@@ -1,0 +1,13 @@
+^LICENSE\.md$
+^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^project$
+^\.claude$
+^CLAUDE\.md$
+^CLAUDE_CODE_KICKOFF\.md$
+^\.lintr$
+^\.DS_Store$
+^.*\.DS_Store$

@@ -1,0 +1,29 @@
+---
+title: "Choosing an ICC"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Choosing an ICC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## The decision framework
+
+The flagship teaching article. It will guide you through the choices that define
+*which* ICC you need:
+
+- **Absolute agreement vs. consistency** — does the actual value matter, or only
+  rank order?
+- **Single vs. average** — are you reporting one rater, or the mean of *k*?
+- **Fixed vs. random raters** — are your raters the whole population of interest,
+  or a sample you generalize from?
+- **Complete vs. incomplete** — is every subject rated by every rater?
+- **Subject- vs. cluster-level** — where does the object of measurement sit?
+
+> This is a placeholder. The full decision framework is written in **Milestone 3**
+> (`project/MILESTONES.md`), the milestone where incomplete designs make the
+> choice consequential.

@@ -1,0 +1,41 @@
+Package: intraclass
+Title: Modern Intraclass Correlation Coefficients
+Version: 0.0.0.9000
+Authors@R:
+    person("Jeffrey", "Girard", , "jeffgirard@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7359-3746"))
+Description: Estimates interrater-reliability intraclass correlation
+    coefficients (ICCs) within the generalizability-theory framework using
+    modern variance-component estimation (linear mixed models) rather than
+    the classical ANOVA mean-squares approach. Provides the full ICC family
+    (absolute agreement versus consistency, single versus average, fixed
+    versus random raters) with boundary-aware Monte-Carlo confidence
+    intervals, support for imbalanced and incomplete designs, and guidance
+    on choosing the correct coefficient.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+Imports:
+    cli,
+    generics,
+    glmmTMB,
+    lifecycle,
+    rlang,
+    stats
+Suggests:
+    covr,
+    ggplot2,
+    knitr,
+    lme4,
+    psych,
+    rmarkdown,
+    spelling,
+    testthat (>= 3.0.0),
+    tibble,
+    withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Language: en-US
+URL: https://github.com/jmgirard/intraclass, https://jmgirard.github.io/intraclass/
+BugReports: https://github.com/jmgirard/intraclass/issues

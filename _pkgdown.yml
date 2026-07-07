@@ -1,0 +1,13 @@
+url: https://jmgirard.github.io/intraclass/
+
+template:
+  bootstrap: 5
+
+# The reference index is grouped by design type as estimators are added
+# (M1+). Kept empty at M0 because pkgdown errors on groups with no matching
+# topics; each milestone adds its exported functions here.
+#
+# reference:
+#   - title: Two-way random designs
+#     contents:
+#       - icc

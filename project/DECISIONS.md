@@ -1,0 +1,66 @@
+# Decision log (ADRs)
+
+Dated statistical and architectural decisions with rationale and references
+(PRINCIPLES.md #6, #12, #14). Newest at the bottom. Format: context → decision →
+consequences → references.
+
+---
+
+## ADR-001: MIT license
+- Date: 2026-07-06
+- Status: accepted
+- Context: The founding brief left the license to be confirmed. A permissive,
+  CRAN-friendly license lowers adoption friction for an applied-research audience.
+- Decision: License under **MIT** (`MIT + file LICENSE`), copyright Jeffrey Girard,
+  2026. Confirmed by the maintainer at bootstrap.
+- Consequences: Maximum reuse freedom; no copyleft obligations on downstream users.
+  Rules out GPL-style share-alike guarantees.
+- References: `CLAUDE_CODE_KICKOFF.md` §3, §7 step 2.
+
+## ADR-002: Default estimation engine is glmmTMB (lme4 supported + as oracle)
+- Date: 2026-07-06
+- Status: accepted
+- Context: The brief specifies `lme4` and/or `glmmTMB` as the default MLE-RE engine.
+  The maintainer noted lme4's frequent convergence warnings and leaned toward
+  glmmTMB. lme4's warnings on simple models like `score ~ 1 + (1|subject) +
+  (1|rater)` are often false positives (a twitchy relative-gradient check), so
+  "quieter" alone is a weak justification — but two stronger reasons tie directly
+  to PRINCIPLES.md #3 (boundary-aware Monte-Carlo CIs):
+    1. `glmmTMB::vcov(fit, full = TRUE)` returns the joint covariance of *all*
+       parameters including the variance-component parameters, exactly what MC CIs
+       sample from. lme4 does not expose this off the shelf (needs `merDeriv` or a
+       parametric bootstrap via `bootMer`, slower and heavier).
+    2. glmmTMB parameterizes variances on an internal log-SD / Cholesky scale, so
+       MC draws back-transform to variances that stay ≥ 0 — the correct behavior at
+       the near-zero-rater-variance boundary that is the common case.
+  Verified live this session on the Shrout & Fleiss (1979) data: both engines give
+  ICC(A,1) = 0.2898 → 0.290 and ICC(A,k) = 0.6201 → 0.620 (agreeing with the
+  published oracle and each other); `vcov(m, full = TRUE)` returned the expected
+  4×4 joint covariance.
+- Decision: **glmmTMB is the default engine** and the one hard engine dependency
+  (Imports). **lme4** is in Suggests and serves two roles: an alternative engine
+  and an independent numerical oracle (its balanced-data point estimate must match
+  glmmTMB to ~1e-4).
+- Consequences: One hard engine dep keeps the base install light. The seed test's
+  provisional adapter default `engine = "lme4"` flips to `"glmmTMB"` in M1 (the file
+  designates that adapter its single editable binding point; no oracle *value*
+  changes), with an lme4-vs-glmmTMB cross-check test retained so both stay verified.
+- References: `CLAUDE_CODE_KICKOFF.md` §1 (estimation engines), PRINCIPLES.md #3;
+  glmmTMB (Brooks et al. 2017); ten Hove, Jorgensen & van der Ark (2024/2025).
+
+## ADR-003: Monte-Carlo CIs are the default interval method
+- Date: 2026-07-06
+- Status: accepted
+- Context: The ICC is a non-normal ratio of variance components; the delta method
+  is unreliable near the zero-rater-variance boundary (the common case). The
+  framework's own 2025 simulation work favors MLE-RE with Monte-Carlo CIs.
+- Decision: Default interval = **Monte-Carlo**, simulated from the fitted parameter
+  covariance matrix (`vcov(fit, full = TRUE)`), on the engine's internal
+  (boundary-respecting) scale, back-transformed to variance components, with the
+  ICC recomputed per draw and quantiles taken. Seeded in tests (PRINCIPLES.md #12).
+  The method used is always reported (PRINCIPLES.md #3). Alternative CI methods
+  (bootstrap, profile) are roadmap items, not the default.
+- Consequences: Intervals are boundary-aware and engine-agnostic in spirit; requires
+  storing/threading a seed and the parameter covariance. Adds a stochastic element
+  that must be seeded for reproducibility.
+- References: PRINCIPLES.md #3, #12; `CLAUDE_CODE_KICKOFF.md` §1, §2.
