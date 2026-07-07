@@ -18,10 +18,12 @@
 #'   condition).
 #' @keywords internal
 #' @noRd
-abort_intraclass <- function(message,
-                             class = NULL,
-                             ...,
-                             call = rlang::caller_env()) {
+abort_intraclass <- function(
+  message,
+  class = NULL,
+  ...,
+  call = rlang::caller_env()
+) {
   cli::cli_abort(
     message,
     class = c(class, "intraclass_error"),

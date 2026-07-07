@@ -8,10 +8,12 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 Run the full local gate and **only mark done on green** (PRINCIPLES.md #10, #11, #16):
 
 1. `R -q -e 'devtools::document()'` — regenerate docs/NAMESPACE if roxygen changed.
-2. `R -q -e 'devtools::test()'` — all tests pass; no unexpected skips.
-3. `R -q -e 'devtools::check()'` — 0 errors, 0 warnings; every note justified.
-4. `R -q -e 'lintr::lint_package()'` — no new lints.
-5. `R -q -e 'covr::package_coverage()'` — ≥90%, statistical paths oracle-covered.
+2. `air format .` — auto-format code (air.toml); the CI `format.yaml` job enforces
+   `air format --check .`, so format locally before committing.
+3. `R -q -e 'devtools::test()'` — all tests pass; no unexpected skips.
+4. `R -q -e 'devtools::check()'` — 0 errors, 0 warnings; every note justified.
+5. `R -q -e 'lintr::lint_package()'` — no new lints (air owns layout; lintr the rest).
+6. `R -q -e 'covr::package_coverage()'` — ≥90%, statistical paths oracle-covered.
 
 If anything is red: report exactly what failed with output, **do not** mark the
 task done, and stop. Never loosen an oracle tolerance to pass (PRINCIPLES.md #1).

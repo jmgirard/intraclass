@@ -1,5 +1,9 @@
 linters: linters_with_defaults(
-    line_length_linter(80L),
+    # air (air.toml) owns code layout: line length, indentation, and spacing.
+    # Disable the lintr linters that duplicate it, to avoid conflicting or
+    # unfixable reports (e.g. a long unbreakable string air leaves as-is).
+    line_length_linter = NULL,
+    indentation_linter = NULL,
     object_usage_linter = NULL,
     # This package documents statistical provenance and formulae in comments
     # (e.g. `psych::ICC()`, ANOVA identities); code-like comments are intentional.

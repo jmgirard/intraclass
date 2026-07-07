@@ -38,8 +38,11 @@ jobs:
 
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
-          # Fail if error if not on PR, or if on PR and token is given
-          fail_ci_if_error: ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          # Codecov disabled tokenless uploads, so only enforce the upload once a
+          # CODECOV_TOKEN secret is configured (link the repo at codecov.io to get
+          # one). Until then, coverage is still computed and printed in the log,
+          # but a failed upload does not break CI.
+          fail_ci_if_error: ${{ secrets.CODECOV_TOKEN != '' }}
           files: ./cobertura.xml
           plugins: noop
           disable_search: true

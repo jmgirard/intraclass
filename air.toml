@@ -1,0 +1,15 @@
+# air formatter configuration (https://posit-dev.github.io/air/)
+# Formatting is owned by air; lintr (.lintr) keeps only the semantic linters that
+# air does not handle. Line width matches so the two never disagree.
+
+[format]
+line-width = 80
+indent-width = 2
+indent-style = "space"
+line-ending = "lf"
+
+# Do not reformat the hand-authored seed oracle fixtures' data layout, and skip
+# generated/derived files.
+exclude = [
+  "tests/testthat/helper-shrout-fleiss.R"
+]

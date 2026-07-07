@@ -16,7 +16,9 @@ condensed to a single line once done.
 - [x] CI workflows (R-CMD-check, coverage, lint, pkgdown, scheduled reference-values) — Opus
 - [x] pkgdown config (`_pkgdown.yml`) + stub vignettes; grouped reference index deferred to M1 (no exports yet) — Opus
 - [x] Lean `CLAUDE.md` — Opus
-- [x] `devtools::document()` + `devtools::check()` clean (0/0/0); `lintr` clean; pkgdown builds — Opus
+- [x] air formatter (`air.toml`, `format.yaml` CI, lintr reconciliation); ADR-004 — Opus
+- [x] Codecov upload gated on `CODECOV_TOKEN` so CI stays green until secret added — Opus
+- [x] `devtools::document()` + `devtools::check()` clean (0/0/0); `air`/`lintr` clean; pkgdown builds — Opus
 - [ ] Create public `jmgirard/intraclass` repo; first push; confirm CI green — Opus
 - [ ] Update STATUS.md "Last green CI"; tag/commit — Opus
 

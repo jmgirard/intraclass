@@ -32,6 +32,8 @@ This file is deliberately lean — it is paid for on every turn. Detail lives in
 - **All user messaging via `cli`; all errors via `rlang::abort()` classed (#8).**
   No bare `stop()`/`warning()`/`cat()`/`print()`.
 - **Tracking files update in the same commit as the work (#16).**
+- **Format with `air` before committing** (`air format .`); CI enforces
+  `air format --check`. `lintr` owns the semantic linters only. See ADR-004.
 
 ## Model routing (§6 of the brief)
 | Work type | Model |

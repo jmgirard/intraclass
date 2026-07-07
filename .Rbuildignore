@@ -9,5 +9,6 @@
 ^CLAUDE\.md$
 ^CLAUDE_CODE_KICKOFF\.md$
 ^\.lintr$
+^air\.toml$
 ^\.DS_Store$
 ^.*\.DS_Store$

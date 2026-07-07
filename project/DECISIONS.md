@@ -64,3 +64,23 @@ consequences → references.
   storing/threading a seed and the parameter covariance. Adds a stochastic element
   that must be seeded for reproducibility.
 - References: PRINCIPLES.md #3, #12; `CLAUDE_CODE_KICKOFF.md` §1, §2.
+
+## ADR-004: air is the code formatter (lintr keeps only semantic linters)
+- Date: 2026-07-06
+- Status: accepted
+- Context: The brief (§3) calls for a formatter alongside the linter ("`lintr` +
+  `air` (or `styler`)"). lintr only *flags*; nothing auto-fixed layout. The
+  maintainer chose air over styler.
+- Decision: **air** (Posit's Rust formatter) owns code layout, configured in
+  `air.toml` (line width 80, 2-space indent, LF). lintr (`.lintr`) keeps only the
+  semantic linters and **disables** the ones air owns (`line_length_linter`,
+  `indentation_linter`) to avoid conflicting or unfixable reports. A CI
+  `format.yaml` job runs `air format --check .` via `posit-dev/setup-air`. The
+  hand-aligned Shrout & Fleiss data matrix in `helper-shrout-fleiss.R` is excluded
+  from air (it would explode the 6×4 grid to one number per line); lintr still
+  checks it.
+- Consequences: Deterministic, fast formatting matching the package's "modern
+  tooling" ethos; adds a standalone binary dependency for local dev (install via
+  the air installer or `posit-dev/setup-air` in CI). Contributors run
+  `air format .` before committing (the `finish-task` skill runs it).
+- References: `CLAUDE_CODE_KICKOFF.md` §3; https://posit-dev.github.io/air/.

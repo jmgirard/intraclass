@@ -27,14 +27,14 @@ fit_sf_agreement <- function() {
     "icc() estimator is implemented in Milestone 1 (see project/MILESTONES.md)."
   )
   icc(
-    data    = sf_ratings_long(),
-    score   = score,
+    data = sf_ratings_long(),
+    score = score,
     subject = subject,
-    rater   = rater,
-    model   = "twoway",
-    type    = "agreement",              # absolute agreement (not consistency)
-    unit    = c("single", "average"),   # -> ICC(A,1) and ICC(A,k)
-    engine  = "lme4",
+    rater = rater,
+    model = "twoway",
+    type = "agreement", # absolute agreement (not consistency)
+    unit = c("single", "average"), # -> ICC(A,1) and ICC(A,k)
+    engine = "lme4",
     conf_level = 0.95
   )
 }
@@ -68,7 +68,7 @@ test_that("estimates agree with psych::ICC at full precision (balanced data)", {
 
   # Independent implementation on the same matrix. psych labels the two-way
   # random, absolute-agreement forms ICC2 (single) and ICC2k (average).
-  res      <- psych::ICC(sf_ratings_wide())$results
+  res <- psych::ICC(sf_ratings_wide())$results
   psych_a1 <- res$ICC[res$type == "ICC2"]
   psych_ak <- res$ICC[res$type == "ICC2k"]
 
@@ -81,7 +81,7 @@ test_that("tidy() output honours the estimator contract", {
   skip_if_not_installed("lme4")
 
   fit <- fit_sf_agreement()
-  td  <- generics::tidy(fit)
+  td <- generics::tidy(fit)
 
   expect_s3_class(td, "tbl_df")
   expect_contains(names(td), c("index", "estimate", "conf.low", "conf.high"))

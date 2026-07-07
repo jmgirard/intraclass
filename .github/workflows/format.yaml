@@ -1,0 +1,23 @@
+# Formatting check with air (https://posit-dev.github.io/air/).
+# Fails if any R file is not formatted per air.toml. Run `air format .` locally
+# to fix. Complements lint.yaml, which owns the semantic (non-layout) linters.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: format.yaml
+
+permissions: read-all
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install air
+        uses: posit-dev/setup-air@v1
+
+      - name: Check formatting
+        run: air format --check .
