@@ -9,6 +9,13 @@ ADR-013; ADR-014 detailed M7).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
+**This file is also the task board (ADR-015).** The **active** milestone's DoD
+checklist *is* the live board — check items off here, in the same commit as the work
+(#16). A shipped milestone keeps its checklist and a done Status line; there is no
+separate `TASKS.md`. Each fact has one home: milestone plan + status live here;
+`STATUS.md` names the active task and next action and *points* here rather than
+restating it.
+
 ---
 
 ## M0: Scaffolding

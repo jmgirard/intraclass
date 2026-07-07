@@ -8,8 +8,8 @@ allowed-tools: Read, Grep, Glob, Bash(git log:*), Bash(git status:*)
 @project/STATUS.md
 
 ## Instructions
-Read `project/STATUS.md`, `project/MILESTONES.md`, and `project/TASKS.md`.
-Summarize, concisely:
+Read `project/STATUS.md` and `project/MILESTONES.md` (the plan *and* the task board
+live in MILESTONES — ADR-015; there is no `TASKS.md`). Summarize, concisely:
 1. the active milestone and its goal,
 2. the active task and any blockers,
 3. the single next action.

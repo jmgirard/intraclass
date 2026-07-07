@@ -13,7 +13,8 @@ This file is deliberately lean — it is paid for on every turn. Detail lives in
 - **`project/PRINCIPLES.md`** — the constitution (19 load-bearing principles).
   Change-controlled; when it conflicts with instinct, it wins.
 - **`project/STATUS.md`** — current milestone, active task, blockers, next action.
-- **`project/MILESTONES.md`**, **`project/TASKS.md`** — the plan and the board.
+- **`project/MILESTONES.md`** — the plan *and* the task board (the active milestone's
+  DoD checklist is the board; no separate `TASKS.md` — ADR-015).
 - **`project/DECISIONS.md`** — ADR log (why things are the way they are).
 - **`project/REFERENCES.md`** — bibliography + the oracle registry every test value
   traces to.

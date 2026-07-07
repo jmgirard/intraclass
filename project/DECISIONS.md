@@ -677,3 +677,52 @@ consequences → references.
   (2020, hyperprior guidance — for the deferred Bayesian slice);
   `CLAUDE_CODE_KICKOFF.md` §1 (optional engines in Suggests), §7 (detail a milestone
   at its start), §8.
+
+## ADR-015: Consolidate the tracking system — single-source each fact
+- Date: 2026-07-07
+- Status: accepted
+- Context: A tracking audit this session found `REFERENCES.md` two milestones behind
+  (oracle O-ML still "planned" after M5 shipped) and `MILESTONES.md` / `ROADMAP.md`
+  carrying forward-looking language ("provisional", "the next milestone", "deferred to
+  M6") left stale by milestone ships and the ADR-013 renumber. The root cause was
+  **not** the number of tracking files (the brief's seven) but **denormalization**:
+  the same fact (a milestone's done-state, an oracle's asserted-state) was restated in
+  several files, so updating one copy left the others stale. The maintainer asked
+  whether consolidating would help — consolidation helps only insofar as it removes
+  duplicated facts.
+- Decision: **Single-source each fact; other files link rather than restate.** This is
+  the primary defense against tracking lapse (the `finish-task` forward-reference sweep
+  is the backstop).
+  - **One home per fact.** Milestone plan + done/in-progress/provisional status →
+    `MILESTONES.md`. Active task / next action / last-green-CI / blockers →
+    `STATUS.md` (a volatile *pointer*, not a history). Decisions → `DECISIONS.md`
+    (append-only). An oracle's asserted-state → its **test file** (the truth), named by
+    `REFERENCES.md`. Future/unscheduled ideas → `ROADMAP.md`. Principles →
+    `PRINCIPLES.md`. Bibliography + oracle registry → `REFERENCES.md`.
+  - **Merge `TASKS.md` into `MILESTONES.md`.** The active milestone's DoD checklist
+    *is* the task board (the brief's "one owner-agent each" rationale is moot — we run
+    solo). `TASKS.md` is deleted; `STATUS.md` names the active task. Removes the
+    biggest checklist duplication and the "condense the board to one line" step that
+    just echoed the `MILESTONES` status.
+  - **`ROADMAP.md` is future-only.** The "Resolved" section (which re-narrated shipped
+    milestones and lapsed twice today) is deleted; a scheduled item moves to
+    `MILESTONES.md`, and once shipped its ROADMAP entry is **removed**, not kept as a
+    stale echo.
+  - **`STATUS.md` stops restating history.** Its "Where we are" enumeration of shipped
+    milestones becomes a one-line pointer to `MILESTONES.md`.
+  - **`REFERENCES.md` carries no independent planned/asserted lifecycle.** An oracle is
+    registered when asserted; its status line names the test file (grep-verifiable). A
+    not-yet-asserted oracle lives in its estimand-spec, not here — so there is no
+    "planned" state in REFERENCES to lapse.
+  - **Skills updated** (`status`, `start-task`, `finish-task`, `new-estimator`,
+    `verify-estimator`) to read/write the new homes and to state the one-home rule.
+- Consequences: seven tracking files → six (`TASKS.md` gone). Amends the brief's (§4)
+  seven-file layout; the brief stays a founding record (not rewritten, like an ADR).
+  Historical done-milestone DoD text mentioning "MILESTONES/STATUS/TASKS same-commit"
+  is left as an accurate record of what happened at that commit. Lower lapse surface:
+  fewer copies of each fact, so fewer places to forget. Touches only `project/`,
+  `.claude/`, and `CLAUDE.md` (no CI-gated path) → direct commit to `main`.
+- References: PRINCIPLES.md #6 (small, deliberate surface), #16 (tracking current in
+  the same commit); `CLAUDE_CODE_KICKOFF.md` §4 (the seven-file design this amends);
+  ADR-013 (the renumber whose fallout exposed the duplication); this session's audit
+  (REFERENCES O-ML lapse; MILESTONES/ROADMAP renumber staleness).

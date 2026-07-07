@@ -41,42 +41,17 @@ Ark).
   and inexact (0.157 vs 0.166 on SF). Needs a sourced method (or a multilevel/
   random-intercept SEM, which would just re-implement the mixed-model engines)
   before it ships.
+- **Bayesian engine** (`brms`/`rstanarm`) behind `Suggests`, with a new
+  `ci_method = "posterior"` (credible intervals from native posterior draws) and
+  half-*t* hyperpriors (ten Hove, Jorgensen & van der Ark 2020). Deferred out of M7
+  (ADR-014); `rstanarm` preferred over `brms` for CI-install sanity (precompiled
+  Stan, no toolchain). The engine × design dispatch seam (M5.5/M7) is ready for it.
 
 ## Proposals under discussion (open design questions)
 
 These are **decision points, not decided directions** — recorded so the design
 is deliberate when scheduled. Resolve the chosen shape at the milestone's start.
 
-*None open right now.* (Resolved proposals are recorded as ADRs and move to
-[`MILESTONES.md`](MILESTONES.md) when scheduled.)
-
-### Resolved
-
-- **D-study projection — reliability at an arbitrary number of raters *m*.**
-  Scheduled and shipped as **M4.5** (its own slice before M5). The chosen shape was
-  all three exposures together: numeric `unit` in `icc()` (`ICC(A,m)` rows) as sugar
-  for one-off *m*, a downstream `d_study(x, m = …)` table reusing the stored fit (no
-  refit), and an `autoplot()`/`plot()` reliability curve. Rationale, the
-  fixed-rater-agreement refusal, and the oracle set (O-DS: Spearman–Brown, GT
-  dependability, `psych` at `m = n_raters`, seeded sim) are in **ADR-010** and
-  [`estimand-specs/M4.5-d-study.md`](estimand-specs/M4.5-d-study.md). Subject-count
-  projection remains parked (M4.5 spec §6).
-- **One-way random ICC(1)/ICC(1,k) (raters not crossed).** Promoted from this
-  parking lot by **ADR-013** and **shipped as M6** (the last member of the classic
-  Shrout–Fleiss family), verified against the staged `sf_oracle_all` values
-  (0.166 / 0.443) plus `psych`, one-way ANOVA, both engines, and a seeded simulation
-  (estimand-spec `M6-oneway.md`).
-- **Multilevel & incomplete-design extensions.** The M5 spec §8 deferrals (Designs
-  2/3, incomplete multilevel, fixed-rater multilevel) plus lme4 for the
-  fixed/multilevel fits are grouped into **M8** by **ADR-013**. Not detailed until
-  that milestone starts.
-- **Optional engines — SEM leads over Bayesian.** Detailed by **ADR-014** and
-  **shipped as M7**: the **SEM/lavaan** engine for the **two-way random** design,
-  because lavaan reuses the existing Monte-Carlo CI path (no new `ci_method`),
-  installs light (no Stan compilation), and is pinnable to a textbook oracle
-  (Jorgensen 2021, which also argues for MC CIs). The **Bayesian** backend (rstanarm
-  preferred over brms; a new `ci_method = "posterior"` for credible intervals;
-  half-*t* hyperpriors, ten Hove et al. 2020), **one-way SEM** (deferred during
-  implementation — no faithful sourced route, see the parking-lot entry above), and
-  incomplete/fixed/multilevel SEM remain **deferred** to a later slice or follow-on
-  milestone — scheduled at that point, not pre-designed here.
+*None open right now.* (This file is **future-only**, ADR-015: once a proposal is
+scheduled it moves to [`MILESTONES.md`](MILESTONES.md); once shipped its entry here
+is removed — shipped work lives in `MILESTONES.md`, not re-narrated here.)

@@ -20,9 +20,12 @@ PRINCIPLES.md #1). Produce, in order:
    messaging and classed errors via the `abort_*()` layer (PRINCIPLES.md #8).
 3. **Test skeleton** in `tests/testthat/` with the required **oracle checklist**
    (≥2 independent types): textbook/analytic, established package, seeded
-   simulation. Reference registered values in `project/REFERENCES.md`; register any
-   new oracle there with provenance (PRINCIPLES.md #4).
+   simulation. The oracle *plan* lives in the estimand-spec (its oracle-set section);
+   **register a row in `project/REFERENCES.md` only once the oracle is asserted
+   green**, naming the test file and provenance (ADR-015 single-source — REFERENCES
+   holds no "planned" state; PRINCIPLES.md #4).
 4. **A `project/DECISIONS.md` stub** if the estimator involves a modeling choice.
 
-Add the task to `project/TASKS.md`. Do not implement the numerics until the
-estimand and oracle plan are written.
+Add the task to the **active milestone's board in `project/MILESTONES.md`** (ADR-015;
+there is no separate `TASKS.md`). Do not implement the numerics until the estimand
+and oracle plan are written.

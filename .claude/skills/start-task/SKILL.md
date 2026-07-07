@@ -5,11 +5,13 @@ allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 ## Board
-@project/TASKS.md
+@project/MILESTONES.md
 
 ## Instructions
-1. Select the **next unblocked** task from `project/TASKS.md` (top-down within the
-   active milestone). If every remaining task is blocked, say so and stop.
+1. Select the **next unblocked** task from the **active milestone's DoD checklist in
+   `project/MILESTONES.md`** (that checklist *is* the board — ADR-015; there is no
+   separate `TASKS.md`). Go top-down within the active milestone; if every remaining
+   item is blocked, say so and stop.
 2. Restate the task's **acceptance criteria** and name the specific
    `project/PRINCIPLES.md` items it must honor (e.g. #1 oracle-first, #2 name the
    estimand, #3 boundary-aware CIs, #8 cli/classed errors).

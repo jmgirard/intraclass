@@ -8,20 +8,10 @@
 
 ## Where we are
 
-Shipped M0–M7 (see [`MILESTONES.md`](MILESTONES.md) for the full record):
-
-- **M0** scaffolding; **M1** two-way random absolute agreement `ICC(A,1)`/`ICC(A,k)`;
-  **M2** consistency `ICC(C,·)` + fixed-vs-random; **M3** imbalanced/incomplete
-  designs (`k_eff`, connectedness guard, real fixed-effect fit); **M4** the
-  flagship "Choosing an ICC" vignette + `ratings`/`ratings_incomplete` datasets;
-  **M4.5** D-study projection (`d_study()`, numeric `unit`, `autoplot()`); **M5**
-  multilevel subject-/cluster-level ICCs (ten Hove Design 1, five-component fit);
-  **M5.5** lme4 as a selectable `engine =` (merDeriv-backed MC CI); **M6** one-way
-  random `ICC(1)`/`ICC(1,k)` — the last classic Shrout–Fleiss member; **M7** the
-  **lavaan (SEM) engine** for two-way random ICCs (Jorgensen 2021 indicator-mean
-  method; ADR-014).
-- The classic SF family is complete; glmmTMB, lme4, and lavaan are all selectable
-  engines through the M5.5 engine × design dispatch seam.
+**Shipped M0–M7** — see [`MILESTONES.md`](MILESTONES.md) for the record (single
+source; not restated here, ADR-015). In short: the classic Shrout–Fleiss ICC family
+is complete, and glmmTMB, lme4, and lavaan are all selectable engines through the
+M5.5 engine × design dispatch seam.
 
 ## Next action
 

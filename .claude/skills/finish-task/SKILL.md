@@ -37,12 +37,22 @@ On green:
   milestone's first commit); package/CI-config work merges via a **PR**, never
   direct to `main` (see "Where changes go" above and the
   `milestone-branches-and-prs` memory).
-- Check off the task in `project/TASKS.md`.
-- Update `project/STATUS.md` (active task, updated date; set "Last green CI" only
-  after the PR's CI is green and the branch is merged).
+**Single-source each fact (ADR-015 — the primary anti-lapse rule).** Each fact has
+one home; every other file *links*, never restates. Update the fact where it lives,
+not in several places: milestone plan + status → `MILESTONES.md`; active task / next
+action / last-green-CI / blockers → `STATUS.md` (a pointer, not a history); an
+oracle's asserted-state → its **test file**, named by `REFERENCES.md`; future ideas →
+`ROADMAP.md`. If you catch yourself restating the same status in a second file, that
+second copy is a future lapse — link instead.
+
+- Check off the task in the **active milestone's DoD checklist in
+  `project/MILESTONES.md`** (that checklist is the board — there is no `TASKS.md`).
+- Update `project/STATUS.md` (active task, next action, updated date; set "Last green
+  CI" only after the PR's CI is green and the branch is merged). Keep it a *pointer* —
+  do not re-enumerate shipped milestones (that record is `MILESTONES.md`).
 - **If this task completes a milestone:** update that milestone's **Status line** in
-  `project/MILESTONES.md` and condense its `project/TASKS.md` board to one line — do
-  not leave the milestone marked in-progress once its board is fully checked.
+  `project/MILESTONES.md` — do not leave it marked in-progress once its checklist is
+  fully checked. (The board is the checklist itself; nothing to condense elsewhere.)
 - If a statistical or architectural decision was made, add an ADR via `add-decision`.
 - **Reconcile `project/REFERENCES.md`** (part of the same-commit tracking set, #16 —
   not an afterthought). Two moves, not just one:
@@ -77,8 +87,8 @@ On green:
 `done (local)`, or `in progress` (and, in `REFERENCES.md`, `planned` /
 `not yet asserted` / `to be committed`) describe a *transition that has not finished
 yet*. The moment the transition completes, the marker is stale and must be reconciled
-to reality across `STATUS.md`, `MILESTONES.md`, `TASKS.md`, **and `REFERENCES.md`** in
-the same pass — REFERENCES lapses the most quietly because no CI job reads it.
+to reality across `STATUS.md`, `MILESTONES.md`, **and `REFERENCES.md`** in the same
+pass — REFERENCES lapses the most quietly because no CI job reads it.
 
 ## After PR CI green + merge
 `finish-task` runs before the PR is opened, so it cannot confirm CI. Open a PR from
@@ -88,7 +98,7 @@ branch is **merged** to `main`, reconcile the deferred markers. This touches onl
 PR needed), on an up-to-date `main` (PRINCIPLES.md #16):
 - Set `STATUS.md` "Last green CI" to the merge commit.
 - Flip every `pending PR CI + merge` / `done (local)` marker for the shipped work to
-  **merged, CI green** in `MILESTONES.md` and `TASKS.md`.
+  **merged, CI green** in `MILESTONES.md` (its Status line).
 - Sanity check: `git rev-list --count origin/main...main` is `0`, nothing labeled
   `pending PR CI + merge` remains in `project/`, and the forward-reference sweep
   (above) is clean — every `planned` / `not yet asserted` / `to be committed` /
