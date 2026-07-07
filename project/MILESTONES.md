@@ -1,11 +1,11 @@
 # Milestones
 
 Ordered milestones with Definition of Done and status. **Shipped milestones
-(M0–M5.5) are fully specified; the remaining ones (M6–M9) are provisional**
+(M0–M7) are fully specified; the remaining ones (M8–M9) are provisional**
 one-liners, detailed only at the start of their milestone after a short retro on
 the previous one (founding brief §7). The arc is a hypothesis, not a contract —
-reorders get a [`DECISIONS.md`](DECISIONS.md) entry (latest: ADR-013, which set
-the current M6–M9 sequence).
+reorders get a [`DECISIONS.md`](DECISIONS.md) entry (the M6–M9 sequence was set by
+ADR-013; ADR-014 detailed M7).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -268,9 +268,11 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   - [x] Oracles per PRINCIPLES.md #1 — lme4 + seeded simulation + single-level
         reduction (O-ML in `REFERENCES.md`); no external worked example exists for
         this estimand (as with O5). `psych`/`gtheory` are not oracles here; a
-        Bayesian/MCMC cross-check is deferred to M6. Any coefficient unpinnable by
-        both required oracles is not shipped (Fable review recommended, then
-        pause — #1/#19).
+        Bayesian/MCMC cross-check remains deferred (a future Bayesian engine;
+        ROADMAP — it was tied to the old "M6 = optional engines" slot, which the
+        ADR-013 renumber moved to M7, where the Bayesian backend is itself deferred).
+        Any coefficient unpinnable by both required oracles is not shipped (Fable
+        review recommended, then pause — #1/#19).
   - [x] `DECISIONS.md` ADR-011 (M5 scope + `level` API + Design-1 five-component fit);
         `air`/`lintr` clean; vignettes knit; full local suite green (no snapshot
         drift). Ships on `m5-multilevel`; `devtools::check()` 0/0/0 + full CI matrix
@@ -278,7 +280,8 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Deferred out of M5 (recorded so they aren't rediscovered): the paper's Designs
   2/3 (raters nested in clusters and/or subjects); incomplete multilevel (reuse M3
   `k_eff`/connectedness); fixed-rater multilevel; a Bayesian/MCMC cross-engine
-  (M6, the paper's own estimator); a three-facet `d_study()` projecting
+  (the paper's own estimator — a future Bayesian engine, ROADMAP; was the old "M6"
+  optional-engines slot, renumbered by ADR-013); a three-facet `d_study()` projecting
   subject-per-cluster counts; exposing the conflated single-level ICC (Eq. 14) as
   a shipped coefficient. (See spec §8.)
 - Status: done (Slices 1–2; merged via PR #8 at `87b4588`; full CI matrix green —

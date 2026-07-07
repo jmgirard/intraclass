@@ -52,12 +52,24 @@ On green:
      provenance from `to be committed` to **committed**. (An oracle scaffolded as
      `planned` by `new-estimator` stays `planned` until *this* step flips it — the
      M5 close-out skipped it and left O-ML stuck on "planned" for two milestones.)
-- **Sweep `project/` for now-resolved forward-references.** Before proposing the
-  commit, run
-  `grep -rniE 'planned|not yet|to be (committed|written|asserted)|to fix|forthcoming|Slice [0-9]' project/`
-  and reconcile every hit the just-shipped work resolved. Genuinely-still-future
-  items (a later milestone, a ROADMAP deferral) stay; a forward-reference whose
-  target has shipped is stale and must be updated in the same commit.
+- **Sweep `project/` for now-resolved forward-references.** A shipped milestone
+  turns *forward-looking* language about it — everywhere, not just its own entry —
+  stale. Before proposing the commit, run
+  `grep -rniE 'planned|not yet|to be (committed|written|asserted)|to fix|forthcoming|provisional|next milestone|detail (it|its|at)|deferred to M[0-9]|Slice [0-9]' project/`
+  and reconcile every hit the just-shipped work (or a renumber) resolved.
+  Genuinely-still-future items (a later milestone, a ROADMAP deferral) stay; a
+  forward-reference whose target has shipped is stale. **Two spots lapse the most and
+  live *outside* the milestone's own entry — check them by name every ship:**
+  1. **`MILESTONES.md` preamble** — the "Shipped milestones (M0–M<x>) are fully
+     specified; the remaining ones (M<x+1>–M9) are provisional" line must advance so
+     the just-shipped milestone is no longer called provisional.
+  2. **`ROADMAP.md` "Resolved" entries** — a promoted item reads "promoted to M<n>
+     (the next milestone) … detail its DoD at milestone start"; once it ships, flip it
+     to "shipped as M<n>" and drop the detail-at-start language.
+  Also reconcile any **cross-milestone deferral** whose target moved in a renumber
+  (e.g. "deferred to M6" written before ADR-013 shifted optional engines to M7).
+  Dated ADRs in `DECISIONS.md` are the exception — they are append-only history and
+  are *not* rewritten to match a later renumber.
 - Propose a Conventional Commit message; remind that tracking-file updates ship in
   the **same commit** as the work (PRINCIPLES.md #16).
 
