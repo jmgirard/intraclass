@@ -160,7 +160,11 @@ Ignored (and must be left at its default) when <code>cluster</code> is not suppl
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
-<dd><p>Estimation engine. Only <code>"glmmTMB"</code> is currently supported.</p></dd>
+<dd><p>Estimation engine: <code>"glmmTMB"</code> (default) or <code>"lme4"</code>. Both fit
+the variance components by REML and agree to within numerical tolerance on
+balanced data. <code>"lme4"</code> currently covers only the random two-way design
+(<code>raters = "random"</code>, no <code>cluster</code>) and requires the <span class="pkg">lme4</span> and
+<span class="pkg">merDeriv</span> packages.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

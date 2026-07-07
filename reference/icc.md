@@ -116,7 +116,11 @@ icc(
 
 - engine:
 
-  Estimation engine. Only `"glmmTMB"` is currently supported.
+  Estimation engine: `"glmmTMB"` (default) or `"lme4"`. Both fit the
+  variance components by REML and agree to within numerical tolerance on
+  balanced data. `"lme4"` currently covers only the random two-way
+  design (`raters = "random"`, no `cluster`) and requires the lme4 and
+  merDeriv packages.
 
 - conf_level:
 

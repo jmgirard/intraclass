@@ -214,6 +214,36 @@ balanced data</strong> (agreement/consistency and single/average apply
 at each level). Raters nested within clusters, incomplete multilevel
 designs, and fixed raters are planned for later milestones.</p>
 </div>
+<div class="section level2">
+<h2 id="choosing-an-estimation-engine">Choosing an estimation engine<a class="anchor" aria-label="anchor" href="#choosing-an-estimation-engine"></a>
+</h2>
+<p>By default <code><a href="../reference/icc.html">icc()</a></code> fits the variance components with
+<strong>glmmTMB</strong>. You can instead request <strong>lme4</strong>
+with <code>engine = "lme4"</code> for the random two-way design. Both
+are REML mixed-model fits of the same model, so on a given dataset they
+return the same coefficients to numerical tolerance — the choice is
+about the fitting backend, not the estimand.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">glmmtmb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">lme4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"lme4"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  index <span class="op">=</span> <span class="va">glmmtmb</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  glmmTMB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">glmmtmb</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  lme4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">lme4</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;      index glmmTMB   lme4</span></span>
+<span><span class="co">#&gt; 1 ICC(A,1)  0.2898 0.2898</span></span>
+<span><span class="co">#&gt; 2 ICC(A,k)  0.6201 0.6201</span></span></code></pre></div>
+<p>The two point estimates agree to well within rounding, and their
+Monte-Carlo intervals coincide to about <code>0.01</code>: the lme4
+interval is built from the parameter covariance supplied by the
+<strong>merDeriv</strong> package, transformed onto the same
+boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended
+default — it is the one required dependency and it is robust when a
+variance component sits exactly at the zero boundary, where the lme4
+route cannot form an interval and directs you back to glmmTMB. lme4 for
+fixed-rater and multilevel designs is planned for a later milestone.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
