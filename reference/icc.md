@@ -165,7 +165,7 @@ icc(ratings, score, subject, rater, seed = 1)
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.706]
-#>   ICC(A,k)    0.620   [0.175, 0.906]
+#>   ICC(A,1)    0.290   [0.050, 0.712]
+#>   ICC(A,k)    0.620   [0.173, 0.908]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
