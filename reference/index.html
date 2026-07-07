@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@
     <div class="section level2">
       <h2 id="choosing-a-coefficient">Choosing a coefficient<a class="anchor" aria-label="anchor" href="#choosing-a-coefficient"></a></h2>
 
-      <div class="section-desc"><p>An interactive decision helper that recommends which ICC to report and the exact call that computes it.</p></div>
+      <div class="section-desc"><p>An interactive decision helper that recommends which ICC to report and emits the exact <code><a href="../reference/icc.html">icc()</a></code> call that computes it — no fitting, teaching-first.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -54,9 +54,9 @@
         </dt>
         <dd>Recommend an ICC and the call that computes it</dd>
       </dl></div><div class="section level2">
-      <h2 id="two-way-random-designs">Two-way random designs<a class="anchor" aria-label="anchor" href="#two-way-random-designs"></a></h2>
+      <h2 id="estimating-an-icc">Estimating an ICC<a class="anchor" aria-label="anchor" href="#estimating-an-icc"></a></h2>
 
-      <div class="section-desc"><p>Absolute-agreement and (later) consistency ICCs for crossed subject-by-rater designs.</p></div>
+      <div class="section-desc"><p>The workhorse. Fit variance components with a modern mixed model and compute the intraclass correlation for a stated design: absolute agreement vs. consistency, single vs. average, fixed vs. random raters, one-way vs. two-way, multilevel (subject vs. cluster level, crossed or nested), and incomplete (ragged) data — all with boundary-aware Monte-Carlo confidence intervals. The <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>, <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>, <code>autoplot()</code> (coefficient forest / variance-component decomposition) and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods are documented on this page.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -72,7 +72,7 @@
       </dl></div><div class="section level2">
       <h2 id="decision-d-studies">Decision (D-) studies<a class="anchor" aria-label="anchor" href="#decision-d-studies"></a></h2>
 
-      <div class="section-desc"><p>Project reliability to other numbers of raters, and plot the curve.</p></div>
+      <div class="section-desc"><p>Project a fitted ICC’s reliability to other numbers of raters and plot the curve, plus its <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>/<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>/<code>autoplot()</code>/<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -85,6 +85,22 @@
           <span class="badge lifecycle lifecycle-experimental">experimental</span>
         </dt>
         <dd>Project reliability to other numbers of raters (a D-study)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="tidy-methods">Tidy methods<a class="anchor" aria-label="anchor" href="#tidy-methods"></a></h2>
+
+      <div class="section-desc"><p>Broom generics re-exported so <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> and <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> resolve without attaching the generics package.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="reexports.html">reexports</a></code> <code><a href="reexports.html">tidy</a></code> <code><a href="reexports.html">glance</a></code>
+
+        </dt>
+        <dd>Objects exported from other packages</dd>
       </dl></div><div class="section level2">
       <h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a></h2>
 
@@ -108,6 +124,22 @@
 
         </dt>
         <dd>Rater reliability example with missing cells</dd>
+      </dl></div><div class="section level2">
+      <h2 id="package-overview">Package overview<a class="anchor" aria-label="anchor" href="#package-overview"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="intraclass-package.html">intraclass</a></code> <code><a href="intraclass-package.html">intraclass-package</a></code>
+
+        </dt>
+        <dd>intraclass: Modern Intraclass Correlation Coefficients</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

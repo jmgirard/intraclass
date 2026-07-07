@@ -4,7 +4,7 @@
 answer. There is no single intraclass correlation: the label hides a
 family of coefficients that estimate *different* population quantities.
 Report the wrong one and you can overstate reliability by a wide margin,
-or penalise a rating procedure for differences that do not matter to
+or penalize a rating procedure for differences that do not matter to
 you.
 
 Four choices pin down the coefficient. Each is a single argument to
@@ -121,7 +121,7 @@ the larger number (the Spearman–Brown relationship).
 For absolute agreement above, the single-rater 0.29 rises to 0.62 for
 the four-rater mean. Report `ICC(*,k)` only if the averaged score is
 what you will actually act on; if downstream users see one rater’s
-judgement, `ICC(*,1)` is the honest figure. Request one or both with
+judgment, `ICC(*,1)` is the honest figure. Request one or both with
 `unit = "single"`, `unit = "average"`, or the default
 `c("single", "average")`.
 

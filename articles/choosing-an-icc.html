@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,7 @@
 answer. There is no single intraclass correlation: the label hides a
 family of coefficients that estimate <em>different</em> population
 quantities. Report the wrong one and you can overstate reliability by a
-wide margin, or penalise a rating procedure for differences that do not
+wide margin, or penalize a rating procedure for differences that do not
 matter to you.</p>
 <p>Four choices pin down the coefficient. Each is a single argument to
 <code><a href="../reference/icc.html">icc()</a></code>, and each is a genuine decision about your
@@ -177,7 +177,7 @@ relationship).</p>
 <p>For absolute agreement above, the single-rater 0.29 rises to 0.62 for
 the four-rater mean. Report <code>ICC(*,k)</code> only if the averaged
 score is what you will actually act on; if downstream users see one
-rater’s judgement, <code>ICC(*,1)</code> is the honest figure. Request
+rater’s judgment, <code>ICC(*,1)</code> is the honest figure. Request
 one or both with <code>unit = "single"</code>,
 <code>unit = "average"</code>, or the default
 <code>c("single", "average")</code>.</p>

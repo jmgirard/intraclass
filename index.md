@@ -12,16 +12,21 @@ multilevel designs, and (4) help you decide **which ICC to choose, and
 why** — the docs and website are a place to learn ICC best practice, not
 just call functions.
 
-> \[!NOTE\] This package is in active development. The two-way designs
-> are implemented: absolute-agreement and consistency ICCs, single and
-> average, random and fixed raters, and imbalanced/incomplete
-> (missing-cell) designs — each with boundary-aware Monte-Carlo
-> intervals. A [*Choosing an
+> \[!NOTE\] This package is approaching its first release. The full
+> interrater-reliability ICC family is implemented — two-way (absolute
+> agreement vs. consistency, single vs. average, random vs. fixed
+> raters) and one-way designs, imbalanced and incomplete (missing-cell)
+> data, and multilevel designs (subject vs. cluster level, with raters
+> crossed with or nested in clusters/subjects) — each with
+> boundary-aware Monte-Carlo intervals. Fits run on mixed-model engines
+> (`glmmTMB`, `lme4`) or an SEM engine (`lavaan`). A [*Choosing an
 > ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-> decision guide and D-study projection to other rater counts
-> ([`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md))
-> have shipped; multilevel designs are next. See `project/MILESTONES.md`
-> for the roadmap.
+> decision guide, the
+> [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+> helper, D-study projection to other rater counts
+> ([`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)),
+> and `autoplot()` plots have all shipped. A Bayesian engine is on the
+> roadmap; see `project/MILESTONES.md`.
 
 ## Installation
 
@@ -60,9 +65,69 @@ icc(ratings, score, subject, rater, seed = 2024)
 
 Which coefficient you want — agreement vs. consistency, single
 vs. average, fixed vs. random raters, complete vs. incomplete — is a
-real modelling decision. The [*Choosing an
+real modeling decision, and each is an argument to
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). Not
+sure which to report?
+[`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+walks the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-guide walks through it.
+decision tree and hands back the coefficient, the reasoning, and the
+exact call to run — no data or fitting required:
+
+``` r
+
+choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "random")
+#> # Recommended ICC
+#> Design: two-way random, consistency
+#> Recommendation: ICC(C,k)
+#> Why:
+#>   - Crossed (two-way): the same raters judge every subject.
+#>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
+#>   - Average: you will act on the mean of your raters.
+#>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
+#> Run this on your data:
+#>   icc(data, score, subject, rater, type = "consistency", unit = "average")
+#> Notes:
+#>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
+```
+
+For **multilevel** data — subjects nested in clusters (pupils in
+classrooms, patients in clinics) — pass a `cluster` column and
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+reports subject-level and cluster-level reliability separately:
+
+``` r
+
+set.seed(1)
+grid <- expand.grid(pupil = 1:5, classroom = 1:12, rater = 1:4)
+grid$score <- with(grid,
+  10 + rnorm(12, sd = 1.2)[classroom] +
+    rnorm(60, sd = 0.6)[(classroom - 1) * 5 + pupil] +
+    rnorm(4, sd = 0.4)[rater] + rnorm(nrow(grid), sd = 0.7))
+school <- data.frame(
+  pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+  classroom = factor(grid$classroom),
+  rater = factor(grid$rater),
+  score = grid$score)
+
+icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2024)
+#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   subject  ICC(A,1)    0.322   [0.162, 0.484]
+#>   subject  ICC(A,k)    0.655   [0.436, 0.790]
+#>   cluster  ICC(A,1)    0.870   [0.005, 0.973]
+#>   cluster  ICC(A,k)    0.964   [0.018, 0.993]
+#> Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492
+```
+
+The
+[*Advanced*](https://jmgirard.github.io/intraclass/articles/advanced.html)
+article works through incomplete and nested multilevel designs, the
+estimation engines, the `autoplot()` plots, and
+[`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+in full.
 
 ## Related work
 

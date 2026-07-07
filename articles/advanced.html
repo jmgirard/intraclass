@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,15 +74,21 @@
 keep:</p>
 <ul>
 <li>
+<strong>D-studies</strong> — projecting reliability to other numbers
+of raters (below).</li>
+<li>
 <strong>Multilevel ICCs</strong> — subject-level vs. cluster-level
-coefficients (below).</li>
+coefficients, crossed and nested, complete and incomplete.</li>
 <li>
-<strong>Engine choice</strong> — linear mixed models vs. SEM
-vs. Bayesian, and when each matters (a forthcoming milestone).</li>
+<strong>Visualizing a fit</strong> — the <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>
+forest and variance-component plots.</li>
 <li>
-<strong>Confidence-interval methods</strong> — Monte-Carlo (the
-default) and its alternatives, especially near the zero-rater-variance
-boundary.</li>
+<strong>Engine choice</strong> — the mixed-model default (glmmTMB /
+lme4) vs. the SEM (lavaan) engine, and when the distinction
+matters.</li>
+<li>
+<strong>Letting the package choose</strong> —
+<code><a href="../reference/choose_icc.html">choose_icc()</a></code>, the decision tree as code.</li>
 </ul>
 <p>Incomplete and imbalanced designs are already supported; the <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> article works
 through a connected incomplete design, the effective number of raters
@@ -259,7 +265,7 @@ raters, the design is a multilevel one-way (Design 3):</p>
 <span><span class="co">#&gt;   subject  ICC(1)      0.412   [0.290, 0.546]</span></span>
 <span><span class="co">#&gt;   subject  ICC(k)      0.737   [0.621, 0.828]</span></span>
 <span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)</span></span></code></pre></div>
-<p>Here the coefficients are labelled <code>ICC(1)</code> /
+<p>Here the coefficients are labeled <code>ICC(1)</code> /
 <code>ICC(k)</code> and <code>type</code> no longer applies — with each
 pupil’s raters unique, there is no rater main effect to keep in or drop
 from the error term. A layout that is neither cleanly crossed nor
@@ -367,6 +373,41 @@ milestones.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="visualizing-a-fit">Visualizing a fit<a class="anchor" aria-label="anchor" href="#visualizing-a-fit"></a>
+</h2>
+<p>Every <code><a href="../reference/icc.html">icc()</a></code> fit carries an <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>
+method (with a <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> wrapper), so you can <em>see</em> the
+coefficients and the variance components behind them without building a
+plot by hand. Both read straight off the fitted object, so the picture
+can never disagree with the printed table. They need
+<strong>ggplot2</strong>, an optional dependency.</p>
+<p>The default, <code>what = "coefficients"</code>, is a <strong>forest
+plot</strong> — each ICC index as a point estimate with its Monte-Carlo
+interval. Reusing the two-way <code>ratings</code> fit from the D-study
+section above:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># `fit &lt;- icc(ratings, score, subject, rater, seed = 1)`</span></span></code></pre></div>
+<p><img src="advanced_files/figure-html/plot-coef-1.png" class="r-plt" alt="Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) both higher and tighter." width="700"></p>
+<p><code>what = "components"</code> shows the other half of the story —
+the estimated <strong>variance components</strong> the ratio is built
+from. It makes plain <em>why</em> absolute agreement is so much lower
+than the averaged coefficient on <code>ratings</code>: the
+<strong>rater</strong> component is large, and only absolute agreement
+counts between-rater differences as error:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span>, what <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="advanced_files/figure-html/plot-comp-1.png" class="r-plt" alt="Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest." width="700"></p>
+<p>For a <strong>multilevel</strong> fit the forest plot facets by
+level, so the subject- and cluster-level coefficients line up for
+comparison — the same <code>school</code> fit from above, whose cluster
+level was the higher of the two:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="advanced_files/figure-html/plot-ml-1.png" class="r-plt" alt="Forest plot of the school multilevel fit, faceted into subject-level and cluster-level panels, each showing ICC(A,1) and ICC(A,k) with Monte-Carlo intervals." width="700"></p>
+</div>
+<div class="section level2">
 <h2 id="choosing-an-estimation-engine">Choosing an estimation engine<a class="anchor" aria-label="anchor" href="#choosing-an-estimation-engine"></a>
 </h2>
 <p>By default <code><a href="../reference/icc.html">icc()</a></code> fits the variance components with
@@ -375,7 +416,7 @@ with <code>engine = "lme4"</code> for the random two-way design. Both
 are REML mixed-model fits of the same model, so on a given dataset they
 return the same coefficients to numerical tolerance — the choice is
 about the fitting backend, not the estimand.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glmmtmb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">lme4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"lme4"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -404,7 +445,7 @@ generalizability model in the sense of Jorgensen (2021) — for the
 complete, balanced random two-way design. Unlike lme4, this is not just
 a different backend for the <em>same</em> estimator: it matters which
 coefficient you ask for.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">axes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
@@ -453,6 +494,80 @@ literature. The SEM engine currently covers the complete, balanced
 random two-way design; one-way, fixed-rater, multilevel, and incomplete
 designs are directed to the mixed-model engines.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="letting-the-package-choose-the-coefficient">Letting the package choose the coefficient<a class="anchor" aria-label="anchor" href="#letting-the-package-choose-the-coefficient"></a>
+</h2>
+<p>Every design above assumes you already know which coefficient you
+want. If you do not, <code><a href="../reference/choose_icc.html">choose_icc()</a></code> walks the same decision
+tree as the <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a>
+guide and hands back a recommendation: the coefficient to report, a
+plain-language reason for each choice, and the exact <code><a href="../reference/icc.html">icc()</a></code>
+call to run. It does <strong>not</strong> fit anything — there is no
+data argument — so it is a fast, side-effect-free advisor you can
+consult before you touch your data.</p>
+<p>Answer the choices that pin down the coefficient and it returns
+advice:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Recommended ICC</span></span>
+<span><span class="co">#&gt; Design: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Recommendation: ICC(A,1)</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span>
+<span><span class="co">#&gt; Why:</span></span>
+<span><span class="co">#&gt;   - Crossed (two-way): the same raters judge every subject.</span></span>
+<span><span class="co">#&gt;   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span>
+<span><span class="co">#&gt;   - Single rater: you will act on one rater's score.</span></span>
+<span><span class="co">#&gt;   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
+<span><span class="co">#&gt; Run this on your data:</span></span>
+<span><span class="co">#&gt;   icc(data, score, subject, rater, unit = "single")</span></span>
+<span><span class="co">#&gt; Notes:</span></span>
+<span><span class="co">#&gt;   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></code></pre></div>
+<p>The recommendation carries the call to run. Because the helper is
+generated from the <strong>same estimand machinery</strong> as
+<code><a href="../reference/icc.html">icc()</a></code>, that call cannot drift from what <code><a href="../reference/icc.html">icc()</a></code>
+actually computes — running the emitted call reproduces exactly the
+coefficient the advisor named:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The emitted call is an ordinary icc() call (agreement + random are the defaults,</span></span>
+<span><span class="co"># so they need not be named):</span></span>
+<span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, unit <span class="op">=</span> <span class="st">"single"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(A,1)    0.290   [0.050, 0.706]</span></span>
+<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span></code></pre></div>
+<p>The tree also covers the designs from the sections above. The
+multilevel fifth choice — subject vs. cluster level — is part of it, so
+a nested-data question resolves to a level-specific recommendation and
+the matching <code>cluster</code> call:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, multilevel <span class="op">=</span> <span class="cn">TRUE</span>, level <span class="op">=</span> <span class="st">"cluster"</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Recommended ICC</span></span>
+<span><span class="co">#&gt; Design: multilevel, two-way random, consistency</span></span>
+<span><span class="co">#&gt; Recommendation:</span></span>
+<span><span class="co">#&gt;   cluster: ICC(C,1)</span></span>
+<span><span class="co">#&gt; Why:</span></span>
+<span><span class="co">#&gt;   - Crossed (two-way): the same raters judge every subject.</span></span>
+<span><span class="co">#&gt;   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.</span></span>
+<span><span class="co">#&gt;   - Single rater: you will act on one rater's score.</span></span>
+<span><span class="co">#&gt;   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
+<span><span class="co">#&gt;   - Cluster level: reliability of the cluster mean.</span></span>
+<span><span class="co">#&gt; Run this on your data:</span></span>
+<span><span class="co">#&gt;   icc(data, score, subject, rater, cluster, type = "consistency", unit = "single", level = "cluster")</span></span>
+<span><span class="co">#&gt; Notes:</span></span>
+<span><span class="co">#&gt;   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
+<span><span class="co">#&gt;   - See vignette("advanced") for a worked multilevel example.</span></span></code></pre></div>
+<p>In an <strong>interactive</strong> session you can omit the deciding
+answers and <code><a href="../reference/choose_icc.html">choose_icc()</a></code> will ask the outstanding questions
+one at a time, then resolve. Leaving a coefficient-selecting choice
+unanswered non-interactively, or answering an axis that does not apply
+to the chosen design (for example <code>type</code> under
+<code>model = "oneway"</code>, where there is no rater main effect to
+keep or drop), is a clear error rather than a silent guess.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
