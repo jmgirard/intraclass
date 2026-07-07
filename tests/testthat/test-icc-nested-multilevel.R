@@ -150,26 +150,90 @@ test_that("nested-design scope and identifiability guards fail loudly", {
   )
 })
 
-test_that("Design 3 (raters nested in subjects) aborts as not-yet-supported", {
-  skip_if_not_installed("glmmTMB")
-  # Each rater rates exactly one subject (nested in subjects and clusters).
-  nc <- 6
-  ns <- 4
-  k <- 3
-  set.seed(11)
-  d <- expand.grid(
-    subj = seq_len(ns),
-    rep = seq_len(k),
-    cluster = seq_len(nc)
-  )
-  d$score <- stats::rnorm(nrow(d))
+# Balanced Design-3 generator (raters nested in subjects): each subject has its
+# own raters. Components sigma^2_c / sigma^2_{s:c} / sigma^2_{r:s:c} (rater
+# confounded into residual).
+sim_design3 <- function(nc, ns, k, vc, vsc, vres, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, sqrt(vc))
+  d <- expand.grid(rep = seq_len(k), subj = seq_len(ns), cluster = seq_len(nc))
+  scv <- stats::rnorm(nc * ns, 0, sqrt(vsc))
+  d$sc <- scv[(d$cluster - 1) * ns + d$subj]
+  d$score <- 10 + cl[d$cluster] + d$sc + stats::rnorm(nrow(d), 0, sqrt(vres))
   d$cluster <- factor(d$cluster)
   d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
-  d$rater <- factor(paste(d$cluster, d$subj, d$rep, sep = "_")) # one subject/rater
+  d$rater <- factor(paste(d$cluster, d$subj, d$rep, sep = "_"))
+  d
+}
+
+test_that("O-NML/lme4: Design-3 ICCs match an independent lme4 fit (<1e-4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_design3(30, 8, 6, 1.0, 1.2, 0.5, seed = 20260707)
+  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+
+  m <- lme4::lmer(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject),
+    data = d,
+    REML = TRUE
+  )
+  vc <- lme4::VarCorr(m)
+  sc <- as.numeric(vc[["cluster:subject"]]) # sigma^2_{s:c}
+  re <- stats::sigma(m)^2 # sigma^2_{r:s:c}
+  k <- 6
+
+  # Table 3, subject level, raters nested in subjects: agreement-only (spec §3b).
+  expect_equal(pick(x, "ICC(1)"), sc / (sc + re), tolerance = 1e-4)
+  expect_equal(pick(x, "ICC(k)"), sc / (sc + re / k), tolerance = 1e-4)
+})
+
+test_that("O-NML/reduction: Design 3 reduces to the M6 one-way ICC(1)", {
+  skip_if_not_installed("glmmTMB")
+  # sigma^2_c = 0, many clusters: Design 3 (raters nested in subjects) IS a
+  # single-level one-way design once cluster is ignored, so its subject-level
+  # ICC(1) matches icc(model = "oneway") on the same ratings (spec M8 §5).
+  d <- sim_design3(50, 20, 6, 0, 1.2, 0.5, seed = 99)
+  x_ml <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  x_ow <- icc(d, score, subject, rater, model = "oneway", seed = 1)
+  expect_equal(
+    pick(x_ml, "ICC(1)"),
+    x_ow$estimates$estimate[x_ow$estimates$index == "ICC(1)"],
+    tolerance = 1e-2
+  )
+})
+
+test_that("Design 3 is detected: agreement-only, 3 components, no A/C label", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_design3(20, 6, 4, 1.0, 1.2, 0.5, seed = 7)
+  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+
+  expect_identical(x$design$ml_design, "nested_in_subjects")
+  expect_setequal(unique(x$estimates$level), "subject")
+  # One-way-style labels ICC(1)/ICC(k), not ICC(A,*); no rater component.
+  expect_setequal(x$estimates$index, c("ICC(1)", "ICC(k)"))
+  expect_null(x$components$rater)
+  expect_null(x$components$cluster_rater)
+  expect_true(is.numeric(x$components$cluster))
+  expect_gte(pick(x, "ICC(k)"), pick(x, "ICC(1)"))
+  expect_true(all(is.na(x$estimates$sf_index)))
+  expect_identical(glance(x)$ml_design, "nested_in_subjects")
+
+  # Consistency is undefined for Design 3.
   expect_error(
-    icc(d, score, subject, rater, cluster = cluster),
+    icc(d, score, subject, rater, cluster = cluster, type = "consistency"),
     class = "intraclass_unsupported"
   )
+  # A subject rated only once cannot separate residual from subject variance.
+  d_thin <- d[!duplicated(paste(d$subject)), ] # one rating per subject
+  expect_error(
+    icc(d_thin, score, subject, rater, cluster = cluster),
+    class = "intraclass_unidentified"
+  )
+
+  # Print surfaces the design and the rater-confounded variance line.
+  out <- paste(format(x), collapse = "\n")
+  expect_match(out, "raters nested in subjects")
+  expect_match(out, "rater confounded")
 })
 
 test_that("ambiguous (mixed crossed/nested) raters abort", {

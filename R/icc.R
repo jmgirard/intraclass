@@ -54,15 +54,19 @@
 #' you will make (about a subject, or about a cluster). The agreement/consistency
 #' and single/average choices above apply at each level.
 #'
-#' The design is **inferred from the data**. If raters are crossed with clusters
-#' (each rater rates in every cluster) the five-component model above is used. If
-#' raters are **nested in clusters** (each cluster has its own raters; ten Hove et
-#' al. 2022 Design 2) a four-component model is fit instead, with the rater
-#' variance carried by the nested rater-within-cluster term. A nested-rater design
-#' defines only the **subject** level -- a cluster-level ICC needs raters crossed
-#' with clusters -- so `level` is restricted to `"subject"` for it. Mixed patterns
-#' (some raters crossed, some nested) are not a supported design and raise an
-#' error. Support currently covers balanced, complete designs with random raters.
+#' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
+#' raters are crossed with clusters (each rater rates in every cluster) the
+#' five-component model above is used (Design 1). If raters are **nested in
+#' clusters** (each cluster has its own raters; Design 2) a four-component model is
+#' fit, with the rater variance carried by the nested rater-within-cluster term. If
+#' raters are **nested in subjects** (each subject has its own raters; Design 3) the
+#' rater variance is confounded into the residual, giving a three-component
+#' multilevel *one-way* model that reports agreement-only `ICC(1)`/`ICC(k)`. Both
+#' nested designs define only the **subject** level -- a cluster-level ICC needs
+#' raters crossed with clusters -- so `level` is restricted to `"subject"` for them.
+#' Mixed patterns (some raters crossed, some nested) are not a supported design and
+#' raise an error. Support currently covers balanced, complete designs with random
+#' raters.
 #'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
@@ -391,33 +395,46 @@ icc <- function(
     }
     # Nested designs define only the subject level; drop the default "cluster".
     level <- "subject"
-    if (ml_design == "nested_in_subjects") {
+    # Design 3 (raters nested in subjects) is the multilevel one-way: the rater
+    # main effect is confounded into residual, so consistency is undefined -- only
+    # absolute agreement ICC(1)/ICC(k) (ten Hove et al. 2022, p. 6; spec M8 §3b).
+    if (ml_design == "nested_in_subjects" && type == "consistency") {
       abort_unsupported(c(
-        "Raters nested within subjects (Design 3) are not supported yet.",
-        i = "Design 3 -- each subject rated by its own raters, nested in clusters \\
-             -- is planned for the next slice of this milestone.",
-        i = "Design 2 (raters nested in clusters) and Design 1 (raters crossed) \\
-             are supported."
+        "Consistency is not defined when raters are nested within subjects.",
+        i = "With each subject rated by its own raters (Design 3) the rater main \\
+             effect cannot be separated, so only absolute agreement is defined \\
+             (ten Hove et al. 2022, p. 6).",
+        i = "Use the default {.code type = \"agreement\"}."
       ))
     }
-    # Design 2 needs >= 2 raters within a cluster to identify the nested rater
-    # variance sigma^2_{r:c} (estimand-spec M8 §7).
-    if (max(colSums(table(df$rater, df$cluster) > 0L)) < 2L) {
-      abort_unidentified(c(
-        "The nested rater variance cannot be estimated when every cluster has a \\
-         single rater.",
-        i = "At least one {.arg cluster} must contain 2 or more raters."
-      ))
+    if (ml_design == "nested_in_clusters") {
+      # Design 2 needs >= 2 raters within a cluster to identify sigma^2_{r:c}
+      # (estimand-spec M8 §7).
+      if (max(colSums(table(df$rater, df$cluster) > 0L)) < 2L) {
+        abort_unidentified(c(
+          "The nested rater variance cannot be estimated when every cluster has \\
+           a single rater.",
+          i = "At least one {.arg cluster} must contain 2 or more raters."
+        ))
+      }
+    } else {
+      # Design 3 needs >= 2 raters per subject to separate residual from subject.
+      if (min(as.integer(table(df$subject))) < 2L) {
+        abort_unidentified(c(
+          "The residual variance cannot be separated from the subject variance \\
+           when a subject is rated only once.",
+          i = "Each {.arg subject} must be rated by 2 or more raters."
+        ))
+      }
     }
     # M8 covers balanced/complete nested designs; incomplete nested multilevel is
     # deferred (spec §8) -- fail loudly rather than use an unvalidated k_eff (#5).
-    if (!nested_design_balanced(df)) {
+    if (!nested_design_balanced(df, ml_design)) {
       abort_unsupported(c(
         "Incomplete or unbalanced nested multilevel designs are not supported yet.",
         i = "This milestone (M8) covers balanced, complete nested designs; \\
              incomplete nested multilevel is planned for a later slice.",
-        x = "Provide one rating for every rater-by-subject cell within each \\
-             cluster, with equally sized clusters."
+        x = "Provide a balanced design with equally sized clusters."
       ))
     }
   }
@@ -488,6 +505,8 @@ icc <- function(
   engine_fit <- if (multilevel) {
     if (ml_design == "nested_in_clusters") {
       fit_glmmtmb_multilevel_nested_clusters(df)
+    } else if (ml_design == "nested_in_subjects") {
+      fit_glmmtmb_multilevel_nested_subjects(df)
     } else {
       fit_glmmtmb_multilevel(df)
     }
@@ -506,8 +525,21 @@ icc <- function(
   # mean), which is k on balanced data (ADR-008; M3 §5). "single" uses 1; a
   # numeric unit projects to that many raters. Resolved per estimand.
   k <- design_info$k_eff
-  estimands <- if (multilevel) {
-    # Cross-product level x unit; level outer so rows group by level (M5 §3).
+  estimands <- if (multilevel && ml_design == "nested_in_subjects") {
+    # Design 3 is the multilevel one-way (agreement-only): ICC(1)/ICC(k), signal
+    # sigma^2_{s:c}, error the confounded residual (spec M8 §3b).
+    lapply(unit, function(u) {
+      icc_estimand(
+        unit = u,
+        k_eff = k,
+        oneway = TRUE,
+        multilevel = TRUE,
+        level = "subject"
+      )
+    })
+  } else if (multilevel) {
+    # Cross-product level x unit; level outer so rows group by level (M5 §3). For
+    # Design 2, `level` is already restricted to "subject" (nested designs).
     unlist(
       lapply(level, function(lv) {
         lapply(unit, function(u) {

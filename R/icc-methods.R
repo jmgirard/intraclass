@@ -20,7 +20,13 @@ format.icc <- function(x, ...) {
       nested_in_subjects = "multilevel (raters nested in subjects)",
       "multilevel"
     )
-    phrase <- paste(ml_label, phrase)
+    # Design 3 is the multilevel one-way (agreement-only); the two-way
+    # agreement/consistency phrase does not apply.
+    phrase <- if (identical(x$design$ml_design, "nested_in_subjects")) {
+      paste(ml_label, "absolute agreement")
+    } else {
+      paste(ml_label, phrase)
+    }
   }
   header <- sprintf("# Intraclass correlation: %s", phrase)
   cell_total <- x$n$subjects * x$n$raters
@@ -130,7 +136,16 @@ format.icc <- function(x, ...) {
 
   vc <- x$components
   d3 <- function(v) formatC(v, format = "f", digits = 3)
-  comps <- if (ml && is.null(vc$cluster_rater)) {
+  comps <- if (ml && is.null(vc$rater)) {
+    # Design 3 (raters nested in subjects): rater is confounded into residual, so
+    # there is no rater or cluster x rater term (spec M8 §2b).
+    sprintf(
+      "Variance components: cluster %s, subject %s, residual %s (rater confounded)",
+      d3(vc$cluster),
+      d3(vc$subject),
+      d3(vc$residual)
+    )
+  } else if (ml && is.null(vc$cluster_rater)) {
     # Nested-rater design (Design 2): the "rater" slot holds sigma^2_{r:c} and
     # there is no separate cluster x rater term (spec M8 §2a).
     sprintf(

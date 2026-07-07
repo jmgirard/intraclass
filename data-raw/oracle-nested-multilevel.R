@@ -182,3 +182,124 @@ cat(
 stopifnot(abs(d2_a1 - tw_a1) < 1e-4)
 
 cat("\nAll O-NML Design-2 oracle checks passed.\n")
+
+# ==============================================================================
+# Design 3: raters nested within subjects and clusters (Eqs. 10-11)
+# ==============================================================================
+#
+# Y_{r:s:c} = mu + mu_c + mu_{s:c} + mu_{r:s:c}                            (Eq. 10)
+# sigma^2 = sigma^2_c + sigma^2_{s:c} + sigma^2_{r:s:c}                    (Eq. 11)
+#
+# Each subject has its OWN raters (rater labels unique per subject). The rater
+# variance is confounded into residual, so this is the multilevel one-way design:
+# AGREEMENT ONLY, no consistency (paper p. 6). Fit (our translation of Eq. 10):
+#   score ~ 1 + (1|cluster) + (1|cluster:subject)
+# with residual = sigma^2_{r:s:c}.
+
+sim_design3 <- function(n_clusters, n_subjects, n_raters, vc, vsc, vres, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(n_clusters, 0, sqrt(vc))
+  d <- expand.grid(
+    rep = seq_len(n_raters),
+    subj = seq_len(n_subjects),
+    cluster = seq_len(n_clusters)
+  )
+  scv <- stats::rnorm(n_clusters * n_subjects, 0, sqrt(vsc))
+  d$sc <- scv[(d$cluster - 1) * n_subjects + d$subj]
+  d$score <- 10 + cl[d$cluster] + d$sc + stats::rnorm(nrow(d), 0, sqrt(vres))
+  d$cluster <- factor(d$cluster)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  # raters nested in subjects: label unique per (cluster, subject)
+  d$rater <- factor(paste(d$cluster, d$subj, d$rep, sep = "_"))
+  d
+}
+
+model3 <- score ~ 1 + (1 | cluster) + (1 | cluster:subject)
+
+comp3_glmmtmb <- function(d) {
+  m <- glmmTMB::glmmTMB(model3, data = d, REML = TRUE)
+  vc <- glmmTMB::VarCorr(m)$cond
+  c(
+    cluster = as.numeric(attr(vc$cluster, "stddev"))^2,
+    subject = as.numeric(attr(vc[["cluster:subject"]], "stddev"))^2,
+    residual = stats::sigma(m)^2 # = sigma^2_{r:s:c} (rater confounded)
+  )
+}
+
+comp3_lme4 <- function(d) {
+  m <- lme4::lmer(model3, data = d, REML = TRUE)
+  vc <- lme4::VarCorr(m)
+  c(
+    cluster = as.numeric(vc$cluster),
+    subject = as.numeric(vc[["cluster:subject"]]),
+    residual = stats::sigma(m)^2
+  )
+}
+
+# Subject-level ICCs, ten Hove Table 3 (subject level, "raters nested in
+# subjects"): agreement-only ICC_s(1)/ICC_s(k); signal sigma^2_{s:c}.
+iccs3 <- function(x, u) {
+  c(
+    I1 = x[["subject"]] / (x[["subject"]] + x[["residual"]]),
+    Ik = x[["subject"]] / (x[["subject"]] + x[["residual"]] / u)
+  )
+}
+
+# --- O-NML/lme4: glmmTMB vs lme4 cross-engine (balanced Design 3) --------------
+e1 <- sim_design3(30, 8, 6, 1.0, 1.2, 0.5, seed = 20260707)
+g3 <- comp3_glmmtmb(e1)
+l3 <- comp3_lme4(e1)
+stopifnot(max(abs(g3 - l3)) < 1e-4)
+jg <- iccs3(g3, 6)
+jl <- iccs3(l3, 6)
+stopifnot(max(abs(jg - jl)) < 1e-4)
+cat(
+  "\nO-NML/lme4 (Design 3): components agree to",
+  signif(max(abs(g3 - l3)), 3),
+  "\n"
+)
+cat("Reference Design-3 subject-level ICCs (glmmTMB, seed 20260707):\n")
+print(round(jg, 5))
+stopifnot(jg[["Ik"]] >= jg[["I1"]], all(jg >= 0 & jg <= 1))
+
+# --- O-NML/sim: recovery of known population components (Design 3) -------------
+pop3 <- c(subject = 1.2, residual = 0.5)
+k3 <- 20
+pop3_iccs <- iccs3(pop3, k3)
+e2 <- sim_design3(40, 5, k3, 1.0, 1.2, 0.5, seed = 424242)
+h3 <- comp3_glmmtmb(e2)
+j2 <- iccs3(h3, k3)
+cat(
+  "\nO-NML/sim (Design 3): population I1 =",
+  round(pop3_iccs[["I1"]], 3),
+  " recovered =",
+  round(j2[["I1"]], 3),
+  "\n"
+)
+stopifnot(abs(j2[["I1"]] - pop3_iccs[["I1"]]) < 0.05)
+
+# --- O-NML/reduction: Design 3 == M6 one-way (zero cluster variance) -----------
+# With sigma^2_c = 0 and many clusters, Design 3 (raters nested in subjects) IS a
+# single-level one-way design once cluster is ignored: rater identity is not
+# modelled, so the subject-level ICC_s(1) must match a one-way fit
+# score ~ 1 + (1|subject) on the same ratings, to < 1e-2. Ties Design 3 to the
+# pinned M6 one-way estimand.
+# Enough clusters/subjects that the estimated sigma^2_c settles near its true 0
+# (finite samples otherwise absorb a little subject variance into cluster).
+e3 <- sim_design3(50, 20, 6, 0, 1.2, 0.5, seed = 99)
+h3r <- comp3_glmmtmb(e3)
+d3_i1 <- h3r[["subject"]] / (h3r[["subject"]] + h3r[["residual"]])
+m_ow <- glmmTMB::glmmTMB(score ~ 1 + (1 | subject), data = e3, REML = TRUE)
+ow_sub <- as.numeric(attr(glmmTMB::VarCorr(m_ow)$cond$subject, "stddev"))^2
+ow_res <- stats::sigma(m_ow)^2
+ow_i1 <- ow_sub / (ow_sub + ow_res)
+cat(
+  "\nO-NML/reduction (Design 3): D3 I1 =",
+  round(d3_i1, 5),
+  " one-way ICC(1) =",
+  round(ow_i1, 5),
+  "\n"
+)
+stopifnot(abs(d3_i1 - ow_i1) < 1e-2)
+
+cat("\nAll O-NML Design-2 and Design-3 oracle checks passed.\n")

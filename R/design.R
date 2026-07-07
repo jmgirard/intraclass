@@ -99,22 +99,35 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
   )
 }
 
-# Is a nested multilevel design (Design 2/3) balanced and complete? Every cluster
-# must hold the same number of subjects and raters, with one rating per rater-by-
-# subject cell within each cluster. M8 covers balanced/complete nested designs;
-# incomplete nested multilevel is deferred (estimand-spec M8 §8), so `icc()` aborts
-# on an unbalanced one rather than silently using an unvalidated k_eff divisor.
-nested_design_balanced <- function(df) {
+# Is a nested multilevel design (Design 2/3) balanced and complete? M8 covers
+# balanced/complete nested designs; incomplete nested multilevel is deferred
+# (estimand-spec M8 §8), so `icc()` aborts on an unbalanced one rather than
+# silently using an unvalidated k_eff divisor. Balance means different things by
+# design, so `design` selects the check (within-cell replicates are caught
+# separately by summarize_design()$has_replicates):
+#   * Design 2 (raters nested in clusters): equal subjects and raters per cluster,
+#     with every rater rating every subject within its cluster (complete crossing);
+#   * Design 3 (raters nested in subjects): equal subjects per cluster and equal
+#     ratings per subject (no within-cluster crossing to complete).
+nested_design_balanced <- function(df, design) {
   subs <- colSums(table(df$subject, df$cluster) > 0L)
-  rats <- colSums(table(df$rater, df$cluster) > 0L)
-  if (length(unique(subs)) != 1L || length(unique(rats)) != 1L) {
+  if (length(unique(subs)) != 1L) {
     return(FALSE)
   }
-  complete <- tapply(seq_len(nrow(df)), df$cluster, function(ix) {
-    tb <- table(droplevels(df$subject[ix]), droplevels(df$rater[ix]))
-    all(tb == 1L)
-  })
-  all(complete)
+  if (design == "nested_in_clusters") {
+    rats <- colSums(table(df$rater, df$cluster) > 0L)
+    if (length(unique(rats)) != 1L) {
+      return(FALSE)
+    }
+    complete <- tapply(seq_len(nrow(df)), df$cluster, function(ix) {
+      tb <- table(droplevels(df$subject[ix]), droplevels(df$rater[ix]))
+      all(tb == 1L)
+    })
+    all(complete)
+  } else {
+    # Design 3: equal ratings per subject.
+    length(unique(as.integer(table(df$subject)))) == 1L
+  }
 }
 
 # Is the subject x rater bipartite design connected? `incidence` is the ns x nr

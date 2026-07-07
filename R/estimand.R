@@ -53,16 +53,21 @@ icc_estimand <- function(
     # term, so the single confounded residual is the whole error set and there is
     # no agreement/consistency choice. McGraw & Wong label these single-argument
     # ICC(1)/ICC(k)/ICC(m); the SF equivalent is ICC(1,1)/ICC(1,k).
+    #
+    # The MULTILEVEL one-way (ten Hove et al. 2022 Design 3, raters nested in
+    # subjects; estimand-spec M8 §3b) shares this shape -- signal sigma^2_{s:c},
+    # error the confounded residual sigma^2_{r:s:c}, agreement-only -- but carries
+    # a subject `level` and has no Shrout & Fleiss form.
     return(list(
       label = sprintf("ICC(%s)", index),
-      sf_label = oneway_sf_label(index),
+      sf_label = if (multilevel) NA_character_ else oneway_sf_label(index),
       signal = "subject",
       error = "residual",
       unit = unit,
       divisor = resolve_divisor(unit, k_eff),
       type = NA_character_,
       raters = "random",
-      level = NA_character_
+      level = if (multilevel) level else NA_character_
     ))
   }
 

@@ -182,15 +182,19 @@ error is the cluster-by-rater term. Choose the level that matches the decision
 you will make (about a subject, or about a cluster). The agreement/consistency
 and single/average choices above apply at each level.
 
-The design is \strong{inferred from the data}. If raters are crossed with clusters
-(each rater rates in every cluster) the five-component model above is used. If
-raters are \strong{nested in clusters} (each cluster has its own raters; ten Hove et
-al. 2022 Design 2) a four-component model is fit instead, with the rater
-variance carried by the nested rater-within-cluster term. A nested-rater design
-defines only the \strong{subject} level -- a cluster-level ICC needs raters crossed
-with clusters -- so \code{level} is restricted to \code{"subject"} for it. Mixed patterns
-(some raters crossed, some nested) are not a supported design and raise an
-error. Support currently covers balanced, complete designs with random raters.
+The design is \strong{inferred from the data} (ten Hove et al. 2022, Table 2). If
+raters are crossed with clusters (each rater rates in every cluster) the
+five-component model above is used (Design 1). If raters are \strong{nested in
+clusters} (each cluster has its own raters; Design 2) a four-component model is
+fit, with the rater variance carried by the nested rater-within-cluster term. If
+raters are \strong{nested in subjects} (each subject has its own raters; Design 3) the
+rater variance is confounded into the residual, giving a three-component
+multilevel \emph{one-way} model that reports agreement-only \code{ICC(1)}/\code{ICC(k)}. Both
+nested designs define only the \strong{subject} level -- a cluster-level ICC needs
+raters crossed with clusters -- so \code{level} is restricted to \code{"subject"} for them.
+Mixed patterns (some raters crossed, some nested) are not a supported design and
+raise an error. Support currently covers balanced, complete designs with random
+raters.
 }
 
 \section{Confidence intervals}{

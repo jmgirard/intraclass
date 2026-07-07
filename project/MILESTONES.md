@@ -175,9 +175,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   example). Level coverage per design (subject-only vs. both) read off Table 3 at spec
   time, not asserted.
 - Slices (mirror M5): **Slice 1 = Design 2** ✅ (design inferred from the crossing
-  pattern; four-component fit; O-NML/lme4 + sim + reduction green locally),
-  **Slice 2 = Design 3** (raters nested in subjects — agreement-only), **Slice 3 =
-  docs**. Each estimand pinned by ≥2 oracles before shipping (#1/#2).
+  pattern; four-component fit; O-NML/lme4 + sim + reduction-to-two-way),
+  **Slice 2 = Design 3** ✅ (raters nested in subjects; three-component multilevel
+  one-way; agreement-only ICC(1)/ICC(k); O-NML/lme4 + sim + reduction-to-M6-one-way),
+  **Slice 3 = docs**. Each estimand pinned by ≥2 oracles before shipping (#1/#2).
 - Estimand: [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md)
   (written — Eqs. 8–11 + Table 3 transcribed); ADR-016.
 - Deferred out of M8 (recorded so not rediscovered): **incomplete multilevel** (reuse

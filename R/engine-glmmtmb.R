@@ -312,6 +312,35 @@ fit_glmmtmb_multilevel_nested_clusters <- function(
   )
 }
 
+# Design 3 -- raters nested within subjects and clusters (estimand-spec M8 §2b;
+# ten Hove et al. 2022 Eqs. 10-11). Each subject has its own raters, so the rater
+# variance is fully confounded into the residual sigma^2_{r:s:c}: three components
+# (cluster, subject, residual) and NO rater term -- the multilevel one-way design
+# (agreement-only). Fits
+#
+#     score ~ 1 + (1|cluster) + (1|cluster:subject)
+#
+# The subject-level ICC reads {subject | residual} (spec M8 §3b), the same shape
+# as the M6 one-way, so icc_point()/mc_ci() are unchanged.
+fit_glmmtmb_multilevel_nested_subjects <- function(
+  data,
+  call = rlang::caller_env()
+) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject"
+    ),
+    call = call
+  )
+}
+
 # Fixed-rater engine (two-way mixed, McGraw & Wong Case 3 / 3A) ------------------
 #
 # Resolves the ADR-006 debt: on incomplete data the balanced-only "fixed ==

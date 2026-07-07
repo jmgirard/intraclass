@@ -1,15 +1,20 @@
 # intraclass 0.0.0.9000
 
-* Multilevel `icc()` now handles **raters nested within clusters** (ten Hove et al.
-  2022 Design 2), in addition to the crossed Design 1. The design is **inferred from
-  the data's crossing pattern**: when each cluster has its own raters, a
-  four-component model (`score ~ 1 + (1 | cluster) + (1 | cluster:subject) +
-  (1 | cluster:rater)`) is fit and the nested rater-within-cluster variance carries
-  the rater term. Nested-rater designs define only the **subject** level (a
-  cluster-level ICC needs raters crossed with clusters), so `level` is restricted to
-  `"subject"` for them; mixed crossed/nested patterns and incomplete nested designs
-  are directed to a clear error. Verified against an independent lme4 fit, a seeded
-  population-recovery simulation, and a reduction to the two-way estimand.
+* Multilevel `icc()` now handles **nested-rater designs** (ten Hove et al. 2022
+  Designs 2 and 3), in addition to the crossed Design 1. The design is **inferred
+  from the data's crossing pattern**. When each cluster has its own raters (**Design
+  2**, raters nested in clusters), a four-component model
+  (`score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)`) is fit
+  and the nested rater-within-cluster variance carries the rater term. When each
+  *subject* has its own raters (**Design 3**, raters nested in subjects), the rater
+  variance is confounded into the residual, giving a three-component multilevel
+  *one-way* model reporting agreement-only `ICC(1)`/`ICC(k)`. Both nested designs
+  define only the **subject** level (a cluster-level ICC needs raters crossed with
+  clusters), so `level` is restricted to `"subject"` for them; mixed crossed/nested
+  patterns, incomplete nested designs, and consistency requests on Design 3 are
+  directed to a clear error. Verified against independent lme4 fits, seeded
+  population-recovery simulations, and reductions to the two-way (Design 2) and
+  one-way (Design 3) estimands.
 * `icc()` gains a selectable **`engine = "lavaan"`** for the complete, balanced
   random two-way design, fitting the generalizability model as a common-factor
   **structural equation model** (Jorgensen 2021). Consistency coefficients equal
