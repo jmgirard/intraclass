@@ -1,27 +1,28 @@
 # Project status
 
-- Milestone: M4 — "Choosing an ICC" flagship vignette (Slices 1–2 complete locally; PR open)
-- Active task: M4 milestone close — `devtools::check()` 0/0/0, 133 tests pass; PR open, awaiting CI + merge
-- Last green CI: PR #2 (M3) full matrix green; merged to `main` at 11ab1b2
+- Milestone: M4 — "Choosing an ICC" flagship vignette (done; merged via PR #5, full CI matrix green)
+- Active task: — (next: plan M5 — multilevel ICCs, after a short M4 retro)
+- Last green CI: PR #5 (M4) full matrix green (9/9); merged to `main` at 4d4b2ba
 - Blockers: —
-- Updated: 2026-07-06 by main session (Opus)
+- Updated: 2026-07-07 by main session (Opus)
 
 ## Next action
 
-M4 (ADR-009) is built and green locally. Slice 1 shipped the `ratings` /
-`ratings_incomplete` teaching datasets, the balanced-core "Choosing an ICC"
-article, the dependency-free decision-tree SVG, and `test-vignette-claims.R`.
-Slice 2 added the incomplete-design section (`k_eff`, connectedness abort,
-fixed ≢ random on `ratings_incomplete`), the subject-vs-cluster preview pointing
-at M5, the pkgdown `articles:` grouping, the getting-started/advanced refreshes,
-and the README overhaul (stale M1 NOTE → current; runnable `icc()` example;
-missing M3 + new M4 NEWS entries). `devtools::check()` 0/0/0, 133 tests pass,
-`air`/`lintr` clean.
+M4 shipped and merged (PR #5, `4d4b2ba`, full CI matrix green — 9/9). It is the
+flagship "Choosing an ICC" teaching article (ADR-009), demonstrated on the M3
+code. Slice 1: the `ratings` / `ratings_incomplete` teaching datasets, the
+balanced-core article, the dependency-free decision-tree SVG, and
+`test-vignette-claims.R`. Slice 2: the incomplete-design section (`k_eff`,
+connectedness abort, fixed ≢ random on `ratings_incomplete`), the
+subject-vs-cluster preview pointing at M5, the pkgdown `articles:` grouping, the
+getting-started/advanced refreshes, and the README overhaul (runnable `icc()`
+example; previously-missing M3 + new M4 NEWS entries). `devtools::check()` 0/0/0,
+133 tests.
 
-Three commits on `m4-choosing-icc` (`d585d90` plan/ADR-009, `e122708` datasets,
-`585e27e` balanced core, plus this close-out). Milestone work merges via PR
-(`milestone-branches-and-prs` memory), so `main` is untouched.
+Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
+(`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a
+direct commit to `main` (finish-task policy — no CI job reads `project/`).
 
-**Next action:** push `m4-choosing-icc` and open the PR; once the full CI matrix
-is green, merge and reconcile M4 status to done (record the merge SHA here). Then
-M5 (multilevel ICCs) is next — detail its DoD at its start after a short M4 retro.
+**Next action:** `/start-task` begins **M5 — multilevel ICCs** (subject-level vs.
+cluster-level, ten Hove 2021). Detail M5's Definition of Done at its start after a
+short M4 retro (founding brief §7).

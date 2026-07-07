@@ -34,40 +34,13 @@ fixed-effect fit (`+ rater`) — Case 3 consistency + Case 3A absolute agreement
 bias-corrected θ²_r + fixed-path MC-CI; oracle O6 (balanced reduction, lme4, 95% CI
 coverage). Resolves the ADR-006 debt. See MILESTONES M3.
 
-## M4 — "Choosing an ICC" flagship vignette — **in progress** (ADR-009; no new estimator)
+## M4 — "Choosing an ICC" flagship vignette — **done** (merged via PR #5 at 4d4b2ba, full CI matrix green)
 
-Teaching milestone: the decision-framework article on shipped M3 code. Numbers are
-computed by `icc()` at knit time and seeded; asserted relationships are tested
-(PRINCIPLES #1/#4/#12). Ships on an `m4-<slug>` branch, merged via PR.
-
-### Slice 1 — teaching dataset + balanced core + diagram
-
-- [x] `data-raw/make-ratings.R`: deterministically build `ratings` (balanced SF
-      6×4) and `ratings_incomplete` (connected incomplete variant of `ratings`) — Opus
-- [x] `R/data.R` roxygen for both datasets (`@source` SF 1979; `@details` missing
-      cells + connectedness + `k_eff` for the incomplete one); `LazyData: true`;
-      `usethis::use_data()`; WORDLIST + pkgdown reference entry — Opus
-- [x] `choosing-an-icc.Rmd` balanced core: worked examples for `type`/`unit`/`raters`
-      on `data(ratings)` (returns 0.290/0.620/0.715/0.909); McGraw–Wong ↔
-      Shrout–Fleiss naming crosswalk — Opus
-- [x] Decision-tree figure: dependency-free static SVG at `vignettes/` (ADR-009
-      refinement), embedded via `knitr::include_graphics()`; renders in vignette — Opus
-- [x] `test-vignette-claims.R`: agreement ≤ consistency, `ICC(*,k)` ≥ `ICC(*,1)`,
-      fixed≡random on balanced (backs the prose) — Opus
-- [x] Slice-1 close: `air`/`lintr`/spell clean; vignette knits; check 0/0/0 — Opus
-
-### Slice 2 — incomplete-design payoff + close-out
-
-- [x] `choosing-an-icc.Rmd` incomplete section on `data(ratings_incomplete)`:
-      `k_eff`, connectedness abort, **fixed ≢ random on incomplete**; claims test
-      extended to these invariants — Opus
-- [x] Subject-vs-cluster axis previewed conceptually, forward-pointer to M5 (not
-      demonstrated) — Opus
-- [x] pkgdown `articles:` grouping surfacing the flagship; `getting-started.Rmd`
-      → `ratings` + link the real article; refresh `advanced.Rmd` note — Opus
-- [x] README refresh: stale M1 NOTE → actual state; Example a real runnable
-      `icc()` on `ratings` (`eval = TRUE`) + article link; `README.md` rebuilt.
-      Also added the missing M3 + new M4 NEWS entries — Opus
-- [x] Milestone close: `devtools::check()` 0/0/0 local, 133 tests, `air`/`lintr`
-      clean; `MILESTONES.md`/`STATUS.md`/`TASKS.md` updated same-commit; NEWS
-      (M3 + M4); PR open — Opus. *(full CI matrix + merge + tag pending on the PR)*
+Teaching milestone (ADR-009; no new estimator). Slice 1: `ratings` +
+`ratings_incomplete` teaching datasets; the balanced-core "Choosing an ICC"
+article (four decision axes on `data(ratings)`, McGraw–Wong ↔ Shrout–Fleiss
+crosswalk); a dependency-free decision-tree SVG; `test-vignette-claims.R`. Slice 2:
+the worked incomplete-design section (`k_eff`, connectedness abort, fixed ≢ random
+on `ratings_incomplete`); subject-vs-cluster preview → M5; pkgdown `articles:`
+grouping; getting-started/advanced refreshes; README overhaul; NEWS (missing M3 +
+new M4). `devtools::check()` 0/0/0, 133 tests. See MILESTONES M4.

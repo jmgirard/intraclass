@@ -175,17 +175,17 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
         code added). `air`/`lintr` clean; spell advisory tidy (WORDLIST +=
         `connectedness`). Full CI matrix confirmed on the PR.
   - [x] `DECISIONS.md` ADR-009 (M4 scope); `MILESTONES.md`/`STATUS.md`/`TASKS.md`
-        updated in the same commit as the work (#16). Shipped on the
-        `m4-choosing-icc` branch; PR open (merge + tag pending CI).
+        updated same-commit (#16). Shipped on the `m4-choosing-icc` branch,
+        merged via PR #5.
 - Deferred out of M4 (recorded so they aren't rediscovered): the `choose_icc()`
   decision helper (ROADMAP); filling `advanced.Rmd` (incomplete/multilevel/engine
   sections — M5+); a `DiagrammeR`/`mermaid`-rendered diagram (adds a dep for zero
   teaching gain vs. static SVG); migrating the oracle tests off inline data (they
   pin numeric values — left untouched deliberately).
-- Status: complete locally, PR open (Slices 1–2; `devtools::check()` 0/0/0,
-  133 tests pass; ships the flagship "Choosing an ICC" article, the decision-tree
-  diagram, and the `ratings`/`ratings_incomplete` datasets). Flips to done once
-  the PR CI is green and it merges.
+- Status: done (Slices 1–2; merged via PR #5 at 4d4b2ba; full CI matrix green —
+  9/9, `devtools::check()` 0/0/0 local, 133 tests pass). Ships the flagship
+  "Choosing an ICC" article, the decision-tree diagram, and the
+  `ratings`/`ratings_incomplete` datasets.
 
 ## M5: Multilevel ICCs *(provisional)*
 - Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*
