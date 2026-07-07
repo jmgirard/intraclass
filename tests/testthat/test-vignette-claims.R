@@ -25,6 +25,30 @@ test_that("consistency is never smaller than agreement on `ratings`", {
   expect_lte(agr$estimate[2], con$estimate[2])
 })
 
+test_that("choosing-an-icc.Rmd: one-way ICC(1) is the most conservative on `ratings`", {
+  skip_if_not_installed("glmmTMB")
+
+  # The article's `model` section states one-way ICC(1) sits below the two-way
+  # ICC(A,1) and ICC(C,1), because one-way absorbs the rater effect the two-way
+  # coefficients separate. Back the claim numerically (#1).
+  ow <- tidy(icc(ratings, score, subject, rater, model = "oneway", seed = 1))
+  agr <- tidy(icc(ratings, score, subject, rater, type = "agreement", seed = 1))
+  con <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    seed = 1
+  ))
+  i1 <- ow$estimate[ow$index == "ICC(1)"]
+  expect_lte(i1, agr$estimate[agr$index == "ICC(A,1)"])
+  expect_lte(
+    agr$estimate[agr$index == "ICC(A,1)"],
+    con$estimate[con$index == "ICC(C,1)"]
+  )
+})
+
 test_that("the average coefficient is never smaller than the single", {
   skip_if_not_installed("glmmTMB")
 

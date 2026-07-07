@@ -1,12 +1,10 @@
 # error messages are stable and actionable
 
     Code
-      icc(d, score, subject, rater, model = "oneway")
+      icc(d, score, subject, rater, model = "nested")
     Condition
       Error in `icc()`:
-      ! `model` must be "twoway" in this release.
-      i Support for designs beyond two-way is planned for a later milestone.
-      x You supplied "oneway".
+      ! `model` must be one of "twoway" and "oneway".
 
 ---
 

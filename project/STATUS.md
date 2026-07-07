@@ -1,8 +1,9 @@
 # Project status
 
-- Milestone: M5.5 — lme4 as a selectable engine (done; merged via PR #9)
-- Active task: — (next: retro + plan M6 — optional engines)
+- Milestone: M6 — one-way random ICC(1)/ICC(k) (code complete; pending PR merge)
+- Active task: — (M6 slice done locally; next: push `m6-oneway`, open PR)
 - Last green CI: PR #9 (M5.5) full matrix green (9/9); merged to `main` at edd9d88
+  (M6 local: `devtools::check()` 0/0/0, tests 247/0/0, lintr clean)
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
 
@@ -86,10 +87,19 @@ fixed/multilevel fits), **M9 = release polish** (was M7). Everything else
 `choose_icc()`, benchmark suite, bootstrap/profile CIs, D-study cost/two-facet/
 subject-count, Eq. 14) stays parked in ROADMAP.
 
-**Next milestone:** M6 — one-way random ICC(1)/ICC(1,k), the last member of the
-classic Shrout–Fleiss family (model `score ~ 1 + (1 | subject)`, no rater term, no
-engine work). Oracle already staged in `sf_oracle_all` (ICC(1) = 0.166,
-ICC(k) = 0.443) + a `psych` ICC1/ICC1k cross-check + the ANOVA path. Promoted from
-ROADMAP by ADR-013 as a light slice that completes the family before the engine
-expansion. Detail its DoD + estimand-spec at milestone start after a short retro
-(PRINCIPLES.md #2, founding brief §7). Ships on `m6-oneway` (branch-per-milestone).
+**Just shipped (local):** M6 — one-way random ICC(1)/ICC(k), the last member of the
+classic Shrout–Fleiss family. `model = "oneway"` fits `score ~ 1 + (1 | subject)`
+(no rater term) on both engines → ICC(1)/ICC(k) (+ numeric-unit `ICC(m)` D-study
+projection). First milestone to change the fitted model (one-way ≠ consistency: the
+confounded residual carries the rater spread). Estimand + all five oracles verified
+live before code (estimand-spec `M6-oneway.md`); O-OW = SF 0.166/0.443 + `psych`
+ICC1/ICC1k + one-way ANOVA + glmmTMB↔lme4 + seeded sim. `rater` still supplied but
+identity ignored (counts k only); `type`/fixed/`cluster` abort or n/a. Ships the
+choosing-an-icc "are the raters crossed?" prior-question section. `devtools::check()`
+0/0/0, tests 247/0/0. Ships on `m6-oneway`; next is push + PR.
+
+**Next milestone:** M7 — optional engines (Bayesian `brms`/`rstanarm`, SEM
+`lavaan`) behind `Suggests`, extending the M5.5 engine × design dispatch seam and
+generalizing the `ci_method` layer for native posterior samples (references
+gathered — see MILESTONES M7). Detail its DoD at start after a short retro
+(founding brief §7).

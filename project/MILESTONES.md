@@ -339,20 +339,56 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   (point + interval cross-engine, boundary + singular-fit abort, seeded-sim
   coverage), and the advanced-vignette engine-choice section.
 
-## M6: One-way random ICC(1) / ICC(1,k) *(provisional — next)*
+## M6: One-way random ICC(1) / ICC(1,k)
 - Goal: the last member of the classic Shrout–Fleiss family — **one-way random
-  effects**, where subjects are not crossed with a fixed set of raters (each
-  subject may be judged by different raters, and rater identity is not modeled).
-  `ICC(1) = σ²_s / (σ²_s + σ²_res)`; `ICC(1,k)` averages the error over `k`. Model
-  `score ~ 1 + (1 | subject)` — **no rater term**, so no new engine work. Promoted
-  from ROADMAP (ADR-013) as a light, well-prepared slice that completes the ICC
-  family before the engine expansion.
-- Oracle already staged: `sf_oracle_all` carries the published SF one-way values
-  `ICC(1) = 0.166` and `ICC(k) = 0.443` (helper-shrout-fleiss.R), alongside a
-  `psych::ICC` ICC1/ICC1k cross-check and the existing ANOVA-mean-squares path.
-- Detail the DoD + estimand-spec at milestone start (PRINCIPLES.md #2, brief §7);
-  watch the single-rater identifiability caveat already noted for the two-way case.
-- Status: provisional (next)
+  effects** (SF Case 1), where subjects are not crossed with a fixed set of raters,
+  so rater identity is not modeled. `ICC(1) = σ²_s / (σ²_s + σ²_res)`; `ICC(1,k)`
+  averages the error over `k`. First milestone to change the **fitted model** itself
+  (`score ~ 1 + (1 | subject)`, no rater term) rather than re-reading the two-way
+  fit — one-way ≠ consistency despite identical algebra (the confounded residual
+  carries the rater spread; SF ICC(1)=0.166 vs ICC(C,1)=0.715). Promoted from
+  ROADMAP by ADR-013.
+- Estimand: see [`estimand-specs/M6-oneway.md`](estimand-specs/M6-oneway.md)
+  (written first, PRINCIPLES.md #2; estimand + all four oracles verified live before
+  code). Adds a `model = "oneway"` knob; `type`/`raters="fixed"`/`cluster` do not
+  apply (documented / aborted); numeric `unit` (D-study) supported for free via the
+  inherited `resolve_divisor()`; `rater` still required but its identity is ignored
+  (defines `k` only — documented clearly). API decisions pinned in spec §5.
+- Definition of Done (per-estimator bar, §8) — one CI-green slice:
+  - [x] Public `model = "oneway"` unlocked → `ICC(1)`/`ICC(k)` (+ `ICC(m)` for
+        numeric `unit`); `model` validated via `validate_choice` (`twoway`/`oneway`).
+  - [x] `fit_glmmtmb_oneway()` + `fit_lme4_oneway()` (`~ 1 + (1 | subject)`)
+        returning the shared six-field contract (`subject`/`residual`, no rater
+        term); `icc_point()`/`resolve_divisor()`/`mc_ci()` reused unchanged; MC CI
+        boundary-aware (ADR-003). Balance / `k_eff` reused from M3
+        (`summarize_design()`); rater identity ignored; two-way-only guards
+        (n_raters≥2, connectedness, replicates) skipped, replaced by a one-way
+        replication guard.
+  - [x] Guards (#5/#8): `raters = "fixed"` + oneway → classed `abort_unsupported()`;
+        `cluster` + oneway → classed abort; `type` ignored (documented, not aborted);
+        one-rating-per-subject → `abort_unidentified`.
+  - [x] Oracles O-OW (5 independent): SF `0.166`/`0.443` (`sf_oracle_all`, absolute
+        gap); `psych::ICC` ICC1/ICC1k ≤1e-4; package-independent one-way ANOVA mean
+        squares; glmmTMB↔lme4 cross-engine (point + interval); seeded simulation
+        (recovery + 95% CI coverage). Absolute tolerances on CI bounds (M5.5 lesson).
+  - [x] `print`/`summary`/`format`/`tidy`/`glance` surface the one-way design +
+        `ICC(1)`/`ICC(k)` label + SF crosswalk (`ICC(1,1)`/`ICC(1,k)`); `glance`
+        `var_rater` = NA; print snapshot.
+  - [x] Roxygen `@param model`/`@param type` extended to one-way (rater-identity-
+        ignored + type-not-applicable notes); `choosing-an-icc.Rmd` "are the raters
+        crossed?" prior-question section + `getting-started` note, backed by a
+        `test-vignette-claims.R` line; NEWS.
+  - [x] `REFERENCES.md` O-OW row (O1 one-way values promoted to asserted);
+        `devtools::check()` 0/0/0 local; `air`/`lintr` clean; tests 247/0/0.
+        MILESTONES/STATUS/TASKS same-commit (#16). Ships on `m6-oneway`, merged via
+        PR; full CI matrix on the PR.
+- Deferred out of M6 (recorded so not rediscovered): within-cell replicates
+  (`(1 | subject:rater)`); one-way *fixed* (not meaningful); categorical/ordinal
+  one-way (GLMM). (Spec §10.)
+- Status: done (one slice; `devtools::check()` 0/0/0 local, tests 247/0/0, lintr
+  clean). Ships `model = "oneway"` (ICC(1)/ICC(k), + numeric-unit projection) on
+  both engines, oracles O-OW (textbook + psych + ANOVA + cross-engine + sim), and
+  the choosing-an-icc "are the raters crossed?" section. **Pending PR merge.**
 
 ## M7: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a

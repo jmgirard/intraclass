@@ -10,7 +10,8 @@
 format.icc <- function(x, ...) {
   ci_pct <- format(100 * x$ci$conf_level, trim = TRUE)
   ml <- isTRUE(x$design$multilevel)
-  phrase <- icc_design_phrase(x$design$type, x$design$raters)
+  ow <- identical(x$design$model, "oneway")
+  phrase <- icc_design_phrase(x$design$type, x$design$raters, oneway = ow)
   if (ml) {
     phrase <- paste("multilevel", phrase)
   }
@@ -25,6 +26,21 @@ format.icc <- function(x, ...) {
       x$n$raters,
       x$design$raters,
       x$n$obs
+    )
+  } else if (ow) {
+    # One-way: raters are interchangeable, so report ratings per subject (k_eff,
+    # the averaging divisor) rather than a subject x rater cell grid (M6 spec §5).
+    k_desc <- if (x$design$balanced) {
+      format(x$k_eff, trim = TRUE)
+    } else {
+      formatC(x$k_eff, format = "f", digits = 2)
+    }
+    sprintf(
+      "Subjects: %d | Ratings: %d (%s per subject, %s) | raters interchangeable",
+      x$n$subjects,
+      x$n$obs,
+      k_desc,
+      if (x$design$balanced) "balanced" else "unbalanced"
     )
   } else {
     sprintf(
@@ -95,7 +111,7 @@ format.icc <- function(x, ...) {
   # On incomplete data ICC(*,k) is a projection to the effective number of
   # ratings per subject (harmonic mean, k_eff); surface it so the divisor is not
   # a black box (M3 spec §5, ADR-008). Silent on balanced data (k_eff == k).
-  keff_note <- if (!x$design$balanced && any(grepl(",k)$", e$index))) {
+  keff_note <- if (!x$design$balanced && any(grepl("k\\)$", e$index))) {
     sprintf(
       "ICC(*,k) projects to an effective %s raters (harmonic mean of ratings/subject).",
       formatC(x$k_eff, format = "f", digits = 2)
@@ -114,6 +130,13 @@ format.icc <- function(x, ...) {
       d3(vc$subject),
       d3(vc$rater),
       d3(vc$cluster_rater),
+      d3(vc$residual)
+    )
+  } else if (ow) {
+    # One-way has no separate rater term; the residual confounds rater with error.
+    sprintf(
+      "Variance components: subject %s, residual %s (rater confounded)",
+      d3(vc$subject),
       d3(vc$residual)
     )
   } else {
@@ -139,22 +162,30 @@ print.icc <- function(x, ...) {
 #' @export
 summary.icc <- function(object, ...) {
   cli::cli_verbatim(format(object, ...))
-  type_note <- if (object$design$type == "agreement") {
-    "Absolute agreement counts the rater main effect (systematic differences in"
+  notes <- if (identical(object$design$model, "oneway")) {
+    c(
+      "One-way random: each subject is rated by a possibly different set of",
+      "interchangeable raters, so systematic rater differences cannot be",
+      "separated and are absorbed into the residual (a conservative ICC)."
+    )
   } else {
-    "Consistency ignores the rater main effect (systematic differences in"
+    type_note <- if (object$design$type == "agreement") {
+      "Absolute agreement counts the rater main effect (systematic differences in"
+    } else {
+      "Consistency ignores the rater main effect (systematic differences in"
+    }
+    effect <- if (object$design$type == "agreement") {
+      "rater level) as error."
+    } else {
+      "rater level); only relative standing counts."
+    }
+    c(
+      paste(type_note, effect),
+      "A single rating per cell confounds the subject-by-rater interaction with",
+      "residual error."
+    )
   }
-  effect <- if (object$design$type == "agreement") {
-    "rater level) as error."
-  } else {
-    "rater level); only relative standing counts."
-  }
-  cli::cli_verbatim(c(
-    "",
-    paste(type_note, effect),
-    "A single rating per cell confounds the subject-by-rater interaction with",
-    "residual error."
-  ))
+  cli::cli_verbatim(c("", notes))
   invisible(object)
 }
 
@@ -189,7 +220,7 @@ glance.icc <- function(x, ...) {
     k_eff = x$k_eff,
     var_cluster = or_na(x$components$cluster),
     var_subject = x$components$subject,
-    var_rater = x$components$rater,
+    var_rater = or_na(x$components$rater),
     var_cluster_rater = or_na(x$components$cluster_rater),
     var_residual = x$components$residual,
     engine = x$engine,

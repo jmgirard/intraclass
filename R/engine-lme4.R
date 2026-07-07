@@ -140,3 +140,104 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
     to_components = to_components
   )
 }
+
+# One-way lme4 engine (M6; raters not crossed) ---------------------------------
+#
+# The one-way counterpart of fit_glmmtmb_oneway(): `score ~ 1 + (1 | subject)`
+# with NO rater term, only `subject` and `residual` components. Same merDeriv ->
+# log-SD delta transform and singular-fit guard as fit_lme4(); see that function's
+# header for the rationale (ADR-012).
+
+fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+
+  fit <- withCallingHandlers(
+    lme4::lmer(
+      score ~ 1 + (1 | subject),
+      data = data,
+      REML = TRUE
+    ),
+    warning = function(w) {
+      cli::cli_warn(c(
+        "The {.pkg lme4} engine reported a fitting warning.",
+        i = conditionMessage(w)
+      ))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  if (lme4::isSingular(fit)) {
+    abort_intraclass(
+      c(
+        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
+         singular (boundary) fit.",
+        i = "A variance component was estimated at exactly zero, so \\
+             {.pkg merDeriv} cannot compute the parameter covariance.",
+        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
+  vc <- lme4::VarCorr(fit)
+  sd_subject <- as.numeric(attr(vc$subject, "stddev"))
+  sd_res <- as.numeric(stats::sigma(fit))
+  components <- list(
+    subject = sd_subject^2,
+    residual = sd_res^2
+  )
+
+  vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
+  nm_sd <- colnames(vcov_sd)
+  idx <- c(
+    intercept = which(nm_sd == "(Intercept)"),
+    subject = grep("subject", nm_sd),
+    residual = which(nm_sd == "residual")
+  )
+  if (length(idx) != 3L || anyNA(idx)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg merDeriv} covariance to the model terms.",
+        i = "Columns returned: {.val {nm_sd}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  vcov_sd <- vcov_sd[idx, idx, drop = FALSE]
+
+  jac <- diag(c(1, 1 / sd_subject, 1 / sd_res))
+  vcov_log <- jac %*% vcov_sd %*% t(jac)
+
+  slots <- c("(Intercept)", "subject", "residual")
+  dimnames(vcov_log) <- list(slots, slots)
+  estimate <- stats::setNames(
+    c(
+      as.numeric(lme4::fixef(fit)[["(Intercept)"]]),
+      log(sd_subject),
+      log(sd_res)
+    ),
+    slots
+  )
+
+  to_components <- function(par) {
+    list(
+      subject = exp(2 * par["subject", ]),
+      residual = exp(2 * par["residual", ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "lme4",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_log,
+    to_components = to_components
+  )
+}

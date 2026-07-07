@@ -3,9 +3,10 @@
 test_that("options that are valid but not yet implemented abort with a pointer", {
   d <- sf_ratings_long()
 
+  # model = "oneway" is now supported (M6); an unknown model still aborts.
   expect_error(
-    icc(d, score, subject, rater, model = "oneway"),
-    class = "intraclass_unsupported"
+    icc(d, score, subject, rater, model = "nested"),
+    class = "intraclass_error"
   )
   # lme4 is now a selectable engine (M5.5); an unknown engine still aborts.
   expect_error(
@@ -71,7 +72,7 @@ test_that("invalid choices for supported dimensions abort as classed errors", {
 test_that("error messages are stable and actionable", {
   d <- sf_ratings_long()
   expect_snapshot(
-    icc(d, score, subject, rater, model = "oneway"),
+    icc(d, score, subject, rater, model = "nested"),
     error = TRUE
   )
   expect_snapshot(
