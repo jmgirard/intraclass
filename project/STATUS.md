@@ -1,24 +1,24 @@
 # Project status
 
-- Milestone: M2 — consistency variants + fixed-vs-random raters (built locally,
-  all gates green; on branch `m2-consistency`, pending push + PR CI)
-- Active task: — (next: push branch, open PR, confirm CI green)
-- Last green CI: 77e8ab0 (M1; the M2 branch is not yet pushed)
+- Milestone: M2 — consistency variants + fixed-vs-random raters (done; merged to
+  `main` via PR #1)
+- Active task: — (awaiting go-ahead to plan M3)
+- Last green CI: PR #1 full matrix green (9 checks) on 9c85c0b; merged to `main`
+  at 334a48a
 - Blockers: —
 - Updated: 2026-07-06 by main session (Opus)
 
 ## Next action
 
-M2 is implemented on branch `m2-consistency` and passes the full local gate:
-71 tests (0 fail/skip), `devtools::check()` 0/0/0, 0 lints, `air` clean, coverage
-94.8% (statistical paths 100%). `icc()` now takes `type = "consistency"` →
-`ICC(C,1)`/`ICC(C,k)` and `raters = c("random", "fixed")`; fixed raters is a
-labelling layer over the shared fit (two-way mixed, SF `ICC(3,*)`) with a loud
-classed `intraclass_fixed_raters` warning. Oracles: SF 0.715/0.909, `psych`
-ICC3/ICC3k (1e-4), and the fixed≡random equivalence (O4;
-`data-raw/oracle-fixed-vs-random.R`).
+M2 shipped: `icc()` now supports `type = "consistency"` (`ICC(C,1)`/`ICC(C,k)`)
+and `raters = c("random", "fixed")` — fixed raters a balanced-data label layer
+over the shared fit (two-way mixed, SF `ICC(3,*)`) with a loud classed
+`intraclass_fixed_raters` warning. Verified against SF 0.715/0.909, `psych`
+ICC3/ICC3k, and the fixed≡random equivalence (O4). PR #1 merged at 334a48a; a
+docs-only reconciliation commit follows to close the "pending push" markers.
 
-**Next:** push `m2-consistency`, open a PR (first commit `13fb915` already carries
-the planning + skill fixes), confirm the full CI matrix is green, then reconcile
-`STATUS.md` "Last green CI" and the MILESTONES/TASKS "pending push" markers (the
-`finish-task` post-push step).
+**Next (M3, provisional):** imbalanced & incomplete designs + the flagship
+"Choosing an ICC" vignette. M3 inherits the load-bearing debt from ADR-006: the
+fixed-raters label layer is **balanced-data only** and must be revisited with a
+real fixed-effect fit path (or a balanced-design guard) once incomplete data
+arrives. Await a short M2 retro + sign-off before planning M3 (founding brief §7).

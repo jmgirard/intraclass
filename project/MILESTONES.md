@@ -83,10 +83,10 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   - [x] `REFERENCES.md` (O1 rows C1/Ck promoted to asserted; new O4 fixed≡random
         oracle) + `DECISIONS.md` (ADR-006) updated; coverage 94.8% (statistical
         paths 100%); `devtools::check()` 0/0/0 locally.
-  - [ ] Full CI matrix confirmed green on push (PR).
+  - [x] Full CI matrix confirmed green on PR #1 (all 9 checks); merged to `main`.
 - Deferred to their own slices (not M2): lme4 as a *selectable* engine + bootstrap
   CI (supersedes ADR-005's "defer to M2"); D-study projection to arbitrary k.
-- Status: done (local; all gates green) — pending push + CI
+- Status: done (merged to `main` via PR #1 at 334a48a; full CI matrix green)
 
 ## M3: Imbalanced & incomplete designs *(provisional)*
 - Goal: missing rater×subject cells; the flagship "Choosing an ICC" vignette.

@@ -27,17 +27,9 @@ condensed to a single line once done.
 `icc()` for `ICC(A,1)`/`ICC(A,k)`: glmmTMB engine, boundary-aware MC CIs,
 `print`/`summary`/`format`/`tidy`/`glance`, 5 oracles, vignette. See MILESTONES M1.
 
-## M2 — consistency variants + fixed-vs-random raters (planned)
+## M2 — consistency variants + fixed-vs-random raters — **done** (PR #1, merged at 334a48a, CI green)
 
-- [x] Plan M2 (scope, fixed≡random verification, API) and get sign-off — Opus
-- [x] Estimand-spec `M2-consistency-and-fixed.md` + ADR-006 — Opus
-- [x] `icc_estimand()`: consistency error set {residual}; `raters`/design dimension (labeling only) — Opus
-- [x] `icc.R`: unlock `type = "consistency"`; add `raters = c("random","fixed")` arg + labeling — Opus
-- [x] Classed warning layer `warn_intraclass()` + `warn_fixed_raters()` (`intraclass_fixed_raters`) — Opus
-- [x] `print`/`summary`/`format`: surface design (random vs mixed) + SF-equivalent (ICC(2,·)/ICC(3,·)); snapshots — Opus
-- [x] Oracle tests: SF 0.715/0.909, `psych` ICC3/ICC3k (1e-4), ANOVA identity, lme4 cross-check, fixed≡random equivalence — Opus
-- [x] Warning-path tests: `intraclass_fixed_raters` fires on `"fixed"`, silent on `"random"`, text snapshot — Opus
-- [x] Roxygen "which ICC / when" for consistency + fixed/random; vignette consistency-vs-agreement note — Opus
-- [x] Commit the seeded fixed≡random script under the reference-values path (O-registry provenance, #4) — Opus
-- [x] REFERENCES.md (promote O1 C-rows; new equivalence oracle); verify; check 0/0/0 locally (94.8% cov) — Opus
-- [ ] Push branch, open PR, confirm full CI matrix green; reconcile STATUS last-green-CI — Opus
+`icc()` gains `type = "consistency"` (`ICC(C,1)`/`ICC(C,k)`) and
+`raters = c("random","fixed")` (fixed = balanced-data label layer, SF `ICC(3,*)`,
+warns). Classed warning layer; design + SF-equivalent in print/summary; oracles
+SF 0.715/0.909, `psych` ICC3/ICC3k, fixed≡random equivalence (O4). See MILESTONES M2.
