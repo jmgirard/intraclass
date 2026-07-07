@@ -122,12 +122,12 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   - [x] Roxygen "which ICC / when" extended to complete-vs-incomplete and the fixed
         real-fit; `DECISIONS.md` ADR-008 (fixed real-fit path + divisor convention);
         `devtools::check()` 0 errors/0 warnings locally (1 pre-existing CRAN-incoming
-        NOTE); full CI matrix pending push.
+        NOTE); full CI matrix green on PR #2.
 - Deferred out of M3 (recorded so they aren't rediscovered): the flagship vignette
   (M4); replicate ratings within a cell; one-way designs; lme4 as a *selectable*
   engine; D-study projection API (ROADMAP).
-- Status: done (Slices 0–2; local gate green — tests 118/0/0, check 0/0/1 justified,
-  coverage 93.8%; on branch `m3-incomplete-designs`, **pending PR CI + merge**)
+- Status: done (Slices 0–2; merged to `main` via PR #2 at 11ab1b2; full CI matrix
+  green — tests 118/0/0, check 0/0/1 justified, coverage 93.8%)
 
 ## M4: "Choosing an ICC" flagship vignette *(provisional)*
 - Goal: the decision-framework teaching article (agreement vs. consistency, single
