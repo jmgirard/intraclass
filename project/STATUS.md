@@ -76,10 +76,20 @@ Scope + the singular-fit note in ADR-012. (CI-only wrinkle, now fixed: the
 interval oracle first used `expect_equal`'s *relative* tolerance, which tripped on
 small `conf.low` bounds on Windows; switched to an absolute-gap assertion.)
 
-**Next milestone:** M6 — optional engines (Bayesian `brms`/`rstanarm`, SEM
-`lavaan`) behind `Suggests`; references already gathered (Jorgensen 2021 SEM,
-ten Hove 2020 hyperpriors — see MILESTONES M6). M6 now extends the engine × design
-dispatch seam M5.5 established, and will need the `ci_method` layer to generalize
-for brms's native posterior samples (M5.5 left it untouched — merDeriv let lme4
-reuse `montecarlo`). Detail M6's DoD at its start after a short retro
-(founding brief §7).
+**Backlog scheduled (ADR-013).** A post-M5.5 take-stock (this session) confirmed
+**nothing mandatory blocks the optional-engine work** — M5.5 built the dispatch
+seam it needed — then reordered the provisional tail. New arc: **M6 = one-way
+random ICC(1)/ICC(1,k)** (next), **M7 = optional engines** (was M6), **M8 =
+multilevel & incomplete-design extensions** (grouped from M5 spec §8 + lme4
+fixed/multilevel fits), **M9 = release polish** (was M7). Everything else
+(categorical/ordinal GLMM, within-cell replicates, general `autoplot()`,
+`choose_icc()`, benchmark suite, bootstrap/profile CIs, D-study cost/two-facet/
+subject-count, Eq. 14) stays parked in ROADMAP.
+
+**Next milestone:** M6 — one-way random ICC(1)/ICC(1,k), the last member of the
+classic Shrout–Fleiss family (model `score ~ 1 + (1 | subject)`, no rater term, no
+engine work). Oracle already staged in `sf_oracle_all` (ICC(1) = 0.166,
+ICC(k) = 0.443) + a `psych` ICC1/ICC1k cross-check + the ANOVA path. Promoted from
+ROADMAP by ADR-013 as a light slice that completes the family before the engine
+expansion. Detail its DoD + estimand-spec at milestone start after a short retro
+(PRINCIPLES.md #2, founding brief §7). Ships on `m6-oneway` (branch-per-milestone).

@@ -1,9 +1,11 @@
 # Milestones
 
-Ordered milestones with Definition of Done and status. **M1 is fully specified;
-M2–M6 are provisional** one-liners, detailed only at the start of their milestone
-after a short retro on the previous one (founding brief §7). The arc is a
-hypothesis, not a contract — reorders get a [`DECISIONS.md`](DECISIONS.md) entry.
+Ordered milestones with Definition of Done and status. **Shipped milestones
+(M0–M5.5) are fully specified; the remaining ones (M6–M9) are provisional**
+one-liners, detailed only at the start of their milestone after a short retro on
+the previous one (founding brief §7). The arc is a hypothesis, not a contract —
+reorders get a [`DECISIONS.md`](DECISIONS.md) entry (latest: ADR-013, which set
+the current M6–M9 sequence).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -285,13 +287,14 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   Design-1 fit, oracles O-ML (lme4 + seeded sim + single-level reduction), and the
   advanced-vignette multilevel section.
 
-## M5.5: lme4 as a selectable engine (pre-M6 interface slice, ADR-012)
+## M5.5: lme4 as a selectable engine (pre-optional-engines interface slice, ADR-012)
 - Goal: promote **lme4 from oracle-only to a selectable `engine = "lme4"`** for the
   default random two-way path, returning the same six-field engine contract so the
   whole downstream pipeline (`icc_point`/`mc_ci`/`d_study`) is untouched. Resolves
   the ADR-005 deferral (lme4-selectable, deferred since M2) and builds the
-  **engine × design dispatch seam** M6 plugs brms/lavaan into — de-risking M6 by
-  proving the interface with an engine already trusted as the cross-check oracle.
+  **engine × design dispatch seam** the optional-engines milestone (now M7,
+  ADR-013) plugs brms/lavaan into — de-risking that work by proving the interface
+  with an engine already trusted as the cross-check oracle.
   **No new estimand, no estimand-spec** (cf. M4); scope decisions in ADR-012.
 - Definition of Done (one CI-green slice):
   - [x] `engine = "lme4"` selectable for the random two-way path; `R/engine-lme4.R`
@@ -326,9 +329,9 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   directing the user to `engine = "glmmTMB"` (#5/#8) — a narrow, well-defined
   engine asymmetry, not a silent wrong answer.
 - Deferred out of M5.5 (recorded so not rediscovered): lme4 for the fixed-effect
-  (Case 3/3A) and multilevel fits; the parametric-bootstrap `ci_method` (bootMer)
-  → M6/ROADMAP; a boundary-robust lme4 interval for singular fits (glmmTMB covers
-  it today); merDeriv edge cases beyond the two-way random model.
+  (Case 3/3A) and multilevel fits (→ M8, ADR-013); the parametric-bootstrap
+  `ci_method` (bootMer) → M7/ROADMAP; a boundary-robust lme4 interval for singular
+  fits (glmmTMB covers it today); merDeriv edge cases beyond the two-way random model.
 - Status: done (one slice; merged via PR #9 at `edd9d88`; full CI matrix green —
   9/9 incl. Windows, `devtools::check()` 0/0/0 local, tests 219/0/0, lintr clean).
   Ships selectable `engine = "lme4"` for the random two-way path via a
@@ -336,9 +339,27 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   (point + interval cross-engine, boundary + singular-fit abort, seeded-sim
   coverage), and the advanced-vignette engine-choice section.
 
-## M6: Optional engines behind `Suggests` *(provisional)*
+## M6: One-way random ICC(1) / ICC(1,k) *(provisional — next)*
+- Goal: the last member of the classic Shrout–Fleiss family — **one-way random
+  effects**, where subjects are not crossed with a fixed set of raters (each
+  subject may be judged by different raters, and rater identity is not modeled).
+  `ICC(1) = σ²_s / (σ²_s + σ²_res)`; `ICC(1,k)` averages the error over `k`. Model
+  `score ~ 1 + (1 | subject)` — **no rater term**, so no new engine work. Promoted
+  from ROADMAP (ADR-013) as a light, well-prepared slice that completes the ICC
+  family before the engine expansion.
+- Oracle already staged: `sf_oracle_all` carries the published SF one-way values
+  `ICC(1) = 0.166` and `ICC(k) = 0.443` (helper-shrout-fleiss.R), alongside a
+  `psych::ICC` ICC1/ICC1k cross-check and the existing ANOVA-mean-squares path.
+- Detail the DoD + estimand-spec at milestone start (PRINCIPLES.md #2, brief §7);
+  watch the single-rater identifiability caveat already noted for the two-way case.
+- Status: provisional (next)
+
+## M7: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a
-  shared interface, gated by `rlang::check_installed()`. *(was M5)*
+  shared interface, gated by `rlang::check_installed()`. Extends the engine ×
+  design dispatch seam M5.5 built (ADR-012), and generalizes the `ci_method` layer
+  for the Bayesian engine's native posterior samples (M5.5 left it untouched —
+  merDeriv let lme4 reuse `montecarlo`). *(was M6 → M7 per ADR-013; was M5 before)*
 - Key references already gathered (pin at milestone start, PRINCIPLES.md #12):
   the **SEM/lavaan** engine's primary source is **Jorgensen (2021), "How to
   Estimate Absolute-Error Components in Structural Equation Models of
@@ -351,6 +372,20 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   PDFs are in the maintainer's Zotero; add to `REFERENCES.md` when they back code.
 - Status: provisional
 
-## M7: Release polish *(provisional)*
-- Goal: pkgdown site, advanced vignette, CRAN submission prep. *(was M6)*
+## M8: Multilevel & incomplete-design extensions *(provisional)*
+- Goal: extend the multilevel estimator beyond M5's Design 1 by working through the
+  deferrals grouped from the M5 spec §8 (ADR-013):
+  - the paper's **Designs 2/3** — raters nested within clusters and/or subjects
+    (ten Hove, Jorgensen & van der Ark 2022, Eqs. 8–11, Table 3 middle/right);
+  - **incomplete multilevel** designs, reusing the M3 `k_eff`/connectedness
+    machinery;
+  - **fixed-rater multilevel**, reusing the M3 real fixed-effect fit path (ADR-008);
+  - **lme4 for the fixed and multilevel fits** (deferred out of M5.5, ADR-012).
+- Likely split into thin per-design slices (#15); each estimand transcribed from
+  the paper and pinned by ≥2 oracles before shipping (#1/#2). Detail at start.
+- Status: provisional
+
+## M9: Release polish *(provisional)*
+- Goal: pkgdown site, advanced vignette, CRAN submission prep. *(was M7 → M9 per
+  ADR-013; was M6 before)*
 - Status: provisional

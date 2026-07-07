@@ -24,7 +24,6 @@ Ark).
 
 ## Parking lot (unscheduled proposals)
 
-- One-way random ICC(1)/ICC(k) (raters not crossed).
 - Replicate ratings within cell → split σ²_sr from σ²_e via `(1 | subject:rater)`.
 - `autoplot()` / `ggplot2` methods for variance-component and CI visualization
   (the reliability-curve case shipped for `d_study()` in M4.5; general
@@ -55,3 +54,11 @@ is deliberate when scheduled. Resolve the chosen shape at the milestone's start.
   dependability, `psych` at `m = n_raters`, seeded sim) are in **ADR-010** and
   [`estimand-specs/M4.5-d-study.md`](estimand-specs/M4.5-d-study.md). Subject-count
   projection remains parked (M4.5 spec §6).
+- **One-way random ICC(1)/ICC(1,k) (raters not crossed).** Promoted from this
+  parking lot to **M6** (the next milestone) by **ADR-013** — the last member of the
+  classic Shrout–Fleiss family, with its oracle already staged in `sf_oracle_all`
+  (0.166 / 0.443). Detail its DoD + estimand-spec at milestone start.
+- **Multilevel & incomplete-design extensions.** The M5 spec §8 deferrals (Designs
+  2/3, incomplete multilevel, fixed-rater multilevel) plus lme4 for the
+  fixed/multilevel fits are grouped into **M8** by **ADR-013**. Not detailed until
+  that milestone starts.

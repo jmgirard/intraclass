@@ -496,3 +496,40 @@ consequences → references.
   ADR-011 (multilevel fit); `merDeriv` (Wang & Merkle 2018, *J. Stat. Softw.*);
   lme4 (Bates et al. 2015); `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its
   start), §1 (engines).
+
+## ADR-013: Post-M5.5 milestone reorder — one-way ICC(1) before optional engines
+- Date: 2026-07-07
+- Status: accepted
+- Context: With M5.5 merged (lme4 selectable engine, PR #9), the maintainer asked to
+  take stock of the deferred/ROADMAP backlog before starting the heavy optional-
+  engine work (the milestone then numbered M6). Assessment: **nothing mandatory
+  blocks that engine work** — M5.5 built the engine × design dispatch seam it
+  needed, and the remaining `ci_method` generalization for posterior samples belongs
+  inside it. The board header requires a DECISIONS entry for any arc reorder
+  (MILESTONES.md), so this ADR records the chosen resequencing.
+- Decision (both points maintainer-approved this session):
+  - **Promote one-way random ICC(1)/ICC(1,k) to M6**, before optional engines. It is
+    the last missing member of the classic Shrout–Fleiss family (the package ships
+    ICC2/ICC3 but not ICC1), self-contained (model `score ~ 1 + (1 | subject)`, no
+    rater term, no engine work), and its oracle is **already staged** in
+    `sf_oracle_all` (ICC(1) = 0.166, ICC(k) = 0.443, the published SF one-way
+    values). A light, well-prepared slice that completes the family before the
+    engine expansion.
+  - **Renumber the provisional tail** by +1: optional engines **M6 → M7**; a new
+    **M8 = multilevel & incomplete-design extensions** (the paper's Designs 2/3, and
+    incomplete + fixed-rater multilevel, grouped from the M5 spec §8, plus lme4 for
+    the fixed/multilevel fits deferred in M5.5); release polish **M7 → M9**.
+  - **Everything else stays in ROADMAP** (not milestone-numbered until scheduled):
+    categorical/ordinal GLMM ratings, within-cell replicates, the conflated
+    single-level ICC (Eq. 14), general `autoplot()`/CI plots, `choose_icc()`, the
+    benchmark suite, bootstrap/profile CIs, and the D-study cost/two-facet/
+    subject-count extensions.
+- Consequences: M6 becomes a small statistical slice with a staged oracle; optional
+  engines (the differentiator) move one slot later but keep all their gathered
+  references (M7). Future milestones stay **provisional one-liners**, detailed at
+  their start after a short retro (#2, brief §7) — this ADR schedules, it does not
+  pre-design them. No code or API change; a planning/tracking-only reorg.
+- References: PRINCIPLES.md #2 (name the estimand first), #14 (milestone gates),
+  #15 (thin slices), #17 (no scope creep); MILESTONES.md (arc-reorder rule);
+  ROADMAP.md (parking lot); ADR-005/ADR-012 (engine deferrals); Shrout & Fleiss
+  (1979) one-way ICC1/ICC1k (0.166/0.443); `CLAUDE_CODE_KICKOFF.md` §7.
