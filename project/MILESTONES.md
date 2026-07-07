@@ -178,7 +178,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   pattern; four-component fit; O-NML/lme4 + sim + reduction-to-two-way),
   **Slice 2 = Design 3** ✅ (raters nested in subjects; three-component multilevel
   one-way; agreement-only ICC(1)/ICC(k); O-NML/lme4 + sim + reduction-to-M6-one-way),
-  **Slice 3 = docs**. Each estimand pinned by ≥2 oracles before shipping (#1/#2).
+  **Slice 3 = docs** ✅ (advanced.Rmd nested-designs subsection + vignette-claims
+  invariants). Each estimand pinned by ≥2 oracles before shipping (#1/#2).
 - Estimand: [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md)
   (written — Eqs. 8–11 + Table 3 transcribed); ADR-016.
 - Deferred out of M8 (recorded so not rediscovered): **incomplete multilevel** (reuse
@@ -188,10 +189,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   these paths, ADR-012); the **Bayesian/MCMC cross-engine** (the paper's own
   estimator); a three-facet `d_study()` over subject-per-cluster counts; exposing the
   conflated single-level ICC (Eq. 14).
-- Status: detailed + estimand-spec written (ADR-016); not started. Resolved from the
-  paper: **subject-level only** (cluster level undefined for nested designs), **Design
-  3 agreement-only** → six coefficients (D2 agreement/consistency × single/average, D3
-  agreement × single/average). Next: Slice 1 (Design 2).
+- Status: all three slices code+docs complete and green locally (313 tests, `air`
+  clean); on branch `m8-nested-multilevel`, not yet merged. Resolved from the paper:
+  **subject-level only** (cluster level undefined for nested designs), **Design 3
+  agreement-only** → six coefficients (D2 agreement/consistency × single/average, D3
+  agreement × single/average). Next: push branch + open PR for the full CI matrix.
 
 ## M9: Release polish *(provisional)*
 - Goal: pkgdown site, advanced vignette, CRAN submission prep. *(was M7 → M9 per

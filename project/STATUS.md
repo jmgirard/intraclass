@@ -2,12 +2,13 @@
 
 - Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **in progress**
   (ADR-016; Slice 1)
-- Active task: **M8 Slices 1–2 (Designs 2 & 3) code-complete, green locally**
-  (design inferred from crossing pattern; 4-component D2 + 3-component D3 fits;
-  O-NML/lme4 + sim + reductions to two-way and M6 one-way; full suite 309 pass / 0
-  fail; `air`-clean). Next: Slice 3 (docs — advanced vignette section), then push
-  branch `m8-nested-multilevel` and open the PR (full CI matrix incl. Windows).
-  Spec: [`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md).
+- Active task: **M8 all three slices code+docs complete, green locally** (Designs 2
+  & 3 inferred from crossing pattern; O-NML/lme4 + sim + reductions to two-way and
+  M6 one-way; advanced.Rmd nested subsection + vignette-claims; full suite 313 pass /
+  0 fail; `air`-clean; vignette knits). Next: **push `m8-nested-multilevel` + open
+  the PR** for the full CI matrix (incl. Windows — watch the absolute-vs-relative
+  interval-tolerance lesson). Spec:
+  [`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md).
 - Last green CI: PR #11 (M7) full matrix green; merged to `main` at fe76f5c
 - Blockers: — (paper obtained; Designs 2/3 equations transcribed into the spec)
 - Slice-1 API resolved (maintainer): design 1/2/3 **inferred from the crossing
