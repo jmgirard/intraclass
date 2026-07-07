@@ -138,7 +138,7 @@ school <- data.frame(
 
 icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
 #> # Intraclass correlation: multilevel two-way random, absolute agreement
-#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
 #>   subject  ICC(A,1)    0.431   [0.251, 0.561]
@@ -184,7 +184,7 @@ school_d2 <- school
 school_d2$rater <- factor(paste(school_d2$classroom, school_d2$rater, sep = "_"))
 icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
 #> # Intraclass correlation: multilevel (raters nested in clusters) two-way random, absolute agreement
-#> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320
+#> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
 #>   subject  ICC(A,1)    0.429   [0.310, 0.549]
@@ -202,7 +202,7 @@ school_d3 <- school
 school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
 icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
 #> # Intraclass correlation: multilevel (raters nested in subjects) absolute agreement
-#> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320
+#> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
 #>   subject  ICC(1)      0.412   [0.290, 0.546]
@@ -216,10 +216,77 @@ effect to keep in or drop from the error term. A layout that is neither
 cleanly crossed nor cleanly nested (some raters shared across clusters,
 some not) raises an informative error rather than guessing at a model.
 
-Multilevel support currently covers **balanced, complete designs with
-random raters**: crossed (Design 1, both levels) and nested (Designs 2
-and 3, subject level). Incomplete multilevel designs and fixed raters
-are planned for later milestones.
+### Incomplete (ragged) multilevel designs
+
+Just as in the single-level case ([*Beyond the balanced
+case*](#beyond-the-balanced-case)), the **crossed** design (Design 1)
+does not need every pupil rated by every rater. The mixed model
+estimates the variance components from whatever cells are present, so a
+ragged classroom design is handled directly. Drop a fifth of the ratings
+from the `school` data at random:
+
+``` r
+
+set.seed(11)
+school_ragged <- school[-sample(nrow(school), round(0.2 * nrow(school))), ]
+```
+
+At the **subject** level both agreement and consistency come back, and —
+exactly as in the single-level incomplete case — `ICC(*,k)` averages
+over the *effective* number of ratings per pupil (`k_eff`, the harmonic
+mean), which is below the full panel size of 4:
+
+``` r
+
+icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
+  level = "subject", seed = 1)
+#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   subject  ICC(A,1)    0.413   [0.233, 0.557]
+#>   subject  ICC(A,k)    0.673   [0.471, 0.787]
+#> ICC(*,k) projects to an effective 2.93 raters (harmonic mean of ratings/subject).
+#> Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457
+```
+
+The header now reads *incomplete*, and the report names the effective
+`k` so the divisor is never a black box.
+
+At the **cluster** level, the single-rater `ICC(c,1)` is available on
+ragged data (it needs no averaging divisor). Request it with
+`unit = "single"`:
+
+``` r
+
+icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
+  level = "cluster", type = "consistency", unit = "single", seed = 1)
+#> # Intraclass correlation: multilevel two-way random, consistency
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   cluster  ICC(C,1)    1.000   [0.000, 1.000]
+#> Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457
+```
+
+Two things are deliberately fenced off on incomplete data, each with a
+clear error rather than a silently wrong number. The **averaged**
+cluster-level `ICC(c,k)` is not yet supported: the effective number of
+raters behind a ragged *cluster* mean is a per-cluster quantity still
+being validated, distinct from the per-pupil `k_eff`. And when missing
+cells make the crossing pattern **ambiguous** — some raters happen to
+appear in only one classroom, so the design could be read as crossed
+*or* nested —
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) does
+not guess; you resolve it by declaring `design = "crossed"` (validated
+against the data), or the abort points you at the nested reading.
+
+Multilevel support currently covers random raters on: **crossed**
+designs (Design 1), complete or **incomplete**, at the subject level and
+— for `ICC(c,1)` — the cluster level; and **nested** designs (Designs 2
+and 3, subject level), which still require complete data. The averaged
+cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs,
+and fixed raters are planned for later milestones.
 
 ## Choosing an estimation engine
 

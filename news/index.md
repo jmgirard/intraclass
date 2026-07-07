@@ -4,6 +4,27 @@
 
 - Multilevel
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) now
+  accepts **incomplete (ragged) crossed designs** (Design 1 with missing
+  subject-by-rater cells), computing the subject-level ICCs by REML with
+  the averaging divisor set to the effective number of ratings per
+  subject (`k_eff`, the harmonic mean) — the multilevel counterpart of
+  the single-level incomplete two-way ICC. Identifiability is checked
+  first: each cluster’s subject-by-rater layout must be connected, and
+  absolute agreement additionally requires raters that bridge clusters
+  (otherwise the design is really rater-nested). A new optional
+  **`design`** argument (`"crossed"`, `"nested_in_clusters"`,
+  `"nested_in_subjects"`) lets you declare the design when missing cells
+  make the crossing pattern ambiguous; it is validated against the data.
+  The **cluster level** is available on incomplete data as the
+  single-rater `ICC(c,1)` (behind an identifiability gate requiring
+  raters that bridge clusters); the averaged `ICC(c,k)` on incomplete
+  data is deferred (its effective-rater divisor is an open modeling
+  question). Verified against independent lme4 fits, a seeded
+  population-recovery simulation, and reductions to the complete-data
+  multilevel and the flat incomplete two-way estimands. Incomplete
+  *nested* designs and fixed-rater multilevel remain for later work.
+- Multilevel
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) now
   handles **nested-rater designs** (ten Hove et al. 2022 Designs 2 and
   3), in addition to the crossed Design 1. The design is **inferred from
   the data’s crossing pattern**. When each cluster has its own raters

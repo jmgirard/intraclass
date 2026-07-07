@@ -86,6 +86,7 @@ raters as a random sample (Case 2) or as fixed (Case 3).</p>
 <span>  raters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"fixed"</span><span class="op">)</span>,</span>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"subject"</span>, <span class="st">"cluster"</span><span class="op">)</span>,</span>
+<span>  design <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"glmmTMB"</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  ci_method <span class="op">=</span> <span class="st">"montecarlo"</span>,</span>
@@ -167,6 +168,16 @@ report: <code>"subject"</code> (within-cluster, distinguishing subjects) and/or
 Ignored (and must be left at its default) when <code>cluster</code> is not supplied. Only
 <code>"subject"</code> is available when raters are nested in clusters (see the
 <em>Multilevel designs</em> section).</p></dd>
+
+
+<dt id="arg-design">design<a class="anchor" aria-label="anchor" href="#arg-design"></a></dt>
+<dd><p>Multilevel design (with a <code>cluster</code> column): <code>NULL</code> (the default)
+infers it from the crossing pattern. On <strong>incomplete</strong> data missing cells can
+make the pattern ambiguous between a crossed and a nested design; declare it
+explicitly with <code>"crossed"</code>, <code>"nested_in_clusters"</code>, or <code>"nested_in_subjects"</code>
+to resolve the ambiguity. A declaration is validated against the data – it
+cannot force a design the data cannot support (e.g. <code>"crossed"</code> still requires
+raters that bridge clusters to estimate absolute agreement).</p></dd>
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
@@ -276,8 +287,20 @@ multilevel <em>one-way</em> model that reports agreement-only <code>ICC(1)</code
 nested designs define only the <strong>subject</strong> level – a cluster-level ICC needs
 raters crossed with clusters – so <code>level</code> is restricted to <code>"subject"</code> for them.
 Mixed patterns (some raters crossed, some nested) are not a supported design and
-raise an error. Support currently covers balanced, complete designs with random
-raters.</p>
+raise an error. The <strong>crossed</strong> design (Design 1) additionally supports
+<strong>incomplete</strong> data – subjects rated by different, overlapping rater subsets
+(missing cells) – computing the subject-level ICCs by REML with the averaging
+divisor set to the effective number of ratings per subject (<code>k_eff</code>, the harmonic
+mean), exactly as the single-level incomplete two-way ICC does. Identifiability is
+checked first: each cluster's subject-by-rater layout must be connected, and for
+absolute agreement raters must bridge clusters (otherwise the design is really
+rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
+declare it with <code>design</code> (above). On incomplete data the <strong>cluster</strong> level is
+reported as the single-rater <code>ICC(c,1)</code> (when raters bridge clusters); the averaged
+cluster-level <code>ICC(c,k)</code> on incomplete data is not yet supported (its effective
+number of raters per cluster is still being validated). Incomplete <em>nested</em>
+designs and fixed raters remain for later milestones. Nested designs still require
+balanced, complete data.</p>
     </div>
     <div class="section level2">
     <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
