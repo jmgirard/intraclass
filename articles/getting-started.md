@@ -54,8 +54,8 @@ fit
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.711]
-#>   ICC(A,k)    0.620   [0.173, 0.908]
+#>   ICC(A,1)    0.290   [0.050, 0.713]
+#>   ICC(A,k)    0.620   [0.173, 0.909]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
 
@@ -72,8 +72,8 @@ tidy(fit)
 #> # A tibble: 2 × 7
 #>   index    estimate std.error conf.low conf.high conf.level method    
 #>   <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
-#> 1 ICC(A,1)    0.290     0.180   0.0498     0.711       0.95 montecarlo
-#> 2 ICC(A,k)    0.620     0.201   0.173      0.908       0.95 montecarlo
+#> 1 ICC(A,1)    0.290     0.180   0.0498     0.713       0.95 montecarlo
+#> 2 ICC(A,k)    0.620     0.201   0.173      0.909       0.95 montecarlo
 
 glance(fit)
 #> # A tibble: 1 × 9
