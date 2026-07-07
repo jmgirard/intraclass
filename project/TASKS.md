@@ -117,13 +117,13 @@ estimands). Two CI-green slices. See MILESTONES M7.
       `data-raw/oracle-sem.R`; `test-icc-lavaan.R` (26 assertions).
       `devtools::check()` 0/0/0; `air`/`lintr` clean; full suite green.
 
-### Slice 2 — lavaan one-way random + docs
-- [ ] `model = "oneway"` + lavaan: parallel one-factor model over k exchangeable
-      columns → `ICC(1)`/`ICC(1,k)` (+ numeric-unit `ICC(m)` free via
-      `resolve_divisor()`). Oracles: SF 0.166/0.443 + `psych` ICC1/ICC1k +
-      cross-engine + sim.
-- [ ] `print`/`glance` surface `engine = "lavaan"` + snapshot; roxygen `@param
-      engine` adds lavaan; NEWS; `advanced.Rmd` SEM-engine section + claims-test
-      line; REFERENCES O-SEM + Jorgensen 2021 + lavaan rows.
-- [ ] `devtools::check()` 0/0/0; `air`/`lintr` clean; full CI matrix on the PR
-      (`m7-sem-engine`).
+### Slice 2 — docs (no new estimator; one-way lavaan deferred, ADR-014)
+- [x] `print` shows `engine = "lavaan" (ML)` (estimator label fixed per engine) +
+      lavaan print snapshot; NEWS entry.
+- [x] `advanced.Rmd` SEM-engine section (when to prefer SEM; the indicator-mean
+      absolute-error estimator + its small-sample difference from the mixed model;
+      MC-CI corroboration) + a backing `test-vignette-claims.R` line.
+- [x] REFERENCES O-SEM oracle block + bibliography rows (Jorgensen 2021, Lee &
+      Vispoel 2024, Vispoel et al. 2022, Rosseel 2012).
+- [x] `devtools::check()` 0/0/0; `air`/`lintr` clean; full suite (incl. snapshots)
+      green. Full CI matrix pending on the PR (`m7-sem-engine`).

@@ -204,6 +204,40 @@ reference values, ever.
 - **Provenance:** SF (1979) textbook + reproducible in-suite computation; nothing
   hardcoded beyond the published 0.166/0.443 (already in `sf_oracle_all`).
 
+### Oracle O-SEM — lavaan (SEM) engine, two-way random (M7, ADR-014)
+- **Status:** **asserted (M7)** in `tests/testthat/test-icc-lavaan.R`. The lavaan
+  engine fits the generalizability model as a common-factor SEM (Jorgensen 2021). It
+  is oracled in **two regimes**, because absolute agreement is a *different estimator*
+  than the mixed model while consistency is not:
+  1. **Consistency ≡ glmmTMB (exact).** σ²_s / (σ²_s + σ²_res) is a ratio, so lavaan
+     reproduces the glmmTMB REML estimate to ≤1e-4 and the published SF ICC(3,·)
+     (0.7148/0.9093). The N−1 (Wishart) likelihood makes the SEM variances match REML
+     on balanced data.
+  2. **Agreement = SEM indicator-mean estimator (Jorgensen 2021, Eq. 6).**
+     σ²_r = Σν²/(k−1), the **raw** variance of the effects-coded indicator intercepts
+     (no bias correction — confirmed by Lee & Vispoel 2024, Eqs. 8/25). Pinned by:
+     (a) the **exact Eq. 6 formula** reproduced independently in-test
+     (`components$rater` = Σ(mean_j − grand)²/(k−1) = 5.4144 on SF); (b) a **large-N
+     seeded simulation** where lavaan → the known population and lavaan ≈ glmmTMB
+     (their asymptotic equivalence, tol 0.02/0.05, #12); (c) **external validation** —
+     Vispoel, Hong, Lee & Xu (2022) show the SEM indicator-mean method matches GENOVA
+     / `gtheory` / SAS / SPSS to ≤ .001 (G-coef) / ≤ .005 (D-coef) across 24 real
+     scales. On the 6-subject SF data this estimator gives ICC(A,1)=0.284 (not the
+     mixed-model 0.290) — a documented small-sample difference, regression-pinned.
+  - **Interval:** consistency vs glmmTMB *random* MC CI, agreement vs glmmTMB *fixed*
+    MC CI (the SEM recovers the rater effect from a finite set of intercepts —
+    Case 3A inference), absolute gap ≤0.02. Boundary: a Heywood/degenerate fit raises
+    a classed `intraclass_singular_fit` → glmmTMB.
+- **Decision:** signal σ²_s, error {rater σ²_r, residual σ²_res} (agreement) or
+  {residual} (consistency), divisor 1/k/m; σ²_s/σ²_res read off the covariance
+  structure, σ²_r off the mean structure (Eq. 6). **An earlier unsourced bias
+  correction was removed** (#1/#4; ADR-014). Two-way random only; one-way SEM has no
+  faithful sourced route and is deferred (ROADMAP).
+- **Provenance:** `data-raw/oracle-sem.R` (seeded; `stopifnot` checks; documents the
+  Jorgensen 2021 / Vispoel et al. 2022 / Lee & Vispoel 2024 sources). Reproducible;
+  the only committed constants are the regression pins 0.284/0.614 (the SEM
+  estimator's SF values, reproducible from Eq. 6).
+
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
   `lme4::lmer` fit directly reproduces the glmmTMB engine's point ICCs to 1e-4 on
@@ -218,8 +252,19 @@ reference values, ever.
 - Brooks, M. E., et al. (2017). glmmTMB balances speed and flexibility among
   packages for zero-inflated generalized linear mixed models. *The R Journal,
   9*(2), 378–400.
+- Jorgensen, T. D. (2021). How to estimate absolute-error components in structural
+  equation models of generalizability theory. *Psych, 3*(2), 113–133.
+  doi:10.3390/psych3020011. (M7 lavaan engine — the SEM absolute-error method; Eq. 6
+  defines σ²_i as the raw variance of the effects-coded indicator intercepts.)
+- Lee, H., & Vispoel, W. P. (2024). A robust indicator mean-based method for
+  estimating generalizability theory absolute error and related dependability indices
+  within structural equation modeling frameworks. *Psych, 6*(1), 401–425.
+  doi:10.3390/psych6010024. (Confirms the raw indicator-mean formula, Eqs. 8/25;
+  "robust" = an ordinal scale-coarseness correction, not a bias correction.)
 - McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass
   correlation coefficients. *Psychological Methods, 1*(1), 30–46 (+ errata p. 390).
+- Rosseel, Y. (2012). lavaan: An R package for structural equation modeling.
+  *Journal of Statistical Software, 48*(2), 1–36. (M7 SEM engine.)
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
   rater reliability. *Psychological Bulletin, 86*(2), 420–428.
@@ -240,5 +285,11 @@ reference values, ever.
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2024). Updated guidelines
   on selecting an ICC for interrater reliability. *Psychological Methods, 29*(5),
   967–979.
+- Vispoel, W. P., Hong, H., Lee, H., & Xu, G. (2022). Accuracy of absolute error
+  estimates within a G-theory SEM framework. Paper presented at the meeting of the
+  National Council on Measurement in Education (NCME), April 9, 2022. (Conference
+  paper — validates the SEM indicator-mean absolute-error method against GENOVA /
+  `gtheory` / SAS / SPSS: G-coefs agree to ≤ .001, D-coefs to ≤ .005 across 24 real
+  scales. External corroboration for O-SEM, M7.)
 - Weeks, D. L., & Williams, D. R. (1964). A note on the determination of
   connectedness in an N-way cross classification. *Technometrics, 6*(3), 319–324.

@@ -534,7 +534,7 @@ consequences → references.
   ROADMAP.md (parking lot); ADR-005/ADR-012 (engine deferrals); Shrout & Fleiss
   (1979) one-way ICC1/ICC1k (0.166/0.443); `CLAUDE_CODE_KICKOFF.md` §7.
 
-## ADR-014: M7 scope — SEM (lavaan) as an optional engine, two-way + one-way random
+## ADR-014: M7 scope — SEM (lavaan) as an optional engine, two-way random
 - Date: 2026-07-07
 - Status: accepted
 - Context: M7 was the provisional "optional engines (Bayesian brms/rstanarm, SEM
@@ -560,25 +560,22 @@ consequences → references.
     corroborating ADR-003. The Bayesian engine's looser oracle bar (a posterior
     summary ≈ REML only within prior/MCMC error, not 1e-4) and Stan install weight
     make it the heavier, later slice.
-  - **Design scope = two-way random + one-way random** (maintainer choice). The
-    lavaan engine supports `model = "twoway"` (agreement + consistency × single/
-    average) and `model = "oneway"` (ICC(1)/ICC(1,k)); numeric `unit` (D-study) is
-    inherited for free via `resolve_divisor()` (as in M6). `raters = "fixed"`,
-    multilevel (`cluster`), and **incomplete/unbalanced** designs → classed
-    `abort_unsupported()` for lavaan, deferred and recorded (SEM handles missing via
-    FIML, but that is its own slice). Wider than M5.5's twoway-only slice, still
+  - **Design scope = two-way random only** (planning said "+ one-way"; one-way was
+    **deferred during implementation** — see the note below). The lavaan engine
+    supports `model = "twoway"` (agreement + consistency × single/average); numeric
+    `unit` (D-study) is inherited for free via `resolve_divisor()`. `model = "oneway"`,
+    `raters = "fixed"`, multilevel (`cluster`), and **incomplete/unbalanced** designs
+    → classed `abort_unsupported()` for lavaan, deferred and recorded (SEM handles
+    missing via FIML, but that is its own slice). Same as M5.5's twoway-only scope,
     excluding the fixed real-fit and multilevel fits (#15).
   - **SEM parameterization (to be oracle-pinned, not assumed).** lavaan wants **wide
-    data** (one row per subject; columns = raters for twoway, k exchangeable ratings
-    for oneway), so `fit_lavaan()` reshapes the long `icc()` data to wide. Two-way: a
-    one-factor model where the subject factor loads on the rater-indicators;
-    **consistency** reads σ²_s / (σ²_s + σ²_res) off the factor and residual
-    variances (a ratio → equals the mixed-model estimate **exactly** on balanced
-    data); **absolute agreement** recovers the rater variance from the
-    **mean structure** as σ²_r = Σν²/(k−1), the sample variance of the effects-coded
-    indicator intercepts (Jorgensen 2021, Eq. 6). One-way random: a
-    **parallel** one-factor model (equal loadings, residual variances, and
-    intercepts) over k exchangeable columns → ICC(1)/ICC(1,k). The engine returns the
+    data** (one row per subject, columns = raters), so `fit_lavaan()` reshapes the
+    long `icc()` data to wide and fits a one-factor model where the subject factor
+    loads on the rater-indicators; **consistency** reads σ²_s / (σ²_s + σ²_res) off
+    the factor and residual variances (a ratio → equals the mixed-model estimate
+    **exactly** on balanced data); **absolute agreement** recovers the rater variance
+    from the **mean structure** as σ²_r = Σν²/(k−1), the sample variance of the
+    effects-coded indicator intercepts (Jorgensen 2021, Eq. 6). The engine returns the
     **same six-field contract** (`fit`/`engine`/`components`/`estimate`/`vcov`/
     `to_components`) as glmmTMB/lme4, so `icc_point()`/`mc_ci()`/`d_study()` are
     unchanged. The claim that this SEM parameterization returns the *same* variance
@@ -611,7 +608,7 @@ consequences → references.
     lesson). Provenance in `data-raw/oracle-sem.R`; O-SEM row in REFERENCES when
     asserted.
   - **Dispatch:** the M5.5 engine × design lookup gains lavaan rows for
-    `{twoway, oneway} × random`; every other cell aborts `abort_unsupported()`.
+    `{twoway} × random`; every other cell aborts `abort_unsupported()`.
     `check_installed("lavaan")` guards the path (light install preserved; lavaan →
     `Suggests`, **no companion package** since lavaan exposes `vcov()` natively —
     lighter than the lme4 + merDeriv pair).
@@ -621,7 +618,22 @@ consequences → references.
     `ci_method = "posterior"` (credible intervals from native draws) and half-*t*
     hyperpriors (ten Hove, Jorgensen & van der Ark 2020), scheduled as a **later
     slice of M7 or its own follow-on milestone** after the SEM slice lands. Also
-    deferred: incomplete/unbalanced SEM (FIML); fixed-rater and multilevel SEM.
+    deferred: incomplete/unbalanced SEM (FIML); fixed-rater and multilevel SEM;
+    **one-way random via SEM** (deferred during implementation — see below).
+- **One-way lavaan deferred during implementation (scope narrowed from planning).**
+  The plan (and the maintainer's Q2) said "two-way + one-way random." Implementation
+  found no faithful, sourced SEM route for the one-way ICC(1): the SEM-GT literature
+  (Jorgensen 2021; Vispoel et al. 2022; Lee & Vispoel 2024) covers **crossed** facet
+  designs (p×i, p×i×o) → G-coef (consistency) and D-coef (absolute), and does **not**
+  derive a one-way random ICC(1). A wide-column parallel model computes covariances
+  around each column's mean (→ *consistency*, 0.715, not one-way); an equal-intercept
+  parallel model approximates it but is **unsourced and inexact** (0.157 vs the ANOVA
+  0.166 on SF); the only faithful route (a multilevel/random-intercept SEM on long
+  data) would merely **re-implement the mixed model** with no added value. Rather than
+  ship an unsourced approximation (the same trap as the removed bias term), one-way
+  lavaan → `abort_unsupported()` and is **parked in ROADMAP**. Consequence: M7's lavaan
+  engine is **two-way random only**, so Slice 1 is the whole estimator and Slice 2 is
+  **docs only** (no new estimator). Maintainer-approved this session.
 - **Corrected during implementation (Slice 1, after reading the primary sources).**
   The planning premise — "lavaan reproduces the SF values 0.290/0.620/0.715/0.909,
   agreement ≤1e-3" — was **only right for consistency**. Reading Jorgensen (2021,
@@ -641,9 +653,9 @@ consequences → references.
   a primary source is inaccessible, obtain it before coding the method rather than
   inferring it (the source PDFs, blocked by the publisher, were supplied by the
   maintainer and reversed the plan).
-- Consequences: M7 ships the **SEM/lavaan engine** for the twoway + oneway random
-  paths as two CI-green slices — Slice 1 twoway (congeneric/mean-structure), Slice 2
-  oneway (parallel) + docs — extending the dispatch seam, adding lavaan to
+- Consequences: M7 ships the **SEM/lavaan engine** for the **two-way random** path —
+  Slice 1 the estimator (congeneric/mean-structure), Slice 2 docs only (one-way
+  deferred) — extending the dispatch seam, adding lavaan to
   `Suggests`, and a `data-raw/oracle-sem.R`. `engine` gains a third value (additive,
   not breaking, #6; `@param engine` roxygen updated). No estimand-spec (engine, not
   estimand). Because SEM absolute agreement is a distinct (asymptotically

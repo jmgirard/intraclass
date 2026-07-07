@@ -1,8 +1,9 @@
 # Project status
 
 - Milestone: M7 — SEM engine (`lavaan`) — **in progress** (scope fixed by ADR-014)
-- Active task: M7 Slice 1 **done** on branch `m7-sem-engine` (`fit_lavaan()` two-way
-  random; O-SEM green; `check()` 0/0/0). Next: Slice 2 (one-way lavaan + docs)
+- Active task: M7 **done pending PR** on branch `m7-sem-engine` (Slices 1+2:
+  `engine = "lavaan"` two-way random + docs; `check()` 0/0/0, full suite green).
+  Next: open the PR for the full CI matrix, then merge
 - Last green CI: PR #10 (M6) full matrix green (9/9); merged to `main` at eb7102d
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
@@ -48,16 +49,23 @@ pinned by a boundary oracle (the ADR-012 merDeriv-scale analog).
 
 ## Next action
 
-**M7 Slice 2** (one-way lavaan + docs) on branch `m7-sem-engine`: `model = "oneway"`
-+ lavaan (parallel one-factor model → ICC(1)/ICC(1,k)); `print`/`glance` lavaan
-snapshot; NEWS; `advanced.Rmd` SEM-engine section (teach the indicator-mean estimator
-+ its small-sample difference from the mixed model) with a `test-vignette-claims.R`
-line; REFERENCES O-SEM rows (Jorgensen 2021, Vispoel et al. 2022, Lee & Vispoel 2024).
+**Open the PR for `m7-sem-engine`** (both slices committed) to run the full CI
+matrix, then merge; post-merge, reconcile `project/` on `main` (finish-task policy).
 
-Slice 1 is done (uncommitted on the branch): `R/engine-lavaan.R::fit_lavaan()` (raw
-indicator-mean σ²_r, Jorgensen 2021 Eq. 6 — the unsourced bias correction was
-removed, ADR-014), engine × design dispatch + guards, lavaan → `Suggests`,
-`data-raw/oracle-sem.R`, `test-icc-lavaan.R` (26 assertions), `check()` 0/0/0.
+M7 shipped `engine = "lavaan"` for the **two-way random** path — the SEM/GT
+common-factor model (Jorgensen 2021). Consistency ≡ glmmTMB exactly; absolute
+agreement uses the **indicator-mean estimator** σ²_r = Σν²/(k−1) (Jorgensen 2021
+Eq. 6; an earlier *unsourced* bias correction was removed, ADR-014) — a distinct,
+asymptotically-equivalent estimator that differs from the mixed model by O(1/n) on
+small designs (0.284 vs 0.290 on SF), validated against GENOVA/`gtheory` by Vispoel
+et al. (2022). One-way SEM deferred (no faithful sourced route → ROADMAP). Oracles
+O-SEM; `data-raw/oracle-sem.R`; advanced-vignette SEM section; `check()` 0/0/0.
+
+**Reading-the-source lesson this milestone** (now a memory,
+[[ask-for-inaccessible-sources]]): the method was first inferred from abstracts
+(publisher blocked the PDFs) and got a bias correction wrong; the maintainer
+supplied the PDFs and the plan was corrected. Ask for inaccessible sources rather
+than guessing.
 
 Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a

@@ -393,7 +393,7 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
 ## M7: SEM engine (lavaan) — optional Bayesian/SEM backends, SEM first
 - Goal: promote **lavaan (SEM / common-factor GT) to a selectable
-  `engine = "lavaan"`** for the two-way and one-way random paths, plugging a third
+  `engine = "lavaan"`** for the two-way random path, plugging a third
   engine into the M5.5 engine × design dispatch seam behind
   `rlang::check_installed()` (Suggests, never Imports; light install preserved). It
   leads the "optional engines" milestone; the Bayesian backend is deferred to a
@@ -405,7 +405,8 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   `vcov()` → **no new `ci_method`**), (2) installs light (no Stan compilation → CI
   stays fast/green on all platforms), and (3) can be pinned to a **textbook oracle**
   (Jorgensen 2021, which also argues for MC CIs — corroborating ADR-003). Design
-  scope = **two-way random + one-way random**.
+  scope = **two-way random** (planning said "+ one-way"; one-way SEM was deferred
+  during implementation — no faithful sourced route, ADR-014).
 - Key references (pin when they back code, PRINCIPLES.md #12): the SEM/lavaan
   engine's primary source is **Jorgensen (2021), "How to Estimate Absolute-Error
   Components in Structural Equation Models of Generalizability Theory," *Psych* 3,
@@ -435,15 +436,13 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
         al. (2022) GENOVA/`gtheory` external check; interval vs glmmTMB *fixed*
         (agreement) / *random* (consistency), absolute gap. `data-raw/oracle-sem.R`;
         `test-icc-lavaan.R`.
-  - [ ] **Slice 2 — lavaan one-way random + docs.** `model = "oneway"` + lavaan: a
-        **parallel** one-factor model (equal loadings/residuals/intercepts) over k
-        exchangeable columns → `ICC(1)`/`ICC(1,k)` (+ numeric-unit `ICC(m)` for free
-        via `resolve_divisor()`). Oracles: SF 0.166/0.443 + `psych` ICC1/ICC1k +
-        cross-engine + sim. `print`/`glance` surface `engine = "lavaan"`; lavaan
-        print snapshot; roxygen `@param engine` adds lavaan; NEWS; `advanced.Rmd`
-        SEM-engine section (when to prefer SEM; the MC-CI corroboration) with a
-        backing `test-vignette-claims.R` line; REFERENCES O-SEM + Jorgensen 2021 +
-        lavaan rows.
+  - [ ] **Slice 2 — docs (no new estimator).** `print`/`glance` surface
+        `engine = "lavaan"`; lavaan print snapshot; NEWS; `advanced.Rmd` SEM-engine
+        section (when to prefer SEM; the indicator-mean absolute-error estimator and
+        its small-sample difference from the mixed model; the MC-CI corroboration)
+        with a backing `test-vignette-claims.R` line; REFERENCES O-SEM rows
+        (Jorgensen 2021, Vispoel et al. 2022, Lee & Vispoel 2024). (`@param engine`
+        already updated in Slice 1.)
   - [ ] Oracles per PRINCIPLES.md #1 — asserted by oracle, never by the formula.
         Consistency is pinned exactly (lavaan ≡ glmmTMB + psych); absolute agreement
         is a **distinct, asymptotically-equivalent** estimator (Jorgensen Eq. 6),
@@ -459,9 +458,16 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Deferred out of M7 (recorded so not rediscovered): the **Bayesian engine**
   (rstanarm preferred over brms for CI-install sanity) + a new
   `ci_method = "posterior"` (credible intervals) + half-*t* hyperpriors (ten Hove et
-  al. 2020) — a later slice or follow-on milestone; **incomplete/unbalanced SEM**
+  al. 2020) — a later slice or follow-on milestone; **one-way random via SEM** (no
+  faithful sourced route — ADR-014; parked in ROADMAP); **incomplete/unbalanced SEM**
   (FIML); **fixed-rater and multilevel SEM**.
-- Status: planning (scope fixed by ADR-014; Slice 1 next)
+- Status: done pending PR — both slices complete on branch `m7-sem-engine`
+  (`devtools::check()` 0/0/0 local; full suite incl. snapshots green). Ships
+  `engine = "lavaan"` for the two-way random path (Jorgensen 2021 SEM-GT), oracles
+  O-SEM (consistency ≡ glmmTMB; agreement = the exact indicator-mean estimator +
+  large-N convergence + Vispoel et al. 2022 external check), and the advanced-vignette
+  SEM-engine section. One-way SEM deferred to ROADMAP (ADR-014). Full CI matrix +
+  merge pending on the PR.
 
 ## M8: Multilevel & incomplete-design extensions *(provisional)*
 - Goal: extend the multilevel estimator beyond M5's Design 1 by working through the

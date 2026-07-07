@@ -53,9 +53,12 @@ format.icc <- function(x, ...) {
       completeness
     )
   }
+  # glmmTMB/lme4 fit by REML; the lavaan SEM engine fits by ML (Wishart N-1).
+  estimator <- if (identical(x$engine, "lavaan")) "ML" else "REML"
   meta2 <- sprintf(
-    "Engine: %s (REML) | CI: %s%% %s (%d draws)",
+    "Engine: %s (%s) | CI: %s%% %s (%d draws)",
     x$engine,
+    estimator,
     ci_pct,
     x$ci$method,
     x$ci$samples

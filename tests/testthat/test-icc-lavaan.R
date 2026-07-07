@@ -297,3 +297,20 @@ test_that("the icc object reports the lavaan engine", {
   expect_equal(fit$engine, "lavaan")
   expect_equal(glance(fit)$engine, "lavaan")
 })
+
+test_that("lavaan print() output is stable", {
+  skip_if_not_installed("lavaan")
+
+  # As with the glmmTMB/lme4 print snapshots, the CI digits are masked (they vary
+  # at ~1e-3 across platforms even when seeded); the engine line and point
+  # estimates are checked verbatim.
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    seed = 1,
+    engine = "lavaan"
+  )
+  expect_snapshot(print(fit), transform = mask_ci)
+})

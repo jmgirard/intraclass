@@ -34,6 +34,13 @@ Ark).
   method comparison.
 - A `choose_icc()` interactive decision helper mirroring the flagship vignette.
 - Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs.
+- One-way random ICC(1)/ICC(1,k) via the **SEM (lavaan) engine** — deferred out of
+  M7 (ADR-014). The SEM-GT literature (Jorgensen 2021; Vispoel et al. 2022; Lee &
+  Vispoel 2024) covers crossed facet designs only; a wide-column parallel model
+  gives consistency (not one-way), and an equal-intercept approximation is unsourced
+  and inexact (0.157 vs 0.166 on SF). Needs a sourced method (or a multilevel/
+  random-intercept SEM, which would just re-implement the mixed-model engines)
+  before it ships.
 
 ## Proposals under discussion (open design questions)
 
