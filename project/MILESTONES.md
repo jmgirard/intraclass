@@ -279,8 +279,11 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   (M6, the paper's own estimator); a three-facet `d_study()` projecting
   subject-per-cluster counts; exposing the conflated single-level ICC (Eq. 14) as
   a shipped coefficient. (See spec §8.)
-- Status: implemented on `m5-multilevel` (Slice 1 estimator `0089d9a`, Slice 2
-  docs) — full local suite green; PR + CI matrix pending.
+- Status: done (Slices 1–2; merged via PR #8 at `87b4588`; full CI matrix green —
+  9/9, `devtools::check()` 0/0/0 local, 188 tests pass). Ships `icc(cluster =, level
+  =)` for subject- and cluster-level multilevel ICCs off one five-component
+  Design-1 fit, oracles O-ML (lme4 + seeded sim + single-level reduction), and the
+  advanced-vignette multilevel section.
 
 ## M6: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a

@@ -1,8 +1,8 @@
 # Project status
 
-- Milestone: M5 — multilevel ICCs (implemented on `m5-multilevel`; PR + CI pending)
-- Active task: — (next: open the M5 PR; run `devtools::check()` + full CI matrix)
-- Last green CI: PR #6 (M4.5) full matrix green (9/9); merged to `main` at 9be03a0
+- Milestone: M5 — multilevel ICCs (done; merged via PR #8, full CI matrix green 9/9)
+- Active task: — (next: retro + plan M6 — optional engines, or a smaller slice)
+- Last green CI: PR #8 (M5) full matrix green (9/9); merged to `main` at 87b4588
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
 
@@ -46,10 +46,18 @@ Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a
 direct commit to `main` (finish-task policy — no CI job reads `project/`).
 
-**Next action:** M5 is implemented on `m5-multilevel` — Slice 1 estimator
-(`0089d9a`: `cluster`/`level` API, five-component Design-1 fit, both subject- and
-cluster-level ICCs, O-ML oracles green) and Slice 2 docs (advanced.Rmd multilevel
-section, choosing-an-icc.Rmd citation fix, NEWS, vignette-claims invariant). Full
-local suite green, no snapshot drift, `air`/`lintr` clean. **Next:** run
-`devtools::check()`, push the branch, open the PR, and confirm the full CI matrix
-before merge.
+**Next action:** M5 shipped and merged (PR #8, `87b4588`, full CI matrix green —
+9/9). `icc()` now takes a `cluster` column and a `level = c("subject","cluster")`
+knob, reporting subject- and cluster-level ICCs off one five-component Design-1 fit
+(ten Hove et al. 2022; scalar divisor unchanged). Oracles O-ML (lme4 <1e-4, seeded
+recovery + MC coverage, single-level reduction). Also merged: the citation audit
+(ADR-002/003 pinned to ten Hove 2025 MLE-RE+MC-CI; DescTools/irrNA fixes) and the
+choosing-an-icc.Rmd multilevel-citation fix.
+
+Deferred (spec §8, recorded so they aren't rediscovered): Designs 2/3 (nested
+raters), incomplete multilevel, fixed-rater multilevel, multilevel D-study.
+
+**Next milestone:** M6 — optional engines (Bayesian `brms`/`rstanarm`, SEM
+`lavaan`) behind `Suggests`; references already gathered (Jorgensen 2021 SEM,
+ten Hove 2020 hyperpriors — see MILESTONES M6). Detail M6's DoD at its start after
+a short retro (founding brief §7).
