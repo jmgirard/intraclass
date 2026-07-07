@@ -44,6 +44,9 @@ lives in `project/`, loaded on demand.
   classed (#8).** No bare
   [`stop()`](https://rdrr.io/r/base/stop.html)/[`warning()`](https://rdrr.io/r/base/warning.html)/[`cat()`](https://rdrr.io/r/base/cat.html)/[`print()`](https://rdrr.io/r/base/print.html).
 - **Tracking files update in the same commit as the work (#16).**
+- **Format with `air` before committing** (`air format .`); CI enforces
+  `air format --check`. `lintr` owns the semantic linters only. See
+  ADR-004.
 
 ## Model routing (§6 of the brief)
 

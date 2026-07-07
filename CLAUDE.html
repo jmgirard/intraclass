@@ -73,6 +73,8 @@
 <li>
 <strong>All user messaging via <code>cli</code>; all errors via <code><a href="https://rlang.r-lib.org/reference/abort.html" class="external-link">rlang::abort()</a></code> classed (#8).</strong> No bare <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>/<code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>/<code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>/<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</li>
 <li><strong>Tracking files update in the same commit as the work (#16).</strong></li>
+<li>
+<strong>Format with <code>air</code> before committing</strong> (<code>air format .</code>); CI enforces <code>air format --check</code>. <code>lintr</code> owns the semantic linters only. See ADR-004.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="model-routing-6-of-the-brief">Model routing (§6 of the brief)<a class="anchor" aria-label="anchor" href="#model-routing-6-of-the-brief"></a></h2>
