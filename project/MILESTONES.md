@@ -257,11 +257,70 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–2; merged via PR #15 at 3368299; full CI matrix green incl.
   Windows and R-devel, 402 tests).
 
-## M12: `choose_icc()` interactive decision helper *(provisional)*
-- Goal: an interactive decision helper mirroring the M4 flagship vignette's
-  agreement/consistency × single/average × fixed/random × complete/incomplete tree.
-  Teaching/API, **no new estimand.** Promoted from the M4 deferral / ROADMAP by ADR-017.
-- Status: provisional
+## M12: `choose_icc()` interactive decision helper — ACTIVE
+- Goal: a decision helper that turns the M4 flagship vignette's six-axis tree into code
+  — a **prior** crossed-vs-one-way `model` question, then agreement/consistency (`type`),
+  single/average (`unit`), random/fixed (`raters`), the multilevel subject/cluster fifth
+  choice (`cluster`/`level`), with complete-vs-incomplete surfaced as a note (`icc()`
+  handles it). Teaching/API, **no new estimand.** Returns a classed `icc_recommendation`
+  advice object (recommended McGraw–Wong + Shrout–Fleiss label, per-axis rationale, and
+  the exact `icc(...)` call to run) — it does **not** fit. Dual interface: programmatic
+  when answers are passed, guarded interactive console Q&A when omitted. Promoted from
+  the M4 deferral / ROADMAP by ADR-017; scoped by ADR-021.
+- Reference: ADR-021 (scope); no estimand-spec (teaching layer — cf. M4/M5.5/M7/M11).
+- Correctness (#1 numerically N/A — no new numbers): a **round-trip oracle** (every
+  valid axis combination's emitted call, eval'd on a shipped dataset, reproduces a
+  direct `icc()` call with those args) + the **crosswalk label table** (recommended
+  MW↔SF labels match the vignette verbatim) + **classed aborts** on inapplicable /
+  underspecified selections (#5). No `vdiffr`, no numeric oracle.
+
+### Slice 1 — programmatic core + advice object (DoD board) — DONE
+- [x] Pure resolver `resolve_icc_recommendation()` — takes a (possibly partial) answer
+      set (`model, type, unit, raters, multilevel, level`), returns the coefficient
+      label(s) + rationale + `icc(...)` call. Enforces axis **applicability**:
+      `model = "oneway"` ⇒ `type`/`raters`/`multilevel` do not exist → classed
+      `abort_inapplicable()` if supplied; recommends `ICC(1)`/`ICC(1,k)` (#5). Reuses
+      `icc_estimand()` for every label, so labels cannot drift from `icc()`.
+- [x] `choose_icc()` programmatic entry: answers as `NULL`-defaulting args; `model`/
+      `multilevel` default to the common case (crossed, non-multilevel); the
+      coefficient-selecting axes (`type`/`unit`/`raters`, `level` when multilevel) are
+      required, and a missing one in a non-interactive session `abort_*()`s
+      (`intraclass_underspecified`) naming the axis (#5/#8).
+- [x] `icc_recommendation` S3 class + `format`/`print.icc_recommendation()` rendering
+      label, per-axis rationale, complete/incomplete + connectedness note, fixed-rater
+      nudge, and the emitted call — all via `cli` (#8). MW↔SF crosswalk from the vignette
+      table (SF = `NA` where none).
+- [x] Tests (#1 N/A): round-trip call-equivalence over every valid axis combination on
+      `ratings` + a multilevel fixture; MW↔SF label table pins; minimal-call string
+      pins; classed-abort tests for one-way×`type`/`raters`/`multilevel`,
+      non-multilevel×`level`, underspecified, and invalid values. 62 tests, all green.
+- [x] roxygen for `choose_icc()`; `@examples` non-interactive (pass args); NEWS bullet;
+      `air format`; `lintr` clean; full suite 464/0/0.
+
+### Slice 2 — interactive shell + vignette pointer (DoD board) — DONE
+- [x] Guarded interactive Q&A shell (`collect_answers_interactively()`) over the Slice-1
+      resolver: asks only the outstanding, applicable axes one at a time via `cli`, only
+      when `rlang::is_interactive()` and a coefficient decision is missing
+      (`required_missing()` gate); collects answers then calls the pure resolver.
+      Question order follows the vignette (model → type → unit → raters → multilevel →
+      level). `ask_choice()` reads via an injectable `prompt_line()` seam.
+- [x] Tests via an **injected responder** (asks-only-outstanding, one-way/multilevel
+      branches) + mocked `prompt_line`/`is_interactive`: `choose_icc()` routes through the
+      shell when interactive, and a non-interactive underspecified call aborts without
+      asking. 14 tests (76 total in the file).
+- [x] Short pointer in `vignettes/choosing-an-icc.Rmd` ("Or let the package choose") with
+      a non-interactive runnable example; vignette knits; `air format`; `lintr` clean;
+      installed-package test (`NOT_CRAN=true`) green — 478/0/0.
+- [ ] Ship: `m12-choose-icc` branch → PR → full CI matrix green → merge; then reconcile
+      `project/` on `main` (finish-task policy).
+
+### Deferred out of M12 (record so not rediscovered)
+- A **`fit=`/data-in path** that runs `icc()` and returns the fitted object (helper is
+  advice-only by ADR-021); a **`tidy`/`glance`** method on `icc_recommendation`;
+  **GUI/Shiny** front-ends; **engine / `ci_method` / `d_study()` guidance** inside the
+  helper (outside the vignette tree); the **full advanced-vignette showcase** of the
+  helper (M13). ADR-017 / M9–M11 estimator carry-overs untouched.
+- Status: **active** (Slice 1 next) — detailed by ADR-021 this session.
 
 ## M13: Release polish *(provisional)*
 - Goal: pkgdown site, advanced vignette (showing the new M9–M12 estimators, plots, and

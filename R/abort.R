@@ -114,6 +114,33 @@ warn_fixed_raters <- function(.envir = rlang::caller_env()) {
   )
 }
 
+#' Abort because a decision axis does not apply to the chosen design
+#'
+#' Used by `choose_icc()` (M12, ADR-021): e.g. a `type`/`raters` answer supplied
+#' for a one-way design, where there is no rater term to reason about. The axis is
+#' not merely unimplemented (`abort_unsupported()`) nor a design-identifiability
+#' failure (`abort_unidentified()`) -- it is meaningless for this design, so the
+#' answer is rejected rather than silently ignored (PRINCIPLES.md #5). Classed
+#' `intraclass_inapplicable`.
+#'
+#' @param message Character vector naming the inapplicable axis.
+#' @keywords internal
+#' @noRd
+abort_inapplicable <- function(
+  message,
+  ...,
+  call = rlang::caller_env(),
+  .envir = rlang::caller_env()
+) {
+  abort_intraclass(
+    message,
+    class = "intraclass_inapplicable",
+    ...,
+    call = call,
+    .envir = .envir
+  )
+}
+
 #' Abort because a requested option is valid but not yet implemented
 #'
 #' Distinct from `abort_unidentified()` (which is about the *design*): this marks

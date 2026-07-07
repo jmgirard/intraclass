@@ -1,12 +1,15 @@
 # Project status
 
-- Milestone: **M12 — `choose_icc()` interactive decision helper** — next (provisional;
-  not yet detailed). M11 shipped (PR #15).
-- Active task: — (next: retro + detail M12 — the interactive ICC-selection helper)
+- Milestone: **M12 — `choose_icc()` interactive decision helper** — ACTIVE (detailed by
+  ADR-021 this session; DoD board in [`MILESTONES.md`](MILESTONES.md)). M11 shipped (PR #15).
+- Active task: **M12 ship** — Slices 1 & 2 DONE on branch `m12-choose-icc`
+  (`choose_icc()` core + guarded interactive shell + M4-vignette pointer, 76 helper
+  tests). Installed-package suite 478/0/0, lintr clean, vignette knits. Remaining: push
+  branch → PR → full CI matrix → merge → reconcile `project/` on `main`.
 - Last green CI: PR #15 (M11) full matrix green incl. Windows and R-devel; merged to
   `main` at 3368299
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M11 merged + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M12 Slices 1 & 2 done locally; ready for PR
 
 ## Where we are
 
@@ -24,12 +27,11 @@ variance-component decomposition (M11).
 
 ## Next action
 
-**Retro + detail M12** (`choose_icc()` interactive decision helper). Per the process
-(#2, brief §7), run a short M11 retro, then resolve M12 scope with the maintainer and
-write the DoD before code. M12 is a **teaching/API helper** (no new estimand) mirroring
-the M4 flagship vignette's agreement/consistency × single/average × fixed/random ×
-complete/incomplete decision tree. Ships on a `m12-*` branch, merges via PR
-(`milestone-branches-and-prs`).
+**Ship M12**: push `m12-choose-icc`, open the PR, and get the full CI matrix (incl.
+Windows + R-devel) green; then merge and reconcile `project/` on `main` (finish-task
+policy — direct commit, no CI job reads `project/`). Both slices are code-complete and
+green locally (installed-package suite 478/0/0). See ADR-021 + the M12 DoD board in
+[`MILESTONES.md`](MILESTONES.md).
 
 Milestone arc after M12 (ADR-017): **M13** release polish (pkgdown, advanced vignette,
 CRAN prep).
