@@ -222,9 +222,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     spec §3b) with a loud abort. Boundary/guard matrix (§7) + incomplete-multilevel
     print snapshot; O-IML/lme4 cluster-single match + complete-M5 both-level reduction.
     340 tests green.
-  - [ ] **Slice 3 — docs.** `advanced.Rmd` multilevel section extended to ragged
-    Design-1 on real code; `print`/`glance` surface incomplete-vs-complete,
-    n_clusters/n_cells/`k_eff`/declared design; `test-vignette-claims.R` invariants.
+  - [x] **Slice 3 — docs.** `advanced.Rmd` multilevel section extended with an
+    *Incomplete (ragged) multilevel designs* subsection on real knit-time code
+    (subject level + `k_eff`, cluster `ICC(c,1)`, the `design` declaration, and the
+    `ICC(c,k)` deferral); `test-vignette-claims.R` invariants rebuild the ragged
+    `school` data and back each prose claim (#1). Vignette knits end-to-end.
   - [ ] Full `R-CMD-check` matrix green (incl. Windows); coverage floor held, new
     statistical paths oracle-covered; `air`/`lintr` clean; pkgdown builds.
   - [ ] `MILESTONES.md`/`STATUS.md` reconciled; merged via PR (`milestone-branches-and-prs`).
