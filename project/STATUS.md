@@ -2,13 +2,14 @@
 
 - Milestone: **M12 — `choose_icc()` interactive decision helper** — ACTIVE (detailed by
   ADR-021 this session; DoD board in [`MILESTONES.md`](MILESTONES.md)). M11 shipped (PR #15).
-- Active task: **M12 Slice 2** — guarded interactive Q&A shell + M4-vignette pointer.
-  Slice 1 (programmatic core + `icc_recommendation` object + 62 tests) DONE on branch
-  `m12-choose-icc` (full suite 464/0/0, lintr clean; not yet committed).
+- Active task: **M12 ship** — Slices 1 & 2 DONE on branch `m12-choose-icc`
+  (`choose_icc()` core + guarded interactive shell + M4-vignette pointer, 76 helper
+  tests). Installed-package suite 478/0/0, lintr clean, vignette knits. Remaining: push
+  branch → PR → full CI matrix → merge → reconcile `project/` on `main`.
 - Last green CI: PR #15 (M11) full matrix green incl. Windows and R-devel; merged to
   `main` at 3368299
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M12 Slice 1 shipped locally (choose_icc core)
+- Updated: 2026-07-07 by main session (Opus) — M12 Slices 1 & 2 done locally; ready for PR
 
 ## Where we are
 
@@ -26,15 +27,11 @@ variance-component decomposition (M11).
 
 ## Next action
 
-**Build M12 Slice 2** on `m12-choose-icc`: the guarded interactive Q&A shell over the
-Slice-1 resolver — ask only the outstanding axes one at a time via `cli`, only when
-`rlang::is_interactive()`, in the vignette's order (model first); collect answers then
-call `resolve_icc_recommendation()`. Test the collection logic via an **injected
-responder** (no live readline in CI) and assert the shell is skipped when
-`is_interactive()` is `FALSE`. Then add the short `choosing-an-icc.Rmd` pointer ("or let
-the package choose: `choose_icc()`") with a non-interactive runnable example; `air
-format`; `lintr`; installed-package test (`NOT_CRAN=true`); then PR → CI → merge. See
-ADR-021 + the M12 DoD board in [`MILESTONES.md`](MILESTONES.md).
+**Ship M12**: push `m12-choose-icc`, open the PR, and get the full CI matrix (incl.
+Windows + R-devel) green; then merge and reconcile `project/` on `main` (finish-task
+policy — direct commit, no CI job reads `project/`). Both slices are code-complete and
+green locally (installed-package suite 478/0/0). See ADR-021 + the M12 DoD board in
+[`MILESTONES.md`](MILESTONES.md).
 
 Milestone arc after M12 (ADR-017): **M13** release polish (pkgdown, advanced vignette,
 CRAN prep).

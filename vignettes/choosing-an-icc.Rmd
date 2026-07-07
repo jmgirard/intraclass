@@ -221,6 +221,23 @@ The two off-diagonal rows are worth noticing: the classic Shrout--Fleiss triplet
 two-way *fixed absolute-agreement* coefficient, even though both are perfectly
 well-defined estimands that `icc()` computes.
 
+## Or let the package choose
+
+If you would rather answer the questions than remember which argument each maps
+to, `choose_icc()` walks the same tree and hands back the coefficient to report
+together with the exact `icc()` call that computes it. It does **not** fit
+anything -- there is no `data` argument -- so it is a quick way to settle the
+choice before you run the model.
+
+```{r choose}
+choose_icc(type = "agreement", unit = "single", raters = "random")
+```
+
+Pass the decisions as arguments, as above, or -- in an interactive session --
+call `choose_icc()` with them omitted to be asked each outstanding question in
+turn. Answering a choice that does not apply to your design (for example `type`
+under a one-way model) is a clear error rather than a silent guess.
+
 ## In one sentence
 
 Pick **agreement vs. consistency** by whether the value or only the rank must

@@ -90,9 +90,127 @@ choose_icc <- function(
     multilevel = multilevel,
     level = level
   )
-  # Slice 2 inserts the guarded interactive Q&A here, filling `answers` before it
-  # is resolved. Slice 1 resolves the supplied answers directly.
+  # If a coefficient-selecting decision is unanswered and the session is
+  # interactive, walk the outstanding questions before resolving; otherwise
+  # resolve the supplied answers directly (a missing one then aborts loudly).
+  if (rlang::is_interactive() && required_missing(answers)) {
+    answers <- collect_answers_interactively(answers)
+  }
   resolve_icc_recommendation(answers)
+}
+
+# Is a coefficient-selecting decision still unanswered? The two structural axes
+# default to the common case (crossed, non-multilevel), so a call that supplies
+# only the coefficient axes is complete and skips the interactive walkthrough
+# (matching the programmatic path); the walkthrough is entered only when a
+# genuine coefficient decision is missing.
+required_missing <- function(answers) {
+  oneway <- identical(answers$model, "oneway")
+  if (oneway) {
+    return(is.null(answers$unit))
+  }
+  multilevel <- isTRUE(answers$multilevel)
+  is.null(answers$unit) ||
+    is.null(answers$type) ||
+    is.null(answers$raters) ||
+    (multilevel && is.null(answers$level))
+}
+
+# Ask the outstanding decisions one at a time, in the vignette's order, asking
+# only those that apply given the answers gathered so far. `ask` is injected so
+# tests drive the walkthrough without live console input (no `readline` in CI).
+collect_answers_interactively <- function(answers, ask = ask_choice) {
+  if (is.null(answers$model)) {
+    answers$model <- ask(
+      "model",
+      "Are the raters crossed, or interchangeable across subjects?",
+      c("twoway", "oneway"),
+      c(
+        "Crossed -- the same raters judge every subject (two-way)",
+        "Interchangeable -- a different set per subject (one-way)"
+      )
+    )
+  }
+  oneway <- identical(answers$model, "oneway")
+  if (!oneway && is.null(answers$type)) {
+    answers$type <- ask(
+      "type",
+      "Does the actual value need to match, or only the rank order?",
+      c("agreement", "consistency"),
+      c(
+        "Absolute agreement -- the value itself must match",
+        "Consistency -- only the rank order must match"
+      )
+    )
+  }
+  if (is.null(answers$unit)) {
+    answers$unit <- ask(
+      "unit",
+      "Will you act on one rater's score, the mean of several, or both?",
+      c("single", "average", "both"),
+      c(
+        "A single rater's score",
+        "The average of your raters",
+        "Both"
+      )
+    )
+  }
+  if (!oneway && is.null(answers$raters)) {
+    answers$raters <- ask(
+      "raters",
+      "Are your raters a sample you generalize beyond, or the only raters of interest?",
+      c("random", "fixed"),
+      c(
+        "Random -- a sample; generalize to the rater universe",
+        "Fixed -- exactly these raters, no generalization"
+      )
+    )
+  }
+  if (!oneway && is.null(answers$multilevel)) {
+    answers$multilevel <- ask(
+      "multilevel",
+      "Are subjects nested in higher-level clusters (e.g. pupils in classrooms)?",
+      c(FALSE, TRUE),
+      c("No", "Yes -- subjects are nested in clusters")
+    )
+  }
+  if (isTRUE(answers$multilevel) && is.null(answers$level)) {
+    answers$level <- ask(
+      "level",
+      "Which reliability: within-cluster, between-cluster, or both?",
+      c("subject", "cluster", "both"),
+      c(
+        "Subject level -- rating a subject within its cluster",
+        "Cluster level -- the cluster mean",
+        "Both"
+      )
+    )
+  }
+  answers
+}
+
+# Pose one multiple-choice question via cli and return the chosen value. All
+# prompt text goes through cli (#8); the numeric selection is read through
+# `prompt_line()` (an injection seam so the read loop is testable without a live
+# console). Re-asks until the input names a listed choice. `arg` is unused by the
+# real asker but lets an injected test responder key on the axis.
+ask_choice <- function(arg, question, choices, labels = as.character(choices)) {
+  cli::cli_inform(question)
+  cli::cli_ol(labels)
+  repeat {
+    input <- prompt_line("Selection (number): ")
+    n <- suppressWarnings(as.integer(input))
+    if (!is.na(n) && n >= 1L && n <= length(choices)) {
+      return(choices[[n]])
+    }
+    cli::cli_inform("Please enter a number between 1 and {length(choices)}.")
+  }
+}
+
+# Thin wrapper over `readline()` -- an injection seam so `ask_choice()`'s read
+# loop can be tested by mocking this binding rather than the console.
+prompt_line <- function(prompt) {
+  readline(prompt)
 }
 
 # Resolve a (possibly partial) answer set into an `icc_recommendation`, or abort.

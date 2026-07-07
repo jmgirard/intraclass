@@ -297,15 +297,20 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - [x] roxygen for `choose_icc()`; `@examples` non-interactive (pass args); NEWS bullet;
       `air format`; `lintr` clean; full suite 464/0/0.
 
-### Slice 2 — interactive shell + vignette pointer (DoD board)
-- [ ] Guarded interactive Q&A shell over the Slice-1 resolver: asks only the outstanding
-      axes one at a time via `cli`, only when `rlang::is_interactive()`; collects answers
-      then calls the pure resolver. Question order follows the vignette (model first).
-- [ ] Tests for the collection logic via an **injected responder** (no live readline in
-      CI); assert the guarded shell is skipped under `is_interactive() == FALSE`.
-- [ ] Short pointer in `vignettes/choosing-an-icc.Rmd` ("or let the package choose:
-      `choose_icc()`") with a non-interactive runnable example; `air format`; `lintr`
-      clean; installed-package test (`NOT_CRAN=true`) green before PR.
+### Slice 2 — interactive shell + vignette pointer (DoD board) — DONE
+- [x] Guarded interactive Q&A shell (`collect_answers_interactively()`) over the Slice-1
+      resolver: asks only the outstanding, applicable axes one at a time via `cli`, only
+      when `rlang::is_interactive()` and a coefficient decision is missing
+      (`required_missing()` gate); collects answers then calls the pure resolver.
+      Question order follows the vignette (model → type → unit → raters → multilevel →
+      level). `ask_choice()` reads via an injectable `prompt_line()` seam.
+- [x] Tests via an **injected responder** (asks-only-outstanding, one-way/multilevel
+      branches) + mocked `prompt_line`/`is_interactive`: `choose_icc()` routes through the
+      shell when interactive, and a non-interactive underspecified call aborts without
+      asking. 14 tests (76 total in the file).
+- [x] Short pointer in `vignettes/choosing-an-icc.Rmd` ("Or let the package choose") with
+      a non-interactive runnable example; vignette knits; `air format`; `lintr` clean;
+      installed-package test (`NOT_CRAN=true`) green — 478/0/0.
 - [ ] Ship: `m12-choose-icc` branch → PR → full CI matrix green → merge; then reconcile
       `project/` on `main` (finish-task policy).
 

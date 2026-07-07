@@ -246,3 +246,164 @@ test_that("choose_icc() returns a printable icc_recommendation", {
   expect_true(any(grepl("ICC(A,1)", out, fixed = TRUE)))
   expect_invisible(print(rec))
 })
+
+# --- Slice 2: the guarded interactive Q&A shell -------------------------------
+#
+# The interactive collection is a thin shell over the Slice-1 resolver. It is
+# driven here by an INJECTED responder (and a mocked prompt_line) so no live
+# console input is needed -- the shell never fires in CI/knitr, guarded by
+# rlang::is_interactive().
+
+# A responder that returns queued answers by axis and records which axes it was
+# asked, so a test can assert the shell asks only the outstanding questions.
+stub_responder <- function(queue, asked = NULL) {
+  function(arg, question, choices, labels = NULL) {
+    if (!is.null(asked)) {
+      asked$args <- c(asked$args, arg)
+    }
+    queue[[arg]]
+  }
+}
+
+test_that("the shell walks the outstanding axes and resolves them", {
+  ask <- stub_responder(list(
+    model = "twoway",
+    type = "agreement",
+    unit = "single",
+    raters = "random",
+    multilevel = FALSE
+  ))
+  answers <- collect_answers_interactively(
+    list(
+      model = NULL,
+      type = NULL,
+      unit = NULL,
+      raters = NULL,
+      multilevel = NULL,
+      level = NULL
+    ),
+    ask = ask
+  )
+  rec <- resolve_icc_recommendation(answers)
+  expect_equal(rec$rows$index, "ICC(A,1)")
+  expect_equal(rec$call, "icc(data, score, subject, rater, unit = \"single\")")
+})
+
+test_that("the shell asks only the unanswered, applicable axes", {
+  # one-way: type/raters/multilevel/level must NOT be asked.
+  asked <- new.env()
+  ask <- stub_responder(list(model = "oneway", unit = "average"), asked = asked)
+  answers <- collect_answers_interactively(
+    list(
+      model = NULL,
+      type = NULL,
+      unit = NULL,
+      raters = NULL,
+      multilevel = NULL,
+      level = NULL
+    ),
+    ask = ask
+  )
+  expect_setequal(asked$args, c("model", "unit"))
+  expect_null(answers$type)
+
+  # a supplied axis is not re-asked.
+  asked2 <- new.env()
+  ask2 <- stub_responder(
+    list(unit = "single", raters = "random", multilevel = FALSE),
+    asked = asked2
+  )
+  collect_answers_interactively(
+    list(
+      model = "twoway",
+      type = "consistency",
+      unit = NULL,
+      raters = NULL,
+      multilevel = NULL,
+      level = NULL
+    ),
+    ask = ask2
+  )
+  expect_false("model" %in% asked2$args)
+  expect_false("type" %in% asked2$args)
+  expect_setequal(asked2$args, c("unit", "raters", "multilevel"))
+})
+
+test_that("the multilevel branch asks for a level", {
+  asked <- new.env()
+  ask <- stub_responder(
+    list(
+      model = "twoway",
+      type = "agreement",
+      unit = "both",
+      raters = "random",
+      multilevel = TRUE,
+      level = "both"
+    ),
+    asked = asked
+  )
+  answers <- collect_answers_interactively(
+    list(
+      model = NULL,
+      type = NULL,
+      unit = NULL,
+      raters = NULL,
+      multilevel = NULL,
+      level = NULL
+    ),
+    ask = ask
+  )
+  expect_true("level" %in% asked$args)
+  expect_equal(answers$level, "both")
+})
+
+test_that("ask_choice maps the entered number to the choice and re-asks on junk", {
+  # "2" selects the second choice.
+  testthat::local_mocked_bindings(prompt_line = function(prompt) "2")
+  expect_equal(
+    ask_choice("unit", "q", c("single", "average", "both")),
+    "average"
+  )
+
+  # out-of-range then valid: re-asks, then accepts.
+  replies <- c("9", "1")
+  i <- 0L
+  testthat::local_mocked_bindings(prompt_line = function(prompt) {
+    i <<- i + 1L
+    replies[i]
+  })
+  expect_equal(
+    suppressMessages(ask_choice("type", "q", c("agreement", "consistency"))),
+    "agreement"
+  )
+})
+
+test_that("choose_icc() routes through the shell only when interactive", {
+  # Interactive: the shell fires; a bare call is fully answered by the responder.
+  testthat::local_mocked_bindings(
+    ask_choice = stub_responder(list(
+      model = "twoway",
+      type = "consistency",
+      unit = "single",
+      raters = "random",
+      multilevel = FALSE
+    ))
+  )
+  rlang::local_interactive(TRUE)
+  rec <- choose_icc()
+  expect_s3_class(rec, "icc_recommendation")
+  expect_equal(rec$rows$index, "ICC(C,1)")
+})
+
+test_that("a non-interactive underspecified call aborts without asking", {
+  # If the shell were (wrongly) entered, this responder would error; instead the
+  # non-interactive guard skips it and the resolver aborts loudly.
+  testthat::local_mocked_bindings(
+    ask_choice = function(...) stop("shell must not run non-interactively")
+  )
+  rlang::local_interactive(FALSE)
+  expect_error(
+    choose_icc(unit = "single"),
+    class = "intraclass_underspecified"
+  )
+})
