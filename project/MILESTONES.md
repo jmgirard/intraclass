@@ -285,67 +285,21 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–2; merged via PR #16 at 20f9afc; full CI matrix green incl.
   Windows and R-devel, 478 tests).
 
-## M13: Release polish — docs, site, CRAN submission-ready *(active)*
+## M13: Release polish — docs, site, CRAN submission-ready
 - Goal: make the complete M0–M12 package **discoverable, teachable, and
-  CRAN-submittable**. **No new estimand, engine, fit, CI machinery, or dependency**
-  (cf. M4/M5.5/M7/M11/M12 — a docs/metadata milestone). Depth is **submission-ready,
-  not submitted**: the actual CRAN upload + win-builder/R-hub round-trips are a
-  maintainer act, out of band (ADR-022). Release version **`0.1.0`**. PRINCIPLES #1 is
-  numerically N/A (no estimator ships); #4/#12 bind — every vignette/README number is
-  computed by `icc()`/`choose_icc()` at knit time and seeded, never transcribed.
+  CRAN-submittable** — a docs/metadata milestone, **no new estimand, engine, fit, CI
+  machinery, or dependency** (cf. M4/M5.5/M7/M11/M12). Depth is **submission-ready, not
+  submitted** (the CRAN upload + win-builder/R-hub round-trips are a maintainer act, out
+  of band). Release version **`0.1.0`**. Three slices: (1) `_pkgdown.yml` reference index
+  rebuilt by role with every export listed (#6) + a pre-existing broken flagship-article
+  image fixed via a vignette `resource_files:` entry; (2) `advanced.Rmd` gained the M11
+  `autoplot()` and M12 `choose_icc()` showcase sections (all numbers computed live,
+  #4/#12) + README refreshed with a multilevel worked example; (3) version bump, NEWS
+  consolidated into a 0.1.0 first-release changelog, `cran-comments.md` + `inst/WORDLIST`,
+  British→US spelling (`Language: en-US`), `R CMD check --as-cran` **0/0/0** in CRAN mode
+  and with `NOT_CRAN=true`, `lintr` clean. Closes the ADR-017 arc (M0–M13).
   *(was M9 per ADR-017; M7 → M9 per ADR-013; M6 originally.)*
 - Reference: ADR-022 (scope); no estimand-spec. Brief §8 per-milestone DoD.
-
-### Slice 1 — pkgdown reference index + site ✓
-- [x] Rebuild `_pkgdown.yml` reference index: stale titles/descriptions fixed (the
-      "Two-way random designs / (later) consistency" wording replaced), grouped by role —
-      *Choosing a coefficient* / *Estimating an ICC* (rich family desc naming the
-      `print`/`summary`/`tidy`/`glance`/`autoplot`/`plot` methods) / *Decision (D-)
-      studies* / *Tidy methods* (`reexports`) / *Datasets* / *Package overview*; every
-      exported topic listed deliberately (#6; memory `pkgdown-reference-index-new-exports`).
-- [x] `pkgdown::check_pkgdown()` clean and `pkgdown::build_site()` builds locally with
-      no errors/warnings/missing-image informs. **Bonus:** fixed a pre-existing broken
-      image on the flagship *Choosing an ICC* article — the static `choosing-icc-tree.svg`
-      was not copied to the pkgdown site (404); added a `resource_files:` entry to the
-      vignette front matter so both `R CMD build` and pkgdown copy it.
-
-### Slice 2 — advanced vignette showcase + README ✓
-- [x] Extended `vignettes/advanced.Rmd`: a **Visualising a fit** section (M11
-      `autoplot()` coefficients forest + variance-component decomposition + a
-      level-faceted multilevel plot, ggplot2-guarded, all with `fig.alt`) and a
-      **Letting the package choose the coefficient** section (M12 `choose_icc()`,
-      two-way + multilevel, with a live round-trip showing the emitted call = an
-      `icc()` call); intro overview list corrected (dropped the non-existent
-      "Confidence-interval methods" section). All numbers computed live (#4/#12);
-      knits clean; pkgdown renders the three plot figures with no alt-text warnings.
-- [x] Refreshed `README.Rmd` → `README.md`: stale "multilevel is next" NOTE replaced
-      with the shipped-family summary; worked example now spans default agreement,
-      `choose_icc()`, and a live **multilevel** fit (60 subjects in 12 clusters, both
-      levels); regenerated via `devtools::build_readme()`.
-- [x] New claim backed in `test-vignette-claims.R` (rater component dominates on
-      `ratings` — the "why agreement is low" narrative); the `choose_icc()` round-trip
-      is already the M12 oracle. All 35 vignette-claim tests green.
-
-### Slice 3 — CRAN submission-ready ✓ (pending PR merge)
-- [x] `DESCRIPTION` version → `0.1.0`; `Description` field expanded (spelled-out
-      "analysis-of-variance"; one-way/multilevel/`choose_icc`/`d_study` mentioned; a
-      CRAN-formatted `<doi:10.1037/met0000391>` reference added). `NEWS.md` rewritten as a
-      clean, capability-grouped `# intraclass 0.1.0` first-release changelog (git history +
-      `MILESTONES.md` keep the per-milestone record). Package-doc `.Rd` re-synced via
-      `document()`.
-- [x] `cran-comments.md` authored (env matrix + `R CMD check` result, new-submission note)
-      and `.Rbuildignore`d; `inst/WORDLIST` rebuilt (`spelling::update_wordlist`);
-      `spell_check_package()` clean. British spellings in user-facing prose corrected to US
-      (`Language: en-US`): modelling→modeling, visualising→visualizing, penalise→penalize,
-      judgement→judgment, labelled→labeled.
-- [x] Roxygen gaps: none — `--as-cran` reported **0 notes**, so `\value`/`@examples`/URLs
-      are all complete and valid.
-- [x] `R CMD check --as-cran` **0 errors / 0 warnings / 0 notes** locally (R 4.6.1), both
-      in CRAN mode and with `NOT_CRAN=true` (full suite, all `skip_on_cran` paths
-      exercised, against the built/installed package); `lintr::lint_package()` → 0 lints.
-      Full CI matrix (Windows + R-devel) confirmed by the PR.
-- [ ] `MILESTONES.md`/`STATUS.md` updated in-commit (#16); merged via PR; clean tagged
-      commit at the release version.
 
 ### Deferred out of M13 (record so not rediscovered)
 - The **actual CRAN upload** + win-builder / R-hub / `devtools::submit_cran` round-trips
@@ -356,6 +310,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   **Bayesian engine** + `ci_method = "posterior"`; **one-way via SEM** (ADR-014);
   within-cell replicates; three-facet `d_study()`; the conflated single-level ICC
   (Eq. 14). All in [`ROADMAP.md`](ROADMAP.md).
-- Status: active — all three slices complete locally (version 0.1.0; `--as-cran` 0/0/0 in
-  CRAN mode and with `NOT_CRAN=true`; lintr clean). Awaiting the `m13-release-polish` PR
-  to go green on the full matrix and merge; that closes the ADR-017 arc (M0–M13).
+- Status: done (Slices 1–3; merged via PR #17 at 54c0947; full CI matrix green incl.
+  Windows and R-devel). **Final milestone of the ADR-017 arc — M0–M13 all shipped.**
+  Package at **v0.1.0**, submission-ready; the CRAN upload itself is the maintainer's
+  out-of-band step.
