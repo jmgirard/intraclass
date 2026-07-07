@@ -112,3 +112,53 @@ consequences → references.
   tibbles); RNG seeding uses a dependency-free save/restore helper rather than
   adding `withr` to Imports (keeps the light-install path).
 - References: PRINCIPLES.md #2, #5, #7, #15; estimand-spec §5; ADR-002/003.
+
+## ADR-006: M2 — consistency ICCs, and fixed raters as a balanced-data label layer
+- Date: 2026-07-06
+- Status: accepted
+- Context: M2 adds the consistency coefficients `ICC(C,1)`/`ICC(C,k)` and the
+  fixed-vs-random rater distinction. Consistency is a clean change of the M1 error
+  set (drop the rater main effect). Fixed-vs-random needed a statistical decision:
+  McGraw & Wong (1996) show Case 2 (random) and Case 3 (fixed) share a
+  point-estimate *formula* for a given A/C definition, but that result is derived
+  in the **ANOVA** framework, and our engine is a **mixed model**. The maintainer
+  asked to confirm the equivalence survives REML before relying on it. It was
+  verified live this session (seeded script, glmmTMB + lme4 + `psych`, SF data):
+  fitting raters as a random intercept vs. as fixed effects returns identical σ²_s
+  and σ²_res on **balanced, complete** data (|Δσ²_s| ≈ 4e-5), hence identical
+  ICC(C,·) and ICC(A,·). It **breaks under imbalance** (dropping 4 of 24 cells:
+  ΔICC(C,1) ≈ 0.0095), because random-rater partial pooling shifts σ²_s once the
+  design is non-orthogonal.
+- Decision:
+  - **Consistency** unlocked via `type = "consistency"` → error set {residual}
+    (drops `rater`); labels `ICC(C,1)`/`ICC(C,k)`. No new fit or CI machinery.
+  - **Fixed raters** exposed via a new `raters = c("random", "fixed")` argument
+    (default `"random"` = M1/Case 2). On M2's balanced data it is a
+    **label/interpretation layer over the shared random-effects fit** — it changes
+    the reported design (two-way *mixed* vs *random*) and the Shrout–Fleiss
+    equivalent (ICC(3,·) vs ICC(2,·)), **not** the number. Justified by the
+    verified balanced-data equivalence above.
+  - **Best-practice guardrail:** `raters = "fixed"` is opt-in and emits a loud,
+    classed `cli` **warning** (`intraclass_fixed_raters`) that random is
+    recommended and fixed forgoes generalization; the value is still returned
+    (fixed raters is well-posed, so a warning, not `abort_*`). Adds a classed
+    warning helper (`warn_intraclass()`) mirroring the `abort_*` layer
+    (PRINCIPLES.md #8 — no bare `warning()`), suppressible by class.
+  - **Scope guard (load-bearing):** the label-layer shortcut is valid **only for
+    balanced data**. **M3 MUST revisit fixed raters** with a real fixed-effect fit
+    path (or guard the layer to balanced designs), because the equivalence fails on
+    incomplete data. Recorded in the estimand-spec §3/§6 so the M3 author inherits
+    it.
+  - **Deferred out of M2** (kept lean, PRINCIPLES.md #14/#15/#17): lme4 as a
+    *selectable* engine + bootstrap CI (this **supersedes ADR-005's** "deferred to
+    M2" note — it becomes its own slice), and D-study projection to arbitrary k.
+- Consequences: M2 is a thin estimand-family slice — no new engine, no new CI
+  method, the fit is untouched. `icc_estimand()` gains the consistency error set
+  and a `raters`/design dimension used for labeling only; `icc_point()`/`mc_ci()`
+  are unchanged. New public arg `raters`; `type = "consistency"` unlocked. A new
+  classed warning path and its tests. The balanced-only validity of the fixed
+  layer is a documented debt for M3.
+- References: PRINCIPLES.md #1, #2, #5, #8, #14, #15, #17; McGraw & Wong (1996);
+  Shrout & Fleiss (1979); ten Hove et al. (2024);
+  [`estimand-specs/M2-consistency-and-fixed.md`](estimand-specs/M2-consistency-and-fixed.md);
+  ADR-002/003/005.
