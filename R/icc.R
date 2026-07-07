@@ -69,9 +69,17 @@
 #'   on the **multilevel** ICC (ten Hove et al. 2022): reliability is reported at
 #'   the subject and/or cluster level (see `level` and the *Multilevel designs*
 #'   section). Left `NULL` (the default) for an ordinary single-level two-way ICC.
-#' @param model Design. Only `"twoway"` is currently supported.
-#' @param type Error definition: `"agreement"` (absolute agreement, the default)
-#'   counts systematic rater differences as error; `"consistency"` ignores them.
+#' @param model Design: `"twoway"` (the default; subjects crossed with a common
+#'   set of raters) or `"oneway"` (each subject rated by a possibly different set
+#'   of raters). Under `"oneway"` (Shrout & Fleiss Case 1) the raters are treated
+#'   as **interchangeable** -- the `rater` column is used only to count the ratings
+#'   per subject, its labels are ignored, and there is no rater main effect to
+#'   model, so `type` does not apply and the coefficients are `ICC(1)` / `ICC(k)`.
+#'   Fixed raters and a `cluster` (multilevel) structure are not defined for a
+#'   one-way design.
+#' @param type Error definition (two-way only): `"agreement"` (absolute agreement,
+#'   the default) counts systematic rater differences as error; `"consistency"`
+#'   ignores them. Not applicable when `model = "oneway"`.
 #' @param raters Rater sampling: `"random"` (the default; two-way random, Case 2)
 #'   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3) treats the
 #'   observed raters as the entire population and is fit with raters as fixed
@@ -150,7 +158,8 @@ icc <- function(
 
   # Dimensions not yet implemented fail loudly and point at where they are coming
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
-  require_supported(model, "twoway", "model", "designs beyond two-way")
+  model <- validate_choice(model, c("twoway", "oneway"), "model")
+  oneway <- model == "oneway"
   engine <- validate_choice(engine, c("glmmTMB", "lme4"), "engine")
   require_supported(
     ci_method,
@@ -208,6 +217,26 @@ icc <- function(
     ))
   }
 
+  # One-way (M6 spec §5): raters are interchangeable, so fixed raters and the
+  # multilevel design do not apply. Fail loudly rather than silently ignore them.
+  if (oneway) {
+    if (multilevel) {
+      abort_unsupported(c(
+        "A one-way ICC has no cluster structure.",
+        i = "Drop {.arg cluster}, or use {.code model = \"twoway\"} for a \\
+             multilevel ICC."
+      ))
+    }
+    if (raters == "fixed") {
+      abort_unsupported(c(
+        "Fixed raters do not apply to a one-way ICC.",
+        i = "One-way designs treat raters as interchangeable; use the default \\
+             {.code raters = \"random\"}, or {.code model = \"twoway\"} for \\
+             fixed raters."
+      ))
+    }
+  }
+
   # A numeric unit is a D-study projection; guard the one ill-posed combination
   # (fixed raters + absolute agreement) before fitting (PRINCIPLES.md #5).
   if (any(vapply(unit, is.numeric, logical(1)))) {
@@ -250,7 +279,7 @@ icc <- function(
   n_subjects <- nlevels(df$subject)
   n_raters <- nlevels(df$rater)
   n_clusters <- if (multilevel) nlevels(df$cluster) else NA_integer_
-  if (n_raters < 2L) {
+  if (!oneway && n_raters < 2L) {
     abort_unidentified(c(
       "A two-way ICC needs at least 2 raters to separate the rater variance.",
       i = "{.arg rater} has {n_raters} level{?s}."
@@ -258,8 +287,18 @@ icc <- function(
   }
   if (n_subjects < 2L) {
     abort_unidentified(c(
-      "A two-way ICC needs at least 2 subjects to estimate the signal variance.",
+      "An ICC needs at least 2 subjects to estimate the signal variance.",
       i = "{.arg subject} has {n_subjects} level{?s}."
+    ))
+  }
+  # One-way separates the subject variance from the residual only if some subject
+  # is rated more than once (estimand-spec M6 §5); with one rating each they are
+  # confounded (PRINCIPLES.md #5). Rater identity is otherwise ignored.
+  if (oneway && nrow(df) <= n_subjects) {
+    abort_unidentified(c(
+      "A one-way ICC needs at least one subject rated more than once to \\
+       separate the subject and residual variances.",
+      i = "Every {.arg subject} was rated once; provide replicate ratings."
     ))
   }
 
@@ -291,29 +330,42 @@ icc <- function(
     }
   }
 
-  # Design facts for a possibly-incomplete layout (estimand-spec M3 §3, §5).
+  # Design facts for a possibly-incomplete layout (estimand-spec M3 §3, §5). For
+  # one-way the k_eff (harmonic mean of ratings/subject) is the only fact needed;
+  # the cross-classified checks below (replicates, connectedness) do not apply --
+  # rater identity is ignored, so multiple ratings per subject are the design, not
+  # a violation (M6 spec §5).
   design_info <- summarize_design(df)
-  # One rating per observed cell is the M3 estimand; replicates would change it
-  # (split the interaction from pure error) and are a later milestone (#5, #17).
-  if (design_info$has_replicates) {
-    abort_unsupported(c(
-      "Some subject-by-rater cells have more than one rating.",
-      i = "Within-cell replicates (splitting the subject-by-rater interaction \\
-           from pure error) are planned for a later milestone.",
-      x = "Provide one rating per subject-by-rater cell."
-    ))
+  if (!oneway) {
+    # One rating per observed cell is the M3 estimand; replicates would change it
+    # (split the interaction from pure error) and are a later milestone (#5, #17).
+    if (design_info$has_replicates) {
+      abort_unsupported(c(
+        "Some subject-by-rater cells have more than one rating.",
+        i = "Within-cell replicates (splitting the subject-by-rater interaction \\
+             from pure error) are planned for a later milestone.",
+        x = "Provide one rating per subject-by-rater cell."
+      ))
+    }
+    # Separating the subject and rater variances needs a connected design; a
+    # disconnected layout confounds them and is not identified (#5; M3 §3).
+    if (!design_info$connected) {
+      abort_unidentified(c(
+        "The subject-by-rater design is disconnected, so the subject and rater \\
+         variances cannot be separated.",
+        i = "Every subject and rater must be linked through shared ratings (one \\
+             connected design).",
+        i = "For unlinked rater groups, a one-way ICC ({.code model = \"oneway\"}) \\
+             or additional linking ratings are needed."
+      ))
+    }
   }
-  # Separating the subject and rater variances needs a connected design; a
-  # disconnected layout confounds them and is not identified (#5; M3 §3).
-  if (!design_info$connected) {
-    abort_unidentified(c(
-      "The subject-by-rater design is disconnected, so the subject and rater \\
-       variances cannot be separated.",
-      i = "Every subject and rater must be linked through shared ratings (one \\
-           connected design).",
-      i = "For unlinked rater groups, a one-way ICC (planned) or additional \\
-           linking ratings are needed."
-    ))
+  # Balance: for one-way, every subject rated the same number of times; for
+  # two-way, a complete crossed design with one rating per cell (M3).
+  balanced <- if (oneway) {
+    length(unique(as.integer(table(df$subject)))) == 1L
+  } else {
+    design_info$balanced
   }
 
   # Multilevel data uses the five-component Design-1 fit; otherwise fixed raters
@@ -323,6 +375,8 @@ icc <- function(
   # M3 §6, ADR-008).
   engine_fit <- if (multilevel) {
     fit_glmmtmb_multilevel(df)
+  } else if (oneway) {
+    if (engine == "lme4") fit_lme4_oneway(df) else fit_glmmtmb_oneway(df)
   } else if (raters == "fixed") {
     fit_glmmtmb_fixed(df)
   } else if (engine == "lme4") {
@@ -351,6 +405,8 @@ icc <- function(
       }),
       recursive = FALSE
     )
+  } else if (oneway) {
+    lapply(unit, function(u) icc_estimand(unit = u, k_eff = k, oneway = TRUE))
   } else {
     lapply(
       unit,
@@ -390,9 +446,9 @@ icc <- function(
       components = engine_fit$components,
       design = list(
         model = model,
-        type = type,
+        type = if (oneway) NA_character_ else type,
         raters = raters,
-        balanced = design_info$balanced,
+        balanced = balanced,
         multilevel = multilevel,
         levels = if (multilevel) level else NULL
       ),

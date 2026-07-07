@@ -92,7 +92,7 @@ CI-green slice.
 
 See MILESTONES M5.5.
 
-## M6 — one-way random ICC(1)/ICC(1,k) — **in progress** (`m6-oneway`, ADR-013)
+## M6 — one-way random ICC(1)/ICC(k) — **code complete** (`m6-oneway`, ADR-013; pending PR)
 
 Last member of the classic SF family (Case 1): `model = "oneway"` fits
 `score ~ 1 + (1 | subject)` (no rater term) → `ICC(1)`/`ICC(1,k)`. First milestone
@@ -103,18 +103,20 @@ to change the fitted model. Estimand + all four oracles verified live before cod
       API decisions pinned (rater identity ignored, `type` n/a, numeric `unit`
       supported); oracles verified live (SF/psych/ANOVA/glmmTMB≡lme4 all 0.1657/
       0.4428).
-- [ ] `model = "oneway"` unlocked in `icc()` (`require_supported` widened);
+- [x] `model = "oneway"` unlocked in `icc()` (`validate_choice`);
       `fit_glmmtmb_oneway()` + `fit_lme4_oneway()` returning the six-field contract
       (`subject`/`residual`, no rater); `icc_point`/`resolve_divisor`/`mc_ci`
-      reused; `k_eff`/balance from M3; numeric `unit` → `ICC(1,m)`.
-- [ ] Guards (#5/#8): `raters="fixed"`+oneway abort; `cluster`+oneway abort;
-      `type` ignored (documented).
-- [ ] Oracles O-OW: SF 0.166/0.443; `psych` ICC1/ICC1k ≤1e-4; one-way ANOVA
-      mean squares; glmmTMB↔lme4 cross-engine; seeded sim (recovery + CI coverage,
-      absolute tolerances).
-- [ ] `print`/`summary`/`tidy`/`glance` one-way label + SF crosswalk + snapshot;
-      roxygen "which ICC/when" (rater-identity + type-n/a notes); choosing-an-icc
-      "same raters?" fork + getting-started note + claims tests; NEWS; REFERENCES
-      O-OW row; `devtools::check()` 0/0/0; `air`/`lintr` clean; full CI matrix on PR.
+      reused; `k_eff`/balance from M3; numeric `unit` → `ICC(m)`; two-way guards
+      skipped + one-way replication guard added.
+- [x] Guards (#5/#8): `raters="fixed"`+oneway abort; `cluster`+oneway abort;
+      `type` ignored (documented); single-rating → unidentified.
+- [x] Oracles O-OW: SF 0.166/0.443 (absolute gap); `psych` ICC1/ICC1k ≤1e-4;
+      one-way ANOVA mean squares; glmmTMB↔lme4 cross-engine; seeded sim (recovery +
+      CI coverage). `test-icc-oneway.R`.
+- [x] `print`/`summary`/`tidy`/`glance` one-way label + SF crosswalk + snapshot
+      (`glance` `var_rater` NA); roxygen `@param model`/`@param type`; choosing-an-icc
+      "are the raters crossed?" section + getting-started note + claims test; NEWS;
+      REFERENCES O-OW row; `devtools::check()` 0/0/0; `air`/`lintr` clean; tests
+      247/0/0. Full CI matrix pending on the PR.
 
 See MILESTONES M6.

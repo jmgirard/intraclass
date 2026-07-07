@@ -53,10 +53,18 @@ on the \strong{multilevel} ICC (ten Hove et al. 2022): reliability is reported a
 the subject and/or cluster level (see \code{level} and the \emph{Multilevel designs}
 section). Left \code{NULL} (the default) for an ordinary single-level two-way ICC.}
 
-\item{model}{Design. Only \code{"twoway"} is currently supported.}
+\item{model}{Design: \code{"twoway"} (the default; subjects crossed with a common
+set of raters) or \code{"oneway"} (each subject rated by a possibly different set
+of raters). Under \code{"oneway"} (Shrout & Fleiss Case 1) the raters are treated
+as \strong{interchangeable} -- the \code{rater} column is used only to count the ratings
+per subject, its labels are ignored, and there is no rater main effect to
+model, so \code{type} does not apply and the coefficients are \code{ICC(1)} / \code{ICC(k)}.
+Fixed raters and a \code{cluster} (multilevel) structure are not defined for a
+one-way design.}
 
-\item{type}{Error definition: \code{"agreement"} (absolute agreement, the default)
-counts systematic rater differences as error; \code{"consistency"} ignores them.}
+\item{type}{Error definition (two-way only): \code{"agreement"} (absolute agreement,
+the default) counts systematic rater differences as error; \code{"consistency"}
+ignores them. Not applicable when \code{model = "oneway"}.}
 
 \item{raters}{Rater sampling: \code{"random"} (the default; two-way random, Case 2)
 generalizes to a rater universe; \code{"fixed"} (two-way mixed, Case 3) treats the

@@ -90,6 +90,80 @@ fit_glmmtmb <- function(data, call = rlang::caller_env()) {
   )
 }
 
+# One-way engine (raters not crossed; Shrout & Fleiss Case 1) -------------------
+#
+# M6 (estimand-spec M6-oneway.md): fits the one-way random-effects model
+#
+#     score ~ 1 + (1 | subject)          -- NO rater term
+#
+# so the residual confounds the rater main effect with pure error (sigma^2_res =
+# sigma^2_r + sigma^2_e). Returns the same six-field contract as fit_glmmtmb()
+# with only `subject` and `residual` components; icc_point()/mc_ci() are unchanged
+# (the error set is just {residual}). Same log-SD internal scale as fit_glmmtmb().
+
+fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
+
+  fit <- withCallingHandlers(
+    glmmTMB::glmmTMB(
+      score ~ 1 + (1 | subject),
+      data = data,
+      REML = TRUE
+    ),
+    warning = function(w) {
+      cli::cli_warn(c(
+        "The {.pkg glmmTMB} engine reported a fitting warning.",
+        i = conditionMessage(w)
+      ))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  vc <- glmmTMB::VarCorr(fit)$cond
+  components <- list(
+    subject = as.numeric(attr(vc$subject, "stddev"))^2,
+    residual = stats::sigma(fit)^2
+  )
+
+  vcov_full <- stats::vcov(fit, full = TRUE)
+  nm <- colnames(vcov_full)
+  estimate <- stats::setNames(rep(NA_real_, length(nm)), nm)
+  estimate[["(Intercept)"]] <- as.numeric(glmmTMB::fixef(fit)$cond[[
+    "(Intercept)"
+  ]])
+  estimate[["disp~(Intercept)"]] <- log(stats::sigma(fit))
+  estimate[grep("subject", nm)] <- log(as.numeric(attr(vc$subject, "stddev")))
+
+  if (anyNA(estimate)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg glmmTMB} parameter vector to its covariance.",
+        i = "Unmatched parameters: {.val {nm[is.na(estimate)]}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  si <- grep("subject", nm)
+  di <- which(nm == "disp~(Intercept)")
+  to_components <- function(par) {
+    list(
+      subject = exp(2 * par[si, ]),
+      residual = exp(2 * par[di, ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "glmmTMB",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_full,
+    to_components = to_components
+  )
+}
+
 # Multilevel engine (subjects nested in clusters, raters crossed) ---------------
 #
 # Design 1 of ten Hove, Jorgensen & van der Ark (2022): raters crossed with both

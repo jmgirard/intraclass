@@ -21,7 +21,7 @@
       Error in `icc()`:
       ! The subject-by-rater design is disconnected, so the subject and rater variances cannot be separated.
       i Every subject and rater must be linked through shared ratings (one connected design).
-      i For unlinked rater groups, a one-way ICC (planned) or additional linking ratings are needed.
+      i For unlinked rater groups, a one-way ICC (`model = "oneway"`) or additional linking ratings are needed.
 
 ---
 

@@ -40,7 +40,9 @@ reference values, ever.
 - **Asserted:** ICC(A,1)=0.290, ICC(A,k)=0.620 (M1,
   `test-icc-twoway-agreement.R`); ICC(C,1)=0.715, ICC(C,k)=0.909 (M2,
   `test-icc-consistency.R`, cross-checked against `psych::ICC` ICC3/ICC3k to
-  1e-4). ICC(1)/ICC(k) recorded for later milestones.
+  1e-4). ICC(1)=0.166, ICC(k)=0.443 **asserted (M6)** for the one-way path
+  (`test-icc-oneway.R`, cross-checked against `psych::ICC` ICC1/ICC1k to 1e-4 and
+  one-way ANOVA mean squares); see O-OW.
 
 ### Oracle O2 — ANOVA mean-squares (package-independent, hand-derived)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-anova-oracle.R`: the
@@ -179,6 +181,28 @@ reference values, ever.
 - **Provenance:** `data-raw/oracle-multilevel.R` (seeded; `stopifnot` tolerance
   checks) — to be committed when the coefficients are asserted. Reproducible;
   nothing hardcoded.
+
+### Oracle O-OW — one-way random ICC(1)/ICC(k) (M6)
+- **Status:** **asserted (M6)** in `tests/testthat/test-icc-oneway.R` (spec
+  `M6-oneway.md` §7). Unlike O-ML, a textbook worked example **does** exist (SF
+  Case 1), so five oracles pin the estimand:
+  1. **Shrout & Fleiss (1979) textbook** — ICC(1) = 0.166, ICC(1,k) = 0.443 (the
+     staged O1 values), asserted on the absolute gap (published to 3 dp).
+  2. **`psych::ICC` ICC1/ICC1k** — live in-suite cross-check to 1e-4.
+  3. **One-way ANOVA mean squares** — `(MSB−MSW)/(MSB+(k−1)MSW)` and
+     `(MSB−MSW)/MSB` from base `stats::aov(score ~ subject)`, package-independent,
+     to 1e-4.
+  4. **glmmTMB ↔ lme4 cross-engine** — both one-way fits agree on point (≤1e-4)
+     and interval (absolute ≤0.02).
+  5. **Seeded simulation** — known σ²_s and a single confounded within-subject
+     error (no rater effect); points recovered within tolerance and the
+     Monte-Carlo interval covers the population values (#12).
+- **Decision:** signal σ²_s, error {confounded residual σ²_res = σ²_r + σ²_e},
+  divisor 1/k/m; read off `score ~ 1 + (1 | subject)` (no rater term). One-way ≠
+  consistency despite identical algebra (different fit; M6 spec §3). Verified live
+  (2026-07-07) before code.
+- **Provenance:** SF (1979) textbook + reproducible in-suite computation; nothing
+  hardcoded beyond the published 0.166/0.443 (already in `sf_oracle_all`).
 
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:

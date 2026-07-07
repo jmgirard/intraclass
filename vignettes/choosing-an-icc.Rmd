@@ -38,6 +38,29 @@ in which the choices below are easiest to see.
 str(ratings)
 ```
 
+## A prior question: are the raters crossed? (`model`)
+
+**Is every subject rated by the *same* set of raters, or by a different set each
+time?** If the same raters judge everyone (a *crossed*, two-way design, like
+`ratings`), keep the default `model = "twoway"` and the four choices below apply.
+If instead each subject is rated by whichever raters happened to be available --
+so "rater 1" for one subject has nothing to do with "rater 1" for another -- the
+raters are *interchangeable* and the design is **one-way** (`model = "oneway"`).
+
+```{r oneway}
+oneway <- icc(ratings, score, subject, rater, model = "oneway", seed = 2024)
+oneway
+```
+
+A one-way model cannot separate systematic rater differences from error, so it
+folds them into the residual and reports a single `ICC(1)` / `ICC(k)`. That makes
+it the **most conservative** coefficient: on this data `ICC(1)` is
+`r sprintf("%.2f", tidy(oneway)$estimate[1])`, below the two-way `ICC(A,1)` and
+`ICC(C,1)` you will see next, precisely because those separate the rater effect
+that one-way absorbs. The agreement/consistency and fixed/random choices below do
+not apply to one-way (there is no rater term to reason about) -- so answer this
+question first.
+
 ## 1. Agreement vs. consistency (`type`)
 
 **Does the actual value need to match, or only the rank order?** *Absolute

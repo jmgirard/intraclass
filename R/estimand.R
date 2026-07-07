@@ -40,12 +40,31 @@ icc_estimand <- function(
   raters = "random",
   k_eff = NA_real_,
   level = "subject",
-  multilevel = FALSE
+  multilevel = FALSE,
+  oneway = FALSE
 ) {
   type <- rlang::arg_match(type, c("agreement", "consistency"))
   raters <- rlang::arg_match(raters, c("random", "fixed"))
   level <- rlang::arg_match(level, c("subject", "cluster"))
   index <- unit_index(unit)
+
+  if (oneway) {
+    # One-way random (Shrout & Fleiss Case 1, M6 spec §2/§3): the fit has NO rater
+    # term, so the single confounded residual is the whole error set and there is
+    # no agreement/consistency choice. McGraw & Wong label these single-argument
+    # ICC(1)/ICC(k)/ICC(m); the SF equivalent is ICC(1,1)/ICC(1,k).
+    return(list(
+      label = sprintf("ICC(%s)", index),
+      sf_label = oneway_sf_label(index),
+      signal = "subject",
+      error = "residual",
+      unit = unit,
+      divisor = resolve_divisor(unit, k_eff),
+      type = NA_character_,
+      raters = "random",
+      level = NA_character_
+    ))
+  }
 
   if (multilevel) {
     # Multilevel Design 1 (ten Hove et al. 2022, Table 3): the signal is the
@@ -124,8 +143,18 @@ sf_label <- function(type, raters, index) {
   sprintf("ICC(%s,%s)", case, index)
 }
 
-# Human-readable design phrase for the report header (M2 spec §5).
-icc_design_phrase <- function(type, raters) {
+# Shrout & Fleiss (1979) equivalent for a one-way coefficient: SF named the single
+# form ICC(1,1) and the average ICC(1,k); a numeric D-study projection has no
+# canonical SF label (M6 spec §6).
+oneway_sf_label <- function(index) {
+  switch(index, "1" = "ICC(1,1)", "k" = "ICC(1,k)", NA_character_)
+}
+
+# Human-readable design phrase for the report header (M2 spec §5; M6 spec §6).
+icc_design_phrase <- function(type, raters, oneway = FALSE) {
+  if (oneway) {
+    return("one-way random")
+  }
   design <- switch(raters, random = "two-way random", fixed = "two-way mixed")
   error <- switch(type, agreement = "absolute agreement", consistency = type)
   sprintf("%s, %s", design, error)
