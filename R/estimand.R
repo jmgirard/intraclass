@@ -165,6 +165,31 @@ icc_design_phrase <- function(type, raters, oneway = FALSE) {
   sprintf("%s, %s", design, error)
 }
 
+# The full human-readable design label for an `icc` object, multilevel-aware: the
+# two-way/one-way phrase, prefixed with the inferred multilevel design (ten Hove
+# et al. 2022; spec M8 §4) when present. Shared by `format.icc` (report header)
+# and `autoplot.icc` (plot title) so the two never drift.
+icc_design_label <- function(design) {
+  ow <- identical(design$model, "oneway")
+  phrase <- icc_design_phrase(design$type, design$raters, oneway = ow)
+  if (!isTRUE(design$multilevel)) {
+    return(phrase)
+  }
+  ml_label <- switch(
+    design$ml_design,
+    nested_in_clusters = "multilevel (raters nested in clusters)",
+    nested_in_subjects = "multilevel (raters nested in subjects)",
+    "multilevel"
+  )
+  # Design 3 (raters nested in subjects) is the multilevel one-way (agreement-only);
+  # the two-way agreement/consistency phrase does not apply.
+  if (identical(design$ml_design, "nested_in_subjects")) {
+    paste(ml_label, "absolute agreement")
+  } else {
+    paste(ml_label, phrase)
+  }
+}
+
 # Compute a single ICC point value from named variance components and an estimand.
 # The estimand's resolved `divisor` (1 for a single rater, k_eff for the average,
 # or m for a D-study projection) divides every error component while leaving the

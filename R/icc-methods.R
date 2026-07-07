@@ -11,23 +11,8 @@ format.icc <- function(x, ...) {
   ci_pct <- format(100 * x$ci$conf_level, trim = TRUE)
   ml <- isTRUE(x$design$multilevel)
   ow <- identical(x$design$model, "oneway")
-  phrase <- icc_design_phrase(x$design$type, x$design$raters, oneway = ow)
-  if (ml) {
-    # Surface the inferred multilevel design (ten Hove et al. 2022; spec M8 §4).
-    ml_label <- switch(
-      x$design$ml_design,
-      nested_in_clusters = "multilevel (raters nested in clusters)",
-      nested_in_subjects = "multilevel (raters nested in subjects)",
-      "multilevel"
-    )
-    # Design 3 is the multilevel one-way (agreement-only); the two-way
-    # agreement/consistency phrase does not apply.
-    phrase <- if (identical(x$design$ml_design, "nested_in_subjects")) {
-      paste(ml_label, "absolute agreement")
-    } else {
-      paste(ml_label, phrase)
-    }
-  }
+  # Multilevel-aware design phrase, shared with autoplot.icc (spec M8 §4).
+  phrase <- icc_design_label(x$design)
   header <- sprintf("# Intraclass correlation: %s", phrase)
   cell_total <- x$n$subjects * x$n$raters
   completeness <- if (x$design$balanced) "complete" else "incomplete"

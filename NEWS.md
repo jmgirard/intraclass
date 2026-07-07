@@ -1,5 +1,12 @@
 # intraclass 0.0.0.9000
 
+* `icc()` objects now have `autoplot()` and `plot()` methods (requires ggplot2, a
+  Suggests dependency). `autoplot(fit)` (equivalently `what = "coefficients"`) draws a
+  **coefficient forest plot** — each ICC index as a point estimate with its Monte-Carlo
+  confidence interval, faceted by level for multilevel fits. The variance-component
+  decomposition (`what = "components"`) is coming in a follow-up. Point estimates and
+  intervals are read straight off the fitted object, so the plot always matches the
+  printed table.
 * Multilevel `icc()` now supports **fixed raters** (`raters = "fixed"`) for the
   crossed design (Design 1) at the **subject level**, on balanced complete data. The
   rater main effect is treated as the finite-population variance of the specific raters

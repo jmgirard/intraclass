@@ -970,3 +970,64 @@ consequences → references.
   §6 and [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md) §3 (the
   reused machinery); McGraw & Wong (1996 Case 3A); ten Hove et al. (2022 Design 1);
   the `verify-against-installed-package` memory (M9 process lesson).
+
+## ADR-020: M11 scope — general `autoplot()` / `plot()` methods for `icc` objects
+- Date: 2026-07-07
+- Status: accepted
+- Context: M11 was scheduled by ADR-017 as "general `autoplot()` / ggplot2 methods,"
+  detailed at its start after a short M10 retro (brief §7). The M10 retro's lesson was
+  a clean one — the milestone was pure reuse (θ²_r into the M5 decomposition), oracle-
+  first caught the single-cluster θ²_r degeneracy *before* code, and it was documented
+  rather than shipped as a silent artifact. M11 is a **change of pace from estimator
+  work**: a visualization layer over the already-shipped coefficients. It introduces
+  **no new estimand, no new fit, no new CI machinery, and no new dependency** — ggplot2
+  is already a `Suggests`, and the M4.5 `autoplot.icc_dstudy()` reliability curve
+  (ADR-010) already established the lazy-`s3_register()` light-install pattern in
+  `zzz.R`. M11 generalizes plotting from the derived `icc_dstudy` object to the `icc`
+  object itself. Two facts shaped scope: (a) an `icc` object exposes exactly two things
+  worth plotting — `$estimates` (index/level/estimate/conf.low/conf.high) and
+  `$components` (the variance decomposition); (b) the existing `autoplot.icc_dstudy` has
+  **zero tests**, so M11 also sets the testing pattern for plot methods here. Two scope
+  questions were put to the maintainer this session.
+- Decision (maintainer-approved this session, 2026-07-07):
+  - **M11 ships both plots behind one `what` argument.** `autoplot.icc(object, what =
+    c("coefficients", "components"), ...)` (`match.arg`, default `"coefficients"`):
+    - `"coefficients"` — a **coefficient forest plot**, one row per estimated index
+      (faceted / grouped by `level` for multilevel objects), point estimate with a
+      Monte-Carlo CI band. The direct generalization of the shipped reliability curve;
+      works across the full estimator set (single/average, agreement/consistency, one-
+      way, multilevel subject+cluster levels).
+    - `"components"` — a **variance-component decomposition** bar (subject / rater /
+      residual, plus cluster and cluster:rater for multilevel; honouring the design
+      variants already handled by `format.icc` — one-way's confounded rater, Design 2's
+      `rater:cluster` slot, Design 3's absent rater/cluster:rater).
+  - A `plot.icc()` wrapper mirrors `plot.icc_dstudy()` (prints the `autoplot`, returns
+    `invisible(x)`). Both registered lazily via `s3_register("ggplot2::autoplot",
+    "icc")` in `.onLoad` alongside the existing `icc_dstudy` registration.
+  - **An invalid `what` fails loudly via a classed `abort_*()` (#5/#8)** — never a bare
+    `match.arg` message; all user-facing text via `cli`.
+  - **Correctness is established by deterministic build-data assertions, not images
+    (#1 is numerically N/A — no estimand, no new numbers).** Tests build the plot
+    (`ggplot2::ggplot_build()` / `layer_data()`) and assert the rendered layer data
+    equals the source object's `$estimates` / `$components` — the plot *faithfully
+    renders the object's already-oracle-pinned numbers*. **No `vdiffr`** — image
+    snapshots are platform/font/version-fragile and add a `Suggests` (consistent with
+    the "don't snapshot fits" lesson, `verify-against-installed-package` memory). The
+    long-untested `autoplot.icc_dstudy` gets the same build-data coverage in passing.
+  - **No estimand-spec** (M11 is a rendering layer, not an estimator — cf. M4/M5.5/M7,
+    which also shipped without an estimand-spec).
+- Consequences: the only new code is `autoplot.icc()` + `plot.icc()` + one `zzz.R`
+  registration line + the `what` validator; the plotted numbers all pre-exist on the
+  object. Because ggplot2 stays a `Suggests`, the methods are `check_installed()`-guarded
+  and the light-install path is preserved. Deferred out of M11 (recorded so not
+  rediscovered): **error-set shading** on the components plot (colouring signal vs. the
+  index-specific error set — depends on type/averaging, its own slice); **a combined /
+  patchwork multi-panel layout**; **`d_study()`-style projection overlays**; **theming /
+  palette customization beyond ggplot2 defaults**; and any **non-ggplot2 (base
+  `graphics`) plot method**. The M10 and M9 estimator carry-overs are untouched.
+- References: PRINCIPLES.md #1 (oracle-first — here: faithful-rendering build-data
+  checks, no new numbers), #2 (no code before scope — this ADR + DoD), #5/#8 (classed
+  aborts + `cli`), #15 (thin slices), #17 (deferrals to ROADMAP, not scope creep);
+  ADR-010 (M4.5 `autoplot.icc_dstudy` + the lazy-registration pattern, generalized),
+  ADR-002 (ggplot2 as `Suggests`, light install), ADR-017 (the arc that scheduled M11);
+  the `verify-against-installed-package` memory (no fragile snapshots).

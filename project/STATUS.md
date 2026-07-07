@@ -1,12 +1,17 @@
 # Project status
 
-- Milestone: **M11 — general `autoplot()` / ggplot2 methods** — next (provisional; not
-  yet detailed). M10 shipped (PR #14).
-- Active task: — (next: retro + detail M11 — general variance-component / CI plots)
+- Milestone: **M11 — general `autoplot()` / `plot()` methods for `icc` objects** —
+  **active** (detailed by ADR-020). M10 shipped (PR #14).
+- Active task: **M11 Slice 2 — variance-component decomposition** (`autoplot.icc(what =
+  "components")`). Slice 1 (coefficient forest plot) is **done + green** (397 tests, lint
+  clean, installed-package dispatch verified); not yet committed. See the M11 DoD board
+  in `MILESTONES.md`.
 - Last green CI: PR #14 (M10) full matrix green incl. Windows; merged to `main` at
   9f799d2
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M10 merged + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M11 scoped (ADR-020) + DoD written;
+  Slice 1 (coefficient forest plot) implemented, green (397 tests), on branch
+  `m11-autoplot-icc` (uncommitted). Slice 2 next.
 
 ## Where we are
 
@@ -22,12 +27,15 @@ crossed × {complete, incomplete} × {random, fixed} at the subject level.
 
 ## Next action
 
-**Retro + detail M11** (general `autoplot()` / ggplot2 methods). Per the process (#2,
-brief §7), run a short M10 retro, then resolve M11 scope with the maintainer and write
-the DoD before code. M11 is a **change of pace from estimator work**: a visualization
-layer over the shipped coefficients (**no new estimand**), generalizing the M4.5
-`d_study()` reliability curve to variance-component and CI plots. Ships on a `m11-*`
-branch, merges via PR (`milestone-branches-and-prs`).
+**M11 Slice 2 — variance-component decomposition.** Slice 1 (coefficient forest plot)
+is done and green on branch `m11-autoplot-icc` (uncommitted — awaiting the go-ahead to
+commit). Slice 2 implements the `what = "components"` branch of `autoplot.icc()` —
+replacing the interim `abort_unsupported` stub in `autoplot_icc_components()` — a bar of
+the `$components` slots (subject/rater/residual, plus cluster + cluster:rater for
+multilevel), honouring the design variants `format.icc` already handles (one-way's
+confounded rater, Design 2's `rater:cluster`, Design 3's absent rater/cluster:rater).
+Build-data tests assert bar heights == `$components` across two-way/one-way/Design 1/
+nested. Then the whole-M11 gate (full CI matrix incl. Windows, pkgdown) + PR.
 
 Milestone arc after M11 (ADR-017): **M12** `choose_icc()` → **M13** release polish.
 

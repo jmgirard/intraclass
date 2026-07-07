@@ -10,6 +10,7 @@
 
 .onLoad <- function(libname, pkgname) {
   s3_register("ggplot2::autoplot", "icc_dstudy")
+  s3_register("ggplot2::autoplot", "icc")
   invisible()
 }
 
