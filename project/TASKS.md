@@ -34,7 +34,7 @@ condensed to a single line once done.
 warns). Classed warning layer; design + SF-equivalent in print/summary; oracles
 SF 0.715/0.909, `psych` ICC3/ICC3k, fixed≡random equivalence (O4). See MILESTONES M2.
 
-## M3 — imbalanced & incomplete designs — **done** (Slices 0–2; local gate green, pending PR CI + merge)
+## M3 — imbalanced & incomplete designs — **done** (merged via PR #2 at 11ab1b2, full CI matrix green)
 
 Ragged subject×rater designs (missing cells). Slice 0: estimand spec + ADR-008
 (arc reordered by ADR-007; vignette → M4). Slice 1: `summarize_design()` (union-find
