@@ -118,8 +118,11 @@ test_that("lme4 Monte-Carlo interval agrees with glmmTMB's (O-LME interval)", {
 
   # merDeriv's SD-scale covariance delta-transformed to log-SD reproduces
   # glmmTMB's internal vcov(full = TRUE) to ~1e-4, so the two engines' MC
-  # intervals coincide to well under 0.02 (observed ~1e-2). A material
-  # disagreement would mean the scale transform is wrong, not a loose tolerance.
+  # interval bounds coincide to well under 0.02 in ABSOLUTE terms (observed
+  # ~1e-2). We check the absolute gap rather than expect_equal()'s relative
+  # tolerance, which is too strict for small conf.low values (a 0.002 gap on a
+  # 0.05 bound is a 4% relative difference). A material absolute disagreement
+  # would mean the scale transform is wrong, not a loose tolerance.
   d <- sf_ratings_long()
   for (ax in lme4_axes) {
     g <- tidy(icc(
@@ -144,8 +147,8 @@ test_that("lme4 Monte-Carlo interval agrees with glmmTMB's (O-LME interval)", {
       seed = 1,
       mc_samples = 20000L
     ))
-    expect_equal(l$conf.low, g$conf.low, tolerance = 0.02)
-    expect_equal(l$conf.high, g$conf.high, tolerance = 0.02)
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
   }
 })
 
