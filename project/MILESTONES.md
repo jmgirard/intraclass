@@ -461,13 +461,12 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   al. 2020) — a later slice or follow-on milestone; **one-way random via SEM** (no
   faithful sourced route — ADR-014; parked in ROADMAP); **incomplete/unbalanced SEM**
   (FIML); **fixed-rater and multilevel SEM**.
-- Status: done pending PR — both slices complete on branch `m7-sem-engine`
-  (`devtools::check()` 0/0/0 local; full suite incl. snapshots green). Ships
+- Status: done (merged via PR #11 at fe76f5c; full CI matrix green). Ships
   `engine = "lavaan"` for the two-way random path (Jorgensen 2021 SEM-GT), oracles
   O-SEM (consistency ≡ glmmTMB; agreement = the exact indicator-mean estimator +
   large-N convergence + Vispoel et al. 2022 external check), and the advanced-vignette
-  SEM-engine section. One-way SEM deferred to ROADMAP (ADR-014). Full CI matrix +
-  merge pending on the PR.
+  SEM-engine section. One-way SEM deferred to ROADMAP (ADR-014).
+  `devtools::check()` 0/0/0 local; full suite incl. snapshots green.
 
 ## M8: Multilevel & incomplete-design extensions *(provisional)*
 - Goal: extend the multilevel estimator beyond M5's Design 1 by working through the

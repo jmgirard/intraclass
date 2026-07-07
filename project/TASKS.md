@@ -92,38 +92,14 @@ section. `devtools::check()` 0/0/0, tests 247/0/0. See MILESTONES M6.
 
 ---
 
-## M7 — SEM engine (lavaan) — **planning done** (scope fixed by ADR-014; Slice 1 next)
+## M7 — SEM engine (lavaan) — **done** (merged via PR #11 at fe76f5c, full CI matrix green)
 
-Promote lavaan (SEM / common-factor GT) to a selectable `engine = "lavaan"` for the
-two-way and one-way random paths — the "optional engines" milestone, SEM first
-(Bayesian deferred, ADR-014). No new estimand, no estimand-spec (engine for existing
-estimands). Two CI-green slices. See MILESTONES M7.
-
-### Slice 1 — lavaan two-way random
-- [x] `R/engine-lavaan.R::fit_lavaan()` — reshape long → wide; one-factor SEM
-      (consistency σ²_s/(σ²_s+σ²_res); absolute agreement σ²_r = Σν²/(k−1) from the
-      effects-coded intercepts, Jorgensen 2021 Eq. 6 — raw, no bias correction);
-      returns the shared six-field contract. *(engine written; tests next)*
-- [x] `vcov(fit)` feeds the existing `montecarlo` path (no new `ci_method`);
-      σ²_s/σ²_res on the log-SD scale so draws stay positive (#3); Heywood fit
-      (σ² ≤ 0) aborts loudly (classed → glmmTMB).
-- [x] Dispatch seam gains lavaan × {twoway} rows; `check_installed("lavaan")`;
-      lavaan → `Suggests`; guards `raters="fixed"`/`cluster`/`oneway`/incomplete +
-      lavaan → `abort_unsupported()` (deferred, recorded).
-- [x] Oracles O-SEM: **consistency** ≡ glmmTMB ≤1e-4 + published SF ICC(C,·) (exact);
-      **agreement** = SEM estimator (0.284 on SF, not 0.290), pinned by exact
-      Σν²/(k−1) + large-N convergence sim (lavaan≈glmmTMB≈population) + interval vs
-      glmmTMB *fixed*/*random* (absolute gap) + Heywood-abort test.
-      `data-raw/oracle-sem.R`; `test-icc-lavaan.R` (26 assertions).
-      `devtools::check()` 0/0/0; `air`/`lintr` clean; full suite green.
-
-### Slice 2 — docs (no new estimator; one-way lavaan deferred, ADR-014)
-- [x] `print` shows `engine = "lavaan" (ML)` (estimator label fixed per engine) +
-      lavaan print snapshot; NEWS entry.
-- [x] `advanced.Rmd` SEM-engine section (when to prefer SEM; the indicator-mean
-      absolute-error estimator + its small-sample difference from the mixed model;
-      MC-CI corroboration) + a backing `test-vignette-claims.R` line.
-- [x] REFERENCES O-SEM oracle block + bibliography rows (Jorgensen 2021, Lee &
-      Vispoel 2024, Vispoel et al. 2022, Rosseel 2012).
-- [x] `devtools::check()` 0/0/0; `air`/`lintr` clean; full suite (incl. snapshots)
-      green. Full CI matrix pending on the PR (`m7-sem-engine`).
+Selectable `engine = "lavaan"` for the **two-way random** design — the generalizability
+model as a common-factor SEM (Jorgensen 2021), third engine through the M5.5 dispatch
+seam. Consistency ≡ glmmTMB exactly; absolute agreement = the SEM indicator-mean
+estimator σ²_r = Σν²/(k−1) (Eq. 6; a distinct, asymptotically-equivalent estimator —
+0.284 vs 0.290 on SF — validated against GENOVA/`gtheory` by Vispoel et al. 2022). An
+earlier unsourced bias correction was removed (#1/#4, ADR-014). Slice 1: `fit_lavaan()`
++ dispatch/guards + O-SEM (`test-icc-lavaan.R`, `data-raw/oracle-sem.R`). Slice 2:
+docs (advanced.Rmd SEM section, NEWS, REFERENCES, print snapshot). One-way SEM deferred
+(no faithful sourced route → ROADMAP). `devtools::check()` 0/0/0. See MILESTONES M7.
