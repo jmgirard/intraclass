@@ -53,6 +53,12 @@ second copy is a future lapse — link instead.
 - **If this task completes a milestone:** update that milestone's **Status line** in
   `project/MILESTONES.md` — do not leave it marked in-progress once its checklist is
   fully checked. (The board is the checklist itself; nothing to condense elsewhere.)
+  Then, once it is **merged** (post-PR, in the reconcile pass below), **compress the
+  shipped milestone's entry** to the summary form the file uses for shipped work —
+  Goal (1–2 lines) / references (ADR + estimand-spec) / **Deferred** / Status — and
+  drop the full `[x]` DoD checklist (recoverable from the ADR, the estimand-spec, and
+  git). **Preserve the "Deferred out of M<n>" list verbatim** — it is load-bearing.
+  Keep only the *active* and *next* milestones fully detailed (ADR-015).
 - If a statistical or architectural decision was made, add an ADR via `add-decision`.
 - **Reconcile `project/REFERENCES.md`** (part of the same-commit tracking set, #16 —
   not an afterthought). Two moves, not just one:
