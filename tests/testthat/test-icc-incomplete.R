@@ -224,7 +224,7 @@ test_that("print surfaces incomplete design and the effective k", {
       !(d$subject == "S2" & d$rater == "J2"),
   ]
   fit <- icc(d2, score, subject, rater, unit = c("single", "average"), seed = 1)
-  expect_snapshot(print(fit))
+  expect_snapshot(print(fit), transform = mask_ci)
 })
 
 test_that("incomplete-design error messages are stable", {
