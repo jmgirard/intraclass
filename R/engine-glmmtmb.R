@@ -292,10 +292,7 @@ fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
 # Only Design-2's `groups` differs from Design 1; the subject-level estimand map
 # (icc_estimand) is UNCHANGED -- "rater" now holds sigma^2_{r:c} and "residual"
 # sigma^2_{(sr):c} (estimand-spec M8 §3a). Cluster level is undefined (paper p. 6).
-fit_glmmtmb_multilevel_nested_clusters <- function(
-  data,
-  call = rlang::caller_env()
-) {
+fit_glmmtmb_nested_clusters <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
   fit <- fit_glmmtmb_ml_model(
     score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater),
@@ -322,10 +319,7 @@ fit_glmmtmb_multilevel_nested_clusters <- function(
 #
 # The subject-level ICC reads {subject | residual} (spec M8 §3b), the same shape
 # as the M6 one-way, so icc_point()/mc_ci() are unchanged.
-fit_glmmtmb_multilevel_nested_subjects <- function(
-  data,
-  call = rlang::caller_env()
-) {
+fit_glmmtmb_nested_subjects <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
   fit <- fit_glmmtmb_ml_model(
     score ~ 1 + (1 | cluster) + (1 | cluster:subject),

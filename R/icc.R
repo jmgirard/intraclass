@@ -504,9 +504,9 @@ icc <- function(
   # §2/§3; M3 §6, ADR-008).
   engine_fit <- if (multilevel) {
     if (ml_design == "nested_in_clusters") {
-      fit_glmmtmb_multilevel_nested_clusters(df)
+      fit_glmmtmb_nested_clusters(df)
     } else if (ml_design == "nested_in_subjects") {
-      fit_glmmtmb_multilevel_nested_subjects(df)
+      fit_glmmtmb_nested_subjects(df)
     } else {
       fit_glmmtmb_multilevel(df)
     }
