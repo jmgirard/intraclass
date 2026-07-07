@@ -111,12 +111,24 @@ before code per #1.)
 
 ### 3b. Cluster-level (between-cluster) IRR — signal σ²_c
 
-The M5 cluster-level estimand map, inherited unchanged (see `M5-multilevel.md §3`).
-Cluster-level identifiability under imbalance has its **own** condition (§4b) and is
-returned only when met; otherwise a classed abort points the user at the subject
-level.
+The M5 cluster-level estimand map, inherited unchanged (see `M5-multilevel.md §3`):
+signal σ²_c; agreement error `{σ²_r, σ²_cr}`, consistency error `{σ²_cr}`.
+Cluster-level identifiability under imbalance has its **own** condition (§4b, Slice 2)
+and is returned only when met; otherwise a classed abort points the user at the
+subject level.
 
-The signal and error **sets** are M5's; `k` is 1 (single) or `k_eff` (average, §5).
+**Slice 2 ships the single-rater `ICC(c,1)` only** (maintainer decision this session,
+recorded in ADR-018). `ICC(c,1)` needs **no divisor** — it is unambiguous. The
+averaging divisor for `ICC(c,k)` under imbalance is a **separate, genuinely open
+modeling question**: the effective number of raters behind a ragged *cluster* mean is
+a **per-cluster** quantity (raters that rated in each cluster), *not* the per-subject
+`k_eff` of §5 — on complete data they coincide (why M5 shipped one divisor), but on
+ragged data they diverge, and there are several defensible definitions (harmonic mean
+of distinct raters per cluster; an inverse-Simpson effective count weighted by
+ratings-per-rater; …) with **no textbook worked example** to pin one. Rather than
+assert an unvalidated divisor (#1), `ICC(c,k)` on incomplete data is **deferred**
+(§9) — a good candidate for a focused simulation-oracle study or a Fable review — and
+requesting it raises a classed abort. Complete data is unaffected (M5 ships both).
 
 ---
 
@@ -299,6 +311,10 @@ If any §3 coefficient or §4 guard cannot be pinned by both required oracles it
 
 ## 9. Out of scope for M9 (recorded for forward-compatibility)
 
+- **Averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
+  effective-rater divisor is an open modeling question with no textbook oracle
+  (§3b); deferred pending a simulation-oracle study or Fable review. Single-rater
+  `ICC(c,1)` ships in Slice 2; complete-data `ICC(c,k)` is unaffected (M5).
 - **Incomplete nested multilevel (Designs 2/3)** — its own later slice; needs the
   ragged nested-vs-crossed inference (§4a) extended to the nested sub-designs
   (ADR-018).

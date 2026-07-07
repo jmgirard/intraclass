@@ -2,9 +2,10 @@
 
 - Milestone: **M9 — incomplete/unbalanced multilevel ICCs, Design 1 (crossed)** —
   detailed and active (estimand-spec + ADR-018 written; M8 retro done)
-- Active task: M9 Slice 2 — cluster-level IRR under imbalance + boundary matrix (next).
-  Slice 1 (incomplete Design-1 subject level) done + committed on
-  `m9-incomplete-multilevel`: 331 tests green, lintr/air clean
+- Active task: M9 Slice 3 — docs (`advanced.Rmd` + vignette-claims), then PR (next).
+  Slices 1–2 done on `m9-incomplete-multilevel`: subject level + cluster-level
+  `ICC(c,1)` on ragged crossed data; `ICC(c,k)`-incomplete deferred (spec §3b). 340
+  tests green, lintr/air clean
 - Last green CI: PR #12 (M8) full matrix green incl. Windows; merged to `main` at
   ca2dcdb
 - Blockers: —
@@ -20,12 +21,15 @@ Designs 1–3 (crossed and both nested-rater designs).
 
 ## Next action
 
-**M9 Slice 2** — cluster-level IRR under imbalance + the boundary matrix (spec §6).
-Lift the Slice-1 loud abort on incomplete cluster-level: report the M5 cluster-level
-estimand (signal σ²_c, error {σ²_r, σ²_cr}) on ragged crossed data behind its own §4b
-gate (σ²_c estimable + cluster×rater linkage), aborting to the subject level when
-unmet; add the full boundary/guard snapshot matrix (§7) and the two-level reductions to
-complete M5. Then Slice 3 (docs) closes M9.
+**M9 Slice 3** — docs, closing the milestone. Extend `advanced.Rmd`'s multilevel
+section to ragged Design-1 data on real code (subject level + cluster-level `ICC(c,1)`,
+and the `design` declaration); add `test-vignette-claims.R` invariants (average ≥
+single; single-cluster → M3; incomplete surfaced in print). Then run the full
+`R-CMD-check` matrix via PR (`milestone-branches-and-prs`) and reconcile `project/`.
+
+Deferred within M9 (recorded): averaged cluster-level `ICC(c,k)` on incomplete data —
+the per-cluster effective-rater divisor is an open modeling question (spec §3b), a
+candidate for a simulation-oracle study or Fable review post-M9.
 
 Milestone arc after M9 (ADR-017): **M10** fixed-rater-ML → **M11** general
 `autoplot()`/ggplot2 → **M12** `choose_icc()` → **M13** release polish.

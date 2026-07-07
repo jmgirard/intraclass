@@ -340,16 +340,165 @@ test_that("`design` requires a cluster column and a valid value", {
   )
 })
 
-test_that("cluster-level IRR on incomplete data is deferred (loud abort)", {
+# Cluster level on incomplete data (M9 Slice 2) --------------------------------
+#
+# Only the SINGLE-rater ICC(c,1) is offered on ragged data (signal sigma^2_c, error
+# {sigma^2_r, sigma^2_cr} for agreement / {sigma^2_cr} for consistency; spec M5 §3b).
+# The averaging divisor ICC(c,k) under imbalance (effective raters PER CLUSTER, not
+# the per-subject k_eff) is a modeling choice with no textbook oracle and is deferred
+# (ADR-018). Cluster-level IRR needs raters bridging clusters to identify sigma^2_cr.
+
+cluster_single_iccs <- function(d) {
+  fit <- lme4::lmer(
+    score ~ 1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data = d,
+    REML = TRUE,
+    control = lme4::lmerControl(check.conv.singular = "ignore")
+  )
+  vc <- as.data.frame(lme4::VarCorr(fit))
+  g <- function(grp) vc$vcov[vc$grp == grp][1]
+  cc <- g("cluster")
+  cr <- g("cluster:rater")
+  rr <- g("rater")
+  c(A1 = cc / (cc + rr + cr), C1 = cc / (cc + cr))
+}
+
+test_that("O-IML/lme4: ragged cluster-level ICC(c,1) matches an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- ragged(
+    sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
+    prop = 0.2,
+    seed = 9
+  )
+  xa <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    type = "agreement",
+    unit = "single",
+    seed = 1
+  )
+  xc <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    type = "consistency",
+    unit = "single",
+    seed = 1
+  )
+  ref <- cluster_single_iccs(d)
+  expect_equal(
+    pick(xa, "ICC(A,1)", "cluster"),
+    unname(ref["A1"]),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(xc, "ICC(C,1)", "cluster"),
+    unname(ref["C1"]),
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-IML/reduction: complete data reproduces M5 at BOTH levels", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_design1(6, 5, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 20260707)
+  # Complete data keeps both levels and both units (the balanced M5 path).
+  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  expect_true(x$design$balanced)
+  expect_setequal(unique(x$estimates$level), c("subject", "cluster"))
+  ref <- cluster_single_iccs(d)
+  expect_equal(
+    pick(x, "ICC(A,1)", "cluster"),
+    unname(ref["A1"]),
+    tolerance = 1e-4
+  )
+})
+
+test_that("cluster-level ICC(c,k) on incomplete data is deferred (loud abort)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged(
+    sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
+    prop = 0.2,
+    seed = 9
+  )
+  # The average divisor is deferred; the single-rater cluster ICC is supported.
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "cluster",
+      unit = "average",
+      seed = 1
+    ),
+    class = "intraclass_unsupported"
+  )
+  # A default call (both levels, both units) hits the same deferral via the cluster
+  # average.
+  expect_error(
+    icc(d, score, subject, rater, cluster = cluster, seed = 1),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("cluster-level IRR aborts to subject when raters do not bridge clusters", {
+  skip_if_not_installed("glmmTMB")
+  set.seed(1)
+  d <- rbind(
+    expand.grid(subject = 1:4, rater = 1:2, cluster = 1),
+    expand.grid(subject = 5:8, rater = 3:4, cluster = 2)
+  )
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  d$cluster <- factor(d$cluster)
+  d$score <- stats::rnorm(nrow(d))
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "crossed",
+      level = "cluster",
+      type = "consistency",
+      unit = "single",
+      seed = 1
+    ),
+    class = "intraclass_unidentified"
+  )
+})
+
+test_that("print surfaces the incomplete multilevel design and effective k", {
+  skip_on_cran()
   skip_if_not_installed("glmmTMB")
   d <- ragged(
     sim_design1(6, 5, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 20260707),
     prop = 0.15,
     seed = 7
   )
-  # Default level includes "cluster"; on incomplete data that is not yet supported.
-  expect_error(
-    icc(d, score, subject, rater, cluster = cluster, seed = 1),
-    class = "intraclass_unsupported"
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "subject",
+    seed = 1
   )
+  expect_snapshot(print(x))
 })

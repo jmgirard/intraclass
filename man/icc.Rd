@@ -210,9 +210,12 @@ mean), exactly as the single-level incomplete two-way ICC does. Identifiability 
 checked first: each cluster's subject-by-rater layout must be connected, and for
 absolute agreement raters must bridge clusters (otherwise the design is really
 rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
-declare it with \code{design} (above). Incomplete \emph{nested} designs, incomplete
-cluster-level IRR, and fixed raters remain for later milestones. Nested designs
-still require balanced, complete data.
+declare it with \code{design} (above). On incomplete data the \strong{cluster} level is
+reported as the single-rater \code{ICC(c,1)} (when raters bridge clusters); the averaged
+cluster-level \code{ICC(c,k)} on incomplete data is not yet supported (its effective
+number of raters per cluster is still being validated). Incomplete \emph{nested}
+designs and fixed raters remain for later milestones. Nested designs still require
+balanced, complete data.
 }
 
 \section{Confidence intervals}{

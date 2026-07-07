@@ -197,9 +197,12 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   ADR-018 (scope). Oracles O-IML (lme4 cross-engine + seeded incomplete-multilevel
   recovery + reductions to complete M5 Design 1 and to M3 flat-incomplete two-way +
   an identifiability oracle; no textbook worked example).
-- Deferred out of M9 (recorded so not rediscovered): **incomplete nested multilevel**
-  (Designs 2/3 — its own later slice; ragged nested-vs-crossed inference); **fixed-rater
-  multilevel** (M10, ADR-017); **lme4 for the multilevel fit** (engine parity, ADR-012);
+- Deferred out of M9 (recorded so not rediscovered): **averaged cluster-level
+  `ICC(c,k)` on incomplete data** (the per-cluster effective-rater divisor is an open
+  modeling question, no textbook oracle — spec §3b; `ICC(c,1)` ships); **incomplete
+  nested multilevel** (Designs 2/3 — its own later slice; ragged nested-vs-crossed
+  inference); **fixed-rater multilevel** (M10, ADR-017); **lme4 for the multilevel
+  fit** (engine parity, ADR-012);
   within-cell replicates via `(1 | cluster:subject:rater)` (ROADMAP); a Bayesian/MCMC
   cross-engine; three-facet `d_study()`; the conflated single-level ICC (Eq. 14).
 - Ships on `m9-incomplete-multilevel`, CI-green slices (spec §6). **DoD board:**
@@ -212,9 +215,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     lintr/air clean. (An oracle-first catch corrected spec §3a: σ²_cr is *not* in the
     subject-level error — matches shipped M5.) Cluster-level-incomplete deferred to
     Slice 2 with a loud abort.
-  - [ ] **Slice 2 — cluster level + boundaries.** Cluster-level IRR under imbalance
-    with its §4b gate + abort-to-subject; full boundary/guard matrix (§7) with
-    snapshots; reductions to complete M5 at both levels.
+  - [x] **Slice 2 — cluster level + boundaries.** Cluster-level **single-rater
+    `ICC(c,1)`** on ragged data behind the §4b cluster×rater-bridging gate
+    (abort-to-subject when raters don't bridge); the **averaged `ICC(c,k)` divisor is
+    deferred** (per-cluster effective raters, no textbook oracle — maintainer decision,
+    spec §3b) with a loud abort. Boundary/guard matrix (§7) + incomplete-multilevel
+    print snapshot; O-IML/lme4 cluster-single match + complete-M5 both-level reduction.
+    340 tests green.
   - [ ] **Slice 3 — docs.** `advanced.Rmd` multilevel section extended to ragged
     Design-1 on real code; `print`/`glance` surface incomplete-vs-complete,
     n_clusters/n_cells/`k_eff`/declared design; `test-vignette-claims.R` invariants.

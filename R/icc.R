@@ -73,9 +73,12 @@
 #' checked first: each cluster's subject-by-rater layout must be connected, and for
 #' absolute agreement raters must bridge clusters (otherwise the design is really
 #' rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
-#' declare it with `design` (above). Incomplete *nested* designs, incomplete
-#' cluster-level IRR, and fixed raters remain for later milestones. Nested designs
-#' still require balanced, complete data.
+#' declare it with `design` (above). On incomplete data the **cluster** level is
+#' reported as the single-rater `ICC(c,1)` (when raters bridge clusters); the averaged
+#' cluster-level `ICC(c,k)` on incomplete data is not yet supported (its effective
+#' number of raters per cluster is still being validated). Incomplete *nested*
+#' designs and fixed raters remain for later milestones. Nested designs still require
+#' balanced, complete data.
 #'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
@@ -540,17 +543,36 @@ icc <- function(
                clusters."
         ))
       }
-      # Cluster-level IRR on incomplete data is deferred to M9 Slice 2 (its own
-      # boundary/identifiability matrix, spec §6); fail loudly rather than report an
-      # unvalidated coefficient (#5). Complete data (M5) is unaffected -- it does not
-      # reach this branch.
+      # Cluster-level IRR on incomplete data (M9 Slice 2, ADR-018). The cluster-level
+      # error carries sigma^2_cr (both types) and sigma^2_r (agreement), which are
+      # identified only when raters bridge clusters; otherwise report just the subject
+      # level (M5 §7 posture). The averaging divisor ICC(c,k) under imbalance is a
+      # separate modeling question with no textbook oracle -- the effective number of
+      # raters behind a ragged cluster mean is per-cluster, not the per-subject k_eff
+      # -- so only the single-rater ICC(c,1) is offered on incomplete data here (#1).
       if ("cluster" %in% level) {
-        abort_unsupported(c(
-          "Cluster-level multilevel ICCs on incomplete data are not supported yet.",
-          i = "This slice covers the subject level on ragged crossed (Design 1) \\
-               designs; incomplete cluster-level IRR is planned for the next slice.",
-          i = "Use {.code level = \"subject\"} for incomplete multilevel data."
-        ))
+        if (!ident$cluster_rater_connected) {
+          abort_unidentified(c(
+            "Cluster-level IRR needs raters that bridge clusters, but the \\
+             cluster-by-rater design is disconnected here.",
+            i = "The cluster-by-rater variance (the cluster-level rater \\
+                 disagreement) cannot be estimated without raters shared across \\
+                 clusters.",
+            i = "Use {.code level = \"subject\"}, or provide raters crossed across \\
+                 clusters."
+          ))
+        }
+        if (!all(vapply(unit, identical, logical(1), "single"))) {
+          abort_unsupported(c(
+            "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not \\
+             supported yet.",
+            i = "The effective number of raters behind a ragged cluster mean is a \\
+                 modeling choice still being validated; on incomplete data only the \\
+                 single-rater {.code unit = \"single\"} cluster ICC is available.",
+            i = "Use {.code unit = \"single\"} for the cluster level, or \\
+                 {.code level = \"subject\"} for the average."
+          ))
+        }
       }
     }
   }
