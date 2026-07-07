@@ -218,7 +218,9 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Deferred (recorded so they aren't rediscovered): cost/optimal-design helpers
   ("cheapest `m` for Φ = 0.8"), two-facet D-studies, and subject-count projection
   (ROADMAP; M4.5 spec §6).
-- Status: in progress (branch `m4.5-d-study`).
+- Status: done (Slices 1–2; merged via PR #6 at 9be03a0; full CI matrix green —
+  9/9, `devtools::check()` 0/0/0 local). Ships `d_study()`, the numeric-`unit`
+  projection, and the `autoplot()` reliability curve.
 
 ## M5: Multilevel ICCs *(provisional)*
 - Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*
