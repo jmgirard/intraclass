@@ -98,11 +98,21 @@
 #'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
 #'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
 #'   Ignored (and must be left at its default) when `cluster` is not supplied.
-#' @param engine Estimation engine: `"glmmTMB"` (default) or `"lme4"`. Both fit
-#'   the variance components by REML and agree to within numerical tolerance on
-#'   balanced data. `"lme4"` currently covers only the random two-way design
-#'   (`raters = "random"`, no `cluster`) and requires the \pkg{lme4} and
-#'   \pkg{merDeriv} packages.
+#' @param engine Estimation engine: `"glmmTMB"` (default), `"lme4"`, or
+#'   `"lavaan"`. `"glmmTMB"` and `"lme4"` fit the variance components by REML and
+#'   agree to within numerical tolerance on balanced data. `"lavaan"` fits the
+#'   equivalent structural-equation (common-factor) generalizability model and
+#'   recovers the rater main effect from the mean structure (Jorgensen 2021).
+#'   **Consistency** ICCs from `"lavaan"` equal the mixed-model estimates exactly
+#'   on balanced data; **absolute-agreement** ICCs use the SEM indicator-mean
+#'   estimator of the rater variance, which is asymptotically equivalent to the
+#'   mixed-model one and matches conventional generalizability-theory software on
+#'   real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
+#'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` and
+#'   `"lavaan"` currently cover only the random two-way design
+#'   (`raters = "random"`, no `cluster`); `"lavaan"` additionally requires
+#'   complete, balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv}
+#'   packages; `"lavaan"` requires the \pkg{lavaan} package.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
 #' @param mc_samples Number of Monte-Carlo draws for the interval.
@@ -160,7 +170,7 @@ icc <- function(
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
   model <- validate_choice(model, c("twoway", "oneway"), "model")
   oneway <- model == "oneway"
-  engine <- validate_choice(engine, c("glmmTMB", "lme4"), "engine")
+  engine <- validate_choice(engine, c("glmmTMB", "lme4", "lavaan"), "engine")
   require_supported(
     ci_method,
     "montecarlo",
@@ -214,6 +224,28 @@ icc <- function(
       i = "{.code engine = \"lme4\"} is not available for {design} designs; \\
            use {.code engine = \"glmmTMB\"}.",
       i = "lme4 for fixed and multilevel fits is planned for a later milestone."
+    ))
+  }
+
+  # M7 Slice 1 (ADR-014): the lavaan (SEM) engine covers the random two-way
+  # COMPLETE design only. Fixed-rater, one-way, multilevel, and incomplete SEM are
+  # deferred (recorded, not rediscovered); route them to a loud abort rather than
+  # a silent glmmTMB fallback (PRINCIPLES.md #5). The incomplete-data guard needs
+  # the design summary and lives further down.
+  if (engine == "lavaan" && (multilevel || raters == "fixed" || oneway)) {
+    design <- if (multilevel) {
+      "multilevel"
+    } else if (oneway) {
+      "one-way"
+    } else {
+      "fixed-rater"
+    }
+    abort_unsupported(c(
+      "The {.pkg lavaan} engine supports only the random two-way design so far.",
+      i = "{.code engine = \"lavaan\"} is not available for {design} designs; \\
+           use {.code engine = \"glmmTMB\"}.",
+      i = "SEM for fixed, one-way, and multilevel designs is planned for a \\
+           later milestone."
     ))
   }
 
@@ -368,6 +400,17 @@ icc <- function(
     design_info$balanced
   }
 
+  # lavaan (SEM) reshapes to a complete subject-by-rater matrix, so an incomplete
+  # (unbalanced) two-way design has no wide layout to fit. Incomplete-design SEM
+  # (FIML) is deferred (ADR-014); fail loudly toward the engine that handles it.
+  if (engine == "lavaan" && !balanced) {
+    abort_unsupported(c(
+      "The {.pkg lavaan} engine requires a complete, balanced two-way design.",
+      i = "Incomplete-design SEM (FIML) is planned for a later milestone; use \\
+           {.code engine = \"glmmTMB\"} for incomplete data."
+    ))
+  }
+
   # Multilevel data uses the five-component Design-1 fit; otherwise fixed raters
   # get their own fixed-effect fit (Case 3/3A) and random raters the shared
   # random-effects fit. The rest of the pipeline is identical -- each engine
@@ -381,6 +424,8 @@ icc <- function(
     fit_glmmtmb_fixed(df)
   } else if (engine == "lme4") {
     fit_lme4(df)
+  } else if (engine == "lavaan") {
+    fit_lavaan(df)
   } else {
     fit_glmmtmb(df)
   }

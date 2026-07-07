@@ -1,8 +1,8 @@
 # Project status
 
-- Milestone: M7 — SEM engine (`lavaan`) — **planning done** (scope fixed by ADR-014;
-  DoD detailed this session after the M6 retro; Slice 1 next)
-- Active task: — (next: M7 Slice 1 — `fit_lavaan()` two-way random)
+- Milestone: M7 — SEM engine (`lavaan`) — **in progress** (scope fixed by ADR-014)
+- Active task: M7 Slice 1 **done** on branch `m7-sem-engine` (`fit_lavaan()` two-way
+  random; O-SEM green; `check()` 0/0/0). Next: Slice 2 (one-way lavaan + docs)
 - Last green CI: PR #10 (M6) full matrix green (9/9); merged to `main` at eb7102d
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
@@ -48,12 +48,16 @@ pinned by a boundary oracle (the ADR-012 merDeriv-scale analog).
 
 ## Next action
 
-**Start M7 Slice 1** (`/start-task`): branch `m7-sem-engine`; write
-`data-raw/oracle-sem.R` and verify the oracles live *before* code (the M6 discipline
-that worked well) — Jorgensen worked values + lavaan≡glmmTMB on `ratings` +
-`psych` ICC2/ICC3; then `R/engine-lavaan.R::fit_lavaan()` (long→wide reshape,
-one-factor SEM, six-field contract), wire the dispatch seam + guards, and the O-SEM
-tests.
+**M7 Slice 2** (one-way lavaan + docs) on branch `m7-sem-engine`: `model = "oneway"`
++ lavaan (parallel one-factor model → ICC(1)/ICC(1,k)); `print`/`glance` lavaan
+snapshot; NEWS; `advanced.Rmd` SEM-engine section (teach the indicator-mean estimator
++ its small-sample difference from the mixed model) with a `test-vignette-claims.R`
+line; REFERENCES O-SEM rows (Jorgensen 2021, Vispoel et al. 2022, Lee & Vispoel 2024).
+
+Slice 1 is done (uncommitted on the branch): `R/engine-lavaan.R::fit_lavaan()` (raw
+indicator-mean σ²_r, Jorgensen 2021 Eq. 6 — the unsourced bias correction was
+removed, ADR-014), engine × design dispatch + guards, lavaan → `Suggests`,
+`data-raw/oracle-sem.R`, `test-icc-lavaan.R` (26 assertions), `check()` 0/0/0.
 
 Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a

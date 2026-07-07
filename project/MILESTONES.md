@@ -420,18 +420,21 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   - [ ] **Slice 1 — lavaan two-way random.** `engine = "lavaan"` selectable for
         `model = "twoway"`, `raters = "random"`; `R/engine-lavaan.R::fit_lavaan()`
         reshapes long → wide and fits a one-factor SEM (consistency:
-        σ²_s/(σ²_s+σ²_res); absolute agreement: + rater main-effect spread via
-        mean-structure/intercept constraints, Jorgensen 2021), returning the shared
-        six-field engine contract. `vcov(fit)` feeds the existing `montecarlo` path
-        (**no new `ci_method`**); `to_components` keeps draws valid at the
-        zero-variance/Heywood boundary (#3), pinned by a boundary oracle; a
-        Heywood/singular fit aborts loudly (classed → glmmTMB). Dispatch seam gains
+        σ²_s/(σ²_s+σ²_res); absolute agreement: σ²_r = Σν²/(k−1) from the effects-coded
+        indicator intercepts, Jorgensen 2021 Eq. 6 — the **raw** indicator-mean
+        estimator, no bias correction), returning the shared six-field engine
+        contract. `vcov(fit)` feeds the existing `montecarlo` path (**no new
+        `ci_method`**); σ²_s/σ²_res on the log-SD scale so draws stay positive (#3);
+        a Heywood fit (σ² ≤ 0) aborts loudly (classed → glmmTMB). Dispatch seam gains
         lavaan rows; `check_installed("lavaan")`; lavaan → `Suggests`. Guards:
         `raters="fixed"`, `cluster`, incomplete/unbalanced + lavaan →
-        `abort_unsupported()` (deferred, recorded). Oracles O-SEM: Jorgensen worked
-        example + point ≡ glmmTMB on `ratings` (≤1e-3) + `psych` ICC2/ICC3 +
-        **interval** ≈ glmmTMB MC CI (absolute gap) + seeded sim;
-        `data-raw/oracle-sem.R`; `test-icc-lavaan.R`.
+        `abort_unsupported()` (deferred, recorded). Oracles O-SEM: **consistency** ≡
+        glmmTMB ≤1e-4 + `psych` ICC3/ICC3k (exact); **agreement** = the SEM estimator
+        (0.284 on SF, **not** 0.290), pinned by the exact Σν²/(k−1) formula + a
+        large-N lavaan→population & lavaan≈glmmTMB convergence sim + the Vispoel et
+        al. (2022) GENOVA/`gtheory` external check; interval vs glmmTMB *fixed*
+        (agreement) / *random* (consistency), absolute gap. `data-raw/oracle-sem.R`;
+        `test-icc-lavaan.R`.
   - [ ] **Slice 2 — lavaan one-way random + docs.** `model = "oneway"` + lavaan: a
         **parallel** one-factor model (equal loadings/residuals/intercepts) over k
         exchangeable columns → `ICC(1)`/`ICC(1,k)` (+ numeric-unit `ICC(m)` for free
@@ -441,11 +444,13 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
         SEM-engine section (when to prefer SEM; the MC-CI corroboration) with a
         backing `test-vignette-claims.R` line; REFERENCES O-SEM + Jorgensen 2021 +
         lavaan rows.
-  - [ ] Oracles per PRINCIPLES.md #1 — the SEM parameterization returning the *same*
-        components is asserted by oracle (O-SEM: textbook + cross-engine + psych +
-        interval + sim), never by the formula; any component unpinnable by both
-        required oracles is not shipped (Fable review recommended, then pause —
-        #1/#19). CI-bound assertions use **absolute** tolerances (M5.5 lesson).
+  - [ ] Oracles per PRINCIPLES.md #1 — asserted by oracle, never by the formula.
+        Consistency is pinned exactly (lavaan ≡ glmmTMB + psych); absolute agreement
+        is a **distinct, asymptotically-equivalent** estimator (Jorgensen Eq. 6),
+        pinned by its exact formula + large-N convergence + the Vispoel et al. (2022)
+        external validation, **not** by the mixed-model number. Any component
+        unpinnable is not shipped (Fable review recommended, then pause — #1/#19).
+        CI-bound assertions use **absolute** tolerances (M5.5 lesson).
   - [ ] `devtools::check()` 0/0/0 local; `air`/`lintr` clean; full suite green (no
         snapshot drift beyond the new lavaan snapshot); coverage floor held with the
         new statistical paths oracle-covered. `DECISIONS.md` ADR-014;

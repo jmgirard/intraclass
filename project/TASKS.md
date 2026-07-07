@@ -100,18 +100,22 @@ two-way and one-way random paths — the "optional engines" milestone, SEM first
 estimands). Two CI-green slices. See MILESTONES M7.
 
 ### Slice 1 — lavaan two-way random
-- [ ] `R/engine-lavaan.R::fit_lavaan()` — reshape long → wide; one-factor SEM
-      (consistency σ²_s/(σ²_s+σ²_res); absolute agreement + rater-intercept
-      mean-structure spread, Jorgensen 2021); returns the shared six-field contract.
-- [ ] `vcov(fit)` feeds the existing `montecarlo` path (no new `ci_method`);
-      `to_components` boundary-safe at zero-variance/Heywood (#3), boundary oracle;
-      Heywood/singular fit aborts loudly (classed → glmmTMB).
-- [ ] Dispatch seam gains lavaan × {twoway} rows; `check_installed("lavaan")`;
-      lavaan → `Suggests`; guards `raters="fixed"`/`cluster`/incomplete + lavaan →
-      `abort_unsupported()` (deferred, recorded).
-- [ ] Oracles O-SEM: Jorgensen worked example; point ≡ glmmTMB on `ratings` (≤1e-3);
-      `psych` ICC2/ICC3; **interval** ≈ glmmTMB MC CI (absolute gap); seeded sim.
-      `data-raw/oracle-sem.R`; `test-icc-lavaan.R`.
+- [x] `R/engine-lavaan.R::fit_lavaan()` — reshape long → wide; one-factor SEM
+      (consistency σ²_s/(σ²_s+σ²_res); absolute agreement σ²_r = Σν²/(k−1) from the
+      effects-coded intercepts, Jorgensen 2021 Eq. 6 — raw, no bias correction);
+      returns the shared six-field contract. *(engine written; tests next)*
+- [x] `vcov(fit)` feeds the existing `montecarlo` path (no new `ci_method`);
+      σ²_s/σ²_res on the log-SD scale so draws stay positive (#3); Heywood fit
+      (σ² ≤ 0) aborts loudly (classed → glmmTMB).
+- [x] Dispatch seam gains lavaan × {twoway} rows; `check_installed("lavaan")`;
+      lavaan → `Suggests`; guards `raters="fixed"`/`cluster`/`oneway`/incomplete +
+      lavaan → `abort_unsupported()` (deferred, recorded).
+- [x] Oracles O-SEM: **consistency** ≡ glmmTMB ≤1e-4 + published SF ICC(C,·) (exact);
+      **agreement** = SEM estimator (0.284 on SF, not 0.290), pinned by exact
+      Σν²/(k−1) + large-N convergence sim (lavaan≈glmmTMB≈population) + interval vs
+      glmmTMB *fixed*/*random* (absolute gap) + Heywood-abort test.
+      `data-raw/oracle-sem.R`; `test-icc-lavaan.R` (26 assertions).
+      `devtools::check()` 0/0/0; `air`/`lintr` clean; full suite green.
 
 ### Slice 2 — lavaan one-way random + docs
 - [ ] `model = "oneway"` + lavaan: parallel one-factor model over k exchangeable
