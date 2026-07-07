@@ -164,7 +164,9 @@ raters (see <code><a href="d_study.html">d_study()</a></code>).</p></dd>
 <dd><p>For multilevel designs (a <code>cluster</code> column), which reliability to
 report: <code>"subject"</code> (within-cluster, distinguishing subjects) and/or
 <code>"cluster"</code> (between-cluster, distinguishing cluster means). Defaults to both.
-Ignored (and must be left at its default) when <code>cluster</code> is not supplied.</p></dd>
+Ignored (and must be left at its default) when <code>cluster</code> is not supplied. Only
+<code>"subject"</code> is available when raters are nested in clusters (see the
+<em>Multilevel designs</em> section).</p></dd>
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
@@ -261,9 +263,21 @@ the between-subject-within-cluster variance and cluster variance drops out. The
 <strong>cluster level</strong> (between-cluster) asks how reliably raters distinguish cluster
 means: its signal is the between-cluster variance and the rater-disagreement
 error is the cluster-by-rater term. Choose the level that matches the decision
-you will make (about a subject, or about a cluster). Multilevel support (M5)
-covers crossed random raters on balanced data; the agreement/consistency and
-single/average choices above apply at each level.</p>
+you will make (about a subject, or about a cluster). The agreement/consistency
+and single/average choices above apply at each level.</p>
+<p>The design is <strong>inferred from the data</strong> (ten Hove et al. 2022, Table 2). If
+raters are crossed with clusters (each rater rates in every cluster) the
+five-component model above is used (Design 1). If raters are <strong>nested in
+clusters</strong> (each cluster has its own raters; Design 2) a four-component model is
+fit, with the rater variance carried by the nested rater-within-cluster term. If
+raters are <strong>nested in subjects</strong> (each subject has its own raters; Design 3) the
+rater variance is confounded into the residual, giving a three-component
+multilevel <em>one-way</em> model that reports agreement-only <code>ICC(1)</code>/<code>ICC(k)</code>. Both
+nested designs define only the <strong>subject</strong> level – a cluster-level ICC needs
+raters crossed with clusters – so <code>level</code> is restricted to <code>"subject"</code> for them.
+Mixed patterns (some raters crossed, some nested) are not a supported design and
+raise an error. Support currently covers balanced, complete designs with random
+raters.</p>
     </div>
     <div class="section level2">
     <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>

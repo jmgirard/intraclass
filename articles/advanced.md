@@ -157,10 +157,69 @@ make: a classroom-level intervention cares about the cluster-level
 reliability, a pupil-level one about the subject level. Request just one
 with `level = "subject"` or `level = "cluster"`.
 
-Multilevel support currently covers **crossed random raters on balanced
-data** (agreement/consistency and single/average apply at each level).
-Raters nested within clusters, incomplete multilevel designs, and fixed
-raters are planned for later milestones.
+### When raters are nested
+
+The classroom example above has every rater rate every pupil in every
+classroom, so raters are **crossed** with clusters (ten Hove et al.’s
+Design 1). Two other layouts are common, and
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+**infers which one you have** from the data — you never declare it:
+
+- **Raters nested in clusters** (Design 2): each classroom has its *own*
+  panel of raters. There is then no between-cluster reliability to
+  report — a cluster-level ICC needs the *same* raters spanning clusters
+  — so [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  returns the subject level only.
+- **Raters nested in subjects** (Design 3): each pupil is rated by their
+  *own* raters. Now systematic rater differences cannot be separated
+  from residual error at all, so this is a multilevel *one-way* design:
+  it reports agreement-only `ICC(1)` / `ICC(k)`, the clustered analogue
+  of `model = "oneway"`.
+
+Take the same classrooms but give each one its own raters (Design 2):
+
+``` r
+
+school_d2 <- school
+school_d2$rater <- factor(paste(school_d2$classroom, school_d2$rater, sep = "_"))
+icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+#> # Intraclass correlation: multilevel (raters nested in clusters) two-way random, absolute agreement
+#> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   subject  ICC(A,1)    0.429   [0.310, 0.549]
+#>   subject  ICC(A,k)    0.751   [0.642, 0.830]
+#> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
+```
+
+The header now reads *raters nested in clusters* and only the subject
+level comes back. If instead each *pupil* has their own raters, the
+design is a multilevel one-way (Design 3):
+
+``` r
+
+school_d3 <- school
+school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
+icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+#> # Intraclass correlation: multilevel (raters nested in subjects) absolute agreement
+#> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   subject  ICC(1)      0.412   [0.290, 0.546]
+#>   subject  ICC(k)      0.737   [0.621, 0.828]
+#> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
+```
+
+Here the coefficients are labelled `ICC(1)` / `ICC(k)` and `type` no
+longer applies — with each pupil’s raters unique, there is no rater main
+effect to keep in or drop from the error term. A layout that is neither
+cleanly crossed nor cleanly nested (some raters shared across clusters,
+some not) raises an informative error rather than guessing at a model.
+
+Multilevel support currently covers **balanced, complete designs with
+random raters**: crossed (Design 1, both levels) and nested (Designs 2
+and 3, subject level). Incomplete multilevel designs and fixed raters
+are planned for later milestones.
 
 ## Choosing an estimation engine
 

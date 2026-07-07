@@ -68,13 +68,13 @@ tidy(fit)
 #> 2 ICC(A,… NA    ICC(2,k)    0.620     0.201   0.173      0.909       0.95 monte…
 
 glance(fit)
-#> # A tibble: 1 × 16
-#>   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel k_eff
-#>        <int>    <int>      <int> <int>   <int> <lgl>    <lgl>      <dbl>
-#> 1          6        4         NA    24      24 TRUE     FALSE          4
-#> # ℹ 8 more variables: var_cluster <dbl>, var_subject <dbl>, var_rater <dbl>,
-#> #   var_cluster_rater <dbl>, var_residual <dbl>, engine <chr>, ci_method <chr>,
-#> #   conf.level <dbl>
+#> # A tibble: 1 × 17
+#>   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel ml_design
+#>        <int>    <int>      <int> <int>   <int> <lgl>    <lgl>      <chr>    
+#> 1          6        4         NA    24      24 TRUE     FALSE      NA       
+#> # ℹ 9 more variables: k_eff <dbl>, var_cluster <dbl>, var_subject <dbl>,
+#> #   var_rater <dbl>, var_cluster_rater <dbl>, var_residual <dbl>, engine <chr>,
+#> #   ci_method <chr>, conf.level <dbl>
 ```
 
 ## Interpret

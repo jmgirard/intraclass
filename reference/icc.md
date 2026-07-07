@@ -119,7 +119,8 @@ icc(
   report: `"subject"` (within-cluster, distinguishing subjects) and/or
   `"cluster"` (between-cluster, distinguishing cluster means). Defaults
   to both. Ignored (and must be left at its default) when `cluster` is
-  not supplied.
+  not supplied. Only `"subject"` is available when raters are nested in
+  clusters (see the *Multilevel designs* section).
 
 - engine:
 
@@ -219,9 +220,24 @@ cluster variance drops out. The **cluster level** (between-cluster) asks
 how reliably raters distinguish cluster means: its signal is the
 between-cluster variance and the rater-disagreement error is the
 cluster-by-rater term. Choose the level that matches the decision you
-will make (about a subject, or about a cluster). Multilevel support (M5)
-covers crossed random raters on balanced data; the agreement/consistency
-and single/average choices above apply at each level.
+will make (about a subject, or about a cluster). The
+agreement/consistency and single/average choices above apply at each
+level.
+
+The design is **inferred from the data** (ten Hove et al. 2022, Table
+2). If raters are crossed with clusters (each rater rates in every
+cluster) the five-component model above is used (Design 1). If raters
+are **nested in clusters** (each cluster has its own raters; Design 2) a
+four-component model is fit, with the rater variance carried by the
+nested rater-within-cluster term. If raters are **nested in subjects**
+(each subject has its own raters; Design 3) the rater variance is
+confounded into the residual, giving a three-component multilevel
+*one-way* model that reports agreement-only `ICC(1)`/`ICC(k)`. Both
+nested designs define only the **subject** level – a cluster-level ICC
+needs raters crossed with clusters – so `level` is restricted to
+`"subject"` for them. Mixed patterns (some raters crossed, some nested)
+are not a supported design and raise an error. Support currently covers
+balanced, complete designs with random raters.
 
 ## Confidence intervals
 
