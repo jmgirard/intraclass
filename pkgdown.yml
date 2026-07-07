@@ -1,0 +1,11 @@
+pandoc: 3.8.3
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  advanced: advanced.html
+  choosing-an-icc: choosing-an-icc.html
+  getting-started: getting-started.html
+last_built: 2026-07-07T00:23Z
+urls:
+  reference: https://jmgirard.github.io/intraclass/reference
+  article: https://jmgirard.github.io/intraclass/articles
