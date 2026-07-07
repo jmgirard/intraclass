@@ -2,9 +2,9 @@
 
 - Milestone: **M10 — fixed-rater multilevel ICCs, Design 1 (crossed) balanced, subject
   level** — detailed and active (estimand-spec + ADR-019 written; M9 retro done)
-- Active task: M10 Slice 2 — docs (`advanced.Rmd` fixed-rater subsection + vignette
-  claims), then PR. Slice 1 done on `m10-fixed-multilevel`: fixed-rater multilevel
-  subject-level `ICC` (balanced crossed); 352 tests green (installed pkg), air/lintr clean
+- Active task: M10 — open the PR. Both slices done on `m10-fixed-multilevel`
+  (fixed-rater multilevel subject-level `ICC`, balanced crossed + docs); needs the full
+  R-CMD-check matrix (incl. Windows) via PR to close the milestone
 - Last green CI: PR #13 (M9) full matrix green incl. Windows; merged to `main` at
   073a51e
 - Blockers: —
@@ -22,17 +22,11 @@ disambiguation and oracle-pinned identifiability guards.
 
 ## Next action
 
-**Start M10 Slice 1** — fixed-rater multilevel fit + subject-level estimand. Cut branch
-`m10-fixed-multilevel`, then (spec §5): lift the `raters = "fixed"` + multilevel abort
-(icc.R ~230); add the fixed-rater multilevel fit
-(`score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)`, θ²_r via
-the reused M3 `fit_glmmtmb_fixed()` machinery in the `rater` slot) and route it; reuse
-`icc_point()` + the M3 fixed MC sampler. Pin every §2b coefficient with **O-FML/reduction
-→ M5 balanced (fixed≡random)** + → M3 single-cluster + lme4 cross-engine + seeded sim
-*before* shipping (#1). Use `/start-task`.
-
-**Verify against the INSTALLED package** (`NOT_CRAN=true`), not just `load_all`, before
-the PR push (`verify-against-installed-package` memory — the M9 CI-red lesson).
+**Open the M10 PR** (`milestone-branches-and-prs`): push `m10-fixed-multilevel` and open
+a PR to `main` so the full `R-CMD-check` matrix (incl. Windows) + lint + pkgdown run.
+Already verified green against the **installed** package (`NOT_CRAN=true`). On green:
+merge and reconcile `project/` (compress M10 to a summary, preserve its deferred list;
+set STATUS to M11).
 
 Milestone arc after M10 (ADR-017): **M11** general `autoplot()`/ggplot2 → **M12**
 `choose_icc()` → **M13** release polish.

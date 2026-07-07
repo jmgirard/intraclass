@@ -241,9 +241,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     single-cluster signal/residual), O-FML/lme4, O-FML/sim. 352 tests green (installed
     pkg, `NOT_CRAN=true`), air/lintr clean. (θ²_r doesn't reduce at a single cluster —
     the cluster×rater term collapses; documented, spec §4.)
-  - [ ] **Slice 2 — docs.** `advanced.Rmd` multilevel section extended to fixed raters
-    on real knit-time code; `test-vignette-claims.R` invariants (balanced fixed ≡ random
-    at the subject level; consistency identical, agreement differs only by θ²_r).
+  - [x] **Slice 2 — docs.** `advanced.Rmd` gained a *Fixed raters in a multilevel
+    design* subsection on real knit-time code (subject-level `raters = "fixed"`, the
+    fixed≡random-on-balanced explanation); `test-vignette-claims.R` backs the claim
+    (balanced fixed ≡ random subject-level agreement, single + average). Vignette knits.
   - [ ] Full `R-CMD-check` matrix green (incl. Windows) — verified against the
     **installed** package with `NOT_CRAN=true` before the PR push
     (`verify-against-installed-package`); coverage floor held; `air`/`lintr` clean;

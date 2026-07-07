@@ -351,6 +351,68 @@ test_that("advanced.Rmd: ragged `school` supports subject + cluster ICC(c,1)", {
   )
 })
 
+# The article's fixed-rater subsection claims that on the balanced `school` design
+# the fixed-rater subject-level ICCs match the random-rater ones (consistency
+# identical, absolute agreement coinciding on balanced data). Back the claim (#1).
+
+test_that("advanced.Rmd: balanced fixed-rater `school` matches random at the subject level", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(2025)
+  n_class <- 16
+  n_pupil <- 5
+  n_rater <- 4
+  grid <- expand.grid(
+    pupil = seq_len(n_pupil),
+    classroom = seq_len(n_class),
+    rater = seq_len(n_rater)
+  )
+  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
+  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
+    (grid$classroom - 1) * n_pupil + grid$pupil
+  ]
+  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
+  school <- data.frame(
+    classroom = factor(grid$classroom),
+    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+    rater = factor(grid$rater),
+    score = 10 +
+      class_effect +
+      pupil_effect +
+      rater_effect +
+      rnorm(nrow(grid), sd = 0.7)
+  )
+  sub <- function(x, index) {
+    x$estimates$estimate[x$estimates$index == index]
+  }
+  fx <- suppressWarnings(icc(
+    school,
+    score,
+    pupil,
+    rater,
+    cluster = classroom,
+    level = "subject",
+    raters = "fixed",
+    type = "agreement",
+    unit = c("single", "average"),
+    seed = 1
+  ))
+  rn <- icc(
+    school,
+    score,
+    pupil,
+    rater,
+    cluster = classroom,
+    level = "subject",
+    raters = "random",
+    type = "agreement",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  expect_equal(sub(fx, "ICC(A,1)"), sub(rn, "ICC(A,1)"), tolerance = 1e-4)
+  expect_equal(sub(fx, "ICC(A,k)"), sub(rn, "ICC(A,k)"), tolerance = 1e-4)
+})
+
 # The article's nested-design examples relabel `school`: giving each classroom its
 # own raters (Design 2) or each pupil their own raters (Design 3). Check the prose
 # claims -- the design is inferred, nested designs report the subject level only,
