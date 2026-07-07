@@ -281,12 +281,50 @@ appear in only one classroom, so the design could be read as crossed
 not guess; you resolve it by declaring `design = "crossed"` (validated
 against the data), or the abort points you at the nested reading.
 
-Multilevel support currently covers random raters on: **crossed**
+### Fixed raters in a multilevel design
+
+The multilevel examples so far treat raters as a **random** sample — the
+recommended default, which generalizes beyond the raters you happened to
+use. When the observed raters *are* the entire population of interest (a
+fixed panel of examiners, say), pass `raters = "fixed"` at the
+**subject** level. As in the single-level case, the rater main effect is
+then the finite-population variance of *these* raters (McGraw & Wong’s
+Case 3A) rather than a random-sample variance:
+
+``` r
+
+icc(school, score, subject = pupil, rater = rater, cluster = classroom,
+  raters = "fixed", level = "subject")
+#> Warning: Modeling raters as fixed restricts inference to exactly these raters; you
+#> cannot generalize to other raters.
+#> ℹ For interrater reliability, the two-way random model (`raters = "random"`) is
+#>   the recommended default (ten Hove et al. 2024; McGraw & Wong 1996, Case 2).
+#> ℹ Use "fixed" only when these are the entire population of raters you will ever
+#>   use.
+#> # Intraclass correlation: multilevel two-way mixed, absolute agreement
+#> Subjects: 80 in 16 clusters | Raters: 4 (fixed) | Observations: 320 (complete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   subject  ICC(A,1)    0.431   [0.318, 0.552]
+#>   subject  ICC(A,k)    0.751   [0.651, 0.831]
+#> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
+```
+
+On this balanced design the fixed-rater subject-level coefficients match
+the random-rater ones: **consistency** never uses the rater term, so it
+is identical either way, and **absolute agreement** coincides because
+the finite-population rater variance equals the random-sample estimate
+when the design is balanced. The two genuinely diverge only on
+incomplete data — which, for fixed-rater multilevel designs, is planned
+for a later milestone.
+
+Multilevel support currently covers **random** raters on: crossed
 designs (Design 1), complete or **incomplete**, at the subject level and
-— for `ICC(c,1)` — the cluster level; and **nested** designs (Designs 2
-and 3, subject level), which still require complete data. The averaged
-cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs,
-and fixed raters are planned for later milestones.
+— for `ICC(c,1)` — the cluster level; and nested designs (Designs 2 and
+3, subject level), complete data. **Fixed** raters are supported for the
+complete crossed design at the subject level. The averaged cluster-level
+`ICC(c,k)` on incomplete data, incomplete nested designs, and incomplete
+or nested fixed-rater designs are planned for later milestones.
 
 ## Choosing an estimation engine
 
