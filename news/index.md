@@ -2,9 +2,17 @@
 
 ## intraclass 0.0.0.9000
 
+- [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  computes two-way random, absolute-agreement intraclass correlation
+  coefficients `ICC(A,1)` and `ICC(A,k)` from a `glmmTMB` linear mixed
+  model, with boundary-aware Monte-Carlo confidence intervals,
+  `print`/`summary`/`format` methods and
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html)/[`glance()`](https://generics.r-lib.org/reference/glance.html).
+  Verified against the Shrout & Fleiss (1979) worked example,
+  [`psych::ICC`](https://rdrr.io/pkg/psych/man/ICC.html), a
+  package-independent ANOVA mean-squares oracle, a seeded simulation,
+  and an lme4 cross-check.
 - Project scaffolding: package skeleton, `project/` tracking system
   (principles, milestones, decisions, oracle registry), custom skills
-  and agent, CI workflows (R-CMD-check, coverage, lint, pkgdown,
-  scheduled reference-values), and a stub pkgdown site. No estimators
-  yet — the first, two-way random absolute-agreement `ICC(A,1)` /
-  `ICC(A,k)`, arrives in Milestone 1.
+  and agent, CI workflows (R-CMD-check, coverage, lint, format, pkgdown,
+  scheduled reference-values), and a pkgdown site.
