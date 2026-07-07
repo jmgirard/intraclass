@@ -4,6 +4,20 @@ description: Close out the current task. Use when the maintainer says "finish th
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 ---
 
+## Where changes go (branch vs. direct-to-`main`)
+Pragmatic policy (maintainer preference; `main` is not currently branch-protected):
+
+- **PR required** — anything the CI matrix builds or inspects, because it can turn
+  `main` red: `R/`, `tests/`, `vignettes/`, `DESCRIPTION`, `NAMESPACE`, `man/`, and
+  CI/tooling config (`.github/workflows/`, `air.toml`, `.lintr`, `_pkgdown.yml`).
+  Ship on a `m<N>-<slug>` (milestone) or short `chore-*`/`fix-*` branch → PR → merge.
+- **Direct commit to `main` is fine** — changes no CI job looks at: `project/`
+  tracking docs, `.claude/` skills/agents, memory files, `ROADMAP.md`. A PR for these
+  only burns CI minutes with no gate value.
+
+If a commit mixes both (e.g. code + its `project/` tracking updates in one commit,
+PRINCIPLES.md #16), the code makes the whole commit PR-bound.
+
 ## Instructions
 Run the full local gate and **only mark done on green** (PRINCIPLES.md #10, #11, #16):
 
@@ -20,9 +34,9 @@ task done, and stop. Never loosen an oracle tolerance to pass (PRINCIPLES.md #1)
 
 On green:
 - Commit the work on the milestone branch `m<N>-<slug>` (create it at the
-  milestone's first commit); milestone work merges via a **PR**, never direct
-  commits to `main` (maintainer preference — see the `milestone-branches-and-prs`
-  memory).
+  milestone's first commit); package/CI-config work merges via a **PR**, never
+  direct to `main` (see "Where changes go" above and the
+  `milestone-branches-and-prs` memory).
 - Check off the task in `project/TASKS.md`.
 - Update `project/STATUS.md` (active task, updated date; set "Last green CI" only
   after the PR's CI is green and the branch is merged).
@@ -42,11 +56,11 @@ reality across `STATUS.md`, `MILESTONES.md`, and `TASKS.md` in the same pass.
 ## After PR CI green + merge
 `finish-task` runs before the PR is opened, so it cannot confirm CI. Open a PR from
 the milestone branch (`gh pr create`); once its full CI matrix is green and the
-branch is **merged** to `main`, reconcile the deferred markers on a fresh short
-branch → PR (PRINCIPLES.md #16):
+branch is **merged** to `main`, reconcile the deferred markers. This touches only
+`project/` docs, so per "Where changes go" it is a **direct commit to `main`** (no
+PR needed), on an up-to-date `main` (PRINCIPLES.md #16):
 - Set `STATUS.md` "Last green CI" to the merge commit.
 - Flip every `pending PR CI + merge` / `done (local)` marker for the shipped work to
   **merged, CI green** in `MILESTONES.md` and `TASKS.md`.
-- Sanity check: after `git switch main && git pull`, `git rev-list --count
-  origin/main...main` is `0` and nothing labeled `pending PR CI + merge` remains in
-  `project/`.
+- Sanity check: `git rev-list --count origin/main...main` is `0` and nothing labeled
+  `pending PR CI + merge` remains in `project/`.
