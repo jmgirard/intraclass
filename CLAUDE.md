@@ -16,8 +16,9 @@ lives in `project/`, loaded on demand.
   wins.
 - **`project/STATUS.md`** — current milestone, active task, blockers,
   next action.
-- **`project/MILESTONES.md`**, **`project/TASKS.md`** — the plan and the
-  board.
+- **`project/MILESTONES.md`** — the plan *and* the task board (the
+  active milestone’s DoD checklist is the board; no separate `TASKS.md`
+  — ADR-015).
 - **`project/DECISIONS.md`** — ADR log (why things are the way they
   are).
 - **`project/REFERENCES.md`** — bibliography + the oracle registry every
