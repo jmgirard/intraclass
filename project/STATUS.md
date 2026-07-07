@@ -1,13 +1,13 @@
 # Project status
 
-- Milestone: **M13 — release polish** — next (provisional; not yet detailed). M12
-  shipped (PR #16).
-- Active task: — (next: retro + detail M13 — pkgdown site, advanced vignette showcasing
-  M9–M12, CRAN prep)
+- Milestone: **M13 — release polish (docs, site, CRAN submission-ready)** — active;
+  detailed by ADR-022 on branch `m13-release-polish`. Final milestone of the ADR-017 arc.
+- Active task: **M13 — open the release PR.** All three slices done locally; awaiting the
+  `m13-release-polish` PR to go green on the full matrix and merge.
 - Last green CI: PR #16 (M12) full matrix green incl. Windows and R-devel; merged to
   `main` at 20f9afc
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M12 merged (PR #16) + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M13 detailed (ADR-022 + DoD); branch cut
 
 ## Where we are
 
@@ -27,11 +27,14 @@ emits the exact `icc()` call — teaching/API, no new estimand (M12).
 
 ## Next action
 
-**Retro + detail M13** (release polish — the final milestone in the ADR-017 arc). Per
-the process (#2, brief §7), run a short M12 retro, then resolve M13 scope with the
-maintainer and write the DoD before code. M13 is the CRAN-prep milestone: pkgdown site,
-an advanced vignette showcasing the M9–M12 estimators/plots/helper, and submission
-polish. Ships on a `m13-*` branch, merges via PR (`milestone-branches-and-prs`).
+**Open the M13 release PR** from `m13-release-polish` and get the full matrix (Windows +
+R-devel) green, then merge. All Slice 3 work is done locally: version **0.1.0**, NEWS
+consolidated, `cran-comments.md` + `inst/WORDLIST` authored, US-spelling fixes,
+`R CMD check --as-cran` **0/0/0** in CRAN mode *and* with `NOT_CRAN=true`, `lintr` clean.
+Per ADR-022 the milestone ends at **submission-ready** — the actual CRAN upload +
+win-builder/R-hub round-trips are the maintainer's out-of-band step (deferred). After
+merge, reconcile `project/` on `main` (finish-task policy) and this closes the ADR-017
+arc (M0–M13 all shipped).
 
 Open deferral from M9 (recorded): averaged cluster-level `ICC(c,k)` on incomplete data
 — the per-cluster effective-rater divisor is an open modeling question (spec §3b), a

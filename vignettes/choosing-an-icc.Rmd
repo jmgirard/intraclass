@@ -5,6 +5,10 @@ vignette: >
   %\VignetteIndexEntry{Choosing an ICC}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+# The decision-tree SVG is a static file (not a knitr-generated figure); declare
+# it so both R CMD build and pkgdown copy it next to the rendered article.
+resource_files:
+  - choosing-icc-tree.svg
 ---
 
 ```{r, include = FALSE}
@@ -15,7 +19,7 @@ library(intraclass)
 "Which ICC should I report?" is the question this package is built to answer.
 There is no single intraclass correlation: the label hides a family of
 coefficients that estimate *different* population quantities. Report the wrong
-one and you can overstate reliability by a wide margin, or penalise a rating
+one and you can overstate reliability by a wide margin, or penalize a rating
 procedure for differences that do not matter to you.
 
 Four choices pin down the coefficient. Each is a single argument to `icc()`, and
@@ -103,7 +107,7 @@ ak <- tidy(agreement)$estimate[2]
 For absolute agreement above, the single-rater `r sprintf("%.2f", a1)` rises to
 `r sprintf("%.2f", ak)` for the four-rater mean. Report `ICC(*,k)` only if the
 averaged score is what you will actually act on; if downstream users see one
-rater's judgement, `ICC(*,1)` is the honest figure. Request one or both with
+rater's judgment, `ICC(*,1)` is the honest figure. Request one or both with
 `unit = "single"`, `unit = "average"`, or the default `c("single", "average")`.
 
 ## 3. Random vs. fixed raters (`raters`)

@@ -15,11 +15,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 This article covers where the mixed-model approach earns its keep:
 
-- **Multilevel ICCs** — subject-level vs. cluster-level coefficients (below).
-- **Engine choice** — linear mixed models vs. SEM vs. Bayesian, and when each
-  matters (a forthcoming milestone).
-- **Confidence-interval methods** — Monte-Carlo (the default) and its
-  alternatives, especially near the zero-rater-variance boundary.
+- **D-studies** — projecting reliability to other numbers of raters (below).
+- **Multilevel ICCs** — subject-level vs. cluster-level coefficients, crossed and
+  nested, complete and incomplete.
+- **Visualizing a fit** — the `autoplot()` forest and variance-component plots.
+- **Engine choice** — the mixed-model default (glmmTMB / lme4) vs. the SEM
+  (lavaan) engine, and when the distinction matters.
+- **Letting the package choose** — `choose_icc()`, the decision tree as code.
 
 Incomplete and imbalanced designs are already supported; the
 [*Choosing an ICC*](choosing-an-icc.html) article works through a connected
@@ -159,7 +161,7 @@ school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
 icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
 ```
 
-Here the coefficients are labelled `ICC(1)` / `ICC(k)` and `type` no longer
+Here the coefficients are labeled `ICC(1)` / `ICC(k)` and `type` no longer
 applies — with each pupil's raters unique, there is no rater main effect to keep
 in or drop from the error term. A layout that is neither cleanly crossed nor
 cleanly nested (some raters shared across clusters, some not) raises an
@@ -236,6 +238,40 @@ raters are supported for the complete crossed design at the subject level. The a
 cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs, and incomplete
 or nested fixed-rater designs are planned for later milestones.
 
+## Visualizing a fit
+
+Every `icc()` fit carries an `autoplot()` method (with a `plot()` wrapper), so you
+can *see* the coefficients and the variance components behind them without building
+a plot by hand. Both read straight off the fitted object, so the picture can never
+disagree with the printed table. They need **ggplot2**, an optional dependency.
+
+The default, `what = "coefficients"`, is a **forest plot** — each ICC index as a
+point estimate with its Monte-Carlo interval. Reusing the two-way `ratings` fit from
+the D-study section above:
+
+```{r plot-coef, eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE), fig.alt = "Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) both higher and tighter."}
+library(ggplot2)
+autoplot(fit) # `fit <- icc(ratings, score, subject, rater, seed = 1)`
+```
+
+`what = "components"` shows the other half of the story — the estimated **variance
+components** the ratio is built from. It makes plain *why* absolute agreement is so
+much lower than the averaged coefficient on `ratings`: the **rater** component is
+large, and only absolute agreement counts between-rater differences as error:
+
+```{r plot-comp, eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE), fig.alt = "Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest."}
+autoplot(fit, what = "components")
+```
+
+For a **multilevel** fit the forest plot facets by level, so the subject- and
+cluster-level coefficients line up for comparison — the same `school` fit from
+above, whose cluster level was the higher of the two:
+
+```{r plot-ml, eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE), fig.alt = "Forest plot of the school multilevel fit, faceted into subject-level and cluster-level panels, each showing ICC(A,1) and ICC(A,k) with Monte-Carlo intervals."}
+autoplot(icc(school, score, subject = pupil, rater = rater, cluster = classroom,
+  seed = 1))
+```
+
 ## Choosing an estimation engine
 
 By default `icc()` fits the variance components with **glmmTMB**. You can instead
@@ -310,3 +346,45 @@ random-rater estimate and its wider, generalize-to-new-raters interval; reach fo
 results comparable to that literature. The SEM engine currently covers the complete,
 balanced random two-way design; one-way, fixed-rater, multilevel, and incomplete
 designs are directed to the mixed-model engines.
+
+## Letting the package choose the coefficient
+
+Every design above assumes you already know which coefficient you want. If you do
+not, `choose_icc()` walks the same decision tree as the
+[*Choosing an ICC*](choosing-an-icc.html) guide and hands back a recommendation: the
+coefficient to report, a plain-language reason for each choice, and the exact
+`icc()` call to run. It does **not** fit anything — there is no data argument — so it
+is a fast, side-effect-free advisor you can consult before you touch your data.
+
+Answer the choices that pin down the coefficient and it returns advice:
+
+```{r choose}
+choose_icc(model = "twoway", type = "agreement", unit = "single", raters = "random")
+```
+
+The recommendation carries the call to run. Because the helper is generated from the
+**same estimand machinery** as `icc()`, that call cannot drift from what `icc()`
+actually computes — running the emitted call reproduces exactly the coefficient the
+advisor named:
+
+```{r choose-roundtrip, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+# The emitted call is an ordinary icc() call (agreement + random are the defaults,
+# so they need not be named):
+icc(ratings, score, subject, rater, unit = "single", seed = 1)
+```
+
+The tree also covers the designs from the sections above. The multilevel fifth
+choice — subject vs. cluster level — is part of it, so a nested-data question resolves
+to a level-specific recommendation and the matching `cluster` call:
+
+```{r choose-ml}
+choose_icc(model = "twoway", multilevel = TRUE, level = "cluster",
+  type = "consistency", unit = "single", raters = "random")
+```
+
+In an **interactive** session you can omit the deciding answers and `choose_icc()`
+will ask the outstanding questions one at a time, then resolve. Leaving a
+coefficient-selecting choice unanswered non-interactively, or answering an axis that
+does not apply to the chosen design (for example `type` under `model = "oneway"`,
+where there is no rater main effect to keep or drop), is a clear error rather than a
+silent guess.
