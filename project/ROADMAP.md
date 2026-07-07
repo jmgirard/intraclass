@@ -33,3 +33,44 @@ Ark).
   method comparison.
 - A `choose_icc()` interactive decision helper mirroring the flagship vignette.
 - Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs.
+
+## Proposals under discussion (open design questions)
+
+These are **decision points, not decided directions** — recorded so the design
+is deliberate when scheduled. Resolve the chosen shape at the milestone's start.
+
+### D-study projection — reliability at an arbitrary number of raters *k*
+
+**Motivation.** In generalizability theory a D-study projects the coefficient to a
+number of raters *m* other than the number observed. The absolute-agreement ICC is
+already the dependability coefficient Φ, and Φ(*m*) =
+σ²_s / (σ²_s + (σ²_r + σ²_res)/*m*), so this is a change of the averaging divisor
+in the existing `(signal, {error set}, divisor)` representation — not new
+machinery. The Monte-Carlo CI handles any *m* naturally (recompute Φ(*m*) per
+draw), which is an advantage over the delta method and honestly widens the
+interval when σ²_r is estimated from few raters. Candidate home: M2 (where the
+estimand abstraction generalizes) or a small dedicated milestone.
+
+**Open design question — how to expose it.** At least three shapes, not mutually
+exclusive:
+
+1. **Numeric `unit` in `icc()`.** Let `unit` accept numbers, so `"single"` ≡ 1,
+   `"average"` ≡ observed count, and `unit = c("single", 3, 10)` adds `ICC(A,3)`,
+   `ICC(A,10)` rows. Inline, minimal surface; good for a few specific *m*.
+2. **A downstream function you pipe an `icc` result into** — e.g.
+   `project_raters(fit, k = 1:20)` / `d_study(fit, ...)` — returning a tidy table
+   of Φ(*k*) with CIs across a *range* of *k*. Better for scanning many *k* and
+   keeps `icc()`'s surface small; reuses the stored fit/covariance so no refit.
+3. **A reliability-curve plot** — an `autoplot()`/`plot()` (or the piped
+   function's companion) drawing Φ(*k*) with a CI band vs. *k*: the classic
+   D-study curve for "how many raters do I need?".
+
+Leaning: (2) + (3) together read most naturally (a projection *is* a separate
+question from "what is my ICC"), with (1) as optional sugar for one-off *m*. But
+this is explicitly unresolved.
+
+**Must-haves when built (whichever shape).** An analytic oracle via the
+Spearman–Brown / GT relationship to `ICC(A,1)` (PRINCIPLES.md #1); a teaching note
+that projection is extrapolation whose trust depends on how well σ²_r is estimated
+(few raters ⇒ wide, honest intervals); integer-*k* guidance. Relates to the
+existing "design/power helpers" and `autoplot()` parking-lot items.
