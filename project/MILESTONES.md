@@ -243,41 +243,44 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   `unit`-style `level = c("subject","cluster")` knob that returns both levels by
   default. Designs 2/3, incomplete, and fixed-rater multilevel are deferred (spec §8).
 - Definition of Done (per-estimator bar, §8) — two internal CI-green slices:
-  - [ ] **Slice 1 — subject-level (within-cluster).** `cluster` (tidy-eval
-        selector, default `NULL` → backward-compatible single-level path) + `level`
+  - [x] **Slice 1 — estimator (both levels).** `cluster` (tidy-eval selector,
+        default `NULL` → backward-compatible single-level path) + `level`
         (validated/iterated like `unit`) args; glmmTMB engine extended to the
-        five-component Design-1 fit (adds `(1 | cluster:rater)`) with component
-        extraction; identifiability guards (spec §7: ≥2 raters, ≥2 clusters, subject
-        not 1:1 with cluster, `level="cluster"` with no `cluster` column). The
-        subject-level signal/error map (spec §3a) reuses today's scalar
-        `icc_point()`. `print`/`tidy`/`glance` surface `level` + `n_clusters`.
-        Oracles O-ML: lme4 cross-engine, seeded simulation, and the single-level
-        reduction (algebraic invariant + a zero-cluster-variance/many-clusters
-        dataset matching a single-level fit; no exact-SF-number claim). End-to-end
-        thin slice.
-  - [ ] **Slice 2 — cluster-level (between-cluster) + docs.** The cluster-level
-        signal/error map (spec §3b: signal σ²_c, error {rater, cluster_rater}) off
-        the **same fit**; MC-CI verified for the cluster-level coefficient; O-ML
-        extended to it. Add the conflated-ICC teaching contrast (Eq. 14): fill
-        `advanced.Rmd`'s multilevel section on real code; turn `choosing-an-icc.Rmd`'s
-        "fifth choice" preview into a worked subject-vs-cluster example;
-        `test-vignette-claims.R` invariants.
-  - [ ] Oracles per PRINCIPLES.md #1 — lme4 + seeded simulation + single-level
+        five-component Design-1 fit (`fit_glmmtmb_multilevel()`, adds
+        `(1 | cluster:rater)`) with component extraction; identifiability guards
+        (spec §7: ≥2 raters, ≥2 clusters, subject not 1:1 with cluster,
+        subject-spans-cluster, out-of-scope fixed/numeric-unit). Both the
+        subject-level (§3a) and cluster-level (§3b) signal/error maps read the
+        **same fit** via the unchanged scalar `icc_point()`. `print`/`tidy`/`glance`
+        surface `level` + `n_clusters` + the five components; single-level output
+        byte-identical (snapshots unchanged); `d_study()` aborts on multilevel.
+        Oracles O-ML: lme4 cross-engine (<1e-4), seeded population recovery (<0.05)
+        + MC coverage, single-level reduction (algebraic + zero-cluster-variance).
+        Committed `0089d9a`. (The plan split subject/cluster across two slices, but
+        the paper's scalar divisor made both trivially the same fit — done together.)
+  - [x] **Slice 2 — docs.** `advanced.Rmd` multilevel section on real code (seeded
+        pupils-in-classrooms example, cluster > subject); `choosing-an-icc.Rmd`
+        "fifth choice" updated to shipped + **citation fixed** (was the wrong paper
+        dated 2021 → ten Hove et al. 2022); `test-vignette-claims.R` multilevel
+        invariant; NEWS; roxygen "Multilevel designs" section + ten Hove 2022 ref.
+  - [x] Oracles per PRINCIPLES.md #1 — lme4 + seeded simulation + single-level
         reduction (O-ML in `REFERENCES.md`); no external worked example exists for
         this estimand (as with O5). `psych`/`gtheory` are not oracles here; a
         Bayesian/MCMC cross-check is deferred to M6. Any coefficient unpinnable by
         both required oracles is not shipped (Fable review recommended, then
         pause — #1/#19).
-  - [ ] `DECISIONS.md` ADR-011 (M5 scope + `level` API + Design-1 five-component fit);
-        `devtools::check()` 0/0/0 locally; `air`/`lintr` clean; vignettes knit;
-        full CI matrix green on the PR. Ships on `m5-multilevel`, merged via PR.
+  - [x] `DECISIONS.md` ADR-011 (M5 scope + `level` API + Design-1 five-component fit);
+        `air`/`lintr` clean; vignettes knit; full local suite green (no snapshot
+        drift). Ships on `m5-multilevel`; `devtools::check()` 0/0/0 + full CI matrix
+        confirmed on the PR.
 - Deferred out of M5 (recorded so they aren't rediscovered): the paper's Designs
   2/3 (raters nested in clusters and/or subjects); incomplete multilevel (reuse M3
   `k_eff`/connectedness); fixed-rater multilevel; a Bayesian/MCMC cross-engine
   (M6, the paper's own estimator); a three-facet `d_study()` projecting
   subject-per-cluster counts; exposing the conflated single-level ICC (Eq. 14) as
   a shipped coefficient. (See spec §8.)
-- Status: planned (spec + ADR-011 written; DoD detailed) — not started
+- Status: implemented on `m5-multilevel` (Slice 1 estimator `0089d9a`, Slice 2
+  docs) — full local suite green; PR + CI matrix pending.
 
 ## M6: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a

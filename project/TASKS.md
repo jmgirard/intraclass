@@ -65,17 +65,14 @@ with clusters, balanced, random raters; `cluster` selector + `unit`-style `level
 knob (both levels by default). Equations pinned from Table 3 (spec §3). Ships on
 `m5-multilevel` via PR.
 
-- [ ] **Slice 1 — subject-level (within-cluster).** `cluster` (tidy-eval, default
-      `NULL`) + `level` (validated/iterated like `unit`) args; glmmTMB five-component
-      Design-1 fit `~ 1 + (1|cluster) + (1|cluster:subject) + (1|rater) +
-      (1|cluster:rater)` + component extraction; identifiability guards (spec §7);
-      subject-level signal/error map (spec §3a; scalar `icc_point()` reused);
-      `print`/`tidy`/`glance` surface `level` + `n_clusters`; oracles O-ML (lme4 +
-      sim + single-level reduction). CI-green.
-- [ ] **Slice 2 — cluster-level (between-cluster) + docs.** Cluster-level
-      signal/error map (spec §3b: signal σ²_c, error {rater, cluster_rater}) off the
-      **same fit** (no divisor change); MC-CI verified; O-ML extended to
-      cluster-level. Conflated-ICC teaching contrast (Eq. 14); fill `advanced.Rmd`
-      multilevel section; `choosing-an-icc.Rmd` "fifth choice" → worked example;
-      `test-vignette-claims.R` invariants; NEWS; `_pkgdown`. `devtools::check()`
-      0/0/0; full CI matrix green on the PR. See MILESTONES M5.
+- [x] **Slice 1 — estimator (both levels)** (`0089d9a`). `cluster` + `level` args;
+      `fit_glmmtmb_multilevel()` five-component fit + extraction; identifiability
+      guards; subject- and cluster-level signal/error maps off one fit (scalar
+      `icc_point()` unchanged); `print`/`tidy`/`glance` surface `level`/`n_clusters`;
+      `d_study()` aborts on multilevel. Oracles O-ML (lme4 <1e-4, seeded recovery +
+      MC coverage, single-level reduction). Full suite green, no snapshot drift.
+- [x] **Slice 2 — docs.** `advanced.Rmd` multilevel section (seeded classrooms
+      example, cluster > subject); `choosing-an-icc.Rmd` "fifth choice" → shipped +
+      **citation fixed** (2022 multilevel paper); `test-vignette-claims.R`
+      invariant; NEWS; roxygen "Multilevel designs" section. `air`/`lintr` clean;
+      vignettes knit. PR + CI matrix pending. See MILESTONES M5.

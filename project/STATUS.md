@@ -1,7 +1,7 @@
 # Project status
 
-- Milestone: M5 — multilevel ICCs (planned; DoD detailed, spec + ADR-011 written; not started)
-- Active task: — (next: `/start-task` → M5 Slice 1, subject-level within-cluster ICC)
+- Milestone: M5 — multilevel ICCs (implemented on `m5-multilevel`; PR + CI pending)
+- Active task: — (next: open the M5 PR; run `devtools::check()` + full CI matrix)
 - Last green CI: PR #6 (M4.5) full matrix green (9/9); merged to `main` at 9be03a0
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
@@ -46,8 +46,10 @@ Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a
 direct commit to `main` (finish-task policy — no CI job reads `project/`).
 
-**Next action:** M5's Definition of Done is now detailed with the exact equations
-pinned from the paper (spec §3 + ADR-011 + DoD above). `/start-task` begins **M5
-Slice 1 — subject-level (within-cluster) ICC**: build the `cluster`/`level` API +
-the five-component Design-1 engine fit on branch `m5-multilevel`, verified by the
-O-ML oracles before any coefficient is asserted (#1/#2/#14).
+**Next action:** M5 is implemented on `m5-multilevel` — Slice 1 estimator
+(`0089d9a`: `cluster`/`level` API, five-component Design-1 fit, both subject- and
+cluster-level ICCs, O-ML oracles green) and Slice 2 docs (advanced.Rmd multilevel
+section, choosing-an-icc.Rmd citation fix, NEWS, vignette-claims invariant). Full
+local suite green, no snapshot drift, `air`/`lintr` clean. **Next:** run
+`devtools::check()`, push the branch, open the PR, and confirm the full CI matrix
+before merge.

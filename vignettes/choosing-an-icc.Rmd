@@ -171,14 +171,15 @@ Subjects 1--2 are rated only by raters 1--2, and subjects 3--4 only by raters
 3--4: two islands with no bridge between them. This is precisely the ill-posed
 case the package refuses to guess at.
 
-## A fifth choice, coming later: subject- vs. cluster-level
+## A fifth choice: subject- vs. cluster-level
 
 Everything above takes the subject as the object of measurement. When subjects
 are themselves nested in higher-level units -- pupils within classrooms, patients
 within clinics -- you may instead want the reliability of the *cluster* mean, a
-multilevel ICC (ten Hove, Jorgensen & van der Ark, 2021). That axis is on the
-roadmap and will get its own treatment; for now `icc()` covers the single-level
-two-way design.
+multilevel ICC (ten Hove, Jorgensen & van der Ark, 2022). Pass a `cluster` column
+to `icc()` and it reports the **subject-level** (within-cluster) and
+**cluster-level** (between-cluster) coefficients side by side. The
+[*Advanced*](advanced.html) article works a full example.
 
 ## Naming crosswalk
 
@@ -213,6 +214,6 @@ correlation coefficients. *Psychological Methods, 1*(1), 30--46.
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
 assessing rater reliability. *Psychological Bulletin, 86*(2), 420--428.
 
-ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2021). Updated guidelines
-on selecting an intraclass correlation coefficient for interrater reliability,
-with applications to incomplete observational designs. *Psychological Methods*.
+ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
+reliability for multilevel data: A generalizability theory approach.
+*Psychological Methods, 27*(4), 650--666.
