@@ -2,6 +2,21 @@
 
 ## intraclass 0.0.0.9000
 
+- [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  objects now have
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  and [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods
+  (requires ggplot2, a Suggests dependency). `autoplot(fit)`
+  (equivalently `what = "coefficients"`) draws a **coefficient forest
+  plot** — each ICC index as a point estimate with its Monte-Carlo
+  confidence interval, faceted by level for multilevel fits.
+  `autoplot(fit, what = "components")` draws the **variance-component
+  decomposition** — one bar per estimated variance component (subject,
+  rater, residual, plus cluster and cluster:rater for multilevel
+  designs), honouring the design’s confounding (e.g. one-way and
+  raters-nested-in-subjects fold the rater into the residual). Both
+  plots read straight off the fitted object, so they always match the
+  printed table.
 - Multilevel
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) now
   supports **fixed raters** (`raters = "fixed"`) for the crossed design

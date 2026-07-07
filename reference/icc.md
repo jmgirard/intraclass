@@ -11,6 +11,11 @@ fixed (Case 3).
 ## Usage
 
 ``` r
+autoplot.icc(object, what = c("coefficients", "components"), ...)
+
+# S3 method for class 'icc'
+plot(x, ...)
+
 # S3 method for class 'icc'
 format(x, ...)
 
@@ -48,13 +53,19 @@ icc(
 
 ## Arguments
 
-- x, object:
+- what:
 
-  An `icc` object.
+  Which plot to draw: `"coefficients"` (the default) for a forest plot
+  of each ICC index with its Monte-Carlo confidence interval, or
+  `"components"` for the variance-component decomposition.
 
 - ...:
 
   Unused, for method consistency.
+
+- x, object:
+
+  An `icc` object.
 
 - data:
 
@@ -294,6 +305,11 @@ reliability for multilevel data: A generalizability theory approach.
 ## Examples
 
 ``` r
+fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
+ggplot2::autoplot(fit) # coefficient forest plot (the default)
+
+ggplot2::autoplot(fit, what = "components") # variance-component decomposition
+
 ratings <- data.frame(
   subject = factor(rep(1:6, 4)),
   rater = factor(rep(1:4, each = 6)),

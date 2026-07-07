@@ -5,7 +5,9 @@
 Absolute-agreement and (later) consistency ICCs for crossed
 subject-by-rater designs.
 
-- [`format(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+- [`autoplot.icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`plot(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  [`format(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`print(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`summary(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`tidy(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
