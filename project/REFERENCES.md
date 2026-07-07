@@ -72,10 +72,33 @@ reference values, ever.
   **breaks under imbalance** (drop 4 of 24 cells ⇒ ΔICC(C,1) ≈ 0.0095), the M3
   caveat behind ADR-006. Reproducible; nothing hardcoded.
 
+### Oracle O5 — incomplete/imbalanced random-rater ICCs (M3 Slice 1)
+- **Status:** **asserted (M3 Slice 1)** in `tests/testthat/test-icc-incomplete.R`.
+  Two independent oracles for the ragged two-way random-rater path, since no
+  textbook worked example exists for arbitrary unbalanced data (M3 spec §8):
+  1. **lme4 cross-engine** — on an incomplete, connected Shrout & Fleiss subset
+     (drop cells (S1,J1),(S2,J2) ⇒ per-subject counts 3,3,4,4,4,4; k_eff = 3.6),
+     `lme4::lmer` reproduces the glmmTMB engine's ICC(A,1)/(A,k)/(C,1)/(C,k) to
+     < 1e-4. Pins the extraction and the `k_eff` divisor plumbing (ADR-008).
+  2. **Seeded simulation** — `set.seed(20260706)`, 120 subjects × 30 raters,
+     ~25% MCAR deletion, σ²_s = 4, σ²_r = 1, σ²_res = 2 (k = 30 so σ²_r is
+     identified in a single draw; few-rater σ²_r is honestly noisy). Recovers the
+     components (≈ 4.14 / 1.01 / 2.01) and ICC(A,1) = 0.579 (pop 0.571),
+     ICC(C,1) = 0.674 (pop 0.667) within 0.05; the boundary-aware Monte-Carlo
+     intervals cover both population values.
+- **Provenance:** `data-raw/oracle-incomplete.R` (seeded; reproduces both oracles
+  with `stopifnot` tolerance checks). Reproducible; nothing hardcoded.
+- **Not oracles here:** `psych::ICC` (ANOVA / listwise-deletion — cannot compute
+  the incomplete-data estimand, so it stays the *balanced*-only oracle O1);
+  `irrNA`/`gtheory` are not installed in this environment and are left as optional
+  future cross-checks (skip-guarded), not required — the lme4 + simulation pair
+  already meets the ≥2-independent-oracle bar (PRINCIPLES.md #1).
+
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
   `lme4::lmer` fit directly reproduces the glmmTMB engine's point ICCs to 1e-4 on
-  the balanced O1 data (ADR-002/005 — lme4 is oracle-only in M1).
+  the balanced O1 data (ADR-002/005 — lme4 is oracle-only in M1). **M3 extends this
+  cross-check to incomplete data** — see O5.
 
 ---
 

@@ -45,16 +45,19 @@ and the approved plan `moonlit-mixing-pinwheel`.
       guard; **pin the `ICC(*,k)` divisor convention** (ADR-008: `k_eff` = harmonic
       mean of per-subject counts; projection to other `m` = future D-study) — Opus
 
-### Slice 1 — incomplete random raters (default path)
-- [ ] `assert_connected_design()` + balance detection (`R/design.R` or `estimand.R`);
-      wire the guard into `icc()`; `abort_unidentified()` on disconnected graphs — Opus
-- [ ] Divisor rule for `unit = "average"` under imbalance (per spec); `ICC(*,1)`
-      always well-posed — Opus
-- [ ] `print`/`summary`/`glance` surface balanced-vs-incomplete + n_cells + divisor;
-      snapshots — Opus
-- [ ] Oracles: seeded unbalanced simulation + lme4 cross-check + `irrNA`/`gtheory`
-      + balanced-reduction regression; `REFERENCES.md` rows (O5) — Opus
-      (`/verify-estimator`)
+### Slice 1 — incomplete random raters (default path) — **done**
+- [x] `summarize_design()` (connectedness via union-find + balance/`k_eff`/replicate
+      detection) in `R/design.R`; guards wired into `icc()`: `abort_unidentified()`
+      on disconnected graphs, `abort_unsupported()` on within-cell replicates — Opus
+- [x] `k_eff` divisor for `unit = "average"` (harmonic mean; = k on balanced data);
+      `ICC(*,1)` always well-posed — Opus
+- [x] `print`/`glance` surface completeness (`N of M cells`), `n_cells`, `k_eff`,
+      `balanced`; snapshots updated — Opus
+- [x] Oracles (O5, `/verify-estimator`): lme4 cross-engine on incomplete data
+      (< 1e-4) + seeded MCAR simulation (recovers components; CIs cover) +
+      balanced-reduction regression; provenance `data-raw/oracle-incomplete.R`,
+      `REFERENCES.md` O5. `irrNA`/`gtheory` deferred — not needed, lme4+sim meet
+      the ≥2-oracle bar (#1) — Opus
 
 ### Slice 2 — real fixed-effect fit path (resolves ADR-006 debt)
 - [ ] Fixed-effect fit `score ~ 1 + rater + (1|subject)` in the engine; read-out for

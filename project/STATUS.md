@@ -1,8 +1,7 @@
 # Project status
 
-- Milestone: M3 — imbalanced & incomplete designs (in progress; estimand spec done)
-- Active task: — (M3 Slice 1 next: connectedness guard + `k_eff` divisor for the
-  incomplete random-rater path — run `/start-task`)
+- Milestone: M3 — imbalanced & incomplete designs (in progress; Slices 0–1 done)
+- Active task: — (M3 Slice 2 next: real fixed-effect fit path — run `/start-task`)
 - Last green CI: PR #1 full matrix green (9 checks) on 9c85c0b; merged to `main`
   at 334a48a
 - Blockers: —
@@ -17,15 +16,19 @@ is now its own milestone (M4); prior M4–M6 renumber to M5–M7. Two internal C
 slices; board in [`TASKS.md`](TASKS.md), Definition of Done in
 [`MILESTONES.md`](MILESTONES.md), full plan `moonlit-mixing-pinwheel`.
 
-Slice 0 done: [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md)
-written (connectedness rule; random + fixed Case 3/3A estimands; `k_eff` divisor;
-balanced-reduction guard; oracle set O5/O6) and ADR-008 recorded. Docs-only, so no
-code gate to run; last green CI unchanged (PR #1).
+Slice 1 done: incomplete random-rater path shipped and oracle-verified.
+`R/design.R` (`summarize_design()`: union-find connectedness, `k_eff`, replicate
+detection); `icc()` guards (`abort_unidentified` disconnected, `abort_unsupported`
+replicates); `k_eff` divisor; `print`/`glance` completeness + `k_eff`. Verified by
+O5 (lme4 cross-engine on incomplete data < 1e-4; seeded MCAR simulation recovers
+components, CIs cover) + balanced reduction. Local gate green: tests 104/0/0,
+`check` 0 errors / 0 warnings / 1 NOTE (CRAN-incoming feasibility — new submission /
+dev version / pkgdown URL 404; pre-existing, unrelated), lint 0, coverage 95.7%
+(`design.R` 100%). Not yet pushed.
 
-**Next action:** `/start-task` on M3 Slice 1 — `assert_connected_design()` +
-balance detection (`abort_unidentified()` on a disconnected subject×rater graph),
-wire it into `icc()`, and implement the `k_eff` (harmonic-mean) divisor for
-`unit = "average"`. Oracle sourcing for unbalanced data is the gating risk
-(seeded O5 simulation + lme4; `irrNA`/`gtheory` only where they compute the same
-estimand); stop and recommend a Fable review if any coefficient can't be pinned by
-≥2 oracles (PRINCIPLES.md #1, #19).
+**Next action:** `/start-task` on M3 Slice 2 — real fixed-effect fit path
+(`score ~ 1 + rater + (1 | subject)`) for `raters = "fixed"`: fixed-raters error
+set (consistency = residual; agreement + θ²_r, Case 3A), branch on `design$raters`,
+fixed-path MC-CI sampler, corrected `raters` roxygen note. Oracle-pin θ²_r in Slice 2
+(psych/lme4 fixed fit + balanced reduction, O6); stop + recommend Fable if unpinnable
+(PRINCIPLES.md #1, #19).

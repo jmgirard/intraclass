@@ -166,12 +166,39 @@ icc <- function(
     ))
   }
 
+  # Design facts for a possibly-incomplete layout (estimand-spec M3 §3, §5).
+  design_info <- summarize_design(df)
+  # One rating per observed cell is the M3 estimand; replicates would change it
+  # (split the interaction from pure error) and are a later milestone (#5, #17).
+  if (design_info$has_replicates) {
+    abort_unsupported(c(
+      "Some subject-by-rater cells have more than one rating.",
+      i = "Within-cell replicates (splitting the subject-by-rater interaction \\
+           from pure error) are planned for a later milestone.",
+      x = "Provide one rating per subject-by-rater cell."
+    ))
+  }
+  # Separating the subject and rater variances needs a connected design; a
+  # disconnected layout confounds them and is not identified (#5; M3 §3).
+  if (!design_info$connected) {
+    abort_unidentified(c(
+      "The subject-by-rater design is disconnected, so the subject and rater \\
+       variances cannot be separated.",
+      i = "Every subject and rater must be linked through shared ratings (one \\
+           connected design).",
+      i = "For unlinked rater groups, a one-way ICC (planned) or additional \\
+           linking ratings are needed."
+    ))
+  }
+
   engine_fit <- fit_glmmtmb(df)
   estimands <- lapply(
     unit,
     function(u) icc_estimand(type = type, unit = u, raters = raters)
   )
-  k <- n_raters
+  # Averaging divisor: the effective number of ratings per subject (harmonic
+  # mean), which is k on balanced data (ADR-008; M3 §5). ICC(*,1) ignores it.
+  k <- design_info$k_eff
 
   points <- vapply(
     estimands,
@@ -201,7 +228,13 @@ icc <- function(
     list(
       estimates = estimates,
       components = engine_fit$components,
-      design = list(model = model, type = type, raters = raters),
+      design = list(
+        model = model,
+        type = type,
+        raters = raters,
+        balanced = design_info$balanced
+      ),
+      k_eff = design_info$k_eff,
       engine = engine_fit$engine,
       ci = list(
         method = ci_method,
@@ -209,7 +242,12 @@ icc <- function(
         samples = mc_samples,
         seed = seed
       ),
-      n = list(subjects = n_subjects, raters = n_raters, obs = nrow(df)),
+      n = list(
+        subjects = n_subjects,
+        raters = n_raters,
+        obs = nrow(df),
+        cells = design_info$n_cells
+      ),
       fit = engine_fit$fit,
       call = match.call()
     ),

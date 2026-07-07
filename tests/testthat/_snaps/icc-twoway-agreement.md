@@ -4,7 +4,7 @@
       print(fit)
     Message
       # Intraclass correlation: two-way random, absolute agreement
-      Subjects: 6 | Raters: 4 (random) | Observations: 24
+      Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
       Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
         index     estimate   95% CI
         ICC(A,1)    0.290   [CI]
