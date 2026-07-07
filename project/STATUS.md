@@ -2,8 +2,9 @@
 
 - Milestone: **M13 — release polish (docs, site, CRAN submission-ready)** — active;
   detailed by ADR-022 on branch `m13-release-polish`. Final milestone of the ADR-017 arc.
-- Active task: **Slice 2 — advanced vignette showcase + README** (next; see M13 DoD in
-  `MILESTONES.md`). Slice 1 (pkgdown reference reorg + flagship-article image fix) done.
+- Active task: **Slice 3 — CRAN submission-ready** (next; see M13 DoD in
+  `MILESTONES.md`). Slices 1 (pkgdown reorg + image fix) and 2 (advanced-vignette M11/M12
+  showcase + README refresh) done.
 - Last green CI: PR #16 (M12) full matrix green incl. Windows and R-devel; merged to
   `main` at 20f9afc
 - Blockers: —
@@ -27,16 +28,17 @@ emits the exact `icc()` call — teaching/API, no new estimand (M12).
 
 ## Next action
 
-**M13 Slice 2 — advanced vignette showcase + README.** Extend `vignettes/advanced.Rmd`
-with an M11 plotting section (`autoplot()` coefficients + components, ggplot2-guarded)
-and an M12 `choose_icc()` section (all numbers computed live, #4/#12); refresh
-`README.Rmd` → `README.md` with a current worked example spanning agreement/consistency,
-a multilevel fit, and `choose_icc()`; back any asserted numeric relationships with
-`test-vignette-claims.R`. Slice 1 done: `_pkgdown.yml` reference index rebuilt
-(role-based groups, every export listed) and a pre-existing broken flagship-article
-image fixed via a vignette `resource_files:` entry; `check_pkgdown()` + `build_site()`
-clean. Scope (ADR-022): submission-**ready** not submitted; version **0.1.0**; showcase
-extends `advanced.Rmd`. Ships on `m13-release-polish`, merges via PR.
+**M13 Slice 3 — CRAN submission-ready.** Bump `DESCRIPTION` to **0.1.0** and consolidate
+the `NEWS.md` dev bullets under a `# intraclass 0.1.0` heading; author `cran-comments.md`
+(test envs + `R CMD check` results, notes justified) and `inst/WORDLIST` (spelling CI
+green); close any `\value`/`@examples`/URL gaps `--as-cran` surfaces; then
+`R CMD check --as-cran` clean on the full matrix, existing tests green, coverage held.
+Verify against the **installed** package with `NOT_CRAN=true` and run
+`lintr::lint_package()` before the PR push (memories `verify-against-installed-package`,
+`run-lintr-before-push`). Slices 1–2 done: pkgdown reference reorg + flagship image fix;
+advanced-vignette M11 plotting + M12 `choose_icc()` showcase; README refreshed with a
+multilevel worked example. Scope (ADR-022): submission-**ready** not submitted (upload is
+a maintainer act). Ships on `m13-release-polish`, merges via PR.
 
 Open deferral from M9 (recorded): averaged cluster-level `ICC(c,k)` on incomplete data
 — the per-cluster effective-rater divisor is an open modeling question (spec §3b), a

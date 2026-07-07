@@ -309,16 +309,22 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       was not copied to the pkgdown site (404); added a `resource_files:` entry to the
       vignette front matter so both `R CMD build` and pkgdown copy it.
 
-### Slice 2 — advanced vignette showcase + README
-- [ ] Extend `vignettes/advanced.Rmd` with an **M11 plotting** section
-      (`autoplot()` coefficients + components, ggplot2-guarded) and a **M12
-      `choose_icc()`** section; all displayed numbers computed live at knit time
-      (#4/#12); vignette knits clean.
-- [ ] Refresh `README.Rmd` → `README.md` with a current worked example spanning the
-      shipped family (agreement/consistency, a multilevel fit, `choose_icc()`); badges
-      verified; `README.md` regenerated from `.Rmd`.
-- [ ] Any vignette/README numeric relationships that assert a claim are backed by
-      `test-vignette-claims.R` (reuse the M4 pattern; no fabricated values, #1/#4/#12).
+### Slice 2 — advanced vignette showcase + README ✓
+- [x] Extended `vignettes/advanced.Rmd`: a **Visualising a fit** section (M11
+      `autoplot()` coefficients forest + variance-component decomposition + a
+      level-faceted multilevel plot, ggplot2-guarded, all with `fig.alt`) and a
+      **Letting the package choose the coefficient** section (M12 `choose_icc()`,
+      two-way + multilevel, with a live round-trip showing the emitted call = an
+      `icc()` call); intro overview list corrected (dropped the non-existent
+      "Confidence-interval methods" section). All numbers computed live (#4/#12);
+      knits clean; pkgdown renders the three plot figures with no alt-text warnings.
+- [x] Refreshed `README.Rmd` → `README.md`: stale "multilevel is next" NOTE replaced
+      with the shipped-family summary; worked example now spans default agreement,
+      `choose_icc()`, and a live **multilevel** fit (60 subjects in 12 clusters, both
+      levels); regenerated via `devtools::build_readme()`.
+- [x] New claim backed in `test-vignette-claims.R` (rater component dominates on
+      `ratings` — the "why agreement is low" narrative); the `choose_icc()` round-trip
+      is already the M12 oracle. All 35 vignette-claim tests green.
 
 ### Slice 3 — CRAN submission-ready
 - [ ] `DESCRIPTION` version → `0.1.0`; `NEWS.md` dev bullets consolidated under a clean

@@ -211,6 +211,20 @@ test_that("advanced.Rmd: lavaan matches glmmTMB on consistency, differs slightly
   expect_lt(abs(la1 - ga1), 0.02) # but close (asymptotically equivalent)
 })
 
+# Plotting claim (advanced.Rmd) -------------------------------------------
+# The "Visualising a fit" section's variance-component plot claims the rater
+# component is the largest on `ratings`, which is why absolute agreement -- the
+# only coefficient that charges between-rater differences as error -- is so much
+# lower than the averaged/consistency coefficients. Back the claim numerically (#1).
+
+test_that("advanced.Rmd: the rater component dominates on `ratings`", {
+  skip_if_not_installed("glmmTMB")
+
+  comp <- icc(ratings, score, subject, rater, seed = 1)$components
+  expect_gt(comp$rater, comp$subject)
+  expect_gt(comp$rater, comp$residual)
+})
+
 # Multilevel claims (advanced.Rmd) ----------------------------------------
 # The advanced article's multilevel example asserts that on the simulated
 # `school` design the cluster-level ICC is the larger of the two levels. Rebuild
