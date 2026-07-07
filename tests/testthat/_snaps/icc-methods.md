@@ -1,0 +1,15 @@
+# summary() prints the report plus interpretive notes
+
+    Code
+      summary(fit)
+    Message
+      # Intraclass correlation: two-way random, absolute agreement
+      Subjects: 6 | Raters: 4 (random) | Observations: 24
+      Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+        index     estimate   95% CI
+        ICC(A,1)    0.290   [0.051, 0.715]
+        ICC(A,k)    0.620   [0.178, 0.909]
+      Variance components: subject 2.556, rater 5.244, residual 1.019
+      Absolute agreement counts the rater main effect as error; a single rating
+      per cell confounds the subject-by-rater interaction with residual error.
+

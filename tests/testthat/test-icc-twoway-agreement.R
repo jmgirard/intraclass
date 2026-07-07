@@ -17,7 +17,7 @@
 # signature in ONE place without touching any oracle value. The unquoted column
 # arguments assume tidy-eval; if M1 chooses string arguments instead, change
 # them here only.
-fit_sf_agreement <- function() {
+fit_sf_agreement <- function(seed = NULL) {
   # M0 scaffolding guard: the estimator lands in M1. Until `icc()` exists these
   # oracle tests SKIP (keeping CI green) rather than error; the guard removes
   # itself automatically the moment M1 defines `icc()`. Documented, time-bound
@@ -26,6 +26,8 @@ fit_sf_agreement <- function() {
     exists("icc", mode = "function"),
     "icc() estimator is implemented in Milestone 1 (see project/MILESTONES.md)."
   )
+  # `seed` is passed only where a deterministic Monte-Carlo CI is needed (e.g.
+  # the print snapshot); the point-estimate oracles do not depend on it.
   icc(
     data = sf_ratings_long(),
     score = score,
@@ -34,13 +36,14 @@ fit_sf_agreement <- function() {
     model = "twoway",
     type = "agreement", # absolute agreement (not consistency)
     unit = c("single", "average"), # -> ICC(A,1) and ICC(A,k)
-    engine = "lme4",
-    conf_level = 0.95
+    engine = "glmmTMB", # M1 default engine (ADR-002); lme4 is oracle-only
+    conf_level = 0.95,
+    seed = seed
   )
 }
 
 test_that("ICC(A,1) matches the published Shrout & Fleiss (1979) value", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("glmmTMB")
 
   fit <- fit_sf_agreement()
   est <- icc_estimate(fit, "ICC(A,1)")
@@ -51,7 +54,7 @@ test_that("ICC(A,1) matches the published Shrout & Fleiss (1979) value", {
 })
 
 test_that("ICC(A,k) matches the published Shrout & Fleiss (1979) value", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("glmmTMB")
 
   fit <- fit_sf_agreement()
   est <- icc_estimate(fit, "ICC(A,k)")
@@ -61,7 +64,7 @@ test_that("ICC(A,k) matches the published Shrout & Fleiss (1979) value", {
 })
 
 test_that("estimates agree with psych::ICC at full precision (balanced data)", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("glmmTMB")
   skip_if_not_installed("psych")
 
   fit <- fit_sf_agreement()
@@ -78,7 +81,7 @@ test_that("estimates agree with psych::ICC at full precision (balanced data)", {
 })
 
 test_that("tidy() output honours the estimator contract", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("glmmTMB")
 
   fit <- fit_sf_agreement()
   td <- generics::tidy(fit)
@@ -97,7 +100,7 @@ test_that("tidy() output honours the estimator contract", {
 })
 
 test_that("averaging raises reliability: ICC(A,k) > ICC(A,1)", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("glmmTMB")
 
   # Oracle-independent invariant (Spearman-Brown): for a positive single-rater
   # ICC, the k-rater average is strictly larger. Cheap guard against a label
@@ -107,10 +110,10 @@ test_that("averaging raises reliability: ICC(A,k) > ICC(A,1)", {
 })
 
 test_that("print() output is stable", {
-  skip_if_not_installed("lme4")
+  skip_if_not_installed("glmmTMB")
 
-  fit <- fit_sf_agreement()
-  # First run: eyeball the printout, then testthat::snapshot_accept() if
-  # correct. Thereafter this guards the cli-formatted summary from drift.
+  # Seeded so the Monte-Carlo CI in the printout is deterministic (#12); an
+  # unseeded fit would make this snapshot flaky.
+  fit <- fit_sf_agreement(seed = 1)
   expect_snapshot(print(fit))
 })

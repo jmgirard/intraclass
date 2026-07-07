@@ -30,21 +30,22 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Estimand: see [`estimand-specs/M1-twoway-random-agreement.md`](estimand-specs/M1-twoway-random-agreement.md).
   ICC(A,1) = σ²_s / (σ²_s + σ²_r + σ²_res); ICC(A,k) = σ²_s / (σ²_s + (σ²_r + σ²_res)/k).
 - Definition of Done (per-estimator bar, §8):
-  - [ ] Public `icc()` API per the seed test signature; classed `icc` object.
-  - [ ] glmmTMB engine (default); lme4 supported as an alternate engine.
-  - [ ] Boundary-aware Monte-Carlo CIs from `vcov(fit, full = TRUE)` (ADR-003).
-  - [ ] `print` / `summary` / `format` / `tidy` / `glance` methods.
-  - [ ] Oracle tests — ≥2 independent types, actually ≥3:
+  - [x] Public `icc()` API per the seed test signature; classed `icc` object.
+  - [x] glmmTMB engine (only selectable engine in M1); lme4 oracle-only (ADR-005).
+  - [x] Boundary-aware Monte-Carlo CIs from `vcov(fit, full = TRUE)` (ADR-003).
+  - [x] `print` / `summary` / `format` / `tidy` / `glance` methods.
+  - [x] Oracle tests — ≥2 independent types, actually 5:
         (a) Shrout & Fleiss (1979) worked values ICC(A,1)=0.290, ICC(A,k)=0.620;
         (b) `psych::ICC` on the balanced case to 1e-4;
-        (c) seeded simulation with known population variance components;
-        plus an lme4-vs-glmmTMB cross-check.
-  - [ ] Boundary/error-path tests; `cli` messaging + classed errors; print snapshot.
-  - [ ] Roxygen "which ICC / when" note incl. the single-rating identifiability caveat.
-  - [ ] *Getting started* vignette knits.
-  - [ ] `REFERENCES.md` + `DECISIONS.md` updated; coverage ≥90%, statistical paths
-        oracle-covered; `R-CMD-check` clean on the full matrix.
-- Status: not started (planned next, after M0 sign-off)
+        (c) package-independent ANOVA mean-squares (base `aov`);
+        (d) seeded simulation with known population variance components;
+        (e) lme4-vs-glmmTMB cross-check.
+  - [x] Boundary/error-path tests; `cli` messaging + classed errors; print snapshot.
+  - [x] Roxygen "which ICC / when" note incl. the single-rating identifiability caveat.
+  - [x] *Getting started* vignette knits.
+  - [x] `REFERENCES.md` + `DECISIONS.md` updated; coverage 94% (statistical paths
+        100%); `devtools::check()` 0/0/0 locally. Full CI matrix confirmed on push.
+- Status: done (local) — pending push + maintainer sign-off
 
 ## M2: Consistency variants + fixed-vs-random raters *(provisional)*
 - Goal: `ICC(C,1)`/`ICC(C,k)`; fixed vs. random rater handling; generalize the

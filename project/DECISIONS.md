@@ -84,3 +84,31 @@ consequences → references.
   the air installer or `posit-dev/setup-air` in CI). Contributors run
   `air format .` before committing (the `finish-task` skill runs it).
 - References: `CLAUDE_CODE_KICKOFF.md` §3; https://posit-dev.github.io/air/.
+
+## ADR-005: M1 `icc()` API, estimand representation, and lme4-oracle-only scope
+- Date: 2026-07-06
+- Status: accepted
+- Context: M1 needed a concrete public API and an internal representation that
+  would not require a rewrite when M2 adds consistency ICCs and fixed raters.
+- Decision:
+  - **Public API** `icc(data, score, subject, rater, model = "twoway", type =
+    "agreement", unit = c("single", "average"), engine = "glmmTMB", conf_level =
+    0.95, ci_method = "montecarlo", mc_samples = 10000, seed = NULL)`; columns
+    captured with tidy-eval; returns a classed `icc` object with
+    `print`/`summary`/`format`/`tidy`/`glance`.
+  - **Estimand representation** = (signal component, {error component set},
+    averaging divisor) (estimand-spec §5). Agreement error = {rater, residual};
+    consistency (M2) drops `rater`; average divides the error sum by k. So the
+    family's knobs are data, not code paths.
+  - **Scope**: glmmTMB is the only selectable engine in M1 with covariance-based
+    Monte-Carlo CIs; **lme4 is oracle-only** (a test fits `lmer` directly and
+    cross-checks point estimates to 1e-4). This narrows ADR-002's "alternative
+    engine" for M1; lme4 as a selectable engine (with a bootstrap CI) is deferred
+    to M2. Every not-yet-implemented knob value aborts via the classed
+    `abort_unsupported()`/`abort_unidentified()` layer (PRINCIPLES.md #5).
+- Consequences: One engine end-to-end (thin vertical slice, #15). The seed test's
+  provisional adapter default flipped `engine = "lme4"` -> `"glmmTMB"` (sanctioned
+  by that file). `withr`/`tibble`: `tibble` promoted to Imports (tidy/glance return
+  tibbles); RNG seeding uses a dependency-free save/restore helper rather than
+  adding `withr` to Imports (keeps the light-install path).
+- References: PRINCIPLES.md #2, #5, #7, #15; estimand-spec §5; ADR-002/003.

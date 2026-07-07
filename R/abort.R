@@ -7,6 +7,9 @@
 #
 # PRINCIPLES.md #5: ill-posed designs fail loudly through this layer (e.g.
 # `abort_unidentified()`), never by silently returning a plausible number.
+#
+# `.envir` is threaded through so cli interpolates message variables (e.g.
+# `{arg}`) in the frame that built the message, even when a wrapper forwards it.
 
 #' Abort with a classed intraclass condition
 #'
@@ -14,21 +17,24 @@
 #'   (supports `{.arg }`, `{.val }`, etc.). Use a named vector for bullets.
 #' @param class Character. Condition subclass(es), prepended to
 #'   `"intraclass_error"`.
-#' @param ... Passed to [cli::cli_abort()] (e.g. `call`, data to store on the
-#'   condition).
+#' @param ... Passed to [cli::cli_abort()].
+#' @param call,.envir The environment for the reported call and for message
+#'   interpolation.
 #' @keywords internal
 #' @noRd
 abort_intraclass <- function(
   message,
   class = NULL,
   ...,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  .envir = rlang::caller_env()
 ) {
   cli::cli_abort(
     message,
     class = c(class, "intraclass_error"),
     ...,
-    call = call
+    call = call,
+    .envir = .envir
   )
 }
 
@@ -39,11 +45,41 @@ abort_intraclass <- function(
 #' @param message Character vector describing what could not be separated.
 #' @keywords internal
 #' @noRd
-abort_unidentified <- function(message, ..., call = rlang::caller_env()) {
+abort_unidentified <- function(
+  message,
+  ...,
+  call = rlang::caller_env(),
+  .envir = rlang::caller_env()
+) {
   abort_intraclass(
     message,
     class = "intraclass_unidentified",
     ...,
-    call = call
+    call = call,
+    .envir = .envir
+  )
+}
+
+#' Abort because a requested option is valid but not yet implemented
+#'
+#' Distinct from `abort_unidentified()` (which is about the *design*): this marks
+#' a knob whose value is planned for a later milestone, so users get a forward
+#' pointer rather than a silent wrong path (PRINCIPLES.md #5, #17).
+#'
+#' @param message Character vector naming the unsupported option.
+#' @keywords internal
+#' @noRd
+abort_unsupported <- function(
+  message,
+  ...,
+  call = rlang::caller_env(),
+  .envir = rlang::caller_env()
+) {
+  abort_intraclass(
+    message,
+    class = "intraclass_unsupported",
+    ...,
+    call = call,
+    .envir = .envir
   )
 }

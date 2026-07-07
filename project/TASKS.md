@@ -22,15 +22,16 @@ condensed to a single line once done.
 - [x] Create public `jmgirard/intraclass` repo; first push; confirm CI green (commit 0d81e34) — Opus
 - [x] Update STATUS.md "Last green CI"; commit — Opus
 
-## M1 — two-way random, absolute agreement (not started; seeded for reference)
+## M1 — two-way random, absolute agreement (done locally, pending push + sign-off)
 
-- [ ] Plan M1 (API shape, engine abstraction, MC-CI design) and get sign-off — Opus
-- [ ] `icc()` core: parse args, fit `score ~ 1 + (1|subject) + (1|rater)` (glmmTMB) — Opus
-- [ ] Variance-component extraction → estimand (signal, error set, divisor) — Opus
-- [ ] Monte-Carlo CI from `vcov(fit, full = TRUE)` (boundary-aware) — Opus
-- [ ] lme4 engine path + engine-agnostic dispatch — Opus
-- [ ] S3 methods: `print`/`summary`/`format`/`tidy`/`glance` — Opus
-- [ ] Seeded-simulation oracle test (known population components) — Opus
-- [ ] Roxygen "which ICC / when" note; *Getting started* vignette — Opus
-- [ ] Flip seed test `engine` default to glmmTMB; add lme4×glmmTMB cross-check — Opus
-- [ ] Verify vs all oracles; coverage ≥90%; `finish-task` gate — Opus
+- [x] Plan M1 (API shape, estimand abstraction, MC-CI design) and get sign-off — Opus
+- [x] `icc()` core: parse args (tidy-eval), fit `score ~ 1 + (1|subject) + (1|rater)` (glmmTMB) — Opus
+- [x] Variance-component extraction → estimand (signal, error set, divisor) — Opus
+- [x] Monte-Carlo CI from `vcov(fit, full = TRUE)` (boundary-aware, seeded) — Opus
+- [x] Engine dispatch scaffolding; lme4 as oracle-only in M1 (ADR-005) — Opus
+- [x] S3 methods: `print`/`summary`/`format`/`tidy`/`glance` — Opus
+- [x] Oracle tests: ANOVA mean-squares, seeded simulation, lme4 cross-check, errors — Opus
+- [x] Roxygen "which ICC / when" note; *Getting started* vignette — Opus
+- [x] Flip seed test `engine` default to glmmTMB; repoint skip guards — Opus
+- [x] Verify vs all oracles; coverage 94%; check 0/0/0 — Opus
+- [ ] Push; confirm full CI matrix green; update STATUS last-green-CI — Opus

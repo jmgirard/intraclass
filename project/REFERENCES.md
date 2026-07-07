@@ -35,7 +35,10 @@ reference values, ever.
   recorded for later milestones.
 
 ### Oracle O2 — ANOVA mean-squares (package-independent, hand-derived)
-- **Status:** registered; to be asserted in M1 as the third oracle type.
+- **Status:** **asserted (M1)** in `tests/testthat/test-icc-anova-oracle.R`: the
+  mean squares are recomputed with base `stats::aov()`, the method-of-moments
+  components derived, and the glmmTMB engine's `VarCorr` + reported ICCs matched
+  to them (tolerance 1e-4). Reproducible; nothing hardcoded.
 - **Source:** the ANOVA identity applied to the O1 dataset, derived in
   [`estimand-specs/M1-twoway-random-agreement.md`](estimand-specs/M1-twoway-random-agreement.md)
   §6 (not another R package). Must be recomputed and checked in R before use — do
@@ -49,9 +52,15 @@ reference values, ever.
   σ²_s/(σ²_s+σ²_res) = 0.71484 → 0.715.)
 
 ### Oracle O3 — seeded simulation with known population components
-- **Status:** to be authored in M1 (its own test file), seeded per PRINCIPLES.md
-  #12. Draw data from a known (σ²_s, σ²_r, σ²_res), fit, and confirm recovery of
-  the population ICC within tolerance across replications.
+- **Status:** **asserted (M1)** in `tests/testthat/test-icc-simulation.R`
+  (`set.seed(2024)`, n = 100, k = 8, σ²_s = 4, σ²_r = 1, σ²_res = 2). The point
+  ICCs recover the population values within 0.05 and the Monte-Carlo interval
+  covers them. Seeded per PRINCIPLES.md #12.
+
+### Cross-engine oracle — lme4 (independent implementation)
+- **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
+  `lme4::lmer` fit directly reproduces the glmmTMB engine's point ICCs to 1e-4 on
+  the balanced O1 data (ADR-002/005 — lme4 is oracle-only in M1).
 
 ---
 

@@ -1,17 +1,16 @@
 # Project status
 
-- Milestone: M0 — scaffolding (complete, pending maintainer sign-off)
-- Active task: — (awaiting go-ahead to plan M1)
-- Last green CI: 0d81e34 (all 5 workflows green: R-CMD-check matrix, coverage,
-  lint, format, pkgdown)
+- Milestone: M1 — two-way random, absolute agreement (complete, pending sign-off)
+- Active task: — (awaiting go-ahead to plan M2)
+- Last green CI: pending push (local: check 0/0/0, coverage 94%, air/lint clean)
 - Blockers: —
 - Updated: 2026-07-06 by main session (Opus)
 
 ## Next action
 
-M0 is built and green. **Await maintainer sign-off on the scaffold** (per
-`CLAUDE_CODE_KICKOFF.md` §7 — stop after scaffolding). On sign-off, **plan M1**
-(two-way random absolute-agreement `ICC(A,1)` / `ICC(A,k)`) — name the estimand
-and oracle set before writing estimator code (PRINCIPLES.md #2, #14). See
-[`MILESTONES.md`](MILESTONES.md) and
-[`estimand-specs/M1-twoway-random-agreement.md`](estimand-specs/M1-twoway-random-agreement.md).
+M1 is built and locally green: `icc()` for `ICC(A,1)`/`ICC(A,k)` (glmmTMB engine,
+boundary-aware Monte-Carlo CIs, `print`/`summary`/`format`/`tidy`/`glance`),
+verified against 5 oracles (Shrout & Fleiss, `psych::ICC`, ANOVA mean squares,
+seeded simulation, lme4 cross-check), plus the Getting-started vignette. Push and
+confirm CI green, then **await sign-off before planning M2** (consistency ICCs +
+fixed raters + generalized estimand abstraction — see [`MILESTONES.md`](MILESTONES.md)).
