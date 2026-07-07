@@ -45,8 +45,8 @@ fit
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.713]
-#>   ICC(A,k)    0.620   [0.173, 0.909]
+#>   ICC(A,1)    0.290   [0.050, 0.711]
+#>   ICC(A,k)    0.620   [0.173, 0.908]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
@@ -64,8 +64,8 @@ tidy(fit)
 #> # A tibble: 2 × 9
 #>   index   level sf_index estimate std.error conf.low conf.high conf.level method
 #>   <chr>   <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr> 
-#> 1 ICC(A,… NA    ICC(2,1)    0.290     0.180   0.0498     0.713       0.95 monte…
-#> 2 ICC(A,… NA    ICC(2,k)    0.620     0.201   0.173      0.909       0.95 monte…
+#> 1 ICC(A,… NA    ICC(2,1)    0.290     0.180   0.0498     0.711       0.95 monte…
+#> 2 ICC(A,… NA    ICC(2,k)    0.620     0.201   0.173      0.908       0.95 monte…
 
 glance(fit)
 #> # A tibble: 1 × 16
@@ -108,8 +108,8 @@ icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(C,1)    0.715   [0.343, 0.924]
-#>   ICC(C,k)    0.909   [0.676, 0.980]
+#>   ICC(C,1)    0.715   [0.340, 0.926]
+#>   ICC(C,k)    0.909   [0.673, 0.980]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
 

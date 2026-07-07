@@ -46,14 +46,14 @@ proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>       m  estimate   95% CI
-#>       1     0.290   [0.050, 0.706]
-#>       2     0.449   [0.096, 0.828]
-#>       3     0.550   [0.137, 0.878]
-#>       4     0.620   [0.175, 0.906]
-#>       5     0.671   [0.210, 0.923]
-#>       6     0.710   [0.241, 0.935]
-#>       7     0.741   [0.271, 0.944]
-#>       8     0.765   [0.298, 0.950]
+#>       1     0.290   [0.050, 0.712]
+#>       2     0.449   [0.095, 0.831]
+#>       3     0.550   [0.136, 0.881]
+#>       4     0.620   [0.173, 0.908]
+#>       5     0.671   [0.207, 0.925]
+#>       6     0.710   [0.239, 0.937]
+#>       7     0.741   [0.268, 0.945]
+#>       8     0.765   [0.295, 0.952]
 ```
 
 Reliability climbs with more raters but with diminishing returns, and
@@ -141,8 +141,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
-#>   subject  ICC(A,1)    0.431   [0.251, 0.561]
-#>   subject  ICC(A,k)    0.751   [0.573, 0.836]
+#>   subject  ICC(A,1)    0.431   [0.249, 0.561]
+#>   subject  ICC(A,k)    0.751   [0.571, 0.836]
 #>   cluster  ICC(A,1)    0.880   [0.000, 0.972]
 #>   cluster  ICC(A,k)    0.967   [0.000, 0.993]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
