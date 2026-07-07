@@ -385,10 +385,11 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Deferred out of M6 (recorded so not rediscovered): within-cell replicates
   (`(1 | subject:rater)`); one-way *fixed* (not meaningful); categorical/ordinal
   one-way (GLMM). (Spec §10.)
-- Status: done (one slice; `devtools::check()` 0/0/0 local, tests 247/0/0, lintr
-  clean). Ships `model = "oneway"` (ICC(1)/ICC(k), + numeric-unit projection) on
-  both engines, oracles O-OW (textbook + psych + ANOVA + cross-engine + sim), and
-  the choosing-an-icc "are the raters crossed?" section. **Pending PR merge.**
+- Status: done (one slice; merged via PR #10 at `eb7102d`; full CI matrix green —
+  9/9 incl. Windows on first try, `devtools::check()` 0/0/0 local, tests 247/0/0,
+  lintr clean). Ships `model = "oneway"` (ICC(1)/ICC(k), + numeric-unit projection)
+  on both engines, oracles O-OW (textbook + psych + ANOVA + cross-engine + sim),
+  and the choosing-an-icc "are the raters crossed?" section.
 
 ## M7: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a

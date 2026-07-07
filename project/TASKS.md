@@ -92,7 +92,7 @@ CI-green slice.
 
 See MILESTONES M5.5.
 
-## M6 — one-way random ICC(1)/ICC(k) — **code complete** (`m6-oneway`, ADR-013; pending PR)
+## M6 — one-way random ICC(1)/ICC(k) — **done** (merged via PR #10 at eb7102d, full CI matrix green)
 
 Last member of the classic SF family (Case 1): `model = "oneway"` fits
 `score ~ 1 + (1 | subject)` (no rater term) → `ICC(1)`/`ICC(1,k)`. First milestone
