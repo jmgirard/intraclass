@@ -14,8 +14,8 @@ M2 shipped: `icc()` now supports `type = "consistency"` (`ICC(C,1)`/`ICC(C,k)`)
 and `raters = c("random", "fixed")` — fixed raters a balanced-data label layer
 over the shared fit (two-way mixed, SF `ICC(3,*)`) with a loud classed
 `intraclass_fixed_raters` warning. Verified against SF 0.715/0.909, `psych`
-ICC3/ICC3k, and the fixed≡random equivalence (O4). PR #1 merged at 334a48a; a
-docs-only reconciliation commit follows to close the "pending push" markers.
+ICC3/ICC3k, and the fixed≡random equivalence (O4). PR #1 merged at 334a48a and
+the tracking markers are reconciled.
 
 **Next (M3, provisional):** imbalanced & incomplete designs + the flagship
 "Choosing an ICC" vignette. M3 inherits the load-bearing debt from ADR-006: the
