@@ -285,6 +285,42 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   Design-1 fit, oracles O-ML (lme4 + seeded sim + single-level reduction), and the
   advanced-vignette multilevel section.
 
+## M5.5: lme4 as a selectable engine (pre-M6 interface slice, ADR-012)
+- Goal: promote **lme4 from oracle-only to a selectable `engine = "lme4"`** for the
+  default random two-way path, returning the same six-field engine contract so the
+  whole downstream pipeline (`icc_point`/`mc_ci`/`d_study`) is untouched. Resolves
+  the ADR-005 deferral (lme4-selectable, deferred since M2) and builds the
+  **engine × design dispatch seam** M6 plugs brms/lavaan into — de-risking M6 by
+  proving the interface with an engine already trusted as the cross-check oracle.
+  **No new estimand, no estimand-spec** (cf. M4); scope decisions in ADR-012.
+- Definition of Done (one CI-green slice):
+  - [ ] `engine = "lme4"` selectable for the random two-way path; `R/engine-lme4.R`
+        `fit_lme4()` fits `lmer(score ~ 1 + (1|subject) + (1|rater), REML = TRUE)`
+        and returns `list(fit, engine, components, estimate, vcov, to_components)`
+        on a **boundary-safe (log-SD) scale**; the hardcoded glmmTMB if/else in
+        `icc()` becomes an engine × design lookup.
+  - [ ] CI via **merDeriv** (new `Suggests`) reusing the existing `montecarlo`
+        path — no new `ci_method` value; `check_installed()` for both `lme4` and
+        `merDeriv`; light install preserved.
+  - [ ] `engine = "lme4"` with `raters = "fixed"` or a multilevel design →
+        classed `abort_unsupported()` (deferred, recorded so not rediscovered).
+  - [ ] Oracles O-LME (≥2 independent, extending the existing lme4-oracle tests):
+        (a) point lme4 ≡ glmmTMB ≤ 1e-4 on SF `ratings` (0.290/0.620/0.715/0.909);
+        (b) **interval** lme4 MC CI ≈ glmmTMB MC CI ~1e-2 (new cross-engine
+        interval oracle — the payoff of merDeriv over bootstrap);
+        (c) boundary — near-zero rater variance emits no negative-variance draws;
+        (d) seeded-sim coverage of the lme4 MC CI at nominal.
+  - [ ] `print`/`glance` surface `engine = "lme4"`; lme4 print snapshot; roxygen
+        `@param engine` corrected (drops "Only glmmTMB"); NEWS; short advanced.Rmd
+        engine-choice note with a backing `test-vignette-claims.R` line.
+  - [ ] `merDeriv` → `Suggests`; `devtools::check()` 0/0/0 local; `air`/`lintr`
+        clean; ADR-012; MILESTONES/STATUS/TASKS same-commit (#16). Ships on
+        `m5.5-lme4-engine`, merged via PR; full CI matrix on the PR.
+- Deferred out of M5.5 (recorded so not rediscovered): lme4 for the fixed-effect
+  (Case 3/3A) and multilevel fits; the parametric-bootstrap `ci_method` (bootMer)
+  → M6/ROADMAP; merDeriv edge cases beyond the two-way random model.
+- Status: in progress (ADR-012 accepted; slice 1 started on `m5.5-lme4-engine`)
+
 ## M6: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a
   shared interface, gated by `rlang::check_installed()`. *(was M5)*

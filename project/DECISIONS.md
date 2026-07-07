@@ -431,3 +431,60 @@ consequences → references.
   ADR-003 (MC CIs), ADR-005 (estimand representation + lme4 oracle), ADR-010
   (divisor generalization); ten Hove, Jorgensen & van der Ark (2022, Table 3);
   Brennan (2001, multivariate GT).
+
+## ADR-012: lme4 as a selectable engine via merDeriv-backed Monte-Carlo CIs (M5.5)
+- Date: 2026-07-07
+- Status: accepted
+- Context: ADR-005 shipped M1 with glmmTMB as the only *selectable* engine and
+  lme4 **oracle-only**, deferring lme4-as-selectable (with a bootstrap CI) first
+  to M2, then repeatedly (out of M2 per ADR-006 notes, out of M3). M6 (optional
+  Bayesian/SEM engines) needs a real **engine × design dispatch seam** that does
+  not yet exist — the engine branch in `icc()` is a hardcoded glmmTMB if/else.
+  Promoting lme4 to a selectable engine first builds and proves that seam with an
+  engine already trusted as the cross-check oracle (lme4 ≡ glmmTMB to ~1e-4
+  everywhere), de-risking M6 rather than inventing the interface and two hard new
+  engines at once. Scheduled as **M5.5** (its own slice before M6, mirroring the
+  M4.5 precedent) after a short M5 retro (founding brief §7). Maintainer-approved
+  this session, incl. the two open design questions below.
+- Decision:
+  - **`engine = "lme4"` becomes selectable for the default random two-way path.**
+    `fit_lme4()` fits `lmer(score ~ 1 + (1 | subject) + (1 | rater), REML = TRUE)`
+    and returns the **same six-field engine contract** as `fit_glmmtmb()`
+    (`fit`/`engine`/`components`/`estimate`/`vcov`/`to_components`), so
+    `icc_point()`/`mc_ci()`/`d_study()` are **unchanged** — this is a second
+    engine, **not a new estimand** (no estimand-spec, cf. M4).
+  - **CI via `merDeriv` (new `Suggests`), reusing the existing Monte-Carlo path**
+    (open question 1, maintainer chose merDeriv over parametric bootstrap).
+    merDeriv recovers the joint covariance of the variance-component parameters —
+    which base lme4 does not expose (ADR-002) — so lme4 populates the MC contract
+    and the `montecarlo` `ci_method` gains **no new value** this slice. The payoff
+    is a **cross-engine *interval* oracle**: lme4's MC CI must match glmmTMB's to
+    ~1e-2, not just the point estimate. The parametric-bootstrap `ci_method`
+    (bootMer) stays deferred (M6/ROADMAP).
+  - **Boundary-awareness (#3):** merDeriv reports the covariance on the
+    variance/SD scale, **not** glmmTMB's internal log-SD scale that keeps MC draws
+    ≥ 0. `to_components` for lme4 must map draws onto a boundary-safe (log-SD)
+    scale so the near-zero-rater-variance case emits no negative-variance draws.
+    Pinned by an explicit boundary oracle.
+  - **Scope: random two-way path only** (open question 2, maintainer chose the
+    thinnest slice, #15). `engine = "lme4"` with `raters = "fixed"` or a multilevel
+    (`cluster`) design → classed `abort_unsupported()`; both `check_installed()`
+    for `lme4` and `merDeriv` guard the path (light install preserved).
+  - **Dispatch seam:** the hardcoded glmmTMB if/else in `icc()` becomes an
+    engine × design lookup — the interface M6 extends with brms/lavaan rows.
+- Consequences: resolves the ADR-005 (and ADR-006-notes) deferral. `engine`
+  becomes a real choice, not a stub (`@param engine` roxygen corrected; this is an
+  additive API change, not breaking, #6). Base install stays light — `lme4` and
+  `merDeriv` are both `Suggests` behind `check_installed()`. Oracles O-LME:
+  (a) point lme4 ≡ glmmTMB ≤ 1e-4 on SF `ratings`; (b) **interval** lme4 MC CI ≈
+  glmmTMB MC CI ~1e-2 (new); (c) boundary — no negative-variance draws near zero;
+  (d) seeded-sim coverage at nominal. Deferred (recorded so not rediscovered):
+  lme4 for the fixed (Case 3/3A) and multilevel fits; the bootstrap `ci_method`;
+  merDeriv edge cases beyond the two-way random model. Ships on `m5.5-lme4-engine`,
+  merged via PR.
+- References: PRINCIPLES.md #1, #2, #3, #5, #6, #8, #15, #16, #17; ADR-002 (glmmTMB
+  default + why lme4 needs merDeriv/bootstrap for the joint vcov), ADR-003 (MC CIs),
+  ADR-005 (deferred lme4-selectable + bootstrap CI), ADR-006 (fixed-rater path),
+  ADR-011 (multilevel fit); `merDeriv` (Wang & Merkle 2018, *J. Stat. Softw.*);
+  lme4 (Bates et al. 2015); `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its
+  start), §1 (engines).
