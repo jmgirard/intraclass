@@ -39,6 +39,22 @@
 #' where \eqn{\sigma^2_s} is the subject (signal) variance and `k` is the number
 #' of raters.
 #'
+#' @section Multilevel designs (subject vs. cluster level):
+#' When subjects are nested in higher-level clusters (pupils in classrooms,
+#' patients in clinics), single-level ICCs conflate the levels and are biased
+#' (ten Hove et al. 2022). Supplying `cluster` fits the five-component Design-1
+#' model
+#' \deqn{score \sim 1 + (1|cluster) + (1|cluster{:}subject) + (1|rater) + (1|cluster{:}rater)}
+#' and reports two distinct reliabilities. The **subject level** (within-cluster)
+#' asks how reliably raters distinguish subjects *within* a cluster: its signal is
+#' the between-subject-within-cluster variance and cluster variance drops out. The
+#' **cluster level** (between-cluster) asks how reliably raters distinguish cluster
+#' means: its signal is the between-cluster variance and the rater-disagreement
+#' error is the cluster-by-rater term. Choose the level that matches the decision
+#' you will make (about a subject, or about a cluster). Multilevel support (M5)
+#' covers crossed random raters on balanced data; the agreement/consistency and
+#' single/average choices above apply at each level.
+#'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
 #' the model's internal (log) scale and back-transformed, so the interval is
@@ -48,6 +64,11 @@
 #' @param data A data frame with one rating per row.
 #' @param score,subject,rater Columns of `data` (unquoted): the numeric rating,
 #'   the subject (object of measurement), and the rater (judge).
+#' @param cluster Optional column of `data` (unquoted) giving the higher-level
+#'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
+#'   on the **multilevel** ICC (ten Hove et al. 2022): reliability is reported at
+#'   the subject and/or cluster level (see `level` and the *Multilevel designs*
+#'   section). Left `NULL` (the default) for an ordinary single-level two-way ICC.
 #' @param model Design. Only `"twoway"` is currently supported.
 #' @param type Error definition: `"agreement"` (absolute agreement, the default)
 #'   counts systematic rater differences as error; `"consistency"` ignores them.
@@ -65,6 +86,10 @@
 #'   `m` raters (-> `ICC(*,m)`), or any combination. See [d_study()] for projecting
 #'   across a range of `m`. Projecting absolute agreement is not defined for fixed
 #'   raters (see [d_study()]).
+#' @param level For multilevel designs (a `cluster` column), which reliability to
+#'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
+#'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
+#'   Ignored (and must be left at its default) when `cluster` is not supplied.
 #' @param engine Estimation engine. Only `"glmmTMB"` is currently supported.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
@@ -84,6 +109,10 @@
 #' Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 #' assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.
 #'
+#' ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
+#' reliability for multilevel data: A generalizability theory approach.
+#' *Psychological Methods, 27*(4), 650-666.
+#'
 #' @examples
 #' ratings <- data.frame(
 #'   subject = factor(rep(1:6, 4)),
@@ -99,10 +128,12 @@ icc <- function(
   score,
   subject,
   rater,
+  cluster = NULL,
   model = "twoway",
   type = c("agreement", "consistency"),
   raters = c("random", "fixed"),
   unit = c("single", "average"),
+  level = c("subject", "cluster"),
   engine = "glmmTMB",
   conf_level = 0.95,
   ci_method = "montecarlo",
@@ -127,6 +158,38 @@ icc <- function(
   type <- validate_choice(type, c("agreement", "consistency"), "type")
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
+
+  # A `cluster` column switches on the multilevel path (subjects nested in
+  # clusters, raters crossed -- ten Hove et al. 2022 Design 1; estimand-spec M5).
+  # `level` selects the within-cluster (subject) and/or between-cluster estimand.
+  cluster_v <- rlang::eval_tidy(rlang::enquo(cluster), data)
+  multilevel <- !is.null(cluster_v)
+  if (multilevel) {
+    level <- validate_levels(level)
+    # M5 scope (ADR-011): random raters, keyword units only. Fixed-rater and
+    # D-study-projection multilevel ICCs are deferred (spec §8).
+    if (raters == "fixed") {
+      abort_unsupported(c(
+        "Fixed raters are not supported for multilevel ICCs yet.",
+        i = "Multilevel support (M5) covers {.code raters = \"random\"}; \\
+             fixed-rater multilevel is planned for a later milestone."
+      ))
+    }
+    if (any(vapply(unit, is.numeric, logical(1)))) {
+      abort_unsupported(c(
+        "Numeric {.arg unit} (D-study projection) is not supported for \\
+         multilevel ICCs yet.",
+        i = "Use {.val single} or {.val average}; multilevel D-study projection \\
+             is planned for a later milestone."
+      ))
+    }
+  } else if (!identical(level, c("subject", "cluster"))) {
+    # `level` only means something once subjects are nested (a `cluster` column).
+    abort_intraclass(c(
+      "{.arg level} requires a {.arg cluster} column.",
+      i = "Supply {.arg cluster} for a multilevel ICC, or drop {.arg level}."
+    ))
+  }
 
   # A numeric unit is a D-study projection; guard the one ill-posed combination
   # (fixed raters + absolute agreement) before fitting (PRINCIPLES.md #5).
@@ -163,9 +226,13 @@ icc <- function(
     rater = droplevels(as.factor(rater_v)),
     score = as.numeric(score_v)
   )
+  if (multilevel) {
+    df$cluster <- droplevels(as.factor(cluster_v))
+  }
 
   n_subjects <- nlevels(df$subject)
   n_raters <- nlevels(df$rater)
+  n_clusters <- if (multilevel) nlevels(df$cluster) else NA_integer_
   if (n_raters < 2L) {
     abort_unidentified(c(
       "A two-way ICC needs at least 2 raters to separate the rater variance.",
@@ -177,6 +244,34 @@ icc <- function(
       "A two-way ICC needs at least 2 subjects to estimate the signal variance.",
       i = "{.arg subject} has {n_subjects} level{?s}."
     ))
+  }
+
+  # Multilevel identifiability (estimand-spec M5 §7). Only >= 2 raters is inherited
+  # from the paper; the cluster/subject-nesting guards below are standard
+  # variance-component identifiability (not cited to ten Hove et al. 2022).
+  if (multilevel) {
+    if (n_clusters < 2L) {
+      abort_unidentified(c(
+        "A cluster-level ICC needs at least 2 clusters to estimate the \\
+         between-cluster variance.",
+        i = "{.arg cluster} has {n_clusters} level{?s}."
+      ))
+    }
+    cluster_of <- table(df$subject, df$cluster) > 0L
+    if (any(rowSums(cluster_of) > 1L)) {
+      abort_unidentified(c(
+        "Each subject must be nested in a single cluster.",
+        i = "Some {.arg subject} levels appear in more than one {.arg cluster}; \\
+             multilevel ICCs (M5) assume subjects nested in clusters."
+      ))
+    }
+    if (max(colSums(cluster_of)) < 2L) {
+      abort_unidentified(c(
+        "The between-subject and between-cluster variances cannot be separated \\
+         when every cluster holds a single subject.",
+        i = "At least one {.arg cluster} must contain 2 or more subjects."
+      ))
+    }
   }
 
   # Design facts for a possibly-incomplete layout (estimand-spec M3 §3, §5).
@@ -204,10 +299,14 @@ icc <- function(
     ))
   }
 
-  # Fixed raters get their own fixed-effect fit (Case 3/3A); random raters use
-  # the shared random-effects fit. The rest of the pipeline is identical -- the
-  # fixed engine returns theta^2_r in the "rater" slot (M3 §6, ADR-008).
-  engine_fit <- if (raters == "fixed") {
+  # Multilevel data uses the five-component Design-1 fit; otherwise fixed raters
+  # get their own fixed-effect fit (Case 3/3A) and random raters the shared
+  # random-effects fit. The rest of the pipeline is identical -- each engine
+  # returns named `components` the estimand indexes by signal/error (M5 §2/§3;
+  # M3 §6, ADR-008).
+  engine_fit <- if (multilevel) {
+    fit_glmmtmb_multilevel(df)
+  } else if (raters == "fixed") {
     fit_glmmtmb_fixed(df)
   } else {
     fit_glmmtmb(df)
@@ -216,10 +315,31 @@ icc <- function(
   # mean), which is k on balanced data (ADR-008; M3 §5). "single" uses 1; a
   # numeric unit projects to that many raters. Resolved per estimand.
   k <- design_info$k_eff
-  estimands <- lapply(
-    unit,
-    function(u) icc_estimand(type = type, unit = u, raters = raters, k_eff = k)
-  )
+  estimands <- if (multilevel) {
+    # Cross-product level x unit; level outer so rows group by level (M5 §3).
+    unlist(
+      lapply(level, function(lv) {
+        lapply(unit, function(u) {
+          icc_estimand(
+            type = type,
+            unit = u,
+            raters = raters,
+            k_eff = k,
+            level = lv,
+            multilevel = TRUE
+          )
+        })
+      }),
+      recursive = FALSE
+    )
+  } else {
+    lapply(
+      unit,
+      function(u) {
+        icc_estimand(type = type, unit = u, raters = raters, k_eff = k)
+      }
+    )
+  }
 
   points <- vapply(
     estimands,
@@ -236,6 +356,7 @@ icc <- function(
 
   estimates <- data.frame(
     index = vapply(estimands, `[[`, character(1), "label"),
+    level = vapply(estimands, `[[`, character(1), "level"),
     sf_index = vapply(estimands, `[[`, character(1), "sf_label"),
     estimate = points,
     std.error = vapply(intervals, `[[`, numeric(1), "std.error"),
@@ -252,7 +373,9 @@ icc <- function(
         model = model,
         type = type,
         raters = raters,
-        balanced = design_info$balanced
+        balanced = design_info$balanced,
+        multilevel = multilevel,
+        levels = if (multilevel) level else NULL
       ),
       k_eff = design_info$k_eff,
       engine = engine_fit$engine,
@@ -265,6 +388,7 @@ icc <- function(
       n = list(
         subjects = n_subjects,
         raters = n_raters,
+        clusters = n_clusters,
         obs = nrow(df),
         cells = design_info$n_cells
       ),
@@ -320,6 +444,20 @@ validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
     )
   }
   value
+}
+
+# Validate the multilevel `level` argument: the default (both) or a subset of
+# {"subject", "cluster"} (M5). Returns the requested levels, de-duplicated,
+# preserving the requested order.
+validate_levels <- function(level, call = rlang::caller_env()) {
+  choices <- c("subject", "cluster")
+  if (!is.character(level) || length(level) < 1L || !all(level %in% choices)) {
+    abort_intraclass(
+      "{.arg level} must be one or both of {.val {choices}}.",
+      call = call
+    )
+  }
+  unique(level)
 }
 
 # `unit` selects the averaging divisor: the keywords "single" (-> ICC(*,1)) and

@@ -16,8 +16,14 @@ reference values, ever.
   correlations: uses in assessing rater reliability. *Psychological Bulletin,
   86*(2), 420–428.
 - **Design:** balanced, complete; 6 subjects × 4 raters, integer ratings.
-- **Independent cross-checks (identical to printed precision):** `psych::ICC()`
-  (Revelle) and `DescTools::ICC()` (Signorell et al.).
+- **Independent cross-checks:** `psych::ICC()` (Revelle) is the **live in-suite
+  cross-check** — a `skip_if_not_installed("psych")` assertion runs on every test
+  pass (psych is in `Suggests`). `DescTools::ICC()` (Signorell et al.) was a
+  **one-time manual confirmation** recorded in `helper-shrout-fleiss.R`'s header
+  comment only; DescTools is **not** a dependency and is **not** exercised by any
+  test — do not read it as a standing oracle. The values themselves trace to the
+  Shrout & Fleiss (1979) textbook (the primary source, #4), so this does not affect
+  provenance.
 - **Values (3 dp):**
 
   | Package label | This package | SF form | Value |
@@ -93,9 +99,11 @@ reference values, ever.
   with `stopifnot` tolerance checks). Reproducible; nothing hardcoded.
 - **Not oracles here:** `psych::ICC` (ANOVA / listwise-deletion — cannot compute
   the incomplete-data estimand, so it stays the *balanced*-only oracle O1);
-  `irrNA`/`gtheory` are not installed in this environment and are left as optional
-  future cross-checks (skip-guarded), not required — the lme4 + simulation pair
-  already meets the ≥2-independent-oracle bar (PRINCIPLES.md #1).
+  `irrNA`/`gtheory` are **not** dependencies and **no test references them** —
+  they remain candidate future cross-checks that would be `skip_if_not_installed`-
+  guarded *if added*, not something exercised today. The lme4 + simulation pair
+  already meets the ≥2-independent-oracle bar (PRINCIPLES.md #1), so they are not
+  required.
 
 ### Oracle O6 — fixed-effect fit path, two-way mixed (Case 3 / 3A) (M3 Slice 2)
 - **Status:** **asserted (M3 Slice 2)** in `tests/testthat/test-icc-fixed-fit.R`.
@@ -141,6 +149,37 @@ reference values, ever.
 - **Provenance:** `data-raw/oracle-d-study.R` (seeded; regenerates the analytic and
   simulation values). Reproducible; nothing hardcoded.
 
+### Oracle O-ML — multilevel ICCs, subject- & cluster-level (M5, planned)
+- **Status:** **planned (M5)** — asserted in `tests/testthat/test-icc-multilevel.R`
+  (ADR-011; spec `M5-multilevel.md` §5). Not yet asserted; the four (level × type)
+  estimand equations are transcribed verbatim from ten Hove Table 3 (Design 1).
+  Three oracles for the subject-level (within-cluster) and cluster-level
+  (between-cluster) IRR ICCs, since no textbook worked example exists for the
+  multilevel IRR estimand (as with O5):
+  1. **lme4 cross-engine** — `lme4::lmer` fits the identical five-component Design-1
+     model `score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) +
+     (1 | cluster:rater)` on a balanced multilevel dataset and reproduces both ICC
+     families' points to <1e-4.
+  2. **Seeded simulation** — known σ²_c/σ²_s/σ²_r/σ²_res; both families' points
+     recovered within tolerance and the boundary-aware Monte-Carlo interval covers
+     the population values. Seeded per PRINCIPLES.md #12.
+  3. **Single-level reduction** — the subject-level estimand is algebraically
+     identical to the single-level M1/M2 estimand once the error set matches
+     (asserted as a code-level invariant); and, numerically, a balanced dataset
+     generated with **zero cluster and cluster×rater variance and many clusters**
+     (a single cluster is degenerate) yields subject-level ICCs equal to a
+     single-level `icc()` fit on the same ratings to <1e-4 (also vs. lme4). Guards
+     the new five-component fit. (No claim that it reproduces the exact Shrout &
+     Fleiss 0.290/0.620/0.715/0.909 unless a dataset yielding them is committed.)
+- **Decision:** signal is σ²_{s:c} (subject level) or σ²_c (cluster level); each ICC
+  is `signal / (signal + error / k)` with a scalar rater divisor `k`, error sets per
+  ten Hove Table 3 / spec §3 (ADR-011). `psych`/`gtheory` are **not** oracles here
+  (they do not target this estimand); a Bayesian/MCMC cross-check (ten Hove's own
+  method) is deferred to M6.
+- **Provenance:** `data-raw/oracle-multilevel.R` (seeded; `stopifnot` tolerance
+  checks) — to be committed when the coefficients are asserted. Reproducible;
+  nothing hardcoded.
+
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
   `lme4::lmer` fit directly reproduces the glmmTMB engine's point ICCs to 1e-4 on
@@ -160,6 +199,20 @@ reference values, ever.
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
   rater reliability. *Psychological Bulletin, 86*(2), 420–428.
+- ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
+  reliability for multilevel data: A generalizability theory approach.
+  *Psychological Methods, 27*(4), 650–666 (advance online publication 2021;
+  doi:10.1037/met0000391). (M5 multilevel estimand — subject- and cluster-level IRR
+  ICCs. **NB — citation error to fix in Slice 2:** `choosing-an-icc.Rmd`'s "fifth
+  choice" (multilevel) currently cites the *Updated Guidelines / incomplete-designs*
+  paper dated "2021" — the **wrong paper and year**. The multilevel forward-pointer
+  should cite *this* entry, ten Hove et al. (2022, multilevel, met0000391).)
+- ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2025). How to estimate
+  intraclass correlation coefficients for interrater reliability from planned
+  incomplete data. *Multivariate Behavioral Research, 60*(5), 1042–1061.
+  doi:10.1080/00273171.2025.2507745. (Simulation comparison concluding MLE of
+  random-effects models with **Monte-Carlo CIs** is preferred — the engine + CI
+  basis for ADR-002/ADR-003.)
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2024). Updated guidelines
   on selecting an ICC for interrater reliability. *Psychological Methods, 29*(5),
   967–979.

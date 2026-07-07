@@ -9,21 +9,34 @@
 #' @export
 format.icc <- function(x, ...) {
   ci_pct <- format(100 * x$ci$conf_level, trim = TRUE)
-  header <- sprintf(
-    "# Intraclass correlation: %s",
-    icc_design_phrase(x$design$type, x$design$raters)
-  )
+  ml <- isTRUE(x$design$multilevel)
+  phrase <- icc_design_phrase(x$design$type, x$design$raters)
+  if (ml) {
+    phrase <- paste("multilevel", phrase)
+  }
+  header <- sprintf("# Intraclass correlation: %s", phrase)
   cell_total <- x$n$subjects * x$n$raters
   completeness <- if (x$design$balanced) "complete" else "incomplete"
-  meta1 <- sprintf(
-    "Subjects: %d | Raters: %d (%s) | Observations: %d of %d cells (%s)",
-    x$n$subjects,
-    x$n$raters,
-    x$design$raters,
-    x$n$cells,
-    cell_total,
-    completeness
-  )
+  meta1 <- if (ml) {
+    sprintf(
+      "Subjects: %d in %d clusters | Raters: %d (%s) | Observations: %d",
+      x$n$subjects,
+      x$n$clusters,
+      x$n$raters,
+      x$design$raters,
+      x$n$obs
+    )
+  } else {
+    sprintf(
+      "Subjects: %d | Raters: %d (%s) | Observations: %d of %d cells (%s)",
+      x$n$subjects,
+      x$n$raters,
+      x$design$raters,
+      x$n$cells,
+      cell_total,
+      completeness
+    )
+  }
   meta2 <- sprintf(
     "Engine: %s (REML) | CI: %s%% %s (%d draws)",
     x$engine,
@@ -33,17 +46,41 @@ format.icc <- function(x, ...) {
   )
 
   e <- x$estimates
-  rows <- sprintf(
-    "  %-9s %7s   [%s, %s]",
-    e$index,
-    formatC(e$estimate, format = "f", digits = 3),
-    formatC(e$conf.low, format = "f", digits = 3),
-    formatC(e$conf.high, format = "f", digits = 3)
-  )
-  table <- c(
-    sprintf("  %-9s %7s   %s", "index", "estimate", paste0(ci_pct, "% CI")),
-    rows
-  )
+  # Multilevel prints a `level` column, because the same index label (e.g.
+  # ICC(A,1)) appears once per level (subject / cluster); single-level is
+  # unchanged (M5 §3).
+  if (ml) {
+    rows <- sprintf(
+      "  %-8s %-9s %7s   [%s, %s]",
+      e$level,
+      e$index,
+      formatC(e$estimate, format = "f", digits = 3),
+      formatC(e$conf.low, format = "f", digits = 3),
+      formatC(e$conf.high, format = "f", digits = 3)
+    )
+    table <- c(
+      sprintf(
+        "  %-8s %-9s %7s   %s",
+        "level",
+        "index",
+        "estimate",
+        paste0(ci_pct, "% CI")
+      ),
+      rows
+    )
+  } else {
+    rows <- sprintf(
+      "  %-9s %7s   [%s, %s]",
+      e$index,
+      formatC(e$estimate, format = "f", digits = 3),
+      formatC(e$conf.low, format = "f", digits = 3),
+      formatC(e$conf.high, format = "f", digits = 3)
+    )
+    table <- c(
+      sprintf("  %-9s %7s   %s", "index", "estimate", paste0(ci_pct, "% CI")),
+      rows
+    )
+  }
 
   # Surface the Shrout & Fleiss equivalent for the forms that have one
   # (agreement+random -> ICC(2,.); consistency+fixed -> ICC(3,.)); M2 spec §5.
@@ -66,12 +103,27 @@ format.icc <- function(x, ...) {
   }
 
   vc <- x$components
-  comps <- sprintf(
-    "Variance components: subject %s, rater %s, residual %s",
-    formatC(vc$subject, format = "f", digits = 3),
-    formatC(vc$rater, format = "f", digits = 3),
-    formatC(vc$residual, format = "f", digits = 3)
-  )
+  d3 <- function(v) formatC(v, format = "f", digits = 3)
+  comps <- if (ml) {
+    sprintf(
+      paste(
+        "Variance components: cluster %s, subject %s, rater %s,",
+        "cluster:rater %s, residual %s"
+      ),
+      d3(vc$cluster),
+      d3(vc$subject),
+      d3(vc$rater),
+      d3(vc$cluster_rater),
+      d3(vc$residual)
+    )
+  } else {
+    sprintf(
+      "Variance components: subject %s, rater %s, residual %s",
+      d3(vc$subject),
+      d3(vc$rater),
+      d3(vc$residual)
+    )
+  }
 
   c(header, meta1, meta2, "", table, "", keff_note, comps, sf_note)
 }
@@ -111,6 +163,7 @@ summary.icc <- function(object, ...) {
 tidy.icc <- function(x, ...) {
   tibble::tibble(
     index = x$estimates$index,
+    level = x$estimates$level,
     sf_index = x$estimates$sf_index,
     estimate = x$estimates$estimate,
     std.error = x$estimates$std.error,
@@ -124,15 +177,20 @@ tidy.icc <- function(x, ...) {
 #' @rdname icc
 #' @export
 glance.icc <- function(x, ...) {
+  or_na <- function(v) if (is.null(v)) NA_real_ else v
   tibble::tibble(
     n_subjects = x$n$subjects,
     n_raters = x$n$raters,
+    n_clusters = x$n$clusters,
     n_obs = x$n$obs,
     n_cells = x$n$cells,
     balanced = x$design$balanced,
+    multilevel = isTRUE(x$design$multilevel),
     k_eff = x$k_eff,
+    var_cluster = or_na(x$components$cluster),
     var_subject = x$components$subject,
     var_rater = x$components$rater,
+    var_cluster_rater = or_na(x$components$cluster_rater),
     var_residual = x$components$residual,
     engine = x$engine,
     ci_method = x$ci$method,

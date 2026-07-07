@@ -1,5 +1,14 @@
 # intraclass 0.0.0.9000
 
+* `icc()` gains **multilevel** ICCs for subjects nested in clusters (pupils in
+  classrooms, patients in clinics). Supply a `cluster` column and it reports the
+  **subject-level** (within-cluster) and **cluster-level** (between-cluster)
+  coefficients -- ten Hove, Jorgensen & van der Ark's (2022) generalizability-theory
+  decomposition -- selectable via `level`. The five-component model is fit with the
+  usual glmmTMB engine and boundary-aware Monte-Carlo intervals; correctness is
+  verified against an lme4 cross-engine fit, a seeded population-recovery
+  simulation, and a reduction to the single-level coefficients. This release
+  covers crossed random raters on balanced data. See the **Advanced** article.
 * New `d_study()` projects the reliability of a fitted `icc()` to the mean of an
   arbitrary number of raters `m` -- a generalizability-theory **decision (D-)
   study**, answering "how many raters do I need?". It returns a tidy `icc_dstudy`

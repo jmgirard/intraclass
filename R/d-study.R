@@ -75,6 +75,13 @@ d_study <- function(
   if (!inherits(x, "icc")) {
     abort_intraclass("{.arg x} must be an {.cls icc} object from {.fn icc}.")
   }
+  if (isTRUE(x$design$multilevel)) {
+    abort_unsupported(c(
+      "D-study projection is not supported for multilevel ICCs yet.",
+      i = "Projecting the rater (and subject-per-cluster) counts of a multilevel \\
+           design is planned for a later milestone (M5 spec, section 8)."
+    ))
+  }
   type <- x$design$type
   raters <- x$design$raters
   # Same ill-posed combination guarded by icc()'s numeric-unit path (M4.5 spec).

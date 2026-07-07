@@ -56,3 +56,23 @@ GT dependability, `psych` at `m = n_raters`, seeded sim); `data-raw/oracle-d-stu
 estimand-spec `M4.5-d-study.md`. Slice 2: `autoplot.icc_dstudy()` (ggplot2, lazily
 registered via `zzz.R`); `plot.icc_dstudy()`; NEWS; `_pkgdown`; `advanced.Rmd`
 section + claims test. `devtools::check()` 0/0/0. See MILESTONES M4.5.
+
+## M5 — multilevel ICCs (subject- vs. cluster-level) — **planned** (DoD detailed; ADR-011)
+
+Subject-level (within-cluster) + cluster-level (between-cluster) IRR ICCs for
+subjects nested in clusters (ten Hove 2022, Design 1). Scope: raters crossed
+with clusters, balanced, random raters; `cluster` selector + `unit`-style `level`
+knob (both levels by default). Equations pinned from Table 3 (spec §3). Ships on
+`m5-multilevel` via PR.
+
+- [x] **Slice 1 — estimator (both levels)** (`0089d9a`). `cluster` + `level` args;
+      `fit_glmmtmb_multilevel()` five-component fit + extraction; identifiability
+      guards; subject- and cluster-level signal/error maps off one fit (scalar
+      `icc_point()` unchanged); `print`/`tidy`/`glance` surface `level`/`n_clusters`;
+      `d_study()` aborts on multilevel. Oracles O-ML (lme4 <1e-4, seeded recovery +
+      MC coverage, single-level reduction). Full suite green, no snapshot drift.
+- [x] **Slice 2 — docs.** `advanced.Rmd` multilevel section (seeded classrooms
+      example, cluster > subject); `choosing-an-icc.Rmd` "fifth choice" → shipped +
+      **citation fixed** (2022 multilevel paper); `test-vignette-claims.R`
+      invariant; NEWS; roxygen "Multilevel designs" section. `air`/`lintr` clean;
+      vignettes knit. PR + CI matrix pending. See MILESTONES M5.

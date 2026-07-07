@@ -46,14 +46,22 @@ consequences → references.
   designates that adapter its single editable binding point; no oracle *value*
   changes), with an lme4-vs-glmmTMB cross-check test retained so both stay verified.
 - References: `CLAUDE_CODE_KICKOFF.md` §1 (estimation engines), PRINCIPLES.md #3;
-  glmmTMB (Brooks et al. 2017); ten Hove, Jorgensen & van der Ark (2024/2025).
+  glmmTMB (Brooks et al. 2017); ten Hove, Jorgensen & van der Ark (2024, *Psychological
+  Methods* 29(5):967–979, updated ICC-selection guidelines) and (2025, MBR
+  60(5):1042–1061, which recommends MLE-RE + Monte-Carlo CIs — see ADR-003).
 
 ## ADR-003: Monte-Carlo CIs are the default interval method
 - Date: 2026-07-06
 - Status: accepted
 - Context: The ICC is a non-normal ratio of variance components; the delta method
   is unreliable near the zero-rater-variance boundary (the common case). The
-  framework's own 2025 simulation work favors MLE-RE with Monte-Carlo CIs.
+  framework's own simulation work favors this choice: ten Hove, Jorgensen & van der
+  Ark (2025, *Multivariate Behavioral Research* 60(5):1042–1061) compared MCMC of
+  Bayesian hierarchical models, MLE of random-effects models, and MLE of
+  common-factor models on planned-incomplete data and concluded "maximum likelihood
+  estimation of random-effects models with **Monte-Carlo confidence intervals** is
+  preferred based on all criteria" (abstract) — exactly this package's engine + CI
+  choice.
 - Decision: Default interval = **Monte-Carlo**, simulated from the fitted parameter
   covariance matrix (`vcov(fit, full = TRUE)`), on the engine's internal
   (boundary-respecting) scale, back-transformed to variance components, with the
@@ -63,7 +71,8 @@ consequences → references.
 - Consequences: Intervals are boundary-aware and engine-agnostic in spirit; requires
   storing/threading a seed and the parameter covariance. Adds a stochastic element
   that must be seeded for reproducibility.
-- References: PRINCIPLES.md #3, #12; `CLAUDE_CODE_KICKOFF.md` §1, §2.
+- References: PRINCIPLES.md #3, #12; `CLAUDE_CODE_KICKOFF.md` §1, §2; ten Hove,
+  Jorgensen & van der Ark (2025, MBR 60(5):1042–1061, doi:10.1080/00273171.2025.2507745).
 
 ## ADR-004: air is the code formatter (lintr keeps only semantic linters)
 - Date: 2026-07-06
@@ -351,3 +360,74 @@ consequences → references.
   `CLAUDE_CODE_KICKOFF.md` §1 (teaching mission), §7 (detail a milestone at its
   start), §8 (Definition of Done); ADR-007 (the split that created M4);
   Shrout & Fleiss (1979).
+
+## ADR-011: M5 scope — multilevel ICCs (`level` API, Design-1 five-component fit)
+- Date: 2026-07-07
+- Status: accepted
+- Context: M5 (multilevel ICCs) was the provisional "subject-level vs.
+  cluster-level" one-liner in the founding arc, to be detailed at its start after
+  an M4/M4.5 retro (founding brief §7). The retro confirmed the single-level
+  two-way machinery (M1–M3) and the D-study divisor generalization (M4.5) are
+  shipped and green, so multilevel can build on a stable estimand abstraction. The
+  estimand is defined by ten Hove, Jorgensen & van der Ark (2022, *Psychological
+  Methods* 27(4):650–666), whose **Table 3 / Eqs. 6–7, 12–13** decompose a
+  multilevel rating into cluster-, subject-, rater-, and cluster×rater components
+  and read a within- and a between-cluster IRR ICC off them. This is the **first
+  estimand where the signal component changes** (subject σ²_{s:c} vs. cluster σ²_c).
+  Four scope questions were open and were confirmed with the maintainer this
+  session; the exact equations were pinned from the paper PDF the maintainer
+  supplied (Zotero `M3BS8XJU`).
+- Decision:
+  - **`level` API, both levels by default.** Add a `cluster` tidy-eval selector to
+    `icc()` (default `NULL` → the existing single-level path, backward-compatible)
+    and a `level = c("subject", "cluster")` argument **validated and iterated
+    exactly like `unit`** — defaults to returning both levels (maintainer's lean),
+    a single level selectable. The result object gains a `level` column; the
+    estimand list becomes the cross-product of `level × unit`. Chosen over a
+    separate `micc()` function (would split the API surface, against #6) and over a
+    scalar `level` (the `unit`-vector mechanism already returns multiple rows, so
+    "both by default" is the natural, zero-new-pattern extension).
+  - **Design 1 (raters crossed with clusters), balanced/complete, random raters.**
+    M5 covers the paper's Design 1 — raters crossed with subjects *and* clusters —
+    on balanced data with `raters = "random"` (the only design for which both a
+    subject- and a cluster-level ICC are defined). The agreement/consistency
+    (`type`) and single/average (`unit`) knobs work at both levels. Designs 2/3
+    (raters nested in clusters/subjects), incomplete multilevel (reuse the M3
+    `k_eff`/connectedness machinery later), and fixed-rater multilevel are deferred
+    (spec §8) — thin vertical slice (#15).
+  - **Scalar divisor retained; the estimand map gains a `level` key.** Correcting a
+    planning-stage assumption: the paper's cluster-level ICC (Eq. 13 / Table 3)
+    divides error by the scalar rater count `k` and **drops all subject-related
+    variance** — it does *not* average over subjects. So **no per-component divisor
+    vector is needed**; `icc_point()` / `resolve_divisor()` are untouched (and the
+    M4.5 `d_study` path carries no regression risk). The only structural additions
+    are (a) two components in the fit — `cluster` (σ²_c) and `cluster_rater`
+    (σ²_{cr}) — via a new `(1 | cluster:rater)` random effect, and (b) a signal +
+    error-set lookup keyed on `level` **and** `type` (four rows; spec §3). Both
+    levels are read off **one shared five-component fit**.
+  - **Oracle plan: lme4 + seeded simulation + single-level reduction.** No
+    Shrout–Fleiss-style textbook worked example exists for the multilevel IRR
+    estimand (as with O5), so the ≥2-independent bar (#1) is met by an lme4
+    cross-engine fit of the identical five-component Design-1 model, a seeded
+    simulation with known components, and a reduction check (σ²_c → 0 reproduces the
+    pinned single-level numbers). `psych`/`gtheory` are not oracles here; a Bayesian/MCMC cross-check
+    (ten Hove's own estimator) is deferred to the M6 engine work. Registered O-ML.
+  - **Estimand equations transcribed from the paper (#1/#2/#4).** The spec §3 gives
+    all four (level × type) numerators/denominators verbatim from ten Hove Table 3
+    (Design 1, raters crossed), each still `signal / (signal + error / k)`. No
+    equation is guessed. They remain oracle-pinned before shipping (O-ML); if any
+    is unpinnable by both required oracles a Fable review is recommended and work
+    pauses (#19).
+- Consequences: `cluster`/`level` are new public API (#6) and a `level` column on
+  the object; `icc_point()`/`resolve_divisor()` are **unchanged** (scalar divisor);
+  the glmmTMB engine gains a five-component Design-1 fit (adds `(1 | cluster:rater)`)
+  + extraction; new identifiability guards (spec §7). Both estimands read off one
+  shared fit, so Slice 2 is largely the cluster-level map + docs. Two CI-green
+  slices on `m5-multilevel`, merged via PR. Deferred items recorded in the spec and
+  MILESTONES so they are not rediscovered.
+- References: PRINCIPLES.md #1, #2, #3, #4, #5, #6, #14, #15, #16, #17, #19;
+  [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md);
+  `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start), §8; ADR-002 (engine),
+  ADR-003 (MC CIs), ADR-005 (estimand representation + lme4 oracle), ADR-010
+  (divisor generalization); ten Hove, Jorgensen & van der Ark (2022, Table 3);
+  Brennan (2001, multivariate GT).

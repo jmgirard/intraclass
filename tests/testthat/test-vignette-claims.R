@@ -120,3 +120,56 @@ test_that("a disconnected design is rejected, not guessed at", {
     class = "intraclass_unidentified"
   )
 })
+
+# Multilevel claims (advanced.Rmd) ----------------------------------------
+# The advanced article's multilevel example asserts that on the simulated
+# `school` design the cluster-level ICC is the larger of the two levels. Rebuild
+# the exact seeded dataset the vignette uses and check the claim holds (#1).
+
+test_that("advanced.Rmd: cluster-level ICC exceeds subject-level on `school`", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(2025)
+  n_class <- 16
+  n_pupil <- 5
+  n_rater <- 4
+  grid <- expand.grid(
+    pupil = seq_len(n_pupil),
+    classroom = seq_len(n_class),
+    rater = seq_len(n_rater)
+  )
+  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
+  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
+    (grid$classroom - 1) * n_pupil + grid$pupil
+  ]
+  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
+  school <- data.frame(
+    classroom = factor(grid$classroom),
+    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+    rater = factor(grid$rater),
+    score = 10 +
+      class_effect +
+      pupil_effect +
+      rater_effect +
+      rnorm(nrow(grid), sd = 0.7)
+  )
+
+  e <- icc(
+    school,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    seed = 1
+  )$estimates
+  cluster_a1 <- e$estimate[e$index == "ICC(A,1)" & e$level == "cluster"]
+  subject_a1 <- e$estimate[e$index == "ICC(A,1)" & e$level == "subject"]
+  expect_gt(cluster_a1, subject_a1)
+
+  # Average >= single at each level (asserted generally in the article).
+  for (lv in c("subject", "cluster")) {
+    single <- e$estimate[e$index == "ICC(A,1)" & e$level == lv]
+    average <- e$estimate[e$index == "ICC(A,k)" & e$level == lv]
+    expect_gte(average, single)
+  }
+})
