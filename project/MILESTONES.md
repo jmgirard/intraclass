@@ -88,19 +88,62 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   CI (supersedes ADR-005's "defer to M2"); D-study projection to arbitrary k.
 - Status: done (merged to `main` via PR #1 at 334a48a; full CI matrix green)
 
-## M3: Imbalanced & incomplete designs *(provisional)*
-- Goal: missing rater×subject cells; the flagship "Choosing an ICC" vignette.
+## M3: Imbalanced & incomplete designs
+- Goal: correct ICCs from the mixed model on **ragged** subject×rater designs
+  (missing cells) — the package's core differentiator vs. ANOVA/balanced-only
+  tools. **Statistical core only:** the flagship "Choosing an ICC" vignette is
+  promoted to its own milestone (M4 below) so it can demonstrate the
+  complete-vs-incomplete decision on working code (ADR-007). Resolves the ADR-006
+  fixed-raters debt with a **real fixed-effect fit path**.
+- Estimand: see [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md)
+  (to be written first, PRINCIPLES.md #2). Builds on M1/M2; the fit already handles
+  imbalance, so the additions are identifiability guards, the fixed-effect fit path
+  + its CI variant, the `ICC(*,k)` divisor rule under imbalance, and unbalanced-data
+  oracles.
+- Definition of Done (per-estimator bar, §8) — two internal slices, each CI-green:
+  - [ ] **Slice 1 — incomplete random raters (default path).** Connectedness /
+        identifiability guard (`abort_unidentified()` on a disconnected
+        subject–rater graph, PRINCIPLES.md #5); balance detection; `unit`
+        divisor rule per the spec; `ICC(*,1)` always well-posed. `mc_ci()`
+        unchanged for the random path.
+  - [ ] **Slice 2 — real fixed-effect fit path** (`score ~ 1 + rater +
+        (1 | subject)`) for `raters = "fixed"`, returning correct (and genuinely
+        different) estimates on incomplete data; agreement error set gains the
+        rater fixed-effect spread (McGraw–Wong Case 3A); a fixed-path MC-CI sampler.
+        Balanced data still reduces to the M2 numbers (extends O4). `raters` roxygen
+        note corrected (no longer claims random≡fixed unconditionally).
+  - [ ] Oracles per path — ≥2 independent types: seeded unbalanced simulation
+        (primary), lme4 cross-check, `irrNA`/`gtheory` on incomplete data, and the
+        balanced-reduction regression (full SF data still returns
+        0.290/0.620/0.715/0.909). New `REFERENCES.md` oracle rows. **Stop and
+        recommend (not auto-run) a Fable review if any coefficient can't be pinned
+        by ≥2 oracles** (PRINCIPLES.md #19).
+  - [ ] `print`/`summary`/`glance` surface balanced-vs-incomplete, n_obs/n_cells,
+        and (if incomplete) the divisor convention; snapshots updated.
+  - [ ] Roxygen "which ICC / when" extended to complete-vs-incomplete and the fixed
+        real-fit; `DECISIONS.md` ADR-008 (fixed real-fit path + divisor convention);
+        `devtools::check()` 0/0/0 locally; full CI matrix green.
+- Deferred out of M3 (recorded so they aren't rediscovered): the flagship vignette
+  (M4); replicate ratings within a cell; one-way designs; lme4 as a *selectable*
+  engine; D-study projection API (ROADMAP).
+- Status: planned (arc reordered by ADR-007; estimand spec + slices not started)
+
+## M4: "Choosing an ICC" flagship vignette *(provisional)*
+- Goal: the decision-framework teaching article (agreement vs. consistency, single
+  vs. average, fixed vs. random, complete vs. incomplete), demonstrated on the M3
+  code; optionally the `choose_icc()` decision helper (ROADMAP). Split out of the
+  old M3 by ADR-007.
 - Status: provisional
 
-## M4: Multilevel ICCs *(provisional)*
-- Goal: subject-level vs. cluster-level ICCs (ten Hove 2021).
+## M5: Multilevel ICCs *(provisional)*
+- Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*
 - Status: provisional
 
-## M5: Optional engines behind `Suggests` *(provisional)*
+## M6: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a
-  shared interface, gated by `rlang::check_installed()`.
+  shared interface, gated by `rlang::check_installed()`. *(was M5)*
 - Status: provisional
 
-## M6: Release polish *(provisional)*
-- Goal: pkgdown site, advanced vignette, CRAN submission prep.
+## M7: Release polish *(provisional)*
+- Goal: pkgdown site, advanced vignette, CRAN submission prep. *(was M6)*
 - Status: provisional

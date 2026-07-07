@@ -162,3 +162,34 @@ consequences → references.
   Shrout & Fleiss (1979); ten Hove et al. (2024);
   [`estimand-specs/M2-consistency-and-fixed.md`](estimand-specs/M2-consistency-and-fixed.md);
   ADR-002/003/005.
+
+## ADR-007: M3 scope — incomplete-design statistical core; flagship vignette split out
+- Date: 2026-07-06
+- Status: accepted
+- Context: The provisional M3 (founding brief §7 arc) bundled two large,
+  loosely-coupled deliverables: (a) correct ICCs on imbalanced/incomplete
+  subject×rater designs, and (b) the flagship "Choosing an ICC" teaching vignette.
+  M3 also inherits the load-bearing ADR-006 debt (fixed raters must stop reusing the
+  balanced-only label layer). Bundling all of this violates thin-vertical-slices
+  (PRINCIPLES.md #15) and would make M3 hard to land green; and the vignette reads
+  better *after* incomplete-design support exists, since its whole point is to
+  demonstrate the complete-vs-incomplete decision on working code.
+- Decision: **M3 is the statistical core only** — imbalanced/incomplete designs
+  (random raters) plus resolving the ADR-006 fixed-raters debt via a **real
+  fixed-effect fit path** (not a balanced-only guard; maintainer decision this
+  session). The flagship **"Choosing an ICC" vignette becomes its own milestone
+  (new M4)**; the prior M4–M6 (multilevel, optional engines, release polish)
+  renumber to **M5–M7**. M3 runs as two internal CI-green slices: (1) incomplete
+  random raters, (2) the fixed-effect fit path. The `ICC(*,k)` averaging-divisor
+  convention under imbalance is deferred to the M3 estimand spec (to be pinned with
+  citations; recommendation: project to the design's rater count, the GT D-study
+  Φ(k) reading) and recorded there and in a forthcoming ADR-008.
+- Consequences: M3 stays a focused, shippable statistical milestone with a clear
+  Definition of Done; the teaching artifact gets its own deliberate treatment.
+  Renumber touches `MILESTONES.md` only (no code depends on milestone numbers). The
+  arc remains a hypothesis (MILESTONES.md preamble); this reorder is the sanctioned
+  way to change it. ADR-008 will record the fixed real-fit estimand + divisor
+  convention once the spec pins them.
+- References: PRINCIPLES.md #14, #15, #17; `CLAUDE_CODE_KICKOFF.md` §7 (arc is a
+  hypothesis, not a contract); ADR-006 (the inherited debt);
+  approved plan `moonlit-mixing-pinwheel`.

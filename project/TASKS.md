@@ -33,3 +33,35 @@ condensed to a single line once done.
 `raters = c("random","fixed")` (fixed = balanced-data label layer, SF `ICC(3,*)`,
 warns). Classed warning layer; design + SF-equivalent in print/summary; oracles
 SF 0.715/0.909, `psych` ICC3/ICC3k, fixed≡random equivalence (O4). See MILESTONES M2.
+
+## M3 — imbalanced & incomplete designs — **planned** (arc reordered by ADR-007)
+
+Statistical core only (vignette split to M4). Two CI-green slices; see MILESTONES M3
+and the approved plan `moonlit-mixing-pinwheel`.
+
+### Slice 0 — spec + tracking (do first, PRINCIPLES.md #2, #16)
+- [ ] Write `project/estimand-specs/M3-incomplete-designs.md`: identifiability
+      (connectedness) rule; random + fixed(Case 3/3A) estimands; balanced-reduction
+      guard; **pin the `ICC(*,k)` divisor convention** with citations → ADR-008 — Opus
+
+### Slice 1 — incomplete random raters (default path)
+- [ ] `assert_connected_design()` + balance detection (`R/design.R` or `estimand.R`);
+      wire the guard into `icc()`; `abort_unidentified()` on disconnected graphs — Opus
+- [ ] Divisor rule for `unit = "average"` under imbalance (per spec); `ICC(*,1)`
+      always well-posed — Opus
+- [ ] `print`/`summary`/`glance` surface balanced-vs-incomplete + n_cells + divisor;
+      snapshots — Opus
+- [ ] Oracles: seeded unbalanced simulation + lme4 cross-check + `irrNA`/`gtheory`
+      + balanced-reduction regression; `REFERENCES.md` rows (O5) — Opus
+      (`/verify-estimator`)
+
+### Slice 2 — real fixed-effect fit path (resolves ADR-006 debt)
+- [ ] Fixed-effect fit `score ~ 1 + rater + (1|subject)` in the engine; read-out for
+      the fixed-raters error set (consistency: residual; agreement: + rater-effect
+      spread, Case 3A) — Opus
+- [ ] Extend `icc_estimand()`/`icc_point()` for the fixed agreement error; branch on
+      `design$raters`; fixed-path MC-CI sampler in `mc_ci()` — Opus
+- [ ] Correct the `raters` roxygen note (fixed now differs from random on incomplete
+      data); warning text reviewed — Opus
+- [ ] Oracles: unbalanced Case 3 / SF `ICC(3,*)` + lme4 fixed-fit cross-check +
+      balanced reduction to M2 (O6) — Opus (`/verify-estimator`)
