@@ -1,14 +1,14 @@
 # Milestones
 
 Ordered milestones with status and the deferrals each one recorded. **Shipped
-milestones (M0–M10) are compressed** to Goal / Status / Deferred + spec-and-ADR
+milestones (M0–M11) are compressed** to Goal / Status / Deferred + spec-and-ADR
 pointers — the full blow-by-blow DoD lives in its ADR (`DECISIONS.md`), its
 estimand-spec, and git history (ADR-015, single-source; don't restate it here). The
 **active** and **next** milestones are detailed in full. Remaining milestones (M12–M13)
 are provisional one-liners, detailed at the start of their milestone after a short
 retro on the previous one (founding brief §7). The arc is a hypothesis, not a
 contract — reorders get a [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was
-set by ADR-017; ADR-018 detailed M9, ADR-019 detailed M10).
+set by ADR-017; ADR-018 detailed M9, ADR-019 detailed M10, ADR-020 detailed M11).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -236,71 +236,26 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–2; merged via PR #14 at 9f799d2; full CI matrix green incl.
   Windows, 371 tests).
 
-## M11: General `autoplot()` / `plot()` methods for `icc` objects  *(active)*
-- Goal: general CI + variance-component plotting over the shipped estimators, by
-  generalizing the M4.5 `autoplot.icc_dstudy()` reliability curve (ADR-010) to the
-  `icc` object itself. **No new estimand, no new fit, no new CI machinery, no new
-  dependency** (ggplot2 is already a `Suggests`, lazily `s3_register()`-ed in `zzz.R`).
-  Ships two plots behind one `what` argument. Promoted from ROADMAP by ADR-017,
-  detailed by **ADR-020**.
-- Reference: ADR-020 (scope); no estimand-spec (rendering layer, not an estimator — cf.
-  M4/M5.5/M7). Object shape plotted: `$estimates` (index/level/estimate/conf.low/
-  conf.high) and `$components` (variance decomposition), both already oracle-pinned by
-  the estimator milestones.
-- Correctness (#1 numerically N/A — no new numbers): **deterministic build-data
-  assertions** (`ggplot2::ggplot_build()` / `layer_data()` == the object's
-  `$estimates` / `$components`); **no `vdiffr`** image snapshots (platform-fragile;
-  `verify-against-installed-package` memory).
-
-### DoD — the live board (check off in the same commit as the work, #16)
-
-**Slice 1 — coefficient forest plot (`what = "coefficients"`, the default)** ✅ done
-- [x] `autoplot.icc(object, what = c("coefficients", "components"), ...)` with a classed
-      validator (`validate_choice`); Slice 1 implements the `"coefficients"` branch.
-      `check_installed("ggplot2")`-guarded (#8 `cli` reason string).
-- [x] Renders one row per row of `$estimates` — point `estimate` + CI band
-      (`conf.low`/`conf.high` via `geom_linerange`); **multilevel** objects facet by
-      `level` (`facet_wrap`, `scales = "free_y"`); single/average, one-way,
-      agreement/consistency all covered.
-- [x] `plot.icc()` wrapper mirrors `plot.icc_dstudy()` (prints `autoplot`, returns
-      `invisible(x)`).
-- [x] Lazy registration: `s3_register("ggplot2::autoplot", "icc")` added to `.onLoad`
-      in `zzz.R` next to the `icc_dstudy` line; installed-package dispatch verified.
-- [x] Invalid `what` → classed `abort_*()` via `validate_choice` (#5/#8), not a bare
-      `match.arg` error; the `"components"` branch is a classed `abort_unsupported`
-      forward-pointer until Slice 2. Both tested by condition class.
-- [x] **Build-data tests**: `ggplot_build()` layer data equals `$estimates` for a
-      two-way, a multilevel, and a one-way `icc`. **Backfilled the same build-data
-      coverage for the previously-untested `autoplot.icc_dstudy`.**
-- [x] roxygen (`@rdname icc`, `what` param, guarded `@examplesIf`), `air format .`,
-      `lintr::lint_package()` clean (0 lints), NEWS bullet. 397 tests green (was 371).
-      Shared `icc_design_label()` extracted from `format.icc` for the plot title (no
-      duplication).
-
-**Slice 2 — variance-component decomposition (`what = "components"`)** ✅ done
-- [x] `"components"` branch: one `geom_col` bar per `$components` slot in model order
-      (cluster → subject → rater → cluster:rater → residual, subset to the design),
-      honouring the variants — one-way's confounded rater, Design 2's `rater:cluster`
-      slot, Design 3's absent rater/cluster:rater (no crash, no `NA` bar). A shared
-      `icc_components_view()` (extracted from `format.icc`) drives both the bars and the
-      printed "Variance components:" line, so they never drift; format snapshots
-      reproduced byte-for-byte.
-- [x] **Build-data tests**: bar heights equal `$components` for two-way, one-way,
-      multilevel Design 1, and a nested Design 2 `icc`.
-- [x] Docs/examples show both `what` values; NEWS; `air`/`lintr` clean (0 lints).
-      402 tests green (was 397); installed-package dispatch of both plots verified;
-      plots eyeballed (coefficient facets by level; component bars in model order).
-
-**Milestone gate (whole M11)**
-- [ ] Full CI matrix green incl. Windows (installed-package test, `NOT_CRAN=true` —
-      `verify-against-installed-package` memory), pkgdown builds with the new methods.
-- [ ] Ships on a `m11-*` branch, merged via PR (`milestone-branches-and-prs`); `project/`
-      reconciled post-merge.
+## M11: General `autoplot()` / `plot()` methods for `icc` objects
+- Goal: general plotting over the shipped estimators, generalizing the M4.5
+  `autoplot.icc_dstudy()` reliability curve (ADR-010) to the `icc` object itself.
+  `autoplot.icc(object, what = c("coefficients", "components"))` + a `plot.icc()`
+  wrapper, lazily `s3_register()`-ed (ggplot2 stays a `Suggests`; light install
+  preserved). `"coefficients"` = a coefficient forest plot (point + MC-CI band per
+  `$estimates` row, faceted by `level` for multilevel); `"components"` = a
+  variance-component decomposition bar per `$components` slot. **No new estimand, fit,
+  CI machinery, or dependency.** Shared `icc_design_label()` + `icc_components_view()`
+  extracted from `format.icc` so plots and the printed report never drift. Correctness
+  is faithful-rendering (#1 numerically N/A): build-data assertions
+  (`ggplot_build()` == `$estimates`/`$components`), **no `vdiffr`**; also backfilled the
+  previously-untested `autoplot.icc_dstudy`.
+- Reference: ADR-020 (scope); no estimand-spec (rendering layer — cf. M4/M5.5/M7).
 - Deferred out of M11 (recorded so not rediscovered): **error-set shading** on the
   components plot (signal vs. index-specific error set — its own slice); a **combined /
   patchwork multi-panel** layout; **`d_study()` projection overlays**; **theming /
   palette customization** beyond ggplot2 defaults; a **base-`graphics` plot method**.
-- Status: **active** (Slice 1 next) — detailed by ADR-020, 2026-07-07.
+- Status: done (Slices 1–2; merged via PR #15 at 3368299; full CI matrix green incl.
+  Windows and R-devel, 402 tests).
 
 ## M12: `choose_icc()` interactive decision helper *(provisional)*
 - Goal: an interactive decision helper mirroring the M4 flagship vignette's
