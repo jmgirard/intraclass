@@ -4,7 +4,7 @@ Current-milestone task board. One owner-agent each; check off in the **same
 commit** as the work (PRINCIPLES.md #16). Completed milestones' boards are
 condensed to a single line once done.
 
-## M0 — scaffolding (in progress)
+## M0 — scaffolding — **done** (commit 0d81e34, pushed, CI green)
 
 - [x] Package skeleton: `DESCRIPTION`, `NAMESPACE`, `R/` package doc + `abort` layer — Opus
 - [x] License (MIT), README.Rmd, NEWS.md, lifecycle badge, spell check + WORDLIST — Opus
@@ -22,16 +22,22 @@ condensed to a single line once done.
 - [x] Create public `jmgirard/intraclass` repo; first push; confirm CI green (commit 0d81e34) — Opus
 - [x] Update STATUS.md "Last green CI"; commit — Opus
 
-## M1 — two-way random, absolute agreement (done locally, pending push + sign-off)
+## M1 — two-way random, absolute agreement — **done** (commit 77e8ab0, CI green)
 
-- [x] Plan M1 (API shape, estimand abstraction, MC-CI design) and get sign-off — Opus
-- [x] `icc()` core: parse args (tidy-eval), fit `score ~ 1 + (1|subject) + (1|rater)` (glmmTMB) — Opus
-- [x] Variance-component extraction → estimand (signal, error set, divisor) — Opus
-- [x] Monte-Carlo CI from `vcov(fit, full = TRUE)` (boundary-aware, seeded) — Opus
-- [x] Engine dispatch scaffolding; lme4 as oracle-only in M1 (ADR-005) — Opus
-- [x] S3 methods: `print`/`summary`/`format`/`tidy`/`glance` — Opus
-- [x] Oracle tests: ANOVA mean-squares, seeded simulation, lme4 cross-check, errors — Opus
-- [x] Roxygen "which ICC / when" note; *Getting started* vignette — Opus
-- [x] Flip seed test `engine` default to glmmTMB; repoint skip guards — Opus
-- [x] Verify vs all oracles; coverage 94%; check 0/0/0 — Opus
-- [x] Push; confirm full CI matrix green (77e8ab0); update STATUS last-green-CI — Opus
+`icc()` for `ICC(A,1)`/`ICC(A,k)`: glmmTMB engine, boundary-aware MC CIs,
+`print`/`summary`/`format`/`tidy`/`glance`, 5 oracles, vignette. See MILESTONES M1.
+
+## M2 — consistency variants + fixed-vs-random raters (planned)
+
+- [x] Plan M2 (scope, fixed≡random verification, API) and get sign-off — Opus
+- [x] Estimand-spec `M2-consistency-and-fixed.md` + ADR-006 — Opus
+- [x] `icc_estimand()`: consistency error set {residual}; `raters`/design dimension (labeling only) — Opus
+- [x] `icc.R`: unlock `type = "consistency"`; add `raters = c("random","fixed")` arg + labeling — Opus
+- [x] Classed warning layer `warn_intraclass()` + `warn_fixed_raters()` (`intraclass_fixed_raters`) — Opus
+- [x] `print`/`summary`/`format`: surface design (random vs mixed) + SF-equivalent (ICC(2,·)/ICC(3,·)); snapshots — Opus
+- [x] Oracle tests: SF 0.715/0.909, `psych` ICC3/ICC3k (1e-4), ANOVA identity, lme4 cross-check, fixed≡random equivalence — Opus
+- [x] Warning-path tests: `intraclass_fixed_raters` fires on `"fixed"`, silent on `"random"`, text snapshot — Opus
+- [x] Roxygen "which ICC / when" for consistency + fixed/random; vignette consistency-vs-agreement note — Opus
+- [x] Commit the seeded fixed≡random script under the reference-values path (O-registry provenance, #4) — Opus
+- [x] REFERENCES.md (promote O1 C-rows; new equivalence oracle); verify; check 0/0/0 locally (94.8% cov) — Opus
+- [ ] Push branch, open PR, confirm full CI matrix green; reconcile STATUS last-green-CI — Opus

@@ -1,33 +1,40 @@
-#' Intraclass correlation coefficient for a two-way random design
+#' Intraclass correlation coefficient for a two-way design
 #'
 #' Estimates interrater-reliability intraclass correlation coefficients (ICCs)
 #' from a fitted linear mixed model, rather than from classical ANOVA mean
-#' squares. In this release `icc()` computes the **two-way random,
-#' absolute-agreement** coefficients `ICC(A,1)` and `ICC(A,k)` (McGraw & Wong
-#' 1996), equivalent to Shrout & Fleiss (1979) `ICC(2,1)` and `ICC(2,k)`.
+#' squares. `icc()` computes the two-way **absolute-agreement** (`ICC(A,*)`) or
+#' **consistency** (`ICC(C,*)`) coefficients of McGraw & Wong (1996), for a
+#' single rater (`ICC(*,1)`) or the mean of `k` raters (`ICC(*,k)`), treating the
+#' raters as a random sample (Case 2) or as fixed (Case 3).
 #'
 #' @section Which ICC is this, and when should you use it?:
-#' This is the **two-way random, absolute-agreement** ICC.
-#' * **Absolute agreement** treats systematic differences between raters (the
-#'   rater main effect, \eqn{\sigma^2_r}) as error: use it when the actual value
-#'   matters and raters must agree on the number (clinical scores, measurements).
-#'   Its sibling, *consistency*, ignores a constant rater offset and is not yet
-#'   implemented.
-#' * **`ICC(A,1)`** is the reliability of a *single* randomly chosen rater;
-#'   **`ICC(A,k)`** is the reliability of the *mean* of your `k` raters. Report
-#'   `ICC(A,k)` when the averaged score is what you will actually use.
-#' * **Two-way random** means both subjects and raters are random samples you
-#'   wish to generalize beyond.
-#'
-#' A large gap between consistency and absolute agreement signals big systematic
-#' differences in rater level -- a rating-procedure problem worth fixing.
+#' Three choices pin down the coefficient:
+#' * **Agreement vs. consistency** (`type`). **Absolute agreement** treats
+#'   systematic differences between raters (the rater main effect,
+#'   \eqn{\sigma^2_r}) as error: use it when the actual value matters and raters
+#'   must agree on the number (clinical scores, measurements). **Consistency**
+#'   ignores a constant per-rater offset: use it when only relative standing
+#'   matters. A large gap between the two signals big systematic differences in
+#'   rater level -- a rating-procedure problem worth fixing.
+#' * **Single vs. average** (`unit`). **`ICC(*,1)`** is the reliability of a
+#'   *single* rater; **`ICC(*,k)`** is the reliability of the *mean* of your `k`
+#'   raters. Report `ICC(*,k)` when the averaged score is what you will use.
+#' * **Random vs. fixed raters** (`raters`). **Random** treats your raters as a
+#'   sample you wish to generalize beyond -- the recommended default for
+#'   interrater reliability. **Fixed** treats them as the only raters of interest
+#'   and forgoes generalization; on balanced data it gives the same number and
+#'   `icc()` warns when you choose it. Fixed-rater consistency is the classic
+#'   Shrout & Fleiss `ICC(3,1)`.
 #'
 #' @section Estimand:
 #' With a single rating per subject-by-rater cell, the subject-by-rater
 #' interaction and pure error are not separately identified; only their sum, the
-#' residual variance \eqn{\sigma^2_{res}}, is estimable. The coefficients are
+#' residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement counts
+#' the rater main effect \eqn{\sigma^2_r} as error; consistency drops it:
 #' \deqn{ICC(A,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_r + \sigma^2_{res})}
 #' \deqn{ICC(A,k) = \sigma^2_s / (\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / k)}
+#' \deqn{ICC(C,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_{res})}
+#' \deqn{ICC(C,k) = \sigma^2_s / (\sigma^2_s + \sigma^2_{res} / k)}
 #' where \eqn{\sigma^2_s} is the subject (signal) variance and `k` is the number
 #' of raters.
 #'
@@ -41,10 +48,16 @@
 #' @param score,subject,rater Columns of `data` (unquoted): the numeric rating,
 #'   the subject (object of measurement), and the rater (judge).
 #' @param model Design. Only `"twoway"` is currently supported.
-#' @param type Error definition. Only `"agreement"` (absolute agreement) is
-#'   currently supported; `"consistency"` is planned.
-#' @param unit One or both of `"single"` (-> `ICC(A,1)`) and `"average"`
-#'   (-> `ICC(A,k)`).
+#' @param type Error definition: `"agreement"` (absolute agreement, the default)
+#'   counts systematic rater differences as error; `"consistency"` ignores them.
+#' @param raters Rater sampling: `"random"` (the default; two-way random, Case 2)
+#'   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3) treats the
+#'   observed raters as the entire population. On balanced data the point estimate
+#'   and interval are identical either way -- `"fixed"` changes only the reported
+#'   design and interpretation -- and choosing it emits a warning, because random
+#'   is the recommended default for interrater reliability.
+#' @param unit One or both of `"single"` (-> `ICC(*,1)`) and `"average"`
+#'   (-> `ICC(*,k)`).
 #' @param engine Estimation engine. Only `"glmmTMB"` is currently supported.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
@@ -80,7 +93,8 @@ icc <- function(
   subject,
   rater,
   model = "twoway",
-  type = "agreement",
+  type = c("agreement", "consistency"),
+  raters = c("random", "fixed"),
   unit = c("single", "average"),
   engine = "glmmTMB",
   conf_level = 0.95,
@@ -92,10 +106,9 @@ icc <- function(
     abort_intraclass("{.arg data} must be a data frame.")
   }
 
-  # Only one point in each dimension is implemented this release; everything else
-  # fails loudly and points at where it is coming (PRINCIPLES.md #5).
+  # Dimensions not yet implemented fail loudly and point at where they are coming
+  # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
   require_supported(model, "twoway", "model", "designs beyond two-way")
-  require_supported(type, "agreement", "type", "consistency ICCs")
   require_supported(engine, "glmmTMB", "engine", "engines beyond glmmTMB")
   require_supported(
     ci_method,
@@ -104,7 +117,15 @@ icc <- function(
     "interval methods beyond Monte-Carlo"
   )
 
+  type <- validate_choice(type, c("agreement", "consistency"), "type")
+  raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
+
+  # Fixed raters is well-posed but forgoes generalization; nudge toward random
+  # (M2 spec §3, ADR-006). Warning, not error -- a valid number is still returned.
+  if (raters == "fixed") {
+    warn_fixed_raters()
+  }
   if (
     !is.numeric(conf_level) ||
       length(conf_level) != 1L ||
@@ -146,7 +167,10 @@ icc <- function(
   }
 
   engine_fit <- fit_glmmtmb(df)
-  estimands <- lapply(unit, function(u) icc_estimand(type = type, unit = u))
+  estimands <- lapply(
+    unit,
+    function(u) icc_estimand(type = type, unit = u, raters = raters)
+  )
   k <- n_raters
 
   points <- vapply(
@@ -165,6 +189,7 @@ icc <- function(
 
   estimates <- data.frame(
     index = vapply(estimands, `[[`, character(1), "label"),
+    sf_index = vapply(estimands, `[[`, character(1), "sf_label"),
     estimate = points,
     std.error = vapply(intervals, `[[`, numeric(1), "std.error"),
     conf.low = vapply(intervals, `[[`, numeric(1), "conf.low"),
@@ -176,7 +201,7 @@ icc <- function(
     list(
       estimates = estimates,
       components = engine_fit$components,
-      design = list(model = model, type = type),
+      design = list(model = model, type = type, raters = raters),
       engine = engine_fit$engine,
       ci = list(
         method = ci_method,
@@ -208,6 +233,22 @@ require_supported <- function(
         i = "Support for {planned} is planned for a later milestone.",
         x = "You supplied {.val {value}}."
       ),
+      call = call
+    )
+  }
+  value
+}
+
+# Match a scalar argument against its supported set, raising a classed intraclass
+# error (PRINCIPLES.md #8) rather than rlang::arg_match's un-classed one. Accepts
+# the default vector (takes the first element) or a single supplied value.
+validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
+  if (identical(value, choices)) {
+    return(choices[[1L]])
+  }
+  if (!is.character(value) || length(value) != 1L || !value %in% choices) {
+    abort_intraclass(
+      "{.arg {arg}} must be one of {.val {choices}}.",
       call = call
     )
   }

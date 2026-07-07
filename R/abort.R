@@ -60,6 +60,60 @@ abort_unidentified <- function(
   )
 }
 
+#' Warn with a classed intraclass condition
+#'
+#' The warning counterpart of `abort_intraclass()`: all warnings go through
+#' `cli::cli_warn()` with a classed condition (PRINCIPLES.md #8 — no bare
+#' `warning()`). Every classed warning subclasses `"intraclass_warning"`, so a
+#' caller can silence the family with `withCallingHandlers()` / `suppressWarnings()`
+#' or match a specific subclass.
+#'
+#' @param message A character vector; formatted with [cli::cli_warn()] styling.
+#' @param class Character. Condition subclass(es), prepended to
+#'   `"intraclass_warning"`.
+#' @param ... Passed to [cli::cli_warn()].
+#' @param .envir The environment for message interpolation.
+#' @keywords internal
+#' @noRd
+warn_intraclass <- function(
+  message,
+  class = NULL,
+  ...,
+  .envir = rlang::caller_env()
+) {
+  cli::cli_warn(
+    message,
+    class = c(class, "intraclass_warning"),
+    ...,
+    .envir = .envir
+  )
+}
+
+#' Warn that fixed raters forgo generalization; random is best practice
+#'
+#' Fired when `raters = "fixed"` is chosen. Fixed raters is well-posed (a valid
+#' number is still returned), so this is a warning, not an `abort_*()`
+#' (PRINCIPLES.md #5 governs ill-posed designs). Classed `intraclass_fixed_raters`
+#' so a genuine fixed-rater user can suppress it by class (M2 spec §3, ADR-006).
+#'
+#' @keywords internal
+#' @noRd
+warn_fixed_raters <- function(.envir = rlang::caller_env()) {
+  warn_intraclass(
+    c(
+      "Modeling raters as {.strong fixed} restricts inference to exactly these \\
+       raters; you cannot generalize to other raters.",
+      i = "For interrater reliability, the two-way {.strong random} model \\
+           ({.code raters = \"random\"}) is the recommended default \\
+           (ten Hove et al. 2024; McGraw & Wong 1996, Case 2).",
+      i = "Use {.val fixed} only when these are the entire population of raters \\
+           you will ever use."
+    ),
+    class = "intraclass_fixed_raters",
+    .envir = .envir
+  )
+}
+
 #' Abort because a requested option is valid but not yet implemented
 #'
 #' Distinct from `abort_unidentified()` (which is about the *design*): this marks

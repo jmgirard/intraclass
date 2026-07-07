@@ -4,10 +4,6 @@ test_that("options that are valid but not yet implemented abort with a pointer",
   d <- sf_ratings_long()
 
   expect_error(
-    icc(d, score, subject, rater, type = "consistency"),
-    class = "intraclass_unsupported"
-  )
-  expect_error(
     icc(d, score, subject, rater, model = "oneway"),
     class = "intraclass_unsupported"
   )
@@ -58,10 +54,23 @@ test_that("malformed input aborts with a classed intraclass error", {
   )
 })
 
+test_that("invalid choices for supported dimensions abort as classed errors", {
+  d <- sf_ratings_long()
+
+  expect_error(
+    icc(d, score, subject, rater, type = "bogus"),
+    class = "intraclass_error"
+  )
+  expect_error(
+    icc(d, score, subject, rater, raters = "bogus"),
+    class = "intraclass_error"
+  )
+})
+
 test_that("error messages are stable and actionable", {
   d <- sf_ratings_long()
   expect_snapshot(
-    icc(d, score, subject, rater, type = "consistency"),
+    icc(d, score, subject, rater, model = "oneway"),
     error = TRUE
   )
   expect_snapshot(

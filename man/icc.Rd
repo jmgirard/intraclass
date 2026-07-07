@@ -7,7 +7,7 @@
 \alias{tidy.icc}
 \alias{glance.icc}
 \alias{icc}
-\title{Intraclass correlation coefficient for a two-way random design}
+\title{Intraclass correlation coefficient for a two-way design}
 \usage{
 \method{format}{icc}(x, ...)
 
@@ -25,7 +25,8 @@ icc(
   subject,
   rater,
   model = "twoway",
-  type = "agreement",
+  type = c("agreement", "consistency"),
+  raters = c("random", "fixed"),
   unit = c("single", "average"),
   engine = "glmmTMB",
   conf_level = 0.95,
@@ -46,11 +47,18 @@ the subject (object of measurement), and the rater (judge).}
 
 \item{model}{Design. Only \code{"twoway"} is currently supported.}
 
-\item{type}{Error definition. Only \code{"agreement"} (absolute agreement) is
-currently supported; \code{"consistency"} is planned.}
+\item{type}{Error definition: \code{"agreement"} (absolute agreement, the default)
+counts systematic rater differences as error; \code{"consistency"} ignores them.}
 
-\item{unit}{One or both of \code{"single"} (-> \code{ICC(A,1)}) and \code{"average"}
-(-> \code{ICC(A,k)}).}
+\item{raters}{Rater sampling: \code{"random"} (the default; two-way random, Case 2)
+generalizes to a rater universe; \code{"fixed"} (two-way mixed, Case 3) treats the
+observed raters as the entire population. On balanced data the point estimate
+and interval are identical either way -- \code{"fixed"} changes only the reported
+design and interpretation -- and choosing it emits a warning, because random
+is the recommended default for interrater reliability.}
+
+\item{unit}{One or both of \code{"single"} (-> \verb{ICC(*,1)}) and \code{"average"}
+(-> \verb{ICC(*,k)}).}
 
 \item{engine}{Estimation engine. Only \code{"glmmTMB"} is currently supported.}
 
@@ -72,37 +80,44 @@ call. Use \link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and th
 \description{
 Estimates interrater-reliability intraclass correlation coefficients (ICCs)
 from a fitted linear mixed model, rather than from classical ANOVA mean
-squares. In this release \code{icc()} computes the \strong{two-way random,
-absolute-agreement} coefficients \code{ICC(A,1)} and \code{ICC(A,k)} (McGraw & Wong
-1996), equivalent to Shrout & Fleiss (1979) \code{ICC(2,1)} and \code{ICC(2,k)}.
+squares. \code{icc()} computes the two-way \strong{absolute-agreement} (\verb{ICC(A,*)}) or
+\strong{consistency} (\verb{ICC(C,*)}) coefficients of McGraw & Wong (1996), for a
+single rater (\verb{ICC(*,1)}) or the mean of \code{k} raters (\verb{ICC(*,k)}), treating the
+raters as a random sample (Case 2) or as fixed (Case 3).
 }
 \section{Which ICC is this, and when should you use it?}{
 
-This is the \strong{two-way random, absolute-agreement} ICC.
+Three choices pin down the coefficient:
 \itemize{
-\item \strong{Absolute agreement} treats systematic differences between raters (the
-rater main effect, \eqn{\sigma^2_r}) as error: use it when the actual value
-matters and raters must agree on the number (clinical scores, measurements).
-Its sibling, \emph{consistency}, ignores a constant rater offset and is not yet
-implemented.
-\item \strong{\code{ICC(A,1)}} is the reliability of a \emph{single} randomly chosen rater;
-\strong{\code{ICC(A,k)}} is the reliability of the \emph{mean} of your \code{k} raters. Report
-\code{ICC(A,k)} when the averaged score is what you will actually use.
-\item \strong{Two-way random} means both subjects and raters are random samples you
-wish to generalize beyond.
+\item \strong{Agreement vs. consistency} (\code{type}). \strong{Absolute agreement} treats
+systematic differences between raters (the rater main effect,
+\eqn{\sigma^2_r}) as error: use it when the actual value matters and raters
+must agree on the number (clinical scores, measurements). \strong{Consistency}
+ignores a constant per-rater offset: use it when only relative standing
+matters. A large gap between the two signals big systematic differences in
+rater level -- a rating-procedure problem worth fixing.
+\item \strong{Single vs. average} (\code{unit}). \strong{\verb{ICC(*,1)}} is the reliability of a
+\emph{single} rater; \strong{\verb{ICC(*,k)}} is the reliability of the \emph{mean} of your \code{k}
+raters. Report \verb{ICC(*,k)} when the averaged score is what you will use.
+\item \strong{Random vs. fixed raters} (\code{raters}). \strong{Random} treats your raters as a
+sample you wish to generalize beyond -- the recommended default for
+interrater reliability. \strong{Fixed} treats them as the only raters of interest
+and forgoes generalization; on balanced data it gives the same number and
+\code{icc()} warns when you choose it. Fixed-rater consistency is the classic
+Shrout & Fleiss \code{ICC(3,1)}.
 }
-
-A large gap between consistency and absolute agreement signals big systematic
-differences in rater level -- a rating-procedure problem worth fixing.
 }
 
 \section{Estimand}{
 
 With a single rating per subject-by-rater cell, the subject-by-rater
 interaction and pure error are not separately identified; only their sum, the
-residual variance \eqn{\sigma^2_{res}}, is estimable. The coefficients are
+residual variance \eqn{\sigma^2_{res}}, is estimable. Absolute agreement counts
+the rater main effect \eqn{\sigma^2_r} as error; consistency drops it:
 \deqn{ICC(A,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_r + \sigma^2_{res})}
 \deqn{ICC(A,k) = \sigma^2_s / (\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / k)}
+\deqn{ICC(C,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_{res})}
+\deqn{ICC(C,k) = \sigma^2_s / (\sigma^2_s + \sigma^2_{res} / k)}
 where \eqn{\sigma^2_s} is the subject (signal) variance and \code{k} is the number
 of raters.
 }
