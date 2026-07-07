@@ -231,13 +231,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   incomplete divisor; Bayesian/MCMC; three-facet `d_study()`; conflated single-level
   ICC, Eq. 14).
 - Ships on `m10-fixed-multilevel`, CI-green slices (spec §5). **DoD board:**
-  - [ ] **Slice 1 — fixed-rater multilevel fit + subject-level estimand.** Lift the
-    `raters = "fixed"` + multilevel abort; add the fixed-rater multilevel fit (θ²_r via
-    the reused M3 machinery, multilevel random structure) returning the six-field engine
-    contract with θ²_r in the `rater` slot; route in `icc()`. Subject-level agreement/
-    consistency, single/average, reusing `icc_point()` + the M3 fixed MC sampler.
-    Oracles O-FML/reduction (→ M5 balanced, → M3 single cluster), O-FML/lme4, O-FML/sim.
-    `print`/`glance` surface fixed-rater multilevel.
+  - [x] **Slice 1 — fixed-rater multilevel fit + subject-level estimand.** Lifted the
+    `raters = "fixed"` + multilevel abort; added `fit_glmmtmb_multilevel_fixed()` (θ²_r
+    via a shared `theta2r_fixed()` helper refactored out of the M3 path, multilevel
+    random structure) returning the six-field contract with θ²_r in the `rater` slot;
+    routed in `icc()` with scope guards (nested/incomplete/cluster-level fixed abort).
+    Subject-level agreement/consistency, single/average, reusing `icc_point()` + the M3
+    fixed MC sampler. Oracles O-FML/reduction (→ M5 balanced fixed≡random <1e-4, → M3
+    single-cluster signal/residual), O-FML/lme4, O-FML/sim. 352 tests green (installed
+    pkg, `NOT_CRAN=true`), air/lintr clean. (θ²_r doesn't reduce at a single cluster —
+    the cluster×rater term collapses; documented, spec §4.)
   - [ ] **Slice 2 — docs.** `advanced.Rmd` multilevel section extended to fixed raters
     on real knit-time code; `test-vignette-claims.R` invariants (balanced fixed ≡ random
     at the subject level; consistency identical, agreement differs only by θ²_r).

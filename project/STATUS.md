@@ -2,8 +2,9 @@
 
 - Milestone: **M10 — fixed-rater multilevel ICCs, Design 1 (crossed) balanced, subject
   level** — detailed and active (estimand-spec + ADR-019 written; M9 retro done)
-- Active task: M10 Slice 1 — fixed-rater multilevel fit + subject-level estimand (not
-  started; branch `m10-fixed-multilevel` not yet cut)
+- Active task: M10 Slice 2 — docs (`advanced.Rmd` fixed-rater subsection + vignette
+  claims), then PR. Slice 1 done on `m10-fixed-multilevel`: fixed-rater multilevel
+  subject-level `ICC` (balanced crossed); 352 tests green (installed pkg), air/lintr clean
 - Last green CI: PR #13 (M9) full matrix green incl. Windows; merged to `main` at
   073a51e
 - Blockers: —
