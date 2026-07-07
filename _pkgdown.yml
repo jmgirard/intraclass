@@ -14,6 +14,13 @@ articles:
 
 # Reference index grouped by design type; each milestone adds its estimators.
 reference:
+  - title: Choosing a coefficient
+    desc: >
+      An interactive decision helper that recommends which ICC to report and
+      the exact call that computes it.
+    contents:
+      - choose_icc
+
   - title: Two-way random designs
     desc: >
       Absolute-agreement and (later) consistency ICCs for crossed
