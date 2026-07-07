@@ -726,3 +726,82 @@ consequences → references.
   the same commit); `CLAUDE_CODE_KICKOFF.md` §4 (the seven-file design this amends);
   ADR-013 (the renumber whose fallout exposed the duplication); this session's audit
   (REFERENCES O-ML lapse; MILESTONES/ROADMAP renumber staleness).
+
+## ADR-016: M8 scope — nested-rater multilevel ICCs (Designs 2/3), thin first pass
+- Date: 2026-07-07
+- Status: accepted
+- Context: M8 was the provisional "multilevel & incomplete-design extensions"
+  one-liner grouped by ADR-013 from the M5 spec §8 deferrals — the paper's **Designs
+  2/3** (raters nested in clusters and/or subjects), incomplete multilevel,
+  fixed-rater multilevel, and lme4 for the fixed/multilevel fits (deferred out of
+  M5.5, ADR-012). Detailed at its start after a short M7 retro (brief §7). The retro
+  confirmed M7 (SEM/lavaan engine, PR #11) landed green and that the M5.5 engine ×
+  design seam is stable; its load-bearing lesson — a primary source reversed the plan
+  mid-implementation, so obtain and read it *before* coding a method (#1/#4;
+  `ask-for-inaccessible-sources` memory) — carries directly into M8, whose estimands
+  are transcribed from a paper. Two scope questions (breadth; where lme4 parity goes)
+  were resolved with the maintainer this session.
+- Decision (maintainer-approved this session):
+  - **M8 = the paper's Designs 2/3 only** — raters nested in clusters (Design 2)
+    and/or subjects (Design 3) — **balanced/complete, random raters.** The direct
+    analog of M5's Design-1 thin scope (#15): ship the novel nested-rater estimand
+    from the paper already in hand, and record the rest. Chosen over bundling
+    incomplete-ML and fixed-ML into the same milestone, which would multiply the
+    fit-and-oracle surface ({D1,D2,D3} × {complete,incomplete} × {random,fixed})
+    before the base nested estimands are trusted.
+  - **Internal slices mirror M5:** Slice 1 = Design 2, Slice 2 = Design 3, Slice 3 =
+    docs. Each estimand transcribed **verbatim** from ten Hove, Jorgensen & van der
+    Ark (2022, Eqs. 8–11, Table 3 middle/right) at spec time and pinned by ≥2 oracles
+    before shipping (#1/#2). The **model formulas are our translation** of the paper's
+    decomposition, **oracle-pinned not assumed** (the paper fits in Stan; same posture
+    as M5, spec §2).
+  - **Estimand-spec required** (unlike the M5.5/M7 *engine* milestones): M8 changes
+    the fitted model and the signal/error map, so it gets
+    `estimand-specs/M8-nested-multilevel.md`. Its equation sections are **held pending
+    the paper PDF** (below).
+  - **Level coverage confirmed from the paper, not asserted.** The M5 spec notes only
+    Design 1 defines *both* a subject- and a cluster-level IRR; nested-rater designs
+    plausibly define **subject-level IRR only**. The exact levels available per design
+    are read off the paper's Table 3 at spec time, not fixed here.
+    **Resolved from the paper (this session, PDF supplied):** M8 is **subject-level
+    only** — cluster-level IRR needs μ_cr, so the paper restricts it to Design 1 and
+    states "Designs 2 and 3 are not interesting" at the cluster level (M5 already ships
+    Design-1 cluster level). Further, **Design 3 is agreement-only** — the rater
+    variance is confounded into residual (Eq. 11), so only ICC_s(A,1)/ICC_s(A,k) exist
+    (the Table 3 consistency cells are "—"). Design 2 keeps agreement + consistency
+    (σ²_r → σ²_{r:c}; σ²_{(s:c)r} → σ²_{(sr):c}). So M8's shipped estimand set is: Design
+    2 {agreement, consistency} × {single, average} + Design 3 {agreement} × {single,
+    average} = **six subject-level coefficients**. Detail + Table 3 transcription in
+    [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md).
+  - **Oracles: the M5 O-ML pattern** — lme4 cross-engine (identical nested model, all
+    point families ≤1e-4), a seeded population-recovery simulation with known
+    components, and a reduction check (a nested design collapses to a shipped estimand
+    when the nesting variance → 0). No Shrout–Fleiss-style textbook worked example
+    exists (as with O5/O-ML). A Bayesian/MCMC cross-check against the paper's own Stan
+    estimator remains a *future* third oracle.
+  - **Deferred out of M8 (recorded so not rediscovered):** incomplete multilevel
+    (reuse M3 `k_eff`/connectedness); fixed-rater multilevel (reuse the M3 real
+    fixed-effect fit path, ADR-008); **lme4 for the fixed (Case 3/3A) and multilevel
+    fits — its own later slice** (maintainer's call this session: engine parity, not
+    multilevel estimand work; glmmTMB already covers these paths, ADR-012); the
+    Bayesian/MCMC cross-engine; a three-facet `d_study()` over subject-per-cluster
+    counts; exposing the conflated single-level ICC (Eq. 14).
+- Consequences: M8 stays a focused, shippable multilevel-estimand milestone with a
+  clear DoD; the differentiator (nested-rater multilevel IRR, rare in software) ships
+  first, the combinatorial variants follow as their own slices. The `cluster`/`level`
+  API and the five-component fit from M5 (ADR-011) are **extended, not redesigned**;
+  no new engine, no new `ci_method`. New public estimands → estimand-spec + the
+  per-estimator oracle bar (#1). The spec's equation transcription is **blocked on
+  obtaining the ten Hove et al. 2022 PDF** (cited for M5 but not committed) — per the
+  M7 lesson, the formulas will not be reconstructed from memory; if any Design 2/3
+  coefficient cannot be pinned by ≥2 oracles it is not shipped and a Fable review is
+  recommended, then work pauses (#19). Ships on `m8-nested-multilevel`, merged via PR.
+  Future variants stay provisional one-liners, detailed at their start (#2).
+- References: PRINCIPLES.md #1, #2, #4, #5, #14, #15, #16, #17, #19;
+  `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start), §8; ADR-011 (M5
+  multilevel — Design 1, the fit and `level` API this extends), ADR-008 (M3
+  `k_eff`/connectedness + fixed real-fit, reused by the deferred variants), ADR-012
+  (lme4 engine + the deferred parity), ADR-013 (the arc that grouped M8);
+  [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md) §8 (the
+  deferrals this schedules); ten Hove, Jorgensen & van der Ark (2022, Designs 2/3,
+  Eqs. 8–11, Table 3); the `ask-for-inaccessible-sources` memory (M7 process lesson).

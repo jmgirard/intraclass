@@ -13,7 +13,20 @@ format.icc <- function(x, ...) {
   ow <- identical(x$design$model, "oneway")
   phrase <- icc_design_phrase(x$design$type, x$design$raters, oneway = ow)
   if (ml) {
-    phrase <- paste("multilevel", phrase)
+    # Surface the inferred multilevel design (ten Hove et al. 2022; spec M8 §4).
+    ml_label <- switch(
+      x$design$ml_design,
+      nested_in_clusters = "multilevel (raters nested in clusters)",
+      nested_in_subjects = "multilevel (raters nested in subjects)",
+      "multilevel"
+    )
+    # Design 3 is the multilevel one-way (agreement-only); the two-way
+    # agreement/consistency phrase does not apply.
+    phrase <- if (identical(x$design$ml_design, "nested_in_subjects")) {
+      paste(ml_label, "absolute agreement")
+    } else {
+      paste(ml_label, phrase)
+    }
   }
   header <- sprintf("# Intraclass correlation: %s", phrase)
   cell_total <- x$n$subjects * x$n$raters
@@ -123,7 +136,26 @@ format.icc <- function(x, ...) {
 
   vc <- x$components
   d3 <- function(v) formatC(v, format = "f", digits = 3)
-  comps <- if (ml) {
+  comps <- if (ml && is.null(vc$rater)) {
+    # Design 3 (raters nested in subjects): rater is confounded into residual, so
+    # there is no rater or cluster x rater term (spec M8 §2b).
+    sprintf(
+      "Variance components: cluster %s, subject %s, residual %s (rater confounded)",
+      d3(vc$cluster),
+      d3(vc$subject),
+      d3(vc$residual)
+    )
+  } else if (ml && is.null(vc$cluster_rater)) {
+    # Nested-rater design (Design 2): the "rater" slot holds sigma^2_{r:c} and
+    # there is no separate cluster x rater term (spec M8 §2a).
+    sprintf(
+      "Variance components: cluster %s, subject %s, rater:cluster %s, residual %s",
+      d3(vc$cluster),
+      d3(vc$subject),
+      d3(vc$rater),
+      d3(vc$residual)
+    )
+  } else if (ml) {
     sprintf(
       paste(
         "Variance components: cluster %s, subject %s, rater %s,",
@@ -220,6 +252,11 @@ glance.icc <- function(x, ...) {
     n_cells = x$n$cells,
     balanced = x$design$balanced,
     multilevel = isTRUE(x$design$multilevel),
+    ml_design = if (isTRUE(x$design$multilevel)) {
+      x$design$ml_design
+    } else {
+      NA_character_
+    },
     k_eff = x$k_eff,
     var_cluster = or_na(x$components$cluster),
     var_subject = x$components$subject,

@@ -263,3 +263,67 @@ test_that("advanced.Rmd: cluster-level ICC exceeds subject-level on `school`", {
     expect_gte(average, single)
   }
 })
+
+# The article's nested-design examples relabel `school`: giving each classroom its
+# own raters (Design 2) or each pupil their own raters (Design 3). Check the prose
+# claims -- the design is inferred, nested designs report the subject level only,
+# and Design 3 is the agreement-only one-way (labels ICC(1)/ICC(k)) -- hold (#1).
+
+test_that("advanced.Rmd: nested relabels of `school` infer Designs 2 and 3", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(2025)
+  n_class <- 16
+  n_pupil <- 5
+  n_rater <- 4
+  grid <- expand.grid(
+    pupil = seq_len(n_pupil),
+    classroom = seq_len(n_class),
+    rater = seq_len(n_rater)
+  )
+  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
+  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
+    (grid$classroom - 1) * n_pupil + grid$pupil
+  ]
+  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
+  school <- data.frame(
+    classroom = factor(grid$classroom),
+    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+    rater = factor(grid$rater),
+    score = 10 +
+      class_effect +
+      pupil_effect +
+      rater_effect +
+      rnorm(nrow(grid), sd = 0.7)
+  )
+
+  # Design 2: each classroom has its own raters -> subject level only.
+  school_d2 <- school
+  school_d2$rater <- factor(
+    paste(school_d2$classroom, school_d2$rater, sep = "_")
+  )
+  x2 <- icc(
+    school_d2,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    seed = 1
+  )
+  expect_identical(x2$design$ml_design, "nested_in_clusters")
+  expect_setequal(unique(x2$estimates$level), "subject")
+
+  # Design 3: each pupil has their own raters -> multilevel one-way, ICC(1)/ICC(k).
+  school_d3 <- school
+  school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
+  x3 <- icc(
+    school_d3,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    seed = 1
+  )
+  expect_identical(x3$design$ml_design, "nested_in_subjects")
+  expect_setequal(x3$estimates$index, c("ICC(1)", "ICC(k)"))
+})

@@ -186,20 +186,11 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
 # parameter "theta_1|<group>.1" (verified against VarCorr); residual at
 # "disp~(Intercept)" -- the same log-SD scale as fit_glmmtmb() (ADR-002/003).
 
-fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
-  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
-
-  fit <- withCallingHandlers(
-    glmmTMB::glmmTMB(
-      score ~
-        1 +
-        (1 | cluster) +
-        (1 | cluster:subject) +
-        (1 | rater) +
-        (1 | cluster:rater),
-      data = data,
-      REML = TRUE
-    ),
+# Fit a multilevel glmmTMB model (REML), routing convergence warnings through cli
+# (PRINCIPLES.md #8). Shared by every multilevel design (D1/D2/...).
+fit_glmmtmb_ml_model <- function(formula, data) {
+  withCallingHandlers(
+    glmmTMB::glmmTMB(formula, data = data, REML = TRUE),
     warning = function(w) {
       cli::cli_warn(c(
         "The {.pkg glmmTMB} engine reported a fitting warning.",
@@ -208,16 +199,20 @@ fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
       invokeRestart("muffleWarning")
     }
   )
+}
 
+# Build the six-field engine contract from a fitted multilevel glmmTMB model.
+# `groups` maps component-slot name -> glmmTMB grouping-factor name (the residual
+# slot is always appended). Every variance component and Monte-Carlo draw stays on
+# glmmTMB's internal log-SD scale (theta_1|<group>.1; residual at
+# "disp~(Intercept)"), so draws back-transform to non-negative variances at the
+# near-zero boundary (ADR-002/003). One code path for all multilevel designs; each
+# design differs only in `groups`.
+glmmtmb_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
   vc <- glmmTMB::VarCorr(fit)$cond
   sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
-  components <- list(
-    cluster = sd_of("cluster")^2,
-    subject = sd_of("cluster:subject")^2,
-    rater = sd_of("rater")^2,
-    cluster_rater = sd_of("cluster:rater")^2,
-    residual = stats::sigma(fit)^2
-  )
+  components <- lapply(groups, function(g) sd_of(g)^2)
+  components$residual <- stats::sigma(fit)^2
 
   vcov_full <- stats::vcov(fit, full = TRUE)
   # `colnames()` here is itself a named vector (cond/disp/theta1...); strip those
@@ -229,10 +224,9 @@ fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
     glmmTMB::fixef(fit)$cond[["(Intercept)"]]
   )
   estimate[["disp~(Intercept)"]] <- log(stats::sigma(fit))
-  estimate[[theta("cluster")]] <- log(sd_of("cluster"))
-  estimate[[theta("cluster:subject")]] <- log(sd_of("cluster:subject"))
-  estimate[[theta("rater")]] <- log(sd_of("rater"))
-  estimate[[theta("cluster:rater")]] <- log(sd_of("cluster:rater"))
+  for (g in unlist(groups, use.names = FALSE)) {
+    estimate[[theta(g)]] <- log(sd_of(g))
+  }
 
   if (anyNA(estimate)) {
     abort_intraclass(
@@ -245,21 +239,12 @@ fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
     )
   }
 
-  ci <- c(
-    cluster = which(nm == theta("cluster")),
-    subject = which(nm == theta("cluster:subject")),
-    rater = which(nm == theta("rater")),
-    cluster_rater = which(nm == theta("cluster:rater")),
-    residual = which(nm == "disp~(Intercept)")
+  idx <- c(
+    lapply(groups, function(g) which(nm == theta(g))),
+    list(residual = which(nm == "disp~(Intercept)"))
   )
   to_components <- function(par) {
-    list(
-      cluster = exp(2 * par[ci[["cluster"]], ]),
-      subject = exp(2 * par[ci[["subject"]], ]),
-      rater = exp(2 * par[ci[["rater"]], ]),
-      cluster_rater = exp(2 * par[ci[["cluster_rater"]], ]),
-      residual = exp(2 * par[ci[["residual"]], ])
-    )
+    lapply(idx, function(i) exp(2 * par[i, ]))
   }
 
   list(
@@ -269,6 +254,84 @@ fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
     estimate = estimate,
     vcov = vcov_full,
     to_components = to_components
+  )
+}
+
+# Design 1 -- raters crossed with clusters (estimand-spec M5).
+fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "rater",
+      cluster_rater = "cluster:rater"
+    ),
+    call = call
+  )
+}
+
+# Design 2 -- raters nested within clusters (estimand-spec M8 §2a; ten Hove et al.
+# 2022 Eqs. 8-9). Four components: the rater main effect and cluster x rater
+# collapse into r:c, carried in the "rater" slot; the highest-order term is the
+# residual (sr):c. There is NO (1|rater) main-effect term -- rater identity lives
+# inside cluster:rater (raters nested). Fits
+#
+#     score ~ 1 + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)
+#
+# Only Design-2's `groups` differs from Design 1; the subject-level estimand map
+# (icc_estimand) is UNCHANGED -- "rater" now holds sigma^2_{r:c} and "residual"
+# sigma^2_{(sr):c} (estimand-spec M8 §3a). Cluster level is undefined (paper p. 6).
+fit_glmmtmb_nested_clusters <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "cluster:rater" # sigma^2_{r:c}
+    ),
+    call = call
+  )
+}
+
+# Design 3 -- raters nested within subjects and clusters (estimand-spec M8 §2b;
+# ten Hove et al. 2022 Eqs. 10-11). Each subject has its own raters, so the rater
+# variance is fully confounded into the residual sigma^2_{r:s:c}: three components
+# (cluster, subject, residual) and NO rater term -- the multilevel one-way design
+# (agreement-only). Fits
+#
+#     score ~ 1 + (1|cluster) + (1|cluster:subject)
+#
+# The subject-level ICC reads {subject | residual} (spec M8 §3b), the same shape
+# as the M6 one-way, so icc_point()/mc_ci() are unchanged.
+fit_glmmtmb_nested_subjects <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject"
+    ),
+    call = call
   )
 }
 
