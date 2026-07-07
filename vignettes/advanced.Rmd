@@ -18,7 +18,7 @@ This article covers where the mixed-model approach earns its keep:
 - **D-studies** — projecting reliability to other numbers of raters (below).
 - **Multilevel ICCs** — subject-level vs. cluster-level coefficients, crossed and
   nested, complete and incomplete.
-- **Visualising a fit** — the `autoplot()` forest and variance-component plots.
+- **Visualizing a fit** — the `autoplot()` forest and variance-component plots.
 - **Engine choice** — the mixed-model default (glmmTMB / lme4) vs. the SEM
   (lavaan) engine, and when the distinction matters.
 - **Letting the package choose** — `choose_icc()`, the decision tree as code.
@@ -161,7 +161,7 @@ school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
 icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
 ```
 
-Here the coefficients are labelled `ICC(1)` / `ICC(k)` and `type` no longer
+Here the coefficients are labeled `ICC(1)` / `ICC(k)` and `type` no longer
 applies — with each pupil's raters unique, there is no rater main effect to keep
 in or drop from the error term. A layout that is neither cleanly crossed nor
 cleanly nested (some raters shared across clusters, some not) raises an
@@ -238,7 +238,7 @@ raters are supported for the complete crossed design at the subject level. The a
 cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs, and incomplete
 or nested fixed-rater designs are planned for later milestones.
 
-## Visualising a fit
+## Visualizing a fit
 
 Every `icc()` fit carries an `autoplot()` method (with a `plot()` wrapper), so you
 can *see* the coefficients and the variance components behind them without building

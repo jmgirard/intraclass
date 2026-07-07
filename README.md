@@ -72,7 +72,7 @@ icc(ratings, score, subject, rater, seed = 2024)
 
 Which coefficient you want — agreement vs. consistency, single
 vs. average, fixed vs. random raters, complete vs. incomplete — is a
-real modelling decision, and each is an argument to `icc()`. Not sure
+real modeling decision, and each is an argument to `icc()`. Not sure
 which to report? `choose_icc()` walks the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
 decision tree and hands back the coefficient, the reasoning, and the

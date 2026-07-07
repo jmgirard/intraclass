@@ -326,18 +326,24 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       `ratings` — the "why agreement is low" narrative); the `choose_icc()` round-trip
       is already the M12 oracle. All 35 vignette-claim tests green.
 
-### Slice 3 — CRAN submission-ready
-- [ ] `DESCRIPTION` version → `0.1.0`; `NEWS.md` dev bullets consolidated under a clean
-      `# intraclass 0.1.0` release heading.
-- [ ] `cran-comments.md` authored (test environments + `R CMD check` results, every NOTE
-      justified); `inst/WORDLIST` authored, spelling CI green (`spelling::spell_check`).
-- [ ] Roxygen gaps `--as-cran` surfaces closed (`\value` on every exported topic, runnable
-      `@examples`, valid URLs).
-- [ ] `R CMD check --as-cran` clean on the full CI matrix (0 errors / 0 warnings; notes
-      justified), incl. Windows + R-devel; existing 478 tests stay green; coverage floor
-      held. Verify against the **installed** package with `NOT_CRAN=true` and run
-      `lintr::lint_package()` before the PR push (memories
-      `verify-against-installed-package`, `run-lintr-before-push`).
+### Slice 3 — CRAN submission-ready ✓ (pending PR merge)
+- [x] `DESCRIPTION` version → `0.1.0`; `Description` field expanded (spelled-out
+      "analysis-of-variance"; one-way/multilevel/`choose_icc`/`d_study` mentioned; a
+      CRAN-formatted `<doi:10.1037/met0000391>` reference added). `NEWS.md` rewritten as a
+      clean, capability-grouped `# intraclass 0.1.0` first-release changelog (git history +
+      `MILESTONES.md` keep the per-milestone record). Package-doc `.Rd` re-synced via
+      `document()`.
+- [x] `cran-comments.md` authored (env matrix + `R CMD check` result, new-submission note)
+      and `.Rbuildignore`d; `inst/WORDLIST` rebuilt (`spelling::update_wordlist`);
+      `spell_check_package()` clean. British spellings in user-facing prose corrected to US
+      (`Language: en-US`): modelling→modeling, visualising→visualizing, penalise→penalize,
+      judgement→judgment, labelled→labeled.
+- [x] Roxygen gaps: none — `--as-cran` reported **0 notes**, so `\value`/`@examples`/URLs
+      are all complete and valid.
+- [x] `R CMD check --as-cran` **0 errors / 0 warnings / 0 notes** locally (R 4.6.1), both
+      in CRAN mode and with `NOT_CRAN=true` (full suite, all `skip_on_cran` paths
+      exercised, against the built/installed package); `lintr::lint_package()` → 0 lints.
+      Full CI matrix (Windows + R-devel) confirmed by the PR.
 - [ ] `MILESTONES.md`/`STATUS.md` updated in-commit (#16); merged via PR; clean tagged
       commit at the release version.
 
@@ -350,4 +356,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   **Bayesian engine** + `ci_method = "posterior"`; **one-way via SEM** (ADR-014);
   within-cell replicates; three-facet `d_study()`; the conflated single-level ICC
   (Eq. 14). All in [`ROADMAP.md`](ROADMAP.md).
-- Status: active — detailed by ADR-022; Slice 1 next.
+- Status: active — all three slices complete locally (version 0.1.0; `--as-cran` 0/0/0 in
+  CRAN mode and with `NOT_CRAN=true`; lintr clean). Awaiting the `m13-release-polish` PR
+  to go green on the full matrix and merge; that closes the ADR-017 arc (M0–M13).

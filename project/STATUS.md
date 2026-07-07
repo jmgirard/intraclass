@@ -2,9 +2,8 @@
 
 - Milestone: **M13 — release polish (docs, site, CRAN submission-ready)** — active;
   detailed by ADR-022 on branch `m13-release-polish`. Final milestone of the ADR-017 arc.
-- Active task: **Slice 3 — CRAN submission-ready** (next; see M13 DoD in
-  `MILESTONES.md`). Slices 1 (pkgdown reorg + image fix) and 2 (advanced-vignette M11/M12
-  showcase + README refresh) done.
+- Active task: **M13 — open the release PR.** All three slices done locally; awaiting the
+  `m13-release-polish` PR to go green on the full matrix and merge.
 - Last green CI: PR #16 (M12) full matrix green incl. Windows and R-devel; merged to
   `main` at 20f9afc
 - Blockers: —
@@ -28,17 +27,14 @@ emits the exact `icc()` call — teaching/API, no new estimand (M12).
 
 ## Next action
 
-**M13 Slice 3 — CRAN submission-ready.** Bump `DESCRIPTION` to **0.1.0** and consolidate
-the `NEWS.md` dev bullets under a `# intraclass 0.1.0` heading; author `cran-comments.md`
-(test envs + `R CMD check` results, notes justified) and `inst/WORDLIST` (spelling CI
-green); close any `\value`/`@examples`/URL gaps `--as-cran` surfaces; then
-`R CMD check --as-cran` clean on the full matrix, existing tests green, coverage held.
-Verify against the **installed** package with `NOT_CRAN=true` and run
-`lintr::lint_package()` before the PR push (memories `verify-against-installed-package`,
-`run-lintr-before-push`). Slices 1–2 done: pkgdown reference reorg + flagship image fix;
-advanced-vignette M11 plotting + M12 `choose_icc()` showcase; README refreshed with a
-multilevel worked example. Scope (ADR-022): submission-**ready** not submitted (upload is
-a maintainer act). Ships on `m13-release-polish`, merges via PR.
+**Open the M13 release PR** from `m13-release-polish` and get the full matrix (Windows +
+R-devel) green, then merge. All Slice 3 work is done locally: version **0.1.0**, NEWS
+consolidated, `cran-comments.md` + `inst/WORDLIST` authored, US-spelling fixes,
+`R CMD check --as-cran` **0/0/0** in CRAN mode *and* with `NOT_CRAN=true`, `lintr` clean.
+Per ADR-022 the milestone ends at **submission-ready** — the actual CRAN upload +
+win-builder/R-hub round-trips are the maintainer's out-of-band step (deferred). After
+merge, reconcile `project/` on `main` (finish-task policy) and this closes the ADR-017
+arc (M0–M13 all shipped).
 
 Open deferral from M9 (recorded): averaged cluster-level `ICC(c,k)` on incomplete data
 — the per-cluster effective-rater divisor is an open modeling question (spec §3b), a
