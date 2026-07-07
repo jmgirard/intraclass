@@ -1,10 +1,31 @@
 # Project status
 
-- Milestone: M4.5 — D-study projection (done; merged via PR #6, full CI matrix green)
-- Active task: — (next: plan M5 — multilevel ICCs)
+- Milestone: M5 — multilevel ICCs (planned; DoD detailed, spec + ADR-011 written; not started)
+- Active task: — (next: `/start-task` → M5 Slice 1, subject-level within-cluster ICC)
 - Last green CI: PR #6 (M4.5) full matrix green (9/9); merged to `main` at 9be03a0
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
+
+## M5 plan (detailed this session, maintainer-approved)
+
+M5 adds **subject-level (within-cluster)** and **cluster-level (between-cluster)**
+interrater ICCs for subjects nested in clusters (ten Hove, Jorgensen & van der Ark
+2022), the flagship vignette's "fifth choice". Equations transcribed verbatim
+from the paper's Table 3 (Design 1). Scope (ADR-011): **Design 1 = raters crossed
+with clusters, balanced/complete, random raters**; agreement/consistency and
+single/average work at both levels. API adds a `cluster` selector + a `unit`-style
+`level = c("subject","cluster")` knob (both levels by default). Each coefficient is
+still `signal / (signal + error / k)` — **scalar divisor and `icc_point()`
+unchanged** (a planning-stage "two-facet subject×rater average" idea was wrong: the
+cluster-level ICC drops all subject variance). Model `score ~ 1 + (1|cluster) +
+(1|cluster:subject) + (1|rater) + (1|cluster:rater)`; **five** components
+σ²_c/σ²_{s:c}/σ²_r/σ²_{cr}/σ²_res; both levels read off **one shared fit**; MC CI
+(ADR-003) inherited. Oracles O-ML: lme4 cross-engine + seeded simulation +
+single-level reduction (no textbook worked example, as with O5). Two CI-green
+slices — Slice 1 subject-level, Slice 2 cluster-level + docs — on branch
+`m5-multilevel`, merged via PR. Detail in
+[`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md),
+[`MILESTONES.md`](MILESTONES.md) M5, ADR-011.
 
 ## Next action
 
@@ -25,6 +46,8 @@ Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a
 direct commit to `main` (finish-task policy — no CI job reads `project/`).
 
-**Next action:** `/start-task` begins **M5 — multilevel ICCs** (subject-level vs.
-cluster-level, ten Hove 2021). Detail M5's Definition of Done at its start
-(founding brief §7).
+**Next action:** M5's Definition of Done is now detailed with the exact equations
+pinned from the paper (spec §3 + ADR-011 + DoD above). `/start-task` begins **M5
+Slice 1 — subject-level (within-cluster) ICC**: build the `cluster`/`level` API +
+the five-component Design-1 engine fit on branch `m5-multilevel`, verified by the
+O-ML oracles before any coefficient is asserted (#1/#2/#14).

@@ -222,13 +222,76 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   9/9, `devtools::check()` 0/0/0 local). Ships `d_study()`, the numeric-`unit`
   projection, and the `autoplot()` reliability curve.
 
-## M5: Multilevel ICCs *(provisional)*
-- Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*
-- Status: provisional
+## M5: Multilevel ICCs — subject-level vs. cluster-level
+- Goal: add subject-level (within-cluster) and cluster-level (between-cluster)
+  interrater ICCs for designs where subjects are nested in clusters (ten Hove,
+  Jorgensen & van der Ark 2022), the "fifth choice" the flagship vignette
+  previews. **Crossed raters, balanced/complete, random raters** in M5; the
+  agreement/consistency and single/average knobs work at both levels.
+- Estimand: see [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md)
+  (written first, PRINCIPLES.md #2; equations transcribed verbatim from ten Hove
+  Table 3, Design 1). First estimand where the **signal component changes** (σ²_{s:c}
+  subject vs. σ²_c cluster). Each coefficient is still `signal / (signal + error /
+  k)` — the **scalar divisor and `icc_point()` are unchanged** (an earlier plan
+  assumption of a subject×rater two-facet average was wrong: the cluster-level ICC
+  drops all subject variance, Eq. 13). Model `score ~ 1 + (1 | cluster) + (1 |
+  cluster:subject) + (1 | rater) + (1 | cluster:rater)`; **five** components
+  σ²_c/σ²_{s:c}/σ²_r/σ²_{cr}/σ²_res; both levels read off **one shared fit**; the
+  Monte-Carlo CI (ADR-003) is inherited unchanged.
+- Scope decisions (ADR-011): Design 1 (raters crossed with clusters) only;
+  balanced/complete first; random raters only; API adds a `cluster` selector + a
+  `unit`-style `level = c("subject","cluster")` knob that returns both levels by
+  default. Designs 2/3, incomplete, and fixed-rater multilevel are deferred (spec §8).
+- Definition of Done (per-estimator bar, §8) — two internal CI-green slices:
+  - [ ] **Slice 1 — subject-level (within-cluster).** `cluster` (tidy-eval
+        selector, default `NULL` → backward-compatible single-level path) + `level`
+        (validated/iterated like `unit`) args; glmmTMB engine extended to the
+        five-component Design-1 fit (adds `(1 | cluster:rater)`) with component
+        extraction; identifiability guards (spec §7: ≥2 raters, ≥2 clusters, subject
+        not 1:1 with cluster, `level="cluster"` with no `cluster` column). The
+        subject-level signal/error map (spec §3a) reuses today's scalar
+        `icc_point()`. `print`/`tidy`/`glance` surface `level` + `n_clusters`.
+        Oracles O-ML: lme4 cross-engine, seeded simulation, and the single-level
+        reduction (algebraic invariant + a zero-cluster-variance/many-clusters
+        dataset matching a single-level fit; no exact-SF-number claim). End-to-end
+        thin slice.
+  - [ ] **Slice 2 — cluster-level (between-cluster) + docs.** The cluster-level
+        signal/error map (spec §3b: signal σ²_c, error {rater, cluster_rater}) off
+        the **same fit**; MC-CI verified for the cluster-level coefficient; O-ML
+        extended to it. Add the conflated-ICC teaching contrast (Eq. 14): fill
+        `advanced.Rmd`'s multilevel section on real code; turn `choosing-an-icc.Rmd`'s
+        "fifth choice" preview into a worked subject-vs-cluster example;
+        `test-vignette-claims.R` invariants.
+  - [ ] Oracles per PRINCIPLES.md #1 — lme4 + seeded simulation + single-level
+        reduction (O-ML in `REFERENCES.md`); no external worked example exists for
+        this estimand (as with O5). `psych`/`gtheory` are not oracles here; a
+        Bayesian/MCMC cross-check is deferred to M6. Any coefficient unpinnable by
+        both required oracles is not shipped (Fable review recommended, then
+        pause — #1/#19).
+  - [ ] `DECISIONS.md` ADR-011 (M5 scope + `level` API + Design-1 five-component fit);
+        `devtools::check()` 0/0/0 locally; `air`/`lintr` clean; vignettes knit;
+        full CI matrix green on the PR. Ships on `m5-multilevel`, merged via PR.
+- Deferred out of M5 (recorded so they aren't rediscovered): the paper's Designs
+  2/3 (raters nested in clusters and/or subjects); incomplete multilevel (reuse M3
+  `k_eff`/connectedness); fixed-rater multilevel; a Bayesian/MCMC cross-engine
+  (M6, the paper's own estimator); a three-facet `d_study()` projecting
+  subject-per-cluster counts; exposing the conflated single-level ICC (Eq. 14) as
+  a shipped coefficient. (See spec §8.)
+- Status: planned (spec + ADR-011 written; DoD detailed) — not started
 
 ## M6: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a
   shared interface, gated by `rlang::check_installed()`. *(was M5)*
+- Key references already gathered (pin at milestone start, PRINCIPLES.md #12):
+  the **SEM/lavaan** engine's primary source is **Jorgensen (2021), "How to
+  Estimate Absolute-Error Components in Structural Equation Models of
+  Generalizability Theory," *Psych* 3, 113–133** (doi:10.3390/psych3020011) — uses
+  `lavaan`/`gtheory`, defines absolute-error components via mean-structure
+  constraints, and independently argues **Monte-Carlo CIs** over the delta method
+  (corroborates ADR-003). The **Bayesian/MCMC** engine's hyperprior guidance is
+  ten Hove, Jorgensen & van der Ark (2020), "Comparing Hyperprior Distributions to
+  Estimate Variance Components for IRR Coefficients" (half-*t* over uniform). Both
+  PDFs are in the maintainer's Zotero; add to `REFERENCES.md` when they back code.
 - Status: provisional
 
 ## M7: Release polish *(provisional)*

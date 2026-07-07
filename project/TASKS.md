@@ -56,3 +56,26 @@ GT dependability, `psych` at `m = n_raters`, seeded sim); `data-raw/oracle-d-stu
 estimand-spec `M4.5-d-study.md`. Slice 2: `autoplot.icc_dstudy()` (ggplot2, lazily
 registered via `zzz.R`); `plot.icc_dstudy()`; NEWS; `_pkgdown`; `advanced.Rmd`
 section + claims test. `devtools::check()` 0/0/0. See MILESTONES M4.5.
+
+## M5 — multilevel ICCs (subject- vs. cluster-level) — **planned** (DoD detailed; ADR-011)
+
+Subject-level (within-cluster) + cluster-level (between-cluster) IRR ICCs for
+subjects nested in clusters (ten Hove 2022, Design 1). Scope: raters crossed
+with clusters, balanced, random raters; `cluster` selector + `unit`-style `level`
+knob (both levels by default). Equations pinned from Table 3 (spec §3). Ships on
+`m5-multilevel` via PR.
+
+- [ ] **Slice 1 — subject-level (within-cluster).** `cluster` (tidy-eval, default
+      `NULL`) + `level` (validated/iterated like `unit`) args; glmmTMB five-component
+      Design-1 fit `~ 1 + (1|cluster) + (1|cluster:subject) + (1|rater) +
+      (1|cluster:rater)` + component extraction; identifiability guards (spec §7);
+      subject-level signal/error map (spec §3a; scalar `icc_point()` reused);
+      `print`/`tidy`/`glance` surface `level` + `n_clusters`; oracles O-ML (lme4 +
+      sim + single-level reduction). CI-green.
+- [ ] **Slice 2 — cluster-level (between-cluster) + docs.** Cluster-level
+      signal/error map (spec §3b: signal σ²_c, error {rater, cluster_rater}) off the
+      **same fit** (no divisor change); MC-CI verified; O-ML extended to
+      cluster-level. Conflated-ICC teaching contrast (Eq. 14); fill `advanced.Rmd`
+      multilevel section; `choosing-an-icc.Rmd` "fifth choice" → worked example;
+      `test-vignette-claims.R` invariants; NEWS; `_pkgdown`. `devtools::check()`
+      0/0/0; full CI matrix green on the PR. See MILESTONES M5.
