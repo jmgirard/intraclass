@@ -73,50 +73,53 @@ See MILESTONES M5.
 ## M5.5 — lme4 as a selectable engine — **done** (merged via PR #9 at edd9d88, full CI matrix green)
 
 Promote lme4 from oracle-only to a selectable `engine = "lme4"` for the random
-two-way path — the pre-M6 interface slice (resolves the ADR-005 deferral). One
-CI-green slice.
-
-- [x] `R/engine-lme4.R::fit_lme4()` — `lmer(score ~ 1 + (1|subject) + (1|rater),
-      REML = TRUE)` returning the shared six-field contract on a boundary-safe
-      (log-SD) scale; MC `vcov` recovered via **merDeriv** (SD-scale, delta-
-      transformed to log-SD).
-- [x] engine × design dispatch replaces the hardcoded glmmTMB if/else in `icc()`;
-      `abort_unsupported()` for lme4 + fixed/multilevel; `check_installed()` for
-      `lme4` and `merDeriv`; `merDeriv` → `Suggests`.
-- [x] oracles O-LME: point ≡ glmmTMB ≤1e-4; **interval** ≈ glmmTMB MC CI
-      (≤9.4e-3); boundary (no negative-variance draws near zero; singular fit
-      aborts `intraclass_singular_fit`); seeded-sim coverage.
-- [x] `print`/`glance` show `engine = "lme4"` + snapshot; roxygen `@param engine`
-      fix; NEWS; advanced.Rmd engine note + claims test; `devtools::check()` 0/0/0;
-      `air`/`lintr` clean; tests 219/0/0. Full CI matrix pending on the PR.
-
-See MILESTONES M5.5.
+two-way path — the pre-M6 interface slice (resolves the ADR-005 deferral, builds the
+engine × design dispatch seam). `fit_lme4()` returns the shared six-field contract on
+a boundary-safe (log-SD) scale; MC `vcov` via **merDeriv** (delta-transformed);
+singular fit aborts `intraclass_singular_fit`. Oracles O-LME (point ≡ glmmTMB ≤1e-4;
+interval ≈ ≤9.4e-3; boundary; seeded-sim coverage). ADR-012. See MILESTONES M5.5.
 
 ## M6 — one-way random ICC(1)/ICC(k) — **done** (merged via PR #10 at eb7102d, full CI matrix green)
 
 Last member of the classic SF family (Case 1): `model = "oneway"` fits
-`score ~ 1 + (1 | subject)` (no rater term) → `ICC(1)`/`ICC(1,k)`. First milestone
-to change the fitted model. Estimand + all four oracles verified live before code
-(estimand-spec `M6-oneway.md`). One CI-green slice.
+`score ~ 1 + (1 | subject)` (no rater term) → `ICC(1)`/`ICC(1,k)` (+ numeric-unit
+`ICC(m)`). First milestone to change the fitted model. `fit_glmmtmb_oneway()` +
+`fit_lme4_oneway()` (six-field contract, no rater); `icc_point`/`resolve_divisor`/
+`mc_ci` reused; rater identity ignored (defines `k`); `type` n/a, `fixed`/`cluster`
+abort. Oracles O-OW (SF 0.166/0.443; `psych` ICC1/ICC1k; one-way ANOVA; glmmTMB↔lme4;
+seeded sim). Estimand-spec `M6-oneway.md`; choosing-an-icc "are the raters crossed?"
+section. `devtools::check()` 0/0/0, tests 247/0/0. See MILESTONES M6.
 
-- [x] Estimand-spec `project/estimand-specs/M6-oneway.md` (PRINCIPLES.md #2);
-      API decisions pinned (rater identity ignored, `type` n/a, numeric `unit`
-      supported); oracles verified live (SF/psych/ANOVA/glmmTMB≡lme4 all 0.1657/
-      0.4428).
-- [x] `model = "oneway"` unlocked in `icc()` (`validate_choice`);
-      `fit_glmmtmb_oneway()` + `fit_lme4_oneway()` returning the six-field contract
-      (`subject`/`residual`, no rater); `icc_point`/`resolve_divisor`/`mc_ci`
-      reused; `k_eff`/balance from M3; numeric `unit` → `ICC(m)`; two-way guards
-      skipped + one-way replication guard added.
-- [x] Guards (#5/#8): `raters="fixed"`+oneway abort; `cluster`+oneway abort;
-      `type` ignored (documented); single-rating → unidentified.
-- [x] Oracles O-OW: SF 0.166/0.443 (absolute gap); `psych` ICC1/ICC1k ≤1e-4;
-      one-way ANOVA mean squares; glmmTMB↔lme4 cross-engine; seeded sim (recovery +
-      CI coverage). `test-icc-oneway.R`.
-- [x] `print`/`summary`/`tidy`/`glance` one-way label + SF crosswalk + snapshot
-      (`glance` `var_rater` NA); roxygen `@param model`/`@param type`; choosing-an-icc
-      "are the raters crossed?" section + getting-started note + claims test; NEWS;
-      REFERENCES O-OW row; `devtools::check()` 0/0/0; `air`/`lintr` clean; tests
-      247/0/0. Full CI matrix pending on the PR.
+---
 
-See MILESTONES M6.
+## M7 — SEM engine (lavaan) — **planning done** (scope fixed by ADR-014; Slice 1 next)
+
+Promote lavaan (SEM / common-factor GT) to a selectable `engine = "lavaan"` for the
+two-way and one-way random paths — the "optional engines" milestone, SEM first
+(Bayesian deferred, ADR-014). No new estimand, no estimand-spec (engine for existing
+estimands). Two CI-green slices. See MILESTONES M7.
+
+### Slice 1 — lavaan two-way random
+- [ ] `R/engine-lavaan.R::fit_lavaan()` — reshape long → wide; one-factor SEM
+      (consistency σ²_s/(σ²_s+σ²_res); absolute agreement + rater-intercept
+      mean-structure spread, Jorgensen 2021); returns the shared six-field contract.
+- [ ] `vcov(fit)` feeds the existing `montecarlo` path (no new `ci_method`);
+      `to_components` boundary-safe at zero-variance/Heywood (#3), boundary oracle;
+      Heywood/singular fit aborts loudly (classed → glmmTMB).
+- [ ] Dispatch seam gains lavaan × {twoway} rows; `check_installed("lavaan")`;
+      lavaan → `Suggests`; guards `raters="fixed"`/`cluster`/incomplete + lavaan →
+      `abort_unsupported()` (deferred, recorded).
+- [ ] Oracles O-SEM: Jorgensen worked example; point ≡ glmmTMB on `ratings` (≤1e-3);
+      `psych` ICC2/ICC3; **interval** ≈ glmmTMB MC CI (absolute gap); seeded sim.
+      `data-raw/oracle-sem.R`; `test-icc-lavaan.R`.
+
+### Slice 2 — lavaan one-way random + docs
+- [ ] `model = "oneway"` + lavaan: parallel one-factor model over k exchangeable
+      columns → `ICC(1)`/`ICC(1,k)` (+ numeric-unit `ICC(m)` free via
+      `resolve_divisor()`). Oracles: SF 0.166/0.443 + `psych` ICC1/ICC1k +
+      cross-engine + sim.
+- [ ] `print`/`glance` surface `engine = "lavaan"` + snapshot; roxygen `@param
+      engine` adds lavaan; NEWS; `advanced.Rmd` SEM-engine section + claims-test
+      line; REFERENCES O-SEM + Jorgensen 2021 + lavaan rows.
+- [ ] `devtools::check()` 0/0/0; `air`/`lintr` clean; full CI matrix on the PR
+      (`m7-sem-engine`).

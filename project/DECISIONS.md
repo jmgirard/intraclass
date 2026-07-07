@@ -533,3 +533,97 @@ consequences → references.
   #15 (thin slices), #17 (no scope creep); MILESTONES.md (arc-reorder rule);
   ROADMAP.md (parking lot); ADR-005/ADR-012 (engine deferrals); Shrout & Fleiss
   (1979) one-way ICC1/ICC1k (0.166/0.443); `CLAUDE_CODE_KICKOFF.md` §7.
+
+## ADR-014: M7 scope — SEM (lavaan) as an optional engine, two-way + one-way random
+- Date: 2026-07-07
+- Status: accepted
+- Context: M7 was the provisional "optional engines (Bayesian brms/rstanarm, SEM
+  lavaan)" one-liner in the ADR-013 arc, to be detailed at its start after an M6
+  retro (brief §7). The retro confirmed M6 landed green in one slice and that the
+  M5.5 engine × design dispatch seam absorbed a *new fitted model* (one-way)
+  cleanly, so the seam is ready to take *new engines*. Two scope questions were open
+  and confirmed with the maintainer this session: which engine leads, and how wide
+  the first slice's design coverage is. As in M5.5 (ADR-012), an alternative engine
+  for an existing estimand is **not** a new estimand — **no estimand-spec** (cf. M4).
+- Decision:
+  - **Lead engine = SEM via `lavaan`** (maintainer choice over the Bayesian
+    brms/rstanarm options), mirroring the successful M5.5 pattern: (1) it **reuses
+    the existing Monte-Carlo CI path** — lavaan exposes `vcov(fit)` (the joint
+    covariance of the estimated model parameters), so MC draws recompute the ICC per
+    draw with **no new `ci_method`**, exactly as merDeriv let lme4 reuse
+    `montecarlo`; (2) **light install, no Stan compilation** — lavaan is a single new
+    `Suggests` needing no C++ toolchain, so the CI matrix (incl. Windows) stays fast
+    and green, unlike brms; (3) **it can be pinned to a textbook oracle** — Jorgensen
+    (2021, *Psych* 3:113–133) gives a worked GT-via-SEM example defining
+    absolute-error components via mean-structure constraints, meeting the PRINCIPLES
+    #1 textbook bar, and that paper **independently argues for Monte-Carlo CIs**,
+    corroborating ADR-003. The Bayesian engine's looser oracle bar (a posterior
+    summary ≈ REML only within prior/MCMC error, not 1e-4) and Stan install weight
+    make it the heavier, later slice.
+  - **Design scope = two-way random + one-way random** (maintainer choice). The
+    lavaan engine supports `model = "twoway"` (agreement + consistency × single/
+    average) and `model = "oneway"` (ICC(1)/ICC(1,k)); numeric `unit` (D-study) is
+    inherited for free via `resolve_divisor()` (as in M6). `raters = "fixed"`,
+    multilevel (`cluster`), and **incomplete/unbalanced** designs → classed
+    `abort_unsupported()` for lavaan, deferred and recorded (SEM handles missing via
+    FIML, but that is its own slice). Wider than M5.5's twoway-only slice, still
+    excluding the fixed real-fit and multilevel fits (#15).
+  - **SEM parameterization (to be oracle-pinned, not assumed).** lavaan wants **wide
+    data** (one row per subject; columns = raters for twoway, k exchangeable ratings
+    for oneway), so `fit_lavaan()` reshapes the long `icc()` data to wide. Two-way: a
+    one-factor model where the subject factor loads on the rater-indicators;
+    **consistency** reads σ²_s / (σ²_s + σ²_res) off the factor and residual
+    variances; **absolute agreement** adds the rater main-effect spread via
+    **mean-structure (intercept) constraints** (Jorgensen 2021). One-way random: a
+    **parallel** one-factor model (equal loadings, residual variances, and
+    intercepts) over k exchangeable columns → ICC(1)/ICC(1,k). The engine returns the
+    **same six-field contract** (`fit`/`engine`/`components`/`estimate`/`vcov`/
+    `to_components`) as glmmTMB/lme4, so `icc_point()`/`mc_ci()`/`d_study()` are
+    unchanged. The claim that this SEM parameterization returns the *same* variance
+    components is **asserted by oracle** (below), not by the formula (#1); any
+    component unpinnable by ≥2 oracles is not shipped and a Fable review is
+    recommended, then work pauses (#19).
+  - **Boundary-awareness (#3) is a named risk.** lavaan estimates variances on the
+    **raw scale** (they can go negative — Heywood cases), unlike glmmTMB's
+    boundary-safe log-SD scale. `to_components` for lavaan must keep MC draws valid at
+    the near-zero-variance boundary (constrain variances ≥ 0 in the fit and/or handle
+    the draw scale), pinned by an explicit boundary oracle — the direct analog of the
+    ADR-012 merDeriv-scale problem. A Heywood/singular fit that cannot yield a valid
+    interval aborts loudly (classed), directing the user to `engine = "glmmTMB"`.
+  - **Oracles O-SEM (≥2 independent, targeting 4–5):** (a) **Jorgensen (2021) worked
+    SEM-GT values** (textbook); (b) **point lavaan ≡ glmmTMB** on balanced SF
+    `ratings` (0.290/0.620/0.715/0.909 twoway; 0.166/0.443 oneway) to a tolerance
+    appropriate to REML-vs-ML/SEM (target ≤1e-3, **pinned during the slice, not
+    assumed 1e-4**); (c) **`psych::ICC`** on the balanced case (twoway ICC2/ICC3,
+    oneway ICC1/ICC1k); (d) **interval** lavaan MC CI ≈ glmmTMB MC CI (**absolute**
+    gap on bounds — the M5.5 Windows lesson); (e) seeded simulation (recovery + 95% CI
+    coverage). Provenance in `data-raw/oracle-sem.R`; O-SEM row in REFERENCES when
+    asserted.
+  - **Dispatch:** the M5.5 engine × design lookup gains lavaan rows for
+    `{twoway, oneway} × random`; every other cell aborts `abort_unsupported()`.
+    `check_installed("lavaan")` guards the path (light install preserved; lavaan →
+    `Suggests`, **no companion package** since lavaan exposes `vcov()` natively —
+    lighter than the lme4 + merDeriv pair).
+  - **Bayesian engine deferred out of M7's first pass** (recorded so not
+    rediscovered): the Bayesian backend (**rstanarm** preferred over brms for
+    CI-install sanity — precompiled Stan, no toolchain) with a new
+    `ci_method = "posterior"` (credible intervals from native draws) and half-*t*
+    hyperpriors (ten Hove, Jorgensen & van der Ark 2020), scheduled as a **later
+    slice of M7 or its own follow-on milestone** after the SEM slice lands. Also
+    deferred: incomplete/unbalanced SEM (FIML); fixed-rater and multilevel SEM.
+- Consequences: M7 ships the **SEM/lavaan engine** for the twoway + oneway random
+  paths as two CI-green slices — Slice 1 twoway (congeneric/mean-structure), Slice 2
+  oneway (parallel) + docs — extending the dispatch seam, adding lavaan to
+  `Suggests`, and a `data-raw/oracle-sem.R`. `engine` gains a third value (additive,
+  not breaking, #6; `@param engine` roxygen updated). No estimand-spec (engine, not
+  estimand). The Bayesian engine and the wider designs stay deferred and recorded.
+  `advanced.Rmd` gains an SEM-engine note with a backing `test-vignette-claims.R`
+  line. Ships on `m7-sem-engine`, merged via PR; full CI matrix on the PR.
+- References: PRINCIPLES.md #1, #2, #3, #5, #6, #8, #12, #15, #16, #17, #19; ADR-002
+  (glmmTMB default + why an alternative engine needs its own vcov route), ADR-003 (MC
+  CIs — corroborated by Jorgensen 2021), ADR-012 (the engine × design seam + the
+  reuse-the-MC-path pattern this follows), ADR-013 (the arc that scheduled M7);
+  Jorgensen (2021, *Psych* 3:113–133, doi:10.3390/psych3020011); lavaan (Rosseel
+  2012, *J. Stat. Softw.* 48(2)); ten Hove, Jorgensen & van der Ark (2020, hyperprior
+  guidance — for the deferred Bayesian slice); `CLAUDE_CODE_KICKOFF.md` §1 (optional
+  engines in Suggests), §7 (detail a milestone at its start), §8.
