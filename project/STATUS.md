@@ -1,9 +1,8 @@
 # Project status
 
-- Milestone: M5.5 — lme4 as a selectable engine (code complete; pending PR merge)
-- Active task: — (M5.5 slice done locally; next: push `m5.5-lme4-engine`, open PR)
-- Last green CI: PR #8 (M5) full matrix green (9/9); merged to `main` at 87b4588
-  (M5.5 local: `devtools::check()` 0/0/0, tests 219/0/0, lintr clean)
+- Milestone: M5.5 — lme4 as a selectable engine (done; merged via PR #9)
+- Active task: — (next: retro + plan M6 — optional engines)
+- Last green CI: PR #9 (M5.5) full matrix green (9/9); merged to `main` at edd9d88
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
 
@@ -58,8 +57,9 @@ choosing-an-icc.Rmd multilevel-citation fix.
 Deferred (spec §8, recorded so they aren't rediscovered): Designs 2/3 (nested
 raters), incomplete multilevel, fixed-rater multilevel, multilevel D-study.
 
-**Current milestone:** M5.5 — lme4 as a selectable engine (ADR-012), code complete
-locally. A pre-M6 take-stock (this session) reviewed the deferred/ROADMAP
+**Just shipped:** M5.5 — lme4 as a selectable engine (ADR-012), merged via PR #9
+(`edd9d88`, full CI matrix green 9/9 incl. Windows; `devtools::check()` 0/0/0 local,
+tests 219/0/0). A pre-M6 take-stock (this session) reviewed the deferred/ROADMAP
 inventory; the maintainer promoted the ADR-005 lme4-selectable debt as the natural
 interface-building slice before M6's heavier optional-engine work. Two design
 questions resolved: (1) CI via **merDeriv** reusing the existing Monte-Carlo path
@@ -68,15 +68,18 @@ questions resolved: (1) CI via **merDeriv** reusing the existing Monte-Carlo pat
 returns the shared six-field engine contract so `icc_point`/`mc_ci`/`d_study` are
 unchanged (no new estimand). The SD-scale merDeriv covariance is delta-transformed
 to glmmTMB's log-SD scale — verified to reproduce glmmTMB's `vcov(full = TRUE)` to
-~1e-4, so the lme4 MC CI matches glmmTMB's to ≤9.4e-3 (oracle O-LME). **Discovered:
-merDeriv fails on a singular fit** (variance component pinned to exactly zero);
-`fit_lme4()` detects `isSingular()` and aborts (`intraclass_singular_fit`) pointing
-to the boundary-robust glmmTMB engine (#5/#8). DoD checked off in MILESTONES M5.5;
-scope + the singular-fit note in ADR-012. Ships on `m5.5-lme4-engine`; next is
-push + PR.
+~1e-4, so the lme4 MC CI matches glmmTMB's to ≤9.4e-3 absolute (oracle O-LME).
+**Discovered: merDeriv fails on a singular fit** (variance component pinned to
+exactly zero); `fit_lme4()` detects `isSingular()` and aborts
+(`intraclass_singular_fit`) pointing to the boundary-robust glmmTMB engine (#5/#8).
+Scope + the singular-fit note in ADR-012. (CI-only wrinkle, now fixed: the
+interval oracle first used `expect_equal`'s *relative* tolerance, which tripped on
+small `conf.low` bounds on Windows; switched to an absolute-gap assertion.)
 
 **Next milestone:** M6 — optional engines (Bayesian `brms`/`rstanarm`, SEM
 `lavaan`) behind `Suggests`; references already gathered (Jorgensen 2021 SEM,
 ten Hove 2020 hyperpriors — see MILESTONES M6). M6 now extends the engine × design
-dispatch seam M5.5 establishes. Detail M6's DoD at its start after a short retro
+dispatch seam M5.5 established, and will need the `ci_method` layer to generalize
+for brms's native posterior samples (M5.5 left it untouched — merDeriv let lme4
+reuse `montecarlo`). Detail M6's DoD at its start after a short retro
 (founding brief §7).

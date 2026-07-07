@@ -70,7 +70,7 @@ choosing-an-icc.Rmd citation fix, NEWS, roxygen, vignette-claims invariant. Also
 citation audit (ADR-002/003 → ten Hove 2025). `devtools::check()` 0/0/0, 188 tests.
 See MILESTONES M5.
 
-## M5.5 — lme4 as a selectable engine — **code complete** (`m5.5-lme4-engine`, ADR-012; pending PR)
+## M5.5 — lme4 as a selectable engine — **done** (merged via PR #9 at edd9d88, full CI matrix green)
 
 Promote lme4 from oracle-only to a selectable `engine = "lme4"` for the random
 two-way path — the pre-M6 interface slice (resolves the ADR-005 deferral). One

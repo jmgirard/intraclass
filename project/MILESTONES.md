@@ -329,11 +329,12 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   (Case 3/3A) and multilevel fits; the parametric-bootstrap `ci_method` (bootMer)
   → M6/ROADMAP; a boundary-robust lme4 interval for singular fits (glmmTMB covers
   it today); merDeriv edge cases beyond the two-way random model.
-- Status: done (one slice; `devtools::check()` 0/0/0 local, tests 219/0/0, lintr
-  clean). Ships selectable `engine = "lme4"` for the random two-way path via a
+- Status: done (one slice; merged via PR #9 at `edd9d88`; full CI matrix green —
+  9/9 incl. Windows, `devtools::check()` 0/0/0 local, tests 219/0/0, lintr clean).
+  Ships selectable `engine = "lme4"` for the random two-way path via a
   merDeriv-backed Monte-Carlo interval on glmmTMB's log-SD scale, oracles O-LME
-  (point + interval cross-engine, boundary, seeded-sim coverage), and the
-  advanced-vignette engine-choice section. **Pending PR merge.**
+  (point + interval cross-engine, boundary + singular-fit abort, seeded-sim
+  coverage), and the advanced-vignette engine-choice section.
 
 ## M6: Optional engines behind `Suggests` *(provisional)*
 - Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a
