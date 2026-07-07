@@ -138,39 +138,43 @@ test_that("O-IML/reduction: complete data reproduces the balanced M5 numbers", {
 test_that("O-IML/reduction: a single cluster equals the flat M3 incomplete two-way", {
   skip_if_not_installed("glmmTMB")
   # With one cluster sigma^2_c -> 0 and sigma^2_cr folds into sigma^2_r, so the
-  # multilevel Design-1 subject-level ICCs collapse to the M3 flat two-way ICCs on
-  # the same ragged ratings (spec M9 §6, O-IML/reduction).
-  d <- sim_design1(1, 12, 5, 0.0, 1.0, 0.5, 0.0, 0.6, seed = 4242)
-  dr <- ragged(d, prop = 0.2, seed = 3)
-  ml <- icc(
-    dr,
-    score,
-    subject,
-    rater,
-    cluster = cluster,
-    level = "subject",
-    design = "crossed",
-    type = "consistency",
-    unit = c("single", "average"),
-    seed = 1
+  # multilevel Design-1 subject-level consistency collapses to the M3 flat two-way
+  # consistency on the same ragged ratings (spec M9 §6, O-IML/reduction). A one-cluster
+  # design is intentionally refused by `icc()` (a multilevel ICC needs >= 2 clusters),
+  # so the reduction is checked at the fit level: the five-component multilevel model
+  # and the flat two-way model, both fit directly, must give the same sigma^2_s and
+  # sigma^2_res. (The seeded data-raw script pins this too.)
+  dr <- ragged(
+    sim_design1(1, 12, 5, 0.0, 1.0, 0.5, 0.0, 0.6, seed = 4242),
+    prop = 0.2,
+    seed = 3
   )
-  flat <- icc(
-    dr,
-    score,
-    subject,
-    rater,
-    type = "consistency",
-    unit = c("single", "average"),
-    seed = 1
+  ml <- glmmTMB::glmmTMB(
+    score ~ 1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data = dr,
+    REML = TRUE
   )
+  mlvc <- glmmTMB::VarCorr(ml)$cond
+  ml_sc <- as.numeric(attr(mlvc[["cluster:subject"]], "stddev"))^2
+  ml_res <- stats::sigma(ml)^2
+
+  flat <- glmmTMB::glmmTMB(
+    score ~ 1 + (1 | subject) + (1 | rater),
+    data = dr,
+    REML = TRUE
+  )
+  fvc <- glmmTMB::VarCorr(flat)$cond
+  f_s <- as.numeric(attr(fvc[["subject"]], "stddev"))^2
+  f_res <- stats::sigma(flat)^2
+
+  # Consistency = sigma^2_s / (sigma^2_s + sigma^2_res) matches between the two fits.
   expect_equal(
-    pick(ml, "ICC(C,1)"),
-    flat$estimates$estimate[1],
-    tolerance = 1e-3
-  )
-  expect_equal(
-    pick(ml, "ICC(C,k)"),
-    flat$estimates$estimate[2],
+    ml_sc / (ml_sc + ml_res),
+    f_s / (f_s + f_res),
     tolerance = 1e-3
   )
 })
@@ -484,7 +488,6 @@ test_that("cluster-level IRR aborts to subject when raters do not bridge cluster
 })
 
 test_that("print surfaces the incomplete multilevel design and effective k", {
-  skip_on_cran()
   skip_if_not_installed("glmmTMB")
   d <- ragged(
     sim_design1(6, 5, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 20260707),
@@ -500,5 +503,13 @@ test_that("print surfaces the incomplete multilevel design and effective k", {
     level = "subject",
     seed = 1
   )
-  expect_snapshot(print(x))
+  # Assert the DETERMINISTIC surfaced strings rather than snapshotting the full
+  # report -- the multilevel fit's variance components (hence the estimates and MC
+  # interval) can differ at the last printed digit across BLAS/platforms, but the
+  # design word and the effective-k note are computed from cell counts and are
+  # platform-stable. k_eff = harmonic mean of the per-subject rating counts = 3.24.
+  out <- cli::cli_fmt(print(x))
+  expect_match(out, "Observations: \\d+ \\(incomplete\\)", all = FALSE)
+  expect_match(out, "effective 3.24 raters", all = FALSE)
+  expect_match(out, "multilevel two-way random", all = FALSE)
 })
