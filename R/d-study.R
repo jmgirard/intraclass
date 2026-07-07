@@ -79,7 +79,7 @@ d_study <- function(
     abort_unsupported(c(
       "D-study projection is not supported for multilevel ICCs yet.",
       i = "Projecting the rater (and subject-per-cluster) counts of a multilevel \\
-           design is planned for a later milestone (M5 spec §8)."
+           design is planned for a later milestone (M5 spec, section 8)."
     ))
   }
   type <- x$design$type
