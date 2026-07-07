@@ -1,14 +1,14 @@
 # Milestones
 
 Ordered milestones with status and the deferrals each one recorded. **Shipped
-milestones (M0–M7) are compressed** to Goal / Status / Deferred + spec-and-ADR
+milestones (M0–M9) are compressed** to Goal / Status / Deferred + spec-and-ADR
 pointers — the full blow-by-blow DoD lives in its ADR (`DECISIONS.md`), its
 estimand-spec, and git history (ADR-015, single-source; don't restate it here). The
-**active** and **next** milestones are detailed in full. Remaining milestones (M8–M9)
+**active** and **next** milestones are detailed in full. Remaining milestones (M10–M13)
 are provisional one-liners, detailed at the start of their milestone after a short
 retro on the previous one (founding brief §7). The arc is a hypothesis, not a
-contract — reorders get a [`DECISIONS.md`](DECISIONS.md) entry (the M6–M9 sequence was
-set by ADR-013; ADR-014 detailed M7).
+contract — reorders get a [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was
+set by ADR-017; ADR-018 detailed M9).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -184,19 +184,21 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–3; merged via PR #12 at ca2dcdb; full CI matrix green incl.
   Windows, 313 tests).
 
-## M9: Incomplete / unbalanced multilevel ICCs — Design 1 (crossed) *(active)*
+## M9: Incomplete / unbalanced multilevel ICCs — Design 1 (crossed)
 - Goal: correct multilevel ICCs on **ragged** Design-1 (raters crossed with clusters)
   data — missing subject×rater cells — by generalizing the M3 connectedness +
   `k_eff` machinery (ADR-008) onto the M5 five-component multilevel fit (ADR-011).
-  **No new estimand** (the M5 Design-1 coefficients estimated on ragged data, as M3 is
-  to M1/M2). Random raters, glmmTMB engine (lme4 oracle), both subject- and
-  cluster-level. Ambiguous ragged crossed/nested patterns are **declared** via a new
-  optional `design` argument, never guessed (#5); the multilevel connectedness rule
-  and `k_eff` are **oracle-pinned, not asserted** (#1/#18).
+  **No new estimand** (the M5 Design-1 coefficients on ragged data, as M3 is to
+  M1/M2). Subject level (agreement/consistency, single/average) + cluster-level
+  single-rater `ICC(c,1)`; a new optional **`design`** argument declares crossed vs.
+  nested when missing cells make the pattern ambiguous (never guessed, #5); the
+  multilevel connectedness rule (`crossed_ml_identifiability()`) and `k_eff` are
+  **oracle-pinned, not asserted** (#1/#18). An oracle-first catch corrected spec §3a
+  before code: σ²_cr is *not* in the subject-level error (matches shipped M5).
 - Estimand: [`estimand-specs/M9-incomplete-multilevel.md`](estimand-specs/M9-incomplete-multilevel.md);
-  ADR-018 (scope). Oracles O-IML (lme4 cross-engine + seeded incomplete-multilevel
-  recovery + reductions to complete M5 Design 1 and to M3 flat-incomplete two-way +
-  an identifiability oracle; no textbook worked example).
+  ADR-018 (scope). Oracles O-IML (lme4 cross-engine <1e-4 + seeded recovery with MC-CI
+  coverage + reductions to complete M5 and flat-incomplete M3 + an identifiability
+  oracle; no textbook worked example).
 - Deferred out of M9 (recorded so not rediscovered): **averaged cluster-level
   `ICC(c,k)` on incomplete data** (the per-cluster effective-rater divisor is an open
   modeling question, no textbook oracle — spec §3b; `ICC(c,1)` ships); **incomplete
@@ -205,31 +207,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   fit** (engine parity, ADR-012);
   within-cell replicates via `(1 | cluster:subject:rater)` (ROADMAP); a Bayesian/MCMC
   cross-engine; three-facet `d_study()`; the conflated single-level ICC (Eq. 14).
-- Ships on `m9-incomplete-multilevel`, CI-green slices (spec §6). **DoD board:**
-  - [x] **Slice 1 — incomplete Design-1 fit + identifiability + divisor.** Multilevel
-    connectedness (`crossed_ml_identifiability()`: within-cluster subject×rater +
-    cluster×rater bridging, spec §4b); optional `design` argument + ambiguity abort
-    (§4a); multilevel `k_eff` (§5); incomplete crossed routed off the M5 fit.
-    Subject-level agreement/consistency, single/average. Oracles O-IML/lme4, /sim,
-    /reduction (→ complete M5 and → flat M3), identifiability oracle. 331 tests green,
-    lintr/air clean. (An oracle-first catch corrected spec §3a: σ²_cr is *not* in the
-    subject-level error — matches shipped M5.) Cluster-level-incomplete deferred to
-    Slice 2 with a loud abort.
-  - [x] **Slice 2 — cluster level + boundaries.** Cluster-level **single-rater
-    `ICC(c,1)`** on ragged data behind the §4b cluster×rater-bridging gate
-    (abort-to-subject when raters don't bridge); the **averaged `ICC(c,k)` divisor is
-    deferred** (per-cluster effective raters, no textbook oracle — maintainer decision,
-    spec §3b) with a loud abort. Boundary/guard matrix (§7) + incomplete-multilevel
-    print snapshot; O-IML/lme4 cluster-single match + complete-M5 both-level reduction.
-    340 tests green.
-  - [x] **Slice 3 — docs.** `advanced.Rmd` multilevel section extended with an
-    *Incomplete (ragged) multilevel designs* subsection on real knit-time code
-    (subject level + `k_eff`, cluster `ICC(c,1)`, the `design` declaration, and the
-    `ICC(c,k)` deferral); `test-vignette-claims.R` invariants rebuild the ragged
-    `school` data and back each prose claim (#1). Vignette knits end-to-end.
-  - [ ] Full `R-CMD-check` matrix green (incl. Windows); coverage floor held, new
-    statistical paths oracle-covered; `air`/`lintr` clean; pkgdown builds.
-  - [ ] `MILESTONES.md`/`STATUS.md` reconciled; merged via PR (`milestone-branches-and-prs`).
+- Status: done (Slices 1–3; merged via PR #13 at 073a51e; full CI matrix green incl.
+  Windows, 348 tests).
 
 ## M10: Fixed-rater multilevel ICCs *(provisional)*
 - Goal: fixed-rater multilevel ICCs, reusing the M3 real fixed-effect fit path
