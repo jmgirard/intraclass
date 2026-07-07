@@ -273,15 +273,17 @@ the ill-posed case the package refuses to guess at.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="a-fifth-choice-coming-later-subject--vs--cluster-level">A fifth choice, coming later: subject- vs. cluster-level<a class="anchor" aria-label="anchor" href="#a-fifth-choice-coming-later-subject--vs--cluster-level"></a>
+<h2 id="a-fifth-choice-subject--vs--cluster-level">A fifth choice: subject- vs. cluster-level<a class="anchor" aria-label="anchor" href="#a-fifth-choice-subject--vs--cluster-level"></a>
 </h2>
 <p>Everything above takes the subject as the object of measurement. When
 subjects are themselves nested in higher-level units – pupils within
 classrooms, patients within clinics – you may instead want the
 reliability of the <em>cluster</em> mean, a multilevel ICC (ten Hove,
-Jorgensen &amp; van der Ark, 2021). That axis is on the roadmap and will
-get its own treatment; for now <code><a href="../reference/icc.html">icc()</a></code> covers the
-single-level two-way design.</p>
+Jorgensen &amp; van der Ark, 2022). Pass a <code>cluster</code> column
+to <code><a href="../reference/icc.html">icc()</a></code> and it reports the <strong>subject-level</strong>
+(within-cluster) and <strong>cluster-level</strong> (between-cluster)
+coefficients side by side. The <a href="advanced.html"><em>Advanced</em></a> article works a full
+example.</p>
 </div>
 <div class="section level2">
 <h2 id="naming-crosswalk">Naming crosswalk<a class="anchor" aria-label="anchor" href="#naming-crosswalk"></a>
@@ -361,10 +363,9 @@ some intraclass correlation coefficients. <em>Psychological Methods,
 <p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations:
 Uses in assessing rater reliability. <em>Psychological Bulletin,
 86</em>(2), 420–428.</p>
-<p>ten Hove, D., Jorgensen, T. D., &amp; van der Ark, L. A. (2021).
-Updated guidelines on selecting an intraclass correlation coefficient
-for interrater reliability, with applications to incomplete
-observational designs. <em>Psychological Methods</em>.</p>
+<p>ten Hove, D., Jorgensen, T. D., &amp; van der Ark, L. A. (2022).
+Interrater reliability for multilevel data: A generalizability theory
+approach. <em>Psychological Methods, 27</em>(4), 650–666.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

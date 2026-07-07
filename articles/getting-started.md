@@ -61,18 +61,19 @@ one-row model summary including the variance components.
 ``` r
 
 tidy(fit)
-#> # A tibble: 2 × 8
-#>   index    sf_index estimate std.error conf.low conf.high conf.level method    
-#>   <chr>    <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
-#> 1 ICC(A,1) ICC(2,1)    0.290     0.180   0.0498     0.713       0.95 montecarlo
-#> 2 ICC(A,k) ICC(2,k)    0.620     0.201   0.173      0.909       0.95 montecarlo
+#> # A tibble: 2 × 9
+#>   index   level sf_index estimate std.error conf.low conf.high conf.level method
+#>   <chr>   <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr> 
+#> 1 ICC(A,… NA    ICC(2,1)    0.290     0.180   0.0498     0.713       0.95 monte…
+#> 2 ICC(A,… NA    ICC(2,k)    0.620     0.201   0.173      0.909       0.95 monte…
 
 glance(fit)
-#> # A tibble: 1 × 12
-#>   n_subjects n_raters n_obs n_cells balanced k_eff var_subject var_rater
-#>        <int>    <int> <int>   <int> <lgl>    <dbl>       <dbl>     <dbl>
-#> 1          6        4    24      24 TRUE         4        2.56      5.24
-#> # ℹ 4 more variables: var_residual <dbl>, engine <chr>, ci_method <chr>,
+#> # A tibble: 1 × 16
+#>   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel k_eff
+#>        <int>    <int>      <int> <int>   <int> <lgl>    <lgl>      <dbl>
+#> 1          6        4         NA    24      24 TRUE     FALSE          4
+#> # ℹ 8 more variables: var_cluster <dbl>, var_subject <dbl>, var_rater <dbl>,
+#> #   var_cluster_rater <dbl>, var_residual <dbl>, engine <chr>, ci_method <chr>,
 #> #   conf.level <dbl>
 ```
 

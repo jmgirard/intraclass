@@ -2,11 +2,12 @@
 
 ## Beyond the balanced case
 
-This article will cover where the mixed-model approach earns its keep:
+This article covers where the mixed-model approach earns its keep:
 
-- **Multilevel ICCs** — subject-level vs. cluster-level coefficients.
+- **Multilevel ICCs** — subject-level vs. cluster-level coefficients
+  (below).
 - **Engine choice** — linear mixed models vs. SEM vs. Bayesian, and when
-  each matters.
+  each matters (a forthcoming milestone).
 - **Confidence-interval methods** — Monte-Carlo (the default) and its
   alternatives, especially near the zero-rater-variance boundary.
 
@@ -86,5 +87,77 @@ lacks — and projecting absolute agreement is refused for *fixed* raters,
 where there is no wider rater universe to generalize to (use
 `raters = "random"`).
 
-> The multilevel and alternative-engine material below is a placeholder,
-> filled in from **Milestone 5** onward (`project/MILESTONES.md`).
+## Multilevel ICCs: subject vs. cluster level
+
+Everything above treats the **subject** as the object of measurement.
+But subjects are often nested in higher-level **clusters** — pupils in
+classrooms, patients in clinics — and then “reliability” splits in two:
+
+- **Subject level** (within-cluster): how reliably do raters distinguish
+  *subjects within a cluster*?
+- **Cluster level** (between-cluster): how reliably do raters
+  distinguish *cluster means*?
+
+Ignoring the nesting *conflates* these and biases both (ten Hove,
+Jorgensen & van der Ark, 2022). Passing a `cluster` column to
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fits
+the multilevel model and reports each level separately.
+
+Consider pupils nested in classrooms, each pupil rated by the same panel
+of raters. We simulate a design with substantial classroom-level signal
+but modest within-classroom differences:
+
+``` r
+
+library(intraclass)
+
+set.seed(2025)
+n_class <- 16
+n_pupil <- 5
+n_rater <- 4
+grid <- expand.grid(
+  pupil = seq_len(n_pupil),
+  classroom = seq_len(n_class),
+  rater = seq_len(n_rater)
+)
+class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
+pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
+  (grid$classroom - 1) * n_pupil + grid$pupil
+]
+rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
+school <- data.frame(
+  classroom = factor(grid$classroom),
+  pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+  rater = factor(grid$rater),
+  score = 10 + class_effect + pupil_effect + rater_effect +
+    rnorm(nrow(grid), sd = 0.7)
+)
+```
+
+``` r
+
+icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   level    index     estimate   95% CI
+#>   subject  ICC(A,1)    0.431   [0.251, 0.561]
+#>   subject  ICC(A,k)    0.751   [0.573, 0.836]
+#>   cluster  ICC(A,1)    0.880   [0.000, 0.972]
+#>   cluster  ICC(A,k)    0.967   [0.000, 0.993]
+#> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
+```
+
+Both levels come back in one call. Here the **cluster-level** ICC is the
+higher of the two: raters agree more about which *classrooms* score high
+than about which *pupils within a classroom* do — exactly the pattern
+you would expect when most of the true variation lives between
+classrooms. Which number you report depends on the decision you will
+make: a classroom-level intervention cares about the cluster-level
+reliability, a pupil-level one about the subject level. Request just one
+with `level = "subject"` or `level = "cluster"`.
+
+Multilevel support currently covers **crossed random raters on balanced
+data** (agreement/consistency and single/average apply at each level).
+Raters nested within clusters, incomplete multilevel designs, and fixed
+raters are planned for later milestones.

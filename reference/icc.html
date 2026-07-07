@@ -80,10 +80,12 @@ raters as a random sample (Case 2) or as fixed (Case 3).</p>
 <span>  <span class="va">score</span>,</span>
 <span>  <span class="va">subject</span>,</span>
 <span>  <span class="va">rater</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model <span class="op">=</span> <span class="st">"twoway"</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
 <span>  raters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"fixed"</span><span class="op">)</span>,</span>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"subject"</span>, <span class="st">"cluster"</span><span class="op">)</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"glmmTMB"</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  ci_method <span class="op">=</span> <span class="st">"montecarlo"</span>,</span>
@@ -113,6 +115,14 @@ raters as a random sample (Case 2) or as fixed (Case 3).</p>
 the subject (object of measurement), and the rater (judge).</p></dd>
 
 
+<dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
+<dd><p>Optional column of <code>data</code> (unquoted) giving the higher-level
+unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
+on the <strong>multilevel</strong> ICC (ten Hove et al. 2022): reliability is reported at
+the subject and/or cluster level (see <code>level</code> and the <em>Multilevel designs</em>
+section). Left <code>NULL</code> (the default) for an ordinary single-level two-way ICC.</p></dd>
+
+
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
 <dd><p>Design. Only <code>"twoway"</code> is currently supported.</p></dd>
 
@@ -140,6 +150,13 @@ interrater reliability.</p></dd>
 <code>m</code> raters (-&gt; <code>ICC(*,m)</code>), or any combination. See <code><a href="d_study.html">d_study()</a></code> for projecting
 across a range of <code>m</code>. Projecting absolute agreement is not defined for fixed
 raters (see <code><a href="d_study.html">d_study()</a></code>).</p></dd>
+
+
+<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
+<dd><p>For multilevel designs (a <code>cluster</code> column), which reliability to
+report: <code>"subject"</code> (within-cluster, distinguishing subjects) and/or
+<code>"cluster"</code> (between-cluster, distinguishing cluster means). Defaults to both.
+Ignored (and must be left at its default) when <code>cluster</code> is not supplied.</p></dd>
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
@@ -208,6 +225,25 @@ where \(\sigma^2_s\) is the subject (signal) variance and <code>k</code> is the 
 of raters.</p>
     </div>
     <div class="section level2">
+    <h2 id="multilevel-designs-subject-vs-cluster-level-">Multilevel designs (subject vs. cluster level)<a class="anchor" aria-label="anchor" href="#multilevel-designs-subject-vs-cluster-level-"></a></h2>
+
+
+<p>When subjects are nested in higher-level clusters (pupils in classrooms,
+patients in clinics), single-level ICCs conflate the levels and are biased
+(ten Hove et al. 2022). Supplying <code>cluster</code> fits the five-component Design-1
+model
+$$score \sim 1 + (1|cluster) + (1|cluster{:}subject) + (1|rater) + (1|cluster{:}rater)$$
+and reports two distinct reliabilities. The <strong>subject level</strong> (within-cluster)
+asks how reliably raters distinguish subjects <em>within</em> a cluster: its signal is
+the between-subject-within-cluster variance and cluster variance drops out. The
+<strong>cluster level</strong> (between-cluster) asks how reliably raters distinguish cluster
+means: its signal is the between-cluster variance and the rater-disagreement
+error is the cluster-by-rater term. Choose the level that matches the decision
+you will make (about a subject, or about a cluster). Multilevel support (M5)
+covers crossed random raters on balanced data; the agreement/consistency and
+single/average choices above apply at each level.</p>
+    </div>
+    <div class="section level2">
     <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
 
 
@@ -222,6 +258,9 @@ fails. Pass <code>seed</code> for a reproducible interval.</p>
 correlation coefficients. <em>Psychological Methods, 1</em>(1), 30-46.</p>
 <p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. <em>Psychological Bulletin, 86</em>(2), 420-428.</p>
+<p>ten Hove, D., Jorgensen, T. D., &amp; van der Ark, L. A. (2022). Interrater
+reliability for multilevel data: A generalizability theory approach.
+<em>Psychological Methods, 27</em>(4), 650-666.</p>
     </div>
 
     <div class="section level2">

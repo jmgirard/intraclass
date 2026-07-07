@@ -31,10 +31,12 @@ icc(
   score,
   subject,
   rater,
+  cluster = NULL,
   model = "twoway",
   type = c("agreement", "consistency"),
   raters = c("random", "fixed"),
   unit = c("single", "average"),
+  level = c("subject", "cluster"),
   engine = "glmmTMB",
   conf_level = 0.95,
   ci_method = "montecarlo",
@@ -61,6 +63,15 @@ icc(
 
   Columns of `data` (unquoted): the numeric rating, the subject (object
   of measurement), and the rater (judge).
+
+- cluster:
+
+  Optional column of `data` (unquoted) giving the higher-level unit each
+  subject is nested in (e.g. classroom, clinic). Supplying it switches
+  on the **multilevel** ICC (ten Hove et al. 2022): reliability is
+  reported at the subject and/or cluster level (see `level` and the
+  *Multilevel designs* section). Left `NULL` (the default) for an
+  ordinary single-level two-way ICC.
 
 - model:
 
@@ -94,6 +105,14 @@ icc(
   for projecting across a range of `m`. Projecting absolute agreement is
   not defined for fixed raters (see
   [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)).
+
+- level:
+
+  For multilevel designs (a `cluster` column), which reliability to
+  report: `"subject"` (within-cluster, distinguishing subjects) and/or
+  `"cluster"` (between-cluster, distinguishing cluster means). Defaults
+  to both. Ignored (and must be left at its default) when `cluster` is
+  not supplied.
 
 - engine:
 
@@ -164,6 +183,24 @@ consistency drops it: \$\$ICC(A,1) = \sigma^2_s / (\sigma^2_s +
 \sigma^2_s / (\sigma^2_s + \sigma^2\_{res} / k)\$\$ where \\\sigma^2_s\\
 is the subject (signal) variance and `k` is the number of raters.
 
+## Multilevel designs (subject vs. cluster level)
+
+When subjects are nested in higher-level clusters (pupils in classrooms,
+patients in clinics), single-level ICCs conflate the levels and are
+biased (ten Hove et al. 2022). Supplying `cluster` fits the
+five-component Design-1 model \$\$score \sim 1 + (1\|cluster) +
+(1\|cluster{:}subject) + (1\|rater) + (1\|cluster{:}rater)\$\$ and
+reports two distinct reliabilities. The **subject level**
+(within-cluster) asks how reliably raters distinguish subjects *within*
+a cluster: its signal is the between-subject-within-cluster variance and
+cluster variance drops out. The **cluster level** (between-cluster) asks
+how reliably raters distinguish cluster means: its signal is the
+between-cluster variance and the rater-disagreement error is the
+cluster-by-rater term. Choose the level that matches the decision you
+will make (about a subject, or about a cluster). Multilevel support (M5)
+covers crossed random raters on balanced data; the agreement/consistency
+and single/average choices above apply at each level.
+
 ## Confidence intervals
 
 Intervals are Monte-Carlo: parameters are drawn from the fitted
@@ -179,6 +216,10 @@ intraclass correlation coefficients. *Psychological Methods, 1*(1),
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.
+
+ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
+reliability for multilevel data: A generalizability theory approach.
+*Psychological Methods, 27*(4), 650-666.
 
 ## Examples
 
