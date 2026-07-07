@@ -1,12 +1,17 @@
 # Project status
 
-- Milestone: **M11 — general `autoplot()` / ggplot2 methods** — next (provisional; not
-  yet detailed). M10 shipped (PR #14).
-- Active task: — (next: retro + detail M11 — general variance-component / CI plots)
+- Milestone: **M11 — general `autoplot()` / `plot()` methods for `icc` objects** —
+  **active** (detailed by ADR-020). M10 shipped (PR #14).
+- Active task: **M11 milestone gate** (open a PR from `m11-autoplot-icc`; full CI matrix
+  incl. Windows + pkgdown). Both slices done + green: Slice 1 (coefficient forest plot,
+  committed `4810a8a`) and Slice 2 (variance-component decomposition, uncommitted). 402
+  tests, lint clean, installed-package dispatch verified. See the M11 DoD board.
 - Last green CI: PR #14 (M10) full matrix green incl. Windows; merged to `main` at
   9f799d2
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M10 merged + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M11 Slices 1 & 2 implemented, green
+  (402 tests), on branch `m11-autoplot-icc`. Slice 1 committed (`4810a8a`), Slice 2
+  uncommitted. Next: commit Slice 2 + open the M11 PR.
 
 ## Where we are
 
@@ -22,12 +27,12 @@ crossed × {complete, incomplete} × {random, fixed} at the subject level.
 
 ## Next action
 
-**Retro + detail M11** (general `autoplot()` / ggplot2 methods). Per the process (#2,
-brief §7), run a short M10 retro, then resolve M11 scope with the maintainer and write
-the DoD before code. M11 is a **change of pace from estimator work**: a visualization
-layer over the shipped coefficients (**no new estimand**), generalizing the M4.5
-`d_study()` reliability curve to variance-component and CI plots. Ships on a `m11-*`
-branch, merges via PR (`milestone-branches-and-prs`).
+**M11 milestone gate — open the PR.** Both slices are done and green on branch
+`m11-autoplot-icc`: Slice 1 (coefficient forest plot, committed `4810a8a`) and Slice 2
+(variance-component decomposition, `what = "components"`, uncommitted). Next: commit
+Slice 2, push `m11-autoplot-icc`, open a PR, and confirm the full CI matrix (incl.
+Windows, installed-package test with `NOT_CRAN=true`) + pkgdown are green before merge
+(`milestone-branches-and-prs`). Post-merge, reconcile `project/` on `main`.
 
 Milestone arc after M11 (ADR-017): **M12** `choose_icc()` → **M13** release polish.
 

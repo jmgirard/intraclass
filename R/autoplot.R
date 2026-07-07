@@ -50,3 +50,117 @@ plot.icc_dstudy <- function(x, ...) {
   print(autoplot.icc_dstudy(x, ...))
   invisible(x)
 }
+
+# Plots for a fitted `icc` object -----------------------------------------------
+#
+# Two views of a fitted estimator, selected by `what` (M11, ADR-020): the
+# coefficient forest plot (each estimated index as a point + Monte-Carlo CI band)
+# and the variance-component decomposition (Slice 2). Like the D-study curve,
+# ggplot2 is a Suggests dependency, so the method is `check_installed()`-guarded
+# and registered lazily in zzz.R (light-install path).
+
+#' @rdname icc
+#' @param what Which plot to draw: `"coefficients"` (the default) for a forest
+#'   plot of each ICC index with its Monte-Carlo confidence interval, or
+#'   `"components"` for the variance-component decomposition.
+#' @examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))
+#' fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
+#' ggplot2::autoplot(fit) # coefficient forest plot (the default)
+#' ggplot2::autoplot(fit, what = "components") # variance-component decomposition
+#' @importFrom rlang .data
+# S3 method for ggplot2::autoplot (a Suggests generic), lazily registered in
+# zzz.R; see the icc_dstudy note above for why object_name_linter is suppressed.
+# nolint start: object_name_linter.
+autoplot.icc <- function(object, what = c("coefficients", "components"), ...) {
+  # nolint end
+  rlang::check_installed("ggplot2", reason = "to plot an {.cls icc} object.")
+  what <- validate_choice(what, c("coefficients", "components"), "what")
+  switch(
+    what,
+    coefficients = autoplot_icc_coefficients(object),
+    components = autoplot_icc_components(object)
+  )
+}
+
+# The coefficient forest plot: one row per estimated index, point estimate with a
+# horizontal Monte-Carlo CI band. Multilevel objects carry the same index at more
+# than one level (subject/cluster), so they are faceted by level.
+autoplot_icc_coefficients <- function(object) {
+  e <- object$estimates
+  ml <- isTRUE(object$design$multilevel)
+  ci_pct <- format(100 * object$ci$conf_level, trim = TRUE)
+
+  df <- data.frame(
+    index = factor(e$index, levels = rev(unique(e$index))),
+    level = e$level,
+    estimate = e$estimate,
+    conf.low = e$conf.low,
+    conf.high = e$conf.high,
+    stringsAsFactors = FALSE
+  )
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$estimate, y = .data$index)) +
+    ggplot2::geom_linerange(
+      ggplot2::aes(xmin = .data$conf.low, xmax = .data$conf.high)
+    ) +
+    ggplot2::geom_point() +
+    ggplot2::coord_cartesian(xlim = c(0, 1)) +
+    ggplot2::labs(
+      x = "ICC estimate",
+      y = NULL,
+      title = sprintf(
+        "Intraclass correlations: %s",
+        icc_design_label(object$design)
+      ),
+      subtitle = sprintf(
+        "Point estimate with %s%% Monte-Carlo interval",
+        ci_pct
+      )
+    )
+  if (ml) {
+    # The same index label appears once per level; free the y scale so each facet
+    # shows only its own rows (cluster level has fewer than subject level).
+    p <- p +
+      ggplot2::facet_wrap(
+        ggplot2::vars(.data$level),
+        ncol = 1,
+        scales = "free_y"
+      )
+  }
+  p
+}
+
+# The variance-component decomposition: one bar per estimated variance component,
+# in the model's natural order (cluster -> subject -> rater -> cluster:rater ->
+# residual, subset to the design). Shares `icc_components_view()` with the printed
+# report, so the bars and the "Variance components:" line always agree.
+autoplot_icc_components <- function(object) {
+  view <- icc_components_view(object)
+  df <- data.frame(
+    component = factor(view$label, levels = view$label),
+    variance = view$variance,
+    stringsAsFactors = FALSE
+  )
+  subtitle <- if (isTRUE(view$confounded)) {
+    "Rater variance is confounded into the residual"
+  }
+
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$component, y = .data$variance)) +
+    ggplot2::geom_col() +
+    ggplot2::labs(
+      x = NULL,
+      y = "Variance",
+      title = sprintf(
+        "Variance components: %s",
+        icc_design_label(object$design)
+      ),
+      subtitle = subtitle
+    )
+}
+
+#' @rdname icc
+#' @export
+plot.icc <- function(x, ...) {
+  print(autoplot.icc(x, ...))
+  invisible(x)
+}
