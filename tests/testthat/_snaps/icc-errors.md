@@ -1,12 +1,12 @@
 # error messages are stable and actionable
 
     Code
-      icc(d, score, subject, rater, type = "consistency")
+      icc(d, score, subject, rater, model = "oneway")
     Condition
       Error in `icc()`:
-      ! `type` must be "agreement" in this release.
-      i Support for consistency ICCs is planned for a later milestone.
-      x You supplied "consistency".
+      ! `model` must be "twoway" in this release.
+      i Support for designs beyond two-way is planned for a later milestone.
+      x You supplied "oneway".
 
 ---
 

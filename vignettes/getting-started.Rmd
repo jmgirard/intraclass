@@ -79,6 +79,25 @@ glance(fit)
   behaves near the common zero-rater-variance boundary where the delta method
   fails.
 
+## Consistency instead of agreement
+
+If a constant per-rater offset is acceptable --- you care only that raters *rank*
+subjects the same way, not that they land on the same number --- ask for
+**consistency** with `type = "consistency"`. It drops the rater main effect from
+the error, so it is never smaller than the agreement coefficient:
+
+```{r consistency}
+icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
+```
+
+The gap between the two (here `ICC(C,1)` ≈ 0.72 vs. `ICC(A,1)` ≈ 0.29) is a direct
+read-out of how much systematic rater-level difference is present.
+
+By default raters are treated as **random** (a sample you generalize beyond). If
+your raters are the entire population of interest you can pass `raters = "fixed"`
+(the classic `ICC(3,1)`), but `icc()` will warn: random is the recommended default
+for interrater reliability, and on balanced data the number is identical anyway.
+
 ## Which ICC do I want?
 
 Absolute agreement vs. consistency, single vs. average, fixed vs. random raters,

@@ -30,13 +30,14 @@ condensed to a single line once done.
 ## M2 — consistency variants + fixed-vs-random raters (planned)
 
 - [x] Plan M2 (scope, fixed≡random verification, API) and get sign-off — Opus
-- [ ] Estimand-spec `M2-consistency-and-fixed.md` + ADR-006 — Opus
-- [ ] `icc_estimand()`: consistency error set {residual}; `raters`/design dimension (labeling only) — Opus
-- [ ] `icc.R`: unlock `type = "consistency"`; add `raters = c("random","fixed")` arg + labeling — Opus
-- [ ] Classed warning layer `warn_intraclass()` + `warn_fixed_raters()` (`intraclass_fixed_raters`) — Opus
-- [ ] `print`/`summary`/`format`: surface design (random vs mixed) + SF-equivalent (ICC(2,·)/ICC(3,·)); snapshots — Opus
-- [ ] Oracle tests: SF 0.715/0.909, `psych` ICC3/ICC3k (1e-4), ANOVA identity, lme4 cross-check, fixed≡random equivalence — Opus
-- [ ] Warning-path tests: `intraclass_fixed_raters` fires on `"fixed"`, silent on `"random"`, text snapshot — Opus
-- [ ] Roxygen "which ICC / when" for consistency + fixed/random; vignette consistency-vs-agreement note — Opus
-- [ ] Commit the seeded fixed≡random script under the reference-values path (O-registry provenance, #4) — Opus
-- [ ] REFERENCES.md (promote O1 C-rows; new equivalence oracle) + STATUS; verify; check 0/0/0; push → CI green — Opus
+- [x] Estimand-spec `M2-consistency-and-fixed.md` + ADR-006 — Opus
+- [x] `icc_estimand()`: consistency error set {residual}; `raters`/design dimension (labeling only) — Opus
+- [x] `icc.R`: unlock `type = "consistency"`; add `raters = c("random","fixed")` arg + labeling — Opus
+- [x] Classed warning layer `warn_intraclass()` + `warn_fixed_raters()` (`intraclass_fixed_raters`) — Opus
+- [x] `print`/`summary`/`format`: surface design (random vs mixed) + SF-equivalent (ICC(2,·)/ICC(3,·)); snapshots — Opus
+- [x] Oracle tests: SF 0.715/0.909, `psych` ICC3/ICC3k (1e-4), ANOVA identity, lme4 cross-check, fixed≡random equivalence — Opus
+- [x] Warning-path tests: `intraclass_fixed_raters` fires on `"fixed"`, silent on `"random"`, text snapshot — Opus
+- [x] Roxygen "which ICC / when" for consistency + fixed/random; vignette consistency-vs-agreement note — Opus
+- [x] Commit the seeded fixed≡random script under the reference-values path (O-registry provenance, #4) — Opus
+- [x] REFERENCES.md (promote O1 C-rows; new equivalence oracle); verify; check 0/0/0 locally (94.8% cov) — Opus
+- [ ] Push branch, open PR, confirm full CI matrix green; reconcile STATUS last-green-CI — Opus

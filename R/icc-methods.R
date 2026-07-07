@@ -10,13 +10,14 @@
 format.icc <- function(x, ...) {
   ci_pct <- format(100 * x$ci$conf_level, trim = TRUE)
   header <- sprintf(
-    "# Intraclass correlation: two-way random, %s",
-    if (x$design$type == "agreement") "absolute agreement" else x$design$type
+    "# Intraclass correlation: %s",
+    icc_design_phrase(x$design$type, x$design$raters)
   )
   meta1 <- sprintf(
-    "Subjects: %d | Raters: %d (random) | Observations: %d",
+    "Subjects: %d | Raters: %d (%s) | Observations: %d",
     x$n$subjects,
     x$n$raters,
+    x$design$raters,
     x$n$obs
   )
   meta2 <- sprintf(
@@ -40,6 +41,16 @@ format.icc <- function(x, ...) {
     rows
   )
 
+  # Surface the Shrout & Fleiss equivalent for the forms that have one
+  # (agreement+random -> ICC(2,.); consistency+fixed -> ICC(3,.)); M2 spec §5.
+  has_sf <- !is.na(e$sf_index)
+  sf_note <- if (any(has_sf)) {
+    sprintf(
+      "Shrout & Fleiss equivalent: %s",
+      paste(e$index[has_sf], e$sf_index[has_sf], sep = " = ", collapse = ", ")
+    )
+  }
+
   vc <- x$components
   comps <- sprintf(
     "Variance components: subject %s, rater %s, residual %s",
@@ -48,7 +59,7 @@ format.icc <- function(x, ...) {
     formatC(vc$residual, format = "f", digits = 3)
   )
 
-  c(header, meta1, meta2, "", table, "", comps)
+  c(header, meta1, meta2, "", table, "", comps, sf_note)
 }
 
 #' @rdname icc
@@ -62,10 +73,21 @@ print.icc <- function(x, ...) {
 #' @export
 summary.icc <- function(object, ...) {
   cli::cli_verbatim(format(object, ...))
+  type_note <- if (object$design$type == "agreement") {
+    "Absolute agreement counts the rater main effect (systematic differences in"
+  } else {
+    "Consistency ignores the rater main effect (systematic differences in"
+  }
+  effect <- if (object$design$type == "agreement") {
+    "rater level) as error."
+  } else {
+    "rater level); only relative standing counts."
+  }
   cli::cli_verbatim(c(
     "",
-    "Absolute agreement counts the rater main effect as error; a single rating",
-    "per cell confounds the subject-by-rater interaction with residual error."
+    paste(type_note, effect),
+    "A single rating per cell confounds the subject-by-rater interaction with",
+    "residual error."
   ))
   invisible(object)
 }
@@ -75,6 +97,7 @@ summary.icc <- function(object, ...) {
 tidy.icc <- function(x, ...) {
   tibble::tibble(
     index = x$estimates$index,
+    sf_index = x$estimates$sf_index,
     estimate = x$estimates$estimate,
     std.error = x$estimates$std.error,
     conf.low = x$estimates$conf.low,

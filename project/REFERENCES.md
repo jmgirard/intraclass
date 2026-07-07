@@ -30,9 +30,11 @@ reference values, ever.
   | ICC3k | ICC(C,k) | two-way, consistency, average     | 0.909 |
 
 - **Notation bridge:** McGraw & Wong (1996) ICC(A,·) two-way random ≡ Shrout &
-  Fleiss ICC(2,·); ICC(C,·) ≡ ICC(3,·).
-- **M1 scope:** only ICC(A,1)=0.290 and ICC(A,k)=0.620 are asserted; the rest are
-  recorded for later milestones.
+  Fleiss ICC(2,·); ICC(C,·) two-way mixed ≡ ICC(3,·).
+- **Asserted:** ICC(A,1)=0.290, ICC(A,k)=0.620 (M1,
+  `test-icc-twoway-agreement.R`); ICC(C,1)=0.715, ICC(C,k)=0.909 (M2,
+  `test-icc-consistency.R`, cross-checked against `psych::ICC` ICC3/ICC3k to
+  1e-4). ICC(1)/ICC(k) recorded for later milestones.
 
 ### Oracle O2 — ANOVA mean-squares (package-independent, hand-derived)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-anova-oracle.R`: the
@@ -56,6 +58,19 @@ reference values, ever.
   (`set.seed(2024)`, n = 100, k = 8, σ²_s = 4, σ²_r = 1, σ²_res = 2). The point
   ICCs recover the population values within 0.05 and the Monte-Carlo interval
   covers them. Seeded per PRINCIPLES.md #12.
+
+### Oracle O4 — fixed ≡ random raters on balanced data (M2)
+- **Status:** **asserted (M2)** in `tests/testthat/test-icc-consistency.R`
+  ("fixed and random raters give identical estimates and CIs"): for both
+  agreement and consistency, `raters = "fixed"` reproduces `raters = "random"`
+  point estimates and the seeded Monte-Carlo interval exactly (same shared fit,
+  ADR-006).
+- **Provenance (engine-level derivation):** `data-raw/oracle-fixed-vs-random.R`
+  fits raters as a random intercept vs. as fixed effects (`lmer`) and shows
+  identical σ²_s/σ²_res on the balanced SF data (|Δσ²_s| ≈ 7e-6), matching ANOVA
+  MoM and `psych::ICC` ICC3/ICC3k. The same script demonstrates the equivalence
+  **breaks under imbalance** (drop 4 of 24 cells ⇒ ΔICC(C,1) ≈ 0.0095), the M3
+  caveat behind ADR-006. Reproducible; nothing hardcoded.
 
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:

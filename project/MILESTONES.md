@@ -57,35 +57,36 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   Fixed vs. random raters is a **label/interpretation layer** over the shared
   random-effects fit — verified numerically identical on balanced data (ADR-006).
 - Definition of Done (per-estimator bar, §8):
-  - [ ] `type = "consistency"` unlocked → `ICC(C,1)`/`ICC(C,k)`; `unit` unchanged.
-  - [ ] New public arg `raters = c("random", "fixed")` (default `"random"`);
+  - [x] `type = "consistency"` unlocked → `ICC(C,1)`/`ICC(C,k)`; `unit` unchanged.
+  - [x] New public arg `raters = c("random", "fixed")` (default `"random"`);
         `"fixed"` opt-in, returns valid estimates via the shared fit.
-  - [ ] Estimand abstraction generalized: consistency error set {residual} + a
+  - [x] Estimand abstraction generalized: consistency error set {residual} + a
         `raters`/design dimension used for labeling only. `icc_point()`/`mc_ci()`
         unchanged (consistency omits the rater draw per the existing error set).
-  - [ ] Classed warning layer (`warn_intraclass()`, PRINCIPLES.md #8) + a loud
+  - [x] Classed warning layer (`warn_intraclass()`, PRINCIPLES.md #8) + a loud
         `intraclass_fixed_raters` best-practice warning when `raters = "fixed"`.
-  - [ ] `print`/`summary`/`format` surface the design (two-way random vs mixed)
+  - [x] `print`/`summary`/`format` surface the design (two-way random vs mixed)
         and the Shrout–Fleiss equivalent (ICC(2,·) vs ICC(3,·)); snapshots updated.
-  - [ ] Boundary-aware Monte-Carlo CIs verified for consistency (rater term absent
+  - [x] Boundary-aware Monte-Carlo CIs verified for consistency (rater term absent
         per draw); `raters="fixed"` CI equals `raters="random"` CI (balanced).
-  - [ ] Oracle tests — ≥2 independent types (targeting 5, per M1):
+  - [x] Oracle tests — ≥2 independent types (5, per M1):
         (a) Shrout & Fleiss ICC(C,1)=0.715, ICC(C,k)=0.909;
         (b) `psych::ICC` ICC3/ICC3k on balanced data to 1e-4;
         (c) package-independent ANOVA mean-squares (existing helper);
         (d) lme4 cross-check;
         (e) fixed≡random point/CI equivalence on balanced data (encodes ADR-006).
-  - [ ] Warning-path tests: `expect_warning(class="intraclass_fixed_raters")` for
+  - [x] Warning-path tests: `expect_warning(class="intraclass_fixed_raters")` for
         `"fixed"`; `"random"` silent; warning-text snapshot.
-  - [ ] Roxygen "which ICC / when" extended to consistency and fixed-vs-random,
+  - [x] Roxygen "which ICC / when" extended to consistency and fixed-vs-random,
         stating random is recommended and fixed forgoes generalization; *Getting
         started* vignette gains a consistency-vs-agreement note.
-  - [ ] `REFERENCES.md` (O1 rows C1/Ck promoted to asserted; new fixed≡random
-        oracle) + `DECISIONS.md` (ADR-006) updated; coverage held; `devtools::check()`
-        0/0/0 locally; full CI matrix confirmed on push.
+  - [x] `REFERENCES.md` (O1 rows C1/Ck promoted to asserted; new O4 fixed≡random
+        oracle) + `DECISIONS.md` (ADR-006) updated; coverage 94.8% (statistical
+        paths 100%); `devtools::check()` 0/0/0 locally.
+  - [ ] Full CI matrix confirmed green on push (PR).
 - Deferred to their own slices (not M2): lme4 as a *selectable* engine + bootstrap
   CI (supersedes ADR-005's "defer to M2"); D-study projection to arbitrary k.
-- Status: planned (spec + ADR-006 written; awaiting go-ahead to build)
+- Status: done (local; all gates green) — pending push + CI
 
 ## M3: Imbalanced & incomplete designs *(provisional)*
 - Goal: missing rater×subject cells; the flagship "Choosing an ICC" vignette.
