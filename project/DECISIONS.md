@@ -921,3 +921,52 @@ consequences → references.
   (the inherited estimands); [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md)
   §3/§5 (the reused machinery); ten Hove et al. (2022 Design 1; 2024 incomplete-design
   guidelines); Searle, Casella & McCulloch (2006); Weeks & Williams (1964).
+
+## ADR-019: M10 scope — fixed-rater multilevel ICCs, crossed (Design 1) balanced, subject level
+- Date: 2026-07-07
+- Status: accepted
+- Context: M10 was scheduled by ADR-017 as "fixed-rater multilevel ICCs," the
+  multilevel-completion pair with M9. Detailed at its start after a short M9 retro
+  (brief §7). The retro's load-bearing lesson: **verify against the installed package,
+  not just `devtools::load_all`** (a stale load_all state masked a guard failure that
+  turned all six M9 R-CMD-check jobs red — the `verify-against-installed-package`
+  memory), and do not snapshot multilevel-fit prints (platform-fragile MC-CI). Like M9,
+  M10 is an **intersection of two shipped machineries** — the M3 real fixed-effect fit
+  with the bias-corrected finite-population θ²_r (`estimand-specs/M3-incomplete-designs.md`
+  §6, ADR-008; McGraw & Wong 1996 Case 3A) and the M5 Design-1 multilevel fit
+  (ADR-011) — and introduces **no new estimand concept**: the rater slot carries θ²_r
+  instead of the random σ²_r, everything else in the subject-level decomposition is M5's.
+  Two scope questions were put to the maintainer this session.
+- Decision (maintainer-approved this session, 2026-07-07):
+  - **M10 = fixed-rater crossed (Design 1), balanced/complete, subject level only.**
+    The M5-analog thin scope for a genuinely **new fitted model** (raters move from a
+    random intercept to fixed effects: `score ~ 1 + rater + (1|cluster) +
+    (1|cluster:subject) + (1|cluster:rater)`, θ²_r in the `rater` component slot). The
+    cluster×rater interaction stays **random** (random-cluster × fixed-rater, standard
+    convention). glmmTMB engine, lme4 cross-engine oracle.
+  - **Fixed + incomplete, fixed + nested, the fixed cluster level, and lme4 for the
+    fixed/multilevel fits are deferred** (spec §7) — each a further combination whose
+    bias/divisor interactions need their own oracles; mirrors the M5 → M9 staging.
+  - **The estimand is oracle-pinned, not asserted (#1/#18).** There is no textbook
+    worked example for fixed-rater multilevel (the paper is a random-effects
+    framework); the fit is validated by its **reduction to the pinned M5 (balanced
+    fixed ≡ random — the M2 O4 equivalence lifted to the multilevel fit) and M3
+    (single-cluster) estimands**, plus an lme4 cross-engine fit and a seeded-sim
+    recovery, before it ships. An unresolved case triggers a *recommended* Fable
+    review (#19).
+- Consequences: M10 reuses M3's θ²_r machinery and the M3 fixed-rater MC sampler, and
+  the M5 subject-level estimand map and `icc_point()` — the only new code is the
+  fixed-rater multilevel fit and its routing (lifting the `raters = "fixed"` +
+  multilevel abort). Consistency is identical to the random-rater case; absolute
+  agreement differs only by θ²_r vs σ²_r (zero on balanced data), so the primary oracle
+  is a clean reduction. No estimand-concept change: the subject-level coefficients are
+  the M5 estimand with a finite-population rater term.
+- References: PRINCIPLES.md #1 (oracle-first), #2 (name the estimand), #5 (fail
+  loudly), #15 (thin slices), #18 (state what's inherited vs. new), #19 (Fable gating);
+  ADR-008 (M3 real fixed-effect fit + θ²_r, reused), ADR-011 (M5 multilevel fit + level
+  API, inherited), ADR-006 (the fixed-vs-random balanced equivalence, O4), ADR-017 (the
+  arc that scheduled M10); [`estimand-specs/M10-fixed-multilevel.md`](estimand-specs/M10-fixed-multilevel.md)
+  (the full spec); [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md)
+  §6 and [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md) §3 (the
+  reused machinery); McGraw & Wong (1996 Case 3A); ten Hove et al. (2022 Design 1);
+  the `verify-against-installed-package` memory (M9 process lesson).

@@ -210,11 +210,42 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–3; merged via PR #13 at 073a51e; full CI matrix green incl.
   Windows, 348 tests).
 
-## M10: Fixed-rater multilevel ICCs *(provisional)*
-- Goal: fixed-rater multilevel ICCs, reusing the M3 real fixed-effect fit path
-  (ADR-008) on the multilevel fit — the multilevel-completion pair with M9. Estimator
-  work; estimand-spec required. Promoted from the M5/M8 deferral lists by ADR-017.
-- Status: provisional
+## M10: Fixed-rater multilevel ICCs — Design 1 (crossed), balanced, subject level *(active)*
+- Goal: subject-level multilevel ICCs with raters treated as **fixed** (McGraw & Wong
+  Case 3/3A) in the **crossed** Design-1 fit, **balanced/complete** — the fixed-rater
+  pair with M9. Reuses the M3 real fixed-effect fit + bias-corrected finite-population
+  **θ²_r** (ADR-008) placed in the M5 multilevel subject-level decomposition (ADR-011).
+  **No new estimand concept** (θ²_r replaces the random σ²_r in the `rater` slot;
+  `icc_point()`/`mc_ci()` unchanged). Fit
+  `score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)`. Consistency
+  ≡ random exactly; agreement differs only by θ²_r vs σ²_r (zero on balanced data). No
+  textbook oracle — **oracle-pinned, not asserted** (#1/#18).
+- Estimand: [`estimand-specs/M10-fixed-multilevel.md`](estimand-specs/M10-fixed-multilevel.md);
+  ADR-019 (scope). Oracles O-FML (primary: reduction → M5 balanced fixed≡random; +
+  reduction → M3 single-cluster; + lme4 cross-engine; + seeded-sim recovery).
+- Deferred out of M10 (recorded so not rediscovered): **fixed-rater cluster-level IRR**
+  (signal σ²_c, error {θ²_r, σ²_cr} — its own later slice); **incomplete/unbalanced
+  fixed-rater multilevel** (reuse M9 connectedness + M3 θ²_r-under-imbalance);
+  **fixed-rater nested designs** (2/3); **lme4 for the fixed/multilevel fits** (engine
+  parity, ADR-012); and the M9 carry-overs (averaged cluster-level `ICC(c,k)`
+  incomplete divisor; Bayesian/MCMC; three-facet `d_study()`; conflated single-level
+  ICC, Eq. 14).
+- Ships on `m10-fixed-multilevel`, CI-green slices (spec §5). **DoD board:**
+  - [ ] **Slice 1 — fixed-rater multilevel fit + subject-level estimand.** Lift the
+    `raters = "fixed"` + multilevel abort; add the fixed-rater multilevel fit (θ²_r via
+    the reused M3 machinery, multilevel random structure) returning the six-field engine
+    contract with θ²_r in the `rater` slot; route in `icc()`. Subject-level agreement/
+    consistency, single/average, reusing `icc_point()` + the M3 fixed MC sampler.
+    Oracles O-FML/reduction (→ M5 balanced, → M3 single cluster), O-FML/lme4, O-FML/sim.
+    `print`/`glance` surface fixed-rater multilevel.
+  - [ ] **Slice 2 — docs.** `advanced.Rmd` multilevel section extended to fixed raters
+    on real knit-time code; `test-vignette-claims.R` invariants (balanced fixed ≡ random
+    at the subject level; consistency identical, agreement differs only by θ²_r).
+  - [ ] Full `R-CMD-check` matrix green (incl. Windows) — verified against the
+    **installed** package with `NOT_CRAN=true` before the PR push
+    (`verify-against-installed-package`); coverage floor held; `air`/`lintr` clean;
+    pkgdown builds.
+  - [ ] `MILESTONES.md`/`STATUS.md` reconciled; merged via PR (`milestone-branches-and-prs`).
 
 ## M11: General `autoplot()` / ggplot2 methods *(provisional)*
 - Goal: general variance-component + CI plotting methods over the shipped estimators

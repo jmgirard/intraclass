@@ -1,12 +1,13 @@
 # Project status
 
-- Milestone: **M10 — fixed-rater multilevel ICCs** — next (provisional; not yet
-  detailed). M9 shipped (PR #13).
-- Active task: — (next: retro + detail M10 — fixed-rater multilevel)
+- Milestone: **M10 — fixed-rater multilevel ICCs, Design 1 (crossed) balanced, subject
+  level** — detailed and active (estimand-spec + ADR-019 written; M9 retro done)
+- Active task: M10 Slice 1 — fixed-rater multilevel fit + subject-level estimand (not
+  started; branch `m10-fixed-multilevel` not yet cut)
 - Last green CI: PR #13 (M9) full matrix green incl. Windows; merged to `main` at
   073a51e
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M9 merged + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M10 detailed (ADR-019, spec, DoD board)
 
 ## Where we are
 
@@ -20,15 +21,17 @@ disambiguation and oracle-pinned identifiability guards.
 
 ## Next action
 
-**Retro + detail M10** (fixed-rater multilevel ICCs). Per the process (#2, brief §7),
-run a short M9 retro, then resolve M10 scope with the maintainer and write the estimand-
-spec + DoD before code. M10 reuses the **M3 real fixed-effect fit path** (ADR-008) on
-the multilevel fit — the multilevel-completion pair with M9 (ADR-017). Ships on a
-`m10-*` branch, merges via PR (`milestone-branches-and-prs`).
+**Start M10 Slice 1** — fixed-rater multilevel fit + subject-level estimand. Cut branch
+`m10-fixed-multilevel`, then (spec §5): lift the `raters = "fixed"` + multilevel abort
+(icc.R ~230); add the fixed-rater multilevel fit
+(`score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)`, θ²_r via
+the reused M3 `fit_glmmtmb_fixed()` machinery in the `rater` slot) and route it; reuse
+`icc_point()` + the M3 fixed MC sampler. Pin every §2b coefficient with **O-FML/reduction
+→ M5 balanced (fixed≡random)** + → M3 single-cluster + lme4 cross-engine + seeded sim
+*before* shipping (#1). Use `/start-task`.
 
-Carry into the M9 retro: the CI-red lesson — **verify against the installed package,
-not just `devtools::load_all`** (`verify-against-installed-package` memory), and don't
-snapshot multilevel-fit prints (platform-fragile MC-CI).
+**Verify against the INSTALLED package** (`NOT_CRAN=true`), not just `load_all`, before
+the PR push (`verify-against-installed-package` memory — the M9 CI-red lesson).
 
 Milestone arc after M10 (ADR-017): **M11** general `autoplot()`/ggplot2 → **M12**
 `choose_icc()` → **M13** release polish.
