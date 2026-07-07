@@ -3,6 +3,15 @@ url: https://jmgirard.github.io/intraclass/
 template:
   bootstrap: 5
 
+# Articles grouped so the flagship decision guide is featured.
+articles:
+  - title: Guides
+    navbar: ~
+    contents:
+      - getting-started
+      - choosing-an-icc
+      - advanced
+
 # Reference index grouped by design type; each milestone adds its estimators.
 reference:
   - title: Two-way random designs
@@ -11,3 +20,10 @@ reference:
       subject-by-rater designs.
     contents:
       - icc
+
+  - title: Datasets
+    desc: >
+      Worked rater-reliability examples used across the docs and vignettes.
+    contents:
+      - ratings
+      - ratings_incomplete

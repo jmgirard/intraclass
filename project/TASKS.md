@@ -6,21 +6,11 @@ condensed to a single line once done.
 
 ## M0 — scaffolding — **done** (commit 0d81e34, pushed, CI green)
 
-- [x] Package skeleton: `DESCRIPTION`, `NAMESPACE`, `R/` package doc + `abort` layer — Opus
-- [x] License (MIT), README.Rmd, NEWS.md, lifecycle badge, spell check + WORDLIST — Opus
-- [x] Move seed tests to `tests/testthat/`; add self-removing M1 skip guard — Opus
-- [x] `project/` tracking system (PRINCIPLES, STATUS, MILESTONES, TASKS, ROADMAP, DECISIONS, REFERENCES) — Opus
-- [x] Fold seed docs into `project/` (REFERENCES-seed, M1 estimand spec) — Opus
-- [x] `.claude/skills/` (status, start-task, finish-task, verify-estimator, new-estimator, add-decision) — Opus
-- [x] `.claude/agents/doc-polisher.md` (Sonnet) — Opus
-- [x] CI workflows (R-CMD-check, coverage, lint, pkgdown, scheduled reference-values) — Opus
-- [x] pkgdown config (`_pkgdown.yml`) + stub vignettes; grouped reference index deferred to M1 (no exports yet) — Opus
-- [x] Lean `CLAUDE.md` — Opus
-- [x] air formatter (`air.toml`, `format.yaml` CI, lintr reconciliation); ADR-004 — Opus
-- [x] Codecov upload gated on `CODECOV_TOKEN` so CI stays green until secret added — Opus
-- [x] `devtools::document()` + `devtools::check()` clean (0/0/0); `air`/`lintr` clean; pkgdown builds — Opus
-- [x] Create public `jmgirard/intraclass` repo; first push; confirm CI green (commit 0d81e34) — Opus
-- [x] Update STATUS.md "Last green CI"; commit — Opus
+Green, well-tracked, empty-but-real package: skeleton (`DESCRIPTION`/`NAMESPACE`/
+`R/` + `abort` layer), MIT license, README/NEWS/lifecycle, spell check; the
+`project/` tracking system + seed docs; `.claude/` skills + `doc-polisher` agent;
+CI matrix (check/coverage/lint/pkgdown/scheduled reference-values); air formatter
+(ADR-004); public repo pushed, `check()` 0/0/0. See MILESTONES M0.
 
 ## M1 — two-way random, absolute agreement — **done** (commit 77e8ab0, CI green)
 
@@ -43,3 +33,41 @@ random-rater path; oracle O5 (lme4 cross-engine + MCAR simulation). Slice 2: rea
 fixed-effect fit (`+ rater`) — Case 3 consistency + Case 3A absolute agreement with
 bias-corrected θ²_r + fixed-path MC-CI; oracle O6 (balanced reduction, lme4, 95% CI
 coverage). Resolves the ADR-006 debt. See MILESTONES M3.
+
+## M4 — "Choosing an ICC" flagship vignette — **in progress** (ADR-009; no new estimator)
+
+Teaching milestone: the decision-framework article on shipped M3 code. Numbers are
+computed by `icc()` at knit time and seeded; asserted relationships are tested
+(PRINCIPLES #1/#4/#12). Ships on an `m4-<slug>` branch, merged via PR.
+
+### Slice 1 — teaching dataset + balanced core + diagram
+
+- [x] `data-raw/make-ratings.R`: deterministically build `ratings` (balanced SF
+      6×4) and `ratings_incomplete` (connected incomplete variant of `ratings`) — Opus
+- [x] `R/data.R` roxygen for both datasets (`@source` SF 1979; `@details` missing
+      cells + connectedness + `k_eff` for the incomplete one); `LazyData: true`;
+      `usethis::use_data()`; WORDLIST + pkgdown reference entry — Opus
+- [x] `choosing-an-icc.Rmd` balanced core: worked examples for `type`/`unit`/`raters`
+      on `data(ratings)` (returns 0.290/0.620/0.715/0.909); McGraw–Wong ↔
+      Shrout–Fleiss naming crosswalk — Opus
+- [x] Decision-tree figure: dependency-free static SVG at `vignettes/` (ADR-009
+      refinement), embedded via `knitr::include_graphics()`; renders in vignette — Opus
+- [x] `test-vignette-claims.R`: agreement ≤ consistency, `ICC(*,k)` ≥ `ICC(*,1)`,
+      fixed≡random on balanced (backs the prose) — Opus
+- [x] Slice-1 close: `air`/`lintr`/spell clean; vignette knits; check 0/0/0 — Opus
+
+### Slice 2 — incomplete-design payoff + close-out
+
+- [x] `choosing-an-icc.Rmd` incomplete section on `data(ratings_incomplete)`:
+      `k_eff`, connectedness abort, **fixed ≢ random on incomplete**; claims test
+      extended to these invariants — Opus
+- [x] Subject-vs-cluster axis previewed conceptually, forward-pointer to M5 (not
+      demonstrated) — Opus
+- [x] pkgdown `articles:` grouping surfacing the flagship; `getting-started.Rmd`
+      → `ratings` + link the real article; refresh `advanced.Rmd` note — Opus
+- [x] README refresh: stale M1 NOTE → actual state; Example a real runnable
+      `icc()` on `ratings` (`eval = TRUE`) + article link; `README.md` rebuilt.
+      Also added the missing M3 + new M4 NEWS entries — Opus
+- [x] Milestone close: `devtools::check()` 0/0/0 local, 133 tests, `air`/`lintr`
+      clean; `MILESTONES.md`/`STATUS.md`/`TASKS.md` updated same-commit; NEWS
+      (M3 + M4); PR open — Opus. *(full CI matrix + merge + tag pending on the PR)*

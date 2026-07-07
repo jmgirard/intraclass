@@ -245,3 +245,62 @@ consequences → references.
   [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md);
   ADR-006 (the debt this resolves); McGraw & Wong (1996); Brennan (2001); ten Hove et
   al. (2024); Searle, Casella & McCulloch (2006); Weeks & Williams (1964).
+
+## ADR-009: M4 scope — flagship vignette + a teaching dataset; `choose_icc()` deferred
+- Date: 2026-07-06
+- Status: accepted
+- Context: M4 was split out of M3 by ADR-007 as the flagship "Choosing an ICC"
+  teaching article, to be detailed at its start after an M3 retro (founding brief
+  §7). The retro confirmed the statistical core the article teaches is shipped and
+  green (PR #2: incomplete designs, `k_eff`, connectedness guard, real fixed-effect
+  fit), so the complete-vs-incomplete decision can now be demonstrated on working
+  code. Three scope questions were open: (a) whether to also ship the exported
+  `choose_icc()` decision helper (ROADMAP); (b) how the vignette obtains its example
+  data (inline vs. a shipped dataset); (c) whether M4 also fills `advanced.Rmd` and
+  refreshes the README. Decisions confirmed with the maintainer this session.
+- Decision:
+  - **Vignette-only for exported code — `choose_icc()` stays in ROADMAP.** An
+    exported helper triggers the full per-estimator bar (API design, oracle/behavior
+    tests, S3 methods) and would materially enlarge a documentation milestone; it
+    gets its own later milestone. M4 adds **no new estimator and no new estimand
+    spec.**
+  - **Ship a teaching dataset** rather than building example data inline. Ship
+    `ratings` (balanced Shrout & Fleiss 1979 6×4, `@source`-cited) and
+    `ratings_incomplete` (a curated *connected-but-incomplete* variant of `ratings`,
+    `@details` documenting the missing cells, connectedness, and `k_eff`), built by a
+    deterministic `data-raw/make-ratings.R`; `LazyData: true`. Rationale: the example
+    data is currently triplicated (getting-started, oracle tests, and now the
+    flagship); a hand-verified incomplete design is a far cleaner teaching object than
+    one assembled in prose; and `data(ratings)` lets readers and `@examples` follow
+    along — fitting the package's teaching mission (brief §1). Cost acknowledged: a
+    dataset is public API (#6) and adds `LazyData`, `R/data.R`, WORDLIST, and a
+    pkgdown reference entry — a deliberate, bounded expansion, not scope creep. The
+    dataset is used in the vignettes and `@examples`; the **oracle tests keep their
+    explicit inline data** (they pin numeric values and are not perturbed for a
+    refactor).
+  - **Decision-tree diagram as a dependency-free static SVG** (embedded via
+    `knitr::include_graphics()`), not a `DiagrammeR`/`mermaid`-rendered chunk — the
+    latter adds a dependency and a build-time render step for zero teaching gain and
+    fights the light-install principle. (Implementation refinement: the SVG lives at
+    `vignettes/choosing-icc-tree.svg`, the canonical build-robust location for a
+    vignette figure, rather than the `man/figures/` first suggested here — a path
+    detail, not a change of substance.)
+  - **README brought current in M4.** The README is stale (its NOTE still says M1 is
+    the current milestone; the Example block is `eval = FALSE` "lands in M1"). M4
+    rewrites the NOTE to actual state, makes the Example a real runnable `icc()` call
+    on `data(ratings)`, links the flagship article, and rebuilds `README.md` from
+    `README.Rmd`. Filling `advanced.Rmd` (incomplete/multilevel/engine sections)
+    stays deferred to M5+ where multilevel and optional engines exist to demonstrate.
+  - **Teaching claims are oracle-backed (PRINCIPLES still bind).** Every coefficient
+    displayed is computed by `icc()` at knit time with a fixed seed (#4, #12); the
+    numeric relationships the prose asserts (agreement ≤ consistency; `ICC(*,k)` ≥
+    `ICC(*,1)`; fixed ≢ random on incomplete data) are asserted in
+    `test-vignette-claims.R` (#1). No hand-typed reference number in the article.
+- Consequences: M4 stays a focused, shippable documentation milestone with a clear
+  Definition of Done, plus one bounded public-API addition (the dataset). The
+  per-milestone §8 bar applies; the per-estimator bar does not (no estimator added).
+  `choose_icc()` and the advanced vignette remain scheduled work in ROADMAP/M5+.
+- References: PRINCIPLES.md #1, #2, #4, #6, #12, #15, #16, #17;
+  `CLAUDE_CODE_KICKOFF.md` §1 (teaching mission), §7 (detail a milestone at its
+  start), §8 (Definition of Done); ADR-007 (the split that created M4);
+  Shrout & Fleiss (1979).
