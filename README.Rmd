@@ -33,9 +33,12 @@ and (4) help you decide **which ICC to choose, and why** — the docs and websit
 are a place to learn ICC best practice, not just call functions.
 
 > [!NOTE]
-> This package is in early development. The first estimator — two-way random,
-> absolute-agreement `ICC(A,1)` / `ICC(A,k)` — is the current milestone (M1). See
-> `project/MILESTONES.md` for the roadmap.
+> This package is in active development. The two-way designs are implemented:
+> absolute-agreement and consistency ICCs, single and average, random and fixed
+> raters, and imbalanced/incomplete (missing-cell) designs — each with
+> boundary-aware Monte-Carlo intervals. The current milestone is the
+> [*Choosing an ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
+> decision guide. See `project/MILESTONES.md` for the roadmap.
 
 ## Installation
 
@@ -51,11 +54,20 @@ Optional Bayesian and SEM engines live in `Suggests`.
 
 ## Example
 
-```{r example, eval = FALSE}
+`ratings` is the classic Shrout & Fleiss (1979) example, shipped with the
+package. The defaults give the two-way random, absolute-agreement `ICC(A,1)` and
+`ICC(A,k)` with a reproducible Monte-Carlo interval:
+
+```{r example}
 library(intraclass)
-## The icc() interface lands in Milestone 1:
-## icc(data, score, subject, rater, type = "agreement", unit = c("single", "average"))
+
+icc(ratings, score, subject, rater, seed = 2024)
 ```
+
+Which coefficient you want — agreement vs. consistency, single vs. average, fixed
+vs. random raters, complete vs. incomplete — is a real modelling decision. The
+[*Choosing an ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
+guide walks through it.
 
 ## Related work
 

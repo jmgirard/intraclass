@@ -1,5 +1,16 @@
 # intraclass 0.0.0.9000
 
+* New datasets `ratings` (the complete Shrout & Fleiss 1979 example) and
+  `ratings_incomplete` (a connected incomplete variant), used throughout the
+  docs and examples. A new **Choosing an ICC** article walks through the whole
+  decision -- agreement vs. consistency, single vs. average, random vs. fixed,
+  and complete vs. incomplete -- with a decision-tree diagram.
+* `icc()` handles **imbalanced and incomplete** subject-by-rater designs
+  (missing cells) via the mixed model: it detects the design, uses the effective
+  number of ratings `k_eff` (the harmonic mean of the per-subject counts) as the
+  `ICC(*,k)` divisor, and aborts loudly on a disconnected (unidentified) design.
+  `raters = "fixed"` now fits raters as fixed effects, so it differs from
+  `"random"` on incomplete data (the two still coincide when balanced).
 * `icc()` gains **consistency** coefficients `ICC(C,1)`/`ICC(C,k)` via
   `type = "consistency"` (drops the rater main effect from the error) and a
   `raters = c("random", "fixed")` argument. On balanced data, fixed raters is a

@@ -143,7 +143,7 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   relationship violates the constitution as surely as a bad estimator.
 - Definition of Done (per-milestone §8, adapted — no per-estimator bar) — two
   internal slices, each CI-green:
-  - [ ] **Slice 1 — teaching dataset + balanced core + diagram.** Ship `ratings`
+  - [x] **Slice 1 — teaching dataset + balanced core + diagram.** Ship `ratings`
         (balanced Shrout & Fleiss 1979 6×4, `@source`-cited) and
         `ratings_incomplete` (a curated *connected-but-incomplete* variant derived
         from `ratings`, `@details` documenting the missing cells, connectedness,
@@ -156,7 +156,7 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
         Shrout–Fleiss naming crosswalk. `test-vignette-claims.R` asserts
         agreement ≤ consistency and `ICC(*,k)` ≥ `ICC(*,1)` on the dataset so no
         prose claim is unbacked.
-  - [ ] **Slice 2 — incomplete-design payoff + close-out.** The complete-vs-
+  - [x] **Slice 2 — incomplete-design payoff + close-out.** The complete-vs-
         incomplete section on M3 code using `ratings_incomplete`: surface `k_eff`,
         the connectedness abort, and **fixed ≢ random on incomplete data** (the
         reason this vignette waited for M3), with the claims test extended to
@@ -169,19 +169,23 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
         Example block a real runnable `icc()` call on `data(ratings)`
         (`eval = TRUE`), link the flagship article, and rebuild `README.md` from
         `README.Rmd` (commit both in sync).
-  - [ ] Every displayed coefficient computed by `icc()` at knit time, seeded.
-  - [ ] `R-CMD-check` full matrix clean (vignette knits on all platforms; 0
-        errors/0 warnings, notes justified); coverage floor held (no statistical
-        code added). Spell check + WORDLIST; `air`/`lintr` clean.
-  - [ ] `DECISIONS.md` ADR-009 (M4 scope); `MILESTONES.md`/`STATUS.md`/`TASKS.md`
-        updated in the same commit as the work (#16). Shipped on an `m4-<slug>`
-        branch, merged via PR, tagged.
+  - [x] Every displayed coefficient computed by `icc()` at knit time, seeded.
+  - [x] `devtools::check()` 0 errors/0 warnings/0 notes locally (vignettes knit;
+        the prior CRAN-incoming NOTE is gone); coverage floor held (no statistical
+        code added). `air`/`lintr` clean; spell advisory tidy (WORDLIST +=
+        `connectedness`). Full CI matrix confirmed on the PR.
+  - [x] `DECISIONS.md` ADR-009 (M4 scope); `MILESTONES.md`/`STATUS.md`/`TASKS.md`
+        updated in the same commit as the work (#16). Shipped on the
+        `m4-choosing-icc` branch; PR open (merge + tag pending CI).
 - Deferred out of M4 (recorded so they aren't rediscovered): the `choose_icc()`
   decision helper (ROADMAP); filling `advanced.Rmd` (incomplete/multilevel/engine
   sections — M5+); a `DiagrammeR`/`mermaid`-rendered diagram (adds a dep for zero
   teaching gain vs. static SVG); migrating the oracle tests off inline data (they
   pin numeric values — left untouched deliberately).
-- Status: not started (spec detailed 2026-07-06 after M3 retro; ADR-009)
+- Status: complete locally, PR open (Slices 1–2; `devtools::check()` 0/0/0,
+  133 tests pass; ships the flagship "Choosing an ICC" article, the decision-tree
+  diagram, and the `ratings`/`ratings_incomplete` datasets). Flips to done once
+  the PR CI is green and it merges.
 
 ## M5: Multilevel ICCs *(provisional)*
 - Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*

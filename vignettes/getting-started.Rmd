@@ -22,21 +22,12 @@ interpret**.
 
 ## The data
 
-We use the classic Shrout & Fleiss (1979) example: 6 subjects each rated by the
-same 4 raters, one rating per cell. `intraclass` wants **long** format --- one
-rating per row.
+We use the classic Shrout & Fleiss (1979) example, shipped with the package as
+`ratings`: 6 subjects each rated by the same 4 raters, one rating per cell.
+`intraclass` wants **long** format --- one rating per row, with columns for the
+subject, the rater, and the score.
 
 ```{r data}
-ratings <- data.frame(
-  subject = factor(rep(1:6, times = 4)),
-  rater = factor(rep(1:4, each = 6)),
-  score = c(
-    9, 6, 8, 7, 10, 6, # rater 1
-    2, 1, 4, 1, 5, 2, # rater 2
-    5, 3, 6, 2, 6, 4, # rater 3
-    8, 2, 8, 6, 9, 7 # rater 4
-  )
-)
 head(ratings)
 ```
 
@@ -102,5 +93,5 @@ for interrater reliability, and on balanced data the number is identical anyway.
 
 Absolute agreement vs. consistency, single vs. average, fixed vs. random raters,
 complete vs. incomplete designs --- these choices define *which* ICC is correct
-for your study. A dedicated "Choosing an ICC" article covers that decision in
-depth.
+for your study. The [*Choosing an ICC*](choosing-an-icc.html) article
+(`vignette("choosing-an-icc")`) covers that decision in depth.

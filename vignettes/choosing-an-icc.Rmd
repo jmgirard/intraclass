@@ -115,8 +115,70 @@ whatever ratings are present. Two things change automatically:
   ratings, `k_eff`, the harmonic mean of the per-subject counts -- so it honestly
   reflects the ragged averages you actually computed.
 
-The `ratings_incomplete` dataset shipped with the package is a worked example of
-a connected incomplete design; the *Advanced* article develops it in full.
+### A worked incomplete design
+
+`ratings_incomplete` is `ratings` with one change: rater 2 acted as a pilot and
+scored only the first two subjects, leaving four empty cells.
+
+```{r incomplete}
+inc <- icc(ratings_incomplete, score, subject, rater, seed = 2024)
+inc
+```
+
+The header now reads `20 of 24 cells (incomplete)`, and `ICC(*,k)` averages over
+an *effective* 3.27 raters rather than 4 -- the harmonic mean of the per-subject
+counts (four subjects were seen by three raters, two by all four). The estimate
+sits a little below the complete-data value, as fewer ratings warrant.
+
+### Fixed and random now diverge
+
+On the balanced `ratings`, `raters = "fixed"` and `raters = "random"` returned
+the same point estimate. On incomplete data they no longer do: they are
+different models, and the missing cells give them different information about the
+rater effects.
+
+```{r incomplete-fixed}
+random_inc <- tidy(icc(ratings_incomplete, score, subject, rater,
+  raters = "random", seed = 2024))
+fixed_inc <- suppressWarnings(tidy(icc(ratings_incomplete, score, subject, rater,
+  raters = "fixed", seed = 2024)))
+
+random_inc[, c("index", "estimate", "conf.low", "conf.high")]
+fixed_inc[, c("index", "estimate", "conf.low", "conf.high")]
+```
+
+The random interval is the wider of the two: generalizing to a rater universe
+carries the extra uncertainty of *which* raters you happened to sample, whereas
+fixing the raters removes it. This is why the choice matters more once data are
+incomplete.
+
+### When a design is not identified
+
+Connectedness is not a formality. If the raters split into groups that never
+share subjects, a subject difference cannot be told apart from a rater
+difference, and `icc()` stops rather than returning a plausible-looking number:
+
+```{r disconnected, error = TRUE}
+disconnected <- data.frame(
+  subject = factor(c(1, 1, 2, 2, 3, 3, 4, 4)),
+  rater = factor(c(1, 2, 1, 2, 3, 4, 3, 4)),
+  score = c(5, 6, 4, 5, 7, 8, 6, 7)
+)
+icc(disconnected, score, subject, rater)
+```
+
+Subjects 1--2 are rated only by raters 1--2, and subjects 3--4 only by raters
+3--4: two islands with no bridge between them. This is precisely the ill-posed
+case the package refuses to guess at.
+
+## A fifth choice, coming later: subject- vs. cluster-level
+
+Everything above takes the subject as the object of measurement. When subjects
+are themselves nested in higher-level units -- pupils within classrooms, patients
+within clinics -- you may instead want the reliability of the *cluster* mean, a
+multilevel ICC (ten Hove, Jorgensen & van der Ark, 2021). That axis is on the
+roadmap and will get its own treatment; for now `icc()` covers the single-level
+two-way design.
 
 ## Naming crosswalk
 
@@ -150,3 +212,7 @@ correlation coefficients. *Psychological Methods, 1*(1), 30--46.
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
 assessing rater reliability. *Psychological Bulletin, 86*(2), 420--428.
+
+ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2021). Updated guidelines
+on selecting an intraclass correlation coefficient for interrater reliability,
+with applications to incomplete observational designs. *Psychological Methods*.

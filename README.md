@@ -24,9 +24,13 @@ multilevel designs, and (4) help you decide **which ICC to choose, and
 why** — the docs and website are a place to learn ICC best practice, not
 just call functions.
 
-> \[!NOTE\] This package is in early development. The first estimator —
-> two-way random, absolute-agreement `ICC(A,1)` / `ICC(A,k)` — is the
-> current milestone (M1). See `project/MILESTONES.md` for the roadmap.
+> \[!NOTE\] This package is in active development. The two-way designs
+> are implemented: absolute-agreement and consistency ICCs, single and
+> average, random and fixed raters, and imbalanced/incomplete
+> (missing-cell) designs — each with boundary-aware Monte-Carlo
+> intervals. The current milestone is the [*Choosing an
+> ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
+> decision guide. See `project/MILESTONES.md` for the roadmap.
 
 ## Installation
 
@@ -43,11 +47,29 @@ The base install is light — only `glmmTMB`, `cli`, `rlang`, and
 
 ## Example
 
+`ratings` is the classic Shrout & Fleiss (1979) example, shipped with
+the package. The defaults give the two-way random, absolute-agreement
+`ICC(A,1)` and `ICC(A,k)` with a reproducible Monte-Carlo interval:
+
 ``` r
 library(intraclass)
-## The icc() interface lands in Milestone 1:
-## icc(data, score, subject, rater, type = "agreement", unit = c("single", "average"))
+
+icc(ratings, score, subject, rater, seed = 2024)
+#> # Intraclass correlation: two-way random, absolute agreement
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   index     estimate   95% CI
+#>   ICC(A,1)    0.290   [0.053, 0.715]
+#>   ICC(A,k)    0.620   [0.182, 0.910]
+#> Variance components: subject 2.556, rater 5.244, residual 1.019
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
+
+Which coefficient you want — agreement vs. consistency, single
+vs. average, fixed vs. random raters, complete vs. incomplete — is a
+real modelling decision. The [*Choosing an
+ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
+guide walks through it.
 
 ## Related work
 

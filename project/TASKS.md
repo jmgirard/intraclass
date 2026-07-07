@@ -58,15 +58,16 @@ computed by `icc()` at knit time and seeded; asserted relationships are tested
 
 ### Slice 2 — incomplete-design payoff + close-out
 
-- [ ] `choosing-an-icc.Rmd` incomplete section on `data(ratings_incomplete)`:
+- [x] `choosing-an-icc.Rmd` incomplete section on `data(ratings_incomplete)`:
       `k_eff`, connectedness abort, **fixed ≢ random on incomplete**; claims test
       extended to these invariants — Opus
-- [ ] Subject-vs-cluster axis previewed conceptually, forward-pointer to M5 (not
+- [x] Subject-vs-cluster axis previewed conceptually, forward-pointer to M5 (not
       demonstrated) — Opus
-- [ ] pkgdown `articles:` grouping surfacing the flagship; `getting-started.Rmd`
-      → `data(ratings)` + link the real article; refresh `advanced.Rmd` note — Opus
-- [ ] README refresh: rewrite stale M1 NOTE → actual state; Example block a real
-      runnable `icc()` on `data(ratings)` (`eval = TRUE`) + article link; rebuild
-      `README.md` from `README.Rmd` (both in sync) — Opus
-- [ ] Milestone close: full CI matrix green; `MILESTONES.md`/`STATUS.md`/`TASKS.md`
-      updated same-commit; PR + tag — Opus
+- [x] pkgdown `articles:` grouping surfacing the flagship; `getting-started.Rmd`
+      → `ratings` + link the real article; refresh `advanced.Rmd` note — Opus
+- [x] README refresh: stale M1 NOTE → actual state; Example a real runnable
+      `icc()` on `ratings` (`eval = TRUE`) + article link; `README.md` rebuilt.
+      Also added the missing M3 + new M4 NEWS entries — Opus
+- [x] Milestone close: `devtools::check()` 0/0/0 local, 133 tests, `air`/`lintr`
+      clean; `MILESTONES.md`/`STATUS.md`/`TASKS.md` updated same-commit; NEWS
+      (M3 + M4); PR open — Opus. *(full CI matrix + merge + tag pending on the PR)*
