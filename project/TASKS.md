@@ -47,14 +47,14 @@ computed by `icc()` at knit time and seeded; asserted relationships are tested
 - [x] `R/data.R` roxygen for both datasets (`@source` SF 1979; `@details` missing
       cells + connectedness + `k_eff` for the incomplete one); `LazyData: true`;
       `usethis::use_data()`; WORDLIST + pkgdown reference entry — Opus
-- [ ] `choosing-an-icc.Rmd` balanced core: worked examples for `type`/`unit`/`raters`
+- [x] `choosing-an-icc.Rmd` balanced core: worked examples for `type`/`unit`/`raters`
       on `data(ratings)` (returns 0.290/0.620/0.715/0.909); McGraw–Wong ↔
       Shrout–Fleiss naming crosswalk — Opus
-- [ ] Decision-tree figure: dependency-free static SVG under `man/figures/`,
-      embedded via `knitr::include_graphics()`; renders in HTML vignette + pkgdown — Opus
-- [ ] `test-vignette-claims.R`: agreement ≤ consistency, `ICC(*,k)` ≥ `ICC(*,1)`
-      on the dataset (backs the prose) — Opus
-- [ ] Slice-1 close: `air`/`lintr`/spell clean; vignette knits; check green — Opus
+- [x] Decision-tree figure: dependency-free static SVG at `vignettes/` (ADR-009
+      refinement), embedded via `knitr::include_graphics()`; renders in vignette — Opus
+- [x] `test-vignette-claims.R`: agreement ≤ consistency, `ICC(*,k)` ≥ `ICC(*,1)`,
+      fixed≡random on balanced (backs the prose) — Opus
+- [x] Slice-1 close: `air`/`lintr`/spell clean; vignette knits; check 0/0/0 — Opus
 
 ### Slice 2 — incomplete-design payoff + close-out
 

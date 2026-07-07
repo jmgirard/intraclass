@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" font-family="'Helvetica Neue', Arial, sans-serif">
+  <rect x="4" y="4" width="712" height="632" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+
+  <text x="360" y="40" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Choosing an ICC</text>
+  <text x="360" y="62" text-anchor="middle" font-size="13" fill="#64748b">Four choices pin down the coefficient — each maps to an icc() argument</text>
+
+  <!-- spine -->
+  <line x1="44" y1="112" x2="44" y2="496" stroke="#cbd5e1" stroke-width="2"/>
+
+  <!-- ===== Step 1 ===== -->
+  <g>
+    <circle cx="44" cy="112" r="15" fill="#2c6e9b"/>
+    <text x="44" y="117" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1</text>
+    <rect x="74" y="90" width="612" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="90" y="117" font-size="14" font-weight="600" fill="#0f172a">Must raters hit the same value, or only rank subjects alike?</text>
+    <line x1="380" y1="134" x2="380" y2="141" stroke="#94a3b8"/>
+    <line x1="223" y1="141" x2="537" y2="141" stroke="#94a3b8"/>
+    <line x1="223" y1="141" x2="223" y2="148" stroke="#94a3b8"/>
+    <line x1="537" y1="141" x2="537" y2="148" stroke="#94a3b8"/>
+    <rect x="74" y="148" width="298" height="52" rx="8" fill="#e0ecf5" stroke="#2c6e9b"/>
+    <text x="90" y="170" font-size="13" font-weight="600" fill="#14425f">Same value matters</text>
+    <text x="90" y="189" font-size="12.5" fill="#14425f" font-family="'SF Mono', Menlo, monospace">type = "agreement"</text>
+    <rect x="388" y="148" width="298" height="52" rx="8" fill="#eef2f7" stroke="#94a3b8"/>
+    <text x="404" y="170" font-size="13" font-weight="600" fill="#334155">Only rank order</text>
+    <text x="404" y="189" font-size="12.5" fill="#334155" font-family="'SF Mono', Menlo, monospace">type = "consistency"</text>
+  </g>
+
+  <!-- ===== Step 2 ===== -->
+  <g>
+    <circle cx="44" cy="240" r="15" fill="#2c6e9b"/>
+    <text x="44" y="245" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">2</text>
+    <rect x="74" y="218" width="612" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="90" y="245" font-size="14" font-weight="600" fill="#0f172a">Will you use one rater's score, or the mean of several?</text>
+    <line x1="380" y1="262" x2="380" y2="269" stroke="#94a3b8"/>
+    <line x1="223" y1="269" x2="537" y2="269" stroke="#94a3b8"/>
+    <line x1="223" y1="269" x2="223" y2="276" stroke="#94a3b8"/>
+    <line x1="537" y1="269" x2="537" y2="276" stroke="#94a3b8"/>
+    <rect x="74" y="276" width="298" height="52" rx="8" fill="#e0ecf5" stroke="#2c6e9b"/>
+    <text x="90" y="298" font-size="13" font-weight="600" fill="#14425f">A single rater</text>
+    <text x="90" y="317" font-size="12.5" fill="#14425f" font-family="'SF Mono', Menlo, monospace">unit = "single"</text>
+    <rect x="388" y="276" width="298" height="52" rx="8" fill="#eef2f7" stroke="#94a3b8"/>
+    <text x="404" y="298" font-size="13" font-weight="600" fill="#334155">The mean of k raters</text>
+    <text x="404" y="317" font-size="12.5" fill="#334155" font-family="'SF Mono', Menlo, monospace">unit = "average"</text>
+  </g>
+
+  <!-- ===== Step 3 ===== -->
+  <g>
+    <circle cx="44" cy="368" r="15" fill="#2c6e9b"/>
+    <text x="44" y="373" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">3</text>
+    <rect x="74" y="346" width="612" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="90" y="373" font-size="14" font-weight="600" fill="#0f172a">Are your raters a sample to generalize from, or the population?</text>
+    <line x1="380" y1="390" x2="380" y2="397" stroke="#94a3b8"/>
+    <line x1="223" y1="397" x2="537" y2="397" stroke="#94a3b8"/>
+    <line x1="223" y1="397" x2="223" y2="404" stroke="#94a3b8"/>
+    <line x1="537" y1="397" x2="537" y2="404" stroke="#94a3b8"/>
+    <rect x="74" y="404" width="298" height="52" rx="8" fill="#e0ecf5" stroke="#2c6e9b"/>
+    <text x="90" y="426" font-size="13" font-weight="600" fill="#14425f">A sample (generalize)</text>
+    <text x="90" y="445" font-size="12.5" fill="#14425f" font-family="'SF Mono', Menlo, monospace">raters = "random"</text>
+    <rect x="388" y="404" width="298" height="52" rx="8" fill="#eef2f7" stroke="#94a3b8"/>
+    <text x="404" y="426" font-size="13" font-weight="600" fill="#334155">The only raters of interest</text>
+    <text x="404" y="445" font-size="12.5" fill="#334155" font-family="'SF Mono', Menlo, monospace">raters = "fixed"</text>
+  </g>
+
+  <!-- ===== Step 4 ===== -->
+  <g>
+    <circle cx="44" cy="496" r="15" fill="#2c6e9b"/>
+    <text x="44" y="501" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">4</text>
+    <rect x="74" y="474" width="612" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="90" y="501" font-size="14" font-weight="600" fill="#0f172a">Is every subject rated by every rater?</text>
+    <line x1="380" y1="518" x2="380" y2="525" stroke="#94a3b8"/>
+    <line x1="223" y1="525" x2="537" y2="525" stroke="#94a3b8"/>
+    <line x1="223" y1="525" x2="223" y2="532" stroke="#94a3b8"/>
+    <line x1="537" y1="525" x2="537" y2="532" stroke="#94a3b8"/>
+    <rect x="74" y="532" width="298" height="52" rx="8" fill="#e0ecf5" stroke="#2c6e9b"/>
+    <text x="90" y="554" font-size="13" font-weight="600" fill="#14425f">Complete design</text>
+    <text x="90" y="573" font-size="12.5" fill="#14425f" font-family="'SF Mono', Menlo, monospace">handled directly</text>
+    <rect x="388" y="532" width="298" height="52" rx="8" fill="#eef2f7" stroke="#94a3b8"/>
+    <text x="404" y="554" font-size="13" font-weight="600" fill="#334155">Incomplete (missing cells)</text>
+    <text x="404" y="573" font-size="12.5" fill="#334155" font-family="'SF Mono', Menlo, monospace">automatic, if connected</text>
+  </g>
+
+  <text x="360" y="612" text-anchor="middle" font-size="11" fill="#64748b" font-family="'SF Mono', Menlo, monospace">icc(data, score, subject, rater, type = …, unit = …, raters = …)</text>
+</svg>

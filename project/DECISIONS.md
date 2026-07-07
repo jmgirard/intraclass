@@ -278,10 +278,13 @@ consequences → references.
     dataset is used in the vignettes and `@examples`; the **oracle tests keep their
     explicit inline data** (they pin numeric values and are not perturbed for a
     refactor).
-  - **Decision-tree diagram as a dependency-free static SVG** under `man/figures/`
-    (embedded via `knitr::include_graphics()`), not a `DiagrammeR`/`mermaid`-rendered
-    chunk — the latter adds a dependency and a build-time render step for zero
-    teaching gain and fights the light-install principle.
+  - **Decision-tree diagram as a dependency-free static SVG** (embedded via
+    `knitr::include_graphics()`), not a `DiagrammeR`/`mermaid`-rendered chunk — the
+    latter adds a dependency and a build-time render step for zero teaching gain and
+    fights the light-install principle. (Implementation refinement: the SVG lives at
+    `vignettes/choosing-icc-tree.svg`, the canonical build-robust location for a
+    vignette figure, rather than the `man/figures/` first suggested here — a path
+    detail, not a change of substance.)
   - **README brought current in M4.** The README is stale (its NOTE still says M1 is
     the current milestone; the Example block is `eval = FALSE` "lands in M1"). M4
     rewrites the NOTE to actual state, makes the Example a real runnable `icc()` call
