@@ -87,11 +87,21 @@ report: \code{"subject"} (within-cluster, distinguishing subjects) and/or
 \code{"cluster"} (between-cluster, distinguishing cluster means). Defaults to both.
 Ignored (and must be left at its default) when \code{cluster} is not supplied.}
 
-\item{engine}{Estimation engine: \code{"glmmTMB"} (default) or \code{"lme4"}. Both fit
-the variance components by REML and agree to within numerical tolerance on
-balanced data. \code{"lme4"} currently covers only the random two-way design
-(\code{raters = "random"}, no \code{cluster}) and requires the \pkg{lme4} and
-\pkg{merDeriv} packages.}
+\item{engine}{Estimation engine: \code{"glmmTMB"} (default), \code{"lme4"}, or
+\code{"lavaan"}. \code{"glmmTMB"} and \code{"lme4"} fit the variance components by REML and
+agree to within numerical tolerance on balanced data. \code{"lavaan"} fits the
+equivalent structural-equation (common-factor) generalizability model and
+recovers the rater main effect from the mean structure (Jorgensen 2021).
+\strong{Consistency} ICCs from \code{"lavaan"} equal the mixed-model estimates exactly
+on balanced data; \strong{absolute-agreement} ICCs use the SEM indicator-mean
+estimator of the rater variance, which is asymptotically equivalent to the
+mixed-model one and matches conventional generalizability-theory software on
+real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
+designs (e.g. 0.284 vs 0.290 on the 6-subject example below). \code{"lme4"} and
+\code{"lavaan"} currently cover only the random two-way design
+(\code{raters = "random"}, no \code{cluster}); \code{"lavaan"} additionally requires
+complete, balanced data. \code{"lme4"} requires the \pkg{lme4} and \pkg{merDeriv}
+packages; \code{"lavaan"} requires the \pkg{lavaan} package.}
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}
 

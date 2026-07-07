@@ -1,0 +1,211 @@
+# lavaan (SEM) engine (selectable optional engine, M7 / ADR-014) ---------------
+#
+# Promotes lavaan to a selectable `engine = "lavaan"` for the random two-way path,
+# via the generalizability-theory-as-SEM formulation of Jorgensen (2021). Returns
+# the SAME six-field engine contract as fit_glmmtmb() -- `components`, `estimate`,
+# `vcov`, `to_components` -- so icc_point()/mc_ci()/d_study() are unchanged.
+#
+# THE SEM PARAMETERIZATION (estimand mapping, ADR-014). lavaan wants WIDE data
+# (one row per subject, one column per rater), so the long `icc()` frame is
+# reshaped. The two-way model  score_ij = mu + s_i + r_j + e_ij  maps to a
+# one-factor CFA with the subject as a common factor loading 1 on every
+# rater-indicator and a single shared indicator residual variance:
+#     subj =~ 1*v1 + ... + 1*vk        (factor variance  = sigma^2_s)
+#     v1 ~~ ev*v1 ; ... ; vk ~~ ev*vk  (equal residuals  = sigma^2_res)
+# CONSISTENCY reads sigma^2_s / (sigma^2_s + sigma^2_res) straight off the
+# covariance structure -- a ratio, so it equals the mixed-model estimate exactly
+# on balanced data (oracle: lavaan == glmmTMB to ~1e-4).
+#
+# ABSOLUTE AGREEMENT needs the rater main effect, which in this single-group
+# layout lives ONLY in the means: a rater is one column, so its effect is a
+# constant offset (an indicator intercept), not a covariance. Jorgensen's (2021)
+# insight is that sigma^2_r can be recovered from the mean structure as a defined
+# parameter WITHOUT a transposed-data-matrix SEM: with the item intercepts
+# effects-coded to sum to zero (so the factor mean equals the grand mean and each
+# intercept nu_j is the rater effect mu_j - mu), the rater variance component is
+# the sample variance of those intercepts (Jorgensen 2021, Eq. 6; Vispoel, Hong,
+# Lee & Xu 2022, Eq. 4):
+#
+#     sigma^2_r = sum_j (nu_j)^2 / (k - 1).                       [raw, NO bias correction]
+#
+# This is a DIFFERENT estimator of sigma^2_r than the mixed model's random-effect
+# variance: it is the raw variance of the k estimated rater means, so it omits the
+# ANOVA/REML "- sigma^2_res / n_subjects" term. The two are asymptotically
+# equivalent and match GENOVA / gtheory / lme4 to ~1e-3 on real (large-N) data
+# (Vispoel et al. 2022, Table 3: they agree to <= .001 on G-coefs, <= .005 on
+# D-coefs), but on a small design the SEM value differs by O(1 / n_subjects). On
+# the 6-subject Shrout & Fleiss data lavaan gives ICC(A,1) = 0.284 vs the
+# mixed-model 0.290 -- a documented small-sample difference, NOT a bug (an earlier
+# draft "corrected" this with an unsourced bias term; removed, ADR-014). The
+# agreement oracle is therefore the exact Eq. 6 formula plus a large-N convergence
+# check, not the mixed-model number (data-raw/oracle-sem.R).
+#
+# CONFIDENCE INTERVALS. Jorgensen (2021) obtains a Monte-Carlo CI for the defined
+# parameters (corroborating ADR-003); we reuse the package's existing MC path. The
+# variance components sigma^2_s / sigma^2_res are put on the log-SD scale (as
+# glmmTMB/lme4 do) so draws back-transform strictly positive (#3); the intercepts
+# stay on their natural scale and feed sigma^2_r = sum(nu^2)/(k-1) per draw (a
+# non-negative quadratic form, so no clamping). A Heywood case (a non-positive
+# variance at the point estimate) cannot be log-transformed and aborts loudly,
+# pointing at the boundary-robust glmmTMB engine (#5/#8) -- the lavaan analog of
+# the lme4 singular-fit guard (ADR-012).
+#
+# ESTIMATION. `likelihood = "wishart"` (the N-1 sample covariance) is used so the
+# variance components match the package's REML mixed-model spine (and the
+# classical published values) on balanced data; ML's N divisor would shrink them
+# and break the consistency oracle. On large N the choice is immaterial (Vispoel
+# et al. 2022).
+#
+# `data` must already be canonicalized to columns `subject`, `rater`, `score`
+# (factors for the first two) and COMPLETE/BALANCED (guarded in icc()); incomplete
+# SEM (FIML) is deferred (ADR-014).
+
+fit_lavaan <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lavaan", reason = "to fit the ICC model with lavaan.")
+
+  k <- nlevels(data$rater)
+  inds <- paste0("v", seq_len(k))
+  nu_slots <- paste0("nu", seq_len(k))
+
+  # Long -> wide: rows = subjects, columns = raters. One rating per cell (the
+  # design is complete/balanced), so each tapply cell is a single value.
+  wide <- tapply(data$score, list(data$subject, data$rater), function(x) x[[1]])
+  wide_df <- as.data.frame(wide)
+  names(wide_df) <- inds
+
+  # Unit loadings + one shared residual variance = the two-way random model.
+  loadings <- paste(sprintf("1*%s", inds), collapse = " + ")
+  residuals <- paste(sprintf("%s ~~ ev*%s", inds, inds), collapse = "\n")
+  model <- paste(
+    sprintf("subj =~ %s", loadings),
+    residuals,
+    "subj ~~ sv*subj",
+    sep = "\n"
+  )
+
+  # A degenerate/boundary design (e.g. perfectly correlated raters -> a non
+  # positive-definite sample covariance) makes lavaan raise its own un-classed
+  # error before we can inspect the fit. Convert any such failure into a classed
+  # intraclass condition pointing at the boundary-robust engine (#5/#8), so the
+  # whole error surface stays classed and actionable.
+  fit <- tryCatch(
+    withCallingHandlers(
+      lavaan::lavaan(
+        model,
+        data = wide_df,
+        meanstructure = TRUE,
+        int.ov.free = TRUE,
+        int.lv.free = FALSE,
+        likelihood = "wishart",
+        information = "observed"
+      ),
+      warning = function(w) {
+        # Surface fit trouble through cli, non-fatal, matching the other engines.
+        cli::cli_warn(c(
+          "The {.pkg lavaan} engine reported a fitting warning.",
+          i = conditionMessage(w)
+        ))
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(e) {
+      emsg <- conditionMessage(e)
+      abort_intraclass(
+        c(
+          "The {.pkg lavaan} engine could not fit the SEM (a degenerate or \\
+           boundary design).",
+          i = "{emsg}",
+          i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+        ),
+        class = "intraclass_singular_fit",
+        call = call,
+        .envir = rlang::current_env()
+      )
+    }
+  )
+
+  if (!lavaan::lavInspect(fit, "converged")) {
+    abort_intraclass(
+      c(
+        "The {.pkg lavaan} engine did not converge.",
+        i = "Use {.code engine = \"glmmTMB\"}, or check the design."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  co <- lavaan::coef(fit)
+  vcov_raw <- as.matrix(lavaan::vcov(fit))
+  cn <- names(co)
+  sv <- unname(co[[which(cn == "sv")[1]]])
+  ev <- unname(co[[which(cn == "ev")[1]]])
+  nu_i <- which(grepl("~1$", cn))
+  nu <- unname(co[nu_i])
+
+  # Heywood / boundary guard (#3/#5): a non-positive variance cannot be put on the
+  # log-SD scale, so no boundary-aware interval can be formed. Fail loudly and
+  # point at the boundary-robust engine, rather than clamp and return a bogus CI.
+  if (sv <= 0 || ev <= 0) {
+    abort_intraclass(
+      c(
+        "The {.pkg lavaan} engine returned a non-positive variance (a Heywood \\
+         case), so a boundary-aware Monte-Carlo interval cannot be formed.",
+        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
+  # sigma^2_r = variance of the effects-coded rater intercepts (Jorgensen 2021,
+  # Eq. 6; Vispoel et al. 2022, Eq. 4). `center = I - J/k` recenters the intercepts
+  # to deviations from the grand mean (identification-invariant); the quadratic
+  # form is non-negative, so no bias correction and no clamping (a deliberate
+  # departure from the mixed-model random-effect variance -- see the header).
+  center <- diag(k) - matrix(1 / k, k, k)
+  sigma2_r <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+
+  components <- list(
+    subject = sv,
+    rater = sigma2_r,
+    residual = ev
+  )
+
+  # Delta-transform the covariance to the internal scale for the Monte-Carlo CI:
+  # log-SD for the two variances (d log(sd)/d var = 1 / (2 var)), identity for the
+  # intercepts (they carry sigma^2_r through the mean structure). `ev` appears k
+  # times in coef()/vcov() (one per equality-constrained residual), all identical;
+  # take the first. Keep the block ordered (sv, ev, intercepts). Under the
+  # saturated mean structure the mean and covariance parameters are asymptotically
+  # orthogonal, so the cross-block is ~0.
+  raw_idx <- c(which(cn == "sv")[1], which(cn == "ev")[1], nu_i)
+  vcov_sub <- vcov_raw[raw_idx, raw_idx, drop = FALSE]
+  slots <- c("subject", "residual", nu_slots)
+  jac <- diag(c(1 / (2 * sv), 1 / (2 * ev), rep(1, k)))
+  vcov_log <- jac %*% vcov_sub %*% t(jac)
+  dimnames(vcov_log) <- list(slots, slots)
+  estimate <- stats::setNames(c(log(sqrt(sv)), log(sqrt(ev)), nu), slots)
+
+  # Back-transform a matrix of internal-scale draws (rows = parameters named as
+  # `slots`, columns = MC draws) to variance components. subject/residual via
+  # exp(2 * draw); rater via sum(nu^2)/(k-1) per draw (a non-negative quadratic
+  # form -- Jorgensen 2021 Eq. 6, no bias term).
+  to_components <- function(par) {
+    means <- par[nu_slots, , drop = FALSE]
+    list(
+      subject = exp(2 * par["subject", ]),
+      rater = colSums(means * (center %*% means)) / (k - 1),
+      residual = exp(2 * par["residual", ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "lavaan",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_log,
+    to_components = to_components
+  )
+}

@@ -391,23 +391,83 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   on both engines, oracles O-OW (textbook + psych + ANOVA + cross-engine + sim),
   and the choosing-an-icc "are the raters crossed?" section.
 
-## M7: Optional engines behind `Suggests` *(provisional)*
-- Goal: Bayesian (`brms`/`rstanarm`) and/or SEM (`lavaan`) backends behind a
-  shared interface, gated by `rlang::check_installed()`. Extends the engine ×
-  design dispatch seam M5.5 built (ADR-012), and generalizes the `ci_method` layer
-  for the Bayesian engine's native posterior samples (M5.5 left it untouched —
-  merDeriv let lme4 reuse `montecarlo`). *(was M6 → M7 per ADR-013; was M5 before)*
-- Key references already gathered (pin at milestone start, PRINCIPLES.md #12):
-  the **SEM/lavaan** engine's primary source is **Jorgensen (2021), "How to
-  Estimate Absolute-Error Components in Structural Equation Models of
-  Generalizability Theory," *Psych* 3, 113–133** (doi:10.3390/psych3020011) — uses
-  `lavaan`/`gtheory`, defines absolute-error components via mean-structure
-  constraints, and independently argues **Monte-Carlo CIs** over the delta method
-  (corroborates ADR-003). The **Bayesian/MCMC** engine's hyperprior guidance is
-  ten Hove, Jorgensen & van der Ark (2020), "Comparing Hyperprior Distributions to
-  Estimate Variance Components for IRR Coefficients" (half-*t* over uniform). Both
-  PDFs are in the maintainer's Zotero; add to `REFERENCES.md` when they back code.
-- Status: provisional
+## M7: SEM engine (lavaan) — optional Bayesian/SEM backends, SEM first
+- Goal: promote **lavaan (SEM / common-factor GT) to a selectable
+  `engine = "lavaan"`** for the two-way random path, plugging a third
+  engine into the M5.5 engine × design dispatch seam behind
+  `rlang::check_installed()` (Suggests, never Imports; light install preserved). It
+  leads the "optional engines" milestone; the Bayesian backend is deferred to a
+  later slice/milestone (ADR-014). **No new estimand, no estimand-spec** — an engine
+  for existing estimands (cf. M4/M5.5); scope in ADR-014.
+  *(was M6 → M7 per ADR-013; was M5 before)*
+- Chosen shape (ADR-014, maintainer-approved this session): **SEM leads over
+  Bayesian** because it (1) reuses the existing Monte-Carlo CI path (lavaan exposes
+  `vcov()` → **no new `ci_method`**), (2) installs light (no Stan compilation → CI
+  stays fast/green on all platforms), and (3) can be pinned to a **textbook oracle**
+  (Jorgensen 2021, which also argues for MC CIs — corroborating ADR-003). Design
+  scope = **two-way random** (planning said "+ one-way"; one-way SEM was deferred
+  during implementation — no faithful sourced route, ADR-014).
+- Key references (pin when they back code, PRINCIPLES.md #12): the SEM/lavaan
+  engine's primary source is **Jorgensen (2021), "How to Estimate Absolute-Error
+  Components in Structural Equation Models of Generalizability Theory," *Psych* 3,
+  113–133** (doi:10.3390/psych3020011) — defines absolute-error components via
+  mean-structure constraints and independently argues **Monte-Carlo CIs** over the
+  delta method (corroborates ADR-003); plus **lavaan** (Rosseel 2012, *JSS* 48(2)).
+  For the deferred Bayesian slice: ten Hove, Jorgensen & van der Ark (2020),
+  "Comparing Hyperprior Distributions to Estimate Variance Components for IRR
+  Coefficients" (half-*t* over uniform). PDFs are in the maintainer's Zotero; add to
+  `REFERENCES.md` when they back code.
+- Definition of Done (per-engine bar, §8) — two internal CI-green slices:
+  - [ ] **Slice 1 — lavaan two-way random.** `engine = "lavaan"` selectable for
+        `model = "twoway"`, `raters = "random"`; `R/engine-lavaan.R::fit_lavaan()`
+        reshapes long → wide and fits a one-factor SEM (consistency:
+        σ²_s/(σ²_s+σ²_res); absolute agreement: σ²_r = Σν²/(k−1) from the effects-coded
+        indicator intercepts, Jorgensen 2021 Eq. 6 — the **raw** indicator-mean
+        estimator, no bias correction), returning the shared six-field engine
+        contract. `vcov(fit)` feeds the existing `montecarlo` path (**no new
+        `ci_method`**); σ²_s/σ²_res on the log-SD scale so draws stay positive (#3);
+        a Heywood fit (σ² ≤ 0) aborts loudly (classed → glmmTMB). Dispatch seam gains
+        lavaan rows; `check_installed("lavaan")`; lavaan → `Suggests`. Guards:
+        `raters="fixed"`, `cluster`, incomplete/unbalanced + lavaan →
+        `abort_unsupported()` (deferred, recorded). Oracles O-SEM: **consistency** ≡
+        glmmTMB ≤1e-4 + `psych` ICC3/ICC3k (exact); **agreement** = the SEM estimator
+        (0.284 on SF, **not** 0.290), pinned by the exact Σν²/(k−1) formula + a
+        large-N lavaan→population & lavaan≈glmmTMB convergence sim + the Vispoel et
+        al. (2022) GENOVA/`gtheory` external check; interval vs glmmTMB *fixed*
+        (agreement) / *random* (consistency), absolute gap. `data-raw/oracle-sem.R`;
+        `test-icc-lavaan.R`.
+  - [ ] **Slice 2 — docs (no new estimator).** `print`/`glance` surface
+        `engine = "lavaan"`; lavaan print snapshot; NEWS; `advanced.Rmd` SEM-engine
+        section (when to prefer SEM; the indicator-mean absolute-error estimator and
+        its small-sample difference from the mixed model; the MC-CI corroboration)
+        with a backing `test-vignette-claims.R` line; REFERENCES O-SEM rows
+        (Jorgensen 2021, Vispoel et al. 2022, Lee & Vispoel 2024). (`@param engine`
+        already updated in Slice 1.)
+  - [ ] Oracles per PRINCIPLES.md #1 — asserted by oracle, never by the formula.
+        Consistency is pinned exactly (lavaan ≡ glmmTMB + psych); absolute agreement
+        is a **distinct, asymptotically-equivalent** estimator (Jorgensen Eq. 6),
+        pinned by its exact formula + large-N convergence + the Vispoel et al. (2022)
+        external validation, **not** by the mixed-model number. Any component
+        unpinnable is not shipped (Fable review recommended, then pause — #1/#19).
+        CI-bound assertions use **absolute** tolerances (M5.5 lesson).
+  - [ ] `devtools::check()` 0/0/0 local; `air`/`lintr` clean; full suite green (no
+        snapshot drift beyond the new lavaan snapshot); coverage floor held with the
+        new statistical paths oracle-covered. `DECISIONS.md` ADR-014;
+        MILESTONES/STATUS/TASKS same-commit (#16). Ships on `m7-sem-engine`, merged
+        via PR; full CI matrix on the PR.
+- Deferred out of M7 (recorded so not rediscovered): the **Bayesian engine**
+  (rstanarm preferred over brms for CI-install sanity) + a new
+  `ci_method = "posterior"` (credible intervals) + half-*t* hyperpriors (ten Hove et
+  al. 2020) — a later slice or follow-on milestone; **one-way random via SEM** (no
+  faithful sourced route — ADR-014; parked in ROADMAP); **incomplete/unbalanced SEM**
+  (FIML); **fixed-rater and multilevel SEM**.
+- Status: done pending PR — both slices complete on branch `m7-sem-engine`
+  (`devtools::check()` 0/0/0 local; full suite incl. snapshots green). Ships
+  `engine = "lavaan"` for the two-way random path (Jorgensen 2021 SEM-GT), oracles
+  O-SEM (consistency ≡ glmmTMB; agreement = the exact indicator-mean estimator +
+  large-N convergence + Vispoel et al. 2022 external check), and the advanced-vignette
+  SEM-engine section. One-way SEM deferred to ROADMAP (ADR-014). Full CI matrix +
+  merge pending on the PR.
 
 ## M8: Multilevel & incomplete-design extensions *(provisional)*
 - Goal: extend the multilevel estimator beyond M5's Design 1 by working through the

@@ -159,6 +159,58 @@ test_that("advanced.Rmd: lme4 and glmmTMB engines agree on `ratings`", {
   expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
 })
 
+test_that("advanced.Rmd: lavaan matches glmmTMB on consistency, differs slightly on agreement", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lavaan")
+
+  # The SEM subsection claims (a) consistency is identical between engines (a ratio),
+  # and (b) absolute agreement differs by a small-sample amount, with lavaan's
+  # indicator-mean estimate a little lower than glmmTMB's on this 6-subject design
+  # (0.284 vs 0.290). Back both claims numerically (#1).
+  gc <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    engine = "glmmTMB",
+    seed = 1
+  ))
+  lc <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    engine = "lavaan",
+    seed = 1
+  ))
+  expect_equal(lc$estimate, gc$estimate, tolerance = 1e-3)
+
+  ga <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    engine = "glmmTMB",
+    seed = 1
+  ))
+  la <- tidy(icc(
+    ratings,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    engine = "lavaan",
+    seed = 1
+  ))
+  ga1 <- ga$estimate[ga$index == "ICC(A,1)"]
+  la1 <- la$estimate[la$index == "ICC(A,1)"]
+  expect_lt(la1, ga1) # lavaan indicator-mean agreement is slightly lower here
+  expect_lt(abs(la1 - ga1), 0.02) # but close (asymptotically equivalent)
+})
+
 # Multilevel claims (advanced.Rmd) ----------------------------------------
 # The advanced article's multilevel example asserts that on the simulated
 # `school` design the cluster-level ICC is the larger of the two levels. Rebuild
