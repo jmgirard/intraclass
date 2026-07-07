@@ -174,7 +174,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   cross-engine + seeded population recovery + reduction check; no textbook worked
   example). Level coverage per design (subject-only vs. both) read off Table 3 at spec
   time, not asserted.
-- Slices (mirror M5): **Slice 1 = Design 2**, **Slice 2 = Design 3**, **Slice 3 =
+- Slices (mirror M5): **Slice 1 = Design 2** ✅ (design inferred from the crossing
+  pattern; four-component fit; O-NML/lme4 + sim + reduction green locally),
+  **Slice 2 = Design 3** (raters nested in subjects — agreement-only), **Slice 3 =
   docs**. Each estimand pinned by ≥2 oracles before shipping (#1/#2).
 - Estimand: [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md)
   (written — Eqs. 8–11 + Table 3 transcribed); ADR-016.

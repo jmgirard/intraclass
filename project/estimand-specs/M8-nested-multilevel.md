@@ -182,11 +182,15 @@ lookup, keeping the divisor scalar and `icc_point()`/`resolve_divisor()` untouch
 | error set | by `type` × `level` | by `type` × **design** (§3; Design 3 = agreement only) |
 | divisor | scalar `k` | scalar `k` — **unchanged** |
 
-**Design detection.** How the design (1/2/3) is determined from the call is a
-Slice-1 API decision (candidate: infer from the rater×cluster/subject crossing
-pattern in the data, or an explicit `design`/`nesting` argument). Resolve the surface
-at Slice 1's start; whichever is chosen, an ambiguous or mis-specified nesting aborts
-loudly (§7), never guesses.
+**Design detection (resolved, Slice 1 start — maintainer-approved).** The design
+(1/2/3) is **inferred from the data's crossing pattern**, not declared by a new
+argument (keeps the API surface small, #6; matches how balance/connectedness are
+already inferred, M3): a rater spanning multiple clusters → crossed (Design 1); a
+rater confined to one cluster but spanning subjects → nested in clusters (Design 2); a
+rater confined to one subject → nested in subjects (Design 3). A **mixed/ambiguous**
+pattern (some raters crossed, some nested) is not one of the three clean designs and
+aborts loudly (§7), never guesses. The detected design is surfaced in `print`/`glance`
+for transparency.
 
 ---
 

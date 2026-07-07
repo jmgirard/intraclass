@@ -51,9 +51,18 @@
 #' **cluster level** (between-cluster) asks how reliably raters distinguish cluster
 #' means: its signal is the between-cluster variance and the rater-disagreement
 #' error is the cluster-by-rater term. Choose the level that matches the decision
-#' you will make (about a subject, or about a cluster). Multilevel support (M5)
-#' covers crossed random raters on balanced data; the agreement/consistency and
-#' single/average choices above apply at each level.
+#' you will make (about a subject, or about a cluster). The agreement/consistency
+#' and single/average choices above apply at each level.
+#'
+#' The design is **inferred from the data**. If raters are crossed with clusters
+#' (each rater rates in every cluster) the five-component model above is used. If
+#' raters are **nested in clusters** (each cluster has its own raters; ten Hove et
+#' al. 2022 Design 2) a four-component model is fit instead, with the rater
+#' variance carried by the nested rater-within-cluster term. A nested-rater design
+#' defines only the **subject** level -- a cluster-level ICC needs raters crossed
+#' with clusters -- so `level` is restricted to `"subject"` for it. Mixed patterns
+#' (some raters crossed, some nested) are not a supported design and raise an
+#' error. Support currently covers balanced, complete designs with random raters.
 #'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
@@ -97,7 +106,9 @@
 #' @param level For multilevel designs (a `cluster` column), which reliability to
 #'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
 #'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
-#'   Ignored (and must be left at its default) when `cluster` is not supplied.
+#'   Ignored (and must be left at its default) when `cluster` is not supplied. Only
+#'   `"subject"` is available when raters are nested in clusters (see the
+#'   *Multilevel designs* section).
 #' @param engine Estimation engine: `"glmmTMB"` (default), `"lme4"`, or
 #'   `"lavaan"`. `"glmmTMB"` and `"lme4"` fit the variance components by REML and
 #'   agree to within numerical tolerance on balanced data. `"lavaan"` fits the
@@ -362,6 +373,55 @@ icc <- function(
     }
   }
 
+  # Which multilevel design is this (ten Hove et al. 2022, Table 2)? Inferred from
+  # the crossing pattern, not declared (estimand-spec M8 §4). Design 1 ("crossed")
+  # is the M5 five-component path; Designs 2/3 (nested raters) are subject-level
+  # only -- cluster-level IRR is undefined for them (paper p. 6, spec §1).
+  ml_design <- if (multilevel) detect_multilevel_design(df) else NA_character_
+  if (multilevel && ml_design != "crossed") {
+    if (!("subject" %in% level)) {
+      abort_unsupported(c(
+        "Cluster-level IRR is not defined when raters are nested in clusters or \\
+         subjects.",
+        i = "A cluster-level ICC needs raters crossed with clusters (Design 1); \\
+             with nested raters only the subject level is defined \\
+             (ten Hove et al. 2022, p. 6).",
+        i = "Use {.code level = \"subject\"}, or cross the raters with clusters."
+      ))
+    }
+    # Nested designs define only the subject level; drop the default "cluster".
+    level <- "subject"
+    if (ml_design == "nested_in_subjects") {
+      abort_unsupported(c(
+        "Raters nested within subjects (Design 3) are not supported yet.",
+        i = "Design 3 -- each subject rated by its own raters, nested in clusters \\
+             -- is planned for the next slice of this milestone.",
+        i = "Design 2 (raters nested in clusters) and Design 1 (raters crossed) \\
+             are supported."
+      ))
+    }
+    # Design 2 needs >= 2 raters within a cluster to identify the nested rater
+    # variance sigma^2_{r:c} (estimand-spec M8 §7).
+    if (max(colSums(table(df$rater, df$cluster) > 0L)) < 2L) {
+      abort_unidentified(c(
+        "The nested rater variance cannot be estimated when every cluster has a \\
+         single rater.",
+        i = "At least one {.arg cluster} must contain 2 or more raters."
+      ))
+    }
+    # M8 covers balanced/complete nested designs; incomplete nested multilevel is
+    # deferred (spec §8) -- fail loudly rather than use an unvalidated k_eff (#5).
+    if (!nested_design_balanced(df)) {
+      abort_unsupported(c(
+        "Incomplete or unbalanced nested multilevel designs are not supported yet.",
+        i = "This milestone (M8) covers balanced, complete nested designs; \\
+             incomplete nested multilevel is planned for a later slice.",
+        x = "Provide one rating for every rater-by-subject cell within each \\
+             cluster, with equally sized clusters."
+      ))
+    }
+  }
+
   # Design facts for a possibly-incomplete layout (estimand-spec M3 §3, §5). For
   # one-way the k_eff (harmonic mean of ratings/subject) is the only fact needed;
   # the cross-classified checks below (replicates, connectedness) do not apply --
@@ -380,8 +440,11 @@ icc <- function(
       ))
     }
     # Separating the subject and rater variances needs a connected design; a
-    # disconnected layout confounds them and is not identified (#5; M3 §3).
-    if (!design_info$connected) {
+    # disconnected layout confounds them and is not identified (#5; M3 §3). This is
+    # a single-level check: nested multilevel designs are block-disconnected in the
+    # subject x rater graph by construction, and their identifiability is handled by
+    # the multilevel guards above, so skip it for them (spec M8 §2).
+    if (!multilevel && !design_info$connected) {
       abort_unidentified(c(
         "The subject-by-rater design is disconnected, so the subject and rater \\
          variances cannot be separated.",
@@ -396,6 +459,11 @@ icc <- function(
   # two-way, a complete crossed design with one rating per cell (M3).
   balanced <- if (oneway) {
     length(unique(as.integer(table(df$subject)))) == 1L
+  } else if (multilevel && ml_design != "crossed") {
+    # Only balanced/complete nested designs reach here (guarded above); the
+    # subject x rater graph is block-diagonal, so design_info$balanced is not the
+    # right notion for them (spec M8 §2).
+    TRUE
   } else {
     design_info$balanced
   }
@@ -411,13 +479,18 @@ icc <- function(
     ))
   }
 
-  # Multilevel data uses the five-component Design-1 fit; otherwise fixed raters
-  # get their own fixed-effect fit (Case 3/3A) and random raters the shared
-  # random-effects fit. The rest of the pipeline is identical -- each engine
-  # returns named `components` the estimand indexes by signal/error (M5 §2/§3;
-  # M3 §6, ADR-008).
+  # Multilevel data uses a Design-1 (crossed, five-component) or Design-2 (raters
+  # nested in clusters, four-component) fit per the inferred design; otherwise
+  # fixed raters get their own fixed-effect fit (Case 3/3A) and random raters the
+  # shared random-effects fit. The rest of the pipeline is identical -- each engine
+  # returns named `components` the estimand indexes by signal/error (M8 §2, M5
+  # §2/§3; M3 §6, ADR-008).
   engine_fit <- if (multilevel) {
-    fit_glmmtmb_multilevel(df)
+    if (ml_design == "nested_in_clusters") {
+      fit_glmmtmb_multilevel_nested_clusters(df)
+    } else {
+      fit_glmmtmb_multilevel(df)
+    }
   } else if (oneway) {
     if (engine == "lme4") fit_lme4_oneway(df) else fit_glmmtmb_oneway(df)
   } else if (raters == "fixed") {
@@ -495,6 +568,7 @@ icc <- function(
         raters = raters,
         balanced = balanced,
         multilevel = multilevel,
+        ml_design = if (multilevel) ml_design else NA_character_,
         levels = if (multilevel) level else NULL
       ),
       k_eff = design_info$k_eff,

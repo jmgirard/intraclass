@@ -1,5 +1,15 @@
 # intraclass 0.0.0.9000
 
+* Multilevel `icc()` now handles **raters nested within clusters** (ten Hove et al.
+  2022 Design 2), in addition to the crossed Design 1. The design is **inferred from
+  the data's crossing pattern**: when each cluster has its own raters, a
+  four-component model (`score ~ 1 + (1 | cluster) + (1 | cluster:subject) +
+  (1 | cluster:rater)`) is fit and the nested rater-within-cluster variance carries
+  the rater term. Nested-rater designs define only the **subject** level (a
+  cluster-level ICC needs raters crossed with clusters), so `level` is restricted to
+  `"subject"` for them; mixed crossed/nested patterns and incomplete nested designs
+  are directed to a clear error. Verified against an independent lme4 fit, a seeded
+  population-recovery simulation, and a reduction to the two-way estimand.
 * `icc()` gains a selectable **`engine = "lavaan"`** for the complete, balanced
   random two-way design, fitting the generalizability model as a common-factor
   **structural equation model** (Jorgensen 2021). Consistency coefficients equal

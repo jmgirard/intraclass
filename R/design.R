@@ -46,6 +46,77 @@ summarize_design <- function(df) {
   )
 }
 
+# Classify a multilevel design from the observed crossing pattern -----------------
+#
+# ten Hove et al. (2022, Table 2) distinguish three multilevel designs by how
+# raters relate to clusters and subjects. M8 (estimand-spec §4) INFERS the design
+# from the data rather than taking a declared argument (maintainer-approved): the
+# data is the ground truth, and this keeps the API surface small (#6). `df` has
+# factor subject/rater/cluster, droplevels()-ed, with subjects already verified
+# nested in a single cluster.
+#
+#   * a rater spanning > 1 cluster            -> raters CROSSED with clusters (Design 1)
+#   * every rater in one cluster, > 1 subject -> raters nested in clusters (Design 2)
+#   * every rater in one subject              -> raters nested in subjects  (Design 3)
+#
+# A mixed pattern (some raters crossed, some nested) is none of the three clean
+# designs and aborts loudly (PRINCIPLES.md #5), never guesses.
+detect_multilevel_design <- function(df, call = rlang::caller_env()) {
+  clusters_per_rater <- rowSums(table(df$rater, df$cluster) > 0L)
+  if (all(clusters_per_rater > 1L)) {
+    return("crossed")
+  }
+  if (any(clusters_per_rater > 1L)) {
+    abort_unidentified(
+      c(
+        "The raters are neither fully crossed with nor fully nested in clusters.",
+        i = "Some raters rate in several clusters while others rate in only one, \\
+             which is not one of the multilevel designs of ten Hove et al. (2022).",
+        i = "A supported design has raters crossed with every cluster (Design 1) \\
+             or each rating a single cluster (Designs 2/3)."
+      ),
+      call = call
+    )
+  }
+  # Every rater is confined to one cluster: nested. Distinguish Design 2 (raters
+  # cross subjects within their cluster) from Design 3 (one subject per rater).
+  subjects_per_rater <- rowSums(table(df$rater, df$subject) > 0L)
+  if (all(subjects_per_rater == 1L)) {
+    return("nested_in_subjects")
+  }
+  if (all(subjects_per_rater > 1L)) {
+    return("nested_in_clusters")
+  }
+  abort_unidentified(
+    c(
+      "The raters are neither fully crossed with nor fully nested in subjects.",
+      i = "Within a cluster some raters rate a single subject while others rate \\
+           several, which is not one of the supported multilevel designs.",
+      i = "Design 2 has each rater rate every subject in its cluster; Design 3 has \\
+           each rater rate a single subject."
+    ),
+    call = call
+  )
+}
+
+# Is a nested multilevel design (Design 2/3) balanced and complete? Every cluster
+# must hold the same number of subjects and raters, with one rating per rater-by-
+# subject cell within each cluster. M8 covers balanced/complete nested designs;
+# incomplete nested multilevel is deferred (estimand-spec M8 §8), so `icc()` aborts
+# on an unbalanced one rather than silently using an unvalidated k_eff divisor.
+nested_design_balanced <- function(df) {
+  subs <- colSums(table(df$subject, df$cluster) > 0L)
+  rats <- colSums(table(df$rater, df$cluster) > 0L)
+  if (length(unique(subs)) != 1L || length(unique(rats)) != 1L) {
+    return(FALSE)
+  }
+  complete <- tapply(seq_len(nrow(df)), df$cluster, function(ix) {
+    tb <- table(droplevels(df$subject[ix]), droplevels(df$rater[ix]))
+    all(tb == 1L)
+  })
+  all(complete)
+}
+
 # Is the subject x rater bipartite design connected? `incidence` is the ns x nr
 # logical matrix of observed cells. Union-find over the ns subject nodes and nr
 # rater nodes: each observed cell unions its subject with its rater; the design

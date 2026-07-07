@@ -1,10 +1,16 @@
 # Project status
 
-- Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **detailed + spec
-  written** (ADR-016); not started
-- Active task: — (next: start Slice 1, Design 2, on branch `m8-nested-multilevel`)
+- Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **in progress**
+  (ADR-016; Slice 1)
+- Active task: **M8 Slice 1 — Design 2 — code-complete, green locally** (design
+  inferred from crossing pattern; four-component fit; O-NML/lme4 + sim + reduction;
+  full suite passes; `air`-clean). Next: Slice 2 (Design 3, agreement-only). Branch
+  `m8-nested-multilevel`. Spec:
+  [`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md).
 - Last green CI: PR #11 (M7) full matrix green; merged to `main` at fe76f5c
 - Blockers: — (paper obtained; Designs 2/3 equations transcribed into the spec)
+- Slice-1 API resolved (maintainer): design 1/2/3 **inferred from the crossing
+  pattern**, ambiguous → loud abort, detected design surfaced in print/glance (spec §4).
 - Updated: 2026-07-07 by main session (Opus)
 
 ## Where we are
