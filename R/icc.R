@@ -60,8 +60,11 @@
 #'   inference about fixed vs. random rater effects is not the same. Choosing
 #'   `"fixed"` emits a warning, because random is the recommended default for
 #'   interrater reliability.
-#' @param unit One or both of `"single"` (-> `ICC(*,1)`) and `"average"`
-#'   (-> `ICC(*,k)`).
+#' @param unit The averaging unit(s): `"single"` (-> `ICC(*,1)`), `"average"`
+#'   (-> `ICC(*,k)`), or a number `m` >= 1 for a D-study projection to the mean of
+#'   `m` raters (-> `ICC(*,m)`), or any combination. See [d_study()] for projecting
+#'   across a range of `m`. Projecting absolute agreement is not defined for fixed
+#'   raters (see [d_study()]).
 #' @param engine Estimation engine. Only `"glmmTMB"` is currently supported.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
@@ -124,6 +127,12 @@ icc <- function(
   type <- validate_choice(type, c("agreement", "consistency"), "type")
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
+
+  # A numeric unit is a D-study projection; guard the one ill-posed combination
+  # (fixed raters + absolute agreement) before fitting (PRINCIPLES.md #5).
+  if (any(vapply(unit, is.numeric, logical(1)))) {
+    abort_fixed_agr_projection(type, raters)
+  }
 
   # Fixed raters is well-posed but forgoes generalization; nudge toward random
   # (M2 spec §3, ADR-006). Warning, not error -- a valid number is still returned.
@@ -203,23 +212,23 @@ icc <- function(
   } else {
     fit_glmmtmb(df)
   }
+  # Averaging divisor: the effective number of ratings per subject (harmonic
+  # mean), which is k on balanced data (ADR-008; M3 §5). "single" uses 1; a
+  # numeric unit projects to that many raters. Resolved per estimand.
+  k <- design_info$k_eff
   estimands <- lapply(
     unit,
-    function(u) icc_estimand(type = type, unit = u, raters = raters)
+    function(u) icc_estimand(type = type, unit = u, raters = raters, k_eff = k)
   )
-  # Averaging divisor: the effective number of ratings per subject (harmonic
-  # mean), which is k on balanced data (ADR-008; M3 §5). ICC(*,1) ignores it.
-  k <- design_info$k_eff
 
   points <- vapply(
     estimands,
-    function(e) icc_point(engine_fit$components, e, k),
+    function(e) icc_point(engine_fit$components, e),
     numeric(1)
   )
   intervals <- mc_ci(
     engine_fit,
     estimands,
-    k,
     conf_level = conf_level,
     mc_samples = mc_samples,
     seed = seed
@@ -260,6 +269,15 @@ icc <- function(
         cells = design_info$n_cells
       ),
       fit = engine_fit$fit,
+      # Everything a downstream D-study projection needs to reuse this fit with
+      # no refit: the fitted parameters, their joint covariance, and the map back
+      # to variance components, all on the engine's internal scale (ROADMAP;
+      # d_study()). Kept alongside `fit` rather than recomputed from it.
+      mc = list(
+        estimate = engine_fit$estimate,
+        vcov = engine_fit$vcov,
+        to_components = engine_fit$to_components
+      ),
       call = match.call()
     ),
     class = "icc"
@@ -304,13 +322,62 @@ validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
   value
 }
 
+# `unit` selects the averaging divisor: the keywords "single" (-> ICC(*,1)) and
+# "average" (-> ICC(*,k)), or a number `m` >= 1 for a D-study projection to the
+# mean of `m` raters (-> ICC(*,m); ROADMAP, M4.5 spec). Because c("single", 3)
+# coerces to character in R, numeric projections may arrive as strings ("3");
+# each element is normalized to "single"/"average" or a numeric. Returns a list
+# (elements are mixed character/numeric), de-duplicated with order preserved.
 validate_unit <- function(unit, call = rlang::caller_env()) {
-  valid <- c("single", "average")
-  if (!is.character(unit) || length(unit) < 1L || !all(unit %in% valid)) {
+  if (length(unit) < 1L) {
     abort_intraclass(
-      "{.arg unit} must be one or both of {.val {valid}}.",
+      "{.arg unit} must name at least one averaging unit.",
       call = call
     )
   }
-  unique(unit)
+  unique(lapply(unit, normalize_unit, call = call))
+}
+
+normalize_unit <- function(u, call = rlang::caller_env()) {
+  if (is.character(u) && length(u) == 1L && u %in% c("single", "average")) {
+    return(u)
+  }
+  num <- suppressWarnings(as.numeric(u))
+  if (length(num) == 1L && is.finite(num) && num >= 1) {
+    return(num)
+  }
+  abort_intraclass(
+    c(
+      "{.arg unit} must be {.val single}, {.val average}, or a number \\
+       {.val {'>= 1'}} (a D-study projection to the mean of that many raters).",
+      x = "You supplied {.val {u}}."
+    ),
+    call = call
+  )
+}
+
+# A D-study projection of ABSOLUTE agreement to a rater count other than the
+# design's own is ill-posed for FIXED raters: theta^2_r is the finite-population
+# variance of exactly the observed raters, so there is no "average of m freshly
+# sampled raters" to project to (PRINCIPLES.md #5; M4.5 spec). Consistency (the
+# rater term drops out) and random-rater agreement project freely.
+abort_fixed_agr_projection <- function(
+  type,
+  raters,
+  call = rlang::caller_env()
+) {
+  if (raters == "fixed" && type == "agreement") {
+    abort_unidentified(
+      c(
+        "Projecting absolute agreement to a different number of raters is not \\
+         defined for {.val fixed} raters.",
+        i = "With fixed raters the rater term is the finite-population variance \\
+             of exactly the raters you observed, so there is no 'average of m \\
+             freshly sampled raters' to project to.",
+        i = "Use {.code raters = \"random\"} to project absolute agreement, or \\
+             {.code type = \"consistency\"} for a fixed-rater D-study."
+      ),
+      call = call
+    )
+  }
 }

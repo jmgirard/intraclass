@@ -1,5 +1,15 @@
 # intraclass 0.0.0.9000
 
+* New `d_study()` projects the reliability of a fitted `icc()` to the mean of an
+  arbitrary number of raters `m` -- a generalizability-theory **decision (D-)
+  study**, answering "how many raters do I need?". It returns a tidy `icc_dstudy`
+  table of Phi(m) with boundary-aware Monte-Carlo intervals and reuses the stored
+  fit (no refit); `autoplot()` draws the reliability curve (needs ggplot2, in
+  Suggests). `icc()`'s `unit` now also accepts numbers (`unit = c("single", 3)`)
+  for one-off projections, adding an `ICC(A,3)` row. Projection is refused for
+  fixed-rater absolute agreement (ill-posed) and is verified against Spearman-Brown
+  (consistency), the GT dependability form (agreement), `psych::ICC`, and a seeded
+  simulation. Experimental.
 * New datasets `ratings` (the complete Shrout & Fleiss 1979 example) and
   `ratings_incomplete` (a connected incomplete variant), used throughout the
   docs and examples. A new **Choosing an ICC** article walks through the whole

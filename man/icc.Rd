@@ -60,8 +60,11 @@ inference about fixed vs. random rater effects is not the same. Choosing
 \code{"fixed"} emits a warning, because random is the recommended default for
 interrater reliability.}
 
-\item{unit}{One or both of \code{"single"} (-> \verb{ICC(*,1)}) and \code{"average"}
-(-> \verb{ICC(*,k)}).}
+\item{unit}{The averaging unit(s): \code{"single"} (-> \verb{ICC(*,1)}), \code{"average"}
+(-> \verb{ICC(*,k)}), or a number \code{m} >= 1 for a D-study projection to the mean of
+\code{m} raters (-> \verb{ICC(*,m)}), or any combination. See \code{\link[=d_study]{d_study()}} for projecting
+across a range of \code{m}. Projecting absolute agreement is not defined for fixed
+raters (see \code{\link[=d_study]{d_study()}}).}
 
 \item{engine}{Estimation engine. Only \code{"glmmTMB"} is currently supported.}
 

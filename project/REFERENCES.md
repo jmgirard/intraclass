@@ -119,6 +119,28 @@ reference values, ever.
   checks; the 300-rep coverage run kept here and in the scheduled reference-values
   job, not the unit suite). Reproducible; nothing hardcoded.
 
+### Oracle O-DS — D-study projection Φ(m) (pre-M5 slice, ADR-010)
+- **Status:** **asserted** in `tests/testthat/test-d-study.R`. Projection of a
+  fitted `icc()` to an arbitrary rater count `m` (`d_study()` and numeric `unit`),
+  pinned by closed-form and independent oracles:
+  1. **O-SB (Spearman–Brown)** — consistency projection equals
+     `Φ_C(m) = m·ρ / (1 + (m−1)·ρ)` with `ρ = ICC(C,1)` (closed form, independent of
+     the estimator's arithmetic).
+  2. **O-GT (dependability)** — agreement projection equals
+     `Φ_A(m) = σ²_s / (σ²_s + (σ²_r + σ²_res)/m)` from the fitted components.
+  3. **O-psych** — at `m = n_raters` the projection equals `icc()`'s own
+     average-measure estimate **and** `psych::ICC`'s average-measure ICC (ICC2k /
+     ICC3k) on the balanced SF data (a third, independent implementation).
+  4. **O-sim** — a seeded simulation with known components recovers the population
+     Φ(m) for an m **not run** (project `m = 12` from `k = 6`) and the MC interval
+     covers it.
+  Invariants: the curve is increasing in `m` and stays in `[0, 1]`; seeded
+  projections are reproducible and RNG-neutral (#9, #12).
+- **Decision:** projection is a change of the averaging divisor (ADR-010; estimand
+  spec `M4.5-d-study.md`); fixed-rater absolute agreement is refused as ill-posed.
+- **Provenance:** `data-raw/oracle-d-study.R` (seeded; regenerates the analytic and
+  simulation values). Reproducible; nothing hardcoded.
+
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
   `lme4::lmer` fit directly reproduces the glmmTMB engine's point ICCs to 1e-4 on
