@@ -151,13 +151,12 @@ reference values, ever.
 - **Provenance:** `data-raw/oracle-d-study.R` (seeded; regenerates the analytic and
   simulation values). Reproducible; nothing hardcoded.
 
-### Oracle O-ML — multilevel ICCs, subject- & cluster-level (M5, planned)
-- **Status:** **planned (M5)** — asserted in `tests/testthat/test-icc-multilevel.R`
-  (ADR-011; spec `M5-multilevel.md` §5). Not yet asserted; the four (level × type)
-  estimand equations are transcribed verbatim from ten Hove Table 3 (Design 1).
-  Three oracles for the subject-level (within-cluster) and cluster-level
-  (between-cluster) IRR ICCs, since no textbook worked example exists for the
-  multilevel IRR estimand (as with O5):
+### Oracle O-ML — multilevel ICCs, subject- & cluster-level (M5)
+- **Status:** **asserted (M5)** in `tests/testthat/test-icc-multilevel.R`
+  (ADR-011; spec `M5-multilevel.md` §5). The four (level × type) estimand equations
+  are transcribed verbatim from ten Hove Table 3 (Design 1). Three oracles for the
+  subject-level (within-cluster) and cluster-level (between-cluster) IRR ICCs, since
+  no textbook worked example exists for the multilevel IRR estimand (as with O5):
   1. **lme4 cross-engine** — `lme4::lmer` fits the identical five-component Design-1
      model `score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) +
      (1 | cluster:rater)` on a balanced multilevel dataset and reproduces both ICC
@@ -177,10 +176,9 @@ reference values, ever.
   is `signal / (signal + error / k)` with a scalar rater divisor `k`, error sets per
   ten Hove Table 3 / spec §3 (ADR-011). `psych`/`gtheory` are **not** oracles here
   (they do not target this estimand); a Bayesian/MCMC cross-check (ten Hove's own
-  method) is deferred to M6.
+  method) remains deferred (ROADMAP).
 - **Provenance:** `data-raw/oracle-multilevel.R` (seeded; `stopifnot` tolerance
-  checks) — to be committed when the coefficients are asserted. Reproducible;
-  nothing hardcoded.
+  checks), committed. Reproducible; nothing hardcoded.
 
 ### Oracle O-OW — one-way random ICC(1)/ICC(k) (M6)
 - **Status:** **asserted (M6)** in `tests/testthat/test-icc-oneway.R` (spec
@@ -272,10 +270,8 @@ reference values, ever.
   reliability for multilevel data: A generalizability theory approach.
   *Psychological Methods, 27*(4), 650–666 (advance online publication 2021;
   doi:10.1037/met0000391). (M5 multilevel estimand — subject- and cluster-level IRR
-  ICCs. **NB — citation error to fix in Slice 2:** `choosing-an-icc.Rmd`'s "fifth
-  choice" (multilevel) currently cites the *Updated Guidelines / incomplete-designs*
-  paper dated "2021" — the **wrong paper and year**. The multilevel forward-pointer
-  should cite *this* entry, ten Hove et al. (2022, multilevel, met0000391).)
+  ICCs. `choosing-an-icc.Rmd`'s "fifth choice" cites this entry, corrected in M5
+  Slice 2 from an earlier wrong-paper/year reference.)
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2025). How to estimate
   intraclass correlation coefficients for interrater reliability from planned
   incomplete data. *Multivariate Behavioral Research, 60*(5), 1042–1061.

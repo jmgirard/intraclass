@@ -44,14 +44,29 @@ On green:
   `project/MILESTONES.md` and condense its `project/TASKS.md` board to one line — do
   not leave the milestone marked in-progress once its board is fully checked.
 - If a statistical or architectural decision was made, add an ADR via `add-decision`.
-- Update `project/REFERENCES.md` if any new oracle value was introduced.
+- **Reconcile `project/REFERENCES.md`** (part of the same-commit tracking set, #16 —
+  not an afterthought). Two moves, not just one:
+  1. Add rows for any genuinely **new** oracle value, with provenance (#4).
+  2. **Transition every oracle this task just proved** from `planned` /
+     `not yet asserted` to **`asserted (M<n>)`** naming its test file, and its
+     provenance from `to be committed` to **committed**. (An oracle scaffolded as
+     `planned` by `new-estimator` stays `planned` until *this* step flips it — the
+     M5 close-out skipped it and left O-ML stuck on "planned" for two milestones.)
+- **Sweep `project/` for now-resolved forward-references.** Before proposing the
+  commit, run
+  `grep -rniE 'planned|not yet|to be (committed|written|asserted)|to fix|forthcoming|Slice [0-9]' project/`
+  and reconcile every hit the just-shipped work resolved. Genuinely-still-future
+  items (a later milestone, a ROADMAP deferral) stay; a forward-reference whose
+  target has shipped is stale and must be updated in the same commit.
 - Propose a Conventional Commit message; remind that tracking-file updates ship in
   the **same commit** as the work (PRINCIPLES.md #16).
 
 **Leave no transient status marker dangling.** Phrases like `pending PR CI + merge`,
-`done (local)`, or `in progress` describe a *transition that has not finished yet*.
-The moment the transition completes, the marker is stale and must be reconciled to
-reality across `STATUS.md`, `MILESTONES.md`, and `TASKS.md` in the same pass.
+`done (local)`, or `in progress` (and, in `REFERENCES.md`, `planned` /
+`not yet asserted` / `to be committed`) describe a *transition that has not finished
+yet*. The moment the transition completes, the marker is stale and must be reconciled
+to reality across `STATUS.md`, `MILESTONES.md`, `TASKS.md`, **and `REFERENCES.md`** in
+the same pass — REFERENCES lapses the most quietly because no CI job reads it.
 
 ## After PR CI green + merge
 `finish-task` runs before the PR is opened, so it cannot confirm CI. Open a PR from
@@ -62,5 +77,7 @@ PR needed), on an up-to-date `main` (PRINCIPLES.md #16):
 - Set `STATUS.md` "Last green CI" to the merge commit.
 - Flip every `pending PR CI + merge` / `done (local)` marker for the shipped work to
   **merged, CI green** in `MILESTONES.md` and `TASKS.md`.
-- Sanity check: `git rev-list --count origin/main...main` is `0` and nothing labeled
-  `pending PR CI + merge` remains in `project/`.
+- Sanity check: `git rev-list --count origin/main...main` is `0`, nothing labeled
+  `pending PR CI + merge` remains in `project/`, and the forward-reference sweep
+  (above) is clean — every `planned` / `not yet asserted` / `to be committed` /
+  `to fix in Slice N` left in `project/` genuinely still points at unshipped work.

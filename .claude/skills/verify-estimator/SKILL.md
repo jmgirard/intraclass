@@ -19,6 +19,11 @@ For the named estimator:
    registered with provenance, stop — do not invent one (PRINCIPLES.md #4).
 2. **Run the comparison** and report agreement to an explicit tolerance, per oracle.
 3. **Record results** in `project/REFERENCES.md` (which oracle, tolerance, pass/fail).
+   If the estimator's oracle block was scaffolded as **`planned` / `not yet
+   asserted`** (by `new-estimator`), and it now passes, **flip its status to
+   `asserted (M<n>)`** naming the test file and mark its provenance script
+   **committed** — do not leave a green oracle registered as "planned". A `planned`
+   status that outlives the work it describes is a silent tracking lapse.
 4. **If no oracle can pin the result:** do **not** escalate on your own. Surface the
    gap plainly, name the specific oracle that *would* settle it, and **recommend**
    the maintainer approve a Fable review (§6 checklist), then **stop and wait**

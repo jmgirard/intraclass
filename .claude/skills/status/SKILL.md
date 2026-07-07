@@ -24,3 +24,11 @@ Also flag **stale transient markers**: grep `project/` for `pending push`,
 "pending push" milestone/task is in fact already on `origin` (local not ahead),
 or an "in progress" milestone has a fully-checked board, report the contradiction
 and name the file/line so it can be reconciled.
+
+Also audit **`project/REFERENCES.md` for lapsed oracle statuses** (this file has no
+CI gate, so it drifts silently — it once sat two milestones behind). Grep it for
+`planned` / `not yet asserted` / `to be committed`; for each hit, cross-check the
+milestone it names against `MILESTONES.md` (is that milestone `done`?) and the test
+file it names (does it exist with `expect_` assertions?). If a `planned` oracle's
+milestone has shipped, report it as a lapse with file/line — it should read
+`asserted`.
