@@ -52,14 +52,14 @@ proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>       m  estimate   95% CI
-#>       1     0.290   [0.050, 0.706]
-#>       2     0.449   [0.096, 0.828]
-#>       3     0.550   [0.137, 0.878]
-#>       4     0.620   [0.175, 0.906]
-#>       5     0.671   [0.210, 0.923]
-#>       6     0.710   [0.241, 0.935]
-#>       7     0.741   [0.271, 0.944]
-#>       8     0.765   [0.298, 0.950]
+#>       1     0.290   [0.050, 0.712]
+#>       2     0.449   [0.095, 0.831]
+#>       3     0.550   [0.136, 0.881]
+#>       4     0.620   [0.173, 0.908]
+#>       5     0.671   [0.207, 0.925]
+#>       6     0.710   [0.239, 0.937]
+#>       7     0.741   [0.268, 0.945]
+#>       8     0.765   [0.295, 0.952]
 ```
 
 Reliability climbs with more raters but with diminishing returns, and
@@ -147,8 +147,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
-#>   subject  ICC(A,1)    0.431   [0.251, 0.561]
-#>   subject  ICC(A,k)    0.751   [0.573, 0.836]
+#>   subject  ICC(A,1)    0.431   [0.249, 0.561]
+#>   subject  ICC(A,k)    0.751   [0.571, 0.836]
 #>   cluster  ICC(A,1)    0.880   [0.000, 0.972]
 #>   cluster  ICC(A,k)    0.967   [0.000, 0.993]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
@@ -193,8 +193,8 @@ icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed 
 #> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
-#>   subject  ICC(A,1)    0.429   [0.310, 0.549]
-#>   subject  ICC(A,k)    0.751   [0.642, 0.830]
+#>   subject  ICC(A,1)    0.429   [0.309, 0.549]
+#>   subject  ICC(A,k)    0.751   [0.641, 0.830]
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
 
@@ -211,8 +211,8 @@ icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed 
 #> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
-#>   subject  ICC(1)      0.412   [0.290, 0.546]
-#>   subject  ICC(k)      0.737   [0.621, 0.828]
+#>   subject  ICC(1)      0.412   [0.291, 0.546]
+#>   subject  ICC(k)      0.737   [0.622, 0.828]
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
 
@@ -311,8 +311,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Subjects: 80 in 16 clusters | Raters: 4 (fixed) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level    index     estimate   95% CI
-#>   subject  ICC(A,1)    0.431   [0.318, 0.552]
-#>   subject  ICC(A,k)    0.751   [0.651, 0.831]
+#>   subject  ICC(A,1)    0.431   [0.312, 0.547]
+#>   subject  ICC(A,k)    0.751   [0.645, 0.828]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 ```
 
@@ -532,7 +532,7 @@ icc(ratings, score, subject, rater, unit = "single", seed = 1)
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.706]
+#>   ICC(A,1)    0.290   [0.050, 0.712]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
 ```
