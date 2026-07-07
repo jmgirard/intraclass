@@ -4,7 +4,7 @@
       print(fit)
     Message
       # Intraclass correlation: two-way mixed, consistency
-      Subjects: 6 | Raters: 4 (fixed) | Observations: 24
+      Subjects: 6 | Raters: 4 (fixed) | Observations: 24 of 24 cells (complete)
       Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
         index     estimate   95% CI
         ICC(C,1)    0.715   [CI]

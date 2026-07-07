@@ -4,9 +4,11 @@
 # fixed-vs-random rater distinction.
 #
 # Consistency drops the rater main effect from the error set (M2 spec §2).
-# Fixed vs. random raters is a label/interpretation layer over the shared fit:
-# on the balanced Shrout & Fleiss data the point estimate and CI are identical
-# (M2 spec §3, ADR-006), verified directly below.
+# Fixed vs. random raters: on balanced data the point estimates coincide (M2
+# spec §3). NOTE: ADR-008 (M3) gave fixed raters their own fixed-effect fit, so
+# the CI-equality once asserted here is now POINT-equality -- the intervals
+# genuinely differ for absolute agreement. Incomplete-data behavior and the
+# fixed interval's coverage live in test-icc-fixed-fit.R (O6).
 #
 # Oracles: Shrout & Fleiss (1979) published ICC(3,*) values (helper), the
 # independent psych::ICC() implementation (ICC3/ICC3k), and the fixed==random
@@ -75,18 +77,24 @@ test_that("consistency >= agreement, with equality only if rater variance is 0",
   expect_gt(icc_estimate(con, "ICC(C,k)"), icc_estimate(agr, "ICC(A,k)"))
 })
 
-test_that("fixed and random raters give identical estimates and CIs (balanced)", {
+test_that("fixed raters reproduce random point estimates on balanced data (ADR-008)", {
   skip_if_not_installed("glmmTMB")
 
-  # Encodes ADR-006: on balanced data raters = "fixed" is a label layer over the
-  # same fit, so point estimates and the seeded Monte-Carlo interval must match
-  # random exactly (not merely to tolerance).
+  # ADR-008 (M3) supersedes the ADR-006 label layer: raters = "fixed" now uses
+  # its OWN fixed-effect fit (score ~ 1 + rater + (1 | subject)). On BALANCED
+  # data the bias-corrected theta^2_r equals the random-fit sigma^2_r, so the
+  # POINT ICCs still match random (and the SF values). The intervals are NOT
+  # identical -- inference about fixed vs random rater effects genuinely differs
+  # for absolute agreement even when the point coincides (McGraw & Wong 1996);
+  # the fixed interval's calibration is validated by O6 (test-icc-fixed-fit.R).
   for (ty in c("agreement", "consistency")) {
     rnd <- tidy(fit_sf(type = ty, raters = "random", seed = 42))
     fix <- tidy(fit_sf(type = ty, raters = "fixed", seed = 42))
-    expect_equal(rnd$estimate, fix$estimate)
-    expect_equal(rnd$conf.low, fix$conf.low)
-    expect_equal(rnd$conf.high, fix$conf.high)
+    expect_equal(fix$estimate, rnd$estimate, tolerance = 1e-3)
+    expect_true(all(
+      fix$conf.low <= fix$estimate & fix$estimate <= fix$conf.high
+    ))
+    expect_true(all(fix$conf.low >= 0 & fix$conf.high <= 1))
   }
 })
 

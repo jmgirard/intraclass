@@ -162,3 +162,86 @@ consequences → references.
   Shrout & Fleiss (1979); ten Hove et al. (2024);
   [`estimand-specs/M2-consistency-and-fixed.md`](estimand-specs/M2-consistency-and-fixed.md);
   ADR-002/003/005.
+
+## ADR-007: M3 scope — incomplete-design statistical core; flagship vignette split out
+- Date: 2026-07-06
+- Status: accepted
+- Context: The provisional M3 (founding brief §7 arc) bundled two large,
+  loosely-coupled deliverables: (a) correct ICCs on imbalanced/incomplete
+  subject×rater designs, and (b) the flagship "Choosing an ICC" teaching vignette.
+  M3 also inherits the load-bearing ADR-006 debt (fixed raters must stop reusing the
+  balanced-only label layer). Bundling all of this violates thin-vertical-slices
+  (PRINCIPLES.md #15) and would make M3 hard to land green; and the vignette reads
+  better *after* incomplete-design support exists, since its whole point is to
+  demonstrate the complete-vs-incomplete decision on working code.
+- Decision: **M3 is the statistical core only** — imbalanced/incomplete designs
+  (random raters) plus resolving the ADR-006 fixed-raters debt via a **real
+  fixed-effect fit path** (not a balanced-only guard; maintainer decision this
+  session). The flagship **"Choosing an ICC" vignette becomes its own milestone
+  (new M4)**; the prior M4–M6 (multilevel, optional engines, release polish)
+  renumber to **M5–M7**. M3 runs as two internal CI-green slices: (1) incomplete
+  random raters, (2) the fixed-effect fit path. The `ICC(*,k)` averaging-divisor
+  convention under imbalance is deferred to the M3 estimand spec (to be pinned with
+  citations; recommendation: project to the design's rater count, the GT D-study
+  Φ(k) reading) and recorded there and in a forthcoming ADR-008.
+- Consequences: M3 stays a focused, shippable statistical milestone with a clear
+  Definition of Done; the teaching artifact gets its own deliberate treatment.
+  Renumber touches `MILESTONES.md` only (no code depends on milestone numbers). The
+  arc remains a hypothesis (MILESTONES.md preamble); this reorder is the sanctioned
+  way to change it. ADR-008 will record the fixed real-fit estimand + divisor
+  convention once the spec pins them.
+- References: PRINCIPLES.md #14, #15, #17; `CLAUDE_CODE_KICKOFF.md` §7 (arc is a
+  hypothesis, not a contract); ADR-006 (the inherited debt);
+  approved plan `moonlit-mixing-pinwheel`.
+
+## ADR-008: M3 estimands — connectedness guard, `ICC(*,k)` divisor, fixed real-fit
+- Date: 2026-07-06
+- Status: accepted
+- Context: The M3 estimand spec must pin three things left open when incomplete data
+  breaks the balanced assumptions M1/M2 relied on: how σ²_s and σ²_r stay
+  identified, what the averaging divisor `k` means when subjects have unequal rating
+  counts, and how `raters = "fixed"` is estimated now that the ADR-006 label-layer
+  shortcut is invalid. Decisions confirmed with the maintainer this session.
+- Decision:
+  - **Identifiability (connectedness).** A two-way ICC is reported only on a
+    **connected** subject×rater design (the observed-cell bipartite graph is a single
+    component). A disconnected design aliases σ²_s with σ²_r and aborts via
+    `abort_unidentified()` (PRINCIPLES.md #5). Standard estimability condition for
+    crossed designs with empty cells (Searle, Casella & McCulloch 2006; Weeks &
+    Williams 1964).
+  - **`ICC(*,k)` divisor.** `ICC(*,1)` is always reported; for the average, use the
+    **effective number of ratings `k_eff` = harmonic mean of the per-subject counts
+    `n_i`** (`k_eff = 1/mean(1/n_i)`) — the standard effective-sample-size at which
+    `error/k_eff` equals the average per-subject error variance, so `ICC(*,k)`
+    describes the ragged averages actually computed. Reduces to `k` when complete;
+    `k_eff` is surfaced in the report. Exact for consistency; an effective-`k`
+    approximation for agreement (the `σ²_r` term divides by `m` only under the GT
+    "average over `m` fresh raters" reading). Both candidate rules are the GT
+    dependability `Φ(m)` at different `m`; **projecting to any other `m`** (the
+    complete design's `n_raters`, or a reliability curve) is a distinct D-study
+    *extrapolation* kept out of the plain "average" and housed in a future
+    `d_study()`/`project_raters()` where the user names `m` (ROADMAP). Rationale: the
+    descriptive question ("what precision did I get") stays separate from the
+    inferential one, and an extrapolation to an un-run design is never reported
+    silently. `k_eff`'s exact use is oracle-pinned in Slice 1 (hand calc + O5
+    simulation), not assumed to match `irrNA` (PRINCIPLES.md #1). (Supersedes the
+    project-to-`n_raters` default first drafted in the spec; maintainer decision.)
+  - **Fixed raters get a real fit.** `raters = "fixed"` fits
+    `score ~ 1 + rater + (1 | subject)` (raters as fixed effects). Consistency error
+    = {σ²_res} (McGraw & Wong Case 3 / SF ICC(3,·)); absolute agreement error =
+    {σ²_res, θ²_r} with θ²_r = Σ(α̂_j − ᾱ)²/(k−1), the finite-population variance of
+    the k estimated rater effects (Case 3A). The MC CI samples α̂ from
+    `vcov(fit, full = TRUE)` and recomputes θ²_r per draw. **θ²_r's exact
+    normalization and CI propagation are asserted by oracle in Slice 2, not by the
+    formula** (PRINCIPLES.md #1); if unpinnable by ≥2 oracles the coefficient is not
+    shipped and a Fable review is recommended (#19). Balanced data still reduces to
+    the M2 numbers (extends O4).
+- Consequences: the random path is unchanged apart from the connectedness guard and
+  the divisor rule; the fixed path gains its own fit, an agreement error term, and a
+  CI sampler branch (keyed on `design$raters`). New oracle rows O5 (unbalanced
+  simulation) and O6 (`irrNA`/incomplete) to be registered when asserted. The
+  `raters` roxygen note is corrected (fixed ≠ random on incomplete data).
+- References: PRINCIPLES.md #1, #2, #5, #18, #19;
+  [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md);
+  ADR-006 (the debt this resolves); McGraw & Wong (1996); Brennan (2001); ten Hove et
+  al. (2024); Searle, Casella & McCulloch (2006); Weeks & Williams (1964).

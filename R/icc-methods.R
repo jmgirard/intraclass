@@ -13,12 +13,16 @@ format.icc <- function(x, ...) {
     "# Intraclass correlation: %s",
     icc_design_phrase(x$design$type, x$design$raters)
   )
+  cell_total <- x$n$subjects * x$n$raters
+  completeness <- if (x$design$balanced) "complete" else "incomplete"
   meta1 <- sprintf(
-    "Subjects: %d | Raters: %d (%s) | Observations: %d",
+    "Subjects: %d | Raters: %d (%s) | Observations: %d of %d cells (%s)",
     x$n$subjects,
     x$n$raters,
     x$design$raters,
-    x$n$obs
+    x$n$cells,
+    cell_total,
+    completeness
   )
   meta2 <- sprintf(
     "Engine: %s (REML) | CI: %s%% %s (%d draws)",
@@ -51,6 +55,16 @@ format.icc <- function(x, ...) {
     )
   }
 
+  # On incomplete data ICC(*,k) is a projection to the effective number of
+  # ratings per subject (harmonic mean, k_eff); surface it so the divisor is not
+  # a black box (M3 spec §5, ADR-008). Silent on balanced data (k_eff == k).
+  keff_note <- if (!x$design$balanced && any(grepl(",k)$", e$index))) {
+    sprintf(
+      "ICC(*,k) projects to an effective %s raters (harmonic mean of ratings/subject).",
+      formatC(x$k_eff, format = "f", digits = 2)
+    )
+  }
+
   vc <- x$components
   comps <- sprintf(
     "Variance components: subject %s, rater %s, residual %s",
@@ -59,7 +73,7 @@ format.icc <- function(x, ...) {
     formatC(vc$residual, format = "f", digits = 3)
   )
 
-  c(header, meta1, meta2, "", table, "", comps, sf_note)
+  c(header, meta1, meta2, "", table, "", keff_note, comps, sf_note)
 }
 
 #' @rdname icc
@@ -114,6 +128,9 @@ glance.icc <- function(x, ...) {
     n_subjects = x$n$subjects,
     n_raters = x$n$raters,
     n_obs = x$n$obs,
+    n_cells = x$n$cells,
+    balanced = x$design$balanced,
+    k_eff = x$k_eff,
     var_subject = x$components$subject,
     var_rater = x$components$rater,
     var_residual = x$components$residual,

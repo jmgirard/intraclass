@@ -33,3 +33,13 @@ condensed to a single line once done.
 `raters = c("random","fixed")` (fixed = balanced-data label layer, SF `ICC(3,*)`,
 warns). Classed warning layer; design + SF-equivalent in print/summary; oracles
 SF 0.715/0.909, `psych` ICC3/ICC3k, fixed≡random equivalence (O4). See MILESTONES M2.
+
+## M3 — imbalanced & incomplete designs — **done** (Slices 0–2; local gate green, pending PR CI + merge)
+
+Ragged subject×rater designs (missing cells). Slice 0: estimand spec + ADR-008
+(arc reordered by ADR-007; vignette → M4). Slice 1: `summarize_design()` (union-find
+connectedness, `k_eff` harmonic-mean divisor, replicate guard) + incomplete
+random-rater path; oracle O5 (lme4 cross-engine + MCAR simulation). Slice 2: real
+fixed-effect fit (`+ rater`) — Case 3 consistency + Case 3A absolute agreement with
+bias-corrected θ²_r + fixed-path MC-CI; oracle O6 (balanced reduction, lme4, 95% CI
+coverage). Resolves the ADR-006 debt. See MILESTONES M3.
