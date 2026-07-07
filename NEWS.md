@@ -1,5 +1,16 @@
 # intraclass 0.0.0.9000
 
+* Multilevel `icc()` now supports **fixed raters** (`raters = "fixed"`) for the
+  crossed design (Design 1) at the **subject level**, on balanced complete data. The
+  rater main effect is treated as the finite-population variance of the specific raters
+  observed (McGraw & Wong Case 3A, as in the single-level fixed path) rather than a
+  random-sample variance, fitting
+  `score ~ 1 + rater + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)`.
+  Consistency is identical to the random-rater case; absolute agreement differs only by
+  the fixed-rater term (and coincides on balanced data). The fixed-rater cluster level,
+  incomplete fixed-rater designs, and nested fixed-rater designs are directed to a clear
+  error. Verified by reduction to the random-rater multilevel estimand (balanced fixed
+  equals random), an independent lme4 fit, and a seeded recovery simulation.
 * Multilevel `icc()` now accepts **incomplete (ragged) crossed designs** (Design 1
   with missing subject-by-rater cells), computing the subject-level ICCs by REML with
   the averaging divisor set to the effective number of ratings per subject (`k_eff`,

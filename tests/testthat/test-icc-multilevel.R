@@ -224,11 +224,8 @@ test_that("multilevel identifiability and scope guards fail loudly", {
     icc(d3, score, subject, rater, cluster = cluster),
     class = "intraclass_unidentified"
   )
-  # fixed raters and numeric unit are out of multilevel scope (M5).
-  expect_error(
-    icc(d, score, subject, rater, cluster = cluster, raters = "fixed"),
-    class = "intraclass_unsupported"
-  )
+  # Numeric unit (a multilevel D-study projection) is out of scope. Fixed-rater
+  # multilevel is now supported at the subject level (M10, test-icc-fixed-multilevel.R).
   expect_error(
     icc(d, score, subject, rater, cluster = cluster, unit = c("single", 3)),
     class = "intraclass_unsupported"

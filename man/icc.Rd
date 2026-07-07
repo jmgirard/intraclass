@@ -213,8 +213,13 @@ rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
 declare it with \code{design} (above). On incomplete data the \strong{cluster} level is
 reported as the single-rater \code{ICC(c,1)} (when raters bridge clusters); the averaged
 cluster-level \code{ICC(c,k)} on incomplete data is not yet supported (its effective
-number of raters per cluster is still being validated). Incomplete \emph{nested}
-designs and fixed raters remain for later milestones. Nested designs still require
+number of raters per cluster is still being validated). \strong{Fixed raters}
+(\code{raters = "fixed"}) are supported for the crossed design at the \strong{subject} level
+on balanced, complete data: the rater main effect becomes the finite-population
+variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
+to the random-rater case and absolute agreement differs only by that term.
+Incomplete \emph{nested} designs, incomplete or nested fixed-rater designs, and the
+fixed-rater cluster level remain for later milestones. Nested designs still require
 balanced, complete data.
 }
 

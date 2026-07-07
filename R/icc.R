@@ -76,8 +76,13 @@
 #' declare it with `design` (above). On incomplete data the **cluster** level is
 #' reported as the single-rater `ICC(c,1)` (when raters bridge clusters); the averaged
 #' cluster-level `ICC(c,k)` on incomplete data is not yet supported (its effective
-#' number of raters per cluster is still being validated). Incomplete *nested*
-#' designs and fixed raters remain for later milestones. Nested designs still require
+#' number of raters per cluster is still being validated). **Fixed raters**
+#' (`raters = "fixed"`) are supported for the crossed design at the **subject** level
+#' on balanced, complete data: the rater main effect becomes the finite-population
+#' variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
+#' to the random-rater case and absolute agreement differs only by that term.
+#' Incomplete *nested* designs, incomplete or nested fixed-rater designs, and the
+#' fixed-rater cluster level remain for later milestones. Nested designs still require
 #' balanced, complete data.
 #'
 #' @section Confidence intervals:
@@ -225,15 +230,7 @@ icc <- function(
   if (multilevel) {
     level <- validate_levels(level)
     design <- validate_design(design)
-    # M5 scope (ADR-011): random raters, keyword units only. Fixed-rater and
-    # D-study-projection multilevel ICCs are deferred (spec §8).
-    if (raters == "fixed") {
-      abort_unsupported(c(
-        "Fixed raters are not supported for multilevel ICCs yet.",
-        i = "Multilevel support (M5) covers {.code raters = \"random\"}; \\
-             fixed-rater multilevel is planned for a later milestone."
-      ))
-    }
+    # Numeric `unit` (a multilevel D-study projection) is deferred at every level.
     if (any(vapply(unit, is.numeric, logical(1)))) {
       abort_unsupported(c(
         "Numeric {.arg unit} (D-study projection) is not supported for \\
@@ -421,6 +418,30 @@ icc <- function(
   } else {
     detect_multilevel_design(df)
   }
+
+  # Fixed-rater multilevel scope (M10, ADR-019): the crossed (Design 1) design,
+  # balanced, subject level only. Fixed-rater nested designs and the fixed-rater
+  # cluster level are deferred -- fail loudly (#5) before the design/fit machinery
+  # runs. The balanced check lives below with the rest of the crossed guards.
+  if (multilevel && raters == "fixed") {
+    if (ml_design != "crossed") {
+      abort_unsupported(c(
+        "Fixed raters are only supported for the crossed multilevel design \\
+         (Design 1).",
+        i = "This design has raters nested in clusters or subjects; fixed-rater \\
+             nested multilevel is planned for a later milestone.",
+        i = "Use {.code raters = \"random\"}, or cross the raters with clusters."
+      ))
+    }
+    if ("cluster" %in% level) {
+      abort_unsupported(c(
+        "Fixed-rater multilevel ICCs are available at the subject level only.",
+        i = "The cluster-level fixed-rater estimand is planned for a later \\
+             milestone.",
+        i = "Use {.code level = \"subject\"} with {.code raters = \"fixed\"}."
+      ))
+    }
+  }
   if (multilevel && ml_design != "crossed") {
     if (!("subject" %in% level)) {
       abort_unsupported(c(
@@ -517,6 +538,18 @@ icc <- function(
     # coefficients. Complete crossed designs satisfy every condition, so this is a
     # no-op for the balanced M5/M8 path.
     if (multilevel && ml_design == "crossed" && !design_info$balanced) {
+      # Fixed-rater multilevel is balanced/complete only in M10 (theta^2_r under
+      # imbalance is deferred, spec §3/§7); fail loudly before fitting (#5).
+      if (raters == "fixed") {
+        abort_unsupported(c(
+          "Incomplete or unbalanced fixed-rater multilevel designs are not \\
+           supported yet.",
+          i = "Fixed-rater multilevel (M10) covers balanced, complete crossed \\
+               designs; incomplete fixed-rater multilevel is planned for a later \\
+               milestone.",
+          i = "Use {.code raters = \"random\"} for incomplete multilevel data."
+        ))
+      }
       ident <- crossed_ml_identifiability(df)
       # Within-cluster subject x rater connectedness separates sigma^2_{s:c} from
       # residual; gates every subject-level coefficient (incl. consistency).
@@ -611,6 +644,10 @@ icc <- function(
       fit_glmmtmb_nested_clusters(df)
     } else if (ml_design == "nested_in_subjects") {
       fit_glmmtmb_nested_subjects(df)
+    } else if (raters == "fixed") {
+      # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
+      # slot (M10). Fixed-rater nested/incomplete/cluster-level are guarded above.
+      fit_glmmtmb_multilevel_fixed(df)
     } else {
       fit_glmmtmb_multilevel(df)
     }

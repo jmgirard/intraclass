@@ -363,6 +363,34 @@ rater_mean_contrast <- function(k) {
   cbind(rep(1, k), rbind(rep(0, k - 1), diag(k - 1)))
 }
 
+# Bias-corrected finite-population variance of the k fixed rater level means
+# (McGraw & Wong 1996, Case 3A; estimand-spec M3 §6 / M10 §2). Shared by the flat
+# (fit_glmmtmb_fixed) and multilevel (fit_glmmtmb_multilevel_fixed) fixed engines:
+# raters enter as fixed effects, so the rater main effect is theta^2_r rather than a
+# random sigma^2_r. Returns the point estimate plus the fixed pieces (contrast,
+# centering, bias, and the fixed-effect names) the Monte-Carlo sampler reuses to
+# recompute theta^2_r from the beta draws each iteration. `center = I - J/k` removes
+# the grand mean; `bias` subtracts the mean sampling variance of the centered means.
+# On BALANCED data the corrected theta^2_r equals the random-fit sigma^2_r (M3 §6,
+# verified on SF; M10's balanced fixed == random reduction).
+theta2r_fixed <- function(fit, k) {
+  beta <- glmmTMB::fixef(fit)$cond
+  vbeta <- as.matrix(stats::vcov(fit)$cond)
+  contrast <- rater_mean_contrast(k)
+  center <- diag(k) - matrix(1 / k, k, k)
+  v_means <- contrast %*% vbeta %*% t(contrast)
+  bias <- sum(diag(center %*% v_means)) / (k - 1)
+  mu <- as.numeric(contrast %*% beta)
+  raw <- as.numeric(t(mu) %*% center %*% mu) / (k - 1)
+  list(
+    point = max(0, raw - bias),
+    contrast = contrast,
+    center = center,
+    bias = bias,
+    beta_names = names(beta)
+  )
+}
+
 fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
   k <- nlevels(data$rater)
@@ -385,21 +413,11 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   vc <- glmmTMB::VarCorr(fit)$cond
   sd_subject <- as.numeric(attr(vc$subject, "stddev"))
   beta <- glmmTMB::fixef(fit)$cond
-  vbeta <- as.matrix(stats::vcov(fit)$cond)
-
-  # theta^2_r point estimate: bias-corrected finite-population variance of the k
-  # rater level means (Case 3A). center = I - J/k removes the grand mean; the
-  # bias term subtracts the mean sampling variance of the centered means.
-  contrast <- rater_mean_contrast(k)
-  center <- diag(k) - matrix(1 / k, k, k)
-  v_means <- contrast %*% vbeta %*% t(contrast)
-  bias <- sum(diag(center %*% v_means)) / (k - 1)
-  mu <- as.numeric(contrast %*% beta)
-  raw <- as.numeric(t(mu) %*% center %*% mu) / (k - 1)
+  th <- theta2r_fixed(fit, k)
 
   components <- list(
     subject = sd_subject^2,
-    rater = max(0, raw - bias),
+    rater = th$point,
     residual = stats::sigma(fit)^2
   )
 
@@ -431,12 +449,103 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   to_components <- function(par) {
     # Per draw: reconstruct the k rater means, apply the SAME bias-corrected
     # theta^2_r (bias is constant -- v_means is fixed), clamp at 0 (boundary).
-    means <- contrast %*% par[bi, , drop = FALSE]
-    raw_draws <- colSums(means * (center %*% means)) / (k - 1)
+    means <- th$contrast %*% par[bi, , drop = FALSE]
+    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     list(
       subject = exp(2 * par[si, ]),
-      rater = pmax(0, raw_draws - bias),
+      rater = pmax(0, raw_draws - th$bias),
       residual = exp(2 * par[di, ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "glmmTMB",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_full,
+    to_components = to_components
+  )
+}
+
+# Fixed-rater multilevel engine (Design 1 crossed, balanced) -- estimand-spec M10.
+# Combines the M5 Design-1 multilevel random structure with the M3 fixed-rater
+# treatment: raters enter as FIXED effects, so the rater main effect becomes the
+# bias-corrected finite-population theta^2_r (Case 3A, via theta2r_fixed()) carried
+# in the "rater" component slot; the cluster x rater interaction stays RANDOM
+# (random cluster x fixed rater, the standard mixed-model convention). Fits
+#
+#   score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)
+#
+# The subject-level estimand map and icc_point()/mc_ci() are UNCHANGED (only
+# theta^2_r vs sigma^2_r fills the rater slot). On balanced data theta^2_r ==
+# sigma^2_r, so the subject-level ICCs equal the random-rater M5 ones (oracle
+# O-FML/reduction). Cluster-level IRR with fixed raters is deferred (spec M10 §7).
+fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  k <- nlevels(data$rater)
+  fit <- fit_glmmtmb_ml_model(
+    score ~
+      1 +
+      rater +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | cluster:rater),
+    data
+  )
+  th <- theta2r_fixed(fit, k)
+
+  vc <- glmmTMB::VarCorr(fit)$cond
+  sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
+  # Random slots (cluster, subject-in-cluster, cluster x rater); theta^2_r and the
+  # residual are appended so the subject-level map reads {subject | rater, residual}.
+  groups <- c(
+    cluster = "cluster",
+    subject = "cluster:subject",
+    cluster_rater = "cluster:rater"
+  )
+  components <- lapply(groups, function(g) sd_of(g)^2)
+  components$rater <- th$point
+  components$residual <- stats::sigma(fit)^2
+
+  vcov_full <- stats::vcov(fit, full = TRUE)
+  nm <- unname(colnames(vcov_full))
+  theta <- function(g) sprintf("theta_1|%s.1", g)
+  beta <- glmmTMB::fixef(fit)$cond
+  estimate <- stats::setNames(rep(NA_real_, length(nm)), nm)
+  # Fixed effects (intercept + rater contrasts) on the natural scale; grouping-
+  # factor SDs and the residual on glmmTMB's internal log-SD scale (ADR-002/003).
+  estimate[th$beta_names] <- as.numeric(beta)
+  estimate[["disp~(Intercept)"]] <- log(stats::sigma(fit))
+  for (g in groups) {
+    estimate[[theta(g)]] <- log(sd_of(g))
+  }
+
+  if (anyNA(estimate)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg glmmTMB} parameter vector to its covariance.",
+        i = "Unmatched parameters: {.val {nm[is.na(estimate)]}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  bi <- match(th$beta_names, nm)
+  di <- which(nm == "disp~(Intercept)")
+  ridx <- lapply(groups, function(g) which(nm == theta(g)))
+  to_components <- function(par) {
+    # Random components back-transform from log-SD; theta^2_r is recomputed from the
+    # rater beta draws with the constant bias correction (as in fit_glmmtmb_fixed).
+    means <- th$contrast %*% par[bi, , drop = FALSE]
+    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
+    c(
+      lapply(ridx, function(i) exp(2 * par[i, ])),
+      list(
+        rater = pmax(0, raw_draws - th$bias),
+        residual = exp(2 * par[di, ])
+      )
     )
   }
 

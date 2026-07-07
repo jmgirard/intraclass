@@ -208,11 +208,33 @@ appear in only one classroom, so the design could be read as crossed *or* nested
 `icc()` does not guess; you resolve it by declaring `design = "crossed"` (validated
 against the data), or the abort points you at the nested reading.
 
-Multilevel support currently covers random raters on: **crossed** designs (Design 1),
+### Fixed raters in a multilevel design
+
+The multilevel examples so far treat raters as a **random** sample — the recommended
+default, which generalizes beyond the raters you happened to use. When the observed
+raters *are* the entire population of interest (a fixed panel of examiners, say), pass
+`raters = "fixed"` at the **subject** level. As in the single-level case, the rater
+main effect is then the finite-population variance of *these* raters (McGraw & Wong's
+Case 3A) rather than a random-sample variance:
+
+```{r ml-fixed, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+icc(school, score, subject = pupil, rater = rater, cluster = classroom,
+  raters = "fixed", level = "subject")
+```
+
+On this balanced design the fixed-rater subject-level coefficients match the
+random-rater ones: **consistency** never uses the rater term, so it is identical either
+way, and **absolute agreement** coincides because the finite-population rater variance
+equals the random-sample estimate when the design is balanced. The two genuinely
+diverge only on incomplete data — which, for fixed-rater multilevel designs, is planned
+for a later milestone.
+
+Multilevel support currently covers **random** raters on: crossed designs (Design 1),
 complete or **incomplete**, at the subject level and — for `ICC(c,1)` — the cluster
-level; and **nested** designs (Designs 2 and 3, subject level), which still require
-complete data. The averaged cluster-level `ICC(c,k)` on incomplete data, incomplete
-nested designs, and fixed raters are planned for later milestones.
+level; and nested designs (Designs 2 and 3, subject level), complete data. **Fixed**
+raters are supported for the complete crossed design at the subject level. The averaged
+cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs, and incomplete
+or nested fixed-rater designs are planned for later milestones.
 
 ## Choosing an estimation engine
 
