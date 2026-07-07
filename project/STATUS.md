@@ -1,28 +1,29 @@
 # Project status
 
-- Milestone: M3 — imbalanced & incomplete designs (done; merged via PR #2, full CI matrix green)
-- Active task: — (next: plan M4 — the flagship "Choosing an ICC" vignette)
+- Milestone: M4 — "Choosing an ICC" flagship vignette (planned; spec in MILESTONES M4, ADR-009)
+- Active task: — (next: `/start-task` → M4 Slice 1, first task = the teaching dataset)
 - Last green CI: PR #2 (M3) full matrix green; merged to `main` at 11ab1b2
 - Blockers: —
 - Updated: 2026-07-06 by main session (Opus)
 
 ## Next action
 
-M3 shipped and merged (PR #2): incomplete/imbalanced two-way designs. Slice 1 —
-`summarize_design()` (union-find connectedness, `k_eff` harmonic-mean divisor,
-within-cell replicate guard) + the incomplete random-rater path (oracle O5: lme4
-cross-engine on incomplete data + seeded MCAR simulation). Slice 2 — the real
-fixed-effect fit (`score ~ 1 + rater + (1 | subject)`) resolving the ADR-006 debt:
-Case 3 consistency and Case 3A absolute agreement with the bias-corrected θ²_r
-(returned in the "rater" slot so `icc_point`/`mc_ci` are unchanged); oracle O6
-(balanced reduction 0.290/0.620/0.715/0.909, lme4 cross-engine, 95% CI coverage).
-Decisions: ADR-007 (arc reorder), ADR-008 (connectedness, `k_eff`, fixed real-fit).
+M4 is planned (this session, after the M3 retro; founding brief §7). It is the
+flagship "Choosing an ICC" teaching article, demonstrated on the now-shipped M3
+code. Scope pinned by **ADR-009**: vignette-only (the `choose_icc()` helper stays
+in ROADMAP) **plus a shipped teaching dataset** (`ratings` + `ratings_incomplete`);
+a dependency-free static-SVG decision diagram; the README brought current. No new
+estimator, no new estimand spec. Two CI-green slices (see MILESTONES M4 / TASKS M4):
+Slice 1 = dataset + balanced-core article + diagram + claims test; Slice 2 =
+incomplete-design section + subject/cluster preview + pkgdown wiring + README
+refresh + close-out. Teaching discipline: every displayed coefficient is computed
+by `icc()` at knit time with a fixed seed (#4, #12), and the asserted numeric
+relationships are backed by `test-vignette-claims.R` (#1).
 
-Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR, not
-direct commits to `main` (see the `milestone-branches-and-prs` memory; the
-`finish-task` skill was updated to match in PR #3).
+Workflow: milestone work ships on a `m<N>-<slug>` branch (here `m4-<slug>`) and
+merges via PR, not direct commits to `main` (see the `milestone-branches-and-prs`
+memory; the `finish-task` skill was updated to match in PR #3).
 
-**Next action:** `/start-task` begins **M4 — the flagship "Choosing an ICC"
-vignette** (the decision framework across agreement/consistency, single/average,
-fixed/random, complete/incomplete, demonstrated on the M3 code). Detail M4's
-Definition of Done at its start after a short M3 retro (founding brief §7).
+**Next action:** `/start-task` begins **M4 Slice 1** — the first task is
+`data-raw/make-ratings.R` building the `ratings` and `ratings_incomplete` teaching
+datasets (PRINCIPLES #12 deterministic/sourced), then the balanced-core article.

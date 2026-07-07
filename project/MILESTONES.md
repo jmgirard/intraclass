@@ -129,12 +129,59 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Status: done (Slices 0–2; merged to `main` via PR #2 at 11ab1b2; full CI matrix
   green — tests 118/0/0, check 0/0/1 justified, coverage 93.8%)
 
-## M4: "Choosing an ICC" flagship vignette *(provisional)*
-- Goal: the decision-framework teaching article (agreement vs. consistency, single
-  vs. average, fixed vs. random, complete vs. incomplete), demonstrated on the M3
-  code; optionally the `choose_icc()` decision helper (ROADMAP). Split out of the
-  old M3 by ADR-007.
-- Status: provisional
+## M4: "Choosing an ICC" flagship vignette
+- Goal: the decision-framework teaching article — agreement vs. consistency,
+  single vs. average, fixed vs. random, complete vs. incomplete — demonstrated on
+  the now-shipped M3 code, with a decision-tree diagram and a shipped teaching
+  dataset. Split out of the old M3 by ADR-007; scoped by ADR-009. **No new
+  estimator, no new estimand spec.** The `choose_icc()` helper stays in ROADMAP.
+- Guiding discipline: this is a teaching artifact, but PRINCIPLES still bind.
+  Every coefficient displayed is **computed by `icc()` at knit time with a fixed
+  seed** (#4 no fabricated values, #12 seeded/sourced) — never a hand-typed number
+  that can drift — and the numeric relationships the prose asserts are backed by a
+  test (#1 oracle-first). A flagship article that silently states a false
+  relationship violates the constitution as surely as a bad estimator.
+- Definition of Done (per-milestone §8, adapted — no per-estimator bar) — two
+  internal slices, each CI-green:
+  - [ ] **Slice 1 — teaching dataset + balanced core + diagram.** Ship `ratings`
+        (balanced Shrout & Fleiss 1979 6×4, `@source`-cited) and
+        `ratings_incomplete` (a curated *connected-but-incomplete* variant derived
+        from `ratings`, `@details` documenting the missing cells, connectedness,
+        and `k_eff`), built by a deterministic `data-raw/make-ratings.R`;
+        `LazyData: true`, `R/data.R` docs, pkgdown reference entry, WORDLIST.
+        Then `choosing-an-icc.Rmd`'s balanced core: worked examples for the three
+        balanced axes (`type`, `unit`, `raters`) returning the pinned
+        0.290/0.620/0.715/0.909; the decision-tree figure (dependency-free static
+        SVG under `man/figures/`, **no new Imports**); the McGraw–Wong ↔
+        Shrout–Fleiss naming crosswalk. `test-vignette-claims.R` asserts
+        agreement ≤ consistency and `ICC(*,k)` ≥ `ICC(*,1)` on the dataset so no
+        prose claim is unbacked.
+  - [ ] **Slice 2 — incomplete-design payoff + close-out.** The complete-vs-
+        incomplete section on M3 code using `ratings_incomplete`: surface `k_eff`,
+        the connectedness abort, and **fixed ≢ random on incomplete data** (the
+        reason this vignette waited for M3), with the claims test extended to
+        these invariants. Subject-vs-cluster axis previewed conceptually with a
+        forward-pointer to M5 (not demonstrated — multilevel isn't built). Wire
+        the article into a pkgdown `articles:` grouping; update
+        `getting-started.Rmd` to `data(ratings)` and link the now-real article;
+        refresh `advanced.Rmd`'s placeholder note. **README refresh**: rewrite the
+        stale NOTE (it still says M1 is current) to reflect actual state, make the
+        Example block a real runnable `icc()` call on `data(ratings)`
+        (`eval = TRUE`), link the flagship article, and rebuild `README.md` from
+        `README.Rmd` (commit both in sync).
+  - [ ] Every displayed coefficient computed by `icc()` at knit time, seeded.
+  - [ ] `R-CMD-check` full matrix clean (vignette knits on all platforms; 0
+        errors/0 warnings, notes justified); coverage floor held (no statistical
+        code added). Spell check + WORDLIST; `air`/`lintr` clean.
+  - [ ] `DECISIONS.md` ADR-009 (M4 scope); `MILESTONES.md`/`STATUS.md`/`TASKS.md`
+        updated in the same commit as the work (#16). Shipped on an `m4-<slug>`
+        branch, merged via PR, tagged.
+- Deferred out of M4 (recorded so they aren't rediscovered): the `choose_icc()`
+  decision helper (ROADMAP); filling `advanced.Rmd` (incomplete/multilevel/engine
+  sections — M5+); a `DiagrammeR`/`mermaid`-rendered diagram (adds a dep for zero
+  teaching gain vs. static SVG); migrating the oracle tests off inline data (they
+  pin numeric values — left untouched deliberately).
+- Status: not started (spec detailed 2026-07-06 after M3 retro; ADR-009)
 
 ## M5: Multilevel ICCs *(provisional)*
 - Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*
