@@ -125,10 +125,13 @@ counts systematic rater differences as error; <code>"consistency"</code> ignores
 <dt id="arg-raters">raters<a class="anchor" aria-label="anchor" href="#arg-raters"></a></dt>
 <dd><p>Rater sampling: <code>"random"</code> (the default; two-way random, Case 2)
 generalizes to a rater universe; <code>"fixed"</code> (two-way mixed, Case 3) treats the
-observed raters as the entire population. On balanced data the point estimate
-and interval are identical either way – <code>"fixed"</code> changes only the reported
-design and interpretation – and choosing it emits a warning, because random
-is the recommended default for interrater reliability.</p></dd>
+observed raters as the entire population and is fit with raters as fixed
+effects (<code>score ~ 1 + rater + (1 | subject)</code>). On balanced data the point
+estimate matches <code>"random"</code>; on incomplete data the two genuinely differ.
+Even when balanced, the interval differs for absolute agreement, because
+inference about fixed vs. random rater effects is not the same. Choosing
+<code>"fixed"</code> emits a warning, because random is the recommended default for
+interrater reliability.</p></dd>
 
 
 <dt id="arg-unit">unit<a class="anchor" aria-label="anchor" href="#arg-unit"></a></dt>
@@ -181,9 +184,10 @@ raters. Report <code>ICC(*,k)</code> when the averaged score is what you will us
 <li><p><strong>Random vs. fixed raters</strong> (<code>raters</code>). <strong>Random</strong> treats your raters as a
 sample you wish to generalize beyond – the recommended default for
 interrater reliability. <strong>Fixed</strong> treats them as the only raters of interest
-and forgoes generalization; on balanced data it gives the same number and
-<code>icc()</code> warns when you choose it. Fixed-rater consistency is the classic
-Shrout &amp; Fleiss <code>ICC(3,1)</code>.</p></li>
+and forgoes generalization; it is fit separately (raters as fixed effects),
+so on balanced data it matches the random point estimate but on incomplete
+data it genuinely differs. <code>icc()</code> warns when you choose it. Fixed-rater
+consistency is the classic Shrout &amp; Fleiss <code>ICC(3,1)</code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="estimand">Estimand<a class="anchor" aria-label="anchor" href="#estimand"></a></h2>
@@ -227,7 +231,7 @@ assessing rater reliability. <em>Psychological Bulletin, 86</em>(2), 420-428.</p
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">icc</span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> # Intraclass correlation: two-way random, absolute agreement</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Subjects: 6 | Raters: 4 (random) | Observations: 24</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   index     estimate   95% CI</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)    0.290   [0.050, 0.706]</span>

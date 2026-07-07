@@ -51,7 +51,7 @@ reproducible.
 fit <- icc(ratings, score, subject, rater, seed = 2024)
 fit
 #> # Intraclass correlation: two-way random, absolute agreement
-#> Subjects: 6 | Raters: 4 (random) | Observations: 24
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
 #>   ICC(A,1)    0.290   [0.050, 0.713]
@@ -77,11 +77,12 @@ tidy(fit)
 #> 2 ICC(A,k) ICC(2,k)    0.620     0.201   0.173      0.909       0.95 montecarlo
 
 glance(fit)
-#> # A tibble: 1 × 9
-#>   n_subjects n_raters n_obs var_subject var_rater var_residual engine  ci_method
-#>        <int>    <int> <int>       <dbl>     <dbl>        <dbl> <chr>   <chr>    
-#> 1          6        4    24        2.56      5.24         1.02 glmmTMB montecar…
-#> # ℹ 1 more variable: conf.level <dbl>
+#> # A tibble: 1 × 12
+#>   n_subjects n_raters n_obs n_cells balanced k_eff var_subject var_rater
+#>        <int>    <int> <int>   <int> <lgl>    <dbl>       <dbl>     <dbl>
+#> 1          6        4    24      24 TRUE         4        2.56      5.24
+#> # ℹ 4 more variables: var_residual <dbl>, engine <chr>, ci_method <chr>,
+#> #   conf.level <dbl>
 ```
 
 ## Interpret
@@ -112,7 +113,7 @@ coefficient:
 
 icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 #> # Intraclass correlation: two-way random, consistency
-#> Subjects: 6 | Raters: 4 (random) | Observations: 24
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
 #>   ICC(C,1)    0.715   [0.343, 0.924]

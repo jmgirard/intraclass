@@ -112,7 +112,7 @@ confidence interval is reproducible.</p>
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt;   index     estimate   95% CI</span></span>
 <span><span class="co">#&gt;   ICC(A,1)    0.290   [0.050, 0.713]</span></span>
@@ -135,11 +135,12 @@ one-row model summary including the variance components.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k) ICC(2,k)    0.620     0.201   0.173      0.909       0.95 montecarlo</span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
-<span><span class="co">#&gt;   n_subjects n_raters n_obs var_subject var_rater var_residual engine  ci_method</span></span>
-<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          6        4    24        2.56      5.24         1.02 glmmTMB montecar…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: conf.level &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 12</span></span></span>
+<span><span class="co">#&gt;   n_subjects n_raters n_obs n_cells balanced k_eff var_subject var_rater</span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          6        4    24      24 TRUE         4        2.56      5.24</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: var_residual &lt;dbl&gt;, engine &lt;chr&gt;, ci_method &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   conf.level &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="interpret">Interpret<a class="anchor" aria-label="anchor" href="#interpret"></a>
@@ -174,7 +175,7 @@ the error, so it is never smaller than the agreement coefficient:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: two-way random, consistency</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt;   index     estimate   95% CI</span></span>
 <span><span class="co">#&gt;   ICC(C,1)    0.715   [0.343, 0.924]</span></span>

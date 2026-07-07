@@ -76,11 +76,14 @@ icc(
 
   Rater sampling: `"random"` (the default; two-way random, Case 2)
   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3)
-  treats the observed raters as the entire population. On balanced data
-  the point estimate and interval are identical either way – `"fixed"`
-  changes only the reported design and interpretation – and choosing it
-  emits a warning, because random is the recommended default for
-  interrater reliability.
+  treats the observed raters as the entire population and is fit with
+  raters as fixed effects (`score ~ 1 + rater + (1 | subject)`). On
+  balanced data the point estimate matches `"random"`; on incomplete
+  data the two genuinely differ. Even when balanced, the interval
+  differs for absolute agreement, because inference about fixed vs.
+  random rater effects is not the same. Choosing `"fixed"` emits a
+  warning, because random is the recommended default for interrater
+  reliability.
 
 - unit:
 
@@ -137,9 +140,11 @@ Three choices pin down the coefficient:
 - **Random vs. fixed raters** (`raters`). **Random** treats your raters
   as a sample you wish to generalize beyond – the recommended default
   for interrater reliability. **Fixed** treats them as the only raters
-  of interest and forgoes generalization; on balanced data it gives the
-  same number and `icc()` warns when you choose it. Fixed-rater
-  consistency is the classic Shrout & Fleiss `ICC(3,1)`.
+  of interest and forgoes generalization; it is fit separately (raters
+  as fixed effects), so on balanced data it matches the random point
+  estimate but on incomplete data it genuinely differs. `icc()` warns
+  when you choose it. Fixed-rater consistency is the classic Shrout &
+  Fleiss `ICC(3,1)`.
 
 ## Estimand
 
@@ -181,7 +186,7 @@ ratings <- data.frame(
 )
 icc(ratings, score, subject, rater, seed = 1)
 #> # Intraclass correlation: two-way random, absolute agreement
-#> Subjects: 6 | Raters: 4 (random) | Observations: 24
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
 #>   ICC(A,1)    0.290   [0.050, 0.706]
