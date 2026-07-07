@@ -12,27 +12,43 @@ articles:
       - choosing-an-icc
       - advanced
 
-# Reference index grouped by design type; each milestone adds its estimators.
+# Reference index: teaching-first — choose a coefficient, then estimate it, then
+# project and tidy it. Grouped by role, not milestone (the single `icc()` entry
+# now spans the whole family). Every exported topic is listed deliberately (#6).
 reference:
   - title: Choosing a coefficient
     desc: >
       An interactive decision helper that recommends which ICC to report and
-      the exact call that computes it.
+      emits the exact `icc()` call that computes it — no fitting, teaching-first.
     contents:
       - choose_icc
 
-  - title: Two-way random designs
+  - title: Estimating an ICC
     desc: >
-      Absolute-agreement and (later) consistency ICCs for crossed
-      subject-by-rater designs.
+      The workhorse. Fit variance components with a modern mixed model and
+      compute the intraclass correlation for a stated design: absolute agreement
+      vs. consistency, single vs. average, fixed vs. random raters, one-way vs.
+      two-way, multilevel (subject vs. cluster level, crossed or nested), and
+      incomplete (ragged) data — all with boundary-aware Monte-Carlo confidence
+      intervals. The `print()`, `summary()`, `tidy()`, `glance()`, `autoplot()`
+      (coefficient forest / variance-component decomposition) and `plot()`
+      methods are documented on this page.
     contents:
       - icc
 
   - title: Decision (D-) studies
     desc: >
-      Project reliability to other numbers of raters, and plot the curve.
+      Project a fitted ICC's reliability to other numbers of raters and plot the
+      curve, plus its `tidy()`/`glance()`/`autoplot()`/`plot()` methods.
     contents:
       - d_study
+
+  - title: Tidy methods
+    desc: >
+      Broom generics re-exported so `tidy()` and `glance()` resolve without
+      attaching the generics package.
+    contents:
+      - reexports
 
   - title: Datasets
     desc: >
@@ -40,3 +56,7 @@ reference:
     contents:
       - ratings
       - ratings_incomplete
+
+  - title: Package overview
+    contents:
+      - intraclass-package

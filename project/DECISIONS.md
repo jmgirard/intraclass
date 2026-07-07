@@ -1103,3 +1103,73 @@ consequences → references.
   ADR-017 (the arc that scheduled M12), ADR-011/016 (the multilevel `cluster`/`level`
   API the fifth axis targets), ADR-013 (M6 one-way `model` axis);
   `vignettes/choosing-an-icc.Rmd` (the six-axis tree + crosswalk table).
+
+## ADR-022: M13 scope — release polish (docs, site, CRAN submission-ready)
+- Date: 2026-07-07
+- Status: accepted
+- Context: M13 is the **final** milestone of the ADR-017 arc — the "release polish"
+  slot the founding brief (§7) has carried as provisional since M0 (was M9 per ADR-017;
+  M7→M9 per ADR-013; M6 originally). No new estimand, engine, fit, CI machinery, or
+  dependency: the statistical package is complete (M0–M12; the classic Shrout–Fleiss
+  family, three engines, the multilevel family across crossed × {complete, incomplete} ×
+  {random, fixed}, D-studies, general plots, and the `choose_icc()` helper). M13's job is
+  to make that body **discoverable, teachable, and CRAN-submittable**. PRINCIPLES #1 is
+  numerically N/A here (no estimator ships), but #4/#12 still bind: every number a
+  vignette displays is computed by `icc()`/`choose_icc()` at knit time and seeded — never
+  transcribed. Four scope questions were put to the maintainer this session.
+- Decision (maintainer-approved this session, 2026-07-07):
+  - **Depth: submission-*ready*, not submitted.** The DoD ends when the package passes
+    `R CMD check --as-cran` clean on the full CI matrix (0 errors / 0 warnings; every
+    NOTE justified in `cran-comments.md`) with `cran-comments.md` + `inst/WORDLIST`
+    authored. The actual upload to CRAN is a **maintainer act** performed out of band
+    (win-builder / R-hub round-trips and `submit_cran` are the maintainer's, not this
+    milestone's — recorded as deferred). Rationale: CRAN's queue and reviewer feedback
+    are out-of-band and cannot gate a milestone's "done".
+  - **Version → `0.1.0`.** First public/CRAN release carries `0.1.0` (a real but
+    pre-1.0 API), not `1.0.0` (the exported surface is not declared frozen) and not the
+    dev `0.0.0.9000`. Bumped in `DESCRIPTION` with the `NEWS.md` release heading.
+  - **Showcase extends `advanced.Rmd`, no new article.** The M11 general `autoplot()`
+    (coefficients + components) and the M12 `choose_icc()` helper are added as sections
+    to the **existing** `advanced.Rmd` (which already showcases M5/M8/M9/M10 designs and
+    the lavaan engine), keeping one coherent advanced guide rather than fragmenting it.
+  - **Polish DoD items (all four selected):** (a) **pkgdown reference reorg** —
+    `_pkgdown.yml` reference index rebuilt: stale titles/descriptions fixed (the
+    "Two-way random designs / (later) consistency" wording predates one-way + multilevel),
+    the `autoplot`/`plot`/`tidy`/`glance`/`summary`/`print` methods and `choose_icc`
+    surfaced, grouped by design family + methods + datasets (memory
+    `pkgdown-reference-index-new-exports`: a missing `@export` fails the pkgdown CI job);
+    (b) **README refresh** — a current worked example spanning the shipped family
+    (agreement/consistency, a multilevel fit, `choose_icc()`), badges verified;
+    (c) **`cran-comments.md` + `inst/WORDLIST`** (spelling CI green);
+    (d) **NEWS consolidation** — the scattered `0.0.0.9000` dev bullets consolidated
+    under a clean `# intraclass 0.1.0` release changelog.
+  - **No estimand-spec** (release/teaching layer, not an estimator — cf.
+    M4/M5.5/M7/M11/M12). All user text via `cli`; any error via classed `abort_*()` (#8).
+    Correctness is **build-green + faithful docs**: vignettes/README knit with all
+    displayed numbers computed live (#4/#12); `pkgdown::build_site()` +
+    `pkgdown::check_pkgdown()` clean; `R CMD check --as-cran` clean; existing 478 tests
+    stay green (no test regressions from doc/site work).
+- Consequences: changes are confined to docs/metadata — `vignettes/advanced.Rmd`,
+  `_pkgdown.yml`, `README.Rmd`/`README.md`, `DESCRIPTION` (version), `NEWS.md`,
+  new `cran-comments.md` + `inst/WORDLIST`, and any roxygen `@examples`/`\value` gaps
+  `--as-cran` surfaces. No `R/` logic change, no new dependency, no `Imports` change,
+  no touch to the fitting/CI/estimand pipeline. Ships on `m13-release-polish`, merges
+  via PR (`milestone-branches-and-prs`). Deferred out of M13 (recorded so not
+  rediscovered): the **actual CRAN upload** + win-builder/R-hub/`submit_cran` round-trips
+  (maintainer, out of band); a **JOSS/paper** submission; a **`pkgdown` custom
+  theme/logo/hex sticker**; **benchmark-vs-prior-art** article (ROADMAP parking lot);
+  and every prior-milestone carry-over untouched (M9 averaged cluster-level `ICC(c,k)`
+  incomplete divisor; lme4 for the fixed/multilevel fits; the Bayesian engine + `ci_method
+  = "posterior"`; one-way-via-SEM; within-cell replicates; three-facet `d_study()`;
+  the conflated single-level ICC, Eq. 14 — all in `ROADMAP.md`).
+- References: PRINCIPLES.md #4 (no fabricated values — vignette/README numbers computed
+  live), #12 (seeded + sourced), #6 (stable small public API — the reference index
+  documents exactly the exported surface), #8 (`cli` + classed aborts), #13
+  (docs-as-teaching — the advanced guide + reference site are first-class learning),
+  #15 (thin slices), #16 (tracking updated in-commit), #17 (deferrals to ROADMAP);
+  brief §7 (release-polish slot) and §8 (per-milestone DoD: `R CMD check` clean, pkgdown
+  builds, vignette knits, tracking updated, clean tagged commit); ADR-017 (the arc that
+  scheduled M13 last), ADR-021/020 (M12/M11 teaching layers this showcases), ADR-009 (M4
+  flagship vignette + `test-vignette-claims.R`, the live-computation posture reused);
+  memory `pkgdown-reference-index-new-exports`, `verify-against-installed-package`,
+  `run-lintr-before-push`.

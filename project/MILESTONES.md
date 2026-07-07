@@ -285,8 +285,63 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–2; merged via PR #16 at 20f9afc; full CI matrix green incl.
   Windows and R-devel, 478 tests).
 
-## M13: Release polish *(provisional)*
-- Goal: pkgdown site, advanced vignette (showing the new M9–M12 estimators, plots, and
-  helper), CRAN submission prep. *(was M9 per ADR-017; was M7 → M9 per ADR-013; was M6
-  before)*
-- Status: provisional
+## M13: Release polish — docs, site, CRAN submission-ready *(active)*
+- Goal: make the complete M0–M12 package **discoverable, teachable, and
+  CRAN-submittable**. **No new estimand, engine, fit, CI machinery, or dependency**
+  (cf. M4/M5.5/M7/M11/M12 — a docs/metadata milestone). Depth is **submission-ready,
+  not submitted**: the actual CRAN upload + win-builder/R-hub round-trips are a
+  maintainer act, out of band (ADR-022). Release version **`0.1.0`**. PRINCIPLES #1 is
+  numerically N/A (no estimator ships); #4/#12 bind — every vignette/README number is
+  computed by `icc()`/`choose_icc()` at knit time and seeded, never transcribed.
+  *(was M9 per ADR-017; M7 → M9 per ADR-013; M6 originally.)*
+- Reference: ADR-022 (scope); no estimand-spec. Brief §8 per-milestone DoD.
+
+### Slice 1 — pkgdown reference index + site ✓
+- [x] Rebuild `_pkgdown.yml` reference index: stale titles/descriptions fixed (the
+      "Two-way random designs / (later) consistency" wording replaced), grouped by role —
+      *Choosing a coefficient* / *Estimating an ICC* (rich family desc naming the
+      `print`/`summary`/`tidy`/`glance`/`autoplot`/`plot` methods) / *Decision (D-)
+      studies* / *Tidy methods* (`reexports`) / *Datasets* / *Package overview*; every
+      exported topic listed deliberately (#6; memory `pkgdown-reference-index-new-exports`).
+- [x] `pkgdown::check_pkgdown()` clean and `pkgdown::build_site()` builds locally with
+      no errors/warnings/missing-image informs. **Bonus:** fixed a pre-existing broken
+      image on the flagship *Choosing an ICC* article — the static `choosing-icc-tree.svg`
+      was not copied to the pkgdown site (404); added a `resource_files:` entry to the
+      vignette front matter so both `R CMD build` and pkgdown copy it.
+
+### Slice 2 — advanced vignette showcase + README
+- [ ] Extend `vignettes/advanced.Rmd` with an **M11 plotting** section
+      (`autoplot()` coefficients + components, ggplot2-guarded) and a **M12
+      `choose_icc()`** section; all displayed numbers computed live at knit time
+      (#4/#12); vignette knits clean.
+- [ ] Refresh `README.Rmd` → `README.md` with a current worked example spanning the
+      shipped family (agreement/consistency, a multilevel fit, `choose_icc()`); badges
+      verified; `README.md` regenerated from `.Rmd`.
+- [ ] Any vignette/README numeric relationships that assert a claim are backed by
+      `test-vignette-claims.R` (reuse the M4 pattern; no fabricated values, #1/#4/#12).
+
+### Slice 3 — CRAN submission-ready
+- [ ] `DESCRIPTION` version → `0.1.0`; `NEWS.md` dev bullets consolidated under a clean
+      `# intraclass 0.1.0` release heading.
+- [ ] `cran-comments.md` authored (test environments + `R CMD check` results, every NOTE
+      justified); `inst/WORDLIST` authored, spelling CI green (`spelling::spell_check`).
+- [ ] Roxygen gaps `--as-cran` surfaces closed (`\value` on every exported topic, runnable
+      `@examples`, valid URLs).
+- [ ] `R CMD check --as-cran` clean on the full CI matrix (0 errors / 0 warnings; notes
+      justified), incl. Windows + R-devel; existing 478 tests stay green; coverage floor
+      held. Verify against the **installed** package with `NOT_CRAN=true` and run
+      `lintr::lint_package()` before the PR push (memories
+      `verify-against-installed-package`, `run-lintr-before-push`).
+- [ ] `MILESTONES.md`/`STATUS.md` updated in-commit (#16); merged via PR; clean tagged
+      commit at the release version.
+
+### Deferred out of M13 (record so not rediscovered)
+- The **actual CRAN upload** + win-builder / R-hub / `devtools::submit_cran` round-trips
+  (maintainer, out of band); a **JOSS / software paper**; a **pkgdown custom
+  theme / logo / hex sticker**; a **benchmark-vs-prior-art** article (ROADMAP parking
+  lot). Every prior-milestone carry-over is untouched: M9 averaged cluster-level
+  `ICC(c,k)` incomplete divisor; **lme4 for the fixed/multilevel fits** (ADR-012); the
+  **Bayesian engine** + `ci_method = "posterior"`; **one-way via SEM** (ADR-014);
+  within-cell replicates; three-facet `d_study()`; the conflated single-level ICC
+  (Eq. 14). All in [`ROADMAP.md`](ROADMAP.md).
+- Status: active — detailed by ADR-022; Slice 1 next.

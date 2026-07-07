@@ -5,6 +5,10 @@ vignette: >
   %\VignetteIndexEntry{Choosing an ICC}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+# The decision-tree SVG is a static file (not a knitr-generated figure); declare
+# it so both R CMD build and pkgdown copy it next to the rendered article.
+resource_files:
+  - choosing-icc-tree.svg
 ---
 
 ```{r, include = FALSE}

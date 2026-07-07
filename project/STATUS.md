@@ -1,13 +1,13 @@
 # Project status
 
-- Milestone: **M13 — release polish** — next (provisional; not yet detailed). M12
-  shipped (PR #16).
-- Active task: — (next: retro + detail M13 — pkgdown site, advanced vignette showcasing
-  M9–M12, CRAN prep)
+- Milestone: **M13 — release polish (docs, site, CRAN submission-ready)** — active;
+  detailed by ADR-022 on branch `m13-release-polish`. Final milestone of the ADR-017 arc.
+- Active task: **Slice 2 — advanced vignette showcase + README** (next; see M13 DoD in
+  `MILESTONES.md`). Slice 1 (pkgdown reference reorg + flagship-article image fix) done.
 - Last green CI: PR #16 (M12) full matrix green incl. Windows and R-devel; merged to
   `main` at 20f9afc
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M12 merged (PR #16) + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M13 detailed (ADR-022 + DoD); branch cut
 
 ## Where we are
 
@@ -27,11 +27,16 @@ emits the exact `icc()` call — teaching/API, no new estimand (M12).
 
 ## Next action
 
-**Retro + detail M13** (release polish — the final milestone in the ADR-017 arc). Per
-the process (#2, brief §7), run a short M12 retro, then resolve M13 scope with the
-maintainer and write the DoD before code. M13 is the CRAN-prep milestone: pkgdown site,
-an advanced vignette showcasing the M9–M12 estimators/plots/helper, and submission
-polish. Ships on a `m13-*` branch, merges via PR (`milestone-branches-and-prs`).
+**M13 Slice 2 — advanced vignette showcase + README.** Extend `vignettes/advanced.Rmd`
+with an M11 plotting section (`autoplot()` coefficients + components, ggplot2-guarded)
+and an M12 `choose_icc()` section (all numbers computed live, #4/#12); refresh
+`README.Rmd` → `README.md` with a current worked example spanning agreement/consistency,
+a multilevel fit, and `choose_icc()`; back any asserted numeric relationships with
+`test-vignette-claims.R`. Slice 1 done: `_pkgdown.yml` reference index rebuilt
+(role-based groups, every export listed) and a pre-existing broken flagship-article
+image fixed via a vignette `resource_files:` entry; `check_pkgdown()` + `build_site()`
+clean. Scope (ADR-022): submission-**ready** not submitted; version **0.1.0**; showcase
+extends `advanced.Rmd`. Ships on `m13-release-polish`, merges via PR.
 
 Open deferral from M9 (recorded): averaged cluster-level `ICC(c,k)` on incomplete data
 — the per-cluster effective-rater divisor is an open modeling question (spec §3b), a
