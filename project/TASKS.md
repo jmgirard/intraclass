@@ -34,4 +34,4 @@ condensed to a single line once done.
 - [x] Roxygen "which ICC / when" note; *Getting started* vignette — Opus
 - [x] Flip seed test `engine` default to glmmTMB; repoint skip guards — Opus
 - [x] Verify vs all oracles; coverage 94%; check 0/0/0 — Opus
-- [ ] Push; confirm full CI matrix green; update STATUS last-green-CI — Opus
+- [x] Push; confirm full CI matrix green (77e8ab0); update STATUS last-green-CI — Opus

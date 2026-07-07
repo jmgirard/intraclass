@@ -2,7 +2,8 @@
 
 - Milestone: M1 — two-way random, absolute agreement (complete, pending sign-off)
 - Active task: — (awaiting go-ahead to plan M2)
-- Last green CI: pending push (local: check 0/0/0, coverage 94%, air/lint clean)
+- Last green CI: 77e8ab0 (all 5 workflows green: R-CMD-check matrix, coverage,
+  lint, format, pkgdown)
 - Blockers: —
 - Updated: 2026-07-06 by main session (Opus)
 
