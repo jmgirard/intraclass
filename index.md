@@ -16,9 +16,12 @@ just call functions.
 > are implemented: absolute-agreement and consistency ICCs, single and
 > average, random and fixed raters, and imbalanced/incomplete
 > (missing-cell) designs — each with boundary-aware Monte-Carlo
-> intervals. The current milestone is the [*Choosing an
+> intervals. A [*Choosing an
 > ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
-> decision guide. See `project/MILESTONES.md` for the roadmap.
+> decision guide and D-study projection to other rater counts
+> ([`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md))
+> have shipped; multilevel designs are next. See `project/MILESTONES.md`
+> for the roadmap.
 
 ## Installation
 
