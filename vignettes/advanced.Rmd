@@ -129,3 +129,30 @@ Multilevel support currently covers **crossed random raters on balanced data**
 (agreement/consistency and single/average apply at each level). Raters nested
 within clusters, incomplete multilevel designs, and fixed raters are planned for
 later milestones.
+
+## Choosing an estimation engine
+
+By default `icc()` fits the variance components with **glmmTMB**. You can instead
+request **lme4** with `engine = "lme4"` for the random two-way design. Both are
+REML mixed-model fits of the same model, so on a given dataset they return the
+same coefficients to numerical tolerance — the choice is about the fitting
+backend, not the estimand.
+
+```{r engine, eval = requireNamespace("lme4", quietly = TRUE) && requireNamespace("merDeriv", quietly = TRUE)}
+glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
+lme4 <- tidy(icc(ratings, score, subject, rater, engine = "lme4", seed = 1))
+data.frame(
+  index = glmmtmb$index,
+  glmmTMB = round(glmmtmb$estimate, 4),
+  lme4 = round(lme4$estimate, 4)
+)
+```
+
+The two point estimates agree to well within rounding, and their Monte-Carlo
+intervals coincide to about `0.01`: the lme4 interval is built from the parameter
+covariance supplied by the **merDeriv** package, transformed onto the same
+boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended default —
+it is the one required dependency and it is robust when a variance component sits
+exactly at the zero boundary, where the lme4 route cannot form an interval and
+directs you back to glmmTMB. lme4 for fixed-rater and multilevel designs is
+planned for a later milestone.

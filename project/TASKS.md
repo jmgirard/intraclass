@@ -70,22 +70,24 @@ choosing-an-icc.Rmd citation fix, NEWS, roxygen, vignette-claims invariant. Also
 citation audit (ADR-002/003 → ten Hove 2025). `devtools::check()` 0/0/0, 188 tests.
 See MILESTONES M5.
 
-## M5.5 — lme4 as a selectable engine — **in progress** (`m5.5-lme4-engine`, ADR-012)
+## M5.5 — lme4 as a selectable engine — **code complete** (`m5.5-lme4-engine`, ADR-012; pending PR)
 
 Promote lme4 from oracle-only to a selectable `engine = "lme4"` for the random
 two-way path — the pre-M6 interface slice (resolves the ADR-005 deferral). One
 CI-green slice.
 
-- [ ] `R/engine-lme4.R::fit_lme4()` — `lmer(score ~ 1 + (1|subject) + (1|rater),
+- [x] `R/engine-lme4.R::fit_lme4()` — `lmer(score ~ 1 + (1|subject) + (1|rater),
       REML = TRUE)` returning the shared six-field contract on a boundary-safe
-      (log-SD) scale; MC `vcov` recovered via **merDeriv**.
-- [ ] engine × design dispatch replaces the hardcoded glmmTMB if/else in `icc()`;
+      (log-SD) scale; MC `vcov` recovered via **merDeriv** (SD-scale, delta-
+      transformed to log-SD).
+- [x] engine × design dispatch replaces the hardcoded glmmTMB if/else in `icc()`;
       `abort_unsupported()` for lme4 + fixed/multilevel; `check_installed()` for
       `lme4` and `merDeriv`; `merDeriv` → `Suggests`.
-- [ ] oracles O-LME: point ≡ glmmTMB ≤1e-4; **interval** ≈ glmmTMB MC CI ~1e-2;
-      boundary (no negative-variance draws near zero); seeded-sim coverage.
-- [ ] `print`/`glance` show `engine = "lme4"` + snapshot; roxygen `@param engine`
+- [x] oracles O-LME: point ≡ glmmTMB ≤1e-4; **interval** ≈ glmmTMB MC CI
+      (≤9.4e-3); boundary (no negative-variance draws near zero; singular fit
+      aborts `intraclass_singular_fit`); seeded-sim coverage.
+- [x] `print`/`glance` show `engine = "lme4"` + snapshot; roxygen `@param engine`
       fix; NEWS; advanced.Rmd engine note + claims test; `devtools::check()` 0/0/0;
-      `air`/`lintr` clean; full CI matrix on PR.
+      `air`/`lintr` clean; tests 219/0/0. Full CI matrix pending on the PR.
 
 See MILESTONES M5.5.

@@ -7,9 +7,10 @@ test_that("options that are valid but not yet implemented abort with a pointer",
     icc(d, score, subject, rater, model = "oneway"),
     class = "intraclass_unsupported"
   )
+  # lme4 is now a selectable engine (M5.5); an unknown engine still aborts.
   expect_error(
-    icc(d, score, subject, rater, engine = "lme4"),
-    class = "intraclass_unsupported"
+    icc(d, score, subject, rater, engine = "brms"),
+    class = "intraclass_error"
   )
   expect_error(
     icc(d, score, subject, rater, ci_method = "delta"),

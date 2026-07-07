@@ -478,10 +478,18 @@ consequences → references.
   `merDeriv` are both `Suggests` behind `check_installed()`. Oracles O-LME:
   (a) point lme4 ≡ glmmTMB ≤ 1e-4 on SF `ratings`; (b) **interval** lme4 MC CI ≈
   glmmTMB MC CI ~1e-2 (new); (c) boundary — no negative-variance draws near zero;
-  (d) seeded-sim coverage at nominal. Deferred (recorded so not rediscovered):
-  lme4 for the fixed (Case 3/3A) and multilevel fits; the bootstrap `ci_method`;
-  merDeriv edge cases beyond the two-way random model. Ships on `m5.5-lme4-engine`,
-  merged via PR.
+  (d) seeded-sim coverage at nominal. **Discovered during implementation:** merDeriv
+  cannot form the parameter covariance for a **singular fit** (a variance component
+  pinned to exactly zero) — the information matrix is singular — whereas glmmTMB's
+  log-SD parameterization stays finite there. `fit_lme4()` therefore detects
+  `lme4::isSingular()` and raises a classed `intraclass_singular_fit` error pointing
+  the user to `engine = "glmmTMB"` (#5/#8), rather than returning an unsupported
+  interval. This is a narrow, well-defined engine asymmetry (glmmTMB is
+  boundary-robust; the lme4+merDeriv route is not at the exact boundary), recorded
+  so it is a documented limitation, not a surprise. Deferred (recorded so not
+  rediscovered): lme4 for the fixed (Case 3/3A) and multilevel fits; the bootstrap
+  `ci_method`; a boundary-robust lme4 interval for singular fits; merDeriv edge
+  cases beyond the two-way random model. Ships on `m5.5-lme4-engine`, merged via PR.
 - References: PRINCIPLES.md #1, #2, #3, #5, #6, #8, #15, #16, #17; ADR-002 (glmmTMB
   default + why lme4 needs merDeriv/bootstrap for the joint vcov), ADR-003 (MC CIs),
   ADR-005 (deferred lme4-selectable + bootstrap CI), ADR-006 (fixed-rater path),

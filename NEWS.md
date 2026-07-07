@@ -1,5 +1,15 @@
 # intraclass 0.0.0.9000
 
+* `icc()` gains a selectable **`engine = "lme4"`** alongside the default
+  `"glmmTMB"` for the random two-way design. Both fit the variance components by
+  REML and agree to numerical tolerance; the lme4 Monte-Carlo interval is built
+  from the parameter covariance supplied by **merDeriv** (a new `Suggests`),
+  delta-transformed to the same boundary-aware log-SD scale glmmTMB uses -- so the
+  two engines' intervals coincide to ~1e-2. lme4 currently covers only the random
+  two-way path; fixed-rater and multilevel designs, and singular (boundary) fits,
+  are directed to the boundary-robust `"glmmTMB"` engine. Verified against
+  glmmTMB point *and* interval estimates, the published Shrout & Fleiss values,
+  and a seeded population-recovery simulation.
 * `icc()` gains **multilevel** ICCs for subjects nested in clusters (pupils in
   classrooms, patients in clinics). Supply a `cluster` column and it reports the
   **subject-level** (within-cluster) and **cluster-level** (between-cluster)

@@ -121,6 +121,20 @@ test_that("a disconnected design is rejected, not guessed at", {
   )
 })
 
+# Engine-choice claim (advanced.Rmd) --------------------------------------
+# The advanced article states the lme4 and glmmTMB engines return the same
+# coefficients to within rounding on `ratings`. Back the claim numerically (#1).
+
+test_that("advanced.Rmd: lme4 and glmmTMB engines agree on `ratings`", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  g <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
+  l <- tidy(icc(ratings, score, subject, rater, engine = "lme4", seed = 1))
+  expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
+})
+
 # Multilevel claims (advanced.Rmd) ----------------------------------------
 # The advanced article's multilevel example asserts that on the simulated
 # `school` design the cluster-level ICC is the larger of the two levels. Rebuild

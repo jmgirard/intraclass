@@ -79,7 +79,11 @@ report: \code{"subject"} (within-cluster, distinguishing subjects) and/or
 \code{"cluster"} (between-cluster, distinguishing cluster means). Defaults to both.
 Ignored (and must be left at its default) when \code{cluster} is not supplied.}
 
-\item{engine}{Estimation engine. Only \code{"glmmTMB"} is currently supported.}
+\item{engine}{Estimation engine: \code{"glmmTMB"} (default) or \code{"lme4"}. Both fit
+the variance components by REML and agree to within numerical tolerance on
+balanced data. \code{"lme4"} currently covers only the random two-way design
+(\code{raters = "random"}, no \code{cluster}) and requires the \pkg{lme4} and
+\pkg{merDeriv} packages.}
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}
 
