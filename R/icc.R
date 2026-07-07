@@ -90,7 +90,11 @@
 #'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
 #'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
 #'   Ignored (and must be left at its default) when `cluster` is not supplied.
-#' @param engine Estimation engine. Only `"glmmTMB"` is currently supported.
+#' @param engine Estimation engine: `"glmmTMB"` (default) or `"lme4"`. Both fit
+#'   the variance components by REML and agree to within numerical tolerance on
+#'   balanced data. `"lme4"` currently covers only the random two-way design
+#'   (`raters = "random"`, no `cluster`) and requires the \pkg{lme4} and
+#'   \pkg{merDeriv} packages.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
 #' @param mc_samples Number of Monte-Carlo draws for the interval.
@@ -147,7 +151,7 @@ icc <- function(
   # Dimensions not yet implemented fail loudly and point at where they are coming
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
   require_supported(model, "twoway", "model", "designs beyond two-way")
-  require_supported(engine, "glmmTMB", "engine", "engines beyond glmmTMB")
+  engine <- validate_choice(engine, c("glmmTMB", "lme4"), "engine")
   require_supported(
     ci_method,
     "montecarlo",
@@ -188,6 +192,19 @@ icc <- function(
     abort_intraclass(c(
       "{.arg level} requires a {.arg cluster} column.",
       i = "Supply {.arg cluster} for a multilevel ICC, or drop {.arg level}."
+    ))
+  }
+
+  # M5.5 (ADR-012): lme4 is selectable for the random two-way design only. Route
+  # fixed-rater and multilevel lme4 requests to a loud abort (PRINCIPLES.md #5)
+  # rather than silently falling back to glmmTMB; both are deferred.
+  if (engine == "lme4" && (multilevel || raters == "fixed")) {
+    design <- if (multilevel) "multilevel" else "fixed-rater"
+    abort_unsupported(c(
+      "The {.pkg lme4} engine supports only the random two-way design so far.",
+      i = "{.code engine = \"lme4\"} is not available for {design} designs; \\
+           use {.code engine = \"glmmTMB\"}.",
+      i = "lme4 for fixed and multilevel fits is planned for a later milestone."
     ))
   }
 
@@ -308,6 +325,8 @@ icc <- function(
     fit_glmmtmb_multilevel(df)
   } else if (raters == "fixed") {
     fit_glmmtmb_fixed(df)
+  } else if (engine == "lme4") {
+    fit_lme4(df)
   } else {
     fit_glmmtmb(df)
   }

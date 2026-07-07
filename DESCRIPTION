@@ -29,6 +29,7 @@ Suggests:
     ggplot2,
     knitr,
     lme4,
+    merDeriv,
     psych,
     rmarkdown,
     spelling,

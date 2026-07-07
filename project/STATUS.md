@@ -1,8 +1,9 @@
 # Project status
 
-- Milestone: M5 — multilevel ICCs (done; merged via PR #8, full CI matrix green 9/9)
-- Active task: — (next: retro + plan M6 — optional engines, or a smaller slice)
+- Milestone: M5.5 — lme4 as a selectable engine (code complete; pending PR merge)
+- Active task: — (M5.5 slice done locally; next: push `m5.5-lme4-engine`, open PR)
 - Last green CI: PR #8 (M5) full matrix green (9/9); merged to `main` at 87b4588
+  (M5.5 local: `devtools::check()` 0/0/0, tests 219/0/0, lintr clean)
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
 
@@ -57,7 +58,25 @@ choosing-an-icc.Rmd multilevel-citation fix.
 Deferred (spec §8, recorded so they aren't rediscovered): Designs 2/3 (nested
 raters), incomplete multilevel, fixed-rater multilevel, multilevel D-study.
 
+**Current milestone:** M5.5 — lme4 as a selectable engine (ADR-012), code complete
+locally. A pre-M6 take-stock (this session) reviewed the deferred/ROADMAP
+inventory; the maintainer promoted the ADR-005 lme4-selectable debt as the natural
+interface-building slice before M6's heavier optional-engine work. Two design
+questions resolved: (1) CI via **merDeriv** reusing the existing Monte-Carlo path
+(not parametric bootstrap) → a cross-engine *interval* oracle, no new `ci_method`;
+(2) **random two-way path only** (fixed/multilevel lme4 deferred). `fit_lme4()`
+returns the shared six-field engine contract so `icc_point`/`mc_ci`/`d_study` are
+unchanged (no new estimand). The SD-scale merDeriv covariance is delta-transformed
+to glmmTMB's log-SD scale — verified to reproduce glmmTMB's `vcov(full = TRUE)` to
+~1e-4, so the lme4 MC CI matches glmmTMB's to ≤9.4e-3 (oracle O-LME). **Discovered:
+merDeriv fails on a singular fit** (variance component pinned to exactly zero);
+`fit_lme4()` detects `isSingular()` and aborts (`intraclass_singular_fit`) pointing
+to the boundary-robust glmmTMB engine (#5/#8). DoD checked off in MILESTONES M5.5;
+scope + the singular-fit note in ADR-012. Ships on `m5.5-lme4-engine`; next is
+push + PR.
+
 **Next milestone:** M6 — optional engines (Bayesian `brms`/`rstanarm`, SEM
 `lavaan`) behind `Suggests`; references already gathered (Jorgensen 2021 SEM,
-ten Hove 2020 hyperpriors — see MILESTONES M6). Detail M6's DoD at its start after
-a short retro (founding brief §7).
+ten Hove 2020 hyperpriors — see MILESTONES M6). M6 now extends the engine × design
+dispatch seam M5.5 establishes. Detail M6's DoD at its start after a short retro
+(founding brief §7).
