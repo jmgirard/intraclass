@@ -193,3 +193,55 @@ consequences → references.
 - References: PRINCIPLES.md #14, #15, #17; `CLAUDE_CODE_KICKOFF.md` §7 (arc is a
   hypothesis, not a contract); ADR-006 (the inherited debt);
   approved plan `moonlit-mixing-pinwheel`.
+
+## ADR-008: M3 estimands — connectedness guard, `ICC(*,k)` divisor, fixed real-fit
+- Date: 2026-07-06
+- Status: accepted
+- Context: The M3 estimand spec must pin three things left open when incomplete data
+  breaks the balanced assumptions M1/M2 relied on: how σ²_s and σ²_r stay
+  identified, what the averaging divisor `k` means when subjects have unequal rating
+  counts, and how `raters = "fixed"` is estimated now that the ADR-006 label-layer
+  shortcut is invalid. Decisions confirmed with the maintainer this session.
+- Decision:
+  - **Identifiability (connectedness).** A two-way ICC is reported only on a
+    **connected** subject×rater design (the observed-cell bipartite graph is a single
+    component). A disconnected design aliases σ²_s with σ²_r and aborts via
+    `abort_unidentified()` (PRINCIPLES.md #5). Standard estimability condition for
+    crossed designs with empty cells (Searle, Casella & McCulloch 2006; Weeks &
+    Williams 1964).
+  - **`ICC(*,k)` divisor.** `ICC(*,1)` is always reported; for the average, use the
+    **effective number of ratings `k_eff` = harmonic mean of the per-subject counts
+    `n_i`** (`k_eff = 1/mean(1/n_i)`) — the standard effective-sample-size at which
+    `error/k_eff` equals the average per-subject error variance, so `ICC(*,k)`
+    describes the ragged averages actually computed. Reduces to `k` when complete;
+    `k_eff` is surfaced in the report. Exact for consistency; an effective-`k`
+    approximation for agreement (the `σ²_r` term divides by `m` only under the GT
+    "average over `m` fresh raters" reading). Both candidate rules are the GT
+    dependability `Φ(m)` at different `m`; **projecting to any other `m`** (the
+    complete design's `n_raters`, or a reliability curve) is a distinct D-study
+    *extrapolation* kept out of the plain "average" and housed in a future
+    `d_study()`/`project_raters()` where the user names `m` (ROADMAP). Rationale: the
+    descriptive question ("what precision did I get") stays separate from the
+    inferential one, and an extrapolation to an un-run design is never reported
+    silently. `k_eff`'s exact use is oracle-pinned in Slice 1 (hand calc + O5
+    simulation), not assumed to match `irrNA` (PRINCIPLES.md #1). (Supersedes the
+    project-to-`n_raters` default first drafted in the spec; maintainer decision.)
+  - **Fixed raters get a real fit.** `raters = "fixed"` fits
+    `score ~ 1 + rater + (1 | subject)` (raters as fixed effects). Consistency error
+    = {σ²_res} (McGraw & Wong Case 3 / SF ICC(3,·)); absolute agreement error =
+    {σ²_res, θ²_r} with θ²_r = Σ(α̂_j − ᾱ)²/(k−1), the finite-population variance of
+    the k estimated rater effects (Case 3A). The MC CI samples α̂ from
+    `vcov(fit, full = TRUE)` and recomputes θ²_r per draw. **θ²_r's exact
+    normalization and CI propagation are asserted by oracle in Slice 2, not by the
+    formula** (PRINCIPLES.md #1); if unpinnable by ≥2 oracles the coefficient is not
+    shipped and a Fable review is recommended (#19). Balanced data still reduces to
+    the M2 numbers (extends O4).
+- Consequences: the random path is unchanged apart from the connectedness guard and
+  the divisor rule; the fixed path gains its own fit, an agreement error term, and a
+  CI sampler branch (keyed on `design$raters`). New oracle rows O5 (unbalanced
+  simulation) and O6 (`irrNA`/incomplete) to be registered when asserted. The
+  `raters` roxygen note is corrected (fixed ≠ random on incomplete data).
+- References: PRINCIPLES.md #1, #2, #5, #18, #19;
+  [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md);
+  ADR-006 (the debt this resolves); McGraw & Wong (1996); Brennan (2001); ten Hove et
+  al. (2024); Searle, Casella & McCulloch (2006); Weeks & Williams (1964).

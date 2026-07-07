@@ -40,9 +40,10 @@ Statistical core only (vignette split to M4). Two CI-green slices; see MILESTONE
 and the approved plan `moonlit-mixing-pinwheel`.
 
 ### Slice 0 — spec + tracking (do first, PRINCIPLES.md #2, #16)
-- [ ] Write `project/estimand-specs/M3-incomplete-designs.md`: identifiability
+- [x] Write `project/estimand-specs/M3-incomplete-designs.md`: identifiability
       (connectedness) rule; random + fixed(Case 3/3A) estimands; balanced-reduction
-      guard; **pin the `ICC(*,k)` divisor convention** with citations → ADR-008 — Opus
+      guard; **pin the `ICC(*,k)` divisor convention** (ADR-008: `k_eff` = harmonic
+      mean of per-subject counts; projection to other `m` = future D-study) — Opus
 
 ### Slice 1 — incomplete random raters (default path)
 - [ ] `assert_connected_design()` + balance detection (`R/design.R` or `estimand.R`);

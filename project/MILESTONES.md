@@ -126,7 +126,8 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 - Deferred out of M3 (recorded so they aren't rediscovered): the flagship vignette
   (M4); replicate ratings within a cell; one-way designs; lme4 as a *selectable*
   engine; D-study projection API (ROADMAP).
-- Status: planned (arc reordered by ADR-007; estimand spec + slices not started)
+- Status: in progress (arc reordered by ADR-007; estimand spec + ADR-008 done,
+  Slice 0; Slices 1–2 pending)
 
 ## M4: "Choosing an ICC" flagship vignette *(provisional)*
 - Goal: the decision-framework teaching article (agreement vs. consistency, single

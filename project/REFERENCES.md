@@ -87,8 +87,11 @@ reference values, ever.
   9*(2), 378–400.
 - McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass
   correlation coefficients. *Psychological Methods, 1*(1), 30–46 (+ errata p. 390).
+- Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
   rater reliability. *Psychological Bulletin, 86*(2), 420–428.
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2024). Updated guidelines
   on selecting an ICC for interrater reliability. *Psychological Methods, 29*(5),
   967–979.
+- Weeks, D. L., & Williams, D. R. (1964). A note on the determination of
+  connectedness in an N-way cross classification. *Technometrics, 6*(3), 319–324.
