@@ -91,3 +91,30 @@ CI-green slice.
       `air`/`lintr` clean; tests 219/0/0. Full CI matrix pending on the PR.
 
 See MILESTONES M5.5.
+
+## M6 — one-way random ICC(1)/ICC(1,k) — **in progress** (`m6-oneway`, ADR-013)
+
+Last member of the classic SF family (Case 1): `model = "oneway"` fits
+`score ~ 1 + (1 | subject)` (no rater term) → `ICC(1)`/`ICC(1,k)`. First milestone
+to change the fitted model. Estimand + all four oracles verified live before code
+(estimand-spec `M6-oneway.md`). One CI-green slice.
+
+- [x] Estimand-spec `project/estimand-specs/M6-oneway.md` (PRINCIPLES.md #2);
+      API decisions pinned (rater identity ignored, `type` n/a, numeric `unit`
+      supported); oracles verified live (SF/psych/ANOVA/glmmTMB≡lme4 all 0.1657/
+      0.4428).
+- [ ] `model = "oneway"` unlocked in `icc()` (`require_supported` widened);
+      `fit_glmmtmb_oneway()` + `fit_lme4_oneway()` returning the six-field contract
+      (`subject`/`residual`, no rater); `icc_point`/`resolve_divisor`/`mc_ci`
+      reused; `k_eff`/balance from M3; numeric `unit` → `ICC(1,m)`.
+- [ ] Guards (#5/#8): `raters="fixed"`+oneway abort; `cluster`+oneway abort;
+      `type` ignored (documented).
+- [ ] Oracles O-OW: SF 0.166/0.443; `psych` ICC1/ICC1k ≤1e-4; one-way ANOVA
+      mean squares; glmmTMB↔lme4 cross-engine; seeded sim (recovery + CI coverage,
+      absolute tolerances).
+- [ ] `print`/`summary`/`tidy`/`glance` one-way label + SF crosswalk + snapshot;
+      roxygen "which ICC/when" (rater-identity + type-n/a notes); choosing-an-icc
+      "same raters?" fork + getting-started note + claims tests; NEWS; REFERENCES
+      O-OW row; `devtools::check()` 0/0/0; `air`/`lintr` clean; full CI matrix on PR.
+
+See MILESTONES M6.

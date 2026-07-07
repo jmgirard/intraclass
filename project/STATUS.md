@@ -1,7 +1,7 @@
 # Project status
 
-- Milestone: M5.5 — lme4 as a selectable engine (done; merged via PR #9)
-- Active task: — (next: retro + plan M6 — optional engines)
+- Milestone: M6 — one-way random ICC(1)/ICC(1,k) (starting; detailing DoD + estimand-spec)
+- Active task: M6 slice 1 — estimand-spec + `model = "oneway"` estimator (awaiting estimand-shape decisions before code)
 - Last green CI: PR #9 (M5.5) full matrix green (9/9); merged to `main` at edd9d88
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
