@@ -117,7 +117,8 @@ confidence interval is reproducible.</p>
 <span><span class="co">#&gt;   index     estimate   95% CI</span></span>
 <span><span class="co">#&gt;   ICC(A,1)    0.290   [0.050, 0.713]</span></span>
 <span><span class="co">#&gt;   ICC(A,k)    0.620   [0.173, 0.909]</span></span>
-<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></code></pre></div>
+<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="read-the-result-with-the-tidy-verbs">Read the result with the tidy verbs<a class="anchor" aria-label="anchor" href="#read-the-result-with-the-tidy-verbs"></a>
@@ -127,11 +128,11 @@ estimate and confidence interval; <code><a href="https://generics.r-lib.org/refe
 one-row model summary including the variance components.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
-<span><span class="co">#&gt;   index    estimate std.error conf.low conf.high conf.level method    </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1)    0.290     0.180   0.049<span style="text-decoration: underline;">8</span>     0.713       0.95 montecarlo</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k)    0.620     0.201   0.173      0.909       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 8</span></span></span>
+<span><span class="co">#&gt;   index    sf_index estimate std.error conf.low conf.high conf.level method    </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1) ICC(2,1)    0.290     0.180   0.049<span style="text-decoration: underline;">8</span>     0.713       0.95 montecarlo</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k) ICC(2,k)    0.620     0.201   0.173      0.909       0.95 montecarlo</span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 9</span></span></span>
@@ -161,6 +162,33 @@ boundary-aware: it is simulated from the fitted parameter covariance on
 the model’s internal scale, so it behaves near the common
 zero-rater-variance boundary where the delta method fails.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="consistency-instead-of-agreement">Consistency instead of agreement<a class="anchor" aria-label="anchor" href="#consistency-instead-of-agreement"></a>
+</h2>
+<p>If a constant per-rater offset is acceptable — you care only that
+raters <em>rank</em> subjects the same way, not that they land on the
+same number — ask for <strong>consistency</strong> with
+<code>type = "consistency"</code>. It drops the rater main effect from
+the error, so it is never smaller than the agreement coefficient:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, consistency</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(C,1)    0.715   [0.343, 0.924]</span></span>
+<span><span class="co">#&gt;   ICC(C,k)    0.909   [0.676, 0.980]</span></span>
+<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></code></pre></div>
+<p>The gap between the two (here <code>ICC(C,1)</code> ≈ 0.72
+vs. <code>ICC(A,1)</code> ≈ 0.29) is a direct read-out of how much
+systematic rater-level difference is present.</p>
+<p>By default raters are treated as <strong>random</strong> (a sample
+you generalize beyond). If your raters are the entire population of
+interest you can pass <code>raters = "fixed"</code> (the classic
+<code>ICC(3,1)</code>), but <code><a href="../reference/icc.html">icc()</a></code> will warn: random is the
+recommended default for interrater reliability, and on balanced data the
+number is identical anyway.</p>
 </div>
 <div class="section level2">
 <h2 id="which-icc-do-i-want">Which ICC do I want?<a class="anchor" aria-label="anchor" href="#which-icc-do-i-want"></a>

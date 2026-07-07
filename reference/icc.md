@@ -1,11 +1,12 @@
-# Intraclass correlation coefficient for a two-way random design
+# Intraclass correlation coefficient for a two-way design
 
 Estimates interrater-reliability intraclass correlation coefficients
 (ICCs) from a fitted linear mixed model, rather than from classical
-ANOVA mean squares. In this release `icc()` computes the **two-way
-random, absolute-agreement** coefficients `ICC(A,1)` and `ICC(A,k)`
-(McGraw & Wong 1996), equivalent to Shrout & Fleiss (1979) `ICC(2,1)`
-and `ICC(2,k)`.
+ANOVA mean squares. `icc()` computes the two-way **absolute-agreement**
+(`ICC(A,*)`) or **consistency** (`ICC(C,*)`) coefficients of McGraw &
+Wong (1996), for a single rater (`ICC(*,1)`) or the mean of `k` raters
+(`ICC(*,k)`), treating the raters as a random sample (Case 2) or as
+fixed (Case 3).
 
 ## Usage
 
@@ -31,7 +32,8 @@ icc(
   subject,
   rater,
   model = "twoway",
-  type = "agreement",
+  type = c("agreement", "consistency"),
+  raters = c("random", "fixed"),
   unit = c("single", "average"),
   engine = "glmmTMB",
   conf_level = 0.95,
@@ -66,13 +68,24 @@ icc(
 
 - type:
 
-  Error definition. Only `"agreement"` (absolute agreement) is currently
-  supported; `"consistency"` is planned.
+  Error definition: `"agreement"` (absolute agreement, the default)
+  counts systematic rater differences as error; `"consistency"` ignores
+  them.
+
+- raters:
+
+  Rater sampling: `"random"` (the default; two-way random, Case 2)
+  generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3)
+  treats the observed raters as the entire population. On balanced data
+  the point estimate and interval are identical either way – `"fixed"`
+  changes only the reported design and interpretation – and choosing it
+  emits a warning, because random is the recommended default for
+  interrater reliability.
 
 - unit:
 
-  One or both of `"single"` (-\> `ICC(A,1)`) and `"average"` (-\>
-  `ICC(A,k)`).
+  One or both of `"single"` (-\> `ICC(*,1)`) and `"average"` (-\>
+  `ICC(*,k)`).
 
 - engine:
 
@@ -105,35 +118,41 @@ the call. Use [tidy()](https://generics.r-lib.org/reference/tidy.html),
 
 ## Which ICC is this, and when should you use it?
 
-This is the **two-way random, absolute-agreement** ICC.
+Three choices pin down the coefficient:
 
-- **Absolute agreement** treats systematic differences between raters
-  (the rater main effect, \\\sigma^2_r\\) as error: use it when the
-  actual value matters and raters must agree on the number (clinical
-  scores, measurements). Its sibling, *consistency*, ignores a constant
-  rater offset and is not yet implemented.
+- **Agreement vs. consistency** (`type`). **Absolute agreement** treats
+  systematic differences between raters (the rater main effect,
+  \\\sigma^2_r\\) as error: use it when the actual value matters and
+  raters must agree on the number (clinical scores, measurements).
+  **Consistency** ignores a constant per-rater offset: use it when only
+  relative standing matters. A large gap between the two signals big
+  systematic differences in rater level – a rating-procedure problem
+  worth fixing.
 
-- **`ICC(A,1)`** is the reliability of a *single* randomly chosen rater;
-  **`ICC(A,k)`** is the reliability of the *mean* of your `k` raters.
-  Report `ICC(A,k)` when the averaged score is what you will actually
-  use.
+- **Single vs. average** (`unit`). **`ICC(*,1)`** is the reliability of
+  a *single* rater; **`ICC(*,k)`** is the reliability of the *mean* of
+  your `k` raters. Report `ICC(*,k)` when the averaged score is what you
+  will use.
 
-- **Two-way random** means both subjects and raters are random samples
-  you wish to generalize beyond.
-
-A large gap between consistency and absolute agreement signals big
-systematic differences in rater level – a rating-procedure problem worth
-fixing.
+- **Random vs. fixed raters** (`raters`). **Random** treats your raters
+  as a sample you wish to generalize beyond – the recommended default
+  for interrater reliability. **Fixed** treats them as the only raters
+  of interest and forgoes generalization; on balanced data it gives the
+  same number and `icc()` warns when you choose it. Fixed-rater
+  consistency is the classic Shrout & Fleiss `ICC(3,1)`.
 
 ## Estimand
 
 With a single rating per subject-by-rater cell, the subject-by-rater
 interaction and pure error are not separately identified; only their
-sum, the residual variance \\\sigma^2\_{res}\\, is estimable. The
-coefficients are \$\$ICC(A,1) = \sigma^2_s / (\sigma^2_s + \sigma^2_r +
-\sigma^2\_{res})\$\$ \$\$ICC(A,k) = \sigma^2_s / (\sigma^2_s +
-(\sigma^2_r + \sigma^2\_{res}) / k)\$\$ where \\\sigma^2_s\\ is the
-subject (signal) variance and `k` is the number of raters.
+sum, the residual variance \\\sigma^2\_{res}\\, is estimable. Absolute
+agreement counts the rater main effect \\\sigma^2_r\\ as error;
+consistency drops it: \$\$ICC(A,1) = \sigma^2_s / (\sigma^2_s +
+\sigma^2_r + \sigma^2\_{res})\$\$ \$\$ICC(A,k) = \sigma^2_s /
+(\sigma^2_s + (\sigma^2_r + \sigma^2\_{res}) / k)\$\$ \$\$ICC(C,1) =
+\sigma^2_s / (\sigma^2_s + \sigma^2\_{res})\$\$ \$\$ICC(C,k) =
+\sigma^2_s / (\sigma^2_s + \sigma^2\_{res} / k)\$\$ where \\\sigma^2_s\\
+is the subject (signal) variance and `k` is the number of raters.
 
 ## Confidence intervals
 
@@ -168,4 +187,5 @@ icc(ratings, score, subject, rater, seed = 1)
 #>   ICC(A,1)    0.290   [0.050, 0.706]
 #>   ICC(A,k)    0.620   [0.175, 0.906]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```

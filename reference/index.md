@@ -11,4 +11,4 @@ subject-by-rater designs.
   [`tidy(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`glance(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) :
-  Intraclass correlation coefficient for a two-way random design
+  Intraclass correlation coefficient for a two-way design

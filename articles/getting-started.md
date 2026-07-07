@@ -57,6 +57,7 @@ fit
 #>   ICC(A,1)    0.290   [0.050, 0.713]
 #>   ICC(A,k)    0.620   [0.173, 0.909]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
 
 ## Read the result with the tidy verbs
@@ -69,11 +70,11 @@ one-row model summary including the variance components.
 ``` r
 
 tidy(fit)
-#> # A tibble: 2 × 7
-#>   index    estimate std.error conf.low conf.high conf.level method    
-#>   <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
-#> 1 ICC(A,1)    0.290     0.180   0.0498     0.713       0.95 montecarlo
-#> 2 ICC(A,k)    0.620     0.201   0.173      0.909       0.95 montecarlo
+#> # A tibble: 2 × 8
+#>   index    sf_index estimate std.error conf.low conf.high conf.level method    
+#>   <chr>    <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr>     
+#> 1 ICC(A,1) ICC(2,1)    0.290     0.180   0.0498     0.713       0.95 montecarlo
+#> 2 ICC(A,k) ICC(2,k)    0.620     0.201   0.173      0.909       0.95 montecarlo
 
 glance(fit)
 #> # A tibble: 1 × 9
@@ -98,6 +99,37 @@ glance(fit)
   simulated from the fitted parameter covariance on the model’s internal
   scale, so it behaves near the common zero-rater-variance boundary
   where the delta method fails.
+
+## Consistency instead of agreement
+
+If a constant per-rater offset is acceptable — you care only that raters
+*rank* subjects the same way, not that they land on the same number —
+ask for **consistency** with `type = "consistency"`. It drops the rater
+main effect from the error, so it is never smaller than the agreement
+coefficient:
+
+``` r
+
+icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
+#> # Intraclass correlation: two-way random, consistency
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   index     estimate   95% CI
+#>   ICC(C,1)    0.715   [0.343, 0.924]
+#>   ICC(C,k)    0.909   [0.676, 0.980]
+#> Variance components: subject 2.556, rater 5.244, residual 1.019
+```
+
+The gap between the two (here `ICC(C,1)` ≈ 0.72 vs. `ICC(A,1)` ≈ 0.29)
+is a direct read-out of how much systematic rater-level difference is
+present.
+
+By default raters are treated as **random** (a sample you generalize
+beyond). If your raters are the entire population of interest you can
+pass `raters = "fixed"` (the classic `ICC(3,1)`), but
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) will
+warn: random is the recommended default for interrater reliability, and
+on balanced data the number is identical anyway.
 
 ## Which ICC do I want?
 
