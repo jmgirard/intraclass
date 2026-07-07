@@ -3,6 +3,22 @@
 ## intraclass 0.0.0.9000
 
 - [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  gains a selectable **`engine = "lavaan"`** for the complete, balanced
+  random two-way design, fitting the generalizability model as a
+  common-factor **structural equation model** (Jorgensen 2021).
+  Consistency coefficients equal the mixed-model estimates exactly;
+  absolute-agreement coefficients use the SEM **indicator-mean
+  estimator** of the rater variance (the variance of the estimated
+  indicator intercepts), which is asymptotically equivalent to the
+  mixed-model estimator and matches conventional generalizability-theory
+  software (GENOVA, `gtheory`) on real data (Vispoel et al. 2022), but
+  differs by a small-sample amount on tiny designs (`ICC(A,1)` = 0.284
+  via lavaan vs 0.290 via the mixed model on the Shrout & Fleiss
+  example). `lavaan` is a new `Suggests`; one-way, fixed-rater,
+  multilevel, and incomplete designs are directed to the mixed-model
+  engines. Verified against the exact Jorgensen (2021) formula, a
+  large-sample convergence simulation, and cross-engine interval checks.
+- [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   gains **`model = "oneway"`** for one-way random designs (Shrout &
   Fleiss Case 1), where each subject is rated by a possibly different,
   interchangeable set of raters. It reports `ICC(1)` (single) and

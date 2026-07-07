@@ -168,11 +168,21 @@ Ignored (and must be left at its default) when <code>cluster</code> is not suppl
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
-<dd><p>Estimation engine: <code>"glmmTMB"</code> (default) or <code>"lme4"</code>. Both fit
-the variance components by REML and agree to within numerical tolerance on
-balanced data. <code>"lme4"</code> currently covers only the random two-way design
-(<code>raters = "random"</code>, no <code>cluster</code>) and requires the <span class="pkg">lme4</span> and
-<span class="pkg">merDeriv</span> packages.</p></dd>
+<dd><p>Estimation engine: <code>"glmmTMB"</code> (default), <code>"lme4"</code>, or
+<code>"lavaan"</code>. <code>"glmmTMB"</code> and <code>"lme4"</code> fit the variance components by REML and
+agree to within numerical tolerance on balanced data. <code>"lavaan"</code> fits the
+equivalent structural-equation (common-factor) generalizability model and
+recovers the rater main effect from the mean structure (Jorgensen 2021).
+<strong>Consistency</strong> ICCs from <code>"lavaan"</code> equal the mixed-model estimates exactly
+on balanced data; <strong>absolute-agreement</strong> ICCs use the SEM indicator-mean
+estimator of the rater variance, which is asymptotically equivalent to the
+mixed-model one and matches conventional generalizability-theory software on
+real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
+designs (e.g. 0.284 vs 0.290 on the 6-subject example below). <code>"lme4"</code> and
+<code>"lavaan"</code> currently cover only the random two-way design
+(<code>raters = "random"</code>, no <code>cluster</code>); <code>"lavaan"</code> additionally requires
+complete, balanced data. <code>"lme4"</code> requires the <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span>
+packages; <code>"lavaan"</code> requires the <span class="pkg">lavaan</span> package.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>

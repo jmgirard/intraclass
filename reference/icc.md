@@ -123,11 +123,22 @@ icc(
 
 - engine:
 
-  Estimation engine: `"glmmTMB"` (default) or `"lme4"`. Both fit the
-  variance components by REML and agree to within numerical tolerance on
-  balanced data. `"lme4"` currently covers only the random two-way
-  design (`raters = "random"`, no `cluster`) and requires the lme4 and
-  merDeriv packages.
+  Estimation engine: `"glmmTMB"` (default), `"lme4"`, or `"lavaan"`.
+  `"glmmTMB"` and `"lme4"` fit the variance components by REML and agree
+  to within numerical tolerance on balanced data. `"lavaan"` fits the
+  equivalent structural-equation (common-factor) generalizability model
+  and recovers the rater main effect from the mean structure (Jorgensen
+  2021). **Consistency** ICCs from `"lavaan"` equal the mixed-model
+  estimates exactly on balanced data; **absolute-agreement** ICCs use
+  the SEM indicator-mean estimator of the rater variance, which is
+  asymptotically equivalent to the mixed-model one and matches
+  conventional generalizability-theory software on real data (Vispoel et
+  al. 2022) but differs by a small-sample term on tiny designs (e.g.
+  0.284 vs 0.290 on the 6-subject example below). `"lme4"` and
+  `"lavaan"` currently cover only the random two-way design
+  (`raters = "random"`, no `cluster`); `"lavaan"` additionally requires
+  complete, balanced data. `"lme4"` requires the lme4 and merDeriv
+  packages; `"lavaan"` requires the lavaan package.
 
 - conf_level:
 

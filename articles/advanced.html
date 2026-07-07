@@ -243,6 +243,64 @@ default — it is the one required dependency and it is robust when a
 variance component sits exactly at the zero boundary, where the lme4
 route cannot form an interval and directs you back to glmmTMB. lme4 for
 fixed-rater and multilevel designs is planned for a later milestone.</p>
+<div class="section level3">
+<h3 id="a-structural-equation-engine-lavaan">A structural-equation engine (<code>lavaan</code>)<a class="anchor" aria-label="anchor" href="#a-structural-equation-engine-lavaan"></a>
+</h3>
+<p><code>engine = "lavaan"</code> fits the same design as a
+<strong>structural equation model</strong> — a common-factor
+generalizability model in the sense of Jorgensen (2021) — for the
+complete, balanced random two-way design. Unlike lme4, this is not just
+a different backend for the <em>same</em> estimator: it matters which
+coefficient you ask for.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">axes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
+<span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">compare</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/funprog.html" class="external-link">Map</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">type</span>, <span class="va">unit</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="va">type</span>, unit <span class="op">=</span> <span class="va">unit</span>,</span>
+<span>           engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="va">type</span>, unit <span class="op">=</span> <span class="va">unit</span>,</span>
+<span>           engine <span class="op">=</span> <span class="st">"lavaan"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    index <span class="op">=</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>    glmmTMB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    lavaan <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">l</span><span class="op">)</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="va">axes</span><span class="op">$</span><span class="va">type</span>, <span class="va">axes</span><span class="op">$</span><span class="va">unit</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">compare</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">compare</span><span class="op">$</span><span class="va">index</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt;                 index glmmTMB lavaan</span></span>
+<span><span class="co">#&gt; agreement    ICC(A,1)  0.2898 0.2843</span></span>
+<span><span class="co">#&gt; consistency  ICC(C,1)  0.7148 0.7148</span></span>
+<span><span class="co">#&gt; agreement1   ICC(A,k)  0.6201 0.6137</span></span>
+<span><span class="co">#&gt; consistency1 ICC(C,k)  0.9093 0.9093</span></span></code></pre></div>
+<p><strong>Consistency</strong> coefficients are a ratio of the subject
+and residual variances, so the SEM returns them identically to the mixed
+model. <strong>Absolute agreement</strong> is different. The SEM has no
+random rater effect to estimate — a rater is a single column, so its
+effect lives in the column <em>means</em>. Following Jorgensen (2021),
+the rater variance is recovered from the mean structure as the variance
+of the estimated indicator intercepts. This <strong>indicator-mean
+estimator</strong> is a genuinely different estimator of the rater
+variance than the mixed model’s random effect: the two are
+asymptotically equivalent and match conventional generalizability-theory
+software (GENOVA, <code>gtheory</code>) closely on real data [Vispoel et
+al. 2022], but on a small design they differ by a modest amount — here
+<code>ICC(A,1)</code> is about <code>0.284</code> from lavaan versus
+<code>0.290</code> from the mixed model, because the raw variance of
+only four estimated rater means carries small-sample noise the mixed
+model shrinks away.</p>
+<p>Which is “right”? Neither is wrong — they are two defensible
+estimators of the same population quantity. Use <code>"glmmTMB"</code>
+(the default) if you want the mixed-model random-rater estimate and its
+wider, generalize-to-new-raters interval; reach for
+<code>"lavaan"</code> if you are working inside an SEM
+generalizability-theory workflow and want results comparable to that
+literature. The SEM engine currently covers the complete, balanced
+random two-way design; one-way, fixed-rater, multilevel, and incomplete
+designs are directed to the mixed-model engines.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
