@@ -2,6 +2,25 @@
 
 ## intraclass 0.0.0.9000
 
+- New
+  [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  decision helper turns the *Choosing an ICC* vignette’s decision tree
+  into code. Answer the choices that pin down the coefficient — crossed
+  vs. interchangeable raters (`model`), absolute agreement
+  vs. consistency (`type`), single vs. average (`unit`), random
+  vs. fixed raters (`raters`), and, for nested data, the subject
+  vs. cluster level (`multilevel`/`level`) — and it returns the
+  recommended coefficient (with its McGraw–Wong and, where one exists,
+  Shrout–Fleiss label), a plain-language rationale for each choice, and
+  the exact
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
+  to run. It does **not** fit a model (there is no `data` argument):
+  copy the emitted call. Call it with the relevant answers omitted in an
+  interactive session to be asked the outstanding questions; leaving a
+  coefficient-selecting decision unanswered non-interactively, or
+  answering an axis that does not apply to the chosen design
+  (e.g. `type` for a one-way model), is a clear error rather than a
+  silent guess.
 - [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   objects now have
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)

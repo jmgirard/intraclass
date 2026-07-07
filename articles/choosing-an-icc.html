@@ -378,6 +378,36 @@ absolute-agreement</em> coefficient, even though both are perfectly
 well-defined estimands that <code><a href="../reference/icc.html">icc()</a></code> computes.</p>
 </div>
 <div class="section level2">
+<h2 id="or-let-the-package-choose">Or let the package choose<a class="anchor" aria-label="anchor" href="#or-let-the-package-choose"></a>
+</h2>
+<p>If you would rather answer the questions than remember which argument
+each maps to, <code><a href="../reference/choose_icc.html">choose_icc()</a></code> walks the same tree and hands
+back the coefficient to report together with the exact
+<code><a href="../reference/icc.html">icc()</a></code> call that computes it. It does <strong>not</strong>
+fit anything – there is no <code>data</code> argument – so it is a quick
+way to settle the choice before you run the model.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Recommended ICC</span></span>
+<span><span class="co">#&gt; Design: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Recommendation: ICC(A,1)</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span>
+<span><span class="co">#&gt; Why:</span></span>
+<span><span class="co">#&gt;   - Crossed (two-way): the same raters judge every subject.</span></span>
+<span><span class="co">#&gt;   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span>
+<span><span class="co">#&gt;   - Single rater: you will act on one rater's score.</span></span>
+<span><span class="co">#&gt;   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
+<span><span class="co">#&gt; Run this on your data:</span></span>
+<span><span class="co">#&gt;   icc(data, score, subject, rater, unit = "single")</span></span>
+<span><span class="co">#&gt; Notes:</span></span>
+<span><span class="co">#&gt;   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></code></pre></div>
+<p>Pass the decisions as arguments, as above, or – in an interactive
+session – call <code><a href="../reference/choose_icc.html">choose_icc()</a></code> with them omitted to be asked
+each outstanding question in turn. Answering a choice that does not
+apply to your design (for example <code>type</code> under a one-way
+model) is a clear error rather than a silent guess.</p>
+</div>
+<div class="section level2">
 <h2 id="in-one-sentence">In one sentence<a class="anchor" aria-label="anchor" href="#in-one-sentence"></a>
 </h2>
 <p>Pick <strong>agreement vs. consistency</strong> by whether the value

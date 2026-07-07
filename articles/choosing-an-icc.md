@@ -292,6 +292,44 @@ though both are perfectly well-defined estimands that
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 computes.
 
+## Or let the package choose
+
+If you would rather answer the questions than remember which argument
+each maps to,
+[`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+walks the same tree and hands back the coefficient to report together
+with the exact
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) call
+that computes it. It does **not** fit anything – there is no `data`
+argument – so it is a quick way to settle the choice before you run the
+model.
+
+``` r
+
+choose_icc(type = "agreement", unit = "single", raters = "random")
+#> # Recommended ICC
+#> Design: two-way random, absolute agreement
+#> Recommendation: ICC(A,1)
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
+#> Why:
+#>   - Crossed (two-way): the same raters judge every subject.
+#>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
+#>   - Single rater: you will act on one rater's score.
+#>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
+#> Run this on your data:
+#>   icc(data, score, subject, rater, unit = "single")
+#> Notes:
+#>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
+```
+
+Pass the decisions as arguments, as above, or – in an interactive
+session – call
+[`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+with them omitted to be asked each outstanding question in turn.
+Answering a choice that does not apply to your design (for example
+`type` under a one-way model) is a clear error rather than a silent
+guess.
+
 ## In one sentence
 
 Pick **agreement vs. consistency** by whether the value or only the rank

@@ -1,5 +1,15 @@
 # Package index
 
+## Choosing a coefficient
+
+An interactive decision helper that recommends which ICC to report and
+the exact call that computes it.
+
+- [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  [`format(`*`<icc_recommendation>`*`)`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  [`print(`*`<icc_recommendation>`*`)`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
+  : Recommend an ICC and the call that computes it
+
 ## Two-way random designs
 
 Absolute-agreement and (later) consistency ICCs for crossed
