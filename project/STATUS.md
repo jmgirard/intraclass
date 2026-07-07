@@ -1,12 +1,14 @@
 # Project status
 
-- Milestone: **M12 — `choose_icc()` interactive decision helper** — next (provisional;
-  not yet detailed). M11 shipped (PR #15).
-- Active task: — (next: retro + detail M12 — the interactive ICC-selection helper)
+- Milestone: **M12 — `choose_icc()` interactive decision helper** — ACTIVE (detailed by
+  ADR-021 this session; DoD board in [`MILESTONES.md`](MILESTONES.md)). M11 shipped (PR #15).
+- Active task: **M12 Slice 2** — guarded interactive Q&A shell + M4-vignette pointer.
+  Slice 1 (programmatic core + `icc_recommendation` object + 62 tests) DONE on branch
+  `m12-choose-icc` (full suite 464/0/0, lintr clean; not yet committed).
 - Last green CI: PR #15 (M11) full matrix green incl. Windows and R-devel; merged to
   `main` at 3368299
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M11 merged + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M12 Slice 1 shipped locally (choose_icc core)
 
 ## Where we are
 
@@ -24,12 +26,15 @@ variance-component decomposition (M11).
 
 ## Next action
 
-**Retro + detail M12** (`choose_icc()` interactive decision helper). Per the process
-(#2, brief §7), run a short M11 retro, then resolve M12 scope with the maintainer and
-write the DoD before code. M12 is a **teaching/API helper** (no new estimand) mirroring
-the M4 flagship vignette's agreement/consistency × single/average × fixed/random ×
-complete/incomplete decision tree. Ships on a `m12-*` branch, merges via PR
-(`milestone-branches-and-prs`).
+**Build M12 Slice 2** on `m12-choose-icc`: the guarded interactive Q&A shell over the
+Slice-1 resolver — ask only the outstanding axes one at a time via `cli`, only when
+`rlang::is_interactive()`, in the vignette's order (model first); collect answers then
+call `resolve_icc_recommendation()`. Test the collection logic via an **injected
+responder** (no live readline in CI) and assert the shell is skipped when
+`is_interactive()` is `FALSE`. Then add the short `choosing-an-icc.Rmd` pointer ("or let
+the package choose: `choose_icc()`") with a non-interactive runnable example; `air
+format`; `lintr`; installed-package test (`NOT_CRAN=true`); then PR → CI → merge. See
+ADR-021 + the M12 DoD board in [`MILESTONES.md`](MILESTONES.md).
 
 Milestone arc after M12 (ADR-017): **M13** release polish (pkgdown, advanced vignette,
 CRAN prep).

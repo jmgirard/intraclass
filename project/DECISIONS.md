@@ -1031,3 +1031,75 @@ consequences → references.
   ADR-010 (M4.5 `autoplot.icc_dstudy` + the lazy-registration pattern, generalized),
   ADR-002 (ggplot2 as `Suggests`, light install), ADR-017 (the arc that scheduled M11);
   the `verify-against-installed-package` memory (no fragile snapshots).
+
+## ADR-021: M12 scope — `choose_icc()` interactive decision helper (advice, not a fit)
+- Date: 2026-07-07
+- Status: accepted
+- Context: M12 is the last of the four ADR-017 deferrals promoted ahead of release
+  polish, and the second **teaching-layer, no-new-estimand** milestone (after M11's
+  plotting methods). It realizes the `choose_icc()` helper deferred out of M4 — a
+  runnable companion to the *Choosing an ICC* flagship vignette (M4), whose decision
+  tree (`vignettes/choosing-icc-tree.svg`) it mirrors. The vignette walks six decision
+  axes — a **prior** crossed-vs-interchangeable question (`model = "twoway"|"oneway"`),
+  then agreement/consistency (`type`), single/average (`unit`), random/fixed (`raters`),
+  a **fifth** subject-vs-cluster question for nested data (`cluster`/`level`), and
+  complete-vs-incomplete which `icc()` **handles automatically** (not a coefficient
+  branch — informational only). The helper turns that prose tree into code. Because
+  there is **no new estimand** (cf. M4/M5.5/M7/M11), PRINCIPLES #1 is numerically N/A:
+  correctness means the recommendation maps to the *right* `icc()` arguments and the
+  emitted call reproduces a direct `icc()` call. Three scope questions were put to the
+  maintainer this session.
+- Decision (maintainer-approved this session, 2026-07-07):
+  - **Dual interface — programmatic core + a guarded interactive shell.** `choose_icc()`
+    takes the decision answers as arguments (each enum defaulting to `NULL` = "not yet
+    answered"). When every needed answer is supplied it returns advice **non-
+    interactively** (scriptable, deterministic, CI-testable). When answers are missing
+    **and** `rlang::is_interactive()`, it asks the outstanding questions one at a time
+    in the console, then resolves. The question-asking I/O is a **thin shell** over a
+    **pure `resolve_*()` core** that takes a complete answer set and returns the advice
+    object — the core is what tests exercise; the shell is `is_interactive()`-guarded so
+    it never fires in CI/knitr. Missing answers in a **non-interactive** session
+    `abort_*()` loudly naming the unanswered axis (#5/#8) — never a silent default.
+  - **Returns a classed advice object; it does NOT fit.** `choose_icc()` returns an
+    `icc_recommendation` object carrying: the recommended coefficient label(s)
+    (McGraw–Wong `ICC(A/C,1)`/`ICC(1)` **and** the Shrout–Fleiss number where the
+    crosswalk table names one, else `NA`), a per-axis rationale, and the **exact
+    `icc(...)` call** (a `call`/deparsed string the user runs on their own data). A
+    `print.icc_recommendation()` method renders all of it via `cli`. **No data argument,
+    no fit** — teaching-first, fast, side-effect-free; the user copies the emitted call.
+    (Reconsider a `fit=`/data path only post-release if demanded — recorded as deferred.)
+  - **Covers the full six-axis tree.** `model` (crossed/one-way), `type`, `unit`,
+    `raters`, and the multilevel `cluster`/`level` fifth choice; complete-vs-incomplete
+    is surfaced as a **note** (connectedness + automatic `k_eff`), not a branch. Axis
+    **applicability is enforced**: with `model = "oneway"` the `type`/`raters` axes do
+    not exist (no rater term) — supplying them `abort_*()`s (#5); the recommendation is
+    `ICC(1)`/`ICC(1,k)`. The fixed-rater + absolute-agreement caveat and the
+    `raters = "fixed"` "random is recommended" note from the vignette are reproduced.
+  - **Correctness (#1 N/A numerically) is established by a round-trip oracle + a label
+    table:** (a) for **every** valid axis combination, the emitted call `eval`'d on a
+    shipped dataset (`ratings`/`ratings_incomplete`/a multilevel fixture) reproduces the
+    same coefficient a **direct** `icc()` call with those arguments produces (the helper
+    cannot recommend a call that disagrees with `icc()`); (b) the recommended
+    McGraw–Wong ↔ Shrout–Fleiss labels match the vignette crosswalk table verbatim;
+    (c) inapplicable/underspecified selections `abort_*()` with the classed condition
+    (#5). No `vdiffr`, no numeric oracle (no new numbers) — same posture as M11.
+  - **No estimand-spec** (teaching/API layer, not an estimator — cf. M4/M5.5/M7/M11).
+    All user text via `cli`; all errors via classed `abort_*()` (#8).
+- Consequences: new code is a single `R/choose-icc.R` (the `choose_icc()` entry, the
+  pure resolver, the label crosswalk, the `icc_recommendation` class + `print`), its
+  tests, roxygen + a `NEWS` bullet, and a short pointer added to the M4 vignette ("or
+  let the package choose: `choose_icc()`"). No new dependency, no `Imports` change, no
+  touch to the fitting/CI pipeline. Deferred out of M12 (recorded so not rediscovered):
+  a **`fit=`/data-in path** that runs `icc()` for you; a **`tidy`/`glance` method** on
+  the recommendation; **GUI/Shiny** front-ends; **engine (`glmmTMB`/`lme4`/`lavaan`)
+  and `ci_method`/`d_study()` guidance** inside the helper (out of the vignette's tree);
+  a **full advanced-vignette showcase** of the helper (that is M13). All ADR-017 /
+  M9–M11 estimator carry-overs are untouched.
+- References: PRINCIPLES.md #1 (oracle-first — here: round-trip call-equivalence, no new
+  numbers), #2 (name it / no code before scope — this ADR + DoD), #5 (fail loudly on
+  ill-posed/underspecified selections), #8 (`cli` + classed aborts), #15 (thin slices),
+  #17 (deferrals to ROADMAP, not scope creep); ADR-009 (M4 flagship vignette + the
+  decision tree this mirrors), ADR-020 (M11, the sibling no-estimand teaching layer),
+  ADR-017 (the arc that scheduled M12), ADR-011/016 (the multilevel `cluster`/`level`
+  API the fifth axis targets), ADR-013 (M6 one-way `model` axis);
+  `vignettes/choosing-an-icc.Rmd` (the six-axis tree + crosswalk table).

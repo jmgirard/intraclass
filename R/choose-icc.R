@@ -1,0 +1,476 @@
+# choose_icc(): the decision helper -------------------------------------------
+#
+# M12 (ADR-021): a teaching/API companion to the "Choosing an ICC" vignette. It
+# turns that article's decision tree into code -- a prior crossed-vs-one-way
+# `model` question, then agreement/consistency (`type`), single/average (`unit`),
+# random/fixed (`raters`), and the multilevel subject/cluster fifth choice
+# (`multilevel`/`level`) -- and returns a recommendation: the coefficient
+# label(s), a per-axis rationale, and the exact `icc()` call to run. It does NOT
+# fit (no `data` argument); the user copies the emitted call.
+#
+# There is no new estimand (PRINCIPLES.md #1 is numerically N/A). Correctness is
+# established by two facts, both reusing the shared estimand layer so the helper
+# cannot drift from `icc()`: (a) every recommended label comes from the same
+# `icc_estimand()` that labels a fitted object; (b) the emitted call, run on data,
+# reproduces a direct `icc()` call with those arguments (the round-trip oracle in
+# the tests). Ill-posed / underspecified selections fail loudly (#5/#8).
+
+#' Recommend an ICC and the call that computes it
+#'
+#' `choose_icc()` walks the decision tree of the *Choosing an ICC* vignette and
+#' returns a recommendation object naming the coefficient(s) to report and the
+#' exact [icc()] call that computes them. It does **not** fit a model: there is no
+#' `data` argument. Copy the emitted call and run it on your data.
+#'
+#' Supply the decisions as arguments to get advice programmatically; call
+#' `choose_icc()` with the relevant answers omitted in an interactive session to
+#' be asked the outstanding questions one at a time.
+#'
+#' The two structural facts about your design -- whether the raters are crossed
+#' (`model`) and whether subjects are nested in clusters (`multilevel`) -- default
+#' to the common case (a crossed, non-multilevel two-way design), matching
+#' [icc()]. The choices that actually select the coefficient (`type`, `unit`,
+#' `raters`, and `level` when multilevel) have no silent default: in a
+#' non-interactive session, leaving one unanswered is an error naming the
+#' unanswered decision (rather than quietly picking one for you).
+#'
+#' @param model `"twoway"` (crossed: the same raters judge every subject) or
+#'   `"oneway"` (raters are interchangeable across subjects). Defaults to
+#'   `"twoway"`. Under `"oneway"` the `type` and `raters` choices do not exist
+#'   (there is no rater term), and supplying them is an error.
+#' @param type `"agreement"` (the value itself must match; systematic rater
+#'   offsets count as error) or `"consistency"` (only rank order matters; a
+#'   constant per-rater offset is forgiven). Required for a two-way design.
+#' @param unit `"single"` (you will act on one rater's score), `"average"` (the
+#'   mean of your raters), or `"both"`. Required.
+#' @param raters `"random"` (a sample you generalize beyond -- the recommended
+#'   default for interrater reliability) or `"fixed"` (exactly these judges, no
+#'   generalization). Required for a two-way design.
+#' @param multilevel `TRUE` if subjects are nested in higher-level clusters
+#'   (pupils in classrooms, patients in clinics), else `FALSE` (the default).
+#' @param level For a multilevel design, `"subject"` (within-cluster reliability),
+#'   `"cluster"` (between-cluster reliability), or `"both"`. Required when
+#'   `multilevel = TRUE`.
+#'
+#' @return An `icc_recommendation` object (a list) with a [print()] method. It
+#'   carries the recommended coefficient rows (`$rows`), the exact `icc()` call as
+#'   a string (`$call`), the per-decision rationale (`$rationale`), and any notes
+#'   (`$notes`).
+#'
+#' @seealso [icc()], and `vignette("choosing-an-icc")` for the full decision tree.
+#'
+#' @examples
+#' # Two-way absolute agreement, single rater, random raters (Shrout & Fleiss
+#' # ICC(2,1)): the two structural defaults (crossed, non-multilevel) are implied.
+#' choose_icc(type = "agreement", unit = "single", raters = "random")
+#'
+#' # Consistency of the average of fixed raters -- McGraw & Wong ICC(C,k):
+#' choose_icc(type = "consistency", unit = "average", raters = "fixed")
+#'
+#' # A one-way design (interchangeable raters): type/raters do not apply.
+#' choose_icc(model = "oneway", unit = "single")
+#'
+#' # A multilevel design, both levels:
+#' choose_icc(type = "agreement", unit = "single", raters = "random",
+#'   multilevel = TRUE, level = "both")
+#' @export
+choose_icc <- function(
+  model = NULL,
+  type = NULL,
+  unit = NULL,
+  raters = NULL,
+  multilevel = NULL,
+  level = NULL
+) {
+  answers <- list(
+    model = model,
+    type = type,
+    unit = unit,
+    raters = raters,
+    multilevel = multilevel,
+    level = level
+  )
+  # Slice 2 inserts the guarded interactive Q&A here, filling `answers` before it
+  # is resolved. Slice 1 resolves the supplied answers directly.
+  resolve_icc_recommendation(answers)
+}
+
+# Resolve a (possibly partial) answer set into an `icc_recommendation`, or abort.
+# The two structural axes default to the common case; the coefficient-selecting
+# axes are required (a NULL there is a loud underspecification error, #5), and
+# axes that do not exist for the chosen design are rejected (an applicability
+# error, #5) -- never silently ignored.
+resolve_icc_recommendation <- function(answers, call = rlang::caller_env()) {
+  model <- if (is.null(answers$model)) "twoway" else answers$model
+  model <- validate_choice(model, c("twoway", "oneway"), "model", call = call)
+  oneway <- model == "oneway"
+
+  multilevel <- if (is.null(answers$multilevel)) FALSE else answers$multilevel
+  if (!rlang::is_bool(multilevel)) {
+    abort_intraclass(
+      "{.arg multilevel} must be {.code TRUE} or {.code FALSE}.",
+      call = call
+    )
+  }
+
+  # Applicability: one-way has no rater term (no agreement/consistency, no
+  # random/fixed) and no cluster structure (M6 spec; mirrors icc()).
+  if (oneway) {
+    reject_inapplicable(answers, c("type", "raters"), "a one-way design", call)
+    if (isTRUE(multilevel)) {
+      abort_inapplicable(
+        c(
+          "A one-way ICC has no cluster structure.",
+          i = "Use {.code model = \"twoway\"} for a multilevel ICC, or drop \\
+               {.arg multilevel}."
+        ),
+        call = call
+      )
+    }
+  }
+
+  # Coefficient-selecting axes: required, no silent default.
+  unit <- require_answer(answers$unit, "unit", call)
+  unit <- validate_choice(unit, c("single", "average", "both"), "unit", call)
+
+  if (oneway) {
+    type <- NA_character_
+    raters <- "random"
+  } else {
+    type <- require_answer(answers$type, "type", call)
+    type <- validate_choice(
+      type,
+      c("agreement", "consistency"),
+      "type",
+      call
+    )
+    raters <- require_answer(answers$raters, "raters", call)
+    raters <- validate_choice(raters, c("random", "fixed"), "raters", call)
+  }
+
+  if (multilevel) {
+    level <- require_answer(answers$level, "level", call)
+    level <- validate_choice(
+      level,
+      c("subject", "cluster", "both"),
+      "level",
+      call
+    )
+  } else {
+    reject_inapplicable(answers, "level", "a non-multilevel design", call)
+    level <- "subject"
+  }
+
+  rows <- recommendation_rows(type, unit, raters, level, multilevel, oneway)
+  icc_call <- build_icc_call(type, raters, unit, level, multilevel, oneway)
+  rationale <- recommendation_rationale(
+    model,
+    type,
+    unit,
+    raters,
+    level,
+    multilevel,
+    oneway
+  )
+  notes <- recommendation_notes(raters, multilevel, oneway)
+
+  new_icc_recommendation(
+    model = model,
+    type = type,
+    raters = raters,
+    unit = unit,
+    multilevel = multilevel,
+    level = level,
+    oneway = oneway,
+    rows = rows,
+    call = icc_call,
+    rationale = rationale,
+    notes = notes
+  )
+}
+
+# A required decision is unanswered: a loud, actionable underspecification error
+# (PRINCIPLES.md #5) -- never a silent default for a choice that changes the
+# coefficient. Classed `intraclass_underspecified` so callers can catch it.
+require_answer <- function(value, arg, call) {
+  if (is.null(value)) {
+    abort_intraclass(
+      c(
+        "The {.arg {arg}} decision is unanswered.",
+        i = "Supply {.arg {arg}}, or call {.fun choose_icc} interactively to be \\
+             asked."
+      ),
+      class = "intraclass_underspecified",
+      call = call
+    )
+  }
+  value
+}
+
+# An axis that does not exist for the chosen design was supplied: reject it loudly
+# rather than ignore it (PRINCIPLES.md #5).
+reject_inapplicable <- function(answers, args, design_phrase, call) {
+  supplied <- args[!vapply(answers[args], is.null, logical(1))]
+  if (length(supplied) > 0L) {
+    abort_inapplicable(
+      c(
+        "{.arg {supplied}} does not apply to {design_phrase}.",
+        i = "Drop {.arg {supplied}}."
+      ),
+      call = call
+    )
+  }
+}
+
+# The recommended coefficient rows. Reuses `icc_estimand()` -- the same label
+# source a fitted `icc` object uses -- so the recommended McGraw-Wong and
+# Shrout-Fleiss labels cannot drift from what `icc()` prints. One row per
+# requested (level x unit); `k_eff` is irrelevant to the label.
+recommendation_rows <- function(type, unit, raters, level, multilevel, oneway) {
+  units <- switch(unit, both = c("single", "average"), unit)
+  levels <- if (multilevel) {
+    switch(level, both = c("subject", "cluster"), level)
+  } else {
+    "subject"
+  }
+  type_arg <- if (oneway) "agreement" else type
+  rows <- list()
+  for (lv in levels) {
+    for (u in units) {
+      est <- icc_estimand(
+        type = type_arg,
+        unit = u,
+        raters = raters,
+        level = lv,
+        multilevel = multilevel,
+        oneway = oneway
+      )
+      rows[[length(rows) + 1L]] <- list(
+        level = lv,
+        index = est$label,
+        sf_index = est$sf_label
+      )
+    }
+  }
+  data.frame(
+    level = vapply(rows, `[[`, character(1), "level"),
+    index = vapply(rows, `[[`, character(1), "index"),
+    sf_index = vapply(rows, `[[`, character(1), "sf_index"),
+    stringsAsFactors = FALSE
+  )
+}
+
+# The exact `icc()` call that computes the recommendation, as a copy-pasteable
+# string. Only non-default arguments are shown (matching how the vignette writes
+# minimal calls), so the emitted call is exactly what a user would type.
+build_icc_call <- function(type, raters, unit, level, multilevel, oneway) {
+  positional <- c("data", "score", "subject", "rater")
+  if (multilevel) {
+    positional <- c(positional, "cluster")
+  }
+  opt <- character()
+  if (oneway) {
+    opt <- c(opt, 'model = "oneway"')
+  }
+  if (!oneway && identical(type, "consistency")) {
+    opt <- c(opt, 'type = "consistency"')
+  }
+  if (!oneway && identical(raters, "fixed")) {
+    opt <- c(opt, 'raters = "fixed"')
+  }
+  if (!identical(unit, "both")) {
+    opt <- c(opt, sprintf('unit = "%s"', unit))
+  }
+  if (multilevel && !identical(level, "both")) {
+    opt <- c(opt, sprintf('level = "%s"', level))
+  }
+  sprintf("icc(%s)", paste(c(positional, opt), collapse = ", "))
+}
+
+# One plain-language sentence per decision the user made, drawn from the vignette.
+recommendation_rationale <- function(
+  model,
+  type,
+  unit,
+  raters,
+  level,
+  multilevel,
+  oneway
+) {
+  out <- c(
+    model = if (oneway) {
+      "One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error -- the most conservative ICC."
+    } else {
+      "Crossed (two-way): the same raters judge every subject."
+    }
+  )
+  if (!oneway) {
+    out <- c(
+      out,
+      type = switch(
+        type,
+        agreement = "Absolute agreement: the value itself must match; a systematic difference between raters counts as error.",
+        consistency = "Consistency: only the rank order must match; a constant per-rater offset is forgiven."
+      )
+    )
+  }
+  out <- c(
+    out,
+    unit = switch(
+      unit,
+      single = "Single rater: you will act on one rater's score.",
+      average = "Average: you will act on the mean of your raters.",
+      both = "Single and average: report the single-rater and averaged reliability side by side."
+    )
+  )
+  if (!oneway) {
+    out <- c(
+      out,
+      raters = switch(
+        raters,
+        random = "Random raters: a sample you generalize beyond, to the rater universe they were drawn from.",
+        fixed = "Fixed raters: exactly these judges; the coefficient does not generalize past them."
+      )
+    )
+  }
+  if (multilevel) {
+    out <- c(
+      out,
+      level = switch(
+        level,
+        subject = "Subject level: reliability of rating a subject within its cluster.",
+        cluster = "Cluster level: reliability of the cluster mean.",
+        both = "Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side."
+      )
+    )
+  }
+  out
+}
+
+# Caveats and automatic behaviours worth surfacing (from the vignette).
+recommendation_notes <- function(raters, multilevel, oneway) {
+  notes <- character()
+  if (identical(raters, "fixed")) {
+    notes <- c(
+      notes,
+      "Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use."
+    )
+  }
+  notes <- c(
+    notes,
+    "Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly."
+  )
+  if (multilevel) {
+    notes <- c(
+      notes,
+      "See vignette(\"advanced\") for a worked multilevel example."
+    )
+  }
+  notes
+}
+
+# Constructor for the recommendation object.
+new_icc_recommendation <- function(
+  model,
+  type,
+  raters,
+  unit,
+  multilevel,
+  level,
+  oneway,
+  rows,
+  call,
+  rationale,
+  notes
+) {
+  structure(
+    list(
+      model = model,
+      type = type,
+      raters = raters,
+      unit = unit,
+      multilevel = multilevel,
+      level = level,
+      oneway = oneway,
+      rows = rows,
+      call = call,
+      rationale = rationale,
+      notes = notes
+    ),
+    class = "icc_recommendation"
+  )
+}
+
+#' @rdname choose_icc
+#' @param x An `icc_recommendation` object.
+#' @param ... Unused, for method consistency.
+#' @export
+format.icc_recommendation <- function(x, ...) {
+  design <- if (x$oneway) {
+    "one-way random"
+  } else {
+    icc_design_phrase(x$type, x$raters)
+  }
+  if (isTRUE(x$multilevel)) {
+    design <- paste0("multilevel, ", design)
+  }
+
+  header <- "# Recommended ICC"
+
+  # The coefficient label(s), grouped by level for a multilevel recommendation.
+  if (isTRUE(x$multilevel)) {
+    rec_lines <- vapply(
+      split(x$rows$index, x$rows$level)[unique(x$rows$level)],
+      function(idx) paste(idx, collapse = ", "),
+      character(1)
+    )
+    rec <- c(
+      "Recommendation:",
+      sprintf("  %-8s %s", paste0(names(rec_lines), ":"), rec_lines)
+    )
+  } else {
+    rec <- sprintf("Recommendation: %s", paste(x$rows$index, collapse = ", "))
+  }
+
+  # Shrout & Fleiss equivalents where the crosswalk names one (never for
+  # multilevel; NA for the two off-diagonal two-way forms).
+  has_sf <- !is.na(x$rows$sf_index)
+  sf_note <- if (any(has_sf)) {
+    sprintf(
+      "Shrout & Fleiss equivalent: %s",
+      paste(
+        x$rows$index[has_sf],
+        x$rows$sf_index[has_sf],
+        sep = " = ",
+        collapse = ", "
+      )
+    )
+  }
+
+  why <- c("Why:", paste0("  - ", unname(x$rationale)))
+  run <- c("Run this on your data:", sprintf("  %s", x$call))
+  notes <- if (length(x$notes) > 0L) {
+    c("Notes:", paste0("  - ", x$notes))
+  }
+
+  c(
+    header,
+    sprintf("Design: %s", design),
+    "",
+    rec,
+    sf_note,
+    "",
+    why,
+    "",
+    run,
+    if (!is.null(notes)) "",
+    notes
+  )
+}
+
+#' @rdname choose_icc
+#' @export
+print.icc_recommendation <- function(x, ...) {
+  cli::cli_verbatim(format(x, ...))
+  invisible(x)
+}
