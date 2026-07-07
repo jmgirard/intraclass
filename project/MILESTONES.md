@@ -184,7 +184,65 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–3; merged via PR #12 at ca2dcdb; full CI matrix green incl.
   Windows, 313 tests).
 
-## M9: Release polish *(provisional)*
-- Goal: pkgdown site, advanced vignette, CRAN submission prep. *(was M7 → M9 per
-  ADR-013; was M6 before)*
+## M9: Incomplete / unbalanced multilevel ICCs — Design 1 (crossed) *(active)*
+- Goal: correct multilevel ICCs on **ragged** Design-1 (raters crossed with clusters)
+  data — missing subject×rater cells — by generalizing the M3 connectedness +
+  `k_eff` machinery (ADR-008) onto the M5 five-component multilevel fit (ADR-011).
+  **No new estimand** (the M5 Design-1 coefficients estimated on ragged data, as M3 is
+  to M1/M2). Random raters, glmmTMB engine (lme4 oracle), both subject- and
+  cluster-level. Ambiguous ragged crossed/nested patterns are **declared** via a new
+  optional `design` argument, never guessed (#5); the multilevel connectedness rule
+  and `k_eff` are **oracle-pinned, not asserted** (#1/#18).
+- Estimand: [`estimand-specs/M9-incomplete-multilevel.md`](estimand-specs/M9-incomplete-multilevel.md);
+  ADR-018 (scope). Oracles O-IML (lme4 cross-engine + seeded incomplete-multilevel
+  recovery + reductions to complete M5 Design 1 and to M3 flat-incomplete two-way +
+  an identifiability oracle; no textbook worked example).
+- Deferred out of M9 (recorded so not rediscovered): **incomplete nested multilevel**
+  (Designs 2/3 — its own later slice; ragged nested-vs-crossed inference); **fixed-rater
+  multilevel** (M10, ADR-017); **lme4 for the multilevel fit** (engine parity, ADR-012);
+  within-cell replicates via `(1 | cluster:subject:rater)` (ROADMAP); a Bayesian/MCMC
+  cross-engine; three-facet `d_study()`; the conflated single-level ICC (Eq. 14).
+- Ships on `m9-incomplete-multilevel`, CI-green slices (spec §6). **DoD board:**
+  - [x] **Slice 1 — incomplete Design-1 fit + identifiability + divisor.** Multilevel
+    connectedness (`crossed_ml_identifiability()`: within-cluster subject×rater +
+    cluster×rater bridging, spec §4b); optional `design` argument + ambiguity abort
+    (§4a); multilevel `k_eff` (§5); incomplete crossed routed off the M5 fit.
+    Subject-level agreement/consistency, single/average. Oracles O-IML/lme4, /sim,
+    /reduction (→ complete M5 and → flat M3), identifiability oracle. 331 tests green,
+    lintr/air clean. (An oracle-first catch corrected spec §3a: σ²_cr is *not* in the
+    subject-level error — matches shipped M5.) Cluster-level-incomplete deferred to
+    Slice 2 with a loud abort.
+  - [ ] **Slice 2 — cluster level + boundaries.** Cluster-level IRR under imbalance
+    with its §4b gate + abort-to-subject; full boundary/guard matrix (§7) with
+    snapshots; reductions to complete M5 at both levels.
+  - [ ] **Slice 3 — docs.** `advanced.Rmd` multilevel section extended to ragged
+    Design-1 on real code; `print`/`glance` surface incomplete-vs-complete,
+    n_clusters/n_cells/`k_eff`/declared design; `test-vignette-claims.R` invariants.
+  - [ ] Full `R-CMD-check` matrix green (incl. Windows); coverage floor held, new
+    statistical paths oracle-covered; `air`/`lintr` clean; pkgdown builds.
+  - [ ] `MILESTONES.md`/`STATUS.md` reconciled; merged via PR (`milestone-branches-and-prs`).
+
+## M10: Fixed-rater multilevel ICCs *(provisional)*
+- Goal: fixed-rater multilevel ICCs, reusing the M3 real fixed-effect fit path
+  (ADR-008) on the multilevel fit — the multilevel-completion pair with M9. Estimator
+  work; estimand-spec required. Promoted from the M5/M8 deferral lists by ADR-017.
+- Status: provisional
+
+## M11: General `autoplot()` / ggplot2 methods *(provisional)*
+- Goal: general variance-component + CI plotting methods over the shipped estimators
+  (the M4.5 `d_study()` reliability curve was the first; this generalizes it). **No new
+  estimand.** Lands after all estimators so it covers the full set. Promoted from
+  ROADMAP by ADR-017.
+- Status: provisional
+
+## M12: `choose_icc()` interactive decision helper *(provisional)*
+- Goal: an interactive decision helper mirroring the M4 flagship vignette's
+  agreement/consistency × single/average × fixed/random × complete/incomplete tree.
+  Teaching/API, **no new estimand.** Promoted from the M4 deferral / ROADMAP by ADR-017.
+- Status: provisional
+
+## M13: Release polish *(provisional)*
+- Goal: pkgdown site, advanced vignette (showing the new M9–M12 estimators, plots, and
+  helper), CRAN submission prep. *(was M9 per ADR-017; was M7 → M9 per ADR-013; was M6
+  before)*
 - Status: provisional

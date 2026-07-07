@@ -65,8 +65,17 @@
 #' nested designs define only the **subject** level -- a cluster-level ICC needs
 #' raters crossed with clusters -- so `level` is restricted to `"subject"` for them.
 #' Mixed patterns (some raters crossed, some nested) are not a supported design and
-#' raise an error. Support currently covers balanced, complete designs with random
-#' raters.
+#' raise an error. The **crossed** design (Design 1) additionally supports
+#' **incomplete** data -- subjects rated by different, overlapping rater subsets
+#' (missing cells) -- computing the subject-level ICCs by REML with the averaging
+#' divisor set to the effective number of ratings per subject (`k_eff`, the harmonic
+#' mean), exactly as the single-level incomplete two-way ICC does. Identifiability is
+#' checked first: each cluster's subject-by-rater layout must be connected, and for
+#' absolute agreement raters must bridge clusters (otherwise the design is really
+#' rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
+#' declare it with `design` (above). Incomplete *nested* designs, incomplete
+#' cluster-level IRR, and fixed raters remain for later milestones. Nested designs
+#' still require balanced, complete data.
 #'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
@@ -113,6 +122,13 @@
 #'   Ignored (and must be left at its default) when `cluster` is not supplied. Only
 #'   `"subject"` is available when raters are nested in clusters (see the
 #'   *Multilevel designs* section).
+#' @param design Multilevel design (with a `cluster` column): `NULL` (the default)
+#'   infers it from the crossing pattern. On **incomplete** data missing cells can
+#'   make the pattern ambiguous between a crossed and a nested design; declare it
+#'   explicitly with `"crossed"`, `"nested_in_clusters"`, or `"nested_in_subjects"`
+#'   to resolve the ambiguity. A declaration is validated against the data -- it
+#'   cannot force a design the data cannot support (e.g. `"crossed"` still requires
+#'   raters that bridge clusters to estimate absolute agreement).
 #' @param engine Estimation engine: `"glmmTMB"` (default), `"lme4"`, or
 #'   `"lavaan"`. `"glmmTMB"` and `"lme4"` fit the variance components by REML and
 #'   agree to within numerical tolerance on balanced data. `"lavaan"` fits the
@@ -171,6 +187,7 @@ icc <- function(
   raters = c("random", "fixed"),
   unit = c("single", "average"),
   level = c("subject", "cluster"),
+  design = NULL,
   engine = "glmmTMB",
   conf_level = 0.95,
   ci_method = "montecarlo",
@@ -204,6 +221,7 @@ icc <- function(
   multilevel <- !is.null(cluster_v)
   if (multilevel) {
     level <- validate_levels(level)
+    design <- validate_design(design)
     # M5 scope (ADR-011): random raters, keyword units only. Fixed-rater and
     # D-study-projection multilevel ICCs are deferred (spec §8).
     if (raters == "fixed") {
@@ -221,12 +239,21 @@ icc <- function(
              is planned for a later milestone."
       ))
     }
-  } else if (!identical(level, c("subject", "cluster"))) {
-    # `level` only means something once subjects are nested (a `cluster` column).
-    abort_intraclass(c(
-      "{.arg level} requires a {.arg cluster} column.",
-      i = "Supply {.arg cluster} for a multilevel ICC, or drop {.arg level}."
-    ))
+  } else {
+    # `level` and `design` only mean something once subjects are nested.
+    if (!identical(level, c("subject", "cluster"))) {
+      abort_intraclass(c(
+        "{.arg level} requires a {.arg cluster} column.",
+        i = "Supply {.arg cluster} for a multilevel ICC, or drop {.arg level}."
+      ))
+    }
+    if (!is.null(design)) {
+      abort_intraclass(c(
+        "{.arg design} requires a {.arg cluster} column.",
+        i = "The multilevel design only applies once subjects are nested in \\
+             clusters; supply {.arg cluster}, or drop {.arg design}."
+      ))
+    }
   }
 
   # M5.5 (ADR-012): lme4 is selectable for the random two-way design only. Route
@@ -378,10 +405,19 @@ icc <- function(
   }
 
   # Which multilevel design is this (ten Hove et al. 2022, Table 2)? Inferred from
-  # the crossing pattern, not declared (estimand-spec M8 §4). Design 1 ("crossed")
-  # is the M5 five-component path; Designs 2/3 (nested raters) are subject-level
-  # only -- cluster-level IRR is undefined for them (paper p. 6, spec §1).
-  ml_design <- if (multilevel) detect_multilevel_design(df) else NA_character_
+  # the crossing pattern (estimand-spec M8 §4) UNLESS the caller declares it via
+  # `design` -- the escape hatch for ragged patterns that are ambiguous between
+  # crossed and nested under missing cells (spec M9 §4a, ADR-018). A declared
+  # design is validated against the data by the identifiability guards below, never
+  # used to override a structural impossibility. Design 1 ("crossed") is the M5
+  # five-component path; Designs 2/3 (nested raters) are subject-level only.
+  ml_design <- if (!multilevel) {
+    NA_character_
+  } else if (!is.null(design)) {
+    design
+  } else {
+    detect_multilevel_design(df)
+  }
   if (multilevel && ml_design != "crossed") {
     if (!("subject" %in% level)) {
       abort_unsupported(c(
@@ -470,6 +506,52 @@ icc <- function(
         i = "For unlinked rater groups, a one-way ICC ({.code model = \"oneway\"}) \\
              or additional linking ratings are needed."
       ))
+    }
+    # Incomplete crossed (Design 1) multilevel identifiability (estimand-spec M9
+    # §4b, ADR-018). The single-level connectedness check above is skipped for
+    # multilevel data (its subject x rater graph is block-structured by cluster);
+    # the multilevel graph conditions here take its place, gating different
+    # coefficients. Complete crossed designs satisfy every condition, so this is a
+    # no-op for the balanced M5/M8 path.
+    if (multilevel && ml_design == "crossed" && !design_info$balanced) {
+      ident <- crossed_ml_identifiability(df)
+      # Within-cluster subject x rater connectedness separates sigma^2_{s:c} from
+      # residual; gates every subject-level coefficient (incl. consistency).
+      if (!ident$within_cluster_connected) {
+        abort_unidentified(c(
+          "The subject-by-rater design is disconnected within some cluster, so the \\
+           subject and residual variances cannot be separated there.",
+          i = "{cli::qty(ident$disconnected_clusters)}Affected cluster{?s}: \\
+               {.val {ident$disconnected_clusters}}.",
+          i = "Every subject and rater within a cluster must be linked through \\
+               shared ratings."
+        ))
+      }
+      # sigma^2_r (rater main effect -- in the AGREEMENT error, spec §3a) separates
+      # from sigma^2_cr only if raters bridge clusters. When they do not, the design
+      # is effectively rater-nested (Design 2) for agreement; consistency (error =
+      # residual only) is unaffected, so gate agreement specifically (spec §4b).
+      if (type == "agreement" && !ident$cluster_rater_connected) {
+        abort_unidentified(c(
+          "Raters do not bridge clusters, so the rater main-effect variance cannot \\
+           be separated from the cluster-by-rater variance for absolute agreement.",
+          i = "This design is effectively rater-nested (Design 2) for agreement.",
+          i = "Use {.code type = \"consistency\"}, or provide raters crossed across \\
+               clusters."
+        ))
+      }
+      # Cluster-level IRR on incomplete data is deferred to M9 Slice 2 (its own
+      # boundary/identifiability matrix, spec §6); fail loudly rather than report an
+      # unvalidated coefficient (#5). Complete data (M5) is unaffected -- it does not
+      # reach this branch.
+      if ("cluster" %in% level) {
+        abort_unsupported(c(
+          "Cluster-level multilevel ICCs on incomplete data are not supported yet.",
+          i = "This slice covers the subject level on ragged crossed (Design 1) \\
+               designs; incomplete cluster-level IRR is planned for the next slice.",
+          i = "Use {.code level = \"subject\"} for incomplete multilevel data."
+        ))
+      }
     }
   }
   # Balance: for one-way, every subject rated the same number of times; for
@@ -684,6 +766,28 @@ validate_levels <- function(level, call = rlang::caller_env()) {
     )
   }
   unique(level)
+}
+
+# Validate the optional multilevel `design` declaration (estimand-spec M9 §4a). The
+# default `NULL` means "infer from the crossing pattern" (M8 behaviour); a non-NULL
+# value asserts the design when missing cells make the pattern ambiguous between
+# crossed and nested. Accepts the vocabulary of detect_multilevel_design().
+validate_design <- function(design, call = rlang::caller_env()) {
+  if (is.null(design)) {
+    return(NULL)
+  }
+  choices <- c("crossed", "nested_in_clusters", "nested_in_subjects")
+  if (!is.character(design) || length(design) != 1L || !design %in% choices) {
+    abort_intraclass(
+      c(
+        "{.arg design} must be {.code NULL} (infer) or one of {.val {choices}}.",
+        i = "Declare {.arg design} only to resolve a ragged pattern that is \\
+             ambiguous between a crossed and a nested design (spec M9)."
+      ),
+      call = call
+    )
+  }
+  design
 }
 
 # `unit` selects the averaging divisor: the keywords "single" (-> ICC(*,1)) and

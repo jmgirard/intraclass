@@ -25,14 +25,10 @@ Ark).
 ## Parking lot (unscheduled proposals)
 
 - Replicate ratings within cell → split σ²_sr from σ²_e via `(1 | subject:rater)`.
-- `autoplot()` / `ggplot2` methods for variance-component and CI visualization
-  (the reliability-curve case shipped for `d_study()` in M4.5; general
-  variance-component / CI plots remain open).
 - Design/power helpers (how many raters/subjects for a target CI width).
 - Categorical/ordinal ratings (GLMM engines) beyond the Gaussian LMM.
 - Bootstrap and profile-likelihood CIs as alternatives to Monte-Carlo, for
   method comparison.
-- A `choose_icc()` interactive decision helper mirroring the flagship vignette.
 - Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs.
 - One-way random ICC(1)/ICC(1,k) via the **SEM (lavaan) engine** — deferred out of
   M7 (ADR-014). The SEM-GT literature (Jorgensen 2021; Vispoel et al. 2022; Lee &
