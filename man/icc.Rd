@@ -244,7 +244,8 @@ fails. Pass \code{seed} for a reproducible interval.
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "glmmTMB"))) withAutoprint(\{ # examplesIf}
 fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
-ggplot2::autoplot(fit)
+ggplot2::autoplot(fit) # coefficient forest plot (the default)
+ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 \dontshow{\}) # examplesIf}
 ratings <- data.frame(
   subject = factor(rep(1:6, 4)),

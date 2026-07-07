@@ -122,54 +122,16 @@ format.icc <- function(x, ...) {
     )
   }
 
-  vc <- x$components
+  # Shared with autoplot.icc (what = "components") so labels/ordering never drift.
+  view <- icc_components_view(x)
   d3 <- function(v) formatC(v, format = "f", digits = 3)
-  comps <- if (ml && is.null(vc$rater)) {
-    # Design 3 (raters nested in subjects): rater is confounded into residual, so
-    # there is no rater or cluster x rater term (spec M8 §2b).
-    sprintf(
-      "Variance components: cluster %s, subject %s, residual %s (rater confounded)",
-      d3(vc$cluster),
-      d3(vc$subject),
-      d3(vc$residual)
-    )
-  } else if (ml && is.null(vc$cluster_rater)) {
-    # Nested-rater design (Design 2): the "rater" slot holds sigma^2_{r:c} and
-    # there is no separate cluster x rater term (spec M8 §2a).
-    sprintf(
-      "Variance components: cluster %s, subject %s, rater:cluster %s, residual %s",
-      d3(vc$cluster),
-      d3(vc$subject),
-      d3(vc$rater),
-      d3(vc$residual)
-    )
-  } else if (ml) {
-    sprintf(
-      paste(
-        "Variance components: cluster %s, subject %s, rater %s,",
-        "cluster:rater %s, residual %s"
-      ),
-      d3(vc$cluster),
-      d3(vc$subject),
-      d3(vc$rater),
-      d3(vc$cluster_rater),
-      d3(vc$residual)
-    )
-  } else if (ow) {
-    # One-way has no separate rater term; the residual confounds rater with error.
-    sprintf(
-      "Variance components: subject %s, residual %s (rater confounded)",
-      d3(vc$subject),
-      d3(vc$residual)
-    )
-  } else {
-    sprintf(
-      "Variance components: subject %s, rater %s, residual %s",
-      d3(vc$subject),
-      d3(vc$rater),
-      d3(vc$residual)
-    )
-  }
+  body <- paste(
+    sprintf("%s %s", view$label, d3(view$variance)),
+    collapse = ", "
+  )
+  # Design 3 and one-way fold the rater into the residual (spec M8 §2b, M6 §2).
+  suffix <- if (isTRUE(view$confounded)) " (rater confounded)" else ""
+  comps <- sprintf("Variance components: %s%s", body, suffix)
 
   c(header, meta1, meta2, "", table, "", keff_note, comps, sf_note)
 }

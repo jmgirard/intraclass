@@ -65,7 +65,8 @@ plot.icc_dstudy <- function(x, ...) {
 #'   `"components"` for the variance-component decomposition.
 #' @examplesIf rlang::is_installed(c("ggplot2", "glmmTMB"))
 #' fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
-#' ggplot2::autoplot(fit)
+#' ggplot2::autoplot(fit) # coefficient forest plot (the default)
+#' ggplot2::autoplot(fit, what = "components") # variance-component decomposition
 #' @importFrom rlang .data
 # S3 method for ggplot2::autoplot (a Suggests generic), lazily registered in
 # zzz.R; see the icc_dstudy note above for why object_name_linter is suppressed.
@@ -129,14 +130,32 @@ autoplot_icc_coefficients <- function(object) {
   p
 }
 
-# The variance-component decomposition (M11 Slice 2). Stubbed here so `what` is a
-# real, validated argument from Slice 1; the implementation lands in Slice 2.
+# The variance-component decomposition: one bar per estimated variance component,
+# in the model's natural order (cluster -> subject -> rater -> cluster:rater ->
+# residual, subset to the design). Shares `icc_components_view()` with the printed
+# report, so the bars and the "Variance components:" line always agree.
 autoplot_icc_components <- function(object) {
-  abort_unsupported(c(
-    "{.code what = \"components\"} is not implemented yet.",
-    i = "The variance-component decomposition plot ships in M11 Slice 2.",
-    i = "Use {.code what = \"coefficients\"} for the coefficient forest plot."
-  ))
+  view <- icc_components_view(object)
+  df <- data.frame(
+    component = factor(view$label, levels = view$label),
+    variance = view$variance,
+    stringsAsFactors = FALSE
+  )
+  subtitle <- if (isTRUE(view$confounded)) {
+    "Rater variance is confounded into the residual"
+  }
+
+  ggplot2::ggplot(df, ggplot2::aes(x = .data$component, y = .data$variance)) +
+    ggplot2::geom_col() +
+    ggplot2::labs(
+      x = NULL,
+      y = "Variance",
+      title = sprintf(
+        "Variance components: %s",
+        icc_design_label(object$design)
+      ),
+      subtitle = subtitle
+    )
 }
 
 #' @rdname icc

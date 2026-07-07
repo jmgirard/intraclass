@@ -277,15 +277,19 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       Shared `icc_design_label()` extracted from `format.icc` for the plot title (no
       duplication).
 
-**Slice 2 — variance-component decomposition (`what = "components"`)**
-- [ ] `"components"` branch: a bar of the `$components` slots (subject / rater /
-      residual, plus cluster + cluster:rater for multilevel), honouring the design
-      variants `format.icc` already handles — one-way's confounded rater, Design 2's
-      `rater:cluster` slot, Design 3's absent rater/cluster:rater (no crash, no `NA`
-      bar).
-- [ ] **Build-data tests**: bar heights equal `$components` for two-way, one-way,
-      multilevel Design 1, and a nested (Design 2/3) `icc`.
-- [ ] Docs/examples updated to show both `what` values; NEWS; `air`/`lintr` clean.
+**Slice 2 — variance-component decomposition (`what = "components"`)** ✅ done
+- [x] `"components"` branch: one `geom_col` bar per `$components` slot in model order
+      (cluster → subject → rater → cluster:rater → residual, subset to the design),
+      honouring the variants — one-way's confounded rater, Design 2's `rater:cluster`
+      slot, Design 3's absent rater/cluster:rater (no crash, no `NA` bar). A shared
+      `icc_components_view()` (extracted from `format.icc`) drives both the bars and the
+      printed "Variance components:" line, so they never drift; format snapshots
+      reproduced byte-for-byte.
+- [x] **Build-data tests**: bar heights equal `$components` for two-way, one-way,
+      multilevel Design 1, and a nested Design 2 `icc`.
+- [x] Docs/examples show both `what` values; NEWS; `air`/`lintr` clean (0 lints).
+      402 tests green (was 397); installed-package dispatch of both plots verified;
+      plots eyeballed (coefficient facets by level; component bars in model order).
 
 **Milestone gate (whole M11)**
 - [ ] Full CI matrix green incl. Windows (installed-package test, `NOT_CRAN=true` —

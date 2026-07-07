@@ -41,7 +41,35 @@ sim_ml_small <- function(seed = 20260707) {
   d
 }
 
-# Pull a built layer's data out of a ggplot (1 = linerange/ribbon, 2 = point).
+# A small nested Design 2 (raters nested in clusters): rater labels unique per
+# cluster, so the fit has a rater:cluster term and no crossed cluster:rater.
+sim_design2_small <- function(seed = 20260707) {
+  set.seed(seed)
+  nc <- 12
+  ns <- 6
+  k <- 4
+  cl <- stats::rnorm(nc, 0, 1)
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  scv <- stats::rnorm(nc * ns, 0, sqrt(1.2))
+  d$sc <- scv[(d$cluster - 1) * ns + d$subj]
+  rcv <- stats::rnorm(nc * k, 0, sqrt(0.7))
+  d$rc <- rcv[(d$cluster - 1) * k + d$rater]
+  d$score <- 10 +
+    cl[d$cluster] +
+    d$sc +
+    d$rc +
+    stats::rnorm(nrow(d), 0, sqrt(0.5))
+  d$cluster <- factor(d$cluster)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d$rater <- factor(paste(d$cluster, d$rater, sep = "_"))
+  d
+}
+
+# Pull a built layer's data out of a ggplot (1 = linerange/ribbon/col, 2 = point).
 built_layer <- function(p, i) ggplot2::ggplot_build(p)$data[[i]]
 
 test_that("coefficient plot renders every estimate as a point (two-way)", {
@@ -125,13 +153,84 @@ test_that("invalid `what` fails loudly with a classed intraclass error", {
   )
 })
 
-test_that("what = 'components' is a classed 'not yet' in Slice 1", {
+# --- what = "components": the variance-component decomposition -----------------
+
+# Bar heights of the `geom_col` layer (component decomposition has one layer).
+bar_heights <- function(p) sort(built_layer(p, 1)$y)
+
+test_that("components plot bar heights equal $components (two-way)", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
-  expect_error(
-    ggplot2::autoplot(fit, what = "components"),
-    class = "intraclass_unsupported"
+  p <- ggplot2::autoplot(fit, what = "components")
+  expect_s3_class(p, "ggplot")
+  expect_equal(
+    bar_heights(p),
+    sort(c(
+      fit$components$subject,
+      fit$components$rater,
+      fit$components$residual
+    ))
+  )
+})
+
+test_that("components plot folds rater into residual for one-way (two bars)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    seed = 1
+  )
+  p <- ggplot2::autoplot(fit, what = "components")
+  expect_equal(
+    bar_heights(p),
+    sort(c(fit$components$subject, fit$components$residual))
+  )
+})
+
+test_that("components plot shows all five terms for multilevel Design 1", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sim_ml_small(), score, subject, rater, cluster = cluster, seed = 1)
+  p <- ggplot2::autoplot(fit, what = "components")
+  expect_equal(
+    bar_heights(p),
+    sort(c(
+      fit$components$cluster,
+      fit$components$subject,
+      fit$components$rater,
+      fit$components$cluster_rater,
+      fit$components$residual
+    ))
+  )
+})
+
+test_that("components plot handles a nested design (Design 2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sim_design2_small(),
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    seed = 1
+  )
+  p <- ggplot2::autoplot(fit, what = "components")
+  # Design 2: cluster:rater is confounded; the rater slot holds sigma^2_{r:c}.
+  expect_null(fit$components$cluster_rater)
+  expect_equal(
+    bar_heights(p),
+    sort(c(
+      fit$components$cluster,
+      fit$components$subject,
+      fit$components$rater,
+      fit$components$residual
+    ))
   )
 })
 

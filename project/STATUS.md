@@ -2,16 +2,16 @@
 
 - Milestone: **M11 — general `autoplot()` / `plot()` methods for `icc` objects** —
   **active** (detailed by ADR-020). M10 shipped (PR #14).
-- Active task: **M11 Slice 2 — variance-component decomposition** (`autoplot.icc(what =
-  "components")`). Slice 1 (coefficient forest plot) is **done + green** (397 tests, lint
-  clean, installed-package dispatch verified); not yet committed. See the M11 DoD board
-  in `MILESTONES.md`.
+- Active task: **M11 milestone gate** (open a PR from `m11-autoplot-icc`; full CI matrix
+  incl. Windows + pkgdown). Both slices done + green: Slice 1 (coefficient forest plot,
+  committed `4810a8a`) and Slice 2 (variance-component decomposition, uncommitted). 402
+  tests, lint clean, installed-package dispatch verified. See the M11 DoD board.
 - Last green CI: PR #14 (M10) full matrix green incl. Windows; merged to `main` at
   9f799d2
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M11 scoped (ADR-020) + DoD written;
-  Slice 1 (coefficient forest plot) implemented, green (397 tests), on branch
-  `m11-autoplot-icc` (uncommitted). Slice 2 next.
+- Updated: 2026-07-07 by main session (Opus) — M11 Slices 1 & 2 implemented, green
+  (402 tests), on branch `m11-autoplot-icc`. Slice 1 committed (`4810a8a`), Slice 2
+  uncommitted. Next: commit Slice 2 + open the M11 PR.
 
 ## Where we are
 
@@ -27,15 +27,12 @@ crossed × {complete, incomplete} × {random, fixed} at the subject level.
 
 ## Next action
 
-**M11 Slice 2 — variance-component decomposition.** Slice 1 (coefficient forest plot)
-is done and green on branch `m11-autoplot-icc` (uncommitted — awaiting the go-ahead to
-commit). Slice 2 implements the `what = "components"` branch of `autoplot.icc()` —
-replacing the interim `abort_unsupported` stub in `autoplot_icc_components()` — a bar of
-the `$components` slots (subject/rater/residual, plus cluster + cluster:rater for
-multilevel), honouring the design variants `format.icc` already handles (one-way's
-confounded rater, Design 2's `rater:cluster`, Design 3's absent rater/cluster:rater).
-Build-data tests assert bar heights == `$components` across two-way/one-way/Design 1/
-nested. Then the whole-M11 gate (full CI matrix incl. Windows, pkgdown) + PR.
+**M11 milestone gate — open the PR.** Both slices are done and green on branch
+`m11-autoplot-icc`: Slice 1 (coefficient forest plot, committed `4810a8a`) and Slice 2
+(variance-component decomposition, `what = "components"`, uncommitted). Next: commit
+Slice 2, push `m11-autoplot-icc`, open a PR, and confirm the full CI matrix (incl.
+Windows, installed-package test with `NOT_CRAN=true`) + pkgdown are green before merge
+(`milestone-branches-and-prs`). Post-merge, reconcile `project/` on `main`.
 
 Milestone arc after M11 (ADR-017): **M12** `choose_icc()` → **M13** release polish.
 
