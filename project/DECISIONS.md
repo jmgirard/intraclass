@@ -246,6 +246,53 @@ consequences → references.
   ADR-006 (the debt this resolves); McGraw & Wong (1996); Brennan (2001); ten Hove et
   al. (2024); Searle, Casella & McCulloch (2006); Weeks & Williams (1964).
 
+## ADR-010: D-study projection — `d_study()` + numeric `unit` + `autoplot()` (pre-M5 slice)
+- Date: 2026-07-07
+- Status: accepted
+- Context: D-study projection (reliability at an arbitrary rater count `m`) was
+  deferred through M1–M4 and parked in ROADMAP with the exposure shape left
+  explicitly open ("resolve at the milestone's start"). The maintainer scheduled it
+  as its own slice **before M5 (multilevel)**. The projection is a change of the
+  averaging *divisor* in the existing `(signal, {error set}, divisor)` estimand, so
+  `icc_point()` already evaluated Φ at an arbitrary divisor and the Monte-Carlo CI
+  already recomputed per draw — the estimator is reuse, not new machinery. Three
+  shapes were on the table (numeric `unit` sugar; a downstream `d_study()` table; a
+  reliability-curve plot); the surface, plot backend, and framing were confirmed with
+  the maintainer this session.
+- Decision:
+  - **Ship all three surfaces.** Numeric `unit` in `icc()` (`unit = c("single", 3)` →
+    an `ICC(A,3)` row) for one-off `m`; `d_study(x, m = 1:20)` returning an
+    `icc_dstudy` tidy table for scanning a range; and `autoplot.icc_dstudy()` for the
+    curve. `d_study()` **reuses the stored fit** — `icc()` now keeps the engine's
+    `estimate`/`vcov`/`to_components` on the object (`x$mc`) — so projection needs no
+    refit. The MC sample is drawn **once** and evaluated at every `m` (coherent curve
+    + band); `mc_components()`/`mc_interval()` were factored out of `mc_ci()` to share
+    that step.
+  - **Divisor generalized, not special-cased.** The estimand carries a resolved
+    numeric `divisor` (`resolve_divisor(unit, k_eff)`); `icc_point()` dropped its `k`
+    argument. Numeric-`m` labels are `ICC(A,m)` with **no** Shrout & Fleiss form
+    (`sf_label()` returns `NA` outside index "1"/"k").
+  - **Fixed-rater absolute-agreement projection is refused** (`abort_unidentified`,
+    PRINCIPLES.md #5): θ²_r is the finite-population variance of exactly the observed
+    raters, so "average of `m` fresh raters" is undefined. Consistency (fixed or
+    random) and random-rater agreement project freely. See M4.5 spec §4.
+  - **Plot via ggplot2 `autoplot()`, light-install preserved.** ggplot2 is
+    Suggests-only; the method is `check_installed()`-guarded and registered **lazily**
+    in `zzz.R` via a vendored `s3_register()` (no vctrs/ggplot2 in Imports; robust for
+    the declared R ≥ 3.5, where native `S3method(pkg::generic, class)` is not
+    available). A `plot.icc_dstudy()` forwards to it.
+  - **Oracle bar met (PRINCIPLES.md #1).** Closed-form Spearman–Brown (consistency)
+    and GT dependability (agreement) oracles, a `psych::ICC` average-measure
+    cross-check at `m = n_raters`, and a seeded simulation; provenance in
+    `data-raw/oracle-d-study.R`, estimand in `estimand-specs/M4.5-d-study.md`.
+- Consequences: `d_study()`/`autoplot()`/`plot()` and numeric `unit` are new public
+  API (#6); `d_study` and the numeric-`unit` projection carry a `lifecycle`
+  "experimental" badge. Ships on `m4.5-d-study` via PR. Cost/optimal-design helpers
+  and subject-count projection stay in ROADMAP (M4.5 spec §6).
+- References: PRINCIPLES.md #1, #2, #3, #5, #6, #9, #12, #14, #16; ROADMAP
+  ("D-study projection"); estimand-specs `M1`/`M3`/`M4.5`; ADR-002 (light install),
+  ADR-003 (MC CIs), ADR-008 (θ²_r fixed fit); Brennan (2001); McGraw & Wong (1996).
+
 ## ADR-009: M4 scope — flagship vignette + a teaching dataset; `choose_icc()` deferred
 - Date: 2026-07-06
 - Status: accepted

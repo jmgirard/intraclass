@@ -44,3 +44,20 @@ the worked incomplete-design section (`k_eff`, connectedness abort, fixed ≢ ra
 on `ratings_incomplete`); subject-vs-cluster preview → M5; pkgdown `articles:`
 grouping; getting-started/advanced refreshes; README overhaul; NEWS (missing M3 +
 new M4). `devtools::check()` 0/0/0, 133 tests. See MILESTONES M4.
+
+## M4.5 — D-study projection — **in progress** (branch `m4.5-d-study`, ADR-010)
+
+Owner: main session (Opus). Ship the deferred D-study projection before M5.
+
+- [x] Slice 1 — projection core. Generalized estimand `divisor`
+      (`resolve_divisor()`); `icc_point()` drops `k`; numeric `unit` in `icc()`
+      (`ICC(A,m)` rows, no SF label); fixed-agreement projection refused (#5);
+      `x$mc` stores the fit internals; `mc_components()`/`mc_interval()` factored
+      out; `d_study()` + `icc_dstudy` (`print`/`tidy`/`glance`). Oracles O-DS
+      (Spearman–Brown, GT dependability, `psych` at `m = n_raters`, seeded sim);
+      `data-raw/oracle-d-study.R`; estimand-spec `M4.5-d-study.md`; ADR-010.
+- [x] Slice 2 — reliability curve + docs. `autoplot.icc_dstudy()` (ggplot2,
+      lazily registered via `zzz.R`); `plot.icc_dstudy()`; NEWS; roxygen
+      (experimental); `_pkgdown` reference group; `advanced.Rmd` D-study section +
+      `test-vignette-claims.R` assertion.
+- [ ] Green gate: `devtools::check()` 0/0/0; full CI matrix on the PR; merge.

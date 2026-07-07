@@ -187,6 +187,39 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   "Choosing an ICC" article, the decision-tree diagram, and the
   `ratings`/`ratings_incomplete` datasets.
 
+## M4.5: D-study projection — reliability at other rater counts (ADR-010)
+- Goal: project the reliability of a fitted `icc()` to the mean of an arbitrary
+  number of raters `m` (a generalizability-theory decision study), the deferred
+  ROADMAP item, shipped as its own slice before M5. The projection is a change of
+  the averaging **divisor** in the existing `(signal, {error set}, divisor)`
+  estimand — reuse, not new machinery (estimand-spec `M4.5-d-study.md`).
+- Definition of Done:
+  - [x] **Slice 1 — projection core + numeric `unit` + oracles.** Estimand carries
+        a resolved numeric `divisor` (`resolve_divisor()`); `icc_point()` drops its
+        `k` arg. `icc()`'s `unit` accepts numbers (`unit = c("single", 3)` →
+        `ICC(A,3)`, no SF label); the fixed-rater absolute-agreement projection is
+        refused (`abort_unidentified`, #5). `icc()` stores the engine's
+        `estimate`/`vcov`/`to_components` (`x$mc`) so `d_study(x, m = …)` reuses the
+        fit with no refit; `mc_components()`/`mc_interval()` factored out of
+        `mc_ci()` and the MC sample is drawn once, evaluated at every `m`. Oracles
+        (O-DS): Spearman–Brown (consistency), GT dependability (agreement),
+        `psych::ICC` average-measure at `m = n_raters`, seeded simulation;
+        `data-raw/oracle-d-study.R`; `test-d-study.R`.
+  - [x] **Slice 2 — reliability curve + docs.** `autoplot.icc_dstudy()` (ggplot2,
+        `check_installed`-guarded, lazily registered in `zzz.R` via a vendored
+        `s3_register()` — light install preserved); `plot.icc_dstudy()` forwards to
+        it. `print`/`tidy`/`glance` methods. NEWS, roxygen (experimental badge),
+        `_pkgdown` reference group, and a D-study section in `advanced.Rmd` with a
+        backing `test-vignette-claims.R` assertion.
+  - [x] `devtools::check()` 0/0/0 local; `air`/`lintr` clean; spell advisory tidy
+        (non-gating). Full CI matrix on the PR.
+  - [x] ADR-010; estimand-spec `M4.5-d-study.md`; oracle O-DS in REFERENCES;
+        tracking updated same-commit (#16). Ships on `m4.5-d-study`, merged via PR.
+- Deferred (recorded so they aren't rediscovered): cost/optimal-design helpers
+  ("cheapest `m` for Φ = 0.8"), two-facet D-studies, and subject-count projection
+  (ROADMAP; M4.5 spec §6).
+- Status: in progress (branch `m4.5-d-study`).
+
 ## M5: Multilevel ICCs *(provisional)*
 - Goal: subject-level vs. cluster-level ICCs (ten Hove 2021). *(was M4)*
 - Status: provisional

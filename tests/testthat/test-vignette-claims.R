@@ -89,6 +89,24 @@ test_that("fixed and random diverge on incomplete data", {
   expect_false(isTRUE(all.equal(rnd$estimate, fix$estimate, tolerance = 1e-4)))
 })
 
+# --- advanced-article D-study claims -------------------------------------
+
+test_that("the D-study projection anchors to ICC(A,k) at m = n_raters", {
+  skip_if_not_installed("glmmTMB")
+
+  # The advanced article states Phi(m) at m = 4 (the raters in `ratings`) equals
+  # the ICC(A,k) icc() reports directly. Point estimates are seed-independent.
+  fit <- icc(ratings, score, subject, rater, seed = 1)
+  proj <- d_study(fit, m = 1:8, seed = 1)
+
+  at_k <- proj$estimate[proj$m == fit$n$raters]
+  ick <- tidy(fit)$estimate[tidy(fit)$index == "ICC(A,k)"]
+  expect_equal(at_k, ick, tolerance = 1e-8)
+
+  # And the "diminishing returns" curve is monotone increasing.
+  expect_true(all(diff(proj$estimate) > 0))
+})
+
 test_that("a disconnected design is rejected, not guessed at", {
   skip_if_not_installed("glmmTMB")
 

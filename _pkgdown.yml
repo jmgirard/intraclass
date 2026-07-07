@@ -21,6 +21,12 @@ reference:
     contents:
       - icc
 
+  - title: Decision (D-) studies
+    desc: >
+      Project reliability to other numbers of raters, and plot the curve.
+    contents:
+      - d_study
+
   - title: Datasets
     desc: >
       Worked rater-reliability examples used across the docs and vignettes.
