@@ -39,3 +39,6 @@ VignetteBuilder: knitr
 Language: en-US
 URL: https://github.com/jmgirard/intraclass, https://jmgirard.github.io/intraclass/
 BugReports: https://github.com/jmgirard/intraclass/issues
+Depends: 
+    R (>= 3.5)
+LazyData: true

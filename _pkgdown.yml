@@ -11,3 +11,10 @@ reference:
       subject-by-rater designs.
     contents:
       - icc
+
+  - title: Datasets
+    desc: >
+      Worked rater-reliability examples used across the docs and vignettes.
+    contents:
+      - ratings
+      - ratings_incomplete

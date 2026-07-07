@@ -42,9 +42,9 @@ computed by `icc()` at knit time and seeded; asserted relationships are tested
 
 ### Slice 1 — teaching dataset + balanced core + diagram
 
-- [ ] `data-raw/make-ratings.R`: deterministically build `ratings` (balanced SF
+- [x] `data-raw/make-ratings.R`: deterministically build `ratings` (balanced SF
       6×4) and `ratings_incomplete` (connected incomplete variant of `ratings`) — Opus
-- [ ] `R/data.R` roxygen for both datasets (`@source` SF 1979; `@details` missing
+- [x] `R/data.R` roxygen for both datasets (`@source` SF 1979; `@details` missing
       cells + connectedness + `k_eff` for the incomplete one); `LazyData: true`;
       `usethis::use_data()`; WORDLIST + pkgdown reference entry — Opus
 - [ ] `choosing-an-icc.Rmd` balanced core: worked examples for `type`/`unit`/`raters`

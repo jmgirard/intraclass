@@ -1,7 +1,7 @@
 # Project status
 
 - Milestone: M4 — "Choosing an ICC" flagship vignette (planned; spec in MILESTONES M4, ADR-009)
-- Active task: — (next: `/start-task` → M4 Slice 1, first task = the teaching dataset)
+- Active task: M4 Slice 1 — teaching dataset done (`ratings` + `ratings_incomplete` shipped); next: balanced-core article + diagram
 - Last green CI: PR #2 (M3) full matrix green; merged to `main` at 11ab1b2
 - Blockers: —
 - Updated: 2026-07-06 by main session (Opus)
