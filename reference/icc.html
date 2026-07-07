@@ -135,8 +135,11 @@ interrater reliability.</p></dd>
 
 
 <dt id="arg-unit">unit<a class="anchor" aria-label="anchor" href="#arg-unit"></a></dt>
-<dd><p>One or both of <code>"single"</code> (-&gt; <code>ICC(*,1)</code>) and <code>"average"</code>
-(-&gt; <code>ICC(*,k)</code>).</p></dd>
+<dd><p>The averaging unit(s): <code>"single"</code> (-&gt; <code>ICC(*,1)</code>), <code>"average"</code>
+(-&gt; <code>ICC(*,k)</code>), or a number <code>m</code> &gt;= 1 for a D-study projection to the mean of
+<code>m</code> raters (-&gt; <code>ICC(*,m)</code>), or any combination. See <code><a href="d_study.html">d_study()</a></code> for projecting
+across a range of <code>m</code>. Projecting absolute agreement is not defined for fixed
+raters (see <code><a href="d_study.html">d_study()</a></code>).</p></dd>
 
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>

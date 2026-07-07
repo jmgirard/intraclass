@@ -87,8 +87,13 @@ icc(
 
 - unit:
 
-  One or both of `"single"` (-\> `ICC(*,1)`) and `"average"` (-\>
-  `ICC(*,k)`).
+  The averaging unit(s): `"single"` (-\> `ICC(*,1)`), `"average"` (-\>
+  `ICC(*,k)`), or a number `m` \>= 1 for a D-study projection to the
+  mean of `m` raters (-\> `ICC(*,m)`), or any combination. See
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  for projecting across a range of `m`. Projecting absolute agreement is
+  not defined for fixed raters (see
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)).
 
 - engine:
 

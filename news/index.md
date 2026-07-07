@@ -2,6 +2,24 @@
 
 ## intraclass 0.0.0.9000
 
+- New
+  [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+  projects the reliability of a fitted
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) to
+  the mean of an arbitrary number of raters `m` – a
+  generalizability-theory **decision (D-) study**, answering “how many
+  raters do I need?”. It returns a tidy `icc_dstudy` table of Phi(m)
+  with boundary-aware Monte-Carlo intervals and reuses the stored fit
+  (no refit);
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  draws the reliability curve (needs ggplot2, in Suggests).
+  [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)’s
+  `unit` now also accepts numbers (`unit = c("single", 3)`) for one-off
+  projections, adding an `ICC(A,3)` row. Projection is refused for
+  fixed-rater absolute agreement (ill-posed) and is verified against
+  Spearman-Brown (consistency), the GT dependability form (agreement),
+  [`psych::ICC`](https://rdrr.io/pkg/psych/man/ICC.html), and a seeded
+  simulation. Experimental.
 - New datasets `ratings` (the complete Shrout & Fleiss 1979 example) and
   `ratings_incomplete` (a connected incomplete variant), used throughout
   the docs and examples. A new **Choosing an ICC** article walks through

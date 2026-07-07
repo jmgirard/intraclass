@@ -88,13 +88,68 @@ boundary.</li>
 through a connected incomplete design, the effective number of raters
 <code>k_eff</code>, and why fixed and random raters diverge once cells
 are missing.</p>
+</div>
+<div class="section level2">
+<h2 id="how-many-raters-do-i-need-a-d-study">How many raters do I need? A D-study<a class="anchor" aria-label="anchor" href="#how-many-raters-do-i-need-a-d-study"></a>
+</h2>
+<p><code>ICC(*,1)</code> is the reliability of a <em>single</em> rater
+and <code>ICC(*,k)</code> the reliability of the mean of the
+<code>k</code> raters you actually used. A <strong>decision (D-)
+study</strong> asks a forward-looking question: <em>how reliable would
+the mean of some other number of raters <code>m</code> be?</em> In
+generalizability theory the absolute-agreement ICC is the dependability
+coefficient, and projecting it to <code>m</code> raters is just a change
+of the averaging divisor,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><msubsup><mi>σ</mi><mi>s</mi><mn>2</mn></msubsup><mrow><msubsup><mi>σ</mi><mi>s</mi><mn>2</mn></msubsup><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mrow><mi>r</mi><mi>e</mi><mi>s</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mi>m</mi></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">\Phi(m) = \frac{\sigma^2_s}{\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / m},</annotation></semantics></math></p>
+<p>so <code><a href="../reference/d_study.html">d_study()</a></code> reuses the fit you already have — no
+refitting.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
+<span><span class="va">proj</span></span>
+<span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;       m  estimate   95% CI</span></span>
+<span><span class="co">#&gt;       1     0.290   [0.050, 0.706]</span></span>
+<span><span class="co">#&gt;       2     0.449   [0.096, 0.828]</span></span>
+<span><span class="co">#&gt;       3     0.550   [0.137, 0.878]</span></span>
+<span><span class="co">#&gt;       4     0.620   [0.175, 0.906]</span></span>
+<span><span class="co">#&gt;       5     0.671   [0.210, 0.923]</span></span>
+<span><span class="co">#&gt;       6     0.710   [0.241, 0.935]</span></span>
+<span><span class="co">#&gt;       7     0.741   [0.271, 0.944]</span></span>
+<span><span class="co">#&gt;       8     0.765   [0.298, 0.950]</span></span></code></pre></div>
+<p>Reliability climbs with more raters but with diminishing returns, and
+the projection is anchored to what you observed: at <code>m = 4</code>
+(the number of raters in <code>ratings</code>) <code>Φ(m)</code> is
+exactly the <code>ICC(A,k)</code> you would get from <code><a href="../reference/icc.html">icc()</a></code>
+directly. For a one-off value you can also ask <code><a href="../reference/icc.html">icc()</a></code> for it
+inline with a numeric <code>unit</code>,
+e.g. <code>unit = c("single", "average", 6)</code>.</p>
+<p>Read as a curve, this is the classic “how many raters?” picture —
+plot it with <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> (which needs
+<strong>ggplot2</strong>):</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="advanced_files/figure-html/dstudy-plot-1.png" class="r-plt" alt="Projected reliability rising with the number of raters, with a Monte-Carlo interval band." width="700"></p>
+<p><strong>Projection is extrapolation.</strong> The rater variance
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>r</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma^2_r</annotation></semantics></math>
+is estimated from only as many raters as you observed, so projecting far
+beyond that design leans hard on that estimate. The Monte-Carlo interval
+widens honestly to reflect this rather than pretending to a precision it
+lacks — and projecting absolute agreement is refused for <em>fixed</em>
+raters, where there is no wider rater universe to generalize to (use
+<code>raters = "random"</code>).</p>
 <blockquote>
-<p>This is a placeholder for the multilevel and alternative-engine
-material, filled in from <strong>Milestone 5</strong> onward
+<p>The multilevel and alternative-engine material below is a
+placeholder, filled in from <strong>Milestone 5</strong> onward
 (<code>project/MILESTONES.md</code>).</p>
 </blockquote>
 </div>
-  </main>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
