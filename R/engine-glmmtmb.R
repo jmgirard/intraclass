@@ -90,6 +90,114 @@ fit_glmmtmb <- function(data, call = rlang::caller_env()) {
   )
 }
 
+# Multilevel engine (subjects nested in clusters, raters crossed) ---------------
+#
+# Design 1 of ten Hove, Jorgensen & van der Ark (2022): raters crossed with both
+# subjects and clusters (estimand-spec M5 §2). Fits the five-component model
+#
+#     score ~ 1 + (1|cluster) + (1|cluster:subject) + (1|rater) + (1|cluster:rater)
+#
+# returning components named on the estimand's scale:
+#   cluster       = sigma^2_c        (between-cluster true score)
+#   subject       = sigma^2_{s:c}    (between-subject-within-cluster true score)
+#   rater         = sigma^2_r        (rater main effect)
+#   cluster_rater = sigma^2_{cr}     (cluster x rater)
+#   residual      = sigma^2_{(s:c)r} (confounded highest-order term)
+#
+# The subject-level ICC reads {subject | rater, residual}; the cluster-level ICC
+# reads {cluster | rater, cluster_rater} (M5 §3) -- so icc_point()/mc_ci() are
+# UNCHANGED, they just index different named components per the estimand's level.
+# `cluster:subject` nesting is used (not a bare subject id) so subject labels need
+# not be globally unique. Each grouping factor's internal log-SD lives at the
+# parameter "theta_1|<group>.1" (verified against VarCorr); residual at
+# "disp~(Intercept)" -- the same log-SD scale as fit_glmmtmb() (ADR-002/003).
+
+fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+
+  fit <- withCallingHandlers(
+    glmmTMB::glmmTMB(
+      score ~
+        1 +
+        (1 | cluster) +
+        (1 | cluster:subject) +
+        (1 | rater) +
+        (1 | cluster:rater),
+      data = data,
+      REML = TRUE
+    ),
+    warning = function(w) {
+      cli::cli_warn(c(
+        "The {.pkg glmmTMB} engine reported a fitting warning.",
+        i = conditionMessage(w)
+      ))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  vc <- glmmTMB::VarCorr(fit)$cond
+  sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
+  components <- list(
+    cluster = sd_of("cluster")^2,
+    subject = sd_of("cluster:subject")^2,
+    rater = sd_of("rater")^2,
+    cluster_rater = sd_of("cluster:rater")^2,
+    residual = stats::sigma(fit)^2
+  )
+
+  vcov_full <- stats::vcov(fit, full = TRUE)
+  # `colnames()` here is itself a named vector (cond/disp/theta1...); strip those
+  # names so `which()` returns clean positions for the component index map below.
+  nm <- unname(colnames(vcov_full))
+  theta <- function(g) sprintf("theta_1|%s.1", g)
+  estimate <- stats::setNames(rep(NA_real_, length(nm)), nm)
+  estimate[["(Intercept)"]] <- as.numeric(
+    glmmTMB::fixef(fit)$cond[["(Intercept)"]]
+  )
+  estimate[["disp~(Intercept)"]] <- log(stats::sigma(fit))
+  estimate[[theta("cluster")]] <- log(sd_of("cluster"))
+  estimate[[theta("cluster:subject")]] <- log(sd_of("cluster:subject"))
+  estimate[[theta("rater")]] <- log(sd_of("rater"))
+  estimate[[theta("cluster:rater")]] <- log(sd_of("cluster:rater"))
+
+  if (anyNA(estimate)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg glmmTMB} parameter vector to its covariance.",
+        i = "Unmatched parameters: {.val {nm[is.na(estimate)]}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  ci <- c(
+    cluster = which(nm == theta("cluster")),
+    subject = which(nm == theta("cluster:subject")),
+    rater = which(nm == theta("rater")),
+    cluster_rater = which(nm == theta("cluster:rater")),
+    residual = which(nm == "disp~(Intercept)")
+  )
+  to_components <- function(par) {
+    list(
+      cluster = exp(2 * par[ci[["cluster"]], ]),
+      subject = exp(2 * par[ci[["subject"]], ]),
+      rater = exp(2 * par[ci[["rater"]], ]),
+      cluster_rater = exp(2 * par[ci[["cluster_rater"]], ]),
+      residual = exp(2 * par[ci[["residual"]], ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "glmmTMB",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_full,
+    to_components = to_components
+  )
+}
+
 # Fixed-rater engine (two-way mixed, McGraw & Wong Case 3 / 3A) ------------------
 #
 # Resolves the ADR-006 debt: on incomplete data the balanced-only "fixed ==

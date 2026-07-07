@@ -30,34 +30,56 @@
 #              the point estimate (M2 spec §3, ADR-006); on incomplete data the
 #              fixed fit genuinely differs (ADR-008). It changes the design
 #              phrase and the Shrout & Fleiss equivalent.
+#   * level  = (multilevel only, M5 spec §3) "subject" (within-cluster, signal
+#              sigma^2_{s:c}) vs "cluster" (between-cluster, signal sigma^2_c). At
+#              the cluster level the residual slot of the error set is the
+#              cluster x rater term. Multilevel ICCs have no Shrout & Fleiss form.
 icc_estimand <- function(
   type = "agreement",
   unit = "single",
   raters = "random",
-  k_eff = NA_real_
+  k_eff = NA_real_,
+  level = "subject",
+  multilevel = FALSE
 ) {
   type <- rlang::arg_match(type, c("agreement", "consistency"))
   raters <- rlang::arg_match(raters, c("random", "fixed"))
+  level <- rlang::arg_match(level, c("subject", "cluster"))
+  index <- unit_index(unit)
 
-  error <- switch(
-    type,
-    agreement = c("rater", "residual"),
-    consistency = "residual"
-  )
+  if (multilevel) {
+    # Multilevel Design 1 (ten Hove et al. 2022, Table 3): the signal is the
+    # subject- or cluster-level true-score variance, and the "residual" of the
+    # error set is sigma^2_res at the subject level but sigma^2_{cr} (cluster x
+    # rater) at the cluster level. Subject-level error is structurally identical
+    # to the single-level estimand (M5 §3a). No canonical SF label.
+    signal <- switch(level, subject = "subject", cluster = "cluster")
+    resid <- switch(level, subject = "residual", cluster = "cluster_rater")
+    error <- switch(type, agreement = c("rater", resid), consistency = resid)
+    sf <- NA_character_
+  } else {
+    signal <- "subject"
+    error <- switch(
+      type,
+      agreement = c("rater", "residual"),
+      consistency = "residual"
+    )
+    sf <- sf_label(type, raters, index)
+  }
 
   letter <- switch(type, agreement = "A", consistency = "C")
-  index <- unit_index(unit)
   label <- sprintf("ICC(%s,%s)", letter, index)
 
   list(
     label = label,
-    sf_label = sf_label(type, raters, index),
-    signal = "subject",
+    sf_label = sf,
+    signal = signal,
     error = error,
     unit = unit,
     divisor = resolve_divisor(unit, k_eff),
     type = type,
-    raters = raters
+    raters = raters,
+    level = if (multilevel) level else NA_character_
   )
 }
 
