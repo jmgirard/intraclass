@@ -163,25 +163,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 ## M8: Nested-rater multilevel ICCs — Designs 2/3 (ADR-016)
 - Goal: extend the multilevel estimator beyond M5's Design 1 to the paper's
-  **nested-rater designs** — raters nested within clusters (Design 2) and/or subjects
-  (Design 3) — **balanced/complete, random raters** (ten Hove, Jorgensen & van der Ark
-  2022, Eqs. 8–11, Table 3 middle/right). The direct analog of M5's Design-1 thin
-  scope (#15): ships the novel nested-rater estimand from the paper in hand, records
-  the combinatorial variants. Extends the M5 `cluster`/`level` API and five-component
-  fit (ADR-011); no new engine, no new `ci_method`. Estimand-spec required (changes
-  the fitted model): `estimand-specs/M8-nested-multilevel.md` (equations transcribed
-  from the paper, held pending the PDF). Oracles = the M5 O-ML pattern (lme4
-  cross-engine + seeded population recovery + reduction check; no textbook worked
-  example). Level coverage per design (subject-only vs. both) read off Table 3 at spec
-  time, not asserted.
-- Slices (mirror M5): **Slice 1 = Design 2** ✅ (design inferred from the crossing
-  pattern; four-component fit; O-NML/lme4 + sim + reduction-to-two-way),
-  **Slice 2 = Design 3** ✅ (raters nested in subjects; three-component multilevel
-  one-way; agreement-only ICC(1)/ICC(k); O-NML/lme4 + sim + reduction-to-M6-one-way),
-  **Slice 3 = docs** ✅ (advanced.Rmd nested-designs subsection + vignette-claims
-  invariants). Each estimand pinned by ≥2 oracles before shipping (#1/#2).
-- Estimand: [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md)
-  (written — Eqs. 8–11 + Table 3 transcribed); ADR-016.
+  **nested-rater designs** — raters nested within clusters (Design 2, four-component
+  fit) and/or subjects (Design 3, three-component multilevel *one-way*, agreement-only)
+  — balanced/complete random raters (ten Hove et al. 2022, Eqs. 8–11, Table 3
+  middle/right). The design (1/2/3) is **inferred from the crossing pattern** (spec §4);
+  mixed patterns abort (#5). Resolved from the paper: **subject-level only** (cluster
+  level undefined for nested designs) and **Design 3 agreement-only** → six subject-level
+  coefficients. Extends the M5 `cluster`/`level` API and fit (ADR-011); no new engine,
+  no new `ci_method`. Fixed a latent bug: a `cluster` column previously forced Design 1.
+- Estimand: [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md);
+  ADR-016. Oracles O-NML (lme4 cross-engine + seeded population recovery + reductions to
+  the M1/M2 two-way and M6 one-way estimands; no textbook worked example).
 - Deferred out of M8 (recorded so not rediscovered): **incomplete multilevel** (reuse
   M3 `k_eff`/connectedness); **fixed-rater multilevel** (reuse the M3 real fixed-effect
   fit path, ADR-008); **lme4 for the fixed (Case 3/3A) and multilevel fits** — its own
@@ -189,11 +181,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   these paths, ADR-012); the **Bayesian/MCMC cross-engine** (the paper's own
   estimator); a three-facet `d_study()` over subject-per-cluster counts; exposing the
   conflated single-level ICC (Eq. 14).
-- Status: all three slices code+docs complete and green locally (313 tests, `air`
-  clean); on branch `m8-nested-multilevel`, not yet merged. Resolved from the paper:
-  **subject-level only** (cluster level undefined for nested designs), **Design 3
-  agreement-only** → six coefficients (D2 agreement/consistency × single/average, D3
-  agreement × single/average). Next: push branch + open PR for the full CI matrix.
+- Status: done (Slices 1–3; merged via PR #12 at ca2dcdb; full CI matrix green incl.
+  Windows, 313 tests).
 
 ## M9: Release polish *(provisional)*
 - Goal: pkgdown site, advanced vignette, CRAN submission prep. *(was M7 → M9 per

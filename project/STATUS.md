@@ -1,40 +1,29 @@
 # Project status
 
-- Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **in progress**
-  (ADR-016; Slice 1)
-- Active task: **M8 all three slices code+docs complete, green locally** (Designs 2
-  & 3 inferred from crossing pattern; O-NML/lme4 + sim + reductions to two-way and
-  M6 one-way; advanced.Rmd nested subsection + vignette-claims; full suite 313 pass /
-  0 fail; `air`-clean; vignette knits). Next: **push `m8-nested-multilevel` + open
-  the PR** for the full CI matrix (incl. Windows — watch the absolute-vs-relative
-  interval-tolerance lesson). Spec:
-  [`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md).
-- Last green CI: PR #11 (M7) full matrix green; merged to `main` at fe76f5c
-- Blockers: — (paper obtained; Designs 2/3 equations transcribed into the spec)
-- Slice-1 API resolved (maintainer): design 1/2/3 **inferred from the crossing
-  pattern**, ambiguous → loud abort, detected design surfaced in print/glance (spec §4).
+- Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **done** (merged via
+  PR #12 at ca2dcdb)
+- Active task: — (next: retro + detail M9 — release polish)
+- Last green CI: PR #12 (M8) full matrix green incl. Windows; merged to `main` at
+  ca2dcdb
+- Blockers: —
 - Updated: 2026-07-07 by main session (Opus)
 
 ## Where we are
 
-**Shipped M0–M7** — see [`MILESTONES.md`](MILESTONES.md) for the record (single
+**Shipped M0–M8** — see [`MILESTONES.md`](MILESTONES.md) for the record (single
 source; not restated here, ADR-015). In short: the classic Shrout–Fleiss ICC family
-is complete, and glmmTMB, lme4, and lavaan are all selectable engines through the
-M5.5 engine × design dispatch seam.
+is complete; glmmTMB, lme4, and lavaan are selectable engines through the M5.5 engine ×
+design dispatch seam; and the multilevel estimator covers ten Hove et al. (2022)
+Designs 1–3 (crossed and both nested-rater designs).
 
 ## Next action
 
-**Start M8 Slice 1 — Design 2 (raters nested in clusters)** on a
-`m8-nested-multilevel` branch (`/start-task`). The estimand-spec
-[`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md) is written and
-scope is locked (ADR-016): Designs 2/3, **subject-level only** (cluster level
-undefined for nested designs), Design 3 **agreement-only**; six coefficients total.
-Slice 1 = the four-component Design-2 fit (`score ~ 1 + (1|cluster) +
-(1|cluster:subject) + (1|cluster:rater)`, our translation — oracle-pinned first),
-design detection (§4), the §3a map, and O-NML oracles (lme4 + sim + reduction to
-two-way). One Slice-1-start API decision to settle: how the design (1/2/3) is
-detected — inferred from the crossing pattern vs. an explicit `design` argument (§4).
-Incomplete-ML, fixed-ML, and lme4-multilevel parity remain deferred (MILESTONES M8).
+**Retro + detail M9** (release polish) — currently a provisional one-liner (pkgdown
+site, advanced vignette, CRAN submission prep). Per the process (#2, brief §7), run a
+short M8 retro, then resolve M9 scope with the maintainer and write the DoD before
+work. M9 is the last planned milestone; its remaining inputs are the ROADMAP
+parking-lot items plus the M8 deferrals (incomplete-ML, fixed-ML, lme4-multilevel
+parity) — decide which, if any, are in scope for a first release vs. post-CRAN.
 
 Also parked and un-scheduled: the **Bayesian engine** (rstanarm + a new
 `ci_method = "posterior"`), and **one-way / general ICC(1) via SEM** (no faithful
