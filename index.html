@@ -35,9 +35,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
+<li><a class="dropdown-item" href="articles/getting-started.html">Getting started</a></li>
     <li><a class="dropdown-item" href="articles/choosing-an-icc.html">Choosing an ICC</a></li>
-    <li><a class="dropdown-item" href="articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -62,7 +62,7 @@
 <p><strong>intraclass</strong> computes interrater-reliability <strong>intraclass correlation coefficients (ICCs)</strong> within the generalizability-theory framework, using <strong>modern variance-component estimation</strong> (linear mixed models) rather than the classical ANOVA / mean-squares approach.</p>
 <p>It aims to (1) fit variance components with modern engines, (2) compute the <em>correct</em> ICC for a stated design with proper (boundary-aware Monte-Carlo) interval estimation, (3) handle imbalanced, incomplete, and multilevel designs, and (4) help you decide <strong>which ICC to choose, and why</strong> — the docs and website are a place to learn ICC best practice, not just call functions.</p>
 <blockquote>
-<p>[!NOTE] This package is in early development. The first estimator — two-way random, absolute-agreement <code>ICC(A,1)</code> / <code>ICC(A,k)</code> — is the current milestone (M1). See <code>project/MILESTONES.md</code> for the roadmap.</p>
+<p>[!NOTE] This package is in active development. The two-way designs are implemented: absolute-agreement and consistency ICCs, single and average, random and fixed raters, and imbalanced/incomplete (missing-cell) designs — each with boundary-aware Monte-Carlo intervals. The current milestone is the <a href="https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html"><em>Choosing an ICC</em></a> decision guide. See <code>project/MILESTONES.md</code> for the roadmap.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -76,10 +76,20 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
+<p><code>ratings</code> is the classic Shrout &amp; Fleiss (1979) example, shipped with the package. The defaults give the two-way random, absolute-agreement <code>ICC(A,1)</code> and <code>ICC(A,k)</code> with a reproducible Monte-Carlo interval:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span>
-<span><span class="co">## The icc() interface lands in Milestone 1:</span></span>
-<span><span class="co">## icc(data, score, subject, rater, type = "agreement", unit = c("single", "average"))</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(A,1)    0.290   [0.053, 0.715]</span></span>
+<span><span class="co">#&gt;   ICC(A,k)    0.620   [0.182, 0.910]</span></span>
+<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
+<p>Which coefficient you want — agreement vs. consistency, single vs. average, fixed vs. random raters, complete vs. incomplete — is a real modelling decision. The <a href="https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html"><em>Choosing an ICC</em></a> guide walks through it.</p>
 </div>
 <div class="section level2">
 <h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>

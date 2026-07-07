@@ -18,9 +18,9 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
     <li><a class="dropdown-item" href="../articles/choosing-an-icc.html">Choosing an ICC</a></li>
-    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -40,7 +40,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="intraclass-0009000">intraclass 0.0.0.9000<a class="anchor" aria-label="anchor" href="#intraclass-0009000"></a></h2>
-<ul><li>
+<ul><li>New datasets <code>ratings</code> (the complete Shrout &amp; Fleiss 1979 example) and <code>ratings_incomplete</code> (a connected incomplete variant), used throughout the docs and examples. A new <strong>Choosing an ICC</strong> article walks through the whole decision – agreement vs. consistency, single vs. average, random vs. fixed, and complete vs. incomplete – with a decision-tree diagram.</li>
+<li>
+<code><a href="../reference/icc.html">icc()</a></code> handles <strong>imbalanced and incomplete</strong> subject-by-rater designs (missing cells) via the mixed model: it detects the design, uses the effective number of ratings <code>k_eff</code> (the harmonic mean of the per-subject counts) as the <code>ICC(*,k)</code> divisor, and aborts loudly on a disconnected (unidentified) design. <code>raters = "fixed"</code> now fits raters as fixed effects, so it differs from <code>"random"</code> on incomplete data (the two still coincide when balanced).</li>
+<li>
 <code><a href="../reference/icc.html">icc()</a></code> gains <strong>consistency</strong> coefficients <code>ICC(C,1)</code>/<code>ICC(C,k)</code> via <code>type = "consistency"</code> (drops the rater main effect from the error) and a <code>raters = c("random", "fixed")</code> argument. On balanced data, fixed raters is a labelling layer over the same fit (two-way mixed, Shrout &amp; Fleiss <code>ICC(3,*)</code>); it is opt-in and warns, since random is the recommended default for interrater reliability. <code>print</code>/<code>summary</code> now report the design and the Shrout &amp; Fleiss equivalent. Verified against the published <code>ICC(3,*)</code> values, <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC</a></code>, and a fixed-vs-random equivalence check.</li>
 <li>
 <code><a href="../reference/icc.html">icc()</a></code> computes two-way random, absolute-agreement intraclass correlation coefficients <code>ICC(A,1)</code> and <code>ICC(A,k)</code> from a <code>glmmTMB</code> linear mixed model, with boundary-aware Monte-Carlo confidence intervals, <code>print</code>/<code>summary</code>/<code>format</code> methods and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>/<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>. Verified against the Shrout &amp; Fleiss (1979) worked example, <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC</a></code>, a package-independent ANOVA mean-squares oracle, a seeded simulation, and an lme4 cross-check.</li>

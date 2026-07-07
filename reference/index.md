@@ -12,3 +12,12 @@ subject-by-rater designs.
   [`glance(`*`<icc>`*`)`](https://jmgirard.github.io/intraclass/reference/icc.md)
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) :
   Intraclass correlation coefficient for a two-way design
+
+## Datasets
+
+Worked rater-reliability examples used across the docs and vignettes.
+
+- [`ratings`](https://jmgirard.github.io/intraclass/reference/ratings.md)
+  : Rater reliability example (Shrout & Fleiss, 1979)
+- [`ratings_incomplete`](https://jmgirard.github.io/intraclass/reference/ratings_incomplete.md)
+  : Rater reliability example with missing cells

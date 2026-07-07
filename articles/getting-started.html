@@ -33,9 +33,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
+<li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
     <li><a class="dropdown-item" href="../articles/choosing-an-icc.html">Choosing an ICC</a></li>
-    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -76,22 +76,13 @@ small, balanced example: <strong>fit → ICC → interpret</strong>.</p>
 <div class="section level2">
 <h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
 </h2>
-<p>We use the classic Shrout &amp; Fleiss (1979) example: 6 subjects
-each rated by the same 4 raters, one rating per cell.
-<code>intraclass</code> wants <strong>long</strong> format — one rating
-per row.</p>
+<p>We use the classic Shrout &amp; Fleiss (1979) example, shipped with
+the package as <code>ratings</code>: 6 subjects each rated by the same 4
+raters, one rating per cell. <code>intraclass</code> wants
+<strong>long</strong> format — one rating per row, with columns for the
+subject, the rater, and the score.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ratings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, times <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, each <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="fl">9</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">7</span>, <span class="fl">10</span>, <span class="fl">6</span>, <span class="co"># rater 1</span></span>
-<span>    <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">2</span>, <span class="co"># rater 2</span></span>
-<span>    <span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">2</span>, <span class="fl">6</span>, <span class="fl">4</span>, <span class="co"># rater 3</span></span>
-<span>    <span class="fl">8</span>, <span class="fl">2</span>, <span class="fl">8</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">7</span> <span class="co"># rater 4</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ratings</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ratings</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   subject rater score</span></span>
 <span><span class="co">#&gt; 1       1     1     9</span></span>
 <span><span class="co">#&gt; 2       2     1     6</span></span>
@@ -196,8 +187,9 @@ number is identical anyway.</p>
 </h2>
 <p>Absolute agreement vs. consistency, single vs. average, fixed
 vs. random raters, complete vs. incomplete designs — these choices
-define <em>which</em> ICC is correct for your study. A dedicated
-“Choosing an ICC” article covers that decision in depth.</p>
+define <em>which</em> ICC is correct for your study. The <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> article
+(<code><a href="../articles/choosing-an-icc.html">vignette("choosing-an-icc")</a></code>) covers that decision in
+depth.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

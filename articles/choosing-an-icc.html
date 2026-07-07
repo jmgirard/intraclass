@@ -33,9 +33,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
+<li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
     <li><a class="dropdown-item" href="../articles/choosing-an-icc.html">Choosing an ICC</a></li>
-    <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -67,35 +67,307 @@
 
     
     
+<p>“Which ICC should I report?” is the question this package is built to
+answer. There is no single intraclass correlation: the label hides a
+family of coefficients that estimate <em>different</em> population
+quantities. Report the wrong one and you can overstate reliability by a
+wide margin, or penalise a rating procedure for differences that do not
+matter to you.</p>
+<p>Four choices pin down the coefficient. Each is a single argument to
+<code><a href="../reference/icc.html">icc()</a></code>, and each is a genuine decision about your
+measurement – not a technicality.</p>
+<p><img src="choosing-icc-tree.svg" class="r-plt" alt="A four-step decision flow: agreement vs. consistency (type), single vs. average (unit), random vs. fixed raters (raters), and complete vs. incomplete designs, each mapping to an icc() argument." width="100%"></p>
+<p>We work through the four choices on one dataset so the numbers are
+comparable.</p>
 <div class="section level2">
-<h2 id="the-decision-framework">The decision framework<a class="anchor" aria-label="anchor" href="#the-decision-framework"></a>
+<h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
 </h2>
-<p>The flagship teaching article. It will guide you through the choices
-that define <em>which</em> ICC you need:</p>
-<ul>
-<li>
-<strong>Absolute agreement vs. consistency</strong> — does the
-actual value matter, or only rank order?</li>
-<li>
-<strong>Single vs. average</strong> — are you reporting one rater,
-or the mean of <em>k</em>?</li>
-<li>
-<strong>Fixed vs. random raters</strong> — are your raters the whole
-population of interest, or a sample you generalize from?</li>
-<li>
-<strong>Complete vs. incomplete</strong> — is every subject rated by
-every rater?</li>
-<li>
-<strong>Subject- vs. cluster-level</strong> — where does the object
-of measurement sit?</li>
-</ul>
-<blockquote>
-<p>This is a placeholder. The full decision framework is written in
-<strong>Milestone 3</strong> (<code>project/MILESTONES.md</code>), the
-milestone where incomplete designs make the choice consequential.</p>
-</blockquote>
+<p><code>ratings</code> is the six-subject, four-rater example of Shrout
+and Fleiss (1979), in the long, one-row-per-rating format
+<code><a href="../reference/icc.html">icc()</a></code> expects. Every subject is rated by every rater, so it
+is a complete, balanced two-way design – the clean case in which the
+choices below are easiest to see.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ratings</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    24 obs. of  3 variables:</span></span>
+<span><span class="co">#&gt;  $ subject: Factor w/ 6 levels "1","2","3","4",..: 1 2 3 4 5 6 1 2 3 4 ...</span></span>
+<span><span class="co">#&gt;  $ rater  : Factor w/ 4 levels "1","2","3","4": 1 1 1 1 1 1 2 2 2 2 ...</span></span>
+<span><span class="co">#&gt;  $ score  : num  9 6 8 7 10 6 2 1 4 1 ...</span></span></code></pre></div>
 </div>
-  </main>
+<div class="section level2">
+<h2 id="agreement-vs--consistency-type">1. Agreement vs. consistency (<code>type</code>)<a class="anchor" aria-label="anchor" href="#agreement-vs--consistency-type"></a>
+</h2>
+<p><strong>Does the actual value need to match, or only the rank
+order?</strong> <em>Absolute agreement</em> treats a systematic
+difference between raters – one judge scoring consistently higher than
+another – as error. <em>Consistency</em> forgives a constant per-rater
+offset and asks only whether raters rank subjects the same way.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">agreement</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">agreement</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(A,1)    0.290   [0.050, 0.713]</span></span>
+<span><span class="co">#&gt;   ICC(A,k)    0.620   [0.173, 0.909]</span></span>
+<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span>
+<span></span>
+<span><span class="va">consistency</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">consistency</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, consistency</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(C,1)    0.715   [0.343, 0.924]</span></span>
+<span><span class="co">#&gt;   ICC(C,k)    0.909   [0.676, 0.980]</span></span>
+<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></code></pre></div>
+<p>Here <code>ICC(A,1)</code> is 0.29 but <code>ICC(C,1)</code> is 0.71.
+The gap is not noise – it is a direct read-out of how much the raters
+differ in average level. Consistency is never smaller than agreement,
+because it drops a source of error. Choose <strong>agreement</strong>
+when the number itself must be trusted (a clinical score, a physical
+measurement) and <strong>consistency</strong> when only relative
+standing matters (ranking applicants).</p>
+</div>
+<div class="section level2">
+<h2 id="single-vs--average-unit">2. Single vs. average (<code>unit</code>)<a class="anchor" aria-label="anchor" href="#single-vs--average-unit"></a>
+</h2>
+<p><strong>Will you use one rater’s score, or the mean of
+several?</strong> <code><a href="../reference/icc.html">icc()</a></code> returns both rows by default:
+<code>ICC(*,1)</code> is the reliability of a <em>single</em> rater, and
+<code>ICC(*,k)</code> is the reliability of the <em>mean</em> of your
+<code>k</code> raters. Averaging cancels independent error, so
+<code>ICC(*,k)</code> is always the larger number (the Spearman–Brown
+relationship).</p>
+<p>For absolute agreement above, the single-rater 0.29 rises to 0.62 for
+the four-rater mean. Report <code>ICC(*,k)</code> only if the averaged
+score is what you will actually act on; if downstream users see one
+rater’s judgement, <code>ICC(*,1)</code> is the honest figure. Request
+one or both with <code>unit = "single"</code>,
+<code>unit = "average"</code>, or the default
+<code>c("single", "average")</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="random-vs--fixed-raters-raters">3. Random vs. fixed raters (<code>raters</code>)<a class="anchor" aria-label="anchor" href="#random-vs--fixed-raters-raters"></a>
+</h2>
+<p><strong>Are your raters a sample you want to generalize beyond, or
+the entire population of interest?</strong> <em>Random</em> raters (the
+default) are a sample; the coefficient generalizes to the rater universe
+they were drawn from. <em>Fixed</em> raters are the only judges you care
+about, and the coefficient does not generalize past them.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, raters <span class="op">=</span> <span class="st">"fixed"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Modeling raters as <span style="font-weight: bold;">fixed</span> restricts inference to exactly these raters; you</span></span>
+<span><span class="co">#&gt; cannot generalize to other raters.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> For interrater reliability, the two-way <span style="font-weight: bold;">random</span> model (`raters = "random"`) is</span></span>
+<span><span class="co">#&gt;   the recommended default (ten Hove et al. 2024; McGraw &amp; Wong 1996, Case 2).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use <span style="color: #0000BB;">"fixed"</span> only when these are the entire population of raters you will ever</span></span>
+<span><span class="co">#&gt;   use.</span></span></code></pre></div>
+<p><code><a href="../reference/icc.html">icc()</a></code> warns on <code>raters = "fixed"</code> because
+random is the recommended default for interrater reliability: fixing the
+raters answers a narrower question. On this <strong>balanced</strong>
+design the fixed and random <em>point estimates</em> coincide, but they
+are fit by different models and their intervals differ – and on
+<strong>incomplete</strong> data even the point estimates diverge (see
+below). Prefer <strong>random</strong> unless you truly never intend to
+generalize beyond these exact raters.</p>
+</div>
+<div class="section level2">
+<h2 id="complete-vs--incomplete-designs">4. Complete vs. incomplete designs<a class="anchor" aria-label="anchor" href="#complete-vs--incomplete-designs"></a>
+</h2>
+<p><strong>Is every subject rated by every rater?</strong> When cells
+are missing, the classical ANOVA identities break down, but the mixed
+model <code><a href="../reference/icc.html">icc()</a></code> fits does not – it uses whatever ratings are
+present. Two things change automatically:</p>
+<ul>
+<li>The design must stay <strong>connected</strong> (the raters and
+subjects must form a single linked web); a disconnected design cannot
+separate subject from rater variance, and <code><a href="../reference/icc.html">icc()</a></code> fails
+loudly rather than returning a plausible-looking number.</li>
+<li>The averaging divisor for <code>ICC(*,k)</code> becomes the
+<em>effective</em> number of ratings, <code>k_eff</code>, the harmonic
+mean of the per-subject counts – so it honestly reflects the ragged
+averages you actually computed.</li>
+</ul>
+<div class="section level3">
+<h3 id="a-worked-incomplete-design">A worked incomplete design<a class="anchor" aria-label="anchor" href="#a-worked-incomplete-design"></a>
+</h3>
+<p><code>ratings_incomplete</code> is <code>ratings</code> with one
+change: rater 2 acted as a pilot and scored only the first two subjects,
+leaving four empty cells.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">inc</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 20 of 24 cells (incomplete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(A,1)    0.249   [0.038, 0.693]</span></span>
+<span><span class="co">#&gt;   ICC(A,k)    0.521   [0.114, 0.881]</span></span>
+<span><span class="co">#&gt; ICC(*,k) projects to an effective 3.27 raters (harmonic mean of ratings/subject).</span></span>
+<span><span class="co">#&gt; Variance components: subject 2.281, rater 5.532, residual 1.344</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
+<p>The header now reads <code>20 of 24 cells (incomplete)</code>, and
+<code>ICC(*,k)</code> averages over an <em>effective</em> 3.27 raters
+rather than 4 – the harmonic mean of the per-subject counts (four
+subjects were seen by three raters, two by all four). The estimate sits
+a little below the complete-data value, as fewer ratings warrant.</p>
+</div>
+<div class="section level3">
+<h3 id="fixed-and-random-now-diverge">Fixed and random now diverge<a class="anchor" aria-label="anchor" href="#fixed-and-random-now-diverge"></a>
+</h3>
+<p>On the balanced <code>ratings</code>, <code>raters = "fixed"</code>
+and <code>raters = "random"</code> returned the same point estimate. On
+incomplete data they no longer do: they are different models, and the
+missing cells give them different information about the rater
+effects.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">random_inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  raters <span class="op">=</span> <span class="st">"random"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">fixed_inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  raters <span class="op">=</span> <span class="st">"fixed"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">random_inc</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"index"</span>, <span class="st">"estimate"</span>, <span class="st">"conf.low"</span>, <span class="st">"conf.high"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">#&gt;   index    estimate conf.low conf.high</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1)    0.249   0.038<span style="text-decoration: underline;">0</span>     0.693</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k)    0.521   0.114      0.881</span></span>
+<span><span class="va">fixed_inc</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"index"</span>, <span class="st">"estimate"</span>, <span class="st">"conf.low"</span>, <span class="st">"conf.high"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">#&gt;   index    estimate conf.low conf.high</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1)    0.236   0.055<span style="text-decoration: underline;">2</span>     0.614</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k)    0.503   0.161      0.839</span></span></code></pre></div>
+<p>The random interval is the wider of the two: generalizing to a rater
+universe carries the extra uncertainty of <em>which</em> raters you
+happened to sample, whereas fixing the raters removes it. This is why
+the choice matters more once data are incomplete.</p>
+</div>
+<div class="section level3">
+<h3 id="when-a-design-is-not-identified">When a design is not identified<a class="anchor" aria-label="anchor" href="#when-a-design-is-not-identified"></a>
+</h3>
+<p>Connectedness is not a formality. If the raters split into groups
+that never share subjects, a subject difference cannot be told apart
+from a rater difference, and <code><a href="../reference/icc.html">icc()</a></code> stops rather than
+returning a plausible-looking number:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">disconnected</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">8</span>, <span class="fl">6</span>, <span class="fl">7</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">disconnected</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `icc()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The subject-by-rater design is disconnected, so the subject and rater</span></span>
+<span><span class="co">#&gt;   variances cannot be separated.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Every subject and rater must be linked through shared ratings (one connected</span></span>
+<span><span class="co">#&gt;   design).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> For unlinked rater groups, a one-way ICC (planned) or additional linking</span></span>
+<span><span class="co">#&gt;   ratings are needed.</span></span></code></pre></div>
+<p>Subjects 1–2 are rated only by raters 1–2, and subjects 3–4 only by
+raters 3–4: two islands with no bridge between them. This is precisely
+the ill-posed case the package refuses to guess at.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="a-fifth-choice-coming-later-subject--vs--cluster-level">A fifth choice, coming later: subject- vs. cluster-level<a class="anchor" aria-label="anchor" href="#a-fifth-choice-coming-later-subject--vs--cluster-level"></a>
+</h2>
+<p>Everything above takes the subject as the object of measurement. When
+subjects are themselves nested in higher-level units – pupils within
+classrooms, patients within clinics – you may instead want the
+reliability of the <em>cluster</em> mean, a multilevel ICC (ten Hove,
+Jorgensen &amp; van der Ark, 2021). That axis is on the roadmap and will
+get its own treatment; for now <code><a href="../reference/icc.html">icc()</a></code> covers the
+single-level two-way design.</p>
+</div>
+<div class="section level2">
+<h2 id="naming-crosswalk">Naming crosswalk<a class="anchor" aria-label="anchor" href="#naming-crosswalk"></a>
+</h2>
+<p>Two older naming schemes are still common. <code><a href="../reference/icc.html">icc()</a></code> prints
+both its own McGraw–Wong label and, where one exists, the Shrout–Fleiss
+number:</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="27%">
+<col width="29%">
+</colgroup>
+<thead><tr class="header">
+<th>Your choice (<code>type</code> × <code>raters</code>)</th>
+<th>McGraw &amp; Wong (1996)</th>
+<th>Shrout &amp; Fleiss (1979)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>agreement × random</td>
+<td>
+<code>ICC(A,1)</code>, <code>ICC(A,k)</code>
+</td>
+<td>
+<code>ICC(2,1)</code>, <code>ICC(2,k)</code>
+</td>
+</tr>
+<tr class="even">
+<td>consistency × fixed</td>
+<td>
+<code>ICC(C,1)</code>, <code>ICC(C,k)</code>
+</td>
+<td>
+<code>ICC(3,1)</code>, <code>ICC(3,k)</code>
+</td>
+</tr>
+<tr class="odd">
+<td>consistency × random</td>
+<td>
+<code>ICC(C,1)</code>, <code>ICC(C,k)</code>
+</td>
+<td><em>(no classic name)</em></td>
+</tr>
+<tr class="even">
+<td>agreement × fixed</td>
+<td>
+<code>ICC(A,1)</code>, <code>ICC(A,k)</code>
+</td>
+<td><em>(no classic name)</em></td>
+</tr>
+</tbody>
+</table>
+<p>The two off-diagonal rows are worth noticing: the classic
+Shrout–Fleiss triplet
+<code>ICC(1,·)</code>/<code>ICC(2,·)</code>/<code>ICC(3,·)</code> never
+named a two-way <em>random consistency</em> or a two-way <em>fixed
+absolute-agreement</em> coefficient, even though both are perfectly
+well-defined estimands that <code><a href="../reference/icc.html">icc()</a></code> computes.</p>
+</div>
+<div class="section level2">
+<h2 id="in-one-sentence">In one sentence<a class="anchor" aria-label="anchor" href="#in-one-sentence"></a>
+</h2>
+<p>Pick <strong>agreement vs. consistency</strong> by whether the value
+or only the rank must match; <strong>single vs. average</strong> by how
+many raters you will actually use; <strong>random vs. fixed</strong> by
+whether you generalize beyond these raters; and let <code><a href="../reference/icc.html">icc()</a></code>
+handle <strong>complete vs. incomplete</strong> for you, provided the
+design stays connected.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about
+some intraclass correlation coefficients. <em>Psychological Methods,
+1</em>(1), 30–46.</p>
+<p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations:
+Uses in assessing rater reliability. <em>Psychological Bulletin,
+86</em>(2), 420–428.</p>
+<p>ten Hove, D., Jorgensen, T. D., &amp; van der Ark, L. A. (2021).
+Updated guidelines on selecting an intraclass correlation coefficient
+for interrater reliability, with applications to incomplete
+observational designs. <em>Psychological Methods</em>.</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
