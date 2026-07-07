@@ -112,8 +112,9 @@ test_that("averaging raises reliability: ICC(A,k) > ICC(A,1)", {
 test_that("print() output is stable", {
   skip_if_not_installed("glmmTMB")
 
-  # Seeded so the Monte-Carlo CI in the printout is deterministic (#12); an
-  # unseeded fit would make this snapshot flaky.
+  # Seeded for determinism (#12); the CI digits are masked because they vary at
+  # ~1e-3 across platforms even when seeded (see helper-format.R). The point
+  # estimates and variance components in the printout remain checked verbatim.
   fit <- fit_sf_agreement(seed = 1)
-  expect_snapshot(print(fit))
+  expect_snapshot(print(fit), transform = mask_ci)
 })

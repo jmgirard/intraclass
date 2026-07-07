@@ -44,5 +44,5 @@ test_that("summary() prints the report plus interpretive notes", {
   skip_if_not_installed("glmmTMB")
 
   fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
-  expect_snapshot(summary(fit))
+  expect_snapshot(summary(fit), transform = mask_ci)
 })
