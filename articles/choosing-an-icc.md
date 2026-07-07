@@ -37,6 +37,39 @@ str(ratings)
 #>  $ score  : num  9 6 8 7 10 6 2 1 4 1 ...
 ```
 
+## A prior question: are the raters crossed? (`model`)
+
+**Is every subject rated by the *same* set of raters, or by a different
+set each time?** If the same raters judge everyone (a *crossed*, two-way
+design, like `ratings`), keep the default `model = "twoway"` and the
+four choices below apply. If instead each subject is rated by whichever
+raters happened to be available – so “rater 1” for one subject has
+nothing to do with “rater 1” for another – the raters are
+*interchangeable* and the design is **one-way** (`model = "oneway"`).
+
+``` r
+
+oneway <- icc(ratings, score, subject, rater, model = "oneway", seed = 2024)
+oneway
+#> # Intraclass correlation: one-way random
+#> Subjects: 6 | Ratings: 24 (4 per subject, balanced) | raters interchangeable
+#> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#>   index     estimate   95% CI
+#>   ICC(1)      0.166   [0.008, 0.838]
+#>   ICC(k)      0.443   [0.032, 0.954]
+#> Variance components: subject 1.244, residual 6.264 (rater confounded)
+#> Shrout & Fleiss equivalent: ICC(1) = ICC(1,1), ICC(k) = ICC(1,k)
+```
+
+A one-way model cannot separate systematic rater differences from error,
+so it folds them into the residual and reports a single `ICC(1)` /
+`ICC(k)`. That makes it the **most conservative** coefficient: on this
+data `ICC(1)` is 0.17, below the two-way `ICC(A,1)` and `ICC(C,1)` you
+will see next, precisely because those separate the rater effect that
+one-way absorbs. The agreement/consistency and fixed/random choices
+below do not apply to one-way (there is no rater term to reason about) –
+so answer this question first.
+
 ## 1. Agreement vs. consistency (`type`)
 
 **Does the actual value need to match, or only the rank order?**
@@ -217,8 +250,8 @@ icc(disconnected, score, subject, rater)
 #>   variances cannot be separated.
 #> ℹ Every subject and rater must be linked through shared ratings (one connected
 #>   design).
-#> ℹ For unlinked rater groups, a one-way ICC (planned) or additional linking
-#>   ratings are needed.
+#> ℹ For unlinked rater groups, a one-way ICC (`model = "oneway"`) or additional
+#>   linking ratings are needed.
 ```
 
 Subjects 1–2 are rated only by raters 1–2, and subjects 3–4 only by

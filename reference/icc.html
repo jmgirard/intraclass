@@ -124,12 +124,20 @@ section). Left <code>NULL</code> (the default) for an ordinary single-level two-
 
 
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
-<dd><p>Design. Only <code>"twoway"</code> is currently supported.</p></dd>
+<dd><p>Design: <code>"twoway"</code> (the default; subjects crossed with a common
+set of raters) or <code>"oneway"</code> (each subject rated by a possibly different set
+of raters). Under <code>"oneway"</code> (Shrout &amp; Fleiss Case 1) the raters are treated
+as <strong>interchangeable</strong> – the <code>rater</code> column is used only to count the ratings
+per subject, its labels are ignored, and there is no rater main effect to
+model, so <code>type</code> does not apply and the coefficients are <code>ICC(1)</code> / <code>ICC(k)</code>.
+Fixed raters and a <code>cluster</code> (multilevel) structure are not defined for a
+one-way design.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>Error definition: <code>"agreement"</code> (absolute agreement, the default)
-counts systematic rater differences as error; <code>"consistency"</code> ignores them.</p></dd>
+<dd><p>Error definition (two-way only): <code>"agreement"</code> (absolute agreement,
+the default) counts systematic rater differences as error; <code>"consistency"</code>
+ignores them. Not applicable when <code>model = "oneway"</code>.</p></dd>
 
 
 <dt id="arg-raters">raters<a class="anchor" aria-label="anchor" href="#arg-raters"></a></dt>

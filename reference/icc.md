@@ -75,13 +75,20 @@ icc(
 
 - model:
 
-  Design. Only `"twoway"` is currently supported.
+  Design: `"twoway"` (the default; subjects crossed with a common set of
+  raters) or `"oneway"` (each subject rated by a possibly different set
+  of raters). Under `"oneway"` (Shrout & Fleiss Case 1) the raters are
+  treated as **interchangeable** – the `rater` column is used only to
+  count the ratings per subject, its labels are ignored, and there is no
+  rater main effect to model, so `type` does not apply and the
+  coefficients are `ICC(1)` / `ICC(k)`. Fixed raters and a `cluster`
+  (multilevel) structure are not defined for a one-way design.
 
 - type:
 
-  Error definition: `"agreement"` (absolute agreement, the default)
-  counts systematic rater differences as error; `"consistency"` ignores
-  them.
+  Error definition (two-way only): `"agreement"` (absolute agreement,
+  the default) counts systematic rater differences as error;
+  `"consistency"` ignores them. Not applicable when `model = "oneway"`.
 
 - raters:
 

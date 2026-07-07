@@ -3,6 +3,19 @@
 ## intraclass 0.0.0.9000
 
 - [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+  gains **`model = "oneway"`** for one-way random designs (Shrout &
+  Fleiss Case 1), where each subject is rated by a possibly different,
+  interchangeable set of raters. It reports `ICC(1)` (single) and
+  `ICC(k)` (average) from a `score ~ 1 + (1 | subject)` fit with no
+  rater term — so systematic rater differences are absorbed into the
+  residual, giving the most conservative ICC. The `rater` column is
+  still supplied but only counts the ratings per subject (its labels are
+  ignored); `type`, fixed raters, and `cluster` do not apply. Numeric
+  `unit` (D-study projection) works here too. Completes the classic
+  Shrout & Fleiss family; verified against the published values (0.166 /
+  0.443), [`psych::ICC`](https://rdrr.io/pkg/psych/man/ICC.html),
+  one-way ANOVA mean squares, both engines, and a seeded simulation.
+- [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   gains a selectable **`engine = "lme4"`** alongside the default
   `"glmmTMB"` for the random two-way design. Both fit the variance
   components by REML and agree to numerical tolerance; the lme4

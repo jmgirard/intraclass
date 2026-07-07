@@ -126,9 +126,11 @@ on balanced data the number is identical anyway.
 
 ## Which ICC do I want?
 
-Absolute agreement vs. consistency, single vs. average, fixed vs. random
-raters, complete vs. incomplete designs — these choices define *which*
-ICC is correct for your study. The [*Choosing an
+Whether the raters are crossed (the same set judges everyone) or
+interchangeable (`model = "oneway"`), absolute agreement
+vs. consistency, single vs. average, fixed vs. random raters, complete
+vs. incomplete designs — these choices define *which* ICC is correct for
+your study. The [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
 article
 ([`vignette("choosing-an-icc")`](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md))

@@ -95,6 +95,39 @@ choices below are easiest to see.</p>
 <span><span class="co">#&gt;  $ score  : num  9 6 8 7 10 6 2 1 4 1 ...</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="a-prior-question-are-the-raters-crossed-model">A prior question: are the raters crossed? (<code>model</code>)<a class="anchor" aria-label="anchor" href="#a-prior-question-are-the-raters-crossed-model"></a>
+</h2>
+<p><strong>Is every subject rated by the <em>same</em> set of raters, or
+by a different set each time?</strong> If the same raters judge everyone
+(a <em>crossed</em>, two-way design, like <code>ratings</code>), keep
+the default <code>model = "twoway"</code> and the four choices below
+apply. If instead each subject is rated by whichever raters happened to
+be available – so “rater 1” for one subject has nothing to do with
+“rater 1” for another – the raters are <em>interchangeable</em> and the
+design is <strong>one-way</strong> (<code>model = "oneway"</code>).</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">oneway</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, model <span class="op">=</span> <span class="st">"oneway"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">oneway</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: one-way random</span></span>
+<span><span class="co">#&gt; Subjects: 6 | Ratings: 24 (4 per subject, balanced) | raters interchangeable</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(1)      0.166   [0.008, 0.838]</span></span>
+<span><span class="co">#&gt;   ICC(k)      0.443   [0.032, 0.954]</span></span>
+<span><span class="co">#&gt; Variance components: subject 1.244, residual 6.264 (rater confounded)</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(1) = ICC(1,1), ICC(k) = ICC(1,k)</span></span></code></pre></div>
+<p>A one-way model cannot separate systematic rater differences from
+error, so it folds them into the residual and reports a single
+<code>ICC(1)</code> / <code>ICC(k)</code>. That makes it the
+<strong>most conservative</strong> coefficient: on this data
+<code>ICC(1)</code> is 0.17, below the two-way <code>ICC(A,1)</code> and
+<code>ICC(C,1)</code> you will see next, precisely because those
+separate the rater effect that one-way absorbs. The
+agreement/consistency and fixed/random choices below do not apply to
+one-way (there is no rater term to reason about) – so answer this
+question first.</p>
+</div>
+<div class="section level2">
 <h2 id="agreement-vs--consistency-type">1. Agreement vs. consistency (<code>type</code>)<a class="anchor" aria-label="anchor" href="#agreement-vs--consistency-type"></a>
 </h2>
 <p><strong>Does the actual value need to match, or only the rank
@@ -102,7 +135,7 @@ order?</strong> <em>Absolute agreement</em> treats a systematic
 difference between raters – one judge scoring consistently higher than
 another – as error. <em>Consistency</em> forgives a constant per-rater
 offset and asks only whether raters rank subjects the same way.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">agreement</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">agreement</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
@@ -157,7 +190,7 @@ the entire population of interest?</strong> <em>Random</em> raters (the
 default) are a sample; the coefficient generalizes to the rater universe
 they were drawn from. <em>Fixed</em> raters are the only judges you care
 about, and the coefficient does not generalize past them.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, raters <span class="op">=</span> <span class="st">"fixed"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Modeling raters as <span style="font-weight: bold;">fixed</span> restricts inference to exactly these raters; you</span></span>
 <span><span class="co">#&gt; cannot generalize to other raters.</span></span>
@@ -197,7 +230,7 @@ averages you actually computed.</li>
 <p><code>ratings_incomplete</code> is <code>ratings</code> with one
 change: rater 2 acted as a pilot and scored only the first two subjects,
 leaving four empty cells.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">inc</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
@@ -223,7 +256,7 @@ and <code>raters = "random"</code> returned the same point estimate. On
 incomplete data they no longer do: they are different models, and the
 missing cells give them different information about the rater
 effects.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">random_inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
 <span>  raters <span class="op">=</span> <span class="st">"random"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">fixed_inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
@@ -253,7 +286,7 @@ the choice matters more once data are incomplete.</p>
 that never share subjects, a subject difference cannot be told apart
 from a rater difference, and <code><a href="../reference/icc.html">icc()</a></code> stops rather than
 returning a plausible-looking number:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disconnected</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -265,8 +298,8 @@ returning a plausible-looking number:</p>
 <span><span class="co">#&gt;   variances cannot be separated.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Every subject and rater must be linked through shared ratings (one connected</span></span>
 <span><span class="co">#&gt;   design).</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> For unlinked rater groups, a one-way ICC (planned) or additional linking</span></span>
-<span><span class="co">#&gt;   ratings are needed.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> For unlinked rater groups, a one-way ICC (`model = "oneway"`) or additional</span></span>
+<span><span class="co">#&gt;   linking ratings are needed.</span></span></code></pre></div>
 <p>Subjects 1–2 are rated only by raters 1–2, and subjects 3–4 only by
 raters 3–4: two islands with no bridge between them. This is precisely
 the ill-posed case the package refuses to guess at.</p>
