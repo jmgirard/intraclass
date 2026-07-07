@@ -12,16 +12,17 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 ## M0: Scaffolding
 - Goal: A green, well-tracked, empty-but-real package that others can build on.
 - Definition of Done:
-  - [ ] Package skeleton (`DESCRIPTION`, `NAMESPACE`, `R/`, license, README, NEWS).
-  - [ ] `project/` tracking system populated (this file + siblings).
-  - [ ] `.claude/` skills (`status`, `start-task`, `finish-task`, `verify-estimator`,
+  - [x] Package skeleton (`DESCRIPTION`, `NAMESPACE`, `R/`, license, README, NEWS).
+  - [x] `project/` tracking system populated (this file + siblings).
+  - [x] `.claude/` skills (`status`, `start-task`, `finish-task`, `verify-estimator`,
         `new-estimator`, `add-decision`) and the `doc-polisher` (Sonnet) agent.
-  - [ ] CI workflows (R-CMD-check matrix, coverage, lint, pkgdown, scheduled
+  - [x] CI workflows (R-CMD-check matrix, coverage, lint, pkgdown, scheduled
         reference-values) + pkgdown config; stub site builds.
-  - [ ] Lean `CLAUDE.md` pointing at `project/` and the routing policy.
-  - [ ] `devtools::check()` clean (0 errors / 0 warnings; notes justified).
-  - [ ] Public `jmgirard/intraclass` repo created; first push; CI green.
-- Status: in progress
+  - [x] Lean `CLAUDE.md` pointing at `project/` and the routing policy.
+  - [x] `devtools::check()` clean (0 errors / 0 warnings; notes justified).
+  - [x] Public `jmgirard/intraclass` repo created; first push; CI green.
+  - [x] air formatter + CI format check (ADR-004).
+- Status: done (commit 0d81e34) — pending maintainer sign-off
 
 ## M1: Two-way random, absolute agreement — `ICC(A,1)` / `ICC(A,k)`
 - Goal: One estimator working end-to-end (fit → estimate → MC CI → print/tidy →

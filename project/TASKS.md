@@ -19,8 +19,8 @@ condensed to a single line once done.
 - [x] air formatter (`air.toml`, `format.yaml` CI, lintr reconciliation); ADR-004 — Opus
 - [x] Codecov upload gated on `CODECOV_TOKEN` so CI stays green until secret added — Opus
 - [x] `devtools::document()` + `devtools::check()` clean (0/0/0); `air`/`lintr` clean; pkgdown builds — Opus
-- [ ] Create public `jmgirard/intraclass` repo; first push; confirm CI green — Opus
-- [ ] Update STATUS.md "Last green CI"; tag/commit — Opus
+- [x] Create public `jmgirard/intraclass` repo; first push; confirm CI green (commit 0d81e34) — Opus
+- [x] Update STATUS.md "Last green CI"; commit — Opus
 
 ## M1 — two-way random, absolute agreement (not started; seeded for reference)
 
