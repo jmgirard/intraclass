@@ -34,38 +34,12 @@ condensed to a single line once done.
 warns). Classed warning layer; design + SF-equivalent in print/summary; oracles
 SF 0.715/0.909, `psych` ICC3/ICC3k, fixed≡random equivalence (O4). See MILESTONES M2.
 
-## M3 — imbalanced & incomplete designs — **planned** (arc reordered by ADR-007)
+## M3 — imbalanced & incomplete designs — **done** (Slices 0–2; local gate green, pending PR CI + merge)
 
-Statistical core only (vignette split to M4). Two CI-green slices; see MILESTONES M3
-and the approved plan `moonlit-mixing-pinwheel`.
-
-### Slice 0 — spec + tracking (do first, PRINCIPLES.md #2, #16)
-- [x] Write `project/estimand-specs/M3-incomplete-designs.md`: identifiability
-      (connectedness) rule; random + fixed(Case 3/3A) estimands; balanced-reduction
-      guard; **pin the `ICC(*,k)` divisor convention** (ADR-008: `k_eff` = harmonic
-      mean of per-subject counts; projection to other `m` = future D-study) — Opus
-
-### Slice 1 — incomplete random raters (default path) — **done**
-- [x] `summarize_design()` (connectedness via union-find + balance/`k_eff`/replicate
-      detection) in `R/design.R`; guards wired into `icc()`: `abort_unidentified()`
-      on disconnected graphs, `abort_unsupported()` on within-cell replicates — Opus
-- [x] `k_eff` divisor for `unit = "average"` (harmonic mean; = k on balanced data);
-      `ICC(*,1)` always well-posed — Opus
-- [x] `print`/`glance` surface completeness (`N of M cells`), `n_cells`, `k_eff`,
-      `balanced`; snapshots updated — Opus
-- [x] Oracles (O5, `/verify-estimator`): lme4 cross-engine on incomplete data
-      (< 1e-4) + seeded MCAR simulation (recovers components; CIs cover) +
-      balanced-reduction regression; provenance `data-raw/oracle-incomplete.R`,
-      `REFERENCES.md` O5. `irrNA`/`gtheory` deferred — not needed, lme4+sim meet
-      the ≥2-oracle bar (#1) — Opus
-
-### Slice 2 — real fixed-effect fit path (resolves ADR-006 debt)
-- [ ] Fixed-effect fit `score ~ 1 + rater + (1|subject)` in the engine; read-out for
-      the fixed-raters error set (consistency: residual; agreement: + rater-effect
-      spread, Case 3A) — Opus
-- [ ] Extend `icc_estimand()`/`icc_point()` for the fixed agreement error; branch on
-      `design$raters`; fixed-path MC-CI sampler in `mc_ci()` — Opus
-- [ ] Correct the `raters` roxygen note (fixed now differs from random on incomplete
-      data); warning text reviewed — Opus
-- [ ] Oracles: unbalanced Case 3 / SF `ICC(3,*)` + lme4 fixed-fit cross-check +
-      balanced reduction to M2 (O6) — Opus (`/verify-estimator`)
+Ragged subject×rater designs (missing cells). Slice 0: estimand spec + ADR-008
+(arc reordered by ADR-007; vignette → M4). Slice 1: `summarize_design()` (union-find
+connectedness, `k_eff` harmonic-mean divisor, replicate guard) + incomplete
+random-rater path; oracle O5 (lme4 cross-engine + MCAR simulation). Slice 2: real
+fixed-effect fit (`+ rater`) — Case 3 consistency + Case 3A absolute agreement with
+bias-corrected θ²_r + fixed-path MC-CI; oracle O6 (balanced reduction, lme4, 95% CI
+coverage). Resolves the ADR-006 debt. See MILESTONES M3.

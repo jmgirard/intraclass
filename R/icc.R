@@ -22,9 +22,10 @@
 #' * **Random vs. fixed raters** (`raters`). **Random** treats your raters as a
 #'   sample you wish to generalize beyond -- the recommended default for
 #'   interrater reliability. **Fixed** treats them as the only raters of interest
-#'   and forgoes generalization; on balanced data it gives the same number and
-#'   `icc()` warns when you choose it. Fixed-rater consistency is the classic
-#'   Shrout & Fleiss `ICC(3,1)`.
+#'   and forgoes generalization; it is fit separately (raters as fixed effects),
+#'   so on balanced data it matches the random point estimate but on incomplete
+#'   data it genuinely differs. `icc()` warns when you choose it. Fixed-rater
+#'   consistency is the classic Shrout & Fleiss `ICC(3,1)`.
 #'
 #' @section Estimand:
 #' With a single rating per subject-by-rater cell, the subject-by-rater
@@ -52,10 +53,13 @@
 #'   counts systematic rater differences as error; `"consistency"` ignores them.
 #' @param raters Rater sampling: `"random"` (the default; two-way random, Case 2)
 #'   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3) treats the
-#'   observed raters as the entire population. On balanced data the point estimate
-#'   and interval are identical either way -- `"fixed"` changes only the reported
-#'   design and interpretation -- and choosing it emits a warning, because random
-#'   is the recommended default for interrater reliability.
+#'   observed raters as the entire population and is fit with raters as fixed
+#'   effects (`score ~ 1 + rater + (1 | subject)`). On balanced data the point
+#'   estimate matches `"random"`; on incomplete data the two genuinely differ.
+#'   Even when balanced, the interval differs for absolute agreement, because
+#'   inference about fixed vs. random rater effects is not the same. Choosing
+#'   `"fixed"` emits a warning, because random is the recommended default for
+#'   interrater reliability.
 #' @param unit One or both of `"single"` (-> `ICC(*,1)`) and `"average"`
 #'   (-> `ICC(*,k)`).
 #' @param engine Estimation engine. Only `"glmmTMB"` is currently supported.
@@ -191,7 +195,14 @@ icc <- function(
     ))
   }
 
-  engine_fit <- fit_glmmtmb(df)
+  # Fixed raters get their own fixed-effect fit (Case 3/3A); random raters use
+  # the shared random-effects fit. The rest of the pipeline is identical -- the
+  # fixed engine returns theta^2_r in the "rater" slot (M3 §6, ADR-008).
+  engine_fit <- if (raters == "fixed") {
+    fit_glmmtmb_fixed(df)
+  } else {
+    fit_glmmtmb(df)
+  }
   estimands <- lapply(
     unit,
     function(u) icc_estimand(type = type, unit = u, raters = raters)

@@ -52,10 +52,13 @@ counts systematic rater differences as error; \code{"consistency"} ignores them.
 
 \item{raters}{Rater sampling: \code{"random"} (the default; two-way random, Case 2)
 generalizes to a rater universe; \code{"fixed"} (two-way mixed, Case 3) treats the
-observed raters as the entire population. On balanced data the point estimate
-and interval are identical either way -- \code{"fixed"} changes only the reported
-design and interpretation -- and choosing it emits a warning, because random
-is the recommended default for interrater reliability.}
+observed raters as the entire population and is fit with raters as fixed
+effects (\code{score ~ 1 + rater + (1 | subject)}). On balanced data the point
+estimate matches \code{"random"}; on incomplete data the two genuinely differ.
+Even when balanced, the interval differs for absolute agreement, because
+inference about fixed vs. random rater effects is not the same. Choosing
+\code{"fixed"} emits a warning, because random is the recommended default for
+interrater reliability.}
 
 \item{unit}{One or both of \code{"single"} (-> \verb{ICC(*,1)}) and \code{"average"}
 (-> \verb{ICC(*,k)}).}
@@ -102,9 +105,10 @@ raters. Report \verb{ICC(*,k)} when the averaged score is what you will use.
 \item \strong{Random vs. fixed raters} (\code{raters}). \strong{Random} treats your raters as a
 sample you wish to generalize beyond -- the recommended default for
 interrater reliability. \strong{Fixed} treats them as the only raters of interest
-and forgoes generalization; on balanced data it gives the same number and
-\code{icc()} warns when you choose it. Fixed-rater consistency is the classic
-Shrout & Fleiss \code{ICC(3,1)}.
+and forgoes generalization; it is fit separately (raters as fixed effects),
+so on balanced data it matches the random point estimate but on incomplete
+data it genuinely differs. \code{icc()} warns when you choose it. Fixed-rater
+consistency is the classic Shrout & Fleiss \code{ICC(3,1)}.
 }
 }
 

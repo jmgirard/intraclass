@@ -59,12 +59,15 @@ reference values, ever.
   ICCs recover the population values within 0.05 and the Monte-Carlo interval
   covers them. Seeded per PRINCIPLES.md #12.
 
-### Oracle O4 — fixed ≡ random raters on balanced data (M2)
-- **Status:** **asserted (M2)** in `tests/testthat/test-icc-consistency.R`
-  ("fixed and random raters give identical estimates and CIs"): for both
-  agreement and consistency, `raters = "fixed"` reproduces `raters = "random"`
-  point estimates and the seeded Monte-Carlo interval exactly (same shared fit,
-  ADR-006).
+### Oracle O4 — fixed ≡ random raters on balanced data (M2; superseded by ADR-008)
+- **Status:** **asserted** in `tests/testthat/test-icc-consistency.R` ("fixed
+  raters reproduce random point estimates on balanced data"). Originally (M2) a
+  shared-fit label layer gave *identical* point estimates and CIs (ADR-006).
+  **ADR-008 (M3) superseded this:** `raters = "fixed"` now has its own
+  fixed-effect fit, so on balanced data the **point** estimates still match random
+  (bias-corrected θ²_r = σ²_r), but the intervals genuinely differ for absolute
+  agreement (fixed-vs-random inference differs). The test now asserts point
+  equivalence (< 1e-3) + valid intervals; the fixed fit's own oracles are O6.
 - **Provenance (engine-level derivation):** `data-raw/oracle-fixed-vs-random.R`
   fits raters as a random intercept vs. as fixed effects (`lmer`) and shows
   identical σ²_s/σ²_res on the balanced SF data (|Δσ²_s| ≈ 7e-6), matching ANOVA
@@ -93,6 +96,28 @@ reference values, ever.
   `irrNA`/`gtheory` are not installed in this environment and are left as optional
   future cross-checks (skip-guarded), not required — the lme4 + simulation pair
   already meets the ≥2-independent-oracle bar (PRINCIPLES.md #1).
+
+### Oracle O6 — fixed-effect fit path, two-way mixed (Case 3 / 3A) (M3 Slice 2)
+- **Status:** **asserted (M3 Slice 2)** in `tests/testthat/test-icc-fixed-fit.R`.
+  The real fixed-effect fit `score ~ 1 + rater + (1 | subject)` for
+  `raters = "fixed"` (resolves the ADR-006 debt), pinned by three oracles:
+  1. **Balanced reduction** — on complete SF the fixed fit reproduces
+     ICC(A,1)=0.290, ICC(A,k)=0.620, ICC(C,1)=0.715, ICC(C,k)=0.909, and the
+     bias-corrected θ²_r equals the random-fit σ²_r (5.2444). Extends O4 from a
+     shared fit to an **independent** fixed-effect fit. (Raw variance fails:
+     θ²_r ≈ 5.41 → ICC(A,1) = 0.284 ≠ 0.290 — the bias correction is load-bearing.)
+  2. **lme4 cross-engine** — on an incomplete SF subset lme4's fixed fit
+     reproduces σ²_s/σ²_res and, via the same θ²_r formula, the fixed ICCs to <1e-4.
+  3. **Coverage simulation** — with **known** fixed rater effects (known true θ²_r
+     and ICCs), 300 seeded MCAR-incomplete reps give ~unbiased points (ICC(A,1)
+     bias −0.005) and nominal Monte-Carlo interval coverage (0.950 / 0.947 at 95%).
+     This is the gate the estimand spec (§6) deferred for the Case 3A θ²_r CI.
+- **Decision:** θ²_r = bias-corrected finite-population variance of the k rater
+  level means (ADR-008); the per-draw θ²_r applies the same correction, clamped
+  at 0 (boundary-aware).
+- **Provenance:** `data-raw/oracle-fixed-incomplete.R` (seeded; `stopifnot`
+  checks; the 300-rep coverage run kept here and in the scheduled reference-values
+  job, not the unit suite). Reproducible; nothing hardcoded.
 
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:

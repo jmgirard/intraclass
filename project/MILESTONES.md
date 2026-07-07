@@ -101,33 +101,33 @@ Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
   + its CI variant, the `ICC(*,k)` divisor rule under imbalance, and unbalanced-data
   oracles.
 - Definition of Done (per-estimator bar, §8) — two internal slices, each CI-green:
-  - [ ] **Slice 1 — incomplete random raters (default path).** Connectedness /
+  - [x] **Slice 1 — incomplete random raters (default path).** Connectedness /
         identifiability guard (`abort_unidentified()` on a disconnected
-        subject–rater graph, PRINCIPLES.md #5); balance detection; `unit`
-        divisor rule per the spec; `ICC(*,1)` always well-posed. `mc_ci()`
-        unchanged for the random path.
-  - [ ] **Slice 2 — real fixed-effect fit path** (`score ~ 1 + rater +
+        subject–rater graph, PRINCIPLES.md #5); balance detection; `k_eff`
+        divisor per the spec; `ICC(*,1)` always well-posed. `mc_ci()` unchanged
+        for the random path.
+  - [x] **Slice 2 — real fixed-effect fit path** (`score ~ 1 + rater +
         (1 | subject)`) for `raters = "fixed"`, returning correct (and genuinely
         different) estimates on incomplete data; agreement error set gains the
-        rater fixed-effect spread (McGraw–Wong Case 3A); a fixed-path MC-CI sampler.
-        Balanced data still reduces to the M2 numbers (extends O4). `raters` roxygen
-        note corrected (no longer claims random≡fixed unconditionally).
-  - [ ] Oracles per path — ≥2 independent types: seeded unbalanced simulation
-        (primary), lme4 cross-check, `irrNA`/`gtheory` on incomplete data, and the
-        balanced-reduction regression (full SF data still returns
-        0.290/0.620/0.715/0.909). New `REFERENCES.md` oracle rows. **Stop and
-        recommend (not auto-run) a Fable review if any coefficient can't be pinned
-        by ≥2 oracles** (PRINCIPLES.md #19).
-  - [ ] `print`/`summary`/`glance` surface balanced-vs-incomplete, n_obs/n_cells,
-        and (if incomplete) the divisor convention; snapshots updated.
-  - [ ] Roxygen "which ICC / when" extended to complete-vs-incomplete and the fixed
+        bias-corrected rater-effect spread θ²_r (McGraw–Wong Case 3A); a fixed-path
+        MC-CI sampler. Balanced data reduces to the M2 numbers (θ²_r = σ²_r = 5.2444;
+        extends O4). `raters` roxygen note corrected.
+  - [x] Oracles per path — ≥2 independent types: seeded unbalanced simulation +
+        lme4 cross-check + balanced-reduction regression (full SF still returns
+        0.290/0.620/0.715/0.909); O5 (random) and O6 (fixed, incl. 95% CI
+        coverage) in `REFERENCES.md`. `irrNA`/`gtheory` not needed — lme4 + sim met
+        the ≥2-oracle bar (#1); no coefficient required a Fable review.
+  - [x] `print`/`glance` surface balanced-vs-incomplete, n_cells, and `k_eff`;
+        snapshots updated.
+  - [x] Roxygen "which ICC / when" extended to complete-vs-incomplete and the fixed
         real-fit; `DECISIONS.md` ADR-008 (fixed real-fit path + divisor convention);
-        `devtools::check()` 0/0/0 locally; full CI matrix green.
+        `devtools::check()` 0 errors/0 warnings locally (1 pre-existing CRAN-incoming
+        NOTE); full CI matrix pending push.
 - Deferred out of M3 (recorded so they aren't rediscovered): the flagship vignette
   (M4); replicate ratings within a cell; one-way designs; lme4 as a *selectable*
   engine; D-study projection API (ROADMAP).
-- Status: in progress (arc reordered by ADR-007; estimand spec + ADR-008 done,
-  Slice 0; Slices 1–2 pending)
+- Status: done (Slices 0–2; local gate green — tests 118/0/0, check 0/0/1 justified,
+  coverage 93.8%; on branch `m3-incomplete-designs`, **pending PR CI + merge**)
 
 ## M4: "Choosing an ICC" flagship vignette *(provisional)*
 - Goal: the decision-framework teaching article (agreement vs. consistency, single
