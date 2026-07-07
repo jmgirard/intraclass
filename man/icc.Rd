@@ -30,6 +30,7 @@ icc(
   raters = c("random", "fixed"),
   unit = c("single", "average"),
   level = c("subject", "cluster"),
+  design = NULL,
   engine = "glmmTMB",
   conf_level = 0.95,
   ci_method = "montecarlo",
@@ -88,6 +89,14 @@ report: \code{"subject"} (within-cluster, distinguishing subjects) and/or
 Ignored (and must be left at its default) when \code{cluster} is not supplied. Only
 \code{"subject"} is available when raters are nested in clusters (see the
 \emph{Multilevel designs} section).}
+
+\item{design}{Multilevel design (with a \code{cluster} column): \code{NULL} (the default)
+infers it from the crossing pattern. On \strong{incomplete} data missing cells can
+make the pattern ambiguous between a crossed and a nested design; declare it
+explicitly with \code{"crossed"}, \code{"nested_in_clusters"}, or \code{"nested_in_subjects"}
+to resolve the ambiguity. A declaration is validated against the data -- it
+cannot force a design the data cannot support (e.g. \code{"crossed"} still requires
+raters that bridge clusters to estimate absolute agreement).}
 
 \item{engine}{Estimation engine: \code{"glmmTMB"} (default), \code{"lme4"}, or
 \code{"lavaan"}. \code{"glmmTMB"} and \code{"lme4"} fit the variance components by REML and
@@ -193,8 +202,20 @@ multilevel \emph{one-way} model that reports agreement-only \code{ICC(1)}/\code{
 nested designs define only the \strong{subject} level -- a cluster-level ICC needs
 raters crossed with clusters -- so \code{level} is restricted to \code{"subject"} for them.
 Mixed patterns (some raters crossed, some nested) are not a supported design and
-raise an error. Support currently covers balanced, complete designs with random
-raters.
+raise an error. The \strong{crossed} design (Design 1) additionally supports
+\strong{incomplete} data -- subjects rated by different, overlapping rater subsets
+(missing cells) -- computing the subject-level ICCs by REML with the averaging
+divisor set to the effective number of ratings per subject (\code{k_eff}, the harmonic
+mean), exactly as the single-level incomplete two-way ICC does. Identifiability is
+checked first: each cluster's subject-by-rater layout must be connected, and for
+absolute agreement raters must bridge clusters (otherwise the design is really
+rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
+declare it with \code{design} (above). On incomplete data the \strong{cluster} level is
+reported as the single-rater \code{ICC(c,1)} (when raters bridge clusters); the averaged
+cluster-level \code{ICC(c,k)} on incomplete data is not yet supported (its effective
+number of raters per cluster is still being validated). Incomplete \emph{nested}
+designs and fixed raters remain for later milestones. Nested designs still require
+balanced, complete data.
 }
 
 \section{Confidence intervals}{

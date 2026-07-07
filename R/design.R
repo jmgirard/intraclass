@@ -71,9 +71,11 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
       c(
         "The raters are neither fully crossed with nor fully nested in clusters.",
         i = "Some raters rate in several clusters while others rate in only one, \\
-             which is not one of the multilevel designs of ten Hove et al. (2022).",
-        i = "A supported design has raters crossed with every cluster (Design 1) \\
-             or each rating a single cluster (Designs 2/3)."
+             which is not unambiguously one of the multilevel designs of ten Hove \\
+             et al. (2022).",
+        i = "On incomplete data this is often a ragged crossed (Design 1) design: \\
+             set {.code design = \"crossed\"} to declare it (validated against the \\
+             data), or each rater must rate a single cluster for a nested design."
       ),
       call = call
     )
@@ -128,6 +130,43 @@ nested_design_balanced <- function(df, design) {
     # Design 3: equal ratings per subject.
     length(unique(as.integer(table(df$subject)))) == 1L
   }
+}
+
+# Identifiability of an INCOMPLETE crossed (Design 1) multilevel design
+# (estimand-spec M9 §4b). Balance is not required for the mixed-model fit, but
+# under missing cells two graph conditions gate DIFFERENT coefficients, so they
+# are reported separately (not folded into one balanced/connected flag):
+#
+#   * within_cluster_connected -- for every cluster, the subject x rater bipartite
+#     graph over that cluster's observed cells is connected. Needed to separate
+#     sigma^2_{s:c} from residual, so it gates CONSISTENCY (and therefore every
+#     subject-level coefficient). Reuses design_connected() per cluster.
+#   * cluster_rater_connected -- the cluster x rater bipartite graph (a node per
+#     cluster, a node per rater, an edge per cluster a rater rated in) is
+#     connected. Needed to separate the rater main effect sigma^2_r from the
+#     cluster x rater interaction sigma^2_cr. sigma^2_cr is NOT in the
+#     subject-level error but sigma^2_r IS (M9 spec §3a), so this gates AGREEMENT
+#     only -- when it fails the design is really nested (Design 2), not crossed.
+#
+# These conditions are the spec's hypothesis, pinned against lme4/glmmTMB rank
+# behaviour by the M9 identifiability oracle before the guards are trusted (#1/#18;
+# spec §4b/§6). `df` has factor subject/rater/cluster, droplevels()-ed.
+crossed_ml_identifiability <- function(df) {
+  clusters <- levels(df$cluster)
+  connected_within <- vapply(
+    clusters,
+    function(cl) {
+      sub <- df[df$cluster == cl, , drop = FALSE]
+      incidence <- table(droplevels(sub$subject), droplevels(sub$rater)) > 0L
+      design_connected(incidence)
+    },
+    logical(1)
+  )
+  list(
+    within_cluster_connected = all(connected_within),
+    disconnected_clusters = clusters[!connected_within],
+    cluster_rater_connected = design_connected(table(df$cluster, df$rater) > 0L)
+  )
 }
 
 # Is the subject x rater bipartite design connected? `incidence` is the ns x nr

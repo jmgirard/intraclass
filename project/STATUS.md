@@ -1,12 +1,15 @@
 # Project status
 
-- Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **done** (merged via
-  PR #12 at ca2dcdb)
-- Active task: — (next: retro + detail M9 — release polish)
+- Milestone: **M9 — incomplete/unbalanced multilevel ICCs, Design 1 (crossed)** —
+  detailed and active (estimand-spec + ADR-018 written; M8 retro done)
+- Active task: M9 — open the PR. All three slices done on `m9-incomplete-multilevel`
+  (subject level + cluster `ICC(c,1)` on ragged crossed data + docs); `ICC(c,k)`-
+  incomplete deferred (spec §3b). Local suite green; needs the full R-CMD-check matrix
+  (incl. Windows) via PR to close the milestone
 - Last green CI: PR #12 (M8) full matrix green incl. Windows; merged to `main` at
   ca2dcdb
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus)
+- Updated: 2026-07-07 by main session (Opus) — M9 detailed (ADR-018, spec, DoD board)
 
 ## Where we are
 
@@ -18,16 +21,23 @@ Designs 1–3 (crossed and both nested-rater designs).
 
 ## Next action
 
-**Retro + detail M9** (release polish) — currently a provisional one-liner (pkgdown
-site, advanced vignette, CRAN submission prep). Per the process (#2, brief §7), run a
-short M8 retro, then resolve M9 scope with the maintainer and write the DoD before
-work. M9 is the last planned milestone; its remaining inputs are the ROADMAP
-parking-lot items plus the M8 deferrals (incomplete-ML, fixed-ML, lme4-multilevel
-parity) — decide which, if any, are in scope for a first release vs. post-CRAN.
+**Open the M9 PR** (`milestone-branches-and-prs`): push `m9-incomplete-multilevel`
+and open a PR to `main` so the full `R-CMD-check` matrix (incl. Windows) + lint +
+pkgdown run. On green, merge and reconcile `project/` (compress M9 to a summary,
+preserve its deferred list; set STATUS to M10). All three slices are committed and
+locally green.
 
-Also parked and un-scheduled: the **Bayesian engine** (rstanarm + a new
-`ci_method = "posterior"`), and **one-way / general ICC(1) via SEM** (no faithful
-sourced route — ADR-014). Both in [`ROADMAP.md`](ROADMAP.md).
+Deferred within M9 (recorded): averaged cluster-level `ICC(c,k)` on incomplete data —
+the per-cluster effective-rater divisor is an open modeling question (spec §3b), a
+candidate for a simulation-oracle study or Fable review post-M9.
+
+Milestone arc after M9 (ADR-017): **M10** fixed-rater-ML → **M11** general
+`autoplot()`/ggplot2 → **M12** `choose_icc()` → **M13** release polish.
+
+Still deferred (not scheduled): **lme4 for the fixed/multilevel fits** (engine parity,
+ADR-012 — glmmTMB covers these paths); the **Bayesian engine** (rstanarm + a new
+`ci_method = "posterior"`); **one-way / general ICC(1) via SEM** (no faithful sourced
+route — ADR-014). All in [`ROADMAP.md`](ROADMAP.md).
 
 Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a

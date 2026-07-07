@@ -32,13 +32,16 @@ format.icc <- function(x, ...) {
   cell_total <- x$n$subjects * x$n$raters
   completeness <- if (x$design$balanced) "complete" else "incomplete"
   meta1 <- if (ml) {
+    # Completeness is meaningful for the crossed (Design 1) design, where cells can
+    # be missing; nested designs are always balanced/complete (guarded, M8).
     sprintf(
-      "Subjects: %d in %d clusters | Raters: %d (%s) | Observations: %d",
+      "Subjects: %d in %d clusters | Raters: %d (%s) | Observations: %d (%s)",
       x$n$subjects,
       x$n$clusters,
       x$n$raters,
       x$design$raters,
-      x$n$obs
+      x$n$obs,
+      completeness
     )
   } else if (ow) {
     # One-way: raters are interchangeable, so report ratings per subject (k_eff,

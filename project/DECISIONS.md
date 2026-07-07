@@ -805,3 +805,119 @@ consequences → references.
   [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md) §8 (the
   deferrals this schedules); ten Hove, Jorgensen & van der Ark (2022, Designs 2/3,
   Eqs. 8–11, Table 3); the `ask-for-inaccessible-sources` memory (M7 process lesson).
+
+## ADR-017: Post-M8 milestone reorder — four deferrals scheduled before release polish
+- Date: 2026-07-07
+- Status: accepted
+- Context: With M8 merged (nested-rater multilevel Designs 2/3, PR #12), the
+  maintainer took stock before starting release polish (the milestone then numbered
+  M9). Nothing earlier is unfinished or broken — M0–M8 are all merged green and every
+  deferral is recorded in a "Deferred out of M<n>" list — so the question was purely
+  the **first-release cut line**: which recorded deferrals ship before a CRAN
+  submission vs. post-CRAN. The maintainer is **not rushing CRAN** and judged two
+  recorded items **important-missing** for a credible first release: **incomplete/
+  unbalanced multilevel** (deferred out of M5 and M8) and **general `autoplot()`/
+  ggplot2 methods** (ROADMAP; only the M4.5 `d_study()` reliability curve shipped).
+  Two further deferrals were folded in as natural pairs: **fixed-rater multilevel**
+  (deferred out of M5/M8; pairs with incomplete-ML as multilevel completion) and the
+  **`choose_icc()` decision helper** (deferred out of M4; pairs with the autoplot
+  teaching/viz layer). The board header requires a DECISIONS entry for any arc
+  reorder (MILESTONES.md), so this ADR records the resequencing. Supersedes the M9
+  slot as fixed by ADR-013.
+- Decision (maintainer-approved this session, 2026-07-07):
+  - **Promote four recorded deferrals ahead of release polish, estimator work first:**
+    - **M9 = incomplete / unbalanced multilevel ICCs** — ragged subject×rater
+      multilevel designs; reuse the M3 `k_eff`/connectedness machinery (ADR-008) on
+      the M5/M8 multilevel fit. Estimator work; estimand-spec required.
+    - **M10 = fixed-rater multilevel ICCs** — reuse the M3 real fixed-effect fit path
+      (ADR-008) on the multilevel fit. Estimator work; estimand-spec required.
+    - **M11 = general `autoplot()` / ggplot2 variance-component + CI methods** — no
+      new estimand (viz over shipped estimators); lands after all estimators so it
+      covers the full set.
+    - **M12 = `choose_icc()` interactive decision helper** — mirrors the M4 flagship
+      vignette; teaching/API, no new estimand.
+  - **Release polish (pkgdown, advanced vignette, CRAN prep) renumbers M9 → M13.**
+  - **Ordering rationale:** incomplete-ML first (maintainer choice) while the M8
+    multilevel code is fresh; fixed-rater-ML adjacent as the multilevel-completion
+    pair; the teaching/viz layer (autoplot, then `choose_icc()`) after all estimators
+    exist so both cover the full estimator set; the advanced vignette (M13) can then
+    show the new plots and helper. **lme4 for the fixed/multilevel fits** (engine
+    parity, deferred out of M5.5/M8, ADR-012) stays in the deferral list — engine
+    work, not blocking; glmmTMB already covers these paths.
+  - **Everything else stays in ROADMAP** (not milestone-numbered until scheduled):
+    the Bayesian engine + `ci_method = "posterior"`, one-way-via-SEM, within-cell
+    replicates, the conflated single-level ICC (Eq. 14), categorical/ordinal GLMM
+    ratings, the benchmark suite, bootstrap/profile CIs, and the D-study cost/
+    two-facet/subject-count extensions.
+- Consequences: the multilevel family completes (Designs 1–3 × {complete,incomplete}
+  × {random,fixed}) and the package gains a general plotting layer and a decision
+  helper before its first release — a stronger, more coherent v1 at the cost of four
+  milestones before polish. Future milestones stay **provisional one-liners**,
+  detailed at their start after a short retro (#2, brief §7) — this ADR schedules, it
+  does not pre-design them. No code or API change lands from this ADR; a planning/
+  tracking-only reorg.
+- References: PRINCIPLES.md #2 (name the estimand first), #14 (milestone gates), #15
+  (thin slices), #17 (no scope creep); MILESTONES.md (arc-reorder rule); ROADMAP.md
+  (parking lot); ADR-008 (M3 `k_eff`/connectedness + real fixed-effect fit, reused by
+  M9/M10), ADR-011 (M5 multilevel fit + `level` API), ADR-012 (lme4 fixed/multilevel
+  parity, stays deferred), ADR-013 (the prior post-M5.5 reorder this supersedes for
+  the M9 slot), ADR-016 (M8, which recorded these deferrals);
+  [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md) §8 and
+  [`estimand-specs/M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md)
+  (the deferrals this schedules); `CLAUDE_CODE_KICKOFF.md` §7.
+
+## ADR-018: M9 scope — incomplete/unbalanced multilevel ICCs, crossed (Design 1) first
+- Date: 2026-07-07
+- Status: accepted
+- Context: M9 was scheduled by ADR-017 as "incomplete / unbalanced multilevel ICCs,"
+  promoted ahead of release polish. Detailed at its start after a short M8 retro
+  (brief §7). The retro's load-bearing finding: M9 is the **intersection of two
+  shipped machineries** — the M5/M8 multilevel fit (`estimand-specs/M5-multilevel.md`,
+  ADR-011) and the M3 incompleteness handling (connectedness + `k_eff`,
+  `estimand-specs/M3-incomplete-designs.md`, ADR-008) — and it introduces **no new
+  estimand** (like M3 relative to M1/M2). It surfaced one genuinely new risk, visible
+  in `R/design.R::detect_multilevel_design()`: that function reads a rater confined to
+  one cluster as *nested*, so a ragged **crossed** (Design 1) design whose raters each
+  happened to land in one cluster would be **silently misclassified as nested**,
+  switching the estimand (crossed separates σ²_r and σ²_cr; nesting confounds them into
+  σ²_{r:c}) — a #5 hazard. Two scope questions were put to the maintainer this session.
+- Decision (maintainer-approved this session, 2026-07-07):
+  - **M9 = incomplete/ragged Design 1 (raters crossed with clusters) only.** Incomplete
+    **nested** designs (Designs 2/3) are deferred to their own later slice — resolve the
+    ragged nested-vs-crossed inference for the crossed base first, mirroring the
+    M5(D1) → M8(D2/3) thin-slice progression (#15). Random raters, glmmTMB engine
+    (lme4 oracle), both subject- and cluster-level IRR as M5 ships (each identifiability-
+    gated).
+  - **Ambiguous ragged designs are declared, not guessed.** When a missing-cell pattern
+    is consistent with more than one multilevel design (the partial-crossing case M8
+    currently aborts as "mixed"), `icc()` gains an **optional `design` argument** (name
+    finalized in Slice 1) by which the user asserts the intended design; silent inference
+    is kept only for the **unambiguous** patterns (every rater spans ≥2 clusters ⇒
+    crossed; every rater confined ⇒ nested). Ambiguous + undeclared → `abort_unidentified()`
+    naming the argument. The argument is **validated against the data**, never used to
+    override a structural impossibility (asserting "crossed" when no rater bridges
+    clusters still aborts on the confounded σ²_r/σ²_cr). Preserves #5/#2 (never silently
+    switch the estimand) while keeping the API minimal (#6 — the argument surfaces only
+    for the genuinely ambiguous ragged case).
+  - **The multilevel identifiability condition (§4) and the multilevel `k_eff` (§5) are
+    oracle-pinned, not asserted (#1/#18).** The connectedness rule is materially more
+    layered than M3's single bipartite graph — within-cluster subject×rater connectedness
+    (σ²_{s:c} vs σ²_res) *and* a cluster×rater bridging condition (σ²_r vs σ²_cr) — and is
+    the spec's hypothesis, corrected against where lme4/glmmTMB actually loses rank before
+    the guard ships; an unresolved case triggers a *recommended* Fable review (#19).
+- Consequences: M9 reuses the M3 `design_connected()`/`k_eff` and the M5 five-component
+  fit rather than adding new estimand or CI machinery; the entry point is removing the
+  `nested_design_balanced()` abort for the crossed case only. The optional `design`
+  argument is a **public-API addition** (hence this ADR, #6) but is inert on complete or
+  unambiguous data. Incomplete nested + fixed-rater multilevel stay deferred (the latter
+  is M10, ADR-017). No estimand changes: every M9 coefficient is the M5 Design-1 estimand
+  estimated on ragged data.
+- References: PRINCIPLES.md #1 (oracle-first), #2 (name the estimand), #5 (fail loudly),
+  #6 (small/considered API), #15 (thin slices), #18 (state what's inherited vs. new),
+  #19 (Fable gating); ADR-008 (M3 `k_eff`/connectedness, reused), ADR-011 (M5 multilevel
+  fit + `level` API, inherited), ADR-016 (M8 nested designs + the design-inference seam),
+  ADR-017 (the arc that scheduled M9); [`estimand-specs/M9-incomplete-multilevel.md`](estimand-specs/M9-incomplete-multilevel.md)
+  (the full spec); [`estimand-specs/M5-multilevel.md`](estimand-specs/M5-multilevel.md) §3
+  (the inherited estimands); [`estimand-specs/M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md)
+  §3/§5 (the reused machinery); ten Hove et al. (2022 Design 1; 2024 incomplete-design
+  guidelines); Searle, Casella & McCulloch (2006); Weeks & Williams (1964).

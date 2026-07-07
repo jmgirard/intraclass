@@ -264,6 +264,93 @@ test_that("advanced.Rmd: cluster-level ICC exceeds subject-level on `school`", {
   }
 })
 
+# The article's incomplete-multilevel subsection drops a fifth of the `school`
+# ratings and claims: the subject level still returns, ICC(*,k) uses an effective
+# k below the panel size, the single-rater cluster ICC(c,1) is available, and the
+# averaged cluster ICC(c,k) on incomplete data is refused. Back each claim (#1).
+
+test_that("advanced.Rmd: ragged `school` supports subject + cluster ICC(c,1)", {
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(2025)
+  n_class <- 16
+  n_pupil <- 5
+  n_rater <- 4
+  grid <- expand.grid(
+    pupil = seq_len(n_pupil),
+    classroom = seq_len(n_class),
+    rater = seq_len(n_rater)
+  )
+  class_effect <- rnorm(n_class, sd = 1.3)[grid$classroom]
+  pupil_effect <- rnorm(n_class * n_pupil, sd = 0.6)[
+    (grid$classroom - 1) * n_pupil + grid$pupil
+  ]
+  rater_effect <- rnorm(n_rater, sd = 0.4)[grid$rater]
+  school <- data.frame(
+    classroom = factor(grid$classroom),
+    pupil = factor(paste(grid$classroom, grid$pupil, sep = "_")),
+    rater = factor(grid$rater),
+    score = 10 +
+      class_effect +
+      pupil_effect +
+      rater_effect +
+      rnorm(nrow(grid), sd = 0.7)
+  )
+  set.seed(11)
+  school_ragged <- school[-sample(nrow(school), round(0.2 * nrow(school))), ]
+
+  sub <- icc(
+    school_ragged,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    level = "subject",
+    seed = 1
+  )
+  # Ragged design is flagged incomplete, and the effective k is strictly between 1
+  # and the full panel size (harmonic mean of unequal per-pupil counts).
+  expect_false(sub$design$balanced)
+  expect_gt(sub$k_eff, 1)
+  expect_lt(sub$k_eff, n_rater)
+  # Average >= single at the subject level.
+  se <- sub$estimates
+  expect_gte(
+    se$estimate[se$index == "ICC(A,k)"],
+    se$estimate[se$index == "ICC(A,1)"]
+  )
+
+  # Single-rater cluster ICC(c,1) is available and in [0, 1].
+  clu <- icc(
+    school_ragged,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    level = "cluster",
+    type = "consistency",
+    unit = "single",
+    seed = 1
+  )
+  c1 <- clu$estimates$estimate[clu$estimates$index == "ICC(C,1)"]
+  expect_true(c1 >= 0 && c1 <= 1)
+
+  # The averaged cluster ICC(c,k) on incomplete data is refused, not guessed.
+  expect_error(
+    icc(
+      school_ragged,
+      score,
+      subject = pupil,
+      rater = rater,
+      cluster = classroom,
+      level = "cluster",
+      unit = "average",
+      seed = 1
+    ),
+    class = "intraclass_unsupported"
+  )
+})
+
 # The article's nested-design examples relabel `school`: giving each classroom its
 # own raters (Design 2) or each pupil their own raters (Design 3). Check the prose
 # claims -- the design is inferred, nested designs report the subject level only,
