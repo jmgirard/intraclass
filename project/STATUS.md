@@ -1,9 +1,10 @@
 # Project status
 
-- Milestone: M7 — SEM engine (`lavaan`) — **done** (merged via PR #11 at fe76f5c)
-- Active task: — (next: retro + detail M8 — multilevel & incomplete-design extensions)
+- Milestone: M8 — nested-rater multilevel ICCs (Designs 2/3) — **detailed + spec
+  written** (ADR-016); not started
+- Active task: — (next: start Slice 1, Design 2, on branch `m8-nested-multilevel`)
 - Last green CI: PR #11 (M7) full matrix green; merged to `main` at fe76f5c
-- Blockers: —
+- Blockers: — (paper obtained; Designs 2/3 equations transcribed into the spec)
 - Updated: 2026-07-07 by main session (Opus)
 
 ## Where we are
@@ -15,13 +16,17 @@ M5.5 engine × design dispatch seam.
 
 ## Next action
 
-**Retro + detail M8** (multilevel & incomplete-design extensions) — currently a
-provisional one-liner. Per the process (#2, brief §7), run a short M7 retro, then
-resolve scope with the maintainer and write the DoD (ADR + spec as needed) before
-code. M8 groups the M5 spec §8 deferrals — the paper's Designs 2/3 (raters nested in
-clusters/subjects), incomplete multilevel (reuse M3 `k_eff`/connectedness),
-fixed-rater multilevel (reuse M3 real fixed-effect fit), and lme4 for the
-fixed/multilevel fits (deferred out of M5.5). See [`MILESTONES.md`](MILESTONES.md) M8.
+**Start M8 Slice 1 — Design 2 (raters nested in clusters)** on a
+`m8-nested-multilevel` branch (`/start-task`). The estimand-spec
+[`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md) is written and
+scope is locked (ADR-016): Designs 2/3, **subject-level only** (cluster level
+undefined for nested designs), Design 3 **agreement-only**; six coefficients total.
+Slice 1 = the four-component Design-2 fit (`score ~ 1 + (1|cluster) +
+(1|cluster:subject) + (1|cluster:rater)`, our translation — oracle-pinned first),
+design detection (§4), the §3a map, and O-NML oracles (lme4 + sim + reduction to
+two-way). One Slice-1-start API decision to settle: how the design (1/2/3) is
+detected — inferred from the crossing pattern vs. an explicit `design` argument (§4).
+Incomplete-ML, fixed-ML, and lme4-multilevel parity remain deferred (MILESTONES M8).
 
 Also parked and un-scheduled: the **Bayesian engine** (rstanarm + a new
 `ci_method = "posterior"`), and **one-way / general ICC(1) via SEM** (no faithful
