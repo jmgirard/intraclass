@@ -41,12 +41,23 @@ icc_estimand <- function(
   k_eff = NA_real_,
   level = "subject",
   multilevel = FALSE,
-  oneway = FALSE
+  oneway = FALSE,
+  replicates = FALSE,
+  occasions = "single",
+  n_o = NA_real_
 ) {
   type <- rlang::arg_match(type, c("agreement", "consistency"))
   raters <- rlang::arg_match(raters, c("random", "fixed"))
   level <- rlang::arg_match(level, c("subject", "cluster", "conflated"))
   index <- unit_index(unit)
+  divisor <- resolve_divisor(unit, k_eff)
+  # Occasions averaged out of pure error (M17 Slice 3): 1 (single) or the observed
+  # replicate count n_o. Only the `residual` (pure-error) term is divided by it.
+  n_o_val <- if (is.numeric(occasions)) {
+    occasions
+  } else {
+    switch(occasions, single = 1, average = n_o)
+  }
 
   if (oneway) {
     # One-way random (Shrout & Fleiss Case 1, M6 spec §2/§3): the fit has NO rater
@@ -63,11 +74,13 @@ icc_estimand <- function(
       sf_label = if (multilevel) NA_character_ else oneway_sf_label(index),
       signal = "subject",
       error = "residual",
+      error_divisors = divisor,
       unit = unit,
-      divisor = resolve_divisor(unit, k_eff),
+      divisor = divisor,
       type = NA_character_,
       raters = "random",
-      level = if (multilevel) level else NA_character_
+      level = if (multilevel) level else NA_character_,
+      occasions = NA_real_
     ))
   }
 
@@ -90,6 +103,19 @@ icc_estimand <- function(
     resid <- switch(level, subject = "residual", cluster = "cluster_rater")
     error <- switch(type, agreement = c("rater", resid), consistency = resid)
     sf <- NA_character_
+  } else if (replicates) {
+    # Within-cell replicates (M17 Slice 3): the residual splits into the
+    # subject x rater interaction (sigma^2_sr) and pure error (sigma^2_e =
+    # "residual"). Both are error for a single rating; consistency additionally
+    # drops the rater main effect (spec M17-within-cell-replicates.md §2).
+    signal <- "subject"
+    error <- switch(
+      type,
+      agreement = c("rater", "subject_rater", "residual"),
+      consistency = c("subject_rater", "residual")
+    )
+    # Occasion averaging touches pure error only, so it has no Shrout & Fleiss form.
+    sf <- if (n_o_val == 1) sf_label(type, raters, index) else NA_character_
   } else {
     signal <- "subject"
     error <- switch(
@@ -103,16 +129,26 @@ icc_estimand <- function(
   letter <- switch(type, agreement = "A", consistency = "C")
   label <- sprintf("ICC(%s,%s)", letter, index)
 
+  # Per-component error divisors: the rater divisor for every term, except pure
+  # error (`residual`) under occasion averaging, which also divides by n_o.
+  error_divisors <- ifelse(
+    replicates & error == "residual",
+    divisor * n_o_val,
+    divisor
+  )
+
   list(
     label = label,
     sf_label = sf,
     signal = signal,
     error = error,
+    error_divisors = error_divisors,
     unit = unit,
-    divisor = resolve_divisor(unit, k_eff),
+    divisor = divisor,
     type = type,
     raters = raters,
-    level = if (multilevel) level else NA_character_
+    level = if (multilevel) level else NA_character_,
+    occasions = if (replicates) n_o_val else NA_real_
   )
 }
 
@@ -209,7 +245,16 @@ icc_components_view <- function(x) {
   vc <- x$components
   ml <- isTRUE(x$design$multilevel)
   ow <- identical(x$design$model, "oneway")
-  spec <- if (ml && is.null(vc$rater)) {
+  rep <- isTRUE(x$design$replicates)
+  spec <- if (rep) {
+    # Within-cell replicates (M17 Slice 3): the residual is split into the
+    # subject x rater interaction and pure within-cell error.
+    list(
+      label = c("subject", "rater", "subject:rater", "residual"),
+      variance = c(vc$subject, vc$rater, vc$subject_rater, vc$residual),
+      confounded = FALSE
+    )
+  } else if (ml && is.null(vc$rater)) {
     # Design 3 (raters nested in subjects): rater confounded into residual.
     list(
       label = c("cluster", "subject", "residual"),
@@ -261,7 +306,18 @@ icc_point <- function(components, estimand) {
   # vector of Monte-Carlo draws is summed element-wise, not collapsed). The signal
   # is a single component for every classic ICC, but the conflated ICC (Eq. 14, M17)
   # sums the cluster and within-cluster subject variances, so it is a set too.
+  #
+  # Each error component is divided by its OWN divisor (`error_divisors`, parallel
+  # to `error`). For every classic ICC these are all equal (the single rater
+  # divisor); the within-cell-replicate occasion facet (M17 Slice 3) divides pure
+  # error sigma^2_e by raters x occasions while the rater/interaction terms divide
+  # by raters only, so the divisors differ within one error set.
   signal <- Reduce(`+`, components[estimand$signal])
-  error <- Reduce(`+`, components[estimand$error])
-  signal / (signal + error / estimand$divisor)
+  terms <- Map(
+    function(nm, dv) components[[nm]] / dv,
+    estimand$error,
+    estimand$error_divisors
+  )
+  error <- Reduce(`+`, terms)
+  signal / (signal + error)
 }

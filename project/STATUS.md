@@ -9,12 +9,13 @@
   estimand → new spec; `gtheory` oracle in `Suggests`). Slice 3 may spin into M18 if the
   milestone runs heavy (decide at its start). M0–M16 shipped; package at v0.1.0,
   submission-ready.
-- Active task: **M17 Slice 3 — within-cell replicates** — next up on branch `m17-varcomp-trio`
-  (the heaviest slice; new estimand → write `M17-within-cell-replicates.md` first; may spin
-  into M18 — decide at its start, ADR-026). **Slices 1 & 2 done** (not yet merged): Slice 1 =
-  `level = "conflated"` (agreement-only Eq. 14 diagnostic); Slice 2 = multilevel rater-count
-  `d_study()` at subject + cluster levels (retargeted from subjects-per-cluster, ADR-026
-  amend; estimand-spec M4.5 §7). 688 tests pass, lint + `air` clean.
+- Active task: **M17 is code-complete on branch `m17-varcomp-trio`** — all three slices done,
+  not yet merged. Slice 1 = `level = "conflated"` (Eq. 14 diagnostic); Slice 2 = multilevel
+  rater-count `d_study()` (retargeted from subjects-per-cluster, ADR-026 amend); Slice 3 =
+  within-cell replicates + occasion-averaged coefficient (`occasions` knob, per-component
+  error divisors; estimand-spec `M17-within-cell-replicates.md`). 721 tests pass, lint + `air`
+  clean. **Next: PR/finish-task gate** — installed-pkg check (`NOT_CRAN=true`) + vignette knit,
+  then open the PR (`milestone-branches-and-prs`).
 - Last green CI: PR #21 (M16) full matrix green incl. Windows and R-devel; merged to
   `main` at 0b84885
 - Blockers: —

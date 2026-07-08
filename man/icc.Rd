@@ -35,6 +35,7 @@ icc(
   type = c("agreement", "consistency"),
   raters = c("random", "fixed"),
   unit = c("single", "average"),
+  occasions = "single",
   level = c("subject", "cluster"),
   design = NULL,
   engine = "glmmTMB",
@@ -93,6 +94,13 @@ interrater reliability.}
 \code{m} raters (-> \verb{ICC(*,m)}), or any combination. See \code{\link[=d_study]{d_study()}} for projecting
 across a range of \code{m}. Projecting absolute agreement is not defined for fixed
 raters (see \code{\link[=d_study]{d_study()}}).}
+
+\item{occasions}{For data with \strong{within-cell replicates} (more than one rating
+per subject-by-rater cell), whether to average over them: \code{"single"} (the
+default -- the reliability of one rating) and/or \code{"average"} (the mean of the
+\code{n_o} replicates, which reduces pure error). \code{"average"} requires replicated
+data. See the \emph{Within-cell replicates} section. Ignored with one rating per
+cell.}
 
 \item{level}{For multilevel designs (a \code{cluster} column), which reliability to
 report: \code{"subject"} (within-cluster, distinguishing subjects) and/or
@@ -270,6 +278,24 @@ to the random-rater case and absolute agreement differs only by that term.
 Incomplete \emph{nested} designs, incomplete or nested fixed-rater designs, and the
 fixed-rater cluster level remain for later milestones. Nested designs still require
 balanced, complete data.
+}
+
+\section{Within-cell replicates}{
+
+When a subject-by-rater cell is rated \strong{more than once} (within-cell
+replicates), \code{icc()} fits the two-way random model \strong{with a subject-by-rater
+interaction}, \code{score ~ 1 + (1|subject) + (1|rater) + (1|subject:rater)}, which
+splits the single-rating residual into the \strong{interaction} \eqn{\sigma^2_{sr}}
+(does a rater systematically rate a subject high or low -- stable disagreement?)
+and \strong{pure error} \eqn{\sigma^2_e} (rating noise). Both are reported. The
+single-occasion ICCs are unchanged in value from a one-rating-per-cell analysis
+(a single rating's error still includes the interaction), but the components are
+no longer confounded, and \code{occasions = "average"} reports the reliability of the
+mean of the replicates (which reduces \eqn{\sigma^2_e} but not
+\eqn{\sigma^2_{sr}}). This slice covers \strong{balanced, complete} replicated
+two-way \strong{random}-rater designs (every cell present and rated the same number of
+times); ragged replicates, fixed raters, one-way, and multilevel replicates are
+planned for later milestones.
 }
 
 \section{Confidence intervals}{

@@ -280,6 +280,45 @@ over subjects (ten Hove et al. 2022, Eq. 13), so "how many subjects per cluster?
 *sample-size* question — how precisely you estimate the variance components — not a
 reliability projection.
 
+## Within-cell replicates: interaction vs. pure error
+
+So far every subject-by-rater cell holds a single rating. When each rater rates each
+subject **more than once** — *within-cell replicates* — you can separate two things
+that a single rating confounds: the **subject-by-rater interaction** (does a rater
+systematically score a particular subject high or low — a *stable* disagreement?)
+and **pure error** (how much a rater's repeat ratings of the same subject wobble).
+`icc()` detects the replicates and fits the interaction model automatically:
+
+```{r replicates-data, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+set.seed(2025)
+ns <- 20
+nr <- 4
+no <- 3
+grid <- expand.grid(subject = seq_len(ns), rater = seq_len(nr), occ = seq_len(no))
+subj <- rnorm(ns, sd = 1.1)[grid$subject]
+rater <- rnorm(nr, sd = 0.8)[grid$rater]
+sr <- rnorm(ns * nr, sd = 0.6)[(grid$rater - 1) * ns + grid$subject]
+reps <- data.frame(
+  subject = factor(grid$subject),
+  rater = factor(grid$rater),
+  score = 10 + subj + rater + sr + rnorm(nrow(grid), sd = 0.7)
+)
+
+icc(reps, score, subject, rater, occasions = c("single", "average"))
+```
+
+The variance-components line now shows `subject:rater` (the interaction) and
+`residual` (pure error) as separate terms. The **single-occasion** rows
+(`occasions = 1`) are the ordinary ICCs — a single rating's error still includes the
+interaction — but they are now fit correctly rather than folding the interaction
+into the residual. The **occasion-averaged** rows (`occasions = 3` here) give the
+reliability of a rater's *mean of three ratings*: averaging cuts pure error (but not
+the interaction), so those coefficients are higher.
+
+This slice covers balanced, complete replicated two-way **random**-rater designs.
+Ragged replicates, fixed raters, and multilevel replicates are planned for later
+milestones.
+
 ## Visualizing a fit
 
 Every `icc()` fit carries an `autoplot()` method (with a `plot()` wrapper), so you

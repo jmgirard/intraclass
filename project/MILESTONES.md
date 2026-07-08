@@ -483,18 +483,27 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
           `gtheory` dependency.
     - [x] roxygen (Multilevel projections section) + NEWS + `advanced.Rmd` worked example;
           full suite green (688 pass), lint + `air` clean.
-  - **Slice 3 — within-cell replicates (new estimand), Wave-2, heaviest.** *(May spin into
-    M18 if the milestone runs heavy — decide at this slice's start, ADR-026.)*
-    - [ ] **Write `M17-within-cell-replicates.md`** first (#2): resolve facet **crossed vs.
-          nested**, the **shipped coefficient set**, and the **occasion data API** — the three
-          questions ADR-026 defers to spec time.
-    - [ ] Replace the existing `has_replicates` abort ([`icc.R`](../R/icc.R)) with the
-          `(1 | subject:rater)` fit path splitting σ²_res → σ²_sr + σ²_e; both engines.
-    - [ ] Identifiability guards for the replicated design (#5, classed `abort_*`).
-    - [ ] `gtheory` added to **`Suggests`** (test-only, like `psych`; light-install intact).
-    - [ ] Oracles: O-gtheory (two-facet VCs), O-MS (closed-form mean squares), O-sim.
-    - [ ] `print`/`tidy`/`glance` surface σ²_sr; MC + bootstrap CIs; roxygen + NEWS +
-          vignette; CI green.
+  - **Slice 3 — within-cell replicates (new estimand), Wave-2, heaviest.** ✅ **done**
+        (kept in M17; maintainer chose to also add the occasion-averaged coefficient).
+    - [x] **Wrote `M17-within-cell-replicates.md`** (#2): resolved with the maintainer —
+          **nested/exchangeable** occasions (no occasion column), the standard ICC family
+          **plus** an occasion-averaged coefficient, data API = bare within-cell row
+          multiplicity. `gtheory` **not** needed (ANOVA + lme4 + sim oracles) — light install
+          intact, no Suggests change.
+    - [x] Replaced the `has_replicates` abort with the `(1|subject:rater)` fit
+          (`fit_{glmmtmb,lme4}_replicates`, reusing the generic `*_ml_contract`), splitting
+          σ²_res → σ²_sr + σ²_e; both engines; MC + bootstrap.
+    - [x] New **`occasions`** knob (single/average) via **per-component error divisors** in
+          the estimand (σ²_e divides by raters×occasions; the shelved M5 §4 idea, now needed);
+          `k_eff` fixed to count distinct raters; `occasions` column in estimates.
+    - [x] Guards (#5/#8): two-way random / balanced-complete replicates only — fixed-rater,
+          multilevel, ragged, and lavaan-engine replicates abort; `occasions="average"`
+          without replicates is a usage error.
+    - [x] Oracles (`test-replicates.R`): O-ANOVA (MoM mean squares), O-lme4 (interaction fit),
+          O-sim (recovery + MC coverage); agreement + consistency, single + occasion-averaged.
+    - [x] `print`/`summary`/`tidy` surface σ²_sr and the occasions column; roxygen section +
+          `@param occasions` + NEWS + `advanced.Rmd` worked example; full suite green (721
+          pass), lint + `air` clean.
   - **Milestone close:** installed-pkg check (`NOT_CRAN=true`) + `lintr::lint_package()` +
     `air format --check` clean before each PR push; `project/` reconciled in the merge commit.
 - Deferred out of M17 (record so not rediscovered): BCa intervals and **bootstrap-projected
@@ -509,5 +518,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ci_method = "posterior"`; **categorical/ordinal GLMM ratings**; **one-way via SEM**
   (blocked, ADR-014); the **non-parametric bootstrap / profile-likelihood CIs** and
   **benchmark suite**; the **lme4 singular-fit / merDeriv edge cases** (deprioritized).
-- Status: **in flight — scoped (ADR-026), not yet started.** No branch, no code. Slice order:
-  conflated ICC → three-facet `d_study()` → within-cell replicates.
+- Status: **all three slices done on branch `m17-varcomp-trio`; code-complete, not yet
+  merged.** Slice 1 = `level = "conflated"` (Eq. 14 diagnostic); Slice 2 = multilevel
+  rater-count `d_study()` (retargeted from subjects-per-cluster, ADR-026 amend); Slice 3 =
+  within-cell replicates + occasion-averaged coefficient. Full suite 721 pass / 0 fail, lint +
+  `air` clean. **Remaining before merge (PR/finish-task gate):** installed-pkg check
+  (`NOT_CRAN=true`) + vignette knit + open the PR; `project/` reconcile on merge.

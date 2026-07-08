@@ -318,6 +318,28 @@ glmmtmb_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
   )
 }
 
+# Within-cell replicates -- the two-way random model with a subject x rater
+# interaction (estimand-spec M17-within-cell-replicates.md §1). Reuses the generic
+# multilevel contract: four components (subject, rater, subject_rater, and the pure
+# within-cell residual), each on glmmTMB's internal log-SD scale, with the shared
+# Monte-Carlo and simulate/refit machinery.
+fit_glmmtmb_replicates <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the replicate ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~ 1 + (1 | subject) + (1 | rater) + (1 | subject:rater),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      subject = "subject",
+      rater = "rater",
+      subject_rater = "subject:rater"
+    ),
+    call = call
+  )
+}
+
 # Design 1 -- raters crossed with clusters (estimand-spec M5).
 fit_glmmtmb_multilevel <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")

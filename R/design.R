@@ -34,14 +34,32 @@ summarize_design <- function(df) {
   n_cells <- sum(counts > 0L)
   per_subject <- rowSums(counts) # ratings per subject (n_i)
   k_eff <- 1 / mean(1 / per_subject)
+  # The ICC(*,k) divisor for the two-way REPLICATE path counts distinct raters per
+  # subject, not total ratings -- replicates within a rater must not inflate it
+  # (estimand-spec M17-within-cell-replicates.md §4). Identical to `k_eff` when there
+  # is one rating per cell, so the classic paths are unchanged.
+  raters_per_subject <- rowSums(counts > 0L)
+  k_eff_raters <- 1 / mean(1 / raters_per_subject)
+  # Within-cell replicate facts: `n_o` is the uniform per-cell rating count when the
+  # replicated design is complete and balanced (every cell present, equal counts);
+  # NA otherwise. `replicates_uniform` gates the M17 Slice 3 replicate path (ragged
+  # replicates are deferred, §7).
+  observed <- counts[counts > 0L]
+  replicates_uniform <- has_replicates &&
+    n_cells == ns * nr &&
+    length(unique(as.integer(observed))) == 1L
+  n_o <- if (replicates_uniform) as.integer(observed[[1L]]) else NA_integer_
   # Balanced == complete crossed design with exactly one rating per cell.
   balanced <- !has_replicates && n_cells == ns * nr
 
   list(
     balanced = balanced,
     has_replicates = has_replicates,
+    replicates_uniform = replicates_uniform,
+    n_o = n_o,
     n_cells = n_cells,
     k_eff = k_eff,
+    k_eff_raters = k_eff_raters,
     connected = design_connected(counts > 0L)
   )
 }

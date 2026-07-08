@@ -36,6 +36,12 @@ alternate engines, and seeded simulations.
   the biased single-level ICC you would get by ignoring the clustering (ten Hove et
   al. 2022, Eq. 14) — a diagnostic contrast, flagged in `print()` as not a
   recommended coefficient (absolute-agreement, complete crossed designs).
+* **Within-cell replicates**: when a subject-by-rater cell is rated more than once,
+  `icc()` fits the two-way random model with a subject-by-rater interaction,
+  separating the interaction variance (stable disagreement) from pure rating error
+  instead of confounding them — and reports both. A new `occasions` argument averages
+  over the replicates (`occasions = "average"`), giving the reliability of a rater's
+  mean-of-replicates score. Balanced, complete replicated two-way random designs.
 
 ## Engines
 

@@ -557,6 +557,31 @@ lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
   )
 }
 
+# Within-cell replicates -- the two-way random model with a subject x rater
+# interaction (estimand-spec M17-within-cell-replicates.md); the lme4 counterpart of
+# fit_glmmtmb_replicates(). Four components (subject, rater, subject_rater, residual)
+# through the shared multilevel contract; a singular boundary fit defers to glmmTMB.
+fit_lme4_replicates <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the replicate ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(
+    score ~ 1 + (1 | subject) + (1 | rater) + (1 | subject:rater),
+    data
+  )
+  lme4_ml_contract(
+    fit,
+    groups = list(
+      subject = "subject",
+      rater = "rater",
+      subject_rater = "subject:rater"
+    ),
+    call = call
+  )
+}
+
 # Design 1 -- raters crossed with clusters (estimand-spec M5); the lme4 counterpart
 # of fit_glmmtmb_multilevel(). Five components (cluster, subject-in-cluster, rater,
 # cluster x rater, residual). Balanced/complete crossed random only in Slice 2.
