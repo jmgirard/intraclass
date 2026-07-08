@@ -21,6 +21,16 @@ simulations.
   vs. two-way (`model`) designs — the classic Shrout & Fleiss / McGraw &
   Wong coefficients — each reported with a boundary-aware Monte-Carlo
   confidence interval and its Shrout & Fleiss equivalent.
+- A second interval method, `ci_method = "bootstrap"`: a parametric
+  bootstrap that simulates response vectors from the fitted model,
+  refits, and takes percentile quantiles (`boot_samples` resamples). It
+  does not rely on the asymptotic-normal covariance approximation the
+  Monte-Carlo default uses, at the cost of a refit per resample.
+  Available for every design the `"glmmTMB"`
+  ([`simulate()`](https://rdrr.io/r/stats/simulate.html) + refit) and
+  `"lme4"` (`bootMer`) engines fit — two-way random and fixed, one-way,
+  and the multilevel designs — at both levels. For fixed raters the
+  finite-population is recomputed directly from each refit.
 - Imbalanced and **incomplete** (missing-cell) designs are handled
   directly by the mixed model: it uses the effective number of ratings
   `k_eff` (the harmonic mean of the per-subject counts) as the

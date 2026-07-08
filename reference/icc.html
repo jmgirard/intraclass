@@ -96,6 +96,7 @@ raters as a random sample (Case 2) or as fixed (Case 3).</p>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  ci_method <span class="op">=</span> <span class="st">"montecarlo"</span>,</span>
 <span>  mc_samples <span class="op">=</span> <span class="fl">10000L</span>,</span>
+<span>  boot_samples <span class="op">=</span> <span class="fl">999L</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -218,11 +219,26 @@ balanced data. <code>"lme4"</code> requires the <span class="pkg">lme4</span> an
 
 
 <dt id="arg-ci-method">ci_method<a class="anchor" aria-label="anchor" href="#arg-ci-method"></a></dt>
-<dd><p>Interval method. Only <code>"montecarlo"</code> is currently supported.</p></dd>
+<dd><p>Interval method. <code>"montecarlo"</code> (default) simulates from the
+fitted parameter covariance on the engine's log scale (fast, boundary-aware).
+<code>"bootstrap"</code> is a parametric bootstrap: it simulates response vectors from the
+fitted model, refits, and takes percentile quantiles of the resampled
+coefficients. The bootstrap does not rely on the asymptotic-normal covariance
+approximation but is far slower (a refit per resample). It is available for
+every design the <code>"glmmTMB"</code> and <code>"lme4"</code> engines fit (via <code>glmmTMB</code>'s
+<code><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate()</a></code> + refit and <code><a href="https://rdrr.io/pkg/lme4/man/bootMer.html" class="external-link">lme4::bootMer</a></code> respectively); the <code>"lavaan"</code> engine
+supports <code>"montecarlo"</code> only. As with the Monte-Carlo interval, the <code>"lme4"</code>
+engine defers a singular (boundary) fit to <code>"glmmTMB"</code> for either method.</p></dd>
 
 
 <dt id="arg-mc-samples">mc_samples<a class="anchor" aria-label="anchor" href="#arg-mc-samples"></a></dt>
-<dd><p>Number of Monte-Carlo draws for the interval.</p></dd>
+<dd><p>Number of Monte-Carlo draws for <code>ci_method = "montecarlo"</code>
+(default <code>10000</code>).</p></dd>
+
+
+<dt id="arg-boot-samples">boot_samples<a class="anchor" aria-label="anchor" href="#arg-boot-samples"></a></dt>
+<dd><p>Number of resamples for <code>ci_method = "bootstrap"</code> (default
+<code>999</code>). Ignored when <code>ci_method = "montecarlo"</code>.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>

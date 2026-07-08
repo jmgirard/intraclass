@@ -47,6 +47,7 @@ icc(
   conf_level = 0.95,
   ci_method = "montecarlo",
   mc_samples = 10000L,
+  boot_samples = 999L,
   seed = NULL
 )
 ```
@@ -174,11 +175,29 @@ icc(
 
 - ci_method:
 
-  Interval method. Only `"montecarlo"` is currently supported.
+  Interval method. `"montecarlo"` (default) simulates from the fitted
+  parameter covariance on the engine's log scale (fast, boundary-aware).
+  `"bootstrap"` is a parametric bootstrap: it simulates response vectors
+  from the fitted model, refits, and takes percentile quantiles of the
+  resampled coefficients. The bootstrap does not rely on the
+  asymptotic-normal covariance approximation but is far slower (a refit
+  per resample). It is available for every design the `"glmmTMB"` and
+  `"lme4"` engines fit (via `glmmTMB`'s
+  [`simulate()`](https://rdrr.io/r/stats/simulate.html) + refit and
+  [`lme4::bootMer`](https://rdrr.io/pkg/lme4/man/bootMer.html)
+  respectively); the `"lavaan"` engine supports `"montecarlo"` only. As
+  with the Monte-Carlo interval, the `"lme4"` engine defers a singular
+  (boundary) fit to `"glmmTMB"` for either method.
 
 - mc_samples:
 
-  Number of Monte-Carlo draws for the interval.
+  Number of Monte-Carlo draws for `ci_method = "montecarlo"` (default
+  `10000`).
+
+- boot_samples:
+
+  Number of resamples for `ci_method = "bootstrap"` (default `999`).
+  Ignored when `ci_method = "montecarlo"`.
 
 - seed:
 

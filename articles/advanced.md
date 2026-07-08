@@ -487,6 +487,46 @@ complete, balanced random two-way design; one-way, fixed-rater,
 multilevel, and incomplete designs are directed to the mixed-model
 engines.
 
+## Choosing a confidence-interval method
+
+Every interval so far has been the default **Monte-Carlo** interval: it
+draws from the fitted parameter covariance on the engine’s log scale and
+back-transforms, which is fast and boundary-aware. A second method, a
+**parametric bootstrap** (`ci_method = "bootstrap"`), instead simulates
+response vectors from the fitted model, refits, and takes percentile
+quantiles of the resampled coefficients. It does not lean on the
+asymptotic-normal covariance approximation — at the cost of a full refit
+per resample, so it is far slower.
+
+``` r
+
+mc <- tidy(icc(ratings, score, subject, rater, seed = 1))
+bs <- tidy(icc(ratings, score, subject, rater,
+  ci_method = "bootstrap", boot_samples = 999, seed = 1
+))
+data.frame(
+  index = mc$index,
+  estimate = round(mc$estimate, 3),
+  mc = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
+  bootstrap = sprintf("[%.2f, %.2f]", bs$conf.low, bs$conf.high)
+)
+#>      index estimate           mc    bootstrap
+#> 1 ICC(A,1)     0.29 [0.05, 0.71] [0.02, 0.72]
+#> 2 ICC(A,k)     0.62 [0.17, 0.91] [0.09, 0.91]
+```
+
+The point estimates are identical (same fit) and the upper bounds
+coincide; the bootstrap’s lower bounds run a little lower here, because
+this is a very small design (six subjects) and the bootstrap’s lower
+tail is noisier than the covariance-based Monte-Carlo draw. The two
+methods can diverge more where the asymptotics are strained — near the
+zero-variance boundary, and for the multilevel designs (more variance
+components, often few clusters), where the bootstrap’s cluster-level
+interval in particular carries more resampling noise. The bootstrap is
+available for every design the `"glmmTMB"` and `"lme4"` engines fit;
+`"lavaan"` supports Monte-Carlo only. Raise `boot_samples` (default
+`999`) for a smoother interval at proportionally more cost.
+
 ## Letting the package choose the coefficient
 
 Every design above assumes you already know which coefficient you want.

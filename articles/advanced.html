@@ -502,6 +502,46 @@ designs are directed to the mixed-model engines.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="choosing-a-confidence-interval-method">Choosing a confidence-interval method<a class="anchor" aria-label="anchor" href="#choosing-a-confidence-interval-method"></a>
+</h2>
+<p>Every interval so far has been the default
+<strong>Monte-Carlo</strong> interval: it draws from the fitted
+parameter covariance on the engine’s log scale and back-transforms,
+which is fast and boundary-aware. A second method, a <strong>parametric
+bootstrap</strong> (<code>ci_method = "bootstrap"</code>), instead
+simulates response vectors from the fitted model, refits, and takes
+percentile quantiles of the resampled coefficients. It does not lean on
+the asymptotic-normal covariance approximation — at the cost of a full
+refit per resample, so it is far slower.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">bs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  ci_method <span class="op">=</span> <span class="st">"bootstrap"</span>, boot_samples <span class="op">=</span> <span class="fl">999</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  index <span class="op">=</span> <span class="va">mc</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  mc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
+<span>  bootstrap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">bs</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">bs</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;      index estimate           mc    bootstrap</span></span>
+<span><span class="co">#&gt; 1 ICC(A,1)     0.29 [0.05, 0.71] [0.02, 0.72]</span></span>
+<span><span class="co">#&gt; 2 ICC(A,k)     0.62 [0.17, 0.91] [0.09, 0.91]</span></span></code></pre></div>
+<p>The point estimates are identical (same fit) and the upper bounds
+coincide; the bootstrap’s lower bounds run a little lower here, because
+this is a very small design (six subjects) and the bootstrap’s lower
+tail is noisier than the covariance-based Monte-Carlo draw. The two
+methods can diverge more where the asymptotics are strained — near the
+zero-variance boundary, and for the multilevel designs (more variance
+components, often few clusters), where the bootstrap’s cluster-level
+interval in particular carries more resampling noise. The bootstrap is
+available for every design the <code>"glmmTMB"</code> and
+<code>"lme4"</code> engines fit; <code>"lavaan"</code> supports
+Monte-Carlo only. Raise <code>boot_samples</code> (default
+<code>999</code>) for a smoother interval at proportionally more
+cost.</p>
+</div>
+<div class="section level2">
 <h2 id="letting-the-package-choose-the-coefficient">Letting the package choose the coefficient<a class="anchor" aria-label="anchor" href="#letting-the-package-choose-the-coefficient"></a>
 </h2>
 <p>Every design above assumes you already know which coefficient you
@@ -514,7 +554,7 @@ data argument — so it is a fast, side-effect-free advisor you can
 consult before you touch your data.</p>
 <p>Answer the choices that pin down the coefficient and it returns
 advice:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Recommended ICC</span></span>
 <span><span class="co">#&gt; Design: two-way random, absolute agreement</span></span>
@@ -534,7 +574,7 @@ generated from the <strong>same estimand machinery</strong> as
 <code><a href="../reference/icc.html">icc()</a></code>, that call cannot drift from what <code><a href="../reference/icc.html">icc()</a></code>
 actually computes — running the emitted call reproduces exactly the
 coefficient the advisor named:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The emitted call is an ordinary icc() call (agreement + random are the defaults,</span></span>
 <span><span class="co"># so they need not be named):</span></span>
 <span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, unit <span class="op">=</span> <span class="st">"single"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -549,7 +589,7 @@ coefficient the advisor named:</p>
 multilevel fifth choice — subject vs. cluster level — is part of it, so
 a nested-data question resolves to a level-specific recommendation and
 the matching <code>cluster</code> call:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, multilevel <span class="op">=</span> <span class="cn">TRUE</span>, level <span class="op">=</span> <span class="st">"cluster"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Recommended ICC</span></span>
