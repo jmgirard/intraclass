@@ -43,7 +43,8 @@ the seed.}
 \value{
 An \code{icc_dstudy} object: a tibble with one row per \code{m} and columns
 \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{estimate}, \code{std.error}, \code{conf.low}, and
-\code{conf.high}, carrying the design and interval settings as attributes. Use
+\code{conf.high}, carrying the design and interval settings as attributes. A
+multilevel projection adds a \code{level} column (one curve per level). Use
 \link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and
 \code{autoplot()} (the reliability curve).
 }
@@ -73,6 +74,20 @@ projection of \code{ICC(1)}). It is \strong{not} defined for fixed-rater absolut
 agreement: there the rater term is the finite-population variance of exactly the
 raters you observed, so there is no "average of \code{m} freshly sampled raters" to
 project to, and \code{d_study()} aborts (use \code{raters = "random"}).
+}
+
+\section{Multilevel projections}{
+
+For a multilevel fit (a \code{cluster} column), \code{d_study()} projects the rater count
+\code{m} for each correctly-partitioned level on the object — the \strong{subject} and/or
+\strong{cluster} level — returning one reliability curve per level (the result gains
+a \code{level} column, and \code{autoplot()} facets by it). This is the paper-sanctioned
+rater projection (ten Hove et al. 2022): \code{m} is the number of raters per cluster,
+and the cluster-level coefficient does \strong{not} average over subjects, so there is
+no "subjects per cluster" projection — that is a sample-size question, not a
+reliability one. Nested designs project the subject level only. The conflated
+diagnostic (\code{level = "conflated"}) is not projected. Multilevel projection covers
+\strong{complete} data only; incomplete multilevel \code{d_study()} aborts.
 }
 
 \examples{

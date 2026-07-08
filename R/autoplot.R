@@ -20,12 +20,16 @@ autoplot.icc_dstudy <- function(object, ...) {
   )
   df <- object[order(object$m), , drop = FALSE]
   ci_pct <- format(100 * attr(object, "conf.level"), trim = TRUE)
-  phrase <- icc_design_phrase(
-    attr(object, "icc_type"),
-    attr(object, "icc_raters")
-  )
+  # icc_design_label is multilevel-aware; older objects fall back to the phrase.
+  label <- attr(object, "icc_design_label")
+  if (is.null(label)) {
+    label <- icc_design_phrase(
+      attr(object, "icc_type"),
+      attr(object, "icc_raters")
+    )
+  }
 
-  ggplot2::ggplot(df, ggplot2::aes(x = .data$m, y = .data$estimate)) +
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$m, y = .data$estimate)) +
     ggplot2::geom_ribbon(
       ggplot2::aes(ymin = .data$conf.low, ymax = .data$conf.high),
       alpha = 0.15
@@ -36,12 +40,18 @@ autoplot.icc_dstudy <- function(object, ...) {
     ggplot2::labs(
       x = "Number of raters (m)",
       y = "Reliability",
-      title = sprintf("D-study projection: %s", phrase),
+      title = sprintf("D-study projection: %s", label),
       subtitle = sprintf(
         "Projected reliability with %s%% Monte-Carlo interval",
         ci_pct
       )
     )
+  # A multilevel projection has one curve per level; facet so the subject- and
+  # cluster-level curves are not overplotted (mirrors autoplot.icc).
+  if (isTRUE(attr(object, "multilevel"))) {
+    p <- p + ggplot2::facet_wrap(ggplot2::vars(.data$level))
+  }
+  p
 }
 
 #' @rdname d_study

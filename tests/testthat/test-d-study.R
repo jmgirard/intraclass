@@ -236,3 +236,198 @@ test_that("the recovered population Phi(m) is covered by the interval (O-sim)", 
   expect_equal(d$estimate, pop, tolerance = 0.05)
   expect_true(all(d$conf.low <= pop & pop <= d$conf.high))
 })
+
+# Multilevel rater-count projection (M17 Slice 2) -------------------------------
+#
+# d_study() projects the rater count m for the subject-level (Eq. 12) and
+# cluster-level (Eq. 13) multilevel ICCs -- a divisor change on the M5 estimand
+# (estimand-spec M4.5 §7). Oracles: reduction to icc()'s ICC(*,k) at m = observed
+# k per level, an independent lme4 five-component fit, and population recovery.
+
+sim_ml_ds <- function(nc, ns, k, vc, vsc, vr, vcr, vres, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, sqrt(vc))
+  rt <- stats::rnorm(k, 0, sqrt(vr))
+  d <- expand.grid(
+    subj = seq_len(ns),
+    cluster = seq_len(nc),
+    rater = seq_len(k)
+  )
+  scv <- stats::rnorm(nc * ns, 0, sqrt(vsc))
+  d$sc <- scv[(d$cluster - 1) * ns + d$subj]
+  crv <- stats::rnorm(nc * k, 0, sqrt(vcr))
+  d$cr <- crv[(d$cluster - 1) * k + d$rater]
+  d$score <- 10 +
+    cl[d$cluster] +
+    d$sc +
+    rt[d$rater] +
+    d$cr +
+    stats::rnorm(nrow(d), 0, sqrt(vres))
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d
+}
+
+test_that("multilevel d_study projects both levels with a level column", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  ds <- d_study(fit, m = 1:8)
+  expect_true("level" %in% names(ds))
+  expect_setequal(unique(ds$level), c("subject", "cluster"))
+  expect_identical(nrow(ds), 16L) # 8 m x 2 levels
+  # Bounded and monotone increasing in m within each level.
+  for (lv in c("subject", "cluster")) {
+    sub <- ds[ds$level == lv, ]
+    sub <- sub[order(sub$m), ]
+    expect_true(all(sub$estimate >= 0 & sub$estimate <= 1))
+    expect_true(all(diff(sub$estimate) >= -1e-9))
+  }
+})
+
+test_that("O-ML-reduction: at m = observed k, projection equals icc() ICC(*,k) per level", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 6)
+  e <- fit$estimates
+  for (lv in c("subject", "cluster")) {
+    proj <- ds$estimate[ds$level == lv & ds$m == 6]
+    icc_ak <- e$estimate[e$index == "ICC(A,k)" & e$level == lv]
+    expect_equal(proj, icc_ak, tolerance = 1e-6)
+  }
+})
+
+test_that("O-ML-lme4: multilevel projection matches an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  ds <- d_study(fit, m = c(3, 10))
+  m <- lme4::lmer(
+    score ~ 1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data = d,
+    REML = TRUE
+  )
+  vc <- lme4::VarCorr(m)
+  sc <- as.numeric(vc[["cluster:subject"]])
+  cl <- as.numeric(vc$cluster)
+  ra <- as.numeric(vc$rater)
+  cr <- as.numeric(vc[["cluster:rater"]])
+  re <- stats::sigma(m)^2
+  for (mm in c(3, 10)) {
+    subj <- ds$estimate[ds$level == "subject" & ds$m == mm]
+    clus <- ds$estimate[ds$level == "cluster" & ds$m == mm]
+    expect_equal(subj, sc / (sc + (ra + re) / mm), tolerance = 1e-4)
+    expect_equal(clus, cl / (cl + (ra + cr) / mm), tolerance = 1e-4)
+  }
+})
+
+test_that("O-ML-sim: population Phi(m) recovered and covered at an m not run", {
+  skip_if_not_installed("glmmTMB")
+  vc <- 1.0
+  vsc <- 1.2
+  vr <- 0.7
+  vcr <- 0.16
+  vres <- 0.5
+  d <- sim_ml_ds(40, 10, 6, vc, vsc, vr, vcr, vres, seed = 424242)
+  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 20260707)
+  ds <- d_study(fit, m = 12)
+  # Project subject and cluster to m = 12 (not the observed 6).
+  pop_subj <- vsc / (vsc + (vr + vres) / 12)
+  pop_clus <- vc / (vc + (vr + vcr) / 12)
+  s <- ds[ds$level == "subject" & ds$m == 12, ]
+  c_ <- ds[ds$level == "cluster" & ds$m == 12, ]
+  expect_lt(abs(s$estimate - pop_subj), 0.05)
+  expect_true(s$conf.low <= pop_subj && pop_subj <= s$conf.high)
+  expect_true(c_$conf.low <= pop_clus && pop_clus <= c_$conf.high)
+})
+
+test_that("multilevel consistency projection is Spearman-Brown of ICC(C,1) per level", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "consistency",
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:6)
+  e <- fit$estimates
+  for (lv in c("subject", "cluster")) {
+    rho1 <- e$estimate[e$index == "ICC(C,1)" & e$level == lv]
+    for (mm in c(2, 4)) {
+      proj <- ds$estimate[ds$level == lv & ds$m == mm]
+      expect_equal(proj, sb_project(rho1, mm), tolerance = 1e-4)
+    }
+  }
+})
+
+test_that("multilevel d_study scope guards (#5, #8)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  # Incomplete multilevel projection is deferred (open ICC(c,k) divisor).
+  d_missing <- d[!(d$cluster == "1" & d$rater == "1"), ]
+  fit_inc <- icc(d_missing, score, subject, rater, cluster = cluster, seed = 1)
+  expect_error(d_study(fit_inc, m = 1:4), class = "intraclass_unsupported")
+  # A conflated-only fit has nothing to project.
+  fit_conf <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    seed = 1
+  )
+  expect_error(d_study(fit_conf, m = 1:4), class = "intraclass_unsupported")
+  # The conflated diagnostic is skipped when requested alongside real levels.
+  fit_all <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster", "conflated"),
+    seed = 1
+  )
+  ds <- d_study(fit_all, m = 1:4)
+  expect_false("conflated" %in% ds$level)
+  expect_setequal(unique(ds$level), c("subject", "cluster"))
+})
+
+test_that("nested multilevel projects the subject level only", {
+  skip_if_not_installed("glmmTMB")
+  # Design 2: raters nested in clusters (cluster-unique rater labels).
+  d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  d$rater <- factor(paste(d$cluster, d$rater, sep = "_"))
+  fit <- suppressMessages(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "nested_in_clusters",
+      seed = 1
+    )
+  )
+  ds <- d_study(fit, m = 1:5)
+  expect_setequal(unique(ds$level), "subject")
+})

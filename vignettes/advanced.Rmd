@@ -260,6 +260,26 @@ raters are supported for the complete crossed design at the subject level. The a
 cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs, and incomplete
 or nested fixed-rater designs are planned for later milestones.
 
+### How many raters? A multilevel D-study
+
+The [D-study](#how-many-raters-do-i-need-a-d-study) works on a multilevel fit too:
+it projects the **number of raters** at each level, so you can ask "how many raters
+would make the *cluster*-level score reliable?" separately from the subject level.
+It returns one curve per level (note the `level` column), and `autoplot()` facets
+them:
+
+```{r ml-dstudy, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+d_study(
+  icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1),
+  m = c(1, 2, 4, 8)
+)
+```
+
+Only the **rater** count is projected. The cluster-level coefficient does not average
+over subjects (ten Hove et al. 2022, Eq. 13), so "how many subjects per cluster?" is a
+*sample-size* question — how precisely you estimate the variance components — not a
+reliability projection.
+
 ## Visualizing a fit
 
 Every `icc()` fit carries an `autoplot()` method (with a `plot()` wrapper), so you

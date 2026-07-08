@@ -463,22 +463,26 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     - [x] roxygen (`@param level` + Multilevel section) + NEWS + `advanced.Rmd` worked
           contrast + `test-vignette-claims.R` invariant; full suite green (663 pass), lint +
           `air` clean.
-  - **Slice 2 — multilevel rater-count `d_study()` (both levels).** *(Retargeted from the
-    "three-facet / subjects-per-cluster" plan: the paper's cluster ICC has no subject facet
-    and Ns is efficiency-only, so subjects-per-cluster is not a sourced reliability
-    projection — dropped from M17, see ADR-026 amendment.)*
-    - [ ] Lift `d_study()`'s blanket multilevel abort; project the **rater count `m`** for the
-          subject-level (Eq. 12) and cluster-level (Eq. 13) multilevel ICCs — a divisor change
-          on the existing M5 estimand, reusing the single-level MC-reuse machinery.
-    - [ ] `icc_dstudy` gains a `level` column for multilevel fits; agreement + consistency per
-          level; nested designs project subject-level only (Design 3 agreement-only).
-    - [ ] **Scope guard**: complete-data multilevel only; incomplete aborts (the cluster level
-          would hit the open M9 `ICC(c,k)` divisor, Wave 3). Fixed-rater agreement projection
-          stays ill-posed and aborts (#5).
-    - [ ] Oracles: O-reduction (at `m = observed k` equals the fitted M5 `ICC(*,k)` per level),
-          O-lme4 (curve matches an independent five-component fit), O-sim (projected value not
-          run + MC coverage). No `gtheory` dependency.
-    - [ ] roxygen + NEWS + `advanced.Rmd`; `autoplot.icc_dstudy` facets by level; CI green.
+  - **Slice 2 — multilevel rater-count `d_study()` (both levels).** ✅ **done.** *(Retargeted
+    from the "three-facet / subjects-per-cluster" plan: the paper's cluster ICC has no subject
+    facet and Ns is efficiency-only, so subjects-per-cluster is not a sourced reliability
+    projection — dropped from M17, ADR-026 amendment; estimand-spec M4.5 §7.)*
+    - [x] Lifted `d_study()`'s blanket multilevel abort; projects the **rater count `m`** for
+          the subject-level (Eq. 12) and cluster-level (Eq. 13) multilevel ICCs — a divisor
+          change on the existing M5 estimand, reusing the single-level MC-reuse machinery.
+    - [x] `icc_dstudy` gains a `level` column for multilevel fits; agreement + consistency per
+          level; nested designs project subject-level only (Design 3 agreement-only). `format`,
+          `tidy`, and `autoplot` (facets by level) all level-aware.
+    - [x] **Scope guard**: complete-data multilevel only; incomplete aborts (the cluster level
+          would hit the open M9 `ICC(c,k)` divisor, Wave 3); conflated-only fit aborts, the
+          conflated diagnostic is skipped alongside real levels; fixed-rater agreement stays
+          ill-posed and aborts (#5).
+    - [x] Oracles: O-ML-reduction (at `m = observed k` equals the fitted M5 `ICC(*,k)` per
+          level), O-ML-lme4 (curve matches an independent five-component fit), O-ML-sim
+          (projected value not run + MC coverage) + Spearman–Brown consistency invariant. No
+          `gtheory` dependency.
+    - [x] roxygen (Multilevel projections section) + NEWS + `advanced.Rmd` worked example;
+          full suite green (688 pass), lint + `air` clean.
   - **Slice 3 — within-cell replicates (new estimand), Wave-2, heaviest.** *(May spin into
     M18 if the milestone runs heavy — decide at this slice's start, ADR-026.)*
     - [ ] **Write `M17-within-cell-replicates.md`** first (#2): resolve facet **crossed vs.

@@ -57,7 +57,10 @@ alternate engines, and seeded simulations.
   It gives advice only; it does not fit.
 * `d_study()` — projects a fitted ICC's reliability to the mean of an arbitrary number
   of raters (a generalizability decision study), with an `autoplot()` reliability
-  curve; `icc()`'s `unit` also accepts numbers for one-off projections.
+  curve; `icc()`'s `unit` also accepts numbers for one-off projections. For a
+  **multilevel** fit it projects the rater count at each level (subject and/or
+  cluster), returning one curve per level (a `level` column; `autoplot()` facets by
+  it) on complete data.
 * `autoplot()` / `plot()` methods for `icc` objects draw a coefficient forest plot
   and a variance-component decomposition; `tidy()` / `glance()` give tidy summaries.
   Plotting needs `ggplot2` (a `Suggests` dependency).
