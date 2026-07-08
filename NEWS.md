@@ -70,9 +70,13 @@ alternate engines, and seeded simulations.
   a variance-component boundary falls back to glmmTMB). A selectable
   `engine = "lavaan"` — an
   SEM common-factor generalizability model (Jorgensen 2021) whose absolute-agreement
-  coefficient uses the indicator-mean rater-variance estimator — covers the random
-  two-way design with both the Monte-Carlo and the parametric-bootstrap interval.
-  Optional engines live in `Suggests`, so the base install stays light.
+  coefficient uses the indicator-mean rater-variance estimator — covers the two-way
+  design with random or fixed raters, and both the Monte-Carlo and the
+  parametric-bootstrap interval. For fixed raters the SEM agreement uses the
+  McGraw & Wong Case-3A bias-corrected finite-population \eqn{\theta^2_r} (the raw
+  indicator-mean variance minus the mean sampling variance of the rater means), which
+  equals the mixed-model estimate on balanced data. Optional engines live in
+  `Suggests`, so the base install stays light.
 
 ## Choosing, projecting, and visualizing
 

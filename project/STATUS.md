@@ -18,20 +18,22 @@
   (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
   Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
   checklist in MILESTONES.md.
-- Active task: **M21 Slice 2 — fixed-rater SEM** (next). **Slice 1 (lavaan bootstrap) ✅ done** on
-  branch `m21-sem-parity`: `lavaan_simulate_refit` factory (parametric bootstrap from the fitted
-  SEM's implied moments) + shared `lavaan_components()`; `ci_method = "bootstrap"` now works for
-  `engine = "lavaan"` on the random two-way path. Oracles: O1 consistency population-coverage, O2
-  bootstrap≈MC (same estimand) + cross-engine consistency, well-formed/reproducible. Not yet
-  committed/merged. See the DoD checklist in MILESTONES.md.
+- Active task: **M21 Slice 3 — incomplete/FIML SEM** (next). **Slices 1–2 ✅ done** on branch
+  `m21-sem-parity`. Slice 1 (lavaan bootstrap): `lavaan_simulate_refit` factory + `ci_method =
+  "bootstrap"` for the SEM engine (committed `e307421`). Slice 2 (fixed-rater SEM): oracle-first
+  catch resolved — fixed SEM agreement is the **distinct** Case-3A bias-corrected θ²_r
+  (`max(0, raw − bias)`), reducing to both glmmTMB Case-3A fixed and random σ²_r on balanced data
+  (M10 identity); `fit_lavaan(raters=)`, guard narrowed, O-FSEM oracles green. Slice 2 not yet
+  committed. See the DoD checklist in MILESTONES.md.
 - Last green CI: **PR #25 (M20) full matrix green incl. Windows and R-devel; merged to `main` at
   137fb98** (the codecov upload flaked once on a bad GPG signature — re-ran green; infra, not the
   diff).
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M21 Slice 1 (lavaan bootstrap) landed on
-  `m21-sem-parity`** (not yet committed at time of writing; air + lintr clean, docs regenerated;
-  test-ci-bootstrap.R + test-icc-lavaan.R green under `load_all` + `NOT_CRAN`). Prior: **M21 scoped
-  and opened (ADR-031); in flight.**
+- Updated: 2026-07-08 by main session (Opus) — **M21 Slices 1–2 landed on `m21-sem-parity`.**
+  Slice 1 (lavaan bootstrap) committed `e307421`. Slice 2 (fixed-rater SEM) code + O-FSEM oracles
+  done (green under `load_all` + `NOT_CRAN`; air + lintr clean, docs/NEWS updated), not yet
+  committed. Oracle-first catch resolved cleanly (Case-3A θ²_r, distinct from M7's raw, reduces to
+  glmmTMB fixed+random on balanced data). Slice 3 (incomplete/FIML SEM) next.
   Short retro (M20 landed clean in one arc-consistent shot) → scoping ADR fixing three slices
   (bootstrap → fixed → incomplete/FIML, order kept per maintainer), estimand posture (engine
   parity, no new estimand-spec — only a FIML-SEM oracle note), and per-slice oracles (glmmTMB the

@@ -251,14 +251,10 @@ test_that("lavaan aborts loudly on a degenerate (boundary) fit (#5/#8)", {
   )
 })
 
-test_that("lavaan is refused for fixed, one-way, multilevel, and incomplete designs", {
+test_that("lavaan is refused for one-way, multilevel, and incomplete designs", {
   skip_if_not_installed("lavaan")
 
   d <- sf_ratings_long()
-  expect_error(
-    icc(d, score, subject, rater, raters = "fixed", engine = "lavaan"),
-    class = "intraclass_unsupported"
-  )
   expect_error(
     icc(d, score, subject, rater, model = "oneway", engine = "lavaan"),
     class = "intraclass_unsupported"
@@ -313,4 +309,234 @@ test_that("lavaan print() output is stable", {
     engine = "lavaan"
   )
   expect_snapshot(print(fit), transform = mask_ci)
+})
+
+# O-FSEM -- fixed-rater SEM (M21 Slice 2, ADR-031) -----------------------------
+# Oracle-first catch (ADR-031): M7's RANDOM agreement estimator already reads the
+# rater variance from a finite set of indicator intercepts (raw = sum(nu^2)/(k-1)),
+# so does fixed-rater SEM agreement coincide with it, or need a distinct theta^2_r?
+# Resolved by oracle: fixed raters take the McGraw & Wong Case-3A bias-corrected
+# finite-population theta^2_r = max(0, raw - bias) -- a DISTINCT estimator (raw minus
+# the mean sampling variance of the intercepts). On balanced data it equals BOTH
+# glmmTMB's Case-3A fixed theta^2_r AND its random sigma^2_r (the M10 balanced
+# fixed==random identity), so lavaan's fixed agreement recovers the mixed-model value
+# the raw estimator (0.284 on SF) does not. Consistency omits the rater term, so it is
+# identical to the random case.
+
+test_that("fixed-rater SEM agreement is the Case-3A theta^2_r, distinct from raw", {
+  skip_if_not_installed("lavaan")
+
+  d <- sf_ratings_long()
+  raw <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "random",
+    engine = "lavaan",
+    seed = 1
+  )
+  fix <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "lavaan",
+    seed = 1
+  ))
+
+  # The fixed rater component is the raw one minus a positive bias (Case-3A
+  # correction), so it is strictly smaller -- NOT a relabel of the raw estimator.
+  expect_lt(fix$components$rater, raw$components$rater)
+  expect_gt(fix$components$rater, 0)
+
+  # Hence a HIGHER agreement ICC than the raw random-SEM value (smaller sigma^2_r).
+  fa <- tidy(fix)
+  ra <- tidy(raw)
+  expect_gt(
+    fa$estimate[fa$index == "ICC(A,1)"],
+    ra$estimate[ra$index == "ICC(A,1)"]
+  )
+})
+
+test_that("balanced fixed-rater SEM reduces to glmmTMB fixed AND random (O-FSEM)", {
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("glmmTMB")
+
+  # Primary oracle: on balanced data the SEM Case-3A theta^2_r equals both the mixed
+  # model's fixed theta^2_r (Case 3A) and its random sigma^2_r (M10 identity). Small
+  # SF data -> a small-sample gap between the SEM observed-information bias and the
+  # REML bias, so a modest tolerance; large N tightens it below.
+  d <- sf_ratings_long()
+  for (u in c("single", "average")) {
+    lav <- suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      unit = u,
+      raters = "fixed",
+      engine = "lavaan",
+      seed = 1
+    )))
+    gf <- suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      unit = u,
+      raters = "fixed",
+      engine = "glmmTMB",
+      seed = 1
+    )))
+    gr <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      unit = u,
+      raters = "random",
+      engine = "glmmTMB",
+      seed = 1
+    ))
+    idx <- if (u == "single") "ICC(A,1)" else "ICC(A,k)"
+    # SF is tiny (6 subjects), so the SEM observed-information bias and the REML bias
+    # leave a documented ~1e-3 absolute gap (relative ~4e-3); the large-N test below
+    # is the tight (1e-3) convergence pin. Honest small-sample tolerance, not tuned.
+    expect_equal(
+      lav$estimate[lav$index == idx],
+      gf$estimate[gf$index == idx],
+      tolerance = 1e-2
+    )
+    expect_equal(
+      lav$estimate[lav$index == idx],
+      gr$estimate[gr$index == idx],
+      tolerance = 1e-2
+    )
+  }
+})
+
+test_that("fixed-rater SEM converges to glmmTMB fixed at large N (O-FSEM)", {
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(214)
+  n <- 120L
+  k <- 6L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  lav <- suppressWarnings(tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "lavaan",
+    seed = 1
+  )))
+  gf <- suppressWarnings(tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "glmmTMB",
+    seed = 1
+  )))
+  # Bias -> 0 as the intercepts stabilise, so the estimators agree tightly.
+  expect_equal(
+    lav$estimate[lav$index == "ICC(A,1)"],
+    gf$estimate[gf$index == "ICC(A,1)"],
+    tolerance = 1e-3
+  )
+})
+
+test_that("fixed-rater SEM consistency is identical to the random case", {
+  skip_if_not_installed("lavaan")
+
+  # Consistency drops the rater term from the error set, so the fixed/random choice
+  # is a no-op: identical point AND interval (same fit, same estimand).
+  d <- sf_ratings_long()
+  fx <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    raters = "fixed",
+    engine = "lavaan",
+    seed = 1
+  )))
+  rn <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    raters = "random",
+    engine = "lavaan",
+    seed = 1
+  ))
+  expect_equal(fx$estimate, rn$estimate, tolerance = 1e-10)
+  expect_equal(fx$conf.low, rn$conf.low, tolerance = 1e-10)
+  expect_equal(fx$conf.high, rn$conf.high, tolerance = 1e-10)
+})
+
+test_that("fixed-rater SEM interval is finite, in [0, 1], and brackets the estimate", {
+  skip_if_not_installed("lavaan")
+
+  fit <- suppressWarnings(icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "lavaan",
+    seed = 1
+  ))
+  ci <- fit$estimates
+  expect_true(all(is.finite(ci$conf.low) & is.finite(ci$conf.high)))
+  expect_true(all(ci$conf.low >= 0 & ci$conf.high <= 1))
+  expect_true(all(ci$conf.low <= ci$estimate & ci$estimate <= ci$conf.high))
+})
+
+test_that("fixed-rater SEM also serves the parametric bootstrap (Slice 1 x Slice 2)", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  set.seed(216)
+  n <- 40L
+  k <- 6L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  bs <- suppressWarnings(tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  )))
+  expect_true(all(is.finite(bs$conf.low) & is.finite(bs$conf.high)))
+  expect_true(all(bs$conf.low <= bs$estimate & bs$estimate <= bs$conf.high))
+  expect_true(all(bs$conf.high <= 1))
 })

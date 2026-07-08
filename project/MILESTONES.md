@@ -631,13 +631,21 @@ DoD checklist (the live board — check off in-commit, #16):
   (≤0.06); well-formed + reproducible + RNG-untouched. The prior "lavaan bootstrap unsupported" test
   became a defensive `bootstrap_ci`-guard unit test. No new argument (`boot_samples` shipped). air +
   lintr clean; docs regenerated.
-- [ ] **Slice 2 — fixed-rater SEM (COVERAGE §③ #1).** Lift the `raters == "fixed"` lavaan abort for
-  the two-way path. Consistency ≡ random exactly. **Oracle-first catch (resolve in-slice, not
-  assumed):** M7's random agreement estimator Σν²/(k−1) already reads a *finite set of indicator
-  intercepts* — determine by oracle whether fixed SEM agreement needs a distinct θ²_r or coincides
-  with the shipped M7 agreement (reduction to single-level M3/M10 fixed θ²_r via cell means +
-  cross-engine vs. glmmTMB Case-3A + MW/SF fixed-agreement crosswalk). Fable review (#19) if close
-  but unpinnable. Balanced/complete, single-level.
+- [x] **Slice 2 — fixed-rater SEM (COVERAGE §③ #1).** ✅ done (branch `m21-sem-parity`).
+  **Oracle-first catch resolved: fixed SEM agreement is a DISTINCT estimator, not M7's raw.** The
+  SEM *fit* is unchanged (rater effects always live in the mean structure as the k intercepts); only
+  the rater component read off it differs — random takes the raw Σν²/(k−1) (M7), fixed takes the
+  **McGraw & Wong Case-3A bias-corrected θ²_r = max(0, raw − bias)**, bias = tr(center·V_ν)/(k−1)
+  from lavaan's intercept vcov (theta2r_fixed()'s correction with the *identity* contrast, because
+  SEM intercepts already are the k rater means). Verified numerically: on balanced data θ²_r equals
+  **both** glmmTMB Case-3A fixed **and** random σ²_r (M10 identity) — SF 0.2909 vs glmmTMB 0.2898
+  (~1e-3 small-sample), 80×6 agree to ~2e-5, 120×6 to ≤1e-3. Impl: `fit_lavaan(raters=)`,
+  `lavaan_components(raters=)` + Case-3A bias, `to_components`/`simulate_refit` apply the correction
+  per draw/refit; icc.R guard narrowed (fixed allowed, one-way/multilevel still abort) + fixed-branch
+  lavaan dispatch. **Oracles (O-FSEM, `test-icc-lavaan.R`):** distinct-from-raw (θ²_r<raw, higher
+  ICC); balanced reduction to glmmTMB fixed AND random (SF ≤1e-2 small-sample, large-N ≤1e-3);
+  consistency ≡ random exactly; interval finite/[0,1]/brackets; fixed × bootstrap (Slice 1×2). No new
+  estimand/spec/argument. Consistency ≡ random exactly, balanced/complete single-level.
 - [ ] **Slice 3 — incomplete / FIML SEM (COVERAGE §③ #2).** Lift the `engine == "lavaan" &&
   !balanced` abort; lavaan `missing = "fiml"` on the wide reshape (no new fit shape) + the M3-style
   connectedness/identifiability guard before dispatch (#5). **Consistency** (a ratio) stays an

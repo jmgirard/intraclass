@@ -135,9 +135,11 @@ the multilevel designs (crossed and nested) at both levels -- on both balanced
 and \strong{incomplete/ragged} data. A ragged fit that lands exactly on a
 variance-component boundary falls back to \code{"glmmTMB"} (which stays finite via its
 log-SD parameterization) with a clear message. \code{"lavaan"}
-currently covers only the random two-way design and also requires complete,
-balanced data. \code{"lme4"} requires the \pkg{lme4} and \pkg{merDeriv} packages;
-\code{"lavaan"} requires the \pkg{lavaan} package.}
+covers the two-way design with random or fixed raters (for fixed raters the
+agreement rater term is the McGraw & Wong Case-3A bias-corrected
+finite-population variance, which equals the mixed-model estimate on balanced
+data) and requires complete, balanced data. \code{"lme4"} requires the \pkg{lme4} and
+\pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan} package.}
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}
 
