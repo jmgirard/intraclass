@@ -66,8 +66,9 @@ glance(x, ...)
 
 An `icc_dstudy` object: a tibble with one row per `m` and columns `m`,
 `index` (e.g. `"ICC(A,3)"`), `estimate`, `std.error`, `conf.low`, and
-`conf.high`, carrying the design and interval settings as attributes.
-Use [tidy()](https://generics.r-lib.org/reference/tidy.html),
+`conf.high`, carrying the design and interval settings as attributes. A
+multilevel projection adds a `level` column (one curve per level). Use
+[tidy()](https://generics.r-lib.org/reference/tidy.html),
 [glance()](https://generics.r-lib.org/reference/glance.html), and
 `autoplot()` (the reliability curve).
 
@@ -89,6 +90,21 @@ for fixed-rater absolute agreement: there the rater term is the
 finite-population variance of exactly the raters you observed, so there
 is no "average of `m` freshly sampled raters" to project to, and
 `d_study()` aborts (use `raters = "random"`).
+
+## Multilevel projections
+
+For a multilevel fit (a `cluster` column), `d_study()` projects the
+rater count `m` for each correctly-partitioned level on the object — the
+**subject** and/or **cluster** level — returning one reliability curve
+per level (the result gains a `level` column, and `autoplot()` facets by
+it). This is the paper-sanctioned rater projection (ten Hove et al.
+2022): `m` is the number of raters per cluster, and the cluster-level
+coefficient does **not** average over subjects, so there is no "subjects
+per cluster" projection — that is a sample-size question, not a
+reliability one. Nested designs project the subject level only. The
+conflated diagnostic (`level = "conflated"`) is not projected.
+Multilevel projection covers **complete** data only; incomplete
+multilevel `d_study()` aborts.
 
 ## References
 

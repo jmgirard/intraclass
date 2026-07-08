@@ -90,6 +90,7 @@ raters as a random sample (Case 2) or as fixed (Case 3).</p>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
 <span>  raters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"fixed"</span><span class="op">)</span>,</span>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  occasions <span class="op">=</span> <span class="st">"single"</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"subject"</span>, <span class="st">"cluster"</span><span class="op">)</span>,</span>
 <span>  design <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"glmmTMB"</span>,</span>
@@ -173,13 +174,24 @@ across a range of <code>m</code>. Projecting absolute agreement is not defined f
 raters (see <code><a href="d_study.html">d_study()</a></code>).</p></dd>
 
 
+<dt id="arg-occasions">occasions<a class="anchor" aria-label="anchor" href="#arg-occasions"></a></dt>
+<dd><p>For data with <strong>within-cell replicates</strong> (more than one rating
+per subject-by-rater cell), whether to average over them: <code>"single"</code> (the
+default – the reliability of one rating) and/or <code>"average"</code> (the mean of the
+<code>n_o</code> replicates, which reduces pure error). <code>"average"</code> requires replicated
+data. See the <em>Within-cell replicates</em> section. Ignored with one rating per
+cell.</p></dd>
+
+
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
 <dd><p>For multilevel designs (a <code>cluster</code> column), which reliability to
 report: <code>"subject"</code> (within-cluster, distinguishing subjects) and/or
 <code>"cluster"</code> (between-cluster, distinguishing cluster means). Defaults to both.
-Ignored (and must be left at its default) when <code>cluster</code> is not supplied. Only
-<code>"subject"</code> is available when raters are nested in clusters (see the
-<em>Multilevel designs</em> section).</p></dd>
+<code>"conflated"</code> may be added for the biased ignore-the-clustering ICC as a
+diagnostic contrast (agreement-only, complete crossed designs; see the
+<em>Multilevel designs</em> section). Ignored (and must be left at its default) when
+<code>cluster</code> is not supplied. Only <code>"subject"</code> is available when raters are nested
+in clusters.</p></dd>
 
 
 <dt id="arg-design">design<a class="anchor" aria-label="anchor" href="#arg-design"></a></dt>
@@ -307,6 +319,15 @@ means: its signal is the between-cluster variance and the rater-disagreement
 error is the cluster-by-rater term. Choose the level that matches the decision
 you will make (about a subject, or about a cluster). The agreement/consistency
 and single/average choices above apply at each level.</p>
+<p><code>level = "conflated"</code> reports the <strong>biased single-level ICC</strong> you would get by
+<em>ignoring</em> the clustering (ten Hove et al. 2022, Eq. 14): between- and
+within-cluster subject variance are both counted as signal, and all three
+rater-related terms as error. It is offered only as a <strong>diagnostic contrast</strong> –
+to quantify how much the nesting distorts reliability – and is never a
+recommended coefficient; <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> flags it as such. It is absolute-agreement
+only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
+random-rater design. Request it alongside the correct levels, e.g.
+<code>level = c("subject", "cluster", "conflated")</code>.</p>
 <p>The design is <strong>inferred from the data</strong> (ten Hove et al. 2022, Table 2). If
 raters are crossed with clusters (each rater rates in every cluster) the
 five-component model above is used (Design 1). Because the design is read from
@@ -346,6 +367,25 @@ to the random-rater case and absolute agreement differs only by that term.
 Incomplete <em>nested</em> designs, incomplete or nested fixed-rater designs, and the
 fixed-rater cluster level remain for later milestones. Nested designs still require
 balanced, complete data.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="within-cell-replicates">Within-cell replicates<a class="anchor" aria-label="anchor" href="#within-cell-replicates"></a></h2>
+
+
+<p>When a subject-by-rater cell is rated <strong>more than once</strong> (within-cell
+replicates), <code>icc()</code> fits the two-way random model <strong>with a subject-by-rater
+interaction</strong>, <code>score ~ 1 + (1|subject) + (1|rater) + (1|subject:rater)</code>, which
+splits the single-rating residual into the <strong>interaction</strong> \(\sigma^2_{sr}\)
+(does a rater systematically rate a subject high or low – stable disagreement?)
+and <strong>pure error</strong> \(\sigma^2_e\) (rating noise). Both are reported. The
+single-occasion ICCs are unchanged in value from a one-rating-per-cell analysis
+(a single rating's error still includes the interaction), but the components are
+no longer confounded, and <code>occasions = "average"</code> reports the reliability of the
+mean of the replicates (which reduces \(\sigma^2_e\) but not
+\(\sigma^2_{sr}\)). This slice covers <strong>balanced, complete</strong> replicated
+two-way <strong>random</strong>-rater designs (every cell present and rated the same number of
+times); ragged replicates, fixed raters, one-way, and multilevel replicates are
+planned for later milestones.</p>
     </div>
     <div class="section level2">
     <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
@@ -401,7 +441,7 @@ reliability for multilevel data: A generalizability theory approach.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

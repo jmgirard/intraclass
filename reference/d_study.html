@@ -113,7 +113,8 @@ the seed.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>icc_dstudy</code> object: a tibble with one row per <code>m</code> and columns
 <code>m</code>, <code>index</code> (e.g. <code>"ICC(A,3)"</code>), <code>estimate</code>, <code>std.error</code>, <code>conf.low</code>, and
-<code>conf.high</code>, carrying the design and interval settings as attributes. Use
+<code>conf.high</code>, carrying the design and interval settings as attributes. A
+multilevel projection adds a <code>level</code> column (one curve per level). Use
 <a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a>, <a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a>, and
 <code>autoplot()</code> (the reliability curve).</p>
     </div>
@@ -135,6 +136,21 @@ projection of <code>ICC(1)</code>). It is <strong>not</strong> defined for fixed
 agreement: there the rater term is the finite-population variance of exactly the
 raters you observed, so there is no "average of <code>m</code> freshly sampled raters" to
 project to, and <code>d_study()</code> aborts (use <code>raters = "random"</code>).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="multilevel-projections">Multilevel projections<a class="anchor" aria-label="anchor" href="#multilevel-projections"></a></h2>
+
+
+<p>For a multilevel fit (a <code>cluster</code> column), <code>d_study()</code> projects the rater count
+<code>m</code> for each correctly-partitioned level on the object — the <strong>subject</strong> and/or
+<strong>cluster</strong> level — returning one reliability curve per level (the result gains
+a <code>level</code> column, and <code>autoplot()</code> facets by it). This is the paper-sanctioned
+rater projection (ten Hove et al. 2022): <code>m</code> is the number of raters per cluster,
+and the cluster-level coefficient does <strong>not</strong> average over subjects, so there is
+no "subjects per cluster" projection — that is a sample-size question, not a
+reliability one. Nested designs project the subject level only. The conflated
+diagnostic (<code>level = "conflated"</code>) is not projected. Multilevel projection covers
+<strong>complete</strong> data only; incomplete multilevel <code>d_study()</code> aborts.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -172,7 +188,7 @@ project to, and <code>d_study()</code> aborts (use <code>raters = "random"</code
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

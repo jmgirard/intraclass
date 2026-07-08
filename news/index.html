@@ -48,7 +48,9 @@
 <li>A second interval method, <code>ci_method = "bootstrap"</code>: a parametric bootstrap that simulates response vectors from the fitted model, refits, and takes percentile quantiles (<code>boot_samples</code> resamples). It does not rely on the asymptotic-normal covariance approximation the Monte-Carlo default uses, at the cost of a refit per resample. Available for every design the <code>"glmmTMB"</code> (<code><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate()</a></code> + refit) and <code>"lme4"</code> (<code>bootMer</code>) engines fit — two-way random and fixed, one-way, and the multilevel designs — at both levels. For fixed raters the finite-population  is recomputed directly from each refit.</li>
 <li>Imbalanced and <strong>incomplete</strong> (missing-cell) designs are handled directly by the mixed model: it uses the effective number of ratings <code>k_eff</code> (the harmonic mean of the per-subject counts) as the <code>ICC(*,k)</code> divisor and aborts loudly on a disconnected, unidentified design.</li>
 <li>
-<strong>Multilevel</strong> ICCs for subjects nested in clusters — pupils in classrooms, patients in clinics — following ten Hove, Jorgensen &amp; van der Ark (2022). Supply a <code>cluster</code> column to get subject-level (within-cluster) and cluster-level (between-cluster) coefficients via <code>level</code>. Covers raters crossed with clusters (Design 1) or nested in clusters/subjects (Designs 2–3), complete or incomplete crossed data, and fixed raters at the subject level.</li>
+<strong>Multilevel</strong> ICCs for subjects nested in clusters — pupils in classrooms, patients in clinics — following ten Hove, Jorgensen &amp; van der Ark (2022). Supply a <code>cluster</code> column to get subject-level (within-cluster) and cluster-level (between-cluster) coefficients via <code>level</code>. Covers raters crossed with clusters (Design 1) or nested in clusters/subjects (Designs 2–3), complete or incomplete crossed data, and fixed raters at the subject level. <code>level = "conflated"</code> reports the biased single-level ICC you would get by ignoring the clustering (ten Hove et al. 2022, Eq. 14) — a diagnostic contrast, flagged in <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> as not a recommended coefficient (absolute-agreement, complete crossed designs).</li>
+<li>
+<strong>Within-cell replicates</strong>: when a subject-by-rater cell is rated more than once, <code><a href="../reference/icc.html">icc()</a></code> fits the two-way random model with a subject-by-rater interaction, separating the interaction variance (stable disagreement) from pure rating error instead of confounding them — and reports both. A new <code>occasions</code> argument averages over the replicates (<code>occasions = "average"</code>), giving the reliability of a rater’s mean-of-replicates score. Balanced, complete replicated two-way random designs.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="engines-0-1-0">Engines<a class="anchor" aria-label="anchor" href="#engines-0-1-0"></a></h3>
@@ -59,7 +61,7 @@
 <ul><li>
 <code><a href="../reference/choose_icc.html">choose_icc()</a></code> — an interactive and programmatic decision helper that recommends which ICC to report, explains each choice, and emits the exact <code><a href="../reference/icc.html">icc()</a></code> call to run. It gives advice only; it does not fit.</li>
 <li>
-<code><a href="../reference/d_study.html">d_study()</a></code> — projects a fitted ICC’s reliability to the mean of an arbitrary number of raters (a generalizability decision study), with an <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> reliability curve; <code><a href="../reference/icc.html">icc()</a></code>’s <code>unit</code> also accepts numbers for one-off projections.</li>
+<code><a href="../reference/d_study.html">d_study()</a></code> — projects a fitted ICC’s reliability to the mean of an arbitrary number of raters (a generalizability decision study), with an <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> reliability curve; <code><a href="../reference/icc.html">icc()</a></code>’s <code>unit</code> also accepts numbers for one-off projections. For a <strong>multilevel</strong> fit it projects the rater count at each level (subject and/or cluster), returning one curve per level (a <code>level</code> column; <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> facets by it) on complete data.</li>
 <li>
 <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> / <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods for <code>icc</code> objects draw a coefficient forest plot and a variance-component decomposition; <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> / <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> give tidy summaries. Plotting needs <code>ggplot2</code> (a <code>Suggests</code> dependency).</li>
 </ul></div>
@@ -91,7 +93,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

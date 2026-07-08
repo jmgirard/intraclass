@@ -41,6 +41,7 @@ icc(
   type = c("agreement", "consistency"),
   raters = c("random", "fixed"),
   unit = c("single", "average"),
+  occasions = "single",
   level = c("subject", "cluster"),
   design = NULL,
   engine = "glmmTMB",
@@ -126,14 +127,26 @@ icc(
   not defined for fixed raters (see
   [`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)).
 
+- occasions:
+
+  For data with **within-cell replicates** (more than one rating per
+  subject-by-rater cell), whether to average over them: `"single"` (the
+  default – the reliability of one rating) and/or `"average"` (the mean
+  of the `n_o` replicates, which reduces pure error). `"average"`
+  requires replicated data. See the *Within-cell replicates* section.
+  Ignored with one rating per cell.
+
 - level:
 
   For multilevel designs (a `cluster` column), which reliability to
   report: `"subject"` (within-cluster, distinguishing subjects) and/or
   `"cluster"` (between-cluster, distinguishing cluster means). Defaults
-  to both. Ignored (and must be left at its default) when `cluster` is
-  not supplied. Only `"subject"` is available when raters are nested in
-  clusters (see the *Multilevel designs* section).
+  to both. `"conflated"` may be added for the biased
+  ignore-the-clustering ICC as a diagnostic contrast (agreement-only,
+  complete crossed designs; see the *Multilevel designs* section).
+  Ignored (and must be left at its default) when `cluster` is not
+  supplied. Only `"subject"` is available when raters are nested in
+  clusters.
 
 - design:
 
@@ -270,6 +283,17 @@ will make (about a subject, or about a cluster). The
 agreement/consistency and single/average choices above apply at each
 level.
 
+`level = "conflated"` reports the **biased single-level ICC** you would
+get by *ignoring* the clustering (ten Hove et al. 2022, Eq. 14):
+between- and within-cluster subject variance are both counted as signal,
+and all three rater-related terms as error. It is offered only as a
+**diagnostic contrast** – to quantify how much the nesting distorts
+reliability – and is never a recommended coefficient;
+[`print()`](https://rdrr.io/r/base/print.html) flags it as such. It is
+absolute-agreement only (Eq. 14 has no consistency form) and needs a
+complete, crossed (Design 1) random-rater design. Request it alongside
+the correct levels, e.g. `level = c("subject", "cluster", "conflated")`.
+
 The design is **inferred from the data** (ten Hove et al. 2022, Table
 2). If raters are crossed with clusters (each rater rates in every
 cluster) the five-component model above is used (Design 1). Because the
@@ -314,6 +338,25 @@ absolute agreement differs only by that term. Incomplete *nested*
 designs, incomplete or nested fixed-rater designs, and the fixed-rater
 cluster level remain for later milestones. Nested designs still require
 balanced, complete data.
+
+## Within-cell replicates
+
+When a subject-by-rater cell is rated **more than once** (within-cell
+replicates), `icc()` fits the two-way random model **with a
+subject-by-rater interaction**,
+`score ~ 1 + (1|subject) + (1|rater) + (1|subject:rater)`, which splits
+the single-rating residual into the **interaction** \\\sigma^2\_{sr}\\
+(does a rater systematically rate a subject high or low – stable
+disagreement?) and **pure error** \\\sigma^2_e\\ (rating noise). Both
+are reported. The single-occasion ICCs are unchanged in value from a
+one-rating-per-cell analysis (a single rating's error still includes the
+interaction), but the components are no longer confounded, and
+`occasions = "average"` reports the reliability of the mean of the
+replicates (which reduces \\\sigma^2_e\\ but not \\\sigma^2\_{sr}\\).
+This slice covers **balanced, complete** replicated two-way
+**random**-rater designs (every cell present and rated the same number
+of times); ragged replicates, fixed raters, one-way, and multilevel
+replicates are planned for later milestones.
 
 ## Confidence intervals
 

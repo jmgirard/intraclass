@@ -204,11 +204,11 @@ signal but modest within-classroom differences:</p>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,1)    0.431   [0.251, 0.561]</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,k)    0.751   [0.573, 0.836]</span></span>
-<span><span class="co">#&gt;   cluster  ICC(A,1)    0.880   [0.000, 0.972]</span></span>
-<span><span class="co">#&gt;   cluster  ICC(A,k)    0.967   [0.000, 0.993]</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)    0.431   [0.251, 0.561]</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)    0.751   [0.573, 0.836]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,1)    0.880   [0.000, 0.972]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,k)    0.967   [0.000, 0.993]</span></span>
 <span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">This message is displayed once per session.</span></span></span></code></pre></div>
@@ -221,6 +221,43 @@ number you report depends on the decision you will make: a
 classroom-level intervention cares about the cluster-level reliability,
 a pupil-level one about the subject level. Request just one with
 <code>level = "subject"</code> or <code>level = "cluster"</code>.</p>
+<div class="section level3">
+<h3 id="how-much-does-ignoring-the-nesting-cost-the-conflated-icc">How much does ignoring the nesting cost? The conflated ICC<a class="anchor" aria-label="anchor" href="#how-much-does-ignoring-the-nesting-cost-the-conflated-icc"></a>
+</h3>
+<p>What would you have reported if you had <em>ignored</em> the
+classrooms and run an ordinary single-level ICC? That number — ten Hove
+et al.’s Equation 14 — folds the between-classroom and within-classroom
+variation together into one “true score” and is biased for
+<strong>both</strong> questions above. <code><a href="../reference/icc.html">icc()</a></code> can compute it
+as a <strong>diagnostic contrast</strong> with
+<code>level = "conflated"</code>, so you can see the distortion directly
+rather than take it on faith:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>,</span>
+<span>  subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
+<span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"subject"</span>, <span class="st">"cluster"</span>, <span class="st">"conflated"</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: multilevel two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)    0.431   [0.251, 0.561]</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)    0.751   [0.573, 0.836]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,1)    0.880   [0.000, 0.972]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,k)    0.967   [0.000, 0.993]</span></span>
+<span><span class="co">#&gt;   conflated  ICC(A,1)    0.705   [0.000, 0.808]</span></span>
+<span><span class="co">#&gt;   conflated  ICC(A,k)    0.905   [0.000, 0.944]</span></span>
+<span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span>
+<span><span class="co">#&gt; Diagnostic contrast: the 'conflated' level ignores the cluster structure</span></span>
+<span><span class="co">#&gt; (ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level</span></span>
+<span><span class="co">#&gt; analysis and is NOT a recommended coefficient; report subject/cluster.</span></span></code></pre></div>
+<p>The conflated value lands between the two correct levels and matches
+neither: it over- or under-states the reliability of any real decision.
+It is printed with a warning label and is <strong>never</strong> a
+coefficient to report — it exists only to quantify the cost of ignoring
+the structure. (It is absolute-agreement only, and needs a complete,
+crossed design.)</p>
+</div>
 <div class="section level3">
 <h3 id="when-raters-are-nested">When raters are nested<a class="anchor" aria-label="anchor" href="#when-raters-are-nested"></a>
 </h3>
@@ -246,30 +283,30 @@ cannot be separated from residual error at all, so this is a multilevel
 </ul>
 <p>Take the same classrooms but give each one its own raters (Design
 2):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">school_d2</span> <span class="op">&lt;-</span> <span class="va">school</span></span>
 <span><span class="va">school_d2</span><span class="op">$</span><span class="va">rater</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">school_d2</span><span class="op">$</span><span class="va">classroom</span>, <span class="va">school_d2</span><span class="op">$</span><span class="va">rater</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_d2</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel (raters nested in clusters) two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,1)    0.429   [0.310, 0.549]</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,k)    0.751   [0.642, 0.830]</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)    0.429   [0.310, 0.549]</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)    0.751   [0.642, 0.830]</span></span>
 <span><span class="co">#&gt; Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481</span></span></code></pre></div>
 <p>The header now reads <em>raters nested in clusters</em> and only the
 subject level comes back. If instead each <em>pupil</em> has their own
 raters, the design is a multilevel one-way (Design 3):</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">school_d3</span> <span class="op">&lt;-</span> <span class="va">school</span></span>
 <span><span class="va">school_d3</span><span class="op">$</span><span class="va">rater</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">school_d3</span><span class="op">$</span><span class="va">pupil</span>, <span class="va">school_d3</span><span class="op">$</span><span class="va">rater</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_d3</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel (raters nested in subjects) absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject  ICC(1)      0.412   [0.290, 0.546]</span></span>
-<span><span class="co">#&gt;   subject  ICC(k)      0.737   [0.621, 0.828]</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(1)      0.412   [0.290, 0.546]</span></span>
+<span><span class="co">#&gt;   subject    ICC(k)      0.737   [0.621, 0.828]</span></span>
 <span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)</span></span></code></pre></div>
 <p>Here the coefficients are labeled <code>ICC(1)</code> /
 <code>ICC(k)</code> and <code>type</code> no longer applies — with each
@@ -287,7 +324,7 @@ rated by every rater. The mixed model estimates the variance components
 from whatever cells are present, so a ragged classroom design is handled
 directly. Drop a fifth of the ratings from the <code>school</code> data
 at random:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">school_ragged</span> <span class="op">&lt;-</span> <span class="va">school</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">0.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>At the <strong>subject</strong> level both agreement and consistency
@@ -295,15 +332,15 @@ come back, and — exactly as in the single-level incomplete case —
 <code>ICC(*,k)</code> averages over the <em>effective</em> number of
 ratings per pupil (<code>k_eff</code>, the harmonic mean), which is
 below the full panel size of 4:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"subject"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,1)    0.413   [0.233, 0.557]</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,k)    0.673   [0.471, 0.787]</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)    0.413   [0.233, 0.557]</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)    0.673   [0.471, 0.787]</span></span>
 <span><span class="co">#&gt; ICC(*,k) projects to an effective 2.93 raters (harmonic mean of ratings/subject).</span></span>
 <span><span class="co">#&gt; Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457</span></span></code></pre></div>
 <p>The header now reads <em>incomplete</em>, and the report names the
@@ -311,14 +348,14 @@ effective <code>k</code> so the divisor is never a black box.</p>
 <p>At the <strong>cluster</strong> level, the single-rater
 <code>ICC(c,1)</code> is available on ragged data (it needs no averaging
 divisor). Request it with <code>unit = "single"</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"cluster"</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel two-way random, consistency</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   cluster  ICC(C,1)    1.000   [0.000, 1.000]</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   cluster    ICC(C,1)    1.000   [0.000, 1.000]</span></span>
 <span><span class="co">#&gt; Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457</span></span></code></pre></div>
 <p>Two things are deliberately fenced off on incomplete data, each with
 a clear error rather than a silently wrong number. The
@@ -344,7 +381,7 @@ examiners, say), pass <code>raters = "fixed"</code> at the
 main effect is then the finite-population variance of <em>these</em>
 raters (McGraw &amp; Wong’s Case 3A) rather than a random-sample
 variance:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  raters <span class="op">=</span> <span class="st">"fixed"</span>, level <span class="op">=</span> <span class="st">"subject"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Modeling raters as <span style="font-weight: bold;">fixed</span> restricts inference to exactly these raters; you</span></span>
@@ -356,9 +393,9 @@ variance:</p>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel two-way mixed, absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 4 (fixed) | Observations: 320 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,1)    0.431   [0.318, 0.552]</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,k)    0.751   [0.651, 0.831]</span></span>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)    0.431   [0.318, 0.552]</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)    0.751   [0.651, 0.831]</span></span>
 <span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span></code></pre></div>
 <p>On this balanced design the fixed-rater subject-level coefficients
 match the random-rater ones: <strong>consistency</strong> never uses the
@@ -377,6 +414,89 @@ crossed design at the subject level. The averaged cluster-level
 incomplete or nested fixed-rater designs are planned for later
 milestones.</p>
 </div>
+<div class="section level3">
+<h3 id="how-many-raters-a-multilevel-d-study">How many raters? A multilevel D-study<a class="anchor" aria-label="anchor" href="#how-many-raters-a-multilevel-d-study"></a>
+</h3>
+<p>The <a href="#how-many-raters-do-i-need-a-d-study">D-study</a> works
+on a multilevel fit too: it projects the <strong>number of
+raters</strong> at each level, so you can ask “how many raters would
+make the <em>cluster</em>-level score reliable?” separately from the
+subject level. It returns one curve per level (note the
+<code>level</code> column), and <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> facets them:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; # D-study projection: multilevel two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   level        m  estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject      1     0.431   [0.251, 0.561]</span></span>
+<span><span class="co">#&gt;   subject      2     0.602   [0.402, 0.719]</span></span>
+<span><span class="co">#&gt;   subject      4     0.751   [0.573, 0.836]</span></span>
+<span><span class="co">#&gt;   subject      8     0.858   [0.729, 0.911]</span></span>
+<span><span class="co">#&gt;   cluster      1     0.880   [0.000, 0.972]</span></span>
+<span><span class="co">#&gt;   cluster      2     0.936   [0.000, 0.986]</span></span>
+<span><span class="co">#&gt;   cluster      4     0.967   [0.000, 0.993]</span></span>
+<span><span class="co">#&gt;   cluster      8     0.983   [0.000, 0.996]</span></span></code></pre></div>
+<p>Only the <strong>rater</strong> count is projected. The cluster-level
+coefficient does not average over subjects (ten Hove et al. 2022, Eq.
+13), so “how many subjects per cluster?” is a <em>sample-size</em>
+question — how precisely you estimate the variance components — not a
+reliability projection.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="within-cell-replicates-interaction-vs--pure-error">Within-cell replicates: interaction vs. pure error<a class="anchor" aria-label="anchor" href="#within-cell-replicates-interaction-vs--pure-error"></a>
+</h2>
+<p>So far every subject-by-rater cell holds a single rating. When each
+rater rates each subject <strong>more than once</strong> —
+<em>within-cell replicates</em> — you can separate two things that a
+single rating confounds: the <strong>subject-by-rater
+interaction</strong> (does a rater systematically score a particular
+subject high or low — a <em>stable</em> disagreement?) and <strong>pure
+error</strong> (how much a rater’s repeat ratings of the same subject
+wobble). <code><a href="../reference/icc.html">icc()</a></code> detects the replicates and fits the
+interaction model automatically:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
+<span><span class="va">ns</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
+<span><span class="va">nr</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span><span class="va">no</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">ns</span><span class="op">)</span>, rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">nr</span><span class="op">)</span>, occ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">no</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">subj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">ns</span>, sd <span class="op">=</span> <span class="fl">1.1</span><span class="op">)</span><span class="op">[</span><span class="va">grid</span><span class="op">$</span><span class="va">subject</span><span class="op">]</span></span>
+<span><span class="va">rater</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">nr</span>, sd <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span><span class="op">[</span><span class="va">grid</span><span class="op">$</span><span class="va">rater</span><span class="op">]</span></span>
+<span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">ns</span> <span class="op">*</span> <span class="va">nr</span>, sd <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span><span class="op">[</span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">rater</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="va">ns</span> <span class="op">+</span> <span class="va">grid</span><span class="op">$</span><span class="va">subject</span><span class="op">]</span></span>
+<span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">subject</span><span class="op">)</span>,</span>
+<span>  rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">grid</span><span class="op">$</span><span class="va">rater</span><span class="op">)</span>,</span>
+<span>  score <span class="op">=</span> <span class="fl">10</span> <span class="op">+</span> <span class="va">subj</span> <span class="op">+</span> <span class="va">rater</span> <span class="op">+</span> <span class="va">sr</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">grid</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, occasions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Subjects: 20 | Raters: 4 (random) | 80 cells x 3 replicates (complete)</span></span>
+<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   index     occasions estimate   95% CI</span></span>
+<span><span class="co">#&gt;   ICC(A,1)          1   0.263   [0.083, 0.489]</span></span>
+<span><span class="co">#&gt;   ICC(A,1)          3   0.300   [0.088, 0.562]</span></span>
+<span><span class="co">#&gt;   ICC(A,k)          1   0.588   [0.265, 0.793]</span></span>
+<span><span class="co">#&gt;   ICC(A,k)          3   0.631   [0.279, 0.837]</span></span>
+<span><span class="co">#&gt; Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443</span></span>
+<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
+<p>The variance-components line now shows <code>subject:rater</code>
+(the interaction) and <code>residual</code> (pure error) as separate
+terms. The <strong>single-occasion</strong> rows
+(<code>occasions = 1</code>) are the ordinary ICCs — a single rating’s
+error still includes the interaction — but they are now fit correctly
+rather than folding the interaction into the residual. The
+<strong>occasion-averaged</strong> rows (<code>occasions = 3</code>
+here) give the reliability of a rater’s <em>mean of three ratings</em>:
+averaging cuts pure error (but not the interaction), so those
+coefficients are higher.</p>
+<p>This slice covers balanced, complete replicated two-way
+<strong>random</strong>-rater designs. Ragged replicates, fixed raters,
+and multilevel replicates are planned for later milestones.</p>
 </div>
 <div class="section level2">
 <h2 id="visualizing-a-fit">Visualizing a fit<a class="anchor" aria-label="anchor" href="#visualizing-a-fit"></a>
@@ -391,7 +511,7 @@ can never disagree with the printed table. They need
 plot</strong> — each ICC index as a point estimate with its Monte-Carlo
 interval. Reusing the two-way <code>ratings</code> fit from the D-study
 section above:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># `fit &lt;- icc(ratings, score, subject, rater, seed = 1)`</span></span></code></pre></div>
 <p><img src="advanced_files/figure-html/plot-coef-1.png" class="r-plt" alt="Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) both higher and tighter." width="700"></p>
@@ -401,14 +521,14 @@ from. It makes plain <em>why</em> absolute agreement is so much lower
 than the averaged coefficient on <code>ratings</code>: the
 <strong>rater</strong> component is large, and only absolute agreement
 counts between-rater differences as error:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span>, what <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="advanced_files/figure-html/plot-comp-1.png" class="r-plt" alt="Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest." width="700"></p>
 <p>For a <strong>multilevel</strong> fit the forest plot facets by
 level, so the subject- and cluster-level coefficients line up for
 comparison — the same <code>school</code> fit from above, whose cluster
 level was the higher of the two:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="advanced_files/figure-html/plot-ml-1.png" class="r-plt" alt="Forest plot of the school multilevel fit, faceted into subject-level and cluster-level panels, each showing ICC(A,1) and ICC(A,k) with Monte-Carlo intervals." width="700"></p>
@@ -422,7 +542,7 @@ with <code>engine = "lme4"</code> for the random two-way design. Both
 are REML mixed-model fits of the same model, so on a given dataset they
 return the same coefficients to numerical tolerance — the choice is
 about the fitting backend, not the estimand.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glmmtmb</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"glmmTMB"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">lme4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"lme4"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -451,7 +571,7 @@ generalizability model in the sense of Jorgensen (2021) — for the
 complete, balanced random two-way design. Unlike lme4, this is not just
 a different backend for the <em>same</em> estimator: it matters which
 coefficient you ask for.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">axes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span></span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
@@ -513,7 +633,7 @@ simulates response vectors from the fitted model, refits, and takes
 percentile quantiles of the resampled coefficients. It does not lean on
 the asymptotic-normal covariance approximation — at the cost of a full
 refit per resample, so it is far slower.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">bs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
 <span>  ci_method <span class="op">=</span> <span class="st">"bootstrap"</span>, boot_samples <span class="op">=</span> <span class="fl">999</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
@@ -554,7 +674,7 @@ data argument — so it is a fast, side-effect-free advisor you can
 consult before you touch your data.</p>
 <p>Answer the choices that pin down the coefficient and it returns
 advice:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Recommended ICC</span></span>
 <span><span class="co">#&gt; Design: two-way random, absolute agreement</span></span>
@@ -574,7 +694,7 @@ generated from the <strong>same estimand machinery</strong> as
 <code><a href="../reference/icc.html">icc()</a></code>, that call cannot drift from what <code><a href="../reference/icc.html">icc()</a></code>
 actually computes — running the emitted call reproduces exactly the
 coefficient the advisor named:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The emitted call is an ordinary icc() call (agreement + random are the defaults,</span></span>
 <span><span class="co"># so they need not be named):</span></span>
 <span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, unit <span class="op">=</span> <span class="st">"single"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -589,7 +709,7 @@ coefficient the advisor named:</p>
 multilevel fifth choice — subject vs. cluster level — is part of it, so
 a nested-data question resolves to a level-specific recommendation and
 the matching <code>cluster</code> call:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"twoway"</span>, multilevel <span class="op">=</span> <span class="cn">TRUE</span>, level <span class="op">=</span> <span class="st">"cluster"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Recommended ICC</span></span>
@@ -626,7 +746,7 @@ keep or drop), is a clear error rather than a silent guess.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
