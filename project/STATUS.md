@@ -9,15 +9,25 @@
   dropped-with-note); **(4)** bootstrap-projected `d_study()` bands (M16 deferral, package-wide).
   Completeness, not new estimand work; no new dependency, no new argument. M0–M18 shipped; package
   at v0.1.0. No milestone in flight.
-- Active task: — (no milestone in flight; **M19 — Multilevel completeness II (nested Designs 2/3):
-  incomplete nested (Slice 1) + fixed-rater nested (Slice 2)** is next in the arc (ADR-027) and
-  gets its own start-of-milestone scoping ADR.)
+- Active task: **M19 finish-task** (both slices done; ready to close the milestone). On
+  `m19-nested-completeness`: **Slice 1** (incomplete nested Designs 2/3) + **Slice 2** (fixed-rater
+  nested Design 2, both engines) shipped. Next: `R CMD check --as-cran` + installed-pkg check +
+  open the PR.
+- Slice-2 highlight (**oracle-first catch**): fixed ≢ random even balanced for *nested* Design 2 —
+  the finite population is per-cluster (θ²_{r:c} = mean over clusters of each cluster's
+  finite-population rater variance), so the M10 crossed "balanced fixed≡random" identity does NOT
+  carry over. New fit `score ~ 0 + rater + (1|cluster:subject)` + new engine-agnostic
+  `theta2r_fixed_nested()`; pinned by per-cluster + single-cluster reduction to the flat M3 fixed
+  θ²_r (exact), cross-engine (<1e-4), consistency≡random (exact). Design 3 fixed ⚫ by-design;
+  incomplete fixed-nested deferred. Full suite 813 pass / 0 fail; `air` + `lintr` clean.
 - Last green CI: PR #23 (M18) full matrix green incl. Windows and R-devel; merged to
   `main` at 7dffbb2
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M18 merged (PR #23, ADR-028)**: all four slices
-  + cross-cutting DoD; `R CMD check --as-cran` 0/0/0, 779 tests, full CI matrix green. Post-merge
-  `project/` reconcile done (M18 compressed in MILESTONES; COVERAGE #8/#9/#13/#14 → ✅). M19 next.
+- Updated: 2026-07-08 by main session (Opus) — **M19 Slices 1 & 2 implemented** on
+  `m19-nested-completeness`. Slice 1: incomplete nested Designs 2/3 (k_eff divisor pinned by exact
+  reduction to M3/M6). Slice 2: fixed-rater nested Design 2, both engines, new
+  `theta2r_fixed_nested()` (oracle-first catch: fixed ≢ random for nested). Full suite 813 pass /
+  0 fail, `air` + `lintr` clean. Next: milestone finish-task (`R CMD check` + PR).
 
 ## Where we are
 
@@ -48,19 +58,18 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M17 shipped (PR #22, ADR-026) — no milestone in flight.** The **M18–M21 completeness arc
-is planned** (ADR-027) to close every 🔵 *not yet* gap in [`COVERAGE.md`](COVERAGE.md).
-Next code work is **starting M18** (it gets its own start-of-milestone scope pass + ADR).
+**M18 shipped (PR #23, ADR-028); M19 implemented (ADR-029) — awaiting its PR.** The
+**M18–M21 completeness arc** (ADR-027) closes every 🔵 *not yet* gap in
+[`COVERAGE.md`](COVERAGE.md). Next code work after the M19 PR merges is **starting M20** (its
+own start-of-milestone scope pass + ADR).
 
-**Planned arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
+**Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
 
-- **M18 — Multilevel completeness I (crossed, incomplete):** incomplete fixed-rater crossed
-  (Slice 1); incomplete conflated ICC (Slice 2); incomplete subject-level `d_study()` +
-  bootstrap `d_study()` bands (Slice 3). Reuses M3 Case-3A / M10 θ²_r / M9 machinery.
-- **M19 — Multilevel completeness II (nested Designs 2/3):** incomplete nested (Slice 1);
-  fixed-rater nested (Slice 2). The M8→incomplete + M10-fixed analog.
+- **M18 — Multilevel completeness I (crossed, incomplete):** ✅ shipped (PR #23).
+- **M19 — Multilevel completeness II (nested Designs 2/3):** incomplete nested (Slice 1) +
+  fixed-rater nested Design 2 (Slice 2) — **implemented on `m19-nested-completeness`, PR pending.**
 - **M20 — Within-cell replicate completeness:** ragged (Slice 1), fixed-rater (Slice 2),
-  multilevel (Slice 3) replicates. Extends M17 Slice 3.
+  multilevel (Slice 3) replicates. Extends M17 Slice 3. **Next.**
 - **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
   (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc.
 

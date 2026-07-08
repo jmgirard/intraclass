@@ -124,8 +124,8 @@ Design inferred from the crossing pattern (or declared via `design`).
 | Sub-design | `level` | `type` | `raters` | balance | `engine` |
 |---|---|---|---|---|---|
 | **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4 |
-| **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random only | balanced/complete only | glmmTMB, lme4 |
-| **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced/complete only | glmmTMB, lme4 |
+| **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random (balanced+incomplete); **fixed** (balanced, M19 Slice 2) | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
+| **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
 
 \* On **incomplete** Design 1: subject level is fully supported (random **and**
 fixed-rater — M18 Slice 1); cluster level is `ICC(c,1)` only (averaged `ICC(c,k)` rows
@@ -147,8 +147,9 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 | `level = "conflated"` + `raters = "fixed"` | ⚫ **By design** — Eq. 14 treats the rater effect as a variance component (random raters); a fixed-rater conflated diagnostic is not defined by the source. |
 | Design 2 / 3, cluster level | ⚫ **By design** — cluster-level IRR needs raters crossed with clusters; with nested raters only the subject level is defined (ten Hove et al. 2022, p. 6). |
 | Design 3, `type = "consistency"` | ⚫ **By design** — with raters nested in subjects the rater main effect is confounded into residual, so only absolute agreement is defined (ten Hove et al. 2022, p. 6). |
-| Design 2 / 3, incomplete data | 🔵 **Not yet → M19 Slice 1** — incomplete nested multilevel deferred (M8 spec §8; ragged nested-vs-crossed inference). |
-| Design 2 / 3, `raters = "fixed"` | 🔵 **Not yet → M19 Slice 2** — fixed-rater nested multilevel deferred (M10). |
+| Design 2 / 3, incomplete data | ✅ (M19 Slice 1) — the fit formulas are ragged-safe and the averaged divisor is the harmonic-mean `k_eff`, which reduces **exactly** to the pinned M3 two-way / M6 one-way incomplete divisor (single-cluster Design 2 → ragged two-way, diff 0; Design 3 → ragged one-way). On **ambiguous** ragged data (missing cells blur crossed-vs-nested) an explicit `design=` is required (never guessed, decision A); Design 2 gains a within-cluster connectedness gate. Subject-level `d_study()` projects on ragged nested data too (M18 path). |
+| Design 2, `raters = "fixed"` | ✅ (M19 Slice 2, balanced) — θ²_{r:c} is the mean over clusters of each cluster's finite-population rater variance (per-cluster McGraw–Wong Case 3A), via `score ~ 0 + rater + (1\|cluster:subject)`. **Fixed ≢ random even balanced** (per-cluster finite population; unlike crossed M10) — pinned by per-cluster + single-cluster reduction to the flat M3 fixed θ²_r, cross-engine, consistency≡random. Incomplete fixed-nested deferred (k_eff × per-cluster θ² interaction). |
+| Design 3, `raters = "fixed"` | ⚫ **By design** — raters nested in subjects is the multilevel one-way (rater confounded into residual); no separable rater effect to treat as fixed (cf. one-way fixed, M6 §10). |
 | any multilevel, `engine = "lavaan"` (multilevel SEM) | 🔵 **Not yet (reclassified → ROADMAP "later", ADR-027)** — a research-flavored two-level SEM-GT lift (the paper's multilevel estimator is Bayesian, not a plain lavaan model); sits beside the Bayesian engine, not in the M18–M21 arc. |
 | any multilevel, `icc(unit = m)` numeric projection | ⚫ **By design (routed elsewhere)** — use `d_study()` for multilevel rater-count projection (M17 Slice 2); `icc()` aborts a numeric multilevel `unit` on purpose. |
 
@@ -161,7 +162,7 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 | two-way (random) rater-count projection | ✅ |
 | multilevel rater-count projection, subject + cluster levels | ✅ (M17 Slice 2) |
 | fixed-rater **absolute-agreement** projection | ⚫ **By design** — refused (same reason as ①: no "average of *m* fresh raters" for a fixed population). |
-| **incomplete-data** multilevel projection | ✅ subject level (M18 Slice 3); cluster level dropped-with-note (bounded by the 🟣 Wave-3 `ICC(c,k)` incomplete divisor). Projection moves only the divisor `m`, so the ragged subject fit projects unchanged (reduction to `ICC(A,k)` at `m = k_eff`; cross-engine; monotone/[0,1]). |
+| **incomplete-data** multilevel projection | ✅ subject level (M18 Slice 3, crossed; **nested** Designs 2/3 via M19 Slice 1); cluster level dropped-with-note (bounded by the 🟣 Wave-3 `ICC(c,k)` incomplete divisor; nested designs have no cluster level). Projection moves only the divisor `m`, so the ragged subject fit projects unchanged (reduction to `ICC(A,k)` at `m = k_eff`; cross-engine; monotone/[0,1]). |
 | **subjects-per-cluster** ("three-facet") projection | ⚫ **By design (not a d_study facet)** — ten Hove Eq. 13's cluster ICC has no subject facet; the subjects-per-cluster count is an efficiency/sample-size dimension, folded into the parked *design/power helpers* item, not a reliability projection ([[cluster-icc-no-subject-facet]], ADR-026 amendment). |
 | bootstrap-projected `d_study()` bands | ✅ (M18 Slice 4) — the band follows the fit's `ci_method`: a bootstrap fit stores its resample components and `d_study()` reprojects them across *m* (at *m* = observed count the band equals the fitted `ICC(*,k)` bootstrap interval exactly). Package-wide (two-way, multilevel, incomplete), no new argument (ADR-025/028). |
 

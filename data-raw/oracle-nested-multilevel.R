@@ -303,3 +303,159 @@ cat(
 stopifnot(abs(d3_i1 - ow_i1) < 1e-2)
 
 cat("\nAll O-NML Design-2 and Design-3 oracle checks passed.\n")
+
+# ==============================================================================
+# INCOMPLETE (ragged) nested designs -- M19 Slice 1 (ADR-029)
+# ==============================================================================
+#
+# M8 shipped balanced/complete nested Designs 2/3; M19 Slice 1 lifts the balance
+# guard. The fit FORMULAS are unchanged (glmmTMB/lme4 fit ragged data natively), the
+# subject-level error-set map is unchanged, and the averaged-coefficient divisor is
+# the harmonic-mean k_eff (ratings per subject) -- the SAME divisor M3/M6 already
+# pinned for incomplete two-way / one-way data. These oracles establish, on ragged
+# nested data (maintainer decision B -- "attempt the k_eff divisor, degrade only if
+# no strong oracle holds"; it holds, so the averaged coefficient ships):
+#   (a) glmmTMB <-> lme4 cross-engine components agree < 1e-4 (fit is fine ragged);
+#   (b) single-cluster incomplete Design 2 == incomplete TWO-WAY (M3) for EVERY
+#       coefficient incl. the averages -- ties the ragged nested error-set + k_eff
+#       divisor directly to the pinned M3 estimand (the averaged-divisor proof);
+#   (c) incomplete Design 3 == incomplete ONE-WAY (M6) as sigma^2_c -> 0;
+#   (d) seeded recovery of known components with MC-coverage on ragged data.
+
+# Drop a random fraction of subject x rater cells, restoring any subject that falls
+# below 2 ratings (subject-vs-residual identifiability). Returns droplevels()-ed data.
+drop_cells <- function(d, frac, seed) {
+  set.seed(seed)
+  keep <- rep(TRUE, nrow(d))
+  keep[sample(nrow(d), floor(frac * nrow(d)))] <- FALSE
+  repeat {
+    tab <- table(d$subject[keep])
+    bad <- names(tab)[tab < 2L]
+    if (length(bad) == 0L) {
+      break
+    }
+    for (s in bad) {
+      cand <- which(!keep & d$subject == s)
+      if (length(cand)) keep[cand[1L]] <- TRUE
+    }
+  }
+  droplevels(d[keep, , drop = FALSE])
+}
+
+harmonic_k <- function(d) 1 / mean(1 / as.integer(table(d$subject)))
+
+# --- (a) O-NML/incomplete cross-engine (ragged Design 2) ----------------------
+d2i <- drop_cells(
+  sim_design2(30, 8, 6, 1.0, 1.2, 0.7, 0.5, seed = 20260708),
+  0.25,
+  seed = 11
+)
+gi <- comp2_glmmtmb(d2i)
+li <- comp2_lme4(d2i)
+stopifnot(max(abs(gi - li)) < 1e-4)
+cat(
+  "\nO-NML/incomplete (Design 2): ragged components cross-engine agree to",
+  signif(max(abs(gi - li)), 3),
+  "(rows",
+  nrow(d2i),
+  "of 1440; ratings/subject",
+  paste(range(table(d2i$subject)), collapse = "-"),
+  ")\n"
+)
+
+# --- (b) O-NML/incomplete reduction: ragged single-cluster D2 == ragged M3 -----
+# One cluster (sigma^2_c degenerate) + missing cells: the Design-2 subject-level
+# agreement/consistency ICCs, single AND averaged (divisor = k_eff), must equal an
+# ordinary incomplete two-way fit on the same ratings to < 1e-4. This is the
+# averaged-divisor proof (decision B): the ragged nested average reduces to the
+# pinned M3 incomplete two-way average.
+d2sc <- drop_cells(
+  sim_design2(1, 10, 6, 0, 1.2, 0.7, 0.5, seed = 99),
+  0.25,
+  seed = 7
+)
+ke <- harmonic_k(d2sc)
+mn <- glmmTMB::glmmTMB(
+  score ~ 1 + (1 | cluster:subject) + (1 | cluster:rater),
+  data = d2sc,
+  REML = TRUE
+)
+vn <- glmmTMB::VarCorr(mn)$cond
+nest <- c(
+  subject = as.numeric(attr(vn[["cluster:subject"]], "stddev"))^2,
+  rater = as.numeric(attr(vn[["cluster:rater"]], "stddev"))^2,
+  residual = stats::sigma(mn)^2
+)
+mt <- glmmTMB::glmmTMB(
+  score ~ 1 + (1 | subject) + (1 | rater),
+  data = d2sc,
+  REML = TRUE
+)
+vt <- glmmTMB::VarCorr(mt)$cond
+tw <- c(
+  subject = as.numeric(attr(vt$subject, "stddev"))^2,
+  rater = as.numeric(attr(vt$rater, "stddev"))^2,
+  residual = stats::sigma(mt)^2
+)
+red <- function(x) {
+  c(
+    A1 = x[["subject"]] / (x[["subject"]] + x[["rater"]] + x[["residual"]]),
+    Ak = x[["subject"]] /
+      (x[["subject"]] + (x[["rater"]] + x[["residual"]]) / ke),
+    C1 = x[["subject"]] / (x[["subject"]] + x[["residual"]]),
+    Ck = x[["subject"]] / (x[["subject"]] + x[["residual"]] / ke)
+  )
+}
+stopifnot(max(abs(red(nest) - red(tw))) < 1e-4)
+cat(
+  "O-NML/incomplete reduction (Design 2 -> two-way): all 4 coeffs agree to",
+  signif(max(abs(red(nest) - red(tw))), 3),
+  "(k_eff =",
+  round(ke, 3),
+  ")\n"
+)
+
+# --- (c) O-NML/incomplete reduction: ragged Design 3 == ragged one-way (M6) ----
+d3i <- drop_cells(
+  sim_design3(50, 20, 6, 0, 1.2, 0.5, seed = 99),
+  0.25,
+  seed = 7
+)
+ke3 <- harmonic_k(d3i)
+h3i <- comp3_glmmtmb(d3i)
+d3_i1 <- h3i[["subject"]] / (h3i[["subject"]] + h3i[["residual"]])
+d3_ik <- h3i[["subject"]] / (h3i[["subject"]] + h3i[["residual"]] / ke3)
+mow <- glmmTMB::glmmTMB(score ~ 1 + (1 | subject), data = d3i, REML = TRUE)
+ow_sub <- as.numeric(attr(glmmTMB::VarCorr(mow)$cond$subject, "stddev"))^2
+ow_res <- stats::sigma(mow)^2
+ow_i1 <- ow_sub / (ow_sub + ow_res)
+ow_ik <- ow_sub / (ow_sub + ow_res / ke3)
+stopifnot(abs(d3_i1 - ow_i1) < 1e-2, abs(d3_ik - ow_ik) < 1e-2)
+cat(
+  "O-NML/incomplete reduction (Design 3 -> one-way): I1 diff",
+  signif(abs(d3_i1 - ow_i1), 3),
+  " Ik diff",
+  signif(abs(d3_ik - ow_ik), 3),
+  "\n"
+)
+
+# --- (d) O-NML/incomplete recovery (ragged Design 2) --------------------------
+d2rec <- drop_cells(
+  sim_design2(40, 6, 20, 1.0, 1.2, 0.7, 0.5, seed = 424243),
+  0.2,
+  seed = 5
+)
+grec <- comp2_glmmtmb(d2rec)
+pop_a1 <- 1.2 / (1.2 + 0.7 + 0.5)
+rec_a1 <- grec[["subject"]] /
+  (grec[["subject"]] + grec[["rater"]] + grec[["residual"]])
+stopifnot(abs(rec_a1 - pop_a1) < 0.05)
+cat(
+  "O-NML/incomplete recovery (Design 2): population A1 =",
+  round(pop_a1, 3),
+  " recovered =",
+  round(rec_a1, 3),
+  "\n"
+)
+
+cat("\nAll O-NML incomplete-nested (M19 Slice 1) oracle checks passed.\n")

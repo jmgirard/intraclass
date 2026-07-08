@@ -1727,3 +1727,105 @@ consequences → references.
   `M10-fixed-multilevel.md §3/§7` and `M9-incomplete-multilevel.md §9` (Slice 1 / the bound);
   `project/COVERAGE.md` §④ + `d_study` (#8/#9/#13/#14); ten Hove, Jorgensen & van der Ark (2022)
   Eqs. 12–14; McGraw & Wong (1996) Case 3/3A.
+
+## ADR-029: M19 scope — Multilevel completeness II (nested Designs 2/3: incomplete + fixed-rater)
+- Date: 2026-07-08
+- Status: accepted
+- Context: The M18–M21 completeness arc was set by ADR-027; per PRINCIPLES.md #2/#14 and brief §7
+  each milestone is detailed by its own scoping ADR at its start (as ADR-028 detailed M18). This
+  ADR opens **M19**, the second arc milestone: the **nested** designs' ragged and fixed-rater
+  corners — bringing Designs 2/3 (raters nested in clusters / in subjects) up to the incomplete +
+  fixed parity the crossed Design 1 reached in M9/M10/M18. Each slice lifts a **single shipped
+  abort guard** onto machinery oracle-pinned elsewhere — the M3 `k_eff`/connectedness + M9
+  identifiability gates (Slice 1) and the M10 engine-agnostic `theta2r_fixed()` (Slice 2) — as
+  M18 did for the crossed corners. **Completeness, not new estimand work** (cf. M14/M15/M18):
+  additive, non-breaking (#6) — no new top-level argument, only new valid combinations of the
+  shipped `design` / `raters` / data-balance arguments. Three scope decisions were put to the
+  maintainer this session (Decision below).
+- Decision:
+  - **Two thin vertical slices** (#14), ordered by oracle-risk (bank the lower-risk win first —
+    but note M19 front-loads the harder characterization in Slice 1, unlike M18):
+    - **Slice 1 — incomplete nested (COVERAGE #10).** Lift the `nested_design_balanced` abort in
+      the nested block (`R/icc.R`, ~L596) for **Designs 2 and 3**. Reuses the M3 `k_eff`
+      harmonic divisor + connectedness and the M9 identifiability gates on the shipped M8
+      four-/three-component nested fits (no fit change). No new estimand — the M8 §3 signal/error
+      map on ragged data. **Design detection on ragged data — explicit `design=` required
+      (maintainer decision A):** when missing cells make the crossed-vs-nested pattern ambiguous
+      (a rater can look cluster-confined only because its other cells are absent),
+      `detect_multilevel_design()` aborts and the caller must declare
+      `design = "nested_in_clusters"` / `"nested_in_subjects"` — never guessed (#5), consistent
+      with the M9 crossed-vs-nested `design` escape hatch (ADR-018). **Averaged-coefficient risk
+      posture — attempt, degrade if weak (maintainer decision B):** the single-rater
+      `ICC_s(·,1)` rides the established reduction + cross-engine oracles; the averaged
+      `ICC_s(·,k)` needs an effective-rater divisor (the subject-level ragged `k_eff` is the
+      natural candidate but is unproven for the nested error structure). Attempt it against the
+      reduction + cross-engine oracles; **if no #1/#4-strong oracle holds, reclassify the
+      averaged nested-incomplete coefficient to 🟣 research** (beside the crossed `ICC(c,k)`
+      incomplete divisor) and ship Slice 1 single-rater-only rather than lower the oracle bar
+      (#1). `verify-estimator` may recommend a Fable review (#19) if close but unpinnable.
+      Extends `M8-nested-multilevel.md §8` with whatever the oracle work establishes.
+    - **Slice 2 — fixed-rater nested (COVERAGE #11).** Lift the `ml_design != "crossed"` abort in
+      the fixed-rater multilevel branch (`R/icc.R`, ~L525) **for Design 2 only (maintainer
+      decision C).** Places a finite-population **θ²_{r:c}** in the rater slot of the Design-2
+      subject-level decomposition (M8 §3a). **Design 3 fixed-rater stays ⚫ by-design:** raters
+      nested in subjects is the multilevel one-way (Eq. 11), the rater main effect is confounded
+      into residual, so there is no separable rater effect to treat as fixed (cf. one-way fixed
+      "not meaningful", M6 §10) — a classed `abort_unsupported` names it. Balanced/complete first
+      (incomplete × fixed nested deferred — the M3 `k_eff` × per-cluster θ² interaction needs its
+      own oracle, as M10 was to M9; guarded loudly).
+
+      **Oracle-first catch (amends the scope assumption; #1/#18).** ADR-029 above assumed Slice 2
+      would "reuse `theta2r_fixed()`" and that "consistency ≡ random, agreement differs by θ²_r vs
+      σ²_{r:c} (zero on balanced data)" — the M10 crossed identity. **Two corrections established
+      by oracle before shipping:** (a) `theta2r_fixed()` is *not* reused verbatim — raters nested
+      in clusters have **no single common rater set**, so the fit is the cell-mean
+      parameterization `score ~ 0 + rater + (1|cluster:subject)` and θ²_{r:c} is a **new helper
+      `theta2r_fixed_nested()`** = the **mean over clusters** of each cluster's within-cluster
+      bias-corrected finite-population rater variance (Case 3A *per cluster*; pooling all raters
+      would conflate between-cluster rater location, confounded with the cluster main effect, with
+      within-cluster spread). (b) **Fixed ≢ random even on balanced data** here — the nested finite
+      population is per-cluster, so θ²_{r:c} (per-cluster, averaged) differs from the random pooled
+      σ²_{r:c} (they coincide only as raters-per-cluster → ∞; observed |Δ| up to ~4e-3 across
+      seeds). The M10 "balanced fixed ≡ random" pin therefore **does not apply**; the θ² pins are
+      instead **per-cluster reduction** (θ²_{r:c} == mean of the flat M3 fixed θ²_r fit on each
+      cluster's data alone — exact, ties to the sourced McGraw–Wong Case 3A estimand) and the
+      **single-cluster reduction** to the flat M3 fixed components (exact). *Consistency ≡ random
+      still holds exactly* (the rater term is unused). This is recorded in the fit-function
+      comments and `data-raw/oracle-fixed-multilevel.R` (O-FNML).
+  - **No new estimand for either slice; no new estimand-spec file** (extend the M8 §8 out-of-scope
+    note into the shipped map). No new dependency (light install intact). No new argument — Slice 1
+    reuses the shipped `design` arg, Slice 2 the shipped `raters = "fixed"`.
+  - **Oracle posture (#1), per slice — the established mixed-model pattern** (no textbook worked
+    example, as M8–M10/M15/M18): glmmTMB↔lme4 **cross-engine < 1e-4**; **reduction** to the
+    shipped balanced/complete nested case (M8) and — Slice 2 — the θ² **per-cluster** and
+    **single-cluster** reductions to the flat M3 fixed estimand (*not* balanced fixed≡random — see
+    the catch above), with consistency ≡ random exact; **seeded population recovery** with MC-CI
+    coverage; plus the M8 reductions (Design 3 → M6 one-way, Design 2 single-cluster → M1/M2
+    two-way) surviving imbalance. lme4 degrades to glmmTMB at the variance boundary (ragged nested
+    fits hit it more, as M15).
+  - **Scope-outs (preserved, not rediscovered):** the averaged crossed cluster-level `ICC(c,k)`
+    on incomplete data stays 🟣 research (Wave 3, M9 §9) and is **not** M19; Design 3 fixed-rater
+    is ⚫ by-design (decision C); nested cluster-level IRR stays ⚫ (undefined for nested raters,
+    ten Hove p. 6); ragged/fixed/multilevel **replicates** are **M20**; **SEM parity** is **M21**.
+    The minimum-viable N_c / raters-per-cluster identifiability thresholds (M8 §7) are reused
+    unchanged under imbalance.
+- Consequences: On M19 close, COVERAGE #10 is ✅ (or its averaged coefficient a recorded 🟣
+  research reclassification — a clean, annotated outcome either way) and #11 is ✅ (Design 2). The
+  nested designs reach ragged + fixed parity with the crossed design except the same one 🟣
+  divisor family. Risk is concentrated in Slice 1's averaged-nested divisor (the only genuine
+  characterization, explicitly allowed to degrade rather than force an unsourced formula, #4);
+  Slice 2 rides shipped M10 machinery. M18/M19 both being crossed/nested multilevel completeness,
+  they could still have merged — kept separate per ADR-027/028 to keep slices thin. This ADR
+  authorizes M19 code; M20 is scoped by its own ADR at its start (brief §7).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + seeded recovery per
+  slice), #2/#14 (name the estimand / thin vertical slices), #4 (no guessed formula — Slice 1's
+  degrade-to-research clause), #5/#8 (classed aborts for the ragged design-detection + Design-3
+  fixed corners), #6 (additive, non-breaking), #16 (tracking in-commit), #18 (characterize the
+  boundary — Slice 1 averaged divisor, lme4 singular degrade), #19 (Fable recommendation path for
+  Slice 1); ADR-027 (the arc this details — M19 = nested completeness), ADR-028 (M18 precedent:
+  guard-lift slices + attempt-then-degrade), ADR-008 (M3 `k_eff`/connectedness — Slice 1),
+  ADR-011 (multilevel fit), ADR-016 (M8 nested designs — this extends), ADR-018 (M9 incomplete
+  crossed + `design` escape hatch — Slice 1 reuses), ADR-019 (M10 `theta2r_fixed()` — Slice 2);
+  estimand-spec `M8-nested-multilevel.md §3/§7/§8`, `M9-incomplete-multilevel.md §4a/§9`,
+  `M10-fixed-multilevel.md §3`; `project/COVERAGE.md` (#10/#11); ten Hove, Jorgensen & van der
+  Ark (2022) Eqs. 8–11, Table 3; McGraw & Wong (1996) Case 3/3A.

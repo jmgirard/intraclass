@@ -197,24 +197,11 @@ test_that("deferred fixed-rater multilevel cases abort loudly", {
     )),
     class = "intraclass_unsupported"
   )
-  # Nested design with fixed raters.
-  dn <- d
-  dn$rater <- factor(paste(dn$cluster, dn$rater, sep = "_"))
-  expect_error(
-    suppressWarnings(icc(
-      dn,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      raters = "fixed",
-      level = "subject",
-      seed = 1
-    )),
-    class = "intraclass_unsupported"
-  )
-  # (Incomplete / unbalanced fixed multilevel is no longer deferred -- it ships in
-  # M18 Slice 1 (ADR-028); its oracles are the O-IFML section below.)
+  # (Fixed-rater NESTED Design 2 is no longer deferred -- it ships in M19 Slice 2
+  # (ADR-029); Design 3 fixed stays by-design undefined. Both are covered in the
+  # "fixed nested scope guards" test below.)
+  # (Incomplete / unbalanced fixed CROSSED multilevel is no longer deferred -- it
+  # ships in M18 Slice 1 (ADR-028); its oracles are the O-IFML section below.)
 })
 
 # Oracle O-IFML: INCOMPLETE fixed-rater crossed multilevel (Design 1), M18 Slice 1 --
@@ -364,5 +351,193 @@ test_that("O-IFML: incomplete fixed identifiability guards still fire", {
       seed = 1
     )),
     class = "intraclass_unidentified"
+  )
+})
+
+# Fixed-rater NESTED multilevel (Design 2), M19 Slice 2 (ADR-029) --------------
+#
+# Raters nested in clusters, treated as fixed: each cluster's k raters are its own
+# finite population, so the rater slot carries theta^2_{r:c} = the mean over clusters
+# of the within-cluster bias-corrected finite-population variance (McGraw & Wong Case
+# 3A per cluster). Unlike the crossed design (M10), fixed != random even on balanced
+# data (per-cluster finite population), so the pins are the per-cluster reduction to
+# the flat M3 fixed theta^2_r, the single-cluster reduction, cross-engine, and
+# consistency == random. Provenance in data-raw/oracle-fixed-multilevel.R.
+
+# Balanced Design-2 generator (raters nested in clusters -> cluster-unique labels).
+sim_design2 <- function(nc, ns, k, vc, vsc, vrc, vres, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, sqrt(vc))
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  scv <- stats::rnorm(nc * ns, 0, sqrt(vsc))
+  d$sc <- scv[(d$cluster - 1) * ns + d$subj]
+  rcv <- stats::rnorm(nc * k, 0, sqrt(vrc))
+  d$rc <- rcv[(d$cluster - 1) * k + d$rater]
+  d$score <- 10 +
+    cl[d$cluster] +
+    d$sc +
+    d$rc +
+    stats::rnorm(nrow(d), 0, sqrt(vres))
+  d$cluster <- factor(d$cluster)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d$rater <- factor(paste(d$cluster, d$rater, sep = "_"))
+  d
+}
+
+test_that("fixed nested Design 2 is detected: subject-level, theta^2_{r:c} slot", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_design2(20, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 7)
+  x <- suppressWarnings(
+    icc(d, score, subject, rater, cluster = cluster, raters = "fixed", seed = 1)
+  )
+  expect_identical(x$design$ml_design, "nested_in_clusters")
+  expect_identical(x$design$raters, "fixed")
+  expect_setequal(unique(x$estimates$level), "subject")
+  # No sigma^2_c (the cell-mean fit absorbs the cluster main effect); rater slot holds
+  # theta^2_{r:c}; no cluster:rater term.
+  expect_null(x$components$cluster)
+  expect_null(x$components$cluster_rater)
+  expect_true(is.numeric(x$components$rater))
+  expect_true(all(x$estimates$estimate >= 0 & x$estimates$estimate <= 1))
+  out <- paste(format(x), collapse = "\n")
+  expect_match(out, "raters nested in clusters")
+  expect_match(out, "rater:cluster")
+})
+
+test_that("O-FNML/reduction: theta^2_{r:c} is the per-cluster flat M3 fixed average", {
+  skip_if_not_installed("glmmTMB")
+  # The PRIMARY pin: the nested fixed rater variance equals the mean over clusters of
+  # the flat two-way fixed theta^2_r fit on each cluster's data alone (McGraw & Wong
+  # Case 3A per cluster) -- tying it to the pinned M3 fixed estimand.
+  d <- sim_design2(15, 8, 5, 1.0, 1.2, 0.7, 0.5, seed = 20260709)
+  x <- suppressWarnings(
+    icc(d, score, subject, rater, cluster = cluster, raters = "fixed", seed = 1)
+  )
+  per_cluster <- vapply(
+    levels(d$cluster),
+    function(cl) {
+      sub <- droplevels(d[d$cluster == cl, ])
+      xf <- suppressWarnings(icc(
+        sub,
+        score,
+        subject,
+        rater,
+        raters = "fixed",
+        seed = 1
+      ))
+      xf$components$rater
+    },
+    numeric(1)
+  )
+  expect_equal(x$components$rater, mean(per_cluster), tolerance = 1e-4)
+})
+
+test_that("O-FNML/single-cluster: fixed-nested components reduce to flat M3 fixed", {
+  skip_if_not_installed("glmmTMB")
+  # icc() refuses a single cluster, so the reduction is checked at the fit level: with
+  # one cluster the fixed-nested components equal the flat M3 fixed ones exactly.
+  d1 <- sim_design2(1, 15, 6, 0, 1.2, 0.7, 0.5, seed = 99)
+  cn <- fit_glmmtmb_nested_fixed(d1)$components
+  cf <- fit_glmmtmb_fixed(d1)$components
+  expect_equal(cn$rater, cf$rater, tolerance = 1e-6)
+  expect_equal(cn$subject, cf$subject, tolerance = 1e-6)
+  expect_equal(cn$residual, cf$residual, tolerance = 1e-6)
+})
+
+test_that("fixed nested: consistency == random, agreement differs (finite population)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_design2(20, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 2)
+  xf <- suppressWarnings(
+    icc(d, score, subject, rater, cluster = cluster, raters = "fixed", seed = 1)
+  )
+  xfc <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    type = "consistency",
+    seed = 1
+  ))
+  xr <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  xrc <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "consistency",
+    seed = 1
+  )
+  # Consistency never uses the rater term -> identical to random.
+  expect_equal(pick(xfc, "ICC(C,1)"), pick(xrc, "ICC(C,1)"), tolerance = 1e-4)
+  expect_equal(pick(xfc, "ICC(C,k)"), pick(xrc, "ICC(C,k)"), tolerance = 1e-4)
+  # Agreement uses theta^2_{r:c} != sigma^2_{r:c}: fixed and random need NOT coincide
+  # even on balanced nested data (this seed differs; the M10 crossed identity does not
+  # carry over). Just require a valid, finite coefficient.
+  expect_true(pick(xf, "ICC(A,1)") > 0 && pick(xf, "ICC(A,1)") < 1)
+})
+
+test_that("O-FNML/lme4: fixed-nested matches lme4 cross-engine (<1e-4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- sim_design2(20, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 7)
+  xg <- suppressWarnings(
+    icc(d, score, subject, rater, cluster = cluster, raters = "fixed", seed = 1)
+  )
+  xl <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "lme4",
+    seed = 1
+  ))
+  merged <- merge(
+    xg$estimates[c("index", "estimate")],
+    xl$estimates[c("index", "estimate")],
+    by = "index"
+  )
+  expect_lt(max(abs(merged$estimate.x - merged$estimate.y)), 1e-4)
+})
+
+test_that("fixed nested scope guards fail loudly (decision C + deferral)", {
+  skip_if_not_installed("glmmTMB")
+  # Design 3 (raters nested in subjects) fixed is by-design undefined: no separable
+  # rater effect (multilevel one-way, cf. M6 fixed one-way).
+  set.seed(3)
+  d3 <- expand.grid(rep = 1:4, subj = 1:6, cluster = 1:15)
+  d3$score <- stats::rnorm(nrow(d3))
+  d3$cluster <- factor(d3$cluster)
+  d3$subject <- factor(paste(d3$cluster, d3$subj, sep = "_"))
+  d3$rater <- factor(paste(d3$cluster, d3$subj, d3$rep, sep = "_"))
+  expect_error(
+    suppressWarnings(
+      icc(d3, score, subject, rater, cluster = cluster, raters = "fixed")
+    ),
+    class = "intraclass_unsupported"
+  )
+  # Incomplete fixed nested (Design 2) is deferred this milestone.
+  d2 <- sim_design2(20, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 7)
+  d2i <- d2[-(1:3), ]
+  expect_error(
+    suppressWarnings(icc(
+      d2i,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      design = "nested_in_clusters"
+    )),
+    class = "intraclass_unsupported"
   )
 })

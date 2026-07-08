@@ -4,12 +4,13 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers — the
 full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
 (`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
-restate it here). **No milestone is in flight** — the next one is scoped by an ADR at
-its start after a short retro (founding brief §7) and detailed in full here until it
-ships. The arc is a hypothesis, not a contract — reorders get a
+restate it here). **M19 is the active milestone** (implemented, PR pending); each milestone
+is scoped by an ADR at its start after a short retro (founding brief §7) and detailed in full
+here until it ships. The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
-ADR-025 M16, ADR-026 M17).
+ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
+M18 and ADR-029 M19).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -513,3 +514,62 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   green incl. Windows and R-devel, 779 tests). Incomplete fixed-rater crossed multilevel,
   incomplete conflated ICC, incomplete subject-level `d_study()`, and bootstrap-projected
   `d_study()` bands all ship; `R CMD check --as-cran` 0/0/0. First milestone of the M18–M21 arc.
+
+## M19: Multilevel completeness II — nested Designs 2/3 (incomplete + fixed-rater) (ADR-029) ⟵ ACTIVE
+- Goal: bring the **nested** designs (Design 2, raters nested in clusters; Design 3, raters nested
+  in subjects) up to the incomplete + fixed-rater parity the **crossed** Design 1 reached in
+  M9/M10/M18 — the second milestone of the M18–M21 completeness arc (ADR-027). **Completeness, not
+  new estimand work** (cf. M14/M15/M18): each slice lifts a **single shipped abort guard** onto
+  oracle-pinned machinery that already exists (M3 `k_eff`/connectedness + M9 identifiability gates;
+  M10 `theta2r_fixed()`). Additive, non-breaking (#6) — no new argument, only new valid
+  combinations of the shipped `design` / `raters` / data-balance arguments. Two thin vertical
+  slices (maintainer scope decisions A/B/C in ADR-029).
+- Reference: ADR-029 (scope + the three maintainer decisions); no new estimand-spec (extend the M8
+  §8 out-of-scope note into the shipped map). Oracles (#1, no textbook worked example, as
+  M8–M10/M15/M18): glmmTMB↔lme4 cross-engine < 1e-4 + reduction to the shipped balanced/complete
+  nested case (M8) + the M8 reductions (Design 3 → M6 one-way; Design 2 single-cluster → M1/M2
+  two-way) surviving imbalance/fixed + seeded recovery; in `test-icc-nested-multilevel.R`,
+  `test-icc-fixed-multilevel.R`.
+
+- **Slice 1 — incomplete nested (COVERAGE #10).** Lift the `nested_design_balanced` abort
+  ([icc.R:596](../R/icc.R)) for Designs 2 and 3. **DONE** (pending full-suite + lintr green).
+  - [x] **Design detection (decision A):** on ambiguous ragged data `detect_multilevel_design()`
+    aborts requiring an explicit `design = "nested_in_clusters"` / `"nested_in_subjects"` — never
+    guessed (#5); classed `abort_unidentified`, test-pinned message.
+  - [x] **Single-rater `ICC_s(·,1)`** on ragged Design-2 (agreement/consistency) and Design-3
+    (agreement) data — cross-engine (glmmTMB↔lme4 <1e-4) + reduction + seeded-recovery oracles.
+  - [x] **Averaged `ICC_s(·,k)` — attempt succeeded, SHIPPED (decision B):** the subject-level
+    ragged `k_eff` divisor reduces **exactly** to the pinned M3 two-way / M6 one-way incomplete
+    divisor (single-cluster Design 2 → ragged two-way, diff 0; Design 3 → ragged one-way).
+    No research degrade needed; no Fable review.
+  - [x] Identifiability guards under imbalance (Design 2: within-cluster connectedness +
+    subjects-rated->1; Design 3: ≥2 ratings/subject); lme4 degrades to glmmTMB at the boundary
+    (via `lme4_ml_contract`). Bonus: incomplete subject-level `d_study()` projects (M18 path).
+  - [x] Oracle script `data-raw/oracle-nested-multilevel.R` + tests
+    `test-icc-nested-multilevel.R` (56 pass); full suite 795 pass / 0 fail; `air` + `lintr` clean.
+    *(installed-pkg check + `R CMD check` deferred to milestone finish-task, before the PR push.)*
+- **Slice 2 — fixed-rater nested (COVERAGE #11), Design 2 only (decision C).** Lift the
+  `ml_design != "crossed"` abort in the fixed-rater branch ([icc.R:525](../R/icc.R)). **DONE.**
+  - [x] **Design 2 fixed raters:** new `fit_{glmmtmb,lme4}_nested_fixed` fits
+    `score ~ 0 + rater + (1|cluster:subject)`; a new engine-agnostic `theta2r_fixed_nested()`
+    puts θ²_{r:c} = **mean over clusters** of each cluster's finite-population rater variance in
+    the rater slot. **Both engines** (maintainer decision — full lme4 parity; merDeriv + per-cluster
+    θ² draws + singular→glmmTMB degrade).
+  - [x] **Oracle-first catch (#1/#18):** fixed ≢ random even balanced for nested (per-cluster
+    finite population ≠ pooled superpopulation; unlike crossed M10) — the M10 balanced-fixed≡random
+    pin does *not* apply. Pinned instead by **per-cluster reduction** (θ²_{r:c} == mean of per-cluster
+    flat M3 fixed θ²_r, exact) + **single-cluster reduction** to M3 (exact) + cross-engine (<1e-4) +
+    consistency≡random (exact). Recorded in ADR-029 + fit comments + O-FNML oracle.
+  - [x] **Design 3 fixed-rater** aborts ⚫ by-design (multilevel one-way — no separable rater
+    effect; cf. M6 §10): classed `abort_unsupported`, test-pinned. Incomplete fixed-nested deferred.
+  - [x] Oracle `data-raw/oracle-fixed-multilevel.R` (O-FNML) + tests (fixed-ml 53 pass); full
+    suite 813 pass / 0 fail; `air` + `lintr` clean. *(installed-pkg + `R CMD check` at finish-task.)*
+- Deferred out of M19 (record so not rediscovered): the averaged crossed cluster-level `ICC(c,k)`
+  incomplete divisor (🟣 Wave-3 research, M9 §9 — **not** M19); Design 3 fixed-rater (⚫ by-design,
+  decision C); nested cluster-level IRR (⚫ undefined for nested raters, ten Hove p. 6);
+  ragged/fixed/multilevel **replicates** (M20); **SEM parity** (M21). Arc carry-overs stay in
+  `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way via
+  SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
+- Status: **active — Slices 1 & 2 done** (incomplete nested Designs 2/3 + fixed-rater nested
+  Design 2 ship, both engines; full suite 813 pass / 0 fail, `air` + `lintr` clean). All planned
+  M19 slices complete; ready for milestone finish-task (`R CMD check` + installed-pkg + PR).

@@ -261,6 +261,15 @@ icc_components_view <- function(x) {
       variance = c(vc$cluster, vc$subject, vc$residual),
       confounded = TRUE
     )
+  } else if (ml && is.null(vc$cluster_rater) && is.null(vc$cluster)) {
+    # Fixed-rater Design 2 (M19 Slice 2): the cell-mean fit `0 + rater` absorbs the
+    # cluster main effect, so there is no sigma^2_c to report; the rater slot holds the
+    # finite-population theta^2_{r:c}.
+    list(
+      label = c("subject", "rater:cluster", "residual"),
+      variance = c(vc$subject, vc$rater, vc$residual),
+      confounded = FALSE
+    )
   } else if (ml && is.null(vc$cluster_rater)) {
     # Design 2 (raters nested in clusters): the rater slot holds sigma^2_{r:c}.
     list(

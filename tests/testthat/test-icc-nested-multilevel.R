@@ -136,12 +136,13 @@ test_that("nested-design scope and identifiability guards fail loudly", {
     icc(d, score, subject, rater, cluster = cluster, level = "cluster"),
     class = "intraclass_unsupported"
   )
-  # Incomplete / unbalanced nested design (drop one cell) is deferred.
+  # Incomplete / unbalanced nested design now fits (M19 Slice 1): dropping a cell
+  # from an otherwise-clear nested layout is still unambiguously nested, so it is
+  # detected and estimated rather than aborted.
   d_inc <- d[-1, ]
-  expect_error(
-    icc(d_inc, score, subject, rater, cluster = cluster),
-    class = "intraclass_unsupported"
-  )
+  x_inc <- icc(d_inc, score, subject, rater, cluster = cluster, seed = 1)
+  expect_identical(x_inc$design$ml_design, "nested_in_clusters")
+  expect_false(x_inc$design$balanced)
   # Only one rater per cluster -> nested rater variance unidentified.
   d_solo <- d[grepl("_1$", as.character(d$rater)), ]
   expect_error(
@@ -266,4 +267,195 @@ test_that("crossed data still infers Design 1 (regression)", {
   expect_identical(x$design$ml_design, "crossed")
   expect_setequal(unique(x$estimates$level), c("subject", "cluster"))
   expect_true(is.numeric(x$components$cluster_rater))
+})
+
+# Incomplete (ragged) nested designs -- M19 Slice 1 (ADR-029) ------------------
+#
+# M8 shipped balanced/complete nested designs; M19 Slice 1 lifts the balance guard.
+# The fit formulas are unchanged and the averaging divisor is the harmonic-mean
+# k_eff (ratings per subject), which reduces EXACTLY to the pinned M3 two-way / M6
+# one-way incomplete divisor (data-raw/oracle-nested-multilevel.R: ragged
+# single-cluster Design 2 == ragged two-way for all four coefficients, diff 0;
+# ragged Design 3 == ragged one-way). Correctness here rests on the cross-engine
+# fit (glmmTMB the independent oracle for lme4), the Design-3 -> one-way reduction,
+# seeded recovery, and the balanced no-op regression (PRINCIPLES.md #1).
+
+# Drop a random fraction of subject x rater cells, restoring any subject that falls
+# below 2 ratings (subject-vs-residual identifiability), then droplevels().
+drop_cells <- function(d, frac, seed) {
+  set.seed(seed)
+  keep <- rep(TRUE, nrow(d))
+  keep[sample(nrow(d), floor(frac * nrow(d)))] <- FALSE
+  repeat {
+    tab <- table(d$subject[keep])
+    bad <- names(tab)[tab < 2L]
+    if (length(bad) == 0L) {
+      break
+    }
+    for (s in bad) {
+      cand <- which(!keep & d$subject == s)
+      if (length(cand)) keep[cand[1L]] <- TRUE
+    }
+  }
+  droplevels(d[keep, , drop = FALSE])
+}
+
+test_that("O-NML/incomplete: ragged Design 2 matches lme4 cross-engine (<1e-4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- drop_cells(
+    sim_design2(30, 8, 6, 1.0, 1.2, 0.7, 0.5, seed = 20260708),
+    0.25,
+    11
+  )
+  # Genuinely ragged (unequal ratings per subject), still detected as Design 2.
+  expect_false(
+    icc(d, score, subject, rater, cluster = cluster, seed = 1)$design$balanced
+  )
+
+  xg <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  xl <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lme4",
+    seed = 1
+  )
+  # Point estimates agree across engines for both single and averaged coefficients
+  # (the averaged one exercises the k_eff divisor on ragged data).
+  merged <- merge(
+    xg$estimates[c("index", "estimate")],
+    xl$estimates[c("index", "estimate")],
+    by = "index"
+  )
+  expect_lt(max(abs(merged$estimate.x - merged$estimate.y)), 1e-4)
+})
+
+test_that("O-NML/incomplete: ragged Design 2 k_eff is the harmonic mean of ratings", {
+  skip_if_not_installed("glmmTMB")
+  d <- drop_cells(
+    sim_design2(30, 8, 6, 1.0, 1.2, 0.7, 0.5, seed = 20260708),
+    0.25,
+    11
+  )
+  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  # Averaged coefficient divides the error by k_eff; reconstruct it from the
+  # reported components and check it equals ICC(A,k). Ties the averaged divisor to
+  # the (independently pinned, M3) harmonic-mean k_eff on ragged nested data.
+  k_eff <- 1 / mean(1 / as.integer(table(d$subject)))
+  cmp <- x$components
+  ak <- cmp$subject / (cmp$subject + (cmp$rater + cmp$residual) / k_eff)
+  expect_equal(pick(x, "ICC(A,k)"), ak, tolerance = 1e-8)
+})
+
+test_that("O-NML/incomplete: balanced data is a no-op (M8 numbers unchanged)", {
+  skip_if_not_installed("glmmTMB")
+  # The lifted balance guard must not perturb the balanced/complete path: a complete
+  # Design 2 gives identical estimates whether or not the incomplete gates run.
+  d <- sim_design2(20, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 7)
+  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  expect_true(x$design$balanced)
+  m <- lme4::lmer(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater),
+    data = d,
+    REML = TRUE
+  )
+  vc <- lme4::VarCorr(m)
+  sc <- as.numeric(vc[["cluster:subject"]])
+  rc <- as.numeric(vc[["cluster:rater"]])
+  re <- stats::sigma(m)^2
+  expect_equal(pick(x, "ICC(A,1)"), sc / (sc + rc + re), tolerance = 1e-4)
+  expect_equal(pick(x, "ICC(A,k)"), sc / (sc + (rc + re) / 4), tolerance = 1e-4)
+})
+
+test_that("O-NML/incomplete: ragged Design 3 reduces to the incomplete one-way", {
+  skip_if_not_installed("glmmTMB")
+  # sigma^2_c = 0, many clusters, missing cells: ragged Design 3 is a ragged
+  # single-level one-way once cluster is ignored, so ICC(1) AND ICC(k) match
+  # icc(model = "oneway") on the same ratings (the one-way k_eff is also the
+  # harmonic mean, so the averaged divisors coincide) -- ties the ragged nested
+  # divisor to the pinned M6 incomplete one-way.
+  d <- drop_cells(sim_design3(50, 20, 6, 0, 1.2, 0.5, seed = 99), 0.25, 7)
+  x_ml <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  x_ow <- icc(d, score, subject, rater, model = "oneway", seed = 1)
+  ow <- function(i) x_ow$estimates$estimate[x_ow$estimates$index == i]
+  expect_equal(pick(x_ml, "ICC(1)"), ow("ICC(1)"), tolerance = 1e-2)
+  expect_equal(pick(x_ml, "ICC(k)"), ow("ICC(k)"), tolerance = 1e-2)
+})
+
+test_that("incomplete nested d_study projects the subject level (M18 path)", {
+  skip_if_not_installed("glmmTMB")
+  # Lifting the balance guard makes incomplete-nested d_study() reachable: nested
+  # designs are subject-level only, so the M18 Slice 3 subject-level projection
+  # applies unchanged. The curve is monotone increasing and equals ICC(A,1) at m = 1.
+  d <- drop_cells(
+    sim_design2(30, 8, 6, 1.0, 1.2, 0.7, 0.5, seed = 20260708),
+    0.25,
+    11
+  )
+  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  ds <- as.data.frame(d_study(x, m = c(1, 4, 8)))
+  expect_setequal(unique(ds$level), "subject")
+  expect_equal(ds$estimate[ds$m == 1], pick(x, "ICC(A,1)"), tolerance = 1e-8)
+  expect_true(all(diff(ds$estimate) > 0))
+})
+
+test_that("decision A: ambiguous ragged nesting requires an explicit design=", {
+  skip_if_not_installed("glmmTMB")
+  # Confine every rater to one cluster (nested), then drop cells so one rater ends
+  # up rating a single subject -> auto-detection can no longer tell Design 2 from
+  # Design 3 and aborts, pointing at design=. Declaring it lets the fit proceed.
+  d <- sim_design2(8, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 21)
+  # Remove all but one subject for rater "1_1": it now rates a single subject.
+  r11 <- d$rater == "1_1"
+  keep_one <- r11 & d$subject != "1_1"
+  d_amb <- d[!keep_one, ]
+  expect_error(
+    icc(d_amb, score, subject, rater, cluster = cluster),
+    class = "intraclass_unidentified"
+  )
+  # Declaring the design resolves the ambiguity (validated against the data).
+  x <- icc(
+    d_amb,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    design = "nested_in_clusters",
+    seed = 1
+  )
+  expect_identical(x$design$ml_design, "nested_in_clusters")
+  expect_false(x$design$balanced)
+})
+
+test_that("ragged nested design that disconnects a cluster aborts (identifiability)", {
+  skip_if_not_installed("glmmTMB")
+  # Split one cluster's raters and subjects into two non-overlapping blocks: that
+  # cluster's subject x rater graph is disconnected, so sigma^2_{s:c} cannot be
+  # separated from residual there -- a classed abort, not a silent number.
+  d <- sim_design2(6, 6, 4, 1.0, 1.2, 0.7, 0.5, seed = 31)
+  c1 <- d$cluster == "1"
+  # In cluster 1: raters 1_1/1_2 rate subjects 1_1..1_3; raters 1_3/1_4 rate
+  # subjects 1_4..1_6 -> two disconnected blocks.
+  block_a <- c1 &
+    d$rater %in% c("1_1", "1_2") &
+    d$subject %in% c("1_4", "1_5", "1_6")
+  block_b <- c1 &
+    d$rater %in% c("1_3", "1_4") &
+    d$subject %in% c("1_1", "1_2", "1_3")
+  d_disc <- d[!(block_a | block_b), ]
+  expect_error(
+    icc(
+      d_disc,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      design = "nested_in_clusters"
+    ),
+    class = "intraclass_unidentified"
+  )
 })
