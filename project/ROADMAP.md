@@ -27,9 +27,9 @@ Ark).
 - Replicate ratings within cell → split σ²_sr from σ²_e via `(1 | subject:rater)`.
 - Design/power helpers (how many raters/subjects for a target CI width).
 - Categorical/ordinal ratings (GLMM engines) beyond the Gaussian LMM.
-- Bootstrap and profile-likelihood CIs as alternatives to Monte-Carlo, for
-  method comparison. Includes the **parametric-bootstrap `ci_method`** (bootMer)
-  deferred out of M14/M15.
+- Non-parametric bootstrap and profile-likelihood CIs as further alternatives to
+  Monte-Carlo, for method comparison (the parametric-bootstrap `ci_method` shipped
+  in M16, ADR-025).
 - Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs.
 - **Three-facet `d_study()`** projecting subject-per-cluster counts for the
   multilevel designs (today's `d_study()` projects rater count only) — deferred

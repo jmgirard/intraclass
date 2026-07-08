@@ -1,14 +1,15 @@
 # Milestones
 
 Ordered milestones with status and the deferrals each one recorded. **Shipped
-milestones (M0–M11) are compressed** to Goal / Status / Deferred + spec-and-ADR
-pointers — the full blow-by-blow DoD lives in its ADR (`DECISIONS.md`), its
-estimand-spec, and git history (ADR-015, single-source; don't restate it here). The
-**active** milestone (M15) is detailed in full; there is no pre-planned next milestone
-(each is scoped by an ADR at its start after a short retro — founding brief §7). The
-arc is a hypothesis, not a contract — reorders get a [`DECISIONS.md`](DECISIONS.md)
-entry (the M9–M13 tail was set by ADR-017; ADR-018 detailed M9, ADR-019 M10, ADR-020
-M11, ADR-021 M12, ADR-023 M14, ADR-024 M15).
+milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers — the
+full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
+(`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
+restate it here). **No milestone is in flight** — the next one is scoped by an ADR at
+its start after a short retro (founding brief §7) and detailed in full here until it
+ships. The arc is a hypothesis, not a contract — reorders get a
+[`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
+detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
+ADR-025 M16).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -276,9 +277,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   crosswalk-label table + classed aborts; interactive shell tested via an injected
   responder + mocked `prompt_line`/`is_interactive` (no live console in CI).
 
-### Deferred out of M12 (record so not rediscovered)
-- A **`fit=`/data-in path** that runs `icc()` and returns the fitted object (helper is
-  advice-only by ADR-021); a **`tidy`/`glance`** method on `icc_recommendation`;
+- Deferred out of M12 (record so not rediscovered): A **`fit=`/data-in path** that runs
+  `icc()` and returns the fitted object (helper is advice-only by ADR-021); a
+  **`tidy`/`glance`** method on `icc_recommendation`;
   **GUI/Shiny** front-ends; **engine / `ci_method` / `d_study()` guidance** inside the
   helper (outside the vignette tree); the **full advanced-vignette showcase** of the
   helper (M13). ADR-017 / M9–M11 estimator carry-overs untouched.
@@ -301,8 +302,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   *(was M9 per ADR-017; M7 → M9 per ADR-013; M6 originally.)*
 - Reference: ADR-022 (scope); no estimand-spec. Brief §8 per-milestone DoD.
 
-### Deferred out of M13 (record so not rediscovered)
-- The **actual CRAN upload** + win-builder / R-hub / `devtools::submit_cran` round-trips
+- Deferred out of M13 (record so not rediscovered): The **actual CRAN upload** +
+  win-builder / R-hub / `devtools::submit_cran` round-trips
   (maintainer, out of band); a **JOSS / software paper**; a **pkgdown custom
   theme / logo / hex sticker**; a **benchmark-vs-prior-art** article (ROADMAP parking
   lot). Every prior-milestone carry-over is untouched: M9 averaged cluster-level
@@ -336,8 +337,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   (~1e-6–1e-10 observed); interval MC-CI ≈ glmmTMB ~1e-2 (≤4.6e-3); boundary/singular-fit
   abort; seeded-sim coverage; + the balanced fixed≡random reduction.
 
-### Deferred out of M14 (record so not rediscovered)
-- **Incomplete/ragged lme4** for every new shape (the M9 `k_eff`/connectedness × merDeriv
+- Deferred out of M14 (record so not rediscovered): **Incomplete/ragged lme4** for every
+  new shape (the M9 `k_eff`/connectedness × merDeriv
   singular-fit interaction — a follow-up slice); the **parametric-bootstrap `ci_method`**
   (bootMer); a **boundary-robust lme4 interval for singular fits** (glmmTMB covers it
   today); merDeriv edge cases beyond these models. Untouched arc carry-overs stay in
@@ -372,19 +373,12 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Reference: ADR-024 (scope); no estimand-spec (engine, not estimand — cf.
   M5.5/M7/M14). Oracles **O-LME2** per shape (glmmTMB the independent oracle): point ≡
   glmmTMB ≤1e-4 on ragged data; interval MC-CI ≈ glmmTMB ~1e-2; a singular-fit-abort
-  oracle on a ragged design that goes singular; seeded-sim coverage at nominal.
-  The three shapes shipped as thin slices: Slice 1 needed **no code fix** (ragged
-  random two-way + one-way lme4 was already ungated, just untested — pinned); Slices
-  2–3 each **removed** a `!balanced` lme4 guard in `R/icc.R` (the θ²_r-under-imbalance
-  correction and the multilevel fit both assume no balance), then pinned the ragged
-  path against glmmTMB. The multilevel **singular→glmmTMB degrade** is characterized
-  and pinned (a σ²_cr≡0 ragged crossed design lands lme4 on the boundary → classed
-  `intraclass_singular_fit` abort; glmmTMB still fits). `fit_lme4_*` functions
-  unchanged; changes confined to the `icc()` guard block, `@param engine` roxygen,
-  `NEWS`, and `test-icc-lme4-engine.R` (O-LME2 ragged oracle per shape).
-
-### Deferred out of M15 (record so not rediscovered)
-- The **parametric-bootstrap `ci_method`** (bootMer); a **boundary-robust lme4
+  oracle on a ragged design that goes singular; seeded-sim coverage at nominal. The
+  multilevel **singular→glmmTMB degrade** is characterized and pinned (a σ²_cr≡0 ragged
+  crossed design lands lme4 on the boundary → classed `intraclass_singular_fit` abort;
+  glmmTMB still fits).
+- Deferred out of M15 (record so not rediscovered): The **parametric-bootstrap
+  `ci_method`** (bootMer); a **boundary-robust lme4
   interval for singular fits** (glmmTMB covers it today — the degrade-to-glmmTMB
   handoff stands); **merDeriv edge cases** beyond these models. Untouched arc
   carry-overs stay in `ROADMAP.md`: the **Bayesian engine** + `ci_method = "posterior"`;
@@ -415,15 +409,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   cases within MC tolerance (MC the independent method), diverging predictably at the
   boundary (characterized, #18); (O3) literature anchor (Efron & Tibshirani 1993; the
   ten Hove/Jorgensen MC-vs-bootstrap comparison).
-- Slices (thin, #15): **S1** `simulate_refit()` contract + `bootstrap` dispatch for the
-  **glmmTMB** engine on the balanced two-way random ICC, O1/O2 (de-risks refit-in-loop);
-  **S2** lme4 `bootMer` parity through the same contract, O2 cross-engine + O1; **S3**
-  extend across the fitted design family (fixed-rater, multilevel) + the refit-failure
-  discard policy (classed `cli` warning, #5/#8). Cross-cutting DoD: roxygen
-  (`@param ci_method`/`boot_samples`), NEWS, `advanced.Rmd` method-comparison note.
-
-### Deferred out of M16 (record so not rediscovered)
-- **BCa intervals** (need jackknife acceleration — percentile ships first); **bootstrap-
+- Deferred out of M16 (record so not rediscovered): **BCa intervals** (need jackknife
+  acceleration — percentile ships first); **bootstrap-
   projected `d_study()` bands** (the reliability-curve band reuses the shared *MC* draws
   across `k` — a bootstrap version would reproject each refit's components); **parallelized
   refits** (keep dependency-light first); **lme4 bootstrap on singular fits** (bootMer
