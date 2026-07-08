@@ -131,13 +131,45 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
     )
   }
 
+  # Parametric-bootstrap support (ADR-025, M16): lme4's native lme4::bootMer is the
+  # purpose-built analogue of the glmmTMB simulate()+refit loop -- it simulates from
+  # the fit, refits, and applies FUN to each refit. FUN returns the variance
+  # components, so a refit that collapses to a singular (boundary) fit still yields
+  # a valid draw with a component at 0 (KEPT, matching the MC boundary policy and the
+  # glmmTMB bootstrap path); only a genuine refit failure becomes NA (bootMer fills
+  # it), dropped upstream. Returns the shared (component x resample) matrix.
+  # Note: merDeriv is not needed for the bootstrap (no covariance is formed), but
+  # fit_lme4() requires it up front for the Monte-Carlo default; that requirement is
+  # unchanged here. Seeded via with_rng_seed() for RNG hygiene (#9, #12).
+  simulate_refit <- function(boot_samples, seed = NULL) {
+    extract <- function(refit) {
+      rvc <- lme4::VarCorr(refit)
+      c(
+        subject = as.numeric(attr(rvc$subject, "stddev"))^2,
+        rater = as.numeric(attr(rvc$rater, "stddev"))^2,
+        residual = as.numeric(stats::sigma(refit))^2
+      )
+    }
+    run <- function() {
+      boot <- suppressWarnings(suppressMessages(lme4::bootMer(
+        fit,
+        FUN = extract,
+        nsim = boot_samples,
+        type = "parametric"
+      )))
+      t(boot$t)
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+
   list(
     fit = fit,
     engine = "lme4",
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = simulate_refit
   )
 }
 

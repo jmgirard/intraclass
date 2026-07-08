@@ -7,18 +7,20 @@
   the variance boundary. M0–M15 all shipped; package at v0.1.0, submission-ready.
 - **Milestone: M16 — parametric-bootstrap `ci_method`** (ADR-025, in flight): a second
   interval method (`ci_method = "bootstrap"`), both engines via a `simulate_refit()`
-  contract. Scope pass + Slice 1 (glmmTMB two-way random) done this session (working tree).
-- Active task: **M16 Slice 1 — done in working tree** (not yet committed/CI'd):
-  `ci_method = "bootstrap"` for the glmmTMB two-way random design via the
-  `simulate_refit()` engine contract; O1 (coverage of known population ICC) + O2
-  (agreement with the MC interval within 0.06 on interior data) + reproducibility/RNG-
-  hygiene oracles green (`test-ci-bootstrap.R`); full suite 588 pass / 0 fail, lint + `air`
-  clean. Next code action: **Slice 2** — lme4 `bootMer` parity through the same contract.
+  contract. Scope pass + Slices 1–2 (glmmTMB + lme4, two-way random) done this session.
+- Active task: **M16 Slices 1–2 done** (S1 committed `b63c471`; S2 in working tree).
+  `ci_method = "bootstrap"` for the two-way random design on **both engines** via the
+  `simulate_refit()` contract — glmmTMB (`simulate()`+refit) and lme4 (`bootMer`). Oracles:
+  O1 coverage of known population ICC; O2 agreement with the MC interval (≤0.06) and
+  **cross-engine** lme4≈glmmTMB (≤0.05); reproducibility/RNG-hygiene; unsupported-design
+  abort; validation. Full suite 588 pass / 0 fail, lint + `air` clean. Next code action:
+  **Slice 3** — extend across the fitted design family (fixed-rater, multilevel) + harden
+  the refit-failure discard policy.
 - Last green CI: PR #19 (M15) full matrix green incl. Windows and R-devel; merged to
   `main` at b0dd492
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus) — non-Bayesian carryover sequencing recorded;
-  M16 (bootstrap `ci_method`) scope pass (ADR-025) + Slice 1 (glmmTMB) done in working tree
+  M16 (bootstrap `ci_method`) scope pass (ADR-025) + Slices 1–2 (glmmTMB + lme4) done
 
 ## Where we are
 
@@ -48,9 +50,10 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 `ci_method`, and the multi-`ci_method` dispatch seam the eventual Bayesian `"posterior"`
 method reuses. Chosen from the non-Bayesian carryovers as the lowest-estimand-risk item
 with the highest infra ROI. Scope pinned (both engines via a `simulate_refit()` contract,
-percentile interval, `d_study` stays MC-only). **Slice 1 (glmmTMB two-way random) is
-implemented + oracle-tested in the working tree**; Slices 2 (lme4 `bootMer` parity) and 3
-(design-family + refit-failure policy) remain.
+percentile interval, `d_study` stays MC-only). **Slices 1–2 done** — the two-way random
+design bootstraps on both glmmTMB (`simulate()`+refit) and lme4 (`bootMer`), oracle-tested
+incl. cross-engine agreement (S1 committed `b63c471`, S2 in working tree). Slice 3
+(design-family extension + refit-failure policy) remains.
 
 **Agreed non-Bayesian carryover sequencing (this session).** Ordered by oracle-risk
 (#1) — bank the clean-oracle wins before the open research question. Each promotion still

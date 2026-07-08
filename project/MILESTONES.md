@@ -432,8 +432,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   averaged cluster-level `ICC(c,k)` incomplete divisor** (Wave 3); the **conflated
   single-level ICC (Eq. 14)** (Wave 1 thin slice); **one-way via SEM** (blocked, ADR-014);
   the boundary-robust lme4 singular interval + merDeriv edge cases (deprioritized).
-- Status: **in flight** — scope pass this session (ADR-025); **Slice 1 done in working
-  tree** (glmmTMB two-way random `ci_method = "bootstrap"` via the `simulate_refit()`
-  contract; O1 coverage + O2 MC-agreement + reproducibility oracles; 588 pass / 0 fail,
-  lint + `air` clean; not yet committed/CI'd). Slices 2 (lme4 `bootMer` parity) and 3
-  (design-family extension + refit-failure policy) pending.
+- Status: **in flight** — scope pass this session (ADR-025); **Slices 1–2 done** (S1
+  glmmTMB `simulate()`+refit committed `b63c471`; S2 lme4 `bootMer` parity through the same
+  `simulate_refit()` contract, in working tree). Two-way random `ci_method = "bootstrap"`
+  on both engines; oracles O1 coverage + O2 MC-agreement + **cross-engine lme4≈glmmTMB** +
+  reproducibility; 588 pass / 0 fail, lint + `air` clean. Slice 3 (design-family extension
+  + refit-failure discard policy) pending.

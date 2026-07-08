@@ -19,7 +19,8 @@ alternate engines, and seeded simulations.
   simulates response vectors from the fitted model, refits, and takes percentile
   quantiles (`boot_samples` resamples). It does not rely on the asymptotic-normal
   covariance approximation the Monte-Carlo default uses, at the cost of a refit per
-  resample. Currently available for the two-way random design on the glmmTMB engine.
+  resample. Currently available for the two-way random design on the `"glmmTMB"`
+  (`simulate()` + refit) and `"lme4"` (`bootMer`) engines.
 * Imbalanced and **incomplete** (missing-cell) designs are handled directly by the
   mixed model: it uses the effective number of ratings `k_eff` (the harmonic mean of
   the per-subject counts) as the `ICC(*,k)` divisor and aborts loudly on a

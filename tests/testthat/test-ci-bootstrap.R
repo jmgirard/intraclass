@@ -182,3 +182,90 @@ test_that("boot_samples is validated like a resample count (#5, #8)", {
     class = "intraclass_error"
   )
 })
+
+# Slice 2 -- lme4 bootMer parity through the same simulate_refit() contract -----
+
+test_that("the lme4 engine bootstraps via bootMer with a well-formed interval", {
+  skip_on_cran()
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  d <- sf_ratings_long()
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "lme4",
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  )
+  td <- tidy(fit)
+
+  expect_identical(fit$engine, "lme4")
+  expect_identical(fit$ci$method, "bootstrap")
+  expect_true(all(is.finite(td$conf.low)))
+  expect_true(all(is.finite(td$conf.high)))
+  expect_true(all(td$conf.low <= td$estimate))
+  expect_true(all(td$estimate <= td$conf.high))
+
+  # Reproducible with a fixed seed, and the global RNG stream is untouched (#9/#12).
+  b <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "lme4",
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  ))
+  expect_equal(td$conf.low, b$conf.low)
+  expect_equal(td$conf.high, b$conf.high)
+})
+
+test_that("bootstrap agrees across engines (lme4 bootMer vs glmmTMB) (O2)", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  set.seed(11)
+  n <- 40L
+  k <- 6L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  bs_tmb <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    ci_method = "bootstrap",
+    boot_samples = 499L,
+    seed = 1
+  ))
+  bs_lme4 <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    engine = "lme4",
+    ci_method = "bootstrap",
+    boot_samples = 499L,
+    seed = 1
+  ))
+
+  # The two engines fit the same REML model (identical point estimates) and each
+  # runs a parametric bootstrap, so their percentile intervals should concur away
+  # from the boundary. Generous, honest tolerance (#1, #4).
+  expect_equal(bs_lme4$estimate, bs_tmb$estimate, tolerance = 1e-4)
+  expect_equal(bs_lme4$conf.low, bs_tmb$conf.low, tolerance = 0.05)
+  expect_equal(bs_lme4$conf.high, bs_tmb$conf.high, tolerance = 0.05)
+})
