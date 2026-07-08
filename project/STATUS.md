@@ -1,28 +1,23 @@
 # Project status
 
 - Milestone: **M18 — Multilevel completeness I (crossed Design 1, incomplete corners)** —
-  **in progress** (scoped by ADR-028; first milestone of the M18–M21 arc, ADR-027). Four thin
-  slices lifting a single shipped abort guard each: **(1)** incomplete fixed-rater crossed
-  (M3 `k_eff` + M10 θ²_r under imbalance); **(2)** incomplete conflated ICC (attempt Eq. 14 on
-  ragged data with a flat `k_eff` — **degrade to 🟣 research if no #1-strong oracle holds**,
-  maintainer decision); **(3)** incomplete **subject-level** `d_study()` (cluster level bounded
-  by the Wave-3 `ICC(c,k)` divisor); **(4)** bootstrap-projected `d_study()` bands (M16 deferral,
-  package-wide — split out of ADR-027's bundled Slice 3). Completeness, not new estimand work;
-  no new dependency. M0–M17 shipped; package at v0.1.0.
-- Active task: **M18 — PR #23 open, awaiting CI + maintainer merge.** All four slices shipped +
-  cross-cutting DoD done: (1) incomplete fixed-rater crossed (O-IFML); (2) incomplete conflated
-  ICC — oracle held, ships (O-conflated/incomplete; spec §6a); (3) incomplete subject-level
-  `d_study()` — level-aware abort (O-IDS); (4) bootstrap-projected `d_study()` bands, coherent
-  with the fitted interval at `m = k_eff` (O-Boot-DS). **779 tests pass**, `R CMD check --as-cran`
-  0/0/0 (installed pkg, vignettes built), lint/`air` clean. On branch `m18-crossed-incomplete`.
-  After merge: post-merge `project/` reconcile (compress M18 in MILESTONES) then start M19.
-- Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
-  `main` at a915256
+  **shipped** (PR #23, ADR-028; first milestone of the M18–M21 arc, ADR-027). Four slices, each
+  lifting a single shipped abort guard: **(1)** incomplete fixed-rater crossed (M3 `k_eff` + M10
+  θ²_r under imbalance); **(2)** incomplete conflated ICC (Eq. 14 well-posed on ragged data — the
+  attempt-then-degrade posture resolved to *ships*, no reclassification; spec §6a); **(3)**
+  incomplete **subject-level** `d_study()` (cluster level bounded by the Wave-3 `ICC(c,k)` divisor,
+  dropped-with-note); **(4)** bootstrap-projected `d_study()` bands (M16 deferral, package-wide).
+  Completeness, not new estimand work; no new dependency, no new argument. M0–M18 shipped; package
+  at v0.1.0. No milestone in flight.
+- Active task: — (no milestone in flight; **M19 — Multilevel completeness II (nested Designs 2/3):
+  incomplete nested (Slice 1) + fixed-rater nested (Slice 2)** is next in the arc (ADR-027) and
+  gets its own start-of-milestone scoping ADR.)
+- Last green CI: PR #23 (M18) full matrix green incl. Windows and R-devel; merged to
+  `main` at 7dffbb2
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped all four slices**
-  (incomplete fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`;
-  bootstrap-projected `d_study()` bands). Lint/`air` clean. Cross-cutting DoD (NEWS + installed
-  `--as-cran` + reconcile) and PR next.
+- Updated: 2026-07-08 by main session (Opus) — **M18 merged (PR #23, ADR-028)**: all four slices
+  + cross-cutting DoD; `R CMD check --as-cran` 0/0/0, 779 tests, full CI matrix green. Post-merge
+  `project/` reconcile done (M18 compressed in MILESTONES; COVERAGE #8/#9/#13/#14 → ✅). M19 next.
 
 ## Where we are
 

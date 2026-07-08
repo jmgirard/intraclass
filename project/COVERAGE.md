@@ -11,9 +11,8 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-08**, after **M18 Slices 1–4** (ADR-028, on branch `m18-crossed-incomplete`,
-pre-merge) — which close the four crossed-incomplete gaps (#8/#9/#13/#14); M17 (PR #22)
-before that.
+**2026-07-08**, after **M18** (PR #23, ADR-028) — which closes the four crossed-incomplete
+gaps (#8/#9/#13/#14); M17 (PR #22) before that.
 
 **Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) are
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason

@@ -479,60 +479,28 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   abort guard**, reusing oracle-pinned machinery (M3 `k_eff`/connectedness, M10
   `theta2r_fixed()`, M17 §7 multilevel `d_study`, M16 `simulate_refit`). Additive, non-breaking
   (#6) — no new argument, only new valid combinations. Four thin slices ordered by oracle-risk.
+  Four thin vertical slices, each lifting a single shipped abort guard: **Slice 1 — incomplete
+  fixed-rater crossed** (COVERAGE #9): the M9 identifiability gates + shipped
+  `fit_{glmmtmb,lme4}_multilevel_fixed` with the M3 `k_eff` divisor and M10 `theta2r_fixed()` read
+  from the ragged rater-contrast vcov (no fit change); balanced fixed≡random, ragged genuinely
+  differs (θ²_r ≠ σ²_r), as the single-level M3 fixed path. **Slice 2 — incomplete conflated ICC**
+  (COVERAGE #8): opened the question `M17-conflated-icc.md §6` left closed — Eq. 14 *lumps*
+  σ²_r+σ²_cr+σ²_res into one error and σ²_c+σ²_{s:c} into one signal, so it is the flat two-way ICC
+  off the five-component fit with the same flat `k_eff`; **well-posed on ragged data** (the
+  attempt-then-degrade posture resolved to *ships*, no reclassification; spec §6a). **Slice 3 —
+  incomplete subject-level `d_study()`** (COVERAGE #13): level-aware guard — the subject level
+  projects (projection moves only the divisor `m`), the cluster level is dropped-with-note (bounded
+  by the open M9 `ICC(c,k)` divisor). **Slice 4 — bootstrap-projected `d_study()` bands** (COVERAGE
+  #14, the M16 deferral, package-wide): `bootstrap_ci()` exposes its resample components, a
+  bootstrap fit stores them on `x$boot`, and `d_study()` reprojects them across `m` — deterministic,
+  and at `m = k_eff` equal to the fitted `ICC(A,k)` bootstrap interval exactly. No new estimand
+  (Slice 2 is the only spec-touching slice), no new dependency, no new argument.
 - Reference: ADR-028 (scope + maintainer decisions: Slice 2 attempt-then-degrade; Slice 3/4
-  split). Only Slice 2 touches a spec (`M17-conflated-icc.md §6`); no new estimand-spec.
-  Oracle posture (#1, all slices): glmmTMB↔lme4 cross-engine < 1e-4 + **reduction** to the
-  shipped balanced/complete case + seeded population recovery (no textbook worked example, as
-  M8–M10/M15). Brief §8 per-milestone DoD.
-
-**DoD board (this is the live task board — ADR-015; check off in the same commit as the work, #16):**
-
-- **Slice 1 — incomplete fixed-rater crossed (COVERAGE #9)** — reuse M3 Case-3A `k_eff` + M10
-  θ²_r under imbalance; θ²_r replaces σ²_r in the rater slot on ragged data. Lowest risk. **Done.**
-  - [x] Narrowed the `raters == "fixed"` abort in the ragged-crossed block (`R/icc.R`); the fixed
-        path flows through the M9 identifiability gates (conservative for fixed) into the shipped
-        `fit_{glmmtmb,lme4}_multilevel_fixed` with the M3 `k_eff` divisor — no fit change needed.
-  - [x] Oracle O-IFML (`test-icc-fixed-multilevel.R`): balanced fixed≡random reduction (existing
-        O-FML); ragged independent-lme4 cross-engine <1e-4 + `icc(lme4)≡icc(glmmTMB)`; genuine
-        fixed≠random under imbalance (matches single-level M3); seeded consistency recovery w/
-        MC-CI coverage; singular→glmmTMB degrade pinned; identifiability guards still fire.
-        Seeded generators (no committed constants), so no `REFERENCES.md` change.
-  - [x] Docs (`icc()` roxygen) updated; COVERAGE #9 → ✅. Suite 740 pass / 0 fail, lint + `air` clean.
-- **Slice 2 — incomplete conflated ICC (COVERAGE #8)** — **attempted flat-`k_eff` Eq. 14 on
-  ragged data; the oracle held → ships** (no reclassification; ADR-028 attempt-then-degrade). **Done.**
-  - [x] Characterized: Eq. 14 lumps σ²_r+σ²_cr+σ²_res into one error and σ²_c+σ²_{s:c} into one
-        signal, so it is the flat two-way ICC off the five-component fit with the same flat
-        `k_eff` — well-posed on ragged data (spec `M17-conflated-icc.md §6a`).
-  - [x] Lifted the `"conflated" %in% level` ragged abort (`R/icc.R`); the conflated path flows
-        through the existing crossed-multilevel identifiability gates (conservative — matches
-        flat-two-way identifiability). Extended the spec §6a; roxygen updated.
-  - [x] Oracles (`test-icc-multilevel.R`): Eq-14 identity on ragged components (~1e-10);
-        cross-engine glmmTMB≡lme4 <1e-4; tracks flat incomplete two-way agreement (~0.02) while
-        staying visibly biased vs subject. Seeded generators. COVERAGE #8 → ✅. Suite 749 pass.
-- **Slice 3 — incomplete subject-level `d_study()` (COVERAGE #13)** — subject level only; cluster
-  level stays behind the 🟣 Wave-3 `ICC(c,k)` divisor (#18 bound). **Done.**
-  - [x] Made the incomplete-multilevel `d_study()` abort level-aware (`R/d-study.R`): the subject
-        level projects (projection moves only the divisor `m`); the cluster level is dropped with
-        a one-time note (mirroring `icc()`'s cluster-on-incomplete posture) or aborts when it is
-        the only requested level.
-  - [x] Oracle O-IDS (`test-d-study.R`): reduction → fitted subject `ICC(A,k)` at `m = k_eff`
-        (exact); independent lme4 cross-engine <1e-4; monotone/[0,1] with boundary-aware band;
-        cluster-only incomplete fit aborts. Roxygen + M4.5 §7.2 spec updated. COVERAGE #13 → ✅.
-        Suite 758 pass.
-- **Slice 4 — bootstrap-projected `d_study()` bands (COVERAGE #14)** — the M16 deferral, package-
-  wide (not just incomplete); reproject the stored `simulate_refit` resamples across `m`. **Done.**
-  - [x] `bootstrap_ci()` now exposes its kept resample components (attribute); a bootstrap fit
-        stores them on `x$boot`. `d_study()` band follows the fit's `ci_method`: bootstrap fit →
-        reproject the stored resamples (no re-draw, deterministic); MC fit → unchanged. Old
-        bootstrap objects without `$boot` fall back to the MC band.
-  - [x] Oracle O-Boot-DS (`test-d-study.R`): **coherence** — at `m = k_eff` the band equals the
-        fitted `ICC(A,k)` bootstrap interval exactly (~1e-9); MC fit still MC (no regression);
-        deterministic/monotone/[0,1]; agrees with the MC band on an interior case (~0.02),
-        diverging at the boundary (#18); multilevel + incomplete-subject bootstrap bands project.
-        Roxygen updated. COVERAGE #14 → ✅.
-- **Cross-cutting DoD:** `air format` + `lintr::lint_package()` clean; installed-pkg check
-  `NOT_CRAN=true` green; `R CMD check --as-cran` 0/0/0; NEWS updated; `project/` (STATUS,
-  COVERAGE, MILESTONES status line) reconciled; ships on a `m18-*` branch via PR.
+  split); estimand-spec `M17-conflated-icc.md §6a` (Slice 2), `M4.5-d-study.md §7.2` (Slices 3/4).
+  Oracles (#1, no textbook worked example, as M8–M10/M15): O-IFML / O-conflated-incomplete /
+  O-IDS / O-Boot-DS — glmmTMB↔lme4 cross-engine <1e-4 + reduction to the shipped balanced/complete
+  case + seeded recovery; in `test-icc-fixed-multilevel.R`, `test-icc-multilevel.R`,
+  `test-d-study.R`.
 
 - Deferred out of M18 (record so not rediscovered): incomplete **nested** Designs 2/3 and
   **fixed-rater nested** (M19); ragged/fixed/multilevel **replicates** (M20); **SEM parity**
@@ -541,6 +509,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way
   via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge
   cases.
-- Status: **in review** — all four slices shipped + cross-cutting DoD done (NEWS, WORDLIST,
-  installed-pkg `R CMD check --as-cran` 0/0/0, `project/` reconciled); **PR #23 open**, awaiting
-  CI + maintainer merge. 779 tests pass, lint/`air` clean. (Compress to the summary form on merge.)
+- Status: **done** (Slices 1–4 + cross-cutting DoD; merged via PR #23 at 7dffbb2; full CI matrix
+  green incl. Windows and R-devel, 779 tests). Incomplete fixed-rater crossed multilevel,
+  incomplete conflated ICC, incomplete subject-level `d_study()`, and bootstrap-projected
+  `d_study()` bands all ship; `R CMD check --as-cran` 0/0/0. First milestone of the M18–M21 arc.
