@@ -510,11 +510,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         cross-engine glmmTMB≡lme4 <1e-4; tracks flat incomplete two-way agreement (~0.02) while
         staying visibly biased vs subject. Seeded generators. COVERAGE #8 → ✅. Suite 749 pass.
 - **Slice 3 — incomplete subject-level `d_study()` (COVERAGE #13)** — subject level only; cluster
-  level stays behind the 🟣 Wave-3 `ICC(c,k)` divisor (#18 bound).
-  - [ ] Narrow the incomplete-multilevel `d_study()` abort (`R/d-study.R` ~L105) for the subject
-        level; keep the cluster-level abort.
-  - [ ] Oracle: reduction → complete M17 §7 subject curve at observed `k` <1e-4; cross-engine;
-        seeded recovery; monotone/[0,1] invariants. COVERAGE #13 → ✅.
+  level stays behind the 🟣 Wave-3 `ICC(c,k)` divisor (#18 bound). **Done.**
+  - [x] Made the incomplete-multilevel `d_study()` abort level-aware (`R/d-study.R`): the subject
+        level projects (projection moves only the divisor `m`); the cluster level is dropped with
+        a one-time note (mirroring `icc()`'s cluster-on-incomplete posture) or aborts when it is
+        the only requested level.
+  - [x] Oracle O-IDS (`test-d-study.R`): reduction → fitted subject `ICC(A,k)` at `m = k_eff`
+        (exact); independent lme4 cross-engine <1e-4; monotone/[0,1] with boundary-aware band;
+        cluster-only incomplete fit aborts. Roxygen + M4.5 §7.2 spec updated. COVERAGE #13 → ✅.
+        Suite 758 pass.
 - **Slice 4 — bootstrap-projected `d_study()` bands (COVERAGE #14)** — the M16 deferral, package-
   wide (not just incomplete); reproject each `simulate_refit` replicate across `k`.
   - [ ] Band from bootstrap replicates when the fit's `ci_method == "bootstrap"`; MC path unchanged.
@@ -531,6 +535,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way
   via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge
   cases.
-- Status: **in progress** — planning done (ADR-028); **Slices 1–2 shipped** (incomplete
-  fixed-rater crossed; incomplete conflated ICC — oracle held, no reclassification; 749 tests
-  pass, lint/`air` clean). Slice 3 (incomplete subject-level `d_study()`) next. No PR yet.
+- Status: **in progress** — planning done (ADR-028); **Slices 1–3 shipped** (incomplete
+  fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`; 758 tests
+  pass, lint/`air` clean). Slice 4 (bootstrap-projected `d_study()` bands) next. No PR yet.

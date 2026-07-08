@@ -9,19 +9,19 @@
   by the Wave-3 `ICC(c,k)` divisor); **(4)** bootstrap-projected `d_study()` bands (M16 deferral,
   package-wide — split out of ADR-027's bundled Slice 3). Completeness, not new estimand work;
   no new dependency. M0–M17 shipped; package at v0.1.0.
-- Active task: **M18 Slice 3 — incomplete subject-level `d_study()`** (COVERAGE #13) next.
-  **Slices 1–2 done:** (1) incomplete fixed-rater crossed — lifted the ragged `raters == "fixed"`
-  abort, shipped fit + M3 `k_eff` unchanged; O-IFML oracles in `test-icc-fixed-multilevel.R`.
-  (2) incomplete conflated ICC — the well-posedness oracle held (Eq. 14 = flat two-way off the
-  multilevel fit, same `k_eff`), so it ships; O-conflated/incomplete oracles in
-  `test-icc-multilevel.R`; spec §6a extended. 749 tests pass, lint/`air` clean. On branch
-  `m18-crossed-incomplete` (Slice 1 committed at 82220bb; Slice 2 uncommitted).
+- Active task: **M18 Slice 4 — bootstrap-projected `d_study()` bands** (COVERAGE #14, the M16
+  deferral; package-wide, not just incomplete) next. **Slices 1–3 done:** (1) incomplete
+  fixed-rater crossed (O-IFML, `test-icc-fixed-multilevel.R`); (2) incomplete conflated ICC —
+  oracle held, ships (O-conflated/incomplete, `test-icc-multilevel.R`; spec §6a); (3) incomplete
+  subject-level `d_study()` — level-aware abort, subject projects / cluster dropped-with-note
+  (O-IDS, `test-d-study.R`). 758 tests pass, lint/`air` clean. On branch `m18-crossed-incomplete`
+  (Slices 1–2 committed 82220bb/86c5b97; Slice 3 uncommitted).
 - Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
   `main` at a915256
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped Slices 1–2**
-  (incomplete fixed-rater crossed; incomplete conflated ICC — attempt-then-degrade resolved to
-  ship). 749 tests green, lint/`air` clean.
+- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped Slices 1–3**
+  (incomplete fixed-rater crossed; incomplete conflated ICC; incomplete subject-level
+  `d_study()`). 758 tests green, lint/`air` clean. Slice 4 (bootstrap `d_study` bands) next.
 
 ## Where we are
 

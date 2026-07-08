@@ -86,8 +86,10 @@ rater projection (ten Hove et al. 2022): \code{m} is the number of raters per cl
 and the cluster-level coefficient does \strong{not} average over subjects, so there is
 no "subjects per cluster" projection — that is a sample-size question, not a
 reliability one. Nested designs project the subject level only. The conflated
-diagnostic (\code{level = "conflated"}) is not projected. Multilevel projection covers
-\strong{complete} data only; incomplete multilevel \code{d_study()} aborts.
+diagnostic (\code{level = "conflated"}) is not projected. On \strong{incomplete} data the
+\strong{subject} level projects (projection moves only the divisor); the \strong{cluster}
+level is dropped with a note, because projecting \code{m} raters is the averaged
+\code{ICC(c,k)} case whose ragged divisor is an open modeling question (M9).
 }
 
 \examples{

@@ -382,10 +382,12 @@ test_that("multilevel consistency projection is Spearman-Brown of ICC(C,1) per l
 test_that("multilevel d_study scope guards (#5, #8)", {
   skip_if_not_installed("glmmTMB")
   d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
-  # Incomplete multilevel projection is deferred (open ICC(c,k) divisor).
+  # Incomplete multilevel: the subject level now projects (M18 Slice 3); the cluster
+  # level is dropped with a note (its ragged ICC(c,k) divisor is the open M9 question).
   d_missing <- d[!(d$cluster == "1" & d$rater == "1"), ]
   fit_inc <- icc(d_missing, score, subject, rater, cluster = cluster, seed = 1)
-  expect_error(d_study(fit_inc, m = 1:4), class = "intraclass_unsupported")
+  ds_inc <- suppressMessages(d_study(fit_inc, m = 1:4))
+  expect_setequal(unique(ds_inc$level), "subject")
   # A conflated-only fit has nothing to project.
   fit_conf <- icc(
     d,
@@ -448,4 +450,124 @@ test_that("multilevel d_study print/tidy/format carry the level column", {
   expect_setequal(unique(td$level), c("subject", "cluster"))
   g <- glance(ds)
   expect_identical(nrow(g), 1L)
+})
+
+# Oracle O-IDS: INCOMPLETE subject-level multilevel d_study(), M18 Slice 3 --------
+#
+# M18 Slice 3 (ADR-028) lifts the balanced-only d_study() guard for the SUBJECT level:
+# projection moves only the averaging divisor `m`, and the subject estimand's error
+# divisor is `m` itself (not k_eff), so the ragged M9 five-component fit's components
+# project unchanged. The CLUSTER level stays bounded -- projecting `m` raters is the
+# averaged ICC(c,k) case, whose per-cluster divisor under imbalance is the open M9
+# question (spec M4.5 §7.2, M9 §9) -- so it is dropped with a note (or aborts when it
+# is the only level). Oracles: reduction to the fitted subject ICC(A,k) at m = k_eff,
+# an independent lme4 fit, and the monotone/[0,1] invariants, all on ragged data.
+
+ragged_ds <- function(d, prop, seed) {
+  set.seed(seed)
+  d[-sample(nrow(d), round(prop * nrow(d))), , drop = FALSE]
+}
+
+test_that("O-IDS/reduction: ragged subject projection at m = k_eff equals fitted ICC(A,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  expect_false(isTRUE(fit$design$balanced))
+  keff <- fit$k_eff
+  ds <- suppressMessages(d_study(fit, m = keff))
+  proj <- ds$estimate[ds$level == "subject"]
+  fitted_ak <- fit$estimates$estimate[
+    fit$estimates$index == "ICC(A,k)" & fit$estimates$level == "subject"
+  ]
+  expect_equal(proj, fitted_ak, tolerance = 1e-6)
+})
+
+test_that("O-IDS: ragged subject curve projects, is monotone in [0, 1], cluster dropped", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  # The default subject+cluster fit drops the cluster level with a one-time note. The
+  # note uses .frequency = "once", so force verbose verbosity to observe it regardless
+  # of test ordering.
+  withr::local_options(rlib_message_verbosity = "verbose")
+  expect_message(
+    ds <- d_study(fit, m = 1:10),
+    "subject level only"
+  )
+  expect_setequal(unique(ds$level), "subject")
+  ds <- ds[order(ds$m), ]
+  expect_true(all(ds$estimate >= 0 & ds$estimate <= 1))
+  expect_true(all(diff(ds$estimate) >= -1e-9))
+  # A boundary-aware interval is present at every m (never a bare point, #3).
+  expect_true(all(is.finite(ds$conf.low) & is.finite(ds$conf.high)))
+})
+
+test_that("O-IDS/lme4: ragged subject projection matches an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  dg <- suppressMessages(
+    d_study(
+      icc(d, score, subject, rater, cluster = cluster, seed = 1),
+      m = c(3, 8)
+    )
+  )
+  dl <- suppressMessages(suppressWarnings(
+    d_study(
+      icc(
+        d,
+        score,
+        subject,
+        rater,
+        cluster = cluster,
+        engine = "lme4",
+        seed = 1
+      ),
+      m = c(3, 8)
+    )
+  ))
+  expect_equal(
+    dg$estimate[dg$level == "subject"],
+    dl$estimate[dl$level == "subject"],
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-IDS: cluster-only incomplete fit refuses projection (bounded, #5)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  fit_c <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    seed = 1
+  )
+  expect_error(d_study(fit_c, m = 1:4), class = "intraclass_unsupported")
 })

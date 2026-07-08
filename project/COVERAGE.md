@@ -159,7 +159,7 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 | two-way (random) rater-count projection | ✅ |
 | multilevel rater-count projection, subject + cluster levels | ✅ (M17 Slice 2) |
 | fixed-rater **absolute-agreement** projection | ⚫ **By design** — refused (same reason as ①: no "average of *m* fresh raters" for a fixed population). |
-| **incomplete-data** multilevel projection | 🔵 **Not yet → M18 Slice 3 (subject level only)** — the subject level is definable on ragged data; the cluster level stays bounded by the 🟣 Wave-3 `ICC(c,k)` incomplete divisor, so M18 does subject-level only (ADR-026 / M17 deferral, ADR-027). |
+| **incomplete-data** multilevel projection | ✅ subject level (M18 Slice 3); cluster level dropped-with-note (bounded by the 🟣 Wave-3 `ICC(c,k)` incomplete divisor). Projection moves only the divisor `m`, so the ragged subject fit projects unchanged (reduction to `ICC(A,k)` at `m = k_eff`; cross-engine; monotone/[0,1]). |
 | **subjects-per-cluster** ("three-facet") projection | ⚫ **By design (not a d_study facet)** — ten Hove Eq. 13's cluster ICC has no subject facet; the subjects-per-cluster count is an efficiency/sample-size dimension, folded into the parked *design/power helpers* item, not a reliability projection ([[cluster-icc-no-subject-facet]], ADR-026 amendment). |
 | bootstrap-projected `d_study()` bands | 🔵 **Not yet → M18 Slice 3** — the reliability band reuses shared MC draws across *k*; a bootstrap version reprojects each refit (M16 deferral, ADR-025). |
 

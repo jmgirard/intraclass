@@ -50,8 +50,10 @@
 #' and the cluster-level coefficient does **not** average over subjects, so there is
 #' no "subjects per cluster" projection — that is a sample-size question, not a
 #' reliability one. Nested designs project the subject level only. The conflated
-#' diagnostic (`level = "conflated"`) is not projected. Multilevel projection covers
-#' **complete** data only; incomplete multilevel `d_study()` aborts.
+#' diagnostic (`level = "conflated"`) is not projected. On **incomplete** data the
+#' **subject** level projects (projection moves only the divisor); the **cluster**
+#' level is dropped with a note, because projecting `m` raters is the averaged
+#' `ICC(c,k)` case whose ragged divisor is an open modeling question (M9).
 #'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
@@ -102,17 +104,40 @@ d_study <- function(
   # cluster-level ICC(c,k) divisor under imbalance is the open M9 question (§7.2).
   proj_levels <- NULL
   if (multilevel) {
-    if (!isTRUE(x$design$balanced)) {
-      abort_unsupported(c(
-        "D-study projection is not supported for incomplete multilevel designs.",
-        i = "The cluster-level ICC(c,k) divisor under imbalance is an open modeling \\
-             question (M9); multilevel projection covers complete data only.",
-        i = "Provide complete, balanced multilevel data."
-      ))
-    }
     # The conflated diagnostic (Eq. 14, M17 Slice 1) is a bias contrast, not a
     # decision-study target, so it is not projected (spec M4.5 §7.2).
     proj_levels <- setdiff(x$design$levels, "conflated")
+    # Incomplete multilevel projection (M18 Slice 3, ADR-028): the SUBJECT level
+    # projects on ragged data -- projection moves only the averaging divisor `m`, and
+    # the subject estimand's error divisor IS `m` (not `k_eff`), so the ragged-fit
+    # components suffice and the M9 subject-level identifiability already held at fit
+    # time. The CLUSTER level stays bounded: projecting `m` raters is precisely the
+    # averaged ICC(c,k) case, whose per-cluster effective-rater divisor under imbalance
+    # is the open M9 question (spec M4.5 §7.2, M9 §9). Drop it with a note (mirroring
+    # icc()'s cluster-on-incomplete posture) and abort only if nothing is left.
+    if (!isTRUE(x$design$balanced) && "cluster" %in% proj_levels) {
+      if (!("subject" %in% proj_levels)) {
+        abort_unsupported(c(
+          "Cluster-level D-study projection is not supported on incomplete data.",
+          i = "The per-cluster effective-rater divisor behind a ragged cluster mean \\
+               is an open modeling question (M9); only the subject level projects on \\
+               incomplete data.",
+          i = "Refit with {.code level = \"subject\"} for an incomplete multilevel \\
+               D-study."
+        ))
+      }
+      cli::cli_inform(
+        c(
+          i = "Cluster-level D-study projection is not available on incomplete data \\
+               (the ragged ICC(c,k) divisor is unresolved); projecting the subject \\
+               level only.",
+          i = "Subject-level projection is unaffected."
+        ),
+        .frequency = "once",
+        .frequency_id = "intraclass_dstudy_cluster_incomplete"
+      )
+      proj_levels <- setdiff(proj_levels, "cluster")
+    }
     if (length(proj_levels) == 0L) {
       abort_unsupported(c(
         "The conflated ICC is a diagnostic contrast and is not projected.",
