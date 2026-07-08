@@ -207,7 +207,13 @@ and single/average choices above apply at each level.
 
 The design is \strong{inferred from the data} (ten Hove et al. 2022, Table 2). If
 raters are crossed with clusters (each rater rates in every cluster) the
-five-component model above is used (Design 1). If raters are \strong{nested in
+five-component model above is used (Design 1). Because the design is read from
+the rater \strong{labels}, a rater label that appears in more than one cluster is
+taken to be the \emph{same} rater (crossed). If your raters are cluster-specific but
+share labels (e.g. "rater 1"/"rater 2" reused in every cluster -- a nested
+design), give them cluster-unique labels or declare \code{design = "nested_in_clusters"};
+otherwise the design is treated as crossed and \code{icc()} prints a one-time note of
+that assumption. If raters are \strong{nested in
 clusters} (each cluster has its own raters; Design 2) a four-component model is
 fit, with the rater variance carried by the nested rater-within-cluster term. If
 raters are \strong{nested in subjects} (each subject has its own raters; Design 3) the
@@ -227,7 +233,10 @@ rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
 declare it with \code{design} (above). On incomplete data the \strong{cluster} level is
 reported as the single-rater \code{ICC(c,1)} (when raters bridge clusters); the averaged
 cluster-level \code{ICC(c,k)} on incomplete data is not yet supported (its effective
-number of raters per cluster is still being validated). \strong{Fixed raters}
+number of raters per cluster is still being validated). If an averaged unit is
+requested for the cluster level on incomplete data, that row is dropped (with a
+message) rather than failing the whole call, so the subject-level averages and the
+single-rater cluster ICC are still returned. \strong{Fixed raters}
 (\code{raters = "fixed"}) are supported for the crossed design at the \strong{subject} level
 on balanced, complete data: the rater main effect becomes the finite-population
 variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical

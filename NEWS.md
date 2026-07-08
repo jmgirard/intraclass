@@ -58,3 +58,25 @@ alternate engines, and seeded simulations.
 * Vignettes: *Getting started*, *Choosing an ICC* (the decision framework, with a
   decision-tree diagram), and *Advanced* (incomplete and multilevel designs, the
   estimation engines, the plots, and `choose_icc()`).
+
+## Robustness (pre-release code review)
+
+* `d_study()` now projects a **one-way** fit (a Spearman-Brown projection of `ICC(1)`)
+  instead of erroring.
+* A fixed-rater multilevel call (`icc(..., cluster =, raters = "fixed")`) now works with
+  the default `level`, dropping the deferred cluster level to the subject level (as the
+  nested-design path already did) rather than requiring an explicit `level = "subject"`.
+* On incomplete crossed multilevel data, requesting an averaged cluster-level `ICC(c,k)`
+  now drops just that (unsupported) row with a message and returns the subject-level and
+  single-rater cluster results, instead of failing the whole call.
+* An incomplete crossed multilevel design in which every subject is rated only once is
+  now reported as unidentified rather than returning a spurious `ICC = 0.5`.
+* `icc()` prints a one-time note when a multilevel design is inferred to be crossed from
+  shared rater labels, so a nested design with reused, cluster-relative labels is not
+  silently treated as crossed.
+* `mc_samples` and `seed` are validated with clear, classed errors; invalid values
+  (e.g. `mc_samples = 0`/`1`, a fractional or non-numeric value) no longer produce a
+  silent `NA` interval or a bare base-R error.
+* A degenerate fit with no variance in any component now fails loudly instead of
+  returning a `NaN` estimate, and an unstable fit whose Monte-Carlo draws overflow is
+  reported rather than silently truncated.

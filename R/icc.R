@@ -56,7 +56,13 @@
 #'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
 #' raters are crossed with clusters (each rater rates in every cluster) the
-#' five-component model above is used (Design 1). If raters are **nested in
+#' five-component model above is used (Design 1). Because the design is read from
+#' the rater **labels**, a rater label that appears in more than one cluster is
+#' taken to be the *same* rater (crossed). If your raters are cluster-specific but
+#' share labels (e.g. "rater 1"/"rater 2" reused in every cluster -- a nested
+#' design), give them cluster-unique labels or declare `design = "nested_in_clusters"`;
+#' otherwise the design is treated as crossed and `icc()` prints a one-time note of
+#' that assumption. If raters are **nested in
 #' clusters** (each cluster has its own raters; Design 2) a four-component model is
 #' fit, with the rater variance carried by the nested rater-within-cluster term. If
 #' raters are **nested in subjects** (each subject has its own raters; Design 3) the
@@ -76,7 +82,10 @@
 #' declare it with `design` (above). On incomplete data the **cluster** level is
 #' reported as the single-rater `ICC(c,1)` (when raters bridge clusters); the averaged
 #' cluster-level `ICC(c,k)` on incomplete data is not yet supported (its effective
-#' number of raters per cluster is still being validated). **Fixed raters**
+#' number of raters per cluster is still being validated). If an averaged unit is
+#' requested for the cluster level on incomplete data, that row is dropped (with a
+#' message) rather than failing the whole call, so the subject-level averages and the
+#' single-rater cluster ICC are still returned. **Fixed raters**
 #' (`raters = "fixed"`) are supported for the crossed design at the **subject** level
 #' on balanced, complete data: the rater main effect becomes the finite-population
 #' variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
@@ -225,6 +234,8 @@ icc <- function(
   type <- validate_choice(type, c("agreement", "consistency"), "type")
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
+  mc_samples <- validate_mc_samples(mc_samples)
+  seed <- validate_seed(seed)
 
   # A `cluster` column switches on the multilevel path (subjects nested in
   # clusters, raters crossed -- ten Hove et al. 2022 Design 1; estimand-spec M5).
@@ -431,7 +442,7 @@ icc <- function(
         i = "Use {.code raters = \"random\"}, or cross the raters with clusters."
       ))
     }
-    if ("cluster" %in% level) {
+    if (!("subject" %in% level)) {
       abort_unsupported(c(
         "Fixed-rater multilevel ICCs are available at the subject level only.",
         i = "The cluster-level fixed-rater estimand is planned for a later \\
@@ -439,6 +450,12 @@ icc <- function(
         i = "Use {.code level = \"subject\"} with {.code raters = \"fixed\"}."
       ))
     }
+    # The default `level` includes "cluster", whose fixed-rater estimand is
+    # deferred; drop it and report the subject level so the natural call
+    # `icc(..., raters = "fixed")` works (mirrors the nested-design branch below,
+    # which drops "cluster" the same way). An explicit cluster-only request
+    # aborted just above.
+    level <- "subject"
   }
   if (multilevel && ml_design != "crossed") {
     if (!("subject" %in% level)) {
@@ -561,6 +578,20 @@ icc <- function(
                shared ratings."
         ))
       }
+      # within_cluster_connected is satisfied by a single-rater "star" cluster
+      # (one rater rating several subjects once each), which is nonetheless
+      # connected. Separating sigma^2_{s:c} from residual ALSO needs at least one
+      # subject rated more than once; when every subject is rated exactly once the
+      # two are confounded and the fit returns a spurious ICC = 0.5, so gate every
+      # subject-level coefficient here rather than report it (spec M9 §4b; #5/#18).
+      if (all(as.integer(table(df$subject)) < 2L)) {
+        abort_unidentified(c(
+          "The subject and residual variances cannot be separated when every \\
+           subject is rated only once.",
+          i = "At least one subject must be rated by 2 or more raters for a \\
+               subject-level interrater ICC to be identified."
+        ))
+      }
       # sigma^2_r (rater main effect -- in the AGREEMENT error, spec §3a) separates
       # from sigma^2_cr only if raters bridge clusters. When they do not, the design
       # is effectively rater-nested (Design 2) for agreement; consistency (error =
@@ -593,16 +624,37 @@ icc <- function(
                  clusters."
           ))
         }
-        if (!all(vapply(unit, identical, logical(1), "single"))) {
-          abort_unsupported(c(
-            "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not \\
-             supported yet.",
-            i = "The effective number of raters behind a ragged cluster mean is a \\
-                 modeling choice still being validated; on incomplete data only the \\
-                 single-rater {.code unit = \"single\"} cluster ICC is available.",
-            i = "Use {.code unit = \"single\"} for the cluster level, or \\
-                 {.code level = \"subject\"} for the average."
-          ))
+        is_single <- vapply(unit, identical, logical(1), "single")
+        # Averaged cluster-level ICC(c,k) under imbalance is unsupported, but the
+        # single-rater ICC(c,1) and the subject-level rows are well-defined. Rather
+        # than reject the whole call (an all-or-nothing refusal when a partial
+        # result is available), drop only the averaged cluster rows below (grid
+        # build) and note it once. Abort only when nothing is computable: the
+        # cluster level is the sole level requested AND no single unit was asked for.
+        if (!all(is_single)) {
+          if (!("subject" %in% level) && !any(is_single)) {
+            abort_unsupported(c(
+              "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not \\
+               supported yet.",
+              i = "The effective number of raters behind a ragged cluster mean is \\
+                   a modeling choice still being validated; on incomplete data \\
+                   only the single-rater {.code unit = \"single\"} cluster ICC is \\
+                   available.",
+              i = "Use {.code unit = \"single\"} for the cluster level, or \\
+                   {.code level = \"subject\"} for the average."
+            ))
+          }
+          cli::cli_inform(
+            c(
+              i = "Averaged cluster-level ICCs (ICC(c,k)) are not available on \\
+                   incomplete data; reporting the single-rater cluster ICC(c,1) \\
+                   only. Subject-level averages are unaffected.",
+              i = "The effective rater count behind a ragged cluster mean is a \\
+                   modeling choice still being validated."
+            ),
+            .frequency = "once",
+            .frequency_id = "intraclass_icc_ck_incomplete"
+          )
         }
       }
     }
@@ -715,7 +767,16 @@ icc <- function(
     # Design 2, `level` is already restricted to "subject" (nested designs).
     unlist(
       lapply(level, function(lv) {
-        lapply(unit, function(u) {
+        # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
+        # effective per-cluster rater count is unresolved); keep only the
+        # single-rater cluster ICC(c,1). The user was informed above. Subject-level
+        # units, and every unit on balanced data, are unaffected.
+        units_lv <- if (lv == "cluster" && !balanced) {
+          Filter(function(u) identical(u, "single"), unit)
+        } else {
+          unit
+        }
+        lapply(units_lv, function(u) {
           icc_estimand(
             type = type,
             unit = u,
@@ -744,6 +805,18 @@ icc <- function(
     function(e) icc_point(engine_fit$components, e),
     numeric(1)
   )
+  # icc_point is signal / (signal + error); it is NaN only when the signal AND
+  # every error component are estimated at exactly zero (a degenerate boundary with
+  # no variance anywhere), which glmmTMB can hit on pathological data. Report it
+  # loudly rather than return a silent NaN estimate (PRINCIPLES.md #5).
+  if (anyNA(points)) {
+    abort_unidentified(c(
+      "The ICC is undefined: the signal and every error variance component were \\
+       estimated at exactly zero.",
+      i = "This degenerate boundary (no between- or within-group variance) leaves \\
+           the variance ratio 0/0; inspect the data or the fitted model."
+    ))
+  }
   intervals <- mc_ci(
     engine_fit,
     estimands,
@@ -843,6 +916,55 @@ validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
     )
   }
   value
+}
+
+# Validate `mc_samples`: a single whole number >= 2. Left unvalidated, a 0 yields a
+# silent all-NA interval, a 1 a zero-width interval with NA std.error, and a
+# fractional value silently recycles the draw matrix -- all violating fail-loudly
+# (PRINCIPLES.md #5) and the classed-error contract (#8). The floor of 2 is the
+# minimum for which a two-sided quantile and a standard deviation are defined (a
+# meaningful interval needs far more; the default is 10000).
+validate_mc_samples <- function(mc_samples, call = rlang::caller_env()) {
+  if (
+    !is.numeric(mc_samples) ||
+      length(mc_samples) != 1L ||
+      !is.finite(mc_samples) ||
+      mc_samples < 2 ||
+      mc_samples != round(mc_samples)
+  ) {
+    abort_intraclass(
+      c(
+        "{.arg mc_samples} must be a single whole number >= 2.",
+        x = "Supplied: {.val {mc_samples}}."
+      ),
+      call = call
+    )
+  }
+  as.integer(mc_samples)
+}
+
+# Validate `seed`: NULL (use the ambient RNG) or a single whole number. Left
+# unvalidated, a non-integer or string seed throws a bare base-R error from
+# set.seed() rather than a classed intraclass condition (PRINCIPLES.md #8).
+validate_seed <- function(seed, call = rlang::caller_env()) {
+  if (is.null(seed)) {
+    return(NULL)
+  }
+  if (
+    !is.numeric(seed) ||
+      length(seed) != 1L ||
+      !is.finite(seed) ||
+      seed != round(seed)
+  ) {
+    abort_intraclass(
+      c(
+        "{.arg seed} must be {.code NULL} or a single whole number.",
+        x = "Supplied: {.val {seed}}."
+      ),
+      call = call
+    )
+  }
+  as.integer(seed)
 }
 
 # Validate the multilevel `level` argument: the default (both) or a subset of

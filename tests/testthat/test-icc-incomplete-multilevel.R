@@ -430,14 +430,15 @@ test_that("O-IML/reduction: complete data reproduces M5 at BOTH levels", {
   )
 })
 
-test_that("cluster-level ICC(c,k) on incomplete data is deferred (loud abort)", {
+test_that("cluster-level ICC(c,k) on incomplete data is dropped, not all-or-nothing (#9)", {
   skip_if_not_installed("glmmTMB")
   d <- ragged(
     sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
     prop = 0.2,
     seed = 9
   )
-  # The average divisor is deferred; the single-rater cluster ICC is supported.
+  # Cluster level ONLY + averaged unit ONLY: nothing is computable -> loud abort
+  # (the averaged cluster divisor under imbalance is deferred, spec M9 §3b).
   expect_error(
     icc(
       d,
@@ -451,12 +452,21 @@ test_that("cluster-level ICC(c,k) on incomplete data is deferred (loud abort)", 
     ),
     class = "intraclass_unsupported"
   )
-  # A default call (both levels, both units) hits the same deferral via the cluster
-  # average.
-  expect_error(
-    icc(d, score, subject, rater, cluster = cluster, seed = 1),
-    class = "intraclass_unsupported"
+  # Default call (both levels, both units): rather than reject the whole call, the
+  # averaged CLUSTER row is dropped (with a one-time message) while the subject-level
+  # rows (incl. the average) and the single-rater cluster ICC(c,1) are returned -- a
+  # partial result, not an abort (#9). The message uses .frequency = "once", so force
+  # verbose verbosity to observe it regardless of test ordering.
+  withr::local_options(rlib_message_verbosity = "verbose")
+  expect_message(
+    fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1),
+    "Averaged cluster-level"
   )
+  expect_s3_class(fit, "icc")
+  e <- fit$estimates
+  # Subject level keeps both single and average; cluster level keeps only single.
+  expect_setequal(e$index[e$level == "subject"], c("ICC(A,1)", "ICC(A,k)"))
+  expect_identical(e$index[e$level == "cluster"], "ICC(A,1)")
 })
 
 test_that("cluster-level IRR aborts to subject when raters do not bridge clusters", {

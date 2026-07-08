@@ -64,6 +64,25 @@ summarize_design <- function(df) {
 detect_multilevel_design <- function(df, call = rlang::caller_env()) {
   clusters_per_rater <- rowSums(table(df$rater, df$cluster) > 0L)
   if (all(clusters_per_rater > 1L)) {
+    # Every rater appears in more than one cluster, so raters are read as CROSSED
+    # with clusters (Design 1) -- the same rater label in different clusters is
+    # taken to be the same person. That is inferred purely from the labels: a nested
+    # design carrying reused, cluster-relative rater labels ("rater 1"/"rater 2" in
+    # every cluster -- a very common convention) is indistinguishable here and would
+    # otherwise be treated as crossed silently, inflating or deflating the ICC.
+    # Subjects get a hard cross-cluster-reuse guard in icc(); raters cannot (shared
+    # raters ARE the crossed design), so surface the assumption once instead. Only
+    # reached during auto-detection (an explicit `design =` skips this function).
+    cli::cli_inform(
+      c(
+        i = "Treating raters with the same label in different clusters as the same \\
+             raters (crossed with clusters, Design 1).",
+        i = "If each cluster has its own raters, give them cluster-unique labels or \\
+             pass {.code design = \"nested_in_clusters\"}."
+      ),
+      .frequency = "once",
+      .frequency_id = "intraclass_crossed_ml_labels"
+    )
     return("crossed")
   }
   if (any(clusters_per_rater > 1L)) {
@@ -95,7 +114,10 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
       i = "Within a cluster some raters rate a single subject while others rate \\
            several, which is not one of the supported multilevel designs.",
       i = "Design 2 has each rater rate every subject in its cluster; Design 3 has \\
-           each rater rate a single subject."
+           each rater rate a single subject.",
+      i = "This can also be an {.emph unbalanced} nested design (e.g. a cluster with \\
+           a single subject); incomplete/unbalanced nested multilevel data is not \\
+           supported yet -- provide a balanced design."
     ),
     call = call
   )

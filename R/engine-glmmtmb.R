@@ -377,7 +377,34 @@ rater_mean_contrast <- function(k) {
 # J/k` removes the grand mean; `bias` subtracts the mean sampling variance of the
 # centered means. On BALANCED data the corrected theta^2_r equals the random-fit
 # sigma^2_r (M3 §6, verified on SF; M10's balanced fixed == random reduction).
-theta2r_fixed <- function(beta, vbeta, k) {
+#
+# Note on the interval (deliberate, not a defect): the Monte-Carlo sampler recomputes
+# `max(0, raw_draws - bias)` each draw with this same constant `bias`, but the drawn
+# rater means carry their own sampling variance, so E[raw_draws] = raw + bias and the
+# theta^2_r DRAWS center on `raw`, i.e. `bias` above the bias-corrected point. The
+# fixed-rater point estimate is therefore not the exact median of its own interval
+# (unlike the log-SD components). This is the percentile bootstrap faithfully
+# reproducing the estimator's bias correction; coverage of the true theta^2_r stays
+# nominal (M3 O6 coverage sim: 0.950/0.947), and `bias` is small relative to the
+# sampling SE, so the effect is minor. Recentering would need a pivotal interval and
+# its own oracle re-validation (a separate decision), so it is left as documented.
+theta2r_fixed <- function(beta, vbeta, k, call = rlang::caller_env()) {
+  # Defensive: the k x k contrast needs exactly k fixed-effect coefficients
+  # (intercept + k-1 rater contrasts). icc() droplevels() its factors, so a
+  # rater-count/beta mismatch (e.g. an unused rater level) is unreachable via the
+  # public API, but guard it as a classed error rather than a bare non-conformable
+  # crash if an internal caller ever violates it (PRINCIPLES.md #8).
+  if (length(beta) != k) {
+    abort_intraclass(
+      c(
+        "The fixed-effect coefficient vector does not match the rater count.",
+        i = "Expected {.val {k}} coefficients (intercept + {.val {k - 1}} rater \\
+             contrasts) but received {.val {length(beta)}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
   vbeta <- as.matrix(vbeta)
   contrast <- rater_mean_contrast(k)
   center <- diag(k) - matrix(1 / k, k, k)

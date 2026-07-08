@@ -36,6 +36,14 @@ with_rng_seed <- function(seed, code) {
 rmvn <- function(n, mu, covariance) {
   p <- length(mu)
   eig <- eigen(covariance, symmetric = TRUE)
+  # Negative eigenvalues are clamped to 0 rather than treated as an error. They
+  # arise not only from boundary roundoff but also from LEGITIMATELY rank-deficient
+  # fits -- e.g. a confounded crossed design where sigma^2_r and sigma^2_cr alias
+  # (the covariance then carries a genuinely large negative eigenvalue). Clamping
+  # zeroes that unestimable direction; the requested estimand is protected upstream
+  # by the identifiability guards in icc() (which reject a design where the aliased
+  # direction feeds a requested coefficient), so a naive "indefinite -> abort" here
+  # would wrongly reject correct consistency/subject-level results (ADR-003).
   values <- pmax(eig$values, 0)
   factor <- eig$vectors %*% diag(sqrt(values), p, p)
   draws <- mu + factor %*% matrix(stats::rnorm(p * n), nrow = p)
@@ -65,11 +73,34 @@ mc_components <- function(mc, mc_samples = 10000L, seed = NULL) {
 
 # Reduce a set of drawn components to a two-sided quantile interval + SD for one
 # estimand. Non-finite draws (e.g. a degenerate covariance direction) are dropped.
-mc_interval <- function(components, estimand, conf_level = 0.95) {
+mc_interval <- function(
+  components,
+  estimand,
+  conf_level = 0.95,
+  call = rlang::caller_env()
+) {
   alpha <- 1 - conf_level
   probs <- c(alpha / 2, 1 - alpha / 2)
   vals <- icc_point(components, estimand)
-  vals <- vals[is.finite(vals)]
+  finite <- is.finite(vals)
+  # Non-finite draws arise only when a variance component overflows to Inf (an
+  # astronomically large fitted SD). A handful is harmless roundoff at the tail;
+  # a material fraction means an unstable fit, and because the overflow is
+  # one-sided (upper tail), silently dropping them would bias the interval down --
+  # so fail loudly (PRINCIPLES.md #5) instead of truncating.
+  if (mean(!finite) > 0.01) {
+    abort_intraclass(
+      c(
+        "The Monte-Carlo interval could not be computed: \\
+         {.val {round(100 * mean(!finite))}}% of draws were non-finite.",
+        i = "A variance component overflowed, which indicates an unstable fit.",
+        i = "Refit with {.code engine = \"glmmTMB\"} or inspect the model."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+  vals <- vals[finite]
   q <- stats::quantile(vals, probs, names = FALSE)
   list(
     conf.low = q[[1]],
