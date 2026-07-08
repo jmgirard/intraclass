@@ -150,19 +150,19 @@ test_that("a fixed seed makes the bootstrap interval reproducible (#12)", {
   expect_identical(.Random.seed, before)
 })
 
-test_that("bootstrap aborts loudly on a design it does not yet cover", {
-  skip_if_not_installed("glmmTMB")
+test_that("bootstrap aborts loudly on an engine it does not cover", {
+  skip_if_not_installed("lavaan")
 
   d <- sf_ratings_long()
-  # The one-way engine fit carries no simulate_refit contract yet (Slice 1 covers
-  # the two-way random glmmTMB fit only); ask for it and fail loudly (#5).
+  # The lavaan SEM engine carries no simulate_refit contract (a parametric bootstrap
+  # of an SEM refit is out of scope, ROADMAP); ask for it and fail loudly (#5).
   expect_error(
     icc(
       d,
       score,
       subject,
       rater,
-      model = "oneway",
+      engine = "lavaan",
       ci_method = "bootstrap",
       boot_samples = 99L,
       seed = 1
@@ -268,4 +268,126 @@ test_that("bootstrap agrees across engines (lme4 bootMer vs glmmTMB) (O2)", {
   expect_equal(bs_lme4$estimate, bs_tmb$estimate, tolerance = 1e-4)
   expect_equal(bs_lme4$conf.low, bs_tmb$conf.low, tolerance = 0.05)
   expect_equal(bs_lme4$conf.high, bs_tmb$conf.high, tolerance = 0.05)
+})
+
+# Slice 3 -- rest of the fitted family + refit-failure discard policy -----------
+
+test_that("the refit-failure discard policy warns, then aborts (#5, #8)", {
+  set.seed(1)
+  est <- list(icc_estimand(
+    type = "agreement",
+    unit = "single",
+    raters = "random"
+  ))
+  # A stub engine whose simulate_refit returns a controlled (component x resample)
+  # matrix with `n_fail` all-NA (nonconvergent) columns -- exercises the policy
+  # deterministically, without needing a pathological real fit.
+  fake <- function(n_ok, n_fail) {
+    total <- n_ok + n_fail
+    mat <- matrix(
+      NA_real_,
+      nrow = 3L,
+      ncol = total,
+      dimnames = list(c("subject", "rater", "residual"), NULL)
+    )
+    if (n_ok > 0L) {
+      mat["subject", seq_len(n_ok)] <- stats::runif(n_ok, 1.5, 2.5)
+      mat["rater", seq_len(n_ok)] <- stats::runif(n_ok, 0.5, 1.5)
+      mat["residual", seq_len(n_ok)] <- stats::runif(n_ok, 0.8, 1.2)
+    }
+    list(simulate_refit = function(boot_samples, seed = NULL) mat)
+  }
+
+  # >10% dropouts -> classed warning, but an interval is still returned.
+  expect_warning(
+    res <- bootstrap_ci(fake(85L, 15L), est, boot_samples = 100L),
+    class = "intraclass_bootstrap_dropouts"
+  )
+  expect_true(is.finite(res[[1]]$conf.low))
+
+  # <50% converged -> loud abort pointing at Monte-Carlo.
+  expect_error(
+    suppressWarnings(bootstrap_ci(fake(40L, 60L), est, boot_samples = 100L)),
+    class = "intraclass_singular_fit"
+  )
+})
+
+test_that("bootstrap covers the multilevel design and agrees with MC (O2)", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(3)
+  nc <- 15L
+  ns <- 4L
+  nr <- 4L
+  ml <- expand.grid(
+    cl = factor(seq_len(nc)),
+    s = factor(seq_len(ns)),
+    rater = factor(seq_len(nr))
+  )
+  ml$subject <- factor(paste(ml$cl, ml$s, sep = "_"))
+  ml$cluster <- ml$cl
+  ml$score <- 10 +
+    stats::rnorm(nc, 0, 1.5)[as.integer(ml$cl)] +
+    stats::rnorm(nlevels(ml$subject), 0, 1)[as.integer(ml$subject)] +
+    stats::rnorm(nr, 0, 1)[as.integer(ml$rater)] +
+    stats::rnorm(nrow(ml), 0, 1)
+
+  mc <- tidy(icc(ml, score, subject, rater, cluster = cluster, seed = 1))
+  bs <- tidy(icc(
+    ml,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  ))
+
+  # Same fit -> the multilevel five-component extractor reproduces the point
+  # estimates exactly (the key correctness check for the ml_contract extractor).
+  expect_equal(bs$estimate, mc$estimate, tolerance = 1e-8)
+  # Well-formed intervals at every level.
+  expect_true(all(is.finite(bs$conf.low)))
+  expect_true(all(bs$conf.low <= bs$estimate))
+  expect_true(all(bs$estimate <= bs$conf.high))
+  # The subject-level interval sits in the same ballpark as MC. Absolute, not
+  # relative, agreement: the two methods genuinely diverge more here than in the
+  # two-way case (five components, few clusters), and cluster-level intervals
+  # diverge more still -- an honest property of the bootstrap, not tuned away
+  # (#1/#4). 199 resamples add tail noise on top.
+  sub <- bs$level == "subject"
+  expect_lt(max(abs(bs$conf.low[sub] - mc$conf.low[sub])), 0.1)
+  expect_lt(max(abs(bs$conf.high[sub] - mc$conf.high[sub])), 0.1)
+})
+
+test_that("bootstrap covers the fixed-rater design (theta^2_r per refit)", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(5)
+  n <- 30L
+  k <- 5L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  bs <- suppressWarnings(tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  )))
+  expect_true(all(is.finite(bs$conf.low)))
+  expect_true(all(bs$conf.low <= bs$estimate))
+  expect_true(all(bs$estimate <= bs$conf.high))
 })

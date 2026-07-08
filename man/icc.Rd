@@ -136,8 +136,10 @@ fitted parameter covariance on the engine's log scale (fast, boundary-aware).
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
-approximation but is far slower (a refit per resample); it is currently
-available for the two-way random design on the \code{"glmmTMB"} engine.}
+approximation but is far slower (a refit per resample). It is available for
+every design the \code{"glmmTMB"} and \code{"lme4"} engines fit (via \code{glmmTMB}'s
+\code{simulate()} + refit and \code{lme4::bootMer} respectively); the \code{"lavaan"} engine
+supports \code{"montecarlo"} only.}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}

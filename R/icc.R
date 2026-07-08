@@ -171,8 +171,10 @@
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
 #'   fitted model, refits, and takes percentile quantiles of the resampled
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
-#'   approximation but is far slower (a refit per resample); it is currently
-#'   available for the two-way random design on the `"glmmTMB"` engine.
+#'   approximation but is far slower (a refit per resample). It is available for
+#'   every design the `"glmmTMB"` and `"lme4"` engines fit (via `glmmTMB`'s
+#'   `simulate()` + refit and `lme4::bootMer` respectively); the `"lavaan"` engine
+#'   supports `"montecarlo"` only.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (default

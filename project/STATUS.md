@@ -7,20 +7,24 @@
   the variance boundary. M0–M15 all shipped; package at v0.1.0, submission-ready.
 - **Milestone: M16 — parametric-bootstrap `ci_method`** (ADR-025, in flight): a second
   interval method (`ci_method = "bootstrap"`), both engines via a `simulate_refit()`
-  contract. Scope pass + Slices 1–2 (glmmTMB + lme4, two-way random) done this session.
-- Active task: **M16 Slices 1–2 done** (S1 committed `b63c471`; S2 in working tree).
-  `ci_method = "bootstrap"` for the two-way random design on **both engines** via the
-  `simulate_refit()` contract — glmmTMB (`simulate()`+refit) and lme4 (`bootMer`). Oracles:
-  O1 coverage of known population ICC; O2 agreement with the MC interval (≤0.06) and
-  **cross-engine** lme4≈glmmTMB (≤0.05); reproducibility/RNG-hygiene; unsupported-design
-  abort; validation. Full suite 588 pass / 0 fail, lint + `air` clean. Next code action:
-  **Slice 3** — extend across the fitted design family (fixed-rater, multilevel) + harden
-  the refit-failure discard policy.
+  contract, covering every design they fit. Scope pass + all three slices + cross-cutting
+  DoD done this session; ready for the installed-pkg check and PR.
+- Active task: **M16 Slices 1–3 + cross-cutting DoD done** (S1 `b63c471`, S2 `9ebf5ad`
+  committed; S3 + DoD in working tree). `ci_method = "bootstrap"` now covers **every
+  design both mixed-model engines fit** — two-way random/fixed, one-way, and all
+  multilevel designs at both levels — via a shared `simulate_refit()` contract per engine
+  (glmmTMB `simulate()`+refit factory; lme4 `bootMer` factory), the component extractor
+  DRY-shared with each fit's point estimate. For fixed raters θ²_r is recomputed per
+  refit. Refit-failure discard policy hardened (classed warning >10%, abort <50%
+  converged) with a deterministic unit test. Cross-cutting DoD: roxygen, NEWS, and an
+  `advanced.Rmd` "Choosing a confidence-interval method" section all landed. Full suite
+  591 pass / 0 fail, lint + `air` clean. **Next: installed-pkg check (`NOT_CRAN=true`) then
+  PR off `m16-bootstrap-ci`.**
 - Last green CI: PR #19 (M15) full matrix green incl. Windows and R-devel; merged to
   `main` at b0dd492
 - Blockers: —
 - Updated: 2026-07-07 by main session (Opus) — non-Bayesian carryover sequencing recorded;
-  M16 (bootstrap `ci_method`) scope pass (ADR-025) + Slices 1–2 (glmmTMB + lme4) done
+  M16 (bootstrap `ci_method`) scope pass (ADR-025) + all 3 slices + cross-cutting DoD done
 
 ## Where we are
 
@@ -50,10 +54,11 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 `ci_method`, and the multi-`ci_method` dispatch seam the eventual Bayesian `"posterior"`
 method reuses. Chosen from the non-Bayesian carryovers as the lowest-estimand-risk item
 with the highest infra ROI. Scope pinned (both engines via a `simulate_refit()` contract,
-percentile interval, `d_study` stays MC-only). **Slices 1–2 done** — the two-way random
-design bootstraps on both glmmTMB (`simulate()`+refit) and lme4 (`bootMer`), oracle-tested
-incl. cross-engine agreement (S1 committed `b63c471`, S2 in working tree). Slice 3
-(design-family extension + refit-failure policy) remains.
+percentile interval, `d_study` stays MC-only). **All three slices + cross-cutting DoD
+done** — bootstrap covers every design both mixed-model engines fit (two-way random/fixed,
+one-way, multilevel at both levels), oracle-tested incl. cross-engine agreement and the
+refit-failure discard policy; roxygen/NEWS/`advanced.Rmd` landed. S1 `b63c471`, S2
+`9ebf5ad` committed; S3 + DoD in the working tree, ready for the installed-pkg check + PR.
 
 **Agreed non-Bayesian carryover sequencing (this session).** Ordered by oracle-risk
 (#1) — bank the clean-oracle wins before the open research question. Each promotion still

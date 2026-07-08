@@ -21,6 +21,31 @@
 # `data` must already be canonicalized to columns `subject`, `rater`, `score`
 # (factors for the first two), as with the glmmTMB engine.
 
+# Parametric-bootstrap factory shared by every lme4 fit shape (ADR-025, M16): lme4's
+# native lme4::bootMer is the purpose-built simulate()+refit loop -- it simulates
+# from the fit, refits, and applies `extract(refit) -> named numeric components` to
+# each refit. Returns the shared (component x resample) matrix `bootstrap_ci()`
+# consumes. A refit that collapses to a singular (boundary) fit still yields a valid
+# draw with a component at 0 (KEPT, matching the MC boundary policy and the glmmTMB
+# path); only a genuine refit failure is NA-filled by bootMer and dropped upstream.
+# merDeriv is not needed for the bootstrap (no covariance is formed), but the lme4
+# fits require it up front for the Monte-Carlo default; that requirement is unchanged.
+# Seeded via with_rng_seed() for RNG hygiene (#9, #12).
+lme4_bootmer_refit <- function(fit, extract) {
+  function(boot_samples, seed = NULL) {
+    run <- function() {
+      boot <- suppressWarnings(suppressMessages(lme4::bootMer(
+        fit,
+        FUN = extract,
+        nsim = boot_samples,
+        type = "parametric"
+      )))
+      t(boot$t)
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+}
+
 fit_lme4 <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
   rlang::check_installed(
@@ -69,11 +94,15 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
   sd_subject <- as.numeric(attr(vc$subject, "stddev"))
   sd_rater <- as.numeric(attr(vc$rater, "stddev"))
   sd_res <- as.numeric(stats::sigma(fit))
-  components <- list(
-    subject = sd_subject^2,
-    rater = sd_rater^2,
-    residual = sd_res^2
-  )
+  extract <- function(f) {
+    fvc <- lme4::VarCorr(f)
+    c(
+      subject = as.numeric(attr(fvc$subject, "stddev"))^2,
+      rater = as.numeric(attr(fvc$rater, "stddev"))^2,
+      residual = as.numeric(stats::sigma(f))^2
+    )
+  }
+  components <- as.list(extract(fit))
 
   # merDeriv's SD-scale joint covariance of (intercept, sd_subject, sd_rater,
   # sd_residual). Call the method directly (it is exported) so dispatch does not
@@ -141,27 +170,6 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
   # Note: merDeriv is not needed for the bootstrap (no covariance is formed), but
   # fit_lme4() requires it up front for the Monte-Carlo default; that requirement is
   # unchanged here. Seeded via with_rng_seed() for RNG hygiene (#9, #12).
-  simulate_refit <- function(boot_samples, seed = NULL) {
-    extract <- function(refit) {
-      rvc <- lme4::VarCorr(refit)
-      c(
-        subject = as.numeric(attr(rvc$subject, "stddev"))^2,
-        rater = as.numeric(attr(rvc$rater, "stddev"))^2,
-        residual = as.numeric(stats::sigma(refit))^2
-      )
-    }
-    run <- function() {
-      boot <- suppressWarnings(suppressMessages(lme4::bootMer(
-        fit,
-        FUN = extract,
-        nsim = boot_samples,
-        type = "parametric"
-      )))
-      t(boot$t)
-    }
-    if (is.null(seed)) run() else with_rng_seed(seed, run())
-  }
-
   list(
     fit = fit,
     engine = "lme4",
@@ -169,7 +177,7 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
     estimate = estimate,
     vcov = vcov_log,
     to_components = to_components,
-    simulate_refit = simulate_refit
+    simulate_refit = lme4_bootmer_refit(fit, extract)
   )
 }
 
@@ -219,10 +227,14 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
   vc <- lme4::VarCorr(fit)
   sd_subject <- as.numeric(attr(vc$subject, "stddev"))
   sd_res <- as.numeric(stats::sigma(fit))
-  components <- list(
-    subject = sd_subject^2,
-    residual = sd_res^2
-  )
+  extract <- function(f) {
+    fvc <- lme4::VarCorr(f)
+    c(
+      subject = as.numeric(attr(fvc$subject, "stddev"))^2,
+      residual = as.numeric(stats::sigma(f))^2
+    )
+  }
+  components <- as.list(extract(fit))
 
   vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
   nm_sd <- colnames(vcov_sd)
@@ -270,7 +282,8 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = lme4_bootmer_refit(fit, extract)
   )
 }
 
@@ -342,11 +355,17 @@ fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
   beta <- lme4::fixef(fit)
   th <- theta2r_fixed(beta, stats::vcov(fit), k)
 
-  components <- list(
-    subject = sd_subject^2,
-    rater = th$point,
-    residual = sd_res^2
-  )
+  # Bootstrap recomputes theta^2_r directly from each refit's rater betas (ADR-023).
+  extract <- function(f) {
+    fvc <- lme4::VarCorr(f)
+    fth <- theta2r_fixed(lme4::fixef(f), stats::vcov(f), k)
+    c(
+      subject = as.numeric(attr(fvc$subject, "stddev"))^2,
+      rater = fth$point,
+      residual = as.numeric(stats::sigma(f))^2
+    )
+  }
+  components <- as.list(extract(fit))
 
   # merDeriv's SD-scale joint covariance of (betas, subject SD, residual SD). The
   # fixed-effect columns are named exactly as fixef(fit) (verified: "(Intercept)",
@@ -406,7 +425,8 @@ fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = lme4_bootmer_refit(fit, extract)
   )
 }
 
@@ -459,8 +479,16 @@ lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
 
   vc <- lme4::VarCorr(fit)
   sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
-  components <- lapply(groups, function(g) sd_of(g)^2)
-  components$residual <- stats::sigma(fit)^2
+  extract <- function(f) {
+    fvc <- lme4::VarCorr(f)
+    out <- vapply(
+      groups,
+      function(g) as.numeric(attr(fvc[[g]], "stddev"))^2,
+      numeric(1)
+    )
+    c(out, residual = as.numeric(stats::sigma(f))^2)
+  }
+  components <- as.list(extract(fit))
 
   vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
   nm_sd <- colnames(vcov_sd)
@@ -512,7 +540,8 @@ lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = lme4_bootmer_refit(fit, extract)
   )
 }
 
@@ -655,9 +684,18 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
   beta <- lme4::fixef(fit)
   th <- theta2r_fixed(beta, stats::vcov(fit), k)
 
-  components <- lapply(groups, function(g) sd_of(g)^2)
-  components$rater <- th$point
-  components$residual <- sd_res^2
+  # Bootstrap extractor: random slots plus theta^2_r from each refit's rater betas.
+  extract <- function(f) {
+    fvc <- lme4::VarCorr(f)
+    fth <- theta2r_fixed(lme4::fixef(f), stats::vcov(f), k)
+    out <- vapply(
+      groups,
+      function(g) as.numeric(attr(fvc[[g]], "stddev"))^2,
+      numeric(1)
+    )
+    c(out, rater = fth$point, residual = as.numeric(stats::sigma(f))^2)
+  }
+  components <- as.list(extract(fit))
 
   vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
   nm_sd <- colnames(vcov_sd)
@@ -718,6 +756,7 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = lme4_bootmer_refit(fit, extract)
   )
 }
