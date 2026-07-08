@@ -94,6 +94,20 @@ d_study <- function(
   if (!inherits(x, "icc")) {
     abort_intraclass("{.arg x} must be an {.cls icc} object from {.fn icc}.")
   }
+  # Within-cell replicate fits (M17 Slice 3; M20 Slices 1-2) split the residual into
+  # the interaction sigma^2_sr and pure error sigma^2_e. A rater-count projection off
+  # such a fit would need the per-component error divisors (the interaction divides by
+  # raters, pure error by raters x occasions), which the projection estimand here does
+  # not carry -- and an occasion projection is a separate deferred facet (M17 §7).
+  # Rather than silently drop the interaction from the error set, refuse loudly (#1/#5).
+  if (isTRUE(x$design$replicates)) {
+    abort_unsupported(c(
+      "D-study projection is not supported for within-cell replicate fits yet.",
+      i = "Projecting the rater (or occasion) count off a replicate fit needs the \\
+           per-component error divisors, which is planned for a later milestone.",
+      i = "Refit with one rating per subject-by-rater cell to project rater counts."
+    ))
+  }
   type <- x$design$type
   raters <- x$design$raters
   oneway <- identical(x$design$model, "oneway")

@@ -665,26 +665,71 @@ icc <- function(
   # a violation (M6 spec §5).
   design_info <- summarize_design(df)
   replicates <- FALSE
+  # The occasion count per cell for the replicate path. `summarize_design()` reads the
+  # flat subject x rater grid (correct for single-level and crossed designs); the
+  # nested (block-diagonal) case overrides it below with a design-aware value.
+  n_o_val <- design_info$n_o
   if (!oneway) {
     # Within-cell replicates (M17 Slice 3): more than one rating per subject x rater
     # cell splits the residual into the interaction sigma^2_sr and pure error
-    # sigma^2_e, fit by adding (1|subject:rater). Scope is two-way RANDOM,
-    # single-level, balanced/complete replicated data; the other cases stay deferred
-    # and abort loudly (#5; estimand-spec M17-within-cell-replicates.md §7).
+    # sigma^2_e, fit by adding (1|subject:rater). Fixed raters (M20 Slice 1) and
+    # multilevel designs (M20 Slice 2) now flow through; ragged replicates stay
+    # deferred (#5; estimand-spec M17-within-cell-replicates.md §7, ADR-030).
     if (design_info$has_replicates) {
       if (multilevel) {
-        # Multilevel replicates (Design 1 crossed + Design 2 nested) are M20 Slice 2;
-        # multilevel x fixed replicates are a further deferred corner. Random and
-        # fixed multilevel replicates both abort here until then.
-        abort_unsupported(c(
-          "Within-cell replicates are not supported for multilevel designs yet.",
-          i = "Replicated multilevel data (splitting pure error from the \\
-               highest-order interaction) is planned for a later milestone.",
-          i = "Provide one rating per subject-by-rater cell within each cluster."
-        ))
-      }
-      if (!design_info$replicates_uniform) {
-        # Ragged replicates (random) are M20 Slice 3; ragged x fixed replicates are a
+        # Multilevel within-cell replicates (M20 Slice 2): crossed Design 1 and nested
+        # Design 2, random raters, balanced/complete. The residual gains a
+        # (1|cluster:subject:rater) interaction split from pure error.
+        if (ml_design == "nested_in_subjects") {
+          # Design 3 is the multilevel one-way: raters nested in subjects, rater
+          # confounded into residual, so there is no subject-by-rater interaction to
+          # split (cf. one-way replicates ⚫; ten Hove et al. 2022, p. 6). By design.
+          abort_unsupported(c(
+            "Within-cell replicates are not defined when raters are nested within \\
+             subjects.",
+            i = "Design 3 is the multilevel one-way (the rater effect is confounded \\
+                 into residual), so there is no subject-by-rater interaction to split \\
+                 from pure error.",
+            i = "Aggregate to one rating per subject-by-rater cell."
+          ))
+        }
+        if (raters == "fixed") {
+          # Fixed-rater multilevel replicates are a deferred compound corner (as
+          # incomplete x fixed nested was for M19); random ships first.
+          abort_unsupported(c(
+            "Within-cell replicates are not supported for fixed-rater multilevel \\
+             designs yet.",
+            i = "Multilevel replicates ship for random raters; the fixed-rater case \\
+                 is planned for a later milestone.",
+            i = "Use {.code raters = \"random\"} with replicated multilevel data."
+          ))
+        }
+        if ("conflated" %in% level) {
+          # The conflated (ignore-clusters) diagnostic on replicated data is deferred.
+          abort_unsupported(c(
+            "Within-cell replicates are not supported for the conflated ICC yet.",
+            i = "The conflated diagnostic on replicated data is planned for a later \\
+                 milestone.",
+            i = "Use {.code level = \"subject\"} or {.code \"cluster\"} with \\
+                 replicated data."
+          ))
+        }
+        ml_rep <- multilevel_replicate_facts(df, ml_design)
+        if (!ml_rep$uniform) {
+          # Ragged / incomplete multilevel replicates are a deferred compound corner
+          # (imbalance x replicates); this slice ships balanced/complete only.
+          abort_unsupported(c(
+            "Ragged or incomplete within-cell replicates are not supported for \\
+             multilevel designs yet.",
+            i = "This slice covers balanced, complete replicated multilevel designs \\
+                 (every cell present and rated the same number of times).",
+            i = "Provide an equal number of ratings in every cell, or aggregate to \\
+                 one rating per cell."
+          ))
+        }
+        n_o_val <- ml_rep$n_o
+      } else if (!design_info$replicates_uniform) {
+        # Ragged replicates (random single-level) are M20 Slice 3; ragged x fixed are a
         # deferred compound corner (one imbalance dimension at a time, ADR-030). Both
         # abort here -- fixed-rater replicates ship for BALANCED/complete data only.
         abort_unsupported(c(
@@ -695,9 +740,9 @@ icc <- function(
                one rating per cell."
         ))
       }
-      # Fixed-rater within-cell replicates (M20 Slice 1, ADR-030) now flow through:
-      # theta^2_r replaces sigma^2_r in the rater slot (fit_*_replicates_fixed), the
-      # estimand map and occasion divisor are unchanged. Balanced/complete single-level.
+      # Fixed-rater (M20 Slice 1) and multilevel (M20 Slice 2) within-cell replicates
+      # now flow through: theta^2_r replaces sigma^2_r for fixed raters, and multilevel
+      # fits gain the (1|cluster:subject:rater) split. Balanced/complete.
       replicates <- TRUE
     }
     # Separating the subject and rater variances needs a connected design; a
@@ -721,7 +766,16 @@ icc <- function(
     # the multilevel graph conditions here take its place, gating different
     # coefficients. Complete crossed designs satisfy every condition, so this is a
     # no-op for the balanced M5/M8 path.
-    if (multilevel && ml_design == "crossed" && !design_info$balanced) {
+    if (
+      multilevel &&
+        ml_design == "crossed" &&
+        !replicates &&
+        !design_info$balanced
+    ) {
+      # `design_info$balanced` reads the flat subject x rater grid, which counts a
+      # replicated cell as "incomplete"; multilevel replicates (M20 Slice 2) are gated
+      # to balanced/complete in the guard block above, so skip this incomplete-crossed
+      # block for them (the de-replicated design is complete).
       # Incomplete conflated ICC (M18 Slice 2, ADR-028): the conflated diagnostic
       # (Eq. 14) LUMPS sigma^2_r + sigma^2_cr + sigma^2_res into one error term and
       # sigma^2_c + sigma^2_{s:c} into one signal, so it is the flat two-way ICC read
@@ -842,6 +896,12 @@ icc <- function(
   # two-way, a complete crossed design with one rating per cell (M3).
   balanced <- if (oneway) {
     length(unique(as.integer(table(df$subject)))) == 1L
+  } else if (replicates) {
+    # Uniform, complete replicated designs (single-level M17, or multilevel M20
+    # Slice 2) are gated to balanced/complete in the guard block above
+    # (summarize_design / multilevel_replicate_facts), so the de-replicated design is
+    # balanced by construction -- every subject is rated by every (in-cluster) rater.
+    TRUE
   } else if (multilevel && ml_design != "crossed") {
     # Nested designs are block-diagonal in the subject x rater graph, so
     # design_info$balanced (a crossed notion) is wrong for them (spec M8 §2); use the
@@ -849,10 +909,6 @@ icc <- function(
     # honest balance so print/glance flag the ragged case (the averaging divisor is
     # k_eff either way, reducing to M3/M6 on ragged data).
     nested_design_balanced(df, ml_design)
-  } else if (replicates) {
-    # A uniform-replicate design is complete crossing with equal cell counts, so
-    # every subject is rated by every rater: k_eff_raters == n_raters (balanced).
-    TRUE
   } else {
     design_info$balanced
   }
@@ -901,7 +957,24 @@ icc <- function(
     ))
   }
 
-  engine_fit <- if (multilevel) {
+  engine_fit <- if (multilevel && replicates) {
+    # Multilevel within-cell replicates (M20 Slice 2): add (1|cluster:subject:rater) to
+    # the M5 crossed (Design 1, six-component) / M8 nested (Design 2, five-component)
+    # fit, splitting the residual into the interaction and pure error. Design 3
+    # (one-way), fixed raters, conflated, and ragged data are aborted upstream; random,
+    # balanced/complete only.
+    if (ml_design == "nested_in_clusters") {
+      if (engine == "lme4") {
+        fit_lme4_nested_replicates(df)
+      } else {
+        fit_glmmtmb_nested_replicates(df)
+      }
+    } else if (engine == "lme4") {
+      fit_lme4_ml_replicates(df)
+    } else {
+      fit_glmmtmb_ml_replicates(df)
+    }
+  } else if (multilevel) {
     # lme4 (M14) mirrors every balanced multilevel glmmTMB fit; the guards above
     # confine the lme4 branches to the balanced/complete case.
     if (ml_design == "nested_in_clusters") {
@@ -994,8 +1067,11 @@ icc <- function(
       )
     })
   } else if (multilevel) {
-    # Cross-product level x unit; level outer so rows group by level (M5 §3). For
-    # Design 2, `level` is already restricted to "subject" (nested designs).
+    # Cross-product level x unit (x occasions for replicates); level outer so rows
+    # group by level (M5 §3). For Design 2, `level` is already restricted to "subject"
+    # (nested designs). With replicates the rater divisor counts DISTINCT raters
+    # (replicates must not inflate it, M17 §4).
+    k_ml <- if (replicates) design_info$k_eff_raters else k
     unlist(
       lapply(level, function(lv) {
         # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
@@ -1007,16 +1083,28 @@ icc <- function(
         } else {
           unit
         }
-        lapply(units_lv, function(u) {
-          icc_estimand(
-            type = type,
-            unit = u,
-            raters = raters,
-            k_eff = k,
-            level = lv,
-            multilevel = TRUE
-          )
-        })
+        # Occasion averaging (M20 Slice 2) reduces only pure error, which is not in the
+        # cluster-level error set, so it is a no-op there -- emit single-occasion
+        # cluster rows only. Non-replicate paths carry a single "single" occasion.
+        occs_lv <- if (replicates && lv == "subject") occasions else "single"
+        unlist(
+          lapply(units_lv, function(u) {
+            lapply(occs_lv, function(o) {
+              icc_estimand(
+                type = type,
+                unit = u,
+                raters = raters,
+                k_eff = k_ml,
+                level = lv,
+                multilevel = TRUE,
+                replicates = replicates,
+                occasions = o,
+                n_o = n_o_val
+              )
+            })
+          }),
+          recursive = FALSE
+        )
       }),
       recursive = FALSE
     )

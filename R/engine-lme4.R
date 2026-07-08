@@ -662,6 +662,71 @@ fit_lme4_nested_subjects <- function(data, call = rlang::caller_env()) {
   )
 }
 
+# Multilevel within-cell replicates -- crossed Design 1 (M20 Slice 2, ADR-030); the
+# lme4 counterpart of fit_glmmtmb_ml_replicates(). Adds (1|cluster:subject:rater)
+# to the M5 crossed structure, splitting the residual into the interaction sigma^2_{csr}
+# ("subject_rater") and pure error ("residual") -- six components. Balanced/complete
+# random raters only; a singular fit defers to glmmTMB via lme4_ml_contract().
+fit_lme4_ml_replicates <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater) +
+      (1 | cluster:subject:rater),
+    data
+  )
+  lme4_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "rater",
+      cluster_rater = "cluster:rater",
+      subject_rater = "cluster:subject:rater"
+    ),
+    call = call
+  )
+}
+
+# Multilevel within-cell replicates -- nested Design 2 (M20 Slice 2, ADR-030); the
+# lme4 counterpart of fit_glmmtmb_nested_replicates(). (1|cluster:subject:rater) splits
+# sigma^2_{(sr):c} into the interaction ("subject_rater") and pure error ("residual") --
+# five components; the rater slot holds sigma^2_{r:c}. Balanced/complete random only.
+fit_lme4_nested_replicates <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | cluster:rater) +
+      (1 | cluster:subject:rater),
+    data
+  )
+  lme4_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "cluster:rater", # sigma^2_{r:c}
+      subject_rater = "cluster:subject:rater"
+    ),
+    call = call
+  )
+}
+
 # Fixed-rater multilevel lme4 engine (Design 1 crossed, balanced; estimand-spec
 # M10). The lme4 counterpart of fit_glmmtmb_multilevel_fixed(): combines the M5
 # Design-1 random structure with the M3 fixed-rater treatment -- raters enter as

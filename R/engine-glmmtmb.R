@@ -418,6 +418,69 @@ fit_glmmtmb_nested_subjects <- function(data, call = rlang::caller_env()) {
   )
 }
 
+# Multilevel within-cell replicates -- crossed Design 1 (M20 Slice 2, ADR-030). The
+# replicate generalization of fit_glmmtmb_multilevel(): adding (1|cluster:subject:rater)
+# splits the M5 residual into the highest-order interaction sigma^2_{csr}
+# ("subject_rater") and pure within-cell error sigma^2_e ("residual") -- six components.
+# The subject-level error map {rater, subject_rater, residual} and the occasion divisor
+# match the single-level M17 path; the cluster level is unaffected by the split (its
+# "residual" is cluster:rater). Balanced/complete random raters only.
+fit_glmmtmb_ml_replicates <- function(
+  data,
+  call = rlang::caller_env()
+) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater) +
+      (1 | cluster:subject:rater),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "rater",
+      cluster_rater = "cluster:rater",
+      subject_rater = "cluster:subject:rater"
+    ),
+    call = call
+  )
+}
+
+# Multilevel within-cell replicates -- nested Design 2 (M20 Slice 2, ADR-030). The
+# replicate generalization of fit_glmmtmb_nested_clusters(): (1|cluster:subject:rater)
+# splits sigma^2_{(sr):c} into the interaction ("subject_rater") and pure error
+# ("residual") -- five components. The rater slot still holds sigma^2_{r:c}
+# (cluster:rater); the subject-level map is the same {rater, subject_rater, residual}.
+fit_glmmtmb_nested_replicates <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | cluster:rater) +
+      (1 | cluster:subject:rater),
+    data
+  )
+  glmmtmb_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "cluster:rater", # sigma^2_{r:c}
+      subject_rater = "cluster:subject:rater"
+    ),
+    call = call
+  )
+}
+
 # Fixed-rater engine (two-way mixed, McGraw & Wong Case 3 / 3A) ------------------
 #
 # Resolves the ADR-006 debt: on incomplete data the balanced-only "fixed ==

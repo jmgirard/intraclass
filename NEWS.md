@@ -48,6 +48,12 @@ alternate engines, and seeded simulations.
   **or fixed** raters — with fixed raters the rater main effect is the
   finite-population \eqn{\theta^2_r} (McGraw & Wong Case 3A), which equals the random
   \eqn{\sigma^2_r} on balanced data, so fixed reproduces the random coefficients.
+  Within-cell replicates are also supported for **multilevel** designs — crossed
+  Design 1 (a six-component fit) and nested Design 2 (five components) — adding a
+  `(1 | cluster:subject:rater)` term so the highest-order residual splits into the
+  interaction and pure error at the subject level. (Design 3, the multilevel one-way,
+  has no separable interaction to split, and `d_study()` projection off a replicate
+  fit is not yet supported.)
 
 ## Engines
 

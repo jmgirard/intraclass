@@ -10,22 +10,26 @@
   **attempt-then-degrade** to 🟣 research). Completeness, not new estimand work; no new dependency,
   no new argument, no new estimand-spec (extends `M17-within-cell-replicates.md`). M0–M19 shipped;
   package at v0.1.0.
-- Active task: **M20 Slice 1 — fixed-rater within-cell replicates: DONE** (branch
-  `m20-fixed-replicates`, not yet merged). `fit_{glmmtmb,lme4}_replicates_fixed`
-  (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, M10 θ²_r in the rater slot via the shared
-  `theta2r_fixed()`); abort lifted + dispatch wired; estimand layer unchanged. O-FRep oracles in
-  `test-replicates.R` all green: exact balanced fixed≡random (<1e-4), consistency≡random (~1e-8),
-  cell-mean reduction, glmmTMB↔lme4 (<1e-4), SF labels, seeded recovery + MC-CI, balanced fixed
-  ANOVA, both `ci_method`s. **Next: Slice 2 — multilevel replicates (crossed D1 + nested D2).**
+- Active task: **M20 Slices 1–2 DONE** (branch `m20-fixed-replicates`; Slice 1 committed
+  `7d82217`, Slice 2 staged). **Slice 1** fixed-rater replicates: `fit_{glmmtmb,lme4}_replicates_fixed`
+  with M10 θ²_r; O-FRep (exact balanced fixed≡random, consistency≡random, cell-mean reduction,
+  cross-engine, SF labels, seeded recovery, both `ci_method`s). **Slice 2** multilevel replicates:
+  crossed Design 1 (`fit_{glmmtmb,lme4}_ml_replicates`, six-component `(1|cluster:subject:rater)`) +
+  nested Design 2 (`fit_{glmmtmb,lme4}_nested_replicates`, five); design-aware
+  `multilevel_replicate_facts()`; O-MLRep (occasion-averaged == M5/M8 on cell means at ~1e-8,
+  cross-engine <1e-4, seeded recovery, cluster single-occasion, both `ci_method`s); Design 3 /
+  fixed / conflated / ragged multilevel replicates abort loudly; **`d_study()`-on-replicate
+  correctness guard** (was silently dropping σ²_sr since M17). Full suite **863 pass / 0 fail**,
+  `air`/`lintr` clean, docs regenerated. **Next: Slice 3 — ragged replicates (occasion-averaged
+  attempt-then-degrade).**
 - Last green CI: PR #24 (M19) full matrix green incl. Windows and R-devel; merged to
-  `main` at 53c9f5e. M20 Slice 1 verified locally only (full suite 0 failures, `air`/`lintr` clean,
+  `main` at 53c9f5e. M20 Slices 1–2 verified locally only (full suite 863/0, `air`/`lintr` clean,
   docs regenerated) — not yet pushed/CI'd.
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M20 scoped (ADR-030) and Slice 1 built.** Retro
+- Updated: 2026-07-08 by main session (Opus) — **M20 scoped (ADR-030); Slices 1–2 built.** Retro
   on M18/M19 done; ADR-030 written with three maintainer decisions (oracle-risk reorder;
-  crossed D1 + nested D2 for Slice 2; attempt-then-degrade for the ragged averaged divisor); M20
-  DoD board added to MILESTONES. Slice 1 (fixed-rater replicates) implemented + tested green on
-  `m20-fixed-replicates`. Slices 2–3 next.
+  crossed D1 + nested D2 for Slice 2; attempt-then-degrade for the ragged averaged divisor). Slice
+  1 (fixed-rater) committed `7d82217`; Slice 2 (multilevel) built + green, staged. Slice 3 next.
 
 ## Where we are
 

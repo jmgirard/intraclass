@@ -172,10 +172,23 @@ Balanced two-way random with `n_o` replicates. Verified in a new
   are unchanged (only θ²_r replaces σ²_r). Balanced/complete single-level only; θ²_r =
   σ²_r on balanced data, so fixed reproduces the random coefficients (oracle
   O-FRep). Ragged × fixed replicates stay deferred (M20 Slice 3 scope-out).
+- **Multilevel replicates** (the `(1 | cluster:subject:rater)` case noted in M9's
+  deferrals) — **shipped in M20 Slice 2** (ADR-030): crossed Design 1 (six-component
+  fit) and nested Design 2 (five-component) add the interaction term so the
+  subject-level residual splits into σ²_{csr} and pure error; the subject-level error
+  map and occasion divisor match this spec (§2), the cluster level is unaffected by
+  the split (its "residual" is cluster:rater). Random raters, balanced/complete only;
+  Design 3 replicate-split is ⚫ by-design (multilevel one-way, no separable
+  interaction), and fixed×multilevel, conflated×replicates, and ragged×multilevel
+  replicates stay deferred.
 - **One-way replicates** (rater identity ignored — replicates already fold into the
-  one-way residual, no change) and **multilevel replicates** (the
-  `(1 | cluster:subject:rater)` case noted in M9's deferrals) — multilevel is M20
-  Slice 2.
+  one-way residual, no change) remain out of scope (⚫ by design).
+- **`d_study()` projection off a replicate fit** — a rater-count (or occasion)
+  projection off a replicate fit needs the per-component error divisors (the
+  interaction divides by raters, pure error by raters × occasions), which the
+  projection estimand does not yet carry; `d_study()` **refuses loudly** on replicate
+  fits rather than silently drop the interaction (M20). The occasion D-study below
+  stays deferred.
 - **Occasion D-study** (`d_study()` projecting `n_o`) — the divisor supports it, but
   projecting occasions is deferred to keep this slice bounded; the `occasions`
   knob covers single/average of the observed count.

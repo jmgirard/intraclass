@@ -595,18 +595,26 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       NA averaged); seeded recovery + MC-CI coverage; balanced fixed ANOVA mean-squares as the
       independent method; both `ci_method`s.
 
-**Slice 2 — multilevel replicates (crossed Design 1 + nested Design 2):**
-- [ ] Lift the `multilevel` replicate abort (`R/icc.R`, ~L672) for Design 1 and Design 2; add
-      `(1|cluster:subject:rater)` via new `fit_{glmmtmb,lme4}_multilevel_replicates` reusing the
-      generic `*_ml_contract`.
-- [ ] Residual splits into σ²_{csr} + σ²_e (Design 1 → six components; Design 2 → five); the
-      `occasions` facet reduces only pure error by n_o (per-component `error_divisors`).
-- [ ] Design 3 replicate-split aborts ⚫ by-design (classed `abort_unsupported`, named: multilevel
-      one-way, no separable subject:rater interaction).
-- [ ] O-MLRep oracles asserted (`test-replicates.R` + `test-icc-multilevel.R`): reduction to M17
-      single-level replicates at N_c = 1; reduction to M5 (D1) / M8 (D2) via cell-mean aggregation
-      (σ²_{csr} + σ²_e ≈ M5/M8 σ²_res); glmmTMB↔lme4 <1e-4; seeded recovery + MC-CI coverage.
-      Balanced/complete.
+**Slice 2 — multilevel replicates (crossed Design 1 + nested Design 2):** ✅ done
+- [x] Lift the `multilevel` replicate abort (`R/icc.R`) for Design 1 and Design 2; add
+      `(1|cluster:subject:rater)` via new `fit_{glmmtmb,lme4}_ml_replicates` (crossed) and
+      `fit_{glmmtmb,lme4}_nested_replicates` (nested) reusing the generic `*_ml_contract`.
+      Design-aware `multilevel_replicate_facts()` computes n_o + completeness (the flat
+      `summarize_design()` grid is crossed-only).
+- [x] Residual splits into σ²_{csr} + σ²_e (Design 1 → six components; Design 2 → five); the
+      `occasions` facet reduces only pure error by n_o (per-component `error_divisors`); cluster
+      level is single-occasion only (pure error not in its error set) and unaffected by the split.
+- [x] Design 3 replicate-split aborts ⚫ by-design (classed `abort_unsupported`, named: multilevel
+      one-way, no separable subject:rater interaction); fixed×multilevel, conflated×replicates, and
+      ragged×multilevel replicates all abort loudly (deferred compound corners).
+- [x] O-MLRep oracles asserted (`test-icc-multilevel.R`): reduction to M5 (D1) / M8 (D2) via
+      cell-mean aggregation (occasion-averaged == M5/M8 on cell means; σ²_{csr} + σ²_e/n_o ≈ M5/M8
+      residual); glmmTMB↔lme4 <1e-4; seeded recovery + MC-CI coverage; components view + cluster
+      single-occasion; both `ci_method`s. (N_c=1→M17 reduction is unreachable — multilevel requires
+      ≥2 clusters.) Balanced/complete.
+- [x] **Correctness fix (surfaced by this slice, #1/#5):** `d_study()` silently dropped σ²_sr when
+      projecting off a replicate fit (pre-existing since M17 single-level); now refuses loudly
+      (`test-d-study.R`), pending per-component-divisor projection.
 
 **Slice 3 — ragged/incomplete replicates (two-way random single-level; the one genuine
 characterization):**
@@ -642,7 +650,10 @@ characterization):**
   incomplete divisor (🟣 research, M9 §9); **SEM parity** (M21); Bayesian engine + `ci_method =
   "posterior"`; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **in flight** (ADR-030; third milestone of the M18–M21 arc). **Slice 1 (fixed-rater
-  replicates) done** on branch `m20-fixed-replicates` — `fit_{glmmtmb,lme4}_replicates_fixed`,
-  abort lifted + dispatch wired, O-FRep oracles in `test-replicates.R`; full local suite green
-  (0 failures), `air`/`lintr` clean, docs regenerated. Slices 2–3 not yet started; not yet merged.
+- Status: **in flight** (ADR-030; third milestone of the M18–M21 arc). **Slices 1–2 done** on
+  branch `m20-fixed-replicates` (Slice 1 committed `7d82217`): Slice 1 fixed-rater replicates
+  (`fit_{glmmtmb,lme4}_replicates_fixed`, O-FRep); Slice 2 multilevel replicates
+  (`fit_{glmmtmb,lme4}_ml_replicates` crossed + `fit_{glmmtmb,lme4}_nested_replicates`,
+  design-aware `multilevel_replicate_facts()`, O-MLRep) + a `d_study()`-on-replicate correctness
+  guard. Full local suite green, `air`/`lintr` clean, docs regenerated. Slice 3 (ragged) not yet
+  started; not yet merged.
