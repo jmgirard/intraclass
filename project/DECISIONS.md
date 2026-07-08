@@ -1829,3 +1829,114 @@ consequences → references.
   estimand-spec `M8-nested-multilevel.md §3/§7/§8`, `M9-incomplete-multilevel.md §4a/§9`,
   `M10-fixed-multilevel.md §3`; `project/COVERAGE.md` (#10/#11); ten Hove, Jorgensen & van der
   Ark (2022) Eqs. 8–11, Table 3; McGraw & Wong (1996) Case 3/3A.
+
+## ADR-030: M20 scope — Within-cell replicate completeness (fixed-rater, multilevel, ragged)
+- Date: 2026-07-08
+- Status: accepted
+- Context: The M18–M21 completeness arc was set by ADR-027; per PRINCIPLES.md #2/#14 and brief §7
+  each milestone is detailed by its own scoping ADR at its start (as ADR-028 detailed M18 and
+  ADR-029 M19). This ADR opens **M20**, the third arc milestone: the within-cell replicate
+  corners that **M17 Slice 3** left open. M17 shipped the two-way **random**, single-level,
+  **balanced/complete** replicated design — splitting the confounded residual σ²_res into the
+  subject×rater interaction σ²_sr and pure within-cell error σ²_e via `(1|subject:rater)`, with
+  the per-component `error_divisors` generalization of `icc_point()` and the `occasions` knob
+  (`M17-within-cell-replicates.md`). M20 extends that estimand to the three corners M17 §7
+  deferred: **fixed raters**, **multilevel** data, and **ragged/incomplete** replicates. Each
+  slice lifts a **single already-shipped abort guard** onto machinery oracle-pinned elsewhere —
+  the M10 engine-agnostic `theta2r_fixed()` (Slice 1), the M5/M8 multilevel fits + the generic
+  `*_ml_contract` (Slice 2), and the M3 `k_eff`/connectedness (Slice 3). This is **completeness,
+  not new estimand work** (cf. M14/M15/M18/M19): additive, non-breaking (#6) — no new top-level
+  argument, only new valid combinations of the shipped `raters` / `cluster` / `design` /
+  `occasions` arguments and data balance. Three scope decisions were put to the maintainer this
+  session (Decision below).
+- Decision:
+  - **Three thin vertical slices** (#14), **reordered from ADR-027's tentative
+    ragged→fixed→multilevel listing to oracle-risk order** (maintainer decision — bank the
+    established-machinery wins first, as M18 reordered its arc-tentative slices):
+    - **Slice 1 — fixed-rater replicates (COVERAGE §② #5).** Lift the `raters == "fixed"` abort
+      in the replicate block (`R/icc.R`, ~L680). New `fit_{glmmtmb,lme4}_replicates_fixed`
+      (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`) places the M10 bias-corrected
+      finite-population **θ²_r** (via the shipped engine-agnostic `theta2r_fixed()`, read from the
+      rater-contrast betas/vcov) in the rater slot of the M17 per-component error decomposition:
+      agreement error `(θ²_r + σ²_sr)/n_r + σ²_e/(n_r·n_o)`, consistency `σ²_sr/n_r +
+      σ²_e/(n_r·n_o)`. **No new estimand** — θ²_r replaces σ²_r in the M17 map. **Balanced/complete
+      replicated, single-level** (ragged×fixed and multilevel×fixed replicates deferred — one
+      imbalance/extension dimension at a time, as M10 was to M9). Consistency ≡ random exactly
+      (rater term unused); **balanced fixed ≡ random** (θ²_r ≡ σ²_r on complete crossed data — the
+      M10 single-level crossed identity applies, giving an *exact* reduction pin). **Lowest risk**
+      (both pieces shipped, only gated apart).
+    - **Slice 2 — multilevel replicates (COVERAGE §② #6), crossed Design 1 + nested Design 2
+      (maintainer decision).** Lift the `multilevel` abort in the replicate block (`R/icc.R`,
+      ~L672) for **Design 1 and Design 2**. Add the within-cell replicate term
+      `(1|cluster:subject:rater)` to the shipped multilevel fits, splitting the M5/M8 residual
+      σ²_res into the cluster:subject:rater interaction σ²_{csr} and pure error σ²_e (Design 1 →
+      six components; Design 2 → five). New `fit_{glmmtmb,lme4}_multilevel_replicates` reusing the
+      generic `*_ml_contract` (as the M17 single-level replicate fits do, ADR-026). The
+      `occasions` facet reduces only the pure-error component by n_o; the M17 per-component
+      `error_divisors` carry it. **Design 3 fixed ⚫ by-design does not arise, and Design 3
+      replicate-split stays ⚫ by-design:** raters nested in subjects is the multilevel one-way
+      (Eq. 11), rater confounded into residual, so there is **no separable subject:rater
+      interaction to split** (cf. one-way replicate-split ⚫, COVERAGE §②; M6 §5) — a classed
+      `abort_unsupported` names it. **Balanced/complete** (ragged×multilevel replicates deferred to
+      Slice 3's ragged scope-out). Fixed×multilevel replicates deferred (Slice-1 scope-out).
+    - **Slice 3 — ragged/incomplete replicates (COVERAGE §② #4).** Lift the `!replicates_uniform`
+      abort (`R/icc.R`, ~L687) for the **two-way random, single-level** design — the replicate
+      analogue of M3. The **single-occasion** ICC family extends first (the interaction fit
+      tolerates ragged data; the rater divisor is the shipped `k_eff` = harmonic mean of *distinct*
+      raters per subject; σ²_sr needs the M3-connected subject×rater graph, already gated). **The
+      occasion-averaged coefficient — attempt, degrade to research (maintainer decision, matching
+      M18 Slice 2 / M19 Slice 1):** `occasions = "average"` on ragged data needs an **effective-n_o
+      divisor** (the harmonic mean of ratings per cell is the natural candidate but is unproven);
+      attempt it against the reduction (uniform ragged → M17 balanced) + cross-engine oracles, and
+      **if no #1/#4-strong oracle holds, ship the single-occasion ragged family only and reclassify
+      occasion-averaged-ragged to 🟣 research** (beside the crossed `ICC(c,k)` incomplete divisor)
+      rather than lower the oracle bar (#1). `verify-estimator` may recommend a Fable review (#19)
+      if close but unpinnable. **Scope-out:** ragged × {fixed, multilevel} replicates stay deferred
+      (compound imbalance — its own later corner, as ragged×fixed nested was for M19).
+  - **No new estimand for any slice; no new estimand-spec file.** M20 extends the shipped M17
+    estimand (`M17-within-cell-replicates.md`) to the deferred corners; the ragged
+    occasion-averaged §7 note is extended with whatever the Slice-3 oracle work establishes
+    (effective-n_o divisor, or a recorded 🟣 research deferral). **No new dependency** (light
+    install intact). **No new argument** — Slices reuse the shipped `raters = "fixed"` (S1),
+    `cluster`/`design` (S2), and data balance + `occasions` (S3).
+  - **Oracle posture (#1), per slice — the established mixed-model pattern** (no textbook worked
+    example, as M8–M10/M15/M18/M19): glmmTMB↔lme4 **cross-engine < 1e-4**; **reduction** to the
+    shipped M17 balanced/complete replicate case and — via aggregation to cell means — to the
+    single-occasion parent (M3 incomplete two-way for S3; M10/M3 fixed for S1; M5/M8 multilevel
+    for S2); **seeded population recovery** with MC-CI coverage; the invariant σ²_sr + σ²_e ≈
+    σ²_res (and σ²_{csr} + σ²_e ≈ the M5/M8 residual for S2). Slice 1 adds the **exact balanced
+    fixed ≡ random** pin and, where balanced, the two-way-with-replication ANOVA mean-squares as
+    an independent method; Slice 3's averaged divisor is the one genuine characterization,
+    explicitly allowed to degrade (#4). lme4 degrades to glmmTMB at the variance boundary (ragged
+    replicate fits hit it more, as M15).
+  - **Scope-outs (preserved, not rediscovered):** ragged × fixed and ragged × multilevel
+    replicates (compound imbalance — later corners); **Design 3 replicate-split** ⚫ by-design
+    (multilevel one-way, no separable interaction); **one-way replicate-split** stays ⚫
+    (COVERAGE §②); the **occasion `d_study()`** projecting n_o (M17 §7 — the per-component divisor
+    supports it, but projecting occasions stays deferred); **SEM ∩ replicates** stays ROADMAP
+    unscheduled (reclassified out of the arc, ADR-027); **SEM parity** is **M21**. The Wave-3
+    averaged crossed `ICC(c,k)` incomplete divisor (🟣 research, M9 §9) is untouched.
+- Consequences: On M20 close, COVERAGE §② is fully annotated — fixed-rater, multilevel (crossed
+  Design 1 + nested Design 2), and single-occasion ragged replicates ✅ (with the occasion-averaged
+  ragged form either ✅ or a recorded 🟣 research reclassification — a clean outcome either way),
+  and only the compound-imbalance corners + Design-3/one-way ⚫ by-design + SEM (ROADMAP) remain.
+  Risk is front-loaded away: Slice 1 rides shipped M10 θ²_r with an exact reduction pin, Slice 2
+  is a new fit shape but with clean reductions to M17/M5/M8, and the one genuine characterization
+  (Slice 3's effective-n_o divisor) is last and explicitly allowed to degrade rather than force an
+  unsourced formula (#4). The arc is a **hypothesis, not a contract** (MILESTONES preamble). This
+  ADR authorizes M20 code; M21 (SEM parity) is scoped by its own ADR at its start (brief §7).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + seeded recovery per
+  slice), #2/#14 (name the estimand / thin vertical slices), #4 (no guessed formula — Slice 3's
+  degrade-to-research clause), #5/#8 (classed aborts for the Design-3 replicate-split + ragged
+  compound corners), #6 (additive, non-breaking — new valid arg combinations only), #16 (tracking
+  in-commit), #18 (characterize the boundary — Slice 3 averaged divisor, lme4 singular degrade),
+  #19 (Fable recommendation path for Slice 3); ADR-027 (the arc this details — M20 = replicate
+  completeness), ADR-028/029 (M18/M19 precedent: guard-lift slices + attempt-then-degrade +
+  oracle-risk reorder), ADR-026 (M17 replicates + per-component `error_divisors` + `occasions` +
+  the `*_ml_contract` reuse — this extends), ADR-019 (M10 `theta2r_fixed()` — Slice 1), ADR-011
+  (M5 five-component multilevel fit — Slice 2), ADR-016 (M8 nested Design 2 fit — Slice 2),
+  ADR-008 (M3 `k_eff`/connectedness — Slice 3); estimand-spec `M17-within-cell-replicates.md`
+  §2/§4/§7 (the deferrals this closes), `M3-incomplete-designs.md` (Slice 3 parent),
+  `M10-fixed-multilevel.md` §3 (Slice 1 θ²_r), `M5-multilevel.md`/`M8-nested-multilevel.md` §3
+  (Slice 2); `project/COVERAGE.md` §② (#4/#5/#6); Shrout & Fleiss (1979), McGraw & Wong (1996)
+  Case 3/3A, Brennan (2001) two-facet decision study.

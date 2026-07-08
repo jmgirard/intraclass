@@ -165,10 +165,17 @@ Balanced two-way random with `n_o` replicates. Verified in a new
   fit tolerates them but `n_o` and the ANOVA oracle do not; deferred (the replicate
   analogue of M3). The single-occasion ICC family would extend first; the
   occasion-averaged coefficient needs an effective-`n_o` divisor study.
-- **Fixed-rater replicates** (θ²_r with an interaction), **one-way replicates**
-  (rater identity ignored — replicates already fold into the one-way residual, no
-  change), and **multilevel replicates** (the `(1 | cluster:subject:rater)` case
-  noted in M9's deferrals).
+- **Fixed-rater replicates** (θ²_r with an interaction) — **shipped in M20 Slice 1**
+  (ADR-030): `fit_{glmmtmb,lme4}_replicates_fixed` fits
+  `score ~ 1 + rater + (1|subject) + (1|subject:rater)` and places the shared
+  `theta2r_fixed()` θ²_r in the rater slot; the estimand map / occasion divisor here
+  are unchanged (only θ²_r replaces σ²_r). Balanced/complete single-level only; θ²_r =
+  σ²_r on balanced data, so fixed reproduces the random coefficients (oracle
+  O-FRep). Ragged × fixed replicates stay deferred (M20 Slice 3 scope-out).
+- **One-way replicates** (rater identity ignored — replicates already fold into the
+  one-way residual, no change) and **multilevel replicates** (the
+  `(1 | cluster:subject:rater)` case noted in M9's deferrals) — multilevel is M20
+  Slice 2.
 - **Occasion D-study** (`d_study()` projecting `n_o`) — the divisor supports it, but
   projecting occasions is deferred to keep this slice bounded; the `occasions`
   knob covers single/average of the observed count.

@@ -119,10 +119,13 @@
 #' (a single rating's error still includes the interaction), but the components are
 #' no longer confounded, and `occasions = "average"` reports the reliability of the
 #' mean of the replicates (which reduces \eqn{\sigma^2_e} but not
-#' \eqn{\sigma^2_{sr}}). This slice covers **balanced, complete** replicated
-#' two-way **random**-rater designs (every cell present and rated the same number of
-#' times); ragged replicates, fixed raters, one-way, and multilevel replicates are
-#' planned for later milestones.
+#' \eqn{\sigma^2_{sr}}). With `raters = "fixed"` the rater main effect becomes the
+#' finite-population \eqn{\theta^2_r} (McGraw & Wong Case 3A, fit as
+#' `score ~ 1 + rater + (1|subject) + (1|subject:rater)`); on balanced, complete data
+#' \eqn{\theta^2_r = \sigma^2_r}, so fixed reproduces the random-rater coefficients.
+#' This covers **balanced, complete** replicated two-way designs (every cell present
+#' and rated the same number of times), random **or fixed** raters; ragged
+#' replicates, one-way, and multilevel replicates are planned for later milestones.
 #'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
@@ -670,6 +673,9 @@ icc <- function(
     # and abort loudly (#5; estimand-spec M17-within-cell-replicates.md §7).
     if (design_info$has_replicates) {
       if (multilevel) {
+        # Multilevel replicates (Design 1 crossed + Design 2 nested) are M20 Slice 2;
+        # multilevel x fixed replicates are a further deferred corner. Random and
+        # fixed multilevel replicates both abort here until then.
         abort_unsupported(c(
           "Within-cell replicates are not supported for multilevel designs yet.",
           i = "Replicated multilevel data (splitting pure error from the \\
@@ -677,14 +683,10 @@ icc <- function(
           i = "Provide one rating per subject-by-rater cell within each cluster."
         ))
       }
-      if (raters == "fixed") {
-        abort_unsupported(c(
-          "Within-cell replicates are not supported for fixed raters yet.",
-          i = "Replicated fixed-rater designs are planned for a later milestone.",
-          i = "Use {.code raters = \"random\"} with replicated data."
-        ))
-      }
       if (!design_info$replicates_uniform) {
+        # Ragged replicates (random) are M20 Slice 3; ragged x fixed replicates are a
+        # deferred compound corner (one imbalance dimension at a time, ADR-030). Both
+        # abort here -- fixed-rater replicates ship for BALANCED/complete data only.
         abort_unsupported(c(
           "Ragged within-cell replicates are not supported yet.",
           i = "This slice covers balanced, complete replicated designs (every \\
@@ -693,6 +695,9 @@ icc <- function(
                one rating per cell."
         ))
       }
+      # Fixed-rater within-cell replicates (M20 Slice 1, ADR-030) now flow through:
+      # theta^2_r replaces sigma^2_r in the rater slot (fit_*_replicates_fixed), the
+      # estimand map and occasion divisor are unchanged. Balanced/complete single-level.
       replicates <- TRUE
     }
     # Separating the subject and rater variances needs a connected design; a
@@ -937,7 +942,20 @@ icc <- function(
   } else if (oneway) {
     if (engine == "lme4") fit_lme4_oneway(df) else fit_glmmtmb_oneway(df)
   } else if (raters == "fixed") {
-    if (engine == "lme4") fit_lme4_fixed(df) else fit_glmmtmb_fixed(df)
+    if (replicates) {
+      # Fixed-rater within-cell replicates (M20 Slice 1): the interaction fit with
+      # raters fixed -- theta^2_r in the rater slot (fit_*_replicates_fixed). lavaan
+      # fixed raters already aborted upstream; balanced/complete single-level only.
+      if (engine == "lme4") {
+        fit_lme4_replicates_fixed(df)
+      } else {
+        fit_glmmtmb_replicates_fixed(df)
+      }
+    } else if (engine == "lme4") {
+      fit_lme4_fixed(df)
+    } else {
+      fit_glmmtmb_fixed(df)
+    }
   } else if (replicates) {
     # Within-cell replicates (M17 Slice 3): the interaction fit (subject, rater,
     # subject_rater, residual). The SEM engine has no replicate path.

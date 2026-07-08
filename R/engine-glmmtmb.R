@@ -776,6 +776,103 @@ fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
   )
 }
 
+# Within-cell replicates with raters FIXED (M20 Slice 1, ADR-030). The fixed-rater
+# analog of fit_glmmtmb_replicates(): the two-way interaction model with raters as
+# FIXED effects, so the rater main effect becomes the bias-corrected finite-population
+# theta^2_r (Case 3A, via the shared theta2r_fixed()) carried in the "rater" slot. Fits
+#
+#   score ~ 1 + rater + (1|subject) + (1|subject:rater)
+#
+# splitting the residual into the interaction sigma^2_sr ("subject_rater") and pure
+# error sigma^2_e ("residual"). The M17 per-component error map and icc_point()/mc_ci()
+# are unchanged (only theta^2_r vs sigma^2_r fills the rater slot; `occasions` still
+# divides only pure error by n_o). Unlike the nested fixed design, this is the CROSSED
+# single-level case, so on balanced/complete data theta^2_r == sigma^2_r (the M10
+# single-level crossed identity) and the coefficients equal the random-rater M17 ones
+# (oracle O-FRep/reduction). Balanced/complete replicated, single-level only
+# (ragged x fixed and multilevel x fixed replicates deferred, ADR-030). Structurally
+# fit_glmmtmb_multilevel_fixed() with the replicate `groups`.
+fit_glmmtmb_replicates_fixed <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("glmmTMB", reason = "to fit the replicate ICC model.")
+  k <- nlevels(data$rater)
+  fit <- fit_glmmtmb_ml_model(
+    score ~ 1 + rater + (1 | subject) + (1 | subject:rater),
+    data
+  )
+  th <- theta2r_fixed(glmmTMB::fixef(fit)$cond, stats::vcov(fit)$cond, k)
+
+  vc <- glmmTMB::VarCorr(fit)$cond
+  sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
+  # Random slots (subject, subject x rater); theta^2_r and the residual are appended
+  # so the map reads {subject | rater, subject_rater, residual} (agreement).
+  groups <- c(
+    subject = "subject",
+    subject_rater = "subject:rater"
+  )
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    fth <- theta2r_fixed(glmmTMB::fixef(f)$cond, stats::vcov(f)$cond, k)
+    out <- vapply(
+      groups,
+      function(g) as.numeric(attr(fvc[[g]], "stddev"))^2,
+      numeric(1)
+    )
+    c(out, rater = fth$point, residual = stats::sigma(f)^2)
+  }
+  components <- as.list(extract(fit))
+
+  vcov_full <- stats::vcov(fit, full = TRUE)
+  nm <- unname(colnames(vcov_full))
+  theta <- function(g) sprintf("theta_1|%s.1", g)
+  beta <- glmmTMB::fixef(fit)$cond
+  estimate <- stats::setNames(rep(NA_real_, length(nm)), nm)
+  # Fixed effects (intercept + rater contrasts) natural; grouping SDs and residual
+  # on glmmTMB's internal log-SD scale (ADR-002/003).
+  estimate[th$beta_names] <- as.numeric(beta)
+  estimate[["disp~(Intercept)"]] <- log(stats::sigma(fit))
+  for (g in groups) {
+    estimate[[theta(g)]] <- log(sd_of(g))
+  }
+
+  if (anyNA(estimate)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg glmmTMB} parameter vector to its covariance.",
+        i = "Unmatched parameters: {.val {nm[is.na(estimate)]}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  bi <- match(th$beta_names, nm)
+  di <- which(nm == "disp~(Intercept)")
+  ridx <- lapply(groups, function(g) which(nm == theta(g)))
+  to_components <- function(par) {
+    # Random components back-transform from log-SD; theta^2_r is recomputed from the
+    # rater beta draws with the constant bias correction (as in fit_glmmtmb_fixed()).
+    means <- th$contrast %*% par[bi, , drop = FALSE]
+    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
+    c(
+      lapply(ridx, function(i) exp(2 * par[i, ])),
+      list(
+        rater = pmax(0, raw_draws - th$bias),
+        residual = exp(2 * par[di, ])
+      )
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "glmmTMB",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_full,
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
+  )
+}
+
 # Design 2 (raters nested in clusters) with raters FIXED (M19 Slice 2, ADR-029). The
 # fixed-rater analog of fit_glmmtmb_nested_clusters(): raters are a fixed finite
 # population within each cluster, so the rater slot carries the bias-corrected

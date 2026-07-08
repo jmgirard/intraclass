@@ -1,24 +1,31 @@
 # Project status
 
-- Milestone: **M19 — Multilevel completeness II (nested Designs 2/3: incomplete + fixed-rater)** —
-  **shipped** (PR #24, ADR-029; second milestone of the M18–M21 arc, ADR-027). Two slices:
-  **(1)** incomplete nested Designs 2/3 (ragged `k_eff` divisor reduces *exactly* to the pinned
-  M3/M6 incomplete divisor; ambiguous ragged requires explicit `design=`); **(2)** fixed-rater
-  nested Design 2, both engines (new `theta2r_fixed_nested()` — θ²_{r:c} = mean over clusters of
-  each cluster's finite-population rater variance). **Oracle-first catch:** fixed ≢ random even
-  balanced for nested (per-cluster finite population; the M10 crossed identity does not carry
-  over) — pinned by per-cluster + single-cluster reduction to flat M3 fixed θ²_r, cross-engine,
-  consistency≡random. Design 3 fixed ⚫ by-design; incomplete fixed-nested deferred. Completeness,
-  not new estimand work; no new dependency, no new argument. M0–M19 shipped; package at v0.1.0.
-  No milestone in flight.
-- Active task: — (no milestone in flight; **M20 — Within-cell replicate completeness** is next in
-  the arc, ADR-027, and gets its own start-of-milestone scoping ADR.)
+- Milestone: **M20 — Within-cell replicate completeness (fixed-rater, multilevel, ragged)** —
+  **in flight** (scoped by ADR-030; third milestone of the M18–M21 arc, ADR-027). Extends the M17
+  Slice 3 within-cell replicate estimand beyond two-way-random/single-level/balanced to three
+  corners, **reordered to oracle-risk** (maintainer): **Slice 1** fixed-rater replicates (θ²_r via
+  shipped `theta2r_fixed()`; balanced fixed≡random exact pin — lowest risk); **Slice 2** multilevel
+  replicates, **crossed D1 + nested D2** (add `(1|cluster:subject:rater)`; Design 3 ⚫ by-design);
+  **Slice 3** ragged replicates (single-occasion extends via `k_eff`; occasion-averaged
+  **attempt-then-degrade** to 🟣 research). Completeness, not new estimand work; no new dependency,
+  no new argument, no new estimand-spec (extends `M17-within-cell-replicates.md`). M0–M19 shipped;
+  package at v0.1.0.
+- Active task: **M20 Slice 1 — fixed-rater within-cell replicates: DONE** (branch
+  `m20-fixed-replicates`, not yet merged). `fit_{glmmtmb,lme4}_replicates_fixed`
+  (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, M10 θ²_r in the rater slot via the shared
+  `theta2r_fixed()`); abort lifted + dispatch wired; estimand layer unchanged. O-FRep oracles in
+  `test-replicates.R` all green: exact balanced fixed≡random (<1e-4), consistency≡random (~1e-8),
+  cell-mean reduction, glmmTMB↔lme4 (<1e-4), SF labels, seeded recovery + MC-CI, balanced fixed
+  ANOVA, both `ci_method`s. **Next: Slice 2 — multilevel replicates (crossed D1 + nested D2).**
 - Last green CI: PR #24 (M19) full matrix green incl. Windows and R-devel; merged to
-  `main` at 53c9f5e
+  `main` at 53c9f5e. M20 Slice 1 verified locally only (full suite 0 failures, `air`/`lintr` clean,
+  docs regenerated) — not yet pushed/CI'd.
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M19 merged (PR #24, ADR-029)**: both slices;
-  `R CMD check --as-cran` 0/0/0, 813 tests, full CI matrix green. Post-merge `project/` reconcile
-  done (M19 compressed in MILESTONES; COVERAGE #10/#11 → ✅). M20 next.
+- Updated: 2026-07-08 by main session (Opus) — **M20 scoped (ADR-030) and Slice 1 built.** Retro
+  on M18/M19 done; ADR-030 written with three maintainer decisions (oracle-risk reorder;
+  crossed D1 + nested D2 for Slice 2; attempt-then-degrade for the ragged averaged divisor); M20
+  DoD board added to MILESTONES. Slice 1 (fixed-rater replicates) implemented + tested green on
+  `m20-fixed-replicates`. Slices 2–3 next.
 
 ## Where we are
 
@@ -49,18 +56,19 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M18 & M19 shipped (PR #23/#24, ADR-028/029) — no milestone in flight.** The
+**M20 in flight (ADR-030); M18 & M19 shipped (PR #23/#24, ADR-028/029).** The
 **M18–M21 completeness arc** (ADR-027) closes every 🔵 *not yet* gap in
-[`COVERAGE.md`](COVERAGE.md). Next code work is **starting M20** (its own start-of-milestone
-scope pass + ADR).
+[`COVERAGE.md`](COVERAGE.md). Next code work is **M20 Slice 1** (fixed-rater within-cell
+replicates) — the DoD board is in [`MILESTONES.md`](MILESTONES.md).
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
 
 - **M18 — Multilevel completeness I (crossed, incomplete):** ✅ shipped (PR #23).
 - **M19 — Multilevel completeness II (nested Designs 2/3):** ✅ shipped (PR #24) — incomplete
   nested + fixed-rater nested Design 2.
-- **M20 — Within-cell replicate completeness:** ragged (Slice 1), fixed-rater (Slice 2),
-  multilevel (Slice 3) replicates. Extends M17 Slice 3. **Next.**
+- **M20 — Within-cell replicate completeness:** 🚧 in flight (ADR-030). Oracle-risk order:
+  **Slice 1** fixed-rater · **Slice 2** multilevel (crossed D1 + nested D2) · **Slice 3** ragged
+  (occasion-averaged attempt-then-degrade). Extends M17 Slice 3.
 - **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
   (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc.
 

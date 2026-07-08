@@ -87,9 +87,9 @@ replicated data (every cell present, equal replicate count). Splits σ²_res →
 
 | Case | Reason |
 |---|---|
-| ragged / non-uniform replicates | 🔵 **Not yet → M20 Slice 1** |
-| `raters = "fixed"` with replicates | 🔵 **Not yet → M20 Slice 2** |
-| multilevel (`cluster`) with replicates | 🔵 **Not yet → M20 Slice 3** |
+| `raters = "fixed"` with replicates | ✅ (M20 Slice 1, balanced) — θ²_r (shared `theta2r_fixed()`) in the rater slot of `fit_{glmmtmb,lme4}_replicates_fixed`; θ²_r = σ²_r on balanced data, so fixed reproduces the random coefficients (O-FRep). Ragged×fixed and multilevel×fixed stay deferred. |
+| multilevel (`cluster`) with replicates | 🔵 **Not yet → M20 Slice 2** (crossed D1 + nested D2) |
+| ragged / non-uniform replicates | 🔵 **Not yet → M20 Slice 3** (occasion-averaged divisor attempt-then-degrade) |
 | `engine = "lavaan"` with replicates | 🔵 **Not yet (reclassified → ROADMAP unscheduled, ADR-027)** — SEM ∩ replicates is niche/low-value; not milestoned. |
 | one-way with replicate-split components | ⚫ **By design** — one-way ignores rater identity, so the σ²_sr interaction is undefined; one-way already *uses* repeated ratings as its design (not a within-cell split). |
 

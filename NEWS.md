@@ -44,7 +44,10 @@ alternate engines, and seeded simulations.
   separating the interaction variance (stable disagreement) from pure rating error
   instead of confounding them — and reports both. A new `occasions` argument averages
   over the replicates (`occasions = "average"`), giving the reliability of a rater's
-  mean-of-replicates score. Balanced, complete replicated two-way random designs.
+  mean-of-replicates score. Balanced, complete replicated two-way designs, random
+  **or fixed** raters — with fixed raters the rater main effect is the
+  finite-population \eqn{\theta^2_r} (McGraw & Wong Case 3A), which equals the random
+  \eqn{\sigma^2_r} on balanced data, so fixed reproduces the random coefficients.
 
 ## Engines
 
