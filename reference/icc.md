@@ -357,10 +357,21 @@ one-rating-per-cell analysis (a single rating's error still includes the
 interaction), but the components are no longer confounded, and
 `occasions = "average"` reports the reliability of the mean of the
 replicates (which reduces \\\sigma^2_e\\ but not \\\sigma^2\_{sr}\\).
-This slice covers **balanced, complete** replicated two-way
-**random**-rater designs (every cell present and rated the same number
-of times); ragged replicates, fixed raters, one-way, and multilevel
-replicates are planned for later milestones.
+With `raters = "fixed"` the rater main effect becomes the
+finite-population \\\theta^2_r\\ (McGraw & Wong Case 3A, fit as
+`score ~ 1 + rater + (1|subject) + (1|subject:rater)`); on balanced,
+complete data \\\theta^2_r = \sigma^2_r\\, so fixed reproduces the
+random-rater coefficients. **Multilevel** replicated designs add a
+`(1|cluster:subject:rater)` term (crossed Design 1 and nested Design 2),
+splitting the highest-order residual at the subject level. **Ragged**
+(unequal per-cell counts or missing cells) two-way random data fits the
+**single-occasion** family directly (the replicate analogue of an
+incomplete design); the occasion-averaged coefficient on ragged data is
+not yet supported (there is no single effective occasion count to
+average over). One-way replicates, fixed or multilevel ragged
+replicates, and
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+projection off a replicate fit are planned for later milestones.
 
 ## Confidence intervals
 
