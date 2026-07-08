@@ -28,8 +28,23 @@ Ark).
 - Design/power helpers (how many raters/subjects for a target CI width).
 - Categorical/ordinal ratings (GLMM engines) beyond the Gaussian LMM.
 - Bootstrap and profile-likelihood CIs as alternatives to Monte-Carlo, for
-  method comparison.
+  method comparison. Includes the **parametric-bootstrap `ci_method`** (bootMer)
+  deferred out of M14/M15.
 - Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs.
+- **Three-facet `d_study()`** projecting subject-per-cluster counts for the
+  multilevel designs (today's `d_study()` projects rater count only) — deferred
+  repeatedly out of M5/M8/M9/M14/M15.
+- **Conflated single-level ICC (Eq. 14, ten Hove et al. 2022)** exposed as a
+  selectable coefficient — the single-number summary that collapses the
+  multilevel variance partition; deferred out of M5/M8/M9/M14/M15.
+- **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
+  lme4 interval for singular fits (glmmTMB covers this today via the
+  degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted
+  models. Includes **lme4 bootstrap on singular fits** — `lme4::bootMer` does not need
+  merDeriv, so it *could* bootstrap a boundary fit, but M16 keeps the existing
+  lme4→glmmTMB singular handoff for both `ci_method`s (ADR-025); lifting it for
+  bootstrap needs `ci_method` threaded into the lme4 fit path and a `d_study`
+  interaction (the MC machinery a bootstrap-skip fit would not build).
 - One-way random ICC(1)/ICC(1,k) via the **SEM (lavaan) engine** — deferred out of
   M7 (ADR-014). The SEM-GT literature (Jorgensen 2021; Vispoel et al. 2022; Lee &
   Vispoel 2024) covers crossed facet designs only; a wide-column parallel model

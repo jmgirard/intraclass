@@ -19,6 +19,48 @@
 # (factors for the first two), so the fitted parameter names are always
 # "theta_1|subject.1", "theta_1|rater.1", and "disp~(Intercept)".
 
+# Parametric-bootstrap factory shared by every glmmTMB fit shape (ADR-025, M16):
+# given a fitted model and an `extract(fit) -> named numeric vector of variance
+# components` closure, build the `simulate_refit(boot_samples, seed)` contract that
+# `bootstrap_ci()` consumes. The refit formula and data are recovered from the fit
+# (`formula(fit)` + `fit$frame`), which round-trips exactly for every shape here
+# (two-way, one-way, fixed-rater, and the multilevel designs incl. interaction
+# terms), so one factory serves all of them. A refit that errors or whose Hessian is
+# not positive-definite is NA-filled (dropped upstream); a refit on the variance
+# boundary (a component at 0) is a valid draw and kept, matching the MC boundary
+# policy (ADR-003). Seeded via with_rng_seed() so the global RNG is left untouched
+# (PRINCIPLES.md #9, #12).
+glmmtmb_simulate_refit <- function(fit, extract) {
+  na_out <- extract(fit)
+  na_out[] <- NA_real_
+  form <- stats::formula(fit)
+  base_data <- fit$frame
+  function(boot_samples, seed = NULL) {
+    run <- function() {
+      sims <- stats::simulate(fit, nsim = boot_samples)
+      refit_one <- function(y) {
+        boot_data <- base_data
+        boot_data$score <- y
+        refit <- tryCatch(
+          suppressWarnings(glmmTMB::glmmTMB(
+            form,
+            data = boot_data,
+            REML = TRUE
+          )),
+          error = function(e) NULL
+        )
+        if (is.null(refit) || !isTRUE(refit$sdr$pdHess)) {
+          return(na_out)
+        }
+        out <- tryCatch(extract(refit), error = function(e) na_out)
+        if (anyNA(out) || any(!is.finite(out))) na_out else out
+      }
+      vapply(sims, refit_one, na_out)
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+}
+
 fit_glmmtmb <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
 
@@ -39,11 +81,15 @@ fit_glmmtmb <- function(data, call = rlang::caller_env()) {
   )
 
   vc <- glmmTMB::VarCorr(fit)$cond
-  components <- list(
-    subject = as.numeric(attr(vc$subject, "stddev"))^2,
-    rater = as.numeric(attr(vc$rater, "stddev"))^2,
-    residual = stats::sigma(fit)^2
-  )
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    c(
+      subject = as.numeric(attr(fvc$subject, "stddev"))^2,
+      rater = as.numeric(attr(fvc$rater, "stddev"))^2,
+      residual = stats::sigma(f)^2
+    )
+  }
+  components <- as.list(extract(fit))
 
   # Joint covariance and the point estimates on the SAME internal scale/order.
   vcov_full <- stats::vcov(fit, full = TRUE)
@@ -86,7 +132,8 @@ fit_glmmtmb <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_full,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
   )
 }
 
@@ -120,10 +167,14 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
   )
 
   vc <- glmmTMB::VarCorr(fit)$cond
-  components <- list(
-    subject = as.numeric(attr(vc$subject, "stddev"))^2,
-    residual = stats::sigma(fit)^2
-  )
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    c(
+      subject = as.numeric(attr(fvc$subject, "stddev"))^2,
+      residual = stats::sigma(f)^2
+    )
+  }
+  components <- as.list(extract(fit))
 
   vcov_full <- stats::vcov(fit, full = TRUE)
   nm <- colnames(vcov_full)
@@ -160,7 +211,8 @@ fit_glmmtmb_oneway <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_full,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
   )
 }
 
@@ -211,8 +263,16 @@ fit_glmmtmb_ml_model <- function(formula, data) {
 glmmtmb_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
   vc <- glmmTMB::VarCorr(fit)$cond
   sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
-  components <- lapply(groups, function(g) sd_of(g)^2)
-  components$residual <- stats::sigma(fit)^2
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    out <- vapply(
+      groups,
+      function(g) as.numeric(attr(fvc[[g]], "stddev"))^2,
+      numeric(1)
+    )
+    c(out, residual = stats::sigma(f)^2)
+  }
+  components <- as.list(extract(fit))
 
   vcov_full <- stats::vcov(fit, full = TRUE)
   # `colnames()` here is itself a named vector (cond/disp/theta1...); strip those
@@ -253,7 +313,8 @@ glmmtmb_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_full,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
   )
 }
 
@@ -445,11 +506,19 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   beta <- glmmTMB::fixef(fit)$cond
   th <- theta2r_fixed(beta, stats::vcov(fit)$cond, k)
 
-  components <- list(
-    subject = sd_subject^2,
-    rater = th$point,
-    residual = stats::sigma(fit)^2
-  )
+  # The bootstrap recomputes theta^2_r directly from each refit's rater betas (a
+  # bias-corrected finite-population quantity, ADR-023) -- more direct than the MC
+  # path, which reconstructs it from the beta draws.
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    fth <- theta2r_fixed(glmmTMB::fixef(f)$cond, stats::vcov(f)$cond, k)
+    c(
+      subject = as.numeric(attr(fvc$subject, "stddev"))^2,
+      rater = fth$point,
+      residual = stats::sigma(f)^2
+    )
+  }
+  components <- as.list(extract(fit))
 
   # Joint covariance + point estimates on the internal scale for the MC CI. The
   # fixed-effect betas are on the natural (identity) scale; the subject SD and
@@ -494,7 +563,8 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_full,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
   )
 }
 
@@ -534,9 +604,19 @@ fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
     subject = "cluster:subject",
     cluster_rater = "cluster:rater"
   )
-  components <- lapply(groups, function(g) sd_of(g)^2)
-  components$rater <- th$point
-  components$residual <- stats::sigma(fit)^2
+  # Bootstrap extractor: the random slots from VarCorr plus theta^2_r recomputed from
+  # each refit's rater betas (ADR-023), the same {subject | rater, residual} map.
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    fth <- theta2r_fixed(glmmTMB::fixef(f)$cond, stats::vcov(f)$cond, k)
+    out <- vapply(
+      groups,
+      function(g) as.numeric(attr(fvc[[g]], "stddev"))^2,
+      numeric(1)
+    )
+    c(out, rater = fth$point, residual = stats::sigma(f)^2)
+  }
+  components <- as.list(extract(fit))
 
   vcov_full <- stats::vcov(fit, full = TRUE)
   nm <- unname(colnames(vcov_full))
@@ -585,6 +665,7 @@ fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_full,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
   )
 }

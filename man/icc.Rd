@@ -41,6 +41,7 @@ icc(
   conf_level = 0.95,
   ci_method = "montecarlo",
   mc_samples = 10000L,
+  boot_samples = 999L,
   seed = NULL
 )
 }
@@ -130,9 +131,22 @@ balanced data. \code{"lme4"} requires the \pkg{lme4} and \pkg{merDeriv} packages
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}
 
-\item{ci_method}{Interval method. Only \code{"montecarlo"} is currently supported.}
+\item{ci_method}{Interval method. \code{"montecarlo"} (default) simulates from the
+fitted parameter covariance on the engine's log scale (fast, boundary-aware).
+\code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
+fitted model, refits, and takes percentile quantiles of the resampled
+coefficients. The bootstrap does not rely on the asymptotic-normal covariance
+approximation but is far slower (a refit per resample). It is available for
+every design the \code{"glmmTMB"} and \code{"lme4"} engines fit (via \code{glmmTMB}'s
+\code{simulate()} + refit and \code{lme4::bootMer} respectively); the \code{"lavaan"} engine
+supports \code{"montecarlo"} only. As with the Monte-Carlo interval, the \code{"lme4"}
+engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.}
 
-\item{mc_samples}{Number of Monte-Carlo draws for the interval.}
+\item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
+(default \code{10000}).}
+
+\item{boot_samples}{Number of resamples for \code{ci_method = "bootstrap"} (default
+\code{999}). Ignored when \code{ci_method = "montecarlo"}.}
 
 \item{seed}{Optional integer seed for a reproducible interval. The global RNG
 state is restored afterward.}

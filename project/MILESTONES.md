@@ -394,3 +394,56 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–3 + finish-task reconcile; merged via PR #19 at b0dd492; full
   CI matrix green incl. Windows and R-devel, 572 tests). `engine = "lme4"` now has full
   design parity with glmmTMB on both balanced and incomplete/ragged data.
+
+## M16: parametric-bootstrap `ci_method` — second interval method (ADR-025)
+- Goal: add **`ci_method = "bootstrap"`**, a parametric bootstrap (simulate from the
+  fitted model → refit → recompute the ICC per replicate → percentile interval), as a
+  sibling to the Monte-Carlo default (ADR-003). The **first genuinely new `ci_method`**
+  (until now `icc()` hard-rejects anything but `"montecarlo"`), and the **multi-method
+  dispatch seam** the eventual Bayesian `"posterior"` method reuses. Chosen as Wave 1 of
+  the non-Bayesian carryover sequencing (STATUS): lowest estimand-risk (no new estimand),
+  highest infra ROI. **Both engines via an engine-level `simulate_refit()` contract**
+  (`bootMer` for lme4, `simulate()`+refit for glmmTMB — maintainer chose "both" so the
+  **default engine** works out of the box), mirroring the M5.5 engine × design seam;
+  each returns per-replicate components on the shared contract so `icc_point()` maps to
+  the ICC identically. New arg **`boot_samples`** (default 999, vs `mc_samples` 10000).
+  **No new estimand, estimand-spec, or dependency** (`bootMer` in lme4/`Suggests`,
+  glmmTMB `simulate()` in `Imports` — light install intact); additive, non-breaking (#6).
+- Reference: ADR-025 (scope); no estimand-spec (an *interval method*, not an estimand —
+  cf. M4.5 `d_study()`). Oracles (a CI method's oracle is **coverage**, #1): (O1) seeded
+  simulation coverage ~nominal at known VCs; (O2) agreement with the MC CI on interior
+  cases within MC tolerance (MC the independent method), diverging predictably at the
+  boundary (characterized, #18); (O3) literature anchor (Efron & Tibshirani 1993; the
+  ten Hove/Jorgensen MC-vs-bootstrap comparison).
+- Slices (thin, #15): **S1** `simulate_refit()` contract + `bootstrap` dispatch for the
+  **glmmTMB** engine on the balanced two-way random ICC, O1/O2 (de-risks refit-in-loop);
+  **S2** lme4 `bootMer` parity through the same contract, O2 cross-engine + O1; **S3**
+  extend across the fitted design family (fixed-rater, multilevel) + the refit-failure
+  discard policy (classed `cli` warning, #5/#8). Cross-cutting DoD: roxygen
+  (`@param ci_method`/`boot_samples`), NEWS, `advanced.Rmd` method-comparison note.
+
+### Deferred out of M16 (record so not rediscovered)
+- **BCa intervals** (need jackknife acceleration — percentile ships first); **bootstrap-
+  projected `d_study()` bands** (the reliability-curve band reuses the shared *MC* draws
+  across `k` — a bootstrap version would reproject each refit's components); **parallelized
+  refits** (keep dependency-light first); **lme4 bootstrap on singular fits** (bootMer
+  could bootstrap a boundary fit without merDeriv, but M16 keeps the lme4→glmmTMB singular
+  handoff for both `ci_method`s — maintainer decision; lifting it needs `ci_method` threaded
+  into the lme4 fit path + a `d_study` interaction → ROADMAP). Untouched arc carry-overs stay in
+  [`ROADMAP.md`](ROADMAP.md): the **Bayesian engine** + `ci_method = "posterior"`;
+  **within-cell replicates** (Wave 2); **three-facet `d_study()`** (Wave 2); the **M9
+  averaged cluster-level `ICC(c,k)` incomplete divisor** (Wave 3); the **conflated
+  single-level ICC (Eq. 14)** (Wave 1 thin slice); **one-way via SEM** (blocked, ADR-014);
+  the boundary-robust lme4 singular interval + merDeriv edge cases (deprioritized).
+- Status: **in flight — all three slices + cross-cutting DoD done, ready for PR** (S1
+  glmmTMB `b63c471`, S2 lme4 `9ebf5ad` committed; S3 + DoD in working tree). `ci_method =
+  "bootstrap"` covers **every design both mixed-model engines fit** — two-way random/fixed,
+  one-way, and the multilevel designs at both levels — via a shared `glmmtmb_simulate_refit`
+  / `lme4_bootmer_refit` factory per engine (the component extractor DRY-shared with each
+  fit's point estimate; θ²_r recomputed per refit for fixed raters). Oracles: O1 coverage,
+  O2 MC-agreement (two-way ≤0.06; multilevel subject-level ≤0.10, honestly looser),
+  cross-engine lme4≈glmmTMB (≤0.05), a deterministic refit-failure discard-policy test,
+  reproducibility, and the lavaan-unsupported abort. Cross-cutting DoD landed: roxygen,
+  NEWS, `advanced.Rmd` "Choosing a confidence-interval method". 591 pass / 0 fail, lint +
+  `air` clean. Remaining: installed-pkg check (`NOT_CRAN=true`) then PR off
+  `m16-bootstrap-ci`.
