@@ -1562,3 +1562,88 @@ consequences → references.
   (detail a milestone at its start), §1 (engines / light install); memory
   `milestone-branches-and-prs`, `verify-against-installed-package`, `run-lintr-before-push`,
   `pkgdown-reference-index-new-exports`.
+
+## ADR-027: M18–M21 arc — close the `COVERAGE.md` "not yet" completeness gaps
+- Date: 2026-07-08
+- Status: accepted
+- Context: With M0–M17 shipped and no milestone in flight, this session built
+  `project/COVERAGE.md` — a current-state stock-take of the `icc()` / `d_study()` argument
+  space that tags every unsupported combination with a reason category (**not yet** /
+  **research** / **blocked** / **by design**). The maintainer asked to plan a milestone (or
+  several) that closes the **🔵 not yet** items — the ones with a known implementation route —
+  **excluding the four cross-cutting items** (Bayesian `ci_method = "posterior"`,
+  categorical/ordinal GLMM, non-parametric/profile-likelihood CIs, lme4 singular/merDeriv edge
+  cases), which are explicitly sequenced for later. Fourteen non-cross-cutting "not yet" items
+  were inventoried (COVERAGE.md §①/②/④/`d_study`). This ADR **sets the arc**; per
+  PRINCIPLES.md #2/#14 and brief §7 each milestone below is **detailed by its own scoping ADR
+  at its start** (as ADR-017 set the M9–M13 tail and ADR-018–022 detailed each). Two
+  sequencing/scope questions were put to the maintainer this session (Decision below).
+- Decision:
+  - **Four milestones, mixed-model-mature first, SEM last** (maintainer chose "ML completeness
+    first"). Order and grouping by **shared machinery + oracle-risk** (#1 — bank the
+    established-oracle wins before the heavier engine arc):
+    - **M18 — Multilevel completeness I: crossed (Design 1) incomplete corners.** Fills the
+      ragged-data corners of the crossed five-component fit that M9/M10/M17 left open.
+      *Slice 1* incomplete **fixed-rater** crossed (COVERAGE #9) — reuses M3 Case-3A +
+      M10 θ²_r under imbalance (lowest risk, machinery exists). *Slice 2* incomplete
+      **conflated** ICC (#8) — characterize Eq. 14 on ragged data (`M17-conflated-icc.md §6`;
+      needs a new oracle characterization). *Slice 3* incomplete **subject-level `d_study()`**
+      (#13, **subject level only** — the cluster level stays bounded by the Wave-3 `ICC(c,k)`
+      incomplete-divisor research item, ADR-018/M9 §9) **+ bootstrap-projected `d_study()`
+      bands** (#14, the M16 deferral).
+    - **M19 — Multilevel completeness II: nested designs (2/3).** Brings the nested designs up
+      to the incomplete + fixed parity crossed Design 1 already has. *Slice 1* **incomplete
+      nested** (#10) — the M8→incomplete analog of M9. *Slice 2* **fixed-rater nested** (#11) —
+      θ²_r in the nested decomposition.
+    - **M20 — Within-cell replicate completeness.** Extends M17 Slice 3 beyond
+      balanced-two-way-random. *Slice 1* **ragged** replicates (#4) · *Slice 2* **fixed-rater**
+      replicates (#5) · *Slice 3* **multilevel** replicates (#6).
+    - **M21 — SEM (lavaan) engine parity** (the lavaan analog of the lme4 M5.5→M15 arc).
+      *Slice 1* lavaan **bootstrap** (#3) — reuse the M16 `simulate_refit` seam (quick, low
+      risk). *Slice 2* **fixed-rater** SEM (#1). *Slice 3* **incomplete** SEM / **FIML** (#2).
+  - **No new estimand for M18–M20; M21 is engine parity, not estimand work.** Like M14/M15,
+    the completeness milestones extend the **existing** estimands to ragged/fixed/replicated
+    data and carry **no new estimand-spec** — except the two that need real spec care:
+    **incomplete-conflated** (extend `M17-conflated-icc.md §6`) and **FIML-SEM** (an oracle
+    note, engine not estimand — cf. M7). Additive and non-breaking throughout (#6): no new
+    top-level argument, only new *valid combinations* of the shipped arguments.
+  - **Oracle posture (#1):** M18–M20 use the established mixed-model pattern — glmmTMB↔lme4
+    cross-engine < 1e-4, **reduction** to the shipped complete/balanced case, and seeded
+    recovery; no textbook worked example (as M8–M10/M15). M21 uses **glmmTMB as the
+    independent oracle** exactly as M7 did. Each milestone's own ADR pins its per-slice
+    oracles at its start.
+  - **Two items reclassified out of this arc** (maintainer chose "reclassify both"):
+    **multilevel SEM (COVERAGE #12)** is a research-flavored heavy lift (two-level SEM-GT; the
+    paper's own multilevel estimator is Bayesian, not a plain lavaan model) — **moved to the
+    cross-cutting "later" bucket beside the Bayesian engine**, not milestoned here.
+    **lavaan + within-cell replicates (#7)** (SEM ∩ replicates) is niche/low-value — **dropped
+    to ROADMAP unscheduled.** Both are re-tagged in COVERAGE.md and recorded in ROADMAP.md.
+  - **Scope-outs preserved from the source milestones** (not rediscovered): the Wave-3
+    **averaged `ICC(c,k)` incomplete divisor** (🟣 research, ADR-018/M9 §9) bounds M18 Slice 3
+    to the subject level and is **not** part of this arc; **one-way via SEM** stays blocked
+    (ADR-014); the four cross-cutting items stay deferred per STATUS.
+- Consequences: On completion of M18–M21, every 🔵 not-yet gap in COVERAGE.md is closed and
+  the only remaining unsupported combinations are the ⚫ by-design (undefined), 🟣 research
+  (`ICC(c,k)` incomplete divisor), 🔴 blocked (one-way SEM), and the four cross-cutting
+  "later" items — a clean, fully-annotated coverage surface. Risk is front-loaded away: M18–M20
+  ride mature glmmTMB/lme4 machinery with reduction oracles; the heavier SEM parity is last and
+  the heaviest SEM piece (multilevel SEM) is deliberately out. The arc is a **hypothesis, not a
+  contract** (MILESTONES preamble) — reorders or a merge of M18/M19 (both mixed-model
+  multilevel completeness) get a follow-up ADR. This ADR does **not** authorize code: M18 is
+  scoped in full by its own ADR at its start after a short retro (brief §7).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + seeded recovery per
+  slice), #2/#14 (name the estimand / detail a milestone at its start — this ADR only sets the
+  arc), #5/#8 (fail-loudly classed guards for the ragged/fixed identifiability corners), #6
+  (additive, non-breaking — new valid arg combinations only), #16 (tracking in-commit), #17
+  (reclassified #12/#7 land in ROADMAP, not scope creep); ADR-017 (precedent: an arc-setting
+  ADR with per-milestone detail ADRs to follow), ADR-008 (M3 k_eff/connectedness + Case-3A
+  θ²_r under imbalance — M18/M19 reuse), ADR-011 (five-component multilevel fit), ADR-016/018
+  (M8 nested / M9 incomplete crossed — M18/M19 extend), ADR-019 (M10 θ²_r multilevel),
+  ADR-025 (M16 bootstrap seam — M21 Slice 1 + M18 `d_study` bands reuse), ADR-014 (M7 SEM
+  engine + its fixed/incomplete/multilevel/one-way deferrals — M21 promotes fixed+incomplete,
+  multilevel SEM & one-way SEM stay out), ADR-026 (M17 replicates + multilevel `d_study` +
+  conflated — M18/M20 extend to incomplete/fixed/multilevel); estimand-specs
+  `M17-conflated-icc.md §6`, `M17-within-cell-replicates.md §7`, `M9-incomplete-multilevel.md
+  §9`, `M4.5-d-study.md`; `project/COVERAGE.md` (the inventory this arc closes),
+  `project/ROADMAP.md` (parking lot for #12/#7); ten Hove, Jorgensen & van der Ark (2022);
+  `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start).
