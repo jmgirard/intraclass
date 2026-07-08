@@ -11,14 +11,16 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-08**, after **M18** (PR #23, ADR-028) — which closes the four crossed-incomplete
-gaps (#8/#9/#13/#14); M17 (PR #22) before that.
+**2026-07-08**, after **M20** (ADR-030, built; pending PR CI + merge) — which closes the
+within-cell replicate corners (fixed / multilevel / ragged single-occasion) and adds a
+`d_study()`-off-replicate guard; M18 (PR #23) and M19 (PR #24) before that.
 
 **Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) are
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason
-cell. **M18 (crossed-incomplete) is done** (#8/#9/#13/#14 now ✅); remaining order: M19
-nested → M20 replicates → M21 SEM parity. Two former 🔵 items were reclassified (multilevel
-SEM and lavaan+replicates → ROADMAP); see below.
+cell. **M18 (crossed-incomplete), M19 (nested), and M20 (replicates) are done**; the only
+remaining arc milestone is **M21 SEM parity**. Two former 🔵 items were reclassified
+(multilevel SEM and lavaan+replicates → ROADMAP); see below. One M20 item degraded to 🟣
+research (occasion-averaged coefficient on ragged data — no validated effective-n_o divisor).
 
 ## Reason taxonomy (why an unsupported case is unsupported)
 
@@ -87,9 +89,11 @@ replicated data (every cell present, equal replicate count). Splits σ²_res →
 
 | Case | Reason |
 |---|---|
-| ragged / non-uniform replicates | 🔵 **Not yet → M20 Slice 1** |
-| `raters = "fixed"` with replicates | 🔵 **Not yet → M20 Slice 2** |
-| multilevel (`cluster`) with replicates | 🔵 **Not yet → M20 Slice 3** |
+| `raters = "fixed"` with replicates | ✅ (M20 Slice 1, balanced) — θ²_r (shared `theta2r_fixed()`) in the rater slot of `fit_{glmmtmb,lme4}_replicates_fixed`; θ²_r = σ²_r on balanced data, so fixed reproduces the random coefficients (O-FRep). Ragged×fixed and multilevel×fixed stay deferred. |
+| multilevel (`cluster`) with replicates | ✅ (M20 Slice 2, balanced) — crossed Design 1 (`(1\|cluster:subject:rater)`, six components) and nested Design 2 (five); the residual splits into the interaction σ²_{csr} and pure error at the subject level. Design 3 replicate-split ⚫ by-design (multilevel one-way, no separable interaction); fixed×multilevel, conflated×replicates, and ragged×multilevel replicates deferred. Cross-engine + reduction (occasion-averaged == M5/M8 on cell means) oracles. |
+| ragged / non-uniform replicates, **single-occasion** | ✅ (M20 Slice 3) — two-way random, the replicate analogue of M3: the shipped interaction fit + harmonic-mean `k_eff` (distinct raters/subject) + connectedness gate. Cross-engine + seeded-recovery oracles. Ragged×fixed and ragged×multilevel stay deferred (compound corners). |
+| ragged replicates, **`occasions = "average"`** | 🟣 **Research** — with unequal per-cell counts the reliability of the mean of `n_o` replicates has no single scalar effective-`n_o` divisor (GT averaging weights are per-cell) and no textbook/independent oracle pins one; needs a simulation-oracle study before it can ship (M20 attempt-then-degrade, ADR-030; M17 §7). |
+| `d_study()` projection off a replicate fit | 🔵 **Not yet** — rater/occasion projection off a replicate fit needs the per-component error divisors; refused loudly (M20; M17 §7). |
 | `engine = "lavaan"` with replicates | 🔵 **Not yet (reclassified → ROADMAP unscheduled, ADR-027)** — SEM ∩ replicates is niche/low-value; not milestoned. |
 | one-way with replicate-split components | ⚫ **By design** — one-way ignores rater identity, so the σ²_sr interaction is undefined; one-way already *uses* repeated ratings as its design (not a within-cell split). |
 

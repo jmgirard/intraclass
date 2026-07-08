@@ -100,7 +100,19 @@ icc_estimand <- function(
     # rater) at the cluster level. Subject-level error is structurally identical
     # to the single-level estimand (M5 §3a). No canonical SF label.
     signal <- switch(level, subject = "subject", cluster = "cluster")
-    resid <- switch(level, subject = "residual", cluster = "cluster_rater")
+    resid <- if (replicates) {
+      # Multilevel within-cell replicates (M20 Slice 2): the subject-level residual
+      # splits into the interaction sigma^2_sr (cluster:subject:rater) and pure error
+      # sigma^2_e; occasion averaging reduces only pure error. The cluster-level
+      # "residual" is cluster:rater, which the split does not touch (M17 §2 shape).
+      switch(
+        level,
+        subject = c("subject_rater", "residual"),
+        cluster = "cluster_rater"
+      )
+    } else {
+      switch(level, subject = "residual", cluster = "cluster_rater")
+    }
     error <- switch(type, agreement = c("rater", resid), consistency = resid)
     sf <- NA_character_
   } else if (replicates) {
@@ -246,7 +258,51 @@ icc_components_view <- function(x) {
   ml <- isTRUE(x$design$multilevel)
   ow <- identical(x$design$model, "oneway")
   rep <- isTRUE(x$design$replicates)
-  spec <- if (rep) {
+  spec <- if (rep && ml) {
+    # Multilevel within-cell replicates (M20 Slice 2): the highest-order residual is
+    # split into the subject x rater interaction and pure error, on top of the
+    # multilevel components. Design 2 (nested) has no cluster:rater term and its rater
+    # slot holds sigma^2_{r:c}.
+    if (is.null(vc$cluster_rater)) {
+      list(
+        label = c(
+          "cluster",
+          "subject",
+          "rater:cluster",
+          "subject:rater",
+          "residual"
+        ),
+        variance = c(
+          vc$cluster,
+          vc$subject,
+          vc$rater,
+          vc$subject_rater,
+          vc$residual
+        ),
+        confounded = FALSE
+      )
+    } else {
+      list(
+        label = c(
+          "cluster",
+          "subject",
+          "rater",
+          "cluster:rater",
+          "subject:rater",
+          "residual"
+        ),
+        variance = c(
+          vc$cluster,
+          vc$subject,
+          vc$rater,
+          vc$cluster_rater,
+          vc$subject_rater,
+          vc$residual
+        ),
+        confounded = FALSE
+      )
+    }
+  } else if (rep) {
     # Within-cell replicates (M17 Slice 3): the residual is split into the
     # subject x rater interaction and pure within-cell error.
     list(

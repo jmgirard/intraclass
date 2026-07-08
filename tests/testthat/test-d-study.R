@@ -709,3 +709,33 @@ test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project"
   expect_setequal(unique(dsi$level), "subject")
   expect_true(all(is.finite(dsi$conf.low) & is.finite(dsi$conf.high)))
 })
+
+test_that("d_study refuses within-cell replicate fits (M20; #1/#5)", {
+  skip_if_not_installed("glmmTMB")
+  # A replicate fit splits the residual into interaction + pure error; projecting
+  # rater counts off it would silently drop the interaction from the error set, so
+  # d_study() must refuse rather than miscompute (occasion/replicate projection is a
+  # deferred facet, M17 §7).
+  set.seed(1)
+  ns <- 12
+  nr <- 4
+  no <- 2
+  s <- stats::rnorm(ns, 0, sqrt(1.2))
+  r <- stats::rnorm(nr, 0, sqrt(0.7))
+  g <- expand.grid(
+    subject = seq_len(ns),
+    rater = seq_len(nr),
+    occ = seq_len(no)
+  )
+  srv <- stats::rnorm(ns * nr, 0, sqrt(0.4))
+  g$sr <- srv[(g$rater - 1) * ns + g$subject]
+  g$score <- 10 +
+    s[g$subject] +
+    r[g$rater] +
+    g$sr +
+    stats::rnorm(nrow(g), 0, sqrt(0.5))
+  g$subject <- factor(g$subject)
+  g$rater <- factor(g$rater)
+  x <- icc(g, score, subject, rater, seed = 1)
+  expect_error(d_study(x, m = 1:3), class = "intraclass_unsupported")
+})

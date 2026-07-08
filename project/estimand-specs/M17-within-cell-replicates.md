@@ -162,13 +162,41 @@ Balanced two-way random with `n_o` replicates. Verified in a new
 ## 7. Out of scope for M17 Slice 3 (recorded for forward-compatibility)
 
 - **Ragged / incomplete replicates** (unequal `n_o` per cell, missing cells) — the
-  fit tolerates them but `n_o` and the ANOVA oracle do not; deferred (the replicate
-  analogue of M3). The single-occasion ICC family would extend first; the
-  occasion-averaged coefficient needs an effective-`n_o` divisor study.
-- **Fixed-rater replicates** (θ²_r with an interaction), **one-way replicates**
-  (rater identity ignored — replicates already fold into the one-way residual, no
-  change), and **multilevel replicates** (the `(1 | cluster:subject:rater)` case
-  noted in M9's deferrals).
+  **single-occasion** ICC family **shipped in M20 Slice 3** (ADR-030): two-way random,
+  the replicate analogue of M3 — the shipped interaction fit tolerates ragged data, the
+  rater divisor is the harmonic-mean `k_eff` over *distinct* raters per subject, and
+  connectedness is gated. Oracle O-RagRep: glmmTMB↔lme4 cross-engine + seeded recovery
+  with MC coverage. **The occasion-averaged coefficient on ragged data is 🟣 research,
+  not shipped** (M20 attempt-then-degrade outcome): with unequal per-cell counts the
+  reliability of the mean of `n_o` replicates has no single scalar effective-`n_o`
+  divisor (the GT averaging weights are per-cell) and no textbook/independent oracle
+  pins one, so shipping a guessed divisor would violate #1/#4 — it needs a
+  simulation-oracle study first. `occasions = "average"` on ragged data aborts loudly.
+  Ragged × fixed and ragged × multilevel replicates stay deferred (compound corners).
+- **Fixed-rater replicates** (θ²_r with an interaction) — **shipped in M20 Slice 1**
+  (ADR-030): `fit_{glmmtmb,lme4}_replicates_fixed` fits
+  `score ~ 1 + rater + (1|subject) + (1|subject:rater)` and places the shared
+  `theta2r_fixed()` θ²_r in the rater slot; the estimand map / occasion divisor here
+  are unchanged (only θ²_r replaces σ²_r). Balanced/complete single-level only; θ²_r =
+  σ²_r on balanced data, so fixed reproduces the random coefficients (oracle
+  O-FRep). Ragged × fixed replicates stay deferred (M20 Slice 3 scope-out).
+- **Multilevel replicates** (the `(1 | cluster:subject:rater)` case noted in M9's
+  deferrals) — **shipped in M20 Slice 2** (ADR-030): crossed Design 1 (six-component
+  fit) and nested Design 2 (five-component) add the interaction term so the
+  subject-level residual splits into σ²_{csr} and pure error; the subject-level error
+  map and occasion divisor match this spec (§2), the cluster level is unaffected by
+  the split (its "residual" is cluster:rater). Random raters, balanced/complete only;
+  Design 3 replicate-split is ⚫ by-design (multilevel one-way, no separable
+  interaction), and fixed×multilevel, conflated×replicates, and ragged×multilevel
+  replicates stay deferred.
+- **One-way replicates** (rater identity ignored — replicates already fold into the
+  one-way residual, no change) remain out of scope (⚫ by design).
+- **`d_study()` projection off a replicate fit** — a rater-count (or occasion)
+  projection off a replicate fit needs the per-component error divisors (the
+  interaction divides by raters, pure error by raters × occasions), which the
+  projection estimand does not yet carry; `d_study()` **refuses loudly** on replicate
+  fits rather than silently drop the interaction (M20). The occasion D-study below
+  stays deferred.
 - **Occasion D-study** (`d_study()` projecting `n_o`) — the divisor supports it, but
   projecting occasions is deferred to keep this slice bounded; the `occasions`
   knob covers single/average of the observed count.

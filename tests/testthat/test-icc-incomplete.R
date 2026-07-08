@@ -52,14 +52,12 @@ test_that("icc() aborts on a disconnected design (#5, unidentified)", {
   )
 })
 
-test_that("icc() aborts on within-cell replicates (unsupported)", {
-  d <- sf_ratings_long()
-  dup <- rbind(d, d[d$subject == "S1" & d$rater == "J1", ])
-  expect_error(
-    icc(dup, score, subject, rater),
-    class = "intraclass_unsupported"
-  )
-})
+# Ragged within-cell replicates now fit as the replicate analogue of an incomplete
+# design (M20 Slice 3, ADR-030); the full oracles (cross-engine, seeded recovery,
+# well-conditioned ragged designs) live in test-replicates.R (O-RagRep). A
+# pathologically degenerate replicate design (too few replicated cells to identify the
+# interaction) fails loudly with a classed intraclass_singular_fit rather than crashing
+# -- covered in test-replicates.R.
 
 test_that("the incomplete-data code path reproduces the balanced oracle", {
   # On complete data k_eff == k, so the M1/M2 numbers must be unchanged.
@@ -232,9 +230,6 @@ test_that("incomplete-design error messages are stable", {
     icc(disconnected_design(), score, subject, rater),
     error = TRUE
   )
-  dup <- rbind(sf_ratings_long(), sf_ratings_long()[1, ])
-  expect_snapshot(
-    icc(dup, score, subject, rater),
-    error = TRUE
-  )
+  # (The duplicated-cell case that once errored here now fits as a ragged replicate
+  # design -- M20 Slice 3; its behaviour is covered in test-replicates.R.)
 })

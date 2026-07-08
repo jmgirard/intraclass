@@ -173,6 +173,30 @@ nested_design_balanced <- function(df, design) {
   }
 }
 
+# Within-cell replicate facts for a MULTILEVEL design (M20 Slice 2, ADR-030).
+# summarize_design() reads the flat subject x rater grid, whose completeness notion
+# (`n_cells == ns * nr`) is crossed-only, so its `n_o`/`replicates_uniform` are wrong
+# for a nested (block-diagonal) Design 2. This computes a design-aware `n_o` (the
+# uniform rating count per OBSERVED cell) and whether the design is a balanced,
+# complete, uniformly-replicated one for its type -- by de-replicating to one row per
+# cell and applying the design's own balance check (crossed: full grid; nested:
+# block-complete). `design` is "crossed" or "nested_in_clusters" (Design 3 replicates
+# are aborted by design before this is reached).
+multilevel_replicate_facts <- function(df, design) {
+  counts <- table(df$subject, df$rater)
+  observed <- as.integer(counts[counts > 0L])
+  equal <- length(unique(observed)) == 1L
+  n_o <- if (equal) observed[[1L]] else NA_integer_
+  cell1 <- !duplicated(df[c("subject", "rater")])
+  df1 <- droplevels(df[cell1, , drop = FALSE])
+  complete <- if (design == "crossed") {
+    summarize_design(df1)$balanced
+  } else {
+    nested_design_balanced(df1, design)
+  }
+  list(n_o = n_o, uniform = equal && complete)
+}
+
 # Identifiability of an INCOMPLETE crossed (Design 1) multilevel design
 # (estimand-spec M9 §4b). Balance is not required for the mixed-model fit, but
 # under missing cells two graph conditions gate DIFFERENT coefficients, so they

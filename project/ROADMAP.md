@@ -29,14 +29,16 @@ visible without re-deriving it. Updated whenever an item's readiness changes;
 `STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
 ready ones.
 
-**Planned as the M18–M21 arc (ADR-027):** the completeness gaps tagged **🔵 not yet** in
-[`COVERAGE.md`](COVERAGE.md) — incomplete/fixed **crossed** multilevel (M18), incomplete/fixed
-**nested** multilevel (M19), ragged/fixed/multilevel **within-cell replicates** (M20), and
-**SEM (lavaan) engine parity** for fixed + incomplete/FIML (M21) — are scheduled as a
-mixed-model-first arc; each is detailed by its own scoping ADR at its start (ADR-015). Those
-items live as *Deferred out of M<n>* lines in [`MILESTONES.md`](MILESTONES.md), not here.
-Two items were reclassified **into** this parking lot instead of milestoned (see below):
-*multilevel SEM* and *lavaan + within-cell replicates*.
+**The M18–M21 arc (ADR-027):** the completeness gaps tagged **🔵 not yet** in
+[`COVERAGE.md`](COVERAGE.md) were scheduled as a mixed-model-first arc; each detailed by its
+own scoping ADR at its start (ADR-015). **Shipped:** incomplete/fixed **crossed** multilevel
+(M18, PR #23), incomplete/fixed **nested** multilevel (M19, PR #24), and ragged/fixed/multilevel
+**within-cell replicates** (M20, ADR-030 — built, pending merge). **Remaining:** **SEM (lavaan)
+engine parity** for fixed + incomplete/FIML (**M21**, next). Those items live as *Deferred out of
+M<n>* lines in [`MILESTONES.md`](MILESTONES.md), not here. Two items were reclassified **into**
+this parking lot instead of milestoned (see below): *multilevel SEM* and *lavaan + within-cell
+replicates*. Two M20 corners degraded/deferred to the parking lot below: the *occasion-averaged
+coefficient on ragged replicates* (🟣 research) and *`d_study()` projection off a replicate fit*.
 
 **Shipped as M17 (PR #22, ADR-026):** the *conflated single-level ICC (Eq. 14)*, a
 *multilevel `d_study()`*, and *within-cell replicates* shipped as milestone M17 (see
@@ -113,6 +115,18 @@ helpers* item below (sample-size / CI-width), where it belongs.
   **Status: reclassified here from M21 (ADR-027); unscheduled, low value.** SEM ∩ replicates is
   niche; would need both a lavaan replicate parameterization and the M20 replicate machinery to
   intersect. Parked rather than milestoned; promote only if a concrete need appears.
+- **Occasion-averaged coefficient on ragged replicates** — `occasions = "average"` when per-cell
+  rating counts are unequal (or cells are missing). **Status: 🟣 research (degraded out of M20
+  Slice 3, ADR-030).** No single scalar effective-`n_o` divisor exists (the GT averaging weights
+  are per-cell) and no textbook/independent oracle pins one, so it aborts loudly rather than ship a
+  guessed divisor (#1/#4). Needs a simulation-oracle study (likely a Fable review, #19) — the
+  replicate sibling of the M9 ragged `ICC(c,k)` divisor question. The single-occasion ragged family
+  ships (M20 Slice 3).
+- **`d_study()` projection off a within-cell replicate fit** — a rater- (or occasion-) count
+  projection off a replicate fit. **Status: 🔵 not yet (M20).** Needs the per-component error
+  divisors threaded into the projection estimand (the interaction divides by raters, pure error by
+  raters × occasions); `d_study()` currently refuses loudly on replicate fits rather than silently
+  drop the interaction. Schedulable once the projection estimand carries `error_divisors`.
 - **Bayesian engine** (`brms`/`rstanarm`) behind `Suggests`, with a new
   `ci_method = "posterior"` (credible intervals from native posterior draws) and
   half-*t* hyperpriors (ten Hove, Jorgensen & van der Ark 2020). Deferred out of M7
