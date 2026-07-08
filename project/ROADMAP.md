@@ -29,10 +29,9 @@ visible without re-deriving it. Updated whenever an item's readiness changes;
 `STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
 ready ones.
 
-**Scheduled into M17 (2026-07-08, ADR-026) — no longer parked:** the *conflated
-single-level ICC (Eq. 14)*, a *multilevel `d_study()`*, and *within-cell
-replicates* are the three slices of milestone M17 (see
-[`MILESTONES.md`](MILESTONES.md)); per ADR-015 they leave this future-only file.
+**Shipped as M17 (PR #22, ADR-026):** the *conflated single-level ICC (Eq. 14)*, a
+*multilevel `d_study()`*, and *within-cell replicates* shipped as milestone M17 (see
+[`MILESTONES.md`](MILESTONES.md)); per ADR-015 they are no longer parked.
 **Note:** M17 Slice 2 was originally scoped as a *three-facet / subjects-per-cluster*
 `d_study()` but retargeted to **rater-count projection** after the source review
 (ten Hove Eq. 13's cluster ICC has no subject facet; Ns is efficiency-only —

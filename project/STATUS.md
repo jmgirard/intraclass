@@ -1,25 +1,20 @@
 # Project status
 
-- Milestone: **M17 — variance-decomposition trio** — **scoped, in flight** (ADR-026); not
-  yet started (no branch, no code). One milestone, three independent vertical slices, ordered
-  by oracle-risk: **(1) conflated single-level ICC (Eq. 14)** via a new `level = "conflated"`
-  (diagnostic contrast off the existing multilevel fit); **(2) three-facet `d_study()`**
-  projecting subjects-per-cluster for complete-data multilevel at the cluster level;
-  **(3) within-cell replicates** splitting σ²_sr from σ²_e via `(1 | subject:rater)` (new
-  estimand → new spec; `gtheory` oracle in `Suggests`). Slice 3 may spin into M18 if the
-  milestone runs heavy (decide at its start). M0–M16 shipped; package at v0.1.0,
-  submission-ready.
-- Active task: **M17 is code-complete on branch `m17-varcomp-trio`** — all three slices done,
-  not yet merged. Slice 1 = `level = "conflated"` (Eq. 14 diagnostic); Slice 2 = multilevel
-  rater-count `d_study()` (retargeted from subjects-per-cluster, ADR-026 amend); Slice 3 =
-  within-cell replicates + occasion-averaged coefficient (`occasions` knob, per-component
-  error divisors; estimand-spec `M17-within-cell-replicates.md`). 721 tests pass, lint + `air`
-  clean. **Next: PR/finish-task gate** — installed-pkg check (`NOT_CRAN=true`) + vignette knit,
-  then open the PR (`milestone-branches-and-prs`).
-- Last green CI: PR #21 (M16) full matrix green incl. Windows and R-devel; merged to
-  `main` at 0b84885
+- Milestone: **M17 — variance-decomposition trio** — **shipped** (PR #22, ADR-026). Three
+  slices: **(1)** conflated single-level ICC via `level = "conflated"` (ten Hove Eq. 14, a
+  diagnostic contrast off the M5 fit; agreement-only); **(2)** multilevel rater-count
+  `d_study()` at subject + cluster levels (retargeted from the original subjects-per-cluster
+  plan — the cluster ICC has no subject facet, ADR-026 amend); **(3)** within-cell replicates
+  splitting σ²_res → σ²_sr + σ²_e via `(1 | subject:rater)`, plus an occasion-averaged
+  coefficient (`occasions` knob, per-component error divisors). No new dependency (`gtheory`
+  proved unnecessary). M0–M17 all shipped; package at v0.1.0, submission-ready. No milestone
+  in flight.
+- Active task: — (M17 shipped; next code work is a maintainer-chosen backlog promotion — see
+  Next action for the sequencing.)
+- Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
+  `main` at a915256
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — M17 scoped (ADR-026); `project/` reconciled
+- Updated: 2026-07-08 by main session (Opus) — M17 merged (PR #22) + `project/` reconciled
   (MILESTONES board + ROADMAP promotion)
 
 ## Where we are
@@ -46,26 +41,13 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M17 is code-complete on `m17-varcomp-trio` (ADR-026) — open the PR.** All three slices
-shipped (full board in [`MILESTONES.md`](MILESTONES.md)); local gate green (`R CMD check`
-0/0/0, 722 tests pass, lint + `air` + spelling clean; coverage 86% per the
-`coverage-baseline` policy). **Immediate next step: push the branch and open the PR**
-(`milestone-branches-and-prs`); on green CI + merge, reconcile the deferred markers and set
-"Last green CI".
+**M17 shipped (PR #22, ADR-026) — no milestone in flight.** The variance-decomposition trio
+is merged: conflated single-level ICC (`level = "conflated"`), multilevel rater-count
+`d_study()`, and within-cell replicates + occasion-averaged coefficient. Next code work is a
+maintainer-chosen backlog promotion from the sequencing below (each needs its own
+start-of-milestone scope pass + ADR).
 
-**What shipped in M17** (see MILESTONES for the per-slice DoD):
-
-- **Slice 1** — conflated single-level ICC via `level = "conflated"` (agreement-only Eq. 14,
-  a diagnostic contrast). Spec [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md).
-- **Slice 2** — multilevel rater-count `d_study()` at subject + cluster levels. *Retargeted*
-  from the original "three-facet / subjects-per-cluster" plan after the source review (ten
-  Hove Eq. 13's cluster ICC has no subject facet; ADR-026 amend; spec M4.5 §7).
-- **Slice 3** — within-cell replicates + the occasion-averaged coefficient (`occasions` knob,
-  per-component error divisors). Spec
-  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md). No new
-  dependency (`gtheory` proved unnecessary — ANOVA + lme4 + sim oracles).
-
-**Still after M17 (unchanged sequencing):**
+**Still to sequence (non-Bayesian carryover):**
 
 - **Wave 3 (research):** **M9 averaged cluster-level `ICC(c,k)` on incomplete data** (open
   per-cluster divisor — a focused simulation-oracle study, likely a Fable review).

@@ -9,7 +9,7 @@ its start after a short retro (founding brief §7) and detailed in full here unt
 ships. The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
-ADR-025 M16).
+ADR-025 M16, ADR-026 M17).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -434,78 +434,27 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   defers a singular fit to glmmTMB for either `ci_method` (maintainer decision; lifting it
   for bootstrap → ROADMAP). Installed-pkg check run; 591 pass / 0 fail, lint + `air` clean.
 
-## M17: variance-decomposition trio — conflated ICC, three-facet `d_study()`, within-cell replicates (ADR-026) — **IN FLIGHT**
-- Goal: promote the next non-Bayesian wave out of the parking lot as **one milestone of
-  three independent vertical slices**, themed *finer variance decomposition and its
-  projection*, ordered by oracle-risk (bank the clean-oracle wins first, #1). Two slices ride
-  the **existing five-component multilevel fit** (M5/M8/M9); the third is a **new single-level
-  two-way fit**. Slices are not mutually dependent — each ships end-to-end on its own.
-- Reference: ADR-026 (scope + the three maintainer API decisions). Estimand-specs: Slice 1
-  promotes M5 §4 (Eq. 14) to a shipped coefficient in
-  [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) (agreement-only; consistency-
-  conflated → ROADMAP); Slice 2 extends [`M4.5-d-study.md`](estimand-specs/M4.5-d-study.md);
-  Slice 3 is a **new spec** `M17-within-cell-replicates.md` (written at Slice 3 start).
-- **DoD board (check off in the same commit as the work, #16):**
-  - **Slice 1 — conflated single-level ICC (Eq. 14), Wave-1 carryover, smallest.** ✅ **done**
-        (agreement-only, ADR-026; estimand-spec `M17-conflated-icc.md`).
-    - [x] `level = "conflated"` accepted by `icc()` (validated/iterated like `level`), read
-          off the existing five-component fit — no new fit, no new dependency. `icc_point()`
-          generalized so the signal is a component *set* (σ²_c + σ²_{s:c}), like the error.
-    - [x] `(σ²_c + σ²_{s:c}) / (σ²_c + σ²_{s:c} + (σ²_r + σ²_{cr} + σ²_{(s:c)r})/k)` via the
-          shared `icc_point()` path; single + average divisor.
-    - [x] `print`/`summary` flag it a **diagnostic contrast, not a recommended coefficient**;
-          `tidy` marks it via the `level` column (never a peer of subject/cluster).
-    - [x] `choose_icc()` never *recommends* conflated (its `level` axis rejects it).
-    - [x] Oracles: O-lme4 (cross-engine Eq. 14), O-Eq14 (closed form on reported components),
-          O-population (seeded recovery + MC coverage + flat single-level resemblance).
-    - [x] Guards (#5/#8): agreement-only, random-rater, crossed, complete — classed aborts;
-          conflated-without-`cluster` is a usage error.
-    - [x] roxygen (`@param level` + Multilevel section) + NEWS + `advanced.Rmd` worked
-          contrast + `test-vignette-claims.R` invariant; full suite green (663 pass), lint +
-          `air` clean.
-  - **Slice 2 — multilevel rater-count `d_study()` (both levels).** ✅ **done.** *(Retargeted
-    from the "three-facet / subjects-per-cluster" plan: the paper's cluster ICC has no subject
-    facet and Ns is efficiency-only, so subjects-per-cluster is not a sourced reliability
-    projection — dropped from M17, ADR-026 amendment; estimand-spec M4.5 §7.)*
-    - [x] Lifted `d_study()`'s blanket multilevel abort; projects the **rater count `m`** for
-          the subject-level (Eq. 12) and cluster-level (Eq. 13) multilevel ICCs — a divisor
-          change on the existing M5 estimand, reusing the single-level MC-reuse machinery.
-    - [x] `icc_dstudy` gains a `level` column for multilevel fits; agreement + consistency per
-          level; nested designs project subject-level only (Design 3 agreement-only). `format`,
-          `tidy`, and `autoplot` (facets by level) all level-aware.
-    - [x] **Scope guard**: complete-data multilevel only; incomplete aborts (the cluster level
-          would hit the open M9 `ICC(c,k)` divisor, Wave 3); conflated-only fit aborts, the
-          conflated diagnostic is skipped alongside real levels; fixed-rater agreement stays
-          ill-posed and aborts (#5).
-    - [x] Oracles: O-ML-reduction (at `m = observed k` equals the fitted M5 `ICC(*,k)` per
-          level), O-ML-lme4 (curve matches an independent five-component fit), O-ML-sim
-          (projected value not run + MC coverage) + Spearman–Brown consistency invariant. No
-          `gtheory` dependency.
-    - [x] roxygen (Multilevel projections section) + NEWS + `advanced.Rmd` worked example;
-          full suite green (688 pass), lint + `air` clean.
-  - **Slice 3 — within-cell replicates (new estimand), Wave-2, heaviest.** ✅ **done**
-        (kept in M17; maintainer chose to also add the occasion-averaged coefficient).
-    - [x] **Wrote `M17-within-cell-replicates.md`** (#2): resolved with the maintainer —
-          **nested/exchangeable** occasions (no occasion column), the standard ICC family
-          **plus** an occasion-averaged coefficient, data API = bare within-cell row
-          multiplicity. `gtheory` **not** needed (ANOVA + lme4 + sim oracles) — light install
-          intact, no Suggests change.
-    - [x] Replaced the `has_replicates` abort with the `(1|subject:rater)` fit
-          (`fit_{glmmtmb,lme4}_replicates`, reusing the generic `*_ml_contract`), splitting
-          σ²_res → σ²_sr + σ²_e; both engines; MC + bootstrap.
-    - [x] New **`occasions`** knob (single/average) via **per-component error divisors** in
-          the estimand (σ²_e divides by raters×occasions; the shelved M5 §4 idea, now needed);
-          `k_eff` fixed to count distinct raters; `occasions` column in estimates.
-    - [x] Guards (#5/#8): two-way random / balanced-complete replicates only — fixed-rater,
-          multilevel, ragged, and lavaan-engine replicates abort; `occasions="average"`
-          without replicates is a usage error.
-    - [x] Oracles (`test-replicates.R`): O-ANOVA (MoM mean squares), O-lme4 (interaction fit),
-          O-sim (recovery + MC coverage); agreement + consistency, single + occasion-averaged.
-    - [x] `print`/`summary`/`tidy` surface σ²_sr and the occasions column; roxygen section +
-          `@param occasions` + NEWS + `advanced.Rmd` worked example; full suite green (721
-          pass), lint + `air` clean.
-  - **Milestone close:** installed-pkg check (`NOT_CRAN=true`) + `lintr::lint_package()` +
-    `air format --check` clean before each PR push; `project/` reconciled in the merge commit.
+## M17: variance-decomposition trio — conflated ICC, multilevel `d_study()`, within-cell replicates (ADR-026)
+- Goal: promote the next non-Bayesian wave as **one milestone of three independent vertical
+  slices** (finer variance decomposition and its projection), ordered by oracle-risk.
+  **Slice 1 — conflated single-level ICC** via `level = "conflated"` (ten Hove Eq. 14, the
+  biased ignore-clusters coefficient off the M5 fit; agreement-only, a diagnostic contrast
+  never recommended). **Slice 2 — multilevel rater-count `d_study()`** projecting the rater
+  count at subject + cluster levels (Eq. 12/13); *retargeted from the original
+  "three-facet / subjects-per-cluster" plan* — the paper's cluster ICC has no subject facet
+  and Ns is efficiency-only, so subjects-per-cluster is not a sourced reliability projection
+  (ADR-026 amendment). **Slice 3 — within-cell replicates** split σ²_res → σ²_sr + σ²_e via
+  `(1|subject:rater)`, plus an occasion-averaged coefficient (`occasions` knob) built on a new
+  **per-component error divisor** in the estimand; two-way random, balanced/complete only.
+  Key engineering: `icc_point()` generalized (signal and per-component error divisors),
+  `fit_{glmmtmb,lme4}_replicates` reuse the generic `*_ml_contract`, `k_eff` counts distinct
+  raters. **No new dependency** (`gtheory` proved unnecessary — light install intact).
+- Reference: ADR-026 (scope + maintainer API decisions + the Slice 2 retarget amendment);
+  estimand-specs [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md),
+  [`M4.5-d-study.md`](estimand-specs/M4.5-d-study.md) §7,
+  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md). Oracles
+  O-Conflated / O-DS(multilevel) / O-Rep, asserted in `test-icc-multilevel.R`,
+  `test-d-study.R`, `test-replicates.R` (`REFERENCES.md`).
 - Deferred out of M17 (record so not rediscovered): BCa intervals and **bootstrap-projected
   `d_study` bands** (ADR-025); the **M9 averaged cluster-level `ICC(c,k)` incomplete divisor**
   (Wave 3, research — Slice 2's complete-data guard must not reach it); **incomplete-data
@@ -518,9 +467,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ci_method = "posterior"`; **categorical/ordinal GLMM ratings**; **one-way via SEM**
   (blocked, ADR-014); the **non-parametric bootstrap / profile-likelihood CIs** and
   **benchmark suite**; the **lme4 singular-fit / merDeriv edge cases** (deprioritized).
-- Status: **all three slices done on branch `m17-varcomp-trio`; code-complete, not yet
-  merged.** Slice 1 = `level = "conflated"` (Eq. 14 diagnostic); Slice 2 = multilevel
-  rater-count `d_study()` (retargeted from subjects-per-cluster, ADR-026 amend); Slice 3 =
-  within-cell replicates + occasion-averaged coefficient. Full suite 721 pass / 0 fail, lint +
-  `air` clean. **Remaining before merge (PR/finish-task gate):** installed-pkg check
-  (`NOT_CRAN=true`) + vignette knit + open the PR; `project/` reconcile on merge.
+- Status: **done** (Slices 1–3; merged via PR #22 at a915256; full CI matrix green incl.
+  Windows and R-devel, 722 tests). `level = "conflated"` (Eq. 14 diagnostic), multilevel
+  rater-count `d_study()` at both levels, and within-cell replicates + occasion-averaged
+  coefficient all ship; `R CMD check` 0/0/0.
