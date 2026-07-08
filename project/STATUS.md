@@ -1,33 +1,24 @@
 # Project status
 
-- Milestone: **M18 — Multilevel completeness I (crossed Design 1, incomplete corners)** —
-  **shipped** (PR #23, ADR-028; first milestone of the M18–M21 arc, ADR-027). Four slices, each
-  lifting a single shipped abort guard: **(1)** incomplete fixed-rater crossed (M3 `k_eff` + M10
-  θ²_r under imbalance); **(2)** incomplete conflated ICC (Eq. 14 well-posed on ragged data — the
-  attempt-then-degrade posture resolved to *ships*, no reclassification; spec §6a); **(3)**
-  incomplete **subject-level** `d_study()` (cluster level bounded by the Wave-3 `ICC(c,k)` divisor,
-  dropped-with-note); **(4)** bootstrap-projected `d_study()` bands (M16 deferral, package-wide).
-  Completeness, not new estimand work; no new dependency, no new argument. M0–M18 shipped; package
-  at v0.1.0. No milestone in flight.
-- Active task: **M19 finish-task** (both slices done; ready to close the milestone). On
-  `m19-nested-completeness`: **Slice 1** (incomplete nested Designs 2/3) + **Slice 2** (fixed-rater
-  nested Design 2, both engines) shipped. Next: `R CMD check --as-cran` + installed-pkg check +
-  open the PR.
-- Slice-2 highlight (**oracle-first catch**): fixed ≢ random even balanced for *nested* Design 2 —
-  the finite population is per-cluster (θ²_{r:c} = mean over clusters of each cluster's
-  finite-population rater variance), so the M10 crossed "balanced fixed≡random" identity does NOT
-  carry over. New fit `score ~ 0 + rater + (1|cluster:subject)` + new engine-agnostic
-  `theta2r_fixed_nested()`; pinned by per-cluster + single-cluster reduction to the flat M3 fixed
-  θ²_r (exact), cross-engine (<1e-4), consistency≡random (exact). Design 3 fixed ⚫ by-design;
-  incomplete fixed-nested deferred. Full suite 813 pass / 0 fail; `air` + `lintr` clean.
-- Last green CI: PR #23 (M18) full matrix green incl. Windows and R-devel; merged to
-  `main` at 7dffbb2
+- Milestone: **M19 — Multilevel completeness II (nested Designs 2/3: incomplete + fixed-rater)** —
+  **shipped** (PR #24, ADR-029; second milestone of the M18–M21 arc, ADR-027). Two slices:
+  **(1)** incomplete nested Designs 2/3 (ragged `k_eff` divisor reduces *exactly* to the pinned
+  M3/M6 incomplete divisor; ambiguous ragged requires explicit `design=`); **(2)** fixed-rater
+  nested Design 2, both engines (new `theta2r_fixed_nested()` — θ²_{r:c} = mean over clusters of
+  each cluster's finite-population rater variance). **Oracle-first catch:** fixed ≢ random even
+  balanced for nested (per-cluster finite population; the M10 crossed identity does not carry
+  over) — pinned by per-cluster + single-cluster reduction to flat M3 fixed θ²_r, cross-engine,
+  consistency≡random. Design 3 fixed ⚫ by-design; incomplete fixed-nested deferred. Completeness,
+  not new estimand work; no new dependency, no new argument. M0–M19 shipped; package at v0.1.0.
+  No milestone in flight.
+- Active task: — (no milestone in flight; **M20 — Within-cell replicate completeness** is next in
+  the arc, ADR-027, and gets its own start-of-milestone scoping ADR.)
+- Last green CI: PR #24 (M19) full matrix green incl. Windows and R-devel; merged to
+  `main` at 53c9f5e
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M19 Slices 1 & 2 implemented** on
-  `m19-nested-completeness`. Slice 1: incomplete nested Designs 2/3 (k_eff divisor pinned by exact
-  reduction to M3/M6). Slice 2: fixed-rater nested Design 2, both engines, new
-  `theta2r_fixed_nested()` (oracle-first catch: fixed ≢ random for nested). Full suite 813 pass /
-  0 fail, `air` + `lintr` clean. Next: milestone finish-task (`R CMD check` + PR).
+- Updated: 2026-07-08 by main session (Opus) — **M19 merged (PR #24, ADR-029)**: both slices;
+  `R CMD check --as-cran` 0/0/0, 813 tests, full CI matrix green. Post-merge `project/` reconcile
+  done (M19 compressed in MILESTONES; COVERAGE #10/#11 → ✅). M20 next.
 
 ## Where we are
 
@@ -58,16 +49,16 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M18 shipped (PR #23, ADR-028); M19 implemented (ADR-029) — awaiting its PR.** The
+**M18 & M19 shipped (PR #23/#24, ADR-028/029) — no milestone in flight.** The
 **M18–M21 completeness arc** (ADR-027) closes every 🔵 *not yet* gap in
-[`COVERAGE.md`](COVERAGE.md). Next code work after the M19 PR merges is **starting M20** (its
-own start-of-milestone scope pass + ADR).
+[`COVERAGE.md`](COVERAGE.md). Next code work is **starting M20** (its own start-of-milestone
+scope pass + ADR).
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
 
 - **M18 — Multilevel completeness I (crossed, incomplete):** ✅ shipped (PR #23).
-- **M19 — Multilevel completeness II (nested Designs 2/3):** incomplete nested (Slice 1) +
-  fixed-rater nested Design 2 (Slice 2) — **implemented on `m19-nested-completeness`, PR pending.**
+- **M19 — Multilevel completeness II (nested Designs 2/3):** ✅ shipped (PR #24) — incomplete
+  nested + fixed-rater nested Design 2.
 - **M20 — Within-cell replicate completeness:** ragged (Slice 1), fixed-rater (Slice 2),
   multilevel (Slice 3) replicates. Extends M17 Slice 3. **Next.**
 - **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
