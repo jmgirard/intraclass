@@ -4,11 +4,11 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones (M0–M11) are compressed** to Goal / Status / Deferred + spec-and-ADR
 pointers — the full blow-by-blow DoD lives in its ADR (`DECISIONS.md`), its
 estimand-spec, and git history (ADR-015, single-source; don't restate it here). The
-**active** and **next** milestones are detailed in full. The remaining milestone (M13)
-is a provisional one-liner, detailed at its start after a short retro on the previous
-one (founding brief §7). The arc is a hypothesis, not a contract — reorders get a
-[`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
-detailed M9, ADR-019 detailed M10, ADR-020 detailed M11, ADR-021 detailed M12).
+**active** milestone (M15) is detailed in full; there is no pre-planned next milestone
+(each is scoped by an ADR at its start after a short retro — founding brief §7). The
+arc is a hypothesis, not a contract — reorders get a [`DECISIONS.md`](DECISIONS.md)
+entry (the M9–M13 tail was set by ADR-017; ADR-018 detailed M9, ADR-019 M10, ADR-020
+M11, ADR-021 M12, ADR-023 M14, ADR-024 M15).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -347,3 +347,82 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: done (Slices 1–3 + cross-cutting DoD; merged via PR #18 at 474e0c1; full CI
   matrix green incl. Windows and R-devel, 533 tests). `engine = "lme4"` now has full
   balanced design parity with glmmTMB.
+
+## M15: Incomplete/ragged lme4 — full incomplete engine parity (ADR-024) — **ACTIVE**
+- Goal: extend `engine = "lme4"` from M14's **balanced/complete** parity to every
+  **incomplete/ragged** design glmmTMB already fits — closing the last ADR-023
+  engine-parity deferral (the M9 `k_eff`/connectedness × merDeriv singular-fit
+  interaction). **Engine parity, not estimand work:** no new estimand, estimand-spec,
+  `ci_method`, or dependency (lme4 + merDeriv stay `Suggests`). Three incomplete
+  shapes, each an **existing `fit_lme4_*` shape run on ragged data** (no new fit
+  function — the `k_eff`/connectedness/θ²_r-under-imbalance machinery is engine-agnostic
+  and runs before fit dispatch, so the fit formulas are unchanged): (1) incomplete
+  random two-way (M3 × M5.5, currently ungated-but-untested); (2) incomplete
+  fixed-rater two-way (M3 Case 3A, θ²_r-under-imbalance); (3) incomplete crossed
+  (Design 1) random multilevel (M9, five-component). The work is narrowing the two
+  `!balanced` lme4 guards in `R/icc.R`, confirming the shipped merDeriv → log-SD
+  delta-transform (and the fixed θ²_r draw from ragged rater-contrast βs) survive
+  unequal rater counts, and **oracle-pinning the success-vs-degrade boundary** (ragged
+  fits reach the variance boundary more often → the shipped `intraclass_singular_fit` →
+  glmmTMB handoff fires more; that graceful degradation is intended, #5/#18). Scope is
+  glmmTMB-limited: incomplete **nested** Designs 2/3, incomplete **fixed multilevel**,
+  and the averaged cluster-level `ICC(c,k)` incomplete divisor stay deferred for **all**
+  engines (lme4 can't cover what glmmTMB doesn't). Chosen to **consolidate M14** over
+  the Bayesian engine and the M9 `ICC(c,k)` divisor.
+- Reference: ADR-024 (scope); no estimand-spec (engine, not estimand — cf.
+  M5.5/M7/M14). Oracles **O-LME2** per shape (glmmTMB the independent oracle): point ≡
+  glmmTMB ≤1e-4 on ragged data; interval MC-CI ≈ glmmTMB ~1e-2; a singular-fit-abort
+  oracle on a ragged design that goes singular; seeded-sim coverage at nominal.
+
+### DoD checklist (the live board — check off in-commit, #16)
+- [x] **Slice 1 — incomplete random two-way.** ✅ **No code fix needed** — ragged
+      two-way random (and one-way) lme4 was already ungated (dispatches to `fit_lme4()`)
+      and matches glmmTMB on `ratings_incomplete`: point ≤1e-4 (~2e-10–9e-7 observed),
+      interval <0.02 (max 1.82e-2, within the shipped balanced O-LME tolerance). Added
+      the O-LME2 ragged oracle to `test-icc-lme4-engine.R` (point + interval, all four
+      estimand axes); narrowed the `@param engine` roxygen to say the random two-way and
+      one-way lme4 paths accept incomplete data (fixed-rater & multilevel still
+      balanced-only until Slices 2–3). `man/icc.Rd` regenerated.
+- [x] **Slice 2 — incomplete fixed-rater two-way.** ✅ Removed the `R/icc.R` fixed-rater
+      `!balanced` guard entirely — `fit_lme4_fixed()` assumes no balance (lmer fits the
+      ragged design; the engine-agnostic `theta2r_fixed()` reads lme4's incomplete-data
+      `vbeta`, so the θ²_r-under-imbalance correction is automatic). Added the O-LME2
+      ragged fixed oracle on `ratings_incomplete` (point ≤1e-4 — observed ~5–7e-5,
+      looser than balanced ~1e-6 since `vbeta` differs slightly between REML optimizers;
+      interval <0.02); replaced the obsolete "refuses incomplete fixed" test; updated
+      the `fit_lme4_fixed()` header comment + `@param engine` roxygen (fixed-rater lme4
+      now incomplete-capable; only multilevel remains balanced-only). `man/icc.Rd`
+      regenerated. Singular ragged fits still abort toward glmmTMB (the intended degrade).
+- [x] **Slice 3 — incomplete crossed random multilevel.** ✅ Removed the `R/icc.R`
+      multilevel `!balanced` lme4 guard entirely — by the time it ran, incomplete nested
+      (icc.R:488) and incomplete fixed-rater crossed multilevel (icc.R:541) had already
+      aborted for **every** engine, so only the crossed-random M9 shape reached it, which
+      `fit_lme4_multilevel()` + `lme4_ml_contract()` handle structurally. O-LME2 ragged
+      oracle vs glmmTMB on `lme4_ml_crossed` (245/288 cells): subject level all four axes
+      (point ≤1e-4 — ~4e-7–5e-6; interval <0.02 — ≤4e-3) **and** cluster `ICC(c,1)`.
+      **Singular-degrade characterized and pinned**: a ragged crossed design with σ²_cr≡0
+      lands lme4 on the boundary → `intraclass_singular_fit` abort toward glmmTMB, which
+      still fits (test asserts both halves). Replaced the obsolete "refuses incomplete
+      multilevel" test.
+- [~] **Cross-cutting.** Done: `@param engine` roxygen now states full balanced +
+      incomplete parity (boundary fits fall back to glmmTMB); `NEWS.md` engine bullet
+      updated (folded into the un-uploaded 0.1.0 section per the M14 precedent — revisit
+      if 0.1.0 is frozen); `air format .` clean; `lintr::lint_package()` clean (no lints);
+      full `load_all` suite green with `NOT_CRAN=true` (572/0/0). **Remaining (finish-task
+      / PR):** test the **installed** package with `NOT_CRAN=true`
+      (`verify-against-installed-package`); full CI matrix green incl. Windows and R-devel;
+      PR opened and merged (`milestone-branches-and-prs`); `project/` reconciled (STATUS +
+      this entry compressed to summary, preserving the "Deferred out of M15" list) in a
+      direct commit to `main` post-merge.
+
+### Deferred out of M15 (record so not rediscovered)
+- The **parametric-bootstrap `ci_method`** (bootMer); a **boundary-robust lme4
+  interval for singular fits** (glmmTMB covers it today — the degrade-to-glmmTMB
+  handoff stands); **merDeriv edge cases** beyond these models. Untouched arc
+  carry-overs stay in `ROADMAP.md`: the **Bayesian engine** + `ci_method = "posterior"`;
+  the **M9 averaged cluster-level `ICC(c,k)` incomplete divisor**; **one-way via SEM**;
+  within-cell replicates; three-facet `d_study()`; the conflated single-level ICC
+  (Eq. 14).
+- Status: **active** — all three slices + local gate done (roxygen, NEWS, `air`,
+  `lintr` clean, full suite 572/0/0); **pending installed-package check + PR + CI
+  merge**. Committed on `m15-incomplete-lme4`.

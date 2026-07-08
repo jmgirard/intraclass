@@ -262,8 +262,11 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
 # JOINT covariance of (betas, subject SD, residual SD). We delta-transform ONLY the
 # two SD terms to the log-SD scale (Jacobian 1/sd) and leave the betas on their
 # natural scale (Jacobian 1), matching glmmTMB's vcov(fit, full = TRUE): betas
-# natural, variance parameters on log-SD (ADR-012/ADR-003). Balanced data only;
-# incomplete fixed-rater lme4 is guarded in icc() (deferred, ADR-023).
+# natural, variance parameters on log-SD (ADR-012/ADR-003). Balanced AND incomplete
+# data (M15 Slice 2, ADR-024): nothing here assumes balance -- lmer fits the ragged
+# design and theta2r_fixed() reads lme4's incomplete-data vcov, so the
+# theta^2_r-under-imbalance correction is automatic; a ragged fit that hits the
+# variance boundary aborts toward glmmTMB via the isSingular() guard above.
 fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
   rlang::check_installed(
