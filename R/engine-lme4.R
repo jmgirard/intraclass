@@ -241,3 +241,136 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
     to_components = to_components
   )
 }
+
+# Fixed-rater lme4 engine (two-way, Case 3/3A, subject level, balanced; M14) ----
+#
+# The lme4 counterpart of fit_glmmtmb_fixed(): raters enter as FIXED effects, so
+# the rater main effect is the bias-corrected finite-population theta^2_r (McGraw &
+# Wong 1996 Case 3A) rather than a random sigma^2_r. Fits
+#
+#   score ~ 1 + rater + (1 | subject)
+#
+# by REML and returns the SAME six-field engine contract as fit_glmmtmb_fixed(), so
+# icc_point()/mc_ci()/d_study() are unchanged -- a second engine, not a new estimand
+# (ADR-023; cf. the random two-way fit_lme4()). The theta^2_r machinery is the
+# shared, engine-agnostic theta2r_fixed() (fed lme4's own fixef()/vcov() here), so
+# the estimand cannot drift from the glmmTMB engine.
+#
+# The one new piece vs. fit_lme4() is that the fixed rater coefficients participate
+# in the Monte-Carlo CI: theta^2_r is recomputed from the fixed-effect beta draws
+# each iteration (as in fit_glmmtmb_fixed). merDeriv's full covariance supplies the
+# JOINT covariance of (betas, subject SD, residual SD). We delta-transform ONLY the
+# two SD terms to the log-SD scale (Jacobian 1/sd) and leave the betas on their
+# natural scale (Jacobian 1), matching glmmTMB's vcov(fit, full = TRUE): betas
+# natural, variance parameters on log-SD (ADR-012/ADR-003). Balanced data only;
+# incomplete fixed-rater lme4 is guarded in icc() (deferred, ADR-023).
+fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the ICC model with lme4.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  k <- nlevels(data$rater)
+
+  fit <- withCallingHandlers(
+    lme4::lmer(
+      score ~ 1 + rater + (1 | subject),
+      data = data,
+      REML = TRUE
+    ),
+    warning = function(w) {
+      cli::cli_warn(c(
+        "The {.pkg lme4} engine reported a fitting warning.",
+        i = conditionMessage(w)
+      ))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  if (lme4::isSingular(fit)) {
+    abort_intraclass(
+      c(
+        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
+         singular (boundary) fit.",
+        i = "A variance component was estimated at exactly zero, so \\
+             {.pkg merDeriv} cannot compute the parameter covariance.",
+        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
+  vc <- lme4::VarCorr(fit)
+  sd_subject <- as.numeric(attr(vc$subject, "stddev"))
+  sd_res <- as.numeric(stats::sigma(fit))
+  beta <- lme4::fixef(fit)
+  th <- theta2r_fixed(beta, stats::vcov(fit), k)
+
+  components <- list(
+    subject = sd_subject^2,
+    rater = th$point,
+    residual = sd_res^2
+  )
+
+  # merDeriv's SD-scale joint covariance of (betas, subject SD, residual SD). The
+  # fixed-effect columns are named exactly as fixef(fit) (verified: "(Intercept)",
+  # "raterJ2", ...); the subject SD is "cov_subject.(Intercept)" and the residual
+  # SD is "residual". Fixed effects contain neither "subject" nor "residual", so the
+  # SD columns are unambiguous.
+  vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
+  nm_sd <- colnames(vcov_sd)
+  beta_nm <- names(beta)
+  idx <- c(
+    match(beta_nm, nm_sd),
+    subject = grep("subject", nm_sd),
+    residual = which(nm_sd == "residual")
+  )
+  if (length(idx) != length(beta_nm) + 2L || anyNA(idx)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg merDeriv} covariance to the model terms.",
+        i = "Columns returned: {.val {nm_sd}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  vcov_sd <- vcov_sd[idx, idx, drop = FALSE]
+
+  # Delta-transform SD-scale -> log-SD scale: identity for every fixed effect (kept
+  # natural, as glmmTMB does) and 1/sd for each of the two SD terms, so exp(2 * draw)
+  # is strictly positive (boundary-aware, #3) and the beta draws stay on the scale
+  # theta2r_fixed()'s contrast expects.
+  jac <- diag(c(rep(1, length(beta_nm)), 1 / sd_subject, 1 / sd_res))
+  vcov_log <- jac %*% vcov_sd %*% t(jac)
+
+  slots <- c(beta_nm, "subject", "residual")
+  dimnames(vcov_log) <- list(slots, slots)
+  estimate <- stats::setNames(
+    c(as.numeric(beta), log(sd_subject), log(sd_res)),
+    slots
+  )
+
+  # Per draw: reconstruct the k rater means from the fixed-effect beta draws, apply
+  # the SAME bias-corrected theta^2_r (bias is constant), clamp at 0 -- identical to
+  # fit_glmmtmb_fixed()'s to_components(). subject/residual back-transform from log-SD.
+  to_components <- function(par) {
+    means <- th$contrast %*% par[beta_nm, , drop = FALSE]
+    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
+    list(
+      subject = exp(2 * par["subject", ]),
+      rater = pmax(0, raw_draws - th$bias),
+      residual = exp(2 * par["residual", ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "lme4",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_log,
+    to_components = to_components
+  )
+}

@@ -118,9 +118,10 @@ on balanced data; \strong{absolute-agreement} ICCs use the SEM indicator-mean
 estimator of the rater variance, which is asymptotically equivalent to the
 mixed-model one and matches conventional generalizability-theory software on
 real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
-designs (e.g. 0.284 vs 0.290 on the 6-subject example below). \code{"lme4"} and
-\code{"lavaan"} currently cover only the random two-way design
-(\code{raters = "random"}, no \code{cluster}); \code{"lavaan"} additionally requires
+designs (e.g. 0.284 vs 0.290 on the 6-subject example below). \code{"lme4"} covers
+the two-way (\code{raters = "random"} or, on complete/balanced data, \code{"fixed"}) and
+one-way designs, but not multilevel designs (a \code{cluster} column); \code{"lavaan"}
+currently covers only the random two-way design and additionally requires
 complete, balanced data. \code{"lme4"} requires the \pkg{lme4} and \pkg{merDeriv}
 packages; \code{"lavaan"} requires the \pkg{lavaan} package.}
 

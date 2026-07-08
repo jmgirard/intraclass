@@ -365,17 +365,20 @@ rater_mean_contrast <- function(k) {
 
 # Bias-corrected finite-population variance of the k fixed rater level means
 # (McGraw & Wong 1996, Case 3A; estimand-spec M3 §6 / M10 §2). Shared by the flat
-# (fit_glmmtmb_fixed) and multilevel (fit_glmmtmb_multilevel_fixed) fixed engines:
-# raters enter as fixed effects, so the rater main effect is theta^2_r rather than a
-# random sigma^2_r. Returns the point estimate plus the fixed pieces (contrast,
-# centering, bias, and the fixed-effect names) the Monte-Carlo sampler reuses to
-# recompute theta^2_r from the beta draws each iteration. `center = I - J/k` removes
-# the grand mean; `bias` subtracts the mean sampling variance of the centered means.
-# On BALANCED data the corrected theta^2_r equals the random-fit sigma^2_r (M3 §6,
-# verified on SF; M10's balanced fixed == random reduction).
-theta2r_fixed <- function(fit, k) {
-  beta <- glmmTMB::fixef(fit)$cond
-  vbeta <- as.matrix(stats::vcov(fit)$cond)
+# (fit_glmmtmb_fixed) and multilevel (fit_glmmtmb_multilevel_fixed) fixed engines --
+# and, via the same interface, the lme4 fixed engines (M14) -- so it is
+# ENGINE-AGNOSTIC: the caller supplies the fixed-effect estimates `beta` and their
+# covariance `vbeta` (glmmTMB: `fixef(fit)$cond` / `vcov(fit)$cond`; lme4:
+# `fixef(fit)` / `vcov(fit)`), and this helper knows nothing about the fitting
+# engine. Raters enter as fixed effects, so the rater main effect is theta^2_r
+# rather than a random sigma^2_r. Returns the point estimate plus the fixed pieces
+# (contrast, centering, bias, and the fixed-effect names) the Monte-Carlo sampler
+# reuses to recompute theta^2_r from the beta draws each iteration. `center = I -
+# J/k` removes the grand mean; `bias` subtracts the mean sampling variance of the
+# centered means. On BALANCED data the corrected theta^2_r equals the random-fit
+# sigma^2_r (M3 §6, verified on SF; M10's balanced fixed == random reduction).
+theta2r_fixed <- function(beta, vbeta, k) {
+  vbeta <- as.matrix(vbeta)
   contrast <- rater_mean_contrast(k)
   center <- diag(k) - matrix(1 / k, k, k)
   v_means <- contrast %*% vbeta %*% t(contrast)
@@ -413,7 +416,7 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   vc <- glmmTMB::VarCorr(fit)$cond
   sd_subject <- as.numeric(attr(vc$subject, "stddev"))
   beta <- glmmTMB::fixef(fit)$cond
-  th <- theta2r_fixed(fit, k)
+  th <- theta2r_fixed(beta, stats::vcov(fit)$cond, k)
 
   components <- list(
     subject = sd_subject^2,
@@ -493,7 +496,7 @@ fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
       (1 | cluster:rater),
     data
   )
-  th <- theta2r_fixed(fit, k)
+  th <- theta2r_fixed(glmmTMB::fixef(fit)$cond, stats::vcov(fit)$cond, k)
 
   vc <- glmmTMB::VarCorr(fit)$cond
   sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
