@@ -51,7 +51,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="engines-0-1-0">Engines<a class="anchor" aria-label="anchor" href="#engines-0-1-0"></a></h3>
-<ul><li>Default <strong>glmmTMB</strong> engine (boundary-robust REML), with a selectable <code>engine = "lme4"</code> and <code>engine = "lavaan"</code> — an SEM common-factor generalizability model (Jorgensen 2021) whose absolute-agreement coefficient uses the indicator-mean rater-variance estimator — for the random two-way design. Optional engines live in <code>Suggests</code>, so the base install stays light.</li>
+<ul><li>Default <strong>glmmTMB</strong> engine (boundary-robust REML), with a selectable <code>engine = "lme4"</code> (via <code>merDeriv</code>) that covers every design glmmTMB does — two-way random and fixed raters, one-way, and the multilevel designs (crossed and nested) at both levels — on complete, balanced data, agreeing with glmmTMB on both the point estimate and the Monte-Carlo interval. A selectable <code>engine = "lavaan"</code> — an SEM common-factor generalizability model (Jorgensen 2021) whose absolute-agreement coefficient uses the indicator-mean rater-variance estimator — covers the random two-way design. Optional engines live in <code>Suggests</code>, so the base install stays light.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="choosing-projecting-and-visualizing-0-1-0">Choosing, projecting, and visualizing<a class="anchor" aria-label="anchor" href="#choosing-projecting-and-visualizing-0-1-0"></a></h3>

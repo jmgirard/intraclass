@@ -158,11 +158,14 @@ icc(
   asymptotically equivalent to the mixed-model one and matches
   conventional generalizability-theory software on real data (Vispoel et
   al. 2022) but differs by a small-sample term on tiny designs (e.g.
-  0.284 vs 0.290 on the 6-subject example below). `"lme4"` and
-  `"lavaan"` currently cover only the random two-way design
-  (`raters = "random"`, no `cluster`); `"lavaan"` additionally requires
-  complete, balanced data. `"lme4"` requires the lme4 and merDeriv
-  packages; `"lavaan"` requires the lavaan package.
+  0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers every
+  design `"glmmTMB"` does – two-way (random or fixed raters), one-way,
+  and the multilevel designs (crossed and nested) at both levels – but
+  only on complete, balanced data (incomplete/ragged designs use
+  `"glmmTMB"`). `"lavaan"` currently covers only the random two-way
+  design and also requires complete, balanced data. `"lme4"` requires
+  the lme4 and merDeriv packages; `"lavaan"` requires the lavaan
+  package.
 
 - conf_level:
 
@@ -321,8 +324,8 @@ icc(ratings, score, subject, rater, seed = 1)
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.712]
-#>   ICC(A,k)    0.620   [0.173, 0.908]
+#>   ICC(A,1)    0.290   [0.050, 0.706]
+#>   ICC(A,k)    0.620   [0.175, 0.906]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
