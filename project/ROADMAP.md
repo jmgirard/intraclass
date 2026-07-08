@@ -29,6 +29,15 @@ visible without re-deriving it. Updated whenever an item's readiness changes;
 `STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
 ready ones.
 
+**Planned as the M18–M21 arc (ADR-027):** the completeness gaps tagged **🔵 not yet** in
+[`COVERAGE.md`](COVERAGE.md) — incomplete/fixed **crossed** multilevel (M18), incomplete/fixed
+**nested** multilevel (M19), ragged/fixed/multilevel **within-cell replicates** (M20), and
+**SEM (lavaan) engine parity** for fixed + incomplete/FIML (M21) — are scheduled as a
+mixed-model-first arc; each is detailed by its own scoping ADR at its start (ADR-015). Those
+items live as *Deferred out of M<n>* lines in [`MILESTONES.md`](MILESTONES.md), not here.
+Two items were reclassified **into** this parking lot instead of milestoned (see below):
+*multilevel SEM* and *lavaan + within-cell replicates*.
+
 **Shipped as M17 (PR #22, ADR-026):** the *conflated single-level ICC (Eq. 14)*, a
 *multilevel `d_study()`*, and *within-cell replicates* shipped as milestone M17 (see
 [`MILESTONES.md`](MILESTONES.md)); per ADR-015 they are no longer parked.
@@ -93,6 +102,17 @@ helpers* item below (sample-size / CI-width), where it belongs.
   before it ships. **Status: blocked (ADR-014).** No faithful sourced method
   exists yet; not schedulable until a source appears (`ask-for-inaccessible-
   sources` policy — don't guess a method to unblock it).
+- **Multilevel SEM (lavaan)** — two-level SEM-GT for the multilevel designs. **Status:
+  reclassified here from the M21 SEM-parity plan (ADR-027); heavy, not scheduled.** A genuine
+  research-flavored lift: ten Hove et al. (2022)'s own multilevel estimator is Bayesian, not a
+  plain lavaan common-factor model, so a faithful two-level SEM formulation is not a
+  mechanical extension of the M7 two-way SEM engine. Sits in the cross-cutting "later" bucket
+  beside the Bayesian engine rather than in the M18–M21 completeness arc; needs its own
+  estimand/oracle pass before it is schedulable.
+- **lavaan + within-cell replicates** — the SEM engine on replicated (σ²_sr/σ²_e-split) data.
+  **Status: reclassified here from M21 (ADR-027); unscheduled, low value.** SEM ∩ replicates is
+  niche; would need both a lavaan replicate parameterization and the M20 replicate machinery to
+  intersect. Parked rather than milestoned; promote only if a concrete need appears.
 - **Bayesian engine** (`brms`/`rstanarm`) behind `Suggests`, with a new
   `ci_method = "posterior"` (credible intervals from native posterior draws) and
   half-*t* hyperpriors (ten Hove, Jorgensen & van der Ark 2020). Deferred out of M7

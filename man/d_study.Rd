@@ -55,7 +55,11 @@ Projects the reliability of a fitted \code{\link[=icc]{icc()}} to the mean of an
 number of raters \code{m} -- a generalizability-theory \strong{decision (D-) study},
 answering "how reliable would the mean of \code{m} raters be?" and, read as a
 curve, "how many raters do I need?". The point estimate and its boundary-aware
-Monte-Carlo interval reuse the fit stored on \code{x}; no model is refit.
+interval reuse the fit stored on \code{x}; no model is refit. The band follows the
+fit's \code{ci_method}: a Monte-Carlo fit reprojects one draw from the parameter
+covariance across every \code{m}, while a \strong{bootstrap} fit reprojects its stored
+resamples (so at \code{m} = the observed rater count the band matches the fitted
+\verb{ICC(*,k)} interval exactly).
 }
 \section{Projection is extrapolation}{
 
@@ -86,8 +90,10 @@ rater projection (ten Hove et al. 2022): \code{m} is the number of raters per cl
 and the cluster-level coefficient does \strong{not} average over subjects, so there is
 no "subjects per cluster" projection — that is a sample-size question, not a
 reliability one. Nested designs project the subject level only. The conflated
-diagnostic (\code{level = "conflated"}) is not projected. Multilevel projection covers
-\strong{complete} data only; incomplete multilevel \code{d_study()} aborts.
+diagnostic (\code{level = "conflated"}) is not projected. On \strong{incomplete} data the
+\strong{subject} level projects (projection moves only the divisor); the \strong{cluster}
+level is dropped with a note, because projecting \code{m} raters is the averaged
+\code{ICC(c,k)} case whose ragged divisor is an open modeling question (M9).
 }
 
 \examples{

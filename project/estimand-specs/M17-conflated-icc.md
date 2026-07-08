@@ -149,6 +149,47 @@ slice adds a `level` value and touches no fit or CI path.
   derivable form with an oracle strong enough for #1/#4 before shipping). Aborts
   today.
 - **Conflated ICC for nested Designs 2/3** — no cluster level, no Eq. 14 analogue.
-- **Incomplete-data conflated ICC** — inherits M9's complete-vs-incomplete story;
-  this slice targets the balanced/complete M5 fit. (Whether the conflated value is
-  well-posed on ragged multilevel data is a later question, not opened here.)
+- **Incomplete-data conflated ICC** — ~~a later question, not opened here~~ **resolved
+  and shipped in M18 Slice 2 (ADR-028); see §6a.**
+
+---
+
+## 6a. Incomplete-data conflated ICC (M18 Slice 2 — resolved)
+
+M17 Slice 1 left open "whether the conflated value is well-posed on ragged
+multilevel data." M18 Slice 2 opened it under the maintainer's *attempt-then-degrade*
+posture (ADR-028): attempt the natural extension, and if no #1/#4-strong oracle holds,
+reclassify to 🟣 research rather than ship a guessed formula. **The oracle held — it
+ships.**
+
+**Why it is well-posed.** Eq. 14 collapses the five components into **one** signal
+(σ²_c + σ²_{s:c}) and **one** error (σ²_r + σ²_{cr} + σ²_{(s:c)r}) — it never needs
+those five terms *separately*, only their two sums. So the conflated ICC is exactly
+the **flat two-way agreement ICC** read off the multilevel fit, and its averaging
+divisor is the **same flat `k_eff`** (the harmonic mean of ratings per subject, which
+is cluster-agnostic) the subject level already uses (M3 §5, ADR-008). Nothing in
+`icc_point()`, the CI, or the component map changes; the ragged five-component fit
+(M9) supplies the components.
+
+**Identifiability (§3, extended).** On ragged data the conflated path flows through
+the **same** crossed-multilevel gates as subject-level agreement (M9 §4b):
+within-cluster connectedness and ≥1 subject rated more than once (for σ²_{s:c}), and
+the agreement rater-bridging gate (which is what makes the *flat* subject×rater design
+connected across clusters). This is **conservative** — the conflated lump strictly
+needs only the r+cr *sum*, not their separation — but a stricter guard is safe for a
+never-recommended diagnostic (#5), and it aligns the refusal set with "the flat
+two-way ICC is identified."
+
+**Oracles (M18 Slice 2, in `test-icc-multilevel.R`):**
+- **O-conflated/incomplete-Eq14** — the ragged estimate equals the closed-form Eq. 14
+  on the reported components to ~1e-10 (formula wiring; divisor `k_eff < k`).
+- **O-conflated/incomplete-lme4** — cross-engine glmmTMB ≡ lme4 to < 1e-4 on ragged
+  data.
+- **O-conflated/incomplete-population** — tracks the flat incomplete two-way agreement
+  `icc()` (cluster dropped) at a loose population tolerance (~0.02; different models),
+  and stays **visibly biased** away from the correctly-partitioned subject level — the
+  diagnostic's whole point, preserved on ragged data.
+
+**Still out (unchanged):** consistency-conflated (not in the paper), fixed-rater
+conflated (Eq. 14 is a random-rater formula), and nested Designs 2/3 conflated — all
+classed aborts on both balanced and ragged data.

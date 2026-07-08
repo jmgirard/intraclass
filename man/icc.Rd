@@ -235,8 +235,10 @@ within-cluster subject variance are both counted as signal, and all three
 rater-related terms as error. It is offered only as a \strong{diagnostic contrast} --
 to quantify how much the nesting distorts reliability -- and is never a
 recommended coefficient; \code{print()} flags it as such. It is absolute-agreement
-only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
-random-rater design. Request it alongside the correct levels, e.g.
+only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
+design; it works on both balanced and \strong{incomplete} data (on ragged data it is the
+flat two-way ICC read off the multilevel fit, with the same \code{k_eff} divisor).
+Request it alongside the correct levels, e.g.
 \code{level = c("subject", "cluster", "conflated")}.
 
 The design is \strong{inferred from the data} (ten Hove et al. 2022, Table 2). If
@@ -272,12 +274,14 @@ requested for the cluster level on incomplete data, that row is dropped (with a
 message) rather than failing the whole call, so the subject-level averages and the
 single-rater cluster ICC are still returned. \strong{Fixed raters}
 (\code{raters = "fixed"}) are supported for the crossed design at the \strong{subject} level
-on balanced, complete data: the rater main effect becomes the finite-population
-variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
-to the random-rater case and absolute agreement differs only by that term.
-Incomplete \emph{nested} designs, incomplete or nested fixed-rater designs, and the
-fixed-rater cluster level remain for later milestones. Nested designs still require
-balanced, complete data.
+on both balanced and \strong{incomplete} data: the rater main effect becomes the
+finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
+balanced data consistency is identical to the random-rater case and absolute
+agreement differs only by that term; on incomplete data both types differ from
+random (the finite-population variance is read from the ragged rater-contrast fit).
+Incomplete \emph{nested} designs, nested fixed-rater designs, and the fixed-rater cluster
+level remain for later milestones. Nested designs still require balanced, complete
+data.
 }
 
 \section{Within-cell replicates}{

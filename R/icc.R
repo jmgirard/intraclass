@@ -60,8 +60,10 @@
 #' rater-related terms as error. It is offered only as a **diagnostic contrast** --
 #' to quantify how much the nesting distorts reliability -- and is never a
 #' recommended coefficient; `print()` flags it as such. It is absolute-agreement
-#' only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
-#' random-rater design. Request it alongside the correct levels, e.g.
+#' only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
+#' design; it works on both balanced and **incomplete** data (on ragged data it is the
+#' flat two-way ICC read off the multilevel fit, with the same `k_eff` divisor).
+#' Request it alongside the correct levels, e.g.
 #' `level = c("subject", "cluster", "conflated")`.
 #'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
@@ -97,12 +99,14 @@
 #' message) rather than failing the whole call, so the subject-level averages and the
 #' single-rater cluster ICC are still returned. **Fixed raters**
 #' (`raters = "fixed"`) are supported for the crossed design at the **subject** level
-#' on balanced, complete data: the rater main effect becomes the finite-population
-#' variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
-#' to the random-rater case and absolute agreement differs only by that term.
-#' Incomplete *nested* designs, incomplete or nested fixed-rater designs, and the
-#' fixed-rater cluster level remain for later milestones. Nested designs still require
-#' balanced, complete data.
+#' on both balanced and **incomplete** data: the rater main effect becomes the
+#' finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
+#' balanced data consistency is identical to the random-rater case and absolute
+#' agreement differs only by that term; on incomplete data both types differ from
+#' random (the finite-population variance is read from the ragged rater-contrast fit).
+#' Incomplete *nested* designs, nested fixed-rater designs, and the fixed-rater cluster
+#' level remain for later milestones. Nested designs still require balanced, complete
+#' data.
 #'
 #' @section Within-cell replicates:
 #' When a subject-by-rater cell is rated **more than once** (within-cell
@@ -661,30 +665,28 @@ icc <- function(
     # coefficients. Complete crossed designs satisfy every condition, so this is a
     # no-op for the balanced M5/M8 path.
     if (multilevel && ml_design == "crossed" && !design_info$balanced) {
-      # The conflated ICC (M17 Slice 1) targets the complete five-component fit;
-      # its behaviour on ragged data is not yet established (spec
-      # M17-conflated-icc.md §6). Fail loudly rather than project it silently (#5).
-      if ("conflated" %in% level) {
-        abort_unsupported(c(
-          "The conflated ICC is available on complete data only.",
-          i = "Its behaviour on incomplete or unbalanced multilevel data is not \\
-               yet established (a later slice).",
-          i = "Provide complete crossed multilevel data, or use \\
-               {.code level = \"subject\"}."
-        ))
-      }
-      # Fixed-rater multilevel is balanced/complete only in M10 (theta^2_r under
-      # imbalance is deferred, spec §3/§7); fail loudly before fitting (#5).
-      if (raters == "fixed") {
-        abort_unsupported(c(
-          "Incomplete or unbalanced fixed-rater multilevel designs are not \\
-           supported yet.",
-          i = "Fixed-rater multilevel (M10) covers balanced, complete crossed \\
-               designs; incomplete fixed-rater multilevel is planned for a later \\
-               milestone.",
-          i = "Use {.code raters = \"random\"} for incomplete multilevel data."
-        ))
-      }
+      # Incomplete conflated ICC (M18 Slice 2, ADR-028): the conflated diagnostic
+      # (Eq. 14) LUMPS sigma^2_r + sigma^2_cr + sigma^2_res into one error term and
+      # sigma^2_c + sigma^2_{s:c} into one signal, so it is the flat two-way ICC read
+      # off the five-component fit -- its divisor is the same flat k_eff (harmonic mean
+      # of ratings per subject) and its identifiability requirement is exactly the flat
+      # two-way one. The crossed-multilevel gates below enforce that on ragged data
+      # (within-cluster connectedness + subjects rated > once for sigma^2_{s:c}; the
+      # agreement rater-bridging gate matches the flat design being connected across
+      # clusters), so the conflated path flows through them unchanged -- conservative
+      # (it strictly needs only the r+cr SUM), which is safe for a never-recommended
+      # contrast (#5). It tracks the flat incomplete two-way agreement icc() at the
+      # population level, as on complete data (spec M17-conflated-icc.md §5/§6).
+      # Incomplete fixed-rater crossed multilevel (M18 Slice 1, ADR-028): the
+      # finite-population theta^2_r (Case 3A, via the shared theta2r_fixed()) is read
+      # from the fitted rater-contrast vcov, which glmmTMB/lme4 estimate on ragged
+      # data, and the subject-level error divisor is the same k_eff (harmonic mean of
+      # ratings per subject) the random path uses -- exactly as the single-level M3
+      # incomplete fixed path (ADR-008). The identifiability gates below apply to the
+      # fixed path unchanged: they are conservative for fixed raters (theta^2_r from a
+      # fixed contrast is more robustly identified than a random sigma^2_r), so a
+      # design they admit is safely fixed-identified too. The cluster level stays
+      # deferred for fixed raters (level already forced to "subject" above).
       ident <- crossed_ml_identifiability(df)
       # Within-cluster subject x rater connectedness separates sigma^2_{s:c} from
       # residual; gates every subject-level coefficient (incl. consistency).
@@ -1002,6 +1004,10 @@ icc <- function(
       seed = seed
     )
   }
+  # A bootstrap fit carries its kept resample components so d_study() can project a
+  # bootstrap band by reprojecting each resample across `m` (M18 Slice 4, ADR-028).
+  # NULL for a Monte-Carlo fit, which reprojects from `mc` (vcov) instead.
+  boot_components <- attr(intervals, "components")
 
   estimates <- data.frame(
     index = vapply(estimands, `[[`, character(1), "label"),
@@ -1063,6 +1069,14 @@ icc <- function(
         vcov = engine_fit$vcov,
         to_components = engine_fit$to_components
       ),
+      # Bootstrap resample components (named list of per-resample vectors) for a
+      # bootstrap fit; NULL otherwise. d_study() reprojects these across `m` to
+      # produce a bootstrap band coherent with the fit's interval (M18 Slice 4).
+      boot = if (is.null(boot_components)) {
+        NULL
+      } else {
+        list(components = boot_components)
+      },
       call = match.call()
     ),
     class = "icc"

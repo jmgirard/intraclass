@@ -22,7 +22,11 @@
 #' number of raters `m` -- a generalizability-theory **decision (D-) study**,
 #' answering "how reliable would the mean of `m` raters be?" and, read as a
 #' curve, "how many raters do I need?". The point estimate and its boundary-aware
-#' Monte-Carlo interval reuse the fit stored on `x`; no model is refit.
+#' interval reuse the fit stored on `x`; no model is refit. The band follows the
+#' fit's `ci_method`: a Monte-Carlo fit reprojects one draw from the parameter
+#' covariance across every `m`, while a **bootstrap** fit reprojects its stored
+#' resamples (so at `m` = the observed rater count the band matches the fitted
+#' `ICC(*,k)` interval exactly).
 #'
 #' @section Projection is extrapolation:
 #' Projecting to an `m` you did not run is an **extrapolation**, and its
@@ -50,8 +54,10 @@
 #' and the cluster-level coefficient does **not** average over subjects, so there is
 #' no "subjects per cluster" projection — that is a sample-size question, not a
 #' reliability one. Nested designs project the subject level only. The conflated
-#' diagnostic (`level = "conflated"`) is not projected. Multilevel projection covers
-#' **complete** data only; incomplete multilevel `d_study()` aborts.
+#' diagnostic (`level = "conflated"`) is not projected. On **incomplete** data the
+#' **subject** level projects (projection moves only the divisor); the **cluster**
+#' level is dropped with a note, because projecting `m` raters is the averaged
+#' `ICC(c,k)` case whose ragged divisor is an open modeling question (M9).
 #'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
@@ -102,17 +108,40 @@ d_study <- function(
   # cluster-level ICC(c,k) divisor under imbalance is the open M9 question (§7.2).
   proj_levels <- NULL
   if (multilevel) {
-    if (!isTRUE(x$design$balanced)) {
-      abort_unsupported(c(
-        "D-study projection is not supported for incomplete multilevel designs.",
-        i = "The cluster-level ICC(c,k) divisor under imbalance is an open modeling \\
-             question (M9); multilevel projection covers complete data only.",
-        i = "Provide complete, balanced multilevel data."
-      ))
-    }
     # The conflated diagnostic (Eq. 14, M17 Slice 1) is a bias contrast, not a
     # decision-study target, so it is not projected (spec M4.5 §7.2).
     proj_levels <- setdiff(x$design$levels, "conflated")
+    # Incomplete multilevel projection (M18 Slice 3, ADR-028): the SUBJECT level
+    # projects on ragged data -- projection moves only the averaging divisor `m`, and
+    # the subject estimand's error divisor IS `m` (not `k_eff`), so the ragged-fit
+    # components suffice and the M9 subject-level identifiability already held at fit
+    # time. The CLUSTER level stays bounded: projecting `m` raters is precisely the
+    # averaged ICC(c,k) case, whose per-cluster effective-rater divisor under imbalance
+    # is the open M9 question (spec M4.5 §7.2, M9 §9). Drop it with a note (mirroring
+    # icc()'s cluster-on-incomplete posture) and abort only if nothing is left.
+    if (!isTRUE(x$design$balanced) && "cluster" %in% proj_levels) {
+      if (!("subject" %in% proj_levels)) {
+        abort_unsupported(c(
+          "Cluster-level D-study projection is not supported on incomplete data.",
+          i = "The per-cluster effective-rater divisor behind a ragged cluster mean \\
+               is an open modeling question (M9); only the subject level projects on \\
+               incomplete data.",
+          i = "Refit with {.code level = \"subject\"} for an incomplete multilevel \\
+               D-study."
+        ))
+      }
+      cli::cli_inform(
+        c(
+          i = "Cluster-level D-study projection is not available on incomplete data \\
+               (the ragged ICC(c,k) divisor is unresolved); projecting the subject \\
+               level only.",
+          i = "Subject-level projection is unaffected."
+        ),
+        .frequency = "once",
+        .frequency_id = "intraclass_dstudy_cluster_incomplete"
+      )
+      proj_levels <- setdiff(proj_levels, "cluster")
+    }
     if (length(proj_levels) == 0L) {
       abort_unsupported(c(
         "The conflated ICC is a diagnostic contrast and is not projected.",
@@ -140,10 +169,9 @@ d_study <- function(
     conf_level <- x$ci$conf_level
   }
   if (is.null(mc_samples)) {
-    # The D-study band is projected by Monte-Carlo regardless of how the fitted
-    # object's interval was computed. Reuse the parent's MC draw count when it too
-    # was Monte-Carlo; otherwise (e.g. a bootstrap fit, whose `samples` counts
-    # refits) fall back to the Monte-Carlo default (ADR-025).
+    # `mc_samples` sizes the Monte-Carlo band only (a bootstrap fit reprojects its
+    # stored resamples instead -- M18 Slice 4, below). Reuse the parent's MC draw
+    # count when it too was Monte-Carlo; otherwise fall back to the default (ADR-025).
     mc_samples <- if (identical(x$ci$method, "montecarlo")) {
       x$ci$samples
     } else {
@@ -195,13 +223,26 @@ d_study <- function(
     function(e) icc_point(x$components, e),
     numeric(1)
   )
-  # One Monte-Carlo sample, reused across every m (and level) so the curve(s) and
-  # band are internally coherent.
-  components <- mc_components(x$mc, mc_samples = mc_samples, seed = seed)
-  intervals <- lapply(
-    estimands,
-    function(e) mc_interval(components, e, conf_level)
-  )
+  # The projection band follows the fitted object's `ci_method` (M18 Slice 4,
+  # ADR-028). A bootstrap fit reprojects its stored resample components across every
+  # `m` (reusing the SAME resamples that produced the reported interval, so the band
+  # is coherent with it and needs no re-draw or seed). A Monte-Carlo fit draws one
+  # sample from the parameter covariance, reused across every m (and level). An older
+  # bootstrap object without a `boot` slot falls back to the Monte-Carlo band.
+  boot_band <- identical(x$ci$method, "bootstrap") && !is.null(x$boot)
+  if (boot_band) {
+    bc <- x$boot$components
+    intervals <- lapply(
+      estimands,
+      function(e) two_sided_interval(icc_point(bc, e), conf_level)
+    )
+  } else {
+    components <- mc_components(x$mc, mc_samples = mc_samples, seed = seed)
+    intervals <- lapply(
+      estimands,
+      function(e) mc_interval(components, e, conf_level)
+    )
+  }
 
   tbl <- tibble::tibble(
     m = row_m,
@@ -225,10 +266,10 @@ d_study <- function(
     icc_design_label = icc_design_label(x$design),
     multilevel = multilevel,
     conf.level = conf_level,
-    # The projection band is always Monte-Carlo (mc_components above), independent
-    # of the fitted object's `ci_method` (ADR-025).
-    method = "montecarlo",
-    samples = mc_samples,
+    # The projection band follows the fit's `ci_method` (M18 Slice 4): a bootstrap
+    # fit gets a bootstrap-reprojected band, otherwise Monte-Carlo (ADR-025/028).
+    method = if (boot_band) "bootstrap" else "montecarlo",
+    samples = if (boot_band) length(x$boot$components[[1L]]) else mc_samples,
     k_observed = x$n$raters,
     k_eff = x$k_eff
   )

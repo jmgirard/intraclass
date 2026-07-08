@@ -1,23 +1,35 @@
 # Project status
 
-- Milestone: **M17 — variance-decomposition trio** — **shipped** (PR #22, ADR-026). Three
-  slices: **(1)** conflated single-level ICC via `level = "conflated"` (ten Hove Eq. 14, a
-  diagnostic contrast off the M5 fit; agreement-only); **(2)** multilevel rater-count
-  `d_study()` at subject + cluster levels (retargeted from the original subjects-per-cluster
-  plan — the cluster ICC has no subject facet, ADR-026 amend); **(3)** within-cell replicates
-  splitting σ²_res → σ²_sr + σ²_e via `(1 | subject:rater)`, plus an occasion-averaged
-  coefficient (`occasions` knob, per-component error divisors). No new dependency (`gtheory`
-  proved unnecessary). M0–M17 all shipped; package at v0.1.0, submission-ready. No milestone
-  in flight.
-- Active task: — (M17 shipped; next code work is a maintainer-chosen backlog promotion — see
-  Next action for the sequencing.)
+- Milestone: **M18 — Multilevel completeness I (crossed Design 1, incomplete corners)** —
+  **in progress** (scoped by ADR-028; first milestone of the M18–M21 arc, ADR-027). Four thin
+  slices lifting a single shipped abort guard each: **(1)** incomplete fixed-rater crossed
+  (M3 `k_eff` + M10 θ²_r under imbalance); **(2)** incomplete conflated ICC (attempt Eq. 14 on
+  ragged data with a flat `k_eff` — **degrade to 🟣 research if no #1-strong oracle holds**,
+  maintainer decision); **(3)** incomplete **subject-level** `d_study()` (cluster level bounded
+  by the Wave-3 `ICC(c,k)` divisor); **(4)** bootstrap-projected `d_study()` bands (M16 deferral,
+  package-wide — split out of ADR-027's bundled Slice 3). Completeness, not new estimand work;
+  no new dependency. M0–M17 shipped; package at v0.1.0.
+- Active task: **M18 — PR #23 open, awaiting CI + maintainer merge.** All four slices shipped +
+  cross-cutting DoD done: (1) incomplete fixed-rater crossed (O-IFML); (2) incomplete conflated
+  ICC — oracle held, ships (O-conflated/incomplete; spec §6a); (3) incomplete subject-level
+  `d_study()` — level-aware abort (O-IDS); (4) bootstrap-projected `d_study()` bands, coherent
+  with the fitted interval at `m = k_eff` (O-Boot-DS). **779 tests pass**, `R CMD check --as-cran`
+  0/0/0 (installed pkg, vignettes built), lint/`air` clean. On branch `m18-crossed-incomplete`.
+  After merge: post-merge `project/` reconcile (compress M18 in MILESTONES) then start M19.
 - Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
   `main` at a915256
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — M17 merged (PR #22) + `project/` reconciled
-  (MILESTONES board + ROADMAP promotion)
+- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped all four slices**
+  (incomplete fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`;
+  bootstrap-projected `d_study()` bands). Lint/`air` clean. Cross-cutting DoD (NEWS + installed
+  `--as-cran` + reconcile) and PR next.
 
 ## Where we are
+
+**Support matrix** — [`COVERAGE.md`](COVERAGE.md) is the current-state stock-take of
+what the `icc()` / `d_study()` argument space supports today, with a reason category
+(not yet / research / blocked / by design) for every gap. Derived, not authoritative;
+refresh it when a milestone ships.
 
 **Shipped M0–M15** — see [`MILESTONES.md`](MILESTONES.md) for the record (single
 source; not restated here, ADR-015). In short: the classic Shrout–Fleiss ICC family
@@ -41,23 +53,35 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M17 shipped (PR #22, ADR-026) — no milestone in flight.** The variance-decomposition trio
-is merged: conflated single-level ICC (`level = "conflated"`), multilevel rater-count
-`d_study()`, and within-cell replicates + occasion-averaged coefficient. Next code work is a
-maintainer-chosen backlog promotion from the sequencing below (each needs its own
-start-of-milestone scope pass + ADR).
+**M17 shipped (PR #22, ADR-026) — no milestone in flight.** The **M18–M21 completeness arc
+is planned** (ADR-027) to close every 🔵 *not yet* gap in [`COVERAGE.md`](COVERAGE.md).
+Next code work is **starting M18** (it gets its own start-of-milestone scope pass + ADR).
 
-**Still to sequence (non-Bayesian carryover):**
+**Planned arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
+
+- **M18 — Multilevel completeness I (crossed, incomplete):** incomplete fixed-rater crossed
+  (Slice 1); incomplete conflated ICC (Slice 2); incomplete subject-level `d_study()` +
+  bootstrap `d_study()` bands (Slice 3). Reuses M3 Case-3A / M10 θ²_r / M9 machinery.
+- **M19 — Multilevel completeness II (nested Designs 2/3):** incomplete nested (Slice 1);
+  fixed-rater nested (Slice 2). The M8→incomplete + M10-fixed analog.
+- **M20 — Within-cell replicate completeness:** ragged (Slice 1), fixed-rater (Slice 2),
+  multilevel (Slice 3) replicates. Extends M17 Slice 3.
+- **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
+  (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc.
+
+**Reclassified out of the arc (ADR-027):** multilevel SEM → cross-cutting "later" bucket
+(research-flavored, sits beside Bayesian); lavaan + replicates → ROADMAP unscheduled (niche).
+
+**Still to sequence (excluded from the M18–M21 arc, later):**
 
 - **Wave 3 (research):** **M9 averaged cluster-level `ICC(c,k)` on incomplete data** (open
-  per-cluster divisor — a focused simulation-oracle study, likely a Fable review).
-- **Deprioritized (opportunistic parity only):** boundary-robust lme4 interval for singular
-  fits + merDeriv edge cases — glmmTMB covers these today.
+  per-cluster divisor — a focused simulation-oracle study, likely a Fable review). *Bounds
+  M18 Slice 3 to the subject level.*
+- **Cross-cutting, later:** the **Bayesian engine** (`ci_method = "posterior"`);
+  **categorical/ordinal GLMM ratings**; **multilevel SEM**; non-parametric/profile-likelihood
+  CIs; boundary-robust lme4 singular-fit + merDeriv edge cases (glmmTMB covers these today).
 - **Blocked, stays parked:** one-way / general ICC(1) via SEM — no faithful sourced route
   (ADR-014); not schedulable until a source appears.
-
-The **Bayesian engine** (`ci_method = "posterior"`) is the remaining arc carry-over,
-sequenced after these per the maintainer's current non-Bayesian focus.
 
 **CRAN submission (out of band, ADR-022).** See below.
 

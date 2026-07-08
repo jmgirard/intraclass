@@ -382,10 +382,12 @@ test_that("multilevel consistency projection is Spearman-Brown of ICC(C,1) per l
 test_that("multilevel d_study scope guards (#5, #8)", {
   skip_if_not_installed("glmmTMB")
   d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
-  # Incomplete multilevel projection is deferred (open ICC(c,k) divisor).
+  # Incomplete multilevel: the subject level now projects (M18 Slice 3); the cluster
+  # level is dropped with a note (its ragged ICC(c,k) divisor is the open M9 question).
   d_missing <- d[!(d$cluster == "1" & d$rater == "1"), ]
   fit_inc <- icc(d_missing, score, subject, rater, cluster = cluster, seed = 1)
-  expect_error(d_study(fit_inc, m = 1:4), class = "intraclass_unsupported")
+  ds_inc <- suppressMessages(d_study(fit_inc, m = 1:4))
+  expect_setequal(unique(ds_inc$level), "subject")
   # A conflated-only fit has nothing to project.
   fit_conf <- icc(
     d,
@@ -448,4 +450,262 @@ test_that("multilevel d_study print/tidy/format carry the level column", {
   expect_setequal(unique(td$level), c("subject", "cluster"))
   g <- glance(ds)
   expect_identical(nrow(g), 1L)
+})
+
+# Oracle O-IDS: INCOMPLETE subject-level multilevel d_study(), M18 Slice 3 --------
+#
+# M18 Slice 3 (ADR-028) lifts the balanced-only d_study() guard for the SUBJECT level:
+# projection moves only the averaging divisor `m`, and the subject estimand's error
+# divisor is `m` itself (not k_eff), so the ragged M9 five-component fit's components
+# project unchanged. The CLUSTER level stays bounded -- projecting `m` raters is the
+# averaged ICC(c,k) case, whose per-cluster divisor under imbalance is the open M9
+# question (spec M4.5 §7.2, M9 §9) -- so it is dropped with a note (or aborts when it
+# is the only level). Oracles: reduction to the fitted subject ICC(A,k) at m = k_eff,
+# an independent lme4 fit, and the monotone/[0,1] invariants, all on ragged data.
+
+ragged_ds <- function(d, prop, seed) {
+  set.seed(seed)
+  d[-sample(nrow(d), round(prop * nrow(d))), , drop = FALSE]
+}
+
+test_that("O-IDS/reduction: ragged subject projection at m = k_eff equals fitted ICC(A,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  expect_false(isTRUE(fit$design$balanced))
+  keff <- fit$k_eff
+  ds <- suppressMessages(d_study(fit, m = keff))
+  proj <- ds$estimate[ds$level == "subject"]
+  fitted_ak <- fit$estimates$estimate[
+    fit$estimates$index == "ICC(A,k)" & fit$estimates$level == "subject"
+  ]
+  expect_equal(proj, fitted_ak, tolerance = 1e-6)
+})
+
+test_that("O-IDS: ragged subject curve projects, is monotone in [0, 1], cluster dropped", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  # The default subject+cluster fit drops the cluster level with a one-time note. The
+  # note uses .frequency = "once", so force verbose verbosity to observe it regardless
+  # of test ordering.
+  withr::local_options(rlib_message_verbosity = "verbose")
+  expect_message(
+    ds <- d_study(fit, m = 1:10),
+    "subject level only"
+  )
+  expect_setequal(unique(ds$level), "subject")
+  ds <- ds[order(ds$m), ]
+  expect_true(all(ds$estimate >= 0 & ds$estimate <= 1))
+  expect_true(all(diff(ds$estimate) >= -1e-9))
+  # A boundary-aware interval is present at every m (never a bare point, #3).
+  expect_true(all(is.finite(ds$conf.low) & is.finite(ds$conf.high)))
+})
+
+test_that("O-IDS/lme4: ragged subject projection matches an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  dg <- suppressMessages(
+    d_study(
+      icc(d, score, subject, rater, cluster = cluster, seed = 1),
+      m = c(3, 8)
+    )
+  )
+  dl <- suppressMessages(suppressWarnings(
+    d_study(
+      icc(
+        d,
+        score,
+        subject,
+        rater,
+        cluster = cluster,
+        engine = "lme4",
+        seed = 1
+      ),
+      m = c(3, 8)
+    )
+  ))
+  expect_equal(
+    dg$estimate[dg$level == "subject"],
+    dl$estimate[dl$level == "subject"],
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-IDS: cluster-only incomplete fit refuses projection (bounded, #5)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ds(
+    sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  fit_c <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    seed = 1
+  )
+  expect_error(d_study(fit_c, m = 1:4), class = "intraclass_unsupported")
+})
+
+# Oracle O-Boot-DS: bootstrap-projected d_study() bands, M18 Slice 4 -------------
+#
+# M18 Slice 4 (ADR-025 deferral, ADR-028): the d_study() band follows the fit's
+# `ci_method`. A bootstrap fit stores its kept resample components on `x$boot`;
+# d_study() reprojects each resample across `m` (moving only the divisor) and takes
+# percentile bands -- reusing the SAME resamples that produced the fit's interval, so
+# at `m = k_eff` the band coincides with the fitted ICC(*,k) bootstrap interval
+# (the primary, exact coherence oracle). It is package-wide (two-way, multilevel,
+# incomplete), keyed off `ci_method`, with no new argument. The band's own oracle is
+# coverage/agreement (a CI method, #1): it agrees with the MC band on interior cases
+# and diverges predictably at the boundary (the M16 O2 pattern, #18).
+
+test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit interval", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  fb <- suppressWarnings(icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    ci_method = "bootstrap",
+    boot_samples = 499,
+    seed = 1
+  ))
+  # Balanced SF data: k_eff = n_raters = 4, so the projection to m = 4 IS ICC(A,k).
+  ds <- d_study(fb, m = fb$n$raters)
+  fit_ak <- fb$estimates[fb$estimates$index == "ICC(A,k)", ]
+  expect_equal(ds$conf.low, fit_ak$conf.low, tolerance = 1e-9)
+  expect_equal(ds$conf.high, fit_ak$conf.high, tolerance = 1e-9)
+  # The band is labelled bootstrap and carries the resample count.
+  expect_identical(attr(ds, "method"), "bootstrap")
+  expect_identical(attr(ds, "samples"), 499L)
+})
+
+test_that("O-Boot-DS: a Monte-Carlo fit still gets a Monte-Carlo band (no regression)", {
+  skip_if_not_installed("glmmTMB")
+  fm <- fit_ds("agreement")
+  ds <- d_study(fm, m = c(1, 4, 8))
+  expect_identical(attr(ds, "method"), "montecarlo")
+})
+
+test_that("O-Boot-DS: the bootstrap band is deterministic, monotone, and in [0, 1]", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  fb <- suppressWarnings(icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    ci_method = "bootstrap",
+    boot_samples = 499,
+    seed = 1
+  ))
+  # No re-draw or seed: the band is fixed by the stored resamples, so repeat calls
+  # are identical (unlike the MC band, which re-draws).
+  a <- d_study(fb, m = 1:6)
+  b <- d_study(fb, m = 1:6)
+  expect_equal(a$conf.low, b$conf.low)
+  expect_equal(a$conf.high, b$conf.high)
+  a <- a[order(a$m), ]
+  expect_true(all(diff(a$estimate) > 0))
+  expect_true(all(a$estimate >= 0 & a$estimate <= 1))
+  expect_true(all(a$conf.low >= 0 & a$conf.high <= 1))
+})
+
+test_that("O-Boot-DS/O2: bootstrap band agrees with the MC band on an interior case", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  # Many subjects, well-separated components -> both methods are far from the
+  # boundary and the bands nearly coincide (they diverge only at the boundary, #18).
+  set.seed(99)
+  ns <- 40L
+  k <- 6L
+  subj <- stats::rnorm(ns, 0, sqrt(4))
+  rat <- stats::rnorm(k, 0, sqrt(0.6))
+  d <- expand.grid(subject = seq_len(ns), rater = seq_len(k))
+  d$score <- 10 +
+    subj[d$subject] +
+    rat[d$rater] +
+    stats::rnorm(nrow(d), 0, sqrt(1.2))
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  fb <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    ci_method = "bootstrap",
+    boot_samples = 999,
+    seed = 1
+  )
+  fm <- icc(d, score, subject, rater, seed = 1)
+  for (m in c(2, 4, 12)) {
+    db <- d_study(fb, m = m)
+    dm <- d_study(fm, m = m)
+    expect_equal(db$conf.low, dm$conf.low, tolerance = 0.02)
+    expect_equal(db$conf.high, dm$conf.high, tolerance = 0.02)
+  }
+})
+
+test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  # Multilevel bootstrap fit: a bootstrap band per projected level.
+  fb <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    ci_method = "bootstrap",
+    boot_samples = 199,
+    seed = 1
+  )
+  ds <- d_study(fb, m = c(1, 5, 10))
+  expect_identical(attr(ds, "method"), "bootstrap")
+  expect_setequal(unique(ds$level), c("subject", "cluster"))
+  # Slice 3 x Slice 4: an incomplete multilevel bootstrap fit projects the subject
+  # level with a bootstrap band.
+  di <- ragged_ds(d, 0.15, 7)
+  fbi <- icc(
+    di,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    ci_method = "bootstrap",
+    boot_samples = 199,
+    seed = 1
+  )
+  dsi <- suppressMessages(d_study(fbi, m = c(1, 5, 10)))
+  expect_identical(attr(dsi, "method"), "bootstrap")
+  expect_setequal(unique(dsi$level), "subject")
+  expect_true(all(is.finite(dsi$conf.low) & is.finite(dsi$conf.high)))
 })

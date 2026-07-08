@@ -76,7 +76,13 @@ bootstrap_ci <- function(
     lapply(rownames(kept), function(r) kept[r, ]),
     rownames(kept)
   )
-  lapply(estimands, function(est) {
+  out <- lapply(estimands, function(est) {
     two_sided_interval(icc_point(components, est), conf_level)
   })
+  # Expose the kept resample components so a D-study projection can reproject them
+  # across `m` without a second round of refits (M18 Slice 4, ADR-028). The fit
+  # stores these on its `boot` slot; the band then reuses the SAME resamples that
+  # produced the reported interval, so at `m = k_eff` the two coincide.
+  attr(out, "components") <- components
+  out
 }
