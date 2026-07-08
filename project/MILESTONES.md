@@ -4,8 +4,9 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers — the
 full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
 (`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
-restate it here). **M20 is in flight** (scoped by ADR-030 after a short retro, founding
-brief §7) — its DoD checklist below *is* the live board.
+restate it here). **No milestone is in flight** — the next one (M21, the arc's last:
+SEM/lavaan engine parity) is scoped by an ADR at its start after a short retro
+(founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
@@ -577,76 +578,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   recovery with MC-CI coverage + the σ²_sr + σ²_e ≈ σ²_res invariant; in `test-replicates.R`
   (+ `test-icc-multilevel.R` for S2).
 
-### DoD checklist (the live board — check off in the same commit as the work, #16)
-
-**Slice 1 — fixed-rater replicates (lowest oracle-risk):** ✅ done
-- [x] Lift the `raters == "fixed"` replicate abort (`R/icc.R`, ~L680); route to a new
-      `fit_{glmmtmb,lme4}_replicates_fixed` (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`).
-- [x] θ²_r via the shipped engine-agnostic `theta2r_fixed()` read from the rater-contrast
-      betas/vcov, placed in the rater slot of the M17 per-component error decomposition (agreement
-      `(θ²_r + σ²_sr)/n_r + σ²_e/(n_r·n_o)`; consistency drops θ²_r). Estimand layer unchanged
-      (it already threads `raters`; only the fit fills the rater slot with θ²_r).
-- [x] `occasions` (single/average) works with fixed raters; balanced/complete replicated,
-      single-level only (ragged×fixed, multilevel×fixed guarded loudly with a forward pointer).
-- [x] O-FRep oracles asserted in `test-replicates.R`: **exact balanced fixed ≡ random**
-      (θ²_r ≡ σ²_r, <1e-4); consistency ≡ random (~1e-8); reduction to the single-occasion
-      fixed fit via cell-mean aggregation (θ²_r/σ²_s exact, cell-mean residual ≡ σ²_sr+σ²_e/n_o);
-      glmmTMB↔lme4 <1e-4; SF labels (fixed agreement NA, fixed consistency ICC(3,·) single /
-      NA averaged); seeded recovery + MC-CI coverage; balanced fixed ANOVA mean-squares as the
-      independent method; both `ci_method`s.
-
-**Slice 2 — multilevel replicates (crossed Design 1 + nested Design 2):** ✅ done
-- [x] Lift the `multilevel` replicate abort (`R/icc.R`) for Design 1 and Design 2; add
-      `(1|cluster:subject:rater)` via new `fit_{glmmtmb,lme4}_ml_replicates` (crossed) and
-      `fit_{glmmtmb,lme4}_nested_replicates` (nested) reusing the generic `*_ml_contract`.
-      Design-aware `multilevel_replicate_facts()` computes n_o + completeness (the flat
-      `summarize_design()` grid is crossed-only).
-- [x] Residual splits into σ²_{csr} + σ²_e (Design 1 → six components; Design 2 → five); the
-      `occasions` facet reduces only pure error by n_o (per-component `error_divisors`); cluster
-      level is single-occasion only (pure error not in its error set) and unaffected by the split.
-- [x] Design 3 replicate-split aborts ⚫ by-design (classed `abort_unsupported`, named: multilevel
-      one-way, no separable subject:rater interaction); fixed×multilevel, conflated×replicates, and
-      ragged×multilevel replicates all abort loudly (deferred compound corners).
-- [x] O-MLRep oracles asserted (`test-icc-multilevel.R`): reduction to M5 (D1) / M8 (D2) via
-      cell-mean aggregation (occasion-averaged == M5/M8 on cell means; σ²_{csr} + σ²_e/n_o ≈ M5/M8
-      residual); glmmTMB↔lme4 <1e-4; seeded recovery + MC-CI coverage; components view + cluster
-      single-occasion; both `ci_method`s. (N_c=1→M17 reduction is unreachable — multilevel requires
-      ≥2 clusters.) Balanced/complete.
-- [x] **Correctness fix (surfaced by this slice, #1/#5):** `d_study()` silently dropped σ²_sr when
-      projecting off a replicate fit (pre-existing since M17 single-level); now refuses loudly
-      (`test-d-study.R`), pending per-component-divisor projection.
-
-**Slice 3 — ragged/incomplete replicates (two-way random single-level; the one genuine
-characterization):** ✅ done
-- [x] Lift the `!replicates_uniform` abort (`R/icc.R`); the single-occasion family fits on
-      ragged data via the shipped interaction fit (`fit_{glmmtmb,lme4}_replicates`), the
-      harmonic-mean `k_eff` (distinct raters/subject), and the M3 connectedness gate. No new fit
-      function needed — the machinery is engine-agnostic and runs before fit dispatch.
-- [x] `occasions = "average"`: **attempted, degraded to 🟣 research** (maintainer-authorized
-      outcome). With unequal per-cell counts the reliability of the mean of `n_o` replicates has no
-      single scalar effective-`n_o` divisor (GT averaging weights are per-cell) and no
-      textbook/independent oracle pins one, so shipping a guessed divisor would violate #1/#4.
-      `occasions = "average"` on ragged data aborts loudly; recorded 🟣 in
-      `M17-within-cell-replicates.md` §7 + `COVERAGE.md` §②.
-- [x] Compound corners guarded loudly: ragged × fixed and ragged × multilevel replicates abort
-      with a forward pointer (deferred — one imbalance dimension at a time).
-- [x] O-RagRep oracles asserted in `test-replicates.R`: glmmTMB↔lme4 cross-engine <1e-4 (unequal
-      counts **and** incomplete crossing); `k_eff = n_raters` on complete-crossing ragged counts;
-      the ICC(A,1)-from-components identity; seeded recovery + MC-CI coverage; both `ci_method`s;
-      the two deferral aborts. (The uniform→M17 and cell-mean→M3 reductions are not cleanly
-      reachable — a uniform design takes the M17 path, and unequal-count cell means are
-      heteroscedastic — so cross-engine + seeded recovery are the independent oracles, as M15.)
-
-**Cross-cutting DoD:**
-- [ ] `M17-within-cell-replicates.md` §7 updated: the shipped corners moved into the map; the
-      ragged occasion-averaged outcome recorded (divisor or 🟣 research deferral).
-- [ ] `COVERAGE.md` §② refreshed (the three 🔵 → ✅ or annotated); `DECISIONS.md`/`STATUS.md`
-      reconciled; NEWS entry under 0.1.0.
-- [ ] `lintr::lint_package()` clean; `air format .` clean; installed-pkg tests with
-      `NOT_CRAN=true`; `R CMD check --as-cran` 0/0/0.
-- [ ] Ships on a `m20-<slug>` branch, merged via PR; full CI matrix green incl. Windows and
-      R-devel (`milestone-branches-and-prs`).
-
 - Deferred out of M20 (record so not rediscovered): **ragged × fixed** and **ragged ×
   multilevel** replicates (compound imbalance — later corners, as ragged×fixed nested was for M19);
   **Design 3 / one-way replicate-split** (⚫ by-design — no separable interaction); the **occasion
@@ -655,15 +586,13 @@ characterization):** ✅ done
   Arc carry-overs stay in `ROADMAP.md`: the Wave-3 averaged crossed cluster-level `ICC(c,k)`
   incomplete divisor (🟣 research, M9 §9); **SEM parity** (M21); Bayesian engine + `ci_method =
   "posterior"`; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
-  non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **all slices done, ready to merge** (ADR-030; third milestone of the M18–M21 arc). On
-  branch `m20-fixed-replicates` (Slice 1 `7d82217`, Slice 2 `bfc23dc`): **Slice 1** fixed-rater
-  replicates (`fit_{glmmtmb,lme4}_replicates_fixed`, O-FRep); **Slice 2** multilevel replicates
-  (`fit_{glmmtmb,lme4}_ml_replicates` crossed + `fit_{glmmtmb,lme4}_nested_replicates`,
-  design-aware `multilevel_replicate_facts()`, O-MLRep) + a `d_study()`-on-replicate correctness
-  guard; **Slice 3** ragged single-occasion replicates (no new fit; occasion-averaged-ragged
-  degraded to 🟣 research, O-RagRep). Full local suite green, `air`/`lintr` clean, docs regenerated.
-  Not yet merged (Slice 3 pending commit).
-- Deferred out of M20 (added at close): **occasion-averaged coefficient on ragged replicates**
-  (🟣 research — no validated effective-`n_o` divisor, M20 Slice 3 attempt-then-degrade); **`d_study()`
-  projection off a replicate fit** (needs per-component error divisors; refused loudly).
+  non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases. Two corners degraded
+  at close: the **occasion-averaged coefficient on ragged replicates** (🟣 research — no validated
+  effective-`n_o` divisor, Slice 3 attempt-then-degrade) and **`d_study()` projection off a
+  replicate fit** (needs per-component error divisors; refused loudly).
+- Status: **done** (Slices 1–3 + finish-task fix; merged via PR #25 at 137fb98; full CI matrix
+  green incl. Windows and R-devel, 894 tests). `R CMD check --as-cran` 0/0/0. Slice 1 fixed-rater
+  (`fit_{glmmtmb,lme4}_replicates_fixed`, θ²_r); Slice 2 multilevel (`fit_{glmmtmb,lme4}_ml_replicates`
+  crossed + `_nested_replicates`, `multilevel_replicate_facts()`) + a `d_study()`-on-replicate
+  correctness guard; Slice 3 ragged single-occasion (no new fit). Occasion-averaged-ragged degraded
+  to 🟣 research. Third milestone of the M18–M21 arc; only M21 (SEM parity) remains.

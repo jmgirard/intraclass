@@ -33,7 +33,7 @@ ready ones.
 [`COVERAGE.md`](COVERAGE.md) were scheduled as a mixed-model-first arc; each detailed by its
 own scoping ADR at its start (ADR-015). **Shipped:** incomplete/fixed **crossed** multilevel
 (M18, PR #23), incomplete/fixed **nested** multilevel (M19, PR #24), and ragged/fixed/multilevel
-**within-cell replicates** (M20, ADR-030 — built, pending merge). **Remaining:** **SEM (lavaan)
+**within-cell replicates** (M20, PR #25, ADR-030). **Remaining:** **SEM (lavaan)
 engine parity** for fixed + incomplete/FIML (**M21**, next). Those items live as *Deferred out of
 M<n>* lines in [`MILESTONES.md`](MILESTONES.md), not here. Two items were reclassified **into**
 this parking lot instead of milestoned (see below): *multilevel SEM* and *lavaan + within-cell

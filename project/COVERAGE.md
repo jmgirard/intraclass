@@ -11,7 +11,7 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-08**, after **M20** (ADR-030, built; pending PR CI + merge) — which closes the
+**2026-07-08**, after **M20** (PR #25, ADR-030) — which closes the
 within-cell replicate corners (fixed / multilevel / ragged single-occasion) and adds a
 `d_study()`-off-replicate guard; M18 (PR #23) and M19 (PR #24) before that.
 
