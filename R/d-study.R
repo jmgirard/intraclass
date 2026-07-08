@@ -34,12 +34,12 @@
 #' pretending a single plugged-in value. `m` is the number of raters and is
 #' normally an integer, though non-integer values are permitted.
 #'
-#' Projection is defined for random raters (both agreement and consistency) and
-#' for fixed-rater **consistency**. It is **not** defined for fixed-rater
-#' absolute agreement: there the rater term is the finite-population variance of
-#' exactly the raters you observed, so there is no "average of `m` freshly
-#' sampled raters" to project to, and `d_study()` aborts (use
-#' `raters = "random"`).
+#' Projection is defined for random raters (both agreement and consistency), for
+#' fixed-rater **consistency**, and for the **one-way** model (a Spearman-Brown
+#' projection of `ICC(1)`). It is **not** defined for fixed-rater absolute
+#' agreement: there the rater term is the finite-population variance of exactly the
+#' raters you observed, so there is no "average of `m` freshly sampled raters" to
+#' project to, and `d_study()` aborts (use `raters = "random"`).
 #'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
@@ -84,8 +84,17 @@ d_study <- function(
   }
   type <- x$design$type
   raters <- x$design$raters
-  # Same ill-posed combination guarded by icc()'s numeric-unit path (M4.5 spec).
-  abort_fixed_agr_projection(type, raters)
+  oneway <- identical(x$design$model, "oneway")
+  # A one-way fit has no rater term (`type` is NA); its projection is the one-way
+  # ICC(m) (signal subject, error residual, divisor m) -- the same estimand the
+  # sibling path `icc(..., model = "oneway", unit = m)` computes. Route to it rather
+  # than fall through to the two-way `icc_estimand()`, which would arg-match NA and
+  # crash with an unclassed error (fixed-rater agreement is impossible here, since
+  # one-way fixed is rejected at `icc()`).
+  if (!oneway) {
+    # Same ill-posed combination guarded by icc()'s numeric-unit path (M4.5 spec).
+    abort_fixed_agr_projection(type, raters)
+  }
 
   if (is.null(m)) {
     m <- seq_len(2L * x$n$raters)
@@ -103,7 +112,13 @@ d_study <- function(
 
   estimands <- lapply(
     m,
-    function(mm) icc_estimand(type = type, unit = mm, raters = raters)
+    function(mm) {
+      if (oneway) {
+        icc_estimand(unit = mm, oneway = TRUE)
+      } else {
+        icc_estimand(type = type, unit = mm, raters = raters)
+      }
+    }
   )
   points <- vapply(
     estimands,

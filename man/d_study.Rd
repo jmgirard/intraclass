@@ -67,12 +67,12 @@ automatically (it recomputes \eqn{\Phi(m)} on every draw) rather than
 pretending a single plugged-in value. \code{m} is the number of raters and is
 normally an integer, though non-integer values are permitted.
 
-Projection is defined for random raters (both agreement and consistency) and
-for fixed-rater \strong{consistency}. It is \strong{not} defined for fixed-rater
-absolute agreement: there the rater term is the finite-population variance of
-exactly the raters you observed, so there is no "average of \code{m} freshly
-sampled raters" to project to, and \code{d_study()} aborts (use
-\code{raters = "random"}).
+Projection is defined for random raters (both agreement and consistency), for
+fixed-rater \strong{consistency}, and for the \strong{one-way} model (a Spearman-Brown
+projection of \code{ICC(1)}). It is \strong{not} defined for fixed-rater absolute
+agreement: there the rater term is the finite-population variance of exactly the
+raters you observed, so there is no "average of \code{m} freshly sampled raters" to
+project to, and \code{d_study()} aborts (use \code{raters = "random"}).
 }
 
 \examples{
