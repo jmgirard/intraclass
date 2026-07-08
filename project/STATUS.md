@@ -18,8 +18,10 @@
   refit. Refit-failure discard policy hardened (classed warning >10%, abort <50%
   converged) with a deterministic unit test. Cross-cutting DoD: roxygen, NEWS, and an
   `advanced.Rmd` "Choosing a confidence-interval method" section all landed. Full suite
-  591 pass / 0 fail, lint + `air` clean. **Next: installed-pkg check (`NOT_CRAN=true`) then
-  PR off `m16-bootstrap-ci`.**
+  591 pass / 0 fail, lint + `air` clean; installed-pkg check (`NOT_CRAN=true`) run. **PR
+  [#21](https://github.com/jmgirard/intraclass/pull/21) open off `m16-bootstrap-ci` —
+  awaiting CI.** Installed check surfaced the lme4-singular bootstrap message (fixed
+  method-neutral, `9f56707`; maintainer kept the lme4→glmmTMB handoff, ADR-025).
 - Last green CI: PR #19 (M15) full matrix green incl. Windows and R-devel; merged to
   `main` at b0dd492
 - Blockers: —
