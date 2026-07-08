@@ -9,19 +9,23 @@
   dropped-with-note); **(4)** bootstrap-projected `d_study()` bands (M16 deferral, package-wide).
   Completeness, not new estimand work; no new dependency, no new argument. M0–M18 shipped; package
   at v0.1.0. No milestone in flight.
-- Active task: **M19 Slice 1 — incomplete nested (Designs 2/3)** (ADR-029, COVERAGE #10). Scoping
-  done: retro + ADR-029 written + M19 board added to MILESTONES.md; maintainer decisions A (explicit
-  `design=` on ambiguous ragged data), B (attempt subject-level `k_eff` for the averaged
-  coefficient, degrade to 🟣 research if unpinnable), C (fixed-rater = Design 2 only) locked. Next:
-  start Slice 1 on branch `m19-nested-completeness` — lift the `nested_design_balanced` abort,
-  single-rater first, then the averaged-divisor oracle characterization (#1/#4). No code yet.
+- Active task: **M19 Slice 2 — fixed-rater nested (Design 2 only)** (ADR-029, COVERAGE #11) — next.
+  **Slice 1 (incomplete nested Designs 2/3) is done** on `m19-nested-completeness`: lifted the
+  `nested_design_balanced` abort; incomplete Designs 2/3 now fit. Decision B **resolved to SHIP the
+  averaged coefficient** — the ragged subject-level `k_eff` divisor reduces **exactly** to the
+  pinned M3 two-way / M6 one-way incomplete divisor (oracle O-NML/incomplete: single-cluster
+  Design 2 → ragged two-way diff 0; Design 3 → ragged one-way) — no 🟣 research degrade, no Fable.
+  Decision A: ambiguous ragged data requires explicit `design=` (detection escape hatch; stale
+  abort message updated). Design 2 gained a within-cluster connectedness gate; incomplete
+  subject-level `d_study()` projects for free (M18 path). Full suite 795 pass / 0 fail; `air` +
+  `lintr` clean.
 - Last green CI: PR #23 (M18) full matrix green incl. Windows and R-devel; merged to
   `main` at 7dffbb2
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M19 scoping opened** via `/start-task M19`. M18
-  shipped (PR #23, ADR-028); no code milestone in flight. Retro done; M19's planned scope
-  (nested Designs 2/3 incomplete + fixed) restated from ADR-027; estimand/oracle posture named.
-  Scope decisions put to the maintainer before ADR-029 is written.
+- Updated: 2026-07-08 by main session (Opus) — **M19 Slice 1 (incomplete nested) implemented** on
+  `m19-nested-completeness`: scoping (ADR-029) + Slice 1 code. Incomplete Designs 2/3 fit; averaged
+  `k_eff` divisor pinned by exact reduction to M3/M6; ambiguous ragged requires `design=`. Oracle
+  script + tests added (full suite 795 pass / 0 fail, `air` + `lintr` clean). Slice 2 next.
 
 ## Where we are
 

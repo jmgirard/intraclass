@@ -531,20 +531,22 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `test-icc-fixed-multilevel.R`.
 
 - **Slice 1 — incomplete nested (COVERAGE #10).** Lift the `nested_design_balanced` abort
-  ([icc.R:596](../R/icc.R)) for Designs 2 and 3.
-  - [ ] **Design detection (decision A):** on ambiguous ragged data `detect_multilevel_design()`
+  ([icc.R:596](../R/icc.R)) for Designs 2 and 3. **DONE** (pending full-suite + lintr green).
+  - [x] **Design detection (decision A):** on ambiguous ragged data `detect_multilevel_design()`
     aborts requiring an explicit `design = "nested_in_clusters"` / `"nested_in_subjects"` — never
-    guessed (#5); classed `abort_*`, oracle-/test-pinned message.
-  - [ ] **Single-rater `ICC_s(·,1)`** on ragged Design-2 (agreement/consistency) and Design-3
-    (agreement) data — reduction + cross-engine + seeded-recovery oracles.
-  - [ ] **Averaged `ICC_s(·,k)` — attempt, degrade if weak (decision B):** attempt the
-    subject-level ragged `k_eff` divisor against reduction + cross-engine oracles. If it pins,
-    ship it; **if no #1/#4-strong oracle holds, reclassify to 🟣 research** (record in COVERAGE +
-    `M8 §8`/ROADMAP), ship single-rater-only, and (if close-but-unpinnable) recommend a Fable
-    review (#19) and pause.
-  - [ ] M8/M9 identifiability guards (≥2 raters/cluster or /subject; connectedness) verified under
-    imbalance; lme4 degrades to glmmTMB at the boundary (as M15).
-  - [ ] Tracking updated in-commit (#16); `air` + `lintr` clean; installed-pkg check green.
+    guessed (#5); classed `abort_unidentified`, test-pinned message.
+  - [x] **Single-rater `ICC_s(·,1)`** on ragged Design-2 (agreement/consistency) and Design-3
+    (agreement) data — cross-engine (glmmTMB↔lme4 <1e-4) + reduction + seeded-recovery oracles.
+  - [x] **Averaged `ICC_s(·,k)` — attempt succeeded, SHIPPED (decision B):** the subject-level
+    ragged `k_eff` divisor reduces **exactly** to the pinned M3 two-way / M6 one-way incomplete
+    divisor (single-cluster Design 2 → ragged two-way, diff 0; Design 3 → ragged one-way).
+    No research degrade needed; no Fable review.
+  - [x] Identifiability guards under imbalance (Design 2: within-cluster connectedness +
+    subjects-rated->1; Design 3: ≥2 ratings/subject); lme4 degrades to glmmTMB at the boundary
+    (via `lme4_ml_contract`). Bonus: incomplete subject-level `d_study()` projects (M18 path).
+  - [x] Oracle script `data-raw/oracle-nested-multilevel.R` + tests
+    `test-icc-nested-multilevel.R` (56 pass); full suite 795 pass / 0 fail; `air` + `lintr` clean.
+    *(installed-pkg check + `R CMD check` deferred to milestone finish-task, before the PR push.)*
 - **Slice 2 — fixed-rater nested (COVERAGE #11), Design 2 only (decision C).** Lift the
   `ml_design != "crossed"` abort in the fixed-rater branch ([icc.R:525](../R/icc.R)).
   - [ ] **Design 2 fixed raters:** M10 `theta2r_fixed()` reads θ²_r from the rater-contrast fit
@@ -559,4 +561,5 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   ragged/fixed/multilevel **replicates** (M20); **SEM parity** (M21). Arc carry-overs stay in
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way via
   SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **active — scoping done (ADR-029), Slice 1 next.** No code yet.
+- Status: **active — Slice 1 done** (incomplete nested Designs 2/3 ship; full suite 795 pass / 0
+  fail, `air` + `lintr` clean). Slice 2 (fixed-rater nested, Design 2 only) next.

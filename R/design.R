@@ -130,21 +130,22 @@ detect_multilevel_design <- function(df, call = rlang::caller_env()) {
     c(
       "The raters are neither fully crossed with nor fully nested in subjects.",
       i = "Within a cluster some raters rate a single subject while others rate \\
-           several, which is not one of the supported multilevel designs.",
-      i = "Design 2 has each rater rate every subject in its cluster; Design 3 has \\
-           each rater rate a single subject.",
-      i = "This can also be an {.emph unbalanced} nested design (e.g. a cluster with \\
-           a single subject); incomplete/unbalanced nested multilevel data is not \\
-           supported yet -- provide a balanced design."
+           several, which is not unambiguously one of the multilevel designs.",
+      i = "Design 2 has each rater rate several subjects in its cluster; Design 3 \\
+           has each rater rate a single subject.",
+      i = "On {.emph incomplete} data missing cells can blur this: declare the \\
+           design with {.code design = \"nested_in_clusters\"} or \\
+           {.code design = \"nested_in_subjects\"} (validated against the data)."
     ),
     call = call
   )
 }
 
-# Is a nested multilevel design (Design 2/3) balanced and complete? M8 covers
-# balanced/complete nested designs; incomplete nested multilevel is deferred
-# (estimand-spec M8 §8), so `icc()` aborts on an unbalanced one rather than
-# silently using an unvalidated k_eff divisor. Balance means different things by
+# Is a nested multilevel design (Design 2/3) balanced and complete? M8 shipped
+# balanced/complete nested designs; M19 Slice 1 (ADR-029) lifted the balance guard,
+# so this no longer gates an abort -- it REPORTS balance for print/glance, and the
+# averaging divisor is the harmonic-mean k_eff either way (reducing to the pinned
+# M3/M6 incomplete divisor on ragged data). Balance means different things by
 # design, so `design` selects the check (within-cell replicates are caught
 # separately by summarize_design()$has_replicates):
 #   * Design 2 (raters nested in clusters): equal subjects and raters per cluster,
