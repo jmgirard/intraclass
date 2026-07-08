@@ -541,7 +541,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way
   via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge
   cases.
-- Status: **in progress** — planning done (ADR-028); **all four slices shipped** (incomplete
-  fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`;
-  bootstrap-projected `d_study()` bands; lint/`air` clean). Cross-cutting DoD (NEWS, installed-pkg
-  `--as-cran`, `project/` reconcile) next, then PR.
+- Status: **in review** — all four slices shipped + cross-cutting DoD done (NEWS, WORDLIST,
+  installed-pkg `R CMD check --as-cran` 0/0/0, `project/` reconciled); **PR #23 open**, awaiting
+  CI + maintainer merge. 779 tests pass, lint/`air` clean. (Compress to the summary form on merge.)
