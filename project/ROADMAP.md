@@ -34,6 +34,15 @@ single-level ICC (Eq. 14)*, *three-facet `d_study()`*, and *within-cell
 replicates* are now the three slices of milestone M17 (see
 [`MILESTONES.md`](MILESTONES.md)); per ADR-015 they leave this future-only file.
 
+- **Consistency-conflated single-level ICC** — M17 Slice 1 ships the *agreement*
+  conflated ICC (`level = "conflated"`), sourced to ten Hove et al. (2022) **Eq. 14**;
+  the paper publishes only the agreement form. A *consistency*-conflated number
+  (drop σ²_r from the error set) is the natural symmetric extension but is **not in
+  the paper**. **Status: investigate whether a sourced or faithfully-derivable
+  consistency form exists** (an oracle strong enough for #1/#4 — closed form, or a
+  reduction that pins it) before exposing `type = "consistency"` + `level =
+  "conflated"`; today that combination aborts (ADR-026). Do **not** ship a guessed
+  formula (#4).
 - Design/power helpers (how many raters/subjects for a target CI width).
   **Status: not ready — needs a scope decision first.** The CI-width-target
   flavor has no independent oracle (correctness would rest on simulation

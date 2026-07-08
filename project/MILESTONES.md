@@ -441,9 +441,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   the **existing five-component multilevel fit** (M5/M8/M9); the third is a **new single-level
   two-way fit**. Slices are not mutually dependent — each ships end-to-end on its own.
 - Reference: ADR-026 (scope + the three maintainer API decisions). Estimand-specs: Slice 1
-  promotes [`M5-multilevel.md §4`](estimand-specs/M5-multilevel.md) (Eq. 14) to a shipped
-  coefficient; Slice 2 extends [`M4.5-d-study.md`](estimand-specs/M4.5-d-study.md); Slice 3
-  is a **new spec** `M17-within-cell-replicates.md` (written at Slice 3 start).
+  promotes M5 §4 (Eq. 14) to a shipped coefficient in
+  [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) (agreement-only; consistency-
+  conflated → ROADMAP); Slice 2 extends [`M4.5-d-study.md`](estimand-specs/M4.5-d-study.md);
+  Slice 3 is a **new spec** `M17-within-cell-replicates.md` (written at Slice 3 start).
 - **DoD board (check off in the same commit as the work, #16):**
   - **Slice 1 — conflated single-level ICC (Eq. 14), Wave-1 carryover, smallest.**
     - [ ] `level = "conflated"` accepted by `icc()` (validated/iterated like `level`), read
