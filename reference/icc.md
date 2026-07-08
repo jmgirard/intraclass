@@ -160,12 +160,13 @@ icc(
   al. 2022) but differs by a small-sample term on tiny designs (e.g.
   0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers every
   design `"glmmTMB"` does – two-way (random or fixed raters), one-way,
-  and the multilevel designs (crossed and nested) at both levels – but
-  only on complete, balanced data (incomplete/ragged designs use
-  `"glmmTMB"`). `"lavaan"` currently covers only the random two-way
-  design and also requires complete, balanced data. `"lme4"` requires
-  the lme4 and merDeriv packages; `"lavaan"` requires the lavaan
-  package.
+  and the multilevel designs (crossed and nested) at both levels – on
+  both balanced and **incomplete/ragged** data. A ragged fit that lands
+  exactly on a variance-component boundary falls back to `"glmmTMB"`
+  (which stays finite via its log-SD parameterization) with a clear
+  message. `"lavaan"` currently covers only the random two-way design
+  and also requires complete, balanced data. `"lme4"` requires the lme4
+  and merDeriv packages; `"lavaan"` requires the lavaan package.
 
 - conf_level:
 

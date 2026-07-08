@@ -39,13 +39,15 @@ simulations.
 - Default **glmmTMB** engine (boundary-robust REML), with a selectable
   `engine = "lme4"` (via `merDeriv`) that covers every design glmmTMB
   does — two-way random and fixed raters, one-way, and the multilevel
-  designs (crossed and nested) at both levels — on complete, balanced
-  data, agreeing with glmmTMB on both the point estimate and the
-  Monte-Carlo interval. A selectable `engine = "lavaan"` — an SEM
-  common-factor generalizability model (Jorgensen 2021) whose
-  absolute-agreement coefficient uses the indicator-mean rater-variance
-  estimator — covers the random two-way design. Optional engines live in
-  `Suggests`, so the base install stays light.
+  designs (crossed and nested) at both levels — on both balanced and
+  incomplete/ragged data, agreeing with glmmTMB on both the point
+  estimate and the Monte-Carlo interval (a ragged fit that lands on a
+  variance-component boundary falls back to glmmTMB). A selectable
+  `engine = "lavaan"` — an SEM common-factor generalizability model
+  (Jorgensen 2021) whose absolute-agreement coefficient uses the
+  indicator-mean rater-variance estimator — covers the random two-way
+  design. Optional engines live in `Suggests`, so the base install stays
+  light.
 
 ### Choosing, projecting, and visualizing
 

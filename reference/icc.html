@@ -204,8 +204,10 @@ mixed-model one and matches conventional generalizability-theory software on
 real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
 designs (e.g. 0.284 vs 0.290 on the 6-subject example below). <code>"lme4"</code> covers
 every design <code>"glmmTMB"</code> does – two-way (random or fixed raters), one-way, and
-the multilevel designs (crossed and nested) at both levels – but only on
-complete, balanced data (incomplete/ragged designs use <code>"glmmTMB"</code>). <code>"lavaan"</code>
+the multilevel designs (crossed and nested) at both levels – on both balanced
+and <strong>incomplete/ragged</strong> data. A ragged fit that lands exactly on a
+variance-component boundary falls back to <code>"glmmTMB"</code> (which stays finite via its
+log-SD parameterization) with a clear message. <code>"lavaan"</code>
 currently covers only the random two-way design and also requires complete,
 balanced data. <code>"lme4"</code> requires the <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span> packages;
 <code>"lavaan"</code> requires the <span class="pkg">lavaan</span> package.</p></dd>
