@@ -155,7 +155,10 @@ subject-level rows, Slice 2 the cluster-level rows.
 σ²_c into σ²_{s:c} and σ²_{cr} into σ²_r, biasing IRR — this is the motivating
 error the package now avoids. It is a natural teaching point for the vignette
 (Slice 2), computed as `(σ²_c + σ²_{s:c}) / (σ²_c + σ²_{s:c} + (σ²_r + σ²_{cr} +
-σ²_{(s:c)r})/k)`, not a shipped coefficient.
+σ²_{(s:c)r})/k)`. **Promoted to a shipped, selectable coefficient
+`level = "conflated"` in M17 Slice 1 (ADR-026)** — agreement-only, labeled a
+diagnostic contrast, never a recommended coefficient; see
+[`M17-conflated-icc.md`](M17-conflated-icc.md).
 
 ---
 

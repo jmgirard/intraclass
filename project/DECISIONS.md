@@ -1443,3 +1443,122 @@ consequences → references.
   Efron & Tibshirani (1993); `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start),
   §1 (engines / light install); memory `milestone-branches-and-prs`,
   `verify-against-installed-package`, `run-lintr-before-push`.
+
+## ADR-026: M17 scope — variance-decomposition trio (replicates, three-facet `d_study()`, conflated ICC)
+- Date: 2026-07-08
+- Status: accepted
+- Context: With M0–M16 shipped and no milestone in flight, the maintainer promoted the
+  **next backlog wave** out of the ROADMAP parking lot. The non-Bayesian sequencing set by
+  ADR-025 / STATUS is: Wave 1 = parametric-bootstrap `ci_method` (shipped, M16) **+ the
+  conflated single-level ICC (Eq. 14)**; Wave 2 = **within-cell replicates + three-facet
+  `d_study()`**; Wave 3 = the M9 averaged `ICC(c,k)` incomplete divisor (research). The
+  maintainer chose to bundle the two remaining Wave-1/Wave-2 items that are *not* research-
+  risk into **one milestone, M17**, because they share a theme — **finer variance
+  decomposition and its projection** — and two of the three ride machinery that already
+  ships. Per PRINCIPLES.md #2/#14 this ADR details M17 at its start; the per-slice estimand
+  detail is deferred to each slice's estimand-spec (Slice 1 promotes M5 §4; Slice 2 extends
+  M4.5; Slice 3 is a new spec). Three scope questions were put to the maintainer this
+  session (Decision below).
+- Decision:
+  - **One milestone, three independent vertical slices, ordered by oracle-risk / effort**
+    (bank the clean-oracle wins first, #1). The three are *not* mutually dependent; the
+    milestone is a container. Two ride the **existing five-component multilevel fit**
+    (M5/M8/M9) and its GT machinery; the third is a **new single-level two-way fit**.
+    **Slice 3 (replicates) may spin into its own M18** if the milestone runs heavy — a
+    maintainer decision revisited at Slice 3 start (maintainer chose "keep as one M17" now).
+  - **Slice 1 — conflated single-level ICC (Eq. 14) as a shipped, selectable coefficient.**
+    The number obtained by *ignoring* the cluster structure of an M5 multilevel design —
+    the motivating bias the package exists to expose. Formula and provenance already stated
+    in `M5-multilevel.md §4`, computed today only as a vignette teaching contrast:
+    `(σ²_c + σ²_{s:c}) / (σ²_c + σ²_{s:c} + (σ²_r + σ²_{cr} + σ²_{(s:c)r})/k)`, read off the
+    same five-component fit. **Surfaced via a new `level = "conflated"` value** (maintainer
+    choice) alongside `level = "subject"/"cluster"` — **labeled in `print`/`tidy`/docs as a
+    diagnostic contrast, not a recommended coefficient** (its entire purpose is to be the
+    *wrong* answer for multilevel data; it must never read as a peer of the correct levels).
+    No new fit, no new dependency. Oracles: (O-Eq14) ten Hove et al. (2022) Eq. 14 closed
+    form from the fitted components; (O-reduction) equals a plain single-level `icc()` on
+    the same ratings ignoring `cluster` (promote M5 §5's vignette invariant to a real test);
+    (O-lme4) same components from `lmer`.
+  - **Slice 2 — multilevel rater-count `d_study()` (both levels).**
+    **⚠ Retargeted 2026-07-08 (amends the original "three-facet / subjects-per-cluster"
+    plan below).** On reading the source before coding (#2), the "project the
+    subjects-per-cluster facet" framing was found to **contradict the paper** and was
+    dropped from M17. ten Hove et al. (2022) **Eq. 13**: the cluster-level ICC
+    `σ²_c / (σ²_c + (σ²_r + σ²_cr)/k)` **contains no subject-related variance** ("the ordering
+    of clusters across raters is independent of subject-related effects"), and its `k` is
+    *raters per cluster*. The paper's only reliability-projection facet is the **number of
+    raters** (p. 4: "different values of k can be used to estimate IRR of future data gathered
+    from different numbers of raters"), for both levels; the **number of subjects per cluster
+    (Ns)** affects only estimation **bias / efficiency / CI width** (Simulation 1), i.e. it is
+    a sample-size/design-power matter, not part of any coefficient. A subjects-per-cluster
+    *reliability* curve would therefore be a fabricated formula (#1/#4); a cluster-mean
+    dependability that *did* average over subjects would be a different, non-IRR general-GT
+    estimand outside this package's scope. (Memory: `cluster-icc-no-subject-facet`.)
+    - **The retargeted, sourced slice:** lift `d_study()`'s current blanket multilevel abort
+      and project the **rater count `m`** for the **subject-level (Eq. 12)** and
+      **cluster-level (Eq. 13)** multilevel ICCs — a pure change of the averaging divisor in
+      the existing M5 estimand, reusing the single-level `d_study()` MC-reuse machinery. The
+      `icc_dstudy` object gains a `level` column for multilevel fits; `autoplot()` facets by
+      level. Agreement + consistency at each level; nested designs project the subject level
+      only (Design 3 agreement-only), matching what `icc()` already reports.
+    - **Scope guard:** **complete-data multilevel only.** Incomplete multilevel projection is
+      deferred — the cluster level would hit the open, un-oracled M9 `ICC(c,k)` incomplete
+      divisor (M9 §9, Wave 3). Fixed-rater absolute-agreement projection stays ill-posed and
+      aborts (reuses `abort_fixed_agr_projection`, M4.5 §4).
+    - **Oracles (#1):** (O-reduction) at `m = observed k` the projection equals the fitted
+      M5 `ICC(*,k)` at each level, to < 1e-4; (O-lme4) the projected curve matches one built
+      from an independent `lmer` five-component fit; (O-sim) seeded recovery of a projected
+      value the design did not run, with MC-band coverage (the M4.5 O-sim pattern). **No
+      `gtheory` dependency needed** (dropped with the subjects-per-cluster oracle).
+    - **Subjects-per-cluster / three-facet is removed from M17**, not merely deferred: it is
+      reclassified under the parked **design/power helpers** item (sample-size / CI-width),
+      where Ns actually lives.
+
+    *Original (superseded) plan:* ~~three-facet `d_study()`: project the subjects-per-cluster
+    facet at the cluster level, restricted to complete-data multilevel; oracle Brennan (2001)
+    two-facet / `gtheory` GENOVA.~~ Superseded by the paragraph above per the paper.
+  - **Slice 3 — within-cell replicates: split σ²_sr from σ²_e.** With ≥2 ratings per
+    subject×rater cell the residual splits into the **subject×rater interaction σ²_sr** and
+    **pure within-cell error σ²_e** via `(1 | subject:rater)`. The detection + refusal
+    **already ship** (`summarize_design()$has_replicates`, the `icc()` abort naming this
+    milestone) — this slice replaces the abort with a fit path. **A new estimand → a new
+    estimand-spec** (`M17-within-cell-replicates.md`). **Three design questions resolved at
+    spec time, not now** (maintainer chose "decide at spec time" for the facet structure):
+    (1) is the replicate/occasion facet **crossed** with rater or **nested** within it;
+    (2) **which coefficients ship** — with σ²_sr separated, agreement/consistency can place
+    it in/out of the error set explicitly and the divisor can average over raters and/or
+    occasions (a two-facet D-study); single-*rating* point values barely move vs. today
+    (σ²_sr + σ²_e were already lumped into σ²_res) — the payoff is reporting σ²_sr and
+    projecting over occasions; (3) the **data API** for identifying the occasion (a
+    `replicate`/`occasion` column vs. bare within-cell row multiplicity). Oracles:
+    (O-gtheory) `gtheory` two-facet variance components — **`gtheory` added to `Suggests`,
+    test-only, exactly like `psych`** (no `Imports` change, light-install intact, ADR-002);
+    (O-MS) classical two-way-with-replication ANOVA mean squares in closed form; (O-sim)
+    seeded recovery of known σ²_sr / σ²_e.
+  - **Cross-cutting DoD.** Each slice is end-to-end: fit → estimand map → point → **both**
+    `ci_method`s (MC + bootstrap, M16) where the fit supports them → `print`/`tidy`/`glance`
+    → `choose_icc()` awareness where a new coefficient is user-selectable → roxygen + NEWS +
+    vignette → ≥2 independent oracles green → full CI matrix (Windows + R-devel) green.
+    Ships on `m17-<slug>` via PR (`milestone-branches-and-prs`); `project/` reconcile is the
+    post-merge direct commit to `main` (finish-task policy).
+  - **Scope boundary / deferrals (#17).** BCa and bootstrap-projected `d_study` bands stay
+    deferred (ADR-025). The **M9 averaged `ICC(c,k)` incomplete divisor** stays Wave-3 /
+    ROADMAP and must not be reached via Slice 2's complete-data restriction. **One-way via
+    SEM** (blocked, ADR-014), the **Bayesian engine** + `ci_method = "posterior"`,
+    **categorical/ordinal GLMM ratings**, and the **lme4 singular-fit / merDeriv edge cases**
+    remain in ROADMAP untouched.
+- References: PRINCIPLES.md #1 (oracle-first — ≥2 independent per slice), #2 (name the
+  estimand first — Slice 3 gets a new spec; Slices 1–2 extend M5 §4 / M4.5), #3 (boundary-
+  aware intervals inherited), #5/#8 (fail loudly / classed guards for replicate & cluster
+  identifiability), #6 (additive, non-breaking — `level` gains a value, `d_study()` gains a
+  facet arg), #14/#15 (milestone gates, thin slices), #16 (tracking in-commit), #17 (BCa /
+  incomplete-`ICC(c,k)` / Bayesian / SEM / ordinal deferrals);
+  **ADR-011 (five-component multilevel fit Slices 1–2 read off)**, ADR-025 (M16 bootstrap
+  `ci_method` each slice must support), ADR-002 (glmmTMB Imports / `gtheory` + lme4 Suggests,
+  light install), ADR-005/012 (engine roles + dispatch seam); estimand-specs
+  `M5-multilevel.md §4` (Eq. 14), `M4.5-d-study.md` (projection), the forthcoming
+  `M17-within-cell-replicates.md`; ten Hove, Jorgensen & van der Ark (2022, Eq. 14),
+  Brennan (2001, two-facet D-studies), `gtheory` (Moore); `CLAUDE_CODE_KICKOFF.md` §7
+  (detail a milestone at its start), §1 (engines / light install); memory
+  `milestone-branches-and-prs`, `verify-against-installed-package`, `run-lintr-before-push`,
+  `pkgdown-reference-index-new-exports`.

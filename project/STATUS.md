@@ -1,19 +1,26 @@
 # Project status
 
-- Milestone: **M16 — parametric-bootstrap `ci_method`** — shipped (PR #21, ADR-025).
-  `ci_method = "bootstrap"` is a second interval method (parametric bootstrap: simulate →
-  refit → percentile interval) alongside the Monte-Carlo default, covering **every design
-  both mixed-model engines fit** — two-way random/fixed, one-way, and all multilevel designs
-  at both levels, complete and incomplete — via a shared `simulate_refit()` contract per
-  engine (glmmTMB `simulate()`+refit; lme4 `bootMer`). `"lavaan"` stays Monte-Carlo-only; a
-  singular lme4 fit defers to glmmTMB for either method. M0–M16 all shipped; package at
-  v0.1.0, submission-ready. No milestone in flight.
-- Active task: — (M16 shipped; next code work is a maintainer-chosen backlog promotion —
-  see Next action for the Wave 1–3 sequencing.)
+- Milestone: **M17 — variance-decomposition trio** — **scoped, in flight** (ADR-026); not
+  yet started (no branch, no code). One milestone, three independent vertical slices, ordered
+  by oracle-risk: **(1) conflated single-level ICC (Eq. 14)** via a new `level = "conflated"`
+  (diagnostic contrast off the existing multilevel fit); **(2) three-facet `d_study()`**
+  projecting subjects-per-cluster for complete-data multilevel at the cluster level;
+  **(3) within-cell replicates** splitting σ²_sr from σ²_e via `(1 | subject:rater)` (new
+  estimand → new spec; `gtheory` oracle in `Suggests`). Slice 3 may spin into M18 if the
+  milestone runs heavy (decide at its start). M0–M16 shipped; package at v0.1.0,
+  submission-ready.
+- Active task: **M17 is code-complete on branch `m17-varcomp-trio`** — all three slices done,
+  not yet merged. Slice 1 = `level = "conflated"` (Eq. 14 diagnostic); Slice 2 = multilevel
+  rater-count `d_study()` (retargeted from subjects-per-cluster, ADR-026 amend); Slice 3 =
+  within-cell replicates + occasion-averaged coefficient (`occasions` knob, per-component
+  error divisors; estimand-spec `M17-within-cell-replicates.md`). 721 tests pass, lint + `air`
+  clean. **Next: PR/finish-task gate** — installed-pkg check (`NOT_CRAN=true`) + vignette knit,
+  then open the PR (`milestone-branches-and-prs`).
 - Last green CI: PR #21 (M16) full matrix green incl. Windows and R-devel; merged to
   `main` at 0b84885
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — M16 merged (PR #21) + `project/` reconciled
+- Updated: 2026-07-08 by main session (Opus) — M17 scoped (ADR-026); `project/` reconciled
+  (MILESTONES board + ROADMAP promotion)
 
 ## Where we are
 
@@ -39,24 +46,29 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**No milestone in flight — M16 shipped (PR #21, ADR-025).** `ci_method = "bootstrap"` is
-live across every design both mixed-model engines fit; the multi-`ci_method` dispatch seam
-is now in place for the eventual Bayesian `"posterior"` method. Next code work is a
-maintainer-chosen backlog promotion from the sequencing below (each needs its own
-start-of-milestone scope pass + ADR).
+**M17 is code-complete on `m17-varcomp-trio` (ADR-026) — open the PR.** All three slices
+shipped (full board in [`MILESTONES.md`](MILESTONES.md)); local gate green (`R CMD check`
+0/0/0, 722 tests pass, lint + `air` + spelling clean; coverage 86% per the
+`coverage-baseline` policy). **Immediate next step: push the branch and open the PR**
+(`milestone-branches-and-prs`); on green CI + merge, reconcile the deferred markers and set
+"Last green CI".
 
-**Non-Bayesian carryover sequencing.** Ordered by oracle-risk (#1) — bank the clean-oracle
-wins before the open research question:
+**What shipped in M17** (see MILESTONES for the per-slice DoD):
 
-- **Wave 1 (low-risk, clean oracle):** **M16 = parametric-bootstrap `ci_method`** — ✅
-  **shipped** (PR #21); remaining Wave-1 item: the **conflated single-level ICC (Eq. 14,
-  ten Hove 2022 — sourced)** as a thin slice (strongest next candidate — small, paper
-  oracle).
-- **Wave 2 (new estimand, attainable oracle):** **M17 = within-cell replicates**
-  (split σ²_sr from σ²_e via `(1 | subject:rater)`; classical-GT / `gtheory` oracle); +
-  **three-facet `d_study()`** as an adjacent feature slice.
-- **Wave 3 (research):** **M18 = M9 averaged cluster-level `ICC(c,k)` on incomplete data**
-  (open per-cluster divisor — a focused simulation-oracle study, likely a Fable review).
+- **Slice 1** — conflated single-level ICC via `level = "conflated"` (agreement-only Eq. 14,
+  a diagnostic contrast). Spec [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md).
+- **Slice 2** — multilevel rater-count `d_study()` at subject + cluster levels. *Retargeted*
+  from the original "three-facet / subjects-per-cluster" plan after the source review (ten
+  Hove Eq. 13's cluster ICC has no subject facet; ADR-026 amend; spec M4.5 §7).
+- **Slice 3** — within-cell replicates + the occasion-averaged coefficient (`occasions` knob,
+  per-component error divisors). Spec
+  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md). No new
+  dependency (`gtheory` proved unnecessary — ANOVA + lme4 + sim oracles).
+
+**Still after M17 (unchanged sequencing):**
+
+- **Wave 3 (research):** **M9 averaged cluster-level `ICC(c,k)` on incomplete data** (open
+  per-cluster divisor — a focused simulation-oracle study, likely a Fable review).
 - **Deprioritized (opportunistic parity only):** boundary-robust lme4 interval for singular
   fits + merDeriv edge cases — glmmTMB covers these today.
 - **Blocked, stays parked:** one-way / general ICC(1) via SEM — no faithful sourced route

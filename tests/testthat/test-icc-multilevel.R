@@ -236,3 +236,223 @@ test_that("multilevel identifiability and scope guards fail loudly", {
     class = "intraclass_error"
   )
 })
+
+# Oracle O-conflated: conflated single-level ICC (Eq. 14, M17 Slice 1) ----------
+#
+# `level = "conflated"` collapses the multilevel structure -- the biased
+# single-level ICC a naive analyst gets by ignoring clusters (ten Hove et al.
+# 2022, Eq. 14): signal sigma^2_c + sigma^2_{s:c}, error the three rater-related
+# terms. Shipped as a diagnostic contrast, agreement-only (estimand-spec
+# M17-conflated-icc.md). Oracles: an independent lme4 fit, the closed-form Eq. 14
+# on the reported components, and population recovery (which coincides with the
+# flat single-level ICC that ignores clustering).
+
+test_that("O-conflated/lme4: conflated ICC = Eq. 14 from an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  m <- lme4::lmer(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data = d,
+    REML = TRUE
+  )
+  vc <- lme4::VarCorr(m)
+  cl <- as.numeric(vc$cluster)
+  sc <- as.numeric(vc[["cluster:subject"]])
+  ra <- as.numeric(vc$rater)
+  cr <- as.numeric(vc[["cluster:rater"]])
+  re <- stats::sigma(m)^2
+  k <- 6
+  sig <- cl + sc
+  err <- ra + cr + re
+  expect_equal(
+    pick(x, "ICC(A,1)", "conflated"),
+    sig / (sig + err),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(x, "ICC(A,k)", "conflated"),
+    sig / (sig + err / k),
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-conflated/Eq14: estimate = closed-form Eq. 14 on the reported components", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  vc <- x$components
+  sig <- vc$cluster + vc$subject
+  err <- vc$rater + vc$cluster_rater + vc$residual
+  k <- x$k_eff
+  expect_equal(
+    pick(x, "ICC(A,1)", "conflated"),
+    sig / (sig + err),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    pick(x, "ICC(A,k)", "conflated"),
+    sig / (sig + err / k),
+    tolerance = 1e-10
+  )
+})
+
+test_that("O-conflated/population: recovers the known conflated reliability (~ flat ICC)", {
+  skip_if_not_installed("glmmTMB")
+  vc <- 1.0
+  vsc <- 1.2
+  vr <- 0.7
+  vcr <- 0.16
+  vres <- 0.5
+  d <- sim_multilevel(40, 20, 6, vc, vsc, vr, vcr, vres, seed = 424242)
+  pop1 <- (vc + vsc) / ((vc + vsc) + vr + vcr + vres)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    seed = 1
+  )
+  # sigma^2_c is estimated from only 40 clusters, so the point estimate is noisy;
+  # the honest recovery check is that the boundary-aware MC interval covers the
+  # known population value (as in O-ML/sim), with a generous point sanity floor.
+  expect_lt(abs(pick(x, "ICC(A,1)", "conflated") - pop1), 0.1)
+  row <- x$estimates[
+    x$estimates$index == "ICC(A,1)" & x$estimates$level == "conflated",
+  ]
+  expect_true(row$conf.low <= pop1 && pop1 <= row$conf.high)
+  # "Conflated" means ignoring the cluster level: on the same data it tracks the
+  # flat single-level agreement ICC (a different fit, hence a loose agreement).
+  flat <- icc(d, score, subject, rater, seed = 1)
+  flat1 <- flat$estimates$estimate[flat$estimates$index == "ICC(A,1)"]
+  expect_equal(pick(x, "ICC(A,1)", "conflated"), flat1, tolerance = 0.02)
+})
+
+test_that("conflated ICC stays inside [0, 1] and average >= single", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  a1 <- pick(x, "ICC(A,1)", "conflated")
+  ak <- pick(x, "ICC(A,k)", "conflated")
+  expect_true(a1 >= 0 && a1 <= 1)
+  expect_true(ak >= a1)
+  # A conflated row carries no Shrout & Fleiss label (no single-level SF form).
+  row <- x$estimates[
+    x$estimates$level == "conflated" & x$estimates$index == "ICC(A,1)",
+  ]
+  expect_true(is.na(row$sf_index))
+})
+
+test_that("conflated can be requested alongside the correctly-partitioned levels", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster", "conflated"),
+    seed = 1
+  )
+  expect_true(all(c("subject", "cluster", "conflated") %in% x$estimates$level))
+  # The conflated (ignore-clusters) value sits between/around the two correct
+  # levels, never silently replacing them.
+  expect_length(pick(x, "ICC(A,1)", "conflated"), 1)
+})
+
+test_that("conflated ICC is agreement-only and needs a crossed, complete random design", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  # Consistency-conflated is not in the paper: parked, not shipped.
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "conflated",
+      type = "consistency"
+    ),
+    class = "intraclass_unsupported"
+  )
+  # Fixed raters: Eq. 14 is a random-rater formula.
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "conflated",
+      raters = "fixed"
+    ),
+    class = "intraclass_unsupported"
+  )
+  # Conflated without a cluster column is a usage error (nothing to conflate).
+  expect_error(
+    icc(ratings, score, subject, rater, level = "conflated"),
+    class = "intraclass_error"
+  )
+})
+
+test_that("conflated ICC is labeled a diagnostic contrast in print and tidy", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster", "conflated"),
+    seed = 1
+  )
+  lines <- format(x)
+  # The report flags it as a diagnostic contrast, not a recommended coefficient.
+  expect_true(any(grepl("[Dd]iagnostic contrast", lines)))
+  expect_true(any(grepl("NOT a recommended", lines)))
+  expect_true(any(grepl("conflated", lines)))
+  # tidy() carries the conflated row, explicitly labeled in the level column.
+  td <- tidy(x)
+  expect_true("conflated" %in% td$level)
+  # A plain subject/cluster fit prints no conflated note.
+  y <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  expect_false(any(grepl("[Dd]iagnostic contrast", format(y))))
+})

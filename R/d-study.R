@@ -41,6 +41,18 @@
 #' raters you observed, so there is no "average of `m` freshly sampled raters" to
 #' project to, and `d_study()` aborts (use `raters = "random"`).
 #'
+#' @section Multilevel projections:
+#' For a multilevel fit (a `cluster` column), `d_study()` projects the rater count
+#' `m` for each correctly-partitioned level on the object — the **subject** and/or
+#' **cluster** level — returning one reliability curve per level (the result gains
+#' a `level` column, and `autoplot()` facets by it). This is the paper-sanctioned
+#' rater projection (ten Hove et al. 2022): `m` is the number of raters per cluster,
+#' and the cluster-level coefficient does **not** average over subjects, so there is
+#' no "subjects per cluster" projection — that is a sample-size question, not a
+#' reliability one. Nested designs project the subject level only. The conflated
+#' diagnostic (`level = "conflated"`) is not projected. Multilevel projection covers
+#' **complete** data only; incomplete multilevel `d_study()` aborts.
+#'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
 #'   Defaults to `1:(2 * n_raters)`, a curve from a single rater to twice the
@@ -52,7 +64,8 @@
 #'
 #' @return An `icc_dstudy` object: a tibble with one row per `m` and columns
 #'   `m`, `index` (e.g. `"ICC(A,3)"`), `estimate`, `std.error`, `conf.low`, and
-#'   `conf.high`, carrying the design and interval settings as attributes. Use
+#'   `conf.high`, carrying the design and interval settings as attributes. A
+#'   multilevel projection adds a `level` column (one curve per level). Use
 #'   [tidy()][generics::tidy], [glance()][generics::glance], and
 #'   `autoplot()` (the reliability curve).
 #'
@@ -75,24 +88,47 @@ d_study <- function(
   if (!inherits(x, "icc")) {
     abort_intraclass("{.arg x} must be an {.cls icc} object from {.fn icc}.")
   }
-  if (isTRUE(x$design$multilevel)) {
-    abort_unsupported(c(
-      "D-study projection is not supported for multilevel ICCs yet.",
-      i = "Projecting the rater (and subject-per-cluster) counts of a multilevel \\
-           design is planned for a later milestone (M5 spec, section 8)."
-    ))
-  }
   type <- x$design$type
   raters <- x$design$raters
   oneway <- identical(x$design$model, "oneway")
+  multilevel <- isTRUE(x$design$multilevel)
+  # Design 3 (raters nested in subjects) is the multilevel one-way: no rater term,
+  # agreement-only ICC(m) (estimand-spec M8 §3b), so it projects like a one-way fit
+  # but carries a subject `level`.
+  ml_oneway <- identical(x$design$ml_design, "nested_in_subjects")
+
+  # Multilevel rater-count projection (M17 Slice 2, estimand-spec M4.5 §7): project
+  # `m` for each correctly-partitioned level on the fit. Complete data only -- the
+  # cluster-level ICC(c,k) divisor under imbalance is the open M9 question (§7.2).
+  proj_levels <- NULL
+  if (multilevel) {
+    if (!isTRUE(x$design$balanced)) {
+      abort_unsupported(c(
+        "D-study projection is not supported for incomplete multilevel designs.",
+        i = "The cluster-level ICC(c,k) divisor under imbalance is an open modeling \\
+             question (M9); multilevel projection covers complete data only.",
+        i = "Provide complete, balanced multilevel data."
+      ))
+    }
+    # The conflated diagnostic (Eq. 14, M17 Slice 1) is a bias contrast, not a
+    # decision-study target, so it is not projected (spec M4.5 §7.2).
+    proj_levels <- setdiff(x$design$levels, "conflated")
+    if (length(proj_levels) == 0L) {
+      abort_unsupported(c(
+        "The conflated ICC is a diagnostic contrast and is not projected.",
+        i = "Refit with {.code level = \"subject\"} and/or {.code \"cluster\"} to \\
+             project a multilevel D-study."
+      ))
+    }
+  }
   # A one-way fit has no rater term (`type` is NA); its projection is the one-way
   # ICC(m) (signal subject, error residual, divisor m) -- the same estimand the
   # sibling path `icc(..., model = "oneway", unit = m)` computes. Route to it rather
   # than fall through to the two-way `icc_estimand()`, which would arg-match NA and
-  # crash with an unclassed error (fixed-rater agreement is impossible here, since
-  # one-way fixed is rejected at `icc()`).
-  if (!oneway) {
-    # Same ill-posed combination guarded by icc()'s numeric-unit path (M4.5 spec).
+  # crash with an unclassed error. Fixed-rater absolute agreement cannot be
+  # projected (single- or multi-level); the guard is a no-op for random/consistency
+  # and for the one-way designs (which have no fixed raters).
+  if (!oneway && !ml_oneway) {
     abort_fixed_agr_projection(type, raters)
   }
 
@@ -118,22 +154,49 @@ d_study <- function(
     seed <- x$ci$seed
   }
 
-  estimands <- lapply(
-    m,
-    function(mm) {
-      if (oneway) {
-        icc_estimand(unit = mm, oneway = TRUE)
-      } else {
-        icc_estimand(type = type, unit = mm, raters = raters)
-      }
+  # One estimand per projected coefficient. Single-level: one per `m`. Multilevel:
+  # the cross-product level x m (level outer, so rows group by level as in icc()).
+  make_estimand <- function(mm, lv) {
+    if (ml_oneway) {
+      icc_estimand(unit = mm, oneway = TRUE, multilevel = TRUE, level = lv)
+    } else if (multilevel) {
+      icc_estimand(
+        type = type,
+        unit = mm,
+        raters = raters,
+        multilevel = TRUE,
+        level = lv
+      )
+    } else if (oneway) {
+      icc_estimand(unit = mm, oneway = TRUE)
+    } else {
+      icc_estimand(type = type, unit = mm, raters = raters)
     }
-  )
+  }
+  if (multilevel) {
+    grid <- expand.grid(
+      m = m,
+      level = proj_levels,
+      KEEP.OUT.ATTRS = FALSE,
+      stringsAsFactors = FALSE
+    )
+    grid <- grid[order(match(grid$level, proj_levels), grid$m), , drop = FALSE]
+    row_m <- grid$m
+    row_level <- grid$level
+  } else {
+    row_m <- m
+    row_level <- NULL
+  }
+  # Single-level: `level` is NA and ignored by the estimand builder (recycled).
+  levels_arg <- if (is.null(row_level)) NA_character_ else row_level
+  estimands <- Map(make_estimand, row_m, levels_arg)
   points <- vapply(
     estimands,
     function(e) icc_point(x$components, e),
     numeric(1)
   )
-  # One Monte-Carlo sample, reused across every m (coherent curve + band).
+  # One Monte-Carlo sample, reused across every m (and level) so the curve(s) and
+  # band are internally coherent.
   components <- mc_components(x$mc, mc_samples = mc_samples, seed = seed)
   intervals <- lapply(
     estimands,
@@ -141,19 +204,26 @@ d_study <- function(
   )
 
   tbl <- tibble::tibble(
-    m = m,
+    m = row_m,
     index = vapply(estimands, `[[`, character(1), "label"),
     estimate = points,
     std.error = vapply(intervals, `[[`, numeric(1), "std.error"),
     conf.low = vapply(intervals, `[[`, numeric(1), "conf.low"),
     conf.high = vapply(intervals, `[[`, numeric(1), "conf.high")
   )
+  # Multilevel projects one curve per level, so a `level` column disambiguates the
+  # shared index label (e.g. ICC(A,3) at subject vs. cluster).
+  if (multilevel) {
+    tbl <- tibble::add_column(tbl, level = row_level, .after = "m")
+  }
 
   structure(
     tbl,
     class = c("icc_dstudy", class(tbl)),
     icc_type = type,
     icc_raters = raters,
+    icc_design_label = icc_design_label(x$design),
+    multilevel = multilevel,
     conf.level = conf_level,
     # The projection band is always Monte-Carlo (mc_components above), independent
     # of the fitted object's `ci_method` (ADR-025).
@@ -193,10 +263,12 @@ validate_m <- function(m, call = rlang::caller_env()) {
 #' @export
 format.icc_dstudy <- function(x, ...) {
   ci_pct <- format(100 * attr(x, "conf.level"), trim = TRUE)
-  header <- sprintf(
-    "# D-study projection: %s",
-    icc_design_phrase(attr(x, "icc_type"), attr(x, "icc_raters"))
-  )
+  # icc_design_label is multilevel-aware; older objects fall back to the phrase.
+  label <- attr(x, "icc_design_label")
+  if (is.null(label)) {
+    label <- icc_design_phrase(attr(x, "icc_type"), attr(x, "icc_raters"))
+  }
+  header <- sprintf("# D-study projection: %s", label)
   meta <- sprintf(
     "Observed raters: %d | CI: %s%% %s (%d draws)",
     attr(x, "k_observed"),
@@ -204,17 +276,40 @@ format.icc_dstudy <- function(x, ...) {
     attr(x, "method"),
     attr(x, "samples")
   )
-  rows <- sprintf(
-    "  %5s  %8s   [%s, %s]",
-    format(x$m, trim = TRUE),
-    formatC(x$estimate, format = "f", digits = 3),
-    formatC(x$conf.low, format = "f", digits = 3),
-    formatC(x$conf.high, format = "f", digits = 3)
-  )
-  table <- c(
-    sprintf("  %5s  %8s   %s", "m", "estimate", paste0(ci_pct, "% CI")),
-    rows
-  )
+  # Multilevel projects one curve per level, so a level column disambiguates the m
+  # rows (the same index label appears at subject and cluster).
+  if (isTRUE(attr(x, "multilevel"))) {
+    rows <- sprintf(
+      "  %-8s %5s  %8s   [%s, %s]",
+      x$level,
+      format(x$m, trim = TRUE),
+      formatC(x$estimate, format = "f", digits = 3),
+      formatC(x$conf.low, format = "f", digits = 3),
+      formatC(x$conf.high, format = "f", digits = 3)
+    )
+    table <- c(
+      sprintf(
+        "  %-8s %5s  %8s   %s",
+        "level",
+        "m",
+        "estimate",
+        paste0(ci_pct, "% CI")
+      ),
+      rows
+    )
+  } else {
+    rows <- sprintf(
+      "  %5s  %8s   [%s, %s]",
+      format(x$m, trim = TRUE),
+      formatC(x$estimate, format = "f", digits = 3),
+      formatC(x$conf.low, format = "f", digits = 3),
+      formatC(x$conf.high, format = "f", digits = 3)
+    )
+    table <- c(
+      sprintf("  %5s  %8s   %s", "m", "estimate", paste0(ci_pct, "% CI")),
+      rows
+    )
+  }
   c(header, meta, "", table)
 }
 
@@ -228,7 +323,7 @@ print.icc_dstudy <- function(x, ...) {
 #' @rdname d_study
 #' @export
 tidy.icc_dstudy <- function(x, ...) {
-  tibble::tibble(
+  out <- tibble::tibble(
     m = x$m,
     index = x$index,
     estimate = x$estimate,
@@ -238,6 +333,11 @@ tidy.icc_dstudy <- function(x, ...) {
     conf.level = attr(x, "conf.level"),
     method = attr(x, "method")
   )
+  # Carry the level column for a multilevel projection (subject/cluster curves).
+  if (isTRUE(attr(x, "multilevel"))) {
+    out <- tibble::add_column(out, level = x$level, .after = "m")
+  }
+  out
 }
 
 #' @rdname d_study

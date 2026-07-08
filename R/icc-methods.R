@@ -43,6 +43,18 @@ format.icc <- function(x, ...) {
       k_desc,
       if (x$design$balanced) "balanced" else "unbalanced"
     )
+  } else if (isTRUE(x$design$replicates)) {
+    # Within-cell replicates: report the per-cell rating count (n_o) so the cell
+    # grid does not hide the extra ratings that identify pure error.
+    sprintf(
+      "Subjects: %d | Raters: %d (%s) | %d cells x %d replicates (%s)",
+      x$n$subjects,
+      x$n$raters,
+      x$design$raters,
+      x$n$cells,
+      x$design$n_o,
+      completeness
+    )
   } else {
     sprintf(
       "Subjects: %d | Raters: %d (%s) | Observations: %d of %d cells (%s)",
@@ -66,12 +78,14 @@ format.icc <- function(x, ...) {
   )
 
   e <- x$estimates
+  rep <- isTRUE(x$design$replicates)
   # Multilevel prints a `level` column, because the same index label (e.g.
   # ICC(A,1)) appears once per level (subject / cluster); single-level is
-  # unchanged (M5 §3).
+  # unchanged (M5 §3). Within-cell replicates likewise print an `occasions`
+  # column (the n_o averaged), so a shared index disambiguates by occasion count.
   if (ml) {
     rows <- sprintf(
-      "  %-8s %-9s %7s   [%s, %s]",
+      "  %-10s %-9s %7s   [%s, %s]",
       e$level,
       e$index,
       formatC(e$estimate, format = "f", digits = 3),
@@ -80,9 +94,28 @@ format.icc <- function(x, ...) {
     )
     table <- c(
       sprintf(
-        "  %-8s %-9s %7s   %s",
+        "  %-10s %-9s %7s   %s",
         "level",
         "index",
+        "estimate",
+        paste0(ci_pct, "% CI")
+      ),
+      rows
+    )
+  } else if (rep) {
+    rows <- sprintf(
+      "  %-9s %9s %7s   [%s, %s]",
+      e$index,
+      format(e$occasions, trim = TRUE),
+      formatC(e$estimate, format = "f", digits = 3),
+      formatC(e$conf.low, format = "f", digits = 3),
+      formatC(e$conf.high, format = "f", digits = 3)
+    )
+    table <- c(
+      sprintf(
+        "  %-9s %9s %7s   %s",
+        "index",
+        "occasions",
         "estimate",
         paste0(ci_pct, "% CI")
       ),
@@ -122,6 +155,17 @@ format.icc <- function(x, ...) {
     )
   }
 
+  # The conflated level is the biased single-level ICC (Eq. 14): a diagnostic
+  # contrast quantifying how much ignoring the clustering distorts reliability,
+  # never a recommended coefficient (estimand-spec M17-conflated-icc.md §4).
+  conflated_note <- if (ml && "conflated" %in% e$level) {
+    c(
+      "Diagnostic contrast: the 'conflated' level ignores the cluster structure",
+      "(ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level",
+      "analysis and is NOT a recommended coefficient; report subject/cluster."
+    )
+  }
+
   # Shared with autoplot.icc (what = "components") so labels/ordering never drift.
   view <- icc_components_view(x)
   d3 <- function(v) formatC(v, format = "f", digits = 3)
@@ -133,7 +177,18 @@ format.icc <- function(x, ...) {
   suffix <- if (isTRUE(view$confounded)) " (rater confounded)" else ""
   comps <- sprintf("Variance components: %s%s", body, suffix)
 
-  c(header, meta1, meta2, "", table, "", keff_note, comps, sf_note)
+  c(
+    header,
+    meta1,
+    meta2,
+    "",
+    table,
+    "",
+    keff_note,
+    comps,
+    sf_note,
+    conflated_note
+  )
 }
 
 #' @rdname icc
@@ -164,11 +219,18 @@ summary.icc <- function(object, ...) {
     } else {
       "rater level); only relative standing counts."
     }
-    c(
-      paste(type_note, effect),
-      "A single rating per cell confounds the subject-by-rater interaction with",
-      "residual error."
-    )
+    cell_note <- if (isTRUE(object$design$replicates)) {
+      c(
+        "Within-cell replicates separate the subject-by-rater interaction from",
+        "pure error; occasion averaging reduces pure error only."
+      )
+    } else {
+      c(
+        "A single rating per cell confounds the subject-by-rater interaction with",
+        "residual error."
+      )
+    }
+    c(paste(type_note, effect), cell_note)
   }
   cli::cli_verbatim(c("", notes))
   invisible(object)
@@ -177,7 +239,7 @@ summary.icc <- function(object, ...) {
 #' @rdname icc
 #' @export
 tidy.icc <- function(x, ...) {
-  tibble::tibble(
+  out <- tibble::tibble(
     index = x$estimates$index,
     level = x$estimates$level,
     sf_index = x$estimates$sf_index,
@@ -188,6 +250,15 @@ tidy.icc <- function(x, ...) {
     conf.level = x$ci$conf_level,
     method = x$ci$method
   )
+  # Within-cell replicates carry the occasion count averaged into each coefficient.
+  if (isTRUE(x$design$replicates)) {
+    out <- tibble::add_column(
+      out,
+      occasions = x$estimates$occasions,
+      .after = "index"
+    )
+  }
+  out
 }
 
 #' @rdname icc

@@ -32,7 +32,16 @@ alternate engines, and seeded simulations.
   `cluster` column to get subject-level (within-cluster) and cluster-level
   (between-cluster) coefficients via `level`. Covers raters crossed with clusters
   (Design 1) or nested in clusters/subjects (Designs 2–3), complete or incomplete
-  crossed data, and fixed raters at the subject level.
+  crossed data, and fixed raters at the subject level. `level = "conflated"` reports
+  the biased single-level ICC you would get by ignoring the clustering (ten Hove et
+  al. 2022, Eq. 14) — a diagnostic contrast, flagged in `print()` as not a
+  recommended coefficient (absolute-agreement, complete crossed designs).
+* **Within-cell replicates**: when a subject-by-rater cell is rated more than once,
+  `icc()` fits the two-way random model with a subject-by-rater interaction,
+  separating the interaction variance (stable disagreement) from pure rating error
+  instead of confounding them — and reports both. A new `occasions` argument averages
+  over the replicates (`occasions = "average"`), giving the reliability of a rater's
+  mean-of-replicates score. Balanced, complete replicated two-way random designs.
 
 ## Engines
 
@@ -54,7 +63,10 @@ alternate engines, and seeded simulations.
   It gives advice only; it does not fit.
 * `d_study()` — projects a fitted ICC's reliability to the mean of an arbitrary number
   of raters (a generalizability decision study), with an `autoplot()` reliability
-  curve; `icc()`'s `unit` also accepts numbers for one-off projections.
+  curve; `icc()`'s `unit` also accepts numbers for one-off projections. For a
+  **multilevel** fit it projects the rater count at each level (subject and/or
+  cluster), returning one curve per level (a `level` column; `autoplot()` facets by
+  it) on complete data.
 * `autoplot()` / `plot()` methods for `icc` objects draw a coefficient forest plot
   and a variance-component decomposition; `tidy()` / `glance()` give tidy summaries.
   Plotting needs `ggplot2` (a `Suggests` dependency).

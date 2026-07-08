@@ -24,19 +24,56 @@ Ark).
 
 ## Parking lot (unscheduled proposals)
 
-- Replicate ratings within cell → split σ²_sr from σ²_e via `(1 | subject:rater)`.
+Each item now carries a **Status** line — reviewed 2026-07-08 — so readiness is
+visible without re-deriving it. Updated whenever an item's readiness changes;
+`STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
+ready ones.
+
+**Scheduled into M17 (2026-07-08, ADR-026) — no longer parked:** the *conflated
+single-level ICC (Eq. 14)*, a *multilevel `d_study()`*, and *within-cell
+replicates* are the three slices of milestone M17 (see
+[`MILESTONES.md`](MILESTONES.md)); per ADR-015 they leave this future-only file.
+**Note:** M17 Slice 2 was originally scoped as a *three-facet / subjects-per-cluster*
+`d_study()` but retargeted to **rater-count projection** after the source review
+(ten Hove Eq. 13's cluster ICC has no subject facet; Ns is efficiency-only —
+[[cluster-icc-no-subject-facet]], ADR-026 amendment). The subjects-per-cluster idea
+is **not a reliability-projection facet**; it is folded into the *design/power
+helpers* item below (sample-size / CI-width), where it belongs.
+
+- **Consistency-conflated single-level ICC** — M17 Slice 1 ships the *agreement*
+  conflated ICC (`level = "conflated"`), sourced to ten Hove et al. (2022) **Eq. 14**;
+  the paper publishes only the agreement form. A *consistency*-conflated number
+  (drop σ²_r from the error set) is the natural symmetric extension but is **not in
+  the paper**. **Status: investigate whether a sourced or faithfully-derivable
+  consistency form exists** (an oracle strong enough for #1/#4 — closed form, or a
+  reduction that pins it) before exposing `type = "consistency"` + `level =
+  "conflated"`; today that combination aborts (ADR-026). Do **not** ship a guessed
+  formula (#4).
 - Design/power helpers (how many raters/subjects for a target CI width).
+  **Status: not ready — needs a scope decision first.** The CI-width-target
+  flavor has no independent oracle (correctness would rest on simulation
+  calibration alone, in tension with #1); `M4.5-d-study.md` §6 already scoped
+  cost/optimal-design helpers and subject-count projection **out** of
+  `d_study()`. **This item now also absorbs the multilevel *subjects-per-cluster*
+  question** (formerly miscast as a "three-facet d_study"): per ten Hove Eq. 13 the
+  number of subjects per cluster is a **sample-size / efficiency** dimension, not a
+  reliability facet ([[cluster-icc-no-subject-facet]]), so it lives here (with the
+  power/CI-width helpers), never as a `d_study()` projection. Belongs in "Proposals
+  under discussion" for a scope ruling before it can be promoted.
 - Categorical/ordinal ratings (GLMM engines) beyond the Gaussian LMM.
+  **Status: unscheduled, no spec drafted.** No milestone slice, ADR, or oracle
+  route exists yet; needs its own estimand pass (link/family choice, oracle
+  registry) before it's schedulable.
 - Non-parametric bootstrap and profile-likelihood CIs as further alternatives to
   Monte-Carlo, for method comparison (the parametric-bootstrap `ci_method` shipped
-  in M16, ADR-025).
-- Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs.
-- **Three-facet `d_study()`** projecting subject-per-cluster counts for the
-  multilevel designs (today's `d_study()` projects rater count only) — deferred
-  repeatedly out of M5/M8/M9/M14/M15.
-- **Conflated single-level ICC (Eq. 14, ten Hove et al. 2022)** exposed as a
-  selectable coefficient — the single-number summary that collapses the
-  multilevel variance partition; deferred out of M5/M8/M9/M14/M15.
+  in M16, ADR-025). **Status: partially superseded; remainder unscheduled.** The
+  parametric-bootstrap half of this idea is done (M16). Non-parametric bootstrap
+  and profile-likelihood remain a method-comparison nice-to-have, not sequenced
+  into Waves 1–3.
+- Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs. **Status: ready
+  anytime, low priority.** Pure engineering — no new estimand or oracle risk,
+  since the comparisons already exist piecemeal in the oracle registry
+  (`REFERENCES.md`) — but not yet sequenced into a wave.
 - **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
   lme4 interval for singular fits (glmmTMB covers this today via the
   degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted
@@ -44,25 +81,53 @@ Ark).
   merDeriv, so it *could* bootstrap a boundary fit, but M16 keeps the existing
   lme4→glmmTMB singular handoff for both `ci_method`s (ADR-025); lifting it for
   bootstrap needs `ci_method` threaded into the lme4 fit path and a `d_study`
-  interaction (the MC machinery a bootstrap-skip fit would not build).
+  interaction (the MC machinery a bootstrap-skip fit would not build). **Status:
+  deprioritized (opportunistic parity only).** glmmTMB already covers the
+  singular-fit case via the degrade handoff; well-scoped if picked up, just not
+  prioritized.
 - One-way random ICC(1)/ICC(1,k) via the **SEM (lavaan) engine** — deferred out of
   M7 (ADR-014). The SEM-GT literature (Jorgensen 2021; Vispoel et al. 2022; Lee &
   Vispoel 2024) covers crossed facet designs only; a wide-column parallel model
   gives consistency (not one-way), and an equal-intercept approximation is unsourced
   and inexact (0.157 vs 0.166 on SF). Needs a sourced method (or a multilevel/
   random-intercept SEM, which would just re-implement the mixed-model engines)
-  before it ships.
+  before it ships. **Status: blocked (ADR-014).** No faithful sourced method
+  exists yet; not schedulable until a source appears (`ask-for-inaccessible-
+  sources` policy — don't guess a method to unblock it).
 - **Bayesian engine** (`brms`/`rstanarm`) behind `Suggests`, with a new
   `ci_method = "posterior"` (credible intervals from native posterior draws) and
   half-*t* hyperpriors (ten Hove, Jorgensen & van der Ark 2020). Deferred out of M7
   (ADR-014); `rstanarm` preferred over `brms` for CI-install sanity (precompiled
   Stan, no toolchain). The engine × design dispatch seam (M5.5/M7) is ready for it.
+  **Status: ready to schedule whenever prioritized.** Not technically blocked —
+  the dispatch seam is already built for it — just sequenced after the
+  non-Bayesian carryover per the maintainer's current focus (STATUS.md).
+- **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
+  effective-rater divisor is an open modeling question with no textbook oracle
+  (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
+  complete-data `ICC(c,k)` is unaffected (M5). *(Added here 2026-07-08: tracked
+  as a carryover since M9 and referenced as living in this file by
+  `MILESTONES.md`, but missing from this list until now.)* **Status: open
+  research question (Wave 3).** Needs a simulation-oracle study — likely with a
+  Fable review (PRINCIPLES.md #19) — before it's schedulable; the open question
+  itself has no sourced route to resolve by reading alone.
 
 ## Proposals under discussion (open design questions)
 
 These are **decision points, not decided directions** — recorded so the design
 is deliberate when scheduled. Resolve the chosen shape at the milestone's start.
 
-*None open right now.* (This file is **future-only**, ADR-015: once a proposal is
-scheduled it moves to [`MILESTONES.md`](MILESTONES.md); once shipped its entry here
-is removed — shipped work lives in `MILESTONES.md`, not re-narrated here.)
+- **Do design/power helpers belong in this package's estimand at all?** The
+  parking-lot item above ("how many raters/subjects for a target CI width") is
+  **not schedulable until this is answered**: `M4.5-d-study.md` §6 currently
+  declares subject-count projection and cost/optimal-design helpers **out of
+  scope** ("the package's estimand is rater reliability"), and the CI-width-target
+  flavor has no independent oracle (#1). Resolve the scope boundary — and an
+  oracle strategy if it's taken in — before promoting it. *(Note: M17's Slice 2
+  adds subjects-per-cluster projection at the **cluster** level for multilevel
+  designs, which is a genuine GT facet; that does not settle the **single-level**
+  subject-count / power question raised here.)*
+
+(This file is **future-only**, ADR-015: once a proposal is scheduled it moves to
+[`MILESTONES.md`](MILESTONES.md); once shipped its entry here is removed — shipped
+work lives in `MILESTONES.md`, not re-narrated here.)

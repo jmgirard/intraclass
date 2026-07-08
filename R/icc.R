@@ -54,6 +54,16 @@
 #' you will make (about a subject, or about a cluster). The agreement/consistency
 #' and single/average choices above apply at each level.
 #'
+#' `level = "conflated"` reports the **biased single-level ICC** you would get by
+#' *ignoring* the clustering (ten Hove et al. 2022, Eq. 14): between- and
+#' within-cluster subject variance are both counted as signal, and all three
+#' rater-related terms as error. It is offered only as a **diagnostic contrast** --
+#' to quantify how much the nesting distorts reliability -- and is never a
+#' recommended coefficient; `print()` flags it as such. It is absolute-agreement
+#' only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
+#' random-rater design. Request it alongside the correct levels, e.g.
+#' `level = c("subject", "cluster", "conflated")`.
+#'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
 #' raters are crossed with clusters (each rater rates in every cluster) the
 #' five-component model above is used (Design 1). Because the design is read from
@@ -94,6 +104,22 @@
 #' fixed-rater cluster level remain for later milestones. Nested designs still require
 #' balanced, complete data.
 #'
+#' @section Within-cell replicates:
+#' When a subject-by-rater cell is rated **more than once** (within-cell
+#' replicates), `icc()` fits the two-way random model **with a subject-by-rater
+#' interaction**, `score ~ 1 + (1|subject) + (1|rater) + (1|subject:rater)`, which
+#' splits the single-rating residual into the **interaction** \eqn{\sigma^2_{sr}}
+#' (does a rater systematically rate a subject high or low -- stable disagreement?)
+#' and **pure error** \eqn{\sigma^2_e} (rating noise). Both are reported. The
+#' single-occasion ICCs are unchanged in value from a one-rating-per-cell analysis
+#' (a single rating's error still includes the interaction), but the components are
+#' no longer confounded, and `occasions = "average"` reports the reliability of the
+#' mean of the replicates (which reduces \eqn{\sigma^2_e} but not
+#' \eqn{\sigma^2_{sr}}). This slice covers **balanced, complete** replicated
+#' two-way **random**-rater designs (every cell present and rated the same number of
+#' times); ragged replicates, fixed raters, one-way, and multilevel replicates are
+#' planned for later milestones.
+#'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
 #' the model's internal (log) scale and back-transformed, so the interval is
@@ -133,12 +159,20 @@
 #'   `m` raters (-> `ICC(*,m)`), or any combination. See [d_study()] for projecting
 #'   across a range of `m`. Projecting absolute agreement is not defined for fixed
 #'   raters (see [d_study()]).
+#' @param occasions For data with **within-cell replicates** (more than one rating
+#'   per subject-by-rater cell), whether to average over them: `"single"` (the
+#'   default -- the reliability of one rating) and/or `"average"` (the mean of the
+#'   `n_o` replicates, which reduces pure error). `"average"` requires replicated
+#'   data. See the *Within-cell replicates* section. Ignored with one rating per
+#'   cell.
 #' @param level For multilevel designs (a `cluster` column), which reliability to
 #'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
 #'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
-#'   Ignored (and must be left at its default) when `cluster` is not supplied. Only
-#'   `"subject"` is available when raters are nested in clusters (see the
-#'   *Multilevel designs* section).
+#'   `"conflated"` may be added for the biased ignore-the-clustering ICC as a
+#'   diagnostic contrast (agreement-only, complete crossed designs; see the
+#'   *Multilevel designs* section). Ignored (and must be left at its default) when
+#'   `cluster` is not supplied. Only `"subject"` is available when raters are nested
+#'   in clusters.
 #' @param design Multilevel design (with a `cluster` column): `NULL` (the default)
 #'   infers it from the crossing pattern. On **incomplete** data missing cells can
 #'   make the pattern ambiguous between a crossed and a nested design; declare it
@@ -219,6 +253,7 @@ icc <- function(
   type = c("agreement", "consistency"),
   raters = c("random", "fixed"),
   unit = c("single", "average"),
+  occasions = "single",
   level = c("subject", "cluster"),
   design = NULL,
   engine = "glmmTMB",
@@ -246,6 +281,7 @@ icc <- function(
   type <- validate_choice(type, c("agreement", "consistency"), "type")
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
+  occasions <- validate_occasions(occasions)
   mc_samples <- validate_sample_count(mc_samples, "mc_samples")
   boot_samples <- validate_sample_count(boot_samples, "boot_samples")
   seed <- validate_seed(seed)
@@ -341,7 +377,9 @@ icc <- function(
 
   # Fixed raters is well-posed but forgoes generalization; nudge toward random
   # (M2 spec §3, ADR-006). Warning, not error -- a valid number is still returned.
-  if (raters == "fixed") {
+  # Skip the advisory when a fixed-rater conflated ICC is requested: that combination
+  # aborts below (Eq. 14 is random-rater), so an advisory about a rejected path is noise.
+  if (raters == "fixed" && !(multilevel && "conflated" %in% level)) {
     warn_fixed_raters()
   }
   if (
@@ -441,6 +479,40 @@ icc <- function(
     detect_multilevel_design(df)
   }
 
+  # Conflated single-level ICC (Eq. 14, M17 Slice 1): the biased ignore-clusters
+  # coefficient off the crossed five-component fit. Agreement-only, random raters,
+  # crossed Design 1 (estimand-spec M17-conflated-icc.md §3). These checks run
+  # before the fixed/nested guards below (which drop non-subject levels) so an
+  # explicit `level = "conflated"` gets a conflated-specific message, not a
+  # cluster-level one. The complete-data restriction lives with the crossed
+  # incomplete guards further down.
+  if (multilevel && "conflated" %in% level) {
+    if (type == "consistency") {
+      abort_unsupported(c(
+        "A consistency conflated ICC is not available.",
+        i = "ten Hove et al. (2022) Eq. 14 is the absolute-agreement conflated \\
+             ICC; a consistency form is not sourced (see the ROADMAP).",
+        i = "Use {.code type = \"agreement\"} with {.code level = \"conflated\"}."
+      ))
+    }
+    if (raters == "fixed") {
+      abort_unsupported(c(
+        "A fixed-rater conflated ICC is not available.",
+        i = "Eq. 14 treats the rater effect as a variance component (random \\
+             raters).",
+        i = "Use {.code raters = \"random\"} with {.code level = \"conflated\"}."
+      ))
+    }
+    if (ml_design != "crossed") {
+      abort_inapplicable(c(
+        "The conflated ICC needs raters crossed with clusters (Design 1).",
+        i = "It collapses the crossed five-component decomposition; with nested \\
+             raters that decomposition is not defined.",
+        i = "Use {.code level = \"subject\"}, or cross the raters with clusters."
+      ))
+    }
+  }
+
   # Fixed-rater multilevel scope (M10, ADR-019): the crossed (Design 1) design,
   # balanced, subject level only. Fixed-rater nested designs and the fixed-rater
   # cluster level are deferred -- fail loudly (#5) before the design/fit machinery
@@ -533,16 +605,39 @@ icc <- function(
   # rater identity is ignored, so multiple ratings per subject are the design, not
   # a violation (M6 spec §5).
   design_info <- summarize_design(df)
+  replicates <- FALSE
   if (!oneway) {
-    # One rating per observed cell is the M3 estimand; replicates would change it
-    # (split the interaction from pure error) and are a later milestone (#5, #17).
+    # Within-cell replicates (M17 Slice 3): more than one rating per subject x rater
+    # cell splits the residual into the interaction sigma^2_sr and pure error
+    # sigma^2_e, fit by adding (1|subject:rater). Scope is two-way RANDOM,
+    # single-level, balanced/complete replicated data; the other cases stay deferred
+    # and abort loudly (#5; estimand-spec M17-within-cell-replicates.md §7).
     if (design_info$has_replicates) {
-      abort_unsupported(c(
-        "Some subject-by-rater cells have more than one rating.",
-        i = "Within-cell replicates (splitting the subject-by-rater interaction \\
-             from pure error) are planned for a later milestone.",
-        x = "Provide one rating per subject-by-rater cell."
-      ))
+      if (multilevel) {
+        abort_unsupported(c(
+          "Within-cell replicates are not supported for multilevel designs yet.",
+          i = "Replicated multilevel data (splitting pure error from the \\
+               highest-order interaction) is planned for a later milestone.",
+          i = "Provide one rating per subject-by-rater cell within each cluster."
+        ))
+      }
+      if (raters == "fixed") {
+        abort_unsupported(c(
+          "Within-cell replicates are not supported for fixed raters yet.",
+          i = "Replicated fixed-rater designs are planned for a later milestone.",
+          i = "Use {.code raters = \"random\"} with replicated data."
+        ))
+      }
+      if (!design_info$replicates_uniform) {
+        abort_unsupported(c(
+          "Ragged within-cell replicates are not supported yet.",
+          i = "This slice covers balanced, complete replicated designs (every \\
+               subject-by-rater cell present and rated the same number of times).",
+          i = "Provide an equal number of ratings in every cell, or aggregate to \\
+               one rating per cell."
+        ))
+      }
+      replicates <- TRUE
     }
     # Separating the subject and rater variances needs a connected design; a
     # disconnected layout confounds them and is not identified (#5; M3 §3). This is
@@ -566,6 +661,18 @@ icc <- function(
     # coefficients. Complete crossed designs satisfy every condition, so this is a
     # no-op for the balanced M5/M8 path.
     if (multilevel && ml_design == "crossed" && !design_info$balanced) {
+      # The conflated ICC (M17 Slice 1) targets the complete five-component fit;
+      # its behaviour on ragged data is not yet established (spec
+      # M17-conflated-icc.md §6). Fail loudly rather than project it silently (#5).
+      if ("conflated" %in% level) {
+        abort_unsupported(c(
+          "The conflated ICC is available on complete data only.",
+          i = "Its behaviour on incomplete or unbalanced multilevel data is not \\
+               yet established (a later slice).",
+          i = "Provide complete crossed multilevel data, or use \\
+               {.code level = \"subject\"}."
+        ))
+      }
       # Fixed-rater multilevel is balanced/complete only in M10 (theta^2_r under
       # imbalance is deferred, spec §3/§7); fail loudly before fitting (#5).
       if (raters == "fixed") {
@@ -681,6 +788,10 @@ icc <- function(
     # subject x rater graph is block-diagonal, so design_info$balanced is not the
     # right notion for them (spec M8 §2).
     TRUE
+  } else if (replicates) {
+    # A uniform-replicate design is complete crossing with equal cell counts, so
+    # every subject is rated by every rater: k_eff_raters == n_raters (balanced).
+    TRUE
   } else {
     design_info$balanced
   }
@@ -719,6 +830,16 @@ icc <- function(
   # shared random-effects fit. The rest of the pipeline is identical -- each engine
   # returns named `components` the estimand indexes by signal/error (M8 §2, M5
   # §2/§3; M3 §6, ADR-008).
+  # `occasions = "average"` averages the within-cell replicates, so it needs
+  # replicated data -- there is nothing to average with one rating per cell (#5/#8).
+  if (!replicates && !identical(occasions, "single")) {
+    abort_intraclass(c(
+      "{.code occasions = \"average\"} requires within-cell replicates.",
+      i = "Provide multiple ratings per subject-by-rater cell, or use \\
+           {.code occasions = \"single\"} (the default)."
+    ))
+  }
+
   engine_fit <- if (multilevel) {
     # lme4 (M14) mirrors every balanced multilevel glmmTMB fit; the guards above
     # confine the lme4 branches to the balanced/complete case.
@@ -752,6 +873,20 @@ icc <- function(
     if (engine == "lme4") fit_lme4_oneway(df) else fit_glmmtmb_oneway(df)
   } else if (raters == "fixed") {
     if (engine == "lme4") fit_lme4_fixed(df) else fit_glmmtmb_fixed(df)
+  } else if (replicates) {
+    # Within-cell replicates (M17 Slice 3): the interaction fit (subject, rater,
+    # subject_rater, residual). The SEM engine has no replicate path.
+    if (engine == "lavaan") {
+      abort_unsupported(c(
+        "The {.pkg lavaan} (SEM) engine does not support within-cell replicates.",
+        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
+      ))
+    }
+    if (engine == "lme4") {
+      fit_lme4_replicates(df)
+    } else {
+      fit_glmmtmb_replicates(df)
+    }
   } else if (engine == "lme4") {
     fit_lme4(df)
   } else if (engine == "lavaan") {
@@ -804,6 +939,26 @@ icc <- function(
     )
   } else if (oneway) {
     lapply(unit, function(u) icc_estimand(unit = u, k_eff = k, oneway = TRUE))
+  } else if (replicates) {
+    # Within-cell replicates (M17 Slice 3): cross unit x occasions (unit outer). The
+    # rater divisor counts DISTINCT raters (replicates must not inflate it, §4);
+    # `occasions` averages pure error over the n_o within-cell replicates.
+    unlist(
+      lapply(unit, function(u) {
+        lapply(occasions, function(o) {
+          icc_estimand(
+            type = type,
+            unit = u,
+            raters = raters,
+            k_eff = design_info$k_eff_raters,
+            replicates = TRUE,
+            occasions = o,
+            n_o = design_info$n_o
+          )
+        })
+      }),
+      recursive = FALSE
+    )
   } else {
     lapply(
       unit,
@@ -858,6 +1013,11 @@ icc <- function(
     conf.high = vapply(intervals, `[[`, numeric(1), "conf.high"),
     stringsAsFactors = FALSE
   )
+  # Within-cell replicates add an `occasions` column (the n_o behind each row),
+  # disambiguating the shared index label as the multilevel `level` column does.
+  if (replicates) {
+    estimates$occasions <- vapply(estimands, `[[`, numeric(1), "occasions")
+  }
 
   structure(
     list(
@@ -870,9 +1030,13 @@ icc <- function(
         balanced = balanced,
         multilevel = multilevel,
         ml_design = if (multilevel) ml_design else NA_character_,
-        levels = if (multilevel) level else NULL
+        levels = if (multilevel) level else NULL,
+        replicates = replicates,
+        n_o = if (replicates) design_info$n_o else NA_integer_
       ),
-      k_eff = design_info$k_eff,
+      # The replicate path averages over distinct raters (k_eff_raters), not total
+      # ratings, so report that divisor (estimand-spec M17-within-cell-replicates §4).
+      k_eff = if (replicates) design_info$k_eff_raters else design_info$k_eff,
       engine = engine_fit$engine,
       ci = list(
         method = ci_method,
@@ -997,14 +1161,34 @@ validate_seed <- function(seed, call = rlang::caller_env()) {
   as.integer(seed)
 }
 
-# Validate the multilevel `level` argument: the default (both) or a subset of
-# {"subject", "cluster"} (M5). Returns the requested levels, de-duplicated,
-# preserving the requested order.
+# Validate the `occasions` averaging argument (within-cell replicates, M17 Slice 3):
+# one or both of {"single", "average"}. "average" (mean of the within-cell
+# replicates) is honoured only on replicated data; the guard for that lives in
+# icc() where the design is known. Returns the requested occasions, de-duplicated.
+validate_occasions <- function(occasions, call = rlang::caller_env()) {
+  choices <- c("single", "average")
+  if (
+    !is.character(occasions) ||
+      length(occasions) < 1L ||
+      !all(occasions %in% choices)
+  ) {
+    abort_intraclass(
+      "{.arg occasions} must be one or both of {.val {choices}}.",
+      call = call
+    )
+  }
+  unique(occasions)
+}
+
+# Validate the multilevel `level` argument: the default (both correct levels) or a
+# subset of {"subject", "cluster"} (M5), optionally with "conflated" -- the biased
+# ignore-clusters diagnostic (Eq. 14, M17). Returns the requested levels,
+# de-duplicated, preserving the requested order.
 validate_levels <- function(level, call = rlang::caller_env()) {
-  choices <- c("subject", "cluster")
+  choices <- c("subject", "cluster", "conflated")
   if (!is.character(level) || length(level) < 1L || !all(level %in% choices)) {
     abort_intraclass(
-      "{.arg level} must be one or both of {.val {choices}}.",
+      "{.arg level} must be one or more of {.val {choices}}.",
       call = call
     )
   }

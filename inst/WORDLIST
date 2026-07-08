@@ -1,6 +1,7 @@
 CMD
 Codecov
 Connectedness
+Eq
 Estimand
 Fleiss
 GENOVA
@@ -16,9 +17,12 @@ Shrout
 Springer
 Vispoel
 al
+asymptotics
 connectedness
 der
 doi
+eqn
+erroring
 estimand
 estimands
 et
@@ -30,6 +34,7 @@ interrater
 lavaan
 lme
 merDeriv
+pre
 reliabilities
 roadmap
 selectable

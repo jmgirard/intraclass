@@ -276,6 +276,21 @@ test_that("advanced.Rmd: cluster-level ICC exceeds subject-level on `school`", {
     average <- e$estimate[e$index == "ICC(A,k)" & e$level == lv]
     expect_gte(average, single)
   }
+
+  # The conflated-ICC subsection claims the biased ignore-the-clustering value
+  # lands between the two correct levels and matches neither (M17 Slice 1).
+  ec <- icc(
+    school,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    level = "conflated",
+    seed = 1
+  )$estimates
+  conflated_a1 <- ec$estimate[ec$index == "ICC(A,1)" & ec$level == "conflated"]
+  expect_gt(conflated_a1, subject_a1)
+  expect_lt(conflated_a1, cluster_a1)
 })
 
 # The article's incomplete-multilevel subsection drops a fifth of the `school`
