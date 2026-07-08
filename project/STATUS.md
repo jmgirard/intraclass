@@ -9,23 +9,25 @@
   dropped-with-note); **(4)** bootstrap-projected `d_study()` bands (M16 deferral, package-wide).
   Completeness, not new estimand work; no new dependency, no new argument. M0–M18 shipped; package
   at v0.1.0. No milestone in flight.
-- Active task: **M19 Slice 2 — fixed-rater nested (Design 2 only)** (ADR-029, COVERAGE #11) — next.
-  **Slice 1 (incomplete nested Designs 2/3) is done** on `m19-nested-completeness`: lifted the
-  `nested_design_balanced` abort; incomplete Designs 2/3 now fit. Decision B **resolved to SHIP the
-  averaged coefficient** — the ragged subject-level `k_eff` divisor reduces **exactly** to the
-  pinned M3 two-way / M6 one-way incomplete divisor (oracle O-NML/incomplete: single-cluster
-  Design 2 → ragged two-way diff 0; Design 3 → ragged one-way) — no 🟣 research degrade, no Fable.
-  Decision A: ambiguous ragged data requires explicit `design=` (detection escape hatch; stale
-  abort message updated). Design 2 gained a within-cluster connectedness gate; incomplete
-  subject-level `d_study()` projects for free (M18 path). Full suite 795 pass / 0 fail; `air` +
-  `lintr` clean.
+- Active task: **M19 finish-task** (both slices done; ready to close the milestone). On
+  `m19-nested-completeness`: **Slice 1** (incomplete nested Designs 2/3) + **Slice 2** (fixed-rater
+  nested Design 2, both engines) shipped. Next: `R CMD check --as-cran` + installed-pkg check +
+  open the PR.
+- Slice-2 highlight (**oracle-first catch**): fixed ≢ random even balanced for *nested* Design 2 —
+  the finite population is per-cluster (θ²_{r:c} = mean over clusters of each cluster's
+  finite-population rater variance), so the M10 crossed "balanced fixed≡random" identity does NOT
+  carry over. New fit `score ~ 0 + rater + (1|cluster:subject)` + new engine-agnostic
+  `theta2r_fixed_nested()`; pinned by per-cluster + single-cluster reduction to the flat M3 fixed
+  θ²_r (exact), cross-engine (<1e-4), consistency≡random (exact). Design 3 fixed ⚫ by-design;
+  incomplete fixed-nested deferred. Full suite 813 pass / 0 fail; `air` + `lintr` clean.
 - Last green CI: PR #23 (M18) full matrix green incl. Windows and R-devel; merged to
   `main` at 7dffbb2
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M19 Slice 1 (incomplete nested) implemented** on
-  `m19-nested-completeness`: scoping (ADR-029) + Slice 1 code. Incomplete Designs 2/3 fit; averaged
-  `k_eff` divisor pinned by exact reduction to M3/M6; ambiguous ragged requires `design=`. Oracle
-  script + tests added (full suite 795 pass / 0 fail, `air` + `lintr` clean). Slice 2 next.
+- Updated: 2026-07-08 by main session (Opus) — **M19 Slices 1 & 2 implemented** on
+  `m19-nested-completeness`. Slice 1: incomplete nested Designs 2/3 (k_eff divisor pinned by exact
+  reduction to M3/M6). Slice 2: fixed-rater nested Design 2, both engines, new
+  `theta2r_fixed_nested()` (oracle-first catch: fixed ≢ random for nested). Full suite 813 pass /
+  0 fail, `air` + `lintr` clean. Next: milestone finish-task (`R CMD check` + PR).
 
 ## Where we are
 

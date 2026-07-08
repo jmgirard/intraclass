@@ -800,3 +800,110 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
     simulate_refit = lme4_bootmer_refit(fit, extract)
   )
 }
+
+# Fixed-rater Design 2 (raters nested in clusters) lme4 engine (M19 Slice 2, ADR-029);
+# the lme4 counterpart of fit_glmmtmb_nested_fixed(). Raters are a fixed finite
+# population within each cluster, so the rater slot carries the bias-corrected
+# theta^2_{r:c} (theta2r_fixed_nested(), averaged over clusters) via the cell-mean
+# parameterization
+#
+#   score ~ 0 + rater + (1 | cluster:subject)
+#
+# (nested rater labels give each cluster its own cell means, absorbing the cluster main
+# effect). One random group (subject-in-cluster) + residual; merDeriv supplies their
+# SD-scale covariance, delta-transformed to log-SD, while the fixed cell means keep the
+# natural scale theta2r_fixed_nested() expects. As in glmmTMB, fixed != random even on
+# balanced data (per-cluster finite population). Balanced/complete only (guarded in
+# icc()); a singular boundary fit defers to glmmTMB as elsewhere (ADR-012).
+fit_lme4_nested_fixed <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(score ~ 0 + rater + (1 | cluster:subject), data)
+  if (lme4::isSingular(fit)) {
+    abort_intraclass(
+      c(
+        "The {.pkg lme4} engine cannot return an interval for a singular \\
+         (boundary) fit.",
+        i = "A variance component was estimated at exactly zero; the \\
+             {.pkg lme4} engine defers boundary fits to the boundary-robust \\
+             default (its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately).",
+        i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
+             which stays finite here."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
+  beta <- lme4::fixef(fit)
+  cluster_of <- nested_rater_clusters(data, names(beta))
+  th <- theta2r_fixed_nested(beta, stats::vcov(fit), cluster_of)
+  sd_subject <- as.numeric(
+    attr(lme4::VarCorr(fit)[["cluster:subject"]], "stddev")
+  )
+  sd_res <- as.numeric(stats::sigma(fit))
+
+  extract <- function(f) {
+    fvc <- lme4::VarCorr(f)
+    fth <- theta2r_fixed_nested(lme4::fixef(f), stats::vcov(f), cluster_of)
+    c(
+      subject = as.numeric(attr(fvc[["cluster:subject"]], "stddev"))^2,
+      rater = fth$point,
+      residual = as.numeric(stats::sigma(f))^2
+    )
+  }
+  components <- as.list(extract(fit))
+
+  vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
+  nm_sd <- colnames(vcov_sd)
+  beta_nm <- names(beta)
+  idx <- c(
+    match(beta_nm, nm_sd),
+    subject = which(nm_sd == "cov_cluster:subject.(Intercept)"),
+    residual = which(nm_sd == "residual")
+  )
+  if (length(idx) != length(beta_nm) + 2L || anyNA(idx)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg merDeriv} covariance to the model terms.",
+        i = "Columns returned: {.val {nm_sd}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  vcov_sd <- vcov_sd[idx, idx, drop = FALSE]
+
+  # Identity for the fixed cell means (kept natural for theta2r_fixed_nested()); 1/sd
+  # for the subject SD and residual (log-SD scale, ADR-002/003).
+  jac <- diag(c(rep(1, length(beta_nm)), 1 / sd_subject, 1 / sd_res))
+  vcov_log <- jac %*% vcov_sd %*% t(jac)
+  slots <- c(beta_nm, "subject", "residual")
+  dimnames(vcov_log) <- list(slots, slots)
+  estimate <- stats::setNames(
+    c(as.numeric(beta), log(sd_subject), log(sd_res)),
+    slots
+  )
+
+  to_components <- function(par) {
+    list(
+      subject = exp(2 * par["subject", ]),
+      rater = theta2r_nested_draws(par[beta_nm, , drop = FALSE], th),
+      residual = exp(2 * par["residual", ])
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "lme4",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_log,
+    to_components = to_components,
+    simulate_refit = lme4_bootmer_refit(fit, extract)
+  )
+}

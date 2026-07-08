@@ -504,6 +504,90 @@ theta2r_fixed <- function(beta, vbeta, k, call = rlang::caller_env()) {
   )
 }
 
+# Fixed-rater theta^2 for a NESTED (Design 2) design (M19 Slice 2, ADR-029). Raters
+# are nested in clusters -- there is no single common rater set -- so theta^2_{r:c} is
+# the WITHIN-cluster bias-corrected finite-population variance of each cluster's k
+# rater means (McGraw & Wong Case 3A, as theta2r_fixed()), AVERAGED over clusters.
+# Pooling all raters would conflate between-cluster rater location (confounded with
+# the cluster main effect) with the within-cluster spread, so the variance is formed
+# per cluster then averaged. On balanced data it equals the random-fit sigma^2_{r:c}
+# (verified reduction, M8 §3a). ENGINE-AGNOSTIC: `beta`/`vbeta` are the cell-mean
+# fixed effects of `score ~ 0 + rater` (nested rater labels) and their covariance;
+# `cluster_of` maps each coefficient to its cluster. Returns the point plus the
+# per-cluster pieces (center, index groups, bias) the Monte-Carlo sampler reuses to
+# recompute theta^2_{r:c} from the beta draws.
+theta2r_fixed_nested <- function(
+  beta,
+  vbeta,
+  cluster_of,
+  call = rlang::caller_env()
+) {
+  vbeta <- as.matrix(vbeta)
+  cluster_idx <- split(seq_along(beta), cluster_of)
+  ks <- lengths(cluster_idx)
+  if (length(unique(ks)) != 1L) {
+    abort_intraclass(
+      c(
+        "Every cluster must contribute the same number of rater means for the \\
+         fixed-rater nested variance.",
+        i = "Cluster rater counts found: {.val {sort(unique(ks))}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  k <- ks[[1L]]
+  center <- diag(k) - matrix(1 / k, k, k)
+  per_bias <- vapply(
+    cluster_idx,
+    function(ix) sum(diag(center %*% vbeta[ix, ix, drop = FALSE])) / (k - 1),
+    numeric(1)
+  )
+  per_raw <- vapply(
+    cluster_idx,
+    function(ix) {
+      mu <- beta[ix]
+      as.numeric(t(mu) %*% center %*% mu) / (k - 1)
+    },
+    numeric(1)
+  )
+  list(
+    point = mean(pmax(0, per_raw - per_bias)),
+    center = center,
+    cluster_idx = cluster_idx,
+    bias = per_bias,
+    beta_names = names(beta),
+    k = k
+  )
+}
+
+# Recompute theta^2_{r:c} for a matrix of beta draws (rows = the nested rater cell
+# means in `th$beta_names` order, columns = draws), reusing the per-cluster center
+# and bias from theta2r_fixed_nested(). Shared by the glmmTMB and lme4 fixed-nested
+# `to_components`. As in the flat fixed path (theta2r_fixed()'s note), the drawn means
+# carry their own sampling variance, so per cluster the raw draw centers `bias` above
+# the point; averaging over clusters is linear, so the same holds for the mean.
+theta2r_nested_draws <- function(beta_draws, th) {
+  k <- th$k
+  per <- Map(
+    function(ix, b) {
+      m <- beta_draws[ix, , drop = FALSE]
+      raw <- colSums(m * (th$center %*% m)) / (k - 1)
+      pmax(0, raw - b)
+    },
+    th$cluster_idx,
+    th$bias
+  )
+  Reduce(`+`, per) / length(per)
+}
+
+# Cluster label for each fixed rater coefficient of `score ~ 0 + rater` (names
+# "rater<level>"); raters are nested, so each rater level sits in exactly one cluster.
+nested_rater_clusters <- function(data, beta_names) {
+  map <- tapply(as.character(data$cluster), data$rater, `[`, 1L)
+  unname(map[sub("^rater", "", beta_names)])
+}
+
 fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("glmmTMB", reason = "to fit the ICC model.")
   k <- nlevels(data$rater)
@@ -678,6 +762,103 @@ fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
         rater = pmax(0, raw_draws - th$bias),
         residual = exp(2 * par[di, ])
       )
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "glmmTMB",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_full,
+    to_components = to_components,
+    simulate_refit = glmmtmb_simulate_refit(fit, extract)
+  )
+}
+
+# Design 2 (raters nested in clusters) with raters FIXED (M19 Slice 2, ADR-029). The
+# fixed-rater analog of fit_glmmtmb_nested_clusters(): raters are a fixed finite
+# population within each cluster, so the rater slot carries the bias-corrected
+# theta^2_{r:c} (theta2r_fixed_nested(), averaged over clusters) rather than the random
+# sigma^2_{r:c}. Because nested rater labels are cluster-specific, the cell-mean
+# parameterization
+#
+#     score ~ 0 + rater + (1 | cluster:subject)
+#
+# gives each (cluster, rater) its own mean directly (absorbing the cluster main effect
+# -- irrelevant to the subject level, which is all nested designs define). Components
+# {subject | rater = theta^2_{r:c}, residual}; the subject-level estimand map and
+# icc_point()/mc_ci() are unchanged (M8 §3a).
+#
+# Unlike the CROSSED fixed design (M10), fixed != random even on balanced data: the
+# nested finite population is per-cluster (each cluster's own k raters), so theta^2_{r:c}
+# = mean over clusters of the within-cluster finite-population variance, which differs
+# from the random pooled sigma^2_{r:c} (they coincide only as k per cluster -> Inf).
+# theta^2_{r:c} is pinned instead by reduction to the flat M3 fixed theta^2_r fit
+# per cluster then averaged (oracle O-FNML/reduction), and by the single-cluster
+# reduction to M3. Balanced/complete only (incomplete fixed-nested deferred, ADR-029).
+fit_glmmtmb_nested_fixed <- function(
+  data,
+  call = rlang::caller_env()
+) {
+  rlang::check_installed("glmmTMB", reason = "to fit the multilevel ICC model.")
+  fit <- fit_glmmtmb_ml_model(
+    score ~ 0 + rater + (1 | cluster:subject),
+    data
+  )
+  beta <- glmmTMB::fixef(fit)$cond
+  cluster_of <- nested_rater_clusters(data, names(beta))
+  th <- theta2r_fixed_nested(beta, stats::vcov(fit)$cond, cluster_of)
+
+  # Bootstrap extractor: subject-in-cluster and residual from VarCorr plus
+  # theta^2_{r:c} recomputed from each refit's rater cell means, the same
+  # {subject | rater, residual} map.
+  extract <- function(f) {
+    fvc <- glmmTMB::VarCorr(f)$cond
+    fth <- theta2r_fixed_nested(
+      glmmTMB::fixef(f)$cond,
+      stats::vcov(f)$cond,
+      cluster_of
+    )
+    c(
+      subject = as.numeric(attr(fvc[["cluster:subject"]], "stddev"))^2,
+      rater = fth$point,
+      residual = stats::sigma(f)^2
+    )
+  }
+  components <- as.list(extract(fit))
+
+  vcov_full <- stats::vcov(fit, full = TRUE)
+  nm <- unname(colnames(vcov_full))
+  sd_subject <- as.numeric(
+    attr(glmmTMB::VarCorr(fit)$cond[["cluster:subject"]], "stddev")
+  )
+  estimate <- stats::setNames(rep(NA_real_, length(nm)), nm)
+  # Fixed rater cell means on the natural scale; the subject-in-cluster SD and the
+  # residual on glmmTMB's internal log-SD scale (ADR-002/003).
+  estimate[th$beta_names] <- as.numeric(beta)
+  estimate[["disp~(Intercept)"]] <- log(stats::sigma(fit))
+  estimate[["theta_1|cluster:subject.1"]] <- log(sd_subject)
+
+  if (anyNA(estimate)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg glmmTMB} parameter vector to its covariance.",
+        i = "Unmatched parameters: {.val {nm[is.na(estimate)]}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  bi <- match(th$beta_names, nm)
+  di <- which(nm == "disp~(Intercept)")
+  si <- which(nm == "theta_1|cluster:subject.1")
+  to_components <- function(par) {
+    list(
+      subject = exp(2 * par[si, ]),
+      rater = theta2r_nested_draws(par[bi, , drop = FALSE], th),
+      residual = exp(2 * par[di, ])
     )
   }
 

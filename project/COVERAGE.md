@@ -124,7 +124,7 @@ Design inferred from the crossing pattern (or declared via `design`).
 | Sub-design | `level` | `type` | `raters` | balance | `engine` |
 |---|---|---|---|---|---|
 | **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4 |
-| **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random only | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
+| **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random (balanced+incomplete); **fixed** (balanced, M19 Slice 2) | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
 | **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
 
 \* On **incomplete** Design 1: subject level is fully supported (random **and**
@@ -148,7 +148,8 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 | Design 2 / 3, cluster level | ⚫ **By design** — cluster-level IRR needs raters crossed with clusters; with nested raters only the subject level is defined (ten Hove et al. 2022, p. 6). |
 | Design 3, `type = "consistency"` | ⚫ **By design** — with raters nested in subjects the rater main effect is confounded into residual, so only absolute agreement is defined (ten Hove et al. 2022, p. 6). |
 | Design 2 / 3, incomplete data | ✅ (M19 Slice 1) — the fit formulas are ragged-safe and the averaged divisor is the harmonic-mean `k_eff`, which reduces **exactly** to the pinned M3 two-way / M6 one-way incomplete divisor (single-cluster Design 2 → ragged two-way, diff 0; Design 3 → ragged one-way). On **ambiguous** ragged data (missing cells blur crossed-vs-nested) an explicit `design=` is required (never guessed, decision A); Design 2 gains a within-cluster connectedness gate. Subject-level `d_study()` projects on ragged nested data too (M18 path). |
-| Design 2 / 3, `raters = "fixed"` | 🔵 **Not yet → M19 Slice 2** — fixed-rater nested multilevel deferred (M10). |
+| Design 2, `raters = "fixed"` | ✅ (M19 Slice 2, balanced) — θ²_{r:c} is the mean over clusters of each cluster's finite-population rater variance (per-cluster McGraw–Wong Case 3A), via `score ~ 0 + rater + (1\|cluster:subject)`. **Fixed ≢ random even balanced** (per-cluster finite population; unlike crossed M10) — pinned by per-cluster + single-cluster reduction to the flat M3 fixed θ²_r, cross-engine, consistency≡random. Incomplete fixed-nested deferred (k_eff × per-cluster θ² interaction). |
+| Design 3, `raters = "fixed"` | ⚫ **By design** — raters nested in subjects is the multilevel one-way (rater confounded into residual); no separable rater effect to treat as fixed (cf. one-way fixed, M6 §10). |
 | any multilevel, `engine = "lavaan"` (multilevel SEM) | 🔵 **Not yet (reclassified → ROADMAP "later", ADR-027)** — a research-flavored two-level SEM-GT lift (the paper's multilevel estimator is Bayesian, not a plain lavaan model); sits beside the Bayesian engine, not in the M18–M21 arc. |
 | any multilevel, `icc(unit = m)` numeric projection | ⚫ **By design (routed elsewhere)** — use `d_study()` for multilevel rater-count projection (M17 Slice 2); `icc()` aborts a numeric multilevel `unit` on purpose. |
 

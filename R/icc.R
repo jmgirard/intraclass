@@ -522,15 +522,24 @@ icc <- function(
   # cluster level are deferred -- fail loudly (#5) before the design/fit machinery
   # runs. The balanced check lives below with the rest of the crossed guards.
   if (multilevel && raters == "fixed") {
-    if (ml_design != "crossed") {
+    # Design 3 (raters nested in subjects) is the multilevel one-way: the rater main
+    # effect is confounded into residual (Eq. 11), so there is no separable rater to
+    # treat as fixed -- fixed vs random is not meaningful (cf. one-way fixed, M6 §10).
+    # A by-design abort, not a "later milestone" deferral (ADR-029 decision C).
+    if (ml_design == "nested_in_subjects") {
       abort_unsupported(c(
-        "Fixed raters are only supported for the crossed multilevel design \\
-         (Design 1).",
-        i = "This design has raters nested in clusters or subjects; fixed-rater \\
-             nested multilevel is planned for a later milestone.",
-        i = "Use {.code raters = \"random\"}, or cross the raters with clusters."
+        "Fixed raters are not defined when raters are nested within subjects.",
+        i = "With each subject rated by its own raters (Design 3) the rater main \\
+             effect is confounded into residual, so there is no rater effect to \\
+             treat as fixed (ten Hove et al. 2022, p. 6).",
+        i = "Use {.code raters = \"random\"} (the default)."
       ))
     }
+    # Design 2 (raters nested in clusters) with fixed raters ships in M19 Slice 2:
+    # theta^2_{r:c} (finite-population, averaged over clusters) replaces the random
+    # sigma^2_{r:c} in the subject-level rater slot. Balanced/complete only -- the
+    # incomplete fixed-nested corner (k_eff x per-cluster theta^2 interaction) is
+    # deferred (ADR-029); guarded with the other fixed-nested checks below.
     if (!("subject" %in% level)) {
       abort_unsupported(c(
         "Fixed-rater multilevel ICCs are available at the subject level only.",
@@ -545,6 +554,24 @@ icc <- function(
     # which drops "cluster" the same way). An explicit cluster-only request
     # aborted just above.
     level <- "subject"
+    # Fixed-rater Design 2 (nested) is balanced/complete only this slice: the
+    # incomplete case pairs the M3 k_eff divisor with the per-cluster theta^2_{r:c}
+    # bias correction under imbalance -- two interacting corrections needing their own
+    # oracle (as M10 was to M9). Defer loudly rather than use an unvalidated divisor
+    # (#5; ADR-029 -- "balanced first"). Random-rater incomplete nested (Slice 1) is
+    # unaffected; the crossed fixed incomplete path (M18 Slice 1) still applies.
+    if (
+      ml_design == "nested_in_clusters" &&
+        !nested_design_balanced(df, ml_design)
+    ) {
+      abort_unsupported(c(
+        "Incomplete fixed-rater nested multilevel designs are not supported yet.",
+        i = "This slice ships balanced, complete fixed-rater nested (Design 2) data; \\
+             the incomplete case is planned for a later milestone.",
+        i = "Use {.code raters = \"random\"} for incomplete nested data, or provide \\
+             a balanced design."
+      ))
+    }
   }
   if (multilevel && ml_design != "crossed") {
     if (!("subject" %in% level)) {
@@ -873,7 +900,16 @@ icc <- function(
     # lme4 (M14) mirrors every balanced multilevel glmmTMB fit; the guards above
     # confine the lme4 branches to the balanced/complete case.
     if (ml_design == "nested_in_clusters") {
-      if (engine == "lme4") {
+      if (raters == "fixed") {
+        # Design 2 with raters fixed -- theta^2_{r:c} (finite-population, averaged over
+        # clusters) in the rater slot (M19 Slice 2). Balanced/complete only, guarded
+        # above. Design 3 fixed aborted by design (no separable rater effect).
+        if (engine == "lme4") {
+          fit_lme4_nested_fixed(df)
+        } else {
+          fit_glmmtmb_nested_fixed(df)
+        }
+      } else if (engine == "lme4") {
         fit_lme4_nested_clusters(df)
       } else {
         fit_glmmtmb_nested_clusters(df)

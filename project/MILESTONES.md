@@ -548,18 +548,27 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     `test-icc-nested-multilevel.R` (56 pass); full suite 795 pass / 0 fail; `air` + `lintr` clean.
     *(installed-pkg check + `R CMD check` deferred to milestone finish-task, before the PR push.)*
 - **Slice 2 — fixed-rater nested (COVERAGE #11), Design 2 only (decision C).** Lift the
-  `ml_design != "crossed"` abort in the fixed-rater branch ([icc.R:525](../R/icc.R)).
-  - [ ] **Design 2 fixed raters:** M10 `theta2r_fixed()` reads θ²_r from the rater-contrast fit
-    into the σ²_{r:c} slot (M8 §3a). Consistency ≡ random; agreement differs by θ²_r (zero
-    balanced). Reduction (balanced fixed≡random) + cross-engine + seeded-recovery oracles.
-  - [ ] **Design 3 fixed-rater** aborts ⚫ by-design (multilevel one-way — no separable rater
-    effect; cf. M6 §10): classed `abort_unsupported`, test-pinned message.
-  - [ ] Tracking updated in-commit (#16); `air` + `lintr` clean; installed-pkg check green.
+  `ml_design != "crossed"` abort in the fixed-rater branch ([icc.R:525](../R/icc.R)). **DONE.**
+  - [x] **Design 2 fixed raters:** new `fit_{glmmtmb,lme4}_nested_fixed` fits
+    `score ~ 0 + rater + (1|cluster:subject)`; a new engine-agnostic `theta2r_fixed_nested()`
+    puts θ²_{r:c} = **mean over clusters** of each cluster's finite-population rater variance in
+    the rater slot. **Both engines** (maintainer decision — full lme4 parity; merDeriv + per-cluster
+    θ² draws + singular→glmmTMB degrade).
+  - [x] **Oracle-first catch (#1/#18):** fixed ≢ random even balanced for nested (per-cluster
+    finite population ≠ pooled superpopulation; unlike crossed M10) — the M10 balanced-fixed≡random
+    pin does *not* apply. Pinned instead by **per-cluster reduction** (θ²_{r:c} == mean of per-cluster
+    flat M3 fixed θ²_r, exact) + **single-cluster reduction** to M3 (exact) + cross-engine (<1e-4) +
+    consistency≡random (exact). Recorded in ADR-029 + fit comments + O-FNML oracle.
+  - [x] **Design 3 fixed-rater** aborts ⚫ by-design (multilevel one-way — no separable rater
+    effect; cf. M6 §10): classed `abort_unsupported`, test-pinned. Incomplete fixed-nested deferred.
+  - [x] Oracle `data-raw/oracle-fixed-multilevel.R` (O-FNML) + tests (fixed-ml 53 pass); full
+    suite 813 pass / 0 fail; `air` + `lintr` clean. *(installed-pkg + `R CMD check` at finish-task.)*
 - Deferred out of M19 (record so not rediscovered): the averaged crossed cluster-level `ICC(c,k)`
   incomplete divisor (🟣 Wave-3 research, M9 §9 — **not** M19); Design 3 fixed-rater (⚫ by-design,
   decision C); nested cluster-level IRR (⚫ undefined for nested raters, ten Hove p. 6);
   ragged/fixed/multilevel **replicates** (M20); **SEM parity** (M21). Arc carry-overs stay in
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way via
   SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **active — Slice 1 done** (incomplete nested Designs 2/3 ship; full suite 795 pass / 0
-  fail, `air` + `lintr` clean). Slice 2 (fixed-rater nested, Design 2 only) next.
+- Status: **active — Slices 1 & 2 done** (incomplete nested Designs 2/3 + fixed-rater nested
+  Design 2 ship, both engines; full suite 813 pass / 0 fail, `air` + `lintr` clean). All planned
+  M19 slices complete; ready for milestone finish-task (`R CMD check` + installed-pkg + PR).

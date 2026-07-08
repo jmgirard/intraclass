@@ -1766,23 +1766,43 @@ consequences → references.
       Extends `M8-nested-multilevel.md §8` with whatever the oracle work establishes.
     - **Slice 2 — fixed-rater nested (COVERAGE #11).** Lift the `ml_design != "crossed"` abort in
       the fixed-rater multilevel branch (`R/icc.R`, ~L525) **for Design 2 only (maintainer
-      decision C).** Reuses the M10 engine-agnostic `theta2r_fixed()` — θ²_r replaces σ²_{r:c}
-      in the rater slot of the Design-2 subject-level decomposition (M8 §3a). No new estimand;
-      consistency ≡ random exactly, agreement differs by θ²_r vs σ²_{r:c} (zero on balanced
-      data). **Design 3 fixed-rater stays ⚫ by-design:** raters nested in subjects is the
-      multilevel one-way (Eq. 11), the rater main effect is confounded into residual, so there
-      is no separable rater effect to treat as fixed (cf. one-way fixed "not meaningful", M6
-      §10) — a classed `abort_unsupported` names it. Balanced/complete first (the incomplete ×
-      fixed nested corner, if reached, composes Slices 1+2 and is verified only if both pin).
+      decision C).** Places a finite-population **θ²_{r:c}** in the rater slot of the Design-2
+      subject-level decomposition (M8 §3a). **Design 3 fixed-rater stays ⚫ by-design:** raters
+      nested in subjects is the multilevel one-way (Eq. 11), the rater main effect is confounded
+      into residual, so there is no separable rater effect to treat as fixed (cf. one-way fixed
+      "not meaningful", M6 §10) — a classed `abort_unsupported` names it. Balanced/complete first
+      (incomplete × fixed nested deferred — the M3 `k_eff` × per-cluster θ² interaction needs its
+      own oracle, as M10 was to M9; guarded loudly).
+
+      **Oracle-first catch (amends the scope assumption; #1/#18).** ADR-029 above assumed Slice 2
+      would "reuse `theta2r_fixed()`" and that "consistency ≡ random, agreement differs by θ²_r vs
+      σ²_{r:c} (zero on balanced data)" — the M10 crossed identity. **Two corrections established
+      by oracle before shipping:** (a) `theta2r_fixed()` is *not* reused verbatim — raters nested
+      in clusters have **no single common rater set**, so the fit is the cell-mean
+      parameterization `score ~ 0 + rater + (1|cluster:subject)` and θ²_{r:c} is a **new helper
+      `theta2r_fixed_nested()`** = the **mean over clusters** of each cluster's within-cluster
+      bias-corrected finite-population rater variance (Case 3A *per cluster*; pooling all raters
+      would conflate between-cluster rater location, confounded with the cluster main effect, with
+      within-cluster spread). (b) **Fixed ≢ random even on balanced data** here — the nested finite
+      population is per-cluster, so θ²_{r:c} (per-cluster, averaged) differs from the random pooled
+      σ²_{r:c} (they coincide only as raters-per-cluster → ∞; observed |Δ| up to ~4e-3 across
+      seeds). The M10 "balanced fixed ≡ random" pin therefore **does not apply**; the θ² pins are
+      instead **per-cluster reduction** (θ²_{r:c} == mean of the flat M3 fixed θ²_r fit on each
+      cluster's data alone — exact, ties to the sourced McGraw–Wong Case 3A estimand) and the
+      **single-cluster reduction** to the flat M3 fixed components (exact). *Consistency ≡ random
+      still holds exactly* (the rater term is unused). This is recorded in the fit-function
+      comments and `data-raw/oracle-fixed-multilevel.R` (O-FNML).
   - **No new estimand for either slice; no new estimand-spec file** (extend the M8 §8 out-of-scope
     note into the shipped map). No new dependency (light install intact). No new argument — Slice 1
     reuses the shipped `design` arg, Slice 2 the shipped `raters = "fixed"`.
   - **Oracle posture (#1), per slice — the established mixed-model pattern** (no textbook worked
     example, as M8–M10/M15/M18): glmmTMB↔lme4 **cross-engine < 1e-4**; **reduction** to the
-    shipped balanced/complete nested case (M8) and — Slice 2 — balanced fixed≡random; **seeded
-    population recovery** with MC-CI coverage; plus the M8 reductions (Design 3 → M6 one-way,
-    Design 2 single-cluster → M1/M2 two-way) surviving imbalance/fixed. lme4 degrades to glmmTMB
-    at the variance boundary (ragged nested fits hit it more, as M15).
+    shipped balanced/complete nested case (M8) and — Slice 2 — the θ² **per-cluster** and
+    **single-cluster** reductions to the flat M3 fixed estimand (*not* balanced fixed≡random — see
+    the catch above), with consistency ≡ random exact; **seeded population recovery** with MC-CI
+    coverage; plus the M8 reductions (Design 3 → M6 one-way, Design 2 single-cluster → M1/M2
+    two-way) surviving imbalance. lme4 degrades to glmmTMB at the variance boundary (ragged nested
+    fits hit it more, as M15).
   - **Scope-outs (preserved, not rediscovered):** the averaged crossed cluster-level `ICC(c,k)`
     on incomplete data stays 🟣 research (Wave 3, M9 §9) and is **not** M19; Design 3 fixed-rater
     is ⚫ by-design (decision C); nested cluster-level IRR stays ⚫ (undefined for nested raters,
