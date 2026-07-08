@@ -49,7 +49,10 @@ maintainer-initiated:
 2. **CRAN submission (out of band, ADR-022).** See below.
 
 **Out-of-band thread (unchanged): CRAN submission (ADR-022).** The package is
-submission-ready. Before uploading, run **win-builder** (R-devel + release) and
+submission-ready. A max-effort code review of the statistical core (2026-07-07)
+verified the estimand/CI/engine math is correct and fixed 12 edge-guard / validation /
+robustness findings (PR #20, merged `cae1c33`; regression tests in
+`test-review-fixes.R`). Before uploading, run **win-builder** (R-devel + release) and
 **R-hub**, then update the "will be run immediately before submission" line in
 `cran-comments.md` with the results. `intraclass` does not (and cannot) submit for you.
 *(Note: M14 — and now M15 — fold their changes into the existing `0.1.0` NEWS section
