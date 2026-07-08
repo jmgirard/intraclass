@@ -446,17 +446,23 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   conflated → ROADMAP); Slice 2 extends [`M4.5-d-study.md`](estimand-specs/M4.5-d-study.md);
   Slice 3 is a **new spec** `M17-within-cell-replicates.md` (written at Slice 3 start).
 - **DoD board (check off in the same commit as the work, #16):**
-  - **Slice 1 — conflated single-level ICC (Eq. 14), Wave-1 carryover, smallest.**
-    - [ ] `level = "conflated"` accepted by `icc()` (validated/iterated like `level`), read
-          off the existing five-component fit — no new fit, no new dependency.
-    - [ ] `(σ²_c + σ²_{s:c}) / (σ²_c + σ²_{s:c} + (σ²_r + σ²_{cr} + σ²_{(s:c)r})/k)` via the
+  - **Slice 1 — conflated single-level ICC (Eq. 14), Wave-1 carryover, smallest.** ✅ **done**
+        (agreement-only, ADR-026; estimand-spec `M17-conflated-icc.md`).
+    - [x] `level = "conflated"` accepted by `icc()` (validated/iterated like `level`), read
+          off the existing five-component fit — no new fit, no new dependency. `icc_point()`
+          generalized so the signal is a component *set* (σ²_c + σ²_{s:c}), like the error.
+    - [x] `(σ²_c + σ²_{s:c}) / (σ²_c + σ²_{s:c} + (σ²_r + σ²_{cr} + σ²_{(s:c)r})/k)` via the
           shared `icc_point()` path; single + average divisor.
-    - [ ] `print`/`tidy`/`glance` label it a **diagnostic contrast, not a recommended
-          coefficient** (never a peer of subject/cluster in the output).
-    - [ ] `choose_icc()` never *recommends* conflated; may name it as the anti-pattern.
-    - [ ] Oracles: O-Eq14 (paper closed form), O-reduction (equals single-level `icc()`
-          ignoring `cluster` — promote M5 §5 invariant to a test), O-lme4.
-    - [ ] roxygen + NEWS + `advanced.Rmd`/`choosing-an-icc.Rmd` worked contrast; CI green.
+    - [x] `print`/`summary` flag it a **diagnostic contrast, not a recommended coefficient**;
+          `tidy` marks it via the `level` column (never a peer of subject/cluster).
+    - [x] `choose_icc()` never *recommends* conflated (its `level` axis rejects it).
+    - [x] Oracles: O-lme4 (cross-engine Eq. 14), O-Eq14 (closed form on reported components),
+          O-population (seeded recovery + MC coverage + flat single-level resemblance).
+    - [x] Guards (#5/#8): agreement-only, random-rater, crossed, complete — classed aborts;
+          conflated-without-`cluster` is a usage error.
+    - [x] roxygen (`@param level` + Multilevel section) + NEWS + `advanced.Rmd` worked
+          contrast + `test-vignette-claims.R` invariant; full suite green (663 pass), lint +
+          `air` clean.
   - **Slice 2 — three-facet `d_study()` (subjects-per-cluster projection), complete-data
     multilevel, cluster level.**
     - [ ] `d_study()` gains a subjects-per-cluster facet arg; projects `ICC(c,k)` over

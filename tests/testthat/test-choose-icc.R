@@ -407,3 +407,20 @@ test_that("a non-interactive underspecified call aborts without asking", {
     class = "intraclass_underspecified"
   )
 })
+
+test_that("choose_icc() never recommends the conflated diagnostic level (M17)", {
+  # The conflated ICC (Eq. 14) is a diagnostic contrast, not a recommendation
+  # target: choose_icc()'s level axis offers only subject/cluster/both, so a
+  # `level = "conflated"` request is a usage error and can never be emitted.
+  expect_error(
+    choose_icc(
+      model = "twoway",
+      type = "agreement",
+      unit = "single",
+      raters = "random",
+      multilevel = TRUE,
+      level = "conflated"
+    ),
+    class = "intraclass_error"
+  )
+})

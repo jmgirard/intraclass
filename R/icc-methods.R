@@ -71,7 +71,7 @@ format.icc <- function(x, ...) {
   # unchanged (M5 §3).
   if (ml) {
     rows <- sprintf(
-      "  %-8s %-9s %7s   [%s, %s]",
+      "  %-10s %-9s %7s   [%s, %s]",
       e$level,
       e$index,
       formatC(e$estimate, format = "f", digits = 3),
@@ -80,7 +80,7 @@ format.icc <- function(x, ...) {
     )
     table <- c(
       sprintf(
-        "  %-8s %-9s %7s   %s",
+        "  %-10s %-9s %7s   %s",
         "level",
         "index",
         "estimate",
@@ -122,6 +122,17 @@ format.icc <- function(x, ...) {
     )
   }
 
+  # The conflated level is the biased single-level ICC (Eq. 14): a diagnostic
+  # contrast quantifying how much ignoring the clustering distorts reliability,
+  # never a recommended coefficient (estimand-spec M17-conflated-icc.md §4).
+  conflated_note <- if (ml && "conflated" %in% e$level) {
+    c(
+      "Diagnostic contrast: the 'conflated' level ignores the cluster structure",
+      "(ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level",
+      "analysis and is NOT a recommended coefficient; report subject/cluster."
+    )
+  }
+
   # Shared with autoplot.icc (what = "components") so labels/ordering never drift.
   view <- icc_components_view(x)
   d3 <- function(v) formatC(v, format = "f", digits = 3)
@@ -133,7 +144,18 @@ format.icc <- function(x, ...) {
   suffix <- if (isTRUE(view$confounded)) " (rater confounded)" else ""
   comps <- sprintf("Variance components: %s%s", body, suffix)
 
-  c(header, meta1, meta2, "", table, "", keff_note, comps, sf_note)
+  c(
+    header,
+    meta1,
+    meta2,
+    "",
+    table,
+    "",
+    keff_note,
+    comps,
+    sf_note,
+    conflated_note
+  )
 }
 
 #' @rdname icc

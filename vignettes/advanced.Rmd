@@ -127,6 +127,28 @@ decision you will make: a classroom-level intervention cares about the cluster-l
 reliability, a pupil-level one about the subject level. Request just one with
 `level = "subject"` or `level = "cluster"`.
 
+### How much does ignoring the nesting cost? The conflated ICC
+
+What would you have reported if you had *ignored* the classrooms and run an ordinary
+single-level ICC? That number — ten Hove et al.'s Equation 14 — folds the
+between-classroom and within-classroom variation together into one "true score" and
+is biased for **both** questions above. `icc()` can compute it as a **diagnostic
+contrast** with `level = "conflated"`, so you can see the distortion directly rather
+than take it on faith:
+
+```{r ml-conflated, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+icc(school, score,
+  subject = pupil, rater = rater, cluster = classroom,
+  level = c("subject", "cluster", "conflated"), seed = 1
+)
+```
+
+The conflated value lands between the two correct levels and matches neither: it
+over- or under-states the reliability of any real decision. It is printed with a
+warning label and is **never** a coefficient to report — it exists only to quantify
+the cost of ignoring the structure. (It is absolute-agreement only, and needs a
+complete, crossed design.)
+
 ### When raters are nested
 
 The classroom example above has every rater rate every pupil in every classroom,

@@ -97,9 +97,11 @@ raters (see \code{\link[=d_study]{d_study()}}).}
 \item{level}{For multilevel designs (a \code{cluster} column), which reliability to
 report: \code{"subject"} (within-cluster, distinguishing subjects) and/or
 \code{"cluster"} (between-cluster, distinguishing cluster means). Defaults to both.
-Ignored (and must be left at its default) when \code{cluster} is not supplied. Only
-\code{"subject"} is available when raters are nested in clusters (see the
-\emph{Multilevel designs} section).}
+\code{"conflated"} may be added for the biased ignore-the-clustering ICC as a
+diagnostic contrast (agreement-only, complete crossed designs; see the
+\emph{Multilevel designs} section). Ignored (and must be left at its default) when
+\code{cluster} is not supplied. Only \code{"subject"} is available when raters are nested
+in clusters.}
 
 \item{design}{Multilevel design (with a \code{cluster} column): \code{NULL} (the default)
 infers it from the crossing pattern. On \strong{incomplete} data missing cells can
@@ -218,6 +220,16 @@ means: its signal is the between-cluster variance and the rater-disagreement
 error is the cluster-by-rater term. Choose the level that matches the decision
 you will make (about a subject, or about a cluster). The agreement/consistency
 and single/average choices above apply at each level.
+
+\code{level = "conflated"} reports the \strong{biased single-level ICC} you would get by
+\emph{ignoring} the clustering (ten Hove et al. 2022, Eq. 14): between- and
+within-cluster subject variance are both counted as signal, and all three
+rater-related terms as error. It is offered only as a \strong{diagnostic contrast} --
+to quantify how much the nesting distorts reliability -- and is never a
+recommended coefficient; \code{print()} flags it as such. It is absolute-agreement
+only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
+random-rater design. Request it alongside the correct levels, e.g.
+\code{level = c("subject", "cluster", "conflated")}.
 
 The design is \strong{inferred from the data} (ten Hove et al. 2022, Table 2). If
 raters are crossed with clusters (each rater rates in every cluster) the

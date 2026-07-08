@@ -45,7 +45,7 @@ icc_estimand <- function(
 ) {
   type <- rlang::arg_match(type, c("agreement", "consistency"))
   raters <- rlang::arg_match(raters, c("random", "fixed"))
-  level <- rlang::arg_match(level, c("subject", "cluster"))
+  level <- rlang::arg_match(level, c("subject", "cluster", "conflated"))
   index <- unit_index(unit)
 
   if (oneway) {
@@ -71,7 +71,16 @@ icc_estimand <- function(
     ))
   }
 
-  if (multilevel) {
+  if (multilevel && level == "conflated") {
+    # Conflated single-level ICC (ten Hove et al. 2022, Eq. 14; M17 Slice 1): the
+    # biased coefficient obtained by *ignoring* the cluster structure. Between- and
+    # within-cluster subject variance are both folded into the signal, and all
+    # three rater-related terms into the error. Agreement-only (guarded upstream);
+    # a diagnostic contrast, not a recommended coefficient (spec M17-conflated-icc.md).
+    signal <- c("cluster", "subject")
+    error <- c("rater", "cluster_rater", "residual")
+    sf <- NA_character_
+  } else if (multilevel) {
     # Multilevel Design 1 (ten Hove et al. 2022, Table 3): the signal is the
     # subject- or cluster-level true-score variance, and the "residual" of the
     # error set is sigma^2_res at the subject level but sigma^2_{cr} (cluster x
@@ -248,10 +257,11 @@ icc_components_view <- function(x) {
 # or m for a D-study projection) divides every error component while leaving the
 # signal untouched (estimand-spec §2).
 icc_point <- function(components, estimand) {
-  signal <- components[[estimand$signal]]
-  # Element-wise across the error components, so this works for both the scalar
-  # point estimate and a vector of Monte-Carlo draws (Reduce("+"), not sum(),
-  # which would collapse the draws).
+  # Signal and error are both component *sets* (Reduce("+"), not sum(), so a
+  # vector of Monte-Carlo draws is summed element-wise, not collapsed). The signal
+  # is a single component for every classic ICC, but the conflated ICC (Eq. 14, M17)
+  # sums the cluster and within-cluster subject variances, so it is a set too.
+  signal <- Reduce(`+`, components[estimand$signal])
   error <- Reduce(`+`, components[estimand$error])
   signal / (signal + error / estimand$divisor)
 }

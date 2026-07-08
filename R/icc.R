@@ -54,6 +54,16 @@
 #' you will make (about a subject, or about a cluster). The agreement/consistency
 #' and single/average choices above apply at each level.
 #'
+#' `level = "conflated"` reports the **biased single-level ICC** you would get by
+#' *ignoring* the clustering (ten Hove et al. 2022, Eq. 14): between- and
+#' within-cluster subject variance are both counted as signal, and all three
+#' rater-related terms as error. It is offered only as a **diagnostic contrast** --
+#' to quantify how much the nesting distorts reliability -- and is never a
+#' recommended coefficient; `print()` flags it as such. It is absolute-agreement
+#' only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
+#' random-rater design. Request it alongside the correct levels, e.g.
+#' `level = c("subject", "cluster", "conflated")`.
+#'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
 #' raters are crossed with clusters (each rater rates in every cluster) the
 #' five-component model above is used (Design 1). Because the design is read from
@@ -136,9 +146,11 @@
 #' @param level For multilevel designs (a `cluster` column), which reliability to
 #'   report: `"subject"` (within-cluster, distinguishing subjects) and/or
 #'   `"cluster"` (between-cluster, distinguishing cluster means). Defaults to both.
-#'   Ignored (and must be left at its default) when `cluster` is not supplied. Only
-#'   `"subject"` is available when raters are nested in clusters (see the
-#'   *Multilevel designs* section).
+#'   `"conflated"` may be added for the biased ignore-the-clustering ICC as a
+#'   diagnostic contrast (agreement-only, complete crossed designs; see the
+#'   *Multilevel designs* section). Ignored (and must be left at its default) when
+#'   `cluster` is not supplied. Only `"subject"` is available when raters are nested
+#'   in clusters.
 #' @param design Multilevel design (with a `cluster` column): `NULL` (the default)
 #'   infers it from the crossing pattern. On **incomplete** data missing cells can
 #'   make the pattern ambiguous between a crossed and a nested design; declare it
@@ -341,7 +353,9 @@ icc <- function(
 
   # Fixed raters is well-posed but forgoes generalization; nudge toward random
   # (M2 spec §3, ADR-006). Warning, not error -- a valid number is still returned.
-  if (raters == "fixed") {
+  # Skip the advisory when a fixed-rater conflated ICC is requested: that combination
+  # aborts below (Eq. 14 is random-rater), so an advisory about a rejected path is noise.
+  if (raters == "fixed" && !(multilevel && "conflated" %in% level)) {
     warn_fixed_raters()
   }
   if (
@@ -439,6 +453,40 @@ icc <- function(
     design
   } else {
     detect_multilevel_design(df)
+  }
+
+  # Conflated single-level ICC (Eq. 14, M17 Slice 1): the biased ignore-clusters
+  # coefficient off the crossed five-component fit. Agreement-only, random raters,
+  # crossed Design 1 (estimand-spec M17-conflated-icc.md §3). These checks run
+  # before the fixed/nested guards below (which drop non-subject levels) so an
+  # explicit `level = "conflated"` gets a conflated-specific message, not a
+  # cluster-level one. The complete-data restriction lives with the crossed
+  # incomplete guards further down.
+  if (multilevel && "conflated" %in% level) {
+    if (type == "consistency") {
+      abort_unsupported(c(
+        "A consistency conflated ICC is not available.",
+        i = "ten Hove et al. (2022) Eq. 14 is the absolute-agreement conflated \\
+             ICC; a consistency form is not sourced (see the ROADMAP).",
+        i = "Use {.code type = \"agreement\"} with {.code level = \"conflated\"}."
+      ))
+    }
+    if (raters == "fixed") {
+      abort_unsupported(c(
+        "A fixed-rater conflated ICC is not available.",
+        i = "Eq. 14 treats the rater effect as a variance component (random \\
+             raters).",
+        i = "Use {.code raters = \"random\"} with {.code level = \"conflated\"}."
+      ))
+    }
+    if (ml_design != "crossed") {
+      abort_inapplicable(c(
+        "The conflated ICC needs raters crossed with clusters (Design 1).",
+        i = "It collapses the crossed five-component decomposition; with nested \\
+             raters that decomposition is not defined.",
+        i = "Use {.code level = \"subject\"}, or cross the raters with clusters."
+      ))
+    }
   }
 
   # Fixed-rater multilevel scope (M10, ADR-019): the crossed (Design 1) design,
@@ -566,6 +614,18 @@ icc <- function(
     # coefficients. Complete crossed designs satisfy every condition, so this is a
     # no-op for the balanced M5/M8 path.
     if (multilevel && ml_design == "crossed" && !design_info$balanced) {
+      # The conflated ICC (M17 Slice 1) targets the complete five-component fit;
+      # its behaviour on ragged data is not yet established (spec
+      # M17-conflated-icc.md §6). Fail loudly rather than project it silently (#5).
+      if ("conflated" %in% level) {
+        abort_unsupported(c(
+          "The conflated ICC is available on complete data only.",
+          i = "Its behaviour on incomplete or unbalanced multilevel data is not \\
+               yet established (a later slice).",
+          i = "Provide complete crossed multilevel data, or use \\
+               {.code level = \"subject\"}."
+        ))
+      }
       # Fixed-rater multilevel is balanced/complete only in M10 (theta^2_r under
       # imbalance is deferred, spec §3/§7); fail loudly before fitting (#5).
       if (raters == "fixed") {
@@ -997,14 +1057,15 @@ validate_seed <- function(seed, call = rlang::caller_env()) {
   as.integer(seed)
 }
 
-# Validate the multilevel `level` argument: the default (both) or a subset of
-# {"subject", "cluster"} (M5). Returns the requested levels, de-duplicated,
-# preserving the requested order.
+# Validate the multilevel `level` argument: the default (both correct levels) or a
+# subset of {"subject", "cluster"} (M5), optionally with "conflated" -- the biased
+# ignore-clusters diagnostic (Eq. 14, M17). Returns the requested levels,
+# de-duplicated, preserving the requested order.
 validate_levels <- function(level, call = rlang::caller_env()) {
-  choices <- c("subject", "cluster")
+  choices <- c("subject", "cluster", "conflated")
   if (!is.character(level) || length(level) < 1L || !all(level %in% choices)) {
     abort_intraclass(
-      "{.arg level} must be one or both of {.val {choices}}.",
+      "{.arg level} must be one or more of {.val {choices}}.",
       call = call
     )
   }

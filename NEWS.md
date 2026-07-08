@@ -32,7 +32,10 @@ alternate engines, and seeded simulations.
   `cluster` column to get subject-level (within-cluster) and cluster-level
   (between-cluster) coefficients via `level`. Covers raters crossed with clusters
   (Design 1) or nested in clusters/subjects (Designs 2–3), complete or incomplete
-  crossed data, and fixed raters at the subject level.
+  crossed data, and fixed raters at the subject level. `level = "conflated"` reports
+  the biased single-level ICC you would get by ignoring the clustering (ten Hove et
+  al. 2022, Eq. 14) — a diagnostic contrast, flagged in `print()` as not a
+  recommended coefficient (absolute-agreement, complete crossed designs).
 
 ## Engines
 
