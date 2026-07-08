@@ -219,8 +219,9 @@
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
 #'   approximation but is far slower (a refit per resample). It is available for
 #'   every design the `"glmmTMB"` and `"lme4"` engines fit (via `glmmTMB`'s
-#'   `simulate()` + refit and `lme4::bootMer` respectively); the `"lavaan"` engine
-#'   supports `"montecarlo"` only. As with the Monte-Carlo interval, the `"lme4"`
+#'   `simulate()` + refit and `lme4::bootMer` respectively) and, for the random
+#'   two-way design, the `"lavaan"` engine (which simulates from the fitted SEM's
+#'   implied moments and refits). As with the Monte-Carlo interval, the `"lme4"`
 #'   engine defers a singular (boundary) fit to `"glmmTMB"` for either method.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).

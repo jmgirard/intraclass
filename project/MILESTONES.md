@@ -4,14 +4,14 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers — the
 full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
 (`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
-restate it here). **No milestone is in flight** — the next one (M21, the arc's last:
-SEM/lavaan engine parity) is scoped by an ADR at its start after a short retro
-(founding brief §7) and detailed in full here until it ships.
+restate it here). **M21 (the arc's last: SEM/lavaan engine parity) is in flight** —
+scoped by ADR-031 after a short retro (founding brief §7) and detailed in full here
+(its DoD checklist below is the live board) until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
-M18, ADR-029 M19, and ADR-030 M20).
+M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -596,3 +596,67 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   crossed + `_nested_replicates`, `multilevel_replicate_facts()`) + a `d_study()`-on-replicate
   correctness guard; Slice 3 ragged single-occasion (no new fit). Occasion-averaged-ragged degraded
   to 🟣 research. Third milestone of the M18–M21 arc; only M21 (SEM parity) remains.
+
+## M21: SEM (lavaan) engine parity — bootstrap, fixed-rater, incomplete/FIML (ADR-031) — **IN FLIGHT**
+- Goal: bring the **lavaan (SEM) engine** up toward the design parity lme4 reached over
+  M5.5→M14→M15 — the arc's **last** milestone (ADR-027). M7 (ADR-014) shipped lavaan for the
+  **random two-way, balanced/complete** path only (consistency ≡ glmmTMB exact; agreement via the
+  Jorgensen 2021 Eq. 6 SEM indicator-mean estimator σ²_r = Σν²/(k−1); MC CI via lavaan's native
+  `vcov()`). M21 promotes the three lavaan deferrals ADR-014 recorded, **engine parity not new
+  estimand work** (cf. M5.5/M7/M14/M15): additive, non-breaking (#6) — no new argument/dependency/
+  estimand-spec, only new valid combinations of `engine = "lavaan"` with the shipped `ci_method` /
+  `raters` / data-balance args. Three thin slices, kept in ADR-027's order (already oracle-risk
+  order): reuse the shipped M16 bootstrap seam first, land the heaviest FIML oracle work last.
+  **Multilevel SEM** and **one-way SEM** stay out (reclassified/blocked, ADR-027/014).
+- Reference: ADR-031 (scope + maintainer decisions: keep slice order; FIML attempt-then-degrade);
+  no new estimand-spec (engine, not estimand — a **FIML-SEM oracle note** appended to the M7 record /
+  `REFERENCES.md` is the only spec-adjacent artifact). Oracles glmmTMB-as-independent-oracle (as M7):
+  consistency exact ≤1e-4 cross-engine at every slice; agreement at the SEM indicator-mean
+  estimator's own bar (exact Σν²/(k−1) formula + seeded large-N recovery + asymptotic
+  lavaan ≈ glmmTMB). Boundary-aware (#3): a Heywood/singular/non-convergent lavaan fit aborts
+  loudly (classed) → `engine = "glmmTMB"`.
+
+DoD checklist (the live board — check off in-commit, #16):
+
+- [x] **Slice 1 — lavaan bootstrap `ci_method` (COVERAGE §③ #3).** ✅ done (branch `m21-sem-parity`).
+  `lavaan_simulate_refit` factory added to `R/engine-lavaan.R` (parametric bootstrap: simulate from
+  the fitted SEM's implied moments via `rmvn` → refit the same one-factor model → recompute the ICC
+  per resample), attached to the `fit_lavaan` six-field contract; a shared `lavaan_components()`
+  extractor returns NULL on a Heywood resample (NA-filled → discard policy). No `icc.R` dispatch
+  change needed (bootstrap_ci is engine-agnostic; the block was the missing `simulate_refit` slot).
+  **Oracles (`test-ci-bootstrap.R`):** O1 population coverage on the estimator-invariant
+  **consistency** ratio (agreement's population-coverage is *not* a valid oracle — the SEM
+  indicator-mean estimator targets the finite-rater agreement, Case-3A, not `v_r`); O2 bootstrap ≈
+  lavaan Monte-Carlo (same estimand, ≤0.06); cross-engine lavaan ≈ glmmTMB **consistency** bootstrap
+  (≤0.06); well-formed + reproducible + RNG-untouched. The prior "lavaan bootstrap unsupported" test
+  became a defensive `bootstrap_ci`-guard unit test. No new argument (`boot_samples` shipped). air +
+  lintr clean; docs regenerated.
+- [ ] **Slice 2 — fixed-rater SEM (COVERAGE §③ #1).** Lift the `raters == "fixed"` lavaan abort for
+  the two-way path. Consistency ≡ random exactly. **Oracle-first catch (resolve in-slice, not
+  assumed):** M7's random agreement estimator Σν²/(k−1) already reads a *finite set of indicator
+  intercepts* — determine by oracle whether fixed SEM agreement needs a distinct θ²_r or coincides
+  with the shipped M7 agreement (reduction to single-level M3/M10 fixed θ²_r via cell means +
+  cross-engine vs. glmmTMB Case-3A + MW/SF fixed-agreement crosswalk). Fable review (#19) if close
+  but unpinnable. Balanced/complete, single-level.
+- [ ] **Slice 3 — incomplete / FIML SEM (COVERAGE §③ #2).** Lift the `engine == "lavaan" &&
+  !balanced` abort; lavaan `missing = "fiml"` on the wide reshape (no new fit shape) + the M3-style
+  connectedness/identifiability guard before dispatch (#5). **Consistency** (a ratio) stays an
+  **exact** cross-engine pin on ragged data. **Absolute agreement — attempt, degrade to 🟣 research**
+  (maintainer decision, matching M18 S2 / M20 S3): FIML agreement ≈ REML only asymptotically →
+  attempt full FIML agreement (reduction complete→M7 + seeded recovery + ≤1e-3 cross-engine); if no
+  #1/#4-strong oracle holds, **ship FIML consistency only and reclassify FIML agreement to 🟣
+  research** rather than lower the bar. Fable review (#19) if close but unpinnable. Heaviest — last.
+- [ ] **Cross-cutting DoD:** FIML-SEM oracle note appended to the M7 record / `REFERENCES.md`
+  (O-SEM row extended); COVERAGE §③ + ROADMAP synced (arc closed: every 🔵 not-yet gap resolved);
+  `air format --check` + `lintr::lint_package()` clean; installed-pkg tests with `NOT_CRAN=true`;
+  `R CMD check --as-cran` 0/0/0; full CI matrix green incl. Windows and R-devel; merged via PR on a
+  `m21-<slug>` branch (`milestone-branches-and-prs`).
+
+- Deferred out of M21 (record so not rediscovered): **fixed × incomplete SEM** and any compound
+  corner (one dimension at a time, as M10 was to M9); **multilevel SEM** (COVERAGE #12 — cross-cutting
+  "later" bucket beside Bayesian, ADR-027); **SEM ∩ within-cell replicates** (#7 — ROADMAP
+  unscheduled, ADR-027); **one-way / general ICC(1) via SEM** (🔴 blocked, no faithful sourced route,
+  ADR-014). Arc carry-overs stay in `ROADMAP.md`: the Wave-3 averaged crossed cluster-level
+  `ICC(c,k)` incomplete divisor (🟣 research, M9 §9); Bayesian engine + `ci_method = "posterior"`;
+  categorical/ordinal GLMM; non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
+- Status: **in flight** — scoped by ADR-031 (2026-07-08); no code yet. Slice 1 is the next task.

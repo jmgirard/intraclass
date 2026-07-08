@@ -150,23 +150,14 @@ test_that("a fixed seed makes the bootstrap interval reproducible (#12)", {
   expect_identical(.Random.seed, before)
 })
 
-test_that("bootstrap aborts loudly on an engine it does not cover", {
-  skip_if_not_installed("lavaan")
-
-  d <- sf_ratings_long()
-  # The lavaan SEM engine carries no simulate_refit contract (a parametric bootstrap
-  # of an SEM refit is out of scope, ROADMAP); ask for it and fail loudly (#5).
+test_that("bootstrap aborts loudly on a fit carrying no simulate_refit contract", {
+  # Every shipped engine/design that reaches bootstrap_ci() now attaches a
+  # simulate_refit contract (glmmTMB, lme4, and -- since M21 Slice 1 -- lavaan for
+  # the two-way random path); other lavaan designs abort earlier at fit dispatch.
+  # The defensive guard for a fit that carries none must still fail loudly (#5/#8).
+  bare_fit <- list(engine = "stub", simulate_refit = NULL)
   expect_error(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      engine = "lavaan",
-      ci_method = "bootstrap",
-      boot_samples = 99L,
-      seed = 1
-    ),
+    bootstrap_ci(bare_fit, estimands = list(), boot_samples = 99L),
     class = "intraclass_unsupported"
   )
 })
@@ -390,4 +381,195 @@ test_that("bootstrap covers the fixed-rater design (theta^2_r per refit)", {
   expect_true(all(is.finite(bs$conf.low)))
   expect_true(all(bs$conf.low <= bs$estimate))
   expect_true(all(bs$estimate <= bs$conf.high))
+})
+
+# M21 Slice 1 (ADR-031) -- lavaan (SEM) bootstrap via the same simulate_refit() ---
+#
+# The lavaan engine now serves ci_method = "bootstrap" through the M16 contract: a
+# PARAMETRIC bootstrap that simulates wide datasets from the fitted SEM's implied
+# moments, refits the one-factor model, and recomputes the ICC per resample. Oracles
+# are the CI-method oracles (#1): O1 coverage of the known population, O2 agreement
+# with the (independent) lavaan Monte-Carlo interval, plus cross-engine agreement on
+# the estimator-invariant consistency ratio. SEM refits are expensive -> modest
+# boot_samples, skip on CRAN, seeded (#12).
+
+test_that("lavaan bootstrap returns a well-formed interval", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  set.seed(31)
+  n <- 40L
+  k <- 6L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  fit <- icc(
+    grid,
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  )
+  td <- tidy(fit)
+
+  expect_identical(fit$engine, "lavaan")
+  expect_identical(fit$ci$method, "bootstrap")
+  expect_identical(fit$ci$samples, 199L)
+  expect_true(all(is.finite(td$conf.low)))
+  expect_true(all(is.finite(td$conf.high)))
+  expect_true(all(td$conf.low <= td$estimate))
+  expect_true(all(td$estimate <= td$conf.high))
+  expect_true(all(td$conf.high <= 1))
+
+  # Reproducible with a fixed seed, and the global RNG stream is untouched (#9/#12).
+  before <- {
+    set.seed(7)
+    .Random.seed
+  }
+  b <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 199L,
+    seed = 1
+  ))
+  expect_equal(td$conf.low, b$conf.low)
+  expect_equal(td$conf.high, b$conf.high)
+})
+
+test_that("lavaan bootstrap interval covers the known population ICC (O1)", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  set.seed(2025)
+  n <- 60L
+  k <- 6L
+  v_s <- 4
+  v_r <- 1
+  v_res <- 2
+  subj <- stats::rnorm(n, 0, sqrt(v_s))
+  rat <- stats::rnorm(k, 0, sqrt(v_r))
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(v_res))
+
+  # The population-coverage oracle uses CONSISTENCY: the ratio
+  # sigma^2_s/(sigma^2_s + sigma^2_res) is estimator-invariant, so the SEM bootstrap
+  # targets the same population value the mixed model does. (Coverage of the
+  # random-rater population by the SEM AGREEMENT interval is NOT a valid oracle: the
+  # SEM indicator-mean estimator targets the FINITE-rater agreement -- the variance
+  # of the k realized rater means, a Case-3A quantity -- not v_r; SEM agreement is
+  # instead pinned against the lavaan Monte-Carlo interval, the O2 test below.)
+  bs <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    unit = "single",
+    type = "consistency",
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 299L,
+    seed = 1
+  ))
+  pop_c1 <- v_s / (v_s + v_res)
+  c1 <- bs[bs$index == "ICC(C,1)", ]
+
+  expect_lte(c1$conf.low, pop_c1)
+  expect_gte(c1$conf.high, pop_c1)
+})
+
+test_that("lavaan bootstrap agrees with the lavaan Monte-Carlo interval (O2)", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  set.seed(37)
+  n <- 40L
+  k <- 6L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  mc <- tidy(icc(grid, score, subject, rater, engine = "lavaan", seed = 1))
+  bs <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 499L,
+    seed = 1
+  ))
+
+  # Same fit (identical point estimates); the two independent interval methods for
+  # the SAME engine/estimator should concur away from the boundary. Generous, honest
+  # tolerance -- resampling noise + method difference, not tuned to pass (#1, #4).
+  expect_equal(bs$estimate, mc$estimate, tolerance = 1e-8)
+  expect_equal(bs$conf.low, mc$conf.low, tolerance = 0.06)
+  expect_equal(bs$conf.high, mc$conf.high, tolerance = 0.06)
+})
+
+test_that("lavaan bootstrap agrees with glmmTMB bootstrap on consistency (O2)", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(41)
+  n <- 40L
+  k <- 6L
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    rat[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+
+  # Consistency is the estimator-invariant ratio sigma^2_s/(sigma^2_s + sigma^2_res),
+  # so the SEM and mixed-model bootstraps should concur closely (agreement uses a
+  # DIFFERENT sigma^2_r estimator, tested separately for coverage, not cross-engine).
+  bs_lav <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 499L,
+    seed = 1
+  ))
+  bs_tmb <- tidy(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    engine = "glmmTMB",
+    ci_method = "bootstrap",
+    boot_samples = 499L,
+    seed = 1
+  ))
+
+  expect_equal(bs_lav$estimate, bs_tmb$estimate, tolerance = 1e-3)
+  expect_equal(bs_lav$conf.low, bs_tmb$conf.low, tolerance = 0.06)
+  expect_equal(bs_lav$conf.high, bs_tmb$conf.high, tolerance = 0.06)
 })

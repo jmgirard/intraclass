@@ -1940,3 +1940,121 @@ consequences → references.
   `M10-fixed-multilevel.md` §3 (Slice 1 θ²_r), `M5-multilevel.md`/`M8-nested-multilevel.md` §3
   (Slice 2); `project/COVERAGE.md` §② (#4/#5/#6); Shrout & Fleiss (1979), McGraw & Wong (1996)
   Case 3/3A, Brennan (2001) two-facet decision study.
+
+## ADR-031: M21 scope — SEM (lavaan) engine parity (bootstrap, fixed-rater, incomplete/FIML)
+- Date: 2026-07-08
+- Status: accepted
+- Context: The M18–M21 completeness arc was set by ADR-027; per PRINCIPLES.md #2/#14 and brief §7
+  each milestone is detailed by its own scoping ADR at its start (as ADR-028/029/030 detailed
+  M18/M19/M20). This ADR opens **M21**, the arc's **last** milestone: bringing the **lavaan (SEM)
+  engine** up toward the design parity the **lme4** engine reached over M5.5→M14→M15. M7 (ADR-014)
+  shipped lavaan for the **random two-way, balanced/complete** path only — **consistency** ≡
+  glmmTMB exactly (a variance ratio off the one-factor fit), **absolute agreement** via the
+  Jorgensen (2021, Eq. 6) SEM indicator-mean estimator σ²_r = Σν²/(k−1) (a *distinct*,
+  asymptotically-equivalent estimator, externally validated by Vispoel et al. 2022), reusing the
+  Monte-Carlo `ci_method` through lavaan's native `vcov()`; every other design cell aborts
+  `abort_unsupported()`. M21 promotes the three lavaan deferrals ADR-014 recorded — bootstrap
+  intervals, fixed raters, and incomplete/FIML — leaving multilevel SEM and one-way SEM out (both
+  reclassified/blocked below). This is **engine parity, not new estimand work** (cf. M5.5/M7/M14/
+  M15): additive, non-breaking (#6) — no new top-level argument, only new *valid combinations* of
+  the shipped `engine = "lavaan"` with the shipped `ci_method` / `raters` / data-balance arguments.
+  Risk is deliberately last in the arc (ADR-027): the SEM engine estimates variances on the **raw
+  scale** (Heywood/negative-variance boundary, unlike glmmTMB's log-SD safety, #3) and its
+  agreement estimator is a different estimator from the mixed-model σ²_r, so the oracle bar is
+  cross-engine-asymptotic, not ≤1e-4-exact, for agreement. Two scope questions were put to the
+  maintainer this session (Decision below).
+- Decision:
+  - **Three thin vertical slices** (#14), **kept in ADR-027's tentative order** (maintainer
+    decision — the order already matches oracle-risk: reuse the shipped bootstrap seam first, land
+    the heaviest FIML oracle work last):
+    - **Slice 1 — lavaan bootstrap `ci_method` (COVERAGE §③ #3).** Lift the `engine == "lavaan"`
+      restriction in the M16 bootstrap dispatch so `ci_method = "bootstrap"` works for the SEM
+      engine. Add a **`lavaan_simulate_refit`** factory to the M16 engine-level `simulate_refit()`
+      contract (ADR-025) — a **parametric** bootstrap (simulate from the fitted lavaan model →
+      refit → recompute the ICC per replicate → percentile interval), mirroring
+      `glmmtmb_simulate_refit` / `lme4_bootmer_refit`; the per-replicate component extractor is the
+      shipped lavaan `to_components`, so `icc_point()` maps to the ICC identically. **No new
+      estimand, no new argument** (`boot_samples` is shipped). **Lowest risk** (the seam and the
+      point estimator both ship — only the lavaan refit factory is new). **Random two-way only** at
+      this slice (fixed/incomplete arrive in Slices 2/3).
+    - **Slice 2 — fixed-rater SEM (COVERAGE §③ #1).** Lift the `raters == "fixed"` lavaan abort for
+      the two-way path. Consistency ≡ random exactly (rater not in the error set). **Oracle-first
+      catch (to resolve in-slice, not assumed — cf. the M19 fixed≢random catch, #1):** M7's
+      *random* agreement estimator σ²_r = Σν²/(k−1) already reads the rater variance from the
+      **mean structure of a finite set of indicator intercepts** — arguably already a
+      finite-population quantity — so whether fixed-rater SEM agreement needs a *distinct* θ²_r
+      correction (the mixed-model σ²_r→θ²_r story) or **coincides with the shipped M7 agreement
+      estimator** is an open question pinned by oracle before shipping: reduction to the single-
+      level M3/M10 fixed θ²_r via cell means, cross-engine vs. glmmTMB's Case-3A fit, and the
+      MW/SF fixed-agreement crosswalk. If the two coincide, the slice is a label/validation layer;
+      if they differ, the difference is oracle-pinned. `verify-estimator` may recommend a Fable
+      review (#19) if the fixed-agreement estimator is close but unpinnable. **Balanced/complete,
+      single-level.**
+    - **Slice 3 — incomplete / FIML SEM (COVERAGE §③ #2).** Lift the `engine == "lavaan" &&
+      !balanced` abort. lavaan handles missing subject×rater cells via **FIML** (`missing =
+      "fiml"`) on the wide reshape — no new fit shape, a fit-option change plus the M3-style
+      identifiability/connectedness guard reused before dispatch (#5). **Consistency** is a
+      variance *ratio* → **estimator-invariant**, so it stays an **exact cross-engine pin** even on
+      ragged data (asymptotically). **Absolute agreement — attempt, degrade to research (maintainer
+      decision, matching M18 Slice 2 / M20 Slice 3):** FIML-SEM agreement agrees with the REML
+      mixed-model only **asymptotically**, so a hard ≤1e-4 cross-engine pin on ragged data is
+      unlikely; attempt full FIML agreement against the reduction (complete → M7) + seeded-recovery
+      + cross-engine (≤1e-3) oracles, and **if no #1/#4-strong oracle holds, ship FIML consistency
+      only and reclassify FIML absolute-agreement to 🟣 research** rather than lower the oracle bar
+      (#1/#4). `verify-estimator` may recommend a Fable review (#19). **Heaviest oracle work — last
+      by design.**
+  - **No new estimand for any slice; no new estimand-spec file** (engine parity — cf.
+    M5.5/M7/M14/M15). The one item that touches spec prose is a **FIML-SEM oracle note** appended
+    to the M7 record / `REFERENCES.md` (an engine oracle, not an estimand — as ADR-027 anticipated),
+    recording whatever the Slice-3 oracle work establishes (exact FIML consistency; FIML agreement
+    either pinned or a 🟣 research deferral). **No new dependency** (lavaan stays `Suggests`, light
+    install intact — lavaan's `simulateData`/parametric bootstrap and FIML are native, no companion
+    package). **No new argument** — Slices reuse the shipped `ci_method = "bootstrap"` (S1),
+    `raters = "fixed"` (S2), and data balance (S3) with `engine = "lavaan"`.
+  - **Oracle posture (#1) — glmmTMB the independent oracle, exactly as M7 (no textbook worked
+    example beyond Jorgensen 2021 for the base estimator):** consistency is pinned **exact**
+    (≤1e-4) cross-engine at every slice (the ratio is estimator-invariant); **agreement** is pinned
+    at the **SEM indicator-mean estimator's** own bar — the exact Σν²/(k−1) formula reproduced
+    in-test, seeded large-N recovery where lavaan → population and lavaan ≈ glmmTMB, and (S1) the
+    M16 coverage + MC-agreement oracles, (S2) the fixed reduction/crosswalk, (S3) the asymptotic
+    FIML agreement (attempt-then-degrade). **Boundary-awareness (#3) is a named risk per slice:** a
+    Heywood/singular/non-convergent lavaan fit that cannot yield a valid interval aborts loudly
+    (classed) and directs the user to `engine = "glmmTMB"` — the shipped M7 posture, exercised
+    harder by bootstrap refits (S1) and ragged FIML (S3).
+  - **Scope-outs (preserved, not rediscovered):** **multilevel SEM** (COVERAGE #12) stays in the
+    cross-cutting "later" bucket beside the Bayesian engine (two-level SEM-GT is research-flavored;
+    the paper's own multilevel estimator is Bayesian — reclassified out of the arc by ADR-027, not
+    milestoned here); **SEM ∩ within-cell replicates** (#7) stays **ROADMAP unscheduled** (niche,
+    reclassified by ADR-027); **one-way / general ICC(1) via SEM** stays **🔴 blocked** — no
+    faithful sourced SEM route (ADR-014); the four cross-cutting "later" items (Bayesian
+    `ci_method = "posterior"`, categorical/ordinal GLMM, non-parametric/profile-likelihood CIs,
+    lme4 singular/merDeriv edge cases) stay deferred per STATUS. **Fixed × incomplete SEM** and any
+    compound corner are deferred (one dimension at a time — as M10 was to M9): S2 is
+    balanced/complete, S3 is random.
+- Consequences: On M21 close, **every 🔵 not-yet gap in COVERAGE.md is closed** and the arc
+  (ADR-027) is complete — the lavaan engine covers the random two-way path with both `ci_method`s,
+  fixed raters, and incomplete/FIML data (agreement possibly 🟣 for FIML), and the only remaining
+  unsupported combinations across the whole package are the ⚫ by-design (undefined), 🟣 research
+  (crossed `ICC(c,k)` incomplete divisor; possibly FIML agreement; occasion-averaged ragged
+  replicates), 🔴 blocked (one-way SEM), and the four cross-cutting "later" items — a clean,
+  fully-annotated coverage surface. Risk stayed front-loaded away (ADR-027): S1 rides the shipped
+  M16 seam, S2's only genuine question (fixed vs. random SEM agreement) is oracle-pinned with a
+  Fable fallback, and the one asymptotic characterization (S3 FIML agreement) is last and allowed
+  to degrade rather than force an unsourced pin (#4). The arc is a **hypothesis, not a contract**
+  (MILESTONES preamble) — a merge or reorder of slices gets a follow-up note. This ADR authorizes
+  M21 code.
+- References: PRINCIPLES.md #1 (oracle-first — cross-engine consistency-exact + agreement at the
+  SEM estimator's bar + seeded recovery per slice), #2/#14 (name scope / thin vertical slices —
+  this details the arc's last milestone), #3 (boundary-aware — the lavaan raw-scale Heywood risk),
+  #4 (no guessed formula — S3 FIML-agreement degrade-to-research clause), #5/#8 (classed aborts for
+  the fixed/incomplete identifiability + Heywood corners), #6 (additive, non-breaking — new valid
+  arg combinations only), #16 (tracking in-commit), #18 (characterize the boundary — S1 bootstrap
+  refits + S3 ragged FIML at the Heywood boundary), #19 (Fable recommendation path for S2/S3);
+  ADR-027 (the arc this details — M21 = SEM parity, the last milestone; multilevel SEM & SEM∩
+  replicates reclassified out here), ADR-014 (M7 SEM engine + its bootstrap/fixed/incomplete/
+  multilevel/one-way deferrals — M21 promotes bootstrap+fixed+incomplete, leaves multilevel & one-
+  way out), ADR-025 (M16 bootstrap `simulate_refit` seam — S1 reuses), ADR-012 (M5.5 lme4-parity
+  precedent: promote an oracle engine to selectable across designs), ADR-008 (M3 k_eff/
+  connectedness — S3 identifiability guard), ADR-019 (M10 θ²_r — S2 fixed reduction); Jorgensen
+  (2021, *Psych* 3:113–133, Eq. 6), Vispoel, Hong, Lee & Xu (2022), Lee & Vispoel (2024); Efron &
+  Tibshirani (1993) (S1 bootstrap); `project/COVERAGE.md` §③ (#1/#2/#3), `REFERENCES.md` O-SEM.

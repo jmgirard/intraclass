@@ -59,6 +59,78 @@
 # `data` must already be canonicalized to columns `subject`, `rater`, `score`
 # (factors for the first two) and COMPLETE/BALANCED (guarded in icc()); incomplete
 # SEM (FIML) is deferred (ADR-014).
+#
+# BOOTSTRAP (M21 Slice 1, ADR-031). Beyond the Monte-Carlo default, the SEM engine
+# also serves `ci_method = "bootstrap"` through the M16 `simulate_refit` contract
+# (ADR-025): a PARAMETRIC bootstrap that simulates wide datasets from the fitted
+# model's implied moments, refits the same one-factor model to each, and recomputes
+# the ICC per resample (cf. glmmtmb_simulate_refit / lme4_bootmer_refit). This is the
+# lavaan analog of the lme4 bootMer path; no new estimand, no new argument.
+
+# Pull the three variance components (subject, rater, residual) from a fitted lavaan
+# two-way model, given `k` and the effects-coding recentring matrix `center`. Returns
+# NULL on a Heywood boundary (a non-positive subject or residual variance): the
+# point-estimate path (fit_lavaan) turns that into a classed abort (#5/#8), while the
+# bootstrap factory treats it as an invalid resample (NA-filled, subject to the
+# discard policy). sigma^2_r is a non-negative quadratic form, so it needs no guard.
+lavaan_components <- function(fit, k, center) {
+  co <- lavaan::coef(fit)
+  cn <- names(co)
+  sv <- unname(co[[which(cn == "sv")[1]]])
+  ev <- unname(co[[which(cn == "ev")[1]]])
+  if (!is.finite(sv) || !is.finite(ev) || sv <= 0 || ev <= 0) {
+    return(NULL)
+  }
+  nu <- unname(co[which(grepl("~1$", cn))])
+  sigma2_r <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  c(subject = sv, rater = sigma2_r, residual = ev)
+}
+
+# Parametric-bootstrap factory for the lavaan engine (M21 Slice 1, ADR-031). Closes
+# over the fitted SEM's implied mean/covariance and subject count; each call
+# simulates `boot_samples` wide datasets, refits the SAME model string with the SAME
+# estimation options, and returns a (component x resample) matrix on the shared
+# component names -- the `simulate_refit(boot_samples, seed)` contract bootstrap_ci()
+# consumes. A refit that errors, does not converge, or lands on a Heywood boundary is
+# NA-filled and dropped upstream by the discard policy (#5/#8). Seeded via
+# with_rng_seed() so the global RNG stream is left untouched (#9, #12).
+lavaan_simulate_refit <- function(fit, model, k, center) {
+  inds <- paste0("v", seq_len(k))
+  na_out <- c(subject = NA_real_, rater = NA_real_, residual = NA_real_)
+  implied <- lavaan::lavInspect(fit, "implied")
+  mu <- stats::setNames(as.numeric(implied$mean[inds]), inds)
+  covariance <- implied$cov[inds, inds, drop = FALSE]
+  n_subjects <- lavaan::lavInspect(fit, "nobs")
+  function(boot_samples, seed = NULL) {
+    run <- function() {
+      refit_one <- function(i) {
+        # rmvn() returns parameters x draws (k x n_subjects); transpose to the wide
+        # one-row-per-subject layout lavaan wants.
+        wide_df <- as.data.frame(t(rmvn(n_subjects, mu, covariance)))
+        names(wide_df) <- inds
+        refit <- tryCatch(
+          suppressWarnings(lavaan::lavaan(
+            model,
+            data = wide_df,
+            meanstructure = TRUE,
+            int.ov.free = TRUE,
+            int.lv.free = FALSE,
+            likelihood = "wishart",
+            information = "observed"
+          )),
+          error = function(e) NULL
+        )
+        if (is.null(refit) || !lavaan::lavInspect(refit, "converged")) {
+          return(na_out)
+        }
+        out <- lavaan_components(refit, k, center)
+        if (is.null(out) || anyNA(out) || any(!is.finite(out))) na_out else out
+      }
+      vapply(seq_len(boot_samples), refit_one, na_out)
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+}
 
 fit_lavaan <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lavaan", reason = "to fit the ICC model with lavaan.")
@@ -206,6 +278,9 @@ fit_lavaan <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    # Parametric-bootstrap contract (M21 Slice 1, ADR-031): simulate from this fit's
+    # implied moments -> refit -> recompute the ICC per resample. Reuses `center`/`k`.
+    simulate_refit = lavaan_simulate_refit(fit, model, k, center)
   )
 }

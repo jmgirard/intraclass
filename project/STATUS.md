@@ -10,17 +10,35 @@
   finish-task fix: `rmvn()` aborts classed on a non-finite MC covariance. Completeness, not new
   estimand work; no new dependency/argument/estimand-spec. M0–M20 shipped; package at v0.1.0.
   **No milestone in flight** — M21 (SEM parity) next, scoped by its own start-of-milestone ADR.
-- Active task: — (no milestone in flight; **M21 — SEM (lavaan) engine parity** is next in the arc,
-  ADR-027, and gets its own start-of-milestone scoping ADR after a short retro.)
+- **M21 — SEM (lavaan) engine parity — IN FLIGHT** (arc's last, ADR-027; scoped by ADR-031,
+  2026-07-08). Promotes the M7 lavaan deferrals toward lme4-style parity, engine parity not new
+  estimand work: **Slice 1** lavaan bootstrap `ci_method` (reuse M16 `simulate_refit` seam;
+  lowest risk); **Slice 2** fixed-rater SEM (oracle-first catch: does fixed agreement need a
+  distinct θ²_r or coincide with M7's finite-intercept estimator?); **Slice 3** incomplete/FIML SEM
+  (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
+  Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
+  checklist in MILESTONES.md.
+- Active task: **M21 Slice 2 — fixed-rater SEM** (next). **Slice 1 (lavaan bootstrap) ✅ done** on
+  branch `m21-sem-parity`: `lavaan_simulate_refit` factory (parametric bootstrap from the fitted
+  SEM's implied moments) + shared `lavaan_components()`; `ci_method = "bootstrap"` now works for
+  `engine = "lavaan"` on the random two-way path. Oracles: O1 consistency population-coverage, O2
+  bootstrap≈MC (same estimand) + cross-engine consistency, well-formed/reproducible. Not yet
+  committed/merged. See the DoD checklist in MILESTONES.md.
 - Last green CI: **PR #25 (M20) full matrix green incl. Windows and R-devel; merged to `main` at
   137fb98** (the codecov upload flaked once on a bad GPG signature — re-ran green; infra, not the
   diff).
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M20 merged (PR #25, ADR-030).** All three slices
-  + a finish-task fix (`rmvn()` now aborts classed on a non-finite MC covariance instead of
-  crashing in `eigen()`). `R CMD check --as-cran` 0/0/0, 894 tests, full CI matrix green. Post-merge
-  `project/` reconcile done (M20 compressed in MILESTONES; REFERENCES O-FRep/O-MLRep/O-RagRep →
-  asserted; COVERAGE §② / ROADMAP synced). Occasion-averaged-ragged degraded to 🟣 research. M21 next.
+- Updated: 2026-07-08 by main session (Opus) — **M21 Slice 1 (lavaan bootstrap) landed on
+  `m21-sem-parity`** (not yet committed at time of writing; air + lintr clean, docs regenerated;
+  test-ci-bootstrap.R + test-icc-lavaan.R green under `load_all` + `NOT_CRAN`). Prior: **M21 scoped
+  and opened (ADR-031); in flight.**
+  Short retro (M20 landed clean in one arc-consistent shot) → scoping ADR fixing three slices
+  (bootstrap → fixed → incomplete/FIML, order kept per maintainer), estimand posture (engine
+  parity, no new estimand-spec — only a FIML-SEM oracle note), and per-slice oracles (glmmTMB the
+  independent oracle, consistency exact / agreement at the SEM estimator's bar). Two scope
+  questions confirmed: keep ADR-027 slice order; FIML agreement attempt-then-degrade to 🟣 research.
+  M21 DoD checklist set live in MILESTONES.md. No code yet — Slice 1 (lavaan bootstrap) is next.
+  Prior line: M20 merged (PR #25, ADR-030), 894 tests, `--as-cran` 0/0/0, full matrix green.
 
 ## Where we are
 
@@ -51,10 +69,11 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M18, M19 & M20 shipped and merged (PR #23/#24/#25, ADR-028/029/030).** The
-**M18–M21 completeness arc** (ADR-027) closes every 🔵 *not yet* gap in
-[`COVERAGE.md`](COVERAGE.md). Next code work is **starting M21 — SEM (lavaan) engine
-parity** (its own start-of-milestone scope pass + ADR). Only M21 remains in the arc.
+**M18, M19 & M20 shipped and merged (PR #23/#24/#25, ADR-028/029/030); M21 scoped and
+now in flight (ADR-031).** The **M18–M21 completeness arc** (ADR-027) closes every 🔵
+*not yet* gap in [`COVERAGE.md`](COVERAGE.md). Next code work is **M21 Slice 1 — lavaan
+bootstrap `ci_method`** (reuse the M16 `simulate_refit` seam; DoD checklist in
+[`MILESTONES.md`](MILESTONES.md)). Only M21 remains in the arc.
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
 
@@ -64,8 +83,9 @@ parity** (its own start-of-milestone scope pass + ADR). Only M21 remains in the 
 - **M20 — Within-cell replicate completeness:** ✅ shipped (PR #25) — fixed-rater · multilevel
   (crossed D1 + nested D2) · ragged single-occasion replicates. Occasion-averaged-ragged degraded
   to 🟣 research (no validated effective-`n_o` divisor). Extends M17 Slice 3.
-- **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
-  (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc. **Next.**
+- **M21 — SEM (lavaan) engine parity:** 🚧 **in flight** (ADR-031) — lavaan bootstrap (Slice 1,
+  next), fixed-rater SEM (Slice 2), incomplete/FIML SEM (Slice 3, agreement attempt-then-degrade).
+  The lavaan analog of the lme4 M5.5→M15 arc.
 
 **Reclassified out of the arc (ADR-027):** multilevel SEM → cross-cutting "later" bucket
 (research-flavored, sits beside Bayesian); lavaan + replicates → ROADMAP unscheduled (niche).
