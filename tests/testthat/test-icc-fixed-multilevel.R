@@ -213,12 +213,148 @@ test_that("deferred fixed-rater multilevel cases abort loudly", {
     )),
     class = "intraclass_unsupported"
   )
-  # Incomplete / unbalanced fixed multilevel.
-  set.seed(3)
-  di <- d[-sample(nrow(d), 20), ]
+  # (Incomplete / unbalanced fixed multilevel is no longer deferred -- it ships in
+  # M18 Slice 1 (ADR-028); its oracles are the O-IFML section below.)
+})
+
+# Oracle O-IFML: INCOMPLETE fixed-rater crossed multilevel (Design 1), M18 Slice 1 --
+#
+# M18 Slice 1 (ADR-028) lifts the balanced-only guard on the fixed-rater crossed
+# multilevel fit: the finite-population theta^2_r (Case 3A, via the shared
+# theta2r_fixed()) is read from the fitted rater-contrast vcov -- which glmmTMB/lme4
+# estimate on ragged data -- and the subject-level error divisor stays the same k_eff
+# (harmonic mean of ratings per subject) the random path uses. No new estimand; this
+# is the M10 estimand on ragged data (as M3 is to M1/M2). No textbook worked example,
+# so correctness rests on (PRINCIPLES.md #1): an independent lme4 cross-engine fit on
+# an interior ragged design, a seeded-sim recovery, and the characterization -- shared
+# with the single-level M3 fixed path -- that on ragged data fixed genuinely differs
+# from random (theta^2_r != sigma^2_r under imbalance). The balanced fixed == random
+# reduction is the O-FML/reduction test above (k_eff == k there). Provenance: seeded
+# generators in this file (sim_design1 + ragged), no committed constants.
+
+ragged <- function(d, n, seed) {
+  set.seed(seed)
+  d[-sample(nrow(d), n), , drop = FALSE]
+}
+
+test_that("O-IFML/lme4: ragged fixed subject ICCs match an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  # An interior ragged design (lme4 stays off the variance boundary here).
+  d <- ragged(sim_design1(12, 6, 5, 1.0, 0.9, 0.5, 0.3, 0.8, seed = 202), 24, 1)
+  x <- fixed_ml(d, "agreement")
+  m <- lme4::lmer(
+    score ~ 1 +
+      rater +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | cluster:rater),
+    data = d,
+    control = lme4::lmerControl(check.conv.singular = "ignore")
+  )
+  vc <- as.data.frame(lme4::VarCorr(m))
+  g <- function(t) vc$vcov[vc$grp == t]
+  # Random components (signal + residual + cluster x rater) match an independent lme4
+  # fit; theta^2_r is a fixed-effect quantity checked via the reductions/characterization.
+  expect_equal(x$components$subject, g("cluster:subject"), tolerance = 1e-4)
+  expect_equal(x$components$residual, g("Residual"), tolerance = 1e-4)
+  expect_equal(x$components$cluster_rater, g("cluster:rater"), tolerance = 1e-4)
+  # End-to-end: the intraclass lme4 engine reproduces the glmmTMB ICCs on ragged data.
+  xl <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    level = "subject",
+    engine = "lme4",
+    seed = 1
+  ))
+  expect_equal(x$estimates$estimate, xl$estimates$estimate, tolerance = 1e-4)
+})
+
+test_that("O-IFML: on ragged data fixed genuinely differs from random", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged(sim_design1(12, 6, 5, 1.0, 0.9, 0.5, 0.3, 0.8, seed = 202), 24, 1)
+  fa <- fixed_ml(d, "agreement")
+  ra <- random_ml(d, "agreement")
+  # theta^2_r != sigma^2_r under imbalance, so the agreement ICCs no longer coincide
+  # (they are equal to numerical tolerance only on balanced data -- O-FML/reduction).
+  expect_false(isTRUE(all.equal(
+    pick(fa, "ICC(A,1)"),
+    pick(ra, "ICC(A,1)"),
+    tolerance = 1e-6
+  )))
+  # Still a valid coefficient in [0, 1] with theta^2_r clamped at the boundary.
+  expect_gte(pick(fa, "ICC(A,1)"), 0)
+  expect_lte(pick(fa, "ICC(A,1)"), 1)
+  expect_gte(fa$components$rater, 0)
+})
+
+test_that("O-IFML/sim: recovers the known subject-level consistency ICC on ragged data", {
+  skip_if_not_installed("glmmTMB")
+  vsc <- 1.2
+  vres <- 0.5
+  d <- ragged(
+    sim_design1(40, 12, 6, 1.0, vsc, 0.6, 0.2, vres, seed = 20260708),
+    round(0.15 * (40 * 12 * 6)),
+    11
+  )
+  x <- fixed_ml(d, "consistency")
+  target_c1 <- vsc / (vsc + vres)
+  expect_lt(abs(pick(x, "ICC(C,1)") - target_c1), 0.04)
+  expect_gte(target_c1, x$estimates$conf.low[1])
+  expect_lte(target_c1, x$estimates$conf.high[1])
+})
+
+test_that("O-IFML: a ragged fixed design that goes singular defers lme4 to glmmTMB", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  # A small design with zero cluster x rater variance driven ragged lands lme4 on the
+  # variance boundary (merDeriv covariance singular); the shipped intraclass_singular_fit
+  # handoff (M15) fires for the fixed path too, and glmmTMB still fits (#5/#18).
+  d <- ragged(sim_design1(6, 4, 4, 1.0, 0.8, 0.5, 0.0, 0.6, seed = 32), 28, 32)
   expect_error(
     suppressWarnings(icc(
-      di,
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      level = "subject",
+      engine = "lme4",
+      seed = 1
+    )),
+    class = "intraclass_singular_fit"
+  )
+  expect_s3_class(
+    suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      level = "subject",
+      engine = "glmmTMB",
+      seed = 1
+    )),
+    "icc"
+  )
+})
+
+test_that("O-IFML: incomplete fixed identifiability guards still fire", {
+  skip_if_not_installed("glmmTMB")
+  # The conservative crossed-multilevel identifiability gates (spec M9 §4b) apply to
+  # the fixed path unchanged. A design where every subject is rated only once cannot
+  # separate the subject and residual variances -> abort, not a spurious ICC.
+  d <- sim_design1(8, 6, 4, 1.0, 0.9, 0.5, 0.3, 0.8, seed = 77)
+  d1 <- d[!duplicated(d$subject), , drop = FALSE] # one rating per subject
+  expect_error(
+    suppressWarnings(icc(
+      d1,
       score,
       subject,
       rater,
@@ -227,6 +363,6 @@ test_that("deferred fixed-rater multilevel cases abort loudly", {
       level = "subject",
       seed = 1
     )),
-    class = "intraclass_unsupported"
+    class = "intraclass_unidentified"
   )
 })

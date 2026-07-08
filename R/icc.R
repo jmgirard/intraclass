@@ -97,12 +97,14 @@
 #' message) rather than failing the whole call, so the subject-level averages and the
 #' single-rater cluster ICC are still returned. **Fixed raters**
 #' (`raters = "fixed"`) are supported for the crossed design at the **subject** level
-#' on balanced, complete data: the rater main effect becomes the finite-population
-#' variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
-#' to the random-rater case and absolute agreement differs only by that term.
-#' Incomplete *nested* designs, incomplete or nested fixed-rater designs, and the
-#' fixed-rater cluster level remain for later milestones. Nested designs still require
-#' balanced, complete data.
+#' on both balanced and **incomplete** data: the rater main effect becomes the
+#' finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
+#' balanced data consistency is identical to the random-rater case and absolute
+#' agreement differs only by that term; on incomplete data both types differ from
+#' random (the finite-population variance is read from the ragged rater-contrast fit).
+#' Incomplete *nested* designs, nested fixed-rater designs, and the fixed-rater cluster
+#' level remain for later milestones. Nested designs still require balanced, complete
+#' data.
 #'
 #' @section Within-cell replicates:
 #' When a subject-by-rater cell is rated **more than once** (within-cell
@@ -673,18 +675,16 @@ icc <- function(
                {.code level = \"subject\"}."
         ))
       }
-      # Fixed-rater multilevel is balanced/complete only in M10 (theta^2_r under
-      # imbalance is deferred, spec §3/§7); fail loudly before fitting (#5).
-      if (raters == "fixed") {
-        abort_unsupported(c(
-          "Incomplete or unbalanced fixed-rater multilevel designs are not \\
-           supported yet.",
-          i = "Fixed-rater multilevel (M10) covers balanced, complete crossed \\
-               designs; incomplete fixed-rater multilevel is planned for a later \\
-               milestone.",
-          i = "Use {.code raters = \"random\"} for incomplete multilevel data."
-        ))
-      }
+      # Incomplete fixed-rater crossed multilevel (M18 Slice 1, ADR-028): the
+      # finite-population theta^2_r (Case 3A, via the shared theta2r_fixed()) is read
+      # from the fitted rater-contrast vcov, which glmmTMB/lme4 estimate on ragged
+      # data, and the subject-level error divisor is the same k_eff (harmonic mean of
+      # ratings per subject) the random path uses -- exactly as the single-level M3
+      # incomplete fixed path (ADR-008). The identifiability gates below apply to the
+      # fixed path unchanged: they are conservative for fixed raters (theta^2_r from a
+      # fixed contrast is more robustly identified than a random sigma^2_r), so a
+      # design they admit is safely fixed-identified too. The cluster level stays
+      # deferred for fixed raters (level already forced to "subject" above).
       ident <- crossed_ml_identifiability(df)
       # Within-cluster subject x rater connectedness separates sigma^2_{s:c} from
       # residual; gates every subject-level coefficient (incl. consistency).

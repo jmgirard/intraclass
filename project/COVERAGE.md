@@ -121,13 +121,13 @@ Design inferred from the crossing pattern (or declared via `design`).
 
 | Sub-design | `level` | `type` | `raters` | balance | `engine` |
 |---|---|---|---|---|---|
-| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only, balanced only) | balanced ✅; incomplete ✅\* | glmmTMB, lme4 |
+| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4 |
 | **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random only | balanced/complete only | glmmTMB, lme4 |
 | **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced/complete only | glmmTMB, lme4 |
 
-\* On **incomplete** Design 1: subject level is fully supported; cluster level is
-`ICC(c,1)` only (averaged `ICC(c,k)` rows are dropped — see gaps); conflated and
-fixed-rater are not available on ragged data.
+\* On **incomplete** Design 1: subject level is fully supported (random **and**
+fixed-rater — M18 Slice 1); cluster level is `ICC(c,1)` only (averaged `ICC(c,k)` rows
+are dropped — see gaps); the conflated diagnostic is not yet available on ragged data.
 
 - `unit` in multilevel `icc()`: ✅ single, average. Numeric `m` (rater-count
   projection) is done through **`d_study()`** (both levels, M17 Slice 2), **not**
@@ -140,7 +140,7 @@ fixed-rater are not available on ragged data.
 |---|---|
 | Design 1 incomplete, averaged cluster-level `ICC(c,k)` | 🟣 **Research (Wave 3)** — the per-cluster effective-rater divisor behind a ragged cluster mean is an open modeling question with no textbook oracle; needs a simulation-oracle study, likely a Fable review (#19). `ICC(c,1)` ships; complete-data `ICC(c,k)` is unaffected (`M9-incomplete-multilevel.md` §9). |
 | Design 1 incomplete, `level = "conflated"` | 🔵 **Not yet → M18 Slice 2** — the conflated ICC targets the complete five-component fit; its behaviour on ragged data is not yet established (`M17-conflated-icc.md` §6). |
-| Design 1 incomplete, `raters = "fixed"` | 🔵 **Not yet → M18 Slice 1** — θ²_r under imbalance is deferred (M10 spec §3/§7). |
+| Design 1 incomplete, `raters = "fixed"` | ✅ (M18 Slice 1) — θ²_r read from the ragged rater-contrast fit; subject level; differs from random under imbalance (as single-level M3). Cross-engine + seeded-recovery oracles; lme4 degrades to glmmTMB at the boundary. |
 | `level = "conflated"` + `type = "consistency"` | 🟣 **Research** — ten Hove Eq. 14 publishes only the *agreement* conflated ICC; a consistency form (drop σ²_r from the error set) is the natural symmetric extension but is **not in the paper**. Investigate whether a sourced/faithfully-derivable form with a #1/#4-strong oracle exists before exposing it; do not ship a guessed formula (ROADMAP, ADR-026). |
 | `level = "conflated"` + `raters = "fixed"` | ⚫ **By design** — Eq. 14 treats the rater effect as a variance component (random raters); a fixed-rater conflated diagnostic is not defined by the source. |
 | Design 2 / 3, cluster level | ⚫ **By design** — cluster-level IRR needs raters crossed with clusters; with nested raters only the subject level is defined (ten Hove et al. 2022, p. 6). |

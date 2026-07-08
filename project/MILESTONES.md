@@ -471,3 +471,61 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Windows and R-devel, 722 tests). `level = "conflated"` (Eq. 14 diagnostic), multilevel
   rater-count `d_study()` at both levels, and within-cell replicates + occasion-averaged
   coefficient all ship; `R CMD check` 0/0/0.
+
+## M18: Multilevel completeness I — crossed (Design 1) incomplete corners (ADR-028)
+- Goal: fill the **ragged-data corners of the crossed (Design 1) five-component** multilevel
+  fit that M9/M10/M17 left open — the first milestone of the M18–M21 completeness arc (ADR-027).
+  **Completeness, not new estimand work** (cf. M14/M15): every slice lifts a **single shipped
+  abort guard**, reusing oracle-pinned machinery (M3 `k_eff`/connectedness, M10
+  `theta2r_fixed()`, M17 §7 multilevel `d_study`, M16 `simulate_refit`). Additive, non-breaking
+  (#6) — no new argument, only new valid combinations. Four thin slices ordered by oracle-risk.
+- Reference: ADR-028 (scope + maintainer decisions: Slice 2 attempt-then-degrade; Slice 3/4
+  split). Only Slice 2 touches a spec (`M17-conflated-icc.md §6`); no new estimand-spec.
+  Oracle posture (#1, all slices): glmmTMB↔lme4 cross-engine < 1e-4 + **reduction** to the
+  shipped balanced/complete case + seeded population recovery (no textbook worked example, as
+  M8–M10/M15). Brief §8 per-milestone DoD.
+
+**DoD board (this is the live task board — ADR-015; check off in the same commit as the work, #16):**
+
+- **Slice 1 — incomplete fixed-rater crossed (COVERAGE #9)** — reuse M3 Case-3A `k_eff` + M10
+  θ²_r under imbalance; θ²_r replaces σ²_r in the rater slot on ragged data. Lowest risk. **Done.**
+  - [x] Narrowed the `raters == "fixed"` abort in the ragged-crossed block (`R/icc.R`); the fixed
+        path flows through the M9 identifiability gates (conservative for fixed) into the shipped
+        `fit_{glmmtmb,lme4}_multilevel_fixed` with the M3 `k_eff` divisor — no fit change needed.
+  - [x] Oracle O-IFML (`test-icc-fixed-multilevel.R`): balanced fixed≡random reduction (existing
+        O-FML); ragged independent-lme4 cross-engine <1e-4 + `icc(lme4)≡icc(glmmTMB)`; genuine
+        fixed≠random under imbalance (matches single-level M3); seeded consistency recovery w/
+        MC-CI coverage; singular→glmmTMB degrade pinned; identifiability guards still fire.
+        Seeded generators (no committed constants), so no `REFERENCES.md` change.
+  - [x] Docs (`icc()` roxygen) updated; COVERAGE #9 → ✅. Suite 740 pass / 0 fail, lint + `air` clean.
+- **Slice 2 — incomplete conflated ICC (COVERAGE #8)** — **attempt flat-`k_eff` Eq. 14 on
+  ragged data; degrade to 🟣 research if no #1/#4-strong oracle holds** (ADR-028 decision).
+  - [ ] Characterize: is Eq. 14 well-posed on ragged data with the flat (clusters-ignored)
+        `k_eff`? Build the reduction (→ complete conflated) + cross-engine oracle.
+  - [ ] If pinned: narrow the `"conflated" %in% level` ragged abort (`R/icc.R` ~L667); extend
+        `M17-conflated-icc.md §6`; commit oracle values. **If not:** reclassify #8 → 🟣 research
+        in COVERAGE + ROADMAP, record why in the spec (may recommend Fable review, #19, then stop).
+- **Slice 3 — incomplete subject-level `d_study()` (COVERAGE #13)** — subject level only; cluster
+  level stays behind the 🟣 Wave-3 `ICC(c,k)` divisor (#18 bound).
+  - [ ] Narrow the incomplete-multilevel `d_study()` abort (`R/d-study.R` ~L105) for the subject
+        level; keep the cluster-level abort.
+  - [ ] Oracle: reduction → complete M17 §7 subject curve at observed `k` <1e-4; cross-engine;
+        seeded recovery; monotone/[0,1] invariants. COVERAGE #13 → ✅.
+- **Slice 4 — bootstrap-projected `d_study()` bands (COVERAGE #14)** — the M16 deferral, package-
+  wide (not just incomplete); reproject each `simulate_refit` replicate across `k`.
+  - [ ] Band from bootstrap replicates when the fit's `ci_method == "bootstrap"`; MC path unchanged.
+  - [ ] Oracle (a band's oracle is coverage, #1): seeded coverage ~nominal; agreement with the MC
+        band on interior cases within tol, diverging at the boundary (#18). COVERAGE #14 → ✅.
+- **Cross-cutting DoD:** `air format` + `lintr::lint_package()` clean; installed-pkg check
+  `NOT_CRAN=true` green; `R CMD check --as-cran` 0/0/0; NEWS updated; `project/` (STATUS,
+  COVERAGE, MILESTONES status line) reconciled; ships on a `m18-*` branch via PR.
+
+- Deferred out of M18 (record so not rediscovered): incomplete **nested** Designs 2/3 and
+  **fixed-rater nested** (M19); ragged/fixed/multilevel **replicates** (M20); **SEM parity**
+  (M21); the **cluster-level `ICC(c,k)` incomplete divisor** (🟣 Wave-3 research, M9 §9 — bounds
+  Slice 3); `consistency`/`fixed` **conflated** (⚫/🟣, COVERAGE §④). Arc carry-overs stay in
+  `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way
+  via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge
+  cases.
+- Status: **in progress** — planning done (ADR-028); **Slice 1 shipped** (incomplete fixed-rater
+  crossed; 740 tests pass, lint/`air` clean). Slice 2 (incomplete conflated) next. No PR yet.

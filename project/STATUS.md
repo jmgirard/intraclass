@@ -1,21 +1,26 @@
 # Project status
 
-- Milestone: **M17 — variance-decomposition trio** — **shipped** (PR #22, ADR-026). Three
-  slices: **(1)** conflated single-level ICC via `level = "conflated"` (ten Hove Eq. 14, a
-  diagnostic contrast off the M5 fit; agreement-only); **(2)** multilevel rater-count
-  `d_study()` at subject + cluster levels (retargeted from the original subjects-per-cluster
-  plan — the cluster ICC has no subject facet, ADR-026 amend); **(3)** within-cell replicates
-  splitting σ²_res → σ²_sr + σ²_e via `(1 | subject:rater)`, plus an occasion-averaged
-  coefficient (`occasions` knob, per-component error divisors). No new dependency (`gtheory`
-  proved unnecessary). M0–M17 all shipped; package at v0.1.0, submission-ready. No milestone
-  in flight.
-- Active task: — (no milestone in flight; the **M18–M21 arc is planned** (ADR-027) to close
-  the COVERAGE.md "not yet" gaps — next code work is starting M18 with its own scoping ADR.)
+- Milestone: **M18 — Multilevel completeness I (crossed Design 1, incomplete corners)** —
+  **in progress** (scoped by ADR-028; first milestone of the M18–M21 arc, ADR-027). Four thin
+  slices lifting a single shipped abort guard each: **(1)** incomplete fixed-rater crossed
+  (M3 `k_eff` + M10 θ²_r under imbalance); **(2)** incomplete conflated ICC (attempt Eq. 14 on
+  ragged data with a flat `k_eff` — **degrade to 🟣 research if no #1-strong oracle holds**,
+  maintainer decision); **(3)** incomplete **subject-level** `d_study()` (cluster level bounded
+  by the Wave-3 `ICC(c,k)` divisor); **(4)** bootstrap-projected `d_study()` bands (M16 deferral,
+  package-wide — split out of ADR-027's bundled Slice 3). Completeness, not new estimand work;
+  no new dependency. M0–M17 shipped; package at v0.1.0.
+- Active task: **M18 Slice 2 — incomplete conflated ICC** (COVERAGE #8) next. **Slice 1
+  (incomplete fixed-rater crossed) is done** — lifted the ragged-crossed `raters == "fixed"`
+  abort; the shipped fixed-multilevel fit + M3 `k_eff` divisor handle imbalance unchanged;
+  O-IFML oracles (cross-engine, seeded recovery, genuine fixed≠random, singular→glmmTMB degrade)
+  in `test-icc-fixed-multilevel.R`; 740 tests pass, lint/`air` clean. On branch
+  `m18-crossed-incomplete`, not yet committed.
 - Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
   `main` at a915256
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — added COVERAGE.md support matrix + planned the
-  M18–M21 completeness arc (ADR-027); ROADMAP/COVERAGE reconciled
+- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028): retro + 4-slice DoD board
+  (Slice 2 attempt-then-degrade, Slice 3/4 split — maintainer decisions); **shipped Slice 1**
+  (incomplete fixed-rater crossed, 740 tests green).
 
 ## Where we are
 

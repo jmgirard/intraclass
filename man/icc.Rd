@@ -272,12 +272,14 @@ requested for the cluster level on incomplete data, that row is dropped (with a
 message) rather than failing the whole call, so the subject-level averages and the
 single-rater cluster ICC are still returned. \strong{Fixed raters}
 (\code{raters = "fixed"}) are supported for the crossed design at the \strong{subject} level
-on balanced, complete data: the rater main effect becomes the finite-population
-variance of the observed raters (McGraw & Wong Case 3A), so consistency is identical
-to the random-rater case and absolute agreement differs only by that term.
-Incomplete \emph{nested} designs, incomplete or nested fixed-rater designs, and the
-fixed-rater cluster level remain for later milestones. Nested designs still require
-balanced, complete data.
+on both balanced and \strong{incomplete} data: the rater main effect becomes the
+finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
+balanced data consistency is identical to the random-rater case and absolute
+agreement differs only by that term; on incomplete data both types differ from
+random (the finite-population variance is read from the ragged rater-contrast fit).
+Incomplete \emph{nested} designs, nested fixed-rater designs, and the fixed-rater cluster
+level remain for later milestones. Nested designs still require balanced, complete
+data.
 }
 
 \section{Within-cell replicates}{
