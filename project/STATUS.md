@@ -9,19 +9,21 @@
   by the Wave-3 `ICC(c,k)` divisor); **(4)** bootstrap-projected `d_study()` bands (M16 deferral,
   package-wide — split out of ADR-027's bundled Slice 3). Completeness, not new estimand work;
   no new dependency. M0–M17 shipped; package at v0.1.0.
-- Active task: **M18 Slice 4 — bootstrap-projected `d_study()` bands** (COVERAGE #14, the M16
-  deferral; package-wide, not just incomplete) next. **Slices 1–3 done:** (1) incomplete
-  fixed-rater crossed (O-IFML, `test-icc-fixed-multilevel.R`); (2) incomplete conflated ICC —
-  oracle held, ships (O-conflated/incomplete, `test-icc-multilevel.R`; spec §6a); (3) incomplete
-  subject-level `d_study()` — level-aware abort, subject projects / cluster dropped-with-note
-  (O-IDS, `test-d-study.R`). 758 tests pass, lint/`air` clean. On branch `m18-crossed-incomplete`
-  (Slices 1–2 committed 82220bb/86c5b97; Slice 3 uncommitted).
+- Active task: **M18 cross-cutting DoD** (NEWS, installed-pkg `R CMD check --as-cran`, `project/`
+  reconcile) then open the PR. **All four slices done:** (1) incomplete fixed-rater crossed
+  (O-IFML, `test-icc-fixed-multilevel.R`); (2) incomplete conflated ICC — oracle held, ships
+  (O-conflated/incomplete, `test-icc-multilevel.R`; spec §6a); (3) incomplete subject-level
+  `d_study()` — level-aware abort (O-IDS, `test-d-study.R`); (4) bootstrap-projected `d_study()`
+  bands — band follows the fit's `ci_method`, coherent with the fitted interval at `m = k_eff`
+  (O-Boot-DS, `test-d-study.R`). Lint/`air` clean. On branch `m18-crossed-incomplete`
+  (Slices 1–3 committed; Slice 4 uncommitted).
 - Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
   `main` at a915256
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped Slices 1–3**
-  (incomplete fixed-rater crossed; incomplete conflated ICC; incomplete subject-level
-  `d_study()`). 758 tests green, lint/`air` clean. Slice 4 (bootstrap `d_study` bands) next.
+- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped all four slices**
+  (incomplete fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`;
+  bootstrap-projected `d_study()` bands). Lint/`air` clean. Cross-cutting DoD (NEWS + installed
+  `--as-cran` + reconcile) and PR next.
 
 ## Where we are
 

@@ -1004,6 +1004,10 @@ icc <- function(
       seed = seed
     )
   }
+  # A bootstrap fit carries its kept resample components so d_study() can project a
+  # bootstrap band by reprojecting each resample across `m` (M18 Slice 4, ADR-028).
+  # NULL for a Monte-Carlo fit, which reprojects from `mc` (vcov) instead.
+  boot_components <- attr(intervals, "components")
 
   estimates <- data.frame(
     index = vapply(estimands, `[[`, character(1), "label"),
@@ -1065,6 +1069,14 @@ icc <- function(
         vcov = engine_fit$vcov,
         to_components = engine_fit$to_components
       ),
+      # Bootstrap resample components (named list of per-resample vectors) for a
+      # bootstrap fit; NULL otherwise. d_study() reprojects these across `m` to
+      # produce a bootstrap band coherent with the fit's interval (M18 Slice 4).
+      boot = if (is.null(boot_components)) {
+        NULL
+      } else {
+        list(components = boot_components)
+      },
       call = match.call()
     ),
     class = "icc"

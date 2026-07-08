@@ -520,10 +520,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         cluster-only incomplete fit aborts. Roxygen + M4.5 §7.2 spec updated. COVERAGE #13 → ✅.
         Suite 758 pass.
 - **Slice 4 — bootstrap-projected `d_study()` bands (COVERAGE #14)** — the M16 deferral, package-
-  wide (not just incomplete); reproject each `simulate_refit` replicate across `k`.
-  - [ ] Band from bootstrap replicates when the fit's `ci_method == "bootstrap"`; MC path unchanged.
-  - [ ] Oracle (a band's oracle is coverage, #1): seeded coverage ~nominal; agreement with the MC
-        band on interior cases within tol, diverging at the boundary (#18). COVERAGE #14 → ✅.
+  wide (not just incomplete); reproject the stored `simulate_refit` resamples across `m`. **Done.**
+  - [x] `bootstrap_ci()` now exposes its kept resample components (attribute); a bootstrap fit
+        stores them on `x$boot`. `d_study()` band follows the fit's `ci_method`: bootstrap fit →
+        reproject the stored resamples (no re-draw, deterministic); MC fit → unchanged. Old
+        bootstrap objects without `$boot` fall back to the MC band.
+  - [x] Oracle O-Boot-DS (`test-d-study.R`): **coherence** — at `m = k_eff` the band equals the
+        fitted `ICC(A,k)` bootstrap interval exactly (~1e-9); MC fit still MC (no regression);
+        deterministic/monotone/[0,1]; agrees with the MC band on an interior case (~0.02),
+        diverging at the boundary (#18); multilevel + incomplete-subject bootstrap bands project.
+        Roxygen updated. COVERAGE #14 → ✅.
 - **Cross-cutting DoD:** `air format` + `lintr::lint_package()` clean; installed-pkg check
   `NOT_CRAN=true` green; `R CMD check --as-cran` 0/0/0; NEWS updated; `project/` (STATUS,
   COVERAGE, MILESTONES status line) reconciled; ships on a `m18-*` branch via PR.
@@ -535,6 +541,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way
   via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge
   cases.
-- Status: **in progress** — planning done (ADR-028); **Slices 1–3 shipped** (incomplete
-  fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`; 758 tests
-  pass, lint/`air` clean). Slice 4 (bootstrap-projected `d_study()` bands) next. No PR yet.
+- Status: **in progress** — planning done (ADR-028); **all four slices shipped** (incomplete
+  fixed-rater crossed; incomplete conflated ICC; incomplete subject-level `d_study()`;
+  bootstrap-projected `d_study()` bands; lint/`air` clean). Cross-cutting DoD (NEWS, installed-pkg
+  `--as-cran`, `project/` reconcile) next, then PR.

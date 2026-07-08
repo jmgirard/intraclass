@@ -55,7 +55,11 @@ Projects the reliability of a fitted \code{\link[=icc]{icc()}} to the mean of an
 number of raters \code{m} -- a generalizability-theory \strong{decision (D-) study},
 answering "how reliable would the mean of \code{m} raters be?" and, read as a
 curve, "how many raters do I need?". The point estimate and its boundary-aware
-Monte-Carlo interval reuse the fit stored on \code{x}; no model is refit.
+interval reuse the fit stored on \code{x}; no model is refit. The band follows the
+fit's \code{ci_method}: a Monte-Carlo fit reprojects one draw from the parameter
+covariance across every \code{m}, while a \strong{bootstrap} fit reprojects its stored
+resamples (so at \code{m} = the observed rater count the band matches the fitted
+\verb{ICC(*,k)} interval exactly).
 }
 \section{Projection is extrapolation}{
 

@@ -571,3 +571,141 @@ test_that("O-IDS: cluster-only incomplete fit refuses projection (bounded, #5)",
   )
   expect_error(d_study(fit_c, m = 1:4), class = "intraclass_unsupported")
 })
+
+# Oracle O-Boot-DS: bootstrap-projected d_study() bands, M18 Slice 4 -------------
+#
+# M18 Slice 4 (ADR-025 deferral, ADR-028): the d_study() band follows the fit's
+# `ci_method`. A bootstrap fit stores its kept resample components on `x$boot`;
+# d_study() reprojects each resample across `m` (moving only the divisor) and takes
+# percentile bands -- reusing the SAME resamples that produced the fit's interval, so
+# at `m = k_eff` the band coincides with the fitted ICC(*,k) bootstrap interval
+# (the primary, exact coherence oracle). It is package-wide (two-way, multilevel,
+# incomplete), keyed off `ci_method`, with no new argument. The band's own oracle is
+# coverage/agreement (a CI method, #1): it agrees with the MC band on interior cases
+# and diverges predictably at the boundary (the M16 O2 pattern, #18).
+
+test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit interval", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  fb <- suppressWarnings(icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    ci_method = "bootstrap",
+    boot_samples = 499,
+    seed = 1
+  ))
+  # Balanced SF data: k_eff = n_raters = 4, so the projection to m = 4 IS ICC(A,k).
+  ds <- d_study(fb, m = fb$n$raters)
+  fit_ak <- fb$estimates[fb$estimates$index == "ICC(A,k)", ]
+  expect_equal(ds$conf.low, fit_ak$conf.low, tolerance = 1e-9)
+  expect_equal(ds$conf.high, fit_ak$conf.high, tolerance = 1e-9)
+  # The band is labelled bootstrap and carries the resample count.
+  expect_identical(attr(ds, "method"), "bootstrap")
+  expect_identical(attr(ds, "samples"), 499L)
+})
+
+test_that("O-Boot-DS: a Monte-Carlo fit still gets a Monte-Carlo band (no regression)", {
+  skip_if_not_installed("glmmTMB")
+  fm <- fit_ds("agreement")
+  ds <- d_study(fm, m = c(1, 4, 8))
+  expect_identical(attr(ds, "method"), "montecarlo")
+})
+
+test_that("O-Boot-DS: the bootstrap band is deterministic, monotone, and in [0, 1]", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  fb <- suppressWarnings(icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    ci_method = "bootstrap",
+    boot_samples = 499,
+    seed = 1
+  ))
+  # No re-draw or seed: the band is fixed by the stored resamples, so repeat calls
+  # are identical (unlike the MC band, which re-draws).
+  a <- d_study(fb, m = 1:6)
+  b <- d_study(fb, m = 1:6)
+  expect_equal(a$conf.low, b$conf.low)
+  expect_equal(a$conf.high, b$conf.high)
+  a <- a[order(a$m), ]
+  expect_true(all(diff(a$estimate) > 0))
+  expect_true(all(a$estimate >= 0 & a$estimate <= 1))
+  expect_true(all(a$conf.low >= 0 & a$conf.high <= 1))
+})
+
+test_that("O-Boot-DS/O2: bootstrap band agrees with the MC band on an interior case", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  # Many subjects, well-separated components -> both methods are far from the
+  # boundary and the bands nearly coincide (they diverge only at the boundary, #18).
+  set.seed(99)
+  ns <- 40L
+  k <- 6L
+  subj <- stats::rnorm(ns, 0, sqrt(4))
+  rat <- stats::rnorm(k, 0, sqrt(0.6))
+  d <- expand.grid(subject = seq_len(ns), rater = seq_len(k))
+  d$score <- 10 +
+    subj[d$subject] +
+    rat[d$rater] +
+    stats::rnorm(nrow(d), 0, sqrt(1.2))
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  fb <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    ci_method = "bootstrap",
+    boot_samples = 999,
+    seed = 1
+  )
+  fm <- icc(d, score, subject, rater, seed = 1)
+  for (m in c(2, 4, 12)) {
+    db <- d_study(fb, m = m)
+    dm <- d_study(fm, m = m)
+    expect_equal(db$conf.low, dm$conf.low, tolerance = 0.02)
+    expect_equal(db$conf.high, dm$conf.high, tolerance = 0.02)
+  }
+})
+
+test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project", {
+  skip_on_cran()
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  # Multilevel bootstrap fit: a bootstrap band per projected level.
+  fb <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    ci_method = "bootstrap",
+    boot_samples = 199,
+    seed = 1
+  )
+  ds <- d_study(fb, m = c(1, 5, 10))
+  expect_identical(attr(ds, "method"), "bootstrap")
+  expect_setequal(unique(ds$level), c("subject", "cluster"))
+  # Slice 3 x Slice 4: an incomplete multilevel bootstrap fit projects the subject
+  # level with a bootstrap band.
+  di <- ragged_ds(d, 0.15, 7)
+  fbi <- icc(
+    di,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    ci_method = "bootstrap",
+    boot_samples = 199,
+    seed = 1
+  )
+  dsi <- suppressMessages(d_study(fbi, m = c(1, 5, 10)))
+  expect_identical(attr(dsi, "method"), "bootstrap")
+  expect_setequal(unique(dsi$level), "subject")
+  expect_true(all(is.finite(dsi$conf.low) & is.finite(dsi$conf.high)))
+})
