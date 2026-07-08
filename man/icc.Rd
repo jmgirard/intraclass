@@ -139,7 +139,8 @@ coefficients. The bootstrap does not rely on the asymptotic-normal covariance
 approximation but is far slower (a refit per resample). It is available for
 every design the \code{"glmmTMB"} and \code{"lme4"} engines fit (via \code{glmmTMB}'s
 \code{simulate()} + refit and \code{lme4::bootMer} respectively); the \code{"lavaan"} engine
-supports \code{"montecarlo"} only.}
+supports \code{"montecarlo"} only. As with the Monte-Carlo interval, the \code{"lme4"}
+engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}

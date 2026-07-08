@@ -174,7 +174,8 @@
 #'   approximation but is far slower (a refit per resample). It is available for
 #'   every design the `"glmmTMB"` and `"lme4"` engines fit (via `glmmTMB`'s
 #'   `simulate()` + refit and `lme4::bootMer` respectively); the `"lavaan"` engine
-#'   supports `"montecarlo"` only.
+#'   supports `"montecarlo"` only. As with the Monte-Carlo interval, the `"lme4"`
+#'   engine defers a singular (boundary) fit to `"glmmTMB"` for either method.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (default

@@ -426,7 +426,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - **BCa intervals** (need jackknife acceleration — percentile ships first); **bootstrap-
   projected `d_study()` bands** (the reliability-curve band reuses the shared *MC* draws
   across `k` — a bootstrap version would reproject each refit's components); **parallelized
-  refits** (keep dependency-light first). Untouched arc carry-overs stay in
+  refits** (keep dependency-light first); **lme4 bootstrap on singular fits** (bootMer
+  could bootstrap a boundary fit without merDeriv, but M16 keeps the lme4→glmmTMB singular
+  handoff for both `ci_method`s — maintainer decision; lifting it needs `ci_method` threaded
+  into the lme4 fit path + a `d_study` interaction → ROADMAP). Untouched arc carry-overs stay in
   [`ROADMAP.md`](ROADMAP.md): the **Bayesian engine** + `ci_method = "posterior"`;
   **within-cell replicates** (Wave 2); **three-facet `d_study()`** (Wave 2); the **M9
   averaged cluster-level `ICC(c,k)` incomplete divisor** (Wave 3); the **conflated

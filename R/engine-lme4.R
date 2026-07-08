@@ -79,11 +79,14 @@ fit_lme4 <- function(data, call = rlang::caller_env()) {
   if (lme4::isSingular(fit)) {
     abort_intraclass(
       c(
-        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
-         singular (boundary) fit.",
-        i = "A variance component was estimated at exactly zero, so \\
-             {.pkg merDeriv} cannot compute the parameter covariance.",
-        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+        "The {.pkg lme4} engine cannot return an interval for a singular \\
+         (boundary) fit.",
+        i = "A variance component was estimated at exactly zero; the \\
+             {.pkg lme4} engine defers boundary fits to the boundary-robust \\
+             default (its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately).",
+        i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
+             which stays finite here."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -213,11 +216,14 @@ fit_lme4_oneway <- function(data, call = rlang::caller_env()) {
   if (lme4::isSingular(fit)) {
     abort_intraclass(
       c(
-        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
-         singular (boundary) fit.",
-        i = "A variance component was estimated at exactly zero, so \\
-             {.pkg merDeriv} cannot compute the parameter covariance.",
-        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+        "The {.pkg lme4} engine cannot return an interval for a singular \\
+         (boundary) fit.",
+        i = "A variance component was estimated at exactly zero; the \\
+             {.pkg lme4} engine defers boundary fits to the boundary-robust \\
+             default (its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately).",
+        i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
+             which stays finite here."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -338,11 +344,14 @@ fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
   if (lme4::isSingular(fit)) {
     abort_intraclass(
       c(
-        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
-         singular (boundary) fit.",
-        i = "A variance component was estimated at exactly zero, so \\
-             {.pkg merDeriv} cannot compute the parameter covariance.",
-        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+        "The {.pkg lme4} engine cannot return an interval for a singular \\
+         (boundary) fit.",
+        i = "A variance component was estimated at exactly zero; the \\
+             {.pkg lme4} engine defers boundary fits to the boundary-robust \\
+             default (its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately).",
+        i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
+             which stays finite here."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -466,11 +475,14 @@ lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
   if (lme4::isSingular(fit)) {
     abort_intraclass(
       c(
-        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
-         singular (boundary) fit.",
-        i = "A variance component was estimated at exactly zero, so \\
-             {.pkg merDeriv} cannot compute the parameter covariance.",
-        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+        "The {.pkg lme4} engine cannot return an interval for a singular \\
+         (boundary) fit.",
+        i = "A variance component was estimated at exactly zero; the \\
+             {.pkg lme4} engine defers boundary fits to the boundary-robust \\
+             default (its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately).",
+        i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
+             which stays finite here."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -659,11 +671,14 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
   if (lme4::isSingular(fit)) {
     abort_intraclass(
       c(
-        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
-         singular (boundary) fit.",
-        i = "A variance component was estimated at exactly zero, so \\
-             {.pkg merDeriv} cannot compute the parameter covariance.",
-        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+        "The {.pkg lme4} engine cannot return an interval for a singular \\
+         (boundary) fit.",
+        i = "A variance component was estimated at exactly zero; the \\
+             {.pkg lme4} engine defers boundary fits to the boundary-robust \\
+             default (its {.pkg merDeriv} covariance is singular there, and a \\
+             bootstrap resamples degenerately).",
+        i = "Use {.code engine = \"glmmTMB\"} (for either {.arg ci_method}), \\
+             which stays finite here."
       ),
       class = "intraclass_singular_fit",
       call = call
