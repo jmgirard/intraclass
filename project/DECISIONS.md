@@ -1264,3 +1264,96 @@ consequences → references.
   2015); `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start), §1 (engines);
   memory `milestone-branches-and-prs`, `verify-against-installed-package`,
   `run-lintr-before-push`.
+
+## ADR-024: M15 scope — incomplete/ragged lme4 (full incomplete parity)
+- Date: 2026-07-07
+- Status: accepted
+- Context: M14 (ADR-023) gave `engine = "lme4"` full **balanced/complete** design
+  parity with glmmTMB but deferred incomplete/ragged data to "a follow-up slice"
+  (the M9 `k_eff`/connectedness × merDeriv singular-fit interaction). With M14
+  shipped (PR #18, v0.1.0 submission-ready) and no milestone in flight, the
+  maintainer opened a backlog review (STATUS "Next action") and chose to
+  **consolidate M14** by closing the incomplete-data gap rather than open new
+  statistical surface (the Bayesian engine, the M9 `ICC(c,k)` divisor). This is the
+  lower-risk of the frontrunners: engine parity on an existing estimand, not new
+  estimand work. Per PRINCIPLES.md #2/#14 this ADR details the milestone at its
+  start; **ADR-023/M14 is the governing precedent** (an alternative engine for an
+  existing estimand is not a new estimand — no estimand-spec, cf. M4/M5.5/M7).
+  A scope-width question was put to the maintainer this session (below).
+- Decision:
+  - **`engine = "lme4"` gains incomplete/ragged parity with glmmTMB across every
+    incomplete shape glmmTMB already fits** — chosen scope width **= full incomplete
+    parity** (maintainer chose full over the thinner "M9 multilevel only" or "random
+    shapes only" subsets). Three targets, each an existing `fit_lme4_*` shape run on
+    ragged data (**no new fit function, no structural fit change**): (1) incomplete
+    **fixed-rater two-way** (M3 Case 3A, θ²_r-under-imbalance); (2) incomplete
+    **crossed (Design 1) random multilevel** (M9, five-component); (3) incomplete
+    **random two-way** (M3 × M5.5) — currently *ungated but untested* as a selectable
+    engine, pinned here with an oracle.
+  - **Key structural fact — no fit change needed.** The `k_eff` (harmonic-mean
+    divisor), connectedness/identifiability, and θ²_r-under-imbalance machinery runs
+    in `icc()` **before** engine-fit dispatch and is engine-agnostic; the fit
+    *formulas* are identical between balanced and incomplete data (ragged data is
+    just missing cells). The work is therefore: (a) **narrow/remove the two
+    `!balanced` lme4 guards** (`R/icc.R` — the fixed-rater guard and the multilevel
+    guard, currently aborting toward glmmTMB); (b) confirm the shipped **merDeriv →
+    log-SD delta-transform** (ADR-012) and, for the fixed shape, the **θ²_r draw from
+    the fixed rater-contrast βs** (ADR-023) survive ragged designs with **unequal
+    rater counts**; (c) pin every shape with oracles.
+  - **Scope boundary (unchanged, glmmTMB-limited).** Only shapes glmmTMB already
+    fits are in scope: incomplete **nested** Designs 2/3, incomplete **fixed
+    multilevel**, and the **averaged cluster-level `ICC(c,k)` incomplete divisor** are
+    deferred **for all engines** (guarded before dispatch, ADR-008/016/018) — lme4
+    cannot cover what glmmTMB does not. This milestone does not change that frontier.
+  - **Boundary/singular policy unchanged (#3, ADR-012/023).** Ragged designs reach
+    the variance boundary far more often → merDeriv's information matrix goes singular
+    → the shipped `lme4::isSingular()` → classed `intraclass_singular_fit` abort
+    pointing at `engine = "glmmTMB"` fires more often. This is the *intended* graceful
+    degradation, not a regression: lme4 covers incomplete data **when it can** and
+    **loudly hands off** to the boundary-robust engine otherwise. A material part of
+    the milestone is **characterizing and oracle-pinning** that success-vs-degrade
+    boundary (#1/#5/#18 — pinned, not asserted).
+  - **No new estimand, estimand-spec, `ci_method`, or dependency.** lme4 + merDeriv
+    stay `Suggests` behind `check_installed()` (light install preserved). Additive,
+    non-breaking API change: `engine = "lme4"` accepts incomplete designs that
+    previously aborted (#6). Correctness is the established **O-LME2 pattern per
+    shape** (glmmTMB the independent oracle, #1): (a) point lme4 ≡ glmmTMB ≤ 1e-4 on
+    ragged data; (b) interval lme4 MC-CI ≈ glmmTMB MC-CI ~1e-2; (c) a
+    singular-fit-abort oracle on a ragged design that goes singular; (d) seeded-sim
+    coverage at nominal.
+  - **Slices (thin, #15):** **Slice 1** incomplete random two-way — narrow no guard
+    (already ungated), add the O-LME2 oracle + roxygen (the cheapest, de-risks the
+    merDeriv-on-ragged mechanics first); **Slice 2** incomplete fixed-rater two-way —
+    narrow the `R/icc.R:637` guard, confirm θ²_r-under-imbalance from ragged
+    fixed-contrast βs, oracle; **Slice 3** incomplete crossed random multilevel —
+    narrow the `R/icc.R:652` guard, five-component merDeriv vcov on ragged data,
+    oracle + the singular-fit-abort characterization.
+- Consequences: retires the last ADR-023 engine-parity deferral — `engine = "lme4"`
+  becomes a real choice on **every** design glmmTMB fits, balanced or ragged, and each
+  incomplete fit gains a cross-engine *interval* check, not just glmmTMB alone.
+  Changes are confined to the `icc()` guard/dispatch block (`R/icc.R` — two guards
+  narrowed), roxygen `@param engine` coverage (drop the "complete, balanced only"
+  caveat for lme4), `NEWS`, and tests; the `fit_lme4_*` functions are unchanged. No
+  `Imports`, estimand, or CI-machinery change. Ships on `m15-incomplete-lme4`, merges
+  via PR (`milestone-branches-and-prs`); post-merge `project/` reconcile is a direct
+  commit to `main` (finish-task policy — no CI job reads `project/`). Deferred out of
+  M15 (recorded so not rediscovered): the **parametric-bootstrap `ci_method`**
+  (bootMer); a **boundary-robust lme4 interval for singular fits** (glmmTMB covers it
+  today — the degrade-to-glmmTMB handoff stands); merDeriv edge cases beyond these
+  models. Untouched arc carry-overs stay in `ROADMAP.md`: the **Bayesian engine** +
+  `ci_method = "posterior"`; the **M9 averaged cluster-level `ICC(c,k)` incomplete
+  divisor**; **one-way via SEM**; within-cell replicates; three-facet `d_study()`;
+  the conflated single-level ICC (Eq. 14).
+- References: PRINCIPLES.md #1 (oracle-first — cross-engine point + interval + sim),
+  #2 (name the estimand first — none new here), #3 (boundary-aware MC intervals),
+  #5/#18 (fail loudly / pin, don't assert — the singular-fit degrade boundary),
+  #6 (additive, non-breaking API), #8 (`cli` + classed aborts), #14 (milestone gates),
+  #15 (thin slices), #16 (tracking in-commit), #17 (deferrals to ROADMAP);
+  **ADR-023 (M14 balanced lme4 parity this milestone extends to ragged data)**,
+  ADR-012 (M5.5 selectable-lme4 seam + merDeriv log-SD delta-transform + singular-fit
+  policy), ADR-008 (M3 `k_eff`/connectedness + fixed-rater θ²_r-under-imbalance),
+  ADR-011 (M5 multilevel fit), ADR-018 (M9 incomplete crossed multilevel estimand this
+  reuses); `merDeriv` (Wang & Merkle 2018), lme4 (Bates et al. 2015);
+  `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start), §1 (engines); memory
+  `milestone-branches-and-prs`, `verify-against-installed-package`,
+  `run-lintr-before-push`.

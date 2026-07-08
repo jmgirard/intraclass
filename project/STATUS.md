@@ -1,14 +1,18 @@
 # Project status
 
-- Milestone: **M14 — lme4 engine parity** — shipped (PR #18). `engine = "lme4"` now
-  matches glmmTMB across every balanced/complete design. The ADR-017 arc (M0–M13) plus
-  M14 are all shipped; the package is at v0.1.0, submission-ready. No milestone in flight.
-- Active task: — (M14 shipped; next code work is another maintainer-chosen backlog
-  promotion — see Next action.)
+- Milestone: **M15 — incomplete/ragged lme4 (full incomplete engine parity)** —
+  **active**, detailed at start (ADR-024). Extends M14's balanced lme4 parity to every
+  incomplete design glmmTMB fits (incomplete random two-way, incomplete fixed-rater
+  two-way, incomplete crossed random multilevel), closing the last ADR-023 deferral.
+  No new estimand/spec/`ci_method`/dependency. M0–M14 all shipped; package at v0.1.0.
+- Active task: **M15 Slice 1 — incomplete random two-way lme4** (not started). See the
+  M15 DoD checklist in [`MILESTONES.md`](MILESTONES.md).
+- Branch: `m15-incomplete-lme4` (created; ADR-024 + M15 board entry committed here).
 - Last green CI: PR #18 (M14) full matrix green incl. Windows and R-devel; merged to
   `main` at 474e0c1
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — M14 merged (PR #18) + `project/` reconciled
+- Updated: 2026-07-07 by main session (Opus) — M15 scoped & detailed (ADR-024), branch
+  created
 
 ## Where we are
 
@@ -32,28 +36,27 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**No milestone is in flight — M14 is shipped.** Two independent threads remain, both
-maintainer-initiated:
+**Start M15 Slice 1 — incomplete random two-way lme4** (`/start-task`). Confirm
+`icc(<ragged>, engine = "lme4")` on the two-way random design already dispatches to
+`fit_lme4()` and matches glmmTMB; add the O-LME2 oracle (point ≤1e-4, interval ~1e-2,
+seeded coverage) pinning it; drop the "complete, balanced only" lme4 caveat from the
+`@param engine` roxygen for this path. See the M15 DoD checklist in
+[`MILESTONES.md`](MILESTONES.md); scope in ADR-024.
 
-1. **CRAN submission (out of band, ADR-022).** The package is submission-ready. Before
-   uploading, run **win-builder** (R-devel + release) and **R-hub**, then update the
-   "will be run immediately before submission" line in `cran-comments.md` with the
-   results. `intraclass` does not (and cannot) submit for you. *(Note: M14 folded its
-   lme4-parity changes into the existing `0.1.0` NEWS section rather than bumping to a
-   dev version, on the basis that 0.1.0 has not yet been uploaded — revisit if 0.1.0 is
-   frozen for submission.)*
-2. **Next code milestone = another backlog promotion** (no pre-planned M15). The strongest
-   remaining candidates, each needing a start-of-milestone scope pass + ADR: the
-   **Bayesian engine** (rstanarm + `ci_method = "posterior"`); the M9 **averaged
-   cluster-level `ICC(c,k)` on incomplete data** (open divisor — a simulation-oracle/Fable
-   candidate); **incomplete/ragged lme4** for the M14 shapes (the natural follow-up now
-   that balanced lme4 parity is complete); **replicate ratings within cell**.
+**Out-of-band thread (unchanged): CRAN submission (ADR-022).** The package is
+submission-ready. Before uploading, run **win-builder** (R-devel + release) and
+**R-hub**, then update the "will be run immediately before submission" line in
+`cran-comments.md` with the results. `intraclass` does not (and cannot) submit for you.
+*(Note: M14 — and now M15 — fold their changes into the existing `0.1.0` NEWS section
+rather than bumping to a dev version, on the basis that 0.1.0 has not yet been uploaded
+— revisit if 0.1.0 is frozen for submission.)*
 
-Deferred out of M14 and still parked (not scheduled): **incomplete/ragged lme4** for the
-new shapes; the **parametric-bootstrap `ci_method`** (bootMer); the **Bayesian engine**
-(rstanarm + `ci_method = "posterior"`); the M9 **averaged cluster-level `ICC(c,k)` on
-incomplete data** (open divisor, spec §3b); **one-way / general ICC(1) via SEM** (no
-faithful sourced route — ADR-014). All in [`ROADMAP.md`](ROADMAP.md).
+Parked after M15 (not scheduled): the **Bayesian engine** (rstanarm +
+`ci_method = "posterior"`); the M9 **averaged cluster-level `ICC(c,k)` on incomplete
+data** (open divisor, spec §3b — a simulation-oracle/Fable candidate); the
+**parametric-bootstrap `ci_method`** (bootMer); **one-way / general ICC(1) via SEM** (no
+faithful sourced route — ADR-014); **replicate ratings within cell**. All in
+[`ROADMAP.md`](ROADMAP.md).
 
 Workflow: milestone work ships on a `m<N>-<slug>` branch and merges via PR
 (`milestone-branches-and-prs` memory); post-merge `project/` reconciles are a
