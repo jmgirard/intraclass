@@ -1,32 +1,19 @@
 # Project status
 
-- Milestone: **M15 — incomplete/ragged lme4 (full incomplete engine parity)** —
-  shipped (PR #19, ADR-024). `engine = "lme4"` now matches glmmTMB across every
-  incomplete design it fits too (incomplete random two-way, incomplete fixed-rater
-  two-way, incomplete crossed random multilevel), degrading loudly to glmmTMB only at
-  the variance boundary. M0–M15 all shipped; package at v0.1.0, submission-ready.
-- **Milestone: M16 — parametric-bootstrap `ci_method`** (ADR-025, in flight): a second
-  interval method (`ci_method = "bootstrap"`), both engines via a `simulate_refit()`
-  contract, covering every design they fit. Scope pass + all three slices + cross-cutting
-  DoD done this session; ready for the installed-pkg check and PR.
-- Active task: **M16 Slices 1–3 + cross-cutting DoD done** (S1 `b63c471`, S2 `9ebf5ad`
-  committed; S3 + DoD in working tree). `ci_method = "bootstrap"` now covers **every
-  design both mixed-model engines fit** — two-way random/fixed, one-way, and all
-  multilevel designs at both levels — via a shared `simulate_refit()` contract per engine
-  (glmmTMB `simulate()`+refit factory; lme4 `bootMer` factory), the component extractor
-  DRY-shared with each fit's point estimate. For fixed raters θ²_r is recomputed per
-  refit. Refit-failure discard policy hardened (classed warning >10%, abort <50%
-  converged) with a deterministic unit test. Cross-cutting DoD: roxygen, NEWS, and an
-  `advanced.Rmd` "Choosing a confidence-interval method" section all landed. Full suite
-  591 pass / 0 fail, lint + `air` clean; installed-pkg check (`NOT_CRAN=true`) run. **PR
-  [#21](https://github.com/jmgirard/intraclass/pull/21) open off `m16-bootstrap-ci` —
-  awaiting CI.** Installed check surfaced the lme4-singular bootstrap message (fixed
-  method-neutral, `9f56707`; maintainer kept the lme4→glmmTMB handoff, ADR-025).
-- Last green CI: PR #19 (M15) full matrix green incl. Windows and R-devel; merged to
-  `main` at b0dd492
+- Milestone: **M16 — parametric-bootstrap `ci_method`** — shipped (PR #21, ADR-025).
+  `ci_method = "bootstrap"` is a second interval method (parametric bootstrap: simulate →
+  refit → percentile interval) alongside the Monte-Carlo default, covering **every design
+  both mixed-model engines fit** — two-way random/fixed, one-way, and all multilevel designs
+  at both levels, complete and incomplete — via a shared `simulate_refit()` contract per
+  engine (glmmTMB `simulate()`+refit; lme4 `bootMer`). `"lavaan"` stays Monte-Carlo-only; a
+  singular lme4 fit defers to glmmTMB for either method. M0–M16 all shipped; package at
+  v0.1.0, submission-ready. No milestone in flight.
+- Active task: — (M16 shipped; next code work is a maintainer-chosen backlog promotion —
+  see Next action for the Wave 1–3 sequencing.)
+- Last green CI: PR #21 (M16) full matrix green incl. Windows and R-devel; merged to
+  `main` at 0b84885
 - Blockers: —
-- Updated: 2026-07-07 by main session (Opus) — non-Bayesian carryover sequencing recorded;
-  M16 (bootstrap `ci_method`) scope pass (ADR-025) + all 3 slices + cross-cutting DoD done
+- Updated: 2026-07-08 by main session (Opus) — M16 merged (PR #21) + `project/` reconciled
 
 ## Where we are
 
@@ -52,23 +39,19 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M16 in flight — parametric-bootstrap `ci_method` (ADR-025).** The first genuinely new
-`ci_method`, and the multi-`ci_method` dispatch seam the eventual Bayesian `"posterior"`
-method reuses. Chosen from the non-Bayesian carryovers as the lowest-estimand-risk item
-with the highest infra ROI. Scope pinned (both engines via a `simulate_refit()` contract,
-percentile interval, `d_study` stays MC-only). **All three slices + cross-cutting DoD
-done** — bootstrap covers every design both mixed-model engines fit (two-way random/fixed,
-one-way, multilevel at both levels), oracle-tested incl. cross-engine agreement and the
-refit-failure discard policy; roxygen/NEWS/`advanced.Rmd` landed. S1 `b63c471`, S2
-`9ebf5ad` committed; S3 + DoD in the working tree, ready for the installed-pkg check + PR.
+**No milestone in flight — M16 shipped (PR #21, ADR-025).** `ci_method = "bootstrap"` is
+live across every design both mixed-model engines fit; the multi-`ci_method` dispatch seam
+is now in place for the eventual Bayesian `"posterior"` method. Next code work is a
+maintainer-chosen backlog promotion from the sequencing below (each needs its own
+start-of-milestone scope pass + ADR).
 
-**Agreed non-Bayesian carryover sequencing (this session).** Ordered by oracle-risk
-(#1) — bank the clean-oracle wins before the open research question. Each promotion still
-gets its own start-of-milestone scope pass + ADR; nothing beyond M16 is pre-committed:
+**Non-Bayesian carryover sequencing.** Ordered by oracle-risk (#1) — bank the clean-oracle
+wins before the open research question:
 
-- **Wave 1 (low-risk, clean oracle):** **M16 = parametric-bootstrap `ci_method`** (bootMer /
-  glmmTMB `simulate` — in flight); + the **conflated single-level ICC (Eq. 14, ten Hove
-  2022 — sourced)** as a thin slice.
+- **Wave 1 (low-risk, clean oracle):** **M16 = parametric-bootstrap `ci_method`** — ✅
+  **shipped** (PR #21); remaining Wave-1 item: the **conflated single-level ICC (Eq. 14,
+  ten Hove 2022 — sourced)** as a thin slice (strongest next candidate — small, paper
+  oracle).
 - **Wave 2 (new estimand, attainable oracle):** **M17 = within-cell replicates**
   (split σ²_sr from σ²_e via `(1 | subject:rater)`; classical-GT / `gtheory` oracle); +
   **three-facet `d_study()`** as an adjacent feature slice.

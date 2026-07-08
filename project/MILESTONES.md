@@ -435,15 +435,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   averaged cluster-level `ICC(c,k)` incomplete divisor** (Wave 3); the **conflated
   single-level ICC (Eq. 14)** (Wave 1 thin slice); **one-way via SEM** (blocked, ADR-014);
   the boundary-robust lme4 singular interval + merDeriv edge cases (deprioritized).
-- Status: **in flight — all three slices + cross-cutting DoD done, ready for PR** (S1
-  glmmTMB `b63c471`, S2 lme4 `9ebf5ad` committed; S3 + DoD in working tree). `ci_method =
-  "bootstrap"` covers **every design both mixed-model engines fit** — two-way random/fixed,
-  one-way, and the multilevel designs at both levels — via a shared `glmmtmb_simulate_refit`
-  / `lme4_bootmer_refit` factory per engine (the component extractor DRY-shared with each
-  fit's point estimate; θ²_r recomputed per refit for fixed raters). Oracles: O1 coverage,
-  O2 MC-agreement (two-way ≤0.06; multilevel subject-level ≤0.10, honestly looser),
-  cross-engine lme4≈glmmTMB (≤0.05), a deterministic refit-failure discard-policy test,
-  reproducibility, and the lavaan-unsupported abort. Cross-cutting DoD landed: roxygen,
-  NEWS, `advanced.Rmd` "Choosing a confidence-interval method". 591 pass / 0 fail, lint +
-  `air` clean. Remaining: installed-pkg check (`NOT_CRAN=true`) then PR off
-  `m16-bootstrap-ci`.
+- Status: **done** (Slices 1–3 + method-neutral singular-fit message + finish-task
+  reconcile; merged via PR #21 at 0b84885; full CI matrix green incl. Windows and R-devel).
+  `ci_method = "bootstrap"` covers **every design both mixed-model engines fit** — two-way
+  random/fixed, one-way, and the multilevel designs at both levels — via a shared
+  `glmmtmb_simulate_refit` / `lme4_bootmer_refit` factory per engine (the component extractor
+  DRY-shared with each fit's point estimate; θ²_r recomputed per refit for fixed raters).
+  Oracles: O1 coverage, O2 MC-agreement (two-way ≤0.06; multilevel subject-level ≤0.10,
+  honestly looser), cross-engine lme4≈glmmTMB (≤0.05), a deterministic refit-failure
+  discard-policy test, reproducibility, and the lavaan-unsupported abort. The lme4 engine
+  defers a singular fit to glmmTMB for either `ci_method` (maintainer decision; lifting it
+  for bootstrap → ROADMAP). Installed-pkg check run; 591 pass / 0 fail, lint + `air` clean.
