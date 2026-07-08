@@ -46,25 +46,24 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M17 is scoped (ADR-026) and in flight — start Slice 1.** M17 bundles the two remaining
-non-research non-Bayesian carryovers (Wave-1 conflated ICC + Wave-2 three-facet `d_study()`
-and within-cell replicates) into one milestone of three independent vertical slices, ordered
-by oracle-risk. The DoD board is in [`MILESTONES.md`](MILESTONES.md); scope + the three API
-decisions are in ADR-026.
+**M17 is code-complete on `m17-varcomp-trio` (ADR-026) — open the PR.** All three slices
+shipped (full board in [`MILESTONES.md`](MILESTONES.md)); local gate green (`R CMD check`
+0/0/0, 722 tests pass, lint + `air` + spelling clean; coverage 86% per the
+`coverage-baseline` policy). **Immediate next step: push the branch and open the PR**
+(`milestone-branches-and-prs`); on green CI + merge, reconcile the deferred markers and set
+"Last green CI".
 
-**Slice order (start here):**
+**What shipped in M17** (see MILESTONES for the per-slice DoD):
 
-- **Slice 1 — conflated single-level ICC (Eq. 14)** — `level = "conflated"`, read off the
-  existing five-component multilevel fit, labeled a diagnostic contrast (not a recommended
-  coefficient). Smallest, cleanest oracle (paper Eq. 14 + reduction + lme4). Promote
-  [`M5-multilevel.md §4`](estimand-specs/M5-multilevel.md) to a shipped-coefficient spec first.
-- **Slice 2 — three-facet `d_study()`** — project subjects-per-cluster for **complete-data**
-  multilevel at the cluster level (Brennan 2001 / `gtheory` oracle). Scope guard: refuse
-  incomplete multilevel (the Wave-3 `ICC(c,k)` divisor).
-- **Slice 3 — within-cell replicates** — split σ²_sr from σ²_e via `(1 | subject:rater)`;
-  **write the new `M17-within-cell-replicates.md` spec first** (resolve crossed-vs-nested
-  facet, coefficient set, occasion data API); `gtheory` oracle in `Suggests`. May spin into
-  M18 if heavy.
+- **Slice 1** — conflated single-level ICC via `level = "conflated"` (agreement-only Eq. 14,
+  a diagnostic contrast). Spec [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md).
+- **Slice 2** — multilevel rater-count `d_study()` at subject + cluster levels. *Retargeted*
+  from the original "three-facet / subjects-per-cluster" plan after the source review (ten
+  Hove Eq. 13's cluster ICC has no subject facet; ADR-026 amend; spec M4.5 §7).
+- **Slice 3** — within-cell replicates + the occasion-averaged coefficient (`occasions` knob,
+  per-component error divisors). Spec
+  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md). No new
+  dependency (`gtheory` proved unnecessary — ANOVA + lme4 + sim oracles).
 
 **Still after M17 (unchanged sequencing):**
 

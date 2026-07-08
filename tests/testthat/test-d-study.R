@@ -431,3 +431,21 @@ test_that("nested multilevel projects the subject level only", {
   ds <- d_study(fit, m = 1:5)
   expect_setequal(unique(ds$level), "subject")
 })
+
+test_that("multilevel d_study print/tidy/format carry the level column", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_ds(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  ds <- d_study(
+    icc(d, score, subject, rater, cluster = cluster, seed = 1),
+    m = 1:4
+  )
+  lines <- format(ds)
+  expect_true(any(grepl("multilevel", lines)))
+  expect_true(any(grepl("level", lines)))
+  expect_invisible(print(ds))
+  td <- tidy(ds)
+  expect_true("level" %in% names(td))
+  expect_setequal(unique(td$level), c("subject", "cluster"))
+  g <- glance(ds)
+  expect_identical(nrow(g), 1L)
+})

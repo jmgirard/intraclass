@@ -152,6 +152,13 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
      covers it.
   Invariants: the curve is increasing in `m` and stays in `[0, 1]`; seeded
   projections are reproducible and RNG-neutral (#9, #12).
+  5. **Multilevel rater-count projection asserted (M17 Slice 2)** — `d_study()` on a
+     multilevel fit projects `m` at the subject and cluster levels (ten Hove Eq.
+     12/13; spec `M4.5-d-study.md` §7): at `m = observed k` each level equals the
+     fitted `ICC(*,k)` (<1e-4), the curve matches an independent `lme4` five-component
+     fit, a seeded sim recovers a projected value not run with MC coverage, and
+     consistency projection is Spearman–Brown per level. Subjects-per-cluster is
+     **not** projected (Eq. 13 has no subject facet; ADR-026 amendment).
 - **Decision:** projection is a change of the averaging divisor (ADR-010; estimand
   spec `M4.5-d-study.md`); fixed-rater absolute agreement is refused as ill-posed.
 - **Provenance:** `data-raw/oracle-d-study.R` (seeded; regenerates the analytic and
@@ -185,6 +192,37 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   method) remains deferred (ROADMAP).
 - **Provenance:** `data-raw/oracle-multilevel.R` (seeded; `stopifnot` tolerance
   checks), committed. Reproducible; nothing hardcoded.
+
+### Oracle O-Conflated — conflated single-level ICC, Eq. 14 (M17 Slice 1)
+- **Status:** **asserted (M17 Slice 1)** in `tests/testthat/test-icc-multilevel.R`
+  (ADR-026; spec `M17-conflated-icc.md`). `level = "conflated"` targets ten Hove et
+  al. (2022) **Eq. 14** — the biased single-level ICC obtained by ignoring the
+  cluster structure — off the M5 five-component fit; agreement-only, a diagnostic
+  contrast. Three oracles: **O-lme4** (Eq. 14 from an independent `lmer` fit, <1e-4);
+  **O-Eq14** (closed-form Eq. 14 on the object's reported components, ~1e-10); and
+  **O-population** (seeded recovery with MC-interval coverage + resemblance to the
+  flat single-level `icc()` — a *population-level*, not finite-sample, equivalence,
+  #18).
+- **Decision:** signal σ²_c + σ²_{s:c} over error {σ²_r, σ²_cr, σ²_{(s:c)r}}, divisor
+  `k`; surfaced only as a diagnostic contrast, never recommended (ADR-026).
+  Consistency-conflated is unsourced and parked (ROADMAP).
+
+### Oracle O-Rep — within-cell replicates, two-way random (M17 Slice 3)
+- **Status:** **asserted (M17 Slice 3)** in `tests/testthat/test-replicates.R`
+  (ADR-026; spec `M17-within-cell-replicates.md`). Replicated cells split the residual
+  into σ²_sr (interaction) and σ²_e (pure error) via `(1 | subject:rater)`; the
+  `occasions` knob averages pure error over replicates. Three oracles, no `gtheory`
+  dependency: **O-ANOVA** (the balanced two-way-with-replication ANOVA mean squares
+  give all four components by method of moments — independent of REML — and every
+  single-occasion and occasion-averaged ICC matches to <1e-4); **O-lme4** (identical
+  interaction fit, <1e-4); **O-sim** (seeded recovery + MC coverage). Both
+  `ci_method`s exercised.
+- **Decision:** per-component error divisors (σ²_e divides by raters × occasions,
+  σ²_r/σ²_sr by raters only); `k_eff` counts distinct raters. Two-way random,
+  balanced/complete replicates only; fixed/one-way/multilevel/ragged deferred
+  (ADR-026; spec §7).
+- **Provenance:** seeded generator `sim_replicates()` in the test file; ANOVA MoM via
+  `stats::aov`. Reproducible; nothing hardcoded.
 
 ### Oracle O-OW — one-way random ICC(1)/ICC(k) (M6)
 - **Status:** **asserted (M6)** in `tests/testthat/test-icc-oneway.R` (spec
