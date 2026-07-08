@@ -433,3 +433,62 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   discard-policy test, reproducibility, and the lavaan-unsupported abort. The lme4 engine
   defers a singular fit to glmmTMB for either `ci_method` (maintainer decision; lifting it
   for bootstrap → ROADMAP). Installed-pkg check run; 591 pass / 0 fail, lint + `air` clean.
+
+## M17: variance-decomposition trio — conflated ICC, three-facet `d_study()`, within-cell replicates (ADR-026) — **IN FLIGHT**
+- Goal: promote the next non-Bayesian wave out of the parking lot as **one milestone of
+  three independent vertical slices**, themed *finer variance decomposition and its
+  projection*, ordered by oracle-risk (bank the clean-oracle wins first, #1). Two slices ride
+  the **existing five-component multilevel fit** (M5/M8/M9); the third is a **new single-level
+  two-way fit**. Slices are not mutually dependent — each ships end-to-end on its own.
+- Reference: ADR-026 (scope + the three maintainer API decisions). Estimand-specs: Slice 1
+  promotes [`M5-multilevel.md §4`](estimand-specs/M5-multilevel.md) (Eq. 14) to a shipped
+  coefficient; Slice 2 extends [`M4.5-d-study.md`](estimand-specs/M4.5-d-study.md); Slice 3
+  is a **new spec** `M17-within-cell-replicates.md` (written at Slice 3 start).
+- **DoD board (check off in the same commit as the work, #16):**
+  - **Slice 1 — conflated single-level ICC (Eq. 14), Wave-1 carryover, smallest.**
+    - [ ] `level = "conflated"` accepted by `icc()` (validated/iterated like `level`), read
+          off the existing five-component fit — no new fit, no new dependency.
+    - [ ] `(σ²_c + σ²_{s:c}) / (σ²_c + σ²_{s:c} + (σ²_r + σ²_{cr} + σ²_{(s:c)r})/k)` via the
+          shared `icc_point()` path; single + average divisor.
+    - [ ] `print`/`tidy`/`glance` label it a **diagnostic contrast, not a recommended
+          coefficient** (never a peer of subject/cluster in the output).
+    - [ ] `choose_icc()` never *recommends* conflated; may name it as the anti-pattern.
+    - [ ] Oracles: O-Eq14 (paper closed form), O-reduction (equals single-level `icc()`
+          ignoring `cluster` — promote M5 §5 invariant to a test), O-lme4.
+    - [ ] roxygen + NEWS + `advanced.Rmd`/`choosing-an-icc.Rmd` worked contrast; CI green.
+  - **Slice 2 — three-facet `d_study()` (subjects-per-cluster projection), complete-data
+    multilevel, cluster level.**
+    - [ ] `d_study()` gains a subjects-per-cluster facet arg; projects `ICC(c,k)` over
+          `(m, n_s)` for complete-data multilevel designs.
+    - [ ] **Scope guard**: aborts/refuses on incomplete multilevel (the open M9 `ICC(c,k)`
+          divisor, Wave 3) — must not silently project it (#5).
+    - [ ] MC band reuses shared draws across the grid (M4.5 device); bootstrap-band stays
+          deferred (ADR-025).
+    - [ ] Oracles: O-GENOVA (Brennan 2001 / `gtheory` two-facet), O-reduction (at observed
+          `n_s` equals reported `ICC(c,k)`), O-sim (projected value not run + MC coverage).
+    - [ ] roxygen + NEWS + vignette; `autoplot` handles the added facet or documents its
+          limit; CI green.
+  - **Slice 3 — within-cell replicates (new estimand), Wave-2, heaviest.** *(May spin into
+    M18 if the milestone runs heavy — decide at this slice's start, ADR-026.)*
+    - [ ] **Write `M17-within-cell-replicates.md`** first (#2): resolve facet **crossed vs.
+          nested**, the **shipped coefficient set**, and the **occasion data API** — the three
+          questions ADR-026 defers to spec time.
+    - [ ] Replace the existing `has_replicates` abort ([`icc.R`](../R/icc.R)) with the
+          `(1 | subject:rater)` fit path splitting σ²_res → σ²_sr + σ²_e; both engines.
+    - [ ] Identifiability guards for the replicated design (#5, classed `abort_*`).
+    - [ ] `gtheory` added to **`Suggests`** (test-only, like `psych`; light-install intact).
+    - [ ] Oracles: O-gtheory (two-facet VCs), O-MS (closed-form mean squares), O-sim.
+    - [ ] `print`/`tidy`/`glance` surface σ²_sr; MC + bootstrap CIs; roxygen + NEWS +
+          vignette; CI green.
+  - **Milestone close:** installed-pkg check (`NOT_CRAN=true`) + `lintr::lint_package()` +
+    `air format --check` clean before each PR push; `project/` reconciled in the merge commit.
+- Deferred out of M17 (record so not rediscovered): BCa intervals and **bootstrap-projected
+  `d_study` bands** (ADR-025); the **M9 averaged cluster-level `ICC(c,k)` incomplete divisor**
+  (Wave 3, research — Slice 2's complete-data guard must not reach it); **single-level
+  subject-count projection** (out of scope, M4.5 §6 — Slice 2 is cluster-level only). Untouched
+  arc carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the **Bayesian engine** +
+  `ci_method = "posterior"`; **categorical/ordinal GLMM ratings**; **one-way via SEM**
+  (blocked, ADR-014); the **non-parametric bootstrap / profile-likelihood CIs** and
+  **benchmark suite**; the **lme4 singular-fit / merDeriv edge cases** (deprioritized).
+- Status: **in flight — scoped (ADR-026), not yet started.** No branch, no code. Slice order:
+  conflated ICC → three-facet `d_study()` → within-cell replicates.
