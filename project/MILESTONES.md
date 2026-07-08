@@ -4,12 +4,13 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers — the
 full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
 (`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
-restate it here). **No milestone is in flight** — the next one is scoped by an ADR at
-its start after a short retro (founding brief §7) and detailed in full here until it
-ships. The arc is a hypothesis, not a contract — reorders get a
+restate it here). **M19 is the active milestone** (implemented, PR pending); each milestone
+is scoped by an ADR at its start after a short retro (founding brief §7) and detailed in full
+here until it ships. The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
-ADR-025 M16, ADR-026 M17).
+ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
+M18 and ADR-029 M19).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 

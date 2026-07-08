@@ -58,19 +58,18 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M17 shipped (PR #22, ADR-026) — no milestone in flight.** The **M18–M21 completeness arc
-is planned** (ADR-027) to close every 🔵 *not yet* gap in [`COVERAGE.md`](COVERAGE.md).
-Next code work is **starting M18** (it gets its own start-of-milestone scope pass + ADR).
+**M18 shipped (PR #23, ADR-028); M19 implemented (ADR-029) — awaiting its PR.** The
+**M18–M21 completeness arc** (ADR-027) closes every 🔵 *not yet* gap in
+[`COVERAGE.md`](COVERAGE.md). Next code work after the M19 PR merges is **starting M20** (its
+own start-of-milestone scope pass + ADR).
 
-**Planned arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
+**Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
 
-- **M18 — Multilevel completeness I (crossed, incomplete):** incomplete fixed-rater crossed
-  (Slice 1); incomplete conflated ICC (Slice 2); incomplete subject-level `d_study()` +
-  bootstrap `d_study()` bands (Slice 3). Reuses M3 Case-3A / M10 θ²_r / M9 machinery.
-- **M19 — Multilevel completeness II (nested Designs 2/3):** incomplete nested (Slice 1);
-  fixed-rater nested (Slice 2). The M8→incomplete + M10-fixed analog.
+- **M18 — Multilevel completeness I (crossed, incomplete):** ✅ shipped (PR #23).
+- **M19 — Multilevel completeness II (nested Designs 2/3):** incomplete nested (Slice 1) +
+  fixed-rater nested Design 2 (Slice 2) — **implemented on `m19-nested-completeness`, PR pending.**
 - **M20 — Within-cell replicate completeness:** ragged (Slice 1), fixed-rater (Slice 2),
-  multilevel (Slice 3) replicates. Extends M17 Slice 3.
+  multilevel (Slice 3) replicates. Extends M17 Slice 3. **Next.**
 - **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
   (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc.
 
