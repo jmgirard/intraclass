@@ -40,12 +40,12 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**Start M15 Slice 1 — incomplete random two-way lme4** (`/start-task`). Confirm
-`icc(<ragged>, engine = "lme4")` on the two-way random design already dispatches to
-`fit_lme4()` and matches glmmTMB; add the O-LME2 oracle (point ≤1e-4, interval ~1e-2,
-seeded coverage) pinning it; drop the "complete, balanced only" lme4 caveat from the
-`@param engine` roxygen for this path. See the M15 DoD checklist in
-[`MILESTONES.md`](MILESTONES.md); scope in ADR-024.
+**Open the M15 PR from `m15-incomplete-lme4`.** All three slices + the local gate are
+done (roxygen, NEWS, `air`, `lintr` clean, full suite 572/0/0; installed-package check
+in this finish pass). Push the branch, `gh pr create`, and once the full CI matrix is
+green and merged, reconcile the pending markers (STATUS "Last green CI" → merge commit;
+M15 Status line → merged; compress the M15 entry to summary form preserving the
+"Deferred out of M15" list) in a direct commit to `main`. Scope in ADR-024.
 
 **Out-of-band thread (unchanged): CRAN submission (ADR-022).** The package is
 submission-ready. Before uploading, run **win-builder** (R-devel + release) and

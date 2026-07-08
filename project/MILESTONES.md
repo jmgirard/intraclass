@@ -4,11 +4,11 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones (M0–M11) are compressed** to Goal / Status / Deferred + spec-and-ADR
 pointers — the full blow-by-blow DoD lives in its ADR (`DECISIONS.md`), its
 estimand-spec, and git history (ADR-015, single-source; don't restate it here). The
-**active** and **next** milestones are detailed in full. The remaining milestone (M13)
-is a provisional one-liner, detailed at its start after a short retro on the previous
-one (founding brief §7). The arc is a hypothesis, not a contract — reorders get a
-[`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
-detailed M9, ADR-019 detailed M10, ADR-020 detailed M11, ADR-021 detailed M12).
+**active** milestone (M15) is detailed in full; there is no pre-planned next milestone
+(each is scoped by an ADR at its start after a short retro — founding brief §7). The
+arc is a hypothesis, not a contract — reorders get a [`DECISIONS.md`](DECISIONS.md)
+entry (the M9–M13 tail was set by ADR-017; ADR-018 detailed M9, ADR-019 M10, ADR-020
+M11, ADR-021 M12, ADR-023 M14, ADR-024 M15).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -423,4 +423,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   the **M9 averaged cluster-level `ICC(c,k)` incomplete divisor**; **one-way via SEM**;
   within-cell replicates; three-facet `d_study()`; the conflated single-level ICC
   (Eq. 14).
-- Status: **active** — detailed at start (ADR-024); no slice committed yet.
+- Status: **active** — all three slices + local gate done (roxygen, NEWS, `air`,
+  `lintr` clean, full suite 572/0/0); **pending installed-package check + PR + CI
+  merge**. Committed on `m15-incomplete-lme4`.
