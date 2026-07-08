@@ -617,19 +617,25 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       (`test-d-study.R`), pending per-component-divisor projection.
 
 **Slice 3 — ragged/incomplete replicates (two-way random single-level; the one genuine
-characterization):**
-- [ ] Lift the `!replicates_uniform` abort (`R/icc.R`, ~L687); the single-occasion family fits on
-      ragged data via the shipped `k_eff` (distinct raters/subject) + M3 connectedness gate.
-- [ ] `occasions = "average"`: **attempt** the effective-n_o divisor against the reduction
-      (uniform-ragged → M17 balanced) + cross-engine oracles; **if unpinnable, ship single-occasion
-      ragged only and reclassify occasion-averaged-ragged to 🟣 research** (record in
-      `M17-within-cell-replicates.md` §7; `verify-estimator` may recommend a Fable review, #19).
-- [ ] Compound corners guarded loudly: ragged × fixed and ragged × multilevel replicates abort
+characterization):** ✅ done
+- [x] Lift the `!replicates_uniform` abort (`R/icc.R`); the single-occasion family fits on
+      ragged data via the shipped interaction fit (`fit_{glmmtmb,lme4}_replicates`), the
+      harmonic-mean `k_eff` (distinct raters/subject), and the M3 connectedness gate. No new fit
+      function needed — the machinery is engine-agnostic and runs before fit dispatch.
+- [x] `occasions = "average"`: **attempted, degraded to 🟣 research** (maintainer-authorized
+      outcome). With unequal per-cell counts the reliability of the mean of `n_o` replicates has no
+      single scalar effective-`n_o` divisor (GT averaging weights are per-cell) and no
+      textbook/independent oracle pins one, so shipping a guessed divisor would violate #1/#4.
+      `occasions = "average"` on ragged data aborts loudly; recorded 🟣 in
+      `M17-within-cell-replicates.md` §7 + `COVERAGE.md` §②.
+- [x] Compound corners guarded loudly: ragged × fixed and ragged × multilevel replicates abort
       with a forward pointer (deferred — one imbalance dimension at a time).
-- [ ] O-RagRep oracles asserted in `test-replicates.R`: reduction to M17 balanced when data is
-      uniform; reduction to M3 single-occasion incomplete two-way via cell-mean aggregation;
-      glmmTMB↔lme4 <1e-4; seeded recovery; the averaged-divisor characterization per the degrade
-      clause.
+- [x] O-RagRep oracles asserted in `test-replicates.R`: glmmTMB↔lme4 cross-engine <1e-4 (unequal
+      counts **and** incomplete crossing); `k_eff = n_raters` on complete-crossing ragged counts;
+      the ICC(A,1)-from-components identity; seeded recovery + MC-CI coverage; both `ci_method`s;
+      the two deferral aborts. (The uniform→M17 and cell-mean→M3 reductions are not cleanly
+      reachable — a uniform design takes the M17 path, and unequal-count cell means are
+      heteroscedastic — so cross-engine + seeded recovery are the independent oracles, as M15.)
 
 **Cross-cutting DoD:**
 - [ ] `M17-within-cell-replicates.md` §7 updated: the shipped corners moved into the map; the
@@ -650,10 +656,14 @@ characterization):**
   incomplete divisor (🟣 research, M9 §9); **SEM parity** (M21); Bayesian engine + `ci_method =
   "posterior"`; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **in flight** (ADR-030; third milestone of the M18–M21 arc). **Slices 1–2 done** on
-  branch `m20-fixed-replicates` (Slice 1 committed `7d82217`): Slice 1 fixed-rater replicates
-  (`fit_{glmmtmb,lme4}_replicates_fixed`, O-FRep); Slice 2 multilevel replicates
+- Status: **all slices done, ready to merge** (ADR-030; third milestone of the M18–M21 arc). On
+  branch `m20-fixed-replicates` (Slice 1 `7d82217`, Slice 2 `bfc23dc`): **Slice 1** fixed-rater
+  replicates (`fit_{glmmtmb,lme4}_replicates_fixed`, O-FRep); **Slice 2** multilevel replicates
   (`fit_{glmmtmb,lme4}_ml_replicates` crossed + `fit_{glmmtmb,lme4}_nested_replicates`,
   design-aware `multilevel_replicate_facts()`, O-MLRep) + a `d_study()`-on-replicate correctness
-  guard. Full local suite green, `air`/`lintr` clean, docs regenerated. Slice 3 (ragged) not yet
-  started; not yet merged.
+  guard; **Slice 3** ragged single-occasion replicates (no new fit; occasion-averaged-ragged
+  degraded to 🟣 research, O-RagRep). Full local suite green, `air`/`lintr` clean, docs regenerated.
+  Not yet merged (Slice 3 pending commit).
+- Deferred out of M20 (added at close): **occasion-averaged coefficient on ragged replicates**
+  (🟣 research — no validated effective-`n_o` divisor, M20 Slice 3 attempt-then-degrade); **`d_study()`
+  projection off a replicate fit** (needs per-component error divisors; refused loudly).

@@ -123,9 +123,14 @@
 #' finite-population \eqn{\theta^2_r} (McGraw & Wong Case 3A, fit as
 #' `score ~ 1 + rater + (1|subject) + (1|subject:rater)`); on balanced, complete data
 #' \eqn{\theta^2_r = \sigma^2_r}, so fixed reproduces the random-rater coefficients.
-#' This covers **balanced, complete** replicated two-way designs (every cell present
-#' and rated the same number of times), random **or fixed** raters; ragged
-#' replicates, one-way, and multilevel replicates are planned for later milestones.
+#' **Multilevel** replicated designs add a `(1|cluster:subject:rater)` term (crossed
+#' Design 1 and nested Design 2), splitting the highest-order residual at the subject
+#' level. **Ragged** (unequal per-cell counts or missing cells) two-way random data
+#' fits the **single-occasion** family directly (the replicate analogue of an
+#' incomplete design); the occasion-averaged coefficient on ragged data is not yet
+#' supported (there is no single effective occasion count to average over). One-way
+#' replicates, fixed or multilevel ragged replicates, and `d_study()` projection off a
+#' replicate fit are planned for later milestones.
 #'
 #' @section Confidence intervals:
 #' Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
@@ -665,6 +670,10 @@ icc <- function(
   # a violation (M6 spec §5).
   design_info <- summarize_design(df)
   replicates <- FALSE
+  # A ragged/incomplete single-level replicate design (M20 Slice 3): the
+  # single-occasion ICC family ships, but the occasion-averaged coefficient needs an
+  # unvalidated effective-n_o divisor and is gated to research below.
+  ragged_replicates <- FALSE
   # The occasion count per cell for the replicate path. `summarize_design()` reads the
   # flat subject x rater grid (correct for single-level and crossed designs); the
   # nested (block-diagonal) case overrides it below with a design-aware value.
@@ -729,20 +738,32 @@ icc <- function(
         }
         n_o_val <- ml_rep$n_o
       } else if (!design_info$replicates_uniform) {
-        # Ragged replicates (random single-level) are M20 Slice 3; ragged x fixed are a
-        # deferred compound corner (one imbalance dimension at a time, ADR-030). Both
-        # abort here -- fixed-rater replicates ship for BALANCED/complete data only.
-        abort_unsupported(c(
-          "Ragged within-cell replicates are not supported yet.",
-          i = "This slice covers balanced, complete replicated designs (every \\
-               subject-by-rater cell present and rated the same number of times).",
-          i = "Provide an equal number of ratings in every cell, or aggregate to \\
-               one rating per cell."
-        ))
+        # Ragged / incomplete single-level replicates (M20 Slice 3, ADR-030). The
+        # single-occasion ICC family is the replicate analogue of M3: the shipped
+        # interaction fit fits ragged data, the rater divisor is the harmonic-mean
+        # k_eff (distinct raters per subject), and connectedness is gated below -- all
+        # sourced/oracle-pinned. The occasion-AVERAGED coefficient is deferred to
+        # research: with unequal per-cell rating counts the "mean of n_o replicates"
+        # has no single scalar effective-n_o divisor (GT averaging weights are
+        # per-cell), and no textbook/independent oracle pins one, so shipping a guessed
+        # divisor would violate #1/#4. Gated at the occasions check below.
+        if (raters == "fixed") {
+          # Ragged x fixed replicates are a deferred compound corner (one imbalance
+          # dimension at a time, ADR-030): fixed-rater replicates ship BALANCED only.
+          abort_unsupported(c(
+            "Ragged within-cell replicates are not supported for fixed raters yet.",
+            i = "Fixed-rater replicates ship for balanced, complete data; the ragged \\
+                 case is planned for a later milestone.",
+            i = "Use {.code raters = \"random\"} for ragged replicated data, or \\
+                 provide an equal number of ratings in every cell."
+          ))
+        }
+        ragged_replicates <- TRUE
       }
-      # Fixed-rater (M20 Slice 1) and multilevel (M20 Slice 2) within-cell replicates
-      # now flow through: theta^2_r replaces sigma^2_r for fixed raters, and multilevel
-      # fits gain the (1|cluster:subject:rater) split. Balanced/complete.
+      # Fixed-rater (M20 Slice 1), multilevel (M20 Slice 2), and ragged single-level
+      # (M20 Slice 3) within-cell replicates now flow through: theta^2_r replaces
+      # sigma^2_r for fixed raters, multilevel fits gain the (1|cluster:subject:rater)
+      # split, and ragged random data fits the shipped interaction model directly.
       replicates <- TRUE
     }
     # Separating the subject and rater variances needs a connected design; a
@@ -896,11 +917,13 @@ icc <- function(
   # two-way, a complete crossed design with one rating per cell (M3).
   balanced <- if (oneway) {
     length(unique(as.integer(table(df$subject)))) == 1L
-  } else if (replicates) {
+  } else if (replicates && !ragged_replicates) {
     # Uniform, complete replicated designs (single-level M17, or multilevel M20
     # Slice 2) are gated to balanced/complete in the guard block above
     # (summarize_design / multilevel_replicate_facts), so the de-replicated design is
     # balanced by construction -- every subject is rated by every (in-cluster) rater.
+    # Ragged single-level replicates (M20 Slice 3) fall through to design_info$balanced
+    # (FALSE), so they are reported as the incomplete designs they are.
     TRUE
   } else if (multilevel && ml_design != "crossed") {
     # Nested designs are block-diagonal in the subject x rater graph, so
@@ -954,6 +977,21 @@ icc <- function(
       "{.code occasions = \"average\"} requires within-cell replicates.",
       i = "Provide multiple ratings per subject-by-rater cell, or use \\
            {.code occasions = \"single\"} (the default)."
+    ))
+  }
+  # Occasion-averaged coefficient on RAGGED replicates (M20 Slice 3, ADR-030): with
+  # unequal per-cell rating counts, the reliability of the mean of `n_o` replicates has
+  # no single scalar effective-n_o divisor (the GT averaging weights are per-cell) and
+  # no textbook/independent oracle pins one -- so it is deferred to research rather than
+  # shipped with a guessed divisor (#1/#4). The single-occasion family fits fine.
+  if (ragged_replicates && !identical(occasions, "single")) {
+    abort_unsupported(c(
+      "{.code occasions = \"average\"} is not supported for ragged (unequal or \\
+       incomplete) within-cell replicates yet.",
+      i = "The effective number of occasions behind an unevenly-replicated cell mean \\
+           is an open modeling question with no validated divisor.",
+      i = "Use {.code occasions = \"single\"} on ragged data, or provide an equal \\
+           number of ratings in every cell for the occasion-averaged coefficient."
     ))
   }
 

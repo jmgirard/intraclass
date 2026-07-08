@@ -10,26 +10,24 @@
   **attempt-then-degrade** to 🟣 research). Completeness, not new estimand work; no new dependency,
   no new argument, no new estimand-spec (extends `M17-within-cell-replicates.md`). M0–M19 shipped;
   package at v0.1.0.
-- Active task: **M20 Slices 1–2 DONE** (branch `m20-fixed-replicates`; Slice 1 committed
-  `7d82217`, Slice 2 staged). **Slice 1** fixed-rater replicates: `fit_{glmmtmb,lme4}_replicates_fixed`
-  with M10 θ²_r; O-FRep (exact balanced fixed≡random, consistency≡random, cell-mean reduction,
-  cross-engine, SF labels, seeded recovery, both `ci_method`s). **Slice 2** multilevel replicates:
-  crossed Design 1 (`fit_{glmmtmb,lme4}_ml_replicates`, six-component `(1|cluster:subject:rater)`) +
-  nested Design 2 (`fit_{glmmtmb,lme4}_nested_replicates`, five); design-aware
-  `multilevel_replicate_facts()`; O-MLRep (occasion-averaged == M5/M8 on cell means at ~1e-8,
-  cross-engine <1e-4, seeded recovery, cluster single-occasion, both `ci_method`s); Design 3 /
-  fixed / conflated / ragged multilevel replicates abort loudly; **`d_study()`-on-replicate
-  correctness guard** (was silently dropping σ²_sr since M17). Full suite **863 pass / 0 fail**,
-  `air`/`lintr` clean, docs regenerated. **Next: Slice 3 — ragged replicates (occasion-averaged
-  attempt-then-degrade).**
+- Active task: **M20 ALL SLICES DONE** (branch `m20-fixed-replicates`; Slice 1 `7d82217`, Slice 2
+  `bfc23dc`, Slice 3 staged). **Slice 1** fixed-rater replicates (`fit_{glmmtmb,lme4}_replicates_fixed`,
+  M10 θ²_r; O-FRep). **Slice 2** multilevel replicates: crossed Design 1
+  (`fit_{glmmtmb,lme4}_ml_replicates`, six-component) + nested Design 2
+  (`fit_{glmmtmb,lme4}_nested_replicates`, five); design-aware `multilevel_replicate_facts()`;
+  O-MLRep (occ-avg == M5/M8 on cell means ~1e-8, cross-engine <1e-4); + `d_study()`-on-replicate
+  correctness guard (was silently dropping σ²_sr since M17). **Slice 3** ragged single-occasion
+  replicates (no new fit; harmonic-mean k_eff + connectedness); O-RagRep (cross-engine, seeded
+  recovery); **occasion-averaged-ragged degraded to 🟣 research** (no validated effective-n_o
+  divisor, #1/#4 — maintainer-authorized attempt-then-degrade). Full suite green, `air`/`lintr`
+  clean, docs regenerated. **Next: commit Slice 3; then M20 finish-task / merge; then M21 (SEM).**
 - Last green CI: PR #24 (M19) full matrix green incl. Windows and R-devel; merged to
-  `main` at 53c9f5e. M20 Slices 1–2 verified locally only (full suite 863/0, `air`/`lintr` clean,
-  docs regenerated) — not yet pushed/CI'd.
+  `main` at 53c9f5e. M20 verified locally only — not yet pushed/CI'd.
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M20 scoped (ADR-030); Slices 1–2 built.** Retro
-  on M18/M19 done; ADR-030 written with three maintainer decisions (oracle-risk reorder;
-  crossed D1 + nested D2 for Slice 2; attempt-then-degrade for the ragged averaged divisor). Slice
-  1 (fixed-rater) committed `7d82217`; Slice 2 (multilevel) built + green, staged. Slice 3 next.
+- Updated: 2026-07-08 by main session (Opus) — **M20 scoped (ADR-030); all three slices built.**
+  Slice 1 (fixed) `7d82217`; Slice 2 (multilevel) `bfc23dc`; Slice 3 (ragged) built + green,
+  staged. Occasion-averaged-ragged degraded to 🟣 research (COVERAGE §②, M17 §7). Next: commit
+  Slice 3 and run M20 finish-task / merge.
 
 ## Where we are
 

@@ -52,11 +52,23 @@ test_that("icc() aborts on a disconnected design (#5, unidentified)", {
   )
 })
 
-test_that("icc() aborts on within-cell replicates (unsupported)", {
+test_that("icc() fits ragged within-cell replicates (M20 Slice 3)", {
+  # A duplicated cell makes a ragged replicate design (one cell rated twice, the rest
+  # once). Once unsupported (M3 era); now the single-occasion family fits it as the
+  # replicate analogue of an incomplete design (ADR-030). Full oracles live in
+  # test-replicates.R (O-RagRep); this is a smoke check on the incomplete path.
   d <- sf_ratings_long()
   dup <- rbind(d, d[d$subject == "S1" & d$rater == "J1", ])
+  # Only one cell is replicated in this tiny SF design, so the interaction is on the
+  # variance boundary and glmmTMB warns about convergence -- a valid boundary fit
+  # (ADR-003), just noisy; suppress for the smoke check.
+  fit <- suppressWarnings(suppressMessages(icc(dup, score, subject, rater)))
+  expect_s3_class(fit, "icc")
+  expect_false(fit$design$balanced)
+  expect_false(is.null(fit$components$subject_rater))
+  # The occasion-averaged coefficient on ragged data stays deferred (research).
   expect_error(
-    icc(dup, score, subject, rater),
+    suppressMessages(icc(dup, score, subject, rater, occasions = "average")),
     class = "intraclass_unsupported"
   )
 })
@@ -232,9 +244,6 @@ test_that("incomplete-design error messages are stable", {
     icc(disconnected_design(), score, subject, rater),
     error = TRUE
   )
-  dup <- rbind(sf_ratings_long(), sf_ratings_long()[1, ])
-  expect_snapshot(
-    icc(dup, score, subject, rater),
-    error = TRUE
-  )
+  # (The duplicated-cell case that once errored here now fits as a ragged replicate
+  # design -- M20 Slice 3; its behaviour is covered in test-replicates.R.)
 })

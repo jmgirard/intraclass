@@ -162,9 +162,17 @@ Balanced two-way random with `n_o` replicates. Verified in a new
 ## 7. Out of scope for M17 Slice 3 (recorded for forward-compatibility)
 
 - **Ragged / incomplete replicates** (unequal `n_o` per cell, missing cells) — the
-  fit tolerates them but `n_o` and the ANOVA oracle do not; deferred (the replicate
-  analogue of M3). The single-occasion ICC family would extend first; the
-  occasion-averaged coefficient needs an effective-`n_o` divisor study.
+  **single-occasion** ICC family **shipped in M20 Slice 3** (ADR-030): two-way random,
+  the replicate analogue of M3 — the shipped interaction fit tolerates ragged data, the
+  rater divisor is the harmonic-mean `k_eff` over *distinct* raters per subject, and
+  connectedness is gated. Oracle O-RagRep: glmmTMB↔lme4 cross-engine + seeded recovery
+  with MC coverage. **The occasion-averaged coefficient on ragged data is 🟣 research,
+  not shipped** (M20 attempt-then-degrade outcome): with unequal per-cell counts the
+  reliability of the mean of `n_o` replicates has no single scalar effective-`n_o`
+  divisor (the GT averaging weights are per-cell) and no textbook/independent oracle
+  pins one, so shipping a guessed divisor would violate #1/#4 — it needs a
+  simulation-oracle study first. `occasions = "average"` on ragged data aborts loudly.
+  Ragged × fixed and ragged × multilevel replicates stay deferred (compound corners).
 - **Fixed-rater replicates** (θ²_r with an interaction) — **shipped in M20 Slice 1**
   (ADR-030): `fit_{glmmtmb,lme4}_replicates_fixed` fits
   `score ~ 1 + rater + (1|subject) + (1|subject:rater)` and places the shared

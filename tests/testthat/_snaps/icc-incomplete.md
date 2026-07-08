@@ -23,13 +23,3 @@
       i Every subject and rater must be linked through shared ratings (one connected design).
       i For unlinked rater groups, a one-way ICC (`model = "oneway"`) or additional linking ratings are needed.
 
----
-
-    Code
-      icc(dup, score, subject, rater)
-    Condition
-      Error in `icc()`:
-      ! Ragged within-cell replicates are not supported yet.
-      i This slice covers balanced, complete replicated designs (every subject-by-rater cell present and rated the same number of times).
-      i Provide an equal number of ratings in every cell, or aggregate to one rating per cell.
-

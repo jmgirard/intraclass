@@ -51,9 +51,12 @@ alternate engines, and seeded simulations.
   Within-cell replicates are also supported for **multilevel** designs — crossed
   Design 1 (a six-component fit) and nested Design 2 (five components) — adding a
   `(1 | cluster:subject:rater)` term so the highest-order residual splits into the
-  interaction and pure error at the subject level. (Design 3, the multilevel one-way,
-  has no separable interaction to split, and `d_study()` projection off a replicate
-  fit is not yet supported.)
+  interaction and pure error at the subject level. **Ragged** replicated two-way
+  random data (unequal per-cell counts or missing cells) fits the single-occasion
+  coefficients directly, as the replicate analogue of an incomplete design. (Design 3,
+  the multilevel one-way, has no separable interaction to split; the occasion-averaged
+  coefficient on ragged data, and `d_study()` projection off a replicate fit, are not
+  yet supported.)
 
 ## Engines
 
