@@ -375,11 +375,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   oracle on a ragged design that goes singular; seeded-sim coverage at nominal.
 
 ### DoD checklist (the live board — check off in-commit, #16)
-- [ ] **Slice 1 — incomplete random two-way.** Confirm `icc(<ragged>, engine = "lme4")`
-      (two-way random) already dispatches to `fit_lme4()` and matches glmmTMB; add the
-      O-LME2 oracle (point ≤1e-4, interval ~1e-2, seeded coverage) pinning it; drop the
-      "complete, balanced only" lme4 caveat from the `@param engine` roxygen for this
-      path. (De-risks the merDeriv-on-ragged mechanics first.)
+- [x] **Slice 1 — incomplete random two-way.** ✅ **No code fix needed** — ragged
+      two-way random (and one-way) lme4 was already ungated (dispatches to `fit_lme4()`)
+      and matches glmmTMB on `ratings_incomplete`: point ≤1e-4 (~2e-10–9e-7 observed),
+      interval <0.02 (max 1.82e-2, within the shipped balanced O-LME tolerance). Added
+      the O-LME2 ragged oracle to `test-icc-lme4-engine.R` (point + interval, all four
+      estimand axes); narrowed the `@param engine` roxygen to say the random two-way and
+      one-way lme4 paths accept incomplete data (fixed-rater & multilevel still
+      balanced-only until Slices 2–3). `man/icc.Rd` regenerated.
 - [ ] **Slice 2 — incomplete fixed-rater two-way.** Narrow the `R/icc.R:637` guard so
       ragged fixed-rater lme4 is supported; confirm θ²_r-under-imbalance is built from
       the ragged fixed rater-contrast βs (merDeriv joint vcov, unequal rater counts);

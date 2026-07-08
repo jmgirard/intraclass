@@ -149,8 +149,11 @@
 #'   real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
 #'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers
 #'   every design `"glmmTMB"` does -- two-way (random or fixed raters), one-way, and
-#'   the multilevel designs (crossed and nested) at both levels -- but only on
-#'   complete, balanced data (incomplete/ragged designs use `"glmmTMB"`). `"lavaan"`
+#'   the multilevel designs (crossed and nested) at both levels. The random two-way
+#'   and one-way paths accept **incomplete/ragged** data as well as balanced; the
+#'   **fixed-rater** and **multilevel** `"lme4"` paths currently require complete,
+#'   balanced data (incomplete/ragged fixed-rater and multilevel designs use
+#'   `"glmmTMB"`). `"lavaan"`
 #'   currently covers only the random two-way design and also requires complete,
 #'   balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages;
 #'   `"lavaan"` requires the \pkg{lavaan} package.

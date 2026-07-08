@@ -152,6 +152,51 @@ test_that("lme4 Monte-Carlo interval agrees with glmmTMB's (O-LME interval)", {
   }
 })
 
+test_that("lme4 matches glmmTMB on INCOMPLETE random two-way data (M15 Slice 1, O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # M15 Slice 1 (ADR-024): incomplete/ragged two-way RANDOM lme4 was already ungated
+  # (it dispatches to fit_lme4()) but untested as a selectable engine. The k_eff /
+  # connectedness machinery runs in icc() BEFORE engine dispatch and is
+  # engine-agnostic, so lme4 fits the same ragged model as glmmTMB; merDeriv's
+  # SD-scale covariance delta-transformed to log-SD (engine-lme4.R) makes the two
+  # engines' MC intervals coincide. glmmTMB is the independent cross-engine oracle
+  # (PRINCIPLES.md #1) on BOTH the point estimate (<= 1e-4) and the interval (< 0.02,
+  # the same absolute tolerance as the balanced O-LME interval block above -- see the
+  # note there on why absolute, not relative). `ratings_incomplete` is a real 6x4
+  # design missing 4 of its 24 subject-by-rater cells.
+  d <- ratings_incomplete
+  for (ax in lme4_axes) {
+    g <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    l <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    expect_lt(max(abs(l$estimate - g$estimate)), 1e-4)
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+  }
+})
+
 test_that("lme4 interval is boundary-aware on a near-zero variance component", {
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")
