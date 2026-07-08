@@ -305,27 +305,6 @@ test_that("lme4 refuses incomplete multilevel data (deferred, M14)", {
   )
 })
 
-test_that("lme4 refuses incomplete data for fixed raters (deferred, M14)", {
-  skip_if_not_installed("lme4")
-
-  # Balanced fixed-rater lme4 is supported (below); the incomplete fixed-rater
-  # theta^2_r-under-imbalance path stays with glmmTMB (ADR-023). A single dropped
-  # cell makes the design unbalanced -> loud abort toward glmmTMB.
-  d <- sf_ratings_long()
-  d_incomplete <- d[-1, ]
-  expect_error(
-    suppressWarnings(icc(
-      d_incomplete,
-      score,
-      subject,
-      rater,
-      raters = "fixed",
-      engine = "lme4"
-    )),
-    class = "intraclass_unsupported"
-  )
-})
-
 test_that("lme4 engine recovers known population ICCs with covering intervals", {
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")
@@ -498,6 +477,53 @@ test_that("lme4 fixed Monte-Carlo interval agrees with glmmTMB's (O-LME2)", {
       seed = 1,
       mc_samples = 20000L
     )))
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+  }
+})
+
+test_that("lme4 matches glmmTMB on INCOMPLETE fixed-rater data (M15 Slice 2, O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # M15 Slice 2 (ADR-024): fixed-rater lme4 on ragged data. Unlike the balanced case
+  # (where theta^2_r == sigma^2_r and both engines match to ~1e-6), on incomplete data
+  # the bias-corrected finite-population theta^2_r depends on the fixed-effect
+  # covariance vbeta, which reflects each rater's UNEQUAL number of ratings. The
+  # correction is the shared engine-agnostic theta2r_fixed() fed lme4's own ragged
+  # vcov(), so nothing here assumes balance. glmmTMB is the independent cross-engine
+  # oracle (PRINCIPLES.md #1): point <= 1e-4 (observed ~5-7e-5, looser than the
+  # balanced ~1e-6 because vbeta differs slightly between the two REML optimizers on a
+  # small ragged design) and interval < 0.02 (the shared O-LME absolute tolerance).
+  # `ratings_incomplete` is a real 6x4 design missing 4 of its 24 cells.
+  d <- ratings_incomplete
+  for (ax in lme4_axes) {
+    g <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    )))
+    l <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    )))
+    expect_lt(max(abs(l$estimate - g$estimate)), 1e-4)
     expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
     expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
   }

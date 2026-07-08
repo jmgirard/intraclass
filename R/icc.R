@@ -149,11 +149,10 @@
 #'   real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
 #'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers
 #'   every design `"glmmTMB"` does -- two-way (random or fixed raters), one-way, and
-#'   the multilevel designs (crossed and nested) at both levels. The random two-way
-#'   and one-way paths accept **incomplete/ragged** data as well as balanced; the
-#'   **fixed-rater** and **multilevel** `"lme4"` paths currently require complete,
-#'   balanced data (incomplete/ragged fixed-rater and multilevel designs use
-#'   `"glmmTMB"`). `"lavaan"`
+#'   the multilevel designs (crossed and nested) at both levels. The two-way (random
+#'   or fixed raters) and one-way paths accept **incomplete/ragged** data as well as
+#'   balanced; the **multilevel** `"lme4"` paths currently require complete, balanced
+#'   data (incomplete/ragged multilevel designs use `"glmmTMB"`). `"lavaan"`
 #'   currently covers only the random two-way design and also requires complete,
 #'   balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages;
 #'   `"lavaan"` requires the \pkg{lavaan} package.
@@ -632,19 +631,13 @@ icc <- function(
     ))
   }
 
-  # Fixed-rater lme4 (M14 Slice 1, ADR-023) covers the BALANCED two-way design
-  # only; the incomplete fixed-rater theta^2_r-under-imbalance path stays with
-  # glmmTMB (deferred). Fail loudly rather than silently switching engines (#5).
-  # (For a multilevel design `raters == "fixed"` is caught by the multilevel guard
-  # below instead, which names the multilevel case.)
-  if (engine == "lme4" && !multilevel && raters == "fixed" && !balanced) {
-    abort_unsupported(c(
-      "The {.pkg lme4} engine requires a complete, balanced design for fixed \\
-       raters.",
-      i = "Incomplete fixed-rater lme4 is planned for a later milestone; use \\
-           {.code engine = \"glmmTMB\"} for incomplete data."
-    ))
-  }
+  # Fixed-rater lme4 (M14 Slice 1 balanced; M15 Slice 2 incomplete, ADR-024) covers
+  # the two-way fixed-rater design on both balanced and ragged data: fit_lme4_fixed()
+  # fits `score ~ 1 + rater + (1 | subject)` (missing cells are fine for lme4) and the
+  # theta^2_r-under-imbalance correction is the shared, engine-agnostic theta2r_fixed()
+  # fed lme4's own incomplete-data vcov -- so no balance guard is needed here. A ragged
+  # design that drives a variance component to the boundary aborts toward glmmTMB from
+  # inside fit_lme4_fixed() (intraclass_singular_fit), the intended graceful degrade.
 
   # Multilevel lme4 (M14, ADR-023) covers all the multilevel designs glmmTMB does --
   # crossed (Design 1) random and fixed, and nested Designs 2/3 -- on balanced,

@@ -383,10 +383,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       estimand axes); narrowed the `@param engine` roxygen to say the random two-way and
       one-way lme4 paths accept incomplete data (fixed-rater & multilevel still
       balanced-only until Slices 2–3). `man/icc.Rd` regenerated.
-- [ ] **Slice 2 — incomplete fixed-rater two-way.** Narrow the `R/icc.R:637` guard so
-      ragged fixed-rater lme4 is supported; confirm θ²_r-under-imbalance is built from
-      the ragged fixed rater-contrast βs (merDeriv joint vcov, unequal rater counts);
-      O-LME2 oracle vs glmmTMB (point + interval + the balanced fixed≡random reduction).
+- [x] **Slice 2 — incomplete fixed-rater two-way.** ✅ Removed the `R/icc.R` fixed-rater
+      `!balanced` guard entirely — `fit_lme4_fixed()` assumes no balance (lmer fits the
+      ragged design; the engine-agnostic `theta2r_fixed()` reads lme4's incomplete-data
+      `vbeta`, so the θ²_r-under-imbalance correction is automatic). Added the O-LME2
+      ragged fixed oracle on `ratings_incomplete` (point ≤1e-4 — observed ~5–7e-5,
+      looser than balanced ~1e-6 since `vbeta` differs slightly between REML optimizers;
+      interval <0.02); replaced the obsolete "refuses incomplete fixed" test; updated
+      the `fit_lme4_fixed()` header comment + `@param engine` roxygen (fixed-rater lme4
+      now incomplete-capable; only multilevel remains balanced-only). `man/icc.Rd`
+      regenerated. Singular ragged fits still abort toward glmmTMB (the intended degrade).
 - [ ] **Slice 3 — incomplete crossed random multilevel.** Narrow the `R/icc.R:652`
       guard so ragged Design-1 crossed random multilevel lme4 is supported;
       five-component merDeriv vcov on ragged data; O-LME2 oracle vs glmmTMB (subject-
