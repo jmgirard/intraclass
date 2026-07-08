@@ -148,11 +148,13 @@
 #'   mixed-model one and matches conventional generalizability-theory software on
 #'   real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
 #'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers
-#'   the two-way (`raters = "random"` or, on complete/balanced data, `"fixed"`) and
-#'   one-way designs, but not multilevel designs (a `cluster` column); `"lavaan"`
-#'   currently covers only the random two-way design and additionally requires
-#'   complete, balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv}
-#'   packages; `"lavaan"` requires the \pkg{lavaan} package.
+#'   the two-way (`raters = "random"` or, on complete/balanced data, `"fixed"`)
+#'   and one-way designs, and the crossed (Design 1) random-rater multilevel design
+#'   on complete, balanced data; the nested multilevel designs and fixed-rater
+#'   multilevel are not yet available for `"lme4"`. `"lavaan"` currently covers only
+#'   the random two-way design and additionally requires complete, balanced data.
+#'   `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"`
+#'   requires the \pkg{lavaan} package.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
 #' @param mc_samples Number of Monte-Carlo draws for the interval.
@@ -258,19 +260,11 @@ icc <- function(
   }
 
   # lme4 design coverage (ADR-012 / M14 ADR-023): lme4 covers the random two-way
-  # (M5.5), one-way (M6), and the balanced fixed-rater two-way (M14 Slice 1) paths.
-  # Multilevel lme4 is still deferred (M14 Slices 2/3), and the incomplete
-  # fixed-rater lme4 path is refused below where balancedness is known. Route the
-  # deferred multilevel request to a loud abort (PRINCIPLES.md #5) rather than
-  # silently falling back to glmmTMB.
-  if (engine == "lme4" && multilevel) {
-    abort_unsupported(c(
-      "The {.pkg lme4} engine does not support multilevel designs yet.",
-      i = "{.code engine = \"lme4\"} is not available for multilevel designs; \\
-           use {.code engine = \"glmmTMB\"}.",
-      i = "lme4 for the multilevel fits is planned for a later milestone."
-    ))
-  }
+  # (M5.5), one-way (M6), the balanced fixed-rater two-way (Slice 1), and the
+  # balanced crossed (Design 1) random-rater multilevel (Slice 2) paths. The
+  # design-specific lme4 refusals -- incomplete fixed-rater, and any multilevel that
+  # is nested, fixed, or incomplete -- are raised below where `ml_design`, `raters`,
+  # and balancedness are known, so they can name the exact unsupported case.
 
   # M7 Slice 1 (ADR-014): the lavaan (SEM) engine covers the random two-way
   # COMPLETE design only. Fixed-rater, one-way, multilevel, and incomplete SEM are
@@ -639,12 +633,31 @@ icc <- function(
   # Fixed-rater lme4 (M14 Slice 1, ADR-023) covers the BALANCED two-way design
   # only; the incomplete fixed-rater theta^2_r-under-imbalance path stays with
   # glmmTMB (deferred). Fail loudly rather than silently switching engines (#5).
-  if (engine == "lme4" && raters == "fixed" && !balanced) {
+  # (For a multilevel design `raters == "fixed"` is caught by the multilevel guard
+  # below instead, which names the multilevel case.)
+  if (engine == "lme4" && !multilevel && raters == "fixed" && !balanced) {
     abort_unsupported(c(
       "The {.pkg lme4} engine requires a complete, balanced design for fixed \\
        raters.",
       i = "Incomplete fixed-rater lme4 is planned for a later milestone; use \\
            {.code engine = \"glmmTMB\"} for incomplete data."
+    ))
+  }
+
+  # Multilevel lme4 (M14 Slice 2, ADR-023) covers the crossed (Design 1)
+  # random-rater design, balanced/complete only. Nested Designs 2/3 and fixed-rater
+  # multilevel are deferred (Slice 3), and incomplete crossed multilevel (M9) stays
+  # with glmmTMB. Fail loudly toward glmmTMB rather than switch engines silently (#5).
+  if (
+    engine == "lme4" &&
+      multilevel &&
+      (ml_design != "crossed" || raters == "fixed" || !balanced)
+  ) {
+    abort_unsupported(c(
+      "The {.pkg lme4} engine supports only the balanced, complete crossed \\
+       (Design 1) random-rater multilevel design so far.",
+      i = "Nested designs, fixed raters, and incomplete multilevel data are \\
+           planned for later milestones; use {.code engine = \"glmmTMB\"}."
     ))
   }
 
@@ -663,6 +676,10 @@ icc <- function(
       # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
       # slot (M10). Fixed-rater nested/incomplete/cluster-level are guarded above.
       fit_glmmtmb_multilevel_fixed(df)
+    } else if (engine == "lme4") {
+      # Crossed (Design 1) random raters via lme4 (M14 Slice 2); guarded above to
+      # the balanced/complete case.
+      fit_lme4_multilevel(df)
     } else {
       fit_glmmtmb_multilevel(df)
     }

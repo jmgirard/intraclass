@@ -374,3 +374,139 @@ fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
     to_components = to_components
   )
 }
+
+# Multilevel lme4 engines (M14 Slice 2/3, ADR-023) -----------------------------
+#
+# The lme4 counterparts of the glmmTMB multilevel fits: the same random-effects
+# models (ten Hove et al. 2022 Designs 1-3), fit by REML, returning the SAME
+# six-field engine contract as glmmtmb_ml_contract() so the estimand map and
+# icc_point()/mc_ci() are unchanged. As with fit_lme4()/fit_lme4_fixed(), merDeriv
+# supplies the joint covariance of the variance-component SDs (which base lme4 does
+# not expose) and we delta-transform every SD to glmmTMB's log-SD scale so MC draws
+# back-transform to non-negative variances at the boundary (ADR-012/003). Only the
+# Design-1 crossed random path ships in Slice 2; Designs 2/3 and multilevel-fixed
+# follow in Slice 3, reusing this machinery.
+
+fit_lme4_ml_model <- function(formula, data) {
+  withCallingHandlers(
+    lme4::lmer(formula, data = data, REML = TRUE),
+    warning = function(w) {
+      cli::cli_warn(c(
+        "The {.pkg lme4} engine reported a fitting warning.",
+        i = conditionMessage(w)
+      ))
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
+# Build the six-field engine contract from a fitted multilevel lme4 model. `groups`
+# maps component-slot name -> lme4 grouping-factor name (the VarCorr / merDeriv
+# label; the residual slot is always appended) -- the same interface as
+# glmmtmb_ml_contract(), so multilevel designs differ only in `groups`. merDeriv
+# names each random-effect SD column "cov_<group>.(Intercept)"; we align by EXACT
+# name (not grep) because interaction groups nest as substrings (e.g. "rater" is a
+# substring of "cluster:rater").
+lme4_ml_contract <- function(fit, groups, call = rlang::caller_env()) {
+  if (lme4::isSingular(fit)) {
+    abort_intraclass(
+      c(
+        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
+         singular (boundary) fit.",
+        i = "A variance component was estimated at exactly zero, so \\
+             {.pkg merDeriv} cannot compute the parameter covariance.",
+        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
+  vc <- lme4::VarCorr(fit)
+  sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
+  components <- lapply(groups, function(g) sd_of(g)^2)
+  components$residual <- stats::sigma(fit)^2
+
+  vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
+  nm_sd <- colnames(vcov_sd)
+  col_of <- function(g) {
+    i <- which(nm_sd == sprintf("cov_%s.(Intercept)", g))
+    if (length(i) == 1L) i else NA_integer_
+  }
+  idx <- c(
+    intercept = which(nm_sd == "(Intercept)"),
+    vapply(groups, col_of, integer(1)),
+    residual = which(nm_sd == "residual")
+  )
+  if (length(idx) != length(groups) + 2L || anyNA(idx)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg merDeriv} covariance to the model terms.",
+        i = "Columns returned: {.val {nm_sd}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  vcov_sd <- vcov_sd[idx, idx, drop = FALSE]
+
+  sds <- vapply(groups, sd_of, numeric(1))
+  sd_res <- as.numeric(stats::sigma(fit))
+  # Intercept on its natural scale (Jacobian 1); every SD on log-SD (Jacobian 1/sd).
+  jac <- diag(c(1, 1 / sds, 1 / sd_res))
+  vcov_log <- jac %*% vcov_sd %*% t(jac)
+
+  slots <- c("(Intercept)", names(groups), "residual")
+  dimnames(vcov_log) <- list(slots, slots)
+  estimate <- stats::setNames(
+    c(as.numeric(lme4::fixef(fit)[["(Intercept)"]]), log(sds), log(sd_res)),
+    slots
+  )
+
+  comp_slots <- c(names(groups), "residual")
+  to_components <- function(par) {
+    stats::setNames(
+      lapply(comp_slots, function(s) exp(2 * par[s, ])),
+      comp_slots
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "lme4",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_log,
+    to_components = to_components
+  )
+}
+
+# Design 1 -- raters crossed with clusters (estimand-spec M5); the lme4 counterpart
+# of fit_glmmtmb_multilevel(). Five components (cluster, subject-in-cluster, rater,
+# cluster x rater, residual). Balanced/complete crossed random only in Slice 2.
+fit_lme4_multilevel <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data
+  )
+  lme4_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "rater",
+      cluster_rater = "cluster:rater"
+    ),
+    call = call
+  )
+}

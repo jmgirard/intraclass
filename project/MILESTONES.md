@@ -344,10 +344,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `(beta, vbeta, k)` (engine-agnostic; both glmmTMB callers updated); O-LME2 green on SF
   `ratings`: point ≡ glmmTMB ~1e-10, interval gap ≤4.6e-3 (<0.02), balanced fixed≡random
   ~5e-7, singular-fit abort + seeded-sim coverage. 504 tests, lintr + `air` clean.
-- [ ] **Slice 2 — `fit_lme4_multilevel`** (Design 1 crossed random, five-component,
+- [x] **Slice 2 — `fit_lme4_multilevel`** (Design 1 crossed random, five-component,
   balanced). Multi-grouping-factor merDeriv vcov + column alignment; delta-transform
   template extended to five components. `engine == "lme4"` branch added in the
-  `engine_fit` dispatch block. O-LME2 (a)–(d) vs `fit_glmmtmb_multilevel`.
+  `engine_fit` dispatch block. O-LME2 (a)–(d) vs `fit_glmmtmb_multilevel`. **Done** —
+  shared `fit_lme4_ml_model()` + `lme4_ml_contract()` helpers (align merDeriv columns
+  by exact `cov_<group>.(Intercept)` name, not grep, since `rater` ⊂ `cluster:rater`);
+  guard narrowed so crossed-random-balanced multilevel lme4 is supported while nested,
+  fixed, and incomplete multilevel abort toward glmmTMB. O-LME2 green on a seeded
+  Design-1 dataset: point ≡ glmmTMB ~1e-6 (subject + cluster, agreement + consistency),
+  interval gap ~1e-5 (<0.02), singular-fit abort + seeded population recovery. 516 tests,
+  lintr + `air` clean.
 - [ ] **Slice 3 — nested + multilevel-fixed** (`fit_lme4_nested_clusters` Design 2,
   `fit_lme4_nested_subjects` Design 3, `fit_lme4_multilevel_fixed` Design 1 fixed),
   reusing Slices 1–2 machinery. Dispatch branches completed; the blanket lme4 guard is
