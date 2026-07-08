@@ -393,20 +393,27 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       the `fit_lme4_fixed()` header comment + `@param engine` roxygen (fixed-rater lme4
       now incomplete-capable; only multilevel remains balanced-only). `man/icc.Rd`
       regenerated. Singular ragged fits still abort toward glmmTMB (the intended degrade).
-- [ ] **Slice 3 — incomplete crossed random multilevel.** Narrow the `R/icc.R:652`
-      guard so ragged Design-1 crossed random multilevel lme4 is supported;
-      five-component merDeriv vcov on ragged data; O-LME2 oracle vs glmmTMB (subject-
-      and cluster-level `ICC(c,1)`) + reduction to complete M5; **characterize and
-      oracle-pin the singular-fit → glmmTMB abort** on a ragged design that goes
-      singular (#5/#18).
-- [ ] **Cross-cutting.** `@param engine` roxygen updated (lme4 now covers incomplete
-      designs); `NEWS.md` entry (folded into the un-uploaded 0.1.0 section per the M14
-      precedent — revisit if 0.1.0 is frozen); `air format .` clean; `lintr::lint_package()`
-      clean (`run-lintr-before-push`); test the **installed** package with
-      `NOT_CRAN=true` (`verify-against-installed-package`); full CI matrix green incl.
-      Windows and R-devel; PR opened and merged (`milestone-branches-and-prs`);
-      `project/` reconciled (STATUS + this entry compressed to summary form, preserving
-      the "Deferred out of M15" list) in a direct commit to `main` post-merge.
+- [x] **Slice 3 — incomplete crossed random multilevel.** ✅ Removed the `R/icc.R`
+      multilevel `!balanced` lme4 guard entirely — by the time it ran, incomplete nested
+      (icc.R:488) and incomplete fixed-rater crossed multilevel (icc.R:541) had already
+      aborted for **every** engine, so only the crossed-random M9 shape reached it, which
+      `fit_lme4_multilevel()` + `lme4_ml_contract()` handle structurally. O-LME2 ragged
+      oracle vs glmmTMB on `lme4_ml_crossed` (245/288 cells): subject level all four axes
+      (point ≤1e-4 — ~4e-7–5e-6; interval <0.02 — ≤4e-3) **and** cluster `ICC(c,1)`.
+      **Singular-degrade characterized and pinned**: a ragged crossed design with σ²_cr≡0
+      lands lme4 on the boundary → `intraclass_singular_fit` abort toward glmmTMB, which
+      still fits (test asserts both halves). Replaced the obsolete "refuses incomplete
+      multilevel" test.
+- [~] **Cross-cutting.** Done: `@param engine` roxygen now states full balanced +
+      incomplete parity (boundary fits fall back to glmmTMB); `NEWS.md` engine bullet
+      updated (folded into the un-uploaded 0.1.0 section per the M14 precedent — revisit
+      if 0.1.0 is frozen); `air format .` clean; `lintr::lint_package()` clean (no lints);
+      full `load_all` suite green with `NOT_CRAN=true` (572/0/0). **Remaining (finish-task
+      / PR):** test the **installed** package with `NOT_CRAN=true`
+      (`verify-against-installed-package`); full CI matrix green incl. Windows and R-devel;
+      PR opened and merged (`milestone-branches-and-prs`); `project/` reconciled (STATUS +
+      this entry compressed to summary, preserving the "Deferred out of M15" list) in a
+      direct commit to `main` post-merge.
 
 ### Deferred out of M15 (record so not rediscovered)
 - The **parametric-bootstrap `ci_method`** (bootMer); a **boundary-robust lme4

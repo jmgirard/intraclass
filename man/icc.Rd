@@ -120,10 +120,10 @@ mixed-model one and matches conventional generalizability-theory software on
 real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
 designs (e.g. 0.284 vs 0.290 on the 6-subject example below). \code{"lme4"} covers
 every design \code{"glmmTMB"} does -- two-way (random or fixed raters), one-way, and
-the multilevel designs (crossed and nested) at both levels. The two-way (random
-or fixed raters) and one-way paths accept \strong{incomplete/ragged} data as well as
-balanced; the \strong{multilevel} \code{"lme4"} paths currently require complete, balanced
-data (incomplete/ragged multilevel designs use \code{"glmmTMB"}). \code{"lavaan"}
+the multilevel designs (crossed and nested) at both levels -- on both balanced
+and \strong{incomplete/ragged} data. A ragged fit that lands exactly on a
+variance-component boundary falls back to \code{"glmmTMB"} (which stays finite via its
+log-SD parameterization) with a clear message. \code{"lavaan"}
 currently covers only the random two-way design and also requires complete,
 balanced data. \code{"lme4"} requires the \pkg{lme4} and \pkg{merDeriv} packages;
 \code{"lavaan"} requires the \pkg{lavaan} package.}

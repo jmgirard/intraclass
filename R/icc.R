@@ -149,10 +149,10 @@
 #'   real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
 #'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers
 #'   every design `"glmmTMB"` does -- two-way (random or fixed raters), one-way, and
-#'   the multilevel designs (crossed and nested) at both levels. The two-way (random
-#'   or fixed raters) and one-way paths accept **incomplete/ragged** data as well as
-#'   balanced; the **multilevel** `"lme4"` paths currently require complete, balanced
-#'   data (incomplete/ragged multilevel designs use `"glmmTMB"`). `"lavaan"`
+#'   the multilevel designs (crossed and nested) at both levels -- on both balanced
+#'   and **incomplete/ragged** data. A ragged fit that lands exactly on a
+#'   variance-component boundary falls back to `"glmmTMB"` (which stays finite via its
+#'   log-SD parameterization) with a clear message. `"lavaan"`
 #'   currently covers only the random two-way design and also requires complete,
 #'   balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages;
 #'   `"lavaan"` requires the \pkg{lavaan} package.
@@ -639,20 +639,14 @@ icc <- function(
   # design that drives a variance component to the boundary aborts toward glmmTMB from
   # inside fit_lme4_fixed() (intraclass_singular_fit), the intended graceful degrade.
 
-  # Multilevel lme4 (M14, ADR-023) covers all the multilevel designs glmmTMB does --
-  # crossed (Design 1) random and fixed, and nested Designs 2/3 -- on balanced,
-  # complete data. Incomplete/ragged multilevel lme4 (M9-style) is deferred: fail
-  # loudly toward glmmTMB rather than switch engines silently (#5). (Incomplete
-  # nested and incomplete fixed multilevel already aborted above, for every engine;
-  # this catches the incomplete *crossed random* case, where balanced is data-driven.)
-  if (engine == "lme4" && multilevel && !balanced) {
-    abort_unsupported(c(
-      "The {.pkg lme4} engine requires balanced, complete data for multilevel \\
-       designs.",
-      i = "Incomplete multilevel lme4 is planned for a later milestone; use \\
-           {.code engine = \"glmmTMB\"} for incomplete data."
-    ))
-  }
+  # Multilevel lme4 (M14 balanced; M15 Slice 3 incomplete, ADR-024) covers every
+  # multilevel design glmmTMB does. On incomplete data only the crossed (Design 1)
+  # RANDOM shape reaches here: incomplete nested (Designs 2/3) and incomplete
+  # fixed-rater crossed multilevel already aborted above, for EVERY engine (the M8/M10
+  # deferrals), so no lme4-specific guard is needed. fit_lme4_multilevel() fits the
+  # ragged five-component model and lme4_ml_contract() reads merDeriv's incomplete-data
+  # vcov; a ragged fit that hits the variance boundary aborts toward glmmTMB from
+  # inside lme4_ml_contract() (intraclass_singular_fit), the intended graceful degrade.
 
   # Multilevel data uses a Design-1 (crossed, five-component) or Design-2 (raters
   # nested in clusters, four-component) fit per the inferred design; otherwise

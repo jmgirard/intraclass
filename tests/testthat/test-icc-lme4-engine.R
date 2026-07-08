@@ -285,23 +285,150 @@ lme4_ml_crossed <- function(nc = 12L, ns = 6L, k = 4L, seed = 20260707) {
   d
 }
 
-test_that("lme4 refuses incomplete multilevel data (deferred, M14)", {
+test_that("lme4 matches glmmTMB on INCOMPLETE crossed multilevel data (M15 Slice 3, O-LME2)", {
+  skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
 
-  # Balanced multilevel designs (crossed random/fixed, nested) are all supported
-  # (below); only incomplete/ragged multilevel lme4 stays with glmmTMB (ADR-023).
-  # A single dropped cell makes the crossed design unbalanced -> loud abort.
-  incomplete <- lme4_ml_crossed(nc = 6L, ns = 5L, k = 4L)[-1, ]
-  expect_error(
-    suppressMessages(icc(
-      incomplete,
+  # M15 Slice 3 (ADR-024): the crossed (Design 1) RANDOM multilevel fit on ragged data.
+  # This is the only incomplete multilevel case that reaches an lme4 fit -- incomplete
+  # nested (Designs 2/3) and incomplete fixed-rater multilevel abort earlier for EVERY
+  # engine (the M8/M10 deferrals). fit_lme4_multilevel() fits the five-component model
+  # on the ragged data and lme4_ml_contract() reads merDeriv's incomplete-data vcov;
+  # the k_eff / connectedness machinery that gates the coefficients runs in icc() before
+  # dispatch and is engine-agnostic. glmmTMB is the independent cross-engine oracle
+  # (PRINCIPLES.md #1) at BOTH the subject level (all four axes) and the cluster level
+  # (ICC(c,1), the only cluster coefficient defined on incomplete data -- M9 Slice 2).
+  # ~15% MCAR cell deletion, kept connected with raters bridging clusters (crossed).
+  d <- lme4_ml_crossed(nc = 12L, ns = 6L, k = 4L)
+  set.seed(24)
+  d <- d[-sample(nrow(d), round(0.15 * nrow(d))), , drop = FALSE]
+
+  for (ax in lme4_axes) {
+    g <- tidy(icc(
+      d,
       score,
       subject,
       rater,
       cluster = cluster,
-      engine = "lme4"
-    )),
-    class = "intraclass_unsupported"
+      level = "subject",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    l <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "subject",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    expect_lt(max(abs(l$estimate - g$estimate)), 1e-4)
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+  }
+
+  # Cluster-level single-rater ICC(c,1) on the same ragged data.
+  gc <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    type = "agreement",
+    unit = "single",
+    engine = "glmmTMB",
+    seed = 1,
+    mc_samples = 20000L
+  ))
+  lc <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    type = "agreement",
+    unit = "single",
+    engine = "lme4",
+    seed = 1,
+    mc_samples = 20000L
+  ))
+  expect_lt(max(abs(lc$estimate - gc$estimate)), 1e-4)
+  expect_lt(max(abs(lc$conf.low - gc$conf.low)), 0.02)
+  expect_lt(max(abs(lc$conf.high - gc$conf.high)), 0.02)
+})
+
+test_that("incomplete multilevel lme4 degrades loudly to glmmTMB at the boundary (M15 Slice 3, #5)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # The intended graceful degrade: on a ragged crossed design whose cluster-by-rater
+  # variance is truly zero, lme4's REML lands exactly on the boundary -> isSingular()
+  # -> merDeriv cannot form the covariance -> a classed intraclass_singular_fit abort
+  # pointing at glmmTMB (which stays finite via its log-SD parameterization). This
+  # characterizes the success-vs-degrade frontier the milestone owns (#5/#18): lme4
+  # covers incomplete multilevel data WHEN IT CAN and hands off loudly otherwise.
+  nc <- 8L
+  ns <- 6L
+  k <- 4L
+  set.seed(1)
+  cl <- stats::rnorm(nc, 0, 1.5)
+  sc <- stats::rnorm(nc * ns, 0, 1.2)
+  rat <- stats::rnorm(k, 0, 1) # raters bridge clusters (stays crossed)
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1) * ns + d$subj] +
+    rat[d$rater] + # NO cluster x rater term -> sigma^2_cr == 0 (the boundary)
+    stats::rnorm(nrow(d), 0, 1)
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  set.seed(3)
+  d <- d[-sample(nrow(d), round(0.05 * nrow(d))), , drop = FALSE]
+
+  # lme4 aborts loudly at the boundary...
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "subject",
+      engine = "lme4",
+      seed = 1
+    ),
+    class = "intraclass_singular_fit"
+  )
+  # ...while glmmTMB fits the same ragged data (the recommended fallback).
+  expect_s3_class(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "subject",
+      engine = "glmmTMB",
+      seed = 1
+    ),
+    "icc"
   )
 })
 

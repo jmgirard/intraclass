@@ -5,11 +5,12 @@
   incomplete design glmmTMB fits (incomplete random two-way, incomplete fixed-rater
   two-way, incomplete crossed random multilevel), closing the last ADR-023 deferral.
   No new estimand/spec/`ci_method`/dependency. M0–M14 all shipped; package at v0.1.0.
-- Active task: **M15 Slice 3 — incomplete crossed random multilevel lme4** (next).
-  Slices 1–2 done: incomplete random two-way (no code fix — already ungated) and
-  incomplete fixed-rater two-way (removed the `!balanced` guard; θ²_r-under-imbalance is
-  automatic via engine-agnostic `theta2r_fixed()`), each pinned with an O-LME2 ragged
-  oracle. See the M15 DoD checklist in [`MILESTONES.md`](MILESTONES.md).
+- Active task: **M15 finish-task / PR** — all three slices done. Incomplete random
+  two-way (already ungated), incomplete fixed-rater two-way, and incomplete crossed
+  random multilevel lme4 all ship, each pinned with an O-LME2 ragged oracle; the
+  multilevel singular→glmmTMB degrade is characterized and pinned. Remaining: installed-
+  package check (`NOT_CRAN=true`), push, PR, CI matrix, post-merge `project/` reconcile.
+  See the M15 DoD checklist in [`MILESTONES.md`](MILESTONES.md).
 - Branch: `m15-incomplete-lme4` (created; ADR-024 + M15 board entry committed here).
 - Last green CI: PR #18 (M14) full matrix green incl. Windows and R-devel; merged to
   `main` at 474e0c1
