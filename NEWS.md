@@ -71,12 +71,13 @@ alternate engines, and seeded simulations.
   `engine = "lavaan"` — an
   SEM common-factor generalizability model (Jorgensen 2021) whose absolute-agreement
   coefficient uses the indicator-mean rater-variance estimator — covers the two-way
-  design with random or fixed raters, and both the Monte-Carlo and the
-  parametric-bootstrap interval. For fixed raters the SEM agreement uses the
-  McGraw & Wong Case-3A bias-corrected finite-population \eqn{\theta^2_r} (the raw
-  indicator-mean variance minus the mean sampling variance of the rater means), which
-  equals the mixed-model estimate on balanced data. Optional engines live in
-  `Suggests`, so the base install stays light.
+  design with random or fixed raters, on both complete and **incomplete** data
+  (missing cells estimated by full-information maximum likelihood), and both the
+  Monte-Carlo and the parametric-bootstrap interval (bootstrap on complete data). For
+  fixed raters the SEM agreement uses the McGraw & Wong Case-3A bias-corrected
+  finite-population \eqn{\theta^2_r} (the raw indicator-mean variance minus the mean
+  sampling variance of the rater means), which equals the mixed-model estimate on
+  balanced data. Optional engines live in `Suggests`, so the base install stays light.
 
 ## Choosing, projecting, and visualizing
 

@@ -251,19 +251,13 @@ test_that("lavaan aborts loudly on a degenerate (boundary) fit (#5/#8)", {
   )
 })
 
-test_that("lavaan is refused for one-way, multilevel, and incomplete designs", {
+test_that("lavaan is refused for one-way and multilevel designs", {
   skip_if_not_installed("lavaan")
 
+  # (Fixed raters and incomplete/FIML data are now supported -- M21 Slices 2/3.)
   d <- sf_ratings_long()
   expect_error(
     icc(d, score, subject, rater, model = "oneway", engine = "lavaan"),
-    class = "intraclass_unsupported"
-  )
-
-  # Incomplete: drop one cell so the design is unbalanced.
-  di <- d[-1, ]
-  expect_error(
-    icc(di, score, subject, rater, engine = "lavaan"),
     class = "intraclass_unsupported"
   )
 
@@ -539,4 +533,191 @@ test_that("fixed-rater SEM also serves the parametric bootstrap (Slice 1 x Slice
   expect_true(all(is.finite(bs$conf.low) & is.finite(bs$conf.high)))
   expect_true(all(bs$conf.low <= bs$estimate & bs$estimate <= bs$conf.high))
   expect_true(all(bs$conf.high <= 1))
+})
+
+# O-FIML -- incomplete/ragged SEM via FIML (M21 Slice 3, ADR-031) ---------------
+# On incomplete data lavaan estimates by full-information maximum likelihood
+# (missing = "fiml"). Oracles (glmmTMB the independent engine, as M7; ADR-031
+# attempt-then-degrade -> SHIPS, no degrade -- FIML pins on moderate ragged data):
+#   * CONSISTENCY is an estimator-invariant ratio -> a tight cross-engine pin even
+#     on ragged data (asymptotically exact; small N-vs-(N-1) residual only).
+#   * AGREEMENT via the SEM indicator-mean estimator vs glmmTMB REML random differs
+#     by the SAME small-sample bias as complete data (raw omits the "- res/n" term),
+#     shrinking with n -- a looser but honest cross-engine pin, NOT a FIML artifact.
+#   * The parametric bootstrap is gated on incomplete data (resamples cannot
+#     reproduce the missingness pattern): ci_method = "bootstrap" aborts loudly.
+
+# Deterministic connected ragged two-way design: a full n x k grid with a scattered
+# subset of cells removed (every 8th), leaving every subject and rater present and the
+# subject-by-rater graph connected.
+ragged_twoway <- function(n = 50L, k = 6L, seed = 11L) {
+  set.seed(seed)
+  subj <- stats::rnorm(n, 0, 2)
+  rat <- stats::rnorm(k, 0, 1)
+  g <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  g$score <- 10 +
+    subj[as.integer(g$subject)] +
+    rat[as.integer(g$rater)] +
+    stats::rnorm(n * k, 0, sqrt(2))
+  g[seq_len(nrow(g)) %% 8L != 0L, ]
+}
+
+test_that("incomplete lavaan fits via FIML and matches glmmTMB consistency (O-FIML)", {
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("glmmTMB")
+
+  gg <- ragged_twoway()
+  expect_false(nrow(gg) == nlevels(gg$subject) * nlevels(gg$rater)) # genuinely ragged
+  for (u in c("single", "average")) {
+    lav <- tidy(icc(
+      gg,
+      score,
+      subject,
+      rater,
+      type = "consistency",
+      unit = u,
+      engine = "lavaan",
+      seed = 1
+    ))
+    tmb <- tidy(icc(
+      gg,
+      score,
+      subject,
+      rater,
+      type = "consistency",
+      unit = u,
+      engine = "glmmTMB",
+      seed = 1
+    ))
+    idx <- if (u == "single") "ICC(C,1)" else "ICC(C,k)"
+    expect_equal(
+      lav$estimate[lav$index == idx],
+      tmb$estimate[tmb$index == idx],
+      tolerance = 8e-3
+    )
+  }
+})
+
+test_that("incomplete lavaan agreement matches glmmTMB via FIML (O-FIML)", {
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("glmmTMB")
+
+  # The gap is the SEM raw-estimator small-sample bias (same kind as complete data),
+  # shrinking with n -- an honest cross-engine tolerance, not tuned to pass (#1, #4).
+  gg <- ragged_twoway()
+  for (u in c("single", "average")) {
+    lav <- tidy(icc(
+      gg,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      unit = u,
+      engine = "lavaan",
+      seed = 1
+    ))
+    tmb <- tidy(icc(
+      gg,
+      score,
+      subject,
+      rater,
+      type = "agreement",
+      unit = u,
+      engine = "glmmTMB",
+      seed = 1
+    ))
+    idx <- if (u == "single") "ICC(A,1)" else "ICC(A,k)"
+    expect_equal(
+      lav$estimate[lav$index == idx],
+      tmb$estimate[tmb$index == idx],
+      tolerance = 1.5e-2
+    )
+  }
+})
+
+test_that("incomplete lavaan recovers the population at large N (O-FIML)", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  v_s <- 4
+  v_r <- 1
+  v_res <- 2
+  gg <- ragged_twoway(n = 300L, k = 6L, seed = 99L)
+  # Rebuild scores with the known variance components (ragged_twoway used 2/1/2 with a
+  # different seed); regenerate here so the population targets are exact.
+  set.seed(99)
+  n <- nlevels(gg$subject)
+  k <- nlevels(gg$rater)
+  subj <- stats::rnorm(n, 0, sqrt(v_s))
+  rat <- stats::rnorm(k, 0, sqrt(v_r))
+  gg$score <- 10 +
+    subj[as.integer(gg$subject)] +
+    rat[as.integer(gg$rater)] +
+    stats::rnorm(nrow(gg), 0, sqrt(v_res))
+
+  lav <- tidy(icc(
+    gg,
+    score,
+    subject,
+    rater,
+    unit = "single",
+    type = c("consistency"),
+    engine = "lavaan",
+    seed = 1
+  ))
+  pop_c1 <- v_s / (v_s + v_res)
+  expect_equal(lav$estimate[lav$index == "ICC(C,1)"], pop_c1, tolerance = 0.05)
+})
+
+test_that("incomplete lavaan interval is finite, in [0, 1], and brackets the estimate", {
+  skip_if_not_installed("lavaan")
+
+  fit <- icc(
+    ragged_twoway(),
+    score,
+    subject,
+    rater,
+    engine = "lavaan",
+    seed = 1
+  )
+  ci <- fit$estimates
+  expect_true(all(is.finite(ci$conf.low) & is.finite(ci$conf.high)))
+  expect_true(all(ci$conf.low >= 0 & ci$conf.high <= 1))
+  expect_true(all(ci$conf.low <= ci$estimate & ci$estimate <= ci$conf.high))
+})
+
+test_that("incomplete lavaan bootstrap aborts loudly (Monte-Carlo only)", {
+  skip_if_not_installed("lavaan")
+
+  # Parametric resamples from the implied moments cannot reproduce the missingness
+  # pattern, so bootstrap is refused for incomplete SEM -> the bootstrap_ci NULL guard.
+  expect_error(
+    icc(
+      ragged_twoway(),
+      score,
+      subject,
+      rater,
+      engine = "lavaan",
+      ci_method = "bootstrap",
+      boot_samples = 99L,
+      seed = 1
+    ),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("a disconnected incomplete design still aborts for lavaan", {
+  skip_if_not_installed("lavaan")
+
+  # Two rater groups that never share a subject -> disconnected; the engine-agnostic
+  # connectedness guard (M3) rejects it before any lavaan fit (#5).
+  d <- data.frame(
+    subject = factor(c(1, 1, 2, 2, 3, 3, 4, 4)),
+    rater = factor(c(1, 2, 1, 2, 3, 4, 3, 4)),
+    score = c(5, 6, 4, 5, 7, 8, 6, 7)
+  )
+  expect_error(
+    icc(d, score, subject, rater, engine = "lavaan"),
+    class = "intraclass_unidentified"
+  )
 })

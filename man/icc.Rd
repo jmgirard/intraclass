@@ -138,7 +138,9 @@ log-SD parameterization) with a clear message. \code{"lavaan"}
 covers the two-way design with random or fixed raters (for fixed raters the
 agreement rater term is the McGraw & Wong Case-3A bias-corrected
 finite-population variance, which equals the mixed-model estimate on balanced
-data) and requires complete, balanced data. \code{"lme4"} requires the \pkg{lme4} and
+data), on both complete and \strong{incomplete} data (missing cells are estimated by
+full-information maximum likelihood; the parametric bootstrap is unavailable for
+incomplete SEM). \code{"lme4"} requires the \pkg{lme4} and
 \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan} package.}
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}

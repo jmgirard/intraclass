@@ -211,7 +211,9 @@
 #'   covers the two-way design with random or fixed raters (for fixed raters the
 #'   agreement rater term is the McGraw & Wong Case-3A bias-corrected
 #'   finite-population variance, which equals the mixed-model estimate on balanced
-#'   data) and requires complete, balanced data. `"lme4"` requires the \pkg{lme4} and
+#'   data), on both complete and **incomplete** data (missing cells are estimated by
+#'   full-information maximum likelihood; the parametric bootstrap is unavailable for
+#'   incomplete SEM). `"lme4"` requires the \pkg{lme4} and
 #'   \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan} package.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
@@ -933,16 +935,10 @@ icc <- function(
     design_info$balanced
   }
 
-  # lavaan (SEM) reshapes to a complete subject-by-rater matrix, so an incomplete
-  # (unbalanced) two-way design has no wide layout to fit. Incomplete-design SEM
-  # (FIML) is deferred (ADR-014); fail loudly toward the engine that handles it.
-  if (engine == "lavaan" && !balanced) {
-    abort_unsupported(c(
-      "The {.pkg lavaan} engine requires a complete, balanced two-way design.",
-      i = "Incomplete-design SEM (FIML) is planned for a later milestone; use \\
-           {.code engine = \"glmmTMB\"} for incomplete data."
-    ))
-  }
+  # lavaan (SEM) reshapes to a wide subject-by-rater matrix; incomplete data leaves
+  # missing cells, which fit_lavaan() estimates by full-information maximum likelihood
+  # (FIML, M21 Slice 3, ADR-031). Disconnected designs are still rejected by the
+  # engine-agnostic connectedness guard below (shared with the mixed-model engines).
 
   # Fixed-rater lme4 (M14 Slice 1 balanced; M15 Slice 2 incomplete, ADR-024) covers
   # the two-way fixed-rater design on both balanced and ragged data: fit_lme4_fixed()

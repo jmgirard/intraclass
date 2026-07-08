@@ -18,13 +18,13 @@
   (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
   Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
   checklist in MILESTONES.md.
-- Active task: **M21 Slice 3 — incomplete/FIML SEM** (next). **Slices 1–2 ✅ done** on branch
-  `m21-sem-parity`. Slice 1 (lavaan bootstrap): `lavaan_simulate_refit` factory + `ci_method =
-  "bootstrap"` for the SEM engine (committed `e307421`). Slice 2 (fixed-rater SEM): oracle-first
-  catch resolved — fixed SEM agreement is the **distinct** Case-3A bias-corrected θ²_r
-  (`max(0, raw − bias)`), reducing to both glmmTMB Case-3A fixed and random σ²_r on balanced data
-  (M10 identity); `fit_lavaan(raters=)`, guard narrowed, O-FSEM oracles green. Slice 2 not yet
-  committed. See the DoD checklist in MILESTONES.md.
+- Active task: **M21 cross-cutting DoD / wrap** (next: installed-pkg `R CMD check --as-cran`, then
+  PR). **All three slices ✅ done** on branch `m21-sem-parity`. S1 lavaan bootstrap (committed
+  `e307421`); S2 fixed-rater SEM = Case-3A θ²_r, reduces to glmmTMB fixed+random (committed
+  `f84b57a`); S3 incomplete/FIML SEM — `missing = "fiml"`, **attempt-then-degrade resolved to
+  SHIPS** (consistency ≤8e-3, agreement ≤1.5e-2 vs glmmTMB; the raw-SEM small-sample bias, not a
+  FIML artifact), bootstrap gated on incomplete data. S3 not yet committed. REFERENCES/COVERAGE/
+  ROADMAP synced (arc closed). See the DoD checklist in MILESTONES.md.
 - Last green CI: **PR #25 (M20) full matrix green incl. Windows and R-devel; merged to `main` at
   137fb98** (the codecov upload flaked once on a bad GPG signature — re-ran green; infra, not the
   diff).

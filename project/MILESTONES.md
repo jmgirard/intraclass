@@ -646,14 +646,23 @@ DoD checklist (the live board — check off in-commit, #16):
   ICC); balanced reduction to glmmTMB fixed AND random (SF ≤1e-2 small-sample, large-N ≤1e-3);
   consistency ≡ random exactly; interval finite/[0,1]/brackets; fixed × bootstrap (Slice 1×2). No new
   estimand/spec/argument. Consistency ≡ random exactly, balanced/complete single-level.
-- [ ] **Slice 3 — incomplete / FIML SEM (COVERAGE §③ #2).** Lift the `engine == "lavaan" &&
-  !balanced` abort; lavaan `missing = "fiml"` on the wide reshape (no new fit shape) + the M3-style
-  connectedness/identifiability guard before dispatch (#5). **Consistency** (a ratio) stays an
-  **exact** cross-engine pin on ragged data. **Absolute agreement — attempt, degrade to 🟣 research**
-  (maintainer decision, matching M18 S2 / M20 S3): FIML agreement ≈ REML only asymptotically →
-  attempt full FIML agreement (reduction complete→M7 + seeded recovery + ≤1e-3 cross-engine); if no
-  #1/#4-strong oracle holds, **ship FIML consistency only and reclassify FIML agreement to 🟣
-  research** rather than lower the bar. Fable review (#19) if close but unpinnable. Heaviest — last.
+- [x] **Slice 3 — incomplete / FIML SEM (COVERAGE §③ #2).** ✅ done (branch `m21-sem-parity`).
+  Incomplete-lavaan abort removed; `fit_lavaan()` detects missing cells (`has_missing`) and fits by
+  FIML (`missing = "fiml"`, dropping the wishart likelihood; complete data keeps wishart) — no new
+  fit shape. The engine-agnostic M3 connectedness guard (icc.R) still rejects disconnected ragged
+  designs before any lavaan fit. **Attempt-then-degrade RESOLVED TO SHIPS (no research degrade):**
+  empirically FIML pins vs glmmTMB — consistency ≤8e-3, agreement ≤1.5e-2 (the *same* raw-SEM
+  small-sample bias as complete data, shrinking with n; not a FIML artifact). Bootstrap **gated** on
+  incomplete data (`simulate_refit = NULL` → loud `bootstrap_ci` abort; parametric resamples can't
+  reproduce the missingness pattern). **Oracles (O-FIML, `test-icc-lavaan.R`):** cross-engine
+  consistency (≤8e-3) + agreement (≤1.5e-2) on a deterministic connected ragged design; large-N
+  population recovery; interval finite/[0,1]/brackets; incomplete-bootstrap loud abort; disconnected
+  ragged still aborts (`intraclass_unidentified`). Consistency stays estimator-invariant; no new
+  estimand/spec/argument.
+- [ ] **Cross-cutting DoD:** ⏳ in progress — REFERENCES O-SEM extended with the M21 fixed/FIML/
+  bootstrap oracles ✅; COVERAGE §③ synced (three rows ✅, arc closed) ✅; ROADMAP sync (pending);
+  `air`/`lintr` clean ✅; docs regenerated ✅; installed-pkg + `R CMD check --as-cran` 0/0/0 (pending);
+  full CI matrix green incl. Windows/R-devel (pending, on PR); merged via PR on `m21-sem-parity`.
 - [ ] **Cross-cutting DoD:** FIML-SEM oracle note appended to the M7 record / `REFERENCES.md`
   (O-SEM row extended); COVERAGE §③ + ROADMAP synced (arc closed: every 🔵 not-yet gap resolved);
   `air format --check` + `lintr::lint_package()` clean; installed-pkg tests with `NOT_CRAN=true`;

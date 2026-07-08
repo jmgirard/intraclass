@@ -169,11 +169,14 @@ fit_lavaan <- function(data, raters = "random", call = rlang::caller_env()) {
   inds <- paste0("v", seq_len(k))
   nu_slots <- paste0("nu", seq_len(k))
 
-  # Long -> wide: rows = subjects, columns = raters. One rating per cell (the
-  # design is complete/balanced), so each tapply cell is a single value.
+  # Long -> wide: rows = subjects, columns = raters. At most one rating per cell (the
+  # two-way design has no within-cell replicates), so each present cell is a single
+  # value; a MISSING subject x rater cell is left as NA (tapply's fill), which FIML
+  # estimates around (M21 Slice 3). `has_missing` selects the estimator below.
   wide <- tapply(data$score, list(data$subject, data$rater), function(x) x[[1]])
   wide_df <- as.data.frame(wide)
   names(wide_df) <- inds
+  has_missing <- anyNA(wide_df)
 
   # Unit loadings + one shared residual variance = the two-way random model.
   loadings <- paste(sprintf("1*%s", inds), collapse = " + ")
@@ -190,17 +193,27 @@ fit_lavaan <- function(data, raters = "random", call = rlang::caller_env()) {
   # error before we can inspect the fit. Convert any such failure into a classed
   # intraclass condition pointing at the boundary-robust engine (#5/#8), so the
   # whole error surface stays classed and actionable.
+  # Estimator: on COMPLETE data the N-1 wishart likelihood matches the REML
+  # mixed-model spine and the classical published values (M7). On INCOMPLETE data
+  # there is no complete sample covariance, so estimate by FIML (`missing = "fiml"`,
+  # which uses casewise ML); the small-sample N-vs-(N-1) difference is immaterial
+  # asymptotically, and the consistency ratio absorbs most of it (M21 Slice 3).
+  fit_args <- list(
+    model = model,
+    data = wide_df,
+    meanstructure = TRUE,
+    int.ov.free = TRUE,
+    int.lv.free = FALSE,
+    information = "observed"
+  )
+  if (has_missing) {
+    fit_args$missing <- "fiml"
+  } else {
+    fit_args$likelihood <- "wishart"
+  }
   fit <- tryCatch(
     withCallingHandlers(
-      lavaan::lavaan(
-        model,
-        data = wide_df,
-        meanstructure = TRUE,
-        int.ov.free = TRUE,
-        int.lv.free = FALSE,
-        likelihood = "wishart",
-        information = "observed"
-      ),
+      do.call(lavaan::lavaan, fit_args),
       warning = function(w) {
         # Surface fit trouble through cli, non-fatal, matching the other engines.
         cli::cli_warn(c(
@@ -322,6 +335,14 @@ fit_lavaan <- function(data, raters = "random", call = rlang::caller_env()) {
     # Parametric-bootstrap contract (M21 Slice 1, ADR-031): simulate from this fit's
     # implied moments -> refit -> recompute the ICC (with the fixed-rater correction
     # recomputed per refit when raters == "fixed") per resample. Reuses `center`/`k`.
-    simulate_refit = lavaan_simulate_refit(fit, model, k, center, raters)
+    # Gated for INCOMPLETE data (M21 Slice 3): resampling complete rows from the
+    # implied moments would not reproduce the observed missingness pattern, so the
+    # bootstrap would silently overstate the information; ci_method = "bootstrap" then
+    # aborts loudly toward the Monte-Carlo interval (bootstrap_ci()'s NULL guard).
+    simulate_refit = if (has_missing) {
+      NULL
+    } else {
+      lavaan_simulate_refit(fit, model, k, center, raters)
+    }
   )
 }
