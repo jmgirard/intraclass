@@ -30,9 +30,15 @@ visible without re-deriving it. Updated whenever an item's readiness changes;
 ready ones.
 
 **Scheduled into M17 (2026-07-08, ADR-026) — no longer parked:** the *conflated
-single-level ICC (Eq. 14)*, *three-facet `d_study()`*, and *within-cell
-replicates* are now the three slices of milestone M17 (see
+single-level ICC (Eq. 14)*, a *multilevel `d_study()`*, and *within-cell
+replicates* are the three slices of milestone M17 (see
 [`MILESTONES.md`](MILESTONES.md)); per ADR-015 they leave this future-only file.
+**Note:** M17 Slice 2 was originally scoped as a *three-facet / subjects-per-cluster*
+`d_study()` but retargeted to **rater-count projection** after the source review
+(ten Hove Eq. 13's cluster ICC has no subject facet; Ns is efficiency-only —
+[[cluster-icc-no-subject-facet]], ADR-026 amendment). The subjects-per-cluster idea
+is **not a reliability-projection facet**; it is folded into the *design/power
+helpers* item below (sample-size / CI-width), where it belongs.
 
 - **Consistency-conflated single-level ICC** — M17 Slice 1 ships the *agreement*
   conflated ICC (`level = "conflated"`), sourced to ten Hove et al. (2022) **Eq. 14**;
@@ -48,8 +54,12 @@ replicates* are now the three slices of milestone M17 (see
   flavor has no independent oracle (correctness would rest on simulation
   calibration alone, in tension with #1); `M4.5-d-study.md` §6 already scoped
   cost/optimal-design helpers and subject-count projection **out** of
-  `d_study()`. Belongs in "Proposals under discussion" for a scope ruling before
-  it can be promoted.
+  `d_study()`. **This item now also absorbs the multilevel *subjects-per-cluster*
+  question** (formerly miscast as a "three-facet d_study"): per ten Hove Eq. 13 the
+  number of subjects per cluster is a **sample-size / efficiency** dimension, not a
+  reliability facet ([[cluster-icc-no-subject-facet]]), so it lives here (with the
+  power/CI-width helpers), never as a `d_study()` projection. Belongs in "Proposals
+  under discussion" for a scope ruling before it can be promoted.
 - Categorical/ordinal ratings (GLMM engines) beyond the Gaussian LMM.
   **Status: unscheduled, no spec drafted.** No milestone slice, ADR, or oracle
   route exists yet; needs its own estimand pass (link/family choice, oracle

@@ -9,12 +9,14 @@
   estimand → new spec; `gtheory` oracle in `Suggests`). Slice 3 may spin into M18 if the
   milestone runs heavy (decide at its start). M0–M16 shipped; package at v0.1.0,
   submission-ready.
-- Active task: **M17 Slice 2 — three-facet `d_study()`** — next up on branch
-  `m17-varcomp-trio`. **Slice 1 (conflated ICC) is done** (not yet merged): `level =
-  "conflated"` ships the agreement-only Eq. 14 as a diagnostic contrast off the existing
-  five-component fit; oracles O-lme4 / O-Eq14 / O-population green; 663 tests pass, lint +
-  `air` clean. See [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) and the
-  Slice-1 board in MILESTONES.
+- Active task: **M17 Slice 2 — multilevel rater-count `d_study()`** — *in progress* on branch
+  `m17-varcomp-trio`. **Retargeted** from "three-facet / subjects-per-cluster" after the
+  source review: ten Hove Eq. 13's cluster ICC has no subject facet and Ns is efficiency-only,
+  so subjects-per-cluster is not a sourced reliability projection (ADR-026 amended; memory
+  `cluster-icc-no-subject-facet`). The sourced slice: lift `d_study()`'s multilevel abort and
+  project the **rater count** at subject + cluster levels (Eq. 12/13, both endorsed p.4).
+  **Slice 1 (conflated ICC) is done** (not yet merged): oracles green, 663 tests pass, lint +
+  `air` clean.
 - Last green CI: PR #21 (M16) full matrix green incl. Windows and R-devel; merged to
   `main` at 0b84885
 - Blockers: —

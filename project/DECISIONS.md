@@ -1479,18 +1479,44 @@ consequences → references.
     form from the fitted components; (O-reduction) equals a plain single-level `icc()` on
     the same ratings ignoring `cluster` (promote M5 §5's vignette invariant to a real test);
     (O-lme4) same components from `lmer`.
-  - **Slice 2 — three-facet `d_study()`: project the subjects-per-cluster facet.** Today
-    `d_study()` projects the **rater** count `m` only (M4.5), for two-way designs. This adds
-    projection over **subjects-per-cluster `n_s`** — the other GT decision facet — for the
-    **complete-data** multilevel designs, at the **cluster level**. **Scope guard:**
-    restricted to complete-data multilevel; averaged cluster-level `ICC(c,k)` on *incomplete*
-    data has the open, un-oracled per-cluster divisor (M9 §9, Wave 3) and is explicitly out
-    of this slice. Distinct from the (out-of-scope, M4.5 §6) single-level subject-count
-    projection: subjects-per-cluster is a genuine GT facet at the cluster level; single-level
-    subject count is not the package's estimand. Oracles: (O-GENOVA) Brennan (2001) two-facet
-    D-study closed form / `gtheory` GENOVA; (O-reduction) at the observed `n_s` equals the
-    reported `ICC(c,k)`; (O-sim) seeded recovery of a projected value the design did not run,
-    with MC-band coverage (the M4.5 O-sim pattern).
+  - **Slice 2 — multilevel rater-count `d_study()` (both levels).**
+    **⚠ Retargeted 2026-07-08 (amends the original "three-facet / subjects-per-cluster"
+    plan below).** On reading the source before coding (#2), the "project the
+    subjects-per-cluster facet" framing was found to **contradict the paper** and was
+    dropped from M17. ten Hove et al. (2022) **Eq. 13**: the cluster-level ICC
+    `σ²_c / (σ²_c + (σ²_r + σ²_cr)/k)` **contains no subject-related variance** ("the ordering
+    of clusters across raters is independent of subject-related effects"), and its `k` is
+    *raters per cluster*. The paper's only reliability-projection facet is the **number of
+    raters** (p. 4: "different values of k can be used to estimate IRR of future data gathered
+    from different numbers of raters"), for both levels; the **number of subjects per cluster
+    (Ns)** affects only estimation **bias / efficiency / CI width** (Simulation 1), i.e. it is
+    a sample-size/design-power matter, not part of any coefficient. A subjects-per-cluster
+    *reliability* curve would therefore be a fabricated formula (#1/#4); a cluster-mean
+    dependability that *did* average over subjects would be a different, non-IRR general-GT
+    estimand outside this package's scope. (Memory: `cluster-icc-no-subject-facet`.)
+    - **The retargeted, sourced slice:** lift `d_study()`'s current blanket multilevel abort
+      and project the **rater count `m`** for the **subject-level (Eq. 12)** and
+      **cluster-level (Eq. 13)** multilevel ICCs — a pure change of the averaging divisor in
+      the existing M5 estimand, reusing the single-level `d_study()` MC-reuse machinery. The
+      `icc_dstudy` object gains a `level` column for multilevel fits; `autoplot()` facets by
+      level. Agreement + consistency at each level; nested designs project the subject level
+      only (Design 3 agreement-only), matching what `icc()` already reports.
+    - **Scope guard:** **complete-data multilevel only.** Incomplete multilevel projection is
+      deferred — the cluster level would hit the open, un-oracled M9 `ICC(c,k)` incomplete
+      divisor (M9 §9, Wave 3). Fixed-rater absolute-agreement projection stays ill-posed and
+      aborts (reuses `abort_fixed_agr_projection`, M4.5 §4).
+    - **Oracles (#1):** (O-reduction) at `m = observed k` the projection equals the fitted
+      M5 `ICC(*,k)` at each level, to < 1e-4; (O-lme4) the projected curve matches one built
+      from an independent `lmer` five-component fit; (O-sim) seeded recovery of a projected
+      value the design did not run, with MC-band coverage (the M4.5 O-sim pattern). **No
+      `gtheory` dependency needed** (dropped with the subjects-per-cluster oracle).
+    - **Subjects-per-cluster / three-facet is removed from M17**, not merely deferred: it is
+      reclassified under the parked **design/power helpers** item (sample-size / CI-width),
+      where Ns actually lives.
+
+    *Original (superseded) plan:* ~~three-facet `d_study()`: project the subjects-per-cluster
+    facet at the cluster level, restricted to complete-data multilevel; oracle Brennan (2001)
+    two-facet / `gtheory` GENOVA.~~ Superseded by the paragraph above per the paper.
   - **Slice 3 — within-cell replicates: split σ²_sr from σ²_e.** With ≥2 ratings per
     subject×rater cell the residual splits into the **subject×rater interaction σ²_sr** and
     **pure within-cell error σ²_e** via `(1 | subject:rater)`. The detection + refusal

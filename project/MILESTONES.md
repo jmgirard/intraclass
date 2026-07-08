@@ -463,18 +463,22 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     - [x] roxygen (`@param level` + Multilevel section) + NEWS + `advanced.Rmd` worked
           contrast + `test-vignette-claims.R` invariant; full suite green (663 pass), lint +
           `air` clean.
-  - **Slice 2 — three-facet `d_study()` (subjects-per-cluster projection), complete-data
-    multilevel, cluster level.**
-    - [ ] `d_study()` gains a subjects-per-cluster facet arg; projects `ICC(c,k)` over
-          `(m, n_s)` for complete-data multilevel designs.
-    - [ ] **Scope guard**: aborts/refuses on incomplete multilevel (the open M9 `ICC(c,k)`
-          divisor, Wave 3) — must not silently project it (#5).
-    - [ ] MC band reuses shared draws across the grid (M4.5 device); bootstrap-band stays
-          deferred (ADR-025).
-    - [ ] Oracles: O-GENOVA (Brennan 2001 / `gtheory` two-facet), O-reduction (at observed
-          `n_s` equals reported `ICC(c,k)`), O-sim (projected value not run + MC coverage).
-    - [ ] roxygen + NEWS + vignette; `autoplot` handles the added facet or documents its
-          limit; CI green.
+  - **Slice 2 — multilevel rater-count `d_study()` (both levels).** *(Retargeted from the
+    "three-facet / subjects-per-cluster" plan: the paper's cluster ICC has no subject facet
+    and Ns is efficiency-only, so subjects-per-cluster is not a sourced reliability
+    projection — dropped from M17, see ADR-026 amendment.)*
+    - [ ] Lift `d_study()`'s blanket multilevel abort; project the **rater count `m`** for the
+          subject-level (Eq. 12) and cluster-level (Eq. 13) multilevel ICCs — a divisor change
+          on the existing M5 estimand, reusing the single-level MC-reuse machinery.
+    - [ ] `icc_dstudy` gains a `level` column for multilevel fits; agreement + consistency per
+          level; nested designs project subject-level only (Design 3 agreement-only).
+    - [ ] **Scope guard**: complete-data multilevel only; incomplete aborts (the cluster level
+          would hit the open M9 `ICC(c,k)` divisor, Wave 3). Fixed-rater agreement projection
+          stays ill-posed and aborts (#5).
+    - [ ] Oracles: O-reduction (at `m = observed k` equals the fitted M5 `ICC(*,k)` per level),
+          O-lme4 (curve matches an independent five-component fit), O-sim (projected value not
+          run + MC coverage). No `gtheory` dependency.
+    - [ ] roxygen + NEWS + `advanced.Rmd`; `autoplot.icc_dstudy` facets by level; CI green.
   - **Slice 3 — within-cell replicates (new estimand), Wave-2, heaviest.** *(May spin into
     M18 if the milestone runs heavy — decide at this slice's start, ADR-026.)*
     - [ ] **Write `M17-within-cell-replicates.md`** first (#2): resolve facet **crossed vs.
@@ -491,9 +495,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     `air format --check` clean before each PR push; `project/` reconciled in the merge commit.
 - Deferred out of M17 (record so not rediscovered): BCa intervals and **bootstrap-projected
   `d_study` bands** (ADR-025); the **M9 averaged cluster-level `ICC(c,k)` incomplete divisor**
-  (Wave 3, research — Slice 2's complete-data guard must not reach it); **single-level
-  subject-count projection** (out of scope, M4.5 §6 — Slice 2 is cluster-level only). Untouched
-  arc carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the **Bayesian engine** +
+  (Wave 3, research — Slice 2's complete-data guard must not reach it); **incomplete-data
+  multilevel `d_study()`** (subject-level projection would be definable, but bundling it with
+  the cluster level's open incomplete divisor is deferred — Slice 2 is complete-data only);
+  **subjects-per-cluster / three-facet projection** — *removed from M17, not merely deferred*:
+  the paper's cluster ICC has no subject facet and Ns is efficiency-only (ADR-026 amendment),
+  so it is reclassified under the parked **design/power helpers** item, not a d_study facet.
+  Untouched arc carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the **Bayesian engine** +
   `ci_method = "posterior"`; **categorical/ordinal GLMM ratings**; **one-way via SEM**
   (blocked, ADR-014); the **non-parametric bootstrap / profile-likelihood CIs** and
   **benchmark suite**; the **lme4 singular-fit / merDeriv edge cases** (deprioritized).
