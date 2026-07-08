@@ -104,7 +104,15 @@ d_study <- function(
     conf_level <- x$ci$conf_level
   }
   if (is.null(mc_samples)) {
-    mc_samples <- x$ci$samples
+    # The D-study band is projected by Monte-Carlo regardless of how the fitted
+    # object's interval was computed. Reuse the parent's MC draw count when it too
+    # was Monte-Carlo; otherwise (e.g. a bootstrap fit, whose `samples` counts
+    # refits) fall back to the Monte-Carlo default (ADR-025).
+    mc_samples <- if (identical(x$ci$method, "montecarlo")) {
+      x$ci$samples
+    } else {
+      10000L
+    }
   }
   if (is.null(seed)) {
     seed <- x$ci$seed
@@ -147,7 +155,9 @@ d_study <- function(
     icc_type = type,
     icc_raters = raters,
     conf.level = conf_level,
-    method = x$ci$method,
+    # The projection band is always Monte-Carlo (mc_components above), independent
+    # of the fitted object's `ci_method` (ADR-025).
+    method = "montecarlo",
     samples = mc_samples,
     k_observed = x$n$raters,
     k_eff = x$k_eff

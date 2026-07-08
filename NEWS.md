@@ -15,6 +15,11 @@ alternate engines, and seeded simulations.
   random vs. fixed raters (`raters`), and one-way vs. two-way (`model`) designs —
   the classic Shrout & Fleiss / McGraw & Wong coefficients — each reported with a
   boundary-aware Monte-Carlo confidence interval and its Shrout & Fleiss equivalent.
+* A second interval method, `ci_method = "bootstrap"`: a parametric bootstrap that
+  simulates response vectors from the fitted model, refits, and takes percentile
+  quantiles (`boot_samples` resamples). It does not rely on the asymptotic-normal
+  covariance approximation the Monte-Carlo default uses, at the cost of a refit per
+  resample. Currently available for the two-way random design on the glmmTMB engine.
 * Imbalanced and **incomplete** (missing-cell) designs are handled directly by the
   mixed model: it uses the effective number of ratings `k_eff` (the harmonic mean of
   the per-subject counts) as the `ICC(*,k)` divisor and aborts loudly on a

@@ -13,9 +13,11 @@ test_that("options that are valid but not yet implemented abort with a pointer",
     icc(d, score, subject, rater, engine = "brms"),
     class = "intraclass_error"
   )
+  # "montecarlo" and "bootstrap" are the interval methods (M16, ADR-025); an
+  # unknown ci_method aborts as an invalid choice, like an unknown engine.
   expect_error(
     icc(d, score, subject, rater, ci_method = "delta"),
-    class = "intraclass_unsupported"
+    class = "intraclass_error"
   )
 })
 

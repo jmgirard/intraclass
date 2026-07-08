@@ -80,13 +80,54 @@ fit_glmmtmb <- function(data, call = rlang::caller_env()) {
     )
   }
 
+  # Parametric-bootstrap support (ADR-025, M16): simulate `n` response vectors from
+  # the fitted model, refit the SAME two-way random model to each, and return the
+  # variance components per resample as a (component x resample) matrix -- the shape
+  # `bootstrap_ci()` reduces to a percentile interval. This is glmmTMB's analogue of
+  # lme4::bootMer (simulate() + refit). A refit that fails or whose Hessian is not
+  # positive-definite is marked NA (dropped upstream); a refit that lands on the
+  # variance boundary (a component at 0) is a valid draw and kept, matching the MC
+  # boundary policy (ADR-003). Seeded via with_rng_seed() so the global RNG stream is
+  # left untouched (PRINCIPLES.md #9, #12).
+  simulate_refit <- function(boot_samples, seed = NULL) {
+    run <- function() {
+      sims <- stats::simulate(fit, nsim = boot_samples)
+      refit_one <- function(y) {
+        boot_data <- data
+        boot_data$score <- y
+        refit <- tryCatch(
+          suppressWarnings(glmmTMB::glmmTMB(
+            score ~ 1 + (1 | subject) + (1 | rater),
+            data = boot_data,
+            REML = TRUE
+          )),
+          error = function(e) NULL
+        )
+        na_out <- c(subject = NA_real_, rater = NA_real_, residual = NA_real_)
+        if (is.null(refit) || !isTRUE(refit$sdr$pdHess)) {
+          return(na_out)
+        }
+        rvc <- glmmTMB::VarCorr(refit)$cond
+        out <- c(
+          subject = as.numeric(attr(rvc$subject, "stddev"))^2,
+          rater = as.numeric(attr(rvc$rater, "stddev"))^2,
+          residual = stats::sigma(refit)^2
+        )
+        if (anyNA(out) || any(!is.finite(out))) na_out else out
+      }
+      vapply(sims, refit_one, numeric(3L))
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+
   list(
     fit = fit,
     engine = "glmmTMB",
     components = components,
     estimate = estimate,
     vcov = vcov_full,
-    to_components = to_components
+    to_components = to_components,
+    simulate_refit = simulate_refit
   )
 }
 

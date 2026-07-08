@@ -166,8 +166,17 @@
 #'   balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages;
 #'   `"lavaan"` requires the \pkg{lavaan} package.
 #' @param conf_level Confidence level for the interval (default `0.95`).
-#' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
-#' @param mc_samples Number of Monte-Carlo draws for the interval.
+#' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
+#'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
+#'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
+#'   fitted model, refits, and takes percentile quantiles of the resampled
+#'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
+#'   approximation but is far slower (a refit per resample); it is currently
+#'   available for the two-way random design on the `"glmmTMB"` engine.
+#' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
+#'   (default `10000`).
+#' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (default
+#'   `999`). Ignored when `ci_method = "montecarlo"`.
 #' @param seed Optional integer seed for a reproducible interval. The global RNG
 #'   state is restored afterward.
 #'
@@ -213,6 +222,7 @@ icc <- function(
   conf_level = 0.95,
   ci_method = "montecarlo",
   mc_samples = 10000L,
+  boot_samples = 999L,
   seed = NULL
 ) {
   if (!is.data.frame(data)) {
@@ -224,17 +234,17 @@ icc <- function(
   model <- validate_choice(model, c("twoway", "oneway"), "model")
   oneway <- model == "oneway"
   engine <- validate_choice(engine, c("glmmTMB", "lme4", "lavaan"), "engine")
-  require_supported(
+  ci_method <- validate_choice(
     ci_method,
-    "montecarlo",
-    "ci_method",
-    "interval methods beyond Monte-Carlo"
+    c("montecarlo", "bootstrap"),
+    "ci_method"
   )
 
   type <- validate_choice(type, c("agreement", "consistency"), "type")
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
-  mc_samples <- validate_mc_samples(mc_samples)
+  mc_samples <- validate_sample_count(mc_samples, "mc_samples")
+  boot_samples <- validate_sample_count(boot_samples, "boot_samples")
   seed <- validate_seed(seed)
 
   # A `cluster` column switches on the multilevel path (subjects nested in
@@ -817,13 +827,23 @@ icc <- function(
            the variance ratio 0/0; inspect the data or the fitted model."
     ))
   }
-  intervals <- mc_ci(
-    engine_fit,
-    estimands,
-    conf_level = conf_level,
-    mc_samples = mc_samples,
-    seed = seed
-  )
+  intervals <- if (ci_method == "bootstrap") {
+    bootstrap_ci(
+      engine_fit,
+      estimands,
+      conf_level = conf_level,
+      boot_samples = boot_samples,
+      seed = seed
+    )
+  } else {
+    mc_ci(
+      engine_fit,
+      estimands,
+      conf_level = conf_level,
+      mc_samples = mc_samples,
+      seed = seed
+    )
+  }
 
   estimates <- data.frame(
     index = vapply(estimands, `[[`, character(1), "label"),
@@ -854,7 +874,9 @@ icc <- function(
       ci = list(
         method = ci_method,
         conf_level = conf_level,
-        samples = mc_samples,
+        # `samples` is the resample count behind the reported interval: MC draws
+        # for "montecarlo", refits for "bootstrap" (ADR-025).
+        samples = if (ci_method == "bootstrap") boot_samples else mc_samples,
         seed = seed
       ),
       n = list(
@@ -918,29 +940,34 @@ validate_choice <- function(value, choices, arg, call = rlang::caller_env()) {
   value
 }
 
-# Validate `mc_samples`: a single whole number >= 2. Left unvalidated, a 0 yields a
-# silent all-NA interval, a 1 a zero-width interval with NA std.error, and a
-# fractional value silently recycles the draw matrix -- all violating fail-loudly
-# (PRINCIPLES.md #5) and the classed-error contract (#8). The floor of 2 is the
-# minimum for which a two-sided quantile and a standard deviation are defined (a
-# meaningful interval needs far more; the default is 10000).
-validate_mc_samples <- function(mc_samples, call = rlang::caller_env()) {
+# Validate a resample count (`mc_samples` or `boot_samples`): a single whole number
+# >= 2. Left unvalidated, a 0 yields a silent all-NA interval, a 1 a zero-width
+# interval with NA std.error, and a fractional value silently recycles the draw
+# matrix -- all violating fail-loudly (PRINCIPLES.md #5) and the classed-error
+# contract (#8). The floor of 2 is the minimum for which a two-sided quantile and a
+# standard deviation are defined (a meaningful interval needs far more; the defaults
+# are 10000 Monte-Carlo draws / 999 bootstrap resamples).
+validate_sample_count <- function(
+  value,
+  arg = "mc_samples",
+  call = rlang::caller_env()
+) {
   if (
-    !is.numeric(mc_samples) ||
-      length(mc_samples) != 1L ||
-      !is.finite(mc_samples) ||
-      mc_samples < 2 ||
-      mc_samples != round(mc_samples)
+    !is.numeric(value) ||
+      length(value) != 1L ||
+      !is.finite(value) ||
+      value < 2 ||
+      value != round(value)
   ) {
     abort_intraclass(
       c(
-        "{.arg mc_samples} must be a single whole number >= 2.",
-        x = "Supplied: {.val {mc_samples}}."
+        "{.arg {arg}} must be a single whole number >= 2.",
+        x = "Supplied: {.val {value}}."
       ),
       call = call
     )
   }
-  as.integer(mc_samples)
+  as.integer(value)
 }
 
 # Validate `seed`: NULL (use the ambient RNG) or a single whole number. Left

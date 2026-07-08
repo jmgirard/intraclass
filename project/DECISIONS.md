@@ -1357,3 +1357,89 @@ consequences → references.
   `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start), §1 (engines); memory
   `milestone-branches-and-prs`, `verify-against-installed-package`,
   `run-lintr-before-push`.
+
+## ADR-025: M16 scope — parametric-bootstrap `ci_method` (second interval method)
+- Date: 2026-07-07
+- Status: accepted
+- Context: With M0–M15 shipped (v0.1.0 submission-ready) and no milestone in flight,
+  the maintainer opened a backlog review of the **non-Bayesian carryovers** and agreed
+  a sequencing plan ordered by oracle-risk (STATUS "Next action"): Wave 1 =
+  parametric-bootstrap `ci_method` (this milestone) + the conflated single-level ICC
+  (Eq. 14); Wave 2 = within-cell replicates + three-facet `d_study()`; Wave 3 = the M9
+  averaged `ICC(c,k)` incomplete divisor (research). The parametric-bootstrap method was
+  chosen as M16 because it is the **lowest-estimand-risk** substantive item (no new
+  estimand) and its **multi-`ci_method` dispatch seam** is reused by the eventual Bayesian
+  `ci_method = "posterior"` — infra ROI that pays forward. This is the **first genuinely
+  new `ci_method`** since the Monte-Carlo default (ADR-003); until now `icc()` has hard-
+  rejected any `ci_method != "montecarlo"` via `require_supported()`. Per PRINCIPLES.md
+  #2/#14 this ADR details the milestone at its start. An engine-coverage scope question
+  was put to the maintainer this session (below).
+- Decision:
+  - **Add `ci_method = "bootstrap"`: a parametric bootstrap.** Simulate response vectors
+    from the fitted model → refit → recompute the ICC per replicate → **percentile**
+    quantiles for `conf.low`/`conf.high` and the replicate SD for `std.error`. Unlike the
+    MC default (draws from the fitted Wald covariance on the engine's log scale, ADR-003),
+    each replicate is a **real refit**, so the interval does not rely on the asymptotic-
+    normal approximation of the parameter covariance. **Boundary-aware by construction**
+    (#3): every refit yields variances ≥ 0, and a replicate that lands on the boundary
+    (a component pinned at 0) is a valid draw, kept.
+  - **Both engines, via an engine-level `simulate_refit()` contract** (maintainer chose
+    "both" over glmmTMB-first / lme4-first). Rationale: a `ci_method` that only works on a
+    non-default `Suggests` engine (lme4) is a UX trap when **glmmTMB is the default engine**.
+    The contract mirrors the M5.5/M7 engine × design dispatch seam (ADR-012): `bootMer()`
+    for lme4, `simulate()` + refit for glmmTMB. Each returns a matrix of per-replicate
+    variance components on the **shared component contract** so `icc_point()` maps each
+    replicate to the ICC identically to the MC path — no per-engine ICC code.
+  - **No new estimand, estimand-spec, or dependency.** Same coefficients, same population
+    definitions — only a new *interval* method. `bootMer` is in lme4 (`Suggests`);
+    glmmTMB `simulate()` is already in `Imports`. Light-install preserved (ADR-002).
+    Additive, non-breaking API: `ci_method` gains a value; the default is unchanged (#6).
+  - **New arg `boot_samples`** (default **999**), distinct from `mc_samples` (10000):
+    the parametric bootstrap is ~1000× costlier (a full refit per replicate). Recorded on
+    the `icc` object's `ci` list alongside `method`/`conf_level`/`seed`; seeded for
+    reproducibility (#9/#12) via the existing `with_rng_seed()` wrapper.
+  - **Percentile interval only** in M16. **BCa** (needs a jackknife acceleration estimate)
+    is deferred to ROADMAP — percentile is boundary-safe and the standard first cut.
+  - **`d_study()` stays MC-only** in M16. The reliability-curve band reuses the *shared MC
+    draws* across projected `k` (ci-montecarlo.R) — a device specific to the MC covariance
+    draw. Bootstrap CIs cover the fitted coefficients; **bootstrap-projected `d_study`
+    bands are deferred** (would reproject each refit's components across `k`).
+  - **Refit-failure policy (#5/#8):** discard **nonconvergent** replicates; if the discard
+    fraction exceeds a threshold (default TBD in execution, ~0.10), raise a **classed `cli`
+    warning** naming the count (never a silent NA interval). **Singular/boundary** refits
+    are valid draws (variance pinned at 0) and are **kept** — consistent with the MC
+    boundary policy (ADR-003).
+  - **Correctness (#1) — a CI *method*'s oracle is coverage.** Three independent oracles:
+    (O1) a **seeded simulation coverage study** at known variance components showing
+    ~nominal (95%) coverage, the estimator-coverage pattern already used across the suite;
+    (O2) **agreement with the MC CI** on interior (non-boundary) cases within Monte-Carlo
+    tolerance — MC is the independent method, and the two should coincide where the
+    asymptotics hold, diverging *predictably* toward the boundary (characterized, #18);
+    (O3) a **literature anchor** for the parametric bootstrap of variance components
+    (Efron & Tibshirani 1993; the ten Hove/Jorgensen/van der Ark MC-vs-bootstrap
+    comparison). Bibliography + oracle-registry rows added during execution/verify.
+  - **Slices (thin, #15):** **Slice 1** — the `simulate_refit()` contract + `bootstrap`
+    dispatch for the **default glmmTMB engine** on the balanced two-way random ICC
+    (simplest fit), with O1/O2 oracles (de-risks the refit-in-loop mechanics first);
+    **Slice 2** — lme4 `bootMer` parity through the same contract, O2 cross-engine
+    (bootstrap-lme4 ≈ bootstrap-glmmTMB) + O1; **Slice 3** — extend across the fitted
+    design family (fixed-rater, multilevel) that both engines already cover, and the
+    refit-failure/discard policy + classed warning. Cross-cutting DoD: roxygen
+    (`@param ci_method`/`boot_samples`), NEWS, `advanced.Rmd` method-comparison note.
+  - **Scope boundary.** Only designs the engines already *fit* are in scope (bootstrap is
+    an interval method layered on existing fits) — it inherits the current design frontier,
+    adds no estimand surface. Bootstrap for `d_study`, BCa intervals, and parallelized
+    refits are deferred to ROADMAP.
+- References: PRINCIPLES.md #1 (oracle-first — coverage + MC agreement + literature),
+  #2 (name the estimand first — **none new**; this is an interval method), #3 (boundary-
+  aware intervals — the refit bootstrap is boundary-aware by construction), #5/#8
+  (fail loudly / classed `cli` on excess refit failure), #6 (additive, non-breaking API),
+  #9/#12 (seeded, reproducible), #14 (milestone gates), #15 (thin slices), #16 (tracking
+  in-commit), #17 (BCa / d-study-bootstrap / parallel deferrals to ROADMAP);
+  **ADR-003 (Monte-Carlo default this adds a sibling to)**, ADR-012 (M5.5 engine dispatch
+  seam the `simulate_refit()` contract mirrors), ADR-002 (glmmTMB Imports / lme4 Suggests
+  light-install), ADR-023/024 (lme4 + merDeriv engine parity these bootstraps run on);
+  `bootMer` (lme4, Bates et al. 2015), glmmTMB `simulate()` (Brooks et al. 2017),
+  Efron & Tibshirani (1993); `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start),
+  §1 (engines / light install); memory `milestone-branches-and-prs`,
+  `verify-against-installed-package`, `run-lintr-before-push`.

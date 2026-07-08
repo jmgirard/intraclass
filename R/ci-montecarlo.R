@@ -71,6 +71,20 @@ mc_components <- function(mc, mc_samples = 10000L, seed = NULL) {
   }
 }
 
+# Reduce a vector of resampled ICC values (Monte-Carlo draws or bootstrap refits)
+# to a two-sided percentile interval + SD. Shared by mc_interval() and
+# bootstrap_interval() so the two `ci_method`s report intervals identically
+# (only how the values are generated differs).
+two_sided_interval <- function(vals, conf_level = 0.95) {
+  alpha <- 1 - conf_level
+  q <- stats::quantile(vals, c(alpha / 2, 1 - alpha / 2), names = FALSE)
+  list(
+    conf.low = q[[1]],
+    conf.high = q[[2]],
+    std.error = stats::sd(vals)
+  )
+}
+
 # Reduce a set of drawn components to a two-sided quantile interval + SD for one
 # estimand. Non-finite draws (e.g. a degenerate covariance direction) are dropped.
 mc_interval <- function(
@@ -79,8 +93,6 @@ mc_interval <- function(
   conf_level = 0.95,
   call = rlang::caller_env()
 ) {
-  alpha <- 1 - conf_level
-  probs <- c(alpha / 2, 1 - alpha / 2)
   vals <- icc_point(components, estimand)
   finite <- is.finite(vals)
   # Non-finite draws arise only when a variance component overflows to Inf (an
@@ -100,13 +112,7 @@ mc_interval <- function(
       call = call
     )
   }
-  vals <- vals[finite]
-  q <- stats::quantile(vals, probs, names = FALSE)
-  list(
-    conf.low = q[[1]],
-    conf.high = q[[2]],
-    std.error = stats::sd(vals)
-  )
+  two_sided_interval(vals[finite], conf_level)
 }
 
 mc_ci <- function(
