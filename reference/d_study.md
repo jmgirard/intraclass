@@ -7,8 +7,12 @@ Projects the reliability of a fitted
 mean of an arbitrary number of raters `m` – a generalizability-theory
 **decision (D-) study**, answering "how reliable would the mean of `m`
 raters be?" and, read as a curve, "how many raters do I need?". The
-point estimate and its boundary-aware Monte-Carlo interval reuse the fit
-stored on `x`; no model is refit.
+point estimate and its boundary-aware interval reuse the fit stored on
+`x`; no model is refit. The band follows the fit's `ci_method`: a
+Monte-Carlo fit reprojects one draw from the parameter covariance across
+every `m`, while a **bootstrap** fit reprojects its stored resamples (so
+at `m` = the observed rater count the band matches the fitted `ICC(*,k)`
+interval exactly).
 
 ## Usage
 
@@ -102,9 +106,11 @@ it). This is the paper-sanctioned rater projection (ten Hove et al.
 coefficient does **not** average over subjects, so there is no "subjects
 per cluster" projection — that is a sample-size question, not a
 reliability one. Nested designs project the subject level only. The
-conflated diagnostic (`level = "conflated"`) is not projected.
-Multilevel projection covers **complete** data only; incomplete
-multilevel `d_study()` aborts.
+conflated diagnostic (`level = "conflated"`) is not projected. On
+**incomplete** data the **subject** level projects (projection moves
+only the divisor); the **cluster** level is dropped with a note, because
+projecting `m` raters is the averaged `ICC(c,k)` case whose ragged
+divisor is an open modeling question (M9).
 
 ## References
 

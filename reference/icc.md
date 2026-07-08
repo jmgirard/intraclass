@@ -291,7 +291,9 @@ and all three rater-related terms as error. It is offered only as a
 reliability – and is never a recommended coefficient;
 [`print()`](https://rdrr.io/r/base/print.html) flags it as such. It is
 absolute-agreement only (Eq. 14 has no consistency form) and needs a
-complete, crossed (Design 1) random-rater design. Request it alongside
+crossed (Design 1) random-rater design; it works on both balanced and
+**incomplete** data (on ragged data it is the flat two-way ICC read off
+the multilevel fit, with the same `k_eff` divisor). Request it alongside
 the correct levels, e.g. `level = c("subject", "cluster", "conflated")`.
 
 The design is **inferred from the data** (ten Hove et al. 2022, Table
@@ -331,13 +333,15 @@ incomplete data, that row is dropped (with a message) rather than
 failing the whole call, so the subject-level averages and the
 single-rater cluster ICC are still returned. **Fixed raters**
 (`raters = "fixed"`) are supported for the crossed design at the
-**subject** level on balanced, complete data: the rater main effect
-becomes the finite-population variance of the observed raters (McGraw &
-Wong Case 3A), so consistency is identical to the random-rater case and
-absolute agreement differs only by that term. Incomplete *nested*
-designs, incomplete or nested fixed-rater designs, and the fixed-rater
-cluster level remain for later milestones. Nested designs still require
-balanced, complete data.
+**subject** level on both balanced and **incomplete** data: the rater
+main effect becomes the finite-population variance of the observed
+raters (McGraw & Wong Case 3A), so on balanced data consistency is
+identical to the random-rater case and absolute agreement differs only
+by that term; on incomplete data both types differ from random (the
+finite-population variance is read from the ragged rater-contrast fit).
+Incomplete *nested* designs, nested fixed-rater designs, and the
+fixed-rater cluster level remain for later milestones. Nested designs
+still require balanced, complete data.
 
 ## Within-cell replicates
 

@@ -42,11 +42,15 @@ simulations.
   (within-cluster) and cluster-level (between-cluster) coefficients via
   `level`. Covers raters crossed with clusters (Design 1) or nested in
   clusters/subjects (Designs 2–3), complete or incomplete crossed data,
-  and fixed raters at the subject level. `level = "conflated"` reports
-  the biased single-level ICC you would get by ignoring the clustering
-  (ten Hove et al. 2022, Eq. 14) — a diagnostic contrast, flagged in
+  and fixed raters at the subject level on **both balanced and
+  incomplete** crossed data (the finite-population rater variance is
+  read from the ragged rater-contrast fit, so it differs from the
+  random-rater ICC under imbalance). `level = "conflated"` reports the
+  biased single-level ICC you would get by ignoring the clustering (ten
+  Hove et al. 2022, Eq. 14) — a diagnostic contrast, flagged in
   [`print()`](https://rdrr.io/r/base/print.html) as not a recommended
-  coefficient (absolute-agreement, complete crossed designs).
+  coefficient (absolute-agreement, crossed designs, balanced **or
+  incomplete**).
 - **Within-cell replicates**: when a subject-by-rater cell is rated more
   than once,
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) fits
@@ -90,7 +94,11 @@ simulations.
   **multilevel** fit it projects the rater count at each level (subject
   and/or cluster), returning one curve per level (a `level` column;
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-  facets by it) on complete data.
+  facets by it); on **incomplete** data it projects the subject level
+  (the cluster level is dropped with a note). The projection band
+  follows the fit’s `ci_method`: a **bootstrap** fit reprojects its
+  stored resamples, so at the observed rater count the band matches the
+  fitted average-measure bootstrap interval exactly.
 - [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   / [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods for
   `icc` objects draw a coefficient forest plot and a variance-component
