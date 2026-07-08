@@ -33,8 +33,28 @@ with_rng_seed <- function(seed, code) {
 # Draw from a multivariate normal via a symmetric eigen-decomposition, which
 # tolerates a numerically semidefinite covariance (tiny negative eigenvalues
 # clamped to 0) at the boundary, where a Cholesky factor would fail.
-rmvn <- function(n, mu, covariance) {
+rmvn <- function(n, mu, covariance, call = rlang::caller_env()) {
   p <- length(mu)
+  # A non-finite parameter covariance means the fit did not identify some component
+  # (an over-parameterized or degenerate model -- e.g. a ragged replicate design with
+  # too few replicated cells to separate the interaction from pure error). `eigen()`
+  # would crash with an unclassed error, so fail loudly with a classed one (#5/#8).
+  if (anyNA(covariance) || any(!is.finite(covariance))) {
+    abort_intraclass(
+      c(
+        "The Monte-Carlo interval could not be computed: the fitted parameter \\
+         covariance is not finite.",
+        i = "A variance component was not identified -- the model is \\
+             over-parameterized or degenerate for this design (for replicates, too \\
+             few cells rated more than once to separate the interaction from pure \\
+             error).",
+        i = "Provide more replicated cells (or a less degenerate design), or \\
+             aggregate to one rating per subject-by-rater cell."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
   eig <- eigen(covariance, symmetric = TRUE)
   # Negative eigenvalues are clamped to 0 rather than treated as an error. They
   # arise not only from boundary roundoff but also from LEGITIMATELY rank-deficient

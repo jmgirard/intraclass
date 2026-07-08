@@ -58,21 +58,22 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M20 in flight (ADR-030); M18 & M19 shipped (PR #23/#24, ADR-028/029).** The
+**M18, M19 & M20 shipped locally (ADR-028/029/030); M18/M19 merged (PR #23/#24).** The
 **M18–M21 completeness arc** (ADR-027) closes every 🔵 *not yet* gap in
-[`COVERAGE.md`](COVERAGE.md). Next code work is **M20 Slice 1** (fixed-rater within-cell
-replicates) — the DoD board is in [`MILESTONES.md`](MILESTONES.md).
+[`COVERAGE.md`](COVERAGE.md). Next code work is **M21 — SEM (lavaan) engine parity**
+(its own start-of-milestone scope pass + ADR). M20 is on branch `m20-fixed-replicates`,
+green locally (finish-task gate), **pending PR CI + merge**.
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
 
 - **M18 — Multilevel completeness I (crossed, incomplete):** ✅ shipped (PR #23).
 - **M19 — Multilevel completeness II (nested Designs 2/3):** ✅ shipped (PR #24) — incomplete
   nested + fixed-rater nested Design 2.
-- **M20 — Within-cell replicate completeness:** 🚧 in flight (ADR-030). Oracle-risk order:
-  **Slice 1** fixed-rater · **Slice 2** multilevel (crossed D1 + nested D2) · **Slice 3** ragged
-  (occasion-averaged attempt-then-degrade). Extends M17 Slice 3.
+- **M20 — Within-cell replicate completeness:** ✅ built (all 3 slices, ADR-030), **pending PR
+  CI + merge**. Slice 1 fixed-rater · Slice 2 multilevel (crossed D1 + nested D2) · Slice 3 ragged
+  single-occasion (occasion-averaged-ragged degraded to 🟣 research). Extends M17 Slice 3.
 - **M21 — SEM (lavaan) engine parity:** lavaan bootstrap (Slice 1), fixed-rater SEM
-  (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc.
+  (Slice 2), incomplete/FIML SEM (Slice 3). The lavaan analog of the lme4 M5.5→M15 arc. **Next.**
 
 **Reclassified out of the arc (ADR-027):** multilevel SEM → cross-cutting "later" bucket
 (research-flavored, sits beside Bayesian); lavaan + replicates → ROADMAP unscheduled (niche).

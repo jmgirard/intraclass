@@ -659,3 +659,22 @@ test_that("O-RagRep: both ci_methods work for ragged single-occasion replicates"
   expect_true(all(b$estimates$estimate <= b$estimates$conf.high))
   expect_identical(b$ci$method, "bootstrap")
 })
+
+test_that("a non-finite parameter covariance fails loudly, not via eigen (#5/#8)", {
+  # A degenerate/over-parameterized fit (e.g. a ragged replicate design with too few
+  # replicated cells to identify the interaction) can hand the Monte-Carlo sampler a
+  # covariance with Inf/NaN entries. `eigen()` would crash with an unclassed error, so
+  # rmvn() must abort with a classed intraclass_singular_fit instead. Tested directly
+  # on the sampler (glmmTMB convergence on such designs is environment-dependent, so a
+  # data-driven trigger would be flaky).
+  cov_inf <- matrix(c(1, 0, 0, Inf), 2, 2)
+  expect_error(
+    intraclass:::rmvn(10, c(0, 0), cov_inf),
+    class = "intraclass_singular_fit"
+  )
+  cov_na <- matrix(c(1, NA, NA, 1), 2, 2)
+  expect_error(
+    intraclass:::rmvn(10, c(0, 0), cov_na),
+    class = "intraclass_singular_fit"
+  )
+})

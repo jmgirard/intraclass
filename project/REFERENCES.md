@@ -219,10 +219,41 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `ci_method`s exercised.
 - **Decision:** per-component error divisors (σ²_e divides by raters × occasions,
   σ²_r/σ²_sr by raters only); `k_eff` counts distinct raters. Two-way random,
-  balanced/complete replicates only; fixed/one-way/multilevel/ragged deferred
-  (ADR-026; spec §7).
+  balanced/complete replicates (M17 Slice 3); fixed / multilevel / ragged replicates
+  shipped in M20 (below); one-way replicates stay ⚫ by design.
 - **Provenance:** seeded generator `sim_replicates()` in the test file; ANOVA MoM via
   `stats::aov`. Reproducible; nothing hardcoded.
+
+### Oracle O-FRep / O-MLRep / O-RagRep — within-cell replicate completeness (M20)
+- **Status:** **asserted (M20)** (ADR-030; extends spec `M17-within-cell-replicates.md`
+  §7 into the shipped map). Three slices extend O-Rep beyond two-way-random /
+  single-level / balanced:
+  - **O-FRep** (fixed-rater, `tests/testthat/test-replicates.R`): θ²_r (shared
+    `theta2r_fixed()`, McGraw & Wong Case 3A) in the rater slot of the interaction fit.
+    Exact **balanced fixed ≡ random** (<1e-4), consistency ≡ random (~1e-8), reduction
+    to the single-occasion fixed fit via cell-mean aggregation, glmmTMB↔lme4 <1e-4, SF
+    labels (fixed agreement NA / consistency ICC(3,·)), the balanced fixed ANOVA mean
+    squares, seeded recovery + MC coverage, both `ci_method`s. Balanced/complete only.
+  - **O-MLRep** (multilevel, `tests/testthat/test-icc-multilevel.R`): crossed Design 1
+    (six-component) and nested Design 2 (five) add `(1|cluster:subject:rater)`. The
+    **occasion-averaged coefficient equals the M5/M8 fit on the replicate cell means**
+    (~1e-8) and σ²_{csr}+σ²_e/n_o == that cell-mean residual; glmmTMB↔lme4 <1e-4;
+    seeded recovery + MC coverage; cluster level single-occasion; both `ci_method`s.
+    Balanced/complete random only. (N_c=1→M17 is unreachable — multilevel needs ≥2
+    clusters — so cross-engine + reduction-via-cell-means are the independent oracles.)
+  - **O-RagRep** (ragged single-occasion, `tests/testthat/test-replicates.R`): the
+    replicate analogue of M3 — harmonic-mean `k_eff` (distinct raters/subject) +
+    connectedness. glmmTMB↔lme4 <1e-4 on unequal counts **and** incomplete crossing;
+    `k_eff = n_raters` on complete-crossing ragged counts; the ICC(A,1)-from-components
+    identity; seeded recovery + MC coverage; both `ci_method`s.
+- **Decision (attempt-then-degrade, #1/#4):** the **occasion-averaged coefficient on
+  ragged data is 🟣 research, not shipped** — unequal per-cell counts give no single
+  scalar effective-n_o divisor and no independent oracle to pin one; `occasions =
+  "average"` on ragged data aborts loudly. Ragged×fixed, ragged×multilevel, Design 3
+  replicate-split, and `d_study()` off a replicate fit are deferred/⚫ (COVERAGE §②).
+- **Provenance:** seeded generators `sim_replicates()`/`sim_multilevel_rep()`/
+  `sim_nested_rep()`/`sim_ragged_rep()` in the test files; glmmTMB the independent
+  oracle for lme4 (and vice versa). Reproducible; nothing hardcoded.
 
 ### Oracle O-OW — one-way random ICC(1)/ICC(k) (M6)
 - **Status:** **asserted (M6)** in `tests/testthat/test-icc-oneway.R` (spec

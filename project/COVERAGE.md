@@ -11,14 +11,16 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-08**, after **M18** (PR #23, ADR-028) — which closes the four crossed-incomplete
-gaps (#8/#9/#13/#14); M17 (PR #22) before that.
+**2026-07-08**, after **M20** (ADR-030, built; pending PR CI + merge) — which closes the
+within-cell replicate corners (fixed / multilevel / ragged single-occasion) and adds a
+`d_study()`-off-replicate guard; M18 (PR #23) and M19 (PR #24) before that.
 
 **Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) are
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason
-cell. **M18 (crossed-incomplete) is done** (#8/#9/#13/#14 now ✅); remaining order: M19
-nested → M20 replicates → M21 SEM parity. Two former 🔵 items were reclassified (multilevel
-SEM and lavaan+replicates → ROADMAP); see below.
+cell. **M18 (crossed-incomplete), M19 (nested), and M20 (replicates) are done**; the only
+remaining arc milestone is **M21 SEM parity**. Two former 🔵 items were reclassified
+(multilevel SEM and lavaan+replicates → ROADMAP); see below. One M20 item degraded to 🟣
+research (occasion-averaged coefficient on ragged data — no validated effective-n_o divisor).
 
 ## Reason taxonomy (why an unsupported case is unsupported)
 

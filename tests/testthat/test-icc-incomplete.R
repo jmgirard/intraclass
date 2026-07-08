@@ -52,26 +52,12 @@ test_that("icc() aborts on a disconnected design (#5, unidentified)", {
   )
 })
 
-test_that("icc() fits ragged within-cell replicates (M20 Slice 3)", {
-  # A duplicated cell makes a ragged replicate design (one cell rated twice, the rest
-  # once). Once unsupported (M3 era); now the single-occasion family fits it as the
-  # replicate analogue of an incomplete design (ADR-030). Full oracles live in
-  # test-replicates.R (O-RagRep); this is a smoke check on the incomplete path.
-  d <- sf_ratings_long()
-  dup <- rbind(d, d[d$subject == "S1" & d$rater == "J1", ])
-  # Only one cell is replicated in this tiny SF design, so the interaction is on the
-  # variance boundary and glmmTMB warns about convergence -- a valid boundary fit
-  # (ADR-003), just noisy; suppress for the smoke check.
-  fit <- suppressWarnings(suppressMessages(icc(dup, score, subject, rater)))
-  expect_s3_class(fit, "icc")
-  expect_false(fit$design$balanced)
-  expect_false(is.null(fit$components$subject_rater))
-  # The occasion-averaged coefficient on ragged data stays deferred (research).
-  expect_error(
-    suppressMessages(icc(dup, score, subject, rater, occasions = "average")),
-    class = "intraclass_unsupported"
-  )
-})
+# Ragged within-cell replicates now fit as the replicate analogue of an incomplete
+# design (M20 Slice 3, ADR-030); the full oracles (cross-engine, seeded recovery,
+# well-conditioned ragged designs) live in test-replicates.R (O-RagRep). A
+# pathologically degenerate replicate design (too few replicated cells to identify the
+# interaction) fails loudly with a classed intraclass_singular_fit rather than crashing
+# -- covered in test-replicates.R.
 
 test_that("the incomplete-data code path reproduces the balanced oracle", {
   # On complete data k_eff == k, so the M1/M2 numbers must be unchanged.
