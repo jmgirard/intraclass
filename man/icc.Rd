@@ -235,8 +235,10 @@ within-cluster subject variance are both counted as signal, and all three
 rater-related terms as error. It is offered only as a \strong{diagnostic contrast} --
 to quantify how much the nesting distorts reliability -- and is never a
 recommended coefficient; \code{print()} flags it as such. It is absolute-agreement
-only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
-random-rater design. Request it alongside the correct levels, e.g.
+only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
+design; it works on both balanced and \strong{incomplete} data (on ragged data it is the
+flat two-way ICC read off the multilevel fit, with the same \code{k_eff} divisor).
+Request it alongside the correct levels, e.g.
 \code{level = c("subject", "cluster", "conflated")}.
 
 The design is \strong{inferred from the data} (ten Hove et al. 2022, Table 2). If

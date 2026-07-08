@@ -9,18 +9,19 @@
   by the Wave-3 `ICC(c,k)` divisor); **(4)** bootstrap-projected `d_study()` bands (M16 deferral,
   package-wide — split out of ADR-027's bundled Slice 3). Completeness, not new estimand work;
   no new dependency. M0–M17 shipped; package at v0.1.0.
-- Active task: **M18 Slice 2 — incomplete conflated ICC** (COVERAGE #8) next. **Slice 1
-  (incomplete fixed-rater crossed) is done** — lifted the ragged-crossed `raters == "fixed"`
-  abort; the shipped fixed-multilevel fit + M3 `k_eff` divisor handle imbalance unchanged;
-  O-IFML oracles (cross-engine, seeded recovery, genuine fixed≠random, singular→glmmTMB degrade)
-  in `test-icc-fixed-multilevel.R`; 740 tests pass, lint/`air` clean. On branch
-  `m18-crossed-incomplete`, not yet committed.
+- Active task: **M18 Slice 3 — incomplete subject-level `d_study()`** (COVERAGE #13) next.
+  **Slices 1–2 done:** (1) incomplete fixed-rater crossed — lifted the ragged `raters == "fixed"`
+  abort, shipped fit + M3 `k_eff` unchanged; O-IFML oracles in `test-icc-fixed-multilevel.R`.
+  (2) incomplete conflated ICC — the well-posedness oracle held (Eq. 14 = flat two-way off the
+  multilevel fit, same `k_eff`), so it ships; O-conflated/incomplete oracles in
+  `test-icc-multilevel.R`; spec §6a extended. 749 tests pass, lint/`air` clean. On branch
+  `m18-crossed-incomplete` (Slice 1 committed at 82220bb; Slice 2 uncommitted).
 - Last green CI: PR #22 (M17) full matrix green incl. Windows and R-devel; merged to
   `main` at a915256
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028): retro + 4-slice DoD board
-  (Slice 2 attempt-then-degrade, Slice 3/4 split — maintainer decisions); **shipped Slice 1**
-  (incomplete fixed-rater crossed, 740 tests green).
+- Updated: 2026-07-08 by main session (Opus) — planned M18 (ADR-028); **shipped Slices 1–2**
+  (incomplete fixed-rater crossed; incomplete conflated ICC — attempt-then-degrade resolved to
+  ship). 749 tests green, lint/`air` clean.
 
 ## Where we are
 

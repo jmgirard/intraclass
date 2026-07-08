@@ -60,8 +60,10 @@
 #' rater-related terms as error. It is offered only as a **diagnostic contrast** --
 #' to quantify how much the nesting distorts reliability -- and is never a
 #' recommended coefficient; `print()` flags it as such. It is absolute-agreement
-#' only (Eq. 14 has no consistency form) and needs a complete, crossed (Design 1)
-#' random-rater design. Request it alongside the correct levels, e.g.
+#' only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
+#' design; it works on both balanced and **incomplete** data (on ragged data it is the
+#' flat two-way ICC read off the multilevel fit, with the same `k_eff` divisor).
+#' Request it alongside the correct levels, e.g.
 #' `level = c("subject", "cluster", "conflated")`.
 #'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
@@ -663,18 +665,18 @@ icc <- function(
     # coefficients. Complete crossed designs satisfy every condition, so this is a
     # no-op for the balanced M5/M8 path.
     if (multilevel && ml_design == "crossed" && !design_info$balanced) {
-      # The conflated ICC (M17 Slice 1) targets the complete five-component fit;
-      # its behaviour on ragged data is not yet established (spec
-      # M17-conflated-icc.md §6). Fail loudly rather than project it silently (#5).
-      if ("conflated" %in% level) {
-        abort_unsupported(c(
-          "The conflated ICC is available on complete data only.",
-          i = "Its behaviour on incomplete or unbalanced multilevel data is not \\
-               yet established (a later slice).",
-          i = "Provide complete crossed multilevel data, or use \\
-               {.code level = \"subject\"}."
-        ))
-      }
+      # Incomplete conflated ICC (M18 Slice 2, ADR-028): the conflated diagnostic
+      # (Eq. 14) LUMPS sigma^2_r + sigma^2_cr + sigma^2_res into one error term and
+      # sigma^2_c + sigma^2_{s:c} into one signal, so it is the flat two-way ICC read
+      # off the five-component fit -- its divisor is the same flat k_eff (harmonic mean
+      # of ratings per subject) and its identifiability requirement is exactly the flat
+      # two-way one. The crossed-multilevel gates below enforce that on ragged data
+      # (within-cluster connectedness + subjects rated > once for sigma^2_{s:c}; the
+      # agreement rater-bridging gate matches the flat design being connected across
+      # clusters), so the conflated path flows through them unchanged -- conservative
+      # (it strictly needs only the r+cr SUM), which is safe for a never-recommended
+      # contrast (#5). It tracks the flat incomplete two-way agreement icc() at the
+      # population level, as on complete data (spec M17-conflated-icc.md §5/§6).
       # Incomplete fixed-rater crossed multilevel (M18 Slice 1, ADR-028): the
       # finite-population theta^2_r (Case 3A, via the shared theta2r_fixed()) is read
       # from the fitted rater-contrast vcov, which glmmTMB/lme4 estimate on ragged

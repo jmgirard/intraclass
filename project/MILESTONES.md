@@ -498,13 +498,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         MC-CI coverage; singular→glmmTMB degrade pinned; identifiability guards still fire.
         Seeded generators (no committed constants), so no `REFERENCES.md` change.
   - [x] Docs (`icc()` roxygen) updated; COVERAGE #9 → ✅. Suite 740 pass / 0 fail, lint + `air` clean.
-- **Slice 2 — incomplete conflated ICC (COVERAGE #8)** — **attempt flat-`k_eff` Eq. 14 on
-  ragged data; degrade to 🟣 research if no #1/#4-strong oracle holds** (ADR-028 decision).
-  - [ ] Characterize: is Eq. 14 well-posed on ragged data with the flat (clusters-ignored)
-        `k_eff`? Build the reduction (→ complete conflated) + cross-engine oracle.
-  - [ ] If pinned: narrow the `"conflated" %in% level` ragged abort (`R/icc.R` ~L667); extend
-        `M17-conflated-icc.md §6`; commit oracle values. **If not:** reclassify #8 → 🟣 research
-        in COVERAGE + ROADMAP, record why in the spec (may recommend Fable review, #19, then stop).
+- **Slice 2 — incomplete conflated ICC (COVERAGE #8)** — **attempted flat-`k_eff` Eq. 14 on
+  ragged data; the oracle held → ships** (no reclassification; ADR-028 attempt-then-degrade). **Done.**
+  - [x] Characterized: Eq. 14 lumps σ²_r+σ²_cr+σ²_res into one error and σ²_c+σ²_{s:c} into one
+        signal, so it is the flat two-way ICC off the five-component fit with the same flat
+        `k_eff` — well-posed on ragged data (spec `M17-conflated-icc.md §6a`).
+  - [x] Lifted the `"conflated" %in% level` ragged abort (`R/icc.R`); the conflated path flows
+        through the existing crossed-multilevel identifiability gates (conservative — matches
+        flat-two-way identifiability). Extended the spec §6a; roxygen updated.
+  - [x] Oracles (`test-icc-multilevel.R`): Eq-14 identity on ragged components (~1e-10);
+        cross-engine glmmTMB≡lme4 <1e-4; tracks flat incomplete two-way agreement (~0.02) while
+        staying visibly biased vs subject. Seeded generators. COVERAGE #8 → ✅. Suite 749 pass.
 - **Slice 3 — incomplete subject-level `d_study()` (COVERAGE #13)** — subject level only; cluster
   level stays behind the 🟣 Wave-3 `ICC(c,k)` divisor (#18 bound).
   - [ ] Narrow the incomplete-multilevel `d_study()` abort (`R/d-study.R` ~L105) for the subject
@@ -527,5 +531,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `ROADMAP.md`: Bayesian engine + `ci_method = "posterior"`; categorical/ordinal GLMM; one-way
   via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge
   cases.
-- Status: **in progress** — planning done (ADR-028); **Slice 1 shipped** (incomplete fixed-rater
-  crossed; 740 tests pass, lint/`air` clean). Slice 2 (incomplete conflated) next. No PR yet.
+- Status: **in progress** — planning done (ADR-028); **Slices 1–2 shipped** (incomplete
+  fixed-rater crossed; incomplete conflated ICC — oracle held, no reclassification; 749 tests
+  pass, lint/`air` clean). Slice 3 (incomplete subject-level `d_study()`) next. No PR yet.

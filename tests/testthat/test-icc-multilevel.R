@@ -396,9 +396,11 @@ test_that("conflated can be requested alongside the correctly-partitioned levels
   expect_length(pick(x, "ICC(A,1)", "conflated"), 1)
 })
 
-test_that("conflated ICC is agreement-only and needs a crossed, complete random design", {
+test_that("conflated ICC is agreement-only and needs a crossed random design", {
   skip_if_not_installed("glmmTMB")
   d <- sim_multilevel(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  # (Incomplete data is no longer refused -- M18 Slice 2 ships it; see the O-conflated
+  # incomplete section below. Consistency/fixed/no-cluster stay classed aborts.)
   # Consistency-conflated is not in the paper: parked, not shipped.
   expect_error(
     icc(
@@ -455,4 +457,137 @@ test_that("conflated ICC is labeled a diagnostic contrast in print and tidy", {
   # A plain subject/cluster fit prints no conflated note.
   y <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
   expect_false(any(grepl("[Dd]iagnostic contrast", format(y))))
+})
+
+# Oracle O-conflated (INCOMPLETE): conflated ICC on ragged data, M18 Slice 2 ------
+#
+# M18 Slice 2 (ADR-028) opens the question M17-conflated-icc.md §6 left closed:
+# whether Eq. 14 is well-posed on ragged multilevel data. It is. The conflated ICC
+# LUMPS sigma^2_r + sigma^2_cr + sigma^2_res into one error and sigma^2_c +
+# sigma^2_{s:c} into one signal, so it is the flat two-way ICC read off the
+# five-component fit, with the same flat k_eff (harmonic mean of ratings per subject)
+# divisor the subject level uses. On ragged data it (a) equals the closed-form Eq. 14
+# on the reported components (exact), (b) agrees cross-engine < 1e-4, and (c) tracks
+# the flat incomplete two-way agreement icc() (cluster dropped) at the population
+# level -- the same operational meaning as complete data (spec §5) -- while staying
+# visibly biased away from the correctly-partitioned subject level. Maintainer posture
+# (ADR-028) was attempt-then-degrade; the oracle held, so it ships (no reclassification).
+
+ragged_ml <- function(d, prop, seed) {
+  set.seed(seed)
+  d[-sample(nrow(d), round(prop * nrow(d))), , drop = FALSE]
+}
+
+test_that("O-conflated/incomplete Eq14: ragged conflated = closed-form Eq. 14 on components", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ml(
+    sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  vc <- x$components
+  sig <- vc$cluster + vc$subject
+  err <- vc$rater + vc$cluster_rater + vc$residual
+  k <- x$k_eff
+  expect_equal(
+    pick(x, "ICC(A,1)", "conflated"),
+    sig / (sig + err),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    pick(x, "ICC(A,k)", "conflated"),
+    sig / (sig + err / k),
+    tolerance = 1e-10
+  )
+  # The divisor is the flat harmonic mean of ratings per subject (< the balanced k = 6).
+  expect_lt(k, 6)
+})
+
+test_that("O-conflated/incomplete lme4: ragged conflated agrees cross-engine", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- ragged_ml(
+    sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  xg <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  xl <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    unit = c("single", "average"),
+    engine = "lme4",
+    seed = 1
+  )
+  expect_equal(
+    pick(xg, "ICC(A,1)", "conflated"),
+    pick(xl, "ICC(A,1)", "conflated"),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(xg, "ICC(A,k)", "conflated"),
+    pick(xl, "ICC(A,k)", "conflated"),
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-conflated/incomplete: tracks the flat two-way ICC, stays biased vs subject", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged_ml(
+    sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260708),
+    0.18,
+    20260708
+  )
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "conflated"),
+    unit = c("single", "average"),
+    seed = 1
+  )
+  # "Conflated" = ignore clusters: on the same ragged data it tracks the flat two-way
+  # agreement icc() (a different fit, hence a loose population-level agreement).
+  flat <- icc(d, score, subject, rater, seed = 1)$estimates
+  flat1 <- flat$estimate[flat$index == "ICC(A,1)"]
+  expect_equal(pick(x, "ICC(A,1)", "conflated"), flat1, tolerance = 0.02)
+  # The whole point of the diagnostic: it stays visibly biased away from the
+  # correctly-partitioned subject level on ragged data too.
+  expect_gt(
+    abs(pick(x, "ICC(A,1)", "conflated") - pick(x, "ICC(A,1)", "subject")),
+    0.02
+  )
+  # Still a valid coefficient with a boundary-aware interval; average >= single.
+  a1 <- pick(x, "ICC(A,1)", "conflated")
+  ak <- pick(x, "ICC(A,k)", "conflated")
+  expect_true(a1 >= 0 && a1 <= 1 && ak >= a1)
+  row <- x$estimates[
+    x$estimates$level == "conflated" & x$estimates$index == "ICC(A,1)",
+  ]
+  expect_true(is.finite(row$conf.low) && is.finite(row$conf.high))
 })
