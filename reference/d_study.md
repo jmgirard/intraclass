@@ -82,9 +82,10 @@ widens automatically (it recomputes \\\Phi(m)\\ on every draw) rather
 than pretending a single plugged-in value. `m` is the number of raters
 and is normally an integer, though non-integer values are permitted.
 
-Projection is defined for random raters (both agreement and consistency)
-and for fixed-rater **consistency**. It is **not** defined for
-fixed-rater absolute agreement: there the rater term is the
+Projection is defined for random raters (both agreement and
+consistency), for fixed-rater **consistency**, and for the **one-way**
+model (a Spearman-Brown projection of `ICC(1)`). It is **not** defined
+for fixed-rater absolute agreement: there the rater term is the
 finite-population variance of exactly the raters you observed, so there
 is no "average of `m` freshly sampled raters" to project to, and
 `d_study()` aborts (use `raters = "random"`).

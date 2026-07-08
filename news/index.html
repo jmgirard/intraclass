@@ -67,6 +67,19 @@
 <ul><li>Datasets <code>ratings</code> (the complete Shrout &amp; Fleiss 1979 example) and <code>ratings_incomplete</code> (a connected incomplete variant), used throughout the docs.</li>
 <li>Vignettes: <em>Getting started</em>, <em>Choosing an ICC</em> (the decision framework, with a decision-tree diagram), and <em>Advanced</em> (incomplete and multilevel designs, the estimation engines, the plots, and <code><a href="../reference/choose_icc.html">choose_icc()</a></code>).</li>
 </ul></div>
+<div class="section level3">
+<h3 id="robustness-pre-release-code-review-0-1-0">Robustness (pre-release code review)<a class="anchor" aria-label="anchor" href="#robustness-pre-release-code-review-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/d_study.html">d_study()</a></code> now projects a <strong>one-way</strong> fit (a Spearman-Brown projection of <code>ICC(1)</code>) instead of erroring.</li>
+<li>A fixed-rater multilevel call (<code>icc(..., cluster =, raters = "fixed")</code>) now works with the default <code>level</code>, dropping the deferred cluster level to the subject level (as the nested-design path already did) rather than requiring an explicit <code>level = "subject"</code>.</li>
+<li>On incomplete crossed multilevel data, requesting an averaged cluster-level <code>ICC(c,k)</code> now drops just that (unsupported) row with a message and returns the subject-level and single-rater cluster results, instead of failing the whole call.</li>
+<li>An incomplete crossed multilevel design in which every subject is rated only once is now reported as unidentified rather than returning a spurious <code>ICC = 0.5</code>.</li>
+<li>
+<code><a href="../reference/icc.html">icc()</a></code> prints a one-time note when a multilevel design is inferred to be crossed from shared rater labels, so a nested design with reused, cluster-relative labels is not silently treated as crossed.</li>
+<li>
+<code>mc_samples</code> and <code>seed</code> are validated with clear, classed errors; invalid values (e.g. <code>mc_samples = 0</code>/<code>1</code>, a fractional or non-numeric value) no longer produce a silent <code>NA</code> interval or a bare base-R error.</li>
+<li>A degenerate fit with no variance in any component now fails loudly instead of returning a <code>NaN</code> estimate, and an unstable fit whose Monte-Carlo draws overflow is reported rather than silently truncated.</li>
+</ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

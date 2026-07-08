@@ -129,12 +129,12 @@ projected interval is honestly wide; the Monte-Carlo interval widens
 automatically (it recomputes \(\Phi(m)\) on every draw) rather than
 pretending a single plugged-in value. <code>m</code> is the number of raters and is
 normally an integer, though non-integer values are permitted.</p>
-<p>Projection is defined for random raters (both agreement and consistency) and
-for fixed-rater <strong>consistency</strong>. It is <strong>not</strong> defined for fixed-rater
-absolute agreement: there the rater term is the finite-population variance of
-exactly the raters you observed, so there is no "average of <code>m</code> freshly
-sampled raters" to project to, and <code>d_study()</code> aborts (use
-<code>raters = "random"</code>).</p>
+<p>Projection is defined for random raters (both agreement and consistency), for
+fixed-rater <strong>consistency</strong>, and for the <strong>one-way</strong> model (a Spearman-Brown
+projection of <code>ICC(1)</code>). It is <strong>not</strong> defined for fixed-rater absolute
+agreement: there the rater term is the finite-population variance of exactly the
+raters you observed, so there is no "average of <code>m</code> freshly sampled raters" to
+project to, and <code>d_study()</code> aborts (use <code>raters = "random"</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

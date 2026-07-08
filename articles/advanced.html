@@ -197,6 +197,10 @@ signal but modest within-classroom differences:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Treating raters with the same label in different clusters as the same raters</span></span>
+<span><span class="co">#&gt;   (crossed with clusters, Design 1).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If each cluster has its own raters, give them cluster-unique labels or pass</span></span>
+<span><span class="co">#&gt;   `design = "nested_in_clusters"`.</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
@@ -205,7 +209,9 @@ signal but modest within-classroom differences:</p>
 <span><span class="co">#&gt;   subject  ICC(A,k)    0.751   [0.573, 0.836]</span></span>
 <span><span class="co">#&gt;   cluster  ICC(A,1)    0.880   [0.000, 0.972]</span></span>
 <span><span class="co">#&gt;   cluster  ICC(A,k)    0.967   [0.000, 0.993]</span></span>
-<span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span></code></pre></div>
+<span><span class="co">#&gt; Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This message is displayed once per session.</span></span></span></code></pre></div>
 <p>Both levels come back in one call. Here the
 <strong>cluster-level</strong> ICC is the higher of the two: raters
 agree more about which <em>classrooms</em> score high than about which

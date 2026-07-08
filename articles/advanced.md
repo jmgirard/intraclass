@@ -143,6 +143,10 @@ school <- data.frame(
 ``` r
 
 icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+#> ℹ Treating raters with the same label in different clusters as the same raters
+#>   (crossed with clusters, Design 1).
+#> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
+#>   `design = "nested_in_clusters"`.
 #> # Intraclass correlation: multilevel two-way random, absolute agreement
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
@@ -152,6 +156,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1
 #>   cluster  ICC(A,1)    0.880   [0.000, 0.972]
 #>   cluster  ICC(A,k)    0.967   [0.000, 0.993]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
+#> 
+#> This message is displayed once per session.
 ```
 
 Both levels come back in one call. Here the **cluster-level** ICC is the

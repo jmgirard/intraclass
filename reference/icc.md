@@ -253,38 +253,48 @@ level.
 
 The design is **inferred from the data** (ten Hove et al. 2022, Table
 2). If raters are crossed with clusters (each rater rates in every
-cluster) the five-component model above is used (Design 1). If raters
-are **nested in clusters** (each cluster has its own raters; Design 2) a
-four-component model is fit, with the rater variance carried by the
-nested rater-within-cluster term. If raters are **nested in subjects**
-(each subject has its own raters; Design 3) the rater variance is
-confounded into the residual, giving a three-component multilevel
-*one-way* model that reports agreement-only `ICC(1)`/`ICC(k)`. Both
-nested designs define only the **subject** level – a cluster-level ICC
-needs raters crossed with clusters – so `level` is restricted to
-`"subject"` for them. Mixed patterns (some raters crossed, some nested)
-are not a supported design and raise an error. The **crossed** design
-(Design 1) additionally supports **incomplete** data – subjects rated by
-different, overlapping rater subsets (missing cells) – computing the
-subject-level ICCs by REML with the averaging divisor set to the
-effective number of ratings per subject (`k_eff`, the harmonic mean),
-exactly as the single-level incomplete two-way ICC does. Identifiability
-is checked first: each cluster's subject-by-rater layout must be
-connected, and for absolute agreement raters must bridge clusters
-(otherwise the design is really rater-nested). When missing cells make
-the crossed-vs-nested pattern ambiguous, declare it with `design`
-(above). On incomplete data the **cluster** level is reported as the
-single-rater `ICC(c,1)` (when raters bridge clusters); the averaged
-cluster-level `ICC(c,k)` on incomplete data is not yet supported (its
-effective number of raters per cluster is still being validated).
-**Fixed raters** (`raters = "fixed"`) are supported for the crossed
-design at the **subject** level on balanced, complete data: the rater
-main effect becomes the finite-population variance of the observed
-raters (McGraw & Wong Case 3A), so consistency is identical to the
-random-rater case and absolute agreement differs only by that term.
-Incomplete *nested* designs, incomplete or nested fixed-rater designs,
-and the fixed-rater cluster level remain for later milestones. Nested
-designs still require balanced, complete data.
+cluster) the five-component model above is used (Design 1). Because the
+design is read from the rater **labels**, a rater label that appears in
+more than one cluster is taken to be the *same* rater (crossed). If your
+raters are cluster-specific but share labels (e.g. "rater 1"/"rater 2"
+reused in every cluster – a nested design), give them cluster-unique
+labels or declare `design = "nested_in_clusters"`; otherwise the design
+is treated as crossed and `icc()` prints a one-time note of that
+assumption. If raters are **nested in clusters** (each cluster has its
+own raters; Design 2) a four-component model is fit, with the rater
+variance carried by the nested rater-within-cluster term. If raters are
+**nested in subjects** (each subject has its own raters; Design 3) the
+rater variance is confounded into the residual, giving a three-component
+multilevel *one-way* model that reports agreement-only
+`ICC(1)`/`ICC(k)`. Both nested designs define only the **subject** level
+– a cluster-level ICC needs raters crossed with clusters – so `level` is
+restricted to `"subject"` for them. Mixed patterns (some raters crossed,
+some nested) are not a supported design and raise an error. The
+**crossed** design (Design 1) additionally supports **incomplete** data
+– subjects rated by different, overlapping rater subsets (missing cells)
+– computing the subject-level ICCs by REML with the averaging divisor
+set to the effective number of ratings per subject (`k_eff`, the
+harmonic mean), exactly as the single-level incomplete two-way ICC does.
+Identifiability is checked first: each cluster's subject-by-rater layout
+must be connected, and for absolute agreement raters must bridge
+clusters (otherwise the design is really rater-nested). When missing
+cells make the crossed-vs-nested pattern ambiguous, declare it with
+`design` (above). On incomplete data the **cluster** level is reported
+as the single-rater `ICC(c,1)` (when raters bridge clusters); the
+averaged cluster-level `ICC(c,k)` on incomplete data is not yet
+supported (its effective number of raters per cluster is still being
+validated). If an averaged unit is requested for the cluster level on
+incomplete data, that row is dropped (with a message) rather than
+failing the whole call, so the subject-level averages and the
+single-rater cluster ICC are still returned. **Fixed raters**
+(`raters = "fixed"`) are supported for the crossed design at the
+**subject** level on balanced, complete data: the rater main effect
+becomes the finite-population variance of the observed raters (McGraw &
+Wong Case 3A), so consistency is identical to the random-rater case and
+absolute agreement differs only by that term. Incomplete *nested*
+designs, incomplete or nested fixed-rater designs, and the fixed-rater
+cluster level remain for later milestones. Nested designs still require
+balanced, complete data.
 
 ## Confidence intervals
 
