@@ -3,9 +3,9 @@
 - Milestone: **M14 — lme4 for the fixed & multilevel fits (engine parity, ADR-023)** —
   detailed and scheduled, **not yet started** (no branch/slice in flight). The ADR-017
   arc (M0–M13) is shipped; the package is at v0.1.0, submission-ready.
-- Active task: **M14 Slices 1–2 — done** (`fit_lme4_fixed` + `fit_lme4_multilevel`, green
-  on branch `m14-lme4-parity`). Next: **Slice 3 — nested Designs 2/3 + `fit_lme4_multilevel_fixed`**.
-  See MILESTONES.md M14 board.
+- Active task: **M14 — all 3 slices + cross-cutting DoD done** (green on branch
+  `m14-lme4-parity`; lme4 now has full balanced design parity with glmmTMB). Next:
+  **open the PR** after the installed-package verification. See MILESTONES.md M14 board.
 - Last green CI: PR #17 (M13) full matrix green incl. Windows and R-devel; merged to
   `main` at 54c0947
 - Blockers: —

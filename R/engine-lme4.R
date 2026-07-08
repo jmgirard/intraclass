@@ -510,3 +510,179 @@ fit_lme4_multilevel <- function(data, call = rlang::caller_env()) {
     call = call
   )
 }
+
+# Design 2 -- raters nested within clusters (estimand-spec M8 §2a); the lme4
+# counterpart of fit_glmmtmb_nested_clusters(). Four components: no (1|rater) main
+# effect (rater identity lives inside cluster:rater), so the "rater" slot carries
+# sigma^2_{r:c} and the residual is sigma^2_{(sr):c}. Only `groups` differs from
+# Design 1 (spec M8 §3a); the estimand map is unchanged. Subject level only.
+fit_lme4_nested_clusters <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater),
+    data
+  )
+  lme4_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject",
+      rater = "cluster:rater" # sigma^2_{r:c}
+    ),
+    call = call
+  )
+}
+
+# Design 3 -- raters nested within subjects and clusters (estimand-spec M8 §2b); the
+# lme4 counterpart of fit_glmmtmb_nested_subjects(). Three components (cluster,
+# subject, residual) and NO rater term -- the multilevel one-way design
+# (agreement-only): the rater variance is fully confounded into sigma^2_{r:s:c}.
+fit_lme4_nested_subjects <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  fit <- fit_lme4_ml_model(
+    score ~ 1 + (1 | cluster) + (1 | cluster:subject),
+    data
+  )
+  lme4_ml_contract(
+    fit,
+    groups = list(
+      cluster = "cluster",
+      subject = "cluster:subject"
+    ),
+    call = call
+  )
+}
+
+# Fixed-rater multilevel lme4 engine (Design 1 crossed, balanced; estimand-spec
+# M10). The lme4 counterpart of fit_glmmtmb_multilevel_fixed(): combines the M5
+# Design-1 random structure with the M3 fixed-rater treatment -- raters enter as
+# FIXED effects, so the rater main effect is the bias-corrected finite-population
+# theta^2_r (Case 3A, via the shared theta2r_fixed()) carried in the "rater" slot;
+# the cluster x rater interaction stays random. Fits
+#
+#   score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)
+#
+# This is the multilevel generalization of fit_lme4_fixed() (multiple random groups)
+# and, equivalently, the fixed-rater generalization of lme4_ml_contract() (a theta^2_r
+# rater slot recomputed from the beta draws) -- so it is written explicitly rather
+# than routed through either. The subject-level estimand map and icc_point()/mc_ci()
+# are unchanged (only theta^2_r vs sigma^2_r fills the rater slot). On balanced data
+# theta^2_r == sigma^2_r, so the subject-level ICCs equal the random-rater ones.
+fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
+  rlang::check_installed("lme4", reason = "to fit the multilevel ICC model.")
+  rlang::check_installed(
+    "merDeriv",
+    reason = "to compute lme4 Monte-Carlo confidence intervals."
+  )
+  k <- nlevels(data$rater)
+  fit <- fit_lme4_ml_model(
+    score ~
+      1 +
+      rater +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | cluster:rater),
+    data
+  )
+  if (lme4::isSingular(fit)) {
+    abort_intraclass(
+      c(
+        "The {.pkg lme4} engine cannot form a Monte-Carlo interval for a \\
+         singular (boundary) fit.",
+        i = "A variance component was estimated at exactly zero, so \\
+             {.pkg merDeriv} cannot compute the parameter covariance.",
+        i = "Use {.code engine = \"glmmTMB\"}, which is boundary-robust here."
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
+  # Random slots (cluster, subject-in-cluster, cluster x rater); theta^2_r and the
+  # residual are appended so the subject-level map reads {subject | rater, residual}.
+  groups <- list(
+    cluster = "cluster",
+    subject = "cluster:subject",
+    cluster_rater = "cluster:rater"
+  )
+  vc <- lme4::VarCorr(fit)
+  sd_of <- function(g) as.numeric(attr(vc[[g]], "stddev"))
+  sds <- vapply(groups, sd_of, numeric(1))
+  sd_res <- as.numeric(stats::sigma(fit))
+  beta <- lme4::fixef(fit)
+  th <- theta2r_fixed(beta, stats::vcov(fit), k)
+
+  components <- lapply(groups, function(g) sd_of(g)^2)
+  components$rater <- th$point
+  components$residual <- sd_res^2
+
+  vcov_sd <- as.matrix(merDeriv::vcov.lmerMod(fit, full = TRUE, ranpar = "sd"))
+  nm_sd <- colnames(vcov_sd)
+  beta_nm <- names(beta)
+  col_of <- function(g) {
+    i <- which(nm_sd == sprintf("cov_%s.(Intercept)", g))
+    if (length(i) == 1L) i else NA_integer_
+  }
+  idx <- c(
+    match(beta_nm, nm_sd),
+    vapply(groups, col_of, integer(1)),
+    residual = which(nm_sd == "residual")
+  )
+  if (length(idx) != length(beta_nm) + length(groups) + 1L || anyNA(idx)) {
+    abort_intraclass(
+      c(
+        "Could not align the {.pkg merDeriv} covariance to the model terms.",
+        i = "Columns returned: {.val {nm_sd}}."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  vcov_sd <- vcov_sd[idx, idx, drop = FALSE]
+
+  # Identity block for every fixed effect (kept natural, so the beta draws stay on
+  # the scale theta2r_fixed()'s contrast expects); 1/sd for each SD term (log-SD).
+  jac <- diag(c(rep(1, length(beta_nm)), 1 / sds, 1 / sd_res))
+  vcov_log <- jac %*% vcov_sd %*% t(jac)
+
+  slots <- c(beta_nm, names(groups), "residual")
+  dimnames(vcov_log) <- list(slots, slots)
+  estimate <- stats::setNames(
+    c(as.numeric(beta), log(sds), log(sd_res)),
+    slots
+  )
+
+  # Random components back-transform from log-SD; theta^2_r is recomputed from the
+  # rater beta draws with the constant bias correction (as in fit_lme4_fixed()).
+  to_components <- function(par) {
+    means <- th$contrast %*% par[beta_nm, , drop = FALSE]
+    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
+    c(
+      stats::setNames(
+        lapply(names(groups), function(s) exp(2 * par[s, ])),
+        names(groups)
+      ),
+      list(
+        rater = pmax(0, raw_draws - th$bias),
+        residual = exp(2 * par["residual", ])
+      )
+    )
+  }
+
+  list(
+    fit = fit,
+    engine = "lme4",
+    components = components,
+    estimate = estimate,
+    vcov = vcov_log,
+    to_components = to_components
+  )
+}

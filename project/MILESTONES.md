@@ -355,15 +355,19 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Design-1 dataset: point ≡ glmmTMB ~1e-6 (subject + cluster, agreement + consistency),
   interval gap ~1e-5 (<0.02), singular-fit abort + seeded population recovery. 516 tests,
   lintr + `air` clean.
-- [ ] **Slice 3 — nested + multilevel-fixed** (`fit_lme4_nested_clusters` Design 2,
+- [x] **Slice 3 — nested + multilevel-fixed** (`fit_lme4_nested_clusters` Design 2,
   `fit_lme4_nested_subjects` Design 3, `fit_lme4_multilevel_fixed` Design 1 fixed),
   reusing Slices 1–2 machinery. Dispatch branches completed; the blanket lme4 guard is
-  now incomplete-only. O-LME2 (a)–(d) per shape vs the matching `fit_glmmtmb_*`.
-- [ ] **Cross-cutting DoD:** `@param engine` roxygen design-coverage updated; NEWS
-  bullet; `air format` + `lintr::lint_package()` clean; `R CMD check` + full test suite
-  green on the installed package with `NOT_CRAN=true` (memory
-  `verify-against-installed-package`); tracking (`STATUS.md`/this board) updated
-  in-commit; ships on `m14-lme4-parity`, merges via PR.
+  now incomplete-only. O-LME2 (a)–(d) per shape vs the matching `fit_glmmtmb_*`. **Done**
+  — nested designs reuse `lme4_ml_contract()` (new `groups`); `fit_lme4_multilevel_fixed`
+  combines the Slice-1 θ²_r draw with the multilevel random groups. O-LME2 green: point ≡
+  glmmTMB ≤6e-6 across Designs 2/3 + fixed multilevel, interval ≤4e-3, fixed≡random ML
+  reduction ~2e-5. 533 tests, lintr + `air` clean.
+- [x] **Cross-cutting DoD:** `@param engine` roxygen design-coverage updated (lme4 = full
+  balanced parity); NEWS engine bullet refreshed; `air format` + `lintr::lint_package()`
+  clean; full test suite green on the installed package with `NOT_CRAN=true` (memory
+  `verify-against-installed-package`); tracking updated in-commit; ships on
+  `m14-lme4-parity`, merges via PR.
 
 ### Deferred out of M14 (record so not rediscovered)
 - **Incomplete/ragged lme4** for every new shape (the M9 `k_eff`/connectedness × merDeriv
