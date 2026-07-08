@@ -9,15 +9,19 @@
   dropped-with-note); **(4)** bootstrap-projected `d_study()` bands (M16 deferral, package-wide).
   Completeness, not new estimand work; no new dependency, no new argument. M0–M18 shipped; package
   at v0.1.0. No milestone in flight.
-- Active task: — (no milestone in flight; **M19 — Multilevel completeness II (nested Designs 2/3):
-  incomplete nested (Slice 1) + fixed-rater nested (Slice 2)** is next in the arc (ADR-027) and
-  gets its own start-of-milestone scoping ADR.)
+- Active task: **M19 Slice 1 — incomplete nested (Designs 2/3)** (ADR-029, COVERAGE #10). Scoping
+  done: retro + ADR-029 written + M19 board added to MILESTONES.md; maintainer decisions A (explicit
+  `design=` on ambiguous ragged data), B (attempt subject-level `k_eff` for the averaged
+  coefficient, degrade to 🟣 research if unpinnable), C (fixed-rater = Design 2 only) locked. Next:
+  start Slice 1 on branch `m19-nested-completeness` — lift the `nested_design_balanced` abort,
+  single-rater first, then the averaged-divisor oracle characterization (#1/#4). No code yet.
 - Last green CI: PR #23 (M18) full matrix green incl. Windows and R-devel; merged to
   `main` at 7dffbb2
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M18 merged (PR #23, ADR-028)**: all four slices
-  + cross-cutting DoD; `R CMD check --as-cran` 0/0/0, 779 tests, full CI matrix green. Post-merge
-  `project/` reconcile done (M18 compressed in MILESTONES; COVERAGE #8/#9/#13/#14 → ✅). M19 next.
+- Updated: 2026-07-08 by main session (Opus) — **M19 scoping opened** via `/start-task M19`. M18
+  shipped (PR #23, ADR-028); no code milestone in flight. Retro done; M19's planned scope
+  (nested Designs 2/3 incomplete + fixed) restated from ADR-027; estimand/oracle posture named.
+  Scope decisions put to the maintainer before ADR-029 is written.
 
 ## Where we are
 
