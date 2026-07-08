@@ -147,11 +147,13 @@
 #'   estimator of the rater variance, which is asymptotically equivalent to the
 #'   mixed-model one and matches conventional generalizability-theory software on
 #'   real data (Vispoel et al. 2022) but differs by a small-sample term on tiny
-#'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` and
-#'   `"lavaan"` currently cover only the random two-way design
-#'   (`raters = "random"`, no `cluster`); `"lavaan"` additionally requires
-#'   complete, balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv}
-#'   packages; `"lavaan"` requires the \pkg{lavaan} package.
+#'   designs (e.g. 0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers
+#'   every design `"glmmTMB"` does -- two-way (random or fixed raters), one-way, and
+#'   the multilevel designs (crossed and nested) at both levels -- but only on
+#'   complete, balanced data (incomplete/ragged designs use `"glmmTMB"`). `"lavaan"`
+#'   currently covers only the random two-way design and also requires complete,
+#'   balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages;
+#'   `"lavaan"` requires the \pkg{lavaan} package.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. Only `"montecarlo"` is currently supported.
 #' @param mc_samples Number of Monte-Carlo draws for the interval.
@@ -256,18 +258,12 @@ icc <- function(
     }
   }
 
-  # M5.5 (ADR-012): lme4 is selectable for the random two-way design only. Route
-  # fixed-rater and multilevel lme4 requests to a loud abort (PRINCIPLES.md #5)
-  # rather than silently falling back to glmmTMB; both are deferred.
-  if (engine == "lme4" && (multilevel || raters == "fixed")) {
-    design <- if (multilevel) "multilevel" else "fixed-rater"
-    abort_unsupported(c(
-      "The {.pkg lme4} engine supports only the random two-way design so far.",
-      i = "{.code engine = \"lme4\"} is not available for {design} designs; \\
-           use {.code engine = \"glmmTMB\"}.",
-      i = "lme4 for fixed and multilevel fits is planned for a later milestone."
-    ))
-  }
+  # lme4 design coverage (ADR-012 / M14 ADR-023): lme4 covers the random two-way
+  # (M5.5), one-way (M6), the balanced fixed-rater two-way (Slice 1), and the
+  # balanced crossed (Design 1) random-rater multilevel (Slice 2) paths. The
+  # design-specific lme4 refusals -- incomplete fixed-rater, and any multilevel that
+  # is nested, fixed, or incomplete -- are raised below where `ml_design`, `raters`,
+  # and balancedness are known, so they can name the exact unsupported case.
 
   # M7 Slice 1 (ADR-014): the lavaan (SEM) engine covers the random two-way
   # COMPLETE design only. Fixed-rater, one-way, multilevel, and incomplete SEM are
@@ -633,6 +629,35 @@ icc <- function(
     ))
   }
 
+  # Fixed-rater lme4 (M14 Slice 1, ADR-023) covers the BALANCED two-way design
+  # only; the incomplete fixed-rater theta^2_r-under-imbalance path stays with
+  # glmmTMB (deferred). Fail loudly rather than silently switching engines (#5).
+  # (For a multilevel design `raters == "fixed"` is caught by the multilevel guard
+  # below instead, which names the multilevel case.)
+  if (engine == "lme4" && !multilevel && raters == "fixed" && !balanced) {
+    abort_unsupported(c(
+      "The {.pkg lme4} engine requires a complete, balanced design for fixed \\
+       raters.",
+      i = "Incomplete fixed-rater lme4 is planned for a later milestone; use \\
+           {.code engine = \"glmmTMB\"} for incomplete data."
+    ))
+  }
+
+  # Multilevel lme4 (M14, ADR-023) covers all the multilevel designs glmmTMB does --
+  # crossed (Design 1) random and fixed, and nested Designs 2/3 -- on balanced,
+  # complete data. Incomplete/ragged multilevel lme4 (M9-style) is deferred: fail
+  # loudly toward glmmTMB rather than switch engines silently (#5). (Incomplete
+  # nested and incomplete fixed multilevel already aborted above, for every engine;
+  # this catches the incomplete *crossed random* case, where balanced is data-driven.)
+  if (engine == "lme4" && multilevel && !balanced) {
+    abort_unsupported(c(
+      "The {.pkg lme4} engine requires balanced, complete data for multilevel \\
+       designs.",
+      i = "Incomplete multilevel lme4 is planned for a later milestone; use \\
+           {.code engine = \"glmmTMB\"} for incomplete data."
+    ))
+  }
+
   # Multilevel data uses a Design-1 (crossed, five-component) or Design-2 (raters
   # nested in clusters, four-component) fit per the inferred design; otherwise
   # fixed raters get their own fixed-effect fit (Case 3/3A) and random raters the
@@ -640,21 +665,38 @@ icc <- function(
   # returns named `components` the estimand indexes by signal/error (M8 §2, M5
   # §2/§3; M3 §6, ADR-008).
   engine_fit <- if (multilevel) {
+    # lme4 (M14) mirrors every balanced multilevel glmmTMB fit; the guards above
+    # confine the lme4 branches to the balanced/complete case.
     if (ml_design == "nested_in_clusters") {
-      fit_glmmtmb_nested_clusters(df)
+      if (engine == "lme4") {
+        fit_lme4_nested_clusters(df)
+      } else {
+        fit_glmmtmb_nested_clusters(df)
+      }
     } else if (ml_design == "nested_in_subjects") {
-      fit_glmmtmb_nested_subjects(df)
+      if (engine == "lme4") {
+        fit_lme4_nested_subjects(df)
+      } else {
+        fit_glmmtmb_nested_subjects(df)
+      }
     } else if (raters == "fixed") {
       # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
       # slot (M10). Fixed-rater nested/incomplete/cluster-level are guarded above.
-      fit_glmmtmb_multilevel_fixed(df)
+      if (engine == "lme4") {
+        fit_lme4_multilevel_fixed(df)
+      } else {
+        fit_glmmtmb_multilevel_fixed(df)
+      }
+    } else if (engine == "lme4") {
+      # Crossed (Design 1) random raters via lme4 (M14 Slice 2).
+      fit_lme4_multilevel(df)
     } else {
       fit_glmmtmb_multilevel(df)
     }
   } else if (oneway) {
     if (engine == "lme4") fit_lme4_oneway(df) else fit_glmmtmb_oneway(df)
   } else if (raters == "fixed") {
-    fit_glmmtmb_fixed(df)
+    if (engine == "lme4") fit_lme4_fixed(df) else fit_glmmtmb_fixed(df)
   } else if (engine == "lme4") {
     fit_lme4(df)
   } else if (engine == "lavaan") {

@@ -1173,3 +1173,94 @@ consequences → references.
   flagship vignette + `test-vignette-claims.R`, the live-computation posture reused);
   memory `pkgdown-reference-index-new-exports`, `verify-against-installed-package`,
   `run-lintr-before-push`.
+
+## ADR-023: M14 scope — lme4 for the fixed & multilevel fits (engine parity)
+- Date: 2026-07-07
+- Status: accepted
+- Context: With the ADR-017 arc shipped (M0–M13, v0.1.0 submission-ready) and no
+  pre-planned M14, the maintainer opened a backlog review of the deferred/parked
+  work (STATUS "Next action" thread). The strongest frontrunners were the
+  **Bayesian engine** (rstanarm + `ci_method = "posterior"`), the **M9 averaged
+  cluster-level `ICC(c,k)` incomplete divisor** (an open modeling question), and
+  **lme4 for the fixed/multilevel fits** (engine parity, the ADR-012 debt deferred
+  four times — out of M5.5, M8, M9, M10). The maintainer chose **lme4 parity** for
+  M14: the lowest-risk, smallest-scope option, it retires a long-standing debt and
+  strengthens the independent *interval* oracle on the package's most complex fits
+  (glmmTMB currently covers these paths as the only engine). Two scope questions were
+  put to the maintainer and confirmed this session (below). Per PRINCIPLES.md #2/#14
+  this ADR details the milestone at its start; ADR-012/M5.5 is the governing
+  precedent (an alternative engine for an existing estimand is **not** a new
+  estimand — no estimand-spec, cf. M4/M7).
+- Decision:
+  - **`engine = "lme4"` gains full design parity with glmmTMB, balanced/complete**,
+    covering the five remaining fit shapes glmmTMB owns today, each a new
+    `fit_lme4_*` returning the **same six-field engine contract** as its glmmTMB twin
+    (`fit`/`engine`/`components`/`estimate`/`vcov`/`to_components`) so
+    `icc_point()`/`mc_ci()`/`d_study()` are untouched:
+    (1) `fit_lme4_fixed` — two-way **fixed** (Case 3/3A), subject level;
+    (2) `fit_lme4_multilevel` — Design 1 crossed random, five-component;
+    (3) `fit_lme4_nested_clusters` — Design 2, four-component;
+    (4) `fit_lme4_nested_subjects` — Design 3, three-component one-way multilevel;
+    (5) `fit_lme4_multilevel_fixed` — Design 1 crossed fixed (M10), reusing (1)'s
+    θ²_r helper.
+  - **Scope width = full parity, all five shapes** (open question 1; maintainer chose
+    full over a thinner "fixed + Design 1 random" subset), sliced thin (#15):
+    **Slice 1** `fit_lme4_fixed` (the one novel derivation — see below); **Slice 2**
+    `fit_lme4_multilevel` (the delta-transform template extended to five components +
+    multi-grouping-factor merDeriv vcov); **Slice 3** nested Designs 2/3 +
+    `fit_lme4_multilevel_fixed`, reusing Slices 1–2.
+  - **Balanced/complete only; incomplete falls through to a loud abort** (open
+    question 2; maintainer chose balanced-only). The blanket lme4 guard in `icc()`
+    (currently `engine == "lme4" && (multilevel || raters == "fixed")` →
+    `abort_unsupported`) is **narrowed to incomplete-only**: the balanced
+    fixed/multilevel lme4 paths become supported; ragged data still aborts loudly
+    toward `engine = "glmmTMB"`. The four `fit_glmmtmb_*` calls in the `engine_fit`
+    dispatch block gain `engine == "lme4"` branches.
+  - **The θ²_r Monte-Carlo draw (Slice 1) is the one new derivation.** Fixed raters
+    put a **bias-corrected finite-population θ²_r** (ADR-008, `theta2r_fixed()`) in the
+    rater slot, built from the **fixed rater contrasts** — not a random SD. lme4's
+    `to_components` must therefore map draws of the **fixed-effect** coefficients
+    (whose joint covariance merDeriv supplies alongside the random SDs) through the
+    θ²_r construction, rather than the `exp(2 · log-SD draw)` map used for random
+    components. Everything else reuses the shipped merDeriv → **log-SD delta-transform**
+    (Jacobian 1/sd; ADR-012) applied to more variance components.
+  - **Boundary policy unchanged (#3):** multilevel and fixed fits reach the variance
+    boundary more often; the shipped `lme4::isSingular()` detection → classed
+    `intraclass_singular_fit` abort pointing at `engine = "glmmTMB"` (boundary-robust
+    via its log-SD parameterization) is reused per shape, oracle-pinned, not asserted.
+  - **No new estimand, estimand-spec, `ci_method`, or dependency.** lme4 + merDeriv
+    stay `Suggests` behind `check_installed()` (light install preserved). Additive,
+    non-breaking API change: `engine = "lme4"` accepts designs that previously aborted
+    (#6). Correctness is the established **O-LME pattern per shape** (glmmTMB the
+    independent oracle, #1): (a) point lme4 ≡ glmmTMB ≤ 1e-4; (b) **interval** lme4
+    MC-CI ≈ glmmTMB MC-CI ~1e-2; (c) a boundary/singular-fit oracle; (d) seeded-sim
+    coverage at nominal.
+- Consequences: retires the ADR-012 (and ADR-005-lineage) engine-parity deferral —
+  `engine = "lme4"` becomes a real choice across every balanced design glmmTMB fits,
+  and each complex fit gains a cross-engine *interval* check, not just a point check.
+  Changes are confined to `R/engine-lme4.R` (five new `fit_lme4_*` fns + the θ²_r
+  helper reuse), the `icc()` dispatch/guard block (`R/icc.R`), roxygen `@param engine`
+  design coverage, and tests. No `Imports` change, no estimand/CI-machinery change.
+  Ships on `m14-lme4-parity`, merges via PR (`milestone-branches-and-prs`); post-merge
+  `project/` reconcile is a direct commit to `main` (finish-task policy). Deferred out
+  of M14 (recorded so not rediscovered): **incomplete/ragged lme4** for every new shape
+  (the M9 `k_eff`/connectedness × merDeriv singular-fit interaction — a follow-up
+  slice); the **parametric-bootstrap `ci_method`** (bootMer); a **boundary-robust lme4
+  interval for singular fits** (glmmTMB covers it today); merDeriv edge cases beyond
+  these models. Untouched arc carry-overs stay in `ROADMAP.md`: the **Bayesian engine**
+  + `ci_method = "posterior"`; the **M9 averaged cluster-level `ICC(c,k)` incomplete
+  divisor**; **one-way via SEM**; within-cell replicates; three-facet `d_study()`;
+  the conflated single-level ICC (Eq. 14).
+- References: PRINCIPLES.md #1 (oracle-first — cross-engine point + interval + sim),
+  #2 (name the estimand first — none new here), #3 (boundary-aware MC intervals),
+  #6 (additive, non-breaking API), #8 (`cli` + classed aborts), #14 (milestone gates),
+  #15 (thin slices), #16 (tracking in-commit), #17 (deferrals to ROADMAP); ADR-002
+  (glmmTMB default + why lme4 needs merDeriv for the joint vcov), ADR-003 (MC CIs),
+  ADR-005 (original lme4 deferral), **ADR-012 (the M5.5 selectable-lme4 seam +
+  merDeriv log-SD delta-transform + singular-fit policy this milestone extends)**,
+  ADR-008 (fixed-rater bias-corrected θ²_r / `theta2r_fixed()`), ADR-011 (M5 multilevel
+  fit + `level` API), ADR-016/019 (nested Designs 2/3 and fixed multilevel fits being
+  mirrored); `merDeriv` (Wang & Merkle 2018, *J. Stat. Softw.*), lme4 (Bates et al.
+  2015); `CLAUDE_CODE_KICKOFF.md` §7 (detail a milestone at its start), §1 (engines);
+  memory `milestone-branches-and-prs`, `verify-against-installed-package`,
+  `run-lintr-before-push`.

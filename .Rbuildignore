@@ -14,3 +14,5 @@
 ^air\.toml$
 ^\.DS_Store$
 ^.*\.DS_Store$
+^tests/testthat/_problems$
+testthat-problems[.]rds$

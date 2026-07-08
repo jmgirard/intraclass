@@ -6,3 +6,5 @@
 docs
 inst/doc
 figure/
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds

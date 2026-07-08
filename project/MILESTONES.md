@@ -314,3 +314,66 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Windows and R-devel). **Final milestone of the ADR-017 arc — M0–M13 all shipped.**
   Package at **v0.1.0**, submission-ready; the CRAN upload itself is the maintainer's
   out-of-band step.
+
+## M14: lme4 for the fixed & multilevel fits — engine parity (ADR-023) — **next**
+- Goal: promote `engine = "lme4"` from the two-way/one-way random paths (M5.5/M6) to
+  **full design parity** with glmmTMB across every **balanced/complete** design —
+  the fixed-rater (Case 3/3A) and all multilevel fits — retiring the ADR-012 engine
+  debt deferred four times (M5.5, M8, M9, M10). **Engine parity, not estimand work:**
+  no new estimand, estimand-spec, `ci_method`, or dependency (lme4 + merDeriv stay
+  `Suggests`; light install preserved). Each new `fit_lme4_*` returns the same
+  six-field engine contract as its glmmTMB twin, so `icc_point()`/`mc_ci()`/`d_study()`
+  are untouched; the merDeriv → log-SD delta-transform + singular-fit → glmmTMB abort
+  (ADR-012) are reused per shape. The one new derivation is the fixed-rater **θ²_r**
+  Monte-Carlo draw (from the fixed rater contrasts via merDeriv's fixed-effect
+  covariance, not a random SD). Balanced/complete only — incomplete falls through to a
+  loud abort toward glmmTMB. *(Chosen from the post-ADR-017 backlog over the Bayesian
+  engine and the M9 `ICC(c,k)` divisor; scope confirmed with the maintainer.)*
+- Reference: ADR-023 (scope); no estimand-spec (engine, not estimand — cf.
+  M5.5/M7/M4). Oracles **O-LME2** per shape: (a) point lme4 ≡ glmmTMB ≤1e-4; (b)
+  interval lme4 MC-CI ≈ glmmTMB ~1e-2; (c) boundary/singular-fit oracle; (d) seeded-sim
+  coverage at nominal.
+
+### Slices (DoD board — check off in the same commit as the work, #16)
+- [x] **Slice 1 — `fit_lme4_fixed`** (two-way fixed, Case 3/3A, subject level, balanced).
+  The θ²_r derivation: `to_components` maps fixed rater-contrast draws (merDeriv joint
+  fixed+random covariance) through the shared `theta2r_fixed()` (ADR-008); reuses the
+  log-SD delta-transform for the random components. `icc()` guard narrowed so the
+  balanced fixed lme4 path is supported; incomplete/one-way-fixed still abort. O-LME2
+  (a)–(d) pinned vs `fit_glmmtmb_fixed`. **Done** — `theta2r_fixed()` generalized to
+  `(beta, vbeta, k)` (engine-agnostic; both glmmTMB callers updated); O-LME2 green on SF
+  `ratings`: point ≡ glmmTMB ~1e-10, interval gap ≤4.6e-3 (<0.02), balanced fixed≡random
+  ~5e-7, singular-fit abort + seeded-sim coverage. 504 tests, lintr + `air` clean.
+- [x] **Slice 2 — `fit_lme4_multilevel`** (Design 1 crossed random, five-component,
+  balanced). Multi-grouping-factor merDeriv vcov + column alignment; delta-transform
+  template extended to five components. `engine == "lme4"` branch added in the
+  `engine_fit` dispatch block. O-LME2 (a)–(d) vs `fit_glmmtmb_multilevel`. **Done** —
+  shared `fit_lme4_ml_model()` + `lme4_ml_contract()` helpers (align merDeriv columns
+  by exact `cov_<group>.(Intercept)` name, not grep, since `rater` ⊂ `cluster:rater`);
+  guard narrowed so crossed-random-balanced multilevel lme4 is supported while nested,
+  fixed, and incomplete multilevel abort toward glmmTMB. O-LME2 green on a seeded
+  Design-1 dataset: point ≡ glmmTMB ~1e-6 (subject + cluster, agreement + consistency),
+  interval gap ~1e-5 (<0.02), singular-fit abort + seeded population recovery. 516 tests,
+  lintr + `air` clean.
+- [x] **Slice 3 — nested + multilevel-fixed** (`fit_lme4_nested_clusters` Design 2,
+  `fit_lme4_nested_subjects` Design 3, `fit_lme4_multilevel_fixed` Design 1 fixed),
+  reusing Slices 1–2 machinery. Dispatch branches completed; the blanket lme4 guard is
+  now incomplete-only. O-LME2 (a)–(d) per shape vs the matching `fit_glmmtmb_*`. **Done**
+  — nested designs reuse `lme4_ml_contract()` (new `groups`); `fit_lme4_multilevel_fixed`
+  combines the Slice-1 θ²_r draw with the multilevel random groups. O-LME2 green: point ≡
+  glmmTMB ≤6e-6 across Designs 2/3 + fixed multilevel, interval ≤4e-3, fixed≡random ML
+  reduction ~2e-5. 533 tests, lintr + `air` clean.
+- [x] **Cross-cutting DoD:** `@param engine` roxygen design-coverage updated (lme4 = full
+  balanced parity); NEWS engine bullet refreshed; `air format` + `lintr::lint_package()`
+  clean; full test suite green on the installed package with `NOT_CRAN=true` (memory
+  `verify-against-installed-package`); tracking updated in-commit; ships on
+  `m14-lme4-parity`, merges via PR.
+
+### Deferred out of M14 (record so not rediscovered)
+- **Incomplete/ragged lme4** for every new shape (the M9 `k_eff`/connectedness × merDeriv
+  singular-fit interaction — a follow-up slice); the **parametric-bootstrap `ci_method`**
+  (bootMer); a **boundary-robust lme4 interval for singular fits** (glmmTMB covers it
+  today); merDeriv edge cases beyond these models. Untouched arc carry-overs stay in
+  [`ROADMAP.md`](ROADMAP.md): the **Bayesian engine** + `ci_method = "posterior"`; the
+  **M9 averaged cluster-level `ICC(c,k)` incomplete divisor**; **one-way via SEM**;
+  within-cell replicates; three-facet `d_study()`; the conflated single-level ICC (Eq. 14).

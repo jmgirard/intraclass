@@ -172,7 +172,7 @@ test_that("lme4 interval is boundary-aware on a near-zero variance component", {
     reff[as.integer(grid$rater)] +
     stats::rnorm(n_s * k, 0, 1)
 
-  fit <- suppressMessages(icc(
+  fit <- suppressWarnings(icc(
     grid,
     score,
     subject,
@@ -202,7 +202,7 @@ test_that("lme4 aborts loudly on a singular (boundary) fit (#5)", {
   grid$score <- subj[as.integer(grid$subject)] + stats::rnorm(n_s * 4L, 0, 1)
 
   expect_error(
-    suppressMessages(icc(
+    suppressWarnings(icc(
       grid,
       score,
       subject,
@@ -214,23 +214,69 @@ test_that("lme4 aborts loudly on a singular (boundary) fit (#5)", {
   )
 })
 
-test_that("lme4 is refused for fixed-rater and multilevel designs (deferred)", {
-  d <- sf_ratings_long()
+# A balanced, complete crossed (Design 1) multilevel dataset: subjects nested in
+# clusters (labels unique per cluster), raters crossed with both. Used by the
+# Slice 2 multilevel oracle block below.
+lme4_ml_crossed <- function(nc = 12L, ns = 6L, k = 4L, seed = 20260707) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, 1.5)
+  sc <- stats::rnorm(nc * ns, 0, 1.2)
+  rat <- stats::rnorm(k, 0, 1)
+  cr <- stats::rnorm(nc * k, 0, 0.7)
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1) * ns + d$subj] +
+    rat[d$rater] +
+    cr[(d$cluster - 1) * k + d$rater] +
+    stats::rnorm(nrow(d), 0, 1)
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d
+}
+
+test_that("lme4 refuses incomplete multilevel data (deferred, M14)", {
+  skip_if_not_installed("lme4")
+
+  # Balanced multilevel designs (crossed random/fixed, nested) are all supported
+  # (below); only incomplete/ragged multilevel lme4 stays with glmmTMB (ADR-023).
+  # A single dropped cell makes the crossed design unbalanced -> loud abort.
+  incomplete <- lme4_ml_crossed(nc = 6L, ns = 5L, k = 4L)[-1, ]
   expect_error(
-    icc(d, score, subject, rater, raters = "fixed", engine = "lme4"),
+    suppressMessages(icc(
+      incomplete,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      engine = "lme4"
+    )),
     class = "intraclass_unsupported"
   )
+})
 
-  skip_if_not_installed("glmmTMB")
-  # Build a minimal multilevel design (subjects nested in clusters).
-  ml <- expand.grid(
-    subject = factor(1:4),
-    rater = factor(1:3),
-    cluster = factor(1:2)
-  )
-  ml$score <- as.numeric(ml$subject) + as.numeric(ml$rater) + rnorm(nrow(ml))
+test_that("lme4 refuses incomplete data for fixed raters (deferred, M14)", {
+  skip_if_not_installed("lme4")
+
+  # Balanced fixed-rater lme4 is supported (below); the incomplete fixed-rater
+  # theta^2_r-under-imbalance path stays with glmmTMB (ADR-023). A single dropped
+  # cell makes the design unbalanced -> loud abort toward glmmTMB.
+  d <- sf_ratings_long()
+  d_incomplete <- d[-1, ]
   expect_error(
-    icc(ml, score, subject, rater, cluster = cluster, engine = "lme4"),
+    suppressWarnings(icc(
+      d_incomplete,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      engine = "lme4"
+    )),
     class = "intraclass_unsupported"
   )
 })
@@ -294,4 +340,582 @@ test_that("lme4 print() output is stable", {
     engine = "lme4"
   )
   expect_snapshot(print(fit), transform = mask_ci)
+})
+
+# O-LME2 (fixed) — lme4 for the fixed-rater two-way fit (M14 Slice 1 / ADR-023) --
+# Raters as fixed effects (McGraw & Wong Case 3/3A): the rater main effect is the
+# bias-corrected finite-population theta^2_r, recomputed from the fixed-effect beta
+# draws in the Monte-Carlo CI. lme4 (fit_lme4_fixed) must match glmmTMB
+# (fit_glmmtmb_fixed) on both the point estimate and the interval, and reduce to the
+# random-rater fit on balanced data (theta^2_r == sigma^2_r). The estimand is
+# UNCHANGED (a second engine, not a new coefficient); glmmTMB is the independent
+# oracle (PRINCIPLES.md #1), the seeded simulation the second.
+
+test_that("lme4 fixed point estimates match glmmTMB to 1e-4 (O-LME2 point)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  d <- sf_ratings_long()
+  for (ax in lme4_axes) {
+    g <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "glmmTMB",
+      seed = 1
+    )))
+    l <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1
+    )))
+    expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
+  }
+})
+
+test_that("lme4 fixed reduces to the random fit on balanced data (O-LME2)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # On balanced data theta^2_r == sigma^2_r, so fixed and random rater fits give
+  # identical point estimates (McGraw & Wong 1996; M3 §6 / M10 reduction).
+  d <- sf_ratings_long()
+  for (ax in lme4_axes) {
+    r <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "random",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1
+    ))
+    f <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1
+    )))
+    expect_equal(f$estimate, r$estimate, tolerance = 1e-4)
+  }
+})
+
+test_that("lme4 fixed Monte-Carlo interval agrees with glmmTMB's (O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # theta^2_r is recomputed each draw from the fixed-effect betas, whose joint
+  # covariance merDeriv supplies alongside the random SDs; delta-transformed to the
+  # log-SD scale it reproduces glmmTMB's vcov(full = TRUE), so both engines sample
+  # the same parameterization. Absolute bound gap (as in the random-rater test).
+  d <- sf_ratings_long()
+  for (ax in lme4_axes) {
+    g <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    )))
+    l <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = ax[["type"]],
+      unit = ax[["unit"]],
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    )))
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+  }
+})
+
+test_that("lme4 fixed aborts loudly on a singular (boundary) fit (#5)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # No subject effect collapses the subject variance to exactly zero -> singular
+  # fit -> merDeriv cannot form the covariance. Fail loudly, class-tagged.
+  set.seed(11)
+  k <- 4L
+  n_s <- 15L
+  reff <- stats::rnorm(k, 0, 1.5)
+  grid <- expand.grid(
+    subject = factor(seq_len(n_s)),
+    rater = factor(seq_len(k))
+  )
+  grid$score <- reff[as.integer(grid$rater)] + stats::rnorm(n_s * k, 0, 1)
+  expect_error(
+    suppressWarnings(icc(
+      grid,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      engine = "lme4",
+      seed = 1
+    )),
+    class = "intraclass_singular_fit"
+  )
+})
+
+test_that("lme4 fixed recovers known population ICCs with covering intervals", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # Seeded-simulation oracle for the fixed-rater fit. With raters fixed, the
+  # finite-population theta^2_r targets the variance of the k realized rater means,
+  # so the population ICC uses those exact rater effects (not a rater universe).
+  set.seed(2025)
+  n <- 100L
+  k <- 6L
+  v_s <- 4
+  v_res <- 2
+  reff <- stats::rnorm(k, 0, 1) # the fixed, realized rater effects
+  theta2r <- sum((reff - mean(reff))^2) / (k - 1)
+  subj <- stats::rnorm(n, 0, sqrt(v_s))
+  grid <- expand.grid(subject = factor(seq_len(n)), rater = factor(seq_len(k)))
+  grid$score <- 10 +
+    subj[as.integer(grid$subject)] +
+    reff[as.integer(grid$rater)] +
+    stats::rnorm(n * k, 0, sqrt(v_res))
+
+  td <- tidy(suppressWarnings(icc(
+    grid,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "lme4",
+    seed = 1
+  )))
+  pop_a1 <- v_s / (v_s + theta2r + v_res)
+  a1 <- td[td$index == "ICC(A,1)", ]
+  expect_equal(a1$estimate, pop_a1, tolerance = 0.05)
+  expect_lte(a1$conf.low, pop_a1)
+  expect_gte(a1$conf.high, pop_a1)
+})
+
+# O-LME2 (multilevel) — lme4 for the crossed (Design 1) random-rater multilevel fit
+# (M14 Slice 2 / ADR-023). The five-component fit
+# score ~ 1 + (1|cluster) + (1|cluster:subject) + (1|rater) + (1|cluster:rater) via
+# lme4 (fit_lme4_multilevel) must match glmmTMB (fit_glmmtmb_multilevel) on the point
+# estimate and interval at BOTH the subject and cluster level, for agreement and
+# consistency. The estimand is unchanged; glmmTMB is the independent oracle (#1), a
+# seeded population recovery the second.
+
+test_that("lme4 multilevel point estimates match glmmTMB to 1e-4 (O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  d <- lme4_ml_crossed()
+  for (lv in c("subject", "cluster")) {
+    for (ty in c("agreement", "consistency")) {
+      g <- tidy(icc(
+        d,
+        score,
+        subject,
+        rater,
+        cluster = cluster,
+        level = lv,
+        type = ty,
+        engine = "glmmTMB",
+        seed = 1
+      ))
+      l <- tidy(icc(
+        d,
+        score,
+        subject,
+        rater,
+        cluster = cluster,
+        level = lv,
+        type = ty,
+        engine = "lme4",
+        seed = 1
+      ))
+      expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
+    }
+  }
+})
+
+test_that("lme4 multilevel Monte-Carlo interval agrees with glmmTMB's (O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # Five variance components delta-transformed to the shared log-SD scale, so both
+  # engines sample the same parameterization. Absolute bound gap (as elsewhere).
+  d <- lme4_ml_crossed()
+  for (lv in c("subject", "cluster")) {
+    g <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = lv,
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    l <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = lv,
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+  }
+})
+
+test_that("lme4 multilevel reports the lme4 engine and covers both levels", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  d <- lme4_ml_crossed()
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lme4",
+    seed = 1
+  )
+  expect_equal(fit$engine, "lme4")
+  # Subject and cluster levels both present in the estimate table.
+  expect_setequal(unique(fit$estimates$level), c("subject", "cluster"))
+})
+
+test_that("lme4 multilevel aborts loudly on a singular (boundary) fit (#5)", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # Two raters and no rater/cluster-rater signal collapses those components to
+  # exactly zero -> singular fit -> merDeriv cannot form the covariance -> classed
+  # abort (as in the two-way singular test, the same code path in lme4_ml_contract).
+  set.seed(1)
+  nc <- 4L
+  ns <- 5L
+  k <- 2L
+  cl <- stats::rnorm(nc, 0, 1.5)
+  sc <- stats::rnorm(nc * ns, 0, 1.2)
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1) * ns + d$subj] +
+    stats::rnorm(nrow(d), 0, 1)
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  expect_error(
+    suppressMessages(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      engine = "lme4",
+      seed = 1
+    )),
+    class = "intraclass_singular_fit"
+  )
+})
+
+test_that("lme4 multilevel recovers a known population subject-level ICC", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # Seeded population recovery through the lme4 multilevel engine. Subject-level
+  # ICC(A,1) = v_sc / (v_sc + v_r + v_res): sigma^2_cr is NOT in the subject-level
+  # error set for cluster-crossed raters (estimand.R; spec M5 §3a -- it is the
+  # cluster-level residual slot instead), matching glmmTMB.
+  # Many raters (k = 20) so the rater-universe variance sigma^2_r is well estimated;
+  # with few raters its finite-sample noise dominates the subject-level ICC.
+  set.seed(303)
+  nc <- 40L
+  ns <- 8L
+  k <- 20L
+  v_c <- 1.0
+  v_sc <- 4.0
+  v_r <- 0.8
+  v_cr <- 0.5
+  v_res <- 2.0
+  cl <- stats::rnorm(nc, 0, sqrt(v_c))
+  sc <- stats::rnorm(nc * ns, 0, sqrt(v_sc))
+  rat <- stats::rnorm(k, 0, sqrt(v_r))
+  cr <- stats::rnorm(nc * k, 0, sqrt(v_cr))
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1) * ns + d$subj] +
+    rat[d$rater] +
+    cr[(d$cluster - 1) * k + d$rater] +
+    stats::rnorm(nrow(d), 0, sqrt(v_res))
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+
+  td <- tidy(icc(d, score, subject, rater, cluster = cluster, seed = 1))
+  a1 <- td[td$index == "ICC(A,1)" & td$level == "subject", ]
+  pop <- v_sc / (v_sc + v_r + v_res)
+  expect_equal(a1$estimate, pop, tolerance = 0.05)
+  expect_lte(a1$conf.low, pop)
+  expect_gte(a1$conf.high, pop)
+})
+
+# O-LME2 (Slice 3) — lme4 for the nested designs (2/3) and fixed-rater multilevel
+# (M14 Slice 3 / ADR-023). Each reuses the Slice-2 lme4_ml_contract() machinery
+# (nested designs differ only in `groups`) or combines it with the Slice-1 theta^2_r
+# draw (fixed multilevel). All must match their glmmTMB twin on the point estimate
+# and interval; glmmTMB is the independent oracle (#1). Balanced/complete only.
+
+# Design 2: raters nested in clusters (rater labels unique per cluster).
+lme4_ml_nested_clusters <- function(
+  nc = 12L,
+  ns = 6L,
+  k = 4L,
+  seed = 20260707
+) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, 1.3)
+  sc <- stats::rnorm(nc * ns, 0, 1.1)
+  rc <- stats::rnorm(nc * k, 0, 1.0)
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1) * ns + d$subj] +
+    rc[(d$cluster - 1) * k + d$rater] +
+    stats::rnorm(nrow(d), 0, 1)
+  d$cluster <- factor(d$cluster)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d$rater <- factor(paste(d$cluster, d$rater, sep = "_"))
+  d
+}
+
+# Design 3: raters nested in subjects (rater labels unique per subject).
+lme4_ml_nested_subjects <- function(
+  nc = 12L,
+  ns = 6L,
+  k = 4L,
+  seed = 20260707
+) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, 1.3)
+  sc <- stats::rnorm(nc * ns, 0, 1.1)
+  d <- expand.grid(
+    subj = seq_len(ns),
+    rater = seq_len(k),
+    cluster = seq_len(nc)
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    sc[(d$cluster - 1) * ns + d$subj] +
+    stats::rnorm(nrow(d), 0, 1.4)
+  d$cluster <- factor(d$cluster)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d$rater <- factor(paste(d$subject, d$rater, sep = "_"))
+  d
+}
+
+test_that("lme4 nested-cluster (Design 2) matches glmmTMB (O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  d <- lme4_ml_nested_clusters()
+  for (ty in c("agreement", "consistency")) {
+    g <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      type = ty,
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    l <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      type = ty,
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    ))
+    expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+  }
+})
+
+test_that("lme4 nested-subject (Design 3) matches glmmTMB (O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # Design 3 is the multilevel one-way (agreement-only): consistency is undefined.
+  d <- lme4_ml_nested_subjects()
+  g <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "glmmTMB",
+    seed = 1,
+    mc_samples = 20000L
+  ))
+  l <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lme4",
+    seed = 1,
+    mc_samples = 20000L
+  ))
+  expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
+  expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+  expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+})
+
+test_that("lme4 fixed-rater multilevel matches glmmTMB and reduces to random (O-LME2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  # Crossed (Design 1) fixed raters, subject level only (M10). theta^2_r fills the
+  # rater slot, recomputed from the fixed beta draws; on balanced data theta^2_r ==
+  # sigma^2_r, so the point estimates equal the random-rater fit.
+  d <- lme4_ml_crossed()
+  for (ty in c("agreement", "consistency")) {
+    g <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "subject",
+      type = ty,
+      raters = "fixed",
+      engine = "glmmTMB",
+      seed = 1,
+      mc_samples = 20000L
+    )))
+    l <- tidy(suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "subject",
+      type = ty,
+      raters = "fixed",
+      engine = "lme4",
+      seed = 1,
+      mc_samples = 20000L
+    )))
+    expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
+    expect_lt(max(abs(l$conf.low - g$conf.low)), 0.02)
+    expect_lt(max(abs(l$conf.high - g$conf.high)), 0.02)
+
+    r <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "subject",
+      type = ty,
+      raters = "random",
+      engine = "lme4",
+      seed = 1
+    ))
+    expect_equal(l$estimate, r$estimate, tolerance = 1e-4)
+  }
+})
+
+test_that("lme4 nested multilevel reports the lme4 engine", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+
+  d2 <- lme4_ml_nested_clusters()
+  expect_equal(
+    icc(
+      d2,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      engine = "lme4",
+      seed = 1
+    )$engine,
+    "lme4"
+  )
+  d3 <- lme4_ml_nested_subjects()
+  expect_equal(
+    icc(
+      d3,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      engine = "lme4",
+      seed = 1
+    )$engine,
+    "lme4"
+  )
 })
