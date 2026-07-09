@@ -1,22 +1,19 @@
 # Project status
 
 - Milestone: **M26 — Bayesian engine (brms), one-way + fixed-rater, two-way, balanced/complete** —
-  **ACTIVE** (ADR-036; scoped, no slice work begun). Opened after the M23–M25 Bayesian-arc retro
-  (2026-07-09). Continues the Bayesian arc with its two lowest-risk **single-level** follow-ons:
-  **Slice 1 — one-way random** (the M6 analog; `fit_brms_oneway()` = `score ~ 1 + (1|subject)`, a
-  strict subset of the shipped `fit_brms_twoway()` — near-zero risk, strong reduction oracle) and
-  **Slice 2 — fixed-rater two-way** (the M2/M3/M10 analog and the brms sibling of the lavaan
-  fixed-rater path M21 shipped; `fit_brms_fixed()` = `score ~ 1 + rater + (1|subject)` with θ²_r read
-  **per posterior draw** from the rater fixed-effect draws). **Engine/interval parity, not new
-  estimand work** (#6) — no new estimand-spec, argument, or dependency; two shipped brms guards
-  narrowed + two dispatch branches. **Slice 2 is attempt-then-degrade** (M18 S2 / M19 S1 / M20 S3
-  posture): the **oracle-first catch** is that brms has a **prior**, so (a) the frequentist bias
-  correction should NOT be applied to posterior draws and (b) the balanced `fixed ≡ random` identity
-  (exact under REML/FIML in M10/M21) holds only **approximately** — the pin is MAP ≈ glmmTMB fixed
-  θ²_r on balanced data plus a *characterized* fixed-vs-random relationship, not asserted equality
-  (#1/#18). If no #1/#4-strong oracle holds, Slice 2 degrades to a recorded deferral and M26 ships
-  one-way alone. Oracle-risk order (one-way first). See the **M26 DoD board** in
-  [`MILESTONES.md`](MILESTONES.md).
+  **shipped** (PR #31, ADR-036; squash-merged to `main` at `c02bc38`). The two lowest-risk
+  **single-level** Bayesian follow-ons, closing the arc's single-level gap: **Slice 1 — one-way random**
+  (M6 analog; `fit_brms_oneway()` = `score ~ 1 + (1|subject)`, a strict subset of `fit_brms_twoway()`)
+  + O-Bayes-OW; **Slice 2 — fixed-rater two-way** (M2/M3/M10 analog, the brms sibling of the lavaan
+  fixed path M21 shipped; `fit_brms_fixed()` = `score ~ 1 + rater + (1|subject)`, θ²_r read **raw** per
+  posterior draw from the rater fixed-effect draws) + O-Bayes-Fixed. Engine/interval parity, not new
+  estimand work (#6) — no new estimand-spec/argument/dependency; two brms guards narrowed + two
+  dispatch branches. **Oracle-first resolution (Slice 2, #18):** brms has a prior, so (a) **raw** θ²_r,
+  no frequentist bias correction (it moves the ICC ~0.002 and double-counts), and (b) balanced
+  `fixed ≡ random` holds only **approximately** → the oracle is **containment** (glmmTMB fixed inside
+  the credible interval), not equality. **Honest finding (Slice 1, #18):** one-way `ICC(1)` MAP biased
+  low ~−12% at k=2 (falsifying the "spared" guess) → the k=2 caveat note fires for one-way too.
+  `R CMD check --as-cran` 0/0/1; test suite 949 pass / 0 fail; all 7 live Stan fits pass locally.
 - Prior milestone: **M25 — Bayesian multilevel (brms), nested Designs 2/3, balanced/complete, random** —
   **shipped** (PR #30, ADR-035; squash-merged to `main` at `2ff081b`). The direct
   continuation of the Bayesian arc — the **M8 analog of M24**: same brms engine + half-*t*(4,0,1) prior
@@ -92,31 +89,25 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M26 both slices DONE — verifying for PR** on branch `m26-bayes-oneway-fixed`.
-  Slice 1 (one-way, `fit_brms_oneway()`) + Slice 2 (fixed-rater, `fit_brms_fixed()`) shipped; full
-  `test-icc-brms.R` green incl. all **7 live Stan fits** (0 failures); `air` + `lint_package()` clean.
-  **Oracle-first resolution (Slice 2, #18):** brms fixed-rater uses the **raw** Case-3A θ²_r from the
-  posterior (no frequentist bias correction — moves the ICC by ~0.002; the posterior already
-  integrates the uncertainty), and balanced `fixed ≡ random` holds only **approximately** under the
-  prior (characterized via containment, not asserted). **Honest finding (Slice 1, #18):** one-way
-  `ICC(1)` MAP biased low ~−12% at k=2 — the k=2 caveat note fires for one-way too. **All DoD green:**
-  `R CMD check --as-cran` **0/0/1**, test suite 949 pass / 0 fail, `air` + `lint_package` clean.
-  **PR #31 open** (https://github.com/jmgirard/intraclass/pull/31) — awaiting CI + merge. Remaining out-of-M26 work lives in [`ROADMAP.md`](ROADMAP.md): the
-  *multilevel* Bayesian fixed/one-way, Bayesian incomplete/replicates/conflated, categorical/ordinal
-  GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and
-  occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
-- Last green CI: **PR #30 (M25) full matrix green incl. Windows and R-devel (all 9 jobs); squash-
-  merged to `main` at `2ff081b`.** Local `R CMD check` 0/0/0; full `test-icc-brms.R` 120/0/0 incl. the
-  live nested Design 2/3 fits; coverage 85.81% (below 90% by design — the brms fit wrappers are
-  live-only, [[coverage-baseline]]). Prior: PR #29 (M24) at `6566057`.
+- Active task: **none** — M26 shipped (PR #31, squash-merged at `c02bc38`). No milestone is currently
+  in flight; the next one needs an ADR after a short retro. Remaining work lives in
+  [`ROADMAP.md`](ROADMAP.md): the *multilevel* Bayesian fixed/one-way, Bayesian
+  incomplete/replicates/conflated, categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged
+  cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band **CRAN
+  upload** (ADR-022) also remains.
+- Last green CI: **PR #31 (M26) CI green; squash-merged to `main` at `c02bc38`.** Local
+  `R CMD check --as-cran` **0/0/1** (only the expected "New submission" NOTE); test suite
+  `FAIL 0 | WARN 0 | SKIP 34 | PASS 949`; all 7 live Stan fits pass locally (`skip_on_ci`); coverage
+  ~85% (below 90% by design — brms fit wrappers are live-only, [[coverage-baseline]]). Prior: PR #30
+  (M25) at `2ff081b`.
 - Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M26 Slice 2 (Bayesian fixed-rater) shipped to the
-  branch; both slices done.** `fit_brms_fixed()` (raw θ²_r per posterior draw, oracle-first resolved) +
-  fixed brms dispatch (abort narrowed to fixed×multilevel), `data-raw/oracle-bayesian-fixed.R` +
-  committed `bayesian-fixed-oracle.rds` (compile-once/`update()`), O-Bayes-Fixed committed-reference +
-  live O-Bayes-Fixed-agree tests, REFERENCES O-Bayes-Fixed row, COVERAGE/ROADMAP/NEWS reconciled, board
-  checked. Full `test-icc-brms.R` green incl. all 7 live Stan fits; `air`/`lint_package` clean. Next:
-  installed-pkg `NOT_CRAN=true` + `R CMD check --as-cran` pre-PR gate, then open the M26 PR.
+- Updated: 2026-07-09 by main session (Opus) — **M26 shipped (PR #31, squash-merged at `c02bc38`).**
+  Slices 1–2 + all cross-cutting DoD done. Post-merge `project/` reconcile: this file, MILESTONES M26 →
+  done + preamble + board compressed, COVERAGE brms one-way/fixed cells, REFERENCES O-Bayes-OW/-Fixed,
+  ROADMAP flipped to shipped, NEWS Bayesian section (all landed in the PR; this commit compresses the
+  M26 board and flips STATUS to shipped). Local `main` fast-forwarded to `origin/main` after the squash;
+  merged branch deleted. Next: open the next milestone (Bayesian multilevel fixed/one-way / incomplete /
+  categorical GLMM / multilevel SEM) after a short retro, or the CRAN upload (ADR-022).
 
 ## Where we are
 
@@ -147,23 +138,15 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M26 (ADR-036) is ACTIVE — start Slice 1 (Bayesian one-way random).** Branch
-`m26-bayes-oneway-fixed`, then:
-1. Add `fit_brms_oneway()` to `R/engine-brms.R` (`score ~ 1 + (1|subject)`, two-component spec) — a
-   strict subset of the shipped `fit_brms_twoway()`.
-2. Narrow the structural one-way brms abort (`icc.R:460`) + dispatch in the one-way branch
-   (`icc.R:1238`).
-3. Write `data-raw/oracle-bayesian-oneway.R`, commit `bayesian-oneway-oracle.rds`, assert **O-Bayes-OW**
-   (MAP ≈ M6 REML; SF 0.166/0.443 reduction; seeded coverage) with a `skip_on_ci()` live fit.
-
-Then **Slice 2 (fixed-rater)** — but **resolve the oracle-first catch first** (does the raw θ²_r
-posterior push-forward, no bias correction, match glmmTMB fixed on balanced data?); attempt-then-degrade
-if no #1/#4-strong oracle holds. The `/start-task` skill drives Slice 1.
-
-Out-of-M26 candidates remain in [`ROADMAP.md`](ROADMAP.md): the **multilevel** Bayesian fixed/one-way,
-Bayesian incomplete/replicates/conflated, **categorical/ordinal GLMM**, **multilevel SEM**, the Wave-3
-averaged cluster-level `ICC(c,k)` incomplete divisor. The out-of-band **CRAN upload** (ADR-022) also
-remains. Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24 (PR #29), M25 (PR #30).
+**M26 (ADR-036) shipped (PR #31) — Bayesian single-level one-way + fixed-rater.** `engine = "brms"` +
+`ci_method = "posterior"` now covers `model = "oneway"` (`ICC(1)`/`ICC(1,k)`) and `raters = "fixed"`
+(raw Case-3A θ²_r from the posterior) at the single level, alongside the shipped two-way + multilevel
+random paths. **No milestone is currently in flight** — the next one needs an ADR after a short retro
+(founding brief §7). Candidates in [`ROADMAP.md`](ROADMAP.md): the **remaining Bayesian follow-ons**
+(fixed/one-way **at the multilevel level**, incomplete/ragged, within-cell replicates, conflated — each
+a later thin slice), **categorical/ordinal GLMM** ratings, **multilevel SEM**, and the Wave-3 averaged
+cluster-level `ICC(c,k)` incomplete divisor. The out-of-band **CRAN upload** (ADR-022) also remains.
+Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24 (PR #29), M25 (PR #30), M26 (PR #31).
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 
