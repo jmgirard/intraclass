@@ -1,22 +1,25 @@
 # Project status
 
 - Milestone: **M24 — Bayesian multilevel (brms), Design 1 crossed, balanced/complete, random** —
-  **opened / scoped, no slice work begun** (ADR-034 accepted; branch `m24-bayesian-multilevel`). The
-  **highest-value Bayesian follow-on** — ten Hove's native turf: the paper's own multilevel IRR
-  estimator (2020/2022) *is* the half-*t*-hyperprior Bayesian model M23 built, so M24 fits the
-  paper's estimator on the paper's flagship design. A **thin vertical slice** standing to M23 as M5
-  stood to M1/M2 — same engine (`brms`) + interval method (`posterior`), extended from the two-way
-  fit to the five-component crossed fit under the half-*t*(4,0,1) SD prior (generalized verbatim).
-  **Engine/interval parity, not new estimand work** — the shipped M5 subject/cluster coefficients
-  (`M5-multilevel.md` §3) read off posterior draws; no new estimand-spec, argument, or dependency
-  (`brms` already `Suggests`); additive, non-breaking (#6). Scope = the M5 box (subject + cluster
-  levels, agreement/consistency, single/average). **Slice 1** subject-level + `fit_brms_multilevel()`;
-  **Slice 2** cluster-level + the O-Bayes-ML coverage oracle (extend `data-raw/oracle-bayesian.R` to
-  ten Hove's multilevel DGP + commit the fixture). Oracles O-Bayes-ML (coverage / reduction to M23 at
-  a single cluster / agreement with M5 glmmTMB-lme4 REML / convergence). The maintainer chose
-  *multilevel-first, thin* over a parity sweep and over warm-up-first; Bayesian one-way / fixed-rater
-  / nested / incomplete / replicates stay deferred (later thin slices). The DoD board is live in
-  [`MILESTONES.md`](MILESTONES.md) but **unchecked** — the next action is Slice 1.
+  **shipped** (PR #29, ADR-034; squash-merged to `main` at `6566057`). The **highest-value Bayesian
+  follow-on** — ten Hove's native turf: the paper's own multilevel IRR estimator (2020/2022) *is* the
+  half-*t*-hyperprior Bayesian model M23 built, so M24 fits the paper's estimator on the paper's
+  flagship design. A **thin vertical slice** standing to M23 as M5 stood to M1/M2 — same engine
+  (`brms`) + interval method (`posterior`), extended to the five-component crossed fit under the
+  half-*t*(4,0,1) SD prior (generalized verbatim). **Engine/interval parity, not new estimand work** —
+  the shipped M5 subject/cluster coefficients read off posterior draws; no new estimand-spec, argument,
+  or dependency; additive, non-breaking (#6). **Slice 1** subject-level (`fit_brms_multilevel()` +
+  `fit_brms_common()` refactor; `brms_component_draws()`/`brms_convergence()` generalized to a component
+  `spec`; the two-way-only guard narrowed to admit crossed Design 1 — nested/conflated/fixed/incomplete/
+  one-way still abort loudly; brms multilevel dispatch). **Slice 2** cluster-level + the **O-Bayes-ML**
+  coverage oracle (new `data-raw/oracle-bayesian-multilevel.R`, companion to the M23 script; committed
+  `tests/testthat/fixtures/bayesian-ml-oracle.rds`). Findings reproduced **honestly** (#18):
+  subject-level MAP ~unbiased + nominal coverage at k = 5 (rel-bias −1.5%, cover .94); cluster-level
+  **few-cluster MAP-low caveat** at N_c = 20 (−16%/−25%, wide intervals still ~nominal). Oracles
+  O-Bayes-ML-agree (live, MAP ≈ M5 glmmTMB/lme4 REML at the subject level) / -coverage (committed
+  fixture) / -reduction (subject-level composes identically to two-way, no fit). Live Stan fits
+  `skip_on_ci()`; CI covers via the committed fixture. Bayesian nested Designs 2/3 / fixed / one-way /
+  incomplete / replicates / conflated stay deferred (later thin slices).
 - Prior milestone: **M23 — Bayesian engine (brms) + `ci_method = "posterior"`, two-way random** —
   **shipped** (PR #28, ADR-033; the first Bayesian milestone, promoting the cross-cutting carryover
   deferred at M7/ADR-014). A **thin two-way-random slice** mirroring M5.5 (lme4) / M7 (lavaan) —
@@ -52,29 +55,23 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M24 complete locally — ready to push + open the PR.** Slices 1–2 (subject + cluster
-  Bayesian crossed multilevel; O-Bayes-ML agree/coverage/reduction) and all cross-cutting DoD are done.
-  Full suite 1041/0/0/0 (`NOT_CRAN=true`); `R CMD check --as-cran` 0/0/1 (New submission NOTE);
-  `air`/`lintr`/`pkgdown` clean. **Next: push `m24-bayesian-multilevel` + open the PR**, then post-merge
-  `project/` reconcile. Remaining non-M24 work lives in [`ROADMAP.md`](ROADMAP.md):
-  the other Bayesian follow-ons (fixed-rater, one-way, nested, incomplete, replicates),
-  categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete
-  divisor, and occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
-- Last green CI: **PR #28 (M23) full matrix green incl. Windows and R-devel (all 9 jobs); squash-
-  merged to `main` at `a6b8467`.** `R CMD check --as-cran` 0/0/1 (only the expected "New submission"
-  NOTE); installed-pkg suite 308/0/0 incl. the live brms fit. Prior: PR #27 (M22) at `8375184`.
+- Active task: **none** — M24 shipped (PR #29). No milestone is currently in flight; the next one
+  needs an ADR after a short retro. Remaining work lives in [`ROADMAP.md`](ROADMAP.md): the other
+  Bayesian follow-ons (fixed-rater, one-way, **nested Designs 2/3**, incomplete, replicates, conflated
+  — each a later thin slice), categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged
+  cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band **CRAN
+  upload** (ADR-022) also remains.
+- Last green CI: **PR #29 (M24) full matrix green incl. Windows and R-devel (all 9 jobs); squash-
+  merged to `main` at `6566057`.** Local `R CMD check --as-cran` 0/0/1 (only the expected "New
+  submission" NOTE); full suite `NOT_CRAN=true` 1041/0/0/0 incl. both live brms fits + merDeriv lme4
+  multilevel. Prior: PR #28 (M23) at `a6b8467`.
 - Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M24 Slices 1–2 implemented** (branch
-  `m24-bayesian-multilevel`). Slice 1: `fit_brms_multilevel()` + `fit_brms_common()` refactor;
-  `brms_component_draws()`/`brms_convergence()` generalized to a component `spec`; the two-way-only brms
-  guard narrowed to admit crossed Design 1 (nested/conflated/fixed/incomplete/one-way still abort);
-  brms multilevel dispatch. Slice 2: new `data-raw/oracle-bayesian-multilevel.R` (100 reps × 2 cells,
-  ~40-min seeded run) committed `bayesian-ml-oracle.rds`; O-Bayes-ML-coverage/reduction tests. Findings
-  reproduced honestly: subject-level nominal (relbias −1.5%, cover .94 at k=5), cluster-level
-  few-cluster MAP-low caveat (−16%/−25% at N_c=20). `test-icc-brms.R` 84/84 green; `air` + `lintr`
-  clean. Cross-cutting DoD then completed: COVERAGE ④ brms cells → ✅, REFERENCES O-Bayes-ML,
-  `pkgdown::check_pkgdown()` clean, full suite 1041/0/0/0, `R CMD check --as-cran` 0/0/1. **Next: push
-  the branch + open the PR.**
+- Updated: 2026-07-09 by main session (Opus) — **M24 shipped (PR #29, squash-merged at `6566057`).**
+  Slices 1–2 + all cross-cutting DoD done. Post-merge `project/` reconcile: this file, MILESTONES
+  M24 → done + preamble, COVERAGE brms multilevel cells, REFERENCES O-Bayes-ML (all landed in the PR;
+  this commit compresses the M24 board to summary form and flips STATUS to shipped). Local `main`
+  fast-forwarded to `origin/main` after the squash; the merged branch deleted. Next: open the next
+  milestone (Bayesian follow-ons / categorical GLMM / multilevel SEM) or the CRAN upload (ADR-022).
 
 ## Where we are
 
@@ -105,20 +102,16 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**Begin M24 Slice 1 — `fit_brms_multilevel()`.** M24 (ADR-034) is **opened and scoped** on branch
-`m24-bayesian-multilevel`, the DoD board live in [`MILESTONES.md`](MILESTONES.md) but **unchecked**;
-no code has been written yet. M24 promotes the highest-value Bayesian follow-on — **multilevel**
-(ten Hove's native turf) — extending `engine = "brms"` + `ci_method = "posterior"` from M23's two-way
-random path to the five-component crossed (Design 1) fit under the half-*t*(4,0,1) SD prior
-(generalized verbatim), reading the shipped M5 subject/cluster coefficients off posterior draws.
-Slice 1 = subject-level + `fit_brms_multilevel()`; Slice 2 = cluster-level + the O-Bayes-ML coverage
-oracle (extend `data-raw/oracle-bayesian.R` + commit the fixture). Run `/start-task` to begin.
-
-The **other Bayesian follow-ons** (fixed-rater / one-way / nested / incomplete / replicates),
-**categorical/ordinal GLMM** ratings, **multilevel SEM**, and the Wave-3 averaged cluster-level
-`ICC(c,k)` incomplete divisor remain later candidates in [`ROADMAP.md`](ROADMAP.md). The out-of-band
-**CRAN upload** (ADR-022) also remains. The M18–M21 completeness arc (ADR-027) is complete
-(PR #23/#24/#25/#26); M22 (PR #27) + M23 (PR #28) shipped after it; M24 is now open.
+**M24 (ADR-034) shipped (PR #29) — Bayesian crossed multilevel.** `engine = "brms"` +
+`ci_method = "posterior"` now covers the crossed (Design 1) multilevel path at the subject and cluster
+levels (ten Hove's native turf). **No milestone is currently in flight** — the next one needs an ADR
+after a short retro (founding brief §7). Candidates in [`ROADMAP.md`](ROADMAP.md): the **remaining
+Bayesian follow-ons** (fixed-rater / one-way / **nested Designs 2/3** / incomplete / replicates /
+conflated — each a later thin slice, the natural continuation of the Bayesian arc), **categorical/
+ordinal GLMM** ratings, **multilevel SEM**, and the Wave-3 averaged cluster-level `ICC(c,k)` incomplete
+divisor. The out-of-band **CRAN upload** (ADR-022) also remains. The M18–M21 completeness arc
+(ADR-027) is complete (PR #23/#24/#25/#26); M22 (PR #27), M23 (PR #28), and M24 (PR #29) shipped after
+it.
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 
