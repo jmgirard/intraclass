@@ -18,7 +18,7 @@
   (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
   Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
   checklist in MILESTONES.md.
-- Active task: **M21 ship — PR #26 open, awaiting full CI matrix**
+- Active task: **M21 ship — PR #26 CI green (all 9 jobs incl. Windows + R-devel), ready to merge**
   (https://github.com/jmgirard/intraclass/pull/26). **All three slices ✅ committed** (`e307421`
   S1 bootstrap, `f84b57a` S2 fixed-rater Case-3A θ²_r, `65aebdd` S3 incomplete/FIML — SHIPS, no
   degrade). Local DoD green: `R CMD check --as-cran` **0/0/0**, installed-pkg `test_check`
