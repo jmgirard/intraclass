@@ -908,6 +908,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - [x] `REFERENCES.md` O-Bayes-OW / O-Bayes-Fixed rows; `COVERAGE.md` brms one-way + fixed cells +
       engine row + cross-cutting line; `ROADMAP.md` flipped the single-level one-way/fixed Bayesian
       follow-ons to shipped. `STATUS.md` + this board updated in-commit (#16).
-- [ ] Ship on the `m26-bayes-oneway-fixed` branch, merge via PR ([[milestone-branches-and-prs]]) — **branch ready; PR pending push.**
-- Status: **both slices done + all DoD green (R CMD check 0/0/1); ready for the M26 PR.** Scoped by ADR-036; opened after the M23–M25 Bayesian-arc
+- [x] Shipped on the `m26-bayes-oneway-fixed` branch; **PR #31 open** ([[milestone-branches-and-prs]]) — awaiting CI + merge.
+- Status: **both slices done + all DoD green (R CMD check 0/0/1); PR #31 open, awaiting CI/merge.** Scoped by ADR-036; opened after the M23–M25 Bayesian-arc
   retro (2026-07-09).
