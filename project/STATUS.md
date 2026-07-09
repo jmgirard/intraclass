@@ -18,12 +18,12 @@
   (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
   Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
   checklist in MILESTONES.md.
-- Active task: **M21 ship — push `m21-sem-parity` + open PR** (only remaining step; awaiting
-  maintainer go-ahead for the outward-facing push). **All three slices ✅ committed** (`e307421`
+- Active task: **M21 ship — PR #26 open, awaiting full CI matrix**
+  (https://github.com/jmgirard/intraclass/pull/26). **All three slices ✅ committed** (`e307421`
   S1 bootstrap, `f84b57a` S2 fixed-rater Case-3A θ²_r, `65aebdd` S3 incomplete/FIML — SHIPS, no
   degrade). Local DoD green: `R CMD check --as-cran` **0/0/0**, installed-pkg `test_check`
   NOT_CRAN **925/0/0 (SKIP 0)**, air + lintr clean, docs/NEWS/REFERENCES/COVERAGE/ROADMAP synced
-  (M18–M21 arc closed — every 🔵 not-yet gap resolved).
+  (M18–M21 arc closed — every 🔵 not-yet gap resolved). Merge once CI (incl. Windows/R-devel) green.
 - Last green CI: **PR #25 (M20) full matrix green incl. Windows and R-devel; merged to `main` at
   137fb98** (the codecov upload flaked once on a bad GPG signature — re-ran green; infra, not the
   diff).
