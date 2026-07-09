@@ -136,11 +136,11 @@ helpers* item below (sample-size / CI-width), where it belongs.
   rstanarm's `decov` prior cannot express ten Hove's per-SD half-*t*, forfeiting the
   source-faithful prior the oracle depends on; rstanarm parked as a future alternate). The
   highest-value follow-on — **Bayesian multilevel Design 1 (crossed)** — **shipped as M24 (ADR-034,
-  PR #29)**, and the **nested Designs 2/3** follow-on is now **promoted to M25 (ADR-035, active on
-  branch `m25-bayesian-nested`, not yet shipped);** see [`MILESTONES.md`](MILESTONES.md). What
-  **remains parked here** are the *other* parity follow-ons M23/M24/M25 defer: Bayesian
-  **fixed-rater**, **one-way**, **incomplete/ragged**, and **within-cell replicates** — for the
-  incomplete/small-k
+  PR #29)**, and the **nested Designs 2/3** follow-on **shipped as M25 (ADR-035, PR #30)** — the
+  Bayesian engine now covers every multilevel design at the subject level; see
+  [`MILESTONES.md`](MILESTONES.md). What **remains parked here** are the *other* parity follow-ons
+  M23/M24/M25 defer: Bayesian **fixed-rater**, **one-way**, **incomplete/ragged**, and **within-cell
+  replicates** — for the incomplete/small-k
   corners ten Hove et al. (2022) flag the best estimator as an open research question, so schedule
   them leaning on coverage calibration. Plus **selectable** `posterior` coupling (MC/bootstrap on a
   Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API.
