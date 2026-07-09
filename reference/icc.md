@@ -186,16 +186,18 @@ icc(
   mixed-model estimate on balanced data), on both complete and
   **incomplete** data (missing cells are estimated by full-information
   maximum likelihood; the parametric bootstrap is unavailable for
-  incomplete SEM). `"brms"` fits the two-way **random** model in a
+  incomplete SEM). `"brms"` fits the **random**-rater model in a
   Bayesian framework (Stan, via brms) under a sourced half-*t*(4, 0, 1)
   prior on the random-effect SDs (ten Hove et al. 2020); the point
   estimate is the posterior mode (MAP) and the interval is a percentile
   **credible** interval (`ci_method = "posterior"`, forced). It covers
-  the balanced, complete two-way random design only in this release;
-  fixed raters, one-way, multilevel, and incomplete Bayesian fits are
-  planned for later milestones. `"lme4"` requires the lme4 and merDeriv
-  packages; `"lavaan"` requires the lavaan package; `"brms"` requires
-  the brms package (and a working Stan toolchain).
+  the balanced, complete two-way random design and the crossed
+  (Design 1) **multilevel** random design (subject and cluster levels);
+  fixed raters, one-way, nested/incomplete multilevel, and
+  within-cell-replicate Bayesian fits are planned for later milestones.
+  `"lme4"` requires the lme4 and merDeriv packages; `"lavaan"` requires
+  the lavaan package; `"brms"` requires the brms package (and a working
+  Stan toolchain).
 
 - conf_level:
 
@@ -244,10 +246,15 @@ icc(
   A named list of extra arguments forwarded to
   [`brms::brm()`](https://paulbuerkner.com/brms/reference/brm.html) when
   `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`,
-  `control`). The default (rstan backend, brms defaults) needs none. The
-  model formula, data, the sourced half-*t* prior, and `seed` are owned
-  by `intraclass` and may not be set here; supplying them, or a
-  non-empty `brm_args` with any other engine, is an error.
+  `control`). The default (rstan backend, brms defaults) needs none. By
+  default brms samples the chains **sequentially on one core**
+  (`cores = getOption("mc.cores", 1L)`); pass
+  `brm_args = list(cores = 4)` (or set `options(mc.cores)`) to sample in
+  parallel — the engine emits a periodic reminder to that effect while
+  running sequentially. The model formula, data, the sourced half-*t*
+  prior, and `seed` are owned by `intraclass` and may not be set here;
+  supplying them, or a non-empty `brm_args` with any other engine, is an
+  error.
 
 ## Value
 

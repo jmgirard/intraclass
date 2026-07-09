@@ -227,13 +227,14 @@ agreement rater term is the McGraw &amp; Wong Case-3A bias-corrected
 finite-population variance, which equals the mixed-model estimate on balanced
 data), on both complete and <strong>incomplete</strong> data (missing cells are estimated by
 full-information maximum likelihood; the parametric bootstrap is unavailable for
-incomplete SEM). <code>"brms"</code> fits the two-way <strong>random</strong> model in a Bayesian
+incomplete SEM). <code>"brms"</code> fits the <strong>random</strong>-rater model in a Bayesian
 framework (Stan, via <span class="pkg">brms</span>) under a sourced half-<em>t</em>(4, 0, 1) prior on the
 random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile <strong>credible</strong> interval
 (<code>ci_method = "posterior"</code>, forced). It covers the balanced, complete two-way
-random design only in this release; fixed raters, one-way, multilevel, and
-incomplete Bayesian fits are planned for later milestones. <code>"lme4"</code> requires the
+random design and the crossed (Design 1) <strong>multilevel</strong> random design (subject and
+cluster levels); fixed raters, one-way, nested/incomplete multilevel, and
+within-cell-replicate Bayesian fits are planned for later milestones. <code>"lme4"</code> requires the
 <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span> packages; <code>"lavaan"</code> requires the <span class="pkg">lavaan</span>
 package; <code>"brms"</code> requires the <span class="pkg">brms</span> package (and a working Stan toolchain).</p></dd>
 
@@ -280,10 +281,13 @@ afterward.</p></dd>
 <dt id="arg-brm-args">brm_args<a class="anchor" aria-label="anchor" href="#arg-brm-args"></a></dt>
 <dd><p>A named list of extra arguments forwarded to <code><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brms::brm()</a></code> when
 <code>engine = "brms"</code> (e.g. <code>backend</code>, <code>chains</code>, <code>iter</code>, <code>cores</code>, <code>control</code>). The
-default (rstan backend, brms defaults) needs none. The model formula, data, the
-sourced half-<em>t</em> prior, and <code>seed</code> are owned by <code>intraclass</code> and may not be set
-here; supplying them, or a non-empty <code>brm_args</code> with any other engine, is an
-error.</p></dd>
+default (rstan backend, brms defaults) needs none. By default brms samples the
+chains <strong>sequentially on one core</strong> (<code>cores = getOption("mc.cores", 1L)</code>); pass
+<code>brm_args = list(cores = 4)</code> (or set <code>options(mc.cores)</code>) to sample in parallel
+— the engine emits a periodic reminder to that effect while running
+sequentially. The model formula, data, the sourced half-<em>t</em> prior, and <code>seed</code>
+are owned by <code>intraclass</code> and may not be set here; supplying them, or a
+non-empty <code>brm_args</code> with any other engine, is an error.</p></dd>
 
 </dl></div>
     <div class="section level2">
