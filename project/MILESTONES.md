@@ -14,8 +14,9 @@ shipped** (PR #28), opening the cross-cutting Bayesian carryover deferred at M7 
 Bayesian engine to the crossed multilevel path (subject + cluster levels), the highest-value Bayesian
 follow-on. **M25 (ADR-035) — Bayesian multilevel (brms) nested Designs 2/3 — then shipped** (PR #30),
 the M8 analog of M24: the Bayesian engine now covers both nested-rater designs at the subject level,
-completing brms coverage of every subject-level multilevel design. No milestone is currently in flight.
-Each
+completing brms coverage of every subject-level multilevel design. **M26 (ADR-036) — Bayesian one-way +
+fixed-rater, two-way, balanced/complete — is now ACTIVE** (opened after the M23–M25 Bayesian-arc retro),
+the two lowest-risk single-level follow-ons (M6 one-way / M2·M10 fixed-rater analogs). Each
 milestone is scoped by an ADR at its start after a short retro
 (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
@@ -23,7 +24,7 @@ The arc is a hypothesis, not a contract — reorders get a
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
-ADR-035 M25).
+ADR-035 M25, ADR-036 M26).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -817,3 +818,82 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `data-raw/oracle-bayesian-nested.R`, n_rep 80) driving O-Bayes-NML-coverage/-converge on CI.
   Findings reproduced honestly (#18): nested subject level ~unbiased even at k=2, nominal coverage;
   no cluster-level estimand exposed. Live Stan fits `skip_on_ci()`; CI covers via the committed fixture.
+
+## M26: Bayesian engine (brms) — one-way + fixed-rater, two-way, balanced/complete (ADR-036) — ACTIVE
+- Goal: continue the Bayesian arc with its two lowest-risk **single-level** follow-ons — extend
+  `engine = "brms"` + `ci_method = "posterior"` to **one-way random** (the M6 analog) and
+  **fixed-rater** two-way (the M2/M3/M10 analog; the brms sibling of the lavaan fixed-rater path
+  shipped in M21 Slice 2). **Engine/interval parity, not new estimand work** (cf.
+  M5.5/M7/M16/M21/M23/M24/M25): the shipped one-way (SF Case 1) and fixed-rater finite-population
+  (McGraw & Wong Case 3A θ²_r) coefficients read off posterior draws — no new estimand-spec, no new
+  user-facing argument, no new dependency (`brms` already a `Suggests`); additive, non-breaking (#6):
+  new valid `engine = "brms"` × {one-way, fixed-rater} combinations only. Scope = the M23 box:
+  **single-level, balanced/complete, two-way (fixed) / one-way (random).** Both fits reuse
+  `fit_brms_common()` under the sourced half-*t*(4, 0, 1) SD prior (unchanged); MAP + percentile
+  credible interval, `posterior` forced-default & Bayesian-only, all unchanged. Two shipped brms
+  guards are **narrowed** (as M24/M25 narrowed theirs): the structural one-way abort (`icc.R:460`)
+  and the data-dependent fixed-rater abort (`icc.R:1123`), each with a new dispatch branch. Two thin
+  vertical slices, **oracle-risk order** (one-way first). **Slice 2 is attempt-then-degrade** (M18
+  S2 / M19 S1 / M20 S3 posture): if no #1/#4-strong oracle pins the Bayesian fixed path, Slice 2
+  degrades to a recorded deferral and M26 ships one-way alone.
+- Reference: ADR-036 (scope + maintainer decisions: both slices, oracle-risk order, Slice-2
+  attempt-then-degrade, the oracle-first catch); no new estimand-spec — one-way reuses
+  `estimand-specs/M6-oneway.md`, fixed-rater reuses `M3-incomplete-designs.md §6` /
+  `M10-fixed-multilevel.md §2` (θ²_r). Oracles **O-Bayes-OW** / **O-Bayes-Fixed** (coverage +
+  reduction + REML agreement, #1; no textbook worked posterior — as M6/M23), asserted in
+  `tests/testthat/test-icc-brms.R` (extend the O-Bayes rows in `REFERENCES.md`).
+- **Oracle-first catch (Slice 2), resolve at build — do not assert (#1/#18):** unlike the REML (M10)
+  and FIML (M21) fixed paths, brms has a **prior**, so (a) the frequentist bias correction
+  (`raw − bias`) should **not** be applied to posterior draws — the posterior already integrates
+  parameter uncertainty, so the raw per-draw finite-population variance of the k rater means is a
+  draw from the posterior of θ²_r (confirm vs glmmTMB fixed); and (b) the balanced `fixed ≡ random`
+  identity (M2 O4 / M10) holds only **approximately** (flat prior on rater fixed effects vs
+  half-*t* on σ_r), so the pin is **MAP ≈ glmmTMB fixed θ²_r on balanced data** plus a
+  *characterized* (not exact-equality) balanced fixed-vs-random relationship — the honest analog of
+  M19 S2's "fixed ≢ random even on balanced for nested" catch.
+
+### DoD board (check off in the same commit as the work, #16)
+
+**Slice 1 — Bayesian one-way random** (unconditional; strict subset of `fit_brms_twoway()`)
+- [ ] `fit_brms_oneway()` in `R/engine-brms.R`: `score ~ 1 + (1 | subject)`, spec
+      `c(subject = "sd_subject__Intercept", residual = "sigma")` via `fit_brms_common()`.
+- [ ] Narrow the structural one-way brms abort (`icc.R:460`) to admit `model = "oneway"`; dispatch
+      to `fit_brms_oneway()` in the one-way branch (`icc.R:1238`). One-way-fixed / one-way-multilevel
+      stay refused for every engine (`icc.R:471`, unchanged).
+- [ ] `ICC(1)`/`ICC(1,k)` compose off the `draws` contract unchanged; the one-way identifiability
+      guard (a subject rated >once, `icc.R:548`) reached before dispatch.
+- [ ] Companion `data-raw/oracle-bayesian-oneway.R` runs the M6 one-way DGP with brms + the half-*t*
+      prior; commit `tests/testthat/fixtures/bayesian-oneway-oracle.rds` (#4).
+- [ ] **O-Bayes-OW**: MAP ≈ M6 glmmTMB/lme4 REML (tolerance stated); reduction to SF `ICC(1)=0.166`
+      / `ICC(1,k)=0.443`; seeded coverage ~nominal off the fixture; convergence rate recorded.
+- [ ] One live brms one-way fit (tiny chains/iter), guarded `skip_on_cran()` +
+      `skip_if_not_installed("brms")` + `skip_on_ci()`.
+
+**Slice 2 — Bayesian fixed-rater two-way** (conditional on the oracle-first resolution)
+- [ ] **Oracle-first resolution FIRST:** confirm the raw θ²_r posterior push-forward (no bias
+      correction) agrees with glmmTMB fixed on balanced data; characterize the balanced
+      fixed-vs-random relationship. If no #1/#4-strong oracle holds → **degrade** (record the
+      scope-out, keep the fixed brms abort, ship Slice 1 alone).
+- [ ] `fit_brms_fixed()` in `R/engine-brms.R`: `score ~ 1 + rater + (1 | subject)` (rater
+      population-level fixed; half-*t* on the subject SD only); σ²_s ← `sd_subject__Intercept`,
+      σ²_res ← `sigma`; **θ²_r per posterior draw** from the rater fixed-effect draws via
+      `rater_mean_contrast()`/centering, stacked as the `rater` row of `draws`.
+- [ ] Narrow the data-dependent fixed-rater brms abort (`icc.R:1123`) to admit `raters = "fixed"`;
+      dispatch to `fit_brms_fixed()` in the fixed branch (`icc.R:1250`). Balance / replicate /
+      numeric-unit / k=2-note brms guards unchanged.
+- [ ] Agreement `{rater, residual}` / consistency `{residual}` compose off `draws` unchanged.
+- [ ] **O-Bayes-Fixed**: MAP ≈ glmmTMB fixed θ²_r agreement (primary pin); consistency-vs-random and
+      balanced fixed-vs-random *characterized* (#18, not asserted equal); seeded coverage ~nominal.
+- [ ] One live brms fixed fit, same skip guards as Slice 1.
+
+**Cross-cutting DoD**
+- [ ] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]).
+- [ ] Installed-pkg suite `NOT_CRAN=true` green incl. the live brms fits
+      ([[verify-against-installed-package]]); `R CMD check --as-cran` 0/0/{0,1}.
+- [ ] New `@export`s (none expected) / `_pkgdown.yml` unaffected; NEWS updated under 0.1.0.
+- [ ] `REFERENCES.md` O-Bayes-OW / O-Bayes-Fixed rows; `COVERAGE.md` brms one-way + fixed cells;
+      `ROADMAP.md` flips the one-way/fixed Bayesian follow-ons to shipped (or records the Slice-2
+      degrade). `STATUS.md` + this board updated in-commit (#16).
+- [ ] Ship on an `m26-<slug>` branch, merge via PR ([[milestone-branches-and-prs]]).
+- Status: **active — scoped by ADR-036, no slice work begun.** Opened after the M23–M25 Bayesian-arc
+  retro (2026-07-09).
