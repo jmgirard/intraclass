@@ -15,12 +15,13 @@ silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
 within-cell replicate corners (fixed / multilevel / ragged single-occasion) and adds a
 `d_study()`-off-replicate guard; M18 (PR #23) and M19 (PR #24) before that.
 
-**Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) are
+**Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) were
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason
-cell. **M18 (crossed-incomplete), M19 (nested), and M20 (replicates) are done**; the only
-remaining arc milestone is **M21 SEM parity**. Two former 🔵 items were reclassified
-(multilevel SEM and lavaan+replicates → ROADMAP); see below. One M20 item degraded to 🟣
-research (occasion-averaged coefficient on ragged data — no validated effective-n_o divisor).
+cell. **M18 (crossed-incomplete), M19 (nested), M20 (replicates), and M21 (SEM parity —
+fixed-rater, incomplete/FIML, bootstrap) are done**, so **every arc 🔵 gap is closed**. Two
+former 🔵 items were reclassified (multilevel SEM and lavaan+replicates → ROADMAP); see below.
+One M20 item degraded to 🟣 research (occasion-averaged coefficient on ragged data — no
+validated effective-n_o divisor).
 
 ## Reason taxonomy (why an unsupported case is unsupported)
 
@@ -68,9 +69,9 @@ research (occasion-averaged coefficient on ragged data — no validated effectiv
 | Case | Reason |
 |---|---|
 | `unit = m` (D-study) with `raters = "fixed"` + `type = "agreement"` | ⚫ **By design** — θ²_r is the finite-population variance of exactly the observed raters; there is no "average of *m* freshly sampled raters" to project to (`icc.R` `abort_fixed_agr_projection`, M4.5 spec). Use `raters = "random"` or `type = "consistency"`. |
-| `engine = "lavaan"` + `raters = "fixed"` | 🔵 **Not yet → M21 Slice 2** — SEM fixed-rater estimator deferred out of M7 (ADR-014). |
-| `engine = "lavaan"` + incomplete data | 🔵 **Not yet → M21 Slice 3** — incomplete-design SEM (FIML) deferred out of M7 (ADR-014). |
-| `engine = "lavaan"` + `ci_method = "bootstrap"` | 🔵 **Not yet → M21 Slice 1** — lavaan supports `montecarlo` only (M16, ADR-025). |
+| `engine = "lavaan"` + `raters = "fixed"` | ✅ **Shipped (M21 Slice 2, ADR-031)** — SEM fixed-rater agreement is the McGraw & Wong Case-3A bias-corrected θ²_r (reduces to glmmTMB fixed AND random on balanced data). |
+| `engine = "lavaan"` + incomplete data | ✅ **Shipped (M21 Slice 3, ADR-031)** — incomplete-design SEM via FIML (`missing = "fiml"`); consistency ≤8e-3 and agreement ≤1.5e-2 vs glmmTMB. Bootstrap gated on incomplete data (montecarlo only). |
+| `engine = "lavaan"` + `ci_method = "bootstrap"` | ✅ **Shipped (M21 Slice 1, ADR-031)** — parametric bootstrap on complete data (simulate from the fitted SEM's implied moments → refit). |
 
 ---
 

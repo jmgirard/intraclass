@@ -135,9 +135,13 @@ the multilevel designs (crossed and nested) at both levels -- on both balanced
 and \strong{incomplete/ragged} data. A ragged fit that lands exactly on a
 variance-component boundary falls back to \code{"glmmTMB"} (which stays finite via its
 log-SD parameterization) with a clear message. \code{"lavaan"}
-currently covers only the random two-way design and also requires complete,
-balanced data. \code{"lme4"} requires the \pkg{lme4} and \pkg{merDeriv} packages;
-\code{"lavaan"} requires the \pkg{lavaan} package.}
+covers the two-way design with random or fixed raters (for fixed raters the
+agreement rater term is the McGraw & Wong Case-3A bias-corrected
+finite-population variance, which equals the mixed-model estimate on balanced
+data), on both complete and \strong{incomplete} data (missing cells are estimated by
+full-information maximum likelihood; the parametric bootstrap is unavailable for
+incomplete SEM). \code{"lme4"} requires the \pkg{lme4} and
+\pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan} package.}
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}
 
@@ -148,8 +152,9 @@ fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
 approximation but is far slower (a refit per resample). It is available for
 every design the \code{"glmmTMB"} and \code{"lme4"} engines fit (via \code{glmmTMB}'s
-\code{simulate()} + refit and \code{lme4::bootMer} respectively); the \code{"lavaan"} engine
-supports \code{"montecarlo"} only. As with the Monte-Carlo interval, the \code{"lme4"}
+\code{simulate()} + refit and \code{lme4::bootMer} respectively) and, for the random
+two-way design, the \code{"lavaan"} engine (which simulates from the fitted SEM's
+implied moments and refits). As with the Monte-Carlo interval, the \code{"lme4"}
 engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}

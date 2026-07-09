@@ -59,19 +59,124 @@
 # `data` must already be canonicalized to columns `subject`, `rater`, `score`
 # (factors for the first two) and COMPLETE/BALANCED (guarded in icc()); incomplete
 # SEM (FIML) is deferred (ADR-014).
+#
+# BOOTSTRAP (M21 Slice 1, ADR-031). Beyond the Monte-Carlo default, the SEM engine
+# also serves `ci_method = "bootstrap"` through the M16 `simulate_refit` contract
+# (ADR-025): a PARAMETRIC bootstrap that simulates wide datasets from the fitted
+# model's implied moments, refits the same one-factor model to each, and recomputes
+# the ICC per resample (cf. glmmtmb_simulate_refit / lme4_bootmer_refit). This is the
+# lavaan analog of the lme4 bootMer path; no new estimand, no new argument.
+#
+# FIXED RATERS (M21 Slice 2, ADR-031). The SEM FIT is identical for random and fixed
+# raters -- in this layout the rater effects always live in the mean structure as the
+# k indicator intercepts nu_j (there is no random rater term to drop). Only the rater
+# COMPONENT read off the fit differs, exactly as in the mixed model (M2/M3/M10):
+#   * RANDOM raters -> the raw indicator-mean variance sigma^2_r = sum(nu^2)/(k-1)
+#     (Jorgensen 2021 Eq. 6), which overstates the finite-rater variance by the mean
+#     sampling variance of the estimated means (the omitted "- sigma^2_res/n" term).
+#   * FIXED raters -> the McGraw & Wong Case-3A bias-corrected finite-population
+#     theta^2_r = max(0, raw - bias), bias = tr(center %*% V_nu)/(k-1), with V_nu the
+#     covariance block of the intercepts from lavaan's vcov(). This is theta2r_fixed()'s
+#     correction with the IDENTITY contrast, because the SEM intercepts ARE the k rater
+#     means (the mixed model needs rater_mean_contrast() to reconstruct them from
+#     treatment-coded betas). On BALANCED data theta^2_r equals BOTH glmmTMB's Case-3A
+#     fixed theta^2_r AND its random sigma^2_r (the M10 balanced fixed==random identity),
+#     so lavaan's fixed agreement recovers the mixed-model value the raw estimator does
+#     not (SF ICC(A,1): raw 0.284 -> corrected ~0.290). Consistency is a ratio that omits
+#     the rater term, so it is identical to the random case. The MC/bootstrap draws apply
+#     the same correction per draw/refit (constant `bias` for MC, per-refit for the
+#     bootstrap -- cf. fit_glmmtmb_fixed()).
 
-fit_lavaan <- function(data, call = rlang::caller_env()) {
+# Pull the three variance components (subject, rater, residual) from a fitted lavaan
+# two-way model, given `k`, the effects-coding recentring matrix `center`, and whether
+# raters are random or fixed. Returns NULL on a Heywood boundary (a non-positive
+# subject or residual variance): the point-estimate path (fit_lavaan) turns that into a
+# classed abort (#5/#8), while the bootstrap factory treats it as an invalid resample
+# (NA-filled, subject to the discard policy). For RANDOM raters the rater slot is the
+# raw indicator-mean variance sum(nu^2)/(k-1) (Jorgensen 2021 Eq. 6, a non-negative
+# quadratic form). For FIXED raters it is the Case-3A bias-corrected finite-population
+# theta^2_r = max(0, raw - bias) -- see fit_lavaan()'s FIXED RATERS note.
+lavaan_components <- function(fit, k, center, raters = "random") {
+  co <- lavaan::coef(fit)
+  cn <- names(co)
+  sv <- unname(co[[which(cn == "sv")[1]]])
+  ev <- unname(co[[which(cn == "ev")[1]]])
+  if (!is.finite(sv) || !is.finite(ev) || sv <= 0 || ev <= 0) {
+    return(NULL)
+  }
+  nu_i <- which(grepl("~1$", cn))
+  nu <- unname(co[nu_i])
+  raw <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  sigma2_r <- if (identical(raters, "fixed")) {
+    v_nu <- as.matrix(lavaan::vcov(fit))[nu_i, nu_i, drop = FALSE]
+    max(0, raw - sum(diag(center %*% v_nu)) / (k - 1))
+  } else {
+    raw
+  }
+  c(subject = sv, rater = sigma2_r, residual = ev)
+}
+
+# Parametric-bootstrap factory for the lavaan engine (M21 Slice 1, ADR-031). Closes
+# over the fitted SEM's implied mean/covariance and subject count; each call
+# simulates `boot_samples` wide datasets, refits the SAME model string with the SAME
+# estimation options, and returns a (component x resample) matrix on the shared
+# component names -- the `simulate_refit(boot_samples, seed)` contract bootstrap_ci()
+# consumes. A refit that errors, does not converge, or lands on a Heywood boundary is
+# NA-filled and dropped upstream by the discard policy (#5/#8). Seeded via
+# with_rng_seed() so the global RNG stream is left untouched (#9, #12).
+lavaan_simulate_refit <- function(fit, model, k, center, raters = "random") {
+  inds <- paste0("v", seq_len(k))
+  na_out <- c(subject = NA_real_, rater = NA_real_, residual = NA_real_)
+  implied <- lavaan::lavInspect(fit, "implied")
+  mu <- stats::setNames(as.numeric(implied$mean[inds]), inds)
+  covariance <- implied$cov[inds, inds, drop = FALSE]
+  n_subjects <- lavaan::lavInspect(fit, "nobs")
+  function(boot_samples, seed = NULL) {
+    run <- function() {
+      refit_one <- function(i) {
+        # rmvn() returns parameters x draws (k x n_subjects); transpose to the wide
+        # one-row-per-subject layout lavaan wants.
+        wide_df <- as.data.frame(t(rmvn(n_subjects, mu, covariance)))
+        names(wide_df) <- inds
+        refit <- tryCatch(
+          suppressWarnings(lavaan::lavaan(
+            model,
+            data = wide_df,
+            meanstructure = TRUE,
+            int.ov.free = TRUE,
+            int.lv.free = FALSE,
+            likelihood = "wishart",
+            information = "observed"
+          )),
+          error = function(e) NULL
+        )
+        if (is.null(refit) || !lavaan::lavInspect(refit, "converged")) {
+          return(na_out)
+        }
+        out <- lavaan_components(refit, k, center, raters)
+        if (is.null(out) || anyNA(out) || any(!is.finite(out))) na_out else out
+      }
+      vapply(seq_len(boot_samples), refit_one, na_out)
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+}
+
+fit_lavaan <- function(data, raters = "random", call = rlang::caller_env()) {
   rlang::check_installed("lavaan", reason = "to fit the ICC model with lavaan.")
 
   k <- nlevels(data$rater)
   inds <- paste0("v", seq_len(k))
   nu_slots <- paste0("nu", seq_len(k))
 
-  # Long -> wide: rows = subjects, columns = raters. One rating per cell (the
-  # design is complete/balanced), so each tapply cell is a single value.
+  # Long -> wide: rows = subjects, columns = raters. At most one rating per cell (the
+  # two-way design has no within-cell replicates), so each present cell is a single
+  # value; a MISSING subject x rater cell is left as NA (tapply's fill), which FIML
+  # estimates around (M21 Slice 3). `has_missing` selects the estimator below.
   wide <- tapply(data$score, list(data$subject, data$rater), function(x) x[[1]])
   wide_df <- as.data.frame(wide)
   names(wide_df) <- inds
+  has_missing <- anyNA(wide_df)
 
   # Unit loadings + one shared residual variance = the two-way random model.
   loadings <- paste(sprintf("1*%s", inds), collapse = " + ")
@@ -88,17 +193,27 @@ fit_lavaan <- function(data, call = rlang::caller_env()) {
   # error before we can inspect the fit. Convert any such failure into a classed
   # intraclass condition pointing at the boundary-robust engine (#5/#8), so the
   # whole error surface stays classed and actionable.
+  # Estimator: on COMPLETE data the N-1 wishart likelihood matches the REML
+  # mixed-model spine and the classical published values (M7). On INCOMPLETE data
+  # there is no complete sample covariance, so estimate by FIML (`missing = "fiml"`,
+  # which uses casewise ML); the small-sample N-vs-(N-1) difference is immaterial
+  # asymptotically, and the consistency ratio absorbs most of it (M21 Slice 3).
+  fit_args <- list(
+    model = model,
+    data = wide_df,
+    meanstructure = TRUE,
+    int.ov.free = TRUE,
+    int.lv.free = FALSE,
+    information = "observed"
+  )
+  if (has_missing) {
+    fit_args$missing <- "fiml"
+  } else {
+    fit_args$likelihood <- "wishart"
+  }
   fit <- tryCatch(
     withCallingHandlers(
-      lavaan::lavaan(
-        model,
-        data = wide_df,
-        meanstructure = TRUE,
-        int.ov.free = TRUE,
-        int.lv.free = FALSE,
-        likelihood = "wishart",
-        information = "observed"
-      ),
+      do.call(lavaan::lavaan, fit_args),
       warning = function(w) {
         # Surface fit trouble through cli, non-fatal, matching the other engines.
         cli::cli_warn(c(
@@ -158,13 +273,21 @@ fit_lavaan <- function(data, call = rlang::caller_env()) {
     )
   }
 
-  # sigma^2_r = variance of the effects-coded rater intercepts (Jorgensen 2021,
-  # Eq. 6; Vispoel et al. 2022, Eq. 4). `center = I - J/k` recenters the intercepts
-  # to deviations from the grand mean (identification-invariant); the quadratic
-  # form is non-negative, so no bias correction and no clamping (a deliberate
-  # departure from the mixed-model random-effect variance -- see the header).
+  # `center = I - J/k` recenters the intercepts to deviations from the grand mean
+  # (identification-invariant). `raw` is the variance of the effects-coded rater
+  # intercepts (Jorgensen 2021 Eq. 6; Vispoel et al. 2022 Eq. 4) -- the RANDOM-rater
+  # sigma^2_r, a non-negative quadratic form. For FIXED raters the rater slot is
+  # instead the Case-3A bias-corrected theta^2_r = max(0, raw - bias); `bias` is the
+  # mean sampling variance of the centred intercepts, constant across MC draws (the
+  # header's FIXED RATERS note; cf. theta2r_fixed() with the identity contrast).
   center <- diag(k) - matrix(1 / k, k, k)
-  sigma2_r <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  raw <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  bias <- if (identical(raters, "fixed")) {
+    sum(diag(center %*% vcov_raw[nu_i, nu_i, drop = FALSE])) / (k - 1)
+  } else {
+    0
+  }
+  sigma2_r <- max(0, raw - bias)
 
   components <- list(
     subject = sv,
@@ -189,13 +312,15 @@ fit_lavaan <- function(data, call = rlang::caller_env()) {
 
   # Back-transform a matrix of internal-scale draws (rows = parameters named as
   # `slots`, columns = MC draws) to variance components. subject/residual via
-  # exp(2 * draw); rater via sum(nu^2)/(k-1) per draw (a non-negative quadratic
-  # form -- Jorgensen 2021 Eq. 6, no bias term).
+  # exp(2 * draw); rater via the raw quadratic form sum(nu^2)/(k-1) per draw, minus the
+  # constant Case-3A `bias` and clamped at 0 for FIXED raters (bias = 0 for random, so
+  # this reduces to the raw Jorgensen 2021 Eq. 6 estimator -- cf. fit_glmmtmb_fixed()).
   to_components <- function(par) {
     means <- par[nu_slots, , drop = FALSE]
+    raw_draws <- colSums(means * (center %*% means)) / (k - 1)
     list(
       subject = exp(2 * par["subject", ]),
-      rater = colSums(means * (center %*% means)) / (k - 1),
+      rater = pmax(0, raw_draws - bias),
       residual = exp(2 * par["residual", ])
     )
   }
@@ -206,6 +331,18 @@ fit_lavaan <- function(data, call = rlang::caller_env()) {
     components = components,
     estimate = estimate,
     vcov = vcov_log,
-    to_components = to_components
+    to_components = to_components,
+    # Parametric-bootstrap contract (M21 Slice 1, ADR-031): simulate from this fit's
+    # implied moments -> refit -> recompute the ICC (with the fixed-rater correction
+    # recomputed per refit when raters == "fixed") per resample. Reuses `center`/`k`.
+    # Gated for INCOMPLETE data (M21 Slice 3): resampling complete rows from the
+    # implied moments would not reproduce the observed missingness pattern, so the
+    # bootstrap would silently overstate the information; ci_method = "bootstrap" then
+    # aborts loudly toward the Monte-Carlo interval (bootstrap_ci()'s NULL guard).
+    simulate_refit = if (has_missing) {
+      NULL
+    } else {
+      lavaan_simulate_refit(fit, model, k, center, raters)
+    }
   )
 }

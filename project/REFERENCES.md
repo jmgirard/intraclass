@@ -277,11 +277,12 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** SF (1979) textbook + reproducible in-suite computation; nothing
   hardcoded beyond the published 0.166/0.443 (already in `sf_oracle_all`).
 
-### Oracle O-SEM — lavaan (SEM) engine, two-way random (M7, ADR-014)
-- **Status:** **asserted (M7)** in `tests/testthat/test-icc-lavaan.R`. The lavaan
-  engine fits the generalizability model as a common-factor SEM (Jorgensen 2021). It
-  is oracled in **two regimes**, because absolute agreement is a *different estimator*
-  than the mixed model while consistency is not:
+### Oracle O-SEM — lavaan (SEM) engine, two-way (M7 random; M21 fixed/incomplete/bootstrap)
+- **Status:** **asserted (M7 + M21)** in `tests/testthat/test-icc-lavaan.R` and
+  `tests/testthat/test-ci-bootstrap.R`. The lavaan engine fits the generalizability
+  model as a common-factor SEM (Jorgensen 2021). It is oracled in **two regimes**,
+  because absolute agreement is a *different estimator* than the mixed model while
+  consistency is not:
   1. **Consistency ≡ glmmTMB (exact).** σ²_s / (σ²_s + σ²_res) is a ratio, so lavaan
      reproduces the glmmTMB REML estimate to ≤1e-4 and the published SF ICC(3,·)
      (0.7148/0.9093). The N−1 (Wishart) likelihood makes the SEM variances match REML
@@ -301,6 +302,26 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
     MC CI (the SEM recovers the rater effect from a finite set of intercepts —
     Case 3A inference), absolute gap ≤0.02. Boundary: a Heywood/degenerate fit raises
     a classed `intraclass_singular_fit` → glmmTMB.
+  - **M21 additions (ADR-031), all vs glmmTMB the independent engine:**
+    - **Bootstrap (Slice 1, O2).** `ci_method = "bootstrap"` runs a parametric bootstrap
+      (simulate from the fitted SEM's implied moments → refit → recompute the ICC per
+      resample). Oracled by coverage of the known population on the estimator-invariant
+      **consistency** ratio (agreement's population-coverage is *not* a valid oracle —
+      the SEM estimator targets the finite-rater quantity), bootstrap ≈ lavaan MC (same
+      estimand, ≤0.06), and cross-engine lavaan ≈ glmmTMB consistency bootstrap (≤0.06).
+    - **Fixed raters (Slice 2, O-FSEM).** The SEM *fit* is unchanged (rater effects are
+      always mean-structure intercepts); fixed raters read the **McGraw & Wong Case-3A
+      bias-corrected θ²_r = max(0, raw − bias)**, bias = tr(center·V_ν)/(k−1) from the
+      intercept vcov (theta2r_fixed()'s correction with the identity contrast). A
+      **distinct** estimator, not the raw M7 σ²_r — pinned by reduction to **both**
+      glmmTMB Case-3A fixed **and** random σ²_r on balanced data (SF ≤1e-2 small-sample:
+      0.291 vs 0.290; large-N ≤1e-3), θ²_r < raw, consistency ≡ random exactly.
+    - **Incomplete/FIML (Slice 3, O-FIML).** Missing cells estimated by FIML (`missing =
+      "fiml"`); consistency vs glmmTMB ≤8e-3, agreement vs glmmTMB ≤1.5e-2 (the same raw
+      SEM small-sample bias as complete data, shrinking with n — attempt-then-degrade
+      **resolved to SHIPS**, no research degrade). Disconnected ragged designs still hit
+      the engine-agnostic connectedness abort; the parametric bootstrap is gated on
+      incomplete data (resamples cannot reproduce the missingness pattern).
 - **Decision:** signal σ²_s, error {rater σ²_r, residual σ²_res} (agreement) or
   {residual} (consistency), divisor 1/k/m; σ²_s/σ²_res read off the covariance
   structure, σ²_r off the mean structure (Eq. 6). **An earlier unsourced bias

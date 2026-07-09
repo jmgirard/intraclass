@@ -208,9 +208,13 @@
 #'   and **incomplete/ragged** data. A ragged fit that lands exactly on a
 #'   variance-component boundary falls back to `"glmmTMB"` (which stays finite via its
 #'   log-SD parameterization) with a clear message. `"lavaan"`
-#'   currently covers only the random two-way design and also requires complete,
-#'   balanced data. `"lme4"` requires the \pkg{lme4} and \pkg{merDeriv} packages;
-#'   `"lavaan"` requires the \pkg{lavaan} package.
+#'   covers the two-way design with random or fixed raters (for fixed raters the
+#'   agreement rater term is the McGraw & Wong Case-3A bias-corrected
+#'   finite-population variance, which equals the mixed-model estimate on balanced
+#'   data), on both complete and **incomplete** data (missing cells are estimated by
+#'   full-information maximum likelihood; the parametric bootstrap is unavailable for
+#'   incomplete SEM). `"lme4"` requires the \pkg{lme4} and
+#'   \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan} package.
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
 #'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
@@ -219,8 +223,9 @@
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
 #'   approximation but is far slower (a refit per resample). It is available for
 #'   every design the `"glmmTMB"` and `"lme4"` engines fit (via `glmmTMB`'s
-#'   `simulate()` + refit and `lme4::bootMer` respectively); the `"lavaan"` engine
-#'   supports `"montecarlo"` only. As with the Monte-Carlo interval, the `"lme4"`
+#'   `simulate()` + refit and `lme4::bootMer` respectively) and, for the random
+#'   two-way design, the `"lavaan"` engine (which simulates from the fitted SEM's
+#'   implied moments and refits). As with the Monte-Carlo interval, the `"lme4"`
 #'   engine defers a singular (boundary) fit to `"glmmTMB"` for either method.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
@@ -339,25 +344,19 @@ icc <- function(
   # is nested, fixed, or incomplete -- are raised below where `ml_design`, `raters`,
   # and balancedness are known, so they can name the exact unsupported case.
 
-  # M7 Slice 1 (ADR-014): the lavaan (SEM) engine covers the random two-way
-  # COMPLETE design only. Fixed-rater, one-way, multilevel, and incomplete SEM are
-  # deferred (recorded, not rediscovered); route them to a loud abort rather than
-  # a silent glmmTMB fallback (PRINCIPLES.md #5). The incomplete-data guard needs
-  # the design summary and lives further down.
-  if (engine == "lavaan" && (multilevel || raters == "fixed" || oneway)) {
-    design <- if (multilevel) {
-      "multilevel"
-    } else if (oneway) {
-      "one-way"
-    } else {
-      "fixed-rater"
-    }
+  # The lavaan (SEM) engine covers the two-way COMPLETE design -- random raters
+  # (M7, ADR-014) and, since M21 Slice 1/2 (ADR-031), fixed raters (Case-3A
+  # theta^2_r) and the parametric bootstrap. One-way, multilevel, and incomplete SEM
+  # stay deferred (recorded, not rediscovered); route them to a loud abort rather
+  # than a silent glmmTMB fallback (PRINCIPLES.md #5). The incomplete-data guard
+  # needs the design summary and lives further down.
+  if (engine == "lavaan" && (multilevel || oneway)) {
+    design <- if (multilevel) "multilevel" else "one-way"
     abort_unsupported(c(
-      "The {.pkg lavaan} engine supports only the random two-way design so far.",
+      "The {.pkg lavaan} engine supports only the two-way design so far.",
       i = "{.code engine = \"lavaan\"} is not available for {design} designs; \\
            use {.code engine = \"glmmTMB\"}.",
-      i = "SEM for fixed, one-way, and multilevel designs is planned for a \\
-           later milestone."
+      i = "SEM for one-way and multilevel designs is planned for a later milestone."
     ))
   }
 
@@ -936,16 +935,10 @@ icc <- function(
     design_info$balanced
   }
 
-  # lavaan (SEM) reshapes to a complete subject-by-rater matrix, so an incomplete
-  # (unbalanced) two-way design has no wide layout to fit. Incomplete-design SEM
-  # (FIML) is deferred (ADR-014); fail loudly toward the engine that handles it.
-  if (engine == "lavaan" && !balanced) {
-    abort_unsupported(c(
-      "The {.pkg lavaan} engine requires a complete, balanced two-way design.",
-      i = "Incomplete-design SEM (FIML) is planned for a later milestone; use \\
-           {.code engine = \"glmmTMB\"} for incomplete data."
-    ))
-  }
+  # lavaan (SEM) reshapes to a wide subject-by-rater matrix; incomplete data leaves
+  # missing cells, which fit_lavaan() estimates by full-information maximum likelihood
+  # (FIML, M21 Slice 3, ADR-031). Disconnected designs are still rejected by the
+  # engine-agnostic connectedness guard below (shared with the mixed-model engines).
 
   # Fixed-rater lme4 (M14 Slice 1 balanced; M15 Slice 2 incomplete, ADR-024) covers
   # the two-way fixed-rater design on both balanced and ragged data: fit_lme4_fixed()
@@ -1056,7 +1049,7 @@ icc <- function(
     if (replicates) {
       # Fixed-rater within-cell replicates (M20 Slice 1): the interaction fit with
       # raters fixed -- theta^2_r in the rater slot (fit_*_replicates_fixed). lavaan
-      # fixed raters already aborted upstream; balanced/complete single-level only.
+      # replicates already aborted upstream; balanced/complete single-level only.
       if (engine == "lme4") {
         fit_lme4_replicates_fixed(df)
       } else {
@@ -1064,6 +1057,11 @@ icc <- function(
       }
     } else if (engine == "lme4") {
       fit_lme4_fixed(df)
+    } else if (engine == "lavaan") {
+      # Fixed-rater two-way SEM (M21 Slice 2, ADR-031): the same one-factor fit, with
+      # the rater intercepts read as the Case-3A bias-corrected finite-population
+      # theta^2_r instead of the raw random-rater sigma^2_r.
+      fit_lavaan(df, raters = "fixed")
     } else {
       fit_glmmtmb_fixed(df)
     }

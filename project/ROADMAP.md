@@ -32,9 +32,10 @@ ready ones.
 **The M18–M21 arc (ADR-027):** the completeness gaps tagged **🔵 not yet** in
 [`COVERAGE.md`](COVERAGE.md) were scheduled as a mixed-model-first arc; each detailed by its
 own scoping ADR at its start (ADR-015). **Shipped:** incomplete/fixed **crossed** multilevel
-(M18, PR #23), incomplete/fixed **nested** multilevel (M19, PR #24), and ragged/fixed/multilevel
-**within-cell replicates** (M20, PR #25, ADR-030). **Remaining:** **SEM (lavaan)
-engine parity** for fixed + incomplete/FIML (**M21**, next). Those items live as *Deferred out of
+(M18, PR #23), incomplete/fixed **nested** multilevel (M19, PR #24), ragged/fixed/multilevel
+**within-cell replicates** (M20, PR #25, ADR-030), and **SEM (lavaan) engine parity** —
+bootstrap, fixed-rater (Case-3A θ²_r), and incomplete/FIML (**M21**, ADR-031). **The arc is
+complete: every 🔵 not-yet gap in `COVERAGE.md` is closed.** Those items live as *Deferred out of
 M<n>* lines in [`MILESTONES.md`](MILESTONES.md), not here. Two items were reclassified **into**
 this parking lot instead of milestoned (see below): *multilevel SEM* and *lavaan + within-cell
 replicates*. Two M20 corners degraded/deferred to the parking lot below: the *occasion-averaged
