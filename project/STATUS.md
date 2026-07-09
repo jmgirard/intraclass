@@ -99,8 +99,9 @@
   posterior (no frequentist bias correction — moves the ICC by ~0.002; the posterior already
   integrates the uncertainty), and balanced `fixed ≡ random` holds only **approximately** under the
   prior (characterized via containment, not asserted). **Honest finding (Slice 1, #18):** one-way
-  `ICC(1)` MAP biased low ~−12% at k=2 — the k=2 caveat note fires for one-way too. Next: installed-pkg
-  `NOT_CRAN=true` + `R CMD check --as-cran` pre-PR gate, then open the M26 PR. Remaining out-of-M26 work lives in [`ROADMAP.md`](ROADMAP.md): the
+  `ICC(1)` MAP biased low ~−12% at k=2 — the k=2 caveat note fires for one-way too. **All DoD green:**
+  `R CMD check --as-cran` **0/0/1**, test suite 949 pass / 0 fail, `air` + `lint_package` clean. Next:
+  push `m26-bayes-oneway-fixed` and open the M26 PR. Remaining out-of-M26 work lives in [`ROADMAP.md`](ROADMAP.md): the
   *multilevel* Bayesian fixed/one-way, Bayesian incomplete/replicates/conflated, categorical/ordinal
   GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and
   occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.

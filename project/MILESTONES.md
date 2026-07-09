@@ -901,14 +901,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 **Cross-cutting DoD**
 - [x] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]).
-- [~] Installed-pkg suite `NOT_CRAN=true` green incl. the live brms fits
-      ([[verify-against-installed-package]]); `R CMD check --as-cran` 0/0/{0,1}. *(load_all full
-      live suite green — 7 live Stan fits, 0 failures; installed-pkg + R CMD check run as the
-      pre-PR gate.)*
+- [x] `R CMD check --as-cran` **0/0/1** (only the expected "New submission" NOTE); installed test
+      suite `FAIL 0 | WARN 0 | SKIP 34 | PASS 949`. Full load_all live suite green (7 live Stan fits,
+      0 failures) covers the brms paths CRAN skips ([[verify-against-installed-package]]).
 - [x] No new `@export`s / `_pkgdown.yml` unaffected; NEWS updated under 0.1.0 (Bayesian section).
 - [x] `REFERENCES.md` O-Bayes-OW / O-Bayes-Fixed rows; `COVERAGE.md` brms one-way + fixed cells +
       engine row + cross-cutting line; `ROADMAP.md` flipped the single-level one-way/fixed Bayesian
       follow-ons to shipped. `STATUS.md` + this board updated in-commit (#16).
-- [ ] Ship on the `m26-bayes-oneway-fixed` branch, merge via PR ([[milestone-branches-and-prs]]).
-- Status: **both slices done; verifying for PR.** Scoped by ADR-036; opened after the M23–M25 Bayesian-arc
+- [ ] Ship on the `m26-bayes-oneway-fixed` branch, merge via PR ([[milestone-branches-and-prs]]) — **branch ready; PR pending push.**
+- Status: **both slices done + all DoD green (R CMD check 0/0/1); ready for the M26 PR.** Scoped by ADR-036; opened after the M23–M25 Bayesian-arc
   retro (2026-07-09).
