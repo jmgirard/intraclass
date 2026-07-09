@@ -2400,3 +2400,118 @@ consequences → references.
   ADR-014 (M7 — Bayesian deferral origin), ADR-002 (optional engines behind `Suggests`); estimand-spec
   `M5-multilevel.md` (§1 scope, §2 fit, §3 estimands, §5 oracles/DGP, §7 identifiability — no new
   spec); `project/ROADMAP.md` (Bayesian multilevel follow-on being promoted), `project/COVERAGE.md`.
+
+## ADR-035: M25 scope — Bayesian multilevel (brms) nested Designs 2/3, balanced/complete, random
+- Date: 2026-07-09
+- Status: accepted
+- Context: M24 (ADR-034, PR #29) shipped the **crossed (Design 1)** Bayesian multilevel path
+  (`engine = "brms"` + `ci_method = "posterior"`); no milestone is in flight. This ADR opens **M25**,
+  the direct continuation of the Bayesian arc — Bayesian **nested Designs 2/3**. It stands to M24
+  exactly as **M8 stood to M5**: the same engine, prior, and interval method extended from the crossed
+  five-component fit to the paper's two **nested-rater** designs (raters nested in clusters, Design 2;
+  raters nested in subjects, Design 3). **Engine/interval parity, not new estimand work** (cf.
+  M5.5/M7/M16/M23/M24): the estimands are the shipped **M8 subject-level** coefficients
+  (`M8-nested-multilevel.md` §3, ten Hove, Jorgensen & van der Ark 2022 Eqs. 8–11, Table 3
+  middle/right), now read off posterior draws — no new estimand-spec, no new argument, no new
+  dependency (`brms` already a `Suggests`); additive, non-breaking (#6): a new valid `engine = "brms"`
+  × nested-design combination only. The maintainer chose **both nested designs in one milestone** (two
+  slices) over Design-2-only — both fits are simple mirrors of shipped glmmTMB shapes, so bundling keeps
+  the Bayesian cadence without adding estimand risk (the M8 precedent shipped both together).
+- Decision:
+  - **Scope: nested Designs 2 and 3, balanced/complete, `raters = "random"`, subject level only, `unit`
+    ∈ {single, average}.** The exact M8 scope box (`M8-nested-multilevel.md` §1) for the Bayesian
+    engine. Two constraints inherit from M8 (already guarded generically in `icc()`, not brms-specific):
+    the **cluster level is undefined for nested raters** (ten Hove p. 6 — subject level only,
+    `icc.R:713`), and **Design 3 is agreement-only** (multilevel one-way; no rater main effect to drop
+    for a consistency form, `icc.R:729`). Crossed Design 1 (M24), fixed-rater, one-way, incomplete/
+    ragged, replicates, and the conflated diagnostic stay deferred (scope-outs below).
+  - **The fits: two new functions mirroring the shipped M8 glmmTMB shapes.**
+    - **`fit_brms_nested_clusters()` (Design 2, four components):**
+      `score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)` — no rater main effect
+      (raters nested in clusters; the rater-in-cluster variance σ²_{r:c} is carried by the
+      `(1 | cluster:rater)` term). Components — matching the shipped M8 glmmTMB Design-2 contract and the
+      `estimand.R` subject-level map (keyed on the **internal `rater` slot**, since Design 2 has no
+      separable σ²_cr): `cluster` (σ²_c, nuisance) ← `sd_cluster__Intercept`, `subject` (σ²_{s:c}) ←
+      `sd_cluster:subject__Intercept`, **`rater` (σ²_{r:c}) ← `sd_cluster:rater__Intercept`** (internal
+      name `rater`, *not* `cluster_rater` — that keeps the brms component set structurally identical to
+      glmmTMB Design 2, so the shipped subject-level error-set `{rater, residual}` / `{residual}` map,
+      print view, and reductions all apply unchanged), `residual` ← `sigma`.
+    - **`fit_brms_nested_subjects()` (Design 3, three components, multilevel one-way):**
+      `score ~ 1 + (1 | cluster) + (1 | cluster:subject)` — components `cluster` ← `sd_cluster__Intercept`,
+      `subject` ← `sd_cluster:subject__Intercept`, `residual` ← `sigma`.
+    Both under the **same sourced half-*t*(4, 0, 1) prior on every random-effect SD**, unchanged from
+    M23/M24 (`brms::set_prior("student_t(4, 0, 1)", class = "sd")`; the M23 collision guard applies, #12).
+    Each is a copy of `fit_brms_multilevel()` (M24) with the M8 formula + its SD→component `spec` map;
+    `fit_brms_common()`, `brms_component_draws()`, and `brms_convergence()` already generalize over any
+    `spec` (M24 did that work) — no restructure.
+  - **Point/interval/dispatch unchanged from M24.** MAP = `posterior_mode()` of each estimand's ICC-draw
+    vector; percentile **credible** interval; `posterior` forced-default & Bayesian-only. The
+    subject-level signal/error map is the shipped **M8** machinery (`M8-nested-multilevel.md` §3) — the
+    Bayesian branch composes each ICC's draws from the nested component rows exactly as the frequentist
+    path composes them from `icc_point()`. **Narrow the single `ml_design != "crossed"` brms guard**
+    (`icc.R:603`) to admit the two nested designs and dispatch to the new fits — precisely how M24
+    narrowed the M23 two-way-only guard. No new field beyond `draws`; the shared `icc_point()`/`mc_ci()`
+    path stays untouched for the other engines.
+  - **Two thin vertical slices** (#14/#15):
+    - **Slice 1 — Design 2 (raters nested in clusters), Bayesian.** `fit_brms_nested_clusters()`
+      end-to-end; the four-component subject-level map composed from `draws`; MAP + percentile credible
+      interval; `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)`; the M8 identifiability guards reached before
+      dispatch. Oracle O-Bayes-NML-agree (Design 2).
+    - **Slice 2 — Design 3 (raters nested in subjects), agreement-only, + the coverage oracle.**
+      `fit_brms_nested_subjects()`; the three-component agreement-only map; `ICC(1)`/`ICC(k)` (the
+      multilevel one-way notation). **As built:** a companion generator
+      `data-raw/oracle-bayesian-nested.R` (not an extension of the crossed
+      `oracle-bayesian-multilevel.R` — a companion keeps the M24 crossed pins intact and mirrors how
+      M24's script was a companion to M23's) runs the M8 nested DGP for **both** nested designs at the
+      subject level (Design 2 k = 5; Design 3 k = 5 and k = 2) with brms + the half-*t* prior and
+      **commits the reference fixture** `tests/testthat/fixtures/bayesian-nested-oracle.rds` (#4). Full
+      O-Bayes-NML set.
+  - **Oracles (#1 — coverage; M8/M24 precedent, no textbook worked value):** **O-Bayes-NML-agree** —
+    MAP ≈ the **M8 glmmTMB/lme4 REML** point within a stated tolerance (ten Hove 2022's "MCMC ≈ MLE";
+    glmmTMB/lme4 the independent oracles); **O-Bayes-NML-coverage** — seeded coverage ~nominal at the
+    nested DGP off the committed fixture; **O-Bayes-NML-reduction** — a single-cluster Design 3 collapses
+    to the one-way component structure (the algebraic subject-level invariant, no fit) and Design 2 at
+    σ²_c → 0 to the flat nested structure; **O-Bayes-NML-converge** — convergence rate at the DGP from
+    the stored diagnostics.
+  - **CI test-gating (DoD), unchanged posture from M23/M24:** coverage/agreement oracles run off the
+    **committed seeded reference** (#4); a **single live `brms` nested fit** (tiny `chains`/`iter`)
+    exercises the wiring, guarded `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
+    ([[brms-live-fit-skip-on-ci]]); reduced draws in tests.
+  - **The M24 few-cluster MAP-low caveat is largely NOT exposed here.** Nested designs define **no
+    cluster-level ICC**, so σ²_c is a nuisance component, not an estimand — the boundary-prone cluster
+    variance that carried M24's caveat does not enter a reported coefficient. The one numerical hazard
+    (the boundary-aware mode) is the pinned M23 `posterior_mode()` helper on a **smaller** component set
+    than M24 (four / three vs five).
+  - **No new estimand, estimand-spec file, user-facing argument, or dependency.** New engine code
+    (`fit_brms_nested_clusters()` / `fit_brms_nested_subjects()` in `R/engine-brms.R`), a narrowed brms
+    multilevel guard + nested dispatch in `R/icc.R`, and the extended
+    `data-raw/oracle-bayesian-multilevel.R` + fixture.
+  - **Scope-outs (preserved, not rediscovered):** Bayesian **fixed-rater** multilevel (crossed M10 /
+    nested M19 analogs — Case-3A θ²_r from the posterior of rater contrasts), **one-way** (M6 analog),
+    **incomplete/ragged** multilevel (M9/M19 analog), **within-cell replicates** (M17/M20 analog), and
+    the **conflated** diagnostic (Eq. 14) — each a later thin slice; per ten Hove 2022 the incomplete/
+    small-k estimator choice is an open research question, so those lean on coverage calibration when
+    scheduled. Plus the M23 carry-overs: **rstanarm** backend, **selectable** `posterior` coupling,
+    **HPDI** intervals, and a **user-exposed `prior=`** API. All stay in `ROADMAP.md`.
+- Consequences: On M25 close, `engine = "brms"` covers **every multilevel design the frequentist engines
+  fit at the subject level** — crossed Design 1 (M24) plus both nested designs — under native posterior
+  credible intervals. Risk is **low and front-loaded into the M24 seam**: each slice is a fit-shape +
+  `spec` map through the M23 `draws` contract and the shipped M8 subject-level signal/error map, with a
+  guard narrowing that mirrors M24's. It extends the oracle inversion (the Bayesian engine cross-checks
+  the nested designs; the M8 REML fits are its independent oracle). Adds a live-fit CI cost bounded by
+  committed-reference + single-live-fit gating (no new dependency). This ADR authorizes M25 code; the
+  MILESTONES.md M25 board entry and the STATUS.md flip are the milestone-start companions (M25 is
+  opened/scoped here but **no slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — coverage + reduction + REML agreement + convergence),
+  #2/#14/#15 (name the estimand / thin vertical slices), #3 (boundary-aware — the half-*t* prior, now on
+  a smaller nested component set), #4 (committed seeded reference; no tuning to oracle), #5/#8 (classed
+  identifiability aborts; `cli` notes), #6 (additive, non-breaking — a new engine×design combination),
+  #12 (sourced prior), #16 (tracking in-commit); ten Hove, Jorgensen & van der Ark (2020) §3.3/§4.1
+  (half-*t*(4,0,1) on SDs; DGP), §4.2 (MAP/percentile), OSF `shkqm`; ten Hove, Jorgensen & van der Ark
+  (2022) Eqs. 8–11, Table 3 middle/right (nested Design 2/3 subject-level estimands; MCMC ≈ MLE;
+  incomplete/small-k open question), OSF `8j26u`; ADR-016 (M8 nested estimand — the coefficients
+  estimated), ADR-034 (M24 Bayesian crossed multilevel — the seam extended), ADR-033 (M23 Bayesian
+  engine), ADR-011 (M5 multilevel estimand), ADR-014 (M7 — Bayesian deferral origin), ADR-002 (optional
+  engines behind `Suggests`); estimand-spec `M8-nested-multilevel.md` (§1 scope, §2 fits, §3 estimands,
+  §5 oracles/DGP, §7 identifiability — no new spec); `project/ROADMAP.md` (Bayesian nested follow-on
+  being promoted), `project/COVERAGE.md`.

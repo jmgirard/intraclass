@@ -1,6 +1,27 @@
 # Project status
 
-- Milestone: **M24 — Bayesian multilevel (brms), Design 1 crossed, balanced/complete, random** —
+- Milestone: **M25 — Bayesian multilevel (brms), nested Designs 2/3, balanced/complete, random** —
+  **both slices done + committed on `m25-bayesian-nested` (`808b0cf`, `92ecd50`); pending PR CI +
+  merge** (ADR-035; opened 2026-07-09 after the M24 retro). The direct
+  continuation of the Bayesian arc — the **M8 analog of M24**: same brms engine + half-*t*(4,0,1) prior
+  + `ci_method = "posterior"`, extended from the crossed (Design 1) five-component fit to the paper's
+  two **nested-rater** designs (raters nested in clusters, Design 2, four components; raters nested in
+  subjects, Design 3, three components / multilevel one-way). **Engine/interval parity, not new estimand
+  work** (#6) — the shipped **M8 subject-level** coefficients (`M8-nested-multilevel.md` §3, ten Hove
+  2022 Eqs. 8–11, Table 3 middle/right) read off posterior draws; no new estimand-spec, argument, or
+  dependency. Scope = the M8 box: **subject level only** (cluster level undefined for nested raters),
+  **Design 3 agreement-only**, balanced/complete, random. **Slice 1** Design 2
+  (`fit_brms_nested_clusters()`; brms guard narrowed + nested dispatch) + O-Bayes-NML-agree. **Slice 2**
+  Design 3 (`fit_brms_nested_subjects()`) + the coverage oracle (companion `data-raw/oracle-bayesian-nested.R`;
+  committed `bayesian-nested-oracle.rds`) + O-Bayes-NML-reduction/-coverage/-converge. **Honest finding
+  (#18):** the nested subject level is ~unbiased even at k=2 (rel-bias < .01, nominal coverage) — no
+  boundary-prone cluster estimand is exposed; the M24-style "k=2 more biased low" pin didn't hold and
+  was corrected to the run, not tuned. The M24 few-cluster
+  MAP-low caveat is **largely not exposed** — nested designs report no cluster-level ICC, so σ²_c is a
+  nuisance component, not an estimand. Both fits are simple mirrors of the shipped M8 glmmTMB shapes;
+  `fit_brms_common()`/`brms_component_draws()`/`brms_convergence()` already generalize over any `spec`
+  (M24 work). Maintainer chose **both nested designs in one milestone** (two slices) over Design-2-only.
+- Prior milestone: **M24 — Bayesian multilevel (brms), Design 1 crossed, balanced/complete, random** —
   **shipped** (PR #29, ADR-034; squash-merged to `main` at `6566057`). The **highest-value Bayesian
   follow-on** — ten Hove's native turf: the paper's own multilevel IRR estimator (2020/2022) *is* the
   half-*t*-hyperprior Bayesian model M23 built, so M24 fits the paper's estimator on the paper's
@@ -55,23 +76,34 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none** — M24 shipped (PR #29). No milestone is currently in flight; the next one
-  needs an ADR after a short retro. Remaining work lives in [`ROADMAP.md`](ROADMAP.md): the other
-  Bayesian follow-ons (fixed-rater, one-way, **nested Designs 2/3**, incomplete, replicates, conflated
-  — each a later thin slice), categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged
-  cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band **CRAN
-  upload** (ADR-022) also remains.
+- Active task: **M25 finish-task — installed-pkg verify + PR** — next. **Both slices are done and green
+  locally** (live Stan present). Slice 1 (Design 2): `fit_brms_nested_clusters()`, guard narrowed,
+  O-Bayes-NML-agree pinned live (committed at `808b0cf`). Slice 2 (Design 3):
+  `fit_brms_nested_subjects()` (three-component multilevel one-way, agreement-only), Design-3 refusal
+  guard removed + dispatched, consistency aborts; O-Bayes-NML-agree + reduction (Design 3 → flat
+  one-way as σ²_c→0) pinned live; the **committed coverage fixture** `bayesian-nested-oracle.rds` (via
+  the companion `data-raw/oracle-bayesian-nested.R`, n_rep 80) drives O-Bayes-NML-coverage/-converge on
+  CI. **Honest finding (#18):** the nested subject level is ~unbiased even at k=2 (rel-bias < .01,
+  nominal coverage) — no boundary-prone cluster estimand is exposed (nested = no cluster ICC); the
+  a-priori "k=2 more biased low" pin imported from M24 was corrected to match the run, not tuned. Docs
+  (@param/NEWS/COVERAGE/REFERENCES), `air`, and lint all clean. Remaining: the installed-package check
+  (`NOT_CRAN=true` incl. live nested fits, `R CMD check --as-cran`) then open the PR. The DoD board is
+  the M25 section of [`MILESTONES.md`](MILESTONES.md). Post-M25 work stays
+  in [`ROADMAP.md`](ROADMAP.md): the
+  other Bayesian follow-ons (fixed-rater, one-way, incomplete, replicates, conflated — each a later
+  thin slice), categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)`
+  incomplete divisor, and occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
 - Last green CI: **PR #29 (M24) full matrix green incl. Windows and R-devel (all 9 jobs); squash-
   merged to `main` at `6566057`.** Local `R CMD check --as-cran` 0/0/1 (only the expected "New
   submission" NOTE); full suite `NOT_CRAN=true` 1041/0/0/0 incl. both live brms fits + merDeriv lme4
   multilevel. Prior: PR #28 (M23) at `a6b8467`.
 - Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M24 shipped (PR #29, squash-merged at `6566057`).**
-  Slices 1–2 + all cross-cutting DoD done. Post-merge `project/` reconcile: this file, MILESTONES
-  M24 → done + preamble, COVERAGE brms multilevel cells, REFERENCES O-Bayes-ML (all landed in the PR;
-  this commit compresses the M24 board to summary form and flips STATUS to shipped). Local `main`
-  fast-forwarded to `origin/main` after the squash; the merged branch deleted. Next: open the next
-  milestone (Bayesian follow-ons / categorical GLMM / multilevel SEM) or the CRAN upload (ADR-022).
+- Updated: 2026-07-09 by main session (Opus) — **M24 retro done; M25 opened (ADR-035).** After the
+  M24 retrospective (parity template held; cluster-level small-N_c caveat noted; clean process), the
+  maintainer picked the Bayesian arc's next step: **nested Designs 2/3** (the M8 analog of M24), both
+  designs in one milestone. This commit records ADR-035, adds the M25 board to MILESTONES (preamble +
+  ADR list updated), and flips STATUS to M25-active. **No slice work has begun.** Next: M25 Slice 1
+  (Bayesian Design 2). COVERAGE/REFERENCES nested-brms cells land with the slice work, not this commit.
 
 ## Where we are
 
@@ -102,16 +134,19 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M24 (ADR-034) shipped (PR #29) — Bayesian crossed multilevel.** `engine = "brms"` +
-`ci_method = "posterior"` now covers the crossed (Design 1) multilevel path at the subject and cluster
-levels (ten Hove's native turf). **No milestone is currently in flight** — the next one needs an ADR
-after a short retro (founding brief §7). Candidates in [`ROADMAP.md`](ROADMAP.md): the **remaining
-Bayesian follow-ons** (fixed-rater / one-way / **nested Designs 2/3** / incomplete / replicates /
-conflated — each a later thin slice, the natural continuation of the Bayesian arc), **categorical/
-ordinal GLMM** ratings, **multilevel SEM**, and the Wave-3 averaged cluster-level `ICC(c,k)` incomplete
-divisor. The out-of-band **CRAN upload** (ADR-022) also remains. The M18–M21 completeness arc
-(ADR-027) is complete (PR #23/#24/#25/#26); M22 (PR #27), M23 (PR #28), and M24 (PR #29) shipped after
-it.
+**M25 (ADR-035) — Bayesian nested multilevel (Designs 2/3) — both slices done, pending PR CI + merge.**
+`engine = "brms"` + `ci_method = "posterior"` now covers both nested designs at the subject level
+(Design 2 four-component; Design 3 three-component / multilevel one-way, agreement-only) — the M8 analog
+of M24, completing brms coverage of every multilevel design the frequentist engines fit at the subject
+level. Committed on `m25-bayesian-nested` (`808b0cf` Slice 1, `92ecd50` Slice 2); full local gate run
+by finish-task. **Next: open the PR to `main`** (`gh pr create`); on green CI + merge, reconcile the
+`pending PR CI + merge` markers and compress the M25 board (ADR-015). The DoD
+board is the M25 section of [`MILESTONES.md`](MILESTONES.md).
+Post-M25 candidates in [`ROADMAP.md`](ROADMAP.md): the **remaining Bayesian follow-ons** (fixed-rater /
+one-way / incomplete / replicates / conflated — each a later thin slice), **categorical/ordinal GLMM**
+ratings, **multilevel SEM**, and the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor. The
+out-of-band **CRAN upload** (ADR-022) also remains. The M18–M21 completeness arc (ADR-027) is complete
+(PR #23/#24/#25/#26); M22 (PR #27), M23 (PR #28), and M24 (PR #29) shipped after it.
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 

@@ -431,6 +431,43 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   composition equals the two-way one deterministically (no fit); **O-Bayes-ML-agree** is the
   live crossed-multilevel fit (MAP ≈ glmmTMB REML at the subject level; `skip_on_ci`).
 
+### Oracle O-Bayes-NML — Bayesian nested multilevel Designs 2/3 (M25, ADR-035)
+
+- **Role:** the nested companion to O-Bayes-ML. A CI method's oracle is **coverage** (#1);
+  the source is a simulation study, so the oracle is that the shipped brms + half-*t*(4, 0, 1)
+  recipe, extended to the M8 **nested** fits — Design 2 (raters nested in clusters,
+  four-component) and Design 3 (raters nested in subjects, three-component / multilevel
+  one-way) — reproduces the source's bias/coverage/convergence behaviour at the **subject**
+  level. There is **no cluster-level cell** (nested designs define no cluster-level IRR —
+  ten Hove 2022 p. 6), so the M24 few-cluster caveat is not exposed here: σ²_c is a fitted
+  nuisance.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) — the prior/MAP/percentile recipe;
+  and (2022, *Psychological Methods* 27(4):650–666) — the nested Design 2/3 subject-level
+  estimands (Eqs. 8–11, Table 3 middle/right) and the multilevel simulation regime,
+  transcribed in `estimand-specs/M8-nested-multilevel.md` §5.
+- **Committed reference (`tests/testthat/fixtures/bayesian-nested-oracle.rds`; n_rep = 80,
+  seed 20250, DGP N_c = 20, N_s/cluster = 5, σ²_c = 0.5, σ²_{s:c} = 1, σ²_r = 0.16,
+  σ²_res = 0.5; pop ICC .6024):** Design 2 k = 5 conv 1.00, MAP rel-bias −.010, coverage
+  .975; Design 3 k = 5 conv 1.00, MAP rel-bias +.002, coverage .950; Design 3 k = 2 conv
+  1.00, MAP rel-bias +.006, coverage .963.
+- **Pins (qualitative, #4/#18):** (1) convergence ≥ .90 at all cells; (2) Design 2 subject
+  level (the two-way analog) MAP ~unbiased (|rel-bias| < .10) + nominal coverage at k = 5;
+  (3) Design 3 subject level (the multilevel one-way) MAP ~unbiased + nominal coverage at
+  **both** k = 5 and k = 2. **The honest finding (#18):** unlike the crossed **cluster**
+  level (M24, MAP biased low at few clusters), the nested **subject** level is well-powered
+  (100 subjects) and stays ~unbiased even at k = 2 (both |rel-bias| < .01) — there is no
+  boundary-prone cluster estimand exposed (nested designs define no cluster ICC), so the
+  M24-style "k = 2 more biased low" ordering is deliberately **not** asserted here. No
+  cluster-level pin (undefined for nested).
+- **Provenance:** `data-raw/oracle-bayesian-nested.R` (companion to
+  `oracle-bayesian-multilevel.R`, leaving the M23/M24 fixtures untouched) — the same
+  compile-once/`update()`-per-rep recipe on the nested fits, checkpointed per cell;
+  **commits** the per-(design × k) reference and `stopifnot`-checks it. The `test-icc-brms.R`
+  **O-Bayes-NML-coverage** test reads the committed reference (fast, no fitting, runs on CI);
+  **O-Bayes-NML-reduction** pins Design 3 → flat M6 one-way as σ²_c → 0 on REML fits;
+  **O-Bayes-NML-agree** is the live nested fit (MAP ≈ glmmTMB/lme4 REML at the subject level;
+  `skip_on_ci`).
+
 ---
 
 ## Bibliography

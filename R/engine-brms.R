@@ -306,3 +306,87 @@ fit_brms_multilevel <- function(
     call = call
   )
 }
+
+# Nested Design 2 (raters nested in clusters) multilevel Bayesian fit (M25 Slice 1,
+# ADR-035): the M8 four-component model
+#   score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)
+# under the SAME sourced half-t(4, 0, 1) prior on every random-effect SD (unchanged from
+# M23/M24 -- ten Hove, Jorgensen & van der Ark 2020 §3.3/§4.1's specification, which
+# generalizes verbatim). Raters are nested in clusters, so there is NO (1 | rater) main
+# effect: the rater-in-cluster variance sigma^2_{r:c} lives in the (1 | cluster:rater)
+# term and lands in the INTERNAL `rater` slot (not `cluster_rater`) -- Design 2 has no
+# separable cluster x rater interaction (sigma^2_cr is confounded away when raters are
+# nested; estimand-spec M8 §2a). That naming keeps the brms component set structurally
+# identical to the shipped glmmTMB Design-2 contract (fit_glmmtmb_nested_clusters), so the
+# shipped subject-level error-set map {rater, residual} / {residual} (estimand.R,
+# M8 §3a), the components view, and the reductions all apply unchanged. Four components
+# map to the M8 internal names:
+#   cluster  = sigma^2_c        <- sd_cluster__Intercept        (nuisance; no cluster ICC)
+#   subject  = sigma^2_{s:c}    <- sd_cluster:subject__Intercept (subject in cluster; signal)
+#   rater    = sigma^2_{r:c}    <- sd_cluster:rater__Intercept   (rater in cluster)
+#   residual = sigma^2_{(sr):c} <- sigma
+# `data` must be canonicalized to columns `subject`, `rater`, `cluster`, `score` and
+# COMPLETE/BALANCED, nested Design 2 random raters (guarded in icc(): crossed dispatches
+# to fit_brms_multilevel; Design 3 / fixed / conflated / incomplete / replicate refused).
+fit_brms_nested_clusters <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)"
+    ),
+    spec = c(
+      cluster = "sd_cluster__Intercept",
+      subject = "sd_cluster:subject__Intercept",
+      rater = "sd_cluster:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}
+
+# Nested Design 3 (raters nested in subjects and clusters) multilevel Bayesian fit (M25
+# Slice 2, ADR-035): the M8 three-component model
+#   score ~ 1 + (1 | cluster) + (1 | cluster:subject)
+# under the SAME sourced half-t(4, 0, 1) prior on every random-effect SD (unchanged from
+# M23/M24). Each subject has its OWN raters, so the rater main effect is fully confounded
+# into the residual sigma^2_{r:s:c} -- there is NO (1 | rater) and NO (1 | cluster:rater)
+# term. This is the MULTILEVEL ONE-WAY design (cf. M6): rater variance is inseparable from
+# residual, so consistency is undefined and only agreement ICCs are reported
+# (estimand-spec M8 §2b/§3b; the type = "consistency" abort lives in icc()). Three
+# components map to the M8 internal names:
+#   cluster  = sigma^2_c       <- sd_cluster__Intercept        (nuisance; no cluster ICC)
+#   subject  = sigma^2_{s:c}   <- sd_cluster:subject__Intercept (subject in cluster; signal)
+#   residual = sigma^2_{r:s:c} <- sigma                         (rater confounded into error)
+# The subject-level ICC reads {subject | residual}, the same shape as the M6 one-way, so
+# the shipped agnostic posterior_summary() path composes it unchanged. `data` must be
+# canonicalized to columns `subject`, `rater`, `cluster`, `score` and COMPLETE/BALANCED,
+# nested Design 3 (guarded in icc(): crossed / Design 2 dispatch elsewhere; fixed /
+# consistency / incomplete / replicate refused).
+fit_brms_nested_subjects <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + (1 | cluster) + (1 | cluster:subject)"
+    ),
+    spec = c(
+      cluster = "sd_cluster__Intercept",
+      subject = "sd_cluster:subject__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}

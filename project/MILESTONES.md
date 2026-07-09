@@ -12,14 +12,17 @@ the first Bayesian milestone (brms engine + `ci_method = "posterior"`, two-way r
 shipped** (PR #28), opening the cross-cutting Bayesian carryover deferred at M7 (ADR-014). **M24
 (ADR-034) — Bayesian multilevel (brms, Design 1 crossed) — then shipped** (PR #29), extending the
 Bayesian engine to the crossed multilevel path (subject + cluster levels), the highest-value Bayesian
-follow-on. No milestone is currently in flight. Each
+follow-on. **M25 (ADR-035) — Bayesian multilevel (brms) nested Designs 2/3 — is now the active
+milestone** (opened 2026-07-09 after the M24 retro; the M8 analog of M24, extending the Bayesian engine
+to the nested-rater designs at the subject level). Each
 milestone is scoped by an ADR at its start after a short retro
 (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
-M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24).
+M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
+ADR-035 M25).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -772,3 +775,95 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   subject-level nominal (rel-bias −1.5%, cover .94 at k = 5), cluster-level few-cluster MAP-low caveat
   (−16%/−25% at N_c = 20, wide intervals still ~nominal). Live Stan fits `skip_on_ci()`; CI covers via
   the committed fixture.
+
+## M25: Bayesian multilevel (brms) — nested Designs 2/3, balanced/complete, random (ADR-035) — ACTIVE
+- Goal: continue the Bayesian arc — extend `engine = "brms"` + `ci_method = "posterior"` from M24's
+  crossed (Design 1) multilevel path to the paper's two **nested-rater** designs (raters nested in
+  clusters, Design 2; raters nested in subjects, Design 3). A **thin vertical slice** standing to M24 as
+  **M8 stood to M5**: same engine + prior + interval method, extended fit. **Engine/interval parity, not
+  new estimand work** (cf. M5.5/M7/M16/M23/M24) — the shipped **M8 subject-level** coefficients
+  (`M8-nested-multilevel.md` §3, ten Hove et al. 2022 Eqs. 8–11, Table 3 middle/right) read off
+  posterior draws; additive, non-breaking (#6): a new valid `engine = "brms"` × nested-design
+  combination, **no new estimand-spec, no new argument, no new dependency** (`brms` already a
+  `Suggests`). Scope = the M8 box: **nested Designs 2/3, balanced/complete, `raters = "random"`, subject
+  level only, single/average.** Two M8 constraints inherit (guarded generically today, not brms-specific):
+  **cluster level undefined for nested raters** (subject level only) and **Design 3 agreement-only**
+  (multilevel one-way — no rater main effect for a consistency form). Fits under half-*t*(4, 0, 1) on
+  every SD (M23/M24 prior verbatim): Design 2 four-component
+  `score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)`, Design 3 three-component
+  `score ~ 1 + (1 | cluster) + (1 | cluster:subject)`. MAP + percentile credible interval, `posterior`
+  forced-default & Bayesian-only, unchanged. The M24 few-cluster MAP-low caveat is **largely not exposed**
+  — nested designs report no cluster-level ICC, so σ²_c is a nuisance, not an estimand.
+- Reference: ADR-035 (scope + the maintainer's *both-designs, one milestone* decision); no new
+  estimand-spec — `estimand-specs/M8-nested-multilevel.md` (§1 scope, §2 fits, §3 estimands, §5
+  oracles/DGP, §7 identifiability) is the estimand of record. Oracles **O-Bayes-NML** (a CI method's
+  oracle is coverage, #1; no textbook worked point — as M8/M24): O-Bayes-NML-agree (MAP ≈ M8
+  glmmTMB/lme4 REML within tolerance — glmmTMB/lme4 the independent oracles), O-Bayes-NML-coverage
+  (seeded coverage ~nominal at the M8 nested DGP off a committed fixture, #4), O-Bayes-NML-reduction
+  (single-cluster Design 3 collapses to the one-way component structure; Design 2 at σ²_c → 0 to the
+  flat nested structure), O-Bayes-NML-converge.
+
+**DoD board (ADR-015 — the active milestone's checklist is the live board; check off in-commit, #16):**
+
+- Slice 1 — Design 2 (raters nested in clusters), Bayesian: **✅ done (local, live Stan present).**
+  - [x] `fit_brms_nested_clusters()` in `R/engine-brms.R` — M8 Design 2 formula
+        (`score ~ 1 + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)`) + four-component `spec` map
+        `{cluster, subject, rater = sd_cluster:rater__Intercept (σ²_{r:c}), residual}` — σ²_{r:c} lands in
+        the **internal `rater` slot** (not `cluster_rater`), matching the shipped glmmTMB Design-2
+        contract + `estimand.R` subject-level map. Under the half-*t*(4,0,1) prior (copy of
+        `fit_brms_multilevel()`); reuses `fit_brms_common()`, `brms_component_draws()`,
+        `brms_convergence()` unchanged.
+  - [x] Narrow the `ml_design != "crossed"` brms guard (`icc.R:597`) to refuse only Design 3 (Slice 2);
+        dispatch Design 2 to the new fit in the `nested_in_clusters` branch; the M8 identifiability
+        guards reached before dispatch.
+  - [x] Subject-level four-component signal/error map (M8 §3a) composed from `draws` via the shipped
+        engine-agnostic `posterior_summary()` path; MAP + percentile credible interval;
+        `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)`; print/tidy report the nested design, subject level,
+        and a **credible** interval (subject level only — no cluster ICC for nested).
+  - [x] O-Bayes-NML-agree (Design 2): MAP ≈ M8 glmmTMB REML within tol 0.08 (subject level well-identified);
+        REML inside the credible interval every row; lme4 the second independent REML oracle concurs (≤1e-2).
+  - [x] Live Stan Design-2 fit test (chains 2 / iter 1200) `skip_on_cran()` + `skip_if_not_installed("brms")`
+        + `skip_on_ci()`; the stale "brms refuses Design 2" refusal test flipped to assert Design 3 refusal.
+        Full `test-icc-brms.R` green locally (97/0/0, live fits ran); nested/multilevel regression files green.
+- Slice 2 — Design 3 (raters nested in subjects), agreement-only, + coverage oracle: **✅ done
+  (fixture generated + committed).**
+  - [x] `fit_brms_nested_subjects()` — M8 Design 3 formula (`score ~ 1 + (1|cluster) + (1|cluster:subject)`)
+        + three-component `spec` map `{cluster, subject, residual}` (rater confounded into residual),
+        same half-*t*(4,0,1) prior.
+  - [x] Removed the brms Design-3 refusal guard; dispatch Design 3 in the `nested_in_subjects` branch;
+        the shipped agreement-only guard (`icc.R`) fires for `type = "consistency"` (verified live +
+        engine-agnostic — asserted in the Design-3 live test).
+  - [x] Three-component agreement-only map; `ICC(1)`/`ICC(k)` (multilevel one-way notation, no A/C letter).
+  - [x] Companion generator `data-raw/oracle-bayesian-nested.R` (not an extension of the crossed script —
+        keeps the M24 pins intact, mirrors M24-companion-to-M23) ran the M8 nested DGP for both designs
+        at the subject level (Design 2 k = 5; Design 3 k = 5, k = 2, n_rep 80, seed 20250) → committed
+        `tests/testthat/fixtures/bayesian-nested-oracle.rds`; its `stopifnot` pins pass.
+  - [x] O-Bayes-NML-agree (Design 3): MAP ≈ M8 glmmTMB/lme4 REML within tol 0.08; REML in the credible
+        interval. O-Bayes-NML-reduction: Design 3 → flat M6 one-way as σ²_c→0 (≤0.02 on REML fits).
+  - [x] O-Bayes-NML-coverage + -converge: fixture-based test reads the committed reference (runs on CI,
+        no fitting) — Design 2 + Design 3 subject-level nominal coverage, 100% convergence.
+  - [x] **Findings reproduced honestly (#18):** Design 2 k=5 rel-bias −.010/cover .975; Design 3 k=5
+        +.002/.950, k=2 +.006/.963; convergence 1.00 all cells. **The nested subject level is
+        ~unbiased even at k=2** — unlike M24's crossed *cluster* level (few-cluster MAP-low), no
+        boundary-prone cluster estimand is exposed (nested designs report no cluster ICC). The a-priori
+        "k=2 more biased low" pin (imported from M24) was corrected to match the run, not tuned away.
+- Cross-cutting DoD (brief §8):
+  - [x] `@param` in `R/icc.R` updated: `engine = "brms"` now covers both nested designs (subject level,
+        agreement-only for Design 3); NEWS entry extended under the 0.1.0 section; docs regenerated.
+  - [x] `COVERAGE.md` brms nested cells + design table updated; `REFERENCES.md` O-Bayes-NML registry
+        entry added (with observed committed-fixture numbers).
+  - [x] `air format .` clean; `lintr::lint_package()` clean on all changed files ([[run-lintr-before-push]]).
+  - [ ] Installed-pkg check with `NOT_CRAN=true` incl. the live nested fits
+        ([[verify-against-installed-package]]); `R CMD check --as-cran` clean (bar the "New submission" NOTE).
+  - [ ] Ship on branch `m25-bayesian-nested` → PR → full CI matrix green incl. Windows + R-devel
+        ([[milestone-branches-and-prs]]); post-merge `project/` reconcile.
+- Deferred out of M25 (record so not rediscovered): Bayesian **fixed-rater** multilevel (crossed M10 /
+  nested M19 analogs), **one-way** (M6 analog), **incomplete/ragged** multilevel (M9/M19 analog),
+  **within-cell replicates** (M17/M20 analog), and the **conflated** diagnostic (Eq. 14) — each a later
+  thin slice; per ten Hove 2022 the incomplete/small-k estimator choice is an open research question →
+  those lean on coverage calibration. Plus the M23 carry-overs: **rstanarm** backend, **selectable**
+  `posterior` coupling, **HPDI** intervals, a **user-exposed `prior=`** API. Untouched carry-overs stay
+  in [`ROADMAP.md`](ROADMAP.md): the Wave-3 averaged crossed cluster-level `ICC(c,k)` incomplete divisor;
+  categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014); non-parametric/profile-likelihood CIs;
+  lme4 singular/merDeriv edge cases.
+- Status: **active — scoped, no slice work begun** (ADR-035; opened 2026-07-09). Next: Slice 1.

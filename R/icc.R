@@ -218,8 +218,10 @@
 #'   random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 #'   mode (MAP) and the interval is a percentile **credible** interval
 #'   (`ci_method = "posterior"`, forced). It covers the balanced, complete two-way
-#'   random design and the crossed (Design 1) **multilevel** random design (subject and
-#'   cluster levels); fixed raters, one-way, nested/incomplete multilevel, and
+#'   random design, the crossed (Design 1) **multilevel** random design (subject and
+#'   cluster levels), and the nested **multilevel** random designs -- Design 2 (raters
+#'   nested in clusters) and Design 3 (raters nested in subjects, agreement-only), both at
+#'   the subject level; fixed raters, one-way, incomplete multilevel, and
 #'   within-cell-replicate Bayesian fits are planned for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
@@ -594,22 +596,16 @@ icc <- function(
     detect_multilevel_design(df)
   }
 
-  # brms (Bayesian) multilevel scope (M24, ADR-034): the CROSSED (Design 1) five-component
-  # fit, subject + cluster levels, agreement/consistency, random, balanced/complete. Nested
-  # Designs 2/3 and the conflated diagnostic are deferred Bayesian follow-ons -- refuse
-  # loudly now that `ml_design` is resolved, BEFORE the generic conflated/nested guards
-  # below would emit a non-brms message (#5/#8). Fixed / incomplete / replicate / numeric
-  # unit brms are refused with the rest of the brms deferrals further down.
+  # brms (Bayesian) multilevel scope (M24 crossed, ADR-034; M25 nested Designs 2/3,
+  # ADR-035): the crossed (Design 1) five-component fit (subject + cluster levels), the
+  # nested Design 2 four-component fit and the nested Design 3 three-component fit (both
+  # subject level) -- random, balanced/complete. Design 3 is agreement-only (the generic
+  # consistency-on-Design-3 abort below applies to every engine). The conflated diagnostic
+  # is the one remaining deferred Bayesian multilevel follow-on -- refuse it loudly now that
+  # `ml_design` is resolved, BEFORE the generic conflated guard below would emit a non-brms
+  # message (#5/#8). Fixed / incomplete / replicate / numeric unit brms are refused with the
+  # rest of the brms deferrals further down.
   if (engine == "brms" && multilevel) {
-    if (ml_design != "crossed") {
-      abort_unsupported(c(
-        "The {.pkg brms} engine supports only the crossed (Design 1) multilevel \\
-         design so far.",
-        i = "Nested-rater multilevel designs (Designs 2/3) are a planned Bayesian \\
-             follow-on; use {.code engine = \"glmmTMB\"} for them.",
-        i = "Cross the raters with clusters for a Bayesian multilevel ICC."
-      ))
-    }
     if ("conflated" %in% level) {
       abort_unsupported(c(
         "The {.pkg brms} engine does not support the conflated ICC yet.",
@@ -1194,13 +1190,26 @@ icc <- function(
         } else {
           fit_glmmtmb_nested_fixed(df)
         }
+      } else if (engine == "brms") {
+        # Design 2 (raters nested in clusters), Bayesian (M25 Slice 1, ADR-035): the M8
+        # four-component fit under the half-t(4, 0, 1) SD prior; the MAP point and the
+        # percentile credible interval come from posterior_summary() off the `draws`
+        # contract, exactly as the crossed Design-1 brms path. Nested Design 3, fixed,
+        # conflated, incomplete, and replicate brms fits are refused upstream (#5).
+        fit_brms_nested_clusters(df, seed = seed, brm_args = brm_args)
       } else if (engine == "lme4") {
         fit_lme4_nested_clusters(df)
       } else {
         fit_glmmtmb_nested_clusters(df)
       }
     } else if (ml_design == "nested_in_subjects") {
-      if (engine == "lme4") {
+      if (engine == "brms") {
+        # Design 3 (raters nested in subjects), Bayesian (M25 Slice 2, ADR-035): the M8
+        # three-component multilevel one-way fit under the half-t(4, 0, 1) SD prior;
+        # agreement-only (consistency aborted upstream). MAP + percentile credible interval
+        # off the `draws` contract, as the other brms multilevel paths.
+        fit_brms_nested_subjects(df, seed = seed, brm_args = brm_args)
+      } else if (engine == "lme4") {
         fit_lme4_nested_subjects(df)
       } else {
         fit_glmmtmb_nested_subjects(df)
