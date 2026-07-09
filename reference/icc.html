@@ -221,9 +221,13 @@ the multilevel designs (crossed and nested) at both levels – on both balanced
 and <strong>incomplete/ragged</strong> data. A ragged fit that lands exactly on a
 variance-component boundary falls back to <code>"glmmTMB"</code> (which stays finite via its
 log-SD parameterization) with a clear message. <code>"lavaan"</code>
-currently covers only the random two-way design and also requires complete,
-balanced data. <code>"lme4"</code> requires the <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span> packages;
-<code>"lavaan"</code> requires the <span class="pkg">lavaan</span> package.</p></dd>
+covers the two-way design with random or fixed raters (for fixed raters the
+agreement rater term is the McGraw &amp; Wong Case-3A bias-corrected
+finite-population variance, which equals the mixed-model estimate on balanced
+data), on both complete and <strong>incomplete</strong> data (missing cells are estimated by
+full-information maximum likelihood; the parametric bootstrap is unavailable for
+incomplete SEM). <code>"lme4"</code> requires the <span class="pkg">lme4</span> and
+<span class="pkg">merDeriv</span> packages; <code>"lavaan"</code> requires the <span class="pkg">lavaan</span> package.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -238,8 +242,9 @@ fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
 approximation but is far slower (a refit per resample). It is available for
 every design the <code>"glmmTMB"</code> and <code>"lme4"</code> engines fit (via <code>glmmTMB</code>'s
-<code><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate()</a></code> + refit and <code><a href="https://rdrr.io/pkg/lme4/man/bootMer.html" class="external-link">lme4::bootMer</a></code> respectively); the <code>"lavaan"</code> engine
-supports <code>"montecarlo"</code> only. As with the Monte-Carlo interval, the <code>"lme4"</code>
+<code><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate()</a></code> + refit and <code><a href="https://rdrr.io/pkg/lme4/man/bootMer.html" class="external-link">lme4::bootMer</a></code> respectively) and, for the random
+two-way design, the <code>"lavaan"</code> engine (which simulates from the fitted SEM's
+implied moments and refits). As with the Monte-Carlo interval, the <code>"lme4"</code>
 engine defers a singular (boundary) fit to <code>"glmmTMB"</code> for either method.</p></dd>
 
 

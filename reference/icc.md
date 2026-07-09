@@ -178,9 +178,14 @@ icc(
   both balanced and **incomplete/ragged** data. A ragged fit that lands
   exactly on a variance-component boundary falls back to `"glmmTMB"`
   (which stays finite via its log-SD parameterization) with a clear
-  message. `"lavaan"` currently covers only the random two-way design
-  and also requires complete, balanced data. `"lme4"` requires the lme4
-  and merDeriv packages; `"lavaan"` requires the lavaan package.
+  message. `"lavaan"` covers the two-way design with random or fixed
+  raters (for fixed raters the agreement rater term is the McGraw & Wong
+  Case-3A bias-corrected finite-population variance, which equals the
+  mixed-model estimate on balanced data), on both complete and
+  **incomplete** data (missing cells are estimated by full-information
+  maximum likelihood; the parametric bootstrap is unavailable for
+  incomplete SEM). `"lme4"` requires the lme4 and merDeriv packages;
+  `"lavaan"` requires the lavaan package.
 
 - conf_level:
 
@@ -198,9 +203,10 @@ icc(
   `"lme4"` engines fit (via `glmmTMB`'s
   [`simulate()`](https://rdrr.io/r/stats/simulate.html) + refit and
   [`lme4::bootMer`](https://rdrr.io/pkg/lme4/man/bootMer.html)
-  respectively); the `"lavaan"` engine supports `"montecarlo"` only. As
-  with the Monte-Carlo interval, the `"lme4"` engine defers a singular
-  (boundary) fit to `"glmmTMB"` for either method.
+  respectively) and, for the random two-way design, the `"lavaan"`
+  engine (which simulates from the fitted SEM's implied moments and
+  refits). As with the Monte-Carlo interval, the `"lme4"` engine defers
+  a singular (boundary) fit to `"glmmTMB"` for either method.
 
 - mc_samples:
 

@@ -29,7 +29,9 @@ simulations.
   Available for every design the `"glmmTMB"`
   ([`simulate()`](https://rdrr.io/r/stats/simulate.html) + refit) and
   `"lme4"` (`bootMer`) engines fit — two-way random and fixed, one-way,
-  and the multilevel designs — at both levels. For fixed raters the
+  and the multilevel designs — at both levels, and for the random
+  two-way design the `"lavaan"` engine (which simulates from the fitted
+  SEM’s implied moments and refits). For fixed raters the
   finite-population is recomputed directly from each refit.
 - Imbalanced and **incomplete** (missing-cell) designs are handled
   directly by the mixed model: it uses the effective number of ratings
@@ -87,9 +89,15 @@ simulations.
   variance-component boundary falls back to glmmTMB). A selectable
   `engine = "lavaan"` — an SEM common-factor generalizability model
   (Jorgensen 2021) whose absolute-agreement coefficient uses the
-  indicator-mean rater-variance estimator — covers the random two-way
-  design. Optional engines live in `Suggests`, so the base install stays
-  light.
+  indicator-mean rater-variance estimator — covers the two-way design
+  with random or fixed raters, on both complete and **incomplete** data
+  (missing cells estimated by full-information maximum likelihood), and
+  both the Monte-Carlo and the parametric-bootstrap interval (bootstrap
+  on complete data). For fixed raters the SEM agreement uses the McGraw
+  & Wong Case-3A bias-corrected finite-population (the raw
+  indicator-mean variance minus the mean sampling variance of the rater
+  means), which equals the mixed-model estimate on balanced data.
+  Optional engines live in `Suggests`, so the base install stays light.
 
 ### Choosing, projecting, and visualizing
 
