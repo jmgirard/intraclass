@@ -52,16 +52,17 @@
 # `brm_args` may NOT set `formula`/`data`/`prior`/`seed` (this engine owns them); icc()
 # guards those before dispatch.
 
-# Long -> the component posterior draw matrix. Pulls the post-warmup SD draws for the
-# subject and rater random effects and the residual SD from the fitted `brmsfit` (column
-# names `sd_subject__Intercept`, `sd_rater__Intercept`, `sigma`), squares them to the
-# variance scale, and stacks them as rows named to match `components`. Every draw is
-# strictly positive (SDs), so the matrix is boundary-aware by construction -- no clamping,
-# no log round-trip (ADR-033: natural variance scale).
-brms_component_draws <- function(fit, call = rlang::caller_env()) {
+# Long -> the component posterior draw matrix. `spec` is a named character vector mapping
+# each internal component name to its `brmsfit` draw column -- for the two-way random model
+# c(subject = "sd_subject__Intercept", rater = "sd_rater__Intercept", residual = "sigma"),
+# and for the crossed (Design 1) multilevel model the five-component map (M24, ADR-034;
+# see fit_brms_multilevel). Pulls the post-warmup SD draws for those columns, squares them
+# to the variance scale, and stacks them as rows named by `names(spec)` to match
+# `components`. Every draw is strictly positive (SDs), so the matrix is boundary-aware by
+# construction -- no clamping, no log round-trip (ADR-033: natural variance scale).
+brms_component_draws <- function(fit, spec, call = rlang::caller_env()) {
   dm <- as.matrix(fit)
-  need <- c("sd_subject__Intercept", "sd_rater__Intercept", "sigma")
-  missing <- setdiff(need, colnames(dm))
+  missing <- setdiff(unname(spec), colnames(dm))
   if (length(missing) > 0L) {
     abort_intraclass(
       c(
@@ -72,26 +73,26 @@ brms_component_draws <- function(fit, call = rlang::caller_env()) {
       call = call
     )
   }
-  rbind(
-    subject = dm[, "sd_subject__Intercept"]^2,
-    rater = dm[, "sd_rater__Intercept"]^2,
-    residual = dm[, "sigma"]^2
-  )
+  draws <- do.call(rbind, lapply(spec, function(col) dm[, col]^2))
+  rownames(draws) <- names(spec)
+  draws
 }
 
 # Backend-agnostic MCMC convergence diagnostics on the variance-component parameters
-# (M23 Slice 2, ADR-033). Returns the max potential-scale-reduction factor (R-hat) and the
-# min bulk effective sample size over the two random-effect SDs and the residual SD --
-# ten Hove et al. (2020) §4.1.3 checked exactly these (R-hat < 1.10, N_eff > 100). Uses
-# `posterior` (a hard brms dependency, so always present behind check_installed("brms")),
-# which reads both rstan and cmdstanr fits. Never fatal: if the diagnostics cannot be read
-# it returns NAs, and the caller degrades to no convergence warning.
-brms_convergence <- function(fit) {
+# (M23 Slice 2, ADR-033; generalized to the multilevel component set in M24, ADR-034).
+# `vars` is the vector of SD/sigma draw columns to check (the values of the component
+# `spec`). Returns the max potential-scale-reduction factor (R-hat) and the min bulk
+# effective sample size over those parameters -- ten Hove et al. (2020) §4.1.3 checked
+# exactly these (R-hat < 1.10, N_eff > 100). Uses `posterior` (a hard brms dependency, so
+# always present behind check_installed("brms")), which reads both rstan and cmdstanr fits.
+# Never fatal: if the diagnostics cannot be read it returns NAs, and the caller degrades to
+# no convergence warning.
+brms_convergence <- function(fit, vars) {
   tryCatch(
     {
       draws <- posterior::subset_draws(
         posterior::as_draws(fit),
-        variable = c("sd_subject__Intercept", "sd_rater__Intercept", "sigma")
+        variable = vars
       )
       s <- posterior::summarise_draws(draws, "rhat", "ess_bulk")
       list(
@@ -132,7 +133,18 @@ brms_maybe_cores_note <- function(brm_args) {
   invisible(NULL)
 }
 
-fit_brms_twoway <- function(
+# Shared brms fit body for every Bayesian design (M23 two-way; M24 crossed multilevel,
+# ADR-034). `formula` is the model and `spec` the component -> draw-column map (see
+# brms_component_draws); everything else -- the sourced half-t(4, 0, 1) SD prior, the
+# `brm_args` passthrough, the parallel-cores nudge, the warning handler, the convergence
+# check, and the six-field contract + `draws` -- is design-agnostic and lives here so the
+# two-way and multilevel paths cannot drift. The engine owns the model, data, sourced prior
+# (#12), and seed; `brm_args` supplies only backend/sampler knobs (chains/iter/cores/...).
+# The collision guard lives in icc() (a classed, teaching abort) so this can assume `brm_args`
+# is clean.
+fit_brms_common <- function(
+  formula,
+  spec,
   data,
   seed = NULL,
   brm_args = list(),
@@ -143,11 +155,8 @@ fit_brms_twoway <- function(
     reason = "to fit the ICC model with brms (the Bayesian engine)."
   )
 
-  # We own the model, data, sourced prior (#12), and seed; `brm_args` supplies only the
-  # backend and sampler knobs (chains/iter/cores/control/...). The collision guard lives
-  # in icc() (a classed, teaching abort) so this engine can assume `brm_args` is clean.
   base_args <- list(
-    formula = stats::as.formula("score ~ 1 + (1 | subject) + (1 | rater)"),
+    formula = formula,
     data = data,
     prior = brms::set_prior("student_t(4, 0, 1)", class = "sd"),
     refresh = 0
@@ -177,7 +186,7 @@ fit_brms_twoway <- function(
   # 1.10; we surface the caveat and point at the sampler knobs rather than silently
   # refit. The stats are also stored on the contract so the O-Bayes oracle can tally the
   # convergence rate across replications.
-  conv <- brms_convergence(fit)
+  conv <- brms_convergence(fit, vars = unname(spec))
   if (isTRUE(conv$rhat >= 1.10) || isTRUE(conv$ess_bulk < 100)) {
     warn_intraclass(
       c(
@@ -192,32 +201,27 @@ fit_brms_twoway <- function(
     )
   }
 
-  draws <- brms_component_draws(fit, call = call)
+  draws <- brms_component_draws(fit, spec = spec, call = call)
 
   # `components` = the boundary-aware MODE of each variance component's draws (keeps the
   # whole object MAP-consistent for the decomposition display; the headline ICC point does
   # not read this -- it reads `draws`). posterior_mode() serves [0, Inf) components here and
   # [0, 1] ICCs downstream via its `lower`/`upper` bounds (R/ci-posterior.R).
-  components <- list(
-    subject = posterior_mode(draws["subject", ], lower = 0),
-    rater = posterior_mode(draws["rater", ], lower = 0),
-    residual = posterior_mode(draws["residual", ], lower = 0)
+  slots <- rownames(draws)
+  components <- stats::setNames(
+    lapply(slots, function(s) posterior_mode(draws[s, ], lower = 0)),
+    slots
   )
 
   # Contract-completeness `mc` slot on the internal log-SD scale (mean + covariance of the
   # log-SD draws). Never used for the reported Bayesian point/interval (`draws` is
   # authoritative); kept so the object is well-formed for the shared downstream paths.
   log_sd <- log(sqrt(draws))
-  slots <- rownames(draws)
   estimate <- stats::setNames(rowMeans(log_sd), slots)
   vcov <- stats::cov(t(log_sd))
   dimnames(vcov) <- list(slots, slots)
   to_components <- function(par) {
-    list(
-      subject = exp(2 * par["subject", ]),
-      rater = exp(2 * par["rater", ]),
-      residual = exp(2 * par["residual", ])
-    )
+    stats::setNames(lapply(slots, function(s) exp(2 * par[s, ])), slots)
   }
 
   list(
@@ -234,5 +238,71 @@ fit_brms_twoway <- function(
     # MCMC convergence diagnostics (max R-hat, min bulk-ESS) for the O-Bayes oracle and
     # programmatic access; NULL for non-Bayesian engines.
     convergence = conv
+  )
+}
+
+# Two-way random Bayesian fit (M23, ADR-033): score ~ 1 + (1 | subject) + (1 | rater),
+# three components (subject, rater, residual). `data` must be canonicalized to columns
+# `subject`, `rater`, `score` (factors for the first two) and COMPLETE/BALANCED (two-way
+# random only in M23; guarded in icc()).
+fit_brms_twoway <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula("score ~ 1 + (1 | subject) + (1 | rater)"),
+    spec = c(
+      subject = "sd_subject__Intercept",
+      rater = "sd_rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}
+
+# Crossed (Design 1) multilevel Bayesian fit (M24 Slice 1, ADR-034): the M5 five-component
+# model
+#   score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater)
+# under the SAME sourced half-t(4, 0, 1) prior on EVERY random-effect SD -- literally ten
+# Hove, Jorgensen & van der Ark (2020) §3.3/§4.1's specification for this model, the source
+# estimator (the frequentist M5 had no worked posterior to match, so the Bayesian path is
+# the MORE faithful one). Five components map to the M5 internal names (estimand-spec
+# M5-multilevel.md §2):
+#   cluster       = sigma^2_c        <- sd_cluster__Intercept
+#   subject       = sigma^2_{s:c}    <- sd_cluster:subject__Intercept  (subject in cluster)
+#   rater         = sigma^2_r        <- sd_rater__Intercept
+#   cluster_rater = sigma^2_{cr}     <- sd_cluster:rater__Intercept
+#   residual      = sigma^2_{(s:c)r} <- sigma
+# The subject- and cluster-level signal/error maps (M5 §3) are the shipped, engine-agnostic
+# estimand machinery in icc(); posterior_summary() composes each ICC's draw vector from
+# these five rows exactly as the frequentist path composes it from icc_point(). `data` must
+# be canonicalized to columns `subject`, `rater`, `cluster`, `score` and COMPLETE/BALANCED,
+# crossed random raters (guarded in icc(): nested / fixed / conflated / incomplete refused).
+fit_brms_multilevel <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater)"
+    ),
+    spec = c(
+      cluster = "sd_cluster__Intercept",
+      subject = "sd_cluster:subject__Intercept",
+      rater = "sd_rater__Intercept",
+      cluster_rater = "sd_cluster:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
   )
 }

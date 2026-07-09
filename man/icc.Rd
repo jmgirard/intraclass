@@ -141,13 +141,14 @@ agreement rater term is the McGraw & Wong Case-3A bias-corrected
 finite-population variance, which equals the mixed-model estimate on balanced
 data), on both complete and \strong{incomplete} data (missing cells are estimated by
 full-information maximum likelihood; the parametric bootstrap is unavailable for
-incomplete SEM). \code{"brms"} fits the two-way \strong{random} model in a Bayesian
+incomplete SEM). \code{"brms"} fits the \strong{random}-rater model in a Bayesian
 framework (Stan, via \pkg{brms}) under a sourced half-\emph{t}(4, 0, 1) prior on the
 random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile \strong{credible} interval
 (\code{ci_method = "posterior"}, forced). It covers the balanced, complete two-way
-random design only in this release; fixed raters, one-way, multilevel, and
-incomplete Bayesian fits are planned for later milestones. \code{"lme4"} requires the
+random design and the crossed (Design 1) \strong{multilevel} random design (subject and
+cluster levels); fixed raters, one-way, nested/incomplete multilevel, and
+within-cell-replicate Bayesian fits are planned for later milestones. \code{"lme4"} requires the
 \pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
 package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}
 
@@ -182,10 +183,13 @@ afterward.}
 
 \item{brm_args}{A named list of extra arguments forwarded to \code{\link[brms:brm]{brms::brm()}} when
 \code{engine = "brms"} (e.g. \code{backend}, \code{chains}, \code{iter}, \code{cores}, \code{control}). The
-default (rstan backend, brms defaults) needs none. The model formula, data, the
-sourced half-\emph{t} prior, and \code{seed} are owned by \code{intraclass} and may not be set
-here; supplying them, or a non-empty \code{brm_args} with any other engine, is an
-error.}
+default (rstan backend, brms defaults) needs none. By default brms samples the
+chains \strong{sequentially on one core} (\code{cores = getOption("mc.cores", 1L)}); pass
+\code{brm_args = list(cores = 4)} (or set \code{options(mc.cores)}) to sample in parallel
+— the engine emits a periodic reminder to that effect while running
+sequentially. The model formula, data, the sourced half-\emph{t} prior, and \code{seed}
+are owned by \code{intraclass} and may not be set here; supplying them, or a
+non-empty \code{brm_args} with any other engine, is an error.}
 }
 \value{
 An \code{icc} object: a list with the estimate table, variance components,

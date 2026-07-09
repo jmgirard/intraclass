@@ -52,9 +52,16 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none yet — M24 opened/scoped, ready to start Slice 1** (`fit_brms_multilevel()`).
-  M24 is the promoted highest-value Bayesian follow-on (multilevel); its scope, board, and branch are
-  in place but no code has been written. Remaining non-M24 work lives in [`ROADMAP.md`](ROADMAP.md):
+- Active task: **M24 Slice 1 — subject-level (within-cluster) Bayesian multilevel** (`start-task`
+  2026-07-09). Add `fit_brms_multilevel()` (M5 five-component crossed fit under the half-*t*(4,0,1) SD
+  prior, generalized verbatim from `fit_brms_twoway()`); generalize `brms_component_draws()` /
+  `brms_convergence()` to five components; narrow the `icc.R:457` two-way-only brms guard to admit
+  crossed Design 1 random (nested/fixed/one-way/incomplete/replicates still abort loudly); add a brms
+  case to the multilevel fit dispatch. `posterior_summary()` + the multilevel level→signal/error map
+  are already engine-agnostic. Oracles this slice: O-Bayes-ML-agree (MAP ≈ M5 glmmTMB/lme4 REML) +
+  O-Bayes-ML-reduction (single-cluster/σ²_c→0 → M23 two-way Bayesian; algebraic subject≡single). The
+  coverage oracle + committed fixture are Slice 2. Remaining non-M24 work lives in
+  [`ROADMAP.md`](ROADMAP.md):
   the other Bayesian follow-ons (fixed-rater, one-way, nested, incomplete, replicates),
   categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete
   divisor, and occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
@@ -62,13 +69,15 @@
   merged to `main` at `a6b8467`.** `R CMD check --as-cran` 0/0/1 (only the expected "New submission"
   NOTE); installed-pkg suite 308/0/0 incl. the live brms fit. Prior: PR #27 (M22) at `8375184`.
 - Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M24 opened/scoped on branch
-  `m24-bayesian-multilevel` (ADR-034 accepted); no slice work begun.** After a short retro on the M23
-  ship, the maintainer chose the Bayesian **multilevel** follow-on (*multilevel-first, thin*) as the
-  next milestone. Milestone-start companions written: DECISIONS ADR-034, MILESTONES M24 board (live,
-  unchecked) + preamble, this file. `COVERAGE.md`/`REFERENCES.md` are refreshed at ship (not opened),
-  per the derived-file convention. **Next: begin Slice 1 — `fit_brms_multilevel()`** (via
-  `/start-task` when ready).
+- Updated: 2026-07-09 by main session (Opus) — **M24 Slice 1 implemented** (branch
+  `m24-bayesian-multilevel`). `fit_brms_multilevel()` (M5 five-component crossed fit under the
+  half-*t*(4,0,1) SD prior) + `fit_brms_common()` refactor; `brms_component_draws()`/
+  `brms_convergence()` generalized to a component `spec`; the two-way-only brms guard narrowed to admit
+  crossed Design 1 (nested/conflated/fixed/incomplete/one-way still abort loudly); brms multilevel fit
+  dispatch. `test-icc-brms.R` green incl. the live crossed-multilevel O-Bayes-ML-agree fit (MAP ≈
+  glmmTMB REML at the subject level; REML inside every credible interval); `air` + `lintr` clean;
+  glmmTMB multilevel regression unaffected. **Next: Slice 2** (cluster-level coverage oracle + fixture;
+  σ²_c→0 reduction-to-M23 pin).
 
 ## Where we are
 

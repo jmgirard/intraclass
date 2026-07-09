@@ -751,23 +751,30 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 ### DoD board — M24 (ADR-015: this checklist *is* the live task board; check items in-commit, #16)
 
-**Slice 1 — subject-level (within-cluster), Bayesian**
-- [ ] `fit_brms_multilevel()` in `R/engine-brms.R`: the M5 five-component crossed formula under the
-      half-*t*(4,0,1) SD prior (generalized verbatim from `fit_brms_twoway()`); returns the six-field
-      contract + the `draws` field carrying all five component-draw rows (`cluster`, `subject`,
-      `rater`, `cluster_rater`, `residual`).
-- [ ] `brms_component_draws()` generalized to the five SD columns (`sd_cluster__Intercept`,
-      `sd_cluster:subject__Intercept`, `sd_rater__Intercept`, `sd_cluster:rater__Intercept`, `sigma`),
-      squared to the variance scale; `brms_convergence()` checks R-hat/bulk-ESS over the same five.
-- [ ] `R/icc.R` brms dispatch: a multilevel branch routing `cluster`-present two-way random fits to
-      `fit_brms_multilevel()`; the M5 identifiability guards (§7: ≥2 raters, ≥2 clusters, cluster not
-      1:1 with subject) reached before dispatch; the M5 subject-level signal/error map (§3a) composes
-      each estimand's ICC draws from the component rows; MAP + percentile credible interval.
-- [ ] print/tidy report `level` + `n_clusters` + a **credible** interval; `ci$method = "posterior"`.
-- [ ] Oracles: O-Bayes-ML-agree (MAP ≈ M5 glmmTMB/lme4 REML, stated tolerance) + O-Bayes-ML-reduction
-      (subject level) in `test-icc-multilevel.R` / a Bayesian test file; a single live multilevel brms
-      fit guarded `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
-      ([[brms-live-fit-skip-on-ci]]).
+**Slice 1 — subject-level (within-cluster), Bayesian** ✅ (fit + wiring + O-Bayes-ML-agree)
+- [x] `fit_brms_multilevel()` in `R/engine-brms.R`: the M5 five-component crossed formula under the
+      half-*t*(4,0,1) SD prior (generalized verbatim from `fit_brms_twoway()`, both now thin wrappers
+      over a shared `fit_brms_common()`); returns the six-field contract + the `draws` field carrying
+      all five component-draw rows (`cluster`, `subject`, `rater`, `cluster_rater`, `residual`).
+- [x] `brms_component_draws()` generalized to a component→column `spec` (five SD columns
+      `sd_cluster__Intercept`, `sd_cluster:subject__Intercept`, `sd_rater__Intercept`,
+      `sd_cluster:rater__Intercept`, `sigma`), squared to the variance scale; `brms_convergence()`
+      checks R-hat/bulk-ESS over `spec`'s columns.
+- [x] `R/icc.R`: the two-way-only brms guard narrowed to admit crossed Design 1 (one-way still aborts
+      structurally; nested + conflated brms abort once `ml_design` is known; fixed / incomplete /
+      replicates / numeric-unit still abort); a brms case in the multilevel fit dispatch. The M5
+      identifiability guards + the M5 subject/cluster signal/error map + `posterior_summary()` are
+      reused unchanged (engine-agnostic).
+- [x] print/tidy report `level` + `n_clusters` + a **credible** interval; `ci$method = "posterior"`.
+- [x] Oracles (`test-icc-brms.R`): O-Bayes-ML-agree — a live crossed-multilevel fit (N_c = 20, matching
+      ten Hove's DGP), the glmmTMB REML point inside every credible interval + pointwise MAP ≈ glmmTMB
+      REML at the well-identified **subject** level (lme4 the second REML oracle when `merDeriv`
+      present); nested + conflated scope aborts (no Stan). Live fit guarded `skip_on_cran()` +
+      `skip_if_not_installed("brms")` + `skip_on_ci()` ([[brms-live-fit-skip-on-ci]]). **Note:** the
+      cluster-level single-rater MAP legitimately diverges from the REML plug-in at ~20 clusters
+      (ten Hove's few-cluster caveat; MAP = mode of the ICC draws ≠ `icc_point()` of modal components,
+      ADR-033) — its numerical σ²_c→0 reduction-to-M23 + coverage bias are pinned by **Slice 2**'s
+      committed fixture (the M23 Slice-1/Slice-2 split).
 
 **Slice 2 — cluster-level (between-cluster), Bayesian + the coverage oracle**
 - [ ] The M5 cluster-level signal/error map (§3b: signal σ²_c, error {rater, cluster_rater} /
@@ -797,5 +804,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3 averaged crossed cluster-level `ICC(c,k)` incomplete
   divisor; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **opened / scoped — no slice work begun** (ADR-034 accepted; this board is the live task
-  board). On branch `m24-bayesian-multilevel`. Next action: Slice 1 (`fit_brms_multilevel()`).
+- Status: **Slice 1 shipped locally** (fit + wiring + O-Bayes-ML-agree; `test-icc-brms.R` green, incl.
+  the live crossed-multilevel fit; `air` + `lintr` clean; glmmTMB multilevel regression unaffected).
+  On branch `m24-bayesian-multilevel`. **Next action: Slice 2** — cluster-level coverage oracle:
+  extend `data-raw/oracle-bayesian.R` to ten Hove's multilevel DGP + commit the fixture; the numerical
+  σ²_c→0 reduction-to-M23 pin lands here too.
