@@ -131,8 +131,8 @@ helpers* item below (sample-size / CI-width), where it belongs.
 - **Bayesian engine** (`brms`) behind `Suggests`, with a new `ci_method = "posterior"`
   (credible intervals from native posterior draws) and half-*t* hyperpriors (ten Hove,
   Jorgensen & van der Ark 2020). Deferred out of M7 (ADR-014). **Status: the two-way random
-  path is now SCHEDULED as M23 (ADR-033) — in flight; per ADR-015 it lives in
-  [`MILESTONES.md`](MILESTONES.md), not here.** Backend resolved to **`brms`** (not rstanarm:
+  path SHIPPED as M23 (ADR-033, PR #28) — `engine = "brms"` + `ci_method = "posterior"` (half-*t*
+  MAP + percentile credible interval), oracle O-Bayes.** Backend resolved to **`brms`** (not rstanarm:
   rstanarm's `decov` prior cannot express ten Hove's per-SD half-*t*, forfeiting the
   source-faithful prior the oracle depends on; rstanarm parked as a future alternate). What
   **remains parked here** are the parity follow-ons M23 defers: Bayesian **fixed-rater**,

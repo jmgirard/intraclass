@@ -11,10 +11,10 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-08**, after **M22** (ADR-032) — which lifts the M20 `d_study()`-off-replicate
-guard into a rater-count projection (single-level + multilevel, one curve per occasion
-setting). Prior: **M21** (PR #26, SEM parity), **M20** (PR #25, replicate corners),
-M18/M19 (PR #23/#24) before that.
+**2026-07-09**, after **M23** (ADR-033, PR #28) — the first Bayesian milestone:
+`engine = "brms"` + `ci_method = "posterior"` (half-*t* MAP + percentile credible interval)
+on the two-way random path. Prior: **M22** (PR #27, `d_study()` off a replicate fit),
+**M21** (PR #26, SEM parity), **M20** (PR #25, replicate corners), M18/M19 (PR #23/#24).
 
 **Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) were
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason
@@ -65,6 +65,7 @@ validated effective-n_o divisor).
 | balance | ✅ balanced, ✅ incomplete/ragged |
 | `engine` = glmmTMB, lme4 | ✅ (both, on balanced + ragged; ragged lme4 degrades to glmmTMB at the variance boundary) |
 | `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4) |
+| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M23, ADR-033)** — two-way **random** only (agreement/consistency, single/average), balanced/complete; half-*t*(4,0,1) prior, MAP point + percentile credible interval, `brm_args` passthrough. Bayesian fixed-rater, numeric-`unit` D-study, and incomplete are deferred (see the cross-cutting section). |
 
 **Gaps**
 

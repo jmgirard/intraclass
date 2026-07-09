@@ -37,11 +37,9 @@
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
 - Active task: **none** — M23 shipped (PR #28). Next milestone is not yet opened; candidates in the
   backlog below (the highest-value Bayesian follow-on is **multilevel** — ten Hove's native turf).
-  The out-of-band **CRAN upload** (ADR-022) also remains.
-  306 pkg tests 0F/0W (incl. one live brms fit under `NOT_CRAN`); lint + spelling clean. Not yet run:
-  `R CMD check --as-cran` and the full CI matrix (milestone-close gates). Remaining non-M23 work lives in `ROADMAP.md`: multilevel SEM, categorical/ordinal
-  GLMM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, occasion-`d_study()`, and
-  the CRAN upload (ADR-022).
+  Remaining non-M23 work lives in [`ROADMAP.md`](ROADMAP.md): Bayesian follow-ons, categorical/ordinal
+  GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and
+  occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
 - Last green CI: **PR #28 (M23) full matrix green incl. Windows and R-devel (all 9 jobs); squash-
   merged to `main` at `a6b8467`.** `R CMD check --as-cran` 0/0/1 (only the expected "New submission"
   NOTE); installed-pkg suite 308/0/0 incl. the live brms fit. Prior: PR #27 (M22) at `8375184`.
@@ -112,10 +110,11 @@ complete (PR #23/#24/#25/#26), and M22 (PR #27) + M23 (PR #28) shipped after it.
   per-cluster divisor — a focused simulation-oracle study, likely a Fable review). *Bounds
   M18 Slice 3 to the subject level.*
 - **Cross-cutting, later:** the **Bayesian engine** two-way random path + `ci_method =
-  "posterior"` is now **M23, in flight** (ADR-033); its parity follow-ons (Bayesian
-  fixed/one-way/multilevel/incomplete/replicates) remain later. **categorical/ordinal GLMM
-  ratings**; **multilevel SEM**; non-parametric/profile-likelihood CIs; boundary-robust lme4
-  singular-fit + merDeriv edge cases (glmmTMB covers these today).
+  "posterior"` **shipped as M23** (ADR-033, PR #28); its parity follow-ons (Bayesian
+  fixed/one-way/**multilevel**/incomplete/replicates) remain later — multilevel is the
+  highest-value (ten Hove's native turf). **categorical/ordinal GLMM ratings**; **multilevel
+  SEM**; non-parametric/profile-likelihood CIs; boundary-robust lme4 singular-fit + merDeriv
+  edge cases (glmmTMB covers these today).
 - **Blocked, stays parked:** one-way / general ICC(1) via SEM — no faithful sourced route
   (ADR-014); not schedulable until a source appears.
 
