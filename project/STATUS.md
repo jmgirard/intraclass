@@ -18,13 +18,12 @@
   (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
   Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
   checklist in MILESTONES.md.
-- Active task: **M21 cross-cutting DoD / wrap** (next: installed-pkg `R CMD check --as-cran`, then
-  PR). **All three slices ✅ done** on branch `m21-sem-parity`. S1 lavaan bootstrap (committed
-  `e307421`); S2 fixed-rater SEM = Case-3A θ²_r, reduces to glmmTMB fixed+random (committed
-  `f84b57a`); S3 incomplete/FIML SEM — `missing = "fiml"`, **attempt-then-degrade resolved to
-  SHIPS** (consistency ≤8e-3, agreement ≤1.5e-2 vs glmmTMB; the raw-SEM small-sample bias, not a
-  FIML artifact), bootstrap gated on incomplete data. S3 not yet committed. REFERENCES/COVERAGE/
-  ROADMAP synced (arc closed). See the DoD checklist in MILESTONES.md.
+- Active task: **M21 ship — push `m21-sem-parity` + open PR** (only remaining step; awaiting
+  maintainer go-ahead for the outward-facing push). **All three slices ✅ committed** (`e307421`
+  S1 bootstrap, `f84b57a` S2 fixed-rater Case-3A θ²_r, `65aebdd` S3 incomplete/FIML — SHIPS, no
+  degrade). Local DoD green: `R CMD check --as-cran` **0/0/0**, installed-pkg `test_check`
+  NOT_CRAN **925/0/0 (SKIP 0)**, air + lintr clean, docs/NEWS/REFERENCES/COVERAGE/ROADMAP synced
+  (M18–M21 arc closed — every 🔵 not-yet gap resolved).
 - Last green CI: **PR #25 (M20) full matrix green incl. Windows and R-devel; merged to `main` at
   137fb98** (the codecov upload flaked once on a bad GPG signature — re-ran green; infra, not the
   diff).

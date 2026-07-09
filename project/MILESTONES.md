@@ -659,10 +659,12 @@ DoD checklist (the live board — check off in-commit, #16):
   population recovery; interval finite/[0,1]/brackets; incomplete-bootstrap loud abort; disconnected
   ragged still aborts (`intraclass_unidentified`). Consistency stays estimator-invariant; no new
   estimand/spec/argument.
-- [ ] **Cross-cutting DoD:** ⏳ in progress — REFERENCES O-SEM extended with the M21 fixed/FIML/
-  bootstrap oracles ✅; COVERAGE §③ synced (three rows ✅, arc closed) ✅; ROADMAP sync (pending);
-  `air`/`lintr` clean ✅; docs regenerated ✅; installed-pkg + `R CMD check --as-cran` 0/0/0 (pending);
-  full CI matrix green incl. Windows/R-devel (pending, on PR); merged via PR on `m21-sem-parity`.
+- [x] **Cross-cutting DoD (local):** REFERENCES O-SEM extended with the M21 fixed/FIML/bootstrap
+  oracles ✅; COVERAGE §③ synced (three rows ✅, arc closed) ✅; ROADMAP arc marked complete ✅;
+  `air`/`lintr` clean ✅; docs regenerated ✅; **`R CMD check --as-cran` 0/0/0** ✅; **installed-pkg
+  `test_check` NOT_CRAN = 925/0/0 (SKIP 0)** ✅.
+- [ ] **Ship:** full CI matrix green incl. Windows/R-devel + merge via PR on `m21-sem-parity`
+  (pending — push + open PR).
 - [ ] **Cross-cutting DoD:** FIML-SEM oracle note appended to the M7 record / `REFERENCES.md`
   (O-SEM row extended); COVERAGE §③ + ROADMAP synced (arc closed: every 🔵 not-yet gap resolved);
   `air format --check` + `lintr::lint_package()` clean; installed-pkg tests with `NOT_CRAN=true`;
