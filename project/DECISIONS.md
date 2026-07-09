@@ -2287,3 +2287,116 @@ consequences → references.
   M5.5 engine × design dispatch seam this plugs into); estimand-specs `M1-twoway-random-agreement.md`,
   `M2-consistency-and-fixed.md` (the coefficients estimated; no new spec — engine + interval method);
   `project/ROADMAP.md` (Bayesian engine parking-lot entry being promoted), `project/COVERAGE.md`.
+
+## ADR-034: M24 scope — Bayesian multilevel (brms) Design 1 crossed, balanced/complete, random
+- Date: 2026-07-09
+- Status: accepted
+- Context: M23 (ADR-033, PR #28) shipped the **two-way random** Bayesian path (`engine = "brms"` +
+  `ci_method = "posterior"`); no milestone is in flight. This ADR opens **M24**, the
+  **highest-value Bayesian follow-on** — Bayesian **multilevel** (ten Hove's *native turf*). It is
+  the most source-faithful extension available: ten Hove, Jorgensen & van der Ark's **own**
+  multilevel IRR estimator (2020/2022) **is** the half-*t*-hyperprior Bayesian model M23 built, so
+  M24 finally fits the paper's estimator on the paper's design instead of translating it to REML.
+  M24 is a **thin vertical slice** standing to M23 exactly as **M5 stood to M1/M2**: the same engine
+  and interval method extended from the two-way random fit to the five-component **crossed (Design 1)**
+  fit. **Engine/interval parity, not new estimand work** (cf. M5.5/M7/M16/M23): the estimands are the
+  shipped M5 subject- and cluster-level coefficients (`M5-multilevel.md` §3, ten Hove 2022 Eqs. 12–13,
+  Table 3), now read off posterior draws — no new estimand-spec, no new argument, no new dependency
+  (`brms` is already a `Suggests`); additive, non-breaking (#6): a new valid `engine = "brms"` ×
+  multilevel combination only. The maintainer chose **multilevel-first, thin** over a parity sweep
+  (one-way + fixed + multilevel bundled) and over a warm-up-first ordering (one-way/fixed before
+  multilevel) — highest value, most source-faithful, disciplined thin slice (#14); Bayesian one-way
+  and fixed-rater become their own later thin milestones.
+- Decision:
+  - **Scope: Design 1 crossed only, balanced/complete, `raters = "random"`, subject + cluster levels,
+    `type` ∈ {agreement, consistency}, `unit` ∈ {single, average}.** The exact M5 scope box
+    (`M5-multilevel.md` §1) for the Bayesian engine. Nested Designs 2/3, fixed-rater, one-way,
+    incomplete/ragged, replicates, and the conflated diagnostic all stay deferred (scope-outs below).
+  - **The fit: new `fit_brms_multilevel()` fitting M5's five-component crossed model** —
+    `score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater)`
+    (`M5-multilevel.md` §2, our translation of ten Hove Eq. 7, oracle-pinned there) — **under
+    half-*t*(4, 0, 1) on every random-effect SD**, `brms::set_prior("student_t(4, 0, 1)", class =
+    "sd")`, unchanged from M23. The prior **generalizes verbatim** and is *literally* ten Hove 2020
+    §3.3/§4.1's specification for this model (the source estimator), so M24 is more source-faithful
+    than the frequentist M5 (which had no worked posterior to match). The prior stays fixed/sourced
+    (#12, not user-overridable; `brm_args` may not set it — the M23 collision guard applies).
+  - **Draws + convergence generalize, not restructure.** `brms_component_draws()` extends from three
+    SD columns to five — `sd_cluster__Intercept`, `sd_cluster:subject__Intercept`,
+    `sd_rater__Intercept`, `sd_cluster:rater__Intercept`, `sigma` — squared to the natural variance
+    scale, rows named to match the M5 component set (`cluster`, `subject`, `rater`, `cluster_rater`,
+    `residual`); `brms_convergence()` checks R-hat/bulk-ESS over the same five (ten Hove 2020 §4.1.3).
+    The new contract `draws` field (ADR-033) carries all five components.
+  - **Point/interval unchanged from M23.** MAP = `posterior_mode()` of each estimand's ICC-draw
+    vector; percentile **credible** interval; `posterior` forced-default & Bayesian-only. The
+    **level-keyed signal/error map is the shipped M5 machinery** (`M5-multilevel.md` §3/§4) — the
+    Bayesian branch composes each estimand's ICC draws from the five component-draw rows exactly as
+    the frequentist path composes them from `icc_point()`. No new field beyond `draws`; the shared
+    `icc_point()`/`mc_ci()` path is untouched for the other engines.
+  - **Two thin vertical slices** (#14/#15):
+    - **Slice 1 — subject-level (within-cluster), Bayesian.** `fit_brms_multilevel()` end-to-end;
+      the subject-level `(signal = σ²_{s:c}, error set by `type`)` map (§3a) composed from `draws`;
+      MAP + percentile credible interval; `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)`; print/tidy
+      report `level` + `n_clusters` + a **credible** interval; the M5 identifiability guards (§7)
+      reached before dispatch. Oracles O-Bayes-ML-agree + O-Bayes-ML-reduction (subject level).
+    - **Slice 2 — cluster-level (between-cluster), Bayesian + the coverage oracle.** The cluster-level
+      `(signal = σ²_c, error set = {rater, cluster_rater} / {cluster_rater})` map (§3b) off the **same
+      fit**; `ICC(c,1)`/`ICC(c,k)`. **Extend `data-raw/oracle-bayesian.R`** to ten Hove 2020/2022's
+      multilevel DGP (`M5-multilevel.md` §5 template: σ²_{s:c} = 1, σ²_{cr} = 0.16, σ²_{(s:c)r} =
+      0.50, σ²_c/σ²_r varied over {0.16, moderate}, N_c ∈ {20, 40}, k ∈ {2, 5, 10}) with brms + the
+      half-*t* prior, and **commit the reference fixture** (`tests/testthat/fixtures/`, #4). Full
+      O-Bayes-ML set.
+  - **Oracles (#1 — a CI method's oracle is coverage; M16/M23 precedent, no textbook worked value):**
+    **O-Bayes-ML-coverage** — seeded coverage ~nominal at the multilevel DGP (MAP unbiased, percentile
+    credible interval nominal at k > 2), off the committed fixture; **O-Bayes-ML-reduction** — (a) a
+    single-cluster / σ²_c → 0 design collapses the cluster:rater term and the fitted subject-level
+    ICCs match the **M23 two-way Bayesian** fit within stated tolerance; (b) the algebraic
+    subject-level ≡ single-level error-set invariant (M5 O-ML/reduction, no fit); **O-Bayes-ML-agree**
+    — MAP ≈ the **M5 glmmTMB/lme4 REML** point within a stated tolerance (ten Hove 2022's "MCMC ≈ MLE
+    point estimates"; glmmTMB/lme4 are the independent oracles, inverting the M5 relationship that
+    named the Bayesian estimator a *future* third oracle); **O-Bayes-ML-converge** — convergence rate
+    at the DGP tracked from the stored diagnostics.
+  - **CI test-gating (DoD), unchanged posture from M23:** coverage/agreement oracles run off the
+    **committed seeded reference** everywhere (#4); a **single live `brms` multilevel fit** (tiny
+    `chains`/`iter`) exercises the real wiring, guarded `skip_on_cran()` +
+    `skip_if_not_installed("brms")` + `skip_on_ci()` (CI runners have brms but no Stan toolchain —
+    [[brms-live-fit-skip-on-ci]]); reduced draws in tests.
+  - **Identifiability:** reuse the shipped M5 guards (≥ 2 raters; ≥ 2 clusters for σ²_c; `cluster`
+    not 1:1 with `subject`; `abort_intraclass` for `level = "cluster"` with no cluster). **Few
+    clusters is where the half-*t* prior earns its keep** — it regularizes the boundary-prone σ²_c /
+    σ²_{cr} that make the frequentist intervals wide or singular (#3, the prior's raison d'être).
+  - **No new estimand, estimand-spec file, user-facing argument, or dependency.** New engine code
+    (`fit_brms_multilevel()` + generalized `brms_component_draws()`/`brms_convergence()` in
+    `R/engine-brms.R`), a new multilevel branch in `R/icc.R`'s brms dispatch, and the extended
+    `data-raw/oracle-bayesian.R` + fixture.
+  - **Scope-outs (preserved, not rediscovered):** Bayesian **nested Designs 2/3** (M8/M19 analog),
+    **fixed-rater** multilevel (Case-3A θ²_r from the posterior of rater contrasts — M10 analog),
+    **one-way** (M6 analog), **incomplete/ragged** multilevel (M9 analog), **within-cell replicates**
+    (M17/M20 analog), and the **conflated** diagnostic (M17 Eq. 14) — each a later thin slice; per ten
+    Hove 2022 the incomplete/small-k estimator choice is an **open research question**, so those lean
+    on coverage calibration when scheduled. Plus the M23 carry-overs: **rstanarm** backend,
+    **selectable** `posterior` coupling (MC/bootstrap on a Bayesian fit), **HPDI** intervals, and a
+    **user-exposed `prior=`** API. All stay in `ROADMAP.md`.
+- Consequences: On M24 close, `engine = "brms"` covers the **crossed multilevel** path with native
+  posterior credible intervals — the paper's own estimator on the paper's flagship design, the
+  single most source-faithful coefficient in the package. Risk is **low and front-loaded into a
+  ready seam**: Slice 1 is a fit-shape + five-way prior generalization through the M23 `draws`
+  contract and the shipped M5 level→signal/error map; the one numerical hazard (the boundary-aware
+  mode at the σ²_c / σ²_{cr} boundary) is the M23 `posterior_mode()` helper, already pinned by
+  reproducing ten Hove's tables, now exercised on more components. Adds a live-fit CI cost bounded by
+  committed-reference + single-live-fit gating (no new dependency). It also **realizes the oracle
+  inversion** ADR-033 anticipated — the Bayesian engine becomes a first-class cross-check for the
+  multilevel designs, and the M5 REML fit becomes the independent oracle for it. This ADR authorizes
+  M24 code; the MILESTONES.md M24 board entry and the STATUS.md flip are the milestone-start
+  companions (M24 is opened/scoped here but **no slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — coverage + reduction + REML agreement + convergence),
+  #2/#14/#15 (name the estimand / thin vertical slices), #3 (boundary-aware — the half-*t*'s reason
+  for being, now on σ²_c/σ²_{cr}), #4 (committed seeded reference; no tuning to oracle), #5/#8
+  (classed identifiability aborts; `cli` notes), #6 (additive, non-breaking — a new engine×design
+  combination), #12 (sourced prior), #16 (tracking in-commit); ten Hove, Jorgensen & van der Ark
+  (2020) §3.3/§4.1 (half-*t*(4,0,1) on SDs; DGP), §4.2 (MAP/percentile), OSF `shkqm`; ten Hove,
+  Jorgensen & van der Ark (2022) Eqs. 6–7, 12–13, Table 3 (Design 1 subject/cluster estimands;
+  brms companion, OSF `8j26u`; MCMC ≈ MLE; incomplete/small-k open question); ADR-011 (M5 multilevel
+  estimand — the coefficients estimated), ADR-033 (M23 Bayesian engine — the seam extended),
+  ADR-014 (M7 — Bayesian deferral origin), ADR-002 (optional engines behind `Suggests`); estimand-spec
+  `M5-multilevel.md` (§1 scope, §2 fit, §3 estimands, §5 oracles/DGP, §7 identifiability — no new
+  spec); `project/ROADMAP.md` (Bayesian multilevel follow-on being promoted), `project/COVERAGE.md`.
