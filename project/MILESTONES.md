@@ -825,20 +825,34 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - [x] Live Stan Design-2 fit test (chains 2 / iter 1200) `skip_on_cran()` + `skip_if_not_installed("brms")`
         + `skip_on_ci()`; the stale "brms refuses Design 2" refusal test flipped to assert Design 3 refusal.
         Full `test-icc-brms.R` green locally (97/0/0, live fits ran); nested/multilevel regression files green.
-- Slice 2 — Design 3 (raters nested in subjects), agreement-only, + coverage oracle:
-  - [ ] `fit_brms_nested_subjects()` — M8 Design 3 formula + three-component `spec` map, same prior.
-  - [ ] Dispatch Design 3 to the new fit; confirm the shipped agreement-only guard (`icc.R:729`) is
-        reached for `type = "consistency"`.
-  - [ ] Three-component agreement-only map; `ICC(A,1)`/`ICC(A,k)`.
-  - [ ] Extend `data-raw/oracle-bayesian-multilevel.R` to the M8 nested DGP (brms + half-*t*); commit
-        the reference fixture under `tests/testthat/fixtures/`.
-  - [ ] O-Bayes-NML-coverage (seeded ~nominal off the fixture) + O-Bayes-NML-reduction + O-Bayes-NML-converge.
-  - [ ] Findings reproduced honestly (#18) — report bias/coverage at the DGP, caveats named.
+- Slice 2 — Design 3 (raters nested in subjects), agreement-only, + coverage oracle: **✅ done
+  (fixture generated + committed).**
+  - [x] `fit_brms_nested_subjects()` — M8 Design 3 formula (`score ~ 1 + (1|cluster) + (1|cluster:subject)`)
+        + three-component `spec` map `{cluster, subject, residual}` (rater confounded into residual),
+        same half-*t*(4,0,1) prior.
+  - [x] Removed the brms Design-3 refusal guard; dispatch Design 3 in the `nested_in_subjects` branch;
+        the shipped agreement-only guard (`icc.R`) fires for `type = "consistency"` (verified live +
+        engine-agnostic — asserted in the Design-3 live test).
+  - [x] Three-component agreement-only map; `ICC(1)`/`ICC(k)` (multilevel one-way notation, no A/C letter).
+  - [x] Companion generator `data-raw/oracle-bayesian-nested.R` (not an extension of the crossed script —
+        keeps the M24 pins intact, mirrors M24-companion-to-M23) ran the M8 nested DGP for both designs
+        at the subject level (Design 2 k = 5; Design 3 k = 5, k = 2, n_rep 80, seed 20250) → committed
+        `tests/testthat/fixtures/bayesian-nested-oracle.rds`; its `stopifnot` pins pass.
+  - [x] O-Bayes-NML-agree (Design 3): MAP ≈ M8 glmmTMB/lme4 REML within tol 0.08; REML in the credible
+        interval. O-Bayes-NML-reduction: Design 3 → flat M6 one-way as σ²_c→0 (≤0.02 on REML fits).
+  - [x] O-Bayes-NML-coverage + -converge: fixture-based test reads the committed reference (runs on CI,
+        no fitting) — Design 2 + Design 3 subject-level nominal coverage, 100% convergence.
+  - [x] **Findings reproduced honestly (#18):** Design 2 k=5 rel-bias −.010/cover .975; Design 3 k=5
+        +.002/.950, k=2 +.006/.963; convergence 1.00 all cells. **The nested subject level is
+        ~unbiased even at k=2** — unlike M24's crossed *cluster* level (few-cluster MAP-low), no
+        boundary-prone cluster estimand is exposed (nested designs report no cluster ICC). The a-priori
+        "k=2 more biased low" pin (imported from M24) was corrected to match the run, not tuned away.
 - Cross-cutting DoD (brief §8):
-  - [ ] `@details`/`@param` in `R/icc.R` updated: `engine = "brms"` now covers nested Designs 2/3
-        (subject level, agreement-only for Design 3); NEWS entry under the unreleased/0.1.0 section.
-  - [ ] `COVERAGE.md` brms nested cells updated; `REFERENCES.md` O-Bayes-NML registry rows added.
-  - [ ] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]).
+  - [x] `@param` in `R/icc.R` updated: `engine = "brms"` now covers both nested designs (subject level,
+        agreement-only for Design 3); NEWS entry extended under the 0.1.0 section; docs regenerated.
+  - [x] `COVERAGE.md` brms nested cells + design table updated; `REFERENCES.md` O-Bayes-NML registry
+        entry added (with observed committed-fixture numbers).
+  - [x] `air format .` clean; `lintr::lint_package()` clean on all changed files ([[run-lintr-before-push]]).
   - [ ] Installed-pkg check with `NOT_CRAN=true` incl. the live nested fits
         ([[verify-against-installed-package]]); `R CMD check --as-cran` clean (bar the "New submission" NOTE).
   - [ ] Ship on branch `m25-bayesian-nested` → PR → full CI matrix green incl. Windows + R-devel

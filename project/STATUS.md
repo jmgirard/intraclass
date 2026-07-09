@@ -1,7 +1,8 @@
 # Project status
 
 - Milestone: **M25 — Bayesian multilevel (brms), nested Designs 2/3, balanced/complete, random** —
-  **active, scoped, no slice work begun** (ADR-035; opened 2026-07-09 after the M24 retro). The direct
+  **both slices done + committed on `m25-bayesian-nested` (`808b0cf`, `92ecd50`); pending PR CI +
+  merge** (ADR-035; opened 2026-07-09 after the M24 retro). The direct
   continuation of the Bayesian arc — the **M8 analog of M24**: same brms engine + half-*t*(4,0,1) prior
   + `ci_method = "posterior"`, extended from the crossed (Design 1) five-component fit to the paper's
   two **nested-rater** designs (raters nested in clusters, Design 2, four components; raters nested in
@@ -10,9 +11,12 @@
   2022 Eqs. 8–11, Table 3 middle/right) read off posterior draws; no new estimand-spec, argument, or
   dependency. Scope = the M8 box: **subject level only** (cluster level undefined for nested raters),
   **Design 3 agreement-only**, balanced/complete, random. **Slice 1** Design 2
-  (`fit_brms_nested_clusters()`; narrow the `ml_design != "crossed"` brms guard + nested dispatch) +
-  O-Bayes-NML-agree. **Slice 2** Design 3 (`fit_brms_nested_subjects()`) + the coverage oracle (extend
-  `data-raw/oracle-bayesian-multilevel.R` to the nested DGP; commit the fixture). The M24 few-cluster
+  (`fit_brms_nested_clusters()`; brms guard narrowed + nested dispatch) + O-Bayes-NML-agree. **Slice 2**
+  Design 3 (`fit_brms_nested_subjects()`) + the coverage oracle (companion `data-raw/oracle-bayesian-nested.R`;
+  committed `bayesian-nested-oracle.rds`) + O-Bayes-NML-reduction/-coverage/-converge. **Honest finding
+  (#18):** the nested subject level is ~unbiased even at k=2 (rel-bias < .01, nominal coverage) — no
+  boundary-prone cluster estimand is exposed; the M24-style "k=2 more biased low" pin didn't hold and
+  was corrected to the run, not tuned. The M24 few-cluster
   MAP-low caveat is **largely not exposed** — nested designs report no cluster-level ICC, so σ²_c is a
   nuisance component, not an estimand. Both fits are simple mirrors of the shipped M8 glmmTMB shapes;
   `fit_brms_common()`/`brms_component_draws()`/`brms_convergence()` already generalize over any `spec`
@@ -72,15 +76,19 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M25 Slice 2 — Bayesian Design 3 (raters nested in subjects) + the coverage oracle** —
-  next. **Slice 1 (Design 2) is done and green locally** (live Stan present): `fit_brms_nested_clusters()`
-  added, the brms multilevel guard narrowed to refuse only Design 3, Design 2 dispatched, and
-  O-Bayes-NML-agree pinned live (MAP ≈ M8 glmmTMB REML within 0.08; REML inside the credible interval;
-  lme4 concurs ≤1e-2). `test-icc-brms.R` 97/0/0; nested/multilevel regression files green; lint + `air`
-  clean; docs regenerated. Slice 2: add `fit_brms_nested_subjects()` (three-component, agreement-only),
-  dispatch Design 3, extend `data-raw/oracle-bayesian-multilevel.R` to the nested DGP + commit the
-  fixture, and pin O-Bayes-NML-coverage/-reduction/-converge. Ship on branch `m25-bayesian-nested`.
-  The DoD board is the M25 section of [`MILESTONES.md`](MILESTONES.md). Remaining post-M25 work stays
+- Active task: **M25 finish-task — installed-pkg verify + PR** — next. **Both slices are done and green
+  locally** (live Stan present). Slice 1 (Design 2): `fit_brms_nested_clusters()`, guard narrowed,
+  O-Bayes-NML-agree pinned live (committed at `808b0cf`). Slice 2 (Design 3):
+  `fit_brms_nested_subjects()` (three-component multilevel one-way, agreement-only), Design-3 refusal
+  guard removed + dispatched, consistency aborts; O-Bayes-NML-agree + reduction (Design 3 → flat
+  one-way as σ²_c→0) pinned live; the **committed coverage fixture** `bayesian-nested-oracle.rds` (via
+  the companion `data-raw/oracle-bayesian-nested.R`, n_rep 80) drives O-Bayes-NML-coverage/-converge on
+  CI. **Honest finding (#18):** the nested subject level is ~unbiased even at k=2 (rel-bias < .01,
+  nominal coverage) — no boundary-prone cluster estimand is exposed (nested = no cluster ICC); the
+  a-priori "k=2 more biased low" pin imported from M24 was corrected to match the run, not tuned. Docs
+  (@param/NEWS/COVERAGE/REFERENCES), `air`, and lint all clean. Remaining: the installed-package check
+  (`NOT_CRAN=true` incl. live nested fits, `R CMD check --as-cran`) then open the PR. The DoD board is
+  the M25 section of [`MILESTONES.md`](MILESTONES.md). Post-M25 work stays
   in [`ROADMAP.md`](ROADMAP.md): the
   other Bayesian follow-ons (fixed-rater, one-way, incomplete, replicates, conflated — each a later
   thin slice), categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)`
@@ -126,13 +134,14 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M25 (ADR-035) active — Bayesian nested multilevel (Designs 2/3).** Scoped after the M24 retro, no
-slice work begun. Extends `engine = "brms"` + `ci_method = "posterior"` from M24's crossed (Design 1)
-path to the paper's nested-rater designs at the subject level — the M8 analog of M24. **Next: Slice 1
-— Bayesian Design 2** (`fit_brms_nested_clusters()`, four components; narrow the brms multilevel guard
-+ nested dispatch; O-Bayes-NML-agree). Then **Slice 2 — Design 3** (three components, agreement-only) +
-the coverage oracle (extend `data-raw/oracle-bayesian-multilevel.R`, commit the fixture). The DoD
-board is the M25 section of [`MILESTONES.md`](MILESTONES.md). Ship on `m25-bayesian-nested`.
+**M25 (ADR-035) — Bayesian nested multilevel (Designs 2/3) — both slices done, pending PR CI + merge.**
+`engine = "brms"` + `ci_method = "posterior"` now covers both nested designs at the subject level
+(Design 2 four-component; Design 3 three-component / multilevel one-way, agreement-only) — the M8 analog
+of M24, completing brms coverage of every multilevel design the frequentist engines fit at the subject
+level. Committed on `m25-bayesian-nested` (`808b0cf` Slice 1, `92ecd50` Slice 2); full local gate run
+by finish-task. **Next: open the PR to `main`** (`gh pr create`); on green CI + merge, reconcile the
+`pending PR CI + merge` markers and compress the M25 board (ADR-015). The DoD
+board is the M25 section of [`MILESTONES.md`](MILESTONES.md).
 Post-M25 candidates in [`ROADMAP.md`](ROADMAP.md): the **remaining Bayesian follow-ons** (fixed-rater /
 one-way / incomplete / replicates / conflated — each a later thin slice), **categorical/ordinal GLMM**
 ratings, **multilevel SEM**, and the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor. The

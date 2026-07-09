@@ -117,26 +117,13 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   )
 })
 
-# M24 (ADR-034) opens the CROSSED (Design 1) multilevel random path for brms; M25 Slice 1
-# (ADR-035) adds nested Design 2 (raters nested in clusters). Nested Design 3 (raters
-# nested in subjects) and the conflated diagnostic stay deferred. These refusals fire
-# before the fit, so they assert the M25-Slice-1 scope boundary without Stan. (That
-# crossed multilevel and Design 2 are *supported* is asserted by the live
-# O-Bayes-ML-agree / O-Bayes-NML-agree fits below.)
-
-test_that("brms refuses nested Design 3 (raters nested in subjects, deferred)", {
-  # Subject-unique rater labels -> raters nested in subjects (Design 3): each rater
-  # rates only one subject. Design 2 (raters nested in clusters) is now SUPPORTED.
-  set.seed(11)
-  nested3 <- expand.grid(rr = 1:2, s = 1:2, cluster = factor(1:3))
-  nested3$subject <- factor(paste0(nested3$cluster, "_s", nested3$s))
-  nested3$rater <- factor(paste0(nested3$subject, "_r", nested3$rr))
-  nested3$score <- rnorm(nrow(nested3))
-  expect_error(
-    icc(nested3, score, subject, rater, cluster = cluster, engine = "brms"),
-    class = "intraclass_unsupported"
-  )
-})
+# M24 (ADR-034) opened the CROSSED (Design 1) multilevel random path for brms; M25
+# (ADR-035) adds both NESTED designs -- Design 2 (raters nested in clusters, Slice 1) and
+# Design 3 (raters nested in subjects, Slice 2). All three multilevel designs are now
+# supported at the subject level, so the conflated diagnostic is the only remaining
+# deferred brms multilevel path (that all three designs are *supported* is asserted by the
+# live O-Bayes-ML-agree / O-Bayes-NML-agree fits below; Design 3's consistency abort is
+# checked in its live test).
 
 test_that("brms refuses the conflated diagnostic (deferred Bayesian follow-on)", {
   set.seed(12)
@@ -355,6 +342,47 @@ test_that("O-Bayes-ML: committed reference reproduces the multilevel findings", 
   #     single-rater cluster MAP is biased LOW vs the subject level (a diffuse near-boundary
   #     sigma^2_c posterior -> the mode of the cluster ICC draws sits below the population).
   expect_lt(clus(5L)$map_icc_relbias, subj(5L)$map_icc_relbias - 0.05)
+})
+
+# --- O-Bayes-NML: the committed nested coverage reference (no brms needed, M25) -------
+# The nested companion to the crossed O-Bayes-ML reference above. data-raw/
+# oracle-bayesian-nested.R runs ten Hove's nested DGP (Design 2 = raters nested in
+# clusters, Design 3 = raters nested in subjects; N_c = 20) through the SHIPPED nested
+# reductions and commits per-(design x k) SUBJECT-level coverage/bias/convergence. There is
+# NO cluster-level cell (nested designs define no cluster IRR), so the M24 few-cluster
+# caveat is not exposed. Fast, no fitting, runs on every CI job.
+
+test_that("O-Bayes-NML: committed reference reproduces the nested findings", {
+  fixture <- test_path("fixtures", "bayesian-nested-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-nested.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  d2 <- function(kk) s[s$design == "nested_in_clusters" & s$k == kk, ]
+  d3 <- function(kk) s[s$design == "nested_in_subjects" & s$k == kk, ]
+
+  # (1) High convergence at the half-t DGP across cells (fixed-warmup budget).
+  expect_true(all(s$converged_frac >= 0.90))
+
+  # (2) Design 2 subject level (the two-way analog): MAP ~ unbiased and percentile coverage
+  #     ~nominal at k = 5 (ten Hove 2022 MCMC ~ MLE, subject level).
+  expect_lt(abs(d2(5L)$map_icc_relbias), 0.10)
+  expect_gte(d2(5L)$coverage_icc, 0.90)
+  expect_lte(d2(5L)$coverage_icc, 0.99)
+
+  # (3) Design 3 subject level (the multilevel one-way): MAP ~ unbiased and coverage
+  #     ~nominal at BOTH k = 5 and k = 2. THE HONEST FINDING (#18): unlike the crossed
+  #     CLUSTER level (M24, MAP biased low at few clusters), the nested SUBJECT level is
+  #     well-powered (100 subjects) and stays ~unbiased even at k = 2 -- no boundary-prone
+  #     cluster estimand is exposed (nested designs define no cluster ICC). We do NOT import
+  #     M24's "k = 2 more biased low" ordering: it does not appear here (both |rel-bias| < .01).
+  expect_lt(abs(d3(5L)$map_icc_relbias), 0.10)
+  expect_gte(d3(5L)$coverage_icc, 0.90)
+  expect_lte(d3(5L)$coverage_icc, 0.99)
+  expect_lt(abs(d3(2L)$map_icc_relbias), 0.10)
+  expect_gte(d3(2L)$coverage_icc, 0.90)
+  expect_lte(d3(2L)$coverage_icc, 0.99)
 })
 
 # --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---
@@ -676,6 +704,158 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
   }
 
   # The header renders the Bayesian engine + a credible interval and names the nested design.
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+  expect_match(hdr, "nested", fixed = TRUE)
+})
+
+# --- Live brms fit: nested Design 3, O-Bayes-NML-agree (M25 Slice 2, ADR-035) --------
+# Raters nested in SUBJECTS (Design 3, three components) -- the MULTILEVEL ONE-WAY design
+# (agreement-only): the rater main effect is confounded into the residual, so only
+# ICC(1)/ICC(k) are defined and consistency aborts. Subject level only. Gated OFF CI.
+# Pins O-Bayes-NML-agree: the MAP tracks the M8 glmmTMB REML point, lme4 the second REML
+# oracle. Also pins O-Bayes-NML-reduction (Design 3 IS a multilevel one-way): with the
+# cluster variance negligible, the Design-3 subject ICC matches the flat M6 one-way ICC
+# on the same ratings (ten Hove 2022: Design 3 = multilevel one-way).
+
+test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # Balanced Design 3: subjects nested in clusters, raters NESTED in subjects (each
+  # subject has its own raters). Subject-unique rater labels make the nesting explicit.
+  set.seed(2026)
+  nc <- 14L
+  ns <- 4L
+  k <- 3L
+  d <- expand.grid(
+    rr = seq_len(k),
+    s = seq_len(ns),
+    cluster = factor(seq_len(nc))
+  )
+  d$subject <- factor(paste0(d$cluster, "_s", d$s))
+  d$rater <- factor(paste0(d$subject, "_r", d$rr)) # rater nested in subject
+  d$score <- 2 +
+    rnorm(nc, 0, 0.5)[as.integer(d$cluster)] +
+    rnorm(nlevels(d$subject), 0, 1)[as.integer(d$subject)] +
+    rnorm(nlevels(d$rater), 0, 0.4)[as.integer(d$rater)] +
+    rnorm(nrow(d), 0, 0.7)
+
+  # Consistency is undefined for Design 3 (no separable rater effect) -- a classed abort,
+  # engine-agnostic, reached before the fit.
+  expect_error(
+    icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      engine = "brms",
+      type = "consistency"
+    ),
+    class = "intraclass_unsupported"
+  )
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  # Structure: the multilevel one-way yields ICC(1)/ICC(k) (no A/C letter), subject level
+  # only, a posterior credible interval, and the Bayesian engine label.
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$engine, "brms")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_setequal(td$index, c("ICC(1)", "ICC(k)"))
+  expect_setequal(td$level, "subject")
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  key <- function(x) paste(x$index, x$level)
+  g <- tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "glmmTMB"
+  ))
+  g <- g[order(key(g)), ]
+  td <- td[order(key(td)), ]
+
+  # O-Bayes-NML-agree (Design 3): the M8 glmmTMB REML point sits inside the brms credible
+  # interval, and the MAP tracks REML pointwise (subject level well-identified: 56 subjects).
+  expect_true(all(g$estimate >= td$conf.low & g$estimate <= td$conf.high))
+  expect_equal(td$estimate, g$estimate, tolerance = 0.08)
+
+  # Second independent REML oracle (lme4), when merDeriv is present.
+  if (
+    requireNamespace("lme4", quietly = TRUE) &&
+      requireNamespace("merDeriv", quietly = TRUE)
+  ) {
+    l <- tidy(icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      engine = "lme4"
+    ))
+    l <- l[order(key(l)), ]
+    expect_equal(l$estimate, g$estimate, tolerance = 1e-2)
+  }
+
+  # O-Bayes-NML-reduction: Design 3 IS the multilevel one-way. As sigma^2_c -> 0 (M8
+  # O-NML/reduction; ten Hove 2022 p. 6), the Design-3 subject ICC equals the flat M6
+  # one-way ICC on the same ratings (cluster ignored) -- the estimand identity that names
+  # Design 3 a multilevel one-way. Pinned on a NEGLIGIBLE-cluster dataset (with real
+  # sigma^2_c the flat one-way absorbs the between-cluster variance into the subject slot
+  # and the two diverge). Cheap REML fits (no extra Stan compile); the brms path shares
+  # the same estimand map, verified against these fits by the agree pin above.
+  set.seed(99)
+  d0 <- expand.grid(
+    rr = seq_len(k),
+    s = seq_len(ns),
+    cluster = factor(seq_len(nc))
+  )
+  d0$subject <- factor(paste0(d0$cluster, "_s", d0$s))
+  d0$rater <- factor(paste0(d0$subject, "_r", d0$rr))
+  d0$score <- 2 + # sigma^2_c = 0 (no cluster term in the DGP)
+    rnorm(nlevels(d0$subject), 0, 1)[as.integer(d0$subject)] +
+    rnorm(nlevels(d0$rater), 0, 0.4)[as.integer(d0$rater)] +
+    rnorm(nrow(d0), 0, 0.7)
+  g0 <- tidy(icc(
+    d0,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "glmmTMB"
+  ))
+  g0 <- g0[order(g0$index), ]
+  ow <- tidy(icc(
+    d0,
+    score,
+    subject,
+    rater,
+    engine = "glmmTMB",
+    model = "oneway"
+  ))
+  ow <- ow[order(ow$index), ]
+  expect_equal(g0$estimate, ow$estimate, tolerance = 0.02)
+
+  # The header names the nested (raters nested in subjects) design + a credible interval.
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)

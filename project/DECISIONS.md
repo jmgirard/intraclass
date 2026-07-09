@@ -2458,9 +2458,14 @@ consequences → references.
       interval; `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)`; the M8 identifiability guards reached before
       dispatch. Oracle O-Bayes-NML-agree (Design 2).
     - **Slice 2 — Design 3 (raters nested in subjects), agreement-only, + the coverage oracle.**
-      `fit_brms_nested_subjects()`; the three-component agreement-only map; `ICC(A,1)`/`ICC(A,k)`.
-      **Extend `data-raw/oracle-bayesian-multilevel.R`** to the M8 nested DGP with brms + the half-*t*
-      prior and **commit the reference fixture** (`tests/testthat/fixtures/`, #4). Full O-Bayes-NML set.
+      `fit_brms_nested_subjects()`; the three-component agreement-only map; `ICC(1)`/`ICC(k)` (the
+      multilevel one-way notation). **As built:** a companion generator
+      `data-raw/oracle-bayesian-nested.R` (not an extension of the crossed
+      `oracle-bayesian-multilevel.R` — a companion keeps the M24 crossed pins intact and mirrors how
+      M24's script was a companion to M23's) runs the M8 nested DGP for **both** nested designs at the
+      subject level (Design 2 k = 5; Design 3 k = 5 and k = 2) with brms + the half-*t* prior and
+      **commits the reference fixture** `tests/testthat/fixtures/bayesian-nested-oracle.rds` (#4). Full
+      O-Bayes-NML set.
   - **Oracles (#1 — coverage; M8/M24 precedent, no textbook worked value):** **O-Bayes-NML-agree** —
     MAP ≈ the **M8 glmmTMB/lme4 REML** point within a stated tolerance (ten Hove 2022's "MCMC ≈ MLE";
     glmmTMB/lme4 the independent oracles); **O-Bayes-NML-coverage** — seeded coverage ~nominal at the
