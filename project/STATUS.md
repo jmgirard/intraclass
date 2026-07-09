@@ -1,45 +1,30 @@
 # Project status
 
-- Milestone: **M20 — Within-cell replicate completeness (fixed-rater, multilevel, ragged)** —
-  **shipped** (PR #25, ADR-030; third milestone of the M18–M21 arc, ADR-027). Extended the M17
-  within-cell replicate estimand beyond two-way-random/single-level/balanced: **Slice 1** fixed-rater
-  (θ²_r via shipped `theta2r_fixed()`; balanced fixed≡random exact pin); **Slice 2** multilevel,
-  crossed D1 + nested D2 (`(1|cluster:subject:rater)`; Design 3 ⚫ by-design) + a `d_study()`-on-
-  replicate correctness guard; **Slice 3** ragged single-occasion (extends via `k_eff`;
-  occasion-averaged **degraded to 🟣 research** — no validated effective-`n_o` divisor). Plus a
-  finish-task fix: `rmvn()` aborts classed on a non-finite MC covariance. Completeness, not new
-  estimand work; no new dependency/argument/estimand-spec. M0–M20 shipped; package at v0.1.0.
-  **No milestone in flight** — M21 (SEM parity) next, scoped by its own start-of-milestone ADR.
-- **M21 — SEM (lavaan) engine parity — IN FLIGHT** (arc's last, ADR-027; scoped by ADR-031,
-  2026-07-08). Promotes the M7 lavaan deferrals toward lme4-style parity, engine parity not new
-  estimand work: **Slice 1** lavaan bootstrap `ci_method` (reuse M16 `simulate_refit` seam;
-  lowest risk); **Slice 2** fixed-rater SEM (oracle-first catch: does fixed agreement need a
-  distinct θ²_r or coincide with M7's finite-intercept estimator?); **Slice 3** incomplete/FIML SEM
-  (consistency exact; agreement **attempt-then-degrade to 🟣 research**, maintainer decision).
-  Multilevel SEM + one-way SEM stay out (reclassified/blocked, ADR-027/014). Board = the M21 DoD
-  checklist in MILESTONES.md.
-- Active task: **M21 ship — PR #26 CI green (all 9 jobs incl. Windows + R-devel), ready to merge**
-  (https://github.com/jmgirard/intraclass/pull/26). **All three slices ✅ committed** (`e307421`
-  S1 bootstrap, `f84b57a` S2 fixed-rater Case-3A θ²_r, `65aebdd` S3 incomplete/FIML — SHIPS, no
-  degrade). Local DoD green: `R CMD check --as-cran` **0/0/0**, installed-pkg `test_check`
-  NOT_CRAN **925/0/0 (SKIP 0)**, air + lintr clean, docs/NEWS/REFERENCES/COVERAGE/ROADMAP synced
-  (M18–M21 arc closed — every 🔵 not-yet gap resolved). Merge once CI (incl. Windows/R-devel) green.
-- Last green CI: **PR #25 (M20) full matrix green incl. Windows and R-devel; merged to `main` at
-  137fb98** (the codecov upload flaked once on a bad GPG signature — re-ran green; infra, not the
-  diff).
+- Milestone: **M21 — SEM (lavaan) engine parity (bootstrap, fixed-rater, incomplete/FIML)** —
+  **shipped** (PR #26, ADR-031; the **last milestone of the M18–M21 completeness arc**, ADR-027).
+  Promoted the three M7 lavaan deferrals to lme4-style parity, engine parity not new estimand work:
+  **Slice 1** `ci_method = "bootstrap"` for lavaan (M16 `simulate_refit` seam; `lavaan_simulate_refit`);
+  **Slice 2** fixed-rater SEM — the Case-3A bias-corrected θ²_r (distinct from M7's raw; reduces to
+  glmmTMB fixed AND random on balanced data, the M10 identity); **Slice 3** incomplete/FIML SEM
+  (`missing = "fiml"`; attempt-then-degrade **resolved to ships** — consistency ≤8e-3, agreement
+  ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
+  incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
+  🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
+- Active task: — (**no milestone in flight**; the M18–M21 arc is done. Next milestone gets its own
+  start-of-milestone scoping ADR after a short retro. Remaining non-arc work lives in `ROADMAP.md`:
+  the Bayesian engine + `ci_method = "posterior"`, multilevel SEM, categorical/ordinal GLMM, the
+  Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and the CRAN upload, ADR-022.)
+- Last green CI: **PR #26 (M21) full matrix green incl. Windows and R-devel (all 9 jobs); merged to
+  `main` at ee81e6f.** 925 tests, `R CMD check --as-cran` 0/0/0.
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M21 Slices 1–2 landed on `m21-sem-parity`.**
-  Slice 1 (lavaan bootstrap) committed `e307421`. Slice 2 (fixed-rater SEM) code + O-FSEM oracles
-  done (green under `load_all` + `NOT_CRAN`; air + lintr clean, docs/NEWS updated), not yet
-  committed. Oracle-first catch resolved cleanly (Case-3A θ²_r, distinct from M7's raw, reduces to
-  glmmTMB fixed+random on balanced data). Slice 3 (incomplete/FIML SEM) next.
-  Short retro (M20 landed clean in one arc-consistent shot) → scoping ADR fixing three slices
-  (bootstrap → fixed → incomplete/FIML, order kept per maintainer), estimand posture (engine
-  parity, no new estimand-spec — only a FIML-SEM oracle note), and per-slice oracles (glmmTMB the
-  independent oracle, consistency exact / agreement at the SEM estimator's bar). Two scope
-  questions confirmed: keep ADR-027 slice order; FIML agreement attempt-then-degrade to 🟣 research.
-  M21 DoD checklist set live in MILESTONES.md. No code yet — Slice 1 (lavaan bootstrap) is next.
-  Prior line: M20 merged (PR #25, ADR-030), 894 tests, `--as-cran` 0/0/0, full matrix green.
+- Updated: 2026-07-08 by main session (Opus) — **M21 merged (PR #26, ADR-031); M18–M21 arc
+  complete.** All three slices shipped (S1 lavaan bootstrap `e307421`; S2 fixed-rater Case-3A θ²_r
+  `f84b57a`; S3 incomplete/FIML `65aebdd` — ships, no research degrade). Full CI matrix green incl.
+  Windows and R-devel (925 tests), `R CMD check --as-cran` 0/0/0. Post-merge `project/` reconcile
+  done (M21 compressed in MILESTONES; preamble → no milestone in flight, arc complete;
+  REFERENCES O-SEM extended; COVERAGE §③ / ROADMAP synced). Two oracle-first catches resolved by
+  numbers (fixed SEM = distinct Case-3A θ²_r; FIML agreement ships). Next: a new milestone's
+  scoping ADR after a short retro, or the out-of-band CRAN upload (ADR-022).
 
 ## Where we are
 
@@ -70,13 +55,15 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M18, M19 & M20 shipped and merged (PR #23/#24/#25, ADR-028/029/030); M21 scoped and
-now in flight (ADR-031).** The **M18–M21 completeness arc** (ADR-027) closes every 🔵
-*not yet* gap in [`COVERAGE.md`](COVERAGE.md). Next code work is **M21 Slice 1 — lavaan
-bootstrap `ci_method`** (reuse the M16 `simulate_refit` seam; DoD checklist in
-[`MILESTONES.md`](MILESTONES.md)). Only M21 remains in the arc.
+**The M18–M21 completeness arc (ADR-027) is COMPLETE — all four milestones shipped and
+merged (PR #23/#24/#25/#26).** Every 🔵 *not yet* gap in [`COVERAGE.md`](COVERAGE.md) is
+closed. **No milestone is in flight.** The next milestone (if any) gets its own
+start-of-milestone scoping ADR after a short retro (founding brief §7); the candidate
+backlog is in [`ROADMAP.md`](ROADMAP.md) (Bayesian engine, multilevel SEM, categorical/
+ordinal GLMM, the Wave-3 `ICC(c,k)` divisor). The out-of-band **CRAN upload** (ADR-022)
+also remains.
 
-**Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027):**
+**Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 
 - **M18 — Multilevel completeness I (crossed, incomplete):** ✅ shipped (PR #23).
 - **M19 — Multilevel completeness II (nested Designs 2/3):** ✅ shipped (PR #24) — incomplete
@@ -84,9 +71,8 @@ bootstrap `ci_method`** (reuse the M16 `simulate_refit` seam; DoD checklist in
 - **M20 — Within-cell replicate completeness:** ✅ shipped (PR #25) — fixed-rater · multilevel
   (crossed D1 + nested D2) · ragged single-occasion replicates. Occasion-averaged-ragged degraded
   to 🟣 research (no validated effective-`n_o` divisor). Extends M17 Slice 3.
-- **M21 — SEM (lavaan) engine parity:** 🚧 **in flight** (ADR-031) — lavaan bootstrap (Slice 1,
-  next), fixed-rater SEM (Slice 2), incomplete/FIML SEM (Slice 3, agreement attempt-then-degrade).
-  The lavaan analog of the lme4 M5.5→M15 arc.
+- **M21 — SEM (lavaan) engine parity:** ✅ shipped (PR #26, ADR-031) — lavaan bootstrap, fixed-rater
+  (Case-3A θ²_r), incomplete/FIML (ships, no degrade). The lavaan analog of the lme4 M5.5→M15 arc.
 
 **Reclassified out of the arc (ADR-027):** multilevel SEM → cross-cutting "later" bucket
 (research-flavored, sits beside Bayesian); lavaan + replicates → ROADMAP unscheduled (niche).
