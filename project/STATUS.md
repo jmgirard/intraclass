@@ -21,14 +21,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M22 Slices 1–2 implemented in `R/d-study.R` (uncommitted, on `main` — needs a
-  `m22-*` branch before PR, `milestone-branches-and-prs`).** `d_study()` now projects the rater
-  count off a within-cell replicate fit; the estimand change was zero (M17's `error_divisors`
+- Active task: **M22 Slices 1–2 — PR [#27](https://github.com/jmgirard/intraclass/pull/27) open,
+  awaiting CI** (branch `m22-dstudy-replicate`, commit `e959778`). `d_study()` now projects the
+  rater count off a within-cell replicate fit; the estimand change was zero (M17's `error_divisors`
   already resolve `unit = m` + `replicates` + `occasions`), so the work is confined to `d_study()`
   (blanket replicate abort → support path + two deferral guards) and its `format`/`tidy` methods
-  (a new `occasions` column). Oracle O-RepDS added to `test-d-study.R` (15 new blocks). Remaining
-  DoD: `document()`, `air format`, `lintr::lint_package()`, installed-pkg `R CMD check` with
-  `NOT_CRAN=true` (`verify-against-installed-package`), then branch + PR.
+  (a new `occasions` column). Oracle O-RepDS added to `test-d-study.R` (15 new blocks). Local DoD
+  green: full suite 293 blocks 0 fail/0 warn, `R CMD check` (`NOT_CRAN=true`) tests pass (only
+  `--no-build-vignettes` WARNINGs + pre-existing spelling NOTE), `air` + `lintr` clean. Next: watch
+  CI, then merge.
 - Last green CI: **PR #26 (M21) full matrix green incl. Windows and R-devel (all 9 jobs); merged to
   `main` at ee81e6f.** 925 tests, `R CMD check --as-cran` 0/0/0. **M22 local:** full `load_all`
   suite green (293 blocks, 0 fail / 0 warn); not yet installed-checked or pushed.
