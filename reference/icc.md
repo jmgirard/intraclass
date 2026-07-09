@@ -191,13 +191,15 @@ icc(
   prior on the random-effect SDs (ten Hove et al. 2020); the point
   estimate is the posterior mode (MAP) and the interval is a percentile
   **credible** interval (`ci_method = "posterior"`, forced). It covers
-  the balanced, complete two-way random design and the crossed
-  (Design 1) **multilevel** random design (subject and cluster levels);
-  fixed raters, one-way, nested/incomplete multilevel, and
-  within-cell-replicate Bayesian fits are planned for later milestones.
-  `"lme4"` requires the lme4 and merDeriv packages; `"lavaan"` requires
-  the lavaan package; `"brms"` requires the brms package (and a working
-  Stan toolchain).
+  the balanced, complete two-way random design, the crossed (Design 1)
+  **multilevel** random design (subject and cluster levels), and the
+  nested **multilevel** random designs – Design 2 (raters nested in
+  clusters) and Design 3 (raters nested in subjects, agreement-only),
+  both at the subject level; fixed raters, one-way, incomplete
+  multilevel, and within-cell-replicate Bayesian fits are planned for
+  later milestones. `"lme4"` requires the lme4 and merDeriv packages;
+  `"lavaan"` requires the lavaan package; `"brms"` requires the brms
+  package (and a working Stan toolchain).
 
 - conf_level:
 

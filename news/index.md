@@ -121,7 +121,11 @@ simulations.
   Chains sample sequentially on one core by default (matching brms); a
   periodic reminder suggests `brm_args = list(cores = ...)` for parallel
   sampling. Optional engines live in `Suggests`, so the base install
-  stays light.
+  stays light. The Bayesian engine also fits the **multilevel** designs
+  at the subject level: the crossed Design 1 (five components, subject
+  and cluster levels) and the nested Design 2 (raters nested in
+  clusters, four components, subject level), each under the same sourced
+  half-*t* prior with MAP + percentile credible intervals.
 
 ### Choosing, projecting, and visualizing
 
