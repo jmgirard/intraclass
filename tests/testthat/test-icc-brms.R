@@ -149,6 +149,23 @@ test_that("brms surfaces the k = 2 bias caveat as a soft note", {
   expect_true(saw_note)
 })
 
+# --- Parallel-sampling nudge (no brms needed) ---------------------------------
+
+test_that("a sequential multi-chain brms fit nudges toward cores > 1", {
+  # rlib_message_verbosity = "verbose" forces rlang's .frequency messages to show every
+  # time, so the periodic nudge is deterministic in the test.
+  withr::local_options(rlib_message_verbosity = "verbose")
+  withr::local_options(mc.cores = 1L)
+  # >1 chain on 1 core -> nudge.
+  expect_message(
+    brms_maybe_cores_note(list(chains = 4L)),
+    regexp = "sequentially"
+  )
+  # Already parallel, or a single chain -> no nudge.
+  expect_no_message(brms_maybe_cores_note(list(chains = 4L, cores = 4L)))
+  expect_no_message(brms_maybe_cores_note(list(chains = 1L)))
+})
+
 # --- posterior_mode(): boundary-aware mode of a draw vector (no brms needed) ---
 
 test_that("posterior_mode recovers a known interior mode", {
@@ -218,6 +235,52 @@ test_that("posterior_summary returns a MAP point inside its percentile interval"
     expect_gte(s$conf.low, 0)
     expect_lte(s$conf.high, 1)
   }
+})
+
+# --- O-Bayes: the committed coverage/bias reference (no brms needed) -----------
+# The heavy simulation lives in data-raw/oracle-bayesian.R (compile once, update() per
+# rep); it reproduces ten Hove et al. (2020)'s DGP through the SHIPPED reduction and
+# commits the per-cell bias/coverage/convergence statistics. Here we re-assert that the
+# committed reference exhibits the source's reported qualitative findings (§4.2, Figs
+# 1-4) -- fast, no fitting, so it runs on every CI job. The tolerances are widened from
+# the source's exact bands to absorb our finite n_rep and our INDEPENDENT MAP estimator
+# (#4/#18): a coverage oracle reproduces the qualitative findings, and any quantitative
+# divergence from the source's own tool is a reported finding, not tuned away.
+
+test_that("O-Bayes: committed reference reproduces ten Hove (2020) findings", {
+  fixture <- test_path("fixtures", "bayesian-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian.R to generate"
+  )
+  ref <- readRDS(fixture)
+  s <- ref$stats
+  k5 <- s[s$k == 5L, ]
+  k2 <- s[s$k == 2L, ]
+
+  # (1) High convergence at the half-t DGP -- their finding was 100%, but they
+  #     adaptively doubled warmup; we use a fixed budget, so a minority of the
+  #     near-boundary k = 2 reps fall short (a reported divergence, #4/#18).
+  expect_true(all(s$converged_frac >= 0.90))
+
+  # (2) sigma_r: the EAP SEVERELY overestimates while the MAP is far less biased
+  #     (their Fig 1). We pin the robust, estimator-independent contrast (EAP >> MAP),
+  #     not our reflected-KDE MAP's absolute bias (which is modestly negative here --
+  #     an independent-estimator divergence that barely moves the ICC).
+  expect_gt(k5$eap_sr_relbias, 0.10)
+  expect_gt(k5$eap_sr_relbias, k5$map_sr_relbias + 0.10)
+  expect_gt(k2$eap_sr_relbias, k2$map_sr_relbias + 0.10)
+
+  # (3) ICC(A,1): MAP unbiased at k = 5, biased low at k = 2, worse at k = 2 (Fig 2).
+  expect_lt(abs(k5$map_icc_relbias), 0.10)
+  expect_lt(k2$map_icc_relbias, -0.05)
+  expect_lt(k2$map_icc_relbias, k5$map_icc_relbias)
+
+  # (4) Percentile 95% credible-interval coverage ~nominal at k = 5; undercovers at
+  #     k = 2 (their Figs 3-4; and our k = 2 caveat).
+  expect_gte(k5$coverage_icc, 0.90)
+  expect_lte(k5$coverage_icc, 0.99)
+  expect_lt(k2$coverage_icc, k5$coverage_icc)
 })
 
 # --- Live brms fit: the full pipeline (needs brms + a Stan toolchain) ----------

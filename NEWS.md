@@ -92,7 +92,9 @@ alternate engines, and seeded simulations.
   interval via a new `ci_method = "posterior"` (the forced, Bayesian-only interval
   method). It covers the balanced, complete two-way random design (agreement and
   consistency, single and average); a `brm_args` list forwards sampler/backend
-  options (e.g. `backend = "cmdstanr"`, `chains`, `iter`) to `brms::brm()`. Optional
+  options (e.g. `backend = "cmdstanr"`, `chains`, `iter`, `cores`) to `brms::brm()`.
+  Chains sample sequentially on one core by default (matching brms); a periodic
+  reminder suggests `brm_args = list(cores = ...)` for parallel sampling. Optional
   engines live in `Suggests`, so the base install stays light.
 
 ## Choosing, projecting, and visualizing

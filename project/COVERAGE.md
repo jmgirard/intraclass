@@ -47,8 +47,9 @@ validated effective-n_o divisor).
 | `occasions` | `single`, `average` | replicates only |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan` | |
-| `ci_method` | `montecarlo`, `bootstrap` | |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random only |
+| `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
+| `brm_args` | list forwarded to `brms::brm()` | brms only |
 | data balance | balanced / incomplete (ragged) | |
 
 ---
@@ -180,7 +181,7 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 
 | Case | Reason |
 |---|---|
-| `ci_method = "posterior"` (Bayesian credible intervals) | 🔵 **Not yet** — the Bayesian engine (`rstanarm`/`brms`) + `ci_method = "posterior"` is the remaining arc carry-over; the engine × design dispatch seam is already built for it, so it is *ready to schedule*, just sequenced after the non-Bayesian carryover (ROADMAP; deferred out of M7, ADR-014). |
+| `engine = "brms"` + `ci_method = "posterior"` (Bayesian credible intervals) | ✅ **Shipped (M23, ADR-033)** — the first Bayesian engine: two-way **random** only (agreement/consistency, single/average), half-*t*(4,0,1) prior on the random-effect SDs (ten Hove et al. 2020), MAP point + percentile **credible** interval, `posterior` forced/Bayesian-only, `brm_args` passthrough. Oracle O-Bayes (committed coverage/bias reference). Bayesian **fixed / one-way / multilevel / incomplete / replicates**, `rstanarm`, selectable coupling, and HPDI intervals stay deferred (follow-ons; ROADMAP). |
 | categorical / ordinal ratings (GLMM engines) | 🔵 **Not yet** — unscheduled; needs its own estimand pass (link/family choice + oracle registry) before it is schedulable (ROADMAP). |
 | non-parametric bootstrap / profile-likelihood CIs | 🔵 **Not yet** — method-comparison nice-to-have; the *parametric* bootstrap shipped in M16 (ADR-025), the rest is unscheduled. |
 | lme4 boundary-robust interval for singular fits / merDeriv edge cases | 🔵 **Not yet (deprioritized)** — glmmTMB covers the singular-fit case today via the degrade-to-glmmTMB handoff; opportunistic parity only (ROADMAP). |

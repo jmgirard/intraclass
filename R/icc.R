@@ -248,10 +248,13 @@
 #'   afterward.
 #' @param brm_args A named list of extra arguments forwarded to [brms::brm()] when
 #'   `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`, `control`). The
-#'   default (rstan backend, brms defaults) needs none. The model formula, data, the
-#'   sourced half-*t* prior, and `seed` are owned by `intraclass` and may not be set
-#'   here; supplying them, or a non-empty `brm_args` with any other engine, is an
-#'   error.
+#'   default (rstan backend, brms defaults) needs none. By default brms samples the
+#'   chains **sequentially on one core** (`cores = getOption("mc.cores", 1L)`); pass
+#'   `brm_args = list(cores = 4)` (or set `options(mc.cores)`) to sample in parallel
+#'   — the engine emits a periodic reminder to that effect while running
+#'   sequentially. The model formula, data, the sourced half-*t* prior, and `seed`
+#'   are owned by `intraclass` and may not be set here; supplying them, or a
+#'   non-empty `brm_args` with any other engine, is an error.
 #'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
@@ -1427,7 +1430,11 @@ icc <- function(
         } else {
           mc_samples
         },
-        seed = seed
+        seed = seed,
+        # Bayesian MCMC convergence diagnostics (brms only; NULL for the other engines,
+        # which are not sampled) -- read by the O-Bayes oracle and available to users.
+        rhat = engine_fit$convergence$rhat,
+        ess_bulk = engine_fit$convergence$ess_bulk
       ),
       n = list(
         subjects = n_subjects,

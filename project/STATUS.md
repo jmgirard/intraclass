@@ -33,10 +33,16 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M23 Slice 2 — reproducibility + the coverage oracle (O-Bayes)** (next; DoD board in
-  MILESTONES.md M23). Seeded MCMC + convergence checks, `data-raw/oracle-bayesian.R` reproducing ten
-  Hove 2020's DGP with committed reference values (#4) vs OSF `shkqm`, and the O-Bayes tests
-  (coverage/MAP-bias at k > 2, cross-impl, MAP ≈ REML, convergence). **Slice 1 shipped** (below).
+- Active task: **M23 finish-task** — Slices 1 & 2 code complete on branch `m23-bayesian`; remaining
+  is the milestone-close gate (installed-pkg check with `NOT_CRAN=true`, `R CMD check --as-cran`
+  0/0/0, open the PR for the full CI matrix). **Slice 2 shipped** (O-Bayes): seeded MCMC +
+  `brms_convergence()` checks (R-hat/bulk-ESS, classed warning, `ci$rhat`/`ci$ess_bulk`);
+  `data-raw/oracle-bayesian.R` reproduces ten Hove 2020's DGP through the shipped reduction (compile
+  once + `update()`, 250 reps/cell) and commits `tests/testthat/fixtures/bayesian-oracle.rds` (#4);
+  O-Bayes tests assert the reproduced findings (MAP-ICC unbiased@k5/biased@k2, EAP-σ_r ≫ MAP-σ_r,
+  coverage nominal@k5). Two reported divergences (#4/#18): convergence 90–99% not 100% (fixed vs
+  adaptive warmup); reflected-KDE σ_r MAP modestly negative-biased vs their `modeest`. **Slice 1
+  shipped** (below). 308 tests 0F/0W incl. live fit; lint + spelling clean.
 - Slice 1 (done, on branch `m23-bayesian`): Bayesian engine + `posterior_summary()` end-to-end —
   `R/engine-brms.R` (`fit_brms_twoway()`, half-*t*(4,0,1) prior, `draws` field on the natural
   variance scale), `R/ci-posterior.R` (`posterior_mode()` reflected-KDE + `posterior_summary()`),
@@ -52,10 +58,11 @@
 - Last green CI: **PR #27 (M22) full matrix green incl. Windows and R-devel (all 9 jobs); merged to
   `main` at `8375184`.** Prior: PR #26 (M21), 925 tests, `R CMD check --as-cran` 0/0/0.
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M23 Slice 1 shipped on branch `m23-bayesian`**
-  (engine + `ci_method = "posterior"` end-to-end; `brm_args` passthrough per the ADR-033 amendment;
-  306 tests 0F/0W incl. a live brms fit; lint + spelling clean). Prior updates this day: Slice 1
-  started (`/start-task`); M23 opened (ADR-033). Next: Slice 2 (O-Bayes coverage oracle). A source-reviewed planning session (ten Hove 2020 hyperprior paper + 2022 guidelines
+- Updated: 2026-07-09 by main session (Opus) — **M23 Slice 2 shipped on branch `m23-bayesian`**
+  (O-Bayes: `data-raw/oracle-bayesian.R` + committed `bayesian-oracle.rds`; `brms_convergence()`;
+  the parallel-sampling `cores` nudge; 308 tests 0F/0W incl. live fit; lint + spelling clean). Prior:
+  Slice 1 shipped; Slice 1 started; M23 opened (ADR-033). Next: **finish-task** (installed-pkg check,
+  `R CMD check --as-cran`, open PR for CI matrix). A source-reviewed planning session (ten Hove 2020 hyperprior paper + 2022 guidelines
   corroboration) resolved every design fork for the first Bayesian milestone: brms backend
   (`Suggests`; rstanarm parked), half-*t*(4,0,1) prior, MAP point via a hand-rolled boundary-aware
   `posterior_mode()` (no new dep), percentile credible interval, `"posterior"` forced-default &

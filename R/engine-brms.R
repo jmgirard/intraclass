@@ -79,6 +79,59 @@ brms_component_draws <- function(fit, call = rlang::caller_env()) {
   )
 }
 
+# Backend-agnostic MCMC convergence diagnostics on the variance-component parameters
+# (M23 Slice 2, ADR-033). Returns the max potential-scale-reduction factor (R-hat) and the
+# min bulk effective sample size over the two random-effect SDs and the residual SD --
+# ten Hove et al. (2020) §4.1.3 checked exactly these (R-hat < 1.10, N_eff > 100). Uses
+# `posterior` (a hard brms dependency, so always present behind check_installed("brms")),
+# which reads both rstan and cmdstanr fits. Never fatal: if the diagnostics cannot be read
+# it returns NAs, and the caller degrades to no convergence warning.
+brms_convergence <- function(fit) {
+  tryCatch(
+    {
+      draws <- posterior::subset_draws(
+        posterior::as_draws(fit),
+        variable = c("sd_subject__Intercept", "sd_rater__Intercept", "sigma")
+      )
+      s <- posterior::summarise_draws(draws, "rhat", "ess_bulk")
+      list(
+        rhat = max(s$rhat, na.rm = TRUE),
+        ess_bulk = min(s$ess_bulk, na.rm = TRUE)
+      )
+    },
+    error = function(e) list(rhat = NA_real_, ess_bulk = NA_real_)
+  )
+}
+
+# Nudge toward parallel sampling when several chains will run sequentially (M23). brms
+# defaults to `cores = getOption("mc.cores", 1L)`, so out of the box the chains run
+# one-at-a-time on a single core -- often the slowest part of a fit. We keep that default
+# (matching brms; no surprise CPU grab) but, when >1 chain will run on 1 core, emit a
+# periodic reminder that the user can parallelize via the `brm_args` passthrough. Rate
+# limited by rlang's "regularly" cadence (at most once every 8 hours, NOT per fit), and
+# skipped entirely when the user already sets `cores > 1` or runs a single chain.
+brms_maybe_cores_note <- function(brm_args) {
+  n_chains <- if (is.null(brm_args$chains)) 4L else brm_args$chains
+  n_cores <- if (is.null(brm_args$cores)) {
+    getOption("mc.cores", 1L)
+  } else {
+    brm_args$cores
+  }
+  if (n_cores <= 1L && n_chains > 1L) {
+    cli::cli_inform(
+      c(
+        "i" = "The {.pkg brms} engine is sampling {n_chains} chains sequentially on \\
+               one core (often the slowest part of the fit).",
+        ">" = "Pass {.code brm_args = list(cores = {n_chains})} (or set \\
+               {.code options(mc.cores)}) to sample chains in parallel."
+      ),
+      .frequency = "regularly",
+      .frequency_id = "intraclass_brms_cores"
+    )
+  }
+  invisible(NULL)
+}
+
 fit_brms_twoway <- function(
   data,
   seed = NULL,
@@ -103,6 +156,9 @@ fit_brms_twoway <- function(
     base_args$seed <- seed
   }
 
+  # Periodic parallel-sampling reminder before the (possibly slow) sequential fit.
+  brms_maybe_cores_note(brm_args)
+
   fit <- withCallingHandlers(
     do.call(brms::brm, c(base_args, brm_args)),
     warning = function(w) {
@@ -114,6 +170,27 @@ fit_brms_twoway <- function(
       invokeRestart("muffleWarning")
     }
   )
+
+  # Convergence diagnostics (Slice 2): warn loudly on weak MCMC mixing (#8) -- a single
+  # non-converged fit still returns (the user got a posterior), but the interval is not
+  # trustworthy until it converges. ten Hove et al. (2020) doubled warmup until R-hat <
+  # 1.10; we surface the caveat and point at the sampler knobs rather than silently
+  # refit. The stats are also stored on the contract so the O-Bayes oracle can tally the
+  # convergence rate across replications.
+  conv <- brms_convergence(fit)
+  if (isTRUE(conv$rhat >= 1.10) || isTRUE(conv$ess_bulk < 100)) {
+    warn_intraclass(
+      c(
+        "The {.pkg brms} fit shows weak MCMC convergence (max R-hat \\
+         {.val {round(conv$rhat, 3)}}, min bulk-ESS {.val {round(conv$ess_bulk)}}).",
+        i = "Draw more/longer chains via {.arg brm_args} (e.g. {.code iter}, \\
+             {.code chains}, {.code warmup}); ten Hove et al. (2020) used R-hat < 1.10 \\
+             and bulk-ESS > 100.",
+        i = "Treat the credible interval with caution until the chains converge."
+      ),
+      class = "intraclass_brms_convergence"
+    )
+  }
 
   draws <- brms_component_draws(fit, call = call)
 
@@ -153,6 +230,9 @@ fit_brms_twoway <- function(
     # The new contract field (ADR-033): the posterior component draws the Bayesian branch
     # reduces to a MAP point + percentile credible interval (R/ci-posterior.R). A
     # non-Bayesian engine leaves this NULL and takes the icc_point()/mc_ci() path.
-    draws = draws
+    draws = draws,
+    # MCMC convergence diagnostics (max R-hat, min bulk-ESS) for the O-Bayes oracle and
+    # programmatic access; NULL for non-Bayesian engines.
+    convergence = conv
   )
 }
