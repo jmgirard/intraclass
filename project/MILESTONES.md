@@ -876,30 +876,39 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       `REFERENCES.md`.
 
 **Slice 2 — Bayesian fixed-rater two-way** (conditional on the oracle-first resolution)
-- [ ] **Oracle-first resolution FIRST:** confirm the raw θ²_r posterior push-forward (no bias
-      correction) agrees with glmmTMB fixed on balanced data; characterize the balanced
-      fixed-vs-random relationship. If no #1/#4-strong oracle holds → **degrade** (record the
-      scope-out, keep the fixed brms abort, ship Slice 1 alone).
-- [ ] `fit_brms_fixed()` in `R/engine-brms.R`: `score ~ 1 + rater + (1 | subject)` (rater
+- [x] **Oracle-first resolution — RESOLVED, Slice 2 PROCEEDS (no degrade).** On a balanced DGP
+      (n=30, k=4, σ²_r>0): (a) **use RAW θ²_r, no bias correction** — the frequentist correction
+      moves MAP ICC(A,1) by ~0.002 (negligible), and the posterior already integrates the
+      parameter uncertainty the correction subtracts; (b) the brms-fixed MAP sits ~0.03 **below**
+      glmmTMB REML — the standard MAP-below-plug-in skew (ADR-033), so the oracle is **containment**
+      (glmmTMB fixed inside the credible interval), not pointwise equality; (c) balanced
+      `fixed ≡ random` holds only **approximately** for brms (fixed MAP 0.19 vs random 0.17) —
+      characterized, not asserted (the ADR's honest catch, confirmed).
+- [x] `fit_brms_fixed()` in `R/engine-brms.R`: `score ~ 1 + rater + (1 | subject)` (rater
       population-level fixed; half-*t* on the subject SD only); σ²_s ← `sd_subject__Intercept`,
-      σ²_res ← `sigma`; **θ²_r per posterior draw** from the rater fixed-effect draws via
-      `rater_mean_contrast()`/centering, stacked as the `rater` row of `draws`.
-- [ ] Narrow the data-dependent fixed-rater brms abort (`icc.R:1123`) to admit `raters = "fixed"`;
-      dispatch to `fit_brms_fixed()` in the fixed branch (`icc.R:1250`). Balance / replicate /
+      σ²_res ← `sigma`; **raw θ²_r per posterior draw** from the rater fixed-effect draws via
+      `rater_mean_contrast()`/centering, injected as the `rater` row of `draws` + component.
+- [x] Narrowed the data-dependent fixed-rater brms abort to **fixed × multilevel** only (single-level
+      fixed ships); dispatch to `fit_brms_fixed()` in the fixed branch. Balance / replicate /
       numeric-unit / k=2-note brms guards unchanged.
-- [ ] Agreement `{rater, residual}` / consistency `{residual}` compose off `draws` unchanged.
-- [ ] **O-Bayes-Fixed**: MAP ≈ glmmTMB fixed θ²_r agreement (primary pin); consistency-vs-random and
-      balanced fixed-vs-random *characterized* (#18, not asserted equal); seeded coverage ~nominal.
-- [ ] One live brms fixed fit, same skip guards as Slice 1.
+- [x] Agreement `{rater, residual}` / consistency `{residual}` compose off `draws` unchanged
+      (verified live: components `subject, rater, residual`).
+- [x] **O-Bayes-Fixed**: `data-raw/oracle-bayesian-fixed.R` (compile-once/`update()`, replicating the
+      raw-θ²_r reduction) + committed fixture (n_rep 200: convergence 1.00, coverage .935, MAP
+      rel-bias −.050); **O-Bayes-Fixed-agree** live — glmmTMB fixed agreement = SF ICC2 (0.290/0.620,
+      the M10 identity) + consistency = SF ICC3 (0.715/0.909), each inside the brms credible interval.
+- [x] One live brms fixed fit, same skip guards as Slice 1 (agreement + consistency).
 
 **Cross-cutting DoD**
-- [ ] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]).
-- [ ] Installed-pkg suite `NOT_CRAN=true` green incl. the live brms fits
-      ([[verify-against-installed-package]]); `R CMD check --as-cran` 0/0/{0,1}.
-- [ ] New `@export`s (none expected) / `_pkgdown.yml` unaffected; NEWS updated under 0.1.0.
-- [ ] `REFERENCES.md` O-Bayes-OW / O-Bayes-Fixed rows; `COVERAGE.md` brms one-way + fixed cells;
-      `ROADMAP.md` flips the one-way/fixed Bayesian follow-ons to shipped (or records the Slice-2
-      degrade). `STATUS.md` + this board updated in-commit (#16).
-- [ ] Ship on an `m26-<slug>` branch, merge via PR ([[milestone-branches-and-prs]]).
-- Status: **active — scoped by ADR-036, no slice work begun.** Opened after the M23–M25 Bayesian-arc
+- [x] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]).
+- [~] Installed-pkg suite `NOT_CRAN=true` green incl. the live brms fits
+      ([[verify-against-installed-package]]); `R CMD check --as-cran` 0/0/{0,1}. *(load_all full
+      live suite green — 7 live Stan fits, 0 failures; installed-pkg + R CMD check run as the
+      pre-PR gate.)*
+- [x] No new `@export`s / `_pkgdown.yml` unaffected; NEWS updated under 0.1.0 (Bayesian section).
+- [x] `REFERENCES.md` O-Bayes-OW / O-Bayes-Fixed rows; `COVERAGE.md` brms one-way + fixed cells +
+      engine row + cross-cutting line; `ROADMAP.md` flipped the single-level one-way/fixed Bayesian
+      follow-ons to shipped. `STATUS.md` + this board updated in-commit (#16).
+- [ ] Ship on the `m26-bayes-oneway-fixed` branch, merge via PR ([[milestone-branches-and-prs]]).
+- Status: **both slices done; verifying for PR.** Scoped by ADR-036; opened after the M23–M25 Bayesian-arc
   retro (2026-07-09).

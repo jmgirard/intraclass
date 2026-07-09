@@ -11,11 +11,11 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-09**, during **M25** (ADR-035, branch `m25-bayesian-nested`) — Bayesian **nested
-multilevel**: `engine = "brms"` + `ci_method = "posterior"` now also covers the nested Designs 2/3 at
-the **subject level** (Design 2 agreement/consistency; Design 3 agreement-only, the multilevel
-one-way), balanced. Prior: **M24** (ADR-034) — Bayesian **crossed (Design 1) multilevel** (subject +
-cluster levels); **M23** (ADR-033, PR #28, the first Bayesian milestone — two-way random), **M22**
+**2026-07-09**, during **M26** (ADR-036, branch `m26-bayes-oneway-fixed`) — Bayesian **single-level
+one-way + fixed-rater**: `engine = "brms"` now covers `model = "oneway"` (`ICC(1)`/`ICC(1,k)`) and
+`raters = "fixed"` (raw Case-3A θ²_r from the posterior), balanced. Prior: **M25** (ADR-035) — Bayesian
+**nested multilevel** (Designs 2/3, subject level); **M24** (ADR-034) — Bayesian **crossed (Design 1)
+multilevel** (subject + cluster levels); **M23** (ADR-033, PR #28, the first Bayesian milestone — two-way random), **M22**
 (PR #27, `d_study()` off a replicate fit), **M21** (PR #26, SEM parity), **M20** (PR #25, replicate
 corners), M18/M19 (PR #23/#24).
 
@@ -50,7 +50,7 @@ validated effective-n_o divisor).
 | `occasions` | `single`, `average` | replicates only |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random + all multilevel (crossed D1 + nested D2/D3, subject level) |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random **+ fixed + one-way** (single-level, balanced) + all multilevel (crossed D1 + nested D2/D3, subject level) |
 | `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | data balance | balanced / incomplete (ragged) | |
@@ -68,7 +68,8 @@ validated effective-n_o divisor).
 | balance | ✅ balanced, ✅ incomplete/ragged |
 | `engine` = glmmTMB, lme4 | ✅ (both, on balanced + ragged; ragged lme4 degrades to glmmTMB at the variance boundary) |
 | `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4) |
-| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M23, ADR-033)** — two-way **random** only (agreement/consistency, single/average), balanced/complete; half-*t*(4,0,1) prior, MAP point + percentile credible interval, `brm_args` passthrough. Bayesian fixed-rater, numeric-`unit` D-study, and incomplete are deferred (see the cross-cutting section). |
+| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M23, ADR-033)** — two-way **random** (agreement/consistency, single/average), balanced/complete; half-*t*(4,0,1) prior, MAP point + percentile credible interval, `brm_args` passthrough. |
+| `engine = "brms"` + `raters = "fixed"` | ✅ **Shipped (M26 Slice 2, ADR-036)** — `score ~ 1 + rater + (1\|subject)`; **raw** θ²_r (McGraw & Wong Case-3A finite-population variance) read per posterior draw from the rater fixed-effect draws — **no** frequentist bias correction (the posterior integrates it; oracle-first resolution). Balanced/complete. Honest catch: balanced `fixed ≡ random` holds only **approximately** for brms (prior on σ_r vs flat on rater effects), so O-Bayes-Fixed pins **containment** (glmmTMB fixed inside the credible interval) + coverage, not pointwise equality. Numeric-`unit` D-study and incomplete brms stay deferred (cross-cutting section). |
 
 **Gaps**
 
@@ -116,7 +117,8 @@ Raters are interchangeable — `type` does not apply; coefficients are `ICC(1)` 
 | `unit` = single, average, numeric `m` | ✅ |
 | balance | ✅ balanced, ✅ incomplete |
 | `engine` = glmmTMB, lme4 | ✅ |
-| `ci_method` = montecarlo, bootstrap | ✅ |
+| `engine = "brms"` | ✅ **balanced** (M26 Slice 1, ADR-036) — `ICC(1)`/`ICC(1,k)` under the half-*t*(4,0,1) prior, MAP + percentile credible interval; incomplete/numeric-`m` brms deferred. |
+| `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4); ✅ **posterior** (brms, balanced) |
 
 **Gaps**
 
@@ -148,8 +150,9 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 - `ci_method`: ✅ montecarlo, bootstrap (glmmTMB + lme4); ✅ **posterior** (brms — crossed
   Design 1 random, subject + cluster levels, balanced (M24, ADR-034); **and nested Designs 2/3 random,
   subject level, balanced (M25, ADR-035)** — MAP + percentile credible interval under the half-*t*(4,0,1)
-  prior). Bayesian **fixed-rater, one-way, incomplete, conflated, replicates** stay deferred
-  (cross-cutting section).
+  prior). Bayesian **incomplete, conflated, replicates**, and **fixed/one-way at the multilevel
+  level** stay deferred (cross-cutting section); single-level Bayesian fixed-rater and one-way
+  shipped in M26 (ADR-036).
 
 **Gaps**
 
@@ -189,7 +192,7 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 
 | Case | Reason |
 |---|---|
-| `engine = "brms"` + `ci_method = "posterior"` (Bayesian credible intervals) | ✅ **Shipped (M23, ADR-033; M24, ADR-034; M25, ADR-035)** — the Bayesian engine: two-way **random** (M23), **crossed (Design 1) multilevel random** (M24 — subject + cluster levels, ten Hove's native turf), **and nested Designs 2/3 multilevel random** (M25 — subject level; Design 2 agreement/consistency, Design 3 agreement-only / multilevel one-way), agreement/consistency, single/average, balanced/complete; half-*t*(4,0,1) prior on every random-effect SD (ten Hove et al. 2020), MAP point + percentile **credible** interval, `posterior` forced/Bayesian-only, `brm_args` passthrough. Oracles O-Bayes (two-way) + O-Bayes-ML (crossed multilevel) + O-Bayes-NML (nested — committed coverage/bias reference; subject-level nominal). Bayesian **fixed / one-way / incomplete / replicates / conflated**, `rstanarm`, selectable coupling, and HPDI intervals stay deferred (follow-ons; ROADMAP). |
+| `engine = "brms"` + `ci_method = "posterior"` (Bayesian credible intervals) | ✅ **Shipped (M23, ADR-033; M24, ADR-034; M25, ADR-035)** — the Bayesian engine: two-way **random** (M23), **crossed (Design 1) multilevel random** (M24 — subject + cluster levels, ten Hove's native turf), **and nested Designs 2/3 multilevel random** (M25 — subject level; Design 2 agreement/consistency, Design 3 agreement-only / multilevel one-way), agreement/consistency, single/average, balanced/complete; half-*t*(4,0,1) prior on every random-effect SD (ten Hove et al. 2020), MAP point + percentile **credible** interval, `posterior` forced/Bayesian-only, `brm_args` passthrough. Plus single-level **one-way** (`ICC(1)`/`ICC(1,k)`) and **fixed-rater** (raw Case-3A θ²_r from the posterior) two-way, balanced (M26, ADR-036). Oracles O-Bayes (two-way) + O-Bayes-ML (crossed multilevel) + O-Bayes-NML (nested) + O-Bayes-OW (one-way) + O-Bayes-Fixed (fixed — committed coverage references; subject/single-level nominal). Bayesian **incomplete / replicates / conflated**, **fixed & one-way at the multilevel level**, `rstanarm`, selectable coupling, and HPDI intervals stay deferred (follow-ons; ROADMAP). |
 | categorical / ordinal ratings (GLMM engines) | 🔵 **Not yet** — unscheduled; needs its own estimand pass (link/family choice + oracle registry) before it is schedulable (ROADMAP). |
 | non-parametric bootstrap / profile-likelihood CIs | 🔵 **Not yet** — method-comparison nice-to-have; the *parametric* bootstrap shipped in M16 (ADR-025), the rest is unscheduled. |
 | lme4 boundary-robust interval for singular fits / merDeriv edge cases | 🔵 **Not yet (deprioritized)** — glmmTMB covers the singular-fit case today via the degrade-to-glmmTMB handoff; opportunistic parity only (ROADMAP). |

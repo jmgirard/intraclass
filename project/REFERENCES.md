@@ -397,6 +397,43 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   fitting); a single tiny live brms fit exercises the wiring (`skip_on_cran` +
   `skip_if_not_installed("brms")`).
 
+### Oracle O-Bayes-Fixed — Bayesian fixed-rater two-way (M26 Slice 2, ADR-036)
+
+- **Role:** the fixed-rater sibling of O-Bayes. A CI method's oracle is **coverage** (#1); the
+  shipped brms recipe on the fixed-rater fit `score ~ 1 + rater + (1 | subject)` — with θ²_r
+  (McGraw & Wong Case-3A finite-population variance of the k fixed rater means) read **raw** per
+  posterior draw — covers the fixed-population ICC(A,1), and via the live fit reduces to the
+  Shrout & Fleiss anchors.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) — the prior/MAP/percentile recipe;
+  McGraw & Wong (1996) Case 3A — the fixed-rater finite-population θ²_r (reused
+  `M3-incomplete-designs.md §6` / `M10-fixed-multilevel.md §2`, no new spec).
+- **Oracle-first resolution (ADR-036, #18).** Two REML/FIML facts do **not** transfer verbatim to a
+  Bayesian fit, resolved empirically at build: (a) **no bias correction** — `theta2r_fixed()`
+  subtracts the sampling variance of a *point* estimate, but the posterior already integrates that
+  uncertainty, so the raw per-draw finite-population variance is the proper posterior draw of θ²_r;
+  confirmed negligible (the correction moves MAP ICC(A,1) by ~0.002). (b) The balanced
+  `fixed ≡ random` identity (exact under REML in M10 / FIML in M21) holds only **approximately** for
+  brms — flat prior on the rater fixed effects vs half-*t*(4,0,1) on σ_r — so the oracle is
+  **containment** (glmmTMB fixed inside the brms credible interval), not pointwise equality, and the
+  MAP tracks glmmTMB within the standard MAP-below-plug-in skew (ADR-033).
+- **DGP:** `Y_sr = μ_s + μ_rj + e`, k = 4 **fixed** rater means `c(−0.6,−0.2,0.2,0.6)`
+  (θ²_r = 0.2667), N = 30, σ²_s = σ²_res = 0.5 → population fixed-rater **ICC(A,1) = 0.3947**.
+- **Committed reference (`tests/testthat/fixtures/bayesian-fixed-oracle.rds`; n_rep = 200,
+  seed 20261):** convergence **1.00**, MAP ICC(A,1) rel-bias **−.050** (mild low skew), coverage
+  of the fixed-population ICC(A,1) **.935** (nominal).
+- **Pins (qualitative, #4/#18):** (1) convergence ≥ .90; (2) percentile coverage of the
+  fixed-population ICC(A,1) ~nominal (≥ .88, ≤ .99); (3) the MAP is biased **low** (the
+  right-skewed-ICC-draws mode sits below the population plug-in) — characterized, not asserted
+  unbiased.
+- **Provenance:** `data-raw/oracle-bayesian-fixed.R` (companion to `oracle-bayesian.R`) — the same
+  compile-once/`update()`-per-rep recipe, **replicating** `fit_brms_fixed()`'s raw-θ²_r reduction
+  (b_rater draws → finite-population variance → the `rater` `draws` row → `posterior_summary`);
+  **commits** the reference and `stopifnot`-checks it. The `test-icc-brms.R` **O-Bayes-Fixed** test
+  reads the committed reference (fast, no fitting, runs on CI); **O-Bayes-Fixed-agree** is the live
+  fit on the Shrout & Fleiss data — with raters fixed and balanced data, glmmTMB agreement = the
+  two-way random **SF ICC2** (0.290 / 0.620, the M10 identity) and consistency = **SF ICC3**
+  (0.715 / 0.909), each inside the brms credible interval (`skip_on_ci`).
+
 ### Oracle O-Bayes-ML — Bayesian crossed multilevel (M24, ADR-034)
 
 - **Role:** the multilevel companion to O-Bayes. A CI method's oracle is **coverage**

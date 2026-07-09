@@ -92,14 +92,8 @@ test_that("brm_args must be a list", {
 
 test_that("brms refuses the deferred designs with a teaching abort", {
   d <- sf_ratings_long()
-  # NB: one-way is now SUPPORTED (M26 Slice 1, ADR-036) -- see the O-Bayes-OW tests below.
-  # fixed raters (the general fixed-rater advisory warning fires first; expected)
-  expect_error(
-    suppressWarnings(
-      icc(d, score, subject, rater, raters = "fixed", engine = "brms")
-    ),
-    class = "intraclass_unsupported"
-  )
+  # NB: one-way (M26 Slice 1) and single-level fixed raters (M26 Slice 2) are now SUPPORTED
+  # -- see the O-Bayes-OW / O-Bayes-Fixed tests below. What stays deferred:
   # numeric unit (D-study projection)
   expect_error(
     icc(d, score, subject, rater, unit = 6, engine = "brms"),
@@ -109,6 +103,27 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   d_inc <- d[-1, , drop = FALSE]
   expect_error(
     icc(d_inc, score, subject, rater, engine = "brms"),
+    class = "intraclass_unsupported"
+  )
+  # fixed-rater MULTILEVEL (single-level fixed ships; fixed multilevel stays deferred). The
+  # general fixed-rater advisory warning fires first (expected); the abort must be reached
+  # before the multilevel dispatch would silently pick glmmTMB (#5).
+  set.seed(3)
+  ml <- expand.grid(subject = 1:4, rater = factor(1:3), cluster = factor(1:3))
+  ml$subject <- factor(paste0(ml$cluster, "_", ml$subject))
+  ml$score <- rnorm(nrow(ml))
+  expect_error(
+    suppressWarnings(
+      icc(
+        ml,
+        score,
+        rater,
+        subject = subject,
+        cluster = cluster,
+        raters = "fixed",
+        engine = "brms"
+      )
+    ),
     class = "intraclass_unsupported"
   )
 })
@@ -425,6 +440,34 @@ test_that("O-Bayes-OW: committed reference reproduces the one-way findings", {
   expect_gte(k2$coverage_icc1, 0.88)
 })
 
+# --- O-Bayes-Fixed: the committed fixed-rater coverage reference (no brms, M26 S2) ---
+# The fixed-rater sibling of O-Bayes. data-raw/oracle-bayesian-fixed.R runs a FIXED-rater DGP
+# (k = 4 fixed rater means, theta^2_r = 0.2667, N = 30, sigma^2_s = sigma^2_res = 0.5 ->
+# population ICC(A,1) = 0.3947) through the SHIPPED fit_brms_fixed() (raw theta^2_r per draw)
+# and commits coverage/bias/convergence for ICC(A,1). Fast, no fitting, runs on every CI job.
+# Coverage of the fixed-population ICC(A,1) is the calibrated quantity; the MAP is biased low
+# by the right-skewed-ICC-draws mode (the standard MAP-below-plug-in skew, ADR-033), reported.
+# Observed (n_rep = 200, seed 20261): convergence 1.00, MAP ICC(A,1) rel-bias -.050, coverage .935.
+
+test_that("O-Bayes-Fixed: committed reference reproduces the fixed-rater findings", {
+  fixture <- test_path("fixtures", "bayesian-fixed-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-fixed.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+
+  # (1) High convergence at the half-t DGP.
+  expect_gte(s$converged_frac, 0.90)
+
+  # (2) Percentile 95% credible-interval coverage of the fixed-population ICC(A,1) ~nominal.
+  expect_gte(s$coverage_icc, 0.88)
+  expect_lte(s$coverage_icc, 0.99)
+
+  # (3) The MAP is biased low (the skew) -- characterized, not asserted unbiased (#18).
+  expect_lt(s$map_icc_relbias, 0)
+})
+
 # --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---
 # The subject-level (within-cluster) agreement estimand has signal sigma^2_{s:c} and error
 # {rater, residual} -- structurally IDENTICAL to the single-level two-way estimand (M5 §3a;
@@ -618,6 +661,96 @@ test_that("brms fits the one-way random ICC end to end (O-Bayes-OW-agree)", {
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: fixed-rater two-way, O-Bayes-Fixed-agree (M26 Slice 2, ADR-036) ---
+# The fixed-rater analogue of the two-way live test, on the Shrout & Fleiss (1979) data.
+# Gated OFF CI (a CI runner has brms but no Stan toolchain). The committed O-Bayes-Fixed
+# fixture is the coverage oracle; this smoke test wires the theta^2_r-from-posterior fit end
+# to end and pins the SF reduction: with raters FIXED and balanced data, glmmTMB agreement =
+# the two-way random values (SF ICC2 = 0.290 / 0.620, the M10 identity) and glmmTMB
+# consistency = SF ICC3 (0.715 / 0.909); each glmmTMB point sits inside the brms credible
+# interval (MAP-consistent, containment -- the fixed MAP is the mode of the right-skewed ICC
+# draws, which legitimately sits below the REML plug-in, ADR-036).
+
+test_that("brms fits the fixed-rater two-way ICC end to end (O-Bayes-Fixed-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  d <- sf_ratings_long()
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+  fa <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  fc <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  expect_identical(fa$engine, "brms")
+  expect_identical(fa$ci$method, "posterior")
+  # theta^2_r lives in the rater component slot (subject, rater, residual).
+  expect_setequal(names(fa$components), c("subject", "rater", "residual"))
+
+  ta <- tidy(fa)
+  tc <- tidy(fc)
+  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(tc$index, c("ICC(C,1)", "ICC(C,k)"))
+  expect_true(all(
+    c(ta$estimate, tc$estimate) >= 0 & c(ta$estimate, tc$estimate) <= 1
+  ))
+
+  # SF reduction + containment. glmmTMB fixed: balanced agreement = SF ICC2 (= random, M10
+  # identity); consistency = SF ICC3. suppressWarnings mutes the expected fixed-rater advisory.
+  gf <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "glmmTMB",
+    seed = 1
+  )))
+  gc <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "consistency",
+    raters = "fixed",
+    engine = "glmmTMB",
+    seed = 1
+  )))
+  by_index <- function(x, i) x$estimate[x$index == i]
+  expect_equal(by_index(gf, "ICC(A,1)"), 0.290, tolerance = 5e-3)
+  expect_equal(by_index(gf, "ICC(A,k)"), 0.620, tolerance = 5e-3)
+  expect_equal(by_index(gc, "ICC(C,1)"), 0.715, tolerance = 5e-3)
+  expect_equal(by_index(gc, "ICC(C,k)"), 0.909, tolerance = 5e-3)
+  for (i in c("ICC(A,1)", "ICC(A,k)")) {
+    reml <- by_index(gf, i)
+    expect_gte(reml, ta$conf.low[ta$index == i])
+    expect_lte(reml, ta$conf.high[ta$index == i])
+  }
+  for (i in c("ICC(C,1)", "ICC(C,k)")) {
+    reml <- by_index(gc, i)
+    expect_gte(reml, tc$conf.low[tc$index == i])
+    expect_lte(reml, tc$conf.high[tc$index == i])
+  }
 })
 
 # --- Live brms fit: crossed (Design 1) multilevel, O-Bayes-ML-agree (M24 Slice 1) ---
