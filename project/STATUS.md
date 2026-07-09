@@ -52,13 +52,11 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M24 Slices 1–2 implemented — cross-cutting DoD + finish-task remain.** Slice 1
-  (subject-level: `fit_brms_multilevel()` + guard narrowing + dispatch + O-Bayes-ML-agree) and Slice 2
-  (cluster-level + the committed multilevel coverage fixture via new
-  `data-raw/oracle-bayesian-multilevel.R` + O-Bayes-ML-coverage/reduction) are done; `test-icc-brms.R`
-  84/84 green incl. both live fits. **Next: cross-cutting DoD** (COVERAGE ④ brms cells → ✅, REFERENCES
-  O-Bayes-ML, `pkgdown::check_pkgdown()`, installed-pkg suite `NOT_CRAN=true`, `R CMD check --as-cran`)
-  then finish-task + open the PR. Remaining non-M24 work lives in [`ROADMAP.md`](ROADMAP.md):
+- Active task: **M24 complete locally — ready to push + open the PR.** Slices 1–2 (subject + cluster
+  Bayesian crossed multilevel; O-Bayes-ML agree/coverage/reduction) and all cross-cutting DoD are done.
+  Full suite 1041/0/0/0 (`NOT_CRAN=true`); `R CMD check --as-cran` 0/0/1 (New submission NOTE);
+  `air`/`lintr`/`pkgdown` clean. **Next: push `m24-bayesian-multilevel` + open the PR**, then post-merge
+  `project/` reconcile. Remaining non-M24 work lives in [`ROADMAP.md`](ROADMAP.md):
   the other Bayesian follow-ons (fixed-rater, one-way, nested, incomplete, replicates),
   categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete
   divisor, and occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
@@ -74,7 +72,9 @@
   ~40-min seeded run) committed `bayesian-ml-oracle.rds`; O-Bayes-ML-coverage/reduction tests. Findings
   reproduced honestly: subject-level nominal (relbias −1.5%, cover .94 at k=5), cluster-level
   few-cluster MAP-low caveat (−16%/−25% at N_c=20). `test-icc-brms.R` 84/84 green; `air` + `lintr`
-  clean. **Next: cross-cutting DoD + finish-task.**
+  clean. Cross-cutting DoD then completed: COVERAGE ④ brms cells → ✅, REFERENCES O-Bayes-ML,
+  `pkgdown::check_pkgdown()` clean, full suite 1041/0/0/0, `R CMD check --as-cran` 0/0/1. **Next: push
+  the branch + open the PR.**
 
 ## Where we are
 

@@ -397,6 +397,40 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   fitting); a single tiny live brms fit exercises the wiring (`skip_on_cran` +
   `skip_if_not_installed("brms")`).
 
+### Oracle O-Bayes-ML — Bayesian crossed multilevel (M24, ADR-034)
+
+- **Role:** the multilevel companion to O-Bayes. A CI method's oracle is **coverage**
+  (#1); the source is a simulation study, so the oracle is that the shipped brms +
+  half-*t*(4, 0, 1) recipe, extended to the M5 **five-component crossed (Design 1)** fit,
+  reproduces the source's bias/coverage/convergence behaviour at the **subject** level and
+  honestly exposes the **few-cluster** caveat at the cluster level.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) — the prior/MAP/percentile recipe;
+  and (2022, *Psychological Methods* 27(4):650–666) — the crossed subject/cluster estimands
+  (Eqs. 12–13, Table 3) and the multilevel simulation regime (N_c ∈ {20, 40}, N_s/cluster,
+  k; σ²_{s:c}=1, σ²_{cr}=0.16, σ²_res=0.5, σ²_c/σ²_r varied), transcribed in
+  `estimand-specs/M5-multilevel.md` §5.
+- **Committed reference (`tests/testthat/fixtures/bayesian-ml-oracle.rds`; n_rep = 100,
+  seed 20240, DGP N_c = 20, N_s/cluster = 5, σ²_c = 0.5, k ∈ {5, 2}):** k = 5 **subject**
+  conv .97, MAP rel-bias −.015, coverage .94; k = 2 subject conv .94, MAP rel-bias −.037,
+  coverage .96; k = 5 **cluster** MAP rel-bias −.159, coverage .93; k = 2 cluster MAP
+  rel-bias −.249, coverage .93.
+- **Pins (qualitative, #4/#18):** (1) convergence ≥ .90 at all cells; (2) subject-level MAP
+  ~unbiased (|rel-bias| < .10) + nominal coverage at k = 5 (ten Hove 2022's MCMC ≈ MLE);
+  (3) subject-level MAP biased more low at k = 2, coverage ~nominal at both k (100 subjects
+  → well-powered even at k = 2); (4) **cluster-level few-cluster caveat** — at N_c = 20 the
+  single-rater cluster MAP is biased low relative to the subject level (a diffuse
+  near-boundary σ²_c posterior → the mode of the cluster ICC draws sits below the
+  population, while the wide percentile interval still covers ~nominally). The MAP-vs-plug-in
+  divergence is a genuine property (MAP = mode of the ICC draws ≠ `icc_point()` of the modal
+  components, ADR-033), reported not tuned away.
+- **Provenance:** `data-raw/oracle-bayesian-multilevel.R` (companion to `oracle-bayesian.R`,
+  leaving the M23 fixture untouched) — the same compile-once/`update()`-per-rep recipe on the
+  five-component fit, checkpointed per cell; **commits** the per-(cell × level) reference and
+  `stopifnot`-checks it. The `test-icc-brms.R` **O-Bayes-ML-coverage** test reads the committed
+  reference (fast, no fitting, runs on CI); **O-Bayes-ML-reduction** pins that the subject-level
+  composition equals the two-way one deterministically (no fit); **O-Bayes-ML-agree** is the
+  live crossed-multilevel fit (MAP ≈ glmmTMB REML at the subject level; `skip_on_ci`).
+
 ---
 
 ## Bibliography

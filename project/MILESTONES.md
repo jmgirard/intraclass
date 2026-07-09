@@ -792,14 +792,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       ~nominal); convergence ≥ .94. Plus O-Bayes-ML-reduction (subject-level composes identically to
       two-way, no fit). k = 2 note inherited from M23.
 
-**Cross-cutting DoD**
-- [ ] `COVERAGE.md` ④ multilevel table: the `engine = "brms"` crossed subject/cluster cells flip to ✅.
-- [ ] `REFERENCES.md`: O-Bayes-ML registered (fixture path + DGP provenance).
-- [ ] `_pkgdown.yml` unchanged (no new export expected) — confirm `pkgdown::check_pkgdown()`
-      ([[pkgdown-reference-index-new-exports]]).
-- [ ] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]); installed-pkg
-      suite green with `NOT_CRAN=true` ([[verify-against-installed-package]]).
-- [ ] `R CMD check --as-cran` 0/0/≤1 (only the expected "New submission" NOTE).
+**Cross-cutting DoD** ✅
+- [x] `COVERAGE.md` ④ multilevel table + axis + cross-cutting rows: `engine = "brms"` crossed
+      subject/cluster cells → ✅; last-synced bumped to M24.
+- [x] `REFERENCES.md`: O-Bayes-ML registered (fixture path + DGP provenance + the observed numbers).
+- [x] `_pkgdown.yml` unchanged (no new export — `fit_brms_multilevel` is internal; NAMESPACE
+      unchanged); `pkgdown::check_pkgdown()` ✔ No problems found.
+- [x] `air format .` clean; `lintr::lint_package()` clean; full suite (`NOT_CRAN=true`, incl. live
+      fits + merDeriv lme4 multilevel) **1041 pass / 0 fail / 0 warn / 0 skip**.
+- [x] `R CMD check --as-cran` **0 errors / 0 warnings / 1 NOTE** (only "New submission"); `tests` +
+      `spelling.R` + vignette re-build all OK.
 
 - Deferred out of M24 (record so not rediscovered): Bayesian **nested Designs 2/3** (M8/M19 analog),
   **fixed-rater** multilevel (Case-3A θ²_r from the posterior of rater contrasts — M10 analog),
@@ -811,9 +813,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3 averaged crossed cluster-level `ICC(c,k)` incomplete
   divisor; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **Slices 1–2 shipped locally** (fit + wiring + O-Bayes-ML-agree; committed multilevel
-  coverage fixture + O-Bayes-ML-coverage/reduction). `test-icc-brms.R` 84/84 green (incl. both live
-  fits + the fixture tests); `air` + `lintr` clean; glmmTMB multilevel regression unaffected. On branch
-  `m24-bayesian-multilevel`. **Next action: cross-cutting DoD** (COVERAGE ④ brms cells → ✅,
-  REFERENCES O-Bayes-ML, `pkgdown::check_pkgdown()`, installed-pkg suite, `R CMD check --as-cran`) then
-  finish-task + PR.
+- Status: **Slices 1–2 + all cross-cutting DoD done locally — ready to push + open the PR.** On branch
+  `m24-bayesian-multilevel`. Full suite 1041/0/0/0 (`NOT_CRAN=true`, incl. both live fits + merDeriv
+  lme4 multilevel); `R CMD check --as-cran` 0/0/1 (New submission NOTE only); `air`/`lintr`/
+  `pkgdown::check_pkgdown()` clean. **Next action: push the branch and open the PR** (then post-merge
+  `project/` reconcile — compress this board to summary, per finish-task policy).
