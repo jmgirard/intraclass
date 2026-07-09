@@ -700,49 +700,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   study): coverage ~nominal + MAP unbiased + percentile-BCI nominal at k > 2 reproducing ten Hove
   2020's reported findings (committed seeded reference vs OSF `shkqm`, #4); cross-implementation
   (our brms vs their rstan); MAP ≈ glmmTMB/lme4 REML within a stated tolerance; 100% convergence.
-- DoD board (live checklist, #16 — check off in the same commit as the work):
-  - **Slice 1 — engine + posterior interval end-to-end.** ✅ (branch `m23-bayesian`; 306 pkg tests
-        0F/0W incl. a live brms fit under `NOT_CRAN`; lint + spelling clean.)
-    - [x] `R/engine-brms.R` — `fit_brms_twoway(data, seed, brm_args)` returns the six-field contract +
-          a new `draws` field (component posterior draws, **natural variance scale**), with
-          `set_prior("student_t(4,0,1)", class = "sd")`; `check_installed("brms")`. Backend override via
-          the `brm_args` passthrough (ADR-033 amendment).
-    - [x] `R/ci-posterior.R` — `posterior_mode()` (boundary-aware reflected KDE, `bw.nrd0` fixed
-          a-priori, serving [0,1] ICCs and [0,∞) components) + `posterior_summary()` (MAP point +
-          percentile interval from the draws, reusing `two_sided_interval()`).
-    - [x] `R/icc.R` — `"posterior"` added to the `ci_method` `validate_choice` set; the Bayesian
-          branch computes point+interval from draws; forced-default + Bayesian-only coupling with
-          classed aborts (#5/#8); brms-only `brm_args` passthrough with prior/formula/data/seed guards;
-          `ci$method`/`samples` (post-warmup draws)/print report a **credible** interval; soft `cli`
-          k = 2 note (#13). `icc-methods.R` header shows `brms (MCMC)` + `posterior credible`.
-    - [x] Tests (`test-icc-brms.R`): wiring, coupling aborts, `brm_args` guards, scope refusals,
-          k = 2 note, `posterior_mode`/`posterior_summary` unit tests, and one live fit
-          (`skip_on_cran` + `skip_if_not_installed("brms")`). Print/tidy asserted via `format()`
-          + structure (not a brittle MCMC snapshot; O-Bayes-agree previewed as REML-in-CI).
-  - **Slice 2 — reproducibility + the coverage oracle (O-Bayes).** ✅ (committed reference
-        `tests/testthat/fixtures/bayesian-oracle.rds`; findings reproduced, two divergences reported.)
-    - [x] Seeded MCMC (`seed=` → Stan seed) + convergence checks: `brms_convergence()` (max R-hat, min
-          bulk-ESS via `posterior`); a classed `intraclass_brms_convergence` warning at R-hat ≥ 1.10 /
-          ESS < 100; `ci$rhat`/`ci$ess_bulk` exposed on the object.
-    - [x] `data-raw/oracle-bayesian.R` — reproduces ten Hove 2020's DGP (N=30, σ²_s=σ²_sr=0.5,
-          σ²_r=.01, k∈{2,5}, half-*t*(4,0,1)) through the **shipped reduction** (compile once +
-          `update()` per rep; 250 reps/cell), and **commits** the per-cell reference (#4), `stopifnot`-
-          validated vs the published §4.2/Figs 1–4 findings. Parameterization is the standard two-way
-          GT brms model (corroborated by the 2022 companion, OSF `8j26u`).
-    - [x] O-Bayes tests: the committed reference reproduces convergence ≈ 100% (fixed-warmup caveat),
-          MAP-ICC unbiased at k=5 / biased-low at k=2, **EAP-σ_r ≫ MAP-σ_r**, coverage ≈ nominal at
-          k=5 / undercovers at k=2 (fast, no fitting); plus one live brms fit (`skip_on_cran` +
-          `skip_if_not_installed`). Two reported divergences (#4/#18): convergence < 100% (fixed vs
-          adaptive warmup); reflected-KDE σ_r MAP modestly negative-biased vs their `modeest`.
-  - **Cross-cutting DoD (§8):**
-    - [x] `brms` added to `DESCRIPTION` Suggests; no new `@export` (all internals) so `_pkgdown.yml`
-          unchanged; NEWS entry; `air format` + `lintr::lint_package()` clean; spelling clean.
-    - [ ] Installed-pkg check with `NOT_CRAN=true`; `R CMD check --as-cran` 0/0/0; full CI matrix green
-          (incl. Windows + R-devel). *(load_all suite 308/0/0 incl. live fit; installed-pkg check +
-          `R CMD check` + CI are the finish-task gates.)*
-    - [x] `REFERENCES.md` O-Bayes row + ten Hove 2020 hyperprior source; `COVERAGE.md` Bayesian
-          engine/`ci_method` cells; tracking synced (this file; STATUS.md). Milestone-preamble → done
-          at finish-task.
 - Deferred out of M23 (record so not rediscovered): Bayesian **fixed-rater** (Case-3A θ²_r) and
   **one-way** (single-level parity — a follow-on, the M14 analog); Bayesian **multilevel** Designs
   1–3 (the highest-value follow-on — ten Hove's native turf) and Bayesian **incomplete/ragged** and
