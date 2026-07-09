@@ -49,7 +49,8 @@ icc(
   ci_method = "montecarlo",
   mc_samples = 10000L,
   boot_samples = 999L,
-  seed = NULL
+  seed = NULL,
+  brm_args = list()
 )
 ```
 
@@ -161,31 +162,40 @@ icc(
 
 - engine:
 
-  Estimation engine: `"glmmTMB"` (default), `"lme4"`, or `"lavaan"`.
-  `"glmmTMB"` and `"lme4"` fit the variance components by REML and agree
-  to within numerical tolerance on balanced data. `"lavaan"` fits the
-  equivalent structural-equation (common-factor) generalizability model
-  and recovers the rater main effect from the mean structure (Jorgensen
-  2021). **Consistency** ICCs from `"lavaan"` equal the mixed-model
-  estimates exactly on balanced data; **absolute-agreement** ICCs use
-  the SEM indicator-mean estimator of the rater variance, which is
-  asymptotically equivalent to the mixed-model one and matches
-  conventional generalizability-theory software on real data (Vispoel et
-  al. 2022) but differs by a small-sample term on tiny designs (e.g.
-  0.284 vs 0.290 on the 6-subject example below). `"lme4"` covers every
-  design `"glmmTMB"` does – two-way (random or fixed raters), one-way,
-  and the multilevel designs (crossed and nested) at both levels – on
-  both balanced and **incomplete/ragged** data. A ragged fit that lands
-  exactly on a variance-component boundary falls back to `"glmmTMB"`
-  (which stays finite via its log-SD parameterization) with a clear
-  message. `"lavaan"` covers the two-way design with random or fixed
-  raters (for fixed raters the agreement rater term is the McGraw & Wong
-  Case-3A bias-corrected finite-population variance, which equals the
+  Estimation engine: `"glmmTMB"` (default), `"lme4"`, `"lavaan"`, or
+  `"brms"`. `"glmmTMB"` and `"lme4"` fit the variance components by REML
+  and agree to within numerical tolerance on balanced data. `"lavaan"`
+  fits the equivalent structural-equation (common-factor)
+  generalizability model and recovers the rater main effect from the
+  mean structure (Jorgensen 2021). **Consistency** ICCs from `"lavaan"`
+  equal the mixed-model estimates exactly on balanced data;
+  **absolute-agreement** ICCs use the SEM indicator-mean estimator of
+  the rater variance, which is asymptotically equivalent to the
+  mixed-model one and matches conventional generalizability-theory
+  software on real data (Vispoel et al. 2022) but differs by a
+  small-sample term on tiny designs (e.g. 0.284 vs 0.290 on the
+  6-subject example below). `"lme4"` covers every design `"glmmTMB"`
+  does – two-way (random or fixed raters), one-way, and the multilevel
+  designs (crossed and nested) at both levels – on both balanced and
+  **incomplete/ragged** data. A ragged fit that lands exactly on a
+  variance-component boundary falls back to `"glmmTMB"` (which stays
+  finite via its log-SD parameterization) with a clear message.
+  `"lavaan"` covers the two-way design with random or fixed raters (for
+  fixed raters the agreement rater term is the McGraw & Wong Case-3A
+  bias-corrected finite-population variance, which equals the
   mixed-model estimate on balanced data), on both complete and
   **incomplete** data (missing cells are estimated by full-information
   maximum likelihood; the parametric bootstrap is unavailable for
-  incomplete SEM). `"lme4"` requires the lme4 and merDeriv packages;
-  `"lavaan"` requires the lavaan package.
+  incomplete SEM). `"brms"` fits the two-way **random** model in a
+  Bayesian framework (Stan, via brms) under a sourced half-*t*(4, 0, 1)
+  prior on the random-effect SDs (ten Hove et al. 2020); the point
+  estimate is the posterior mode (MAP) and the interval is a percentile
+  **credible** interval (`ci_method = "posterior"`, forced). It covers
+  the balanced, complete two-way random design only in this release;
+  fixed raters, one-way, multilevel, and incomplete Bayesian fits are
+  planned for later milestones. `"lme4"` requires the lme4 and merDeriv
+  packages; `"lavaan"` requires the lavaan package; `"brms"` requires
+  the brms package (and a working Stan toolchain).
 
 - conf_level:
 
@@ -207,6 +217,11 @@ icc(
   engine (which simulates from the fitted SEM's implied moments and
   refits). As with the Monte-Carlo interval, the `"lme4"` engine defers
   a singular (boundary) fit to `"glmmTMB"` for either method.
+  `"posterior"` is the percentile **credible** interval from the
+  Bayesian engine's posterior draws; it is the forced default for, and
+  available only with, `engine = "brms"` (and `"brms"` requires it) –
+  the other methods do not apply to a Bayesian fit, and `"posterior"`
+  needs posterior draws no other engine produces.
 
 - mc_samples:
 
@@ -220,8 +235,19 @@ icc(
 
 - seed:
 
-  Optional integer seed for a reproducible interval. The global RNG
-  state is restored afterward.
+  Optional integer seed for a reproducible interval (and, for
+  `engine = "brms"`, the Stan sampler seed). The global RNG state is
+  restored afterward.
+
+- brm_args:
+
+  A named list of extra arguments forwarded to
+  [`brms::brm()`](https://paulbuerkner.com/brms/reference/brm.html) when
+  `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`,
+  `control`). The default (rstan backend, brms defaults) needs none. The
+  model formula, data, the sourced half-*t* prior, and `seed` are owned
+  by `intraclass` and may not be set here; supplying them, or a
+  non-empty `brm_args` with any other engine, is an error.
 
 ## Value
 
