@@ -11,10 +11,11 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-09**, after **M23** (ADR-033, PR #28) — the first Bayesian milestone:
-`engine = "brms"` + `ci_method = "posterior"` (half-*t* MAP + percentile credible interval)
-on the two-way random path. Prior: **M22** (PR #27, `d_study()` off a replicate fit),
-**M21** (PR #26, SEM parity), **M20** (PR #25, replicate corners), M18/M19 (PR #23/#24).
+**2026-07-09**, after **M24** (ADR-034, branch `m24-bayesian-multilevel`) — Bayesian **crossed
+(Design 1) multilevel**: `engine = "brms"` + `ci_method = "posterior"` now covers the subject and
+cluster levels (agreement/consistency, single/average) on balanced crossed data. Prior: **M23**
+(ADR-033, PR #28, the first Bayesian milestone — two-way random), **M22** (PR #27, `d_study()` off a
+replicate fit), **M21** (PR #26, SEM parity), **M20** (PR #25, replicate corners), M18/M19 (PR #23/#24).
 
 **Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) were
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason
@@ -47,7 +48,7 @@ validated effective-n_o divisor).
 | `occasions` | `single`, `average` | replicates only |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random only |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random + crossed multilevel |
 | `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | data balance | balanced / incomplete (ragged) | |
@@ -131,7 +132,7 @@ Design inferred from the crossing pattern (or declared via `design`).
 
 | Sub-design | `level` | `type` | `raters` | balance | `engine` |
 |---|---|---|---|---|---|
-| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4 |
+| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4, **brms** (balanced random, subject+cluster — M24) |
 | **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random (balanced+incomplete); **fixed** (balanced, M19 Slice 2) | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
 | **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4 |
 
@@ -142,7 +143,10 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 - `unit` in multilevel `icc()`: ✅ single, average. Numeric `m` (rater-count
   projection) is done through **`d_study()`** (both levels, M17 Slice 2), **not**
   through `icc(unit = m)` — see the `d_study()` note below.
-- `ci_method`: ✅ montecarlo, bootstrap (glmmTMB + lme4).
+- `ci_method`: ✅ montecarlo, bootstrap (glmmTMB + lme4); ✅ **posterior** (brms, crossed
+  Design 1 random, balanced — M24, ADR-034; subject + cluster levels, MAP + percentile credible
+  interval under the half-*t*(4,0,1) prior). Bayesian **nested Designs 2/3, fixed-rater, incomplete,
+  conflated, replicates** stay deferred (cross-cutting section).
 
 **Gaps**
 
@@ -182,7 +186,7 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 
 | Case | Reason |
 |---|---|
-| `engine = "brms"` + `ci_method = "posterior"` (Bayesian credible intervals) | ✅ **Shipped (M23, ADR-033)** — the first Bayesian engine: two-way **random** only (agreement/consistency, single/average), half-*t*(4,0,1) prior on the random-effect SDs (ten Hove et al. 2020), MAP point + percentile **credible** interval, `posterior` forced/Bayesian-only, `brm_args` passthrough. Oracle O-Bayes (committed coverage/bias reference). Bayesian **fixed / one-way / multilevel / incomplete / replicates**, `rstanarm`, selectable coupling, and HPDI intervals stay deferred (follow-ons; ROADMAP). |
+| `engine = "brms"` + `ci_method = "posterior"` (Bayesian credible intervals) | ✅ **Shipped (M23, ADR-033; M24, ADR-034)** — the Bayesian engine: two-way **random** (M23) **and crossed (Design 1) multilevel random** (M24 — subject + cluster levels, ten Hove's native turf), agreement/consistency, single/average, balanced/complete; half-*t*(4,0,1) prior on every random-effect SD (ten Hove et al. 2020), MAP point + percentile **credible** interval, `posterior` forced/Bayesian-only, `brm_args` passthrough. Oracles O-Bayes (two-way) + O-Bayes-ML (multilevel — committed coverage/bias reference; subject-level nominal, cluster-level few-cluster caveat honestly reported). Bayesian **nested Designs 2/3 / fixed / one-way / incomplete / replicates / conflated**, `rstanarm`, selectable coupling, and HPDI intervals stay deferred (follow-ons; ROADMAP). |
 | categorical / ordinal ratings (GLMM engines) | 🔵 **Not yet** — unscheduled; needs its own estimand pass (link/family choice + oracle registry) before it is schedulable (ROADMAP). |
 | non-parametric bootstrap / profile-likelihood CIs | 🔵 **Not yet** — method-comparison nice-to-have; the *parametric* bootstrap shipped in M16 (ADR-025), the rest is unscheduled. |
 | lme4 boundary-robust interval for singular fits / merDeriv edge cases | 🔵 **Not yet (deprioritized)** — glmmTMB covers the singular-fit case today via the degrade-to-glmmTMB handoff; opportunistic parity only (ROADMAP). |

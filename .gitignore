@@ -8,3 +8,4 @@ inst/doc
 figure/
 tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
+data-raw/.oracle-bayesian-multilevel-checkpoint.rds

@@ -213,13 +213,14 @@
 #'   finite-population variance, which equals the mixed-model estimate on balanced
 #'   data), on both complete and **incomplete** data (missing cells are estimated by
 #'   full-information maximum likelihood; the parametric bootstrap is unavailable for
-#'   incomplete SEM). `"brms"` fits the two-way **random** model in a Bayesian
+#'   incomplete SEM). `"brms"` fits the **random**-rater model in a Bayesian
 #'   framework (Stan, via \pkg{brms}) under a sourced half-*t*(4, 0, 1) prior on the
 #'   random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 #'   mode (MAP) and the interval is a percentile **credible** interval
 #'   (`ci_method = "posterior"`, forced). It covers the balanced, complete two-way
-#'   random design only in this release; fixed raters, one-way, multilevel, and
-#'   incomplete Bayesian fits are planned for later milestones. `"lme4"` requires the
+#'   random design and the crossed (Design 1) **multilevel** random design (subject and
+#'   cluster levels); fixed raters, one-way, nested/incomplete multilevel, and
+#'   within-cell-replicate Bayesian fits are planned for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
 #' @param conf_level Confidence level for the interval (default `0.95`).
@@ -446,21 +447,20 @@ icc <- function(
     ))
   }
 
-  # The brms (Bayesian) engine covers ONLY the two-way random, balanced/complete,
-  # single-replicate path in M23 (ADR-033) -- the first Bayesian slice. One-way,
-  # multilevel, fixed-rater, incomplete, within-cell-replicate, and D-study Bayesian
-  # fits are deferred follow-ons (recorded, not rediscovered); route each to a loud,
-  # teaching abort rather than a silent glmmTMB fallback (#5). The STRUCTURAL refusals
-  # (one-way, multilevel) are raised here; the data-dependent ones (fixed, incomplete,
-  # replicates, numeric unit) are raised below where balance/replication and the
-  # resolved unit are known.
-  if (engine == "brms" && (multilevel || oneway)) {
-    design <- if (multilevel) "multilevel" else "one-way"
+  # The brms (Bayesian) engine covers the two-way random path (M23, ADR-033) and the
+  # crossed (Design 1) multilevel random path (M24, ADR-034), balanced/complete, single
+  # replicate. One-way, nested multilevel, fixed-rater, incomplete, within-cell-replicate,
+  # and D-study Bayesian fits are deferred follow-ons (recorded, not rediscovered); route
+  # each to a loud, teaching abort rather than a silent glmmTMB fallback (#5). ONE-WAY is
+  # the only structural refusal knowable here (before `ml_design`); the crossed-only
+  # multilevel + conflated refusals are raised once `ml_design` is resolved (below), and
+  # the data-dependent ones (fixed, incomplete, replicates, numeric unit) further down.
+  if (engine == "brms" && oneway) {
     abort_unsupported(c(
-      "The {.pkg brms} engine supports only the two-way random design so far.",
-      i = "{.code engine = \"brms\"} is not available for {design} designs; \\
-           use {.code engine = \"glmmTMB\"}.",
-      i = "Bayesian one-way and multilevel designs are planned for later milestones."
+      "The {.pkg brms} engine does not support one-way designs yet.",
+      i = "{.code engine = \"brms\"} covers the two-way random and crossed multilevel \\
+           designs; use {.code engine = \"glmmTMB\"} for one-way.",
+      i = "Bayesian one-way ICCs are planned for a later milestone."
     ))
   }
 
@@ -592,6 +592,32 @@ icc <- function(
     design
   } else {
     detect_multilevel_design(df)
+  }
+
+  # brms (Bayesian) multilevel scope (M24, ADR-034): the CROSSED (Design 1) five-component
+  # fit, subject + cluster levels, agreement/consistency, random, balanced/complete. Nested
+  # Designs 2/3 and the conflated diagnostic are deferred Bayesian follow-ons -- refuse
+  # loudly now that `ml_design` is resolved, BEFORE the generic conflated/nested guards
+  # below would emit a non-brms message (#5/#8). Fixed / incomplete / replicate / numeric
+  # unit brms are refused with the rest of the brms deferrals further down.
+  if (engine == "brms" && multilevel) {
+    if (ml_design != "crossed") {
+      abort_unsupported(c(
+        "The {.pkg brms} engine supports only the crossed (Design 1) multilevel \\
+         design so far.",
+        i = "Nested-rater multilevel designs (Designs 2/3) are a planned Bayesian \\
+             follow-on; use {.code engine = \"glmmTMB\"} for them.",
+        i = "Cross the raters with clusters for a Bayesian multilevel ICC."
+      ))
+    }
+    if ("conflated" %in% level) {
+      abort_unsupported(c(
+        "The {.pkg brms} engine does not support the conflated ICC yet.",
+        i = "The Bayesian conflated diagnostic is a planned follow-on; use \\
+             {.code engine = \"glmmTMB\"}.",
+        i = "Use {.code level = \"subject\"} or {.code \"cluster\"}."
+      ))
+    }
   }
 
   # Conflated single-level ICC (Eq. 14, M17 Slice 1): the biased ignore-clusters
@@ -1187,6 +1213,13 @@ icc <- function(
       } else {
         fit_glmmtmb_multilevel_fixed(df)
       }
+    } else if (engine == "brms") {
+      # Crossed (Design 1) random raters, Bayesian (M24 Slice 1, ADR-034): the M5
+      # five-component fit under the half-t(4, 0, 1) SD prior; the point (MAP) and the
+      # percentile credible interval come from posterior_summary() off the `draws`
+      # contract. Nested, fixed, conflated, incomplete, and replicate brms fits are
+      # refused upstream (#5).
+      fit_brms_multilevel(df, seed = seed, brm_args = brm_args)
     } else if (engine == "lme4") {
       # Crossed (Design 1) random raters via lme4 (M14 Slice 2).
       fit_lme4_multilevel(df)

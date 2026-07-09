@@ -134,10 +134,12 @@ helpers* item below (sample-size / CI-width), where it belongs.
   path SHIPPED as M23 (ADR-033, PR #28) — `engine = "brms"` + `ci_method = "posterior"` (half-*t*
   MAP + percentile credible interval), oracle O-Bayes.** Backend resolved to **`brms`** (not rstanarm:
   rstanarm's `decov` prior cannot express ten Hove's per-SD half-*t*, forfeiting the
-  source-faithful prior the oracle depends on; rstanarm parked as a future alternate). What
-  **remains parked here** are the parity follow-ons M23 defers: Bayesian **fixed-rater**,
-  **one-way**, **multilevel** (Designs 1–3 — ten Hove's native turf, the highest-value
-  follow-on), **incomplete/ragged**, and **within-cell replicates** — for the incomplete/small-k
+  source-faithful prior the oracle depends on; rstanarm parked as a future alternate). The
+  highest-value follow-on — **Bayesian multilevel Design 1 (crossed)** — was **promoted to M24
+  (ADR-034, opened on branch `m24-bayesian-multilevel`, not yet shipped);** see
+  [`MILESTONES.md`](MILESTONES.md). What **remains parked here** are the *other* parity follow-ons
+  M23/M24 defer: Bayesian **fixed-rater**, **one-way**, **multilevel Designs 2/3** (nested),
+  **incomplete/ragged**, and **within-cell replicates** — for the incomplete/small-k
   corners ten Hove et al. (2022) flag the best estimator as an open research question, so schedule
   them leaning on coverage calibration. Plus **selectable** `posterior` coupling (MC/bootstrap on a
   Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API.

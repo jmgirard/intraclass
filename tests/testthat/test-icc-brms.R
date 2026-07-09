@@ -117,11 +117,43 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   )
 })
 
-test_that("brms multilevel is refused", {
-  d <- sf_ratings_long()
-  d$cluster <- factor(rep(c("a", "b"), length.out = nrow(d)))
+# M24 (ADR-034) opens the CROSSED (Design 1) multilevel random path for brms; the
+# NESTED designs (2/3) and the conflated diagnostic stay deferred. These refusals fire
+# before the fit, so they assert the M24 scope boundary without Stan. (That crossed
+# multilevel is *supported* is asserted by the live O-Bayes-ML-agree fit below.)
+
+test_that("brms refuses nested multilevel designs (crossed only in M24)", {
+  # Cluster-unique rater labels -> raters nested in clusters (Design 2).
+  set.seed(11)
+  nested <- expand.grid(s = 1:4, rr = 1:2, cluster = factor(1:3))
+  nested$subject <- factor(paste0(nested$cluster, "_s", nested$s))
+  nested$rater <- factor(paste0(nested$cluster, "_r", nested$rr))
+  nested$score <- rnorm(nrow(nested))
   expect_error(
-    icc(d, score, subject, rater, cluster = cluster, engine = "brms"),
+    icc(nested, score, subject, rater, cluster = cluster, engine = "brms"),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("brms refuses the conflated diagnostic (deferred Bayesian follow-on)", {
+  set.seed(12)
+  crossed <- expand.grid(
+    subject = 1:4,
+    rater = factor(1:3),
+    cluster = factor(1:3)
+  )
+  crossed$subject <- factor(paste0(crossed$cluster, "_", crossed$subject))
+  crossed$score <- rnorm(nrow(crossed))
+  expect_error(
+    icc(
+      crossed,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      level = "conflated",
+      engine = "brms"
+    ),
     class = "intraclass_unsupported"
   )
 })
@@ -283,6 +315,91 @@ test_that("O-Bayes: committed reference reproduces ten Hove (2020) findings", {
   expect_lt(k2$coverage_icc, k5$coverage_icc)
 })
 
+# --- O-Bayes-ML: the committed multilevel coverage reference (no brms needed, M24) ---
+# The multilevel companion to the two-way O-Bayes reference above. data-raw/
+# oracle-bayesian-multilevel.R runs ten Hove's crossed Design-1 DGP (N_c = 20) through the
+# SHIPPED five-component reduction and commits per-(cell x level) coverage/bias/convergence.
+# Here we re-assert the source's qualitative findings -- fast, no fitting, runs on every CI
+# job. Tolerances absorb our finite n_rep and INDEPENDENT MAP estimator (#4/#18).
+
+test_that("O-Bayes-ML: committed reference reproduces the multilevel findings", {
+  fixture <- test_path("fixtures", "bayesian-ml-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-multilevel.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  subj <- function(kk) s[s$k == kk & s$level == "subject", ]
+  clus <- function(kk) s[s$k == kk & s$level == "cluster", ]
+
+  # (1) High convergence at the half-t DGP across cells (fixed-warmup budget).
+  expect_true(all(s$converged_frac >= 0.90))
+
+  # (2) SUBJECT level (de-confounded two-way analog): MAP ~ unbiased and percentile
+  #     coverage ~nominal at k = 5 (ten Hove 2022's MCMC ~ MLE, subject level).
+  expect_lt(abs(subj(5L)$map_icc_relbias), 0.10)
+  expect_gte(subj(5L)$coverage_icc, 0.90)
+  expect_lte(subj(5L)$coverage_icc, 0.99)
+
+  # (3) k = 2 at the subject level: the MAP is biased more LOW than at k = 5 (ten Hove's
+  #     k = 2 MAP-low finding), while subject-level coverage stays ~nominal at both k -- the
+  #     subject level here has 100 subjects, so it is well-powered even at k = 2 and the
+  #     undercoverage the two-way N = 30 case showed does not strongly appear.
+  expect_lt(subj(2L)$map_icc_relbias, subj(5L)$map_icc_relbias)
+  expect_gte(subj(2L)$coverage_icc, 0.90)
+
+  # (4) CLUSTER level, few-cluster caveat (the honest M24 finding): at N_c = 20 the
+  #     single-rater cluster MAP is biased LOW vs the subject level (a diffuse near-boundary
+  #     sigma^2_c posterior -> the mode of the cluster ICC draws sits below the population).
+  expect_lt(clus(5L)$map_icc_relbias, subj(5L)$map_icc_relbias - 0.05)
+})
+
+# --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---
+# The subject-level (within-cluster) agreement estimand has signal sigma^2_{s:c} and error
+# {rater, residual} -- structurally IDENTICAL to the single-level two-way estimand (M5 §3a;
+# M5 O-ML/reduction (a)). So posterior_summary() of a five-row draw matrix at level
+# "subject" must equal posterior_summary() of the same subject/rater/residual rows under a
+# plain two-way estimand, regardless of the cluster / cluster_rater rows. This pins the
+# Bayesian subject-level reduction deterministically, without a Stan fit.
+
+test_that("O-Bayes-ML-reduction: subject-level equals the two-way composition", {
+  set.seed(7)
+  n <- 4000
+  sub <- rgamma(n, 5, 5)
+  rat <- rgamma(n, 2, 8)
+  res <- rgamma(n, 6, 6)
+  ml_draws <- rbind(
+    cluster = rgamma(n, 3, 4), # present but must NOT enter the subject-level error set
+    subject = sub,
+    rater = rat,
+    cluster_rater = rgamma(n, 2, 6), # ditto
+    residual = res
+  )
+  tw_draws <- rbind(subject = sub, rater = rat, residual = res)
+
+  for (u in c("single", "average")) {
+    ml_est <- icc_estimand(
+      type = "agreement",
+      unit = u,
+      raters = "random",
+      k_eff = 4,
+      multilevel = TRUE,
+      level = "subject"
+    )
+    tw_est <- icc_estimand(
+      type = "agreement",
+      unit = u,
+      raters = "random",
+      k_eff = 4
+    )
+    ml <- posterior_summary(ml_draws, list(ml_est))[[1]]
+    tw <- posterior_summary(tw_draws, list(tw_est))[[1]]
+    expect_equal(ml$point, tw$point)
+    expect_equal(ml$conf.low, tw$conf.low)
+    expect_equal(ml$conf.high, tw$conf.high)
+  }
+})
+
 # --- Live brms fit: the full pipeline (needs brms + a Stan toolchain) ----------
 # This is the ONE test that compiles + samples a real Stan model. It is gated OFF CI:
 # a CI runner may have the brms *package* without a working Stan C++ toolchain (Boost/BH,
@@ -339,6 +456,120 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
 
   # The header reports a Bayesian (MCMC) engine and a CREDIBLE interval (format() is the
   # deterministic source print.icc renders verbatim).
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: crossed (Design 1) multilevel, O-Bayes-ML-agree (M24 Slice 1) ---
+# The Bayesian analogue of the two-way live test above, on ten Hove's flagship design.
+# Gated OFF CI for the same reason (a CI runner has the brms package but no Stan C++
+# toolchain). The numerical coverage oracle (O-Bayes-ML-coverage) + the sigma^2_c -> 0
+# reduction-to-M23 pin are Slice 2's committed fixture; this smoke test wires the
+# five-component fit end to end and pins O-Bayes-ML-agree: the MAP tracks the M5 glmmTMB
+# REML point (ten Hove 2022: MCMC ~ MLE), with lme4 the second independent REML oracle.
+
+test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # A balanced crossed Design-1 dataset (subjects nested in clusters, raters crossed).
+  # ~20 clusters, matching ten Hove et al. (2020)'s DGP (N_c in {20, 40}) so sigma^2_c --
+  # and hence the CLUSTER-level ICC -- is identified: at few clusters the cluster-level
+  # posterior piles at the boundary and the MAP legitimately collapses toward 0 (ten Hove's
+  # few-cluster caveat), which would swamp the agreement check.
+  set.seed(2024)
+  nc <- 20L
+  ns <- 4L
+  k <- 3L
+  d <- expand.grid(
+    s = seq_len(ns),
+    rater = factor(seq_len(k)),
+    cluster = factor(seq_len(nc))
+  )
+  d$subject <- factor(paste0(d$cluster, "_", d$s))
+  d$score <- 2 +
+    rnorm(nc, 0, 0.6)[as.integer(d$cluster)] +
+    rnorm(nlevels(d$subject), 0, 1)[as.integer(d$subject)] +
+    rnorm(k, 0, 0.4)[as.integer(d$rater)] +
+    rnorm(nc * k, 0, 0.3)[as.integer(interaction(d$cluster, d$rater))] +
+    rnorm(nrow(d), 0, 0.7)
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  # Structure: the five-component fit yields subject- AND cluster-level rows, a
+  # posterior credible interval, and the Bayesian engine label.
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$engine, "brms")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$level, c("subject", "cluster"))
+  # Every row is a valid probability interval. We do NOT assert the MAP point lies inside
+  # its own percentile interval: the point (mode of the ICC draws) and the interval
+  # (percentiles) come from DIFFERENT reductions of the same posterior (ADR-033), so on a
+  # skewed near-boundary component they can legitimately diverge.
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  key <- function(x) paste(x$index, x$level)
+  g <- tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "glmmTMB"
+  ))
+  g <- g[order(key(g)), ]
+  td <- td[order(key(td)), ]
+
+  # O-Bayes-ML-agree, robust form (mirrors the two-way live test): the glmmTMB REML point
+  # sits inside the brms credible interval for EVERY row -- the credible interval covers
+  # MLE, the honest engine-agreement pin. We do NOT assert MAP ~ REML pointwise at every
+  # level: the MAP is the mode of the ICC DRAWS (not icc_point() of the modal components,
+  # ADR-033), so on a skewed near-boundary component -- notably the single-rater CLUSTER
+  # ICC at ~20 clusters, ten Hove's few-cluster caveat -- it legitimately sits below the
+  # REML plug-in. That bias is a Slice-2 coverage question (committed fixture), not a wiring
+  # failure.
+  expect_true(all(g$estimate >= td$conf.low & g$estimate <= td$conf.high))
+  # Pointwise MCMC ~ MLE where the estimand is well-identified: the de-confounded SUBJECT
+  # level (the two-way analog; ten Hove 2022's MCMC ~ MLE regime).
+  subj <- td$level == "subject"
+  expect_equal(td$estimate[subj], g$estimate[subj], tolerance = 0.08)
+
+  # The SECOND independent REML oracle (lme4) must concur with glmmTMB -- both fit the
+  # identical five-component model (M5 O-ML/lme4). Its multilevel CI needs merDeriv, so run
+  # the concurrence only when both are present rather than skip the whole agree oracle.
+  if (
+    requireNamespace("lme4", quietly = TRUE) &&
+      requireNamespace("merDeriv", quietly = TRUE)
+  ) {
+    l <- tidy(icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      engine = "lme4"
+    ))
+    l <- l[order(key(l)), ]
+    expect_equal(l$estimate, g$estimate, tolerance = 1e-2)
+  }
+
+  # The header renders the Bayesian engine + a credible interval, grouped by level.
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
