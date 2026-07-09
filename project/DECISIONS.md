@@ -2135,3 +2135,141 @@ consequences → references.
   — incomplete subject-level + bootstrap bands); estimand-spec `M17-within-cell-replicates.md §7`
   (the deferral this closes), `M4.5-d-study.md §7` (projection scope); Brennan (2001) two-facet
   decision study; `project/COVERAGE.md` `d_study()` table.
+
+## ADR-033: M23 scope — Bayesian engine (brms) + `ci_method = "posterior"`, two-way random
+- Date: 2026-07-08
+- Status: accepted
+- Context: The M18–M21 completeness arc (ADR-027) closed and M22 (ADR-032) shipped; no milestone is
+  in flight. This ADR opens **M23**, the **first Bayesian milestone** — the largest remaining
+  carryover, deferred at M7 (ADR-014) and tracked in `ROADMAP.md` as *ready to schedule whenever
+  prioritized* (not blocked: the engine × design dispatch seam from M5.5/M7 and the multi-method
+  `ci_method` seam from M16/ADR-025 were built for exactly this). It is a **thin two-way-random
+  slice** mirroring the first engine milestones M5.5 (lme4) and M7 (lavaan): prove the engine and
+  the new interval method end-to-end on the two-way random path, then defer parity (fixed, one-way,
+  multilevel, incomplete, replicates) to follow-on milestones. **Engine + interval method, not new
+  estimand work** (cf. M5.5/M7/M16): additive, non-breaking (#6) — no new estimand-spec file; new
+  valid values of the shipped `engine` and `ci_method` arguments.
+  A source review (this session) confirmed the estimation recipe against the primary Bayesian
+  source. **ten Hove, Jorgensen & van der Ark (2020)** — *Comparing Hyperprior Distributions to
+  Estimate Variance Components for IRR Coefficients* — is a hyperprior **simulation study** (no
+  single worked-example ICC to reproduce), which fits the M23 posture since a CI method's oracle is
+  **coverage** (#1). It fixes the exact prior (§4.1: **half-*t*(4, 0, 1) on every random-effect
+  *SD***), the model (Eq. 1–3, two-way crossed random, interaction+error confounded into σ²_sr — the
+  M1/M2 family Table 1), and reports (§4.2, Figs 1–5) that the **posterior mode (MAP) is unbiased for
+  σ_r and ICC(A,1) at k > 2 while the posterior mean (EAP) severely overestimates σ_r**, and that
+  **percentile** BCIs (not HPDIs) give nominal coverage at k > 2. The later **ten Hove et al. (2022)**
+  *Updated Guidelines* paper corroborates the backend and philosophy without revisiting hyperpriors:
+  its own companion software (OSF `8j26u`) estimates the ICCs via **`brms`** (Bürkner 2017) and lme4,
+  reports MCMC and MLE yield **similar point estimates**, and endorses **Monte-Carlo CIs for ICCs**
+  because they are non-normal functions of parameters (verbatim the ADR-003 / #3 rationale) — and it
+  flags the best estimator for *incomplete/small-k* designs as an **open research question**
+  (relevant to the deferred Bayesian-incomplete/multilevel milestones, not M23).
+- Decision:
+  - **Backend: `brms`** (a new `Suggests`, behind `rlang::check_installed()` — the ADR-002
+    light-install pattern; base install unchanged), rstan backend for a CRAN-clean dependency.
+    Chosen over rstanarm because rstanarm's `decov` prior cannot express ten Hove's per-SD
+    half-*t* even in the two-way case, which would forfeit the source-faithful prior; **rstanarm**
+    is parked as a possible future alternate backend (ROADMAP). Selector value **`engine = "brms"`**
+    (package-named, consistent with `glmmTMB`/`lme4`/`lavaan`; leaves `engine = "rstanarm"` open).
+  - **Prior (sourced, #12): half-*t*(4, 0, 1) on all random-effect SDs** —
+    `brms::set_prior("student_t(4, 0, 1)", class = "sd")` (brms positive-truncates SD priors → the
+    half-*t*), per ten Hove 2020 §3.3/§4.1. df = 4 is their deliberate choice for variance params
+    near the zero boundary (Gelman 2019) — Principle #3's exact regime. **No user-exposed `prior=`
+    control in M23** (fixed sourced default; a prior-tuning API is deferred).
+  - **`ci_method = "posterior"` — a third interval method through the M16 seam.** Added to the
+    `validate_choice` set in `R/icc.R`; a new `R/ci-posterior.R` derives the interval from the fit's
+    native posterior draws. The **interval is the percentile credible interval**, reusing M16's
+    `bootstrap_interval()` percentile reduction verbatim (sourced-optimal over HPDI per ten Hove 2020
+    §4.2). **Coupling: forced-default and Bayesian-only** — a Bayesian fit defaults to and requires
+    `"posterior"`; `"posterior"` on a non-Bayesian engine and `montecarlo`/`bootstrap` on a Bayesian
+    fit both `abort` with a classed, teaching message (#5/#8). A **selectable** coupling (also
+    allowing MC/bootstrap on a Bayesian fit for method comparison) is parked.
+  - **Point estimate: MAP (posterior mode), computed from the ICC draws.** Because the mode is not
+    transform-invariant (`MAP(ICC) ≠ icc_point(MAP components)`), the point is the mode of each
+    estimand's posterior ICC-draw vector — so for the Bayesian engine **both point and interval come
+    from the same draw matrix** (a `posterior_summary()` returning point + interval together), a
+    small restructure of the `points`/`intervals` split in `R/icc.R` for this branch only; the shared
+    `icc_point()` path is untouched for the other engines. The EAP (mean) is **not** used (ten Hove
+    2020: biased).
+  - **Mode estimator: a hand-rolled, boundary-aware `posterior_mode()`** — no new dependency
+    (light-install ethos; the house style of `rmvn()`/`with_rng_seed()`). A reflected KDE
+    (`stats::density` with reflection at finite bounds; one helper serving both the [0, 1] ICCs and
+    the [0, ∞) variance components via `lower`/`upper`) with an **a-priori-fixed bandwidth rule**
+    (stated in code). **Guardrail (#4):** the bandwidth/boundary spec is fixed *before* comparison and
+    the ten Hove 2020 reproduction is treated as **validation, not a tuning target** — if the pinned
+    estimator does not reproduce their MAP bias/coverage within tolerance, that is a reported finding,
+    not something to tune away. An independent estimator converging on their numbers is a *stronger*
+    oracle than re-running their own `modeest` tool (near-tautological); `modeest`/`bayestestR` are
+    noted as validated-alternative paths, not adopted.
+  - **Engine contract:** the shared six-field contract plus **one new field**, a matrix of
+    internal-scale component posterior draws (`estimate`/`vcov` still filled from the posterior for
+    completeness, but the interval and point come from the draws, not the normal approximation).
+  - **Scope: two-way random only** — agreement + consistency, single + average (ICC(A,1)/(A,k)/
+    (C,1)/(C,k), the M1/M2 family, single replicate). A **soft `cli` note when k = 2** surfaces ten
+    Hove 2020's bias/undercoverage caveat (#13). `d_study()` and the M11 `autoplot()` ride the
+    existing draws/`mc` slots unchanged where applicable.
+  - **Two thin vertical slices** (#14/#15):
+    - **Slice 1 — engine + `posterior_summary()` wired end-to-end.** `fit_brms_twoway()` returns the
+      contract + draws with the sourced half-*t* prior; `posterior_mode()` + `posterior_ci()`
+      (percentile) in `R/ci-posterior.R`; the `"posterior"` branch and forced-default/Bayesian-only
+      coupling with classed aborts in `R/icc.R`; print/tidy report a **credible** interval,
+      `ci$method = "posterior"`, `samples` = post-warmup draws; `check_installed("brms")` gating; the
+      k = 2 note.
+    - **Slice 2 — reproducibility + the coverage oracle (O-Bayes).** Seeded MCMC (`seed=` → Stan's
+      seed) for reproducible intervals; convergence checks (R-hat < 1.10, bulk-ESS) as ten Hove did.
+      A **`data-raw/` script** reproduces ten Hove 2020's DGP (N = 30, σ²_s = σ²_sr = 0.5,
+      σ²_r ∈ {.01, .04}, k ∈ {2, 3, 5}) with brms + the half-*t* prior and **pins the committed
+      reference values** (#4) against their published tables (OSF `shkqm`); the brms model/prior
+      parameterization is cross-checked against the 2022 companion brms code (OSF `8j26u`).
+  - **Oracle posture (#1), a CI method's oracle is coverage** (M16 precedent): **O-Bayes-coverage** —
+    seeded-simulation coverage ~nominal at the ten Hove DGP, MAP unbiased and percentile-BCI coverage
+    nominal at k > 2, reproducing their reported findings within a stated tolerance (committed
+    reference, #4); **O-Bayes-crossimpl** — our brms + half-*t* reproduces the source's own rstan
+    results (independent implementation, not tautology); **O-Bayes-agree** — MAP ≈ glmmTMB/lme4 REML
+    point within a **stated tolerance** (corroborated by ten Hove 2022's "MCMC ≈ MLE point
+    estimates"); **O-Bayes-converge** — 100% convergence at the DGP (their finding).
+  - **CI test-gating (DoD):** the coverage/agreement oracle runs off the **committed seeded
+    reference** everywhere (#4); a **single live `brms` fit** on one representative matrix job with
+    tiny `chains`/`iter` exercises the real wiring; `skip_on_cran` + `skip_if_not_installed("brms")`
+    keep per-model Stan compilation out of all nine matrix cells and off CRAN. brms is fit with its
+    defaults for production; tests use reduced draws.
+  - **No new estimand, estimand-spec file, or user-facing argument** (new *values* of `engine` and
+    `ci_method` only). One new `Suggests` (`brms`); one new field on the engine contract; a new
+    `R/ci-posterior.R` and `R/engine-brms.R`.
+  - **Scope-outs (preserved, not rediscovered):** Bayesian **fixed-rater** (Case-3A θ²_r) and
+    **one-way** (single-level parity — a follow-on, the M14 analog); Bayesian **multilevel** Designs
+    1–3 (the **highest-value** follow-on — ten Hove's native estimator is Bayesian; its own turf) and
+    Bayesian **incomplete/ragged** and **within-cell replicates** (all deferred, and per ten Hove
+    2022 the estimator choice there is an *open research question* → lean on coverage calibration when
+    scheduled); **rstanarm** alternate backend; **selectable** `posterior` coupling (MC/bootstrap on a
+    Bayesian fit); **HPDI** intervals (ten Hove found percentile better); a **user-exposed `prior=`**
+    API; `modeest`/`bayestestR` mode estimators. Untouched carry-overs stay in `ROADMAP.md`.
+- Consequences: On M23 close, `intraclass` gains a Bayesian estimation engine and a native posterior
+  credible-interval method, validated against the Bayesian IRR literature's own source — closing the
+  ADR-014 Bayesian deferral for the two-way random path and inverting the oracle relationship (the
+  Bayesian engine becomes a candidate independent oracle for the deferred multilevel designs, ten
+  Hove's native turf). The forced-default/Bayesian-only coupling keeps the API story clean at the
+  cost of method-comparison flexibility (parked). Adopting brms adds one `Suggests` and a live-fit CI
+  cost, bounded by the committed-reference + single-live-fit gating. Risk is front-loaded: Slice 1 is
+  wiring through two ready seams; Slice 2's numerical risk (the MAP mode estimator at the boundary) is
+  isolated in a small pinned helper whose correctness is established by reproducing the source's
+  tables, not by inspection. This ADR authorizes M23 code; the MILESTONES.md M23 board entry and the
+  STATUS.md flip to *in flight* are the milestone-start companions.
+- References: PRINCIPLES.md #1 (oracle-first — coverage + cross-implementation + REML agreement +
+  convergence), #2/#14/#15 (name the estimand / thin vertical slices), #3 (boundary-aware,
+  non-normal ratio — the half-*t*'s reason for being, corroborated by ten Hove 2022's MC-CI
+  endorsement), #4 (committed seeded reference values; the no-tuning-to-oracle guardrail on the mode
+  estimator), #5/#8 (classed aborts for the coupling; `cli` k = 2 note), #6 (additive, non-breaking —
+  new `engine`/`ci_method` values only), #12 (sourced prior), #13 (teaching the k = 2 caveat), #16
+  (tracking in-commit); ten Hove, Jorgensen & van der Ark (2020) §3.3 / §4.1 (half-*t*(4,0,1) on SDs;
+  DGP), §4.2 + Figs 1–5 (MAP unbiased k > 2, EAP biased, percentile nominal coverage), OSF `shkqm`;
+  ten Hove et al. (2022) *Updated Guidelines* Discussion pp. 11–12 (brms companion software; MCMC ≈
+  MLE point estimates; MC-CI for non-normal ICCs; incomplete/small-k estimation an open question),
+  OSF `8j26u`; McGraw & Wong (1996) / Shrout & Fleiss (1979) Table 1 (the ICC(A/C, 1/k) family);
+  ADR-014 (M7 SEM — where the Bayesian engine + `ci_method = "posterior"` were deferred), ADR-002
+  (optional engines behind `Suggests`/`check_installed`; light install), ADR-025 (M16 — the
+  multi-method `ci_method` dispatch seam + the `bootstrap_interval()` percentile reduction reused
+  here), ADR-003 (Monte-Carlo boundary-aware CI — the sibling interval method), ADR-005/ADR-012 (the
+  M5.5 engine × design dispatch seam this plugs into); estimand-specs `M1-twoway-random-agreement.md`,
+  `M2-consistency-and-fixed.md` (the coefficients estimated; no new spec — engine + interval method);
+  `project/ROADMAP.md` (Bayesian engine parking-lot entry being promoted), `project/COVERAGE.md`.
