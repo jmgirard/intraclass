@@ -125,7 +125,12 @@ simulations.
   at the subject level: the crossed Design 1 (five components, subject
   and cluster levels) and the nested Design 2 (raters nested in
   clusters, four components, subject level), each under the same sourced
-  half-*t* prior with MAP + percentile credible intervals.
+  half-*t* prior with MAP + percentile credible intervals. Beyond the
+  two-way random path it covers the single-level **one-way** random
+  design (`model = "oneway"` — `ICC(1)`/`ICC(1,k)`) and **fixed** raters
+  (`raters = "fixed"` — the McGraw & Wong finite-population read
+  directly from the posterior of the rater effects), both balanced and
+  complete.
 
 ### Choosing, projecting, and visualizing
 
