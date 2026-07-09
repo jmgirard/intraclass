@@ -92,10 +92,13 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M26 Slice 1 — Bayesian one-way random** (next up; no code written yet). Start with
-  `fit_brms_oneway()` + the narrowed one-way brms guard + the O-Bayes-OW oracle
-  (`data-raw/oracle-bayesian-oneway.R` + committed fixture). Slice 2 (fixed-rater) follows, gated on
-  its oracle-first resolution. Remaining out-of-M26 work lives in [`ROADMAP.md`](ROADMAP.md): the
+- Active task: **M26 Slice 2 — Bayesian fixed-rater two-way** (next up; not started). **Slice 1
+  (Bayesian one-way random) is DONE** on branch `m26-bayes-oneway-fixed` (`fit_brms_oneway()` +
+  dispatch + O-Bayes-OW oracle/fixture; full brms test file green incl. all 5 live Stan fits).
+  **Honest finding (#18):** one-way `ICC(1)` MAP is biased low ~−12% at k=2 (falsifying the "one-way
+  is spared" guess) — the `icc()` k=2 caveat note fires for one-way too. Slice 2 must **resolve the
+  oracle-first catch first** (does the raw θ²_r posterior push-forward, no bias correction, match
+  glmmTMB fixed on balanced data?); attempt-then-degrade if no #1/#4-strong oracle holds. Remaining out-of-M26 work lives in [`ROADMAP.md`](ROADMAP.md): the
   *multilevel* Bayesian fixed/one-way, Bayesian incomplete/replicates/conflated, categorical/ordinal
   GLMM, multilevel SEM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and
   occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains.
@@ -104,10 +107,12 @@
   live nested Design 2/3 fits; coverage 85.81% (below 90% by design — the brms fit wrappers are
   live-only, [[coverage-baseline]]). Prior: PR #29 (M24) at `6566057`.
 - Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M26 opened (ADR-036) after the M23–M25 Bayesian-arc
-  retro.** Recorded ADR-036, added the active M26 DoD board to MILESTONES (+ preamble/ADR-list), and
-  flipped this file to M26 active. No slice code written yet. Next: `git checkout -b m26-bayes-oneway-fixed`
-  and start Slice 1 (one-way) via `fit_brms_oneway()` + O-Bayes-OW.
+- Updated: 2026-07-09 by main session (Opus) — **M26 Slice 1 (Bayesian one-way random) shipped to the
+  branch.** `fit_brms_oneway()` + one-way brms dispatch (abort removed), `data-raw/oracle-bayesian-oneway.R`
+  + committed `bayesian-oneway-oracle.rds`, O-Bayes-OW committed-reference + live O-Bayes-OW-agree tests,
+  REFERENCES O-Bayes-OW row, board Slice-1 checked. Full `test-icc-brms.R` green incl. all 5 live Stan
+  fits; `air`/`lintr` clean. Honest finding: one-way k=2 MAP biased low (k=2 note ungated for one-way).
+  Next: Slice 2 (fixed-rater), starting with the oracle-first resolution.
 
 ## Where we are
 

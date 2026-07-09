@@ -265,6 +265,42 @@ fit_brms_twoway <- function(
   )
 }
 
+# One-way random Bayesian fit (M26 Slice 1, ADR-036): the Shrout & Fleiss Case-1 model
+#   score ~ 1 + (1 | subject)
+# under the SAME sourced half-t(4, 0, 1) prior on the (single) random-effect SD (unchanged
+# from M23-M25; ten Hove, Jorgensen & van der Ark 2020 §3.3/§4.1's specification, which
+# generalizes verbatim). A STRICT SUBSET of fit_brms_twoway(): rater identity is not
+# modeled (raters are interchangeable, M6 spec §2), so there is NO (1 | rater) term and the
+# rater main effect + subject x rater interaction are both confounded into the residual
+# sigma^2_res. Two components map to the M6 internal names:
+#   subject  = sigma^2_s   <- sd_subject__Intercept
+#   residual = sigma^2_res <- sigma                     (rater + interaction confounded in)
+# The subject-level ICC reads {subject | residual} -- the same shape the shipped Design-3
+# brms path (M25) already composes -- so brms_component_draws() / posterior_summary() map
+# ICC(1)/ICC(1,k) off the `draws` contract unchanged. `data` must be canonicalized to
+# columns `subject`, `rater`, `score` (factors for the first two) and BALANCED/COMPLETE,
+# one-way random (guarded in icc(): fixed / multilevel / incomplete / replicate / numeric
+# unit refused). The one-way identifiability guard (a subject rated more than once) fires
+# in icc() before dispatch.
+fit_brms_oneway <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula("score ~ 1 + (1 | subject)"),
+    spec = c(
+      subject = "sd_subject__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}
+
 # Crossed (Design 1) multilevel Bayesian fit (M24 Slice 1, ADR-034): the M5 five-component
 # model
 #   score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater)

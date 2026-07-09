@@ -468,6 +468,42 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   **O-Bayes-NML-agree** is the live nested fit (MAP ≈ glmmTMB/lme4 REML at the subject level;
   `skip_on_ci`).
 
+### Oracle O-Bayes-OW — Bayesian one-way random (M26 Slice 1, ADR-036)
+
+- **Role:** the one-way (single-level) sibling of O-Bayes. A CI method's oracle is
+  **coverage** (#1); the shipped brms + half-*t*(4, 0, 1) recipe on the M6 **one-way**
+  component structure (subject + confounded residual, **no rater term**) reproduces the
+  bias/coverage/convergence behaviour of a seeded one-way DGP, and — via the live fit —
+  reduces to the Shrout & Fleiss anchor.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) — the prior/MAP/percentile recipe;
+  Shrout & Fleiss (1979) / McGraw & Wong (1996) Case 1 — the estimand ICC(1) =
+  σ²_s/(σ²_s+σ²_res), ICC(1,k) = σ²_s/(σ²_s+σ²_res/k) (reused `estimand-specs/M6-oneway.md`,
+  no new spec).
+- **DGP:** `Y_sr = μ + μ_s + e_sr`, N = 30 subjects, σ²_s = σ²_res = 0.5 (population
+  **ICC(1) = 0.5**, an interior ratio), k ∈ {2, 5} ratings/subject; half-*t*(4, 0, 1) on σ_s.
+- **Committed reference (`tests/testthat/fixtures/bayesian-oneway-oracle.rds`; n_rep = 150,
+  seed 20260):** k = 5 conv **1.00**, MAP ICC(1) rel-bias **−.008**, coverage **.94**,
+  ICC(1,k) rel-bias **+.002**, coverage **.94**; k = 2 conv **1.00**, MAP ICC(1) rel-bias
+  **−.118**, coverage **.95**, ICC(1,k) rel-bias **−.089**, coverage **.95**. (Parallel-MCMC
+  cross-run variation of a few tenths of a percent is ordinary noise and leaves every pin
+  intact — as the sibling `oracle-bayesian.R` notes.)
+- **Pins (qualitative, #4/#18):** (1) convergence ≥ .90 at all cells; (2) MAP of ICC(1) and
+  ICC(1,k) ~unbiased (|rel-bias| < .10) at k = 5; (3) percentile coverage ~nominal at k = 5,
+  both units. (4) **The honest finding (#18):** the a-priori hypothesis — that the one-way
+  ICC, lacking a near-boundary rater variance, would be **spared** the two-way k = 2 bias —
+  was **falsified** by the seeded run: the one-way MAP of ICC(1) is biased **low at k = 2**
+  (−.128) and more so than at k = 5, the **same** skewed small-sample variance-ratio
+  mechanism as the two-way ICC(A,1) (M23). Coverage stays ~nominal (the point moves, the
+  percentile interval still brackets). Consequently the `icc()` **k = 2 caveat note fires for
+  the one-way path too** (not gated off, as first drafted).
+- **Provenance:** `data-raw/oracle-bayesian-oneway.R` (companion to `oracle-bayesian.R`,
+  leaving the M23–M25 fixtures untouched) — the same compile-once/`update()`-per-rep recipe on
+  the two-component one-way fit; **commits** the per-k reference and `stopifnot`-checks it. The
+  `test-icc-brms.R` **O-Bayes-OW** test reads the committed reference (fast, no fitting, runs
+  on CI); **O-Bayes-OW-agree** is the live one-way fit on the Shrout & Fleiss data — glmmTMB
+  one-way REML = the published **ICC(1) = 0.166 / ICC(1,k) = 0.443**, inside the brms credible
+  interval, lme4 the second REML oracle (`skip_on_ci`).
+
 ---
 
 ## Bibliography

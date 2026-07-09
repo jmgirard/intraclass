@@ -854,20 +854,26 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 ### DoD board (check off in the same commit as the work, #16)
 
-**Slice 1 — Bayesian one-way random** (unconditional; strict subset of `fit_brms_twoway()`)
-- [ ] `fit_brms_oneway()` in `R/engine-brms.R`: `score ~ 1 + (1 | subject)`, spec
+**Slice 1 — Bayesian one-way random** (unconditional; strict subset of `fit_brms_twoway()`) — **DONE**
+- [x] `fit_brms_oneway()` in `R/engine-brms.R`: `score ~ 1 + (1 | subject)`, spec
       `c(subject = "sd_subject__Intercept", residual = "sigma")` via `fit_brms_common()`.
-- [ ] Narrow the structural one-way brms abort (`icc.R:460`) to admit `model = "oneway"`; dispatch
-      to `fit_brms_oneway()` in the one-way branch (`icc.R:1238`). One-way-fixed / one-way-multilevel
-      stay refused for every engine (`icc.R:471`, unchanged).
-- [ ] `ICC(1)`/`ICC(1,k)` compose off the `draws` contract unchanged; the one-way identifiability
-      guard (a subject rated >once, `icc.R:548`) reached before dispatch.
-- [ ] Companion `data-raw/oracle-bayesian-oneway.R` runs the M6 one-way DGP with brms + the half-*t*
-      prior; commit `tests/testthat/fixtures/bayesian-oneway-oracle.rds` (#4).
-- [ ] **O-Bayes-OW**: MAP ≈ M6 glmmTMB/lme4 REML (tolerance stated); reduction to SF `ICC(1)=0.166`
-      / `ICC(1,k)=0.443`; seeded coverage ~nominal off the fixture; convergence rate recorded.
-- [ ] One live brms one-way fit (tiny chains/iter), guarded `skip_on_cran()` +
+- [x] Removed the structural one-way brms abort (`icc.R`); dispatch to `fit_brms_oneway()` in the
+      one-way branch. One-way-fixed / one-way-multilevel stay refused for every engine (unchanged).
+- [x] `ICC(1)`/`ICC(1,k)` compose off the `draws` contract unchanged; the one-way identifiability
+      guard (a subject rated >once) reached before dispatch. Verified without Stan.
+- [x] Companion `data-raw/oracle-bayesian-oneway.R` runs a one-way DGP with brms + the half-*t*
+      prior; committed `tests/testthat/fixtures/bayesian-oneway-oracle.rds` (#4).
+- [x] **O-Bayes-OW**: seeded coverage ~nominal off the fixture (k=5 cover .94, convergence 1.00);
+      **O-Bayes-OW-agree** live — glmmTMB one-way REML = SF `ICC(1)=0.166`/`ICC(1,k)=0.443`, inside
+      the brms credible interval, lme4 the second REML oracle.
+- [x] One live brms one-way fit (tiny chains/iter), guarded `skip_on_cran()` +
       `skip_if_not_installed("brms")` + `skip_on_ci()`.
+- **HONEST FINDING (#18):** the a-priori guess that one-way (no near-boundary rater variance) would
+      be *spared* the two-way k=2 MAP bias was **falsified** by the seeded run — one-way `ICC(1)` MAP
+      is biased low ~−12% at k=2 (vs −0.8% at k=5), same skewed-small-sample mechanism, coverage still
+      nominal. Consequence: **reverted** the change that gated the `icc()` k=2 caveat note off for
+      one-way — it now fires for one-way too. Recorded in the oracle script, O-Bayes-OW test, and
+      `REFERENCES.md`.
 
 **Slice 2 — Bayesian fixed-rater two-way** (conditional on the oracle-first resolution)
 - [ ] **Oracle-first resolution FIRST:** confirm the raw θ²_r posterior push-forward (no bias

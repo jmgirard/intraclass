@@ -449,22 +449,15 @@ icc <- function(
     ))
   }
 
-  # The brms (Bayesian) engine covers the two-way random path (M23, ADR-033) and the
-  # crossed (Design 1) multilevel random path (M24, ADR-034), balanced/complete, single
-  # replicate. One-way, nested multilevel, fixed-rater, incomplete, within-cell-replicate,
-  # and D-study Bayesian fits are deferred follow-ons (recorded, not rediscovered); route
-  # each to a loud, teaching abort rather than a silent glmmTMB fallback (#5). ONE-WAY is
-  # the only structural refusal knowable here (before `ml_design`); the crossed-only
-  # multilevel + conflated refusals are raised once `ml_design` is resolved (below), and
-  # the data-dependent ones (fixed, incomplete, replicates, numeric unit) further down.
-  if (engine == "brms" && oneway) {
-    abort_unsupported(c(
-      "The {.pkg brms} engine does not support one-way designs yet.",
-      i = "{.code engine = \"brms\"} covers the two-way random and crossed multilevel \\
-           designs; use {.code engine = \"glmmTMB\"} for one-way.",
-      i = "Bayesian one-way ICCs are planned for a later milestone."
-    ))
-  }
+  # The brms (Bayesian) engine covers the two-way random path (M23, ADR-033), the crossed
+  # (Design 1) + nested (Designs 2/3) multilevel random paths (M24/M25, ADR-034/035), and
+  # the single-level one-way random path (M26 Slice 1, ADR-036) -- all balanced/complete,
+  # single replicate. Fixed-rater (Slice 2 follow-on), incomplete, within-cell-replicate,
+  # and D-study Bayesian fits stay deferred (recorded, not rediscovered); each routes to a
+  # loud, teaching abort rather than a silent glmmTMB fallback (#5). The crossed-only
+  # multilevel + conflated refusals are raised once `ml_design` is resolved (below), and the
+  # data-dependent ones (fixed, incomplete, replicates, numeric unit) further down. One-way
+  # multilevel / one-way fixed already abort for every engine just below.
 
   # One-way (M6 spec §5): raters are interchangeable, so fixed raters and the
   # multilevel design do not apply. Fail loudly rather than silently ignore them.
@@ -1151,6 +1144,10 @@ icc <- function(
       ))
     }
     if (n_raters == 2L) {
+      # The caveat applies to the one-way ICC(1) too (M26 S1): the O-Bayes-OW oracle found
+      # the one-way MAP biased low at k = 2 (~-13% rel bias) by the SAME skewed small-sample
+      # variance-ratio mechanism as the two-way ICC(A,1) -- so the note fires for every brms
+      # k = 2 path, not just two-way (#18: the a-priori "one-way is spared" guess did not hold).
       cli::cli_inform(c(
         "!" = "With only {.val {2L}} raters (k = 2), the Bayesian ICC point and \\
                interval can be biased and undercover.",
@@ -1236,7 +1233,17 @@ icc <- function(
       fit_glmmtmb_multilevel(df)
     }
   } else if (oneway) {
-    if (engine == "lme4") fit_lme4_oneway(df) else fit_glmmtmb_oneway(df)
+    # One-way random (M6). brms (M26 Slice 1, ADR-036): the two-component
+    # score ~ 1 + (1 | subject) fit under the half-t(4, 0, 1) SD prior; MAP + percentile
+    # credible interval off the `draws` contract, as the other brms paths. Fixed / numeric
+    # unit / incomplete brms one-way are refused upstream (#5).
+    if (engine == "brms") {
+      fit_brms_oneway(df, seed = seed, brm_args = brm_args)
+    } else if (engine == "lme4") {
+      fit_lme4_oneway(df)
+    } else {
+      fit_glmmtmb_oneway(df)
+    }
   } else if (raters == "fixed") {
     if (replicates) {
       # Fixed-rater within-cell replicates (M20 Slice 1): the interaction fit with

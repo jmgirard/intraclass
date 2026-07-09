@@ -92,11 +92,7 @@ test_that("brm_args must be a list", {
 
 test_that("brms refuses the deferred designs with a teaching abort", {
   d <- sf_ratings_long()
-  # one-way
-  expect_error(
-    icc(d, score, subject, rater, model = "oneway", engine = "brms"),
-    class = "intraclass_unsupported"
-  )
+  # NB: one-way is now SUPPORTED (M26 Slice 1, ADR-036) -- see the O-Bayes-OW tests below.
   # fixed raters (the general fixed-rater advisory warning fires first; expected)
   expect_error(
     suppressWarnings(
@@ -385,6 +381,50 @@ test_that("O-Bayes-NML: committed reference reproduces the nested findings", {
   expect_lte(d3(2L)$coverage_icc, 0.99)
 })
 
+# --- O-Bayes-OW: the committed one-way coverage reference (no brms needed, M26 S1) ---
+# The one-way sibling of the O-Bayes / O-Bayes-ML references above. data-raw/
+# oracle-bayesian-oneway.R runs a one-way DGP (N = 30, sigma^2_s = sigma^2_res = 0.5 ->
+# population ICC(1) = 0.5, an INTERIOR ratio; k in {2, 5}) through the SHIPPED one-way
+# reduction (brms_component_draws / posterior_summary on the subject+residual draws) and
+# commits per-k coverage/bias/convergence for ICC(1) and ICC(1,k). Fast, no fitting, runs on
+# every CI job. THE HONEST FINDING (#18): the a-priori guess -- that the one-way ICC, lacking
+# a near-boundary rater variance, would be SPARED the two-way k = 2 bias -- was FALSIFIED by
+# the seeded run. The one-way MAP of ICC(1) is biased low at k = 2 (~-13%), the same skewed
+# small-sample variance-ratio mechanism as the two-way ICC(A,1); coverage stays ~nominal.
+# Observed (n_rep = 150, seed 20260): k = 5 conv 1.00, MAP ICC(1) rel-bias -.008, cover .94,
+# ICC(1,k) rel-bias +.002, cover .94; k = 2 conv 1.00, MAP ICC(1) rel-bias -.118, cover .95.
+
+test_that("O-Bayes-OW: committed reference reproduces the one-way findings", {
+  fixture <- test_path("fixtures", "bayesian-oneway-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-oneway.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  k5 <- s[s$k == 5L, ]
+  k2 <- s[s$k == 2L, ]
+
+  # (1) High convergence at the half-t DGP across k (interior variance ratio).
+  expect_true(all(s$converged_frac >= 0.90))
+
+  # (2) MAP of ICC(1) and ICC(1,k) ~unbiased at k = 5 (|rel bias| < .10).
+  expect_lt(abs(k5$map_icc1_relbias), 0.10)
+  expect_lt(abs(k5$map_icck_relbias), 0.10)
+
+  # (3) Percentile 95% credible-interval coverage ~nominal at k = 5, both units.
+  expect_gte(k5$coverage_icc1, 0.90)
+  expect_lte(k5$coverage_icc1, 0.99)
+  expect_gte(k5$coverage_icck, 0.90)
+  expect_lte(k5$coverage_icck, 0.99)
+
+  # (4) THE HONEST FINDING (#18): the one-way MAP of ICC(1) IS biased low at k = 2 and more
+  #     so than at k = 5 -- the one-way analog of the two-way k = 2 caveat, not the a-priori
+  #     exemption. Coverage stays ~nominal (the point moves, the interval still brackets).
+  expect_lt(k2$map_icc1_relbias, -0.05)
+  expect_lt(k2$map_icc1_relbias, k5$map_icc1_relbias)
+  expect_gte(k2$coverage_icc1, 0.88)
+})
+
 # --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---
 # The subject-level (within-cluster) agreement estimand has signal sigma^2_{s:c} and error
 # {rater, residual} -- structurally IDENTICAL to the single-level two-way estimand (M5 §3a;
@@ -487,6 +527,94 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
 
   # The header reports a Bayesian (MCMC) engine and a CREDIBLE interval (format() is the
   # deterministic source print.icc renders verbatim).
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: one-way random, O-Bayes-OW-agree (M26 Slice 1, ADR-036) ---
+# The one-way analogue of the two-way live test above, on the Shrout & Fleiss (1979) Case-1
+# data. Gated OFF CI (a CI runner has brms but no Stan toolchain). The numerical coverage
+# oracle (O-Bayes-OW) is the committed fixture above; this smoke test wires the two-component
+# one-way fit end to end and pins the REDUCTION to the SF anchor: the glmmTMB one-way REML
+# point equals the published ICC(1) = 0.166 / ICC(1,k) = 0.443, and it falls inside the brms
+# credible interval (MAP-consistent, ten Hove 2022 MCMC ~ MLE; lme4 the second REML oracle).
+
+test_that("brms fits the one-way random ICC end to end (O-Bayes-OW-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  d <- sf_ratings_long()
+  # Tiny sampler for a fast wiring check (NOT the coverage oracle). Sampling warnings on this
+  # 6-subject design (low ESS at tiny iter) are expected and irrelevant to the wiring.
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1000, refresh = 0)
+  ))
+
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$engine, "brms")
+  expect_identical(fit$ci$method, "posterior")
+  expect_identical(fit$ci$samples, 1000L)
+
+  # A one-way call reports the single-argument family ICC(1) / ICC(1,k) -- NO agreement/
+  # consistency split (raters are interchangeable).
+  td <- tidy(fit)
+  expect_setequal(td$index, c("ICC(1)", "ICC(k)"))
+  expect_true(all(td$estimate >= 0 & td$estimate <= 1))
+  # The interval is well-ordered and on [0, 1]. We do NOT assert the point lies inside its
+  # own credible interval here: on this tiny (n = 6) one-way posterior the MAP piles at the
+  # boundary (mode ~ 0) and can sit just BELOW the 2.5% percentile bound -- the mode of the
+  # ICC draws is not a percentile, so a boundary MAP legitimately falls outside its own
+  # percentile interval (ADR-033; the interval-vs-REML containment is checked below).
+  expect_true(all(td$conf.low >= 0 & td$conf.high <= 1))
+  expect_true(all(td$conf.low <= td$conf.high))
+
+  # REDUCTION to the SF anchor + O-Bayes-OW-agree: the glmmTMB one-way REML point equals the
+  # published SF values and sits inside the brms credible interval (as the two-way live test;
+  # we do NOT assert MAP ~ REML pointwise -- the MAP is the mode of the ICC DRAWS, which on a
+  # wide skewed n = 6 posterior legitimately sits below the REML plug-in).
+  g <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    engine = "glmmTMB",
+    seed = 1
+  ))
+  by_index <- function(x, i) x$estimate[x$index == i]
+  expect_equal(by_index(g, "ICC(1)"), 0.166, tolerance = 5e-3)
+  expect_equal(by_index(g, "ICC(k)"), 0.443, tolerance = 5e-3)
+  for (i in c("ICC(1)", "ICC(k)")) {
+    reml <- by_index(g, i)
+    expect_gte(reml, td$conf.low[td$index == i])
+    expect_lte(reml, td$conf.high[td$index == i])
+  }
+
+  # lme4 the second independent REML oracle, when present.
+  if (requireNamespace("lme4", quietly = TRUE)) {
+    l <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      engine = "lme4",
+      seed = 1
+    ))
+    expect_equal(by_index(l, "ICC(1)"), by_index(g, "ICC(1)"), tolerance = 1e-3)
+  }
+
+  # The header reports a Bayesian (MCMC) engine and a CREDIBLE interval.
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
