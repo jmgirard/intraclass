@@ -146,9 +146,11 @@ framework (Stan, via \pkg{brms}) under a sourced half-\emph{t}(4, 0, 1) prior on
 random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile \strong{credible} interval
 (\code{ci_method = "posterior"}, forced). It covers the balanced, complete two-way
-random design and the crossed (Design 1) \strong{multilevel} random design (subject and
-cluster levels); fixed raters, one-way, nested/incomplete multilevel, and
-within-cell-replicate Bayesian fits are planned for later milestones. \code{"lme4"} requires the
+random design, the crossed (Design 1) \strong{multilevel} random design (subject and
+cluster levels), and the nested Design 2 (raters nested in clusters) multilevel
+random design (subject level); fixed raters, one-way, nested Design 3,
+incomplete multilevel, and within-cell-replicate Bayesian fits are planned for later
+milestones. \code{"lme4"} requires the
 \pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
 package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}
 

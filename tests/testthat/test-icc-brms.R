@@ -117,20 +117,23 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   )
 })
 
-# M24 (ADR-034) opens the CROSSED (Design 1) multilevel random path for brms; the
-# NESTED designs (2/3) and the conflated diagnostic stay deferred. These refusals fire
-# before the fit, so they assert the M24 scope boundary without Stan. (That crossed
-# multilevel is *supported* is asserted by the live O-Bayes-ML-agree fit below.)
+# M24 (ADR-034) opens the CROSSED (Design 1) multilevel random path for brms; M25 Slice 1
+# (ADR-035) adds nested Design 2 (raters nested in clusters). Nested Design 3 (raters
+# nested in subjects) and the conflated diagnostic stay deferred. These refusals fire
+# before the fit, so they assert the M25-Slice-1 scope boundary without Stan. (That
+# crossed multilevel and Design 2 are *supported* is asserted by the live
+# O-Bayes-ML-agree / O-Bayes-NML-agree fits below.)
 
-test_that("brms refuses nested multilevel designs (crossed only in M24)", {
-  # Cluster-unique rater labels -> raters nested in clusters (Design 2).
+test_that("brms refuses nested Design 3 (raters nested in subjects, deferred)", {
+  # Subject-unique rater labels -> raters nested in subjects (Design 3): each rater
+  # rates only one subject. Design 2 (raters nested in clusters) is now SUPPORTED.
   set.seed(11)
-  nested <- expand.grid(s = 1:4, rr = 1:2, cluster = factor(1:3))
-  nested$subject <- factor(paste0(nested$cluster, "_s", nested$s))
-  nested$rater <- factor(paste0(nested$cluster, "_r", nested$rr))
-  nested$score <- rnorm(nrow(nested))
+  nested3 <- expand.grid(rr = 1:2, s = 1:2, cluster = factor(1:3))
+  nested3$subject <- factor(paste0(nested3$cluster, "_s", nested3$s))
+  nested3$rater <- factor(paste0(nested3$subject, "_r", nested3$rr))
+  nested3$score <- rnorm(nrow(nested3))
   expect_error(
-    icc(nested, score, subject, rater, cluster = cluster, engine = "brms"),
+    icc(nested3, score, subject, rater, cluster = cluster, engine = "brms"),
     class = "intraclass_unsupported"
   )
 })
@@ -573,4 +576,108 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: nested Design 2, O-Bayes-NML-agree (M25 Slice 1, ADR-035) --------
+# The nested-rater analogue of the crossed live test above: raters nested in clusters
+# (Design 2, four components), so the fit is SUBJECT LEVEL ONLY (cluster-level IRR is
+# undefined for nested raters -- ten Hove 2022 p. 6). Gated OFF CI (brms present, Stan
+# toolchain absent). Pins O-Bayes-NML-agree: the MAP tracks the M8 glmmTMB REML point
+# (ten Hove 2022: MCMC ~ MLE), with lme4 the second independent REML oracle. The
+# few-cluster MAP-low caveat that dogged M24's cluster level does NOT apply here --
+# sigma^2_c is a fitted nuisance, not a reported estimand.
+
+test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # Balanced Design 2: subjects nested in clusters, raters NESTED in clusters (each
+  # cluster has its own raters, crossed with that cluster's subjects). Cluster-unique
+  # rater labels make the nesting explicit. ~16 clusters so sigma^2_{r:c} is well
+  # identified across clusters.
+  set.seed(2025)
+  nc <- 16L
+  ns <- 4L
+  k <- 3L
+  d <- expand.grid(
+    s = seq_len(ns),
+    rr = seq_len(k),
+    cluster = factor(seq_len(nc))
+  )
+  d$subject <- factor(paste0(d$cluster, "_s", d$s))
+  d$rater <- factor(paste0(d$cluster, "_r", d$rr)) # rater nested in cluster
+  d$score <- 2 +
+    rnorm(nc, 0, 0.6)[as.integer(d$cluster)] +
+    rnorm(nlevels(d$subject), 0, 1)[as.integer(d$subject)] +
+    rnorm(nlevels(d$rater), 0, 0.4)[as.integer(d$rater)] +
+    rnorm(nrow(d), 0, 0.7)
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  # Structure: Design 2 is SUBJECT LEVEL ONLY (no cluster-level row), a posterior
+  # credible interval, the Bayesian engine label, and the nested-design report.
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$engine, "brms")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(td$level, "subject")
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  key <- function(x) paste(x$index, x$level)
+  g <- tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "glmmTMB"
+  ))
+  g <- g[order(key(g)), ]
+  td <- td[order(key(td)), ]
+
+  # O-Bayes-NML-agree: the M8 glmmTMB REML point sits inside the brms credible interval
+  # for every (subject-level) row -- the credible interval covers MLE. And because the
+  # subject level is well-identified for Design 2 (the two-way analog, no boundary-prone
+  # cluster ICC), the MAP tracks REML pointwise within tolerance (ten Hove 2022 MCMC ~ MLE).
+  expect_true(all(g$estimate >= td$conf.low & g$estimate <= td$conf.high))
+  expect_equal(td$estimate, g$estimate, tolerance = 0.08)
+
+  # The SECOND independent REML oracle (lme4) must concur with glmmTMB -- both fit the
+  # identical four-component Design-2 model (M8 O-NML/lme4). Its multilevel CI needs
+  # merDeriv, so run the concurrence only when both are present.
+  if (
+    requireNamespace("lme4", quietly = TRUE) &&
+      requireNamespace("merDeriv", quietly = TRUE)
+  ) {
+    l <- tidy(icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      engine = "lme4"
+    ))
+    l <- l[order(key(l)), ]
+    expect_equal(l$estimate, g$estimate, tolerance = 1e-2)
+  }
+
+  # The header renders the Bayesian engine + a credible interval and names the nested design.
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+  expect_match(hdr, "nested", fixed = TRUE)
 })
