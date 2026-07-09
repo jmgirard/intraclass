@@ -192,8 +192,8 @@
 #'   to resolve the ambiguity. A declaration is validated against the data -- it
 #'   cannot force a design the data cannot support (e.g. `"crossed"` still requires
 #'   raters that bridge clusters to estimate absolute agreement).
-#' @param engine Estimation engine: `"glmmTMB"` (default), `"lme4"`, or
-#'   `"lavaan"`. `"glmmTMB"` and `"lme4"` fit the variance components by REML and
+#' @param engine Estimation engine: `"glmmTMB"` (default), `"lme4"`,
+#'   `"lavaan"`, or `"brms"`. `"glmmTMB"` and `"lme4"` fit the variance components by REML and
 #'   agree to within numerical tolerance on balanced data. `"lavaan"` fits the
 #'   equivalent structural-equation (common-factor) generalizability model and
 #'   recovers the rater main effect from the mean structure (Jorgensen 2021).
@@ -213,8 +213,15 @@
 #'   finite-population variance, which equals the mixed-model estimate on balanced
 #'   data), on both complete and **incomplete** data (missing cells are estimated by
 #'   full-information maximum likelihood; the parametric bootstrap is unavailable for
-#'   incomplete SEM). `"lme4"` requires the \pkg{lme4} and
-#'   \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan} package.
+#'   incomplete SEM). `"brms"` fits the two-way **random** model in a Bayesian
+#'   framework (Stan, via \pkg{brms}) under a sourced half-*t*(4, 0, 1) prior on the
+#'   random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
+#'   mode (MAP) and the interval is a percentile **credible** interval
+#'   (`ci_method = "posterior"`, forced). It covers the balanced, complete two-way
+#'   random design only in this release; fixed raters, one-way, multilevel, and
+#'   incomplete Bayesian fits are planned for later milestones. `"lme4"` requires the
+#'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
+#'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
 #' @param conf_level Confidence level for the interval (default `0.95`).
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
 #'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
@@ -227,12 +234,24 @@
 #'   two-way design, the `"lavaan"` engine (which simulates from the fitted SEM's
 #'   implied moments and refits). As with the Monte-Carlo interval, the `"lme4"`
 #'   engine defers a singular (boundary) fit to `"glmmTMB"` for either method.
+#'   `"posterior"` is the percentile **credible** interval from the Bayesian
+#'   engine's posterior draws; it is the forced default for, and available only with,
+#'   `engine = "brms"` (and `"brms"` requires it) -- the other methods do not apply
+#'   to a Bayesian fit, and `"posterior"` needs posterior draws no other engine
+#'   produces.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (default
 #'   `999`). Ignored when `ci_method = "montecarlo"`.
-#' @param seed Optional integer seed for a reproducible interval. The global RNG
-#'   state is restored afterward.
+#' @param seed Optional integer seed for a reproducible interval (and, for
+#'   `engine = "brms"`, the Stan sampler seed). The global RNG state is restored
+#'   afterward.
+#' @param brm_args A named list of extra arguments forwarded to [brms::brm()] when
+#'   `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`, `control`). The
+#'   default (rstan backend, brms defaults) needs none. The model formula, data, the
+#'   sourced half-*t* prior, and `seed` are owned by `intraclass` and may not be set
+#'   here; supplying them, or a non-empty `brm_args` with any other engine, is an
+#'   error.
 #'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
@@ -278,22 +297,86 @@ icc <- function(
   ci_method = "montecarlo",
   mc_samples = 10000L,
   boot_samples = 999L,
-  seed = NULL
+  seed = NULL,
+  brm_args = list()
 ) {
   if (!is.data.frame(data)) {
     abort_intraclass("{.arg data} must be a data frame.")
   }
 
+  # Capture whether the caller left `ci_method` at its default BEFORE validate_choice
+  # reassigns it, so the Bayesian forced-default coupling can tell an unset `ci_method`
+  # (auto-upgrade to "posterior" for a brms fit) from an explicit mismatch (abort).
+  ci_method_default <- missing(ci_method)
+
   # Dimensions not yet implemented fail loudly and point at where they are coming
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
   model <- validate_choice(model, c("twoway", "oneway"), "model")
   oneway <- model == "oneway"
-  engine <- validate_choice(engine, c("glmmTMB", "lme4", "lavaan"), "engine")
+  engine <- validate_choice(
+    engine,
+    c("glmmTMB", "lme4", "lavaan", "brms"),
+    "engine"
+  )
   ci_method <- validate_choice(
     ci_method,
-    c("montecarlo", "bootstrap"),
+    c("montecarlo", "bootstrap", "posterior"),
     "ci_method"
   )
+
+  # Bayesian coupling (ADR-033): the brms engine and `ci_method = "posterior"` are
+  # locked together -- a Bayesian fit reports a posterior CREDIBLE interval from its
+  # MCMC draws, so it defaults to and requires "posterior", and "posterior" is
+  # meaningless without the posterior draws only the brms engine produces. A brms fit
+  # with `ci_method` left unset upgrades to "posterior"; explicit mismatches abort
+  # loudly and teach the coupling (#5/#8). A selectable coupling (MC/bootstrap on a
+  # Bayesian fit for method comparison) is parked (ADR-033).
+  if (engine == "brms" && ci_method_default) {
+    ci_method <- "posterior"
+  }
+  if (engine == "brms" && ci_method != "posterior") {
+    abort_unsupported(c(
+      "The {.pkg brms} (Bayesian) engine reports a posterior credible interval, so \\
+       it requires {.code ci_method = \"posterior\"}.",
+      i = "{.code \"montecarlo\"} and {.code \"bootstrap\"} do not apply to a \\
+           Bayesian fit.",
+      i = "Drop {.arg ci_method} -- it defaults to {.val posterior} for \\
+           {.code engine = \"brms\"}."
+    ))
+  }
+  if (ci_method == "posterior" && engine != "brms") {
+    abort_unsupported(c(
+      "{.code ci_method = \"posterior\"} requires {.code engine = \"brms\"}.",
+      i = "The posterior credible interval is derived from MCMC draws, which only \\
+           the Bayesian engine produces.",
+      i = "Use {.code engine = \"brms\"}, or choose {.code ci_method = \"montecarlo\"} \\
+           or {.code \"bootstrap\"}."
+    ))
+  }
+
+  # `brm_args` is a brms-scoped passthrough to brms::brm() (ADR-033 amendment): the
+  # backend and sampler knobs only. It is an error off the Bayesian engine, and it may
+  # not override what `intraclass` owns -- the model formula, the data, the SOURCED
+  # half-*t* prior (#12), or `seed` (which icc() threads to Stan). Guard both loudly
+  # (#5/#8) so the engine can assume a clean list.
+  if (!is.list(brm_args)) {
+    abort_intraclass("{.arg brm_args} must be a list.")
+  }
+  if (length(brm_args) > 0L && engine != "brms") {
+    abort_unsupported(c(
+      "{.arg brm_args} only applies to {.code engine = \"brms\"}.",
+      i = "It forwards arguments to {.fn brms::brm}; drop it for other engines."
+    ))
+  }
+  reserved <- intersect(names(brm_args), c("formula", "data", "prior", "seed"))
+  if (length(reserved) > 0L) {
+    abort_intraclass(c(
+      "{.arg brm_args} may not set {.val {reserved}}.",
+      i = "The model formula, data, the sourced half-{.emph t} prior, and \\
+           {.arg seed} are set by {.pkg intraclass}; pass only sampler/backend \\
+           knobs (e.g. {.code backend}, {.code chains}, {.code iter}, {.code cores})."
+    ))
+  }
 
   type <- validate_choice(type, c("agreement", "consistency"), "type")
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
@@ -357,6 +440,24 @@ icc <- function(
       i = "{.code engine = \"lavaan\"} is not available for {design} designs; \\
            use {.code engine = \"glmmTMB\"}.",
       i = "SEM for one-way and multilevel designs is planned for a later milestone."
+    ))
+  }
+
+  # The brms (Bayesian) engine covers ONLY the two-way random, balanced/complete,
+  # single-replicate path in M23 (ADR-033) -- the first Bayesian slice. One-way,
+  # multilevel, fixed-rater, incomplete, within-cell-replicate, and D-study Bayesian
+  # fits are deferred follow-ons (recorded, not rediscovered); route each to a loud,
+  # teaching abort rather than a silent glmmTMB fallback (#5). The STRUCTURAL refusals
+  # (one-way, multilevel) are raised here; the data-dependent ones (fixed, incomplete,
+  # replicates, numeric unit) are raised below where balance/replication and the
+  # resolved unit are known.
+  if (engine == "brms" && (multilevel || oneway)) {
+    design <- if (multilevel) "multilevel" else "one-way"
+    abort_unsupported(c(
+      "The {.pkg brms} engine supports only the two-way random design so far.",
+      i = "{.code engine = \"brms\"} is not available for {design} designs; \\
+           use {.code engine = \"glmmTMB\"}.",
+      i = "Bayesian one-way and multilevel designs are planned for later milestones."
     ))
   }
 
@@ -988,6 +1089,52 @@ icc <- function(
     ))
   }
 
+  # brms (Bayesian) engine data-dependent scope (ADR-033): fixed raters (Case-3A
+  # theta^2_r), incomplete/ragged data, within-cell replicates, and numeric-unit
+  # (D-study) projection are deferred Bayesian follow-ons. Refuse loudly here, now that
+  # balance/replication and the resolved unit are known (#5/#8). A soft k = 2 note
+  # surfaces ten Hove et al. (2020)'s bias/undercoverage caveat (#13).
+  if (engine == "brms") {
+    if (raters == "fixed") {
+      abort_unsupported(c(
+        "The {.pkg brms} engine supports only random raters so far.",
+        i = "Bayesian fixed-rater (finite-population) ICCs are planned for a later \\
+             milestone; use {.code engine = \"glmmTMB\"} for fixed raters.",
+        i = "Use {.code raters = \"random\"}."
+      ))
+    }
+    if (replicates) {
+      abort_unsupported(c(
+        "The {.pkg brms} engine does not support within-cell replicates yet.",
+        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
+             replicated data."
+      ))
+    }
+    if (!balanced) {
+      abort_unsupported(c(
+        "The {.pkg brms} engine supports only balanced, complete data so far.",
+        i = "Bayesian incomplete/ragged ICCs are planned for a later milestone; use \\
+             {.code engine = \"glmmTMB\"} for incomplete data."
+      ))
+    }
+    if (any(vapply(unit, is.numeric, logical(1)))) {
+      abort_unsupported(c(
+        "Numeric {.arg unit} (a D-study projection) is not supported for the \\
+         {.pkg brms} engine yet.",
+        i = "Use {.val single} or {.val average}; Bayesian D-study projection is \\
+             planned for a later milestone."
+      ))
+    }
+    if (n_raters == 2L) {
+      cli::cli_inform(c(
+        "!" = "With only {.val {2L}} raters (k = 2), the Bayesian ICC point and \\
+               interval can be biased and undercover.",
+        i = "ten Hove et al. (2020) found the MAP unbiased and the percentile \\
+             credible interval nominal only at k > 2."
+      ))
+    }
+  }
+
   engine_fit <- if (multilevel && replicates) {
     # Multilevel within-cell replicates (M20 Slice 2): add (1|cluster:subject:rater) to
     # the M5 crossed (Design 1, six-component) / M8 nested (Design 2, five-component)
@@ -1083,6 +1230,8 @@ icc <- function(
     fit_lme4(df)
   } else if (engine == "lavaan") {
     fit_lavaan(df)
+  } else if (engine == "brms") {
+    fit_brms_twoway(df, seed = seed, brm_args = brm_args)
   } else {
     fit_glmmtmb(df)
   }
@@ -1175,11 +1324,44 @@ icc <- function(
     )
   }
 
-  points <- vapply(
-    estimands,
-    function(e) icc_point(engine_fit$components, e),
-    numeric(1)
-  )
+  # Bayesian branch (ADR-033): the MAP point and the percentile credible interval come
+  # from the SAME posterior draws, because the mode is not transform-invariant
+  # (MAP(ICC) != icc_point(MAP components)) -- so the point is the mode of each
+  # estimand's posterior ICC-draw vector, computed alongside its interval by
+  # posterior_summary(). The other engines take the shared icc_point()/mc/bootstrap path
+  # unchanged. `points` is extracted from the summary so the downstream `estimates`
+  # frame is built identically for every method.
+  if (ci_method == "posterior") {
+    intervals <- posterior_summary(
+      engine_fit$draws,
+      estimands,
+      conf_level = conf_level
+    )
+    points <- vapply(intervals, `[[`, numeric(1), "point")
+  } else {
+    points <- vapply(
+      estimands,
+      function(e) icc_point(engine_fit$components, e),
+      numeric(1)
+    )
+    intervals <- if (ci_method == "bootstrap") {
+      bootstrap_ci(
+        engine_fit,
+        estimands,
+        conf_level = conf_level,
+        boot_samples = boot_samples,
+        seed = seed
+      )
+    } else {
+      mc_ci(
+        engine_fit,
+        estimands,
+        conf_level = conf_level,
+        mc_samples = mc_samples,
+        seed = seed
+      )
+    }
+  }
   # icc_point is signal / (signal + error); it is NaN only when the signal AND
   # every error component are estimated at exactly zero (a degenerate boundary with
   # no variance anywhere), which glmmTMB can hit on pathological data. Report it
@@ -1191,23 +1373,6 @@ icc <- function(
       i = "This degenerate boundary (no between- or within-group variance) leaves \\
            the variance ratio 0/0; inspect the data or the fitted model."
     ))
-  }
-  intervals <- if (ci_method == "bootstrap") {
-    bootstrap_ci(
-      engine_fit,
-      estimands,
-      conf_level = conf_level,
-      boot_samples = boot_samples,
-      seed = seed
-    )
-  } else {
-    mc_ci(
-      engine_fit,
-      estimands,
-      conf_level = conf_level,
-      mc_samples = mc_samples,
-      seed = seed
-    )
   }
   # A bootstrap fit carries its kept resample components so d_study() can project a
   # bootstrap band by reprojecting each resample across `m` (M18 Slice 4, ADR-028).
@@ -1252,9 +1417,16 @@ icc <- function(
       ci = list(
         method = ci_method,
         conf_level = conf_level,
-        # `samples` is the resample count behind the reported interval: MC draws
-        # for "montecarlo", refits for "bootstrap" (ADR-025).
-        samples = if (ci_method == "bootstrap") boot_samples else mc_samples,
+        # `samples` is the number of draws behind the reported interval: MC draws for
+        # "montecarlo", refits for "bootstrap" (ADR-025), post-warmup posterior draws
+        # for "posterior" (ADR-033).
+        samples = if (ci_method == "bootstrap") {
+          boot_samples
+        } else if (ci_method == "posterior") {
+          ncol(engine_fit$draws)
+        } else {
+          mc_samples
+        },
         seed = seed
       ),
       n = list(

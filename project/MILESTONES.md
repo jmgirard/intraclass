@@ -701,17 +701,24 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   2020's reported findings (committed seeded reference vs OSF `shkqm`, #4); cross-implementation
   (our brms vs their rstan); MAP ≈ glmmTMB/lme4 REML within a stated tolerance; 100% convergence.
 - DoD board (live checklist, #16 — check off in the same commit as the work):
-  - **Slice 1 — engine + posterior interval end-to-end.**
-    - [ ] `R/engine-brms.R` — `fit_brms_twoway()` returns the six-field contract + a new posterior
-          draw-matrix field, with `set_prior("student_t(4,0,1)", class = "sd")`; `check_installed("brms")`.
-    - [ ] `R/ci-posterior.R` — `posterior_mode()` (boundary-aware reflected KDE, fixed bandwidth,
-          serving [0,1] ICCs and [0,∞) components) + `posterior_summary()` (MAP point + percentile
-          interval from the draws, reusing `bootstrap_interval()`).
-    - [ ] `R/icc.R` — `"posterior"` added to the `ci_method` `validate_choice` set; the Bayesian
+  - **Slice 1 — engine + posterior interval end-to-end.** ✅ (branch `m23-bayesian`; 306 pkg tests
+        0F/0W incl. a live brms fit under `NOT_CRAN`; lint + spelling clean.)
+    - [x] `R/engine-brms.R` — `fit_brms_twoway(data, seed, brm_args)` returns the six-field contract +
+          a new `draws` field (component posterior draws, **natural variance scale**), with
+          `set_prior("student_t(4,0,1)", class = "sd")`; `check_installed("brms")`. Backend override via
+          the `brm_args` passthrough (ADR-033 amendment).
+    - [x] `R/ci-posterior.R` — `posterior_mode()` (boundary-aware reflected KDE, `bw.nrd0` fixed
+          a-priori, serving [0,1] ICCs and [0,∞) components) + `posterior_summary()` (MAP point +
+          percentile interval from the draws, reusing `two_sided_interval()`).
+    - [x] `R/icc.R` — `"posterior"` added to the `ci_method` `validate_choice` set; the Bayesian
           branch computes point+interval from draws; forced-default + Bayesian-only coupling with
-          classed aborts (#5/#8); `ci$method`/`samples`/print+tidy report a **credible** interval;
-          soft `cli` k = 2 note (#13).
-    - [ ] Tests: wiring, coupling aborts, print/tidy snapshot, k = 2 note; `skip_if_not_installed("brms")`.
+          classed aborts (#5/#8); brms-only `brm_args` passthrough with prior/formula/data/seed guards;
+          `ci$method`/`samples` (post-warmup draws)/print report a **credible** interval; soft `cli`
+          k = 2 note (#13). `icc-methods.R` header shows `brms (MCMC)` + `posterior credible`.
+    - [x] Tests (`test-icc-brms.R`): wiring, coupling aborts, `brm_args` guards, scope refusals,
+          k = 2 note, `posterior_mode`/`posterior_summary` unit tests, and one live fit
+          (`skip_on_cran` + `skip_if_not_installed("brms")`). Print/tidy asserted via `format()`
+          + structure (not a brittle MCMC snapshot; O-Bayes-agree previewed as REML-in-CI).
   - **Slice 2 — reproducibility + the coverage oracle (O-Bayes).**
     - [ ] Seeded MCMC (`seed=` → Stan seed); convergence checks (R-hat < 1.10, bulk-ESS).
     - [ ] `data-raw/oracle-bayesian.R` — reproduce ten Hove 2020's DGP with brms + half-*t*; **commit

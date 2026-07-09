@@ -28,6 +28,7 @@ Imports:
     stats,
     tibble
 Suggests:
+    brms,
     covr,
     ggplot2,
     knitr,

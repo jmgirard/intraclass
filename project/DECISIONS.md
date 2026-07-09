@@ -2236,6 +2236,20 @@ consequences → references.
   - **No new estimand, estimand-spec file, or user-facing argument** (new *values* of `engine` and
     `ci_method` only). One new `Suggests` (`brms`); one new field on the engine contract; a new
     `R/ci-posterior.R` and `R/engine-brms.R`.
+    - **Amendment (2026-07-08, Slice 1, maintainer decision):** M23 adds **one** new user-facing
+      argument after all — **`brm_args = list()`**, a brms-scoped passthrough forwarded to
+      `brms::brm()` (backend, chains, iter, cores, control, …). This supersedes the original "no
+      new user-facing argument" and "rstan backend only" language: the default is still rstan and
+      brms's defaults (so `brm_args` is unneeded for the common path), but the user can now override
+      the **backend** (e.g. `backend = "cmdstanr"` — faster compile, no Rtools on Windows) and any
+      sampler knob without us modeling backends, since nothing in the engine branches on the backend
+      (`brm()` returns a `brmsfit` and every extraction is backend-agnostic). A dedicated `backend`
+      argument and a raw `...` on `icc()` were both rejected — `...` on the single public entry
+      would silently swallow typos for **all** engines (violates #5, fail-loudly). `brm_args` is a
+      single named, greppable, brms-only argument; it aborts (classed) if set for a non-brms engine,
+      and it may **not** set `formula`/`data`/`prior`/`seed` (the model, the **sourced half-*t*
+      prior** #12, and the Stan seed are `intraclass`'s to own) — those collisions abort too. The
+      **`prior=`** API stays deferred (the half-*t* is fixed and not user-overridable in M23).
   - **Scope-outs (preserved, not rediscovered):** Bayesian **fixed-rater** (Case-3A θ²_r) and
     **one-way** (single-level parity — a follow-on, the M14 analog); Bayesian **multilevel** Designs
     1–3 (the **highest-value** follow-on — ten Hove's native estimator is Bayesian; its own turf) and
