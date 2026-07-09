@@ -8,9 +8,9 @@ restate it here). The **M18–M21 completeness arc (ADR-027) is complete** (M21 
 shipped, PR #26), closing every arc 🔵 *not yet* gap in `COVERAGE.md`; **M22 (ADR-032) —
 `d_study()` projection off a within-cell replicate fit — then shipped** (PR #27), a small
 standalone milestone promoting the one deferred `d_study()` corner (M17 §7). **M23 (ADR-033) —
-the first Bayesian milestone (brms engine + `ci_method = "posterior"`, two-way random) — is now in
-flight**, opening the cross-cutting Bayesian carryover deferred at M7 (ADR-014); its DoD checklist
-below is the live board. Each milestone is scoped by an ADR at its start after a short retro
+the first Bayesian milestone (brms engine + `ci_method = "posterior"`, two-way random) — then
+shipped** (PR #28), opening the cross-cutting Bayesian carryover deferred at M7 (ADR-014). No
+milestone is currently in flight. Each milestone is scoped by an ADR at its start after a short retro
 (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
@@ -753,5 +753,12 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3 averaged crossed cluster-level
   `ICC(c,k)` incomplete divisor; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **in progress** (opened by ADR-033; DoD board above is live). First Bayesian milestone;
-  ships on a `m23-bayesian` branch, merges via PR (`milestone-branches-and-prs`).
+- Status: **done** (Slices 1–2 + cross-cutting DoD; merged via PR #28 at `a6b8467`; full CI matrix
+  green incl. Windows and R-devel — all 9 jobs). `R CMD check --as-cran` 0/0/1 (only the expected
+  "New submission" NOTE); installed-pkg suite 308/0/0 incl. the live brms fit. First Bayesian
+  milestone: `engine = "brms"` + `ci_method = "posterior"` (half-*t*(4,0,1) prior, MAP point +
+  percentile credible interval) on the two-way random path; `brm_args` passthrough (ADR-033
+  amendment); `brms_convergence()` + the parallel-`cores` nudge; O-Bayes coverage oracle
+  (`data-raw/oracle-bayesian.R` + committed `tests/testthat/fixtures/bayesian-oracle.rds`,
+  reproducing ten Hove 2020's findings with two reported divergences). The live Stan fit is
+  `skip_on_ci()` (CI has no Stan toolchain); CI covers the Bayesian path via the committed fixture.

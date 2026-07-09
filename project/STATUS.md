@@ -1,18 +1,20 @@
 # Project status
 
 - Milestone: **M23 — Bayesian engine (brms) + `ci_method = "posterior"`, two-way random** —
-  **in flight** (opened by ADR-033; the first Bayesian milestone, promoting the cross-cutting
-  carryover deferred at M7/ADR-014). A **thin two-way-random slice** mirroring M5.5 (lme4) / M7
-  (lavaan) — engine + interval method, **not** new estimand work; additive, non-breaking (#6). Backend
-  **brms** (rstan, new `Suggests` behind `check_installed()`; rstanarm parked). Prior **half-*t*(4,0,1)
-  on all random-effect SDs**, sourced ten Hove et al. (2020) §3.3/§4.1. **MAP** point estimate (mode
-  of ICC draws via a hand-rolled boundary-aware `posterior_mode()`, no new dep; EAP is biased),
-  **percentile** credible interval (reuses M16 `bootstrap_interval()`). `"posterior"` **forced-default
-  & Bayesian-only** (selectable coupling parked). **Slice 1** engine + `posterior_summary()` wired
-  end-to-end; **Slice 2** seeded MCMC + O-Bayes coverage oracle (reproduce ten Hove 2020's DGP, commit
-  reference vs OSF `shkqm`; cross-impl vs their rstan; MAP ≈ REML; convergence). DoD board live in
-  MILESTONES.md. Corroborated by ten Hove et al. (2022) — brms companion software, MCMC ≈ MLE points,
-  MC-CI for non-normal ICCs.
+  **shipped** (PR #28, ADR-033; the first Bayesian milestone, promoting the cross-cutting carryover
+  deferred at M7/ADR-014). A **thin two-way-random slice** mirroring M5.5 (lme4) / M7 (lavaan) —
+  engine + interval method, **not** new estimand work; additive, non-breaking (#6). Backend **brms**
+  (rstan default, new `Suggests` behind `check_installed()`; `brm_args` passthrough forwards
+  backend/chains/iter/cores per the ADR-033 amendment; rstanarm parked). Prior **half-*t*(4,0,1) on
+  all random-effect SDs** (ten Hove et al. 2020 §3.3/§4.1). **MAP** point (mode of the ICC draws via a
+  boundary-aware `posterior_mode()`, no new dep) + **percentile** credible interval; `"posterior"`
+  forced-default & Bayesian-only. **Slice 1** engine end-to-end; **Slice 2** seeded MCMC +
+  `brms_convergence()` (R-hat/bulk-ESS) + the **O-Bayes** coverage oracle
+  (`data-raw/oracle-bayesian.R` reproduces ten Hove 2020's DGP through the shipped reduction and
+  commits `tests/testthat/fixtures/bayesian-oracle.rds` (#4); findings reproduced with two reported
+  divergences — convergence < 100% under fixed vs adaptive warmup; reflected-KDE σ_r MAP mildly
+  low vs their `modeest`). Live Stan fit `skip_on_ci()` (no CI toolchain); CI covers the Bayesian
+  path via the committed fixture. Bayesian fixed/one-way/multilevel/incomplete/replicates deferred.
 - Prior milestone: **M22 — `d_study()` projection off a within-cell replicate fit** — **shipped**
   (PR #27, ADR-032; small standalone milestone after the M18–M21 arc). Promoted the one deferred
   `d_study()` corner (M17 §7 / M20): projecting the rater count `m` off a replicate fit, using the
@@ -33,42 +35,24 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M23 finish-task** — Slices 1 & 2 code complete on branch `m23-bayesian`; remaining
-  is the milestone-close gate (installed-pkg check with `NOT_CRAN=true`, `R CMD check --as-cran`
-  0/0/0, open the PR for the full CI matrix). **Slice 2 shipped** (O-Bayes): seeded MCMC +
-  `brms_convergence()` checks (R-hat/bulk-ESS, classed warning, `ci$rhat`/`ci$ess_bulk`);
-  `data-raw/oracle-bayesian.R` reproduces ten Hove 2020's DGP through the shipped reduction (compile
-  once + `update()`, 250 reps/cell) and commits `tests/testthat/fixtures/bayesian-oracle.rds` (#4);
-  O-Bayes tests assert the reproduced findings (MAP-ICC unbiased@k5/biased@k2, EAP-σ_r ≫ MAP-σ_r,
-  coverage nominal@k5). Two reported divergences (#4/#18): convergence 90–99% not 100% (fixed vs
-  adaptive warmup); reflected-KDE σ_r MAP modestly negative-biased vs their `modeest`. **Slice 1
-  shipped** (below). 308 tests 0F/0W incl. live fit; lint + spelling clean.
-- Slice 1 (done, on branch `m23-bayesian`): Bayesian engine + `posterior_summary()` end-to-end —
-  `R/engine-brms.R` (`fit_brms_twoway()`, half-*t*(4,0,1) prior, `draws` field on the natural
-  variance scale), `R/ci-posterior.R` (`posterior_mode()` reflected-KDE + `posterior_summary()`),
-  the `"posterior"` branch + forced-default/Bayesian-only coupling + brms-only `brm_args` passthrough
-  in `R/icc.R`, `brms (MCMC)`/`posterior credible` in the print header. **Backend override resolved
-  to a brms-scoped `brm_args = list()` passthrough** (default rstan; forwards backend/chains/iter/
-  cores to `brm()`; guards the sourced half-*t* `prior`/formula/data/`seed` we own, #12; aborts off
-  brms) — a new user-facing arg → **ADR-033 amendment** recorded in DECISIONS.md + the `icc.R` commit.
+- Active task: **none** — M23 shipped (PR #28). Next milestone is not yet opened; candidates in the
+  backlog below (the highest-value Bayesian follow-on is **multilevel** — ten Hove's native turf).
+  The out-of-band **CRAN upload** (ADR-022) also remains.
   306 pkg tests 0F/0W (incl. one live brms fit under `NOT_CRAN`); lint + spelling clean. Not yet run:
   `R CMD check --as-cran` and the full CI matrix (milestone-close gates). Remaining non-M23 work lives in `ROADMAP.md`: multilevel SEM, categorical/ordinal
   GLMM, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, occasion-`d_study()`, and
   the CRAN upload (ADR-022).
-- Last green CI: **PR #27 (M22) full matrix green incl. Windows and R-devel (all 9 jobs); merged to
-  `main` at `8375184`.** Prior: PR #26 (M21), 925 tests, `R CMD check --as-cran` 0/0/0.
+- Last green CI: **PR #28 (M23) full matrix green incl. Windows and R-devel (all 9 jobs); squash-
+  merged to `main` at `a6b8467`.** `R CMD check --as-cran` 0/0/1 (only the expected "New submission"
+  NOTE); installed-pkg suite 308/0/0 incl. the live brms fit. Prior: PR #27 (M22) at `8375184`.
 - Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M23 Slice 2 shipped on branch `m23-bayesian`**
-  (O-Bayes: `data-raw/oracle-bayesian.R` + committed `bayesian-oracle.rds`; `brms_convergence()`;
-  the parallel-sampling `cores` nudge; 308 tests 0F/0W incl. live fit; lint + spelling clean). Prior:
-  Slice 1 shipped; Slice 1 started; M23 opened (ADR-033). Next: **finish-task** (installed-pkg check,
-  `R CMD check --as-cran`, open PR for CI matrix). A source-reviewed planning session (ten Hove 2020 hyperprior paper + 2022 guidelines
-  corroboration) resolved every design fork for the first Bayesian milestone: brms backend
-  (`Suggests`; rstanarm parked), half-*t*(4,0,1) prior, MAP point via a hand-rolled boundary-aware
-  `posterior_mode()` (no new dep), percentile credible interval, `"posterior"` forced-default &
-  Bayesian-only. ADR-033 written (accepted); MILESTONES M23 board added (live DoD checklist) +
-  preamble → M23 in flight; STATUS flipped. No code yet. Next: `/start-task` → M23 Slice 1 on a
-  `m23-bayesian` branch. (M22 remains the last shipped: PR #27, ADR-032.)
+- Updated: 2026-07-09 by main session (Opus) — **M23 shipped (PR #28, squash-merged at `a6b8467`).**
+  Slices 1–2 + all cross-cutting DoD done; the `skip_on_ci()` guard on the live Stan fit fixed the CI
+  matrix (runners lack a Stan toolchain → `Boost not found`). Post-merge `project/` reconcile: this
+  file, MILESTONES M23 → done + preamble (no milestone in flight), DECISIONS ADR-033, REFERENCES
+  O-Bayes + ten Hove 2020, COVERAGE brms/posterior cells. Local `main` realigned to `origin/main`
+  after the squash (a stale local-only `970f79b` was folded into the squash). Next: open the next
+  milestone (Bayesian follow-ons / categorical GLMM / multilevel SEM) or the CRAN upload (ADR-022).
 
 ## Where we are
 
@@ -99,15 +83,14 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M23 (ADR-033) is in flight — the first Bayesian milestone.** Start **Slice 1**: the brms
-engine (`R/engine-brms.R`, `fit_brms_twoway()` + half-*t*(4,0,1) prior) and the posterior
-interval method (`R/ci-posterior.R`, `posterior_mode()` + percentile `posterior_summary()`),
-wired through the `"posterior"` branch + forced-default/Bayesian-only coupling in `R/icc.R`.
-The full DoD checklist is the live board in [`MILESTONES.md`](MILESTONES.md) M23. Run
-`/start-task` to branch `m23-bayesian` and begin. The M18–M21 completeness arc (ADR-027) is
-complete (PR #23/#24/#25/#26) and M22 shipped (PR #27); the remaining backlog beyond M23 is in
-[`ROADMAP.md`](ROADMAP.md) (multilevel SEM, categorical/ordinal GLMM, the Wave-3 `ICC(c,k)`
-divisor). The out-of-band **CRAN upload** (ADR-022) also remains.
+**M23 (ADR-033) shipped (PR #28) — the first Bayesian milestone.** `engine = "brms"` +
+`ci_method = "posterior"` on the two-way random path. **No milestone is currently in flight** — the
+next one needs an ADR after a short retro (founding brief §7). Candidates in
+[`ROADMAP.md`](ROADMAP.md): the **Bayesian follow-ons** (fixed-rater / one-way / **multilevel** —
+the highest-value, ten Hove's native turf / incomplete / replicates), **categorical/ordinal GLMM**
+ratings, **multilevel SEM**, and the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor.
+The out-of-band **CRAN upload** (ADR-022) also remains. The M18–M21 completeness arc (ADR-027) is
+complete (PR #23/#24/#25/#26), and M22 (PR #27) + M23 (PR #28) shipped after it.
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 
