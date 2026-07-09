@@ -57,8 +57,16 @@ alternate engines, and seeded simulations.
   random data (unequal per-cell counts or missing cells) fits the single-occasion
   coefficients directly, as the replicate analogue of an incomplete design. (Design 3,
   the multilevel one-way, has no separable interaction to split; the occasion-averaged
-  coefficient on ragged data, and `d_study()` projection off a replicate fit, are not
-  yet supported.)
+  coefficient on ragged data is not yet supported.)
+* `d_study()` now projects the rater count off a **within-cell replicate** fit,
+  returning one reliability curve per occasion setting (a new `occasions` column): the
+  rater and interaction terms divide by the projected count `m`, pure error by
+  `m * n_o`, so at `m` = the observed rater count each curve matches the fitted
+  `ICC(*,k)`. Single-level two-way (fixed-rater consistency via Spearman-Brown; fixed
+  absolute agreement refused) and multilevel (crossed Design 1 + nested Design 2 —
+  subject level across occasion settings, cluster level single-occasion) replicate fits
+  are supported. Projecting the occasion count itself, and projecting off a ragged
+  replicate fit, remain unsupported.
 
 ## Engines
 

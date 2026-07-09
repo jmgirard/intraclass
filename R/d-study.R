@@ -59,6 +59,20 @@
 #' level is dropped with a note, because projecting `m` raters is the averaged
 #' `ICC(c,k)` case whose ragged divisor is an open modeling question (M9).
 #'
+#' @section Within-cell replicate fits:
+#' For a within-cell replicate fit (more than one rating per subject-by-rater cell,
+#' where the residual splits into the subject-by-rater interaction and pure error),
+#' `d_study()` projects the **rater count `m`**, holding the number of occasions
+#' `n_o` at the fitted value: the rater and interaction terms divide by `m`, pure
+#' error by `m * n_o`. The result gains an `occasions` column, one reliability curve
+#' per occasion setting on the fit (`occasions = "single"` and/or `"average"`), so at
+#' `m` = the observed rater count each curve matches the fitted `ICC(*,k)` for that
+#' setting. Multilevel replicate fits project the subject level across occasion
+#' settings and the cluster level single-occasion (occasion averaging touches only
+#' pure error, which is not in the cluster-level error set). Projecting the occasion
+#' count itself is not yet supported; **ragged** replicate fits are refused (the
+#' occasion-averaged ragged divisor is an open modeling question).
+#'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
 #'   Defaults to `1:(2 * n_raters)`, a curve from a single rater to twice the
@@ -94,24 +108,30 @@ d_study <- function(
   if (!inherits(x, "icc")) {
     abort_intraclass("{.arg x} must be an {.cls icc} object from {.fn icc}.")
   }
-  # Within-cell replicate fits (M17 Slice 3; M20 Slices 1-2) split the residual into
-  # the interaction sigma^2_sr and pure error sigma^2_e. A rater-count projection off
-  # such a fit would need the per-component error divisors (the interaction divides by
-  # raters, pure error by raters x occasions), which the projection estimand here does
-  # not carry -- and an occasion projection is a separate deferred facet (M17 §7).
-  # Rather than silently drop the interaction from the error set, refuse loudly (#1/#5).
-  if (isTRUE(x$design$replicates)) {
-    abort_unsupported(c(
-      "D-study projection is not supported for within-cell replicate fits yet.",
-      i = "Projecting the rater (or occasion) count off a replicate fit needs the \\
-           per-component error divisors, which is planned for a later milestone.",
-      i = "Refit with one rating per subject-by-rater cell to project rater counts."
-    ))
-  }
   type <- x$design$type
   raters <- x$design$raters
   oneway <- identical(x$design$model, "oneway")
   multilevel <- isTRUE(x$design$multilevel)
+  # Within-cell replicate fits (M17 Slice 3; M20) split the residual into the
+  # interaction sigma^2_sr and pure error sigma^2_e, so the projected error set needs
+  # PER-COMPONENT divisors: the rater and interaction terms divide by the projected
+  # rater count `m`, pure error by `m * n_o`. The estimand already carries
+  # `error_divisors` (M17, `icc_estimand()`), so projection is just that divisor change
+  # applied at a numeric `unit = m` -- no new machinery (M22, ADR-032). The occasion
+  # count `n_o` is held at the fitted value; an occasion projection is a separate
+  # deferred facet (M17 §7). Two compound corners stay deferred (#5): a MULTILEVEL
+  # replicate fit is projected by Slice 2 (guarded here in Slice 1), and a RAGGED
+  # replicate fit needs an effective-n_o divisor that is itself open research
+  # (M20/ADR-030) -- refuse loudly rather than project a guessed divisor (#4).
+  replicates <- isTRUE(x$design$replicates)
+  if (replicates && !isTRUE(x$design$balanced)) {
+    abort_unsupported(c(
+      "D-study projection is not supported off a ragged within-cell replicate fit.",
+      i = "Projecting the mean of unequal per-cell replicate counts needs an \\
+           effective-n_o divisor that is an open modeling question (M20; ADR-030).",
+      i = "Refit with balanced, complete replicated data to project rater counts."
+    ))
+  }
   # Design 3 (raters nested in subjects) is the multilevel one-way: no rater term,
   # agreement-only ICC(m) (estimand-spec M8 §3b), so it projects like a one-way fit
   # but carries a subject `level`.
@@ -198,40 +218,93 @@ d_study <- function(
 
   # One estimand per projected coefficient. Single-level: one per `m`. Multilevel:
   # the cross-product level x m (level outer, so rows group by level as in icc()).
-  make_estimand <- function(mm, lv) {
+  make_estimand <- function(mm, lv, oc) {
     if (ml_oneway) {
       icc_estimand(unit = mm, oneway = TRUE, multilevel = TRUE, level = lv)
     } else if (multilevel) {
+      # A multilevel replicate fit (M22 Slice 2) projects the subject level across each
+      # occasion setting (`oc` rescales pure error); the cluster error set has no
+      # pure-error term, so it is projected single-occasion (oc = 1, a no-op there).
       icc_estimand(
         type = type,
         unit = mm,
         raters = raters,
         multilevel = TRUE,
-        level = lv
+        level = lv,
+        replicates = replicates,
+        occasions = if (replicates) oc else "single"
       )
     } else if (oneway) {
       icc_estimand(unit = mm, oneway = TRUE)
     } else {
-      icc_estimand(type = type, unit = mm, raters = raters)
+      # A replicate fit projects at each occasion setting on the fit; `oc` is the
+      # numeric occasion divisor (1 or n_o), which rescales only pure error (M22).
+      icc_estimand(
+        type = type,
+        unit = mm,
+        raters = raters,
+        replicates = replicates,
+        occasions = if (replicates) oc else "single"
+      )
     }
   }
+  # A replicate fit projects one curve per distinct occasion setting it carries (pure
+  # error is divided by `m * n_o`); a non-replicate fit carries a single NA placeholder.
+  proj_occ <- if (replicates) sort(unique(x$estimates$occasions)) else NA_real_
   if (multilevel) {
+    # Level x occasions x m. Occasion averaging rescales pure error, which lives in the
+    # SUBJECT error set only (the cluster error set is cluster:rater), so the cluster
+    # level is projected single-occasion (M22 Slice 2, mirroring icc()). A non-replicate
+    # multilevel fit carries a single NA placeholder occasion.
+    grid <- do.call(
+      rbind,
+      lapply(proj_levels, function(lv) {
+        occ_lv <- if (!replicates) {
+          NA_real_
+        } else if (lv == "subject") {
+          proj_occ
+        } else {
+          min(proj_occ)
+        }
+        expand.grid(
+          m = m,
+          level = lv,
+          occ = occ_lv,
+          KEEP.OUT.ATTRS = FALSE,
+          stringsAsFactors = FALSE
+        )
+      })
+    )
+    ord <- if (replicates) {
+      order(match(grid$level, proj_levels), grid$occ, grid$m)
+    } else {
+      order(match(grid$level, proj_levels), grid$m)
+    }
+    grid <- grid[ord, , drop = FALSE]
+    row_m <- grid$m
+    row_level <- grid$level
+    row_occ <- if (replicates) grid$occ else NULL
+  } else if (replicates) {
     grid <- expand.grid(
       m = m,
-      level = proj_levels,
+      occ = proj_occ,
       KEEP.OUT.ATTRS = FALSE,
       stringsAsFactors = FALSE
     )
-    grid <- grid[order(match(grid$level, proj_levels), grid$m), , drop = FALSE]
+    grid <- grid[order(grid$occ, grid$m), , drop = FALSE]
     row_m <- grid$m
-    row_level <- grid$level
+    row_occ <- grid$occ
+    row_level <- NULL
   } else {
     row_m <- m
     row_level <- NULL
+    row_occ <- NULL
   }
-  # Single-level: `level` is NA and ignored by the estimand builder (recycled).
+  # Single-level/non-replicate: `level`/`occ` are NA and recycled/ignored by the
+  # estimand builder.
   levels_arg <- if (is.null(row_level)) NA_character_ else row_level
-  estimands <- Map(make_estimand, row_m, levels_arg)
+  occ_arg <- if (is.null(row_occ)) NA_real_ else row_occ
+  estimands <- Map(make_estimand, row_m, levels_arg, occ_arg)
   points <- vapply(
     estimands,
     function(e) icc_point(x$components, e),
@@ -267,9 +340,13 @@ d_study <- function(
     conf.high = vapply(intervals, `[[`, numeric(1), "conf.high")
   )
   # Multilevel projects one curve per level, so a `level` column disambiguates the
-  # shared index label (e.g. ICC(A,3) at subject vs. cluster).
+  # shared index label (e.g. ICC(A,3) at subject vs. cluster). A replicate fit projects
+  # one curve per occasion setting, so an `occasions` column disambiguates likewise (M22).
   if (multilevel) {
     tbl <- tibble::add_column(tbl, level = row_level, .after = "m")
+  }
+  if (replicates) {
+    tbl <- tibble::add_column(tbl, occasions = row_occ, .after = "m")
   }
 
   structure(
@@ -279,6 +356,7 @@ d_study <- function(
     icc_raters = raters,
     icc_design_label = icc_design_label(x$design),
     multilevel = multilevel,
+    replicates = replicates,
     conf.level = conf_level,
     # The projection band follows the fit's `ci_method` (M18 Slice 4): a bootstrap
     # fit gets a bootstrap-reprojected band, otherwise Monte-Carlo (ADR-025/028).
@@ -331,41 +409,52 @@ format.icc_dstudy <- function(x, ...) {
     attr(x, "method"),
     attr(x, "samples")
   )
-  # Multilevel projects one curve per level, so a level column disambiguates the m
-  # rows (the same index label appears at subject and cluster).
+  # Assemble the display table one column at a time so the optional descriptor columns
+  # compose: multilevel projects one curve per `level` (subject/cluster), a replicate
+  # fit one curve per `occasions` setting, and a multilevel replicate fit both (M22).
+  cols <- list()
+  heads <- character()
   if (isTRUE(attr(x, "multilevel"))) {
-    rows <- sprintf(
-      "  %-8s %5s  %8s   [%s, %s]",
-      x$level,
-      format(x$m, trim = TRUE),
-      formatC(x$estimate, format = "f", digits = 3),
-      formatC(x$conf.low, format = "f", digits = 3),
-      formatC(x$conf.high, format = "f", digits = 3)
-    )
-    table <- c(
-      sprintf(
-        "  %-8s %5s  %8s   %s",
-        "level",
-        "m",
-        "estimate",
-        paste0(ci_pct, "% CI")
-      ),
-      rows
-    )
-  } else {
-    rows <- sprintf(
-      "  %5s  %8s   [%s, %s]",
-      format(x$m, trim = TRUE),
-      formatC(x$estimate, format = "f", digits = 3),
-      formatC(x$conf.low, format = "f", digits = 3),
-      formatC(x$conf.high, format = "f", digits = 3)
-    )
-    table <- c(
-      sprintf("  %5s  %8s   %s", "m", "estimate", paste0(ci_pct, "% CI")),
-      rows
-    )
+    cols <- c(cols, list(as.character(x$level)))
+    heads <- c(heads, "level")
   }
-  c(header, meta, "", table)
+  if (isTRUE(attr(x, "replicates"))) {
+    cols <- c(cols, list(format(x$occasions, trim = TRUE)))
+    heads <- c(heads, "occ")
+  }
+  cols <- c(
+    cols,
+    list(
+      format(x$m, trim = TRUE),
+      formatC(x$estimate, format = "f", digits = 3),
+      sprintf(
+        "[%s, %s]",
+        formatC(x$conf.low, format = "f", digits = 3),
+        formatC(x$conf.high, format = "f", digits = 3)
+      )
+    )
+  )
+  heads <- c(heads, "m", "estimate", paste0(ci_pct, "% CI"))
+  # Right-align each column to the wider of its header and its cells.
+  widths <- vapply(
+    seq_along(cols),
+    function(j) max(nchar(heads[[j]]), nchar(cols[[j]])),
+    integer(1)
+  )
+  row_line <- function(vals) {
+    padded <- vapply(
+      seq_along(vals),
+      function(j) formatC(vals[[j]], width = widths[[j]]),
+      character(1)
+    )
+    paste0("  ", paste(padded, collapse = "  "))
+  }
+  body <- vapply(
+    seq_len(nrow(x)),
+    function(i) row_line(vapply(cols, `[[`, character(1), i)),
+    character(1)
+  )
+  c(header, meta, "", row_line(heads), body)
 }
 
 #' @rdname d_study
@@ -388,9 +477,13 @@ tidy.icc_dstudy <- function(x, ...) {
     conf.level = attr(x, "conf.level"),
     method = attr(x, "method")
   )
-  # Carry the level column for a multilevel projection (subject/cluster curves).
+  # Carry the level column for a multilevel projection (subject/cluster curves) and the
+  # occasions column for a replicate projection (one curve per occasion setting, M22).
   if (isTRUE(attr(x, "multilevel"))) {
     out <- tibble::add_column(out, level = x$level, .after = "m")
+  }
+  if (isTRUE(attr(x, "replicates"))) {
+    out <- tibble::add_column(out, occasions = x$occasions, .after = "m")
   }
   out
 }

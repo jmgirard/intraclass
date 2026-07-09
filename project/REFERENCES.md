@@ -159,6 +159,16 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
      fit, a seeded sim recovers a projected value not run with MC coverage, and
      consistency projection is Spearman–Brown per level. Subjects-per-cluster is
      **not** projected (Eq. 13 has no subject facet; ADR-026 amendment).
+  6. **O-RepDS — projection off a within-cell replicate fit asserted (M22, ADR-032)** —
+     `d_study()` on a replicate fit projects `m` with per-component divisors (rater and
+     interaction ÷ `m`, pure error ÷ `m·n_o`), one curve per occasion setting (spec
+     `M17-within-cell-replicates.md` §7): at `m = k_eff` each level/occasion curve
+     equals the fitted `ICC(*,k)` (<1e-4), the curve matches an independent `lme4`
+     replicate fit (cross-engine), consistency projection is Spearman–Brown, a seeded
+     sim recovers a projected value not run with MC coverage, and the curve is
+     monotone/[0,1] with occasion-averaged ≥ single-occasion. Single-level (Slice 1) +
+     multilevel crossed D1 / nested D2 (Slice 2, subject across occasions, cluster
+     single-occasion). Occasion projection and ragged-replicate projection deferred.
 - **Decision:** projection is a change of the averaging divisor (ADR-010; estimand
   spec `M4.5-d-study.md`); fixed-rater absolute agreement is refused as ill-posed.
 - **Provenance:** `data-raw/oracle-d-study.R` (seeded; regenerates the analytic and
@@ -249,8 +259,9 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Decision (attempt-then-degrade, #1/#4):** the **occasion-averaged coefficient on
   ragged data is 🟣 research, not shipped** — unequal per-cell counts give no single
   scalar effective-n_o divisor and no independent oracle to pin one; `occasions =
-  "average"` on ragged data aborts loudly. Ragged×fixed, ragged×multilevel, Design 3
-  replicate-split, and `d_study()` off a replicate fit are deferred/⚫ (COVERAGE §②).
+  "average"` on ragged data aborts loudly. Ragged×fixed, ragged×multilevel, and Design 3
+  replicate-split are deferred/⚫ (COVERAGE §②). `d_study()` off a replicate fit **now
+  ships** (M22, ADR-032; Oracle O-RepDS under O-DS above).
 - **Provenance:** seeded generators `sim_replicates()`/`sim_multilevel_rep()`/
   `sim_nested_rep()`/`sim_ragged_rep()` in the test files; glmmTMB the independent
   oracle for lme4 (and vice versa). Reproducible; nothing hardcoded.

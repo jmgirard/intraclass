@@ -191,12 +191,18 @@ Balanced two-way random with `n_o` replicates. Verified in a new
   replicates stay deferred.
 - **One-way replicates** (rater identity ignored — replicates already fold into the
   one-way residual, no change) remain out of scope (⚫ by design).
-- **`d_study()` projection off a replicate fit** — a rater-count (or occasion)
-  projection off a replicate fit needs the per-component error divisors (the
-  interaction divides by raters, pure error by raters × occasions), which the
-  projection estimand does not yet carry; `d_study()` **refuses loudly** on replicate
-  fits rather than silently drop the interaction (M20). The occasion D-study below
-  stays deferred.
-- **Occasion D-study** (`d_study()` projecting `n_o`) — the divisor supports it, but
-  projecting occasions is deferred to keep this slice bounded; the `occasions`
-  knob covers single/average of the observed count.
+- **`d_study()` projection off a replicate fit** — **shipped in M22** (ADR-032): the
+  rater-count projection uses the per-component `error_divisors` `icc_estimand()`
+  already carries (rater and interaction divide by the projected `m`, pure error by
+  `m · n_o`); `d_study()` projects each occasion setting on the fit as a separate curve
+  (an `occasions` column), holding `n_o` fixed. **Slice 1** is the single-level two-way
+  corner (random agreement/consistency; fixed consistency via Spearman–Brown; fixed
+  absolute agreement still refused); **Slice 2** the multilevel corner (crossed Design 1
+  + nested Design 2 — subject level across occasion settings, cluster single-occasion).
+  **Ragged** replicate projection stays deferred (its occasion-averaged divisor is 🟣
+  research, above). Oracle O-RepDS: reduction to the fitted `ICC(*,k)` at `m = k_eff` +
+  cross-engine glmmTMB↔lme4 + Spearman–Brown + seeded coverage.
+- **Occasion D-study** (`d_study()` projecting `n_o`) — still deferred: the per-component
+  divisor supports it, but projecting the occasion count (rather than the rater count)
+  stays out; the M22 replicate `d_study()` projects the **rater** count only, and the
+  `occasions` knob covers single/average of the observed count.
