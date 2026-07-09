@@ -315,6 +315,91 @@ test_that("O-Bayes: committed reference reproduces ten Hove (2020) findings", {
   expect_lt(k2$coverage_icc, k5$coverage_icc)
 })
 
+# --- O-Bayes-ML: the committed multilevel coverage reference (no brms needed, M24) ---
+# The multilevel companion to the two-way O-Bayes reference above. data-raw/
+# oracle-bayesian-multilevel.R runs ten Hove's crossed Design-1 DGP (N_c = 20) through the
+# SHIPPED five-component reduction and commits per-(cell x level) coverage/bias/convergence.
+# Here we re-assert the source's qualitative findings -- fast, no fitting, runs on every CI
+# job. Tolerances absorb our finite n_rep and INDEPENDENT MAP estimator (#4/#18).
+
+test_that("O-Bayes-ML: committed reference reproduces the multilevel findings", {
+  fixture <- test_path("fixtures", "bayesian-ml-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-multilevel.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  subj <- function(kk) s[s$k == kk & s$level == "subject", ]
+  clus <- function(kk) s[s$k == kk & s$level == "cluster", ]
+
+  # (1) High convergence at the half-t DGP across cells (fixed-warmup budget).
+  expect_true(all(s$converged_frac >= 0.90))
+
+  # (2) SUBJECT level (de-confounded two-way analog): MAP ~ unbiased and percentile
+  #     coverage ~nominal at k = 5 (ten Hove 2022's MCMC ~ MLE, subject level).
+  expect_lt(abs(subj(5L)$map_icc_relbias), 0.10)
+  expect_gte(subj(5L)$coverage_icc, 0.90)
+  expect_lte(subj(5L)$coverage_icc, 0.99)
+
+  # (3) k = 2 at the subject level: the MAP is biased more LOW than at k = 5 (ten Hove's
+  #     k = 2 MAP-low finding), while subject-level coverage stays ~nominal at both k -- the
+  #     subject level here has 100 subjects, so it is well-powered even at k = 2 and the
+  #     undercoverage the two-way N = 30 case showed does not strongly appear.
+  expect_lt(subj(2L)$map_icc_relbias, subj(5L)$map_icc_relbias)
+  expect_gte(subj(2L)$coverage_icc, 0.90)
+
+  # (4) CLUSTER level, few-cluster caveat (the honest M24 finding): at N_c = 20 the
+  #     single-rater cluster MAP is biased LOW vs the subject level (a diffuse near-boundary
+  #     sigma^2_c posterior -> the mode of the cluster ICC draws sits below the population).
+  expect_lt(clus(5L)$map_icc_relbias, subj(5L)$map_icc_relbias - 0.05)
+})
+
+# --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---
+# The subject-level (within-cluster) agreement estimand has signal sigma^2_{s:c} and error
+# {rater, residual} -- structurally IDENTICAL to the single-level two-way estimand (M5 §3a;
+# M5 O-ML/reduction (a)). So posterior_summary() of a five-row draw matrix at level
+# "subject" must equal posterior_summary() of the same subject/rater/residual rows under a
+# plain two-way estimand, regardless of the cluster / cluster_rater rows. This pins the
+# Bayesian subject-level reduction deterministically, without a Stan fit.
+
+test_that("O-Bayes-ML-reduction: subject-level equals the two-way composition", {
+  set.seed(7)
+  n <- 4000
+  sub <- rgamma(n, 5, 5)
+  rat <- rgamma(n, 2, 8)
+  res <- rgamma(n, 6, 6)
+  ml_draws <- rbind(
+    cluster = rgamma(n, 3, 4), # present but must NOT enter the subject-level error set
+    subject = sub,
+    rater = rat,
+    cluster_rater = rgamma(n, 2, 6), # ditto
+    residual = res
+  )
+  tw_draws <- rbind(subject = sub, rater = rat, residual = res)
+
+  for (u in c("single", "average")) {
+    ml_est <- icc_estimand(
+      type = "agreement",
+      unit = u,
+      raters = "random",
+      k_eff = 4,
+      multilevel = TRUE,
+      level = "subject"
+    )
+    tw_est <- icc_estimand(
+      type = "agreement",
+      unit = u,
+      raters = "random",
+      k_eff = 4
+    )
+    ml <- posterior_summary(ml_draws, list(ml_est))[[1]]
+    tw <- posterior_summary(tw_draws, list(tw_est))[[1]]
+    expect_equal(ml$point, tw$point)
+    expect_equal(ml$conf.low, tw$conf.low)
+    expect_equal(ml$conf.high, tw$conf.high)
+  }
+})
+
 # --- Live brms fit: the full pipeline (needs brms + a Stan toolchain) ----------
 # This is the ONE test that compiles + samples a real Stan model. It is gated OFF CI:
 # a CI runner may have the brms *package* without a working Stan C++ toolchain (Boost/BH,

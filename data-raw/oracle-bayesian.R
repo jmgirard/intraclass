@@ -71,6 +71,14 @@ brm_args <- list(
   refresh = 0L
 )
 
+# The two-way component -> posterior-draw-column map the engine uses (M23); passed to the
+# shipped reducers, which since M24 (ADR-034) take an explicit `spec`/`vars`.
+spec_tw <- c(
+  subject = "sd_subject__Intercept",
+  rater = "sd_rater__Intercept",
+  residual = "sigma"
+)
+
 pop_icc_a1 <- function(s2_r) s2_s / (s2_s + s2_r + s2_sr)
 
 # One dataset from the DGP (long format, factors) -- Eq. 1 with the confounded
@@ -130,7 +138,7 @@ one_rep <- function(k, s2_r, seed) {
       refresh = 0
     )
   ))
-  draws <- intraclass:::brms_component_draws(fit)
+  draws <- intraclass:::brms_component_draws(fit, spec_tw)
   est <- intraclass:::icc_estimand(
     type = "agreement",
     unit = "single",
@@ -140,7 +148,7 @@ one_rep <- function(k, s2_r, seed) {
   summ <- intraclass:::posterior_summary(draws, list(est), conf_level = 0.95)[[
     1
   ]]
-  conv <- intraclass:::brms_convergence(fit)
+  conv <- intraclass:::brms_convergence(fit, vars = unname(spec_tw))
   pop <- pop_icc_a1(s2_r)
   sr_draws <- sqrt(draws["rater", ]) # sigma_r = sqrt of the rater-variance draws
   out <- data.frame(

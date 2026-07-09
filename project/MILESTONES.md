@@ -776,14 +776,21 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       ADR-033) — its numerical σ²_c→0 reduction-to-M23 + coverage bias are pinned by **Slice 2**'s
       committed fixture (the M23 Slice-1/Slice-2 split).
 
-**Slice 2 — cluster-level (between-cluster), Bayesian + the coverage oracle**
-- [ ] The M5 cluster-level signal/error map (§3b: signal σ²_c, error {rater, cluster_rater} /
-      {cluster_rater}) off the **same fit**; `ICC(c,1)`/`ICC(c,k)`.
-- [ ] Extend `data-raw/oracle-bayesian.R` to ten Hove's multilevel DGP (`M5-multilevel.md` §5:
-      σ²_{s:c}=1, σ²_{cr}=0.16, σ²_{(s:c)r}=0.50, σ²_c/σ²_r varied, N_c ∈ {20,40}, k ∈ {2,5,10}) with
-      brms + the half-*t* prior; **commit the reference fixture** under `tests/testthat/fixtures/`.
-- [ ] Full O-Bayes-ML set green off the committed fixture (coverage + convergence-rate); cluster-level
-      MC-CI verified; the k = 2 caveat note surfaces (#13, inherited from M23).
+**Slice 2 — cluster-level (between-cluster), Bayesian + the coverage oracle** ✅
+- [x] The M5 cluster-level signal/error map (§3b: signal σ²_c, error {rater, cluster_rater} /
+      {cluster_rater}) off the **same fit**; `ICC(c,1)`/`ICC(c,k)` — the shipped M5 map, exercised by
+      the Slice-1 live fit and the committed coverage fixture (cluster rows present in both).
+- [x] **New** `data-raw/oracle-bayesian-multilevel.R` (companion to the M23 two-way
+      `oracle-bayesian.R`, keeping its fixture untouched) runs ten Hove's crossed Design-1 DGP
+      (N_c = 20, N_s/cluster = 5, σ²_c = 0.5, σ²_{s:c} = 1, σ²_r = σ²_{cr} = 0.16, σ²_res = 0.5,
+      k ∈ {5, 2}) through the shipped five-component reduction; **committed fixture**
+      `tests/testthat/fixtures/bayesian-ml-oracle.rds` (per-cell × level coverage/bias/convergence);
+      the two-way script's now-`spec`-required reducer calls fixed too.
+- [x] O-Bayes-ML-coverage green off the committed fixture (`test-icc-brms.R`): subject-level MAP
+      ≈ unbiased + nominal coverage at k = 5 (relbias −1.5%, cover .94); MAP biased more low at k = 2;
+      the cluster-level few-cluster caveat (MAP relbias −16%/−25% at N_c = 20, wide intervals still
+      ~nominal); convergence ≥ .94. Plus O-Bayes-ML-reduction (subject-level composes identically to
+      two-way, no fit). k = 2 note inherited from M23.
 
 **Cross-cutting DoD**
 - [ ] `COVERAGE.md` ④ multilevel table: the `engine = "brms"` crossed subject/cluster cells flip to ✅.
@@ -804,8 +811,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3 averaged crossed cluster-level `ICC(c,k)` incomplete
   divisor; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
-- Status: **Slice 1 shipped locally** (fit + wiring + O-Bayes-ML-agree; `test-icc-brms.R` green, incl.
-  the live crossed-multilevel fit; `air` + `lintr` clean; glmmTMB multilevel regression unaffected).
-  On branch `m24-bayesian-multilevel`. **Next action: Slice 2** — cluster-level coverage oracle:
-  extend `data-raw/oracle-bayesian.R` to ten Hove's multilevel DGP + commit the fixture; the numerical
-  σ²_c→0 reduction-to-M23 pin lands here too.
+- Status: **Slices 1–2 shipped locally** (fit + wiring + O-Bayes-ML-agree; committed multilevel
+  coverage fixture + O-Bayes-ML-coverage/reduction). `test-icc-brms.R` 84/84 green (incl. both live
+  fits + the fixture tests); `air` + `lintr` clean; glmmTMB multilevel regression unaffected. On branch
+  `m24-bayesian-multilevel`. **Next action: cross-cutting DoD** (COVERAGE ④ brms cells → ✅,
+  REFERENCES O-Bayes-ML, `pkgdown::check_pkgdown()`, installed-pkg suite, `R CMD check --as-cran`) then
+  finish-task + PR.
