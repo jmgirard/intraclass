@@ -5,11 +5,11 @@ milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers 
 full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
 (`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
 restate it here). The **M18–M21 completeness arc (ADR-027) is complete** (M21 SEM parity
-shipped, PR #26), closing every arc 🔵 *not yet* gap in `COVERAGE.md`. **M22 (ADR-032) —
-`d_study()` projection off a within-cell replicate fit — is now in flight**, a small
-standalone milestone promoting the one deferred `d_study()` corner (M17 §7). The next
-milestone is scoped by an ADR at its start after a short retro (founding brief §7) and
-detailed in full here until it ships.
+shipped, PR #26), closing every arc 🔵 *not yet* gap in `COVERAGE.md`; **M22 (ADR-032) —
+`d_study()` projection off a within-cell replicate fit — then shipped** (PR #27), a small
+standalone milestone promoting the one deferred `d_study()` corner (M17 §7). **No milestone is
+currently in flight.** The next milestone is scoped by an ADR at its start after a short retro
+(founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
@@ -668,4 +668,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   (ROADMAP unscheduled, ADR-027). Arc carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3
   averaged crossed cluster-level `ICC(c,k)` incomplete divisor; Bayesian engine + `ci_method =
   "posterior"`; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014).
-- Status: **in progress** (Slices 1–2 implemented, local tests green; see `STATUS.md`).
+- Status: **done** (Slices 1–2; merged via PR #27 at `8375184`; full CI matrix green incl. Windows
+  and R-devel — all 9 jobs). `d_study()` projects the rater count off single-level and multilevel
+  (crossed D1 + nested D2) within-cell replicate fits, one curve per occasion setting; occasion
+  projection and ragged-replicate projection stay deferred. Standalone milestone after the M18–M21
+  arc; no new estimand/dependency.
