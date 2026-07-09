@@ -4,10 +4,12 @@ Ordered milestones with status and the deferrals each one recorded. **Shipped
 milestones are compressed** to Goal / Status / Deferred + spec-and-ADR pointers — the
 full blow-by-blow DoD (slices, oracle-by-oracle detail) lives in its ADR
 (`DECISIONS.md`), its estimand-spec, and git history (ADR-015, single-source; don't
-restate it here). **No milestone is in flight** — the **M18–M21 completeness arc
-(ADR-027) is complete** (M21 SEM parity shipped, PR #26), so every 🔵 *not yet* gap in
-`COVERAGE.md` is closed. The next milestone is scoped by an ADR at its start after a
-short retro (founding brief §7) and detailed in full here until it ships.
+restate it here). The **M18–M21 completeness arc (ADR-027) is complete** (M21 SEM parity
+shipped, PR #26), closing every arc 🔵 *not yet* gap in `COVERAGE.md`. **M22 (ADR-032) —
+`d_study()` projection off a within-cell replicate fit — is now in flight**, a small
+standalone milestone promoting the one deferred `d_study()` corner (M17 §7). The next
+milestone is scoped by an ADR at its start after a short retro (founding brief §7) and
+detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
@@ -634,3 +636,36 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   (`lavaan_simulate_refit`); Slice 2 fixed-rater (`fit_lavaan(raters=)`, Case-3A θ²_r); Slice 3
   incomplete/FIML (`missing = "fiml"`, ships — no research degrade). **Final milestone of the
   M18–M21 arc — every 🔵 not-yet gap in `COVERAGE.md` is closed.**
+
+## M22: `d_study()` projection off a within-cell replicate fit (ADR-032)
+- Goal: promote the one deferred `d_study()` corner (M17 §7 / M20; the COVERAGE `d_study()`
+  table's last 🔵) — projecting the rater count `m` off a within-cell replicate fit. A small
+  standalone milestone after the M18–M21 arc; **completeness, not new estimand work** (cf.
+  M14/M15/M18–M21): additive, non-breaking (#6) — no new argument, dependency, or estimand-spec
+  file. A replicate fit splits the residual into the subject×rater interaction σ²_sr and pure
+  error σ²_e, so projection needs **per-component error divisors** (rater and interaction ÷ the
+  projected `m`, pure error ÷ `m·n_o`) — which `icc_estimand()` already carries from M17, so the
+  ROADMAP's stated blocker was already resolved and the work is confined to `d_study()` (which
+  previously refused every replicate fit). Two thin slices: **Slice 1 — single-level** two-way
+  replicate projection (random agreement/consistency; **fixed consistency** via Spearman–Brown;
+  **fixed absolute agreement** still refused — θ²_r is a finite population), emitting one curve
+  per occasion setting on the fit (a new `occasions` column, paralleling the multilevel `level`
+  column), holding `n_o` fixed; **Slice 2 — multilevel** (crossed Design 1 + nested Design 2)
+  projecting the subject level across occasion settings and the cluster level single-occasion
+  (occasion averaging touches only pure error, absent from the cluster error set). The occasion
+  count projection and ragged-replicate projection stay deferred (the ragged occasion-averaged
+  divisor is 🟣 research, M20/ADR-030).
+- Reference: ADR-032 (scope + the maintainer's do-both-in-two-slices decision); no new
+  estimand-spec — extends `M17-within-cell-replicates.md §7` and `M4.5-d-study.md §7`. Oracles
+  **O-RepDS** (glmmTMB the independent oracle, as M8–M10/M15/M18–M21): reduction — at `m = k_eff`
+  each level/occasion curve equals the fitted `ICC(*,k)` (< 1e-4); cross-engine glmmTMB↔lme4
+  (< 1e-4); Spearman–Brown for consistency; seeded-coverage recovery at an `m` not run;
+  monotone/[0,1] and occasion-averaged ≥ single-occasion invariants; in `test-d-study.R`.
+- Deferred out of M22 (record so not rediscovered): the **occasion `d_study()`** projecting `n_o`
+  (M17 §7 — the per-component divisor supports it, projecting occasions stays out); **ragged ×
+  replicate** projection (bounded by the 🟣 research occasion-averaged ragged divisor, M20/ADR-030);
+  **fixed × multilevel** replicate fits (never fitted, M20 Slice-1 scope-out); **SEM ∩ replicates**
+  (ROADMAP unscheduled, ADR-027). Arc carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3
+  averaged crossed cluster-level `ICC(c,k)` incomplete divisor; Bayesian engine + `ci_method =
+  "posterior"`; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014).
+- Status: **in progress** (Slices 1–2 implemented, local tests green; see `STATUS.md`).

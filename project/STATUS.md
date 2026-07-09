@@ -1,6 +1,17 @@
 # Project status
 
-- Milestone: **M21 — SEM (lavaan) engine parity (bootstrap, fixed-rater, incomplete/FIML)** —
+- Milestone: **M22 — `d_study()` projection off a within-cell replicate fit** — **in progress**
+  (ADR-032; small standalone milestone after the M18–M21 arc). Promotes the one deferred
+  `d_study()` corner (M17 §7 / M20): projecting the rater count `m` off a replicate fit, using the
+  per-component `error_divisors` M17 already delivered (rater/interaction ÷ `m`, pure error ÷
+  `m·n_o`), one curve per occasion setting (a new `occasions` column). **Slice 1** single-level
+  two-way (fixed consistency via Spearman–Brown; fixed agreement refused) and **Slice 2**
+  multilevel (crossed D1 + nested D2, subject across occasions, cluster single-occasion) both
+  implemented; **local full suite green (293 blocks, 0 fail/0 warn)**. Oracle O-RepDS (reduction
+  at `m = k_eff` + cross-engine + Spearman–Brown + seeded coverage + monotone/[0,1]). Remaining:
+  regen roxygen/`document()`, `air`, `lintr`, installed-pkg `R CMD check`, then branch + PR
+  (`milestone-branches-and-prs`). Occasion projection and ragged-replicate projection stay deferred.
+- Prior milestone: **M21 — SEM (lavaan) engine parity (bootstrap, fixed-rater, incomplete/FIML)** —
   **shipped** (PR #26, ADR-031; the **last milestone of the M18–M21 completeness arc**, ADR-027).
   Promoted the three M7 lavaan deferrals to lme4-style parity, engine parity not new estimand work:
   **Slice 1** `ci_method = "bootstrap"` for lavaan (M16 `simulate_refit` seam; `lavaan_simulate_refit`);
@@ -10,21 +21,26 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: — (**no milestone in flight**; the M18–M21 arc is done. Next milestone gets its own
-  start-of-milestone scoping ADR after a short retro. Remaining non-arc work lives in `ROADMAP.md`:
-  the Bayesian engine + `ci_method = "posterior"`, multilevel SEM, categorical/ordinal GLMM, the
-  Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and the CRAN upload, ADR-022.)
+- Active task: **M22 Slices 1–2 implemented in `R/d-study.R` (uncommitted, on `main` — needs a
+  `m22-*` branch before PR, `milestone-branches-and-prs`).** `d_study()` now projects the rater
+  count off a within-cell replicate fit; the estimand change was zero (M17's `error_divisors`
+  already resolve `unit = m` + `replicates` + `occasions`), so the work is confined to `d_study()`
+  (blanket replicate abort → support path + two deferral guards) and its `format`/`tidy` methods
+  (a new `occasions` column). Oracle O-RepDS added to `test-d-study.R` (15 new blocks). Remaining
+  DoD: `document()`, `air format`, `lintr::lint_package()`, installed-pkg `R CMD check` with
+  `NOT_CRAN=true` (`verify-against-installed-package`), then branch + PR.
 - Last green CI: **PR #26 (M21) full matrix green incl. Windows and R-devel (all 9 jobs); merged to
-  `main` at ee81e6f.** 925 tests, `R CMD check --as-cran` 0/0/0.
+  `main` at ee81e6f.** 925 tests, `R CMD check --as-cran` 0/0/0. **M22 local:** full `load_all`
+  suite green (293 blocks, 0 fail / 0 warn); not yet installed-checked or pushed.
 - Blockers: —
-- Updated: 2026-07-08 by main session (Opus) — **M21 merged (PR #26, ADR-031); M18–M21 arc
-  complete.** All three slices shipped (S1 lavaan bootstrap `e307421`; S2 fixed-rater Case-3A θ²_r
-  `f84b57a`; S3 incomplete/FIML `65aebdd` — ships, no research degrade). Full CI matrix green incl.
-  Windows and R-devel (925 tests), `R CMD check --as-cran` 0/0/0. Post-merge `project/` reconcile
-  done (M21 compressed in MILESTONES; preamble → no milestone in flight, arc complete;
-  REFERENCES O-SEM extended; COVERAGE §③ / ROADMAP synced). Two oracle-first catches resolved by
-  numbers (fixed SEM = distinct Case-3A θ²_r; FIML agreement ships). Next: a new milestone's
-  scoping ADR after a short retro, or the out-of-band CRAN upload (ADR-022).
+- Updated: 2026-07-08 by main session (Opus) — **M22 opened (ADR-032) and implemented locally.**
+  Both slices done: Slice 1 single-level replicate `d_study()` (fixed consistency via
+  Spearman–Brown; fixed agreement refused), Slice 2 multilevel (crossed D1 + nested D2, subject
+  across occasions, cluster single-occasion). O-RepDS oracles green (reduction at `m = k_eff` +
+  cross-engine glmmTMB↔lme4 + Spearman–Brown + seeded coverage + monotone/[0,1]). Tracking synced
+  (ADR-032; MILESTONES M22 + preamble; COVERAGE `d_study()` table; M17 §7 + M4.5 §7 specs;
+  REFERENCES O-RepDS; NEWS). Next: finish the DoD (document/air/lintr/installed check) then branch
+  + PR. Occasion projection and ragged-replicate projection stay deferred.
 
 ## Where we are
 

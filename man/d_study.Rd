@@ -96,6 +96,22 @@ level is dropped with a note, because projecting \code{m} raters is the averaged
 \code{ICC(c,k)} case whose ragged divisor is an open modeling question (M9).
 }
 
+\section{Within-cell replicate fits}{
+
+For a within-cell replicate fit (more than one rating per subject-by-rater cell,
+where the residual splits into the subject-by-rater interaction and pure error),
+\code{d_study()} projects the \strong{rater count \code{m}}, holding the number of occasions
+\code{n_o} at the fitted value: the rater and interaction terms divide by \code{m}, pure
+error by \code{m * n_o}. The result gains an \code{occasions} column, one reliability curve
+per occasion setting on the fit (\code{occasions = "single"} and/or \code{"average"}), so at
+\code{m} = the observed rater count each curve matches the fitted \verb{ICC(*,k)} for that
+setting. Multilevel replicate fits project the subject level across occasion
+settings and the cluster level single-occasion (occasion averaging touches only
+pure error, which is not in the cluster-level error set). Projecting the occasion
+count itself is not yet supported; \strong{ragged} replicate fits are refused (the
+occasion-averaged ragged divisor is an open modeling question).
+}
+
 \examples{
 fit <- icc(ratings, score, subject, rater, seed = 1)
 d_study(fit, m = 1:8)

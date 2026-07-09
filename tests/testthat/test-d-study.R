@@ -710,32 +710,325 @@ test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project"
   expect_true(all(is.finite(dsi$conf.low) & is.finite(dsi$conf.high)))
 })
 
-test_that("d_study refuses within-cell replicate fits (M20; #1/#5)", {
-  skip_if_not_installed("glmmTMB")
-  # A replicate fit splits the residual into interaction + pure error; projecting
-  # rater counts off it would silently drop the interaction from the error set, so
-  # d_study() must refuse rather than miscompute (occasion/replicate projection is a
-  # deferred facet, M17 §7).
-  set.seed(1)
-  ns <- 12
-  nr <- 4
-  no <- 2
-  s <- stats::rnorm(ns, 0, sqrt(1.2))
-  r <- stats::rnorm(nr, 0, sqrt(0.7))
+# Oracle O-RepDS: d_study() off a within-cell replicate fit, M22 Slice 1 ----------
+#
+# A replicate fit splits the residual into the interaction sigma^2_sr and pure error
+# sigma^2_e (M17 §2), so projecting the rater count `m` needs PER-COMPONENT divisors:
+# rater and interaction divide by `m`, pure error by `m * n_o`. The estimand already
+# carries `error_divisors` (M17), so d_study() projects each occasion setting on the
+# fit as a separate curve (an `occasions` column), holding the occasion count fixed
+# (occasion projection stays a deferred facet, M17 §7; ADR-032).
+
+# Balanced two-way replicate generator (no `sim_replicates` visible from this file).
+sim_rep_ds <- function(ns, nr, no, vs, vr, vsr, ve, seed) {
+  set.seed(seed)
+  s <- stats::rnorm(ns, 0, sqrt(vs))
+  r <- stats::rnorm(nr, 0, sqrt(vr))
   g <- expand.grid(
     subject = seq_len(ns),
     rater = seq_len(nr),
     occ = seq_len(no)
   )
-  srv <- stats::rnorm(ns * nr, 0, sqrt(0.4))
+  srv <- stats::rnorm(ns * nr, 0, sqrt(vsr))
   g$sr <- srv[(g$rater - 1) * ns + g$subject]
   g$score <- 10 +
     s[g$subject] +
     r[g$rater] +
     g$sr +
-    stats::rnorm(nrow(g), 0, sqrt(0.5))
+    stats::rnorm(nrow(g), 0, sqrt(ve))
   g$subject <- factor(g$subject)
   g$rater <- factor(g$rater)
-  x <- icc(g, score, subject, rater, seed = 1)
-  expect_error(d_study(x, m = 1:3), class = "intraclass_unsupported")
+  g
+}
+
+test_that("O-RepDS/reduction: replicate projection at m = k reproduces ICC(*,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    occasions = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 4)
+  expect_true("occasions" %in% names(ds))
+  expect_setequal(unique(ds$occasions), c(1, 3))
+  for (o in c(1, 3)) {
+    proj <- ds$estimate[ds$occasions == o]
+    fitted_k <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" & fit$estimates$occasions == o
+    ]
+    expect_equal(proj, fitted_k, tolerance = 1e-4)
+  }
+})
+
+test_that("O-RepDS/SB: replicate consistency projection is Spearman-Brown", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fit <- icc(d, score, subject, rater, type = "consistency", seed = 1)
+  ds <- d_study(fit, m = c(1, 2, 5, 10))
+  r1 <- ds$estimate[ds$m == 1]
+  sb <- ds$m * r1 / (1 + (ds$m - 1) * r1)
+  expect_equal(ds$estimate, sb, tolerance = 1e-8)
+})
+
+test_that("O-RepDS: replicate curve is monotone, in [0,1], occ-averaged >= single", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    occasions = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:8)
+  for (o in c(1, 3)) {
+    est <- ds$estimate[ds$occasions == o]
+    expect_true(all(diff(est) > 0))
+    expect_true(all(est >= 0 & est <= 1))
+  }
+  # Averaging over occasions only cuts pure error, so it can only raise reliability.
+  single <- ds$estimate[ds$occasions == 1]
+  averaged <- ds$estimate[ds$occasions == 3]
+  expect_true(all(averaged >= single))
+})
+
+test_that("O-RepDS/lme4: replicate projection matches an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fg <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fl <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    occasions = "average",
+    engine = "lme4",
+    seed = 1
+  )
+  dg <- d_study(fg, m = c(2, 6, 12))
+  dl <- d_study(fl, m = c(2, 6, 12))
+  expect_equal(dg$estimate, dl$estimate, tolerance = 1e-4)
+})
+
+test_that("O-RepDS: fixed consistency projects, fixed agreement refused", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  con <- suppressWarnings(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = "consistency",
+      seed = 1
+    )
+  )
+  expect_s3_class(d_study(con, m = 1:3), "icc_dstudy")
+  agr <- suppressWarnings(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = "agreement",
+      seed = 1
+    )
+  )
+  expect_error(d_study(agr, m = 1:3), class = "intraclass_unidentified")
+})
+
+test_that("O-RepDS/sim: population Phi(m) recovered and covered at an m not run", {
+  skip_if_not_installed("glmmTMB")
+  vs <- 1.2
+  vr <- 0.7
+  vsr <- 0.4
+  ve <- 0.5
+  d <- sim_rep_ds(60, 5, 3, vs, vr, vsr, ve, seed = 424242)
+  fit <- icc(d, score, subject, rater, seed = 1)
+  mm <- 8 # not the observed count (5)
+  phi <- vs / (vs + (vr + vsr + ve) / mm) # single-occasion agreement at m = 8
+  ds <- d_study(fit, m = mm, seed = 1)
+  # Recovery is by coverage (as O-sim/O-IDS): with few raters sigma^2_r is noisily
+  # estimated, so the projected point drifts, but the boundary-aware MC band covers
+  # the population Phi(m) at an m not run.
+  expect_gte(phi, ds$conf.low)
+  expect_lte(phi, ds$conf.high)
+})
+
+test_that("d_study defers ragged-replicate projection (#5, #8)", {
+  skip_if_not_installed("glmmTMB")
+  # Ragged (non-uniform) replicates: the occasion-averaged ragged divisor is open
+  # research (M20/ADR-030), so projection is refused (single-level or multilevel).
+  d <- sim_rep_ds(15, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 7)
+  ragged <- suppressMessages(icc(d[-(1:3), ], score, subject, rater, seed = 1))
+  expect_error(d_study(ragged, m = 1:3), class = "intraclass_unsupported")
+})
+
+# Oracle O-RepDS (multilevel): d_study() off a multilevel replicate fit, M22 Slice 2 -
+#
+# The M20 Slice 2 multilevel replicate fits (crossed Design 1 six-component, nested
+# Design 2 five-component) project the SUBJECT level across each occasion setting; the
+# cluster error set (cluster:rater) has no pure-error term, so the cluster level is
+# projected single-occasion. Nested designs project the subject level only.
+
+sim_ml_rep_ds <- function(nc, ns, k, no, vc, vsc, vr, vcr, vsr, ve, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, sqrt(vc))
+  rt <- stats::rnorm(k, 0, sqrt(vr))
+  d <- expand.grid(
+    occ = seq_len(no),
+    rater = seq_len(k),
+    subj = seq_len(ns),
+    cluster = seq_len(nc)
+  )
+  scv <- stats::rnorm(nc * ns, 0, sqrt(vsc))
+  crv <- stats::rnorm(nc * k, 0, sqrt(vcr))
+  srv <- stats::rnorm(nc * ns * k, 0, sqrt(vsr))
+  sc <- (d$cluster - 1) * ns + d$subj
+  cr <- (d$cluster - 1) * k + d$rater
+  sr <- ((d$cluster - 1) * ns + (d$subj - 1)) * k + d$rater
+  d$score <- 10 +
+    cl[d$cluster] +
+    scv[sc] +
+    rt[d$rater] +
+    crv[cr] +
+    srv[sr] +
+    stats::rnorm(nrow(d), 0, sqrt(ve))
+  d$cluster <- factor(paste0("c", d$cluster))
+  d$rater <- factor(paste0("r", d$rater))
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d
+}
+
+sim_nested_rep_ds <- function(nc, ns, k, no, vc, vsc, vrc, vsr, ve, seed) {
+  set.seed(seed)
+  cl <- stats::rnorm(nc, 0, sqrt(vc))
+  d <- expand.grid(
+    occ = seq_len(no),
+    rater = seq_len(k),
+    subj = seq_len(ns),
+    cluster = seq_len(nc)
+  )
+  scv <- stats::rnorm(nc * ns, 0, sqrt(vsc))
+  rcv <- stats::rnorm(nc * k, 0, sqrt(vrc))
+  srv <- stats::rnorm(nc * ns * k, 0, sqrt(vsr))
+  sc <- (d$cluster - 1) * ns + d$subj
+  rc <- (d$cluster - 1) * k + d$rater
+  sr <- ((d$cluster - 1) * ns + (d$subj - 1)) * k + d$rater
+  d$score <- 10 +
+    cl[d$cluster] +
+    scv[sc] +
+    rcv[rc] +
+    srv[sr] +
+    stats::rnorm(nrow(d), 0, sqrt(ve))
+  d$cluster <- factor(paste0("c", d$cluster))
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d$rater <- factor(paste(d$cluster, d$rater, sep = "_r"))
+  d
+}
+
+test_that("O-RepDS/reduction: multilevel replicate projection reproduces ICC(*,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, m = 4))
+  expect_true(all(c("level", "occasions") %in% names(ds)))
+  # Subject projects both occasion settings; cluster is single-occasion only.
+  expect_setequal(ds$occasions[ds$level == "subject"], c(1, 3))
+  expect_setequal(ds$occasions[ds$level == "cluster"], 1)
+  for (i in seq_len(nrow(ds))) {
+    f <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" &
+        fit$estimates$level == ds$level[i] &
+        fit$estimates$occasions == ds$occasions[i]
+    ]
+    expect_equal(ds$estimate[i], f, tolerance = 1e-4)
+  }
+})
+
+test_that("O-RepDS/lme4: multilevel replicate projection matches an lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  common <- list(
+    d,
+    quote(score),
+    quote(subject),
+    quote(rater),
+    cluster = quote(cluster),
+    level = c("subject", "cluster"),
+    occasions = "average",
+    seed = 1
+  )
+  fg <- suppressMessages(do.call(icc, common))
+  fl <- suppressMessages(do.call(icc, c(common, engine = "lme4")))
+  dg <- suppressMessages(d_study(fg, m = c(2, 6)))
+  dl <- suppressMessages(d_study(fl, m = c(2, 6)))
+  expect_equal(dg$estimate, dl$estimate, tolerance = 1e-4)
+})
+
+test_that("O-RepDS: nested Design 2 replicate projects the subject level only", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_nested_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.4, 0.5, seed = 12)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, m = 4))
+  expect_setequal(unique(ds$level), "subject")
+  for (i in seq_len(nrow(ds))) {
+    f <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" &
+        fit$estimates$level == "subject" &
+        fit$estimates$occasions == ds$occasions[i]
+    ]
+    expect_equal(ds$estimate[i], f, tolerance = 1e-4)
+  }
+})
+
+test_that("O-RepDS: multilevel replicate curve is monotone and in [0,1]", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, m = 1:6))
+  for (lv in unique(ds$level)) {
+    for (o in unique(ds$occasions[ds$level == lv])) {
+      est <- ds$estimate[ds$level == lv & ds$occasions == o]
+      expect_true(all(diff(est) > 0))
+      expect_true(all(est >= 0 & est <= 1))
+    }
+  }
 })

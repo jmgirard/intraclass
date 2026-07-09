@@ -11,9 +11,10 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-08**, after **M20** (PR #25, ADR-030) — which closes the
-within-cell replicate corners (fixed / multilevel / ragged single-occasion) and adds a
-`d_study()`-off-replicate guard; M18 (PR #23) and M19 (PR #24) before that.
+**2026-07-08**, after **M22** (ADR-032) — which lifts the M20 `d_study()`-off-replicate
+guard into a rater-count projection (single-level + multilevel, one curve per occasion
+setting). Prior: **M21** (PR #26, SEM parity), **M20** (PR #25, replicate corners),
+M18/M19 (PR #23/#24) before that.
 
 **Scheduling:** the 🔵 *not yet* gaps below (excluding the cross-cutting section) were
 planned as the **M18–M21 arc** (ADR-027) — each gap's target slice is noted in its reason
@@ -94,7 +95,7 @@ replicated data (every cell present, equal replicate count). Splits σ²_res →
 | multilevel (`cluster`) with replicates | ✅ (M20 Slice 2, balanced) — crossed Design 1 (`(1\|cluster:subject:rater)`, six components) and nested Design 2 (five); the residual splits into the interaction σ²_{csr} and pure error at the subject level. Design 3 replicate-split ⚫ by-design (multilevel one-way, no separable interaction); fixed×multilevel, conflated×replicates, and ragged×multilevel replicates deferred. Cross-engine + reduction (occasion-averaged == M5/M8 on cell means) oracles. |
 | ragged / non-uniform replicates, **single-occasion** | ✅ (M20 Slice 3) — two-way random, the replicate analogue of M3: the shipped interaction fit + harmonic-mean `k_eff` (distinct raters/subject) + connectedness gate. Cross-engine + seeded-recovery oracles. Ragged×fixed and ragged×multilevel stay deferred (compound corners). |
 | ragged replicates, **`occasions = "average"`** | 🟣 **Research** — with unequal per-cell counts the reliability of the mean of `n_o` replicates has no single scalar effective-`n_o` divisor (GT averaging weights are per-cell) and no textbook/independent oracle pins one; needs a simulation-oracle study before it can ship (M20 attempt-then-degrade, ADR-030; M17 §7). |
-| `d_study()` projection off a replicate fit | 🔵 **Not yet** — rater/occasion projection off a replicate fit needs the per-component error divisors; refused loudly (M20; M17 §7). |
+| `d_study()` projection off a replicate fit | ✅ (M22, ADR-032) — rater-count projection (single-level two-way + multilevel crossed D1 / nested D2), one curve per occasion setting; see the `d_study()` table below. Occasion projection and ragged-replicate projection stay 🔵/🟣 deferred. |
 | `engine = "lavaan"` with replicates | 🔵 **Not yet (reclassified → ROADMAP unscheduled, ADR-027)** — SEM ∩ replicates is niche/low-value; not milestoned. |
 | one-way with replicate-split components | ⚫ **By design** — one-way ignores rater identity, so the σ²_sr interaction is undefined; one-way already *uses* repeated ratings as its design (not a within-cell split). |
 
@@ -170,6 +171,8 @@ are dropped — see gaps); the conflated diagnostic is not yet available on ragg
 | **incomplete-data** multilevel projection | ✅ subject level (M18 Slice 3, crossed; **nested** Designs 2/3 via M19 Slice 1); cluster level dropped-with-note (bounded by the 🟣 Wave-3 `ICC(c,k)` incomplete divisor; nested designs have no cluster level). Projection moves only the divisor `m`, so the ragged subject fit projects unchanged (reduction to `ICC(A,k)` at `m = k_eff`; cross-engine; monotone/[0,1]). |
 | **subjects-per-cluster** ("three-facet") projection | ⚫ **By design (not a d_study facet)** — ten Hove Eq. 13's cluster ICC has no subject facet; the subjects-per-cluster count is an efficiency/sample-size dimension, folded into the parked *design/power helpers* item, not a reliability projection ([[cluster-icc-no-subject-facet]], ADR-026 amendment). |
 | bootstrap-projected `d_study()` bands | ✅ (M18 Slice 4) — the band follows the fit's `ci_method`: a bootstrap fit stores its resample components and `d_study()` reprojects them across *m* (at *m* = observed count the band equals the fitted `ICC(*,k)` bootstrap interval exactly). Package-wide (two-way, multilevel, incomplete), no new argument (ADR-025/028). |
+| rater-count projection off a **within-cell replicate** fit | ✅ (M22, ADR-032) — uses the per-component `error_divisors` (rater/interaction ÷ `m`, pure error ÷ `m·n_o`); one curve per occasion setting (an `occasions` column). Slice 1 single-level two-way (fixed consistency via Spearman–Brown; fixed agreement refused); Slice 2 multilevel (crossed D1 + nested D2 — subject across occasions, cluster single-occasion). Reduction (`m=k_eff` → fitted `ICC(*,k)`) + cross-engine + Spearman–Brown + seeded-coverage oracles. |
+| **occasion** (`n_o`) projection, and projection off a **ragged** replicate fit | 🔵 **Not yet** — the per-component divisor supports an occasion projection but it stays deferred (M17 §7); ragged-replicate projection is bounded by the 🟣 research occasion-averaged ragged divisor (M20/ADR-030). Both refused loudly (M22). |
 
 ---
 

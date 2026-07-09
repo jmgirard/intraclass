@@ -2058,3 +2058,80 @@ consequences → references.
   connectedness — S3 identifiability guard), ADR-019 (M10 θ²_r — S2 fixed reduction); Jorgensen
   (2021, *Psych* 3:113–133, Eq. 6), Vispoel, Hong, Lee & Xu (2022), Lee & Vispoel (2024); Efron &
   Tibshirani (1993) (S1 bootstrap); `project/COVERAGE.md` §③ (#1/#2/#3), `REFERENCES.md` O-SEM.
+
+## ADR-032: M22 scope — `d_study()` projection off a within-cell replicate fit
+- Date: 2026-07-08
+- Status: accepted
+- Context: The M18–M21 completeness arc (ADR-027) closed every 🔵 *not yet* gap in `COVERAGE.md`; no
+  milestone is in flight. This ADR opens **M22**, a small standalone milestone promoting the one
+  deferred `d_study()` corner recorded across M17 §7 / M20 (COVERAGE `d_study()` table, "projection
+  off a replicate fit — 🔵 not yet"). Within-cell replicate fits (M17 Slice 3; M20 Slices 1–2)
+  split the confounded residual σ²_res into the subject×rater interaction σ²_sr and pure within-cell
+  error σ²_e via `(1|subject:rater)`, so a rater-count projection needs **per-component error
+  divisors**: the rater and interaction terms divide by the projected raters `m`, pure error by
+  `m · n_o` (the occasion count held at the fitted value). M17 already generalized `icc_point()` to
+  carry `error_divisors` and `icc_estimand()` already resolves them for a numeric `unit = m` with
+  `replicates = TRUE` (`estimand.R`), so the **projection estimand blocker the ROADMAP recorded is
+  already resolved** — the remaining work is confined to `d_study()`, which currently refuses every
+  replicate fit with a blanket `abort_unsupported`. **Completeness, not new estimand work** (cf.
+  M14/M15/M18–M21): additive, non-breaking (#6) — no new argument, dependency, or estimand-spec
+  file; only new valid inputs to `d_study()`. The maintainer chose to do **both** the single-level
+  and multilevel replicate projections, **split into two slices**, tracked as a milestone with this
+  scoping ADR (brief §7).
+- Decision:
+  - **Two thin vertical slices** (#14), single-level first (lowest risk — the estimand is the
+    shipped M17 single-level replicate map at a projected divisor):
+    - **Slice 1 — single-level replicate projection.** Lift the blanket replicate abort in
+      `d_study()` for a **two-way, single-level, balanced/complete** replicate fit (random
+      agreement/consistency; **fixed consistency** projects via Spearman–Brown; **fixed absolute
+      agreement** stays refused by the shipped `abort_fixed_agr_projection`, θ²_r being a
+      finite-population variance). Thread `replicates`/`occasions` into the `d_study()` estimand
+      builder; the estimand is `icc_estimand(type, unit = m, raters, replicates = TRUE,
+      occasions = o)` with `o` each distinct occasion setting on the fit (numeric divisor). The
+      result gains an **`occasions` column** (paralleling the multilevel `level` column), one
+      reliability curve per occasion setting; the rater count `m` is projected, the occasion count
+      `n_o` is **held fixed** (an occasion `d_study()` is a separate deferred facet, M17 §7). Guard
+      the two compound corners with classed aborts (#5): **multilevel** replicate fits (→ Slice 2)
+      and **ragged/incomplete** replicate fits (the occasion-averaged ragged divisor is itself 🟣
+      research, M20/ADR-030).
+    - **Slice 2 — multilevel replicate projection.** Lift the Slice-1 multilevel guard for **crossed
+      Design 1 and nested Design 2** balanced/complete replicate fits (the M20 Slice 2 shapes),
+      projecting the **subject** level across the level × occasions × `m` grid; the **cluster** level
+      is single-occasion only (occasion averaging touches pure error, which is not in the cluster
+      error set — a no-op there, mirroring `icc()`), and the incomplete-cluster drop-with-note is
+      unreachable (ragged replicate fits are aborted). Design 3 (multilevel one-way) has no
+      replicate split, so no Design-3 replicate fit exists to project (⚫ by-design upstream).
+  - **No new estimand, estimand-spec file, argument, or dependency.** M22 extends the shipped M17
+    projection estimand to replicate fits (`M17-within-cell-replicates.md §7` and
+    `M4.5-d-study.md §7` notes updated); the `occasions` output column reuses the existing per-fit
+    `occasions` divisor.
+  - **Oracle posture (#1), the established mixed-model pattern** (no textbook worked example, as
+    M8–M10/M15/M18–M21): **O-RepDS-reduction** — at `m = k_eff` (the distinct-rater divisor) each
+    occasion (and level) curve equals the fitted `icc()` `ICC(*,k)` row to < 1e-4; **O-RepDS-lme4**
+    — the projected curve equals one from an independent `lme4` replicate fit (cross-engine);
+    **O-RepDS-SB** — consistency projection equals Spearman–Brown of that fit's `ICC(C,1)`;
+    **invariants** — monotone increasing in `m`, in [0, 1], occasion-averaged curve ≥ single-occasion
+    at equal `m` (averaging only cuts pure error); **O-RepDS-sim** — a seeded fit recovers the
+    population Φ(m) at an `m` not run and the MC band covers it.
+  - **Scope-outs (preserved, not rediscovered):** the **occasion `d_study()`** projecting `n_o` (M17
+    §7 — the per-component divisor supports it, but projecting occasions stays deferred); **ragged ×
+    replicate** projection (the occasion-averaged ragged divisor is 🟣 research, M20/ADR-030);
+    **fixed × multilevel** replicate fits (never fitted, M20 Slice-1 scope-out); **SEM ∩ replicates**
+    (ROADMAP unscheduled, ADR-027). Untouched arc carry-overs stay in `ROADMAP.md`.
+- Consequences: On M22 close the `COVERAGE.md` `d_study()` table's last 🔵 (projection off a
+  replicate fit) becomes ✅ for the single-level and multilevel (crossed D1 + nested D2)
+  balanced/complete corners, with the occasion projection and ragged-replicate projection recorded
+  as deferred. Risk is front-loaded away: Slice 1 rides the shipped M17 `error_divisors` estimand
+  with an exact reduction pin, and Slice 2 is the same divisor change over the M20 multilevel
+  replicate fit with clean per-level/occasion reductions. This ADR authorizes M22 code.
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + Spearman–Brown + seeded
+  recovery), #2/#14 (name the estimand / thin vertical slices), #5/#8 (classed aborts for the
+  ragged/multilevel replicate-projection corners + fixed-agreement), #6 (additive, non-breaking —
+  new valid `d_study()` inputs only), #16 (tracking in-commit), #18 (characterize the boundary —
+  the occasion facet held fixed); ADR-026 (M17 replicates + per-component `error_divisors` — the
+  estimand this projects), ADR-030 (M20 replicate completeness — fixed/multilevel/ragged fits this
+  projects off; the ragged occasion-averaged 🟣 research it defers around), ADR-010 (M4.5 `d_study()`
+  — the projection machinery this extends), ADR-028 (M18 Slice 3/4 `d_study()` guard-lift precedent
+  — incomplete subject-level + bootstrap bands); estimand-spec `M17-within-cell-replicates.md §7`
+  (the deferral this closes), `M4.5-d-study.md §7` (projection scope); Brennan (2001) two-facet
+  decision study; `project/COVERAGE.md` `d_study()` table.
