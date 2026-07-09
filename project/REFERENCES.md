@@ -349,6 +349,54 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   the balanced O1 data (ADR-002/005 — lme4 is oracle-only in M1). **M3 extends this
   cross-check to incomplete data** — see O5.
 
+### Oracle O-Bayes — Bayesian engine + `ci_method = "posterior"` (M23, ADR-033)
+- **Status:** Slice 1 **shipped** (wiring); **O-Bayes coverage oracle is M23 Slice 2**
+  (in progress). A CI method's oracle is **coverage** (#1; M16 precedent), and the
+  source is a **simulation study**, so there is no single worked-example point to
+  reproduce — the oracle is that our brms + half-*t*(4,0,1) + MAP/percentile pipeline
+  reproduces ten Hove et al. (2020)'s reported simulation findings.
+- **Source & DGP (ten Hove, Jorgensen & van der Ark 2020, §4; OSF `shkqm`).** Model
+  `Y_sr = μ + μ_s + μ_r + μ_sr` (Eq. 1; interaction+error confounded into σ²_sr).
+  Data generation (§4.1.1): **N = 30** subjects, **μ = 0**, **σ²_s = σ²_sr = 0.5**,
+  **σ²_r ∈ {.01, .04}**, **k ∈ {2, 3, 5}**. Evaluated coefficient **ICC(A,1)** (and
+  ICC(A,k), which resembles it) — population ICC(A,1) = σ²_s/(σ²_s+σ²_r+σ²_sr) =
+  **0.4950** (σ²_r=.01) / **0.4808** (σ²_r=.04). Prior (half-*t* condition, §4.1.2):
+  **half-*t*(4, 0, 1)** on every random-effect SD (σ_s, σ_r, σ_sr) — our engine's
+  exact prior. MCMC (§4.1.3): 3 chains × 1000 iter (500 warmup → 1500 draws), R̂ <
+  1.10, N_eff > 100, **1000 replications** per cell.
+- **Reproducible findings (the pins; §4.2, Figs 1–4).** (1) **Convergence 100%** at
+  the half-*t* DGP across all k. (2) **MAP is unbiased for σ_r at k > 2** (relative
+  bias |θ̄−θ|/θ within their ≤.05 minor-bias band) while the **EAP severely
+  overestimates σ_r** (large positive relative bias, decreasing in k but always ≫ the
+  MAP). (3) For **ICC(A,1)**, MAP is **unbiased at k = 5** (≤.05) and biased low
+  (~−0.3 relative) at k = 2; MAP and EAP of ICC(A,1) are comparable. (4) **Percentile
+  95% BCI coverage is ~nominal (≈95–97%)** at k > 2 (HPDI is too wide for σ_r — we use
+  percentile, ADR-033). **Guardrail (#4):** our MAP estimator (reflected-KDE) is
+  *independent* of their `modeest` tool, so convergence on their numbers is a stronger
+  cross-implementation check than re-running their code; the mode bandwidth/boundary
+  spec is fixed a-priori and validated, not tuned to these targets.
+- **Reproduced (n_rep = 250/cell, σ²_r = .01, seed 20200; committed
+  `tests/testthat/fixtures/bayesian-oracle.rds`).** k = 5: convergence .992, MAP
+  ICC(A,1) rel bias **−.040** (unbiased), coverage **.948** (nominal), EAP σ_r rel bias
+  **+.741** vs MAP σ_r **−.147**. k = 2: convergence .924, MAP ICC(A,1) rel bias
+  **−.243** (biased low), coverage .912 (undercovers), EAP σ_r rel bias **+3.60** vs
+  MAP σ_r −.318. The four findings replicate. **Two reported divergences (#4/#18, not
+  tuned):** (a) convergence is high but not their 100% — they adaptively *doubled*
+  warmup until R̂ < 1.10, we use a fixed budget, so a minority of the near-boundary
+  k = 2 reps fall short; (b) our reflected-KDE σ_r MAP is modestly *negative*-biased
+  where their `modeest` MAP was ~unbiased — an independent-estimator difference at a
+  tiny near-boundary σ_r that barely moves the ICC (σ²_r is a small denominator term).
+  So the σ_r pin is the robust **EAP-overestimates-far-more-than-MAP** contrast, not our
+  MAP's absolute bias.
+- **Provenance:** `data-raw/oracle-bayesian.R` (Slice 2) — seeded reproduction of the
+  DGP applying the shipped reduction (`brms_component_draws` / `posterior_summary` /
+  `posterior_mode` / `brms_convergence`) to `update()`-refit brms fits (the model is
+  compiled once, then the same half-*t* prior + MAP/percentile recipe runs per rep);
+  **commits** the per-cell reference statistics (#4) and `stopifnot`-checks them against
+  the published findings above. O-Bayes tests read the committed reference (fast, no
+  fitting); a single tiny live brms fit exercises the wiring (`skip_on_cran` +
+  `skip_if_not_installed("brms")`).
+
 ---
 
 ## Bibliography
@@ -373,6 +421,16 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
   rater reliability. *Psychological Bulletin, 86*(2), 420–428.
+- ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2020). Comparing hyperprior
+  distributions to estimate variance components for interrater reliability
+  coefficients. In M. Wiberg et al. (Eds.), *Quantitative Psychology* (Springer
+  Proceedings in Mathematics & Statistics, Vol. 322, pp. 79–93). Springer.
+  doi:10.1007/978-3-030-43469-4_7. OSF: `shkqm` (companion code/materials). **The M23
+  Bayesian source (O-Bayes):** fixes the half-*t*(4, 0, 1) prior on random-effect SDs
+  (§3.3/§4.1), the two-way crossed-random DGP (§4.1.1: N = 30, σ²_s = σ²_sr = 0.5,
+  σ²_r ∈ {.01, .04}, k ∈ {2, 3, 5}), and reports MAP unbiased / EAP biased for σ_r and
+  percentile-BCI nominal coverage at k > 2 (§4.2, Figs 1–4). Open-access PDF via UvA
+  DARE / pure.uva.nl.
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
   reliability for multilevel data: A generalizability theory approach.
   *Psychological Methods, 27*(4), 650–666 (advance online publication 2021;

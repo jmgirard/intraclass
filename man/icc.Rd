@@ -43,7 +43,8 @@ icc(
   ci_method = "montecarlo",
   mc_samples = 10000L,
   boot_samples = 999L,
-  seed = NULL
+  seed = NULL,
+  brm_args = list()
 )
 }
 \arguments{
@@ -119,8 +120,8 @@ to resolve the ambiguity. A declaration is validated against the data -- it
 cannot force a design the data cannot support (e.g. \code{"crossed"} still requires
 raters that bridge clusters to estimate absolute agreement).}
 
-\item{engine}{Estimation engine: \code{"glmmTMB"} (default), \code{"lme4"}, or
-\code{"lavaan"}. \code{"glmmTMB"} and \code{"lme4"} fit the variance components by REML and
+\item{engine}{Estimation engine: \code{"glmmTMB"} (default), \code{"lme4"},
+\code{"lavaan"}, or \code{"brms"}. \code{"glmmTMB"} and \code{"lme4"} fit the variance components by REML and
 agree to within numerical tolerance on balanced data. \code{"lavaan"} fits the
 equivalent structural-equation (common-factor) generalizability model and
 recovers the rater main effect from the mean structure (Jorgensen 2021).
@@ -140,8 +141,15 @@ agreement rater term is the McGraw & Wong Case-3A bias-corrected
 finite-population variance, which equals the mixed-model estimate on balanced
 data), on both complete and \strong{incomplete} data (missing cells are estimated by
 full-information maximum likelihood; the parametric bootstrap is unavailable for
-incomplete SEM). \code{"lme4"} requires the \pkg{lme4} and
-\pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan} package.}
+incomplete SEM). \code{"brms"} fits the two-way \strong{random} model in a Bayesian
+framework (Stan, via \pkg{brms}) under a sourced half-\emph{t}(4, 0, 1) prior on the
+random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
+mode (MAP) and the interval is a percentile \strong{credible} interval
+(\code{ci_method = "posterior"}, forced). It covers the balanced, complete two-way
+random design only in this release; fixed raters, one-way, multilevel, and
+incomplete Bayesian fits are planned for later milestones. \code{"lme4"} requires the
+\pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
+package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}
 
 \item{conf_level}{Confidence level for the interval (default \code{0.95}).}
 
@@ -155,7 +163,12 @@ every design the \code{"glmmTMB"} and \code{"lme4"} engines fit (via \code{glmmT
 \code{simulate()} + refit and \code{lme4::bootMer} respectively) and, for the random
 two-way design, the \code{"lavaan"} engine (which simulates from the fitted SEM's
 implied moments and refits). As with the Monte-Carlo interval, the \code{"lme4"}
-engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.}
+engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.
+\code{"posterior"} is the percentile \strong{credible} interval from the Bayesian
+engine's posterior draws; it is the forced default for, and available only with,
+\code{engine = "brms"} (and \code{"brms"} requires it) -- the other methods do not apply
+to a Bayesian fit, and \code{"posterior"} needs posterior draws no other engine
+produces.}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}
@@ -163,8 +176,16 @@ engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.}
 \item{boot_samples}{Number of resamples for \code{ci_method = "bootstrap"} (default
 \code{999}). Ignored when \code{ci_method = "montecarlo"}.}
 
-\item{seed}{Optional integer seed for a reproducible interval. The global RNG
-state is restored afterward.}
+\item{seed}{Optional integer seed for a reproducible interval (and, for
+\code{engine = "brms"}, the Stan sampler seed). The global RNG state is restored
+afterward.}
+
+\item{brm_args}{A named list of extra arguments forwarded to \code{\link[brms:brm]{brms::brm()}} when
+\code{engine = "brms"} (e.g. \code{backend}, \code{chains}, \code{iter}, \code{cores}, \code{control}). The
+default (rstan backend, brms defaults) needs none. The model formula, data, the
+sourced half-\emph{t} prior, and \code{seed} are owned by \code{intraclass} and may not be set
+here; supplying them, or a non-empty \code{brm_args} with any other engine, is an
+error.}
 }
 \value{
 An \code{icc} object: a list with the estimate table, variance components,

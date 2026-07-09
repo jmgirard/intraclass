@@ -128,14 +128,19 @@ helpers* item below (sample-size / CI-width), where it belongs.
   divisors threaded into the projection estimand (the interaction divides by raters, pure error by
   raters × occasions); `d_study()` currently refuses loudly on replicate fits rather than silently
   drop the interaction. Schedulable once the projection estimand carries `error_divisors`.
-- **Bayesian engine** (`brms`/`rstanarm`) behind `Suggests`, with a new
-  `ci_method = "posterior"` (credible intervals from native posterior draws) and
-  half-*t* hyperpriors (ten Hove, Jorgensen & van der Ark 2020). Deferred out of M7
-  (ADR-014); `rstanarm` preferred over `brms` for CI-install sanity (precompiled
-  Stan, no toolchain). The engine × design dispatch seam (M5.5/M7) is ready for it.
-  **Status: ready to schedule whenever prioritized.** Not technically blocked —
-  the dispatch seam is already built for it — just sequenced after the
-  non-Bayesian carryover per the maintainer's current focus (STATUS.md).
+- **Bayesian engine** (`brms`) behind `Suggests`, with a new `ci_method = "posterior"`
+  (credible intervals from native posterior draws) and half-*t* hyperpriors (ten Hove,
+  Jorgensen & van der Ark 2020). Deferred out of M7 (ADR-014). **Status: the two-way random
+  path is now SCHEDULED as M23 (ADR-033) — in flight; per ADR-015 it lives in
+  [`MILESTONES.md`](MILESTONES.md), not here.** Backend resolved to **`brms`** (not rstanarm:
+  rstanarm's `decov` prior cannot express ten Hove's per-SD half-*t*, forfeiting the
+  source-faithful prior the oracle depends on; rstanarm parked as a future alternate). What
+  **remains parked here** are the parity follow-ons M23 defers: Bayesian **fixed-rater**,
+  **one-way**, **multilevel** (Designs 1–3 — ten Hove's native turf, the highest-value
+  follow-on), **incomplete/ragged**, and **within-cell replicates** — for the incomplete/small-k
+  corners ten Hove et al. (2022) flag the best estimator as an open research question, so schedule
+  them leaning on coverage calibration. Plus **selectable** `posterior` coupling (MC/bootstrap on a
+  Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API.
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,

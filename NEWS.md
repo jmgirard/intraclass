@@ -85,7 +85,17 @@ alternate engines, and seeded simulations.
   fixed raters the SEM agreement uses the McGraw & Wong Case-3A bias-corrected
   finite-population \eqn{\theta^2_r} (the raw indicator-mean variance minus the mean
   sampling variance of the rater means), which equals the mixed-model estimate on
-  balanced data. Optional engines live in `Suggests`, so the base install stays light.
+  balanced data. A selectable **`engine = "brms"`** — the first Bayesian engine —
+  fits the two-way **random** model in Stan under a sourced half-*t*(4, 0, 1) prior
+  on the random-effect standard deviations (ten Hove, Jorgensen & van der Ark 2020),
+  reporting the posterior-mode (MAP) point estimate and a percentile **credible**
+  interval via a new `ci_method = "posterior"` (the forced, Bayesian-only interval
+  method). It covers the balanced, complete two-way random design (agreement and
+  consistency, single and average); a `brm_args` list forwards sampler/backend
+  options (e.g. `backend = "cmdstanr"`, `chains`, `iter`, `cores`) to `brms::brm()`.
+  Chains sample sequentially on one core by default (matching brms); a periodic
+  reminder suggests `brm_args = list(cores = ...)` for parallel sampling. Optional
+  engines live in `Suggests`, so the base install stays light.
 
 ## Choosing, projecting, and visualizing
 

@@ -8,9 +8,10 @@ test_that("options that are valid but not yet implemented abort with a pointer",
     icc(d, score, subject, rater, model = "nested"),
     class = "intraclass_error"
   )
-  # lme4 is now a selectable engine (M5.5); an unknown engine still aborts.
+  # lme4/lavaan/brms are now selectable engines (M5.5/M7/M23); an unknown engine
+  # still aborts as an invalid choice.
   expect_error(
-    icc(d, score, subject, rater, engine = "brms"),
+    icc(d, score, subject, rater, engine = "nonesuch"),
     class = "intraclass_error"
   )
   # "montecarlo" and "bootstrap" are the interval methods (M16, ADR-025); an

@@ -66,14 +66,22 @@ format.icc <- function(x, ...) {
       completeness
     )
   }
-  # glmmTMB/lme4 fit by REML; the lavaan SEM engine fits by ML (Wishart N-1).
-  estimator <- if (identical(x$engine, "lavaan")) "ML" else "REML"
+  # glmmTMB/lme4 fit by REML; the lavaan SEM engine fits by ML (Wishart N-1); the
+  # brms Bayesian engine samples the posterior by MCMC (Stan).
+  estimator <- switch(x$engine, lavaan = "ML", brms = "MCMC", "REML")
+  # The Bayesian "posterior" method is a CREDIBLE interval; the others are confidence
+  # intervals. Surface that in the header (ci$method stays the raw token, ADR-033).
+  ci_label <- if (identical(x$ci$method, "posterior")) {
+    "posterior credible"
+  } else {
+    x$ci$method
+  }
   meta2 <- sprintf(
     "Engine: %s (%s) | CI: %s%% %s (%d draws)",
     x$engine,
     estimator,
     ci_pct,
-    x$ci$method,
+    ci_label,
     x$ci$samples
   )
 
