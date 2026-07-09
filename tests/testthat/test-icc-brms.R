@@ -284,9 +284,16 @@ test_that("O-Bayes: committed reference reproduces ten Hove (2020) findings", {
 })
 
 # --- Live brms fit: the full pipeline (needs brms + a Stan toolchain) ----------
+# This is the ONE test that compiles + samples a real Stan model. It is gated OFF CI:
+# a CI runner may have the brms *package* without a working Stan C++ toolchain (Boost/BH,
+# compiler), so brms::brm() errors at compile time (`Boost not found`) rather than
+# skipping -- and Stan compilation is slow/fragile across the matrix regardless. On CI the
+# wiring is covered by the committed O-Bayes fixture (no fitting) plus every non-fitting
+# test above; this live smoke test runs locally, where the toolchain is present.
 
 test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", {
   skip_on_cran()
+  skip_on_ci()
   skip_if_not_installed("brms")
   skip_if_not_installed("glmmTMB")
 
