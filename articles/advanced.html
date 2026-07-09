@@ -117,15 +117,15 @@ refitting.</p>
 <span><span class="va">proj</span></span>
 <span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;       m  estimate   95% CI</span></span>
-<span><span class="co">#&gt;       1     0.290   [0.050, 0.706]</span></span>
-<span><span class="co">#&gt;       2     0.449   [0.096, 0.828]</span></span>
-<span><span class="co">#&gt;       3     0.550   [0.137, 0.878]</span></span>
-<span><span class="co">#&gt;       4     0.620   [0.175, 0.906]</span></span>
-<span><span class="co">#&gt;       5     0.671   [0.210, 0.923]</span></span>
-<span><span class="co">#&gt;       6     0.710   [0.241, 0.935]</span></span>
-<span><span class="co">#&gt;       7     0.741   [0.271, 0.944]</span></span>
-<span><span class="co">#&gt;       8     0.765   [0.298, 0.950]</span></span></code></pre></div>
+<span><span class="co">#&gt;   m  estimate          95% CI</span></span>
+<span><span class="co">#&gt;   1     0.290  [0.050, 0.706]</span></span>
+<span><span class="co">#&gt;   2     0.449  [0.096, 0.828]</span></span>
+<span><span class="co">#&gt;   3     0.550  [0.137, 0.878]</span></span>
+<span><span class="co">#&gt;   4     0.620  [0.175, 0.906]</span></span>
+<span><span class="co">#&gt;   5     0.671  [0.210, 0.923]</span></span>
+<span><span class="co">#&gt;   6     0.710  [0.241, 0.935]</span></span>
+<span><span class="co">#&gt;   7     0.741  [0.271, 0.944]</span></span>
+<span><span class="co">#&gt;   8     0.765  [0.298, 0.950]</span></span></code></pre></div>
 <p>Reliability climbs with more raters but with diminishing returns, and
 the projection is anchored to what you observed: at <code>m = 4</code>
 (the number of raters in <code>ratings</code>) <code>Φ(m)</code> is
@@ -430,15 +430,15 @@ subject level. It returns one curve per level (note the
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; # D-study projection: multilevel two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level        m  estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject      1     0.431   [0.251, 0.561]</span></span>
-<span><span class="co">#&gt;   subject      2     0.602   [0.402, 0.719]</span></span>
-<span><span class="co">#&gt;   subject      4     0.751   [0.573, 0.836]</span></span>
-<span><span class="co">#&gt;   subject      8     0.858   [0.729, 0.911]</span></span>
-<span><span class="co">#&gt;   cluster      1     0.880   [0.000, 0.972]</span></span>
-<span><span class="co">#&gt;   cluster      2     0.936   [0.000, 0.986]</span></span>
-<span><span class="co">#&gt;   cluster      4     0.967   [0.000, 0.993]</span></span>
-<span><span class="co">#&gt;   cluster      8     0.983   [0.000, 0.996]</span></span></code></pre></div>
+<span><span class="co">#&gt;     level  m  estimate          95% CI</span></span>
+<span><span class="co">#&gt;   subject  1     0.431  [0.251, 0.561]</span></span>
+<span><span class="co">#&gt;   subject  2     0.602  [0.402, 0.719]</span></span>
+<span><span class="co">#&gt;   subject  4     0.751  [0.573, 0.836]</span></span>
+<span><span class="co">#&gt;   subject  8     0.858  [0.729, 0.911]</span></span>
+<span><span class="co">#&gt;   cluster  1     0.880  [0.000, 0.972]</span></span>
+<span><span class="co">#&gt;   cluster  2     0.936  [0.000, 0.986]</span></span>
+<span><span class="co">#&gt;   cluster  4     0.967  [0.000, 0.993]</span></span>
+<span><span class="co">#&gt;   cluster  8     0.983  [0.000, 0.996]</span></span></code></pre></div>
 <p>Only the <strong>rater</strong> count is projected. The cluster-level
 coefficient does not average over subjects (ten Hove et al. 2022, Eq.
 13), so “how many subjects per cluster?” is a <em>sample-size</em>

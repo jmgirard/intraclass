@@ -167,6 +167,23 @@ level is dropped with a note, because projecting <code>m</code> raters is the av
 <code>ICC(c,k)</code> case whose ragged divisor is an open modeling question (M9).</p>
     </div>
     <div class="section level2">
+    <h2 id="within-cell-replicate-fits">Within-cell replicate fits<a class="anchor" aria-label="anchor" href="#within-cell-replicate-fits"></a></h2>
+
+
+<p>For a within-cell replicate fit (more than one rating per subject-by-rater cell,
+where the residual splits into the subject-by-rater interaction and pure error),
+<code>d_study()</code> projects the <strong>rater count <code>m</code></strong>, holding the number of occasions
+<code>n_o</code> at the fitted value: the rater and interaction terms divide by <code>m</code>, pure
+error by <code>m * n_o</code>. The result gains an <code>occasions</code> column, one reliability curve
+per occasion setting on the fit (<code>occasions = "single"</code> and/or <code>"average"</code>), so at
+<code>m</code> = the observed rater count each curve matches the fitted <code>ICC(*,k)</code> for that
+setting. Multilevel replicate fits project the subject level across occasion
+settings and the cluster level single-occasion (occasion averaging touches only
+pure error, which is not in the cluster-level error set). Projecting the occasion
+count itself is not yet supported; <strong>ragged</strong> replicate fits are refused (the
+occasion-averaged ragged divisor is an open modeling question).</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Brennan, R. L. (2001). <em>Generalizability Theory</em>. Springer.</p>
     </div>
@@ -181,15 +198,15 @@ level is dropped with a note, because projecting <code>m</code> raters is the av
 <span class="r-in"><span><span class="fu">d_study</span><span class="op">(</span><span class="va">fit</span>, m <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> # D-study projection: two-way random, absolute agreement</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Observed raters: 4 | CI: 95% montecarlo (10000 draws)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       m  estimate   95% CI</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       1     0.290   [0.050, 0.706]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       2     0.449   [0.096, 0.828]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       3     0.550   [0.137, 0.878]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       4     0.620   [0.175, 0.906]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       5     0.671   [0.210, 0.923]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       6     0.710   [0.241, 0.935]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       7     0.741   [0.271, 0.944]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>       8     0.765   [0.298, 0.950]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   m  estimate          95% CI</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   1     0.290  [0.050, 0.706]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   2     0.449  [0.096, 0.828]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   3     0.550  [0.137, 0.878]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   4     0.620  [0.175, 0.906]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   5     0.671  [0.210, 0.923]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   6     0.710  [0.241, 0.935]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   7     0.741  [0.271, 0.944]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   8     0.765  [0.298, 0.950]</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

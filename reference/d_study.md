@@ -112,6 +112,23 @@ only the divisor); the **cluster** level is dropped with a note, because
 projecting `m` raters is the averaged `ICC(c,k)` case whose ragged
 divisor is an open modeling question (M9).
 
+## Within-cell replicate fits
+
+For a within-cell replicate fit (more than one rating per
+subject-by-rater cell, where the residual splits into the
+subject-by-rater interaction and pure error), `d_study()` projects the
+**rater count `m`**, holding the number of occasions `n_o` at the fitted
+value: the rater and interaction terms divide by `m`, pure error by
+`m * n_o`. The result gains an `occasions` column, one reliability curve
+per occasion setting on the fit (`occasions = "single"` and/or
+`"average"`), so at `m` = the observed rater count each curve matches
+the fitted `ICC(*,k)` for that setting. Multilevel replicate fits
+project the subject level across occasion settings and the cluster level
+single-occasion (occasion averaging touches only pure error, which is
+not in the cluster-level error set). Projecting the occasion count
+itself is not yet supported; **ragged** replicate fits are refused (the
+occasion-averaged ragged divisor is an open modeling question).
+
 ## References
 
 Brennan, R. L. (2001). *Generalizability Theory*. Springer.
@@ -128,13 +145,13 @@ fit <- icc(ratings, score, subject, rater, seed = 1)
 d_study(fit, m = 1:8)
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
-#>       m  estimate   95% CI
-#>       1     0.290   [0.050, 0.706]
-#>       2     0.449   [0.096, 0.828]
-#>       3     0.550   [0.137, 0.878]
-#>       4     0.620   [0.175, 0.906]
-#>       5     0.671   [0.210, 0.923]
-#>       6     0.710   [0.241, 0.935]
-#>       7     0.741   [0.271, 0.944]
-#>       8     0.765   [0.298, 0.950]
+#>   m  estimate          95% CI
+#>   1     0.290  [0.050, 0.706]
+#>   2     0.449  [0.096, 0.828]
+#>   3     0.550  [0.137, 0.878]
+#>   4     0.620  [0.175, 0.906]
+#>   5     0.671  [0.210, 0.923]
+#>   6     0.710  [0.241, 0.935]
+#>   7     0.741  [0.271, 0.944]
+#>   8     0.765  [0.298, 0.950]
 ```

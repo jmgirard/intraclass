@@ -51,15 +51,15 @@ proj <- d_study(fit, m = 1:8)
 proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
-#>       m  estimate   95% CI
-#>       1     0.290   [0.050, 0.706]
-#>       2     0.449   [0.096, 0.828]
-#>       3     0.550   [0.137, 0.878]
-#>       4     0.620   [0.175, 0.906]
-#>       5     0.671   [0.210, 0.923]
-#>       6     0.710   [0.241, 0.935]
-#>       7     0.741   [0.271, 0.944]
-#>       8     0.765   [0.298, 0.950]
+#>   m  estimate          95% CI
+#>   1     0.290  [0.050, 0.706]
+#>   2     0.449  [0.096, 0.828]
+#>   3     0.550  [0.137, 0.878]
+#>   4     0.620  [0.175, 0.906]
+#>   5     0.671  [0.210, 0.923]
+#>   6     0.710  [0.241, 0.935]
+#>   7     0.741  [0.271, 0.944]
+#>   8     0.765  [0.298, 0.950]
 ```
 
 Reliability climbs with more raters but with diminishing returns, and
@@ -394,15 +394,15 @@ d_study(
 )
 #> # D-study projection: multilevel two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
-#>   level        m  estimate   95% CI
-#>   subject      1     0.431   [0.251, 0.561]
-#>   subject      2     0.602   [0.402, 0.719]
-#>   subject      4     0.751   [0.573, 0.836]
-#>   subject      8     0.858   [0.729, 0.911]
-#>   cluster      1     0.880   [0.000, 0.972]
-#>   cluster      2     0.936   [0.000, 0.986]
-#>   cluster      4     0.967   [0.000, 0.993]
-#>   cluster      8     0.983   [0.000, 0.996]
+#>     level  m  estimate          95% CI
+#>   subject  1     0.431  [0.251, 0.561]
+#>   subject  2     0.602  [0.402, 0.719]
+#>   subject  4     0.751  [0.573, 0.836]
+#>   subject  8     0.858  [0.729, 0.911]
+#>   cluster  1     0.880  [0.000, 0.972]
+#>   cluster  2     0.936  [0.000, 0.986]
+#>   cluster  4     0.967  [0.000, 0.993]
+#>   cluster  8     0.983  [0.000, 0.996]
 ```
 
 Only the **rater** count is projected. The cluster-level coefficient
