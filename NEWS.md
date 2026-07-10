@@ -123,9 +123,14 @@ alternate engines, and seeded simulations.
   cluster `ICC(c,k)` is dropped with a note, as for the other engines): the model is fit
   on the observed cells and the same harmonic-mean `k_eff` divisor + connectedness
   identifiability used by the other engines are applied per posterior draw. Because
-  random-rater ICCs are ratios of variance components, this needs no moment correction;
-  incomplete nested-multilevel and fixed-rater Bayesian fits remain planned for later
-  milestones.
+  random-rater ICCs are ratios of variance components, this needs no moment correction.
+  The Bayesian engine also fits **incomplete/ragged fixed-rater** data for the two-way
+  single-level design (`raters = "fixed"`): the finite-population \eqn{\theta^2_r} is
+  read from the ragged rater-contrast posterior, and — because the rater means are then
+  estimated from unequal cell counts — the moment correction that keeps the credible
+  interval covering the fixed-population coefficient becomes active at the single level
+  (it is negligible on balanced data). Incomplete nested-multilevel and incomplete
+  fixed-rater **multilevel** Bayesian fits remain planned for later milestones.
 
 ## Choosing, projecting, and visualizing
 

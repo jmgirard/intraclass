@@ -99,17 +99,32 @@ test_that("brms refuses the deferred designs with a teaching abort", {
     icc(d, score, subject, rater, unit = 6, engine = "brms"),
     class = "intraclass_unsupported"
   )
-  # NB: incomplete/ragged RANDOM-rater fits now ship for brms -- TWO-WAY single level
-  # (M30 Slice 1) and CROSSED (Design 1) MULTILEVEL (M30 Slice 2, ADR-040) -- see the
-  # O-Bayes-Incomplete / O-Bayes-IML live + fixture tests below. What stays deferred (and
-  # aborts BEFORE any fit, no Stan needed): incomplete FIXED-rater (theta^2 under imbalance),
-  # incomplete ONE-WAY, and incomplete NESTED multilevel (Designs 2/3). Each must name the
-  # supported random two-way + crossed-multilevel scope (#5/#8).
+  # NB: incomplete/ragged fits now ship for brms at the TWO-WAY single level -- RANDOM
+  # (M30 Slice 1, ADR-040) and FIXED-rater (M31 Slice 1, ADR-041; theta^2 under imbalance
+  # via the 2b moment correction) -- plus CROSSED (Design 1) MULTILEVEL RANDOM (M30 Slice 2)
+  # -- see the O-Bayes-Incomplete / O-Bayes-IFixed / O-Bayes-IML live + fixture tests below.
+  # What stays deferred (and aborts BEFORE any fit, no Stan needed): incomplete FIXED-rater
+  # MULTILEVEL (M31 Slice 2 / later), incomplete ONE-WAY, and incomplete NESTED multilevel
+  # (Designs 2/3). Each must name the supported scope (#5/#8).
   d_inc <- d[-1, , drop = FALSE] # ragged two-way (one cell dropped)
-  # incomplete fixed-rater (suppressWarnings: the fixed-rater nudge fires before the abort)
+  # incomplete FIXED-rater CROSSED MULTILEVEL (still deferred): raters crossed with clusters
+  # (Design 1, shared labels), fixed, one cell dropped. (suppressWarnings: the fixed-rater
+  # nudge fires before the abort.)
+  dcm <- expand.grid(rater = factor(1:3), s = 1:3, cluster = factor(1:2))
+  dcm$subject <- factor(paste0(dcm$cluster, "_", dcm$s))
+  dcm$score <- as.numeric(seq_len(nrow(dcm)))
+  dcm_inc <- dcm[-1, , drop = FALSE]
   expect_error(
     suppressWarnings(
-      icc(d_inc, score, subject, rater, raters = "fixed", engine = "brms")
+      icc(
+        dcm_inc,
+        score,
+        rater,
+        subject = subject,
+        cluster = cluster,
+        raters = "fixed",
+        engine = "brms"
+      )
     ),
     class = "intraclass_unsupported"
   )
@@ -632,6 +647,61 @@ test_that("O-Bayes-IML: committed reference covers ragged crossed multilevel ran
   # (5) Subject MAP tracks the population in both cells (small skew, the M23/M26 posture).
   expect_lt(abs(cmp$map_subj1_relbias), 0.10)
   expect_lt(abs(rag$map_subj1_relbias), 0.12)
+})
+
+# --- O-Bayes-IFixed: committed ragged FIXED-rater coverage reference (no brms, M31 S1) ---
+# The incomplete/ragged FIXED-rater sibling of O-Bayes-Incomplete (random) and O-Bayes-Fixed
+# (balanced). data-raw/oracle-bayesian-incomplete-fixed.R runs the McGraw & Wong Case-3A fixed
+# DGP (k = 5, fixed rater means) at ten Hove's half-t(4,0,1) prior in two cells -- a COMPLETE
+# 30 x 5 grid (k_eff = k, b ~= 0, the shipped M26 reduction) and a FIXED, connected RAGGED
+# incidence (~20% cells deleted, constant k_eff < 5, b != 0) -- through the SHIPPED
+# brms_theta2r_draws() (the 2b + boundary-aware average-floor moment correction). The genuine
+# unknown (#1): unlike the RANDOM incomplete path (a clean variance-ratio push-forward, M30),
+# the fixed theta^2_r is a convex quadratic functional whose 2b correction goes LIVE at the
+# single level for the FIRST time on ragged data (b != 0 once the rater means come from unequal
+# cell counts; b ~= 0 balanced). The pin checks the ragged cell tracks the complete cell within
+# Monte-Carlo error (SE(coverage) ~ .015 at n_rep = 200). A real shortfall is REPORTED (#18) and
+# gates a Fable review (#19), never tuned away (#4). Fast, no fitting, runs on every CI job.
+test_that("O-Bayes-IFixed: committed reference covers ragged two-way fixed-rater data", {
+  fixture <- test_path("fixtures", "bayesian-incomplete-fixed-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete-fixed.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$design == "complete", ]
+  rag <- s[s$design == "ragged", ]
+
+  # The ragged cell exercises the k_eff divisor AND activates the 2b correction (b != 0):
+  # k_eff strictly below k = 5.
+  expect_lt(rag$k_eff, 5)
+  expect_equal(cmp$k_eff, 5)
+
+  # (1) High convergence at the half-t DGP in both cells (k = 5, past the k = 2 caveat).
+  expect_gte(cmp$converged_frac, 0.90)
+  expect_gte(rag$converged_frac, 0.90)
+
+  # (2) REDUCTION: on complete data the incomplete fixed path IS the shipped M26 fixed path
+  #     (k_eff = k, b ~= 0), so both units cover ~nominal -- the baseline the ragged cell is
+  #     judged against.
+  expect_gte(cmp$coverage_icc1, 0.88)
+  expect_lte(cmp$coverage_icc1, 0.99)
+  expect_gte(cmp$coverage_icck, 0.88)
+  expect_lte(cmp$coverage_icck, 0.99)
+
+  # (3) COVERAGE ON RAGGED DATA (the milestone's one unknown, #1/#18): with the 2b moment
+  #     correction LIVE single-level (b != 0), ragged coverage tracks the complete cell within
+  #     Monte-Carlo error and stays ~nominal for BOTH the divisor-free ICC(A,1) and the
+  #     k_eff-divided ICC(A, k_eff). A > ~.05 shortfall would be a real finding.
+  expect_gte(rag$coverage_icc1, cmp$coverage_icc1 - 0.05)
+  expect_gte(rag$coverage_icck, cmp$coverage_icck - 0.05)
+  expect_gte(rag$coverage_icc1, 0.88)
+  expect_gte(rag$coverage_icck, 0.88)
+
+  # (4) MAP is biased low (the mode of the right-skewed ICC draws sits below the population
+  #     plug-in, the M23/M26 posture) -- characterized, not asserted unbiased.
+  expect_lt(cmp$map_icc1_relbias, 0.02)
+  expect_lt(rag$map_icc1_relbias, 0.02)
 })
 
 # O-Bayes-Rep wiring (no brms/Stan needed, M29 Slice 2): the within-cell-replicate ICC is a
@@ -1203,6 +1273,79 @@ test_that("brms fits the fixed-rater two-way ICC end to end (O-Bayes-Fixed-agree
     reml <- by_index(gc, i)
     expect_gte(reml, tc$conf.low[tc$index == i])
     expect_lte(reml, tc$conf.high[tc$index == i])
+  }
+})
+
+# --- Live brms fit: INCOMPLETE fixed-rater two-way, O-Bayes-IFixed-agree (M31 S1, ADR-041) ---
+# The ragged sibling of the O-Bayes-Fixed-agree smoke test above. Gated OFF CI (a CI runner has
+# brms but no Stan toolchain). The committed O-Bayes-IFixed fixture is the coverage oracle; this
+# smoke test wires the theta^2_r-from-posterior fit end to end ON RAGGED DATA -- where the 2b
+# moment correction goes LIVE single-level (b != 0) -- and pins CONTAINMENT of the independent
+# glmmTMB M3 incomplete fixed point (no textbook value on ragged data; the REML fit is the oracle,
+# ADR-008). The fixed MAP is the mode of the right-skewed ICC draws and legitimately sits near/below
+# the REML plug-in (containment, not equality -- the ADR-036 posture, here on ragged data).
+test_that("brms fits the ragged fixed-rater two-way ICC end to end (O-Bayes-IFixed-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # A connected ragged two-way fixed-rater design (all k = 4 raters present, ~15% cells dropped).
+  set.seed(4110)
+  k <- 4L
+  n <- 24L
+  mu_r <- c(-0.6, -0.2, 0.2, 0.6)
+  grid <- expand.grid(subject = seq_len(n), rater = seq_len(k))
+  mu_s <- rnorm(n, 0, sqrt(0.5))
+  e <- rnorm(nrow(grid), 0, sqrt(0.5))
+  grid$score <- mu_s[grid$subject] + mu_r[grid$rater] + e
+  drop <- c(1L, 7L, 13L, 19L, 25L, 31L, 37L, 43L, 50L, 56L, 62L, 70L, 82L, 90L)
+  d <- grid[-drop, , drop = FALSE]
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  # The design must be ragged (some cells missing) yet keep every rater.
+  expect_lt(nrow(d), n * k)
+  expect_equal(nlevels(d$rater), k)
+
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+  fa <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  expect_identical(fa$engine, "brms")
+  expect_identical(fa$ci$method, "posterior")
+  # theta^2_r lives in the rater component slot (subject, rater, residual).
+  expect_setequal(names(fa$components), c("subject", "rater", "residual"))
+
+  ta <- tidy(fa)
+  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
+  # Ragged -> the fixed and random agreement values genuinely differ (theta^2_r != sigma^2_r):
+  # the low <= point <= high interval is well-formed and strictly inside [0, 1].
+  expect_true(all(ta$conf.low <= ta$estimate & ta$estimate <= ta$conf.high))
+
+  # CONTAINMENT: the glmmTMB M3 incomplete fixed point (the independent oracle) sits inside each
+  # brms credible interval. suppressWarnings mutes the expected fixed-rater advisory.
+  gf <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    engine = "glmmTMB",
+    seed = 1
+  )))
+  by_index <- function(x, i) x$estimate[x$index == i]
+  for (i in c("ICC(A,1)", "ICC(A,k)")) {
+    reml <- by_index(gf, i)
+    expect_gte(reml, ta$conf.low[ta$index == i])
+    expect_lte(reml, ta$conf.high[ta$index == i])
   }
 })
 

@@ -35,15 +35,21 @@ crossed multilevel random — then shipped** (PR #35), the Bayesian sibling of t
 the one `!balanced` brms guard so the shipped `k_eff`/connectedness machinery threads through the posterior
 push-forward (random-only → no θ² moment correction). Its one unknown — ragged-data coverage of the credible
 interval through `k_eff` — came back **nominal** at the subject level for both slices, so no Fable review.
-**No milestone is currently in flight.** Each milestone is scoped by an ADR at its start
+**M31 (ADR-041) — Bayesian incomplete/ragged FIXED-rater, two-way single level + crossed multilevel — is now
+ACTIVE** (branch `m31-bayes-incomplete-fixed`), the first deferred sibling ADR-040 named: the Bayesian sibling
+of the frequentist M3 (single-level fixed) / M18 Slice 1 (crossed-multilevel fixed), narrowing the same
+`!balanced` brms guard for the fixed-rater paths. Its one unknown is genuinely higher-risk than M30's — on
+ragged data the 2b θ² moment correction (`brms_theta2r_moment_draws()`) goes **live single-level for the first
+time** (`b ≠ 0`), so ragged fixed-rater credible coverage is the open question; a gated Fable review is
+conditional. Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
-ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30). No milestone is
-currently in flight; the next one needs an ADR after a short retro (founding brief §7).
+ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31). M31 is
+currently in flight (ADR-041); the next one needs an ADR after a short retro (founding brief §7).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1041,3 +1047,70 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   containment; `skip_on_ci`). `R CMD check --as-cran` 0/0/1; installed-pkg both ragged fits verified; full
   suite (CI mode) 1030/0. Bayesian incomplete **nested / fixed / replicates** and the `ICC(c,k)` divisor stay
   deferred.
+
+## M31: Bayesian engine (brms) — incomplete/ragged FIXED-rater, two-way single level + crossed multilevel (ADR-041) — ACTIVE
+- Goal: extend `engine = "brms"` + `ci_method = "posterior"` from balanced/complete to **incomplete/ragged**
+  data for the **fixed**-rater paths — the first deferred sibling ADR-040 named, the Bayesian sibling of the
+  frequentist **M3** (incomplete single-level fixed θ²_r, Case-3A under imbalance) / **M18 Slice 1** (incomplete
+  fixed-rater crossed multilevel). **Engine/interval parity, not new estimand work** (cf. M15/M21/M23–M30):
+  reuses the *shipped* M3 `theta2r_fixed()` finite-population variance + `k_eff` divisor (ADR-008) and the M18
+  Slice 1 crossed-multilevel fixed path (ADR-028), read off posterior draws; **no new fit function** —
+  `fit_brms_fixed()` / `fit_brms_multilevel_fixed()` run on ragged data unchanged; **no new θ² helper** —
+  `brms_theta2r_moment_draws()` (2b + boundary-aware average-floor, ADR-037/038) already ships. The work is
+  narrowing the same `!balanced` brms guard M30 touched (`icc.R:1128` — the `raters == "fixed"` and
+  `multilevel && ml_design != "crossed"` clauses). **The genuine risk (why the fixed corner was held back from
+  the random-only M30):** on ragged data the fixed rater means come from **unequal cell counts**, so
+  `b = tr(C·Σ_post)/(k−1) ≠ 0` **for the first time in the single-level regime** — the 2b moment correction
+  goes live where it has never been exercised (balanced single-level/crossed had `b ≈ 0`, the correction
+  invisible). The one unknown is empirical: does the percentile credible interval still cover nominally?
+- Reference: ADR-041 (scope + Fable posture); no new estimand-spec — reuses
+  [`M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md) §6 (Case-3A θ²_r under imbalance) and
+  [`M10-fixed-multilevel.md`](estimand-specs/M10-fixed-multilevel.md) / M18 Slice 1. Oracles **O-Bayes-IFixed**
+  (single level) / **O-Bayes-IFML-fixed** (crossed multilevel) — reduction to the shipped balanced fixed brms
+  fit (M26 / M27 Slice 1) at balance + MAP-**containment** vs the M3 / M18 Slice 1 glmmTMB REML fixed points on
+  ragged data (not equality — flat-rater-prior skew, ADR-036) + seeded ragged coverage off a committed fixture
+  (companion to `data-raw/oracle-bayesian-incomplete{,-multilevel}.R`), registered in
+  [`REFERENCES.md`](REFERENCES.md).
+- **DoD board (ADR-015 — this checklist IS the live task list; check items off in the same commit as the work, #16):**
+  - **Slice 1 — Bayesian incomplete two-way fixed (single level): ✅ DONE.**
+    - [x] Narrow the `raters == "fixed"` clause of the `!balanced` brms guard (`icc.R:1128`) so ragged two-way
+          fixed dispatches to `fit_brms_fixed()`; keep the still-deferred fixed corners (nested / multilevel
+          non-crossed / one-way / replicates) refused with a case-naming message (#5/#8). *(Guard narrowed to
+          `(raters == "fixed" && multilevel)`; verified inline — single-level fixed no longer `unsupported`,
+          multilevel-fixed / one-way / nested still `unsupported`.)*
+    - [x] Confirm `fit_brms_fixed()` + `brms_theta2r_draws()` run unchanged on ragged data (rater means from
+          `b_Intercept` + treatment contrasts with `b ≠ 0`); ICC(A,1)/ICC(A,k) compose off the M3 `k_eff`
+          divisor. *(Smoke + live fit: brms MAP tracks glmmTMB; no code change to the fit or θ² helper.)*
+    - [x] O-Bayes-IFixed: (a) **reduction** — at balance ≡ shipped balanced fixed brms fit (M26, complete-cell
+          coverage .955 ~nominal); (b) **-agree** — MAP containment of the glmmTMB M3 incomplete fixed point
+          (live, `skip_on_ci`; ICC(A,1) 0.450 vs 0.448, ICC(A,k) 0.734 vs 0.722, both contained).
+    - [x] O-Bayes-IFixed **-coverage** — committed seeded ragged-data coverage fixture
+          (`bayesian-incomplete-fixed-oracle.rds`, seed 31100, n_rep 200); `data-raw/oracle-bayesian-incomplete-fixed.R`
+          drives the SHIPPED `brms_theta2r_draws()`, no tuning to oracle (#4).
+    - [x] **Coverage verdict (#18/#19): NOMINAL.** Ragged coverage **.965/.965** tracks complete .955/.955
+          (k_eff 3.85 exercised, 2b active single-level, conv 1.00, MAP biased low −.020/−.042) → **no Fable
+          review** (ADR-041's conditional escalation not triggered).
+  - **Slice 2 — Bayesian incomplete crossed (Design 1) fixed multilevel (subject level):**
+    - [ ] Narrow the multilevel clause of the `!balanced` brms guard so ragged crossed fixed dispatches to
+          `fit_brms_multilevel_fixed()`; nested / cluster-level fixed stay refused.
+    - [ ] Confirm the fit runs unchanged on ragged data; subject-level ICC(A,1)/ICC(A,k) off `k_eff`; cluster
+          `ICC(c,k)` dropped-with-note as M30.
+    - [ ] O-Bayes-IFML-fixed: reduction (≡ M27 Slice 1 balanced) + MAP-containment vs glmmTMB M18 Slice 1
+          incomplete fixed point (live, `skip_on_ci`) + seeded ragged coverage (committed fixture).
+  - **Cross-cutting DoD (brief §8):**
+    - [ ] `_pkgdown.yml` unchanged (no new export) or updated if one appears; NEWS entry under 0.1.0.
+    - [ ] `air format .` clean; `lintr::lint_package()` clean (run locally before PR — memory
+          [[run-lintr-before-push]]).
+    - [ ] Installed-pkg both ragged fixed fits driven through `library(intraclass)` with `NOT_CRAN=true`
+          (memory [[verify-against-installed-package]]); live Stan fits `skip_on_ci` (memory
+          [[brms-live-fit-skip-on-ci]]).
+    - [ ] `R CMD check --as-cran` 0/0/1 (New submission only); full CI matrix green; STATUS/MILESTONES/COVERAGE
+          reconciled in-commit (#16).
+- Deferred out of M31 (record so not rediscovered): Bayesian incomplete **nested** fixed (Design 2, M19 Slice 2
+  analog on ragged data); Bayesian **cluster-level fixed** rater ICC (deferred all engines); Bayesian incomplete
+  **within-cell replicates** (imbalance × replicates, M20 corner); Bayesian **one-way** incomplete (M6 analog,
+  low value); the averaged cluster-level **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, open all engines, M9 §9);
+  Bayesian **numeric-unit `d_study()`**; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
+  coupling, **HPDI**, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
+- Status: **active — Slice 1 DONE (coverage NOMINAL, no Fable review); Slice 2 pending.** Branch
+  `m31-bayes-incomplete-fixed`.

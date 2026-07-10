@@ -773,6 +773,50 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-incomplete-multilevel.R` (seeded; writes the fixture before the
   hard pins).
 
+### Oracle O-Bayes-IFixed — Bayesian incomplete/ragged two-way fixed-rater (M31 Slice 1, ADR-041)
+
+- **Role:** the incomplete/ragged **FIXED-rater** sibling of O-Bayes-Incomplete (random) and O-Bayes-Fixed
+  (balanced). `engine = "brms"` + `raters = "fixed"` now fits **incomplete/ragged two-way fixed-rater** data —
+  the shipped M26 `fit_brms_fixed()` (`score ~ 1 + rater + (1|subject)`) run on ragged data unchanged, with the
+  McGraw & Wong Case-3A finite-population θ²_r read per posterior draw through the shipped
+  `brms_theta2r_draws()` → `brms_theta2r_moment_draws()` (the **2b** moment correction + boundary-aware
+  average-floor, ADR-037/038) and the engine-agnostic M3 harmonic-mean `k_eff` divisor + connectedness
+  (ADR-008) threaded per draw. **The genuine unknown (#1):** unlike the random incomplete path (a clean
+  variance-ratio push-forward, no θ² functional — M30), the fixed θ²_r is a **convex quadratic functional**
+  whose 2b correction is invisible on balanced data (b = tr(C·Σ_post)/(k−1) ≈ 0, rater means from the whole
+  sample) but goes **live at the single level for the first time on ragged data** (b ≠ 0 once the rater means
+  are estimated from unequal cell counts). Whether the percentile credible interval still covers nominally is
+  the question this oracle answers.
+- **Oracles (≥2 independent, #1):** **O-Bayes-IFixed** (committed reference, no Stan) — a **reduction cell**
+  (complete grid, k_eff = k, b ≈ 0) covers ~nominally (the shipped M26 behaviour), and a **ragged cell** (fixed
+  connected incidence, ~20% cells deleted, constant k_eff < 5, b ≠ 0) covers the fixed-population ICC(A,1) &
+  ICC(A,k_eff) within Monte-Carlo error of the complete cell; **O-Bayes-IFixed-agree** (live ragged fit) — the
+  glmmTMB REML **M3** incomplete fixed point falls inside the brms credible intervals (containment, not
+  equality — the ADR-036 flat-rater-prior posture, here on ragged data).
+- **Sources:** McGraw & Wong (1996) Case 3A (fixed-rater finite-population θ²_r); ten Hove et al. (2020)
+  prior/recipe (half-*t*(4,0,1) on σ_s, MAP + percentile; the ragged extension is **not in the source**, so the
+  independent oracle for the ragged point is the shipped glmmTMB M3 estimator, ADR-008); estimand-specs
+  `M3-incomplete-designs.md` §6 (Case-3A θ²_r under imbalance) / `M10-fixed-multilevel.md` — **no new spec**
+  (M31 gives the shipped incomplete fixed estimand the brms engine).
+- **DGP:** two-way fixed raters, N_s = 30 subjects, k = 5 **fixed** rater means μ_r = (−0.6, −0.3, 0, 0.3, 0.6)
+  (θ²_r = 0.225, not redrawn), σ²_s = σ²_res = 0.50; complete cell (k_eff = 5) and a fixed ragged incidence
+  (120 of 150 cells kept, k_eff = 3.854); pop fixed ICC(A,1) = σ²_s/(σ²_s+θ²_r+σ²_res) = 0.408, ICC(A,m) with
+  the {θ²_r, residual} error ÷ m.
+- **Committed reference (`tests/testthat/fixtures/bayesian-incomplete-fixed-oracle.rds`; seed 31100, n_rep =
+  200):** per-cell convergence / ICC(A,1) & ICC(A,k_eff) coverage / MAP relative bias (pins qualitative,
+  #4/#18). **Observed:** complete — conv 1.00, coverage **.955/.955** (ICC(A,1)/ICC(A,k)), MAP relbias
+  −.020/+.001; ragged — conv 1.00, coverage **.965/.965**, MAP relbias −.042/−.010. **The milestone's one
+  unknown is resolved: ragged fixed-rater coverage is NOMINAL** through the k_eff divisor even with the 2b
+  moment correction active single-level — so **no Fable review** (ADR-041's conditional escalation not
+  triggered). The MAP is biased low (the mode of the right-skewed ICC draws sits below the population plug-in,
+  the M23/M26 posture) — characterized, not asserted unbiased.
+- **Pins (#4/#18):** convergence ≥ .90 both cells; complete-cell ICC(A,1) & ICC(A,k) coverage ∈ [.88, .99]
+  (reduction baseline); ragged coverage ≥ complete − .05 and ≥ .88 for both units; MAP relbias < .02 (biased
+  low) both cells. Asserted in `test-icc-brms.R` **O-Bayes-IFixed** (committed reference, on CI) +
+  **O-Bayes-IFixed-agree** (live ragged fit, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-incomplete-fixed.R` (seeded; drives the SHIPPED
+  `brms_theta2r_draws()` so it validates the exact 2b path, not a hand recipe).
+
 ---
 
 ## Bibliography
