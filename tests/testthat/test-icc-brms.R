@@ -1415,19 +1415,19 @@ test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes
 
   # A connected ragged crossed Design-1 fixed multilevel design (raters shared across clusters).
   set.seed(5120)
-  Nc <- 8L
-  Ns <- 4L
+  n_clusters <- 8L
+  n_sub <- 4L
   k <- 4L
   mu_r <- c(-0.6, -0.2, 0.2, 0.6)
   grid <- expand.grid(
     rater = seq_len(k),
-    s = seq_len(Ns),
-    cluster = seq_len(Nc)
+    s = seq_len(n_sub),
+    cluster = seq_len(n_clusters)
   )
   sid <- paste0(grid$cluster, "_", grid$s)
-  mu_c <- rnorm(Nc, 0, sqrt(0.5))
+  mu_c <- rnorm(n_clusters, 0, sqrt(0.5))
   mu_sc <- rnorm(length(unique(sid)), 0, sqrt(1.0))[as.integer(factor(sid))]
-  mu_cr <- rnorm(Nc * k, 0, sqrt(0.16))[as.integer(interaction(
+  mu_cr <- rnorm(n_clusters * k, 0, sqrt(0.16))[as.integer(interaction(
     grid$cluster,
     grid$rater
   ))]
@@ -1443,7 +1443,7 @@ test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes
     -seq(1L, nrow(grid), by = 9L),
     c("subject", "rater", "cluster", "score")
   ]
-  expect_lt(nrow(d), Nc * Ns * k) # ragged
+  expect_lt(nrow(d), n_clusters * n_sub * k) # ragged
 
   ba <- list(chains = 2, iter = 1000, refresh = 0)
   fa <- suppressWarnings(icc(
