@@ -11,7 +11,13 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 [`MILESTONES.md`](MILESTONES.md), the parking lot in [`ROADMAP.md`](ROADMAP.md),
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
-**2026-07-10**, during **M32** (ADR-042, branch `m32-bayes-incomplete-nested`) — the Bayesian engine now
+**2026-07-10**, during **M33** (ADR-043, branch `m33-bayes-parity-mopup`) Slice 1 — the Bayesian parity
+mop-up: the engine now fits **incomplete/ragged single-level one-way** data (`ICC(1)`/`ICC(1,k)`), reusing
+`fit_brms_oneway()` (M26 S1) unchanged by narrowing the `!balanced` brms guard's `oneway` clause; the M3/M6
+harmonic-mean `k_eff` divisor threads per posterior draw — a variance-ratio push-forward (no θ² functional,
+no 2b — the M30 regime). O-Bayes-IOneway pins reduction-to-M26 + ragged coverage of ICC(1) & ICC(1,k_eff) +
+glmmTMB/lme4 M6+M3 containment. (Slices 2–3 — fixed-rater and multilevel within-cell replicates — pending.)
+Prior: during **M32** (ADR-042, branch `m32-bayes-incomplete-nested`) — the Bayesian engine now
 fits **incomplete/ragged nested random**-rater data at the subject level for **both** nested designs:
 Design 2 (raters nested in clusters, Slice 1, `fit_brms_nested_clusters()`) and Design 3 (raters nested in
 subjects, the multilevel one-way, agreement-only, Slice 2, `fit_brms_nested_subjects()`) — narrowing the one
@@ -67,7 +73,7 @@ validated effective-n_o divisor).
 | `occasions` | `single`, `average` | replicates only |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random (single-level, balanced **and incomplete/ragged**) **+ fixed** (single-level, balanced **and incomplete/ragged**) **+ one-way** (single-level, balanced) + multilevel subject level: crossed D1 random (balanced **and incomplete**; + cluster `ICC(c,1)`) & fixed (balanced **and incomplete**), nested D2 random (balanced **and incomplete/ragged**, M32 S1) & fixed (balanced), nested D3 random (balanced **and incomplete/ragged**, M32 S2, agreement-only) |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random (single-level, balanced **and incomplete/ragged**) **+ fixed** (single-level, balanced **and incomplete/ragged**) **+ one-way** (single-level, balanced **and incomplete/ragged**, M33 S1) + multilevel subject level: crossed D1 random (balanced **and incomplete**; + cluster `ICC(c,1)`) & fixed (balanced **and incomplete**), nested D2 random (balanced **and incomplete/ragged**, M32 S1) & fixed (balanced), nested D3 random (balanced **and incomplete/ragged**, M32 S2, agreement-only) |
 | `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | data balance | balanced / incomplete (ragged) | |
@@ -135,8 +141,8 @@ Raters are interchangeable — `type` does not apply; coefficients are `ICC(1)` 
 | `unit` = single, average, numeric `m` | ✅ |
 | balance | ✅ balanced, ✅ incomplete |
 | `engine` = glmmTMB, lme4 | ✅ |
-| `engine = "brms"` | ✅ **balanced** (M26 Slice 1, ADR-036) — `ICC(1)`/`ICC(1,k)` under the half-*t*(4,0,1) prior, MAP + percentile credible interval; incomplete/numeric-`m` brms deferred. |
-| `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4); ✅ **posterior** (brms, balanced) |
+| `engine = "brms"` | ✅ **balanced and incomplete/ragged** (M26 Slice 1, ADR-036; incomplete M33 Slice 1, ADR-043) — `ICC(1)`/`ICC(1,k)` (`score ~ 1 + (1\|subject)`) under the half-*t*(4,0,1) prior, MAP + percentile credible interval. On ragged data the M3/M6 harmonic-mean `k_eff` divisor threads per posterior draw — a variance-ratio push-forward (no θ² functional, no 2b correction — the M30 regime), reusing `fit_brms_oneway()` unchanged by narrowing the `!balanced` brms guard. O-Bayes-IOneway pins reduction-to-M26 (complete cell) + ragged coverage of ICC(1) & ICC(1,k_eff) + glmmTMB/lme4 M6+M3 containment. Numeric-`m` (D-study) brms deferred. |
+| `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4); ✅ **posterior** (brms, balanced **and incomplete/ragged**) |
 
 **Gaps**
 

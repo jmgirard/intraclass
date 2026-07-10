@@ -958,6 +958,43 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-incomplete-nested-subjects.R` (seeded; drives the SHIPPED
   `fit_brms_nested_subjects()` recipe; writes the fixture before the hard pins).
 
+### Oracle O-Bayes-IOneway — Bayesian incomplete/ragged single-level one-way random (M33 Slice 1, ADR-043)
+
+- **Role:** the incomplete/ragged **single-level one-way** (Shrout & Fleiss Case 1) sibling of
+  O-Bayes-Incomplete (two-way). `engine = "brms"` now fits **incomplete/ragged one-way** data
+  (`ICC(1)`/`ICC(1,k)`) — the shipped M26 Slice 1 `fit_brms_oneway()` two-component
+  `score ~ 1 + (1 | subject)` fit run on ragged data unchanged, reached by narrowing the `!balanced` brms
+  guard's `oneway` clause; the engine-agnostic M3/M6 harmonic-mean `k_eff` divisor (ratings per subject) is
+  threaded per posterior draw. Random raters → **variance-ratio push-forward**, no θ² functional, no 2b
+  correction (the M30 regime). The first of the M33 Bayesian parity-mop-up slices.
+- **Oracles (≥2 independent, #1):** **O-Bayes-IOneway** (committed reference, no Stan) — a **reduction cell**
+  (complete grid, k_eff = k = 5) covers ~nominally (the shipped M26 Slice 1 behaviour), and a **ragged cell**
+  (fixed incidence, ~20% of rating slots deleted, constant k_eff < 5) covers ICC(1) & ICC(1, k_eff) within
+  Monte-Carlo error of the complete cell; **O-Bayes-IOneway-agree** (live ragged fit) — the glmmTMB/lme4 REML
+  **M6+M3** incomplete one-way point falls inside the brms credible intervals (containment, not equality —
+  the MAP-below-REML skew + prior gap).
+- **Sources:** Shrout & Fleiss (1979) Case 1 / McGraw & Wong (1996) one-way random (estimand); ten Hove et al.
+  (2020) prior/recipe (the ragged extension is **not in the source**, so the independent oracle for the ragged
+  point is the shipped glmmTMB/lme4 M6+M3 estimator, ADR-008); estimand-spec `M6-oneway.md` with
+  `M3-incomplete-designs.md` §6 (harmonic-mean `k_eff` under imbalance — no new spec).
+- **DGP:** one-way, N = 30 subjects, k = 5 ratings/subject at balance, σ²_s = σ²_res = 0.5 (population
+  ICC(1) = 0.5, an interior ratio past the k = 2 caveat); complete cell (k_eff = 5) and a fixed ragged
+  incidence (120 of 150 slots kept, k_eff = 3.7344); pop ICC(1, m) = σ²_s/(σ²_s + σ²_res/m).
+- **Committed reference (`tests/testthat/fixtures/bayesian-incomplete-oneway-oracle.rds`; seed 33100,
+  n_rep = 240, per-rep seeding):** per-cell convergence / ICC(1)+ICC(1,k_eff) coverage / MAP relative bias
+  (pins qualitative, #4/#18). **Observed (n_rep 240):** complete — conv 1.00, coverage **.9375/.9375**, MAP
+  relbias −.027/−.004; ragged (k_eff 3.73) — conv 1.00, coverage **.9458/.9458**, MAP relbias −.040/−.009.
+  **The one unknown is resolved: ragged one-way coverage is NOMINAL** through the k_eff divisor — a
+  random-rater variance-ratio push-forward (no 2b), the M30 regime — so **no Fable review** (the pin's
+  conditional escalation was not triggered). Both cells sit within ~1 MC SE of nominal .95 and inside the
+  [.92, .975] band; the ragged ≥ .88 pin passes comfortably.
+- **Pins (#4/#18):** convergence ≥ .90 both cells; k_eff shrinks under imbalance; complete-cell ICC(1) & ICC(k)
+  coverage ∈ [.90, .99] (reduction baseline); ragged coverage ≥ complete − .06 and ≥ .88 for both units;
+  |MAP relbias| < .10 (complete) / < .12 (ragged). Asserted in `test-icc-brms.R` **O-Bayes-IOneway** (committed
+  reference, on CI) + **O-Bayes-IOneway-agree** (live ragged fit, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-incomplete-oneway.R` (seeded; drives the SHIPPED
+  `fit_brms_oneway()` recipe; writes the fixture before the hard pins).
+
 ---
 
 ## Bibliography

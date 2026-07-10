@@ -135,8 +135,11 @@ alternate engines, and seeded simulations.
   the multilevel one-way, agreement-only): the shipped nested fits are run on the observed cells
   with the same harmonic-mean `k_eff` divisor + connectedness / per-subject identifiability gates
   the other engines use, and — random raters being ratios of variance components — need no moment
-  correction. Incomplete **fixed**-rater nested and incomplete single-level one-way Bayesian fits
-  remain planned for later milestones.
+  correction. The Bayesian engine now also fits **incomplete/ragged single-level one-way** data
+  (`ICC(1)`/`ICC(1,k)`): the shipped one-way fit is run on the observed ratings with the same
+  harmonic-mean `k_eff` divisor, a ratio of variance components needing no moment correction.
+  Incomplete **fixed**-rater nested and incomplete within-cell-replicate Bayesian fits remain
+  planned for later milestones.
 
 ## Choosing, projecting, and visualizing
 

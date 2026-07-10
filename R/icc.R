@@ -224,10 +224,10 @@
 #'   \eqn{\theta^2_r}), the crossed (Design 1) multilevel **fixed-rater** design (subject
 #'   level), and the nested **Design 2** (raters nested in clusters) and **Design 3** (raters
 #'   nested in subjects, the multilevel one-way, agreement-only) *random* multilevel designs
-#'   (subject level); and, on balanced/complete data only, the single-level one-way random
-#'   design, the nested Design 2 *fixed-rater* multilevel design at the subject level, the
+#'   (subject level), and the single-level one-way random design; and, on balanced/complete
+#'   data only, the nested Design 2 *fixed-rater* multilevel design at the subject level, the
 #'   conflated diagnostic, and within-cell replicates. Incomplete/ragged **fixed**-nested and
-#'   single-level one-way Bayesian fits, and numeric-`unit` (D-study) projection, are planned
+#'   within-cell-replicate Bayesian fits, and numeric-`unit` (D-study) projection, are planned
 #'   for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
@@ -455,14 +455,18 @@ icc <- function(
     ))
   }
 
-  # The brms (Bayesian) engine covers the two-way random path (M23, ADR-033), the crossed
-  # (Design 1) + nested (Designs 2/3) multilevel random paths (M24/M25, ADR-034/035), and
-  # the single-level one-way random path (M26 Slice 1, ADR-036) -- all balanced/complete,
-  # single replicate. Fixed-rater (Slice 2 follow-on), incomplete, within-cell-replicate,
-  # and D-study Bayesian fits stay deferred (recorded, not rediscovered); each routes to a
-  # loud, teaching abort rather than a silent glmmTMB fallback (#5). The crossed-only
-  # multilevel + conflated refusals are raised once `ml_design` is resolved (below), and the
-  # data-dependent ones (fixed, incomplete, replicates, numeric unit) further down. One-way
+  # The brms (Bayesian) engine covers the two-way random (M23) and fixed-rater (M26 Slice 2)
+  # single-level paths, the crossed (Design 1) + nested (Designs 2/3) multilevel random paths
+  # (M24/M25) plus crossed/nested-D2 fixed-rater multilevel (M27), the single-level one-way
+  # random path (M26 Slice 1), the conflated diagnostic + within-cell replicates (M29), and
+  # -- on incomplete/ragged data -- the two-way random/fixed + crossed multilevel random/fixed
+  # (M30/M31), the nested Designs 2/3 random (M32), and the single-level one-way (M33 Slice 1,
+  # ADR-043). The still-deferred Bayesian fits -- incomplete within-cell replicates, incomplete
+  # fixed-NESTED (no frequentist oracle), and D-study numeric unit -- stay deferred (recorded,
+  # not rediscovered); each routes to a loud, teaching abort rather than a silent glmmTMB
+  # fallback (#5). The crossed-only multilevel + conflated refusals are raised once `ml_design`
+  # is resolved (below), and the data-dependent ones (replicates, incomplete corners, numeric
+  # unit) further down. One-way
   # multilevel / one-way fixed already abort for every engine just below.
 
   # One-way (M6 spec §5): raters are interchangeable, so fixed raters and the
@@ -1106,12 +1110,13 @@ icc <- function(
   }
 
   # brms (Bayesian) engine data-dependent scope (ADR-033): the remaining deferred
-  # Bayesian follow-ons -- incomplete/ragged FIXED-rater MULTILEVEL and NESTED fits,
-  # incomplete one-way, incomplete/fixed/multilevel replicates, and numeric-unit (D-study)
-  # projection -- are refused loudly here, now that balance/replication and the resolved
-  # unit are known (#5/#8). Single-level fixed raters (Case-3A theta^2_r) ship on both
-  # balanced (M26 Slice 2) and incomplete/ragged (M31 Slice 1, ADR-041) data. A soft k = 2
-  # note surfaces ten Hove et al. (2020)'s bias/undercoverage caveat (#13).
+  # Bayesian follow-ons -- incomplete/ragged within-cell replicates, incomplete fixed-NESTED
+  # (no frequentist oracle, upstream), and numeric-unit (D-study) projection -- are refused
+  # loudly here, now that balance/replication and the resolved unit are known (#5/#8).
+  # Single-level fixed raters (Case-3A theta^2_r) ship on both balanced (M26 Slice 2) and
+  # incomplete/ragged (M31 Slice 1, ADR-041) data; single-level one-way ships balanced
+  # (M26 Slice 1) and incomplete/ragged (M33 Slice 1, ADR-043). A soft k = 2 note surfaces
+  # ten Hove et al. (2020)'s bias/undercoverage caveat (#13).
   if (engine == "brms") {
     # Fixed-rater multilevel brms covers crossed (Design 1, M27 Slice 1) and nested
     # (Design 2, M27 Slice 2) at the subject level, balanced/complete. The remaining
@@ -1149,20 +1154,25 @@ icc <- function(
       # Random raters make each ICC a ratio of variance components (no theta^2 functional), so this
       # is a clean posterior push-forward -- the M30 regime, NOT the M31 fixed regime: the 2b moment
       # correction never engages, and the shipped M25 nested fits run unchanged on ragged data,
-      # protected by the same engine-agnostic pre-dispatch k_eff/connectedness above. The
-      # still-deferred incomplete corners are refused with a case-naming message (#5/#8): SINGLE-LEVEL
-      # one-way (model = "oneway"; the multilevel one-way is Design 3, now supported) and replicates.
-      # (Incomplete fixed-NESTED is refused engine-agnostically upstream ~L685/L651 -- it has no
-      # frequentist oracle, deferred all engines, ADR-029/ADR-042 -- so only random nested reaches
-      # here.)
-      if (oneway || replicates) {
+      # protected by the same engine-agnostic pre-dispatch k_eff/connectedness above. M33 (ADR-043,
+      # Slice 1): incomplete/ragged SINGLE-LEVEL ONE-WAY ships too -- fit_brms_oneway() (M26 Slice 1)
+      # runs unchanged, the two-component score ~ 1 + (1 | subject) fit composing ICC(1)/ICC(1,k) as a
+      # ratio of variance components (no theta^2 functional -- the M30 regime, no 2b) with the M3/M6
+      # harmonic-mean k_eff divisor threaded pre-dispatch (design_info$k_eff, ~L1409). The one
+      # still-deferred incomplete corner is refused with a case-naming message (#5/#8): within-cell
+      # REPLICATES (the fixed/multilevel Bayesian replicate siblings ship balanced first, M33 Slices
+      # 2/3; ragged replicates stay 🟣 research, ADR-030). (Incomplete fixed-NESTED is refused
+      # engine-agnostically upstream ~L685/L651 -- it has no frequentist oracle, deferred all engines,
+      # ADR-029/ADR-042 -- so only random nested reaches here.)
+      if (replicates) {
         abort_unsupported(c(
           "The {.pkg brms} engine supports incomplete/ragged data only for the \\
-           two-way single-level (random or fixed), crossed (Design 1) multilevel \\
-           (random or fixed), and nested Design 2/3 (random) designs so far.",
-          i = "Incomplete Bayesian single-level one-way ({.code model = \"oneway\"}) \\
-               and replicate ICCs are planned for later milestones; use \\
-               {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for incomplete data."
+           two-way single-level (random or fixed), single-level one-way, crossed \\
+           (Design 1) multilevel (random or fixed), and nested Design 2/3 (random) \\
+           designs so far.",
+          i = "Incomplete Bayesian within-cell replicate ICCs are planned for a later \\
+               milestone; use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} \\
+               for incomplete data."
         ))
       }
     }
@@ -1280,8 +1290,10 @@ icc <- function(
   } else if (oneway) {
     # One-way random (M6). brms (M26 Slice 1, ADR-036): the two-component
     # score ~ 1 + (1 | subject) fit under the half-t(4, 0, 1) SD prior; MAP + percentile
-    # credible interval off the `draws` contract, as the other brms paths. Fixed / numeric
-    # unit / incomplete brms one-way are refused upstream (#5).
+    # credible interval off the `draws` contract, as the other brms paths. Runs unchanged on
+    # incomplete/ragged data (M33 Slice 1, ADR-043) -- the M3/M6 harmonic-mean k_eff divisor
+    # threads pre-dispatch (design_info$k_eff), a variance-ratio push-forward (no theta^2, no
+    # 2b -- the M30 regime). Fixed / numeric-unit brms one-way are refused upstream (#5).
     if (engine == "brms") {
       fit_brms_oneway(df, seed = seed, brm_args = brm_args)
     } else if (engine == "lme4") {

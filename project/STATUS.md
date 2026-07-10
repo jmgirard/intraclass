@@ -177,23 +177,18 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M33 Slice 1 — Bayesian incomplete/ragged single-level one-way** (started 2026-07-10; plan
-  stated, no code yet — #14). **Estimand:** ICC(1) / ICC(1,k) one-way random (Shrout & Fleiss Case 1; ten
-  Hove one-way) on **incomplete/ragged** data, the σ²_s / (σ²_s + σ²_e[/k_eff]) variance ratio read off
-  posterior draws, with the M3/M6 harmonic-mean **k_eff** divisor (no new estimand-spec —
-  [`M6-oneway.md`](estimand-specs/M6-oneway.md) + [`M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md)
-  §6). **Mechanism:** narrow the `if (oneway || replicates)` clause of the `!balanced` brms guard
-  (`icc.R:1158`) to drop `oneway` for the single level — `fit_brms_oneway()` (`engine-brms.R:328`) and the
-  k_eff estimand assembly (`icc.R:1409`, `k_eff = design_info$k_eff`) are **already ragged-ready** and run
-  unchanged; retarget the guard message + the deferred-corner comment block (~`icc.R:1108–1166`). Random →
-  variance ratio, **no θ² functional** (the M30 regime, no 2b). **Oracle set O-Bayes-IOneway (#1):**
-  (a) reduction — at balance the incomplete path ≡ the M26 S1 balanced one-way; (b) -agree — MAP tracks the
-  glmmTMB/lme4 incomplete one-way point by **containment** (inside the credible interval, the ADR-036
-  posture), live + `skip_on_ci`; (c) -coverage — a committed seeded ragged fixture at **n_rep ≥ 240**
-  ([[ragged-coverage-nrep-240]]), a new `data-raw/oracle-bayesian-incomplete-oneway.R` companion to M30's
-  `oracle-bayesian-incomplete.R`. **The one unknown is (c)**; if it undercovers, characterize honestly and
-  **recommend a gated Fable review and stop** (#19, never auto-invoke). Then Slice 2 (fixed replicates),
-  Slice 3 (multilevel replicates).
+- Active task: **M33 Slice 1 DONE (uncommitted); Slice 2 is next.** Slice 1 — Bayesian incomplete/ragged
+  single-level one-way — shipped: narrowed the `if (oneway || replicates)` clause of the `!balanced` brms
+  guard (`icc.R:1158` → `if (replicates)`) so `fit_brms_oneway()` (M26) runs unchanged on ragged data with the
+  M3/M6 harmonic-mean `k_eff` divisor threaded per draw; retargeted the guard message + deferred-corner
+  comments + `@param engine` roxygen. Random → variance ratio, **no θ² functional** (M30 regime, no 2b).
+  **O-Bayes-IOneway resolved NOMINAL** (`bayesian-incomplete-oneway-oracle.rds`, seed 33100, n_rep = 240 +
+  per-rep seeding): complete coverage .9375/.9375, ragged (k_eff 3.73) **.9458/.9458**, conv 1.00, MAP relbias
+  −.027/−.040 — both cells ∈ [.92, .975] → **no Fable review** (the pin's conditional escalation not
+  triggered). Live O-Bayes-IOneway-agree glmmTMB/lme4 M6+M3 containment verified; fixture + refusal + full
+  suite (CI mode) green; `lintr`/`air` clean. Tracking updated in-commit (#16): COVERAGE §3, REFERENCES
+  (O-Bayes-IOneway registry), NEWS, roxygen. **Next: `/start-task` Slice 2** (fixed-rater within-cell
+  replicates — narrow `icc.R:1122`, balanced → 2b ≈ 0, O-Bayes-FRep), then Slice 3 (multilevel replicates).
 - Last green CI: **PR #37 (M32) — full CI matrix green (9/9), squash-merged to `main` at `dd8e3e2`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/0** (built with

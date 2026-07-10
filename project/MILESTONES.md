@@ -1153,12 +1153,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   / **O-Bayes-FRep** (Slice 2) / **O-Bayes-MLRep** (Slice 3) — reduction to the shipped balanced brms fit +
   glmmTMB/lme4 MAP-containment + committed seeded coverage (`REFERENCES.md`).
 - DoD (the board, ADR-015):
-  - [ ] **Slice 1 — incomplete/ragged single-level one-way.** Narrow `icc.R:1158` (`if (oneway || replicates)`
-    → drop `oneway` single-level); `fit_brms_oneway()` unchanged; M3/M6 `k_eff` threads per draw. Random →
-    variance ratio, no θ² functional (M30 regime). **The one unknown: ragged coverage** → committed seeded
-    fixture at **n_rep ≥ 240** ([[ragged-coverage-nrep-240]]). O-Bayes-IOneway: reduction ≡ M26 S1 + glmmTMB
-    containment + coverage. Conditional gated Fable review **only if** this undercovers (#19,
-    recommend-and-stop).
+  - [x] **Slice 1 — incomplete/ragged single-level one-way.** DONE. Narrowed `icc.R:1158`
+    (`if (oneway || replicates)` → `if (replicates)`); `fit_brms_oneway()` runs unchanged, M3/M6 `k_eff`
+    threads per draw. Random → variance ratio, no θ² functional (M30 regime). **The one unknown resolved
+    NOMINAL:** O-Bayes-IOneway coverage complete .9375/.9375, ragged (k_eff 3.73) **.9458/.9458** (both ∈
+    [.92, .975], conv 1.00), committed at **n_rep = 240 + per-rep seeding**
+    (`bayesian-incomplete-oneway-oracle.rds`, seed 33100) → **no Fable review**. Live O-Bayes-IOneway-agree
+    glmmTMB/lme4 M6+M3 containment verified. Fixture + refusal tests + full suite (CI mode) green; lint/air
+    clean.
   - [ ] **Slice 2 — fixed-rater within-cell replicates (balanced).** Narrow `icc.R:1122` (admit single-level
     `raters == "fixed"` replicates); fixed replicate fit
     (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`) reusing M20 S1 formula + M29 replicate machinery +
@@ -1180,7 +1182,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Bayesian **numeric-unit `d_study()`**; the **(B)** customization milestone — **`prior=`** API, **HPDI**
   intervals, **selectable** `posterior` coupling (next); **rstanarm** backend. All stay in
   [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — opened/scoped, no slice code yet** (plan before code, #14). Branch
-  `m33-bayes-parity-mopup`. Next: `/start-task` Slice 1.
+- Status: **active — Slice 1 DONE, Slices 2–3 pending.** Branch `m33-bayes-parity-mopup`. Slice 1
+  (incomplete/ragged single-level one-way) shipped: the `!balanced` brms guard narrowed, `fit_brms_oneway()`
+  reused unchanged, O-Bayes-IOneway coverage **nominal** (ragged .9458, no Fable review). Next:
+  `/start-task` Slice 2 (fixed-rater within-cell replicates).
   Bayesian incomplete **fixed** nested / **cluster-level** / **replicates** / single-level **one-way** stay
   deferred.

@@ -104,11 +104,12 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   # via the 2b moment correction) -- plus CROSSED (Design 1) MULTILEVEL, RANDOM (M30 Slice 2)
   # and FIXED (M31 Slice 2, subject level), and NESTED Design 2 (raters nested in clusters,
   # M32 Slice 1) and Design 3 (raters nested in subjects, the multilevel one-way, M32 Slice 2)
-  # RANDOM (ADR-042) -- see the O-Bayes-Incomplete / O-Bayes-IFixed / O-Bayes-IML /
-  # O-Bayes-IFML-fixed / O-Bayes-INML-clusters / O-Bayes-INML-subjects live + fixture tests below.
-  # What stays deferred (and aborts BEFORE any fit, no Stan needed): incomplete FIXED nested
-  # (Designs 2/3, no frequentist oracle), incomplete SINGLE-LEVEL one-way, and incomplete
-  # replicates. Each must name the supported scope (#5/#8).
+  # RANDOM (ADR-042), and the SINGLE-LEVEL ONE-WAY (M33 Slice 1, ADR-043; a clean variance-ratio
+  # push-forward, no theta^2) -- see the O-Bayes-Incomplete / O-Bayes-IFixed / O-Bayes-IML /
+  # O-Bayes-IFML-fixed / O-Bayes-INML-clusters / O-Bayes-INML-subjects / O-Bayes-IOneway live +
+  # fixture tests below. What stays deferred (and aborts BEFORE any fit, no Stan needed): incomplete
+  # FIXED nested (Designs 2/3, no frequentist oracle) and incomplete within-cell REPLICATES. Each
+  # must name the supported scope (#5/#8).
   d_inc <- d[-1, , drop = FALSE] # ragged two-way (one cell dropped)
   # incomplete FIXED-rater NESTED multilevel (Design 2, still deferred): raters nested in
   # clusters (cluster-unique labels), fixed, one cell dropped. (suppressWarnings: the
@@ -132,16 +133,18 @@ test_that("brms refuses the deferred designs with a teaching abort", {
     ),
     class = "intraclass_unsupported"
   )
-  # incomplete one-way (unequal ratings per subject)
-  d_ow <- data.frame(
-    subject = factor(c(1, 1, 1, 2, 2, 3, 3, 3)),
-    rater = factor(1:8),
-    score = c(1, 2, 1.5, 3, 3.5, 2, 2.2, 1.8)
+  # incomplete within-cell REPLICATES (still deferred): >1 rating per subject x rater cell, ragged.
+  d_rep <- data.frame(
+    subject = factor(c(1, 1, 1, 2, 2, 2, 3, 3)),
+    rater = factor(c(1, 1, 2, 1, 2, 2, 1, 2)),
+    score = c(1, 1.2, 2, 3, 3.5, 3.2, 2, 2.4)
   )
   expect_error(
-    icc(d_ow, score, subject, rater, model = "oneway", engine = "brms"),
+    icc(d_rep, score, subject, rater, engine = "brms"),
     class = "intraclass_unsupported"
   )
+  # NB: incomplete SINGLE-LEVEL one-way now ships for brms (M33 Slice 1) -- asserted supported by
+  # the O-Bayes-IOneway live + fixture tests below.
   # NB: incomplete NESTED multilevel RANDOM now ships for brms -- Design 2 (M32 Slice 1) and
   # Design 3 (M32 Slice 2) -- asserted supported by the O-Bayes-INML-clusters / -subjects live +
   # fixture tests below. Incomplete FIXED nested stays deferred (dnf_inc above; no frequentist
@@ -751,6 +754,55 @@ test_that("O-Bayes-INML-subjects: committed reference covers ragged nested Desig
   # (4) Subject MAP tracks the population in both cells (small skew, the M25 well-powered posture).
   expect_lt(abs(cmp$relbias_a1), 0.10)
   expect_lt(abs(rag$relbias_a1), 0.12)
+})
+
+# --- O-Bayes-IOneway: committed ragged SINGLE-LEVEL ONE-WAY coverage reference (no brms, M33 S1) ---
+# The incomplete/ragged single-level ONE-WAY (Shrout & Fleiss Case 1) sibling of O-Bayes-Incomplete
+# (two-way). data-raw/oracle-bayesian-incomplete-oneway.R runs the one-way DGP (Y = mu_s + e) in a
+# COMPLETE cell (k_eff = k = 5, the M26 Slice 1 reduction) and a FIXED RAGGED cell (~20% of the
+# rating slots deleted, constant k_eff < 5) through the SHIPPED fit_brms_oneway() + reduce recipe,
+# and commits per-cell ICC(1) & ICC(1, k_eff) coverage (the harmonic-mean k_eff divisor is exercised
+# on the average unit). One-way is RANDOM -> a clean variance-ratio push-forward (NO theta^2, NO 2b),
+# so ~nominal coverage is expected (the M30 regime, not the M31 fixed regime). n_rep = 240 + per-rep
+# seeding (the M32 Slice 2 convention, ADR-042 Amendment 2). Fast, no fitting, runs on every CI job.
+test_that("O-Bayes-IOneway: committed reference covers ragged one-way random data", {
+  fixture <- test_path("fixtures", "bayesian-incomplete-oneway-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete-oneway.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$design == "complete", ]
+  rag <- s[s$design == "ragged", ]
+
+  # The ragged cell exercises the k_eff divisor: k_eff strictly below k = 5.
+  expect_lt(rag$k_eff, 5)
+  expect_equal(cmp$k_eff, 5)
+
+  # (1) High convergence at the half-t DGP in both cells (k = 5, past the k = 2 caveat).
+  expect_gte(cmp$converged_frac, 0.90)
+  expect_gte(rag$converged_frac, 0.90)
+
+  # (2) REDUCTION: on complete data the incomplete path IS the shipped M26 Slice 1 one-way path
+  #     (k_eff = k), so both units cover ~nominal -- the baseline the ragged cell is judged against.
+  expect_gte(cmp$coverage_icc1, 0.90)
+  expect_lte(cmp$coverage_icc1, 0.99)
+  expect_gte(cmp$coverage_icck, 0.90)
+  expect_lte(cmp$coverage_icck, 0.99)
+
+  # (3) COVERAGE ON RAGGED DATA (the slice's one unknown, #1/#18): random raters give a clean
+  #     variance-ratio push-forward (no 2b), so ragged coverage tracks the complete cell within
+  #     Monte-Carlo error and stays ~nominal for BOTH the divisor-free ICC(1) and the k_eff-divided
+  #     ICC(1, k_eff). A > ~.06 shortfall would be a real finding -> characterize honestly (#18) and
+  #     recommend a gated Fable review (#19), do NOT loosen the pin (#4).
+  expect_gte(rag$coverage_icc1, cmp$coverage_icc1 - 0.06)
+  expect_gte(rag$coverage_icck, cmp$coverage_icck - 0.06)
+  expect_gte(rag$coverage_icc1, 0.88)
+  expect_gte(rag$coverage_icck, 0.88)
+
+  # (4) MAP tracks the population in both cells (small negative skew, the M26 one-way posture).
+  expect_lt(abs(cmp$map_icc1_relbias), 0.10)
+  expect_lt(abs(rag$map_icc1_relbias), 0.12)
 })
 
 # --- O-Bayes-IFixed: committed ragged FIXED-rater coverage reference (no brms, M31 S1) ---
@@ -2086,6 +2138,77 @@ test_that("brms fits incomplete/ragged two-way random data end to end (O-Bayes-I
     score,
     rater,
     subject = subject,
+    unit = c("single", "average"),
+    engine = "glmmTMB"
+  )
+  ge <- g$estimates[order(g$estimates$index), ]
+  fe <- fit$estimates[order(fit$estimates$index), ]
+  expect_true(all(ge$estimate >= fe$conf.low & ge$estimate <= fe$conf.high))
+
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: incomplete/ragged single-level one-way, O-Bayes-IOneway-agree (M33 Slice 1) ---
+# The ragged one-way analogue of the O-Bayes-OW-agree live test: an unbalanced subjects x
+# rating-slots design (unequal per-subject rating counts), so the harmonic-mean k_eff divisor (< k)
+# drives the average-unit ICC(1, k). Confirms icc() -> fit_brms_oneway() on ragged data (the newly
+# narrowed !balanced brms guard) -> posterior_summary() with k_eff, end to end, and pins
+# O-Bayes-IOneway-agree: the glmmTMB/lme4 REML M6+M3 one-way points (the independent incomplete-data
+# oracle, ADR-008) sit inside the brms credible intervals (containment, not equality -- the
+# MAP-below-REML skew + prior gap, the M26 one-way posture).
+test_that("brms fits incomplete/ragged one-way random data end to end (O-Bayes-IOneway-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(3310)
+  ns <- 20L
+  k <- 5L
+  grid <- expand.grid(rater = factor(seq_len(k)), subject = factor(seq_len(ns)))
+  grid$score <- 1 +
+    rnorm(ns, 0, 1)[as.integer(grid$subject)] +
+    rnorm(nrow(grid), 0, sqrt(0.6))
+  # Delete rating slots so per-subject counts are unequal (k_eff < k); one-way needs no
+  # connectedness, only every subject keeping >= 2 ratings.
+  drop <- c(2L, 7L, 13L, 26L, 41L, 55L, 68L, 74L, 90L, 96L)
+  d <- grid[-drop, c("subject", "rater", "score")]
+  d$subject <- droplevels(d$subject)
+  d$rater <- droplevels(d$rater)
+  di <- summarize_design(d)
+  expect_false(di$balanced)
+  expect_lt(di$k_eff, k) # the harmonic-mean divisor is genuinely below k
+  expect_gt(di$k_eff, 1)
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    unit = c("single", "average"),
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  # O-Bayes-IOneway-agree: the glmmTMB REML M6+M3 one-way points sit inside the brms credible
+  # intervals (the incomplete-data engine-agreement pin; the credible interval covers the MLE).
+  g <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
     unit = c("single", "average"),
     engine = "glmmTMB"
   )
