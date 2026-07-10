@@ -1028,17 +1028,21 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   [`REFERENCES.md`](REFERENCES.md).
 
 - DoD board (§8; check off in the same commit as the work, #16):
-  - **Slice 1 — Bayesian incomplete two-way random**
-    - [ ] Narrow the `!balanced` brms guard (`icc.R:1125`) to admit incomplete two-way **random** data;
-          fixed / replicates / numeric-unit / nested-incomplete stay refused (classed, #5/#8).
-    - [ ] Confirm `design_info$k_eff` (harmonic mean) + connectedness thread into `posterior_summary()` per
-          draw; complete data reduces **identically** to shipped M23.
-    - [ ] `data-raw/oracle-bayesian-incomplete.R` — seeded ragged two-way random DGP; commit
+  - **Slice 1 — Bayesian incomplete two-way random** ✅ (code complete; committed on branch)
+    - [x] Narrow the `!balanced` brms guard (`icc.R:1128`) to admit incomplete two-way **random** data;
+          fixed / replicates / one-way / multilevel-incomplete stay refused (classed, #5/#8).
+    - [x] Confirm `design_info$k_eff` (harmonic mean) + connectedness thread into `posterior_summary()` per
+          draw; complete data reduces **identically** to shipped M23 (verified: complete cell coverage .945).
+    - [x] `data-raw/oracle-bayesian-incomplete.R` — seeded ragged two-way random DGP; committed
           `tests/testthat/fixtures/bayesian-incomplete-oracle.rds` (#4).
-    - [ ] Oracle **O-Bayes-Incomplete**: complete-data reduction to M23 + ragged MAP-containment vs M3
-          glmmTMB + **seeded coverage** (the real bar) + convergence rate. Characterize coverage honestly (#18).
-    - [ ] Live single brms fit `skip_on_cran()`/`skip_if_not_installed`/`skip_on_ci()`; reduced draws in tests.
-    - [ ] `@param engine` roxygen + `advanced`-facing notes updated to state brms incomplete random is supported.
+    - [x] Oracle **O-Bayes-Incomplete**: complete-data reduction to M23 + ragged MAP-containment vs M3
+          glmmTMB + **seeded coverage** + convergence. **Coverage is NOMINAL on ragged data** (ragged .965 vs
+          complete .945 for both ICC(A,1) & ICC(A,k_eff), conv .995) → variance-ratio regime confirmed, **no
+          Fable review needed** (#18/#19).
+    - [x] Live single brms fit `skip_on_cran()`/`skip_if_not_installed`/`skip_on_ci()`; reduced draws in tests
+          (O-Bayes-Incomplete-agree; live ragged fit verified — k_eff 3.48 < k, containment holds).
+    - [x] `@param engine` roxygen updated (vignettes make no brms claim — deferred to the parked
+          vignette-reassessment).
   - **Slice 2 — Bayesian incomplete crossed (Design 1) multilevel random**
     - [ ] Guard narrowing admits incomplete crossed-random multilevel; `fit_brms_multilevel()` on ragged
           crossed data unchanged; `design =` disambiguation flows (M9).
@@ -1063,4 +1067,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, open for all engines, M9 §9); Bayesian **numeric-unit
   `d_study()`**; the M23 carry-overs — **rstanarm**, **selectable** `posterior` coupling, **HPDI**,
   **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — scoped, no slice work begun.** Branch `m30-bayes-incomplete`; ADR-040 accepted.
+- Status: **active — Slice 1 code complete (committed on branch `m30-bayes-incomplete`); Slice 2 next.**
+  ADR-040 accepted. Slice 1 shipped the guard narrowing + O-Bayes-Incomplete; the milestone's one unknown
+  (ragged-data credible-interval coverage) **resolved NOMINAL** — no Fable review. Cross-cutting DoD
+  (installed-pkg test, `R CMD check`, PR) runs after Slice 2.

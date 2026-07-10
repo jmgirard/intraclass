@@ -116,7 +116,13 @@ alternate engines, and seeded simulations.
   **within-cell replicates** (more than one rating per subject×rater cell): the residual
   splits into the subject×rater interaction and pure error, and `occasions = "average"`
   reports the reliability of the replicate mean (pure error divided per posterior draw by
-  the replicate count) — single-level two-way random, balanced.
+  the replicate count) — single-level two-way random, balanced. Finally, the Bayesian
+  engine now fits **incomplete/ragged** two-way random single-level data (unequal or
+  missing subject×rater cells): the model is fit on the observed cells and the same
+  harmonic-mean `k_eff` divisor + connectedness identifiability used by the other engines
+  are applied per posterior draw. Because random-rater ICCs are ratios of variance
+  components, this needs no moment correction; incomplete multilevel and fixed-rater
+  Bayesian fits remain planned for later milestones.
 
 ## Choosing, projecting, and visualizing
 

@@ -138,9 +138,12 @@
   tested by the seeded coverage oracle; a gated Fable review (#19) is **recommended-and-stop only if it
   undercovers** (Fable NOT pre-authorized). Deferred: incomplete fixed (θ² × imbalance), incomplete nested,
   incomplete replicates, `ICC(c,k)` divisor.
-- Active task: **Slice 1 — Bayesian incomplete two-way random** (not yet begun). Narrow the guard, confirm
-  the `k_eff` per-draw threading, build O-Bayes-Incomplete (complete-data reduction to M23 + ragged
-  MAP-containment vs M3 glmmTMB + seeded coverage). The M30 DoD board is the live task list
+- Active task: **Slice 2 — Bayesian incomplete crossed (Design 1) multilevel random** (next). **Slice 1 —
+  Bayesian incomplete two-way random — code complete, committed on branch.** The guard narrowed
+  (`icc.R:1128`), O-Bayes-Incomplete built; the milestone's one unknown — **ragged-data credible-interval
+  coverage — resolved NOMINAL** (ragged .965 vs complete .945 for both ICC(A,1) and ICC(A,k_eff), conv .995),
+  confirming the variance-ratio regime → **no Fable review**. Live O-Bayes-Incomplete-agree ragged fit
+  verified (k_eff 3.48 < k, glmmTMB M3 containment). The M30 DoD board is the live task list
   ([`MILESTONES.md`](MILESTONES.md), ADR-015). Other candidates remain parked in
   [`ROADMAP.md`](ROADMAP.md): Bayesian fixed/nested/replicate incomplete corners, **categorical/ordinal
   GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)` divisor, occasion/ragged
@@ -153,8 +156,14 @@
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
 - Blockers: —
-- Updated: 2026-07-10 by main session (Opus) — **M30 opened + scoped (ADR-040); milestone-start
-  companions.** After a short retro the maintainer chose to continue the Bayesian arc with the
+- Updated: 2026-07-10 by main session (Opus) — **M30 Slice 1 shipped on branch (Bayesian incomplete two-way
+  random).** Guard narrowed (`icc.R:1128`) so `fit_brms_twoway()` fits ragged data with the engine-agnostic
+  M3 `k_eff`/connectedness threaded per posterior draw; O-Bayes-Incomplete oracle
+  (`data-raw/oracle-bayesian-incomplete.R` + committed fixture) + live O-Bayes-Incomplete-agree fit + docs.
+  **The milestone's one unknown — ragged-data credible-interval coverage — came back NOMINAL** (ragged
+  .965/.965 vs complete .945/.945, conv .995), so no θ² correction and **no Fable review** (the M29 regime).
+  Full suite (CI mode) 1015 pass / 0 fail; `air`/`lintr` clean. Next: Slice 2 (incomplete crossed multilevel
+  random). Prior line: **M30 opened + scoped (ADR-040); milestone-start companions.** After a short retro the maintainer chose to continue the Bayesian arc with the
   incomplete/ragged random path (both single-level and crossed-multilevel slices). This commit (on branch
   `m30-bayes-incomplete`) writes ADR-040, adds the M30 active board to MILESTONES (DoD checklist = live
   board, ADR-015), updates the MILESTONES preamble + ADR-index (ADR-040 M30), and flips STATUS to

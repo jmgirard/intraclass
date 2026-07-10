@@ -217,12 +217,15 @@
 #'   framework (Stan, via \pkg{brms}) under a sourced half-*t*(4, 0, 1) prior on the
 #'   random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 #'   mode (MAP) and the interval is a percentile **credible** interval
-#'   (`ci_method = "posterior"`, forced). It covers the balanced, complete two-way
-#'   random design, the crossed (Design 1) **multilevel** random design (subject and
-#'   cluster levels), and the nested **multilevel** random designs -- Design 2 (raters
-#'   nested in clusters) and Design 3 (raters nested in subjects, agreement-only), both at
-#'   the subject level; fixed raters, one-way, incomplete multilevel, and
-#'   within-cell-replicate Bayesian fits are planned for later milestones. `"lme4"` requires the
+#'   (`ci_method = "posterior"`, forced). It covers the two-way random design at the
+#'   single level on **both balanced/complete and incomplete/ragged** data; and, on
+#'   balanced/complete data, the one-way random and fixed-rater two-way designs, the
+#'   crossed (Design 1) **multilevel** random and fixed-rater designs (subject and cluster
+#'   levels), the nested **multilevel** designs -- Design 2 (raters nested in clusters,
+#'   random and fixed) and Design 3 (raters nested in subjects, agreement-only) at the
+#'   subject level -- the conflated diagnostic, and within-cell replicates.
+#'   Incomplete/ragged **multilevel** and **fixed-rater** Bayesian fits, and
+#'   numeric-`unit` (D-study) projection, are planned for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
 #' @param conf_level Confidence level for the interval (default `0.95`).
@@ -1123,11 +1126,23 @@ icc <- function(
       ))
     }
     if (!balanced) {
-      abort_unsupported(c(
-        "The {.pkg brms} engine supports only balanced, complete data so far.",
-        i = "Bayesian incomplete/ragged ICCs are planned for a later milestone; use \\
-             {.code engine = \"glmmTMB\"} for incomplete data."
-      ))
+      # M30 Slice 1 (ADR-040): incomplete/ragged two-way RANDOM single-level now fits.
+      # The M3 k_eff (harmonic-mean divisor) + connectedness machinery is engine-agnostic
+      # and already runs pre-dispatch (the connectedness refusal at ~L884 protects brms
+      # too), and random raters make each ICC a variance ratio -- no theta^2 finite-
+      # population functional, so no moment correction (the M29 clean-push-forward regime).
+      # The still-deferred incomplete corners are refused with a case-naming message
+      # (#5/#8): multilevel (M30 Slice 2), fixed-rater (theta^2 under imbalance), one-way,
+      # and replicates.
+      if (multilevel || raters == "fixed" || oneway || replicates) {
+        abort_unsupported(c(
+          "The {.pkg brms} engine supports incomplete/ragged data only for the \\
+           two-way random single-level design so far.",
+          i = "Incomplete Bayesian fixed-rater, one-way, multilevel, and replicate \\
+               ICCs are planned for later milestones; use {.code engine = \"glmmTMB\"} \\
+               (default) or {.code \"lme4\"} for incomplete data."
+        ))
+      }
     }
     if (any(vapply(unit, is.numeric, logical(1)))) {
       abort_unsupported(c(
