@@ -1062,8 +1062,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     - [x] `COVERAGE.md` refreshed (brms incomplete random two-way + crossed multilevel now supported).
     - [x] `NEWS.md` entry under 0.1.0.
     - [x] `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]).
-    - [ ] Installed-pkg test with `NOT_CRAN=true` ([[verify-against-installed-package]]); full CI-mode suite green.
-    - [ ] `R CMD check --as-cran` 0/0/1; full CI matrix green; PR opened + merged ([[milestone-branches-and-prs]]).
+    - [x] Installed-pkg test with `NOT_CRAN=true` ([[verify-against-installed-package]]) — both new ragged
+          fits drive through `library(intraclass)` (posterior CI, containment, ICC(c,k) dropped); full
+          CI-mode suite green (1030 pass / 0 fail).
+    - [x] `R CMD check --as-cran` **0/0/1** (only the "New submission" NOTE); tests + vignette rebuild OK.
+    - [ ] Full CI matrix green; PR opened + merged ([[milestone-branches-and-prs]]) — **pending push**.
 - Deferred out of M30 (record so not rediscovered): Bayesian incomplete **fixed-rater** (two-way + crossed
   multilevel — pairs the M3 `k_eff` divisor with the M27/M28 θ² **2b moment correction under imbalance**;
   higher-risk, its own slice); Bayesian incomplete **nested** Designs 2/3 (M19 Slice 1 analog); Bayesian
@@ -1071,8 +1074,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, open for all engines, M9 §9); Bayesian **numeric-unit
   `d_study()`**; the M23 carry-overs — **rstanarm**, **selectable** `posterior` coupling, **HPDI**,
   **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — Slices 1 & 2 code complete (committed on branch `m30-bayes-incomplete`); finish-task
-  verification + PR remain.** ADR-040 accepted. Both slices shipped the guard narrowings + O-Bayes-Incomplete
-  / O-Bayes-IML; the milestone's one unknown (ragged-data credible-interval coverage) **resolved NOMINAL at
-  the subject level for both** (two-way .965/.965, crossed-ml .97/.97; cluster ICC(c,1) tracks complete) —
-  variance-ratio regime confirmed, **no Fable review**. Remaining: installed-pkg test, `R CMD check`, PR.
+- Status: **active — Slices 1 & 2 code complete + locally verified (branch `m30-bayes-incomplete`); only the
+  PR remains.** ADR-040 accepted. Both slices shipped the guard narrowings + O-Bayes-Incomplete / O-Bayes-IML;
+  the milestone's one unknown (ragged-data credible-interval coverage) **resolved NOMINAL at the subject level
+  for both** (two-way .965/.965, crossed-ml .97/.97; cluster ICC(c,1) tracks complete) — variance-ratio
+  regime confirmed, **no Fable review**. Local gates green: full suite (CI mode) 1030/0; installed-pkg both
+  ragged fits verified; `R CMD check --as-cran` 0/0/1; `air`/`lintr` clean. **Next: push branch + open PR.**

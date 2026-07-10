@@ -6,6 +6,8 @@
 \alias{intraclass-package}
 \title{intraclass: Modern Intraclass Correlation Coefficients}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Estimates interrater-reliability intraclass correlation coefficients (ICCs) within the generalizability-theory framework using modern variance-component estimation (linear mixed models) rather than the classical analysis-of-variance mean-squares approach. Provides the full ICC family (absolute agreement versus consistency, single versus average, fixed versus random raters, one-way versus two-way) with boundary-aware Monte-Carlo confidence intervals, support for imbalanced, incomplete, and multilevel (nested) designs, decision-study projection to other numbers of raters, and an interactive helper for choosing the correct coefficient. Multilevel methods follow ten Hove, Jorgensen and van der Ark (2022) \doi{10.1037/met0000391}.
 }
 \seealso{
