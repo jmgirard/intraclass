@@ -125,41 +125,35 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active milestone: **M29 — Bayesian engine (brms) conflated diagnostic + within-cell replicates**
-  (ADR-039; branch `m29-bayes-conflated-replicates`). Continues the Bayesian arc with its two remaining
-  low-risk parity follow-ons — `level = "conflated"` (Eq. 14) read off the shipped M24 crossed fit
-  (Slice 1) + within-cell replicates via a new `fit_brms_replicates()` (Slice 2) — two-way random,
-  balanced/complete, single level. Engine/interval parity, not new estimand work (#6): both reuse the
-  shipped M17 estimands, read off posterior draws; no new spec/argument/dependency. Both are
-  variance-ratio push-forwards, so **no θ² 2b moment correction and no Fable-review risk**
-  ([[fixed-rater-interval-2b-moment-correction]] N/A). Bayesian incomplete/ragged is the isolated next
-  milestone (M30).
-- Active task: **M29 — both slices done, all gates green, ready for PR.** **Slice 1 (conflated)**: guard
-  narrowed; conflated composes off the crossed brms draws; O-Bayes-Conflated pinned (coverage .95, glmmTMB
-  containment 1.00, gap .144) off a committed 80-rep fixture (seed 20290). **Slice 2 (within-cell
-  replicates)**: `fit_brms_replicates()` (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`);
-  single-level random only (fixed×/multilevel× refused); `occasions` per-draw divisor; O-Bayes-Rep pinned
-  (coverage .94/.93, containment 1.00, average > single 1.00) off a committed 80-rep fixture (seed 20291).
-  Both variance-ratio push-forwards (no θ² moment correction). Gates: `air`/`lintr` clean; full suite (CI
-  mode) 1089/0/10; installed-pkg brms 266/0/0 (all live Stan fits ran); `R CMD check --as-cran` 0/0/1.
-  **PR [#34](https://github.com/jmgirard/intraclass/pull/34) open** (full CI matrix running). On
-  squash-merge: compress the MILESTONES M29 board to summary form + flip STATUS to M29-shipped.
-- Last green CI: **PR #33 (M28) — full CI matrix green (9/9), squash-merged to `main` at `e6ce64d`.**
+- Active milestone: **none** — M29 shipped (PR #34, squash-merged to `main` at `be4e25f`). No milestone is
+  currently in flight; the next one needs an ADR after a short retro (founding brief §7).
+- Active task: **none.** Candidates for the next milestone live in [`ROADMAP.md`](ROADMAP.md): the
+  **remaining Bayesian** follow-ons — **incomplete/ragged** (the isolated next candidate M30; leans on
+  coverage calibration, likely a gated Fable review, #19), Bayesian **fixed-rater / multilevel replicates**,
+  **cluster-level fixed** — plus **categorical/ordinal GLMM** ratings (needs an estimand pass),
+  **multilevel SEM** (research-flavored), the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor,
+  occasion/ragged-replicate `d_study()`, and the parked **vignette reassessment** (docs). The out-of-band
+  **CRAN upload** (ADR-022) also remains.
+- Last green CI: **PR #34 (M29) — full CI matrix green (9/9), squash-merged to `main` at `be4e25f`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/1** (full
-  build, only "New submission"); installed `test-icc-brms.R` `NOT_CRAN=true` **29/0/0** (9 live Stan fits);
-  non-brms suite **295/0/0**; `lintr`/`air` clean; coverage ~85% (below 90% by design —
-  [[coverage-baseline]]). Prior green: **PR #32 (M27)** at `0a93fe6`.
+  build, only "New submission"); installed `test-icc-brms.R` `NOT_CRAN=true` **266/0/0** (all live Stan
+  fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
+  `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
+  (M28)** at `e6ce64d`.
 - Blockers: —
-- Updated: 2026-07-10 by main session (Opus) — **M29 implemented end-to-end (both slices) on branch
-  `m29-bayes-conflated-replicates`; all gates green, ready for PR.** ADR-039 opened the milestone; Slice 1
-  (Bayesian conflated, `eed84c0`) narrowed the brms conflated guard so Eq. 14 composes off the crossed
-  five-component draws + O-Bayes-Conflated fixture; Slice 2 (within-cell replicates, `176a85a`) added
-  `fit_brms_replicates()` + O-Bayes-Rep fixture. Both variance-ratio push-forwards (no θ² moment
-  correction). Gates: `air`/`lintr` clean; full suite (CI mode) 1089/0/10; installed-pkg brms 266/0/0 (all
-  live Stan fits ran, `NOT_CRAN=true`); `R CMD check --as-cran` 0/0/1. Next: push branch + open PR (then
-  compress the MILESTONES M29 board on merge). Prior line: **M28 shipped (PR #33, squash-merged at
-  `e6ce64d`).**
+- Updated: 2026-07-10 by main session (Opus) — **M29 shipped (PR #34, squash-merged at `be4e25f`);
+  post-merge `project/` reconcile.** This commit flips STATUS to M29-shipped, compresses the MILESTONES M29
+  board to the summary form, updates the MILESTONES preamble + ADR-index, and reconciles ROADMAP (Bayesian
+  item: conflated/replicates → shipped-as-M29). Whole milestone (retro → ADR-039 → Slice 1 conflated →
+  Slice 2 replicates → finish-task) landed in one session on branch `m29-bayes-conflated-replicates`; local
+  `main` fast-forwarded after the squash, merged branch deleted. Slice 1 (Bayesian conflated, `eed84c0`)
+  narrowed the brms conflated guard so Eq. 14 composes off the crossed five-component draws + O-Bayes-
+  Conflated fixture; Slice 2 (within-cell replicates, `176a85a`) added `fit_brms_replicates()` + O-Bayes-Rep
+  fixture. Both variance-ratio push-forwards (no θ² moment correction). Gates: `air`/`lintr` clean; full
+  suite (CI mode) 1089/0/10; installed-pkg brms 266/0/0 (all live Stan fits ran, `NOT_CRAN=true`); `R CMD
+  check --as-cran` 0/0/1. Next: open the next milestone after a short retro, or the CRAN upload (ADR-022).
+  Prior line: **M28 shipped (PR #33, squash-merged at `e6ce64d`).**
 
 ## Where we are
 
@@ -190,18 +184,20 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M29 (ADR-039) in flight — Bayesian conflated diagnostic + within-cell replicates.** Continues the
+**M29 (ADR-039) shipped (PR #34) — Bayesian conflated diagnostic + within-cell replicates.** Continued the
 Bayesian arc with its two remaining low-risk parity follow-ons: Slice 1 — `level = "conflated"` (Eq. 14)
-read off the shipped M24 crossed fit (no new fit); Slice 2 — within-cell replicates via a new
-`fit_brms_replicates()`. Two-way random, balanced/complete, single level; both variance-ratio
-push-forwards → no θ² 2b moment correction, no Fable-review risk. Oracles O-Bayes-Conflated /
-O-Bayes-Rep off committed fixtures. **Currently on Slice 1** (Bayesian conflated). Bayesian
-incomplete/ragged is the isolated next milestone (M30). Other candidates still parked in
-[`ROADMAP.md`](ROADMAP.md): **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**
-(research-flavored), the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor,
-occasion/ragged-replicate `d_study()`, the **vignette reassessment**, and the out-of-band **CRAN upload**
-(ADR-022). Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24 (PR #29), M25 (PR #30),
-M26 (PR #31), M27 (PR #32), M28 (PR #33).
+reads off the shipped M24 crossed fit (no new fit); Slice 2 — within-cell replicates via a new
+`fit_brms_replicates()` with an `occasions` per-draw divisor. Two-way random, balanced/complete, single
+level; both variance-ratio push-forwards → no θ² moment correction, no Fable review. Oracles
+O-Bayes-Conflated (coverage .95, containment 1.00) / O-Bayes-Rep (coverage .94/.93, containment 1.00) off
+committed fixtures. **No milestone is currently in flight** — the next one needs an ADR after a short retro
+(founding brief §7). Candidates in [`ROADMAP.md`](ROADMAP.md): the **remaining Bayesian follow-ons** —
+**incomplete/ragged** (the isolated next candidate M30; leans on coverage calibration, likely a gated Fable
+review), fixed/multilevel replicates, cluster-level fixed — plus **categorical/ordinal GLMM** (needs an
+estimand pass), **multilevel SEM** (research-flavored), the Wave-3 averaged cluster-level `ICC(c,k)`
+incomplete divisor, occasion/ragged-replicate `d_study()`, the **vignette reassessment**, and the
+out-of-band **CRAN upload** (ADR-022). Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28),
+M24 (PR #29), M25 (PR #30), M26 (PR #31), M27 (PR #32), M28 (PR #33), M29 (PR #34).
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 

@@ -27,10 +27,11 @@ resolved by a gated Fable review (#19) adopting a 2b moment correction + boundar
 nested finite population (per-cluster floor + 1b), fixed by the shared `theta2r_moment_draws()` (2b +
 boundary-aware average-floor) unified across glmmTMB/lme4/lavaan after a second gated Fable review (#19).
 **M29 (ADR-039) — Bayesian conflated diagnostic + within-cell replicates, two-way random,
-balanced/complete — is now in flight** (branch `m29-bayes-conflated-replicates`), continuing the Bayesian
-arc with its two remaining low-risk parity follow-ons (both variance-ratio push-forwards → no θ² moment
-correction, no Fable-review risk); Bayesian incomplete/ragged is the isolated next milestone (M30). Each
-milestone is scoped by an ADR at its start
+balanced/complete — then shipped** (PR #34), continuing the Bayesian arc with its two remaining low-risk
+parity follow-ons (both variance-ratio push-forwards → no θ² moment correction, no Fable review): the
+conflated Eq. 14 reads off the shipped M24 crossed fit, and `fit_brms_replicates()` splits the residual
+with an `occasions` per-draw divisor. **No milestone is currently in flight** — Bayesian incomplete/ragged
+is the isolated next candidate (M30). Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
@@ -972,60 +973,20 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 ## M29: Bayesian engine (brms) — conflated diagnostic + within-cell replicates (ADR-039)
 - Goal: extend `engine = "brms"` + `ci_method = "posterior"` to the two remaining low-risk parity
-  follow-ons — the **conflated** diagnostic (`level = "conflated"`, ten Hove Eq. 14) and **within-cell
-  replicates** (σ²_res → σ²_sr + σ²_e) — two-way **random**, balanced/complete, single level.
-  **Engine/interval parity, not new estimand work** (cf. M23–M27): both reuse *shipped* M17 estimands
-  (ADR-026), read off posterior draws; no new estimand-spec, argument, or dependency (`brms` already a
-  `Suggests`); additive, non-breaking (#6) — new valid `engine = "brms"` × {conflated, replicates}
-  combinations only. Both are **ratios of variance components** (like the whole random-rater Bayesian
-  arc), so neither exposes the θ² finite-population functional that forced the M27/M28 2b moment
-  correction — a clean push-forward, **no Fable-review risk**. Two thin vertical slices, ascending
-  oracle-risk (conflated first). Bayesian **incomplete/ragged** is the isolated next milestone (M30).
-- Reference: ADR-039 (scope + slice split + oracle posture); no new estimand-spec — reuses
-  [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) (§2 composition, §4 never-recommended,
-  §6 out-of-scope) and [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md)
-  (§2 per-component divisors, §3 `occasions`, §6 reduction oracle). Oracles **O-Bayes-Conflated** /
-  **O-Bayes-Rep** (#1 — reduction + REML agreement/containment + coverage; no textbook worked posterior
-  value, M23–M27 precedent), off committed seeded fixtures; provenance `data-raw/oracle-bayesian-{conflated,replicates}.R`,
-  registered in [`REFERENCES.md`](REFERENCES.md).
-
-- **Slice 1 — Bayesian conflated (no new fit).** `level = "conflated"` reads Eq. 14 off the
-  already-shipped M24 `fit_brms_multilevel()` five-component draws (`icc.R:1238`) — the flat two-way ICC
-  (σ²_c+σ²_{s:c} lumped as signal; σ²_r+σ²_cr+σ²_res as error, same flat `k_eff`), **agreement-only**,
-  per posterior draw. Narrow the brms conflated refusal (`icc.R:598–604`) to admit `level = "conflated"`
-  → route to the multilevel fit; preserve the diagnostic-only "never recommended" posture (§4).
-  - [x] Guard narrowed + conflated brms dispatch; conflated `ICC` off the M24 draws; MAP + percentile
-    credible interval. (Verified live: conflated rows render with no SF label; header "Diagnostic contrast".)
-  - [x] Oracle **O-Bayes-Conflated**: Eq-14 identity per draw (O-Eq14, Stan-free); MAP ≈ frequentist
-    glmmTMB conflated (**containment 1.00**, #18); visibly above the subject level (gap **.144**);
-    coverage **.95**; convergence **1.00**.
-  - [x] Committed fixture `tests/testthat/fixtures/bayesian-conflated-oracle.rds` (seed 20290, 80 reps) +
-    generator `data-raw/oracle-bayesian-conflated.R` (#4); single live brms fit `skip_on_ci()` +
-    `skip_if_not_installed("brms")` ([[brms-live-fit-skip-on-ci]]).
-
-- **Slice 2 — Bayesian within-cell replicates (one new fit).** `fit_brms_replicates()` in
-  `R/engine-brms.R` (reuses `fit_brms_common()`): `score ~ 1 + rater + (1|subject) + (1|subject:rater)`
-  under the unchanged half-*t*(4,0,1) SD prior (now covering σ_sr too). `occasions` applies the M17
-  per-component error divisors per draw (`"average"` divides pure error by `n_o`; σ²_sr not divided).
-  Narrow the brms replicate refusal (`icc.R:1124`) + add a dispatch branch by `fit_brms_twoway()`
-  (`icc.R:1304`).
-  - [x] `fit_brms_replicates()`; σ²_sr/σ²_e split; guard narrowed + dispatch (single-level random only;
-    fixed×/multilevel× replicates refused); `occasions` single/average per-draw divisors. (Verified live:
-    single/average occasion rows render; average > single.)
-  - [x] Oracle **O-Bayes-Rep**: O-Bayes-Rep-wiring (Stan-free, exact per-draw occasion divisor); coverage
-    single **.94** / average **.93**; glmmTMB containment **1.00/1.00**; average > single **1.00**;
-    converged **.99** (MAP ~10% low at N_s=25, reported #18 — coverage is the pin).
-  - [x] Committed fixture `tests/testthat/fixtures/bayesian-replicates-oracle.rds` (seed 20291, 80 reps) +
-    generator `data-raw/oracle-bayesian-replicates.R` (#4); single live brms fit `skip_on_ci()`.
-
-- **Cross-cutting DoD:**
-  - [x] No new `@export` (both reuse shipped `icc()` surface) → `_pkgdown.yml` unaffected.
-  - [x] `COVERAGE.md` §② (replicates) + §④ (conflated) + cross-cutting brms row + last-synced refreshed;
-    NEWS updated (folded into the unreleased 0.1.0 section); REFERENCES O-Bayes-Conflated / O-Bayes-Rep.
-  - [x] `air format .` + `lintr` clean ([[run-lintr-before-push]]); installed-pkg brms suite green with
-    `NOT_CRAN=true` — **266 pass / 0 fail, all live Stan fits ran** ([[verify-against-installed-package]]);
-    `R CMD check --as-cran` **0/0/1** (New submission NOTE only); full suite (CI mode) 1089/0. *(Full CI
-    matrix runs on the PR.)*
+  follow-ons — the **conflated** diagnostic (`level = "conflated"`, ten Hove Eq. 14, Slice 1: no new fit —
+  Eq. 14 reads off the shipped M24 `fit_brms_multilevel()` five-component draws) and **within-cell
+  replicates** (σ²_res → σ²_sr + σ²_e, Slice 2: new `fit_brms_replicates()`; `occasions` divides pure
+  error by n_o per draw) — two-way **random**, balanced/complete, single level. **Engine/interval parity,
+  not new estimand work** (cf. M23–M27): both reuse *shipped* M17 estimands (ADR-026), read off posterior
+  draws; no new estimand-spec, argument, or dependency. Both are **variance-ratio push-forwards**, so
+  neither exposes the θ² functional that forced the M27/M28 2b moment correction — no Fable review.
+- Reference: ADR-039 (scope + oracle posture); no new estimand-spec — reuses
+  [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) and
+  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md). Oracles
+  **O-Bayes-Conflated** (Eq-14 identity + coverage .95 + glmmTMB containment 1.00 + conflated > subject)
+  / **O-Bayes-Rep** (per-draw occasion divisor + coverage .94/.93 + glmmTMB containment 1.00 + average >
+  single) off committed seeded fixtures (`data-raw/oracle-bayesian-{conflated,replicates}.R`), registered
+  in [`REFERENCES.md`](REFERENCES.md).
 
 - Deferred out of M29 (record so not rediscovered): Bayesian **incomplete/ragged** (M30 — leans on
   coverage calibration, likely a gated Fable review, #19); Bayesian **fixed-rater × replicates** and
@@ -1033,10 +994,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   consistency** (🟣 research, unsourced) and **conflated × fixed** (⚫ by design); Bayesian
   **numeric-unit `d_study()`** projection; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
   coupling, **HPDI** intervals, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **done (all gates green) — ready for PR.** Opened by ADR-039 (2026-07-10) on branch
-  `m29-bayes-conflated-replicates`. **Slice 1 (conflated)** — O-Bayes-Conflated pinned (coverage .95,
-  containment 1.00, gap .144). **Slice 2 (within-cell replicates)** — `fit_brms_replicates()`; O-Bayes-Rep
-  pinned (coverage .94/.93, containment 1.00, average > single 1.00). Both are variance-ratio
-  push-forwards (no θ² moment correction). `air`/`lintr` clean; full suite (CI mode) 1089/0/10;
-  installed-pkg brms 266/0/0 (all live Stan fits ran); `R CMD check --as-cran` 0/0/1. Compress this board
-  to the summary form once the PR merges.
+- Status: **done** (Slices 1–2 + cross-cutting DoD; merged via PR #34 at `be4e25f`; full CI matrix green
+  9/9). `engine = "brms"` now covers the conflated diagnostic and single-level two-way random within-cell
+  replicates alongside the two-way/one-way/multilevel random + fixed paths. `R CMD check --as-cran` 0/0/1;
+  installed-pkg brms 266/0/0 (all live Stan fits ran); full suite (CI mode) 1089/0/10; `air`/`lint` clean.
+  Both slices are variance-ratio push-forwards (no θ² moment correction). Bayesian incomplete/ragged is the
+  isolated next milestone (M30).

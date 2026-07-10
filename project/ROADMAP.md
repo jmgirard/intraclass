@@ -24,7 +24,7 @@ Ark).
 
 ## Parking lot (unscheduled proposals)
 
-Each item now carries a **Status** line — last reviewed 2026-07-09 — so readiness is
+Each item now carries a **Status** line — last reviewed 2026-07-10 — so readiness is
 visible without re-deriving it. Updated whenever an item's readiness changes;
 `STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
 ready ones.
@@ -157,19 +157,22 @@ helpers* item below (sample-size / CI-width), where it belongs.
   the unresolved effective-`n_o` divisor (the *occasion-averaged coefficient on ragged replicates* 🟣
   item above).
 - **Bayesian engine** (`brms`) + `ci_method = "posterior"` (half-*t* hyperpriors, ten Hove, Jorgensen &
-  van der Ark 2020), deferred out of M7 (ADR-014). **Shipped as the M23–M27 arc** (see
+  van der Ark 2020), deferred out of M7 (ADR-014). **Shipped as the M23–M29 arc** (see
   [`MILESTONES.md`](MILESTONES.md)): two-way random (M23), multilevel crossed (M24) + nested Designs 2/3
-  (M25), single-level one-way + fixed-rater (M26), fixed-rater multilevel (M27). Backend resolved to
+  (M25), single-level one-way + fixed-rater (M26), fixed-rater multilevel (M27), and the **conflated
+  diagnostic + single-level within-cell replicates (M29, ADR-039, PR #34)**. Backend resolved to
   `brms` (rstanarm parked — its `decov` prior can't express the per-SD half-*t*). The M27 gated Fable
   review (#19, ADR-037) established the **2b moment correction** for the finite-population θ² functional
   (the raw posterior push-forward undercovers the nested per-cluster variance; the "posterior integrates
   the bias" rationale holds only when `tr(C·Σ) ≈ 0`, i.e. single-level/crossed); its **frequentist sibling
   shipped as M28** (ADR-038, PR #33), unifying all engines onto one boundary-aware `theta2r_moment_draws()`
-  ([[fixed-rater-interval-2b-moment-correction]]). **Still parked** — the *other* Bayesian parity
-  follow-ons: **incomplete/ragged**, **within-cell replicates**, **conflated**, and **cluster-level
-  fixed** (for the incomplete/small-k corners ten Hove et al. 2022 flag the best estimator as an open
-  research question → schedule leaning on coverage calibration); plus **selectable** `posterior` coupling
-  (MC/bootstrap on a Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API.
+  ([[fixed-rater-interval-2b-moment-correction]]). M29's conflated + replicate follow-ons are **variance
+  ratios**, so they need none of that correction (a clean push-forward). **Still parked** — the *other*
+  Bayesian parity follow-ons: **incomplete/ragged** (the isolated next candidate, M30), **fixed-rater and
+  multilevel within-cell replicates**, and **cluster-level fixed** (for the incomplete/small-k corners ten
+  Hove et al. 2022 flag the best estimator as an open research question → schedule leaning on coverage
+  calibration); plus **selectable** `posterior` coupling (MC/bootstrap on a Bayesian fit), **HPDI**
+  intervals, and a **user-exposed `prior=`** API.
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
