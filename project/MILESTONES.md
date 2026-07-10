@@ -1066,7 +1066,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
           fits drive through `library(intraclass)` (posterior CI, containment, ICC(c,k) dropped); full
           CI-mode suite green (1030 pass / 0 fail).
     - [x] `R CMD check --as-cran` **0/0/1** (only the "New submission" NOTE); tests + vignette rebuild OK.
-    - [ ] Full CI matrix green; PR opened + merged ([[milestone-branches-and-prs]]) — **pending push**.
+    - [ ] Full CI matrix green; PR opened + merged ([[milestone-branches-and-prs]]) — **PR #35 open, CI
+          running** (format-check green; awaiting the matrix + merge).
 - Deferred out of M30 (record so not rediscovered): Bayesian incomplete **fixed-rater** (two-way + crossed
   multilevel — pairs the M3 `k_eff` divisor with the M27/M28 θ² **2b moment correction under imbalance**;
   higher-risk, its own slice); Bayesian incomplete **nested** Designs 2/3 (M19 Slice 1 analog); Bayesian

@@ -138,10 +138,11 @@
   tested by the seeded coverage oracle; a gated Fable review (#19) is **recommended-and-stop only if it
   undercovers** (Fable NOT pre-authorized). Deferred: incomplete fixed (θ² × imbalance), incomplete nested,
   incomplete replicates, `ICC(c,k)` divisor.
-- Active task: **M30 — push branch + open PR** (both slices code complete + locally verified). Local gates
-  all green: full suite (CI mode) 1030/0; installed-pkg both ragged fits driven through `library(intraclass)`
-  (posterior CI, glmmTMB M3/M9 containment, ICC(c,k) dropped); `R CMD check --as-cran` **0/0/1** (New
-  submission NOTE only); `air`/`lintr` clean. **Slice 1** (incomplete two-way random) + **Slice 2** (incomplete crossed
+- Active task: **M30 — awaiting CI on [PR #35](https://github.com/jmgirard/intraclass/pull/35), then merge**
+  (both slices code complete + locally verified; branch pushed, PR open, CI running — format-check green).
+  Local gates all green: full suite (CI mode) 1030/0; installed-pkg both ragged fits driven through
+  `library(intraclass)` (posterior CI, glmmTMB M3/M9 containment, ICC(c,k) dropped); `R CMD check --as-cran`
+  **0/0/1** (New submission NOTE only); `air`/`lintr` clean. **Slice 1** (incomplete two-way random) + **Slice 2** (incomplete crossed
   Design-1 multilevel random) both narrowed the `!balanced` brms guard (`icc.R:1128`) so the shipped fits
   run on ragged data with the engine-agnostic M3/M9 `k_eff`/connectedness threaded per posterior draw. The
   milestone's one unknown — **ragged-data credible-interval coverage — resolved NOMINAL at the subject level
