@@ -2810,3 +2810,47 @@ consequences → references.
   catch), ADR-008 (M3 Case-3A θ²_r), ADR-014 (M7 — Bayesian deferral origin), ADR-002 (optional engines
   behind `Suggests`); `project/ROADMAP.md` (Bayesian multilevel fixed follow-on being promoted),
   `project/COVERAGE.md`.
+- **Amendment (2026-07-09, Slice 2 — Fable review of the nested θ²_{r:c} push-forward, #19).** The
+  Slice-2 oracle-first fork the scope anticipated fired: the **raw** θ²_{r:c} posterior push-forward
+  (the M26 posture generalized) **undercovers** the fixed-population subject-level ICC(A,1) for the
+  nested design — seeded 100-rep coverage **0.86** (vs the crossed Slice-1 0.96), MAP rel-bias −.106 —
+  and, per the review, its coverage **→ 0 as clusters accrue** (an incidental-parameters pathology from
+  the flat prior on C_n·k cell means, a *consistency* failure, not a small-sample refinement). The
+  maintainer approved a **gated Fable review** (Claude Fable 5, 2026-07-09; brief + response archived);
+  its verdict is adopted:
+  - **Ship the 2b moment correction, not the raw push-forward.** Per posterior draw, per group (one
+    group for a common rater set, one per cluster for nested): subtract **2·b**, `b = tr(C·Σ_post)/(k−1)`
+    from the raw quadratic `q(μ^draw)`. There are **two** equal inflations, not one: (1) the push-forward
+    `E[q(μ^draw)] = q(μ̄) + b` (uses Σ_post exactly), and (2) the plug-in bias of the center
+    `E[q(μ̄)] = θ² + b` (Σ_post is the Bernstein–von Mises–consistent estimate of the sampling covariance
+    `V`; on balanced data `b = σ²_res/n_s` exactly). The shipped **frequentist** `theta2r_fixed_nested()`
+    subtracts only **1b** from its draws because its *point* is computed separately and is unbiased — the
+    Bayesian engine reads the MAP off the same draws, so it needs the full **2b**. Derived, not tuned
+    (#4): the brms table's raw→1b step is exactly one `b` (−4.1 pts), and a Stan-free conjugate-normal
+    check hits θ+2b, θ+b, θ to ≲.003.
+  - **Boundary-aware flooring (#3): floor the per-draw group AVERAGE, not each group.** Per-cluster
+    `pmax(0,·)` makes every cluster's contribution strictly positive near θ²=0, so the interval cannot
+    reach 0 → **zero** coverage at the boundary; letting negative per-cluster draws cancel and flooring
+    only the average is unbiased at the boundary and boundary-reaching.
+  - **Unify the crossed/single-level helper to the same 2b path** (`brms_theta2r_moment_draws()`): there
+    `b ≈ 0` (means estimated from the whole sample), recovering M26/Slice-1 behaviour, so one estimator is
+    correct in both regimes and retires a regime-split. `brms_theta2r_draws()` (common set) and
+    `brms_theta2r_nested_draws()` (nested) now both delegate to it.
+  - **Scope ADR-036's rationale.** ADR-036's "a posterior already integrates the parameter uncertainty
+    the `− bias` removes" is correct for functionals **linear** in β and numerically harmless whenever
+    `tr(C·Σ_post) ≈ 0` (crossed/single-level), but **not** for the convex *quadratic* finite-population
+    variance functional in the nested regime, where the push-forward is inflated **and** its center is
+    biased. It was the right call in M26's regime for the wrong general reason; future Bayesian
+    fixed-rater slices use the moment-corrected form.
+  - **Validation:** O-Bayes-FNML regenerated on the corrected estimator across an **interior** and a
+    **boundary (θ²=0)** cell (Fable predicts interior coverage ≈.95, MAP ≈−.02; boundary coverage ≥
+    nominal under the average-floor). Slice-1 O-Bayes-FML regenerated after unifying the crossed helper
+    (2b ≈ 0 there; containment tolerances hold).
+  - **Corollary spun off (out of Slice-2 scope):** the shipped **frequentist** nested-fixed *interval*
+    (`theta2r_nested_draws()`) is the 1b-corrected, per-cluster-floored construction, so it shares an
+    attenuated displacement and cannot reach θ²=0; no committed coverage sim pins the nested-fixed *MC
+    interval* specifically. Recommended as its own task/ADR (a seeded coverage sim across the Fable Q6
+    grid); the frequentist *point* estimator is unaffected. The Fable-recommended fully-Bayesian
+    alternative (a hierarchical half-*t* prior on the within-cluster rater effects, θ² read off the
+    realized η draws) is parked as a scoped future alternative (own ADR/validation) — it leaves the
+    fixed-effects parity contract with `fit_glmmtmb_nested_fixed()`.

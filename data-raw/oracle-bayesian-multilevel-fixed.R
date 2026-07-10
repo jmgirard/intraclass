@@ -12,9 +12,13 @@
 #
 # A CI method's oracle is COVERAGE (#1; M16/M23 precedent). This runs the
 # SHIPPED recipe -- brms + half-t(4, 0, 1) on the random-effect SDs, the fixed
-# `rater` effect, theta^2_r read RAW per posterior draw (brms_theta2r_draws),
-# injected as the `rater` row of the M5 five-component `draws`, MAP/percentile --
-# on the crossed Design-1 fixed-rater fit fit_brms_multilevel_fixed().
+# `rater` effect, theta^2_r read per posterior draw (brms_theta2r_draws, the
+# moment-corrected common-set path), injected as the `rater` row of the M5
+# five-component `draws`, MAP/percentile -- on the crossed Design-1 fixed-rater
+# fit fit_brms_multilevel_fixed(). In the crossed regime the 2b moment correction
+# (ADR-037 amendment) is ~0 (the rater means are estimated from the whole sample),
+# so this path is numerically ~the raw push-forward -- the correction matters only
+# in the nested regime (O-Bayes-FNML).
 #
 # ESTIMAND (sourced -- #1/#4; no new spec, reuses M10 §2)
 # ---------------------------------------------------------------------------
@@ -34,9 +38,8 @@
 #   ten Hove, Jorgensen & van der Ark (2020): half-t(4, 0, 1) on the
 #   random-effect SDs (here sigma_c, sigma_{s:c}, sigma_{cr}; the k - 1 rater
 #   contrasts keep brms's default flat prior); MAP point + percentile 95%
-#   credible interval. RAW theta^2_r per draw (NO frequentist bias correction --
-#   the posterior integrates the parameter uncertainty theta2r_fixed()'s
-#   correction subtracts; ADR-036/037 oracle-first resolution).
+#   credible interval. theta^2_r via the moment-corrected common-set path
+#   (2b ~ 0 in the crossed regime; ADR-037 amendment / Fable review).
 #
 # THE PINS (O-Bayes-FML), reported not tuned (#4/#18)
 # ---------------------------------------------------------------------------
@@ -49,8 +52,9 @@
 #       under REML in M10) holds only APPROXIMATELY -- containment, not equality.
 #   (3) Percentile coverage of the fixed-population subject-level ICC(A,1)
 #       ~nominal.
-#   (4) The MAP is biased low (the mode of the right-skewed ICC draws sits below
-#       the plug-in, ADR-033) -- characterized, not asserted unbiased.
+#   (4) The MAP is ~unbiased (|rel-bias| < .05, either sign): the ~0 crossed
+#       correction roughly cancels the small mode-below-mean skew -- characterized,
+#       not asserted to a direction (#18).
 #   The fixture is written BEFORE the hard assertions so a long run is never lost
 #   to a marginal pin.
 # ===========================================================================
@@ -269,11 +273,13 @@ stopifnot(
   #     inside the brms credible interval ~nominally often.
   agg$containment_reml >= 0.90,
   # (3) Percentile coverage of the fixed-population subject-level ICC(A,1) ~nominal.
-  agg$coverage_icc >= 0.88,
+  agg$coverage_icc >= 0.90,
   agg$coverage_icc <= 0.99,
-  # (4) The MAP is biased low (the right-skewed-ICC-draws mode sits below the
-  #     population plug-in) -- characterized, not asserted unbiased.
-  agg$map_icc_relbias < 0
+  # (4) The MAP is ~unbiased. In the crossed regime the 2b moment correction is ~0
+  #     (means estimated from the whole sample), so it roughly cancels the small
+  #     mode-below-mean skew and the MAP sits within a few percent of the population
+  #     value (either sign) -- characterized, not asserted to a direction (#18).
+  abs(agg$map_icc_relbias) < 0.05
 )
 
 message("All O-Bayes-FML pins passed.")

@@ -923,28 +923,39 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       Live Stan fit `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
       ([[brms-live-fit-skip-on-ci]]); reduced draws. Full file `NOT_CRAN=true`: **194 pass / 0 fail / 0 skip**.
 
-**Slice 2 — Bayesian nested Design 2 fixed (`fit_brms_nested_fixed()`) + O-Bayes-FNML** ⛔ **BLOCKED on a gated Fable review (#19)** — the oracle-first fork fired; see below.
+**Slice 2 — Bayesian nested Design 2 fixed (`fit_brms_nested_fixed()`) + O-Bayes-FNML** — Fable review returned (#19); implementing the verdict.
 - [x] `fit_brms_nested_fixed()` in `R/engine-brms.R` reusing `fit_brms_common()` — `score ~ 0 + rater +
       (1|cluster:subject)`; θ²_{r:c} per posterior draw via `brms_theta2r_nested_draws()`, injected as the
-      `rater` row. **Implemented locally but RAW/uncommitted** pending the Fable verdict on the estimator.
-- [x] `R/icc.R`: removed the brms fixed-multilevel guard (crossed + nested D2 now dispatch; Design-3
-      fixed / cluster-level / incomplete refused engine-agnostically upstream) + nested-fixed dispatch
-      branch. (Uncommitted with the fit.)
-- [x] Subject-level agreement/consistency coefficients off `draws`; MAP + percentile credible interval;
-      3-component {subject, rater, residual} set (no cluster/cluster_rater) — verified by smoke fit.
-- [ ] **Oracle-first resolution — FORK (#1/#18):** containment of the glmmTMB M19 point holds **1.00**,
-      but the **raw** θ²_{r:c} push-forward **undercovers** the fixed-population ICC(A,1): seeded 100-rep
-      coverage **0.86** (vs crossed Slice 1's 0.96), MAP −.106. Root cause: each cluster's k means are
-      estimated from little data, so the raw per-cluster finite-population variance is inflated by the
-      quadratic push-forward (the crossed/pooled case is spared — Slice 1 raw gave 0.96). A **bias-corrected**
-      push-forward (the frequentist `theta2r_fixed_nested()` term with posterior covariance for `vbeta`)
-      restores coverage **0.92**, MAP −.065, containment 1.00. Maintainer chose **investigate → Fable
-      review** (it reverses M26's "raw" stance for the nested regime); **main session stopped/waiting per
-      #19** (Fable manual, never auto-delegated). Brief: `scratchpad/FABLE-REVIEW-fnml-biascorrection.md`.
-- [ ] **Blocked until the Fable verdict:** implement the recommended estimator (raw / corrected / other +
-      flooring/interval + crossed-consistency), regenerate the committed fixture, finalize O-Bayes-FNML in
-      `test-icc-brms.R` (containment + seeded coverage + single-cluster reduction + live gated fit). The
-      raw-run fixture is written locally but **uncommitted** (it fails its own ≥.88 coverage pin, by design).
+      `rater` row; 3-component {subject, rater, residual} set (no cluster/cluster_rater).
+- [x] `R/icc.R`: removed the brms fixed-multilevel guard (crossed + nested D2 dispatch; Design-3
+      fixed / cluster-level / incomplete refused engine-agnostically upstream) + nested-fixed dispatch.
+- [x] **Oracle-first FORK resolved by a gated Fable review (#19, ADR-037 amendment).** The **raw**
+      θ²_{r:c} push-forward undercovered (interior coverage 0.86, MAP −.106; coverage → 0 as clusters
+      accrue — an incidental-parameters pathology). Fable verdict adopted: subtract **2b** per draw
+      (`b = tr(C·Σ_post)/(k−1)` = σ²_res/n_s; two inflations — push-forward + plug-in — not one), **floor
+      the per-draw group AVERAGE** not each cluster (per-cluster flooring → zero coverage at θ²=0, #3),
+      and **unify** the crossed/single-level helper to the same 2b path (`brms_theta2r_moment_draws()`;
+      2b ≈ 0 there). Scopes ADR-036's "posterior integrates it" (true for linear functionals, false for the
+      convex quadratic variance functional). Review: `scratchpad/FABLE-REVIEW-fnml-biascorrection-RESPONSE.md`.
+- [x] `brms_theta2r_moment_draws()` implemented (2b + average-floor); both `brms_theta2r_draws` (crossed)
+      and `brms_theta2r_nested_draws` (nested) delegate to it. Smoke-fit verified (containment holds).
+- [x] O-Bayes-FNML regenerated on the corrected estimator — **interior** coverage **.95**, MAP **−.017**,
+      containment 1.00; **boundary (θ²=0)** coverage **1.00** (the average-floor pin per-cluster flooring
+      would fail). Matches Fable's derived predictions (≈.95 / ≈−.02) with no free parameter.
+- [x] O-Bayes-FML (Slice 1) regenerated after unifying the crossed helper — coverage **.95**, containment
+      **1.00**, MAP **+.012** (~unbiased; 2b ≈ 0 in the crossed regime). Pin updated to |rel-bias| < .05.
+- [x] Live O-Bayes-FNML-agree + O-Bayes-FML-agree fits green; full `test-icc-brms.R` `NOT_CRAN=true`
+      **219 pass / 0 fail / 0 skip**; `lint_package()` clean; `air` clean.
+- [x] Corollary spun off (background task `task_f3345a29`): coverage sim for the **frequentist**
+      nested-fixed MC interval (`theta2r_nested_draws()` shares an attenuated 1b displacement +
+      per-cluster floor — its own ADR).
+
+**Cross-cutting DoD (brief §8)**
+- [x] ADR-037 **amendment** records the Fable verdict (2b + average-floor + crossed unification + scopes
+      ADR-036's rationale). COVERAGE §④ + engine axis + cross-cutting row + last-synced refreshed;
+      REFERENCES O-Bayes-FML / O-Bayes-FNML registered; NEWS multilevel fixed-rater entry.
+- [x] `air format` + `lintr::lint_package()` clean; installed-pkg posture unchanged (brms fits live-only).
+- [ ] `R CMD check --as-cran` 0/0/1 + ship on the branch via PR — finish-task pass.
 
 **Cross-cutting DoD (brief §8)**
 - [ ] `COVERAGE.md §④` refreshed — crossed-D1-fixed / nested-D2-fixed brms cells; the stale

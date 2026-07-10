@@ -483,22 +483,24 @@ test_that("O-Bayes-FML: committed reference reproduces the crossed fixed-rater f
 
   # (3) Percentile 95% credible-interval coverage of the fixed-population subject-level
   #     ICC(A,1) ~nominal.
-  expect_gte(s$coverage_icc, 0.88)
+  expect_gte(s$coverage_icc, 0.90)
   expect_lte(s$coverage_icc, 0.99)
 
-  # (4) The MAP is biased low (the skew) -- characterized, not asserted unbiased (#18).
-  expect_lt(s$map_icc_relbias, 0)
+  # (4) The MAP is ~unbiased -- in the crossed regime the 2b moment correction is ~0, so it
+  #     roughly cancels the small mode-below-mean skew; |rel-bias| stays within a few percent
+  #     of either sign (characterized, not asserted to a direction, #18).
+  expect_lt(abs(s$map_icc_relbias), 0.05)
 })
 
 # --- O-Bayes-FNML: the committed nested FIXED-rater coverage reference (no brms, M27 S2) ---
 # The nested Design-2 sibling of O-Bayes-FML (crossed). data-raw/oracle-bayesian-nested-fixed.R
 # runs a nested Design-2 DGP with FIXED per-cluster rater means through the SHIPPED
-# fit_brms_nested_fixed() recipe (raw theta^2_{r:c} per draw injected into the three-component
-# `draws`), and commits convergence / CONTAINMENT / coverage / bias for the subject-level
-# ICC(A,1). Fast, no fitting, runs on every CI job. As the crossed case, the PRIMARY oracle is
-# CONTAINMENT (the glmmTMB M19 REML point inside the brms credible interval) -- and here it is
-# the ONLY sensible pin, since for NESTED designs fixed != random even balanced (per-cluster
-# finite population; the M19 catch), so there is no fixed ~ random identity to lean on (#18).
+# fit_brms_nested_fixed() recipe -- theta^2_{r:c} per draw via the MOMENT-CORRECTED (2b)
+# brms_theta2r_nested_draws() with the boundary-aware average-floor (Fable review, ADR-037
+# amendment) -- and commits convergence / CONTAINMENT / coverage / bias for the subject-level
+# ICC(A,1) across an INTERIOR and a BOUNDARY (theta^2_{r:c} = 0) cell. Fast, no fitting, runs on
+# every CI job. History (#18): the RAW push-forward undercovered (interior coverage 0.86, MAP
+# -.106) and its coverage -> 0 as clusters accrue; the 2b correction restores nominal coverage.
 
 test_that("O-Bayes-FNML: committed reference reproduces the nested fixed-rater findings", {
   fixture <- test_path("fixtures", "bayesian-nested-fixed-oracle.rds")
@@ -507,19 +509,27 @@ test_that("O-Bayes-FNML: committed reference reproduces the nested fixed-rater f
     "run data-raw/oracle-bayesian-nested-fixed.R to generate"
   )
   s <- readRDS(fixture)$stats
+  interior <- s[s$cell == "interior", ]
+  boundary <- s[s$cell == "boundary", ]
 
-  # (1) High convergence at the half-t DGP.
-  expect_gte(s$converged_frac, 0.90)
+  # (1) High convergence at the half-t DGP, both cells.
+  expect_true(all(s$converged_frac >= 0.90))
 
-  # (2) CONTAINMENT (the primary, and here only, fixed-rater oracle): the glmmTMB M19 REML
-  #     nested subject-level ICC(A,1) sits inside the brms credible interval ~nominally often.
-  #     Fixed != random even balanced for nested, so this -- not an identity -- is the pin (#18).
-  expect_gte(s$containment_reml, 0.90)
+  # (2) INTERIOR CONTAINMENT (the primary fixed-rater oracle): the glmmTMB M19 REML nested
+  #     subject-level ICC(A,1) sits inside the brms credible interval ~nominally often. Fixed !=
+  #     random even balanced for nested, so this -- not an identity -- is the pin (#18).
+  expect_gte(interior$containment_reml, 0.90)
 
-  # (3) Percentile 95% credible-interval coverage of the fixed-population subject-level
-  #     ICC(A,1) ~nominal.
-  expect_gte(s$coverage_icc, 0.88)
-  expect_lte(s$coverage_icc, 0.99)
+  # (3) INTERIOR coverage of the fixed-population ICC(A,1) ~nominal -- the 2b moment correction
+  #     restores what the RAW push-forward lost (0.86 -> ~0.95, Fable's derived prediction).
+  expect_gte(interior$coverage_icc, 0.90)
+  expect_lte(interior$coverage_icc, 0.99)
+
+  # (4) BOUNDARY (theta^2_{r:c} = 0): the AVERAGE-floor keeps coverage at or above nominal --
+  #     the pin that per-cluster flooring would FAIL (coverage -> 0 at the boundary, #3). The
+  #     interior MAP is only mildly low (the residual mode-below-mean skew, ADR-033), reported.
+  expect_gte(boundary$coverage_icc, 0.90)
+  expect_gt(interior$map_icc_relbias, -0.06)
 })
 
 # --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---

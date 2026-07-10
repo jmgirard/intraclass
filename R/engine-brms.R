@@ -301,15 +301,47 @@ fit_brms_oneway <- function(
   )
 }
 
-# Fixed-rater two-way Bayesian fit (M26 Slice 2, ADR-036): the McGraw & Wong Case-3
-# theta^2_r per posterior draw from a fixed-rater brms fit's population-level rater
-# contrasts -- shared by the single-level fit_brms_fixed (M26) and the crossed-multilevel
-# fit_brms_multilevel_fixed (M27). Treatment coding: b_Intercept + the k - 1 non-reference
-# rater contrasts, mapped to the k level means by the shared rater_mean_contrast().
-# center = I - J/k removes the grand mean; the quadratic form is a finite-population
-# variance (>= 0), so RAW -- no frequentist bias term is subtracted (a POSTERIOR already
-# integrates the parameter uncertainty theta2r_fixed()'s `- bias` removes from a point
-# estimate; ADR-036/037, #1/#18).
+# Moment-corrected finite-population rater variance (theta^2) per posterior draw, from a
+# list of per-GROUP rater-mean draw matrices (each k_g x draws; one group for a common rater
+# set, one per cluster for nested raters). Shared by the crossed/single-level path
+# (brms_theta2r_draws) and the nested path (brms_theta2r_nested_draws).
+#
+# THE 2b CORRECTION (Fable review, ADR-037 amendment; #1/#4/#18). For a group with k means
+# mu, estimand theta = q(mu) = mu' C mu / (k - 1), C = I - J/k, there are TWO equal quadratic
+# inflations to remove from the raw per-draw push-forward:
+#   (1) push-forward:  E_post[q(mu^d)]  = q(mu_bar) + tr(C Sigma_post)/(k - 1)
+#   (2) plug-in bias:  E[q(mu_bar)]     = theta     + tr(C V)/(k - 1),  Sigma_post ~= V (BvM)
+# Under the model's flat prior on the cell means the posterior of mu is N(mu_hat, V), so
+# mu_bar = mu_hat and Sigma_post = V; both terms equal b = tr(C Sigma_post)/(k - 1) and the
+# raw posterior mean sits at theta + 2b. Subtract 2b per draw. (The shipped frequentist
+# theta2r_fixed_nested() removes only 1b from its draws because its POINT is computed
+# separately and is unbiased; the Bayesian engine reads the MAP off these same draws, so the
+# full 2b is needed -- see the ADR-037 amendment / the Fable review brief.) In the
+# crossed/single-level regime the means are estimated from the whole sample, so b ~= 0 and
+# this recovers the M26 raw behaviour; in the nested regime b = sigma^2_res / n_s exactly and
+# does NOT shrink as clusters accrue, so the correction is essential (raw coverage -> 0).
+#
+# BOUNDARY-AWARE FLOORING (#3). Do NOT floor per group: near theta^2 = 0 the per-group
+# corrected draws are negative ~half the time, and flooring each at 0 makes every group's
+# contribution strictly positive, so the group average never reaches 0 and the interval has
+# ZERO coverage at the boundary. Let negative per-group draws cancel across groups; floor
+# only the group AVERAGE. Unbiased at the boundary, and the interval can reach 0.
+brms_theta2r_moment_draws <- function(mean_draws_list) {
+  per <- lapply(mean_draws_list, function(m) {
+    k <- nrow(m)
+    center <- diag(k) - matrix(1 / k, k, k)
+    q <- colSums(m * (center %*% m)) / (k - 1) # raw push-forward, per draw
+    b <- sum(diag(center %*% stats::cov(t(m)))) / (k - 1) # one inflation
+    q - 2 * b # remove push-forward (1) + plug-in (2), each = b; NO per-group floor
+  })
+  pmax(0, Reduce(`+`, per) / length(per)) # floor the group AVERAGE only
+}
+
+# Fixed-rater theta^2_r per posterior draw for a COMMON rater set (single-level M26 /
+# crossed-multilevel M27 Slice 1). Treatment coding: b_Intercept + the k - 1 non-reference
+# rater contrasts, mapped to the k level means by the shared rater_mean_contrast(); one group,
+# moment-corrected by brms_theta2r_moment_draws() (the 2b term is ~0 here as the means are
+# precisely estimated from the whole sample).
 brms_theta2r_draws <- function(fit, data, call = rlang::caller_env()) {
   k <- nlevels(data$rater)
   dm <- as.matrix(fit)
@@ -326,26 +358,21 @@ brms_theta2r_draws <- function(fit, data, call = rlang::caller_env()) {
     )
   }
   beta_draws <- t(dm[, b_cols, drop = FALSE]) # rows = coefficients, cols = draws
-  contrast <- rater_mean_contrast(k)
-  center <- diag(k) - matrix(1 / k, k, k)
-  mu_draws <- contrast %*% beta_draws # k rater means x draws
-  theta_draws <- colSums(mu_draws * (center %*% mu_draws)) / (k - 1)
-  pmax(0, theta_draws)
+  mu_draws <- rater_mean_contrast(k) %*% beta_draws # k rater means x draws
+  brms_theta2r_moment_draws(list(mu_draws))
 }
 
-# theta^2_{r:c} per posterior draw for a NESTED (Design 2) fixed-rater brms fit
-# (M27 Slice 2, ADR-037). Raters are nested in clusters, fit as cell means via
+# theta^2_{r:c} per posterior draw for a NESTED (Design 2) fixed-rater brms fit (M27 Slice 2,
+# ADR-037). Raters are nested in clusters, fit as cell means via
 # `score ~ 0 + rater + (1 | cluster:subject)`, so each rater level has its own
 # population-level coefficient b_rater<label> and belongs to exactly one cluster.
-# theta^2_{r:c} is the WITHIN-cluster finite-population variance of each cluster's k
-# rater means, AVERAGED over clusters (McGraw & Wong Case 3A per cluster, the
-# frequentist theta2r_fixed_nested()). RAW per draw -- no per-cluster bias correction
-# subtracted: a POSTERIOR already integrates the parameter uncertainty the frequentist
-# `- bias` removes from a point estimate (ADR-037 oracle-first resolution, #1/#18). The
-# per-cluster raw variance is a proper draw from theta^2_{r:c}'s posterior; averaging
-# over clusters is linear. Unlike the CROSSED design (brms_theta2r_draws), fixed != random
-# even balanced (per-cluster finite population; the M19 catch), so the oracle is
-# CONTAINMENT of the glmmTMB REML point, not equality.
+# theta^2_{r:c} is the within-cluster finite-population variance of each cluster's k rater
+# means, moment-corrected (2b) per cluster and AVERAGED over clusters (the boundary-aware
+# average-floor lives in brms_theta2r_moment_draws()). Estimand as the frequentist
+# theta2r_fixed_nested() (M19 Slice 2). Unlike the CROSSED design, fixed != random even
+# balanced (per-cluster finite population; the M19 catch), so the oracle is CONTAINMENT of the
+# glmmTMB REML point, not equality; and the 2b correction is essential (per-cluster
+# b = sigma^2_res / n_s does not shrink as clusters accrue).
 brms_theta2r_nested_draws <- function(fit, data, call = rlang::caller_env()) {
   lvls <- levels(data$rater)
   b_cols <- paste0("b_rater", lvls)
@@ -362,17 +389,11 @@ brms_theta2r_nested_draws <- function(fit, data, call = rlang::caller_env()) {
     )
   }
   beta_draws <- t(dm[, b_cols, drop = FALSE]) # rows = rater cell means (lvls order)
-  # Each rater level sits in exactly one cluster; group the cell-mean rows by cluster.
+  # Each rater level sits in exactly one cluster; one draw matrix per cluster.
   cluster_of <- nested_rater_clusters(data, paste0("rater", lvls))
   cluster_idx <- split(seq_along(lvls), cluster_of)
-  ks <- lengths(cluster_idx)
-  k <- ks[[1L]] # equal per cluster (balanced; guarded upstream)
-  center <- diag(k) - matrix(1 / k, k, k)
-  per <- lapply(cluster_idx, function(ix) {
-    m <- beta_draws[ix, , drop = FALSE]
-    pmax(0, colSums(m * (center %*% m)) / (k - 1)) # RAW, no bias
-  })
-  Reduce(`+`, per) / length(per)
+  mean_list <- lapply(cluster_idx, function(ix) beta_draws[ix, , drop = FALSE])
+  brms_theta2r_moment_draws(mean_list)
 }
 
 # model with raters as POPULATION-LEVEL fixed effects
