@@ -205,3 +205,17 @@ simulations.
 - A degenerate fit with no variance in any component now fails loudly
   instead of returning a `NaN` estimate, and an unstable fit whose
   Monte-Carlo draws overflow is reported rather than silently truncated.
+- The Monte-Carlo confidence interval for **fixed-rater** designs is now
+  moment-corrected so it stays calibrated. Previously the
+  finite-population draws were displaced above the point estimate, which
+  was harmless for crossed designs (rater means estimated from the whole
+  sample) but materially **undercovered** for nested (Design 2) fixed
+  raters as the number of clusters grew — down to ~37% coverage of a
+  nominal-95% interval with many clusters and few subjects each, and the
+  point estimate could even fall outside its own interval near the
+  zero-rater-variance boundary. The draws are now re-centered on the
+  point and floored as a per-draw average (so the interval remains
+  boundary-aware and can reach ); the **point estimate is unchanged**
+  away from the boundary. Coverage is verified nominal across raters,
+  subjects-per-cluster, and cluster counts. Applies to the `"glmmTMB"`,
+  `"lme4"`, and `"lavaan"` engines.

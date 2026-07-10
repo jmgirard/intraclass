@@ -220,8 +220,8 @@ fixed_inc[, c("index", "estimate", "conf.low", "conf.high")]
 #> # A tibble: 2 × 4
 #>   index    estimate conf.low conf.high
 #>   <chr>       <dbl>    <dbl>     <dbl>
-#> 1 ICC(A,1)    0.236   0.0552     0.614
-#> 2 ICC(A,k)    0.503   0.161      0.839
+#> 1 ICC(A,1)    0.236   0.0574     0.630
+#> 2 ICC(A,k)    0.503   0.166      0.848
 ```
 
 The random interval is the wider of the two: generalizing to a rater
