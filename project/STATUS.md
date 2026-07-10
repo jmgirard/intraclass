@@ -119,17 +119,16 @@
   **Characterize-then-decide** posture (#1/#18): Slice 1 (the coverage sim) is required; Slice 2 (recenter
   + average-floor fix, gated on a Fable review since it changes a shipped interval) fires only if Slice 1
   shows under-coverage. Chosen after a short retro of the M23→M27 Bayesian arc.
-- Active task: **Both slices implemented + green; pre-PR checks remain.** Slice 1 (characterization) found
-  the shipped `theta2r_nested_draws()` interval undercovering (boundary .95/.86/.57 as C_n=5/20/80, worst
-  ≈.37). The **gated Fable review (#19) returned and its full verdict was adopted** (ADR-038 amendment;
-  brief+response+`fable-check-nfi.R` committed): Slice 2 shipped the shared `theta2r_moment_draws()` (2b +
-  boundary-aware average-floor) across **glmmTMB/lme4/lavaan**, moved the **point** floor to the average
-  (Fable §3 — point-in-own-CI containment .59→1.00), unified the crossed paths, and retired the
-  "deliberate displacement" note. **Post-fix O-NFI nominal** (interior .962 / boundary .958, every cell
-  ≥.91, C_n collapse gone). Non-brms suite **295/0/0** (`load_all`; brms untouched); `air`/`lint` clean
-  (0 lints). **Remaining before the PR:** `R CMD check --as-cran` (expect 0/0/1) + installed-package suite
-  (`NOT_CRAN=true`, [[verify-against-installed-package]]), then ship on `m28-nested-fixed-interval`,
-  merge via PR. Remaining post-M28 work lives in
+- Active task: **M28 shipped to PR [#33](https://github.com/jmgirard/intraclass/pull/33) — awaiting CI +
+  merge.** Both slices done and green locally. Slice 1 found the shipped `theta2r_nested_draws()` interval
+  undercovering (boundary .95/.86/.57 as C_n=5/20/80, worst ≈.37); the **gated Fable review (#19) verdict
+  was adopted in full** (ADR-038 amendment): shared `theta2r_moment_draws()` (2b + boundary-aware
+  average-floor) across **glmmTMB/lme4/lavaan**, the **point** floor moved to the average (Fable §3 —
+  containment .59→1.00), crossed paths unified, "deliberate displacement" note retired. Verified: post-fix
+  O-NFI nominal (interior .962/boundary .958), non-brms **295/0/0**, installed brms **29/0/0**,
+  `R CMD check --as-cran` **0/0/1**, `air`/`lint` clean. **Next:** watch PR #33 CI; on merge, reconcile
+  markers + set "Last green CI" (direct to `main`) and compress the M28 board. Remaining post-M28 work
+  lives in
   [`ROADMAP.md`](ROADMAP.md): remaining **Bayesian** follow-ons (incomplete/ragged, within-cell
   replicates, conflated, cluster-level fixed), **categorical/ordinal GLMM**, **multilevel SEM**, the
   Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band

@@ -992,11 +992,12 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
           NOTE; the in-check testthat suite passed (67s, brms skips under `--as-cran`).
     - [x] Installed-package **brms** suite (`NOT_CRAN=true`, CI unset) **29/0/0**, all 9 live Stan fits
           run + pass (the one path `--as-cran` skips; this change does not touch brms, confirmed green).
-    - [ ] Tracking files reconciled ✓; **remaining:** commit + ship on `m28-nested-fixed-interval`, merge
-          via PR (maintainer's call).
-- Status: **active — both slices implemented + green; pre-PR checks remain.** Slice 1 (characterization)
+    - [x] Tracking files reconciled; committed + pushed on `m28-nested-fixed-interval`; **PR
+          [#33](https://github.com/jmgirard/intraclass/pull/33) open — awaiting the CI matrix + merge.**
+- Status: **active — both slices implemented + green; shipped to PR
+  [#33](https://github.com/jmgirard/intraclass/pull/33), awaiting CI + merge.** Slice 1 (characterization)
   found the shipped interval undercovering (boundary .95/.86/.57, worst ~.37); the gated Fable review
   (#19) returned and its full verdict was adopted in Slice 2 (2b + average-floor interval, point
   average-floor, all-engine unification). Post-fix O-NFI nominal (interior .962 / boundary .958, no
-  collapse); non-brms suite 295/0/0; `air`/`lint` clean. Remaining before the PR: `R CMD check --as-cran`
-  + installed-package suite (`NOT_CRAN=true`), then ship on `m28-nested-fixed-interval`.
+  collapse); non-brms suite 295/0/0, installed brms 29/0/0, `R CMD check --as-cran` 0/0/1, `air`/`lint`
+  clean. On merge: reconcile markers (direct to `main`) + compress this board to the shipped summary form.
