@@ -503,6 +503,63 @@ fit_brms_fixed <- function(
   base
 }
 
+# Fixed-rater within-cell replicate Bayesian fit (M33 Slice 2, ADR-043): the M20 Slice 1
+# replicate model with raters FIXED --
+#   score ~ 1 + rater + (1 | subject) + (1 | subject:rater)
+# splitting the residual into the interaction sigma^2_sr ("subject_rater") and pure error
+# sigma^2_e ("residual"), with theta^2_r (Case-3A finite-population rater variance) read PER
+# POSTERIOR DRAW from the rater fixed-effect draws (the shared brms_theta2r_draws()) and injected
+# into the "rater" slot. The replicate sibling of fit_brms_fixed() (M26 Slice 2) and the Bayesian
+# sibling of fit_glmmtmb_replicates_fixed() (M20 Slice 1). On BALANCED/complete replicated data the
+# rater means are estimated from the whole sample, so the 2b moment correction in
+# brms_theta2r_draws() is ~0 (the M26/M27-S1 raw-push-forward regime, NOT the ragged M31 regime),
+# and theta^2_r == sigma^2_r -- so the coefficients equal the random-rater M29 replicate ones
+# (oracle O-Bayes-FRep/reduction). The `occasions` per-draw divisor (pure error / n_o, the
+# interaction NOT divided) composes off these draws exactly as the random replicate path. `data`
+# must be canonicalized to columns subject/rater/score, BALANCED/complete replicated, single-level
+# (fixed multilevel / ragged replicates refused in icc()).
+fit_brms_replicates_fixed <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  base <- fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + rater + (1 | subject) + (1 | subject:rater)"
+    ),
+    spec = c(
+      subject = "sd_subject__Intercept",
+      subject_rater = "sd_subject:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+
+  # theta^2_r per posterior draw from the rater fixed-effect draws (shared helper; the 2b
+  # moment correction is ~0 on balanced replicated data).
+  theta_draws <- brms_theta2r_draws(base$fit, data, call = call)
+
+  # Inject the rater row so the map reads {subject | rater, subject_rater, residual} (the same
+  # order the random replicate path uses, with theta^2_r replacing sigma^2_r).
+  base$draws <- rbind(
+    subject = base$draws["subject", ],
+    rater = theta_draws,
+    subject_rater = base$draws["subject_rater", ],
+    residual = base$draws["residual", ]
+  )
+  base$components <- list(
+    subject = base$components$subject,
+    rater = posterior_mode(theta_draws, lower = 0),
+    subject_rater = base$components$subject_rater,
+    residual = base$components$residual
+  )
+  base
+}
+
 # Crossed (Design 1) multilevel Bayesian fit (M24 Slice 1, ADR-034): the M5 five-component
 # model
 #   score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater)

@@ -177,18 +177,19 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M33 Slice 1 DONE (uncommitted); Slice 2 is next.** Slice 1 — Bayesian incomplete/ragged
-  single-level one-way — shipped: narrowed the `if (oneway || replicates)` clause of the `!balanced` brms
-  guard (`icc.R:1158` → `if (replicates)`) so `fit_brms_oneway()` (M26) runs unchanged on ragged data with the
-  M3/M6 harmonic-mean `k_eff` divisor threaded per draw; retargeted the guard message + deferred-corner
-  comments + `@param engine` roxygen. Random → variance ratio, **no θ² functional** (M30 regime, no 2b).
-  **O-Bayes-IOneway resolved NOMINAL** (`bayesian-incomplete-oneway-oracle.rds`, seed 33100, n_rep = 240 +
-  per-rep seeding): complete coverage .9375/.9375, ragged (k_eff 3.73) **.9458/.9458**, conv 1.00, MAP relbias
-  −.027/−.040 — both cells ∈ [.92, .975] → **no Fable review** (the pin's conditional escalation not
-  triggered). Live O-Bayes-IOneway-agree glmmTMB/lme4 M6+M3 containment verified; fixture + refusal + full
-  suite (CI mode) green; `lintr`/`air` clean. Tracking updated in-commit (#16): COVERAGE §3, REFERENCES
-  (O-Bayes-IOneway registry), NEWS, roxygen. **Next: `/start-task` Slice 2** (fixed-rater within-cell
-  replicates — narrow `icc.R:1122`, balanced → 2b ≈ 0, O-Bayes-FRep), then Slice 3 (multilevel replicates).
+- Active task: **M33 Slices 1–2 DONE (committed 17f3b87 + this commit); Slice 3 is next.** Slice 1
+  (incomplete/ragged single-level one-way): narrowed the `if (oneway || replicates)` clause of the `!balanced`
+  brms guard (`icc.R:1158` → `if (replicates)`); `fit_brms_oneway()` reused; **O-Bayes-IOneway NOMINAL**
+  (ragged .9458, n_rep 240). Slice 2 (fixed-rater within-cell replicates): narrowed the replicate guard
+  (`icc.R:1127` → `if (replicates && multilevel)`) + added the brms dispatch branch + new
+  `fit_brms_replicates_fixed()` (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, θ²_r per draw via the
+  shipped `brms_theta2r_draws()`; 2b ≈ 0 on balanced data → θ²_r = σ²_r, fixed ≡ random). **O-Bayes-FRep
+  NOMINAL** (`bayesian-fixed-replicates-oracle.rds`, seed 33200, n_rep 80): coverage .9625/.9625, glmmTMB
+  containment 1.00/1.00, average>single 1.00, MAP relbias −.056/−.024 → **no Fable review**. Live
+  O-Bayes-FRep-agree containment verified; fixture + full suite (CI mode) green; `lintr`/`air` clean. Tracking
+  in-commit (#16): COVERAGE §②, REFERENCES (O-Bayes-FRep registry), NEWS. **Next: `/start-task` Slice 3** —
+  multilevel within-cell replicates (crossed D1 six-component + nested D2 five-component fits mirroring M20 S2;
+  variance-ratio push-forward, O-Bayes-MLRep).
 - Last green CI: **PR #37 (M32) — full CI matrix green (9/9), squash-merged to `main` at `dd8e3e2`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/0** (built with

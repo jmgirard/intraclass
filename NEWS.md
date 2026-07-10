@@ -116,7 +116,9 @@ alternate engines, and seeded simulations.
   **within-cell replicates** (more than one rating per subject×rater cell): the residual
   splits into the subject×rater interaction and pure error, and `occasions = "average"`
   reports the reliability of the replicate mean (pure error divided per posterior draw by
-  the replicate count) — single-level two-way random, balanced. Finally, the Bayesian
+  the replicate count) — single-level two-way, random **or fixed** raters (with fixed
+  raters the rater slot carries the finite-population \eqn{\theta^2_r} read per posterior
+  draw, equal to \eqn{\sigma^2_r} on balanced data), balanced. Finally, the Bayesian
   engine now fits **incomplete/ragged** random-rater data (unequal or missing
   subject×rater cells) for the two-way single-level design and the crossed (Design 1)
   multilevel design (subject level, and the single-rater cluster `ICC(c,1)`; the averaged

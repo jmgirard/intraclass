@@ -1124,15 +1124,18 @@ icc <- function(
     # fixed, and incomplete fixed-nested -- are refused engine-agnostically upstream
     # (~L655); incomplete crossed fixed MULTILEVEL is caught by the `!balanced` brms guard
     # below (M31 Slice 2 / later). So no brms-specific fixed guard is needed here.
-    if (replicates && (multilevel || raters == "fixed")) {
-      # Single-level two-way RANDOM replicates ship for brms (M29 Slice 2, ADR-039).
-      # The fixed-rater and multilevel replicate corners stay deferred (the Bayesian
-      # siblings of the M20 Slice 1/2 frequentist deferrals) -- refuse them loudly (#5).
+    if (replicates && multilevel) {
+      # Single-level two-way RANDOM replicates ship for brms (M29 Slice 2, ADR-039) and
+      # single-level FIXED-rater replicates ship too (M33 Slice 2, ADR-043;
+      # fit_brms_replicates_fixed, theta^2_r in the rater slot -- the 2b moment correction
+      # is ~0 on balanced replicated data). The MULTILEVEL replicate corner (crossed Design 1
+      # + nested Design 2, random or fixed) stays deferred (the Bayesian sibling of the M20
+      # Slice 2 frequentist path; M33 Slice 3) -- refuse it loudly (#5).
       abort_unsupported(c(
         "The {.pkg brms} engine supports within-cell replicates only for the \\
-         single-level two-way random design so far.",
-        i = "Fixed-rater and multilevel Bayesian replicates are planned for a later \\
-             milestone; use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
+         single-level two-way (random or fixed-rater) design so far.",
+        i = "Multilevel Bayesian replicates are planned for a later milestone; use \\
+             {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
       ))
     }
     if (!balanced) {
@@ -1305,8 +1308,12 @@ icc <- function(
     if (replicates) {
       # Fixed-rater within-cell replicates (M20 Slice 1): the interaction fit with
       # raters fixed -- theta^2_r in the rater slot (fit_*_replicates_fixed). lavaan
-      # replicates already aborted upstream; balanced/complete single-level only.
-      if (engine == "lme4") {
+      # replicates already aborted upstream; balanced/complete single-level only. brms
+      # (M33 Slice 2, ADR-043) reads theta^2_r per posterior draw (2b ~ 0 on balanced
+      # replicated data); the multilevel replicate corner is refused upstream.
+      if (engine == "brms") {
+        fit_brms_replicates_fixed(df, seed = seed, brm_args = brm_args)
+      } else if (engine == "lme4") {
         fit_lme4_replicates_fixed(df)
       } else {
         fit_glmmtmb_replicates_fixed(df)

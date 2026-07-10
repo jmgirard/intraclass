@@ -1161,12 +1161,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     (`bayesian-incomplete-oneway-oracle.rds`, seed 33100) → **no Fable review**. Live O-Bayes-IOneway-agree
     glmmTMB/lme4 M6+M3 containment verified. Fixture + refusal tests + full suite (CI mode) green; lint/air
     clean.
-  - [ ] **Slice 2 — fixed-rater within-cell replicates (balanced).** Narrow `icc.R:1122` (admit single-level
-    `raters == "fixed"` replicates); fixed replicate fit
-    (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`) reusing M20 S1 formula + M29 replicate machinery +
-    shipped `brms_theta2r_moment_draws()` (2b ≈ 0 on balanced data — the M26/M27-S1 regime, not ragged M31).
-    O-Bayes-FRep: reduction (fixed ≡ random, θ²_r = σ²_r) + glmmTMB M20 S1 containment + coverage +
-    average > single.
+  - [x] **Slice 2 — fixed-rater within-cell replicates (balanced).** DONE. Narrowed the replicate guard
+    (`icc.R:1127` → `if (replicates && multilevel)`) to admit single-level `raters == "fixed"` replicates +
+    added the brms dispatch branch; new `fit_brms_replicates_fixed()`
+    (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, θ²_r per draw via the shipped
+    `brms_theta2r_draws()`, 2b ≈ 0 on balanced data). **O-Bayes-FRep NOMINAL:** coverage .9625/.9625
+    (single/average), glmmTMB containment 1.00/1.00, average>single 1.00, MAP relbias −.056/−.024
+    (`bayesian-fixed-replicates-oracle.rds`, seed 33200, n_rep 80) → **no Fable review**. Live
+    O-Bayes-FRep-agree containment verified; fixture + full suite (CI mode) green; lint/air clean.
   - [ ] **Slice 3 — multilevel within-cell replicates (balanced).** Narrow `icc.R:1122`'s `multilevel`
     clause; crossed D1 (`(1|cluster:subject:rater)`, 6-component) + nested D2 (5-component) replicate fits
     mirroring M20 S2; residual → σ²_{csr} + pure error, `occasions` per-draw divisor. Design 3 replicate-split
@@ -1182,9 +1184,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Bayesian **numeric-unit `d_study()`**; the **(B)** customization milestone — **`prior=`** API, **HPDI**
   intervals, **selectable** `posterior` coupling (next); **rstanarm** backend. All stay in
   [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — Slice 1 DONE, Slices 2–3 pending.** Branch `m33-bayes-parity-mopup`. Slice 1
-  (incomplete/ragged single-level one-way) shipped: the `!balanced` brms guard narrowed, `fit_brms_oneway()`
-  reused unchanged, O-Bayes-IOneway coverage **nominal** (ragged .9458, no Fable review). Next:
-  `/start-task` Slice 2 (fixed-rater within-cell replicates).
+- Status: **active — Slices 1–2 DONE, Slice 3 pending.** Branch `m33-bayes-parity-mopup`. Slice 1
+  (incomplete/ragged single-level one-way): `!balanced` brms guard narrowed, `fit_brms_oneway()` reused,
+  O-Bayes-IOneway **nominal** (ragged .9458). Slice 2 (fixed-rater within-cell replicates): replicate guard
+  narrowed + new `fit_brms_replicates_fixed()`, O-Bayes-FRep **nominal** (coverage .9625, containment 1.00) —
+  no Fable review either. Next: `/start-task` Slice 3 (multilevel within-cell replicates — crossed D1 +
+  nested D2 replicate fits mirroring M20 S2).
   Bayesian incomplete **fixed** nested / **cluster-level** / **replicates** / single-level **one-way** stay
   deferred.

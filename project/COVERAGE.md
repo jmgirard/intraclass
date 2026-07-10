@@ -16,7 +16,10 @@ mop-up: the engine now fits **incomplete/ragged single-level one-way** data (`IC
 `fit_brms_oneway()` (M26 S1) unchanged by narrowing the `!balanced` brms guard's `oneway` clause; the M3/M6
 harmonic-mean `k_eff` divisor threads per posterior draw — a variance-ratio push-forward (no θ² functional,
 no 2b — the M30 regime). O-Bayes-IOneway pins reduction-to-M26 + ragged coverage of ICC(1) & ICC(1,k_eff) +
-glmmTMB/lme4 M6+M3 containment. (Slices 2–3 — fixed-rater and multilevel within-cell replicates — pending.)
+glmmTMB/lme4 M6+M3 containment. Slice 2 adds **fixed-rater within-cell replicates**
+(`fit_brms_replicates_fixed()`, θ²_r per draw into the rater slot, 2b ≈ 0 on balanced data → θ²_r = σ²_r);
+O-Bayes-FRep pins coverage .9625 + glmmTMB M20 S1 containment + average > single. (Slice 3 — multilevel
+within-cell replicates — pending.)
 Prior: during **M32** (ADR-042, branch `m32-bayes-incomplete-nested`) — the Bayesian engine now
 fits **incomplete/ragged nested random**-rater data at the subject level for **both** nested designs:
 Design 2 (raters nested in clusters, Slice 1, `fit_brms_nested_clusters()`) and Design 3 (raters nested in
@@ -115,7 +118,7 @@ replicated data (every cell present, equal replicate count). Splits σ²_res →
 |---|---|
 | `occasions` = single, average | ✅ |
 | `engine` = glmmTMB, lme4 | ✅ |
-| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M29 Slice 2, ADR-039)** — `score ~ 1 + rater + (1\|subject) + (1\|subject:rater)` under the half-*t*(4,0,1) SD prior; the σ²_sr/σ²_e split and the `occasions` per-draw divisor (pure error ÷ n_o, interaction not divided) compose off the posterior draws exactly as the frequentist estimand (a variance-ratio push-forward, no θ² moment correction). Two-way random, balanced. O-Bayes-Rep: coverage + glmmTMB containment + average > single. Fixed-rater and multilevel Bayesian replicates stay deferred (the M20 Slice 1/2 siblings). |
+| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M29 Slice 2, ADR-039; fixed-rater M33 Slice 2, ADR-043)** — `score ~ 1 + [rater +] (1\|subject) + (1\|subject:rater)` under the half-*t*(4,0,1) SD prior; the σ²_sr/σ²_e split and the `occasions` per-draw divisor (pure error ÷ n_o, interaction not divided) compose off the posterior draws exactly as the frequentist estimand. **Two-way random** (M29) **and fixed-rater** (M33 S2, `fit_brms_replicates_fixed()`: θ²_r read per draw into the rater slot, 2b moment correction ≈ 0 on balanced data → θ²_r = σ²_r, fixed reproduces random), single-level, balanced. O-Bayes-Rep / O-Bayes-FRep: coverage + glmmTMB containment + average > single. **Multilevel** Bayesian replicates stay deferred (the M20 Slice 2 sibling; M33 Slice 3). |
 
 **Gaps** (all M17 Slice 3 deferrals — `M17-within-cell-replicates.md` §7)
 

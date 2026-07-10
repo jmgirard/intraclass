@@ -157,23 +157,13 @@ test_that("brms refuses the deferred designs with a teaching abort", {
 })
 
 # M29 Slice 2 ships SINGLE-LEVEL two-way RANDOM within-cell replicates for brms (the live
-# O-Bayes-Rep-agree fit below). The compound replicate corners -- fixed-rater replicates and
-# multilevel replicates -- stay deferred (the Bayesian siblings of the M20 Slice 1/2
-# frequentist deferrals) and abort loudly BEFORE any fit dispatch (no Stan needed).
-test_that("brms refuses the fixed-rater and multilevel replicate corners", {
+# O-Bayes-Rep-agree fit below); M33 Slice 2 (ADR-043) adds SINGLE-LEVEL FIXED-rater replicates
+# (the O-Bayes-FRep live + fixture tests below). The remaining replicate corner -- MULTILEVEL
+# replicates (crossed Design 1 + nested Design 2, random or fixed) -- stays deferred (the Bayesian
+# sibling of the M20 Slice 2 frequentist path; M33 Slice 3) and aborts loudly BEFORE any fit
+# dispatch (no Stan needed).
+test_that("brms refuses the multilevel replicate corner", {
   set.seed(30)
-  # Replicated single-level data: 2 ratings per subject x rater cell.
-  base <- expand.grid(rep = 1:2, rater = factor(1:3), subject = factor(1:6))
-  base$score <- rnorm(nrow(base))
-  d <- base[, c("subject", "rater", "score")]
-  # Fixed-rater replicates: deferred. (suppressWarnings: the fixed-rater nudge fires
-  # before the abort; we assert the abort, not the nudge.)
-  expect_error(
-    suppressWarnings(
-      icc(d, score, rater, subject = subject, raters = "fixed", engine = "brms")
-    ),
-    class = "intraclass_unsupported"
-  )
   # Multilevel replicates: deferred. Well-formed crossed Design 1 with 2 ratings per
   # subject x rater cell (subjects nested in clusters, raters crossed).
   dm <- expand.grid(
@@ -996,6 +986,48 @@ test_that("O-Bayes-Rep: committed reference reproduces the replicate findings", 
   # (3) CONTAINMENT (the M17 §6 reduction): the frequentist glmmTMB replicate points -- which
   #     compose the same variance ratio -- fall inside the brms credible intervals for ~all reps
   #     (the two engines differ only by the prior; the M26 containment posture).
+  expect_gte(s$containment_single, 0.90)
+  expect_gte(s$containment_average, 0.90)
+
+  # (4) OCCASION AVERAGING: the average-occasion ICC sits above the single-occasion one in
+  #     ~every rep (averaging n_o replicates reduces pure error).
+  expect_gte(s$average_above_single, 0.95)
+})
+
+# --- O-Bayes-FRep: the committed FIXED-rater replicate coverage reference (no brms, M33 S2) ---
+# The fixed-rater sibling of O-Bayes-Rep (random replicates). data-raw/oracle-bayesian-fixed-replicates.R
+# runs a two-way FIXED-rater DGP with within-cell replicates (N_s = 25, k = 4 FIXED raters
+# mu_r = c(-.6,-.2,.2,.6) so θ²_r = 0.8/3 = 0.2667, n_o = 3) through the SHIPPED
+# fit_brms_replicates_fixed() recipe and commits single-/average-occasion fixed-population ICC(A,1)
+# coverage, containment of the frequentist glmmTMB fixed points (the M20 §6 reduction; on balanced
+# data θ²_r == σ²_r so fixed == random), and the average > single ordering. On BALANCED replicated
+# data the 2b moment correction is ~0 (the M26/M27-S1 regime), so no undercoverage from the θ²
+# functional is expected. Fast, no fitting, runs on every CI job.
+
+test_that("O-Bayes-FRep: committed reference reproduces the fixed-rater replicate findings", {
+  fixture <- test_path("fixtures", "bayesian-fixed-replicates-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-fixed-replicates.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+
+  # θ²_r is the fixed finite-population rater variance (0.8/3), genuinely exercised.
+  expect_equal(s$theta2_r, 0.8 / 3, tolerance = 1e-6)
+
+  # (1) High convergence at the half-t DGP (fixed-warmup budget, so >= 0.90).
+  expect_gte(s$converged_frac, 0.90)
+
+  # (2) Coverage of the FIXED-population single-/average-occasion ICC(A,1) ~nominal (the pin is
+  #     coverage, not the point; balanced -> 2b ~ 0, no θ²-functional undercoverage expected).
+  expect_gte(s$coverage_single, 0.90)
+  expect_lte(s$coverage_single, 0.99)
+  expect_gte(s$coverage_average, 0.90)
+  expect_lte(s$coverage_average, 0.99)
+
+  # (3) CONTAINMENT / REDUCTION (M20 §6): the frequentist glmmTMB fixed replicate points fall inside
+  #     the brms credible intervals for ~all reps (θ²_r == σ²_r on balanced data -> fixed == random;
+  #     the two engines differ only by the prior, the M26/M29 containment posture).
   expect_gte(s$containment_single, 0.90)
   expect_gte(s$containment_average, 0.90)
 
@@ -2071,6 +2103,87 @@ test_that("brms fits within-cell replicates end to end (O-Bayes-Rep-agree)", {
 
   # Occasion averaging raises reliability: the average-occasion ICC(A,1) exceeds the
   # single-occasion one (pure error divided by n_o).
+  a1 <- fit$estimates[fit$estimates$index == "ICC(A,1)", ]
+  expect_gt(
+    a1$estimate[a1$occasions == n_o],
+    a1$estimate[a1$occasions == 1]
+  )
+
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: FIXED-rater within-cell replicates, O-Bayes-FRep-agree (M33 Slice 2) ------
+# The fixed-rater analogue of the O-Bayes-Rep-agree live test: the same replicate interaction fit,
+# with the rater slot carrying the Case-3A finite-population theta^2_r (read per posterior draw)
+# instead of sigma^2_r. Confirms icc() -> fit_brms_replicates_fixed() -> posterior_summary() end to
+# end, and pins O-Bayes-FRep-agree: the glmmTMB REML fixed replicate points sit inside the brms
+# credible intervals (θ²_r == σ²_r on balanced data, so this is also the fixed == random reduction),
+# and the average-occasion ICC exceeds the single-occasion one.
+test_that("brms fits fixed-rater within-cell replicates end to end (O-Bayes-FRep-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(3320)
+  ns <- 25L
+  k <- 4L
+  n_o <- 3L
+  mu_r <- c(-0.6, -0.2, 0.2, 0.6) # fixed finite population of k raters
+  grid <- expand.grid(
+    rep = seq_len(n_o),
+    rater = factor(seq_len(k)),
+    subject = factor(seq_len(ns))
+  )
+  grid$score <- 2 +
+    rnorm(ns, 0, 1)[as.integer(grid$subject)] +
+    mu_r[as.integer(grid$rater)] +
+    rnorm(ns * k, 0, sqrt(0.5))[as.integer(interaction(
+      grid$subject,
+      grid$rater
+    ))] +
+    rnorm(nrow(grid), 0, sqrt(0.7))
+  d <- grid[, c("subject", "rater", "score")]
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    raters = "fixed",
+    occasions = c("single", "average"),
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$ci$method, "posterior")
+  expect_setequal(fit$estimates$occasions, c(1, n_o))
+  td <- tidy(fit)
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  # O-Bayes-FRep-agree: the glmmTMB REML fixed replicate points sit inside the brms credible
+  # intervals (the M20 §6 reduction; θ²_r == σ²_r on balanced data).
+  g <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    raters = "fixed",
+    occasions = c("single", "average"),
+    engine = "glmmTMB"
+  ))
+  key <- function(x) paste(x$index, x$occasions)
+  ge <- g$estimates[order(key(g$estimates)), ]
+  fe <- fit$estimates[order(key(fit$estimates)), ]
+  expect_true(all(ge$estimate >= fe$conf.low & ge$estimate <= fe$conf.high))
+
+  # Occasion averaging raises reliability: the average-occasion ICC(A,1) exceeds the single one.
   a1 <- fit$estimates[fit$estimates$index == "ICC(A,1)", ]
   expect_gt(
     a1$estimate[a1$occasions == n_o],

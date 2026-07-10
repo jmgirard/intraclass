@@ -995,6 +995,41 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-incomplete-oneway.R` (seeded; drives the SHIPPED
   `fit_brms_oneway()` recipe; writes the fixture before the hard pins).
 
+### Oracle O-Bayes-FRep — Bayesian fixed-rater within-cell replicates (M33 Slice 2, ADR-043)
+
+- **Role:** the **fixed-rater** sibling of O-Bayes-Rep (M29 Slice 2, random replicates) and the Bayesian
+  sibling of the frequentist **M20 Slice 1** (`fit_glmmtmb_replicates_fixed`). `engine = "brms"` +
+  `raters = "fixed"` now fits **single-level within-cell replicates** — `fit_brms_replicates_fixed()` fits
+  `score ~ 1 + rater + (1 | subject) + (1 | subject:rater)`, splits the residual into the interaction σ²_sr
+  and pure error σ²_e, and reads the Case-3A finite-population **θ²_r per posterior draw** from the rater
+  fixed-effect draws (the shared `brms_theta2r_draws()`), injecting it into the rater slot. The `occasions`
+  per-draw divisor (pure error ÷ n_o) composes off these draws exactly as the random path. On **balanced**
+  replicated data the rater means come from the whole sample, so the **2b moment correction ≈ 0** (the
+  M26/M27-S1 regime, not the ragged M31 regime) and θ²_r = σ²_r — fixed reproduces the random coefficients.
+- **Oracles (≥2 independent, #1):** **O-Bayes-FRep** (committed reference, no Stan) — single-/average-occasion
+  fixed-population ICC(A,1) **coverage** ~nominal, **containment** of the glmmTMB fixed replicate points (the
+  M20 §6 reduction; = the fixed==random reduction on balanced data), and **average > single**;
+  **O-Bayes-FRep-agree** (live fit) — the glmmTMB REML fixed replicate points fall inside the brms credible
+  intervals (containment, `skip_on_ci`).
+- **Sources:** McGraw & Wong (1996) Case 3A (θ²_r = Σ(μ_rj − μ̄_r)²/(k−1)); GT two-facet replicate
+  decomposition (`M17-within-cell-replicates.md`); ten Hove et al. (2020) prior/recipe; the independent point
+  oracle is the shipped glmmTMB M20 Slice 1 estimator (no new spec).
+- **DGP:** single-level two-way fixed-rater with within-cell replicates, N_s = 25, **k = 4 FIXED raters**
+  μ_r = (−0.6, −0.2, 0.2, 0.6) → θ²_r = 0.8/3 = 0.2667, n_o = 3, σ²_s = 1.00, σ²_sr = 0.50, σ²_e = 0.70;
+  pop single = 1/(1 + 0.2667 + 0.5 + 0.7) = 0.4054, average = 1/(1 + 0.2667 + 0.5 + 0.7/3) = 0.5000. The
+  rater means are FIXED across replications (a fixed finite population); subjects/interactions/error redrawn.
+- **Committed reference (`tests/testthat/fixtures/bayesian-fixed-replicates-oracle.rds`; seed 33200,
+  n_rep = 80):** convergence / single+average coverage / glmmTMB containment / average>single / MAP relbias
+  (pins qualitative, #4/#18). **Observed:** conv 1.00, coverage **.9625/.9625** (single/average, both ∈
+  [.90, .99] — nominal), containment **1.00/1.00**, average>single **1.00**, MAP relbias −.056/−.024 (mode
+  below the plug-in, the standard MAP skew — characterized, not tuned). **Balanced → 2b ≈ 0, so no
+  θ²-functional undercoverage** → **no Fable review**.
+- **Pins (#4/#18):** convergence ≥ .90; θ²_r = 0.8/3; single/average coverage ∈ [.90, .99]; containment
+  ≥ .90 both; average>single ≥ .95. Asserted in `test-icc-brms.R` **O-Bayes-FRep** (committed reference, on
+  CI) + **O-Bayes-FRep-agree** (live fit, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-fixed-replicates.R` (seeded; drives the SHIPPED
+  `fit_brms_replicates_fixed()` recipe; writes the fixture before the hard pins).
+
 ---
 
 ## Bibliography
