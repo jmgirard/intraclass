@@ -110,11 +110,13 @@
   incomplete/replicates/conflated + cluster-level fixed, categorical/ordinal GLMM, multilevel SEM, the
   Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band
   **CRAN upload** (ADR-022) also remains.
-- Last green CI: **PR #31 (M26) CI green; squash-merged to `main` at `c02bc38`.** Local
-  `R CMD check --as-cran` **0/0/1** (only the expected "New submission" NOTE); test suite
-  `FAIL 0 | WARN 0 | SKIP 34 | PASS 949`; all 7 live Stan fits pass locally (`skip_on_ci`); coverage
-  ~85% (below 90% by design — brms fit wrappers are live-only, [[coverage-baseline]]). Prior: PR #30
-  (M25) at `2ff081b`.
+- Last green CI: **M27 local green on branch `m27-bayes-multilevel-fixed` (not yet pushed/PR'd).** Local
+  `R CMD check --as-cran` **0/0/1** (only the expected "New submission" NOTE — a stray 2-WARNING run was
+  a `--no-build-vignettes` artifact, clean on a full build); `test-icc-brms.R` `NOT_CRAN=true`
+  **219/0/0** (all 9 live Stan fits pass, `skip_on_ci`); full suite `NOT_CRAN=true`
+  **FAIL 0 | WARN 0 | SKIP 0 | PASS 1175**; `lintr::lint_package()` + `air` clean; coverage
+  ~85% (below 90% by design — brms fit wrappers are live-only, [[coverage-baseline]]). Prior green:
+  **PR #31 (M26)** squash-merged to `main` at `c02bc38`.
 - Blockers: — (the M27 Slice 2 Fable review returned 2026-07-09 and its verdict is implemented + green).
 - Updated: 2026-07-09 by main session (Opus) — **M27 both slices done; ready for finish-task/PR.**
   Slice 1 (crossed fixed) shipped, Slice 2 (nested fixed) resolved via a gated Fable review (#19): the raw
