@@ -217,14 +217,14 @@
 #'   framework (Stan, via \pkg{brms}) under a sourced half-*t*(4, 0, 1) prior on the
 #'   random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 #'   mode (MAP) and the interval is a percentile **credible** interval
-#'   (`ci_method = "posterior"`, forced). It covers the two-way random design at the
-#'   single level on **both balanced/complete and incomplete/ragged** data; and, on
-#'   balanced/complete data, the one-way random and fixed-rater two-way designs, the
-#'   crossed (Design 1) **multilevel** random and fixed-rater designs (subject and cluster
-#'   levels), the nested **multilevel** designs -- Design 2 (raters nested in clusters,
-#'   random and fixed) and Design 3 (raters nested in subjects, agreement-only) at the
-#'   subject level -- the conflated diagnostic, and within-cell replicates.
-#'   Incomplete/ragged **multilevel** and **fixed-rater** Bayesian fits, and
+#'   (`ci_method = "posterior"`, forced). It covers, on **both balanced/complete and
+#'   incomplete/ragged** data, the two-way random single-level design and the crossed
+#'   (Design 1) **multilevel** random design (subject and cluster levels); and, on
+#'   balanced/complete data only, the one-way random and fixed-rater two-way designs, the
+#'   crossed multilevel **fixed-rater** design, the nested **multilevel** designs -- Design 2
+#'   (raters nested in clusters, random and fixed) and Design 3 (raters nested in subjects,
+#'   agreement-only) at the subject level -- the conflated diagnostic, and within-cell
+#'   replicates. Incomplete/ragged **nested** and **fixed-rater** Bayesian fits, and
 #'   numeric-`unit` (D-study) projection, are planned for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
@@ -1126,21 +1126,30 @@ icc <- function(
       ))
     }
     if (!balanced) {
-      # M30 Slice 1 (ADR-040): incomplete/ragged two-way RANDOM single-level now fits.
-      # The M3 k_eff (harmonic-mean divisor) + connectedness machinery is engine-agnostic
-      # and already runs pre-dispatch (the connectedness refusal at ~L884 protects brms
-      # too), and random raters make each ICC a variance ratio -- no theta^2 finite-
-      # population functional, so no moment correction (the M29 clean-push-forward regime).
-      # The still-deferred incomplete corners are refused with a case-naming message
-      # (#5/#8): multilevel (M30 Slice 2), fixed-rater (theta^2 under imbalance), one-way,
-      # and replicates.
-      if (multilevel || raters == "fixed" || oneway || replicates) {
+      # M30 (ADR-040): incomplete/ragged RANDOM-rater fits now ship -- two-way single
+      # level (Slice 1) and crossed (Design 1) multilevel (Slice 2). The M3/M9 k_eff
+      # (harmonic-mean divisor) + connectedness machinery is engine-agnostic and already
+      # runs pre-dispatch (the single-level connectedness refusal at ~L884 and the
+      # multilevel identifiability + cluster-ICC(c,k)-dropped-with-note gates at ~L895
+      # protect brms too), and random raters make each ICC a variance ratio -- no theta^2
+      # finite-population functional, so no moment correction (the M29 clean-push-forward
+      # regime). The still-deferred incomplete corners are refused with a case-naming
+      # message (#5/#8): NESTED multilevel (Designs 2/3), fixed-rater (theta^2 under
+      # imbalance), one-way, and replicates.
+      if (
+        raters == "fixed" ||
+          oneway ||
+          replicates ||
+          (multilevel && ml_design != "crossed")
+      ) {
         abort_unsupported(c(
           "The {.pkg brms} engine supports incomplete/ragged data only for the \\
-           two-way random single-level design so far.",
-          i = "Incomplete Bayesian fixed-rater, one-way, multilevel, and replicate \\
-               ICCs are planned for later milestones; use {.code engine = \"glmmTMB\"} \\
-               (default) or {.code \"lme4\"} for incomplete data."
+           two-way random single-level and crossed (Design 1) multilevel random \\
+           designs so far.",
+          i = "Incomplete Bayesian fixed-rater, one-way, nested-multilevel, and \\
+               replicate ICCs are planned for later milestones; use \\
+               {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
+               incomplete data."
         ))
       }
     }

@@ -731,6 +731,48 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   CI) + **O-Bayes-Incomplete-agree** (live ragged fit, glmmTMB inside the CI; `skip_on_ci`).
 - **Provenance:** `data-raw/oracle-bayesian-incomplete.R` (seeded; writes the fixture before the hard pins).
 
+### Oracle O-Bayes-IML — Bayesian incomplete/ragged crossed multilevel random (M30 Slice 2, ADR-040)
+
+- **Role:** the incomplete crossed (Design 1) **multilevel** sibling of O-Bayes-Incomplete. `engine =
+  "brms"` now fits **incomplete/ragged crossed multilevel random** data — the shipped M5/M24
+  `fit_brms_multilevel()` five-component fit run on ragged data unchanged, with the engine-agnostic M9
+  harmonic-mean `k_eff` divisor + crossed-multilevel connectedness (ADR-018) threaded per posterior draw.
+  Random raters → **variance-ratio push-forward**, no θ² functional, no 2b correction (the M29/Slice-1
+  regime). Subject level (ICC(A,1), ICC(A,k_eff)) + single-rater cluster **ICC(c,1)** ship; the averaged
+  cluster **ICC(c,k)** is undefined on incomplete data (the open per-cluster divisor, M9 §9) and is
+  **dropped-with-note**.
+- **Oracles (≥2 independent, #1):** **O-Bayes-IML** (committed reference, no Stan) — a **reduction cell**
+  (complete grid, k_eff = k) covers ~nominally (the shipped M24 behaviour), and a **ragged cell** (fixed
+  connected incidence, ~12% cells deleted, constant k_eff < 5) covers subject-level ICC(A,1) & ICC(A,k_eff)
+  within Monte-Carlo error of the complete cell; **O-Bayes-IML-agree** (live ragged fit) — the glmmTMB REML
+  **M9** points fall inside the brms credible intervals (containment, not equality), and the cluster rows
+  are single-rater only (ICC(c,k) dropped).
+- **Sources:** ten Hove et al. (2022) crossed Design 1 five-component decomposition; ten Hove et al. (2020)
+  prior/recipe (the ragged extension is **not in the source**, so the independent oracle for the ragged
+  point is the shipped glmmTMB M9 estimator, ADR-018); estimand-spec `M9-incomplete-multilevel.md` (k_eff /
+  connectedness / cluster ICC(c,1) ships / ICC(c,k) open — no new spec, M30 gives the shipped incomplete
+  estimand the brms engine).
+- **DGP:** crossed Design 1, N_c = 15 clusters, N_s = 4/cluster, k = 5, σ²_c = 0.50, σ²_{s:c} = 1.00,
+  σ²_r = 0.16, σ²_cr = 0.16, σ²_res = 0.50; complete cell (k_eff = 5) and a fixed ragged incidence (264 of
+  300 cells kept, k_eff = 4.30); pop subject ICC(A,1) = s²_{s:c}/(s²_{s:c}+s²_r+s²_res), ICC(A,m) with the
+  {rater, residual} error ÷ m; pop cluster ICC(c,1) = s²_c/(s²_c+s²_r+s²_cr).
+- **Committed reference (`tests/testthat/fixtures/bayesian-incomplete-ml-oracle.rds`; seed 30200, n_rep =
+  100):** per-cell convergence / subject ICC(A,1)+ICC(A,k_eff) & cluster ICC(c,1) coverage / subject MAP
+  relative bias (pins qualitative, #4/#18). **Observed:** complete — conv .98, subject coverage .95/.95
+  (ICC(A,1)/ICC(A,k)), cluster ICC(c,1) coverage .92, subject MAP relbias −.043/−.009; ragged — conv .97,
+  subject coverage **.97/.97**, cluster ICC(c,1) coverage .95, subject MAP relbias −.028/−.005. **The
+  Slice-2 unknown is resolved: ragged SUBJECT-level coverage is nominal** through the k_eff divisor. The
+  cluster level inherits the M24 few-cluster caveat (cluster MAP biased low ~−24% to −28% at N_c = 15), so
+  cluster ICC(c,1) is **characterized** (ragged .95 tracks complete .92; the wide credible interval still
+  covers despite the biased point), not pinned nominal (#18).
+- **Pins (#4/#18):** convergence ≥ .90 both cells; complete-cell subject ICC(A,1) & ICC(A,k) coverage ∈
+  [.90, .99] (reduction baseline); ragged subject coverage ≥ complete − .06 and ≥ .88 for both units; ragged
+  cluster ICC(c,1) coverage ≥ complete − .06 (characterized); |subject MAP relbias| < .10 (complete) / < .12
+  (ragged). Asserted in `test-icc-brms.R` **O-Bayes-IML** (committed reference, on CI) + **O-Bayes-IML-agree**
+  (live ragged fit, glmmTMB inside the CI, ICC(c,k) dropped; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-incomplete-multilevel.R` (seeded; writes the fixture before the
+  hard pins).
+
 ---
 
 ## Bibliography
