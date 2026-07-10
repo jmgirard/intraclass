@@ -34,9 +34,18 @@ one_cell <- function(k, ns, cn, theta2) {
   V <- (S2SC / ns) * matrix(1, k, k) + (S2RES / ns) * diag(k)
   L <- chol(V)
   base <- seq_len(k) - (k + 1) / 2
-  mu <- if (theta2 == 0) rep(0, k) else base * sqrt(theta2 / (sum(base^2) / (k - 1)))
+  mu <- if (theta2 == 0) {
+    rep(0, k)
+  } else {
+    base * sqrt(theta2 / (sum(base^2) / (k - 1)))
+  }
 
-  hit <- matrix(0L, N_REP, 3, dimnames = list(NULL, c("shipped", "proposed", "reflected")))
+  hit <- matrix(
+    0L,
+    N_REP,
+    3,
+    dimnames = list(NULL, c("shipped", "proposed", "reflected"))
+  )
   contain <- 0L # point inside the proposed interval
   for (r in seq_len(N_REP)) {
     beta_hat <- mu + t(L) %*% matrix(rnorm(k * cn), k, cn) # k x cn, per-cluster estimates
@@ -64,22 +73,40 @@ one_cell <- function(k, ns, cn, theta2) {
     contain <- contain + (point >= ci_p[1] && point <= ci_p[2])
   }
   data.frame(
-    k = k, n_s = ns, C_n = cn, theta2 = theta2,
+    k = k,
+    n_s = ns,
+    C_n = cn,
+    theta2 = theta2,
     cell = if (theta2 == 0) "boundary" else "interior",
-    shipped = mean(hit[, 1]), proposed = mean(hit[, 2]), reflected = mean(hit[, 3]),
+    shipped = mean(hit[, 1]),
+    proposed = mean(hit[, 2]),
+    reflected = mean(hit[, 3]),
     point_in_proposed = contain / N_REP
   )
 }
 
-grid <- expand.grid(k = c(2L, 4L), n_s = c(3L, 20L), C_n = c(5L, 80L), KEEP.OUT.ATTRS = FALSE)
-out <- do.call(rbind, lapply(seq_len(nrow(grid)), function(g) {
-  do.call(rbind, lapply(c(0, S2RES / grid$n_s[g], 0.66), function(t2) {
-    one_cell(grid$k[g], grid$n_s[g], grid$C_n[g], t2)
-  }))
-}))
+grid <- expand.grid(
+  k = c(2L, 4L),
+  n_s = c(3L, 20L),
+  C_n = c(5L, 80L),
+  KEEP.OUT.ATTRS = FALSE
+)
+out <- do.call(
+  rbind,
+  lapply(seq_len(nrow(grid)), function(g) {
+    do.call(
+      rbind,
+      lapply(c(0, S2RES / grid$n_s[g], 0.66), function(t2) {
+        one_cell(grid$k[g], grid$n_s[g], grid$C_n[g], t2)
+      })
+    )
+  })
+)
 out[, c("shipped", "proposed", "reflected", "point_in_proposed")] <-
   round(out[, c("shipped", "proposed", "reflected", "point_in_proposed")], 3)
 print(out, row.names = FALSE)
 
 cat("\nsummary (mean coverage by cell type):\n")
-print(aggregate(cbind(shipped, proposed, reflected) ~ cell, out, function(z) round(mean(z), 3)))
+print(aggregate(cbind(shipped, proposed, reflected) ~ cell, out, function(z) {
+  round(mean(z), 3)
+}))
