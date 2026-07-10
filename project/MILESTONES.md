@@ -1105,19 +1105,21 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
           ragged .91/.91 tracks complete .95/.95 within MC error (SE≈.022, within the .06 tolerance),
           conv .94/.98, MAP ~unbiased → **no Fable review**.
   - **Cross-cutting DoD (brief §8):**
-    - [ ] `_pkgdown.yml` unchanged (no new export) or updated if one appears; NEWS entry under 0.1.0.
-    - [ ] `air format .` clean; `lintr::lint_package()` clean (run locally before PR — memory
-          [[run-lintr-before-push]]).
-    - [ ] Installed-pkg both ragged fixed fits driven through `library(intraclass)` with `NOT_CRAN=true`
-          (memory [[verify-against-installed-package]]); live Stan fits `skip_on_ci` (memory
-          [[brms-live-fit-skip-on-ci]]).
-    - [ ] `R CMD check --as-cran` 0/0/1 (New submission only); full CI matrix green; STATUS/MILESTONES/COVERAGE
-          reconciled in-commit (#16).
+    - [x] `_pkgdown.yml` unchanged (no new export — NAMESPACE unchanged); NEWS entry under 0.1.0.
+    - [x] `air format .` clean; `lintr::lint_package()` clean (icc.R / engine-brms.R 0 lints).
+    - [x] Installed-pkg both ragged fixed fits driven through `library(intraclass)` with `NOT_CRAN=true`
+          (S1 glmmTMB M3 containment ✓; S2 subject-only + glmmTMB M18 containment ✓); live Stan fits
+          `skip_on_ci` (memory [[brms-live-fit-skip-on-ci]]).
+    - [x] `R CMD check --as-cran` **0 errors / 0 warnings / 0 notes** (spelling "undercovered" whitelisted in
+          `inst/WORDLIST`); `devtools::test()` 0 failures (all live fits ran); full CI-mode suite 1148/0/14;
+          STATUS/MILESTONES/COVERAGE/ROADMAP reconciled in-commit (#16). **PR CI matrix pending.**
 - Deferred out of M31 (record so not rediscovered): Bayesian incomplete **nested** fixed (Design 2, M19 Slice 2
   analog on ragged data); Bayesian **cluster-level fixed** rater ICC (deferred all engines); Bayesian incomplete
   **within-cell replicates** (imbalance × replicates, M20 corner); Bayesian **one-way** incomplete (M6 analog,
   low value); the averaged cluster-level **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, open all engines, M9 §9);
   Bayesian **numeric-unit `d_study()`**; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
   coupling, **HPDI**, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — both slices DONE (coverage NOMINAL both, no Fable review); cross-cutting DoD + PR
-  pending.** Branch `m31-bayes-incomplete-fixed`. Slice 1 committed at `91f0502`.
+- Status: **active — both slices DONE + full local gate GREEN (coverage NOMINAL both, no Fable review);
+  PR CI + merge pending.** Branch `m31-bayes-incomplete-fixed` (Slice 1 `91f0502`, Slice 2 `5b2a8ab`).
+  `R CMD check --as-cran` 0/0/0; `devtools::test()` 0 failures (live fits ran); installed-pkg both fits
+  verified.

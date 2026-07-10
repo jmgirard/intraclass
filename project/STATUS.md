@@ -164,8 +164,11 @@
   Committed fixtures `bayesian-incomplete-fixed{,-ml}-oracle.rds` + `data-raw/oracle-bayesian-incomplete-fixed{,-multilevel}.R`.
   **No new fit, no new θ² helper (`brms_theta2r_moment_draws()` ships), no new argument/dependency** (#6).
   Tracking (ADR-041, MILESTONES board both slices checked, REFERENCES O-Bayes-IFixed/-IFML-fixed, NEWS,
-  COVERAGE) updated in-commit (#16). **Next: cross-cutting DoD** (installed-pkg both ragged fixed fits,
-  `R CMD check --as-cran`, full suite, `_pkgdown.yml` no-op) then finish-task / PR. Other candidates remain
+  COVERAGE, ROADMAP) updated in-commit (#16). **Full local gate GREEN:** `R CMD check --as-cran` 0/0/0
+  (spelling "undercovered" whitelisted); `devtools::test()` 0 failures (all live Stan fits ran);
+  installed-pkg both ragged fixed fits verified (glmmTMB M3/M18 containment); `air`/`lintr` clean. **Next:
+  push branch + open PR; on green CI + merge, reconcile "Last green CI" and compress the M31 board.** Other
+  candidates remain
   parked in [`ROADMAP.md`](ROADMAP.md): Bayesian **nested** fixed / replicate / cluster-fixed incomplete
   corners, **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
