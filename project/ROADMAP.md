@@ -139,14 +139,28 @@ helpers* item below (sample-size / CI-width), where it belongs.
   PR #29)**, the **nested Designs 2/3** follow-on **shipped as M25 (ADR-035, PR #30)**, and the
   **single-level one-way + fixed-rater** follow-ons **shipped as M26 (ADR-036)** — the Bayesian engine
   now covers every multilevel design at the subject level plus the single-level one-way and fixed-rater
-  designs; see [`MILESTONES.md`](MILESTONES.md). M26's oracle-first finding: brms fixed-rater uses the
-  **raw** Case-3A θ²_r from the posterior (no frequentist bias correction — the posterior integrates
-  it), and balanced `fixed ≡ random` holds only approximately under the prior (characterized, not
-  asserted). What **remains parked here** are the *other* parity follow-ons: Bayesian **fixed-rater and
-  one-way at the multilevel level**, Bayesian **incomplete/ragged**, and **within-cell replicates** —
-  for the incomplete/small-k corners ten Hove et al. (2022) flag the best estimator as an open research
-  question, so schedule them leaning on coverage calibration. Plus **selectable** `posterior` coupling
-  (MC/bootstrap on a Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API.
+  designs; and the **fixed-rater multilevel** follow-on (crossed Design 1 + nested Design 2, subject
+  level) **shipped as M27 (ADR-037, PR #32)** — completing the brms multilevel story (random ✓ M24/M25,
+  fixed ✓ M27; multilevel one-way = Design 3, already M25). See [`MILESTONES.md`](MILESTONES.md).
+  Oracle-first findings, **scoped by the ADR-037 gated Fable review (#19):** M26's "brms reads the
+  **raw** Case-3A θ²_r, the posterior integrates the bias" is correct only for functionals **linear** in
+  β / when `tr(C·Σ_post) ≈ 0` (single-level, crossed); for the **nested** finite-population variance
+  (a convex quadratic functional estimated per cluster from little data) the raw push-forward undercovers,
+  and the shipped estimator subtracts the **2b** moment correction with a boundary-aware per-draw-average
+  floor. What **remains parked here** are the *other* parity follow-ons: Bayesian **incomplete/ragged**,
+  **within-cell replicates**, **conflated**, and **cluster-level fixed** — for the incomplete/small-k
+  corners ten Hove et al. (2022) flag the best estimator as an open research question, so schedule them
+  leaning on coverage calibration. Plus **selectable** `posterior` coupling (MC/bootstrap on a Bayesian
+  fit), **HPDI** intervals, and a **user-exposed `prior=`** API.
+- **Frequentist nested-fixed MC-interval coverage** — the ADR-037 Fable-review **corollary** (§6): the
+  shipped `theta2r_nested_draws()` (the M19 nested-fixed θ²_{r:c} Monte-Carlo interval) subtracts only
+  **1b** from its draws and floors **per cluster**, so it likely shares an attenuated version of the
+  displacement the Bayesian path fixed (and cannot reach θ²=0). The frequentist **point** estimator is
+  unaffected (unbiased). **Status: ready, spun off as a background task (2026-07-09).** Needs a seeded
+  coverage sim across the Fable Q6 grid (k ∈ {2,4}, n_s ∈ {3,5,20}, C_n ∈ {5,20,80}, θ²_{r:c} ∈ {0,
+  σ²_res/n_s, .66}); if it undercovers, recenter + average-floor the MC draws (mirroring
+  `brms_theta2r_moment_draws()`), its own ADR — likely a Fable review (#19) since it changes a shipped
+  interval. The crossed fixed MC interval (`theta2r_fixed`) may share it too, negligibly (v → 0 there).
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,

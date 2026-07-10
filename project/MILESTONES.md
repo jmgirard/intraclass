@@ -18,10 +18,12 @@ completing brms coverage of every subject-level multilevel design. **M26 (ADR-03
 fixed-rater, two-way, balanced/complete — then shipped** (PR #31), the two lowest-risk single-level
 follow-ons (M6 one-way / M2·M10 fixed-rater analogs); with M26 the Bayesian engine also covers the
 single-level one-way and fixed-rater designs. **M27 (ADR-037) — Bayesian multilevel fixed-rater (brms),
-crossed Design 1 + nested Design 2, subject level — is now ACTIVE** (the brms sibling of the frequentist
-M10 / M19 Slice 2 fixed paths; multilevel one-way was already shipped as Design 3 in M25). Each
-milestone is scoped by an ADR at its start after a short retro
-(founding brief §7) and detailed in full here until it ships.
+crossed Design 1 + nested Design 2, subject level — then shipped** (PR #32), the brms sibling of the
+frequentist M10 / M19 Slice 2 fixed paths (multilevel one-way was already shipped as Design 3 in M25);
+its Slice-2 oracle-first fork (the raw θ²_{r:c} push-forward undercovers the nested finite population) was
+resolved by a gated Fable review (#19) adopting a 2b moment correction + boundary-aware average-floor
+(ADR-037 amendment). No milestone is currently in flight. Each milestone is scoped by an ADR at its start
+after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
@@ -865,7 +867,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   oracle-first findings reproduced honestly (#18): one-way k=2 MAP-low (k=2 note ungated for one-way);
   raw θ²_r + approximate balanced `fixed ≡ random` (containment oracle). `air`/`lint_package` clean.
 
-## M27: Bayesian multilevel (brms) — fixed-rater, crossed Design 1 + nested Design 2, subject level (ADR-037) — **ACTIVE**
+## M27: Bayesian multilevel (brms) — fixed-rater, crossed Design 1 + nested Design 2, subject level (ADR-037)
 - Goal: continue the Bayesian arc with its remaining well-scoped follow-on — extend `engine = "brms"` +
   `ci_method = "posterior"` to **fixed-rater at the multilevel level**, the brms sibling of the
   frequentist M10 (crossed Design 1 fixed) and M19 Slice 2 (nested Design 2 fixed). Engine/interval
@@ -897,80 +899,25 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `tests/testthat/test-icc-brms.R`; committed coverage fixtures via `data-raw/oracle-bayesian-multilevel-fixed.R`
   (`REFERENCES.md`). Brief §8 per-milestone DoD.
 
-### DoD checklist (the live board — ADR-015; check items off in the same commit as the work, #16)
-
-**Slice 1 — Bayesian crossed Design 1 fixed (`fit_brms_multilevel_fixed()`) + O-Bayes-FML** ✅ **done**
-- [x] `fit_brms_multilevel_fixed()` in `R/engine-brms.R` reusing `fit_brms_common()` — five-component
-      crossed fit with a fixed `rater` population-level effect; half-*t*(4,0,1) prior on the random-effect
-      SDs only; θ²_r read **raw** per posterior draw from the rater fixed-effect draws (shared
-      `brms_theta2r_draws()` helper, extracted from `fit_brms_fixed`), injected as the `rater` row of the
-      five-row `draws` contract (M26 Slice 2 pattern at the multilevel level).
-- [x] `R/icc.R`: narrowed the brms fixed-multilevel guard to `ml_design != "crossed"` (admits crossed D1,
-      still defers nested D2) + added the crossed-fixed brms dispatch branch. Cluster-level fixed /
-      Design-3 fixed / incomplete / replicate / numeric-unit brms refusals stay (classed aborts, #5/#8;
-      Design-3/cluster-level/incomplete handled engine-agnostically upstream at ~L655).
-- [x] Subject-level `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)` compose off `draws` unchanged
-      (`brms_component_draws()`); MAP + percentile credible interval; `posterior` forced-default; cluster
-      level correctly absent (forced `level = "subject"`).
-- [x] **Oracle-first resolution recorded (#1/#18):** raw θ²_r push-forward (no bias correction)
-      **contained** by glmmTMB M10 fixed in **100/100 reps** (containment 1.00); balanced fixed-vs-random
-      *characterized* via containment, not asserted equal. No tuning — the raw push-forward agreed.
-- [x] `data-raw/oracle-bayesian-multilevel-fixed.R` generator ran the M10 crossed-fixed DGP with brms +
-      the half-*t* prior; committed `tests/testthat/fixtures/bayesian-multilevel-fixed-oracle.rds` (#4).
-      Observed (n_rep 100, seed 20270): converged .97, containment 1.00, coverage .96, MAP rel-bias −.004.
-- [x] O-Bayes-FML asserted in `test-icc-brms.R`: containment + seeded coverage ~nominal + convergence +
-      the live O-Bayes-FML-agree fit (glmmTMB inside brms CI, agreement + consistency, lme4 concurrence).
-      Live Stan fit `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
-      ([[brms-live-fit-skip-on-ci]]); reduced draws. Full file `NOT_CRAN=true`: **194 pass / 0 fail / 0 skip**.
-
-**Slice 2 — Bayesian nested Design 2 fixed (`fit_brms_nested_fixed()`) + O-Bayes-FNML** — Fable review returned (#19); implementing the verdict.
-- [x] `fit_brms_nested_fixed()` in `R/engine-brms.R` reusing `fit_brms_common()` — `score ~ 0 + rater +
-      (1|cluster:subject)`; θ²_{r:c} per posterior draw via `brms_theta2r_nested_draws()`, injected as the
-      `rater` row; 3-component {subject, rater, residual} set (no cluster/cluster_rater).
-- [x] `R/icc.R`: removed the brms fixed-multilevel guard (crossed + nested D2 dispatch; Design-3
-      fixed / cluster-level / incomplete refused engine-agnostically upstream) + nested-fixed dispatch.
-- [x] **Oracle-first FORK resolved by a gated Fable review (#19, ADR-037 amendment).** The **raw**
-      θ²_{r:c} push-forward undercovered (interior coverage 0.86, MAP −.106; coverage → 0 as clusters
-      accrue — an incidental-parameters pathology). Fable verdict adopted: subtract **2b** per draw
-      (`b = tr(C·Σ_post)/(k−1)` = σ²_res/n_s; two inflations — push-forward + plug-in — not one), **floor
-      the per-draw group AVERAGE** not each cluster (per-cluster flooring → zero coverage at θ²=0, #3),
-      and **unify** the crossed/single-level helper to the same 2b path (`brms_theta2r_moment_draws()`;
-      2b ≈ 0 there). Scopes ADR-036's "posterior integrates it" (true for linear functionals, false for the
-      convex quadratic variance functional). Review: `data-raw/reviews/fable-review-m27-nested-fixed-{brief,response}.md`.
-- [x] `brms_theta2r_moment_draws()` implemented (2b + average-floor); both `brms_theta2r_draws` (crossed)
-      and `brms_theta2r_nested_draws` (nested) delegate to it. Smoke-fit verified (containment holds).
-- [x] O-Bayes-FNML regenerated on the corrected estimator — **interior** coverage **.95**, MAP **−.017**,
-      containment 1.00; **boundary (θ²=0)** coverage **1.00** (the average-floor pin per-cluster flooring
-      would fail). Matches Fable's derived predictions (≈.95 / ≈−.02) with no free parameter.
-- [x] O-Bayes-FML (Slice 1) regenerated after unifying the crossed helper — coverage **.95**, containment
-      **1.00**, MAP **+.012** (~unbiased; 2b ≈ 0 in the crossed regime). Pin updated to |rel-bias| < .05.
-- [x] Live O-Bayes-FNML-agree + O-Bayes-FML-agree fits green; full `test-icc-brms.R` `NOT_CRAN=true`
-      **219 pass / 0 fail / 0 skip**; `lint_package()` clean; `air` clean.
-- [x] Corollary spun off (background task `task_f3345a29`): coverage sim for the **frequentist**
-      nested-fixed MC interval (`theta2r_nested_draws()` shares an attenuated 1b displacement +
-      per-cluster floor — its own ADR).
-
-**Cross-cutting DoD (brief §8)**
-- [x] ADR-037 **amendment** records the Fable verdict (2b + average-floor + crossed unification + scopes
-      ADR-036's rationale). COVERAGE §④ + engine axis + cross-cutting row + last-synced refreshed;
-      REFERENCES O-Bayes-FML / O-Bayes-FNML registered; NEWS multilevel fixed-rater entry.
-- [x] `air format` + `lintr::lint_package()` clean; installed-pkg posture unchanged (brms fits live-only).
-- [ ] `R CMD check --as-cran` 0/0/1 + ship on the branch via PR — finish-task pass.
-
-**Cross-cutting DoD (brief §8)**
-- [ ] `COVERAGE.md §④` refreshed — crossed-D1-fixed / nested-D2-fixed brms cells; the stale
-      "fixed/one-way at the multilevel level" deferral wording corrected (one-way already shipped M25).
-- [ ] `REFERENCES.md` — O-Bayes-FML / O-Bayes-FNML registered with provenance.
-- [ ] `NEWS.md` — Bayesian multilevel fixed-rater entry (folded into the 0.1.0 section, unshipped —
-      [[verify-against-installed-package]] posture).
-- [ ] `_pkgdown.yml` — no new `@export` expected (internal fits); confirm (pkgdown-reference-index memory).
-- [ ] `air format .` clean; `lintr::lint_package()` clean before push ([[run-lintr-before-push]]).
-- [ ] Installed-package test run with `NOT_CRAN=true` ([[verify-against-installed-package]]);
-      `R CMD check --as-cran` 0/0/1 (New submission NOTE only).
-- [ ] Ships on a `m27-bayes-multilevel-fixed` branch, merged via PR ([[milestone-branches-and-prs]]);
-      post-merge `project/` reconcile (STATUS/MILESTONES/COVERAGE/REFERENCES/ROADMAP/NEWS) in the finish-task pass.
-- Status: **in flight** — ADR-037 accepted (2026-07-09); board opened. **Slice 1 is the next task.** No
-  code written yet.
+- Status: **done** (Slices 1–2 + cross-cutting DoD; merged via PR #32 at `0a93fe6`; full CI matrix
+  green incl. Windows and R-devel). **Slice 1 — crossed D1 fixed** (`fit_brms_multilevel_fixed()`; shared
+  `brms_theta2r_draws()`) shipped with O-Bayes-FML (coverage .95, containment 1.00). **Slice 2 — nested D2
+  fixed** (`fit_brms_nested_fixed()` = `score ~ 0 + rater + (1|cluster:subject)`) hit the ADR-anticipated
+  oracle-first FORK — the **raw** θ²_{r:c} push-forward undercovers the nested finite population (coverage
+  .86, →0 as clusters accrue, an incidental-parameters pathology) — resolved by a **gated Fable review
+  (#19, ADR-037 amendment):** subtract **2b** per draw (`b = tr(C·Σ_post)/(k−1)` = σ²_res/n_s; **two**
+  inflations — push-forward + plug-in of the center — the Bayesian MAP reads off the draws so needs both,
+  the frequentist point removes one), **floor the per-draw cluster AVERAGE** not each cluster (per-cluster
+  flooring → zero boundary coverage, #3), and **unify** the crossed/single-level helper to the same path
+  (`brms_theta2r_moment_draws()`; 2b ≈ 0 there). Regenerated oracles match Fable's derived predictions:
+  O-Bayes-FNML interior coverage **.95**/MAP −.017, boundary(θ²=0) **1.00**; O-Bayes-FML **.95**. Scopes
+  ADR-036's "posterior integrates it" rationale (true for linear functionals, false for the convex
+  quadratic variance functional). Multilevel one-way was already brms (Design 3, M25) — the stale deferral
+  wording corrected. `R CMD check --as-cran` 0/0/1; full suite 1175 pass / 0 fail; all 9 live Stan fits
+  pass locally (`skip_on_ci`); `air`/`lint_package` clean. Corollary spun off (background task): the
+  frequentist nested-fixed MC interval (`theta2r_nested_draws()`) likely shares an attenuated 1b
+  displacement + per-cluster floor → its own ADR (the frequentist point estimator is unaffected). Fable
+  review committed at `data-raw/reviews/fable-review-m27-nested-fixed-{brief,response}.md`.
 
 - Deferred out of M27 (record so not rediscovered): Bayesian **cluster-level** fixed (⚫ nested has none;
   crossed fixed cluster level unshipped for all engines), Bayesian **Design 3 fixed** (⚫ by-design —
