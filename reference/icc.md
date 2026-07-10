@@ -193,18 +193,20 @@ icc(
   **credible** interval (`ci_method = "posterior"`, forced). It covers,
   on **both balanced/complete and incomplete/ragged** data, the two-way
   random single-level design, the crossed (Design 1) **multilevel**
-  random design (subject and cluster levels), and the two-way
+  random design (subject and cluster levels), the two-way
   **fixed-rater** single-level design (Case-3A finite-population
-  \\\theta^2_r\\), and the crossed (Design 1) multilevel **fixed-rater**
-  design (subject level); and, on balanced/complete data only, the
-  one-way random design, the nested **multilevel** designs – Design 2
-  (raters nested in clusters, random and fixed) and Design 3 (raters
-  nested in subjects, agreement-only) at the subject level – the
-  conflated diagnostic, and within-cell replicates. Incomplete/ragged
-  **nested** Bayesian fits, and numeric-`unit` (D-study) projection, are
-  planned for later milestones. `"lme4"` requires the lme4 and merDeriv
-  packages; `"lavaan"` requires the lavaan package; `"brms"` requires
-  the brms package (and a working Stan toolchain).
+  \\\theta^2_r\\), the crossed (Design 1) multilevel **fixed-rater**
+  design (subject level), and the nested **Design 2** (raters nested in
+  clusters) and **Design 3** (raters nested in subjects, the multilevel
+  one-way, agreement-only) *random* multilevel designs (subject level);
+  and, on balanced/complete data only, the single-level one-way random
+  design, the nested Design 2 *fixed-rater* multilevel design at the
+  subject level, the conflated diagnostic, and within-cell replicates.
+  Incomplete/ragged **fixed**-nested and single-level one-way Bayesian
+  fits, and numeric-`unit` (D-study) projection, are planned for later
+  milestones. `"lme4"` requires the lme4 and merDeriv packages;
+  `"lavaan"` requires the lavaan package; `"brms"` requires the brms
+  package (and a working Stan toolchain).
 
 - conf_level:
 

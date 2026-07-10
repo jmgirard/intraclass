@@ -232,14 +232,16 @@ random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile <strong>credible</strong> interval
 (<code>ci_method = "posterior"</code>, forced). It covers, on <strong>both balanced/complete and
 incomplete/ragged</strong> data, the two-way random single-level design, the crossed
-(Design 1) <strong>multilevel</strong> random design (subject and cluster levels), and the
+(Design 1) <strong>multilevel</strong> random design (subject and cluster levels), the
 two-way <strong>fixed-rater</strong> single-level design (Case-3A finite-population
-\(\theta^2_r\)), and the crossed (Design 1) multilevel <strong>fixed-rater</strong> design (subject
-level); and, on balanced/complete data only, the one-way random design, the nested
-<strong>multilevel</strong> designs – Design 2 (raters nested in clusters, random and fixed) and
-Design 3 (raters nested in subjects, agreement-only) at the subject level – the conflated
-diagnostic, and within-cell replicates. Incomplete/ragged <strong>nested</strong> Bayesian fits, and
-numeric-<code>unit</code> (D-study) projection, are planned for later milestones. <code>"lme4"</code> requires the
+\(\theta^2_r\)), the crossed (Design 1) multilevel <strong>fixed-rater</strong> design (subject
+level), and the nested <strong>Design 2</strong> (raters nested in clusters) and <strong>Design 3</strong> (raters
+nested in subjects, the multilevel one-way, agreement-only) <em>random</em> multilevel designs
+(subject level); and, on balanced/complete data only, the single-level one-way random
+design, the nested Design 2 <em>fixed-rater</em> multilevel design at the subject level, the
+conflated diagnostic, and within-cell replicates. Incomplete/ragged <strong>fixed</strong>-nested and
+single-level one-way Bayesian fits, and numeric-<code>unit</code> (D-study) projection, are planned
+for later milestones. <code>"lme4"</code> requires the
 <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span> packages; <code>"lavaan"</code> requires the <span class="pkg">lavaan</span>
 package; <code>"brms"</code> requires the <span class="pkg">brms</span> package (and a working Stan toolchain).</p></dd>
 

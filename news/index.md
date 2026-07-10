@@ -162,8 +162,17 @@ simulations.
   rater-contrast posterior, and — because the rater means are then
   estimated from unequal cell counts — the moment correction that keeps
   the credible interval covering the fixed-population coefficient
-  becomes active (it is negligible on balanced data). Incomplete
-  nested-multilevel Bayesian fits remain planned for later milestones.
+  becomes active (it is negligible on balanced data). The Bayesian
+  engine now also fits **incomplete/ragged nested** **random**-rater
+  data at the subject level — Design 2 (raters nested in clusters) and
+  Design 3 (raters nested in subjects, the multilevel one-way,
+  agreement-only): the shipped nested fits are run on the observed cells
+  with the same harmonic-mean `k_eff` divisor + connectedness /
+  per-subject identifiability gates the other engines use, and — random
+  raters being ratios of variance components — need no moment
+  correction. Incomplete **fixed**-rater nested and incomplete
+  single-level one-way Bayesian fits remain planned for later
+  milestones.
 
 ### Choosing, projecting, and visualizing
 
