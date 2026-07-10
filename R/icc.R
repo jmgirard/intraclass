@@ -221,11 +221,11 @@
 #'   incomplete/ragged** data, the two-way random single-level design, the crossed
 #'   (Design 1) **multilevel** random design (subject and cluster levels), and the
 #'   two-way **fixed-rater** single-level design (Case-3A finite-population
-#'   \eqn{\theta^2_r}); and, on balanced/complete data only, the one-way random design, the
-#'   crossed multilevel **fixed-rater** design, the nested **multilevel** designs -- Design 2
-#'   (raters nested in clusters, random and fixed) and Design 3 (raters nested in subjects,
-#'   agreement-only) at the subject level -- the conflated diagnostic, and within-cell
-#'   replicates. Incomplete/ragged **fixed-rater multilevel** and **nested** Bayesian fits, and
+#'   \eqn{\theta^2_r}), and the crossed (Design 1) multilevel **fixed-rater** design (subject
+#'   level); and, on balanced/complete data only, the one-way random design, the nested
+#'   **multilevel** designs -- Design 2 (raters nested in clusters, random and fixed) and
+#'   Design 3 (raters nested in subjects, agreement-only) at the subject level -- the conflated
+#'   diagnostic, and within-cell replicates. Incomplete/ragged **nested** Bayesian fits, and
 #'   numeric-`unit` (D-study) projection, are planned for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
@@ -1130,32 +1130,33 @@ icc <- function(
     }
     if (!balanced) {
       # M30 (ADR-040): incomplete/ragged RANDOM-rater fits ship -- two-way single level +
-      # crossed (Design 1) multilevel. M31 (ADR-041) Slice 1: incomplete/ragged SINGLE-LEVEL
-      # two-way FIXED-rater ships too. fit_brms_fixed() runs unchanged on ragged data -- the k
-      # rater means (b_Intercept + treatment contrasts) feed brms_theta2r_draws(), which reads
-      # theta^2_r per draw through the shipped 2b moment correction + boundary-aware
-      # average-floor (ADR-037/038). That correction goes LIVE at the single level for the
-      # first time here: b = tr(C.Sigma_post)/(k - 1) != 0 once the rater means are estimated
-      # from unequal cell counts (b ~= 0 on balanced data, where the means come from the whole
-      # sample -- the M26/M27-S1 raw-push-forward regime). The M3 k_eff (harmonic-mean divisor)
-      # + single-level connectedness guard (~L887) are engine-agnostic and run pre-dispatch, so
-      # they protect brms. The still-deferred incomplete corners are refused with a case-naming
-      # message (#5/#8): FIXED MULTILEVEL (M31 Slice 2 / later), NESTED random multilevel
-      # (Designs 2/3), one-way, and replicates.
+      # crossed (Design 1) multilevel. M31 (ADR-041): incomplete/ragged FIXED-rater fits ship
+      # too -- SINGLE-LEVEL two-way (Slice 1, fit_brms_fixed) and CROSSED (Design 1) MULTILEVEL
+      # subject level (Slice 2, fit_brms_multilevel_fixed). Both run unchanged on ragged data --
+      # the k rater means (b_Intercept + treatment contrasts) feed brms_theta2r_draws(), which
+      # reads theta^2_r per draw through the shipped 2b moment correction + boundary-aware
+      # average-floor (ADR-037/038). That correction goes LIVE for the first time on ragged
+      # fixed data: b = tr(C.Sigma_post)/(k - 1) != 0 once the rater means are estimated from
+      # unequal cell counts (b ~= 0 on balanced data, where the means come from the whole
+      # sample -- the M26/M27-S1 raw-push-forward regime). The M3 k_eff (harmonic-mean divisor),
+      # single-level connectedness guard (~L887), and crossed-multilevel identifiability +
+      # cluster-ICC(c,k)-dropped-with-note gates (~L903) are engine-agnostic and run
+      # pre-dispatch, so they protect brms. The still-deferred incomplete corners are refused
+      # with a case-naming message (#5/#8): NESTED multilevel (Designs 2/3, fixed or random),
+      # one-way, and replicates. (Incomplete fixed-NESTED is also refused engine-agnostically
+      # upstream; the `ml_design != "crossed"` clause below is the brms catch for nested random.)
       if (
         oneway ||
           replicates ||
-          (raters == "fixed" && multilevel) ||
           (multilevel && ml_design != "crossed")
       ) {
         abort_unsupported(c(
           "The {.pkg brms} engine supports incomplete/ragged data only for the \\
            two-way single-level (random or fixed) and crossed (Design 1) multilevel \\
-           random designs so far.",
-          i = "Incomplete Bayesian fixed-rater multilevel, one-way, nested-multilevel, \\
-               and replicate ICCs are planned for later milestones; use \\
-               {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
-               incomplete data."
+           (random or fixed) designs so far.",
+          i = "Incomplete Bayesian nested-multilevel, one-way, and replicate ICCs are \\
+               planned for later milestones; use {.code engine = \"glmmTMB\"} (default) \\
+               or {.code \"lme4\"} for incomplete data."
         ))
       }
     }

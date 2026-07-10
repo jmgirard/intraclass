@@ -1090,13 +1090,20 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     - [x] **Coverage verdict (#18/#19): NOMINAL.** Ragged coverage **.965/.965** tracks complete .955/.955
           (k_eff 3.85 exercised, 2b active single-level, conv 1.00, MAP biased low −.020/−.042) → **no Fable
           review** (ADR-041's conditional escalation not triggered).
-  - **Slice 2 — Bayesian incomplete crossed (Design 1) fixed multilevel (subject level):**
-    - [ ] Narrow the multilevel clause of the `!balanced` brms guard so ragged crossed fixed dispatches to
-          `fit_brms_multilevel_fixed()`; nested / cluster-level fixed stay refused.
-    - [ ] Confirm the fit runs unchanged on ragged data; subject-level ICC(A,1)/ICC(A,k) off `k_eff`; cluster
-          `ICC(c,k)` dropped-with-note as M30.
-    - [ ] O-Bayes-IFML-fixed: reduction (≡ M27 Slice 1 balanced) + MAP-containment vs glmmTMB M18 Slice 1
-          incomplete fixed point (live, `skip_on_ci`) + seeded ragged coverage (committed fixture).
+  - **Slice 2 — Bayesian incomplete crossed (Design 1) fixed multilevel (subject level): ✅ DONE.**
+    - [x] Narrow the multilevel clause of the `!balanced` brms guard so ragged crossed fixed dispatches to
+          `fit_brms_multilevel_fixed()`; nested / cluster-level fixed stay refused. *(Removed the
+          `(raters == "fixed" && multilevel)` clause — nested stays caught by `ml_design != "crossed"`;
+          verified inline: crossed fixed incomplete proceeds, nested fixed/random incomplete still
+          `unsupported`.)*
+    - [x] Confirm the fit runs unchanged on ragged data; subject-level ICC(A,1)/ICC(A,k) off `k_eff`.
+          *(Subject level only — fixed cluster-level IRR is deferred for all engines, so `icc()` produces no
+          cluster rows; smoke + live fit: brms 0.636/0.863 vs glmmTMB M18 0.594/0.835, contained.)*
+    - [x] O-Bayes-IFML-fixed: reduction (≡ M27 Slice 1 balanced, complete-cell coverage .95 ~nominal) +
+          MAP-containment vs glmmTMB M18 Slice 1 incomplete fixed point (live, `skip_on_ci`) + seeded ragged
+          coverage (`bayesian-incomplete-fixed-ml-oracle.rds`, seed 31200, n_rep 100). **Coverage NOMINAL:**
+          ragged .91/.91 tracks complete .95/.95 within MC error (SE≈.022, within the .06 tolerance),
+          conv .94/.98, MAP ~unbiased → **no Fable review**.
   - **Cross-cutting DoD (brief §8):**
     - [ ] `_pkgdown.yml` unchanged (no new export) or updated if one appears; NEWS entry under 0.1.0.
     - [ ] `air format .` clean; `lintr::lint_package()` clean (run locally before PR — memory
@@ -1112,5 +1119,5 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   low value); the averaged cluster-level **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, open all engines, M9 §9);
   Bayesian **numeric-unit `d_study()`**; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
   coupling, **HPDI**, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — Slice 1 DONE (coverage NOMINAL, no Fable review); Slice 2 pending.** Branch
-  `m31-bayes-incomplete-fixed`.
+- Status: **active — both slices DONE (coverage NOMINAL both, no Fable review); cross-cutting DoD + PR
+  pending.** Branch `m31-bayes-incomplete-fixed`. Slice 1 committed at `91f0502`.

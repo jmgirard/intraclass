@@ -152,25 +152,24 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M31 Slice 2 — Bayesian incomplete crossed (Design 1) fixed multilevel (subject level) —
-  next.** **Slice 1 (incomplete two-way fixed, single level) is DONE:** guard narrowed (`icc.R:1128` — the
-  `raters == "fixed"` clause now `(raters == "fixed" && multilevel)`, so single-level ragged fixed dispatches
-  to `fit_brms_fixed()`; multilevel-fixed / one-way / nested still refused); `fit_brms_fixed()` +
-  `brms_theta2r_draws()` run unchanged on ragged data (no code change to the fit or the θ² helper).
-  **O-Bayes-IFixed coverage came back NOMINAL** — ragged .965/.965 tracks complete .955/.955 (k_eff 3.85
-  exercised, the 2b moment correction active single-level for the first time, conv 1.00, MAP biased low
-  −.020/−.042) → **no Fable review**. Live O-Bayes-IFixed-agree: glmmTMB M3 incomplete fixed points contained
-  (ICC(A,1) 0.450 vs 0.448, ICC(A,k) 0.734 vs 0.722). Committed fixture
-  `bayesian-incomplete-fixed-oracle.rds` (seed 31100, n_rep 200) + `data-raw/oracle-bayesian-incomplete-fixed.R`
-  (drives the shipped path). Tracking (ADR-041, MILESTONES board, REFERENCES O-Bayes-IFixed, NEWS, COVERAGE)
-  updated in-commit (#16). **Slice 2 acceptance:** narrow the multilevel clause of the same guard so ragged
-  crossed fixed dispatches to `fit_brms_multilevel_fixed()`; subject-level ICC(A,1)/ICC(A,k) off `k_eff`
-  (cluster `ICC(c,k)` dropped-with-note as M30); O-Bayes-IFML-fixed reduction (≡ M27 Slice 1 balanced) +
-  MAP-containment vs glmmTMB M18 Slice 1 incomplete fixed + seeded ragged coverage fixture. Other candidates
-  remain parked in [`ROADMAP.md`](ROADMAP.md): Bayesian nested/replicate/cluster-fixed incomplete corners,
-  **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)` divisor,
-  occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN upload**
-  (ADR-022).
+- Active task: **M31 — both slices DONE; cross-cutting DoD + finish-task/PR pending.** **Slice 1**
+  (incomplete two-way fixed, single level, committed `91f0502`): guard narrowed so single-level ragged fixed
+  dispatches to `fit_brms_fixed()`; O-Bayes-IFixed coverage **NOMINAL** (ragged .965/.965 vs complete
+  .955/.955); live glmmTMB M3 containment (0.450 vs 0.448, 0.734 vs 0.722). **Slice 2** (incomplete crossed
+  Design-1 fixed multilevel, subject level): removed the `(raters == "fixed" && multilevel)` guard clause so
+  ragged crossed fixed dispatches to `fit_brms_multilevel_fixed()` (nested stays refused via
+  `ml_design != "crossed"`); subject level only (fixed cluster-level IRR deferred all engines). O-Bayes-IFML-fixed
+  coverage **NOMINAL** (ragged .91/.91 tracks complete .95/.95 within MC error, SE≈.022; conv .94/.98) →
+  **no Fable review**; live glmmTMB M18 containment (0.594 in [0.381, 0.763], 0.835 in [0.681, 0.918]).
+  Committed fixtures `bayesian-incomplete-fixed{,-ml}-oracle.rds` + `data-raw/oracle-bayesian-incomplete-fixed{,-multilevel}.R`.
+  **No new fit, no new θ² helper (`brms_theta2r_moment_draws()` ships), no new argument/dependency** (#6).
+  Tracking (ADR-041, MILESTONES board both slices checked, REFERENCES O-Bayes-IFixed/-IFML-fixed, NEWS,
+  COVERAGE) updated in-commit (#16). **Next: cross-cutting DoD** (installed-pkg both ragged fixed fits,
+  `R CMD check --as-cran`, full suite, `_pkgdown.yml` no-op) then finish-task / PR. Other candidates remain
+  parked in [`ROADMAP.md`](ROADMAP.md): Bayesian **nested** fixed / replicate / cluster-fixed incomplete
+  corners, **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
+  divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
+  upload** (ADR-022).
 - Last green CI: **PR #35 (M30) — full CI matrix green (9/9), squash-merged to `main` at `9d2f0ed`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/1** (New
@@ -184,7 +183,14 @@
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
 - Blockers: —
-- Updated: 2026-07-10 by main session (Opus) — **M31 opened (ADR-041) + Slice 1 shipped, in one session.**
+- Updated: 2026-07-10 by main session (Opus) — **M31 opened (ADR-041) + BOTH slices shipped, in one session.**
+  Slice 2 (incomplete crossed Design-1 fixed multilevel, subject level): removed the
+  `(raters == "fixed" && multilevel)` clause of the `!balanced` brms guard so ragged crossed fixed dispatches
+  to `fit_brms_multilevel_fixed()` (nested stays refused via `ml_design != "crossed"`); subject level only.
+  O-Bayes-IFML-fixed coverage NOMINAL (ragged .91/.91 vs complete .95/.95, within MC error, SE≈.022) → no Fable
+  review; live glmmTMB M18 Slice 1 containment (0.594/0.835 inside the CIs). Fixture
+  `bayesian-incomplete-fixed-ml-oracle.rds` (seed 31200, n_rep 100) + `data-raw/oracle-bayesian-incomplete-fixed-multilevel.R`.
+  Below: **M31 Slice 1 shipped, in one session.**
   After a short retro the maintainer chose the incomplete/ragged **fixed-rater** Bayesian path (the first
   sibling ADR-040 deferred), then approved going straight into Slice 1. On branch `m31-bayes-incomplete-fixed`:
   ADR-041 written, M31 board added to MILESTONES (DoD = live board, ADR-015), preamble + ADR-index updated,
@@ -244,22 +250,23 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M31 (ADR-041) ACTIVE — Slice 1 DONE, Slice 2 next.** **Slice 1 (incomplete/ragged FIXED-rater, two-way
-single level) shipped:** the `!balanced` brms guard (`icc.R:1128`) was narrowed (`raters == "fixed"` →
-`(raters == "fixed" && multilevel)`) so single-level ragged fixed dispatches to `fit_brms_fixed()`, which runs
-unchanged (`brms_theta2r_draws()` reads θ²_r through the shipped 2b moment correction — **now live
-single-level for the first time**, `b ≠ 0`). **O-Bayes-IFixed coverage came back NOMINAL** (ragged .965/.965
-vs complete .955/.955, k_eff 3.85, conv 1.00) → **no Fable review** (ADR-041's conditional escalation not
-triggered); live O-Bayes-IFixed-agree glmmTMB M3 containment verified. **Slice 2 — incomplete crossed
-(Design 1) fixed multilevel (subject level):** narrow the multilevel clause of the same guard so
-`fit_brms_multilevel_fixed()` fits ragged data; subject-level ICC(A,1)/ICC(A,k) off `k_eff` (cluster
-`ICC(c,k)` dropped-with-note); O-Bayes-IFML-fixed reduction (≡ M27 Slice 1) + MAP-containment vs glmmTMB M18
-Slice 1 incomplete fixed + seeded ragged coverage. **No new fit, no new θ² helper, no new argument/dependency**
-(#6). Other candidates stay parked in [`ROADMAP.md`](ROADMAP.md): Bayesian nested/replicate/cluster-fixed
-incomplete corners, **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3
-`ICC(c,k)` divisor, occasion/ragged `d_study()`, the **vignette reassessment**, and the out-of-band **CRAN
-upload** (ADR-022). Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24 (PR #29), M25 (PR #30),
-M26 (PR #31), M27 (PR #32), M28 (PR #33), M29 (PR #34), M30 (PR #35); M31 in flight.
+**M31 (ADR-041) ACTIVE — both slices DONE; cross-cutting DoD + finish-task/PR next.** `engine = "brms"` +
+`raters = "fixed"` now fits incomplete/ragged data at the **two-way single level** (Slice 1, `fit_brms_fixed`,
+committed `91f0502`) and the **crossed (Design 1) fixed multilevel subject level** (Slice 2,
+`fit_brms_multilevel_fixed`). Both were narrowings of the one `!balanced` brms guard (`icc.R:1128`) — **no new
+fit, no new θ² helper** (`brms_theta2r_draws()` / `brms_theta2r_moment_draws()` ship), no new
+argument/dependency (#6). The milestone's genuine risk — the **2b θ² moment correction going live for the
+first time on ragged fixed data** (`b ≠ 0`) — resolved **NOMINAL** for both: O-Bayes-IFixed ragged .965/.965
+vs complete .955/.955; O-Bayes-IFML-fixed ragged .91/.91 vs complete .95/.95 (within MC error) → **no Fable
+review** (ADR-041's conditional escalation not triggered). Live -agree containment verified against glmmTMB
+M3 (single) / M18 Slice 1 (multilevel). Committed fixtures + seeded `data-raw` scripts; tracking in-commit
+(#16); `air`/`lintr` clean. **Next: cross-cutting DoD** — installed-pkg both ragged fixed fits with
+`NOT_CRAN=true`, `R CMD check --as-cran`, full suite, `_pkgdown.yml` no-op — then `/finish-task` and the PR.
+Other candidates stay parked in [`ROADMAP.md`](ROADMAP.md): Bayesian **nested** fixed / replicate /
+cluster-fixed incomplete corners, **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**,
+the Wave-3 `ICC(c,k)` divisor, occasion/ragged `d_study()`, the **vignette reassessment**, and the
+out-of-band **CRAN upload** (ADR-022). Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24
+(PR #29), M25 (PR #30), M26 (PR #31), M27 (PR #32), M28 (PR #33), M29 (PR #34), M30 (PR #35); M31 in flight.
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 

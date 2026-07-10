@@ -567,10 +567,14 @@ fit_brms_multilevel <- function(
 # ICC off these five rows unchanged. On balanced data theta^2_r ~= sigma^2_r, so the
 # subject-level ICCs track the random-rater M24 ones -- but only APPROXIMATELY under the
 # prior (flat on rater effects vs half-t on sigma_r), so the oracle is CONTAINMENT (glmmTMB
-# fixed inside the credible interval), not pointwise equality (O-Bayes-FML, #18). `data` must
-# be canonicalized to columns `subject`, `rater`, `cluster`, `score` and COMPLETE/BALANCED,
-# crossed fixed raters, subject level (guarded in icc(): nested / cluster-level / Design-3
-# fixed / conflated / incomplete / replicate refused).
+# fixed inside the credible interval), not pointwise equality (O-Bayes-FML, #18). On INCOMPLETE/
+# ragged data (M31 Slice 2, ADR-041) the fit is unchanged -- the missing cells are handled
+# natively, brms_theta2r_draws() reads theta^2_r from the ragged rater contrasts (the 2b moment
+# correction goes live, b != 0), and the engine-agnostic M9 k_eff divisor + crossed-multilevel
+# identifiability run pre-dispatch (O-Bayes-IFML-fixed). `data` must be canonicalized to columns
+# `subject`, `rater`, `cluster`, `score` and crossed fixed raters, subject level, balanced OR
+# incomplete (guarded in icc(): nested / cluster-level / Design-3 fixed / conflated / replicate
+# refused).
 fit_brms_multilevel_fixed <- function(
   data,
   seed = NULL,

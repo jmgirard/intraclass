@@ -101,23 +101,24 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   )
   # NB: incomplete/ragged fits now ship for brms at the TWO-WAY single level -- RANDOM
   # (M30 Slice 1, ADR-040) and FIXED-rater (M31 Slice 1, ADR-041; theta^2 under imbalance
-  # via the 2b moment correction) -- plus CROSSED (Design 1) MULTILEVEL RANDOM (M30 Slice 2)
-  # -- see the O-Bayes-Incomplete / O-Bayes-IFixed / O-Bayes-IML live + fixture tests below.
-  # What stays deferred (and aborts BEFORE any fit, no Stan needed): incomplete FIXED-rater
-  # MULTILEVEL (M31 Slice 2 / later), incomplete ONE-WAY, and incomplete NESTED multilevel
-  # (Designs 2/3). Each must name the supported scope (#5/#8).
+  # via the 2b moment correction) -- plus CROSSED (Design 1) MULTILEVEL, RANDOM (M30 Slice 2)
+  # and FIXED (M31 Slice 2, subject level) -- see the O-Bayes-Incomplete / O-Bayes-IFixed /
+  # O-Bayes-IML / O-Bayes-IFML-fixed live + fixture tests below. What stays deferred (and aborts
+  # BEFORE any fit, no Stan needed): incomplete NESTED multilevel (Designs 2/3, fixed or random),
+  # incomplete ONE-WAY, and incomplete replicates. Each must name the supported scope (#5/#8).
   d_inc <- d[-1, , drop = FALSE] # ragged two-way (one cell dropped)
-  # incomplete FIXED-rater CROSSED MULTILEVEL (still deferred): raters crossed with clusters
-  # (Design 1, shared labels), fixed, one cell dropped. (suppressWarnings: the fixed-rater
-  # nudge fires before the abort.)
-  dcm <- expand.grid(rater = factor(1:3), s = 1:3, cluster = factor(1:2))
-  dcm$subject <- factor(paste0(dcm$cluster, "_", dcm$s))
-  dcm$score <- as.numeric(seq_len(nrow(dcm)))
-  dcm_inc <- dcm[-1, , drop = FALSE]
+  # incomplete FIXED-rater NESTED multilevel (Design 2, still deferred): raters nested in
+  # clusters (cluster-unique labels), fixed, one cell dropped. (suppressWarnings: the
+  # fixed-rater nudge fires before the abort.)
+  dnf <- expand.grid(r_in_c = 1:2, s = 1:3, cluster = factor(1:2))
+  dnf$subject <- factor(paste0(dnf$cluster, "_", dnf$s))
+  dnf$rater <- factor(paste0(dnf$cluster, "_r", dnf$r_in_c))
+  dnf$score <- as.numeric(seq_len(nrow(dnf)))
+  dnf_inc <- dnf[-1, , drop = FALSE]
   expect_error(
     suppressWarnings(
       icc(
-        dcm_inc,
+        dnf_inc,
         score,
         rater,
         subject = subject,
@@ -702,6 +703,56 @@ test_that("O-Bayes-IFixed: committed reference covers ragged two-way fixed-rater
   #     plug-in, the M23/M26 posture) -- characterized, not asserted unbiased.
   expect_lt(cmp$map_icc1_relbias, 0.02)
   expect_lt(rag$map_icc1_relbias, 0.02)
+})
+
+# --- O-Bayes-IFML-fixed: committed ragged crossed FIXED multilevel coverage (no brms, M31 S2) ---
+# The crossed (Design 1) MULTILEVEL FIXED-rater sibling of O-Bayes-IFixed (single-level fixed) and
+# O-Bayes-IML (crossed multilevel random). data-raw/oracle-bayesian-incomplete-fixed-multilevel.R
+# runs the ten Hove (2022) crossed five-component DGP with FIXED rater means (k = 5) in two cells --
+# a COMPLETE grid (k_eff = k, b ~= 0, the shipped M27-Slice-1 reduction) and a FIXED, connected
+# RAGGED incidence (~12% cells deleted, constant k_eff < 5, b != 0) -- through the SHIPPED
+# fit_brms_multilevel_fixed() recipe (brms_theta2r_draws() with the 2b + average-floor moment
+# correction). SUBJECT LEVEL ONLY (fixed cluster-level IRR is deferred for all engines). The
+# unknown (#1): whether the percentile credible interval COVERS on ragged crossed data once the 2b
+# correction is active in the multilevel fixed regime. The pin checks the ragged cell tracks the
+# complete cell within Monte-Carlo error. A real shortfall is REPORTED (#18) and gates a Fable
+# review (#19), never tuned away (#4). Fast, no fitting, runs on every CI job.
+test_that("O-Bayes-IFML-fixed: committed reference covers ragged crossed fixed multilevel data", {
+  fixture <- test_path("fixtures", "bayesian-incomplete-fixed-ml-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete-fixed-multilevel.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$design == "complete", ]
+  rag <- s[s$design == "ragged", ]
+
+  # The ragged cell exercises the k_eff divisor AND activates the 2b correction (b != 0).
+  expect_lt(rag$k_eff, 5)
+  expect_equal(cmp$k_eff, 5)
+
+  # (1) High convergence at the half-t DGP in both cells.
+  expect_gte(cmp$converged_frac, 0.90)
+  expect_gte(rag$converged_frac, 0.90)
+
+  # (2) REDUCTION: on complete data the incomplete fixed multilevel path IS the shipped M27-S1
+  #     fixed path (k_eff = k, b ~= 0), so subject-level coverage is ~nominal.
+  expect_gte(cmp$coverage_subj1, 0.88)
+  expect_lte(cmp$coverage_subj1, 0.99)
+  expect_gte(cmp$coverage_subjk, 0.88)
+  expect_lte(cmp$coverage_subjk, 0.99)
+
+  # (3) SUBJECT-LEVEL COVERAGE ON RAGGED DATA (the Slice-2 unknown, #1/#18): ragged subject
+  #     coverage tracks the complete cell within Monte-Carlo error and stays ~nominal for BOTH
+  #     the divisor-free ICC(A,1) and the k_eff-divided ICC(A, k_eff).
+  expect_gte(rag$coverage_subj1, cmp$coverage_subj1 - 0.06)
+  expect_gte(rag$coverage_subjk, cmp$coverage_subjk - 0.06)
+  expect_gte(rag$coverage_subj1, 0.88)
+  expect_gte(rag$coverage_subjk, 0.88)
+
+  # (4) Subject MAP tracks the population in both cells (small skew, the M23/M26 posture).
+  expect_lt(abs(cmp$map_subj1_relbias), 0.10)
+  expect_lt(abs(rag$map_subj1_relbias), 0.12)
 })
 
 # O-Bayes-Rep wiring (no brms/Stan needed, M29 Slice 2): the within-cell-replicate ICC is a
@@ -1341,6 +1392,92 @@ test_that("brms fits the ragged fixed-rater two-way ICC end to end (O-Bayes-IFix
     engine = "glmmTMB",
     seed = 1
   )))
+  by_index <- function(x, i) x$estimate[x$index == i]
+  for (i in c("ICC(A,1)", "ICC(A,k)")) {
+    reml <- by_index(gf, i)
+    expect_gte(reml, ta$conf.low[ta$index == i])
+    expect_lte(reml, ta$conf.high[ta$index == i])
+  }
+})
+
+# --- Live brms fit: INCOMPLETE crossed FIXED multilevel, O-Bayes-IFML-fixed-agree (M31 S2) ---
+# The ragged crossed (Design 1) FIXED-rater multilevel sibling of O-Bayes-IFixed-agree (single
+# level) and O-Bayes-ML-agree (random multilevel). Gated OFF CI. The committed O-Bayes-IFML-fixed
+# fixture is the coverage oracle; this smoke test wires fit_brms_multilevel_fixed() end to end ON
+# RAGGED DATA -- where the 2b moment correction goes live (b != 0) -- and pins CONTAINMENT of the
+# independent glmmTMB M18 Slice 1 incomplete fixed point at the SUBJECT level (fixed cluster-level
+# IRR is deferred for all engines, so only the subject rows are produced).
+test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes-IFML-fixed-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # A connected ragged crossed Design-1 fixed multilevel design (raters shared across clusters).
+  set.seed(5120)
+  Nc <- 8L
+  Ns <- 4L
+  k <- 4L
+  mu_r <- c(-0.6, -0.2, 0.2, 0.6)
+  grid <- expand.grid(
+    rater = seq_len(k),
+    s = seq_len(Ns),
+    cluster = seq_len(Nc)
+  )
+  sid <- paste0(grid$cluster, "_", grid$s)
+  mu_c <- rnorm(Nc, 0, sqrt(0.5))
+  mu_sc <- rnorm(length(unique(sid)), 0, sqrt(1.0))[as.integer(factor(sid))]
+  mu_cr <- rnorm(Nc * k, 0, sqrt(0.16))[as.integer(interaction(
+    grid$cluster,
+    grid$rater
+  ))]
+  grid$score <- mu_c[grid$cluster] +
+    mu_sc +
+    mu_r[grid$rater] +
+    mu_cr +
+    rnorm(nrow(grid), 0, sqrt(0.5))
+  grid$subject <- factor(sid)
+  grid$rater <- factor(grid$rater)
+  grid$cluster <- factor(grid$cluster)
+  d <- grid[
+    -seq(1L, nrow(grid), by = 9L),
+    c("subject", "rater", "cluster", "score")
+  ]
+  expect_lt(nrow(d), Nc * Ns * k) # ragged
+
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+  fa <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  expect_identical(fa$engine, "brms")
+  expect_identical(fa$ci$method, "posterior")
+  ta <- tidy(fa)
+  # Subject level only for fixed crossed multilevel (cluster-level fixed IRR is deferred).
+  expect_setequal(unique(ta$level), "subject")
+  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
+
+  # CONTAINMENT: the glmmTMB M18 Slice 1 incomplete fixed subject point sits inside each brms
+  # credible interval. suppressWarnings mutes the expected fixed-rater advisory.
+  gf <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "glmmTMB",
+    seed = 1
+  )))
+  gf <- gf[gf$level == "subject", ]
   by_index <- function(x, i) x$estimate[x$index == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {
     reml <- by_index(gf, i)
