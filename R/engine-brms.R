@@ -265,6 +265,49 @@ fit_brms_twoway <- function(
   )
 }
 
+# Within-cell replicates Bayesian fit (M29 Slice 2, ADR-039): the M17 two-way random model
+# with a subject-by-rater interaction,
+#   score ~ 1 + (1 | subject) + (1 | rater) + (1 | subject:rater)
+# under the SAME sourced half-t(4, 0, 1) prior on every random-effect SD (unchanged from
+# M23-M27; the prior now also covers the interaction SD sigma_sr, as it applies to all
+# random-effect SDs). Extends fit_brms_twoway() by splitting the residual into the
+# subject x rater interaction sigma^2_sr and pure error sigma^2_e (estimand-spec
+# M17-within-cell-replicates.md §1). Four components map to the M17 internal names:
+#   subject       = sigma^2_s   <- sd_subject__Intercept
+#   rater         = sigma^2_r   <- sd_rater__Intercept
+#   subject_rater = sigma^2_sr  <- sd_subject:rater__Intercept
+#   residual      = sigma^2_e   <- sigma                      (pure error)
+# The M17 error-set map ({rater, subject_rater, residual} for agreement, {subject_rater,
+# residual} for consistency) and the per-component `occasions` divisor (pure error / n_o,
+# the interaction NOT divided) are applied PER DRAW by the shared posterior_summary() ->
+# icc_point() path, exactly as the frequentist replicate estimand -- a VARIANCE-RATIO
+# push-forward (no theta^2 functional). `data` must be canonicalized to columns `subject`,
+# `rater`, `score` (factors for the first two) and BALANCED/COMPLETE replicated (>1 rating
+# per subject x rater cell), two-way random single level (guarded in icc(): fixed /
+# multilevel / incomplete / numeric unit replicate brms refused).
+fit_brms_replicates <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + (1 | subject) + (1 | rater) + (1 | subject:rater)"
+    ),
+    spec = c(
+      subject = "sd_subject__Intercept",
+      rater = "sd_rater__Intercept",
+      subject_rater = "sd_subject:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}
+
 # One-way random Bayesian fit (M26 Slice 1, ADR-036): the Shrout & Fleiss Case-1 model
 #   score ~ 1 + (1 | subject)
 # under the SAME sourced half-t(4, 0, 1) prior on the (single) random-effect SD (unchanged

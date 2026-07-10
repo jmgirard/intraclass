@@ -26,14 +26,18 @@ resolved by a gated Fable review (#19) adopting a 2b moment correction + boundar
 (PR #33), the spun-off M27 corollary: the shipped `theta2r_nested_draws()` interval undercovered the
 nested finite population (per-cluster floor + 1b), fixed by the shared `theta2r_moment_draws()` (2b +
 boundary-aware average-floor) unified across glmmTMB/lme4/lavaan after a second gated Fable review (#19).
-**No milestone is currently in flight.** Each milestone is scoped by an ADR at its start
+**M29 (ADR-039) — Bayesian conflated diagnostic + within-cell replicates, two-way random,
+balanced/complete — is now in flight** (branch `m29-bayes-conflated-replicates`), continuing the Bayesian
+arc with its two remaining low-risk parity follow-ons (both variance-ratio push-forwards → no θ² moment
+correction, no Fable-review risk); Bayesian incomplete/ragged is the isolated next milestone (M30). Each
+milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
-ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28).
+ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -965,3 +969,74 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   incl. Windows and R-devel, 9/9). `R CMD check --as-cran` 0/0/1; installed brms 29/0/0; non-brms suite
   295/0/0; `air`/`lint` clean. The frequentist nested-fixed MC interval is now moment-corrected and
   nominal; all fixed-rater intervals share one boundary-aware helper.
+
+## M29: Bayesian engine (brms) — conflated diagnostic + within-cell replicates (ADR-039)
+- Goal: extend `engine = "brms"` + `ci_method = "posterior"` to the two remaining low-risk parity
+  follow-ons — the **conflated** diagnostic (`level = "conflated"`, ten Hove Eq. 14) and **within-cell
+  replicates** (σ²_res → σ²_sr + σ²_e) — two-way **random**, balanced/complete, single level.
+  **Engine/interval parity, not new estimand work** (cf. M23–M27): both reuse *shipped* M17 estimands
+  (ADR-026), read off posterior draws; no new estimand-spec, argument, or dependency (`brms` already a
+  `Suggests`); additive, non-breaking (#6) — new valid `engine = "brms"` × {conflated, replicates}
+  combinations only. Both are **ratios of variance components** (like the whole random-rater Bayesian
+  arc), so neither exposes the θ² finite-population functional that forced the M27/M28 2b moment
+  correction — a clean push-forward, **no Fable-review risk**. Two thin vertical slices, ascending
+  oracle-risk (conflated first). Bayesian **incomplete/ragged** is the isolated next milestone (M30).
+- Reference: ADR-039 (scope + slice split + oracle posture); no new estimand-spec — reuses
+  [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) (§2 composition, §4 never-recommended,
+  §6 out-of-scope) and [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md)
+  (§2 per-component divisors, §3 `occasions`, §6 reduction oracle). Oracles **O-Bayes-Conflated** /
+  **O-Bayes-Rep** (#1 — reduction + REML agreement/containment + coverage; no textbook worked posterior
+  value, M23–M27 precedent), off committed seeded fixtures; provenance `data-raw/oracle-bayesian-{conflated,replicates}.R`,
+  registered in [`REFERENCES.md`](REFERENCES.md).
+
+- **Slice 1 — Bayesian conflated (no new fit).** `level = "conflated"` reads Eq. 14 off the
+  already-shipped M24 `fit_brms_multilevel()` five-component draws (`icc.R:1238`) — the flat two-way ICC
+  (σ²_c+σ²_{s:c} lumped as signal; σ²_r+σ²_cr+σ²_res as error, same flat `k_eff`), **agreement-only**,
+  per posterior draw. Narrow the brms conflated refusal (`icc.R:598–604`) to admit `level = "conflated"`
+  → route to the multilevel fit; preserve the diagnostic-only "never recommended" posture (§4).
+  - [x] Guard narrowed + conflated brms dispatch; conflated `ICC` off the M24 draws; MAP + percentile
+    credible interval. (Verified live: conflated rows render with no SF label; header "Diagnostic contrast".)
+  - [x] Oracle **O-Bayes-Conflated**: Eq-14 identity per draw (O-Eq14, Stan-free); MAP ≈ frequentist
+    glmmTMB conflated (**containment 1.00**, #18); visibly above the subject level (gap **.144**);
+    coverage **.95**; convergence **1.00**.
+  - [x] Committed fixture `tests/testthat/fixtures/bayesian-conflated-oracle.rds` (seed 20290, 80 reps) +
+    generator `data-raw/oracle-bayesian-conflated.R` (#4); single live brms fit `skip_on_ci()` +
+    `skip_if_not_installed("brms")` ([[brms-live-fit-skip-on-ci]]).
+
+- **Slice 2 — Bayesian within-cell replicates (one new fit).** `fit_brms_replicates()` in
+  `R/engine-brms.R` (reuses `fit_brms_common()`): `score ~ 1 + rater + (1|subject) + (1|subject:rater)`
+  under the unchanged half-*t*(4,0,1) SD prior (now covering σ_sr too). `occasions` applies the M17
+  per-component error divisors per draw (`"average"` divides pure error by `n_o`; σ²_sr not divided).
+  Narrow the brms replicate refusal (`icc.R:1124`) + add a dispatch branch by `fit_brms_twoway()`
+  (`icc.R:1304`).
+  - [x] `fit_brms_replicates()`; σ²_sr/σ²_e split; guard narrowed + dispatch (single-level random only;
+    fixed×/multilevel× replicates refused); `occasions` single/average per-draw divisors. (Verified live:
+    single/average occasion rows render; average > single.)
+  - [x] Oracle **O-Bayes-Rep**: O-Bayes-Rep-wiring (Stan-free, exact per-draw occasion divisor); coverage
+    single **.94** / average **.93**; glmmTMB containment **1.00/1.00**; average > single **1.00**;
+    converged **.99** (MAP ~10% low at N_s=25, reported #18 — coverage is the pin).
+  - [x] Committed fixture `tests/testthat/fixtures/bayesian-replicates-oracle.rds` (seed 20291, 80 reps) +
+    generator `data-raw/oracle-bayesian-replicates.R` (#4); single live brms fit `skip_on_ci()`.
+
+- **Cross-cutting DoD:**
+  - [x] No new `@export` (both reuse shipped `icc()` surface) → `_pkgdown.yml` unaffected.
+  - [x] `COVERAGE.md` §② (replicates) + §④ (conflated) + cross-cutting brms row + last-synced refreshed;
+    NEWS updated (folded into the unreleased 0.1.0 section); REFERENCES O-Bayes-Conflated / O-Bayes-Rep.
+  - [x] `air format .` + `lintr` clean ([[run-lintr-before-push]]); installed-pkg brms suite green with
+    `NOT_CRAN=true` — **266 pass / 0 fail, all live Stan fits ran** ([[verify-against-installed-package]]);
+    `R CMD check --as-cran` **0/0/1** (New submission NOTE only); full suite (CI mode) 1089/0. *(Full CI
+    matrix runs on the PR.)*
+
+- Deferred out of M29 (record so not rediscovered): Bayesian **incomplete/ragged** (M30 — leans on
+  coverage calibration, likely a gated Fable review, #19); Bayesian **fixed-rater × replicates** and
+  **multilevel × replicates** (the M20 Slice 1/2 frequentist deferrals' siblings); **conflated ×
+  consistency** (🟣 research, unsourced) and **conflated × fixed** (⚫ by design); Bayesian
+  **numeric-unit `d_study()`** projection; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
+  coupling, **HPDI** intervals, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
+- Status: **done (all gates green) — ready for PR.** Opened by ADR-039 (2026-07-10) on branch
+  `m29-bayes-conflated-replicates`. **Slice 1 (conflated)** — O-Bayes-Conflated pinned (coverage .95,
+  containment 1.00, gap .144). **Slice 2 (within-cell replicates)** — `fit_brms_replicates()`; O-Bayes-Rep
+  pinned (coverage .94/.93, containment 1.00, average > single 1.00). Both are variance-ratio
+  push-forwards (no θ² moment correction). `air`/`lintr` clean; full suite (CI mode) 1089/0/10;
+  installed-pkg brms 266/0/0 (all live Stan fits ran); `R CMD check --as-cran` 0/0/1. Compress this board
+  to the summary form once the PR merges.

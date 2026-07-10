@@ -590,24 +590,16 @@ icc <- function(
   }
 
   # brms (Bayesian) multilevel scope (M24 crossed, ADR-034; M25 nested Designs 2/3,
-  # ADR-035): the crossed (Design 1) five-component fit (subject + cluster levels), the
-  # nested Design 2 four-component fit and the nested Design 3 three-component fit (both
-  # subject level) -- random, balanced/complete. Design 3 is agreement-only (the generic
-  # consistency-on-Design-3 abort below applies to every engine). The conflated diagnostic
-  # is the one remaining deferred Bayesian multilevel follow-on -- refuse it loudly now that
-  # `ml_design` is resolved, BEFORE the generic conflated guard below would emit a non-brms
-  # message (#5/#8). Fixed / incomplete / replicate / numeric unit brms are refused with the
-  # rest of the brms deferrals further down.
-  if (engine == "brms" && multilevel) {
-    if ("conflated" %in% level) {
-      abort_unsupported(c(
-        "The {.pkg brms} engine does not support the conflated ICC yet.",
-        i = "The Bayesian conflated diagnostic is a planned follow-on; use \\
-             {.code engine = \"glmmTMB\"}.",
-        i = "Use {.code level = \"subject\"} or {.code \"cluster\"}."
-      ))
-    }
-  }
+  # ADR-035; M29 conflated, ADR-039): the crossed (Design 1) five-component fit (subject +
+  # cluster + conflated levels), the nested Design 2 four-component fit and the nested
+  # Design 3 three-component fit (both subject level) -- random, balanced/complete. Design 3
+  # is agreement-only (the generic consistency-on-Design-3 abort below applies to every
+  # engine). The conflated diagnostic (M29 Slice 1) reads Eq. 14 off the same crossed
+  # five-component fit as a variance-ratio push-forward -- no new fit, no brms-specific
+  # guard: the engine-agnostic conflated checks below (consistency / fixed / nested) apply
+  # to brms too, and brms incomplete data is refused by the balance guard. Fixed /
+  # incomplete / replicate / numeric unit brms are refused with the rest of the brms
+  # deferrals further down.
 
   # Conflated single-level ICC (Eq. 14, M17 Slice 1): the biased ignore-clusters
   # coefficient off the crossed five-component fit. Agreement-only, random raters,
@@ -1119,11 +1111,15 @@ icc <- function(
     # fixed-nested -- are refused engine-agnostically upstream (~L655); incomplete crossed
     # fixed is caught by the `!balanced` brms guard below. So no brms-specific fixed guard
     # is needed here.
-    if (replicates) {
+    if (replicates && (multilevel || raters == "fixed")) {
+      # Single-level two-way RANDOM replicates ship for brms (M29 Slice 2, ADR-039).
+      # The fixed-rater and multilevel replicate corners stay deferred (the Bayesian
+      # siblings of the M20 Slice 1/2 frequentist deferrals) -- refuse them loudly (#5).
       abort_unsupported(c(
-        "The {.pkg brms} engine does not support within-cell replicates yet.",
-        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
-             replicated data."
+        "The {.pkg brms} engine supports within-cell replicates only for the \\
+         single-level two-way random design so far.",
+        i = "Fixed-rater and multilevel Bayesian replicates are planned for a later \\
+             milestone; use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
       ))
     }
     if (!balanced) {
@@ -1233,8 +1229,10 @@ icc <- function(
       # Crossed (Design 1) random raters, Bayesian (M24 Slice 1, ADR-034): the M5
       # five-component fit under the half-t(4, 0, 1) SD prior; the point (MAP) and the
       # percentile credible interval come from posterior_summary() off the `draws`
-      # contract. Nested, fixed, conflated, incomplete, and replicate brms fits are
-      # refused upstream (#5).
+      # contract. Also serves the conflated diagnostic (M29 Slice 1, ADR-039): Eq. 14
+      # composes off these same five components (signal cluster + subject, error rater +
+      # cluster_rater + residual) per posterior draw. Nested, fixed, incomplete, and
+      # replicate brms fits are refused upstream (#5).
       fit_brms_multilevel(df, seed = seed, brm_args = brm_args)
     } else if (engine == "lme4") {
       # Crossed (Design 1) random raters via lme4 (M14 Slice 2).
@@ -1293,6 +1291,13 @@ icc <- function(
     }
     if (engine == "lme4") {
       fit_lme4_replicates(df)
+    } else if (engine == "brms") {
+      # Two-way random replicates, Bayesian (M29 Slice 2, ADR-039): the same
+      # interaction fit under the half-t(4, 0, 1) SD prior; the residual splits into
+      # sigma^2_sr (subject:rater) and pure error, and `occasions` averaging divides
+      # pure error by n_o PER DRAW (posterior_summary -> icc_point). Fixed / multilevel /
+      # incomplete replicate brms are refused upstream (#5).
+      fit_brms_replicates(df, seed = seed, brm_args = brm_args)
     } else {
       fit_glmmtmb_replicates(df)
     }
