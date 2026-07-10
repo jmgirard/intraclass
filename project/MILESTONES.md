@@ -899,24 +899,29 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 ### DoD checklist (the live board — ADR-015; check items off in the same commit as the work, #16)
 
-**Slice 1 — Bayesian crossed Design 1 fixed (`fit_brms_multilevel_fixed()`) + O-Bayes-FML**
-- [ ] `fit_brms_multilevel_fixed()` in `R/engine-brms.R` reusing `fit_brms_common()` — five-component
+**Slice 1 — Bayesian crossed Design 1 fixed (`fit_brms_multilevel_fixed()`) + O-Bayes-FML** ✅ **done**
+- [x] `fit_brms_multilevel_fixed()` in `R/engine-brms.R` reusing `fit_brms_common()` — five-component
       crossed fit with a fixed `rater` population-level effect; half-*t*(4,0,1) prior on the random-effect
-      SDs only; θ²_r read **raw** per posterior draw from the rater fixed-effect draws, injected as the
-      `rater` row of the `draws` contract (M26 Slice 2 pattern at the multilevel level).
-- [ ] `R/icc.R`: narrow the brms crossed-D1 multilevel guard to admit `raters = "fixed"` + add the
-      dispatch branch to `fit_brms_multilevel_fixed()`. Cluster-level fixed / Design-3 fixed / incomplete
-      / replicate / numeric-unit brms refusals stay (classed aborts, #5/#8).
-- [ ] Subject-level `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)` compose off `draws` unchanged
-      (`brms_component_draws()`); MAP + percentile credible interval; `posterior` forced-default.
-- [ ] **Oracle-first resolution recorded (#1/#18):** raw θ²_r push-forward (no bias correction)
-      **contained** by / MAP ≈ glmmTMB M10 fixed; balanced fixed-vs-random *characterized*, not asserted
-      equal. Characterize (don't tune, #4) if the raw push-forward disagrees.
-- [ ] `data-raw/oracle-bayesian-multilevel-fixed.R` generator runs the M10 crossed-fixed DGP with brms +
-      the half-*t* prior; commits `tests/testthat/fixtures/bayesian-multilevel-fixed-oracle.rds` (#4).
-- [ ] O-Bayes-FML asserted in `test-icc-brms.R`: containment + seeded coverage ~nominal + convergence
-      (`brms_convergence()`) + consistency≡random where it holds. Single live Stan fit `skip_on_cran()` +
-      `skip_if_not_installed("brms")` + `skip_on_ci()` ([[brms-live-fit-skip-on-ci]]); reduced draws.
+      SDs only; θ²_r read **raw** per posterior draw from the rater fixed-effect draws (shared
+      `brms_theta2r_draws()` helper, extracted from `fit_brms_fixed`), injected as the `rater` row of the
+      five-row `draws` contract (M26 Slice 2 pattern at the multilevel level).
+- [x] `R/icc.R`: narrowed the brms fixed-multilevel guard to `ml_design != "crossed"` (admits crossed D1,
+      still defers nested D2) + added the crossed-fixed brms dispatch branch. Cluster-level fixed /
+      Design-3 fixed / incomplete / replicate / numeric-unit brms refusals stay (classed aborts, #5/#8;
+      Design-3/cluster-level/incomplete handled engine-agnostically upstream at ~L655).
+- [x] Subject-level `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)` compose off `draws` unchanged
+      (`brms_component_draws()`); MAP + percentile credible interval; `posterior` forced-default; cluster
+      level correctly absent (forced `level = "subject"`).
+- [x] **Oracle-first resolution recorded (#1/#18):** raw θ²_r push-forward (no bias correction)
+      **contained** by glmmTMB M10 fixed in **100/100 reps** (containment 1.00); balanced fixed-vs-random
+      *characterized* via containment, not asserted equal. No tuning — the raw push-forward agreed.
+- [x] `data-raw/oracle-bayesian-multilevel-fixed.R` generator ran the M10 crossed-fixed DGP with brms +
+      the half-*t* prior; committed `tests/testthat/fixtures/bayesian-multilevel-fixed-oracle.rds` (#4).
+      Observed (n_rep 100, seed 20270): converged .97, containment 1.00, coverage .96, MAP rel-bias −.004.
+- [x] O-Bayes-FML asserted in `test-icc-brms.R`: containment + seeded coverage ~nominal + convergence +
+      the live O-Bayes-FML-agree fit (glmmTMB inside brms CI, agreement + consistency, lme4 concurrence).
+      Live Stan fit `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
+      ([[brms-live-fit-skip-on-ci]]); reduced draws. Full file `NOT_CRAN=true`: **194 pass / 0 fail / 0 skip**.
 
 **Slice 2 — Bayesian nested Design 2 fixed (`fit_brms_nested_fixed()`) + O-Bayes-FNML** *(conditional on the oracle-first resolution; degrades to a recorded deferral if unpinnable)*
 - [ ] `fit_brms_nested_fixed()` in `R/engine-brms.R` reusing `fit_brms_common()` — `score ~ 0 + rater +

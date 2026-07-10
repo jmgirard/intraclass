@@ -1113,15 +1113,18 @@ icc <- function(
   # balance/replication and the resolved unit are known (#5/#8). A soft k = 2 note
   # surfaces ten Hove et al. (2020)'s bias/undercoverage caveat (#13).
   if (engine == "brms") {
-    if (raters == "fixed" && multilevel) {
-      # Single-level fixed-rater brms ships (M26 Slice 2, ADR-036); the fixed-rater
-      # MULTILEVEL brms fits (crossed M10 / nested M19 analogs) stay deferred -- refuse them
-      # loudly rather than let the multilevel dispatch below silently pick glmmTMB (#5).
+    if (raters == "fixed" && multilevel && ml_design != "crossed") {
+      # Crossed (Design 1) fixed-rater brms ships (M27 Slice 1, ADR-037); the NESTED
+      # (Design 2) fixed-rater brms fit stays deferred to M27 Slice 2 -- refuse it loudly
+      # rather than let the multilevel dispatch below silently pick glmmTMB (#5). Design 3
+      # fixed, cluster-level fixed, and incomplete fixed-nested are aborted upstream
+      # (engine-agnostic, ~L655) before this point.
       abort_unsupported(c(
-        "The {.pkg brms} engine does not support fixed-rater multilevel ICCs yet.",
-        i = "Bayesian fixed-rater multilevel is a planned follow-on; use \\
+        "The {.pkg brms} engine does not support fixed-rater nested multilevel ICCs yet.",
+        i = "Bayesian fixed-rater nested (Design 2) is a planned follow-on; use \\
              {.code engine = \"glmmTMB\"}.",
-        i = "For a single-level fixed-rater Bayesian ICC, drop {.arg cluster}."
+        i = "Crossed (Design 1) fixed-rater Bayesian ICCs are supported, as are \\
+             single-level ones (drop {.arg cluster})."
       ))
     }
     if (replicates) {
@@ -1217,7 +1220,14 @@ icc <- function(
     } else if (raters == "fixed") {
       # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
       # slot (M10). Fixed-rater nested/incomplete/cluster-level are guarded above.
-      if (engine == "lme4") {
+      if (engine == "brms") {
+        # Crossed (Design 1) fixed raters, Bayesian (M27 Slice 1, ADR-037): the M10
+        # five-component fit with a fixed `rater` effect under the half-t(4, 0, 1) SD
+        # prior; theta^2_r read raw per posterior draw into the rater `draws` row. MAP +
+        # percentile credible interval off the shared contract. Nested (Design 2) fixed
+        # brms is refused upstream (M27 Slice 2 follow-on, #5).
+        fit_brms_multilevel_fixed(df, seed = seed, brm_args = brm_args)
+      } else if (engine == "lme4") {
         fit_lme4_multilevel_fixed(df)
       } else {
         fit_glmmtmb_multilevel_fixed(df)

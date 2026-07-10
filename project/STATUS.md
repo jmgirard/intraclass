@@ -95,10 +95,12 @@
   (nested fixed) paths; engine/interval parity, not new estimand work (#6). **Disambiguation (ADR-037):**
   Bayesian multilevel *one-way* was already shipped as Design 3 in M25 Slice 2, so M27 is **fixed-rater
   only**. Chosen after a short retro of the M23→M26 Bayesian arc.
-- Active task: **M27 Slice 1 — Bayesian crossed Design 1 fixed** (`fit_brms_multilevel_fixed()` +
-  O-Bayes-FML). Next unblocked item on the M27 board; **no code written yet** — plan stated below,
-  implementation not begun. Slice 2 (nested Design 2 fixed) follows, conditional on the oracle-first
-  resolution (attempt-then-degrade). Remaining post-M27 work lives in [`ROADMAP.md`](ROADMAP.md): Bayesian
+- Active task: **M27 Slice 2 — Bayesian nested Design 2 fixed** (`fit_brms_nested_fixed()` + O-Bayes-FNML;
+  conditional on the oracle-first resolution, attempt-then-degrade). **Slice 1 — crossed Design 1 fixed —
+  is done** (`fit_brms_multilevel_fixed()` + `brms_theta2r_draws()` helper; guard narrowed to
+  `ml_design != "crossed"` + dispatch; O-Bayes-FML fixture: containment **1.00**, coverage .96, converged
+  .97, MAP rel-bias −.004; live O-Bayes-FML-agree Stan fit green; full `test-icc-brms.R` `NOT_CRAN=true`
+  194 pass / 0 fail / 0 skip). Cross-cutting DoD (COVERAGE/REFERENCES/NEWS refresh) done in the finish pass. Remaining post-M27 work lives in [`ROADMAP.md`](ROADMAP.md): Bayesian
   incomplete/replicates/conflated + cluster-level fixed, categorical/ordinal GLMM, multilevel SEM, the
   Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band
   **CRAN upload** (ADR-022) also remains.

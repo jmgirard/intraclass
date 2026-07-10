@@ -105,17 +105,20 @@ test_that("brms refuses the deferred designs with a teaching abort", {
     icc(d_inc, score, subject, rater, engine = "brms"),
     class = "intraclass_unsupported"
   )
-  # fixed-rater MULTILEVEL (single-level fixed ships; fixed multilevel stays deferred). The
-  # general fixed-rater advisory warning fires first (expected); the abort must be reached
-  # before the multilevel dispatch would silently pick glmmTMB (#5).
+  # fixed-rater NESTED (Design 2) multilevel. Single-level fixed (M26) and CROSSED (Design 1)
+  # fixed multilevel (M27 Slice 1) now ship; the NESTED fixed brms fit stays deferred to M27
+  # Slice 2. The general fixed-rater advisory warning fires first (expected); the abort must be
+  # reached before the multilevel dispatch would silently pick glmmTMB (#5). Cluster-unique
+  # rater labels make the design nested_in_clusters.
   set.seed(3)
-  ml <- expand.grid(subject = 1:4, rater = factor(1:3), cluster = factor(1:3))
-  ml$subject <- factor(paste0(ml$cluster, "_", ml$subject))
-  ml$score <- rnorm(nrow(ml))
+  nml <- expand.grid(subject = 1:4, rater = 1:3, cluster = factor(1:3))
+  nml$subject <- factor(paste0(nml$cluster, "_", nml$subject))
+  nml$rater <- factor(paste0(nml$cluster, "_", nml$rater))
+  nml$score <- rnorm(nrow(nml))
   expect_error(
     suppressWarnings(
       icc(
-        ml,
+        nml,
         score,
         rater,
         subject = subject,
@@ -465,6 +468,44 @@ test_that("O-Bayes-Fixed: committed reference reproduces the fixed-rater finding
   expect_lte(s$coverage_icc, 0.99)
 
   # (3) The MAP is biased low (the skew) -- characterized, not asserted unbiased (#18).
+  expect_lt(s$map_icc_relbias, 0)
+})
+
+# --- O-Bayes-FML: the committed crossed FIXED-rater coverage reference (no brms, M27 S1) ---
+# The crossed multilevel fixed-rater sibling of O-Bayes-Fixed (single-level) and O-Bayes-ML
+# (crossed random). data-raw/oracle-bayesian-multilevel-fixed.R runs a crossed Design-1 DGP
+# with FIXED rater means (k = 4, theta^2_r = 0.2667) through the SHIPPED
+# fit_brms_multilevel_fixed() recipe (raw theta^2_r per draw injected into the five-component
+# `draws`), and commits convergence / CONTAINMENT / coverage / bias for the subject-level
+# ICC(A,1). Fast, no fitting, runs on every CI job. The PRIMARY fixed-rater oracle is
+# CONTAINMENT -- the glmmTMB M10 REML point inside the brms credible interval -- NOT equality:
+# under the prior the balanced fixed ~ random identity holds only approximately (#18). The MAP
+# is biased low by the right-skewed-ICC-draws mode (ADR-033), reported. Observed (n_rep = 100,
+# seed 20270): see the committed fixture's stats.
+
+test_that("O-Bayes-FML: committed reference reproduces the crossed fixed-rater findings", {
+  fixture <- test_path("fixtures", "bayesian-multilevel-fixed-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-multilevel-fixed.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+
+  # (1) High convergence at the half-t DGP.
+  expect_gte(s$converged_frac, 0.90)
+
+  # (2) CONTAINMENT (the primary fixed-rater oracle): the glmmTMB M10 REML subject-level
+  #     ICC(A,1) sits inside the brms credible interval ~nominally often. Equality is the
+  #     WRONG oracle -- the balanced fixed ~ random identity holds only approximately under
+  #     the prior (flat on rater effects vs half-t on the SDs), so we pin containment (#18).
+  expect_gte(s$containment_reml, 0.90)
+
+  # (3) Percentile 95% credible-interval coverage of the fixed-population subject-level
+  #     ICC(A,1) ~nominal.
+  expect_gte(s$coverage_icc, 0.88)
+  expect_lte(s$coverage_icc, 0.99)
+
+  # (4) The MAP is biased low (the skew) -- characterized, not asserted unbiased (#18).
   expect_lt(s$map_icc_relbias, 0)
 })
 
@@ -863,6 +904,158 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
 
   # The header renders the Bayesian engine + a credible interval, grouped by level.
   hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: crossed (Design 1) FIXED raters, O-Bayes-FML-agree (M27 Slice 1) ---
+# The fixed-rater analogue of the crossed live test above: raters as a fixed population-level
+# effect, theta^2_r read raw per posterior draw into the rater slot of the five-component
+# `draws`. SUBJECT LEVEL ONLY (the cluster-level fixed estimand is deferred; the engine-
+# agnostic guard forces level = "subject"). Gated OFF CI (brms present, Stan toolchain
+# absent). The numerical coverage/containment oracle is O-Bayes-FML's committed fixture; this
+# smoke test wires the fit end to end and pins O-Bayes-FML-agree: the glmmTMB M10 REML point
+# sits INSIDE the brms credible interval (containment, not equality -- the balanced fixed ~
+# random identity holds only approximately under the prior, #18), for both agreement and
+# consistency, with lme4 the second independent REML oracle.
+
+test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-FML-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # A balanced crossed Design-1 dataset (~20 clusters, as the random live test) with FIXED
+  # rater means, so theta^2_r is a genuine finite-population variance.
+  set.seed(2027)
+  nc <- 20L
+  ns <- 4L
+  mu_r <- c(-0.6, 0, 0.6) # k = 3 fixed rater means
+  k <- length(mu_r)
+  d <- expand.grid(
+    s = seq_len(ns),
+    rater = factor(seq_len(k)),
+    cluster = factor(seq_len(nc))
+  )
+  d$subject <- factor(paste0(d$cluster, "_", d$s))
+  d$score <- 2 +
+    rnorm(nc, 0, 0.6)[as.integer(d$cluster)] +
+    rnorm(nlevels(d$subject), 0, 1)[as.integer(d$subject)] +
+    mu_r[as.integer(d$rater)] +
+    rnorm(nc * k, 0, 0.3)[as.integer(interaction(d$cluster, d$rater))] +
+    rnorm(nrow(d), 0, 0.7)
+
+  ba <- list(chains = 2, iter = 1200, refresh = 0)
+  fa <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  fc <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    type = "consistency",
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+
+  # Structure: the five-component fixed fit yields SUBJECT-level rows only, a posterior
+  # credible interval, the Bayesian engine label, and theta^2_r in the rater slot.
+  expect_s3_class(fa, "icc")
+  expect_identical(fa$engine, "brms")
+  expect_identical(fa$ci$method, "posterior")
+  expect_setequal(
+    names(fa$components),
+    c("cluster", "subject", "rater", "cluster_rater", "residual")
+  )
+  ta <- tidy(fa)
+  tc <- tidy(fc)
+  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_setequal(tc$index, c("ICC(C,1)", "ICC(C,k)"))
+  expect_setequal(ta$level, "subject")
+  expect_true(all(
+    c(ta$estimate, tc$estimate) >= 0 &
+      c(ta$estimate, tc$estimate) <= 1
+  ))
+  expect_true(all(ta$conf.low <= ta$estimate & ta$estimate <= ta$conf.high))
+
+  # O-Bayes-FML-agree (containment): the glmmTMB M10 crossed fixed REML point sits inside the
+  # brms credible interval for every subject-level row (agreement AND consistency). This is
+  # the honest engine-agreement pin -- NOT pointwise equality, since the flat rater-effect
+  # prior vs half-t on the SDs perturbs the balanced fixed ~ random identity (#18).
+  ga <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "glmmTMB"
+  )))
+  gcons <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    type = "consistency",
+    raters = "fixed",
+    engine = "glmmTMB"
+  )))
+  by_index <- function(x, i) x$estimate[x$index == i]
+  for (i in c("ICC(A,1)", "ICC(A,k)")) {
+    reml <- by_index(ga, i)
+    expect_gte(reml, ta$conf.low[ta$index == i])
+    expect_lte(reml, ta$conf.high[ta$index == i])
+  }
+  for (i in c("ICC(C,1)", "ICC(C,k)")) {
+    reml <- by_index(gcons, i)
+    expect_gte(reml, tc$conf.low[tc$index == i])
+    expect_lte(reml, tc$conf.high[tc$index == i])
+  }
+  # Pointwise MCMC ~ MLE at the well-identified subject level (ten Hove 2022's MCMC ~ MLE
+  # regime; ~80 subjects, so well-powered even at k = 3).
+  expect_equal(
+    by_index(ta, "ICC(A,1)"),
+    by_index(ga, "ICC(A,1)"),
+    tolerance = 0.08
+  )
+
+  # The SECOND independent REML oracle (lme4) must concur with glmmTMB on the same M10
+  # five-component fixed fit; run only when both engines (+ merDeriv) are present.
+  if (
+    requireNamespace("lme4", quietly = TRUE) &&
+      requireNamespace("merDeriv", quietly = TRUE)
+  ) {
+    la <- suppressWarnings(tidy(icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      raters = "fixed",
+      engine = "lme4"
+    )))
+    expect_equal(
+      by_index(la, "ICC(A,1)"),
+      by_index(ga, "ICC(A,1)"),
+      tolerance = 1e-2
+    )
+  }
+
+  # The header renders the Bayesian engine + a credible interval.
+  hdr <- paste(format(fa), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
 })

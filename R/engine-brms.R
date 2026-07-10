@@ -302,6 +302,37 @@ fit_brms_oneway <- function(
 }
 
 # Fixed-rater two-way Bayesian fit (M26 Slice 2, ADR-036): the McGraw & Wong Case-3
+# theta^2_r per posterior draw from a fixed-rater brms fit's population-level rater
+# contrasts -- shared by the single-level fit_brms_fixed (M26) and the crossed-multilevel
+# fit_brms_multilevel_fixed (M27). Treatment coding: b_Intercept + the k - 1 non-reference
+# rater contrasts, mapped to the k level means by the shared rater_mean_contrast().
+# center = I - J/k removes the grand mean; the quadratic form is a finite-population
+# variance (>= 0), so RAW -- no frequentist bias term is subtracted (a POSTERIOR already
+# integrates the parameter uncertainty theta2r_fixed()'s `- bias` removes from a point
+# estimate; ADR-036/037, #1/#18).
+brms_theta2r_draws <- function(fit, data, call = rlang::caller_env()) {
+  k <- nlevels(data$rater)
+  dm <- as.matrix(fit)
+  b_cols <- c("b_Intercept", paste0("b_rater", levels(data$rater)[-1L]))
+  missing <- setdiff(b_cols, colnames(dm))
+  if (length(missing) > 0L) {
+    abort_intraclass(
+      c(
+        "Could not read the {.pkg brms} fixed-rater posterior draws.",
+        i = "Expected columns {.val {missing}} were not in the draw matrix."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  beta_draws <- t(dm[, b_cols, drop = FALSE]) # rows = coefficients, cols = draws
+  contrast <- rater_mean_contrast(k)
+  center <- diag(k) - matrix(1 / k, k, k)
+  mu_draws <- contrast %*% beta_draws # k rater means x draws
+  theta_draws <- colSums(mu_draws * (center %*% mu_draws)) / (k - 1)
+  pmax(0, theta_draws)
+}
+
 # model with raters as POPULATION-LEVEL fixed effects
 #   score ~ 1 + rater + (1 | subject)
 # The sourced half-t(4, 0, 1) prior applies to the (single) random-effect SD, sigma_s
@@ -346,30 +377,9 @@ fit_brms_fixed <- function(
     call = call
   )
 
-  # theta^2_r per posterior draw from the rater fixed-effect draws (treatment coding:
-  # b_Intercept + the k - 1 non-reference rater contrasts, mapped to the k level means by the
-  # shared rater_mean_contrast()). center = I - J/k removes the grand mean; the quadratic
-  # form is a variance (>= 0), so no bias term is subtracted (see the header).
-  k <- nlevels(data$rater)
-  dm <- as.matrix(base$fit)
-  b_cols <- c("b_Intercept", paste0("b_rater", levels(data$rater)[-1L]))
-  missing <- setdiff(b_cols, colnames(dm))
-  if (length(missing) > 0L) {
-    abort_intraclass(
-      c(
-        "Could not read the {.pkg brms} fixed-rater posterior draws.",
-        i = "Expected columns {.val {missing}} were not in the draw matrix."
-      ),
-      class = "intraclass_engine_error",
-      call = call
-    )
-  }
-  beta_draws <- t(dm[, b_cols, drop = FALSE]) # rows = coefficients, cols = draws
-  contrast <- rater_mean_contrast(k)
-  center <- diag(k) - matrix(1 / k, k, k)
-  mu_draws <- contrast %*% beta_draws # k rater means x draws
-  theta_draws <- colSums(mu_draws * (center %*% mu_draws)) / (k - 1)
-  theta_draws <- pmax(0, theta_draws)
+  # theta^2_r per posterior draw from the rater fixed-effect draws (shared helper, also
+  # used by the crossed-multilevel fixed fit in M27).
+  theta_draws <- brms_theta2r_draws(base$fit, data, call = call)
 
   # Inject the rater row (subject, rater, residual order) and its component mode; the
   # Bayesian path reads `draws` for both point and interval (ADR-033), so the log-SD
@@ -427,6 +437,76 @@ fit_brms_multilevel <- function(
     brm_args = brm_args,
     call = call
   )
+}
+
+# Crossed (Design 1) FIXED-rater multilevel Bayesian fit (M27 Slice 1, ADR-037): the M10
+# five-component model with raters as POPULATION-LEVEL fixed effects
+#   score ~ 1 + rater + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)
+# -- the brms sibling of fit_glmmtmb_multilevel_fixed() (M10) and of the crossed-random
+# fit_brms_multilevel() (M24) with the (1 | rater) random-rater main effect replaced by a
+# fixed `rater` effect. The sourced half-t(4, 0, 1) prior applies to the random-effect SDs
+# only (sd_cluster, sd_cluster:subject, sd_cluster:rater); the k - 1 rater contrasts carry
+# brms's default (flat) population-level prior. Four random components come off the standard
+# spec; the rater slot carries theta^2_r, the Case-3A finite-population variance of the k
+# fixed rater means (estimand-spec M10 §2), computed PER POSTERIOR DRAW (RAW, no bias
+# correction -- see brms_theta2r_draws) and injected as the `rater` row so the `draws`
+# contract is the SAME five rows fit_brms_multilevel() produces:
+#   cluster       = sigma^2_c     <- sd_cluster__Intercept
+#   subject       = sigma^2_{s:c} <- sd_cluster:subject__Intercept
+#   rater         = theta^2_r     <- posterior push-forward of the fixed rater means
+#   cluster_rater = sigma^2_{cr}  <- sd_cluster:rater__Intercept
+#   residual      = sigma^2_res   <- sigma
+# The shipped M5/M10 subject-level error-set map ({rater, cluster_rater, residual} for
+# agreement, {cluster_rater, residual} for consistency) and posterior_summary() compose each
+# ICC off these five rows unchanged. On balanced data theta^2_r ~= sigma^2_r, so the
+# subject-level ICCs track the random-rater M24 ones -- but only APPROXIMATELY under the
+# prior (flat on rater effects vs half-t on sigma_r), so the oracle is CONTAINMENT (glmmTMB
+# fixed inside the credible interval), not pointwise equality (O-Bayes-FML, #18). `data` must
+# be canonicalized to columns `subject`, `rater`, `cluster`, `score` and COMPLETE/BALANCED,
+# crossed fixed raters, subject level (guarded in icc(): nested / cluster-level / Design-3
+# fixed / conflated / incomplete / replicate refused).
+fit_brms_multilevel_fixed <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  base <- fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + rater + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)"
+    ),
+    spec = c(
+      cluster = "sd_cluster__Intercept",
+      subject = "sd_cluster:subject__Intercept",
+      cluster_rater = "sd_cluster:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+
+  theta_draws <- brms_theta2r_draws(base$fit, data, call = call)
+
+  # Inject the rater row in the M5 five-row order (cluster, subject, rater, cluster_rater,
+  # residual) and its component mode; the Bayesian path reads `draws` for both point and
+  # interval (ADR-033), so the log-SD estimate/vcov contract slots are left untouched.
+  base$draws <- rbind(
+    cluster = base$draws["cluster", ],
+    subject = base$draws["subject", ],
+    rater = theta_draws,
+    cluster_rater = base$draws["cluster_rater", ],
+    residual = base$draws["residual", ]
+  )
+  base$components <- list(
+    cluster = base$components$cluster,
+    subject = base$components$subject,
+    rater = posterior_mode(theta_draws, lower = 0),
+    cluster_rater = base$components$cluster_rater,
+    residual = base$components$residual
+  )
+  base
 }
 
 # Nested Design 2 (raters nested in clusters) multilevel Bayesian fit (M25 Slice 1,
