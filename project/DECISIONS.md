@@ -3313,3 +3313,160 @@ consequences → references.
   here), ADR-040 (M30 — the immediately prior incomplete/ragged random Bayesian milestone; deferred
   incomplete fixed to a later slice, promoted here), ADR-002 (optional engines behind `Suggests`);
   `project/ROADMAP.md` (Bayesian incomplete fixed follow-on being promoted), `project/COVERAGE.md`.
+
+## ADR-042: M32 scope — Bayesian engine (brms) incomplete/ragged NESTED random ICCs, Designs 2 & 3, subject level
+- Date: 2026-07-10
+- Status: accepted
+- Context: M30 (ADR-040, PR #35) closed the incomplete/ragged **random**-rater Bayesian gap for the two-way
+  single level and the **crossed** (Design 1) multilevel; M31 (ADR-041, PR #36) closed the incomplete
+  **fixed**-rater corner for the same two designs. Both came back **nominal** on their one unknown
+  (ragged coverage through `k_eff`). What remains open on the "brms × incomplete" row are the **nested**
+  designs (raters nested in clusters, Design 2; raters nested in subjects, Design 3 / multilevel one-way):
+  the brms engine fits them only balanced/complete (M25, ADR-035), because the `!balanced` brms guard's
+  `(multilevel && ml_design != "crossed")` clause (`icc.R:1148–1152`) still refuses them on ragged data.
+  No milestone is in flight. After a short retro — which noted the Bayesian arc has moved from *discovery*
+  (M27/M28's 2b moment correction) into *mop-up* (M29/M30/M31 all nominal, no Fable) — the maintainer chose
+  to **continue the mop-up with the incomplete/ragged nested corner**. This ADR opens **M32**.
+  - **An oracle-first scoping catch bounds the milestone to RANDOM raters.** The natural instinct was to
+    mirror M30→M31 (random slice, then a fixed slice). But **incomplete fixed-rater nested is deferred for
+    *every* engine**, not just brms: `icc.R:685–696` (ADR-029, M19) refuses `raters = "fixed"` ×
+    `nested_in_clusters` × `!balanced` for glmmTMB itself — the M3 `k_eff` divisor paired with the
+    per-cluster θ²_{r:c} finite-population correction under imbalance is "two interacting corrections
+    needing their own oracle", and that frequentist estimand has never been built. **With no frequentist
+    incomplete-fixed-nested path, there is no independent oracle** (#1), so a Bayesian incomplete-fixed-nested
+    slice cannot ship as engine parity — it would be *new research* (the frequentist version must exist
+    first). M32 is therefore **random-only**; incomplete fixed nested stays deferred (below).
+  - **Engine/interval parity, not new estimand work** (cf. M5.5/M7/M15/M21/M23–M31): the estimand is the
+    *shipped* frequentist incomplete nested **random** subject-level coefficient (M19, the M8/M9 machinery
+    on ragged nested data — ten Hove et al. 2022 Eqs. 8–11, Table 3 middle/right), now read off posterior
+    draws. No new estimand-spec, no new user-facing argument, no new dependency (`brms` already a
+    `Suggests`); additive, non-breaking (#6): new valid `engine = "brms"` × {incomplete nested Design 2,
+    incomplete nested Design 3} combinations only, by narrowing the same `!balanced` brms guard M30/M31
+    touched (`icc.R:1148–1152`, the `ml_design != "crossed"` clause).
+  - **Where the risk is (and why it is genuinely LOWER than M31's).** Random raters make each ICC a **ratio
+    of variance components** — a clean posterior push-forward with **no θ² finite-population functional**, so
+    the M27/M28 **2b moment correction never engages** (the M30 regime, not the M31 regime). The shipped M25
+    nested fits (`fit_brms_nested_clusters` / `fit_brms_nested_subjects`) run *unchanged* on ragged data; the
+    M3/M9 `k_eff` + connectedness machinery is engine-agnostic and runs **pre-dispatch**, so it protects
+    brms exactly as it does glmmTMB. **The one remaining unknown is narrow and empirical — coverage.**
+    Whether the percentile credible interval covers nominally once the nested fit sees ragged data through
+    `k_eff` is a seeded-simulation question (the CI method's oracle IS coverage, #1). Because there is no θ²
+    functional here, the working hypothesis (as M30) is that it comes back **nominal**. **Fable posture
+    (#19):** the seeded coverage oracle is the test; **if** it undercovers, **recommend a gated Fable review
+    and stop** — never auto-invoke. Fable is not pre-authorized by this ADR.
+- Decision:
+  - **Scope: RANDOM raters, INCOMPLETE/ragged, NESTED (Designs 2 & 3), subject level.** Nested designs are
+    subject-level only (the cluster level is undefined for nested raters — already enforced, M8/M25). Two
+    thin slices, mirroring the M25 split. **Slice 1 — Bayesian incomplete nested Design 2** (raters nested
+    in clusters): narrow the `ml_design != "crossed"` guard clause for `nested_in_clusters` on ragged data;
+    `fit_brms_nested_clusters()` runs unchanged; the M3 `k_eff` divisor + M9 connectedness compose the
+    subject-level agreement/consistency ICCs per posterior draw. **Slice 2 — Bayesian incomplete nested
+    Design 3** (raters nested in subjects, the multilevel one-way, agreement-only): narrow the same clause
+    for `nested_in_subjects`; `fit_brms_nested_subjects()` unchanged. No new fit, no new θ² helper (none is
+    needed — random regime).
+  - **Oracles (#1, no textbook worked example — as M8–M10/M25/M30):** O-Bayes-INML-clusters (Design 2) /
+    O-Bayes-INML-subjects (Design 3): (a) **reduction** — at balance the ragged nested fit ≡ the shipped
+    balanced nested brms fit (M25 Slice 1 / Slice 2); (b) **-agree** — the MAP tracks the glmmTMB
+    frequentist incomplete nested random point (M19, `icc.R:1068`) by **CONTAINMENT** (glmmTMB inside the
+    credible interval), not pointwise equality (the half-*t* prior + ragged small-sample regime, the ADR-035
+    posture); (c) **-coverage** — a committed seeded ragged-data coverage fixture (the one unknown),
+    companion to the M30 `oracle-bayesian-incomplete.R` / `oracle-bayesian-incomplete-multilevel.R` scripts;
+    live `-agree` fits `skip_on_ci()`, CI covered by the committed fixture.
+  - **Conditional gated Fable review (#19):** if either seeded nested coverage oracle undercovers,
+    characterize the finding honestly (#18) and **recommend** a Fable review of the ragged nested
+    push-forward under `k_eff` — **recommend-and-stop**, never auto-invoke.
+  - **Deferred out of M32** (record so not rediscovered): Bayesian incomplete **fixed** nested (Designs 2/3)
+    — **has no frequentist oracle** (deferred all engines, ADR-029, `icc.R:685`); it is *research*, not
+    parity, and needs the frequentist incomplete-fixed-nested estimand built first (the k_eff × per-cluster
+    θ²_{r:c} interaction, likely a Fable-reviewed simulation study — the nested sibling of the M9 `ICC(c,k)`
+    divisor). Bayesian **cluster-level** rater ICC for nested designs (undefined — the cluster level needs
+    crossed raters). Bayesian incomplete **within-cell replicates** (imbalance × replicates, M20 corner);
+    Bayesian **one-way** incomplete single-level (M6 analog, low value — distinct from the Design-3
+    *multilevel* one-way shipping here); the averaged cluster-level **`ICC(c,k)` incomplete divisor** (🟣
+    Wave-3, open all engines, M9 §9 — not reachable, nested designs report no cluster level); Bayesian
+    **numeric-unit `d_study()`**; the M23 carry-overs (rstanarm backend, selectable `posterior` coupling,
+    HPDI intervals, user-exposed `prior=`). All stay in `ROADMAP.md`.
+- Consequences: On M32 close, `engine = "brms"` covers incomplete/ragged **random**-rater ICCs across the
+  whole design surface it fits balanced — two-way single level, crossed (Design 1) multilevel, and now both
+  **nested** designs (2/3) at the subject level — completing the "brms × incomplete × random" row. The
+  remaining brms gaps become: incomplete **fixed** nested (research, no oracle), **cluster-level** fixed,
+  incomplete **replicates**, incomplete single-level **one-way**, and the ⚫/🟣/infra carry-overs. The
+  milestone is mechanically thin (one guard clause narrowed across two `ml_design` values, no new fit, no
+  new θ² helper — the random regime needs none) and carries the *lowest* residual risk of the mop-up corners
+  (no 2b functional), with the single empirical unknown — ragged-data coverage of the percentile credible
+  interval for nested designs — resolved by a committed seeded oracle. If nominal, M32 ships clean with **no
+  Fable review** (as M29/M30); if it undercovers, the honest finding is characterized and a gated Fable
+  review is **recommended, not performed** (#19). It extends the oracle inversion (the brms nested fits
+  cross-check the M19 frequentist incomplete nested random coefficients; the REML fits are its independent
+  oracles) at a live-fit CI cost bounded by committed-reference + `skip_on_ci` gating (no new dependency).
+  This ADR authorizes M32 code; the `MILESTONES.md` M32 board and the `STATUS.md` flip are the
+  milestone-start companions (M32 is opened/scoped here but **no slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + glmmTMB agreement + coverage; the scoping catch
+  that no incomplete-fixed-nested oracle exists), #2/#14/#15 (name the estimand / thin vertical slices;
+  oracle-risk ordering — Design 2 before Design 3), #3 (boundary-aware — `posterior_mode()`; MC-CI), #4
+  (committed seeded reference; no tuning to oracle), #5/#8 (classed brms refusals for incomplete fixed
+  nested / cluster-level / replicates / one-way / numeric-unit; `cli` notes), #6 (additive, non-breaking —
+  new engine×design combinations), #12 (sourced estimands), #16 (tracking in-commit), #18 (report the run —
+  containment not asserted equality; characterize coverage honestly), #19 (Fable never auto-invoked —
+  conditional on a coverage shortfall, recommend-and-stop); ten Hove, Jorgensen & van der Ark (2022) Eqs.
+  8–11, Table 3 middle/right (nested Designs 2/3 subject-level coefficients), (2020) §3.3/§4.1
+  (half-*t*(4,0,1) on SDs; DGP), §4.2 (MAP/percentile), OSF `shkqm`; estimand-spec
+  `M8-nested-multilevel.md` (nested subject-level coefficients — no new spec) with `M9-incomplete-multilevel.md`
+  / `M3-incomplete-designs.md` §6 (`k_eff` + connectedness under imbalance — reused engine-agnostic); ADR-008
+  (M3 `k_eff`), ADR-016 (M8 nested designs), ADR-018 (M9 incomplete crossed), ADR-029 (M19 — incomplete
+  nested **random** ships / incomplete **fixed** nested deferred all engines: the reason M32 is random-only),
+  ADR-033 (M23 Bayesian engine — the seam extended), ADR-035 (M25 — the balanced nested brms fits reused:
+  `fit_brms_nested_clusters` / `fit_brms_nested_subjects`), ADR-040 (M30 — the incomplete/ragged **random**
+  crossed Bayesian milestone this extends to nested; the variance-ratio-no-2b regime), ADR-041 (M31 — the
+  incomplete fixed sibling; named incomplete nested fixed as a deferred later slice), ADR-002 (optional
+  engines behind `Suggests`); `project/ROADMAP.md` (Bayesian incomplete nested follow-on being promoted),
+  `project/COVERAGE.md`.
+- **Amendment (2026-07-10, M32 Slice 2 — coverage finding + gated Fable recommendation, #18/#19):** the
+  a-priori "random → no 2b → nominal" hypothesis **held for Slice 1 (Design 2)** — the O-Bayes-INML-clusters
+  seeded oracle came back nominal (ragged coverage .925/.925 vs complete .95/.95, seed 32100, n_rep 80), so
+  Slice 1 shipped clean (committed `7b8b60c`). **It did NOT hold for Slice 2 (Design 3, the multilevel
+  one-way).** The O-Bayes-INML-subjects oracle (seed 32200, n_rep 80) found the **complete cell nominal
+  (.975/.975)** but the **ragged cell undercovering: coverage .8625/.8625** for ICC(1)/ICC(k) — 3.6 SD below
+  the .95 nominal (a real signal, not MC noise at n_rep 80), with the **point unbiased** (rel-bias ≈ 0), so
+  the **credible interval is too narrow** on ragged Design-3 data, not the point biased. This is
+  **Design-3-specific**: it did not appear in the crossed random (M30) or nested Design-2 (Slice 1) ragged
+  paths, all nominal. Plausible mechanism (for Fable to adjudicate): in Design 3 the rater main effect is
+  confounded into the residual and each subject carries its own raters, so under imbalance the per-subject
+  effective information varies and the scalar `k_eff` + posterior push-forward may under-propagate that
+  variability — a *calibration* shortfall distinct from the M27/M28 finite-population θ² **2b** displacement
+  (there is no θ² functional here). **Per #19 the response is recommend-and-stop:** the pin is **not
+  loosened** (#4 — the committed test asserts ragged coverage ≥ .88 and fails on the evidence fixture, the
+  honest signal), Fable is **not auto-invoked**, and the maintainer (2026-07-10) approved **recommending a
+  gated Fable review**. **Fable's charge:** confirm/characterize the ragged one-way undercoverage (magnitude,
+  robustness across incidences and higher `n_rep`) and rule on whether a calibration correction is warranted
+  or incomplete nested **Design 3** should be **deferred as research** (the multilevel-one-way sibling of the
+  M9 `ICC(c,k)` divisor). **This amendment records the finding + recommendation; the verdict is pending the
+  maintainer's manual Fable run and will be recorded as a follow-up amendment** (the M32 board Slice 2 line
+  stays `[~]` blocked until then). Slice 1 (Design 2) is unaffected and shipped.
+- **Amendment 2 (2026-07-10, M32 Slice 2 — Fable verdict ADOPTED: no shortfall, ship unchanged, #19):** the
+  gated Fable review (Claude Fable 5; brief `project/fable-brief-m32-s2.md`, response + seeded harness
+  `data-raw/reviews/fable-review-m32-s2-response.md` / `fable-check-m32s2.R` / `fable-check-m32s2-results.rds`)
+  returned: **the ragged Design-3 undercoverage does NOT replicate — the n_rep-80 `.8625` cell was a
+  Monte-Carlo tail event (one-sided P ≈ .002), not an estimator property.** Fable re-ran the *same* seeded
+  incidence at n = 240 → coverage **.9458** [Wilson .910–.968]; four fresh incidences (Bayes) → **.9500**; a
+  2,000-fit **frequentist** arm on the same incidence → **.9555**. Observing 227/240 under a true .8625 is a
+  z ≈ +3.8 event (excluded). Mechanism checks: the population-value **PIT is uniform** across 560 ragged
+  posteriors (KS D = .028, p = .76 — the percentile interval is calibrated, no under-dispersion); posterior
+  sd (.0486) matches the empirical sampling sd (.0509) — the Bernstein–von Mises regime (100 subjects,
+  ~340 residual df), where a 9-point coverage collapse from 12% missingness has no room to exist. **Every
+  proposed mechanism rejected**, including my brief's `k_eff` under-propagation hypothesis — Fable noted
+  ICC(1) takes **no divisor**, so `k_eff` never enters the undercovering interval, and that **ICC(1)/ICC(k)
+  identical coverage is STRUCTURAL** (percentile intervals are equivariant under the monotone ICC(1)→ICC(k)
+  transform), not two independent evidence points (a correction to the brief's §2 framing). **Disposition
+  (advisory #19, adopted by the maintainer 2026-07-10):** (1) **ship M32 Slice 2 UNCHANGED** — estimator
+  needs no correction, design needs no deferral; on the brief's §4 dichotomy, (A) with an empty correction
+  and (B) deferral unsupported. (2) **Regenerate the coverage fixture at n_rep = 240 + per-rep seeding,
+  keeping every pin exactly as committed** (ragged ≥ .88 NOT loosened, #4) — a pre-registered precision
+  upgrade, not seed-shopping; the follow-up records that the n_rep-80 cell read .8625 and why (this
+  amendment). (3) **Adopt n_rep ≥ 240 for future ragged coverage cells** — at n_rep = 80 the ≥ .88 pin
+  carries a ~0.7% per-cell false-alarm rate (this firing was ~expected across the M23–M32 n_rep-80 family).
+  (4) Record Fable's **frequentist** ragged-D3 coverage (.9555) in the O-NML/incomplete registry — it closes
+  a real gap (M19 pinned point reductions only, no ragged-D3 *coverage* evidence). **Falsifiability:** a
+  regenerated n_rep-240 fixture with ragged coverage < .90 would reopen this (P ≈ 1e-5 under the review's
+  estimate). With this verdict M32 Slice 2 unblocks; the milestone ships both nested designs (2/3) random at
+  the subject level — the mop-up hypothesis (random → no 2b → nominal) held after the tail-event scare.
