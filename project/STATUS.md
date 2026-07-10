@@ -142,7 +142,8 @@
   (coverage .94/.93, containment 1.00, average > single 1.00) off a committed 80-rep fixture (seed 20291).
   Both variance-ratio push-forwards (no θ² moment correction). Gates: `air`/`lintr` clean; full suite (CI
   mode) 1089/0/10; installed-pkg brms 266/0/0 (all live Stan fits ran); `R CMD check --as-cran` 0/0/1.
-  Next: push branch + open PR.
+  **PR [#34](https://github.com/jmgirard/intraclass/pull/34) open** (full CI matrix running). On
+  squash-merge: compress the MILESTONES M29 board to summary form + flip STATUS to M29-shipped.
 - Last green CI: **PR #33 (M28) — full CI matrix green (9/9), squash-merged to `main` at `e6ce64d`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/1** (full
