@@ -2816,8 +2816,8 @@ consequences → references.
   nested design — seeded 100-rep coverage **0.86** (vs the crossed Slice-1 0.96), MAP rel-bias −.106 —
   and, per the review, its coverage **→ 0 as clusters accrue** (an incidental-parameters pathology from
   the flat prior on C_n·k cell means, a *consistency* failure, not a small-sample refinement). The
-  maintainer approved a **gated Fable review** (Claude Fable 5, 2026-07-09; brief + response archived);
-  its verdict is adopted:
+  maintainer approved a **gated Fable review** (Claude Fable 5, 2026-07-09; brief + response committed at
+  `data-raw/reviews/fable-review-m27-nested-fixed-{brief,response}.md`); its verdict is adopted:
   - **Ship the 2b moment correction, not the raw push-forward.** Per posterior draw, per group (one
     group for a common rater set, one per cluster for nested): subtract **2·b**, `b = tr(C·Σ_post)/(k−1)`
     from the raw quadratic `q(μ^draw)`. There are **two** equal inflations, not one: (1) the push-forward

@@ -936,7 +936,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
       the per-draw group AVERAGE** not each cluster (per-cluster flooring → zero coverage at θ²=0, #3),
       and **unify** the crossed/single-level helper to the same 2b path (`brms_theta2r_moment_draws()`;
       2b ≈ 0 there). Scopes ADR-036's "posterior integrates it" (true for linear functionals, false for the
-      convex quadratic variance functional). Review: `scratchpad/FABLE-REVIEW-fnml-biascorrection-RESPONSE.md`.
+      convex quadratic variance functional). Review: `data-raw/reviews/fable-review-m27-nested-fixed-{brief,response}.md`.
 - [x] `brms_theta2r_moment_draws()` implemented (2b + average-floor); both `brms_theta2r_draws` (crossed)
       and `brms_theta2r_nested_draws` (nested) delegate to it. Smoke-fit verified (containment holds).
 - [x] O-Bayes-FNML regenerated on the corrected estimator — **interior** coverage **.95**, MAP **−.017**,
