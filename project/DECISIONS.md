@@ -3069,3 +3069,146 @@ consequences → references.
   containment-not-equality oracle posture), ADR-037/038 (M27/M28 — the θ² 2b moment correction, N/A here
   as both slices are variance-ratio push-forwards), ADR-002 (optional engines behind `Suggests`);
   `project/ROADMAP.md` (Bayesian conflated/replicate follow-ons being promoted), `project/COVERAGE.md`.
+
+## ADR-040: M30 scope — Bayesian engine (brms) incomplete/ragged, two-way random + crossed multilevel random, subject level
+- Date: 2026-07-10
+- Status: accepted
+- Context: The Bayesian arc M23→M29 (ADR-033–039, PRs #28–#34) took `engine = "brms"` +
+  `ci_method = "posterior"` across every design at the subject level — two-way random/fixed, one-way,
+  all multilevel crossed + nested (random and fixed), the conflated diagnostic, and within-cell
+  replicates — but only on **balanced/complete** data (every brms path is gated by a single `!balanced`
+  refusal, `icc.R:1125`). Incomplete/ragged Bayesian ICCs are the **isolated remaining random-rater gap**
+  and the arc's next candidate (STATUS/ROADMAP). No milestone is in flight. After a short retro the
+  maintainer chose to **continue the Bayesian arc with the incomplete/ragged path**, and to take **both**
+  the single-level and crossed-multilevel random slices in one milestone (the M23+M24 pairing, on ragged
+  data). This ADR opens **M30**. **Engine/interval parity, not new estimand work** (cf.
+  M5.5/M7/M15/M21/M23–M29): the estimands are the *shipped* frequentist incomplete two-way (M3, ADR-008)
+  and incomplete crossed multilevel (M9, ADR-018) random-rater coefficients — the same `k_eff`
+  harmonic-mean divisor + connectedness identifiability — now read off posterior draws. No new
+  estimand-spec, no new user-facing argument, no new dependency (`brms` already a `Suggests`); additive,
+  non-breaking (#6): new valid `engine = "brms"` × {incomplete two-way random, incomplete crossed
+  multilevel random} combinations only.
+  - **Why this is thinner than "likely a gated Fable review" (STATUS/ADR-039 framing) suggested, and
+    where the real risk is.** The `k_eff` divisor and *every* connectedness/identifiability guard
+    (`crossed_ml_identifiability()`, harmonic-mean `k_eff`) are computed **engine-agnostically before fit
+    dispatch** (`icc.R:~1316`, `design_info$k_eff`), and the brms path composes each ICC off the shipped
+    `draws` contract via `posterior_summary()` using that same estimand divisor. brms fits ragged data
+    natively — **the model formulas do not change** (`fit_brms_twoway`, `fit_brms_multilevel` are
+    unchanged). And because both slices are **random** raters, each ICC is a **ratio of variance
+    components** — the M29 mechanism — with **no θ² finite-population functional**, so the M27/M28 **2b
+    moment correction does not apply** (a clean posterior push-forward; `tr(C·Σ)` is not in play). The
+    2b machinery bites only for *fixed* raters, deferred here. So the mechanical work is: narrow one
+    `!balanced` brms guard, add nothing to the fit/compose path. **The remaining risk is narrow and
+    empirical — coverage.** The `k_eff` harmonic-mean divisor is an *approximation* on ragged data
+    (oracle-pinned in the frequentist path); whether the **percentile credible interval** covers
+    nominally *through that divisor* on ragged data is a seeded-simulation question (the CI method's
+    oracle IS coverage, #1). **Fable posture (#19):** proceed on the working hypothesis that coverage is
+    nominal (the variance-ratio regime that was clean in M29); the seeded coverage oracle is the test.
+    **If** it undercovers, **recommend a gated Fable review and stop** — never auto-invoke Fable. Fable is
+    not pre-authorized by this ADR; it is a conditional escalation the maintainer approves only if the
+    coverage oracle exposes a shortfall.
+- Decision:
+  - **Scope: two-way RANDOM raters, INCOMPLETE/ragged, subject level (+ cluster-level `ICC(c,1)` for the
+    multilevel slice).** Slice 1 — **Bayesian incomplete two-way random** (`engine = "brms"`, ragged
+    subject × rater, `type` ∈ {agreement, consistency}, `unit` ∈ {single, average}). Slice 2 —
+    **Bayesian incomplete crossed (Design 1) multilevel random** (`engine = "brms"`, ragged, `multilevel
+    = TRUE`, `level` ∈ {subject, cluster}, with `design =` available for crossed/nested-ambiguous ragged
+    patterns as in M9). Bayesian incomplete **fixed** (θ²_r *under imbalance* — the k_eff × 2b-moment
+    interaction), incomplete **nested** Designs 2/3, incomplete **replicates**, and the averaged
+    cluster-level **`ICC(c,k)`** incomplete divisor all stay deferred (scope-outs below).
+  - **Slice 1 — incomplete two-way random: no new fit.** `fit_brms_twoway()` (M23) is run on ragged data
+    unchanged — brms estimates the variance components from the observed cells natively. The shipped
+    `!balanced` brms refusal (`icc.R:1125`) is **narrowed** to admit incomplete two-way *random* data
+    (fixed / replicates / numeric-unit / nested-incomplete stay refused). The engine-agnostic
+    connectedness + harmonic-mean `k_eff` machinery (M3, ADR-008) already runs pre-dispatch and threads
+    `design_info$k_eff` into `icc_estimand()`; `posterior_summary()` composes each draw's ICC with that
+    divisor — the exact frequentist estimand, per draw. On complete data this reduces **identically** to
+    shipped M23 (`k_eff = k`).
+  - **Slice 2 — incomplete crossed multilevel random: no new fit.** `fit_brms_multilevel()` (M24,
+    five-component crossed Design 1) is run on ragged crossed data unchanged. The M9 multilevel
+    connectedness (`crossed_ml_identifiability()`) + `k_eff` + the `design =` disambiguation are
+    engine-agnostic and already run pre-dispatch (`icc.R`); the `!balanced` guard narrowing from Slice 1
+    admits the crossed-random-multilevel case. **Subject level (agreement/consistency, single/average) +
+    cluster-level single-rater `ICC(c,1)`** ship; the averaged cluster-level `ICC(c,k)` row is **dropped
+    with the shipped note** on incomplete data (`icc.R:1341`, the open per-cluster divisor — bounded for
+    *all* engines, unaffected here). On complete data this reduces **identically** to shipped M24.
+  - **Point/interval/dispatch unchanged from M23–M29.** MAP = `posterior_mode()` of each estimand's
+    ICC-draw vector; percentile **credible** interval; `posterior` forced-default & Bayesian-only. No new
+    field beyond the shipped `draws` contract; the shared `icc_point()`/`mc_ci()` path stays untouched for
+    the other engines. Both slices are random-rater **ratios of variance components** — no θ²
+    finite-population functional, so the M27/M28 2b moment correction does **not** apply. The k = 2 soft
+    note and the fixed/replicate/numeric-unit brms refusals stay.
+  - **Two thin vertical slices** (#14/#15), oracle-risk order (single-level before multilevel):
+    - **Slice 1 — Bayesian incomplete two-way random + its coverage oracle.** Guard narrowed;
+      `fit_brms_twoway()` on ragged data; `k_eff` divisor per draw. A companion generator
+      `data-raw/oracle-bayesian-incomplete.R` runs a seeded ragged two-way random DGP with brms + the
+      half-*t* prior and **commits the reference fixture**
+      `tests/testthat/fixtures/bayesian-incomplete-oracle.rds` (#4). Oracle O-Bayes-Incomplete.
+    - **Slice 2 — Bayesian incomplete crossed multilevel random + its oracle.** `fit_brms_multilevel()`
+      on ragged crossed data; subject + cluster-`ICC(c,1)`; the `design =` disambiguation; the
+      `ICC(c,k)`-dropped note. Companion generator `data-raw/oracle-bayesian-incomplete-multilevel.R`
+      commits `tests/testthat/fixtures/bayesian-incomplete-ml-oracle.rds` (#4). Oracle O-Bayes-IML.
+  - **Oracles (#1 — reduction + REML agreement + coverage; M23–M29 precedent, no textbook worked
+    posterior value):**
+    - **O-Bayes-Incomplete** — reduction: on complete data the ragged path composes **identically** to
+      shipped M23 (same `k_eff = k`); on ragged data MAP ≈ the frequentist **M3 glmmTMB** incomplete
+      two-way ICC within a stated tolerance (glmmTMB the independent oracle) — **containment** of the
+      glmmTMB point in the credible interval, not pointwise equality (the MAP-below-REML skew + prior gap,
+      the M26/M29 posture); **seeded coverage ~nominal** off the committed fixture (the real bar — if it
+      is *not* nominal, characterize honestly and recommend a gated Fable review, #18/#19); convergence
+      rate from `brms_convergence()`.
+    - **O-Bayes-IML** — reduction: on complete data ≡ shipped M24 (crossed five-component); on ragged
+      crossed data subject-level + `ICC(c,1)` MAP ≈ the **M9 glmmTMB** incomplete multilevel coefficients
+      (containment, not equality); seeded coverage ~nominal off the committed fixture; the `ICC(c,k)`
+      row is dropped-with-note (asserted, not silently absent).
+  - **CI test-gating (DoD), unchanged posture from M23–M29:** coverage/reduction oracles run off the
+    **committed seeded reference** (#4); a **single live `brms` fit** per slice (tiny `chains`/`iter`)
+    exercises the ragged wiring, guarded `skip_on_cran()` + `skip_if_not_installed("brms")` +
+    `skip_on_ci()` ([[brms-live-fit-skip-on-ci]]); reduced draws in tests. Coverage stays ~85% by design
+    ([[coverage-baseline]]); consented up front.
+  - **No new estimand, estimand-spec file, user-facing argument, or dependency.** The change is: two
+    narrowed brms guards in `R/icc.R` (the `!balanced` refusal admits incomplete two-way random +
+    incomplete crossed multilevel random), and the committed oracle generators + fixtures. No new fit
+    function — `fit_brms_twoway()`/`fit_brms_multilevel()` are reused verbatim. Reuses the shipped
+    estimand-specs `M3-incomplete-designs.md` and `M9-incomplete-multilevel.md` — no new spec.
+  - **Scope-outs (preserved, not rediscovered):** Bayesian incomplete **fixed-rater** (two-way + crossed
+    multilevel — pairs the M3 `k_eff` divisor with the M27/M28 θ² **2b moment correction under
+    imbalance**; genuinely higher-risk, its own later slice); Bayesian incomplete **nested** Designs 2/3
+    (the M19 Slice 1 analog); Bayesian incomplete **within-cell replicates** (imbalance × replicates, the
+    M20 corner); the averaged cluster-level **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, open for all
+    engines, M9 §9); Bayesian **numeric-unit `d_study()`** projection; plus the M23 carry-overs —
+    **rstanarm** backend, **selectable** `posterior` coupling, **HPDI** intervals, **user-exposed
+    `prior=`** API. All stay in `ROADMAP.md`.
+- Consequences: On M30 close, `engine = "brms"` covers incomplete/ragged **random**-rater ICCs at the
+  two-way single level and the crossed Design-1 multilevel subject + cluster-`ICC(c,1)` levels — leaving
+  Bayesian incomplete **fixed** and **nested**, incomplete **replicates**, and the ⚫/🟣/infra
+  carry-overs as the remaining brms gaps. The milestone is mechanically thin (two guard narrowings, no
+  new fit) but carries one genuine unknown — **ragged-data coverage of the percentile credible interval
+  through the `k_eff` divisor** — deliberately isolated to random raters so the θ² 2b machinery is not
+  entangled. If the seeded coverage oracle is nominal, M30 ships clean with **no Fable review** (the
+  variance-ratio regime, as M29); if it undercovers, the honest finding is characterized and a gated
+  Fable review is **recommended, not performed** (#19). It extends the oracle inversion (the Bayesian
+  engine cross-checks the M3/M9 frequentist incomplete coefficients; the REML fits are its independent
+  oracles) and adds a live-fit CI cost bounded by committed-reference + single-live-fit gating (no new
+  dependency). This ADR authorizes M30 code; the `MILESTONES.md` M30 board and the `STATUS.md` flip are
+  the milestone-start companions (M30 is opened/scoped here but **no slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + REML agreement + coverage + convergence),
+  #2/#14/#15 (name the estimand / thin vertical slices; oracle-risk ordering — single-level first), #3
+  (boundary-aware — the half-*t* prior; `posterior_mode()`), #4 (committed seeded reference; no tuning to
+  oracle), #5/#8 (classed brms refusals for incomplete fixed / nested / replicates / numeric-unit; `cli`
+  notes; the `ICC(c,k)`-dropped note), #6 (additive, non-breaking — new engine×design combinations), #12
+  (sourced prior; sourced estimands), #16 (tracking in-commit), #18 (report the run — containment not
+  asserted equality; characterize coverage honestly), #19 (Fable never auto-invoked — conditional on a
+  coverage shortfall, recommend-and-stop); ten Hove, Jorgensen & van der Ark (2022) Eqs. 8–11 (the
+  five-component crossed fit) — the incomplete/small-k estimator choice flagged as an open research
+  question is what motivates the coverage-calibration caution; ten Hove, Jorgensen & van der Ark (2020)
+  §3.3/§4.1 (half-*t*(4,0,1) on SDs; DGP), §4.2 (MAP/percentile), OSF `shkqm`; estimand-specs
+  `M3-incomplete-designs.md` (`k_eff`/connectedness — no new spec) and `M9-incomplete-multilevel.md`
+  (incomplete crossed multilevel, `design=` disambiguation, cluster `ICC(c,1)` ships / `ICC(c,k)` open —
+  no new spec); ADR-008 (M3 `k_eff`/connectedness — reused engine-agnostic), ADR-018 (M9 incomplete
+  crossed multilevel — reused), ADR-033 (M23 Bayesian engine — the seam extended), ADR-034 (M24 crossed
+  multilevel — the fit reused), ADR-036 (M26 — containment-not-equality oracle posture), ADR-037/038
+  (M27/M28 — the θ² 2b moment correction, N/A here as both slices are variance-ratio push-forwards),
+  ADR-039 (M29 — the immediately prior variance-ratio Bayesian milestone; deferred incomplete/ragged to
+  M30), ADR-002 (optional engines behind `Suggests`); `project/ROADMAP.md` (Bayesian incomplete follow-on
+  being promoted), `project/COVERAGE.md`.

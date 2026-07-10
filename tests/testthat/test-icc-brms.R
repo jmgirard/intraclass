@@ -99,10 +99,46 @@ test_that("brms refuses the deferred designs with a teaching abort", {
     icc(d, score, subject, rater, unit = 6, engine = "brms"),
     class = "intraclass_unsupported"
   )
-  # incomplete data
-  d_inc <- d[-1, , drop = FALSE]
+  # NB: incomplete/ragged RANDOM-rater fits now ship for brms -- TWO-WAY single level
+  # (M30 Slice 1) and CROSSED (Design 1) MULTILEVEL (M30 Slice 2, ADR-040) -- see the
+  # O-Bayes-Incomplete / O-Bayes-IML live + fixture tests below. What stays deferred (and
+  # aborts BEFORE any fit, no Stan needed): incomplete FIXED-rater (theta^2 under imbalance),
+  # incomplete ONE-WAY, and incomplete NESTED multilevel (Designs 2/3). Each must name the
+  # supported random two-way + crossed-multilevel scope (#5/#8).
+  d_inc <- d[-1, , drop = FALSE] # ragged two-way (one cell dropped)
+  # incomplete fixed-rater (suppressWarnings: the fixed-rater nudge fires before the abort)
   expect_error(
-    icc(d_inc, score, subject, rater, engine = "brms"),
+    suppressWarnings(
+      icc(d_inc, score, subject, rater, raters = "fixed", engine = "brms")
+    ),
+    class = "intraclass_unsupported"
+  )
+  # incomplete one-way (unequal ratings per subject)
+  d_ow <- data.frame(
+    subject = factor(c(1, 1, 1, 2, 2, 3, 3, 3)),
+    rater = factor(1:8),
+    score = c(1, 2, 1.5, 3, 3.5, 2, 2.2, 1.8)
+  )
+  expect_error(
+    icc(d_ow, score, subject, rater, model = "oneway", engine = "brms"),
+    class = "intraclass_unsupported"
+  )
+  # incomplete NESTED multilevel (Design 2, still deferred): raters nested in clusters,
+  # cluster-unique labels, one cell dropped.
+  dn <- expand.grid(r_in_c = 1:2, s = 1:3, cluster = factor(1:2))
+  dn$subject <- factor(paste0(dn$cluster, "_", dn$s))
+  dn$rater <- factor(paste0(dn$cluster, "_r", dn$r_in_c))
+  dn$score <- as.numeric(seq_len(nrow(dn)))
+  dn_inc <- dn[-1, , drop = FALSE]
+  expect_error(
+    icc(
+      dn_inc,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      engine = "brms"
+    ),
     class = "intraclass_unsupported"
   )
   # NB: fixed-rater MULTILEVEL now ships for brms -- single-level (M26 Slice 2), crossed
@@ -494,6 +530,108 @@ test_that("O-Bayes-Conflated: committed reference reproduces the conflated findi
   # (4) DISTINCTNESS: the conflated ICC sits visibly ABOVE the subject level (Eq. 14 folds the
   #     large between-cluster variance into the signal) -- the diagnostic's whole point.
   expect_gt(s$map_minus_subject, 0.05)
+})
+
+# --- O-Bayes-Incomplete: the committed ragged coverage reference (no brms needed, M30 S1) ---
+# The incomplete/ragged sibling of the O-Bayes reference above. data-raw/
+# oracle-bayesian-incomplete.R runs the ten Hove (2020) two-way random DGP at k = 5 in two
+# cells -- a COMPLETE 30 x 5 grid (k_eff = k, the shipped M23 reduction) and a FIXED, connected
+# RAGGED incidence (~20% cells deleted, constant k_eff < 5) -- through the SHIPPED
+# fit-then-reduce recipe, and commits per-cell coverage of ICC(A,1) (no divisor) and
+# ICC(A, k_eff) (the harmonic-mean divisor is exercised), MAP relative bias, and convergence.
+# Fast, no fitting, runs on every CI job. The milestone's one genuine unknown is whether the
+# percentile credible interval COVERS on ragged data (#1); the pin checks the ragged cell tracks
+# the complete cell within Monte-Carlo error (SE(coverage) ~ .015 at n_rep = 200). If a real
+# shortfall appears it is REPORTED (#18) and gates a Fable review (#19), never tuned away (#4).
+test_that("O-Bayes-Incomplete: committed reference covers ragged two-way random data", {
+  fixture <- test_path("fixtures", "bayesian-incomplete-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$design == "complete", ]
+  rag <- s[s$design == "ragged", ]
+
+  # The ragged cell exercises the k_eff divisor: k_eff strictly below k = 5.
+  expect_lt(rag$k_eff, 5)
+  expect_equal(cmp$k_eff, 5)
+
+  # (1) High convergence at the half-t DGP in both cells (k = 5, past the k = 2 caveat).
+  expect_gte(cmp$converged_frac, 0.90)
+  expect_gte(rag$converged_frac, 0.90)
+
+  # (2) REDUCTION: on complete data the incomplete path IS the shipped M23 path (k_eff = k),
+  #     so both units cover ~nominal -- the baseline the ragged cell is judged against.
+  expect_gte(cmp$coverage_icc1, 0.90)
+  expect_lte(cmp$coverage_icc1, 0.99)
+  expect_gte(cmp$coverage_icck, 0.90)
+  expect_lte(cmp$coverage_icck, 0.99)
+
+  # (3) COVERAGE ON RAGGED DATA (the milestone's one unknown, #1/#18): ragged coverage tracks
+  #     the complete cell within Monte-Carlo error, and stays ~nominal for BOTH the divisor-free
+  #     ICC(A,1) and the k_eff-divided ICC(A, k_eff). A > ~.05 shortfall would be a real finding.
+  expect_gte(rag$coverage_icc1, cmp$coverage_icc1 - 0.05)
+  expect_gte(rag$coverage_icck, cmp$coverage_icck - 0.05)
+  expect_gte(rag$coverage_icc1, 0.90)
+  expect_gte(rag$coverage_icck, 0.90)
+
+  # (4) MAP tracks the population in both cells (small negative skew, the M23/M26 posture).
+  expect_lt(abs(cmp$map_icc1_relbias), 0.10)
+  expect_lt(abs(rag$map_icc1_relbias), 0.12)
+})
+
+# --- O-Bayes-IML: the committed ragged crossed-multilevel coverage reference (M30 S2) ---
+# The incomplete crossed (Design 1) MULTILEVEL sibling of O-Bayes-Incomplete. data-raw/
+# oracle-bayesian-incomplete-multilevel.R runs the ten Hove (2022) five-component crossed DGP
+# in a COMPLETE cell (k_eff = k, the M24 reduction) and a FIXED, connected RAGGED cell
+# (~12% cells deleted, constant k_eff < 5) through the SHIPPED fit_brms_multilevel() +
+# reduce recipe, and commits per-cell SUBJECT-level ICC(A,1) & ICC(A,k_eff) coverage (the
+# k_eff divisor is exercised) plus the single-rater CLUSTER ICC(c,1) coverage. The averaged
+# cluster ICC(c,k) is undefined on incomplete data (dropped-with-note), so it is not tallied.
+# Fast, no fitting, runs on every CI job. Subject-level coverage is the pin; the cluster level
+# inherits the M24 few-cluster caveat, so it is CHARACTERIZED (ragged tracks complete), not
+# pinned nominal (#18).
+test_that("O-Bayes-IML: committed reference covers ragged crossed multilevel random data", {
+  fixture <- test_path("fixtures", "bayesian-incomplete-ml-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete-multilevel.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$design == "complete", ]
+  rag <- s[s$design == "ragged", ]
+
+  # The ragged cell exercises the k_eff divisor: k_eff strictly below k = 5.
+  expect_lt(rag$k_eff, 5)
+  expect_equal(cmp$k_eff, 5)
+
+  # (1) High convergence at the half-t DGP in both cells.
+  expect_gte(cmp$converged_frac, 0.90)
+  expect_gte(rag$converged_frac, 0.90)
+
+  # (2) REDUCTION: on complete data the incomplete path IS the shipped M24 path (k_eff = k),
+  #     so subject-level coverage is ~nominal -- the baseline the ragged cell is judged against.
+  expect_gte(cmp$coverage_subj1, 0.90)
+  expect_lte(cmp$coverage_subj1, 0.99)
+  expect_gte(cmp$coverage_subjk, 0.90)
+  expect_lte(cmp$coverage_subjk, 0.99)
+
+  # (3) SUBJECT-LEVEL COVERAGE ON RAGGED DATA (the Slice-2 unknown, #1/#18): ragged subject
+  #     coverage tracks the complete cell within Monte-Carlo error and stays ~nominal for BOTH
+  #     the divisor-free ICC(A,1) and the k_eff-divided ICC(A, k_eff).
+  expect_gte(rag$coverage_subj1, cmp$coverage_subj1 - 0.06)
+  expect_gte(rag$coverage_subjk, cmp$coverage_subjk - 0.06)
+  expect_gte(rag$coverage_subj1, 0.88)
+  expect_gte(rag$coverage_subjk, 0.88)
+
+  # (4) CLUSTER ICC(c,1) is CHARACTERIZED, not pinned nominal (the M24 few-cluster caveat):
+  #     ragged coverage tracks the complete cell. ICC(c,k) is dropped-with-note (not tallied).
+  expect_gte(rag$coverage_clus1, cmp$coverage_clus1 - 0.06)
+
+  # (5) Subject MAP tracks the population in both cells (small skew, the M23/M26 posture).
+  expect_lt(abs(cmp$map_subj1_relbias), 0.10)
+  expect_lt(abs(rag$map_subj1_relbias), 0.12)
 })
 
 # O-Bayes-Rep wiring (no brms/Stan needed, M29 Slice 2): the within-cell-replicate ICC is a
@@ -1338,6 +1476,158 @@ test_that("brms fits within-cell replicates end to end (O-Bayes-Rep-agree)", {
     a1$estimate[a1$occasions == n_o],
     a1$estimate[a1$occasions == 1]
   )
+
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: incomplete/ragged two-way random, O-Bayes-Incomplete-agree (M30 Slice 1) ---
+# The ragged analogue of the two-way live test: a connected but unbalanced subject x rater
+# design (unequal per-subject rating counts), so the harmonic-mean k_eff divisor (< k) drives
+# the average-unit ICC. Confirms icc() -> fit_brms_twoway() on ragged data -> posterior_summary()
+# with the k_eff divisor, end to end, and pins O-Bayes-Incomplete-agree: the glmmTMB REML M3
+# points (the independent incomplete-data oracle, ADR-008) sit inside the brms credible intervals
+# (containment, not equality -- the MAP-below-REML skew + prior gap, the M26/M29 posture).
+test_that("brms fits incomplete/ragged two-way random data end to end (O-Bayes-Incomplete-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(3010)
+  ns <- 18L
+  k <- 4L
+  grid <- expand.grid(rater = factor(seq_len(k)), subject = factor(seq_len(ns)))
+  grid$score <- 2 +
+    rnorm(ns, 0, 1)[as.integer(grid$subject)] +
+    rnorm(k, 0, 0.4)[as.integer(grid$rater)] +
+    rnorm(nrow(grid), 0, sqrt(0.7))
+  # Delete a connected-preserving set of cells so per-subject counts are unequal (k_eff < k).
+  drop <- c(1L, 6L, 9L, 20L, 33L, 48L, 55L, 60L)
+  d <- grid[-drop, c("subject", "rater", "score")]
+  d$subject <- droplevels(d$subject)
+  d$rater <- droplevels(d$rater)
+  di <- summarize_design(d)
+  expect_true(di$connected)
+  expect_false(di$balanced)
+  expect_lt(di$k_eff, k) # the harmonic-mean divisor is genuinely below k
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    unit = c("single", "average"),
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  # O-Bayes-Incomplete-agree: the glmmTMB REML M3 points sit inside the brms credible intervals
+  # (the incomplete-data engine-agreement pin; the credible interval covers the MLE).
+  g <- icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    unit = c("single", "average"),
+    engine = "glmmTMB"
+  )
+  ge <- g$estimates[order(g$estimates$index), ]
+  fe <- fit$estimates[order(fit$estimates$index), ]
+  expect_true(all(ge$estimate >= fe$conf.low & ge$estimate <= fe$conf.high))
+
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: incomplete/ragged crossed multilevel random, O-Bayes-IML-agree (M30 S2) ---
+# The multilevel analogue of the ragged two-way live test: a ragged crossed (Design 1) design
+# (subjects nested in clusters, raters crossed, unequal cells) fit with fit_brms_multilevel().
+# Confirms icc() -> the five-component brms fit on ragged data -> posterior_summary() with the
+# k_eff divisor, subject + cluster-ICC(c,1) rows (the averaged cluster ICC(c,k) dropped-with-note),
+# and pins O-Bayes-IML-agree: the glmmTMB REML M9 points (the independent incomplete-multilevel
+# oracle, ADR-018) sit inside the brms credible intervals (containment, not equality).
+test_that("brms fits ragged crossed multilevel random data end to end (O-Bayes-IML-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(3020)
+  nc <- 4L
+  nspc <- 5L
+  k <- 4L
+  base <- expand.grid(
+    rater = seq_len(k),
+    s = seq_len(nspc),
+    cluster = seq_len(nc)
+  )
+  sid <- paste0(base$cluster, "_", base$s)
+  base$subject <- sid
+  base$score <- rnorm(nc, 0, 0.8)[base$cluster] +
+    rnorm(nc * nspc, 0, 1)[as.integer(factor(sid))] +
+    rnorm(k, 0, 0.4)[base$rater] +
+    rnorm(nrow(base), 0, 0.6)
+  base$subject <- factor(base$subject)
+  base$rater <- factor(base$rater)
+  base$cluster <- factor(base$cluster)
+  # Drop a connectedness-preserving set of cells so per-subject counts are unequal.
+  drop <- c(2L, 9L, 17L, 28L, 41L, 55L, 63L, 70L)
+  d <- base[-drop, c("subject", "rater", "cluster", "score")]
+  di <- summarize_design(d)
+  expect_false(di$balanced)
+
+  fit <- suppressWarnings(suppressMessages(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    engine = "brms",
+    seed = 2,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  )))
+
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+  # The averaged cluster-level ICC(c,k) is dropped on incomplete data: cluster rows are
+  # single-rater only (ICC(A,1)/ICC(C,1)), never an average unit.
+  clus <- fit$estimates[fit$estimates$level == "cluster", ]
+  expect_true(nrow(clus) >= 1L)
+  expect_false(any(grepl(",k)$", clus$index)))
+
+  # O-Bayes-IML-agree: the glmmTMB REML M9 points sit inside the brms credible intervals.
+  g <- suppressMessages(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    engine = "glmmTMB"
+  ))
+  key <- function(x) paste(x$level, x$index)
+  gm <- g$estimates[match(key(fit$estimates), key(g$estimates)), ]
+  expect_true(all(
+    gm$estimate >= fit$estimates$conf.low &
+      gm$estimate <= fit$estimates$conf.high,
+    na.rm = TRUE
+  ))
 
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
