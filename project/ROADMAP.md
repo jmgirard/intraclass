@@ -85,6 +85,29 @@ helpers* item below (sample-size / CI-width), where it belongs.
   anytime, low priority.** Pure engineering — no new estimand or oracle risk,
   since the comparisons already exist piecemeal in the oracle registry
   (`REFERENCES.md`) — but not yet sequenced into a wave.
+- **Reassess the vignettes** (`getting-started`, `choosing-an-icc`, `advanced`). The
+  three articles were written/last-shaped around **M4** (the flagship *Choosing an ICC*
+  guide) and **M13** (the *Advanced: imbalanced & multilevel designs* showcase), before
+  roughly fifteen feature milestones landed: the **lme4** parity (M14/M15), the
+  **parametric-bootstrap** `ci_method` (M16), the variance-decomposition trio —
+  conflated ICC, multilevel `d_study()`, within-cell replicates (M17), the **M18–M21
+  multilevel/SEM completeness arc**, `d_study()` off a replicate fit (M22), and the
+  entire **Bayesian (brms) engine arc** (M23–M28). So `advanced.Rmd` (~500 lines) is
+  probably both **stale** (missing engines/methods shipped since) and **overloaded**
+  (one article now straddles imbalance, multilevel, three alternate engines, two
+  interval methods, replicates, and projection). **Open questions (a triage pass, not a
+  decided direction):** (1) *Update* — which shipped features are undocumented or
+  wrongly described? (2) *Split* — should `advanced.Rmd` break into focused articles
+  (e.g. *Engines* [lme4/lavaan/brms], *Interval methods* [MC/bootstrap/posterior],
+  *Multilevel designs*, *Replicates & D-studies*) so each is navigable? (3) *Rewrite for
+  clarity/accessibility* — reduce jargon, add a from-scratch worked path, make the
+  *Choosing an ICC* tree and the estimand vocabulary approachable to applied users, not
+  just methodologists. **Status: not scheduled — needs a triage pass first.** No new
+  estimand or oracle risk (docs only, cf. M4/M13); the work is a content audit +
+  restructure decision. Every displayed number must stay computed live + claim-tested
+  (#1/#4/#12), and any new article joins the `_pkgdown.yml` articles index
+  ([[pkgdown-reference-index-new-exports]] applies to articles too). Promote to a
+  docs milestone once the split/scope is decided.
 - **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
   lme4 interval for singular fits (glmmTMB covers this today via the
   degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted
