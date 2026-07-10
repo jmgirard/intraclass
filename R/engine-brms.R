@@ -333,6 +333,48 @@ brms_theta2r_draws <- function(fit, data, call = rlang::caller_env()) {
   pmax(0, theta_draws)
 }
 
+# theta^2_{r:c} per posterior draw for a NESTED (Design 2) fixed-rater brms fit
+# (M27 Slice 2, ADR-037). Raters are nested in clusters, fit as cell means via
+# `score ~ 0 + rater + (1 | cluster:subject)`, so each rater level has its own
+# population-level coefficient b_rater<label> and belongs to exactly one cluster.
+# theta^2_{r:c} is the WITHIN-cluster finite-population variance of each cluster's k
+# rater means, AVERAGED over clusters (McGraw & Wong Case 3A per cluster, the
+# frequentist theta2r_fixed_nested()). RAW per draw -- no per-cluster bias correction
+# subtracted: a POSTERIOR already integrates the parameter uncertainty the frequentist
+# `- bias` removes from a point estimate (ADR-037 oracle-first resolution, #1/#18). The
+# per-cluster raw variance is a proper draw from theta^2_{r:c}'s posterior; averaging
+# over clusters is linear. Unlike the CROSSED design (brms_theta2r_draws), fixed != random
+# even balanced (per-cluster finite population; the M19 catch), so the oracle is
+# CONTAINMENT of the glmmTMB REML point, not equality.
+brms_theta2r_nested_draws <- function(fit, data, call = rlang::caller_env()) {
+  lvls <- levels(data$rater)
+  b_cols <- paste0("b_rater", lvls)
+  dm <- as.matrix(fit)
+  missing <- setdiff(b_cols, colnames(dm))
+  if (length(missing) > 0L) {
+    abort_intraclass(
+      c(
+        "Could not read the {.pkg brms} fixed-rater nested posterior draws.",
+        i = "Expected columns {.val {missing}} were not in the draw matrix."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+  beta_draws <- t(dm[, b_cols, drop = FALSE]) # rows = rater cell means (lvls order)
+  # Each rater level sits in exactly one cluster; group the cell-mean rows by cluster.
+  cluster_of <- nested_rater_clusters(data, paste0("rater", lvls))
+  cluster_idx <- split(seq_along(lvls), cluster_of)
+  ks <- lengths(cluster_idx)
+  k <- ks[[1L]] # equal per cluster (balanced; guarded upstream)
+  center <- diag(k) - matrix(1 / k, k, k)
+  per <- lapply(cluster_idx, function(ix) {
+    m <- beta_draws[ix, , drop = FALSE]
+    pmax(0, colSums(m * (center %*% m)) / (k - 1)) # RAW, no bias
+  })
+  Reduce(`+`, per) / length(per)
+}
+
 # model with raters as POPULATION-LEVEL fixed effects
 #   score ~ 1 + rater + (1 | subject)
 # The sourced half-t(4, 0, 1) prior applies to the (single) random-effect SD, sigma_s
@@ -591,4 +633,65 @@ fit_brms_nested_subjects <- function(
     brm_args = brm_args,
     call = call
   )
+}
+
+# Nested Design 2 (raters nested in clusters) FIXED-rater multilevel Bayesian fit (M27
+# Slice 2, ADR-037): the M19 Slice 2 model with raters as cell-mean fixed effects
+#   score ~ 0 + rater + (1 | cluster:subject)
+# -- the brms sibling of fit_glmmtmb_nested_fixed(). Nested rater labels are cluster-
+# specific, so `0 + rater` gives each (cluster, rater) its own mean directly, absorbing the
+# cluster main effect (irrelevant to the subject level, the only level nested designs
+# define). The half-t(4, 0, 1) prior applies to the single random-effect SD
+# (sd_cluster:subject); the rater cell means keep brms's default flat prior. Two random
+# components come off the standard spec; the rater slot carries theta^2_{r:c}, the
+# within-cluster finite-population rater variance averaged over clusters (estimand as M19
+# Slice 2 / theta2r_fixed_nested), read RAW per posterior draw (brms_theta2r_nested_draws)
+# and injected as the `rater` row so the `draws` contract is the SAME three rows the
+# glmmTMB nested-fixed fit produces:
+#   subject  = sigma^2_{s:c} <- sd_cluster:subject__Intercept
+#   rater    = theta^2_{r:c} <- posterior push-forward of the per-cluster rater means
+#   residual = sigma^2_res   <- sigma
+# There is NO `cluster` / `cluster_rater` component (the cell-mean fit absorbs the cluster
+# main effect; nested Design 2 has no separable cluster x rater term). The shipped M8 §3a
+# subject-level error-set map ({rater, residual} for agreement, {residual} for consistency)
+# composes each ICC unchanged. Unlike the CROSSED design (M27 Slice 1), fixed != random even
+# on balanced data (per-cluster finite population; the M19 catch), so the oracle is
+# CONTAINMENT of the glmmTMB REML point, not equality (O-Bayes-FNML, #18). `data` must be
+# canonicalized to columns `subject`, `rater`, `cluster`, `score` and COMPLETE/BALANCED,
+# nested Design 2 fixed raters, subject level (guarded in icc(): crossed dispatches to
+# fit_brms_multilevel_fixed; Design 3 fixed / cluster-level / consistency-where-undefined /
+# incomplete / replicate refused).
+fit_brms_nested_fixed <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  base <- fit_brms_common(
+    formula = stats::as.formula("score ~ 0 + rater + (1 | cluster:subject)"),
+    spec = c(
+      subject = "sd_cluster:subject__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+
+  theta_draws <- brms_theta2r_nested_draws(base$fit, data, call = call)
+
+  # Inject the rater row in the {subject, rater, residual} order the nested subject-level
+  # map expects; the Bayesian path reads `draws` for both point and interval (ADR-033).
+  base$draws <- rbind(
+    subject = base$draws["subject", ],
+    rater = theta_draws,
+    residual = base$draws["residual", ]
+  )
+  base$components <- list(
+    subject = base$components$subject,
+    rater = posterior_mode(theta_draws, lower = 0),
+    residual = base$components$residual
+  )
+  base
 }

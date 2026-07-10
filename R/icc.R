@@ -1113,20 +1113,12 @@ icc <- function(
   # balance/replication and the resolved unit are known (#5/#8). A soft k = 2 note
   # surfaces ten Hove et al. (2020)'s bias/undercoverage caveat (#13).
   if (engine == "brms") {
-    if (raters == "fixed" && multilevel && ml_design != "crossed") {
-      # Crossed (Design 1) fixed-rater brms ships (M27 Slice 1, ADR-037); the NESTED
-      # (Design 2) fixed-rater brms fit stays deferred to M27 Slice 2 -- refuse it loudly
-      # rather than let the multilevel dispatch below silently pick glmmTMB (#5). Design 3
-      # fixed, cluster-level fixed, and incomplete fixed-nested are aborted upstream
-      # (engine-agnostic, ~L655) before this point.
-      abort_unsupported(c(
-        "The {.pkg brms} engine does not support fixed-rater nested multilevel ICCs yet.",
-        i = "Bayesian fixed-rater nested (Design 2) is a planned follow-on; use \\
-             {.code engine = \"glmmTMB\"}.",
-        i = "Crossed (Design 1) fixed-rater Bayesian ICCs are supported, as are \\
-             single-level ones (drop {.arg cluster})."
-      ))
-    }
+    # Fixed-rater multilevel brms now covers crossed (Design 1, M27 Slice 1) and nested
+    # (Design 2, M27 Slice 2) at the subject level. The remaining fixed-multilevel cases --
+    # Design 3 fixed (no separable rater effect), cluster-level fixed, and incomplete
+    # fixed-nested -- are refused engine-agnostically upstream (~L655); incomplete crossed
+    # fixed is caught by the `!balanced` brms guard below. So no brms-specific fixed guard
+    # is needed here.
     if (replicates) {
       abort_unsupported(c(
         "The {.pkg brms} engine does not support within-cell replicates yet.",
@@ -1188,7 +1180,12 @@ icc <- function(
         # Design 2 with raters fixed -- theta^2_{r:c} (finite-population, averaged over
         # clusters) in the rater slot (M19 Slice 2). Balanced/complete only, guarded
         # above. Design 3 fixed aborted by design (no separable rater effect).
-        if (engine == "lme4") {
+        if (engine == "brms") {
+          # Design 2 fixed raters, Bayesian (M27 Slice 2, ADR-037): score ~ 0 + rater +
+          # (1|cluster:subject) with theta^2_{r:c} read raw per posterior draw into the
+          # rater `draws` row. Subject level only; MAP + percentile credible interval.
+          fit_brms_nested_fixed(df, seed = seed, brm_args = brm_args)
+        } else if (engine == "lme4") {
           fit_lme4_nested_fixed(df)
         } else {
           fit_glmmtmb_nested_fixed(df)
