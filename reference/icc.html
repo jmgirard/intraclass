@@ -230,12 +230,15 @@ incomplete SEM). <code>"brms"</code> fits the <strong>random</strong>-rater mode
 framework (Stan, via <span class="pkg">brms</span>) under a sourced half-<em>t</em>(4, 0, 1) prior on the
 random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile <strong>credible</strong> interval
-(<code>ci_method = "posterior"</code>, forced). It covers the balanced, complete two-way
-random design, the crossed (Design 1) <strong>multilevel</strong> random design (subject and
-cluster levels), and the nested <strong>multilevel</strong> random designs – Design 2 (raters
-nested in clusters) and Design 3 (raters nested in subjects, agreement-only), both at
-the subject level; fixed raters, one-way, incomplete multilevel, and
-within-cell-replicate Bayesian fits are planned for later milestones. <code>"lme4"</code> requires the
+(<code>ci_method = "posterior"</code>, forced). It covers, on <strong>both balanced/complete and
+incomplete/ragged</strong> data, the two-way random single-level design and the crossed
+(Design 1) <strong>multilevel</strong> random design (subject and cluster levels); and, on
+balanced/complete data only, the one-way random and fixed-rater two-way designs, the
+crossed multilevel <strong>fixed-rater</strong> design, the nested <strong>multilevel</strong> designs – Design 2
+(raters nested in clusters, random and fixed) and Design 3 (raters nested in subjects,
+agreement-only) at the subject level – the conflated diagnostic, and within-cell
+replicates. Incomplete/ragged <strong>nested</strong> and <strong>fixed-rater</strong> Bayesian fits, and
+numeric-<code>unit</code> (D-study) projection, are planned for later milestones. <code>"lme4"</code> requires the
 <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span> packages; <code>"lavaan"</code> requires the <span class="pkg">lavaan</span>
 package; <code>"brms"</code> requires the <span class="pkg">brms</span> package (and a working Stan toolchain).</p></dd>
 
@@ -470,8 +473,8 @@ reliability for multilevel data: A generalizability theory approach.
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   index     estimate   95% CI</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)    0.290   [0.050, 0.706]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,k)    0.620   [0.175, 0.906]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)    0.290   [0.050, 0.712]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,k)    0.620   [0.173, 0.908]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variance components: subject 2.556, rater 5.244, residual 1.019</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span>
 <span class="r-in"><span></span></span>

@@ -190,16 +190,20 @@ icc(
   Bayesian framework (Stan, via brms) under a sourced half-*t*(4, 0, 1)
   prior on the random-effect SDs (ten Hove et al. 2020); the point
   estimate is the posterior mode (MAP) and the interval is a percentile
-  **credible** interval (`ci_method = "posterior"`, forced). It covers
-  the balanced, complete two-way random design, the crossed (Design 1)
-  **multilevel** random design (subject and cluster levels), and the
-  nested **multilevel** random designs – Design 2 (raters nested in
-  clusters) and Design 3 (raters nested in subjects, agreement-only),
-  both at the subject level; fixed raters, one-way, incomplete
-  multilevel, and within-cell-replicate Bayesian fits are planned for
-  later milestones. `"lme4"` requires the lme4 and merDeriv packages;
-  `"lavaan"` requires the lavaan package; `"brms"` requires the brms
-  package (and a working Stan toolchain).
+  **credible** interval (`ci_method = "posterior"`, forced). It covers,
+  on **both balanced/complete and incomplete/ragged** data, the two-way
+  random single-level design and the crossed (Design 1) **multilevel**
+  random design (subject and cluster levels); and, on balanced/complete
+  data only, the one-way random and fixed-rater two-way designs, the
+  crossed multilevel **fixed-rater** design, the nested **multilevel**
+  designs – Design 2 (raters nested in clusters, random and fixed) and
+  Design 3 (raters nested in subjects, agreement-only) at the subject
+  level – the conflated diagnostic, and within-cell replicates.
+  Incomplete/ragged **nested** and **fixed-rater** Bayesian fits, and
+  numeric-`unit` (D-study) projection, are planned for later milestones.
+  `"lme4"` requires the lme4 and merDeriv packages; `"lavaan"` requires
+  the lavaan package; `"brms"` requires the brms package (and a working
+  Stan toolchain).
 
 - conf_level:
 
@@ -453,8 +457,8 @@ icc(ratings, score, subject, rater, seed = 1)
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.706]
-#>   ICC(A,k)    0.620   [0.175, 0.906]
+#>   ICC(A,1)    0.290   [0.050, 0.712]
+#>   ICC(A,k)    0.620   [0.173, 0.908]
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
