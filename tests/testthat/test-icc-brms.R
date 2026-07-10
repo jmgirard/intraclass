@@ -102,10 +102,12 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   # NB: incomplete/ragged fits now ship for brms at the TWO-WAY single level -- RANDOM
   # (M30 Slice 1, ADR-040) and FIXED-rater (M31 Slice 1, ADR-041; theta^2 under imbalance
   # via the 2b moment correction) -- plus CROSSED (Design 1) MULTILEVEL, RANDOM (M30 Slice 2)
-  # and FIXED (M31 Slice 2, subject level) -- see the O-Bayes-Incomplete / O-Bayes-IFixed /
-  # O-Bayes-IML / O-Bayes-IFML-fixed live + fixture tests below. What stays deferred (and aborts
-  # BEFORE any fit, no Stan needed): incomplete NESTED multilevel (Designs 2/3, fixed or random),
-  # incomplete ONE-WAY, and incomplete replicates. Each must name the supported scope (#5/#8).
+  # and FIXED (M31 Slice 2, subject level), and NESTED Design 2 (raters nested in clusters)
+  # RANDOM (M32 Slice 1, ADR-042) -- see the O-Bayes-Incomplete / O-Bayes-IFixed / O-Bayes-IML /
+  # O-Bayes-IFML-fixed / O-Bayes-INML-clusters live + fixture tests below. What stays deferred
+  # (and aborts BEFORE any fit, no Stan needed): incomplete NESTED Design 3 (raters nested in
+  # subjects), incomplete FIXED nested (Design 2, no frequentist oracle), incomplete ONE-WAY, and
+  # incomplete replicates. Each must name the supported scope (#5/#8).
   d_inc <- d[-1, , drop = FALSE] # ragged two-way (one cell dropped)
   # incomplete FIXED-rater NESTED multilevel (Design 2, still deferred): raters nested in
   # clusters (cluster-unique labels), fixed, one cell dropped. (suppressWarnings: the
@@ -139,11 +141,12 @@ test_that("brms refuses the deferred designs with a teaching abort", {
     icc(d_ow, score, subject, rater, model = "oneway", engine = "brms"),
     class = "intraclass_unsupported"
   )
-  # incomplete NESTED multilevel (Design 2, still deferred): raters nested in clusters,
-  # cluster-unique labels, one cell dropped.
-  dn <- expand.grid(r_in_c = 1:2, s = 1:3, cluster = factor(1:2))
+  # incomplete NESTED multilevel Design 3 (raters nested in SUBJECTS, still deferred -- M32
+  # Slice 2 follow-on): subject-unique rater labels, one cell dropped. (Design 2 random now
+  # ships -- M32 Slice 1 -- asserted supported by O-Bayes-INML-clusters below.)
+  dn <- expand.grid(r_in_s = 1:3, s = 1:2, cluster = factor(1:2))
   dn$subject <- factor(paste0(dn$cluster, "_", dn$s))
-  dn$rater <- factor(paste0(dn$cluster, "_r", dn$r_in_c))
+  dn$rater <- factor(paste0(dn$subject, "_r", dn$r_in_s)) # rater nested in subject
   dn$score <- as.numeric(seq_len(nrow(dn)))
   dn_inc <- dn[-1, , drop = FALSE]
   expect_error(
@@ -648,6 +651,58 @@ test_that("O-Bayes-IML: committed reference covers ragged crossed multilevel ran
   # (5) Subject MAP tracks the population in both cells (small skew, the M23/M26 posture).
   expect_lt(abs(cmp$map_subj1_relbias), 0.10)
   expect_lt(abs(rag$map_subj1_relbias), 0.12)
+})
+
+# --- O-Bayes-INML-clusters: committed ragged NESTED D2 coverage reference (no brms, M32 S1) ---
+# The incomplete/ragged NESTED Design-2 (raters nested in clusters) sibling of O-Bayes-IML
+# (crossed) and the ragged extension of O-Bayes-NML (balanced nested). data-raw/
+# oracle-bayesian-incomplete-nested.R runs the ten Hove (2022) four-component nested DGP in a
+# COMPLETE cell (k_eff = k, the M25 Slice 1 reduction) and a FIXED, connected RAGGED cell
+# (~12% cells deleted, constant k_eff < 5) through the SHIPPED fit_brms_nested_clusters() + reduce
+# recipe, and commits per-cell SUBJECT-level ICC(A,1) & ICC(A,k_eff) coverage (the harmonic-mean
+# k_eff divisor is exercised). Random raters -> a clean variance-ratio push-forward (NO theta^2
+# functional, so NO 2b moment correction), so ~nominal coverage is expected (the M30 regime, not
+# the M31 fixed regime). There is no cluster-level cell (nested designs define no cluster IRR).
+# Fast, no fitting, runs on every CI job. If a real shortfall appears it is REPORTED (#18) and
+# gates a Fable review (#19), never tuned away (#4).
+test_that("O-Bayes-INML-clusters: committed reference covers ragged nested Design-2 random data", {
+  fixture <- test_path("fixtures", "bayesian-incomplete-nested-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete-nested.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$design == "complete", ]
+  rag <- s[s$design == "ragged", ]
+
+  # The ragged cell exercises the k_eff divisor: k_eff strictly below k = 5.
+  expect_lt(rag$k_eff, 5)
+  expect_equal(cmp$k_eff, 5)
+
+  # (1) High convergence at the half-t DGP in both cells.
+  expect_gte(cmp$converged_frac, 0.90)
+  expect_gte(rag$converged_frac, 0.90)
+
+  # (2) REDUCTION: on complete data the incomplete path IS the shipped M25 Slice 1 nested path
+  #     (k_eff = k), so subject-level coverage is ~nominal -- the baseline the ragged cell is
+  #     judged against.
+  expect_gte(cmp$coverage_a1, 0.90)
+  expect_lte(cmp$coverage_a1, 0.99)
+  expect_gte(cmp$coverage_ak, 0.90)
+  expect_lte(cmp$coverage_ak, 0.99)
+
+  # (3) COVERAGE ON RAGGED DATA (the milestone's one unknown, #1/#18): random raters give a clean
+  #     variance-ratio push-forward (no 2b), so ragged coverage tracks the complete cell within
+  #     Monte-Carlo error and stays ~nominal for BOTH the divisor-free ICC(A,1) and the
+  #     k_eff-divided ICC(A, k_eff). A > ~.06 shortfall would be a real finding.
+  expect_gte(rag$coverage_a1, cmp$coverage_a1 - 0.06)
+  expect_gte(rag$coverage_ak, cmp$coverage_ak - 0.06)
+  expect_gte(rag$coverage_a1, 0.88)
+  expect_gte(rag$coverage_ak, 0.88)
+
+  # (4) Subject MAP tracks the population in both cells (small skew, the M23/M25 posture).
+  expect_lt(abs(cmp$relbias_a1), 0.10)
+  expect_lt(abs(rag$relbias_a1), 0.12)
 })
 
 # --- O-Bayes-IFixed: committed ragged FIXED-rater coverage reference (no brms, M31 S1) ---
@@ -1477,6 +1532,89 @@ test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes
     engine = "glmmTMB",
     seed = 1
   )))
+  gf <- gf[gf$level == "subject", ]
+  by_index <- function(x, i) x$estimate[x$index == i]
+  for (i in c("ICC(A,1)", "ICC(A,k)")) {
+    reml <- by_index(gf, i)
+    expect_gte(reml, ta$conf.low[ta$index == i])
+    expect_lte(reml, ta$conf.high[ta$index == i])
+  }
+})
+
+# --- Live brms fit: INCOMPLETE nested Design-2 random multilevel, O-Bayes-INML-clusters-agree (M32 S1) ---
+# The ragged nested (Design 2, raters nested in clusters) RANDOM sibling of O-Bayes-IML-agree
+# (crossed random) and O-Bayes-NML-agree (balanced nested). Gated OFF CI (a CI runner has the brms
+# package but no Stan C++ toolchain). The committed O-Bayes-INML-clusters fixture is the coverage
+# oracle; this smoke test wires fit_brms_nested_clusters() end to end ON RAGGED DATA and pins
+# CONTAINMENT of the independent glmmTMB M19 incomplete nested random point at the SUBJECT level
+# (nested designs define no cluster level). Random raters -> a clean variance-ratio push-forward,
+# so no 2b moment correction is involved.
+test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-INML-clusters-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # A connected ragged nested Design-2 design: each cluster has its OWN k raters (cluster-unique
+  # labels), crossed with that cluster's subjects.
+  set.seed(3210)
+  n_clusters <- 8L
+  n_sub <- 4L
+  k <- 4L
+  grid <- expand.grid(
+    rr = seq_len(k),
+    s = seq_len(n_sub),
+    cluster = seq_len(n_clusters)
+  )
+  sid <- paste0(grid$cluster, "_s", grid$s)
+  rid <- paste0(grid$cluster, "_r", grid$rr) # rater nested in cluster
+  mu_c <- rnorm(n_clusters, 0, sqrt(0.5))
+  mu_sc <- rnorm(length(unique(sid)), 0, sqrt(1.0))[as.integer(factor(sid))]
+  mu_rc <- rnorm(length(unique(rid)), 0, sqrt(0.16))[as.integer(factor(rid))]
+  grid$score <- mu_c[grid$cluster] +
+    mu_sc +
+    mu_rc +
+    rnorm(nrow(grid), 0, sqrt(0.5))
+  grid$subject <- factor(sid)
+  grid$rater <- factor(rid)
+  grid$cluster <- factor(grid$cluster)
+  d <- grid[
+    -seq(1L, nrow(grid), by = 9L),
+    c("subject", "rater", "cluster", "score")
+  ]
+  expect_lt(nrow(d), n_clusters * n_sub * k) # ragged
+
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+  fa <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  expect_identical(fa$engine, "brms")
+  expect_identical(fa$ci$method, "posterior")
+  expect_identical(fa$design$ml_design, "nested_in_clusters")
+  ta <- tidy(fa)
+  # Subject level only (nested designs define no cluster-level IRR); agreement by default.
+  expect_setequal(unique(ta$level), "subject")
+  expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
+
+  # CONTAINMENT: the glmmTMB M19 incomplete nested random subject point sits inside each brms
+  # credible interval.
+  gf <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "glmmTMB",
+    seed = 1
+  ))
   gf <- gf[gf$level == "subject", ]
   by_index <- function(x, i) x$estimate[x$index == i]
   for (i in c("ICC(A,1)", "ICC(A,k)")) {

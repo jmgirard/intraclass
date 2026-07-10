@@ -40,16 +40,21 @@ shipped** (PR #36), the first deferred sibling ADR-040 named: the Bayesian sibli
 (single-level fixed) / M18 Slice 1 (crossed-multilevel fixed), narrowing the same `!balanced` brms guard for
 the fixed-rater paths. Here the 2b θ² moment correction (`brms_theta2r_moment_draws()`) went **live
 single-level for the first time** (`b ≠ 0` on ragged fixed data), and the flagged risk — ragged
-fixed-rater credible coverage — resolved **nominal** for both slices, so no Fable review. **No milestone is
-currently in flight.** Each milestone is scoped by an ADR at its start
+fixed-rater credible coverage — resolved **nominal** for both slices, so no Fable review. **M32 (ADR-042) —
+Bayesian incomplete/ragged NESTED random, Designs 2 & 3, subject level — is now in flight** (branch
+`m32-bayes-incomplete-nested`), completing the "brms × incomplete × random" row: the Bayesian sibling of the
+frequentist M19, narrowing the same `!balanced` brms guard's nested clause so the shipped M25 nested fits run
+on ragged data unchanged (random → no 2b, the M30 regime). Scoped **random-only** by an oracle-first catch —
+incomplete *fixed* nested has no frequentist oracle (deferred all engines, ADR-029), so it cannot ship as
+parity. Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
-ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31). No milestone is
-currently in flight; the next one needs an ADR after a short retro (founding brief §7).
+ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32).
+M32 is the milestone currently in flight.
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1081,3 +1086,62 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `skip_on_ci`). `R CMD check --as-cran` 0/0/0; installed-pkg both fixed fits verified; full suite (CI mode)
   1148/0. Bayesian incomplete **nested** fixed / **cluster-level** fixed / **replicates** / **one-way** stay
   deferred.
+
+## M32: Bayesian engine (brms) — incomplete/ragged NESTED random, Designs 2 & 3, subject level (ADR-042) — ACTIVE
+- Goal: extend `engine = "brms"` + `ci_method = "posterior"` from balanced/complete to **incomplete/ragged
+  NESTED random** ICCs — the Bayesian sibling of the frequentist **M19** (incomplete nested random, the
+  M8/M9 machinery on ragged nested data). Completes the "brms × incomplete × random" row: M30 shipped the
+  two-way single level + crossed (Design 1) multilevel, M32 adds both **nested** designs (raters nested in
+  clusters, Design 2; raters nested in subjects, Design 3 / multilevel one-way, agreement-only), subject
+  level. **Engine/interval parity, not new estimand work** (cf. M15/M21/M23–M31): both slices narrow the
+  same `!balanced` brms guard M30/M31 touched (`icc.R:1148–1152`, the `ml_design != "crossed"` clause) so
+  the shipped M25 fits `fit_brms_nested_clusters()` (Slice 1) / `fit_brms_nested_subjects()` (Slice 2) run
+  on ragged data **unchanged** — **no new fit, no new θ² helper** (none needed — random raters → variance
+  ratios, the clean M30 push-forward, **no 2b moment correction**), no new argument or dependency. **Scope
+  is RANDOM-only by an oracle-first catch:** incomplete *fixed* nested has no frequentist oracle (deferred
+  all engines, ADR-029, `icc.R:685`), so it cannot ship as parity — it is research, deferred below.
+- Reference: ADR-042 (scope + the random-only oracle-first bound + Fable posture); no new estimand-spec —
+  reuses [`M8-nested-multilevel.md`](estimand-specs/M8-nested-multilevel.md) (nested subject-level
+  coefficients) with [`M9-incomplete-multilevel.md`](estimand-specs/M9-incomplete-multilevel.md) /
+  [`M3-incomplete-designs.md`](estimand-specs/M3-incomplete-designs.md) §6 (`k_eff` + connectedness under
+  imbalance, engine-agnostic, pre-dispatch). Oracles **O-Bayes-INML-clusters** (Design 2) /
+  **O-Bayes-INML-subjects** (Design 3) — reduction to the shipped balanced nested brms fit (M25
+  Slice 1 / 2) + MAP-**containment** vs the M19 glmmTMB REML point on ragged nested data + committed seeded
+  ragged coverage fixtures; to be registered in [`REFERENCES.md`](REFERENCES.md).
+- DoD (the live board — check off in the same commit as the work, #16 / ADR-015):
+  - [x] **Slice 1 — incomplete nested Design 2 (raters nested in clusters), subject level.** Narrowed the
+        `ml_design != "crossed"` clause of the `!balanced` brms guard to still-refuse only
+        `nested_in_subjects` (`icc.R:1148-1152`) so ragged `nested_in_clusters` random dispatches to the
+        shipped `fit_brms_nested_clusters()` unchanged; verified the pre-dispatch M3/M9 `k_eff`/connectedness
+        (`icc.R:723-777`, engine-agnostic) threads through the posterior push-forward. O-Bayes-INML-clusters:
+        (a) reduction ≡ M25 Slice 1 at balance (complete cell coverage .95/.95); (b) live `-agree` containment
+        vs glmmTMB M19 (`skip_on_ci`, verified: glmmTMB 0.717 ∈ brms CI); (c) committed seeded ragged coverage
+        fixture `bayesian-incomplete-nested-oracle.rds` (seed 32100, n_rep 80) +
+        `data-raw/oracle-bayesian-incomplete-nested.R`. **Ragged coverage .925/.925 — NOMINAL** (tracks
+        complete .95/.95 within MC error). Stale "incomplete nested D2 aborts" test swapped for the
+        still-deferred Design 3 case. Full suite (CI mode) FAIL 0 / PASS 1162 / SKIP 15; `air`/`lintr` clean.
+  - [ ] **Slice 2 — incomplete nested Design 3 (raters nested in subjects, multilevel one-way,
+        agreement-only), subject level.** Narrow the same clause for `nested_in_subjects`;
+        `fit_brms_nested_subjects()` dispatches on ragged data. O-Bayes-INML-subjects: (a) reduction ≡ M25
+        Slice 2 at balance; (b) live `-agree` containment vs glmmTMB M19; (c) committed seeded ragged
+        coverage fixture.
+  - [ ] **The one unknown → risk gate.** Ragged-data coverage of the percentile credible interval through
+        `k_eff` for the nested designs. Working hypothesis (random → no 2b, the M30 regime): **nominal**.
+        **If** either coverage oracle undercovers → characterize honestly (#18) and **recommend a gated
+        Fable review, then stop** (#19); never auto-invoke.
+  - [ ] **Cross-cutting DoD** (brief §8): roxygen/`NEWS`/`COVERAGE.md`/`REFERENCES.md` updated in-commit
+        (#16); `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]);
+        `R CMD check --as-cran` 0/0/{≤1}; installed-pkg both nested fits driven via `library(intraclass)`
+        with `NOT_CRAN=true` ([[verify-against-installed-package]]); full CI matrix green (9/9); merged via
+        PR to `main` ([[milestone-branches-and-prs]]).
+- Deferred out of M32 (record so not rediscovered): Bayesian incomplete **fixed** nested (Designs 2/3) —
+  **no frequentist oracle** (deferred all engines, ADR-029, `icc.R:685`); it is *research*, needs the
+  frequentist incomplete-fixed-nested estimand (k_eff × per-cluster θ²_{r:c}) built first — the nested
+  sibling of the M9 `ICC(c,k)` divisor. Bayesian **cluster-level** ICC for nested designs (undefined —
+  cluster level needs crossed raters); Bayesian incomplete **within-cell replicates** (M20 corner);
+  Bayesian incomplete single-level **one-way** (M6 analog, low value); the averaged cluster-level
+  **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, not reachable — nested designs report no cluster level);
+  Bayesian **numeric-unit `d_study()`**; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
+  coupling, **HPDI**, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
+- Status: **in flight** (opened by ADR-042; no slice work begun — plan before code, #14). Branch
+  `m32-bayes-incomplete-nested`.

@@ -129,8 +129,13 @@ alternate engines, and seeded simulations.
   level) (`raters = "fixed"`): the finite-population \eqn{\theta^2_r} is read from the ragged
   rater-contrast posterior, and — because the rater means are then estimated from unequal
   cell counts — the moment correction that keeps the credible interval covering the
-  fixed-population coefficient becomes active (it is negligible on balanced data). Incomplete
-  nested-multilevel Bayesian fits remain planned for later milestones.
+  fixed-population coefficient becomes active (it is negligible on balanced data). The
+  Bayesian engine now also fits **incomplete/ragged nested** Design 2 (raters nested in
+  clusters) **random**-rater data at the subject level: the shipped nested fit is run on the
+  observed cells with the same harmonic-mean `k_eff` divisor + within-cluster connectedness
+  gates the other engines use, and — random raters being ratios of variance components — needs
+  no moment correction. Incomplete nested Design 3 and incomplete **fixed**-rater nested
+  Bayesian fits remain planned for later milestones.
 
 ## Choosing, projecting, and visualizing
 
