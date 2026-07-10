@@ -1009,22 +1009,22 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   per-component error divisors per draw (`"average"` divides pure error by `n_o`; σ²_sr not divided).
   Narrow the brms replicate refusal (`icc.R:1124`) + add a dispatch branch by `fit_brms_twoway()`
   (`icc.R:1304`).
-  - [ ] `fit_brms_replicates()`; σ²_sr/σ²_e split; guard narrowed + dispatch; `occasions` single/average
-    per-draw divisors; agreement/consistency, single/average.
-  - [ ] Oracle **O-Bayes-Rep**: reduction — `occasions = "average"` MAP ≈ M17 glmmTMB/lme4 (occasion-
-    averaged == two-way ICC on cell means, §6); single-occasion MAP ≈ glmmTMB (containment); seeded
-    coverage ~nominal.
-  - [ ] Committed fixture `tests/testthat/fixtures/bayesian-replicates-oracle.rds` + generator
-    `data-raw/oracle-bayesian-replicates.R` (#4); single live brms fit `skip_on_ci()`.
+  - [x] `fit_brms_replicates()`; σ²_sr/σ²_e split; guard narrowed + dispatch (single-level random only;
+    fixed×/multilevel× replicates refused); `occasions` single/average per-draw divisors. (Verified live:
+    single/average occasion rows render; average > single.)
+  - [x] Oracle **O-Bayes-Rep**: O-Bayes-Rep-wiring (Stan-free, exact per-draw occasion divisor); coverage
+    single **.94** / average **.93**; glmmTMB containment **1.00/1.00**; average > single **1.00**;
+    converged **.99** (MAP ~10% low at N_s=25, reported #18 — coverage is the pin).
+  - [x] Committed fixture `tests/testthat/fixtures/bayesian-replicates-oracle.rds` (seed 20291, 80 reps) +
+    generator `data-raw/oracle-bayesian-replicates.R` (#4); single live brms fit `skip_on_ci()`.
 
 - **Cross-cutting DoD:**
-  - [ ] No new `@export` (both reuse shipped `icc()` surface) → `_pkgdown.yml` unaffected
-    ([[pkgdown-reference-index-new-exports]] N/A, but confirm).
-  - [ ] `COVERAGE.md` §② (replicates) + §④ (conflated) + cross-cutting brms row refreshed; NEWS updated
-    (folded into the unreleased 0.1.0 section).
-  - [ ] `air format .` + `lintr::lint_package()` clean ([[run-lintr-before-push]]); installed-pkg brms
-    suite green with `NOT_CRAN=true` ([[verify-against-installed-package]]); `R CMD check --as-cran`
-    0/0/1; full CI matrix green.
+  - [x] No new `@export` (both reuse shipped `icc()` surface) → `_pkgdown.yml` unaffected.
+  - [x] `COVERAGE.md` §② (replicates) + §④ (conflated) + cross-cutting brms row + last-synced refreshed;
+    NEWS updated (folded into the unreleased 0.1.0 section); REFERENCES O-Bayes-Conflated / O-Bayes-Rep.
+  - [ ] `air format .` + `lintr` clean ([[run-lintr-before-push]]); installed-pkg brms suite green with
+    `NOT_CRAN=true` ([[verify-against-installed-package]]); `R CMD check --as-cran` 0/0/1; full CI matrix
+    green. *(air/lintr done; full-suite green (CI mode); `R CMD check` + installed-pkg pending.)*
 
 - Deferred out of M29 (record so not rediscovered): Bayesian **incomplete/ragged** (M30 — leans on
   coverage calibration, likely a gated Fable review, #19); Bayesian **fixed-rater × replicates** and
@@ -1033,6 +1033,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   **numeric-unit `d_study()`** projection; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
   coupling, **HPDI** intervals, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
 - Status: **in progress** — opened by ADR-039 (2026-07-10) on branch `m29-bayes-conflated-replicates`.
-  **Slice 1 (conflated) done** — guard narrowed, conflated composes off the crossed brms draws, O-Bayes-
-  Conflated pinned (coverage .95, containment 1.00, gap .144) off a committed 80-rep fixture; non-brms
-  suite green, `air`/`lintr` clean. **Slice 2 (within-cell replicates) active.**
+  **Slice 1 (conflated) done** — O-Bayes-Conflated pinned (coverage .95, containment 1.00, gap .144).
+  **Slice 2 (within-cell replicates) done** — `fit_brms_replicates()`; O-Bayes-Rep pinned (coverage
+  .94/.93, containment 1.00, average > single 1.00) off a committed 80-rep fixture. Both slices'
+  code/tests/docs land; `air`/`lintr` clean, full suite green (CI mode). **Remaining: `R CMD check
+  --as-cran` + installed-pkg brms run, then finish-task.**

@@ -112,7 +112,11 @@ alternate engines, and seeded simulations.
   reports the **conflated** diagnostic (`level = "conflated"`, the biased
   ignore-the-clustering ICC of ten Hove et al. 2022, Eq. 14): a variance-ratio
   push-forward composed off the same crossed five-component posterior draws, with the
-  frequentist glmmTMB conflated point falling inside its credible interval.
+  frequentist glmmTMB conflated point falling inside its credible interval. It also fits
+  **within-cell replicates** (more than one rating per subject×rater cell): the residual
+  splits into the subject×rater interaction and pure error, and `occasions = "average"`
+  reports the reliability of the replicate mean (pure error divided per posterior draw by
+  the replicate count) — single-level two-way random, balanced.
 
 ## Choosing, projecting, and visualizing
 

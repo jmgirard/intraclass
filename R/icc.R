@@ -1111,11 +1111,15 @@ icc <- function(
     # fixed-nested -- are refused engine-agnostically upstream (~L655); incomplete crossed
     # fixed is caught by the `!balanced` brms guard below. So no brms-specific fixed guard
     # is needed here.
-    if (replicates) {
+    if (replicates && (multilevel || raters == "fixed")) {
+      # Single-level two-way RANDOM replicates ship for brms (M29 Slice 2, ADR-039).
+      # The fixed-rater and multilevel replicate corners stay deferred (the Bayesian
+      # siblings of the M20 Slice 1/2 frequentist deferrals) -- refuse them loudly (#5).
       abort_unsupported(c(
-        "The {.pkg brms} engine does not support within-cell replicates yet.",
-        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
-             replicated data."
+        "The {.pkg brms} engine supports within-cell replicates only for the \\
+         single-level two-way random design so far.",
+        i = "Fixed-rater and multilevel Bayesian replicates are planned for a later \\
+             milestone; use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
       ))
     }
     if (!balanced) {
@@ -1287,6 +1291,13 @@ icc <- function(
     }
     if (engine == "lme4") {
       fit_lme4_replicates(df)
+    } else if (engine == "brms") {
+      # Two-way random replicates, Bayesian (M29 Slice 2, ADR-039): the same
+      # interaction fit under the half-t(4, 0, 1) SD prior; the residual splits into
+      # sigma^2_sr (subject:rater) and pure error, and `occasions` averaging divides
+      # pure error by n_o PER DRAW (posterior_summary -> icc_point). Fixed / multilevel /
+      # incomplete replicate brms are refused upstream (#5).
+      fit_brms_replicates(df, seed = seed, brm_args = brm_args)
     } else {
       fit_glmmtmb_replicates(df)
     }

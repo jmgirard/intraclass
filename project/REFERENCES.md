@@ -663,6 +663,36 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   glmmTMB inside the CI, conflated > subject; `skip_on_ci`).
 - **Provenance:** `data-raw/oracle-bayesian-conflated.R` (seeded; writes the fixture before the hard pins).
 
+### Oracle O-Bayes-Rep — Bayesian within-cell replicates (M29 Slice 2, ADR-039)
+
+- **Role:** the Bayesian sibling of the frequentist replicate oracle (M17 Slice 3). The
+  within-cell-replicate ICC splits σ²_res → σ²_sr (subject:rater interaction) + σ²_e (pure error) via
+  `fit_brms_replicates()` (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`), and `occasions =
+  "average"` divides **pure error** (not the interaction) by n_o. Like every random-rater Bayesian
+  coefficient it is a **variance-ratio push-forward** — the estimand's per-component `error_divisors` are
+  applied per posterior draw by `posterior_summary()` → `icc_point()`, so **none** of the θ² moment
+  correction applies.
+- **Oracles (≥2 independent, #1):** **O-Bayes-Rep-wiring** (no Stan) — `posterior_summary()` reproduces the
+  closed-form occasion-averaged ratio per draw (pure error ÷ n_o, interaction undivided) and average >
+  single draw-for-draw; **O-population** (coverage) — the single- and average-occasion credible intervals
+  cover their known population values ~nominally; **O-glmmTMB containment** (the M17 §6 reduction) — the
+  frequentist glmmTMB replicate points fall inside the brms credible intervals (differing only by the
+  prior; the M26 containment posture).
+- **Sources:** ten Hove et al. (2020) prior/recipe; generalizability theory two-facet (rater × occasion)
+  decomposition (Cronbach et al. 1972; Brennan 2001); estimand-spec `M17-within-cell-replicates.md` (§1-2
+  measurement model + per-component divisors — no new spec, M29 gives the shipped estimand the brms engine).
+- **DGP:** two-way random with within-cell replicates, N_s = 25, k = 4, n_o = 3, σ²_s = 1.0, σ²_r = 0.16,
+  σ²_sr = 0.5, σ²_e = 0.7; pop single ICC(A,1) = s²_s/(s²_s+s²_r+s²_sr+s²_e), pop average = the same with
+  s²_e/n_o.
+- **Committed reference (`tests/testthat/fixtures/bayesian-replicates-oracle.rds`; seed 20291):** per-run
+  convergence / single+average coverage / glmmTMB containment / average-above-single fraction (values
+  recorded by the generator run; pins qualitative, #4/#18).
+- **Pins (#4/#18):** convergence ≥ .90; single and average coverage ∈ [.90, .99]; single and average
+  glmmTMB containment ≥ .90; average > single in ≥ .95 of reps. Asserted in `test-icc-brms.R`
+  **O-Bayes-Rep-wiring** (no Stan) + **O-Bayes-Rep** (committed reference, on CI) + **O-Bayes-Rep-agree**
+  (live replicate fit, glmmTMB inside the CI, average > single; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-replicates.R` (seeded; writes the fixture before the hard pins).
+
 ---
 
 ## Bibliography

@@ -134,14 +134,14 @@
   variance-ratio push-forwards, so **no θ² 2b moment correction and no Fable-review risk**
   ([[fixed-rater-interval-2b-moment-correction]] N/A). Bayesian incomplete/ragged is the isolated next
   milestone (M30).
-- Active task: **M29 Slice 2 — Bayesian within-cell replicates.** New `fit_brms_replicates()`
-  (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, half-*t*(4,0,1) SD prior); narrow the brms
-  replicate refusal (`icc.R:1124`) + dispatch by `fit_brms_twoway()` (`icc.R:1304`); `occasions`
-  single/average per-draw divisors; oracle **O-Bayes-Rep** (reduction to M17 glmmTMB/lme4 + containment +
-  coverage) off a committed fixture. **Slice 1 (conflated) done** — guard narrowed; conflated composes
-  off the crossed brms draws (a variance-ratio push-forward, no θ² moment correction); O-Bayes-Conflated
-  pinned (coverage .95, glmmTMB containment 1.00, conflated−subject gap .144, converged 1.00) off a
-  committed 80-rep fixture (seed 20290); non-brms suite green, `air`/`lintr` clean.
+- Active task: **M29 finish-task** — both slices done; running the final `R CMD check --as-cran` +
+  installed-pkg brms suite before the PR. **Slice 1 (conflated)**: guard narrowed; conflated composes off
+  the crossed brms draws; O-Bayes-Conflated pinned (coverage .95, glmmTMB containment 1.00, gap .144) off
+  a committed 80-rep fixture (seed 20290). **Slice 2 (within-cell replicates)**: `fit_brms_replicates()`
+  (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`); single-level random only (fixed×/multilevel×
+  refused); `occasions` per-draw divisor; O-Bayes-Rep pinned (coverage .94/.93, containment 1.00,
+  average > single 1.00) off a committed 80-rep fixture (seed 20291). Both are variance-ratio
+  push-forwards (no θ² moment correction). `air`/`lintr` clean; full suite green (CI mode).
 - Last green CI: **PR #33 (M28) — full CI matrix green (9/9), squash-merged to `main` at `e6ce64d`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/1** (full
