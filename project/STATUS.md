@@ -134,14 +134,15 @@
   variance-ratio push-forwards, so **no θ² 2b moment correction and no Fable-review risk**
   ([[fixed-rater-interval-2b-moment-correction]] N/A). Bayesian incomplete/ragged is the isolated next
   milestone (M30).
-- Active task: **M29 finish-task** — both slices done; running the final `R CMD check --as-cran` +
-  installed-pkg brms suite before the PR. **Slice 1 (conflated)**: guard narrowed; conflated composes off
-  the crossed brms draws; O-Bayes-Conflated pinned (coverage .95, glmmTMB containment 1.00, gap .144) off
-  a committed 80-rep fixture (seed 20290). **Slice 2 (within-cell replicates)**: `fit_brms_replicates()`
-  (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`); single-level random only (fixed×/multilevel×
-  refused); `occasions` per-draw divisor; O-Bayes-Rep pinned (coverage .94/.93, containment 1.00,
-  average > single 1.00) off a committed 80-rep fixture (seed 20291). Both are variance-ratio
-  push-forwards (no θ² moment correction). `air`/`lintr` clean; full suite green (CI mode).
+- Active task: **M29 — both slices done, all gates green, ready for PR.** **Slice 1 (conflated)**: guard
+  narrowed; conflated composes off the crossed brms draws; O-Bayes-Conflated pinned (coverage .95, glmmTMB
+  containment 1.00, gap .144) off a committed 80-rep fixture (seed 20290). **Slice 2 (within-cell
+  replicates)**: `fit_brms_replicates()` (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`);
+  single-level random only (fixed×/multilevel× refused); `occasions` per-draw divisor; O-Bayes-Rep pinned
+  (coverage .94/.93, containment 1.00, average > single 1.00) off a committed 80-rep fixture (seed 20291).
+  Both variance-ratio push-forwards (no θ² moment correction). Gates: `air`/`lintr` clean; full suite (CI
+  mode) 1089/0/10; installed-pkg brms 266/0/0 (all live Stan fits ran); `R CMD check --as-cran` 0/0/1.
+  Next: push branch + open PR.
 - Last green CI: **PR #33 (M28) — full CI matrix green (9/9), squash-merged to `main` at `e6ce64d`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/1** (full
@@ -149,13 +150,15 @@
   non-brms suite **295/0/0**; `lintr`/`air` clean; coverage ~85% (below 90% by design —
   [[coverage-baseline]]). Prior green: **PR #32 (M27)** at `0a93fe6`.
 - Blockers: —
-- Updated: 2026-07-10 by main session (Opus) — **M29 opened (ADR-039) on branch
-  `m29-bayes-conflated-replicates`.** Milestone-start companions committed together (#16): ADR-039 appended
-  to DECISIONS; the M29 active-milestone board + DoD checklist added to MILESTONES (preamble +
-  ADR-index updated); STATUS flipped to M29 / Slice 1 active. No slice code written yet. Next: implement
-  Slice 1 (Bayesian conflated) — narrow the `icc.R:598–604` brms conflated guard, dispatch to the shipped
-  `fit_brms_multilevel()`, and pin O-Bayes-Conflated off a committed fixture. Prior line: **M28 shipped
-  (PR #33, squash-merged at `e6ce64d`).**
+- Updated: 2026-07-10 by main session (Opus) — **M29 implemented end-to-end (both slices) on branch
+  `m29-bayes-conflated-replicates`; all gates green, ready for PR.** ADR-039 opened the milestone; Slice 1
+  (Bayesian conflated, `eed84c0`) narrowed the brms conflated guard so Eq. 14 composes off the crossed
+  five-component draws + O-Bayes-Conflated fixture; Slice 2 (within-cell replicates, `176a85a`) added
+  `fit_brms_replicates()` + O-Bayes-Rep fixture. Both variance-ratio push-forwards (no θ² moment
+  correction). Gates: `air`/`lintr` clean; full suite (CI mode) 1089/0/10; installed-pkg brms 266/0/0 (all
+  live Stan fits ran, `NOT_CRAN=true`); `R CMD check --as-cran` 0/0/1. Next: push branch + open PR (then
+  compress the MILESTONES M29 board on merge). Prior line: **M28 shipped (PR #33, squash-merged at
+  `e6ce64d`).**
 
 ## Where we are
 

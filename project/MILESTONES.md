@@ -1022,9 +1022,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - [x] No new `@export` (both reuse shipped `icc()` surface) → `_pkgdown.yml` unaffected.
   - [x] `COVERAGE.md` §② (replicates) + §④ (conflated) + cross-cutting brms row + last-synced refreshed;
     NEWS updated (folded into the unreleased 0.1.0 section); REFERENCES O-Bayes-Conflated / O-Bayes-Rep.
-  - [ ] `air format .` + `lintr` clean ([[run-lintr-before-push]]); installed-pkg brms suite green with
-    `NOT_CRAN=true` ([[verify-against-installed-package]]); `R CMD check --as-cran` 0/0/1; full CI matrix
-    green. *(air/lintr done; full-suite green (CI mode); `R CMD check` + installed-pkg pending.)*
+  - [x] `air format .` + `lintr` clean ([[run-lintr-before-push]]); installed-pkg brms suite green with
+    `NOT_CRAN=true` — **266 pass / 0 fail, all live Stan fits ran** ([[verify-against-installed-package]]);
+    `R CMD check --as-cran` **0/0/1** (New submission NOTE only); full suite (CI mode) 1089/0. *(Full CI
+    matrix runs on the PR.)*
 
 - Deferred out of M29 (record so not rediscovered): Bayesian **incomplete/ragged** (M30 — leans on
   coverage calibration, likely a gated Fable review, #19); Bayesian **fixed-rater × replicates** and
@@ -1032,9 +1033,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   consistency** (🟣 research, unsourced) and **conflated × fixed** (⚫ by design); Bayesian
   **numeric-unit `d_study()`** projection; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
   coupling, **HPDI** intervals, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress** — opened by ADR-039 (2026-07-10) on branch `m29-bayes-conflated-replicates`.
-  **Slice 1 (conflated) done** — O-Bayes-Conflated pinned (coverage .95, containment 1.00, gap .144).
-  **Slice 2 (within-cell replicates) done** — `fit_brms_replicates()`; O-Bayes-Rep pinned (coverage
-  .94/.93, containment 1.00, average > single 1.00) off a committed 80-rep fixture. Both slices'
-  code/tests/docs land; `air`/`lintr` clean, full suite green (CI mode). **Remaining: `R CMD check
-  --as-cran` + installed-pkg brms run, then finish-task.**
+- Status: **done (all gates green) — ready for PR.** Opened by ADR-039 (2026-07-10) on branch
+  `m29-bayes-conflated-replicates`. **Slice 1 (conflated)** — O-Bayes-Conflated pinned (coverage .95,
+  containment 1.00, gap .144). **Slice 2 (within-cell replicates)** — `fit_brms_replicates()`; O-Bayes-Rep
+  pinned (coverage .94/.93, containment 1.00, average > single 1.00). Both are variance-ratio
+  push-forwards (no θ² moment correction). `air`/`lintr` clean; full suite (CI mode) 1089/0/10;
+  installed-pkg brms 266/0/0 (all live Stan fits ran); `R CMD check --as-cran` 0/0/1. Compress this board
+  to the summary form once the PR merges.

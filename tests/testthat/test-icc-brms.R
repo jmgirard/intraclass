@@ -122,9 +122,12 @@ test_that("brms refuses the fixed-rater and multilevel replicate corners", {
   base <- expand.grid(rep = 1:2, rater = factor(1:3), subject = factor(1:6))
   base$score <- rnorm(nrow(base))
   d <- base[, c("subject", "rater", "score")]
-  # Fixed-rater replicates: deferred.
+  # Fixed-rater replicates: deferred. (suppressWarnings: the fixed-rater nudge fires
+  # before the abort; we assert the abort, not the nudge.)
   expect_error(
-    icc(d, score, rater, subject = subject, raters = "fixed", engine = "brms"),
+    suppressWarnings(
+      icc(d, score, rater, subject = subject, raters = "fixed", engine = "brms")
+    ),
     class = "intraclass_unsupported"
   )
   # Multilevel replicates: deferred. Well-formed crossed Design 1 with 2 ratings per
