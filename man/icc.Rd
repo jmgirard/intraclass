@@ -146,13 +146,14 @@ framework (Stan, via \pkg{brms}) under a sourced half-\emph{t}(4, 0, 1) prior on
 random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile \strong{credible} interval
 (\code{ci_method = "posterior"}, forced). It covers, on \strong{both balanced/complete and
-incomplete/ragged} data, the two-way random single-level design and the crossed
-(Design 1) \strong{multilevel} random design (subject and cluster levels); and, on
-balanced/complete data only, the one-way random and fixed-rater two-way designs, the
-crossed multilevel \strong{fixed-rater} design, the nested \strong{multilevel} designs -- Design 2
-(raters nested in clusters, random and fixed) and Design 3 (raters nested in subjects,
-agreement-only) at the subject level -- the conflated diagnostic, and within-cell
-replicates. Incomplete/ragged \strong{nested} and \strong{fixed-rater} Bayesian fits, and
+incomplete/ragged} data, the two-way random single-level design, the crossed
+(Design 1) \strong{multilevel} random design (subject and cluster levels), and the
+two-way \strong{fixed-rater} single-level design (Case-3A finite-population
+\eqn{\theta^2_r}), and the crossed (Design 1) multilevel \strong{fixed-rater} design (subject
+level); and, on balanced/complete data only, the one-way random design, the nested
+\strong{multilevel} designs -- Design 2 (raters nested in clusters, random and fixed) and
+Design 3 (raters nested in subjects, agreement-only) at the subject level -- the conflated
+diagnostic, and within-cell replicates. Incomplete/ragged \strong{nested} Bayesian fits, and
 numeric-\code{unit} (D-study) projection, are planned for later milestones. \code{"lme4"} requires the
 \pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
 package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}

@@ -171,9 +171,14 @@ helpers* item below (sample-size / CI-width), where it belongs.
   then **shipped as M30** (ADR-040, PR #35): two-way random single-level + crossed (Design 1) multilevel
   random, narrowing the one `!balanced` brms guard so the shipped M3/M9 `k_eff`/connectedness thread per
   posterior draw — a variance-ratio push-forward, so the ragged-data coverage that was flagged as the risk
-  came back **nominal** at the subject level (no Fable review; O-Bayes-Incomplete / O-Bayes-IML). **Still
-  parked** — the *other* Bayesian parity follow-ons: incomplete **fixed-rater** (θ² under imbalance → the
-  `k_eff` × 2b-moment interaction, higher-risk) and incomplete **nested** Designs 2/3; **fixed-rater and
+  came back **nominal** at the subject level (no Fable review; O-Bayes-Incomplete / O-Bayes-IML). Incomplete/ragged
+  **fixed-rater** then **shipped as M31** (ADR-041, PR #36): two-way fixed single-level + crossed (Design 1)
+  fixed multilevel subject level, narrowing the same `!balanced` brms guard. Here the θ² **2b moment
+  correction** (shipped `brms_theta2r_moment_draws()`) went **live at the single level for the first time**
+  (`b ≠ 0` once the fixed rater means are estimated from unequal cell counts, invisible on balanced data);
+  the flagged `k_eff` × 2b interaction risk resolved **nominal** for both slices (O-Bayes-IFixed .965/.965,
+  O-Bayes-IFML-fixed .91/.91 tracking their complete cells → no Fable review). **Still parked** — the *other*
+  Bayesian parity follow-ons: incomplete **nested** Designs 2/3 (fixed or random); **fixed-rater and
   multilevel within-cell replicates**; and **cluster-level fixed** (for the incomplete/small-k corners ten
   Hove et al. 2022 flag the best estimator as an open research question → schedule leaning on coverage
   calibration); plus **selectable** `posterior` coupling (MC/bootstrap on a Bayesian fit), **HPDI**

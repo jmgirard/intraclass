@@ -57,7 +57,7 @@ validated effective-n_o divisor).
 | `occasions` | `single`, `average` | replicates only |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random (single-level, balanced **and incomplete/ragged**) **+ fixed + one-way** (single-level, balanced) + all multilevel (crossed D1 + nested D2/D3, subject level), **random and fixed** (fixed subject level, crossed D1 + nested D2) |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random (single-level, balanced **and incomplete/ragged**) **+ fixed** (single-level, balanced **and incomplete/ragged**) **+ one-way** (single-level, balanced) + all multilevel (crossed D1 + nested D2/D3, subject level), **random and fixed** (fixed subject level, crossed D1 + nested D2) |
 | `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | data balance | balanced / incomplete (ragged) | |
@@ -76,7 +76,7 @@ validated effective-n_o divisor).
 | `engine` = glmmTMB, lme4 | ✅ (both, on balanced + ragged; ragged lme4 degrades to glmmTMB at the variance boundary) |
 | `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4) |
 | `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M23, ADR-033; incomplete M30 Slice 1, ADR-040)** — two-way **random** (agreement/consistency, single/average), **balanced/complete and incomplete/ragged**; half-*t*(4,0,1) prior, MAP point + percentile credible interval, `brm_args` passthrough. On ragged data the harmonic-mean `k_eff` divisor + connectedness (M3, ADR-008) thread per posterior draw (a variance-ratio push-forward — no θ² correction); O-Bayes-Incomplete pins reduction-to-M23 (complete cell) + ragged coverage of ICC(A,1) & ICC(A,k_eff) + glmmTMB M3 containment. |
-| `engine = "brms"` + `raters = "fixed"` | ✅ **Shipped (M26 Slice 2, ADR-036)** — `score ~ 1 + rater + (1\|subject)`; **raw** θ²_r (McGraw & Wong Case-3A finite-population variance) read per posterior draw from the rater fixed-effect draws — **no** frequentist bias correction (the posterior integrates it; oracle-first resolution). Balanced/complete. Honest catch: balanced `fixed ≡ random` holds only **approximately** for brms (prior on σ_r vs flat on rater effects), so O-Bayes-Fixed pins **containment** (glmmTMB fixed inside the credible interval) + coverage, not pointwise equality. Numeric-`unit` D-study and incomplete brms stay deferred (cross-cutting section). |
+| `engine = "brms"` + `raters = "fixed"` | ✅ **Shipped (M26 Slice 2, ADR-036; incomplete M31 Slice 1, ADR-041)** — `score ~ 1 + rater + (1\|subject)`; θ²_r (McGraw & Wong Case-3A finite-population variance) read per posterior draw from the rater fixed-effect draws, moment-corrected (2b) with a boundary-aware average-floor. **Balanced and incomplete/ragged**, single level. On balanced data the 2b correction is negligible (rater means from the whole sample); on **ragged** data the rater means come from unequal cell counts, so the 2b correction goes **live at the single level** and the M3 `k_eff` divisor + connectedness thread per draw. Honest catch: balanced `fixed ≡ random` holds only **approximately** for brms (prior on σ_r vs flat on rater effects), so O-Bayes-Fixed / O-Bayes-IFixed pin **containment** (glmmTMB fixed inside the credible interval) + coverage, not pointwise equality. The crossed (Design 1) fixed-rater **multilevel** subject level ships incomplete/ragged too (M31 Slice 2, O-Bayes-IFML-fixed); numeric-`unit` D-study and **incomplete fixed-rater nested** brms stay deferred (cross-cutting section). |
 
 **Gaps**
 
@@ -144,7 +144,7 @@ Design inferred from the crossing pattern (or declared via `design`).
 
 | Sub-design | `level` | `type` | `raters` | balance | `engine` |
 |---|---|---|---|---|---|
-| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4, **brms** (random subject+cluster — balanced M24, **incomplete/ragged M30 Slice 2**; **fixed subject — M27 Slice 1**; **conflated — M29 Slice 1**) |
+| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject only; balanced **and** incomplete) | balanced ✅; incomplete ✅\* | glmmTMB, lme4, **brms** (random subject+cluster — balanced M24, **incomplete/ragged M30 Slice 2**; **fixed subject — balanced M27 Slice 1, incomplete/ragged M31 Slice 2**; **conflated — M29 Slice 1**) |
 | **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random (balanced+incomplete); **fixed** (balanced, M19 Slice 2) | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4, **brms** (balanced; random subject — M25 Slice 1; **fixed subject — M27 Slice 2**) |
 | **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced ✅; incomplete ✅ (M19 Slice 1) | glmmTMB, lme4, **brms** (balanced random, subject — M25 Slice 2) |
 
