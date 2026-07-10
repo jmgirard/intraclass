@@ -415,15 +415,14 @@ fit_lme4_fixed <- function(data, call = rlang::caller_env()) {
     slots
   )
 
-  # Per draw: reconstruct the k rater means from the fixed-effect beta draws, apply
-  # the SAME bias-corrected theta^2_r (bias is constant), clamp at 0 -- identical to
-  # fit_glmmtmb_fixed()'s to_components(). subject/residual back-transform from log-SD.
+  # Per draw: reconstruct the k rater means from the fixed-effect beta draws and apply
+  # the moment-corrected theta^2_r (2b + boundary-aware floor; one group -- M28/ADR-038),
+  # identical to fit_glmmtmb_fixed(). subject/residual back-transform from log-SD.
   to_components <- function(par) {
     means <- th$contrast %*% par[beta_nm, , drop = FALSE]
-    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     list(
       subject = exp(2 * par["subject", ]),
-      rater = pmax(0, raw_draws - th$bias),
+      rater = theta2r_moment_draws(list(means), list(th$bias), th$center, k),
       residual = exp(2 * par["residual", ])
     )
   }
@@ -839,17 +838,16 @@ fit_lme4_multilevel_fixed <- function(data, call = rlang::caller_env()) {
   )
 
   # Random components back-transform from log-SD; theta^2_r is recomputed from the
-  # rater beta draws with the constant bias correction (as in fit_lme4_fixed()).
+  # rater beta draws, moment-corrected (2b + boundary-aware floor; one group -- M28).
   to_components <- function(par) {
     means <- th$contrast %*% par[beta_nm, , drop = FALSE]
-    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     c(
       stats::setNames(
         lapply(names(groups), function(s) exp(2 * par[s, ])),
         names(groups)
       ),
       list(
-        rater = pmax(0, raw_draws - th$bias),
+        rater = theta2r_moment_draws(list(means), list(th$bias), th$center, k),
         residual = exp(2 * par["residual", ])
       )
     )
@@ -969,15 +967,16 @@ fit_lme4_replicates_fixed <- function(data, call = rlang::caller_env()) {
   )
 
   to_components <- function(par) {
+    # theta^2_r moment-corrected from the rater beta draws (2b + boundary-aware floor;
+    # one group -- M28/ADR-038); random components back-transform from log-SD.
     means <- th$contrast %*% par[beta_nm, , drop = FALSE]
-    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     c(
       stats::setNames(
         lapply(names(groups), function(s) exp(2 * par[s, ])),
         names(groups)
       ),
       list(
-        rater = pmax(0, raw_draws - th$bias),
+        rater = theta2r_moment_draws(list(means), list(th$bias), th$center, k),
         residual = exp(2 * par["residual", ])
       )
     )

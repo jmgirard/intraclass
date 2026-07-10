@@ -12,5 +12,9 @@ linters: linters_with_defaults(
 encoding: "UTF-8"
 exclusions: list(
     "tests/testthat.R",
-    "tests/spelling.R"
+    "tests/spelling.R",
+    # Committed statistical-review verification scripts (PRINCIPLES.md #19) use
+    # mathematical single-capital matrix notation (C, V, L) and constants that do
+    # not follow package snake_case; they are provenance artifacts, not package code.
+    "data-raw/reviews"
   )

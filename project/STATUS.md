@@ -110,20 +110,28 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active milestone: **M27 — Bayesian multilevel fixed-rater (brms), crossed Design 1 + nested Design 2,
-  subject level, balanced/complete** (ADR-037, accepted 2026-07-09; board opened in
-  [`MILESTONES.md`](MILESTONES.md)). The brms sibling of the frequentist M10 (crossed fixed) / M19 Slice 2
-  (nested fixed) paths; engine/interval parity, not new estimand work (#6). **Disambiguation (ADR-037):**
-  Bayesian multilevel *one-way* was already shipped as Design 3 in M25 Slice 2, so M27 is **fixed-rater
-  only**. Chosen after a short retro of the M23→M26 Bayesian arc.
-- Active task: **none** — M27 shipped (PR #32, squash-merged at `0a93fe6`). No milestone is currently in
-  flight; the next one needs an ADR after a short retro. Remaining work lives in
-  [`ROADMAP.md`](ROADMAP.md): the **frequentist nested-fixed MC-interval** coverage sim (spun off as a
-  background task from the ADR-037 Fable-review corollary — its own ADR), remaining **Bayesian** follow-ons
-  (incomplete/ragged, within-cell replicates, conflated, cluster-level fixed), **categorical/ordinal
-  GLMM**, **multilevel SEM**, the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and
-  occasion-`d_study()`. The out-of-band **CRAN upload** (ADR-022) also remains. Remaining post-M27 work lives in [`ROADMAP.md`](ROADMAP.md): Bayesian
-  incomplete/replicates/conflated + cluster-level fixed, categorical/ordinal GLMM, multilevel SEM, the
+- Active milestone: **M28 — Frequentist nested-fixed MC-interval coverage** (ADR-038, accepted
+  2026-07-09; board opened in [`MILESTONES.md`](MILESTONES.md)). The spun-off M27 corollary: pin — and,
+  only if the seeded coverage sim warrants, fix — the shipped frequentist nested-fixed θ²_{r:c} MC
+  interval (`theta2r_nested_draws()`), which is built the same per-cluster-floor / 1b-subtract way the M27
+  Fable review found undercovers the nested finite population and cannot reach θ²=0. **Interval-method
+  work, not new estimand work** (#6); the frequentist **point** estimator is out of scope (unbiased).
+  **Characterize-then-decide** posture (#1/#18): Slice 1 (the coverage sim) is required; Slice 2 (recenter
+  + average-floor fix, gated on a Fable review since it changes a shipped interval) fires only if Slice 1
+  shows under-coverage. Chosen after a short retro of the M23→M27 Bayesian arc.
+- Active task: **Both slices implemented + green; pre-PR checks remain.** Slice 1 (characterization) found
+  the shipped `theta2r_nested_draws()` interval undercovering (boundary .95/.86/.57 as C_n=5/20/80, worst
+  ≈.37). The **gated Fable review (#19) returned and its full verdict was adopted** (ADR-038 amendment;
+  brief+response+`fable-check-nfi.R` committed): Slice 2 shipped the shared `theta2r_moment_draws()` (2b +
+  boundary-aware average-floor) across **glmmTMB/lme4/lavaan**, moved the **point** floor to the average
+  (Fable §3 — point-in-own-CI containment .59→1.00), unified the crossed paths, and retired the
+  "deliberate displacement" note. **Post-fix O-NFI nominal** (interior .962 / boundary .958, every cell
+  ≥.91, C_n collapse gone). Non-brms suite **295/0/0** (`load_all`; brms untouched); `air`/`lint` clean
+  (0 lints). **Remaining before the PR:** `R CMD check --as-cran` (expect 0/0/1) + installed-package suite
+  (`NOT_CRAN=true`, [[verify-against-installed-package]]), then ship on `m28-nested-fixed-interval`,
+  merge via PR. Remaining post-M28 work lives in
+  [`ROADMAP.md`](ROADMAP.md): remaining **Bayesian** follow-ons (incomplete/ragged, within-cell
+  replicates, conflated, cluster-level fixed), **categorical/ordinal GLMM**, **multilevel SEM**, the
   Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band
   **CRAN upload** (ADR-022) also remains.
 - Last green CI: **M27 local green on branch `m27-bayes-multilevel-fixed` (not yet pushed/PR'd).** Local
@@ -134,13 +142,14 @@
   ~85% (below 90% by design — brms fit wrappers are live-only, [[coverage-baseline]]). Prior green:
   **PR #31 (M26)** squash-merged to `main` at `c02bc38`.
 - Blockers: — (the M27 Slice 2 Fable review returned 2026-07-09 and its verdict is implemented + green).
-- Updated: 2026-07-09 by main session (Opus) — **M27 shipped (PR #32, squash-merged at `0a93fe6`);
-  post-merge `project/` reconcile.** Both slices + the gated Fable-review resolution (2b moment correction
-  + boundary-aware average-floor) landed in the PR; this commit flips STATUS to shipped and compresses the
-  MILESTONES M27 board. Local `main` fast-forwarded to `origin/main` after the squash; merged branch
-  deleted. Next: open the next milestone after a short retro (frequentist nested-fixed interval corollary /
-  remaining Bayesian follow-ons / categorical GLMM / multilevel SEM), or the CRAN upload (ADR-022).
-  Prior line: **M26 shipped (PR #31, squash-merged at `c02bc38`).**
+- Updated: 2026-07-09 by main session (Opus) — **M28 both slices implemented + green (retro → ADR-038 →
+  Slice 1 characterization → gated Fable review → Slice 2 fix, all in one session).** Slice 1 pinned the
+  shipped nested-fixed MC interval undercovering; the maintainer-approved Fable review returned and its
+  full verdict was adopted — shared `theta2r_moment_draws()` (2b + average-floor) across glmmTMB/lme4/
+  lavaan, point floor moved to the average, crossed paths unified. Post-fix O-NFI nominal
+  (interior .962/boundary .958); non-brms suite 295/0/0; `air`/`lint` clean. Remaining before PR:
+  `R CMD check --as-cran` + installed-pkg suite (`NOT_CRAN=true`). Prior line: **opened M28 (ADR-038) +
+  shipped Slice 1.** Earlier: **M27 shipped (PR #32, squash-merged at `0a93fe6`).**
   Slices 1–2 + all cross-cutting DoD done. Post-merge `project/` reconcile: this file, MILESTONES M26 →
   done + preamble + board compressed, COVERAGE brms one-way/fixed cells, REFERENCES O-Bayes-OW/-Fixed,
   ROADMAP flipped to shipped, NEWS Bayesian section (all landed in the PR; this commit compresses the
@@ -177,18 +186,19 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M27 (ADR-037) shipped (PR #32) — Bayesian multilevel fixed-rater.** `engine = "brms"` +
-`raters = "fixed"` now covers the crossed Design 1 and nested Design 2 subject level (balanced), via
-θ²_r/θ²_{r:c} read per posterior draw and **moment-corrected (2b + boundary-aware average-floor)** per
-the gated Fable review (ADR-037 amendment) — completing the brms multilevel story (random ✓ M24/M25,
-fixed ✓ M27; multilevel one-way = Design 3, already M25). **No milestone is currently in flight** — the
-next one needs an ADR after a short retro (founding brief §7). Candidates in [`ROADMAP.md`](ROADMAP.md):
-the **frequentist nested-fixed MC-interval coverage sim** (the ADR-037 corollary — its own ADR; likely a
-Fable review), the **remaining Bayesian follow-ons** (incomplete/ragged, within-cell replicates,
-conflated, cluster-level fixed — each a later thin slice), **categorical/ordinal GLMM** ratings,
-**multilevel SEM**, and the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor. The out-of-band
-**CRAN upload** (ADR-022) also remains. Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28),
-M24 (PR #29), M25 (PR #30), M26 (PR #31), M27 (PR #32).
+**M28 (ADR-038) — Frequentist nested-fixed MC-interval coverage — both slices implemented + green.** The
+shipped nested-fixed MC interval undercovered (Slice 1); the maintainer-approved gated Fable review (#19)
+returned and its full verdict shipped in Slice 2 — shared `theta2r_moment_draws()` (2b + boundary-aware
+average-floor) across glmmTMB/lme4/lavaan, the **point** floor moved to the average, crossed paths unified,
+"deliberate displacement" note retired. Post-fix O-NFI nominal (interior .962/boundary .958). **Next action:
+finish the pre-PR checks** — `R CMD check --as-cran` (running) + installed-package suite (`NOT_CRAN=true`),
+then `/finish-task` and ship on `m28-nested-fixed-interval` via PR. This closes the M27 corollary thread.
+Candidates for **after** M28 in
+[`ROADMAP.md`](ROADMAP.md): the **remaining Bayesian follow-ons** (incomplete/ragged, within-cell
+replicates, conflated, cluster-level fixed), **categorical/ordinal GLMM** ratings, **multilevel SEM**, and
+the Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor. The out-of-band **CRAN upload** (ADR-022)
+also remains. Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24 (PR #29), M25 (PR #30),
+M26 (PR #31), M27 (PR #32).
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 

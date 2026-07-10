@@ -524,16 +524,15 @@ rater_mean_contrast <- function(k) {
 # centered means. On BALANCED data the corrected theta^2_r equals the random-fit
 # sigma^2_r (M3 §6, verified on SF; M10's balanced fixed == random reduction).
 #
-# Note on the interval (deliberate, not a defect): the Monte-Carlo sampler recomputes
-# `max(0, raw_draws - bias)` each draw with this same constant `bias`, but the drawn
-# rater means carry their own sampling variance, so E[raw_draws] = raw + bias and the
-# theta^2_r DRAWS center on `raw`, i.e. `bias` above the bias-corrected point. The
-# fixed-rater point estimate is therefore not the exact median of its own interval
-# (unlike the log-SD components). This is the percentile bootstrap faithfully
-# reproducing the estimator's bias correction; coverage of the true theta^2_r stays
-# nominal (M3 O6 coverage sim: 0.950/0.947), and `bias` is small relative to the
-# sampling SE, so the effect is minor. Recentering would need a pivotal interval and
-# its own oracle re-validation (a separate decision), so it is left as documented.
+# Interval: the Monte-Carlo sampler routes the beta draws through theta2r_moment_draws()
+# (2b re-centering + boundary-aware average floor -- M28, ADR-038), so the theta^2_r
+# DRAWS center on the bias-corrected point. Here the rater means come from the whole
+# sample, so `bias` ~ 0 and the moment correction is a negligible shift from the earlier
+# 1b construction (M3 O6 coverage stays nominal, 0.950/0.947); the same helper is
+# load-bearing in the NESTED regime, where `bias` is material and 1b undercovers
+# (oracle O-NFI). An earlier note here called the crossed 1b displacement "deliberate";
+# that was true only because b ~ 0 in this regime -- the Fable review (M28 §5) retired
+# the regime-conditional exception by unifying both regimes onto the 2b helper.
 theta2r_fixed <- function(beta, vbeta, k, call = rlang::caller_env()) {
   # Defensive: the k x k contrast needs exactly k fixed-effect coefficients
   # (intercept + k-1 rater contrasts). icc() droplevels() its factors, so a
@@ -615,7 +614,14 @@ theta2r_fixed_nested <- function(
     numeric(1)
   )
   list(
-    point = mean(pmax(0, per_raw - per_bias)),
+    # Floor the AVERAGE, not each cluster (M28, ADR-038 amendment; Fable review §3):
+    # per-cluster pmax() gives every cluster a strictly-positive mean at theta^2=0, a
+    # boundary bias (~0.05-0.08 at n_s=3) that does not vanish as clusters accrue and,
+    # once the MC interval is moment-corrected, puts the point OUTSIDE its own interval
+    # in up to ~40% of boundary replications. Averaging first then flooring restores
+    # containment to 1.00 and is a no-op interiorly (every cluster clears the floor, so
+    # the O-FNML reduction pins are unmoved). The 1b correction itself is unchanged.
+    point = max(0, mean(per_raw - per_bias)),
     center = center,
     cluster_idx = cluster_idx,
     bias = per_bias,
@@ -624,24 +630,42 @@ theta2r_fixed_nested <- function(
   )
 }
 
-# Recompute theta^2_{r:c} for a matrix of beta draws (rows = the nested rater cell
-# means in `th$beta_names` order, columns = draws), reusing the per-cluster center
-# and bias from theta2r_fixed_nested(). Shared by the glmmTMB and lme4 fixed-nested
-# `to_components`. As in the flat fixed path (theta2r_fixed()'s note), the drawn means
-# carry their own sampling variance, so per cluster the raw draw centers `bias` above
-# the point; averaging over clusters is linear, so the same holds for the mean.
-theta2r_nested_draws <- function(beta_draws, th) {
-  k <- th$k
+# The moment-corrected finite-population rater-variance push-forward for a fixed-rater
+# Monte-Carlo interval -- shared by EVERY fixed-rater path (crossed/flat = one group;
+# nested = one group per cluster; glmmTMB, lme4, and lavaan). M28, ADR-038 amendment
+# (gated Fable review #19); the frequentist analog of brms_theta2r_moment_draws().
+#
+# Per group g, per draw: q_g = colSums(m * (C m))/(k-1) on the drawn cell means m, minus
+# 2*b_g. There are TWO equal inflations, so 2b not 1b (Fable review §1): one b undoes the
+# Gaussian push-forward (E_draw[q(beta*)] = q(beta_hat) + b, with the SAME b the point
+# subtracts, so b MUST come from the engine's vcov that generates the draws, not the
+# empirical draw covariance), one removes the plug-in bias of the center
+# (E[q(beta_hat)] = theta^2 + b). The draws then centre on the 1b-corrected point exactly.
+# Average over groups, then floor the AVERAGE (boundary-aware, #3) -- never per group
+# (per-group flooring cannot reach theta^2=0 -> zero boundary coverage, oracle O-NFI).
+# For the crossed/flat single-group case b ~ 0 (whole-sample means) and average-floor
+# equals per-group floor, so this reduces to the M10/M3 behaviour up to a ~b shift.
+# `group_means` is a list of k x ndraw drawn-cell-mean matrices, `group_bias` the
+# matching list of per-group b_g scalars.
+theta2r_moment_draws <- function(group_means, group_bias, center, k) {
   per <- Map(
-    function(ix, b) {
-      m <- beta_draws[ix, , drop = FALSE]
-      raw <- colSums(m * (th$center %*% m)) / (k - 1)
-      pmax(0, raw - b)
-    },
-    th$cluster_idx,
-    th$bias
+    function(m, b) colSums(m * (center %*% m)) / (k - 1) - 2 * b,
+    group_means,
+    group_bias
   )
-  Reduce(`+`, per) / length(per)
+  pmax(0, Reduce(`+`, per) / length(per))
+}
+
+# Recompute theta^2_{r:c} for a matrix of nested rater cell-mean draws (rows in
+# `th$beta_names` order), reusing the per-cluster center/bias from theta2r_fixed_nested().
+# Shared by the glmmTMB and lme4 fixed-nested `to_components`; delegates to the moment
+# helper (one group per cluster).
+theta2r_nested_draws <- function(beta_draws, th) {
+  group_means <- lapply(
+    th$cluster_idx,
+    function(ix) beta_draws[ix, , drop = FALSE]
+  )
+  theta2r_moment_draws(group_means, as.list(th$bias), th$center, th$k)
 }
 
 # Cluster label for each fixed rater coefficient of `score ~ 0 + rater` (names
@@ -715,13 +739,12 @@ fit_glmmtmb_fixed <- function(data, call = rlang::caller_env()) {
   di <- which(nm == "disp~(Intercept)")
   si <- grep("subject", nm)
   to_components <- function(par) {
-    # Per draw: reconstruct the k rater means, apply the SAME bias-corrected
-    # theta^2_r (bias is constant -- v_means is fixed), clamp at 0 (boundary).
+    # Per draw: reconstruct the k rater means, apply the moment-corrected
+    # finite-population theta^2_r (2b + boundary-aware floor; one group -- M28/ADR-038).
     means <- th$contrast %*% par[bi, , drop = FALSE]
-    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     list(
       subject = exp(2 * par[si, ]),
-      rater = pmax(0, raw_draws - th$bias),
+      rater = theta2r_moment_draws(list(means), list(th$bias), th$center, k),
       residual = exp(2 * par[di, ])
     )
   }
@@ -816,13 +839,12 @@ fit_glmmtmb_multilevel_fixed <- function(data, call = rlang::caller_env()) {
   ridx <- lapply(groups, function(g) which(nm == theta(g)))
   to_components <- function(par) {
     # Random components back-transform from log-SD; theta^2_r is recomputed from the
-    # rater beta draws with the constant bias correction (as in fit_glmmtmb_fixed).
+    # rater beta draws, moment-corrected (2b + boundary-aware floor; one group -- M28).
     means <- th$contrast %*% par[bi, , drop = FALSE]
-    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     c(
       lapply(ridx, function(i) exp(2 * par[i, ])),
       list(
-        rater = pmax(0, raw_draws - th$bias),
+        rater = theta2r_moment_draws(list(means), list(th$bias), th$center, k),
         residual = exp(2 * par[di, ])
       )
     )
@@ -913,13 +935,12 @@ fit_glmmtmb_replicates_fixed <- function(data, call = rlang::caller_env()) {
   ridx <- lapply(groups, function(g) which(nm == theta(g)))
   to_components <- function(par) {
     # Random components back-transform from log-SD; theta^2_r is recomputed from the
-    # rater beta draws with the constant bias correction (as in fit_glmmtmb_fixed()).
+    # rater beta draws, moment-corrected (2b + boundary-aware floor; one group -- M28).
     means <- th$contrast %*% par[bi, , drop = FALSE]
-    raw_draws <- colSums(means * (th$center %*% means)) / (k - 1)
     c(
       lapply(ridx, function(i) exp(2 * par[i, ])),
       list(
-        rater = pmax(0, raw_draws - th$bias),
+        rater = theta2r_moment_draws(list(means), list(th$bias), th$center, k),
         residual = exp(2 * par[di, ])
       )
     )

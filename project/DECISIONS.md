@@ -2854,3 +2854,88 @@ consequences → references.
     alternative (a hierarchical half-*t* prior on the within-cluster rater effects, θ² read off the
     realized η draws) is parked as a scoped future alternative (own ADR/validation) — it leaves the
     fixed-effects parity contract with `fit_glmmtmb_nested_fixed()`.
+
+## ADR-038: M28 scope — Frequentist nested-fixed MC-interval coverage (characterize-then-decide)
+- Date: 2026-07-09
+- Status: accepted
+- Context: The M27 gated Fable review (#19, ADR-037 amendment) fixed the **Bayesian** nested-fixed
+  interval — the raw θ²_{r:c} push-forward undercovers the nested finite population (an
+  incidental-parameters pathology: coverage 0.86 → 0 as clusters accrue) — by subtracting a **2b**
+  moment correction and flooring the per-draw **average** rather than each cluster. Its **corollary**
+  (ADR-037 Decision, "Corollary spun off") observed that the shipped **frequentist** sibling —
+  `theta2r_nested_draws()` ([`R/engine-glmmtmb.R`](../R/engine-glmmtmb.R), the M19 Slice 2 θ²_{r:c}
+  Monte-Carlo interval) — is built the *same suspect way*: per draw it does `pmax(0, raw - b)` **per
+  cluster** (subtracting only **1b**) and then averages, so it likely shares an attenuated displacement
+  and **cannot reach θ²=0**. No committed coverage sim pins the nested-fixed *MC interval* specifically.
+  The frequentist **point** estimator (`th$point`, computed separately) is unbiased and out of scope.
+  After a short retro of the M23→M27 Bayesian arc the maintainer chose this corollary as the next
+  milestone (M28) and — per oracle-first (#1/#18) — the **characterize-then-decide** posture: do not
+  presume the interval is broken before a sim says so.
+- Decision:
+  - **Slice 1 (required) — commit to characterization only.** A committed **seeded coverage sim**
+    (new `data-raw/oracle-nested-fixed-interval.R` + committed fixture, #4) across the Fable Q6 grid:
+    `k ∈ {2,4}`, `n_s ∈ {3,5,20}`, `C_n ∈ {5,20,80}`, `θ²_{r:c} ∈ {0, σ²_res/n_s, .66}`. Reports
+    **interior and boundary (θ²=0)** coverage of the *shipped* `theta2r_nested_draws()` interval,
+    honestly (#18). This is the milestone deliverable **even if coverage is already nominal** — a
+    regression fixture + the first coverage pin on this interval. A CI method's oracle is coverage (#1).
+    Slice 1 alone (characterizing, not changing a shipped interval) does **not** require a Fable review.
+  - **Slice 2 (conditional on Slice 1 showing under-coverage) — mirror the M27 fix.** Recenter the MC
+    draws + floor the per-draw **average** instead of per cluster, reusing the M27 template
+    (`brms_theta2r_moment_draws()`); regenerate the sim green. Spot-check that the crossed
+    `theta2r_fixed()` interval shares this only negligibly (v → 0 there, per the corollary) — confirm,
+    do not rebuild machinery. Because Slice 2 **changes a shipped interval**, it is a strong candidate
+    for a **gated Fable review** (#19): `verify-estimator` recommends, then **stops and waits** for
+    explicit maintainer approval before Fable runs.
+  - **Interval-method work, not new estimand work** (cf. M16/M21/M23–M27): no new estimand-spec, no new
+    user-facing argument, no new dependency; additive, non-breaking (#6). The **point** estimator is
+    unchanged by design.
+- Consequences: Pins (and if warranted, fixes) the last known interval built on the pre-Fable
+  per-cluster-floor pattern, closing the M27 corollary thread. Under the characterize-then-decide
+  posture, if the sim shows nominal coverage the milestone ships as a characterization + committed
+  regression fixture with **no code change** — a legitimate outcome, not a failure. If Slice 2 fires it
+  is a **behavior change to a shipped MC interval** (the point is stable, but reported CIs near the
+  boundary move and can now reach θ²=0), gated on a Fable review. Rules out (stays parked, own future
+  ADR): the Fable-recommended **fully-Bayesian alternative** (hierarchical half-*t* prior on the
+  within-cluster rater effects, θ² read off realized η draws) — it would leave the fixed-effects parity
+  contract with `fit_glmmtmb_nested_fixed()`. Categorical/ordinal GLMM and multilevel SEM untouched.
+- References: ADR-037 (M27 scope + the gated Fable-review amendment and its spun-off corollary);
+  `data-raw/reviews/fable-review-m27-nested-fixed-{brief,response}.md` (Q6 grid); M19/ADR-029 (the
+  shipped `theta2r_fixed_nested()` / `theta2r_nested_draws()` nested-fixed path); McGraw & Wong (1996)
+  Case 3A finite-population θ²_r; ten Hove, Jorgensen & van der Ark (2022) nested Design 2. Oracle:
+  O-NFI (nested-fixed-interval) coverage, `data-raw/oracle-nested-fixed-interval.R` → committed fixture,
+  registered in [`REFERENCES.md`](REFERENCES.md).
+
+- **Amendment (2026-07-09) — Slice 1 finding + Slice 2 resolution via a gated Fable review (#19).**
+  Slice 1 fired: O-NFI pinned the shipped interval undercovering (boundary coverage .95/.86/.57 as
+  C_n = 5/20/80; worst cell C_n=80/n_s=3 ≈ .37; interior means .95/.92/.80) — the incidental-parameters
+  displacement the corollary predicted. The maintainer approved a gated Fable review; brief + response
+  committed at `data-raw/reviews/fable-review-m28-nested-fixed-interval-{brief,response}.md`. Fable's
+  verdict (adopted in full):
+  - **Ship the moment-corrected interval: subtract 2·b_c per group per draw, no per-group floor, floor the
+    per-draw AVERAGE.** Two equal inflations, so 2b not 1b (Fable §1): one undoes the Gaussian
+    push-forward `E_draw[q(β*)] = q(β̂) + b` (b from the engine vcov that generates the draws — exact, not
+    the empirical draw covariance), one removes the plug-in bias of the center `E[q(β̂)] = θ² + b`; the
+    draws then center on the 1b-corrected point. Derived, not tuned (#4): Fable's independent
+    conjugate-normal check (`data-raw/reviews/fable-check-nfi.R`) confirms it with no free parameter, and
+    tested the two "obvious" alternatives head-to-head — the percentile-of-the-recomputed-estimator (= the
+    shipped +b displacement) and its **pivotal reflection** (−b, interior coverage as low as .006) — both
+    collapse. Delta-method / profile intervals are degenerate at the boundary (∇q = 0). The point keeps
+    its **1b** correction (not a double-correction, Fable §2).
+  - **Point flooring also moves to the average (Fable §3, finding beyond the brief).** The shipped POINT
+    `mean_c pmax(0, q(β̂_c) − b_c)` has a boundary bias (~.05–.08 at n_s=3) constant in C_n, so once the
+    interval is corrected the **point falls outside its own 95% interval** in up to ~40% of boundary reps
+    at C_n=80 (a user-visible incoherence). Fix: `max(0, mean_c(q(β̂_c) − b_c))` — 1b unchanged, interior
+    identical (O-FNML pins unmoved), boundary containment restored to 1.00 (verified: worst cell .59→1.00).
+  - **Unify all fixed-rater MC draws onto one shared `theta2r_moment_draws()` helper** (crossed/flat +
+    multilevel-fixed, glmmTMB + lme4 + lavaan; Fable §5). Crossed b ≈ 0 (whole-sample means), so the shift
+    is negligible and coverage stays nominal (verified crossed flat-fixed .958; M3 O6 / O-FML pins hold);
+    unification **retires** the `theta2r_fixed()` "deliberate displacement" note as a regime-conditional
+    exception that should not survive the milestone. The lavaan random path is unchanged (b = 0 → reduces
+    to raw Jorgensen Eq. 6 exactly).
+  - **Validation:** O-NFI regenerated on the corrected estimator (same committed grid) as **confirmation
+    of derived constants** — Fable predicts boundary ~.97–1.00 (conservative, boundary-aware #3), interior
+    mean ≈ .95, no cell < ~.90. The pivotal-reflection alternative is recorded as tested-and-rejected so it
+    is not rediscovered.
+  Scope note: the fully-Bayesian hierarchical-shrinkage alternative stays parked (own future ADR); this
+  amendment implements the frequentist analog of the ADR-037 (M27) Bayesian resolution, now unified so one
+  construction is correct in both the crossed (b≈0) and nested (b material) regimes.
