@@ -167,9 +167,14 @@ helpers* item below (sample-size / CI-width), where it belongs.
   the bias" rationale holds only when `tr(C·Σ) ≈ 0`, i.e. single-level/crossed); its **frequentist sibling
   shipped as M28** (ADR-038, PR #33), unifying all engines onto one boundary-aware `theta2r_moment_draws()`
   ([[fixed-rater-interval-2b-moment-correction]]). M29's conflated + replicate follow-ons are **variance
-  ratios**, so they need none of that correction (a clean push-forward). **Still parked** — the *other*
-  Bayesian parity follow-ons: **incomplete/ragged** (the isolated next candidate, M30), **fixed-rater and
-  multilevel within-cell replicates**, and **cluster-level fixed** (for the incomplete/small-k corners ten
+  ratios**, so they need none of that correction (a clean push-forward). **Incomplete/ragged random-rater**
+  then **shipped as M30** (ADR-040, PR #35): two-way random single-level + crossed (Design 1) multilevel
+  random, narrowing the one `!balanced` brms guard so the shipped M3/M9 `k_eff`/connectedness thread per
+  posterior draw — a variance-ratio push-forward, so the ragged-data coverage that was flagged as the risk
+  came back **nominal** at the subject level (no Fable review; O-Bayes-Incomplete / O-Bayes-IML). **Still
+  parked** — the *other* Bayesian parity follow-ons: incomplete **fixed-rater** (θ² under imbalance → the
+  `k_eff` × 2b-moment interaction, higher-risk) and incomplete **nested** Designs 2/3; **fixed-rater and
+  multilevel within-cell replicates**; and **cluster-level fixed** (for the incomplete/small-k corners ten
   Hove et al. 2022 flag the best estimator as an open research question → schedule leaning on coverage
   calibration); plus **selectable** `posterior` coupling (MC/bootstrap on a Bayesian fit), **HPDI**
   intervals, and a **user-exposed `prior=`** API.
