@@ -2656,3 +2656,157 @@ consequences → references.
   ADR-031 (M21 Slice 2 — the lavaan fixed-rater sibling), ADR-014 (M7 — Bayesian deferral origin),
   ADR-002 (optional engines behind `Suggests`); `project/ROADMAP.md` (Bayesian fixed/one-way follow-ons
   being promoted), `project/COVERAGE.md`.
+
+## ADR-037: M27 scope — Bayesian multilevel (brms) fixed-rater, crossed Design 1 + nested Design 2, balanced/complete, subject level
+- Date: 2026-07-09
+- Status: accepted
+- Context: The Bayesian arc M23→M26 (ADR-033/034/035/036, PRs #28/#29/#30/#31) took `engine = "brms"` +
+  `ci_method = "posterior"` from two-way random through every **multilevel** design at the subject level
+  (random), and then through the two single-level follow-ons (**one-way random** + **fixed-rater
+  two-way**). No milestone is in flight. After a short retro the maintainer chose to **continue the
+  Bayesian arc** with its remaining well-scoped follow-on — **fixed-rater at the multilevel level**,
+  the brms sibling of the frequentist M10 (crossed Design 1 fixed) and M19 Slice 2 (nested Design 2
+  fixed). This ADR opens **M27**. **Disambiguation resolved at planning (recorded so it is not
+  rediscovered):** the stale "fixed/**one-way** at the multilevel level" deferral wording carried in
+  ADR-036's scope-outs / `COVERAGE.md §④` / `STATUS.md` is **half already shipped** — the multilevel
+  one-way *is* Design 3 (raters nested in subjects, `model = "twoway"` + nested data, agreement-only;
+  `model = "oneway"` + `cluster` is ⚫ by-design, `COVERAGE.md §③`), and **M25 Slice 2 already shipped
+  the brms Design-3 path** (ADR-035). So Bayesian multilevel one-way is **done**; only the **fixed-rater**
+  multilevel cells remain open. M27 fixes that wording in the tracking files. **Engine/interval parity,
+  not new estimand work** (cf. M5.5/M7/M16/M21/M23/M24/M25/M26): the estimand is the *shipped* fixed-rater
+  finite-population (McGraw & Wong Case 3A) coefficient placed in the M5/M8 multilevel subject-level
+  decomposition, now read off posterior draws — no new estimand-spec, no new user-facing argument, no new
+  dependency (`brms` already a `Suggests`); additive, non-breaking (#6): new valid `engine = "brms"` ×
+  {crossed-D1-fixed, nested-D2-fixed} combinations only. The maintainer chose **both slices in one
+  milestone** (the M25/M26 precedent), ordered by oracle-risk (crossed D1 first — its frequentist sibling
+  M10 has the *exact* balanced fixed≡random identity; nested D2 does not).
+- Decision:
+  - **Scope: multilevel, subject level, balanced/complete, `raters = "fixed"`.** Slice 1 — **crossed
+    Design 1 fixed** (`cluster` present, crossing pattern → Design 1, `raters = "fixed"`, `level =
+    "subject"`, `type` ∈ {agreement, consistency}, `unit` ∈ {single, average}). Slice 2 — **nested
+    Design 2 fixed** (raters nested in clusters, `raters = "fixed"`, `level = "subject"`). Cluster-level
+    fixed (⚫ by-design for both — nested has no cluster level; crossed fixed cluster level is an
+    unshipped frequentist cell too), **Design 3 fixed** (⚫ by-design — raters nested in subjects is the
+    multilevel one-way, no separable rater effect, `COVERAGE.md §④`), incomplete/ragged brms, replicates,
+    the conflated diagnostic, and numeric-unit (D-study) projection all stay deferred (scope-outs below).
+  - **The fits: two new functions in `R/engine-brms.R`, each reusing `fit_brms_common()`.**
+    - **Slice 1 — `fit_brms_multilevel_fixed()` (crossed Design 1 fixed, five components).**
+      `score ~ 1 + rater + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater)` — the brms
+      sibling of `fit_glmmtmb_multilevel_fixed()` (M10) and of the shipped random `fit_brms_multilevel()`
+      (M24) with the `(1 | rater)`/`(1 | cluster:rater)` random-rater main effect replaced by a
+      **population-level fixed `rater` effect** (brms default prior on the rater contrasts). The sourced
+      half-*t*(4, 0, 1) SD prior (unchanged from M23–M26) applies **only to the random-effect SDs**
+      (`sd_cluster`, `sd_cluster:subject`, `sd_cluster:rater`), as ten Hove's prior is on random-effect
+      SDs. Components σ²_c ← `sd_cluster__Intercept`, σ²_{s:c} ← `sd_cluster:subject__Intercept`, σ²_{cr}
+      ← `sd_cluster:rater__Intercept`, σ²_res ← `sigma` come off the standard `spec`; the **rater slot
+      carries θ²_r**, the Case-3A finite-population variance of the k fixed rater means, computed **per
+      posterior draw** from the rater fixed-effect draws (the M26 Slice 2 pattern applied to the
+      multilevel decomposition). The subject-level error set is `{rater, cluster:rater, residual}` for
+      agreement / `{cluster:rater, residual}` for consistency — the *shipped* M10 subject-level error map,
+      unchanged; `brms_component_draws()` composes the ICC off `draws` unchanged.
+    - **Slice 2 — `fit_brms_nested_fixed()` (nested Design 2 fixed).**
+      `score ~ 0 + rater + (1 | cluster:subject)` — the brms sibling of `fit_glmmtmb_nested_fixed()`
+      (M19 Slice 2), `0 + rater` giving one fixed level per rater. The **rater slot carries θ²_{r:c}**,
+      the mean over clusters of each cluster's finite-population rater variance (per-cluster McGraw–Wong
+      Case 3A, the M19 `theta2r_fixed_nested()` estimand), computed **per posterior draw** from the
+      per-cluster rater fixed-effect draws. σ²_{s:c} ← `sd_cluster:subject__Intercept`, σ²_res ← `sigma`.
+      Agreement-only at the subject level (Design 2 admits consistency too — carry the shipped M19
+      agreement/consistency subject-level error map unchanged).
+  - **Oracle-first catch (both slices) — the frequentist bias correction and the balanced identities need
+    NOT transfer to a Bayesian fit; resolve numerically, do not assert (#1/#18).** Same posture M26
+    Slice 2 established, now at the multilevel level:
+    - **No frequentist bias correction on the posterior θ²_r / θ²_{r:c} draws.** The REML/FIML
+      `theta2r_fixed()` / `theta2r_fixed_nested()` subtract the mean sampling variance of the β̂ rater
+      means because a *point* estimate overstates the finite-population variance by the estimator's
+      sampling variance. A **posterior** already integrates that parameter uncertainty, so the **raw**
+      per-draw finite-population variance is a draw from the posterior of θ²_r / θ²_{r:c} — no bias
+      correction applied. Confirm against the glmmTMB oracle at build; characterize (don't tune, #4) if
+      the raw push-forward disagrees.
+    - **Balanced fixed-vs-random relationship differs by construction.** M10 (crossed, REML) satisfies
+      the *exact* balanced identity θ²_r = σ²_r ⇒ fixed agreement ≡ random agreement; M19 (nested, REML)
+      **does not** (per-cluster finite population ⇒ fixed ≢ random even balanced, the ADR-029
+      oracle-first catch). brms puts a flat prior on the rater fixed effects but half-*t*(4, 0, 1) on the
+      random-effect SDs, so under the prior **neither identity holds exactly** — the crossed identity is
+      expected only **approximately** (converging as N grows), and the nested inequality persists. The
+      correct oracle is therefore **containment** (glmmTMB fixed point inside the brms credible interval)
+      + coverage, **not pointwise equality** — the honest analog of M26's "fixed ≡ random only
+      approximately under the prior" resolution.
+    - **Attempt-then-degrade posture (maintainer decision, matching M18 S2 / M19 S1 / M20 S3 / M26 S2):**
+      if no #1/#4-strong oracle pins a slice's Bayesian fixed path, that slice **degrades to a recorded
+      deferral**. Slices are independent (crossed D1 does not depend on nested D2); Slice 1 ships even if
+      Slice 2 degrades.
+  - **Point/interval/dispatch unchanged from M23–M26.** MAP = `posterior_mode()` of each estimand's
+    ICC-draw vector; percentile **credible** interval; `posterior` forced-default & Bayesian-only. The
+    shipped brms multilevel guards are **narrowed** exactly as M24/M25/M26 narrowed theirs: admit
+    `raters = "fixed"` on the crossed-D1 and nested-D2 brms multilevel branches + dispatch to the two new
+    fits. The k = 2 soft note and the balance/replicate/numeric-unit/cluster-level brms refusals stay. No
+    new field beyond the shipped `draws` contract; the shared `icc_point()`/`mc_ci()` path stays untouched
+    for the other engines.
+  - **Two thin vertical slices** (#14/#15), oracle-risk order:
+    - **Slice 1 — Bayesian crossed Design 1 fixed + its oracle.** `fit_brms_multilevel_fixed()`
+      end-to-end; θ²_r-from-posterior draw row; subject-level `ICC(A,1)`/`ICC(A,k)`/`ICC(C,1)`/`ICC(C,k)`;
+      MAP + percentile credible interval. A companion generator `data-raw/oracle-bayesian-multilevel-fixed.R`
+      runs the M10 crossed-fixed DGP with brms + the half-*t* prior and **commits the reference fixture**
+      `tests/testthat/fixtures/bayesian-multilevel-fixed-oracle.rds` (#4). Oracle O-Bayes-FML.
+    - **Slice 2 — Bayesian nested Design 2 fixed + its oracle (conditional on the oracle-first
+      resolution).** `fit_brms_nested_fixed()`; the θ²_{r:c}-from-posterior draw row; subject-level
+      coefficients. Extends the same generator (nested-fixed DGP) + committed fixture. Oracle
+      O-Bayes-FNML. If it degrades, its scope-out line is recorded and the nested-fixed brms abort stays.
+  - **Oracles (#1 — containment + coverage + reduction + REML agreement; M10/M19/M26 precedent, no
+    textbook worked posterior value):**
+    - **O-Bayes-FML** (crossed D1) — glmmTMB M10 fixed point **contained** in the brms subject-level
+      credible interval (glmmTMB the independent oracle); the balanced fixed-vs-random agreement
+      relationship *characterized* (approximate under the prior, #18); MAP ≈ glmmTMB fixed within a
+      stated tolerance; consistency ≡ random pinned where it holds; seeded coverage ~nominal at the M10
+      DGP off the committed fixture; convergence rate from `brms_convergence()`.
+    - **O-Bayes-FNML** (nested D2) — glmmTMB M19 nested-fixed point **contained** in the brms credible
+      interval; the balanced **fixed ≢ random** relationship *characterized* (per-cluster finite
+      population, the M19 catch, expected to persist under the prior, #18); reduction of θ²_{r:c} to the
+      flat M3 fixed θ²_r at a single cluster; seeded coverage ~nominal.
+  - **CI test-gating (DoD), unchanged posture from M23–M26:** coverage/containment oracles run off the
+    **committed seeded reference** (#4); a **single live `brms` fit** per slice (tiny `chains`/`iter`)
+    exercises the wiring, guarded `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
+    ([[brms-live-fit-skip-on-ci]]); reduced draws in tests. Coverage stays ~85% by design — the two new
+    fit wrappers are live-only ([[coverage-baseline]]); consented up front.
+  - **No new estimand, estimand-spec file, user-facing argument, or dependency.** New engine code
+    (`fit_brms_multilevel_fixed()` / `fit_brms_nested_fixed()` in `R/engine-brms.R`), two narrowed brms
+    guards + two dispatch branches in `R/icc.R`, and the committed oracle generator + fixture. Crossed
+    fixed reuses `M10-fixed-multilevel.md §2` (θ²_r); nested fixed reuses the M19 nested-fixed θ²_{r:c}
+    estimand — no new spec.
+  - **Scope-outs (preserved, not rediscovered):** Bayesian **cluster-level** fixed (⚫ nested has none;
+    crossed fixed cluster level unshipped for all engines), Bayesian **Design 3 fixed** (⚫ by-design —
+    multilevel one-way), Bayesian **incomplete/ragged** fixed multilevel (M18 S1 / M19 analog — the
+    k_eff × per-cluster θ² interaction), Bayesian **within-cell replicates**, the Bayesian **conflated**
+    diagnostic (Eq. 14), Bayesian **numeric-unit `d_study()`** projection — each a later thin slice; per
+    ten Hove 2022 the incomplete/small-k estimator choice is an open research question, so those lean on
+    coverage calibration when scheduled. Plus the M23 carry-overs: **rstanarm** backend, **selectable**
+    `posterior` coupling, **HPDI** intervals, **user-exposed `prior=`** API. All stay in `ROADMAP.md`.
+- Consequences: On M27 close, `engine = "brms"` covers the multilevel **fixed-rater** subject-level cells
+  it did not — crossed Design 1 fixed, and (if the oracle holds) nested Design 2 fixed — alongside the
+  multilevel random paths already shipped (M24/M25). Combined with M26's single-level fixed and the
+  already-shipped multilevel one-way (Design 3, M25), the brms multilevel story is then **random ✓
+  (M24/M25) + fixed ✓ (M27)** at the subject level. Slice 1 is low risk (a shipped fit shape with a
+  well-understood glmmTMB independent oracle and the M10 balanced identity as a soft anchor). Slice 2
+  carries the milestone's oracle-first question (does θ²_{r:c} push-forward, no bias correction, sit
+  inside the credible interval, with the M19 fixed≢random inequality intact under the prior?) with the
+  explicit **attempt-then-degrade** escape, so the milestone ships value (crossed D1) even in the worst
+  case. It corrects the stale one-way deferral wording in the tracking files. This ADR authorizes M27
+  code; the `MILESTONES.md` M27 board and the `STATUS.md` flip are the milestone-start companions (M27 is
+  opened/scoped here but **no slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — containment + coverage + reduction + REML agreement +
+  convergence), #2/#14/#15 (name the estimand / thin vertical slices; oracle-risk ordering), #3
+  (boundary-aware — the half-*t* prior; `posterior_mode()` on [0, 1] ICCs), #4 (committed seeded
+  reference; no tuning to oracle), #5/#8 (classed structural aborts for Design-3 fixed / cluster-level
+  fixed; `cli` notes; k = 2 caveat), #6 (additive, non-breaking — new engine×design combinations), #12
+  (sourced prior; sourced estimands), #16 (tracking in-commit), #18 (report the run — the balanced
+  fixed-vs-random relationship characterized via containment, not asserted equal); ten Hove, Jorgensen &
+  van der Ark (2020) §3.3/§4.1 (half-*t*(4,0,1) on SDs; DGP), §4.2 (MAP/percentile; MCMC ≈ MLE), OSF
+  `shkqm`; ten Hove, Jorgensen & van der Ark (2022) Eqs. 8–11 (nested Design 2 subject-level components);
+  McGraw & Wong (1996) Case 3A (fixed-rater finite-population θ²_r); estimand-specs
+  `M10-fixed-multilevel.md §2` (crossed θ²_r — no new spec) and the M19 nested-fixed θ²_{r:c} (no new
+  spec); ADR-033 (M23 Bayesian engine — the seam extended), ADR-034/035 (M24/M25 multilevel random —
+  guard-narrowing precedent), ADR-036 (M26 single-level fixed — the raw-θ²-from-posterior + containment
+  precedent), ADR-019 (M10 crossed fixed multilevel), ADR-029 (M19 nested fixed — the fixed≢random
+  catch), ADR-008 (M3 Case-3A θ²_r), ADR-014 (M7 — Bayesian deferral origin), ADR-002 (optional engines
+  behind `Suggests`); `project/ROADMAP.md` (Bayesian multilevel fixed follow-on being promoted),
+  `project/COVERAGE.md`.
