@@ -125,17 +125,21 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active milestone: **M32 (ADR-042)** — Bayesian engine (brms) **incomplete/ragged NESTED random**, Designs
-  2 & 3, subject level. Opened after a short retro (M23→M31 Bayesian arc: discovery at M27/M28's 2b moment
-  correction, then M29/M30/M31 all nominal → mop-up). Completes the "brms × incomplete × random" row — the
-  Bayesian sibling of the frequentist **M19**: narrow the `ml_design != "crossed"` clause of the `!balanced`
-  brms guard (`icc.R:1148–1152`) so the shipped **M25** fits `fit_brms_nested_clusters()` (Slice 1, Design 2)
-  / `fit_brms_nested_subjects()` (Slice 2, Design 3) run on ragged data **unchanged**. Random → variance
-  ratios → **no 2b moment correction** (the clean M30 regime), so the lowest-risk mop-up corner; the one
-  unknown is ragged coverage through `k_eff`, gated by a committed seeded oracle (recommend-and-stop Fable
-  only if it undercovers, #19). **Scoped RANDOM-only by an oracle-first catch:** incomplete *fixed* nested
-  has **no frequentist oracle** (deferred all engines, ADR-029, `icc.R:685`) → research, not parity; deferred.
-  On branch `m32-bayes-incomplete-nested`; **no slice work begun** (plan before code, #14).
+- Active milestone: **none** — M32 shipped (PR #37, ADR-042; squash-merged to `main` at `dd8e3e2`).
+  `engine = "brms"` now fits incomplete/ragged **nested random**-rater ICCs at the subject level for both
+  designs — Design 2 (`fit_brms_nested_clusters`, Slice 1) and Design 3 (`fit_brms_nested_subjects`, the
+  multilevel one-way, Slice 2) — the Bayesian sibling of the frequentist M19, completing the "brms ×
+  incomplete × random" row. **Engine/interval parity** (#6): both slices narrowed the same `!balanced` brms
+  guard's `ml_design != "crossed"` clause; no new fit, no θ² helper (random → variance ratios, no 2b, the M30
+  regime). **Scoped RANDOM-only by an oracle-first catch** (incomplete *fixed* nested has no frequentist
+  oracle, ADR-029). Slice 1 (Design 2) ragged coverage **NOMINAL** (.925/.925). **Slice 2 (Design 3)
+  triggered a gated Fable review** (#19): the first n_rep-80 ragged cell drew **.8625** (below ≥ .88) — pin
+  NOT loosened (#4), Fable NOT auto-invoked, characterized honestly (#18); **verdict (ADR-042 Amendment 2): a
+  Monte-Carlo tail event, no estimator shortfall** (same incidence n=240 → .9458, 2,000-fit frequentist →
+  .9555, PIT uniform). Fixture regenerated at **n_rep = 240 + per-rep seeding**, pins unchanged (.9375/.9417),
+  and **n_rep ≥ 240 adopted for future ragged coverage cells**. Fable brief/response/harness committed as #19
+  provenance. `R CMD check --as-cran` 0/0/0; full CI matrix green 9/9. **No milestone is currently in flight;
+  the next needs an ADR after a short retro (founding brief §7).**
 - Prior milestone: **none** — M31 shipped (PR #36, ADR-041; squash-merged to `main` at `5d6848e`).
   `engine = "brms"` + `raters = "fixed"` now fits incomplete/ragged data at the two-way single level (Slice 1,
   `fit_brms_fixed()`) and the crossed Design-1 fixed multilevel subject level (Slice 2,
@@ -158,29 +162,21 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M32 Slice 2 — Fable-CLEARED; regenerating the fixture, then milestone-close gates.** Slice 1
-  (Design 2) shipped/committed (`7b8b60c`, ragged coverage .925/.925 NOMINAL). Slice 2 (Design 3,
-  `nested_in_subjects`, multilevel one-way): guard's `nested_in_subjects` clause removed → ragged dispatches
-  to `fit_brms_nested_subjects()` (verified glmmTMB 0.508 ∈ brms CI); O-Bayes-INML-subjects built. The n_rep-80
-  ragged cell drew **.8625** → gated Fable review (#19) → **VERDICT (ADR-042 Amendment 2): tail event, no
-  shortfall** (same incidence at n=240 → .9458; 2,000-fit frequentist → .9555; PIT uniform) → **ship
-  unchanged, regenerate fixture at n_rep=240 + per-rep seeding, pins kept (ragged ≥ .88 NOT loosened, #4).**
-  **Both slices committed** (Slice 1 `7b8b60c`, Slice 2 + Fable review `3726d0b`); milestone **code-complete,
-  all local gates green.** `R CMD check --as-cran` **0/0/0**; installed-pkg both ragged nested fits driven via
-  `library(intraclass)` (D2 ICC(A,1) .585 + D3 ICC(1) .636, `ci = "posterior"`); full suite (CI mode) **FAIL
-  0 / PASS 1175 / SKIP 16**; `air`/`lintr` clean. **Remaining: open the M32 PR** (branch
-  `m32-bayes-incomplete-nested` → `main`; the full CI matrix 9/9 is the only outstanding DoD item, an
-  await-CI gate). Board + DoD live in [`MILESTONES.md`](MILESTONES.md) M32. Still parked in
-  [`ROADMAP.md`](ROADMAP.md) after M32: incomplete **fixed** nested
+- Active task: **none** — M32 shipped and merged (PR #37, `dd8e3e2`). The next milestone needs an ADR after a
+  short retro (founding brief §7). Candidates parked in [`ROADMAP.md`](ROADMAP.md): the remaining **Bayesian
+  follow-ons** — incomplete **fixed** nested
   (no frequentist oracle — research), Bayesian **replicates**/**cluster-fixed**/**one-way** incomplete,
   **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)` divisor,
   occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN upload**.
-- Last green CI: **PR #36 (M31) — full CI matrix green (9/9), squash-merged to `main` at `5d6848e`.**
+- Last green CI: **PR #37 (M32) — full CI matrix green (9/9), squash-merged to `main` at `dd8e3e2`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
-  release·oldrel·**devel** all passed (one lint-job re-run after fixing camelCase test locals `Nc`/`Ns` →
-  snake_case, [[run-lintr-before-push]]). Locally before the PR: `R CMD check --as-cran` **0/0/0** (spelling
-  "undercovered" whitelisted); `devtools::test()` 0 failures (all live Stan fits ran); installed-pkg both
-  ragged fixed fits driven through `library(intraclass)` (glmmTMB M3/M18 containment; S2 subject-only); full
+  release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/0** (built with
+  vignettes); `devtools::test()` full suite (CI mode) **1175/0/16** (the O-Bayes-INML-subjects coverage test
+  passes against the regenerated n_rep-240 fixture); installed-pkg both ragged **nested** fits driven through
+  `library(intraclass)` (Design 2 ICC(A,1) .585 + Design 3 ICC(1) .636, `ci = "posterior"`); `air`/`lintr`
+  clean. Prior green: **PR #36 (M31)** at `5d6848e`.
+  Superseded detail (M31): one lint-job re-run after fixing camelCase test locals `Nc`/`Ns` → snake_case
+  ([[run-lintr-before-push]]); installed-pkg both ragged fixed fits driven (glmmTMB M3/M18 containment); full
   suite (CI mode) **1148/0/14**; `air`/`lintr` clean; coverage ~85% (below 90% by design —
   [[coverage-baseline]]). Prior green: **PR #35 (M30)** at `9d2f0ed`.
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
@@ -199,20 +195,23 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M32 opened (ADR-042): Bayesian incomplete/ragged NESTED
-  random, Designs 2 & 3, subject level.** After a short retro of the M23→M31 Bayesian arc (discovery at
-  M27/M28's 2b moment correction, then M29/M30/M31 all nominal → the arc is in mop-up), the maintainer chose
-  to finish the Bayesian mop-up with the incomplete nested corner. An oracle-first scoping pass bounded it to
-  **random-only** — incomplete *fixed* nested has no frequentist oracle (deferred all engines, ADR-029,
-  `icc.R:685`), so a Bayesian fixed-nested slice would be research, not parity. This commit (branch
-  `m32-bayes-incomplete-nested`) writes ADR-042, adds the M32 active board + DoD to MILESTONES (live board,
-  ADR-015), advances the MILESTONES preamble + ADR-index, and flips STATUS to M32-active. **No slice code yet**
-  — plan before code (#14). Scope is deliberately random-only (no θ² functional → no 2b), so the one unknown —
-  ragged nested credible-interval coverage through `k_eff` — is isolated and expected nominal (the M30 regime);
-  a gated Fable review is conditional (recommend-and-stop only if the seeded coverage oracle undercovers, #19).
-  Next: `/start-task` Slice 1 (Design 2, narrow the guard clause, confirm `k_eff` threading through
-  `fit_brms_nested_clusters()`, build O-Bayes-INML-clusters). Prior line: **M31 shipped (PR #36, squash-merged
-  at `5d6848e`); post-merge `project/` reconcile.** This commit flips STATUS to M31-shipped, compresses the MILESTONES M31 board to the
+- Updated: 2026-07-10 by main session (Opus) — **M32 shipped (PR #37, squash-merged at `dd8e3e2`); post-merge
+  `project/` reconcile.** This commit flips STATUS to M32-shipped, compresses the MILESTONES M32 board to the
+  summary form (preserving the "Deferred out of M32" list and the Fable-review record), advances the MILESTONES
+  preamble + ADR-index (M32 no longer in flight), and sets "Last green CI" to the merge commit. The whole
+  milestone landed in one session on branch `m32-bayes-incomplete-nested` (retro → ADR-042 → Slice 1 → Slice 2
+  → the gated Fable review → PR #37); the full CI matrix went green 9/9. **The milestone's substance was its
+  one gated Fable review** (#19): Slice 2 (incomplete nested Design 3, the multilevel one-way) drew a .8625
+  ragged coverage cell at n_rep 80 — below the ≥ .88 pin. The pin was NOT loosened (#4), Fable NOT
+  auto-invoked; the finding was characterized honestly (#18) and a gated Fable review recommended/approved.
+  **Verdict (ADR-042 Amendment 2): a Monte-Carlo tail event (P ≈ .002), no estimator shortfall** — Fable
+  re-ran the same incidence at n=240 → .9458, plus a 2,000-fit frequentist cross-check (.9555) and a uniform
+  PIT (calibrated). Adopted in full: ship Slice 2 unchanged, regenerate the fixture at n_rep 240 + per-rep
+  seeding (pins unchanged; .9375/.9417), and adopt n_rep ≥ 240 for future ragged coverage cells (the ≥ .88 pin
+  false-alarms ~0.7%/cell at n_rep 80). Slice 1 (Design 2) was nominal throughout. Local `main` fast-forwarded
+  after the squash, merged branch deleted. Next: open the next milestone after a short retro, or the CRAN
+  upload (ADR-022). Prior line: **M31 shipped (PR #36, squash-merged at `5d6848e`); post-merge `project/`
+  reconcile.** This commit flips STATUS to M31-shipped, compresses the MILESTONES M31 board to the
   summary form (preserving the Deferred-out-of-M31 list), advances the MILESTONES preamble + ADR-index (M31 no
   longer in flight), and sets "Last green CI" to the merge commit. The whole milestone (retro → ADR-041 →
   Slice 1 → Slice 2 → finish-task gate → PR #36) landed in one session on branch `m31-bayes-incomplete-fixed`;
@@ -289,23 +288,27 @@ v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M32 (ADR-042) opened — Bayesian engine (brms) incomplete/ragged NESTED random, Designs 2 & 3, subject
-level.** Start **Slice 1** (Design 2, raters nested in clusters): narrow the `ml_design != "crossed"` clause
-of the `!balanced` brms guard (`icc.R:1148–1152`) for `nested_in_clusters` on ragged data so the shipped M25
-`fit_brms_nested_clusters()` dispatches; the engine-agnostic M3/M9 `k_eff`/connectedness runs pre-dispatch;
-build **O-Bayes-INML-clusters** (reduction ≡ M25 Slice 1 at balance + live `-agree` containment vs glmmTMB
-M19 incomplete nested random + committed seeded ragged coverage fixture). Then **Slice 2** (Design 3, raters
-nested in subjects / multilevel one-way, agreement-only) — same clause narrowed for `nested_in_subjects`,
-`fit_brms_nested_subjects()`, O-Bayes-INML-subjects. **No new fit, no new θ² helper** — random raters →
-variance ratios → **no 2b moment correction** (the clean M30 regime), so the lowest-risk mop-up corner. The
-one unknown — ragged coverage of the credible interval through `k_eff` for nested designs — is expected
-nominal (as M30); **recommend-and-stop Fable review only if a coverage oracle undercovers** (#19).
-**Scoped RANDOM-only by an oracle-first catch:** incomplete *fixed* nested has no frequentist oracle
-(deferred all engines, ADR-029, `icc.R:685`) → research, deferred. On branch `m32-bayes-incomplete-nested`;
-plan-before-code (#14) — no slice work begun. `/start-task` to begin Slice 1. Prior milestone: **M31
-(ADR-041) shipped** (PR #36) — Bayesian incomplete/ragged fixed-rater, two-way single level + crossed
-multilevel; 2b correction went live single-level, resolved nominal, no Fable review. Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24
-(PR #29), M25 (PR #30), M26 (PR #31), M27 (PR #32), M28 (PR #33), M29 (PR #34), M30 (PR #35), M31 (PR #36).
+**M32 (ADR-042) shipped (PR #37) — Bayesian engine (brms) incomplete/ragged NESTED random, Designs 2 & 3,
+subject level.** `engine = "brms"` now fits incomplete/ragged **nested random**-rater ICCs at the subject
+level for both designs — Design 2 (`fit_brms_nested_clusters`, Slice 1) and Design 3
+(`fit_brms_nested_subjects`, the multilevel one-way, Slice 2) — the Bayesian sibling of the frequentist M19,
+completing the "brms × incomplete × random" row. Both slices narrowed the same `!balanced` brms guard's
+`ml_design != "crossed"` clause; no new fit, no θ² helper (random → variance ratios, no 2b, the M30 regime).
+**Scoped RANDOM-only by an oracle-first catch** (incomplete *fixed* nested has no frequentist oracle,
+ADR-029). Slice 1 (Design 2) ragged coverage **NOMINAL** (.925/.925). **Slice 2 (Design 3) triggered the
+milestone's one gated Fable review** (#19): the first n_rep-80 ragged coverage cell drew **.8625** (below the
+≥ .88 pin) — the pin was NOT loosened (#4), Fable NOT auto-invoked, the finding characterized honestly (#18).
+**Fable verdict (ADR-042 Amendment 2): a Monte-Carlo tail event (P ≈ .002), no estimator shortfall** — same
+incidence at n=240 → .9458, four fresh incidences → .9500, a 2,000-fit frequentist arm → .9555, PIT uniform
+(calibrated). Adopted: ship unchanged, regenerate the fixture at **n_rep = 240 + per-rep seeding** (pins
+unchanged; .9375/.9417), and **adopt n_rep ≥ 240 for future ragged coverage cells**. `R CMD check --as-cran`
+0/0/0; full CI matrix green 9/9. **No milestone is currently in flight** — the next needs an ADR after a short
+retro (founding brief §7). Candidates stay parked in [`ROADMAP.md`](ROADMAP.md): Bayesian incomplete **fixed**
+nested (research, no oracle) / **cluster-level** / **replicates** / single-level **one-way**;
+**categorical/ordinal GLMM** (needs an estimand pass); **multilevel SEM**; the Wave-3 `ICC(c,k)` divisor;
+occasion/ragged `d_study()`; the **vignette reassessment**; and the out-of-band **CRAN upload** (ADR-022).
+Arc history: M18–M21 (PR #23–#26); M22 (PR #27), M23 (PR #28), M24 (PR #29), M25 (PR #30), M26 (PR #31),
+M27 (PR #32), M28 (PR #33), M29 (PR #34), M30 (PR #35), M31 (PR #36), M32 (PR #37).
 
 **Arc — M18→M21, mixed-model completeness first, SEM last (ADR-027) — ALL SHIPPED:**
 
