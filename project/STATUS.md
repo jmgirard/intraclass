@@ -134,11 +134,14 @@
   variance-ratio push-forwards, so **no θ² 2b moment correction and no Fable-review risk**
   ([[fixed-rater-interval-2b-moment-correction]] N/A). Bayesian incomplete/ragged is the isolated next
   milestone (M30).
-- Active task: **M29 Slice 1 — Bayesian conflated diagnostic.** Narrow the brms conflated refusal
-  (`icc.R:598–604`) to admit `level = "conflated"` → route to `fit_brms_multilevel()` (`icc.R:1238`);
-  read Eq. 14 (flat two-way ICC off the five-component crossed draws, agreement-only) per posterior draw;
-  oracle **O-Bayes-Conflated** (Eq-14 identity + containment vs frequentist M17/M18 glmmTMB + coverage)
-  off a committed fixture. No slice code written yet — plan stated below.
+- Active task: **M29 Slice 2 — Bayesian within-cell replicates.** New `fit_brms_replicates()`
+  (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, half-*t*(4,0,1) SD prior); narrow the brms
+  replicate refusal (`icc.R:1124`) + dispatch by `fit_brms_twoway()` (`icc.R:1304`); `occasions`
+  single/average per-draw divisors; oracle **O-Bayes-Rep** (reduction to M17 glmmTMB/lme4 + containment +
+  coverage) off a committed fixture. **Slice 1 (conflated) done** — guard narrowed; conflated composes
+  off the crossed brms draws (a variance-ratio push-forward, no θ² moment correction); O-Bayes-Conflated
+  pinned (coverage .95, glmmTMB containment 1.00, conflated−subject gap .144, converged 1.00) off a
+  committed 80-rep fixture (seed 20290); non-brms suite green, `air`/`lintr` clean.
 - Last green CI: **PR #33 (M28) — full CI matrix green (9/9), squash-merged to `main` at `e6ce64d`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/1** (full

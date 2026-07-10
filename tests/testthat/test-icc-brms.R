@@ -114,13 +114,14 @@ test_that("brms refuses the deferred designs with a teaching abort", {
 
 # M24 (ADR-034) opened the CROSSED (Design 1) multilevel random path for brms; M25
 # (ADR-035) adds both NESTED designs -- Design 2 (raters nested in clusters, Slice 1) and
-# Design 3 (raters nested in subjects, Slice 2). All three multilevel designs are now
-# supported at the subject level, so the conflated diagnostic is the only remaining
-# deferred brms multilevel path (that all three designs are *supported* is asserted by the
-# live O-Bayes-ML-agree / O-Bayes-NML-agree fits below; Design 3's consistency abort is
-# checked in its live test).
+# Design 3 (raters nested in subjects, Slice 2); M29 (ADR-039) adds the CONFLATED diagnostic
+# (Eq. 14) off the crossed fit. All three multilevel designs plus the conflated level are now
+# supported at the subject level for brms (the live O-Bayes-*-agree fits below assert the
+# designs, O-Bayes-Conflated the conflated path). What stays refused for a conflated brms call
+# is engine-agnostic and fires BEFORE any fit dispatch (no Stan needed): the consistency and
+# fixed-rater conflated forms are not sourced / not defined by Eq. 14 (M17-conflated-icc.md).
 
-test_that("brms refuses the conflated diagnostic (deferred Bayesian follow-on)", {
+test_that("brms refuses the consistency / fixed conflated forms (engine-agnostic)", {
   set.seed(12)
   crossed <- expand.grid(
     subject = 1:4,
@@ -129,6 +130,7 @@ test_that("brms refuses the conflated diagnostic (deferred Bayesian follow-on)",
   )
   crossed$subject <- factor(paste0(crossed$cluster, "_", crossed$subject))
   crossed$score <- rnorm(nrow(crossed))
+  # Consistency conflated is not sourced (ten Hove Eq. 14 is agreement-only).
   expect_error(
     icc(
       crossed,
@@ -137,9 +139,86 @@ test_that("brms refuses the conflated diagnostic (deferred Bayesian follow-on)",
       subject = subject,
       cluster = cluster,
       level = "conflated",
+      type = "consistency",
       engine = "brms"
     ),
     class = "intraclass_unsupported"
+  )
+  # Fixed-rater conflated is not defined (Eq. 14 treats the rater as a variance component).
+  expect_error(
+    icc(
+      crossed,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      level = "conflated",
+      raters = "fixed",
+      engine = "brms"
+    ),
+    class = "intraclass_unsupported"
+  )
+})
+
+# O-Eq14 (Bayesian wiring, no brms/Stan needed): the conflated ICC is a VARIANCE-RATIO
+# push-forward that composes off the SAME five-component posterior draws as the subject/cluster
+# levels -- signal = cluster + subject, error = rater + cluster_rater + residual (Eq. 14). We
+# assert posterior_summary() reproduces the closed-form Eq. 14 identity per draw (independent of
+# the estimator's own ICC arithmetic path) and that the conflated level is DISTINCT from the
+# subject level. This is the O-Eq14 analog of the frequentist conflated oracle (M17 S1, §5).
+test_that("O-Eq14: brms conflated composes off the five-component draws per Eq. 14", {
+  set.seed(29)
+  nd <- 4000L
+  draws <- rbind(
+    cluster = rgamma(nd, 3, 2),
+    subject = rgamma(nd, 3, 2),
+    rater = rgamma(nd, 1, 5),
+    cluster_rater = rgamma(nd, 1, 8),
+    residual = rgamma(nd, 4, 2)
+  )
+  k <- 5L
+  conf <- icc_estimand(
+    type = "agreement",
+    unit = "single",
+    raters = "random",
+    k_eff = k,
+    multilevel = TRUE,
+    level = "conflated"
+  )
+  subj <- icc_estimand(
+    type = "agreement",
+    unit = "single",
+    raters = "random",
+    k_eff = k,
+    multilevel = TRUE,
+    level = "subject"
+  )
+  expect_identical(conf$signal, c("cluster", "subject"))
+  expect_identical(conf$error, c("rater", "cluster_rater", "residual"))
+
+  summ <- posterior_summary(draws, list(conflated = conf, subject = subj))
+  # Closed-form Eq. 14 per draw (single rater), composed independently of icc_point().
+  sig <- draws["cluster", ] + draws["subject", ]
+  err <- draws["rater", ] + draws["cluster_rater", ] + draws["residual", ]
+  hand <- sig / (sig + err)
+  # The MAP is the mode of the ICC draws; recompute it the same way and match to ~1e-10.
+  expect_equal(summ$conflated$point, posterior_mode(hand, lower = 0, upper = 1))
+  expect_equal(
+    unname(quantile(hand, 0.025)),
+    summ$conflated$conf.low,
+    tolerance = 1e-8
+  )
+  expect_equal(
+    unname(quantile(hand, 0.975)),
+    summ$conflated$conf.high,
+    tolerance = 1e-8
+  )
+  # Conflated ∈ [0, 1], distinct from the subject level, and carries a CI (never a bare point).
+  expect_gte(summ$conflated$point, 0)
+  expect_lte(summ$conflated$point, 1)
+  expect_false(isTRUE(all.equal(summ$conflated$point, summ$subject$point)))
+  expect_true(
+    is.finite(summ$conflated$conf.low) && is.finite(summ$conflated$conf.high)
   )
 })
 
@@ -337,6 +416,43 @@ test_that("O-Bayes-ML: committed reference reproduces the multilevel findings", 
   #     single-rater cluster MAP is biased LOW vs the subject level (a diffuse near-boundary
   #     sigma^2_c posterior -> the mode of the cluster ICC draws sits below the population).
   expect_lt(clus(5L)$map_icc_relbias, subj(5L)$map_icc_relbias - 0.05)
+})
+
+# --- O-Bayes-Conflated: the committed conflated coverage reference (no brms needed, M29) ---
+# The conflated (Eq. 14) sibling of the O-Bayes-ML reference. data-raw/
+# oracle-bayesian-conflated.R runs a crossed Design-1 DGP with a LARGE between-cluster
+# variance (so the conflated ICC clearly overstates the subject level) through the SHIPPED
+# five-component fit read via the conflated estimand, and commits per-run coverage of the
+# known Eq. 14 value, containment of the frequentist glmmTMB conflated point, and the
+# distinctness gap vs the subject level. Fast, no fitting, runs on every CI job. Tolerances
+# absorb the finite n_rep and the INDEPENDENT MAP estimator (#4/#18); the conflated inherits
+# the cluster level's few-cluster sigma^2_c caveat, so COVERAGE (not the point) is the pin.
+
+test_that("O-Bayes-Conflated: committed reference reproduces the conflated findings", {
+  fixture <- test_path("fixtures", "bayesian-conflated-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-conflated.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+
+  # (1) High convergence at the half-t DGP (fixed-warmup budget, so >= 0.90).
+  expect_gte(s$converged_frac, 0.90)
+
+  # (2) The conflated credible interval COVERS the known Eq. 14 value ~nominally (the honest
+  #     recovery check, M17 §5 O-population; the point may be biased by the few-cluster
+  #     sigma^2_c, so coverage -- not the point -- is the pin).
+  expect_gte(s$coverage_conflated, 0.90)
+  expect_lte(s$coverage_conflated, 0.99)
+
+  # (3) CONTAINMENT (O-Eq14/O-lme4 analog): the frequentist glmmTMB conflated point -- which
+  #     composes the SAME Eq. 14 -- falls inside the brms credible interval for ~all reps; the
+  #     two engines differ only by the prior (the M26 containment posture, not pointwise equality).
+  expect_gte(s$containment_glmmtmb, 0.90)
+
+  # (4) DISTINCTNESS: the conflated ICC sits visibly ABOVE the subject level (Eq. 14 folds the
+  #     large between-cluster variance into the signal) -- the diagnostic's whole point.
+  expect_gt(s$map_minus_subject, 0.05)
 })
 
 # --- O-Bayes-NML: the committed nested coverage reference (no brms needed, M25) -------
@@ -929,6 +1045,89 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: conflated diagnostic (Eq. 14), O-Bayes-Conflated-agree (M29 Slice 1) ---
+# The conflated analogue of the crossed live test above: the SAME five-component fit read via
+# the conflated estimand (signal cluster + subject, error rater + cluster_rater + residual).
+# Confirms the guard-narrowing wired the full path (icc() -> fit_brms_multilevel() ->
+# posterior_summary()) and pins O-Bayes-Conflated-agree: the glmmTMB REML conflated point sits
+# inside the brms credible interval (containment), and the conflated ICC is visibly above the
+# subject level (Eq. 14 folds the between-cluster variance into the signal). The numerical
+# coverage oracle is the committed O-Bayes-Conflated fixture; this exercises the live wiring.
+test_that("brms fits the conflated diagnostic end to end (O-Bayes-Conflated-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # Crossed Design 1 with a LARGE between-cluster variance so the conflated ICC (which folds
+  # sigma^2_c into the signal) clearly overstates the subject level. ~20 clusters so sigma^2_c
+  # is identified.
+  set.seed(2029)
+  nc <- 20L
+  ns <- 5L
+  k <- 5L
+  d <- expand.grid(
+    s = seq_len(ns),
+    rater = factor(seq_len(k)),
+    cluster = factor(seq_len(nc))
+  )
+  d$subject <- factor(paste0(d$cluster, "_", d$s))
+  d$score <- 2 +
+    rnorm(nc, 0, sqrt(1.5))[as.integer(d$cluster)] +
+    rnorm(nlevels(d$subject), 0, 1)[as.integer(d$subject)] +
+    rnorm(k, 0, 0.4)[as.integer(d$rater)] +
+    rnorm(nc * k, 0, 0.4)[as.integer(interaction(d$cluster, d$rater))] +
+    rnorm(nrow(d), 0, sqrt(0.5))
+
+  fit <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    level = c("subject", "conflated"),
+    engine = "brms",
+    seed = 1,
+    brm_args = list(chains = 2, iter = 1200, refresh = 0)
+  ))
+
+  # Structure: a conflated row alongside the subject row, a posterior credible interval, the
+  # Bayesian engine label. Conflated carries NO Shrout & Fleiss label.
+  expect_s3_class(fit, "icc")
+  expect_identical(fit$ci$method, "posterior")
+  td <- tidy(fit)
+  expect_true("conflated" %in% td$level)
+  cf <- td[td$level == "conflated" & td$index == "ICC(A,1)", ]
+  sj <- td[td$level == "subject" & td$index == "ICC(A,1)", ]
+  expect_true(is.na(cf$sf_index))
+  # Every conflated row is a valid probability interval.
+  expect_true(all(
+    cf$conf.low >= 0 & cf$conf.high <= 1 & cf$conf.low <= cf$conf.high
+  ))
+
+  # O-Bayes-Conflated-agree: the glmmTMB REML conflated point (the same Eq. 14) sits inside
+  # the brms credible interval (containment, the honest engine-agreement pin).
+  g <- tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    level = "conflated",
+    engine = "glmmTMB"
+  ))
+  g1 <- g[g$index == "ICC(A,1)", ]
+  expect_true(g1$estimate >= cf$conf.low && g1$estimate <= cf$conf.high)
+
+  # Distinctness: the conflated ICC is visibly above the subject level (the diagnostic's point).
+  expect_gt(cf$estimate, sj$estimate)
+
+  # The header renders the conflated diagnostic under its own heading (never a peer level).
+  hdr <- paste(format(fit), collapse = "\n")
+  expect_match(hdr, "brms (MCMC)", fixed = TRUE)
+  expect_match(hdr, "Diagnostic contrast", fixed = TRUE)
 })
 
 # --- Live brms fit: crossed (Design 1) FIXED raters, O-Bayes-FML-agree (M27 Slice 1) ---

@@ -634,6 +634,35 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   before/after; writes the fixture). Fable's independent conjugate-normal check:
   `data-raw/reviews/fable-check-nfi.R`.
 
+### Oracle O-Bayes-Conflated — Bayesian conflated diagnostic (M29 Slice 1, ADR-039)
+
+- **Role:** the Bayesian sibling of the frequentist conflated oracle (M17 Slice 1). The conflated
+  single-level ICC (ten Hove et al. 2022, **Eq. 14**) is the biased ignore-the-clustering coefficient
+  composed off the crossed Design-1 five-component posterior draws — signal = cluster + subject, error =
+  rater + cluster_rater + residual. It is a **variance-ratio push-forward** (like every random-rater
+  Bayesian coefficient), so **none** of the θ² 2b moment correction (O-Bayes-FNML/O-NFI) applies —
+  `posterior_summary()` → `icc_point()` composes it exactly as the subject/cluster levels.
+- **Oracles (≥2 independent, #1):** **O-Eq14** (wiring, no Stan) — `posterior_summary()` reproduces the
+  closed-form Eq. 14 per draw to floating-point, independent of the estimator's own ICC path;
+  **O-population** (coverage) — the credible interval covers the known Eq. 14 value ~nominally (the point
+  may be biased by the few-cluster σ²_c, so coverage is the honest pin, M17 §5); **O-glmmTMB containment**
+  — the frequentist glmmTMB conflated point (the same Eq. 14, differing only by the prior) falls inside
+  the brms credible interval (the M26 containment posture); **distinctness** — the conflated MAP sits
+  visibly above the subject level (Eq. 14 folds the between-cluster variance into the signal).
+- **Sources:** ten Hove et al. (2020) prior/recipe + (2022) Eq. 14 (the conflated estimand); estimand-spec
+  `M17-conflated-icc.md` (no new spec — M29 gives the shipped estimand the brms engine).
+- **DGP:** crossed Design 1, N_c = 20 × 5 subjects, k = 5, **large** σ²_c = 1.5 (so the conflated clearly
+  overstates); pop conflated = (σ²_c + σ²_{s:c})/(σ²_c + σ²_{s:c} + σ²_r + σ²_cr + σ²_res) = 0.7530, pop
+  subject = 0.6024.
+- **Committed reference (`tests/testthat/fixtures/bayesian-conflated-oracle.rds`; seed 20290):** per-run
+  convergence / coverage-of-Eq14 / glmmTMB-containment / conflated-minus-subject gap (values recorded by
+  the generator run; pins are qualitative, #4/#18).
+- **Pins (#4/#18):** convergence ≥ .90; coverage ∈ [.90, .99]; glmmTMB containment ≥ .90; conflated−subject
+  gap > .05 (distinctness). Asserted in `test-icc-brms.R` **O-Eq14** (wiring, no Stan) +
+  **O-Bayes-Conflated** (committed reference, on CI) + **O-Bayes-Conflated-agree** (live crossed fit,
+  glmmTMB inside the CI, conflated > subject; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-conflated.R` (seeded; writes the fixture before the hard pins).
+
 ---
 
 ## Bibliography

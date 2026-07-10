@@ -108,7 +108,11 @@ alternate engines, and seeded simulations.
   Design 2 — with \eqn{\theta^2_r} / \eqn{\theta^2_{r:c}} read per posterior draw and
   moment-corrected so the credible interval covers the fixed-population coefficient
   (a bias correction that matters when each cluster's raters are estimated from few
-  subjects, and is boundary-aware at zero rater variance).
+  subjects, and is boundary-aware at zero rater variance). The Bayesian engine also
+  reports the **conflated** diagnostic (`level = "conflated"`, the biased
+  ignore-the-clustering ICC of ten Hove et al. 2022, Eq. 14): a variance-ratio
+  push-forward composed off the same crossed five-component posterior draws, with the
+  frequentist glmmTMB conflated point falling inside its credible interval.
 
 ## Choosing, projecting, and visualizing
 

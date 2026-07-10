@@ -994,13 +994,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   (σ²_c+σ²_{s:c} lumped as signal; σ²_r+σ²_cr+σ²_res as error, same flat `k_eff`), **agreement-only**,
   per posterior draw. Narrow the brms conflated refusal (`icc.R:598–604`) to admit `level = "conflated"`
   → route to the multilevel fit; preserve the diagnostic-only "never recommended" posture (§4).
-  - [ ] Guard narrowed + conflated brms dispatch; conflated `ICC` off the M24 draws; MAP + percentile
-    credible interval.
-  - [ ] Oracle **O-Bayes-Conflated**: Eq-14 identity per draw; MAP ≈ frequentist M17/M18 glmmTMB
-    conflated (containment, not equality — the M26 prior-vs-flat posture, #18); stays visibly biased vs.
-    the subject level (§4); seeded coverage ~nominal; convergence from `brms_convergence()`.
-  - [ ] Committed fixture `tests/testthat/fixtures/bayesian-conflated-oracle.rds` + generator
-    `data-raw/oracle-bayesian-conflated.R` (#4); single live brms fit `skip_on_ci()` +
+  - [x] Guard narrowed + conflated brms dispatch; conflated `ICC` off the M24 draws; MAP + percentile
+    credible interval. (Verified live: conflated rows render with no SF label; header "Diagnostic contrast".)
+  - [x] Oracle **O-Bayes-Conflated**: Eq-14 identity per draw (O-Eq14, Stan-free); MAP ≈ frequentist
+    glmmTMB conflated (**containment 1.00**, #18); visibly above the subject level (gap **.144**);
+    coverage **.95**; convergence **1.00**.
+  - [x] Committed fixture `tests/testthat/fixtures/bayesian-conflated-oracle.rds` (seed 20290, 80 reps) +
+    generator `data-raw/oracle-bayesian-conflated.R` (#4); single live brms fit `skip_on_ci()` +
     `skip_if_not_installed("brms")` ([[brms-live-fit-skip-on-ci]]).
 
 - **Slice 2 — Bayesian within-cell replicates (one new fit).** `fit_brms_replicates()` in
@@ -1033,4 +1033,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   **numeric-unit `d_study()`** projection; the M23 carry-overs — **rstanarm**, **selectable** `posterior`
   coupling, **HPDI** intervals, **user-exposed `prior=`**. All stay in [`ROADMAP.md`](ROADMAP.md).
 - Status: **in progress** — opened by ADR-039 (2026-07-10) on branch `m29-bayes-conflated-replicates`.
-  Slice 1 active; no slice code written yet.
+  **Slice 1 (conflated) done** — guard narrowed, conflated composes off the crossed brms draws, O-Bayes-
+  Conflated pinned (coverage .95, containment 1.00, gap .144) off a committed 80-rep fixture; non-brms
+  suite green, `air`/`lintr` clean. **Slice 2 (within-cell replicates) active.**
