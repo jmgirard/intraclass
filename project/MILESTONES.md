@@ -22,14 +22,16 @@ crossed Design 1 + nested Design 2, subject level — then shipped** (PR #32), t
 frequentist M10 / M19 Slice 2 fixed paths (multilevel one-way was already shipped as Design 3 in M25);
 its Slice-2 oracle-first fork (the raw θ²_{r:c} push-forward undercovers the nested finite population) was
 resolved by a gated Fable review (#19) adopting a 2b moment correction + boundary-aware average-floor
-(ADR-037 amendment). No milestone is currently in flight. Each milestone is scoped by an ADR at its start
+(ADR-037 amendment). **M28 (ADR-038) — frequentist nested-fixed MC-interval coverage — is now ACTIVE**
+(the spun-off M27 corollary: pin, and only if the sim warrants fix, the shipped `theta2r_nested_draws()`
+interval; characterize-then-decide). Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
-ADR-035 M25, ADR-036 M26, ADR-037 M27).
+ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -928,3 +930,74 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   carry-overs stay in [`ROADMAP.md`](ROADMAP.md): the Wave-3 averaged crossed cluster-level `ICC(c,k)`
   incomplete divisor; categorical/ordinal GLMM; one-way via SEM (blocked, ADR-014);
   non-parametric/profile-likelihood CIs; lme4 singular/merDeriv edge cases.
+
+## M28: Frequentist nested-fixed MC-interval coverage (ADR-038) — ACTIVE
+- Goal: pin — and, only if the sim warrants, fix — the coverage of the shipped **frequentist**
+  nested-fixed θ²_{r:c} Monte-Carlo interval (`theta2r_nested_draws()`, [`R/engine-glmmtmb.R`](../R/engine-glmmtmb.R),
+  the M19 Slice 2 construction). This is the **corollary spun off from the M27 gated Fable review**
+  (ADR-037): the frequentist sibling is built the same suspect way the Bayesian path was — per draw
+  `pmax(0, raw - b)` **per cluster** (subtracting only **1b**), then averaged — so it likely shares an
+  attenuated displacement and **cannot reach θ²=0**. **Interval-method work, not new estimand work**
+  (cf. M16/M21/M23–M27): no new estimand-spec, argument, or dependency; additive, non-breaking (#6).
+  The frequentist **point** estimator (`th$point`, computed separately, unbiased) is out of scope. The
+  maintainer chose the **characterize-then-decide** posture (#1/#18): do not presume the interval is
+  broken before a sim says so.
+- Reference: ADR-038 (scope + characterize-then-decide + the conditional-Slice-2/Fable-gate decision);
+  no new estimand-spec (interval method — cf. M16). Oracle **O-NFI** (nested-fixed-interval **coverage**,
+  #1): committed seeded sim `data-raw/oracle-nested-fixed-interval.R` → committed fixture, across the
+  Fable Q6 grid `k ∈ {2,4}` × `n_s ∈ {3,5,20}` × `C_n ∈ {5,20,80}` × `θ²_{r:c} ∈ {0, σ²_res/n_s, .66}`;
+  registered in [`REFERENCES.md`](REFERENCES.md). Brief §8 per-milestone DoD.
+
+- Deferred out of M28 (record so not rediscovered): the Fable-recommended **fully-Bayesian alternative**
+  (hierarchical half-*t* prior on the within-cluster rater effects, θ² read off realized η draws — leaves
+  the fixed-effects parity contract with `fit_glmmtmb_nested_fixed()`; own future ADR); a boundary-robust
+  rework of the **crossed** `theta2r_fixed()` interval beyond the negligible-`v` spot-check. Untouched
+  carry-overs stay in [`ROADMAP.md`](ROADMAP.md): remaining Bayesian follow-ons (incomplete/ragged,
+  replicates, conflated, cluster-level fixed); the Wave-3 averaged cluster-level `ICC(c,k)` incomplete
+  divisor; categorical/ordinal GLMM; multilevel SEM; one-way via SEM (blocked, ADR-014).
+
+- DoD board (check off in the same commit as the work, #16):
+  - **Slice 1 — coverage characterization (required): DONE 2026-07-09.** **Finding (#18): the shipped
+    interval UNDERCOVERS**, worsening with cluster count (incidental parameters) and easing with
+    subjects-per-cluster — boundary coverage C_n=5/20/80 = **.95/.86/.57**, worst cell (C_n=80, n_s=3)
+    **.36–.38**; interior means **.95/.92/.80**. The ADR-037 corollary confirmed → **Slice 2 warranted.**
+    - [x] `data-raw/oracle-nested-fixed-interval.R`: seeded DGP for nested Design 2 fixed-rater across
+          the Q6 grid; computes MC-interval coverage of `theta2r_nested_draws()` at each cell, interior
+          **and** boundary (θ²_{r:c}=0); commits the summary fixture (#4).
+    - [x] O-NFI asserted in `tests/testthat/test-icc-fixed-multilevel.R` against the committed fixture
+          (file-local 20/0, incl. O-NFI + O-NFI/point); finding reported honestly (#18) — undercoverage.
+    - [x] O-NFI registered in [`REFERENCES.md`](REFERENCES.md) oracle registry.
+    - [x] Confirm the **point** estimator is unmoved (O-NFI/point regression check).
+  - **Slice 2 — recenter + average-floor fix (DONE 2026-07-09, full Fable verdict adopted).** Fable's
+    written verdict returned and was adopted in full (ADR-038 amendment;
+    `data-raw/reviews/fable-review-m28-nested-fixed-interval-{brief,response}.md` + Fable's committed
+    conjugate-normal check `fable-check-nfi.R`). **Post-fix O-NFI: interior mean .962, boundary mean .958,
+    every cell ≥ .91, C_n collapse gone** (boundary .957/.965/.953 across C_n=5/20/80).
+    - [x] Fable review recommended + **approved by the maintainer** + verdict returned (2026-07-09):
+          ship 2b + average-floor; also move the POINT floor to the average (§3); unify all fixed-rater
+          draws; pivotal-reflection alternative tested-and-rejected (over-corrects by b).
+    - [x] Shared `theta2r_moment_draws()` helper (2b + boundary-aware average-floor); the nested helper +
+          all 7 crossed draw sites across **glmmTMB, lme4, lavaan** route through it. O-NFI regenerated
+          nominal.
+    - [x] **Point** floor moved to the per-draw average (Fable §3) — point-in-own-CI containment
+          .59→**1.00** at the worst boundary cell (was falling outside its own interval).
+    - [x] Crossed `theta2r_fixed()` unified + spot-checked: crossed flat-fixed coverage **.958** (b≈0,
+          negligible shift); O6/O-FML pins hold; "deliberate displacement" note retired (Fable §5).
+    - [x] NEWS entry for the interval behavior change (point stable away from the boundary; near-boundary
+          CIs move / can reach 0; glmmTMB + lme4 + lavaan).
+  - **Cross-cutting:**
+    - [x] `air format` + `lintr::lint_package()` clean (0 lints; `data-raw/reviews` excluded — math
+          notation); full non-brms suite **295/0/0** on `load_all` (brms untouched by this change).
+    - [x] `R CMD check --as-cran` (full build w/ vignettes) **0/0/1** — only the expected "New submission"
+          NOTE; the in-check testthat suite passed (67s, brms skips under `--as-cran`).
+    - [x] Installed-package **brms** suite (`NOT_CRAN=true`, CI unset) **29/0/0**, all 9 live Stan fits
+          run + pass (the one path `--as-cran` skips; this change does not touch brms, confirmed green).
+    - [x] Tracking files reconciled; committed + pushed on `m28-nested-fixed-interval`; **PR
+          [#33](https://github.com/jmgirard/intraclass/pull/33) open — awaiting the CI matrix + merge.**
+- Status: **active — both slices implemented + green; shipped to PR
+  [#33](https://github.com/jmgirard/intraclass/pull/33), awaiting CI + merge.** Slice 1 (characterization)
+  found the shipped interval undercovering (boundary .95/.86/.57, worst ~.37); the gated Fable review
+  (#19) returned and its full verdict was adopted in Slice 2 (2b + average-floor interval, point
+  average-floor, all-engine unification). Post-fix O-NFI nominal (interior .962 / boundary .958, no
+  collapse); non-brms suite 295/0/0, installed brms 29/0/0, `R CMD check --as-cran` 0/0/1, `air`/`lint`
+  clean. On merge: reconcile markers (direct to `main`) + compress this board to the shipped summary form.

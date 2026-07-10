@@ -600,6 +600,40 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `test-icc-brms.R` **O-Bayes-FNML** (committed reference, on CI) + **O-Bayes-FNML-agree** (live nested
   fixed fit, glmmTMB inside the CI for agreement + consistency, lme4 the second REML oracle; `skip_on_ci`).
 
+### Oracle O-NFI — frequentist nested-fixed MC-interval coverage (M28, ADR-038)
+
+- **Role:** the **frequentist** sibling of O-Bayes-FNML — coverage of the shipped nested (Design 2)
+  fixed-rater θ²_{r:c} **Monte-Carlo interval** (`theta2r_nested_draws()`, R/engine-glmmtmb.R). A CI
+  method's oracle is **coverage** (#1). This is the ADR-037 **corollary** (spun off from the M27 Fable
+  review) made concrete: the interval was never coverage-pinned. The **point** estimator is separate,
+  bias-corrected, and pinned by O-FNML — out of scope here.
+- **DGP:** nested Design 2, raters FIXED (per-cluster centered rater means held fixed across
+  replications; only subjects + residuals resampled — coverage is of the fixed value). σ²_{s:c} = 1,
+  σ²_res = 0.5; the **Fable Q6 grid** k ∈ {2,4} × n_s ∈ {3,5,20} × C_n ∈ {5,20,80} × θ²_{r:c} ∈
+  {0 (boundary), σ²_res/n_s, 0.66} — 54 cells × n_rep 100.
+- **The finding + fix (M28 Slice 1 → 2, gated Fable review #19,
+  `data-raw/reviews/fable-review-m28-nested-fixed-interval-{brief,response}.md`).** Slice 1 pinned the
+  **shipped** (1b, per-cluster-floor) interval **UNDERCOVERING**, worsening with cluster count (an
+  incidental-parameters pathology — the per-cluster 1b correction + **per-cluster floor** displace each
+  cluster's contribution, and averaging over many clusters narrows the interval faster than it removes the
+  displacement): boundary (θ²=0) coverage **C_n=5/20/80 = .95/.86/.57**, worst cell (C_n=80, n_s=3)
+  **.36–.38**; interior means **.95/.92/.80** — the M27 Bayesian finding confirmed on the frequentist path.
+  Slice 2 replaced it with the shared `theta2r_moment_draws()` (subtract **2b**, floor the per-draw
+  AVERAGE) and moved the POINT floor to the average (Fable §3, fixing point-outside-its-own-CI at the
+  boundary).
+- **Committed reference (`tests/testthat/fixtures/nested-fixed-interval-oracle.rds`; seeds 203800 + i·1000)
+  — POST-FIX:** interior coverage **mean .962** (range .91–.99), boundary **mean .958** (range .94–.99);
+  the C_n collapse is gone (boundary **.957/.965/.953** across C_n=5/20/80), worst pre-fix cell
+  **.37 → .95–.98**, every cell ≥ .91. Confirms Fable's derived prediction (boundary conservative-nominal,
+  interior mean ≈ .95) with no free parameter (#4).
+- **Pins (#4/#18):** min cell coverage > .87, overall mean > .93; boundary coverage ≥ .90 at every C_n
+  (the regression guard — no incidental-parameters collapse); worst cell (C_n=80, n_s=3, θ²=0) > .88; a
+  live point-in-own-CI containment check > .85 at the boundary. Asserted in `test-icc-fixed-multilevel.R`
+  **O-NFI** + **O-NFI/point**.
+- **Provenance:** `data-raw/oracle-nested-fixed-interval.R` (standalone, seeded; header records the
+  before/after; writes the fixture). Fable's independent conjugate-normal check:
+  `data-raw/reviews/fable-check-nfi.R`.
+
 ---
 
 ## Bibliography

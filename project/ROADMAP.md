@@ -184,11 +184,12 @@ helpers* item below (sample-size / CI-width), where it belongs.
   shipped `theta2r_nested_draws()` (the M19 nested-fixed θ²_{r:c} Monte-Carlo interval) subtracts only
   **1b** from its draws and floors **per cluster**, so it likely shares an attenuated version of the
   displacement the Bayesian path fixed (and cannot reach θ²=0). The frequentist **point** estimator is
-  unaffected (unbiased). **Status: ready, spun off as a background task (2026-07-09).** Needs a seeded
-  coverage sim across the Fable Q6 grid (k ∈ {2,4}, n_s ∈ {3,5,20}, C_n ∈ {5,20,80}, θ²_{r:c} ∈ {0,
-  σ²_res/n_s, .66}); if it undercovers, recenter + average-floor the MC draws (mirroring
-  `brms_theta2r_moment_draws()`), its own ADR — likely a Fable review (#19) since it changes a shipped
-  interval. The crossed fixed MC interval (`theta2r_fixed`) may share it too, negligibly (v → 0 there).
+  unaffected (unbiased). **Status: SCHEDULED as M28 (ADR-038, 2026-07-09) — active.** Slice 1 (required):
+  the seeded coverage sim across the Fable Q6 grid (k ∈ {2,4}, n_s ∈ {3,5,20}, C_n ∈ {5,20,80}, θ²_{r:c} ∈
+  {0, σ²_res/n_s, .66}), characterize-then-decide (#1/#18). Slice 2 (conditional on under-coverage):
+  recenter + average-floor the MC draws (mirroring `brms_theta2r_moment_draws()`), gated on a Fable review
+  (#19) since it changes a shipped interval. The crossed fixed MC interval (`theta2r_fixed`) may share it
+  too, negligibly (v → 0 there — spot-check only). See [`MILESTONES.md`](MILESTONES.md) M28.
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,

@@ -312,15 +312,15 @@ fit_lavaan <- function(data, raters = "random", call = rlang::caller_env()) {
 
   # Back-transform a matrix of internal-scale draws (rows = parameters named as
   # `slots`, columns = MC draws) to variance components. subject/residual via
-  # exp(2 * draw); rater via the raw quadratic form sum(nu^2)/(k-1) per draw, minus the
-  # constant Case-3A `bias` and clamped at 0 for FIXED raters (bias = 0 for random, so
-  # this reduces to the raw Jorgensen 2021 Eq. 6 estimator -- cf. fit_glmmtmb_fixed()).
+  # exp(2 * draw); rater via the shared moment helper (one group). For FIXED raters
+  # `bias` > 0, so the draws are 2b-recentered + floored (M28, ADR-038); for RANDOM
+  # raters `bias` = 0, so it reduces to the raw Jorgensen 2021 Eq. 6 estimator
+  # pmax(0, sum(nu^2)/(k-1)) exactly -- unchanged (cf. fit_glmmtmb_fixed()).
   to_components <- function(par) {
     means <- par[nu_slots, , drop = FALSE]
-    raw_draws <- colSums(means * (center %*% means)) / (k - 1)
     list(
       subject = exp(2 * par["subject", ]),
-      rater = pmax(0, raw_draws - bias),
+      rater = theta2r_moment_draws(list(means), list(bias), center, k),
       residual = exp(2 * par["residual", ])
     )
   }
