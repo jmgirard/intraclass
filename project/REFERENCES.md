@@ -543,6 +543,65 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 
 ---
 
+### Oracle O-Bayes-FML — Bayesian crossed fixed-rater multilevel (M27 Slice 1, ADR-037)
+
+- **Role:** the crossed (Design 1) fixed-rater sibling of O-Bayes-ML. A CI method's oracle is
+  **coverage** (#1). The shipped brms recipe on the M10 five-component crossed fit with a **fixed**
+  `rater` effect (θ²_r read per posterior draw, **moment-corrected** — see below) reproduces the
+  coverage/containment/convergence behaviour of a seeded crossed fixed DGP. The **primary** pin is
+  **containment** — the glmmTMB M10 REML point inside the brms credible interval — *not* equality,
+  since the balanced `fixed ≡ random` identity holds only approximately under the prior (#18).
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) prior/recipe + (2022) Design-1 estimands;
+  McGraw & Wong (1996) Case 3A θ²_r (reused `estimand-specs/M10-fixed-multilevel.md §2`, no new spec).
+- **DGP:** crossed Design 1, N_c = 20 clusters × 5 subjects, k = 4 **fixed** rater means
+  (θ²_r = 0.2667), σ²_{s:c} = 1, σ²_res = 0.5 → pop subject **ICC(A,1) = 0.5660**; half-*t*(4,0,1)
+  on the random-effect SDs.
+- **Committed reference (`tests/testthat/fixtures/bayesian-multilevel-fixed-oracle.rds`; n_rep = 100,
+  seed 20270):** converged **.98**, **containment 1.00**, coverage **.95**, MAP rel-bias **≈ +.01**
+  (≈ unbiased; crossed b ≈ 0, so the 2b moment correction is ~a no-op and roughly cancels the small
+  mode-below-mean skew; regenerated after the ADR-037 helper unification).
+- **Pins (#4/#18):** convergence ≥ .90; containment ≥ .90; coverage of the fixed-population ICC(A,1)
+  ~nominal; MAP ~unbiased (|rel-bias| < .05, either sign), characterized not asserted to a direction.
+- **Provenance:** `data-raw/oracle-bayesian-multilevel-fixed.R`; `test-icc-brms.R` **O-Bayes-FML**
+  (committed reference, on CI) + **O-Bayes-FML-agree** (live crossed fixed fit, glmmTMB inside the CI
+  for agreement + consistency, lme4 the second REML oracle; `skip_on_ci`).
+
+### Oracle O-Bayes-FNML — Bayesian nested fixed-rater multilevel (M27 Slice 2, ADR-037)
+
+- **Role:** the nested (Design 2) fixed-rater sibling of O-Bayes-NML. The rater slot carries
+  θ²_{r:c} = the within-cluster finite-population rater variance averaged over clusters. A CI
+  method's oracle is **coverage** (#1); the primary pin is **containment** of the glmmTMB M19 REML
+  point — and here containment is the *only* identity available, since for nested designs fixed ≢
+  random even balanced (per-cluster finite population; the M19/ADR-029 catch).
+- **THE 2b MOMENT CORRECTION (ADR-037 amendment, gated Fable review #19):** the naïve **raw**
+  per-draw push-forward of θ²_{r:c} **undercovers** the fixed-population value (interior coverage
+  **.86**, MAP **−.106**, seed 20271) and its coverage → 0 as clusters accrue (an incidental-parameters
+  pathology from the flat prior on the C_n·k cell means). The shipped estimator subtracts **2b** per
+  draw (`b = tr(C·Σ_post)/(k−1) = σ²_res/n_s`; **two** equal inflations — push-forward + plug-in — the
+  frequentist point removes one because its point is separate/unbiased, the Bayesian MAP is read off
+  the draws so needs both) and floors only the per-draw cluster **AVERAGE** (per-cluster flooring →
+  **zero** coverage at θ²=0, #3). Derived not tuned (#4): a Stan-free conjugate check hits θ+2b, θ+b,
+  θ to ≲.003, and the brms raw→1b step is exactly one `b`.
+- **Sources:** ten Hove et al. (2020) prior/recipe + (2022) Design-2 estimands; McGraw & Wong (1996)
+  Case 3A per cluster (the M19 nested θ²_{r:c}, no new spec).
+- **DGP:** nested Design 2, N_c = 20 × 5 subjects, k = 4 fixed per-cluster rater means; **interior**
+  cell θ²_{r:c} = 0.6616 (pop ICC(A,1) = 0.4626) and **boundary** cell θ²_{r:c} = 0 (pop 0.6667).
+- **Committed reference (`tests/testthat/fixtures/bayesian-nested-fixed-oracle.rds`; seed 20271):**
+  **interior** (n_rep 100) converged **1.00**, containment **1.00**, coverage **.95**, MAP rel-bias
+  **−.017**; **boundary** (n_rep 80) coverage **1.00**, containment **1.00** — the average-floor keeps
+  the boundary at/above nominal (the pin per-cluster flooring would fail). Matches Fable's derived
+  predictions (≈.95 / ≈−.02) with no free parameter.
+- **Pins (#4/#18):** convergence ≥ .90 both cells; interior containment ≥ .90 and coverage ~nominal;
+  interior MAP only mildly low (> −.06, the skew); **boundary coverage ≥ .90** (the #3 boundary-aware
+  pin). Corollary (Fable §6, out of scope): the frequentist nested-fixed **MC interval**
+  (`theta2r_nested_draws()`) is 1b-corrected + per-cluster-floored and likely shares an attenuated
+  displacement — spun off as its own task/ADR (the point estimator is unaffected).
+- **Provenance:** `data-raw/oracle-bayesian-nested-fixed.R` (interior + boundary cells);
+  `test-icc-brms.R` **O-Bayes-FNML** (committed reference, on CI) + **O-Bayes-FNML-agree** (live nested
+  fixed fit, glmmTMB inside the CI for agreement + consistency, lme4 the second REML oracle; `skip_on_ci`).
+
+---
+
 ## Bibliography
 
 - Brennan, R. L. (2001). *Generalizability Theory.* Springer.

@@ -89,19 +89,42 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none** — M26 shipped (PR #31, squash-merged at `c02bc38`). No milestone is currently
-  in flight; the next one needs an ADR after a short retro. Remaining work lives in
-  [`ROADMAP.md`](ROADMAP.md): the *multilevel* Bayesian fixed/one-way, Bayesian
-  incomplete/replicates/conflated, categorical/ordinal GLMM, multilevel SEM, the Wave-3 averaged
-  cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band **CRAN
-  upload** (ADR-022) also remains.
-- Last green CI: **PR #31 (M26) CI green; squash-merged to `main` at `c02bc38`.** Local
-  `R CMD check --as-cran` **0/0/1** (only the expected "New submission" NOTE); test suite
-  `FAIL 0 | WARN 0 | SKIP 34 | PASS 949`; all 7 live Stan fits pass locally (`skip_on_ci`); coverage
-  ~85% (below 90% by design — brms fit wrappers are live-only, [[coverage-baseline]]). Prior: PR #30
-  (M25) at `2ff081b`.
-- Blockers: —
-- Updated: 2026-07-09 by main session (Opus) — **M26 shipped (PR #31, squash-merged at `c02bc38`).**
+- Active milestone: **M27 — Bayesian multilevel fixed-rater (brms), crossed Design 1 + nested Design 2,
+  subject level, balanced/complete** (ADR-037, accepted 2026-07-09; board opened in
+  [`MILESTONES.md`](MILESTONES.md)). The brms sibling of the frequentist M10 (crossed fixed) / M19 Slice 2
+  (nested fixed) paths; engine/interval parity, not new estimand work (#6). **Disambiguation (ADR-037):**
+  Bayesian multilevel *one-way* was already shipped as Design 3 in M25 Slice 2, so M27 is **fixed-rater
+  only**. Chosen after a short retro of the M23→M26 Bayesian arc.
+- Active task: **M27 both slices DONE — ready for the finish-task pass / PR.** The Slice-2 oracle-first
+  fork (raw θ²_{r:c} undercovers the nested finite population) was resolved by a **gated Fable review
+  (#19, ADR-037 amendment)**: ship the **2b moment correction** (two inflations — push-forward + plug-in —
+  not one) with a **boundary-aware per-draw-average floor**, and **unify** the crossed/single-level helper
+  to the same path (`brms_theta2r_moment_draws()`; 2b ≈ 0 there). Regenerated oracles match Fable's derived
+  predictions: O-Bayes-FNML **interior** coverage **.95**/MAP **−.017**, **boundary(θ²=0)** coverage **1.00**;
+  O-Bayes-FML coverage **.95**/MAP **+.012**; containment **1.00** throughout. Full `test-icc-brms.R`
+  `NOT_CRAN=true` **219/0/0**; `lint_package()` + `air` clean. Cross-cutting DoD done (ADR-037 amendment,
+  COVERAGE/REFERENCES/NEWS). Corollary spun off (`task_f3345a29`): the frequentist nested-fixed MC interval
+  likely shares an attenuated displacement — its own ADR. **Remaining:** `R CMD check --as-cran` + PR.
+- **Slice 1 — crossed Design 1 fixed — done** (6a304b5; helper later unified to the 2b path in Slice 2).
+- **Slice 2 — nested Design 2 fixed — done** (corrected estimator per the Fable review). Remaining post-M27 work lives in [`ROADMAP.md`](ROADMAP.md): Bayesian
+  incomplete/replicates/conflated + cluster-level fixed, categorical/ordinal GLMM, multilevel SEM, the
+  Wave-3 averaged cluster-level `ICC(c,k)` incomplete divisor, and occasion-`d_study()`. The out-of-band
+  **CRAN upload** (ADR-022) also remains.
+- Last green CI: **M27 local green on branch `m27-bayes-multilevel-fixed` (not yet pushed/PR'd).** Local
+  `R CMD check --as-cran` **0/0/1** (only the expected "New submission" NOTE — a stray 2-WARNING run was
+  a `--no-build-vignettes` artifact, clean on a full build); `test-icc-brms.R` `NOT_CRAN=true`
+  **219/0/0** (all 9 live Stan fits pass, `skip_on_ci`); full suite `NOT_CRAN=true`
+  **FAIL 0 | WARN 0 | SKIP 0 | PASS 1175**; `lintr::lint_package()` + `air` clean; coverage
+  ~85% (below 90% by design — brms fit wrappers are live-only, [[coverage-baseline]]). Prior green:
+  **PR #31 (M26)** squash-merged to `main` at `c02bc38`.
+- Blockers: — (the M27 Slice 2 Fable review returned 2026-07-09 and its verdict is implemented + green).
+- Updated: 2026-07-09 by main session (Opus) — **M27 both slices done; ready for finish-task/PR.**
+  Slice 1 (crossed fixed) shipped, Slice 2 (nested fixed) resolved via a gated Fable review (#19): the raw
+  θ²_{r:c} push-forward undercovered the nested finite population → adopted the **2b moment correction +
+  boundary-aware average-floor**, unified the crossed/single-level helper (`brms_theta2r_moment_draws()`).
+  Regenerated O-Bayes-FML/FNML match Fable's predictions; `test-icc-brms.R` `NOT_CRAN=true` 219/0/0; lint
+  clean; ADR-037 amendment + COVERAGE/REFERENCES/NEWS done; frequentist-interval corollary spun off.
+  Prior line: **M26 shipped (PR #31, squash-merged at `c02bc38`).**
   Slices 1–2 + all cross-cutting DoD done. Post-merge `project/` reconcile: this file, MILESTONES M26 →
   done + preamble + board compressed, COVERAGE brms one-way/fixed cells, REFERENCES O-Bayes-OW/-Fixed,
   ROADMAP flipped to shipped, NEWS Bayesian section (all landed in the PR; this commit compresses the
