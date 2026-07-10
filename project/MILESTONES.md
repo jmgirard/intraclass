@@ -49,16 +49,21 @@ frequentist oracle (deferred all engines, ADR-029), so it cannot ship as parity.
 nominal; **Slice 2 (Design 3) fired a gated Fable review** (#19) when the first n_rep-80 ragged coverage cell
 drew .8625 — **verdict: a Monte-Carlo tail event, no estimator shortfall** (n=240 .9458, 2,000-fit
 frequentist .9555, PIT uniform; ADR-042 Amendment 2), fixture regenerated at n_rep 240 with pins unchanged,
-and n_rep ≥ 240 adopted as the convention for future ragged coverage cells. **No milestone is currently in
-flight.** Each milestone is scoped by an ADR at its start
+and n_rep ≥ 240 adopted as the convention for future ragged coverage cells. **M33 (ADR-043) — the Bayesian
+parity mop-up (incomplete single-level one-way + fixed-rater & multilevel within-cell replicates) — is now
+in flight** (branch `m33-bayes-parity-mopup`), closing the last clean-oracle estimand gaps on the brms
+ledger; each of its three corners has a frequentist oracle (the gate), so all ship as parity, not research.
+Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
 detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
-ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32).
-No milestone is currently in flight; the next one needs an ADR after a short retro (founding brief §7).
+ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
+ADR-043 M33).
+**M33 (ADR-043) is currently in flight** (the Bayesian parity mop-up; branch `m33-bayes-parity-mopup`) —
+opened/scoped, no slice code yet; see its board below.
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1131,5 +1136,51 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   future ragged coverage cells** (the ≥ .88 pin false-alarms ~0.7%/cell at n_rep 80). The Fable brief +
   response + seeded harness are committed under `project/` + `data-raw/reviews/` as the #19 provenance.
   `R CMD check --as-cran` 0/0/0; installed-pkg both nested fits verified; full suite (CI mode) 1175/0.
+
+## M33: Bayesian engine (brms) — parity mop-up: incomplete one-way + fixed & multilevel replicates (ADR-043)
+- Goal: close the **last clean-oracle estimand gaps** on the brms parity ledger — the corners the
+  balanced/complete and incomplete arcs left behind — in one milestone (the recorded direction **(A)**,
+  `ROADMAP.md`). Three thin slices, each a *shipped* frequentist coefficient read off posterior draws:
+  **(1)** incomplete/ragged single-level **one-way**, **(2)** **fixed-rater** within-cell replicates,
+  **(3)** **multilevel** within-cell replicates (crossed Design 1 + nested Design 2). **Engine/interval
+  parity, not new estimand work** (cf. M15/M21/M23–M32): no new estimand-spec (reuses
+  [`M6-oneway.md`](estimand-specs/M6-oneway.md) /
+  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md)), no new argument, no new
+  dependency; two brms guards narrowed (`icc.R:1122`, `icc.R:1158`) + reuse of shipped fits/helpers. **Gate
+  met (#1):** every corner has a frequentist oracle — Slice 1 → glmmTMB/lme4 incomplete one-way (M6 + M3
+  `k_eff`); Slice 2 → M20 Slice 1 (balanced fixed replicates); Slice 3 → M20 Slice 2 (crossed D1 + nested D2).
+- Reference: ADR-043 (scope + gate + per-slice regime + Fable posture). Oracles **O-Bayes-IOneway** (Slice 1)
+  / **O-Bayes-FRep** (Slice 2) / **O-Bayes-MLRep** (Slice 3) — reduction to the shipped balanced brms fit +
+  glmmTMB/lme4 MAP-containment + committed seeded coverage (`REFERENCES.md`).
+- DoD (the board, ADR-015):
+  - [ ] **Slice 1 — incomplete/ragged single-level one-way.** Narrow `icc.R:1158` (`if (oneway || replicates)`
+    → drop `oneway` single-level); `fit_brms_oneway()` unchanged; M3/M6 `k_eff` threads per draw. Random →
+    variance ratio, no θ² functional (M30 regime). **The one unknown: ragged coverage** → committed seeded
+    fixture at **n_rep ≥ 240** ([[ragged-coverage-nrep-240]]). O-Bayes-IOneway: reduction ≡ M26 S1 + glmmTMB
+    containment + coverage. Conditional gated Fable review **only if** this undercovers (#19,
+    recommend-and-stop).
+  - [ ] **Slice 2 — fixed-rater within-cell replicates (balanced).** Narrow `icc.R:1122` (admit single-level
+    `raters == "fixed"` replicates); fixed replicate fit
+    (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`) reusing M20 S1 formula + M29 replicate machinery +
+    shipped `brms_theta2r_moment_draws()` (2b ≈ 0 on balanced data — the M26/M27-S1 regime, not ragged M31).
+    O-Bayes-FRep: reduction (fixed ≡ random, θ²_r = σ²_r) + glmmTMB M20 S1 containment + coverage +
+    average > single.
+  - [ ] **Slice 3 — multilevel within-cell replicates (balanced).** Narrow `icc.R:1122`'s `multilevel`
+    clause; crossed D1 (`(1|cluster:subject:rater)`, 6-component) + nested D2 (5-component) replicate fits
+    mirroring M20 S2; residual → σ²_{csr} + pure error, `occasions` per-draw divisor. Design 3 replicate-split
+    ⚫ by design. O-Bayes-MLRep: reduction (occasion-averaged ≡ M5/M8 on cell means) + glmmTMB M20 S2
+    containment + coverage.
+  - [ ] Cross-cutting: roxygen/NEWS/COVERAGE/REFERENCES updated in-commit (#16); new deferred-corner brms
+    refusal messages retargeted; `air format` + `lintr::lint_package()` clean; installed-pkg drive of each new
+    path (`NOT_CRAN=true`, live Stan fits `skip_on_ci`); `R CMD check --as-cran`; full CI matrix green.
+- Deferred out of M33 (record so not rediscovered): **ragged / `occasions = "average"`** replicates (🟣
+  research, no scalar effective-`n_o` divisor, ADR-030) and ragged×fixed / ragged×multilevel replicate
+  compounds; incomplete **fixed** nested + **cluster-level** fixed (research, no frequentist oracle —
+  direction (C), ADR-029/042); averaged cluster-level **`ICC(c,k)`** incomplete divisor (🟣 Wave-3, M9 §9);
+  Bayesian **numeric-unit `d_study()`**; the **(B)** customization milestone — **`prior=`** API, **HPDI**
+  intervals, **selectable** `posterior` coupling (next); **rstanarm** backend. All stay in
+  [`ROADMAP.md`](ROADMAP.md).
+- Status: **active — opened/scoped, no slice code yet** (plan before code, #14). Branch
+  `m33-bayes-parity-mopup`. Next: `/start-task` Slice 1.
   Bayesian incomplete **fixed** nested / **cluster-level** / **replicates** / single-level **one-way** stay
   deferred.

@@ -188,13 +188,37 @@ helpers* item below (sample-size / CI-width), where it belongs.
   ragged coverage cell drew .8625 — **verdict (ADR-042 Amendment 2): a Monte-Carlo tail event, no estimator
   shortfall** (same incidence at n=240 → .9458, 2,000-fit frequentist → .9555, uniform PIT), fixture
   regenerated at n_rep 240 with pins unchanged, and **n_rep ≥ 240 adopted as the convention for future ragged
-  coverage cells** (the ≥ .88 pin false-alarms ~0.7%/cell at n_rep 80). **Still parked** — the *other*
-  Bayesian parity follow-ons: incomplete **fixed** nested (Designs 2/3 — **research**, needs the frequentist
-  incomplete-fixed-nested estimand built first, the nested sibling of the M9 `ICC(c,k)` divisor); **fixed-rater
-  and multilevel within-cell replicates**; incomplete single-level **one-way**; and **cluster-level fixed**
-  (for the incomplete/small-k corners ten Hove et al. 2022 flag the best estimator as an open research
-  question → schedule leaning on coverage calibration); plus **selectable** `posterior` coupling (MC/bootstrap
-  on a Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API.
+  coverage cells** (the ≥ .88 pin false-alarms ~0.7%/cell at n_rep 80). **Still parked**, now grouped and
+  *sequenced* (planning discussion 2026-07-10 — a recorded direction, not yet an ADR):
+    - **(A) ~~Next up~~ — PROMOTED to M33 (ADR-043, branch `m33-bayes-parity-mopup`, 2026-07-10).** The
+      Bayesian parity mop-up (the last clean-oracle estimand gaps): **incomplete single-level one-way**
+      (Slice 1) and **fixed-rater + multilevel within-cell replicates** (Slices 2–3; M29 shipped only *two-way
+      random single-level* replicates). **The gate was met** — each corner has a frequentist oracle (glmmTMB/lme4
+      incomplete one-way = M6 + M3 `k_eff`; M20 Slice 1 fixed / Slice 2 multilevel replicates) — so all three
+      ship as parity, not research. Details now live in the M33 board in [`MILESTONES.md`](MILESTONES.md); this
+      line stays until M33 ships (then it is removed, ADR-015).
+    - **(B) After (A) — one Bayesian-customization milestone, two slices**, theme "let users deviate from a
+      sourced default *with guardrails*." Override is **allowed** — the primary use case is
+      prior-sensitivity / method-comparison / simulation studies, which need *arbitrary* priors, so a clean
+      escape hatch, **not** a curated whitelist. The milestone's oracle is a **reduction oracle** (defaults
+      reproduce shipped M23+ results bit-identically); arbitrary-prior / HPDI coverage is deliberately **not**
+      oracle-claimed. **Slice 1 (first, higher-stakes) — user `prior=` API:** lift the reserved-arg guard that
+      today refuses `prior` (`R/icc.R:383`, `R/engine-brms.R:52`) and thread an override through
+      `fit_brms_common` (the sourced half-*t*(4,0,1) — ten Hove et al. 2020 §3.3/§4.1 — stays as the
+      `prior = NULL` default); fire a **classed `cli` warning** (#8) naming the *specific* footgun — leaving the
+      sourced prior voids the coverage oracle, and a vague/"non-informative" SD prior *worsens* small-*k*
+      boundary bias (the half-*t* is weakly informative on purpose). **Slice 2 — HPDI credible intervals:** a
+      post-fit summary alternative to the default percentile; likely a new
+      `posterior_summary = c("percentile", "hpdi")` sub-choice *within* `ci_method = "posterior"` (ADR-time API
+      call), **default stays percentile**. Caveat to document: percentile is monotone-transformation invariant
+      and degrades gracefully as θ²→0; HPDI is neither, so it can misbehave at the variance boundary — this
+      package's core regime. HPDI is an *alternative for comparison*, not a strict upgrade being withheld.
+    - **(C) Still research / blocked** (no frequentist oracle — cannot ship as parity): incomplete **fixed**
+      nested (Designs 2/3 — needs the frequentist incomplete-fixed-nested estimand built first, the nested
+      sibling of the M9 `ICC(c,k)` divisor) and **cluster-level fixed** (ten Hove et al. 2022 flag the best
+      estimator for the incomplete/small-*k* corner as an open question → would schedule leaning on coverage
+      calibration, likely a Fable review). Also parked, low priority: **selectable** `posterior` coupling
+      (MC/bootstrap on a Bayesian fit).
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
