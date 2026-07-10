@@ -24,7 +24,7 @@ Ark).
 
 ## Parking lot (unscheduled proposals)
 
-Each item now carries a **Status** line — reviewed 2026-07-08 — so readiness is
+Each item now carries a **Status** line — last reviewed 2026-07-09 — so readiness is
 visible without re-deriving it. Updated whenever an item's readiness changes;
 `STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
 ready ones.
@@ -38,8 +38,10 @@ bootstrap, fixed-rater (Case-3A θ²_r), and incomplete/FIML (**M21**, ADR-031).
 complete: every 🔵 not-yet gap in `COVERAGE.md` is closed.** Those items live as *Deferred out of
 M<n>* lines in [`MILESTONES.md`](MILESTONES.md), not here. Two items were reclassified **into**
 this parking lot instead of milestoned (see below): *multilevel SEM* and *lavaan + within-cell
-replicates*. Two M20 corners degraded/deferred to the parking lot below: the *occasion-averaged
-coefficient on ragged replicates* (🟣 research) and *`d_study()` projection off a replicate fit*.
+replicates*. Of two M20 corners sent to the parking lot below, the *occasion-averaged coefficient on ragged
+replicates* stays 🟣 research; the *`d_study()` projection off a replicate fit* was then largely
+resolved — its rater-count form **shipped as M22 (ADR-032)**, leaving only occasion/ragged projection
+parked.
 
 **Shipped as M17 (PR #22, ADR-026):** the *conflated single-level ICC (Eq. 14)*, a
 *multilevel `d_study()`*, and *within-cell replicates* shipped as milestone M17 (see
@@ -146,11 +148,14 @@ helpers* item below (sample-size / CI-width), where it belongs.
   guessed divisor (#1/#4). Needs a simulation-oracle study (likely a Fable review, #19) — the
   replicate sibling of the M9 ragged `ICC(c,k)` divisor question. The single-occasion ragged family
   ships (M20 Slice 3).
-- **`d_study()` projection off a within-cell replicate fit** — a rater- (or occasion-) count
-  projection off a replicate fit. **Status: 🔵 not yet (M20).** Needs the per-component error
-  divisors threaded into the projection estimand (the interaction divides by raters, pure error by
-  raters × occasions); `d_study()` currently refuses loudly on replicate fits rather than silently
-  drop the interaction. Schedulable once the projection estimand carries `error_divisors`.
+- **`d_study()` occasion-count and ragged-replicate projection** — the **rater-count** projection off
+  a within-cell replicate fit **shipped as M22** (PR #27, ADR-032; the per-component `error_divisors`
+  thread the interaction ÷ `m` and pure error ÷ `m·n_o`, one curve per occasion setting). What **remains
+  parked** are the two corners M22 deferred: projecting the **occasion** count `n_o` itself, and
+  projecting off a **ragged** replicate fit. **Status: 🔵 not yet.** Occasion projection needs an
+  occasion axis added to the projection estimand; ragged-replicate projection is additionally bounded by
+  the unresolved effective-`n_o` divisor (the *occasion-averaged coefficient on ragged replicates* 🟣
+  item above).
 - **Bayesian engine** (`brms`) behind `Suggests`, with a new `ci_method = "posterior"`
   (credible intervals from native posterior draws) and half-*t* hyperpriors (ten Hove,
   Jorgensen & van der Ark 2020). Deferred out of M7 (ADR-014). **Status: the two-way random
