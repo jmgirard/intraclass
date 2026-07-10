@@ -2939,3 +2939,133 @@ consequences → references.
   Scope note: the fully-Bayesian hierarchical-shrinkage alternative stays parked (own future ADR); this
   amendment implements the frequentist analog of the ADR-037 (M27) Bayesian resolution, now unified so one
   construction is correct in both the crossed (b≈0) and nested (b material) regimes.
+
+## ADR-039: M29 scope — Bayesian engine (brms) conflated diagnostic + within-cell replicates, two-way random, balanced/complete
+- Date: 2026-07-10
+- Status: accepted
+- Context: The Bayesian arc M23→M28 (ADR-033–038, PRs #28–#33) took `engine = "brms"` +
+  `ci_method = "posterior"` from the two-way random path through every design at the subject level
+  (two-way random/fixed, one-way, all multilevel crossed + nested, random and fixed) on
+  **balanced/complete** data, and resolved the finite-population θ² interval question (the 2b moment
+  correction, unified across all engines in M28). No milestone is in flight. After a short retro the
+  maintainer chose to **continue the Bayesian arc** with its two lowest-risk remaining parity
+  follow-ons — the **conflated** diagnostic (`level = "conflated"`, ten Hove Eq. 14) and **within-cell
+  replicates** (σ²_res → σ²_sr + σ²_e) — deferring Bayesian **incomplete/ragged** to its own later
+  milestone (M30) where its coverage-calibration risk is isolated. This ADR opens **M29**.
+  **Engine/interval parity, not new estimand work** (cf. M5.5/M7/M16/M21/M23–M27): the estimands are the
+  *shipped* conflated (M17 Slice 1, ADR-026) and within-cell-replicate (M17 Slice 3, ADR-026)
+  coefficients, now read off posterior draws — no new estimand-spec, no new user-facing argument, no new
+  dependency (`brms` already a `Suggests`); additive, non-breaking (#6): new valid `engine = "brms"` ×
+  {conflated, replicates} combinations only. Both are two-way **random**, balanced/complete, single
+  level. Crucially, both are **ratios of variance components** (like the whole random-rater Bayesian
+  arc), so neither exposes the θ² finite-population functional that forced the M27/M28 2b moment
+  correction — a clean posterior push-forward, the lowest-drama Bayesian milestone available. The
+  maintainer chose **both slices in one milestone** (the M25/M26 precedent), ordered by oracle-risk
+  (conflated first).
+- Decision:
+  - **Scope: two-way random, balanced/complete, single level.** Slice 1 — **Bayesian conflated**
+    (`engine = "brms"`, `level = "conflated"`, `type = "agreement"`, `unit` ∈ {single, average}). Slice 2
+    — **Bayesian within-cell replicates** (`engine = "brms"`, replicated data inferred, `raters =
+    "random"`, `type` ∈ {agreement, consistency}, `occasions` ∈ {single, average}, `unit` ∈ {single,
+    average}). Bayesian **incomplete/ragged** (M30), **fixed × replicates** and **multilevel ×
+    replicates** brms (mirror the M20 frequentist deferrals), **conflated × consistency** (🟣 research,
+    unsourced), and numeric-unit (D-study) Bayesian projection all stay deferred (scope-outs below).
+  - **Slice 1 — conflated: no new fit.** `level = "conflated"` reads Eq. 14 off the *already-shipped*
+    M24 `fit_brms_multilevel()` five-component draws (`icc.R:1238`) — the **flat two-way ICC** off the
+    multilevel fit: signal = σ²_c + σ²_{s:c} lumped, error = σ²_r + σ²_cr + σ²_res lumped, with the same
+    flat `k_eff`; **agreement-only** (Eq. 14 treats the rater effect as a variance component; a
+    consistency or fixed-rater conflated form is not defined by the source — COVERAGE §④). Computed
+    **per posterior draw** through the same push-forward the frequentist M17 Slice 1 / M18 Slice 2 use.
+    The shipped brms conflated refusal (`icc.R:598–604`) is **narrowed** to admit `level = "conflated"`
+    and route to the multilevel fit; the diagnostic-only "biased, never recommended" posture
+    (`M17-conflated-icc.md §4`) is preserved verbatim.
+  - **Slice 2 — within-cell replicates: one new fit function.** `fit_brms_replicates()` in
+    `R/engine-brms.R`, reusing `fit_brms_common()`: `score ~ 1 + rater + (1 | subject) + (1 |
+    subject:rater)` under the SAME sourced half-*t*(4, 0, 1) SD prior (unchanged from M23–M27; the prior
+    now covers the σ_sr interaction SD too, as it applies to every random-effect SD). Components map to
+    the M17 internal names: `subject` (σ²_s), `rater` (σ²_r), `interaction` (σ²_sr) ←
+    `sd_subject:rater__Intercept`, `residual`/pure error (σ²_e) ← `sigma`. The `occasions` knob applies
+    the shipped M17 **per-component error divisors** (`M17-within-cell-replicates.md §2`) **per draw**:
+    `occasions = "single"` reports the single-rating reliability; `occasions = "average"` divides the
+    pure-error component by `n_o` (the interaction σ²_sr is NOT divided — it is shared across the
+    replicates of a cell), reporting the reliability of the replicate mean. The shipped brms replicate
+    refusal (`icc.R:1124`) is **narrowed** and a dispatch branch added alongside `fit_brms_twoway()`
+    (`icc.R:1304`).
+  - **Point/interval/dispatch unchanged from M23–M27.** MAP = `posterior_mode()` of each estimand's
+    ICC-draw vector; percentile **credible** interval; `posterior` forced-default & Bayesian-only. No new
+    field beyond the shipped `draws` contract; the shared `icc_point()`/`mc_ci()` path stays untouched
+    for the other engines. Both slices are random-rater **ratios of variance components** — no θ²
+    finite-population functional, so the M27/M28 2b moment correction does **not** apply (a clean
+    push-forward; `tr(C·Σ) ≈ 0` is not even in play). The k = 2 soft note and the balance/numeric-unit
+    brms refusals stay.
+  - **Two thin vertical slices** (#14/#15), oracle-risk order:
+    - **Slice 1 — Bayesian conflated + its coverage oracle.** Conflated ICC off the M24 multilevel
+      draws; MAP + percentile credible interval; the shipped conflated-diagnostic guards reached before
+      dispatch. A companion generator `data-raw/oracle-bayesian-conflated.R` runs the M17/M5 crossed DGP
+      with brms + the half-*t* prior and **commits the reference fixture**
+      `tests/testthat/fixtures/bayesian-conflated-oracle.rds` (#4). Oracle O-Bayes-Conflated.
+    - **Slice 2 — Bayesian within-cell replicates + its oracle.** `fit_brms_replicates()`; the
+      σ²_sr/σ²_e split; `occasions` single/average per-draw divisors; agreement/consistency, single/
+      average. Companion generator `data-raw/oracle-bayesian-replicates.R` commits
+      `tests/testthat/fixtures/bayesian-replicates-oracle.rds` (#4). Oracle O-Bayes-Rep.
+  - **Oracles (#1 — reduction + REML agreement + coverage; M23–M27 precedent, no textbook worked
+    posterior value):**
+    - **O-Bayes-Conflated** — the Eq-14 identity holds per draw (the conflated ICC composes from the
+      five components exactly as `M17-conflated-icc.md §2` specifies); MAP ≈ the frequentist **M17/M18
+      glmmTMB** conflated ICC within a stated tolerance (glmmTMB the independent oracle) — **containment**
+      of the glmmTMB conflated point in the credible interval, not pointwise equality (the prior-vs-flat
+      gap, the M26 O-Bayes-Fixed posture); the conflated stays **visibly biased vs. the subject level**
+      (the diagnostic's whole point, `§4`); seeded coverage ~nominal off the committed fixture;
+      convergence rate from `brms_convergence()`.
+    - **O-Bayes-Rep** — reduction: `occasions = "average"` MAP ≈ the **M17 glmmTMB/lme4** replicate
+      coefficients on the same data (the occasion-averaged coefficient == the two-way ICC on cell means,
+      `M17-within-cell-replicates.md §6`); MAP ≈ glmmTMB single-occasion within tolerance (containment,
+      not equality); seeded coverage ~nominal off the committed fixture.
+  - **CI test-gating (DoD), unchanged posture from M23–M27:** coverage/reduction oracles run off the
+    **committed seeded reference** (#4); a **single live `brms` fit** per slice (tiny `chains`/`iter`)
+    exercises the wiring, guarded `skip_on_cran()` + `skip_if_not_installed("brms")` + `skip_on_ci()`
+    ([[brms-live-fit-skip-on-ci]]); reduced draws in tests. Coverage stays ~85% by design — the new fit
+    wrapper is live-only ([[coverage-baseline]]); consented up front.
+  - **No new estimand, estimand-spec file, user-facing argument, or dependency.** New engine code
+    (`fit_brms_replicates()` in `R/engine-brms.R`; conflated reads the existing multilevel fit), two
+    narrowed brms guards + one new dispatch branch in `R/icc.R`, and the committed oracle generators +
+    fixtures. Conflated reuses `M17-conflated-icc.md`; replicates reuse `M17-within-cell-replicates.md`
+    — no new spec.
+  - **Scope-outs (preserved, not rediscovered):** Bayesian **incomplete/ragged** (M9/M19 analog — its
+    own milestone M30; per ten Hove 2022 the incomplete/small-k estimator choice is an open research
+    question, so it leans on coverage calibration and likely a gated Fable review, #19); Bayesian
+    **fixed-rater × replicates** and **multilevel × replicates** (the M20 Slice 1/2 frequentist
+    deferrals' Bayesian siblings); **conflated × consistency** and **conflated × fixed** (🟣 research /
+    ⚫ by design — unsourced / undefined, COVERAGE §④); Bayesian **numeric-unit `d_study()`** projection;
+    plus the M23 carry-overs — **rstanarm** backend, **selectable** `posterior` coupling (MC/bootstrap on
+    a Bayesian fit), **HPDI** intervals, and a **user-exposed `prior=`** API. All stay in `ROADMAP.md`.
+- Consequences: On M29 close, `engine = "brms"` covers the conflated diagnostic and within-cell
+  replicates alongside the two-way/one-way/multilevel random and fixed paths already shipped — leaving
+  Bayesian incomplete/ragged (M30) and the ⚫/🟣/infra carry-overs as the only remaining brms gaps. Both
+  slices are low risk: Slice 1 adds **no new fit** (it re-reads shipped M24 draws), and Slice 2 is a
+  single new fit shape with a **textbook reduction oracle** (occasion-averaged == cell-means two-way).
+  Neither exposes the θ² functional, so the milestone carries **no Fable-review risk** — a deliberate
+  low-drama choice after two consecutive Fable-review milestones (M27/M28). It extends the oracle
+  inversion (the Bayesian engine cross-checks the conflated and replicate coefficients; the M17 REML
+  fits are its independent oracles) and adds a live-fit CI cost bounded by committed-reference +
+  single-live-fit gating (no new dependency). This ADR authorizes M29 code; the `MILESTONES.md` M29
+  board and the `STATUS.md` flip are the milestone-start companions (M29 is opened/scoped here but **no
+  slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + REML agreement + coverage + convergence),
+  #2/#14/#15 (name the estimand / thin vertical slices; oracle-risk ordering — conflated first), #3
+  (boundary-aware — the half-*t* prior; `posterior_mode()` on [0, Inf) components / [0, 1] ICCs), #4
+  (committed seeded reference; no tuning to oracle), #5/#8 (classed brms refusals for
+  incomplete/fixed-replicate/conflated-consistency; `cli` notes; the conflated "never recommended"
+  posture), #6 (additive, non-breaking — new engine×design combinations), #12 (sourced prior; sourced
+  estimands), #16 (tracking in-commit), #18 (report the run — containment, not asserted equality, under
+  the differing priors); ten Hove, Jorgensen & van der Ark (2022) Eq. 14 (conflated single-level ICC),
+  Eqs. 8–11 (the five-component crossed fit conflated reads from); ten Hove, Jorgensen & van der Ark
+  (2020) §3.3/§4.1 (half-*t*(4,0,1) on SDs; DGP), §4.2 (MAP/percentile; MCMC ≈ MLE), OSF `shkqm`;
+  estimand-specs `M17-conflated-icc.md` (conflated estimand — §2 composition, §4 never-recommended, §6
+  out-of-scope — no new spec) and `M17-within-cell-replicates.md` (replicate estimand — §2 per-component
+  divisors, §3 `occasions`, §6 reduction oracle — no new spec); ADR-026 (M17 — the two estimands being
+  given a Bayesian engine), ADR-033 (M23 Bayesian engine — the seam extended), ADR-034/035 (M24/M25
+  multilevel — the conflated fit + guard-narrowing precedent), ADR-036 (M26 — single-level parity,
+  containment-not-equality oracle posture), ADR-037/038 (M27/M28 — the θ² 2b moment correction, N/A here
+  as both slices are variance-ratio push-forwards), ADR-002 (optional engines behind `Suggests`);
+  `project/ROADMAP.md` (Bayesian conflated/replicate follow-ons being promoted), `project/COVERAGE.md`.
