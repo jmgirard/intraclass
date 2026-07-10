@@ -130,7 +130,12 @@ simulations.
   design (`model = "oneway"` — `ICC(1)`/`ICC(1,k)`) and **fixed** raters
   (`raters = "fixed"` — the McGraw & Wong finite-population read
   directly from the posterior of the rater effects), both balanced and
-  complete.
+  complete. Fixed raters are also supported at the **multilevel**
+  subject level, balanced — the crossed Design 1 and the nested Design 2
+  — with / read per posterior draw and moment-corrected so the credible
+  interval covers the fixed-population coefficient (a bias correction
+  that matters when each cluster’s raters are estimated from few
+  subjects, and is boundary-aware at zero rater variance).
 
 ### Choosing, projecting, and visualizing
 
