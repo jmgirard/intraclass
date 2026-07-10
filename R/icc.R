@@ -222,13 +222,13 @@
 #'   (Design 1) **multilevel** random design (subject and cluster levels), the
 #'   two-way **fixed-rater** single-level design (Case-3A finite-population
 #'   \eqn{\theta^2_r}), the crossed (Design 1) multilevel **fixed-rater** design (subject
-#'   level), and the nested **Design 2** (raters nested in clusters) *random* multilevel
-#'   design (subject level); and, on balanced/complete data only, the one-way random design,
-#'   the nested Design 2 *fixed-rater* and Design 3 (raters nested in subjects,
-#'   agreement-only) multilevel designs at the subject level, the conflated diagnostic, and
-#'   within-cell replicates. Incomplete/ragged nested **Design 3** and **fixed**-nested
-#'   Bayesian fits, and numeric-`unit` (D-study) projection, are planned for later milestones.
-#'   `"lme4"` requires the
+#'   level), and the nested **Design 2** (raters nested in clusters) and **Design 3** (raters
+#'   nested in subjects, the multilevel one-way, agreement-only) *random* multilevel designs
+#'   (subject level); and, on balanced/complete data only, the single-level one-way random
+#'   design, the nested Design 2 *fixed-rater* multilevel design at the subject level, the
+#'   conflated diagnostic, and within-cell replicates. Incomplete/ragged **fixed**-nested and
+#'   single-level one-way Bayesian fits, and numeric-`unit` (D-study) projection, are planned
+#'   for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
 #' @param conf_level Confidence level for the interval (default `0.95`).
@@ -1144,27 +1144,24 @@ icc <- function(
       # single-level connectedness guard (~L887), and crossed-multilevel identifiability +
       # cluster-ICC(c,k)-dropped-with-note gates (~L903) are engine-agnostic and run
       # pre-dispatch, so they protect brms. M32 (ADR-042): incomplete/ragged NESTED RANDOM ships
-      # too -- Design 2 (raters nested in clusters, Slice 1, fit_brms_nested_clusters). Random
-      # raters make each ICC a ratio of variance components (no theta^2 functional), so this is a
-      # clean posterior push-forward -- the M30 regime, NOT the M31 fixed regime: the 2b moment
-      # correction never engages, and the shipped M25 nested fit runs unchanged on ragged data,
+      # too -- Design 2 (raters nested in clusters, Slice 1, fit_brms_nested_clusters) and Design 3
+      # (raters nested in subjects, the multilevel one-way, Slice 2, fit_brms_nested_subjects).
+      # Random raters make each ICC a ratio of variance components (no theta^2 functional), so this
+      # is a clean posterior push-forward -- the M30 regime, NOT the M31 fixed regime: the 2b moment
+      # correction never engages, and the shipped M25 nested fits run unchanged on ragged data,
       # protected by the same engine-agnostic pre-dispatch k_eff/connectedness above. The
-      # still-deferred incomplete corners are refused with a case-naming message (#5/#8): NESTED
-      # Design 3 (raters nested in subjects, the M32 Slice 2 follow-on), one-way, and replicates.
+      # still-deferred incomplete corners are refused with a case-naming message (#5/#8): SINGLE-LEVEL
+      # one-way (model = "oneway"; the multilevel one-way is Design 3, now supported) and replicates.
       # (Incomplete fixed-NESTED is refused engine-agnostically upstream ~L685/L651 -- it has no
       # frequentist oracle, deferred all engines, ADR-029/ADR-042 -- so only random nested reaches
-      # here; the `ml_design == "nested_in_subjects"` clause below is the brms catch for Design 3.)
-      if (
-        oneway ||
-          replicates ||
-          (multilevel && ml_design == "nested_in_subjects")
-      ) {
+      # here.)
+      if (oneway || replicates) {
         abort_unsupported(c(
           "The {.pkg brms} engine supports incomplete/ragged data only for the \\
            two-way single-level (random or fixed), crossed (Design 1) multilevel \\
-           (random or fixed), and nested Design 2 (random) designs so far.",
-          i = "Incomplete Bayesian nested Design 3 (raters nested in subjects), \\
-               one-way, and replicate ICCs are planned for later milestones; use \\
+           (random or fixed), and nested Design 2/3 (random) designs so far.",
+          i = "Incomplete Bayesian single-level one-way ({.code model = \"oneway\"}) \\
+               and replicate ICCs are planned for later milestones; use \\
                {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for incomplete data."
         ))
       }

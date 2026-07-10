@@ -12,12 +12,14 @@ in [`../R/icc.R`](../R/icc.R), the per-milestone *Deferred out of M<n>* lists in
 and the estimand-specs. **Refresh this file whenever a milestone ships** (it drifts
 silently — no CI gate reads it, same hazard as `REFERENCES.md`). Last synced:
 **2026-07-10**, during **M32** (ADR-042, branch `m32-bayes-incomplete-nested`) — the Bayesian engine now
-fits **incomplete/ragged nested Design 2 (raters nested in clusters) random**-rater data at the subject
-level (`fit_brms_nested_clusters()` on ragged data, narrowing the one `!balanced` brms guard's nested
-clause); the shipped M3/M9 harmonic-mean `k_eff` + within-cluster connectedness run pre-dispatch, and —
-random raters being variance ratios — no θ² moment correction engages. O-Bayes-INML-clusters pins
-reduction (≡ M25 at balance) + committed ragged coverage + live glmmTMB M19 containment. Scoped
-**random-only**: incomplete *fixed* nested has no frequentist oracle (deferred all engines, ADR-029).
+fits **incomplete/ragged nested random**-rater data at the subject level for **both** nested designs:
+Design 2 (raters nested in clusters, Slice 1, `fit_brms_nested_clusters()`) and Design 3 (raters nested in
+subjects, the multilevel one-way, agreement-only, Slice 2, `fit_brms_nested_subjects()`) — narrowing the one
+`!balanced` brms guard's nested clause so the shipped M3/M9 harmonic-mean `k_eff` + connectedness /
+per-subject identifiability (pre-dispatch, engine-agnostic) thread through, and — random raters being
+variance ratios — no θ² moment correction engages. O-Bayes-INML-clusters / -subjects pin reduction (≡ M25 at
+balance) + committed ragged coverage + live glmmTMB M19 containment. Scoped **random-only**: incomplete
+*fixed* nested has no frequentist oracle (deferred all engines, ADR-029).
 Prior: **M30/M31** (ADR-040/041) — Bayesian incomplete/ragged crossed random then fixed; **M29** (ADR-039,
 branch `m29-bayes-conflated-replicates`) — Slice 1: the Bayesian
 **conflated** diagnostic (`engine = "brms"` + `level = "conflated"`) composes ten Hove Eq. 14 off the
@@ -65,7 +67,7 @@ validated effective-n_o divisor).
 | `occasions` | `single`, `average` | replicates only |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random (single-level, balanced **and incomplete/ragged**) **+ fixed** (single-level, balanced **and incomplete/ragged**) **+ one-way** (single-level, balanced) + multilevel subject level: crossed D1 random (balanced **and incomplete**; + cluster `ICC(c,1)`) & fixed (balanced **and incomplete**), nested D2 random (balanced **and incomplete/ragged**, M32) & fixed (balanced), nested D3 random (balanced, agreement-only) |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` = two-way random (single-level, balanced **and incomplete/ragged**) **+ fixed** (single-level, balanced **and incomplete/ragged**) **+ one-way** (single-level, balanced) + multilevel subject level: crossed D1 random (balanced **and incomplete**; + cluster `ICC(c,1)`) & fixed (balanced **and incomplete**), nested D2 random (balanced **and incomplete/ragged**, M32 S1) & fixed (balanced), nested D3 random (balanced **and incomplete/ragged**, M32 S2, agreement-only) |
 | `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | data balance | balanced / incomplete (ragged) | |

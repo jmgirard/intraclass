@@ -905,6 +905,61 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 
 ---
 
+### Oracle O-Bayes-INML-subjects — Bayesian incomplete/ragged nested Design 3 random (M32 Slice 2, ADR-042)
+
+- **Role:** the incomplete/ragged **nested** Design 3 (raters nested in subjects, the multilevel **one-way**,
+  agreement-only) **random** sibling of O-Bayes-INML-clusters (Design 2). `engine = "brms"` now fits
+  **incomplete/ragged nested Design-3 random** data at the subject level — the shipped M8/M25
+  `fit_brms_nested_subjects()` three-component fit run on ragged data unchanged, with the engine-agnostic
+  M3/M9 harmonic-mean `k_eff` divisor + the per-subject ≥ 2 raters identifiability gate (ADR-018, run
+  pre-dispatch) threaded per posterior draw. In Design 3 the rater main effect is **confounded into the
+  residual** (ten Hove 2022 p. 6), so there is no consistency coefficient and no cluster level. Random raters
+  → **variance-ratio push-forward**, no θ² functional, no 2b correction (the M30 regime). Scoped
+  **random-only** (fixed nested is not defined for Design 3 — no separable rater effect, ADR-029/ADR-042).
+- **Oracles (≥2 independent, #1):** **O-Bayes-INML-subjects** (committed reference, no Stan) — a **reduction
+  cell** (complete grid, k_eff = k) covers ~nominally (the shipped M25 Slice 2 behaviour), and a **ragged
+  cell** (fixed connected incidence, ~12% cells deleted, constant k_eff < 5) covers subject-level one-way
+  ICC(1) & ICC(k_eff) within Monte-Carlo error of the complete cell; **O-Bayes-INML-subjects-agree** (live
+  ragged fit) — the glmmTMB REML **M19** incomplete nested random point falls inside the brms credible
+  intervals (containment, not equality).
+- **Sources:** ten Hove et al. (2022) nested Design 3 three-component decomposition (Eq. 11, Table 3 right);
+  ten Hove et al. (2020) prior/recipe (the ragged extension is **not in the source**, so the independent
+  oracle for the ragged point is the shipped glmmTMB M19 estimator, ADR-029); estimand-spec
+  `M8-nested-multilevel.md` with `M9-incomplete-multilevel.md` / `M3-incomplete-designs.md` §6 (k_eff /
+  per-subject identifiability under imbalance — no new spec).
+- **DGP:** nested Design 3, N_c = 20 clusters, N_s = 5/cluster, k = 5 raters/subject (nested in subject),
+  σ²_c = 0.50 (nuisance — no cluster ICC), σ²_{s:c} = 1.00, σ²_r = 0.16 (confounded into residual),
+  σ²_res = 0.50; complete cell (k_eff = 5) and a fixed ragged incidence (440 of 500 cells kept,
+  k_eff = 4.29); pop subject one-way ICC(1) = s²_{s:c}/(s²_{s:c}+s²_r+s²_res), ICC(m) with the confounded
+  residual ÷ m.
+- **Committed reference (`tests/testthat/fixtures/bayesian-incomplete-nested-subjects-oracle.rds`; seed
+  32200, n_rep = 240, per-rep seeding):** per-cell convergence / subject one-way ICC(1)+ICC(k_eff) coverage /
+  subject MAP relative bias (pins qualitative, #4/#18). **Observed (n_rep 240):** complete — conv .98,
+  coverage **.9375/.9375**, MAP relbias ≈ 0; ragged (k_eff 4.29) — conv .98, coverage **.9417/.9417**, MAP
+  relbias −.007/−.002. Both cells sit within ~1 MC SE of nominal .95 and inside Fable's pre-registered
+  [.92, .975]; the ragged ≥ .88 pin passes comfortably (the n_rep-80 .8625 tail did not recur — same
+  incidence, now .9417). **The one unknown is resolved: ragged subject-level coverage is nominal** through
+  the k_eff divisor — a
+  random-rater variance-ratio push-forward (no 2b). **History (#18/#19):** the first committed run (n_rep 80)
+  drew a ragged cell of **.8625** — a ~.002 Monte-Carlo tail event that fired the ragged ≥ .88 pin and
+  triggered a **gated Fable review** (ADR-042 Amendment 2). Fable re-ran the SAME incidence at n = 240 →
+  **.9458** [Wilson .910–.968], four fresh incidences → **.9500**, and a **2,000-fit frequentist arm** on the
+  same incidence → **.9555** [.946–.964], with a **uniform PIT** (KS D = .028, p = .76 — the percentile
+  interval is calibrated) and posterior sd ≈ empirical sampling sd (Bernstein–von Mises regime). Verdict:
+  **no estimator shortfall**; the fixture was regenerated at n_rep = 240 with per-rep seeding (a pre-registered
+  precision upgrade, not tuning, #4) and the pins are UNCHANGED. Fable's frequentist arm (`fable-check-m32s2.R`)
+  also supplies the first committed **ragged nested Design-3 coverage** evidence for the glmmTMB M19 estimator
+  (M19 pinned point reductions only).
+- **Pins (#4/#18):** convergence ≥ .90 both cells; complete-cell subject ICC(1) & ICC(k) coverage ∈
+  [.90, .99] (reduction baseline); ragged subject coverage ≥ complete − .06 and ≥ .88 for both units; |subject
+  MAP relbias| < .10 (complete) / < .12 (ragged). Asserted in `test-icc-brms.R` **O-Bayes-INML-subjects**
+  (committed reference, on CI) + **O-Bayes-INML-subjects-agree** (live ragged fit, glmmTMB inside the CI,
+  subject level only, one-way labels; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-incomplete-nested-subjects.R` (seeded; drives the SHIPPED
+  `fit_brms_nested_subjects()` recipe; writes the fixture before the hard pins).
+
+---
+
 ## Bibliography
 
 - Brennan, R. L. (2001). *Generalizability Theory.* Springer.

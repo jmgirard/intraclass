@@ -1120,20 +1120,30 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         `data-raw/oracle-bayesian-incomplete-nested.R`. **Ragged coverage .925/.925 — NOMINAL** (tracks
         complete .95/.95 within MC error). Stale "incomplete nested D2 aborts" test swapped for the
         still-deferred Design 3 case. Full suite (CI mode) FAIL 0 / PASS 1162 / SKIP 15; `air`/`lintr` clean.
-  - [ ] **Slice 2 — incomplete nested Design 3 (raters nested in subjects, multilevel one-way,
-        agreement-only), subject level.** Narrow the same clause for `nested_in_subjects`;
-        `fit_brms_nested_subjects()` dispatches on ragged data. O-Bayes-INML-subjects: (a) reduction ≡ M25
-        Slice 2 at balance; (b) live `-agree` containment vs glmmTMB M19; (c) committed seeded ragged
-        coverage fixture.
-  - [ ] **The one unknown → risk gate.** Ragged-data coverage of the percentile credible interval through
-        `k_eff` for the nested designs. Working hypothesis (random → no 2b, the M30 regime): **nominal**.
-        **If** either coverage oracle undercovers → characterize honestly (#18) and **recommend a gated
-        Fable review, then stop** (#19); never auto-invoke.
-  - [ ] **Cross-cutting DoD** (brief §8): roxygen/`NEWS`/`COVERAGE.md`/`REFERENCES.md` updated in-commit
+  - [x] **Slice 2 — incomplete nested Design 3 (raters nested in subjects, multilevel one-way,
+        agreement-only), subject level — SHIPS (Fable-cleared).** Narrowed the guard's `nested_in_subjects`
+        clause so `fit_brms_nested_subjects()` dispatches ragged (verified end-to-end, glmmTMB 0.508 ∈ brms
+        CI); O-Bayes-INML-subjects built (complete cell .975/.975 NOMINAL; live `-agree` containment,
+        `skip_on_ci`). The n_rep-80 ragged cell drew **.8625** → gated Fable review (#19). **VERDICT (ADR-042
+        Amendment 2): no shortfall — a Monte-Carlo tail event (P ≈ .002), does NOT replicate.** Fable re-ran
+        the same incidence at n = 240 → **.9458**, four fresh incidences → **.9500**, a 2,000-fit frequentist
+        arm → **.9555**; PIT uniform (calibrated). Estimator needs **no correction**, design needs **no
+        deferral** → Slice 2 ships unchanged. Fixture **regenerated at n_rep = 240 + per-rep seeding**, every
+        pin kept as written (ragged ≥ .88 NOT loosened, #4). **Regenerated observed: complete .9375/.9375,
+        ragged .9417/.9417** (both ∈ Fable's pre-registered [.92, .975]; the .8625 tail did not recur — same
+        incidence now .9417). All O-Bayes-INML-subjects pins pass.
+  - [x] **The one unknown → risk gate — resolved.** Ragged-data coverage through `k_eff`: Slice 1 (Design 2)
+        **NOMINAL** (.925/.925, no gate). Slice 2 (Design 3): the n_rep-80 fixture fired the gate (.8625) →
+        gated Fable review (#19, never auto-invoked) → **verdict: tail event, no shortfall** (n=240 .9458,
+        freq .9555; ADR-042 Amendment 2). The mop-up hypothesis (random → no 2b → nominal) **held** for both
+        designs after the scare.
+  - [x] **Cross-cutting DoD** (brief §8): roxygen/`NEWS`/`COVERAGE.md`/`REFERENCES.md` updated in-commit
         (#16); `air format .` clean; `lintr::lint_package()` clean ([[run-lintr-before-push]]);
-        `R CMD check --as-cran` 0/0/{≤1}; installed-pkg both nested fits driven via `library(intraclass)`
-        with `NOT_CRAN=true` ([[verify-against-installed-package]]); full CI matrix green (9/9); merged via
-        PR to `main` ([[milestone-branches-and-prs]]).
+        **`R CMD check --as-cran` 0/0/0** (properly built with vignettes); **installed-pkg both nested fits
+        driven via `library(intraclass)` with `NOT_CRAN=true`** — ragged Design 2 (ICC(A,1) .585) + Design 3
+        (ICC(1) .636), both `ci = "posterior"` ([[verify-against-installed-package]]); **full suite (CI mode)
+        FAIL 0 / PASS 1175 / SKIP 16**. Remaining: full CI matrix green (9/9) + merged via PR to `main`
+        ([[milestone-branches-and-prs]]) — the PR-time gates.
 - Deferred out of M32 (record so not rediscovered): Bayesian incomplete **fixed** nested (Designs 2/3) —
   **no frequentist oracle** (deferred all engines, ADR-029, `icc.R:685`); it is *research*, needs the
   frequentist incomplete-fixed-nested estimand (k_eff × per-cluster θ²_{r:c}) built first — the nested
