@@ -145,8 +145,12 @@ simulations.
   subject×rater cell): the residual splits into the subject×rater
   interaction and pure error, and `occasions = "average"` reports the
   reliability of the replicate mean (pure error divided per posterior
-  draw by the replicate count) — single-level two-way random, balanced.
-  Finally, the Bayesian engine now fits **incomplete/ragged**
+  draw by the replicate count) — single-level two-way, random **or
+  fixed** raters (with fixed raters the rater slot carries the
+  finite-population read per posterior draw, equal to on balanced data),
+  and **multilevel** designs (crossed Design 1, six components; nested
+  Design 2, five components; random raters, subject level), all
+  balanced. Finally, the Bayesian engine now fits **incomplete/ragged**
   random-rater data (unequal or missing subject×rater cells) for the
   two-way single-level design and the crossed (Design 1) multilevel
   design (subject level, and the single-rater cluster `ICC(c,1)`; the
@@ -170,9 +174,12 @@ simulations.
   with the same harmonic-mean `k_eff` divisor + connectedness /
   per-subject identifiability gates the other engines use, and — random
   raters being ratios of variance components — need no moment
-  correction. Incomplete **fixed**-rater nested and incomplete
-  single-level one-way Bayesian fits remain planned for later
-  milestones.
+  correction. The Bayesian engine now also fits **incomplete/ragged
+  single-level one-way** data (`ICC(1)`/`ICC(1,k)`): the shipped one-way
+  fit is run on the observed ratings with the same harmonic-mean `k_eff`
+  divisor, a ratio of variance components needing no moment correction.
+  Incomplete **fixed**-rater nested and incomplete within-cell-replicate
+  Bayesian fits remain planned for later milestones.
 
 ### Choosing, projecting, and visualizing
 
