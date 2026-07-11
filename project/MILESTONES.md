@@ -60,6 +60,11 @@ interface/customization work, not new estimand (cf. M5.5/M7/M11/M16), with **red
 reproduce shipped M23+ bit-identically) and guardrails (a classed `intraclass_custom_prior` footgun warning;
 documented caveats) in place of a coverage claim — so **no Fable review**; the local `R CMD check` before the
 PR caught an over-aggressive `posterior_summary` guard + an undeclared `coda` (→ `Suggests`), both fixed.
+**M35 (ADR-045) — the vignette-reassessment milestone (docs: update stale claims, split `advanced.Rmd`, add
+Bayesian coverage) — is now in flight** (board below): a docs milestone (cf. M4/M13, no new estimand/engine/
+CI machinery/dependency) fixing five materially false "planned for later" claims, retiring the overloaded
+504-line `advanced.Rmd` into four focused articles (`multilevel-designs`, `engines`, `interval-methods`,
+`d-studies-and-replicates`), and documenting the M23–M34 Bayesian engine for the first time.
 Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
@@ -68,9 +73,9 @@ detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
-ADR-043 M33, ADR-044 M34).
-**No milestone is currently in flight** — M34 (ADR-044, the Bayesian customization milestone) shipped (PR #39,
-squash-merged to `main` at `3fc133c`); the next one needs an ADR after a short retro (founding brief §7).
+ADR-043 M33, ADR-044 M34, ADR-045 M35).
+**M35 (ADR-045, the vignette-reassessment docs milestone) is in flight** — opened after a short retro
+following M34's merge (PR #39, `3fc133c`). Its DoD checklist below is the live board (ADR-015).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1211,3 +1216,67 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   (explicit `"percentile"` off-brms should be a no-op; only `"hpdi"` needs the posterior path) and an
   undeclared `coda`, both fixed. `R CMD check --as-cran` 0/0/1; full suite (CI mode) 1227/0/21; installed-pkg
   both new paths driven.
+
+## M35: Vignette reassessment — update stale claims, split `advanced.Rmd`, add Bayesian coverage (ADR-045)
+- Goal: bring the pkgdown vignettes in line with the shipped feature set for the first time since M13. A
+  **docs milestone** — no new estimand, engine, fit, CI machinery, or dependency (cf. M4/M13); additive to the
+  docs surface, no code behavior change. Three problems, per the retro triage: (1) `advanced.Rmd` carries
+  **five materially false "planned for a later milestone" claims** (docs bugs misstating shipped behavior,
+  #18); (2) the entire **Bayesian engine (M23–M34)** is undocumented in every vignette; (3) the 504-line
+  `advanced.Rmd` is **overloaded**. Maintainer chose **Update + Split** (over update-only / full rewrite /
+  minimal patch). Correctness is the docs contract (cf. M4): every displayed number **computed live** at knit
+  time + numeric relationships **claim-tested** (`test-vignette-claims.R`, #1/#4/#12); no fabricated output
+  (#4). **No Fable review** (#19 — no coverage claim).
+- Reference: ADR-045 (scope + the article structure + the brms-chunk `eval=FALSE` decision). No estimand-spec
+  (docs — cf. M4/M13); no oracle registry entry (no numerical oracle). [[pkgdown-reference-index-new-exports]]
+  applies to new **articles** (they must join `_pkgdown.yml`); [[brms-live-fit-skip-on-ci]] is why brms
+  chunks can't run in CI (→ `eval=FALSE` illustrative + committed output).
+- Deferred out of M35 (record so not rediscovered): a **clarity/accessibility rewrite** of `getting-started` /
+  `choosing-an-icc` (the set-aside "Rewrite" option — those articles are already good); a
+  **benchmark-vs-prior-art** article and a **JOSS/software paper**; **live brms chunks** (blocked by the CI
+  Stan toolchain — revisit only under a precomputed-cache mechanism); the **CRAN upload** (out of band,
+  ADR-022); and every non-docs carryover — the **(C) research/blocked** brms corners (incomplete fixed
+  nested, cluster-level fixed), **categorical/ordinal GLMM**, **multilevel SEM**, the Wave-3 `ICC(c,k)`
+  incomplete divisor, occasion/ragged `d_study()` — all stay in [`ROADMAP.md`](ROADMAP.md).
+
+**DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
+
+*Slice 1 — stale-claim fixes (the docs bug; lands first):*
+- [ ] Fix the five false "planned for later" claims in `advanced.Rmd`: (1) incomplete fixed-rater multilevel
+      (≈L254 — shipped M18); (2) incomplete nested designs (≈L256–261 — M19/M32); (3) fixed-rater & multilevel
+      & ragged replicates (≈L318–320 — M20/M33); (4) lme4 fixed/multilevel (≈L380–381 — M14/M15); (5) lavaan
+      fixed-rater / incomplete-FIML (≈L427–429 — M21).
+- [ ] Re-audit every remaining "planned / later / not yet supported" phrasing across all three articles
+      against `COVERAGE.md`; correct any other stale statement found.
+- [ ] `test-vignette-claims.R` still green; any corrected numeric claim re-pinned live.
+
+*Slice 2 — the split (mechanical redistribution):*
+- [ ] Create `multilevel-designs.Rmd` (subject/cluster, conflated Eq.14, nested Designs 2/3, incomplete
+      crossed, fixed multilevel, multilevel D-study) from the `advanced.Rmd` multilevel block.
+- [ ] Create `engines.Rmd` (glmmTMB/lme4, lavaan) from the `advanced.Rmd` engine block — brms section added
+      in Slice 3.
+- [ ] Create `interval-methods.Rmd` (Monte-Carlo, bootstrap) from the `advanced.Rmd` CI-method block —
+      posterior/HPDI added in Slice 3.
+- [ ] Create `d-studies-and-replicates.Rmd` (rater-count D-study, within-cell replicates, `autoplot()`
+      visualizing) from the corresponding `advanced.Rmd` blocks.
+- [ ] Retire `advanced.Rmd`; fix all internal cross-links (single-article anchors → inter-article links);
+      add the four new articles to the `_pkgdown.yml` articles index (#6).
+- [ ] All moved live chunks still evaluate; `R CMD build` + pkgdown build clean; claim tests green.
+
+*Slice 3 — add the missing Bayesian coverage (new prose):*
+- [ ] `engines.Rmd`: brms (Bayesian) section — the half-*t*(4,0,1) prior, `engine = "brms"`, the M34
+      `prior=` override + `intraclass_custom_prior` footgun note; brms chunks `eval=FALSE` illustrative with
+      committed real output (#4).
+- [ ] `interval-methods.Rmd`: `ci_method = "posterior"` section — MAP + percentile/**HPDI**
+      (`posterior_summary`, M34); same `eval=FALSE` + committed-output treatment.
+- [ ] Verify the illustrative brms outputs against a local live run (spot-check, not claim-tested — can't run
+      in CI); note in each so a future editor knows to refresh on print-format changes.
+
+*Cross-cutting DoD:*
+- [ ] `_pkgdown.yml` articles index lists all articles; `pkgdown::check_pkgdown()` clean.
+- [ ] `R CMD check --as-cran` (built with vignettes) + full CI matrix green (9/9); `air` / `lintr` / spell
+      clean.
+- [ ] NEWS + `COVERAGE.md` (docs row) + this board updated in-commit (#16); PR opened on
+      `m35-vignette-reassessment`.
+- Status: **in flight** (opened this session; ADR-045). Branch `m35-vignette-reassessment`. No slice code yet
+  beyond this board (plan before code, #14).
