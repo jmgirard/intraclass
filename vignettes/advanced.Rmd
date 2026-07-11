@@ -250,15 +250,20 @@ On this balanced design the fixed-rater subject-level coefficients match the
 random-rater ones: **consistency** never uses the rater term, so it is identical either
 way, and **absolute agreement** coincides because the finite-population rater variance
 equals the random-sample estimate when the design is balanced. The two genuinely
-diverge only on incomplete data — which, for fixed-rater multilevel designs, is planned
-for a later milestone.
+diverge on **incomplete** data, where the rater variance is estimated from unequal cell
+counts — and the crossed (Design 1) fixed-rater multilevel design is supported on ragged
+data too, at the subject level, exactly as the single-level incomplete case above.
 
-Multilevel support currently covers **random** raters on: crossed designs (Design 1),
+Multilevel support now covers **random** raters on the crossed design (Design 1),
 complete or **incomplete**, at the subject level and — for `ICC(c,1)` — the cluster
-level; and nested designs (Designs 2 and 3, subject level), complete data. **Fixed**
-raters are supported for the complete crossed design at the subject level. The averaged
-cluster-level `ICC(c,k)` on incomplete data, incomplete nested designs, and incomplete
-or nested fixed-rater designs are planned for later milestones.
+level; and the nested designs (Designs 2 and 3, subject level), complete **or
+incomplete**. **Fixed** raters are supported at the subject level on the crossed design
+(complete **and** incomplete) and, on complete data, the nested Design 2. What remains
+open: the averaged cluster-level `ICC(c,k)` on incomplete data (the per-cluster
+effective-rater divisor is still being validated) and incomplete *fixed-rater nested*
+designs. Design 3 reports no fixed-rater or cluster-level coefficient by construction —
+with raters nested in subjects there is no separable rater effect to fix, and no
+crossed-cluster structure to support a cluster mean.
 
 ### How many raters? A multilevel D-study
 
@@ -315,9 +320,12 @@ into the residual. The **occasion-averaged** rows (`occasions = 3` here) give th
 reliability of a rater's *mean of three ratings*: averaging cuts pure error (but not
 the interaction), so those coefficients are higher.
 
-This slice covers balanced, complete replicated two-way **random**-rater designs.
-Ragged replicates, fixed raters, and multilevel replicates are planned for later
-milestones.
+Within-cell replicates extend beyond this balanced two-way random example: **fixed**
+raters (balanced), **multilevel** designs (crossed Design 1 and nested Design 2,
+balanced), and **ragged** replicates at a single occasion are all supported. What
+remains open is the occasion-*averaged* coefficient on ragged replicates — with unequal
+per-cell counts there is no single effective-occasion divisor with a validated oracle —
+along with the compound fixed-by-ragged and multilevel-by-ragged corners.
 
 ## Visualizing a fit
 
@@ -377,8 +385,9 @@ covariance supplied by the **merDeriv** package, transformed onto the same
 boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended default —
 it is the one required dependency and it is robust when a variance component sits
 exactly at the zero boundary, where the lme4 route cannot form an interval and
-directs you back to glmmTMB. lme4 for fixed-rater and multilevel designs is
-planned for a later milestone.
+directs you back to glmmTMB. lme4 otherwise has full design parity with glmmTMB — the
+fixed-rater and every multilevel design, on balanced **and** incomplete/ragged data —
+degrading to glmmTMB only at that variance boundary.
 
 ### A structural-equation engine (`lavaan`)
 
@@ -424,9 +433,10 @@ Which is "right"? Neither is wrong — they are two defensible estimators of the
 population quantity. Use `"glmmTMB"` (the default) if you want the mixed-model
 random-rater estimate and its wider, generalize-to-new-raters interval; reach for
 `"lavaan"` if you are working inside an SEM generalizability-theory workflow and want
-results comparable to that literature. The SEM engine currently covers the complete,
-balanced random two-way design; one-way, fixed-rater, multilevel, and incomplete
-designs are directed to the mixed-model engines.
+results comparable to that literature. The SEM engine covers the random **and
+fixed-rater** two-way design, on complete **and incomplete** (FIML) data — the
+parametric bootstrap is available on complete data, Monte-Carlo throughout. One-way and
+multilevel designs are still directed to the mixed-model engines.
 
 ## Choosing a confidence-interval method
 

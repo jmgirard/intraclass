@@ -1241,14 +1241,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 
 **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
 
-*Slice 1 — stale-claim fixes (the docs bug; lands first):*
-- [ ] Fix the five false "planned for later" claims in `advanced.Rmd`: (1) incomplete fixed-rater multilevel
-      (≈L254 — shipped M18); (2) incomplete nested designs (≈L256–261 — M19/M32); (3) fixed-rater & multilevel
-      & ragged replicates (≈L318–320 — M20/M33); (4) lme4 fixed/multilevel (≈L380–381 — M14/M15); (5) lavaan
-      fixed-rater / incomplete-FIML (≈L427–429 — M21).
-- [ ] Re-audit every remaining "planned / later / not yet supported" phrasing across all three articles
-      against `COVERAGE.md`; correct any other stale statement found.
-- [ ] `test-vignette-claims.R` still green; any corrected numeric claim re-pinned live.
+*Slice 1 — stale-claim fixes (the docs bug; lands first):* ✅ **done**
+- [x] Fix the five false "planned for later" claims in `advanced.Rmd`: (1) incomplete fixed-rater multilevel
+      (L249–255 — shipped M18); (2) incomplete nested designs (L256–264 — M19/M32); (3) fixed-rater & multilevel
+      & ragged replicates (L321–326 — M20/M33); (4) lme4 fixed/multilevel (L387–391 — M14/M15); (5) lavaan
+      fixed-rater / incomplete-FIML (L433–436 — M21). All corrected against `COVERAGE.md` current-support wording.
+- [x] Re-audit every remaining "planned / later / not yet supported" phrasing across all three articles
+      against `COVERAGE.md` — `grep` confirms no stale "planned/later milestone" phrasing remains; the one
+      surviving "not yet supported" (averaged cluster `ICC(c,k)` on incomplete data) is genuinely still
+      🟣 research (COVERAGE.md ④), left as-is. `getting-started` / `choosing-an-icc` had none.
+- [x] `test-vignette-claims.R` green (no failures); the five corrected claims are **capability** statements
+      (not numeric), so nothing to re-pin; `advanced.Rmd` renders cleanly end-to-end (live chunks unchanged).
 
 *Slice 2 — the split (mechanical redistribution):*
 - [ ] Create `multilevel-designs.Rmd` (subject/cluster, conflated Eq.14, nested Designs 2/3, incomplete

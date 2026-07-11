@@ -210,17 +210,18 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M35 Slice 1 — stale-claim fixes** (the docs bug; lands first). Correct the five false
-  "planned for a later milestone" statements in `advanced.Rmd` (≈L254 incomplete fixed multilevel → M18; L256–261
-  incomplete nested → M19/M32; L318–320 fixed/multilevel/ragged replicates → M20/M33; L380–381 lme4
-  fixed/multilevel → M14/M15; L427–429 lavaan fixed / incomplete-FIML → M21), then re-audit every remaining
-  "planned/later/not yet" phrasing across all three articles against `COVERAGE.md`, keeping
-  `test-vignette-claims.R` green. **Acceptance criteria:** no vignette statement misstates a shipped capability;
-  every corrected numeric claim stays live-computed + claim-tested; `R CMD build` + claim tests green.
-  **Principles it must honor:** #4 (no fabricated/false docs), #12/#1 (claim-tested live numbers), #18 (honest
-  reporting — these were docs bugs), #16 (board checked off in-commit), #17 (no scope creep into the split yet —
-  Slice 2). *Superseded active task (M34, done):* the next milestone needed an ADR after a short retro; that
-  retro + ADR-045 opened M35 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked** —
+- Active task: **M35 Slice 2 — the split** (next). Carve the 504-line `advanced.Rmd` into four focused
+  articles (`multilevel-designs`, `engines`, `interval-methods`, `d-studies-and-replicates`), wire
+  `_pkgdown.yml`, fix cross-links, retire `advanced.Rmd` — mechanical redistribution of existing prose/live
+  chunks, no new capability claims (brms sections come in Slice 3). **Slice 1 — stale-claim fixes — DONE**
+  (committed this session): the five false "planned for a later milestone" statements in `advanced.Rmd`
+  corrected against `COVERAGE.md` current-support wording (incomplete fixed multilevel → M18; incomplete nested
+  → M19/M32; fixed/multilevel/ragged replicates → M20/M33; lme4 fixed/multilevel → M14/M15; lavaan fixed /
+  incomplete-FIML → M21); a full re-audit (`grep` across all three articles) found no other stale "planned"
+  phrasing, and the one surviving "not yet supported" (averaged cluster `ICC(c,k)` incomplete) is genuinely
+  still 🟣 research; `test-vignette-claims.R` green; `advanced.Rmd` renders end-to-end. The corrected claims are
+  capability statements (not numeric), so nothing to re-pin. *Superseded active task (M34, done):* the next
+  milestone needed an ADR after a short retro; that retro + ADR-045 opened M35 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked** —
   incomplete **fixed** nested and **cluster-level fixed** (no frequentist oracle; would need a simulation-oracle
   study, likely a Fable review); also parked — **selectable `posterior` coupling** (MC/bootstrap on a Bayesian
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
@@ -267,8 +268,14 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **opened M35 (ADR-045): the vignette-reassessment docs
-  milestone.** After a short retro that triaged all three vignettes against the shipped feature set (finding
+- Updated: 2026-07-10 by main session (Opus) — **M35 Slice 1 (stale-claim fixes) DONE.** Corrected the five
+  false "planned for a later milestone" claims in `advanced.Rmd` against `COVERAGE.md` (incomplete fixed
+  multilevel → M18; incomplete nested → M19/M32; fixed/multilevel/ragged replicates → M20/M33; lme4
+  fixed/multilevel → M14/M15; lavaan fixed / incomplete-FIML → M21); re-audited all three articles (`grep`
+  clean of stale "planned/later" phrasing); `test-vignette-claims.R` green, `advanced.Rmd` renders end-to-end.
+  Board S1 items checked off; STATUS Active task advanced to Slice 2 (the split). Prior line: **opened M35
+  (ADR-045): the vignette-reassessment docs milestone.** After a short retro that triaged all three vignettes
+  against the shipped feature set (finding
   `advanced.Rmd` both stale — five false "planned for later" claims — and overloaded, and the entire Bayesian
   arc undocumented), the maintainer chose the parked vignette reassessment and confirmed the **Update + Split**
   shape and the four-article structure. This commit (on branch `m35-vignette-reassessment`) writes ADR-045,
