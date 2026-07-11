@@ -193,7 +193,10 @@ helpers* item below (sample-size / CI-width), where it belongs.
   parity mop-up — SHIPPED as M33** (ADR-043, PR #38): incomplete single-level one-way + fixed-rater &
   multilevel within-cell replicates, every oracle nominal (no Fable); its entry is removed here per ADR-015.
   The remaining sequence:
-    - **(B) Next up — one Bayesian-customization milestone, two slices**, theme "let users deviate from a
+    - **(B) — PROMOTED to M34 (ADR-044), in flight** (branch `m34-bayes-customization`; ADR-time API
+      decisions settled: Slice 1 = a dedicated top-level `prior=` arg, Slice 2 = `posterior_summary`
+      sub-choice). Scope preserved below until it ships (then removed per ADR-015). **One
+      Bayesian-customization milestone, two slices**, theme "let users deviate from a
       sourced default *with guardrails*." Override is **allowed** — the primary use case is
       prior-sensitivity / method-comparison / simulation studies, which need *arbitrary* priors, so a clean
       escape hatch, **not** a curated whitelist. The milestone's oracle is a **reduction oracle** (defaults
