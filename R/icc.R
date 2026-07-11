@@ -284,8 +284,9 @@
 #'   approaches the variance boundary, and ten Hove, Jorgensen & van der Ark (2020)
 #'   found percentile (not HPD) intervals give nominal coverage at small rater
 #'   counts; the HPDI is offered for comparison, not as a strict upgrade (no
-#'   coverage is claimed for it). Only applies to `ci_method = "posterior"`;
-#'   setting it for another interval method is an error.
+#'   coverage is claimed for it). Only the HPDI needs the posterior draws, so
+#'   `posterior_summary = "hpdi"` requires `ci_method = "posterior"`; the other
+#'   interval methods already report a percentile interval.
 #'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
@@ -344,9 +345,6 @@ icc <- function(
   # reassigns it, so the Bayesian forced-default coupling can tell an unset `ci_method`
   # (auto-upgrade to "posterior" for a brms fit) from an explicit mismatch (abort).
   ci_method_default <- missing(ci_method)
-  # Likewise for `posterior_summary` (M34 Slice 2, ADR-044): an EXPLICIT setting off the
-  # posterior path is a teaching abort, while the default is a silent no-op everywhere.
-  posterior_summary_default <- missing(posterior_summary)
 
   # Dimensions not yet implemented fail loudly and point at where they are coming
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
@@ -462,22 +460,23 @@ icc <- function(
   }
 
   # Posterior summary choice (M34 Slice 2, ADR-044): percentile (default) vs HPDI credible
-  # interval. It is meaningful ONLY for `ci_method = "posterior"` (the brms path produces the
-  # posterior draws both summaries reduce); setting it explicitly for another interval method
-  # is a teaching abort (#5/#8), mirroring the `brm_args`/`prior` coupling. `ci_method` is
-  # already final here (the Bayesian forced-default upgrade ran above).
+  # interval. Only the HPDI needs the posterior draws (the brms path); the mc/bootstrap
+  # methods already report a PERCENTILE interval, so an explicit "percentile" is harmless
+  # everywhere and only "hpdi" off the posterior path is meaningless -- a teaching abort
+  # (#5/#8). `ci_method` is already final here (the Bayesian forced-default upgrade ran above).
   posterior_summary <- validate_choice(
     posterior_summary,
     c("percentile", "hpdi"),
     "posterior_summary"
   )
-  if (!posterior_summary_default && ci_method != "posterior") {
+  if (posterior_summary == "hpdi" && ci_method != "posterior") {
     abort_unsupported(c(
-      "{.arg posterior_summary} only applies to {.code ci_method = \"posterior\"}.",
-      i = "It selects how the {.pkg brms} posterior draws are summarized (a percentile \\
-           or HPDI credible interval); {.code \"montecarlo\"} and {.code \"bootstrap\"} \\
-           do not produce posterior draws.",
-      i = "Drop {.arg posterior_summary} -- it defaults to {.val percentile}."
+      "{.code posterior_summary = \"hpdi\"} requires {.code ci_method = \"posterior\"}.",
+      i = "The HPDI is computed from the {.pkg brms} posterior draws; \\
+           {.code \"montecarlo\"} and {.code \"bootstrap\"} report a percentile interval \\
+           and produce no posterior to take an HPDI of.",
+      i = "Use {.code engine = \"brms\"} (which defaults to {.code ci_method = \\
+           \"posterior\"}), or drop {.arg posterior_summary}."
     ))
   }
 

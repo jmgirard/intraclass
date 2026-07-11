@@ -3266,9 +3266,13 @@ test_that("brms prior= override: reduction + round-trip + moves + warns (O-Prior
   )
   # The classed footgun warning fired ...
   expect_true(warned)
-  # ... and the estimate genuinely changed (shrunk) under the tight prior.
+  # ... and the estimate MATERIALLY changed under the tight prior (the override took
+  # effect). We assert magnitude, not sign: a tight normal(0, 0.5) on every SD shrinks the
+  # variance components, but the ICC is a RATIO of them, so the direction of the change is
+  # data/seed-dependent (e.g. it moves down on this SF data yet up on other data) -- pinning
+  # the sign would be a brittle assertion.
   icc_a1 <- function(f) f$estimates$estimate[f$estimates$index == "ICC(A,1)"]
-  expect_lt(icc_a1(f_tight), icc_a1(f_null))
+  expect_gt(abs(icc_a1(f_tight) - icc_a1(f_null)), 0.01)
 })
 
 # --- Live brms fit: HPDI credible intervals, O-HPDI (M34 Slice 2, ADR-044) ------

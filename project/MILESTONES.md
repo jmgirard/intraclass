@@ -1217,10 +1217,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         (unit, on CI); (c) HPDI same MAP point + width ≤ percentile (live); (d) classed guard. No coverage
         claim for HPDI (#4). Roxygen + NEWS + COVERAGE + REFERENCES in-commit (#16); `air`/`lintr`/spell clean;
         brms file 261/0/21.
-  - [ ] **Cross-cutting DoD (§8):** `?icc` documents both args + the footgun/HPDI caveats; installed-pkg check
-        (`NOT_CRAN=true`, not just `load_all`) drives both new paths; `lintr::lint_package()` + `air format`
-        clean; `R CMD check --as-cran` 0/0/{0,1}; full CI matrix green; ship on `m34-bayes-customization` via PR
-        to `main` ([[milestone-branches-and-prs]]).
+  - [x] **Cross-cutting DoD (§8):** `?icc` documents both args + the footgun/HPDI caveats; **installed-pkg
+        check DONE** (`NOT_CRAN=true`, not `load_all`) — both new paths driven through `library(intraclass)`
+        (prior= default ICC(A,1) .166 / tight .284 + warning; HPDI same MAP, narrower than percentile, `(HPDI)`
+        header; both guards `intraclass_unsupported`); `lintr`/`air`/spell clean; full suite (CI mode)
+        **1227/0/21**; **`R CMD check --as-cran` 0/0/1** (only "New submission"; the local check caught a
+        guard-vs-test mismatch — explicit `posterior_summary = "percentile"` off-brms should be a no-op, only
+        `"hpdi"` needs the posterior path — and an undeclared `coda` in the O-HPDI test; both fixed, `coda` →
+        `Suggests`). Remaining: full CI matrix green + ship on `m34-bayes-customization` via PR to `main`
+        ([[milestone-branches-and-prs]]).
 - Deferred out of M34 (record so not rediscovered): **selectable `posterior` coupling** (MC/bootstrap
   `ci_method` on a Bayesian fit — low-priority (B) tail, `ROADMAP.md`); **BCa / HDI-of-transform** and other
   credible-interval flavors beyond percentile/HPDI; **per-component / per-SD distinct priors** beyond the
@@ -1228,5 +1233,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `engine-brms.R:24`); the **(C) research/blocked** corners (incomplete fixed nested, cluster-level fixed —
   need a frequentist estimand first, ADR-029/042); **rstanarm** backend; the **vignette reassessment** (docs).
   All stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **active** (scoped by ADR-044; **no slice code yet** — plan before code, #14). Next: `/start-task`
-  Slice 1.
+- Status: **code-complete** (both slices + cross-cutting DoD; local gate green — full suite 1227/0/21,
+  `R CMD check --as-cran` 0/0/1). Awaiting go-ahead to push `m34-bayes-customization` + open the PR (the
+  outward step). Commits: ADR/board `d7dcaa0`, Slice 1 `90d69ad`, Slice 2 `c3a5a45`, gate reconcile (next).

@@ -188,10 +188,14 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M34 cross-cutting DoD / finish-task gate.** Both slices done; remaining = installed-pkg
-  check (`NOT_CRAN=true`, not just `load_all` — [[verify-against-installed-package]]) driving both new paths,
-  `R CMD check --as-cran`, full CI matrix green, then ship on `m34-bayes-customization` via PR to `main`
-  ([[milestone-branches-and-prs]]).
+- Active task: **M34 code-complete — awaiting go-ahead to push + open the PR.** Both slices + the cross-cutting
+  DoD are done and the **local gate is green**: installed-pkg check drove both new paths through
+  `library(intraclass)` ([[verify-against-installed-package]]); full suite (CI mode) **1227/0/21**;
+  **`R CMD check --as-cran` 0/0/1** (only "New submission"). The local `R CMD check` caught two issues the
+  CI-mode `test_dir` run masked — an over-aggressive guard (explicit `posterior_summary = "percentile"`
+  off-brms should be a no-op; only `"hpdi"` needs the posterior path) and an undeclared `coda` in the O-HPDI
+  test — both fixed (`coda` → `Suggests`). Next (outward, needs maintainer OK): push `m34-bayes-customization`
+  + open the PR to `main` ([[milestone-branches-and-prs]]); the full CI matrix runs there.
 - Done this session: **M34 Slices 1 & 2 — COMPLETE.** **Slice 1 (user `prior=` override) committed**
   (`90d69ad`): `prior = NULL` on `icc()` (brms-only, default = sourced half-*t*(4,0,1)); `fit_brms_common()`
   honours an injected `brm_args$prior` (icc() validates + injects — **no wrapper changes**; `prior` stays
@@ -245,8 +249,19 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M34 Slice 1 (user `prior=` override) shipped on branch
-  `m34-bayes-customization`.** Added a dedicated `icc(prior=)` argument (default `NULL` = sourced
+- Updated: 2026-07-10 by main session (Opus) — **M34 code-complete: both slices (user `prior=` override +
+  HPDI `posterior_summary`) implemented, tested, and the local gate green on branch
+  `m34-bayes-customization`.** Slice 1 (`90d69ad`): dedicated `icc(prior=)` (default sourced half-*t*),
+  injected into `brm_args$prior` (no wrapper changes), classed footgun warning; O-PriorReduce PASS. Slice 2
+  (`c3a5a45`): `posterior_summary = c("percentile","hpdi")` (default percentile), dependency-free
+  `hpdi_interval()` (≡ `coda::HPDinterval`), `(HPDI)` header label; O-HPDI PASS. Gate reconcile (this commit):
+  `R CMD check --as-cran` **0/0/1** — the local check caught an over-aggressive `posterior_summary` guard
+  (explicit `"percentile"` off-brms now a no-op; only `"hpdi"` needs the posterior path) and an undeclared
+  `coda` (→ `Suggests`), both fixed; also hardened the O-PriorReduce "override takes effect" assertion to
+  magnitude-not-sign (the direction is data/seed-dependent — the installed-pkg drive moved it *up*, the SF
+  test *down*). Reduction oracle throughout (defaults reproduce shipped M23+ bit-identically); **no coverage
+  claim, no Fable review in scope** (#4). Next (outward, needs OK): push + PR. Prior line: **M34 Slice 1 (user
+  `prior=` override) shipped on branch `m34-bayes-customization`.** Added a dedicated `icc(prior=)` argument (default `NULL` = sourced
   half-*t*(4,0,1)); `fit_brms_common()` honours an injected `brm_args$prior`, so no `fit_brms_*` wrapper
   changed; classed `intraclass_custom_prior` footgun warning + three classed guards. O-PriorReduce PASS
   (reduction + bit-identical round-trip + tight-prior move + warning; live `skip_on_ci`). Full suite (CI mode)

@@ -222,8 +222,9 @@ monotone-transformation invariant and degrades gracefully as the ICC
 approaches the variance boundary, and ten Hove, Jorgensen & van der Ark (2020)
 found percentile (not HPD) intervals give nominal coverage at small rater
 counts; the HPDI is offered for comparison, not as a strict upgrade (no
-coverage is claimed for it). Only applies to \code{ci_method = "posterior"};
-setting it for another interval method is an error.}
+coverage is claimed for it). Only the HPDI needs the posterior draws, so
+\code{posterior_summary = "hpdi"} requires \code{ci_method = "posterior"}; the other
+interval methods already report a percentile interval.}
 }
 \value{
 An \code{icc} object: a list with the estimate table, variance components,
