@@ -1203,6 +1203,61 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   (on CI where coda is present) + **O-HPDI** (live: reduction `expect_identical`, HPDI same MAP + no wider +
   `(HPDI)` header; `skip_on_ci`).
 
+### Oracle O-Bayes-FCL — Bayesian fixed-rater CLUSTER-level ICC, crossed Design 1, balanced (M38 Cell 1, ADR-048)
+
+- **Role:** the brms sibling of **O-FCL** (frequentist) and the cluster-level companion of **O-Bayes-FML**
+  (brms crossed fixed subject level). Engine/interval **parity, not new estimand work**: removing the
+  brms cluster-drop guard routes the cluster-level (σ²_c | {θ²_r, σ²_cr}, k) push-forward off the shipped M27
+  `fit_brms_multilevel_fixed()` five-component draws — no new fit, since `icc_estimand()` keys the cluster
+  error set on `level` not `raters` and the injected `rater` draw row is θ²_r.
+- **Why reduction, not coverage (the M34/M27 posture):** M37's Outcome A (on balanced data θ²_r = σ²_r and
+  σ²_cr is unbiased under fixing) makes this a **variance-ratio push-forward** with `b ≈ 0` — the brms fixed
+  cluster level reduces to the brms **random** cluster level (M24). So the oracle is (a) reduction + (b)
+  containment, with **no coverage claim and no Fable** (the risk is entirely in Cell 2's ragged 2b path).
+- **Oracles (#1):** **(a) reduction** — the brms fixed cluster-level ICC(A,1)/ICC(A,k) tracks the brms random
+  cluster level (M24) on the same seeded balanced crossed Design 1 (~20 clusters so σ²_c is identified) within
+  Monte-Carlo error; verified live |Δ|max **.0215** (tol .06). **(b) containment** — the glmmTMB M37 fixed
+  cluster point sits inside the brms credible interval for every cluster row (the engines differ only by the
+  prior, #18). Plus a fast CI-runnable guard: the INCOMPLETE fixed cluster level still aborts
+  (`intraclass_unsupported`) at the engine-agnostic balance gate, so the guard removal did not open the
+  deferred cell.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2022) Eq. 13 / Table 3 (cluster-level decomposition);
+  McGraw & Wong (1996) Case 3/3A. No new estimand-spec (references `M37-fixed-cluster-level.md`,
+  `M5-multilevel.md §3b`). No committed fixture (reduction + containment are live; `skip_on_ci`).
+- **Pins:** `test-icc-brms.R` — **O-Bayes-FCL** (live: both levels returned, containment, fixed≈random
+  reduction; `skip_on_ci`) + the fast incomplete-boundary guard (on CI).
+
+### Oracle O-Bayes-IFNML — Bayesian INCOMPLETE/ragged fixed-nested (Design 2) single-rater (M38 Cell 2, ADR-048)
+
+- **Role:** the brms sibling of the frequentist **O-IFNML** (M36) and the ragged sibling of **O-Bayes-FNML**
+  (balanced nested fixed). Removing the brms incomplete-fixed-nested guard lets `fit_brms_nested_fixed()`
+  (`score ~ 0 + rater + (1|cluster:subject)`) fit ragged data unchanged; `brms_theta2r_nested_draws()` →
+  `brms_theta2r_moment_draws()` reads a **per-cluster** k (nrow of each cluster's rater-mean matrix), so
+  unequal per-cluster counts k_c and the **2b-under-imbalance moment correction** (b ≠ 0) + boundary-aware
+  average-floor fall out per cluster with no new code. Subject level, single + average ICC_s (divisor = the
+  well-defined per-subject k_eff, the M19/M36 divisor — **not** the open per-cluster ICC(c,k), M9 §9).
+- **The milestone's genuine risk (#1/#18):** the 2b moment correction going **nested-brms for the first time**
+  on ragged data. The recovery is **NON-CIRCULAR**: θ²_{r:c} is a deterministic function of the fixed
+  per-cluster rater means, so the single-rater population value vsc/(vsc + θ² + vres) is fixed and its
+  credible-interval coverage is a genuine independent oracle.
+- **The gate (ADR-048):** nominal in [.90, .99] interior AND boundary (θ²=0) at BOTH cluster counts → Cell 2
+  ships; under-coverage would have been **STOP-and-replan** (no pin-loosening #4, no tuning, no Fable #19).
+- **DGP + committed reference (`tests/testthat/fixtures/bayesian-incomplete-fixed-nested-oracle.rds`;
+  base_seed 38200):** the M36 `sim_ragged_d2_fixed()` (cluster-unique fixed rater means scaled to an exact
+  per-cluster θ²; ~15% cells dropped; unequal k_c ∈ {3,4}; subjects with <2 ratings dropped), vsc=1.0,
+  vres=0.5, n_rep **240** ([[ragged-coverage-nrep-240]]). Compile-once + `update(recompile=FALSE)` over a
+  **4-cell grid** crossing {C_n 20, C_n 80} × {interior θ²=.30, boundary θ²=0}
+  ([[coverage-oracle-cluster-count-axis]] — the C_n=80 cell is the incidental-parameters probe). **Result:
+  NOMINAL — coverage .975 / .954 / .983 / .970**, |bias| ≤ .008; the C_n=80 boundary (.970) shows **no decay**,
+  so the per-cluster 2b correction does not suffer the M28-style collapse through the posterior. 7/240 fits at
+  C_n=80 errored and were discarded + counted (#18).
+- **Sources:** ten Hove et al. (2022) p. 6 (nested Design 2); McGraw & Wong (1996) Case 3A. Regenerate with
+  `data-raw/oracle-bayesian-incomplete-fixed-nested.R` (~960 live Stan refits; the fixture, not the sim, is
+  what CI checks — [[brms-live-fit-skip-on-ci]]). No new estimand-spec (references `M36-incomplete-fixed-nested.md`).
+- **Pins:** `test-icc-brms.R` — **O-Bayes-IFNML** (committed fixture: all four cells in [.90,.99] + the
+  C_n=80-boundary no-collapse pin + |bias|<.02 + n_fail<10%, fast/CI-runnable) + **O-Bayes-IFNML-agree** (live:
+  ragged fit end-to-end, glmmTMB M36 containment; `skip_on_ci`).
+
 ---
 
 ## Bibliography
