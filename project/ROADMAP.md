@@ -185,17 +185,18 @@ helpers* item below (sample-size / CI-width), where it belongs.
   (classed footgun warning) + HPDI credible intervals (`posterior_summary = c("percentile","hpdi")`); reduction
   oracles, no coverage claim, no Fable review; its detailed scope is removed here per ADR-015.
   The remaining sequence:
-    - **(C) research / blocked.** **Incomplete fixed nested Design 2, single-rater — PROMOTED to M36**
-      (ADR-046): a feasibility spike (2026-07-11) showed the ragged per-cluster Case-3A θ²_{r:c} recovers a
-      **non-circular finite-population truth** (ICC bias ≤ 1%, cross-engine ≤ 5e-5) with **nominal** coverage
-      interior (.964) and at the boundary θ²=0 (.960), so it ships as **parity, not open research** (frequentist
-      first; brms/lavaan siblings then unblockable). Detailed scope in [`MILESTONES.md`](MILESTONES.md), not
-      here (ADR-015). **Still parked / genuinely open:** the **averaged** nested-incomplete `ICC_s(·,k)`
-      divisor (🟣 research, M9 `ICC(c,k)` sibling); **Design 3 fixed** (⚫ by-design — multilevel one-way, no
-      separable rater effect); and **cluster-level fixed** (crossed or nested — ten Hove et al. 2022 flag the
-      best incomplete/small-*k* estimator as an open question; no scaffolding, would schedule leaning on
-      coverage calibration, likely a Fable review). Also parked, low priority: **selectable** `posterior`
-      coupling (MC/bootstrap on a Bayesian fit).
+    - **(C) research / blocked.** **Incomplete fixed nested Design 2 — SHIPPED as M36** (ADR-046, PR #41): the
+      ragged per-cluster Case-3A θ²_{r:c} (generalized to unequal k_c) for glmmTMB/lme4, subject level, **both
+      single and average** `ICC_s(·,k)` — pinned by a non-circular finite-population recovery oracle (no
+      Fable). The averaged coefficient's divisor turned out to be the well-defined subject-level `k_eff` (the
+      M19 random-nested divisor), **not** the open per-cluster `ICC(c,k)` divisor — so it shipped, not
+      deferred. Shipped detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015). **Still parked /
+      genuinely open:** **cluster-level fixed** raters (crossed or nested — ten Hove et al. 2022 flag the best
+      incomplete/small-*k* estimator as an open question; no scaffolding, would schedule leaning on coverage
+      calibration, likely a Fable review); **Design 3 fixed** (⚫ by-design — multilevel one-way, no separable
+      rater effect); the **brms/lavaan** incomplete-fixed-nested siblings (engine parity, now unblockable given
+      M36's frequentist oracle). Also parked, low priority: **selectable** `posterior` coupling (MC/bootstrap
+      on a Bayesian fit).
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,

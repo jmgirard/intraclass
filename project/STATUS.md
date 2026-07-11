@@ -1,22 +1,17 @@
 # Project status
 
-- Active milestone: **M36** (ADR-046, branch `m36-incomplete-fixed-nested`) — incomplete/ragged
-  **fixed-rater nested** (Design 2), subject level, single-rater `ICC_s(·,1)`: the first parked **(C)
-  research/blocked** corner, chosen this session after the maintainer picked direction (C) and asked whether a
-  simulation oracle could unblock it. A seeded **feasibility spike**
-  (`data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`) answered **yes** and showed it is **parity-shippable, not open research**: a
-  first-principles generalization of `theta2r_fixed_nested()` to unequal per-cluster k_c recovers a
-  **non-circular finite-population truth** (θ²_{r:c} is a deterministic function of the fixed rater effects) —
-  ICC(A,1) bias **+0.1%** (equal k_c, 25% cells missing) / **−1.0%** (unequal k_c ∈ {2..5}, 20% missing),
-  cross-engine glmmTMB↔lme4 **|ΔICC| ≤ 4.7e-5** — and the M28 **2b moment-corrected** MC interval,
-  generalized per-cluster, covers **nominally**: **.964 interior / .960 at the boundary θ²=0**, point-in-own-CI
-  1.00. So it pins by the standard multilevel oracle pattern (reduction + cross-engine + seeded recovery) that
-  shipped M9/M15/M19 without a Fable review; a Fable review stays **conditional-and-recommend-only** (#19) if
-  the committed n_rep≥240 boundary oracle undercovers. Single-rater only; averaged `ICC_s(·,k)` degrades to 🟣
-  research on its open `k_eff` divisor (M19 Slice 1 posture). Design 3 fixed ⚫ by-design; cluster-level fixed
-  deferred. **No slice code yet** — ADR + tracking-file open only (plan before code, #14). Next:
-  `/start-task` Slice 1.
-- Prior milestone: **none** — M35 shipped (PR #40, ADR-045; squash-merged to `main` at `d69f39e`). The
+- Active milestone: **none** — M36 (ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped
+  (PR #41, squash-merged to `main` at `f5a19e8`). It generalized the balanced M19 `theta2r_fixed_nested()` to
+  unequal per-cluster k_c (bit-identical on balanced), lifted the deferral for glmmTMB/lme4 (brms refused),
+  and shipped **both** single and average `ICC_s(·,k)` at the subject level — the averaged coefficient's
+  "attempt, else 🟣 research" clause **resolved to ship** (pinned by the exact single-cluster reduction to flat
+  M3; its divisor is the per-subject `k_eff`, the M19 random-nested divisor, **not** the open per-cluster
+  `ICC(c,k)` divisor — ADR-046/the board had conflated the two, #18). O-IFNML committed (non-circular
+  finite-population recovery; coverage interior .967 / boundary θ²=0 .942; no Fable). Feasibility spike
+  provenance: `data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`. **The next milestone needs an ADR
+  after a short retro** (founding brief §7); the remaining **(C)** corner is **cluster-level fixed** raters
+  (no scaffolding; ten-Hove open question).
+- Prior milestone: **M35** shipped (PR #40, ADR-045; squash-merged to `main` at `d69f39e`). The
   vignette-reassessment **docs** milestone: fixed five materially false "planned for a later milestone" claims
   in `advanced.Rmd` (M14/M15, M18, M19, M20/M33, M21 all shipped the "later" work), retired the overloaded
   504-line `advanced.Rmd` into four focused articles (`multilevel-designs`, `engines`, `interval-methods`,
@@ -225,25 +220,14 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M36 Slice 1** — ragged fixed-nested Design-2 single-rater estimator + O-IFNML oracle (the
-  DoD checklist in [`MILESTONES.md`](MILESTONES.md) is the live board). Generalize `theta2r_fixed_nested()` /
-  `theta2r_moment_draws()` to unequal per-cluster k_c (drop the equal-k guard; per-cluster center/raw/bias,
-  average-then-floor — balanced is the special case, O-FNML pins unmoved); lift the `!balanced` refusal on the
-  `raters = "fixed"` × `design = "nested_in_clusters"` path (reuse M9 `k_eff`/connectedness + `design` escape
-  hatch, pre-dispatch); subject-level agreement + consistency single-rater with the 2b boundary-aware MC
-  interval; lme4 path + singular→glmmTMB degrade; commit `data-raw/oracle-incomplete-fixed-nested.R` (spike
-  scripts are its seed) + fixture at n_rep≥240 (recovery + reductions to M19/M3 + cross-engine + coverage
-  interior/boundary). **Slice 1 code COMPLETE:** estimator generalized (bit-identical on balanced), guard
-  lifted (brms refused with a case-naming message), O-IFNML fixture committed (coverage interior .967 /
-  boundary θ²=0 .942, |bias|≤.018, reductions ~1e-16, cross-engine 2.6e-6 — all nominal, **no Fable**),
-  print/glance/docs/COVERAGE/NEWS/REFERENCES in-commit; affected suites green, `air`/`lintr` clean. **The
-  averaged `ICC_s(·,k)` SHIPPED** (the "attempt, else degrade" resolved to ship — pinned by the exact
-  single-cluster reduction to flat M3; its divisor is the per-subject `k_eff`, the M19 random-nested divisor,
-  NOT the open per-cluster `ICC(c,k)` divisor). **Local finish-task gate GREEN** (test 1483/0/0, check 0/0/0,
-  lint 0, format clean, installed-pkg driven). **Done (local) — pending PR CI + merge.** One open item: the
-  maintainer's call on keeping the averaged `ICC_s(·,k)` (ships) vs. restricting to single-rater. Superseded active task (M35, done): the next milestone needed an ADR
-  after a short retro; that retro + spike + ADR-046 opened M36 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
-  (incomplete fixed nested, cluster-level fixed — no frequentist oracle, likely a Fable review); **selectable
+- Active task: **none** — M36 shipped and merged (PR #41, `f5a19e8`). The next milestone needs an ADR after a
+  short retro (founding brief §7). *Superseded active task (M36, done):* incomplete/ragged fixed-rater nested
+  Design 2 — `theta2r_fixed_nested()` generalized to unequal per-cluster k_c (bit-identical on balanced),
+  guard narrowed to refuse brms only, both single + average `ICC_s(·,k)` shipped (average pinned by the exact
+  single-cluster reduction to flat M3), O-IFNML committed (coverage interior .967 / boundary θ²=0 .942, no
+  Fable); local gate + full PR CI matrix both green. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
+  (now just **cluster-level fixed** — no scaffolding, ten-Hove open question, likely a Fable review; the
+  incomplete-fixed-nested half shipped as M36); **selectable
   `posterior` coupling**; **categorical/ordinal GLMM** (needs an estimand pass); **multilevel SEM**; the Wave-3
   `ICC(c,k)` incomplete divisor; occasion/ragged `d_study()`; the set-aside **clarity/accessibility rewrite**
   of `getting-started` / `choosing-an-icc` (deferred out of M35); and the out-of-band **CRAN upload**
@@ -272,7 +256,14 @@
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
   upload** (ADR-022).
-- Last green CI: **PR #40 (M35) — full CI matrix green (9/9), squash-merged to `main` at `d69f39e`.**
+- Last green CI: **PR #41 (M36) — full CI matrix green (9/9), squash-merged to `main` at `f5a19e8`.**
+  format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
+  release·oldrel·**devel** all passed (no flakes, no re-runs — devel ran clean). Locally before the PR:
+  `devtools::test()` **1483 pass / 0 fail / 0 skip** (live brms Stan fits ran), `devtools::check()`
+  **0 errors / 0 warnings / 0 notes** (`--no-manual` to sidestep the local TinyTeX Courier PDF-manual
+  infra error, [[rcmdcheck-pdf-manual-courier]]); `air`/`lintr` (0 lints) clean; installed-pkg M36 path driven
+  through `library(intraclass)` (glmmTMB ragged fixed-nested ICC(A,1) .295 / ICC(A,k) .483; lme4 single .2946;
+  brms refused). Prior green: **PR #40 (M35) — full CI matrix green (9/9), squash-merged to `main` at `d69f39e`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed (no flakes, no re-runs — the devel job ran clean this time). Locally
   before the PR: `devtools::test()` **1471 pass / 0 fail / 0 skip** (the live brms Stan fits ran locally),
@@ -306,10 +297,10 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M36 (ADR-046) opened this session on branch `m36-incomplete-fixed-nested` — the
-  feasibility spike de-risked the one flagged unknown (ragged 2b-under-imbalance interval: nominal at the
-  boundary), so Slice 1 has no open blocker; the averaged-coefficient divisor is a *scoped-out* 🟣 research
-  degrade, not a blocker. M35 (ADR-045) shipped and merged (PR #40, `d69f39e`), full CI matrix green 9/9.
+- Blockers: **none.** M36 (ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped and merged
+  (PR #41, `f5a19e8`), full CI matrix green 9/9, no Fable review. The flagged risk (ragged 2b-under-imbalance
+  interval) resolved nominal in the committed O-IFNML oracle (boundary θ²=0 coverage .942). The next milestone
+  needs an ADR after a short retro (founding brief §7).
   Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
   (`.8625` at n_rep 80) went to a gated Fable review (#19) → **VERDICT: no shortfall, a Monte-Carlo tail
   event that does not replicate** (Fable re-ran the same incidence at n=240 → .9458; 2,000-fit frequentist
@@ -320,13 +311,18 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M36 Slice 1 done (local), finish-task gate green; pending PR.**
-  Incomplete/ragged fixed-rater nested Design 2 ships for glmmTMB/lme4 (`theta2r_fixed_nested()` generalized to
-  unequal per-cluster k_c — bit-identical on balanced; guard narrowed to refuse brms only); single + average
-  `ICC_s(·,k)` both ship (average pinned by exact single-cluster reduction to flat M3). O-IFNML committed
-  (coverage interior .967 / boundary θ²=0 .942, |bias|≤.018, reductions ~1e-16, cross-engine 2.6e-6 — no
-  Fable). Gate: test 1483/0/0, check 0/0/0, lint 0, `air` clean, installed-pkg driven. Tracking in-commit
-  (spec/COVERAGE/REFERENCES/NEWS/board). Next: open the PR. Prior line: **M36 opened (ADR-046):
+- Updated: 2026-07-11 by main session (Opus) — **M36 shipped (PR #41, squash-merged at `f5a19e8`); post-merge
+  `project/` reconcile.** This commit flips STATUS to M36-shipped, compresses the MILESTONES M36 board to the
+  summary form (preserving the "Deferred out of M36" list), advances the MILESTONES preamble (M36 no longer in
+  flight), sets "Last green CI" to the merge commit, and flips the ROADMAP (C) entry to "shipped as M36". The
+  whole milestone landed in one session on branch `m36-incomplete-fixed-nested` (retro + feasibility spike →
+  ADR-046 → Slice 1 → finish-task gate → PR #41); the full CI matrix went green 9/9 with no flakes (devel
+  clean). Incomplete/ragged fixed-rater nested Design 2 now ships for glmmTMB/lme4; both single + average
+  `ICC_s(·,k)` (average pinned by the exact single-cluster reduction to flat M3 — its divisor is the
+  subject-level `k_eff`, not the open per-cluster `ICC(c,k)` divisor); O-IFNML committed (non-circular
+  finite-population recovery, coverage interior .967 / boundary θ²=0 .942), no Fable review. Local `main`
+  fast-forwarded after the squash, merged branch deleted. Next: open the next milestone after a short retro —
+  the remaining (C) corner is cluster-level fixed (research/blocked). Prior line: **M36 opened (ADR-046):
   incomplete/ragged fixed-rater nested (Design 2) — the first (C) research/blocked corner, unblocked by a
   feasibility spike.** After
   the maintainer chose direction (C) and asked whether a simulation oracle could work, a seeded spike
@@ -541,15 +537,13 @@ closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M36 (ADR-046) Slice 1 is done (local) — open the PR from `m36-incomplete-fixed-nested`.** Incomplete/ragged
-fixed-rater nested Design 2 now ships for glmmTMB/lme4 (brms refused); single-rater **and** average
-`ICC_s(·,k)` both ship (average pinned by the exact single-cluster reduction to flat M3). O-IFNML committed
-(coverage interior .967 / boundary θ²=0 .942, |bias|≤.018, no Fable). Local gate green (test 1483/0/0, check
-0/0/0, lint 0, installed-pkg driven). **Next:** `gh pr create` → full CI matrix → merge → post-merge
-reconcile (set "Last green CI", flip the M36 Status to merged, compress the M36 board to summary form,
-ADR-015). One maintainer decision outstanding: keep the averaged `ICC_s(·,k)` (recommended — correct + pinned)
-or restrict to single-rater. After M36 merges, the remaining (C) corner is **cluster-level fixed** (still
-research/blocked — no scaffolding, ten-Hove open question).
+**No milestone is currently in flight — the next needs an ADR after a short retro (founding brief §7).** M36
+(ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped (PR #41, `f5a19e8`): the last frequentist
+completeness corner ADR-029 deferred now ships for glmmTMB/lme4 (both single + average `ICC_s(·,k)`; brms
+refused), with a non-circular finite-population recovery oracle (no Fable). Pick a direction from the parked
+candidates (below / `ROADMAP.md`), run a short retro, and open the next milestone with an ADR. The remaining
+**(C) research/blocked** corner is **cluster-level fixed** raters (no scaffolding; ten Hove flag the estimator
+itself as open — likely a Fable review if picked up).
 
 **Deferred / candidates —** With
 M34 the Bayesian arc's *parity* (M23–M33) and *customization* (M34) are both complete. Remaining brms work is
