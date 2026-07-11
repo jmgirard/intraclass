@@ -1311,10 +1311,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     - [x] Docs: roxygen `@details` corrected (the stale "nested designs still require balanced" note →
           nested fixed on balanced + incomplete); COVERAGE.md Design-2 fixed row + matrix updated; NEWS
           multilevel bullet extended. All tracking in-commit (#16).
-  - [ ] **Cross-cutting DoD (brief §8):** full CI matrix green; `R CMD check --as-cran` clean; `air`/`lintr`/
-        spell clean (local `air`/`lintr` on changed files clean; affected suites green); installed-pkg path
-        driven ([[verify-against-installed-package]]); coverage per [[coverage-baseline]];
-        `lintr::lint_package()` before push ([[run-lintr-before-push]]). **← the `/finish-task` gate.**
+  - [x] **Cross-cutting DoD (brief §8) — local gate GREEN:** `devtools::test()` **1483 pass / 0 fail / 0
+        skip** (live brms Stan fits ran); `devtools::check()` **0 errors / 0 warnings / 0 notes** (`--no-manual`
+        to sidestep the local TinyTeX Courier PDF-manual infra error, [[rcmdcheck-pdf-manual-courier]]; vignettes
+        build); `air format --check` clean; `lintr::lint_package()` **0 lints** ([[run-lintr-before-push]]);
+        installed-pkg M36 path driven through `library(intraclass)` ([[verify-against-installed-package]] —
+        glmmTMB ICC(A,1) .295/ICC(A,k) .483, lme4 single .2946, brms refused); coverage per [[coverage-baseline]]
+        (~88% by design, unenforced; new paths O-IFNML-covered). **Full CI matrix runs at the PR.**
 - Deferred out of M36 (record so not rediscovered): **cluster-level fixed** raters (the other (C)
   corner — no scaffolding, ten-Hove open question, its own later milestone); **Design 3 fixed** (⚫ by-design);
   **lavaan/brms** incomplete-fixed-nested (engine parity, later — M32 was random-only for the same
@@ -1323,8 +1326,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `k_eff`, which shipped); the untouched carryovers — **categorical/ordinal GLMM**, **multilevel SEM**,
   occasion/ragged `d_study()`, the CRAN upload — stay in [`ROADMAP.md`](ROADMAP.md). (The averaged
   subject-level `ICC_s(·,k)` was expected to possibly defer but **shipped** — see the board.)
-- Status: **Slice 1 code complete on branch `m36-incomplete-fixed-nested`** — estimator generalized, guard
-  lifted (brms refused), O-IFNML oracle committed (all cells nominal, no Fable), docs/COVERAGE/NEWS/REFERENCES
-  in-commit; affected suites green, `air`/`lintr` clean. **Averaged coefficient shipped** (pinned by exact
-  reduction). Remaining: the cross-cutting `/finish-task` gate (full suite + `R CMD check` + installed-pkg
-  drive) and the maintainer's call on keeping the averaged coefficient.
+- Status: **done (local) — pending PR CI + merge.** M36 is a single-slice milestone; Slice 1 + the
+  cross-cutting DoD are both checked. Local gate green (test 1483/0/0, check 0/0/0, lint 0, format clean,
+  installed-pkg driven). On branch `m36-incomplete-fixed-nested`. **Averaged coefficient shipped** (pinned by
+  the exact single-cluster reduction to flat M3). Open the PR; on green CI + merge, reconcile to
+  **merged, CI green** and compress this entry to the summary form (ADR-015). One open item for the
+  maintainer: confirm keeping the averaged `ICC_s(·,k)` (ships) vs. restricting to single-rater.

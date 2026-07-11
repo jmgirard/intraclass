@@ -239,8 +239,9 @@
   print/glance/docs/COVERAGE/NEWS/REFERENCES in-commit; affected suites green, `air`/`lintr` clean. **The
   averaged `ICC_s(·,k)` SHIPPED** (the "attempt, else degrade" resolved to ship — pinned by the exact
   single-cluster reduction to flat M3; its divisor is the per-subject `k_eff`, the M19 random-nested divisor,
-  NOT the open per-cluster `ICC(c,k)` divisor). Remaining: the `/finish-task` gate (full suite + `R CMD check`
-  + installed-pkg drive) and the maintainer's call on keeping the averaged coefficient. Superseded active task (M35, done): the next milestone needed an ADR
+  NOT the open per-cluster `ICC(c,k)` divisor). **Local finish-task gate GREEN** (test 1483/0/0, check 0/0/0,
+  lint 0, format clean, installed-pkg driven). **Done (local) — pending PR CI + merge.** One open item: the
+  maintainer's call on keeping the averaged `ICC_s(·,k)` (ships) vs. restricting to single-rater. Superseded active task (M35, done): the next milestone needed an ADR
   after a short retro; that retro + spike + ADR-046 opened M36 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
   (incomplete fixed nested, cluster-level fixed — no frequentist oracle, likely a Fable review); **selectable
   `posterior` coupling**; **categorical/ordinal GLMM** (needs an estimand pass); **multilevel SEM**; the Wave-3
@@ -319,8 +320,15 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M36 opened (ADR-046): incomplete/ragged fixed-rater nested
-  (Design 2), single-rater — the first (C) research/blocked corner, unblocked by a feasibility spike.** After
+- Updated: 2026-07-11 by main session (Opus) — **M36 Slice 1 done (local), finish-task gate green; pending PR.**
+  Incomplete/ragged fixed-rater nested Design 2 ships for glmmTMB/lme4 (`theta2r_fixed_nested()` generalized to
+  unequal per-cluster k_c — bit-identical on balanced; guard narrowed to refuse brms only); single + average
+  `ICC_s(·,k)` both ship (average pinned by exact single-cluster reduction to flat M3). O-IFNML committed
+  (coverage interior .967 / boundary θ²=0 .942, |bias|≤.018, reductions ~1e-16, cross-engine 2.6e-6 — no
+  Fable). Gate: test 1483/0/0, check 0/0/0, lint 0, `air` clean, installed-pkg driven. Tracking in-commit
+  (spec/COVERAGE/REFERENCES/NEWS/board). Next: open the PR. Prior line: **M36 opened (ADR-046):
+  incomplete/ragged fixed-rater nested (Design 2) — the first (C) research/blocked corner, unblocked by a
+  feasibility spike.** After
   the maintainer chose direction (C) and asked whether a simulation oracle could work, a seeded spike
   (`data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`) confirmed the ragged per-cluster Case-3A θ²_{r:c} recovers a non-circular
   finite-population truth (ICC bias ≤ 1%, cross-engine ≤ 5e-5) with nominal 2b interval coverage interior
@@ -533,14 +541,15 @@ closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M36 (ADR-046) is in flight — run `/start-task` for Slice 1.** The ADR + tracking files are open; the DoD
-checklist in [`MILESTONES.md`](MILESTONES.md) is the live board. Slice 1: generalize `theta2r_fixed_nested()`
-/ `theta2r_moment_draws()` to unequal per-cluster k_c, lift the `!balanced` refusal on the ragged
-fixed-nested path, ship single-rater `ICC_s(·,1)` with the 2b boundary-aware interval, and commit the
-O-IFNML oracle (`data-raw/oracle-incomplete-fixed-nested.R` seeded from the scratchpad spike, fixture at
-n_rep≥240). The feasibility spike already de-risked the estimand (recovery + coverage nominal, incl. the
-boundary); the committed oracle is the real gate, with a conditional Fable recommendation (#19) only on a
-shortfall. No slice code has begun (plan before code, #14).
+**M36 (ADR-046) Slice 1 is done (local) — open the PR from `m36-incomplete-fixed-nested`.** Incomplete/ragged
+fixed-rater nested Design 2 now ships for glmmTMB/lme4 (brms refused); single-rater **and** average
+`ICC_s(·,k)` both ship (average pinned by the exact single-cluster reduction to flat M3). O-IFNML committed
+(coverage interior .967 / boundary θ²=0 .942, |bias|≤.018, no Fable). Local gate green (test 1483/0/0, check
+0/0/0, lint 0, installed-pkg driven). **Next:** `gh pr create` → full CI matrix → merge → post-merge
+reconcile (set "Last green CI", flip the M36 Status to merged, compress the M36 board to summary form,
+ADR-015). One maintainer decision outstanding: keep the averaged `ICC_s(·,k)` (recommended — correct + pinned)
+or restrict to single-rater. After M36 merges, the remaining (C) corner is **cluster-level fixed** (still
+research/blocked — no scaffolding, ten-Hove open question).
 
 **Deferred / candidates —** With
 M34 the Bayesian arc's *parity* (M23–M33) and *customization* (M34) are both complete. Remaining brms work is
