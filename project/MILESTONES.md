@@ -75,13 +75,14 @@ ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-02
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37).
-**M37 (ADR-047) is in flight** — fixed-rater **cluster-level** multilevel ICC (crossed Design 1,
-balanced/complete), the last parked **(C) research/blocked** corner, planned on branch
-`m37-fixed-cluster-level`. Investigation split the ROADMAP's blanket "blocked" into a **parity-shippable
-balanced cell** (read off the shipped M10 fit — the cluster-level sibling of M10) and a **genuinely-open
-incomplete cell** (double-blocked: ten Hove open small-k estimator + the M9 §9 `ICC(c,k)` divisor —
-deferred). Spike-first; Fable **conditionally pre-authorized** on the spike's Outcome B (the σ²_cr
-fixed-treatment). **No slice code yet** (plan before code, #14).
+**No milestone is currently in flight** — M37 (ADR-047, fixed-rater **cluster-level** multilevel ICC, crossed
+Design 1, balanced) shipped (PR #43, squash-merged to `main` at `f0b29b7`); the next one needs an ADR after a
+short retro (founding brief §7). M37 filled the last parked **(C) research/blocked** corner: a feasibility
+spike split the ROADMAP's blanket "blocked" into a parity-shippable balanced cell (reads off the shipped M10
+fit — the cluster-level sibling of M10; **Outcome A**, exact reduction to M5 random cluster-level, **no
+Fable**) and a genuinely-open incomplete cell (double-blocked, deferred). Remaining (C) work: incomplete
+cluster-fixed (🟣), the brms/lavaan cluster siblings (engine parity), and cluster-signal-zero coverage
+(cross-cutting).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1300,50 +1301,28 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   deferred (§7). Completeness, not new estimand work (cf. M9/M10/M18/M19/M36): additive, non-breaking (#6),
   no new argument/dependency. Estimand (M5 §3b map, θ²_r in the rater slot): signal σ²_c, agreement error
   `{θ²_r, σ²_cr}`, consistency `{σ²_cr}`, divisor `k` (raters/cluster); consistency ≡ random exactly.
-- **The one genuinely new derivation (spike-gated):** at the subject level σ²_cr is *not* in the error set,
-  so M10 fixed≡random was exact; at the cluster level σ²_cr **is** the error — whether the standard random
-  `(1|cluster:rater)` variance is the correct **fixed**-rater interaction error, or needs a finite-population
-  treatment, is the unvalidated bit (M10 §7). A **feasibility spike settles it before any shipping code**:
-  **Outcome A** (reduction to M5 random cluster-level exact + recovery nominal) → reduction oracle, **no
-  Fable**; **Outcome B** (σ²_cr needs a finite-population correction) → derive it, pin against the
-  non-circular recovery oracle, and fire the **conditionally pre-authorized** gated Fable review (#19) before
-  shipping. Estimator never tuned to force coverage (#4) — degrades to 🟣 research if unpinnable even with Fable.
-- Reference: ADR-047 (scope + spike gate + conditional Fable); estimand-spec `M37-fixed-cluster-level.md`.
-  Oracle **O-FCL** — reduction to M5 random cluster-level (balanced fixed≡random, Outcome A) *or* the
-  Fable-confirmed relationship (Outcome B); lme4 cross-engine < 1e-4; committed **non-circular** seeded
-  finite-population cluster-mean recovery (interior + boundary σ²_c=0, n_rep ≥ 240 — [[ragged-coverage-nrep-240]]).
-- Tasks / DoD (live board, ADR-015):
-  - [x] **Slice 1 — feasibility spike (no shipping code) — DONE (2026-07-11): OUTCOME A, no Fable.**
-        `data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`. Reduction exact in all
-        regimes (fixed-vs-M5-random |Δ| ~ 1e-6; θ²_r=σ²_r **and s2cr_fixed=s2cr_random**, both |d| ~ 1e-7 —
-        the σ²_cr verdict: **random σ²_cr is the correct fixed cluster-level error**, no finite-population
-        correction). Recovery vs the non-circular finite-population truth unbiased at C_n=80 (A1 +0.0001).
-        Interval at **exact M5 parity**: interior 0.963/0.992; σ²_c=0 boundary 0.550 **but identical for
-        fixed and M5-random** (pre-existing cluster-signal-zero loss, not an M37 defect → boundary claim is
-        parity; improving it is a candidate follow-up, §7). **The pre-authorized Fable review does NOT fire.**
-  - [x] **Slice 2 — cluster-level fixed estimand + fit path — DONE (2026-07-11).** Lifted the
-        `level = "cluster"` + `raters = "fixed"` abort (`R/icc.R`) for balanced crossed Design 1 only (brms +
-        incomplete refused: two new guards); the cluster-level `{σ²_c | θ²_r, σ²_cr}` reads off the shipped
-        M10 fit — **no new fit**, the estimand map keys the error set on `level` not `raters`. Default level
-        now returns **both** levels for balanced fixed. Oracles **O-FCL/reduction** (fixed ≡ M5 random
-        cluster point, |Δ| 2.1e-6 < 1e-4), **/lme4** (1.7e-5 < 1e-4), **/recovery** (committed fixture:
-        interior coverage .975/.925, |bias| ≤ .008; boundary σ²_c=0 **parity** with M5-random, both .000 —
-        the shared cluster-signal-zero loss, a candidate follow-up, not an M37 defect). `data-raw/oracle-fixed-cluster-level.R`
-        + fixture committed. Roxygen/NEWS/COVERAGE/REFERENCES in-commit (#16). Regression: full suite green
-        after updating three stale "fixed multilevel = subject only" tests (test-review-fixes ×2, test-icc-brms
-        subject-level containment pin). `air`/`lintr` clean.
-  - [x] **Slice 3 — docs — DONE (2026-07-11).** Extended `multilevel-designs.Rmd`'s fixed-rater section to
-        the cluster level on real knit-time code (the `ml-fixed` chunk now returns both levels; prose states
-        balanced fixed ≡ random at **both** levels); added a `test-vignette-claims.R` invariant (balanced
-        fixed ≡ random cluster-level ICC(A,1)/ICC(A,k)). Roxygen/NEWS/COVERAGE/REFERENCES were updated in
-        Slice 2's commit.
-  - [ ] finish-task gate (`devtools::test`/`check`, `air`, `lintr`, installed-pkg path) green; PR; review; merge.
+  A **feasibility spike** (Slice 1) settled the one genuinely-open question (M10 §7 — at the subject level
+  σ²_cr isn't in the error set, so M10 fixed≡random was clean; at the cluster level it **is** the error):
+  fixing the rater main effect does **not** bias the `(1|cluster:rater)` interaction (`s2cr_fixed = s2cr_random`,
+  |d| ~1e-7), so the **random σ²_cr is the correct fixed cluster-level error** and the coefficient reduces to
+  the M5 random cluster-level ICC **exactly** (|Δ| ~1e-6) → **Outcome A, no Fable** (the pre-authorization did
+  not fire).
+- Reference: ADR-047 (scope + spike gate); estimand-spec `M37-fixed-cluster-level.md`. Oracle **O-FCL**
+  (`test-icc-fixed-multilevel.R`; `data-raw/oracle-fixed-cluster-level.R` + committed fixture): reduction to
+  M5 random cluster-level (balanced fixed≡random) **2.1e-6**, lme4 cross-engine **1.7e-5**, committed
+  **non-circular** seeded finite-population recovery (interior coverage **.975/.925**, |bias| ≤ .008). The
+  σ²_c=0 boundary interval under-covers **identically to M5-random** (parity |Δ| .000) — the pre-existing
+  cluster-signal-zero loss (no moment correction for the signal variance), a candidate follow-up, **not an
+  M37 defect** (#18). No new fit function; the default call now returns **both** levels for balanced fixed.
 - Deferred out of M37 (record so not rediscovered): **incomplete/unbalanced cluster-level fixed** (🟣
   Wave-3, double-blocked — ten Hove open small-k estimator + the M9 §9 open `ICC(c,k)` divisor; its own later
   milestone); **brms/lavaan cluster-level fixed** siblings (engine parity, unblockable once M37 ships the
   frequentist oracle — the M27 note left crossed fixed cluster level "an unshipped frequentist cell too");
   **nested Designs 2/3 cluster-level** and **Design 3 fixed** (⚫ by-design); fixed cluster-level `d_study()`
   (refused, M4.5); the untouched carryovers — **categorical/ordinal GLMM**, **multilevel SEM**,
-  occasion/ragged `d_study()`, the CRAN upload — stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **planned — in flight, no slice code yet** (branch `m37-fixed-cluster-level`; ADR-047 + spec +
-  board + ROADMAP/STATUS this commit). Next: `/start-task` Slice 1 (the feasibility spike).
+  occasion/ragged `d_study()`, the CRAN upload — stay in [`ROADMAP.md`](ROADMAP.md); improving
+  cluster-signal-zero (σ²_c→0) interval coverage is a cross-cutting candidate (M5/M9/M37 alike).
+- Status: **done — merged, CI green** (PR #43, squash-merged to `main` at `f0b29b7`; full CI matrix green 9/9,
+  incl. `ubuntu-latest (devel)`). Local gate: `devtools::check` 0/0/0 (`--no-manual`; full suite + vignettes,
+  live brms ran), `air`/`lintr` clean, installed-pkg cluster-fixed path driven (ICC(A,1) .363 / ICC(A,k) .695).
+  Shipped in one session (plan/ADR-047 → Slice 1 spike Outcome A → Slices 2–3 → gate → PR #43); **no Fable review**.

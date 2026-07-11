@@ -191,11 +191,12 @@ helpers* item below (sample-size / CI-width), where it belongs.
       Fable). The averaged coefficient's divisor turned out to be the well-defined subject-level `k_eff` (the
       M19 random-nested divisor), **not** the open per-cluster `ICC(c,k)` divisor — so it shipped, not
       deferred. Shipped detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015). **Cluster-level fixed
-      (balanced crossed) — PLANNED as M37** (ADR-047): investigation split the blanket "blocked" — the
-      **balanced/complete crossed Design-1** cell reads a new coefficient off the *shipped* M10 fit (the
-      cluster-level sibling of M10, no new fit), spike-gated on the σ²_cr fixed-treatment (Fable conditionally
-      pre-authorized on the reduction failing); frequentist glmmTMB/lme4. Planned detail in
-      [`MILESTONES.md`](MILESTONES.md) (ADR-015). **Still parked / genuinely open:** **incomplete/unbalanced**
+      (balanced crossed) — SHIPPED as M37** (ADR-047, PR #43): the **balanced/complete crossed Design-1** cell
+      reads `{σ²_c | θ²_r, σ²_cr}` off the *shipped* M10 fit (the cluster-level sibling of M10, **no new fit**;
+      the estimand map keys the cluster error set on `level` not `raters`), glmmTMB/lme4. A feasibility spike
+      settled the σ²_cr question (fixing raters doesn't bias the interaction) → exact reduction to the M5
+      random cluster-level ICC, **Outcome A, no Fable**. Shipped detail in [`MILESTONES.md`](MILESTONES.md)
+      (ADR-015). **Still parked / genuinely open:** **incomplete/unbalanced**
       cluster-level fixed (🟣 double-blocked — ten Hove's open small-*k* estimator *and* the M9 §9 open
       cluster-level `ICC(c,k)` divisor; its own later milestone); **Design 3 fixed** (⚫ by-design — multilevel
       one-way, no separable rater effect); the **brms/lavaan** incomplete-fixed-nested **and** cluster-level-fixed
