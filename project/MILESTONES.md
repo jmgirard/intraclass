@@ -1293,5 +1293,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - [x] NEWS updated in-commit (#16); `COVERAGE.md` unchanged (docs milestone — no code-support change, and it
       has no docs row); this board updated in-commit. **PR still to open on `m35-vignette-reassessment`
       (finish-task).**
-- Status: **all three slices done; ready for the finish-task gate** (`R CMD check --as-cran` + full CI matrix
-      + `lintr` + PR). Branch `m35-vignette-reassessment`.
+- Status: **done (local), pending PR CI + merge.** All three slices complete on branch
+      `m35-vignette-reassessment`; the local finish-task gate is **green**: `devtools::test()` 1471 pass / 0
+      fail / **0 skip** (live brms Stan fits ran locally), `R CMD check --as-cran` **0/0/0** (all six vignettes
+      build + re-build OK, 29s), `air` / `lintr` (0 lints) / spell clean, `pkgdown::check_pkgdown()` clean.
+      Coverage unchanged (docs milestone, no new R code — [[coverage-baseline]]). Next: open the PR; on
+      full-CI-matrix green + merge, compress this entry to the shipped summary form (preserving the "Deferred
+      out of M35" list) and flip Status to merged.

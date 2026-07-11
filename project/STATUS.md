@@ -210,8 +210,13 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M35 — all three slices DONE; ready for the finish-task gate** (`R CMD check --as-cran` built
-  with vignettes + full CI matrix + `lintr` + open the PR). **Slice 3 — the Bayesian coverage — DONE**
+- Active task: **M35 — all three slices DONE; local finish-task gate GREEN; pending PR CI + merge.** Local
+  gate: `devtools::test()` **1471 pass / 0 fail / 0 skip** (live brms Stan fits ran), `R CMD check --as-cran`
+  **0/0/0** (all six vignettes build + re-build OK), `air` / `lintr` (0) / spell / `pkgdown::check_pkgdown()`
+  clean; coverage unchanged (docs milestone, no new R code). Next: `gh pr create` on
+  `m35-vignette-reassessment`; on full-CI-matrix green + merge, set "Last green CI" to the merge commit,
+  compress the MILESTONES M35 board to the shipped summary, and reconcile the "in flight"/"pending" markers.
+  **Slice 3 — the Bayesian coverage — DONE**
   (committed this session): brms sections added to `engines.Rmd` (half-*t*(4,0,1) prior, `engine = "brms"`, the
   M34 `prior=` override + footgun warning) and `interval-methods.Rmd` (`ci_method = "posterior"`, MAP +
   percentile/HPDI `posterior_summary`). brms chunks are `eval=FALSE` illustrative with **committed real output**
