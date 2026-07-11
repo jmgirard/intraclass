@@ -192,26 +192,10 @@ helpers* item below (sample-size / CI-width), where it belongs.
   *sequenced* (planning discussion 2026-07-10 — a recorded direction, not yet an ADR). **(A) — the Bayesian
   parity mop-up — SHIPPED as M33** (ADR-043, PR #38): incomplete single-level one-way + fixed-rater &
   multilevel within-cell replicates, every oracle nominal (no Fable); its entry is removed here per ADR-015.
+  **(B) — the Bayesian customization milestone — SHIPPED as M34** (ADR-044, PR #39): user `prior=` override
+  (classed footgun warning) + HPDI credible intervals (`posterior_summary = c("percentile","hpdi")`); reduction
+  oracles, no coverage claim, no Fable review; its detailed scope is removed here per ADR-015.
   The remaining sequence:
-    - **(B) — PROMOTED to M34 (ADR-044), in flight** (branch `m34-bayes-customization`; ADR-time API
-      decisions settled: Slice 1 = a dedicated top-level `prior=` arg, Slice 2 = `posterior_summary`
-      sub-choice). Scope preserved below until it ships (then removed per ADR-015). **One
-      Bayesian-customization milestone, two slices**, theme "let users deviate from a
-      sourced default *with guardrails*." Override is **allowed** — the primary use case is
-      prior-sensitivity / method-comparison / simulation studies, which need *arbitrary* priors, so a clean
-      escape hatch, **not** a curated whitelist. The milestone's oracle is a **reduction oracle** (defaults
-      reproduce shipped M23+ results bit-identically); arbitrary-prior / HPDI coverage is deliberately **not**
-      oracle-claimed. **Slice 1 (first, higher-stakes) — user `prior=` API:** lift the reserved-arg guard that
-      today refuses `prior` (`R/icc.R:383`, `R/engine-brms.R:52`) and thread an override through
-      `fit_brms_common` (the sourced half-*t*(4,0,1) — ten Hove et al. 2020 §3.3/§4.1 — stays as the
-      `prior = NULL` default); fire a **classed `cli` warning** (#8) naming the *specific* footgun — leaving the
-      sourced prior voids the coverage oracle, and a vague/"non-informative" SD prior *worsens* small-*k*
-      boundary bias (the half-*t* is weakly informative on purpose). **Slice 2 — HPDI credible intervals:** a
-      post-fit summary alternative to the default percentile; likely a new
-      `posterior_summary = c("percentile", "hpdi")` sub-choice *within* `ci_method = "posterior"` (ADR-time API
-      call), **default stays percentile**. Caveat to document: percentile is monotone-transformation invariant
-      and degrades gracefully as θ²→0; HPDI is neither, so it can misbehave at the variance boundary — this
-      package's core regime. HPDI is an *alternative for comparison*, not a strict upgrade being withheld.
     - **(C) Still research / blocked** (no frequentist oracle — cannot ship as parity): incomplete **fixed**
       nested (Designs 2/3 — needs the frequentist incomplete-fixed-nested estimand built first, the nested
       sibling of the M9 `ICC(c,k)` divisor) and **cluster-level fixed** (ten Hove et al. 2022 flag the best
