@@ -3802,3 +3802,108 @@ consequences → references.
   M18 (incomplete fixed multilevel), M19 (incomplete/fixed nested), M20 (replicates completeness), M21 (lavaan
   parity), M32/M33 (brms incomplete nested / parity mop-up); `project/ROADMAP.md` (the vignette-reassessment
   item being promoted), `project/COVERAGE.md`; [[brms-live-fit-skip-on-ci]] (why brms chunks can't run in CI).
+
+## ADR-046: M36 scope — Incomplete/ragged fixed-rater nested (Design 2), subject level, single-rater `ICC_s(·,1)`
+- Date: 2026-07-11
+- Status: accepted
+- Context: With the M18–M21 completeness arc (ADR-027) and the M23–M34 Bayesian arc both shipped, the
+  remaining parked estimand work was classed **(C) research/blocked** in `ROADMAP.md`: incomplete **fixed**
+  nested (Designs 2/3) and **cluster-level fixed**. Both were deferred for *every* engine because no
+  frequentist oracle was known — the ADR-029 (M19) carve-out ("incomplete × fixed nested deferred — the M3
+  `k_eff` × per-cluster θ² interaction needs its own oracle") and the ten-Hove-flagged open cluster-fixed
+  small-*k* estimator. After a short retro the maintainer chose direction (C) and asked whether a
+  **simulation oracle** could unblock it. Before any ADR, a seeded **feasibility spike** (this session,
+  committed as `data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`) targeted the most tractable cell — **incomplete
+  fixed nested Design 2, single-rater `ICC_s(·,1)`** — because (a) the balanced version already shipped as
+  M19 Slice 2 (`theta2r_fixed_nested()`, the per-cluster Case-3A finite-population variance averaged over
+  clusters), and (b) single-rater needs **no averaging divisor**, so it sidesteps the open `k_eff` question
+  the averaged coefficient shares with the M9 `ICC(c,k)` divisor. **The spike is non-circular by
+  construction:** a finite-population θ²_{r:c} is a *deterministic function of the specific fixed rater
+  effects* (the variance of the realized rater means), not a sampled parameter, so recovering it from ragged
+  data is a genuine independent oracle, not a self-calibration. **Spike verdict — the estimand pins:**
+    - **Point (300 reps/regime).** A first-principles generalization of `theta2r_fixed_nested()` to unequal
+      per-cluster rater counts k_c (drop the equal-k guard; per-cluster `center = I − J/k_c`, `raw`, `bias`,
+      average, floor) recovers the **known** truth: ICC(A,1) bias **+0.1%** (equal k_c=4, 25% cells missing)
+      and **−1.0%** (unequal k_c ∈ {2..5}, 20% missing); θ²_{r:c} bias +0.0025 / +0.0059.
+    - **Cross-engine.** glmmTMB↔lme4 agree to **|ΔICC| ≤ 4.7e-5** on the identical `score ~ 0 + rater +
+      (1|cluster:subject)` fit (validates the raw VC/θ² extraction, though **not** the finite-population
+      correction — that math is the same authored formula in both engines, which is why the seeded-truth
+      oracle is the load-bearing one, #18).
+    - **Interval (250 reps/regime).** The M28/ADR-038 **2b moment correction** (`theta2r_moment_draws()`),
+      generalized to per-cluster k_c with average-then-floor, gives **nominal** 95% coverage of the truth:
+      **0.964 interior** (unequal k_c) and **0.960 at the boundary θ²_{r:c}=0** — the M28 danger zone —
+      with point-in-own-CI containment 1.00. The `k_eff × per-cluster θ²` interaction ADR-029 flagged as the
+      risk resolved nominal for single-rater.
+  The honest reading (#18): this pins by the **standard multilevel oracle pattern** (reduction + cross-engine
+  + seeded population recovery) that shipped M9/M15/M19 *without* a Fable review — so the cell is **more
+  tractable than "research/blocked" implied; parity-shippable, not open research** — while the *averaged*
+  `ICC_s(·,k)` stays genuinely open (its `k_eff` divisor). This is the M19 Slice 1 posture exactly.
+- Decision:
+  - **One thin vertical slice (#14): incomplete/ragged fixed-rater nested Design 2, subject level,
+    single-rater `ICC_s(·,1)` (agreement + consistency).** Lift the balanced-only guard on the fixed-nested
+    path (`R/icc.R`, the `nested_design_balanced` / `!balanced` refusal reached with `raters = "fixed"` ×
+    `design = "nested_in_clusters"`) so ragged data dispatches to `fit_glmmtmb_nested_fixed()` reusing the
+    shipped M9 `k_eff`/connectedness + `design`-escape-hatch machinery (engine-agnostic, runs pre-dispatch)
+    and the M8 §3a subject-level estimand map. **No new fit function.**
+  - **Estimator: generalize `theta2r_fixed_nested()` to unequal per-cluster k_c** (drop the line-590
+    equal-k guard; per-cluster `center`/`raw`/`bias` with that cluster's own k_c; average then floor — the
+    balanced path is the k_c-constant special case, so the shipped M19 O-FNML reductions are unmoved and the
+    common missing-cells-only case with intact rater sets already flowed through unchanged). The MC interval
+    reuses `theta2r_moment_draws()` (per-cluster 2b, average-floor) generalized the same way. `theta2r_nested_draws()`
+    threads the per-cluster center/k.
+  - **Design 3 fixed stays ⚫ by-design** (raters nested in subjects = the multilevel one-way, no separable
+    rater effect — the M19/ADR-029 ruling, unchanged). **Cluster-level fixed** (the other (C) corner) is
+    **out of scope** — no shipped scaffolding and the estimator itself is a ten-Hove open question; deferred
+    for its own later milestone.
+  - **The averaged `ICC_s(·,k)` degrades to 🟣 research** if it cannot be pinned (its effective-rater divisor
+    is the M9 `ICC(c,k)` open question) — attempt against the reduction + cross-engine oracles, and reclassify
+    rather than ship a guessed divisor (#4), exactly as M19 Slice 1. Ship single-rater-only on that outcome.
+  - **No new estimand concept, no new top-level argument, no new dependency** (light install intact) — a new
+    valid combination of the shipped `design`/`raters`/data-balance arguments (cf. M9/M15/M18/M19, #6). A
+    focused estimand-spec **`M36-incomplete-fixed-nested.md`** records the ragged per-cluster Case-3A
+    derivation and the 2b-under-imbalance interval (the one genuinely new derivation), extending the M8 §8 /
+    M10 §7 out-of-scope notes into the shipped map.
+  - **Oracle posture (#1), the established multilevel pattern:** (O-IFNML) glmmTMB↔lme4 **cross-engine
+    < 1e-4**; **reduction** to the shipped balanced M19 nested-fixed (bit-identical when k_c constant and
+    complete) and the **per-cluster / single-cluster reductions** to the flat M3 fixed θ²_r (with consistency
+    ≡ random exact); **committed seeded population recovery** against the known finite-population truth
+    (interior + boundary θ²=0) with MC-CI coverage, at **n_rep ≥ 240** ([[ragged-coverage-nrep-240]]);
+    lme4 degrades to glmmTMB at the variance boundary (ragged nested fits hit it more, as M15). The seeded
+    oracle regenerates from a committed `data-raw/oracle-incomplete-fixed-nested.R` (the spike scripts are its
+    seed), fixture committed (#4).
+  - **Fable posture (#19): conditional-and-recommend-only.** The spike came back nominal, so a Fable review is
+    **not** pre-authorized. If the full committed boundary oracle (n_rep ≥ 240) undercovers below the
+    pre-registered band, `verify-estimator` **recommends** a Fable review and work pauses (#1/#19) — the point
+    estimator is not tuned to force coverage (#4). This is the maintainer-chosen posture ("first-principles
+    derivation + Fable review").
+- Consequences: On M36 close, the (C) *incomplete-fixed-nested* corner is ✅ for Design 2 single-rater (or its
+  averaged coefficient a recorded 🟣 reclassification — a clean outcome either way), narrowing the (C) bucket
+  to *cluster-level fixed* + Design-3-fixed (⚫) + the averaged nested/`ICC(c,k)` divisor family. The nested
+  fixed design reaches ragged parity with the crossed design (M18) except the same one 🟣 divisor. Risk is
+  concentrated in the averaged divisor (explicitly allowed to degrade, #4) and the 2b-under-imbalance interval
+  (spike-nominal but the committed oracle is the real gate). It rules out shipping the averaged coefficient on
+  a guessed divisor and shipping cluster-fixed or Design-3-fixed here (scoped out). Additive, non-breaking
+  (#6) — balanced/complete and random paths untouched (regression guard: the full M1–M19 suite stays green).
+  This ADR authorizes M36 code; the `MILESTONES.md` M36 board and the `STATUS.md` flip are the milestone-start
+  companions — **no slice code has begun (plan before code, #14)**. Next: `/start-task` Slice 1.
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + committed seeded recovery against a
+  non-circular finite-population truth; the seeded oracle is load-bearing since cross-engine cannot validate
+  the authored correction), #2/#14 (name the estimand / one thin vertical slice), #3 (boundary-aware interval
+  — the 2b average-floor, coverage at θ²=0), #4 (no guessed divisor — the averaged-coefficient degrade
+  clause; committed seeded script), #5/#8 (classed aborts for the ragged design-detection ambiguity + the
+  Design-3-fixed / cluster-fixed / averaged-divisor out-of-scope corners), #6 (additive, non-breaking; no new
+  argument/dependency), #16 (tracking in-commit), #18 (characterize honestly — the spike shows parity-shippable,
+  not research; cross-engine does not validate the correction; the averaged divisor stays open), #19
+  (conditional Fable recommendation on a committed-oracle shortfall — the maintainer-chosen posture);
+  [[ragged-coverage-nrep-240]] (n_rep ≥ 240 convention), [[fixed-rater-interval-2b-moment-correction]] (the 2b
+  moment correction this generalizes), [[milestone-branches-and-prs]] (ships on `m36-incomplete-fixed-nested`
+  via PR). ADR-029 (M19 — the deferral this lifts; `theta2r_fixed_nested()` / the fixed≢random-even-balanced
+  nested finding), ADR-008 (M3 `k_eff`/connectedness + Case-3A θ²_r), ADR-011/016 (M5/M8 multilevel fit +
+  nested designs), ADR-018 (M9 incomplete crossed + `design` escape hatch — reused), ADR-019 (M10 crossed
+  fixed multilevel), ADR-038 (M28 — the `theta2r_moment_draws()` 2b correction, gated Fable review #19),
+  ADR-024 (M15 — incomplete/ragged lme4 engine-parity precedent, singular degrade). Estimand-spec
+  `M36-incomplete-fixed-nested.md` (Slice 1); `M8-nested-multilevel.md §3a/§8`, `M10-fixed-multilevel.md §7`,
+  `M9-incomplete-multilevel.md §9` (the shared `k_eff` divisor open question). ten Hove, Jorgensen & van der
+  Ark (2022) Eqs. 8–11, Table 3 (nested Design 2 subject-level decomposition); McGraw & Wong (1996) Case 3/3A
+  (the finite-population θ² this generalizes to ragged per-cluster k_c). `project/COVERAGE.md` (#11 fixed
+  nested, incomplete column).

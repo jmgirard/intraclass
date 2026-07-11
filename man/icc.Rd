@@ -344,9 +344,12 @@ finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
 balanced data consistency is identical to the random-rater case and absolute
 agreement differs only by that term; on incomplete data both types differ from
 random (the finite-population variance is read from the ragged rater-contrast fit).
-Incomplete \emph{nested} designs, nested fixed-rater designs, and the fixed-rater cluster
-level remain for later milestones. Nested designs still require balanced, complete
-data.
+\strong{Nested (Design 2) fixed raters} are likewise supported at the \strong{subject} level on
+both balanced and \strong{incomplete} data (the finite-population rater variance is formed
+\strong{per cluster} -- each cluster's own raters -- and averaged over clusters; on ragged
+data each cluster uses its own effective rater count). The fixed-rater \strong{cluster}
+level, Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
+Bayesian (\code{engine = "brms"}) incomplete fixed-nested path remain for later milestones.
 }
 
 \section{Within-cell replicates}{
