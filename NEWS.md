@@ -144,6 +144,15 @@ alternate engines, and seeded simulations.
   harmonic-mean `k_eff` divisor, a ratio of variance components needing no moment correction.
   Incomplete **fixed**-rater nested and incomplete within-cell-replicate Bayesian fits remain
   planned for later milestones.
+* A new **`prior`** argument lets you override the sourced half-*t*(4, 0, 1) prior for
+  `engine = "brms"` with any \pkg{brms} prior object (from `brms::set_prior()` /
+  `brms::prior()`) — intended for prior-sensitivity, method-comparison, or simulation work.
+  The default (`prior = NULL`) is unchanged and reproduces earlier results bit-for-bit.
+  Supplying a custom prior is a deliberate deviation that **voids the package's coverage
+  guarantees** (which hold only for the sourced prior), so `icc()` emits a loud classed
+  (`intraclass_custom_prior`) warning: a vague or flat SD prior can *worsen* small-\eqn{k}
+  boundary bias, since the half-*t* is weakly informative on purpose. The prior stays
+  owned by the package elsewhere — it may not be set through `brm_args`.
 
 ## Choosing, projecting, and visualizing
 

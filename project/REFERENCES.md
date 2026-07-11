@@ -1071,6 +1071,34 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `icc_point()` on the shipped replicate fit's components — bypassing `mc_ci()`, which can overflow on an
   unstable small-multilevel fit; writes the fixture before the hard pins).
 
+### Oracle O-PriorReduce — Bayesian user `prior=` override (M34 Slice 1, ADR-044)
+
+- **Role:** the customization oracle for the new user **`prior=`** argument on `engine = "brms"`. This is a
+  **REDUCTION oracle, not a coverage oracle** — the whole point of `prior=` is to let users leave the sourced
+  regime (prior-sensitivity / method-comparison / simulation work), so no coverage is claimed under a custom
+  prior (#4). Correctness is established by three checks: the default and an *explicit* sourced prior agree
+  bit-identically (the override path is faithful and the default path is unchanged), and a *different* prior
+  demonstrably changes the fit. The sourced half-*t*(4, 0, 1) on every random-effect SD (ten Hove et al.
+  2020 §3.3/§4.1) stays the `prior = NULL` default.
+- **Oracles (#1):** **(a) reduction** — `prior = NULL` reproduces the shipped M23+ MAP/credible-interval
+  results at a fixed seed (the default path is structurally unchanged: the sourced prior is set only when the
+  user supplies none); **(b) round-trip** — passing the sourced half-*t* *explicitly*
+  (`brms::set_prior("student_t(4, 0, 1)", class = "sd")`) reproduces the `NULL` result **bit-identically**
+  (`expect_identical` on `$estimates$estimate` and `$components`), proving the injection into the `brms::brm`
+  call is faithful; **(c) override-takes-effect + footgun warning** — a deliberately tight SD prior
+  (`normal(0, 0.5)`) shrinks the random-effect SDs, moving `ICC(A,1)` **down** vs the sourced prior, and fires
+  the classed `intraclass_custom_prior` warning; **(d) classed guards** — `prior` off `engine = "brms"` →
+  `intraclass_unsupported`; a non-`brmsprior` value on brms → `intraclass_error`; `prior` set through
+  `brm_args` → `intraclass_error` routing the user to the dedicated argument.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) §3.3/§4.1 (the half-*t*(4, 0, 1) SD prior that is the
+  *sourced default* the override departs from), §4.2 (why the coverage claims are prior-specific). No new
+  estimand-spec (interface milestone). No committed fixture / no Stan needed for the guard checks (they fire
+  before the fit, run on every CI job); the reduction/round-trip/override checks are a **live** fit
+  (`skip_on_ci` — a CI runner has brms but no Stan toolchain).
+- **Pins (#4/#18):** no coverage claim under a custom prior. Asserted in `test-icc-brms.R`: the `prior=` guard
+  tests (`intraclass_unsupported` / `intraclass_error`, on CI) + **O-PriorReduce** (live: round-trip
+  `expect_identical`, tight-prior `expect_lt` + classed warning; `skip_on_ci`).
+
 ---
 
 ## Bibliography

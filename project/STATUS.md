@@ -188,19 +188,22 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M34 Slice 1 — user `prior=` override (top-level `icc()` arg).** Add `prior = NULL` to
-  `icc()` (brms-only, default = sourced half-*t*(4,0,1)); thread through `fit_brms_common()` to replace the
-  hardcoded `set_prior("student_t(4,0,1)", class = "sd")` when non-`NULL`; keep `prior` reserved in `brm_args`
-  (`icc.R:383` — the dedicated arg is the one canonical path); validate (`brmsprior`/list or `NULL`), non-brms
-  engine → classed `abort_unsupported`; fire a classed `cli` **`intraclass_custom_prior`** warning naming the
-  footgun (voids the coverage oracle; a flat SD prior worsens small-*k* boundary bias). **O-PriorReduce:**
-  (a) `prior = NULL` reproduces shipped M23+ MAP/CI bit-identically at fixed seed; (b) explicit sourced
-  half-*t* ≡ `NULL` (round-trip); (c) a deliberately different prior moves the estimate + fires the warning
-  (live `skip_on_ci()`); (d) classed warning/abort conditions. **No coverage claim under a custom prior**
-  (#4). Acceptance = the M34 board's Slice 1 boxes (MILESTONES.md); honors #1 (reduction oracle), #4 (no
-  unfounded coverage claim), #5/#8 (classed warning/abort), #6 (additive), #12 (sourced default is what the
-  override departs from), #16 (tracking in-commit), #18 (footgun stated honestly). **Not started — plan
-  before code (#14).** Then Slice 2 (HPDI `posterior_summary`).
+- Active task: **M34 Slice 2 — HPDI credible intervals (`posterior_summary` sub-choice).** Add
+  `posterior_summary = c("percentile", "hpdi")` (default `"percentile"`), meaningful only under
+  `ci_method = "posterior"`; HPDI via a dependency-free boundary-aware internal helper (narrowest interval
+  covering the credible mass on the ICC draws); misapplied (`"hpdi"` off posterior/non-brms) → classed
+  `abort_unsupported`; label the interval method so print/tidy distinguishes the two. **O-HPDI:**
+  (a) `"percentile"` reproduces shipped intervals bit-identically; (b) helper ≡ `coda::HPDinterval`
+  (`skip_if_not_installed`) ≤ 1e-8; (c) HPDI width ≤ percentile width; (d) classed abort conditions.
+  **Not started — plan before code (#14).**
+- Done this session: **M34 Slice 1 — user `prior=` override (top-level `icc()` arg) — COMPLETE, not yet
+  committed as a slice.** Added `prior = NULL` to `icc()` (brms-only, default = sourced half-*t*(4,0,1));
+  `fit_brms_common()` honours an injected `brm_args$prior`, else the sourced default (icc() validates the
+  dedicated arg and injects — **no wrapper changes**; `prior` stays reserved in `brm_args` at `icc.R:383`);
+  classed `intraclass_custom_prior` footgun warning (#8). **O-PriorReduce PASS** (live, `skip_on_ci`):
+  reduction + round-trip **bit-identical** + tight prior moves ICC(A,1) 0.256→0.206 + warning; three classed
+  guard tests on CI. brms file 255/0/20, full suite (CI mode) **1221/0/20**; `air`/`lintr`/spell clean; roxygen
+  + NEWS + COVERAGE + REFERENCES in-commit (#16). No coverage claim under a custom prior (#4).
 - Last green CI: **PR #38 (M33) — full CI matrix green (9/9), squash-merged to `main` at `34cb974`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed (no flakes, no re-runs). Locally before the PR: `R CMD check --as-cran`
@@ -239,7 +242,14 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M34 opened (ADR-044): the Bayesian customization milestone.**
+- Updated: 2026-07-10 by main session (Opus) — **M34 Slice 1 (user `prior=` override) shipped on branch
+  `m34-bayes-customization`.** Added a dedicated `icc(prior=)` argument (default `NULL` = sourced
+  half-*t*(4,0,1)); `fit_brms_common()` honours an injected `brm_args$prior`, so no `fit_brms_*` wrapper
+  changed; classed `intraclass_custom_prior` footgun warning + three classed guards. O-PriorReduce PASS
+  (reduction + bit-identical round-trip + tight-prior move + warning; live `skip_on_ci`). Full suite (CI mode)
+  1221/0/20; `air`/`lintr`/spell clean; docs/NEWS/COVERAGE/REFERENCES in-commit (#16). Next: Slice 2 (HPDI
+  `posterior_summary`). Prior line below opened the milestone. **M34 opened (ADR-044): the Bayesian
+  customization milestone.**
   After a short retro (the Bayesian arc has moved from *discovery* through *mop-up* — M29–M33 all shipped
   without a corrective Fable review; the brms **estimand** surface is now complete) the maintainer chose
   direction **(B)** and confirmed both ADR-time API decisions (Slice 1 = a dedicated top-level `prior=` arg,

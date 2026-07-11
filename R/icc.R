@@ -262,8 +262,19 @@
 #'   `brm_args = list(cores = 4)` (or set `options(mc.cores)`) to sample in parallel
 #'   — the engine emits a periodic reminder to that effect while running
 #'   sequentially. The model formula, data, the sourced half-*t* prior, and `seed`
-#'   are owned by `intraclass` and may not be set here; supplying them, or a
-#'   non-empty `brm_args` with any other engine, is an error.
+#'   are owned by `intraclass` and may not be set here (the prior has its own
+#'   `prior` argument); supplying them, or a non-empty `brm_args` with any other
+#'   engine, is an error.
+#' @param prior Optional custom prior for `engine = "brms"`, as a \pkg{brms} prior
+#'   object (from [brms::set_prior()] / [brms::prior()]; combine several with `c()`).
+#'   The default `NULL` uses the **sourced** half-*t*(4, 0, 1) prior on every
+#'   random-effect SD (ten Hove, Jorgensen & van der Ark 2020), the prior every
+#'   coverage result in this package depends on. Supplying a custom prior is a
+#'   deliberate deviation — intended for prior-sensitivity, method-comparison, or
+#'   simulation work — and **voids those coverage guarantees**; `icc()` warns
+#'   loudly (a classed `intraclass_custom_prior` condition) because a vague or flat
+#'   SD prior can *worsen* small-*k* boundary bias (the half-*t* is weakly
+#'   informative on purpose). Ignored (must be `NULL`) for non-Bayesian engines.
 #'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
@@ -310,7 +321,8 @@ icc <- function(
   mc_samples = 10000L,
   boot_samples = 999L,
   seed = NULL,
-  brm_args = list()
+  brm_args = list(),
+  prior = NULL
 ) {
   if (!is.data.frame(data)) {
     abort_intraclass("{.arg data} must be a data frame.")
@@ -386,8 +398,52 @@ icc <- function(
       "{.arg brm_args} may not set {.val {reserved}}.",
       i = "The model formula, data, the sourced half-{.emph t} prior, and \\
            {.arg seed} are set by {.pkg intraclass}; pass only sampler/backend \\
-           knobs (e.g. {.code backend}, {.code chains}, {.code iter}, {.code cores})."
+           knobs (e.g. {.code backend}, {.code chains}, {.code iter}, {.code cores}).",
+      i = if ("prior" %in% reserved) {
+        "To use a custom prior, pass the {.arg prior} argument of {.fn icc}, not \\
+         {.arg brm_args}."
+      }
     ))
+  }
+
+  # User prior override (M34 Slice 1, ADR-044). `prior = NULL` keeps the SOURCED
+  # half-*t*(4, 0, 1) SD prior (#12) -- the prior every coverage result depends on. A
+  # non-NULL `prior` is a deliberate deviation (prior-sensitivity / method-comparison /
+  # simulation work); it is brms-only, must be a brms prior object, and VOIDS the
+  # coverage oracle. It is the ONE canonical override path (the `brm_args` guard above
+  # still forbids setting `prior` there), injected into the engine's brm() call here and
+  # announced by a loud classed footgun warning (#8). No coverage claim is made under a
+  # custom prior (#4); the warning + docs carry the honesty (#18).
+  if (!is.null(prior)) {
+    if (engine != "brms") {
+      abort_unsupported(c(
+        "{.arg prior} only applies to {.code engine = \"brms\"}.",
+        i = "The sourced half-{.emph t} prior is specific to the Bayesian engine; \\
+             drop {.arg prior} for other engines."
+      ))
+    }
+    if (!inherits(prior, "brmsprior")) {
+      abort_intraclass(c(
+        "{.arg prior} must be a {.pkg brms} prior object or {.code NULL}.",
+        i = "Build one with {.fn brms::set_prior} or {.fn brms::prior}, e.g. \\
+             {.code prior = brms::set_prior(\"student_t(4, 0, 1)\", class = \"sd\")}."
+      ))
+    }
+    warn_intraclass(
+      c(
+        "Using a custom {.arg prior} instead of the sourced \\
+         half-{.emph t}(4, 0, 1).",
+        "!" = "This VOIDS the package's coverage guarantees: the credible-interval \\
+               coverage results (ten Hove et al. 2020) hold only for the sourced \\
+               prior.",
+        i = "A vague or flat SD prior can WORSEN small-{.var k} boundary bias -- the \\
+             half-{.emph t} is weakly informative on purpose (Principle #3's regime).",
+        i = "Leave {.arg prior} unset for the sourced default unless you are running \\
+             prior-sensitivity or method-comparison work."
+      ),
+      class = "intraclass_custom_prior"
+    )
+    brm_args$prior <- prior
   }
 
   type <- validate_choice(type, c("agreement", "consistency"), "type")

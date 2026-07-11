@@ -1194,16 +1194,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `coda::HPDinterval` + narrower-or-equal (`REFERENCES.md`). **No coverage claim** under a custom prior / for
   HPDI. Live custom-prior/HPDI Stan fits `skip_on_ci()`; CI covered by the default/reduction tests.
 - DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):
-  - [ ] **Slice 1 — user `prior=` override (top-level `icc()` arg).** Add `prior = NULL` to `icc()` (brms-only,
-        default `NULL` = sourced half-*t*(4,0,1)); thread through `fit_brms_common()` to replace the hardcoded
-        `set_prior("student_t(4,0,1)", class = "sd")` when non-`NULL`. Keep `prior` in the `brm_args` reserved
-        set (`icc.R:383`) — the dedicated arg is the one canonical path. Validate it (`brmsprior`/list or
-        `NULL`); non-brms engine → classed `abort_unsupported`. Fire a classed `cli` **`intraclass_custom_prior`**
-        warning (#8) naming the footgun (voids the coverage oracle; a flat SD prior worsens small-*k* boundary
-        bias). **O-PriorReduce:** (a) `prior = NULL` reproduces shipped M23+ MAP/CI bit-identically at fixed
-        seed; (b) explicit sourced half-*t* ≡ `NULL` (round-trip); (c) a deliberately different prior moves the
-        estimate + fires the warning (live `skip_on_ci()`); (d) classed warning/abort conditions. Roxygen +
-        NEWS + COVERAGE + REFERENCES in-commit (#16); `air`/`lintr` clean.
+  - [x] **Slice 1 — user `prior=` override (top-level `icc()` arg).** Added `prior = NULL` to `icc()`
+        (brms-only, default `NULL` = sourced half-*t*(4,0,1)); `fit_brms_common()` uses `brm_args$prior` when
+        present, else the sourced default (icc() injects the validated override there — **no wrapper changes**;
+        `prior` stays reserved in `brm_args` at `icc.R:383` with a hint to the dedicated arg). Validated
+        (`brmsprior` or `NULL`; non-brms engine → `intraclass_unsupported`, bad type → `intraclass_error`);
+        classed `intraclass_custom_prior` footgun warning (#8). **O-PriorReduce PASS** (live, `skip_on_ci`):
+        (a) `prior = NULL` unchanged default path; (b) explicit sourced half-*t* ≡ `NULL` **bit-identical**
+        (`expect_identical` estimates + components); (c) tight `normal(0,0.5)` moved ICC(A,1) 0.256→0.206 +
+        fired the warning; (d) three classed guard tests (on CI). No coverage claim under a custom prior (#4).
+        Roxygen + NEWS + COVERAGE + REFERENCES updated in-commit (#16); `air`/`lintr`/spell clean; brms file
+        255/0/20, full suite (CI mode) 1221/0/20.
   - [ ] **Slice 2 — HPDI credible intervals (`posterior_summary` sub-choice).** Add
         `posterior_summary = c("percentile", "hpdi")` (default `"percentile"`), meaningful only under
         `ci_method = "posterior"`. HPDI via a **dependency-free internal boundary-aware helper** (narrowest

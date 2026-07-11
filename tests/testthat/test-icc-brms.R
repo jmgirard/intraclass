@@ -87,6 +87,62 @@ test_that("brm_args must be a list", {
   )
 })
 
+# --- User prior= override guards (M34 Slice 1, ADR-044; no brms needed) ---------
+# The dedicated `prior=` argument lifts the fixed-prior restriction with GUARDRAILS: a
+# custom prior is brms-only, must be a brms prior object, and voids the coverage oracle
+# (a loud classed footgun warning). These guards fire before any fit, so no Stan needed;
+# the live reduction/round-trip/override oracle (O-PriorReduce) is skip_on_ci below.
+
+test_that("prior= only applies to engine = \"brms\"", {
+  d <- sf_ratings_long()
+  # A non-NULL prior off the Bayesian engine is refused (the sourced half-t is
+  # brms-specific) -- and the abort fires before any prior-type check.
+  expect_error(
+    icc(d, score, subject, rater, prior = "student_t(4, 0, 1)"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(d, score, subject, rater, engine = "lme4", prior = 1),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("prior= must be a brms prior object", {
+  d <- sf_ratings_long()
+  # On the Bayesian engine a non-brmsprior value is rejected with a classed abort,
+  # before check_installed()/any fit -- so this runs without brms/Stan.
+  expect_error(
+    icc(d, score, subject, rater, engine = "brms", prior = list(1)),
+    class = "intraclass_error"
+  )
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      engine = "brms",
+      prior = "student_t(4, 0, 1)"
+    ),
+    class = "intraclass_error"
+  )
+})
+
+test_that("prior may not be smuggled through brm_args (points to prior=)", {
+  d <- sf_ratings_long()
+  err <- tryCatch(
+    icc(d, score, subject, rater, engine = "brms", brm_args = list(prior = 1)),
+    condition = function(e) e
+  )
+  expect_s3_class(err, "intraclass_error")
+  # The teaching hint routes the user to the dedicated argument.
+  expect_match(
+    paste(conditionMessage(err), collapse = " "),
+    "prior",
+    fixed = TRUE
+  )
+})
+
 # --- brms scope: two-way random, balanced/complete only (no brms needed) -------
 # These fire before the fit, so they assert the deferral boundary without Stan.
 
@@ -3093,4 +3149,75 @@ test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
   expect_match(hdr, "nested", fixed = TRUE)
+})
+
+# --- Live brms fit: user prior= override, O-PriorReduce (M34 Slice 1, ADR-044) --
+# The customization oracle is a REDUCTION oracle, not coverage: (a/b) the defaults and an
+# EXPLICIT sourced half-t(4, 0, 1) produce bit-identical estimates at a fixed seed (the
+# override path is faithful and the default is unchanged); (c) a deliberately different
+# (tight) prior MOVES the estimate in the predicted direction and fires the classed
+# intraclass_custom_prior footgun warning. No coverage is claimed under a custom prior
+# (#4). Gated OFF CI (a CI runner has brms but no Stan toolchain).
+
+test_that("brms prior= override: reduction + round-trip + moves + warns (O-PriorReduce)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+
+  d <- sf_ratings_long()
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+
+  # (a) Default path (prior = NULL) -> the sourced half-t(4, 0, 1).
+  f_null <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 7,
+    brm_args = ba
+  ))
+
+  # (b) Round-trip: the SAME half-t passed EXPLICITLY through prior= must reproduce the
+  # default BIT-IDENTICALLY at the same seed (the injection into the brm() call is faithful).
+  sourced <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
+  f_sourced <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 7,
+    brm_args = ba,
+    prior = sourced
+  ))
+  expect_identical(f_null$estimates$estimate, f_sourced$estimates$estimate)
+  expect_identical(f_null$components, f_sourced$components)
+
+  # (c) A tight SD prior shrinks every random-effect SD toward 0, so ICC(A,1) moves DOWN
+  # vs the weakly-informative sourced prior -- the override demonstrably takes effect.
+  tight <- brms::set_prior("normal(0, 0.5)", class = "sd")
+  warned <- FALSE
+  f_tight <- withCallingHandlers(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      engine = "brms",
+      seed = 7,
+      brm_args = ba,
+      prior = tight
+    ),
+    intraclass_custom_prior = function(w) {
+      warned <<- TRUE
+      invokeRestart("muffleWarning")
+    },
+    warning = function(w) invokeRestart("muffleWarning")
+  )
+  # The classed footgun warning fired ...
+  expect_true(warned)
+  # ... and the estimate genuinely changed (shrunk) under the tight prior.
+  icc_a1 <- function(f) f$estimates$estimate[f$estimates$index == "ICC(A,1)"]
+  expect_lt(icc_a1(f_tight), icc_a1(f_null))
 })
