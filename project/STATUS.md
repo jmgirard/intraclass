@@ -7,7 +7,15 @@
   "attempt, else 🟣 research" clause **resolved to ship** (pinned by the exact single-cluster reduction to flat
   M3; its divisor is the per-subject `k_eff`, the M19 random-nested divisor, **not** the open per-cluster
   `ICC(c,k)` divisor — ADR-046/the board had conflated the two, #18). O-IFNML committed (non-circular
-  finite-population recovery; coverage interior .967 / boundary θ²=0 .942; no Fable). Feasibility spike
+  finite-population recovery; coverage interior .967 / boundary θ²=0 .942; no Fable at ship time). A
+  **post-hoc gated Fable review** (maintainer-requested, #19; `fable-review-m36-incomplete-fixed-nested-
+  {brief,response}.md`) landed 2026-07-11 with a **clean bill — no corrective follow-up**: the ragged 2b
+  construction's identities verified against exact GLS (`fable-check-m36-identities.R`), and the
+  cluster-count sweep Opus omitted run at n_rep=500 (`fable-check-m36.R`) — boundary coverage **flat to
+  C_n=80** (.951–.968 across four regimes), no M28-style decay. Three doc/test-asset follow-ups
+  recommended (response §6): a C_n=80 boundary sentinel + one low-n_s cell at the next O-IFNML
+  regeneration, two spec sentences (harmonic-k_eff identity + Cov(θ²_c, 1/m_s) caveat; plug-in b_c/REML
+  note), and an ADR-046 amendment — **not yet ingested**. Feasibility spike
   provenance: `data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`. **The next milestone needs an ADR
   after a short retro** (founding brief §7); the remaining **(C)** corner is **cluster-level fixed** raters
   (no scaffolding; ten-Hove open question).

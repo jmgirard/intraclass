@@ -647,13 +647,20 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **DGP:** ragged nested Design 2, raters FIXED (per-cluster centered rater means held fixed across
   replications so θ²_{r:c} is exact; subjects, residuals, and the missing-cell pattern resampled per rep;
   subjects with < 2 remaining ratings dropped). σ²_{s:c} = 1, σ²_res = 0.5. Grid {equal-k (k_c=4),
-  unequal-k (k_c ∈ {2..5})} × {boundary θ²=0, interior θ²=0.5}, **n_rep 240** (the ≥ .88 pin false-alarms
-  ~0.7%/cell at n_rep 80 — [[ragged-coverage-nrep-240]]). Single-rater needs no averaging divisor, so its
-  population value vsc/(vsc+θ²+vres) is fixed and coverage is clean.
+  unequal-k (k_c ∈ {2..5})} × {boundary θ²=0, interior θ²=0.5} at n_s=8, **plus** a C_n=80 boundary
+  cluster-count sentinel and a n_s=4 interior certification cell (Fable RR §3/§5), **n_rep 240** (the ≥ .88
+  pin false-alarms ~0.7%/cell at n_rep 80 — [[ragged-coverage-nrep-240]]). Single-rater needs no averaging
+  divisor, so its population value vsc/(vsc+θ²+vres) is fixed and coverage is clean.
 - **Committed reference (`tests/testthat/fixtures/incomplete-fixed-nested-oracle.rds`; seeds 360000 + i·1000):**
-  coverage **interior .967/.967, boundary θ²=0 .942/.942** (all ≥ .90, boundary-aware #3); point **|bias|
-  ≤ .018** every cell (the recovery of the known finite-population truth); 0 fit failures. The 2b-under-
-  imbalance interaction ADR-046 flagged as the risk resolved **nominal** — no Fable review triggered.
+  6 cells. The four n_s=8 cells: coverage **interior .967/.967, boundary θ²=0 .942/.942**, |bias| ≤ .018.
+  **Plus two Fable-review sentinels (RR §3/§5, ADR-046 Amendment 1):** a **C_n=80 boundary** cluster-count
+  sentinel (coverage **.967** — no incidental-parameters decay, the M28 *post*-fix signature; |bias| shrinks
+  to −.005 as clusters accrue) and a **n_s=4 interior** low-information cell (coverage .979, 1b |bias| .015 —
+  so the |bias| < .03 pin actively rejects a 2b over-correction, which sits at +.037 there). All ≥ .90,
+  boundary-aware (#3); 0 fit failures. The 2b-under-imbalance risk resolved **nominal**; a **post-hoc gated
+  Fable review** (#19, maintainer-requested) subsequently **confirmed the construction is sound** — the M28
+  inflation identities are Gaussian quadratic-form facts (not balanced-data facts), REML closes the growing-β̂
+  channel, and the cluster-count sweep is flat to C_n=80 (`fable-review-m36-*`).
 - **Reductions (deterministic, committed as an attribute + re-checked live):** ragged **single-cluster**
   fixed-nested ≡ flat M3 fixed for **both** single and average (|diff| ~1e-16 — a single-cluster
   nested-fixed design IS a flat two-way fixed design; ties θ²_{r:c} to the sourced McGraw–Wong Case 3A AND
