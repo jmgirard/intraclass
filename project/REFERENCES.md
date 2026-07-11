@@ -1099,6 +1099,32 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   tests (`intraclass_unsupported` / `intraclass_error`, on CI) + **O-PriorReduce** (live: round-trip
   `expect_identical`, tight-prior `expect_lt` + classed warning; `skip_on_ci`).
 
+### Oracle O-HPDI — Bayesian HPDI credible intervals (M34 Slice 2, ADR-044)
+
+- **Role:** the customization oracle for the new **`posterior_summary = c("percentile", "hpdi")`** argument,
+  which selects how `ci_method = "posterior"` reduces the posterior ICC draws to a credible interval. Like
+  O-PriorReduce this is a **REDUCTION oracle, not a coverage oracle**: percentile stays the default (ten Hove
+  et al. 2020 §4.2 found percentile — not HPD — intervals give nominal coverage at k > 2; percentile is
+  transform-invariant and boundary-graceful, HPDI is neither), so **no coverage is claimed for HPDI** (#4). The
+  HPDI is the narrowest interval covering the credible mass, computed by a dependency-free internal helper
+  `hpdi_interval()` whose index arithmetic matches `coda::HPDinterval` exactly (light install preserved).
+- **Oracles (#1):** **(a) reduction** — `posterior_summary = "percentile"` (and the default) reproduces the
+  shipped M23+ intervals **bit-identically** (`expect_identical` on `$estimates`); threading the choice through
+  does not disturb the default path. **(b) definitional agreement** — `hpdi_interval()` ≡ `coda::HPDinterval`
+  (the independent oracle, `skip_if_not_installed("coda")`) to ≤ 1e-8 on a fixed skewed-toward-zero draw
+  vector (a boundary-ICC mimic). **(c) narrower-or-equal + same point** — on a live brms fit the HPDI is no
+  wider than the percentile interval on the same draws (the defining HPDI property) and the **MAP point is
+  unchanged** (only the interval reduction differs); the printed header names the `(HPDI)` variant. **(d)
+  classed guard** — `posterior_summary` set for a non-`posterior` `ci_method` → `intraclass_unsupported`.
+- **Sources:** ten Hove, Jorgensen & van der Ark (2020) §4.2 (percentile BCIs nominal at k > 2, the reason
+  percentile stays default); `coda::HPDinterval` (the independent HPDI reference; Suggests-only, test-time).
+  No new estimand-spec (interface milestone). No committed fixture: the reduction/agreement/guard checks need
+  no Stan (run on CI); the live narrower-or-equal / label check is a fit (`skip_on_ci`).
+- **Pins (#4/#18):** no coverage claim for HPDI. Asserted in `test-icc-brms.R`: the `posterior_summary` guard
+  test (`intraclass_unsupported`, on CI) + the `hpdi_interval` ≡ `coda` + narrower-than-percentile unit test
+  (on CI where coda is present) + **O-HPDI** (live: reduction `expect_identical`, HPDI same MAP + no wider +
+  `(HPDI)` header; `skip_on_ci`).
+
 ---
 
 ## Bibliography

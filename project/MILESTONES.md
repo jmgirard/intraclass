@@ -1205,15 +1205,18 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         fired the warning; (d) three classed guard tests (on CI). No coverage claim under a custom prior (#4).
         Roxygen + NEWS + COVERAGE + REFERENCES updated in-commit (#16); `air`/`lintr`/spell clean; brms file
         255/0/20, full suite (CI mode) 1221/0/20.
-  - [ ] **Slice 2 — HPDI credible intervals (`posterior_summary` sub-choice).** Add
+  - [x] **Slice 2 — HPDI credible intervals (`posterior_summary` sub-choice).** Added
         `posterior_summary = c("percentile", "hpdi")` (default `"percentile"`), meaningful only under
-        `ci_method = "posterior"`. HPDI via a **dependency-free internal boundary-aware helper** (narrowest
-        interval covering the credible mass, sort-and-scan on the ICC draws). Misapplied (`"hpdi"` with a
-        non-posterior `ci_method` / non-brms engine) → classed `abort_unsupported`. Label the interval method
-        so print/tidy distinguishes percentile vs HPDI. **O-HPDI:** (a) `"percentile"` reproduces shipped
-        intervals bit-identically; (b) helper ≡ `coda::HPDinterval` (`skip_if_not_installed`) ≤ 1e-8;
-        (c) HPDI width ≤ percentile width on the same draws; (d) classed abort conditions. Roxygen + NEWS +
-        COVERAGE in-commit (#16); `air`/`lintr` clean.
+        `ci_method = "posterior"`; HPDI via a **dependency-free boundary-aware helper** `hpdi_interval()`
+        (narrowest window covering the credible mass, index arithmetic matching `coda::HPDinterval`). Internal
+        reducer `posterior_summary()` kept (renaming its ~30 data-raw/test call sites was avoided — R resolves
+        the function-call position past the like-named public arg); it gained an `interval_type` param.
+        Misapplied (explicit `posterior_summary` off `ci_method = "posterior"`) → `intraclass_unsupported`;
+        header labels the `(HPDI)` variant; `ci$posterior_summary` field added. **O-HPDI PASS:** (a) default ≡
+        explicit `"percentile"` **bit-identical** (live); (b) `hpdi_interval` ≡ `coda::HPDinterval` ≤ 1e-8
+        (unit, on CI); (c) HPDI same MAP point + width ≤ percentile (live); (d) classed guard. No coverage
+        claim for HPDI (#4). Roxygen + NEWS + COVERAGE + REFERENCES in-commit (#16); `air`/`lintr`/spell clean;
+        brms file 261/0/21.
   - [ ] **Cross-cutting DoD (§8):** `?icc` documents both args + the footgun/HPDI caveats; installed-pkg check
         (`NOT_CRAN=true`, not just `load_all`) drives both new paths; `lintr::lint_package()` + `air format`
         clean; `R CMD check --as-cran` 0/0/{0,1}; full CI matrix green; ship on `m34-bayes-customization` via PR

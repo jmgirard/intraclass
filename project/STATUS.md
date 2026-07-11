@@ -188,22 +188,25 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **M34 Slice 2 — HPDI credible intervals (`posterior_summary` sub-choice).** Add
-  `posterior_summary = c("percentile", "hpdi")` (default `"percentile"`), meaningful only under
-  `ci_method = "posterior"`; HPDI via a dependency-free boundary-aware internal helper (narrowest interval
-  covering the credible mass on the ICC draws); misapplied (`"hpdi"` off posterior/non-brms) → classed
-  `abort_unsupported`; label the interval method so print/tidy distinguishes the two. **O-HPDI:**
-  (a) `"percentile"` reproduces shipped intervals bit-identically; (b) helper ≡ `coda::HPDinterval`
-  (`skip_if_not_installed`) ≤ 1e-8; (c) HPDI width ≤ percentile width; (d) classed abort conditions.
-  **Not started — plan before code (#14).**
-- Done this session: **M34 Slice 1 — user `prior=` override (top-level `icc()` arg) — COMPLETE, not yet
-  committed as a slice.** Added `prior = NULL` to `icc()` (brms-only, default = sourced half-*t*(4,0,1));
-  `fit_brms_common()` honours an injected `brm_args$prior`, else the sourced default (icc() validates the
-  dedicated arg and injects — **no wrapper changes**; `prior` stays reserved in `brm_args` at `icc.R:383`);
-  classed `intraclass_custom_prior` footgun warning (#8). **O-PriorReduce PASS** (live, `skip_on_ci`):
-  reduction + round-trip **bit-identical** + tight prior moves ICC(A,1) 0.256→0.206 + warning; three classed
-  guard tests on CI. brms file 255/0/20, full suite (CI mode) **1221/0/20**; `air`/`lintr`/spell clean; roxygen
-  + NEWS + COVERAGE + REFERENCES in-commit (#16). No coverage claim under a custom prior (#4).
+- Active task: **M34 cross-cutting DoD / finish-task gate.** Both slices done; remaining = installed-pkg
+  check (`NOT_CRAN=true`, not just `load_all` — [[verify-against-installed-package]]) driving both new paths,
+  `R CMD check --as-cran`, full CI matrix green, then ship on `m34-bayes-customization` via PR to `main`
+  ([[milestone-branches-and-prs]]).
+- Done this session: **M34 Slices 1 & 2 — COMPLETE.** **Slice 1 (user `prior=` override) committed**
+  (`90d69ad`): `prior = NULL` on `icc()` (brms-only, default = sourced half-*t*(4,0,1)); `fit_brms_common()`
+  honours an injected `brm_args$prior` (icc() validates + injects — **no wrapper changes**; `prior` stays
+  reserved in `brm_args` at `icc.R:383`); classed `intraclass_custom_prior` footgun warning. O-PriorReduce
+  PASS (reduction + round-trip **bit-identical** + tight prior moves ICC(A,1) 0.256→0.206 + warning). **Slice 2
+  (HPDI credible intervals) — DONE, not yet committed:** `posterior_summary = c("percentile","hpdi")` (default
+  percentile), meaningful only under `ci_method = "posterior"`; dependency-free `hpdi_interval()` (index
+  arithmetic matching `coda::HPDinterval`); internal reducer `posterior_summary()` kept (function-call
+  position resolves past the like-named arg — avoided renaming ~30 data-raw/test call sites), gained an
+  `interval_type` param; `(HPDI)` header label + `ci$posterior_summary` field; misapplied off-posterior →
+  `intraclass_unsupported`. O-HPDI PASS (live: default ≡ percentile **bit-identical**, HPDI same MAP + width ≤
+  percentile, `(HPDI)` header; unit: `hpdi_interval` ≡ `coda::HPDinterval` ≤ 1e-8, no wider than percentile).
+  brms file **261/0/21**; `air`/`lintr`/spell clean (added `HPDI` to WORDLIST); roxygen + NEWS + COVERAGE +
+  REFERENCES + M34 board in-commit (#16). **No coverage claim under a custom prior / for HPDI (#4) — no Fable
+  review in scope.**
 - Last green CI: **PR #38 (M33) — full CI matrix green (9/9), squash-merged to `main` at `34cb974`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed (no flakes, no re-runs). Locally before the PR: `R CMD check --as-cran`

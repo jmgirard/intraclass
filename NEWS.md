@@ -153,6 +153,15 @@ alternate engines, and seeded simulations.
   (`intraclass_custom_prior`) warning: a vague or flat SD prior can *worsen* small-\eqn{k}
   boundary bias, since the half-*t* is weakly informative on purpose. The prior stays
   owned by the package elsewhere — it may not be set through `brm_args`.
+* A new **`posterior_summary`** argument chooses how `ci_method = "posterior"` reduces the
+  posterior draws to a credible interval: `"percentile"` (the default, unchanged) or
+  `"hpdi"` (the highest-posterior-density interval — the narrowest interval covering the
+  credible mass, computed with a dependency-free helper). Percentile stays the default
+  because it is monotone-transformation invariant and degrades gracefully at the variance
+  boundary, and percentile (not HPD) intervals give nominal coverage at small rater counts
+  (ten Hove et al. 2020); the HPDI is offered for comparison, not as a strict upgrade, and
+  no coverage is claimed for it. The printed header names the HPDI variant. Setting
+  `posterior_summary` for a non-posterior interval method is an error.
 
 ## Choosing, projecting, and visualizing
 

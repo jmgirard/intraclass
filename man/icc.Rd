@@ -45,7 +45,8 @@ icc(
   boot_samples = 999L,
   seed = NULL,
   brm_args = list(),
-  prior = NULL
+  prior = NULL,
+  posterior_summary = c("percentile", "hpdi")
 )
 }
 \arguments{
@@ -211,6 +212,18 @@ simulation work — and \strong{voids those coverage guarantees}; \code{icc()} w
 loudly (a classed \code{intraclass_custom_prior} condition) because a vague or flat
 SD prior can \emph{worsen} small-\emph{k} boundary bias (the half-\emph{t} is weakly
 informative on purpose). Ignored (must be \code{NULL}) for non-Bayesian engines.}
+
+\item{posterior_summary}{How to summarize the posterior draws into a credible
+interval when \code{ci_method = "posterior"} (the Bayesian engine): \code{"percentile"}
+(the default — a two-sided percentile interval) or \code{"hpdi"} (the
+highest-posterior-density interval, the narrowest interval covering the
+credible mass). Percentile is the default because it is
+monotone-transformation invariant and degrades gracefully as the ICC
+approaches the variance boundary, and ten Hove, Jorgensen & van der Ark (2020)
+found percentile (not HPD) intervals give nominal coverage at small rater
+counts; the HPDI is offered for comparison, not as a strict upgrade (no
+coverage is claimed for it). Only applies to \code{ci_method = "posterior"};
+setting it for another interval method is an error.}
 }
 \value{
 An \code{icc} object: a list with the estimate table, variance components,

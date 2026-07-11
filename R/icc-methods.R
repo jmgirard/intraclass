@@ -70,9 +70,14 @@ format.icc <- function(x, ...) {
   # brms Bayesian engine samples the posterior by MCMC (Stan).
   estimator <- switch(x$engine, lavaan = "ML", brms = "MCMC", "REML")
   # The Bayesian "posterior" method is a CREDIBLE interval; the others are confidence
-  # intervals. Surface that in the header (ci$method stays the raw token, ADR-033).
+  # intervals. Surface that in the header (ci$method stays the raw token, ADR-033), and name
+  # the HPDI variant when chosen (posterior_summary = "hpdi", M34 Slice 2, ADR-044).
   ci_label <- if (identical(x$ci$method, "posterior")) {
-    "posterior credible"
+    if (identical(x$ci$posterior_summary, "hpdi")) {
+      "posterior credible (HPDI)"
+    } else {
+      "posterior credible"
+    }
   } else {
     x$ci$method
   }

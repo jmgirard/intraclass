@@ -275,6 +275,17 @@
 #'   loudly (a classed `intraclass_custom_prior` condition) because a vague or flat
 #'   SD prior can *worsen* small-*k* boundary bias (the half-*t* is weakly
 #'   informative on purpose). Ignored (must be `NULL`) for non-Bayesian engines.
+#' @param posterior_summary How to summarize the posterior draws into a credible
+#'   interval when `ci_method = "posterior"` (the Bayesian engine): `"percentile"`
+#'   (the default — a two-sided percentile interval) or `"hpdi"` (the
+#'   highest-posterior-density interval, the narrowest interval covering the
+#'   credible mass). Percentile is the default because it is
+#'   monotone-transformation invariant and degrades gracefully as the ICC
+#'   approaches the variance boundary, and ten Hove, Jorgensen & van der Ark (2020)
+#'   found percentile (not HPD) intervals give nominal coverage at small rater
+#'   counts; the HPDI is offered for comparison, not as a strict upgrade (no
+#'   coverage is claimed for it). Only applies to `ci_method = "posterior"`;
+#'   setting it for another interval method is an error.
 #'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
@@ -322,7 +333,8 @@ icc <- function(
   boot_samples = 999L,
   seed = NULL,
   brm_args = list(),
-  prior = NULL
+  prior = NULL,
+  posterior_summary = c("percentile", "hpdi")
 ) {
   if (!is.data.frame(data)) {
     abort_intraclass("{.arg data} must be a data frame.")
@@ -332,6 +344,9 @@ icc <- function(
   # reassigns it, so the Bayesian forced-default coupling can tell an unset `ci_method`
   # (auto-upgrade to "posterior" for a brms fit) from an explicit mismatch (abort).
   ci_method_default <- missing(ci_method)
+  # Likewise for `posterior_summary` (M34 Slice 2, ADR-044): an EXPLICIT setting off the
+  # posterior path is a teaching abort, while the default is a silent no-op everywhere.
+  posterior_summary_default <- missing(posterior_summary)
 
   # Dimensions not yet implemented fail loudly and point at where they are coming
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
@@ -444,6 +459,26 @@ icc <- function(
       class = "intraclass_custom_prior"
     )
     brm_args$prior <- prior
+  }
+
+  # Posterior summary choice (M34 Slice 2, ADR-044): percentile (default) vs HPDI credible
+  # interval. It is meaningful ONLY for `ci_method = "posterior"` (the brms path produces the
+  # posterior draws both summaries reduce); setting it explicitly for another interval method
+  # is a teaching abort (#5/#8), mirroring the `brm_args`/`prior` coupling. `ci_method` is
+  # already final here (the Bayesian forced-default upgrade ran above).
+  posterior_summary <- validate_choice(
+    posterior_summary,
+    c("percentile", "hpdi"),
+    "posterior_summary"
+  )
+  if (!posterior_summary_default && ci_method != "posterior") {
+    abort_unsupported(c(
+      "{.arg posterior_summary} only applies to {.code ci_method = \"posterior\"}.",
+      i = "It selects how the {.pkg brms} posterior draws are summarized (a percentile \\
+           or HPDI credible interval); {.code \"montecarlo\"} and {.code \"bootstrap\"} \\
+           do not produce posterior draws.",
+      i = "Drop {.arg posterior_summary} -- it defaults to {.val percentile}."
+    ))
   }
 
   type <- validate_choice(type, c("agreement", "consistency"), "type")
@@ -1521,10 +1556,14 @@ icc <- function(
   # unchanged. `points` is extracted from the summary so the downstream `estimates`
   # frame is built identically for every method.
   if (ci_method == "posterior") {
+    # `posterior_summary(...)` here is the internal reducer (function-call position); the
+    # like-named `posterior_summary` variable is the validated user choice, passed as
+    # `interval_type` (percentile vs HPDI, M34 Slice 2).
     intervals <- posterior_summary(
       engine_fit$draws,
       estimands,
-      conf_level = conf_level
+      conf_level = conf_level,
+      interval_type = posterior_summary
     )
     points <- vapply(intervals, `[[`, numeric(1), "point")
   } else {
@@ -1617,6 +1656,14 @@ icc <- function(
           mc_samples
         },
         seed = seed,
+        # How the posterior draws were summarized into the credible interval
+        # ("percentile" or "hpdi", M34 Slice 2); NA for the non-Bayesian methods, which
+        # do not produce a posterior. Surfaced in the printed header + glance().
+        posterior_summary = if (ci_method == "posterior") {
+          posterior_summary
+        } else {
+          NA_character_
+        },
         # Bayesian MCMC convergence diagnostics (brms only; NULL for the other engines,
         # which are not sampled) -- read by the O-Bayes oracle and available to users.
         rhat = engine_fit$convergence$rhat,
