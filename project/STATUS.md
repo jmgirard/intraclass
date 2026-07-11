@@ -1,6 +1,23 @@
 # Project status
 
-- Active milestone: **none** — M36 (ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped
+- Active milestone: **M37** (ADR-047) — fixed-rater **cluster-level** multilevel ICC (crossed Design 1,
+  balanced/complete), frequentist glmmTMB + lme4. **Planned, in flight, no slice code yet** (branch
+  `m37-fixed-cluster-level`). The last parked **(C) research/blocked** corner and the **cluster-level sibling
+  of M10**. Investigation split the ROADMAP's blanket "blocked": the balanced crossed cell reads a **new
+  coefficient off the shipped M10 fit** (σ²_c signal, `{θ²_r, σ²_cr}` agreement error, divisor `k`) — **no new
+  fit function**; the genuinely-open *incomplete* cell is deferred (double-blocked: ten Hove open small-*k*
+  estimator + the M9 §9 `ICC(c,k)` divisor). **The one new derivation is spike-gated:** at the subject level
+  σ²_cr wasn't in the error set (M10 fixed≡random was exact); at the cluster level it **is** — whether the
+  random `(1|cluster:rater)` variance is the correct **fixed**-rater interaction error is unvalidated (M10 §7).
+  A feasibility spike (Slice 1) settles it before shipping code: **Outcome A** (reduction to M5 random
+  cluster-level exact + recovery nominal) → reduction oracle, no Fable; **Outcome B** (σ²_cr needs a
+  finite-population correction) → derive it, pin against the non-circular recovery oracle, and fire the
+  **conditionally pre-authorized** gated Fable review (#19). Estimator never tuned to force coverage — 🟣
+  degrade if unpinnable (#4). This commit writes ADR-047, adds the M37 board to MILESTONES, advances the
+  MILESTONES preamble + ADR-index, adds estimand-spec `M37-fixed-cluster-level.md`, annotates ROADMAP (the (C)
+  cluster-level-fixed corner promoted), and flips STATUS to M37-active. **No slice code yet** — plan before
+  code (#14). Next: `/start-task` Slice 1 (the feasibility spike).
+- Prior milestone: **M36** (ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped
   (PR #41, squash-merged to `main` at `f5a19e8`). It generalized the balanced M19 `theta2r_fixed_nested()` to
   unequal per-cluster k_c (bit-identical on balanced), lifted the deferral for glmmTMB/lme4 (brms refused),
   and shipped **both** single and average `ICC_s(·,k)` at the subject level — the averaged coefficient's
@@ -228,8 +245,14 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none** — M36 shipped and merged (PR #41, `f5a19e8`). The next milestone needs an ADR after a
-  short retro (founding brief §7). *Superseded active task (M36, done):* incomplete/ragged fixed-rater nested
+- Active task: **M37 Slice 1 — the feasibility spike (next; no slice code yet).** Write
+  `data-raw/reviews/m37-feasibility-spike-{point,coverage}.R`: on balanced data, does the fixed cluster-level
+  ICC (θ²_r main-effect correction + random σ²_cr interaction) equal the shipped M5 random cluster-level ICC,
+  and does the point/interval recover a non-circular finite-population cluster-mean truth (interior + boundary
+  σ²_c=0, n_rep ≥ 240)? Decide Outcome A (reduction exact → ship reduction-oracle, no Fable) vs B (σ²_cr needs
+  a finite-population correction → derive it, pin against recovery, fire the pre-authorized gated Fable review).
+  Then Slice 2 (lift the M10 `level="cluster"`+fixed abort for balanced crossed Design 1, read §2b off the M10
+  fit, O-FCL oracles) and Slice 3 (docs). Run via `/start-task`. *Superseded active task (M36, done):* incomplete/ragged fixed-rater nested
   Design 2 — `theta2r_fixed_nested()` generalized to unequal per-cluster k_c (bit-identical on balanced),
   guard narrowed to refuse brms only, both single + average `ICC_s(·,k)` shipped (average pinned by the exact
   single-cluster reduction to flat M3), O-IFNML committed (coverage interior .967 / boundary θ²=0 .942, no
@@ -310,10 +333,13 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M36 (ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped and merged
-  (PR #41, `f5a19e8`), full CI matrix green 9/9, no Fable review. The flagged risk (ragged 2b-under-imbalance
-  interval) resolved nominal in the committed O-IFNML oracle (boundary θ²=0 coverage .942). The next milestone
-  needs an ADR after a short retro (founding brief §7).
+- Blockers: **none** — M37 (ADR-047) is planned and in flight. Its **one open question is spike-resolvable,
+  not a blocker**: whether the random `(1|cluster:rater)` σ²_cr is the correct fixed-rater cluster-level error
+  (M10 §7). Slice 1 (the feasibility spike) settles it; a gated Fable review is **conditionally
+  pre-authorized** to fire only on Outcome B (σ²_cr needs a finite-population correction). Historical (M36,
+  cleared): M36 (ADR-046) shipped and merged (PR #41, `f5a19e8`), full CI matrix green 9/9, no Fable review;
+  the flagged risk (ragged 2b-under-imbalance interval) resolved nominal in the committed O-IFNML oracle
+  (boundary θ²=0 coverage .942).
   Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
   (`.8625` at n_rep 80) went to a gated Fable review (#19) → **VERDICT: no shortfall, a Monte-Carlo tail
   event that does not replicate** (Fable re-ran the same incidence at n=240 → .9458; 2,000-fit frequentist
@@ -324,7 +350,19 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M36 shipped (PR #41, squash-merged at `f5a19e8`); post-merge
+- Updated: 2026-07-11 by main session (Opus) — **M37 planned (ADR-047): fixed-rater cluster-level multilevel
+  ICC (crossed Design 1, balanced), the last (C) research/blocked corner.** After a short retro + investigation
+  that split the ROADMAP's blanket "cluster-level fixed is blocked" into a **parity-shippable balanced cell**
+  (reads a new coefficient off the shipped M10 fit — the cluster-level sibling of M10, no new fit) and a
+  **genuinely-open incomplete cell** (double-blocked: ten Hove open small-*k* estimator + the M9 §9 open
+  `ICC(c,k)` divisor — deferred), the maintainer chose (via the plan question gate): **balanced crossed
+  frequentist only** (glmmTMB + lme4), **spike-first structure**, and a **conditional Fable pre-authorization**
+  (fires only if the spike shows the balanced fixed≡random cluster-level reduction fails — the σ²_cr
+  finite-population treatment). This commit (on branch `m37-fixed-cluster-level`) writes ADR-047, adds the M37
+  DoD board to MILESTONES (live board, ADR-015), advances the MILESTONES preamble + ADR-index (M37 in flight),
+  adds estimand-spec `M37-fixed-cluster-level.md`, annotates ROADMAP (the (C) cluster-level-fixed corner
+  promoted to M37), and flips STATUS to M37-active. **No slice code yet** — plan before code (#14). Next:
+  `/start-task` Slice 1 (the feasibility spike). Prior line: **M36 shipped (PR #41, squash-merged at `f5a19e8`); post-merge
   `project/` reconcile.** This commit flips STATUS to M36-shipped, compresses the MILESTONES M36 board to the
   summary form (preserving the "Deferred out of M36" list), advances the MILESTONES preamble (M36 no longer in
   flight), sets "Last green CI" to the merge commit, and flips the ROADMAP (C) entry to "shipped as M36". The
@@ -550,13 +588,14 @@ closing the ADR-017 arc (M13).
 
 ## Next action
 
-**No milestone is currently in flight — the next needs an ADR after a short retro (founding brief §7).** M36
-(ADR-046, incomplete/ragged fixed-rater nested Design 2) shipped (PR #41, `f5a19e8`): the last frequentist
-completeness corner ADR-029 deferred now ships for glmmTMB/lme4 (both single + average `ICC_s(·,k)`; brms
-refused), with a non-circular finite-population recovery oracle (no Fable). Pick a direction from the parked
-candidates (below / `ROADMAP.md`), run a short retro, and open the next milestone with an ADR. The remaining
-**(C) research/blocked** corner is **cluster-level fixed** raters (no scaffolding; ten Hove flag the estimator
-itself as open — likely a Fable review if picked up).
+**M37 (ADR-047) is in flight — planned, no slice code yet (branch `m37-fixed-cluster-level`).** The last
+parked **(C) research/blocked** corner: fixed-rater **cluster-level** multilevel ICC (crossed Design 1,
+balanced/complete), the cluster-level sibling of M10, frequentist glmmTMB/lme4. Investigation split the blanket
+"blocked" — the balanced crossed cell reads a new coefficient off the shipped M10 fit (no new fit); the
+genuinely-open *incomplete* cell is deferred (double-blocked). Spike-first (Slice 1 settles the σ²_cr
+fixed-treatment); Fable **conditionally pre-authorized** on the spike's Outcome B. Prior: M36 (ADR-046,
+incomplete/ragged fixed-rater nested Design 2) shipped (PR #41, `f5a19e8`) with a non-circular
+finite-population recovery oracle (no Fable). Next: `/start-task` Slice 1 (the feasibility spike).
 
 **Deferred / candidates —** With
 M34 the Bayesian arc's *parity* (M23–M33) and *customization* (M34) are both complete. Remaining brms work is

@@ -190,13 +190,17 @@ helpers* item below (sample-size / CI-width), where it belongs.
       single and average** `ICC_s(·,k)` — pinned by a non-circular finite-population recovery oracle (no
       Fable). The averaged coefficient's divisor turned out to be the well-defined subject-level `k_eff` (the
       M19 random-nested divisor), **not** the open per-cluster `ICC(c,k)` divisor — so it shipped, not
-      deferred. Shipped detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015). **Still parked /
-      genuinely open:** **cluster-level fixed** raters (crossed or nested — ten Hove et al. 2022 flag the best
-      incomplete/small-*k* estimator as an open question; no scaffolding, would schedule leaning on coverage
-      calibration, likely a Fable review); **Design 3 fixed** (⚫ by-design — multilevel one-way, no separable
-      rater effect); the **brms/lavaan** incomplete-fixed-nested siblings (engine parity, now unblockable given
-      M36's frequentist oracle). Also parked, low priority: **selectable** `posterior` coupling (MC/bootstrap
-      on a Bayesian fit).
+      deferred. Shipped detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015). **Cluster-level fixed
+      (balanced crossed) — PLANNED as M37** (ADR-047): investigation split the blanket "blocked" — the
+      **balanced/complete crossed Design-1** cell reads a new coefficient off the *shipped* M10 fit (the
+      cluster-level sibling of M10, no new fit), spike-gated on the σ²_cr fixed-treatment (Fable conditionally
+      pre-authorized on the reduction failing); frequentist glmmTMB/lme4. Planned detail in
+      [`MILESTONES.md`](MILESTONES.md) (ADR-015). **Still parked / genuinely open:** **incomplete/unbalanced**
+      cluster-level fixed (🟣 double-blocked — ten Hove's open small-*k* estimator *and* the M9 §9 open
+      cluster-level `ICC(c,k)` divisor; its own later milestone); **Design 3 fixed** (⚫ by-design — multilevel
+      one-way, no separable rater effect); the **brms/lavaan** incomplete-fixed-nested **and** cluster-level-fixed
+      siblings (engine parity, unblockable given M36/M37's frequentist oracles). Also parked, low priority:
+      **selectable** `posterior` coupling (MC/bootstrap on a Bayesian fit).
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
