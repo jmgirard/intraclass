@@ -264,7 +264,12 @@
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
   upload** (ADR-022).
-- Last green CI: **PR #41 (M36) — full CI matrix green (9/9), squash-merged to `main` at `f5a19e8`.**
+- Last green CI: **PR #42 (M36 Fable-review ingestion) — full CI matrix green (9/9), squash-merged to `main`
+  at `9aedfc9`.** The post-hoc gated Fable review (#19, maintainer-requested) confirmed the M36 ragged 2b
+  construction sound (no corrective follow-up); ingestion applied its recommendations as doc/test-asset
+  amendments — O-IFNML gained a C_n=80 cluster-count sentinel (coverage .967, no decay) + an n_s=4
+  certification cell, plus ADR-046 Amendment 1 and the spec/REFERENCES notes. No shipped-code change. Prior
+  green: **PR #41 (M36) — full CI matrix green (9/9), squash-merged to `main` at `f5a19e8`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed (no flakes, no re-runs — devel ran clean). Locally before the PR:
   `devtools::test()` **1483 pass / 0 fail / 0 skip** (live brms Stan fits ran), `devtools::check()`
