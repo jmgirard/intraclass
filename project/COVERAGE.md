@@ -18,8 +18,11 @@ harmonic-mean `k_eff` divisor threads per posterior draw — a variance-ratio pu
 no 2b — the M30 regime). O-Bayes-IOneway pins reduction-to-M26 + ragged coverage of ICC(1) & ICC(1,k_eff) +
 glmmTMB/lme4 M6+M3 containment. Slice 2 adds **fixed-rater within-cell replicates**
 (`fit_brms_replicates_fixed()`, θ²_r per draw into the rater slot, 2b ≈ 0 on balanced data → θ²_r = σ²_r);
-O-Bayes-FRep pins coverage .9625 + glmmTMB M20 S1 containment + average > single. (Slice 3 — multilevel
-within-cell replicates — pending.)
+O-Bayes-FRep pins coverage .9625 + glmmTMB M20 S1 containment + average > single. Slice 3 adds **multilevel
+within-cell replicates** — crossed Design 1 (`fit_brms_ml_replicates()`, six-component) + nested Design 2
+(`fit_brms_nested_replicates()`, five-component), random raters, subject level; O-Bayes-MLRep pins coverage
+(.95–.9625 both designs) + glmmTMB M20 S2 containment + average > single. **All three slices came back
+nominal — no Fable review** (the M30 variance-ratio regime). The Bayesian parity mop-up is complete.
 Prior: during **M32** (ADR-042, branch `m32-bayes-incomplete-nested`) — the Bayesian engine now
 fits **incomplete/ragged nested random**-rater data at the subject level for **both** nested designs:
 Design 2 (raters nested in clusters, Slice 1, `fit_brms_nested_clusters()`) and Design 3 (raters nested in
@@ -118,14 +121,14 @@ replicated data (every cell present, equal replicate count). Splits σ²_res →
 |---|---|
 | `occasions` = single, average | ✅ |
 | `engine` = glmmTMB, lme4 | ✅ |
-| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M29 Slice 2, ADR-039; fixed-rater M33 Slice 2, ADR-043)** — `score ~ 1 + [rater +] (1\|subject) + (1\|subject:rater)` under the half-*t*(4,0,1) SD prior; the σ²_sr/σ²_e split and the `occasions` per-draw divisor (pure error ÷ n_o, interaction not divided) compose off the posterior draws exactly as the frequentist estimand. **Two-way random** (M29) **and fixed-rater** (M33 S2, `fit_brms_replicates_fixed()`: θ²_r read per draw into the rater slot, 2b moment correction ≈ 0 on balanced data → θ²_r = σ²_r, fixed reproduces random), single-level, balanced. O-Bayes-Rep / O-Bayes-FRep: coverage + glmmTMB containment + average > single. **Multilevel** Bayesian replicates stay deferred (the M20 Slice 2 sibling; M33 Slice 3). |
+| `engine = "brms"` + `ci_method = "posterior"` | ✅ **Shipped (M29 Slice 2, ADR-039; fixed-rater M33 Slice 2 + multilevel M33 Slice 3, ADR-043)** — `score ~ 1 + [rater +] (1\|subject/cluster terms) + (1\|…:subject:rater)` under the half-*t*(4,0,1) SD prior; the σ²_sr/σ²_e split and the `occasions` per-draw divisor (pure error ÷ n_o, interaction not divided) compose off the posterior draws exactly as the frequentist estimand. **Single-level two-way random** (M29) **and fixed-rater** (M33 S2, `fit_brms_replicates_fixed()`: θ²_r read per draw into the rater slot, 2b ≈ 0 on balanced data → θ²_r = σ²_r), plus **multilevel random** (M33 S3, `fit_brms_ml_replicates()` crossed Design 1 six-component + `fit_brms_nested_replicates()` nested Design 2 five-component, subject level) — all balanced. O-Bayes-Rep / O-Bayes-FRep / O-Bayes-MLRep: coverage + glmmTMB containment + average > single. **Fixed-rater** multilevel replicates stay deferred (the compound corner). |
 
 **Gaps** (all M17 Slice 3 deferrals — `M17-within-cell-replicates.md` §7)
 
 | Case | Reason |
 |---|---|
 | `raters = "fixed"` with replicates | ✅ (M20 Slice 1, balanced) — θ²_r (shared `theta2r_fixed()`) in the rater slot of `fit_{glmmtmb,lme4}_replicates_fixed`; θ²_r = σ²_r on balanced data, so fixed reproduces the random coefficients (O-FRep). Ragged×fixed and multilevel×fixed stay deferred. |
-| multilevel (`cluster`) with replicates | ✅ (M20 Slice 2, balanced) — crossed Design 1 (`(1\|cluster:subject:rater)`, six components) and nested Design 2 (five); the residual splits into the interaction σ²_{csr} and pure error at the subject level. Design 3 replicate-split ⚫ by-design (multilevel one-way, no separable interaction); fixed×multilevel, conflated×replicates, and ragged×multilevel replicates deferred. Cross-engine + reduction (occasion-averaged == M5/M8 on cell means) oracles. |
+| multilevel (`cluster`) with replicates | ✅ (M20 Slice 2, balanced; **brms M33 Slice 3, ADR-043**) — crossed Design 1 (`(1\|cluster:subject:rater)`, six components) and nested Design 2 (five); the residual splits into the interaction σ²_{csr} and pure error at the subject level. glmmTMB/lme4 (M20 S2) **and brms** (M33 S3: `fit_brms_ml_replicates()` / `fit_brms_nested_replicates()`, random raters → variance-ratio push-forward, no θ²; O-Bayes-MLRep coverage + glmmTMB containment). Design 3 replicate-split ⚫ by-design (multilevel one-way, no separable interaction); fixed×multilevel, conflated×replicates, and ragged×multilevel replicates deferred (all engines). Cross-engine + reduction (occasion-averaged == M5/M8 on cell means) oracles. |
 | ragged / non-uniform replicates, **single-occasion** | ✅ (M20 Slice 3) — two-way random, the replicate analogue of M3: the shipped interaction fit + harmonic-mean `k_eff` (distinct raters/subject) + connectedness gate. Cross-engine + seeded-recovery oracles. Ragged×fixed and ragged×multilevel stay deferred (compound corners). |
 | ragged replicates, **`occasions = "average"`** | 🟣 **Research** — with unequal per-cell counts the reliability of the mean of `n_o` replicates has no single scalar effective-`n_o` divisor (GT averaging weights are per-cell) and no textbook/independent oracle pins one; needs a simulation-oracle study before it can ship (M20 attempt-then-degrade, ADR-030; M17 §7). |
 | `d_study()` projection off a replicate fit | ✅ (M22, ADR-032) — rater-count projection (single-level two-way + multilevel crossed D1 / nested D2), one curve per occasion setting; see the `d_study()` table below. Occasion projection and ragged-replicate projection stay 🔵/🟣 deferred. |

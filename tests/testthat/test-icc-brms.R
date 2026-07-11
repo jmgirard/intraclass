@@ -156,16 +156,17 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   # assert the crossed and nested fixed paths are *supported*.
 })
 
-# M29 Slice 2 ships SINGLE-LEVEL two-way RANDOM within-cell replicates for brms (the live
-# O-Bayes-Rep-agree fit below); M33 Slice 2 (ADR-043) adds SINGLE-LEVEL FIXED-rater replicates
-# (the O-Bayes-FRep live + fixture tests below). The remaining replicate corner -- MULTILEVEL
-# replicates (crossed Design 1 + nested Design 2, random or fixed) -- stays deferred (the Bayesian
-# sibling of the M20 Slice 2 frequentist path; M33 Slice 3) and aborts loudly BEFORE any fit
-# dispatch (no Stan needed).
-test_that("brms refuses the multilevel replicate corner", {
+# M29 Slice 2 ships SINGLE-LEVEL two-way RANDOM within-cell replicates for brms; M33 Slice 2
+# (ADR-043) adds SINGLE-LEVEL FIXED-rater replicates; M33 Slice 3 adds MULTILEVEL RANDOM replicates
+# -- crossed Design 1 (six-component) + nested Design 2 (five-component), subject level (the
+# O-Bayes-MLRep live + fixture tests below). The remaining replicate corner -- FIXED-rater
+# MULTILEVEL replicates (the compound corner; the Bayesian sibling of the M20 fixed×multilevel
+# deferral) -- stays deferred and aborts loudly (engine-agnostically, ~icc.R:825) BEFORE any fit.
+test_that("brms refuses the fixed-rater multilevel replicate corner", {
   set.seed(30)
-  # Multilevel replicates: deferred. Well-formed crossed Design 1 with 2 ratings per
-  # subject x rater cell (subjects nested in clusters, raters crossed).
+  # Fixed-rater multilevel replicates: still deferred. Well-formed crossed Design 1 with 2
+  # ratings per subject x rater cell, raters fixed. (suppressWarnings: the fixed-rater nudge
+  # fires before the abort; we assert the abort.)
   dm <- expand.grid(
     rep = 1:2,
     rater = factor(1:3),
@@ -175,14 +176,15 @@ test_that("brms refuses the multilevel replicate corner", {
   dm$subject <- factor(paste0(dm$cluster, "_", dm$s))
   dm$score <- rnorm(nrow(dm))
   expect_error(
-    icc(
+    suppressWarnings(icc(
       dm,
       score,
       rater,
       subject = subject,
       cluster = cluster,
+      raters = "fixed",
       engine = "brms"
-    ),
+    )),
     class = "intraclass_unsupported"
   )
 })
@@ -1034,6 +1036,48 @@ test_that("O-Bayes-FRep: committed reference reproduces the fixed-rater replicat
   # (4) OCCASION AVERAGING: the average-occasion ICC sits above the single-occasion one in
   #     ~every rep (averaging n_o replicates reduces pure error).
   expect_gte(s$average_above_single, 0.95)
+})
+
+# --- O-Bayes-MLRep: the committed MULTILEVEL replicate coverage reference (no brms, M33 S3) ---
+# The multilevel sibling of O-Bayes-Rep. data-raw/oracle-bayesian-multilevel-replicates.R runs a
+# replicate multilevel DGP through the SHIPPED fit_brms_ml_replicates() (crossed Design 1,
+# six-component) and fit_brms_nested_replicates() (nested Design 2, five-component) recipes and
+# commits per-design SUBJECT-level single-/average-occasion ICC(A,1) coverage, containment of the
+# frequentist glmmTMB points (the M20 §6 reduction), and the average > single ordering. Random
+# raters → variance-ratio push-forward (no θ² functional, no 2b), so ~nominal coverage is expected
+# (the M30 regime). Fast, no fitting, runs on every CI job.
+
+test_that("O-Bayes-MLRep: committed reference reproduces the multilevel replicate findings", {
+  fixture <- test_path("fixtures", "bayesian-multilevel-replicates-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-multilevel-replicates.R to generate"
+  )
+  s <- readRDS(fixture)$stats
+
+  for (dn in c("crossed", "nested")) {
+    a <- s[s$design == dn, ]
+    expect_equal(nrow(a), 1L)
+
+    # (1) High convergence at the half-t DGP (fixed-warmup budget, so >= 0.90).
+    expect_gte(a$converged_frac, 0.90)
+
+    # (2) Subject-level single-/average-occasion credible intervals COVER their known population
+    #     values ~nominally (coverage is the pin; variance-ratio push-forward, no θ² undercoverage).
+    expect_gte(a$coverage_single, 0.90)
+    expect_lte(a$coverage_single, 0.99)
+    expect_gte(a$coverage_average, 0.90)
+    expect_lte(a$coverage_average, 0.99)
+
+    # (3) CONTAINMENT (M20 §6 reduction): the frequentist glmmTMB replicate points fall inside the
+    #     brms credible intervals for ~all reps (the two engines differ only by the prior).
+    expect_gte(a$containment_single, 0.90)
+    expect_gte(a$containment_average, 0.90)
+
+    # (4) OCCASION AVERAGING: the average-occasion ICC sits above the single-occasion one in
+    #     ~every rep (averaging n_o replicates reduces pure error).
+    expect_gte(a$average_above_single, 0.95)
+  }
 })
 
 # --- O-Bayes-NML: the committed nested coverage reference (no brms needed, M25) -------
@@ -2193,6 +2237,89 @@ test_that("brms fits fixed-rater within-cell replicates end to end (O-Bayes-FRep
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: MULTILEVEL within-cell replicates, O-Bayes-MLRep-agree (M33 Slice 3) ------
+# The multilevel analogue of the O-Bayes-Rep-agree live test, for BOTH replicate multilevel designs:
+# crossed Design 1 (six-component, subject + cluster levels) and nested Design 2 (five-component,
+# subject level). Confirms icc() -> fit_brms_ml_replicates() / fit_brms_nested_replicates() ->
+# posterior_summary() end to end and pins O-Bayes-MLRep-agree: the glmmTMB REML replicate points sit
+# inside the brms credible intervals (the M20 §6 reduction), and the average-occasion subject ICC
+# exceeds the single-occasion one.
+test_that("brms fits multilevel within-cell replicates end to end (O-Bayes-MLRep-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  make_data <- function(design) {
+    grid <- expand.grid(rep = 1:2, r = 1:3, s = 1:4, cluster = 1:5)
+    sid <- interaction(grid$cluster, grid$s, drop = TRUE)
+    crid <- interaction(grid$cluster, grid$r, drop = TRUE)
+    csrid <- interaction(grid$cluster, grid$s, grid$r, drop = TRUE)
+    score <- rnorm(5, 0, sqrt(0.5))[grid$cluster] +
+      rnorm(nlevels(sid), 0, 1)[sid] +
+      rnorm(3, 0, 0.4)[grid$r] +
+      (if (design == "crossed") rnorm(nlevels(crid), 0, 0.4)[crid] else 0) +
+      rnorm(nlevels(csrid), 0, sqrt(0.4))[csrid] +
+      rnorm(nrow(grid), 0, sqrt(0.5))
+    data.frame(
+      subject = factor(paste0(grid$cluster, "_", grid$s)),
+      rater = if (design == "crossed") {
+        factor(grid$r)
+      } else {
+        factor(paste0(grid$cluster, "_r", grid$r))
+      },
+      cluster = factor(grid$cluster),
+      score = score
+    )
+  }
+
+  for (design in c("crossed", "nested")) {
+    set.seed(if (design == "crossed") 3330L else 3331L)
+    d <- make_data(design)
+    fit <- suppressWarnings(icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      occasions = c("single", "average"),
+      engine = "brms",
+      seed = 1,
+      brm_args = list(chains = 2, iter = 1200, refresh = 0)
+    ))
+    expect_s3_class(fit, "icc")
+    expect_identical(fit$ci$method, "posterior")
+    td <- tidy(fit)
+    expect_true(all(
+      td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+    ))
+
+    # O-Bayes-MLRep-agree: the glmmTMB REML replicate points sit inside the brms credible intervals.
+    g <- suppressWarnings(icc(
+      d,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      occasions = c("single", "average"),
+      engine = "glmmTMB"
+    ))
+    key <- function(x) paste(x$index, x$level, x$occasions)
+    ge <- g$estimates[order(key(g$estimates)), ]
+    fe <- fit$estimates[order(key(fit$estimates)), ]
+    expect_true(all(ge$estimate >= fe$conf.low & ge$estimate <= fe$conf.high))
+
+    # Occasion averaging raises reliability at the subject level.
+    a1 <- fit$estimates[
+      fit$estimates$index == "ICC(A,1)" & fit$estimates$level == "subject",
+    ]
+    expect_gt(
+      a1$estimate[a1$occasions == 2],
+      a1$estimate[a1$occasions == 1]
+    )
+  }
 })
 
 # --- Live brms fit: incomplete/ragged two-way random, O-Bayes-Incomplete-agree (M30 Slice 1) ---

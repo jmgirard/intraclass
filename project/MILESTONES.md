@@ -63,7 +63,8 @@ M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M2
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33).
 **M33 (ADR-043) is currently in flight** (the Bayesian parity mop-up; branch `m33-bayes-parity-mopup`) —
-opened/scoped, no slice code yet; see its board below.
+all three slices shipped (incomplete one-way + fixed & multilevel within-cell replicates), every oracle
+nominal, ready for the finish-task gate + PR; see its board below.
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1169,11 +1170,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     (single/average), glmmTMB containment 1.00/1.00, average>single 1.00, MAP relbias −.056/−.024
     (`bayesian-fixed-replicates-oracle.rds`, seed 33200, n_rep 80) → **no Fable review**. Live
     O-Bayes-FRep-agree containment verified; fixture + full suite (CI mode) green; lint/air clean.
-  - [ ] **Slice 3 — multilevel within-cell replicates (balanced).** Narrow `icc.R:1122`'s `multilevel`
-    clause; crossed D1 (`(1|cluster:subject:rater)`, 6-component) + nested D2 (5-component) replicate fits
-    mirroring M20 S2; residual → σ²_{csr} + pure error, `occasions` per-draw divisor. Design 3 replicate-split
-    ⚫ by design. O-Bayes-MLRep: reduction (occasion-averaged ≡ M5/M8 on cell means) + glmmTMB M20 S2
-    containment + coverage.
+  - [x] **Slice 3 — multilevel within-cell replicates (balanced).** DONE. Removed the obsolete brms
+    `replicates && multilevel` guard (the deferred corners — Design 3, fixed, conflated, ragged — are refused
+    engine-agnostically upstream) + added the brms dispatch branches; new `fit_brms_ml_replicates()` (crossed
+    D1, `(1|cluster:subject:rater)` → 6-component) + `fit_brms_nested_replicates()` (nested D2, 5-component),
+    random raters → variance-ratio push-forward, no θ² (plain `fit_brms_common()`). **O-Bayes-MLRep NOMINAL
+    both designs:** coverage crossed .9500/.9500, nested .9625/.9500, glmmTMB containment 1.00, avg>single
+    1.00 (`bayesian-multilevel-replicates-oracle.rds`, seed 33300, n_rep 80/design) → **no Fable review**.
+    Live O-Bayes-MLRep-agree containment (both designs) verified; fixture + full suite (CI mode) green;
+    lint/air clean.
   - [ ] Cross-cutting: roxygen/NEWS/COVERAGE/REFERENCES updated in-commit (#16); new deferred-corner brms
     refusal messages retargeted; `air format` + `lintr::lint_package()` clean; installed-pkg drive of each new
     path (`NOT_CRAN=true`, live Stan fits `skip_on_ci`); `R CMD check --as-cran`; full CI matrix green.
@@ -1184,11 +1189,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Bayesian **numeric-unit `d_study()`**; the **(B)** customization milestone — **`prior=`** API, **HPDI**
   intervals, **selectable** `posterior` coupling (next); **rstanarm** backend. All stay in
   [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — Slices 1–2 DONE, Slice 3 pending.** Branch `m33-bayes-parity-mopup`. Slice 1
-  (incomplete/ragged single-level one-way): `!balanced` brms guard narrowed, `fit_brms_oneway()` reused,
-  O-Bayes-IOneway **nominal** (ragged .9458). Slice 2 (fixed-rater within-cell replicates): replicate guard
-  narrowed + new `fit_brms_replicates_fixed()`, O-Bayes-FRep **nominal** (coverage .9625, containment 1.00) —
-  no Fable review either. Next: `/start-task` Slice 3 (multilevel within-cell replicates — crossed D1 +
-  nested D2 replicate fits mirroring M20 S2).
+- Status: **all three slices DONE — milestone ready for finish-task/PR.** Branch `m33-bayes-parity-mopup`.
+  Slice 1 (incomplete/ragged single-level one-way): `!balanced` brms guard narrowed, `fit_brms_oneway()`
+  reused, O-Bayes-IOneway **nominal** (ragged .9458). Slice 2 (fixed-rater within-cell replicates): replicate
+  guard narrowed + new `fit_brms_replicates_fixed()`, O-Bayes-FRep **nominal** (.9625, containment 1.00).
+  Slice 3 (multilevel within-cell replicates): brms multilevel-replicate guard removed + new
+  `fit_brms_ml_replicates()` (crossed D1) / `fit_brms_nested_replicates()` (nested D2), O-Bayes-MLRep
+  **nominal** both designs (.95–.9625, containment 1.00). **No Fable review anywhere** — the whole mop-up
+  came back nominal, as the M30 variance-ratio regime predicted (Slice 1's ragged one-way + Slices 2–3's
+  balanced replicates). Next: finish-task gate (`R CMD check`, installed-pkg drive of the new paths) → PR.
   Bayesian incomplete **fixed** nested / **cluster-level** / **replicates** / single-level **one-way** stay
   deferred.

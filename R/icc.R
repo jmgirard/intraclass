@@ -1124,20 +1124,12 @@ icc <- function(
     # fixed, and incomplete fixed-nested -- are refused engine-agnostically upstream
     # (~L655); incomplete crossed fixed MULTILEVEL is caught by the `!balanced` brms guard
     # below (M31 Slice 2 / later). So no brms-specific fixed guard is needed here.
-    if (replicates && multilevel) {
-      # Single-level two-way RANDOM replicates ship for brms (M29 Slice 2, ADR-039) and
-      # single-level FIXED-rater replicates ship too (M33 Slice 2, ADR-043;
-      # fit_brms_replicates_fixed, theta^2_r in the rater slot -- the 2b moment correction
-      # is ~0 on balanced replicated data). The MULTILEVEL replicate corner (crossed Design 1
-      # + nested Design 2, random or fixed) stays deferred (the Bayesian sibling of the M20
-      # Slice 2 frequentist path; M33 Slice 3) -- refuse it loudly (#5).
-      abort_unsupported(c(
-        "The {.pkg brms} engine supports within-cell replicates only for the \\
-         single-level two-way (random or fixed-rater) design so far.",
-        i = "Multilevel Bayesian replicates are planned for a later milestone; use \\
-             {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
-      ))
-    }
+    # Within-cell replicates ship for brms at the single level -- two-way random (M29 Slice 2)
+    # and fixed-rater (M33 Slice 2) -- and at the MULTILEVEL level -- crossed Design 1
+    # (six-component) + nested Design 2 (five-component), random raters (M33 Slice 3,
+    # ADR-043; fit_brms_{ml,nested}_replicates). The still-deferred multilevel-replicate corners
+    # (Design 3 by design, fixed-rater, conflated, and ragged multilevel replicates) are refused
+    # ENGINE-AGNOSTICALLY upstream (~L807), so no brms-specific replicate guard is needed here.
     if (!balanced) {
       # M30 (ADR-040): incomplete/ragged RANDOM-rater fits ship -- two-way single level +
       # crossed (Design 1) multilevel. M31 (ADR-041): incomplete/ragged FIXED-rater fits ship
@@ -1208,11 +1200,21 @@ icc <- function(
     # (one-way), fixed raters, conflated, and ragged data are aborted upstream; random,
     # balanced/complete only.
     if (ml_design == "nested_in_clusters") {
-      if (engine == "lme4") {
+      if (engine == "brms") {
+        # Nested Design 2 replicates, Bayesian (M33 Slice 3, ADR-043): the M8
+        # four-component fit + (1|cluster:subject:rater) split; random raters -> a
+        # variance-ratio push-forward, no theta^2. Subject level only.
+        fit_brms_nested_replicates(df, seed = seed, brm_args = brm_args)
+      } else if (engine == "lme4") {
         fit_lme4_nested_replicates(df)
       } else {
         fit_glmmtmb_nested_replicates(df)
       }
+    } else if (engine == "brms") {
+      # Crossed Design 1 replicates, Bayesian (M33 Slice 3, ADR-043): the M5
+      # five-component fit + (1|cluster:subject:rater) split (six components); random
+      # raters -> a variance-ratio push-forward, no theta^2.
+      fit_brms_ml_replicates(df, seed = seed, brm_args = brm_args)
     } else if (engine == "lme4") {
       fit_lme4_ml_replicates(df)
     } else {

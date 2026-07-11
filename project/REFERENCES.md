@@ -1030,6 +1030,47 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-fixed-replicates.R` (seeded; drives the SHIPPED
   `fit_brms_replicates_fixed()` recipe; writes the fixture before the hard pins).
 
+### Oracle O-Bayes-MLRep — Bayesian multilevel within-cell replicates (M33 Slice 3, ADR-043)
+
+- **Role:** the **multilevel** sibling of O-Bayes-Rep (single-level random replicates) and the Bayesian
+  sibling of the frequentist **M20 Slice 2** (`fit_glmmtmb_{ml,nested}_replicates`). `engine = "brms"` now
+  fits **multilevel within-cell replicate** ICCs for **both** replicate multilevel designs, subject level,
+  random raters: crossed **Design 1** (`fit_brms_ml_replicates()`, `+ (1|cluster:subject:rater)` on the M5
+  five-component fit → **six components**) and nested **Design 2** (`fit_brms_nested_replicates()`, the same
+  split on the M8 four-component fit → **five components**). The (1|cluster:subject:rater) term splits the
+  subject-level residual into the interaction σ²_{csr} ("subject_rater") and pure error σ²_e ("residual");
+  `occasions` divides only pure error by n_o. Random raters → **variance-ratio push-forward**, no θ²
+  functional, no 2b (a plain `fit_brms_common()` call, the M30 regime). Design 3 replicate-split is ⚫ by
+  design (multilevel one-way, no separable interaction); fixed-rater / conflated / ragged multilevel
+  replicates stay deferred (all engines).
+- **Oracles (≥2 independent, #1):** **O-Bayes-MLRep** (committed reference, no Stan) — per-design (crossed /
+  nested) subject-level single-/average-occasion ICC(A,1) **coverage** ~nominal, **containment** of the
+  frequentist glmmTMB replicate points (the M20 §6 reduction), and **average > single**;
+  **O-Bayes-MLRep-agree** (live fits, both designs) — the glmmTMB REML replicate points fall inside the brms
+  credible intervals (containment, `skip_on_ci`).
+- **Sources:** ten Hove et al. (2022) Table 3 (multilevel estimand) + GT two-facet replicate split
+  (`M17-within-cell-replicates.md`); ten Hove et al. (2020) prior/recipe; the independent point oracle is the
+  shipped glmmTMB M20 Slice 2 estimator (no new spec). The subject-level agreement error set is
+  {rater, subject_rater, residual} — **excluding** cluster_rater, which is a cluster-level phenomenon
+  (estimand.R; matches the M24 subject-level definition).
+- **DGP:** replicate multilevel, N_c = 15 clusters, N_s = 4 subjects/cluster, k = 3 raters, n_o = 2, σ²_c =
+  0.50, σ²_{s:c} = 1.00, σ²_r = 0.16 (D1 rater main / D2 rater-in-cluster σ²_{r:c}), σ²_{cr} = 0.16 (D1 only,
+  cluster-level), σ²_{csr} = 0.40, σ²_e = 0.50; pop subject single = 1.0/(1.0+0.16+0.40+0.50) = 0.4854,
+  average = 1.0/(1.0+0.16+0.40+0.50/2) = 0.5525 (same for both designs; σ²_r = σ²_{r:c}).
+- **Committed reference (`tests/testthat/fixtures/bayesian-multilevel-replicates-oracle.rds`; seed 33300,
+  n_rep = 80 per design):** per-design convergence / single+average coverage / glmmTMB containment /
+  average>single / MAP relbias (pins qualitative, #4/#18). **Observed:** crossed D1 — conv .96, coverage
+  **.9500/.9500**, containment 1.00/1.00, avg>single 1.00, MAP relbias −.074/−.063; nested D2 — conv .99,
+  coverage **.9625/.9500**, containment 1.00/1.00, avg>single 1.00, MAP relbias +.029/+.024. **Both designs
+  NOMINAL** — random-rater variance-ratio push-forward (no 2b) → **no Fable review**.
+- **Pins (#4/#18):** per design — convergence ≥ .90; single/average coverage ∈ [.90, .99]; containment ≥ .90
+  both; average>single ≥ .95. Asserted in `test-icc-brms.R` **O-Bayes-MLRep** (committed reference, on CI) +
+  **O-Bayes-MLRep-agree** (live fits both designs, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-multilevel-replicates.R` (seeded; compiles one model per design,
+  drives the SHIPPED `fit_brms_{ml,nested}_replicates()` recipes; the glmmTMB point comes from
+  `icc_point()` on the shipped replicate fit's components — bypassing `mc_ci()`, which can overflow on an
+  unstable small-multilevel fit; writes the fixture before the hard pins).
+
 ---
 
 ## Bibliography

@@ -560,6 +560,89 @@ fit_brms_replicates_fixed <- function(
   base
 }
 
+# Crossed (Design 1) multilevel within-cell replicate Bayesian fit (M33 Slice 3, ADR-043): the
+# replicate generalization of fit_brms_multilevel() (M24) -- adding (1 | cluster:subject:rater)
+# splits the M5 residual into the highest-order interaction sigma^2_{csr} ("subject_rater") and
+# pure within-cell error sigma^2_e ("residual") -- SIX components. The Bayesian sibling of
+# fit_glmmtmb_ml_replicates() (M20 Slice 2). Random raters -> a clean variance-ratio push-forward
+# (no theta^2 functional, no 2b), so it is a plain fit_brms_common() call under the SAME sourced
+# half-t(4, 0, 1) SD prior. The subject-level error map {rater, subject_rater, residual} and the
+# `occasions` per-draw divisor (pure error / n_o, the interaction NOT divided) match the
+# single-level M29 replicate path; the cluster level is unaffected by the split. Six components:
+#   cluster       = sigma^2_c        <- sd_cluster__Intercept
+#   subject       = sigma^2_{s:c}    <- sd_cluster:subject__Intercept
+#   rater         = sigma^2_r        <- sd_rater__Intercept
+#   cluster_rater = sigma^2_{cr}     <- sd_cluster:rater__Intercept
+#   subject_rater = sigma^2_{csr}    <- sd_cluster:subject:rater__Intercept
+#   residual      = sigma^2_e        <- sigma
+# `data` must be canonicalized to columns subject/rater/cluster/score, crossed random raters,
+# BALANCED/complete replicated (fixed / Design 3 / conflated / ragged replicates refused in icc()).
+fit_brms_ml_replicates <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater) + (1 | cluster:subject:rater)"
+    ),
+    spec = c(
+      cluster = "sd_cluster__Intercept",
+      subject = "sd_cluster:subject__Intercept",
+      rater = "sd_rater__Intercept",
+      cluster_rater = "sd_cluster:rater__Intercept",
+      subject_rater = "sd_cluster:subject:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}
+
+# Nested Design 2 (raters nested in clusters) multilevel within-cell replicate Bayesian fit
+# (M33 Slice 3, ADR-043): the replicate generalization of fit_brms_nested_clusters() (M25 Slice 1)
+# -- (1 | cluster:subject:rater) splits sigma^2_{(sr):c} into the interaction ("subject_rater") and
+# pure error ("residual") -- FIVE components. The Bayesian sibling of fit_glmmtmb_nested_replicates()
+# (M20 Slice 2). As Design 2 has no separable cluster x rater interaction, the rater-in-cluster
+# variance sigma^2_{r:c} lives in (1 | cluster:rater) and lands in the INTERNAL `rater` slot (the
+# same naming fit_brms_nested_clusters() uses, keeping the component set identical to the shipped
+# glmmTMB Design-2 replicate contract). Random raters -> a variance-ratio push-forward (no theta^2,
+# no 2b), a plain fit_brms_common() call. Five components:
+#   cluster       = sigma^2_c        <- sd_cluster__Intercept        (nuisance; no cluster ICC)
+#   subject       = sigma^2_{s:c}    <- sd_cluster:subject__Intercept
+#   rater         = sigma^2_{r:c}    <- sd_cluster:rater__Intercept  (rater-in-cluster)
+#   subject_rater = sigma^2_{(sr):c} <- sd_cluster:subject:rater__Intercept
+#   residual      = sigma^2_e        <- sigma
+# `data` must be canonicalized to columns subject/rater/cluster/score, nested Design 2 random
+# raters, BALANCED/complete replicated, subject level (fixed / conflated / ragged replicates refused
+# in icc(); the cluster level is undefined for nested raters).
+fit_brms_nested_replicates <- function(
+  data,
+  seed = NULL,
+  brm_args = list(),
+  call = rlang::caller_env()
+) {
+  fit_brms_common(
+    formula = stats::as.formula(
+      "score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | cluster:rater) + (1 | cluster:subject:rater)"
+    ),
+    spec = c(
+      cluster = "sd_cluster__Intercept",
+      subject = "sd_cluster:subject__Intercept",
+      rater = "sd_cluster:rater__Intercept",
+      subject_rater = "sd_cluster:subject:rater__Intercept",
+      residual = "sigma"
+    ),
+    data = data,
+    seed = seed,
+    brm_args = brm_args,
+    call = call
+  )
+}
+
 # Crossed (Design 1) multilevel Bayesian fit (M24 Slice 1, ADR-034): the M5 five-component
 # model
 #   score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) + (1 | cluster:rater)
