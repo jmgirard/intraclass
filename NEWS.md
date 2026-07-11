@@ -186,8 +186,10 @@ alternate engines, and seeded simulations.
 * Datasets `ratings` (the complete Shrout & Fleiss 1979 example) and
   `ratings_incomplete` (a connected incomplete variant), used throughout the docs.
 * Vignettes: *Getting started*, *Choosing an ICC* (the decision framework, with a
-  decision-tree diagram), and *Advanced* (incomplete and multilevel designs, the
-  estimation engines, the plots, and `choose_icc()`).
+  decision-tree diagram), *Multilevel designs* (subject/cluster level, crossed and
+  nested, complete and incomplete), *Estimation engines* (glmmTMB, lme4, lavaan),
+  *Confidence-interval methods* (Monte-Carlo and bootstrap), and *D-studies and
+  within-cell replicates* (with the `autoplot()` plots).
 
 ## Robustness (pre-release code review)
 

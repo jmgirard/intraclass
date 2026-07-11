@@ -1253,18 +1253,23 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - [x] `test-vignette-claims.R` green (no failures); the five corrected claims are **capability** statements
       (not numeric), so nothing to re-pin; `advanced.Rmd` renders cleanly end-to-end (live chunks unchanged).
 
-*Slice 2 — the split (mechanical redistribution):*
-- [ ] Create `multilevel-designs.Rmd` (subject/cluster, conflated Eq.14, nested Designs 2/3, incomplete
-      crossed, fixed multilevel, multilevel D-study) from the `advanced.Rmd` multilevel block.
-- [ ] Create `engines.Rmd` (glmmTMB/lme4, lavaan) from the `advanced.Rmd` engine block — brms section added
+*Slice 2 — the split (mechanical redistribution):* ✅ **done**
+- [x] Create `multilevel-designs.Rmd` (subject/cluster, conflated Eq.14, nested Designs 2/3, incomplete
+      crossed, fixed multilevel, multilevel D-study) from the `advanced.Rmd` multilevel block. Also received
+      the **multilevel forest plot** (`plot-ml`, data-locality: it needs `school`) and the multilevel
+      `choose_icc()` closer.
+- [x] Create `engines.Rmd` (glmmTMB/lme4, lavaan) from the `advanced.Rmd` engine block — brms section added
       in Slice 3.
-- [ ] Create `interval-methods.Rmd` (Monte-Carlo, bootstrap) from the `advanced.Rmd` CI-method block —
+- [x] Create `interval-methods.Rmd` (Monte-Carlo, bootstrap) from the `advanced.Rmd` CI-method block —
       posterior/HPDI added in Slice 3.
-- [ ] Create `d-studies-and-replicates.Rmd` (rater-count D-study, within-cell replicates, `autoplot()`
-      visualizing) from the corresponding `advanced.Rmd` blocks.
-- [ ] Retire `advanced.Rmd`; fix all internal cross-links (single-article anchors → inter-article links);
-      add the four new articles to the `_pkgdown.yml` articles index (#6).
-- [ ] All moved live chunks still evaluate; `R CMD build` + pkgdown build clean; claim tests green.
+- [x] Create `d-studies-and-replicates.Rmd` (rater-count D-study, within-cell replicates, two-way `autoplot()`
+      forest + components) from the corresponding `advanced.Rmd` blocks.
+- [x] Retire `advanced.Rmd`; fix all internal cross-links (single-article anchors → inter-article links) and
+      the three external refs (README, `choosing-an-icc.Rmd`, the `choose_icc()` runtime note in
+      `R/choose-icc.R`); add the four new articles to the `_pkgdown.yml` articles index (#6); update the
+      `test-vignette-claims.R` per-claim article labels + the 0.1.0 NEWS vignette list; `FIML` → `WORDLIST`.
+- [x] All six articles render self-contained (independent evaluation); `pkgdown::check_pkgdown()` clean;
+      `test-vignette-claims.R` green; `air` clean; spell clean.
 
 *Slice 3 — add the missing Bayesian coverage (new prose):*
 - [ ] `engines.Rmd`: brms (Bayesian) section — the half-*t*(4,0,1) prior, `engine = "brms"`, the M34

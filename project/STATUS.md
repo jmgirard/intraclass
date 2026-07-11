@@ -210,18 +210,20 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M35 Slice 2 — the split** (next). Carve the 504-line `advanced.Rmd` into four focused
-  articles (`multilevel-designs`, `engines`, `interval-methods`, `d-studies-and-replicates`), wire
-  `_pkgdown.yml`, fix cross-links, retire `advanced.Rmd` — mechanical redistribution of existing prose/live
-  chunks, no new capability claims (brms sections come in Slice 3). **Slice 1 — stale-claim fixes — DONE**
-  (committed this session): the five false "planned for a later milestone" statements in `advanced.Rmd`
-  corrected against `COVERAGE.md` current-support wording (incomplete fixed multilevel → M18; incomplete nested
-  → M19/M32; fixed/multilevel/ragged replicates → M20/M33; lme4 fixed/multilevel → M14/M15; lavaan fixed /
-  incomplete-FIML → M21); a full re-audit (`grep` across all three articles) found no other stale "planned"
-  phrasing, and the one surviving "not yet supported" (averaged cluster `ICC(c,k)` incomplete) is genuinely
-  still 🟣 research; `test-vignette-claims.R` green; `advanced.Rmd` renders end-to-end. The corrected claims are
-  capability statements (not numeric), so nothing to re-pin. *Superseded active task (M34, done):* the next
-  milestone needed an ADR after a short retro; that retro + ADR-045 opened M35 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked** —
+- Active task: **M35 Slice 3 — add the missing Bayesian coverage** (next). New brms sections in `engines.Rmd`
+  (the half-*t*(4,0,1) prior, `engine = "brms"`, the M34 `prior=` override + footgun note) and
+  `interval-methods.Rmd` (`ci_method = "posterior"`, MAP + percentile/HPDI `posterior_summary`); brms chunks
+  `eval=FALSE` illustrative with **committed real output** (CI has no Stan toolchain — [[brms-live-fit-skip-on-ci]]),
+  spot-checked against a local live run. **Slice 2 — the split — DONE** (committed this session): `advanced.Rmd`
+  (504 lines) retired into four self-contained articles — `multilevel-designs`, `engines`, `interval-methods`,
+  `d-studies-and-replicates` — plus the two kept articles. Data-locality call: the multilevel forest plot moved
+  to `multilevel-designs` (it needs `school`); the multilevel `choose_icc()` closer went there too. Fixed all
+  cross-links + three external refs (README, `choosing-an-icc.Rmd`, the `choose_icc()` runtime note in
+  `R/choose-icc.R`); wired `_pkgdown.yml`; relabelled `test-vignette-claims.R` per-claim article names; updated
+  the 0.1.0 NEWS vignette list; `FIML` → `WORDLIST`. All six articles render self-contained;
+  `pkgdown::check_pkgdown()` clean; claim tests green; `air`/spell clean. **Slice 1 — stale-claim fixes — DONE**
+  (committed earlier this session). *Superseded active task (M34, done):* the next milestone needed an ADR
+  after a short retro; that retro + ADR-045 opened M35 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked** —
   incomplete **fixed** nested and **cluster-level fixed** (no frequentist oracle; would need a simulation-oracle
   study, likely a Fable review); also parked — **selectable `posterior` coupling** (MC/bootstrap on a Bayesian
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
@@ -268,7 +270,18 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M35 Slice 1 (stale-claim fixes) DONE.** Corrected the five
+- Updated: 2026-07-10 by main session (Opus) — **M35 Slice 2 (the split) DONE.** Retired the 504-line
+  `advanced.Rmd` into four self-contained focused articles — `multilevel-designs`, `engines`,
+  `interval-methods`, `d-studies-and-replicates` — a mechanical redistribution of the existing prose/live
+  chunks (no new capability claims; brms comes in Slice 3). One data-locality call: the multilevel forest plot
+  (needs `school`) went to `multilevel-designs`, keeping the two-way plots in `d-studies-and-replicates`; the
+  multilevel `choose_icc()` closer went to `multilevel-designs` too. Fixed all cross-links + three external
+  refs (README, `choosing-an-icc.Rmd`, the `choose_icc()` runtime note in `R/choose-icc.R`); wired the four
+  articles into `_pkgdown.yml`; relabelled `test-vignette-claims.R` per-claim article names; updated the 0.1.0
+  NEWS vignette list; added `FIML` to `WORDLIST`. All six articles render self-contained;
+  `pkgdown::check_pkgdown()` clean; `test-vignette-claims.R` green; `air`/spell clean. Board S2 items checked
+  off; STATUS Active task advanced to Slice 3 (the brms sections). Prior line: **M35 Slice 1 (stale-claim
+  fixes) DONE.** Corrected the five
   false "planned for a later milestone" claims in `advanced.Rmd` against `COVERAGE.md` (incomplete fixed
   multilevel → M18; incomplete nested → M19/M32; fixed/multilevel/ragged replicates → M20/M33; lme4
   fixed/multilevel → M14/M15; lavaan fixed / incomplete-FIML → M21); re-audited all three articles (`grep`

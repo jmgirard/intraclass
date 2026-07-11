@@ -481,7 +481,7 @@ recommendation_notes <- function(raters, multilevel, oneway) {
   if (multilevel) {
     notes <- c(
       notes,
-      "See vignette(\"advanced\") for a worked multilevel example."
+      "See vignette(\"multilevel-designs\") for a worked multilevel example."
     )
   }
   notes

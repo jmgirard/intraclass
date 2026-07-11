@@ -1,0 +1,53 @@
+---
+title: "Confidence-interval methods"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Confidence-interval methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(intraclass)
+```
+
+Every `icc()` coefficient comes with an interval, never a bare point estimate. The
+`ci_method` argument selects how that interval is built. This article covers the two
+available methods and when they diverge.
+
+## Monte-Carlo and the parametric bootstrap
+
+Every interval elsewhere in these articles has been the default **Monte-Carlo**
+interval: it draws from the fitted parameter covariance on the engine's log scale and
+back-transforms, which is fast and boundary-aware. A second method, a **parametric
+bootstrap** (`ci_method = "bootstrap"`), instead simulates response vectors from the
+fitted model, refits, and takes percentile quantiles of the resampled coefficients. It
+does not lean on the asymptotic-normal covariance approximation — at the cost of a full
+refit per resample, so it is far slower.
+
+```{r ci-bootstrap, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+mc <- tidy(icc(ratings, score, subject, rater, seed = 1))
+bs <- tidy(icc(ratings, score, subject, rater,
+  ci_method = "bootstrap", boot_samples = 999, seed = 1
+))
+data.frame(
+  index = mc$index,
+  estimate = round(mc$estimate, 3),
+  mc = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
+  bootstrap = sprintf("[%.2f, %.2f]", bs$conf.low, bs$conf.high)
+)
+```
+
+The point estimates are identical (same fit) and the upper bounds coincide; the
+bootstrap's lower bounds run a little lower here, because this is a very small design
+(six subjects) and the bootstrap's lower tail is noisier than the covariance-based
+Monte-Carlo draw. The two methods can diverge more where the asymptotics are strained
+— near the zero-variance boundary, and for the multilevel designs (more variance
+components, often few clusters), where the bootstrap's cluster-level interval in
+particular carries more resampling noise. The bootstrap is available for every design
+the `"glmmTMB"` and `"lme4"` engines fit; `"lavaan"` supports Monte-Carlo only. Raise
+`boot_samples` (default `999`) for a smoother interval at proportionally more cost.
