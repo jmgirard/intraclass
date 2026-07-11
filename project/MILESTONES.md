@@ -54,8 +54,11 @@ parity mop-up (incomplete single-level one-way + fixed-rater & multilevel within
 shipped** (PR #38), closing the last clean-oracle estimand gaps on the brms ledger: each of its three corners
 had a frequentist oracle (the gate), so all shipped as parity, not research (`fit_brms_oneway()` reused +
 `fit_brms_replicates_fixed()` / `fit_brms_ml_replicates()` / `fit_brms_nested_replicates()` added), and
-**every oracle came back nominal — no Fable review** (the M30 variance-ratio regime). **No milestone is
-currently in flight.** Each milestone is scoped by an ADR at its start
+**every oracle came back nominal — no Fable review** (the M30 variance-ratio regime). **M34 (ADR-044) — the
+Bayesian customization milestone (user `prior=` override + HPDI credible intervals) — is now in flight**
+(direction (B), `ROADMAP.md`): interface/customization work, not new estimand (cf. M5.5/M7/M11/M16), with a
+**reduction oracle** (defaults reproduce shipped M23+ bit-identically) and guardrails (a classed footgun
+warning; documented caveats) in place of a coverage claim. Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
@@ -63,9 +66,9 @@ detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
-ADR-043 M33).
-**No milestone is currently in flight** — M33 (ADR-043, the Bayesian parity mop-up) shipped (PR #38,
-squash-merged to `main` at `34cb974`); the next one needs an ADR after a short retro (founding brief §7).
+ADR-043 M33, ADR-044 M34).
+**M34 (ADR-044, the Bayesian customization milestone) is in flight** — its DoD checklist below is the live
+board; M33 (ADR-043, the Bayesian parity mop-up) shipped (PR #38, squash-merged to `main` at `34cb974`).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1173,3 +1176,63 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   oracle nominal — no Fable review anywhere** (the M30 variance-ratio regime held, exactly as ADR-043
   predicted). `R CMD check --as-cran` 0/0/1; installed-pkg all three new paths driven through
   `library(intraclass)`; full suite (CI mode) 0 failures.
+
+## M34: Bayesian engine (brms) — customization: user `prior=` override + HPDI credible intervals (ADR-044) — **ACTIVE**
+- Goal: promote the recorded direction **(B)** (`ROADMAP.md`) — a **customization** milestone whose theme is
+  "let users deviate from a sourced default *with guardrails*." With M33 the brms **estimand** surface is
+  complete; M34 adds a **customization interface**, **not** new estimand work (cf. M5.5/M7/M11/M16 — no
+  estimand-spec). Two thin slices, ordered by stakes: **(1)** a user `prior=` override (fit-touching, voids
+  the coverage oracle); **(2)** HPDI credible intervals as a post-fit summary alternative to percentile.
+  Additive, non-breaking (#6): two **optional** arguments whose defaults reproduce the shipped M23+ results
+  **bit-identically**. The oracle is a **REDUCTION oracle** (defaults ≡ shipped); arbitrary-prior / HPDI
+  **coverage is deliberately NOT oracle-claimed** (#4) — the guardrails (a classed footgun warning; documented
+  caveats) carry the honesty (#18). No new dependency (`brms` already `Suggests`; HPDI via a dependency-free
+  internal helper).
+- Reference: ADR-044 (scope + the two ADR-time API decisions + oracle character + Fable posture). Oracles
+  **O-PriorReduce** (Slice 1) / **O-HPDI** (Slice 2) — reduction (default reproduces shipped bit-identically)
+  + round-trip (explicit sourced prior ≡ `NULL`) + override-takes-effect + definitional HPDI agreement vs
+  `coda::HPDinterval` + narrower-or-equal (`REFERENCES.md`). **No coverage claim** under a custom prior / for
+  HPDI. Live custom-prior/HPDI Stan fits `skip_on_ci()`; CI covered by the default/reduction tests.
+- DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):
+  - [x] **Slice 1 — user `prior=` override (top-level `icc()` arg).** Added `prior = NULL` to `icc()`
+        (brms-only, default `NULL` = sourced half-*t*(4,0,1)); `fit_brms_common()` uses `brm_args$prior` when
+        present, else the sourced default (icc() injects the validated override there — **no wrapper changes**;
+        `prior` stays reserved in `brm_args` at `icc.R:383` with a hint to the dedicated arg). Validated
+        (`brmsprior` or `NULL`; non-brms engine → `intraclass_unsupported`, bad type → `intraclass_error`);
+        classed `intraclass_custom_prior` footgun warning (#8). **O-PriorReduce PASS** (live, `skip_on_ci`):
+        (a) `prior = NULL` unchanged default path; (b) explicit sourced half-*t* ≡ `NULL` **bit-identical**
+        (`expect_identical` estimates + components); (c) tight `normal(0,0.5)` moved ICC(A,1) 0.256→0.206 +
+        fired the warning; (d) three classed guard tests (on CI). No coverage claim under a custom prior (#4).
+        Roxygen + NEWS + COVERAGE + REFERENCES updated in-commit (#16); `air`/`lintr`/spell clean; brms file
+        255/0/20, full suite (CI mode) 1221/0/20.
+  - [x] **Slice 2 — HPDI credible intervals (`posterior_summary` sub-choice).** Added
+        `posterior_summary = c("percentile", "hpdi")` (default `"percentile"`), meaningful only under
+        `ci_method = "posterior"`; HPDI via a **dependency-free boundary-aware helper** `hpdi_interval()`
+        (narrowest window covering the credible mass, index arithmetic matching `coda::HPDinterval`). Internal
+        reducer `posterior_summary()` kept (renaming its ~30 data-raw/test call sites was avoided — R resolves
+        the function-call position past the like-named public arg); it gained an `interval_type` param.
+        Misapplied (explicit `posterior_summary` off `ci_method = "posterior"`) → `intraclass_unsupported`;
+        header labels the `(HPDI)` variant; `ci$posterior_summary` field added. **O-HPDI PASS:** (a) default ≡
+        explicit `"percentile"` **bit-identical** (live); (b) `hpdi_interval` ≡ `coda::HPDinterval` ≤ 1e-8
+        (unit, on CI); (c) HPDI same MAP point + width ≤ percentile (live); (d) classed guard. No coverage
+        claim for HPDI (#4). Roxygen + NEWS + COVERAGE + REFERENCES in-commit (#16); `air`/`lintr`/spell clean;
+        brms file 261/0/21.
+  - [x] **Cross-cutting DoD (§8):** `?icc` documents both args + the footgun/HPDI caveats; **installed-pkg
+        check DONE** (`NOT_CRAN=true`, not `load_all`) — both new paths driven through `library(intraclass)`
+        (prior= default ICC(A,1) .166 / tight .284 + warning; HPDI same MAP, narrower than percentile, `(HPDI)`
+        header; both guards `intraclass_unsupported`); `lintr`/`air`/spell clean; full suite (CI mode)
+        **1227/0/21**; **`R CMD check --as-cran` 0/0/1** (only "New submission"; the local check caught a
+        guard-vs-test mismatch — explicit `posterior_summary = "percentile"` off-brms should be a no-op, only
+        `"hpdi"` needs the posterior path — and an undeclared `coda` in the O-HPDI test; both fixed, `coda` →
+        `Suggests`). Remaining: full CI matrix green + ship on `m34-bayes-customization` via PR to `main`
+        ([[milestone-branches-and-prs]]).
+- Deferred out of M34 (record so not rediscovered): **selectable `posterior` coupling** (MC/bootstrap
+  `ci_method` on a Bayesian fit — low-priority (B) tail, `ROADMAP.md`); **BCa / HDI-of-transform** and other
+  credible-interval flavors beyond percentile/HPDI; **per-component / per-SD distinct priors** beyond the
+  single `class = "sd"` override; a **prior on the residual `sigma`** (ten Hove folds the interaction there —
+  `engine-brms.R:24`); the **(C) research/blocked** corners (incomplete fixed nested, cluster-level fixed —
+  need a frequentist estimand first, ADR-029/042); **rstanarm** backend; the **vignette reassessment** (docs).
+  All stay in [`ROADMAP.md`](ROADMAP.md).
+- Status: **code-complete** (both slices + cross-cutting DoD; local gate green — full suite 1227/0/21,
+  `R CMD check --as-cran` 0/0/1). Awaiting go-ahead to push `m34-bayes-customization` + open the PR (the
+  outward step). Commits: ADR/board `d7dcaa0`, Slice 1 `90d69ad`, Slice 2 `c3a5a45`, gate reconcile (next).

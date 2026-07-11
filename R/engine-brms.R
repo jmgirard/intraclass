@@ -19,10 +19,14 @@
 #   set_prior("student_t(4, 0, 1)", class = "sd")
 # (brms positive-truncates SD-class priors, so student_t becomes the half-t). df = 4
 # is ten Hove 2020's deliberate choice for variance parameters near the zero boundary
-# (Gelman 2019; §3.3/§4.1) -- exactly Principle #3's regime. The prior is FIXED and
-# sourced: it is NOT user-overridable in M23 (#12), and `brm_args` may not set it (guarded
-# in icc()). The residual SD (`sigma`) keeps brms's default weakly-informative prior, as
-# ten Hove's parameterization folds the interaction into it.
+# (Gelman 2019; §3.3/§4.1) -- exactly Principle #3's regime. The sourced half-t is the
+# DEFAULT (#12): `brm_args` may not set `prior` (guarded in icc()). Since M34 (ADR-044) a
+# user MAY override it via the dedicated `prior` argument of icc() -- a deliberate deviation
+# for prior-sensitivity / method-comparison work that VOIDS the coverage oracle (a loud
+# classed footgun warning fires); icc() injects the validated override into `brm_args$prior`,
+# which fit_brms_common() honours in place of the sourced default below. The residual SD
+# (`sigma`) keeps brms's default weakly-informative prior, as ten Hove's parameterization
+# folds the interaction into it.
 #
 # POINT ESTIMATE = MAP, NOT EAP. ten Hove 2020 §4.2 (Figs 1-5) shows the posterior mode
 # (MAP) is unbiased for sigma_r and ICC(A,1) at k > 2, while the posterior mean (EAP)
@@ -158,9 +162,17 @@ fit_brms_common <- function(
   base_args <- list(
     formula = formula,
     data = data,
-    prior = brms::set_prior("student_t(4, 0, 1)", class = "sd"),
     refresh = 0
   )
+  # The SOURCED half-t(4, 0, 1) SD prior (#12) is the default. icc() may have injected a
+  # user override into `brm_args$prior` (M34 Slice 1, ADR-044 -- validated + footgun-warned
+  # there; the public `brm_args` guard forbids users setting `prior` directly, so this is
+  # the one canonical override path). Use the override when present, else the sourced
+  # default; setting it in base_args only when absent from brm_args avoids a duplicate
+  # `prior` in the do.call below.
+  if (is.null(brm_args$prior)) {
+    base_args$prior <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
+  }
   if (!is.null(seed)) {
     base_args$seed <- seed
   }

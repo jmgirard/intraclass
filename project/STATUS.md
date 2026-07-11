@@ -125,7 +125,19 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active milestone: **none** — M33 shipped (PR #38, ADR-043; squash-merged to `main` at `34cb974`).
+- Active milestone: **M34 — Bayesian engine (brms) customization: user `prior=` override + HPDI credible
+  intervals** (ADR-044; branch `m34-bayes-customization`). The recorded direction **(B)** (`ROADMAP.md`) —
+  interface/customization work, **not** new estimand (cf. M5.5/M7/M11/M16, no estimand-spec). With M33 the
+  brms estimand surface is complete; M34 lets users **deviate from the sourced default with guardrails**. Two
+  thin slices, ordered by stakes: **Slice 1** a user `prior=` override (top-level `icc()` arg, default `NULL`
+  = sourced half-*t*(4,0,1); a dedicated arg, `prior` stays reserved in `brm_args` at `icc.R:383`; classed
+  `intraclass_custom_prior` footgun warning); **Slice 2** HPDI credible intervals via
+  `posterior_summary = c("percentile","hpdi")` (default percentile), dependency-free internal helper. The
+  oracle is a **REDUCTION oracle** (defaults reproduce shipped M23+ **bit-identically**); arbitrary-prior /
+  HPDI **coverage is deliberately NOT oracle-claimed** (#4) — guardrails carry the honesty (#18). Additive,
+  non-breaking (#6): two optional args, defaults preserved. **No coverage unknown → no Fable review in scope.**
+  **No slice code yet — plan before code (#14).**
+- Prior milestone: **none** — M33 shipped (PR #38, ADR-043; squash-merged to `main` at `34cb974`).
   `engine = "brms"` now covers the **last clean-oracle estimand gaps** on the parity ledger, in three thin
   slices, each a *shipped* frequentist coefficient read off posterior draws (engine/interval parity, not new
   estimand work, #6 — no new estimand-spec/argument/dependency; two brms guards narrowed + one removed +
@@ -176,13 +188,29 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **none** — M33 shipped and merged (PR #38, `34cb974`). The next milestone needs an ADR after a
-  short retro (founding brief §7). Candidates parked in [`ROADMAP.md`](ROADMAP.md): the recorded next-up is
-  **(B) the Bayesian customization milestone** — user-exposed **`prior=`** API (reduction oracle + footgun
-  warning) + **HPDI** intervals; then **(C) research/blocked** — incomplete **fixed** nested and
-  **cluster-level fixed** (no frequentist oracle). Also parked: **categorical/ordinal GLMM** (needs an
-  estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)` divisor, occasion/ragged `d_study()`, the
-  **vignette reassessment** (docs), and the out-of-band **CRAN upload** (ADR-022).
+- Active task: **M34 code-complete — awaiting go-ahead to push + open the PR.** Both slices + the cross-cutting
+  DoD are done and the **local gate is green**: installed-pkg check drove both new paths through
+  `library(intraclass)` ([[verify-against-installed-package]]); full suite (CI mode) **1227/0/21**;
+  **`R CMD check --as-cran` 0/0/1** (only "New submission"). The local `R CMD check` caught two issues the
+  CI-mode `test_dir` run masked — an over-aggressive guard (explicit `posterior_summary = "percentile"`
+  off-brms should be a no-op; only `"hpdi"` needs the posterior path) and an undeclared `coda` in the O-HPDI
+  test — both fixed (`coda` → `Suggests`). Next (outward, needs maintainer OK): push `m34-bayes-customization`
+  + open the PR to `main` ([[milestone-branches-and-prs]]); the full CI matrix runs there.
+- Done this session: **M34 Slices 1 & 2 — COMPLETE.** **Slice 1 (user `prior=` override) committed**
+  (`90d69ad`): `prior = NULL` on `icc()` (brms-only, default = sourced half-*t*(4,0,1)); `fit_brms_common()`
+  honours an injected `brm_args$prior` (icc() validates + injects — **no wrapper changes**; `prior` stays
+  reserved in `brm_args` at `icc.R:383`); classed `intraclass_custom_prior` footgun warning. O-PriorReduce
+  PASS (reduction + round-trip **bit-identical** + tight prior moves ICC(A,1) 0.256→0.206 + warning). **Slice 2
+  (HPDI credible intervals) — DONE, not yet committed:** `posterior_summary = c("percentile","hpdi")` (default
+  percentile), meaningful only under `ci_method = "posterior"`; dependency-free `hpdi_interval()` (index
+  arithmetic matching `coda::HPDinterval`); internal reducer `posterior_summary()` kept (function-call
+  position resolves past the like-named arg — avoided renaming ~30 data-raw/test call sites), gained an
+  `interval_type` param; `(HPDI)` header label + `ci$posterior_summary` field; misapplied off-posterior →
+  `intraclass_unsupported`. O-HPDI PASS (live: default ≡ percentile **bit-identical**, HPDI same MAP + width ≤
+  percentile, `(HPDI)` header; unit: `hpdi_interval` ≡ `coda::HPDinterval` ≤ 1e-8, no wider than percentile).
+  brms file **261/0/21**; `air`/`lintr`/spell clean (added `HPDI` to WORDLIST); roxygen + NEWS + COVERAGE +
+  REFERENCES + M34 board in-commit (#16). **No coverage claim under a custom prior / for HPDI (#4) — no Fable
+  review in scope.**
 - Last green CI: **PR #38 (M33) — full CI matrix green (9/9), squash-merged to `main` at `34cb974`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed (no flakes, no re-runs). Locally before the PR: `R CMD check --as-cran`
@@ -207,9 +235,11 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M33 shipped and merged (PR #38, `34cb974`); every oracle came back nominal, no Fable
-  review, full CI matrix green. The next milestone (recorded next-up: (B) Bayesian customization) needs an ADR
-  after a short retro. Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
+- Blockers: **none.** M34 (ADR-044, Bayesian customization) opened on branch `m34-bayes-customization` after
+  a short retro; direction (B) confirmed by the maintainer, both ADR-time API decisions settled (Slice 1 =
+  dedicated top-level `prior=` arg; Slice 2 = `posterior_summary` sub-choice). No slice code yet.
+  M33 shipped and merged (PR #38, `34cb974`); every oracle came back nominal, no Fable
+  review, full CI matrix green. Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
   (`.8625` at n_rep 80) went to a gated Fable review (#19) → **VERDICT: no shortfall, a Monte-Carlo tail
   event that does not replicate** (Fable re-ran the same incidence at n=240 → .9458; 2,000-fit frequentist
   arm → .9555; PIT uniform). Adopted in full (ADR-042 Amendment 2): **ship Slice 2 unchanged**, regenerate
@@ -219,7 +249,38 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M33 shipped (PR #38, squash-merged at `34cb974`); post-merge
+- Updated: 2026-07-10 by main session (Opus) — **M34 code-complete: both slices (user `prior=` override +
+  HPDI `posterior_summary`) implemented, tested, and the local gate green on branch
+  `m34-bayes-customization`.** Slice 1 (`90d69ad`): dedicated `icc(prior=)` (default sourced half-*t*),
+  injected into `brm_args$prior` (no wrapper changes), classed footgun warning; O-PriorReduce PASS. Slice 2
+  (`c3a5a45`): `posterior_summary = c("percentile","hpdi")` (default percentile), dependency-free
+  `hpdi_interval()` (≡ `coda::HPDinterval`), `(HPDI)` header label; O-HPDI PASS. Gate reconcile (this commit):
+  `R CMD check --as-cran` **0/0/1** — the local check caught an over-aggressive `posterior_summary` guard
+  (explicit `"percentile"` off-brms now a no-op; only `"hpdi"` needs the posterior path) and an undeclared
+  `coda` (→ `Suggests`), both fixed; also hardened the O-PriorReduce "override takes effect" assertion to
+  magnitude-not-sign (the direction is data/seed-dependent — the installed-pkg drive moved it *up*, the SF
+  test *down*). Reduction oracle throughout (defaults reproduce shipped M23+ bit-identically); **no coverage
+  claim, no Fable review in scope** (#4). Next (outward, needs OK): push + PR. Prior line: **M34 Slice 1 (user
+  `prior=` override) shipped on branch `m34-bayes-customization`.** Added a dedicated `icc(prior=)` argument (default `NULL` = sourced
+  half-*t*(4,0,1)); `fit_brms_common()` honours an injected `brm_args$prior`, so no `fit_brms_*` wrapper
+  changed; classed `intraclass_custom_prior` footgun warning + three classed guards. O-PriorReduce PASS
+  (reduction + bit-identical round-trip + tight-prior move + warning; live `skip_on_ci`). Full suite (CI mode)
+  1221/0/20; `air`/`lintr`/spell clean; docs/NEWS/COVERAGE/REFERENCES in-commit (#16). Next: Slice 2 (HPDI
+  `posterior_summary`). Prior line below opened the milestone. **M34 opened (ADR-044): the Bayesian
+  customization milestone.**
+  After a short retro (the Bayesian arc has moved from *discovery* through *mop-up* — M29–M33 all shipped
+  without a corrective Fable review; the brms **estimand** surface is now complete) the maintainer chose
+  direction **(B)** and confirmed both ADR-time API decisions (Slice 1 = a dedicated top-level `prior=` arg,
+  my recommendation over `prior`-in-`brm_args`; Slice 2 = `posterior_summary = c("percentile","hpdi")`). This
+  commit (on branch `m34-bayes-customization`) writes ADR-044, adds the M34 active board to MILESTONES (DoD
+  checklist = live board, ADR-015), advances the MILESTONES preamble + ADR-index (M34 in flight), annotates
+  ROADMAP direction (B) as promoted, and flips STATUS to M34-active. **No slice code yet** — plan before code
+  (#14). The oracle character is deliberately different from the parity milestones: a **reduction oracle**
+  (defaults reproduce shipped M23+ bit-identically), **not** a coverage claim — arbitrary-prior / HPDI
+  coverage is explicitly out-of-oracle, with a classed footgun warning + documented caveats carrying the
+  honesty (#4/#18). No new estimand-spec, no new dependency, no coverage unknown → **no Fable review in
+  scope**. Next: `/start-task` Slice 1 (the `prior=` override). Prior line: **M33 shipped (PR #38,
+  squash-merged at `34cb974`); post-merge
   `project/` reconcile.** This commit flips STATUS to M33-shipped, compresses the MILESTONES M33 board to the
   summary form (preserving the "Deferred out of M33" list), advances the MILESTONES preamble + ADR-index (M33
   no longer in flight), and sets "Last green CI" to the merge commit. The whole milestone landed in one session
@@ -336,6 +397,16 @@ brought the pkgdown site, the M9–M12 showcase in `advanced.Rmd`, and a **CRAN-
 v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
+
+**M34 (ADR-044) active — `/start-task` Slice 1: user `prior=` override.** Implement the top-level
+`prior = NULL` argument on `icc()` (brms-only, default = sourced half-*t*(4,0,1)), thread it through
+`fit_brms_common()`, keep `prior` reserved in `brm_args` (`icc.R:383`), validate it, and fire a classed
+`intraclass_custom_prior` footgun warning when non-`NULL`. Oracle **O-PriorReduce** (reduction: default ≡
+shipped bit-identically; round-trip: explicit sourced half-*t* ≡ `NULL`; override-takes-effect + fires
+warning; classed conditions). **No coverage claim under a custom prior** (#4). Then Slice 2 — HPDI via
+`posterior_summary = c("percentile","hpdi")` (default percentile), dependency-free helper. Ship on branch
+`m34-bayes-customization` via PR to `main`. See the M34 board in [`MILESTONES.md`](MILESTONES.md) (the live
+DoD checklist).
 
 **M33 (ADR-043) shipped (PR #38) — Bayesian engine (brms) parity mop-up: incomplete single-level one-way +
 fixed-rater & multilevel within-cell replicates.** `engine = "brms"` now covers the last clean-oracle

@@ -44,7 +44,9 @@ icc(
   mc_samples = 10000L,
   boot_samples = 999L,
   seed = NULL,
-  brm_args = list()
+  brm_args = list(),
+  prior = NULL,
+  posterior_summary = c("percentile", "hpdi")
 )
 }
 \arguments{
@@ -152,10 +154,10 @@ two-way \strong{fixed-rater} single-level design (Case-3A finite-population
 \eqn{\theta^2_r}), the crossed (Design 1) multilevel \strong{fixed-rater} design (subject
 level), and the nested \strong{Design 2} (raters nested in clusters) and \strong{Design 3} (raters
 nested in subjects, the multilevel one-way, agreement-only) \emph{random} multilevel designs
-(subject level); and, on balanced/complete data only, the single-level one-way random
-design, the nested Design 2 \emph{fixed-rater} multilevel design at the subject level, the
+(subject level), and the single-level one-way random design; and, on balanced/complete
+data only, the nested Design 2 \emph{fixed-rater} multilevel design at the subject level, the
 conflated diagnostic, and within-cell replicates. Incomplete/ragged \strong{fixed}-nested and
-single-level one-way Bayesian fits, and numeric-\code{unit} (D-study) projection, are planned
+within-cell-replicate Bayesian fits, and numeric-\code{unit} (D-study) projection, are planned
 for later milestones. \code{"lme4"} requires the
 \pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
 package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}
@@ -196,8 +198,33 @@ chains \strong{sequentially on one core} (\code{cores = getOption("mc.cores", 1L
 \code{brm_args = list(cores = 4)} (or set \code{options(mc.cores)}) to sample in parallel
 — the engine emits a periodic reminder to that effect while running
 sequentially. The model formula, data, the sourced half-\emph{t} prior, and \code{seed}
-are owned by \code{intraclass} and may not be set here; supplying them, or a
-non-empty \code{brm_args} with any other engine, is an error.}
+are owned by \code{intraclass} and may not be set here (the prior has its own
+\code{prior} argument); supplying them, or a non-empty \code{brm_args} with any other
+engine, is an error.}
+
+\item{prior}{Optional custom prior for \code{engine = "brms"}, as a \pkg{brms} prior
+object (from \code{\link[brms:set_prior]{brms::set_prior()}} / \code{\link[brms:prior]{brms::prior()}}; combine several with \code{c()}).
+The default \code{NULL} uses the \strong{sourced} half-\emph{t}(4, 0, 1) prior on every
+random-effect SD (ten Hove, Jorgensen & van der Ark 2020), the prior every
+coverage result in this package depends on. Supplying a custom prior is a
+deliberate deviation — intended for prior-sensitivity, method-comparison, or
+simulation work — and \strong{voids those coverage guarantees}; \code{icc()} warns
+loudly (a classed \code{intraclass_custom_prior} condition) because a vague or flat
+SD prior can \emph{worsen} small-\emph{k} boundary bias (the half-\emph{t} is weakly
+informative on purpose). Ignored (must be \code{NULL}) for non-Bayesian engines.}
+
+\item{posterior_summary}{How to summarize the posterior draws into a credible
+interval when \code{ci_method = "posterior"} (the Bayesian engine): \code{"percentile"}
+(the default — a two-sided percentile interval) or \code{"hpdi"} (the
+highest-posterior-density interval, the narrowest interval covering the
+credible mass). Percentile is the default because it is
+monotone-transformation invariant and degrades gracefully as the ICC
+approaches the variance boundary, and ten Hove, Jorgensen & van der Ark (2020)
+found percentile (not HPD) intervals give nominal coverage at small rater
+counts; the HPDI is offered for comparison, not as a strict upgrade (no
+coverage is claimed for it). Only the HPDI needs the posterior draws, so
+\code{posterior_summary = "hpdi"} requires \code{ci_method = "posterior"}; the other
+interval methods already report a percentile interval.}
 }
 \value{
 An \code{icc} object: a list with the estimate table, variance components,

@@ -144,6 +144,24 @@ alternate engines, and seeded simulations.
   harmonic-mean `k_eff` divisor, a ratio of variance components needing no moment correction.
   Incomplete **fixed**-rater nested and incomplete within-cell-replicate Bayesian fits remain
   planned for later milestones.
+* A new **`prior`** argument lets you override the sourced half-*t*(4, 0, 1) prior for
+  `engine = "brms"` with any \pkg{brms} prior object (from `brms::set_prior()` /
+  `brms::prior()`) — intended for prior-sensitivity, method-comparison, or simulation work.
+  The default (`prior = NULL`) is unchanged and reproduces earlier results bit-for-bit.
+  Supplying a custom prior is a deliberate deviation that **voids the package's coverage
+  guarantees** (which hold only for the sourced prior), so `icc()` emits a loud classed
+  (`intraclass_custom_prior`) warning: a vague or flat SD prior can *worsen* small-\eqn{k}
+  boundary bias, since the half-*t* is weakly informative on purpose. The prior stays
+  owned by the package elsewhere — it may not be set through `brm_args`.
+* A new **`posterior_summary`** argument chooses how `ci_method = "posterior"` reduces the
+  posterior draws to a credible interval: `"percentile"` (the default, unchanged) or
+  `"hpdi"` (the highest-posterior-density interval — the narrowest interval covering the
+  credible mass, computed with a dependency-free helper). Percentile stays the default
+  because it is monotone-transformation invariant and degrades gracefully at the variance
+  boundary, and percentile (not HPD) intervals give nominal coverage at small rater counts
+  (ten Hove et al. 2020); the HPDI is offered for comparison, not as a strict upgrade, and
+  no coverage is claimed for it. The printed header names the HPDI variant. Setting
+  `posterior_summary` for a non-posterior interval method is an error.
 
 ## Choosing, projecting, and visualizing
 

@@ -3588,3 +3588,120 @@ consequences → references.
   fixed data; here balanced → negligible), ADR-042 (M32 — the n_rep ≥ 240 ragged-coverage convention),
   ADR-002 (optional engines behind `Suggests`); `project/ROADMAP.md` (direction (A) being promoted),
   `project/COVERAGE.md`.
+
+## ADR-044: M34 scope — Bayesian engine (brms) customization: user `prior=` override + HPDI credible intervals
+- Date: 2026-07-10
+- Status: accepted
+- Context: With M33 (ADR-043) the **Bayesian parity mop-up (direction A) is complete** — `engine = "brms"`
+  covers every clean-oracle estimand gap the balanced and incomplete arcs left. A short retro read the
+  Bayesian arc as having moved decisively from *discovery* (M27/M28's 2b moment correction) through *mop-up*
+  (M29–M33 all shipped without a corrective Fable review; M32's one gated review resolved to a no-shortfall
+  tail event → the n_rep ≥ 240 convention). **The brms estimand surface is now complete.** What remains on the
+  ledger is the recorded direction **(B)** of the 2026-07-10 planning discussion (`ROADMAP.md`): a
+  **customization** milestone whose theme is "let users deviate from a sourced default *with guardrails*."
+  No milestone is in flight. This ADR opens **M34**. The maintainer chose direction (B) over (C)
+  research/blocked (incomplete fixed nested, cluster-level fixed — both need a frequentist estimand built
+  first) and over the parked docs/vignette reassessment.
+  - **This is interface/customization work, NOT new estimand work** (cf. M5.5/M7/M11/M16 — engine/interval
+    /interface milestones with no estimand-spec). No new estimand, no new estimand-spec, no new dependency
+    (`brms` already `Suggests`; HPDI via a dependency-free internal helper — see Slice 2). Additive,
+    non-breaking (#6): two new **optional** arguments whose defaults preserve current behavior bit-for-bit.
+  - **The oracle character changes with the milestone (#1).** Parity milestones proved a *new coefficient*
+    against a frequentist oracle. Customization has no such target — the whole point is to let users leave the
+    sourced regime. So M34's oracle is a **REDUCTION oracle**: the defaults (`prior = NULL`,
+    `posterior_summary = "percentile"`) must reproduce the shipped M23+ results **bit-identically** (same seed
+    → same draws → same MAP/CI). **Coverage under arbitrary priors, and HPDI coverage, are deliberately NOT
+    oracle-claimed** — they cannot be, and claiming them would violate #4. The guardrails (a classed footgun
+    warning; documented caveats) are how the milestone stays honest about that (#18).
+  - **Why guardrails, not a whitelist (the sourced-default posture, #12).** The half-*t*(4, 0, 1) on every
+    random-effect SD (ten Hove, Jorgensen & van der Ark 2020 §3.3/§4.1; df = 4 deliberately for
+    variance parameters near the zero boundary — Principle #3's regime) is *sourced* and is what every shipped
+    coverage result depends on. The primary use case for overriding it is prior-sensitivity /
+    method-comparison / simulation studies, which need **arbitrary** priors — so the escape hatch is open (a
+    clean override), **not** a curated list of "approved" priors. The honesty burden is carried by a loud,
+    classed `cli` warning naming the *specific* footgun, not by refusing the deviation.
+- Decision:
+  - **Scope: two thin slices, ordered by stakes (#15)** — Slice 1 first (the `prior=` override, higher-stakes:
+    it touches the fit and voids the coverage oracle), then Slice 2 (HPDI, a post-fit summary alternative).
+  - **Slice 1 — user `prior=` override, via a top-level `icc()` argument.** Add a new **`prior = NULL`**
+    argument to `icc()` (brms-only; default `NULL` = the sourced half-*t*(4, 0, 1)). Thread it through
+    `fit_brms_common()` to replace the hardcoded `set_prior("student_t(4, 0, 1)", class = "sd")` default when
+    non-`NULL`. **API decision (ADR-time):** a **dedicated top-level `prior=` arg**, NOT `prior` inside
+    `brm_args`. Rationale — `brm_args` is contractually a *blind* passthrough of sampler/backend knobs
+    `intraclass` has no opinion on (`icc.R:387`, `engine-brms.R:52`); the prior is the opposite, a **sourced
+    default `intraclass` deliberately owns** (#12). A named arg is discoverable in `?icc`, gives the footgun
+    warning a natural home, is type-validated (a `brmsprior`/`brmsprior`-list or `NULL`), and makes the
+    reduction oracle's default explicit and testable. Consequently **`prior` STAYS in the `brm_args` reserved
+    set** at `icc.R:383` (one canonical path; setting it via `brm_args` still aborts loudly, #5/#8) — the
+    guard is *narrowed in effect* only in that the prior is now settable, but through the dedicated arg. When
+    `prior` is non-`NULL`, fire a **classed `cli` warning** (a new `intraclass_custom_prior` condition, #8)
+    naming the specific footgun: leaving the sourced prior **voids the coverage oracle**, and a
+    vague/flat/"non-informative" SD prior *worsens* small-*k* boundary bias (the half-*t* is weakly informative
+    on purpose). Passing `prior` with a non-brms engine → classed `abort_unsupported` (as `brm_args`).
+    **Oracle O-PriorReduce:** (a) **reduction** — `prior = NULL` reproduces the shipped M23+ MAP/CI
+    bit-identically at a fixed seed (the default path is unchanged); (b) **round-trip** — passing the sourced
+    half-*t* *explicitly* as `prior = set_prior("student_t(4,0,1)", class = "sd")` reproduces the `NULL`
+    result (proves the thread is faithful); (c) **override takes effect** — a deliberately different prior
+    (e.g. a tight `normal(0, 0.1)` SD prior) *moves* the estimate in the predicted direction and fires the
+    warning (a live `skip_on_ci()` Stan fit); (d) the classed warning/abort conditions. **No coverage claim
+    under a custom prior.**
+  - **Slice 2 — HPDI credible intervals, via `posterior_summary`.** Add a new
+    **`posterior_summary = c("percentile", "hpdi")`** argument (default `"percentile"`), meaningful only under
+    `ci_method = "posterior"` (the brms path). **API decision (ADR-time):** a sub-choice *within*
+    `ci_method = "posterior"`, NOT a new `ci_method` value — it selects how the posterior draws are summarized,
+    a different axis from *which interval method* produces the draws (MC / bootstrap / posterior). Default
+    stays **percentile**: ten Hove 2020 §4.2 finds percentile BCIs (not HPDIs) give nominal coverage at k > 2,
+    percentile is monotone-transformation invariant and degrades gracefully as θ² → 0, whereas HPDI is neither
+    and can misbehave at the variance boundary (this package's core regime). HPDI is an **alternative for
+    comparison, not a strict upgrade being withheld** — documented as such. Compute the HPDI with a small
+    **dependency-free internal helper** (the narrowest interval covering the credible mass, a sort-and-scan
+    over the ICC draws; boundary-aware — no transform round-trip) so light install is preserved (no
+    `HDInterval`/`coda`/`bayestestR` dependency). Passing `posterior_summary = "hpdi"` with a non-posterior
+    `ci_method` (or non-brms engine) → classed `abort_unsupported`. **Oracle O-HPDI:** (a) **reduction** —
+    `posterior_summary = "percentile"` reproduces the shipped intervals bit-identically (default unchanged);
+    (b) **agreement** — the internal HPDI helper matches a reference implementation (`coda::HPDinterval`,
+    `skip_if_not_installed`) to ≤ 1e-8 on a fixed draw vector; (c) **narrower-or-equal** — HPDI width ≤
+    percentile width on the same draws (the defining HPDI property); (d) the classed abort conditions. **No
+    coverage claim for HPDI** (it is the comparison alternative, not the recommended interval).
+  - **Oracles (#1):** the milestone's correctness is **reduction + definitional agreement**, not a new
+    frequentist target — parity milestones' `-agree`/coverage oracles have no analogue here (there is no
+    "true" custom-prior ICC to pin). Live custom-prior/HPDI Stan fits `skip_on_ci()`; CI is covered by the
+    reduction/round-trip/helper-agreement tests (no live Stan needed for the default paths).
+  - **Fable posture (#19):** **no unknown of the kind Fable adjudicates.** M34 makes no coverage claim that
+    could undercover — the defaults are pinned by reduction and the deviations are explicitly out-of-oracle.
+    Fable is **not** authorized by this ADR.
+  - **Deferred out of M34** (record so not rediscovered): **selectable `posterior` coupling** (running the MC
+    or bootstrap `ci_method` on a Bayesian fit — parked low-priority, direction (B) tail in `ROADMAP.md`); a
+    **BCa/HDI-of-transform** or other credible-interval flavors beyond percentile/HPDI; **per-component /
+    per-SD distinct priors** beyond the single `class = "sd"` override (the sourced default is one prior on all
+    SDs — a heterogeneous-prior API is a further extension); **prior on the residual `sigma`** (ten Hove's
+    parameterization keeps brms's default there — see `engine-brms.R:24`); the **(C) research/blocked** corners
+    (incomplete fixed nested, cluster-level fixed — need a frequentist estimand built first, ADR-029/ADR-042);
+    **rstanarm** backend; the **vignette reassessment** (docs). All stay in [`ROADMAP.md`](ROADMAP.md).
+- Consequences: On M34 close, `engine = "brms"` gains a **customization surface with guardrails** — users can
+  supply an arbitrary `prior=` (for sensitivity / method-comparison / simulation work) and choose HPDI vs
+  percentile summaries, while the sourced defaults and every shipped coverage result are preserved
+  bit-identically (the reduction oracle) and every deviation is flagged loudly as out-of-oracle (#18). The
+  brms ledger then reduces to **(C)** research/blocked only (both need a new frequentist estimand first) plus
+  the low-priority selectable-coupling tail. Mechanically the milestone is **two new optional arguments** +
+  one classed warning condition + one dependency-free HPDI helper, all additive and non-breaking (#6) — no new
+  estimand, no new estimand-spec, no new dependency. It carries **no coverage risk** (nothing claims coverage
+  that could undercover), so **no Fable review** is in scope. This ADR authorizes M34 code; the
+  `MILESTONES.md` M34 board and the `STATUS.md` flip are the milestone-start companions (M34 is scoped here
+  but **no slice work has begun** — plan before code, #14).
+- References: PRINCIPLES.md #1 (oracle-first — here a *reduction* oracle: defaults reproduce shipped results
+  bit-identically; deviations explicitly out-of-oracle), #2/#14/#15 (name the interface change / thin vertical
+  slices; stakes ordering — the fit-touching `prior=` before the post-fit HPDI summary), #3 (boundary-aware —
+  percentile is transform-invariant and boundary-graceful, the reason it stays the default; HPDI helper is
+  boundary-aware but the caveat is documented), #4 (no coverage claim under a custom prior / for HPDI — do not
+  assert what no oracle backs), #5/#8 (classed `cli` footgun warning `intraclass_custom_prior`; classed
+  aborts for misapplied `prior`/`posterior_summary`), #6 (additive, non-breaking — two optional args, defaults
+  preserved), #12 (the half-*t*(4, 0, 1) is the *sourced* default the override departs from — ten Hove et al.
+  2020 §3.3/§4.1), #16 (tracking in-commit), #18 (report honestly — the warning and docs state the deviation
+  voids the oracle), #19 (Fable not authorized — no coverage unknown to adjudicate); ten Hove, Jorgensen &
+  van der Ark (2020) §3.3/§4.1 (half-*t* prior), §4.2 (percentile BCIs nominal at k > 2, not HPDIs); no new
+  estimand-spec (interface milestone — cf. M5.5/M7/M11/M16, ADR-012/ADR-014/ADR-020/ADR-025); ADR-033 (M23 —
+  the brms engine, the fixed sourced prior, percentile credible intervals this milestone makes optional),
+  ADR-036 (M26 — the half-*t* posture / containment), ADR-025 (M16 — the `ci_method` dispatch seam
+  `posterior_summary` sub-selects within); `project/ROADMAP.md` (direction (B) being promoted),
+  `project/COVERAGE.md`.

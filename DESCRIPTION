@@ -29,6 +29,7 @@ Imports:
     tibble
 Suggests:
     brms,
+    coda,
     covr,
     ggplot2,
     knitr,

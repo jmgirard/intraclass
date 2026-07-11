@@ -87,6 +87,111 @@ test_that("brm_args must be a list", {
   )
 })
 
+# --- User prior= override guards (M34 Slice 1, ADR-044; no brms needed) ---------
+# The dedicated `prior=` argument lifts the fixed-prior restriction with GUARDRAILS: a
+# custom prior is brms-only, must be a brms prior object, and voids the coverage oracle
+# (a loud classed footgun warning). These guards fire before any fit, so no Stan needed;
+# the live reduction/round-trip/override oracle (O-PriorReduce) is skip_on_ci below.
+
+test_that("prior= only applies to engine = \"brms\"", {
+  d <- sf_ratings_long()
+  # A non-NULL prior off the Bayesian engine is refused (the sourced half-t is
+  # brms-specific) -- and the abort fires before any prior-type check.
+  expect_error(
+    icc(d, score, subject, rater, prior = "student_t(4, 0, 1)"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(d, score, subject, rater, engine = "lme4", prior = 1),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("prior= must be a brms prior object", {
+  d <- sf_ratings_long()
+  # On the Bayesian engine a non-brmsprior value is rejected with a classed abort,
+  # before check_installed()/any fit -- so this runs without brms/Stan.
+  expect_error(
+    icc(d, score, subject, rater, engine = "brms", prior = list(1)),
+    class = "intraclass_error"
+  )
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      engine = "brms",
+      prior = "student_t(4, 0, 1)"
+    ),
+    class = "intraclass_error"
+  )
+})
+
+test_that("prior may not be smuggled through brm_args (points to prior=)", {
+  d <- sf_ratings_long()
+  err <- tryCatch(
+    icc(d, score, subject, rater, engine = "brms", brm_args = list(prior = 1)),
+    condition = function(e) e
+  )
+  expect_s3_class(err, "intraclass_error")
+  # The teaching hint routes the user to the dedicated argument.
+  expect_match(
+    paste(conditionMessage(err), collapse = " "),
+    "prior",
+    fixed = TRUE
+  )
+})
+
+# --- posterior_summary = HPDI guards + helper (M34 Slice 2, ADR-044) ------------
+# `posterior_summary` chooses percentile (default) vs HPDI credible intervals, and only
+# applies to ci_method = "posterior". The coupling guard + the hpdi_interval() helper need
+# no brms/Stan (they run before / independent of any fit); the live end-to-end O-HPDI is
+# skip_on_ci below.
+
+test_that("posterior_summary = \"hpdi\" only applies to ci_method = \"posterior\"", {
+  d <- sf_ratings_long()
+  # Off the Bayesian engine the default ci_method is montecarlo -> HPDI is meaningless.
+  expect_error(
+    icc(d, score, subject, rater, posterior_summary = "hpdi"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      engine = "lme4",
+      ci_method = "bootstrap",
+      posterior_summary = "hpdi"
+    ),
+    class = "intraclass_unsupported"
+  )
+  # The default ("percentile") is a silent no-op for a non-Bayesian fit (not an error).
+  expect_s3_class(
+    icc(d, score, subject, rater, seed = 1, posterior_summary = "percentile"),
+    "icc"
+  )
+})
+
+test_that("hpdi_interval matches coda::HPDinterval and is no wider than percentile", {
+  # A skewed-toward-zero sample mimics a boundary ICC posterior. The internal helper is
+  # dependency-free; coda is the INDEPENDENT oracle (used only in this test).
+  skip_if_not_installed("coda")
+  set.seed(99)
+  v <- stats::rbeta(4000, 1.2, 6)
+  h <- hpdi_interval(v, 0.95)
+  cd <- coda::HPDinterval(coda::as.mcmc(v), prob = 0.95)
+  expect_equal(h$conf.low, cd[1, "lower"], tolerance = 1e-8)
+  expect_equal(h$conf.high, cd[1, "upper"], tolerance = 1e-8)
+  # Defining HPDI property: no wider than the percentile interval on the same draws ...
+  p <- two_sided_interval(v, 0.95)
+  expect_lte(h$conf.high - h$conf.low, p$conf.high - p$conf.low)
+  # ... and the reported std.error (posterior SD) is the same either way.
+  expect_equal(h$std.error, p$std.error)
+})
+
 # --- brms scope: two-way random, balanced/complete only (no brms needed) -------
 # These fire before the fit, so they assert the deferral boundary without Stan.
 
@@ -3093,4 +3198,150 @@ test_that("brms fits the nested Design 3 ICC end to end (O-Bayes-NML-agree)", {
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
   expect_match(hdr, "nested", fixed = TRUE)
+})
+
+# --- Live brms fit: user prior= override, O-PriorReduce (M34 Slice 1, ADR-044) --
+# The customization oracle is a REDUCTION oracle, not coverage: (a/b) the defaults and an
+# EXPLICIT sourced half-t(4, 0, 1) produce bit-identical estimates at a fixed seed (the
+# override path is faithful and the default is unchanged); (c) a deliberately different
+# (tight) prior MOVES the estimate in the predicted direction and fires the classed
+# intraclass_custom_prior footgun warning. No coverage is claimed under a custom prior
+# (#4). Gated OFF CI (a CI runner has brms but no Stan toolchain).
+
+test_that("brms prior= override: reduction + round-trip + moves + warns (O-PriorReduce)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+
+  d <- sf_ratings_long()
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+
+  # (a) Default path (prior = NULL) -> the sourced half-t(4, 0, 1).
+  f_null <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 7,
+    brm_args = ba
+  ))
+
+  # (b) Round-trip: the SAME half-t passed EXPLICITLY through prior= must reproduce the
+  # default BIT-IDENTICALLY at the same seed (the injection into the brm() call is faithful).
+  sourced <- brms::set_prior("student_t(4, 0, 1)", class = "sd")
+  f_sourced <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 7,
+    brm_args = ba,
+    prior = sourced
+  ))
+  expect_identical(f_null$estimates$estimate, f_sourced$estimates$estimate)
+  expect_identical(f_null$components, f_sourced$components)
+
+  # (c) A tight SD prior shrinks every random-effect SD toward 0, so ICC(A,1) moves DOWN
+  # vs the weakly-informative sourced prior -- the override demonstrably takes effect.
+  tight <- brms::set_prior("normal(0, 0.5)", class = "sd")
+  warned <- FALSE
+  f_tight <- withCallingHandlers(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      engine = "brms",
+      seed = 7,
+      brm_args = ba,
+      prior = tight
+    ),
+    intraclass_custom_prior = function(w) {
+      warned <<- TRUE
+      invokeRestart("muffleWarning")
+    },
+    warning = function(w) invokeRestart("muffleWarning")
+  )
+  # The classed footgun warning fired ...
+  expect_true(warned)
+  # ... and the estimate MATERIALLY changed under the tight prior (the override took
+  # effect). We assert magnitude, not sign: a tight normal(0, 0.5) on every SD shrinks the
+  # variance components, but the ICC is a RATIO of them, so the direction of the change is
+  # data/seed-dependent (e.g. it moves down on this SF data yet up on other data) -- pinning
+  # the sign would be a brittle assertion.
+  icc_a1 <- function(f) f$estimates$estimate[f$estimates$index == "ICC(A,1)"]
+  expect_gt(abs(icc_a1(f_tight) - icc_a1(f_null)), 0.01)
+})
+
+# --- Live brms fit: HPDI credible intervals, O-HPDI (M34 Slice 2, ADR-044) ------
+# The HPDI is a post-fit SUMMARY alternative to the default percentile credible interval,
+# selected by posterior_summary = "hpdi" under ci_method = "posterior". The oracle is a
+# REDUCTION oracle: the default and an explicit "percentile" agree bit-identically (the
+# threading is faithful), and switching to HPDI keeps the same MAP point while producing an
+# interval no wider than percentile (the defining HPDI property), labelled as such in the
+# header. No coverage is claimed for HPDI (#4). Gated OFF CI (no Stan toolchain).
+
+test_that("brms posterior_summary = \"hpdi\": reduction + same MAP + narrower + labelled (O-HPDI)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+
+  d <- sf_ratings_long()
+  ba <- list(chains = 2, iter = 1000, refresh = 0)
+
+  # Default (percentile) vs an EXPLICIT "percentile" -> bit-identical: threading the choice
+  # through did not disturb the shipped default path.
+  f_default <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 5,
+    brm_args = ba
+  ))
+  f_pct <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 5,
+    brm_args = ba,
+    posterior_summary = "percentile"
+  ))
+  expect_identical(f_default$estimates, f_pct$estimates)
+  expect_identical(f_default$ci$posterior_summary, "percentile")
+
+  # HPDI at the same seed: the MAP POINT is unchanged (only the interval reduction differs),
+  # and each HPDI is NO WIDER than the corresponding percentile interval.
+  f_hpdi <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    engine = "brms",
+    seed = 5,
+    brm_args = ba,
+    posterior_summary = "hpdi"
+  ))
+  expect_identical(f_hpdi$estimates$estimate, f_pct$estimates$estimate)
+  w_pct <- f_pct$estimates$conf.high - f_pct$estimates$conf.low
+  w_hpdi <- f_hpdi$estimates$conf.high - f_hpdi$estimates$conf.low
+  expect_true(all(w_hpdi <= w_pct + 1e-12))
+  expect_identical(f_hpdi$ci$posterior_summary, "hpdi")
+
+  # The header names the HPDI variant; the percentile fit does not.
+  expect_match(
+    paste(format(f_hpdi), collapse = "\n"),
+    "posterior credible (HPDI)",
+    fixed = TRUE
+  )
+  expect_false(grepl(
+    "HPDI",
+    paste(format(f_pct), collapse = "\n"),
+    fixed = TRUE
+  ))
 })
