@@ -3960,3 +3960,88 @@ consequences → references.
   cluster-count-axis lesson); `data-raw/reviews/fable-review-m36-incomplete-fixed-nested-{brief,response}.md`
   + `fable-check-m36{,-identities}.R`; ADR-038 (M28 — the 2b construction and its two identities, which this
   confirms generalize); Kackar & Harville (1984, *JASA* 79:853 — EGLS/REML unbiasedness).
+
+## ADR-047: M37 scope — fixed-rater **cluster-level** multilevel ICC (crossed Design 1, balanced/complete), spike-gated
+- Date: 2026-07-11
+- Status: accepted
+- Context: With M36 (ADR-046) shipping the incomplete/ragged fixed-rater *nested* (Design 2) corner, the
+  **last** parked **(C) research/blocked** item is **cluster-level fixed** raters — the ROADMAP classed it
+  "no scaffolding; ten Hove flag the estimator itself as open." After a short retro the maintainer chose to
+  plan it. Investigation (this session) splits the ROADMAP's blanket "blocked" into two claims: (a) the
+  **balanced/complete crossed Design-1** cell is **structurally well-defined and its fit already ships** —
+  the M10 fixed multilevel fit (`score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)`)
+  already produces every component this coefficient needs (σ²_c, σ²_cr, θ²_r), so M37 reads a **different
+  coefficient off the same validated fit, with no new fit function** (the M10-subject → M37-cluster step, the
+  cluster-level sibling M10 §7 explicitly names as "its own later slice"); (b) the **genuinely open** part is
+  *incomplete/small-k* (ten Hove's flagged estimator), which is **double-blocked** here (it also hits the
+  M9 §9 open cluster-level `ICC(c,k)` divisor) — **out of scope**. This is the M36 posture: the ROADMAP's
+  "blocked" over-generalized; investigation carves out a parity-shippable balanced cell from a genuinely-open
+  incomplete one.
+  - **The one genuinely new derivation (the real risk).** At the *subject* level (M10) σ²_cr is **not** in the
+    error set, so fixing raters was clean and gave M10 its exact "balanced fixed ≡ random" reduction oracle
+    (θ²_r = σ²_r on balanced data, M3 §6). At the *cluster* level σ²_cr **is** the error term (M5 §3b, Eq. 13:
+    error `{rater, cluster_rater}`). So the open question is exactly: **when raters are fixed, is the standard
+    random `(1|cluster:rater)` variance σ²_cr the correct cluster-level rater-disagreement error, or does the
+    interaction also need a finite-population treatment (as the main effect does)?** — precisely M10 §7's
+    "needs the fixed-rater treatment of the cluster×rater term validated." M37 **does not assume** the clean
+    reduction; a **feasibility spike settles it before any shipping code** (the maintainer chose "spike first").
+- Decision (maintainer-approved this session, 2026-07-11):
+  - **Scope: balanced/complete crossed Design-1 cluster-level fixed-rater ICC, frequentist glmmTMB + lme4**
+    (lme4 as cross-engine oracle, ADR-002/012). Agreement + consistency, single `ICC_c(·,1)` + average
+    `ICC_c(·,k)`, `k` = raters-per-cluster (ten Hove 2022 p. 6). Lift the M10 subject-only guard
+    (`R/icc.R`, the `level = "cluster"` + `raters = "fixed"` abort at ~line 765) for **this cell only**;
+    incomplete/unbalanced stays refused. **No new fit function** (read the cluster-level `(signal, {error set},
+    divisor)` off the shipped M10 fit — signal σ²_c, error `{θ²_r, σ²_cr}` agreement / `{σ²_cr}` consistency,
+    scalar `k`), no new top-level argument, no new dependency (light install intact) — a new valid combination
+    of shipped `level`/`raters` arguments (cf. M9/M10/M18/M19/M36, #6).
+  - **Spike-first structure (Slice 1, no shipping code):** seeded `data-raw/reviews/m37-feasibility-spike-{point,coverage}.R`
+    (the M36 provenance precedent) determines, on balanced data, whether the provisional §2b map reduces to
+    the shipped M5 random cluster-level ICC (holds iff random σ²_cr is the correct fixed error term, since
+    θ²_r = σ²_r) **and** whether the point/interval recover a **non-circular finite-population cluster-mean
+    reliability truth** (a deterministic function of the fixed design, M36 pattern; interior + boundary
+    σ²_c → 0; n_rep ≥ 240, [[ragged-coverage-nrep-240]]).
+    - **Outcome A — reduction exact, recovery nominal:** ship §2b with a **reduction oracle** (balanced
+      fixed ≡ random cluster-level) + lme4 cross-engine + seeded recovery — **no Fable review** (the M10
+      posture lifted to the cluster level).
+    - **Outcome B — reduction fails (σ²_cr needs a finite-population treatment):** derive the corrected
+      cluster-level error term from first principles, pin it against the non-circular recovery oracle, **and
+      fire the pre-authorized gated Fable review to confirm the derivation before shipping.**
+  - **Fable posture (#19): CONDITIONALLY PRE-AUTHORIZED.** Unlike M36 (recommend-only), the maintainer has
+    **pre-approved a gated Fable review this session** to fire **iff** the spike yields Outcome B (the σ²_cr
+    finite-population derivation needs independent confirmation). It is still gated — never a subagent, never
+    auto-spawned; the RB/RR brief protocol applies (`/milestone-brief`), and it does **not** fire on Outcome A.
+    The point estimator is **never tuned to force coverage** (#4); if the corrected term cannot be pinned even
+    with Fable, the cell degrades to 🟣 research and M37 ships nothing for it.
+  - **Out of scope (deferred, not dropped):** incomplete/unbalanced cluster-level fixed (double-blocked —
+    ten Hove open small-k estimator + M9 §9 `ICC(c,k)` divisor; its own later milestone); **brms/lavaan**
+    cluster-level fixed siblings (engine parity, unblockable once M37 ships the frequentist oracle — the M27
+    note left crossed fixed cluster level "an unshipped frequentist cell too"); nested Designs 2/3
+    cluster-level and **Design 3 fixed** (⚫ by-design — no cluster-level ICC / no separable rater effect);
+    fixed cluster-level `d_study()` (refused, M4.5). Recorded in ROADMAP + `M37-fixed-cluster-level.md §7`.
+- Consequences: On M37 close, the crossed Design-1 fixed family is complete at **both** levels
+  (subject = M10, cluster = M37); the residual (C) bucket narrows to *incomplete* cluster-level fixed (🟣
+  Wave-3, double-blocked) + the engine-parity brms/lavaan siblings + the ⚫ by-design cells. If Outcome B and
+  even Fable cannot pin the corrected term, M37 records a clean 🟣 reclassification (the M19-Slice-1 posture) —
+  a defensible outcome either way. Risk is concentrated in the σ²_cr fixed-treatment (spike-gated, Fable-backed)
+  and the cluster-level MC interval (the recovery oracle is the real gate). Additive, non-breaking (#6) —
+  balanced random + M10 subject paths untouched (regression guard: the full M1–M36 suite stays green). This
+  ADR authorizes M37 planning; the `MILESTONES.md` M37 board, the estimand-spec, the ROADMAP annotation, and
+  the `STATUS.md` flip are the milestone-start companions — **no slice code has begun (plan before code, #14)**.
+  Next: `/start-task` Slice 1 (the feasibility spike).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + committed seeded recovery against a
+  non-circular finite-population cluster-mean truth), #2/#14 (name the estimand / thin vertical slices; spike
+  before shipping code), #3 (boundary-aware MC interval — coverage at σ²_c = 0), #4 (no tuned estimator; 🟣
+  degrade rather than ship a guessed error term), #5/#8 (classed aborts for incomplete / nested-cluster /
+  Design-3-fixed out-of-scope corners), #6 (additive, non-breaking; no new fit/argument/dependency), #16
+  (tracking in-commit), #18 (characterize honestly — the balanced cell is parity-shippable, the incomplete
+  cell genuinely open; the σ²_cr treatment is the honest unknown), #19 (gated Fable — conditionally
+  pre-authorized on Outcome B, still brief-gated, never a subagent); [[ragged-coverage-nrep-240]],
+  [[fixed-rater-interval-2b-moment-correction]], [[cluster-icc-no-subject-facet]] (the cluster-level estimand
+  omits subject variance), [[milestone-branches-and-prs]] (ships on `m37-fixed-cluster-level` via PR).
+  ADR-019 (M10 crossed fixed multilevel subject level — the fit reused, its §7 forward note), ADR-011 (M5
+  multilevel fit + cluster-level Eq. 13 estimand this specializes), ADR-008 (M3 Case-3A θ²_r), ADR-038
+  (M28 — the 2b moment correction, if the interaction needs it), ADR-046 (M36 — the spike/recovery-oracle
+  pattern this reuses). Estimand-spec `M37-fixed-cluster-level.md`; `M5-multilevel.md §3b`,
+  `M10-fixed-multilevel.md §7`, `M9-incomplete-multilevel.md §9`. ten Hove, Jorgensen & van der Ark (2022)
+  Eq. 13 / Table 3 (cluster-level decomposition); McGraw & Wong (1996) Case 3/3A. `project/COVERAGE.md`
+  (#11 fixed, cluster level).

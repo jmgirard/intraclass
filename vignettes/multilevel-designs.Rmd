@@ -185,33 +185,36 @@ against the data), or the abort points you at the nested reading.
 The multilevel examples so far treat raters as a **random** sample — the recommended
 default, which generalizes beyond the raters you happened to use. When the observed
 raters *are* the entire population of interest (a fixed panel of examiners, say), pass
-`raters = "fixed"` at the **subject** level. As in the single-level case, the rater
-main effect is then the finite-population variance of *these* raters (McGraw & Wong's
-Case 3A) rather than a random-sample variance:
+`raters = "fixed"`. As in the single-level case, the rater main effect is then the
+finite-population variance of *these* raters (McGraw & Wong's Case 3A) rather than a
+random-sample variance. On a balanced crossed design both levels come back:
 
 ```{r ml-fixed, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 icc(school, score, subject = pupil, rater = rater, cluster = classroom,
-  raters = "fixed", level = "subject")
+  raters = "fixed")
 ```
 
-On this balanced design the fixed-rater subject-level coefficients match the
-random-rater ones: **consistency** never uses the rater term, so it is identical either
-way, and **absolute agreement** coincides because the finite-population rater variance
-equals the random-sample estimate when the design is balanced. The two genuinely
-diverge on **incomplete** data, where the rater variance is estimated from unequal cell
-counts — and the crossed (Design 1) fixed-rater multilevel design is supported on ragged
-data too, at the subject level, exactly as the single-level incomplete case above.
+On this balanced design the fixed-rater coefficients match the random-rater ones **at
+both levels**: **consistency** never uses the rater term, so it is identical either way,
+and **absolute agreement** coincides because the finite-population rater variance equals
+the random-sample estimate when the design is balanced. At the cluster level the
+between-rater disagreement in cluster means is that same finite-population term plus the
+cluster-by-rater interaction. The subject level genuinely diverges from random on
+**incomplete** data, where the rater variance is estimated from unequal cell counts —
+and the crossed (Design 1) fixed-rater multilevel design is supported on ragged data too,
+at the subject level, exactly as the single-level incomplete case above.
 
 Multilevel support now covers **random** raters on the crossed design (Design 1),
 complete or **incomplete**, at the subject level and — for `ICC(c,1)` — the cluster
 level; and the nested designs (Designs 2 and 3, subject level), complete **or
 incomplete**. **Fixed** raters are supported at the subject level on the crossed design
-(complete **and** incomplete) and, on complete data, the nested Design 2. What remains
-open: the averaged cluster-level `ICC(c,k)` on incomplete data (the per-cluster
-effective-rater divisor is still being validated) and incomplete *fixed-rater nested*
-designs. Design 3 reports no fixed-rater or cluster-level coefficient by construction —
-with raters nested in subjects there is no separable rater effect to fix, and no
-crossed-cluster structure to support a cluster mean.
+(complete **and** incomplete), at the **cluster** level on the crossed design (complete
+data), and, on complete data, the nested Design 2. What remains open: the averaged
+cluster-level `ICC(c,k)` on incomplete data (the per-cluster effective-rater divisor is
+still being validated), incomplete *fixed-rater cluster-level* estimation, and incomplete
+*fixed-rater nested* designs. Design 3 reports no fixed-rater or cluster-level coefficient
+by construction — with raters nested in subjects there is no separable rater effect to
+fix, and no crossed-cluster structure to support a cluster mean.
 
 ## How many raters? A multilevel D-study
 

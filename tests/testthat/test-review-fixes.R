@@ -51,8 +51,9 @@ test_that("d_study() projects a one-way fit instead of crashing (review #2)", {
 test_that("fixed-rater multilevel default call needs no explicit level (review #3)", {
   skip_if_not_installed("glmmTMB")
   d <- review_ml_crossed()
-  # Default `level = c("subject", "cluster")`: the deferred cluster level is dropped
-  # (as the nested branch does), so the natural call succeeds at the subject level.
+  # Default `level = c("subject", "cluster")`: on balanced crossed data BOTH levels ship
+  # for fixed raters -- subject (M10) and cluster (M37, ADR-047) -- so the natural call
+  # returns both. (Incomplete/unbalanced still drops the cluster level to subject.)
   fit <- suppressWarnings(icc(
     d,
     score,
@@ -63,21 +64,20 @@ test_that("fixed-rater multilevel default call needs no explicit level (review #
     seed = 1
   ))
   expect_s3_class(fit, "icc")
-  expect_identical(unique(fit$estimates$level), "subject")
-  # An explicit cluster-only request still aborts (that estimand is deferred).
-  expect_error(
-    suppressWarnings(icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      raters = "fixed",
-      level = "cluster",
-      seed = 1
-    )),
-    class = "intraclass_unsupported"
-  )
+  expect_setequal(unique(fit$estimates$level), c("subject", "cluster"))
+  # An explicit cluster-only request now SUCCEEDS on balanced data (M37); it equals the
+  # random-rater cluster-level ICC (O-FCL/reduction in test-icc-fixed-multilevel.R).
+  cl_only <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    level = "cluster",
+    seed = 1
+  ))
+  expect_identical(unique(cl_only$estimates$level), "cluster")
 })
 
 # Finding 4 -- unidentified subject/residual split ----------------------------

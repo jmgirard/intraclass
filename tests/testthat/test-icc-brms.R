@@ -2736,6 +2736,9 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
   # brms credible interval for every subject-level row (agreement AND consistency). This is
   # the honest engine-agreement pin -- NOT pointwise equality, since the flat rater-effect
   # prior vs half-t on the SDs perturbs the balanced fixed ~ random identity (#18).
+  # Pin the reference to the SUBJECT level: glmmTMB fixed multilevel now also returns the
+  # cluster level on balanced data (M37, ADR-047), but this containment pin is subject-level
+  # (brms is subject-only for fixed multilevel), so subset explicitly to avoid a two-row index.
   ga <- suppressWarnings(tidy(icc(
     d,
     score,
@@ -2743,6 +2746,7 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
     subject = subject,
     cluster = cluster,
     raters = "fixed",
+    level = "subject",
     engine = "glmmTMB"
   )))
   gcons <- suppressWarnings(tidy(icc(
@@ -2753,6 +2757,7 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
     cluster = cluster,
     type = "consistency",
     raters = "fixed",
+    level = "subject",
     engine = "glmmTMB"
   )))
   by_index <- function(x, i) x$estimate[x$index == i]
@@ -2787,6 +2792,7 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
       subject = subject,
       cluster = cluster,
       raters = "fixed",
+      level = "subject",
       engine = "lme4"
     )))
     expect_equal(

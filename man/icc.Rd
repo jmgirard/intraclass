@@ -348,8 +348,13 @@ random (the finite-population variance is read from the ragged rater-contrast fi
 both balanced and \strong{incomplete} data (the finite-population rater variance is formed
 \strong{per cluster} -- each cluster's own raters -- and averaged over clusters; on ragged
 data each cluster uses its own effective rater count). The fixed-rater \strong{cluster}
-level, Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
-Bayesian (\code{engine = "brms"}) incomplete fixed-nested path remain for later milestones.
+level is supported for the crossed (Design 1) design on \strong{balanced, complete} data
+(signal \eqn{\sigma^2_c}, agreement error the finite-population \eqn{\theta^2_r} plus
+the cluster-by-rater term \eqn{\sigma^2_{cr}}); on balanced data it equals the
+random-rater cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
+estimation, Design-3 fixed raters (nested in subjects -- no separable rater effect),
+and the Bayesian (\code{engine = "brms"}) fixed-rater cluster-level and incomplete
+fixed-nested paths remain for later milestones.
 }
 
 \section{Within-cell replicates}{
