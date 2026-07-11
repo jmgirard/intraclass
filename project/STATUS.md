@@ -1,6 +1,22 @@
 # Project status
 
-- Active milestone: **none** — M35 shipped (PR #40, ADR-045; squash-merged to `main` at `d69f39e`). The
+- Active milestone: **M36** (ADR-046, branch `m36-incomplete-fixed-nested`) — incomplete/ragged
+  **fixed-rater nested** (Design 2), subject level, single-rater `ICC_s(·,1)`: the first parked **(C)
+  research/blocked** corner, chosen this session after the maintainer picked direction (C) and asked whether a
+  simulation oracle could unblock it. A seeded **feasibility spike**
+  (`data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`) answered **yes** and showed it is **parity-shippable, not open research**: a
+  first-principles generalization of `theta2r_fixed_nested()` to unequal per-cluster k_c recovers a
+  **non-circular finite-population truth** (θ²_{r:c} is a deterministic function of the fixed rater effects) —
+  ICC(A,1) bias **+0.1%** (equal k_c, 25% cells missing) / **−1.0%** (unequal k_c ∈ {2..5}, 20% missing),
+  cross-engine glmmTMB↔lme4 **|ΔICC| ≤ 4.7e-5** — and the M28 **2b moment-corrected** MC interval,
+  generalized per-cluster, covers **nominally**: **.964 interior / .960 at the boundary θ²=0**, point-in-own-CI
+  1.00. So it pins by the standard multilevel oracle pattern (reduction + cross-engine + seeded recovery) that
+  shipped M9/M15/M19 without a Fable review; a Fable review stays **conditional-and-recommend-only** (#19) if
+  the committed n_rep≥240 boundary oracle undercovers. Single-rater only; averaged `ICC_s(·,k)` degrades to 🟣
+  research on its open `k_eff` divisor (M19 Slice 1 posture). Design 3 fixed ⚫ by-design; cluster-level fixed
+  deferred. **No slice code yet** — ADR + tracking-file open only (plan before code, #14). Next:
+  `/start-task` Slice 1.
+- Prior milestone: **none** — M35 shipped (PR #40, ADR-045; squash-merged to `main` at `d69f39e`). The
   vignette-reassessment **docs** milestone: fixed five materially false "planned for a later milestone" claims
   in `advanced.Rmd` (M14/M15, M18, M19, M20/M33, M21 all shipped the "later" work), retired the overloaded
   504-line `advanced.Rmd` into four focused articles (`multilevel-designs`, `engines`, `interval-methods`,
@@ -209,8 +225,17 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none** — M35 shipped and merged (PR #40, `d69f39e`). The next milestone needs an ADR after a
-  short retro (founding brief §7). Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
+- Active task: **M36 Slice 1** — ragged fixed-nested Design-2 single-rater estimator + O-IFNML oracle (the
+  DoD checklist in [`MILESTONES.md`](MILESTONES.md) is the live board). Generalize `theta2r_fixed_nested()` /
+  `theta2r_moment_draws()` to unequal per-cluster k_c (drop the equal-k guard; per-cluster center/raw/bias,
+  average-then-floor — balanced is the special case, O-FNML pins unmoved); lift the `!balanced` refusal on the
+  `raters = "fixed"` × `design = "nested_in_clusters"` path (reuse M9 `k_eff`/connectedness + `design` escape
+  hatch, pre-dispatch); subject-level agreement + consistency single-rater with the 2b boundary-aware MC
+  interval; lme4 path + singular→glmmTMB degrade; commit `data-raw/oracle-incomplete-fixed-nested.R` (spike
+  scripts are its seed) + fixture at n_rep≥240 (recovery + reductions to M19/M3 + cross-engine + coverage
+  interior/boundary). Averaged `ICC_s(·,k)`: attempt, else reclassify 🟣 research (#4). **No slice code yet —
+  plan stated, `/start-task` next.** Superseded active task (M35, done): the next milestone needed an ADR
+  after a short retro; that retro + spike + ADR-046 opened M36 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
   (incomplete fixed nested, cluster-level fixed — no frequentist oracle, likely a Fable review); **selectable
   `posterior` coupling**; **categorical/ordinal GLMM** (needs an estimand pass); **multilevel SEM**; the Wave-3
   `ICC(c,k)` incomplete divisor; occasion/ragged `d_study()`; the set-aside **clarity/accessibility rewrite**
@@ -274,9 +299,10 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M35 (ADR-045, vignette reassessment) shipped and merged (PR #40, `d69f39e`); all three
-  docs slices landed, full CI matrix green 9/9, no Fable review. The next milestone needs an ADR after a short
-  retro (founding brief §7).
+- Blockers: **none.** M36 (ADR-046) opened this session on branch `m36-incomplete-fixed-nested` — the
+  feasibility spike de-risked the one flagged unknown (ragged 2b-under-imbalance interval: nominal at the
+  boundary), so Slice 1 has no open blocker; the averaged-coefficient divisor is a *scoped-out* 🟣 research
+  degrade, not a blocker. M35 (ADR-045) shipped and merged (PR #40, `d69f39e`), full CI matrix green 9/9.
   Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
   (`.8625` at n_rep 80) went to a gated Fable review (#19) → **VERDICT: no shortfall, a Monte-Carlo tail
   event that does not replicate** (Fable re-ran the same incidence at n=240 → .9458; 2,000-fit frequentist
@@ -287,7 +313,17 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M35 shipped (PR #40, squash-merged at `d69f39e`); post-merge
+- Updated: 2026-07-11 by main session (Opus) — **M36 opened (ADR-046): incomplete/ragged fixed-rater nested
+  (Design 2), single-rater — the first (C) research/blocked corner, unblocked by a feasibility spike.** After
+  the maintainer chose direction (C) and asked whether a simulation oracle could work, a seeded spike
+  (`data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`) confirmed the ragged per-cluster Case-3A θ²_{r:c} recovers a non-circular
+  finite-population truth (ICC bias ≤ 1%, cross-engine ≤ 5e-5) with nominal 2b interval coverage interior
+  (.964) and at the boundary θ²=0 (.960) — parity-shippable, not open research. This commit (on branch
+  `m36-incomplete-fixed-nested`) writes ADR-046, adds the M36 DoD board to MILESTONES (live board, ADR-015),
+  advances the MILESTONES preamble + ADR-index (M36 in flight), adds estimand-spec
+  `M36-incomplete-fixed-nested.md`, annotates ROADMAP (the (C) incomplete-fixed-nested corner promoted), and
+  flips STATUS to M36-active. **No slice code yet** — plan before code (#14). Next: `/start-task` Slice 1.
+  Prior line: **M35 shipped (PR #40, squash-merged at `d69f39e`); post-merge
   `project/` reconcile.** This commit flips STATUS to M35-shipped, compresses the MILESTONES M35 board to the
   summary form (preserving the "Deferred out of M35" list), advances the MILESTONES preamble + ADR-index (M35
   no longer in flight), sets "Last green CI" to the merge commit, and flips ROADMAP's vignette item to
@@ -491,11 +527,14 @@ closing the ADR-017 arc (M13).
 
 ## Next action
 
-**No milestone is currently in flight — the next needs an ADR after a short retro (founding brief §7).** M35
-(ADR-045, vignette reassessment) shipped (PR #40, `d69f39e`): the pkgdown vignettes now match the shipped
-feature set — `advanced.Rmd` split into four focused articles and the M23–M34 Bayesian engine documented for
-the first time. Pick a direction from the parked candidates (below / `ROADMAP.md`), run a short retro, and
-open the next milestone with an ADR.
+**M36 (ADR-046) is in flight — run `/start-task` for Slice 1.** The ADR + tracking files are open; the DoD
+checklist in [`MILESTONES.md`](MILESTONES.md) is the live board. Slice 1: generalize `theta2r_fixed_nested()`
+/ `theta2r_moment_draws()` to unequal per-cluster k_c, lift the `!balanced` refusal on the ragged
+fixed-nested path, ship single-rater `ICC_s(·,1)` with the 2b boundary-aware interval, and commit the
+O-IFNML oracle (`data-raw/oracle-incomplete-fixed-nested.R` seeded from the scratchpad spike, fixture at
+n_rep≥240). The feasibility spike already de-risked the estimand (recovery + coverage nominal, incl. the
+boundary); the committed oracle is the real gate, with a conditional Fable recommendation (#19) only on a
+shortfall. No slice code has begun (plan before code, #14).
 
 **Deferred / candidates —** With
 M34 the Bayesian arc's *parity* (M23–M33) and *customization* (M34) are both complete. Remaining brms work is
