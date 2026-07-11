@@ -50,7 +50,9 @@ icc(
   mc_samples = 10000L,
   boot_samples = 999L,
   seed = NULL,
-  brm_args = list()
+  brm_args = list(),
+  prior = NULL,
+  posterior_summary = c("percentile", "hpdi")
 )
 ```
 
@@ -198,11 +200,11 @@ icc(
   \\\theta^2_r\\), the crossed (Design 1) multilevel **fixed-rater**
   design (subject level), and the nested **Design 2** (raters nested in
   clusters) and **Design 3** (raters nested in subjects, the multilevel
-  one-way, agreement-only) *random* multilevel designs (subject level);
-  and, on balanced/complete data only, the single-level one-way random
-  design, the nested Design 2 *fixed-rater* multilevel design at the
+  one-way, agreement-only) *random* multilevel designs (subject level),
+  and the single-level one-way random design; and, on balanced/complete
+  data only, the nested Design 2 *fixed-rater* multilevel design at the
   subject level, the conflated diagnostic, and within-cell replicates.
-  Incomplete/ragged **fixed**-nested and single-level one-way Bayesian
+  Incomplete/ragged **fixed**-nested and within-cell-replicate Bayesian
   fits, and numeric-`unit` (D-study) projection, are planned for later
   milestones. `"lme4"` requires the lme4 and merDeriv packages;
   `"lavaan"` requires the lavaan package; `"brms"` requires the brms
@@ -261,9 +263,44 @@ icc(
   `brm_args = list(cores = 4)` (or set `options(mc.cores)`) to sample in
   parallel — the engine emits a periodic reminder to that effect while
   running sequentially. The model formula, data, the sourced half-*t*
-  prior, and `seed` are owned by `intraclass` and may not be set here;
-  supplying them, or a non-empty `brm_args` with any other engine, is an
-  error.
+  prior, and `seed` are owned by `intraclass` and may not be set here
+  (the prior has its own `prior` argument); supplying them, or a
+  non-empty `brm_args` with any other engine, is an error.
+
+- prior:
+
+  Optional custom prior for `engine = "brms"`, as a brms prior object
+  (from
+  [`brms::set_prior()`](https://paulbuerkner.com/brms/reference/set_prior.html)
+  /
+  [`brms::prior()`](https://paulbuerkner.com/brms/reference/set_prior.html);
+  combine several with [`c()`](https://rdrr.io/r/base/c.html)). The
+  default `NULL` uses the **sourced** half-*t*(4, 0, 1) prior on every
+  random-effect SD (ten Hove, Jorgensen & van der Ark 2020), the prior
+  every coverage result in this package depends on. Supplying a custom
+  prior is a deliberate deviation — intended for prior-sensitivity,
+  method-comparison, or simulation work — and **voids those coverage
+  guarantees**; `icc()` warns loudly (a classed
+  `intraclass_custom_prior` condition) because a vague or flat SD prior
+  can *worsen* small-*k* boundary bias (the half-*t* is weakly
+  informative on purpose). Ignored (must be `NULL`) for non-Bayesian
+  engines.
+
+- posterior_summary:
+
+  How to summarize the posterior draws into a credible interval when
+  `ci_method = "posterior"` (the Bayesian engine): `"percentile"` (the
+  default — a two-sided percentile interval) or `"hpdi"` (the
+  highest-posterior-density interval, the narrowest interval covering
+  the credible mass). Percentile is the default because it is
+  monotone-transformation invariant and degrades gracefully as the ICC
+  approaches the variance boundary, and ten Hove, Jorgensen & van der
+  Ark (2020) found percentile (not HPD) intervals give nominal coverage
+  at small rater counts; the HPDI is offered for comparison, not as a
+  strict upgrade (no coverage is claimed for it). Only the HPDI needs
+  the posterior draws, so `posterior_summary = "hpdi"` requires
+  `ci_method = "posterior"`; the other interval methods already report a
+  percentile interval.
 
 ## Value
 

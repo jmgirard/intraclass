@@ -98,7 +98,9 @@ raters as a random sample (Case 2) or as fixed (Case 3).</p>
 <span>  mc_samples <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  boot_samples <span class="op">=</span> <span class="fl">999L</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  brm_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  brm_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  posterior_summary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"percentile"</span>, <span class="st">"hpdi"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -237,10 +239,10 @@ two-way <strong>fixed-rater</strong> single-level design (Case-3A finite-populat
 \(\theta^2_r\)), the crossed (Design 1) multilevel <strong>fixed-rater</strong> design (subject
 level), and the nested <strong>Design 2</strong> (raters nested in clusters) and <strong>Design 3</strong> (raters
 nested in subjects, the multilevel one-way, agreement-only) <em>random</em> multilevel designs
-(subject level); and, on balanced/complete data only, the single-level one-way random
-design, the nested Design 2 <em>fixed-rater</em> multilevel design at the subject level, the
+(subject level), and the single-level one-way random design; and, on balanced/complete
+data only, the nested Design 2 <em>fixed-rater</em> multilevel design at the subject level, the
 conflated diagnostic, and within-cell replicates. Incomplete/ragged <strong>fixed</strong>-nested and
-single-level one-way Bayesian fits, and numeric-<code>unit</code> (D-study) projection, are planned
+within-cell-replicate Bayesian fits, and numeric-<code>unit</code> (D-study) projection, are planned
 for later milestones. <code>"lme4"</code> requires the
 <span class="pkg">lme4</span> and <span class="pkg">merDeriv</span> packages; <code>"lavaan"</code> requires the <span class="pkg">lavaan</span>
 package; <code>"brms"</code> requires the <span class="pkg">brms</span> package (and a working Stan toolchain).</p></dd>
@@ -293,8 +295,37 @@ chains <strong>sequentially on one core</strong> (<code>cores = getOption("mc.co
 <code>brm_args = list(cores = 4)</code> (or set <code>options(mc.cores)</code>) to sample in parallel
 — the engine emits a periodic reminder to that effect while running
 sequentially. The model formula, data, the sourced half-<em>t</em> prior, and <code>seed</code>
-are owned by <code>intraclass</code> and may not be set here; supplying them, or a
-non-empty <code>brm_args</code> with any other engine, is an error.</p></dd>
+are owned by <code>intraclass</code> and may not be set here (the prior has its own
+<code>prior</code> argument); supplying them, or a non-empty <code>brm_args</code> with any other
+engine, is an error.</p></dd>
+
+
+<dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
+<dd><p>Optional custom prior for <code>engine = "brms"</code>, as a <span class="pkg">brms</span> prior
+object (from <code><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">brms::set_prior()</a></code> / <code><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">brms::prior()</a></code>; combine several with <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>).
+The default <code>NULL</code> uses the <strong>sourced</strong> half-<em>t</em>(4, 0, 1) prior on every
+random-effect SD (ten Hove, Jorgensen &amp; van der Ark 2020), the prior every
+coverage result in this package depends on. Supplying a custom prior is a
+deliberate deviation — intended for prior-sensitivity, method-comparison, or
+simulation work — and <strong>voids those coverage guarantees</strong>; <code>icc()</code> warns
+loudly (a classed <code>intraclass_custom_prior</code> condition) because a vague or flat
+SD prior can <em>worsen</em> small-<em>k</em> boundary bias (the half-<em>t</em> is weakly
+informative on purpose). Ignored (must be <code>NULL</code>) for non-Bayesian engines.</p></dd>
+
+
+<dt id="arg-posterior-summary">posterior_summary<a class="anchor" aria-label="anchor" href="#arg-posterior-summary"></a></dt>
+<dd><p>How to summarize the posterior draws into a credible
+interval when <code>ci_method = "posterior"</code> (the Bayesian engine): <code>"percentile"</code>
+(the default — a two-sided percentile interval) or <code>"hpdi"</code> (the
+highest-posterior-density interval, the narrowest interval covering the
+credible mass). Percentile is the default because it is
+monotone-transformation invariant and degrades gracefully as the ICC
+approaches the variance boundary, and ten Hove, Jorgensen &amp; van der Ark (2020)
+found percentile (not HPD) intervals give nominal coverage at small rater
+counts; the HPDI is offered for comparison, not as a strict upgrade (no
+coverage is claimed for it). Only the HPDI needs the posterior draws, so
+<code>posterior_summary = "hpdi"</code> requires <code>ci_method = "posterior"</code>; the other
+interval methods already report a percentile interval.</p></dd>
 
 </dl></div>
     <div class="section level2">
