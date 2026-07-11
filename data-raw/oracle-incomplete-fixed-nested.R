@@ -223,14 +223,52 @@ if (requireNamespace("lme4", quietly = TRUE)) {
 }
 
 # --- recovery + coverage grid --------------------------------------------------------
+# Each cell carries its own theta^2 vector. The first two (both theta^2, ~6 clusters,
+# n_s = 8) are the original M36 grid. The last two are the Fable review sentinels
+# (fable-review-m36-...-response.md §3/§5, 2026-07-11):
+#   sentinel-Cn80 : a CLUSTER-COUNT boundary cell (C_n = 80) -- a permanent regression
+#                   guard for the M27/M28 incidental-parameters class the ~6-cluster grid
+#                   could not detect (Fable Q2; boundary coverage held flat in C_n = .951
+#                   at n_rep 500, no decay).
+#   certif-ns4    : a LOW-INFORMATION interior cell (n_s = 4) -- separates the shipped 1b
+#                   from 0b (under) and 2b (over), so the |bias| < .03 pin certifies the
+#                   correction's SIZE, not just its presence (Fable Q4/Q5: at n_s = 8 a 2b
+#                   over-correction sits inside the pin; at n_s = 4 it is +.037, outside).
 cells <- list(
-  list(label = "equal-k4", kc = rep(4L, 6L), ns = 8L, p = 0.75),
-  list(label = "unequal-k", kc = c(2L, 3L, 4L, 5L, 4L, 3L), ns = 8L, p = 0.80)
+  list(
+    label = "equal-k4",
+    kc = rep(4L, 6L),
+    ns = 8L,
+    p = 0.75,
+    theta2 = c(0, 0.5)
+  ),
+  list(
+    label = "unequal-k",
+    kc = c(2L, 3L, 4L, 5L, 4L, 3L),
+    ns = 8L,
+    p = 0.80,
+    theta2 = c(0, 0.5)
+  ),
+  list(
+    label = "sentinel-Cn80",
+    kc = rep(4L, 80L),
+    ns = 4L,
+    p = 0.80,
+    theta2 = 0
+  ),
+  list(
+    label = "certif-ns4",
+    kc = c(2L, 3L, 4L, 5L, 4L, 3L),
+    ns = 4L,
+    p = 0.80,
+    theta2 = 0.5
+  )
 )
 results <- list()
 i <- 0L
+n_total <- sum(vapply(cells, function(cc) length(cc$theta2), integer(1)))
 for (cc in cells) {
-  for (theta2 in c(0, 0.5)) {
+  for (theta2 in cc$theta2) {
     i <- i + 1L
     res <- one_cell(
       cc$label,
@@ -242,11 +280,12 @@ for (cc in cells) {
     )
     results[[i]] <- res
     cat(sprintf(
-      "[%d/%d] %-9s kc=%-11s theta2=%.2f (%-8s) pop=%.4f cover=%.3f bias=%+.4f (n=%d fail=%d)\n",
+      "[%d/%d] %-13s kc=%-11s ns=%d theta2=%.2f (%-8s) pop=%.4f cover=%.3f bias=%+.4f (n=%d fail=%d)\n",
       i,
-      length(cells) * 2L,
+      n_total,
       cc$label,
       res$kc,
+      cc$ns,
       theta2,
       res$cell,
       res$pop_icc,

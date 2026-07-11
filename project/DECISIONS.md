@@ -3907,3 +3907,56 @@ consequences → references.
   Ark (2022) Eqs. 8–11, Table 3 (nested Design 2 subject-level decomposition); McGraw & Wong (1996) Case 3/3A
   (the finite-population θ² this generalizes to ragged per-cluster k_c). `project/COVERAGE.md` (#11 fixed
   nested, incomplete column).
+
+### ADR-046 Amendment 1 — post-hoc Fable review (gated #19): construction confirmed, three doc/test-asset amendments
+- Date: 2026-07-11
+- Status: accepted
+- Context: The main session (Opus) shipped M36 (PR #41, `f5a19e8`) concluding it did **not** need a Fable
+  review — the ragged 2b-under-imbalance interval and the averaged-coefficient `k_eff` divisor were the
+  genuine unknowns, and the committed O-IFNML oracle came back nominal. The maintainer then requested a
+  **post-hoc** gated Fable review (#19) of exactly those calls. Brief + response committed:
+  `data-raw/reviews/fable-review-m36-incomplete-fixed-nested-{brief,response}.md` (+ the review's own seeded
+  scripts `fable-check-m36.R` cluster-count sweep at n_rep 500 and `fable-check-m36-identities.R` derivation
+  check).
+- Decision (Fable verdict adopted in full): **The shipped M36 construction is sound; no corrective
+  follow-up milestone is needed** (contrast M28, which *was* the corrective follow-up to M27 — here the
+  ragged generalization holds). Findings and their disposition:
+  1. **Q1 — the 2b construction survives raggedness.** The two M28 inflation identities are **Gaussian
+     quadratic-form facts** (E[xᵀCx] = μᵀCμ + tr(CV), any V), *not* balanced-data facts: the push-forward is
+     exact by construction of the draws (the β-block of `vcov(fit, full=TRUE)` equals `vcov()$cond`, verified
+     0.00e+00), and the plug-in identity holds for unbiased REML β̂ (Kackar–Harville). The balanced closed
+     form `b = σ²_res/n_s` was only ever an *analytic evaluation* of the trace; on ragged data b_c is read
+     from the engine V̂ (carrying the subject-mean leakage the naive diagonal misses by up to 12%). Residual
+     center displacement mean_c(b̂_c − b_c^true) measured **+0.0006 vs a mean b of 0.117**, and it is o(1)
+     while the interval shrinks as C_n^{−1/2} — **REML is load-bearing** (an ML fit's growing-β̂ Neyman–Scott
+     bias would rebuild an incidental-parameters displacement; REML closes it).
+  2. **Q2 — no cluster-count decay.** The C_n sweep Opus omitted (the honest process gap: a ~6-cluster grid
+     cannot detect this pathology by construction) comes back **flat**: boundary coverage .951–.968 at
+     C_n = 80 across four regimes (n_rep 500), the M28 *post*-fix signature, nowhere near the pre-fix
+     collapse (.95/.86/.57). The "no Fable needed" conclusion was **right but under-evidenced** — a coverage
+     claim for an interval whose known failure mode is cluster-count decay needs a cluster-count axis (#18).
+  3. **Q3 — the pooled harmonic `k_eff` is coherent, with a recorded identity.** Under homogeneous per-cluster
+     rater variance, **harmonic pooling of rating counts IS per-subject error-variance averaging**:
+     err = (θ̄² + σ²_res)·mean_s(1/m_s) = (θ̄² + σ²_res)/k_eff exactly — so the multi-cluster average is a
+     derivation, not merely single-cluster-pinned. Under *heterogeneous* θ²_c it drops a second-order
+     covariance term Cov_s(θ²_{c(s)}, 1/m_s) (~.03 ICC at deliberately stark heterogeneity) — a *definitional*
+     choice of summary, not an estimation bug. **Keep as shipped; do not move to per-cluster divisors** (they
+     would inject the noisiest, individually-unfloorable per-cluster θ̂²_c into the headline average).
+  4. **Q4 — the recovery oracle's non-circularity is valid; its certification power is partial.** Recovery
+     certifies the correction's *presence and rough scale*, but at n_s = 8 cannot see its *exact size* (a 2b
+     over-correction sits inside the |bias| < .03 pin; only at n_s ≈ 4 is it +.037, visible). The exact size
+     is pinned by the boundary-coverage cells (M28's lesson) + the committed identity checks.
+- Consequences (all **documentation / test-asset** amendments — no shipped-code change, the point estimator
+  and interval stand): (a) O-IFNML regenerated with two Fable sentinel cells — a **C_n = 80 boundary**
+  cluster-count sentinel (guards the M27/M28 incidental-parameters class) and a **n_s = 4 interior**
+  low-information cell (so the |bias| pin certifies the correction's size); the prior fixture was not wrong,
+  it asserted *less* than it appeared to. (b) `M36-incomplete-fixed-nested.md` records the §4(a) harmonic-pooling
+  identity, the §4(b) heterogeneity caveat, and the ragged-plug-in-b / REML-load-bearing note. (c) This
+  amendment. The **process lesson** (#18): a coverage claim for a per-cluster-nested interval family must
+  sweep the cluster-count axis, because the known failure mode (incidental-parameters displacement) is
+  invisible at few clusters — do not read a single low-C_n coverage number as sufficient.
+- References: PRINCIPLE #19 (gated manual Fable, maintainer-requested; never a subagent — brief prepared,
+  reviewed manually), #1/#4 (recovery oracle non-circular, not tuned), #18 (the honest process gap +
+  cluster-count-axis lesson); `data-raw/reviews/fable-review-m36-incomplete-fixed-nested-{brief,response}.md`
+  + `fable-check-m36{,-identities}.R`; ADR-038 (M28 — the 2b construction and its two identities, which this
+  confirms generalize); Kackar & Harville (1984, *JASA* 79:853 — EGLS/REML unbiasedness).

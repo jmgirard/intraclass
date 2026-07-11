@@ -96,6 +96,24 @@ it reduces to flat M3 fixed **exactly** at a single cluster (§4, |diff| ~1e-16)
 "attempt, else 🟣 research" clause resolved to ship. This is the well-defined subject-level
 divisor, **distinct from the open per-cluster `ICC(c,k)` divisor** (M9 §9, still deferred).
 
+*Multi-cluster identity (Fable review 2026-07-11, RR §4a; the derivation behind the
+single-cluster reduction).* The average-unit error is the mean per-subject error variance of
+the averaged score, mean_s[(θ²_{c(s)} + σ²_res)/m_s] (each subject's own cluster's rater
+variance, own rating count m_s — the M3/McGraw–Wong Case-3A averaging convention). Under
+**homogeneous** per-cluster variance (θ²_c ≡ θ̄² = θ²_{r:c}), harmonic pooling of rating
+counts *is* per-subject error-variance averaging:
+
+    err = (θ̄² + σ²_res)·mean_s(1/m_s) = (θ̄² + σ²_res)/k_eff   — exactly the shipped denominator.
+
+So the pooled `k_eff` is coherent for the cross-cluster mixture, not a convenience. *Caveat
+(RR §4b):* under **heterogeneous** θ²_c the shipped form omits a second-order term
+Cov_s(θ²_{c(s)}, 1/m_s) — zero when θ²_c is constant or rating counts are exchangeable across
+clusters, ~.03 of ICC under deliberately stark heterogeneity (noisy rater sets co-occurring
+with thin rating counts). This is a **definitional** choice of which single summary to report
+(the random-nested model cannot even express it — one σ²_{r:c} by assumption), not an
+estimation bug; we do **not** move to per-cluster/weighted divisors, which would inject the
+noisiest, individually-unfloorable per-cluster θ̂²_c into the headline average (RR §4).
+
 ---
 
 ## 3. The interval (inherited M28 2b, generalized per-cluster)
@@ -107,6 +125,17 @@ q_c = colSums(m_c ∘ (center_c m_c))/(k_c−1) − **2 b_c**, averaged over clu
 average floored. The 2b (two equal inflations: undo the Gaussian push-forward + remove
 the plug-in bias of the centre) is what made M28's nested interval cover; b_c comes from
 the engine `vcov` that generates the draws (not the empirical draw covariance).
+
+*Why 2b survives raggedness (Fable review 2026-07-11, RR §1).* The two inflations are
+**Gaussian quadratic-form identities** (E[xᵀCx] = μᵀCμ + tr(CV), any V), not balanced-data
+facts — the balanced closed form `b = σ²_res/n_s` was only an *analytic evaluation* of the
+trace. On ragged data b_c is a consistent **plug-in estimate** read from the engine V̂_c
+(which carries the subject-mean leakage the naive diagonal misses by up to ~12%); its error
+enters the interval centre only at **second order** (measured mean_c(b̂_c − b_c^true) ≈ +6e-4
+vs a mean b of .117) and is o(1) while the interval shrinks as C_n^{−1/2}, so no
+incidental-parameters displacement rebuilds as clusters accrue. **REML is load-bearing** here
+(`fit_glmmtmb_ml_model()`, `REML = TRUE`): the fixed-effect count grows ∝ C_n, so an ML fit's
+Neyman–Scott bias in σ̂²_res would feed every b̂_c systematically — REML closes that channel.
 
 ---
 
