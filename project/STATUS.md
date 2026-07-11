@@ -245,14 +245,20 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M37 Slice 1 — the feasibility spike (next; no slice code yet).** Write
-  `data-raw/reviews/m37-feasibility-spike-{point,coverage}.R`: on balanced data, does the fixed cluster-level
-  ICC (θ²_r main-effect correction + random σ²_cr interaction) equal the shipped M5 random cluster-level ICC,
-  and does the point/interval recover a non-circular finite-population cluster-mean truth (interior + boundary
-  σ²_c=0, n_rep ≥ 240)? Decide Outcome A (reduction exact → ship reduction-oracle, no Fable) vs B (σ²_cr needs
-  a finite-population correction → derive it, pin against recovery, fire the pre-authorized gated Fable review).
-  Then Slice 2 (lift the M10 `level="cluster"`+fixed abort for balanced crossed Design 1, read §2b off the M10
-  fit, O-FCL oracles) and Slice 3 (docs). Run via `/start-task`. *Superseded active task (M36, done):* incomplete/ragged fixed-rater nested
+- Active task: **M37 Slice 2 — cluster-level fixed estimand + fit path (next).** *Slice 1 (the feasibility
+  spike) is DONE — Outcome A, no Fable* (`data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`):
+  reduction to the shipped M5 random cluster-level ICC is **exact** in all regimes (|Δ| ~ 1e-6; θ²_r=σ²_r
+  **and s2cr_fixed=s2cr_random**, both |d| ~ 1e-7 — the σ²_cr verdict is that the **random σ²_cr is the correct
+  fixed cluster-level error**, no finite-population correction); recovery of the non-circular finite-population
+  truth is unbiased at C_n=80; the MC interval is at **exact M5 parity** (interior 0.963/0.992; the σ²_c=0
+  boundary is 0.550 but **identical fixed-vs-random**, a pre-existing cluster-signal-zero loss, not an M37
+  defect). Slice 2: lift the M10 `level="cluster"`+`raters="fixed"` abort (`R/icc.R` ~765) for **balanced
+  crossed Design 1 only** (incomplete stays refused); read the cluster-level `(signal, {error set}, divisor)`
+  off the shipped M10 fit (σ²_c signal, `{θ²_r, σ²_cr}` agreement / `{σ²_cr}` consistency, divisor `k`); route
+  in `icc()`; `print`/`glance` surface it; MC CI reuses the M10 fixed sampler. Oracles **O-FCL/reduction**
+  (balanced fixed ≡ M5 random cluster-level < 1e-4), **/lme4** cross-engine, **/recovery** (committed seeded,
+  interior nominal + boundary parity, n_rep ≥ 240). Regression guard M1–M36 green; docs/NEWS/COVERAGE/
+  REFERENCES in-commit (#16). Then Slice 3 (docs). Run via `/start-task`. *Superseded active task (M36, done):* incomplete/ragged fixed-rater nested
   Design 2 — `theta2r_fixed_nested()` generalized to unequal per-cluster k_c (bit-identical on balanced),
   guard narrowed to refuse brms only, both single + average `ICC_s(·,k)` shipped (average pinned by the exact
   single-cluster reduction to flat M3), O-IFNML committed (coverage interior .967 / boundary θ²=0 .942, no
@@ -333,10 +339,10 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none** — M37 (ADR-047) is planned and in flight. Its **one open question is spike-resolvable,
-  not a blocker**: whether the random `(1|cluster:rater)` σ²_cr is the correct fixed-rater cluster-level error
-  (M10 §7). Slice 1 (the feasibility spike) settles it; a gated Fable review is **conditionally
-  pre-authorized** to fire only on Outcome B (σ²_cr needs a finite-population correction). Historical (M36,
+- Blockers: **none** — M37 (ADR-047) in flight, Slice 1 done. **The one open question is RESOLVED (Outcome A):**
+  the random `(1|cluster:rater)` σ²_cr **is** the correct fixed-rater cluster-level error (spike: fixed ≡ M5
+  random to |d| ~ 1e-7), so no finite-population correction and the **pre-authorized Fable review does not
+  fire.** Slice 2 (the estimand + fit path) is a parity implementation with a reduction oracle. Historical (M36,
   cleared): M36 (ADR-046) shipped and merged (PR #41, `f5a19e8`), full CI matrix green 9/9, no Fable review;
   the flagged risk (ragged 2b-under-imbalance interval) resolved nominal in the committed O-IFNML oracle
   (boundary θ²=0 coverage .942).
@@ -350,7 +356,19 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M37 planned (ADR-047): fixed-rater cluster-level multilevel
+- Updated: 2026-07-11 by main session (Opus) — **M37 Slice 1 (feasibility spike) DONE — Outcome A, no Fable.**
+  Committed `data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R` (900 + 720 seeded
+  glmmTMB fits). Settled the σ²_cr question (M10 §7): fixing the rater main effect does **not** bias the
+  `(1|cluster:rater)` interaction (`s2cr_fixed = s2cr_random`, |d| ~ 1e-7), so the **random σ²_cr is the
+  correct fixed-rater cluster-level error** — the fixed cluster-level ICC reduces to the shipped M5 random
+  cluster-level ICC **exactly** in all regimes (|Δ| ~ 1e-6; θ²_r=σ²_r too). Recovery of a non-circular
+  finite-population truth unbiased at C_n=80. The MC interval is at **exact M5 parity** — the σ²_c=0 boundary
+  under-covers (0.550) but **identically for fixed and M5-random** (`boundary-parity.R`), a pre-existing
+  cluster-signal-zero property, **not an M37 defect** (recorded as a candidate follow-up, spec §7). So M37
+  ships as estimand + interval parity with M5 random cluster-level (the M10-subject posture at the cluster
+  level): reduction oracle, lme4 cross-engine, seeded recovery — **the pre-authorized Fable review does not
+  fire.** STATUS/board updated; Slice 1 checked off; Active task advanced to Slice 2. Next: `/start-task`
+  Slice 2 (the estimand + fit path). Prior line: **M37 planned (ADR-047): fixed-rater cluster-level multilevel
   ICC (crossed Design 1, balanced), the last (C) research/blocked corner.** After a short retro + investigation
   that split the ROADMAP's blanket "cluster-level fixed is blocked" into a **parity-shippable balanced cell**
   (reads a new coefficient off the shipped M10 fit — the cluster-level sibling of M10, no new fit) and a

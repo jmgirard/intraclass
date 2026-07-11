@@ -149,6 +149,31 @@ committed as provenance, the M36 precedent) answers, on **balanced/complete** da
   coverage** (#4); if it cannot be pinned it degrades to 🟣 research and M37 ships
   nothing for this cell.
 
+**Spike verdict — OUTCOME A (resolved 2026-07-11, no Fable).** The committed scripts
+(`data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`) settled it:
+- **Reduction exact in all regimes:** fixed-vs-M5-random cluster-level ICC |Δ| ~ 1e-6;
+  θ²_r = σ²_r (|d| ~ 1e-7, the M3 §6 identity) **and — the open question —
+  `s2cr_fixed = s2cr_random` (|d| ~ 1e-7)**: fixing the rater main effect does **not**
+  bias the `(1|cluster:rater)` estimate, so the **random σ²_cr is the correct
+  fixed-rater cluster-level interaction error** (no finite-population correction on the
+  interaction — the interaction is a fresh random draw for each random cluster, so it is
+  still generalized over even with raters fixed).
+- **Recovery clean:** vs the non-circular finite-population truth, bias +0.0001 (A1) /
+  −0.0029 (Ak) at C_n=80 (unbiased); the C_n=20 (−0.024/−0.035) and boundary
+  (+0.025/+0.082) biases are standard few-cluster / variance-floor effects.
+- **Interval at exact M5 parity:** interior coverage 0.963 (C_n=80) / 0.992 (C_n=20);
+  the σ²_c=0 boundary coverage is **0.550 — but identical for M37-fixed and M5-random**
+  on the same data (`boundary-parity.R`). It is the **pre-existing cluster-signal-at-zero
+  coverage loss** (a ratio floored at 0 in its numerator; no moment correction for the
+  *signal* variance, unlike the rater θ² boundary of M28) shared by M5/M9/M37 — **not an
+  M37 regression.** M37's boundary claim is therefore **parity (fixed ≡ random)**, not
+  "nominal"; improving cluster-signal-zero coverage is a cross-cutting interval matter,
+  a candidate follow-up **out of M37 scope** (§7).
+
+So M37 ships as **estimand + interval parity with the shipped M5 random cluster-level**
+(the M10-subject posture lifted to the cluster level): reduction oracle, lme4
+cross-engine, seeded recovery — **no Fable review**.
+
 ### 4b. Shipping oracles (O-FCL), whichever §4a outcome
 
 - **O-FCL/reduction.** Outcome A: §2b equals M5 random cluster-level (agreement +
@@ -221,6 +246,11 @@ unification), but the cluster-level interaction error is new territory the spike
   raters, M5/M8).
 - **Design 3 fixed** — ⚫ by-design (multilevel one-way, no separable rater effect).
 - **Absolute-agreement `d_study()` for fixed cluster-level raters** — refused (M4.5).
+- **Improving cluster-signal-zero (σ²_c → 0) interval coverage** — the spike found 0.550
+  boundary coverage, but **identical for M37-fixed and the shipped M5-random** (parity,
+  not an M37 defect); it is the pre-existing cluster-signal-at-zero loss shared by
+  M5/M9/M37. A moment-correction / boundary treatment for the *signal* variance is a
+  cross-cutting interval milestone (affects M5/M9 too), a candidate follow-up.
 
 ---
 

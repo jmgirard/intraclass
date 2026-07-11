@@ -1313,9 +1313,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Fable-confirmed relationship (Outcome B); lme4 cross-engine < 1e-4; committed **non-circular** seeded
   finite-population cluster-mean recovery (interior + boundary σ²_c=0, n_rep ≥ 240 — [[ragged-coverage-nrep-240]]).
 - Tasks / DoD (live board, ADR-015):
-  - [ ] **Slice 1 — feasibility spike (no shipping code).** `data-raw/reviews/m37-feasibility-spike-{point,coverage}.R`;
-        decide Outcome A vs B; record the σ²_cr verdict. On Outcome B, prepare the Fable brief and pause for
-        the review before Slice 2.
+  - [x] **Slice 1 — feasibility spike (no shipping code) — DONE (2026-07-11): OUTCOME A, no Fable.**
+        `data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`. Reduction exact in all
+        regimes (fixed-vs-M5-random |Δ| ~ 1e-6; θ²_r=σ²_r **and s2cr_fixed=s2cr_random**, both |d| ~ 1e-7 —
+        the σ²_cr verdict: **random σ²_cr is the correct fixed cluster-level error**, no finite-population
+        correction). Recovery vs the non-circular finite-population truth unbiased at C_n=80 (A1 +0.0001).
+        Interval at **exact M5 parity**: interior 0.963/0.992; σ²_c=0 boundary 0.550 **but identical for
+        fixed and M5-random** (pre-existing cluster-signal-zero loss, not an M37 defect → boundary claim is
+        parity; improving it is a candidate follow-up, §7). **The pre-authorized Fable review does NOT fire.**
   - [ ] **Slice 2 — cluster-level fixed estimand + fit path.** Lift the `level = "cluster"` + `raters =
         "fixed"` abort (`R/icc.R`, M10 subject-only guard) for balanced crossed Design 1 only (incomplete
         stays refused); read §2b off the M10 fit with θ²_r (+ §4a-settled interaction term) in the rater slot;
