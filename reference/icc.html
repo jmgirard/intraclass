@@ -445,8 +445,13 @@ random (the finite-population variance is read from the ragged rater-contrast fi
 both balanced and <strong>incomplete</strong> data (the finite-population rater variance is formed
 <strong>per cluster</strong> – each cluster's own raters – and averaged over clusters; on ragged
 data each cluster uses its own effective rater count). The fixed-rater <strong>cluster</strong>
-level, Design-3 fixed raters (nested in subjects – no separable rater effect), and the
-Bayesian (<code>engine = "brms"</code>) incomplete fixed-nested path remain for later milestones.</p>
+level is supported for the crossed (Design 1) design on <strong>balanced, complete</strong> data
+(signal \(\sigma^2_c\), agreement error the finite-population \(\theta^2_r\) plus
+the cluster-by-rater term \(\sigma^2_{cr}\)); on balanced data it equals the
+random-rater cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
+estimation, Design-3 fixed raters (nested in subjects – no separable rater effect),
+and the Bayesian (<code>engine = "brms"</code>) fixed-rater cluster-level and incomplete
+fixed-nested paths remain for later milestones.</p>
     </div>
     <div class="section level2">
     <h2 id="within-cell-replicates">Within-cell replicates<a class="anchor" aria-label="anchor" href="#within-cell-replicates"></a></h2>
@@ -513,8 +518,8 @@ reliability for multilevel data: A generalizability theory approach.
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   index     estimate   95% CI</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)    0.290   [0.050, 0.706]</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,k)    0.620   [0.175, 0.906]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)    0.290   [0.050, 0.712]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,k)    0.620   [0.173, 0.908]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variance components: subject 2.556, rater 5.244, residual 1.019</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span>
 <span class="r-in"><span></span></span>

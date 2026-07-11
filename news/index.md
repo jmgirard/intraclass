@@ -47,14 +47,18 @@ simulations.
   and fixed raters at the subject level on **both balanced and
   incomplete** crossed data (the finite-population rater variance is
   read from the ragged rater-contrast fit, so it differs from the
-  random-rater ICC under imbalance). Fixed raters in the **nested**
-  Design 2 (raters nested in clusters) are likewise supported at the
-  subject level on **both balanced and incomplete/ragged** data — the
-  finite-population rater variance is formed per cluster (each cluster’s
-  own raters, with its own effective rater count on ragged data) and
-  averaged over clusters. `level = "conflated"` reports the biased
-  single-level ICC you would get by ignoring the clustering (ten Hove et
-  al. 2022, Eq. 14) — a diagnostic contrast, flagged in
+  random-rater ICC under imbalance). Fixed raters are also supported at
+  the **cluster** level for the crossed (Design 1) design on **balanced,
+  complete** data — signal , error the finite-population plus the
+  cluster-by-rater term — where the coefficient equals the random-rater
+  cluster-level ICC. Fixed raters in the **nested** Design 2 (raters
+  nested in clusters) are likewise supported at the subject level on
+  **both balanced and incomplete/ragged** data — the finite-population
+  rater variance is formed per cluster (each cluster’s own raters, with
+  its own effective rater count on ragged data) and averaged over
+  clusters. `level = "conflated"` reports the biased single-level ICC
+  you would get by ignoring the clustering (ten Hove et al. 2022,
+  Eq. 14) — a diagnostic contrast, flagged in
   [`print()`](https://rdrr.io/r/base/print.html) as not a recommended
   coefficient (absolute-agreement, crossed designs, balanced **or
   incomplete**).

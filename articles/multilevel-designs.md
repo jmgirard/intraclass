@@ -70,8 +70,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)    0.751   [0.573, 0.836]
+#>   subject    ICC(A,1)    0.431   [0.249, 0.561]
+#>   subject    ICC(A,k)    0.751   [0.571, 0.836]
 #>   cluster    ICC(A,1)    0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)    0.967   [0.000, 0.993]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
@@ -108,12 +108,12 @@ icc(school, score,
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)    0.751   [0.573, 0.836]
+#>   subject    ICC(A,1)    0.431   [0.249, 0.561]
+#>   subject    ICC(A,k)    0.751   [0.571, 0.836]
 #>   cluster    ICC(A,1)    0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)    0.967   [0.000, 0.993]
-#>   conflated  ICC(A,1)    0.705   [0.000, 0.808]
-#>   conflated  ICC(A,k)    0.905   [0.000, 0.944]
+#>   conflated  ICC(A,1)    0.705   [0.000, 0.805]
+#>   conflated  ICC(A,k)    0.905   [0.000, 0.943]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
 #> (ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level
@@ -156,8 +156,8 @@ icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed 
 #> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.429   [0.310, 0.549]
-#>   subject    ICC(A,k)    0.751   [0.642, 0.830]
+#>   subject    ICC(A,1)    0.429   [0.309, 0.549]
+#>   subject    ICC(A,k)    0.751   [0.641, 0.830]
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
 
@@ -174,8 +174,8 @@ icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed 
 #> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)      0.412   [0.290, 0.546]
-#>   subject    ICC(k)      0.737   [0.621, 0.828]
+#>   subject    ICC(1)      0.412   [0.291, 0.546]
+#>   subject    ICC(k)      0.737   [0.622, 0.828]
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
 
@@ -256,15 +256,16 @@ against the data), or the abort points you at the nested reading.
 The multilevel examples so far treat raters as a **random** sample — the
 recommended default, which generalizes beyond the raters you happened to
 use. When the observed raters *are* the entire population of interest (a
-fixed panel of examiners, say), pass `raters = "fixed"` at the
-**subject** level. As in the single-level case, the rater main effect is
-then the finite-population variance of *these* raters (McGraw & Wong’s
-Case 3A) rather than a random-sample variance:
+fixed panel of examiners, say), pass `raters = "fixed"`. As in the
+single-level case, the rater main effect is then the finite-population
+variance of *these* raters (McGraw & Wong’s Case 3A) rather than a
+random-sample variance. On a balanced crossed design both levels come
+back:
 
 ``` r
 
 icc(school, score, subject = pupil, rater = rater, cluster = classroom,
-  raters = "fixed", level = "subject")
+  raters = "fixed")
 #> Warning: Modeling raters as fixed restricts inference to exactly these raters; you
 #> cannot generalize to other raters.
 #> ℹ For interrater reliability, the two-way random model (`raters = "random"`) is
@@ -275,31 +276,38 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Subjects: 80 in 16 clusters | Raters: 4 (fixed) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.431   [0.320, 0.555]
-#>   subject    ICC(A,k)    0.751   [0.653, 0.833]
+#>   subject    ICC(A,1)    0.431   [0.314, 0.550]
+#>   subject    ICC(A,k)    0.751   [0.647, 0.830]
+#>   cluster    ICC(A,1)    0.880   [0.000, 0.944]
+#>   cluster    ICC(A,k)    0.967   [0.000, 0.985]
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 ```
 
-On this balanced design the fixed-rater subject-level coefficients match
-the random-rater ones: **consistency** never uses the rater term, so it
-is identical either way, and **absolute agreement** coincides because
-the finite-population rater variance equals the random-sample estimate
-when the design is balanced. The two genuinely diverge on **incomplete**
-data, where the rater variance is estimated from unequal cell counts —
-and the crossed (Design 1) fixed-rater multilevel design is supported on
-ragged data too, at the subject level, exactly as the single-level
-incomplete case above.
+On this balanced design the fixed-rater coefficients match the
+random-rater ones **at both levels**: **consistency** never uses the
+rater term, so it is identical either way, and **absolute agreement**
+coincides because the finite-population rater variance equals the
+random-sample estimate when the design is balanced. At the cluster level
+the between-rater disagreement in cluster means is that same
+finite-population term plus the cluster-by-rater interaction. The
+subject level genuinely diverges from random on **incomplete** data,
+where the rater variance is estimated from unequal cell counts — and the
+crossed (Design 1) fixed-rater multilevel design is supported on ragged
+data too, at the subject level, exactly as the single-level incomplete
+case above.
 
 Multilevel support now covers **random** raters on the crossed design
 (Design 1), complete or **incomplete**, at the subject level and — for
 `ICC(c,1)` — the cluster level; and the nested designs (Designs 2 and 3,
 subject level), complete **or incomplete**. **Fixed** raters are
 supported at the subject level on the crossed design (complete **and**
-incomplete) and, on complete data, the nested Design 2. What remains
-open: the averaged cluster-level `ICC(c,k)` on incomplete data (the
-per-cluster effective-rater divisor is still being validated) and
-incomplete *fixed-rater nested* designs. Design 3 reports no fixed-rater
-or cluster-level coefficient by construction — with raters nested in
+incomplete), at the **cluster** level on the crossed design (complete
+data), and, on complete data, the nested Design 2. What remains open:
+the averaged cluster-level `ICC(c,k)` on incomplete data (the
+per-cluster effective-rater divisor is still being validated),
+incomplete *fixed-rater cluster-level* estimation, and incomplete
+*fixed-rater nested* designs. Design 3 reports no fixed-rater or
+cluster-level coefficient by construction — with raters nested in
 subjects there is no separable rater effect to fix, and no
 crossed-cluster structure to support a cluster mean.
 
@@ -323,10 +331,10 @@ d_study(
 #> # D-study projection: multilevel two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>     level  m  estimate          95% CI
-#>   subject  1     0.431  [0.251, 0.561]
-#>   subject  2     0.602  [0.402, 0.719]
-#>   subject  4     0.751  [0.573, 0.836]
-#>   subject  8     0.858  [0.729, 0.911]
+#>   subject  1     0.431  [0.249, 0.561]
+#>   subject  2     0.602  [0.399, 0.719]
+#>   subject  4     0.751  [0.571, 0.836]
+#>   subject  8     0.858  [0.727, 0.911]
 #>   cluster  1     0.880  [0.000, 0.972]
 #>   cluster  2     0.936  [0.000, 0.986]
 #>   cluster  4     0.967  [0.000, 0.993]
