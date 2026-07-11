@@ -1,16 +1,15 @@
 # Project status
 
-- Active milestone: **M35 — vignette reassessment** (ADR-045; docs). Opened this session on branch
-  `m35-vignette-reassessment` after a short retro over M34's merge. **Update + Split** (maintainer choice): fix
-  five materially false "planned for a later milestone" claims in `advanced.Rmd` (docs bugs — M14/M15, M18,
-  M19, M20, M21 all shipped the "later" work), retire the overloaded 504-line `advanced.Rmd` into four focused
-  articles (`multilevel-designs`, `engines`, `interval-methods`, `d-studies-and-replicates`), and document the
-  M23–M34 **Bayesian engine** (brms / `posterior` / `prior=` / HPDI) for the first time in any vignette. A
-  docs milestone (cf. M4/M13) — no new estimand/engine/CI machinery/dependency; correctness = **live-computed +
-  claim-tested** numbers (`test-vignette-claims.R`, #1/#4/#12); brms chunks `eval=FALSE` illustrative with
-  committed real output (CI has no Stan toolchain — [[brms-live-fit-skip-on-ci]]); **no Fable review** (#19).
-  Three slices (DoD checklist in [`MILESTONES.md`](MILESTONES.md) is the live board): S1 stale-claim fixes →
-  S2 the split → S3 the new brms prose. **No slice code yet** — plan before code (#14).
+- Active milestone: **none** — M35 shipped (PR #40, ADR-045; squash-merged to `main` at `d69f39e`). The
+  vignette-reassessment **docs** milestone: fixed five materially false "planned for a later milestone" claims
+  in `advanced.Rmd` (M14/M15, M18, M19, M20/M33, M21 all shipped the "later" work), retired the overloaded
+  504-line `advanced.Rmd` into four focused articles (`multilevel-designs`, `engines`, `interval-methods`,
+  `d-studies-and-replicates`), and documented the M23–M34 **Bayesian engine** (brms / `posterior` / `prior=` /
+  HPDI) for the first time in any vignette. Docs milestone (cf. M4/M13) — no new estimand/engine/CI
+  machinery/dependency; correctness = live-computed + claim-tested numbers plus **genuine committed brms output
+  from a local live rstan run** (brms chunks `eval=FALSE`, CI has no Stan toolchain — [[brms-live-fit-skip-on-ci]]);
+  **no Fable review**. **No milestone is currently in flight; the next needs an ADR after a short retro (founding
+  brief §7).**
 - Prior milestone: **M34** shipped (PR #39, ADR-044; squash-merged to `main` at `3fc133c`). The
   Bayesian **customization** milestone (direction (B), `ROADMAP.md`) — interface/customization work, **not**
   new estimand (cf. M5.5/M7/M11/M16, no estimand-spec); two additive, non-breaking optional args whose defaults
@@ -210,12 +209,14 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M35 — all three slices DONE; local finish-task gate GREEN; pending PR CI + merge.** Local
-  gate: `devtools::test()` **1471 pass / 0 fail / 0 skip** (live brms Stan fits ran), `R CMD check --as-cran`
-  **0/0/0** (all six vignettes build + re-build OK), `air` / `lintr` (0) / spell / `pkgdown::check_pkgdown()`
-  clean; coverage unchanged (docs milestone, no new R code). Next: `gh pr create` on
-  `m35-vignette-reassessment`; on full-CI-matrix green + merge, set "Last green CI" to the merge commit,
-  compress the MILESTONES M35 board to the shipped summary, and reconcile the "in flight"/"pending" markers.
+- Active task: **none** — M35 shipped and merged (PR #40, `d69f39e`). The next milestone needs an ADR after a
+  short retro (founding brief §7). Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
+  (incomplete fixed nested, cluster-level fixed — no frequentist oracle, likely a Fable review); **selectable
+  `posterior` coupling**; **categorical/ordinal GLMM** (needs an estimand pass); **multilevel SEM**; the Wave-3
+  `ICC(c,k)` incomplete divisor; occasion/ragged `d_study()`; the set-aside **clarity/accessibility rewrite**
+  of `getting-started` / `choosing-an-icc` (deferred out of M35); and the out-of-band **CRAN upload**
+  (ADR-022). *Superseded active task (M35, done):* all three slices shipped; the local finish-task gate and the
+  full PR CI matrix both came back green. **Historical detail (M35 slices):**
   **Slice 3 — the Bayesian coverage — DONE**
   (committed this session): brms sections added to `engines.Rmd` (half-*t*(4,0,1) prior, `engine = "brms"`, the
   M34 `prior=` override + footgun warning) and `interval-methods.Rmd` (`ci_method = "posterior"`, MAP +
@@ -239,7 +240,14 @@
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
   upload** (ADR-022).
-- Last green CI: **PR #39 (M34) — full CI matrix green (9/9), squash-merged to `main` at `3fc133c`.**
+- Last green CI: **PR #40 (M35) — full CI matrix green (9/9), squash-merged to `main` at `d69f39e`.**
+  format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
+  release·oldrel·**devel** all passed (no flakes, no re-runs — the devel job ran clean this time). Locally
+  before the PR: `devtools::test()` **1471 pass / 0 fail / 0 skip** (the live brms Stan fits ran locally),
+  `R CMD check --as-cran` **0/0/0** (all six vignettes build + re-build OK, 29s), `air` / `lintr` (0 lints) /
+  spell / `pkgdown::check_pkgdown()` clean; coverage unchanged (docs milestone, no new R code). Docs-only
+  milestone — no installed-pkg estimator paths to drive. Prior green: **PR #39 (M34) — full CI matrix green
+  (9/9), squash-merged to `main` at `3fc133c`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed (no flakes, no re-runs). Locally before the PR: `R CMD check --as-cran`
   **0/0/1** (built with vignettes, only "New submission"); full suite (CI mode) **1227/0/21**; installed-pkg
@@ -266,10 +274,9 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M35 (ADR-045, vignette reassessment) opened this session on branch
-  `m35-vignette-reassessment`; a docs milestone with no coverage claim and no Fable review. The one known
-  wrinkle is a *design decision, not a blocker*: brms vignette chunks can't compile Stan on CRAN/CI, resolved
-  in the ADR to `eval=FALSE` illustrative chunks with committed real output. Ready to start Slice 1.
+- Blockers: **none.** M35 (ADR-045, vignette reassessment) shipped and merged (PR #40, `d69f39e`); all three
+  docs slices landed, full CI matrix green 9/9, no Fable review. The next milestone needs an ADR after a short
+  retro (founding brief §7).
   Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
   (`.8625` at n_rep 80) went to a gated Fable review (#19) → **VERDICT: no shortfall, a Monte-Carlo tail
   event that does not replicate** (Fable re-ran the same incidence at n=240 → .9458; 2,000-fit frequentist
@@ -280,15 +287,24 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M35 Slice 3 (Bayesian coverage) DONE — milestone ready for
-  the finish-task gate.** Added brms sections to `engines.Rmd` (half-*t*(4,0,1) prior, `engine = "brms"`, the
+- Updated: 2026-07-10 by main session (Opus) — **M35 shipped (PR #40, squash-merged at `d69f39e`); post-merge
+  `project/` reconcile.** This commit flips STATUS to M35-shipped, compresses the MILESTONES M35 board to the
+  summary form (preserving the "Deferred out of M35" list), advances the MILESTONES preamble + ADR-index (M35
+  no longer in flight), sets "Last green CI" to the merge commit, and flips ROADMAP's vignette item to
+  "shipped as M35". The whole milestone landed in one session on branch `m35-vignette-reassessment` (retro →
+  ADR-045 → S1 stale-claim fixes `61b6ec0` → S2 the split `b8b625b` → S3 brms prose `00e7bab` → finish-task
+  gate `54b5246` → PR #40); the full CI matrix went green 9/9 with no flakes (devel clean). Docs milestone —
+  no new estimand/engine/CI machinery/dependency; correctness = live-computed + claim-tested numbers plus
+  genuine committed brms output; no Fable review. Local `main` fast-forwarded after the squash, merged branch
+  deleted. Next: open the next milestone after a short retro. Prior line: **M35 Slice 3 (Bayesian coverage)
+  DONE.** Added brms sections to `engines.Rmd` (half-*t*(4,0,1) prior, `engine = "brms"`, the
   M34 `prior=` override + `intraclass_custom_prior` footgun warning) and `interval-methods.Rmd`
   (`ci_method = "posterior"`, MAP + percentile/HPDI `posterior_summary`). All brms chunks are `eval=FALSE`
   illustrative with committed output generated from a **local live rstan run** (genuine, not fabricated, #4);
   each section notes the output is pre-computed (CI has no Stan toolchain). Honest findings preserved (tight
   `normal(0,0.1)` prior → ICC collapses to ~0; brms MAP 0.24 < glmmTMB REML 0.29). Fixed a cross-link anchor
   (`ci_method` underscore, not hyphen); all five inter-article anchors verified; `pkgdown::check_pkgdown()`,
-  `air`, spell clean; NEWS vignette bullet updated. Next: finish-task gate + PR. Prior line: **M35 Slice 2 (the
+  `air`, spell clean; NEWS vignette bullet updated. Prior line: **M35 Slice 2 (the
   split) DONE.** Retired the 504-line
   `advanced.Rmd` into four self-contained focused articles — `multilevel-designs`, `engines`,
   `interval-methods`, `d-studies-and-replicates` — a mechanical redistribution of the existing prose/live
@@ -469,20 +485,19 @@ crossed × {complete, incomplete} × {random, fixed} at the subject level. Every
 variance-component decomposition (M11). And `choose_icc()` turns the *Choosing an ICC*
 decision tree into an interactive/programmatic helper that recommends a coefficient and
 emits the exact `icc()` call — teaching/API, no new estimand (M12). And release polish
-brought the pkgdown site, the M9–M12 showcase in `advanced.Rmd`, and a **CRAN-submittable
-v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
+brought the pkgdown site, the M9–M12 showcase in the advanced vignette (retired and split
+into four focused articles in M35), and a **CRAN-submittable v0.1.0** (`--as-cran` 0/0/0),
+closing the ADR-017 arc (M13).
 
 ## Next action
 
-**M35 (ADR-045, vignette reassessment) is in flight — run `/start-task` for Slice 1 (the stale-claim fixes).**
-The DoD checklist in [`MILESTONES.md`](MILESTONES.md) is the live board: S1 fix the five false "planned for
-later" claims in `advanced.Rmd` + re-audit the other two articles against `COVERAGE.md`; S2 split the
-overloaded `advanced.Rmd` into `multilevel-designs` / `engines` / `interval-methods` / `d-studies-and-replicates`
-(wire `_pkgdown.yml`, retire `advanced.Rmd`); S3 add the brms/`posterior`/`prior=`/HPDI sections
-(`eval=FALSE` illustrative + committed output). Docs milestone — live-computed + claim-tested numbers, no
-Fable review.
+**No milestone is currently in flight — the next needs an ADR after a short retro (founding brief §7).** M35
+(ADR-045, vignette reassessment) shipped (PR #40, `d69f39e`): the pkgdown vignettes now match the shipped
+feature set — `advanced.Rmd` split into four focused articles and the M23–M34 Bayesian engine documented for
+the first time. Pick a direction from the parked candidates (below / `ROADMAP.md`), run a short retro, and
+open the next milestone with an ADR.
 
-**Deferred / after M35 —** With
+**Deferred / candidates —** With
 M34 the Bayesian arc's *parity* (M23–M33) and *customization* (M34) are both complete. Remaining brms work is
 **(C) research/blocked** only: incomplete **fixed** nested (Designs 2/3 — needs the frequentist
 incomplete-fixed-nested estimand built first) and **cluster-level fixed** (ten Hove et al. 2022 flag the
