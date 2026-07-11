@@ -699,20 +699,8 @@ test_that("fixed nested scope guards fail loudly (decision C + deferral)", {
   ))
   expect_setequal(fit_i$estimates$index, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(is.finite(fit_i$estimates$estimate)))
-  # brms incomplete fixed-nested is deferred (no Bayesian path yet).
-  expect_error(
-    suppressWarnings(icc(
-      d2i,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      raters = "fixed",
-      design = "nested_in_clusters",
-      engine = "brms"
-    )),
-    class = "intraclass_unsupported"
-  )
+  # brms incomplete/ragged fixed-nested (Design 2) now ships too (M38 Cell 2, ADR-048); the
+  # Bayesian path is exercised by the live O-Bayes-IFNML-agree fit in test-icc-brms.R.
 })
 
 # O-NFI: frequentist nested-fixed theta^2_{r:c} MC-INTERVAL coverage (M28, ADR-038) -

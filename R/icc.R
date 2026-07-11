@@ -113,9 +113,10 @@
 #' the cluster-by-rater term \eqn{\sigma^2_{cr}}); on balanced data it equals the
 #' random-rater cluster-level ICC. The Bayesian (`engine = "brms"`) fixed-rater
 #' **cluster** level is likewise supported for the crossed (Design 1) design on
-#' balanced, complete data. Incomplete/unbalanced fixed-rater cluster-level estimation,
-#' Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
-#' Bayesian incomplete fixed-nested path remain for later milestones.
+#' balanced, complete data, and the Bayesian incomplete/ragged fixed-rater **nested**
+#' (Design 2) subject level is supported too. Incomplete/unbalanced fixed-rater
+#' cluster-level estimation and Design-3 fixed raters (nested in subjects -- no
+#' separable rater effect) remain for later milestones.
 #'
 #' @section Within-cell replicates:
 #' When a subject-by-rater cell is rated **more than once** (within-cell
@@ -233,10 +234,11 @@
 #'   \eqn{\theta^2_r}), the crossed (Design 1) multilevel **fixed-rater** design (subject
 #'   level), and the nested **Design 2** (raters nested in clusters) and **Design 3** (raters
 #'   nested in subjects, the multilevel one-way, agreement-only) *random* multilevel designs
-#'   (subject level), and the single-level one-way random design; and, on balanced/complete
-#'   data only, the nested Design 2 *fixed-rater* multilevel design at the subject level, the
-#'   conflated diagnostic, and within-cell replicates. Incomplete/ragged **fixed**-nested and
-#'   within-cell-replicate Bayesian fits, and numeric-`unit` (D-study) projection, are planned
+#'   (subject level), and the single-level one-way random design; the nested Design 2
+#'   *fixed-rater* multilevel design at the subject level on both balanced and
+#'   incomplete/ragged data; and, on balanced/complete data only, the crossed Design 1
+#'   *fixed-rater* **cluster** level, the conflated diagnostic, and within-cell replicates.
+#'   Within-cell-replicate Bayesian fits and numeric-`unit` (D-study) projection are planned
 #'   for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
@@ -787,30 +789,19 @@ icc <- function(
     # "cluster" / aborts an explicit cluster request and runs the M8/M19/M36
     # identifiability. Crossed fixed at the subject level (M10/M18) is unaffected.
     # Incomplete/ragged fixed-rater nested Design 2 ships for the MIXED-MODEL engines
-    # (M36, ADR-046): the ragged per-cluster Case-3A theta^2_{r:c} (theta2r_fixed_nested()
-    # generalized to unequal k_c) pairs with the M9 k_eff/connectedness machinery, pinned
-    # by a seeded finite-population-recovery oracle (interior + boundary coverage nominal;
-    # cross-engine < 1e-4; reduction to balanced M19 + flat M3). The BAYESIAN engine stays
-    # deferred: fit_brms_nested_fixed() is balanced-only, and incomplete fixed-nested was
-    # random-only through M32 (the M30 variance-ratio regime, no 2b) -- the brms sibling is
-    # a later milestone. Refuse it with a case-naming message rather than misfit (#5/#8).
-    # lavaan cannot reach here (multilevel SEM is unsupported, aborted upstream). The
-    # per-subject k_eff averaging divisor here is well-defined (ratings/subject, the M19
-    # random-nested divisor); it is NOT the open per-cluster ICC(c,k) divisor (M9 §9).
-    if (
-      engine == "brms" &&
-        ml_design == "nested_in_clusters" &&
-        !nested_design_balanced(df, ml_design)
-    ) {
-      abort_unsupported(c(
-        "The {.pkg brms} engine does not support incomplete/ragged fixed-rater \\
-         nested (Design 2) data yet.",
-        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
-             incomplete fixed-rater nested data; the Bayesian sibling is planned for \\
-             a later milestone.",
-        i = "Or use {.code raters = \"random\"} for incomplete nested Bayesian data."
-      ))
-    }
+    # (M36, ADR-046) AND the brms engine (M38 Cell 2, ADR-048): the ragged per-cluster
+    # Case-3A theta^2_{r:c} pairs with the M9 k_eff/connectedness machinery. The brms sibling
+    # needs no new fit and no brms-specific guard: fit_brms_nested_fixed() fits
+    # `score ~ 0 + rater + (1|cluster:subject)` unchanged on ragged data, and
+    # brms_theta2r_nested_draws() -> brms_theta2r_moment_draws() already reads a per-cluster
+    # k (nrow of each cluster's rater-mean matrix), so unequal k_c and the 2b-under-imbalance
+    # moment correction (b != 0) fall out per cluster with the boundary-aware average-floor.
+    # The engine-agnostic identifiability gates below (>= 2 raters/cluster, within-cluster
+    # connectedness, >= 2 ratings/subject) and the pre-dispatch harmonic-mean k_eff divisor
+    # protect the ragged fit for every engine. The per-subject k_eff averaging divisor is
+    # well-defined (ratings/subject, the M19 random-nested divisor); it is NOT the open
+    # per-cluster ICC(c,k) divisor (M9 §9). lavaan cannot reach here (multilevel SEM is
+    # unsupported, aborted upstream).
   }
   if (multilevel && ml_design != "crossed") {
     if (!("subject" %in% level)) {

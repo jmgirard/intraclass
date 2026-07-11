@@ -1360,9 +1360,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     end-to-end: brms fixed returns **both** levels, glmmTMB M37 cluster point contained, brms fixed≈random
     cluster (|Δ|max .0215 < .06). Updated one stale "brms fixed cluster deferred" test + the roxygen. Full
     suite green (1170/0, 50 live-Stan skipped); `air`/`lintr` clean.
-  - [ ] **T2 — Cell 2 code.** Lift the `R/icc.R:810` brms incomplete-fixed-nested guard; run
-    `fit_brms_nested_fixed()` on ragged Design-2 data with `brms_theta2r_moment_draws()` (2b-under-imbalance);
-    single `ICC_s(·,1)` + average `ICC_s(·,k)` at the subject level.
+  - [x] **T2 — Cell 2 code** (2026-07-11). Removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800);
+    `fit_brms_nested_fixed()` fits ragged Design-2 data unchanged and `brms_theta2r_nested_draws()` →
+    `brms_theta2r_moment_draws()` already reads a **per-cluster** `k` (nrow of each cluster's rater-mean
+    matrix), so the 2b-under-imbalance correction + boundary-aware average-floor fire per cluster with no new
+    code. Single + average `ICC_s(·,k)` at the subject level. Live O-Bayes-IFNML-agree (`skip_on_ci`)
+    containment test + removed two stale "brms incomplete-fixed-nested deferred" assertions; roxygen updated.
+    Verified end-to-end (ragged 72/96, 12 raters; glmmTMB M36 point .630/.808 contained in the brms CI). Full
+    suite 1168/0 (51 live-Stan skipped); `air`/`lintr` clean.
   - [ ] **T3 — Cell 2 coverage oracle (the gate).** Seeded O-Bayes-IFNML (`data-raw/oracle-*` + committed
     fixture, n_rep ≥ 240, interior + boundary θ²=0 + a high-C_n cell); glmmTMB M36 containment. **Decision
     point:** nominal → ship Cell 2; under-covers → STOP-and-replan (Cell 1 only), record honest evidence.

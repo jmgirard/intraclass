@@ -216,28 +216,6 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   # FIXED nested (Designs 2/3, no frequentist oracle) and incomplete within-cell REPLICATES. Each
   # must name the supported scope (#5/#8).
   d_inc <- d[-1, , drop = FALSE] # ragged two-way (one cell dropped)
-  # incomplete FIXED-rater NESTED multilevel (Design 2, still deferred): raters nested in
-  # clusters (cluster-unique labels), fixed, one cell dropped. (suppressWarnings: the
-  # fixed-rater nudge fires before the abort.)
-  dnf <- expand.grid(r_in_c = 1:2, s = 1:3, cluster = factor(1:2))
-  dnf$subject <- factor(paste0(dnf$cluster, "_", dnf$s))
-  dnf$rater <- factor(paste0(dnf$cluster, "_r", dnf$r_in_c))
-  dnf$score <- as.numeric(seq_len(nrow(dnf)))
-  dnf_inc <- dnf[-1, , drop = FALSE]
-  expect_error(
-    suppressWarnings(
-      icc(
-        dnf_inc,
-        score,
-        rater,
-        subject = subject,
-        cluster = cluster,
-        raters = "fixed",
-        engine = "brms"
-      )
-    ),
-    class = "intraclass_unsupported"
-  )
   # incomplete within-cell REPLICATES (still deferred): >1 rating per subject x rater cell, ragged.
   d_rep <- data.frame(
     subject = factor(c(1, 1, 1, 2, 2, 2, 3, 3)),
@@ -250,10 +228,10 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   )
   # NB: incomplete SINGLE-LEVEL one-way now ships for brms (M33 Slice 1) -- asserted supported by
   # the O-Bayes-IOneway live + fixture tests below.
-  # NB: incomplete NESTED multilevel RANDOM now ships for brms -- Design 2 (M32 Slice 1) and
-  # Design 3 (M32 Slice 2) -- asserted supported by the O-Bayes-INML-clusters / -subjects live +
-  # fixture tests below. Incomplete FIXED nested stays deferred (dnf_inc above; no frequentist
-  # oracle, all engines, ADR-029/ADR-042).
+  # NB: incomplete NESTED multilevel now ships for brms at the subject level for BOTH random --
+  # Design 2 (M32 Slice 1) and Design 3 (M32 Slice 2) -- and FIXED Design 2 (M38 Cell 2, ADR-048;
+  # the frequentist M36 oracle unblocked it), asserted supported by the O-Bayes-INML-clusters /
+  # -subjects and O-Bayes-IFNML-agree live + fixture tests below.
   # NB: fixed-rater MULTILEVEL now ships for brms -- single-level (M26 Slice 2), crossed
   # Design 1 (M27 Slice 1), and nested Design 2 (M27 Slice 2). Design 3 fixed stays refused
   # (by design, all engines -- no separable rater effect), asserted engine-agnostically in
@@ -1936,6 +1914,95 @@ test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-I
     reml <- by_index(gf, i)
     expect_gte(reml, ta$conf.low[ta$index == i])
     expect_lte(reml, ta$conf.high[ta$index == i])
+  }
+})
+
+# --- Live brms fit: INCOMPLETE nested Design-2 FIXED, O-Bayes-IFNML-agree (M38 Cell 2, ADR-048) ---
+# The ragged nested (Design 2, raters nested in clusters) FIXED sibling of O-Bayes-INML-clusters-agree
+# (random) and the Bayesian sibling of the frequentist M36 (ADR-046). Gated OFF CI (Stan toolchain).
+# Cell 2 lifts the brms incomplete-fixed-nested guard: fit_brms_nested_fixed() fits unchanged on
+# ragged data, and brms_theta2r_nested_draws() -> brms_theta2r_moment_draws() reads a PER-CLUSTER k,
+# so the 2b-under-imbalance moment correction (b != 0) fires per cluster with the boundary-aware
+# average-floor -- the milestone's genuine risk goes live here. This smoke test wires the ragged path
+# end to end (single + average subject-level ICC_s) and pins CONTAINMENT of the independent glmmTMB M36
+# incomplete fixed-nested point (no textbook value on ragged data; the REML fit is the oracle, ADR-008;
+# fixed != random even balanced -- the per-cluster finite population, the M19 catch -- so containment,
+# not equality, #18). The numerical COVERAGE gate is the committed O-Bayes-IFNML fixture (a separate
+# test); this asserts the path is supported and tracks the frequentist point.
+test_that("brms fits the ragged nested Design-2 FIXED ICC end to end (O-Bayes-IFNML-agree)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  # Ragged nested Design 2: 4 clusters x 3 cluster-unique raters x 8 subjects, ~15% cells dropped,
+  # keeping every rater, >= 2 raters/cluster and >= 2 ratings/subject (the identifiability gates).
+  set.seed(4820)
+  nc <- 4L
+  k <- 3L
+  ns <- 8L
+  g <- expand.grid(
+    s = seq_len(ns),
+    r = seq_len(k),
+    cluster = factor(seq_len(nc))
+  )
+  g$subject <- factor(paste0(g$cluster, "_", g$s))
+  g$rater <- factor(paste0(g$cluster, "_r", g$r))
+  mu_r <- rnorm(nlevels(g$rater), 0, 0.4)
+  g$score <- 2 +
+    rnorm(nc, 0, 0.6)[as.integer(g$cluster)] +
+    rnorm(nlevels(g$subject), 0, 1)[as.integer(g$subject)] +
+    mu_r[as.integer(g$rater)] +
+    rnorm(nrow(g), 0, 0.7)
+  set.seed(9)
+  d <- g[runif(nrow(g)) < 0.85, ]
+  d <- d[d$subject %in% names(which(table(d$subject) >= 2L)), ]
+  d$subject <- droplevels(d$subject)
+  d$rater <- droplevels(d$rater)
+  d$cluster <- droplevels(d$cluster)
+  expect_lt(nrow(d), nrow(g)) # ragged
+  expect_gte(nlevels(d$rater), 2L * nlevels(d$cluster))
+
+  ba <- list(chains = 2, iter = 1200, refresh = 0)
+  fb <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    unit = c("single", "average"),
+    design = "nested_in_clusters",
+    engine = "brms",
+    seed = 1,
+    brm_args = ba
+  ))
+  expect_identical(fb$engine, "brms")
+  expect_identical(fb$ci$method, "posterior")
+  tb <- tidy(fb)
+  # Nested designs define only the subject level; both single and average ship (M36).
+  expect_setequal(tb$level, "subject")
+  expect_setequal(tb$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_true(all(
+    tb$conf.low >= 0 & tb$conf.high <= 1 & tb$conf.low <= tb$conf.high
+  ))
+
+  gm <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    unit = c("single", "average"),
+    design = "nested_in_clusters",
+    engine = "glmmTMB"
+  )))
+  by_index <- function(x, i) x$estimate[x$index == i]
+  for (i in c("ICC(A,1)", "ICC(A,k)")) {
+    reml <- by_index(gm, i)
+    expect_gte(reml, tb$conf.low[tb$index == i])
+    expect_lte(reml, tb$conf.high[tb$index == i])
   }
 })
 

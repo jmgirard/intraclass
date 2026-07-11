@@ -256,8 +256,19 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M38 Task 2 (Cell 2 — brms incomplete/ragged fixed-nested Design 2)** — not started; run via
-  `/start-task`. *T1 (Cell 1 — brms cluster-level fixed) DONE (2026-07-11):* removed the brms-specific
+- Active task: **M38 Task 3 (Cell 2 coverage oracle O-Bayes-IFNML — the ship/stop gate)** — not started; run
+  via `/start-task`. Build the seeded Bayesian incomplete/ragged fixed-nested coverage oracle
+  (`data-raw/oracle-bayesian-incomplete-fixed-nested.R` + committed `bayesian-incomplete-fixed-nested-oracle.rds`,
+  n_rep ≥ 240 per [[ragged-coverage-nrep-240]], interior + boundary θ²=0 + a high-C_n cell per
+  [[coverage-oracle-cluster-count-axis]]); it mirrors the frequentist M36 O-IFNML sim + the M32
+  incomplete-nested-random Bayesian oracle. **Decision gate (ADR-048):** nominal → ship Cell 2; under-covers →
+  **STOP — no pin-loosening (#4), no tuning, no Fable** — ship Cell 1 only and re-plan Cell 2. *T2 (Cell 2 code)
+  DONE (2026-07-11):* removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800); `fit_brms_nested_fixed()`
+  fits ragged data unchanged and `brms_theta2r_moment_draws()` already reads a per-cluster `k`, so the
+  2b-under-imbalance correction fires per cluster with no new code; single + average `ICC_s(·,k)` subject level;
+  live O-Bayes-IFNML-agree containment test (glmmTMB M36 .630/.808 contained); two stale deferral assertions
+  removed; suite 1168/0. Then T4 (docs/NEWS/COVERAGE + finish-task gate). *T1 (Cell 1 — brms cluster-level
+  fixed) DONE (2026-07-11):* removed the brms-specific
   cluster-drop at `R/icc.R:781` — balanced brms fixed cluster now routes through the engine-agnostic
   estimand/`posterior_summary()` path off the shipped `fit_brms_multilevel_fixed()` draws (no new fit),
   incomplete falls to the engine-agnostic balance gate (~`R/icc.R:1187`) and aborts. O-Bayes-FCL (live,
@@ -393,8 +404,18 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M38 Task 1 (Cell 1 — brms cluster-level fixed) DONE.** The
-  brms sibling of M37: removed the brms-specific cluster-drop at `R/icc.R:781`, so balanced brms fixed cluster
+- Updated: 2026-07-11 by main session (Opus) — **M38 Task 2 (Cell 2 code — brms incomplete/ragged fixed-nested
+  Design 2) DONE.** Removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800). The path needed no new
+  code: `fit_brms_nested_fixed()` (`score ~ 0 + rater + (1|cluster:subject)`) fits ragged data unchanged, and
+  `brms_theta2r_nested_draws()` → `brms_theta2r_moment_draws()` already reads a **per-cluster** `k` (nrow of
+  each cluster's rater-mean matrix), so unequal k_c and the 2b-under-imbalance moment correction (`b≠0`) +
+  boundary-aware average-floor fall out per cluster; the engine-agnostic identifiability gates + pre-dispatch
+  k_eff protect the ragged fit. Single + average `ICC_s(·,k)` at the subject level. Live O-Bayes-IFNML-agree
+  (`skip_on_ci`) containment test added (verified end-to-end: ragged 72/96, 12 raters; glmmTMB M36 point
+  .630/.808 contained in the brms CI); removed two stale "brms incomplete-fixed-nested deferred" assertions +
+  updated roxygen. Full suite 1168/0 (51 live-Stan skipped); `air`/`lintr` clean. Board T2 checked off; active
+  task advanced to **T3 — the Cell 2 coverage oracle (the ship/stop gate)**. Next: `/start-task` T3. Prior
+  line: **M38 Task 1 (Cell 1 — brms cluster-level fixed) DONE.** The brms sibling of M37: removed the brms-specific cluster-drop at `R/icc.R:781`, so balanced brms fixed cluster
   routes through the same engine-agnostic estimand/`posterior_summary()` path as the M24 random cluster level
   (off the shipped `fit_brms_multilevel_fixed()` draws — no new fit), while incomplete brms fixed cluster falls
   to the engine-agnostic balance gate (~`R/icc.R:1187`) and aborts identically to glmmTMB/lme4. O-Bayes-FCL
