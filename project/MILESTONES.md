@@ -1371,6 +1371,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - [ ] **T3 — Cell 2 coverage oracle (the gate).** Seeded O-Bayes-IFNML (`data-raw/oracle-*` + committed
     fixture, n_rep ≥ 240, interior + boundary θ²=0 + a high-C_n cell); glmmTMB M36 containment. **Decision
     point:** nominal → ship Cell 2; under-covers → STOP-and-replan (Cell 1 only), record honest evidence.
+    *In progress (2026-07-11):* `data-raw/oracle-bayesian-incomplete-fixed-nested.R` **written + smoke-verified**
+    (compile-once + `update(recompile=FALSE)`, the M32 mechanics; M36 fixed-nested DGP + non-circular truth;
+    4 cells = {C_n 20, C_n 80} × {interior θ²=.30, boundary θ²=0}, unequal k_c, n_rep 240 — ~960 live Stan
+    refits, checkpointed per cell). **The full run is a multi-hour offline compute (the M32/M36 pattern); it is
+    the ship/stop gate — pending.** Then the committed fixture + the O-Bayes-IFNML coverage test.
   - [ ] **T4 — docs + gate.** NEWS / COVERAGE (brms columns) / REFERENCES in-commit; installed-pkg both new
     brms paths driven through `library(intraclass)`; `air`/`lintr` clean; `/finish-task` gate → PR.
 - Deferred out of M38 (record so not rediscovered): **lavaan cluster-fixed + lavaan incomplete-fixed-nested**
