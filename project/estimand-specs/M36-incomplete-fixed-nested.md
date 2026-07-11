@@ -15,10 +15,17 @@ is an **intersection of shipped machineries** and introduces *no new estimand co
 3. the **M8 §3a nested subject-level estimand map** and the **M28 2b moment-corrected
    MC interval** (`theta2r_moment_draws()`, ADR-038), both inherited.
 
-**Locked scope (ADR-046, maintainer-approved 2026-07-11):**
-- **Design 2 (raters nested in clusters) only, subject level only, single-rater
-  `ICC_s(·,1)`** (agreement + consistency). The averaged `ICC_s(·,k)` needs the open
-  effective-rater divisor (§4) and **degrades to 🟣 research** if unpinnable (#4).
+**Locked scope (ADR-046, maintainer-approved 2026-07-11; averaged-coefficient outcome
+recorded below):**
+- **Design 2 (raters nested in clusters) only, subject level only** (agreement +
+  consistency). The headline deliverable is **single-rater `ICC_s(·,1)`** (the strongly
+  pinned, non-circular finite-population recovery oracle). The **averaged `ICC_s(·,k)`
+  ships too**: the ADR "attempt, else degrade" clause resolved to **ship** — its divisor
+  is the per-subject harmonic `k_eff` (ratings/subject), which is the well-defined M19
+  random-nested divisor and **reduces to flat M3 fixed EXACTLY at a single cluster** (both
+  single and average, |diff| ~1e-16, §4). It is **NOT** the open per-cluster `ICC(c,k)`
+  divisor (M9 §9) — ADR-046's "degrade to research" was a conflation of the two; the
+  subject-level averaged divisor was never the open one.
 - **Design 3 fixed** stays ⚫ by-design (raters nested in subjects = the multilevel
   one-way; no separable rater effect — M19/ADR-029); **cluster-level fixed** and the
   **lavaan/brms** engines are out of scope (deferred).
@@ -61,15 +68,21 @@ correction. The load-bearing oracle is therefore the seeded finite-population tr
 
 ---
 
-## 2. The estimand (M8 §3a, θ²_{r:c} in the rater slot, single-rater)
+## 2. The estimand (M8 §3a, θ²_{r:c} in the rater slot)
 
 Subject-level components {σ²_{s:c} (signal), θ²_{r:c} (rater slot), σ²_{(s:c)r}
 (residual)}; σ²_c is absorbed by the cell-mean fit (nested designs define only the
-subject level). Single-rater only:
+subject level). Single and average both ship (§Locked scope):
 
 | | agreement | consistency |
 |---|---|---|
 | single `ICC_s(·,1)` | σ²_{s:c} / (σ²_{s:c} + θ²_{r:c} + σ²_{(s:c)r}) | σ²_{s:c} / (σ²_{s:c} + σ²_{(s:c)r}) |
+| average `ICC_s(·,k_eff)` | σ²_{s:c} / (σ²_{s:c} + (θ²_{r:c} + σ²_{(s:c)r})/k_eff) | σ²_{s:c} / (σ²_{s:c} + σ²_{(s:c)r}/k_eff) |
+
+with `k_eff` the per-subject harmonic mean of ratings/subject (the M19 random-nested
+divisor). The **single-rater** row carries the load-bearing finite-population recovery
+oracle (§4); the **average** row is pinned by the exact single-cluster reduction to flat
+M3 (§4) — the same basis on which the random nested M19 Slice 1 ships its average.
 
 Consistency is **identical to the random-rater case** (the rater term is unused); only
 absolute agreement uses θ²_{r:c}. Fixed raters emit the classed `intraclass_fixed_raters`
@@ -77,9 +90,11 @@ warning (M2/M3/M10/M19). **Fixed ≢ random even on balanced data** here (the ne
 population is per-cluster — the M19 finding, unchanged); on ragged data they diverge
 further, so the pins are reductions to the flat M3 fixed estimand, not fixed≡random.
 
-**Averaged `ICC_s(·,k)` (§4)** would divide the error by an effective-rater divisor. The
-per-subject harmonic `k_eff` is unproven for the nested error structure (the M9 `ICC(c,k)`
-open question); attempted against the oracles, **reclassified to 🟣 research** if unpinned.
+**Averaged `ICC_s(·,k_eff)` (§4) — ships.** The effective-rater divisor is the per-subject
+harmonic `k_eff` (ratings/subject), the same divisor the random nested M19 Slice 1 ships;
+it reduces to flat M3 fixed **exactly** at a single cluster (§4, |diff| ~1e-16), so the
+"attempt, else 🟣 research" clause resolved to ship. This is the well-defined subject-level
+divisor, **distinct from the open per-cluster `ICC(c,k)` divisor** (M9 §9, still deferred).
 
 ---
 
@@ -130,8 +145,9 @@ a Fable review is *recommended* (#19, the ADR-046 conditional posture), and work
 - **Connectedness** (M3/M9): a disconnected ragged nested design aborts.
 - **Ambiguous crossed-vs-nested pattern on ragged data:** explicit `design =
   "nested_in_clusters"` required — never guessed (#5, the M9 escape hatch).
-- **`level = "cluster"`, `unit`-averaged (until pinned), Design 3 fixed, cluster-level
-  fixed** all abort with classed errors (§scope; ADR-046).
+- **`level = "cluster"`, Design 3 fixed, cluster-level fixed** all abort with classed
+  errors (§scope; ADR-046). The **Bayesian** engine (`brms`) on ragged fixed-nested aborts
+  with a case-naming message (mixed-model engines only this milestone).
 
 ---
 
@@ -140,19 +156,18 @@ a Fable review is *recommended* (#19, the ADR-046 conditional posture), and work
 - Ragged Design-2 + `raters = "fixed"` + `design = "nested_in_clusters"` fits §1 and
   returns θ²_{r:c} (per-cluster, ragged-generalized) in the rater slot; the
   `intraclass_fixed_raters` warning fires.
-- Single-rater agreement + consistency with boundary-aware MC CIs; **reduces to balanced
-  M19 bit-identically** and to the M3 per-cluster/single-cluster fixed estimand; matches
-  lme4 < 1e-4; consistency ≡ random exact.
-- Seeded recovery + coverage (interior + boundary) committed at n_rep ≥ 240.
-- Averaged `ICC_s(·,k)` either pins or is reclassified 🟣 research with a classed abort.
+- Single-rater **and average** agreement + consistency with boundary-aware MC CIs;
+  **reduces to balanced M19 bit-identically** (k_c constant → the helper is bit-identical)
+  and to the M3 per-cluster/single-cluster fixed estimand (both single and average); matches
+  lme4 < 1e-3 on ragged data; consistency ≡ random exact.
+- Seeded single-rater recovery + coverage (interior + boundary) committed at n_rep ≥ 240;
+  the average rides the exact single-cluster reduction (its divisor is the M19 `k_eff`).
 - Guards (§5) fire; complete/balanced and random paths untouched (regression green).
 
 ---
 
 ## 7. Out of scope for M36 (recorded for forward-compatibility)
 
-- **Averaged nested-incomplete `ICC_s(·,k)`** — the effective-rater divisor (M9 `ICC(c,k)`
-  sibling), 🟣 research if it degrades.
 - **Cluster-level fixed** raters (crossed or nested) — the other (C) corner; no scaffolding,
   ten Hove et al. 2022 flag the small-*k* estimator as open. Its own later milestone.
 - **Design 3 fixed** (⚫ by-design — multilevel one-way, no separable rater effect).

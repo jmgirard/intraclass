@@ -104,9 +104,12 @@
 #' balanced data consistency is identical to the random-rater case and absolute
 #' agreement differs only by that term; on incomplete data both types differ from
 #' random (the finite-population variance is read from the ragged rater-contrast fit).
-#' Incomplete *nested* designs, nested fixed-rater designs, and the fixed-rater cluster
-#' level remain for later milestones. Nested designs still require balanced, complete
-#' data.
+#' **Nested (Design 2) fixed raters** are likewise supported at the **subject** level on
+#' both balanced and **incomplete** data (the finite-population rater variance is formed
+#' **per cluster** -- each cluster's own raters -- and averaged over clusters; on ragged
+#' data each cluster uses its own effective rater count). The fixed-rater **cluster**
+#' level, Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
+#' Bayesian (`engine = "brms"`) incomplete fixed-nested path remain for later milestones.
 #'
 #' @section Within-cell replicates:
 #' When a subject-by-rater cell is rated **more than once** (within-cell
@@ -753,11 +756,12 @@ icc <- function(
         i = "Use {.code raters = \"random\"} (the default)."
       ))
     }
-    # Design 2 (raters nested in clusters) with fixed raters ships in M19 Slice 2:
-    # theta^2_{r:c} (finite-population, averaged over clusters) replaces the random
-    # sigma^2_{r:c} in the subject-level rater slot. Balanced/complete only -- the
-    # incomplete fixed-nested corner (k_eff x per-cluster theta^2 interaction) is
-    # deferred (ADR-029); guarded with the other fixed-nested checks below.
+    # Design 2 (raters nested in clusters) with fixed raters ships in M19 Slice 2
+    # (balanced) and M36 (incomplete/ragged, ADR-046): theta^2_{r:c} (finite-population,
+    # averaged over clusters) replaces the random sigma^2_{r:c} in the subject-level
+    # rater slot. The incomplete case (mixed-model engines) uses the ragged per-cluster
+    # Case-3A theta^2_{r:c} (generalized to unequal k_c) + the M9 k_eff/connectedness
+    # machinery; the Bayesian engine stays deferred here (guarded below).
     if (!("subject" %in% level)) {
       abort_unsupported(c(
         "Fixed-rater multilevel ICCs are available at the subject level only.",
@@ -772,22 +776,29 @@ icc <- function(
     # which drops "cluster" the same way). An explicit cluster-only request
     # aborted just above.
     level <- "subject"
-    # Fixed-rater Design 2 (nested) is balanced/complete only this slice: the
-    # incomplete case pairs the M3 k_eff divisor with the per-cluster theta^2_{r:c}
-    # bias correction under imbalance -- two interacting corrections needing their own
-    # oracle (as M10 was to M9). Defer loudly rather than use an unvalidated divisor
-    # (#5; ADR-029 -- "balanced first"). Random-rater incomplete nested (Slice 1) is
-    # unaffected; the crossed fixed incomplete path (M18 Slice 1) still applies.
+    # Incomplete/ragged fixed-rater nested Design 2 ships for the MIXED-MODEL engines
+    # (M36, ADR-046): the ragged per-cluster Case-3A theta^2_{r:c} (theta2r_fixed_nested()
+    # generalized to unequal k_c) pairs with the M9 k_eff/connectedness machinery, pinned
+    # by a seeded finite-population-recovery oracle (interior + boundary coverage nominal;
+    # cross-engine < 1e-4; reduction to balanced M19 + flat M3). The BAYESIAN engine stays
+    # deferred: fit_brms_nested_fixed() is balanced-only, and incomplete fixed-nested was
+    # random-only through M32 (the M30 variance-ratio regime, no 2b) -- the brms sibling is
+    # a later milestone. Refuse it with a case-naming message rather than misfit (#5/#8).
+    # lavaan cannot reach here (multilevel SEM is unsupported, aborted upstream). The
+    # per-subject k_eff averaging divisor here is well-defined (ratings/subject, the M19
+    # random-nested divisor); it is NOT the open per-cluster ICC(c,k) divisor (M9 §9).
     if (
-      ml_design == "nested_in_clusters" &&
+      engine == "brms" &&
+        ml_design == "nested_in_clusters" &&
         !nested_design_balanced(df, ml_design)
     ) {
       abort_unsupported(c(
-        "Incomplete fixed-rater nested multilevel designs are not supported yet.",
-        i = "This slice ships balanced, complete fixed-rater nested (Design 2) data; \\
-             the incomplete case is planned for a later milestone.",
-        i = "Use {.code raters = \"random\"} for incomplete nested data, or provide \\
-             a balanced design."
+        "The {.pkg brms} engine does not support incomplete/ragged fixed-rater \\
+         nested (Design 2) data yet.",
+        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"} for \\
+             incomplete fixed-rater nested data; the Bayesian sibling is planned for \\
+             a later milestone.",
+        i = "Or use {.code raters = \"random\"} for incomplete nested Bayesian data."
       ))
     }
   }
@@ -1210,10 +1221,12 @@ icc <- function(
   if (engine == "brms") {
     # Fixed-rater multilevel brms covers crossed (Design 1, M27 Slice 1) and nested
     # (Design 2, M27 Slice 2) at the subject level, balanced/complete. The remaining
-    # fixed-multilevel cases -- Design 3 fixed (no separable rater effect), cluster-level
-    # fixed, and incomplete fixed-nested -- are refused engine-agnostically upstream
-    # (~L655); incomplete crossed fixed MULTILEVEL is caught by the `!balanced` brms guard
-    # below (M31 Slice 2 / later). So no brms-specific fixed guard is needed here.
+    # fixed-multilevel cases -- Design 3 fixed (no separable rater effect) and cluster-level
+    # fixed -- are refused engine-agnostically upstream (~L655). Incomplete fixed-NESTED
+    # now ships for the mixed-model engines (M36, ADR-046) but stays deferred for brms; it
+    # is refused by a brms-specific guard upstream (~L785). Incomplete crossed fixed
+    # MULTILEVEL is caught by the `!balanced` brms guard below (M31 Slice 2). So no
+    # brms-specific fixed guard is needed here.
     # Within-cell replicates ship for brms at the single level -- two-way random (M29 Slice 2)
     # and fixed-rater (M33 Slice 2) -- and at the MULTILEVEL level -- crossed Design 1
     # (six-component) + nested Design 2 (five-component), random raters (M33 Slice 3,
@@ -1246,9 +1259,10 @@ icc <- function(
       # harmonic-mean k_eff divisor threaded pre-dispatch (design_info$k_eff, ~L1409). The one
       # still-deferred incomplete corner is refused with a case-naming message (#5/#8): within-cell
       # REPLICATES (the fixed/multilevel Bayesian replicate siblings ship balanced first, M33 Slices
-      # 2/3; ragged replicates stay 🟣 research, ADR-030). (Incomplete fixed-NESTED is refused
-      # engine-agnostically upstream ~L685/L651 -- it has no frequentist oracle, deferred all engines,
-      # ADR-029/ADR-042 -- so only random nested reaches here.)
+      # 2/3; ragged replicates stay 🟣 research, ADR-030). (Incomplete fixed-NESTED now has a
+      # frequentist oracle and ships for the mixed-model engines (M36, ADR-046), but the brms sibling
+      # is deferred -- refused by a brms-specific guard upstream ~L785 -- so only random nested reaches
+      # here.)
       if (replicates) {
         abort_unsupported(c(
           "The {.pkg brms} engine supports incomplete/ragged data only for the \\

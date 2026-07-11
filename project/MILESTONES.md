@@ -1281,38 +1281,50 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   population recovery** against the known finite-population truth (interior + boundary θ²=0) with MC-CI
   coverage at **n_rep ≥ 240** ([[ragged-coverage-nrep-240]]); lme4 degrades to glmmTMB at the boundary (M15).
 - DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):
-  - [ ] **Slice 1 — ragged fixed-nested Design-2 single-rater estimator + oracle.**
-    - [ ] Generalize `theta2r_fixed_nested()` to unequal per-cluster k_c (drop the equal-k guard; per-cluster
-          `center`/`raw`/`bias`, average, floor — balanced is the k_c-constant special case, O-FNML pins
-          unmoved); generalize `theta2r_nested_draws()` / `theta2r_moment_draws()` (per-cluster 2b,
-          average-floor) the same way.
-    - [ ] Lift the balanced-only guard on the fixed-nested path (`R/icc.R`, the `!balanced` refusal reached
-          with `raters = "fixed"` × `design = "nested_in_clusters"`) so ragged data dispatches to
-          `fit_glmmtmb_nested_fixed()`; reuse the M9 `k_eff`/connectedness + `design`-escape-hatch machinery
-          (engine-agnostic, pre-dispatch) and the ragged design-detection abort (explicit `design=` when
-          ambiguous, #5).
-    - [ ] Subject-level agreement + consistency, single-rater, with the boundary-aware MC interval; lme4
-          engine path + singular→glmmTMB degrade (M15).
-    - [ ] **Averaged `ICC_s(·,k)`:** attempt against reduction + cross-engine; if no #1/#4-strong oracle
-          holds, reclassify to 🟣 research (record in the spec + COVERAGE) and ship single-rater-only.
-    - [ ] Oracle O-IFNML committed: `data-raw/oracle-incomplete-fixed-nested.R` (seeded, `stopifnot`; the
-          spike scripts are its seed) + committed fixture at n_rep ≥ 240; cross-engine + reductions +
-          coverage (interior + boundary). REFERENCES.md registry entry.
-    - [ ] **Conditional Fable posture (#19):** if the committed boundary oracle undercovers below the
-          pre-registered band, `verify-estimator` recommends a Fable review and work pauses (point not tuned
-          to force coverage, #4).
-    - [ ] `print`/`glance`/`format` surface incomplete fixed-nested; `intraclass_fixed_raters` warning fires.
-    - [ ] Docs: the fixed-nested article/section notes ragged support; COVERAGE.md #11 incomplete column
-          updated; NEWS entry; roxygen. All tracking in-commit (#16).
+  - [x] **Slice 1 — ragged fixed-nested Design-2 estimator + O-IFNML oracle.** (code committed; the
+        cross-cutting gate below is the finish-task step.)
+    - [x] Generalized `theta2r_fixed_nested()` to unequal per-cluster k_c (dropped the equal-k guard;
+          per-cluster `center`/`raw`/`bias`, average, floor — balanced is the k_c-constant special case,
+          verified **bit-identical**, O-FNML pins unmoved); generalized `theta2r_nested_draws()` to per-cluster
+          2b + average-floor (the shared `theta2r_moment_draws()` is left untouched — its flat/crossed/lavaan
+          callers pass a single shared center/k; only the nested path needed per-cluster k_c).
+    - [x] Lifted the balanced-only guard on the fixed-nested path (`R/icc.R` ~L775) so ragged data dispatches
+          to `fit_glmmtmb_nested_fixed()`/`fit_lme4_nested_fixed()`; reuses the M9 `k_eff`/connectedness +
+          `design`-escape-hatch machinery (pre-dispatch). **Narrowed to `engine == "brms"`** — brms stays
+          refused with a case-naming message (no Bayesian path; the brms `!balanced` guard only caught
+          replicates and relied on this upstream refusal). lavaan can't reach here (multilevel SEM aborts).
+    - [x] Subject-level agreement + consistency, single + average, boundary-aware MC interval; lme4 path +
+          singular→glmmTMB degrade (M15).
+    - [x] **Averaged `ICC_s(·,k)`: SHIPS** (attempt resolved to ship, not degrade). Pinned by the **exact
+          single-cluster reduction to flat M3** (both single + average, |diff| ~1e-16); its divisor is the
+          per-subject harmonic `k_eff` (the M19 random-nested divisor), **not** the open per-cluster
+          `ICC(c,k)` divisor (ADR-046 conflated the two). Recorded in the spec + COVERAGE + REFERENCES.
+    - [x] Oracle O-IFNML committed: `data-raw/oracle-incomplete-fixed-nested.R` (seeded, `stopifnot`) +
+          fixture `incomplete-fixed-nested-oracle.rds` at n_rep 240. Results: coverage interior .967/.967,
+          **boundary θ²=0 .942/.942** (both regimes), |bias| ≤ .018, reductions ~1e-16, cross-engine 2.6e-6,
+          0 fit failures. REFERENCES.md O-IFNML entry added.
+    - [x] **Conditional Fable posture (#19):** the committed boundary oracle came back **nominal** (≥ .94), so
+          the conditional escalation did **not** trigger — no Fable review. Point not tuned to force coverage.
+    - [x] `print`/`glance`/`format` surface incomplete fixed-nested (header "raters nested in clusters",
+          "fixed", "incomplete"; both ICC(A,1) + ICC(A,k) with the k_eff note); `intraclass_fixed_raters`
+          warning fires.
+    - [x] Docs: roxygen `@details` corrected (the stale "nested designs still require balanced" note →
+          nested fixed on balanced + incomplete); COVERAGE.md Design-2 fixed row + matrix updated; NEWS
+          multilevel bullet extended. All tracking in-commit (#16).
   - [ ] **Cross-cutting DoD (brief §8):** full CI matrix green; `R CMD check --as-cran` clean; `air`/`lintr`/
-        spell clean; installed-pkg path driven ([[verify-against-installed-package]]); coverage per
-        [[coverage-baseline]]; `lintr::lint_package()` before push ([[run-lintr-before-push]]).
-- Deferred out of M36 (record so not rediscovered): the **averaged nested-incomplete `ICC_s(·,k)`** divisor
-  (🟣 research if it degrades — the M9 `ICC(c,k)` sibling); **cluster-level fixed** raters (the other (C)
+        spell clean (local `air`/`lintr` on changed files clean; affected suites green); installed-pkg path
+        driven ([[verify-against-installed-package]]); coverage per [[coverage-baseline]];
+        `lintr::lint_package()` before push ([[run-lintr-before-push]]). **← the `/finish-task` gate.**
+- Deferred out of M36 (record so not rediscovered): **cluster-level fixed** raters (the other (C)
   corner — no scaffolding, ten-Hove open question, its own later milestone); **Design 3 fixed** (⚫ by-design);
   **lavaan/brms** incomplete-fixed-nested (engine parity, later — M32 was random-only for the same
-  no-oracle reason, now unblockable given M36's frequentist oracle); the untouched carryovers —
-  **categorical/ordinal GLMM**, **multilevel SEM**, occasion/ragged `d_study()`, the CRAN upload — stay in
-  [`ROADMAP.md`](ROADMAP.md).
-- Status: **in flight** — ADR-046 written; board added; STATUS flipped to M36-active. On branch
-  `m36-incomplete-fixed-nested`. No slice code yet (plan before code, #14). Next: `/start-task` Slice 1.
+  no-oracle reason, now unblockable given M36's frequentist oracle); the genuinely-open **per-cluster
+  `ICC(c,k)` incomplete divisor** at the *cluster* level (M9 §9, 🟣 Wave-3 — distinct from M36's subject-level
+  `k_eff`, which shipped); the untouched carryovers — **categorical/ordinal GLMM**, **multilevel SEM**,
+  occasion/ragged `d_study()`, the CRAN upload — stay in [`ROADMAP.md`](ROADMAP.md). (The averaged
+  subject-level `ICC_s(·,k)` was expected to possibly defer but **shipped** — see the board.)
+- Status: **Slice 1 code complete on branch `m36-incomplete-fixed-nested`** — estimator generalized, guard
+  lifted (brms refused), O-IFNML oracle committed (all cells nominal, no Fable), docs/COVERAGE/NEWS/REFERENCES
+  in-commit; affected suites green, `air`/`lintr` clean. **Averaged coefficient shipped** (pinned by exact
+  reduction). Remaining: the cross-cutting `/finish-task` gate (full suite + `R CMD check` + installed-pkg
+  drive) and the maintainer's call on keeping the averaged coefficient.

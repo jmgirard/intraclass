@@ -233,8 +233,14 @@
   hatch, pre-dispatch); subject-level agreement + consistency single-rater with the 2b boundary-aware MC
   interval; lme4 path + singular→glmmTMB degrade; commit `data-raw/oracle-incomplete-fixed-nested.R` (spike
   scripts are its seed) + fixture at n_rep≥240 (recovery + reductions to M19/M3 + cross-engine + coverage
-  interior/boundary). Averaged `ICC_s(·,k)`: attempt, else reclassify 🟣 research (#4). **No slice code yet —
-  plan stated, `/start-task` next.** Superseded active task (M35, done): the next milestone needed an ADR
+  interior/boundary). **Slice 1 code COMPLETE:** estimator generalized (bit-identical on balanced), guard
+  lifted (brms refused with a case-naming message), O-IFNML fixture committed (coverage interior .967 /
+  boundary θ²=0 .942, |bias|≤.018, reductions ~1e-16, cross-engine 2.6e-6 — all nominal, **no Fable**),
+  print/glance/docs/COVERAGE/NEWS/REFERENCES in-commit; affected suites green, `air`/`lintr` clean. **The
+  averaged `ICC_s(·,k)` SHIPPED** (the "attempt, else degrade" resolved to ship — pinned by the exact
+  single-cluster reduction to flat M3; its divisor is the per-subject `k_eff`, the M19 random-nested divisor,
+  NOT the open per-cluster `ICC(c,k)` divisor). Remaining: the `/finish-task` gate (full suite + `R CMD check`
+  + installed-pkg drive) and the maintainer's call on keeping the averaged coefficient. Superseded active task (M35, done): the next milestone needed an ADR
   after a short retro; that retro + spike + ADR-046 opened M36 this session. Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked**
   (incomplete fixed nested, cluster-level fixed — no frequentist oracle, likely a Fable review); **selectable
   `posterior` coupling**; **categorical/ordinal GLMM** (needs an estimand pass); **multilevel SEM**; the Wave-3

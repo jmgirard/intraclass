@@ -587,29 +587,39 @@ theta2r_fixed_nested <- function(
   vbeta <- as.matrix(vbeta)
   cluster_idx <- split(seq_along(beta), cluster_of)
   ks <- lengths(cluster_idx)
-  if (length(unique(ks)) != 1L) {
+  # Each cluster needs >= 2 raters to form a within-cluster finite-population variance.
+  # On INCOMPLETE/ragged data (M36, ADR-046) clusters may carry UNEQUAL rater counts
+  # k_c, so -- unlike the balanced M19 path -- there is no single shared k: the Case-3A
+  # center and (k_c - 1) divisor are formed PER CLUSTER with that cluster's own k_c.
+  # Balanced/complete Design 2 is the k_c-constant special case (every k_c equal), so
+  # the per-cluster centers coincide and the O-FNML reductions are bit-identical
+  # (verified: |shipped - generalized| = 0 on balanced equal-k data).
+  if (any(ks < 2L)) {
     abort_intraclass(
       c(
-        "Every cluster must contribute the same number of rater means for the \\
-         fixed-rater nested variance.",
+        "Every cluster must contribute at least 2 rater means for the fixed-rater \\
+         nested variance.",
         i = "Cluster rater counts found: {.val {sort(unique(ks))}}."
       ),
       class = "intraclass_engine_error",
       call = call
     )
   }
-  k <- ks[[1L]]
-  center <- diag(k) - matrix(1 / k, k, k)
+  centers <- lapply(ks, function(kc) diag(kc) - matrix(1 / kc, kc, kc))
   per_bias <- vapply(
-    cluster_idx,
-    function(ix) sum(diag(center %*% vbeta[ix, ix, drop = FALSE])) / (k - 1),
+    seq_along(cluster_idx),
+    function(j) {
+      ix <- cluster_idx[[j]]
+      sum(diag(centers[[j]] %*% vbeta[ix, ix, drop = FALSE])) / (ks[[j]] - 1)
+    },
     numeric(1)
   )
   per_raw <- vapply(
-    cluster_idx,
-    function(ix) {
+    seq_along(cluster_idx),
+    function(j) {
+      ix <- cluster_idx[[j]]
       mu <- beta[ix]
-      as.numeric(t(mu) %*% center %*% mu) / (k - 1)
+      as.numeric(t(mu) %*% centers[[j]] %*% mu) / (ks[[j]] - 1)
     },
     numeric(1)
   )
@@ -622,11 +632,13 @@ theta2r_fixed_nested <- function(
     # containment to 1.00 and is a no-op interiorly (every cluster clears the floor, so
     # the O-FNML reduction pins are unmoved). The 1b correction itself is unchanged.
     point = max(0, mean(per_raw - per_bias)),
-    center = center,
+    # `center`/`k` are now PER CLUSTER (a list of centers + a vector of k_c) to carry
+    # the ragged unequal-k case through the MC sampler (theta2r_nested_draws()).
+    center = centers,
     cluster_idx = cluster_idx,
     bias = per_bias,
     beta_names = names(beta),
-    k = k
+    k = as.integer(ks)
   )
 }
 
@@ -657,15 +669,21 @@ theta2r_moment_draws <- function(group_means, group_bias, center, k) {
 }
 
 # Recompute theta^2_{r:c} for a matrix of nested rater cell-mean draws (rows in
-# `th$beta_names` order), reusing the per-cluster center/bias from theta2r_fixed_nested().
-# Shared by the glmmTMB and lme4 fixed-nested `to_components`; delegates to the moment
-# helper (one group per cluster).
+# `th$beta_names` order), reusing the PER-CLUSTER center/k/bias from theta2r_fixed_nested().
+# Shared by the glmmTMB and lme4 fixed-nested `to_components`. The 2b moment correction
+# (M28/ADR-038) is applied per cluster with that cluster's own center_c and k_c -- the
+# same math as theta2r_moment_draws() but generalized to unequal per-cluster k_c (M36,
+# ADR-046), then averaged over clusters and the AVERAGE floored (never per cluster, #3).
+# On balanced/equal-k data every center_c/k_c is identical, so this reduces to the shared
+# helper's single-group-per-cluster path (O-FNML pins unmoved).
 theta2r_nested_draws <- function(beta_draws, th) {
-  group_means <- lapply(
-    th$cluster_idx,
-    function(ix) beta_draws[ix, , drop = FALSE]
-  )
-  theta2r_moment_draws(group_means, as.list(th$bias), th$center, th$k)
+  per <- lapply(seq_along(th$cluster_idx), function(j) {
+    m <- beta_draws[th$cluster_idx[[j]], , drop = FALSE]
+    center_c <- th$center[[j]]
+    kc <- th$k[[j]]
+    colSums(m * (center_c %*% m)) / (kc - 1) - 2 * th$bias[[j]]
+  })
+  pmax(0, Reduce(`+`, per) / length(per))
 }
 
 # Cluster label for each fixed rater coefficient of `score ~ 0 + rater` (names

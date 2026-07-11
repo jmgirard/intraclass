@@ -634,6 +634,39 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   before/after; writes the fixture). Fable's independent conjugate-normal check:
   `data-raw/reviews/fable-check-nfi.R`.
 
+### Oracle O-IFNML — INCOMPLETE/ragged fixed-nested (Design 2) single-rater (M36, ADR-046)
+
+- **Role:** correctness of the **incomplete/ragged** fixed-rater nested Design-2 subject-level
+  single-rater ICC_s(A,1) — the ragged generalization of the balanced M19 fixed-nested θ²_{r:c}
+  (`theta2r_fixed_nested()`) to unequal per-cluster rater counts k_c, with the 2b moment-corrected MC
+  interval (`theta2r_nested_draws()`) per cluster. The **point estimand is NON-CIRCULAR**: a
+  finite-population θ²_{r:c} is a deterministic function of the specific fixed rater means, so recovering
+  a **known** value from ragged data is a genuine independent oracle — cross-engine (glmmTMB↔lme4)
+  validates only the raw fit, **not** the authored ragged correction (both engines run the same formula),
+  so seeded recovery is the **load-bearing** oracle (#1/#18).
+- **DGP:** ragged nested Design 2, raters FIXED (per-cluster centered rater means held fixed across
+  replications so θ²_{r:c} is exact; subjects, residuals, and the missing-cell pattern resampled per rep;
+  subjects with < 2 remaining ratings dropped). σ²_{s:c} = 1, σ²_res = 0.5. Grid {equal-k (k_c=4),
+  unequal-k (k_c ∈ {2..5})} × {boundary θ²=0, interior θ²=0.5}, **n_rep 240** (the ≥ .88 pin false-alarms
+  ~0.7%/cell at n_rep 80 — [[ragged-coverage-nrep-240]]). Single-rater needs no averaging divisor, so its
+  population value vsc/(vsc+θ²+vres) is fixed and coverage is clean.
+- **Committed reference (`tests/testthat/fixtures/incomplete-fixed-nested-oracle.rds`; seeds 360000 + i·1000):**
+  coverage **interior .967/.967, boundary θ²=0 .942/.942** (all ≥ .90, boundary-aware #3); point **|bias|
+  ≤ .018** every cell (the recovery of the known finite-population truth); 0 fit failures. The 2b-under-
+  imbalance interaction ADR-046 flagged as the risk resolved **nominal** — no Fable review triggered.
+- **Reductions (deterministic, committed as an attribute + re-checked live):** ragged **single-cluster**
+  fixed-nested ≡ flat M3 fixed for **both** single and average (|diff| ~1e-16 — a single-cluster
+  nested-fixed design IS a flat two-way fixed design; ties θ²_{r:c} to the sourced McGraw–Wong Case 3A AND
+  pins the **average** ICC(A,k_eff) divisor, which is the per-subject harmonic `k_eff` — the M19
+  random-nested divisor, **not** the open per-cluster `ICC(c,k)` divisor of M9 §9); cross-engine ragged
+  glmmTMB↔lme4 |ΔICC(A,1)| < 1e-3 (M15 ragged tolerance). On balanced/equal-k data the generalized helper
+  is **bit-identical** to the shipped M19 helper (|diff| = 0), so the O-FNML pins are unmoved.
+- **Pins (#4/#18):** min cell coverage > .90, overall mean > .93, boundary min > .90; max |bias| < .03;
+  reductions single/average < 1e-8, cross-engine < 1e-3. Asserted in `test-icc-fixed-multilevel.R`
+  **O-IFNML** + **O-IFNML/reduction**.
+- **Provenance:** `data-raw/oracle-incomplete-fixed-nested.R` (standalone, seeded; writes the fixture),
+  seeded from the feasibility spike `data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`.
+
 ### Oracle O-Bayes-Conflated — Bayesian conflated diagnostic (M29 Slice 1, ADR-039)
 
 - **Role:** the Bayesian sibling of the frequentist conflated oracle (M17 Slice 1). The conflated
