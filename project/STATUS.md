@@ -256,13 +256,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M38 Task 3 (Cell 2 coverage oracle O-Bayes-IFNML — the ship/stop gate)** — not started; run
-  via `/start-task`. Build the seeded Bayesian incomplete/ragged fixed-nested coverage oracle
-  (`data-raw/oracle-bayesian-incomplete-fixed-nested.R` + committed `bayesian-incomplete-fixed-nested-oracle.rds`,
-  n_rep ≥ 240 per [[ragged-coverage-nrep-240]], interior + boundary θ²=0 + a high-C_n cell per
-  [[coverage-oracle-cluster-count-axis]]); it mirrors the frequentist M36 O-IFNML sim + the M32
-  incomplete-nested-random Bayesian oracle. **Decision gate (ADR-048):** nominal → ship Cell 2; under-covers →
-  **STOP — no pin-loosening (#4), no tuning, no Fable** — ship Cell 1 only and re-plan Cell 2. *T2 (Cell 2 code)
+- Active task: **M38 Task 4 (docs/NEWS/COVERAGE/REFERENCES + finish-task gate → PR)** — not started; run via
+  `/start-task`. Update NEWS (brms fixed cluster-level + incomplete fixed-nested), COVERAGE.md (brms columns for
+  #11 fixed cluster level + incomplete fixed-nested), REFERENCES (O-Bayes-FCL / O-Bayes-IFNML oracle registry);
+  drive both new brms paths through the installed pkg; `/finish-task` gate → PR. *T3 (Cell 2 coverage oracle —
+  the gate) DONE (2026-07-11): **NOMINAL, Cell 2 ships.*** The full O-Bayes-IFNML sim (4 cells, n_rep 240, ~960
+  live Stan refits) came back nominal in [.90,.99] at all cells — mod_interior .975 / mod_boundary .954 /
+  high_interior .983 / **high_boundary .970** (the C_n=80 incidental-parameters probe, **no decay**); |bias| ≤
+  .008. Committed `bayesian-incomplete-fixed-nested-oracle.rds` + the O-Bayes-IFNML coverage test. The ADR-048
+  stop-and-replan branch did not fire (no pin-loosening, no Fable). *T2 (Cell 2 code)
   DONE (2026-07-11):* removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800); `fit_brms_nested_fixed()`
   fits ragged data unchanged and `brms_theta2r_moment_draws()` already reads a per-cluster `k`, so the
   2b-under-imbalance correction fires per cluster with no new code; single + average `ICC_s(·,k)` subject level;
@@ -404,8 +406,18 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M38 Task 2 (Cell 2 code — brms incomplete/ragged fixed-nested
-  Design 2) DONE.** Removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800). The path needed no new
+- Updated: 2026-07-11 by main session (Opus) — **M38 Task 3 (Cell 2 coverage oracle — the ship/stop gate) DONE:
+  NOMINAL, Cell 2 ships.** Ran the full O-Bayes-IFNML sim (`data-raw/oracle-bayesian-incomplete-fixed-nested.R`;
+  4 cells crossing {C_n 20, C_n 80} × {interior θ²=.30, boundary θ²=0}, unequal k_c, n_rep 240, ~960 live Stan
+  refits, compile-once + `update(recompile=FALSE)`) in the background this session. **All four cells nominal in
+  [.90,.99]:** mod_interior .975, mod_boundary .954, high_interior .983, **high_boundary .970** — the C_n=80
+  boundary (the incidental-parameters probe, [[coverage-oracle-cluster-count-axis]]) shows **no decay**, so the
+  2b-under-imbalance moment correction holds through the posterior on ragged nested data; |bias| ≤ .008, 7/240
+  fits at C_n=80 discarded+counted (#18). Committed `bayesian-incomplete-fixed-nested-oracle.rds` + the
+  O-Bayes-IFNML coverage test (7 assertions incl. the C_n=80-boundary no-collapse pin). **The ADR-048
+  stop-and-replan branch did NOT fire** — no pin-loosening (#4), no tuning, no Fable (#19). Board T3 checked
+  off; active task advanced to **T4** (docs/NEWS/COVERAGE + finish-task gate → PR). Next: `/start-task` T4. Prior
+  line: **M38 Task 2 (Cell 2 code — brms incomplete/ragged fixed-nested Design 2) DONE.** Removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800). The path needed no new
   code: `fit_brms_nested_fixed()` (`score ~ 0 + rater + (1|cluster:subject)`) fits ragged data unchanged, and
   `brms_theta2r_nested_draws()` → `brms_theta2r_moment_draws()` already reads a **per-cluster** `k` (nrow of
   each cluster's rater-mean matrix), so unequal k_c and the 2b-under-imbalance moment correction (`b≠0`) +

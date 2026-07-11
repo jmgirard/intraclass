@@ -1368,14 +1368,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     containment test + removed two stale "brms incomplete-fixed-nested deferred" assertions; roxygen updated.
     Verified end-to-end (ragged 72/96, 12 raters; glmmTMB M36 point .630/.808 contained in the brms CI). Full
     suite 1168/0 (51 live-Stan skipped); `air`/`lintr` clean.
-  - [ ] **T3 — Cell 2 coverage oracle (the gate).** Seeded O-Bayes-IFNML (`data-raw/oracle-*` + committed
-    fixture, n_rep ≥ 240, interior + boundary θ²=0 + a high-C_n cell); glmmTMB M36 containment. **Decision
-    point:** nominal → ship Cell 2; under-covers → STOP-and-replan (Cell 1 only), record honest evidence.
-    *In progress (2026-07-11):* `data-raw/oracle-bayesian-incomplete-fixed-nested.R` **written + smoke-verified**
-    (compile-once + `update(recompile=FALSE)`, the M32 mechanics; M36 fixed-nested DGP + non-circular truth;
-    4 cells = {C_n 20, C_n 80} × {interior θ²=.30, boundary θ²=0}, unequal k_c, n_rep 240 — ~960 live Stan
-    refits, checkpointed per cell). **The full run is a multi-hour offline compute (the M32/M36 pattern); it is
-    the ship/stop gate — pending.** Then the committed fixture + the O-Bayes-IFNML coverage test.
+  - [x] **T3 — Cell 2 coverage oracle (the gate) — NOMINAL, Cell 2 ships** (2026-07-11).
+    `data-raw/oracle-bayesian-incomplete-fixed-nested.R` (compile-once + `update(recompile=FALSE)`, M32
+    mechanics; M36 fixed-nested DGP + non-circular single-rater truth) ran the full 4-cell grid ({C_n 20, C_n
+    80} × {interior θ²=.30, boundary θ²=0}, unequal k_c, n_rep 240, ~960 live Stan refits). **All four cells
+    nominal in [.90,.99]:** mod_interior .975, mod_boundary .954, high_interior .983, **high_boundary .970** —
+    the C_n=80 boundary (the incidental-parameters probe) shows **no decay**, so the 2b-under-imbalance moment
+    correction holds through the posterior on ragged nested data. |bias| ≤ .008; 7/240 fits at C_n=80
+    discarded+counted (#18). Committed `bayesian-incomplete-fixed-nested-oracle.rds` + the O-Bayes-IFNML
+    coverage test (7 assertions incl. the C_n=80-boundary no-collapse pin). The ADR-048 stop-and-replan branch
+    did **not** fire — no pin-loosening, no Fable.
   - [ ] **T4 — docs + gate.** NEWS / COVERAGE (brms columns) / REFERENCES in-commit; installed-pkg both new
     brms paths driven through `library(intraclass)`; `air`/`lintr` clean; `/finish-task` gate → PR.
 - Deferred out of M38 (record so not rediscovered): **lavaan cluster-fixed + lavaan incomplete-fixed-nested**

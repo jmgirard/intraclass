@@ -1390,6 +1390,60 @@ test_that("O-Bayes-FNML: committed reference reproduces the nested fixed-rater f
   expect_gt(interior$map_icc_relbias, -0.06)
 })
 
+# --- O-Bayes-IFNML: committed INCOMPLETE/ragged nested FIXED coverage (M38 Cell 2, ADR-048) ---
+# The Bayesian sibling of the frequentist M36 O-IFNML and the ragged sibling of O-Bayes-FNML
+# (balanced nested fixed). data-raw/oracle-bayesian-incomplete-fixed-nested.R runs the M36
+# fixed-nested DGP (deterministic per-cluster rater means -> a NON-CIRCULAR single-rater truth
+# vsc/(vsc+theta2+vres)) through the SHIPPED fit_brms_nested_fixed() recipe on ragged data (unequal
+# k_c, ~15% cells dropped), scoring 95% credible-interval coverage over a 4-cell grid crossing
+# {C_n 20, C_n 80} x {interior theta2=.30, boundary theta2=0}, n_rep 240. THE MILESTONE'S GENUINE
+# RISK (#1/#18): the 2b-under-imbalance moment correction (brms_theta2r_moment_draws, b != 0) going
+# nested-brms for the first time -- does the credible interval still cover, and does the C_n=80 cell
+# show the incidental-parameters decay that would sink a per-cluster finite-population correction?
+# THE GATE (ADR-048): nominal in [.90,.99] interior AND boundary at BOTH cluster counts -> Cell 2
+# ships; under-coverage would have been STOP-and-replan (no pin-loosening #4, no tuning, no Fable).
+# The committed run came back NOMINAL at all four cells (the C_n=80 boundary at .970, no decay), so
+# Cell 2 shipped. Fast, no fitting, runs on every CI job.
+test_that("O-Bayes-IFNML: committed reference covers ragged nested fixed data (the gate)", {
+  fixture <- test_path(
+    "fixtures",
+    "bayesian-incomplete-fixed-nested-oracle.rds"
+  )
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-incomplete-fixed-nested.R to generate"
+  )
+  s <- readRDS(fixture)$summary
+  expect_setequal(
+    s$cell,
+    c("mod_interior", "mod_boundary", "high_interior", "high_boundary")
+  )
+  cell <- function(nm) s[s$cell == nm, ]
+
+  # (1) The grid actually exercised the risk: unequal k_c ragged data at C_n = 20 and C_n = 80,
+  #     n_rep 240 ([[ragged-coverage-nrep-240]]); a few fits may error and are discarded (< 10%).
+  expect_true(all(s$n_clusters %in% c(20L, 80L)))
+  expect_true(all(s$n_fail < 0.10 * 240))
+
+  # (2) THE GATE: single-rater ICC(A,1) credible-interval coverage is nominal in [.90, .99] for
+  #     EVERY cell -- interior and boundary, at moderate AND high cluster count.
+  expect_true(all(s$coverage_a1 >= 0.90 & s$coverage_a1 <= 0.99))
+
+  # (3) THE INCIDENTAL-PARAMETERS PROBE ([[coverage-oracle-cluster-count-axis]]): the C_n=80
+  #     boundary (theta^2 = 0) is where a per-cluster 2b correction would decay toward 0 as
+  #     clusters accrue (the M28 failure mode). It must NOT collapse -- it stays ~nominal and does
+  #     not fall materially below the C_n=20 boundary. This is the pin that lets Cell 2 ship (#18).
+  expect_gte(cell("high_boundary")$coverage_a1, 0.90)
+  expect_gte(
+    cell("high_boundary")$coverage_a1,
+    cell("mod_boundary")$coverage_a1 - 0.05
+  )
+
+  # (4) Point (MAP) is close to the non-circular population truth in every cell -- no systematic
+  #     bias from the ragged 2b correction (characterized, #18).
+  expect_true(all(abs(s$mean_bias) < 0.02))
+})
+
 # --- O-Bayes-ML-reduction: subject level composes like two-way (no brms needed) ---
 # The subject-level (within-cluster) agreement estimand has signal sigma^2_{s:c} and error
 # {rater, residual} -- structurally IDENTICAL to the single-level two-way estimand (M5 §3a;
