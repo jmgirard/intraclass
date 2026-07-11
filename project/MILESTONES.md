@@ -1352,10 +1352,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   is nominal; **if it under-covers, STOP — no pin-loosening (#4), no tuning, no Fable** — ship Cell 1 only and
   re-plan Cell 2.
 - Tasks (DoD board — check off in the commit that does the work, #16):
-  - [ ] **T1 — Cell 1 code + oracle.** Lift the `R/icc.R:781` brms cluster-fixed guard for balanced crossed
-    Design 1; route the cluster-level push-forward off `fit_brms_multilevel_fixed()` draws (σ²_c signal,
-    `{θ²_r, σ²_cr}` agreement / `{σ²_cr}` consistency, divisor `k`); `print`/`glance` surface it. O-Bayes-FCL
-    in `test-icc-brms.R` (reduction to M24 brms random cluster + glmmTMB M37 containment).
+  - [x] **T1 — Cell 1 code + oracle** (2026-07-11). Removed the brms-specific cluster-drop at `R/icc.R:781`
+    (was forcing `level <- "subject"` for brms fixed); balanced brms fixed cluster now flows through the
+    engine-agnostic estimand/`posterior_summary()` path off the shipped `fit_brms_multilevel_fixed()` draws
+    (no new fit), incomplete falls to the engine-agnostic balance gate (`R/icc.R` ~1187) and aborts there.
+    O-Bayes-FCL (live, `skip_on_ci`) in `test-icc-brms.R` + a fast incomplete-boundary guard test; verified
+    end-to-end: brms fixed returns **both** levels, glmmTMB M37 cluster point contained, brms fixed≈random
+    cluster (|Δ|max .0215 < .06). Updated one stale "brms fixed cluster deferred" test + the roxygen. Full
+    suite green (1170/0, 50 live-Stan skipped); `air`/`lintr` clean.
   - [ ] **T2 — Cell 2 code.** Lift the `R/icc.R:810` brms incomplete-fixed-nested guard; run
     `fit_brms_nested_fixed()` on ragged Design-2 data with `brms_theta2r_moment_draws()` (2b-under-imbalance);
     single `ICC_s(·,1)` + average `ICC_s(·,k)` at the subject level.

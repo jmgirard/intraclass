@@ -111,10 +111,11 @@
 #' level is supported for the crossed (Design 1) design on **balanced, complete** data
 #' (signal \eqn{\sigma^2_c}, agreement error the finite-population \eqn{\theta^2_r} plus
 #' the cluster-by-rater term \eqn{\sigma^2_{cr}}); on balanced data it equals the
-#' random-rater cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
-#' estimation, Design-3 fixed raters (nested in subjects -- no separable rater effect),
-#' and the Bayesian (`engine = "brms"`) fixed-rater cluster-level and incomplete
-#' fixed-nested paths remain for later milestones.
+#' random-rater cluster-level ICC. The Bayesian (`engine = "brms"`) fixed-rater
+#' **cluster** level is likewise supported for the crossed (Design 1) design on
+#' balanced, complete data. Incomplete/unbalanced fixed-rater cluster-level estimation,
+#' Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
+#' Bayesian incomplete fixed-nested path remain for later milestones.
 #'
 #' @section Within-cell replicates:
 #' When a subject-by-rater cell is rated **more than once** (within-cell
@@ -767,31 +768,20 @@ icc <- function(
     # rater slot. The incomplete case (mixed-model engines) uses the ragged per-cluster
     # Case-3A theta^2_{r:c} (generalized to unequal k_c) + the M9 k_eff/connectedness
     # machinery; the Bayesian engine stays deferred here (guarded below).
-    # Cluster-level fixed raters (M37, ADR-047): SHIP for the mixed-model engines
-    # (glmmTMB/lme4) on balanced/complete CROSSED Design 1 -- the cluster-level
-    # {sigma^2_c | theta^2_r, sigma^2_cr} read off the shipped M10 fixed fit. The
-    # feasibility spike confirmed EXACT reduction to the M5 random cluster-level ICC
-    # (theta^2_r == sigma^2_r AND sigma^2_cr unbiased under fixing, both |d| ~ 1e-7),
-    # so no finite-population correction on the interaction. The balance gate lives
-    # below with `balanced` (incomplete/unbalanced cluster fixed is deferred --
-    # double-blocked: ten Hove's open small-k estimator + the M9 §9 ICC(c,k) divisor).
-    # Here, refuse only the still-deferred crossed cluster-level fixed cell -- brms
-    # (engine parity, unblockable given M37's frequentist oracle; a later milestone);
-    # lavaan multilevel is unsupported (aborted upstream, cannot reach).
-    if (ml_design == "crossed" && "cluster" %in% level && engine == "brms") {
-      if (!("subject" %in% level)) {
-        abort_unsupported(c(
-          "Cluster-level fixed-rater ICCs are available for the {.pkg glmmTMB} and \\
-           {.pkg lme4} engines only.",
-          i = "The {.pkg brms} cluster-level fixed-rater sibling is planned for a \\
-               later milestone.",
-          i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}, or \\
-               {.code level = \"subject\"}."
-        ))
-      }
-      # Default level includes "cluster"; drop it for brms (subject ships, M27 Slice 1).
-      level <- "subject"
-    }
+    # Cluster-level fixed raters ship for the CROSSED Design 1, balanced/complete: the
+    # mixed-model engines (glmmTMB/lme4) via M37 (ADR-047, off the M10 fixed fit) and the
+    # brms engine via M38 Cell 1 (ADR-048, off the shipped M27 fit_brms_multilevel_fixed()
+    # five-component draws -- no new fit; the cluster-level {sigma^2_c | theta^2_r, sigma^2_cr}
+    # push-forward reads the same draws as the M24 random cluster level, since icc_estimand()
+    # keys the cluster error set on `level` not `raters`). M37's feasibility spike confirmed
+    # EXACT reduction to the M5 random cluster-level ICC (theta^2_r == sigma^2_r AND sigma^2_cr
+    # unbiased under fixing, both |d| ~ 1e-7), so no finite-population correction on the
+    # interaction and, on brms, `b ~ 0` -- a variance-ratio push-forward. The engine-agnostic
+    # balance gate below (with `balanced`) defers the INCOMPLETE/unbalanced cluster-fixed cell
+    # for every engine (double-blocked: ten Hove's open small-k estimator + the M9 §9 ICC(c,k)
+    # divisor), so brms incomplete fixed cluster falls through to it and aborts there, exactly
+    # as glmmTMB/lme4 do -- no brms-specific cluster guard is needed here. (lavaan multilevel
+    # is unsupported, aborted upstream, and cannot reach this block.)
     # Nested fixed designs (nested_in_clusters) have no cluster level; they fall
     # through to the generic nested guard below (~L805), which drops the default
     # "cluster" / aborts an explicit cluster request and runs the M8/M19/M36

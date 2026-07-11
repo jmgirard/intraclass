@@ -261,6 +261,40 @@ test_that("brms refuses the deferred designs with a teaching abort", {
   # assert the crossed and nested fixed paths are *supported*.
 })
 
+# M38 Cell 1 (ADR-048) ships the brms fixed CLUSTER level for BALANCED crossed Design 1, but the
+# INCOMPLETE/unbalanced fixed cluster level stays deferred for ALL engines (double-blocked: ten
+# Hove's open small-k estimator + the M9 §9 ICC(c,k) divisor). Lifting the brms-specific
+# cluster-drop must NOT open that cell: an incomplete brms fixed cluster request falls through to
+# the engine-agnostic balance gate (R/icc.R, the `!balanced` fixed-cluster guard) and aborts there,
+# exactly as glmmTMB/lme4 do (M37). Pre-fit guard, so no Stan toolchain is needed (CI-runnable).
+test_that("brms still refuses the INCOMPLETE fixed cluster-level cell (M38 Cell 1 boundary)", {
+  skip_if_not_installed("brms")
+
+  # Balanced crossed Design 1, then drop one cell -> unbalanced.
+  d <- expand.grid(
+    s = seq_len(3L),
+    rater = factor(seq_len(3L)),
+    cluster = factor(seq_len(2L))
+  )
+  d$subject <- factor(paste0(d$cluster, "_", d$s))
+  d$score <- as.numeric(seq_len(nrow(d)))
+  d_inc <- d[-1L, ]
+
+  expect_error(
+    suppressWarnings(icc(
+      d_inc,
+      score,
+      rater,
+      subject = subject,
+      cluster = cluster,
+      level = "cluster",
+      raters = "fixed",
+      engine = "brms"
+    )),
+    class = "intraclass_unsupported"
+  )
+})
+
 # M29 Slice 2 ships SINGLE-LEVEL two-way RANDOM within-cell replicates for brms; M33 Slice 2
 # (ADR-043) adds SINGLE-LEVEL FIXED-rater replicates; M33 Slice 3 adds MULTILEVEL RANDOM replicates
 # -- crossed Design 1 (six-component) + nested Design 2 (five-component), subject level (the
@@ -2099,6 +2133,108 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
   hdr <- paste(format(fit), collapse = "\n")
   expect_match(hdr, "brms (MCMC)", fixed = TRUE)
   expect_match(hdr, "posterior credible", fixed = TRUE)
+})
+
+# --- Live brms fit: crossed (Design 1) FIXED-rater CLUSTER level, O-Bayes-FCL (M38 Cell 1) ---
+# The brms sibling of the frequentist M37 (fixed cluster-level ICC, ADR-047) and the cluster-level
+# companion of M27's fixed SUBJECT level (O-Bayes-FML-agree). Engine/interval parity, NOT new
+# estimand work (ADR-048): no new fit -- the shipped M27 fit_brms_multilevel_fixed() five-component
+# draws already carry sigma^2_c (cluster), sigma^2_cr (cluster_rater) and the fixed theta^2_r
+# (the injected `rater` row), and icc_estimand() keys the cluster error set on `level` not `raters`,
+# so lifting the brms cluster-fixed guard routes the cluster-level (sigma^2_c | {theta^2_r,
+# sigma^2_cr}, k) push-forward through the SAME posterior_summary() path as M24's random cluster
+# level. M37's Outcome A (on balanced data theta^2_r = sigma^2_r and sigma^2_cr is unbiased under
+# fixing) makes this a variance-ratio push-forward: the brms fixed cluster ICC reduces to the brms
+# RANDOM cluster ICC, so O-Bayes-FCL is (a) reduction (fixed ~ random cluster level) + (b)
+# containment of the glmmTMB M37 fixed cluster point -- no coverage claim, no Fable (the M34
+# reduction-oracle posture). Gated OFF CI (Stan toolchain). ~20 clusters so sigma^2_c is identified
+# (ten Hove's few-cluster caveat, as in O-Bayes-ML-agree).
+test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL)", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_not_installed("brms")
+  skip_if_not_installed("glmmTMB")
+
+  set.seed(2038)
+  nc <- 20L
+  ns <- 4L
+  k <- 3L
+  d <- expand.grid(
+    s = seq_len(ns),
+    rater = factor(seq_len(k)),
+    cluster = factor(seq_len(nc))
+  )
+  d$subject <- factor(paste0(d$cluster, "_", d$s))
+  d$score <- 2 +
+    rnorm(nc, 0, 0.6)[as.integer(d$cluster)] +
+    rnorm(nlevels(d$subject), 0, 1)[as.integer(d$subject)] +
+    rnorm(k, 0, 0.4)[as.integer(d$rater)] +
+    rnorm(nc * k, 0, 0.3)[as.integer(interaction(d$cluster, d$rater))] +
+    rnorm(nrow(d), 0, 0.7)
+
+  br_args <- list(chains = 2, iter = 1200, refresh = 0)
+  fit_fixed <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "brms",
+    seed = 1,
+    brm_args = br_args
+  ))
+
+  # Cell 1's behavioral change: brms FIXED raters now returns BOTH levels (before M38 the
+  # cluster row was dropped for brms fixed). Agreement + the default single/average units.
+  expect_s3_class(fit_fixed, "icc")
+  expect_identical(fit_fixed$engine, "brms")
+  td <- tidy(fit_fixed)
+  expect_setequal(td$level, c("subject", "cluster"))
+  expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
+  expect_true(all(
+    td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
+  ))
+
+  key <- function(x) paste(x$index, x$level)
+  cl <- function(x) x[x$level == "cluster", ]
+
+  # (b) Containment: the glmmTMB M37 fixed cluster-level point sits inside the brms fixed
+  # credible interval for every cluster row (the M27/M34 containment posture -- the engines
+  # differ only by the prior, #18).
+  g_fixed <- cl(tidy(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    raters = "fixed",
+    engine = "glmmTMB"
+  )))
+  tf <- cl(td)
+  g_fixed <- g_fixed[order(key(g_fixed)), ]
+  tf <- tf[order(key(tf)), ]
+  expect_true(all(
+    g_fixed$estimate >= tf$conf.low & g_fixed$estimate <= tf$conf.high
+  ))
+
+  # (a) Reduction: on balanced data theta^2_r = sigma^2_r, so the brms FIXED cluster level
+  # tracks the brms RANDOM cluster level (same fit shape, same seed) -- the variance-ratio
+  # push-forward reduces exactly at the population level (M37 Outcome A). MAP is the mode of
+  # the ICC draws, so pin agreement to MC tolerance, not equality.
+  fit_random <- suppressWarnings(icc(
+    d,
+    score,
+    rater,
+    subject = subject,
+    cluster = cluster,
+    engine = "brms",
+    seed = 1,
+    brm_args = br_args
+  ))
+  tr <- cl(tidy(fit_random))
+  tr <- tr[order(key(tr)), ]
+  expect_equal(tf$estimate, tr$estimate, tolerance = 0.06)
 })
 
 # --- Live brms fit: conflated diagnostic (Eq. 14), O-Bayes-Conflated-agree (M29 Slice 1) ---

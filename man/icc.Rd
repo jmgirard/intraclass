@@ -351,10 +351,11 @@ data each cluster uses its own effective rater count). The fixed-rater \strong{c
 level is supported for the crossed (Design 1) design on \strong{balanced, complete} data
 (signal \eqn{\sigma^2_c}, agreement error the finite-population \eqn{\theta^2_r} plus
 the cluster-by-rater term \eqn{\sigma^2_{cr}}); on balanced data it equals the
-random-rater cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
-estimation, Design-3 fixed raters (nested in subjects -- no separable rater effect),
-and the Bayesian (\code{engine = "brms"}) fixed-rater cluster-level and incomplete
-fixed-nested paths remain for later milestones.
+random-rater cluster-level ICC. The Bayesian (\code{engine = "brms"}) fixed-rater
+\strong{cluster} level is likewise supported for the crossed (Design 1) design on
+balanced, complete data. Incomplete/unbalanced fixed-rater cluster-level estimation,
+Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
+Bayesian incomplete fixed-nested path remain for later milestones.
 }
 
 \section{Within-cell replicates}{

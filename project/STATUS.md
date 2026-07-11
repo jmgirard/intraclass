@@ -256,14 +256,18 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M38 Task 1 (Cell 1 — brms cluster-level fixed)** — not started; run via `/start-task`. Lift
-  the `R/icc.R:781` brms cluster-fixed guard for balanced crossed Design 1; route the cluster-level
-  `(σ²_c | {θ²_r, σ²_cr}, k)` push-forward off the shipped `fit_brms_multilevel_fixed()` draws (no new fit);
-  `print`/`glance` surface it; O-Bayes-FCL in `test-icc-brms.R` (reduction to the M24 brms random cluster level
-  within MC error + glmmTMB M37 cluster ICC contained in the credible interval). Then T2 (Cell 2 code — ragged
-  `fit_brms_nested_fixed()` + `brms_theta2r_moment_draws()`), T3 (Cell 2 coverage oracle O-Bayes-IFNML — the
-  gate: nominal → ship, under-covers → STOP-and-replan Cell 1 only), T4 (docs/NEWS/COVERAGE + finish-task gate).
-  Board: [`MILESTONES.md`](MILESTONES.md) M38. *Superseded active task (M37, done):* M37 shipped and merged
+- Active task: **M38 Task 2 (Cell 2 — brms incomplete/ragged fixed-nested Design 2)** — not started; run via
+  `/start-task`. *T1 (Cell 1 — brms cluster-level fixed) DONE (2026-07-11):* removed the brms-specific
+  cluster-drop at `R/icc.R:781` — balanced brms fixed cluster now routes through the engine-agnostic
+  estimand/`posterior_summary()` path off the shipped `fit_brms_multilevel_fixed()` draws (no new fit),
+  incomplete falls to the engine-agnostic balance gate (~`R/icc.R:1187`) and aborts. O-Bayes-FCL (live,
+  `skip_on_ci`) + a fast incomplete-boundary guard; verified end-to-end (both levels returned, glmmTMB M37 point
+  contained, brms fixed≈random cluster |Δ|max .0215); one stale test + roxygen updated; full suite 1170/0 (50
+  live-Stan skipped), `air`/`lintr` clean. **T2 next:** lift the `R/icc.R:810` brms incomplete-fixed-nested
+  guard; run `fit_brms_nested_fixed()` on ragged Design-2 data with `brms_theta2r_moment_draws()`
+  (2b-under-imbalance); single `ICC_s(·,1)` + average `ICC_s(·,k)` at the subject level. Then T3 (Cell 2
+  coverage oracle O-Bayes-IFNML — the gate: nominal → ship, under-covers → STOP-and-replan Cell 1 only), T4
+  (docs/NEWS/COVERAGE + finish-task gate). Board: [`MILESTONES.md`](MILESTONES.md) M38. *Superseded active task (M37, done):* M37 shipped and merged
   (PR #43, `f0b29b7`). *Slice 3 (docs) DONE (2026-07-11):* extended
   `multilevel-designs.Rmd`'s fixed-rater section to the cluster level (the `ml-fixed` chunk now returns both
   levels) + a `test-vignette-claims.R` cluster invariant. *Slice 2 (the estimand + fit path) is DONE (2026-07-11):*
@@ -389,7 +393,16 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M38 planned (ADR-048): brms engine parity for the fixed
+- Updated: 2026-07-11 by main session (Opus) — **M38 Task 1 (Cell 1 — brms cluster-level fixed) DONE.** The
+  brms sibling of M37: removed the brms-specific cluster-drop at `R/icc.R:781`, so balanced brms fixed cluster
+  routes through the same engine-agnostic estimand/`posterior_summary()` path as the M24 random cluster level
+  (off the shipped `fit_brms_multilevel_fixed()` draws — no new fit), while incomplete brms fixed cluster falls
+  to the engine-agnostic balance gate (~`R/icc.R:1187`) and aborts identically to glmmTMB/lme4. O-Bayes-FCL
+  (live, `skip_on_ci`: reduction to brms random cluster + glmmTMB M37 containment) + a fast incomplete-boundary
+  guard; end-to-end verified (both levels returned, glmmTMB M37 point contained, brms fixed≈random cluster
+  |Δ|max .0215 < .06). Fixed one stale "brms fixed cluster deferred" test + the roxygen. Full suite 1170/0 (50
+  live-Stan skipped), `air`/`lintr` clean. Board T1 checked off; active task advanced to T2. Next: `/start-task`
+  T2 (Cell 2). Prior line: **M38 planned (ADR-048): brms engine parity for the fixed
   multilevel cells — opened on branch `m38-brms-fixed-multilevel-parity`.** After a short retro + a feasibility
   sweep of the remaining (C) corner, the maintainer chose (plan question gate) to wrap up (C) via one milestone
   covering **both** brms parity cells (cluster-level fixed, M37 sibling + incomplete/ragged fixed-nested Design
