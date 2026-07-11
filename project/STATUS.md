@@ -245,8 +245,11 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M37 finish-task gate (next).** All three slices done; run `devtools::test`/`check`, `air`,
-  `lintr`, installed-pkg path, then PR → review → merge. *Slice 3 (docs) DONE (2026-07-11):* extended
+- Active task: **M37 — local finish-task gate GREEN; PR open, pending CI + merge.** `devtools::check`
+  **0/0/0** (`--no-manual`, [[rcmdcheck-pdf-manual-courier]]; full suite + all six vignettes built, live brms
+  Stan fits ran), `air format --check` clean, `lintr::lint_package()` 0, installed-pkg cluster-fixed path
+  driven through `library(intraclass)` (ICC(A,1) .363 / ICC(A,k) .695). Next: merge on green CI + maintainer
+  approval, then post-merge reconcile (set Last green CI, flip MILESTONES status, ROADMAP (C) → shipped). *Slice 3 (docs) DONE (2026-07-11):* extended
   `multilevel-designs.Rmd`'s fixed-rater section to the cluster level (the `ml-fixed` chunk now returns both
   levels) + a `test-vignette-claims.R` cluster invariant. *Slice 2 (the estimand + fit path) is DONE (2026-07-11):*
   lifted the `level="cluster"`+`raters="fixed"` abort for balanced crossed Design 1 (brms + incomplete
