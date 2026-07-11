@@ -256,15 +256,17 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M38 Task 4 (docs/NEWS/COVERAGE/REFERENCES + finish-task gate → PR)** — not started; run via
-  `/start-task`. Update NEWS (brms fixed cluster-level + incomplete fixed-nested), COVERAGE.md (brms columns for
-  #11 fixed cluster level + incomplete fixed-nested), REFERENCES (O-Bayes-FCL / O-Bayes-IFNML oracle registry);
-  drive both new brms paths through the installed pkg; `/finish-task` gate → PR. *T3 (Cell 2 coverage oracle —
-  the gate) DONE (2026-07-11): **NOMINAL, Cell 2 ships.*** The full O-Bayes-IFNML sim (4 cells, n_rep 240, ~960
-  live Stan refits) came back nominal in [.90,.99] at all cells — mod_interior .975 / mod_boundary .954 /
-  high_interior .983 / **high_boundary .970** (the C_n=80 incidental-parameters probe, **no decay**); |bias| ≤
-  .008. Committed `bayesian-incomplete-fixed-nested-oracle.rds` + the O-Bayes-IFNML coverage test. The ADR-048
-  stop-and-replan branch did not fire (no pin-loosening, no Fable). *T2 (Cell 2 code)
+- Active task: **none — M38 all 4 tasks done, local gate green, PR pending.** The finish-task gate is green
+  (`devtools::document` / `air format --check` / `lintr` 0 lints / full CI-mode suite **1175/0** /
+  `devtools::check` CI-parity **0/0/0** / installed-pkg both new brms paths driven). Next action: **open the PR
+  from `m38-brms-fixed-multilevel-parity`**; on green CI + merge, reconcile M38 → done + set "Last green CI".
+  *T4 (docs + gate) DONE (2026-07-11):* NEWS/COVERAGE/REFERENCES updated (O-Bayes-FCL / O-Bayes-IFNML
+  registered), gate green, installed-pkg drive OK. *T3 (Cell 2 coverage oracle — the gate) DONE (2026-07-11):
+  **NOMINAL, Cell 2 ships.*** The full O-Bayes-IFNML sim (4 cells, n_rep 240, ~960 live Stan refits) came back
+  nominal in [.90,.99] at all cells — mod_interior .975 / mod_boundary .954 / high_interior .983 /
+  **high_boundary .970** (the C_n=80 incidental-parameters probe, **no decay**); |bias| ≤ .008. Committed
+  `bayesian-incomplete-fixed-nested-oracle.rds` + the O-Bayes-IFNML coverage test. The ADR-048 stop-and-replan
+  branch did not fire (no pin-loosening, no Fable). *T2 (Cell 2 code)
   DONE (2026-07-11):* removed the brms incomplete-fixed-nested guard (`R/icc.R` ~800); `fit_brms_nested_fixed()`
   fits ragged data unchanged and `brms_theta2r_moment_draws()` already reads a per-cluster `k`, so the
   2b-under-imbalance correction fires per cluster with no new code; single + average `ICC_s(·,k)` subject level;
@@ -406,8 +408,14 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M38 Task 3 (Cell 2 coverage oracle — the ship/stop gate) DONE:
-  NOMINAL, Cell 2 ships.** Ran the full O-Bayes-IFNML sim (`data-raw/oracle-bayesian-incomplete-fixed-nested.R`;
+- Updated: 2026-07-11 by main session (Opus) — **M38 Task 4 (docs + finish-task gate) DONE — M38 tasks all
+  complete, local gate green, PR pending.** NEWS/COVERAGE/REFERENCES updated for both brms fixed cells
+  (O-Bayes-FCL / O-Bayes-IFNML registered). Local gate: `devtools::document` / `air format --check` /
+  `lintr::lint_package` (0 lints) / full CI-mode suite **1175/0** (51 live-Stan skipped) / `devtools::check`
+  (`NOT_CRAN=false`, CI-parity — a first run with `NOT_CRAN=true` was recompiling the whole live-Stan suite,
+  ~40 min, and was killed) **0/0/0**; installed-pkg both new brms paths driven through `library(intraclass)`.
+  M38 board flipped to **review**; next is the PR. Prior line: **M38 Task 3 (Cell 2 coverage oracle — the
+  ship/stop gate) DONE: NOMINAL, Cell 2 ships.** Ran the full O-Bayes-IFNML sim (`data-raw/oracle-bayesian-incomplete-fixed-nested.R`;
   4 cells crossing {C_n 20, C_n 80} × {interior θ²=.30, boundary θ²=0}, unequal k_c, n_rep 240, ~960 live Stan
   refits, compile-once + `update(recompile=FALSE)`) in the background this session. **All four cells nominal in
   [.90,.99]:** mod_interior .975, mod_boundary .954, high_interior .983, **high_boundary .970** — the C_n=80

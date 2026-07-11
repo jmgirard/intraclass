@@ -1378,8 +1378,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     discarded+counted (#18). Committed `bayesian-incomplete-fixed-nested-oracle.rds` + the O-Bayes-IFNML
     coverage test (7 assertions incl. the C_n=80-boundary no-collapse pin). The ADR-048 stop-and-replan branch
     did **not** fire — no pin-loosening, no Fable.
-  - [ ] **T4 — docs + gate.** NEWS / COVERAGE (brms columns) / REFERENCES in-commit; installed-pkg both new
-    brms paths driven through `library(intraclass)`; `air`/`lintr` clean; `/finish-task` gate → PR.
+  - [x] **T4 — docs + gate** (2026-07-11). NEWS (both brms fixed cells), COVERAGE (M38 prose + engine summary +
+    brms-fixed / Design-2-fixed rows + cross-cutting deferred correction), REFERENCES (O-Bayes-FCL /
+    O-Bayes-IFNML registered) in-commit. Local gate green: `devtools::document` / `air format --check` /
+    `lintr::lint_package` (0 lints) / full CI-mode suite **1175/0** (51 live-Stan skipped) / `devtools::check`
+    (`NOT_CRAN=false`, CI-parity) **0/0/0**; installed-pkg both new brms paths driven through
+    `library(intraclass)` (Cell 1 returns both levels; Cell 2 subject single+average). Coverage at baseline
+    (~85–88%, below 90% by design — defensive abort blocks, not CI-gated, [[coverage-baseline]]).
 - Deferred out of M38 (record so not rediscovered): **lavaan cluster-fixed + lavaan incomplete-fixed-nested**
   siblings (candidate, **blocked on the multilevel-SEM lift** — NOT unblockable; the M38 ROADMAP edit corrects
   that wording); **incomplete/unbalanced cluster-level fixed** (🟣 Wave-3, double-blocked — ten Hove open
@@ -1387,5 +1392,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   the ADR-029 by-design abort — ROADMAP hygiene, not future work); the untouched carryovers — categorical/
   ordinal GLMM, multilevel SEM proper, occasion/ragged `d_study()`, the teaching-vignette clarity rewrite, the
   CRAN upload (ADR-022) — stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress** — opened this session on branch `m38-brms-fixed-multilevel-parity` (retro → ADR-048 →
-  board). No code yet (plan before code, #14). Next: `/start-task` Task 1.
+- Status: **review — all 4 tasks done, local gate green, pending PR CI + merge** (branch
+  `m38-brms-fixed-multilevel-parity`). Both cells shipped as clean guard-lifts (the estimand machinery was
+  already engine-agnostic; the 2b moment machinery already per-cluster ragged-ready) — no new fit code. **Cell
+  2's coverage gate came back NOMINAL** (O-Bayes-IFNML all four cells in band incl. the C_n=80 boundary at
+  .970), so the ADR-048 stop-and-replan branch did not fire; no Fable. `devtools::check` 0/0/0. Next: open the
+  PR; on green CI + merge, reconcile to **done** and compress this board.
