@@ -267,8 +267,8 @@ reliability of the *cluster* mean, a multilevel ICC (ten Hove, Jorgensen
 & van der Ark, 2022). Pass a `cluster` column to
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) and it
 reports the **subject-level** (within-cluster) and **cluster-level**
-(between-cluster) coefficients side by side. The
-[*Advanced*](https://jmgirard.github.io/intraclass/articles/advanced.md)
+(between-cluster) coefficients side by side. The [*Multilevel
+designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md)
 article works a full example.
 
 ## Naming crosswalk

@@ -244,9 +244,15 @@ simulations.
   `ratings_incomplete` (a connected incomplete variant), used throughout
   the docs.
 - Vignettes: *Getting started*, *Choosing an ICC* (the decision
-  framework, with a decision-tree diagram), and *Advanced* (incomplete
-  and multilevel designs, the estimation engines, the plots, and
-  [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)).
+  framework, with a decision-tree diagram), *Multilevel designs*
+  (subject/cluster level, crossed and nested, complete and incomplete),
+  *Estimation engines* (glmmTMB, lme4, lavaan, and the Bayesian brms
+  engine with the `prior=` override), *Confidence-interval methods*
+  (Monte-Carlo, bootstrap, and Bayesian `posterior` credible intervals
+  with percentile/HPDI summaries), and *D-studies and within-cell
+  replicates* (with the
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  plots).
 
 ### Robustness (pre-release code review)
 

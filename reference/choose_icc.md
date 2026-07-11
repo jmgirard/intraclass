@@ -171,5 +171,5 @@ choose_icc(type = "agreement", unit = "single", raters = "random",
 #>   icc(data, score, subject, rater, cluster, unit = "single")
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
-#>   - See vignette("advanced") for a worked multilevel example.
+#>   - See vignette("multilevel-designs") for a worked multilevel example.
 ```

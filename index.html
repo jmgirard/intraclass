@@ -43,7 +43,10 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/getting-started.html">Getting started</a></li>
     <li><a class="dropdown-item" href="articles/choosing-an-icc.html">Choosing an ICC</a></li>
-    <li><a class="dropdown-item" href="articles/advanced.html">Advanced: imbalanced &amp; multilevel designs</a></li>
+    <li><a class="dropdown-item" href="articles/multilevel-designs.html">Multilevel designs: subject and cluster level</a></li>
+    <li><a class="dropdown-item" href="articles/engines.html">Estimation engines</a></li>
+    <li><a class="dropdown-item" href="articles/interval-methods.html">Confidence-interval methods</a></li>
+    <li><a class="dropdown-item" href="articles/d-studies-and-replicates.html">D-studies and within-cell replicates</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -127,16 +130,22 @@
 <span>  score <span class="op">=</span> <span class="va">grid</span><span class="op">$</span><span class="va">score</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ℹ Treating raters with the same label in different clusters as the same raters</span></span>
+<span><span class="co">#&gt;   (crossed with clusters, Design 1).</span></span>
+<span><span class="co">#&gt; ℹ If each cluster has its own raters, give them cluster-unique labels or pass</span></span>
+<span><span class="co">#&gt;   `design = "nested_in_clusters"`.</span></span>
 <span><span class="co">#&gt; # Intraclass correlation: multilevel two-way random, absolute agreement</span></span>
 <span><span class="co">#&gt; Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   level    index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,1)    0.322   [0.162, 0.484]</span></span>
-<span><span class="co">#&gt;   subject  ICC(A,k)    0.655   [0.436, 0.790]</span></span>
-<span><span class="co">#&gt;   cluster  ICC(A,1)    0.870   [0.005, 0.973]</span></span>
-<span><span class="co">#&gt;   cluster  ICC(A,k)    0.964   [0.018, 0.993]</span></span>
-<span><span class="co">#&gt; Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492</span></span></code></pre></div>
-<p>The <a href="https://jmgirard.github.io/intraclass/articles/advanced.html"><em>Advanced</em></a> article works through incomplete and nested multilevel designs, the estimation engines, the <code>autoplot()</code> plots, and <code><a href="reference/choose_icc.html">choose_icc()</a></code> in full.</p>
+<span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,1)    0.322   [0.162, 0.484]</span></span>
+<span><span class="co">#&gt;   subject    ICC(A,k)    0.655   [0.436, 0.790]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,1)    0.870   [0.005, 0.973]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,k)    0.964   [0.018, 0.993]</span></span>
+<span><span class="co">#&gt; Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; This message is displayed once per session.</span></span></code></pre></div>
+<p>The <a href="https://jmgirard.github.io/intraclass/articles/multilevel-designs.html"><em>Multilevel designs</em></a> article works through incomplete and nested multilevel designs; separate articles cover the <a href="https://jmgirard.github.io/intraclass/articles/engines.html">estimation engines</a>, <a href="https://jmgirard.github.io/intraclass/articles/interval-methods.html">interval methods</a>, and <a href="https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html">D-studies and within-cell replicates</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>

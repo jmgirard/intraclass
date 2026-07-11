@@ -111,23 +111,32 @@ school <- data.frame(
   score = grid$score)
 
 icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2024)
+#> ℹ Treating raters with the same label in different clusters as the same raters
+#>   (crossed with clusters, Design 1).
+#> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
+#>   `design = "nested_in_clusters"`.
 #> # Intraclass correlation: multilevel two-way random, absolute agreement
 #> Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
-#>   level    index     estimate   95% CI
-#>   subject  ICC(A,1)    0.322   [0.162, 0.484]
-#>   subject  ICC(A,k)    0.655   [0.436, 0.790]
-#>   cluster  ICC(A,1)    0.870   [0.005, 0.973]
-#>   cluster  ICC(A,k)    0.964   [0.018, 0.993]
+#>   level      index     estimate   95% CI
+#>   subject    ICC(A,1)    0.322   [0.162, 0.484]
+#>   subject    ICC(A,k)    0.655   [0.436, 0.790]
+#>   cluster    ICC(A,1)    0.870   [0.005, 0.973]
+#>   cluster    ICC(A,k)    0.964   [0.018, 0.993]
 #> Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492
+#> 
+#> This message is displayed once per session.
 ```
 
-The
-[*Advanced*](https://jmgirard.github.io/intraclass/articles/advanced.html)
-article works through incomplete and nested multilevel designs, the
-estimation engines, the `autoplot()` plots, and
-[`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)
-in full.
+The [*Multilevel
+designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html)
+article works through incomplete and nested multilevel designs; separate
+articles cover the [estimation
+engines](https://jmgirard.github.io/intraclass/articles/engines.html),
+[interval
+methods](https://jmgirard.github.io/intraclass/articles/interval-methods.html),
+and [D-studies and within-cell
+replicates](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html).
 
 ## Related work
 
