@@ -125,7 +125,9 @@ helpers* item below (sample-size / CI-width), where it belongs.
   plain lavaan common-factor model, so a faithful two-level SEM formulation is not a
   mechanical extension of the M7 two-way SEM engine. Sits in the cross-cutting "later" bucket
   beside the Bayesian engine rather than in the M18–M21 completeness arc; needs its own
-  estimand/oracle pass before it is schedulable.
+  estimand/oracle pass before it is schedulable. **Blocks** the lavaan cluster-level-fixed and
+  incomplete-fixed-nested siblings noted in the (C) sequence below — those cannot ship as engine
+  parity until this two-level SEM lift lands.
 - **lavaan + within-cell replicates** — the SEM engine on replicated (σ²_sr/σ²_e-split) data.
   **Status: reclassified here from M21 (ADR-027); unscheduled, low value.** SEM ∩ replicates is
   niche; would need both a lavaan replicate parameterization and the M20 replicate machinery to
@@ -196,12 +198,19 @@ helpers* item below (sample-size / CI-width), where it belongs.
       the estimand map keys the cluster error set on `level` not `raters`), glmmTMB/lme4. A feasibility spike
       settled the σ²_cr question (fixing raters doesn't bias the interaction) → exact reduction to the M5
       random cluster-level ICC, **Outcome A, no Fable**. Shipped detail in [`MILESTONES.md`](MILESTONES.md)
-      (ADR-015). **Still parked / genuinely open:** **incomplete/unbalanced**
-      cluster-level fixed (🟣 double-blocked — ten Hove's open small-*k* estimator *and* the M9 §9 open
-      cluster-level `ICC(c,k)` divisor; its own later milestone); **Design 3 fixed** (⚫ by-design — multilevel
-      one-way, no separable rater effect); the **brms/lavaan** incomplete-fixed-nested **and** cluster-level-fixed
-      siblings (engine parity, unblockable given M36/M37's frequentist oracles). Also parked, low priority:
-      **selectable** `posterior` coupling (MC/bootstrap on a Bayesian fit).
+      (ADR-015). **brms cluster-level-fixed + brms incomplete-fixed-nested siblings — PLANNED as M38**
+      (ADR-048): engine parity (each a lift of one shipped brms guard, checked against the glmmTMB M37/M36
+      frequentist oracle), one milestone; no Fable pre-authorized (the ragged-fixed-nested-brms coverage cell
+      is stop-and-replan). Planned detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015).
+      **Still parked / genuinely open:** **incomplete/unbalanced** cluster-level fixed (🟣 double-blocked —
+      ten Hove's open small-*k* estimator *and* the M9 §9 open cluster-level `ICC(c,k)` divisor; its own later
+      milestone); the **lavaan** cluster-level-fixed **and** incomplete-fixed-nested siblings (**blocked on the
+      multilevel-SEM lift** — lavaan multilevel is unsupported (`R/icc.R` aborts every multilevel/one-way SEM
+      path), so these are *not* cheap parity; they become reachable only once two-level SEM-GT ships, the
+      "Multilevel SEM (lavaan)" parking-lot item below); **selectable** `posterior` coupling (MC/bootstrap on a
+      Bayesian fit), low priority. **Design 3 fixed** is **not future work** — it is already closed in code by
+      the ADR-029 by-design abort (fixed raters are undefined when raters nest in subjects; the classed abort
+      ships and is tested), so it is no longer listed as parked.
 - **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
   effective-rater divisor is an open modeling question with no textbook oracle
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
