@@ -180,13 +180,31 @@ test_that("fixed-rater multilevel warns, and reports at the subject level", {
   expect_identical(unique(x$estimates$level), "subject")
 })
 
-test_that("deferred fixed-rater multilevel cases abort loudly", {
+test_that("still-deferred fixed-rater multilevel cases abort loudly", {
   skip_if_not_installed("glmmTMB")
   d <- sim_design1(10, 6, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 5)
-  # Cluster level (subject-only in M10).
+  # Balanced crossed CLUSTER level is no longer deferred -- it ships in M37 (ADR-047);
+  # its oracles are the O-FCL section below. The remaining deferred cluster-fixed cells:
+  # brms (engine parity) and incomplete/unbalanced data (double-blocked, ten Hove open
+  # small-k + M9 §9 ICC(c,k) divisor).
   expect_error(
     suppressWarnings(icc(
       d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      level = "cluster",
+      engine = "brms",
+      seed = 1
+    )),
+    class = "intraclass_unsupported"
+  )
+  di <- d[-(1:12), ] # incomplete crossed (missing cells)
+  expect_error(
+    suppressWarnings(icc(
+      di,
       score,
       subject,
       rater,
@@ -200,8 +218,159 @@ test_that("deferred fixed-rater multilevel cases abort loudly", {
   # (Fixed-rater NESTED Design 2 is no longer deferred -- it ships in M19 Slice 2
   # (ADR-029); Design 3 fixed stays by-design undefined. Both are covered in the
   # "fixed nested scope guards" test below.)
-  # (Incomplete / unbalanced fixed CROSSED multilevel is no longer deferred -- it
-  # ships in M18 Slice 1 (ADR-028); its oracles are the O-IFML section below.)
+  # (Incomplete / unbalanced fixed CROSSED multilevel SUBJECT level is no longer
+  # deferred -- it ships in M18 Slice 1 (ADR-028); its oracles are the O-IFML section.)
+})
+
+# Oracle O-FCL: fixed-rater CLUSTER-level ICC (crossed Design 1, balanced), M37 --------
+#
+# M37 (ADR-047) reads the CLUSTER level off the same M10 fixed fit: signal sigma^2_c,
+# agreement error {theta^2_r, sigma^2_cr}, consistency {sigma^2_cr}, divisor k (M5 §3b
+# map with theta^2_r in the rater slot). No new fit, no new estimand concept -- the
+# estimand map keys the error set on `level`, not `raters`. The feasibility spike settled
+# the one open question (M10 §7): fixing the rater main effect does NOT bias the
+# (1|cluster:rater) interaction, so the RANDOM sigma^2_cr is the correct fixed-rater
+# cluster-level error, and the coefficient reduces to the M5 random cluster-level ICC
+# EXACTLY on balanced data. Correctness (#1): the PRIMARY reduction to the pinned M5
+# random cluster-level estimand, an lme4 cross-engine fit, and a committed NON-CIRCULAR
+# seeded recovery (theta^2_r is a deterministic function of the fixed rater means).
+# Provenance: data-raw/oracle-fixed-cluster-level.R + the spike scripts.
+
+fixed_cluster <- function(
+  d,
+  type,
+  unit = c("single", "average"),
+  engine = "glmmTMB"
+) {
+  suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    raters = "fixed",
+    type = type,
+    unit = unit,
+    engine = engine,
+    seed = 1
+  ))
+}
+random_cluster <- function(d, type, unit = c("single", "average")) {
+  icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    raters = "random",
+    type = type,
+    unit = unit,
+    seed = 1
+  )
+}
+
+test_that("O-FCL/reduction (PRIMARY): balanced fixed == random M5 CLUSTER level", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_design1(12, 6, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 20260707)
+  fa <- fixed_cluster(d, "agreement")
+  ra <- random_cluster(d, "agreement")
+  fc <- fixed_cluster(d, "consistency")
+  rc <- random_cluster(d, "consistency")
+  # Absolute agreement: theta^2_r == sigma^2_r on balanced data AND sigma^2_cr is
+  # unbiased under fixing (spike), so single AND average match random at the cluster level.
+  expect_equal(
+    pick(fa, "ICC(A,1)", "cluster"),
+    pick(ra, "ICC(A,1)", "cluster"),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(fa, "ICC(A,k)", "cluster"),
+    pick(ra, "ICC(A,k)", "cluster"),
+    tolerance = 1e-4
+  )
+  # Consistency uses only sigma^2_cr (no rater main effect), so fixed == random exactly.
+  expect_equal(
+    pick(fc, "ICC(C,1)", "cluster"),
+    pick(rc, "ICC(C,1)", "cluster"),
+    tolerance = 1e-6
+  )
+  expect_equal(
+    pick(fc, "ICC(C,k)", "cluster"),
+    pick(rc, "ICC(C,k)", "cluster"),
+    tolerance = 1e-6
+  )
+})
+
+test_that("O-FCL/lme4: fixed cluster-level ICCs match the lme4 cross-engine (<1e-4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_design1(12, 6, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 20260707)
+  xg <- fixed_cluster(d, "agreement")
+  xl <- fixed_cluster(d, "agreement", engine = "lme4")
+  merged <- merge(
+    xg$estimates[xg$estimates$level == "cluster", c("index", "estimate")],
+    xl$estimates[xl$estimates$level == "cluster", c("index", "estimate")],
+    by = "index"
+  )
+  expect_lt(max(abs(merged$estimate.x - merged$estimate.y)), 1e-4)
+})
+
+test_that("O-FCL: cluster consistency == random; agreement differs only by theta^2_r", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_design1(10, 6, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 77)
+  fc <- fixed_cluster(d, "consistency", unit = "single")
+  rc <- random_cluster(d, "consistency", unit = "single")
+  # Cluster consistency error is {cluster_rater} -- never the rater main effect.
+  expect_equal(
+    pick(fc, "ICC(C,1)", "cluster"),
+    pick(rc, "ICC(C,1)", "cluster"),
+    tolerance = 1e-6
+  )
+  fa <- fixed_cluster(d, "agreement", unit = "single")
+  expect_true("rater" %in% names(fa$components))
+  expect_gte(fa$components$rater, 0) # theta^2_r clamped at 0 (boundary-aware)
+})
+
+test_that("O-FCL: balanced fixed returns BOTH levels by default; print surfaces cluster", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_design1(10, 6, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 5)
+  x <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    raters = "fixed",
+    seed = 1
+  ))
+  expect_setequal(unique(x$estimates$level), c("subject", "cluster"))
+  expect_identical(x$design$raters, "fixed")
+  out <- paste(format(x), collapse = "\n")
+  expect_match(out, "cluster")
+})
+
+test_that("O-FCL/recovery: committed fixture -- interior calibrated + unbiased, boundary parity", {
+  o <- readRDS(test_path("fixtures", "fixed-cluster-level-oracle.rds"))
+  int <- o[o$cell == "interior", ]
+  # Interior recovery of the KNOWN finite-population cluster-level value is nominal
+  # (MC SE ~1.4 pts at n_rep = 240; a .90 floor clears noise) and unbiased at adequate
+  # cluster count (the C_n = 20 cell is few-cluster-noisier but still covers).
+  expect_gt(min(int$coverage), 0.90)
+  expect_lt(max(abs(int$mean_bias)), 0.05)
+  # The reduction to the M5 random cluster-level (balanced fixed == random, point) and
+  # the lme4 cross-engine tie committed with the fixture stayed exact.
+  red <- attr(o, "reductions")
+  expect_lt(red[["reduction"]], 1e-4)
+  if (!is.na(red[["cross_engine"]])) {
+    expect_lt(red[["cross_engine"]], 1e-4)
+  }
+  # BOUNDARY (sigma^2_c = 0): the cluster-signal-zero interval under-covers, but
+  # IDENTICALLY for fixed and M5-random -- a pre-existing shared property, NOT an M37
+  # defect (spike boundary-parity). Assert PARITY, not nominal (#18).
+  b <- o[o$cell == "boundary", ]
+  expect_lt(abs(b$coverage - b$coverage_random), 0.06)
 })
 
 # Oracle O-IFML: INCOMPLETE fixed-rater crossed multilevel (Design 1), M18 Slice 1 --

@@ -245,8 +245,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M37 Slice 2 — cluster-level fixed estimand + fit path (next).** *Slice 1 (the feasibility
-  spike) is DONE — Outcome A, no Fable* (`data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`):
+- Active task: **M37 finish-task gate (next).** All three slices done; run `devtools::test`/`check`, `air`,
+  `lintr`, installed-pkg path, then PR → review → merge. *Slice 3 (docs) DONE (2026-07-11):* extended
+  `multilevel-designs.Rmd`'s fixed-rater section to the cluster level (the `ml-fixed` chunk now returns both
+  levels) + a `test-vignette-claims.R` cluster invariant. *Slice 2 (the estimand + fit path) is DONE (2026-07-11):*
+  lifted the `level="cluster"`+`raters="fixed"` abort for balanced crossed Design 1 (brms + incomplete
+  refused), cluster-level `{σ²_c | θ²_r, σ²_cr}` reads off the M10 fit (no new fit); O-FCL/reduction (2.1e-6),
+  /lme4 (1.7e-5), /recovery (committed fixture; interior coverage .975/.925, boundary parity with M5-random);
+  full suite green after updating three stale "fixed multilevel = subject only" tests. *Slice 1 (the
+  feasibility spike) is DONE — Outcome A, no Fable* (`data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`):
   reduction to the shipped M5 random cluster-level ICC is **exact** in all regimes (|Δ| ~ 1e-6; θ²_r=σ²_r
   **and s2cr_fixed=s2cr_random**, both |d| ~ 1e-7 — the σ²_cr verdict is that the **random σ²_cr is the correct
   fixed cluster-level error**, no finite-population correction); recovery of the non-circular finite-population
@@ -356,7 +363,20 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M37 Slice 1 (feasibility spike) DONE — Outcome A, no Fable.**
+- Updated: 2026-07-11 by main session (Opus) — **M37 Slices 2 + 3 DONE — fixed-rater cluster-level ICC ships
+  for balanced crossed Design 1 (glmmTMB/lme4).** Slice 2: lifted the `level="cluster"`+`raters="fixed"` abort
+  (`R/icc.R`) for balanced crossed Design 1 (two new guards refuse brms and incomplete/unbalanced); the
+  cluster-level `{σ²_c | θ²_r, σ²_cr}` reads off the **shipped M10 fit** — no new fit function, since
+  `icc_estimand()` keys the cluster error set on `level` not `raters`. Default level now returns **both**
+  levels for balanced fixed. Oracles **O-FCL/reduction** (fixed ≡ M5 random cluster point |Δ| 2.1e-6),
+  **/lme4** (1.7e-5), **/recovery** (committed `fixed-cluster-level-oracle.rds`: interior coverage .975/.925,
+  |bias| ≤ .008; boundary σ²_c=0 **parity** with M5-random — both under-cover identically, the shared
+  cluster-signal-zero loss, a candidate follow-up, not an M37 defect). Roxygen/NEWS/COVERAGE/REFERENCES
+  in-commit. Slice 3: `multilevel-designs.Rmd` fixed-rater section extended to the cluster level + a
+  vignette-claim invariant. Full suite green after fixing **three stale "fixed multilevel = subject only"
+  tests** (test-review-fixes ×2, test-icc-brms subject-level containment pins now `level="subject"`);
+  `air`/`lintr` clean; brms file re-run 0 failures. Next: finish-task gate → PR. Prior line: **M37 Slice 1
+  (feasibility spike) DONE — Outcome A, no Fable.**
   Committed `data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R` (900 + 720 seeded
   glmmTMB fits). Settled the σ²_cr question (M10 §7): fixing the rater main effect does **not** bias the
   `(1|cluster:rater)` interaction (`s2cr_fixed = s2cr_random`, |d| ~ 1e-7), so the **random σ²_cr is the

@@ -440,6 +440,36 @@ test_that("multilevel-designs.Rmd: balanced fixed-rater `school` matches random 
   )
   expect_equal(sub(fx, "ICC(A,1)"), sub(rn, "ICC(A,1)"), tolerance = 1e-4)
   expect_equal(sub(fx, "ICC(A,k)"), sub(rn, "ICC(A,k)"), tolerance = 1e-4)
+
+  # The article now also states fixed matches random AT THE CLUSTER LEVEL on balanced
+  # data (M37, ADR-047) -- the same finite-population rater term equals the random σ²_r
+  # and the cluster-by-rater interaction is unchanged. Back that claim too (#1).
+  fxc <- suppressWarnings(icc(
+    school,
+    score,
+    pupil,
+    rater,
+    cluster = classroom,
+    level = "cluster",
+    raters = "fixed",
+    type = "agreement",
+    unit = c("single", "average"),
+    seed = 1
+  ))
+  rnc <- icc(
+    school,
+    score,
+    pupil,
+    rater,
+    cluster = classroom,
+    level = "cluster",
+    raters = "random",
+    type = "agreement",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  expect_equal(sub(fxc, "ICC(A,1)"), sub(rnc, "ICC(A,1)"), tolerance = 1e-4)
+  expect_equal(sub(fxc, "ICC(A,k)"), sub(rnc, "ICC(A,k)"), tolerance = 1e-4)
 })
 
 # The article's nested-design examples relabel `school`: giving each classroom its

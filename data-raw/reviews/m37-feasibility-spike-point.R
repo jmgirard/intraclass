@@ -51,11 +51,27 @@ sim_one <- function(seed, Nc, ns, rho, s2c, s2s, s2cr, s2e) {
   k <- length(rho)
   cl <- gl(Nc, ns * k, labels = paste0("c", seq_len(Nc)))
   sub <- factor(rep(rep(seq_len(ns), each = k), times = Nc))
-  rat <- factor(rep(seq_len(k), times = Nc * ns), labels = paste0("r", seq_len(k)))
+  rat <- factor(
+    rep(seq_len(k), times = Nc * ns),
+    labels = paste0("r", seq_len(k))
+  )
   c_eff <- rnorm(Nc, 0, sqrt(s2c))[as.integer(cl)]
-  s_eff <- rnorm(Nc * ns, 0, sqrt(s2s))[as.integer(interaction(cl, sub, drop = TRUE))]
-  cr_eff <- rnorm(Nc * k, 0, sqrt(s2cr))[as.integer(interaction(cl, rat, drop = TRUE))]
-  y <- 10 + c_eff + s_eff + rho[as.integer(rat)] + cr_eff + rnorm(Nc * ns * k, 0, sqrt(s2e))
+  s_eff <- rnorm(Nc * ns, 0, sqrt(s2s))[as.integer(interaction(
+    cl,
+    sub,
+    drop = TRUE
+  ))]
+  cr_eff <- rnorm(Nc * k, 0, sqrt(s2cr))[as.integer(interaction(
+    cl,
+    rat,
+    drop = TRUE
+  ))]
+  y <- 10 +
+    c_eff +
+    s_eff +
+    rho[as.integer(rat)] +
+    cr_eff +
+    rnorm(Nc * ns * k, 0, sqrt(s2e))
   df <- data.frame(subject = sub, rater = rat, cluster = cl, score = y)
 
   ff <- tryCatch(fit_glmmtmb_multilevel_fixed(df), error = function(e) NULL)
@@ -71,45 +87,70 @@ sim_one <- function(seed, Nc, ns, rho, s2c, s2s, s2cr, s2e) {
   truth <- cluster_iccs(s2c, theta2_true(rho), s2cr, k)
 
   c(
-    fixed_A1 = fixed[["A1"]], fixed_Ak = fixed[["Ak"]],
-    fixed_C1 = fixed[["C1"]], fixed_Ck = fixed[["Ck"]],
+    fixed_A1 = fixed[["A1"]],
+    fixed_Ak = fixed[["Ak"]],
+    fixed_C1 = fixed[["C1"]],
+    fixed_Ck = fixed[["Ck"]],
     reduce_A1 = fixed[["A1"]] - random[["A1"]], # fixed vs M5 random (should be ~0 balanced)
     reduce_Ak = fixed[["Ak"]] - random[["Ak"]],
     biasT_A1 = fixed[["A1"]] - truth[["A1"]], # fixed vs finite-population truth
     biasT_Ak = fixed[["Ak"]] - truth[["Ak"]],
-    s2cr_fixed = cf$cluster_rater, s2cr_random = cr$cluster_rater, # does fixing bias cr?
-    theta2 = cf$rater, sigma2r = cr$rater, # theta^2_r vs sigma^2_r (M3 §6 identity)
+    s2cr_fixed = cf$cluster_rater,
+    s2cr_random = cr$cluster_rater, # does fixing bias cr?
+    theta2 = cf$rater,
+    sigma2r = cr$rater, # theta^2_r vs sigma^2_r (M3 §6 identity)
     s2c_hat = cf$cluster,
-    truth_A1 = truth[["A1"]], truth_Ak = truth[["Ak"]]
+    truth_A1 = truth[["A1"]],
+    truth_Ak = truth[["Ak"]]
   )
 }
 
 run_regime <- function(label, n_rep, Nc, ns, rho, s2c, s2s, s2cr, s2e, seed0) {
-  m <- do.call(rbind, Filter(Negate(is.null), lapply(
-    seq_len(n_rep),
-    function(i) sim_one(seed0 + i, Nc, ns, rho, s2c, s2s, s2cr, s2e)
-  )))
+  m <- do.call(
+    rbind,
+    Filter(
+      Negate(is.null),
+      lapply(
+        seq_len(n_rep),
+        function(i) sim_one(seed0 + i, Nc, ns, rho, s2c, s2s, s2cr, s2e)
+      )
+    )
+  )
   mean_c <- function(col) mean(m[, col])
   cat(sprintf(
-    "\n[%s]  Nc=%d ns=%d k=%d  reps=%d\n", label, Nc, ns, length(rho), nrow(m)
+    "\n[%s]  Nc=%d ns=%d k=%d  reps=%d\n",
+    label,
+    Nc,
+    ns,
+    length(rho),
+    nrow(m)
   ))
   cat(sprintf(
     "  truth: theta2_r=%.4f  ICC_c(A,1)=%.4f  ICC_c(A,k)=%.4f\n",
-    theta2_true(rho), mean_c("truth_A1"), mean_c("truth_Ak")
+    theta2_true(rho),
+    mean_c("truth_A1"),
+    mean_c("truth_Ak")
   ))
   cat(sprintf(
     "  REDUCTION fixed-vs-M5random  |A1|=%.2e  |Ak|=%.2e   (Outcome A wants ~0)\n",
-    mean(abs(m[, "reduce_A1"])), mean(abs(m[, "reduce_Ak"]))
+    mean(abs(m[, "reduce_A1"])),
+    mean(abs(m[, "reduce_Ak"]))
   ))
   cat(sprintf(
     "  theta2_r=%.4f vs sigma2_r=%.4f (|d|=%.2e)   s2cr fixed=%.4f random=%.4f (|d|=%.2e)\n",
-    mean_c("theta2"), mean_c("sigma2r"), abs(mean_c("theta2") - mean_c("sigma2r")),
-    mean_c("s2cr_fixed"), mean_c("s2cr_random"),
+    mean_c("theta2"),
+    mean_c("sigma2r"),
+    abs(mean_c("theta2") - mean_c("sigma2r")),
+    mean_c("s2cr_fixed"),
+    mean_c("s2cr_random"),
     abs(mean_c("s2cr_fixed") - mean_c("s2cr_random"))
   ))
   cat(sprintf(
     "  RECOVERY bias vs truth  A1=%+.4f  Ak=%+.4f   s2c_hat=%.4f (true %.4f)\n",
-    mean_c("biasT_A1"), mean_c("biasT_Ak"), mean_c("s2c_hat"), s2c
+    mean_c("biasT_A1"),
+    mean_c("biasT_Ak"),
+    mean_c("s2c_hat"),
+    s2c
   ))
   invisible(m)
 }
@@ -117,14 +158,53 @@ run_regime <- function(label, n_rep, Nc, ns, rho, s2c, s2s, s2cr, s2e, seed0) {
 # Fixed rater effects (k=4): a real finite population, theta^2_r ~ 0.417.
 rho4 <- c(-0.8, -0.2, 0.3, 0.7)
 
-cat("=== M37 point spike: fixed-rater cluster-level ICC (balanced crossed D1) ===\n")
-cat(sprintf("rho = (%s); theta^2_r(true) = %.4f\n", paste(rho4, collapse = ", "), theta2_true(rho4)))
+cat(
+  "=== M37 point spike: fixed-rater cluster-level ICC (balanced crossed D1) ===\n"
+)
+cat(sprintf(
+  "rho = (%s); theta^2_r(true) = %.4f\n",
+  paste(rho4, collapse = ", "),
+  theta2_true(rho4)
+))
 
 # Interior regimes: sweep cluster count (few-cluster efficiency + the incidental axis).
-run_regime("interior C_n=20", 300, Nc = 20, ns = 6, rho4, s2c = 0.60, s2s = 0.80, s2cr = 0.25, s2e = 1.0, seed0 = 37000)
-run_regime("interior C_n=80", 300, Nc = 80, ns = 6, rho4, s2c = 0.60, s2s = 0.80, s2cr = 0.25, s2e = 1.0, seed0 = 37100)
+run_regime(
+  "interior C_n=20",
+  300,
+  Nc = 20,
+  ns = 6,
+  rho4,
+  s2c = 0.60,
+  s2s = 0.80,
+  s2cr = 0.25,
+  s2e = 1.0,
+  seed0 = 37000
+)
+run_regime(
+  "interior C_n=80",
+  300,
+  Nc = 80,
+  ns = 6,
+  rho4,
+  s2c = 0.60,
+  s2s = 0.80,
+  s2cr = 0.25,
+  s2e = 1.0,
+  seed0 = 37100
+)
 # Boundary regime: sigma^2_c = 0 (clusters do not differ) -> ICC_c = 0 (#3).
-run_regime("boundary  C_n=80", 300, Nc = 80, ns = 6, rho4, s2c = 0.00, s2s = 0.80, s2cr = 0.25, s2e = 1.0, seed0 = 37200)
+run_regime(
+  "boundary  C_n=80",
+  300,
+  Nc = 80,
+  ns = 6,
+  rho4,
+  s2c = 0.00,
+  s2s = 0.80,
+  s2cr = 0.25,
+  s2e = 1.0,
+  seed0 = 37200
+)
 
 # VERDICT -- OUTCOME A. Reduction fixed-vs-M5random |A1|,|Ak| ~ 1e-6 in ALL regimes;
 # theta^2_r == sigma^2_r (|d| ~ 1e-7, the M3 §6 identity) AND -- the open question --
@@ -136,4 +216,6 @@ run_regime("boundary  C_n=80", 300, Nc = 80, ns = 6, rho4, s2c = 0.00, s2s = 0.8
 # floor effects, not an sigma^2_cr-treatment failure. => Ship with a REDUCTION oracle
 # (balanced fixed == M5 random cluster-level) + lme4 cross-engine + seeded recovery; the
 # pre-authorized gated Fable review (ADR-047) does NOT fire.
-cat("\n=== VERDICT: Outcome A -- reduction exact, recovery clean; no Fable (see comment) ===\n")
+cat(
+  "\n=== VERDICT: Outcome A -- reduction exact, recovery clean; no Fable (see comment) ===\n"
+)

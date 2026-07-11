@@ -674,6 +674,44 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-incomplete-fixed-nested.R` (standalone, seeded; writes the fixture),
   seeded from the feasibility spike `data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`.
 
+### Oracle O-FCL — fixed-rater CLUSTER-level ICC, crossed Design 1, balanced (M37, ADR-047)
+
+- **Role:** correctness of the **balanced/complete crossed Design-1 fixed-rater CLUSTER-level** ICC — signal
+  σ²_c, agreement error {θ²_r, σ²_cr}, consistency {σ²_cr}, divisor k (M5 §3b map with θ²_r in the rater
+  slot), read off the shipped M10 fixed fit (`fit_glmmtmb_multilevel_fixed()`; the estimand map keys the
+  error set on `level`, not `raters`). No new fit, no new estimand concept. The recovery is **NON-CIRCULAR**:
+  θ²_r is a deterministic function of the k fixed rater means, so recovering the known cluster-level
+  population value σ²_c/(σ²_c + θ²_r + σ²_cr) is a genuine independent oracle.
+- **The open question the feasibility spike settled (M10 §7):** at the subject level σ²_cr is not in the
+  error set, so M10's balanced fixed≡random reduction was clean; at the cluster level σ²_cr **is** the error.
+  The spike (`data-raw/reviews/m37-feasibility-spike-{point,coverage,boundary-parity}.R`) showed fixing the
+  rater main effect does **not** bias the `(1|cluster:rater)` interaction (`s2cr_fixed = s2cr_random`,
+  |d| ~1e-7), so the **random σ²_cr is the correct fixed-rater cluster-level error** (no finite-population
+  correction) and the coefficient reduces to the M5 random cluster-level ICC **exactly** in all regimes
+  (|Δ| ~1e-6). **Outcome A → no Fable review** (the ADR-047 pre-authorization did not fire).
+- **DGP:** balanced crossed Design 1, k=4 fixed rater means ρ = (−0.8, −0.2, 0.3, 0.7) held fixed across
+  reps (θ²_r = 0.42 exact), σ²_{s:c} = 0.8, σ²_cr = 0.25, σ²_res = 1.0, n_s = 6; clusters/subjects/
+  interaction/residual resampled per rep. n_rep 240, mc_samples 3000 ([[ragged-coverage-nrep-240]],
+  [[coverage-oracle-cluster-count-axis]]).
+- **Committed reference (`tests/testthat/fixtures/fixed-cluster-level-oracle.rds`; seeds 370100/370200/370300):**
+  three cells. **Interior** recovery of the known cluster-level ICC(A,1): coverage **.975 (C_n=20) / .925
+  (C_n=80)**, |bias| ≤ **.008** — unbiased, boundary-aware. **Boundary σ²_c = 0** (pop ICC = 0): coverage
+  **.000 for BOTH fixed AND M5-random** (parity |Δ| = **.000**). The cluster-level ICC is a ratio floored at
+  0 in its numerator with **no moment correction for the signal variance** (unlike the rater θ² boundary of
+  M28), so it under-covers at the exact boundary — but **identically for fixed and random**, a pre-existing
+  shared M5/M9/M37 property, **not an M37 defect** (#18). Improving cluster-signal-zero coverage is a
+  cross-cutting candidate follow-up (`M37-fixed-cluster-level.md` §7). n_fit at the boundary is reduced
+  (~113/240) by singular fits at the exact variance boundary.
+- **Reductions (committed as an attribute + re-checked live):** balanced fixed cluster-level ≡ M5 random
+  cluster-level (point) |Δ| = **2.1e-6**; glmmTMB↔lme4 cross-engine |Δ| = **1.7e-5** (both < 1e-4). The MC
+  *interval* differs between fixed and random by construction (β-sampling vs σ²_r-sampling — the documented
+  M10 agreement-interval behavior), so the reduction pin is on the **point** (#18).
+- **Pins (#4/#18):** interior min coverage > .90, max |bias| < .05; boundary parity |fixed − random| < .06;
+  reduction < 1e-4, cross-engine < 1e-4. Asserted in `test-icc-fixed-multilevel.R` **O-FCL/reduction**,
+  **O-FCL/lme4**, **O-FCL/recovery**.
+- **Provenance:** `data-raw/oracle-fixed-cluster-level.R` (standalone, seeded; writes the fixture), seeded
+  from the feasibility spike `data-raw/reviews/m37-feasibility-spike-*.R`.
+
 ### Oracle O-Bayes-Conflated — Bayesian conflated diagnostic (M29 Slice 1, ADR-039)
 
 - **Role:** the Bayesian sibling of the frequentist conflated oracle (M17 Slice 1). The conflated

@@ -1321,16 +1321,22 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         Interval at **exact M5 parity**: interior 0.963/0.992; σ²_c=0 boundary 0.550 **but identical for
         fixed and M5-random** (pre-existing cluster-signal-zero loss, not an M37 defect → boundary claim is
         parity; improving it is a candidate follow-up, §7). **The pre-authorized Fable review does NOT fire.**
-  - [ ] **Slice 2 — cluster-level fixed estimand + fit path.** Lift the `level = "cluster"` + `raters =
-        "fixed"` abort (`R/icc.R`, M10 subject-only guard) for balanced crossed Design 1 only (incomplete
-        stays refused); read §2b off the M10 fit with θ²_r (+ §4a-settled interaction term) in the rater slot;
-        route in `icc()`; `print`/`glance` surface it. Oracles O-FCL/reduction, O-FCL/lme4, O-FCL/recovery;
-        MC CI reuses the M10 fixed sampler. Regression guard: M1–M36 suite green. Docs/NEWS/COVERAGE/
-        REFERENCES in-commit (#16).
-  - [ ] **Slice 3 — docs.** Extend `multilevel-designs` + the "which ICC / when" note to fixed-rater
-        cluster level on real knit-time code; `test-vignette-claims.R` invariants (Outcome A: balanced
-        fixed ≡ random cluster-level; consistency identical, agreement differs only by θ²_r — or the
-        §4a-corrected statement).
+  - [x] **Slice 2 — cluster-level fixed estimand + fit path — DONE (2026-07-11).** Lifted the
+        `level = "cluster"` + `raters = "fixed"` abort (`R/icc.R`) for balanced crossed Design 1 only (brms +
+        incomplete refused: two new guards); the cluster-level `{σ²_c | θ²_r, σ²_cr}` reads off the shipped
+        M10 fit — **no new fit**, the estimand map keys the error set on `level` not `raters`. Default level
+        now returns **both** levels for balanced fixed. Oracles **O-FCL/reduction** (fixed ≡ M5 random
+        cluster point, |Δ| 2.1e-6 < 1e-4), **/lme4** (1.7e-5 < 1e-4), **/recovery** (committed fixture:
+        interior coverage .975/.925, |bias| ≤ .008; boundary σ²_c=0 **parity** with M5-random, both .000 —
+        the shared cluster-signal-zero loss, a candidate follow-up, not an M37 defect). `data-raw/oracle-fixed-cluster-level.R`
+        + fixture committed. Roxygen/NEWS/COVERAGE/REFERENCES in-commit (#16). Regression: full suite green
+        after updating three stale "fixed multilevel = subject only" tests (test-review-fixes ×2, test-icc-brms
+        subject-level containment pin). `air`/`lintr` clean.
+  - [x] **Slice 3 — docs — DONE (2026-07-11).** Extended `multilevel-designs.Rmd`'s fixed-rater section to
+        the cluster level on real knit-time code (the `ml-fixed` chunk now returns both levels; prose states
+        balanced fixed ≡ random at **both** levels); added a `test-vignette-claims.R` invariant (balanced
+        fixed ≡ random cluster-level ICC(A,1)/ICC(A,k)). Roxygen/NEWS/COVERAGE/REFERENCES were updated in
+        Slice 2's commit.
   - [ ] finish-task gate (`devtools::test`/`check`, `air`, `lintr`, installed-pkg path) green; PR; review; merge.
 - Deferred out of M37 (record so not rediscovered): **incomplete/unbalanced cluster-level fixed** (🟣
   Wave-3, double-blocked — ten Hove open small-k estimator + the M9 §9 open `ICC(c,k)` divisor; its own later

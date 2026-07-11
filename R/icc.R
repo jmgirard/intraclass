@@ -108,8 +108,13 @@
 #' both balanced and **incomplete** data (the finite-population rater variance is formed
 #' **per cluster** -- each cluster's own raters -- and averaged over clusters; on ragged
 #' data each cluster uses its own effective rater count). The fixed-rater **cluster**
-#' level, Design-3 fixed raters (nested in subjects -- no separable rater effect), and the
-#' Bayesian (`engine = "brms"`) incomplete fixed-nested path remain for later milestones.
+#' level is supported for the crossed (Design 1) design on **balanced, complete** data
+#' (signal \eqn{\sigma^2_c}, agreement error the finite-population \eqn{\theta^2_r} plus
+#' the cluster-by-rater term \eqn{\sigma^2_{cr}}); on balanced data it equals the
+#' random-rater cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
+#' estimation, Design-3 fixed raters (nested in subjects -- no separable rater effect),
+#' and the Bayesian (`engine = "brms"`) fixed-rater cluster-level and incomplete
+#' fixed-nested paths remain for later milestones.
 #'
 #' @section Within-cell replicates:
 #' When a subject-by-rater cell is rated **more than once** (within-cell
@@ -762,20 +767,35 @@ icc <- function(
     # rater slot. The incomplete case (mixed-model engines) uses the ragged per-cluster
     # Case-3A theta^2_{r:c} (generalized to unequal k_c) + the M9 k_eff/connectedness
     # machinery; the Bayesian engine stays deferred here (guarded below).
-    if (!("subject" %in% level)) {
-      abort_unsupported(c(
-        "Fixed-rater multilevel ICCs are available at the subject level only.",
-        i = "The cluster-level fixed-rater estimand is planned for a later \\
-             milestone.",
-        i = "Use {.code level = \"subject\"} with {.code raters = \"fixed\"}."
-      ))
+    # Cluster-level fixed raters (M37, ADR-047): SHIP for the mixed-model engines
+    # (glmmTMB/lme4) on balanced/complete CROSSED Design 1 -- the cluster-level
+    # {sigma^2_c | theta^2_r, sigma^2_cr} read off the shipped M10 fixed fit. The
+    # feasibility spike confirmed EXACT reduction to the M5 random cluster-level ICC
+    # (theta^2_r == sigma^2_r AND sigma^2_cr unbiased under fixing, both |d| ~ 1e-7),
+    # so no finite-population correction on the interaction. The balance gate lives
+    # below with `balanced` (incomplete/unbalanced cluster fixed is deferred --
+    # double-blocked: ten Hove's open small-k estimator + the M9 §9 ICC(c,k) divisor).
+    # Here, refuse only the still-deferred crossed cluster-level fixed cell -- brms
+    # (engine parity, unblockable given M37's frequentist oracle; a later milestone);
+    # lavaan multilevel is unsupported (aborted upstream, cannot reach).
+    if (ml_design == "crossed" && "cluster" %in% level && engine == "brms") {
+      if (!("subject" %in% level)) {
+        abort_unsupported(c(
+          "Cluster-level fixed-rater ICCs are available for the {.pkg glmmTMB} and \\
+           {.pkg lme4} engines only.",
+          i = "The {.pkg brms} cluster-level fixed-rater sibling is planned for a \\
+               later milestone.",
+          i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}, or \\
+               {.code level = \"subject\"}."
+        ))
+      }
+      # Default level includes "cluster"; drop it for brms (subject ships, M27 Slice 1).
+      level <- "subject"
     }
-    # The default `level` includes "cluster", whose fixed-rater estimand is
-    # deferred; drop it and report the subject level so the natural call
-    # `icc(..., raters = "fixed")` works (mirrors the nested-design branch below,
-    # which drops "cluster" the same way). An explicit cluster-only request
-    # aborted just above.
-    level <- "subject"
+    # Nested fixed designs (nested_in_clusters) have no cluster level; they fall
+    # through to the generic nested guard below (~L805), which drops the default
+    # "cluster" / aborts an explicit cluster request and runs the M8/M19/M36
+    # identifiability. Crossed fixed at the subject level (M10/M18) is unaffected.
     # Incomplete/ragged fixed-rater nested Design 2 ships for the MIXED-MODEL engines
     # (M36, ADR-046): the ragged per-cluster Case-3A theta^2_{r:c} (theta2r_fixed_nested()
     # generalized to unequal k_c) pairs with the M9 k_eff/connectedness machinery, pinned
@@ -1157,6 +1177,33 @@ icc <- function(
     design_info$balanced
   }
 
+  # Cluster-level fixed raters ship for balanced/complete CROSSED Design 1 only
+  # (M37, ADR-047; glmmTMB/lme4). Incomplete/unbalanced cluster-level fixed is
+  # deferred -- double-blocked: ten Hove et al. (2022) flag the small-k estimator as
+  # open AND the averaged ICC(c,k) effective-rater divisor is unresolved on incomplete
+  # data (M9 §9). Now that `balanced` is known, refuse an explicit ragged cluster
+  # request; drop the default "cluster" to the shipped subject level (M18). Subject
+  # level and every balanced path are unaffected; brms/nested were handled upstream.
+  if (
+    multilevel &&
+      raters == "fixed" &&
+      ml_design == "crossed" &&
+      !balanced &&
+      "cluster" %in% level
+  ) {
+    if (!("subject" %in% level)) {
+      abort_unsupported(c(
+        "Cluster-level fixed-rater ICCs need balanced, complete data.",
+        i = "Incomplete/unbalanced cluster-level fixed-rater estimation is an open \\
+             research question (ten Hove et al. 2022, p. 6) and is deferred to a \\
+             later milestone.",
+        i = "Use complete data, {.code level = \"subject\"}, or \\
+             {.code raters = \"random\"}."
+      ))
+    }
+    level <- "subject"
+  }
+
   # lavaan (SEM) reshapes to a wide subject-by-rater matrix; incomplete data leaves
   # missing cells, which fit_lavaan() estimates by full-information maximum likelihood
   # (FIML, M21 Slice 3, ADR-031). Disconnected designs are still rejected by the
@@ -1220,9 +1267,11 @@ icc <- function(
   # ten Hove et al. (2020)'s bias/undercoverage caveat (#13).
   if (engine == "brms") {
     # Fixed-rater multilevel brms covers crossed (Design 1, M27 Slice 1) and nested
-    # (Design 2, M27 Slice 2) at the subject level, balanced/complete. The remaining
-    # fixed-multilevel cases -- Design 3 fixed (no separable rater effect) and cluster-level
-    # fixed -- are refused engine-agnostically upstream (~L655). Incomplete fixed-NESTED
+    # (Design 2, M27 Slice 2) at the subject level, balanced/complete. Of the remaining
+    # fixed-multilevel cases: Design 3 fixed (no separable rater effect) is refused
+    # engine-agnostically upstream; cluster-level fixed now SHIPS for glmmTMB/lme4 on
+    # balanced crossed data (M37, ADR-047) but the brms sibling stays deferred -- refused
+    # by the brms cluster-level fixed guard upstream (~L765). Incomplete fixed-NESTED
     # now ships for the mixed-model engines (M36, ADR-046) but stays deferred for brms; it
     # is refused by a brms-specific guard upstream (~L785). Incomplete crossed fixed
     # MULTILEVEL is caught by the `!balanced` brms guard below (M31 Slice 2). So no
@@ -1368,7 +1417,10 @@ icc <- function(
       }
     } else if (raters == "fixed") {
       # Crossed (Design 1) with raters as fixed effects -- theta^2_r in the rater
-      # slot (M10). Fixed-rater nested/incomplete/cluster-level are guarded above.
+      # slot. Subject level (M10) and, on balanced data, the cluster level (M37,
+      # ADR-047) both read off this one fit; the estimand map keys the cluster error
+      # set {theta^2_r, sigma^2_cr} on `level`, not `raters`. Fixed-rater nested and
+      # incomplete cluster-level are guarded above.
       if (engine == "brms") {
         # Crossed (Design 1) fixed raters, Bayesian (M27 Slice 1, ADR-037): the M10
         # five-component fit with a fixed `rater` effect under the half-t(4, 0, 1) SD

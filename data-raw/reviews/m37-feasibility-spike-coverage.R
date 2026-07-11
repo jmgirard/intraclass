@@ -33,11 +33,27 @@ sim_df <- function(seed, Nc, ns, rho, s2c, s2s, s2cr, s2e) {
   k <- length(rho)
   cl <- gl(Nc, ns * k, labels = paste0("c", seq_len(Nc)))
   sub <- factor(rep(rep(seq_len(ns), each = k), times = Nc))
-  rat <- factor(rep(seq_len(k), times = Nc * ns), labels = paste0("r", seq_len(k)))
+  rat <- factor(
+    rep(seq_len(k), times = Nc * ns),
+    labels = paste0("r", seq_len(k))
+  )
   c_eff <- rnorm(Nc, 0, sqrt(s2c))[as.integer(cl)]
-  s_eff <- rnorm(Nc * ns, 0, sqrt(s2s))[as.integer(interaction(cl, sub, drop = TRUE))]
-  cr_eff <- rnorm(Nc * k, 0, sqrt(s2cr))[as.integer(interaction(cl, rat, drop = TRUE))]
-  y <- 10 + c_eff + s_eff + rho[as.integer(rat)] + cr_eff + rnorm(Nc * ns * k, 0, sqrt(s2e))
+  s_eff <- rnorm(Nc * ns, 0, sqrt(s2s))[as.integer(interaction(
+    cl,
+    sub,
+    drop = TRUE
+  ))]
+  cr_eff <- rnorm(Nc * k, 0, sqrt(s2cr))[as.integer(interaction(
+    cl,
+    rat,
+    drop = TRUE
+  ))]
+  y <- 10 +
+    c_eff +
+    s_eff +
+    rho[as.integer(rat)] +
+    cr_eff +
+    rnorm(Nc * ns * k, 0, sqrt(s2e))
   data.frame(subject = sub, rater = rat, cluster = cl, score = y)
 }
 
@@ -56,40 +72,107 @@ cluster_icc_draws <- function(cd, k) {
 
 covered <- function(vals, tru, conf = 0.95) {
   a <- 1 - conf
-  q <- stats::quantile(vals[is.finite(vals)], c(a / 2, 1 - a / 2), names = FALSE)
+  q <- stats::quantile(
+    vals[is.finite(vals)],
+    c(a / 2, 1 - a / 2),
+    names = FALSE
+  )
   tru >= q[[1]] && tru <= q[[2]]
 }
 
-run_regime <- function(label, n_rep, Nc, ns, rho, s2c, s2s, s2cr, s2e, seed0, mc = 4000L) {
+run_regime <- function(
+  label,
+  n_rep,
+  Nc,
+  ns,
+  rho,
+  s2c,
+  s2s,
+  s2cr,
+  s2e,
+  seed0,
+  mc = 4000L
+) {
   k <- length(rho)
   tru <- cluster_truth(s2c, rho, s2cr, k)
-  hit <- matrix(0L, nrow = 0, ncol = 4, dimnames = list(NULL, c("A1", "Ak", "C1", "Ck")))
+  hit <- matrix(
+    0L,
+    nrow = 0,
+    ncol = 4,
+    dimnames = list(NULL, c("A1", "Ak", "C1", "Ck"))
+  )
   for (i in seq_len(n_rep)) {
     df <- sim_df(seed0 + i, Nc, ns, rho, s2c, s2s, s2cr, s2e)
     ff <- tryCatch(fit_glmmtmb_multilevel_fixed(df), error = function(e) NULL)
-    if (is.null(ff)) next
+    if (is.null(ff)) {
+      next
+    }
     cd <- mc_components(ff, mc_samples = mc, seed = seed0 + i)
     d <- cluster_icc_draws(cd, k)
-    hit <- rbind(hit, c(
-      A1 = covered(d$A1, tru[["A1"]]),
-      Ak = covered(d$Ak, tru[["Ak"]]),
-      C1 = covered(d$C1, tru[["C1"]]),
-      Ck = covered(d$Ck, tru[["Ck"]])
-    ))
+    hit <- rbind(
+      hit,
+      c(
+        A1 = covered(d$A1, tru[["A1"]]),
+        Ak = covered(d$Ak, tru[["Ak"]]),
+        C1 = covered(d$C1, tru[["C1"]]),
+        Ck = covered(d$Ck, tru[["Ck"]])
+      )
+    )
   }
   cov <- colMeans(hit)
   cat(sprintf(
     "[%s] Nc=%d reps=%d  truth A1=%.3f Ak=%.3f | coverage A1=%.3f Ak=%.3f C1=%.3f Ck=%.3f\n",
-    label, Nc, nrow(hit), tru[["A1"]], tru[["Ak"]], cov[["A1"]], cov[["Ak"]], cov[["C1"]], cov[["Ck"]]
+    label,
+    Nc,
+    nrow(hit),
+    tru[["A1"]],
+    tru[["Ak"]],
+    cov[["A1"]],
+    cov[["Ak"]],
+    cov[["C1"]],
+    cov[["Ck"]]
   ))
   invisible(cov)
 }
 
 rho4 <- c(-0.8, -0.2, 0.3, 0.7)
 cat("=== M37 coverage spike: fixed-rater cluster-level MC interval (95%) ===\n")
-run_regime("interior C_n=20", 240, Nc = 20, ns = 6, rho4, s2c = 0.60, s2s = 0.80, s2cr = 0.25, s2e = 1.0, seed0 = 37500)
-run_regime("interior C_n=80", 240, Nc = 80, ns = 6, rho4, s2c = 0.60, s2s = 0.80, s2cr = 0.25, s2e = 1.0, seed0 = 37600)
-run_regime("boundary  C_n=80", 240, Nc = 80, ns = 6, rho4, s2c = 0.00, s2s = 0.80, s2cr = 0.25, s2e = 1.0, seed0 = 37700)
+run_regime(
+  "interior C_n=20",
+  240,
+  Nc = 20,
+  ns = 6,
+  rho4,
+  s2c = 0.60,
+  s2s = 0.80,
+  s2cr = 0.25,
+  s2e = 1.0,
+  seed0 = 37500
+)
+run_regime(
+  "interior C_n=80",
+  240,
+  Nc = 80,
+  ns = 6,
+  rho4,
+  s2c = 0.60,
+  s2s = 0.80,
+  s2cr = 0.25,
+  s2e = 1.0,
+  seed0 = 37600
+)
+run_regime(
+  "boundary  C_n=80",
+  240,
+  Nc = 80,
+  ns = 6,
+  rho4,
+  s2c = 0.00,
+  s2s = 0.80,
+  s2cr = 0.25,
+  s2e = 1.0,
+  seed0 = 37700
+)
 
 # RESULT: interior C_n=20 0.992 (conservative, wide few-cluster intervals); interior
 # C_n=80 0.963 (nominal); boundary sigma^2_c=0 0.550. The boundary value is NOT an M37
@@ -98,4 +181,6 @@ run_regime("boundary  C_n=80", 240, Nc = 80, ns = 6, rho4, s2c = 0.00, s2s = 0.8
 # exactly). It is the pre-existing cluster-signal-at-zero coverage loss (ratio floored
 # at 0, no moment correction for the SIGNAL variance) shared by M5/M9/M37. M37 ships at
 # exact parity with M5; the boundary claim is PARITY (fixed == random), not "nominal".
-cat("\n=== Outcome A: interior nominal; sigma^2_c=0 boundary == M5 (parity, not a defect) ===\n")
+cat(
+  "\n=== Outcome A: interior nominal; sigma^2_c=0 boundary == M5 (parity, not a defect) ===\n"
+)
