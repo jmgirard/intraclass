@@ -958,6 +958,119 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-incomplete-nested-subjects.R` (seeded; drives the SHIPPED
   `fit_brms_nested_subjects()` recipe; writes the fixture before the hard pins).
 
+### Oracle O-Bayes-IOneway — Bayesian incomplete/ragged single-level one-way random (M33 Slice 1, ADR-043)
+
+- **Role:** the incomplete/ragged **single-level one-way** (Shrout & Fleiss Case 1) sibling of
+  O-Bayes-Incomplete (two-way). `engine = "brms"` now fits **incomplete/ragged one-way** data
+  (`ICC(1)`/`ICC(1,k)`) — the shipped M26 Slice 1 `fit_brms_oneway()` two-component
+  `score ~ 1 + (1 | subject)` fit run on ragged data unchanged, reached by narrowing the `!balanced` brms
+  guard's `oneway` clause; the engine-agnostic M3/M6 harmonic-mean `k_eff` divisor (ratings per subject) is
+  threaded per posterior draw. Random raters → **variance-ratio push-forward**, no θ² functional, no 2b
+  correction (the M30 regime). The first of the M33 Bayesian parity-mop-up slices.
+- **Oracles (≥2 independent, #1):** **O-Bayes-IOneway** (committed reference, no Stan) — a **reduction cell**
+  (complete grid, k_eff = k = 5) covers ~nominally (the shipped M26 Slice 1 behaviour), and a **ragged cell**
+  (fixed incidence, ~20% of rating slots deleted, constant k_eff < 5) covers ICC(1) & ICC(1, k_eff) within
+  Monte-Carlo error of the complete cell; **O-Bayes-IOneway-agree** (live ragged fit) — the glmmTMB/lme4 REML
+  **M6+M3** incomplete one-way point falls inside the brms credible intervals (containment, not equality —
+  the MAP-below-REML skew + prior gap).
+- **Sources:** Shrout & Fleiss (1979) Case 1 / McGraw & Wong (1996) one-way random (estimand); ten Hove et al.
+  (2020) prior/recipe (the ragged extension is **not in the source**, so the independent oracle for the ragged
+  point is the shipped glmmTMB/lme4 M6+M3 estimator, ADR-008); estimand-spec `M6-oneway.md` with
+  `M3-incomplete-designs.md` §6 (harmonic-mean `k_eff` under imbalance — no new spec).
+- **DGP:** one-way, N = 30 subjects, k = 5 ratings/subject at balance, σ²_s = σ²_res = 0.5 (population
+  ICC(1) = 0.5, an interior ratio past the k = 2 caveat); complete cell (k_eff = 5) and a fixed ragged
+  incidence (120 of 150 slots kept, k_eff = 3.7344); pop ICC(1, m) = σ²_s/(σ²_s + σ²_res/m).
+- **Committed reference (`tests/testthat/fixtures/bayesian-incomplete-oneway-oracle.rds`; seed 33100,
+  n_rep = 240, per-rep seeding):** per-cell convergence / ICC(1)+ICC(1,k_eff) coverage / MAP relative bias
+  (pins qualitative, #4/#18). **Observed (n_rep 240):** complete — conv 1.00, coverage **.9375/.9375**, MAP
+  relbias −.027/−.004; ragged (k_eff 3.73) — conv 1.00, coverage **.9458/.9458**, MAP relbias −.040/−.009.
+  **The one unknown is resolved: ragged one-way coverage is NOMINAL** through the k_eff divisor — a
+  random-rater variance-ratio push-forward (no 2b), the M30 regime — so **no Fable review** (the pin's
+  conditional escalation was not triggered). Both cells sit within ~1 MC SE of nominal .95 and inside the
+  [.92, .975] band; the ragged ≥ .88 pin passes comfortably.
+- **Pins (#4/#18):** convergence ≥ .90 both cells; k_eff shrinks under imbalance; complete-cell ICC(1) & ICC(k)
+  coverage ∈ [.90, .99] (reduction baseline); ragged coverage ≥ complete − .06 and ≥ .88 for both units;
+  |MAP relbias| < .10 (complete) / < .12 (ragged). Asserted in `test-icc-brms.R` **O-Bayes-IOneway** (committed
+  reference, on CI) + **O-Bayes-IOneway-agree** (live ragged fit, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-incomplete-oneway.R` (seeded; drives the SHIPPED
+  `fit_brms_oneway()` recipe; writes the fixture before the hard pins).
+
+### Oracle O-Bayes-FRep — Bayesian fixed-rater within-cell replicates (M33 Slice 2, ADR-043)
+
+- **Role:** the **fixed-rater** sibling of O-Bayes-Rep (M29 Slice 2, random replicates) and the Bayesian
+  sibling of the frequentist **M20 Slice 1** (`fit_glmmtmb_replicates_fixed`). `engine = "brms"` +
+  `raters = "fixed"` now fits **single-level within-cell replicates** — `fit_brms_replicates_fixed()` fits
+  `score ~ 1 + rater + (1 | subject) + (1 | subject:rater)`, splits the residual into the interaction σ²_sr
+  and pure error σ²_e, and reads the Case-3A finite-population **θ²_r per posterior draw** from the rater
+  fixed-effect draws (the shared `brms_theta2r_draws()`), injecting it into the rater slot. The `occasions`
+  per-draw divisor (pure error ÷ n_o) composes off these draws exactly as the random path. On **balanced**
+  replicated data the rater means come from the whole sample, so the **2b moment correction ≈ 0** (the
+  M26/M27-S1 regime, not the ragged M31 regime) and θ²_r = σ²_r — fixed reproduces the random coefficients.
+- **Oracles (≥2 independent, #1):** **O-Bayes-FRep** (committed reference, no Stan) — single-/average-occasion
+  fixed-population ICC(A,1) **coverage** ~nominal, **containment** of the glmmTMB fixed replicate points (the
+  M20 §6 reduction; = the fixed==random reduction on balanced data), and **average > single**;
+  **O-Bayes-FRep-agree** (live fit) — the glmmTMB REML fixed replicate points fall inside the brms credible
+  intervals (containment, `skip_on_ci`).
+- **Sources:** McGraw & Wong (1996) Case 3A (θ²_r = Σ(μ_rj − μ̄_r)²/(k−1)); GT two-facet replicate
+  decomposition (`M17-within-cell-replicates.md`); ten Hove et al. (2020) prior/recipe; the independent point
+  oracle is the shipped glmmTMB M20 Slice 1 estimator (no new spec).
+- **DGP:** single-level two-way fixed-rater with within-cell replicates, N_s = 25, **k = 4 FIXED raters**
+  μ_r = (−0.6, −0.2, 0.2, 0.6) → θ²_r = 0.8/3 = 0.2667, n_o = 3, σ²_s = 1.00, σ²_sr = 0.50, σ²_e = 0.70;
+  pop single = 1/(1 + 0.2667 + 0.5 + 0.7) = 0.4054, average = 1/(1 + 0.2667 + 0.5 + 0.7/3) = 0.5000. The
+  rater means are FIXED across replications (a fixed finite population); subjects/interactions/error redrawn.
+- **Committed reference (`tests/testthat/fixtures/bayesian-fixed-replicates-oracle.rds`; seed 33200,
+  n_rep = 80):** convergence / single+average coverage / glmmTMB containment / average>single / MAP relbias
+  (pins qualitative, #4/#18). **Observed:** conv 1.00, coverage **.9625/.9625** (single/average, both ∈
+  [.90, .99] — nominal), containment **1.00/1.00**, average>single **1.00**, MAP relbias −.056/−.024 (mode
+  below the plug-in, the standard MAP skew — characterized, not tuned). **Balanced → 2b ≈ 0, so no
+  θ²-functional undercoverage** → **no Fable review**.
+- **Pins (#4/#18):** convergence ≥ .90; θ²_r = 0.8/3; single/average coverage ∈ [.90, .99]; containment
+  ≥ .90 both; average>single ≥ .95. Asserted in `test-icc-brms.R` **O-Bayes-FRep** (committed reference, on
+  CI) + **O-Bayes-FRep-agree** (live fit, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-fixed-replicates.R` (seeded; drives the SHIPPED
+  `fit_brms_replicates_fixed()` recipe; writes the fixture before the hard pins).
+
+### Oracle O-Bayes-MLRep — Bayesian multilevel within-cell replicates (M33 Slice 3, ADR-043)
+
+- **Role:** the **multilevel** sibling of O-Bayes-Rep (single-level random replicates) and the Bayesian
+  sibling of the frequentist **M20 Slice 2** (`fit_glmmtmb_{ml,nested}_replicates`). `engine = "brms"` now
+  fits **multilevel within-cell replicate** ICCs for **both** replicate multilevel designs, subject level,
+  random raters: crossed **Design 1** (`fit_brms_ml_replicates()`, `+ (1|cluster:subject:rater)` on the M5
+  five-component fit → **six components**) and nested **Design 2** (`fit_brms_nested_replicates()`, the same
+  split on the M8 four-component fit → **five components**). The (1|cluster:subject:rater) term splits the
+  subject-level residual into the interaction σ²_{csr} ("subject_rater") and pure error σ²_e ("residual");
+  `occasions` divides only pure error by n_o. Random raters → **variance-ratio push-forward**, no θ²
+  functional, no 2b (a plain `fit_brms_common()` call, the M30 regime). Design 3 replicate-split is ⚫ by
+  design (multilevel one-way, no separable interaction); fixed-rater / conflated / ragged multilevel
+  replicates stay deferred (all engines).
+- **Oracles (≥2 independent, #1):** **O-Bayes-MLRep** (committed reference, no Stan) — per-design (crossed /
+  nested) subject-level single-/average-occasion ICC(A,1) **coverage** ~nominal, **containment** of the
+  frequentist glmmTMB replicate points (the M20 §6 reduction), and **average > single**;
+  **O-Bayes-MLRep-agree** (live fits, both designs) — the glmmTMB REML replicate points fall inside the brms
+  credible intervals (containment, `skip_on_ci`).
+- **Sources:** ten Hove et al. (2022) Table 3 (multilevel estimand) + GT two-facet replicate split
+  (`M17-within-cell-replicates.md`); ten Hove et al. (2020) prior/recipe; the independent point oracle is the
+  shipped glmmTMB M20 Slice 2 estimator (no new spec). The subject-level agreement error set is
+  {rater, subject_rater, residual} — **excluding** cluster_rater, which is a cluster-level phenomenon
+  (estimand.R; matches the M24 subject-level definition).
+- **DGP:** replicate multilevel, N_c = 15 clusters, N_s = 4 subjects/cluster, k = 3 raters, n_o = 2, σ²_c =
+  0.50, σ²_{s:c} = 1.00, σ²_r = 0.16 (D1 rater main / D2 rater-in-cluster σ²_{r:c}), σ²_{cr} = 0.16 (D1 only,
+  cluster-level), σ²_{csr} = 0.40, σ²_e = 0.50; pop subject single = 1.0/(1.0+0.16+0.40+0.50) = 0.4854,
+  average = 1.0/(1.0+0.16+0.40+0.50/2) = 0.5525 (same for both designs; σ²_r = σ²_{r:c}).
+- **Committed reference (`tests/testthat/fixtures/bayesian-multilevel-replicates-oracle.rds`; seed 33300,
+  n_rep = 80 per design):** per-design convergence / single+average coverage / glmmTMB containment /
+  average>single / MAP relbias (pins qualitative, #4/#18). **Observed:** crossed D1 — conv .96, coverage
+  **.9500/.9500**, containment 1.00/1.00, avg>single 1.00, MAP relbias −.074/−.063; nested D2 — conv .99,
+  coverage **.9625/.9500**, containment 1.00/1.00, avg>single 1.00, MAP relbias +.029/+.024. **Both designs
+  NOMINAL** — random-rater variance-ratio push-forward (no 2b) → **no Fable review**.
+- **Pins (#4/#18):** per design — convergence ≥ .90; single/average coverage ∈ [.90, .99]; containment ≥ .90
+  both; average>single ≥ .95. Asserted in `test-icc-brms.R` **O-Bayes-MLRep** (committed reference, on CI) +
+  **O-Bayes-MLRep-agree** (live fits both designs, glmmTMB inside the CI; `skip_on_ci`).
+- **Provenance:** `data-raw/oracle-bayesian-multilevel-replicates.R` (seeded; compiles one model per design,
+  drives the SHIPPED `fit_brms_{ml,nested}_replicates()` recipes; the glmmTMB point comes from
+  `icc_point()` on the shipped replicate fit's components — bypassing `mc_ci()`, which can overflow on an
+  unstable small-multilevel fit; writes the fixture before the hard pins).
+
 ---
 
 ## Bibliography

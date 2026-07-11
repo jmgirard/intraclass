@@ -125,7 +125,22 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active milestone: **none** — M32 shipped (PR #37, ADR-042; squash-merged to `main` at `dd8e3e2`).
+- Active milestone: **M33 — Bayesian engine (brms) parity mop-up: incomplete single-level one-way +
+  fixed-rater & multilevel within-cell replicates** (ADR-043; branch `m33-bayes-parity-mopup`) —
+  **opened/scoped, no slice code yet** (plan before code, #14). Closes the **last clean-oracle estimand gaps**
+  on the brms parity ledger in three thin slices, each a *shipped* frequentist coefficient read off posterior
+  draws: **Slice 1** incomplete/ragged single-level **one-way** (narrow `icc.R:1158`; `fit_brms_oneway()`
+  unchanged; random → variance ratio, no θ² — the M30 regime; **the one unknown is ragged coverage**, seeded
+  fixture at **n_rep ≥ 240**); **Slice 2** **fixed-rater** within-cell replicates (narrow `icc.R:1122`;
+  balanced → 2b ≈ 0, negligible; θ²_r = σ²_r so fixed ≡ random, the M20 S1 identity); **Slice 3**
+  **multilevel** replicates (crossed D1 6-component + nested D2 5-component, mirroring M20 S2; variance-ratio
+  push-forward). **Engine/interval parity, not new estimand work** (#6): no new estimand-spec/argument/
+  dependency; two brms guards narrowed + reuse of shipped fits/helpers (`brms_theta2r_moment_draws()`, M29
+  replicate machinery). **Gate met (#1):** every corner has a frequentist oracle — glmmTMB/lme4 incomplete
+  one-way (M6 + M3 `k_eff`), M20 S1 (fixed), M20 S2 (multilevel) — so all three ship as parity, not research.
+  **Fable posture (#19):** only Slice 1's ragged coverage is a genuine unknown; recommend-and-stop **if** it
+  undercovers, never auto-invoke. Next: `/start-task` Slice 1.
+- Prior milestone: **M32** — shipped (PR #37, ADR-042; squash-merged to `main` at `dd8e3e2`).
   `engine = "brms"` now fits incomplete/ragged **nested random**-rater ICCs at the subject level for both
   designs — Design 2 (`fit_brms_nested_clusters`, Slice 1) and Design 3 (`fit_brms_nested_subjects`, the
   multilevel one-way, Slice 2) — the Bayesian sibling of the frequentist M19, completing the "brms ×
@@ -162,12 +177,21 @@
   `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
   ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
   caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
-- Active task: **none** — M32 shipped and merged (PR #37, `dd8e3e2`). The next milestone needs an ADR after a
-  short retro (founding brief §7). Candidates parked in [`ROADMAP.md`](ROADMAP.md): the remaining **Bayesian
-  follow-ons** — incomplete **fixed** nested
-  (no frequentist oracle — research), Bayesian **replicates**/**cluster-fixed**/**one-way** incomplete,
-  **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)` divisor,
-  occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN upload**.
+- Active task: **M33 ALL THREE SLICES DONE — milestone ready for finish-task/PR** (Slices 1–2 committed
+  `17f3b87`/`0e7c7b6`; Slice 3 this commit). Slice 1 (incomplete/ragged single-level one-way): narrowed the
+  `if (oneway || replicates)` clause of the `!balanced` brms guard; `fit_brms_oneway()` reused; **O-Bayes-IOneway
+  NOMINAL** (ragged .9458, n_rep 240). Slice 2 (fixed-rater within-cell replicates): narrowed the replicate
+  guard + new `fit_brms_replicates_fixed()` (θ²_r per draw, 2b ≈ 0 balanced → fixed ≡ random); **O-Bayes-FRep
+  NOMINAL** (.9625, containment 1.00). Slice 3 (multilevel within-cell replicates): removed the obsolete brms
+  `replicates && multilevel` guard (deferred corners refused engine-agnostically upstream) + brms dispatch
+  branches + new `fit_brms_ml_replicates()` (crossed D1, 6-component) / `fit_brms_nested_replicates()` (nested
+  D2, 5-component), random → variance-ratio push-forward (no θ²); **O-Bayes-MLRep NOMINAL both designs**
+  (coverage crossed .9500/.9500, nested .9625/.9500, glmmTMB containment 1.00, avg>single 1.00;
+  `bayesian-multilevel-replicates-oracle.rds`, seed 33300, n_rep 80/design). **No Fable review anywhere** —
+  the whole mop-up came back nominal (the M30 regime). Live O-Bayes-MLRep-agree (both designs) verified;
+  fixture + full suite (CI mode) green; `lintr`/`air` clean. Tracking in-commit (#16): COVERAGE §②, REFERENCES
+  (O-Bayes-MLRep registry), NEWS. **Next: finish-task gate** — `R CMD check --as-cran`, installed-pkg drive of
+  all three new paths (`NOT_CRAN=true`, live Stan `skip_on_ci`), then PR.
 - Last green CI: **PR #37 (M32) — full CI matrix green (9/9), squash-merged to `main` at `dd8e3e2`.**
   format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and Ubuntu
   release·oldrel·**devel** all passed. Locally before the PR: `R CMD check --as-cran` **0/0/0** (built with
@@ -185,7 +209,10 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **— (cleared 2026-07-10).** The M32 Slice 2 ragged-Design-3 undercoverage finding
+- Blockers: **none.** M33 is opened and scoped (ADR-043); the plan is approved (direction + all-three-slices
+  scope confirmed by the maintainer 2026-07-10) and Slice 1 is ready to start. The gate is met — every corner
+  has a frequentist oracle — so no research bar stands in the way (contrast M32's incomplete-fixed-nested
+  scope-out). Historical (M32, cleared 2026-07-10): the M32 Slice 2 ragged-Design-3 undercoverage finding
   (`.8625` at n_rep 80) went to a gated Fable review (#19) → **VERDICT: no shortfall, a Monte-Carlo tail
   event that does not replicate** (Fable re-ran the same incidence at n=240 → .9458; 2,000-fit frequentist
   arm → .9555; PIT uniform). Adopted in full (ADR-042 Amendment 2): **ship Slice 2 unchanged**, regenerate
@@ -195,7 +222,18 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M32 shipped (PR #37, squash-merged at `dd8e3e2`); post-merge
+- Updated: 2026-07-10 by main session (Opus) — **M33 opened (ADR-043): the Bayesian parity mop-up.** After a
+  short retro (the arc has moved from *discovery* into *mop-up* — M29–M32 all shipped without a corrective
+  Fable review; M32's one gated review resolved to a no-shortfall tail event) the maintainer chose direction
+  **(A)** and confirmed **all three corners in one milestone**. This commit (on branch
+  `m33-bayes-parity-mopup`) writes ADR-043, adds the M33 active board to MILESTONES (DoD checklist = live
+  board, ADR-015), advances the MILESTONES preamble + ADR-index (M33 in flight), annotates ROADMAP direction
+  (A) as promoted, and flips STATUS to M33-active. **No slice code yet** — plan before code (#14). The gate
+  was verified before the ADR (#1): every corner has a frequentist oracle (glmmTMB/lme4 incomplete one-way =
+  M6 + M3 `k_eff`; M20 S1 fixed / S2 multilevel replicates), so all three ship as parity, not research — the
+  key scoping difference from M32's incomplete-fixed-nested carve-out. Only Slice 1 (ragged one-way) carries
+  a genuine unknown (coverage), and a Fable review is conditional-and-recommend-only there (#19). Next:
+  `/start-task` Slice 1. Prior line: **M32 shipped (PR #37, squash-merged at `dd8e3e2`); post-merge
   `project/` reconcile.** This commit flips STATUS to M32-shipped, compresses the MILESTONES M32 board to the
   summary form (preserving the "Deferred out of M32" list and the Fable-review record), advances the MILESTONES
   preamble + ADR-index (M32 no longer in flight), and sets "Last green CI" to the merge commit. The whole
@@ -287,6 +325,20 @@ brought the pkgdown site, the M9–M12 showcase in `advanced.Rmd`, and a **CRAN-
 v0.1.0** (`--as-cran` 0/0/0), closing the ADR-017 arc (M13).
 
 ## Next action
+
+**M33 (ADR-043) OPENED — Bayesian engine (brms) parity mop-up: incomplete single-level one-way + fixed-rater
+& multilevel within-cell replicates.** After a short retro the maintainer chose direction **(A)** (the last
+clean-oracle estimand gaps) with **all three corners in one milestone**. The plan is written (ADR-043, M33
+board in [`MILESTONES.md`](MILESTONES.md), branch `m33-bayes-parity-mopup`); **no slice code yet** (#14).
+**`/start-task` Slice 1 — incomplete/ragged single-level one-way:** narrow the `oneway` clause of the
+`!balanced` brms guard (`icc.R:1158`), confirm `fit_brms_oneway()` (M26) + the M3/M6 `k_eff` divisor thread
+on ragged data, and build **O-Bayes-IOneway** (reduction ≡ M26 S1 balanced + glmmTMB/lme4 incomplete-one-way
+containment + committed seeded ragged coverage at **n_rep ≥ 240**). Random → variance ratio, no θ² functional
+(the M30 regime), so a Fable review is only conditional on a coverage shortfall (#19, recommend-and-stop).
+Then **Slice 2** (fixed replicates — narrow `icc.R:1122`, balanced → 2b ≈ 0, O-Bayes-FRep) and **Slice 3**
+(multilevel replicates — crossed D1 + nested D2 mirroring M20 S2, O-Bayes-MLRep). On M33 close the Bayesian
+parity mop-up is complete; the remaining brms ledger is (B) customization (`prior=`/HPDI) and (C)
+research/blocked (incomplete fixed nested, cluster-level fixed).
 
 **M32 (ADR-042) shipped (PR #37) — Bayesian engine (brms) incomplete/ragged NESTED random, Designs 2 & 3,
 subject level.** `engine = "brms"` now fits incomplete/ragged **nested random**-rater ICCs at the subject

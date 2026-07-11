@@ -3470,3 +3470,121 @@ consequences → references.
   regenerated n_rep-240 fixture with ragged coverage < .90 would reopen this (P ≈ 1e-5 under the review's
   estimate). With this verdict M32 Slice 2 unblocks; the milestone ships both nested designs (2/3) random at
   the subject level — the mop-up hypothesis (random → no 2b → nominal) held after the tail-event scare.
+
+## ADR-043: M33 scope — Bayesian engine (brms) parity mop-up: incomplete single-level one-way + fixed-rater & multilevel within-cell replicates
+- Date: 2026-07-10
+- Status: accepted
+- Context: The incomplete/ragged brms row is closed — M30 (ADR-040) random, M31 (ADR-041) fixed, M32
+  (ADR-042) nested random. A short retro read the Bayesian arc as having moved from *discovery* (M27/M28's
+  2b moment correction for the finite-population θ² functional) into *mop-up* (M29–M32 all shipped without a
+  corrective Fable review; M32's one gated review resolved to "no shortfall, a Monte-Carlo tail event").
+  What remains on the "brms parity" ledger — the **last clean-oracle estimand gaps** the balanced/complete
+  and incomplete arcs left behind — are three single corners: incomplete single-level **one-way**,
+  **fixed-rater** within-cell replicates, and **multilevel** within-cell replicates (M29 Slice 2 shipped only
+  *two-way random single-level* replicates). No milestone is in flight. The maintainer chose to close these
+  three in one milestone (the "parity mop-up"), the recorded direction **(A)** of the 2026-07-10 planning
+  discussion (`ROADMAP.md`). This ADR opens **M33**.
+  - **The gate is met: every corner has an independent frequentist oracle** (#1) — the precondition the
+    planning discussion set before an ADR (and the reason the M32 incomplete-*fixed*-nested corner was scoped
+    *out*, ADR-029/ADR-042: it had none). Slice 1 (incomplete one-way) → the shipped frequentist glmmTMB/lme4
+    **incomplete one-way** (M6 + the M3 `k_eff` divisor, `COVERAGE.md` §3). Slice 2 (fixed replicates) → the
+    shipped frequentist **M20 Slice 1** (balanced fixed-rater replicates, `theta2r_fixed()` in the rater
+    slot). Slice 3 (multilevel replicates) → the shipped frequentist **M20 Slice 2** (crossed Design 1
+    six-component + nested Design 2 five-component, balanced). All three ship as engine parity, not research.
+  - **Engine/interval parity, not new estimand work** (cf. M5.5/M7/M15/M21/M23–M32): each estimand is a
+    *shipped* frequentist coefficient now read off posterior draws. No new estimand-spec (reuses
+    [`M6-oneway.md`](estimand-specs/M6-oneway.md) and
+    [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md)), no new user-facing
+    argument, no new dependency (`brms` already a `Suggests`); additive, non-breaking (#6) — new valid
+    `engine = "brms"` combinations only, by narrowing two existing brms guards (`icc.R:1122`, `icc.R:1158`).
+  - **Where the risk is, per slice (and why it is low).** The three corners sit in *different* regimes, and
+    only one carries a genuine empirical unknown:
+    - **Slice 1 — incomplete/ragged one-way, RANDOM.** Each ICC is a **ratio of variance components** — a
+      clean posterior push-forward, **no θ² functional**, so the M27/M28 2b moment correction never engages
+      (the M30 regime). `fit_brms_oneway()` (M26 Slice 1) runs *unchanged* on ragged data; the M3/M6 `k_eff`
+      harmonic-mean divisor is engine-agnostic and runs **pre-dispatch**. **The one unknown is ragged-data
+      coverage of the percentile credible interval** (the CI method's oracle IS coverage, #1). As M30, the
+      working hypothesis is **nominal**. Per M32/ADR-042 Amendment 2, the seeded coverage fixture uses
+      **n_rep ≥ 240** (the ≥ .88 ragged pin false-alarms ~0.7%/cell at n_rep 80).
+    - **Slice 2 — balanced fixed-rater replicates.** θ²_r *is* a finite-population functional, but on
+      **balanced** replicate data `b = tr(C·Σ_post)/(k−1) ≈ 0` (the rater means come from the whole sample),
+      so the 2b moment correction is **negligible/invisible** — the M26/M27-S1 regime, *not* the ragged M31
+      regime where 2b went live. On balanced data θ²_r = σ²_r, so fixed reproduces the random replicate
+      coefficients (the M20 Slice 1 identity). Reuses the shipped `brms_theta2r_moment_draws()` — no new θ²
+      helper.
+    - **Slice 3 — balanced multilevel replicates, RANDOM.** Variance-ratio push-forward (no θ²); the residual
+      splits into the interaction σ²_{csr} and pure error at the subject level, with the `occasions` per-draw
+      divisor (M29 machinery). Balanced → coverage tracks M29 (nominal expected). The lift is *mechanical*
+      (two fits mirroring the M20 Slice 2 shapes), not statistical.
+  - **Fable posture (#19):** the only genuine unknown is Slice 1's ragged-data coverage; Slices 2–3 are
+    balanced and expected nominal by construction. **If** the Slice 1 seeded oracle undercovers, characterize
+    the finding honestly (#18) and **recommend a gated Fable review and stop** — never auto-invoke. Fable is
+    not pre-authorized by this ADR.
+- Decision:
+  - **Scope: three thin slices, ordered by oracle risk (#15)** — Slice 1 first (the one ragged corner, the
+    coverage unknown), then the two balanced replicate corners (fixed, then the larger multilevel lift).
+  - **Slice 1 — Bayesian incomplete/ragged single-level one-way.** Narrow the `if (oneway || replicates)`
+    clause of the `!balanced` brms guard (`icc.R:1158`) to drop `oneway` for the single-level case;
+    `fit_brms_oneway()` runs unchanged; the M3/M6 `k_eff` divisor + connectedness compose ICC(1)/ICC(1,k) per
+    posterior draw. No new fit. **Oracle O-Bayes-IOneway** (#1): (a) **reduction** — at balance the ragged
+    one-way fit ≡ the shipped M26 Slice 1 balanced one-way; (b) **-agree** — MAP tracks the glmmTMB/lme4
+    frequentist incomplete one-way point by **CONTAINMENT** (inside the credible interval), not pointwise
+    equality (the ADR-036 half-*t* posture); (c) **-coverage** — a committed seeded ragged coverage fixture
+    at **n_rep ≥ 240**, companion to the M30 `oracle-bayesian-incomplete.R`.
+  - **Slice 2 — Bayesian fixed-rater within-cell replicates (balanced).** Narrow the
+    `if (replicates && (multilevel || raters == "fixed"))` guard (`icc.R:1122`) to admit single-level
+    `raters = "fixed"` replicates; a fixed-rater replicate fit
+    (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`) reusing the M20 Slice 1 formula + the M29
+    replicate machinery, with θ²_r read per draw via the shipped `brms_theta2r_moment_draws()` (2b ≈ 0 on
+    balanced data). **Oracle O-Bayes-FRep:** reduction (balanced fixed ≡ random replicate coefficients, the
+    M20 identity θ²_r = σ²_r) + glmmTMB M20 Slice 1 containment + seeded coverage (balanced, standard n_rep) +
+    average > single.
+  - **Slice 3 — Bayesian multilevel within-cell replicates (balanced).** Narrow the same `icc.R:1122` guard's
+    `multilevel` clause; crossed Design 1 (`(1|cluster:subject:rater)`, six components) and nested Design 2
+    (five components) replicate fits mirroring M20 Slice 2, the residual splitting into σ²_{csr} + pure error
+    at the subject level with the `occasions` per-draw divisor. Design 3 replicate-split stays ⚫ by design
+    (multilevel one-way — no separable interaction, as M20). **Oracle O-Bayes-MLRep:** reduction
+    (occasion-averaged ≡ M5/M8 on cell means) + glmmTMB M20 Slice 2 containment + seeded coverage.
+  - **Oracles (#1, no textbook worked example — as M20/M29):** reduction + glmmTMB/lme4 agreement (containment)
+    + committed seeded coverage; live `-agree` fits `skip_on_ci()`, CI covered by the committed fixtures.
+  - **Conditional gated Fable review (#19):** only Slice 1's ragged coverage is a real unknown; if it
+    undercovers, characterize honestly and **recommend-and-stop**.
+  - **Deferred out of M33** (record so not rediscovered): **ragged / occasion-averaged** replicates
+    (`occasions = "average"` on unequal cell counts — 🟣 research, no scalar effective-`n_o` divisor,
+    ADR-030/M20; and ragged×fixed / ragged×multilevel replicates, the compound corners); incomplete **fixed**
+    nested + **cluster-level** fixed (research, no frequentist oracle — direction **(C)**, ADR-029/ADR-042);
+    the averaged cluster-level **`ICC(c,k)` incomplete divisor** (🟣 Wave-3, M9 §9); Bayesian **numeric-unit
+    `d_study()`**; the **(B) customization** milestone — user-exposed **`prior=`** API + **HPDI** intervals +
+    **selectable** `posterior` coupling (the next milestone after this mop-up); **rstanarm** backend. All stay
+    in [`ROADMAP.md`](ROADMAP.md).
+- Consequences: On M33 close, the **Bayesian parity mop-up (direction A) is complete** — `engine = "brms"`
+  covers every clean-oracle estimand gap the balanced and incomplete arcs left: single-level one-way
+  (balanced M26 + now incomplete), fixed-rater replicates, and multilevel replicates (crossed D1 + nested
+  D2). The remaining brms ledger reduces to **(B)** customization (`prior=`, HPDI, selectable coupling) and
+  **(C)** research/blocked (incomplete fixed nested, cluster-level fixed — both need a frequentist estimand
+  built first). Mechanically the milestone is two guard clauses narrowed plus one fixed and two multilevel
+  replicate fits, all reusing shipped machinery (no new θ² helper, no new argument, no new dependency); it
+  carries the *lowest* residual risk of the mop-up corners — only Slice 1 is ragged, Slice 2's 2b is
+  negligible on balanced data, Slice 3 is a variance-ratio push-forward. If the Slice 1 coverage oracle is
+  nominal, M33 ships clean with **no Fable review** (as M29/M30); if it undercovers, the honest finding is
+  characterized and a gated review is **recommended, not performed** (#19). This ADR authorizes M33 code; the
+  `MILESTONES.md` M33 board and the `STATUS.md` flip are the milestone-start companions (M33 is scoped here
+  but **no slice work has begun**).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + glmmTMB/lme4 agreement + coverage; the gate that
+  every corner has a frequentist oracle), #2/#14/#15 (name the estimand / thin vertical slices; oracle-risk
+  ordering — ragged one-way before the balanced replicate corners), #3 (boundary-aware — `posterior_mode()`;
+  MC-CI), #4 (committed seeded reference; no tuning to oracle; n_rep ≥ 240 for the ragged cell), #5/#8
+  (classed brms refusals for the still-deferred corners; `cli` guard messages), #6 (additive, non-breaking —
+  new engine × design combinations), #12 (sourced estimands), #16 (tracking in-commit), #18 (report the run —
+  containment not asserted equality; characterize coverage honestly), #19 (Fable never auto-invoked —
+  conditional on a Slice 1 coverage shortfall, recommend-and-stop); ten Hove, Jorgensen & van der Ark (2022)
+  (one-way / within-cell-replicate designs), (2020) §3.3/§4.1 (half-*t*(4,0,1) on SDs; DGP), §4.2
+  (MAP/percentile); estimand-specs [`M6-oneway.md`](estimand-specs/M6-oneway.md),
+  [`M17-within-cell-replicates.md`](estimand-specs/M17-within-cell-replicates.md) (no new spec); ADR-008 (M3
+  `k_eff`), ADR-026 (M17 replicates), ADR-030 (M20 — the frequentist fixed/multilevel replicate oracles this
+  mirrors), ADR-033 (M23 Bayesian engine — the seam extended), ADR-036 (M26 — `fit_brms_oneway()` reused),
+  ADR-039 (M29 — `fit_brms_replicates()` machinery reused; single-level random replicates), ADR-040 (M30 —
+  the incomplete/ragged random regime: variance-ratio push-forward, no 2b), ADR-041 (M31 — 2b live on ragged
+  fixed data; here balanced → negligible), ADR-042 (M32 — the n_rep ≥ 240 ragged-coverage convention),
+  ADR-002 (optional engines behind `Suggests`); `project/ROADMAP.md` (direction (A) being promoted),
+  `project/COVERAGE.md`.
