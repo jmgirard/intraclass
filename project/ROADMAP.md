@@ -189,15 +189,11 @@ helpers* item below (sample-size / CI-width), where it belongs.
   shortfall** (same incidence at n=240 → .9458, 2,000-fit frequentist → .9555, uniform PIT), fixture
   regenerated at n_rep 240 with pins unchanged, and **n_rep ≥ 240 adopted as the convention for future ragged
   coverage cells** (the ≥ .88 pin false-alarms ~0.7%/cell at n_rep 80). **Still parked**, now grouped and
-  *sequenced* (planning discussion 2026-07-10 — a recorded direction, not yet an ADR):
-    - **(A) ~~Next up~~ — PROMOTED to M33 (ADR-043, branch `m33-bayes-parity-mopup`, 2026-07-10).** The
-      Bayesian parity mop-up (the last clean-oracle estimand gaps): **incomplete single-level one-way**
-      (Slice 1) and **fixed-rater + multilevel within-cell replicates** (Slices 2–3; M29 shipped only *two-way
-      random single-level* replicates). **The gate was met** — each corner has a frequentist oracle (glmmTMB/lme4
-      incomplete one-way = M6 + M3 `k_eff`; M20 Slice 1 fixed / Slice 2 multilevel replicates) — so all three
-      ship as parity, not research. Details now live in the M33 board in [`MILESTONES.md`](MILESTONES.md); this
-      line stays until M33 ships (then it is removed, ADR-015).
-    - **(B) After (A) — one Bayesian-customization milestone, two slices**, theme "let users deviate from a
+  *sequenced* (planning discussion 2026-07-10 — a recorded direction, not yet an ADR). **(A) — the Bayesian
+  parity mop-up — SHIPPED as M33** (ADR-043, PR #38): incomplete single-level one-way + fixed-rater &
+  multilevel within-cell replicates, every oracle nominal (no Fable); its entry is removed here per ADR-015.
+  The remaining sequence:
+    - **(B) Next up — one Bayesian-customization milestone, two slices**, theme "let users deviate from a
       sourced default *with guardrails*." Override is **allowed** — the primary use case is
       prior-sensitivity / method-comparison / simulation studies, which need *arbitrary* priors, so a clean
       escape hatch, **not** a curated whitelist. The milestone's oracle is a **reduction oracle** (defaults

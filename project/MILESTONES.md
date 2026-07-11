@@ -50,10 +50,12 @@ nominal; **Slice 2 (Design 3) fired a gated Fable review** (#19) when the first 
 drew .8625 — **verdict: a Monte-Carlo tail event, no estimator shortfall** (n=240 .9458, 2,000-fit
 frequentist .9555, PIT uniform; ADR-042 Amendment 2), fixture regenerated at n_rep 240 with pins unchanged,
 and n_rep ≥ 240 adopted as the convention for future ragged coverage cells. **M33 (ADR-043) — the Bayesian
-parity mop-up (incomplete single-level one-way + fixed-rater & multilevel within-cell replicates) — is now
-in flight** (branch `m33-bayes-parity-mopup`), closing the last clean-oracle estimand gaps on the brms
-ledger; each of its three corners has a frequentist oracle (the gate), so all ship as parity, not research.
-Each milestone is scoped by an ADR at its start
+parity mop-up (incomplete single-level one-way + fixed-rater & multilevel within-cell replicates) — then
+shipped** (PR #38), closing the last clean-oracle estimand gaps on the brms ledger: each of its three corners
+had a frequentist oracle (the gate), so all shipped as parity, not research (`fit_brms_oneway()` reused +
+`fit_brms_replicates_fixed()` / `fit_brms_ml_replicates()` / `fit_brms_nested_replicates()` added), and
+**every oracle came back nominal — no Fable review** (the M30 variance-ratio regime). **No milestone is
+currently in flight.** Each milestone is scoped by an ADR at its start
 after a short retro (founding brief §7) and detailed in full here until it ships.
 The arc is a hypothesis, not a contract — reorders get a
 [`DECISIONS.md`](DECISIONS.md) entry (the M9–M13 tail was set by ADR-017; ADR-018
@@ -62,9 +64,8 @@ ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-02
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33).
-**M33 (ADR-043) is currently in flight** (the Bayesian parity mop-up; branch `m33-bayes-parity-mopup`) —
-all three slices shipped (incomplete one-way + fixed & multilevel within-cell replicates), every oracle
-nominal, ready for the finish-task gate + PR; see its board below.
+**No milestone is currently in flight** — M33 (ADR-043, the Bayesian parity mop-up) shipped (PR #38,
+squash-merged to `main` at `34cb974`); the next one needs an ADR after a short retro (founding brief §7).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1153,35 +1154,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Reference: ADR-043 (scope + gate + per-slice regime + Fable posture). Oracles **O-Bayes-IOneway** (Slice 1)
   / **O-Bayes-FRep** (Slice 2) / **O-Bayes-MLRep** (Slice 3) — reduction to the shipped balanced brms fit +
   glmmTMB/lme4 MAP-containment + committed seeded coverage (`REFERENCES.md`).
-- DoD (the board, ADR-015):
-  - [x] **Slice 1 — incomplete/ragged single-level one-way.** DONE. Narrowed `icc.R:1158`
-    (`if (oneway || replicates)` → `if (replicates)`); `fit_brms_oneway()` runs unchanged, M3/M6 `k_eff`
-    threads per draw. Random → variance ratio, no θ² functional (M30 regime). **The one unknown resolved
-    NOMINAL:** O-Bayes-IOneway coverage complete .9375/.9375, ragged (k_eff 3.73) **.9458/.9458** (both ∈
-    [.92, .975], conv 1.00), committed at **n_rep = 240 + per-rep seeding**
-    (`bayesian-incomplete-oneway-oracle.rds`, seed 33100) → **no Fable review**. Live O-Bayes-IOneway-agree
-    glmmTMB/lme4 M6+M3 containment verified. Fixture + refusal tests + full suite (CI mode) green; lint/air
-    clean.
-  - [x] **Slice 2 — fixed-rater within-cell replicates (balanced).** DONE. Narrowed the replicate guard
-    (`icc.R:1127` → `if (replicates && multilevel)`) to admit single-level `raters == "fixed"` replicates +
-    added the brms dispatch branch; new `fit_brms_replicates_fixed()`
-    (`score ~ 1 + rater + (1|subject) + (1|subject:rater)`, θ²_r per draw via the shipped
-    `brms_theta2r_draws()`, 2b ≈ 0 on balanced data). **O-Bayes-FRep NOMINAL:** coverage .9625/.9625
-    (single/average), glmmTMB containment 1.00/1.00, average>single 1.00, MAP relbias −.056/−.024
-    (`bayesian-fixed-replicates-oracle.rds`, seed 33200, n_rep 80) → **no Fable review**. Live
-    O-Bayes-FRep-agree containment verified; fixture + full suite (CI mode) green; lint/air clean.
-  - [x] **Slice 3 — multilevel within-cell replicates (balanced).** DONE. Removed the obsolete brms
-    `replicates && multilevel` guard (the deferred corners — Design 3, fixed, conflated, ragged — are refused
-    engine-agnostically upstream) + added the brms dispatch branches; new `fit_brms_ml_replicates()` (crossed
-    D1, `(1|cluster:subject:rater)` → 6-component) + `fit_brms_nested_replicates()` (nested D2, 5-component),
-    random raters → variance-ratio push-forward, no θ² (plain `fit_brms_common()`). **O-Bayes-MLRep NOMINAL
-    both designs:** coverage crossed .9500/.9500, nested .9625/.9500, glmmTMB containment 1.00, avg>single
-    1.00 (`bayesian-multilevel-replicates-oracle.rds`, seed 33300, n_rep 80/design) → **no Fable review**.
-    Live O-Bayes-MLRep-agree containment (both designs) verified; fixture + full suite (CI mode) green;
-    lint/air clean.
-  - [ ] Cross-cutting: roxygen/NEWS/COVERAGE/REFERENCES updated in-commit (#16); new deferred-corner brms
-    refusal messages retargeted; `air format` + `lintr::lint_package()` clean; installed-pkg drive of each new
-    path (`NOT_CRAN=true`, live Stan fits `skip_on_ci`); `R CMD check --as-cran`; full CI matrix green.
 - Deferred out of M33 (record so not rediscovered): **ragged / `occasions = "average"`** replicates (🟣
   research, no scalar effective-`n_o` divisor, ADR-030) and ragged×fixed / ragged×multilevel replicate
   compounds; incomplete **fixed** nested + **cluster-level** fixed (research, no frequentist oracle —
@@ -1189,14 +1161,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   Bayesian **numeric-unit `d_study()`**; the **(B)** customization milestone — **`prior=`** API, **HPDI**
   intervals, **selectable** `posterior` coupling (next); **rstanarm** backend. All stay in
   [`ROADMAP.md`](ROADMAP.md).
-- Status: **all three slices DONE — milestone ready for finish-task/PR.** Branch `m33-bayes-parity-mopup`.
-  Slice 1 (incomplete/ragged single-level one-way): `!balanced` brms guard narrowed, `fit_brms_oneway()`
-  reused, O-Bayes-IOneway **nominal** (ragged .9458). Slice 2 (fixed-rater within-cell replicates): replicate
-  guard narrowed + new `fit_brms_replicates_fixed()`, O-Bayes-FRep **nominal** (.9625, containment 1.00).
-  Slice 3 (multilevel within-cell replicates): brms multilevel-replicate guard removed + new
-  `fit_brms_ml_replicates()` (crossed D1) / `fit_brms_nested_replicates()` (nested D2), O-Bayes-MLRep
-  **nominal** both designs (.95–.9625, containment 1.00). **No Fable review anywhere** — the whole mop-up
-  came back nominal, as the M30 variance-ratio regime predicted (Slice 1's ragged one-way + Slices 2–3's
-  balanced replicates). Next: finish-task gate (`R CMD check`, installed-pkg drive of the new paths) → PR.
-  Bayesian incomplete **fixed** nested / **cluster-level** / **replicates** / single-level **one-way** stay
-  deferred.
+- Status: **done** (all three slices + cross-cutting DoD; merged via PR #38, squash-merged to `main` at
+  `34cb974`; full CI matrix green 9/9). `engine = "brms"` now covers the last clean-oracle estimand gaps —
+  **Slice 1** incomplete/ragged single-level one-way (`fit_brms_oneway()` reused, narrowed the `!balanced`
+  guard's `oneway` clause; O-Bayes-IOneway ragged .9458/.9458, n_rep 240); **Slice 2** fixed-rater within-cell
+  replicates (new `fit_brms_replicates_fixed()`, θ²_r per draw, 2b ≈ 0 on balanced data → θ²_r = σ²_r;
+  O-Bayes-FRep .9625/.9625, containment 1.00); **Slice 3** multilevel within-cell replicates (new
+  `fit_brms_ml_replicates()` crossed D1 6-component + `fit_brms_nested_replicates()` nested D2 5-component,
+  variance-ratio push-forward; O-Bayes-MLRep crossed .9500/.9500, nested .9625/.9500, containment 1.00). Two
+  brms guards narrowed + one removed + three new fits; no new estimand-spec/argument/dependency. **Every
+  oracle nominal — no Fable review anywhere** (the M30 variance-ratio regime held, exactly as ADR-043
+  predicted). `R CMD check --as-cran` 0/0/1; installed-pkg all three new paths driven through
+  `library(intraclass)`; full suite (CI mode) 0 failures.
