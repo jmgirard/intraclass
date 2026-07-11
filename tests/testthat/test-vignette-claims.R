@@ -113,12 +113,12 @@ test_that("fixed and random diverge on incomplete data", {
   expect_false(isTRUE(all.equal(rnd$estimate, fix$estimate, tolerance = 1e-4)))
 })
 
-# --- advanced-article D-study claims -------------------------------------
+# --- D-study claims (d-studies-and-replicates.Rmd) -----------------------
 
 test_that("the D-study projection anchors to ICC(A,k) at m = n_raters", {
   skip_if_not_installed("glmmTMB")
 
-  # The advanced article states Phi(m) at m = 4 (the raters in `ratings`) equals
+  # The D-studies article states Phi(m) at m = 4 (the raters in `ratings`) equals
   # the ICC(A,k) icc() reports directly. Point estimates are seed-independent.
   fit <- icc(ratings, score, subject, rater, seed = 1)
   proj <- d_study(fit, m = 1:8, seed = 1)
@@ -145,11 +145,11 @@ test_that("a disconnected design is rejected, not guessed at", {
   )
 })
 
-# Engine-choice claim (advanced.Rmd) --------------------------------------
-# The advanced article states the lme4 and glmmTMB engines return the same
+# Engine-choice claim (engines.Rmd) ---------------------------------------
+# The engines article states the lme4 and glmmTMB engines return the same
 # coefficients to within rounding on `ratings`. Back the claim numerically (#1).
 
-test_that("advanced.Rmd: lme4 and glmmTMB engines agree on `ratings`", {
+test_that("engines.Rmd: lme4 and glmmTMB engines agree on `ratings`", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")
@@ -159,7 +159,7 @@ test_that("advanced.Rmd: lme4 and glmmTMB engines agree on `ratings`", {
   expect_equal(l$estimate, g$estimate, tolerance = 1e-4)
 })
 
-test_that("advanced.Rmd: lavaan matches glmmTMB on consistency, differs slightly on agreement", {
+test_that("engines.Rmd: lavaan matches glmmTMB on consistency, differs slightly on agreement", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lavaan")
 
@@ -211,13 +211,13 @@ test_that("advanced.Rmd: lavaan matches glmmTMB on consistency, differs slightly
   expect_lt(abs(la1 - ga1), 0.02) # but close (asymptotically equivalent)
 })
 
-# Plotting claim (advanced.Rmd) -------------------------------------------
-# The "Visualising a fit" section's variance-component plot claims the rater
+# Plotting claim (d-studies-and-replicates.Rmd) ---------------------------
+# The "Visualizing a fit" section's variance-component plot claims the rater
 # component is the largest on `ratings`, which is why absolute agreement -- the
 # only coefficient that charges between-rater differences as error -- is so much
 # lower than the averaged/consistency coefficients. Back the claim numerically (#1).
 
-test_that("advanced.Rmd: the rater component dominates on `ratings`", {
+test_that("d-studies-and-replicates.Rmd: the rater component dominates on `ratings`", {
   skip_if_not_installed("glmmTMB")
 
   comp <- icc(ratings, score, subject, rater, seed = 1)$components
@@ -225,12 +225,12 @@ test_that("advanced.Rmd: the rater component dominates on `ratings`", {
   expect_gt(comp$rater, comp$residual)
 })
 
-# Multilevel claims (advanced.Rmd) ----------------------------------------
-# The advanced article's multilevel example asserts that on the simulated
+# Multilevel claims (multilevel-designs.Rmd) ------------------------------
+# The multilevel-designs article's example asserts that on the simulated
 # `school` design the cluster-level ICC is the larger of the two levels. Rebuild
 # the exact seeded dataset the vignette uses and check the claim holds (#1).
 
-test_that("advanced.Rmd: cluster-level ICC exceeds subject-level on `school`", {
+test_that("multilevel-designs.Rmd: cluster-level ICC exceeds subject-level on `school`", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(2025)
@@ -298,7 +298,7 @@ test_that("advanced.Rmd: cluster-level ICC exceeds subject-level on `school`", {
 # k below the panel size, the single-rater cluster ICC(c,1) is available, and the
 # averaged cluster ICC(c,k) on incomplete data is refused. Back each claim (#1).
 
-test_that("advanced.Rmd: ragged `school` supports subject + cluster ICC(c,1)", {
+test_that("multilevel-designs.Rmd: ragged `school` supports subject + cluster ICC(c,1)", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(2025)
@@ -384,7 +384,7 @@ test_that("advanced.Rmd: ragged `school` supports subject + cluster ICC(c,1)", {
 # the fixed-rater subject-level ICCs match the random-rater ones (consistency
 # identical, absolute agreement coinciding on balanced data). Back the claim (#1).
 
-test_that("advanced.Rmd: balanced fixed-rater `school` matches random at the subject level", {
+test_that("multilevel-designs.Rmd: balanced fixed-rater `school` matches random at the subject level", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(2025)
@@ -447,7 +447,7 @@ test_that("advanced.Rmd: balanced fixed-rater `school` matches random at the sub
 # claims -- the design is inferred, nested designs report the subject level only,
 # and Design 3 is the agreement-only one-way (labels ICC(1)/ICC(k)) -- hold (#1).
 
-test_that("advanced.Rmd: nested relabels of `school` infer Designs 2 and 3", {
+test_that("multilevel-designs.Rmd: nested relabels of `school` infer Designs 2 and 3", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(2025)

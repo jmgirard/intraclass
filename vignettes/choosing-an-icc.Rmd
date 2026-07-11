@@ -206,7 +206,7 @@ within clinics -- you may instead want the reliability of the *cluster* mean, a
 multilevel ICC (ten Hove, Jorgensen & van der Ark, 2022). Pass a `cluster` column
 to `icc()` and it reports the **subject-level** (within-cluster) and
 **cluster-level** (between-cluster) coefficients side by side. The
-[*Advanced*](advanced.html) article works a full example.
+[*Multilevel designs*](multilevel-designs.html) article works a full example.
 
 ## Naming crosswalk
 

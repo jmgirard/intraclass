@@ -100,9 +100,11 @@ school <- data.frame(
 icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2024)
 ```
 
-The [*Advanced*](https://jmgirard.github.io/intraclass/articles/advanced.html)
-article works through incomplete and nested multilevel designs, the estimation
-engines, the `autoplot()` plots, and `choose_icc()` in full.
+The [*Multilevel designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html)
+article works through incomplete and nested multilevel designs; separate articles cover the
+[estimation engines](https://jmgirard.github.io/intraclass/articles/engines.html),
+[interval methods](https://jmgirard.github.io/intraclass/articles/interval-methods.html),
+and [D-studies and within-cell replicates](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.html).
 
 ## Related work
 

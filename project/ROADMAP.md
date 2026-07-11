@@ -109,7 +109,13 @@ helpers* item below (sample-size / CI-width), where it belongs.
   restructure decision. Every displayed number must stay computed live + claim-tested
   (#1/#4/#12), and any new article joins the `_pkgdown.yml` articles index
   ([[pkgdown-reference-index-new-exports]] applies to articles too). Promote to a
-  docs milestone once the split/scope is decided.
+  docs milestone once the split/scope is decided. **PROMOTED — scheduled as M35**
+  (ADR-045, 2026-07-10): the triage pass ran (five false "planned for later" claims found
+  in `advanced.Rmd`; the Bayesian arc undocumented; `advanced.Rmd` overloaded) and the
+  maintainer chose **Update + Split** into four focused articles. Detailed scope now lives in
+  [`MILESTONES.md`](MILESTONES.md); this entry is retained only until M35 ships, then removed
+  per ADR-015. The set-aside **clarity/accessibility rewrite** of `getting-started` /
+  `choosing-an-icc` stays parked here as a later docs pass.
 - **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
   lme4 interval for singular fits (glmmTMB covers this today via the
   degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted
