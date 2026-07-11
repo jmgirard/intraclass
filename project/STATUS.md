@@ -1,6 +1,80 @@
 # Project status
 
-- Milestone: **M28 — Frequentist nested-fixed MC-interval coverage** — **shipped** (PR #33, ADR-038;
+- Active milestone: **none** — M34 shipped (PR #39, ADR-044; squash-merged to `main` at `3fc133c`). The
+  Bayesian **customization** milestone (direction (B), `ROADMAP.md`) — interface/customization work, **not**
+  new estimand (cf. M5.5/M7/M11/M16, no estimand-spec); two additive, non-breaking optional args whose defaults
+  reproduce shipped M23+ results **bit-identically**, each backed by a **REDUCTION oracle** (no coverage claim,
+  no Fable review). **Slice 1** — `icc(prior = NULL)` (brms-only; default = sourced half-*t*(4,0,1)) threaded
+  through `fit_brms_common()` via an injected `brm_args$prior` (**no `fit_brms_*` wrapper changes**; `prior`
+  stays reserved in `brm_args`), classed `intraclass_custom_prior` footgun warning; O-PriorReduce (reduction +
+  bit-identical round-trip + override-takes-effect + classed guards). **Slice 2** —
+  `posterior_summary = c("percentile","hpdi")` (default percentile) under `ci_method = "posterior"`;
+  dependency-free `hpdi_interval()` (index arithmetic ≡ `coda::HPDinterval`), `(HPDI)` header label +
+  `ci$posterior_summary` field; O-HPDI (percentile default bit-identical + `coda` agreement ≤ 1e-8 + same MAP /
+  no wider than percentile + classed guard). `coda` added test-only to `Suggests` (no new `Imports`). Full CI
+  matrix green 9/9; `R CMD check --as-cran` 0/0/1; full suite (CI mode) 1227/0/21; installed-pkg both new paths
+  driven. **No milestone is currently in flight; the next needs an ADR after a short retro (founding brief §7).**
+- Prior milestone: **M33** shipped (PR #38, ADR-043; squash-merged to `main` at `34cb974`).
+  `engine = "brms"` now covers the **last clean-oracle estimand gaps** on the parity ledger, in three thin
+  slices, each a *shipped* frequentist coefficient read off posterior draws (engine/interval parity, not new
+  estimand work, #6 — no new estimand-spec/argument/dependency; two brms guards narrowed + one removed +
+  three new `fit_brms_*` helpers). **Slice 1** incomplete/ragged single-level **one-way**
+  (`fit_brms_oneway()` reused; random → variance ratio, no θ² — the M30 regime); O-Bayes-IOneway coverage
+  ragged **.9458/.9458** (n_rep 240). **Slice 2** **fixed-rater** within-cell replicates
+  (`fit_brms_replicates_fixed()`; θ²_r per draw, 2b ≈ 0 on balanced data → θ²_r = σ²_r); O-Bayes-FRep
+  **.9625/.9625**, containment 1.00. **Slice 3** **multilevel** replicates (`fit_brms_ml_replicates()`
+  crossed D1 6-component + `fit_brms_nested_replicates()` nested D2 5-component; variance-ratio push-forward);
+  O-Bayes-MLRep crossed **.9500/.9500**, nested **.9625/.9500**, containment 1.00. **Every oracle nominal —
+  no Fable review anywhere** (the M30 variance-ratio regime held, exactly as ADR-043 predicted). Full CI
+  matrix green 9/9; `R CMD check --as-cran` 0/0/1; installed-pkg all three new paths driven. **No milestone
+  is currently in flight; the next needs an ADR after a short retro (founding brief §7).**
+- Prior milestone: **M32** — shipped (PR #37, ADR-042; squash-merged to `main` at `dd8e3e2`).
+  `engine = "brms"` now fits incomplete/ragged **nested random**-rater ICCs at the subject level for both
+  designs — Design 2 (`fit_brms_nested_clusters`, Slice 1) and Design 3 (`fit_brms_nested_subjects`, the
+  multilevel one-way, Slice 2) — the Bayesian sibling of the frequentist M19, completing the "brms ×
+  incomplete × random" row. **Engine/interval parity** (#6): both slices narrowed the same `!balanced` brms
+  guard's `ml_design != "crossed"` clause; no new fit, no θ² helper (random → variance ratios, no 2b, the M30
+  regime). **Scoped RANDOM-only by an oracle-first catch** (incomplete *fixed* nested has no frequentist
+  oracle, ADR-029). Slice 1 (Design 2) ragged coverage **NOMINAL** (.925/.925). **Slice 2 (Design 3)
+  triggered a gated Fable review** (#19): the first n_rep-80 ragged cell drew **.8625** (below ≥ .88) — pin
+  NOT loosened (#4), Fable NOT auto-invoked, characterized honestly (#18); **verdict (ADR-042 Amendment 2): a
+  Monte-Carlo tail event, no estimator shortfall** (same incidence n=240 → .9458, 2,000-fit frequentist →
+  .9555, PIT uniform). Fixture regenerated at **n_rep = 240 + per-rep seeding**, pins unchanged (.9375/.9417),
+  and **n_rep ≥ 240 adopted for future ragged coverage cells**. Fable brief/response/harness committed as #19
+  provenance. `R CMD check --as-cran` 0/0/0; full CI matrix green 9/9. **No milestone is currently in flight;
+  the next needs an ADR after a short retro (founding brief §7).**
+- Prior milestone: **M31** shipped (PR #36, ADR-041; squash-merged to `main` at `5d6848e`).
+  `engine = "brms"` + `raters = "fixed"` now fits incomplete/ragged data at the two-way single level (Slice 1,
+  `fit_brms_fixed()`) and the crossed Design-1 fixed multilevel subject level (Slice 2,
+  `fit_brms_multilevel_fixed()`) — the Bayesian sibling of the frequentist M3 / M18 Slice 1. **Engine/interval
+  parity, not new estimand work** (#6): both narrowed the one `!balanced` brms guard — **no new fit, no new θ²
+  helper** (`brms_theta2r_draws()` / `brms_theta2r_moment_draws()` ship), no new argument/dependency. **The
+  milestone's genuine risk — the 2b θ² moment correction going live single-level for the first time on ragged
+  fixed data (`b ≠ 0`) — resolved NOMINAL for both** (O-Bayes-IFixed .965/.965 vs complete .955/.955;
+  O-Bayes-IFML-fixed .91/.91 vs .95/.95 within MC error) → **no Fable review** (ADR-041's conditional
+  escalation not triggered). Live -agree glmmTMB M3/M18 containment verified. **No milestone is currently in
+  flight; the next needs an ADR after a short retro (founding brief §7).**
+- Prior milestone: **M30 — Bayesian incomplete/ragged, two-way random + crossed multilevel random** — **shipped**
+  (PR #35, ADR-040; squash-merged to `main` at `9d2f0ed`).
+  `engine = "brms"` fits incomplete/ragged **random**-rater ICCs at the two-way single level (Slice 1) and
+  the crossed Design-1 multilevel subject + cluster-`ICC(c,1)` levels (Slice 2) — the Bayesian sibling of the
+  frequentist M3/M9. **Engine/interval parity, not new estimand work** (#6): both were narrowings of the one
+  `!balanced` brms guard, reusing the shipped M3/M9 `k_eff`/connectedness read off posterior draws — no new
+  fit, no new argument, no new dependency. Random → variance ratios, so no θ² functional and no 2b moment
+  correction (the M29 regime). **The milestone's one unknown — ragged-data credible-interval coverage through
+  `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
+  ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
+  caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
+- Prior milestone: **M29 — Bayesian engine (brms), conflated diagnostic + within-cell replicates,
+  two-way random, balanced/complete** — **shipped** (PR #34, ADR-039; squash-merged to `main` at
+  `be4e25f`). The two remaining low-risk Bayesian parity follow-ons, both **variance-ratio**
+  push-forwards (no θ² moment correction → no Fable review): the **conflated** diagnostic
+  (`level = "conflated"`, ten Hove Eq. 14 — reads off the shipped M24 `fit_brms_multilevel()`
+  five-component draws, no new fit) and **within-cell replicates** (`fit_brms_replicates()`; σ²_res →
+  σ²_sr + σ²_e with an `occasions` per-draw divisor). Oracles O-Bayes-Conflated (Eq-14 identity +
+  coverage + glmmTMB containment) / O-Bayes-Rep (single/average coverage + glmmTMB containment +
+  average > single). No new estimand/spec/argument/dependency.
+- Prior milestone: **M28 — Frequentist nested-fixed MC-interval coverage** — **shipped** (PR #33, ADR-038;
   squash-merged to `main` at `e6ce64d`). The spun-off M27 corollary (ADR-037 §6): the shipped frequentist
   nested-fixed θ²_{r:c} Monte-Carlo interval (`theta2r_nested_draws()`) undercovered the nested finite
   population, worsening with cluster count (boundary coverage .95/.86/.57 as C_n=5/20/80; worst ≈.37) — an
@@ -125,71 +199,6 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active milestone: **none** — M34 shipped (PR #39, ADR-044; squash-merged to `main` at `3fc133c`). The
-  Bayesian **customization** milestone (direction (B), `ROADMAP.md`) — interface/customization work, **not**
-  new estimand (cf. M5.5/M7/M11/M16, no estimand-spec); two additive, non-breaking optional args whose defaults
-  reproduce shipped M23+ results **bit-identically**, each backed by a **REDUCTION oracle** (no coverage claim,
-  no Fable review). **Slice 1** — `icc(prior = NULL)` (brms-only; default = sourced half-*t*(4,0,1)) threaded
-  through `fit_brms_common()` via an injected `brm_args$prior` (**no `fit_brms_*` wrapper changes**; `prior`
-  stays reserved in `brm_args`), classed `intraclass_custom_prior` footgun warning; O-PriorReduce (reduction +
-  bit-identical round-trip + override-takes-effect + classed guards). **Slice 2** —
-  `posterior_summary = c("percentile","hpdi")` (default percentile) under `ci_method = "posterior"`;
-  dependency-free `hpdi_interval()` (index arithmetic ≡ `coda::HPDinterval`), `(HPDI)` header label +
-  `ci$posterior_summary` field; O-HPDI (percentile default bit-identical + `coda` agreement ≤ 1e-8 + same MAP /
-  no wider than percentile + classed guard). `coda` added test-only to `Suggests` (no new `Imports`). Full CI
-  matrix green 9/9; `R CMD check --as-cran` 0/0/1; full suite (CI mode) 1227/0/21; installed-pkg both new paths
-  driven. **No milestone is currently in flight; the next needs an ADR after a short retro (founding brief §7).**
-- Prior milestone: **M33** shipped (PR #38, ADR-043; squash-merged to `main` at `34cb974`).
-  `engine = "brms"` now covers the **last clean-oracle estimand gaps** on the parity ledger, in three thin
-  slices, each a *shipped* frequentist coefficient read off posterior draws (engine/interval parity, not new
-  estimand work, #6 — no new estimand-spec/argument/dependency; two brms guards narrowed + one removed +
-  three new `fit_brms_*` helpers). **Slice 1** incomplete/ragged single-level **one-way**
-  (`fit_brms_oneway()` reused; random → variance ratio, no θ² — the M30 regime); O-Bayes-IOneway coverage
-  ragged **.9458/.9458** (n_rep 240). **Slice 2** **fixed-rater** within-cell replicates
-  (`fit_brms_replicates_fixed()`; θ²_r per draw, 2b ≈ 0 on balanced data → θ²_r = σ²_r); O-Bayes-FRep
-  **.9625/.9625**, containment 1.00. **Slice 3** **multilevel** replicates (`fit_brms_ml_replicates()`
-  crossed D1 6-component + `fit_brms_nested_replicates()` nested D2 5-component; variance-ratio push-forward);
-  O-Bayes-MLRep crossed **.9500/.9500**, nested **.9625/.9500**, containment 1.00. **Every oracle nominal —
-  no Fable review anywhere** (the M30 variance-ratio regime held, exactly as ADR-043 predicted). Full CI
-  matrix green 9/9; `R CMD check --as-cran` 0/0/1; installed-pkg all three new paths driven. **No milestone
-  is currently in flight; the next needs an ADR after a short retro (founding brief §7).**
-- Prior milestone: **M32** — shipped (PR #37, ADR-042; squash-merged to `main` at `dd8e3e2`).
-  `engine = "brms"` now fits incomplete/ragged **nested random**-rater ICCs at the subject level for both
-  designs — Design 2 (`fit_brms_nested_clusters`, Slice 1) and Design 3 (`fit_brms_nested_subjects`, the
-  multilevel one-way, Slice 2) — the Bayesian sibling of the frequentist M19, completing the "brms ×
-  incomplete × random" row. **Engine/interval parity** (#6): both slices narrowed the same `!balanced` brms
-  guard's `ml_design != "crossed"` clause; no new fit, no θ² helper (random → variance ratios, no 2b, the M30
-  regime). **Scoped RANDOM-only by an oracle-first catch** (incomplete *fixed* nested has no frequentist
-  oracle, ADR-029). Slice 1 (Design 2) ragged coverage **NOMINAL** (.925/.925). **Slice 2 (Design 3)
-  triggered a gated Fable review** (#19): the first n_rep-80 ragged cell drew **.8625** (below ≥ .88) — pin
-  NOT loosened (#4), Fable NOT auto-invoked, characterized honestly (#18); **verdict (ADR-042 Amendment 2): a
-  Monte-Carlo tail event, no estimator shortfall** (same incidence n=240 → .9458, 2,000-fit frequentist →
-  .9555, PIT uniform). Fixture regenerated at **n_rep = 240 + per-rep seeding**, pins unchanged (.9375/.9417),
-  and **n_rep ≥ 240 adopted for future ragged coverage cells**. Fable brief/response/harness committed as #19
-  provenance. `R CMD check --as-cran` 0/0/0; full CI matrix green 9/9. **No milestone is currently in flight;
-  the next needs an ADR after a short retro (founding brief §7).**
-- Prior milestone: **none** — M31 shipped (PR #36, ADR-041; squash-merged to `main` at `5d6848e`).
-  `engine = "brms"` + `raters = "fixed"` now fits incomplete/ragged data at the two-way single level (Slice 1,
-  `fit_brms_fixed()`) and the crossed Design-1 fixed multilevel subject level (Slice 2,
-  `fit_brms_multilevel_fixed()`) — the Bayesian sibling of the frequentist M3 / M18 Slice 1. **Engine/interval
-  parity, not new estimand work** (#6): both narrowed the one `!balanced` brms guard — **no new fit, no new θ²
-  helper** (`brms_theta2r_draws()` / `brms_theta2r_moment_draws()` ship), no new argument/dependency. **The
-  milestone's genuine risk — the 2b θ² moment correction going live single-level for the first time on ragged
-  fixed data (`b ≠ 0`) — resolved NOMINAL for both** (O-Bayes-IFixed .965/.965 vs complete .955/.955;
-  O-Bayes-IFML-fixed .91/.91 vs .95/.95 within MC error) → **no Fable review** (ADR-041's conditional
-  escalation not triggered). Live -agree glmmTMB M3/M18 containment verified. **No milestone is currently in
-  flight; the next needs an ADR after a short retro (founding brief §7).**
-- Prior milestone: **M30 — Bayesian incomplete/ragged, two-way random + crossed multilevel random** — **shipped**
-  (PR #35, ADR-040; squash-merged to `main` at `9d2f0ed`).
-  `engine = "brms"` fits incomplete/ragged **random**-rater ICCs at the two-way single level (Slice 1) and
-  the crossed Design-1 multilevel subject + cluster-`ICC(c,1)` levels (Slice 2) — the Bayesian sibling of the
-  frequentist M3/M9. **Engine/interval parity, not new estimand work** (#6): both were narrowings of the one
-  `!balanced` brms guard, reusing the shipped M3/M9 `k_eff`/connectedness read off posterior draws — no new
-  fit, no new argument, no new dependency. Random → variance ratios, so no θ² functional and no 2b moment
-  correction (the M29 regime). **The milestone's one unknown — ragged-data credible-interval coverage through
-  `k_eff` — resolved NOMINAL at the subject level for both** (two-way .965/.965, crossed-ml .97/.97 for
-  ICC(A,1)/ICC(A,k_eff); cluster ICC(c,1) .95 tracks complete .92, characterized per the M24 few-cluster
-  caveat), so **no Fable review** (ADR-040's conditional escalation not triggered).
 - Active task: **none** — M34 shipped and merged (PR #39, `3fc133c`). The next milestone needs an ADR after a
   short retro (founding brief §7). Candidates parked in [`ROADMAP.md`](ROADMAP.md): **(C) research/blocked** —
   incomplete **fixed** nested and **cluster-level fixed** (no frequentist oracle; would need a simulation-oracle
@@ -236,7 +245,15 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M34 shipped (PR #39, squash-merged at `3fc133c`); post-merge
+- Updated: 2026-07-10 by main session (Opus) — **STATUS.md hygiene: merged the two overlapping
+  milestone-history chains into one reverse-chronological list.** The top `- Milestone: **M28**` head had gone
+  stale (never advanced as M29–M34 shipped) while a second chain (M34→M30) had been inserted mid-file, and the
+  M29 bullet was missing entirely. Fixed: the M34→M30 chain now leads (headed by `Active milestone: none — M34
+  shipped`), the old M28 head is demoted to `Prior milestone:`, a backfilled M29 bullet (ADR-039, PR #34,
+  `be4e25f`) sits between M30 and M28, and the odd `Prior milestone: none — M31` label is normalized to `M31`.
+  Pure STATUS.md reorder + label fixes + the M29 backfill — no other tracking file or code touched; verified
+  against `MILESTONES.md` that every M21–M34 status is preserved (all shipped, none in flight) with no
+  duplicated or dropped milestones. Prior line: **M34 shipped (PR #39, squash-merged at `3fc133c`); post-merge
   `project/` reconcile.** This commit flips STATUS to M34-shipped, compresses the MILESTONES M34 board to the
   summary form (preserving the "Deferred out of M34" list), advances the MILESTONES preamble + ADR-index (M34
   no longer in flight), sets "Last green CI" to the merge commit, and marks ROADMAP direction (B) shipped
