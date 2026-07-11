@@ -210,11 +210,16 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M35 Slice 3 — add the missing Bayesian coverage** (next). New brms sections in `engines.Rmd`
-  (the half-*t*(4,0,1) prior, `engine = "brms"`, the M34 `prior=` override + footgun note) and
-  `interval-methods.Rmd` (`ci_method = "posterior"`, MAP + percentile/HPDI `posterior_summary`); brms chunks
-  `eval=FALSE` illustrative with **committed real output** (CI has no Stan toolchain — [[brms-live-fit-skip-on-ci]]),
-  spot-checked against a local live run. **Slice 2 — the split — DONE** (committed this session): `advanced.Rmd`
+- Active task: **M35 — all three slices DONE; ready for the finish-task gate** (`R CMD check --as-cran` built
+  with vignettes + full CI matrix + `lintr` + open the PR). **Slice 3 — the Bayesian coverage — DONE**
+  (committed this session): brms sections added to `engines.Rmd` (half-*t*(4,0,1) prior, `engine = "brms"`, the
+  M34 `prior=` override + footgun warning) and `interval-methods.Rmd` (`ci_method = "posterior"`, MAP +
+  percentile/HPDI `posterior_summary`). brms chunks are `eval=FALSE` illustrative with **committed real output**
+  generated from a **local live rstan run** (#4; CI has no Stan toolchain — [[brms-live-fit-skip-on-ci]]); each
+  section states the output is pre-computed. Honest findings preserved (the over-tight `normal(0,0.1)` prior
+  collapses the ICC to ~0; brms MAP 0.24 < glmmTMB REML 0.29 at small *k*). All six articles render; all five
+  inter-article anchor links verified against generated ids; `pkgdown::check_pkgdown()` / `air` / spell clean;
+  NEWS updated. **Slice 2 — the split — DONE** (committed this session): `advanced.Rmd`
   (504 lines) retired into four self-contained articles — `multilevel-designs`, `engines`, `interval-methods`,
   `d-studies-and-replicates` — plus the two kept articles. Data-locality call: the multilevel forest plot moved
   to `multilevel-designs` (it needs `school`); the multilevel `choose_icc()` closer went there too. Fixed all
@@ -270,7 +275,16 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-10 by main session (Opus) — **M35 Slice 2 (the split) DONE.** Retired the 504-line
+- Updated: 2026-07-10 by main session (Opus) — **M35 Slice 3 (Bayesian coverage) DONE — milestone ready for
+  the finish-task gate.** Added brms sections to `engines.Rmd` (half-*t*(4,0,1) prior, `engine = "brms"`, the
+  M34 `prior=` override + `intraclass_custom_prior` footgun warning) and `interval-methods.Rmd`
+  (`ci_method = "posterior"`, MAP + percentile/HPDI `posterior_summary`). All brms chunks are `eval=FALSE`
+  illustrative with committed output generated from a **local live rstan run** (genuine, not fabricated, #4);
+  each section notes the output is pre-computed (CI has no Stan toolchain). Honest findings preserved (tight
+  `normal(0,0.1)` prior → ICC collapses to ~0; brms MAP 0.24 < glmmTMB REML 0.29). Fixed a cross-link anchor
+  (`ci_method` underscore, not hyphen); all five inter-article anchors verified; `pkgdown::check_pkgdown()`,
+  `air`, spell clean; NEWS vignette bullet updated. Next: finish-task gate + PR. Prior line: **M35 Slice 2 (the
+  split) DONE.** Retired the 504-line
   `advanced.Rmd` into four self-contained focused articles — `multilevel-designs`, `engines`,
   `interval-methods`, `d-studies-and-replicates` — a mechanical redistribution of the existing prose/live
   chunks (no new capability claims; brms comes in Slice 3). One data-locality call: the multilevel forest plot

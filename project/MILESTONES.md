@@ -1271,20 +1271,27 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - [x] All six articles render self-contained (independent evaluation); `pkgdown::check_pkgdown()` clean;
       `test-vignette-claims.R` green; `air` clean; spell clean.
 
-*Slice 3 — add the missing Bayesian coverage (new prose):*
-- [ ] `engines.Rmd`: brms (Bayesian) section — the half-*t*(4,0,1) prior, `engine = "brms"`, the M34
+*Slice 3 — add the missing Bayesian coverage (new prose):* ✅ **done**
+- [x] `engines.Rmd`: brms (Bayesian) section — the half-*t*(4,0,1) prior, `engine = "brms"`, the M34
       `prior=` override + `intraclass_custom_prior` footgun note; brms chunks `eval=FALSE` illustrative with
-      committed real output (#4).
-- [ ] `interval-methods.Rmd`: `ci_method = "posterior"` section — MAP + percentile/**HPDI**
-      (`posterior_summary`, M34); same `eval=FALSE` + committed-output treatment.
-- [ ] Verify the illustrative brms outputs against a local live run (spot-check, not claim-tested — can't run
-      in CI); note in each so a future editor knows to refresh on print-format changes.
+      committed real output (#4). Honest finding preserved: the over-tight `normal(0,0.1)` prior collapses the
+      ICC to ~0 (a genuine footgun illustration); brms MAP `ICC(A,1)` 0.24 < glmmTMB REML 0.29 (small-*k*
+      MAP-low, ten Hove 2020).
+- [x] `interval-methods.Rmd`: `ci_method = "posterior"` section — MAP + percentile/**HPDI**
+      (`posterior_summary`, M34); same `eval=FALSE` + committed-output treatment; HPDI narrower than percentile
+      on the same draws (`ICC(A,1)` [0.04,0.60] vs [0.07,0.65]), same MAP.
+- [x] All illustrative brms outputs generated from a **local live rstan run** (genuine, not fabricated #4),
+      cli glyphs shown in ASCII fallback; each section states the chunks are pre-computed / not knit-evaluated
+      so a future editor knows to refresh on print-format changes.
 
 *Cross-cutting DoD:*
-- [ ] `_pkgdown.yml` articles index lists all articles; `pkgdown::check_pkgdown()` clean.
-- [ ] `R CMD check --as-cran` (built with vignettes) + full CI matrix green (9/9); `air` / `lintr` / spell
-      clean.
-- [ ] NEWS + `COVERAGE.md` (docs row) + this board updated in-commit (#16); PR opened on
-      `m35-vignette-reassessment`.
-- Status: **in flight** (opened this session; ADR-045). Branch `m35-vignette-reassessment`. No slice code yet
-  beyond this board (plan before code, #14).
+- [x] `_pkgdown.yml` articles index lists all six articles; `pkgdown::check_pkgdown()` clean; all five
+      inter-article `#anchor` cross-links verified to resolve against the generated heading ids.
+- [ ] `R CMD check --as-cran` (built with vignettes) + full CI matrix green (9/9) — **finish-task gate**.
+- [x] `air` / spell clean (`FIML` added to `WORDLIST`; `lintr` deferred to the finish-task gate,
+      [[run-lintr-before-push]]).
+- [x] NEWS updated in-commit (#16); `COVERAGE.md` unchanged (docs milestone — no code-support change, and it
+      has no docs row); this board updated in-commit. **PR still to open on `m35-vignette-reassessment`
+      (finish-task).**
+- Status: **all three slices done; ready for the finish-task gate** (`R CMD check --as-cran` + full CI matrix
+      + `lintr` + PR). Branch `m35-vignette-reassessment`.

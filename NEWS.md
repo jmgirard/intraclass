@@ -187,9 +187,11 @@ alternate engines, and seeded simulations.
   `ratings_incomplete` (a connected incomplete variant), used throughout the docs.
 * Vignettes: *Getting started*, *Choosing an ICC* (the decision framework, with a
   decision-tree diagram), *Multilevel designs* (subject/cluster level, crossed and
-  nested, complete and incomplete), *Estimation engines* (glmmTMB, lme4, lavaan),
-  *Confidence-interval methods* (Monte-Carlo and bootstrap), and *D-studies and
-  within-cell replicates* (with the `autoplot()` plots).
+  nested, complete and incomplete), *Estimation engines* (glmmTMB, lme4, lavaan, and
+  the Bayesian brms engine with the `prior=` override), *Confidence-interval methods*
+  (Monte-Carlo, bootstrap, and Bayesian `posterior` credible intervals with
+  percentile/HPDI summaries), and *D-studies and within-cell replicates* (with the
+  `autoplot()` plots).
 
 ## Robustness (pre-release code review)
 

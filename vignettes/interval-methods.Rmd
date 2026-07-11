@@ -17,7 +17,8 @@ library(intraclass)
 
 Every `icc()` coefficient comes with an interval, never a bare point estimate. The
 `ci_method` argument selects how that interval is built. This article covers the two
-available methods and when they diverge.
+frequentist methods — Monte-Carlo and the parametric bootstrap — and the Bayesian
+**credible** interval that comes with the brms engine, and when they diverge.
 
 ## Monte-Carlo and the parametric bootstrap
 
@@ -51,3 +52,65 @@ components, often few clusters), where the bootstrap's cluster-level interval in
 particular carries more resampling noise. The bootstrap is available for every design
 the `"glmmTMB"` and `"lme4"` engines fit; `"lavaan"` supports Monte-Carlo only. Raise
 `boot_samples` (default `999`) for a smoother interval at proportionally more cost.
+
+## Bayesian credible intervals (`ci_method = "posterior"`)
+
+When the fit is Bayesian (`engine = "brms"`, see [*Estimation
+engines*](engines.html#a-bayesian-engine-brms)), the interval is neither a Monte-Carlo
+nor a bootstrap *confidence* interval but a **credible** interval read directly off the
+posterior draws of the ICC. `ci_method = "posterior"` is automatic — and required — for
+that engine.
+
+As in the engines article, the brms chunks below are shown with pre-computed output
+(fitting a Stan model needs a toolchain not available when this site is built), so they
+are not evaluated at knit time.
+
+```{r posterior, eval = FALSE}
+icc(ratings, score, subject, rater, engine = "brms", seed = 1)
+```
+
+```
+#> # Intraclass correlation: two-way random, absolute agreement
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
+#> Engine: brms (MCMC) | CI: 95% posterior credible (4000 draws)
+#>   index     estimate   95% CI
+#>   ICC(A,1)    0.241   [0.066, 0.649]
+#>   ICC(A,k)    0.679   [0.221, 0.881]
+#> Variance components: subject 1.522, rater 2.653, residual 0.962
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
+```
+
+The point estimate is the posterior mode (MAP) and the default interval is a
+**percentile** credible interval — the lower `2.5%` and upper `97.5%` quantiles of the
+ICC draws.
+Percentile is the default because it is invariant to how the ICC is parameterized and
+degrades gracefully as a variance component approaches zero (ten Hove et al. 2020, §4.2,
+find it nominal at more than two raters).
+
+### Highest-posterior-density intervals
+
+For comparison you can ask for a **highest-posterior-density interval** (HPDI) — the
+*narrowest* interval containing 95% of the posterior mass — with
+`posterior_summary = "hpdi"`:
+
+```{r posterior-hpdi, eval = FALSE}
+icc(ratings, score, subject, rater, engine = "brms",
+  posterior_summary = "hpdi", seed = 1)
+```
+
+```
+#> # Intraclass correlation: two-way random, absolute agreement
+#> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
+#> Engine: brms (MCMC) | CI: 95% posterior credible (HPDI) (4000 draws)
+#>   index     estimate   95% CI
+#>   ICC(A,1)    0.241   [0.040, 0.601]
+#>   ICC(A,k)    0.679   [0.256, 0.904]
+#> Variance components: subject 1.522, rater 2.653, residual 0.962
+#> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
+```
+
+The header now flags `(HPDI)`, and on the same draws the interval is no wider than the
+percentile one — that is what "narrowest" means. Here `ICC(A,1)` is `[0.04, 0.60]`
+against the percentile `[0.07, 0.65]`; the point estimate (the MAP) is unchanged.
+Percentile stays the default, because HPDI is not transform-invariant and can behave
+less well at the variance boundary — it is offered for comparison, not as an upgrade.
