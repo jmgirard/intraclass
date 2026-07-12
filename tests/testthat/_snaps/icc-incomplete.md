@@ -3,13 +3,17 @@
     Code
       print(fit)
     Message
-      -- Intraclass correlation: two-way random, absolute agreement ------------------
+      -- Intraclass correlation: two-way random, absolute agreement & consistency ----
       Subjects: 6 | Raters: 4 (random) | Observations: 22 of 24 cells (incomplete)
       Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
       
         index     estimate   95% CI
+        Absolute agreement
         ICC(A,1)     0.300   [CI]
         ICC(A,k)     0.606   [CI]
+        Consistency
+        ICC(C,1)     0.715   [CI]
+        ICC(C,k)     0.900   [CI]
       
       ICC(*,k) projects to an effective 3.60 raters (harmonic mean of ratings/subject).
       Variance components: subject 2.671, rater 5.181, residual 1.067

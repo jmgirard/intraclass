@@ -47,7 +47,7 @@
         - Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side.
       
       Run this on your data:
-        icc(data, score, subject, rater, cluster)
+        icc(data, score, subject, rater, cluster, type = "agreement")
       
       Notes:
         - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.

@@ -278,21 +278,21 @@ summary.icc <- function(object, ...) {
     # One interpretive note per error definition present (both, for the default
     # four-formulation report; ADR-054). The two-line split per type is preserved so a
     # single-type summary is byte-identical to before this milestone.
-    type_lines <- function(ty) {
+    type_line <- function(ty) {
       if (ty == "agreement") {
-        c(
+        paste(
           "Absolute agreement counts the rater main effect (systematic differences in",
           "rater level) as error."
         )
       } else {
-        c(
+        paste(
           "Consistency ignores the rater main effect (systematic differences in",
           "rater level); only relative standing counts."
         )
       }
     }
     types_present <- unique(object$design$type[!is.na(object$design$type)])
-    type_notes <- unlist(lapply(types_present, type_lines))
+    type_notes <- vapply(types_present, type_line, character(1))
     cell_note <- if (isTRUE(object$design$replicates)) {
       c(
         "Within-cell replicates separate the subject-by-rater interaction from",
