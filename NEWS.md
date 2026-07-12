@@ -1,4 +1,4 @@
-# intraclass 0.2.0
+# intraclass (development version)
 
 ## Breaking changes
 

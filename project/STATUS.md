@@ -1,5 +1,10 @@
 # Project status
 
+- **Version reverted to dev (2026-07-12, ADR-055):** `DESCRIPTION` `0.2.0 → 0.0.0.9000`; top NEWS heading
+  → `# intraclass (development version)`. Real version numbers are applied **only at the actual CRAN
+  release**, and the **first CRAN submission is `0.1.0`** (supersedes ADR-054/M44's 0.2.0 framing — M44
+  behavior untouched; the drafted `# intraclass 0.1.0` NEWS section stays as the pending release notes).
+  Docs/metadata-only, direct to `main`. The release consolidation (ADR-022) stays a later milestone.
 - Active milestone: **none** — M44 (ADR-054, vectorize `type` → all four formulations A1/Ak/C1/Ck from one fit)
   shipped (PR [#50](https://github.com/jmgirard/intraclass/pull/50), squash-merged to `main` at `7aff8b3`; full CI
   matrix green 9/9). A **public-API default-shape change** (#6): `type` is now vectorized like `unit`/`level` and

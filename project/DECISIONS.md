@@ -4660,3 +4660,37 @@ consequences → references.
   inform-and-drop precedent generalized here), ADR-053 (the print/summary restyle this grouping builds
   on). [[milestone-branches-and-prs]] (implementation ships on its own branch via PR);
   [[verify-against-installed-package]] (snapshot regeneration discipline).
+
+## ADR-055: version numbers only at CRAN release — `main` returns to a dev version
+- Date: 2026-07-12
+- Status: accepted (supersedes ADR-054/M44's 0.2.0 version framing; refines ADR-022's version timing)
+- Context: `intraclass` has never been released — it is not on CRAN and has no external users. ADR-022
+  authored a `0.1.0` release version and a consolidated `# intraclass 0.1.0` NEWS heading for a
+  *submission-ready* (never-submitted) state; ADR-054/M44 then bumped `DESCRIPTION` to `0.2.0` (with a
+  `# intraclass 0.2.0` NEWS heading) to frame M44's default-output-shape change as a minor version, and
+  M44 recorded `main` drifting to "0.2.0-dev". The maintainer's standing intent (plan gate, 2026-07-12):
+  an unreleased package should not advertise a real semantic version — real version numbers are applied
+  only at the actual CRAN release, and the **first CRAN submission carries `0.1.0`**.
+- Decision (maintainer, 2026-07-12):
+  - `DESCRIPTION` `Version` returns to the dev sentinel **`0.0.0.9000`** — the canonical "never released"
+    development version. No real `x.y.z` version lives on `main` before release.
+  - The top NEWS heading becomes **`# intraclass (development version)`**; M44's changes sit under it. The
+    drafted `# intraclass 0.1.0` changelog stays below as the pending first-release notes — the full NEWS
+    consolidation under a single release heading remains the release milestone's job (ADR-022 item d), not
+    done here.
+  - **The first CRAN submission is `0.1.0`.** M44's default-shape change is not a "breaking change" against
+    any released baseline (there is none) — it is simply part of the initial release; the ADR-054 "0.2.0
+    minor bump" framing is retired. M44's *behavior* is untouched — only its version framing changes.
+  - Docs/metadata-only (no runtime surface, no test/behavior delta) → committed directly to `main` (the
+    docs-only carve-out).
+- Consequences:
+  - `main` no longer claims a version it does not intend to honor. The prior `--as-cran` verification of the
+    submission-ready state is not "invalidated by a version bump" — the release gate re-runs in full at the
+    actual release regardless (ADR-022).
+  - The release milestone stamps `0.1.0` on `DESCRIPTION` + the NEWS heading and consolidates the changelog;
+    normal semver bumps follow *after* the first release.
+  - Ruled out: keeping `0.2.0` on `main` (advertises an unhonored version); `0.1.0.9000` (implies 0.1.0 has
+    already released).
+- References: ADR-022 (release plan / version-at-release — this refines its timing: the sentinel lives at
+  dev until the release milestone), ADR-054/M44 (the 0.2.0 framing superseded here; vectorized-`type`
+  behavior unchanged). PRINCIPLES.md #16 (tracking travels with the change).
