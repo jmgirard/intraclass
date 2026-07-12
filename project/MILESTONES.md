@@ -75,12 +75,15 @@ ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-02
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40).
-**M40 (ADR-050) is the active milestone** — an accessibility rewrite of the two front-door vignettes
-(`getting-started`, `choosing-an-icc`) for applied readers, planned this session after a short retro (founding
-brief §7) that found the clean-oracle parity engine exhausted (the (C) corner closed at M36–M38; M39 was the
-last thin projection slice). A **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/
-dependency; correctness = live-computed + claim-tested numbers; adds a sourced, caveated interpretation-band
-guide (Koo & Li 2016 / Cicchetti 1994). Its board is the DoD checklist in the M40 section below.
+**No milestone is currently in flight** — M40 (ADR-050, accessibility rewrite of the two front-door vignettes
+`getting-started` + `choosing-an-icc` for applied readers) shipped (PR #46, squash-merged to `main` at
+`e34f037`; full CI matrix green 9/9); the next one needs an ADR after a short retro (founding brief §7). M40 was
+a **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness =
+live-computed + claim-tested numbers; it added a sourced, caveated interpretation-band guide (Koo & Li 2016 /
+Cicchetti 1994, "judge the interval not the point", no verdict). Its planning retro (this session) recorded two
+strategic facts for the next scoping: the clean-oracle **parity engine is exhausted** (the (C) corner closed at
+M36–M38; M39/M40 were the tail), and the **v0.2.0 release gap** (v0.1.0 "submission-ready" since M13, ~15
+milestones added since, unreleased; parked to ROADMAP/ADR-022) is the biggest open call.
 Prior milestone M39 (ADR-049, `d_study()` occasion-count projection) shipped
 (PR #45, squash-merged to `main` at `91e14e7`; full CI matrix green 9/9, devel clean). M39 was the symmetric
 sibling of the M22 (ADR-032) rater-count
@@ -1403,54 +1406,31 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   incl. `ubuntu-latest (devel)` clean). Shipped in one session (retro → plan/ADR-049 → T1 single-level → T2
   multilevel → T3 docs/gate → PR #45); **no Fable review**.
 
-## M40: accessibility rewrite of the two front-door vignettes — `getting-started`, `choosing-an-icc` (ADR-050) — ACTIVE
+## M40: accessibility rewrite of the two front-door vignettes — `getting-started`, `choosing-an-icc` (ADR-050)
 - Goal: make the two entry-point teaching articles approachable to **applied** readers (a researcher who needs
-  an ICC but is not a methodologist), not just methodologists. A **docs milestone** (cf. M4/M13/M35): **no new
-  estimand, engine, fit, CI machinery, or dependency** (#6); correctness = **live-computed + claim-tested
-  numbers** (#1/#4/#12), not a numerical oracle. Rewrite **in place** (keep filenames/URLs/`_pkgdown.yml` — no
-  split, unlike M35). Both articles are already good (ROADMAP) — this lowers the barrier to entry, it does not
-  fix broken content. Three concrete gaps drive it (ADR-050): jargon lands before it is defined; there is no
-  from-scratch on-ramp; and there is no "is my ICC any good?" guidance.
-- Reference: ADR-050; no estimand-spec (docs, not estimand — cf. M4/M13/M35). New `REFERENCES.md` entries:
-  **Koo & Li (2016)**, **Cicchetti (1994)** (the interpretation-band sources). Correctness: every prose numeric
-  relationship computed live at knit time + pinned in `test-vignette-claims.R` (#1/#4/#12); both articles render
-  standalone under `R CMD build` and pkgdown; all inter-article anchors resolve.
-- DoD / board (check off in the same commit as the work, #16):
-  - [x] **Slice 1 — `getting-started.Rmd`** (done 2026-07-11, checkpoint below). Added the "What an ICC tells
-        you" from-scratch on-ramp; rewrote the Monte-Carlo-CI bullet into a plain "About the confidence interval"
-        section (internal-scale/delta-method detail → plain language + `interval-methods` cross-link); glossed
-        Spearman–Brown, absolute agreement, random/fixed on first use. Added the canonical **"Is this a good
-        ICC?"** band guide — Koo & Li (2016) primary table (poor/moderate/good/excellent) + Cicchetti (1994) as
-        the older sibling, framed as conventions with caveats and the **"judge the interval, not the point"**
-        rule (Koo & Li's own), illustrated live: `ICC(A,k)` = 0.62 ("moderate") with a 95% interval 0.18–0.91
-        spanning poor→excellent — no verdict computed (#4/#18). Converted the hard-coded ≈0.29/0.62/0.72 prose to
-        inline `r`-computed values (#4/#12). **Koo & Li (2016)** + **Cicchetti (1994)** added to `REFERENCES.md`;
-        Cicchetti/Koo/normed added to `inst/WORDLIST`; a new `getting-started.Rmd` block in
-        `test-vignette-claims.R` pins the band-spanning interval. Knits clean; spell/`air` clean; all
-        vignette-claim tests pass.
-  - [x] **Slice 2 — `choosing-an-icc.Rmd`** (done 2026-07-11, checkpoint below). Rewrote the intro into a
-        warmer "start here" framing ("you do not need the formulas — answer a few plain questions") with a plain
-        first-use gloss of *estimand* ("different true quantities you could be trying to pin down"); glossed the
-        `k_eff`/harmonic-mean divisor ("an average that leans toward the smaller counts"); added a new **"Once
-        you have a number"** section that **cross-links** the Slice-1 interpretation bands
-        (`getting-started.html#is-this-a-good-icc`, anchor verified present) instead of re-tabulating them —
-        avoiding drift. Kept the decision-tree SVG, the crosswalk table, the `choose_icc()` closer, and every
-        live `r`-computed number and pinned claim. Both articles knit; spell/`air` clean; vignette-claim tests
-        pass.
-  - [x] **Slice 3 — DoD / gate** (done 2026-07-11, checkpoint below). `REFERENCES.md` (Koo & Li 2016 +
-        Cicchetti 1994) and `inst/WORDLIST` (Cicchetti/Koo/normed) were added in S1 (the bands' source gate);
-        NEWS gains a *Data and documentation* bullet on the rewrite + interpretation guide. Local gate **GREEN**:
-        `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0** (all six vignettes built), `lintr::lint_package()`
-        **0 lints**, `spelling` clean, `air format --check` clean, `pkgdown::check_pkgdown()` "No problems found",
-        `test-vignette-claims.R` re-passes (no printed number moved), the `getting-started#is-this-a-good-icc`
-        cross-link anchor verified present. Docs-only → no installed-pkg estimator paths to drive. **PR on
-        `m40-vignette-accessibility`.**
-- Fable posture (#19): **NONE** — docs milestone, no estimand/coverage claim.
-- Status: **all 3 slices done; local gate green (0/0/0); PR open, awaiting CI.**
+  an ICC but is not a methodologist). A **docs milestone** (cf. M4/M13/M35): **no new estimand, engine, fit, CI
+  machinery, or dependency** (#6); correctness = **live-computed + claim-tested numbers** (#1/#4/#12), not a
+  numerical oracle. Rewrote **in place** (kept filenames/URLs/`_pkgdown.yml` — no split, unlike M35). Three gaps
+  drove it (ADR-050): jargon before definition; no from-scratch on-ramp; no "is my ICC any good?" guidance.
+- Reference: ADR-050; no estimand-spec (docs, not estimand). New `REFERENCES.md` entries **Koo & Li (2016)** +
+  **Cicchetti (1994)** (the interpretation-band sources, #4). Shipped (3 slices, 2026-07-11): **S1**
+  `getting-started.Rmd` (`f53165b`) — the "What an ICC tells you" on-ramp; the Monte-Carlo-CI bullet rewritten
+  as a plain "About the confidence interval" section (+ `interval-methods` cross-link); first-use glosses; the
+  canonical **"Is this a good ICC?"** band guide (Koo & Li 2016 primary + Cicchetti 1994 sibling, framed as
+  conventions with the "judge the interval, not the point" rule, illustrated live via `ICC(A,k)` = 0.62 whose
+  95% interval 0.18–0.91 spans poor→excellent, no verdict — #4/#18); hard-coded prose numbers → inline
+  `r`-computed; REFERENCES/WORDLIST + a `getting-started.Rmd` claim block pinning the band-spanning interval.
+  **S2** `choosing-an-icc.Rmd` (`6558b50`) — warmer "start here" intro + plain *estimand*/`k_eff` glosses + a new
+  "Once you have a number" section **cross-linking** the S1 bands (`#is-this-a-good-icc`, anchor verified) rather
+  than re-tabulating; tree SVG / crosswalk / `choose_icc()` / every live number kept. **S3** gate (`6163f19`) —
+  NEWS bullet; local gate green: `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0** (all six vignettes
+  built), `lintr` 0 lints, `spelling`/`air`/`pkgdown::check_pkgdown()` clean, claim tests re-pass. **No Fable.**
 - Deferred out of M40 (record so not rediscovered): the **v0.2.0 release consolidation / CRAN upload** (ADR-022;
   the release-gap the retro raised — its own milestone if scheduled); the **benchmark-vs-prior-art** article; the
   **clarity pass over the other four articles** (`engines`, `interval-methods`, `multilevel-designs`,
   `d-studies-and-replicates` — M40 touches only the two front-door articles); a **glossary page** (glosses are
   inline this milestone); every untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor
   research items, lavaan siblings) stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **active — planned this session (retro → ADR-050 → board); no code yet.** Next: `/start-task` Slice 1.
+- Status: **done — merged, CI green** (PR #46, squash-merged to `main` at `e34f037`; full CI matrix green 9/9,
+  incl. `ubuntu-latest (devel)` clean). Shipped in one session (retro → ADR-050 → S1 → S2 → S3 gate → PR #46 →
+  merge); **no Fable review**.
