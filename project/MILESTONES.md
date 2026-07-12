@@ -2077,3 +2077,73 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     test-coverage + R CMD check macOS·Windows·Ubuntu release·devel·oldrel). Post-merge reconcile: ROADMAP item
     retired (shipped); STATUS updated; branch deleted. `main` stays on `0.0.0.9000` (release consolidation
     ADR-022 still parked).
+
+## M47: brms engine parity — averaged cluster-level `ICC(c,k)` on incomplete data (ADR-058)
+- Goal: fold the M46 inverse-Simpson `k_c^eff` divisor into the **brms** engine so `engine = "brms"` also returns
+  the **averaged cluster-level `ICC(c,k)`** on incomplete/ragged crossed Design-1 multilevel data instead of
+  dropping the cluster average (with a once-note) or aborting when it is the sole computable cell. **Engine/interval
+  parity, not new estimand work** (#6): the divisor `cluster_k_eff(df)` is engine-agnostic (already computed at
+  `R/icc.R:1582`) and applied post-fit to the five-component **posterior draws** — the same draws brms cluster
+  `ICC(c,1)` already reads on incomplete data (M30). Random raters → **variance-ratio push-forward, no θ² 2b moment
+  correction** (the M30/M32 regime — not `ip-touching`). The only change is **narrowing one guard**
+  (`drop_brms_cluster_avg`, `R/icc.R:1589`) plus validating the push-forward against the shipped glmmTMB/lme4 M46
+  frequentist oracle. The divisor is already Fable-blessed (ADR-057 Am.1); M47 does **not** re-litigate the divisor
+  choice or the target — it validates the Bayesian engine reproduces it.
+- Priority: normal. Depends on: **M46** (ADR-057 — ships the inverse-Simpson `k_c^eff` + the glmmTMB/lme4
+  frequentist oracle), **M30** (ADR-040 — ships brms cluster `ICC(c,1)` on incomplete data + the five-component
+  posterior draws + the `!balanced` brms guard this narrows).
+- Reference: **ADR-058** (scoping). **No new estimand-spec** (#6 — reuses M9 §3b + the M46 divisor resolution,
+  `estimand-specs/M9-incomplete-multilevel.md` §10); a one-line engine note only if the vignette needs it. Source
+  oracle: **glmmTMB/lme4 M46** (the shipped frequentist coefficient — an independent oracle for the Bayesian
+  MAP/interval) + a committed seeded coverage fixture. **Fable: conditional escalation** — recommend-and-**stop**
+  ONLY if the coverage oracle is anomalous or discriminates weakly (the M30/M32 variance-ratio precedent that
+  shipped without Fable). No mandatory Fable, no RB tripwire: the divisor is blessed and the push-forward is a
+  variance ratio (#19, D-004 — per-instance gate).
+- **Acceptance criteria** (each names the behavior that must be tested):
+  - **AC1 — brms ships the averaged cluster `ICC(c,k)`.** `icc(engine = "brms", cluster =, level = "cluster",
+    unit = "average")` returns the agreement + consistency averaged cluster-level `ICC(c,k)` on incomplete/ragged
+    crossed Design-1 multilevel data, with `k_c^eff` surfaced in the report, structurally matching the
+    glmmTMB/lme4 M46 path (same divisor applied per posterior draw). The `drop_brms_cluster_avg` once-note/drop
+    (`R/icc.R:1607`) and the sole-computable abort (`R/icc.R:1594`) are removed for the **random-rater** cell.
+  - **AC2 — Still-out cells and every shipped path unchanged (regression).** The **incomplete/unbalanced fixed
+    cluster-level** cell stays **refused for ALL engines including brms** (double-blocked: ten Hove's open small-`k`
+    estimator + the M9 §9 fixed `ICC(c,k)` divisor); narrowing the random guard must **not** open it — the request
+    falls through to the engine-agnostic balance gate and aborts there (`test-icc-brms.R:248` guards this exact
+    boundary). brms cluster `ICC(c,1)`, the subject level, and every balanced/complete path are byte-unchanged.
+  - **AC3 — Oracles (#1, ≥2 independent).** **O-Bayes-cluster-ck-reduction** — on complete data the brms cluster
+    `ICC(c,k)` MAP ≈ glmmTMB/lme4 M5 Design-1 `ICC(c,k)` (REML) and `k_c^eff = k`. **O-Bayes-cluster-ck-containment**
+    — on ragged data the brms MAP/credible interval **contains/tracks** the glmmTMB **M46** frequentist point
+    (containment, not equality — brms carries the half-*t* prior; the M24+ pattern). Live Stan fit `skip_on_ci()`
+    with a committed `.rds` fixture ([[brms-live-fit-skip-on-ci]]). Invariants: ∈[0,1], average ≥ single, CI always
+    present (#3).
+  - **AC4 — Coverage (#12).** A committed seeded fixture: the posterior credible interval covers the population
+    cluster `ICC(c,k)` at nominal rate, swept across the **cluster-count axis with a high-`C_n` cell**
+    ([[coverage-oracle-cluster-count-axis]] — the incidental-parameters mode is invisible at few clusters),
+    **n_rep ≥ 240 + per-rep seeding** ([[ragged-coverage-nrep-240]]), target **defined per realized design** (freeze
+    the cell pattern across reps, the M36 pattern). **Decision point (conditional Fable, D-004):** if coverage is
+    anomalous or weakly discriminating, **recommend a Fable review and stop** for maintainer approval; nominal → ship
+    without Fable (mirroring M30/M32).
+  - **AC5 — Docs + NEWS + gate.** NEWS bullet (dev heading) noting brms now covers the averaged cluster `ICC(c,k)`
+    on incomplete data; the `engines` / `multilevel-designs` vignette engine-coverage note updated (the cluster
+    `k_c^eff` itself is already documented from M46); the ROADMAP candidate row retired; finish-task gate green
+    (`air`/`lintr` 0 / `spelling` / `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity
+    0/0/0 passing `env_vars = c(NOT_CRAN=…)` so the live-Stan suite does not flake the gate —
+    [[devtools-check-not-cran-env-var]]; installed-pkg drive of the new brms cell — [[verify-against-installed-package]]);
+    `pkgdown::check_pkgdown()` clean; the `_pkgdown.yml` reference index unchanged (no new export).
+- **Tasks** (≤ one session each, dependency-ordered):
+  - T1 — Narrow the guard + reduction/containment oracle (AC1, AC2, AC3). Narrow `drop_brms_cluster_avg`
+    (`R/icc.R:1589`) to lift the random-rater cluster-average drop/abort while **preserving** the fixed-cluster
+    incomplete refusal (all engines) and removing the once-note; update the inline deferral comment
+    (`R/icc.R:1583–1588`). Build `data-raw/oracle-bayesian-cluster-ck.R` (reduction + glmmTMB-M46 containment), live
+    Stan + committed fixture. Regression-assert the still-refused fixed cell + balanced/`ICC(c,1)`/subject unchanged.
+  - T2 — Coverage sweep (AC4). Committed seeded coverage fixture over the `C_n` axis (high-`C_n` cell, n_rep ≥ 240,
+    per-rep seeding, target per realized design). **Decision point:** anomalous → recommend Fable + stop; nominal →
+    proceed to T3.
+  - T3 — Docs + NEWS + finish-task gate (AC5) → PR from `m47-brms-cluster-ck`.
+- **Coverage:** AC1 → T1; AC2 → T1; AC3 → T1; AC4 → T2; AC5 → T3.
+- Status: **planned** (ADR-058; not started). No active milestone until started.
+- Work log:
+  - 2026-07-12 — Planned via the plan gate. Maintainer chose the clean brms parity fold-in (over the v0.1.0
+    release consolidation, which stays next-parked); **conditional Fable escalation** (ship on nominal coverage,
+    recommend-and-stop only on an anomaly); **pure brms parity** — the now-unblocked `d_study()` cluster-ragged
+    projection kept OUT as a candidate. ADR-058 authored; ROADMAP candidate → SCHEDULED as M47.
