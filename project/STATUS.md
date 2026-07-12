@@ -1,16 +1,17 @@
 # Project status
 
-- **Active task: M45 T3 next** (branch `m45-conflated-consistency`). **T1 + T2 DONE (2026-07-12, AC1/AC2/AC4
-  ✓):** consistency-conflated ships — the estimand map (`R/estimand.R:87`) derives the conflated error set by
-  `switch(type, …, consistency=c("cluster_rater","residual"))`; the engine-agnostic consistency abort/drop
-  guard and the cross-product skip are removed. Because that guard was engine-agnostic and the brms conflated
-  path composes generically via `icc_estimand()`+`posterior_summary()`, **brms consistency-conflated landed
-  for free (T4 folded into T2)** — a variance ratio, no moment correction. Oracles: O-cc/Eq14-analogue,
-  O-cc/lme4, O-cc/population, invariants (`test-icc-multilevel.R`); O-cc-Eq14 brms wiring (`test-icc-brms.R`);
-  M44 drop assertion updated (`test-icc-type-vector.R`). Suites green, `air` clean. **T3 (next):** the shared
-  change already enables incomplete/ragged consistency-conflated — verify it flows through the M18 §6a gates
-  (connectedness / agreement-bridging / `k_eff`) and add ragged O-cc oracles. Then T5 (still-out aborts
-  regression + conflated snapshots + spec §6b) and T6 (docs/NEWS + finish-task gate → PR).
+- **Active task: M45 T5 next** (branch `m45-conflated-consistency`). **T1–T4 DONE (2026-07-12, AC1–AC4 ✓):**
+  consistency-conflated ships for glmmTMB/lme4/brms, balanced + incomplete/ragged. Core change: estimand map
+  (`R/estimand.R:87`) derives the conflated error set by `switch(type, …, consistency=c("cluster_rater",
+  "residual"))`; removed the engine-agnostic consistency guard + cross-product skip (T2, brms free → T4 folded
+  in); added a conflated-level rater-bridging gate (`R/icc.R`) so the σ²_cr-reading conflated level is dropped
+  /aborted when raters don't bridge (T3 identifiability catch). Oracles: O-cc/Eq14-analogue, O-cc/lme4,
+  O-cc/population, O-cc/incomplete, non-bridging gate, invariants (`test-icc-multilevel.R`); O-cc-Eq14 brms
+  wiring (`test-icc-brms.R`); M44 drop assertion updated (`test-icc-type-vector.R`). Affected + adjacent suites
+  green; `air` clean. **T5 (next):** regression-assert the still-out conflated aborts (fixed-rater / nested
+  Designs 2-3 / lavaan — AC6); regenerate conflated `_snaps` (new consistency rows, retained agreement numbers
+  identical); author spec §6b in `estimand-specs/M17-conflated-icc.md`. Then T6 (docs/NEWS + finish-task gate
+  → PR).
 - **M45 planned (2026-07-12, ADR-056):** the *consistency-conflated single-level ICC* — drop σ²_r from the
   agreement-conflated error → the **flat two-way consistency ICC** read off the multilevel fit (sourced
   McGraw & Wong 1996, the symmetric twin of the M18 §6a agreement derivation; **not a guessed formula**, #4).

@@ -1127,6 +1127,36 @@ icc <- function(
         ))
         type <- setdiff(type, "agreement")
       }
+      # The conflated level reads sigma^2_cr (cluster:rater) in its error set for BOTH
+      # types -- the Eq. 14 agreement error {r, cr, res} and the M45 consistency error
+      # {cr, res} -- so, like the cluster level below, it is identified only when raters
+      # bridge clusters (M18 §6a's conservative flat-design-connected posture). Consistency
+      # survives non-bridging at the SUBJECT level (its error is residual only), but NOT at
+      # the conflated level, where sigma^2_cr does not separate from sigma^2_r. Drop the
+      # whole conflated level when raters do not bridge; abort if it is the sole explicit
+      # level (drop-vs-abort, ADR-054/ADR-029).
+      if ("conflated" %in% level && !ident$cluster_rater_connected) {
+        if (identical(level, "conflated")) {
+          abort_unidentified(c(
+            "The conflated ICC needs raters that bridge clusters, but the \\
+             cluster-by-rater design is disconnected here.",
+            i = "It reads the cluster-by-rater variance off the crossed fit, which \\
+                 is not identified without raters shared across clusters.",
+            i = "Use {.code level = \"subject\"}, or provide raters crossed across \\
+                 clusters."
+          ))
+        }
+        cli::cli_inform(
+          c(
+            "!" = "Dropping the {.val conflated} level: raters do not bridge clusters, \\
+                   so the cluster-by-rater variance it reads is not identified. \\
+                   Reporting the correctly-partitioned levels."
+          ),
+          .frequency = "once",
+          .frequency_id = "conflated-nonbridging"
+        )
+        level <- setdiff(level, "conflated")
+      }
       # Cluster-level IRR on incomplete data (M9 Slice 2, ADR-018). The cluster-level
       # error carries sigma^2_cr (both types) and sigma^2_r (agreement), which are
       # identified only when raters bridge clusters; otherwise report just the subject

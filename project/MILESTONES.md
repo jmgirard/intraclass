@@ -1869,3 +1869,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     stale M44 drop assertion (`test-icc-type-vector.R`). Affected suites green (multilevel, type-vector,
     brms non-Stan); `air` clean. **Next: T3** (incomplete/ragged verification + oracles — the code is
     already enabled via the shared change; T3 confirms the M18 §6a gates + adds ragged oracles), then T5/T6.
+  - 2026-07-12 — **T3 DONE (AC3 ✓).** Ragged (bridging) consistency-conflated works unchanged (tracks the
+    flat two-way consistency `icc()` to |diff|=1.6e-3; O-cc/incomplete: drop-σ²_r identity + lme4 cross-engine
+    + flat-tracking + biased-vs-subject, `k_eff`<6). **Identifiability catch (statistical-correctness):** the
+    conflated error reads σ²_cr, which — like the cluster level — is unidentified when raters do NOT bridge
+    clusters (unlike subject-level consistency, whose error is residual-only). Added a conflated-level bridging
+    gate (`R/icc.R`, modeled on the cluster-level gate): when `!cluster_rater_connected`, drop the conflated
+    level (both types), or abort `intraclass_unidentified` if it is the sole explicit level — matching M18 §6a's
+    conservative posture. Tested both paths. Adjacent suites (incomplete-multilevel, type-vector,
+    nested-multilevel) green; `air` clean. **Next: T5** (still-out aborts regression + conflated snapshots +
+    spec §6b), then T6 (docs/NEWS + finish-task gate → PR).
