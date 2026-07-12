@@ -141,6 +141,47 @@ per-cell counts there is no single effective-occasion divisor with a
 validated oracle — along with the compound fixed-by-ragged and
 multilevel-by-ragged corners.
 
+## How many occasions do I need? A D-study on the occasion facet
+
+Just as `d_study(m = ...)` projects the number of *raters*,
+`d_study(n_o = ...)` projects the number of *occasions* off a replicate
+fit — holding the raters fixed and asking “how reliable would each
+rater’s mean of `n_o` ratings be?”. Supply exactly one axis per call
+(`m` **or** `n_o`).
+
+``` r
+
+fit_rep <- icc(reps, score, subject, rater, occasions = "average")
+d_study(fit_rep, n_o = 1:6)
+#> # D-study projection: two-way random, absolute agreement
+#> Held raters: 4 (average) | projecting occasions | CI: 95% montecarlo (10000 draws)
+#>   n_o  m  estimate          95% CI
+#>     1  4     0.588  [0.265, 0.791]
+#>     2  4     0.620  [0.277, 0.824]
+#>     3  4     0.631  [0.280, 0.835]
+#>     4  4     0.637  [0.282, 0.841]
+#>     5  4     0.641  [0.283, 0.845]
+#>     6  4     0.643  [0.284, 0.847]
+```
+
+Notice the curve **flattens**. Averaging more occasions only cancels
+*pure error* (`residual`); it never touches the rater or `subject:rater`
+variance. So the occasion curve climbs to a **ceiling below 1** — the
+reliability you would reach with perfectly repeatable ratings but the
+same raters — rather than approaching 1 the way a rater projection does.
+Read it as “how much does re-rating help?”, which saturates.
+
+Because occasions are a **random** facet however the raters are treated,
+the occasion projection is defined even where a rater projection is not:
+**fixed-rater absolute agreement projects on the occasion axis** (it is
+only the *rater* axis that is undefined for fixed absolute agreement,
+having no “freshly sampled rater” to add). On a **multilevel** replicate
+fit the subject-level curve rises with `n_o` while the cluster-level
+curve is **flat** — the cluster-level error set has no pure-error term,
+so occasions cannot change it
+([`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+says so with a note).
+
 ## Visualizing a fit
 
 Every [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)

@@ -22,7 +22,14 @@ autoplot.icc_dstudy(object, ...)
 # S3 method for class 'icc_dstudy'
 plot(x, ...)
 
-d_study(x, m = NULL, conf_level = NULL, mc_samples = NULL, seed = NULL)
+d_study(
+  x,
+  m = NULL,
+  n_o = NULL,
+  conf_level = NULL,
+  mc_samples = NULL,
+  seed = NULL
+)
 
 # S3 method for class 'icc_dstudy'
 format(x, ...)
@@ -58,7 +65,15 @@ glance(x, ...)
 
   Numeric vector of rater counts to project to (each \\\ge 1\\).
   Defaults to `1:(2 * n_raters)`, a curve from a single rater to twice
-  the observed count.
+  the observed count. Mutually exclusive with `n_o`.
+
+- n_o:
+
+  Numeric vector of occasion (within-cell replicate) counts to project
+  to (each \\\ge 1\\), holding raters at the observed count – a D-study
+  on the **occasion** facet of a within-cell replicate fit. Mutually
+  exclusive with `m`; supplying both aborts. `NULL` (the default)
+  projects the rater count `m` instead.
 
 - conf_level, mc_samples, seed:
 
@@ -116,18 +131,40 @@ divisor is an open modeling question (M9).
 
 For a within-cell replicate fit (more than one rating per
 subject-by-rater cell, where the residual splits into the
-subject-by-rater interaction and pure error), `d_study()` projects the
-**rater count `m`**, holding the number of occasions `n_o` at the fitted
-value: the rater and interaction terms divide by `m`, pure error by
-`m * n_o`. The result gains an `occasions` column, one reliability curve
-per occasion setting on the fit (`occasions = "single"` and/or
-`"average"`), so at `m` = the observed rater count each curve matches
-the fitted `ICC(*,k)` for that setting. Multilevel replicate fits
-project the subject level across occasion settings and the cluster level
-single-occasion (occasion averaging touches only pure error, which is
-not in the cluster-level error set). Projecting the occasion count
-itself is not yet supported; **ragged** replicate fits are refused (the
-occasion-averaged ragged divisor is an open modeling question).
+subject-by-rater interaction and pure error), `d_study()` can project
+**either** axis (one per call):
+
+- the **rater count `m`** (the default), holding the number of occasions
+  `n_o` at the fitted value: the rater and interaction terms divide by
+  `m`, pure error by `m * n_o`. The result gains an `occasions` column,
+  one reliability curve per occasion setting on the fit (`"single"`
+  and/or `"average"`), so at `m` = the observed rater count each curve
+  matches the fitted `ICC(*,k)`.
+
+- the **occasion count `n_o`** (supply the `n_o` argument), holding
+  raters at the observed count: pure error divides by `m * n_o` while
+  the rater and interaction terms are unchanged. Because occasion
+  averaging rescales **only pure error**, this curve is well-posed for
+  random **and** fixed raters – including fixed absolute agreement,
+  which the rater projection refuses (occasions are a random facet
+  however the raters are treated). At `n_o` = the fitted occasion count
+  it matches the fitted `ICC(*,k)`.
+
+**The occasion curve has a finite ceiling.** As `n_o` grows it
+approaches `sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)`,
+**not** 1 – averaging more occasions washes out only pure measurement
+error, never the rater or subject-by-rater variance. Read it as "how
+much does re-rating help?", which plateaus, unlike adding raters.
+
+For a multilevel replicate fit (crossed Design 1 or nested Design 2), a
+**rater** projection moves the subject level across occasion settings
+and the cluster level single-occasion, while an **occasion** projection
+moves the subject level across `n_o` and returns the cluster level as a
+**flat** curve: the cluster-level error set (`{rater, cluster:rater}`)
+has no pure-error term, so averaging occasions cannot change it
+(`d_study()` notes this). **Ragged** replicate fits are refused for
+either axis (the occasion-averaged ragged divisor is an open modeling
+question).
 
 ## References
 

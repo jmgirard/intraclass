@@ -79,7 +79,14 @@ resamples (so at <code>m</code> = the observed rater count the band matches the 
 <span><span class="co"># S3 method for class 'icc_dstudy'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">d_study</span><span class="op">(</span><span class="va">x</span>, m <span class="op">=</span> <span class="cn">NULL</span>, conf_level <span class="op">=</span> <span class="cn">NULL</span>, mc_samples <span class="op">=</span> <span class="cn">NULL</span>, seed <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">d_study</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  m <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_o <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  conf_level <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mc_samples <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'icc_dstudy'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -113,7 +120,14 @@ resamples (so at <code>m</code> = the observed rater count the band matches the 
 <dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
 <dd><p>Numeric vector of rater counts to project to (each \(\ge 1\)).
 Defaults to <code>1:(2 * n_raters)</code>, a curve from a single rater to twice the
-observed count.</p></dd>
+observed count. Mutually exclusive with <code>n_o</code>.</p></dd>
+
+
+<dt id="arg-n-o">n_o<a class="anchor" aria-label="anchor" href="#arg-n-o"></a></dt>
+<dd><p>Numeric vector of occasion (within-cell replicate) counts to project to
+(each \(\ge 1\)), holding raters at the observed count – a D-study on the
+<strong>occasion</strong> facet of a within-cell replicate fit. Mutually exclusive with <code>m</code>;
+supplying both aborts. <code>NULL</code> (the default) projects the rater count <code>m</code> instead.</p></dd>
 
 
 <dt id="arg-conf-level-mc-samples-seed">conf_level, mc_samples, seed<a class="anchor" aria-label="anchor" href="#arg-conf-level-mc-samples-seed"></a></dt>
@@ -174,16 +188,30 @@ level is dropped with a note, because projecting <code>m</code> raters is the av
 
 <p>For a within-cell replicate fit (more than one rating per subject-by-rater cell,
 where the residual splits into the subject-by-rater interaction and pure error),
-<code>d_study()</code> projects the <strong>rater count <code>m</code></strong>, holding the number of occasions
-<code>n_o</code> at the fitted value: the rater and interaction terms divide by <code>m</code>, pure
-error by <code>m * n_o</code>. The result gains an <code>occasions</code> column, one reliability curve
-per occasion setting on the fit (<code>occasions = "single"</code> and/or <code>"average"</code>), so at
-<code>m</code> = the observed rater count each curve matches the fitted <code>ICC(*,k)</code> for that
-setting. Multilevel replicate fits project the subject level across occasion
-settings and the cluster level single-occasion (occasion averaging touches only
-pure error, which is not in the cluster-level error set). Projecting the occasion
-count itself is not yet supported; <strong>ragged</strong> replicate fits are refused (the
-occasion-averaged ragged divisor is an open modeling question).</p>
+<code>d_study()</code> can project <strong>either</strong> axis (one per call):</p><ul><li><p>the <strong>rater count <code>m</code></strong> (the default), holding the number of occasions <code>n_o</code> at
+the fitted value: the rater and interaction terms divide by <code>m</code>, pure error by
+<code>m * n_o</code>. The result gains an <code>occasions</code> column, one reliability curve per
+occasion setting on the fit (<code>"single"</code> and/or <code>"average"</code>), so at <code>m</code> = the
+observed rater count each curve matches the fitted <code>ICC(*,k)</code>.</p></li>
+<li><p>the <strong>occasion count <code>n_o</code></strong> (supply the <code>n_o</code> argument), holding raters at the
+observed count: pure error divides by <code>m * n_o</code> while the rater and interaction
+terms are unchanged. Because occasion averaging rescales <strong>only pure error</strong>, this
+curve is well-posed for random <strong>and</strong> fixed raters – including fixed absolute
+agreement, which the rater projection refuses (occasions are a random facet
+however the raters are treated). At <code>n_o</code> = the fitted occasion count it matches
+the fitted <code>ICC(*,k)</code>.</p></li>
+</ul><p><strong>The occasion curve has a finite ceiling.</strong> As <code>n_o</code> grows it approaches
+<code>sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)</code>, <strong>not</strong> 1 – averaging
+more occasions washes out only pure measurement error, never the rater or
+subject-by-rater variance. Read it as "how much does re-rating help?", which
+plateaus, unlike adding raters.</p>
+<p>For a multilevel replicate fit (crossed Design 1 or nested Design 2), a <strong>rater</strong>
+projection moves the subject level across occasion settings and the cluster level
+single-occasion, while an <strong>occasion</strong> projection moves the subject level across
+<code>n_o</code> and returns the cluster level as a <strong>flat</strong> curve: the cluster-level error set
+(<code>{rater, cluster:rater}</code>) has no pure-error term, so averaging occasions cannot
+change it (<code>d_study()</code> notes this). <strong>Ragged</strong> replicate fits are refused for either
+axis (the occasion-averaged ragged divisor is an open modeling question).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

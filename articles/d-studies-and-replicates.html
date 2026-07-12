@@ -195,6 +195,45 @@ with a validated oracle — along with the compound fixed-by-ragged and
 multilevel-by-ragged corners.</p>
 </div>
 <div class="section level2">
+<h2 id="how-many-occasions-do-i-need-a-d-study-on-the-occasion-facet">How many occasions do I need? A D-study on the occasion facet<a class="anchor" aria-label="anchor" href="#how-many-occasions-do-i-need-a-d-study-on-the-occasion-facet"></a>
+</h2>
+<p>Just as <code>d_study(m = ...)</code> projects the number of
+<em>raters</em>, <code>d_study(n_o = ...)</code> projects the number of
+<em>occasions</em> off a replicate fit — holding the raters fixed and
+asking “how reliable would each rater’s mean of <code>n_o</code> ratings
+be?”. Supply exactly one axis per call (<code>m</code>
+<strong>or</strong> <code>n_o</code>).</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">reps</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, occasions <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/d_study.html">d_study</a></span><span class="op">(</span><span class="va">fit_rep</span>, n_o <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # D-study projection: two-way random, absolute agreement</span></span>
+<span><span class="co">#&gt; Held raters: 4 (average) | projecting occasions | CI: 95% montecarlo (10000 draws)</span></span>
+<span><span class="co">#&gt;   n_o  m  estimate          95% CI</span></span>
+<span><span class="co">#&gt;     1  4     0.588  [0.265, 0.791]</span></span>
+<span><span class="co">#&gt;     2  4     0.620  [0.277, 0.824]</span></span>
+<span><span class="co">#&gt;     3  4     0.631  [0.280, 0.835]</span></span>
+<span><span class="co">#&gt;     4  4     0.637  [0.282, 0.841]</span></span>
+<span><span class="co">#&gt;     5  4     0.641  [0.283, 0.845]</span></span>
+<span><span class="co">#&gt;     6  4     0.643  [0.284, 0.847]</span></span></code></pre></div>
+<p>Notice the curve <strong>flattens</strong>. Averaging more occasions
+only cancels <em>pure error</em> (<code>residual</code>); it never
+touches the rater or <code>subject:rater</code> variance. So the
+occasion curve climbs to a <strong>ceiling below 1</strong> — the
+reliability you would reach with perfectly repeatable ratings but the
+same raters — rather than approaching 1 the way a rater projection does.
+Read it as “how much does re-rating help?”, which saturates.</p>
+<p>Because occasions are a <strong>random</strong> facet however the
+raters are treated, the occasion projection is defined even where a
+rater projection is not: <strong>fixed-rater absolute agreement projects
+on the occasion axis</strong> (it is only the <em>rater</em> axis that
+is undefined for fixed absolute agreement, having no “freshly sampled
+rater” to add). On a <strong>multilevel</strong> replicate fit the
+subject-level curve rises with <code>n_o</code> while the cluster-level
+curve is <strong>flat</strong> — the cluster-level error set has no
+pure-error term, so occasions cannot change it (<code><a href="../reference/d_study.html">d_study()</a></code>
+says so with a note).</p>
+</div>
+<div class="section level2">
 <h2 id="visualizing-a-fit">Visualizing a fit<a class="anchor" aria-label="anchor" href="#visualizing-a-fit"></a>
 </h2>
 <p>Every <code><a href="../reference/icc.html">icc()</a></code> fit carries an <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>
@@ -207,7 +246,7 @@ can never disagree with the printed table. They need
 plot</strong> — each ICC index as a point estimate with its Monte-Carlo
 interval. Reusing the two-way <code>ratings</code> fit from the D-study
 section above:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># `fit &lt;- icc(ratings, score, subject, rater, seed = 1)`</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-coef-1.png" class="r-plt" alt="Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a point estimate with a horizontal Monte-Carlo interval, ICC(A,k) both higher and tighter." width="700"></p>
@@ -217,7 +256,7 @@ from. It makes plain <em>why</em> absolute agreement is so much lower
 than the averaged coefficient on <code>ratings</code>: the
 <strong>rater</strong> component is large, and only absolute agreement
 counts between-rater differences as error:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">fit</span>, what <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="d-studies-and-replicates_files/figure-html/plot-comp-1.png" class="r-plt" alt="Bar chart of the estimated variance components for the ratings fit: subject, rater, and residual, with the rater component the largest." width="700"></p>
 <p>For a <strong>multilevel</strong> fit the forest plot facets by level
