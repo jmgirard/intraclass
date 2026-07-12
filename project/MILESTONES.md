@@ -1967,9 +1967,28 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - T5 — Docs + spec §10 + NEWS + finish-task gate (AC6) → PR from `m46-cluster-ck-divisor`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T1 (sim), T2 (lme4/reduction), T3 (ragged); AC4 → T3; AC5 → T4;
   AC6 → T5.
-- Status: **planned** (2026-07-12, ADR-057). Not started; no active milestone. Ships on
-  `m46-cluster-ck-divisor` via the implement path (attempt-then-degrade, ADR-028 — the abort stays if the
-  oracle fails to validate any divisor).
+- Status: **in-progress** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor`. Active task: **T1** (candidate
+  divisors + simulation oracle — the ship-vs-abort decision point). Attempt-then-degrade (ADR-028 — the abort
+  stays if the oracle validates no divisor).
 - Work log:
   - 2026-07-12 — Planned via the plan gate (retro → direction = Fable-gated research item → item B
     cluster-level `ICC(c,k)`, ship-or-abort acceptance). ADR-057 authored; ROADMAP item marked SCHEDULED.
+  - 2026-07-12 — Branch `m46-cluster-ck-divisor` cut; M46 → in-progress; T1 started.
+  - 2026-07-12 — **T1 DONE (AC1 ✓); attempt-then-degrade did NOT fire — a divisor is validated (ship path).**
+    `data-raw/reviews/m46-cluster-ck-divisor-spike.R` (+ `-out.txt`) settles it with two independent legs
+    (#1): **(L1) analytic** — a cluster mean weights rater `r` by cells-per-rater `w_{c,r}`, so the per-cluster
+    error is `(σ²_r+σ²_cr)/m_c^IS` (agreement) / `σ²_cr/m_c^IS` (consistency) with the **inverse-Simpson**
+    effective count `m_c^IS = 1/Σ_r w_{c,r}²`; a single divisor matches the cross-cluster-average error iff
+    **`k_c^eff = 1/mean_c(1/m_c^IS)`** (harmonic mean of the IS counts) — *exact, closed-form*. **(L2) MC** —
+    direct variance-decomposition reliability on fixed ragged designs (known components, large `n_s`) confirms
+    it across a **C_n=6→80, MCAR + structured-MAR + extreme-imbalance + component-invariance battery**:
+    inverse-Simpson harmonic recovers both Φ and ρ to **< 0.003 everywhere**. **Findings:** (a) the divisor is
+    **design-only / component-invariant** (C7: different components, still exact); (b) **agreement is EXACT,
+    not approximate** — the absolute-error coefficient uses per-cluster marginal error, so cross-cluster
+    rater-sharing does not enter (resolves M9 §5's hedge *at the cluster level*); (c) **refuted:**
+    distinct-count harmonic (exact only under uniform weights; +0.15 Φ under extreme imbalance where IS→2.14
+    vs distinct=6), arithmetic mean (+0.02–0.24 under uneven `m_c`), subject-level `k_eff` (wrong quantity,
+    §3b confirmed). **Decision point (RB tripwire: no-oracle):** the study is unambiguous (analytic proof +
+    MC across 7 cells), so per ADR-057 it *may* ship without Fable — pending the maintainer's per-instance
+    call (#19/D-004). **Next: T2** (wire `k_c^eff` inverse-Simpson into `error_divisors`; lift the `R/icc.R`
+    ~L1188 abort) once the Fable call is made.
