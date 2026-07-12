@@ -1,23 +1,28 @@
 # Choosing an ICC
 
 “Which ICC should I report?” is the question this package is built to
-answer. There is no single intraclass correlation: the label hides a
-family of coefficients that estimate *different* population quantities.
-Report the wrong one and you can overstate reliability by a wide margin,
-or penalize a rating procedure for differences that do not matter to
-you.
+answer. There is no single intraclass correlation: the name hides a
+whole family of coefficients, and they do not all measure the same
+thing. (In the jargon, they target different *estimands* — different
+true quantities you could be trying to pin down.) Report the wrong one
+and you can overstate reliability by a wide margin, or penalize a rating
+procedure for differences that do not actually matter to you.
 
-Four choices pin down the coefficient. Each is a single argument to
-[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md), and
-each is a genuine decision about your measurement – not a technicality.
+The good news: you do not need the formulas. You need to answer a few
+plain questions about *your* study — does the exact value matter or only
+the ranking? will you use one rater or an average of several? — and each
+answer sets one argument of
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md). Four
+such choices pin down the coefficient, and each is a genuine decision
+about your measurement, not a technicality. Work through them top to
+bottom on the single dataset below (so the numbers stay comparable); by
+the end you will know both which coefficient to report and the exact
+call that computes it.
 
 ![A four-step decision flow: agreement vs. consistency (type), single
 vs. average (unit), random vs. fixed raters (raters), and complete vs.
 incomplete designs, each mapping to an icc()
 argument.](choosing-icc-tree.svg)
-
-We work through the four choices on one dataset so the numbers are
-comparable.
 
 ## The data
 
@@ -167,7 +172,9 @@ automatically:
   [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
   fails loudly rather than returning a plausible-looking number.
 - The averaging divisor for `ICC(*,k)` becomes the *effective* number of
-  ratings, `k_eff`, the harmonic mean of the per-subject counts – so it
+  ratings, `k_eff` — the harmonic mean of the per-subject counts (an
+  average that leans toward the smaller counts, so a few well-rated
+  subjects cannot disguise the many that were rated by fewer raters). It
   honestly reflects the ragged averages you actually computed.
 
 ### A worked incomplete design
@@ -270,6 +277,20 @@ reports the **subject-level** (within-cluster) and **cluster-level**
 (between-cluster) coefficients side by side. The [*Multilevel
 designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.md)
 article works a full example.
+
+## Once you have a number
+
+Picking the right coefficient is half the job; reading it is the other
+half. Two habits keep you honest, whichever coefficient you chose.
+Interpret it against its **confidence interval**, not the point estimate
+alone — a small study can leave the reliability genuinely uncertain
+across a wide range. And treat published “poor / good / excellent”
+cutoffs as rough conventions, not verdicts: the bar that matters depends
+on the stakes of your decision and on which coefficient you are reading.
+The [*Getting
+started*](https://jmgirard.github.io/intraclass/articles/getting-started.html#is-this-a-good-icc)
+article’s “Is this a good ICC?” section lays out the common rules of
+thumb and their caveats.
 
 ## Naming crosswalk
 

@@ -76,10 +76,32 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span></code></pre></div>
-<p><code>intraclass</code> estimates interrater-reliability intraclass
-correlation coefficients (ICCs) from a mixed model rather than from
-classical ANOVA mean squares. This article walks the full pipeline on a
-small, balanced example: <strong>fit → ICC → interpret</strong>.</p>
+<div class="section level2">
+<h2 id="what-an-icc-tells-you">What an ICC tells you<a class="anchor" aria-label="anchor" href="#what-an-icc-tells-you"></a>
+</h2>
+<p>Suppose several raters each score the same set of things — essays,
+patients, video clips — and you want to know whether the scores can be
+<em>trusted</em>. If two raters watch the same clip, will they land on
+the same number? If you swapped in a different rater, would the result
+hold up? That is a question about <strong>interrater
+reliability</strong>, and an <strong>intraclass correlation coefficient
+(ICC)</strong> is the number that answers it.</p>
+<p>An ICC runs from 0 to 1 and reports <strong>the share of the
+variation in scores that reflects real differences between the things
+being rated</strong>, rather than disagreement or noise between raters.
+Near 1, almost all the spread in scores is genuine subject-to-subject
+difference and the raters barely disagree — the ratings are highly
+reliable. Near 0, the raters are effectively adding noise, and a score
+tells you more about who happened to rate it than about the subject.</p>
+<p><code>intraclass</code> estimates that number by fitting a
+<strong>mixed model</strong> (it separates subject variation from rater
+variation as variance components), rather than from the classical ANOVA
+mean-squares formulas older tools use. The two agree on clean, balanced
+data but the model-based approach also handles missing ratings, multiple
+designs, and honest confidence intervals — see <a href="engines.html"><em>Engines</em></a> for the machinery. This article
+walks the whole pipeline on a small example: <strong>fit → estimate →
+interpret</strong>.</p>
+</div>
 <div class="section level2">
 <h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
 </h2>
@@ -104,8 +126,8 @@ subject, the rater, and the score.</p>
 <p>Call <code><a href="../reference/icc.html">icc()</a></code> with the data and the three columns
 (unquoted). The defaults give the <strong>two-way random,
 absolute-agreement</strong> coefficients <code>ICC(A,1)</code> and
-<code>ICC(A,k)</code>. We set a <code>seed</code> so the Monte-Carlo
-confidence interval is reproducible.</p>
+<code>ICC(A,k)</code> (the next section unpacks that label). We set a
+<code>seed</code> so the confidence interval is reproducible.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
@@ -144,24 +166,86 @@ one-row model summary including the variance components.</p>
 <div class="section level2">
 <h2 id="interpret">Interpret<a class="anchor" aria-label="anchor" href="#interpret"></a>
 </h2>
-<ul>
-<li>
-<strong><code>ICC(A,1)</code> ≈ 0.29</strong> is the reliability of
-a <em>single</em> rater; <strong><code>ICC(A,k)</code> ≈ 0.62</strong>
-is the reliability of the <em>mean</em> of the 4 raters. Averaging
-raises reliability (Spearman–Brown), so report <code>ICC(A,k)</code>
-when the averaged score is what you will actually use.</li>
-<li>These are <strong>absolute-agreement</strong> coefficients:
-systematic differences in rater level (some raters scoring higher than
-others) count as error. Here the raters differ sharply in average level,
-which is why the agreement ICC is much lower than a consistency ICC
-would be — a signal that the rating procedure has a level problem worth
-fixing.</li>
-<li>The <strong>confidence interval</strong> is Monte-Carlo and
-boundary-aware: it is simulated from the fitted parameter covariance on
-the model’s internal scale, so it behaves near the common
-zero-rater-variance boundary where the delta method fails.</li>
-</ul>
+<p><strong>Single vs. the average of several raters.</strong>
+<code>ICC(A,1)</code> = 0.29 is the reliability of a <em>single</em>
+rater — how much you can trust one person’s score. <code>ICC(A,k)</code>
+= 0.62 is the reliability of the <em>mean</em> of all 4 raters.
+Averaging cancels out independent rater noise, so the mean is always
+more reliable than one rater alone (this is the
+<strong>Spearman–Brown</strong> relationship: more raters, higher
+reliability, with diminishing returns). Report <code>ICC(A,k)</code>
+when the averaged score is what you will actually use, and
+<code>ICC(A,1)</code> when downstream users see one rater’s
+judgment.</p>
+<p><strong>Absolute agreement vs. rank order.</strong> These are
+<strong>absolute-agreement</strong> coefficients: if one rater scores
+consistently higher than another, that systematic gap counts as error.
+Here the raters differ sharply in average level, which is why the
+agreement ICC is low — a signal that the rating procedure has a level
+problem worth fixing. (If you only care that raters <em>rank</em>
+subjects the same way, ask for <em>consistency</em> instead — see
+below.)</p>
+<div class="section level3">
+<h3 id="is-this-a-good-icc">Is this a good ICC?<a class="anchor" aria-label="anchor" href="#is-this-a-good-icc"></a>
+</h3>
+<p>There is no universal cutoff, but two widely cited rules of thumb
+give a rough vocabulary. <strong>Koo &amp; Li (2016)</strong>
+propose:</p>
+<table class="table">
+<thead><tr class="header">
+<th>ICC</th>
+<th>Label</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>&lt; 0.50</td>
+<td>poor</td>
+</tr>
+<tr class="even">
+<td>0.50–0.75</td>
+<td>moderate</td>
+</tr>
+<tr class="odd">
+<td>0.75–0.90</td>
+<td>good</td>
+</tr>
+<tr class="even">
+<td>&gt; 0.90</td>
+<td>excellent</td>
+</tr>
+</tbody>
+</table>
+<p>An older scheme, <strong>Cicchetti (1994)</strong>, draws its lines a
+little differently (&lt; 0.40 poor, 0.40–0.59 fair, 0.60–0.74 good,
+0.75–1.00 excellent). Treat these as conventions, not laws: the bar that
+matters depends on the stakes of your decision, and on <em>which</em>
+ICC you are reading (an agreement and a consistency coefficient on the
+same data are not comparable to the same cutoff).</p>
+<p>Most important — and this is Koo &amp; Li’s own recommendation —
+<strong>judge the confidence interval, not just the point
+estimate.</strong> Here the four-rater mean <code>ICC(A,k)</code> = 0.62
+reads as “moderate,” but its 95% interval runs from 0.17 to 0.91 — from
+“poor” all the way to “excellent.” With only six subjects, the data
+simply cannot pin the reliability down to one band. That is why
+<code><a href="../reference/icc.html">icc()</a></code> never returns a point estimate without an interval,
+and never labels a result for you: the honest summary is the whole
+interval.</p>
+</div>
+<div class="section level3">
+<h3 id="about-the-confidence-interval">About the confidence interval<a class="anchor" aria-label="anchor" href="#about-the-confidence-interval"></a>
+</h3>
+<p>The interval <code><a href="../reference/icc.html">icc()</a></code> reports is a
+<strong>Monte-Carlo</strong> interval, and it is
+<strong>boundary-aware</strong>. In plain terms: instead of relying on a
+textbook formula that misbehaves when a variance is near zero (a common
+situation — raters who barely differ push the rater variance to its zero
+boundary), <code><a href="../reference/icc.html">icc()</a></code> simulates many plausible parameter sets
+from the fitted model and reads the interval off the resulting spread of
+ICCs. This keeps the interval well-behaved right at that boundary. The
+<a href="interval-methods.html"><em>Interval methods</em></a> article
+covers how it works and the alternatives (a parametric bootstrap, and
+Bayesian credible intervals).</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="consistency-instead-of-agreement">Consistency instead of agreement<a class="anchor" aria-label="anchor" href="#consistency-instead-of-agreement"></a>
@@ -180,11 +264,12 @@ the error, so it is never smaller than the agreement coefficient:</p>
 <span><span class="co">#&gt;   ICC(C,1)    0.715   [0.343, 0.924]</span></span>
 <span><span class="co">#&gt;   ICC(C,k)    0.909   [0.676, 0.980]</span></span>
 <span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></code></pre></div>
-<p>The gap between the two (here <code>ICC(C,1)</code> ≈ 0.72
-vs. <code>ICC(A,1)</code> ≈ 0.29) is a direct read-out of how much
+<p>The gap between the two (here <code>ICC(C,1)</code> = 0.71
+vs. <code>ICC(A,1)</code> = 0.29) is a direct read-out of how much
 systematic rater-level difference is present.</p>
-<p>By default raters are treated as <strong>random</strong> (a sample
-you generalize beyond). If your raters are the entire population of
+<p>By default raters are treated as <strong>random</strong> — a sample
+you want to generalize beyond, so that your reliability claim covers
+raters you did not use. If your raters are the entire population of
 interest you can pass <code>raters = "fixed"</code> (the classic
 <code>ICC(3,1)</code>), but <code><a href="../reference/icc.html">icc()</a></code> will warn: random is the
 recommended default for interrater reliability, and on balanced data the
@@ -198,8 +283,21 @@ interchangeable (<code>model = "oneway"</code>), absolute agreement
 vs. consistency, single vs. average, fixed vs. random raters, complete
 vs. incomplete designs — these choices define <em>which</em> ICC is
 correct for your study. The <a href="choosing-an-icc.html"><em>Choosing
-an ICC</em></a> article (<code><a href="../articles/choosing-an-icc.html">vignette("choosing-an-icc")</a></code>)
-covers that decision in depth.</p>
+an ICC</em></a> article (<code><a href="../articles/choosing-an-icc.html">vignette("choosing-an-icc")</a></code>) walks
+that decision step by step.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Cicchetti, D. V. (1994). Guidelines, criteria, and rules of thumb for
+evaluating normed and standardized assessment instruments in psychology.
+<em>Psychological Assessment, 6</em>(4), 284–290.</p>
+<p>Koo, T. K., &amp; Li, M. Y. (2016). A guideline of selecting and
+reporting intraclass correlation coefficients for reliability research.
+<em>Journal of Chiropractic Medicine, 15</em>(2), 155–163.</p>
+<p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations:
+Uses in assessing rater reliability. <em>Psychological Bulletin,
+86</em>(2), 420–428.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

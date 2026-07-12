@@ -287,6 +287,13 @@ simulations.
   replicates* (with the
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   plots).
+- *Getting started* and *Choosing an ICC* were rewritten to be
+  approachable to readers new to reliability: a from-scratch on-ramp
+  (“what an ICC tells you”), plainer language for the confidence
+  interval and the estimand vocabulary, and a new interpretation-band
+  guide (poor / moderate / good / excellent, after Koo & Li 2016 and
+  Cicchetti 1994) framed as conventions to read against the interval —
+  not verdicts the package computes for you.
 
 ### Robustness (pre-release code review)
 

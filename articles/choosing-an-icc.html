@@ -75,17 +75,23 @@
     
     
 <p>“Which ICC should I report?” is the question this package is built to
-answer. There is no single intraclass correlation: the label hides a
-family of coefficients that estimate <em>different</em> population
-quantities. Report the wrong one and you can overstate reliability by a
-wide margin, or penalize a rating procedure for differences that do not
-matter to you.</p>
-<p>Four choices pin down the coefficient. Each is a single argument to
-<code><a href="../reference/icc.html">icc()</a></code>, and each is a genuine decision about your
-measurement – not a technicality.</p>
+answer. There is no single intraclass correlation: the name hides a
+whole family of coefficients, and they do not all measure the same
+thing. (In the jargon, they target different <em>estimands</em> —
+different true quantities you could be trying to pin down.) Report the
+wrong one and you can overstate reliability by a wide margin, or
+penalize a rating procedure for differences that do not actually matter
+to you.</p>
+<p>The good news: you do not need the formulas. You need to answer a few
+plain questions about <em>your</em> study — does the exact value matter
+or only the ranking? will you use one rater or an average of several? —
+and each answer sets one argument of <code><a href="../reference/icc.html">icc()</a></code>. Four such
+choices pin down the coefficient, and each is a genuine decision about
+your measurement, not a technicality. Work through them top to bottom on
+the single dataset below (so the numbers stay comparable); by the end
+you will know both which coefficient to report and the exact call that
+computes it.</p>
 <p><img src="choosing-icc-tree.svg" class="r-plt" alt="A four-step decision flow: agreement vs. consistency (type), single vs. average (unit), random vs. fixed raters (raters), and complete vs. incomplete designs, each mapping to an icc() argument." width="100%"></p>
-<p>We work through the four choices on one dataset so the numbers are
-comparable.</p>
 <div class="section level2">
 <h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
 </h2>
@@ -227,9 +233,11 @@ subjects must form a single linked web); a disconnected design cannot
 separate subject from rater variance, and <code><a href="../reference/icc.html">icc()</a></code> fails
 loudly rather than returning a plausible-looking number.</li>
 <li>The averaging divisor for <code>ICC(*,k)</code> becomes the
-<em>effective</em> number of ratings, <code>k_eff</code>, the harmonic
-mean of the per-subject counts – so it honestly reflects the ragged
-averages you actually computed.</li>
+<em>effective</em> number of ratings, <code>k_eff</code> — the harmonic
+mean of the per-subject counts (an average that leans toward the smaller
+counts, so a few well-rated subjects cannot disguise the many that were
+rated by fewer raters). It honestly reflects the ragged averages you
+actually computed.</li>
 </ul>
 <div class="section level3">
 <h3 id="a-worked-incomplete-design">A worked incomplete design<a class="anchor" aria-label="anchor" href="#a-worked-incomplete-design"></a>
@@ -324,6 +332,20 @@ to <code><a href="../reference/icc.html">icc()</a></code> and it reports the <st
 (within-cluster) and <strong>cluster-level</strong> (between-cluster)
 coefficients side by side. The <a href="multilevel-designs.html"><em>Multilevel designs</em></a> article
 works a full example.</p>
+</div>
+<div class="section level2">
+<h2 id="once-you-have-a-number">Once you have a number<a class="anchor" aria-label="anchor" href="#once-you-have-a-number"></a>
+</h2>
+<p>Picking the right coefficient is half the job; reading it is the
+other half. Two habits keep you honest, whichever coefficient you chose.
+Interpret it against its <strong>confidence interval</strong>, not the
+point estimate alone — a small study can leave the reliability genuinely
+uncertain across a wide range. And treat published “poor / good /
+excellent” cutoffs as rough conventions, not verdicts: the bar that
+matters depends on the stakes of your decision and on which coefficient
+you are reading. The <a href="getting-started.html#is-this-a-good-icc"><em>Getting
+started</em></a> article’s “Is this a good ICC?” section lays out the
+common rules of thumb and their caveats.</p>
 </div>
 <div class="section level2">
 <h2 id="naming-crosswalk">Naming crosswalk<a class="anchor" aria-label="anchor" href="#naming-crosswalk"></a>
