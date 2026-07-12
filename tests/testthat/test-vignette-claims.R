@@ -373,7 +373,7 @@ test_that("multilevel-designs.Rmd: cluster-level ICC exceeds subject-level on `s
 # k below the panel size, the single-rater cluster ICC(c,1) is available, and the
 # averaged cluster ICC(c,k) on incomplete data is refused. Back each claim (#1).
 
-test_that("multilevel-designs.Rmd: ragged `school` supports subject + cluster ICC(c,1)", {
+test_that("multilevel-designs.Rmd: ragged `school` supports subject + cluster ICC(c,1) and ICC(c,k)", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(2025)
@@ -439,20 +439,27 @@ test_that("multilevel-designs.Rmd: ragged `school` supports subject + cluster IC
   c1 <- clu$estimates$estimate[clu$estimates$index == "ICC(C,1)"]
   expect_true(c1 >= 0 && c1 <= 1)
 
-  # The averaged cluster ICC(c,k) on incomplete data is refused, not guessed.
-  expect_error(
-    icc(
-      school_ragged,
-      score,
-      subject = pupil,
-      rater = rater,
-      cluster = classroom,
-      level = "cluster",
-      unit = "average",
-      seed = 1
-    ),
-    class = "intraclass_unsupported"
+  # The averaged cluster ICC(c,k) on incomplete data now ships (M46): both types,
+  # both units, in [0, 1], with the inverse-Simpson k_c^eff reported and below the
+  # panel size.
+  ck <- icc(
+    school_ragged,
+    score,
+    subject = pupil,
+    rater = rater,
+    cluster = classroom,
+    level = "cluster",
+    type = c("agreement", "consistency"),
+    unit = c("single", "average"),
+    seed = 1
   )
+  ce <- ck$estimates
+  expect_setequal(
+    ce$index,
+    c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
+  )
+  expect_true(all(ce$estimate >= 0 & ce$estimate <= 1))
+  expect_true(!is.na(ck$k_c_eff) && ck$k_c_eff > 1 && ck$k_c_eff <= n_rater)
 })
 
 # The article's fixed-rater subsection claims that on the balanced `school` design

@@ -636,3 +636,38 @@ test_that("print surfaces the incomplete multilevel design and effective k", {
   expect_match(out, "effective 3.24 raters", all = FALSE)
   expect_match(out, "multilevel two-way random", all = FALSE)
 })
+
+test_that("print/glance surface the cluster-level k_c^eff on incomplete data (M46)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged(
+    sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
+    prop = 0.2,
+    seed = 9
+  )
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  out <- cli::cli_fmt(print(x))
+  # The cluster divisor is surfaced separately from the subject k_eff and matches the
+  # reported k_c_eff (inverse-Simpson). A cluster-only report does not claim a
+  # per-subject k_eff note (no subject rows are shown).
+  expect_match(
+    out,
+    sprintf(
+      "effective %s raters .inverse-Simpson",
+      formatC(x$k_c_eff, format = "f", digits = 2)
+    ),
+    all = FALSE
+  )
+  expect_false(any(grepl("ratings/subject", out)))
+  expect_equal(glance(x)$k_c_eff, x$k_c_eff)
+  # A single-level object carries no cluster divisor.
+  expect_true(is.na(glance(icc(ratings, score, subject, rater))$k_c_eff))
+})

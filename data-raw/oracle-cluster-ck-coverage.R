@@ -121,14 +121,14 @@ rescore <- function(d, vc, vsc, vr, vcr, vres) {
 }
 
 # one grid cell: coverage of the FROZEN design's population ICC_c(A,k)/ICC_c(C,k)
-run_cell <- function(label, C_n, d, vc, vsc, vr, vcr, vres, seed) {
+run_cell <- function(label, c_n, d, vc, vsc, vr, vcr, vres, seed) {
   kce <- k_c_eff_ref(d)
   pop <- c(
     A = vc / (vc + (vr + vcr) / kce),
     C = vc / (vc + vcr / kce)
   )
-  hitA <- hitC <- nfit <- 0L
-  biasA <- 0
+  hit_a <- hit_c <- nfit <- 0L
+  bias_a <- 0
   for (r in seq_len(n_rep)) {
     set.seed(seed + r)
     di <- rescore(d, vc, vsc, vr, vcr, vres)
@@ -157,35 +157,35 @@ run_cell <- function(label, C_n, d, vc, vsc, vr, vcr, vres, seed) {
       next
     }
     nfit <- nfit + 1L
-    biasA <- biasA + (ra$estimate - pop[["A"]])
+    bias_a <- bias_a + (ra$estimate - pop[["A"]])
     if (pop[["A"]] >= ra$conf.low && pop[["A"]] <= ra$conf.high) {
-      hitA <- hitA + 1L
+      hit_a <- hit_a + 1L
     }
     if (pop[["C"]] >= rc$conf.low && pop[["C"]] <= rc$conf.high) {
-      hitC <- hitC + 1L
+      hit_c <- hit_c + 1L
     }
   }
   cat(sprintf(
-    "[%-26s] C_n=%-3d k_c^eff=%.2f popA=%.3f popC=%.3f  coverA=%.3f coverC=%.3f biasA=%+.4f (n=%d)\n",
+    "[%-26s] C_n=%-3d k_c^eff=%.2f popA=%.3f popC=%.3f  coverA=%.3f coverC=%.3f bias_a=%+.4f (n=%d)\n",
     label,
-    C_n,
+    c_n,
     kce,
     pop[["A"]],
     pop[["C"]],
-    hitA / nfit,
-    hitC / nfit,
-    biasA / nfit,
+    hit_a / nfit,
+    hit_c / nfit,
+    bias_a / nfit,
     nfit
   ))
   data.frame(
     cell = label,
-    C_n = C_n,
+    C_n = c_n,
     k_c_eff = kce,
     pop_A = pop[["A"]],
     pop_C = pop[["C"]],
-    coverage_A = hitA / nfit,
-    coverage_C = hitC / nfit,
-    bias_A = biasA / nfit,
+    coverage_A = hit_a / nfit,
+    coverage_C = hit_c / nfit,
+    bias_A = bias_a / nfit,
     n_fit = nfit
   )
 }

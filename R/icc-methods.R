@@ -213,10 +213,29 @@ format.icc <- function(x, ...) {
   # On incomplete data ICC(*,k) is a projection to the effective number of
   # ratings per subject (harmonic mean, k_eff); surface it so the divisor is not
   # a black box (M3 spec §5, ADR-008). Silent on balanced data (k_eff == k).
-  keff_note <- if (!x$design$balanced && any(grepl("k\\)$", e$index))) {
+  keff_note <- if (
+    !x$design$balanced && any(grepl("k\\)$", e$index) & !(e$level %in% "cluster"))
+  ) {
     icc_mute(sprintf(
       "ICC(*,k) projects to an effective %s raters (harmonic mean of ratings/subject).",
       formatC(x$k_eff, format = "f", digits = 2)
+    ))
+  }
+
+  # The averaged cluster-level ICC(c,k) on incomplete data divides by a distinct,
+  # per-cluster divisor -- the inverse-Simpson harmonic k_c^eff, the effective raters
+  # behind each cluster's observed (cells-pooled) mean (M46, ADR-057). Surface it
+  # separately so it is not confused with the subject-level k_eff. Silent on balanced
+  # data (k_c^eff == rater count) and when no cluster average is reported.
+  kceff_note <- if (
+    !x$design$balanced &&
+      !is.null(x$k_c_eff) &&
+      !is.na(x$k_c_eff) &&
+      any(grepl("k\\)$", e$index) & e$level == "cluster")
+  ) {
+    icc_mute(sprintf(
+      "Cluster ICC(c,k) averages over an effective %s raters (inverse-Simpson k_c^eff).",
+      formatC(x$k_c_eff, format = "f", digits = 2)
     ))
   }
 
@@ -250,6 +269,7 @@ format.icc <- function(x, ...) {
     table,
     "",
     keff_note,
+    kceff_note,
     comps,
     sf_note,
     conflated_note
@@ -356,6 +376,7 @@ glance.icc <- function(x, ...) {
       NA_character_
     },
     k_eff = x$k_eff,
+    k_c_eff = or_na(x$k_c_eff),
     var_cluster = or_na(x$components$cluster),
     var_subject = x$components$subject,
     var_rater = or_na(x$components$rater),

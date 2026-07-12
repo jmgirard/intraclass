@@ -2058,3 +2058,12 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     numbers are byte-unchanged by construction (`k_c^eff`=k on balanced → pinned by existing M5 tests); brms
     deferral + bridging gate aborts are tested. 46/46 in the suite. **Next: T5** (spec §10 + the four RR doc
     items + NEWS + print surfacing + finish-task gate).
+  - 2026-07-12 — **T5 docs done (AC6 pending only the gate).** Authored M9 spec **§10** (resolution: the
+    inverse-Simpson `k_c^eff`, the general 1/Σw² identity + named cell-pooled target, agreement-exact, the
+    ragged-consistency ordering caveat, the oracle/coverage set, scope) and **rescoped §5's** agreement
+    "approximation" hedge (now: exact for the mean marginal absolute error); §3b/§9 pointers updated. NEWS bullet
+    (dev heading). `print`/`glance` surface the cluster `k_c_eff` **separately** from the subject `k_eff`
+    (inverse-Simpson note; the subject-`k_eff` note no longer over-fires on a cluster-only report — scoped to
+    non-cluster rows); `glance()` gains a `k_c_eff` column. `multilevel-designs.Rmd` updated (averaged cluster
+    `ICC(c,k)` now ships + the ordering caveat + brms note). Surfacing tests added (50/50). Roxygen re-documented.
+    **Next: finish-task gate** (lintr/spelling/`devtools::check` CI-parity/installed-pkg drive) → PR.

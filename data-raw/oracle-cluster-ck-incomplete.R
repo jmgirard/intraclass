@@ -1,8 +1,8 @@
 # Oracle O-cluster-ck: averaged cluster-level ICC(c,k) on incomplete/ragged crossed
 # (Design 1) multilevel data (M46, ADR-057; Fable-blessed, ADR-057 Amendment 1) ----
 #
-# Provenance for tests/testthat/test-icc-incomplete-multilevel.R (PRINCIPLES.md
-# #1, #4). Reproducible, seeded, standalone (Rscript data-raw/oracle-cluster-ck-incomplete.R);
+# Provenance for tests/testthat/test-icc-incomplete-multilevel.n_draw (PRINCIPLES.md
+# #1, #4). Reproducible, seeded, standalone (Rscript data-raw/oracle-cluster-ck-incomplete.n_draw);
 # every reference relationship is re-derived here with stopifnot() tolerances, by
 # deliberately-dumb code INDEPENDENT of icc() (the tests then check icc() against it).
 #
@@ -31,7 +31,7 @@ suppressPackageStartupMessages({
   stopifnot(requireNamespace("lme4", quietly = TRUE))
 })
 
-# ---- the divisor, re-implemented independently of R/design.R ----
+# ---- the divisor, re-implemented independently of n_draw/design.n_draw ----
 cluster_k_eff_ref <- function(d) {
   per <- tapply(seq_len(nrow(d)), d$cluster, function(ix) {
     w <- as.numeric(table(droplevels(d$rater[ix])))
@@ -96,7 +96,15 @@ extreme_imbalance <- function(nc, ns, k, vc, vsc, vr, vcr, vres, seed) {
 # cluster/subject effects cancel in the difference; only the iid-mean leakage
 # vres/n_cells remains, subtracted analytically. Agreement: fresh raters + cr per
 # replicate. Consistency: shared rater mains, fresh cr.
-measure_reliability <- function(d, vc, vr, vcr, vres, R = 6000, seed = 4601) {
+measure_reliability <- function(
+  d,
+  vc,
+  vr,
+  vcr,
+  vres,
+  n_draw = 6000,
+  seed = 4601
+) {
   set.seed(seed)
   cl_ix <- as.integer(d$cluster)
   nc <- max(cl_ix)
@@ -106,7 +114,7 @@ measure_reliability <- function(d, vc, vr, vcr, vres, R = 6000, seed = 4601) {
   leak <- vres / n_cells
   cell_mean <- function(y) as.numeric(rowsum(y, cl_ix)) / n_cells
   agree <- consis <- numeric(nc)
-  for (g in seq_len(R)) {
+  for (g in seq_len(n_draw)) {
     rr1 <- stats::rnorm(k, 0, sqrt(vr))
     rr2 <- stats::rnorm(k, 0, sqrt(vr))
     cr1 <- matrix(stats::rnorm(nc * k, 0, sqrt(vcr)), nc, k)
@@ -124,8 +132,8 @@ measure_reliability <- function(d, vc, vr, vcr, vres, R = 6000, seed = 4601) {
     agree <- agree + (m1 - cell_mean(y2))^2 / 2
     consis <- consis + (m1 - cell_mean(y3))^2 / 2
   }
-  abs_err <- mean(agree / R - leak) # mean per-cluster absolute (agreement) error
-  rel_err <- mean(consis / R - leak) # mean per-cluster relative (consistency) error
+  abs_err <- mean(agree / n_draw - leak) # mean per-cluster absolute (agreement) error
+  rel_err <- mean(consis / n_draw - leak) # mean per-cluster relative (consistency) error
   c(
     Phi = vc / (vc + abs_err),
     rho = vc / (vc + rel_err),
@@ -185,7 +193,15 @@ cat("Components: vc=1.0 vsc=0.8 vr=0.5 vcr=0.3 vres=0.6\n")
 # --- O-cluster-score (CHK-A): inverse-Simpson plug-in recovers the weight-free truth
 d_c6 <- extreme_imbalance(60, 30, 6, vc, vsc, vr, vcr, vres, 2026071206)
 k_is <- cluster_k_eff_ref(d_c6)
-truth <- measure_reliability(d_c6, vc, vr, vcr, vres, R = 6000, seed = 4606)
+truth <- measure_reliability(
+  d_c6,
+  vc,
+  vr,
+  vcr,
+  vres,
+  n_draw = 6000,
+  seed = 4606
+)
 plug <- c(
   Phi = vc / (vc + (vr + vcr) / k_is),
   rho = vc / (vc + vcr / k_is)
