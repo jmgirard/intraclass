@@ -2047,3 +2047,14 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     < 1e-4; complete reduction); replaced the stale "dropped" test; updated the now-false roxygen `@details`
     claim. **0 fail / 654 pass** across multilevel/type-vector/print/glance/choose/d-study; `air`+`document`
     clean. **Next: T3** (coverage sweep — the four AC4 requirements).
+  - 2026-07-12 — **T3 DONE (AC4 ✓); T4 folded in (AC5 ✓).** Coverage oracle
+    `data-raw/oracle-cluster-ck-coverage.R` → committed fixture `cluster-ck-coverage-oracle.rds`, n_rep=240,
+    all four AC4 requirements: C_n axis {8,20,60}, heterogeneous-`m_c`, extreme-imbalance, boundary σ²_c≈0;
+    target defined **per realized (frozen) design**. Result: **nominal everywhere — min coverage A=0.908,
+    C=0.912; no C_n decay** (0.983→0.954→0.921, mild low-C_n conservatism = the M28/M36 post-fix signature);
+    boundary cell covers (0.908/0.913); max |bias_A|=0.048 (the C_n=8 small-cluster cell, honestly the largest).
+    Fixture test (`test-icc-incomplete-multilevel.R`, skip_on_cran, >.88 pin + no-decay + boundary + bias).
+    **T4 (reduction/regression):** the complete→M5 reduction (`k_c^eff`=k) test ships in T2; balanced cluster
+    numbers are byte-unchanged by construction (`k_c^eff`=k on balanced → pinned by existing M5 tests); brms
+    deferral + bridging gate aborts are tested. 46/46 in the suite. **Next: T5** (spec §10 + the four RR doc
+    items + NEWS + print surfacing + finish-task gate).
