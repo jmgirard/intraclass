@@ -2911,13 +2911,19 @@ test_that("brms fits ragged crossed multilevel random data end to end (O-Bayes-I
   expect_true(all(
     td$conf.low >= 0 & td$conf.high <= 1 & td$conf.low <= td$conf.high
   ))
-  # The averaged cluster-level ICC(c,k) is dropped on incomplete data: cluster rows are
-  # single-rater only (ICC(A,1)/ICC(C,1)), never an average unit.
+  # M47 (ADR-058): the averaged cluster-level ICC(c,k) now SHIPS for brms on incomplete
+  # data (the inverse-Simpson k_c^eff applied to the posterior draws). Cluster rows carry
+  # BOTH the single-rater ICC(c,1) and the averaged ICC(c,k), agreement + consistency.
   clus <- fit$estimates[fit$estimates$level == "cluster", ]
-  expect_true(nrow(clus) >= 1L)
-  expect_false(any(grepl(",k)$", clus$index)))
+  expect_true(any(grepl(",k)$", clus$index)))
+  expect_true(any(grepl(",1)$", clus$index)))
+  expect_true(
+    !is.null(fit$k_c_eff) && is.finite(fit$k_c_eff) && fit$k_c_eff > 1
+  )
 
-  # O-Bayes-IML-agree: the glmmTMB REML M9 points sit inside the brms credible intervals.
+  # O-Bayes-IML-agree + O-Bayes-cluster-ck-containment: the glmmTMB REML M9/M46 points sit
+  # inside the brms credible intervals, for EVERY row -- subject ICC(A,1)/ICC(A,k_eff),
+  # cluster ICC(c,1) AND the averaged cluster ICC(c,k_c^eff) (containment, not equality).
   g <- suppressMessages(icc(
     d,
     score,

@@ -350,8 +350,10 @@ averaged \code{ICC(c,k)}: the average divides the cluster error by the effective
 of raters behind each cluster's observed (cells-pooled) mean, the inverse-Simpson
 harmonic \code{k_c^eff} (reported as \code{k_c_eff}; equal to the rater count on complete
 data). A rater-balanced cluster mean would have a different (higher) effective
-count. For the \code{brms} engine the averaged cluster \code{ICC(c,k)} on incomplete data is
-not yet available (the single-rater \code{ICC(c,1)} still is). \strong{Fixed raters}
+count. This averaged cluster \code{ICC(c,k)} on incomplete data ships for every
+random-rater engine -- \code{glmmTMB}, \code{lme4}, and \code{brms} (the divisor is applied to the
+posterior draws' variance components exactly as for the frequentist fits). \strong{Fixed
+raters}
 (\code{raters = "fixed"}) are supported for the crossed design at the \strong{subject} level
 on both balanced and \strong{incomplete} data: the rater main effect becomes the
 finite-population variance of the observed raters (McGraw & Wong Case 3A), so on

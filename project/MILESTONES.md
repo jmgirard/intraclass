@@ -2141,9 +2141,25 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     proceed to T3.
   - T3 — Docs + NEWS + finish-task gate (AC5) → PR from `m47-brms-cluster-ck`.
 - **Coverage:** AC1 → T1; AC2 → T1; AC3 → T1; AC4 → T2; AC5 → T3.
-- Status: **planned** (ADR-058; not started). No active milestone until started.
+- Status: **in-progress** (ADR-058). Branch: `m47-brms-cluster-ck`.
 - Work log:
   - 2026-07-12 — Planned via the plan gate. Maintainer chose the clean brms parity fold-in (over the v0.1.0
     release consolidation, which stays next-parked); **conditional Fable escalation** (ship on nominal coverage,
     recommend-and-stop only on an anomaly); **pure brms parity** — the now-unblocked `d_study()` cluster-ragged
     projection kept OUT as a candidate. ADR-058 authored; ROADMAP candidate → SCHEDULED as M47.
+  - 2026-07-12 — Branch `m47-brms-cluster-ck` cut from `main` (`bb91b4a`); M47 → in-progress; T1 started.
+  - 2026-07-12 — **T1 DONE (AC1, AC2, AC3-containment).** Removed the `drop_brms_cluster_avg` machinery
+    (`R/icc.R` — the guard, the sole-computable abort, the once-note, and the units filter): the fixed-incomplete
+    cluster cell is already refused *upstream* by the engine-agnostic balance gate (`R/icc.R:1214`,
+    `level <- "subject"`) which runs before this branch, so `!balanced && "cluster" %in% level` here is always
+    random-rater — the crossed-random branch is now engine-uniform (glmmTMB/lme4/brms all apply the same
+    `k_c_eff`). Updated the `icc()` roxygen (the stale "not yet available for brms" note) + the M31-era inline
+    comment. Reworked the live O-Bayes-IML-agree test (`test-icc-brms.R:2866`) to assert the averaged cluster
+    `ICC(c,k)` is now **present** (was `expect_false`) + `k_c_eff` surfaced; its existing all-rows containment
+    loop now also pins **O-Bayes-cluster-ck-containment**. Focused live validation (ragged nc=4, k=4,
+    k_c_eff=3.93): all 8 glmmTMB M46 points inside the brms credible intervals; cluster MAP piles at 1.0 (the M24
+    few-cluster caveat, intervals still contain). Full fast suite **407/0/0** (54 live-Stan skip, 1 pre-existing
+    non-bridging warn); `air` clean. **Minor amendment (artifact consolidation):** reduction is already covered by
+    the untouched balanced brms cluster path (M24 — the guard only ever fired on `!balanced`); the committed
+    `data-raw/oracle-bayesian-cluster-ck.R` (reduction + coverage fixture) folds entirely into **T2** rather than
+    a near-duplicate of the M30 IML oracle. AC scope unchanged.
