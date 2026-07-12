@@ -223,14 +223,15 @@ helpers* item below (sample-size / CI-width), where it belongs.
   (ADR-057, PR #52, squash-merged at `87aef18`): the averaged cluster-level
   `ICC(c,k)` on ragged crossed multilevel data with the **inverse-Simpson harmonic
   `k_c^eff`** (glmmTMB/lme4), blessed by a gated Fable review (ADR-057 Am.1). Shipped
-  detail lives in [`MILESTONES.md`](MILESTONES.md) M46 (ADR-015), not here. **What
-  remains parked:** the **brms** cluster-level `ICC(c,k)` sibling — **SCHEDULED as M47**
-  (ADR-058, planned 2026-07-12): the engine-parity fold-in (variance-ratio push-forward,
-  narrowing one guard, validated against the glmmTMB/lme4 M46 frequentist oracle +
-  O-Bayes-cluster-ck coverage; conditional Fable). Full scope in
-  [`MILESTONES.md`](MILESTONES.md) M47 (ADR-015), not re-narrated here. Also still parked:
-  the **`d_study()` cluster-level ragged projection** (now-revisitable once `k_c^eff` is
-  blessed, but engine-agnostic and out of M47 — a candidate); and the incomplete/unbalanced
+  detail lives in [`MILESTONES.md`](MILESTONES.md) M46 (ADR-015), not here. The **brms**
+  cluster-level `ICC(c,k)` sibling then **SHIPPED as M47** (ADR-058, PR #53, squash-merged at
+  `d2258ae`): the engine-parity fold-in — one guard removed, validated against the glmmTMB/lme4
+  M46 frequentist oracle + the O-Bayes-cluster-ck coverage sweep (nominal, no Fable), so the
+  averaged cluster `ICC(c,k)` on incomplete data now covers all three random-rater engines
+  (glmmTMB/lme4/brms). Shipped detail in [`MILESTONES.md`](MILESTONES.md) M47 (ADR-015), not
+  here. **What remains parked:** the **`d_study()` cluster-level ragged projection**
+  (now-revisitable once `k_c^eff` is blessed, but engine-agnostic and was out of M47 — a
+  candidate); and the incomplete/unbalanced
   cluster-level **fixed** `ICC(c,k)` — M46 removed one of its two blocks (this divisor),
   but ten Hove's open small-`k` estimator still blocks it. The occasion-averaged-ragged
   replicate sibling (ADR-030) stays a separate open item above.

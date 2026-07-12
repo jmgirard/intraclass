@@ -1,18 +1,18 @@
 # Project status
 
-- **M47 planned (2026-07-12, ADR-058):** *brms engine parity — averaged cluster-level `ICC(c,k)` on incomplete
-  data.* The clean fold-in the plan gate selected (over the v0.1.0 release consolidation, which stays next-parked,
-  ADR-022/ADR-055). M46 shipped the inverse-Simpson `k_c^eff` divisor for **glmmTMB/lme4 only** and deliberately
-  left `drop_brms_cluster_avg` (`R/icc.R:1589`) as the seam; the divisor is engine-agnostic (`R/icc.R:1582`) and
-  brms already reads the five-component crossed-multilevel draws on incomplete data (M30). So M47 is a
-  **variance-ratio push-forward of a shipped, Fable-blessed coefficient** (random raters → no θ² 2b correction, the
-  M30/M32 regime): **narrow one guard**, validate against the glmmTMB/lme4 M46 **frequentist oracle** (reduction +
-  containment) + a seeded coverage sweep. **No new estimand-spec** (#6). **Conditional Fable** — recommend-and-stop
-  ONLY if coverage is anomalous (D-004); nominal ships without it. **Pure brms parity** — the now-revisitable
-  `d_study()` cluster-ragged projection kept OUT (candidate). Must NOT open the incomplete **fixed** cluster cell
-  (double-blocked; `test-icc-brms.R:248` guards it). Three tasks (T1 guard+reduction/containment oracle → T2
-  coverage sweep → T3 docs/NEWS/gate), ships on `m47-brms-cluster-ck`. See [`MILESTONES.md`](MILESTONES.md) M47 +
-  ADR-058; ROADMAP candidate → SCHEDULED. No active milestone until started.
+- Active milestone: **none** — **M47 (ADR-058, brms engine parity for the averaged cluster-level `ICC(c,k)` on
+  incomplete data) shipped** (PR [#53](https://github.com/jmgirard/intraclass/pull/53), squash-merged to `main` at
+  `d2258ae`; full CI matrix green 9/9). The averaged cluster-level `ICC(c,k)` on incomplete/ragged crossed
+  Design-1 data now ships for **all three random-rater engines** (glmmTMB/lme4/brms): M47 removed the
+  `drop_brms_cluster_avg` guard so `engine = "brms"` applies the M46 inverse-Simpson `k_c^eff` to the posterior
+  draws' components — a variance-ratio push-forward (random raters → no θ² 2b), validated against the glmmTMB/lme4
+  M46 frequentist oracle (containment) + a committed coverage sweep (**O-Bayes-cluster-ck**, n_rep=240 across the
+  cluster-count axis). Coverage **nominal** (.942–.963 A/C), and the M24 few-cluster caveat resolves along the
+  axis (MAP rel-bias −7.9% at nc=15 → −1.4% at nc=45), so the ADR-058 **conditional Fable did not fire**.
+  Incomplete **fixed** cluster-level `ICC(c,k)` stays refused (double-blocked). Independent review (diff-bug +
+  blame-history) clean, 0 findings. **Next milestone to plan via `/milestone-plan`** — the v0.1.0 release
+  consolidation (ADR-022/ADR-055) remains the biggest deliberate open call; `main` stays on `0.0.0.9000`. Last
+  green CI: `d2258ae` (main, 9/9).
 - Active milestone: **none** — **M46 (ADR-057, averaged cluster-level `ICC(c,k)` on incomplete data) shipped**
   (PR [#52](https://github.com/jmgirard/intraclass/pull/52), squash-merged to `main` at `87aef18`; full CI
   matrix green 9/9). The averaged cluster-level `ICC(c,k)` now ships on incomplete/ragged crossed Design-1

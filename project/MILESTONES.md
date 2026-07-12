@@ -2141,8 +2141,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     proceed to T3.
   - T3 — Docs + NEWS + finish-task gate (AC5) → PR from `m47-brms-cluster-ck`.
 - **Coverage:** AC1 → T1; AC2 → T1; AC3 → T1; AC4 → T2; AC5 → T3.
-- Status: **review** (ADR-058). Branch: `m47-brms-cluster-ck`. All tasks T1–T3 / AC1–AC5 done; full local gate
-  green. No Fable (coverage nominal). Awaiting PR + CI.
+- Status: **done — merged, CI green** (PR [#53](https://github.com/jmgirard/intraclass/pull/53), squash-merged to
+  `main` at `d2258ae`; full CI matrix green 9/9). All tasks T1–T3, AC1–AC5. Coverage nominal across the C_n sweep
+  → **no Fable** (ADR-058 conditional escalation not triggered). Independent review (diff-bug + blame-history):
+  0 findings. The averaged cluster-level `ICC(c,k)` on incomplete/ragged data now ships for all three random-rater
+  engines (glmmTMB/lme4/brms). `main` stays on `0.0.0.9000` (release consolidation ADR-022 still parked).
 - Work log:
   - 2026-07-12 — Planned via the plan gate. Maintainer chose the clean brms parity fold-in (over the v0.1.0
     release consolidation, which stays next-parked); **conditional Fable escalation** (ship on nominal coverage,
@@ -2199,3 +2202,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     by the live containment test [no action]; (2) the "computed INDEPENDENTLY" divisor comment overstated (it's a
     re-derivation that cancels) → **fixed** (comment corrected, #4); (3) containment `match()`+`na.rm` can't be
     exploited (`index` is the literal `"k"`, presence separately asserted) [no action]. Awaiting green CI on #53.
+  - 2026-07-12 — **MERGED (PR #53, `d2258ae`); M47 → done.** Full CI matrix green 9/9 (format-check/lint/pkgdown/
+    test-coverage + R CMD check macOS·Windows·Ubuntu release·devel·oldrel). Post-merge reconcile: ROADMAP candidate
+    retired (shipped); STATUS updated; branch auto-deleted. `main` stays on `0.0.0.9000` (release consolidation
+    ADR-022 still parked).
