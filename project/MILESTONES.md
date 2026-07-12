@@ -2141,9 +2141,61 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     proceed to T3.
   - T3 — Docs + NEWS + finish-task gate (AC5) → PR from `m47-brms-cluster-ck`.
 - **Coverage:** AC1 → T1; AC2 → T1; AC3 → T1; AC4 → T2; AC5 → T3.
-- Status: **planned** (ADR-058; not started). No active milestone until started.
+- Status: **review** (ADR-058). Branch: `m47-brms-cluster-ck`. All tasks T1–T3 / AC1–AC5 done; full local gate
+  green. No Fable (coverage nominal). Awaiting PR + CI.
 - Work log:
   - 2026-07-12 — Planned via the plan gate. Maintainer chose the clean brms parity fold-in (over the v0.1.0
     release consolidation, which stays next-parked); **conditional Fable escalation** (ship on nominal coverage,
     recommend-and-stop only on an anomaly); **pure brms parity** — the now-unblocked `d_study()` cluster-ragged
     projection kept OUT as a candidate. ADR-058 authored; ROADMAP candidate → SCHEDULED as M47.
+  - 2026-07-12 — Branch `m47-brms-cluster-ck` cut from `main` (`bb91b4a`); M47 → in-progress; T1 started.
+  - 2026-07-12 — **T1 DONE (AC1, AC2, AC3-containment).** Removed the `drop_brms_cluster_avg` machinery
+    (`R/icc.R` — the guard, the sole-computable abort, the once-note, and the units filter): the fixed-incomplete
+    cluster cell is already refused *upstream* by the engine-agnostic balance gate (`R/icc.R:1214`,
+    `level <- "subject"`) which runs before this branch, so `!balanced && "cluster" %in% level` here is always
+    random-rater — the crossed-random branch is now engine-uniform (glmmTMB/lme4/brms all apply the same
+    `k_c_eff`). Updated the `icc()` roxygen (the stale "not yet available for brms" note) + the M31-era inline
+    comment. Reworked the live O-Bayes-IML-agree test (`test-icc-brms.R:2866`) to assert the averaged cluster
+    `ICC(c,k)` is now **present** (was `expect_false`) + `k_c_eff` surfaced; its existing all-rows containment
+    loop now also pins **O-Bayes-cluster-ck-containment**. Focused live validation (ragged nc=4, k=4,
+    k_c_eff=3.93): all 8 glmmTMB M46 points inside the brms credible intervals; cluster MAP piles at 1.0 (the M24
+    few-cluster caveat, intervals still contain). Full fast suite **407/0/0** (54 live-Stan skip, 1 pre-existing
+    non-bridging warn); `air` clean. **Minor amendment (artifact consolidation):** reduction is already covered by
+    the untouched balanced brms cluster path (M24 — the guard only ever fired on `!balanced`); the committed
+    `data-raw/oracle-bayesian-cluster-ck.R` (reduction + coverage fixture) folds entirely into **T2** rather than
+    a near-duplicate of the M30 IML oracle. AC scope unchanged.
+  - 2026-07-12 — **T2 DONE (AC3-reduction, AC4); coverage NOMINAL — the conditional-Fable branch did NOT fire.**
+    `data-raw/oracle-bayesian-cluster-ck.R` (live-Stan, `skip_on_ci` pattern) runs the five-component crossed DGP
+    through the shipped brms recipe over a cluster-count sweep — **complete** (reduction, k_c^eff=5), **ragged
+    low-C_n** (nc=15), **ragged high-C_n** (nc=45) — at **n_rep=240 + per-rep seeding**, design frozen per cell,
+    population target = M46's formula (independent `k_c_eff_ref`). Committed `bayesian-cluster-ck-oracle.rds` +
+    the fast CI test `O-Bayes-cluster-ck` (13 assertions). **Result:** coverage nominal across the sweep —
+    complete .946/.963, low-C_n .946/.946, high-C_n **.942/.946** (agreement/consistency); convergence .97–.99.
+    The M24 few-cluster caveat **resolves along the C_n axis** — MAP rel-bias −7.9% (nc=15) → **−1.4% (nc=45)** —
+    with coverage nominal throughout (the clean variance-ratio regime, no 2b). ALL PINS PASS → **no Fable**
+    (ADR-058 conditional escalation not triggered). Run cost: ~2h (720 live refits, Defender + a concurrent R CMD
+    check contending on 8 cores). `.gitignore` gains the checkpoint; the stale M30 IML comment repointed to this
+    oracle. AC scope unchanged.
+  - 2026-07-12 — **T3 DONE (AC5); M47 → review.** Docs: NEWS bullet (the M46 averaged-cluster line now reads
+    "every random-rater engine — glmmTMB, lme4, brms"); `multilevel-designs.Rmd` engine-coverage notes corrected
+    (also fixed two stale M46/M36-era "still open" claims the same sentence touched). **Finish-task gate GREEN:**
+    `air format --check` clean / `devtools::document` no delta / `spelling` clean / `lintr` **0 lints** /
+    `pkgdown::check_pkgdown()` clean / full CI-mode suite (`NOT_CRAN=true CI=true`) **408/0/0** (23 live-Stan skip) /
+    `devtools::check` CI-parity (`NOT_CRAN=true CI=true`, no-manual) **0/0/0** / installed-pkg drive of the new brms
+    ragged cluster `ICC(c,k)` cell OK (`k_c_eff`=3.90, both types present). PR next.
+  - 2026-07-12 — **REVIEW (PR [#53](https://github.com/jmgirard/intraclass/pull/53)).** Fresh per-AC evidence:
+    **AC1** installed-pkg drive returns brms ragged cluster `ICC(A,k)`/`ICC(C,k)` (`k_c_eff`=3.90) + focused live
+    validation (8/8 glmmTMB M46 points inside the brms CIs); **AC2** CI-mode suite 408/0/0 incl. the untouched
+    fixed-incomplete-cluster refusal test — balanced/`ICC(c,1)`/subject byte-unchanged; **AC3** O-Bayes-cluster-ck
+    reduction cell coverage .946/.963 at `k_c_eff`=5 + live containment; **AC4** committed sweep nominal
+    (.942–.963 across complete/low-/high-`C_n`, n_rep=240, few-cluster bias resolves −7.9%→−1.4%); **AC5** full
+    gate green (above). Consistency gate: `document` no diff, README in sync, `data-raw` `.Rbuildignore`'d, NEWS
+    dev-heading bullet present (no milestone number), pkgdown clean, every AC→existing task. **Independent review
+    — two fresh-context lenses, both clean (0 findings):** [O] diff-bug (control-flow trace: guard removal safe,
+    fixed/nested/non-bridging/D-study all intercepted upstream, no NA-divisor leak; oracle non-circular; tests
+    sound) + [S] blame-history (the guard was an explicitly-temporary M46 fence, ADR-058 pre-authorized the exact
+    lines, test inversion is the planned flip, fixed cell untouched). No findings ≥80 → **scorer not needed.**
+    Three non-blocking observations logged: (1) oracle drives internals not `icc()` end-to-end — routing covered
+    by the live containment test [no action]; (2) the "computed INDEPENDENTLY" divisor comment overstated (it's a
+    re-derivation that cancels) → **fixed** (comment corrected, #4); (3) containment `match()`+`na.rm` can't be
+    exploited (`index` is the literal `"k"`, presence separately asserted) [no action]. Awaiting green CI on #53.

@@ -99,8 +99,10 @@
 #' of raters behind each cluster's observed (cells-pooled) mean, the inverse-Simpson
 #' harmonic `k_c^eff` (reported as `k_c_eff`; equal to the rater count on complete
 #' data). A rater-balanced cluster mean would have a different (higher) effective
-#' count. For the `brms` engine the averaged cluster `ICC(c,k)` on incomplete data is
-#' not yet available (the single-rater `ICC(c,1)` still is). **Fixed raters**
+#' count. This averaged cluster `ICC(c,k)` on incomplete data ships for every
+#' random-rater engine -- `glmmTMB`, `lme4`, and `brms` (the divisor is applied to the
+#' posterior draws' variance components exactly as for the frequentist fits). **Fixed
+#' raters**
 #' (`raters = "fixed"`) are supported for the crossed design at the **subject** level
 #' on both balanced and **incomplete** data: the rater main effect becomes the
 #' finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
@@ -1320,9 +1322,13 @@ icc <- function(
       # fixed data: b = tr(C.Sigma_post)/(k - 1) != 0 once the rater means are estimated from
       # unequal cell counts (b ~= 0 on balanced data, where the means come from the whole
       # sample -- the M26/M27-S1 raw-push-forward regime). The M3 k_eff (harmonic-mean divisor),
-      # single-level connectedness guard (~L887), and crossed-multilevel identifiability +
-      # cluster-ICC(c,k)-dropped-with-note gates (~L903) are engine-agnostic and run
-      # pre-dispatch, so they protect brms. M32 (ADR-042): incomplete/ragged NESTED RANDOM ships
+      # single-level connectedness guard (~L887) and crossed-multilevel identifiability
+      # gates (~L903) are engine-agnostic and run pre-dispatch, so they protect brms.
+      # M47 (ADR-058): the averaged cluster-level ICC(c,k) on ragged data now ships for
+      # brms too (the inverse-Simpson k_c^eff applied to the posterior draws' components,
+      # a variance-ratio push-forward -- no theta^2, no 2b), so no engine special-case
+      # remains; the incomplete FIXED cluster cell is still refused upstream (all engines).
+      # M32 (ADR-042): incomplete/ragged NESTED RANDOM ships
       # too -- Design 2 (raters nested in clusters, Slice 1, fit_brms_nested_clusters) and Design 3
       # (raters nested in subjects, the multilevel one-way, Slice 2, fit_brms_nested_subjects).
       # Random raters make each ICC a ratio of variance components (no theta^2 functional), so this
@@ -1580,40 +1586,13 @@ icc <- function(
     # balanced/complete data it equals the rater count k (so balanced numbers are
     # unchanged -- number-invariance). Fable-blessed as exact for both types (Am.1).
     k_c_eff <- if (ml_design == "crossed") cluster_k_eff(df) else NA_real_
-    # brms cluster-level ICC(c,k) on incomplete data stays deferred: M46 (ADR-057)
-    # ships the inverse-Simpson divisor for glmmTMB/lme4 only; the brms variance-ratio
-    # push-forward would fold in but is not yet oracle-validated (no O-cluster-brms) --
-    # a candidate, not this milestone (#1). Preserve the pre-M46 behavior for brms only:
-    # drop the averaged cluster row (with a once-note), or abort if a brms cluster
-    # average is the sole thing computable.
-    drop_brms_cluster_avg <- engine == "brms" &&
-      !balanced &&
-      "cluster" %in% level
-    any_single <- any(vapply(unit, identical, logical(1), "single"))
-    if (drop_brms_cluster_avg && !any_single && !("subject" %in% level)) {
-      abort_unsupported(c(
-        "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not available \\
-         for the {.pkg brms} engine yet.",
-        i = "M46 ships them for {.code engine = \"glmmTMB\"} (default) or \\
-             {.code \"lme4\"}; the Bayesian sibling is not yet validated.",
-        i = "Use a frequentist engine for the cluster average, or \\
-             {.code unit = \"single\"} for the cluster level."
-      ))
-    }
-    if (
-      drop_brms_cluster_avg &&
-        !all(vapply(unit, identical, logical(1), "single"))
-    ) {
-      cli::cli_inform(
-        c(
-          i = "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not \\
-               available for {.pkg brms} yet; reporting the single-rater cluster \\
-               ICC(c,1). Use a frequentist engine (glmmTMB/lme4) for the average."
-        ),
-        .frequency = "once",
-        .frequency_id = "intraclass_icc_ck_incomplete_brms"
-      )
-    }
+    # The averaged cluster-level ICC(c,k) on incomplete data now ships for ALL
+    # random-rater engines -- glmmTMB/lme4 (M46, ADR-057) AND brms (M47, ADR-058):
+    # the inverse-Simpson k_c^eff is engine-agnostic (applied post-fit to the five
+    # components / posterior draws), a variance-ratio push-forward validated against
+    # the frequentist M46 oracle (O-Bayes-cluster-ck). No engine special-case remains
+    # here; the incomplete FIXED cluster cell is still refused upstream (all engines,
+    # the balance gate above), so this crossed random branch is safely engine-uniform.
     unlist(
       lapply(type, function(ty) {
         unlist(
@@ -1621,12 +1600,7 @@ icc <- function(
             # The cluster level averages over raters with the per-cluster inverse-Simpson
             # divisor k_c^eff (M46); the subject level uses the per-subject k_eff (M9 §5).
             k_lv <- if (lv == "cluster") k_c_eff else k_ml
-            units_lv <- if (lv == "cluster" && drop_brms_cluster_avg) {
-              Filter(function(u) identical(u, "single"), unit)
-            } else {
-              unit
-            }
-            units_lv <- agr_projection_units(units_lv, ty, raters)
+            units_lv <- agr_projection_units(unit, ty, raters)
             # Occasion averaging (M20 Slice 2) reduces only pure error, which is not in
             # the cluster-level error set, so it is a no-op there -- emit single-occasion
             # cluster rows only. Non-replicate paths carry a single "single" occasion.
