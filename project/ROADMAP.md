@@ -198,10 +198,11 @@ helpers* item below (sample-size / CI-width), where it belongs.
       the estimand map keys the cluster error set on `level` not `raters`), glmmTMB/lme4. A feasibility spike
       settled the σ²_cr question (fixing raters doesn't bias the interaction) → exact reduction to the M5
       random cluster-level ICC, **Outcome A, no Fable**. Shipped detail in [`MILESTONES.md`](MILESTONES.md)
-      (ADR-015). **brms cluster-level-fixed + brms incomplete-fixed-nested siblings — PLANNED as M38**
-      (ADR-048): engine parity (each a lift of one shipped brms guard, checked against the glmmTMB M37/M36
-      frequentist oracle), one milestone; no Fable pre-authorized (the ragged-fixed-nested-brms coverage cell
-      is stop-and-replan). Planned detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015).
+      (ADR-015). **brms cluster-level-fixed + brms incomplete-fixed-nested siblings — SHIPPED as M38**
+      (ADR-048, PR #44): engine parity (each a lift of one shipped brms guard, checked against the glmmTMB
+      M37/M36 frequentist oracle), both clean guard-lifts. The ragged-fixed-nested-brms coverage gate
+      (O-Bayes-IFNML) came back **nominal** (C_n=80 boundary .970, no decay), so the no-Fable stop-and-replan
+      branch did not fire. Shipped detail in [`MILESTONES.md`](MILESTONES.md), not here (ADR-015).
       **Still parked / genuinely open:** **incomplete/unbalanced** cluster-level fixed (🟣 double-blocked —
       ten Hove's open small-*k* estimator *and* the M9 §9 open cluster-level `ICC(c,k)` divisor; its own later
       milestone); the **lavaan** cluster-level-fixed **and** incomplete-fixed-nested siblings (**blocked on the
