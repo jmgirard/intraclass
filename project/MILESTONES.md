@@ -1847,4 +1847,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     conflated snapshots; author §6b of the spec.
   - T6 — Docs + NEWS + finish-task gate (AC7) → PR from `m45-conflated-consistency`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T3; AC4 → T4; AC5 → T2, T3, T4; AC6 → T5; AC7 → T5, T6.
-- Status: **planned** (ADR-056, 2026-07-12). Not started.
+- Status: **in-progress** (ADR-056, started 2026-07-12) — branch `m45-conflated-consistency`. T1 active.
+- Work log:
+  - 2026-07-12 — T1 started (derivation-confirmation spike). Located the mechanism: conflated error set is
+    hardcoded agreement-only at `R/estimand.R:94`; every other design derives consistency by dropping
+    `"rater"` from the agreement error (lines 116/127/135) — the structural symmetry T1 confirms.
+  - 2026-07-12 — **T1 DONE (AC1 ✓).** `data-raw/reviews/m45-conflated-consistency-spike.R` confirms
+    consistency-conflated = flat two-way consistency ICC (drop σ²_r): Route A identity (ICC(C,1)=0.756,
+    ICC(C,k)=0.949, ∈[0,1], avg≥single, > agreement-conflated); Route B tracking (conflated 0.7463 vs flat
+    two-way `icc(type="consistency")` 0.7458, |diff|=5e-4; recovers population; stays biased vs correct
+    subject level). Attempt-then-degrade did NOT fire — sourced (McGraw & Wong 1996), proceed to T2.
