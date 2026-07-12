@@ -281,17 +281,17 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M40 Slice 3 — DoD / finish-task gate → PR (NEXT).** On branch `m40-vignette-accessibility`.
-  *Slices 1–2 DONE (2026-07-11, checkpoint commits):* S1 `getting-started.Rmd` (on-ramp + plain
-  "About the confidence interval" + glosses + the canonical "Is this a good ICC?" band guide, Koo & Li 2016 /
-  Cicchetti 1994, "judge the interval" illustrated live, no verdict; prose numbers → inline `r`; REFERENCES +
-  WORDLIST + a claim block). S2 `choosing-an-icc.Rmd` (warmer "start here" intro + estimand/`k_eff` glosses +
-  new "Once you have a number" section cross-linking the S1 bands — anchor `#is-this-a-good-icc` verified —
-  instead of re-tabulating; tree/crosswalk/`choose_icc()`/live numbers kept). **Slice 3 scope:** NEWS entry;
-  confirm `test-vignette-claims.R` re-passes; all six articles render (`R CMD build` + `pkgdown::check_pkgdown()`);
-  inter-article links + `_pkgdown.yml` intact; finish-task gate (`devtools::check` CI-parity `NOT_CRAN=false`
-  0/0/0; docs-only — no estimator paths to drive) → PR on `m40-vignette-accessibility`. REFERENCES/WORDLIST were
-  already updated in S1 (the bands' source gate). Docs milestone, no Fable. *Superseded (M39, done):* T1 (single-level,
+- Active task: **M40 all 3 slices done; local gate green; PR open, awaiting CI.** On branch
+  `m40-vignette-accessibility`. S1 `getting-started.Rmd` (on-ramp + plain "About the confidence interval" +
+  glosses + the canonical "Is this a good ICC?" band guide, Koo & Li 2016 / Cicchetti 1994, "judge the interval"
+  illustrated live, no verdict; prose numbers → inline `r`; REFERENCES + WORDLIST + a claim block). S2
+  `choosing-an-icc.Rmd` (warmer "start here" intro + estimand/`k_eff` glosses + new "Once you have a number"
+  section cross-linking the S1 bands — anchor `#is-this-a-good-icc` verified — instead of re-tabulating;
+  tree/crosswalk/`choose_icc()`/live numbers kept). S3 gate: NEWS bullet added; local gate **GREEN** —
+  `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0** (all six vignettes built), `lintr` **0 lints**,
+  `spelling`/`air`/`pkgdown::check_pkgdown()` clean, claim tests re-pass. Docs-only → no installed-pkg estimator
+  paths. **Next action: open the PR from `m40-vignette-accessibility`; on green CI + merge, reconcile M40 → done
+  + set "Last green CI".** Docs milestone, no Fable. *Superseded (M39, done):* T1 (single-level,
   `a23c768`) + T2
   (multilevel, `e7be0df`) + T3 (docs/spec §9/tracking/gate) complete on branch `m39-occasion-dstudy`. The
   finish-task gate is green: `devtools::document` (no delta) / `air format --check` / `lintr` (0 lints) / full

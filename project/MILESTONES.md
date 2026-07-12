@@ -1437,13 +1437,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         avoiding drift. Kept the decision-tree SVG, the crosswalk table, the `choose_icc()` closer, and every
         live `r`-computed number and pinned claim. Both articles knit; spell/`air` clean; vignette-claim tests
         pass.
-  - [ ] **Slice 3 — DoD / gate.** `REFERENCES.md` gains Koo & Li (2016) + Cicchetti (1994); new WORDLIST terms
-        added; `test-vignette-claims.R` re-passes (relabelled if any printed number moved — none should); all
-        six articles render (`R CMD build` + `pkgdown::check_pkgdown()`); inter-article links + `_pkgdown.yml`
-        intact; NEWS updated; `air format --check` / `lintr` clean; finish-task gate (`devtools::check`
-        CI-parity `NOT_CRAN=false` 0/0/0; installed-pkg — docs-only, no estimator paths to drive) → PR on
-        `m40-vignette-accessibility`.
+  - [x] **Slice 3 — DoD / gate** (done 2026-07-11, checkpoint below). `REFERENCES.md` (Koo & Li 2016 +
+        Cicchetti 1994) and `inst/WORDLIST` (Cicchetti/Koo/normed) were added in S1 (the bands' source gate);
+        NEWS gains a *Data and documentation* bullet on the rewrite + interpretation guide. Local gate **GREEN**:
+        `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0** (all six vignettes built), `lintr::lint_package()`
+        **0 lints**, `spelling` clean, `air format --check` clean, `pkgdown::check_pkgdown()` "No problems found",
+        `test-vignette-claims.R` re-passes (no printed number moved), the `getting-started#is-this-a-good-icc`
+        cross-link anchor verified present. Docs-only → no installed-pkg estimator paths to drive. **PR on
+        `m40-vignette-accessibility`.**
 - Fable posture (#19): **NONE** — docs milestone, no estimand/coverage claim.
+- Status: **all 3 slices done; local gate green (0/0/0); PR open, awaiting CI.**
 - Deferred out of M40 (record so not rediscovered): the **v0.2.0 release consolidation / CRAN upload** (ADR-022;
   the release-gap the retro raised — its own milestone if scheduled); the **benchmark-vs-prior-art** article; the
   **clarity pass over the other four articles** (`engines`, `interval-methods`, `multilevel-designs`,
