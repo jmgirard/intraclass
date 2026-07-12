@@ -103,9 +103,20 @@ icc(
 
 - type:
 
-  Error definition (two-way only): `"agreement"` (absolute agreement,
-  the default) counts systematic rater differences as error;
-  `"consistency"` ignores them. Not applicable when `model = "oneway"`.
+  Error definition(s) (two-way only): `"agreement"` (absolute agreement)
+  counts systematic rater differences as error; `"consistency"` ignores
+  them. Like `unit` and `level`, `type` is **vectorized and defaults to
+  both** (`c("agreement", "consistency")`), so a default call reports
+  every defined formulation – `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`,
+  `ICC(C,k)` – from the single fit (agreement vs. consistency is
+  post-fit arithmetic on the same variance components, so the second
+  definition is free). Pass a single value to report just that
+  coefficient once you have named your estimand. A definition that is
+  undefined for the design (e.g. `"consistency"` for the conflated
+  diagnostic, or a fixed-rater agreement projection to a different rater
+  count) is dropped with a message when reached via the default, and
+  aborts with a teaching error when requested explicitly. Not applicable
+  when `model = "oneway"`.
 
 - raters:
 
@@ -507,13 +518,17 @@ ratings <- data.frame(
             5, 3, 6, 2, 6, 4, 8, 2, 8, 6, 9, 7)
 )
 icc(ratings, score, subject, rater, seed = 1)
-#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
+#> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.712]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   Absolute agreement
+#>   ICC(A,1)     0.290   [0.050, 0.706]
+#>   ICC(A,k)     0.620   [0.175, 0.906]
+#>   Consistency
+#>   ICC(C,1)     0.715   [0.339, 0.924]
+#>   ICC(C,k)     0.909   [0.672, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)

@@ -121,7 +121,7 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #> 
 #> Run this on your data:
-#>   icc(data, score, subject, rater, unit = "single")
+#>   icc(data, score, subject, rater, type = "agreement", unit = "single")
 #> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
@@ -183,7 +183,7 @@ choose_icc(type = "agreement", unit = "single", raters = "random",
 #>   - Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side.
 #> 
 #> Run this on your data:
-#>   icc(data, score, subject, rater, cluster, unit = "single")
+#>   icc(data, score, subject, rater, cluster, type = "agreement", unit = "single")
 #> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.

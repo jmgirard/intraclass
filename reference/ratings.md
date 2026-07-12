@@ -47,13 +47,17 @@ for a connected incomplete variant.
 
 ``` r
 icc(ratings, score, subject, rater, seed = 2024)
-#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
+#> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   Absolute agreement
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
+#>   Consistency
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)

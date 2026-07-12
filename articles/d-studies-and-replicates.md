@@ -37,20 +37,20 @@ reuses the fit you already have — no refitting.
 
 ``` r
 
-fit <- icc(ratings, score, subject, rater, seed = 1)
+fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
 proj <- d_study(fit, m = 1:8)
 proj
 #> # D-study projection: two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>   m  estimate          95% CI
-#>   1     0.290  [0.050, 0.712]
-#>   2     0.449  [0.095, 0.831]
-#>   3     0.550  [0.136, 0.881]
-#>   4     0.620  [0.173, 0.908]
-#>   5     0.671  [0.207, 0.925]
-#>   6     0.710  [0.239, 0.937]
-#>   7     0.741  [0.268, 0.945]
-#>   8     0.765  [0.295, 0.952]
+#>   1     0.290  [0.050, 0.706]
+#>   2     0.449  [0.096, 0.828]
+#>   3     0.550  [0.137, 0.878]
+#>   4     0.620  [0.175, 0.906]
+#>   5     0.671  [0.210, 0.923]
+#>   6     0.710  [0.241, 0.935]
+#>   7     0.741  [0.271, 0.944]
+#>   8     0.765  [0.298, 0.950]
 ```
 
 Reliability climbs with more raters but with diminishing returns, and
@@ -60,6 +60,15 @@ from [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 directly. For a one-off value you can also ask
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) for it
 inline with a numeric `unit`, e.g. `unit = c("single", "average", 6)`.
+
+We fit with `type = "agreement"` here because the dependability
+coefficient above *is* the absolute-agreement projection. A default
+[`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+reports both agreement and consistency, and
+[`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)
+then projects **one curve per error definition** (adding a `type`
+column) — handy when you want both, but for this walkthrough one curve
+keeps the picture clear.
 
 Read as a curve, this is the classic “how many raters?” picture — plot
 it with
@@ -114,16 +123,16 @@ reps <- data.frame(
   score = 10 + subj + rater + sr + rnorm(nrow(grid), sd = 0.7)
 )
 
-icc(reps, score, subject, rater, occasions = c("single", "average"))
+icc(reps, score, subject, rater, type = "agreement", occasions = c("single", "average"))
 #> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 20 | Raters: 4 (random) | 80 cells x 3 replicates (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     occasions estimate   95% CI
-#>   ICC(A,1)          1    0.263   [0.082, 0.490]
-#>   ICC(A,1)          3    0.300   [0.087, 0.564]
-#>   ICC(A,k)          1    0.588   [0.263, 0.794]
-#>   ICC(A,k)          3    0.631   [0.277, 0.838]
+#>   ICC(A,1)          1    0.263   [0.083, 0.489]
+#>   ICC(A,1)          3    0.300   [0.088, 0.562]
+#>   ICC(A,k)          1    0.588   [0.265, 0.793]
+#>   ICC(A,k)          3    0.631   [0.279, 0.837]
 #> 
 #> Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -157,17 +166,17 @@ rater’s mean of `n_o` ratings be?”. Supply exactly one axis per call
 
 ``` r
 
-fit_rep <- icc(reps, score, subject, rater, occasions = "average")
+fit_rep <- icc(reps, score, subject, rater, type = "agreement", occasions = "average")
 d_study(fit_rep, n_o = 1:6)
 #> # D-study projection: two-way random, absolute agreement
 #> Held raters: 4 (average) | projecting occasions | CI: 95% montecarlo (10000 draws)
 #>   n_o  m  estimate          95% CI
-#>     1  4     0.588  [0.274, 0.790]
-#>     2  4     0.620  [0.285, 0.822]
-#>     3  4     0.631  [0.288, 0.834]
-#>     4  4     0.637  [0.290, 0.840]
-#>     5  4     0.641  [0.292, 0.844]
-#>     6  4     0.643  [0.293, 0.846]
+#>     1  4     0.588  [0.265, 0.791]
+#>     2  4     0.620  [0.277, 0.824]
+#>     3  4     0.631  [0.280, 0.835]
+#>     4  4     0.637  [0.282, 0.841]
+#>     5  4     0.641  [0.283, 0.845]
+#>     6  4     0.643  [0.284, 0.847]
 ```
 
 Notice the curve **flattens**. Averaging more occasions only cancels
@@ -206,7 +215,7 @@ two-way `ratings` fit from the D-study section above:
 ``` r
 
 library(ggplot2)
-autoplot(fit) # `fit <- icc(ratings, score, subject, rater, seed = 1)`
+autoplot(fit) # `fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)`
 ```
 
 ![Forest plot of ICC(A,1) and ICC(A,k) for the ratings data, each a

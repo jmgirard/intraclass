@@ -97,8 +97,8 @@ agreement
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -110,8 +110,8 @@ consistency
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
@@ -195,13 +195,17 @@ pilot and scored only the first two subjects, leaving four empty cells.
 
 inc <- icc(ratings_incomplete, score, subject, rater, seed = 2024)
 inc
-#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
+#> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 20 of 24 cells (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
+#>   Absolute agreement
 #>   ICC(A,1)     0.249   [0.038, 0.693]
 #>   ICC(A,k)     0.521   [0.114, 0.881]
+#>   Consistency
+#>   ICC(C,1)     0.629   [0.228, 0.906]
+#>   ICC(C,k)     0.847   [0.491, 0.969]
 #> 
 #> ICC(*,k) projects to an effective 3.27 raters (harmonic mean of ratings/subject).
 #> Variance components: subject 2.281, rater 5.532, residual 1.344
@@ -229,17 +233,21 @@ fixed_inc <- suppressWarnings(tidy(icc(ratings_incomplete, score, subject, rater
   raters = "fixed", seed = 2024)))
 
 random_inc[, c("index", "estimate", "conf.low", "conf.high")]
-#> # A tibble: 2 × 4
+#> # A tibble: 4 × 4
 #>   index    estimate conf.low conf.high
 #>   <chr>       <dbl>    <dbl>     <dbl>
 #> 1 ICC(A,1)    0.249   0.0380     0.693
 #> 2 ICC(A,k)    0.521   0.114      0.881
+#> 3 ICC(C,1)    0.629   0.228      0.906
+#> 4 ICC(C,k)    0.847   0.491      0.969
 fixed_inc[, c("index", "estimate", "conf.low", "conf.high")]
-#> # A tibble: 2 × 4
+#> # A tibble: 4 × 4
 #>   index    estimate conf.low conf.high
 #>   <chr>       <dbl>    <dbl>     <dbl>
 #> 1 ICC(A,1)    0.236   0.0574     0.630
 #> 2 ICC(A,k)    0.503   0.166      0.848
+#> 3 ICC(C,1)    0.621   0.218      0.906
+#> 4 ICC(C,k)    0.843   0.477      0.969
 ```
 
 The random interval is the wider of the two: generalizing to a rater
@@ -352,7 +360,7 @@ choose_icc(type = "agreement", unit = "single", raters = "random")
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #> 
 #> Run this on your data:
-#>   icc(data, score, subject, rater, unit = "single")
+#>   icc(data, score, subject, rater, type = "agreement", unit = "single")
 #> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,8 +114,10 @@ slower.</p>
 <span>  bootstrap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">bs</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">bs</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;      index estimate           mc    bootstrap</span></span>
-<span><span class="co">#&gt; 1 ICC(A,1)     0.29 [0.05, 0.71] [0.02, 0.72]</span></span>
-<span><span class="co">#&gt; 2 ICC(A,k)     0.62 [0.17, 0.91] [0.09, 0.91]</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]</span></span>
+<span><span class="co">#&gt; 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]</span></span>
+<span><span class="co">#&gt; 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]</span></span>
+<span><span class="co">#&gt; 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]</span></span></code></pre></div>
 <p>The point estimates are identical (same fit) and the upper bounds
 coincide; the bootstrap’s lower bounds run a little lower here, because
 this is a very small design (six subjects) and the bootstrap’s lower
@@ -146,7 +148,7 @@ pre-computed output (fitting a Stan model needs a toolchain not
 available when this site is built), so they are not evaluated at knit
 time.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement ──────────────────</span></span>
 <span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
 <span><span class="co">#&gt; Engine: brms (MCMC) | CI: 95% posterior credible (4000 draws)</span></span>
@@ -173,7 +175,7 @@ interval</strong> (HPDI) — the <em>narrowest</em> interval containing
 <code>posterior_summary = "hpdi"</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>,</span>
-<span>  posterior_summary <span class="op">=</span> <span class="st">"hpdi"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span>  type <span class="op">=</span> <span class="st">"agreement"</span>, posterior_summary <span class="op">=</span> <span class="st">"hpdi"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement ──────────────────</span></span>
 <span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
 <span><span class="co">#&gt; Engine: brms (MCMC) | CI: 95% posterior credible (HPDI) (4000 draws)</span></span>

@@ -58,22 +58,29 @@ head(ratings)
 ## Fit
 
 Call [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-with the data and the three columns (unquoted). The defaults give the
-**two-way random, absolute-agreement** coefficients `ICC(A,1)` and
-`ICC(A,k)` (the next section unpacks that label). We set a `seed` so the
-confidence interval is reproducible.
+with the data and the three columns (unquoted). With the defaults a
+single **two-way random** fit reports every defined formulation —
+absolute agreement and consistency, each for a single rater and for the
+average of your raters: `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, `ICC(C,k)`
+(the next sections unpack these labels). They are grouped by error
+definition in the printout. We set a `seed` so the confidence interval
+is reproducible.
 
 ``` r
 
 fit <- icc(ratings, score, subject, rater, seed = 2024)
 fit
-#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
+#> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.711]
-#>   ICC(A,k)     0.620   [0.173, 0.908]
+#>   Absolute agreement
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
+#>   Consistency
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -89,11 +96,14 @@ one-row model summary including the variance components.
 ``` r
 
 tidy(fit)
-#> # A tibble: 2 × 9
-#>   index   level sf_index estimate std.error conf.low conf.high conf.level method
-#>   <chr>   <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl> <chr> 
-#> 1 ICC(A,… NA    ICC(2,1)    0.290     0.180   0.0498     0.711       0.95 monte…
-#> 2 ICC(A,… NA    ICC(2,k)    0.620     0.201   0.173      0.908       0.95 monte…
+#> # A tibble: 4 × 10
+#>   index    type  level sf_index estimate std.error conf.low conf.high conf.level
+#>   <chr>    <chr> <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl>
+#> 1 ICC(A,1) agre… NA    ICC(2,1)    0.290    0.180    0.0498     0.713       0.95
+#> 2 ICC(A,k) agre… NA    ICC(2,k)    0.620    0.201    0.173      0.909       0.95
+#> 3 ICC(C,1) cons… NA    NA          0.715    0.155    0.343      0.924       0.95
+#> 4 ICC(C,k) cons… NA    NA          0.909    0.0810   0.676      0.980       0.95
+#> # ℹ 1 more variable: method <chr>
 
 glance(fit)
 #> # A tibble: 1 × 17
@@ -189,8 +199,8 @@ icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.340, 0.926]
-#>   ICC(C,k)     0.909   [0.673, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```

@@ -47,8 +47,10 @@ data.frame(
   bootstrap = sprintf("[%.2f, %.2f]", bs$conf.low, bs$conf.high)
 )
 #>      index estimate           mc    bootstrap
-#> 1 ICC(A,1)     0.29 [0.05, 0.71] [0.02, 0.72]
-#> 2 ICC(A,k)     0.62 [0.17, 0.91] [0.09, 0.91]
+#> 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]
+#> 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]
+#> 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]
+#> 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]
 ```
 
 The point estimates are identical (same fit) and the upper bounds
@@ -81,7 +83,7 @@ time.
 
 ``` r
 
-icc(ratings, score, subject, rater, engine = "brms", seed = 1)
+icc(ratings, score, subject, rater, engine = "brms", type = "agreement", seed = 1)
 ```
 
     #> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
@@ -112,7 +114,7 @@ with `posterior_summary = "hpdi"`:
 ``` r
 
 icc(ratings, score, subject, rater, engine = "brms",
-  posterior_summary = "hpdi", seed = 1)
+  type = "agreement", posterior_summary = "hpdi", seed = 1)
 ```
 
     #> ── Intraclass correlation: two-way random, absolute agreement ──────────────────

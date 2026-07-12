@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,18 +91,22 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p><code>ratings</code> is the classic Shrout &amp; Fleiss (1979) example, shipped with the package. The defaults give the two-way random, absolute-agreement <code>ICC(A,1)</code> and <code>ICC(A,k)</code> with a reproducible Monte-Carlo interval:</p>
+<p><code>ratings</code> is the classic Shrout &amp; Fleiss (1979) example, shipped with the package. With the defaults a single two-way random fit reports every defined formulation — absolute agreement and consistency, single-rater and average — grouped by error definition, each with a reproducible Monte-Carlo interval:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement ──────────────────</span></span>
+<span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement &amp; consistency ────</span></span>
 <span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   Absolute agreement</span></span>
 <span><span class="co">#&gt;   ICC(A,1)     0.290   [0.053, 0.715]</span></span>
 <span><span class="co">#&gt;   ICC(A,k)     0.620   [0.182, 0.910]</span></span>
+<span><span class="co">#&gt;   Consistency</span></span>
+<span><span class="co">#&gt;   ICC(C,1)     0.715   [0.341, 0.924]</span></span>
+<span><span class="co">#&gt;   ICC(C,k)     0.909   [0.674, 0.980]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
 <span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
@@ -144,15 +148,21 @@
 <span><span class="co">#&gt;   (crossed with clusters, Design 1).</span></span>
 <span><span class="co">#&gt; ℹ If each cluster has its own raters, give them cluster-unique labels or pass</span></span>
 <span><span class="co">#&gt;   `design = "nested_in_clusters"`.</span></span>
-<span><span class="co">#&gt; ── Intraclass correlation: multilevel two-way random, absolute agreement ───────</span></span>
+<span><span class="co">#&gt; ── Intraclass correlation: multilevel two-way random, absolute agreement &amp; consi</span></span>
 <span><span class="co">#&gt; Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)</span></span>
 <span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   level      index     estimate   95% CI</span></span>
+<span><span class="co">#&gt;   Absolute agreement</span></span>
 <span><span class="co">#&gt;   subject    ICC(A,1)     0.322   [0.162, 0.484]</span></span>
 <span><span class="co">#&gt;   subject    ICC(A,k)     0.655   [0.436, 0.790]</span></span>
 <span><span class="co">#&gt;   cluster    ICC(A,1)     0.870   [0.005, 0.973]</span></span>
 <span><span class="co">#&gt;   cluster    ICC(A,k)     0.964   [0.018, 0.993]</span></span>
+<span><span class="co">#&gt;   Consistency</span></span>
+<span><span class="co">#&gt;   subject    ICC(C,1)     0.383   [0.245, 0.544]</span></span>
+<span><span class="co">#&gt;   subject    ICC(C,k)     0.713   [0.565, 0.827]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(C,1)     0.995   [0.005, 1.000]</span></span>
+<span><span class="co">#&gt;   cluster    ICC(C,k)     0.999   [0.018, 1.000]</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492</span></span>
 <span><span class="co">#&gt; </span></span>

@@ -48,6 +48,8 @@ data.frame(
 #>      index glmmTMB   lme4
 #> 1 ICC(A,1)  0.2898 0.2898
 #> 2 ICC(A,k)  0.6201 0.6201
+#> 3 ICC(C,1)  0.7148 0.7148
+#> 4 ICC(C,k)  0.9093 0.9093
 ```
 
 The two point estimates agree to well within rounding, and their
@@ -148,7 +150,7 @@ chunks are not evaluated at knit time.
 
 ``` r
 
-bayes <- icc(ratings, score, subject, rater, engine = "brms", seed = 1)
+bayes <- icc(ratings, score, subject, rater, engine = "brms", type = "agreement", seed = 1)
 bayes
 ```
 

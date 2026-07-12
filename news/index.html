@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,22 @@
       <small>Source: <a href="https://github.com/jmgirard/intraclass/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="intraclass-020">intraclass 0.2.0<a class="anchor" aria-label="anchor" href="#intraclass-020"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/icc.html">icc()</a></code> now reports <strong>all defined error definitions by default.</strong> The <code>type</code> argument is vectorized like <code>unit</code> and <code>level</code> and defaults to <code>c("agreement", "consistency")</code>, so a default two-way call returns <code>ICC(A,1)</code>, <code>ICC(A,k)</code>, <code>ICC(C,1)</code>, and <code>ICC(C,k)</code> from a single fit — agreement vs. consistency is post-fit arithmetic on the same variance components, so the extra coefficients are free (this matters most for the expensive <code>brms</code> engine). Pass a single <code>type</code> to report just that coefficient. <strong>No computed value changes</strong> and every explicit <code>type = "agreement"</code> / <code>type = "consistency"</code> call is unaffected, but the <strong>default</strong> <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> / <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> output grows from two rows to four (grouped by error definition in <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>). Code that indexes default <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> rows by position should select by the <code>index</code> / <code>type</code> columns instead.</li>
+<li>
+<code><a href="../reference/d_study.html">d_study()</a></code> likewise projects <strong>one reliability curve per error definition</strong> the fitted <code>icc</code> reports, adding a <code>type</code> column to distinguish the curves; a single-type fit projects a single curve as before.</li>
+<li>A definition that is undefined for the design (the conflated-level consistency diagnostic, consistency for a Design-3 nested-in-subjects fit, a fixed-rater absolute-agreement D-study projection, or absolute agreement when raters do not bridge clusters) is dropped with an informative message when reached via the default vector, and still aborts with a teaching error when requested explicitly.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-0-2-0">Minor improvements<a class="anchor" aria-label="anchor" href="#minor-improvements-0-2-0"></a></h3>
+<ul><li>
+<code>tidy(icc(...))</code> and <code>tidy(d_study(...))</code> gain a <code>type</code> column.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="intraclass-010">intraclass 0.1.0<a class="anchor" aria-label="anchor" href="#intraclass-010"></a></h2>
 <p>First public release. <strong>intraclass</strong> estimates interrater-reliability intraclass correlation coefficients (ICCs) within the generalizability-theory framework using modern mixed-model variance-component estimation (rather than the classical ANOVA mean-squares approach), with boundary-aware Monte-Carlo confidence intervals and guidance on choosing the right coefficient. Every estimator is verified against independent oracles — published worked examples, <code>psych</code>/ANOVA cross-checks, alternate engines, and seeded simulations.</p>

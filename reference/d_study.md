@@ -83,11 +83,16 @@ glance(x, ...)
 
 ## Value
 
-An `icc_dstudy` object: a tibble with one row per `m` and columns `m`,
-`index` (e.g. `"ICC(A,3)"`), `estimate`, `std.error`, `conf.low`, and
-`conf.high`, carrying the design and interval settings as attributes. A
-multilevel projection adds a `level` column (one curve per level). Use
-[tidy()](https://generics.r-lib.org/reference/tidy.html),
+An `icc_dstudy` object: a tibble with one row per projected point and
+columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`, `estimate`,
+`std.error`, `conf.low`, and `conf.high`, carrying the design and
+interval settings as attributes. If the fitted `icc` reports both error
+definitions (the default), `d_study()` projects **one reliability curve
+per definition** and
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) surfaces a
+`type` column to distinguish them; a single-type fit projects a single
+curve. A multilevel projection adds a `level` column (one curve per
+level). Use [tidy()](https://generics.r-lib.org/reference/tidy.html),
 [glance()](https://generics.r-lib.org/reference/glance.html), and
 `autoplot()` (the reliability curve).
 
@@ -180,15 +185,23 @@ also accepts a numeric `unit` for one-off projections.
 ``` r
 fit <- icc(ratings, score, subject, rater, seed = 1)
 d_study(fit, m = 1:8)
-#> # D-study projection: two-way random, absolute agreement
+#> # D-study projection: two-way random, absolute agreement & consistency
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
-#>   m  estimate          95% CI
-#>   1     0.290  [0.050, 0.712]
-#>   2     0.449  [0.095, 0.831]
-#>   3     0.550  [0.136, 0.881]
-#>   4     0.620  [0.173, 0.908]
-#>   5     0.671  [0.207, 0.925]
-#>   6     0.710  [0.239, 0.937]
-#>   7     0.741  [0.268, 0.945]
-#>   8     0.765  [0.295, 0.952]
+#>          type  m  estimate          95% CI
+#>     agreement  1     0.290  [0.050, 0.706]
+#>     agreement  2     0.449  [0.096, 0.828]
+#>     agreement  3     0.550  [0.137, 0.878]
+#>     agreement  4     0.620  [0.175, 0.906]
+#>     agreement  5     0.671  [0.210, 0.923]
+#>     agreement  6     0.710  [0.241, 0.935]
+#>     agreement  7     0.741  [0.271, 0.944]
+#>     agreement  8     0.765  [0.298, 0.950]
+#>   consistency  1     0.715  [0.339, 0.924]
+#>   consistency  2     0.834  [0.507, 0.961]
+#>   consistency  3     0.883  [0.606, 0.973]
+#>   consistency  4     0.909  [0.672, 0.980]
+#>   consistency  5     0.926  [0.720, 0.984]
+#>   consistency  6     0.938  [0.755, 0.987]
+#>   consistency  7     0.946  [0.782, 0.988]
+#>   consistency  8     0.953  [0.804, 0.990]
 ```

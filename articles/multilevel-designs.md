@@ -66,7 +66,7 @@ school <- data.frame(
 
 ``` r
 
-icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 #> ℹ Treating raters with the same label in different clusters as the same raters
 #>   (crossed with clusters, Design 1).
 #> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
@@ -76,8 +76,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #> 
@@ -111,19 +111,19 @@ the distortion directly rather than take it on faith:
 
 icc(school, score,
   subject = pupil, rater = rater, cluster = classroom,
-  level = c("subject", "cluster", "conflated"), seed = 1
+  type = "agreement", level = c("subject", "cluster", "conflated"), seed = 1
 )
 #> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
-#>   conflated  ICC(A,1)     0.705   [0.000, 0.805]
-#>   conflated  ICC(A,k)     0.905   [0.000, 0.943]
+#>   conflated  ICC(A,1)     0.705   [0.000, 0.808]
+#>   conflated  ICC(A,k)     0.905   [0.000, 0.944]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
@@ -162,14 +162,14 @@ Take the same classrooms but give each one its own raters (Design 2):
 
 school_d2 <- school
 school_d2$rater <- factor(paste(school_d2$classroom, school_d2$rater, sep = "_"))
-icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 #> ── Intraclass correlation: multilevel (raters nested in clusters) two-way random
 #> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.429   [0.309, 0.549]
-#>   subject    ICC(A,k)     0.751   [0.641, 0.830]
+#>   subject    ICC(A,1)     0.429   [0.310, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.642, 0.830]
 #> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
@@ -182,14 +182,14 @@ design is a multilevel one-way (Design 3):
 
 school_d3 <- school
 school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
-icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 #> ── Intraclass correlation: multilevel (raters nested in subjects) absolute agree
 #> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)       0.412   [0.291, 0.546]
-#>   subject    ICC(k)       0.737   [0.622, 0.828]
+#>   subject    ICC(1)       0.412   [0.290, 0.546]
+#>   subject    ICC(k)       0.737   [0.621, 0.828]
 #> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
@@ -227,7 +227,7 @@ size of 4:
 ``` r
 
 icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
-  level = "subject", seed = 1)
+  type = "agreement", level = "subject", seed = 1)
 #> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
@@ -289,7 +289,7 @@ variance. On a balanced crossed design both levels come back:
 ``` r
 
 icc(school, score, subject = pupil, rater = rater, cluster = classroom,
-  raters = "fixed")
+  type = "agreement", raters = "fixed")
 #> Warning: Modeling raters as fixed restricts inference to exactly these raters; you
 #> cannot generalize to other raters.
 #> ℹ For interrater reliability, the two-way random model (`raters = "random"`) is
@@ -301,10 +301,10 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.314, 0.550]
-#>   subject    ICC(A,k)     0.751   [0.647, 0.830]
-#>   cluster    ICC(A,1)     0.880   [0.000, 0.944]
-#>   cluster    ICC(A,k)     0.967   [0.000, 0.985]
+#>   subject    ICC(A,1)     0.431   [0.320, 0.555]
+#>   subject    ICC(A,k)     0.751   [0.653, 0.833]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.945]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.986]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 ```
@@ -351,16 +351,16 @@ facets them:
 ``` r
 
 d_study(
-  icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1),
+  icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1),
   m = c(1, 2, 4, 8)
 )
 #> # D-study projection: multilevel two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>     level  m  estimate          95% CI
-#>   subject  1     0.431  [0.249, 0.561]
-#>   subject  2     0.602  [0.399, 0.719]
-#>   subject  4     0.751  [0.571, 0.836]
-#>   subject  8     0.858  [0.727, 0.911]
+#>   subject  1     0.431  [0.251, 0.561]
+#>   subject  2     0.602  [0.402, 0.719]
+#>   subject  4     0.751  [0.573, 0.836]
+#>   subject  8     0.858  [0.729, 0.911]
 #>   cluster  1     0.880  [0.000, 0.972]
 #>   cluster  2     0.936  [0.000, 0.986]
 #>   cluster  4     0.967  [0.000, 0.993]
@@ -387,7 +387,7 @@ two:
 
 library(ggplot2)
 autoplot(icc(school, score, subject = pupil, rater = rater, cluster = classroom,
-  seed = 1))
+  type = "agreement", seed = 1))
 ```
 
 ![Forest plot of the school multilevel fit, faceted into subject-level

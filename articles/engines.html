@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">intraclass</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,7 +114,9 @@ fitting backend, not the estimand.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;      index glmmTMB   lme4</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)  0.2898 0.2898</span></span>
-<span><span class="co">#&gt; 2 ICC(A,k)  0.6201 0.6201</span></span></code></pre></div>
+<span><span class="co">#&gt; 2 ICC(A,k)  0.6201 0.6201</span></span>
+<span><span class="co">#&gt; 3 ICC(C,1)  0.7148 0.7148</span></span>
+<span><span class="co">#&gt; 4 ICC(C,k)  0.9093 0.9093</span></span></code></pre></div>
 <p>The two point estimates agree to well within rounding, and their
 Monte-Carlo intervals coincide to about <code>0.01</code>: the lme4
 interval is built from the parameter covariance supplied by the
@@ -207,7 +209,7 @@ optional <code>Suggests</code> dependency).</p>
 model needs a toolchain not available when this site is built, so these
 chunks are not evaluated at knit time.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">bayes</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement ──────────────────</span></span>
 <span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
