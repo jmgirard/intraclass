@@ -291,9 +291,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M41 Slice 2 next** — clarity/accessibility pass over `engines.Rmd` + `interval-methods.Rmd`
-  (warm plain-language on-ramp, first-use glosses, glossary cross-links; no statistical/example change). Branch
-  `m41-vignette-glossary`. *Superseded (M41 S1, done):* new `vignettes/glossary.Rmd` (26 alphabetical terms with
+- Active task: **M41 Slice 3 next** — clarity/accessibility pass over `multilevel-designs.Rmd` +
+  `d-studies-and-replicates.Rmd` (warm on-ramp, first-use glosses, glossary cross-links; no statistical/example
+  change) + `test-vignette-claims.R` relabel + finish-task gate → PR. Branch `m41-vignette-glossary`.
+  *Superseded (M41 S2, done):* `engines.Rmd` + `interval-methods.Rmd` got warmer on-ramps + glossary pointers +
+  first-use jargon deep-linked (12 `glossary.html#…` links, all verified against generated ids, incl. the dotted
+  `#confidence-interval-vs.-credible-interval`) + two inline plain glosses; no number touched; package
+  spell-check clean; both render. Also fixed a latent S1 anchor bug (the glossary's
+  `multilevel-designs.html#subject-level-vs.-cluster-level` link needed the "vs." dot pandoc keeps — audited all
+  14 cross-article links, the rest resolve). *Superseded (M41 S1, done):* new `vignettes/glossary.Rmd` (26 alphabetical terms with
   clean anchors) registered under a new **Reference** group in `_pkgdown.yml`; the two M40 front-door articles
   retrofitted with glossary deep-links + a "see the Glossary" pointer (no numbers touched); WORDLIST +`Wiberg`,
   NEWS Glossary bullet. Verified: all three touched articles + glossary render standalone; package spell-check

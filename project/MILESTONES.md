@@ -1467,8 +1467,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         `Wiberg`, NEWS gains a Glossary bullet. Verified: all three touched articles + glossary render
         standalone; `spelling::spell_check_package()` clean; `pkgdown::check_pkgdown()` "No problems found"; every
         referenced anchor confirmed against generated ids.
-  - [ ] **S2 — `engines` + `interval-methods` clarity pass.** Warm on-ramp + first-use glosses + glossary
-        cross-links on both; no statistical/example change; claim tests (if any numbers restated) re-pass.
+  - [x] **S2 — `engines` + `interval-methods` clarity pass.** DONE. Both gained a warmer plain-language
+        on-ramp + a glossary pointer; first-use jargon deep-linked to the glossary (engines: engine, variance
+        component, REML, zero boundary, indicator-mean estimator, FIML, posterior mode/MAP, prior; interval:
+        Monte-Carlo, boundary-aware, parametric bootstrap, MAP, credible / confidence-vs-credible), with two
+        inline plain-language glosses (asymptotic equivalence; asymptotic-normal approximation). No
+        statistical/example change, no printed number touched. Verified: both render; package spell-check clean;
+        all 12 `glossary.html#…` links (incl. the dotted `#confidence-interval-vs.-credible-interval`) resolve
+        against the glossary's generated ids. Also fixed a latent S1 bug — the glossary's outbound
+        `multilevel-designs.html#subject-level-vs.-cluster-level` link needed the "vs." period pandoc keeps.
   - [ ] **S3 — `multilevel-designs` + `d-studies-and-replicates` clarity pass + gate.** Same treatment on both;
         `test-vignette-claims.R` relabelled per-article as needed; finish-task gate (`devtools::document` no
         delta, `air format --check`, `lintr` 0 lints, full CI-mode suite, `devtools::check` CI-parity

@@ -15,20 +15,26 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(intraclass)
 ```
 
-`icc()` fits the variance components with a mixed model by default, but the `engine`
-argument lets you choose the backend. Some engine choices are purely computational —
-the same estimator, a different solver — while others compute a genuinely different
-(though asymptotically equivalent) estimator, or move to a fully Bayesian fit. This
-article covers the mixed-model engines (glmmTMB, lme4), the structural-equation engine
-(lavaan), and the Bayesian engine (brms), and when the distinction matters.
+Most of the time you never think about the engine: the default just works, and every
+example in the other articles uses it. This article is for when you want to know what
+that default is doing, or you have a reason to switch. An
+[**engine**](glossary.html#engine) is the computational backend `icc()` uses to
+estimate the [variance components](glossary.html#variance-component) — chosen with the
+`engine` argument. Some engine choices are purely computational — the same estimator, a
+different solver — while others compute a genuinely different (though asymptotically
+equivalent: converging to the same answer as the sample grows) estimator, or move to a
+fully Bayesian fit. This article covers the mixed-model engines (glmmTMB, lme4), the
+structural-equation engine (lavaan), and the Bayesian engine (brms), and when the
+distinction matters. Any unfamiliar term is defined in the [*Glossary*](glossary.html).
 
 ## The mixed-model engines: glmmTMB and lme4
 
 By default `icc()` fits the variance components with **glmmTMB**. You can instead
 request **lme4** with `engine = "lme4"` for the random two-way design. Both are
-REML mixed-model fits of the same model, so on a given dataset they return the
-same coefficients to numerical tolerance — the choice is about the fitting
-backend, not the estimand.
+[REML](glossary.html#reml) mixed-model fits of the same model (REML — restricted
+maximum likelihood — is the standard way to estimate variance components), so on a
+given dataset they return the same coefficients to numerical tolerance — the choice is
+about the fitting backend, not the estimand.
 
 ```{r engine, eval = requireNamespace("lme4", quietly = TRUE) && requireNamespace("merDeriv", quietly = TRUE)}
 glmmtmb <- tidy(icc(ratings, score, subject, rater, engine = "glmmTMB", seed = 1))
@@ -45,7 +51,7 @@ intervals coincide to about `0.01`: the lme4 interval is built from the paramete
 covariance supplied by the **merDeriv** package, transformed onto the same
 boundary-aware log-scale glmmTMB uses. glmmTMB remains the recommended default —
 it is the one required dependency and it is robust when a variance component sits
-exactly at the zero boundary, where the lme4 route cannot form an interval and
+exactly at the [zero boundary](glossary.html#zero-variance-boundary), where the lme4 route cannot form an interval and
 directs you back to glmmTMB. lme4 otherwise has full design parity with glmmTMB — the
 fixed-rater and every multilevel design, on balanced **and** incomplete/ragged data —
 degrading to glmmTMB only at that variance boundary.
@@ -82,7 +88,8 @@ the SEM returns them identically to the mixed model. **Absolute agreement** is
 different. The SEM has no random rater effect to estimate — a rater is a single
 column, so its effect lives in the column *means*. Following Jorgensen (2021), the
 rater variance is recovered from the mean structure as the variance of the estimated
-indicator intercepts. This **indicator-mean estimator** is a genuinely different
+indicator intercepts. This [**indicator-mean
+estimator**](glossary.html#indicator-mean-estimator) is a genuinely different
 estimator of the rater variance than the mixed model's random effect: the two are
 asymptotically equivalent and match conventional generalizability-theory software
 (GENOVA, `gtheory`) closely on real data [Vispoel et al. 2022], but on a small
@@ -95,7 +102,8 @@ population quantity. Use `"glmmTMB"` (the default) if you want the mixed-model
 random-rater estimate and its wider, generalize-to-new-raters interval; reach for
 `"lavaan"` if you are working inside an SEM generalizability-theory workflow and want
 results comparable to that literature. The SEM engine covers the random **and
-fixed-rater** two-way design, on complete **and incomplete** (FIML) data — the
+fixed-rater** two-way design, on complete **and incomplete**
+([FIML](glossary.html#fiml)) data — the
 parametric bootstrap is available on complete data, Monte-Carlo throughout. One-way and
 multilevel designs are still directed to the mixed-model engines.
 
@@ -105,7 +113,8 @@ multilevel designs are still directed to the mixed-model engines.
 (Stan, via the **brms** package) — the approach ten Hove, Jorgensen & van der Ark
 (2020) developed for interrater reliability. Instead of a single REML point with a
 Monte-Carlo interval, it samples the posterior of every variance component and reads the
-ICC off the draws: the point estimate is the posterior **mode** (MAP) and the interval
+ICC off the draws: the point estimate is the [posterior **mode**
+(MAP)](glossary.html#posterior-mode-map) and the interval
 is a **credible** interval (covered in [*Confidence-interval
 methods*](interval-methods.html#bayesian-credible-intervals-ci_method-posterior)).
 Because it samples a Stan model, this engine is slower than the others and needs the
@@ -141,7 +150,8 @@ iterations, backend, parallel `cores` — pass through `brm_args`, e.g.
 
 ### The prior, and overriding it
 
-By default the engine places a weakly-informative **half-*t*(4, 0, 1)** prior on every
+By default the engine places a weakly-informative **half-*t*(4, 0, 1)**
+[prior](glossary.html#prior) on every
 random-effect standard deviation — the *sourced* prior (ten Hove et al. 2020, §3.3/§4.1)
 that every coverage result in this package depends on. You can supply your own prior for
 prior-sensitivity or method-comparison work with the `prior` argument (any brms prior

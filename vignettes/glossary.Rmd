@@ -111,9 +111,10 @@ single and average, subject level and cluster level are *different estimands*, a
 picking the coefficient is really picking which one answers your question. See
 [*Choosing an ICC*](choosing-an-icc.html).
 
-## FIML (full-information maximum likelihood)
+## FIML
 
-The technique the **lavaan** (SEM) engine uses to fit **incomplete** data: rather than
+**Full-information maximum likelihood** — the technique the **lavaan** (SEM) engine
+uses to fit **incomplete** data: rather than
 dropping cases with missing cells, it uses every observed value to estimate the
 model. See [*Estimation engines*](engines.html#a-structural-equation-engine-lavaan).
 
@@ -190,9 +191,10 @@ standard deviation (ten Hove et al. 2020), the sourced prior every coverage resu
 depends on. Overriding it (`prior =`) voids those guarantees, so `icc()` warns. See
 [*Estimation engines*](engines.html#the-prior-and-overriding-it).
 
-## REML (restricted maximum likelihood)
+## REML
 
-The standard method the mixed-model engines (glmmTMB, lme4) use to estimate variance
+**Restricted maximum likelihood** — the standard method the mixed-model engines
+(glmmTMB, lme4) use to estimate variance
 components. It corrects the downward bias that ordinary maximum likelihood has when
 estimating variances, which matters for the small samples common in
 reliability studies.
@@ -209,7 +211,7 @@ In a **multilevel** design (subjects nested in clusters — pupils in classrooms
 reliabilities are defined. The **subject level** asks how reliably raters distinguish
 subjects *within* a cluster; the **cluster level** asks how reliably they distinguish
 *cluster means*. `icc()` reports both from one fit. See [*Multilevel
-designs*](multilevel-designs.html#subject-level-vs-cluster-level).
+designs*](multilevel-designs.html#subject-level-vs.-cluster-level).
 
 ## Variance component
 
