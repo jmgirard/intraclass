@@ -220,6 +220,12 @@ alternate engines, and seeded simulations.
   (Monte-Carlo, bootstrap, and Bayesian `posterior` credible intervals with
   percentile/HPDI summaries), and *D-studies and within-cell replicates* (with the
   `autoplot()` plots).
+* *Getting started* and *Choosing an ICC* were rewritten to be approachable to
+  readers new to reliability: a from-scratch on-ramp ("what an ICC tells you"),
+  plainer language for the confidence interval and the estimand vocabulary, and a
+  new interpretation-band guide (poor / moderate / good / excellent, after Koo & Li
+  2016 and Cicchetti 1994) framed as conventions to read against the interval —
+  not verdicts the package computes for you.
 
 ## Robustness (pre-release code review)
 

@@ -15,10 +15,29 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(intraclass)
 ```
 
-`intraclass` estimates interrater-reliability intraclass correlation coefficients
-(ICCs) from a mixed model rather than from classical ANOVA mean squares. This
-article walks the full pipeline on a small, balanced example: **fit → ICC →
-interpret**.
+## What an ICC tells you
+
+Suppose several raters each score the same set of things --- essays, patients,
+video clips --- and you want to know whether the scores can be *trusted*. If two
+raters watch the same clip, will they land on the same number? If you swapped in a
+different rater, would the result hold up? That is a question about **interrater
+reliability**, and an **intraclass correlation coefficient (ICC)** is the number
+that answers it.
+
+An ICC runs from 0 to 1 and reports **the share of the variation in scores that
+reflects real differences between the things being rated**, rather than
+disagreement or noise between raters. Near 1, almost all the spread in scores is
+genuine subject-to-subject difference and the raters barely disagree --- the
+ratings are highly reliable. Near 0, the raters are effectively adding noise, and a
+score tells you more about who happened to rate it than about the subject.
+
+`intraclass` estimates that number by fitting a **mixed model** (it separates
+subject variation from rater variation as variance components), rather than from
+the classical ANOVA mean-squares formulas older tools use. The two agree on clean,
+balanced data but the model-based approach also handles missing ratings, multiple
+designs, and honest confidence intervals --- see
+[*Engines*](engines.html) for the machinery. This article walks the whole pipeline
+on a small example: **fit → estimate → interpret**.
 
 ## The data
 
@@ -34,12 +53,24 @@ head(ratings)
 ## Fit
 
 Call `icc()` with the data and the three columns (unquoted). The defaults give the
-**two-way random, absolute-agreement** coefficients `ICC(A,1)` and `ICC(A,k)`. We
-set a `seed` so the Monte-Carlo confidence interval is reproducible.
+**two-way random, absolute-agreement** coefficients `ICC(A,1)` and `ICC(A,k)` (the
+next section unpacks that label). We set a `seed` so the confidence interval is
+reproducible.
 
 ```{r fit}
 fit <- icc(ratings, score, subject, rater, seed = 2024)
 fit
+```
+
+```{r values, include = FALSE}
+td <- tidy(fit)
+a1 <- td$estimate[1] # ICC(A,1), single rater
+ak <- td$estimate[2] # ICC(A,k), mean of the 4 raters
+ak_lo <- td$conf.low[2]
+ak_hi <- td$conf.high[2]
+cons1 <- tidy(icc(ratings, score, subject, rater,
+  type = "consistency", seed = 2024))$estimate[1]
+fmt <- function(x) sprintf("%.2f", x)
 ```
 
 ## Read the result with the tidy verbs
@@ -56,19 +87,59 @@ glance(fit)
 
 ## Interpret
 
-* **`ICC(A,1)` ≈ 0.29** is the reliability of a *single* rater; **`ICC(A,k)` ≈
-  0.62** is the reliability of the *mean* of the 4 raters. Averaging raises
-  reliability (Spearman--Brown), so report `ICC(A,k)` when the averaged score is
-  what you will actually use.
-* These are **absolute-agreement** coefficients: systematic differences in rater
-  level (some raters scoring higher than others) count as error. Here the raters
-  differ sharply in average level, which is why the agreement ICC is much lower
-  than a consistency ICC would be --- a signal that the rating procedure has a
-  level problem worth fixing.
-* The **confidence interval** is Monte-Carlo and boundary-aware: it is simulated
-  from the fitted parameter covariance on the model's internal scale, so it
-  behaves near the common zero-rater-variance boundary where the delta method
-  fails.
+**Single vs. the average of several raters.** `ICC(A,1)` = `r fmt(a1)` is the
+reliability of a *single* rater --- how much you can trust one person's score.
+`ICC(A,k)` = `r fmt(ak)` is the reliability of the *mean* of all
+`r nlevels(factor(ratings$rater))` raters. Averaging cancels out independent rater
+noise, so the mean is always more reliable than one rater alone (this is the
+**Spearman--Brown** relationship: more raters, higher reliability, with diminishing
+returns). Report `ICC(A,k)` when the averaged score is what you will actually use,
+and `ICC(A,1)` when downstream users see one rater's judgment.
+
+**Absolute agreement vs. rank order.** These are **absolute-agreement**
+coefficients: if one rater scores consistently higher than another, that systematic
+gap counts as error. Here the raters differ sharply in average level, which is why
+the agreement ICC is low --- a signal that the rating procedure has a level problem
+worth fixing. (If you only care that raters *rank* subjects the same way, ask for
+*consistency* instead --- see below.)
+
+### Is this a good ICC?
+
+There is no universal cutoff, but two widely cited rules of thumb give a rough
+vocabulary. **Koo & Li (2016)** propose:
+
+| ICC        | Label      |
+|------------|------------|
+| < 0.50     | poor       |
+| 0.50--0.75 | moderate   |
+| 0.75--0.90 | good       |
+| > 0.90     | excellent  |
+
+An older scheme, **Cicchetti (1994)**, draws its lines a little differently
+(< 0.40 poor, 0.40--0.59 fair, 0.60--0.74 good, 0.75--1.00 excellent). Treat these
+as conventions, not laws: the bar that matters depends on the stakes of your
+decision, and on *which* ICC you are reading (an agreement and a consistency
+coefficient on the same data are not comparable to the same cutoff).
+
+Most important --- and this is Koo & Li's own recommendation --- **judge the
+confidence interval, not just the point estimate.** Here the four-rater mean
+`ICC(A,k)` = `r fmt(ak)` reads as "moderate," but its 95% interval runs from
+`r fmt(ak_lo)` to `r fmt(ak_hi)` --- from "poor" all the way to "excellent." With
+only six subjects, the data simply cannot pin the reliability down to one band.
+That is why `icc()` never returns a point estimate without an interval, and never
+labels a result for you: the honest summary is the whole interval.
+
+### About the confidence interval
+
+The interval `icc()` reports is a **Monte-Carlo** interval, and it is
+**boundary-aware**. In plain terms: instead of relying on a textbook formula that
+misbehaves when a variance is near zero (a common situation --- raters who barely
+differ push the rater variance to its zero boundary), `icc()` simulates many
+plausible parameter sets from the fitted model and reads the interval off the
+resulting spread of ICCs. This keeps the interval well-behaved right at that
+boundary. The [*Interval methods*](interval-methods.html) article covers how it
+works and the alternatives (a parametric bootstrap, and Bayesian credible
+intervals).
 
 ## Consistency instead of agreement
 
@@ -81,13 +152,15 @@ the error, so it is never smaller than the agreement coefficient:
 icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 ```
 
-The gap between the two (here `ICC(C,1)` ≈ 0.72 vs. `ICC(A,1)` ≈ 0.29) is a direct
-read-out of how much systematic rater-level difference is present.
+The gap between the two (here `ICC(C,1)` = `r fmt(cons1)` vs. `ICC(A,1)` =
+`r fmt(a1)`) is a direct read-out of how much systematic rater-level difference is
+present.
 
-By default raters are treated as **random** (a sample you generalize beyond). If
-your raters are the entire population of interest you can pass `raters = "fixed"`
-(the classic `ICC(3,1)`), but `icc()` will warn: random is the recommended default
-for interrater reliability, and on balanced data the number is identical anyway.
+By default raters are treated as **random** --- a sample you want to generalize
+beyond, so that your reliability claim covers raters you did not use. If your raters
+are the entire population of interest you can pass `raters = "fixed"` (the classic
+`ICC(3,1)`), but `icc()` will warn: random is the recommended default for interrater
+reliability, and on balanced data the number is identical anyway.
 
 ## Which ICC do I want?
 
@@ -96,4 +169,17 @@ Whether the raters are crossed (the same set judges everyone) or interchangeable
 fixed vs. random raters, complete vs. incomplete designs --- these choices define
 *which* ICC is correct for your study. The
 [*Choosing an ICC*](choosing-an-icc.html) article (`vignette("choosing-an-icc")`)
-covers that decision in depth.
+walks that decision step by step.
+
+## References
+
+Cicchetti, D. V. (1994). Guidelines, criteria, and rules of thumb for evaluating
+normed and standardized assessment instruments in psychology. *Psychological
+Assessment, 6*(4), 284--290.
+
+Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass
+correlation coefficients for reliability research. *Journal of Chiropractic
+Medicine, 15*(2), 155--163.
+
+Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in assessing
+rater reliability. *Psychological Bulletin, 86*(2), 420--428.

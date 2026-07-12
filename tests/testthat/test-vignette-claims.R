@@ -1,3 +1,28 @@
+# Vignette claims (getting-started.Rmd) -----------------------------------
+# The "Is this a good ICC?" section teaches that a point estimate should be read
+# against its confidence interval, not a cutoff band, and illustrates it with the
+# live `ratings` fit: ICC(A,k) lands in the "moderate" band yet its 95% interval
+# spans from "poor" to "excellent". That is a numeric claim about the shipped
+# example and the vignette's seed -- back it so the caveat is never illustrated by
+# a stale interval (PRINCIPLES.md #1/#4). The interpretation bands (Koo & Li 2016;
+# Cicchetti 1994) trace to `project/REFERENCES.md`.
+
+test_that("getting-started.Rmd: the ICC(A,k) interval spans interpretation bands", {
+  skip_if_not_installed("glmmTMB")
+
+  # Uses the vignette's own seed: the interval is Monte-Carlo, so the band-spanning
+  # illustration is seed-dependent (unlike the point-estimate claims below).
+  ak <- tidy(icc(ratings, score, subject, rater, seed = 2024))[2, ]
+
+  # Point estimate sits in Koo & Li's "moderate" band (0.50-0.75) ...
+  expect_gte(ak$estimate, 0.50)
+  expect_lte(ak$estimate, 0.75)
+  # ... yet the 95% interval reaches "poor" (< 0.50) and "excellent" (> 0.90),
+  # the concrete reason the article tells readers to judge the interval.
+  expect_lt(ak$conf.low, 0.50)
+  expect_gt(ak$conf.high, 0.90)
+})
+
 # Vignette claims (choosing-an-icc.Rmd) -----------------------------------
 # The flagship "Choosing an ICC" article makes comparative statements in prose
 # ("consistency is never smaller than agreement", "ICC(*,k) is always the larger

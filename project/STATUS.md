@@ -1,6 +1,22 @@
 # Project status
 
-- Active milestone: **none** — M39 (ADR-049, `d_study()` occasion-count projection) shipped
+- Active milestone: **M40 (ADR-050) — accessibility rewrite of the two front-door vignettes**
+  (`getting-started`, `choosing-an-icc`). Planned this session after a short retro (retro → ADR-050 → M40 board;
+  **no code yet**). A **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency;
+  correctness = live-computed + claim-tested numbers (#1/#4/#12). The retro found the clean-oracle **parity
+  engine exhausted** — from M23 on nearly everything shipped as parity because an oracle existed; the (C) corner
+  closed at M36–M38, M39 was the last thin projection slice, and the remaining ROADMAP work is qualitatively
+  different (🟣 research + Fable, heavy lifts, docs, or the release itself). Also surfaced but **not chosen**:
+  the package has been v0.1.0 "submission-ready" since **M13** with ~15 milestones added since, unreleased (the
+  v0.2.0 consolidation — parked to ROADMAP/ADR-022). The maintainer chose the accessibility rewrite (plan gate)
+  with **interpretation benchmarks IN, sourced + caveated** (Koo & Li 2016 / Cicchetti 1994 — #4: cited, not
+  invented). Three DoD slices (board = the M40 checklist in [`MILESTONES.md`](MILESTONES.md)): **S1**
+  `getting-started` (from-scratch on-ramp + plain-language CI paragraph + first-use glosses + the canonical
+  interpretation-band guide); **S2** `choosing-an-icc` (plain "start here" framing + glosses + cross-linked
+  bands); **S3** REFERENCES/WORDLIST/NEWS + claim tests re-pass + all six articles render + finish-task gate →
+  PR on `m40-vignette-accessibility`. Rewrite **in place** (no URL/`_pkgdown.yml` churn). **No Fable** (docs).
+  **Next action: `/start-task` Slice 1.**
+- Prior milestone: **M39** (ADR-049, `d_study()` occasion-count projection) shipped
   (PR #45, squash-merged to `main` at `91e14e7`; full CI matrix green 9/9, devel clean). The symmetric sibling
   of the M22 (ADR-032) rater-count projection: a new `n_o` argument on `d_study()` (mutually exclusive with `m`)
   projects the occasion count off a **balanced** within-cell replicate fit, holding raters at `k_eff`. It landed
@@ -10,8 +26,8 @@
   is well-posed for **fixed absolute agreement** where the rater axis is not (occasions are a random facet) — is
   sourced in spec §9.3 and tested. **No Fable** (variance-ratio push-forward, MC interval reused → no coverage
   pathology). Deferred (still parked): **ragged**-replicate occasion projection (🟣 effective-`n_o` divisor),
-  brms/posterior occasion projection, the 2-D `m × n_o` surface. **The next milestone needs an ADR after a short
-  retro** (founding brief §7).
+  brms/posterior occasion projection, the 2-D `m × n_o` surface. (Its "next milestone needs an ADR after a retro"
+  note is now resolved — that retro ran this session and opened **M40/ADR-050**.)
 - Prior milestone: **M38** (ADR-048, brms engine parity for the fixed multilevel cells) shipped
   (PR #44, squash-merged to `main` at `4124297`; full CI matrix green 9/9). It closed the **brms** half of the
   (C) research/blocked corner: Cell 1 balanced fixed cluster level (M37 sibling) + Cell 2 incomplete/ragged
@@ -265,8 +281,18 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M39 shipped and merged (PR #45, `91e14e7`).** The next milestone needs an ADR after a
-  short retro (founding brief §7). *Superseded (M39, done):* T1 (single-level, `a23c768`) + T2
+- Active task: **M40 all 3 slices done; local gate green; PR open, awaiting CI.** On branch
+  `m40-vignette-accessibility`. S1 `getting-started.Rmd` (on-ramp + plain "About the confidence interval" +
+  glosses + the canonical "Is this a good ICC?" band guide, Koo & Li 2016 / Cicchetti 1994, "judge the interval"
+  illustrated live, no verdict; prose numbers → inline `r`; REFERENCES + WORDLIST + a claim block). S2
+  `choosing-an-icc.Rmd` (warmer "start here" intro + estimand/`k_eff` glosses + new "Once you have a number"
+  section cross-linking the S1 bands — anchor `#is-this-a-good-icc` verified — instead of re-tabulating;
+  tree/crosswalk/`choose_icc()`/live numbers kept). S3 gate: NEWS bullet added; local gate **GREEN** —
+  `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0** (all six vignettes built), `lintr` **0 lints**,
+  `spelling`/`air`/`pkgdown::check_pkgdown()` clean, claim tests re-pass. Docs-only → no installed-pkg estimator
+  paths. **Next action: open the PR from `m40-vignette-accessibility`; on green CI + merge, reconcile M40 → done
+  + set "Last green CI".** Docs milestone, no Fable. *Superseded (M39, done):* T1 (single-level,
+  `a23c768`) + T2
   (multilevel, `e7be0df`) + T3 (docs/spec §9/tracking/gate) complete on branch `m39-occasion-dstudy`. The
   finish-task gate is green: `devtools::document` (no delta) / `air format --check` / `lintr` (0 lints) / full
   CI-mode suite **379/0/51** / `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0**; installed-pkg both
@@ -469,11 +495,12 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M39 (ADR-049) shipped and merged (PR #45, `91e14e7`), full CI matrix green 9/9 (devel
+- Blockers: **none.** M40 (ADR-050) is a docs milestone with no estimand/coverage claim and no Fable; its only
+  risk is the interpretation bands, gated on a real `REFERENCES.md` citation + caveat (#4). M39 (ADR-049) shipped
+  and merged (PR #45, `91e14e7`), full CI matrix green 9/9 (devel
   clean); the scoped (balanced) path had no research question and no Fable was needed (variance-ratio
   push-forward, MC interval reused). The ragged-replicate occasion half stays deferred, not blocking (its
-  effective-`n_o` divisor is the open 🟣 item, M20/ADR-030). The next milestone needs an ADR after a short
-  retro. Prior (M38, cleared): M38 (ADR-048) shipped and
+  effective-`n_o` divisor is the open 🟣 item, M20/ADR-030). Prior (M38, cleared): M38 (ADR-048) shipped and
   merged (PR #44, `4124297`), full CI matrix green 9/9; the Cell 2 coverage risk
   (2b-under-imbalance-nested-brms) resolved NOMINAL (O-Bayes-IFNML C_n=80 boundary .970, no decay), so the
   stop-and-replan branch did not fire and no Fable was needed.
