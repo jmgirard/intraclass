@@ -465,8 +465,13 @@ test_that("cluster-level ICC(c,k) on incomplete data is dropped, not all-or-noth
   expect_s3_class(fit, "icc")
   e <- fit$estimates
   # Subject level keeps both single and average; cluster level keeps only single.
-  expect_setequal(e$index[e$level == "subject"], c("ICC(A,1)", "ICC(A,k)"))
-  expect_identical(e$index[e$level == "cluster"], "ICC(A,1)")
+  # The default reports both error definitions (ADR-054), so each level carries its
+  # agreement and consistency rows; the averaged cluster ICC(c,k) is the only drop.
+  expect_setequal(
+    e$index[e$level == "subject"],
+    c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
+  )
+  expect_setequal(e$index[e$level == "cluster"], c("ICC(A,1)", "ICC(C,1)"))
 })
 
 test_that("cluster-level IRR aborts to subject when raters do not bridge clusters", {

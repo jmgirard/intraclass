@@ -54,10 +54,12 @@ head(ratings)
 
 ## Fit
 
-Call `icc()` with the data and the three columns (unquoted). The defaults give the
-**two-way random, absolute-agreement** coefficients `ICC(A,1)` and `ICC(A,k)` (the
-next section unpacks that label). We set a `seed` so the confidence interval is
-reproducible.
+Call `icc()` with the data and the three columns (unquoted). With the defaults a
+single **two-way random** fit reports every defined formulation --- absolute
+agreement and consistency, each for a single rater and for the average of your
+raters: `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, `ICC(C,k)` (the next sections unpack
+these labels). They are grouped by error definition in the printout. We set a `seed`
+so the confidence interval is reproducible.
 
 ```{r fit}
 fit <- icc(ratings, score, subject, rater, seed = 2024)

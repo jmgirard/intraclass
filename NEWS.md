@@ -1,3 +1,31 @@
+# intraclass 0.2.0
+
+## Breaking changes
+
+* `icc()` now reports **all defined error definitions by default.** The `type`
+  argument is vectorized like `unit` and `level` and defaults to
+  `c("agreement", "consistency")`, so a default two-way call returns `ICC(A,1)`,
+  `ICC(A,k)`, `ICC(C,1)`, and `ICC(C,k)` from a single fit — agreement vs.
+  consistency is post-fit arithmetic on the same variance components, so the extra
+  coefficients are free (this matters most for the expensive `brms` engine). Pass a
+  single `type` to report just that coefficient. **No computed value changes** and
+  every explicit `type = "agreement"` / `type = "consistency"` call is unaffected,
+  but the **default** `print()` / `tidy()` output grows from two rows to four
+  (grouped by error definition in `print()`). Code that indexes default `tidy()`
+  rows by position should select by the `index` / `type` columns instead.
+* `d_study()` likewise projects **one reliability curve per error definition** the
+  fitted `icc` reports, adding a `type` column to distinguish the curves; a
+  single-type fit projects a single curve as before.
+* A definition that is undefined for the design (the conflated-level consistency
+  diagnostic, consistency for a Design-3 nested-in-subjects fit, a fixed-rater
+  absolute-agreement D-study projection, or absolute agreement when raters do not
+  bridge clusters) is dropped with an informative message when reached via the
+  default vector, and still aborts with a teaching error when requested explicitly.
+
+## Minor improvements
+
+* `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
+
 # intraclass 0.1.0
 
 First public release. **intraclass** estimates interrater-reliability intraclass

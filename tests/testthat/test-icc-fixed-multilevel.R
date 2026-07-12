@@ -410,6 +410,7 @@ test_that("O-IFML/lme4: ragged fixed subject ICCs match an independent lme4 fit"
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     raters = "fixed",
     level = "subject",
     engine = "lme4",
@@ -697,7 +698,13 @@ test_that("fixed nested scope guards fail loudly (decision C + deferral)", {
     unit = c("single", "average"),
     seed = 1
   ))
-  expect_setequal(fit_i$estimates$index, c("ICC(A,1)", "ICC(A,k)"))
+  # The default now reports both error definitions (ADR-054): fixed-nested agreement
+  # (the M36/M38 theta^2_{r:c} path) plus consistency, which drops the rater term and
+  # so reduces to the random-nested consistency (oracle-backed; the M2/M10 identity).
+  expect_setequal(
+    fit_i$estimates$index,
+    c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
+  )
   expect_true(all(is.finite(fit_i$estimates$estimate)))
   # brms incomplete/ragged fixed-nested (Design 2) now ships too (M38 Cell 2, ADR-048); the
   # Bayesian path is exercised by the live O-Bayes-IFNML-agree fit in test-icc-brms.R.

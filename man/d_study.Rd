@@ -53,11 +53,14 @@ override to change the confidence level, the number of Monte-Carlo draws, or
 the seed.}
 }
 \value{
-An \code{icc_dstudy} object: a tibble with one row per \code{m} and columns
-\code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{estimate}, \code{std.error}, \code{conf.low}, and
-\code{conf.high}, carrying the design and interval settings as attributes. A
-multilevel projection adds a \code{level} column (one curve per level). Use
-\link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and
+An \code{icc_dstudy} object: a tibble with one row per projected point and
+columns \code{m}, \code{index} (e.g. \code{"ICC(A,3)"}), \code{type}, \code{estimate}, \code{std.error},
+\code{conf.low}, and \code{conf.high}, carrying the design and interval settings as
+attributes. If the fitted \code{icc} reports both error definitions (the default),
+\code{d_study()} projects \strong{one reliability curve per definition} and \code{tidy()}
+surfaces a \code{type} column to distinguish them; a single-type fit projects a
+single curve. A multilevel projection adds a \code{level} column (one curve per
+level). Use \link[generics:tidy]{tidy()}, \link[generics:glance]{glance()}, and
 \code{autoplot()} (the reliability curve).
 }
 \description{

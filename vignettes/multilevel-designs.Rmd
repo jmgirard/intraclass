@@ -67,7 +67,7 @@ school <- data.frame(
 ```
 
 ```{r ml-fit, eval = requireNamespace("glmmTMB", quietly = TRUE)}
-icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 ```
 
 Both levels come back in one call. Here the **cluster-level** ICC is the higher
@@ -91,7 +91,7 @@ than take it on faith:
 ```{r ml-conflated, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 icc(school, score,
   subject = pupil, rater = rater, cluster = classroom,
-  level = c("subject", "cluster", "conflated"), seed = 1
+  type = "agreement", level = c("subject", "cluster", "conflated"), seed = 1
 )
 ```
 
@@ -122,7 +122,7 @@ Take the same classrooms but give each one its own raters (Design 2):
 ```{r ml-nested-clusters, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 school_d2 <- school
 school_d2$rater <- factor(paste(school_d2$classroom, school_d2$rater, sep = "_"))
-icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 ```
 
 The header now reads *raters nested in clusters* and only the subject level comes
@@ -132,7 +132,7 @@ one-way (Design 3):
 ```{r ml-nested-subjects, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 school_d3 <- school
 school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
-icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
+icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1)
 ```
 
 Here the coefficients are labeled `ICC(1)` / `ICC(k)` and `type` no longer
@@ -163,7 +163,7 @@ of `r n_rater`:
 
 ```{r ml-incomplete-subject, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
-  level = "subject", seed = 1)
+  type = "agreement", level = "subject", seed = 1)
 ```
 
 The header now reads *incomplete*, and the report names the effective `k` so the
@@ -199,7 +199,7 @@ random-sample variance. On a balanced crossed design both levels come back:
 
 ```{r ml-fixed, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 icc(school, score, subject = pupil, rater = rater, cluster = classroom,
-  raters = "fixed")
+  type = "agreement", raters = "fixed")
 ```
 
 On this balanced design the fixed-rater coefficients match the random-rater ones **at
@@ -234,7 +234,7 @@ them:
 
 ```{r ml-dstudy, eval = requireNamespace("glmmTMB", quietly = TRUE)}
 d_study(
-  icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1),
+  icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "agreement", seed = 1),
   m = c(1, 2, 4, 8)
 )
 ```
@@ -255,7 +255,7 @@ level was the higher of the two:
 ```{r plot-ml, eval = requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("glmmTMB", quietly = TRUE), fig.alt = "Forest plot of the school multilevel fit, faceted into subject-level and cluster-level panels, each showing ICC(A,1) and ICC(A,k) with Monte-Carlo intervals."}
 library(ggplot2)
 autoplot(icc(school, score, subject = pupil, rater = rater, cluster = classroom,
-  seed = 1))
+  type = "agreement", seed = 1))
 ```
 
 ## Or let the package choose the level

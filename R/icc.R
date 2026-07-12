@@ -164,9 +164,19 @@
 #'   model, so `type` does not apply and the coefficients are `ICC(1)` / `ICC(k)`.
 #'   Fixed raters and a `cluster` (multilevel) structure are not defined for a
 #'   one-way design.
-#' @param type Error definition (two-way only): `"agreement"` (absolute agreement,
-#'   the default) counts systematic rater differences as error; `"consistency"`
-#'   ignores them. Not applicable when `model = "oneway"`.
+#' @param type Error definition(s) (two-way only): `"agreement"` (absolute
+#'   agreement) counts systematic rater differences as error; `"consistency"`
+#'   ignores them. Like `unit` and `level`, `type` is **vectorized and defaults to
+#'   both** (`c("agreement", "consistency")`), so a default call reports every
+#'   defined formulation -- `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, `ICC(C,k)` -- from
+#'   the single fit (agreement vs. consistency is post-fit arithmetic on the same
+#'   variance components, so the second definition is free). Pass a single value to
+#'   report just that coefficient once you have named your estimand. A definition
+#'   that is undefined for the design (e.g. `"consistency"` for the conflated
+#'   diagnostic, or a fixed-rater agreement projection to a different rater count)
+#'   is dropped with a message when reached via the default, and aborts with a
+#'   teaching error when requested explicitly. Not applicable when
+#'   `model = "oneway"`.
 #' @param raters Rater sampling: `"random"` (the default; two-way random, Case 2)
 #'   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3) treats the
 #'   observed raters as the entire population and is fit with raters as fixed
@@ -491,7 +501,7 @@ icc <- function(
     ))
   }
 
-  type <- validate_choice(type, c("agreement", "consistency"), "type")
+  type <- validate_type(type)
   raters <- validate_choice(raters, c("random", "fixed"), "raters")
   unit <- validate_unit(unit)
   occasions <- validate_occasions(occasions)
@@ -590,10 +600,24 @@ icc <- function(
     }
   }
 
-  # A numeric unit is a D-study projection; guard the one ill-posed combination
-  # (fixed raters + absolute agreement) before fitting (PRINCIPLES.md #5).
-  if (any(vapply(unit, is.numeric, logical(1)))) {
-    abort_fixed_agr_projection(type, raters)
+  # A numeric unit is a D-study projection; fixed-rater absolute agreement cannot be
+  # projected to a different rater count (theta^2_r is the finite-population variance
+  # of exactly the observed raters -- M4.5 spec, PRINCIPLES.md #5). An explicit single
+  # `type = "agreement"` aborts; under a multi-type request the agreement projection is
+  # dropped and consistency reported (ADR-054 drop-vs-abort). `type` stays unreduced --
+  # agreement is still defined for non-numeric units -- so the estimand cross-product
+  # filters agreement only where the unit is numeric.
+  if (raters == "fixed" && any(vapply(unit, is.numeric, logical(1)))) {
+    if (identical(type, "agreement")) {
+      abort_fixed_agr_projection("agreement", raters)
+    }
+    if ("agreement" %in% type) {
+      cli::cli_inform(c(
+        "!" = "Dropping the {.val agreement} D-study projection: absolute agreement \\
+               cannot be projected to a different rater count for fixed raters. \\
+               Reporting {.val consistency} for numeric units."
+      ))
+    }
   }
 
   # Fixed raters is well-posed but forgoes generalization; nudge toward random
@@ -720,12 +744,23 @@ icc <- function(
   # cluster-level one. The complete-data restriction lives with the crossed
   # incomplete guards further down.
   if (multilevel && "conflated" %in% level) {
-    if (type == "consistency") {
+    # The conflated level is agreement-only (Eq. 14). An explicit single
+    # `type = "consistency"` aborts; under a multi-type request consistency is dropped
+    # for the conflated level only (the estimand cross-product skips that cell) and
+    # reported at the subject/cluster levels (ADR-054 drop-vs-abort).
+    if (identical(type, "consistency")) {
       abort_unsupported(c(
         "A consistency conflated ICC is not available.",
         i = "ten Hove et al. (2022) Eq. 14 is the absolute-agreement conflated \\
              ICC; a consistency form is not sourced (see the ROADMAP).",
         i = "Use {.code type = \"agreement\"} with {.code level = \"conflated\"}."
+      ))
+    }
+    if ("consistency" %in% type) {
+      cli::cli_inform(c(
+        "!" = "Dropping the {.val consistency} conflated ICC: ten Hove et al. (2022) \\
+               Eq. 14 is the absolute-agreement conflated diagnostic; a consistency \\
+               form is not sourced. Reporting {.val agreement} at the conflated level."
       ))
     }
     if (raters == "fixed") {
@@ -819,14 +854,25 @@ icc <- function(
     # Design 3 (raters nested in subjects) is the multilevel one-way: the rater
     # main effect is confounded into residual, so consistency is undefined -- only
     # absolute agreement ICC(1)/ICC(k) (ten Hove et al. 2022, p. 6; spec M8 §3b).
-    if (ml_design == "nested_in_subjects" && type == "consistency") {
-      abort_unsupported(c(
-        "Consistency is not defined when raters are nested within subjects.",
-        i = "With each subject rated by its own raters (Design 3) the rater main \\
-             effect cannot be separated, so only absolute agreement is defined \\
-             (ten Hove et al. 2022, p. 6).",
-        i = "Use the default {.code type = \"agreement\"}."
+    if (ml_design == "nested_in_subjects" && "consistency" %in% type) {
+      # Design 3 is agreement-only design-wide. An explicit single
+      # `type = "consistency"` aborts; a multi-type request drops consistency for the
+      # whole design and reports agreement (ADR-054 drop-vs-abort).
+      if (identical(type, "consistency")) {
+        abort_unsupported(c(
+          "Consistency is not defined when raters are nested within subjects.",
+          i = "With each subject rated by its own raters (Design 3) the rater main \\
+               effect cannot be separated, so only absolute agreement is defined \\
+               (ten Hove et al. 2022, p. 6).",
+          i = "Use the default {.code type = \"agreement\"}."
+        ))
+      }
+      cli::cli_inform(c(
+        "!" = "Dropping {.val consistency}: not defined when raters are nested within \\
+               subjects (Design 3) -- the rater main effect cannot be separated, so \\
+               only absolute agreement is defined (ten Hove et al. 2022, p. 6)."
       ))
+      type <- setdiff(type, "consistency")
     }
     # Nested-design identifiability (estimand-spec M8 §7). These gates hold on both
     # balanced (M8) and INCOMPLETE/ragged (M19 Slice 1, ADR-029) data: the fit
@@ -1072,14 +1118,28 @@ icc <- function(
       # from sigma^2_cr only if raters bridge clusters. When they do not, the design
       # is effectively rater-nested (Design 2) for agreement; consistency (error =
       # residual only) is unaffected, so gate agreement specifically (spec §4b).
-      if (type == "agreement" && !ident$cluster_rater_connected) {
-        abort_unidentified(c(
-          "Raters do not bridge clusters, so the rater main-effect variance cannot \\
-           be separated from the cluster-by-rater variance for absolute agreement.",
-          i = "This design is effectively rater-nested (Design 2) for agreement.",
-          i = "Use {.code type = \"consistency\"}, or provide raters crossed across \\
-               clusters."
+      if (!ident$cluster_rater_connected && "agreement" %in% type) {
+        # Agreement is unidentifiable design-wide here (sigma^2_r does not separate
+        # from sigma^2_cr); consistency is unaffected. An explicit single
+        # `type = "agreement"` aborts; a multi-type request drops agreement and
+        # reports consistency (ADR-054 drop-vs-abort; the ADR-029 inform-and-drop
+        # precedent applied to a data-driven, not by-design, undefined cell).
+        if (identical(type, "agreement")) {
+          abort_unidentified(c(
+            "Raters do not bridge clusters, so the rater main-effect variance cannot \\
+             be separated from the cluster-by-rater variance for absolute agreement.",
+            i = "This design is effectively rater-nested (Design 2) for agreement.",
+            i = "Use {.code type = \"consistency\"}, or provide raters crossed across \\
+                 clusters."
+          ))
+        }
+        cli::cli_inform(c(
+          "!" = "Dropping {.val agreement}: raters do not bridge clusters, so the \\
+                 rater main-effect variance cannot be separated from the \\
+                 cluster-by-rater variance -- this design is effectively rater-nested \\
+                 (Design 2) for agreement. Reporting {.val consistency}."
         ))
+        type <- setdiff(type, "agreement")
       }
       # Cluster-level IRR on incomplete data (M9 Slice 2, ADR-018). The cluster-level
       # error carries sigma^2_cr (both types) and sigma^2_r (agreement), which are
@@ -1522,41 +1582,57 @@ icc <- function(
       )
     })
   } else if (multilevel) {
-    # Cross-product level x unit (x occasions for replicates); level outer so rows
-    # group by level (M5 §3). For Design 2, `level` is already restricted to "subject"
-    # (nested designs). With replicates the rater divisor counts DISTINCT raters
-    # (replicates must not inflate it, M17 §4).
+    # Cross-product type x level x unit (x occasions for replicates); type outer so
+    # rows group by error definition (ADR-054 print grouping), then level (M5 §3). For
+    # Design 2, `level` is already restricted to "subject" (nested designs). With
+    # replicates the rater divisor counts DISTINCT raters (replicates must not inflate
+    # it, M17 §4).
     k_ml <- if (replicates) design_info$k_eff_raters else k
     unlist(
-      lapply(level, function(lv) {
-        # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
-        # effective per-cluster rater count is unresolved); keep only the
-        # single-rater cluster ICC(c,1). The user was informed above. Subject-level
-        # units, and every unit on balanced data, are unaffected.
-        units_lv <- if (lv == "cluster" && !balanced) {
-          Filter(function(u) identical(u, "single"), unit)
-        } else {
-          unit
-        }
-        # Occasion averaging (M20 Slice 2) reduces only pure error, which is not in the
-        # cluster-level error set, so it is a no-op there -- emit single-occasion
-        # cluster rows only. Non-replicate paths carry a single "single" occasion.
-        occs_lv <- if (replicates && lv == "subject") occasions else "single"
+      lapply(type, function(ty) {
         unlist(
-          lapply(units_lv, function(u) {
-            lapply(occs_lv, function(o) {
-              icc_estimand(
-                type = type,
-                unit = u,
-                raters = raters,
-                k_eff = k_ml,
-                level = lv,
-                multilevel = TRUE,
-                replicates = replicates,
-                occasions = o,
-                n_o = n_o_val
-              )
-            })
+          lapply(level, function(lv) {
+            # The conflated level is the agreement-only Eq. 14 diagnostic; skip its
+            # consistency cell (the user was informed above; ADR-054 drop-vs-abort).
+            if (lv == "conflated" && ty == "consistency") {
+              return(NULL)
+            }
+            # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
+            # effective per-cluster rater count is unresolved); keep only the
+            # single-rater cluster ICC(c,1). The user was informed above. Subject-level
+            # units, and every unit on balanced data, are unaffected.
+            units_lv <- if (lv == "cluster" && !balanced) {
+              Filter(function(u) identical(u, "single"), unit)
+            } else {
+              unit
+            }
+            units_lv <- agr_projection_units(units_lv, ty, raters)
+            # Occasion averaging (M20 Slice 2) reduces only pure error, which is not in
+            # the cluster-level error set, so it is a no-op there -- emit single-occasion
+            # cluster rows only. Non-replicate paths carry a single "single" occasion.
+            occs_lv <- if (replicates && lv == "subject") {
+              occasions
+            } else {
+              "single"
+            }
+            unlist(
+              lapply(units_lv, function(u) {
+                lapply(occs_lv, function(o) {
+                  icc_estimand(
+                    type = ty,
+                    unit = u,
+                    raters = raters,
+                    k_eff = k_ml,
+                    level = lv,
+                    multilevel = TRUE,
+                    replicates = replicates,
+                    occasions = o,
+                    n_o = n_o_val
+                  )
+                })
+              }),
+              recursive = FALSE
+            )
           }),
           recursive = FALSE
         )
@@ -1566,31 +1642,42 @@ icc <- function(
   } else if (oneway) {
     lapply(unit, function(u) icc_estimand(unit = u, k_eff = k, oneway = TRUE))
   } else if (replicates) {
-    # Within-cell replicates (M17 Slice 3): cross unit x occasions (unit outer). The
-    # rater divisor counts DISTINCT raters (replicates must not inflate it, §4);
-    # `occasions` averages pure error over the n_o within-cell replicates.
+    # Within-cell replicates (M17 Slice 3): cross type x unit x occasions (type outer
+    # for print grouping, ADR-054). The rater divisor counts DISTINCT raters (replicates
+    # must not inflate it, §4); `occasions` averages pure error over the n_o replicates.
     unlist(
-      lapply(unit, function(u) {
-        lapply(occasions, function(o) {
-          icc_estimand(
-            type = type,
-            unit = u,
-            raters = raters,
-            k_eff = design_info$k_eff_raters,
-            replicates = TRUE,
-            occasions = o,
-            n_o = design_info$n_o
-          )
-        })
+      lapply(type, function(ty) {
+        unlist(
+          lapply(agr_projection_units(unit, ty, raters), function(u) {
+            lapply(occasions, function(o) {
+              icc_estimand(
+                type = ty,
+                unit = u,
+                raters = raters,
+                k_eff = design_info$k_eff_raters,
+                replicates = TRUE,
+                occasions = o,
+                n_o = design_info$n_o
+              )
+            })
+          }),
+          recursive = FALSE
+        )
       }),
       recursive = FALSE
     )
   } else {
-    lapply(
-      unit,
-      function(u) {
-        icc_estimand(type = type, unit = u, raters = raters, k_eff = k)
-      }
+    # Two-way single level: cross type x unit (type outer for print grouping, ADR-054).
+    unlist(
+      lapply(type, function(ty) {
+        lapply(
+          agr_projection_units(unit, ty, raters),
+          function(u) {
+            icc_estimand(type = ty, unit = u, raters = raters, k_eff = k)
+          }
+        )
+      }),
+      recursive = FALSE
     )
   }
 
@@ -1655,6 +1742,7 @@ icc <- function(
 
   estimates <- data.frame(
     index = vapply(estimands, `[[`, character(1), "label"),
+    type = vapply(estimands, `[[`, character(1), "type"),
     level = vapply(estimands, `[[`, character(1), "level"),
     sf_index = vapply(estimands, `[[`, character(1), "sf_label"),
     estimate = points,
@@ -1855,6 +1943,39 @@ validate_occasions <- function(occasions, call = rlang::caller_env()) {
     )
   }
   unique(occasions)
+}
+
+# Validate the `type` (error-definition) argument. Vectorizable exactly like `unit`
+# and `level` (ADR-054): one or both of {"agreement", "consistency"}, defaulting to
+# both, so a default two-way call reports all four formulations (A1/Ak/C1/Ck) from
+# one fit. `type` never reaches an engine -- agreement vs. consistency is post-fit
+# arithmetic on the same variance components (McGraw & Wong 1996) -- so the second
+# type costs a microsecond atop a fit that may take minutes (brms). Returns the
+# requested types, de-duplicated, preserving the requested order. `length(type)`
+# drives the drop-vs-abort policy in icc(): a single named type aborts on an
+# undefined cell (#5), a multi-type request drops it with a cli_inform (ADR-029).
+validate_type <- function(type, call = rlang::caller_env()) {
+  choices <- c("agreement", "consistency")
+  if (!is.character(type) || length(type) < 1L || !all(type %in% choices)) {
+    abort_intraclass(
+      "{.arg type} must be one or both of {.val {choices}}.",
+      call = call
+    )
+  }
+  unique(type)
+}
+
+# The units for which error definition `ty` is defined in the estimand cross-product:
+# fixed-rater absolute agreement cannot be projected to a numeric (D-study) rater
+# count (theta^2_r is the finite-population variance of the observed raters, M4.5), so
+# a fixed-rater agreement cell drops numeric units. Consistency and random-rater
+# agreement keep every unit. (The user was informed of any such drop in icc().)
+agr_projection_units <- function(units, ty, raters) {
+  if (ty == "agreement" && raters == "fixed") {
+    Filter(function(u) !is.numeric(u), units)
+  } else {
+    units
+  }
 }
 
 # Validate the multilevel `level` argument: the default (both correct levels) or a

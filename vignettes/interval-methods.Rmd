@@ -75,7 +75,7 @@ As in the engines article, the brms chunks below are shown with pre-computed out
 are not evaluated at knit time.
 
 ```{r posterior, eval = FALSE}
-icc(ratings, score, subject, rater, engine = "brms", seed = 1)
+icc(ratings, score, subject, rater, engine = "brms", type = "agreement", seed = 1)
 ```
 
 ```
@@ -107,7 +107,7 @@ For comparison you can ask for a **highest-posterior-density interval** (HPDI) â
 
 ```{r posterior-hpdi, eval = FALSE}
 icc(ratings, score, subject, rater, engine = "brms",
-  posterior_summary = "hpdi", seed = 1)
+  type = "agreement", posterior_summary = "hpdi", seed = 1)
 ```
 
 ```

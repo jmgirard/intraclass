@@ -134,10 +134,13 @@ test_that("the recommended labels match the vignette crosswalk verbatim", {
 
 # --- emitted call strings are the minimal, copy-pasteable forms ---------------
 
-test_that("emitted calls show only the non-default arguments", {
+test_that("emitted calls pin type and omit other default arguments", {
+  # `type` is always pinned now (icc() defaults to reporting both, ADR-054), so the
+  # copied call reproduces the single recommended coefficient; the other axes still
+  # show only their non-default values.
   expect_equal(
     choose_icc(type = "agreement", unit = "both", raters = "random")$call,
-    "icc(data, score, subject, rater)"
+    'icc(data, score, subject, rater, type = "agreement")'
   )
   expect_equal(
     choose_icc(type = "consistency", unit = "single", raters = "fixed")$call,
@@ -155,7 +158,7 @@ test_that("emitted calls show only the non-default arguments", {
       multilevel = TRUE,
       level = "cluster"
     )$call,
-    'icc(data, score, subject, rater, cluster, level = "cluster")'
+    'icc(data, score, subject, rater, cluster, type = "agreement", level = "cluster")'
   )
 })
 
@@ -286,7 +289,10 @@ test_that("the shell walks the outstanding axes and resolves them", {
   )
   rec <- resolve_icc_recommendation(answers)
   expect_equal(rec$rows$index, "ICC(A,1)")
-  expect_equal(rec$call, "icc(data, score, subject, rater, unit = \"single\")")
+  expect_equal(
+    rec$call,
+    "icc(data, score, subject, rater, type = \"agreement\", unit = \"single\")"
+  )
 })
 
 test_that("the shell asks only the unanswered, applicable axes", {

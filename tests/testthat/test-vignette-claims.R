@@ -145,7 +145,7 @@ test_that("the D-study projection anchors to ICC(A,k) at m = n_raters", {
 
   # The D-studies article states Phi(m) at m = 4 (the raters in `ratings`) equals
   # the ICC(A,k) icc() reports directly. Point estimates are seed-independent.
-  fit <- icc(ratings, score, subject, rater, seed = 1)
+  fit <- icc(ratings, score, subject, rater, type = "agreement", seed = 1)
   proj <- d_study(fit, m = 1:8, seed = 1)
 
   at_k <- proj$estimate[proj$m == fit$n$raters]
@@ -172,7 +172,15 @@ test_that("the occasion D-study rises to a ceiling below 1 and lifts fixed agree
     rater = factor(grid$rater),
     score = 10 + subj + rtr + sr + rnorm(nrow(grid), sd = 0.7)
   )
-  fit <- icc(reps, score, subject, rater, occasions = "average", seed = 1)
+  fit <- icc(
+    reps,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   k <- fit$k_eff
   vc <- fit$components
   ceiling <- vc$subject / (vc$subject + (vc$rater + vc$subject_rater) / k)

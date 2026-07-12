@@ -346,11 +346,16 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M44 T1 — vectorize the `type` argument + estimand cross-product (not yet started; `/start-task`).**
-  M44 (ADR-054) planned this session; see the top bullet + the [`MILESTONES.md`](MILESTONES.md) M44 board. Release
-  context (unchanged): release prep for v0.1.0 is done (2026-07-12); the CRAN submission is the maintainer's
-  out-of-band act (`devtools::submit_cran()`, never self-submitted); version gate kept `0.1.0` (ADR-022; the
-  earlier "v0.2.0" plan framing was declined). M44 lands on `main` as 0.2.0-dev (maintainer chose implement-now). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
+- Active task: **M44 — all tasks DONE; PR [#50](https://github.com/jmgirard/intraclass/pull/50) open, awaiting CI +
+  merge approval.** T1–T5 complete on branch `m44-vectorize-type`: vectorize `type` (default all four
+  formulations), drop-vs-abort policy, presentation (type subheaders), `d_study()` project-both (user gate),
+  invariance + policy tests (`test-icc-type-vector.R`), 5 snapshots regenerated, docs/NEWS/vignettes. **Local gate
+  GREEN:** `air`/`lintr`/`spelling` clean, `document` delta = icc.Rd/d_study.Rd only, `pkgdown` clean,
+  installed-pkg drive OK, **`devtools::check` CI-parity (`NOT_CRAN=false`) 0/0/0**, snapshots pass under
+  `NOT_CRAN=true`. **DESCRIPTION bumped 0.1.0 → 0.2.0** (per ADR-054's 0.2.0 framing — flagged for maintainer;
+  final version + `cran-comments` are the ADR-022 release-consolidation step). **Next: green CI → merge-approval
+  gate → squash-merge → reconcile M44 done.** Release context unchanged (v0.1.0 CRAN handoff is the maintainer's
+  out-of-band act; main is now 0.2.0-dev per the implement-now gate). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
   the top. *Superseded (M43 S3, DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
   blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
   `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE

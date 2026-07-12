@@ -1720,24 +1720,56 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     **0/0/0**; installed-pkg drive of the defaulted `type` vector across representative designs
     ([[verify-against-installed-package]]).
 - **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
-  - [ ] **T1 — Vectorize the argument + estimand cross-product.** Add `validate_type()` mirroring
-        `validate_unit()` (dedup/order/classed abort); change the default to
-        `type = c("agreement", "consistency")`; thread a `type` loop into every branch of the estimand
-        cross-product (`icc.R:1524-1595` — two-way, multilevel, replicates), leaving the one-way path
-        type-free. *(AC1)*
-  - [ ] **T2 — Drop-vs-abort policy.** Inform-and-drop defaulted undefined cells; keep the classed
-        teaching aborts for *explicit* undefined requests (Design 3 consistency, conflated
-        consistency, fixed-agreement numeric-unit projection). Reuse the ADR-029 inform-and-drop
-        precedent; a `cli_inform` names which cells were dropped and why. *(AC3)*
-  - [ ] **T3 — Presentation.** Type subheaders in `format.icc`; fix `summary.icc`'s scalar-`type`
-        assumption → per-type note; per-row `type` in `tidy.icc`/`glance.icc`. Verify plain-text
-        degradation at 80 cols. *(AC4, AC5 partial)*
-  - [ ] **T4 — Invariance + policy tests + snapshot regen.** Defaulted-vector == scalar-call
-        cell-for-cell across designs/engines/one posterior path (AC2); inform-and-drop vs. abort per
-        agreement-only surface (AC3); regenerate the affected `_snaps/icc-*.md` under reproducible cli
-        output (AC4). *(AC2, AC3, AC4)*
-  - [ ] **T5 — Docs / NEWS / gate.** `@param type` + vignette note; NEWS default-shape bullet + the
-        `tidy()`-row-indexing caveat; WORDLIST if needed; finish-task gate + installed-pkg drive. *(AC5, AC6)*
+  - [x] **T1 — Vectorize the argument + estimand cross-product.** DONE (2026-07-12). Added
+        `validate_type()` (mirrors `validate_occasions()`: dedup/order/classed abort); default is
+        `type = c("agreement", "consistency")` (the signature already listed both; `validate_choice`
+        had collapsed it to a scalar). `type` is now the outer loop of every type-bearing
+        cross-product branch (two-way, multilevel, replicates), so rows come out **type-major**;
+        one-way stays type-free. Verified: default two-way → 4 rows A1/Ak/C1/Ck from one fit;
+        explicit single-type unchanged; number-invariance holds (default agreement rows == explicit
+        agreement call). *(AC1)*
+  - [x] **T2 — Drop-vs-abort policy.** DONE (2026-07-12). `length(type)` is the discriminator: a
+        single named type keeps its classed teaching abort; a multi-type request inform-and-drops the
+        undefined cell (ADR-029 precedent). Four guards routed: conflated×consistency (cell-specific —
+        kept at subject/cluster), Design-3 consistency (design-wide), fixed numeric-unit agreement
+        (`agr_projection_units()`, per-cell), and the incomplete-crossed connectedness agreement case
+        (design-wide; the not-in-ADR-054 guard 4, resolved by the ADR-029 precedent per the plan gate).
+        Verified per surface. *(AC3)*
+  - [x] **T3 — Presentation.** DONE (2026-07-12). `format.icc` groups rows under bold type headings
+        ("Absolute agreement"/"Consistency") only when ≥2 types present (single-type/one-way output
+        byte-identical). Fixed three scalar-`type` consumers: `summary.icc` (per-type note),
+        `icc_design_phrase` (header reads "…, absolute agreement & consistency"), and added a per-row
+        `type` column to `estimates` + `tidy.icc`. Plain-text degradation verified at 80 cols.
+        *(AC4, AC5 partial)*
+  - [x] **T4 — Invariance + policy tests + snapshot regen.** DONE (2026-07-12). New
+        `test-icc-type-vector.R` (139 checks): the **number-invariance oracle** (defaulted `type` ==
+        scalar-type calls cell-for-cell — estimate + both CI bounds — across two-way random & fixed,
+        incomplete, multilevel subject & cluster, and the lme4 engine) + **drop-vs-abort tests for all
+        four agreement-only surfaces** (conflated, Design 3, fixed numeric-unit agreement, and the
+        connectedness guard-4 case). Also fixed a `summary.icc` note that had split onto two lines (now
+        rejoined → single-type byte-identical). Regenerated the 5 default-call snapshots under
+        reproducible cli output (methods/incomplete/lavaan/lme4 show the grouped table; choose-icc pins
+        `type=` in the emitted call) — every diff a shape change, every retained number identical. Also
+        fixed every existing test that assumed the old default (choose-icc round-trip ×12 via a real
+        `build_icc_call` fix; fixed/incomplete multilevel; replicates; ~24 d-study; nested-multilevel; 2
+        vignette-claim). **Whole suite GREEN (0/395 CRAN-mode; snapshot tests pass under `NOT_CRAN=true`).**
+        *(AC2, AC3, AC4)*
+  - [x] **T5 — Docs / NEWS / gate.** DONE (2026-07-12). `@param type` (vector default + filter +
+        drop-vs-abort), `d_study()` `@return` (one curve per error definition + `type` column); NEWS
+        **`# intraclass 0.2.0`** heading with the default-shape change + the `tidy()`-row-indexing caveat;
+        **DESCRIPTION bumped 0.1.0 → 0.2.0** (per ADR-054's 0.2.0 framing — flagged for maintainer; the
+        final version + `cran-comments` stay the ADR-022 release-consolidation step). getting-started +
+        README prose describe the four-formulation default (front-door showcase); d-studies (+ note),
+        multilevel, engines, interval-methods vignettes pinned `type = "agreement"` on teaching
+        prints/static output whose prose or `fig.alt` is agreement-focused. Gate: `air`/`lintr`/`spelling`
+        clean, `document` delta = icc.Rd/d_study.Rd only, `pkgdown::check_pkgdown()` clean, installed-pkg
+        drive OK, all vignettes knit. `devtools::check` CI-parity running → then PR. *(AC5, AC6)*
+  - [x] **RESOLVED (user gate 2026-07-12): `d_study()` on a multi-type `icc` → project BOTH curves.**
+        `d_study()` now threads a `type` axis through the projection grid (type-major), reusing the
+        drop-vs-abort policy (fixed-agreement rater projection drops-and-informs under multi-type,
+        single-type still aborts). Adds a `type` column to the curve tbl; format/tidy expose it only
+        when >1 type present (single-type output unchanged); `glance` collapses to one row. Preserves
+        the `d_study(icc(...))` idiom.
 - **Coverage (criterion → task):** AC1 → T1 · AC2 → T4 · AC3 → T2, T4 · AC4 → T3, T4 · AC5 → T3, T5 ·
   AC6 → T5.
 - Deferred out of M44 (record so not rediscovered): a **post-hoc `update(x, type = ...)`

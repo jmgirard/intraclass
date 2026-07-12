@@ -218,7 +218,17 @@ icc_design_phrase <- function(type, raters, oneway = FALSE) {
     return("one-way random")
   }
   design <- switch(raters, random = "two-way random", fixed = "two-way mixed")
-  error <- switch(type, agreement = "absolute agreement", consistency = type)
+  # `type` may report both error definitions (the default four-formulation table,
+  # ADR-054); name each present, so the header reads e.g. "two-way random, absolute
+  # agreement & consistency". A single type is byte-identical to before.
+  error_of <- function(t) {
+    switch(t, agreement = "absolute agreement", consistency = "consistency")
+  }
+  types_present <- unique(type[!is.na(type)])
+  error <- paste(
+    vapply(types_present, error_of, character(1)),
+    collapse = " & "
+  )
   sprintf("%s, %s", design, error)
 }
 

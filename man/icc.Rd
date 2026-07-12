@@ -78,9 +78,19 @@ model, so \code{type} does not apply and the coefficients are \code{ICC(1)} / \c
 Fixed raters and a \code{cluster} (multilevel) structure are not defined for a
 one-way design.}
 
-\item{type}{Error definition (two-way only): \code{"agreement"} (absolute agreement,
-the default) counts systematic rater differences as error; \code{"consistency"}
-ignores them. Not applicable when \code{model = "oneway"}.}
+\item{type}{Error definition(s) (two-way only): \code{"agreement"} (absolute
+agreement) counts systematic rater differences as error; \code{"consistency"}
+ignores them. Like \code{unit} and \code{level}, \code{type} is \strong{vectorized and defaults to
+both} (\code{c("agreement", "consistency")}), so a default call reports every
+defined formulation -- \code{ICC(A,1)}, \code{ICC(A,k)}, \code{ICC(C,1)}, \code{ICC(C,k)} -- from
+the single fit (agreement vs. consistency is post-fit arithmetic on the same
+variance components, so the second definition is free). Pass a single value to
+report just that coefficient once you have named your estimand. A definition
+that is undefined for the design (e.g. \code{"consistency"} for the conflated
+diagnostic, or a fixed-rater agreement projection to a different rater count)
+is dropped with a message when reached via the default, and aborts with a
+teaching error when requested explicitly. Not applicable when
+\code{model = "oneway"}.}
 
 \item{raters}{Rater sampling: \code{"random"} (the default; two-way random, Case 2)
 generalizes to a rater universe; \code{"fixed"} (two-way mixed, Case 3) treats the
