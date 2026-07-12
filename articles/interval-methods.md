@@ -5,24 +5,34 @@
 library(intraclass)
 ```
 
-Every [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-coefficient comes with an interval, never a bare point estimate. The
+A point estimate on its own can mislead — with a handful of subjects the
+same ICC could be “poor” or “excellent” and you would not know it. So
+every [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
+coefficient comes with an interval, never a bare number, and the
 `ci_method` argument selects how that interval is built. This article
 covers the two frequentist methods — Monte-Carlo and the parametric
-bootstrap — and the Bayesian **credible** interval that comes with the
-brms engine, and when they diverge.
+bootstrap — and the Bayesian
+[**credible**](https://jmgirard.github.io/intraclass/articles/glossary.html#credible-interval)
+interval that comes with the brms engine, and when they diverge. (Terms
+are defined in the
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).)
 
 ## Monte-Carlo and the parametric bootstrap
 
 Every interval elsewhere in these articles has been the default
-**Monte-Carlo** interval: it draws from the fitted parameter covariance
-on the engine’s log scale and back-transforms, which is fast and
-boundary-aware. A second method, a **parametric bootstrap**
+[**Monte-Carlo**
+interval](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval):
+it draws from the fitted parameter covariance on the engine’s log scale
+and back-transforms, which is fast and
+[boundary-aware](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary).
+A second method, a [**parametric
+bootstrap**](https://jmgirard.github.io/intraclass/articles/glossary.html#parametric-bootstrap)
 (`ci_method = "bootstrap"`), instead simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. It does not lean on the asymptotic-normal covariance
-approximation — at the cost of a full refit per resample, so it is far
-slower.
+approximation (the assumption that the estimates are normally
+distributed around the truth, which frays in small samples) — at the
+cost of a full refit per resample, so it is far slower.
 
 ``` r
 
@@ -59,8 +69,10 @@ When the fit is Bayesian (`engine = "brms"`, see [*Estimation
 engines*](https://jmgirard.github.io/intraclass/articles/engines.html#a-bayesian-engine-brms)),
 the interval is neither a Monte-Carlo nor a bootstrap *confidence*
 interval but a **credible** interval read directly off the posterior
-draws of the ICC. `ci_method = "posterior"` is automatic — and required
-— for that engine.
+draws of the ICC — a [different kind of
+statement](https://jmgirard.github.io/intraclass/articles/glossary.html#confidence-interval-vs.-credible-interval)
+about where the ICC lies. `ci_method = "posterior"` is automatic — and
+required — for that engine.
 
 As in the engines article, the brms chunks below are shown with
 pre-computed output (fitting a Stan model needs a toolchain not
@@ -81,12 +93,13 @@ icc(ratings, score, subject, rater, engine = "brms", seed = 1)
     #> Variance components: subject 1.522, rater 2.653, residual 0.962
     #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 
-The point estimate is the posterior mode (MAP) and the default interval
-is a **percentile** credible interval — the lower `2.5%` and upper
-`97.5%` quantiles of the ICC draws. Percentile is the default because it
-is invariant to how the ICC is parameterized and degrades gracefully as
-a variance component approaches zero (ten Hove et al. 2020, §4.2, find
-it nominal at more than two raters).
+The point estimate is the [posterior mode
+(MAP)](https://jmgirard.github.io/intraclass/articles/glossary.html#posterior-mode-map)
+and the default interval is a **percentile** credible interval — the
+lower `2.5%` and upper `97.5%` quantiles of the ICC draws. Percentile is
+the default because it is invariant to how the ICC is parameterized and
+degrades gracefully as a variance component approaches zero (ten Hove et
+al. 2020, §4.2, find it nominal at more than two raters).
 
 ### Highest-posterior-density intervals
 

@@ -3,8 +3,11 @@
 “Which ICC should I report?” is the question this package is built to
 answer. There is no single intraclass correlation: the name hides a
 whole family of coefficients, and they do not all measure the same
-thing. (In the jargon, they target different *estimands* — different
-true quantities you could be trying to pin down.) Report the wrong one
+thing. (In the jargon, they target different
+[*estimands*](https://jmgirard.github.io/intraclass/articles/glossary.html#estimand)
+— different true quantities you could be trying to pin down; the
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md)
+defines this and the other terms as they arise.) Report the wrong one
 and you can overstate reliability by a wide margin, or penalize a rating
 procedure for differences that do not actually matter to you.
 

@@ -11,10 +11,15 @@ and [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
 articles treat the **subject** as the object of measurement. But
 subjects are often nested in higher-level **clusters** — pupils in
-classrooms, patients in clinics — and then “reliability” splits in two.
-This article covers the multilevel ICC family (ten Hove, Jorgensen & van
-der Ark, 2022): crossed and nested layouts, complete and incomplete
-data, fixed raters, and the multilevel D-study.
+classrooms, patients in clinics — and then “reliability” splits in two:
+how well raters tell *subjects* apart, and how well they tell *clusters*
+apart. Those are different questions with different answers, and
+reporting one when you needed the other can be badly misleading. This
+article covers the multilevel ICC family (ten Hove, Jorgensen & van der
+Ark, 2022): crossed and nested layouts, complete and incomplete data,
+fixed raters, and the multilevel D-study. (Any unfamiliar term is
+defined in the
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).)
 
 ## Subject level vs. cluster level
 
@@ -95,8 +100,10 @@ an ordinary single-level ICC? That number — ten Hove et al.’s Equation
 14 — folds the between-classroom and within-classroom variation together
 into one “true score” and is biased for **both** questions above.
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) can
-compute it as a **diagnostic contrast** with `level = "conflated"`, so
-you can see the distortion directly rather than take it on faith:
+compute this [conflated
+ICC](https://jmgirard.github.io/intraclass/articles/glossary.html#conflated-icc)
+as a **diagnostic contrast** with `level = "conflated"`, so you can see
+the distortion directly rather than take it on faith:
 
 ``` r
 
@@ -191,9 +198,10 @@ Just as in the single-level case (the [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md)
 article works a connected incomplete design), the **crossed** design
 (Design 1) does not need every pupil rated by every rater. The mixed
-model estimates the variance components from whatever cells are present,
-so a ragged classroom design is handled directly. Drop a fifth of the
-ratings from the `school` data at random:
+model estimates the [variance
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)
+from whatever cells are present, so a ragged classroom design is handled
+directly. Drop a fifth of the ratings from the `school` data at random:
 
 ``` r
 
@@ -203,8 +211,10 @@ school_ragged <- school[-sample(nrow(school), round(0.2 * nrow(school))), ]
 
 At the **subject** level both agreement and consistency come back, and —
 exactly as in the single-level incomplete case — `ICC(*,k)` averages
-over the *effective* number of ratings per pupil (`k_eff`, the harmonic
-mean), which is below the full panel size of 4:
+over the [*effective* number of
+ratings](https://jmgirard.github.io/intraclass/articles/glossary.html#effective-number-of-ratings-k_eff)
+per pupil (`k_eff`, the harmonic mean), which is below the full panel
+size of 4:
 
 ``` r
 
@@ -253,14 +263,16 @@ against the data), or the abort points you at the nested reading.
 
 ## Fixed raters in a multilevel design
 
-The multilevel examples so far treat raters as a **random** sample — the
-recommended default, which generalizes beyond the raters you happened to
-use. When the observed raters *are* the entire population of interest (a
-fixed panel of examiners, say), pass `raters = "fixed"`. As in the
-single-level case, the rater main effect is then the finite-population
-variance of *these* raters (McGraw & Wong’s Case 3A) rather than a
-random-sample variance. On a balanced crossed design both levels come
-back:
+The multilevel examples so far treat raters as a [**random**
+sample](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs.-random-raters)
+— the recommended default, which generalizes beyond the raters you
+happened to use. When the observed raters *are* the entire population of
+interest (a fixed panel of examiners, say), pass `raters = "fixed"`. As
+in the single-level case, the rater main effect is then the
+[finite-population
+variance](https://jmgirard.github.io/intraclass/articles/glossary.html#finite-population-rater-variance-%CE%B8%C2%B2_r)
+of *these* raters (McGraw & Wong’s Case 3A) rather than a random-sample
+variance. On a balanced crossed design both levels come back:
 
 ``` r
 

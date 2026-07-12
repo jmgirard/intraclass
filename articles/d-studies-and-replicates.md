@@ -7,12 +7,14 @@ library(intraclass)
 
 Two things you can do once you have a fitted
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md):
-project its reliability to a different number of raters (a **decision
-study**), and — when each cell holds more than one rating — separate the
+project its reliability to a different number of raters (a [**decision
+study**](https://jmgirard.github.io/intraclass/articles/glossary.html#d-study-decision-study)),
+and — when each cell holds more than one rating — separate the
 subject-by-rater interaction from pure error (**within-cell
 replicates**). This article also shows the
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-methods that visualize a fit.
+methods that visualize a fit. (Unfamiliar terms are defined in the
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).)
 
 ## How many raters do I need? A D-study
 
@@ -20,9 +22,10 @@ methods that visualize a fit.
 reliability of the mean of the `k` raters you actually used. A
 **decision (D-) study** asks a forward-looking question: *how reliable
 would the mean of some other number of raters `m` be?* In
-generalizability theory the absolute-agreement ICC is the dependability
-coefficient, and projecting it to `m` raters is just a change of the
-averaging divisor,
+generalizability theory the absolute-agreement ICC is the [dependability
+coefficient](https://jmgirard.github.io/intraclass/articles/glossary.html#dependability-coefficient),
+and projecting it to `m` raters is just a change of the averaging
+divisor,
 
 ``` math
 \Phi(m) = \frac{\sigma^2_s}{\sigma^2_s + (\sigma^2_r + \sigma^2_{res}) / m},
@@ -77,7 +80,8 @@ band.](d-studies-and-replicates_files/figure-html/dstudy-plot-1.png)
 estimated from only as many raters as you observed, so projecting far
 beyond that design leans hard on that estimate. The Monte-Carlo interval
 widens honestly to reflect this rather than pretending to a precision it
-lacks — and projecting absolute agreement is refused for *fixed* raters,
+lacks — and projecting absolute agreement is refused for [*fixed*
+raters](https://jmgirard.github.io/intraclass/articles/glossary.html#fixed-vs.-random-raters),
 where there is no wider rater universe to generalize to (use
 `raters = "random"`). The [D-study also works on a multilevel
 fit](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html#how-many-raters-a-multilevel-d-study),

@@ -23,14 +23,18 @@ are effectively adding noise, and a score tells you more about who
 happened to rate it than about the subject.
 
 `intraclass` estimates that number by fitting a **mixed model** (it
-separates subject variation from rater variation as variance
-components), rather than from the classical ANOVA mean-squares formulas
-older tools use. The two agree on clean, balanced data but the
-model-based approach also handles missing ratings, multiple designs, and
-honest confidence intervals — see
+separates subject variation from rater variation as [variance
+components](https://jmgirard.github.io/intraclass/articles/glossary.html#variance-component)),
+rather than from the classical ANOVA mean-squares formulas older tools
+use. The two agree on clean, balanced data but the model-based approach
+also handles missing ratings, multiple designs, and honest confidence
+intervals — see
 [*Engines*](https://jmgirard.github.io/intraclass/articles/engines.md)
 for the machinery. This article walks the whole pipeline on a small
-example: **fit → estimate → interpret**.
+example: **fit → estimate → interpret**. (New to any of the terms as
+they come up? The
+[*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md)
+defines each one in a sentence.)
 
 ## The data
 
@@ -152,8 +156,11 @@ for you: the honest summary is the whole interval.
 
 The interval
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
-reports is a **Monte-Carlo** interval, and it is **boundary-aware**. In
-plain terms: instead of relying on a textbook formula that misbehaves
+reports is a [**Monte-Carlo**
+interval](https://jmgirard.github.io/intraclass/articles/glossary.html#monte-carlo-interval),
+and it is
+[**boundary-aware**](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary).
+In plain terms: instead of relying on a textbook formula that misbehaves
 when a variance is near zero (a common situation — raters who barely
 differ push the rater variance to its zero boundary),
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)

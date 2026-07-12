@@ -6,9 +6,10 @@ articles:
   d-studies-and-replicates: d-studies-and-replicates.html
   engines: engines.html
   getting-started: getting-started.html
+  glossary: glossary.html
   interval-methods: interval-methods.html
   multilevel-designs: multilevel-designs.html
-last_built: 2026-07-12T02:34Z
+last_built: 2026-07-12T03:30Z
 urls:
   reference: https://jmgirard.github.io/intraclass/reference
   article: https://jmgirard.github.io/intraclass/articles

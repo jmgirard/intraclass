@@ -44,6 +44,9 @@
     <li><a class="dropdown-item" href="../articles/engines.html">Estimation engines</a></li>
     <li><a class="dropdown-item" href="../articles/interval-methods.html">Confidence-interval methods</a></li>
     <li><a class="dropdown-item" href="../articles/d-studies-and-replicates.html">D-studies and within-cell replicates</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
+    <li><a class="dropdown-item" href="../articles/glossary.html">Glossary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -95,12 +98,14 @@ reliable. Near 0, the raters are effectively adding noise, and a score
 tells you more about who happened to rate it than about the subject.</p>
 <p><code>intraclass</code> estimates that number by fitting a
 <strong>mixed model</strong> (it separates subject variation from rater
-variation as variance components), rather than from the classical ANOVA
-mean-squares formulas older tools use. The two agree on clean, balanced
-data but the model-based approach also handles missing ratings, multiple
-designs, and honest confidence intervals — see <a href="engines.html"><em>Engines</em></a> for the machinery. This article
+variation as <a href="glossary.html#variance-component">variance
+components</a>), rather than from the classical ANOVA mean-squares
+formulas older tools use. The two agree on clean, balanced data but the
+model-based approach also handles missing ratings, multiple designs, and
+honest confidence intervals — see <a href="engines.html"><em>Engines</em></a> for the machinery. This article
 walks the whole pipeline on a small example: <strong>fit → estimate →
-interpret</strong>.</p>
+interpret</strong>. (New to any of the terms as they come up? The <a href="glossary.html"><em>Glossary</em></a> defines each one in a
+sentence.)</p>
 </div>
 <div class="section level2">
 <h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
@@ -234,15 +239,14 @@ interval.</p>
 <div class="section level3">
 <h3 id="about-the-confidence-interval">About the confidence interval<a class="anchor" aria-label="anchor" href="#about-the-confidence-interval"></a>
 </h3>
-<p>The interval <code><a href="../reference/icc.html">icc()</a></code> reports is a
-<strong>Monte-Carlo</strong> interval, and it is
-<strong>boundary-aware</strong>. In plain terms: instead of relying on a
-textbook formula that misbehaves when a variance is near zero (a common
-situation — raters who barely differ push the rater variance to its zero
-boundary), <code><a href="../reference/icc.html">icc()</a></code> simulates many plausible parameter sets
-from the fitted model and reads the interval off the resulting spread of
-ICCs. This keeps the interval well-behaved right at that boundary. The
-<a href="interval-methods.html"><em>Interval methods</em></a> article
+<p>The interval <code><a href="../reference/icc.html">icc()</a></code> reports is a <a href="glossary.html#monte-carlo-interval"><strong>Monte-Carlo</strong>
+interval</a>, and it is <a href="glossary.html#zero-variance-boundary"><strong>boundary-aware</strong></a>.
+In plain terms: instead of relying on a textbook formula that misbehaves
+when a variance is near zero (a common situation — raters who barely
+differ push the rater variance to its zero boundary), <code><a href="../reference/icc.html">icc()</a></code>
+simulates many plausible parameter sets from the fitted model and reads
+the interval off the resulting spread of ICCs. This keeps the interval
+well-behaved right at that boundary. The <a href="interval-methods.html"><em>Interval methods</em></a> article
 covers how it works and the alternatives (a parametric bootstrap, and
 Bayesian credible intervals).</p>
 </div>

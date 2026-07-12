@@ -44,6 +44,9 @@
     <li><a class="dropdown-item" href="../articles/engines.html">Estimation engines</a></li>
     <li><a class="dropdown-item" href="../articles/interval-methods.html">Confidence-interval methods</a></li>
     <li><a class="dropdown-item" href="../articles/d-studies-and-replicates.html">D-studies and within-cell replicates</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
+    <li><a class="dropdown-item" href="../articles/glossary.html">Glossary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -81,9 +84,13 @@
 treat the <strong>subject</strong> as the object of measurement. But
 subjects are often nested in higher-level <strong>clusters</strong> —
 pupils in classrooms, patients in clinics — and then “reliability”
-splits in two. This article covers the multilevel ICC family (ten Hove,
-Jorgensen &amp; van der Ark, 2022): crossed and nested layouts, complete
-and incomplete data, fixed raters, and the multilevel D-study.</p>
+splits in two: how well raters tell <em>subjects</em> apart, and how
+well they tell <em>clusters</em> apart. Those are different questions
+with different answers, and reporting one when you needed the other can
+be badly misleading. This article covers the multilevel ICC family (ten
+Hove, Jorgensen &amp; van der Ark, 2022): crossed and nested layouts,
+complete and incomplete data, fixed raters, and the multilevel D-study.
+(Any unfamiliar term is defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
 <div class="section level2">
 <h2 id="subject-level-vs--cluster-level">Subject level vs. cluster level<a class="anchor" aria-label="anchor" href="#subject-level-vs--cluster-level"></a>
 </h2>
@@ -160,8 +167,9 @@ a pupil-level one about the subject level. Request just one with
 classrooms and run an ordinary single-level ICC? That number — ten Hove
 et al.’s Equation 14 — folds the between-classroom and within-classroom
 variation together into one “true score” and is biased for
-<strong>both</strong> questions above. <code><a href="../reference/icc.html">icc()</a></code> can compute it
-as a <strong>diagnostic contrast</strong> with
+<strong>both</strong> questions above. <code><a href="../reference/icc.html">icc()</a></code> can compute
+this <a href="glossary.html#conflated-icc">conflated ICC</a> as a
+<strong>diagnostic contrast</strong> with
 <code>level = "conflated"</code>, so you can see the distortion directly
 rather than take it on faith:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -253,17 +261,18 @@ informative error rather than guessing at a model.</p>
 <p>Just as in the single-level case (the <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a> article works a
 connected incomplete design), the <strong>crossed</strong> design
 (Design 1) does not need every pupil rated by every rater. The mixed
-model estimates the variance components from whatever cells are present,
-so a ragged classroom design is handled directly. Drop a fifth of the
-ratings from the <code>school</code> data at random:</p>
+model estimates the <a href="glossary.html#variance-component">variance
+components</a> from whatever cells are present, so a ragged classroom
+design is handled directly. Drop a fifth of the ratings from the
+<code>school</code> data at random:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">11</span><span class="op">)</span></span>
 <span><span class="va">school_ragged</span> <span class="op">&lt;-</span> <span class="va">school</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">0.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">school</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>At the <strong>subject</strong> level both agreement and consistency
 come back, and — exactly as in the single-level incomplete case —
-<code>ICC(*,k)</code> averages over the <em>effective</em> number of
-ratings per pupil (<code>k_eff</code>, the harmonic mean), which is
-below the full panel size of 4:</p>
+<code>ICC(*,k)</code> averages over the <a href="glossary.html#effective-number-of-ratings-k_eff"><em>effective</em>
+number of ratings</a> per pupil (<code>k_eff</code>, the harmonic mean),
+which is below the full panel size of 4:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  level <span class="op">=</span> <span class="st">"subject"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -304,15 +313,15 @@ against the data), or the abort points you at the nested reading.</p>
 <div class="section level2">
 <h2 id="fixed-raters-in-a-multilevel-design">Fixed raters in a multilevel design<a class="anchor" aria-label="anchor" href="#fixed-raters-in-a-multilevel-design"></a>
 </h2>
-<p>The multilevel examples so far treat raters as a
-<strong>random</strong> sample — the recommended default, which
-generalizes beyond the raters you happened to use. When the observed
-raters <em>are</em> the entire population of interest (a fixed panel of
-examiners, say), pass <code>raters = "fixed"</code>. As in the
-single-level case, the rater main effect is then the finite-population
-variance of <em>these</em> raters (McGraw &amp; Wong’s Case 3A) rather
-than a random-sample variance. On a balanced crossed design both levels
-come back:</p>
+<p>The multilevel examples so far treat raters as a <a href="glossary.html#fixed-vs.-random-raters"><strong>random</strong>
+sample</a> — the recommended default, which generalizes beyond the
+raters you happened to use. When the observed raters <em>are</em> the
+entire population of interest (a fixed panel of examiners, say), pass
+<code>raters = "fixed"</code>. As in the single-level case, the rater
+main effect is then the <a href="glossary.html#finite-population-rater-variance-%CE%B8%C2%B2_r">finite-population
+variance</a> of <em>these</em> raters (McGraw &amp; Wong’s Case 3A)
+rather than a random-sample variance. On a balanced crossed design both
+levels come back:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
 <span>  raters <span class="op">=</span> <span class="st">"fixed"</span><span class="op">)</span></span>

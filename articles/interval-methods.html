@@ -44,6 +44,9 @@
     <li><a class="dropdown-item" href="../articles/engines.html">Estimation engines</a></li>
     <li><a class="dropdown-item" href="../articles/interval-methods.html">Confidence-interval methods</a></li>
     <li><a class="dropdown-item" href="../articles/d-studies-and-replicates.html">D-studies and within-cell replicates</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
+    <li><a class="dropdown-item" href="../articles/glossary.html">Glossary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -76,24 +79,28 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jmgirard/intraclass" class="external-link">intraclass</a></span><span class="op">)</span></span></code></pre></div>
-<p>Every <code><a href="../reference/icc.html">icc()</a></code> coefficient comes with an interval, never a
-bare point estimate. The <code>ci_method</code> argument selects how
-that interval is built. This article covers the two frequentist methods
-— Monte-Carlo and the parametric bootstrap — and the Bayesian
-<strong>credible</strong> interval that comes with the brms engine, and
-when they diverge.</p>
+<p>A point estimate on its own can mislead — with a handful of subjects
+the same ICC could be “poor” or “excellent” and you would not know it.
+So every <code><a href="../reference/icc.html">icc()</a></code> coefficient comes with an interval, never a
+bare number, and the <code>ci_method</code> argument selects how that
+interval is built. This article covers the two frequentist methods —
+Monte-Carlo and the parametric bootstrap — and the Bayesian <a href="glossary.html#credible-interval"><strong>credible</strong></a>
+interval that comes with the brms engine, and when they diverge. (Terms
+are defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
 <div class="section level2">
 <h2 id="monte-carlo-and-the-parametric-bootstrap">Monte-Carlo and the parametric bootstrap<a class="anchor" aria-label="anchor" href="#monte-carlo-and-the-parametric-bootstrap"></a>
 </h2>
-<p>Every interval elsewhere in these articles has been the default
-<strong>Monte-Carlo</strong> interval: it draws from the fitted
-parameter covariance on the engine’s log scale and back-transforms,
-which is fast and boundary-aware. A second method, a <strong>parametric
-bootstrap</strong> (<code>ci_method = "bootstrap"</code>), instead
+<p>Every interval elsewhere in these articles has been the default <a href="glossary.html#monte-carlo-interval"><strong>Monte-Carlo</strong>
+interval</a>: it draws from the fitted parameter covariance on the
+engine’s log scale and back-transforms, which is fast and <a href="glossary.html#zero-variance-boundary">boundary-aware</a>. A second
+method, a <a href="glossary.html#parametric-bootstrap"><strong>parametric
+bootstrap</strong></a> (<code>ci_method = "bootstrap"</code>), instead
 simulates response vectors from the fitted model, refits, and takes
 percentile quantiles of the resampled coefficients. It does not lean on
-the asymptotic-normal covariance approximation — at the cost of a full
-refit per resample, so it is far slower.</p>
+the asymptotic-normal covariance approximation (the assumption that the
+estimates are normally distributed around the truth, which frays in
+small samples) — at the cost of a full refit per resample, so it is far
+slower.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">bs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
@@ -129,7 +136,8 @@ cost.</p>
 <p>When the fit is Bayesian (<code>engine = "brms"</code>, see <a href="engines.html#a-bayesian-engine-brms"><em>Estimation
 engines</em></a>), the interval is neither a Monte-Carlo nor a bootstrap
 <em>confidence</em> interval but a <strong>credible</strong> interval
-read directly off the posterior draws of the ICC.
+read directly off the posterior draws of the ICC — a <a href="glossary.html#confidence-interval-vs.-credible-interval">different
+kind of statement</a> about where the ICC lies.
 <code>ci_method = "posterior"</code> is automatic — and required — for
 that engine.</p>
 <p>As in the engines article, the brms chunks below are shown with
@@ -146,11 +154,11 @@ time.</p>
 <span><span class="co">#&gt;   ICC(A,k)    0.679   [0.221, 0.881]</span></span>
 <span><span class="co">#&gt; Variance components: subject 1.522, rater 2.653, residual 0.962</span></span>
 <span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre>
-<p>The point estimate is the posterior mode (MAP) and the default
-interval is a <strong>percentile</strong> credible interval — the lower
-<code>2.5%</code> and upper <code>97.5%</code> quantiles of the ICC
-draws. Percentile is the default because it is invariant to how the ICC
-is parameterized and degrades gracefully as a variance component
+<p>The point estimate is the <a href="glossary.html#posterior-mode-map">posterior mode (MAP)</a> and the
+default interval is a <strong>percentile</strong> credible interval —
+the lower <code>2.5%</code> and upper <code>97.5%</code> quantiles of
+the ICC draws. Percentile is the default because it is invariant to how
+the ICC is parameterized and degrades gracefully as a variance component
 approaches zero (ten Hove et al. 2020, §4.2, find it nominal at more
 than two raters).</p>
 <div class="section level3">
