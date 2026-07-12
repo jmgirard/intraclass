@@ -53,20 +53,26 @@ The base install is light — only `glmmTMB`, `cli`, `rlang`, and
 ## Example
 
 `ratings` is the classic Shrout & Fleiss (1979) example, shipped with
-the package. The defaults give the two-way random, absolute-agreement
-`ICC(A,1)` and `ICC(A,k)` with a reproducible Monte-Carlo interval:
+the package. With the defaults a single two-way random fit reports every
+defined formulation — absolute agreement and consistency, single-rater
+and average — grouped by error definition, each with a reproducible
+Monte-Carlo interval:
 
 ``` r
 library(intraclass)
 
 icc(ratings, score, subject, rater, seed = 2024)
-#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
+#> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
+#>   Absolute agreement
 #>   ICC(A,1)     0.290   [0.053, 0.715]
 #>   ICC(A,k)     0.620   [0.182, 0.910]
+#>   Consistency
+#>   ICC(C,1)     0.715   [0.341, 0.924]
+#>   ICC(C,k)     0.909   [0.674, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -122,15 +128,21 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 #>   (crossed with clusters, Design 1).
 #> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
 #>   `design = "nested_in_clusters"`.
-#> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
+#> ── Intraclass correlation: multilevel two-way random, absolute agreement & consi
 #> Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
+#>   Absolute agreement
 #>   subject    ICC(A,1)     0.322   [0.162, 0.484]
 #>   subject    ICC(A,k)     0.655   [0.436, 0.790]
 #>   cluster    ICC(A,1)     0.870   [0.005, 0.973]
 #>   cluster    ICC(A,k)     0.964   [0.018, 0.993]
+#>   Consistency
+#>   subject    ICC(C,1)     0.383   [0.245, 0.544]
+#>   subject    ICC(C,k)     0.713   [0.565, 0.827]
+#>   cluster    ICC(C,1)     0.995   [0.005, 1.000]
+#>   cluster    ICC(C,k)     0.999   [0.018, 1.000]
 #> 
 #> Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492
 #> 

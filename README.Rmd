@@ -60,8 +60,9 @@ Optional Bayesian and SEM engines live in `Suggests`.
 ## Example
 
 `ratings` is the classic Shrout & Fleiss (1979) example, shipped with the
-package. The defaults give the two-way random, absolute-agreement `ICC(A,1)` and
-`ICC(A,k)` with a reproducible Monte-Carlo interval:
+package. With the defaults a single two-way random fit reports every defined
+formulation — absolute agreement and consistency, single-rater and average —
+grouped by error definition, each with a reproducible Monte-Carlo interval:
 
 ```{r example}
 library(intraclass)

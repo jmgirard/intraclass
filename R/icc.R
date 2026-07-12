@@ -164,9 +164,19 @@
 #'   model, so `type` does not apply and the coefficients are `ICC(1)` / `ICC(k)`.
 #'   Fixed raters and a `cluster` (multilevel) structure are not defined for a
 #'   one-way design.
-#' @param type Error definition (two-way only): `"agreement"` (absolute agreement,
-#'   the default) counts systematic rater differences as error; `"consistency"`
-#'   ignores them. Not applicable when `model = "oneway"`.
+#' @param type Error definition(s) (two-way only): `"agreement"` (absolute
+#'   agreement) counts systematic rater differences as error; `"consistency"`
+#'   ignores them. Like `unit` and `level`, `type` is **vectorized and defaults to
+#'   both** (`c("agreement", "consistency")`), so a default call reports every
+#'   defined formulation -- `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, `ICC(C,k)` -- from
+#'   the single fit (agreement vs. consistency is post-fit arithmetic on the same
+#'   variance components, so the second definition is free). Pass a single value to
+#'   report just that coefficient once you have named your estimand. A definition
+#'   that is undefined for the design (e.g. `"consistency"` for the conflated
+#'   diagnostic, or a fixed-rater agreement projection to a different rater count)
+#'   is dropped with a message when reached via the default, and aborts with a
+#'   teaching error when requested explicitly. Not applicable when
+#'   `model = "oneway"`.
 #' @param raters Rater sampling: `"random"` (the default; two-way random, Case 2)
 #'   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3) treats the
 #'   observed raters as the entire population and is fit with raters as fixed

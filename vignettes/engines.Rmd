@@ -125,7 +125,7 @@ toolchain not available when this site is built, so these chunks are not evaluat
 knit time.
 
 ```{r brms, eval = FALSE}
-bayes <- icc(ratings, score, subject, rater, engine = "brms", seed = 1)
+bayes <- icc(ratings, score, subject, rater, engine = "brms", type = "agreement", seed = 1)
 bayes
 ```
 

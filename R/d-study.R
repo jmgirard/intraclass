@@ -104,11 +104,14 @@
 #'   override to change the confidence level, the number of Monte-Carlo draws, or
 #'   the seed.
 #'
-#' @return An `icc_dstudy` object: a tibble with one row per `m` and columns
-#'   `m`, `index` (e.g. `"ICC(A,3)"`), `estimate`, `std.error`, `conf.low`, and
-#'   `conf.high`, carrying the design and interval settings as attributes. A
-#'   multilevel projection adds a `level` column (one curve per level). Use
-#'   [tidy()][generics::tidy], [glance()][generics::glance], and
+#' @return An `icc_dstudy` object: a tibble with one row per projected point and
+#'   columns `m`, `index` (e.g. `"ICC(A,3)"`), `type`, `estimate`, `std.error`,
+#'   `conf.low`, and `conf.high`, carrying the design and interval settings as
+#'   attributes. If the fitted `icc` reports both error definitions (the default),
+#'   `d_study()` projects **one reliability curve per definition** and `tidy()`
+#'   surfaces a `type` column to distinguish them; a single-type fit projects a
+#'   single curve. A multilevel projection adds a `level` column (one curve per
+#'   level). Use [tidy()][generics::tidy], [glance()][generics::glance], and
 #'   `autoplot()` (the reliability curve).
 #'
 #' @references
