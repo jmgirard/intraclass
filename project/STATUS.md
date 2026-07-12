@@ -1,5 +1,10 @@
 # Project status
 
+- **M46 (ADR-057) → REVIEW** on `m46-cluster-ck-divisor` — all tasks done (T1–T5, AC1–AC6), finish-task gate
+  green (`devtools::check` CI-parity 0/0/0; full CI-mode suite 0 fail / 1545 pass; lintr 0; pkgdown clean;
+  installed-pkg drive OK), awaiting merge approval. The averaged cluster-level `ICC(c,k)` now ships on
+  incomplete/ragged crossed multilevel data (glmmTMB/lme4) with the **inverse-Simpson harmonic `k_c^eff`**
+  (Fable-blessed, ADR-057 Am.1); brms deferred (candidate). Updated 2026-07-12.
 - **Active milestone: M46** (ADR-057) — in-progress on `m46-cluster-ck-divisor`. Updated 2026-07-12.
   **T1 DONE (AC1 ✓) — divisor VALIDATED, ship path** (attempt-then-degrade did not fire): the averaged
   cluster-level divisor is **`k_c^eff = 1/mean_c(1/m_c^IS)`**, the harmonic mean of per-cluster **inverse-Simpson**

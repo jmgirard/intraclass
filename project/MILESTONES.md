@@ -1988,10 +1988,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - T5 — Docs + spec §10 + NEWS + finish-task gate (AC6) → PR from `m46-cluster-ck-divisor`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T1 (sim), T2 (lme4/reduction), T3 (ragged); AC4 → T3; AC5 → T4;
   AC6 → T5.
-- Status: **in-progress** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor`. Active task: **T2** (wire the
-  inverse-Simpson `k_c^eff` + lift the `R/icc.R` ~L1188 abort). **Fable review ingested (RR blessed the divisor
-  + committed the cell-mean target, ADR-057 Amendment 1)** — degrade branch not triggered; T2/T3/T5 requirements
-  amended per the RR (below).
+- Status: **review** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor` — all tasks done (T1–T5, AC1–AC6);
+  finish-task gate green; awaiting merge approval. **Fable review ingested (RR blessed the inverse-Simpson
+  divisor + committed the cell-mean target, ADR-057 Amendment 1)** — degrade branch not triggered.
 - Work log:
   - 2026-07-12 — Planned via the plan gate (retro → direction = Fable-gated research item → item B
     cluster-level `ICC(c,k)`, ship-or-abort acceptance). ADR-057 authored; ROADMAP item marked SCHEDULED.
@@ -2067,3 +2066,9 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     non-cluster rows); `glance()` gains a `k_c_eff` column. `multilevel-designs.Rmd` updated (averaged cluster
     `ICC(c,k)` now ships + the ordering caveat + brms note). Surfacing tests added (50/50). Roxygen re-documented.
     **Next: finish-task gate** (lintr/spelling/`devtools::check` CI-parity/installed-pkg drive) → PR.
+  - 2026-07-12 — **Finish-task gate GREEN; M46 → review.** `air` clean, `lintr` 0 (snake_case fixes in the
+    oracle scripts), `spelling` clean, `devtools::document` no delta, **full CI-mode suite (`NOT_CRAN=true
+    CI=true`) 0 fail / 0 error / 1545 pass** / 1 pre-existing non-bridging convergence warn / 23 live-Stan skip,
+    **`devtools::check` CI-parity (`NOT_CRAN=false`, no-manual) 0/0/0**, installed-pkg drive of the new cluster
+    `ICC(c,k)` cell OK (`k_c_eff`=4.82), `pkgdown::check_pkgdown()` clean. Fixed one vignette-claim test
+    (the old "ICC(c,k) refused" claim → now "ships"). PR pending.
