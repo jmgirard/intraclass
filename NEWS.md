@@ -34,13 +34,14 @@
   cluster level it needs raters that bridge clusters; without bridging the conflated
   level is dropped (or aborts if it is the only level requested).
 * The **averaged cluster-level ICC** (`level = "cluster"`, `unit = "average"`) now ships
-  on **incomplete/ragged** multilevel data (crossed Design 1, random raters,
-  `glmmTMB`/`lme4`), where it previously aborted. The averaging divisor is the effective
-  number of raters behind each cluster's observed (cells-pooled) mean — the
-  inverse-Simpson harmonic `k_c^eff`, reported on the fitted object and equal to the rater
-  count on complete data. A rater-balanced cluster mean would have a different (higher)
-  effective count. (The Bayesian `brms` engine still reports only the single-rater
-  cluster `ICC(c,1)` on incomplete data.)
+  on **incomplete/ragged** multilevel data (crossed Design 1, random raters), where it
+  previously aborted. The averaging divisor is the effective number of raters behind each
+  cluster's observed (cells-pooled) mean — the inverse-Simpson harmonic `k_c^eff`, reported
+  on the fitted object and equal to the rater count on complete data. A rater-balanced
+  cluster mean would have a different (higher) effective count. This ships for **every
+  random-rater engine** — `glmmTMB`, `lme4`, and the Bayesian `brms` engine (which applies
+  the same divisor to the posterior draws' variance components, its credible interval
+  covering the population value across the cluster-count axis).
 
 # intraclass 0.1.0
 

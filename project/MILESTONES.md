@@ -2141,7 +2141,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     proceed to T3.
   - T3 — Docs + NEWS + finish-task gate (AC5) → PR from `m47-brms-cluster-ck`.
 - **Coverage:** AC1 → T1; AC2 → T1; AC3 → T1; AC4 → T2; AC5 → T3.
-- Status: **in-progress** (ADR-058). Branch: `m47-brms-cluster-ck`.
+- Status: **review** (ADR-058). Branch: `m47-brms-cluster-ck`. All tasks T1–T3 / AC1–AC5 done; full local gate
+  green. No Fable (coverage nominal). Awaiting PR + CI.
 - Work log:
   - 2026-07-12 — Planned via the plan gate. Maintainer chose the clean brms parity fold-in (over the v0.1.0
     release consolidation, which stays next-parked); **conditional Fable escalation** (ship on nominal coverage,
@@ -2175,3 +2176,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     (ADR-058 conditional escalation not triggered). Run cost: ~2h (720 live refits, Defender + a concurrent R CMD
     check contending on 8 cores). `.gitignore` gains the checkpoint; the stale M30 IML comment repointed to this
     oracle. AC scope unchanged.
+  - 2026-07-12 — **T3 DONE (AC5); M47 → review.** Docs: NEWS bullet (the M46 averaged-cluster line now reads
+    "every random-rater engine — glmmTMB, lme4, brms"); `multilevel-designs.Rmd` engine-coverage notes corrected
+    (also fixed two stale M46/M36-era "still open" claims the same sentence touched). **Finish-task gate GREEN:**
+    `air format --check` clean / `devtools::document` no delta / `spelling` clean / `lintr` **0 lints** /
+    `pkgdown::check_pkgdown()` clean / full CI-mode suite (`NOT_CRAN=true CI=true`) **408/0/0** (23 live-Stan skip) /
+    `devtools::check` CI-parity (`NOT_CRAN=true CI=true`, no-manual) **0/0/0** / installed-pkg drive of the new brms
+    ragged cluster `ICC(c,k)` cell OK (`k_c_eff`=3.90, both types present). PR next.

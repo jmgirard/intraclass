@@ -187,8 +187,10 @@ One subtlety worth knowing: on ragged data, systematic rater differences no long
 cancel perfectly from a *comparison* of observed cluster means (they cancel only when
 every cluster has the same rater weighting). If you are ranking clusters by their
 observed means, prefer the **agreement** `ICC(c,k)`, whose error term accounts for
-that; `ICC(c,k)` consistency measures cluster×rater disagreement only. (The Bayesian
-`brms` engine reports only `ICC(c,1)` on incomplete data for now.)
+that; `ICC(c,k)` consistency measures cluster×rater disagreement only. This averaged
+cluster coefficient on ragged data ships for every random-rater engine — `glmmTMB`,
+`lme4`, and the Bayesian `brms` engine (which applies the same `k_c_eff` divisor to its
+posterior draws).
 
 One thing is still deliberately fenced off, with a clear error rather than a silently
 wrong number: when missing cells make the crossing pattern **ambiguous** — some raters
@@ -223,14 +225,14 @@ and the crossed (Design 1) fixed-rater multilevel design is supported on ragged 
 at the subject level, exactly as the single-level incomplete case above.
 
 Multilevel support now covers **random** raters on the crossed design (Design 1),
-complete or **incomplete**, at the subject level and — for `ICC(c,1)` — the cluster
-level; and the nested designs (Designs 2 and 3, subject level), complete **or
-incomplete**. **Fixed** raters are supported at the subject level on the crossed design
-(complete **and** incomplete), at the **cluster** level on the crossed design (complete
-data), and, on complete data, the nested Design 2. What remains open: the averaged
-cluster-level `ICC(c,k)` on incomplete data (the per-cluster effective-rater divisor is
-still being validated), incomplete *fixed-rater cluster-level* estimation, and incomplete
-*fixed-rater nested* designs. Design 3 reports no fixed-rater or cluster-level coefficient
+complete or **incomplete**, at the subject level and the cluster level — both the
+single-rater `ICC(c,1)` and the averaged `ICC(c,k)`, across all three engines
+(`glmmTMB`, `lme4`, `brms`); and the nested designs (Designs 2 and 3, subject level),
+complete **or incomplete**. **Fixed** raters are supported at the subject level on the
+crossed design (complete **and** incomplete), at the **cluster** level on the crossed
+design (complete data), and, on complete data, the nested Design 2. What remains open:
+incomplete *fixed-rater cluster-level* estimation. Design 3 reports no fixed-rater or
+cluster-level coefficient
 by construction — with raters nested in subjects there is no separable rater effect to
 fix, and no crossed-cluster structure to support a cluster mean.
 
