@@ -14,7 +14,14 @@ autoplot.icc_dstudy(object, ...)
 
 \method{plot}{icc_dstudy}(x, ...)
 
-d_study(x, m = NULL, conf_level = NULL, mc_samples = NULL, seed = NULL)
+d_study(
+  x,
+  m = NULL,
+  n_o = NULL,
+  conf_level = NULL,
+  mc_samples = NULL,
+  seed = NULL
+)
 
 \method{format}{icc_dstudy}(x, ...)
 
@@ -33,7 +40,12 @@ d_study(x, m = NULL, conf_level = NULL, mc_samples = NULL, seed = NULL)
 
 \item{m}{Numeric vector of rater counts to project to (each \eqn{\ge 1}).
 Defaults to \code{1:(2 * n_raters)}, a curve from a single rater to twice the
-observed count.}
+observed count. Mutually exclusive with \code{n_o}.}
+
+\item{n_o}{Numeric vector of occasion (within-cell replicate) counts to project to
+(each \eqn{\ge 1}), holding raters at the observed count -- a D-study on the
+\strong{occasion} facet of a within-cell replicate fit. Mutually exclusive with \code{m};
+supplying both aborts. \code{NULL} (the default) projects the rater count \code{m} instead.}
 
 \item{conf_level, mc_samples, seed}{Interval settings. Each defaults to the
 value stored on \code{x} (so a seeded fit yields a reproducible projection);
@@ -100,16 +112,32 @@ level is dropped with a note, because projecting \code{m} raters is the averaged
 
 For a within-cell replicate fit (more than one rating per subject-by-rater cell,
 where the residual splits into the subject-by-rater interaction and pure error),
-\code{d_study()} projects the \strong{rater count \code{m}}, holding the number of occasions
-\code{n_o} at the fitted value: the rater and interaction terms divide by \code{m}, pure
-error by \code{m * n_o}. The result gains an \code{occasions} column, one reliability curve
-per occasion setting on the fit (\code{occasions = "single"} and/or \code{"average"}), so at
-\code{m} = the observed rater count each curve matches the fitted \verb{ICC(*,k)} for that
-setting. Multilevel replicate fits project the subject level across occasion
-settings and the cluster level single-occasion (occasion averaging touches only
-pure error, which is not in the cluster-level error set). Projecting the occasion
-count itself is not yet supported; \strong{ragged} replicate fits are refused (the
-occasion-averaged ragged divisor is an open modeling question).
+\code{d_study()} can project \strong{either} axis (one per call):
+\itemize{
+\item the \strong{rater count \code{m}} (the default), holding the number of occasions \code{n_o} at
+the fitted value: the rater and interaction terms divide by \code{m}, pure error by
+\code{m * n_o}. The result gains an \code{occasions} column, one reliability curve per
+occasion setting on the fit (\code{"single"} and/or \code{"average"}), so at \code{m} = the
+observed rater count each curve matches the fitted \verb{ICC(*,k)}.
+\item the \strong{occasion count \code{n_o}} (supply the \code{n_o} argument), holding raters at the
+observed count: pure error divides by \code{m * n_o} while the rater and interaction
+terms are unchanged. Because occasion averaging rescales \strong{only pure error}, this
+curve is well-posed for random \strong{and} fixed raters -- including fixed absolute
+agreement, which the rater projection refuses (occasions are a random facet
+however the raters are treated). At \code{n_o} = the fitted occasion count it matches
+the fitted \verb{ICC(*,k)}.
+}
+
+\strong{The occasion curve has a finite ceiling.} As \code{n_o} grows it approaches
+\verb{sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)}, \strong{not} 1 -- averaging
+more occasions washes out only pure measurement error, never the rater or
+subject-by-rater variance. Read it as "how much does re-rating help?", which
+plateaus, unlike adding raters.
+
+Multilevel replicate fits project the subject level across occasion settings and
+the cluster level single-occasion (occasion averaging touches only pure error,
+which is not in the cluster-level error set); \strong{ragged} replicate fits are refused
+(the occasion-averaged ragged divisor is an open modeling question).
 }
 
 \examples{

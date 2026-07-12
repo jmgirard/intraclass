@@ -62,21 +62,40 @@
 #' @section Within-cell replicate fits:
 #' For a within-cell replicate fit (more than one rating per subject-by-rater cell,
 #' where the residual splits into the subject-by-rater interaction and pure error),
-#' `d_study()` projects the **rater count `m`**, holding the number of occasions
-#' `n_o` at the fitted value: the rater and interaction terms divide by `m`, pure
-#' error by `m * n_o`. The result gains an `occasions` column, one reliability curve
-#' per occasion setting on the fit (`occasions = "single"` and/or `"average"`), so at
-#' `m` = the observed rater count each curve matches the fitted `ICC(*,k)` for that
-#' setting. Multilevel replicate fits project the subject level across occasion
-#' settings and the cluster level single-occasion (occasion averaging touches only
-#' pure error, which is not in the cluster-level error set). Projecting the occasion
-#' count itself is not yet supported; **ragged** replicate fits are refused (the
-#' occasion-averaged ragged divisor is an open modeling question).
+#' `d_study()` can project **either** axis (one per call):
+#'
+#' * the **rater count `m`** (the default), holding the number of occasions `n_o` at
+#'   the fitted value: the rater and interaction terms divide by `m`, pure error by
+#'   `m * n_o`. The result gains an `occasions` column, one reliability curve per
+#'   occasion setting on the fit (`"single"` and/or `"average"`), so at `m` = the
+#'   observed rater count each curve matches the fitted `ICC(*,k)`.
+#' * the **occasion count `n_o`** (supply the `n_o` argument), holding raters at the
+#'   observed count: pure error divides by `m * n_o` while the rater and interaction
+#'   terms are unchanged. Because occasion averaging rescales **only pure error**, this
+#'   curve is well-posed for random **and** fixed raters -- including fixed absolute
+#'   agreement, which the rater projection refuses (occasions are a random facet
+#'   however the raters are treated). At `n_o` = the fitted occasion count it matches
+#'   the fitted `ICC(*,k)`.
+#'
+#' **The occasion curve has a finite ceiling.** As `n_o` grows it approaches
+#' `sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m)`, **not** 1 -- averaging
+#' more occasions washes out only pure measurement error, never the rater or
+#' subject-by-rater variance. Read it as "how much does re-rating help?", which
+#' plateaus, unlike adding raters.
+#'
+#' Multilevel replicate fits project the subject level across occasion settings and
+#' the cluster level single-occasion (occasion averaging touches only pure error,
+#' which is not in the cluster-level error set); **ragged** replicate fits are refused
+#' (the occasion-averaged ragged divisor is an open modeling question).
 #'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
 #'   Defaults to `1:(2 * n_raters)`, a curve from a single rater to twice the
-#'   observed count.
+#'   observed count. Mutually exclusive with `n_o`.
+#' @param n_o Numeric vector of occasion (within-cell replicate) counts to project to
+#'   (each \eqn{\ge 1}), holding raters at the observed count -- a D-study on the
+#'   **occasion** facet of a within-cell replicate fit. Mutually exclusive with `m`;
+#'   supplying both aborts. `NULL` (the default) projects the rater count `m` instead.
 #' @param conf_level,mc_samples,seed Interval settings. Each defaults to the
 #'   value stored on `x` (so a seeded fit yields a reproducible projection);
 #'   override to change the confidence level, the number of Monte-Carlo draws, or
@@ -101,6 +120,7 @@
 d_study <- function(
   x,
   m = NULL,
+  n_o = NULL,
   conf_level = NULL,
   mc_samples = NULL,
   seed = NULL
@@ -136,6 +156,43 @@ d_study <- function(
   # agreement-only ICC(m) (estimand-spec M8 §3b), so it projects like a one-way fit
   # but carries a subject `level`.
   ml_oneway <- identical(x$design$ml_design, "nested_in_subjects")
+
+  # `d_study()` has TWO projection axes (M39, ADR-049): the rater count `m` (the
+  # default, M22) and the occasion count `n_o` off a within-cell replicate fit. They
+  # are mutually exclusive -- exactly one axis per call; a 2-D `m x n_o` surface is out
+  # of scope (#5). Occasion projection holds raters at the fitted average-measure count
+  # (`unit = "average"`, m = k_eff) and sweeps `n_o`, which rescales ONLY pure error
+  # sigma^2_e (the `m * n_o` divisor), so it is well-posed for RANDOM and FIXED raters
+  # alike -- including fixed absolute agreement, which the rater axis refuses (§4/the
+  # gate below): occasions are a random facet regardless of how raters are treated.
+  occasion_axis <- !is.null(n_o)
+  if (occasion_axis && !is.null(m)) {
+    abort_unsupported(c(
+      "Project the rater count {.arg m} OR the occasion count {.arg n_o}, not both.",
+      i = "A joint {.code m x n_o} reliability surface is not supported; call \\
+           {.fn d_study} once per axis.",
+      i = "Supply {.arg n_o} for an occasion projection or {.arg m} for a rater \\
+           projection (the default)."
+    ))
+  }
+  if (occasion_axis && !replicates) {
+    abort_unsupported(c(
+      "Occasion-count projection ({.arg n_o}) requires a within-cell replicate fit.",
+      i = "Without replicated ratings (more than one rating per subject-by-rater \\
+           cell) there is no occasion facet to project; pure error and the \\
+           subject-by-rater interaction are confounded.",
+      i = "Refit with replicated data, or project the rater count {.arg m} instead."
+    ))
+  }
+  # Multilevel occasion projection ships in M39 Slice 2 (T2); Slice 1 is the
+  # single-level two-way corner. Guarded here so Slice 1 stays scoped (lifted in T2).
+  if (occasion_axis && multilevel) {
+    abort_unsupported(c(
+      "Multilevel occasion-count projection is not supported yet.",
+      i = "Project the occasion count on a single-level within-cell replicate fit; \\
+           the multilevel corner is planned (M39 Slice 2)."
+    ))
+  }
 
   # Multilevel rater-count projection (M17 Slice 2, estimand-spec M4.5 §7): project
   # `m` for each correctly-partitioned level on the fit. Complete data only -- the
@@ -188,17 +245,29 @@ d_study <- function(
   # ICC(m) (signal subject, error residual, divisor m) -- the same estimand the
   # sibling path `icc(..., model = "oneway", unit = m)` computes. Route to it rather
   # than fall through to the two-way `icc_estimand()`, which would arg-match NA and
-  # crash with an unclassed error. Fixed-rater absolute agreement cannot be
-  # projected (single- or multi-level); the guard is a no-op for random/consistency
-  # and for the one-way designs (which have no fixed raters).
-  if (!oneway && !ml_oneway) {
+  # crash with an unclassed error. Fixed-rater absolute agreement cannot be projected
+  # to a different RATER count (single- or multi-level); the guard is a no-op for
+  # random/consistency and for the one-way designs (which have no fixed raters). It is
+  # AXIS-SPECIFIC (M39): the occasion axis holds raters fixed and projects a random
+  # facet, so fixed absolute agreement projects freely there (guard skipped).
+  if (!occasion_axis && !oneway && !ml_oneway) {
     abort_fixed_agr_projection(type, raters)
   }
 
-  if (is.null(m)) {
-    m <- seq_len(2L * x$n$raters)
+  # The projected axis: the rater count `m` (default) sweeps `m` holding each fitted
+  # occasion setting; the occasion count `n_o` (M39) sweeps `n_o` holding raters at the
+  # fitted average-measure count k_eff (`unit = "average"` -> label ICC(*,k)). Only
+  # `residual` (pure error) divides by `n_o`, so the ICC(*,k) index is constant across
+  # the sweep. `n_o` reuses the replicate grid's `occ` axis (below).
+  if (occasion_axis) {
+    n_o <- validate_n_o(n_o)
+    m <- x$k_eff
+  } else {
+    if (is.null(m)) {
+      m <- seq_len(2L * x$n$raters)
+    }
+    m <- validate_m(m)
   }
-  m <- validate_m(m)
   if (is.null(conf_level)) {
     conf_level <- x$ci$conf_level
   }
@@ -250,7 +319,15 @@ d_study <- function(
   }
   # A replicate fit projects one curve per distinct occasion setting it carries (pure
   # error is divided by `m * n_o`); a non-replicate fit carries a single NA placeholder.
-  proj_occ <- if (replicates) sort(unique(x$estimates$occasions)) else NA_real_
+  # On the OCCASION axis (M39) `n_o` IS the swept quantity, so it replaces the fitted
+  # occasion settings as the grid's `occ` axis (raters held at k_eff, above).
+  proj_occ <- if (occasion_axis) {
+    n_o
+  } else if (replicates) {
+    sort(unique(x$estimates$occasions))
+  } else {
+    NA_real_
+  }
   if (multilevel) {
     # Level x occasions x m. Occasion averaging rescales pure error, which lives in the
     # SUBJECT error set only (the cluster error set is cluster:rater), so the cluster
@@ -357,6 +434,9 @@ d_study <- function(
     icc_design_label = icc_design_label(x$design),
     multilevel = multilevel,
     replicates = replicates,
+    # The swept axis (M39): "raters" projects `m`, "occasions" projects `n_o` (raters
+    # held at k_eff). Drives which column the reliability curve plots against.
+    axis = if (occasion_axis) "occasions" else "raters",
     conf.level = conf_level,
     # The projection band follows the fit's `ci_method` (M18 Slice 4): a bootstrap
     # fit gets a bootstrap-reprojected band, otherwise Monte-Carlo (ADR-025/028).
@@ -389,6 +469,30 @@ validate_m <- function(m, call = rlang::caller_env()) {
   m
 }
 
+# Validate the projected occasion counts (M39): a non-empty numeric vector, all
+# finite and >= 1 (you cannot average fewer than one occasion). Non-integer n_o is
+# allowed for symmetry with `m` (though occasions are normally an integer count).
+validate_n_o <- function(n_o, call = rlang::caller_env()) {
+  if (
+    !is.numeric(n_o) || length(n_o) < 1L || anyNA(n_o) || any(!is.finite(n_o))
+  ) {
+    abort_intraclass(
+      "{.arg n_o} must be a non-empty numeric vector of occasion counts.",
+      call = call
+    )
+  }
+  if (any(n_o < 1)) {
+    abort_intraclass(
+      c(
+        "{.arg n_o} must be at least 1 (the mean of at least one occasion).",
+        x = "Smallest value supplied: {.val {min(n_o)}}."
+      ),
+      call = call
+    )
+  }
+  n_o
+}
+
 # Methods ----------------------------------------------------------------------
 
 #' @rdname d_study
@@ -401,17 +505,31 @@ format.icc_dstudy <- function(x, ...) {
   if (is.null(label)) {
     label <- icc_design_phrase(attr(x, "icc_type"), attr(x, "icc_raters"))
   }
+  # The occasion projection (M39) holds raters at the observed count and sweeps `n_o`,
+  # so the meta line reports the held raters and the swept axis reads `n_o`, not `occ`.
+  occasion_axis <- identical(attr(x, "axis"), "occasions")
   header <- sprintf("# D-study projection: %s", label)
-  meta <- sprintf(
-    "Observed raters: %d | CI: %s%% %s (%d draws)",
-    attr(x, "k_observed"),
-    ci_pct,
-    attr(x, "method"),
-    attr(x, "samples")
-  )
+  meta <- if (occasion_axis) {
+    sprintf(
+      "Held raters: %d (average) | projecting occasions | CI: %s%% %s (%d draws)",
+      attr(x, "k_observed"),
+      ci_pct,
+      attr(x, "method"),
+      attr(x, "samples")
+    )
+  } else {
+    sprintf(
+      "Observed raters: %d | CI: %s%% %s (%d draws)",
+      attr(x, "k_observed"),
+      ci_pct,
+      attr(x, "method"),
+      attr(x, "samples")
+    )
+  }
   # Assemble the display table one column at a time so the optional descriptor columns
   # compose: multilevel projects one curve per `level` (subject/cluster), a replicate
   # fit one curve per `occasions` setting, and a multilevel replicate fit both (M22).
+  # On the occasion axis the `occasions` column IS the swept quantity (header `n_o`).
   cols <- list()
   heads <- character()
   if (isTRUE(attr(x, "multilevel"))) {
@@ -420,7 +538,7 @@ format.icc_dstudy <- function(x, ...) {
   }
   if (isTRUE(attr(x, "replicates"))) {
     cols <- c(cols, list(format(x$occasions, trim = TRUE)))
-    heads <- c(heads, "occ")
+    heads <- c(heads, if (occasion_axis) "n_o" else "occ")
   }
   cols <- c(
     cols,

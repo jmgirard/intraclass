@@ -1373,12 +1373,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   honest caveat (#18); and it is **well-posed for fixed raters incl. absolute agreement** (the M22 §4 abort is
   axis-specific — refused for `m`, permitted for `n_o`).
 - DoD (the live board — check off in the same commit as the work, #16):
-  - [ ] **T1 — Slice 1: single-level two-way occasion projection.** New `n_o` argument
+  - [x] **T1 — Slice 1: single-level two-way occasion projection. DONE (2026-07-11).** New `n_o` argument
     (`d_study(x, m = NULL, n_o = NULL, ...)`, exactly one of `m`/`n_o`, both → abort; `n_o` valid only on a
     balanced replicate fit); occasion projection for random + fixed raters, agreement + consistency (fixed
-    absolute agreement now projects — lift the §4 abort for the `n_o` axis only); `occasions` column / print /
-    tidy / glance / autoplot carry the projected axis. O-OccDS single-level (reduction, lme4, GT form, ceiling,
-    sim). Classed aborts: both-axes, non-replicate, ragged (#5/#8).
+    absolute agreement now projects — the §4 abort is now axis-specific, gated on `!occasion_axis`); the swept
+    axis reuses the replicate grid (hold `m = k_eff`, sweep `occ` over `n_o`); `axis` attribute + print (`n_o`
+    header, "Held raters" meta) + autoplot (x = `n_o`) carry it. **O-OccDS single-level** committed (reduction
+    at n_o = fitted → ICC(*,k) both types; analytic GT dependability form; `n_o→∞` ceiling invariant +
+    monotone/[0,1]; the fixed-agreement lift + reduction; lme4 cross-engine; seeded-sim coverage). Classed
+    aborts: both-axes, non-replicate, **multilevel (T2 guard, lifted in T2)**, bad `n_o` (#5/#8). Full suite
+    374/0, `air`/`lintr` (0 lints) clean, docs regenerated.
   - [ ] **T2 — Slice 2: multilevel occasion projection.** Crossed Design 1 + nested Design 2 + Design 3 (the
     multilevel one-way, agreement-only). **Subject** level projects across `n_o`; **cluster** level is
     occasion-invariant → returned as a **flat curve with a documented note** (its error set has no pure-error

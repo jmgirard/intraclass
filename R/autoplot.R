@@ -18,7 +18,17 @@ autoplot.icc_dstudy <- function(object, ...) {
     "ggplot2",
     reason = "to plot a D-study reliability curve."
   )
-  df <- object[order(object$m), , drop = FALSE]
+  # The swept axis (M39): the occasion projection plots reliability against `n_o`
+  # (raters held at k_eff), the default rater projection against `m`. Older objects
+  # (pre-M39) have no `axis` attribute and default to the rater axis.
+  occasion_axis <- identical(attr(object, "axis"), "occasions")
+  x_col <- if (occasion_axis) "occasions" else "m"
+  x_lab <- if (occasion_axis) {
+    "Number of occasions (n_o)"
+  } else {
+    "Number of raters (m)"
+  }
+  df <- object[order(object[[x_col]]), , drop = FALSE]
   ci_pct <- format(100 * attr(object, "conf.level"), trim = TRUE)
   # icc_design_label is multilevel-aware; older objects fall back to the phrase.
   label <- attr(object, "icc_design_label")
@@ -29,7 +39,10 @@ autoplot.icc_dstudy <- function(object, ...) {
     )
   }
 
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$m, y = .data$estimate)) +
+  p <- ggplot2::ggplot(
+    df,
+    ggplot2::aes(x = .data[[x_col]], y = .data$estimate)
+  ) +
     ggplot2::geom_ribbon(
       ggplot2::aes(ymin = .data$conf.low, ymax = .data$conf.high),
       alpha = 0.15
@@ -38,7 +51,7 @@ autoplot.icc_dstudy <- function(object, ...) {
     ggplot2::geom_point() +
     ggplot2::coord_cartesian(ylim = c(0, 1)) +
     ggplot2::labs(
-      x = "Number of raters (m)",
+      x = x_lab,
       y = "Reliability",
       title = sprintf("D-study projection: %s", label),
       subtitle = sprintf(

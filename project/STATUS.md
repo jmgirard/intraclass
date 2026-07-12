@@ -270,11 +270,36 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none yet — M39 planned (ADR-049), Task 1 not started.** The M39 board is live
-  ([`MILESTONES.md`](MILESTONES.md)); next action is **`/start-task` T1** (Slice 1: the `n_o` argument + the
-  single-level two-way occasion projection, O-OccDS single-level). No code written this session — plan only
-  (#14): ADR-049 + the M39 board + the ROADMAP flip (occasion-count → M39; ragged-replicate stays 🟣 parked) +
-  this STATUS flip, all on branch `m39-occasion-dstudy`. The M4.5 §9 spec lands in T3 with the docs. *Superseded
+- Active task: **M39 Task 1 (Slice 1 — single-level two-way occasion projection) — DONE (2026-07-11).**
+  Shipped the `n_o` argument on `d_study()` and single-level occasion projection: hold `m = k_eff`
+  (`unit = "average"`), sweep the replicate grid's `occ` axis over the requested `n_o`; `icc_point()`'s
+  per-component `error_divisors` do the rest (only pure error σ²_e divides by `m·n_o`). Fixed absolute
+  agreement now projects on the `n_o` axis (the §4 abort is gated on `!occasion_axis`; the rater axis still
+  refuses it). Verified end-to-end: reduction exact at n_o∈{1, observed} → fitted ICC(*,k); fixed-agreement
+  curve → analytic ceiling 0.8228; all guards fire. **O-OccDS single-level** committed to
+  `test-d-study.R` (reduction both types, GT dependability form, `n_o→∞` ceiling + monotone/[0,1], the
+  fixed-agreement lift + reduction, lme4 cross-engine, seeded-sim coverage, four classed guards). Full suite
+  374/0/51, `air`/`lintr` (0 lints) clean, `man/d_study.Rd` regenerated. **Next: `/start-task` T2** (Slice 2 —
+  multilevel occasion projection: lift the T1 multilevel guard; subject projects, cluster is occasion-invariant
+  → flat curve + note; multilevel O-OccDS). *Superseded (M39 T1, in progress):* started via `/start-task`;
+  acceptance criteria + estimand + oracle plan stated below. Acceptance criteria (board T1): new `n_o` arg on
+  `d_study()` (exactly one of `m`/`n_o`; both → abort; `n_o` valid only on a **balanced** replicate fit, else
+  abort); occasion projection for random + fixed raters, agreement + consistency (fixed absolute agreement
+  **now projects** on the `n_o` axis — the M22 §4 abort is lifted for occasions, kept for raters); print/tidy/
+  glance carry the swept axis; O-OccDS single-level (reduction at `n_o` = fitted → shipped ICC(*,k); lme4
+  cross-engine; analytic GT dependability form; `n_o → ∞` ceiling invariant; seeded-sim coverage; monotone/
+  [0,1]); classed aborts (both-axes, non-replicate, ragged) via `cli`/`rlang` (#5/#8). Principles: #1
+  (oracle-first, ≥2 independent), #2/#14 (estimand named — the existing replicate estimand at a projected
+  `n_o` divisor; plan before code), #3 (boundary-aware MC interval reused), #5/#8 (classed aborts), #6
+  (additive/non-breaking), #18 (finite-ceiling caveat). **Implementation insight:** occasion projection reuses
+  the existing replicate grid — hold `m` at `k_eff` (`unit = "average"`) and sweep `occ` over the requested
+  `n_o` (the raters axis holds `occ` and sweeps `m`); `icc_point()` is already generic over per-component
+  `error_divisors`, and fixed-rater θ²_r flows through unchanged (M22 fixed-consistency + M31/M36
+  fixed-agreement replicate paths already exercise it) — the only new behavior is *not* aborting fixed
+  agreement on the `n_o` axis. No code written yet at this line; plan stated. The M4.5 §9 spec lands in T3
+  with the docs. *Superseded (M39 planning, done):* ADR-049 + the M39 board + the ROADMAP flip (occasion-count
+  → M39; ragged-replicate stays 🟣 parked) + the STATUS flip, all on branch `m39-occasion-dstudy` (committed
+  `4a01ae0`). *Superseded
   active task (M38, done):* **M38 all 4 tasks done, local gate green, PR pending.** The finish-task gate is green
   (`devtools::document` / `air format --check` / `lintr` 0 lints / full CI-mode suite **1175/0** /
   `devtools::check` CI-parity **0/0/0** / installed-pkg both new brms paths driven). Next action: **open the PR
