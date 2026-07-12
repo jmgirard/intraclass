@@ -308,8 +308,13 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M43 S2 — interactive `choose_icc()` decision tree** (next, on `m43-cli-polish`). *Superseded
-  (S1, DONE 2026-07-11):* `format.icc()` restyled (medium cli — rule header, aligned table with estimate bold /
+- Active task: **M43 S3 — ADR-053 + NEWS + vignette/pkgdown re-render + finish-task gate → PR** (next, on
+  `m43-cli-polish`). *Superseded (S2, DONE 2026-07-11):* `choose_icc()` walkthrough restyled — rule intro +
+  per-question pointer/bold header + numbered options + running "So far:" breadcrumb
+  (`choose_icc_breadcrumb()`); `format.icc_recommendation()` restyled (rule header, sectioned, print joins `\n`);
+  resolver core + `ask=`/`prompt_line` seam untouched (all existing correctness tests pass unmodified); two
+  reproducible-output snapshots added (plain ASCII @ 80 cols); `air`/`lintr` clean. ADR-053 already authored at
+  start. *Superseded (S1, DONE 2026-07-11):* `format.icc()` restyled (medium cli — rule header, aligned table with estimate bold /
   CI dim, muted meta+notes); fixed a latent `cli_verbatim` blank-line-drop so section spacing renders;
   7 print-format snapshots regenerated (header-rule + blank lines + 1-space shift, **every number identical**,
   `[CI]` mask kept); number-invariance claim test added; `air`/`lintr` clean; affected + autoplot/choose-icc/

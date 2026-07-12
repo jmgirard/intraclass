@@ -119,9 +119,20 @@ required_missing <- function(answers) {
 # Ask the outstanding decisions one at a time, in the vignette's order, asking
 # only those that apply given the answers gathered so far. `ask` is injected so
 # tests drive the walkthrough without live console input (no `readline` in CI).
+#
+# M43/ADR-053: the walkthrough opens with a rule and shows a running breadcrumb of
+# the choices made so far before each question, so it reads as a guided decision
+# tree. This is presentation only -- the answer set built and returned, the axis
+# order, and the injectable `ask` seam are all unchanged (ADR-021).
 collect_answers_interactively <- function(answers, ask = ask_choice) {
+  cli::cli_rule(left = cli::style_bold("Choosing an ICC"))
+  # A stepping wrapper: render the path so far (muted), then ask via the seam.
+  step <- function(arg, question, choices, labels) {
+    choose_icc_breadcrumb(answers)
+    ask(arg, question, choices, labels)
+  }
   if (is.null(answers$model)) {
-    answers$model <- ask(
+    answers$model <- step(
       "model",
       "Are the raters crossed, or interchangeable across subjects?",
       c("twoway", "oneway"),
@@ -133,7 +144,7 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
   }
   oneway <- identical(answers$model, "oneway")
   if (!oneway && is.null(answers$type)) {
-    answers$type <- ask(
+    answers$type <- step(
       "type",
       "Does the actual value need to match, or only the rank order?",
       c("agreement", "consistency"),
@@ -144,7 +155,7 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
     )
   }
   if (is.null(answers$unit)) {
-    answers$unit <- ask(
+    answers$unit <- step(
       "unit",
       "Will you act on one rater's score, the mean of several, or both?",
       c("single", "average", "both"),
@@ -156,7 +167,7 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
     )
   }
   if (!oneway && is.null(answers$raters)) {
-    answers$raters <- ask(
+    answers$raters <- step(
       "raters",
       "Are your raters a sample you generalize beyond, or the only raters of interest?",
       c("random", "fixed"),
@@ -167,7 +178,7 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
     )
   }
   if (!oneway && is.null(answers$multilevel)) {
-    answers$multilevel <- ask(
+    answers$multilevel <- step(
       "multilevel",
       "Are subjects nested in higher-level clusters (e.g. pupils in classrooms)?",
       c(FALSE, TRUE),
@@ -175,7 +186,7 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
     )
   }
   if (isTRUE(answers$multilevel) && is.null(answers$level)) {
-    answers$level <- ask(
+    answers$level <- step(
       "level",
       "Which reliability: within-cluster, between-cluster, or both?",
       c("subject", "cluster", "both"),
@@ -189,13 +200,50 @@ collect_answers_interactively <- function(answers, ask = ask_choice) {
   answers
 }
 
+# The running "decision path" line shown before each outstanding question: the
+# axes answered so far, in the tree's order, muted. Nothing is shown before the
+# first choice. Presentation only (M43).
+choose_icc_breadcrumb <- function(answers) {
+  labs <- c(
+    model = "Model",
+    type = "Type",
+    unit = "Unit",
+    raters = "Raters",
+    multilevel = "Multilevel",
+    level = "Level"
+  )
+  chosen <- answers[names(labs)]
+  keep <- !vapply(chosen, is.null, logical(1))
+  if (!any(keep)) {
+    return(invisible(NULL))
+  }
+  vals <- vapply(chosen[keep], choose_icc_choice_label, character(1))
+  crumb <- paste(
+    sprintf("%s = %s", labs[names(chosen)[keep]], vals),
+    collapse = " > "
+  )
+  cli::cli_text(cli::col_grey(paste0("So far: ", crumb)))
+  invisible(NULL)
+}
+
+# Render a chosen axis value for the breadcrumb (logical multilevel -> yes/no).
+choose_icc_choice_label <- function(v) {
+  if (is.logical(v)) {
+    if (isTRUE(v)) "yes" else "no"
+  } else {
+    as.character(v)
+  }
+}
+
 # Pose one multiple-choice question via cli and return the chosen value. All
 # prompt text goes through cli (#8); the numeric selection is read through
 # `prompt_line()` (an injection seam so the read loop is testable without a live
 # console). Re-asks until the input names a listed choice. `arg` is unused by the
 # real asker but lets an injected test responder key on the axis.
 ask_choice <- function(arg, question, choices, labels = as.character(choices)) {
-  cli::cli_inform(question)
+  # A pointer + bold question, then the numbered options (M43/ADR-053). All via
+  # cli, degrading to plain text with no colour; the numeric read is unchanged.
+  cli::cli_text("{cli::symbol$pointer} {.strong {question}}")
   cli::cli_ol(labels)
   repeat {
     input <- prompt_line("Selection (number): ")
@@ -533,7 +581,10 @@ format.icc_recommendation <- function(x, ...) {
     design <- paste0("multilevel, ", design)
   }
 
-  header <- "# Recommended ICC"
+  # A rule header + bold section labels + a bold recommendation + muted supporting
+  # prose, all via the shared cli helpers (M43/ADR-053); the run-this call is kept
+  # unstyled so it copy-pastes cleanly. Degrades to plain text with no colour.
+  header <- icc_rule("Recommended ICC")
 
   # The coefficient label(s), grouped by level for a multilevel recommendation.
   if (isTRUE(x$multilevel)) {
@@ -543,18 +594,20 @@ format.icc_recommendation <- function(x, ...) {
       character(1)
     )
     rec <- c(
-      "Recommendation:",
-      sprintf("  %-8s %s", paste0(names(rec_lines), ":"), rec_lines)
+      icc_emph("Recommendation:"),
+      icc_emph(sprintf("  %-8s %s", paste0(names(rec_lines), ":"), rec_lines))
     )
   } else {
-    rec <- sprintf("Recommendation: %s", paste(x$rows$index, collapse = ", "))
+    rec <- icc_emph(
+      sprintf("Recommendation: %s", paste(x$rows$index, collapse = ", "))
+    )
   }
 
   # Shrout & Fleiss equivalents where the crosswalk names one (never for
   # multilevel; NA for the two off-diagonal two-way forms).
   has_sf <- !is.na(x$rows$sf_index)
   sf_note <- if (any(has_sf)) {
-    sprintf(
+    icc_mute(sprintf(
       "Shrout & Fleiss equivalent: %s",
       paste(
         x$rows$index[has_sf],
@@ -562,18 +615,18 @@ format.icc_recommendation <- function(x, ...) {
         sep = " = ",
         collapse = ", "
       )
-    )
+    ))
   }
 
-  why <- c("Why:", paste0("  - ", unname(x$rationale)))
-  run <- c("Run this on your data:", sprintf("  %s", x$call))
+  why <- c(icc_emph("Why:"), icc_mute(paste0("  - ", unname(x$rationale))))
+  run <- c(icc_emph("Run this on your data:"), sprintf("  %s", x$call))
   notes <- if (length(x$notes) > 0L) {
-    c("Notes:", paste0("  - ", x$notes))
+    c(icc_emph("Notes:"), icc_mute(paste0("  - ", x$notes)))
   }
 
   c(
     header,
-    sprintf("Design: %s", design),
+    icc_mute(sprintf("Design: %s", design)),
     "",
     rec,
     sf_note,
@@ -589,6 +642,8 @@ format.icc_recommendation <- function(x, ...) {
 #' @rdname choose_icc
 #' @export
 print.icc_recommendation <- function(x, ...) {
-  cli::cli_verbatim(format(x, ...))
+  # Join to one string so blank-line separators survive cli_verbatim (see
+  # print.icc); section spacing is part of the restyle (M43).
+  cli::cli_verbatim(paste(format(x, ...), collapse = "\n"))
   invisible(x)
 }

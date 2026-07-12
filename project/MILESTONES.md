@@ -1618,12 +1618,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         Number-invariance claim test added (`test-icc-methods.R`): every printed estimate/CI-bound/component/
         `k_eff` equals `tidy()`/`glance()` at shown precision. `air`/`lintr` clean; affected + autoplot/choose-icc/
         multilevel/replicates suites green. *(AC1, AC2)*
-  - [ ] **S2 — interactive `choose_icc()` decision tree.** Restyle `ask_choice()` /
-        `collect_answers_interactively()`: per-question header/rule + styled option list + accumulating
-        breadcrumb; restyle `format.icc_recommendation()` (rule header + styled Recommendation/Why/Run/Notes).
-        Keep `resolve_icc_recommendation()` and the `ask=` / `prompt_line` seam untouched; existing
-        `test-choose-icc.R` correctness tests pass unmodified; add a reproducible-output shell snapshot via the
-        injected responder. *(AC3, AC4)*
+  - [x] **S2 — interactive `choose_icc()` decision tree.** DONE (2026-07-11). `collect_answers_interactively()`
+        now opens with a `cli::rule("Choosing an ICC")` and shows a running muted breadcrumb ("So far: Model =
+        twoway > Type = agreement > ...") before each outstanding question (new `choose_icc_breadcrumb()` /
+        `choose_icc_choice_label()` helpers); `ask_choice()` renders a pointer + bold question + numbered option
+        list; `format.icc_recommendation()` restyled (rule header, bold section labels + recommendation, muted
+        design/why/notes, run-call left unstyled for copy-paste), and its print joins with `\n` (same
+        blank-line-drop fix as print.icc). **Resolver core + `ask=`/`prompt_line` seam untouched** — every
+        existing `test-choose-icc.R` correctness test (crosswalk, round-trip, classed aborts) passes unmodified.
+        Two reproducible-output snapshots added (styled walkthrough via mocked `prompt_line`; multilevel
+        recommendation print) — captured plain ASCII at width 80, proving clean degradation. `air`/`lintr`
+        clean; choose-icc/icc-methods/autoplot suites green (0 fail / 0 warn). *(AC3, AC4)*
   - [ ] **S3 — ADR-053 + NEWS + vignette/pkgdown re-render + finish-task gate → PR.** Short retro → ADR-053
         (keep-name, one-milestone/two-slices, medium restyle, breadcrumb tree, presentation-only); NEWS bullet;
         WORDLIST if new terms; re-render vignettes that display printed objects + `pkgdown::check_pkgdown()`;
