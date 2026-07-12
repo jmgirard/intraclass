@@ -15,8 +15,12 @@
   (§5's hedge over-cautious → rescope); (Q3) T2's oracle adopts Fable's **CHK-A weight-free score** + **CHK-B
   ship-path fit** legs (the T1 `mc_truth` is tautological for the target); (§4) new doc caveat — steer
   observed-ordering comparisons to `ICC_c(A,·)`; (Q4) no interval interaction, four T3 sweep requirements.
-  **Active task: T2** (wire the inverse-Simpson `k_c^eff` into `error_divisors`; lift the `R/icc.R` ~L1188 abort;
-  build the CHK-A/CHK-B oracle). See MILESTONES M46 + ADR-057 Am.1.
+  **T2 DONE (AC2/AC3 ✓):** inverse-Simpson `k_c^eff` wired (`cluster_k_eff()` in `R/design.R`, threaded in
+  `R/icc.R`; `~L1188` abort replaced by the computed average; `k_c_eff` on the object; balanced numbers
+  unchanged). brms kept deferred (re-added a brms-only drop). Committed oracle
+  `data-raw/oracle-cluster-ck-incomplete.R` (O-cluster-score / -fit / -lme4 / -reduction — all pass); tests drive
+  real `icc()` (0 fail / 654 pass affected). **Active task: T3** (coverage sweep — four AC4 requirements: C_n
+  axis n_rep≥240, extreme-imbalance + heterogeneous-`m_c` cells, boundary σ²_c≈0, target per realized design).
 - **M46 planned (2026-07-12, ADR-057):** the *averaged cluster-level `ICC(c,k)` divisor on incomplete data* —
   the last-open per-cluster effective-rater divisor (M9 §3b/§9). On complete data the per-subject and
   per-cluster effective rater counts coincide (M5 ships one divisor); on ragged data they diverge and the

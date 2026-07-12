@@ -64,6 +64,36 @@ summarize_design <- function(df) {
   )
 }
 
+# Effective rater divisor for the averaged cluster-level ICC(c,k) under multilevel
+# imbalance (M9 §3b/§9, ADR-057; Fable-blessed, ADR-057 Am.1). On complete data the
+# cluster average divides by the rater count k, exactly like every other coefficient;
+# on ragged data the effective raters behind a cluster mean is a PER-CLUSTER quantity,
+# distinct from the per-subject k_eff of summarize_design(). The reported cluster
+# coefficient describes each cluster's OBSERVED cell-pooled mean, in which rater r
+# carries weight w_{c,r} = (cells of r in cluster c) / (cells in cluster c). The
+# effective raters behind that mean is the inverse-Simpson count
+# m_c^IS = 1 / sum_r w_{c,r}^2 (= distinct raters when weights are equal, < it
+# otherwise), and the single divisor whose error/k equals the cross-cluster average
+# of the per-cluster error is their harmonic mean:
+#
+#   k_c^eff = 1 / mean_c(1 / m_c^IS)
+#
+# This is EXACT for both agreement and consistency (the marginal per-cluster error
+# is (sigma^2_r + sigma^2_cr)/m_c^IS and sigma^2_cr/m_c^IS respectively; cross-cluster
+# rater-sharing does not enter the estimand -- ADR-057 Am.1 Q2), reduces to k on
+# balanced/uniform-weight data (recovering M5), and is a deterministic design constant
+# (component-free, draw-independent -- no interval interaction, Am.1 Q4). `df` has
+# factor cluster/subject/rater, droplevels()-ed; used only for the crossed Design 1
+# cluster level.
+cluster_k_eff <- function(df) {
+  per_cluster <- tapply(seq_len(nrow(df)), df$cluster, function(ix) {
+    w <- as.numeric(table(droplevels(df$rater[ix])))
+    w <- w / sum(w)
+    1 / sum(w^2)
+  })
+  1 / mean(1 / per_cluster)
+}
+
 # Classify a multilevel design from the observed crossing pattern -----------------
 #
 # ten Hove et al. (2022, Table 2) distinguish three multilevel designs by how

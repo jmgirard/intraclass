@@ -2033,3 +2033,17 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     *ordering* (~2× the consistency error), steer ordering-comparisons to `ICC_c(A,·)`; (Q4) no divisor→interval
     interaction, four T3 sweep requirements. Review artifacts (RB/RR + `fable-check-m46.R`/`-results.rds`) stay
     in `data-raw/reviews/`. **Next: T2.**
+  - 2026-07-12 — **T2 DONE (AC2 ✓, AC3 ✓, part AC5/AC6).** Wired the inverse-Simpson `k_c^eff`: new
+    `cluster_k_eff()` (`R/design.R`), threaded as the cluster-level divisor in the estimand build
+    (`R/icc.R` — `k_lv <- if (lv == "cluster") k_c_eff else k_ml`), and the `~L1188` abort/drop **replaced** by
+    the computed average; `k_c_eff` surfaced on the object. On balanced data `k_c_eff == k`, so every balanced
+    cluster number is unchanged (number-invariance). **brms kept deferred** (M46 = glmmTMB/lme4; the removed gate
+    was engine-agnostic and had protected brms, so re-added a brms-only drop/abort — its variance-ratio fold-in
+    is a candidate, unvalidated here, #1). Committed oracle `data-raw/oracle-cluster-ck-incomplete.R` adopts
+    Fable's independent legs — **O-cluster-score** (weight-free: IS plug-in recovers the empirical Φ/ρ, distinct-
+    count refuted by >0.1), **O-cluster-fit** (ship-path glmmTMB fit + plug-in), **O-cluster-lme4** (cross-engine
+    3.4e-7), **O-cluster-reduction** (complete → `k_c^eff`=k exact) — all pass. Tests drive the real `icc()`
+    (`test-icc-incomplete-multilevel.R`: ships-on-ragged + invariants + k_c_eff match; ragged ≡ lme4 at k_c^eff
+    < 1e-4; complete reduction); replaced the stale "dropped" test; updated the now-false roxygen `@details`
+    claim. **0 fail / 654 pass** across multilevel/type-vector/print/glance/choose/d-study; `air`+`document`
+    clean. **Next: T3** (coverage sweep — the four AC4 requirements).

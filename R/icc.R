@@ -94,12 +94,13 @@
 #' absolute agreement raters must bridge clusters (otherwise the design is really
 #' rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
 #' declare it with `design` (above). On incomplete data the **cluster** level is
-#' reported as the single-rater `ICC(c,1)` (when raters bridge clusters); the averaged
-#' cluster-level `ICC(c,k)` on incomplete data is not yet supported (its effective
-#' number of raters per cluster is still being validated). If an averaged unit is
-#' requested for the cluster level on incomplete data, that row is dropped (with a
-#' message) rather than failing the whole call, so the subject-level averages and the
-#' single-rater cluster ICC are still returned. **Fixed raters**
+#' reported (when raters bridge clusters) as both the single-rater `ICC(c,1)` and the
+#' averaged `ICC(c,k)`: the average divides the cluster error by the effective number
+#' of raters behind each cluster's observed (cells-pooled) mean, the inverse-Simpson
+#' harmonic `k_c^eff` (reported as `k_c_eff`; equal to the rater count on complete
+#' data). A rater-balanced cluster mean would have a different (higher) effective
+#' count. For the `brms` engine the averaged cluster `ICC(c,k)` on incomplete data is
+#' not yet available (the single-rater `ICC(c,1)` still is). **Fixed raters**
 #' (`raters = "fixed"`) are supported for the crossed design at the **subject** level
 #' on both balanced and **incomplete** data: the rater main effect becomes the
 #' finite-population variance of the observed raters (McGraw & Wong Case 3A), so on
@@ -1159,57 +1160,24 @@ icc <- function(
         )
         level <- setdiff(level, "conflated")
       }
-      # Cluster-level IRR on incomplete data (M9 Slice 2, ADR-018). The cluster-level
-      # error carries sigma^2_cr (both types) and sigma^2_r (agreement), which are
-      # identified only when raters bridge clusters; otherwise report just the subject
-      # level (M5 §7 posture). The averaging divisor ICC(c,k) under imbalance is a
-      # separate modeling question with no textbook oracle -- the effective number of
-      # raters behind a ragged cluster mean is per-cluster, not the per-subject k_eff
-      # -- so only the single-rater ICC(c,1) is offered on incomplete data here (#1).
-      if ("cluster" %in% level) {
-        if (!ident$cluster_rater_connected) {
-          abort_unidentified(c(
-            "Cluster-level IRR needs raters that bridge clusters, but the \\
-             cluster-by-rater design is disconnected here.",
-            i = "The cluster-by-rater variance (the cluster-level rater \\
-                 disagreement) cannot be estimated without raters shared across \\
-                 clusters.",
-            i = "Use {.code level = \"subject\"}, or provide raters crossed across \\
-                 clusters."
-          ))
-        }
-        is_single <- vapply(unit, identical, logical(1), "single")
-        # Averaged cluster-level ICC(c,k) under imbalance is unsupported, but the
-        # single-rater ICC(c,1) and the subject-level rows are well-defined. Rather
-        # than reject the whole call (an all-or-nothing refusal when a partial
-        # result is available), drop only the averaged cluster rows below (grid
-        # build) and note it once. Abort only when nothing is computable: the
-        # cluster level is the sole level requested AND no single unit was asked for.
-        if (!all(is_single)) {
-          if (!("subject" %in% level) && !any(is_single)) {
-            abort_unsupported(c(
-              "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not \\
-               supported yet.",
-              i = "The effective number of raters behind a ragged cluster mean is \\
-                   a modeling choice still being validated; on incomplete data \\
-                   only the single-rater {.code unit = \"single\"} cluster ICC is \\
-                   available.",
-              i = "Use {.code unit = \"single\"} for the cluster level, or \\
-                   {.code level = \"subject\"} for the average."
-            ))
-          }
-          cli::cli_inform(
-            c(
-              i = "Averaged cluster-level ICCs (ICC(c,k)) are not available on \\
-                   incomplete data; reporting the single-rater cluster ICC(c,1) \\
-                   only. Subject-level averages are unaffected.",
-              i = "The effective rater count behind a ragged cluster mean is a \\
-                   modeling choice still being validated."
-            ),
-            .frequency = "once",
-            .frequency_id = "intraclass_icc_ck_incomplete"
-          )
-        }
+      # Cluster-level IRR on incomplete data (M9 Slice 2, ADR-018; averaged case M46,
+      # ADR-057). The cluster-level error carries sigma^2_cr (both types) and sigma^2_r
+      # (agreement), which are identified only when raters bridge clusters; otherwise
+      # report just the subject level (M5 §7 posture). The averaged ICC(c,k) divisor
+      # under imbalance -- an open modeling question at M9 -- is resolved by M46: the
+      # inverse-Simpson harmonic k_c^eff (Fable-blessed, ADR-057 Am.1), threaded into
+      # the cluster estimand below. So the bridging gate is the only cluster-level
+      # guard here now; both ICC(c,1) and ICC(c,k) ship on incomplete data.
+      if ("cluster" %in% level && !ident$cluster_rater_connected) {
+        abort_unidentified(c(
+          "Cluster-level IRR needs raters that bridge clusters, but the \\
+           cluster-by-rater design is disconnected here.",
+          i = "The cluster-by-rater variance (the cluster-level rater \\
+               disagreement) cannot be estimated without raters shared across \\
+               clusters.",
+          i = "Use {.code level = \"subject\"}, or provide raters crossed across \\
+               clusters."
+        ))
       }
     }
   }
@@ -1606,15 +1574,54 @@ icc <- function(
     # replicates the rater divisor counts DISTINCT raters (replicates must not inflate
     # it, M17 §4).
     k_ml <- if (replicates) design_info$k_eff_raters else k
+    # Averaged cluster-level ICC(c,k) divisor under imbalance (M46, ADR-057): the
+    # inverse-Simpson harmonic k_c^eff, the effective raters behind each cluster's
+    # observed cell-pooled mean. Only the crossed design has a cluster level; on
+    # balanced/complete data it equals the rater count k (so balanced numbers are
+    # unchanged -- number-invariance). Fable-blessed as exact for both types (Am.1).
+    k_c_eff <- if (ml_design == "crossed") cluster_k_eff(df) else NA_real_
+    # brms cluster-level ICC(c,k) on incomplete data stays deferred: M46 (ADR-057)
+    # ships the inverse-Simpson divisor for glmmTMB/lme4 only; the brms variance-ratio
+    # push-forward would fold in but is not yet oracle-validated (no O-cluster-brms) --
+    # a candidate, not this milestone (#1). Preserve the pre-M46 behavior for brms only:
+    # drop the averaged cluster row (with a once-note), or abort if a brms cluster
+    # average is the sole thing computable.
+    drop_brms_cluster_avg <- engine == "brms" &&
+      !balanced &&
+      "cluster" %in% level
+    any_single <- any(vapply(unit, identical, logical(1), "single"))
+    if (drop_brms_cluster_avg && !any_single && !("subject" %in% level)) {
+      abort_unsupported(c(
+        "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not available \\
+         for the {.pkg brms} engine yet.",
+        i = "M46 ships them for {.code engine = \"glmmTMB\"} (default) or \\
+             {.code \"lme4\"}; the Bayesian sibling is not yet validated.",
+        i = "Use a frequentist engine for the cluster average, or \\
+             {.code unit = \"single\"} for the cluster level."
+      ))
+    }
+    if (
+      drop_brms_cluster_avg &&
+        !all(vapply(unit, identical, logical(1), "single"))
+    ) {
+      cli::cli_inform(
+        c(
+          i = "Averaged cluster-level ICCs (ICC(c,k)) on incomplete data are not \\
+               available for {.pkg brms} yet; reporting the single-rater cluster \\
+               ICC(c,1). Use a frequentist engine (glmmTMB/lme4) for the average."
+        ),
+        .frequency = "once",
+        .frequency_id = "intraclass_icc_ck_incomplete_brms"
+      )
+    }
     unlist(
       lapply(type, function(ty) {
         unlist(
           lapply(level, function(lv) {
-            # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
-            # effective per-cluster rater count is unresolved); keep only the
-            # single-rater cluster ICC(c,1). The user was informed above. Subject-level
-            # units, and every unit on balanced data, are unaffected.
-            units_lv <- if (lv == "cluster" && !balanced) {
+            # The cluster level averages over raters with the per-cluster inverse-Simpson
+            # divisor k_c^eff (M46); the subject level uses the per-subject k_eff (M9 §5).
+            k_lv <- if (lv == "cluster") k_c_eff else k_ml
+            units_lv <- if (lv == "cluster" && drop_brms_cluster_avg) {
               Filter(function(u) identical(u, "single"), unit)
             } else {
               unit
@@ -1635,7 +1642,7 @@ icc <- function(
                     type = ty,
                     unit = u,
                     raters = raters,
-                    k_eff = k_ml,
+                    k_eff = k_lv,
                     level = lv,
                     multilevel = TRUE,
                     replicates = replicates,
@@ -1788,6 +1795,15 @@ icc <- function(
       # The replicate path averages over distinct raters (k_eff_raters), not total
       # ratings, so report that divisor (estimand-spec M17-within-cell-replicates §4).
       k_eff = if (replicates) design_info$k_eff_raters else design_info$k_eff,
+      # Cluster-level averaging divisor (inverse-Simpson harmonic; M46, ADR-057) --
+      # NA unless a crossed multilevel design with a cluster level was reported.
+      k_c_eff = if (
+        multilevel && ml_design == "crossed" && "cluster" %in% level
+      ) {
+        cluster_k_eff(df)
+      } else {
+        NA_real_
+      },
       engine = engine_fit$engine,
       ci = list(
         method = ci_method,
