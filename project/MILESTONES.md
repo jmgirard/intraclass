@@ -1988,9 +1988,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - T5 — Docs + spec §10 + NEWS + finish-task gate (AC6) → PR from `m46-cluster-ck-divisor`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T1 (sim), T2 (lme4/reduction), T3 (ragged); AC4 → T3; AC5 → T4;
   AC6 → T5.
-- Status: **review** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor` — all tasks done (T1–T5, AC1–AC6);
-  finish-task gate green; awaiting merge approval. **Fable review ingested (RR blessed the inverse-Simpson
-  divisor + committed the cell-mean target, ADR-057 Amendment 1)** — degrade branch not triggered.
+- Status: **done — merged, CI green** (PR [#52](https://github.com/jmgirard/intraclass/pull/52),
+  squash-merged to `main` at `87aef18`; full CI matrix green 9/9). All tasks T1–T5, AC1–AC6. A gated **Fable
+  review** (ADR-057 Amendment 1) blessed the inverse-Simpson divisor + committed the cell-mean target; the
+  attempt-then-degrade branch did not fire. brms deferred (candidate).
 - Work log:
   - 2026-07-12 — Planned via the plan gate (retro → direction = Fable-gated research item → item B
     cluster-level `ICC(c,k)`, ship-or-abort acceptance). ADR-057 authored; ROADMAP item marked SCHEDULED.
@@ -2072,3 +2073,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     **`devtools::check` CI-parity (`NOT_CRAN=false`, no-manual) 0/0/0**, installed-pkg drive of the new cluster
     `ICC(c,k)` cell OK (`k_c_eff`=4.82), `pkgdown::check_pkgdown()` clean. Fixed one vignette-claim test
     (the old "ICC(c,k) refused" claim → now "ships"). PR pending.
+  - 2026-07-12 — **MERGED (PR #52, `87aef18`); M46 → done.** Full CI matrix green 9/9 (format-check/lint/pkgdown/
+    test-coverage + R CMD check macOS·Windows·Ubuntu release·devel·oldrel). Post-merge reconcile: ROADMAP item
+    retired (shipped); STATUS updated; branch deleted. `main` stays on `0.0.0.9000` (release consolidation
+    ADR-022 still parked).

@@ -219,20 +219,15 @@ helpers* item below (sample-size / CI-width), where it belongs.
       Bayesian fit), low priority. **Design 3 fixed** is **not future work** — it is already closed in code by
       the ADR-029 by-design abort (fixed raters are undefined when raters nest in subjects; the classed abort
       ships and is tested), so it is no longer listed as parked.
-- **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
-  effective-rater divisor is an open modeling question with no textbook oracle
-  (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
-  complete-data `ICC(c,k)` is unaffected (M5). *(Added here 2026-07-08: tracked
-  as a carryover since M9 and referenced as living in this file by
-  `MILESTONES.md`, but missing from this list until now.)* **Status: SCHEDULED as
-  M46** (ADR-057, planned 2026-07-12) — resolved against a **seeded simulation
-  oracle**, **ship-or-abort** (attempt-then-degrade, ADR-028/ADR-030): a validated
-  per-cluster divisor ships the averaged coefficient (glmmTMB/lme4), else the abort
-  stays and the negative finding is documented. **Fable recommended-and-stop if the
-  study is ambiguous** (RB tripwire: `no-oracle`, #19/D-004). Full scope in
-  [`MILESTONES.md`](MILESTONES.md) M46 (ADR-015 — not re-narrated here). Lifting the
-  random-rater half **removes one of the two blocks** on the incomplete/unbalanced
-  cluster-level *fixed* sibling (still parked). The occasion-averaged-ragged
+- **M9 averaged cluster-level `ICC(c,k)` on incomplete data** — **SHIPPED as M46**
+  (ADR-057, PR #52, squash-merged at `87aef18`): the averaged cluster-level
+  `ICC(c,k)` on ragged crossed multilevel data with the **inverse-Simpson harmonic
+  `k_c^eff`** (glmmTMB/lme4), blessed by a gated Fable review (ADR-057 Am.1). Shipped
+  detail lives in [`MILESTONES.md`](MILESTONES.md) M46 (ADR-015), not here. **What
+  remains parked:** the **brms** cluster-level `ICC(c,k)` sibling (a variance-ratio
+  fold-in candidate, unvalidated — needs O-cluster-brms); and the incomplete/unbalanced
+  cluster-level **fixed** `ICC(c,k)` — M46 removed one of its two blocks (this divisor),
+  but ten Hove's open small-`k` estimator still blocks it. The occasion-averaged-ragged
   replicate sibling (ADR-030) stays a separate open item above.
 
 ## Proposals under discussion (open design questions)
