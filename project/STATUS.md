@@ -1,17 +1,15 @@
 # Project status
 
-- Active milestone: **M41** (ADR-051, clarity/accessibility pass over the four secondary vignettes +
-  a standalone `glossary.Rmd`) — branch `m41-vignette-glossary`, **S1 in progress**. A **docs milestone**
-  (cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency; correctness = live-computed +
-  claim-tested numbers (#1/#4/#12); **no Fable**. Extends M40's applied-reader treatment to `engines`,
-  `interval-methods`, `multilevel-designs`, `d-studies-and-replicates` (all M35-era, methodologist-pitched),
-  and homes the recurring jargon (variance component, REML, MAP, credible vs. confidence interval, the
-  zero-variance boundary, FIML, `k_eff`/harmonic mean, finite-population variance, conflated, connectedness,
-  dependability, indicator-mean estimator) in one deep-linkable glossary. First of two release-strengthening
-  milestones before **0.2.0** (M41 clarity → M42 benchmark → cut 0.2.0). Slices: **S1** glossary page +
-  `_pkgdown.yml` articles wiring + retrofit the two M40 front-door articles to link it; **S2** `engines` +
-  `interval-methods`; **S3** `multilevel-designs` + `d-studies-and-replicates` + claim-test relabel +
-  finish-task gate. Board: [`MILESTONES.md`](MILESTONES.md) M41.
+- Active milestone: **none** — M41 (ADR-051, clarity/accessibility pass over the four secondary vignettes +
+  a standalone `glossary.Rmd`) shipped (PR #47, squash-merged to `main` at `3e00999`; full CI matrix green 9/9,
+  devel clean). A **docs milestone** (cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency;
+  correctness = live-computed + claim-tested numbers (#1/#4/#12); **no Fable**. Extended M40's applied-reader
+  treatment to `engines`, `interval-methods`, `multilevel-designs`, `d-studies-and-replicates` (warm on-ramps +
+  first-use glossary deep-links, no number touched) and added a new standalone `glossary.Rmd` (26 terms) all six
+  articles link into. **The next milestone is M42 — the benchmark-vs-prior-art suite (an engineering milestone)
+  — which needs an ADR after a short retro** (founding brief §7); it is the second of the two
+  release-strengthening milestones the 2026-07-11 retro sequenced before **0.2.0** (M41 clarity ✓ → M42 benchmark
+  → cut 0.2.0). The v0.2.0 release consolidation (version bump + NEWS + cran-comments; ADR-022) follows M42.
 - Prior milestone: **M40** (ADR-050, accessibility rewrite of the two front-door vignettes
   `getting-started` + `choosing-an-icc`) shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix
   green 9/9). A **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness
@@ -291,12 +289,12 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M41 all 3 slices done, local gate green — PR pending.** The finish-task gate is green:
-  `air format --check` clean, `lintr` 0 lints, `spelling` clean, `devtools::document` no delta, vignette-claims
-  tests pass, `pkgdown::check_pkgdown()` clean, `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`)
-  **0/0/0** with all seven vignettes built. Docs-only → no installed-pkg estimator paths. **Next action: open the
-  PR from `m41-vignette-glossary`**; on green CI + merge, reconcile M41 → done + set "Last green CI", then M42
-  (benchmark) → cut 0.2.0. *Superseded (M41 S3, done):* `multilevel-designs.Rmd` + `d-studies-and-replicates.Rmd`
+- Active task: **none — M41 shipped and merged (PR #47, `3e00999`).** The next milestone (M42, benchmark suite)
+  needs an ADR after a short retro (founding brief §7), then the v0.2.0 release. *Superseded (M41, done):* all
+  three slices shipped and the full CI matrix came back green 9/9. Gate before the PR: `air format --check` /
+  `lintr` 0 lints / `spelling` clean / `devtools::document` no delta / vignette-claims tests pass /
+  `pkgdown::check_pkgdown()` clean / `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with
+  all seven vignettes built. Docs-only → no installed-pkg estimator paths. *Superseded (M41 S3, done):* `multilevel-designs.Rmd` + `d-studies-and-replicates.Rmd`
   got warm on-ramps + glossary pointers + first-use deep-links (7 links verified, incl. the underscore `#…-k_eff`
   + unicode `#…-θ²_r` + dotted `#fixed-vs.-random-raters` anchors); no number touched; `test-vignette-claims.R`
   needed no relabel. *Superseded (M41 S2, done):* `engines.Rmd` + `interval-methods.Rmd` got warmer on-ramps + glossary pointers +
@@ -453,7 +451,15 @@
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
   upload** (ADR-022).
-- Last green CI: **PR #46 (M40, accessibility rewrite of the two front-door vignettes) — full CI matrix green
+- Last green CI: **PR #47 (M41, clarity pass over the four secondary vignettes + a standalone glossary) — full
+  CI matrix green (9/9), squash-merged to `main` at `3e00999`.** format-check / lint / pkgdown / test-coverage /
+  `R CMD check` on macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean).
+  Locally before the PR: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** (all **seven**
+  vignettes built), `lintr` **0 lints**, `spelling` / `air format --check` / `pkgdown::check_pkgdown()` clean,
+  `devtools::document` no delta, `test-vignette-claims.R` re-passes, and all 33 cross-article + glossary anchor
+  links verified against generated ids (incl. the underscore `#…-k_eff`, unicode `#…-θ²_r`, and dotted
+  `#…-vs.-…` anchors). Docs-only milestone — no installed-pkg estimator paths to drive. Prior green: **PR #46
+  (M40, accessibility rewrite of the two front-door vignettes) — full CI matrix green
   (9/9), squash-merged to `main` at `e34f037`.** format-check / lint / pkgdown / test-coverage / `R CMD check`
   on macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean). Locally before the
   PR: `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0** (all six vignettes built), `lintr` **0 lints**,
