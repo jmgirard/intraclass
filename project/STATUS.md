@@ -281,19 +281,17 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M40 Slice 2 — `choosing-an-icc.Rmd` accessibility rewrite (NEXT).** On branch
-  `m40-vignette-accessibility`. *Slice 1 (`getting-started.Rmd`) DONE (2026-07-11, checkpoint commit):* added the
-  "What an ICC tells you" on-ramp, the plain "About the confidence interval" section (MC-CI in plain language +
-  `interval-methods` link), first-use glosses, and the canonical **"Is this a good ICC?"** band guide (Koo & Li
-  2016 primary + Cicchetti 1994 older sibling; framed as conventions with the "judge the interval not the point"
-  rule; illustrated live — `ICC(A,k)` 0.62 with interval 0.18–0.91 spanning poor→excellent; no verdict, #4/#18);
-  hard-coded prose numbers → inline `r`-computed (#4/#12); Koo & Li + Cicchetti added to `REFERENCES.md`,
-  Cicchetti/Koo/normed to `inst/WORDLIST`, a `getting-started.Rmd` claim block added; knits + spell + `air` +
-  vignette-claim tests all clean. **Slice 2 scope:** a plain-language "start here" framing ahead of the
-  four-choice tree; first-use glosses (estimand, variance components, connected/identified, `k_eff`/harmonic
-  mean); cross-link the interpretation bands from Slice 1 (don't re-tabulate — avoid drift); keep the tree SVG,
-  crosswalk table, `choose_icc()` closer, every live number. Then Slice 3 (REFERENCES/WORDLIST/NEWS done →
-  claim tests re-pass + all six articles render + finish-task gate → PR). Docs milestone, no Fable. *Superseded (M39, done):* T1 (single-level,
+- Active task: **M40 Slice 3 — DoD / finish-task gate → PR (NEXT).** On branch `m40-vignette-accessibility`.
+  *Slices 1–2 DONE (2026-07-11, checkpoint commits):* S1 `getting-started.Rmd` (on-ramp + plain
+  "About the confidence interval" + glosses + the canonical "Is this a good ICC?" band guide, Koo & Li 2016 /
+  Cicchetti 1994, "judge the interval" illustrated live, no verdict; prose numbers → inline `r`; REFERENCES +
+  WORDLIST + a claim block). S2 `choosing-an-icc.Rmd` (warmer "start here" intro + estimand/`k_eff` glosses +
+  new "Once you have a number" section cross-linking the S1 bands — anchor `#is-this-a-good-icc` verified —
+  instead of re-tabulating; tree/crosswalk/`choose_icc()`/live numbers kept). **Slice 3 scope:** NEWS entry;
+  confirm `test-vignette-claims.R` re-passes; all six articles render (`R CMD build` + `pkgdown::check_pkgdown()`);
+  inter-article links + `_pkgdown.yml` intact; finish-task gate (`devtools::check` CI-parity `NOT_CRAN=false`
+  0/0/0; docs-only — no estimator paths to drive) → PR on `m40-vignette-accessibility`. REFERENCES/WORDLIST were
+  already updated in S1 (the bands' source gate). Docs milestone, no Fable. *Superseded (M39, done):* T1 (single-level,
   `a23c768`) + T2
   (multilevel, `e7be0df`) + T3 (docs/spec §9/tracking/gate) complete on branch `m39-occasion-dstudy`. The
   finish-task gate is green: `devtools::document` (no delta) / `air format --check` / `lintr` (0 lints) / full

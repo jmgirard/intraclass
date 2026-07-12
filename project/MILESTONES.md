@@ -1428,10 +1428,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         Cicchetti/Koo/normed added to `inst/WORDLIST`; a new `getting-started.Rmd` block in
         `test-vignette-claims.R` pins the band-spanning interval. Knits clean; spell/`air` clean; all
         vignette-claim tests pass.
-  - [ ] **Slice 2 — `choosing-an-icc.Rmd`.** A plain-language "start here" framing ahead of the four-choice
-        tree; gloss each term (estimand, variance components, connected/identified, `k_eff`/harmonic mean) on
-        first use; cross-link the interpretation bands from Slice 1 (do not re-tabulate — avoid drift). Keep the
-        decision-tree SVG (`resource_files:`), the crosswalk table, `choose_icc()` closer, and every live number.
+  - [x] **Slice 2 — `choosing-an-icc.Rmd`** (done 2026-07-11, checkpoint below). Rewrote the intro into a
+        warmer "start here" framing ("you do not need the formulas — answer a few plain questions") with a plain
+        first-use gloss of *estimand* ("different true quantities you could be trying to pin down"); glossed the
+        `k_eff`/harmonic-mean divisor ("an average that leans toward the smaller counts"); added a new **"Once
+        you have a number"** section that **cross-links** the Slice-1 interpretation bands
+        (`getting-started.html#is-this-a-good-icc`, anchor verified present) instead of re-tabulating them —
+        avoiding drift. Kept the decision-tree SVG, the crosswalk table, the `choose_icc()` closer, and every
+        live `r`-computed number and pinned claim. Both articles knit; spell/`air` clean; vignette-claim tests
+        pass.
   - [ ] **Slice 3 — DoD / gate.** `REFERENCES.md` gains Koo & Li (2016) + Cicchetti (1994); new WORDLIST terms
         added; `test-vignette-claims.R` re-passes (relabelled if any printed number moved — none should); all
         six articles render (`R CMD build` + `pkgdown::check_pkgdown()`); inter-article links + `_pkgdown.yml`
