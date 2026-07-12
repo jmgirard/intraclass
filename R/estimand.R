@@ -87,11 +87,19 @@ icc_estimand <- function(
   if (multilevel && level == "conflated") {
     # Conflated single-level ICC (ten Hove et al. 2022, Eq. 14; M17 Slice 1): the
     # biased coefficient obtained by *ignoring* the cluster structure. Between- and
-    # within-cluster subject variance are both folded into the signal, and all
-    # three rater-related terms into the error. Agreement-only (guarded upstream);
-    # a diagnostic contrast, not a recommended coefficient (spec M17-conflated-icc.md).
+    # within-cluster subject variance are both folded into the signal. Collapsing the
+    # design to a flat two-way subject x rater model, the flat "residual" is
+    # sigma^2_cr + sigma^2_res and the rater main effect is sigma^2_r, so this reads as
+    # a flat two-way ICC: agreement counts the rater main effect as error, consistency
+    # drops it (M45/ADR-056 -- the flat two-way *consistency* ICC, McGraw & Wong 1996,
+    # the symmetric twin of the agreement collapse). A diagnostic contrast, not a
+    # recommended coefficient (spec M17-conflated-icc.md).
     signal <- c("cluster", "subject")
-    error <- c("rater", "cluster_rater", "residual")
+    error <- switch(
+      type,
+      agreement = c("rater", "cluster_rater", "residual"),
+      consistency = c("cluster_rater", "residual")
+    )
     sf <- NA_character_
   } else if (multilevel) {
     # Multilevel Design 1 (ten Hove et al. 2022, Table 3): the signal is the

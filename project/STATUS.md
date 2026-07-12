@@ -1,14 +1,16 @@
 # Project status
 
-- **Active task: M45 T2 next** (branch `m45-conflated-consistency`). **T1 DONE (2026-07-12, AC1 ✓):** the
-  derivation-confirmation spike (`data-raw/reviews/m45-conflated-consistency-spike.R`) confirmed
-  consistency-conflated = flat two-way consistency ICC (drop σ²_r) — Route A identity + Route B tracking
-  (|diff|=5e-4 vs the shipped flat `icc(type="consistency")`); attempt-then-degrade did NOT fire, sourced
-  McGraw & Wong 1996. **T2 (next):** add the conflated × consistency error set (drop `"rater"`) to the
-  estimand map at `R/estimand.R:87-95` — `error <- switch(type, agreement = c("rater","cluster_rater",
-  "residual"), consistency = c("cluster_rater","residual"))` — remove conflated-consistency from the
-  agreement-only drop/abort surface (the upstream guard + M44 inform-and-drop list), then the balanced
-  glmmTMB/lme4 oracles (O-cc-Eq14-analogue / O-cc-lme4 / O-cc-population) + invariants.
+- **Active task: M45 T3 next** (branch `m45-conflated-consistency`). **T1 + T2 DONE (2026-07-12, AC1/AC2/AC4
+  ✓):** consistency-conflated ships — the estimand map (`R/estimand.R:87`) derives the conflated error set by
+  `switch(type, …, consistency=c("cluster_rater","residual"))`; the engine-agnostic consistency abort/drop
+  guard and the cross-product skip are removed. Because that guard was engine-agnostic and the brms conflated
+  path composes generically via `icc_estimand()`+`posterior_summary()`, **brms consistency-conflated landed
+  for free (T4 folded into T2)** — a variance ratio, no moment correction. Oracles: O-cc/Eq14-analogue,
+  O-cc/lme4, O-cc/population, invariants (`test-icc-multilevel.R`); O-cc-Eq14 brms wiring (`test-icc-brms.R`);
+  M44 drop assertion updated (`test-icc-type-vector.R`). Suites green, `air` clean. **T3 (next):** the shared
+  change already enables incomplete/ragged consistency-conflated — verify it flows through the M18 §6a gates
+  (connectedness / agreement-bridging / `k_eff`) and add ragged O-cc oracles. Then T5 (still-out aborts
+  regression + conflated snapshots + spec §6b) and T6 (docs/NEWS + finish-task gate → PR).
 - **M45 planned (2026-07-12, ADR-056):** the *consistency-conflated single-level ICC* — drop σ²_r from the
   agreement-conflated error → the **flat two-way consistency ICC** read off the multilevel fit (sourced
   McGraw & Wong 1996, the symmetric twin of the M18 §6a agreement derivation; **not a guessed formula**, #4).

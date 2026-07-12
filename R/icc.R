@@ -744,25 +744,11 @@ icc <- function(
   # cluster-level one. The complete-data restriction lives with the crossed
   # incomplete guards further down.
   if (multilevel && "conflated" %in% level) {
-    # The conflated level is agreement-only (Eq. 14). An explicit single
-    # `type = "consistency"` aborts; under a multi-type request consistency is dropped
-    # for the conflated level only (the estimand cross-product skips that cell) and
-    # reported at the subject/cluster levels (ADR-054 drop-vs-abort).
-    if (identical(type, "consistency")) {
-      abort_unsupported(c(
-        "A consistency conflated ICC is not available.",
-        i = "ten Hove et al. (2022) Eq. 14 is the absolute-agreement conflated \\
-             ICC; a consistency form is not sourced (see the ROADMAP).",
-        i = "Use {.code type = \"agreement\"} with {.code level = \"conflated\"}."
-      ))
-    }
-    if ("consistency" %in% type) {
-      cli::cli_inform(c(
-        "!" = "Dropping the {.val consistency} conflated ICC: ten Hove et al. (2022) \\
-               Eq. 14 is the absolute-agreement conflated diagnostic; a consistency \\
-               form is not sourced. Reporting {.val agreement} at the conflated level."
-      ))
-    }
+    # The conflated collapse reads as a flat two-way ICC (M45/ADR-056): both the
+    # agreement form (Eq. 14, ten Hove et al. 2022) and the consistency form (the flat
+    # two-way consistency ICC, dropping the rater main effect sigma^2_r; McGraw & Wong
+    # 1996) ship -- so `type` flows through unfiltered here, exactly as at the
+    # subject/cluster levels. Fixed raters and non-crossed designs still abort below.
     if (raters == "fixed") {
       abort_unsupported(c(
         "A fixed-rater conflated ICC is not available.",
@@ -1592,11 +1578,6 @@ icc <- function(
       lapply(type, function(ty) {
         unlist(
           lapply(level, function(lv) {
-            # The conflated level is the agreement-only Eq. 14 diagnostic; skip its
-            # consistency cell (the user was informed above; ADR-054 drop-vs-abort).
-            if (lv == "conflated" && ty == "consistency") {
-              return(NULL)
-            }
             # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
             # effective per-cluster rater count is unresolved); keep only the
             # single-rater cluster ICC(c,1). The user was informed above. Subject-level

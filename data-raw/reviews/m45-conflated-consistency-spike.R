@@ -55,7 +55,15 @@ vres <- 0.5
 
 # --- Route A: formula-wiring identity on the reported components -----------------
 d <- sim_multilevel(30, 10, 6, vc, vsc, vr, vcr, vres, seed = 20260707)
-x <- icc(d, score, subject, rater, cluster = cluster, level = "conflated", seed = 1)
+x <- icc(
+  d,
+  score,
+  subject,
+  rater,
+  cluster = cluster,
+  level = "conflated",
+  seed = 1
+)
 comp <- x$components
 k_eff <- x$k_eff
 
@@ -78,7 +86,15 @@ stopifnot(cc1 >= 0, cc1 <= 1, cck >= 0, cck <= 1, cck >= cc1, cc1 > ca1)
 # --- Route B: tracks the flat two-way consistency icc() on the same data ----------
 # larger cluster count so sigma^2_c is estimated less noisily (as O-conflated/population)
 d2 <- sim_multilevel(40, 20, 6, vc, vsc, vr, vcr, vres, seed = 424242)
-xc <- icc(d2, score, subject, rater, cluster = cluster, level = "conflated", seed = 1)
+xc <- icc(
+  d2,
+  score,
+  subject,
+  rater,
+  cluster = cluster,
+  level = "conflated",
+  seed = 1
+)
 sig2 <- xc$components$cluster + xc$components$subject
 errC2 <- xc$components$cluster_rater + xc$components$residual
 cc1_2 <- sig2 / (sig2 + errC2)
@@ -90,8 +106,16 @@ flat_c1 <- flat$estimates$estimate[flat$estimates$index == "ICC(C,1)"]
 pop_cc1 <- (vc + vsc) / ((vc + vsc) + (vcr + vres))
 
 # correct subject-level consistency ICC (what conflated is biased away from)
-subj <- icc(d2, score, subject, rater, cluster = cluster, type = "consistency",
-            level = "subject", seed = 1)
+subj <- icc(
+  d2,
+  score,
+  subject,
+  rater,
+  cluster = cluster,
+  type = "consistency",
+  level = "subject",
+  seed = 1
+)
 subj_c1 <- subj$estimates$estimate[subj$estimates$index == "ICC(C,1)"]
 
 cat(sprintf(
@@ -112,5 +136,9 @@ stopifnot(
   abs(cc1_2 - subj_c1) > 0.02 # stays visibly biased vs the correct level
 )
 
-cat("\nT1 VERDICT: consistency-conflated ICC = flat two-way consistency ICC (drop sigma^2_r).\n")
-cat("Sourced (McGraw & Wong 1996) and faithfully derivable — M45 proceeds to implement.\n")
+cat(
+  "\nT1 VERDICT: consistency-conflated ICC = flat two-way consistency ICC (drop sigma^2_r).\n"
+)
+cat(
+  "Sourced (McGraw & Wong 1996) and faithfully derivable — M45 proceeds to implement.\n"
+)

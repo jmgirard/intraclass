@@ -1857,3 +1857,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     ICC(C,k)=0.949, ∈[0,1], avg≥single, > agreement-conflated); Route B tracking (conflated 0.7463 vs flat
     two-way `icc(type="consistency")` 0.7458, |diff|=5e-4; recovers population; stays biased vs correct
     subject level). Attempt-then-degrade did NOT fire — sourced (McGraw & Wong 1996), proceed to T2.
+  - 2026-07-12 — **T2 DONE (AC2 ✓), and T4 folded in (AC4 ✓).** Estimand map (`R/estimand.R:87`) now derives
+    the conflated error set via `switch(type, agreement=…, consistency=c("cluster_rater","residual"))`;
+    removed the engine-agnostic consistency abort/inform-drop guard (`R/icc.R`) and the cross-product skip of
+    the conflated×consistency cell. **Plan refinement:** the removed guard was *engine-agnostic* and the brms
+    conflated path composes generically via `icc_estimand()`+`posterior_summary()` over the estimand's
+    error set — so brms consistency-conflated (a variance-ratio push-forward, no moment correction, M29
+    regime) landed for free with the same change; T4 collapses into T2. Oracles: O-cc/Eq14-analogue,
+    O-cc/lme4, O-cc/population (tracks flat two-way consistency 5e-4; biased vs subject level) + invariants
+    (`test-icc-multilevel.R`); O-cc-Eq14 brms wiring + refusal-test update (`test-icc-brms.R`); updated the
+    stale M44 drop assertion (`test-icc-type-vector.R`). Affected suites green (multilevel, type-vector,
+    brms non-Stan); `air` clean. **Next: T3** (incomplete/ragged verification + oracles — the code is
+    already enabled via the shared change; T3 confirms the M18 §6a gates + adds ragged oracles), then T5/T6.

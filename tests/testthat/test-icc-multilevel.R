@@ -354,6 +354,152 @@ test_that("O-conflated/population: recovers the known conflated reliability (~ f
   expect_equal(pick(x, "ICC(A,1)", "conflated"), flat1, tolerance = 0.02)
 })
 
+# Oracle O-cc: consistency-conflated ICC (M45/ADR-056) -------------------------
+#
+# The consistency form of the conflated collapse: the flat two-way *consistency*
+# ICC read off the five-component fit, dropping the rater main effect sigma^2_r
+# from the agreement-conflated error (McGraw & Wong 1996; the symmetric twin of
+# Eq. 14). Signal sigma^2_c + sigma^2_{s:c}; error sigma^2_cr + sigma^2_res.
+# Oracles: the closed-form drop-sigma^2_r identity, an independent lme4 fit, and
+# population tracking of the flat two-way consistency icc() (a different model,
+# hence a loose tolerance -- #18), staying biased vs the correct subject level.
+
+test_that("O-cc/Eq14-analogue: consistency-conflated = drop-sigma^2_r on reported components", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    type = "consistency",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  vc <- x$components
+  sig <- vc$cluster + vc$subject
+  err <- vc$cluster_rater + vc$residual # drop the rater main effect sigma^2_r
+  k <- x$k_eff
+  expect_equal(
+    pick(x, "ICC(C,1)", "conflated"),
+    sig / (sig + err),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    pick(x, "ICC(C,k)", "conflated"),
+    sig / (sig + err / k),
+    tolerance = 1e-10
+  )
+})
+
+test_that("O-cc/lme4: consistency-conflated = drop-sigma^2_r from an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    type = "consistency",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  m <- lme4::lmer(
+    score ~
+      1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data = d,
+    REML = TRUE
+  )
+  vc <- lme4::VarCorr(m)
+  sig <- as.numeric(vc$cluster) + as.numeric(vc[["cluster:subject"]])
+  err <- as.numeric(vc[["cluster:rater"]]) + stats::sigma(m)^2 # no rater term
+  k <- 6
+  expect_equal(
+    pick(x, "ICC(C,1)", "conflated"),
+    sig / (sig + err),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(x, "ICC(C,k)", "conflated"),
+    sig / (sig + err / k),
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-cc/population: tracks the flat two-way consistency ICC, biased vs the correct level", {
+  skip_if_not_installed("glmmTMB")
+  vc <- 1.0
+  vsc <- 1.2
+  vr <- 0.7
+  vcr <- 0.16
+  vres <- 0.5
+  d <- sim_multilevel(40, 20, 6, vc, vsc, vr, vcr, vres, seed = 424242)
+  pop1 <- (vc + vsc) / ((vc + vsc) + (vcr + vres)) # known conflated-consistency
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    type = "consistency",
+    seed = 1
+  )
+  cc1 <- pick(x, "ICC(C,1)", "conflated")
+  expect_lt(abs(cc1 - pop1), 0.1)
+  row <- x$estimates[
+    x$estimates$index == "ICC(C,1)" & x$estimates$level == "conflated",
+  ]
+  expect_true(row$conf.low <= pop1 && pop1 <= row$conf.high)
+  # "Conflated" = ignoring the cluster level: it tracks the flat two-way consistency
+  # ICC on the same data (a different fit, hence a loose agreement).
+  flat <- icc(d, score, subject, rater, type = "consistency", seed = 1)
+  flat1 <- flat$estimates$estimate[flat$estimates$index == "ICC(C,1)"]
+  expect_equal(cc1, flat1, tolerance = 0.02)
+  # ...and stays visibly biased away from the correctly-partitioned subject-level
+  # consistency ICC (the diagnostic's whole point).
+  subj <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "consistency",
+    level = "subject",
+    seed = 1
+  )
+  subj1 <- subj$estimates$estimate[subj$estimates$index == "ICC(C,1)"]
+  expect_gt(abs(cc1 - subj1), 0.02)
+})
+
+test_that("default level = conflated reports both agreement and consistency (no drop)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
+  expect_no_message(
+    x <- icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "conflated",
+      seed = 1
+    ),
+    message = "Dropping"
+  )
+  conf <- x$estimates[x$estimates$level == "conflated", ]
+  expect_setequal(unique(conf$type), c("agreement", "consistency"))
+})
+
 test_that("conflated ICC stays inside [0, 1] and average >= single", {
   skip_if_not_installed("glmmTMB")
   d <- sim_multilevel(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
@@ -364,13 +510,20 @@ test_that("conflated ICC stays inside [0, 1] and average >= single", {
     rater,
     cluster = cluster,
     level = "conflated",
+    type = c("agreement", "consistency"),
     unit = c("single", "average"),
     seed = 1
   )
   a1 <- pick(x, "ICC(A,1)", "conflated")
   ak <- pick(x, "ICC(A,k)", "conflated")
+  c1 <- pick(x, "ICC(C,1)", "conflated")
+  ck <- pick(x, "ICC(C,k)", "conflated")
   expect_true(a1 >= 0 && a1 <= 1)
   expect_true(ak >= a1)
+  # consistency drops rater error, so it is >= agreement; average >= single; in [0,1].
+  expect_true(c1 >= 0 && c1 <= 1)
+  expect_true(ck >= c1)
+  expect_true(c1 >= a1)
   # A conflated row carries no Shrout & Fleiss label (no single-level SF form).
   row <- x$estimates[
     x$estimates$level == "conflated" & x$estimates$index == "ICC(A,1)",
@@ -396,24 +549,13 @@ test_that("conflated can be requested alongside the correctly-partitioned levels
   expect_length(pick(x, "ICC(A,1)", "conflated"), 1)
 })
 
-test_that("conflated ICC is agreement-only and needs a crossed random design", {
+test_that("conflated ICC needs a crossed random design (fixed & no-cluster abort)", {
   skip_if_not_installed("glmmTMB")
   d <- sim_multilevel(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
   # (Incomplete data is no longer refused -- M18 Slice 2 ships it; see the O-conflated
-  # incomplete section below. Consistency/fixed/no-cluster stay classed aborts.)
-  # Consistency-conflated is not in the paper: parked, not shipped.
-  expect_error(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      level = "conflated",
-      type = "consistency"
-    ),
-    class = "intraclass_unsupported"
-  )
+  # incomplete section below. Consistency now ships too -- M45/ADR-056, the flat
+  # two-way consistency ICC; see the O-cc-* section. Fixed/no-cluster stay classed
+  # aborts.)
   # Fixed raters: Eq. 14 is a random-rater formula.
   expect_error(
     icc(
