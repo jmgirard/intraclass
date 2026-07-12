@@ -294,12 +294,18 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M42 planning done — ADR-052 + board committed on branch `m42-benchmark-comparison`; S1
-  (validation section + `_pkgdown.yml` wiring + `irr` → Suggests + agreement claim tests) next.** Retro this
-  session confirmed the ADR-050/051 sequencing unchanged (parity engine exhausted + v0.2.0 gap → M41 clarity ✓ →
-  M42 benchmark → 0.2.0); maintainer chose the reader-facing **article + claim tests** deliverable (plan
-  question gate) and delegated the package set → `psych` + `irr` + `irrICC` (`gtheory` dropped: archived off
-  CRAN). *Superseded (M41, done):* all
+- Active task: **M42 all 3 slices done, local gate green, PR pending.** Branch `m42-benchmark-comparison`:
+  ADR-052 + board + the `comparison-with-other-packages.Rmd` article (S1 validation `intraclass`≡`psych`≡`irr`
+  to ~5 dp on `ratings`, S2 differentiation — listwise deletion collapses to 2/6 subjects vs `intraclass`'s
+  `k_eff`, `irrICC` foil, capability matrix) + `irr`/`irrICC` → Suggests + 3 claim tests + WORDLIST/NEWS/S3 gate
+  all committed. Finish-task gate GREEN: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`)
+  **0/0/0** (all eight vignettes built, new Suggests present), full CI-mode suite **1244/0/51**, `air format
+  --check` / `lintr` 0 lints / `spelling` / `pkgdown::check_pkgdown()` clean, `devtools::document` no delta.
+  **Next action: open the PR from `m42-benchmark-comparison`**; on green CI + merge, reconcile M42 → done + set
+  "Last green CI". Docs/deps-only → no installed-pkg estimator paths to drive. Retro confirmed ADR-050/051
+  sequencing unchanged; maintainer chose the **article + claim tests** deliverable (plan question gate),
+  delegated the package set → `psych`+`irr`+`irrICC` (`gtheory` dropped: removed from CRAN 2025-03-24, cited
+  instead). *Superseded (M41, done):* all
   three slices shipped and the full CI matrix came back green 9/9. Gate before the PR: `air format --check` /
   `lintr` 0 lints / `spelling` clean / `devtools::document` no delta / vignette-claims tests pass /
   `pkgdown::check_pkgdown()` clean / `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with

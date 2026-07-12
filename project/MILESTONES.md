@@ -1536,18 +1536,22 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         incomplete-data output was **not** pinned (its `Mtot` accounting couldn't be cleanly explained, #1/#4).
         Every displayed number live + claim-tested. Verified: renders; claims pass; six cross-links + five
         glossary anchors resolve.
-  - [ ] **S3 — WORDLIST + NEWS + cross-links + finish-task gate → PR.** WORDLIST (`irrICC`, `Gwet`, term/author
-        spellings); NEWS bullet; cross-links from the existing articles/README where natural. Finish-task gate:
-        `air format --check` / `lintr` 0 lints / `spelling` clean / `devtools::document` no delta /
-        vignette-claims tests pass / `pkgdown::check_pkgdown()` clean / `devtools::check` CI-parity
-        (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with all eight vignettes built and the new Suggests present
-        ([[verify-against-installed-package]]). Docs/deps-only → no installed-pkg estimator paths to drive.
+  - [x] **S3 — WORDLIST + NEWS + cross-links + finish-task gate → PR.** DONE. WORDLIST (`Gwet`/`Gwet's`,
+        `Revelle`/`Revelle's`, `IRR`, `listwise`); NEWS *Comparison with other packages* bullet; the article
+        cross-links the four companion articles (choosing / multilevel / interval-methods / engines). **Finish-task
+        gate GREEN:** `air format --check` clean, `lintr` **0 lints**, `spelling` clean, `devtools::document` no
+        delta, full CI-mode suite **1244/0/51** (three new comparison claims pass), `pkgdown::check_pkgdown()`
+        clean, `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with all **eight**
+        vignettes built and `irr`/`irrICC` present ([[verify-against-installed-package]]). Docs/deps-only → no
+        installed-pkg estimator paths to drive.
 - Deferred out of M42 (record so not rediscovered): the **v0.2.0 release consolidation / CRAN upload** (ADR-022,
   the next sequenced step); a `data-raw/` benchmark **harness** and any **speed/timing** benchmark (out of scope
   — the maintainer chose the reader-facing agreement/capability article); `gtheory` as a live dep (impossible —
   archived off CRAN); the broad VPC/NA package sweep (`performance`/`misty`/`irrNA`/`DescTools`, #17); every
   untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, the lavaan
   siblings) stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress** — branch `m42-benchmark-comparison`; ADR-052 + board committed; S1+S2 done (the
-  article + deps + claims committed, local suite 1244/0/51, `air`/`lintr` 0 / `spelling` / `pkgdown` clean).
-  S3 (finish-task `devtools::check` CI-parity gate → PR) in progress.
+- Status: **in progress — all 3 slices done, local gate green, PR pending.** Branch `m42-benchmark-comparison`;
+  ADR-052 + board + the article (S1+S2) + WORDLIST/NEWS/gate (S3) all committed. Finish-task gate green
+  (`devtools::check` CI-parity **0/0/0**, all eight vignettes built; suite 1244/0/51; `air`/`lintr`/`spelling`/
+  `pkgdown` clean). **Next: open the PR from `m42-benchmark-comparison`**; on green CI + merge, reconcile M42 →
+  done + set "Last green CI".
