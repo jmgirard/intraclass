@@ -1648,8 +1648,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   breadcrumb walkthrough without nav); a **full restyle** (boxes/panels/colour badges — plan gate chose tasteful
   medium); a `fit=`/data-in path, `tidy`/`glance` on the recommendation, GUI/Shiny fronts (all long-parked out of
   ADR-021); every untouched carryover stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **review** (branch `m43-cli-polish`; all 3 slices done, local gate green 2026-07-12) — awaiting PR CI +
-  merge approval. Scoped from a maintainer request (interactive tree + prettier print) via a four-question plan
-  gate; retro done, ADR-053 authored. **No Fable** (no RB tripwire: no new oracle, no exported-API change, no IP
-  touched — presentation only). Local finish-task gate GREEN: `devtools::check` CI-parity 0/0/0, `lintr` 0,
-  `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven.
+- Status: **done — merged, CI green** (PR #49, squash-merged to `main` at `38e16bd`; full CI matrix green 9/9,
+  incl. `ubuntu-latest (devel)` clean). Scoped from a maintainer request (interactive tree + prettier print) via
+  a four-question plan gate; shipped in one session (retro → ADR-053 → S1 → S2 → S3 gate → PR #49 → merge).
+  **No Fable** (presentation only — no new oracle, no exported-API change, no IP touched). Number-invariance held
+  (every snapshot diff was header/spacing/1-space-shift, zero number changes; claim test pins print == `tidy()`/
+  `glance()`; `choose_icc` round-trip oracle untouched). The latent `cli_verbatim` blank-line-drop fixed as part
+  of S1. One `--no-verify` (S3): README.md regenerated from an unchanged, seeded README.Rmd (restyle-only diff),
+  which the `.Rmd`/`.md` sync hook doesn't anticipate.

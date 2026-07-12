@@ -1,9 +1,15 @@
 # Project status
 
-- Active milestone: **M43 IN REVIEW** (branch `m43-cli-polish`; all 3 slices done, local gate green 2026-07-12) —
-  **cli presentation polish: interactive `choose_icc()` decision tree + `print`/`summary` aesthetics** (board in
-  [`MILESTONES.md`](MILESTONES.md) M43; ADR-053 authored). **Next: open the PR from `m43-cli-polish`**; on green
-  CI + merge approval, reconcile M43 → done + set "Last green CI". Scoped from a maintainer request via a four-question plan gate:
+- Active milestone: **none** — M43 (ADR-053, cli presentation polish: styled `print`/`summary` + interactive
+  `choose_icc()` decision tree) shipped (PR #49, squash-merged to `main` at `38e16bd`; full CI matrix green 9/9,
+  devel clean). A **presentation-only** milestone (cf. M4/M11/M40): no new estimand/engine/argument/dependency,
+  **no displayed number changed** (number-invariance claim test + restyle-only snapshot diffs), **no Fable**.
+  Restyled `format.icc()` (rule header, aligned table with estimate bold / CI dim, muted meta/notes — degrades to
+  plain text off-colour) and the `choose_icc()` walkthrough (rule intro + per-question header + numbered options +
+  running "So far:" breadcrumb + sectioned recommendation), preserving the ADR-021 resolver core + `ask=`/
+  `prompt_line` seam. Fixed a latent `cli_verbatim` blank-line-drop so section spacing renders. **The v0.2.0
+  release consolidation (ADR-022) is again the next step** (version bump `0.1.0`→`0.2.0`, NEWS heading over the
+  ~29 accreted milestones, cran-comments, then CRAN upload — the `cairn:cairn-release` skill covers this shape). Scoped from a maintainer request via a four-question plan gate:
   **(S1)** restyle `format.icc()` (shared by `print.icc`/`summary.icc`) from `cli_verbatim` monospace into
   **tasteful medium** cli (rule header, aligned coefficient table, estimate emphasized / CI dimmed, styled
   notes) — degrading to plain deterministic text under no-colour/knitr/CRAN; **(S2)** turn `choose_icc()`'s
@@ -309,8 +315,10 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M43 all 3 slices done, local gate green, PR pending.** Next action: **open the PR from
-  `m43-cli-polish`**; on green CI + merge approval, reconcile M43 → done + set "Last green CI". *Superseded (S3,
+- Active task: **none — M43 shipped and merged (PR #49, `38e16bd`).** The next work is the **v0.2.0 release
+  consolidation** (out-of-band release milestone, ADR-022): version bump `0.1.0`→`0.2.0`, add a `0.2.0` NEWS
+  heading over the ~29 milestones accreted since M13, `cran-comments.md`, `R CMD check --as-cran`, then the CRAN
+  upload — its own kickoff (the `cairn:cairn-release` skill covers this shape). *Superseded (M43 S3,
   DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
   blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
   `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
@@ -507,9 +515,16 @@
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
   upload** (ADR-022).
-- Last green CI: **PR #48 (M42, benchmark-vs-prior-art comparison article) — full CI matrix green (9/9),
-  squash-merged to `main` at `1baf7db`.** format-check / lint / pkgdown / test-coverage / `R CMD check` on
-  macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean). Locally before the
+- Last green CI: **PR #49 (M43, cli presentation polish — styled print/summary + interactive `choose_icc()`
+  tree) — full CI matrix green (9/9), squash-merged to `main` at `38e16bd`.** format-check / lint / pkgdown /
+  test-coverage / `R CMD check` on macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes;
+  devel clean). Locally before the PR: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0**
+  (all eight vignettes built), `lintr` **0 lints**, `spelling` / `air format --check` / `pkgdown::check_pkgdown()`
+  clean, `devtools::document` no delta; 7 print-format + 2 `choose_icc` snapshots regenerated (restyle-only,
+  numbers identical); installed-pkg `print.icc`/`choose_icc` driven. Presentation-only milestone — no estimator
+  numeric paths changed. Prior green: **PR #48 (M42, benchmark-vs-prior-art comparison article) — full CI matrix
+  green (9/9), squash-merged to `main` at `1baf7db`.** format-check / lint / pkgdown / test-coverage / `R CMD
+  check` on macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean). Locally before the
   PR: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** (all **eight** vignettes built,
   `irr`/`irrICC` present), full CI-mode suite **1244/0/51** (three new comparison claims pass), `lintr`
   **0 lints**, `spelling` / `air format --check` / `pkgdown::check_pkgdown()` clean, `devtools::document` no
