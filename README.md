@@ -35,7 +35,7 @@ just call functions.
 > ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.html)
 > decision guide, the `choose_icc()` helper, D-study projection to other
 > rater counts (`d_study()`), and `autoplot()` plots have all shipped. A
-> Bayesian engine is on the roadmap; see `project/MILESTONES.md`.
+> Bayesian engine is on the roadmap; see `cairn/ROADMAP.md`.
 
 ## Installation
 

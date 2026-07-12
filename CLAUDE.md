@@ -7,18 +7,20 @@ with boundary-aware Monte-Carlo confidence intervals and guidance on choosing th
 right coefficient.
 
 This file is deliberately lean — it is paid for on every turn. Detail lives in
-`project/`, loaded on demand.
+`cairn/`, loaded on demand.
 
 ## Read these first
-- **`project/PRINCIPLES.md`** — the constitution (19 load-bearing principles).
+- **`cairn/PRINCIPLES.md`** — the constitution (19 load-bearing principles, `#1`–`#19`).
   Change-controlled; when it conflicts with instinct, it wins.
-- **`project/STATUS.md`** — current milestone, active task, blockers, next action.
-- **`project/MILESTONES.md`** — the plan *and* the task board (the active milestone's
-  DoD checklist is the board; no separate `TASKS.md` — ADR-015).
-- **`project/DECISIONS.md`** — ADR log (why things are the way they are).
-- **`project/REFERENCES.md`** — bibliography + the oracle registry every test value
-  traces to.
-- **`project/estimand-specs/`** — the precise population definition per estimator.
+- **`cairn/DESIGN.md`** — purpose, architecture, conventions (a migration seed;
+  deepen via `/design-interview`).
+- **`cairn/DECISIONS.md`** — live decisions (D-001…); the full ADR log
+  (ADR-001..058) is entombed at `cairn/legacy/DECISIONS.md` and still cited by id.
+- **`cairn/references/REFERENCES.md`** — bibliography + the oracle registry every
+  test value traces to.
+- **`cairn/estimand-specs/`** — the precise population definition per estimator.
+- **Status & the task board:** `cairn/ROADMAP.md` + the active `cairn/milestones/`
+  file — cairn owns status now (see the Project tracking section below).
 - Founding brief: `CLAUDE_CODE_KICKOFF.md`.
 
 ## Non-negotiable rules (see PRINCIPLES.md for the full text)
@@ -47,9 +49,14 @@ This file is deliberately lean — it is paid for on every turn. Detail lives in
 Fable is a gated escalation, not an agent. `verify-estimator` may *recommend* a
 Fable review and must then stop and wait.
 
-## Skills (invoke as `/name`)
-`status`, `start-task`, `finish-task`, `verify-estimator`, `new-estimator`,
-`add-decision` — see `.claude/skills/`.
+## Skills
+Project tracking is handled by the **cairn plugin** (`/milestone-plan` →
+`/milestone-implement` → `/milestone-review`, plus `/milestone`, `/hotfix`,
+`/cairn-release`, `/design-interview`) — see the Project tracking section below.
+The former repo-local skills (`status`, `start-task`, `finish-task`,
+`add-decision`, `new-estimator`, `verify-estimator`) are entombed at
+`cairn/legacy/skills/` — superseded by the plugin. Their domain value (estimator
+scaffolding, oracle-verification workflow) is not yet re-expressed in cairn terms.
 
 ## Engines & install
 - Default engine **glmmTMB** (Imports); **lme4** (Suggests) is an alternate engine
@@ -57,3 +64,28 @@ Fable review and must then stop and wait.
 - Light-install path: base install pulls only `glmmTMB`, `cli`, `rlang`,
   `generics`. Optional engines (Bayesian/SEM, M5) live in `Suggests` behind
   `rlang::check_installed()` — never `Imports`.
+
+## Project tracking (cairn)
+
+This repo uses the cairn plugin. **Before acting on any request, classify it
+and route** — the tracking rulebook only loads once a cairn skill fires, so
+starting work in plain conversation silently bypasses the work tiers and the
+git model. Classify first:
+
+- **Trivial** (no runtime surface — typo, comment, tracking edit): commit
+  directly to the default branch.
+- **User-visible bug**: invoke `/hotfix`.
+- **New work, a design decision, or more than one sitting**: invoke
+  `/milestone-plan` (then `/milestone-implement` → `/milestone-review`).
+- **Status, "what's next", or unsure which tier**: invoke `/milestone`.
+- **Never implement code on the default branch** outside a milestone/hotfix
+  branch; nothing reaches it without the user's explicit approval at the
+  review gate.
+
+Whenever the request is anything but trivial, invoke the skill *first* so the
+full rulebook (the plugin's `skills/shared/tracking-rules.md`) and its conduct
+load — do not reconstruct the rules here from memory. All project state lives under
+`cairn/` (**Architecture → DESIGN · Status → ROADMAP · Tasks → milestone
+files · Decisions → DECISIONS · History → archive + git**); never record
+status or TODOs in this file. Claude's persistent memory never holds project
+state; `cairn/` files win any conflict.
