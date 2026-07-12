@@ -144,12 +144,8 @@ slice adds a `level` value and touches no fit or CI path.
 
 ## 6. Out of scope (recorded for forward-compatibility)
 
-- **Consistency-conflated ICC** — dropping σ²_r from the error set. Not in the
-  paper; **SCHEDULED as M45 (ADR-056)** — the plan-gate investigation resolved the
-  #1/#4 oracle question (it is the flat two-way *consistency* ICC read off the fit,
-  sourced McGraw & Wong 1996, the symmetric twin of the §6a agreement derivation;
-  drop σ²_r → error = σ²_cr + σ²_{(s:c)r}). A §6b lands with the M45 implementation.
-  Aborts today until M45 ships.
+- **Consistency-conflated ICC** — dropping σ²_r from the error set. **Shipped in M45
+  (ADR-056); see §6b.**
 - **Conflated ICC for nested Designs 2/3** — no cluster level, no Eq. 14 analogue.
 - **Incomplete-data conflated ICC** — ~~a later question, not opened here~~ **resolved
   and shipped in M18 Slice 2 (ADR-028); see §6a.**
@@ -192,6 +188,64 @@ two-way ICC is identified."
   and stays **visibly biased** away from the correctly-partitioned subject level — the
   diagnostic's whole point, preserved on ragged data.
 
-**Still out (unchanged):** consistency-conflated (not in the paper), fixed-rater
-conflated (Eq. 14 is a random-rater formula), and nested Designs 2/3 conflated — all
-classed aborts on both balanced and ragged data.
+**Still out (M18 Slice 2):** fixed-rater conflated (Eq. 14 is a random-rater
+formula) and nested Designs 2/3 conflated — classed aborts on both balanced and
+ragged data. *(Consistency-conflated shipped in M45; see §6b.)*
+
+## 6b. Consistency-conflated ICC (M45 — resolved)
+
+M17 §6 parked the consistency form ("drop σ²_r from the error set") because the paper
+publishes only the agreement Eq. 14. M45 (ADR-056) opened it under the same
+*attempt-then-degrade* posture as §6a (ADR-028): attempt the natural extension, and
+ship only if a #1/#4-strong oracle holds. **The oracle held — it ships.**
+
+**Why it is well-posed (sourced, not guessed).** §6a established that the
+*agreement*-conflated ICC is the **flat two-way agreement ICC** read off the
+five-component fit (Eq. 14 collapses the five components into one signal and one
+error). The flat two-way design has BOTH agreement and consistency forms — the
+standard McGraw & Wong (1996) ICC(C,1)/ICC(C,k), already shipped and oracle-backed at
+the single level. Collapsing the components, the flat "residual" is σ²_cr + σ²_res and
+the rater main effect is σ²_r; flat **consistency** excludes the rater main effect, so:
+
+```
+signal = σ²_c + σ²_{s:c}
+error  = σ²_cr + σ²_{(s:c)r}          (drop σ²_r)
+
+                          σ²_c + σ²_{s:c}
+ICC_conflated,C(k) = ────────────────────────────────
+                     σ²_c + σ²_{s:c} + (σ²_cr + σ²_res) / k
+```
+
+This is the **flat two-way consistency ICC** read off the multilevel fit — the exact
+symmetric twin of §2/§6a, on identical footing. Estimand triple:
+`(signal = {c, s:c}, error = {cr, (s:c)r}, divisor = 1 | k_eff)`. The `switch(type, …)`
+in `estimand.R` derives it exactly as consistency drops `"rater"` for every other
+design. Random raters, crossed Design 1, single + average, balanced **and**
+incomplete/ragged, glmmTMB/lme4/brms (a variance-ratio push-forward — no θ² moment
+correction, the M29 regime). A diagnostic contrast, never `choose_icc()`-recommended
+(§4 unchanged: it renders under the diagnostic-contrast heading, carries no SF label).
+
+**Identifiability (§3, extended).** The consistency-conflated error reads **σ²_cr**,
+which — like the cluster level (M9 §4b) — separates from σ²_r only when raters **bridge
+clusters**. Subject-level consistency survives non-bridging data (its error is residual
+only); the conflated level does **not**. So on non-bridging (effectively rater-nested)
+data the conflated level is dropped (both types), or aborts `intraclass_unidentified`
+if it is the sole explicit level — the same conservative flat-design-connected gate §6a
+applies to agreement, now covering consistency too.
+
+**Oracles (M45, in `test-icc-multilevel.R` / `test-icc-brms.R`):**
+- **O-cc/Eq14-analogue** — the estimate equals the closed-form drop-σ²_r value on the
+  reported components to ~1e-10 (formula wiring).
+- **O-cc/lme4** — cross-engine glmmTMB ≡ lme4 to < 1e-4 (balanced **and** ragged).
+- **O-cc/population** — tracks the flat two-way **consistency** `icc()` (cluster
+  dropped) at a loose population tolerance (~0.02; different models, §18), staying
+  visibly biased away from the correctly-partitioned subject-level consistency ICC.
+- **O-cc-Eq14 (brms)** — the consistency-conflated push-forward composes off the
+  five-component posterior draws dropping σ²_r (a variance ratio; no moment correction).
+
+**Invariants:** consistency-conflated ∈ [0, 1]; average ≥ single; ≥ the
+agreement-conflated value (it drops rater error); CI always present (#3). Provenance
+of the derivation spike: `data-raw/reviews/m45-conflated-consistency-spike.R`.
+
+**Still out (unchanged):** fixed-rater conflated, nested Designs 2/3 conflated, and
+lavaan conflated (single-level engine) — all classed aborts for both types.

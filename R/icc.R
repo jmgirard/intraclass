@@ -56,15 +56,17 @@
 #'
 #' `level = "conflated"` reports the **biased single-level ICC** you would get by
 #' *ignoring* the clustering (ten Hove et al. 2022, Eq. 14): between- and
-#' within-cluster subject variance are both counted as signal, and all three
-#' rater-related terms as error. It is offered only as a **diagnostic contrast** --
-#' to quantify how much the nesting distorts reliability -- and is never a
-#' recommended coefficient; `print()` flags it as such. It is absolute-agreement
-#' only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
-#' design; it works on both balanced and **incomplete** data (on ragged data it is the
-#' flat two-way ICC read off the multilevel fit, with the same `k_eff` divisor).
-#' Request it alongside the correct levels, e.g.
-#' `level = c("subject", "cluster", "conflated")`.
+#' within-cluster subject variance are both counted as signal, and the rater-related
+#' terms as error. It is offered only as a **diagnostic contrast** -- to quantify how
+#' much the nesting distorts reliability -- and is never a recommended coefficient;
+#' `print()` flags it as such. It is the **flat two-way ICC** read off the multilevel
+#' fit, so it comes in both `type` forms: absolute agreement (Eq. 14) and
+#' **consistency** (which drops the rater main-effect variance, McGraw & Wong 1996).
+#' It needs a crossed (Design 1) random-rater design and works on both balanced and
+#' **incomplete** data (same `k_eff` divisor). Because it reads the cluster-by-rater
+#' variance, it needs raters that bridge clusters; without bridging the conflated
+#' level is dropped (like the cluster level). Request it alongside the correct levels,
+#' e.g. `level = c("subject", "cluster", "conflated")`.
 #'
 #' The design is **inferred from the data** (ten Hove et al. 2022, Table 2). If
 #' raters are crossed with clusters (each rater rates in every cluster) the
@@ -172,10 +174,10 @@
 #'   the single fit (agreement vs. consistency is post-fit arithmetic on the same
 #'   variance components, so the second definition is free). Pass a single value to
 #'   report just that coefficient once you have named your estimand. A definition
-#'   that is undefined for the design (e.g. `"consistency"` for the conflated
-#'   diagnostic, or a fixed-rater agreement projection to a different rater count)
-#'   is dropped with a message when reached via the default, and aborts with a
-#'   teaching error when requested explicitly. Not applicable when
+#'   that is undefined for the design (e.g. `"consistency"` for a Design-3
+#'   nested-in-subjects fit, or a fixed-rater agreement projection to a different
+#'   rater count) is dropped with a message when reached via the default, and aborts
+#'   with a teaching error when requested explicitly. Not applicable when
 #'   `model = "oneway"`.
 #' @param raters Rater sampling: `"random"` (the default; two-way random, Case 2)
 #'   generalizes to a rater universe; `"fixed"` (two-way mixed, Case 3) treats the
@@ -744,25 +746,11 @@ icc <- function(
   # cluster-level one. The complete-data restriction lives with the crossed
   # incomplete guards further down.
   if (multilevel && "conflated" %in% level) {
-    # The conflated level is agreement-only (Eq. 14). An explicit single
-    # `type = "consistency"` aborts; under a multi-type request consistency is dropped
-    # for the conflated level only (the estimand cross-product skips that cell) and
-    # reported at the subject/cluster levels (ADR-054 drop-vs-abort).
-    if (identical(type, "consistency")) {
-      abort_unsupported(c(
-        "A consistency conflated ICC is not available.",
-        i = "ten Hove et al. (2022) Eq. 14 is the absolute-agreement conflated \\
-             ICC; a consistency form is not sourced (see the ROADMAP).",
-        i = "Use {.code type = \"agreement\"} with {.code level = \"conflated\"}."
-      ))
-    }
-    if ("consistency" %in% type) {
-      cli::cli_inform(c(
-        "!" = "Dropping the {.val consistency} conflated ICC: ten Hove et al. (2022) \\
-               Eq. 14 is the absolute-agreement conflated diagnostic; a consistency \\
-               form is not sourced. Reporting {.val agreement} at the conflated level."
-      ))
-    }
+    # The conflated collapse reads as a flat two-way ICC (M45/ADR-056): both the
+    # agreement form (Eq. 14, ten Hove et al. 2022) and the consistency form (the flat
+    # two-way consistency ICC, dropping the rater main effect sigma^2_r; McGraw & Wong
+    # 1996) ship -- so `type` flows through unfiltered here, exactly as at the
+    # subject/cluster levels. Fixed raters and non-crossed designs still abort below.
     if (raters == "fixed") {
       abort_unsupported(c(
         "A fixed-rater conflated ICC is not available.",
@@ -1140,6 +1128,36 @@ icc <- function(
                  (Design 2) for agreement. Reporting {.val consistency}."
         ))
         type <- setdiff(type, "agreement")
+      }
+      # The conflated level reads sigma^2_cr (cluster:rater) in its error set for BOTH
+      # types -- the Eq. 14 agreement error {r, cr, res} and the M45 consistency error
+      # {cr, res} -- so, like the cluster level below, it is identified only when raters
+      # bridge clusters (M18 §6a's conservative flat-design-connected posture). Consistency
+      # survives non-bridging at the SUBJECT level (its error is residual only), but NOT at
+      # the conflated level, where sigma^2_cr does not separate from sigma^2_r. Drop the
+      # whole conflated level when raters do not bridge; abort if it is the sole explicit
+      # level (drop-vs-abort, ADR-054/ADR-029).
+      if ("conflated" %in% level && !ident$cluster_rater_connected) {
+        if (identical(level, "conflated")) {
+          abort_unidentified(c(
+            "The conflated ICC needs raters that bridge clusters, but the \\
+             cluster-by-rater design is disconnected here.",
+            i = "It reads the cluster-by-rater variance off the crossed fit, which \\
+                 is not identified without raters shared across clusters.",
+            i = "Use {.code level = \"subject\"}, or provide raters crossed across \\
+                 clusters."
+          ))
+        }
+        cli::cli_inform(
+          c(
+            "!" = "Dropping the {.val conflated} level: raters do not bridge clusters, \\
+                   so the cluster-by-rater variance it reads is not identified. \\
+                   Reporting the correctly-partitioned levels."
+          ),
+          .frequency = "once",
+          .frequency_id = "conflated-nonbridging"
+        )
+        level <- setdiff(level, "conflated")
       }
       # Cluster-level IRR on incomplete data (M9 Slice 2, ADR-018). The cluster-level
       # error carries sigma^2_cr (both types) and sigma^2_r (agreement), which are
@@ -1592,11 +1610,6 @@ icc <- function(
       lapply(type, function(ty) {
         unlist(
           lapply(level, function(lv) {
-            # The conflated level is the agreement-only Eq. 14 diagnostic; skip its
-            # consistency cell (the user was informed above; ADR-054 drop-vs-abort).
-            if (lv == "conflated" && ty == "consistency") {
-              return(NULL)
-            }
             # Averaged cluster-level ICC(c,k) is undefined on incomplete data (the
             # effective per-cluster rater count is unresolved); keep only the
             # single-rater cluster ICC(c,1). The user was informed above. Subject-level

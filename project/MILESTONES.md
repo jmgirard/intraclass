@@ -1847,4 +1847,50 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     conflated snapshots; author §6b of the spec.
   - T6 — Docs + NEWS + finish-task gate (AC7) → PR from `m45-conflated-consistency`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T3; AC4 → T4; AC5 → T2, T3, T4; AC6 → T5; AC7 → T5, T6.
-- Status: **planned** (ADR-056, 2026-07-12). Not started.
+- Status: **review** (ADR-056; branch `m45-conflated-consistency`, all tasks done, local gate green — PR pending).
+- Work log:
+  - 2026-07-12 — T1 started (derivation-confirmation spike). Located the mechanism: conflated error set is
+    hardcoded agreement-only at `R/estimand.R:94`; every other design derives consistency by dropping
+    `"rater"` from the agreement error (lines 116/127/135) — the structural symmetry T1 confirms.
+  - 2026-07-12 — **T1 DONE (AC1 ✓).** `data-raw/reviews/m45-conflated-consistency-spike.R` confirms
+    consistency-conflated = flat two-way consistency ICC (drop σ²_r): Route A identity (ICC(C,1)=0.756,
+    ICC(C,k)=0.949, ∈[0,1], avg≥single, > agreement-conflated); Route B tracking (conflated 0.7463 vs flat
+    two-way `icc(type="consistency")` 0.7458, |diff|=5e-4; recovers population; stays biased vs correct
+    subject level). Attempt-then-degrade did NOT fire — sourced (McGraw & Wong 1996), proceed to T2.
+  - 2026-07-12 — **T2 DONE (AC2 ✓), and T4 folded in (AC4 ✓).** Estimand map (`R/estimand.R:87`) now derives
+    the conflated error set via `switch(type, agreement=…, consistency=c("cluster_rater","residual"))`;
+    removed the engine-agnostic consistency abort/inform-drop guard (`R/icc.R`) and the cross-product skip of
+    the conflated×consistency cell. **Plan refinement:** the removed guard was *engine-agnostic* and the brms
+    conflated path composes generically via `icc_estimand()`+`posterior_summary()` over the estimand's
+    error set — so brms consistency-conflated (a variance-ratio push-forward, no moment correction, M29
+    regime) landed for free with the same change; T4 collapses into T2. Oracles: O-cc/Eq14-analogue,
+    O-cc/lme4, O-cc/population (tracks flat two-way consistency 5e-4; biased vs subject level) + invariants
+    (`test-icc-multilevel.R`); O-cc-Eq14 brms wiring + refusal-test update (`test-icc-brms.R`); updated the
+    stale M44 drop assertion (`test-icc-type-vector.R`). Affected suites green (multilevel, type-vector,
+    brms non-Stan); `air` clean. **Next: T3** (incomplete/ragged verification + oracles — the code is
+    already enabled via the shared change; T3 confirms the M18 §6a gates + adds ragged oracles), then T5/T6.
+  - 2026-07-12 — **T3 DONE (AC3 ✓).** Ragged (bridging) consistency-conflated works unchanged (tracks the
+    flat two-way consistency `icc()` to |diff|=1.6e-3; O-cc/incomplete: drop-σ²_r identity + lme4 cross-engine
+    + flat-tracking + biased-vs-subject, `k_eff`<6). **Identifiability catch (statistical-correctness):** the
+    conflated error reads σ²_cr, which — like the cluster level — is unidentified when raters do NOT bridge
+    clusters (unlike subject-level consistency, whose error is residual-only). Added a conflated-level bridging
+    gate (`R/icc.R`, modeled on the cluster-level gate): when `!cluster_rater_connected`, drop the conflated
+    level (both types), or abort `intraclass_unidentified` if it is the sole explicit level — matching M18 §6a's
+    conservative posture. Tested both paths. Adjacent suites (incomplete-multilevel, type-vector,
+    nested-multilevel) green; `air` clean. **Next: T5** (still-out aborts regression + conflated snapshots +
+    spec §6b), then T6 (docs/NEWS + finish-task gate → PR).
+  - 2026-07-12 — **T5 DONE (AC6 ✓, AC7 partial).** Regression test asserts the still-out conflated cells
+    refuse *consistency* too: nested Design 2 → `intraclass_inapplicable`, fixed-rater → `intraclass_unsupported`,
+    lavaan → `intraclass_unsupported` (`test-icc-multilevel.R`). Authored spec §6b in
+    `estimand-specs/M17-conflated-icc.md` (the derivation, identifiability/bridging gate, O-cc oracle set,
+    invariants) + updated §6. **No conflated `_snaps` exist** (conflated is opt-in, not in default prints) —
+    AC7's snapshot clause is moot; nothing to regenerate. 30/30 multilevel tests pass. **Next: T6** — docs
+    (`@param`/conflated Rd note + vignette mention), NEWS bullet, finish-task gate (`lintr`/`spelling`/
+    `devtools::check` CI-parity/installed-pkg drive), then PR from `m45-conflated-consistency`.
+  - 2026-07-12 — **T6 DONE (AC7 ✓); milestone → review.** Docs: roxygen `@param type` + conflated section
+    updated (consistency now ships; bridging requirement), `man/icc.Rd` regenerated; NEWS breaking-change
+    bullet corrected + a Minor-improvements bullet; `multilevel-designs.Rmd` stale "agreement-only /
+    complete-only" claim fixed. **Finish-task gate GREEN:** `air` clean, `spelling` clean, `lintr` 0 lints,
+    `devtools::document` no delta, full CI-mode suite (`NOT_CRAN=true CI=true`) **403 pass / 0 fail / 1 warn
+    (pre-existing non-bridging fit) / 23 skip (live Stan)**, installed-pkg drive of the defaulted conflated
+    cell OK, **`devtools::check` CI-parity (`NOT_CRAN=false`, no-manual) 0/0/0**. PR pending.

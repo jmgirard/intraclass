@@ -1,5 +1,27 @@
 # Project status
 
+- **M45 in REVIEW (2026-07-12): all tasks done, local gate green, PR pending.** Consistency-conflated ICC
+  ships (the flat two-way consistency ICC read off the multilevel fit, drop σ²_r; McGraw & Wong 1996) for
+  glmmTMB/lme4/brms, balanced + incomplete/ragged, single+average; a default `level="conflated"` call now
+  reports both agreement and consistency. Identifiability: the σ²_cr-reading conflated level needs raters that
+  bridge clusters (dropped/aborted otherwise). Still-out unchanged (fixed/nested/lavaan conflated abort).
+  **Finish-task gate GREEN** (`air`/`spelling`/`lintr` 0 / `document` no delta / CI-mode suite 403 pass 0 fail
+  1 warn[pre-existing] 23 skip[live Stan] / installed-pkg drive OK / `devtools::check` CI-parity `NOT_CRAN=false`
+  no-manual **0/0/0**). **Next: open the PR from `m45-conflated-consistency`; on green CI + merge approval,
+  reconcile M45 → done + set Last green CI.** Merge stays a separate approval gate. **No Fable** (sourced
+  oracle; additive; no IP). ADR-056; spec §6b.
+- **T1–T4 detail (2026-07-12, AC1–AC4 ✓):**
+  consistency-conflated ships for glmmTMB/lme4/brms, balanced + incomplete/ragged. Core change: estimand map
+  (`R/estimand.R:87`) derives the conflated error set by `switch(type, …, consistency=c("cluster_rater",
+  "residual"))`; removed the engine-agnostic consistency guard + cross-product skip (T2, brms free → T4 folded
+  in); added a conflated-level rater-bridging gate (`R/icc.R`) so the σ²_cr-reading conflated level is dropped
+  /aborted when raters don't bridge (T3 identifiability catch). Oracles: O-cc/Eq14-analogue, O-cc/lme4,
+  O-cc/population, O-cc/incomplete, non-bridging gate, invariants (`test-icc-multilevel.R`); O-cc-Eq14 brms
+  wiring (`test-icc-brms.R`); M44 drop assertion updated (`test-icc-type-vector.R`). Affected + adjacent suites
+  green; `air` clean. **T5 (next):** regression-assert the still-out conflated aborts (fixed-rater / nested
+  Designs 2-3 / lavaan — AC6); regenerate conflated `_snaps` (new consistency rows, retained agreement numbers
+  identical); author spec §6b in `estimand-specs/M17-conflated-icc.md`. Then T6 (docs/NEWS + finish-task gate
+  → PR).
 - **M45 planned (2026-07-12, ADR-056):** the *consistency-conflated single-level ICC* — drop σ²_r from the
   agreement-conflated error → the **flat two-way consistency ICC** read off the multilevel fit (sourced
   McGraw & Wong 1996, the symmetric twin of the M18 §6a agreement derivation; **not a guessed formula**, #4).

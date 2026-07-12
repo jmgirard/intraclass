@@ -315,7 +315,7 @@ test_that("brms refuses the fixed-rater multilevel replicate corner", {
 # is engine-agnostic and fires BEFORE any fit dispatch (no Stan needed): the consistency and
 # fixed-rater conflated forms are not sourced / not defined by Eq. 14 (M17-conflated-icc.md).
 
-test_that("brms refuses the consistency / fixed conflated forms (engine-agnostic)", {
+test_that("brms refuses the fixed conflated form (engine-agnostic)", {
   set.seed(12)
   crossed <- expand.grid(
     subject = 1:4,
@@ -324,20 +324,8 @@ test_that("brms refuses the consistency / fixed conflated forms (engine-agnostic
   )
   crossed$subject <- factor(paste0(crossed$cluster, "_", crossed$subject))
   crossed$score <- rnorm(nrow(crossed))
-  # Consistency conflated is not sourced (ten Hove Eq. 14 is agreement-only).
-  expect_error(
-    icc(
-      crossed,
-      score,
-      rater,
-      subject = subject,
-      cluster = cluster,
-      level = "conflated",
-      type = "consistency",
-      engine = "brms"
-    ),
-    class = "intraclass_unsupported"
-  )
+  # (Consistency conflated now ships for brms too -- M45/ADR-056, a variance-ratio
+  # push-forward off the same five-component draws; see the O-cc-Eq14 brms wiring test.)
   # Fixed-rater conflated is not defined (Eq. 14 treats the rater as a variance component).
   expect_error(
     icc(
@@ -414,6 +402,51 @@ test_that("O-Eq14: brms conflated composes off the five-component draws per Eq. 
   expect_true(
     is.finite(summ$conflated$conf.low) && is.finite(summ$conflated$conf.high)
   )
+})
+
+# O-cc-Eq14 (Bayesian wiring, no brms/Stan needed): the consistency-conflated ICC
+# (M45/ADR-056) is the same variance-ratio push-forward with the rater main effect
+# sigma^2_r dropped from the error set -- the flat two-way consistency ICC composed off
+# the five-component draws. No moment correction (a pure variance ratio, the M29 regime).
+test_that("O-cc-Eq14: brms consistency-conflated composes off the draws dropping sigma^2_r", {
+  set.seed(29)
+  nd <- 4000L
+  draws <- rbind(
+    cluster = rgamma(nd, 3, 2),
+    subject = rgamma(nd, 3, 2),
+    rater = rgamma(nd, 1, 5),
+    cluster_rater = rgamma(nd, 1, 8),
+    residual = rgamma(nd, 4, 2)
+  )
+  cc <- icc_estimand(
+    type = "consistency",
+    unit = "single",
+    raters = "random",
+    k_eff = 5L,
+    multilevel = TRUE,
+    level = "conflated"
+  )
+  # The consistency error set drops the rater main effect (cf. the agreement Eq. 14 set).
+  expect_identical(cc$signal, c("cluster", "subject"))
+  expect_identical(cc$error, c("cluster_rater", "residual"))
+
+  summ <- posterior_summary(draws, list(cc = cc))
+  sig <- draws["cluster", ] + draws["subject", ]
+  err <- draws["cluster_rater", ] + draws["residual", ] # no rater term
+  hand <- sig / (sig + err)
+  expect_equal(summ$cc$point, posterior_mode(hand, lower = 0, upper = 1))
+  expect_equal(
+    unname(quantile(hand, 0.025)),
+    summ$cc$conf.low,
+    tolerance = 1e-8
+  )
+  expect_equal(
+    unname(quantile(hand, 0.975)),
+    summ$cc$conf.high,
+    tolerance = 1e-8
+  )
+  expect_gte(summ$cc$point, 0)
+  expect_lte(summ$cc$point, 1)
 })
 
 test_that("brms surfaces the k = 2 bias caveat as a soft note", {

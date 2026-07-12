@@ -86,10 +86,10 @@ defined formulation -- \code{ICC(A,1)}, \code{ICC(A,k)}, \code{ICC(C,1)}, \code{
 the single fit (agreement vs. consistency is post-fit arithmetic on the same
 variance components, so the second definition is free). Pass a single value to
 report just that coefficient once you have named your estimand. A definition
-that is undefined for the design (e.g. \code{"consistency"} for the conflated
-diagnostic, or a fixed-rater agreement projection to a different rater count)
-is dropped with a message when reached via the default, and aborts with a
-teaching error when requested explicitly. Not applicable when
+that is undefined for the design (e.g. \code{"consistency"} for a Design-3
+nested-in-subjects fit, or a fixed-rater agreement projection to a different
+rater count) is dropped with a message when reached via the default, and aborts
+with a teaching error when requested explicitly. Not applicable when
 \code{model = "oneway"}.}
 
 \item{raters}{Rater sampling: \code{"random"} (the default; two-way random, Case 2)
@@ -307,15 +307,17 @@ and single/average choices above apply at each level.
 
 \code{level = "conflated"} reports the \strong{biased single-level ICC} you would get by
 \emph{ignoring} the clustering (ten Hove et al. 2022, Eq. 14): between- and
-within-cluster subject variance are both counted as signal, and all three
-rater-related terms as error. It is offered only as a \strong{diagnostic contrast} --
-to quantify how much the nesting distorts reliability -- and is never a
-recommended coefficient; \code{print()} flags it as such. It is absolute-agreement
-only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
-design; it works on both balanced and \strong{incomplete} data (on ragged data it is the
-flat two-way ICC read off the multilevel fit, with the same \code{k_eff} divisor).
-Request it alongside the correct levels, e.g.
-\code{level = c("subject", "cluster", "conflated")}.
+within-cluster subject variance are both counted as signal, and the rater-related
+terms as error. It is offered only as a \strong{diagnostic contrast} -- to quantify how
+much the nesting distorts reliability -- and is never a recommended coefficient;
+\code{print()} flags it as such. It is the \strong{flat two-way ICC} read off the multilevel
+fit, so it comes in both \code{type} forms: absolute agreement (Eq. 14) and
+\strong{consistency} (which drops the rater main-effect variance, McGraw & Wong 1996).
+It needs a crossed (Design 1) random-rater design and works on both balanced and
+\strong{incomplete} data (same \code{k_eff} divisor). Because it reads the cluster-by-rater
+variance, it needs raters that bridge clusters; without bridging the conflated
+level is dropped (like the cluster level). Request it alongside the correct levels,
+e.g. \code{level = c("subject", "cluster", "conflated")}.
 
 The design is \strong{inferred from the data} (ten Hove et al. 2022, Table 2). If
 raters are crossed with clusters (each rater rates in every cluster) the

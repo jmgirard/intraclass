@@ -198,11 +198,13 @@ test_that("O-invariance holds across engines (lme4)", {
 
 # --- drop-vs-abort policy per agreement-only surface (ADR-054) -----------------
 
-test_that("conflated: default drops consistency at the conflated level, keeps it elsewhere", {
+test_that("conflated: default reports both types (M45); explicit consistency ships", {
   skip_if_not_installed("glmmTMB")
   d <- ml_ratings()
   withr::local_options(rlib_message_verbosity = "verbose")
-  expect_message(
+  # M45/ADR-056: consistency-conflated now ships (the flat two-way consistency ICC),
+  # so the default vector no longer drops it -- no "Dropping ... consistency conflated".
+  expect_no_message(
     x <- icc(
       d,
       score,
@@ -212,25 +214,25 @@ test_that("conflated: default drops consistency at the conflated level, keeps it
       level = c("subject", "cluster", "conflated"),
       seed = 1
     ),
-    "Dropping the .*consistency.* conflated"
+    message = "Dropping the .*consistency.* conflated"
   )
   e <- x$estimates
-  # Conflated is agreement-only; subject/cluster keep both types.
-  expect_setequal(e$type[e$level == "conflated"], "agreement")
+  # Conflated now carries both types, like subject/cluster.
+  expect_setequal(e$type[e$level == "conflated"], c("agreement", "consistency"))
   expect_setequal(e$type[e$level == "subject"], c("agreement", "consistency"))
-  # Explicit consistency at the conflated level still aborts loudly.
-  expect_error(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      level = "conflated",
-      type = "consistency"
-    ),
-    class = "intraclass_unsupported"
+  # Explicit consistency at the conflated level now computes (was a classed abort).
+  x2 <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "conflated",
+    type = "consistency",
+    seed = 1
   )
+  expect_setequal(x2$estimates$type, "consistency")
+  expect_true(all(x2$estimates$level == "conflated"))
 })
 
 test_that("Design 3: default drops consistency design-wide, explicit consistency aborts", {
