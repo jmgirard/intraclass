@@ -4240,3 +4240,83 @@ consequences → references.
   (M4.5 — the original `d_study()` estimand + the §4 fixed-agreement ill-posedness this refines).
   Estimand-spec: **`M4.5-d-study.md` §9 (new)** — occasion-count projection. `project/COVERAGE.md` (d_study
   occasion axis).
+
+## ADR-050: M40 scope — accessibility rewrite of the two front-door vignettes (`getting-started`, `choosing-an-icc`)
+- Date: 2026-07-11
+- Status: accepted
+- Context: A short retro after the M33–M39 run (this session) found the **clean-oracle parity engine
+  exhausted**: from M23 on nearly every milestone shipped as engine/interval/projection parity because a
+  frequentist or textbook oracle existed (the (C) research/blocked corner closed at M36–M38; M39 was the last
+  thin projection slice). What remains in [`ROADMAP.md`](ROADMAP.md) is *qualitatively different* — genuine 🟣
+  research (needs a simulation-oracle study + a gated Fable review), heavy lifts (multilevel SEM, categorical
+  GLMM), docs, a scope decision, or the release itself. The package has also been **v0.1.0 "submission-ready"
+  since M13** with ~15 milestones of capability added since, unreleased — flagged in the retro as a strategic
+  question but **not chosen** this session. The maintainer chose (plan question gate, this session) the
+  **accessibility docs rewrite** — the set-aside third M35 option (ADR-045): the two front-door teaching
+  articles are feature-complete and *already good* (the ROADMAP said so), but assume a methodologist reader.
+  Read for an **applied** reader (a researcher who needs an ICC but is not a methodologist), three concrete
+  accessibility gaps stand out:
+  - **Jargon lands before it is defined** — "estimand", "population quantities", "variance components",
+    "Spearman–Brown", "harmonic mean", "connected / identified", and especially `getting-started`'s
+    Monte-Carlo-CI paragraph ("simulated from the fitted parameter covariance on the model's internal scale …
+    where the delta method fails") all appear cold.
+  - **No from-scratch on-ramp** — `getting-started` assumes the reader already knows what an ICC is and why to
+    compute one; there is no "what interrater reliability is / why an ICC / what question each number answers"
+    opening for a first-timer.
+  - **No "is my ICC any good?" guidance** — applied users always ask this; it is currently absent. The biggest
+    single accessibility win *and* the one item carrying non-docs risk (a sourcing obligation, #4).
+- Decision (maintainer-approved this session, 2026-07-11, via the plan question gate):
+  - **Scope: M40 = a clarity/accessibility rewrite of `getting-started.Rmd` and `choosing-an-icc.Rmd`, in
+    place.** A **docs milestone** (cf. M4/M13/M35): **no new estimand, engine, fit, CI machinery, or
+    dependency** (#6). Correctness is **live-computed + claim-tested numbers** (#1/#4/#12), not a numerical
+    oracle. Rewrite **in place** — the two front-door articles keep their filenames, URLs, and `_pkgdown.yml`
+    entries (no split, unlike M35; no URL churn on the entry points). Jargon handled by **first-use glosses**
+    (not a separate glossary page). The estimand vocabulary and the *Choosing an ICC* decision tree must read
+    as approachable to applied users, not just methodologists.
+  - **Interpretation benchmarks: IN, sourced + caveated (maintainer-approved).** Add an "is my ICC good?"
+    cutoff-band guide (poor / moderate / good / excellent), **cited to a real reference** and framed as **one
+    convention among several with explicit caveats** — never as truth, never an invented cutoff (#4). Primary
+    source **Koo & Li (2016)** (the modern IRR-benchmark standard), with **Cicchetti (1994)** noted as the
+    older sibling band and **ten Hove et al. (2024)** ("Updated guidelines …", already in `REFERENCES.md`) for
+    the selection framing. The bands live in **one canonical place** (`getting-started`'s Interpret section) and
+    are cross-linked from `choosing-an-icc` to avoid drift. The caveat must foreground that a cutoff depends on
+    stakes, base rates, and the coefficient chosen — the package deliberately does not compute a verdict.
+  - **Fable posture (#19): NONE.** A docs milestone with no estimand/coverage claim; no escalation.
+  - **Deferred out of M40 (record so not rediscovered):** the **v0.2.0 release consolidation / CRAN upload**
+    (ADR-022; the strategic release-gap question the retro raised — a separate milestone if scheduled); the
+    **benchmark-vs-prior-art** article; the **clarity pass over the *other* articles** (`engines`,
+    `interval-methods`, `multilevel-designs`, `d-studies-and-replicates` — M40 touches only the two front-door
+    articles); a **glossary page** (glosses are inline this milestone); and every untouched carryover
+    (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, lavaan siblings) stays in
+    [`ROADMAP.md`](ROADMAP.md).
+- Consequences:
+  - The two entry-point articles gain an applied-reader on-ramp, first-use glosses, a plainer Monte-Carlo-CI
+    explanation (technical detail pushed to an aside or cross-linked to `interval-methods`), and a sourced,
+    caveated interpretation-band guide. Every displayed coefficient stays computed live at knit time and pinned
+    by `test-vignette-claims.R` (#1/#4/#12) — a rewrite must not silently change a printed number, and any that
+    moves updates its claim test in the same commit (#16).
+  - The interpretation bands are the one place a docs milestone can introduce unsourced content; they are
+    gated on a real citation in `REFERENCES.md` + a caveat, or they do not ship (#4). This is the milestone's
+    only genuine risk.
+  - No `_pkgdown.yml` article-index change (in-place rewrite), but any new WORDLIST terms (e.g. "Cicchetti")
+    join `inst/WORDLIST` so `spelling` stays clean ([[pkgdown-reference-index-new-exports]] applies to article
+    prose too); `air` / `lintr` clean.
+- Correctness (a docs milestone's "oracle" is claim-tested live computation, #1 numerically N/A — cf.
+  ADR-045/M35):
+  - Every numeric relationship the prose asserts is computed live and pinned in `test-vignette-claims.R`
+    (relabelled per-article as needed); no hand-typed coefficient.
+  - Both rewritten articles render standalone under `R CMD build` **and** pkgdown; all inter-article anchor
+    links resolve against generated ids; the decision-tree SVG still resolves via `resource_files:`.
+  - The interpretation bands trace to a committed `REFERENCES.md` entry (Koo & Li 2016; Cicchetti 1994), framed
+    as convention-not-truth with caveats — verified by reading, not asserted.
+- References: PRINCIPLES.md #1/#4/#12 (live-computed + claim-tested numbers; no fabricated/unsourced band
+  cutoffs), #2/#14 (plan before code; thin docs slices), #6 (additive, non-breaking; no new estimand/engine/
+  dependency — cf. M4/M13/M35), #16 (tracking + claim tests in-commit), #17 (the other articles + release
+  consolidation parked, not crept), #18 (characterize honestly — the interpretation caveat, the
+  finite-ceiling / boundary language kept accurate while simplified), #19 (no Fable — docs milestone).
+  [[milestone-branches-and-prs]] (ships on `m40-vignette-accessibility` via PR). ADR-045 (M35 — the vignette
+  *reassessment*; M40 is its set-aside clarity/accessibility third option), ADR-009 (M4 — the flagship
+  *Choosing an ICC* teaching article this makes more approachable), ADR-022 (M13 — the docs/release posture;
+  the v0.2.0 consolidation deferred here). New `REFERENCES.md` entries: **Koo & Li (2016)**, **Cicchetti
+  (1994)**. No estimand-spec (docs, not estimand — cf. M4/M13/M35). `project/COVERAGE.md` unaffected (no new
+  estimand cell).

@@ -95,10 +95,13 @@ helpers* item below (sample-size / CI-width), where it belongs.
   set-aside M35 option: a **clarity/accessibility rewrite** of `getting-started` /
   `choosing-an-icc` — reduce jargon, add a from-scratch worked path, make the *Choosing an ICC*
   tree and the estimand vocabulary approachable to applied users, not just methodologists.
-  **Status: not scheduled — deferred out of M35 (those two articles are already good; a rewrite
-  is a later docs pass).** No new estimand or oracle risk (docs only, cf. M4/M13); every displayed
-  number must stay computed live + claim-tested (#1/#4/#12), and any new article joins the
-  `_pkgdown.yml` articles index ([[pkgdown-reference-index-new-exports]] applies to articles too).
+  **Status: SCHEDULED as M40** (ADR-050, planned 2026-07-11) — the rewrite ships **in place** (both
+  front-door articles, no split), adds a **sourced, caveated interpretation-band guide** (Koo & Li 2016 /
+  Cicchetti 1994 — #4: cited, not invented), and stays a pure docs milestone (cf. M4/M13/M35 — no new
+  estimand or oracle risk; every displayed number computed live + claim-tested, #1/#4/#12). Full scope is in
+  [`MILESTONES.md`](MILESTONES.md) M40 (ADR-015 — not re-narrated here). **What remains parked** after M40 is
+  the **clarity pass over the other four articles** (`engines`, `interval-methods`, `multilevel-designs`,
+  `d-studies-and-replicates`) and a standalone **glossary page** — later docs passes, not scheduled.
 - **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
   lme4 interval for singular fits (glmmTMB covers this today via the
   degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted

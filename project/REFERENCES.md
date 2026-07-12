@@ -1281,10 +1281,24 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - Brooks, M. E., et al. (2017). glmmTMB balances speed and flexibility among
   packages for zero-inflated generalized linear mixed models. *The R Journal,
   9*(2), 378–400.
+- Cicchetti, D. V. (1994). Guidelines, criteria, and rules of thumb for evaluating
+  normed and standardized assessment instruments in psychology. *Psychological
+  Assessment, 6*(4), 284–290. doi:10.1037/1040-3590.6.4.284. (Interpretation-band
+  source for `getting-started.Rmd`, M40 — the older sibling rule of thumb: ICC < 0.40
+  poor, 0.40–0.59 fair, 0.60–0.74 good, 0.75–1.00 excellent. Cited as one convention
+  among several, with caveats; the package computes no verdict — #4/#18.)
 - Jorgensen, T. D. (2021). How to estimate absolute-error components in structural
   equation models of generalizability theory. *Psych, 3*(2), 113–133.
   doi:10.3390/psych3020011. (M7 lavaan engine — the SEM absolute-error method; Eq. 6
   defines σ²_i as the raw variance of the effects-coded indicator intercepts.)
+- Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass
+  correlation coefficients for reliability research. *Journal of Chiropractic
+  Medicine, 15*(2), 155–163. doi:10.1016/j.jcm.2016.02.012. (Primary
+  interpretation-band source for `getting-started.Rmd`, M40: ICC < 0.5 poor,
+  0.5–0.75 moderate, 0.75–0.90 good, > 0.90 excellent — and, load-bearing for the
+  vignette's caveat, the guideline is to **judge against the 95% CI of the estimate,
+  not the point** (§ "Interpretation"). Cited as one convention among several; the
+  package deliberately computes no verdict — #4/#18.)
 - Lee, H., & Vispoel, W. P. (2024). A robust indicator mean-based method for
   estimating generalizability theory absolute error and related dependability indices
   within structural equation modeling frameworks. *Psych, 6*(1), 401–425.
