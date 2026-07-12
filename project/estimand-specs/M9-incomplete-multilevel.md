@@ -204,14 +204,23 @@ before the guard ships; an unresolved case triggers a recommended Fable review (
 its cluster). It reduces to the balanced rater count when complete (recovering M5),
 and `icc()` surfaces `k_eff` so the divisor is transparent.
 
-The M3 agreement-vs-consistency caveat carries over and **widens**: `k_eff` is exact
-for **consistency** (error = σ²_res only). For **agreement** the error now carries
-**two** rater-side terms (σ²_r *and* σ²_cr) beyond σ²_res, each of which reduces under
-averaging only under the GT "average over `k` freshly sampled raters" reading; using a
-single `k_eff` for the whole error applies one consistent effective rater count — an
-effective-`k` approximation the report notes and the boundary-aware MC CI reflects
-honestly (ADR-003). **Pinned by oracle in Slice 1** (define `Φ(k_eff)` from known
-components + the realized design and check recovery), not asserted.
+The M3 agreement-vs-consistency caveat carries over: `k_eff` is exact for
+**consistency** (error = σ²_res only). For **agreement** the error carries **two**
+rater-side terms (σ²_r *and* σ²_cr) beyond σ²_res. Using a single `k_eff` for the whole
+error applies one consistent effective rater count. **Pinned by oracle in Slice 1**
+(define `Φ(k_eff)` from known components + the realized design and check recovery), not
+asserted.
+
+**Note (M46, ADR-057 Am.1 — the "approximation" hedge rescoped).** An earlier draft called
+the agreement average an *effective-`k` approximation*. The M46 Fable review established
+that harmonic pooling *is* per-unit error-variance averaging **exactly** (the mean marginal
+absolute error of the observed means is `(σ²_r + σ²_res)·mean(1/n_s) = error/k_eff`), so
+`ICC(A, k_eff)` is **exact for the mean marginal absolute agreement error**, not an
+approximation. What remains true is only that a single `k_eff` summarizes the *average*
+per-unit error (not each unit's own), and that the marginal (universe) reading differs from
+a conditional "these particular raters" reading — a distinction that exists on complete data
+too. The cluster level is *cleaner still* and exact (§10); the "approximation" language is
+retired and must not propagate to the cluster-level docs.
 
 ---
 
@@ -311,9 +320,9 @@ If any §3 coefficient or §4 guard cannot be pinned by both required oracles it
 
 ## 9. Out of scope for M9 (recorded for forward-compatibility)
 
-- **Averaged cluster-level `ICC(c,k)` on incomplete data** — the per-cluster
-  effective-rater divisor is an open modeling question with no textbook oracle
-  (§3b); deferred pending a simulation-oracle study or Fable review. Single-rater
+- **Averaged cluster-level `ICC(c,k)` on incomplete data** — was an open modeling
+  question here (§3b); **RESOLVED by M46 (ADR-057) → §10** with the inverse-Simpson
+  harmonic divisor `k_c^eff`, for glmmTMB/lme4 (brms deferred). Single-rater
   `ICC(c,1)` ships in Slice 2; complete-data `ICC(c,k)` is unaffected (M5).
 - **Incomplete nested multilevel (Designs 2/3)** — its own later slice; needs the
   ragged nested-vs-crossed inference (§4a) extended to the nested sub-designs
@@ -327,6 +336,72 @@ If any §3 coefficient or §4 guard cannot be pinned by both required oracles it
 - **A Bayesian/MCMC cross-engine** (the paper's own estimator); a three-facet
   `d_study()` over subject-per-cluster counts; exposing the conflated single-level ICC
   (Eq. 14). (ROADMAP / M5 §8.)
+
+---
+
+## 10. Resolution — the averaged cluster-level `ICC(c,k)` divisor (M46, ADR-057)
+
+M46 lifts the §3b/§9 deferral. The fit and the cluster error sets are unchanged (M5/§3b:
+signal σ²_c; agreement error {σ²_r, σ²_cr}, consistency {σ²_cr}); the only new object is
+the averaging divisor under imbalance.
+
+**The divisor.** The reported cluster coefficient describes each cluster's **observed,
+cells-pooled mean**, in which rater `r` carries weight `w_{c,r} =` (observed cells of `r`
+in cluster `c`) / (observed cells in `c`). The effective number of raters behind that
+mean is the **inverse-Simpson** count, and a single reported divisor is their harmonic
+mean across clusters:
+
+```
+m_c^IS = 1 / Σ_r w_{c,r}²           (per-cluster effective rater count; = distinct raters when weights equal)
+k_c^eff = 1 / mean_c(1 / m_c^IS)    (the reported averaging divisor)
+```
+
+This reduces to the rater count `k` on complete/uniform-weight data (recovering M5). It is
+implemented as `cluster_k_eff()` (`R/design.R`) and surfaced on the object as `k_c_eff`.
+
+**The general identity (name the target).** For *any* linear cluster score with weights
+`w` summing to 1, the marginal per-cluster error is `(σ²_r + σ²_cr)·Σw²` (agreement) /
+`σ²_cr·Σw²` (consistency), so the effective count is always `1/Σw²`. **Every candidate
+divisor is exact for *some* score** — the cell-pooled mean gives inverse-Simpson; a
+rater-balanced mean (average each rater's cluster-mean, then average raters) gives the
+distinct-count harmonic. No simulation can adjudicate the *target*; it is a commitment.
+The package reports the **cell-pooled** target (matching §5's "observed subject means" and
+ADR-057's "realized cluster means"; GT decision-study logic; ten Hove et al. 2022 p. 14
+*bracket* k = 3/5 under this exact imbalance, and inverse-Simpson = 4.5 sits inside their
+bracket). A future score variant is a weight swap, not a re-derivation.
+
+**Exactness — both types (resolves §5's hedge at the cluster level).** `k_c^eff` is
+**exact for agreement as well as consistency**: the agreement (absolute) coefficient
+averages each cluster's *marginal* absolute error, into which cross-cluster rater-sharing
+covariance does not enter. There is **no** effective-`k` approximation at the cluster level
+(cf. §5 — that hedge is over-cautious; see the §5 note).
+
+**Oracles (#1, Fable-blessed — ADR-057 Am.1).** No textbook worked example, so ≥2
+independent legs (`data-raw/oracle-cluster-ck-incomplete.R`): **O-cluster-score** — a
+score-based, **weight-free** empirical reliability (paired fresh-rater replicates, plain
+cluster cell means; the T1 `mc_truth` alone is tautological for the target) that the
+inverse-Simpson plug-in recovers, with distinct-count **refuted** (> 0.1 Φ bias under
+extreme imbalance); **O-cluster-fit** — ship-path glmmTMB REML fit + plug-in at `k_c^eff`
+from estimated components; **O-cluster-lme4** — cross-engine components < 1e-4;
+**O-cluster-reduction** — complete data → `k_c^eff = k` exact. **Coverage** (#12,
+`data-raw/oracle-cluster-ck-coverage.R`, n_rep = 240): the boundary-aware MC interval is
+nominal across a C_n = {8, 20, 60} axis + heterogeneous-`m_c` + extreme-imbalance +
+boundary σ²_c ≈ 0 cells (min coverage ≈ .91, no C_n decay); target defined per frozen
+realized design.
+
+**Ragged-consistency ordering caveat (documentation, not a divisor bug).** On ragged data,
+rater main effects do **not** fully cancel from the *observed ordering* of cluster means
+(they cancel only under identical rater weight profiles): the leftover ≈ `σ²_r·mean_c Σ_r
+(w_{c,r} − w̄_r)²` measures ~2× the entire consistency error on typical ragged designs.
+`ICC_c(C, k_c^eff)` remains correct **as the inherited component-based estimand** (rater
+disagreement σ²_cr only); users comparing observed ragged cluster means should prefer
+`ICC_c(A, k_c^eff)`, whose error term bounds the ordering contamination. (Same
+distinction-family as M45's conflation caveat.)
+
+**Scope.** Crossed Design 1, random raters, glmmTMB/lme4 (variance ratio — no θ²
+correction). **brms deferred** (its variance-ratio push-forward would fold in but is not
+yet oracle-validated — a candidate). Incomplete/unbalanced cluster-level **fixed**
+`ICC(c,k)` stays double-blocked, but M46 removes one of its two blocks (this divisor).
 
 ---
 

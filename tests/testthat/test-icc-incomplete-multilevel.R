@@ -371,6 +371,37 @@ cluster_single_iccs <- function(d) {
   c(A1 = cc / (cc + rr + cr), C1 = cc / (cc + cr))
 }
 
+# The averaged cluster-level ICC(c,k) divisor under imbalance (M46, ADR-057):
+# inverse-Simpson harmonic k_c^eff, computed independently of R/design.R.
+k_c_eff_ref <- function(d) {
+  per <- tapply(seq_len(nrow(d)), d$cluster, function(ix) {
+    w <- as.numeric(table(droplevels(d$rater[ix])))
+    w <- w / sum(w)
+    1 / sum(w^2)
+  })
+  1 / mean(1 / per)
+}
+
+# Averaged cluster-level ICC(c,k) from an independent lme4 fit at divisor `k`.
+cluster_ck_iccs <- function(d, k) {
+  fit <- lme4::lmer(
+    score ~ 1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
+      (1 | cluster:rater),
+    data = d,
+    REML = TRUE,
+    control = lme4::lmerControl(check.conv.singular = "ignore")
+  )
+  vc <- as.data.frame(lme4::VarCorr(fit))
+  g <- function(grp) vc$vcov[vc$grp == grp][1]
+  cc <- g("cluster")
+  cr <- g("cluster:rater")
+  rr <- g("rater")
+  c(Ak = cc / (cc + (rr + cr) / k), Ck = cc / (cc + cr / k))
+}
+
 test_that("O-IML/lme4: ragged cluster-level ICC(c,1) matches an independent lme4 fit", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
@@ -430,48 +461,125 @@ test_that("O-IML/reduction: complete data reproduces M5 at BOTH levels", {
   )
 })
 
-test_that("cluster-level ICC(c,k) on incomplete data is dropped, not all-or-nothing (#9)", {
+test_that("O-cluster-ck: averaged cluster-level ICC(c,k) ships on incomplete data (M46)", {
   skip_if_not_installed("glmmTMB")
   d <- ragged(
     sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
     prop = 0.2,
     seed = 9
   )
-  # Cluster level ONLY + averaged unit ONLY: nothing is computable -> loud abort
-  # (the averaged cluster divisor under imbalance is deferred, spec M9 §3b).
-  expect_error(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      level = "cluster",
-      unit = "average",
-      seed = 1
-    ),
-    class = "intraclass_unsupported"
-  )
-  # Default call (both levels, both units): rather than reject the whole call, the
-  # averaged CLUSTER row is dropped (with a one-time message) while the subject-level
-  # rows (incl. the average) and the single-rater cluster ICC(c,1) are returned -- a
-  # partial result, not an abort (#9). The message uses .frequency = "once", so force
-  # verbose verbosity to observe it regardless of test ordering.
-  withr::local_options(rlib_message_verbosity = "verbose")
-  expect_message(
-    fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1),
-    "Averaged cluster-level"
-  )
+  # M46 (ADR-057): the averaged cluster ICC(c,k) now ships on ragged data with the
+  # inverse-Simpson harmonic k_c^eff -- no abort, no drop. A default call reports the
+  # full A1/Ak/C1/Ck family at BOTH levels.
+  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
   expect_s3_class(fit, "icc")
   e <- fit$estimates
-  # Subject level keeps both single and average; cluster level keeps only single.
-  # The default reports both error definitions (ADR-054), so each level carries its
-  # agreement and consistency rows; the averaged cluster ICC(c,k) is the only drop.
   expect_setequal(
-    e$index[e$level == "subject"],
+    e$index[e$level == "cluster"],
     c("ICC(A,1)", "ICC(A,k)", "ICC(C,1)", "ICC(C,k)")
   )
-  expect_setequal(e$index[e$level == "cluster"], c("ICC(A,1)", "ICC(C,1)"))
+  # k_c^eff is reported and matches the independent inverse-Simpson computation, and
+  # is strictly below the rater count (ragged) yet above 1.
+  expect_equal(fit$k_c_eff, k_c_eff_ref(d), tolerance = 1e-8)
+  expect_true(fit$k_c_eff > 1 && fit$k_c_eff < 5)
+  # Invariants (#3): estimates in [0,1], average >= single, CI always present.
+  ck <- e[e$level == "cluster", ]
+  expect_true(all(ck$estimate >= 0 & ck$estimate <= 1))
+  expect_true(all(is.finite(ck$conf.low) & is.finite(ck$conf.high)))
+  expect_gte(pick(fit, "ICC(A,k)", "cluster"), pick(fit, "ICC(A,1)", "cluster"))
+  expect_gte(pick(fit, "ICC(C,k)", "cluster"), pick(fit, "ICC(C,1)", "cluster"))
+})
+
+test_that("O-cluster-ck: ragged cluster ICC(c,k) matches an independent lme4 fit at k_c^eff", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- ragged(
+    sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
+    prop = 0.2,
+    seed = 9
+  )
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    type = c("agreement", "consistency"),
+    unit = "average",
+    seed = 1
+  )
+  ref <- cluster_ck_iccs(d, k_c_eff_ref(d))
+  expect_equal(
+    pick(x, "ICC(A,k)", "cluster"),
+    unname(ref["Ak"]),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(x, "ICC(C,k)", "cluster"),
+    unname(ref["Ck"]),
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-cluster-ck/reduction: complete data -> k_c^eff = k, balanced M5 numbers", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  d <- sim_design1(6, 5, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 20260707)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    unit = "average",
+    seed = 1
+  )
+  expect_equal(x$k_c_eff, 4, tolerance = 1e-9)
+  ref <- cluster_ck_iccs(d, 4)
+  expect_equal(
+    pick(x, "ICC(A,k)", "cluster"),
+    unname(ref["Ak"]),
+    tolerance = 1e-4
+  )
+  expect_equal(
+    pick(x, "ICC(C,k)", "cluster"),
+    unname(ref["Ck"]),
+    tolerance = 1e-4
+  )
+})
+
+test_that("O-cluster-ck/cover: ragged cluster ICC(c,k) MC interval covers, no C_n decay", {
+  # A CI method's oracle is coverage (#1, #3, #12). The committed fixture
+  # (fixtures/cluster-ck-coverage-oracle.rds) is a seeded coverage sim over the M46
+  # sweep (ADR-057 Am.1 §5): the C_n axis {8, 20, 60}, a heterogeneous-m_c cell, an
+  # extreme-imbalance cell (small k_c^eff), and a boundary sigma^2_c ~ 0 cell. Each
+  # design's ragged cell pattern is frozen across reps; the population ICC_c(A/C,k) is
+  # its own realized-design value; n_rep = 240 ([[ragged-coverage-nrep-240]]).
+  # Regenerated by data-raw/oracle-cluster-ck-coverage.R.
+  skip_on_cran()
+  o <- readRDS(test_path("fixtures", "cluster-ck-coverage-oracle.rds"))
+  expect_equal(unique(o$n_rep), 240L)
+  # Nominal everywhere -- no cell materially undercovers (MC SE ~1.4 pts at n_rep 240;
+  # the >= .88 floor clears noise, [[ragged-coverage-nrep-240]]).
+  expect_gt(min(o$coverage_A), 0.88)
+  expect_gt(min(o$coverage_C), 0.88)
+  # No incidental-parameters decay with cluster count: the large-C_n agreement cell is
+  # not materially below the small-C_n one (the failure mode is invisible at few
+  # clusters -- [[coverage-oracle-cluster-count-axis]]). Mild low-C_n conservatism is
+  # the boundary-aware signature, not a decay.
+  axis <- o[grepl("C_n axis", o$cell), ]
+  axis <- axis[order(axis$C_n), ]
+  expect_gt(
+    axis$coverage_A[axis$C_n == 60],
+    axis$coverage_A[axis$C_n == 8] - 0.1
+  )
+  # The boundary sigma^2_c ~ 0 cell (a low-coefficient regime) still covers.
+  expect_gt(o$coverage_A[o$cell == "boundary vc~0"], 0.88)
+  # Point bias is small at adequate C_n (the C_n=8 cell carries the largest, honest
+  # small-cluster bias; every cell's |bias| stays well inside the interval half-width).
+  expect_lt(max(abs(o$bias_A)), 0.06)
 })
 
 test_that("cluster-level IRR aborts to subject when raters do not bridge clusters", {
@@ -527,4 +635,39 @@ test_that("print surfaces the incomplete multilevel design and effective k", {
   expect_match(out, "Observations: \\d+ \\(incomplete\\)", all = FALSE)
   expect_match(out, "effective 3.24 raters", all = FALSE)
   expect_match(out, "multilevel two-way random", all = FALSE)
+})
+
+test_that("print/glance surface the cluster-level k_c^eff on incomplete data (M46)", {
+  skip_if_not_installed("glmmTMB")
+  d <- ragged(
+    sim_design1(20, 8, 5, 1.5, 0.8, 0.5, 0.4, 0.6, seed = 7),
+    prop = 0.2,
+    seed = 9
+  )
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = "cluster",
+    unit = c("single", "average"),
+    seed = 1
+  )
+  out <- cli::cli_fmt(print(x))
+  # The cluster divisor is surfaced separately from the subject k_eff and matches the
+  # reported k_c_eff (inverse-Simpson). A cluster-only report does not claim a
+  # per-subject k_eff note (no subject rows are shown).
+  expect_match(
+    out,
+    sprintf(
+      "effective %s raters .inverse-Simpson",
+      formatC(x$k_c_eff, format = "f", digits = 2)
+    ),
+    all = FALSE
+  )
+  expect_false(any(grepl("ratings/subject", out)))
+  expect_equal(glance(x)$k_c_eff, x$k_c_eff)
+  # A single-level object carries no cluster divisor.
+  expect_true(is.na(glance(icc(ratings, score, subject, rater))$k_c_eff))
 })

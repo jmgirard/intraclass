@@ -1,5 +1,31 @@
 # Project status
 
+- **M46 (ADR-057) → REVIEW** on `m46-cluster-ck-divisor` — all tasks done (T1–T5, AC1–AC6), finish-task gate
+  green (`devtools::check` CI-parity 0/0/0; full CI-mode suite 0 fail / 1545 pass; lintr 0; pkgdown clean;
+  installed-pkg drive OK), awaiting merge approval. The averaged cluster-level `ICC(c,k)` now ships on
+  incomplete/ragged crossed multilevel data (glmmTMB/lme4) with the **inverse-Simpson harmonic `k_c^eff`**
+  (Fable-blessed, ADR-057 Am.1); brms deferred (candidate). Updated 2026-07-12.
+- **Active milestone: M46** (ADR-057) — in-progress on `m46-cluster-ck-divisor`. Updated 2026-07-12.
+  **T1 DONE (AC1 ✓) — divisor VALIDATED, ship path** (attempt-then-degrade did not fire): the averaged
+  cluster-level divisor is **`k_c^eff = 1/mean_c(1/m_c^IS)`**, the harmonic mean of per-cluster **inverse-Simpson**
+  effective rater counts `m_c^IS = 1/Σ_r w_{c,r}²` (cell-weighted) — proven exact analytically (L1) and confirmed
+  by direct Monte-Carlo across a C_n=6→80 MCAR/MAR/extreme-imbalance/component-invariance battery (< 0.003 on
+  both Φ and ρ; `data-raw/reviews/m46-cluster-ck-divisor-spike.R`). Agreement is **exact, not approximate**
+  (resolves M9 §5's cluster-level hedge); distinct-count harmonic, arithmetic mean, and subject-`k_eff` are
+  refuted. **Decision point pending (RB tripwire: no-oracle):** the study is unambiguous, so per ADR-057 it may
+  ship without a Fable review — the maintainer **escalated** (per-instance, #19/D-004). **RR INGESTED (Fable 5,
+  2026-07-12): inverse-Simpson `k_c^eff` confirmed on the ship path — degrade branch NOT triggered** (ADR-057
+  Amendment 1). Rulings folded into the ACs/tasks: (Q1) the **cell-pooled cluster-mean target** is a
+  definitional commitment (ten Hove bracket k=3/5, IS=4.5 inside) → name the score; (Q2) agreement is **exact**
+  (§5's hedge over-cautious → rescope); (Q3) T2's oracle adopts Fable's **CHK-A weight-free score** + **CHK-B
+  ship-path fit** legs (the T1 `mc_truth` is tautological for the target); (§4) new doc caveat — steer
+  observed-ordering comparisons to `ICC_c(A,·)`; (Q4) no interval interaction, four T3 sweep requirements.
+  **T2 DONE (AC2/AC3 ✓):** inverse-Simpson `k_c^eff` wired (`cluster_k_eff()` in `R/design.R`, threaded in
+  `R/icc.R`; `~L1188` abort replaced by the computed average; `k_c_eff` on the object; balanced numbers
+  unchanged). brms kept deferred (re-added a brms-only drop). Committed oracle
+  `data-raw/oracle-cluster-ck-incomplete.R` (O-cluster-score / -fit / -lme4 / -reduction — all pass); tests drive
+  real `icc()` (0 fail / 654 pass affected). **Active task: T3** (coverage sweep — four AC4 requirements: C_n
+  axis n_rep≥240, extreme-imbalance + heterogeneous-`m_c` cells, boundary σ²_c≈0, target per realized design).
 - **M46 planned (2026-07-12, ADR-057):** the *averaged cluster-level `ICC(c,k)` divisor on incomplete data* —
   the last-open per-cluster effective-rater divisor (M9 §3b/§9). On complete data the per-subject and
   per-cluster effective rater counts coincide (M5 ships one divisor); on ragged data they diverge and the
