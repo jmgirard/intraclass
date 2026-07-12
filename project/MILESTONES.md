@@ -1847,7 +1847,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     conflated snapshots; author §6b of the spec.
   - T6 — Docs + NEWS + finish-task gate (AC7) → PR from `m45-conflated-consistency`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T3; AC4 → T4; AC5 → T2, T3, T4; AC6 → T5; AC7 → T5, T6.
-- Status: **review** (ADR-056; branch `m45-conflated-consistency`, all tasks done, local gate green — PR pending).
+- Status: **done — merged, CI green** (PR [#51](https://github.com/jmgirard/intraclass/pull/51),
+  squash-merged to `main` at `109a46e`; full CI matrix green 9/9). Planned + implemented in one session; T4
+  (brms) folded into T2 (engine-agnostic guard + generic composition); T3 added a rater-bridging gate for the
+  σ²_cr-reading conflated level (identifiability catch). **No Fable** (sourced McGraw & Wong oracle; additive;
+  no IP). ADR-056; estimand-spec §6b; derivation spike `data-raw/reviews/m45-conflated-consistency-spike.R`.
 - Work log:
   - 2026-07-12 — T1 started (derivation-confirmation spike). Located the mechanism: conflated error set is
     hardcoded agreement-only at `R/estimand.R:94`; every other design derives consistency by dropping

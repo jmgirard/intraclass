@@ -1,15 +1,14 @@
 # Project status
 
-- **M45 in REVIEW (2026-07-12): all tasks done, local gate green, PR pending.** Consistency-conflated ICC
-  ships (the flat two-way consistency ICC read off the multilevel fit, drop σ²_r; McGraw & Wong 1996) for
-  glmmTMB/lme4/brms, balanced + incomplete/ragged, single+average; a default `level="conflated"` call now
-  reports both agreement and consistency. Identifiability: the σ²_cr-reading conflated level needs raters that
-  bridge clusters (dropped/aborted otherwise). Still-out unchanged (fixed/nested/lavaan conflated abort).
-  **Finish-task gate GREEN** (`air`/`spelling`/`lintr` 0 / `document` no delta / CI-mode suite 403 pass 0 fail
-  1 warn[pre-existing] 23 skip[live Stan] / installed-pkg drive OK / `devtools::check` CI-parity `NOT_CRAN=false`
-  no-manual **0/0/0**). **Next: open the PR from `m45-conflated-consistency`; on green CI + merge approval,
-  reconcile M45 → done + set Last green CI.** Merge stays a separate approval gate. **No Fable** (sourced
-  oracle; additive; no IP). ADR-056; spec §6b.
+- Active milestone: **none** — **M45 (ADR-056, consistency-conflated single-level ICC) shipped** (PR
+  [#51](https://github.com/jmgirard/intraclass/pull/51), squash-merged to `main` at `109a46e`; full CI matrix
+  green 9/9). Consistency-conflated ICC (the flat two-way consistency ICC read off the multilevel fit, drop
+  σ²_r; McGraw & Wong 1996) now ships for glmmTMB/lme4/brms, balanced + incomplete/ragged, single+average; a
+  default `level="conflated"` call reports both agreement and consistency. The σ²_cr-reading conflated level
+  needs raters that bridge clusters (dropped/aborted otherwise — T3 identifiability catch); fixed/nested/lavaan
+  conflated still abort. T4 (brms) folded into T2 (engine-agnostic guard + generic push-forward). **No Fable.**
+  Last green CI: `109a46e` (main, 9/9). **Next milestone to plan via `/milestone-plan`** (another parking-lot
+  item — the release consolidation ADR-022 still parked; `main` stays on the `0.0.0.9000` dev version, ADR-055).
 - **T1–T4 detail (2026-07-12, AC1–AC4 ✓):**
   consistency-conflated ships for glmmTMB/lme4/brms, balanced + incomplete/ragged. Core change: estimand map
   (`R/estimand.R:87`) derives the conflated error set by `switch(type, …, consistency=c("cluster_rater",
