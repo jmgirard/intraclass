@@ -187,8 +187,23 @@ simulations.
   single-level one-way** data (`ICC(1)`/`ICC(1,k)`): the shipped one-way
   fit is run on the observed ratings with the same harmonic-mean `k_eff`
   divisor, a ratio of variance components needing no moment correction.
-  Incomplete **fixed**-rater nested and incomplete within-cell-replicate
-  Bayesian fits remain planned for later milestones.
+  The Bayesian engine also reports the **fixed-rater cluster level** for
+  the crossed (Design 1) design on balanced data (`raters = "fixed"`,
+  `level = "cluster"`): the between-cluster ICC is read off the same
+  crossed fixed multilevel posterior draws (signal , error the
+  finite-population plus the cluster-by-rater variance), a
+  variance-ratio push-forward that equals the random-rater cluster-level
+  ICC on balanced data — so it now returns **both** levels for balanced
+  fixed raters, matching the `glmmTMB`/`lme4` engines. Finally, it fits
+  **incomplete/ragged fixed-rater nested** (Design 2) data at the
+  subject level: is read per posterior draw with the per-cluster moment
+  correction applied to each cluster’s own rater count, so unequal
+  per-cluster counts and the boundary (zero rater variance) are handled,
+  and a seeded coverage reference confirms the credible interval covers
+  at both moderate and high cluster counts. Incomplete
+  within-cell-replicate and numeric-`unit` (D-study) Bayesian fits, and
+  the incomplete/unbalanced fixed-rater *cluster* level (open for every
+  engine), remain planned for later milestones.
 - A new **`prior`** argument lets you override the sourced half-*t*(4,
   0, 1) prior for `engine = "brms"` with any prior object (from
   [`brms::set_prior()`](https://paulbuerkner.com/brms/reference/set_prior.html)

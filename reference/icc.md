@@ -201,11 +201,12 @@ icc(
   design (subject level), and the nested **Design 2** (raters nested in
   clusters) and **Design 3** (raters nested in subjects, the multilevel
   one-way, agreement-only) *random* multilevel designs (subject level),
-  and the single-level one-way random design; and, on balanced/complete
-  data only, the nested Design 2 *fixed-rater* multilevel design at the
-  subject level, the conflated diagnostic, and within-cell replicates.
-  Incomplete/ragged **fixed**-nested and within-cell-replicate Bayesian
-  fits, and numeric-`unit` (D-study) projection, are planned for later
+  and the single-level one-way random design; the nested Design 2
+  *fixed-rater* multilevel design at the subject level on both balanced
+  and incomplete/ragged data; and, on balanced/complete data only, the
+  crossed Design 1 *fixed-rater* **cluster** level, the conflated
+  diagnostic, and within-cell replicates. Within-cell-replicate Bayesian
+  fits and numeric-`unit` (D-study) projection are planned for later
   milestones. `"lme4"` requires the lme4 and merDeriv packages;
   `"lavaan"` requires the lavaan package; `"brms"` requires the brms
   package (and a working Stan toolchain).
@@ -433,11 +434,13 @@ level is supported for the crossed (Design 1) design on **balanced,
 complete** data (signal \\\sigma^2_c\\, agreement error the
 finite-population \\\theta^2_r\\ plus the cluster-by-rater term
 \\\sigma^2\_{cr}\\); on balanced data it equals the random-rater
-cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
-estimation, Design-3 fixed raters (nested in subjects – no separable
-rater effect), and the Bayesian (`engine = "brms"`) fixed-rater
-cluster-level and incomplete fixed-nested paths remain for later
-milestones.
+cluster-level ICC. The Bayesian (`engine = "brms"`) fixed-rater
+**cluster** level is likewise supported for the crossed (Design 1)
+design on balanced, complete data, and the Bayesian incomplete/ragged
+fixed-rater **nested** (Design 2) subject level is supported too.
+Incomplete/unbalanced fixed-rater cluster-level estimation and Design-3
+fixed raters (nested in subjects – no separable rater effect) remain for
+later milestones.
 
 ## Within-cell replicates
 
