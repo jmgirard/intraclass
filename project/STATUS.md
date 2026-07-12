@@ -1,6 +1,23 @@
 # Project status
 
-- Active milestone: **none** — M38 (ADR-048, brms engine parity for the fixed multilevel cells) shipped
+- Active milestone: **M39** (ADR-049, `d_study()` occasion-count projection off a within-cell replicate fit) —
+  **planned, no code yet** (plan before code, #14), on branch `m39-occasion-dstudy`. Opened after a short retro
+  of the M23–M38 arc: the estimand family is now very complete, so the maintainer chose (plan question gate) a
+  **thin parked corner** — the symmetric sibling of the M22 (ADR-032) rater-count projection. M39 projects the
+  **occasion count `n_o`** off a **balanced** within-cell replicate fit, holding raters at the fitted count, via
+  a new `n_o` argument (`d_study(x, m = NULL, n_o = NULL, ...)`, exactly one axis per call). Projection
+  machinery, **not new estimand work** (#6) — the only spec change is a new §9 in `M4.5-d-study.md`. Three
+  structural facts (ADR-049) settle scope + risk: occasion averaging rescales **only pure error σ²_e** (a
+  variance-ratio push-forward, M22 MC interval reused → **no Fable, no coverage pathology**); the curve has a
+  **finite ceiling** (`σ²_s/(σ²_s+(σ²_r+σ²_sr)/m)`, not →1 — the honest caveat, #18); and it is **well-posed for
+  fixed raters incl. absolute agreement** (the M22 §4 abort is axis-specific — refused for `m`, permitted for
+  `n_o`). Two slices mirror M22: **T1** single-level two-way; **T2** multilevel (subject projects; cluster
+  occasion-invariant → flat curve + note); **T3** docs/spec §9/gate → PR. Oracles **O-OccDS** (reduction /
+  lme4 / GT dependability form / ceiling invariant / seeded-sim coverage / monotone-[0,1] / cluster-flat).
+  Deferred: **ragged**-replicate occasion projection (🟣, blocked on the effective-`n_o` divisor), brms/posterior
+  occasion projection, the 2-D `m × n_o` surface. Board: [`MILESTONES.md`](MILESTONES.md) M39. Next:
+  `/start-task` T1.
+- Prior milestone: **M38** (ADR-048, brms engine parity for the fixed multilevel cells) shipped
   (PR #44, squash-merged to `main` at `4124297`; full CI matrix green 9/9). It closed the **brms** half of the
   (C) research/blocked corner: Cell 1 balanced fixed cluster level (M37 sibling) + Cell 2 incomplete/ragged
   fixed-nested Design 2 (M36 sibling), both **clean guard-lifts** (no new fit code — the estimand machinery was
@@ -253,7 +270,12 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M38 all 4 tasks done, local gate green, PR pending.** The finish-task gate is green
+- Active task: **none yet — M39 planned (ADR-049), Task 1 not started.** The M39 board is live
+  ([`MILESTONES.md`](MILESTONES.md)); next action is **`/start-task` T1** (Slice 1: the `n_o` argument + the
+  single-level two-way occasion projection, O-OccDS single-level). No code written this session — plan only
+  (#14): ADR-049 + the M39 board + the ROADMAP flip (occasion-count → M39; ragged-replicate stays 🟣 parked) +
+  this STATUS flip, all on branch `m39-occasion-dstudy`. The M4.5 §9 spec lands in T3 with the docs. *Superseded
+  active task (M38, done):* **M38 all 4 tasks done, local gate green, PR pending.** The finish-task gate is green
   (`devtools::document` / `air format --check` / `lintr` 0 lints / full CI-mode suite **1175/0** /
   `devtools::check` CI-parity **0/0/0** / installed-pkg both new brms paths driven). Next action: **open the PR
   from `m38-brms-fixed-multilevel-parity`**; on green CI + merge, reconcile M38 → done + set "Last green CI".
@@ -394,10 +416,13 @@
   fits ran, incl. O-Bayes-Conflated-agree + O-Bayes-Rep-agree); full suite (CI mode) **1089/0/10**;
   `lintr`/`air` clean; coverage ~85% (below 90% by design — [[coverage-baseline]]). Prior green: **PR #33
   (M28)** at `e6ce64d`.
-- Blockers: **none.** M38 (ADR-048) shipped and merged (PR #44, `4124297`), full CI matrix green 9/9; the Cell
-  2 coverage risk (2b-under-imbalance-nested-brms) resolved NOMINAL (O-Bayes-IFNML C_n=80 boundary .970, no
-  decay), so the stop-and-replan branch did not fire and no Fable was needed. The next milestone needs an ADR
-  after a short retro.
+- Blockers: **none.** M39 (ADR-049) is planned and unblocked — a thin projection slice off shipped M22
+  machinery (occasion averaging rescales only σ²_e; MC interval reused), no research question in the scoped
+  (balanced) path and no Fable anticipated. The ragged-replicate occasion half is deferred, not blocking (its
+  effective-`n_o` divisor is the open 🟣 item, M20/ADR-030). Prior (M38, cleared): M38 (ADR-048) shipped and
+  merged (PR #44, `4124297`), full CI matrix green 9/9; the Cell 2 coverage risk
+  (2b-under-imbalance-nested-brms) resolved NOMINAL (O-Bayes-IFNML C_n=80 boundary .970, no decay), so the
+  stop-and-replan branch did not fire and no Fable was needed.
   Historical (M37, cleared): M37 (ADR-047) shipped and merged (PR #43, `f0b29b7`), full CI matrix green 9/9, no
   Fable review (the pre-authorization did not fire — Outcome A).
   Historical (M36,
@@ -414,7 +439,14 @@
   [`fable-brief-m32-s2.md`](fable-brief-m32-s2.md) / `data-raw/reviews/fable-review-m32-s2-response.md`. Slice 2 code/oracle/fixture/tests are **staged in the working tree, UNCOMMITTED**
   (the coverage test asserts ≥ .88 and fails on the committed-evidence fixture — the honest signal, not
   loosened). Slice 1 (Design 2) is shipped/committed (7b8b60c) and unaffected.
-- Updated: 2026-07-11 by main session (Opus) — **M38 shipped (PR #44, squash-merged at `4124297`); post-merge
+- Updated: 2026-07-11 by main session (Opus) — **retro of the M23–M38 arc + M39 planned (ADR-049,
+  `d_study()` occasion-count projection).** Plan-only, no code (#14): wrote ADR-049 (context/decision/oracles
+  O-OccDS + the API `n_o` decision and cluster-flat decision, both maintainer-approved via the plan question
+  gate), added the M39 DoD board to MILESTONES + advanced the preamble/ADR-index (M39 in flight), flipped the
+  ROADMAP `d_study()` item (occasion-count → M39; ragged-replicate stays 🟣 parked on the effective-`n_o`
+  divisor), and flipped STATUS to M39-active. Branch `m39-occasion-dstudy` created off `main` @ `4124297`.
+  Next: `/start-task` T1 (Slice 1 — the `n_o` argument + single-level occasion projection). Prior line: **M38
+  shipped (PR #44, squash-merged at `4124297`); post-merge
   `project/` reconcile.** Flips STATUS to M38-shipped (active milestone none), sets "Last green CI" to the merge
   commit, compresses the MILESTONES M38 board to summary form (preserving the "Deferred out of M38" list),
   advances the MILESTONES preamble (M38 no longer in flight), and flips the ROADMAP (C) entry to "shipped as
