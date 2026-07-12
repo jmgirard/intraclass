@@ -346,11 +346,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M44 T1 — vectorize the `type` argument + estimand cross-product (not yet started; `/start-task`).**
-  M44 (ADR-054) planned this session; see the top bullet + the [`MILESTONES.md`](MILESTONES.md) M44 board. Release
-  context (unchanged): release prep for v0.1.0 is done (2026-07-12); the CRAN submission is the maintainer's
-  out-of-band act (`devtools::submit_cran()`, never self-submitted); version gate kept `0.1.0` (ADR-022; the
-  earlier "v0.2.0" plan framing was declined). M44 lands on `main` as 0.2.0-dev (maintainer chose implement-now). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
+- Active task: **M44 T4/T5 — remaining tests + docs/gate on branch `m44-vectorize-type`.** T1–T3 code DONE
+  (vectorize `type`, drop-vs-abort, presentation) + the `d_study()` project-both extension (user gate) DONE;
+  **whole suite GREEN (0/386, 53 skip), lintr clean.** Existing tests that assumed the old agreement-only default
+  were pinned to their single-type oracle. **Remaining:** (T4) a committed invariance test (defaulted == scalar
+  cell-for-cell), dedicated inform-and-drop/abort tests, snapshot regen for the grouped table; (T5) docs
+  (`@param type`, `d_study()` `@return`/`@section`, the d-studies vignette now shows two curves), NEWS
+  default-shape + `tidy()`-indexing caveat, finish-task gate, installed-pkg drive → PR. Checkpoints: `71c952e`
+  (icc core), `2f7f0b4` (d_study), `dd4fcaf` (suite green). Release context unchanged (v0.1.0 handoff is the
+  maintainer's out-of-band act; M44 lands on `main` as 0.2.0-dev per the implement-now gate). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
   the top. *Superseded (M43 S3, DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
   blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
   `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
