@@ -31,6 +31,14 @@
   kept `choose_icc()`** (the request's "`suggest_icc()`" was a misremembering — no rename/alias); one milestone
   / two slices; medium restyle (not full boxes/badges); breadcrumb walkthrough (no back-nav). **v0.2.0 release
   consolidation (ADR-022) stays the next step _after_ M43.**
+- **Decision recorded (2026-07-12): ADR-054** — vectorize `type` in `icc()` (accept
+  `c("agreement", "consistency")`, like `unit`/`level`) and **default to both**, so a default two-way call
+  reports every defined formulation (A1/Ak/C1/Ck) from ONE fit. Motivated by fit cost (brms); investigation
+  confirmed `type` never reaches any engine and all three interval methods already amortize over estimand
+  lists, so the second type is free. Undefined-by-design cells (Design 3, conflated Eq. 14, fixed-rater
+  agreement projection) inform-and-drop when defaulted in, keep their teaching aborts when explicit (#5;
+  ADR-029 precedent). **Sequencing: does NOT hold up the pending v0.1.0 handoff — targets 0.2.0.** Next
+  milestone to plan (via `/milestone-plan`) after the CRAN submission/acceptance.
 - Prior milestone: **none** — M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped (PR #48,
   squash-merged to `main` at `1baf7db`; full CI matrix green 9/9, devel clean). An **engineering/docs milestone**
   (cf. M4/M13/M35/M40/M41) with a bounded dependency delta: one reader-facing

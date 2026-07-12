@@ -4578,3 +4578,85 @@ consequences → references.
   (ships on `m43-cli-polish` via PR), [[verify-against-installed-package]] (snapshot discipline: reproducible cli
   output + retained `[CI]` mask; verify the installed package before the PR), [[run-lintr-before-push]] (semantic
   lint before push). No estimand-spec (presentation, not an estimator — cf. M4/M11/M13/M35/M40/M41/M42).
+
+## ADR-054: Vectorize `type` and default to both — all defined formulations (A1/Ak/C1/Ck) from one fit
+- Date: 2026-07-12
+- Status: accepted
+- Context: The maintainer raised a design question motivated by fit cost (a brms fit can take minutes to
+  hours): should a call report **all four two-way formulations** — ICC(A,1), ICC(A,k), ICC(C,1), ICC(C,k) —
+  instead of forcing a choice or a duplicate fit? Investigation confirmed the cost framing is even stronger
+  than posed: **`type` never reaches any engine.** The fitted model depends only on the design, `raters`,
+  and `engine`; agreement vs. consistency is post-fit arithmetic on the same variance components
+  (`estimand.R` — agreement puts the rater main effect in the error set, consistency drops it; McGraw &
+  Wong 1996). And the whole downstream pipeline is **already list-of-estimands**: `icc()` crosses
+  `unit` × `level` × `occasions` into an estimand list, the MC interval transforms one shared draws matrix,
+  the bootstrap does its refits once and loops estimands over the kept resample components
+  (`ci-bootstrap.R`), and the posterior path reuses the same MCMC draws. Even the lavaan engine fits one
+  `meanstructure = TRUE` model serving both types. `unit` and `level` are already **vectorized and default
+  to everything defined** (`validate_unit()` keeps the whole vector, so a default call reports both
+  `ICC(*,1)` and `ICC(*,k)`); **`type` is the lone scalar dimension** — the only axis where seeing the
+  other coefficient means refitting an identical model. The marginal cost of the second type is
+  microseconds atop a fit that is already paid for.
+- Decision (maintainer-approved this session, 2026-07-12):
+  - **`type` becomes vectorizable exactly like `unit`**: it accepts `c("agreement", "consistency")`, and
+    that vector is the **new default** — a default two-way call reports all four defined formulations
+    (A1/Ak/C1/Ck) from the single fit. A scalar `type` remains a filter for users who have named their
+    estimand (#2). No engine, fit, component, or interval-method change: the estimand cross-product in
+    `icc()` gains the type axis and everything downstream already consumes estimand lists.
+  - **Drop-vs-abort policy for the ragged grid** (not every design defines every cell): a cell that is
+    undefined **by design** and arrived via the *default* vector is **dropped with a `cli_inform`**
+    (precedent: the averaged cluster-level `ICC(c,k)` drop on incomplete data); an **explicit** request
+    for an undefined cell **keeps its loud teaching abort** (#5) — e.g. `type = "consistency"` on Design 3
+    still aborts. Known agreement-only surfaces (unchanged, now defaulted around rather than into):
+    Design 3 / the multilevel one-way (rater effect confounded), the conflated Eq. 14 diagnostic, and the
+    fixed-rater numeric-`unit` agreement projection (`abort_fixed_agr_projection`, which under a defaulted
+    vector drops the agreement cells instead). The single-level one-way keeps **no type axis at all**
+    (ICC(1)/ICC(k) labels; `type` recorded as `NA`, as today).
+  - **The estimand-first stance (#2) is enforced at the guidance layer, not by output suppression.** The
+    package's existing pattern — `unit` defaults to both, the Eq. 14 conflated coefficient is computed and
+    *flagged* in print — extends to type: `print.icc` groups rows by type (atop the M43/ADR-053 restyle),
+    docs and `choose_icc()` keep teaching the choice, and `choose_icc()`'s contract (resolve to ONE named
+    coefficient, ADR-021) is unchanged. Rationale: the variance components are printed anyway, so the
+    withheld coefficients were always one line of arithmetic away — suppression taxed the diligent user
+    (the A−C gap *is* the rater main-effect variance share, a systematic-bias diagnostic) without stopping
+    a determined coefficient-shopper.
+  - **Sequencing:** implement as its own milestone (plan gate to set slices/snapshot inventory), targeted
+    at **0.2.0** — i.e. **after** the pending v0.1.0 CRAN handoff (release prep is DONE and verified;
+    ADR-022 reaffirmed 0.1.0 as the first-submission number). Holding the submission to squeeze this in
+    would invalidate a completed `--as-cran` verification for a change that alters no computed value; a
+    documented default-shape change in 0.2.0 (NEWS behavior entry) is the cheaper path. If the maintainer
+    instead chooses to hold the handoff, the release gate re-runs in full — that call stays with the
+    maintainer at the milestone plan gate.
+- Consequences:
+  - One fit — including an expensive Bayesian one — yields every defined coefficient; the
+    choose-a-subset-or-refit asymmetry between `type` and `unit`/`level` is gone.
+  - **Public API change under #6, hence this ADR**: no computed value changes and every existing explicit
+    call is untouched, but the *default* estimate table grows from 2 rows to (up to) 4, so default-call
+    `print`/`tidy()` output changes shape. All per-design print snapshots regenerate once
+    ([[verify-against-installed-package]]); a NEWS entry documents that positional indexing of default
+    `tidy()` rows is not stable across this change. Multilevel × replicates default prints get large
+    (level × unit × occasions × type); the print grouping must keep them readable — a presentation
+    acceptance criterion for the milestone.
+  - Test/oracle surface: no new oracle values needed for balanced/complete designs (all four formulations
+    are already individually oracle-backed); the milestone adds coverage that the *defaulted* vector
+    reproduces the scalar calls cell-for-cell (an invariance check, cf. ADR-053's number-invariance
+    pattern) and pins the inform-and-drop behavior per agreement-only design.
+  - **Ruled out (recorded so not rediscovered):** (a) *always-four with no filter* — the scalar filter
+    stays, both for estimand-named workflows and because some cells are undefined by design; (b) a
+    *post-hoc `update(x, type = ...)` recompute-from-stored-fit method* — it solves the refit cost but
+    adds a second API surface the vectorized argument makes redundant (revisit only if a real
+    recompute-without-refit need surfaces, e.g. changing `conf_level` on a stored brms fit); (c) keeping
+    the default scalar (`"agreement"`) with vector opt-in — rejected as inconsistent with `unit`/`level`
+    defaults and as preserving the suppression-as-guidance posture the Decision rejects.
+- References: McGraw, K. O., & Wong, S. P. (1996), *Psychological Methods, 1*(1), 30–46 (the
+  agreement/consistency families and single/average units this reports jointly). PRINCIPLES.md #2
+  (estimand-first — honored via guidance, not suppression, per the Decision), #5/#8 (drop-vs-abort policy:
+  defaulted-in undefined cells inform-and-drop via `cli`, explicit requests keep classed teaching aborts),
+  #6 (default output contract change requires this ADR), #14 (implementation deferred to a planned
+  milestone with thin slices), #16 (snapshots regenerate in-commit), #18 (print grouping must keep the
+  larger default table honest and readable). ADR-021 (`choose_icc()` single-recommendation contract,
+  unchanged), ADR-022 (release plan — the pending v0.1.0 handoff this does *not* hold up; targets 0.2.0),
+  ADR-029 (the incomplete `ICC(c,k)`
+  inform-and-drop precedent generalized here), ADR-053 (the print/summary restyle this grouping builds
+  on). [[milestone-branches-and-prs]] (implementation ships on its own branch via PR);
+  [[verify-against-installed-package]] (snapshot regeneration discipline).
