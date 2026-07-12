@@ -438,8 +438,12 @@ build_icc_call <- function(type, raters, unit, level, multilevel, oneway) {
   if (oneway) {
     opt <- c(opt, 'model = "oneway"')
   }
-  if (!oneway && identical(type, "consistency")) {
-    opt <- c(opt, 'type = "consistency"')
+  # Always pin `type` explicitly (both agreement and consistency): icc() now defaults
+  # to reporting BOTH error definitions (ADR-054), so an unpinned call would compute
+  # all four formulations instead of the single recommended coefficient. choose_icc()
+  # resolves to ONE coefficient (ADR-021), so its emitted call must name the type.
+  if (!oneway) {
+    opt <- c(opt, sprintf('type = "%s"', type))
   }
   if (!oneway && identical(raters, "fixed")) {
     opt <- c(opt, 'raters = "fixed"')

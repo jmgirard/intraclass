@@ -1720,24 +1720,43 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     **0/0/0**; installed-pkg drive of the defaulted `type` vector across representative designs
     ([[verify-against-installed-package]]).
 - **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
-  - [ ] **T1 — Vectorize the argument + estimand cross-product.** Add `validate_type()` mirroring
-        `validate_unit()` (dedup/order/classed abort); change the default to
-        `type = c("agreement", "consistency")`; thread a `type` loop into every branch of the estimand
-        cross-product (`icc.R:1524-1595` — two-way, multilevel, replicates), leaving the one-way path
-        type-free. *(AC1)*
-  - [ ] **T2 — Drop-vs-abort policy.** Inform-and-drop defaulted undefined cells; keep the classed
-        teaching aborts for *explicit* undefined requests (Design 3 consistency, conflated
-        consistency, fixed-agreement numeric-unit projection). Reuse the ADR-029 inform-and-drop
-        precedent; a `cli_inform` names which cells were dropped and why. *(AC3)*
-  - [ ] **T3 — Presentation.** Type subheaders in `format.icc`; fix `summary.icc`'s scalar-`type`
-        assumption → per-type note; per-row `type` in `tidy.icc`/`glance.icc`. Verify plain-text
-        degradation at 80 cols. *(AC4, AC5 partial)*
-  - [ ] **T4 — Invariance + policy tests + snapshot regen.** Defaulted-vector == scalar-call
-        cell-for-cell across designs/engines/one posterior path (AC2); inform-and-drop vs. abort per
-        agreement-only surface (AC3); regenerate the affected `_snaps/icc-*.md` under reproducible cli
-        output (AC4). *(AC2, AC3, AC4)*
+  - [x] **T1 — Vectorize the argument + estimand cross-product.** DONE (2026-07-12). Added
+        `validate_type()` (mirrors `validate_occasions()`: dedup/order/classed abort); default is
+        `type = c("agreement", "consistency")` (the signature already listed both; `validate_choice`
+        had collapsed it to a scalar). `type` is now the outer loop of every type-bearing
+        cross-product branch (two-way, multilevel, replicates), so rows come out **type-major**;
+        one-way stays type-free. Verified: default two-way → 4 rows A1/Ak/C1/Ck from one fit;
+        explicit single-type unchanged; number-invariance holds (default agreement rows == explicit
+        agreement call). *(AC1)*
+  - [x] **T2 — Drop-vs-abort policy.** DONE (2026-07-12). `length(type)` is the discriminator: a
+        single named type keeps its classed teaching abort; a multi-type request inform-and-drops the
+        undefined cell (ADR-029 precedent). Four guards routed: conflated×consistency (cell-specific —
+        kept at subject/cluster), Design-3 consistency (design-wide), fixed numeric-unit agreement
+        (`agr_projection_units()`, per-cell), and the incomplete-crossed connectedness agreement case
+        (design-wide; the not-in-ADR-054 guard 4, resolved by the ADR-029 precedent per the plan gate).
+        Verified per surface. *(AC3)*
+  - [x] **T3 — Presentation.** DONE (2026-07-12). `format.icc` groups rows under bold type headings
+        ("Absolute agreement"/"Consistency") only when ≥2 types present (single-type/one-way output
+        byte-identical). Fixed three scalar-`type` consumers: `summary.icc` (per-type note),
+        `icc_design_phrase` (header reads "…, absolute agreement & consistency"), and added a per-row
+        `type` column to `estimates` + `tidy.icc`. Plain-text degradation verified at 80 cols.
+        *(AC4, AC5 partial)*
+  - [~] **T4 — Invariance + policy tests + snapshot regen.** IN PROGRESS (2026-07-12). Fixed the 17
+        existing tests that assumed the old agreement-only default (choose-icc round-trip ×12 via a
+        real `build_icc_call` fix — the emitted call now always pins `type=` so a copied recommendation
+        reproduces the single coefficient, ADR-021; plus fixed-multilevel, incomplete-multilevel,
+        replicates). **Still TODO:** dedicated invariance test (defaulted == scalar cell-for-cell
+        across designs/engines/one posterior path), inform-and-drop/abort tests per agreement-only
+        surface, and snapshot regen for the grouped default table. *(AC2, AC3, AC4)*
   - [ ] **T5 — Docs / NEWS / gate.** `@param type` + vignette note; NEWS default-shape bullet + the
         `tidy()`-row-indexing caveat; WORDLIST if needed; finish-task gate + installed-pkg drive. *(AC5, AC6)*
+  - **OPEN (surfaced 2026-07-12, not in the ADR-054 plan): `d_study()` on a multi-type `icc` object.**
+        A default `icc()` is now multi-type, and `d_study(icc(...))` is the common idiom. Today
+        `d_study()` reads `x$design$type` as a scalar (`d-study.R:134`) and silently projects only
+        agreement while `glance()` reports 2 rows — a bug. Genuine fork: **project both reliability
+        curves** (a `type` axis through the projection grid + curve print/tidy/glance — mild scope
+        add) vs. **require a single-type input** (abort with guidance — breaks the `d_study(icc(...))`
+        idiom). Awaiting a user decision at the mid-implementation gate.
 - **Coverage (criterion → task):** AC1 → T1 · AC2 → T4 · AC3 → T2, T4 · AC4 → T3, T4 · AC5 → T3, T5 ·
   AC6 → T5.
 - Deferred out of M44 (record so not rediscovered): a **post-hoc `update(x, type = ...)`

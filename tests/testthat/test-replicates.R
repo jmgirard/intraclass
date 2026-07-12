@@ -457,6 +457,7 @@ test_that("O-FRep: fixed replicate SF labels and seeded recovery", {
     score,
     subject,
     rater,
+    type = "agreement",
     raters = "fixed",
     unit = c("single", "average"),
     seed = 1

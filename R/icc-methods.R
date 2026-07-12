@@ -18,6 +18,17 @@ icc_rule <- function(title) {
 icc_emph <- function(x) cli::style_bold(x)
 icc_mute <- function(x) cli::style_dim(x)
 
+# The full-word error-definition heading used to group the coefficient table by
+# `type` when a call reports both agreement and consistency (the default; ADR-054).
+icc_type_heading <- function(type) {
+  switch(
+    type,
+    agreement = "Absolute agreement",
+    consistency = "Consistency",
+    type
+  )
+}
+
 #' @rdname icc
 #' @param x,object An `icc` object.
 #' @param ... Unused, for method consistency.
@@ -174,7 +185,20 @@ format.icc <- function(x, ...) {
     )
     rows <- paste0("  ", idx_col, " ", est_col, "   ", ci_col)
   }
-  table <- c(icc_mute(head), rows)
+  # When a call reports more than one error definition (the default four-formulation
+  # table, ADR-054), group the rows under bold type headings ("Absolute agreement" /
+  # "Consistency"); the rows are already type-major from the estimand cross-product.
+  # A single-type call (or one-way, where `type` is NA) prints one ungrouped block --
+  # byte-identical to before this milestone (number/shape invariance).
+  types_present <- unique(e$type[!is.na(e$type)])
+  table <- if (length(types_present) >= 2) {
+    groups <- lapply(types_present, function(ty) {
+      c(icc_emph(paste0("  ", icc_type_heading(ty))), rows[e$type == ty])
+    })
+    c(icc_mute(head), unlist(groups))
+  } else {
+    c(icc_mute(head), rows)
+  }
 
   # Surface the Shrout & Fleiss equivalent for the forms that have one
   # (agreement+random -> ICC(2,.); consistency+fixed -> ICC(3,.)); M2 spec §5.
@@ -251,16 +275,24 @@ summary.icc <- function(object, ...) {
       "separated and are absorbed into the residual (a conservative ICC)."
     )
   } else {
-    type_note <- if (object$design$type == "agreement") {
-      "Absolute agreement counts the rater main effect (systematic differences in"
-    } else {
-      "Consistency ignores the rater main effect (systematic differences in"
+    # One interpretive note per error definition present (both, for the default
+    # four-formulation report; ADR-054). The two-line split per type is preserved so a
+    # single-type summary is byte-identical to before this milestone.
+    type_lines <- function(ty) {
+      if (ty == "agreement") {
+        c(
+          "Absolute agreement counts the rater main effect (systematic differences in",
+          "rater level) as error."
+        )
+      } else {
+        c(
+          "Consistency ignores the rater main effect (systematic differences in",
+          "rater level); only relative standing counts."
+        )
+      }
     }
-    effect <- if (object$design$type == "agreement") {
-      "rater level) as error."
-    } else {
-      "rater level); only relative standing counts."
-    }
+    types_present <- unique(object$design$type[!is.na(object$design$type)])
+    type_notes <- unlist(lapply(types_present, type_lines))
     cell_note <- if (isTRUE(object$design$replicates)) {
       c(
         "Within-cell replicates separate the subject-by-rater interaction from",
@@ -272,7 +304,7 @@ summary.icc <- function(object, ...) {
         "residual error."
       )
     }
-    c(paste(type_note, effect), cell_note)
+    c(type_notes, cell_note)
   }
   # The report (format) plus a blank line plus the interpretive notes, emitted as
   # one string so the section blanks render (see print.icc).
@@ -285,6 +317,7 @@ summary.icc <- function(object, ...) {
 tidy.icc <- function(x, ...) {
   out <- tibble::tibble(
     index = x$estimates$index,
+    type = x$estimates$type,
     level = x$estimates$level,
     sf_index = x$estimates$sf_index,
     estimate = x$estimates$estimate,
