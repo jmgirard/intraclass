@@ -47,21 +47,21 @@
 <div id="claudemd--working-guide-for-intraclass" class="section level1">
 
 <p><code>intraclass</code> computes interrater-reliability <strong>intraclass correlation coefficients</strong> within the generalizability-theory framework using <strong>modern mixed-model variance-component estimation</strong> (not classical ANOVA mean squares), with boundary-aware Monte-Carlo confidence intervals and guidance on choosing the right coefficient.</p>
-<p>This file is deliberately lean — it is paid for on every turn. Detail lives in <code>project/</code>, loaded on demand.</p>
+<p>This file is deliberately lean — it is paid for on every turn. Detail lives in <code>cairn/</code>, loaded on demand.</p>
 <div class="section level2">
 <h2 id="read-these-first">Read these first<a class="anchor" aria-label="anchor" href="#read-these-first"></a></h2>
 <ul><li>
-<strong><code>project/PRINCIPLES.md</code></strong> — the constitution (19 load-bearing principles). Change-controlled; when it conflicts with instinct, it wins.</li>
+<strong><code>cairn/PRINCIPLES.md</code></strong> — the constitution (19 load-bearing principles, <code>#1</code>–<code>#19</code>). Change-controlled; when it conflicts with instinct, it wins.</li>
 <li>
-<strong><code>project/STATUS.md</code></strong> — current milestone, active task, blockers, next action.</li>
+<strong><code>cairn/DESIGN.md</code></strong> — purpose, architecture, conventions (a migration seed; deepen via <code>/design-interview</code>).</li>
 <li>
-<strong><code>project/MILESTONES.md</code></strong> — the plan <em>and</em> the task board (the active milestone’s DoD checklist is the board; no separate <code>TASKS.md</code> — ADR-015).</li>
+<strong><code>cairn/DECISIONS.md</code></strong> — live decisions (D-001…); the full ADR log (ADR-001..058) is entombed at <code>cairn/legacy/DECISIONS.md</code> and still cited by id.</li>
 <li>
-<strong><code>project/DECISIONS.md</code></strong> — ADR log (why things are the way they are).</li>
+<strong><code>cairn/references/REFERENCES.md</code></strong> — bibliography + the oracle registry every test value traces to.</li>
 <li>
-<strong><code>project/REFERENCES.md</code></strong> — bibliography + the oracle registry every test value traces to.</li>
+<strong><code>cairn/estimand-specs/</code></strong> — the precise population definition per estimator.</li>
 <li>
-<strong><code>project/estimand-specs/</code></strong> — the precise population definition per estimator.</li>
+<strong>Status &amp; the task board:</strong> <code>cairn/ROADMAP.md</code> + the active <code>cairn/milestones/</code> file — cairn owns status now (see the Project tracking section below).</li>
 <li>Founding brief: <code>CLAUDE_CODE_KICKOFF.md</code>.</li>
 </ul></div>
 <div class="section level2">
@@ -100,14 +100,29 @@
 </tr></tbody></table><p>Fable is a gated escalation, not an agent. <code>verify-estimator</code> may <em>recommend</em> a Fable review and must then stop and wait.</p>
 </div>
 <div class="section level2">
-<h2 id="skills-invoke-as-name">Skills (invoke as <code>/name</code>)<a class="anchor" aria-label="anchor" href="#skills-invoke-as-name"></a></h2>
-<p><code>status</code>, <code>start-task</code>, <code>finish-task</code>, <code>verify-estimator</code>, <code>new-estimator</code>, <code>add-decision</code> — see <code>.claude/skills/</code>.</p>
+<h2 id="skills">Skills<a class="anchor" aria-label="anchor" href="#skills"></a></h2>
+<p>Project tracking is handled by the <strong>cairn plugin</strong> (<code>/milestone-plan</code> → <code>/milestone-implement</code> → <code>/milestone-review</code>, plus <code>/milestone</code>, <code>/hotfix</code>, <code>/cairn-release</code>, <code>/design-interview</code>) — see the Project tracking section below. The former repo-local skills (<code>status</code>, <code>start-task</code>, <code>finish-task</code>, <code>add-decision</code>, <code>new-estimator</code>, <code>verify-estimator</code>) are entombed at <code>cairn/legacy/skills/</code> — superseded by the plugin. Their domain value (estimator scaffolding, oracle-verification workflow) is not yet re-expressed in cairn terms.</p>
 </div>
 <div class="section level2">
 <h2 id="engines--install">Engines &amp; install<a class="anchor" aria-label="anchor" href="#engines--install"></a></h2>
 <ul><li>Default engine <strong>glmmTMB</strong> (Imports); <strong>lme4</strong> (Suggests) is an alternate engine and an independent oracle. See ADR-002.</li>
 <li>Light-install path: base install pulls only <code>glmmTMB</code>, <code>cli</code>, <code>rlang</code>, <code>generics</code>. Optional engines (Bayesian/SEM, M5) live in <code>Suggests</code> behind <code><a href="https://rlang.r-lib.org/reference/is_installed.html" class="external-link">rlang::check_installed()</a></code> — never <code>Imports</code>.</li>
 </ul></div>
+<div class="section level2">
+<h2 id="project-tracking-cairn">Project tracking (cairn)<a class="anchor" aria-label="anchor" href="#project-tracking-cairn"></a></h2>
+<p>This repo uses the cairn plugin. <strong>Before acting on any request, classify it and route</strong> — the tracking rulebook only loads once a cairn skill fires, so starting work in plain conversation silently bypasses the work tiers and the git model. Classify first:</p>
+<ul><li>
+<strong>Trivial</strong> (no runtime surface — typo, comment, tracking edit): commit directly to the default branch.</li>
+<li>
+<strong>User-visible bug</strong>: invoke <code>/hotfix</code>.</li>
+<li>
+<strong>New work, a design decision, or more than one sitting</strong>: invoke <code>/milestone-plan</code> (then <code>/milestone-implement</code> → <code>/milestone-review</code>).</li>
+<li>
+<strong>Status, “what’s next”, or unsure which tier</strong>: invoke <code>/milestone</code>.</li>
+<li>
+<strong>Never implement code on the default branch</strong> outside a milestone/hotfix branch; nothing reaches it without the user’s explicit approval at the review gate.</li>
+</ul><p>Whenever the request is anything but trivial, invoke the skill <em>first</em> so the full rulebook (the plugin’s <code>skills/shared/tracking-rules.md</code>) and its conduct load — do not reconstruct the rules here from memory. All project state lives under <code>cairn/</code> (<strong>Architecture → DESIGN · Status → ROADMAP · Tasks → milestone files · Decisions → DECISIONS · History → archive + git</strong>); never record status or TODOs in this file. Claude’s persistent memory never holds project state; <code>cairn/</code> files win any conflict.</p>
+</div>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -26,7 +26,7 @@ just call functions.
 > helper, D-study projection to other rater counts
 > ([`d_study()`](https://jmgirard.github.io/intraclass/reference/d_study.md)),
 > and `autoplot()` plots have all shipped. A Bayesian engine is on the
-> roadmap; see `project/MILESTONES.md`.
+> roadmap; see `cairn/ROADMAP.md`.
 
 ## Installation
 
