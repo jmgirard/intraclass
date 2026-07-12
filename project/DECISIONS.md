@@ -4839,3 +4839,51 @@ consequences → references.
 - Spec: resolves the open question in [`M9-incomplete-multilevel.md`](estimand-specs/M9-incomplete-multilevel.md)
   §3b/§9 — a §10 (resolution) authored at implementation recording the validated divisor (or the negative
   finding) with the battery, tolerances, and page/table anchors.
+- **Amendment 1 (2026-07-12) — Fable review ingested; divisor blessed, target committed, ship path confirmed.**
+  The maintainer escalated the T1 divisor call to a gated Fable review (#19/D-004). Verdict
+  (`data-raw/reviews/fable-review-m46-cluster-ck-divisor-response.md`, Fable 5): **proceed to T2 with the
+  inverse-Simpson harmonic `k_c^eff`** — the degrade branch is not triggered. Rulings folded into the plan:
+  - **(Q1, target) The reported coefficient describes the *observed cell-pooled* cluster mean → inverse-Simpson.**
+    This is a **definitional commitment**, not an empirical result (no simulation can adjudicate the target;
+    every candidate divisor is exact for *some* score under the general identity *effective count = 1/Σ_r w_{c,r}²*
+    for any linear cluster score with weights `w`). Grounds: ADR-057 already commits the target to "the
+    reliability of the **realized** ragged cluster means" (= the pooled cell mean), matching M9 §5's
+    "**observed** subject means"; GT decision-study logic (users form pooled means / BLUPs, never a
+    rater-balanced mean); the sources punt (ten Hove Eq. 13 assumes equal raters/cluster, and the paper's own
+    imbalanced illustrative example *brackets* k=3/5 — inverse-Simpson = 4.5 sits inside that bracket);
+    error-under-misuse is conservative (shipping distinct-count would *overstate* reliability up to +0.15 Φ).
+    **Ship condition (docs):** spec + user-facing report must **name the score** in one sentence and record the
+    general 1/Σw² identity.
+  - **(Q2, agreement exact) C-A certified:** cluster-level agreement is *exact*, not an effective-k
+    approximation — cross-cluster rater-sharing covariance enters no estimand term (the coefficient averages
+    per-cluster **marginal** absolute error). M9 §5's subject-level "approximation" hedge is **over-cautious**
+    (harmonic pooling *is* per-unit error-variance averaging, exactly — the M36 §4(a) identity). **Action:**
+    rescope §5's hedge to its two true statements (a single k describes the *average* error; marginal vs
+    conditional "these raters" reading, which exists on complete data too); do **not** propagate "approximation"
+    language to cluster-level docs.
+  - **(Q3, oracle independence) The T1 `mc_truth` is tautological for the *target*** (it re-verifies L1's algebra
+    under the assumed cell-weighting) — valid for the harmonic aggregation + candidate discrimination, not for
+    the target. **Action:** T2's committed oracle (`data-raw/oracle-cluster-ck-incomplete.R`) **adopts the two
+    independent legs Fable committed** (`fable-check-m46.R`): **CHK-A** a score-based, weight-free truth (paired
+    fresh-rater replicates, plain `mean()` per cluster, halved squared differences; subject terms cancel exactly,
+    only σ²_res/n_cells leakage subtracted analytically) and **CHK-B** the ship-path recovery (real glmmTMB
+    five-component REML fit → plug-in at `k_c^eff` from estimated components). Do not re-litigate Q1 by
+    simulation. A literal score-MSE truth from full data must control the finite-`n_s` leakage
+    (σ²_sc Σ_s w_s² + σ²_res/n_cells) explicitly, never by a "large n_s" assertion.
+  - **(New finding §4, doc caveat — not a divisor bug) On ragged data, rater main effects do not fully cancel
+    from the *observed ordering* of cluster means** (they cancel only under identical rater weight profiles):
+    the centered contribution ≈ σ²_r·mean_c Σ_r(w_{c,r}−w̄_r)² measured at ~2× the whole consistency error
+    (C4: 0.132 vs 0.076; C6: 0.303 vs 0.153, exact expectation matched < 0.5%). `ICC_c(C, k_c^eff)` stays
+    correct **as the inherited component-based estimand**; **required:** one honest spec/doc sentence — users
+    comparing observed ragged cluster means should prefer `ICC_c(A, k_c^eff)` (its error bounds the ordering
+    contamination). Same distinction-family as M45's conflation caveat.
+  - **(Q4, intervals) No divisor→interval interaction** — `k_c^eff` is a deterministic, draw-independent design
+    constant (no analog of the M27/M28 draw-dependent 2b). **T3 coverage requirements:** sweep C_n
+    ([[coverage-oracle-cluster-count-axis]], n_rep ≥ 240 [[ragged-coverage-nrep-240]]); include a C6-style
+    extreme-imbalance cell (small `k_c^eff` ≈ 2 pushes toward the boundary regime where the machinery is
+    exercised) and a C4-style heterogeneous-`m_c` cell (harmonic aggregation active) plus boundary σ²_c ≈ 0
+    rows; **define the coverage target per realized design** — freeze the cell pattern across reps (M36 pattern)
+    or check against each rep's own realized-design population value, never a pooled truth across heterogeneous
+    patterns.
+  - No IP touched; no ADR superseded. Review artifacts stay in `data-raw/reviews/` (RB + RR + `fable-check-m46.R`
+    + `-results.rds`), per the M27/M28/M36 precedent. M46 → in-progress, T2.

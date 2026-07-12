@@ -1925,29 +1925,47 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     **population reliability of the realized ragged cluster means**, across a battery of imbalance patterns and
     a **swept cluster-count axis** ([[coverage-oracle-cluster-count-axis]]). Outcome is one of: (a) a divisor
     recovers the population value within tolerance → ships (AC2–AC5); (b) none does → the abort stays, the
-    finding is documented, and AC2/AC4 are moot. *(Expected: per-cluster harmonic-mean `k_c^eff` — exact for
-    consistency, effective-`k` approximation for agreement, mirroring subject-level §5.)*
+    finding is documented, and AC2/AC4 are moot. **✓ RESOLVED (T1 + Fable RR): outcome (a)** — the divisor is
+    the **inverse-Simpson harmonic `k_c^eff` = 1/mean_c(1/m_c^IS)`, `m_c^IS = 1/Σ_r w_{c,r}²** (cell-weighted),
+    for the **observed cell-pooled cluster-mean target** (a definitional commitment, ADR-057 Am.1 Q1); **exact
+    for BOTH agreement and consistency** (the "approximation for agreement" expectation was *refuted* — §5's
+    hedge is over-cautious, Am.1 Q2).
   - **AC2 — Coefficient ships (if AC1 validates).** `icc(..., cluster =, level = "cluster", unit = "average")`
     returns the averaged cluster-level `ICC(c,k)` (agreement + consistency) on incomplete/ragged crossed
     Design-1 multilevel data instead of aborting; the divisor `k_c^eff` is surfaced in the report; glmmTMB +
     lme4. *(Conditional on AC1 outcome (a).)*
-  - **AC3 — Oracles (#1, ≥2 independent).** O-cluster-sim (population recovery + divisor discrimination, AC1),
-    O-cluster-lme4 (cross-engine five components on ragged data < 1e-4), O-cluster-reduction (complete data →
-    M5 Design-1 `ICC(c,k)` exact, `k_c^eff = k`). Invariants: ∈[0,1], average ≥ single, CI always present (#3).
-  - **AC4 — Coverage (#12, if AC1 validates).** The boundary-aware MC interval covers the population
-    `ICC(c,k)` at nominal rate, swept across the cluster-count axis with a high-`C_n` cell included
-    ([[coverage-oracle-cluster-count-axis]]; n_rep ≥ 240 — [[ragged-coverage-nrep-240]]). Committed seeded
-    fixtures.
+  - **AC3 — Oracles (#1, ≥2 independent).** The committed `data-raw/oracle-cluster-ck-incomplete.R` adopts the
+    **two independent legs Fable committed** (ADR-057 Am.1 Q3; patterns in `data-raw/reviews/fable-check-m46.R`):
+    **O-cluster-score / CHK-A** — a score-based, **weight-free** truth (paired fresh-rater replicates, plain
+    `mean()` per cluster, halved squared differences; subject terms cancel exactly, only σ²_res/n_cells leakage
+    subtracted analytically) — the T1 `mc_truth` alone is tautological for the target and does not suffice;
+    **O-cluster-fit / CHK-B** — ship-path recovery through the real glmmTMB five-component REML fit → plug-in at
+    `k_c^eff` from *estimated* components. Plus **O-cluster-lme4** (cross-engine five components on ragged data
+    < 1e-4) and **O-cluster-reduction** (complete data → M5 Design-1 `ICC(c,k)` exact, `k_c^eff = k`).
+    Invariants: ∈[0,1], average ≥ single, CI always present (#3).
+  - **AC4 — Coverage (#12).** The boundary-aware MC interval covers the population `ICC(c,k)` at nominal rate.
+    Per ADR-057 Am.1 Q4, the sweep must contain: the **C_n axis** with a high-`C_n` cell
+    ([[coverage-oracle-cluster-count-axis]]; n_rep ≥ 240 — [[ragged-coverage-nrep-240]]); a **C6-style
+    extreme-imbalance cell** (small `k_c^eff` ≈ 2 → the boundary regime is actually exercised); a **C4-style
+    heterogeneous-`m_c` cell** (harmonic aggregation active) plus **boundary σ²_c ≈ 0** rows; and the coverage
+    target **defined per realized design** — freeze the cell pattern across reps (M36 pattern) or check against
+    each rep's own realized-design population value, never a pooled truth across heterogeneous patterns.
+    Committed seeded fixtures.
   - **AC5 — Reduction + regression + abort handling.** Complete data reproduces the M5 Design-1 `ICC(c,k)`
     exactly; `ICC(c,1)`, subject-level, and every balanced path are byte-unchanged (regression guard); the
     `R/icc.R` ~L1188 abort is replaced by the shipped average (outcome (a)) or retained with its message
     updated to cite the study (outcome (b)) — the retained cell is regression-tested either way (#5/#8).
-  - **AC6 — Docs + spec + gate.** M9 spec §10 records the validated divisor (or negative finding) with the
-    battery, tolerances, and anchors; a NEWS bullet (dev heading); `print`/`summary`/`glance` surface the
-    cluster-level `k_c^eff`; the `multilevel-designs` vignette mention; finish-task gate green (`air`/`lintr` 0
-    / `spelling` / `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity 0/0/0;
-    installed-pkg drive of the new cell — [[verify-against-installed-package]]); `pkgdown::check_pkgdown()`
-    clean.
+  - **AC6 — Docs + spec + gate.** M9 spec §10 records the validated divisor with the battery, tolerances, and
+    anchors, **plus the four RR-required items (ADR-057 Am.1):** (a) **name the target score** — one sentence in
+    spec + user-facing report that `k_c^eff` is the effective raters behind each cluster's *observed
+    (cells-pooled)* mean [required]; (b) record the **general 1/Σw² identity** (any future score variant is a
+    weight swap); (c) the **ragged-consistency ordering caveat** — rater mains don't fully cancel from observed
+    cluster-mean *ordering*, so steer ordering-comparisons to `ICC_c(A,·)` [required, §4]; (d) **rescope M9 §5's
+    agreement hedge** (exact, not "approximation"; do not propagate to cluster docs). A NEWS bullet (dev
+    heading); `print`/`summary`/`glance` surface the cluster-level `k_c^eff` (ideally the per-cluster `m_c^IS`
+    range); the `multilevel-designs` vignette mention; finish-task gate green (`air`/`lintr` 0 / `spelling` /
+    `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity 0/0/0; installed-pkg drive
+    of the new cell — [[verify-against-installed-package]]); `pkgdown::check_pkgdown()` clean.
 - **Tasks** (≤ one session each, dependency-ordered):
   - T1 — Candidate divisors + simulation oracle (AC1, AC3 O-cluster-sim). *(RB tripwire: no-oracle.)* Implement
     the candidate per-cluster divisors; build `data-raw/oracle-cluster-ck-incomplete.R` computing the
@@ -1955,22 +1973,25 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     battery. **Decision point:** if the study is ambiguous / weakly discriminating, recommend a Fable review and
     **stop** for maintainer approval; if it cleanly validates, proceed to T2; if it validates none, jump to the
     degrade branch (T4 abort-retain + T5 docs).
-  - T2 — Wire the validated divisor (AC2, AC3 lme4/reduction balanced). Add cluster-level `k_c^eff` to
-    `error_divisors` (`R/estimand.R`), threaded when `level = "cluster"` & `unit = "average"` under imbalance;
-    replace the `R/icc.R` ~L1188 abort with the computed average; O-cluster-lme4 + O-cluster-reduction +
-    invariants.
-  - T3 — Ragged recovery + coverage (AC3 ragged, AC4). O-cluster-sim recovery on ragged; the coverage sweep
-    across the cluster-count axis (high-`C_n` cell, n_rep ≥ 240); commit seeded fixtures.
+  - T2 — Wire the inverse-Simpson divisor (AC2, AC3). Add cluster-level `k_c^eff = 1/mean_c(1/m_c^IS)` (cell-
+    weighted inverse-Simpson) to `error_divisors` (`R/estimand.R`), threaded when `level = "cluster"` &
+    `unit = "average"` under imbalance; replace the `R/icc.R` ~L1188 abort with the computed average; build the
+    committed `data-raw/oracle-cluster-ck-incomplete.R` adopting the **CHK-A (score-based, weight-free)** and
+    **CHK-B (ship-path fit)** legs (ADR-057 Am.1 Q3) + O-cluster-lme4 + O-cluster-reduction + invariants; surface
+    `k_c^eff` (+ `m_c^IS` range) in the report; **do not re-litigate Q1 by simulation** (target is committed).
+  - T3 — Ragged recovery + coverage (AC3 ragged, AC4). Score-based + ship-path recovery on ragged; the coverage
+    sweep meeting the four AC4 requirements (C_n axis high-`C_n` cell n_rep ≥ 240, extreme-imbalance cell,
+    heterogeneous-`m_c` cell, boundary σ²_c ≈ 0, target per realized design); commit seeded fixtures.
   - T4 — Reduction/regression + abort/degrade (AC5). Complete → M5 exact; `ICC(c,1)`/subject/balanced
     unchanged; ship the updated abort message (outcome (a)) or retain the abort citing the study (outcome (b));
     regression-test the retained/updated cell.
   - T5 — Docs + spec §10 + NEWS + finish-task gate (AC6) → PR from `m46-cluster-ck-divisor`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T1 (sim), T2 (lme4/reduction), T3 (ragged); AC4 → T3; AC5 → T4;
   AC6 → T5.
-- Status: **blocked** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor` — awaiting a gated **Fable review**
-  (RB `data-raw/reviews/fable-review-m46-cluster-ck-divisor-brief.md`; maintainer-requested per-instance,
-  #19/D-004). T1 done (divisor validated, ship path); T2 (wire the divisor + lift the `R/icc.R` ~L1188 abort)
-  gated on the RR verdict. Attempt-then-degrade (ADR-028 — the abort stays if the review rejects the divisor).
+- Status: **in-progress** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor`. Active task: **T2** (wire the
+  inverse-Simpson `k_c^eff` + lift the `R/icc.R` ~L1188 abort). **Fable review ingested (RR blessed the divisor
+  + committed the cell-mean target, ADR-057 Amendment 1)** — degrade branch not triggered; T2/T3/T5 requirements
+  amended per the RR (below).
 - Work log:
   - 2026-07-12 — Planned via the plan gate (retro → direction = Fable-gated research item → item B
     cluster-level `ICC(c,k)`, ship-or-abort acceptance). ADR-057 authored; ROADMAP item marked SCHEDULED.
@@ -2002,3 +2023,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     agreement-is-exact claim vs M9 §5's approximation hedge; (Q3) potential circularity of the MC truth; (Q4)
     divisor→interval interaction for T3. **Fable is manual/out-of-band (never a subagent, #19) — awaiting the
     maintainer's RR** (`fable-review-m46-cluster-ck-divisor-response.md`), then ingest per the RB/RR protocol.
+  - 2026-07-12 — **RR ingested (Fable 5); M46 → in-progress, T2.** Verdict: **inverse-Simpson harmonic
+    `k_c^eff` confirmed on the ship path — degrade branch NOT triggered.** Rulings recorded as ADR-057
+    **Amendment 1** and folded into the ACs/tasks: (Q1) the **cell-pooled cluster-mean target** is a definitional
+    commitment (ten Hove *bracket* k=3/5, IS=4.5 inside it) → name the score in spec+report; (Q2) agreement is
+    **exact**, §5's hedge over-cautious → rescope, don't propagate to cluster docs; (Q3) the T1 `mc_truth` is
+    tautological for the target → T2's committed oracle adopts Fable's **CHK-A (weight-free score)** + **CHK-B
+    (ship-path fit)** legs; (§4) **new doc caveat** — rater mains don't cancel from observed cluster-mean
+    *ordering* (~2× the consistency error), steer ordering-comparisons to `ICC_c(A,·)`; (Q4) no divisor→interval
+    interaction, four T3 sweep requirements. Review artifacts (RB/RR + `fable-check-m46.R`/`-results.rds`) stay
+    in `data-raw/reviews/`. **Next: T2.**

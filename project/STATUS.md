@@ -8,12 +8,15 @@
   both Φ and ρ; `data-raw/reviews/m46-cluster-ck-divisor-spike.R`). Agreement is **exact, not approximate**
   (resolves M9 §5's cluster-level hedge); distinct-count harmonic, arithmetic mean, and subject-`k_eff` are
   refuted. **Decision point pending (RB tripwire: no-oracle):** the study is unambiguous, so per ADR-057 it may
-  ship without a Fable review — the maintainer **escalated** (per-instance, #19/D-004). **M46 now BLOCKED**
-  pending the gated Fable review: RB authored (`data-raw/reviews/fable-review-m46-cluster-ck-divisor-brief.md`),
-  pre-ship, T2 gated on the verdict. The RB's load-bearing question (Q1): the divisor depends on whether the
-  cluster universe score is the ratings-weighted cell-mean (→ inverse-Simpson, proposed) or rater-balanced
-  (→ distinct-count harmonic) — the MC oracle assumes the former. **Fable is manual/out-of-band (never a
-  subagent, #19); awaiting the maintainer's RR** (`…-response.md`), then ingest + resume at T2 (or degrade).
+  ship without a Fable review — the maintainer **escalated** (per-instance, #19/D-004). **RR INGESTED (Fable 5,
+  2026-07-12): inverse-Simpson `k_c^eff` confirmed on the ship path — degrade branch NOT triggered** (ADR-057
+  Amendment 1). Rulings folded into the ACs/tasks: (Q1) the **cell-pooled cluster-mean target** is a
+  definitional commitment (ten Hove bracket k=3/5, IS=4.5 inside) → name the score; (Q2) agreement is **exact**
+  (§5's hedge over-cautious → rescope); (Q3) T2's oracle adopts Fable's **CHK-A weight-free score** + **CHK-B
+  ship-path fit** legs (the T1 `mc_truth` is tautological for the target); (§4) new doc caveat — steer
+  observed-ordering comparisons to `ICC_c(A,·)`; (Q4) no interval interaction, four T3 sweep requirements.
+  **Active task: T2** (wire the inverse-Simpson `k_c^eff` into `error_divisors`; lift the `R/icc.R` ~L1188 abort;
+  build the CHK-A/CHK-B oracle). See MILESTONES M46 + ADR-057 Am.1.
 - **M46 planned (2026-07-12, ADR-057):** the *averaged cluster-level `ICC(c,k)` divisor on incomplete data* —
   the last-open per-cluster effective-rater divisor (M9 §3b/§9). On complete data the per-subject and
   per-cluster effective rater counts coincide (M5 ships one divisor); on ragged data they diverge and the
