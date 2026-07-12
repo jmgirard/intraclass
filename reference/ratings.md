@@ -52,8 +52,8 @@ icc(ratings, score, subject, rater, seed = 2024)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)     0.290   [0.050, 0.713]
-#>   ICC(A,k)     0.620   [0.173, 0.909]
+#>   ICC(A,1)     0.290   [0.050, 0.711]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
