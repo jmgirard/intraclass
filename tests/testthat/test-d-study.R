@@ -106,7 +106,7 @@ test_that("numeric unit in icc() equals the d_study projection at that m", {
   expect_true(all(is.na(td$sf_index[td$index %in% c("ICC(A,3)", "ICC(A,7)")])))
 
   d <- d_study(
-    icc(sf_ratings_long(), score, subject, rater, seed = 1),
+    icc(sf_ratings_long(), score, subject, rater, type = "agreement", seed = 1),
     m = c(3, 7)
   )
   expect_equal(
@@ -229,7 +229,7 @@ test_that("the recovered population Phi(m) is covered by the interval (O-sim)", 
     rat[as.integer(grid$rater)] +
     stats::rnorm(n * k, 0, sqrt(v_res))
 
-  fit <- icc(grid, score, subject, rater, seed = 1)
+  fit <- icc(grid, score, subject, rater, type = "agreement", seed = 1)
   d <- d_study(fit, m = c(6, 12), seed = 1)
 
   pop <- gt_project(v_s, v_r, v_res, c(6, 12))
@@ -272,7 +272,15 @@ sim_ml_ds <- function(nc, ns, k, vc, vsc, vr, vcr, vres, seed) {
 test_that("multilevel d_study projects both levels with a level column", {
   skip_if_not_installed("glmmTMB")
   d <- sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
-  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "agreement",
+    seed = 1
+  )
   ds <- d_study(fit, m = 1:8)
   expect_true("level" %in% names(ds))
   expect_setequal(unique(ds$level), c("subject", "cluster"))
@@ -295,6 +303,7 @@ test_that("O-ML-reduction: at m = observed k, projection equals icc() ICC(*,k) p
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     unit = c("single", "average"),
     seed = 1
   )
@@ -311,7 +320,15 @@ test_that("O-ML-lme4: multilevel projection matches an independent lme4 fit", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lme4")
   d <- sim_ml_ds(30, 10, 6, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 20260707)
-  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "agreement",
+    seed = 1
+  )
   ds <- d_study(fit, m = c(3, 10))
   m <- lme4::lmer(
     score ~ 1 +
@@ -344,7 +361,15 @@ test_that("O-ML-sim: population Phi(m) recovered and covered at an m not run", {
   vcr <- 0.16
   vres <- 0.5
   d <- sim_ml_ds(40, 10, 6, vc, vsc, vr, vcr, vres, seed = 424242)
-  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 20260707)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "agreement",
+    seed = 20260707
+  )
   ds <- d_study(fit, m = 12)
   # Project subject and cluster to m = 12 (not the observed 6).
   pop_subj <- vsc / (vsc + (vr + vres) / 12)
@@ -481,6 +506,7 @@ test_that("O-IDS/reduction: ragged subject projection at m = k_eff equals fitted
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     unit = c("single", "average"),
     seed = 1
   )
@@ -501,7 +527,15 @@ test_that("O-IDS: ragged subject curve projects, is monotone in [0, 1], cluster 
     0.18,
     20260708
   )
-  fit <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "agreement",
+    seed = 1
+  )
   # The default subject+cluster fit drops the cluster level with a one-time note. The
   # note uses .frequency = "once", so force verbose verbosity to observe it regardless
   # of test ordering.
@@ -528,7 +562,15 @@ test_that("O-IDS/lme4: ragged subject projection matches an independent lme4 fit
   )
   dg <- suppressMessages(
     d_study(
-      icc(d, score, subject, rater, cluster = cluster, seed = 1),
+      icc(
+        d,
+        score,
+        subject,
+        rater,
+        cluster = cluster,
+        type = "agreement",
+        seed = 1
+      ),
       m = c(3, 8)
     )
   )
@@ -540,6 +582,7 @@ test_that("O-IDS/lme4: ragged subject projection matches an independent lme4 fit
         subject,
         rater,
         cluster = cluster,
+        type = "agreement",
         engine = "lme4",
         seed = 1
       ),
@@ -749,6 +792,7 @@ test_that("O-RepDS/reduction: replicate projection at m = k reproduces ICC(*,k)"
     score,
     subject,
     rater,
+    type = "agreement",
     occasions = c("single", "average"),
     seed = 1
   )
@@ -782,6 +826,7 @@ test_that("O-RepDS: replicate curve is monotone, in [0,1], occ-averaged >= singl
     score,
     subject,
     rater,
+    type = "agreement",
     occasions = c("single", "average"),
     seed = 1
   )
@@ -802,12 +847,21 @@ test_that("O-RepDS/lme4: replicate projection matches an independent lme4 fit", 
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")
   d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
-  fg <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fg <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   fl <- icc(
     d,
     score,
     subject,
     rater,
+    type = "agreement",
     occasions = "average",
     engine = "lme4",
     seed = 1
@@ -913,7 +967,15 @@ test_that("O-OccDS/reduction: occasion projection at n_o = fitted reproduces ICC
 test_that("O-OccDS/GT: occasion projection equals the dependability form", {
   skip_if_not_installed("glmmTMB")
   d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
-  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   vc <- fit$components
   k <- fit$k_eff
   ds <- d_study(fit, n_o = c(1, 2, 5, 9))
@@ -929,7 +991,15 @@ test_that("O-OccDS/GT: occasion projection equals the dependability form", {
 test_that("O-OccDS/ceiling: curve is monotone, in [0,1], bounded by the n_o->Inf floor", {
   skip_if_not_installed("glmmTMB")
   d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
-  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   vc <- fit$components
   k <- fit$k_eff
   ceiling <- vc$subject /
@@ -977,12 +1047,21 @@ test_that("O-OccDS/lme4: occasion projection matches an independent lme4 fit", {
   skip_if_not_installed("lme4")
   skip_if_not_installed("merDeriv")
   d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
-  fg <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fg <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   fl <- icc(
     d,
     score,
     subject,
     rater,
+    type = "agreement",
     occasions = "average",
     engine = "lme4",
     seed = 1
@@ -999,7 +1078,15 @@ test_that("O-OccDS/sim: population Phi(n_o) recovered and covered at an n_o not 
   vsr <- 0.4
   ve <- 0.5
   d <- sim_rep_ds(60, 5, 3, vs, vr, vsr, ve, seed = 424242)
-  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   k <- 5 # raters held at the observed count
   no <- 8 # not the observed occasion count (3)
   phi <- vs / (vs + (vr + vsr) / k + ve / (k * no))
@@ -1013,7 +1100,15 @@ test_that("O-OccDS/sim: population Phi(n_o) recovered and covered at an n_o not 
 test_that("O-OccDS: occasion axis guards (both axes / non-replicate / n_o)", {
   skip_if_not_installed("glmmTMB")
   d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
-  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    type = "agreement",
+    occasions = "average",
+    seed = 1
+  )
   # Exactly one axis per call (no 2-D m x n_o surface).
   expect_error(
     d_study(fit, m = 1:3, n_o = 1:3),
@@ -1099,6 +1194,7 @@ test_that("O-RepDS/reduction: multilevel replicate projection reproduces ICC(*,k
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = c("single", "average"),
     seed = 1
@@ -1129,6 +1225,7 @@ test_that("O-RepDS/lme4: multilevel replicate projection matches an lme4 fit", {
     quote(subject),
     quote(rater),
     cluster = quote(cluster),
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = "average",
     seed = 1
@@ -1149,6 +1246,7 @@ test_that("O-RepDS: nested Design 2 replicate projects the subject level only", 
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     occasions = c("single", "average"),
     seed = 1
   ))
@@ -1173,6 +1271,7 @@ test_that("O-RepDS: multilevel replicate curve is monotone and in [0,1]", {
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = c("single", "average"),
     seed = 1
@@ -1202,6 +1301,7 @@ test_that("O-OccDS/ML-reduction: crossed D1 occasion projection reproduces ICC(*
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = c("single", "average"),
     seed = 1
@@ -1231,6 +1331,7 @@ test_that("O-OccDS/ML: the cluster occasion curve is flat, the subject curve ris
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = "average",
     seed = 1
@@ -1261,6 +1362,7 @@ test_that("O-OccDS/ML-lme4: crossed D1 occasion projection matches an lme4 fit",
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = "average",
     seed = 1
@@ -1271,6 +1373,7 @@ test_that("O-OccDS/ML-lme4: crossed D1 occasion projection matches an lme4 fit",
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     level = c("subject", "cluster"),
     occasions = "average",
     engine = "lme4",
@@ -1290,6 +1393,7 @@ test_that("O-OccDS/ML-nested: nested Design 2 projects the subject level only", 
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     occasions = c("single", "average"),
     seed = 1
   ))

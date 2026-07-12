@@ -396,7 +396,15 @@ test_that("incomplete nested d_study projects the subject level (M18 path)", {
     0.25,
     11
   )
-  x <- icc(d, score, subject, rater, cluster = cluster, seed = 1)
+  x <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    type = "agreement",
+    seed = 1
+  )
   ds <- as.data.frame(d_study(x, m = c(1, 4, 8)))
   expect_setequal(unique(ds$level), "subject")
   expect_equal(ds$estimate[ds$m == 1], pick(x, "ICC(A,1)"), tolerance = 1e-8)

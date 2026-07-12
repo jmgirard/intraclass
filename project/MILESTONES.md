@@ -1741,22 +1741,25 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         `icc_design_phrase` (header reads "…, absolute agreement & consistency"), and added a per-row
         `type` column to `estimates` + `tidy.icc`. Plain-text degradation verified at 80 cols.
         *(AC4, AC5 partial)*
-  - [~] **T4 — Invariance + policy tests + snapshot regen.** IN PROGRESS (2026-07-12). Fixed the 17
-        existing tests that assumed the old agreement-only default (choose-icc round-trip ×12 via a
-        real `build_icc_call` fix — the emitted call now always pins `type=` so a copied recommendation
-        reproduces the single coefficient, ADR-021; plus fixed-multilevel, incomplete-multilevel,
-        replicates). **Still TODO:** dedicated invariance test (defaulted == scalar cell-for-cell
-        across designs/engines/one posterior path), inform-and-drop/abort tests per agreement-only
-        surface, and snapshot regen for the grouped default table. *(AC2, AC3, AC4)*
-  - [ ] **T5 — Docs / NEWS / gate.** `@param type` + vignette note; NEWS default-shape bullet + the
-        `tidy()`-row-indexing caveat; WORDLIST if needed; finish-task gate + installed-pkg drive. *(AC5, AC6)*
-  - **OPEN (surfaced 2026-07-12, not in the ADR-054 plan): `d_study()` on a multi-type `icc` object.**
-        A default `icc()` is now multi-type, and `d_study(icc(...))` is the common idiom. Today
-        `d_study()` reads `x$design$type` as a scalar (`d-study.R:134`) and silently projects only
-        agreement while `glance()` reports 2 rows — a bug. Genuine fork: **project both reliability
-        curves** (a `type` axis through the projection grid + curve print/tidy/glance — mild scope
-        add) vs. **require a single-type input** (abort with guidance — breaks the `d_study(icc(...))`
-        idiom). Awaiting a user decision at the mid-implementation gate.
+  - [~] **T4 — Invariance + policy tests + snapshot regen.** IN PROGRESS (2026-07-12). **Whole suite
+        GREEN (0/386, 53 skip).** Fixed every existing test that assumed the old agreement-only default:
+        choose-icc round-trip ×12 (via a real `build_icc_call` fix — the emitted call now always pins
+        `type=` so a copied recommendation reproduces the single coefficient, ADR-021), fixed/incomplete
+        multilevel, replicates, ~24 d-study tests (pinned `type = "agreement"` on their `icc()` inputs,
+        matching each single-type oracle), nested-multilevel, and 2 vignette-claim tests. **Still TODO:**
+        a dedicated invariance test (defaulted == scalar cell-for-cell across designs/engines/one
+        posterior path — verified manually, not yet committed), dedicated inform-and-drop/abort tests
+        per agreement-only surface, and snapshot regen for the grouped default table. *(AC2, AC3, AC4)*
+  - [ ] **T5 — Docs / NEWS / gate.** `@param type` + `d_study()` `@return`/`@section` (both-curves) +
+        vignette note (the d-studies article shows `d_study(icc(...))` — now two curves); NEWS
+        default-shape bullet + the `tidy()`-row-indexing caveat; WORDLIST if needed; finish-task gate +
+        installed-pkg drive. *(AC5, AC6)*
+  - [x] **RESOLVED (user gate 2026-07-12): `d_study()` on a multi-type `icc` → project BOTH curves.**
+        `d_study()` now threads a `type` axis through the projection grid (type-major), reusing the
+        drop-vs-abort policy (fixed-agreement rater projection drops-and-informs under multi-type,
+        single-type still aborts). Adds a `type` column to the curve tbl; format/tidy expose it only
+        when >1 type present (single-type output unchanged); `glance` collapses to one row. Preserves
+        the `d_study(icc(...))` idiom.
 - **Coverage (criterion → task):** AC1 → T1 · AC2 → T4 · AC3 → T2, T4 · AC4 → T3, T4 · AC5 → T3, T5 ·
   AC6 → T5.
 - Deferred out of M44 (record so not rediscovered): a **post-hoc `update(x, type = ...)`
