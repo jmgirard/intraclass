@@ -134,10 +134,13 @@ more occasions washes out only pure measurement error, never the rater or
 subject-by-rater variance. Read it as "how much does re-rating help?", which
 plateaus, unlike adding raters.
 
-Multilevel replicate fits project the subject level across occasion settings and
-the cluster level single-occasion (occasion averaging touches only pure error,
-which is not in the cluster-level error set); \strong{ragged} replicate fits are refused
-(the occasion-averaged ragged divisor is an open modeling question).
+For a multilevel replicate fit (crossed Design 1 or nested Design 2), a \strong{rater}
+projection moves the subject level across occasion settings and the cluster level
+single-occasion, while an \strong{occasion} projection moves the subject level across
+\code{n_o} and returns the cluster level as a \strong{flat} curve: the cluster-level error set
+(\verb{\{rater, cluster:rater\}}) has no pure-error term, so averaging occasions cannot
+change it (\code{d_study()} notes this). \strong{Ragged} replicate fits are refused for either
+axis (the occasion-averaged ragged divisor is an open modeling question).
 }
 
 \examples{

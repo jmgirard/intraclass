@@ -270,7 +270,20 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M39 Task 1 (Slice 1 — single-level two-way occasion projection) — DONE (2026-07-11).**
+- Active task: **M39 Task 2 (Slice 2 — multilevel occasion projection) — DONE (2026-07-11).** Lifted the T1
+  `occasion_axis && multilevel` guard; the **subject** level projects across `n_o` and the **cluster** level is
+  occasion-invariant → returned as a **flat curve with a documented `cli` note**. The flat behavior emerged for
+  free from the estimand: sweeping `occ` over `n_o` for both levels, the cluster `error_divisors` (set
+  `{rater, cluster:rater}`, no pure-error term) simply ignore `n_o`, so `icc_point()` returns a constant. Only
+  new code: lift the guard, route the cluster level through the full `n_o` sweep (was `min(proj_occ)`), emit the
+  note. Verified: crossed-D1 subject reduces at n_o∈{1,3} → fitted ICC(*,k), cluster flat at 0.455 (= its
+  single-occasion fitted value); nested-D2 subject-only. **O-OccDS multilevel** committed (crossed-D1 per-level
+  reduction, cluster-flat + subject-rising invariant, lme4 cross-engine, nested-D2 subject-only reduction +
+  monotone). Design 3 replicate is N/A (not a shipped `icc()` combination). Full suite **378/0/51**,
+  `air`/`lintr` (0 lints) clean, `man/d_study.Rd` regenerated. **Next: `/start-task` T3** (docs — the
+  `d-studies-and-replicates` vignette + a claim test — the M4.5 §9 estimand spec, NEWS/COVERAGE/REFERENCES,
+  finish-task gate → PR). *Superseded (M39 T1, done):* Slice 1 shipped (committed `a23c768`); T2 in progress
+  plan stated below.
   Shipped the `n_o` argument on `d_study()` and single-level occasion projection: hold `m = k_eff`
   (`unit = "average"`), sweep the replicate grid's `occ` axis over the requested `n_o`; `icc_point()`'s
   per-component `error_divisors` do the rest (only pure error σ²_e divides by `m·n_o`). Fixed absolute

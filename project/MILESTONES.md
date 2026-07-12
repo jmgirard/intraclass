@@ -1383,10 +1383,16 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     monotone/[0,1]; the fixed-agreement lift + reduction; lme4 cross-engine; seeded-sim coverage). Classed
     aborts: both-axes, non-replicate, **multilevel (T2 guard, lifted in T2)**, bad `n_o` (#5/#8). Full suite
     374/0, `air`/`lintr` (0 lints) clean, docs regenerated.
-  - [ ] **T2 — Slice 2: multilevel occasion projection.** Crossed Design 1 + nested Design 2 + Design 3 (the
-    multilevel one-way, agreement-only). **Subject** level projects across `n_o`; **cluster** level is
-    occasion-invariant → returned as a **flat curve with a documented note** (its error set has no pure-error
-    term). O-OccDS multilevel (per-level reduction, lme4, sim; cluster-flat invariant).
+  - [x] **T2 — Slice 2: multilevel occasion projection. DONE (2026-07-11).** Crossed Design 1 + nested Design 2.
+    **Subject** level projects across `n_o`; **cluster** level is occasion-invariant → returned as a **flat
+    curve with a documented `cli` note** — the flatness emerges for free from the estimand (the cluster error
+    set `{rater, cluster:rater}` has no pure-error term, so `n_o` never enters its `error_divisors`); the only
+    code was lifting the T1 guard, routing the cluster level through the full `n_o` sweep, and the note.
+    **O-OccDS multilevel** committed (crossed-D1 per-level reduction at n_o = fitted → ICC(*,k); the
+    cluster-flat + subject-rising invariant; lme4 cross-engine; nested-D2 subject-only reduction + monotone).
+    Full suite 378/0, `air`/`lintr` (0 lints) clean, docs regenerated. Note: **Design 3 replicate** is not a
+    shipped `icc()` combination (the multilevel one-way confounds the rater, so there is no pure-error facet to
+    project), so it is N/A here, not deferred.
   - [ ] **T3 — docs + spec + finish-task gate → PR.** Write `M4.5-d-study.md` §9; extend the
     `d-studies-and-replicates` vignette (the finite-ceiling caveat + the axis-specific fixed-agreement rule) +
     a claim test; NEWS / COVERAGE / REFERENCES (register O-OccDS) in-commit; `devtools::document` / `air format

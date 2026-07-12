@@ -83,10 +83,13 @@
 #' subject-by-rater variance. Read it as "how much does re-rating help?", which
 #' plateaus, unlike adding raters.
 #'
-#' Multilevel replicate fits project the subject level across occasion settings and
-#' the cluster level single-occasion (occasion averaging touches only pure error,
-#' which is not in the cluster-level error set); **ragged** replicate fits are refused
-#' (the occasion-averaged ragged divisor is an open modeling question).
+#' For a multilevel replicate fit (crossed Design 1 or nested Design 2), a **rater**
+#' projection moves the subject level across occasion settings and the cluster level
+#' single-occasion, while an **occasion** projection moves the subject level across
+#' `n_o` and returns the cluster level as a **flat** curve: the cluster-level error set
+#' (`{rater, cluster:rater}`) has no pure-error term, so averaging occasions cannot
+#' change it (`d_study()` notes this). **Ragged** replicate fits are refused for either
+#' axis (the occasion-averaged ragged divisor is an open modeling question).
 #'
 #' @param x An `icc` object returned by [icc()].
 #' @param m Numeric vector of rater counts to project to (each \eqn{\ge 1}).
@@ -184,16 +187,6 @@ d_study <- function(
       i = "Refit with replicated data, or project the rater count {.arg m} instead."
     ))
   }
-  # Multilevel occasion projection ships in M39 Slice 2 (T2); Slice 1 is the
-  # single-level two-way corner. Guarded here so Slice 1 stays scoped (lifted in T2).
-  if (occasion_axis && multilevel) {
-    abort_unsupported(c(
-      "Multilevel occasion-count projection is not supported yet.",
-      i = "Project the occasion count on a single-level within-cell replicate fit; \\
-           the multilevel corner is planned (M39 Slice 2)."
-    ))
-  }
-
   # Multilevel rater-count projection (M17 Slice 2, estimand-spec M4.5 §7): project
   # `m` for each correctly-partitioned level on the fit. Complete data only -- the
   # cluster-level ICC(c,k) divisor under imbalance is the open M9 question (§7.2).
@@ -232,6 +225,24 @@ d_study <- function(
         .frequency_id = "intraclass_dstudy_cluster_incomplete"
       )
       proj_levels <- setdiff(proj_levels, "cluster")
+    }
+    # Multilevel OCCASION projection (M39 Slice 2): the cluster-level error set is
+    # {rater, cluster:rater} -- it carries NO pure-error term, and occasion averaging
+    # rescales only pure error, so `n_o` does not enter the cluster estimand at all.
+    # The cluster curve is therefore occasion-INVARIANT (flat). It is still returned
+    # (mirroring the rater axis's both-level output), with a note so the flatness reads
+    # as a genuine result, not a missing computation (#18).
+    if (occasion_axis && "cluster" %in% proj_levels) {
+      cli::cli_inform(
+        c(
+          i = "The cluster-level ICC does not average over occasions (its error set \\
+               has no pure-error term), so its occasion curve is flat.",
+          i = "Subject-level reliability rises with more occasions; cluster-level \\
+               reliability is unchanged."
+        ),
+        .frequency = "once",
+        .frequency_id = "intraclass_dstudy_cluster_occasion_flat"
+      )
     }
     if (length(proj_levels) == 0L) {
       abort_unsupported(c(
@@ -330,15 +341,17 @@ d_study <- function(
   }
   if (multilevel) {
     # Level x occasions x m. Occasion averaging rescales pure error, which lives in the
-    # SUBJECT error set only (the cluster error set is cluster:rater), so the cluster
-    # level is projected single-occasion (M22 Slice 2, mirroring icc()). A non-replicate
-    # multilevel fit carries a single NA placeholder occasion.
+    # SUBJECT error set only (the cluster error set is cluster:rater). On the RATER axis
+    # (M22) the cluster level is projected single-occasion (`min(proj_occ)`, mirroring
+    # icc()). On the OCCASION axis (M39) both levels sweep `n_o`: the cluster estimand
+    # ignores `n_o` (no pure-error term), so its curve comes out flat across the same
+    # x-axis as the subject curve. A non-replicate multilevel fit carries an NA occasion.
     grid <- do.call(
       rbind,
       lapply(proj_levels, function(lv) {
         occ_lv <- if (!replicates) {
           NA_real_
-        } else if (lv == "subject") {
+        } else if (occasion_axis || lv == "subject") {
           proj_occ
         } else {
           min(proj_occ)

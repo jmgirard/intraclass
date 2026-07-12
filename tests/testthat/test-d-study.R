@@ -1010,7 +1010,7 @@ test_that("O-OccDS/sim: population Phi(n_o) recovered and covered at an n_o not 
   expect_lte(phi, ds$conf.high)
 })
 
-test_that("O-OccDS: occasion axis guards (both axes / non-replicate / multilevel / n_o)", {
+test_that("O-OccDS: occasion axis guards (both axes / non-replicate / n_o)", {
   skip_if_not_installed("glmmTMB")
   d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
   fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
@@ -1022,35 +1022,6 @@ test_that("O-OccDS: occasion axis guards (both axes / non-replicate / multilevel
   # Occasion projection needs a replicate fit.
   nonrep <- icc(ratings, score, subject, rater, seed = 1)
   expect_error(d_study(nonrep, n_o = 1:3), class = "intraclass_unsupported")
-  # Multilevel occasion projection is M39 Slice 2 (T2); Slice 1 guards it. A small
-  # crossed multilevel replicate frame (cluster x subject x rater x occasion), built
-  # inline so the guard test does not depend on a later-defined generator.
-  set.seed(11)
-  dm <- expand.grid(
-    subject = 1:4,
-    rater = 1:3,
-    occ = 1:2,
-    cluster = 1:3
-  )
-  dm$score <- 10 +
-    rnorm(3)[dm$cluster] +
-    rnorm(12)[(dm$cluster - 1) * 4 + dm$subject] +
-    rnorm(3)[dm$rater] +
-    rnorm(nrow(dm))
-  dm$subject <- factor(paste(dm$cluster, dm$subject, sep = "_"))
-  dm$rater <- factor(dm$rater)
-  dm$cluster <- factor(dm$cluster)
-  mlfit <- suppressMessages(icc(
-    dm,
-    score,
-    subject,
-    rater,
-    cluster = cluster,
-    level = c("subject", "cluster"),
-    occasions = "average",
-    seed = 1
-  ))
-  expect_error(d_study(mlfit, n_o = 1:3), class = "intraclass_unsupported")
   # n_o must be a numeric vector >= 1.
   expect_error(d_study(fit, n_o = c(0, 2)), class = "intraclass_error")
   expect_error(d_study(fit, n_o = "x"), class = "intraclass_error")
@@ -1214,4 +1185,125 @@ test_that("O-RepDS: multilevel replicate curve is monotone and in [0,1]", {
       expect_true(all(est >= 0 & est <= 1))
     }
   }
+})
+
+# Oracle O-OccDS (multilevel): occasion projection off a multilevel replicate fit ----
+#
+# M39 Slice 2: the subject level projects across n_o (only its error set carries pure
+# error); the cluster error set is {rater, cluster:rater} with NO pure-error term, so
+# the cluster occasion curve is INVARIANT (flat) -- returned with a note (ADR-049).
+
+test_that("O-OccDS/ML-reduction: crossed D1 occasion projection reproduces ICC(*,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, n_o = c(1, 3)))
+  expect_identical(attr(ds, "axis"), "occasions")
+  expect_true(all(c("level", "occasions") %in% names(ds)))
+  # Both levels sweep n_o; the subject level reduces at each fitted occasion setting,
+  # the cluster level reduces to its (single-occasion) fitted ICC(A,k) at every n_o.
+  for (i in seq_len(nrow(ds))) {
+    occ_lookup <- if (ds$level[i] == "cluster") 1 else ds$occasions[i]
+    f <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" &
+        fit$estimates$level == ds$level[i] &
+        fit$estimates$occasions == occ_lookup
+    ]
+    expect_equal(ds$estimate[i], f, tolerance = 1e-4)
+  }
+})
+
+test_that("O-OccDS/ML: the cluster occasion curve is flat, the subject curve rises", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = "average",
+    seed = 1
+  ))
+  # The note fires once for a multilevel occasion projection with a cluster level; the
+  # .frequency = "once" note needs verbose verbosity to observe regardless of ordering.
+  withr::local_options(rlib_message_verbosity = "verbose")
+  expect_message(
+    d_study(fit, n_o = 1:6),
+    "cluster-level ICC does not average over occasions"
+  )
+  ds <- suppressMessages(d_study(fit, n_o = 1:6))
+  clus <- ds$estimate[ds$level == "cluster"]
+  subj <- ds$estimate[ds$level == "subject"]
+  expect_equal(diff(range(clus)), 0, tolerance = 1e-9) # flat
+  expect_true(all(diff(subj) > 0)) # rising
+  expect_true(all(ds$estimate >= 0 & ds$estimate <= 1))
+})
+
+test_that("O-OccDS/ML-lme4: crossed D1 occasion projection matches an lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fg <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = "average",
+    seed = 1
+  ))
+  fl <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = "average",
+    engine = "lme4",
+    seed = 1
+  ))
+  dg <- suppressMessages(d_study(fg, n_o = c(1, 4, 10)))
+  dl <- suppressMessages(d_study(fl, n_o = c(1, 4, 10)))
+  expect_equal(dg$estimate, dl$estimate, tolerance = 1e-4)
+})
+
+test_that("O-OccDS/ML-nested: nested Design 2 projects the subject level only", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_nested_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.4, 0.5, seed = 12)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, n_o = c(1, 3)))
+  expect_setequal(unique(ds$level), "subject")
+  for (i in seq_len(nrow(ds))) {
+    f <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" &
+        fit$estimates$level == "subject" &
+        fit$estimates$occasions == ds$occasions[i]
+    ]
+    expect_equal(ds$estimate[i], f, tolerance = 1e-4)
+  }
+  # Subject occasion curve rises with n_o.
+  ds2 <- suppressMessages(d_study(fit, n_o = 1:6))
+  expect_true(all(diff(ds2$estimate) > 0))
 })
