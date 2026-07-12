@@ -1627,6 +1627,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   breadcrumb walkthrough without nav); a **full restyle** (boxes/panels/colour badges — plan gate chose tasteful
   medium); a `fit=`/data-in path, `tidy`/`glance` on the recommendation, GUI/Shiny fronts (all long-parked out of
   ADR-021); every untouched carryover stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **planned** (2026-07-11) — scoped from a maintainer request (interactive tree + prettier print) via a
-  four-question plan gate. Next: `/start-task` on `m43-cli-polish` (retro → ADR-053 → S1 → S2 → S3 → PR). **No
+- Status: **in progress** (branch `m43-cli-polish`; 2026-07-11) — scoped from a maintainer request (interactive
+  tree + prettier print) via a four-question plan gate; **retro done, ADR-053 authored**. Now on **S1**. **No
   Fable** (no RB tripwire: no new oracle, no exported-API change, no IP touched — presentation only).
