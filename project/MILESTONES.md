@@ -1554,3 +1554,79 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: **done — merged, CI green** (PR #48, squash-merged to `main` at `1baf7db`; full CI matrix green 9/9,
   incl. `ubuntu-latest (devel)` clean). Shipped in one session (retro → ADR-052 → S1+S2 article → S3 gate →
   PR #48 → merge); **no Fable review**. Docs/deps-only → no installed-pkg estimator paths driven.
+
+## M43: cli presentation polish — interactive `choose_icc()` decision tree + `print`/`summary` aesthetics (ADR-053)
+- Goal: make the package's two most-seen console surfaces pleasant to read and use, without touching any
+  number. **(1)** Turn `choose_icc()`'s interactive walkthrough from a plain numbered `cli_ol` + `readline`
+  loop into a **styled cli decision tree** — a header/rule per outstanding question, a styled option list, a
+  running **breadcrumb** of choices made so far, then a restyled recommendation — while preserving the pure
+  `resolve_icc_recommendation()` core and the injectable `ask=` / `prompt_line` test seam (ADR-021). **(2)**
+  Restyle `format.icc()` (shared by `print.icc` **and** `summary.icc`) from hand-aligned `cli_verbatim`
+  monospace into **tasteful medium** cli styling — a `cli_rule` header, a cleanly aligned coefficient table
+  with the point estimate emphasized and the CI de-emphasized, and cli-styled meta/notes — degrading to clean,
+  deterministic plain text under no-colour / knitr / pkgdown / CRAN. A **presentation-only engineering milestone**
+  (cf. M4/M11/M13/M35/M40/M41): **no new estimand, engine, fit, CI machinery, public argument, or dependency**
+  (#6); correctness = **displayed numbers provably unchanged** (identity vs. `tidy()` / the shipped oracles,
+  #1/#4) + the `choose_icc()` **round-trip oracle unchanged** (ADR-021); **no Fable** (#19). Name **kept as
+  `choose_icc()`** (maintainer decision at the plan gate; the user's "`suggest_icc()`" was a misremembering — no
+  rename, no alias).
+- Reference: ADR-053 (to be authored at implement-start after the retro, as M40–M42 did); no estimand-spec
+  (presentation, not an estimator). Amends the interactive-shell presentation of ADR-021 (dual-interface
+  contract, resolver core, and test seam all **preserved** — this enriches rendering only). Touches `R/icc-methods.R`
+  (`format.icc`/`print.icc`/`summary.icc`), `R/choose-icc.R` (`ask_choice`/`collect_answers_interactively`/
+  `format.icc_recommendation`), the 8 `_snaps/icc-*.md` print snapshots + `test-choose-icc.R` /
+  `test-icc-methods.R`. **Snapshot discipline:** keep the existing CI-masking snapshot transform (`[CI]`) so
+  Monte-Carlo/posterior interval jitter never destabilizes a formatting snapshot ([[verify-against-installed-package]]),
+  and capture all new/regenerated snapshots under `cli` reproducible output (ANSI stripped) so they are
+  colour/width deterministic on CI.
+- **Acceptance criteria** (each names the behavior that must be tested):
+  - **AC1** — `print.icc` / `summary.icc` render with tasteful cli styling (a `cli_rule` header, an aligned
+    coefficient table with the estimate emphasized and the CI dimmed, cli-styled notes) with **every displayed
+    numeric value byte-identical in meaning to today's** — a claim test asserts each printed estimate/CI
+    bound/variance component equals `tidy()`/`glance()` to shown precision.
+  - **AC2** — all `print.icc` design variants are covered and each degrades to clean, column-aligned plain
+    text at 80 columns with ANSI disabled: two-way agreement/consistency, one-way, multilevel (subject/cluster/
+    conflated), within-cell replicates, incomplete (`k_eff` note), and the lavaan/lme4 engine headers — the 8
+    `_snaps/icc-*.md` regenerated under reproducible cli output.
+  - **AC3** — `choose_icc()`'s interactive walkthrough renders as a styled cli tree: each outstanding question
+    shows a header/rule + styled option list, a breadcrumb of prior choices accumulates as the walk proceeds,
+    and the resolved object prints via the restyled `print.icc_recommendation` — verified by a reproducible-output
+    snapshot driving the shell through the injected `ask=` responder + mocked `prompt_line`.
+  - **AC4** — the pure resolver core and its correctness oracle are **untouched**: every existing
+    `test-choose-icc.R` test (crosswalk-label table, round-trip call-equivalence on shipped data, classed
+    `intraclass_underspecified` / inapplicable aborts) passes **unmodified**, and the `ask=` / `prompt_line`
+    injection seam is preserved (ADR-021 dual-interface contract intact).
+  - **AC5** — all user-facing text stays routed through `cli` (no bare `print()`/`cat()`/`warning()`, #8), and
+    every vignette + the pkgdown site still builds with the new output: `pkgdown::check_pkgdown()` clean, all
+    vignettes render, and any vignette displaying a printed `icc`/recommendation object shows the restyled form
+    without breakage.
+  - **AC6** — ADR-053 recorded (scoping + the four plan-gate decisions), a `NEWS` bullet added under the
+    unreleased heading, and the finish-task gate is green (`air format --check` / `lintr` 0 lints / `spelling` /
+    `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity `NOT_CRAN=false` 0/0/0).
+- **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
+  - [ ] **S1 — `print.icc` / `summary.icc` cli restyle.** Restyle `format.icc()` (medium): `cli_rule` header;
+        coefficient table aligned via `cli::ansi_align`/`ansi_nchar` (width-safe with invisible ANSI), estimate
+        bold + CI dimmed; styled meta lines, variance-components line, and the `k_eff` / Shrout–Fleiss /
+        conflated-diagnostic notes; **plain-text degradation** verified (ANSI off → deterministic, 80-col
+        aligned). Regenerate the 8 `_snaps/icc-*.md` under reproducible cli output, keeping the `[CI]` mask. Add
+        the "displayed numbers == `tidy()`/`glance()`" claim test. *(AC1, AC2)*
+  - [ ] **S2 — interactive `choose_icc()` decision tree.** Restyle `ask_choice()` /
+        `collect_answers_interactively()`: per-question header/rule + styled option list + accumulating
+        breadcrumb; restyle `format.icc_recommendation()` (rule header + styled Recommendation/Why/Run/Notes).
+        Keep `resolve_icc_recommendation()` and the `ask=` / `prompt_line` seam untouched; existing
+        `test-choose-icc.R` correctness tests pass unmodified; add a reproducible-output shell snapshot via the
+        injected responder. *(AC3, AC4)*
+  - [ ] **S3 — ADR-053 + NEWS + vignette/pkgdown re-render + finish-task gate → PR.** Short retro → ADR-053
+        (keep-name, one-milestone/two-slices, medium restyle, breadcrumb tree, presentation-only); NEWS bullet;
+        WORDLIST if new terms; re-render vignettes that display printed objects + `pkgdown::check_pkgdown()`;
+        finish-task gate; open PR from `m43-cli-polish`. *(AC5, AC6)*
+- **Coverage (criterion → slice):** AC1 → S1 · AC2 → S1 · AC3 → S2 · AC4 → S2 · AC5 → S1,S2,S3 · AC6 → S3.
+- Deferred out of M43 (record so not rediscovered): the **v0.2.0 release consolidation / CRAN upload** (ADR-022,
+  still the next sequenced step after M43); a `suggest_icc()` **rename/alias** (maintainer kept `choose_icc()` at
+  the plan gate); back-navigation / restart / confirm-before-resolve in the interactive tree (plan gate chose the
+  breadcrumb walkthrough without nav); a **full restyle** (boxes/panels/colour badges — plan gate chose tasteful
+  medium); a `fit=`/data-in path, `tidy`/`glance` on the recommendation, GUI/Shiny fronts (all long-parked out of
+  ADR-021); every untouched carryover stays in [`ROADMAP.md`](ROADMAP.md).
+- Status: **planned** (2026-07-11) — scoped from a maintainer request (interactive tree + prettier print) via a
+  four-question plan gate. Next: `/start-task` on `m43-cli-polish` (retro → ADR-053 → S1 → S2 → S3 → PR). **No
+  Fable** (no RB tripwire: no new oracle, no exported-API change, no IP touched — presentation only).

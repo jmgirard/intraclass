@@ -1,6 +1,21 @@
 # Project status
 
-- Active milestone: **none** — M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped (PR #48,
+- Active milestone: **none in flight; M43 PLANNED** (2026-07-11) — **cli presentation polish: interactive
+  `choose_icc()` decision tree + `print`/`summary` aesthetics** (board in [`MILESTONES.md`](MILESTONES.md) M43;
+  ADR-053 to be authored at implement-start). Scoped from a maintainer request via a four-question plan gate:
+  **(S1)** restyle `format.icc()` (shared by `print.icc`/`summary.icc`) from `cli_verbatim` monospace into
+  **tasteful medium** cli (rule header, aligned coefficient table, estimate emphasized / CI dimmed, styled
+  notes) — degrading to plain deterministic text under no-colour/knitr/CRAN; **(S2)** turn `choose_icc()`'s
+  interactive walkthrough (today a plain `cli_ol` + `readline` loop, fired only when interactive **and** a
+  required arg is missing) into a **styled cli decision tree with a breadcrumb**, preserving the pure resolver
+  core + `ask=`/`prompt_line` test seam (ADR-021); **(S3)** ADR-053 + NEWS + vignette/pkgdown re-render +
+  finish-task gate → PR from `m43-cli-polish`. **Presentation-only** (cf. M4/M11/M40): no new estimand/engine/
+  fit/CI/argument/dependency (#6); correctness = displayed numbers provably unchanged (identity vs. `tidy()`) +
+  the `choose_icc()` round-trip oracle unchanged; **no Fable** (no RB tripwire). Plan-gate decisions: **name
+  kept `choose_icc()`** (the request's "`suggest_icc()`" was a misremembering — no rename/alias); one milestone
+  / two slices; medium restyle (not full boxes/badges); breadcrumb walkthrough (no back-nav). **v0.2.0 release
+  consolidation (ADR-022) stays the next step _after_ M43.**
+- Prior milestone: **none** — M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped (PR #48,
   squash-merged to `main` at `1baf7db`; full CI matrix green 9/9, devel clean). An **engineering/docs milestone**
   (cf. M4/M13/M35/M40/M41) with a bounded dependency delta: one reader-facing
   `vignettes/comparison-with-other-packages.Rmd` — a **validation** half (`intraclass` ≡ `psych` ≡ `irr` across
@@ -293,8 +308,10 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M42 shipped and merged (PR #48, `1baf7db`).** The next work is the **v0.2.0 release
-  consolidation** (out-of-band release milestone, ADR-022): version bump `0.1.0`→`0.2.0`, add a `0.2.0` NEWS
+- Active task: **none started — M43 PLANNED, awaiting `/start-task` on `m43-cli-polish`** (retro → ADR-053 →
+  S1 print restyle → S2 interactive tree → S3 gate → PR). M42 shipped and merged (PR #48, `1baf7db`). After M43,
+  the **v0.2.0 release consolidation** remains the next work (out-of-band release milestone, ADR-022): version
+  bump `0.1.0`→`0.2.0`, add a `0.2.0` NEWS
   heading over the ~28 milestones accreted since M13, `cran-comments.md`, `R CMD check --as-cran`, then the CRAN
   upload — needs its own kickoff (the `cairn:cairn-release` skill covers this shape). *Superseded (M42, done):*
   all 3 slices shipped and the full CI matrix came back green 9/9. Gate before the PR: `air format --check` /
