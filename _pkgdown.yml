@@ -14,6 +14,7 @@ articles:
       - engines
       - interval-methods
       - d-studies-and-replicates
+      - comparison-with-other-packages
   - title: Reference
     navbar: Reference
     contents:

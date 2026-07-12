@@ -74,17 +74,19 @@ detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
-ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40).
-**No milestone is currently in flight** — M41 (ADR-051, clarity/accessibility pass over the four secondary
-vignettes + a standalone `glossary.Rmd`) shipped (PR #47, squash-merged to `main` at `3e00999`; full CI matrix
-green 9/9). A **docs milestone**
+ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40,
+ADR-051 M41, ADR-052 M42).
+**M42 is in flight** (ADR-052, the benchmark-vs-prior-art comparison article — engineering/docs; board below) on
+branch `m42-benchmark-comparison`. Prior milestone M41 (ADR-051, clarity/accessibility pass over the four
+secondary vignettes + a standalone `glossary.Rmd`) shipped (PR #47, squash-merged to `main` at `3e00999`; full
+CI matrix green 9/9). A **docs milestone**
 (cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency; correctness = live-computed +
 claim-tested numbers (#1/#4/#12); **no Fable**. Extended M40's applied-reader treatment to the remaining four
-articles and added a standalone `glossary.Rmd` (26 terms) all six articles deep-link into. **The next milestone
-is M42 — the benchmark-vs-prior-art suite (engineering) — which needs an ADR after a short retro** (founding
-brief §7); it is the second of the two release-strengthening milestones the 2026-07-11 retro sequenced before
-**0.2.0** (M41 clarity ✓ → M42 benchmark → cut 0.2.0; the v0.2.0 consolidation + CRAN upload, ADR-022, follow
-M42). Prior milestone **M40** (ADR-050,
+articles and added a standalone `glossary.Rmd` (26 terms) all six articles deep-link into. **M42** is the second
+of the two release-strengthening milestones the 2026-07-11 retro sequenced before **0.2.0** (M41 clarity ✓ →
+M42 benchmark → cut 0.2.0; the v0.2.0 consolidation + CRAN upload, ADR-022, follow M42) — one reader-facing
+comparison article showing agreement with `psych`/`irr` + the differentiator (`irrICC` foil), two new
+test/vignette-only `Suggests`, no new estimand. Prior milestone **M40** (ADR-050,
 accessibility rewrite of the two front-door vignettes `getting-started` + `choosing-an-icc` for applied readers)
 shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix green 9/9). M40 was
 a **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness =
@@ -1497,3 +1499,59 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: **done — merged, CI green** (PR #47, squash-merged to `main` at `3e00999`; full CI matrix green 9/9,
   incl. `ubuntu-latest (devel)` clean). Shipped in one session (retro → ADR-051 → S1 → S2 → S3 gate → PR #47 →
   merge); **no Fable review**. Docs-only → no installed-pkg estimator paths driven.
+
+## M42: benchmark-vs-prior-art comparison article (ADR-052)
+- Goal: give a prospective user one reader-facing page that shows **both** that `intraclass` reproduces the
+  ICC tools they already trust (`psych`, `irr`) to numerical precision on the balanced designs where all are
+  defined, **and** what `intraclass` does that prior art cannot (incomplete/unbalanced data, multilevel
+  subject/cluster IRR, boundary-aware Monte-Carlo intervals, fixed-vs-random error framing, a selection
+  framework). The long-parked benchmark-vs-prior-art ROADMAP item, the **second** release-strengthening
+  milestone before 0.2.0 (M41 clarity ✓ → **M42 benchmark** → cut 0.2.0). An **engineering / docs milestone**
+  (cf. M4/M13/M35/M40/M41) **with a bounded dependency delta**: **no new estimand, engine, fit, CI machinery, or
+  public argument** (#6); correctness = **live-computed + claim-tested numbers** (#1/#4/#12), not a new numerical
+  oracle (the agreement half re-presents the shipped `psych` cross-check); **no Fable** (#19).
+- Reference: ADR-052; no estimand-spec (docs, not estimand). New deliverable
+  `vignettes/comparison-with-other-packages.Rmd`; new **test/vignette-only** `Suggests`: `irr`, `irrICC`
+  (`psych` already present). **Package set `psych` + `irr` + `irrICC`** (classical exact-agreement + Gwet
+  model-based/missing-data foil); **`gtheory` deliberately not a dep** (archived off CRAN 2025-03-24 — its
+  agreement is cited from existing `REFERENCES.md` provenance), and the VPC/NA sweep
+  (`performance`/`misty`/`irrNA`/`DescTools`) is stated in a capability matrix, not run live (#17). Smoke-test
+  premise (this session, `irr::anxiety`): `intraclass` ≡ `psych` ≡ `irr` to 6 dp on ICC(1)=0.175022,
+  ICC(A,k)=0.425499, ICC(C,k)=0.452586.
+- **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
+  - [x] **S1 — validation section + wiring + `irr` dep.** DONE (S1+S2 shipped together — one coherent `.Rmd`,
+        no value in splitting a single file across commits). New `comparison-with-other-packages.Rmd`
+        validation section: the full six-coefficient family (ICC(1)/ICC(1,k)/ICC(A,1)/ICC(A,k)/ICC(C,1)/ICC(C,k))
+        computed **live** across `intraclass`/`psych`/`irr` on `ratings`, agreeing to ~5 dp (max gap 6.7e-6, a
+        REML-vs-ANOVA-mean-squares gap, explained). Registered in `_pkgdown.yml`'s **articles** index (not the
+        reference index — [[pkgdown-reference-index-new-exports]]); `irr` → `DESCRIPTION` `Suggests`;
+        `test-vignette-claims.R` gains the agreement claims (`skip_if_not_installed(psych/irr)`, tol 1e-4).
+        Verified: renders standalone; `pkgdown::check_pkgdown()` "No problems found"; claims pass.
+  - [x] **S2 — differentiation section + `irrICC` dep.** DONE (with S1). Incomplete/unbalanced worked case on
+        `ratings_incomplete`: classical listwise deletion collapses to **2 of 6 subjects**, while `intraclass`
+        uses all 6 subjects / 20 observed ratings via `k_eff`=3.27; a **capability matrix** (balanced ANOVA /
+        incomplete / multilevel / boundary-aware CI / fixed-vs-random / selection) that **cites**
+        `gtheory`/`performance` rather than running them (#18 — framed as intent, not a scorecard). `irrICC` →
+        `Suggests`, used only for its rock-solid **balanced** point (Gwet `icc2r` ≡ ICC(A,1) to 1e-4) — its
+        incomplete-data output was **not** pinned (its `Mtot` accounting couldn't be cleanly explained, #1/#4).
+        Every displayed number live + claim-tested. Verified: renders; claims pass; six cross-links + five
+        glossary anchors resolve.
+  - [x] **S3 — WORDLIST + NEWS + cross-links + finish-task gate → PR.** DONE. WORDLIST (`Gwet`/`Gwet's`,
+        `Revelle`/`Revelle's`, `IRR`, `listwise`); NEWS *Comparison with other packages* bullet; the article
+        cross-links the four companion articles (choosing / multilevel / interval-methods / engines). **Finish-task
+        gate GREEN:** `air format --check` clean, `lintr` **0 lints**, `spelling` clean, `devtools::document` no
+        delta, full CI-mode suite **1244/0/51** (three new comparison claims pass), `pkgdown::check_pkgdown()`
+        clean, `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with all **eight**
+        vignettes built and `irr`/`irrICC` present ([[verify-against-installed-package]]). Docs/deps-only → no
+        installed-pkg estimator paths to drive.
+- Deferred out of M42 (record so not rediscovered): the **v0.2.0 release consolidation / CRAN upload** (ADR-022,
+  the next sequenced step); a `data-raw/` benchmark **harness** and any **speed/timing** benchmark (out of scope
+  — the maintainer chose the reader-facing agreement/capability article); `gtheory` as a live dep (impossible —
+  archived off CRAN); the broad VPC/NA package sweep (`performance`/`misty`/`irrNA`/`DescTools`, #17); every
+  untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, the lavaan
+  siblings) stays in [`ROADMAP.md`](ROADMAP.md).
+- Status: **in progress — all 3 slices done, local gate green, PR pending.** Branch `m42-benchmark-comparison`;
+  ADR-052 + board + the article (S1+S2) + WORDLIST/NEWS/gate (S3) all committed. Finish-task gate green
+  (`devtools::check` CI-parity **0/0/0**, all eight vignettes built; suite 1244/0/51; `air`/`lintr`/`spelling`/
+  `pkgdown` clean). **Next: open the PR from `m42-benchmark-comparison`**; on green CI + merge, reconcile M42 →
+  done + set "Last green CI".

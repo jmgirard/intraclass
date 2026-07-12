@@ -83,10 +83,16 @@ helpers* item below (sample-size / CI-width), where it belongs.
   parametric-bootstrap half of this idea is done (M16). Non-parametric bootstrap
   and profile-likelihood remain a method-comparison nice-to-have, not sequenced
   into Waves 1–3.
-- Benchmark suite vs. `psych`/`gtheory`/`irrICC` across designs. **Status: ready
-  anytime, low priority.** Pure engineering — no new estimand or oracle risk,
-  since the comparisons already exist piecemeal in the oracle registry
-  (`REFERENCES.md`) — but not yet sequenced into a wave.
+- Benchmark suite vs. prior art across designs. **Status: SCHEDULED as M42** (ADR-052, in flight on branch
+  `m42-benchmark-comparison`). Scoped as one reader-facing comparison article
+  (`comparison-with-other-packages.Rmd`): a **validation** half (`intraclass` ≡ `psych` ≡ `irr` to numerical
+  precision on balanced designs — no new oracle risk, the `psych` cross-check already ships) + a
+  **differentiation** half (incomplete/multilevel/boundary-CI capability the classical tools lack, with `irrICC`
+  as the model-based foil). Two new test/vignette-only `Suggests` (`irr`, `irrICC`); **`gtheory` cannot be a dep
+  (removed from CRAN 2025-03-24)** so its agreement is cited from existing `REFERENCES.md` provenance, and the
+  VPC/NA sweep (`performance`/`misty`/`irrNA`/`DescTools`) stays out (#17). Full scope in
+  [`MILESTONES.md`](MILESTONES.md) M42 (ADR-015 — not re-narrated here); the v0.2.0 consolidation (ADR-022)
+  follows.
 - **Clarity/accessibility rewrite of the teaching vignettes.** The **vignette *reassessment***
   (Update + Split) **shipped as M35** (ADR-045, PR #40): `advanced.Rmd` was retired into four
   focused articles (`multilevel-designs`, `engines`, `interval-methods`, `d-studies-and-replicates`)
