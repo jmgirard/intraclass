@@ -24,6 +24,7 @@
     <li><a class="dropdown-item" href="../articles/engines.html">Estimation engines</a></li>
     <li><a class="dropdown-item" href="../articles/interval-methods.html">Confidence-interval methods</a></li>
     <li><a class="dropdown-item" href="../articles/d-studies-and-replicates.html">D-studies and within-cell replicates</a></li>
+    <li><a class="dropdown-item" href="../articles/comparison-with-other-packages.html">Comparison with other packages</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
     <li><a class="dropdown-item" href="../articles/glossary.html">Glossary</a></li>
@@ -83,6 +84,7 @@
 <li>
 <em>Getting started</em> and <em>Choosing an ICC</em> were rewritten to be approachable to readers new to reliability: a from-scratch on-ramp (“what an ICC tells you”), plainer language for the confidence interval and the estimand vocabulary, and a new interpretation-band guide (poor / moderate / good / excellent, after Koo &amp; Li 2016 and Cicchetti 1994) framed as conventions to read against the interval — not verdicts the package computes for you.</li>
 <li>A new <em>Glossary</em> article defines the recurring vocabulary — variance component, REML, credible vs. confidence interval, <code>k_eff</code>, the zero-variance boundary, and the rest — in one place that the other articles link into.</li>
+<li>A new <em>Comparison with other packages</em> article shows, with numbers computed live from the shipped datasets, that <code>intraclass</code> reproduces <code><a href="https://rdrr.io/pkg/psych/man/ICC.html" class="external-link">psych::ICC</a></code> and <code><a href="https://rdrr.io/pkg/irr/man/icc.html" class="external-link">irr::icc</a></code> across the McGraw &amp; Wong family on balanced data (and that Gwet’s model-based <code>irrICC</code> agrees too), then where it goes further — incomplete and unbalanced data, multilevel subject/cluster reliability, boundary-aware intervals, and guidance on which coefficient to report.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="robustness-pre-release-code-review-0-1-0">Robustness (pre-release code review)<a class="anchor" aria-label="anchor" href="#robustness-pre-release-code-review-0-1-0"></a></h3>

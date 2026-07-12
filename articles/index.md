@@ -14,6 +14,8 @@
   methods](https://jmgirard.github.io/intraclass/articles/interval-methods.md):
 - [D-studies and within-cell
   replicates](https://jmgirard.github.io/intraclass/articles/d-studies-and-replicates.md):
+- [Comparison with other
+  packages](https://jmgirard.github.io/intraclass/articles/comparison-with-other-packages.md):
 
 ### Reference
 

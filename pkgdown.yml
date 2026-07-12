@@ -3,13 +3,14 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   choosing-an-icc: choosing-an-icc.html
+  comparison-with-other-packages: comparison-with-other-packages.html
   d-studies-and-replicates: d-studies-and-replicates.html
   engines: engines.html
   getting-started: getting-started.html
   glossary: glossary.html
   interval-methods: interval-methods.html
   multilevel-designs: multilevel-designs.html
-last_built: 2026-07-12T03:33Z
+last_built: 2026-07-12T04:21Z
 urls:
   reference: https://jmgirard.github.io/intraclass/reference
   article: https://jmgirard.github.io/intraclass/articles
