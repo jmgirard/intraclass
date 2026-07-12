@@ -73,8 +73,17 @@ alternate engines, and seeded simulations.
   `ICC(*,k)`. Single-level two-way (fixed-rater consistency via Spearman-Brown; fixed
   absolute agreement refused) and multilevel (crossed Design 1 + nested Design 2 —
   subject level across occasion settings, cluster level single-occasion) replicate fits
-  are supported. Projecting the occasion count itself, and projecting off a ragged
-  replicate fit, remain unsupported.
+  are supported.
+* `d_study()` also projects the **occasion count** off a within-cell replicate fit — a
+  new `n_o` argument (mutually exclusive with `m`) that holds the raters fixed and
+  sweeps the number of occasions: "how reliable would each rater's mean of `n_o` ratings
+  be?". Because occasion averaging cancels only pure error, the curve rises to a
+  **finite ceiling below 1** (not toward 1, as a rater projection does), and it is
+  well-posed for **fixed absolute agreement** — the axis a rater projection cannot take.
+  On a multilevel fit the subject level rises with `n_o` while the cluster level is flat
+  (occasion-invariant). Projecting the occasion count off a **ragged** replicate fit
+  remains unsupported (the occasion-averaged ragged divisor is an open modeling
+  question).
 
 ## Engines
 

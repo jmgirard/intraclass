@@ -270,7 +270,17 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M39 Task 2 (Slice 2 — multilevel occasion projection) — DONE (2026-07-11).** Lifted the T1
+- Active task: **none — M39 all 3 tasks done, local gate green, PR pending.** T1 (single-level, `a23c768`) + T2
+  (multilevel, `e7be0df`) + T3 (docs/spec §9/tracking/gate) complete on branch `m39-occasion-dstudy`. The
+  finish-task gate is green: `devtools::document` (no delta) / `air format --check` / `lintr` (0 lints) / full
+  CI-mode suite **379/0/51** / `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0**; installed-pkg both
+  `n_o` paths driven through `library(intraclass)` (single-level plateaus 0.711→0.764; multilevel subject
+  rises, cluster flat 0.455 + note). **No Fable** (variance-ratio push-forward, MC interval reused).
+  **Next action: open the PR from `m39-occasion-dstudy`**; on green CI + merge, reconcile M39 → done + set
+  "Last green CI". Note: a first `devtools::check` at the devtools default `NOT_CRAN=true` ran the live-Stan
+  suite (CI skips it via `skip_on_cran`/`skip_on_ci`) and a brms credible-interval containment live test
+  (O-Bayes-FML-agree) flaked on MCMC noise — **unrelated to M39** (no brms code touched); the CI-parity run is
+  clean. *Superseded (M39 T3, in progress):* docs/spec/tracking plan stated below. Lifted the T1
   `occasion_axis && multilevel` guard; the **subject** level projects across `n_o` and the **cluster** level is
   occasion-invariant → returned as a **flat curve with a documented `cli` note**. The flat behavior emerged for
   free from the estimand: sweeping `occ` over `n_o` for both levels, the cluster `error_divisors` (set

@@ -1393,11 +1393,18 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     Full suite 378/0, `air`/`lintr` (0 lints) clean, docs regenerated. Note: **Design 3 replicate** is not a
     shipped `icc()` combination (the multilevel one-way confounds the rater, so there is no pure-error facet to
     project), so it is N/A here, not deferred.
-  - [ ] **T3 — docs + spec + finish-task gate → PR.** Write `M4.5-d-study.md` §9; extend the
-    `d-studies-and-replicates` vignette (the finite-ceiling caveat + the axis-specific fixed-agreement rule) +
-    a claim test; NEWS / COVERAGE / REFERENCES (register O-OccDS) in-commit; `devtools::document` / `air format
-    --check` / `lintr` / full CI-mode suite / `devtools::check` (CI-parity) all green; installed-pkg both new
-    `n_o` paths driven through `library(intraclass)`; open the PR.
+  - [x] **T3 — docs + spec + finish-task gate. DONE (2026-07-11).** `M4.5-d-study.md` §9 written (population,
+    finite-ceiling §9.2, axis-specific fixed-agreement §9.3, multilevel cluster-flat §9.4, O-OccDS §9.5);
+    `d-studies-and-replicates` vignette gained a "How many occasions?" section (renders live: rising, plateauing
+    curve) + a backing claim test (ceiling < 1, monotone, the fixed-agreement lift); NEWS / COVERAGE (O-OccDS +
+    the fixed-agreement abort reclassified rater-axis-only) / REFERENCES (O-OccDS item 7) in-commit. **Gate
+    green:** `devtools::document` / `air format --check` / `lintr` (0 lints) / full CI-mode suite **379/0/51** /
+    `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0**; installed-pkg both `n_o` paths driven through
+    `library(intraclass)` (single-level plateaus 0.711→0.764; multilevel subject rises, cluster flat 0.455 +
+    note). Note: a first `devtools::check` at the devtools default `NOT_CRAN=true` ran the live-Stan suite (which
+    CI skips via `skip_on_cran`/`skip_on_ci`) and a brms **credible-interval containment** live test
+    (O-Bayes-FML-agree) flaked on MCMC noise — unrelated to M39 (no brms code touched); the CI-parity run is
+    clean.
 - Deferred out of M39 (record so not rediscovered): **ragged-replicate occasion projection** (blocked on the
   🟣 effective-`n_o` divisor — the *occasion-averaged coefficient on ragged replicates* research item,
   M20/ADR-030; the `R/d-study.R` ragged-replicate abort stays); **brms/posterior occasion projection**
@@ -1405,5 +1412,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   the **2-D `m × n_o` joint surface** (one axis per call — aborts); the untouched carryovers (categorical/
   ordinal GLMM, multilevel SEM proper, benchmark suite, teaching-vignette clarity rewrite, CRAN upload ADR-022)
   stay in [`ROADMAP.md`](ROADMAP.md).
-- Status: **planned — no code yet (plan before code, #14).** ADR-049 written, board live, spec §9 pending in
-  T3. On branch `m39-occasion-dstudy`. Next: `/start-task` T1.
+- Status: **review — all 3 tasks done, local gate green, PR pending.** T1 (single-level, `a23c768`) + T2
+  (multilevel, `e7be0df`) + T3 (docs/spec/gate) complete on branch `m39-occasion-dstudy`. Local gate:
+  `devtools::document` / `air format --check` / `lintr` (0 lints) / full CI-mode suite **379/0/51** /
+  `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0**; installed-pkg both `n_o` paths driven. No Fable
+  (variance-ratio push-forward, MC interval reused). Next: open the PR.
