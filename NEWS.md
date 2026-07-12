@@ -171,7 +171,7 @@ alternate engines, and seeded simulations.
   variance) are handled, and a seeded coverage reference confirms the credible interval covers at
   both moderate and high cluster counts. Incomplete within-cell-replicate and numeric-`unit`
   (D-study) Bayesian fits, and the incomplete/unbalanced fixed-rater *cluster* level (open for
-  every engine), remain planned for later milestones.
+  every engine), are planned for a future release.
 * A new **`prior`** argument lets you override the sourced half-*t*(4, 0, 1) prior for
   `engine = "brms"` with any \pkg{brms} prior object (from `brms::set_prior()` /
   `brms::prior()`) — intended for prior-sensitivity, method-comparison, or simulation work.

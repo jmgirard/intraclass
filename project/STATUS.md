@@ -7,9 +7,18 @@
   Restyled `format.icc()` (rule header, aligned table with estimate bold / CI dim, muted meta/notes — degrades to
   plain text off-colour) and the `choose_icc()` walkthrough (rule intro + per-question header + numbered options +
   running "So far:" breadcrumb + sectioned recommendation), preserving the ADR-021 resolver core + `ask=`/
-  `prompt_line` seam. Fixed a latent `cli_verbatim` blank-line-drop so section spacing renders. **The v0.2.0
-  release consolidation (ADR-022) is again the next step** (version bump `0.1.0`→`0.2.0`, NEWS heading over the
-  ~29 accreted milestones, cran-comments, then CRAN upload — the `cairn:cairn-release` skill covers this shape). Scoped from a maintainer request via a four-question plan gate:
+  `prompt_line` seam. Fixed a latent `cli_verbatim` blank-line-drop so section spacing renders.
+- **Release prep DONE — v0.1.0, submission-ready, handoff pending** (2026-07-12). At the release version gate the
+  maintainer **kept `0.1.0`** (ADR-022 reaffirmed — the *first* CRAN submission carries the conventional
+  first-release number; the earlier "v0.2.0" framing in the M43 notes was **not** taken). No version bump
+  (DESCRIPTION already `0.1.0`); NEWS already consolidated under `# intraclass 0.1.0` (one "later milestones" →
+  "a future release" wording fix). Full local verification GREEN: `devtools::document` no delta, `spelling` /
+  `air` / `pkgdown::check_pkgdown()` clean, `urlchecker::url_check()` all-correct, **`devtools::check` --as-cran
+  with PDF manual (`NOT_CRAN=false`, `manual=TRUE`) 0/0/0** (Courier/psnfss present); full CI matrix already green
+  9/9 on the merge commit; `cran-comments.md` accurate (first submission, R 4.6.1 macOS, no downstream deps).
+  **Handoff to maintainer** (out of band, never self-submitted): win-builder / R-hub, then
+  `devtools::submit_cran()`, confirm the CRAN email, and after acceptance tag `v0.1.0` +
+  `usethis::use_dev_version()`. *(M43 detail follows.)* Scoped from a maintainer request via a four-question plan gate:
   **(S1)** restyle `format.icc()` (shared by `print.icc`/`summary.icc`) from `cli_verbatim` monospace into
   **tasteful medium** cli (rule header, aligned coefficient table, estimate emphasized / CI dimmed, styled
   notes) — degrading to plain deterministic text under no-colour/knitr/CRAN; **(S2)** turn `choose_icc()`'s
@@ -315,11 +324,10 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M43 shipped and merged (PR #49, `38e16bd`).** The next work is the **v0.2.0 release
-  consolidation** (out-of-band release milestone, ADR-022): version bump `0.1.0`→`0.2.0`, add a `0.2.0` NEWS
-  heading over the ~29 milestones accreted since M13, `cran-comments.md`, `R CMD check --as-cran`, then the CRAN
-  upload — its own kickoff (the `cairn:cairn-release` skill covers this shape). *Superseded (M43 S3,
-  DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
+- Active task: **none — release prep for v0.1.0 done (2026-07-12); the actual CRAN submission is the maintainer's
+  out-of-band act** (`devtools::submit_cran()`, never self-submitted). Version gate kept `0.1.0` (ADR-022; the
+  earlier "v0.2.0" plan framing was declined). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
+  the top. *Superseded (M43 S3, DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
   blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
   `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
   2026-07-11):* `choose_icc()` walkthrough restyled — rule intro +
