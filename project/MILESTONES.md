@@ -1879,3 +1879,11 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     conservative posture. Tested both paths. Adjacent suites (incomplete-multilevel, type-vector,
     nested-multilevel) green; `air` clean. **Next: T5** (still-out aborts regression + conflated snapshots +
     spec §6b), then T6 (docs/NEWS + finish-task gate → PR).
+  - 2026-07-12 — **T5 DONE (AC6 ✓, AC7 partial).** Regression test asserts the still-out conflated cells
+    refuse *consistency* too: nested Design 2 → `intraclass_inapplicable`, fixed-rater → `intraclass_unsupported`,
+    lavaan → `intraclass_unsupported` (`test-icc-multilevel.R`). Authored spec §6b in
+    `estimand-specs/M17-conflated-icc.md` (the derivation, identifiability/bridging gate, O-cc oracle set,
+    invariants) + updated §6. **No conflated `_snaps` exist** (conflated is opt-in, not in default prints) —
+    AC7's snapshot clause is moot; nothing to regenerate. 30/30 multilevel tests pass. **Next: T6** — docs
+    (`@param`/conflated Rd note + vignette mention), NEWS bullet, finish-task gate (`lintr`/`spelling`/
+    `devtools::check` CI-parity/installed-pkg drive), then PR from `m45-conflated-consistency`.

@@ -861,6 +861,60 @@ test_that("consistency-conflated needs rater bridging: dropped/aborted when non-
   expect_setequal(unique(x$estimates$type), "consistency")
 })
 
+test_that("still-out conflated cells stay refused for consistency too (M45 AC6)", {
+  skip_if_not_installed("glmmTMB")
+  # Nested Design 2 (raters nested in clusters): the conflated collapse needs the
+  # crossed Design-1 five-component decomposition, so it is inapplicable here.
+  set.seed(1)
+  d2 <- expand.grid(subject = 1:6, rater = 1:3, cluster = 1:4)
+  d2$rater <- factor(paste0("c", d2$cluster, "_r", d2$rater)) # cluster-unique -> nested
+  d2$subject <- factor(paste0(d2$cluster, "_", d2$subject))
+  d2$cluster <- factor(d2$cluster)
+  d2$score <- stats::rnorm(nrow(d2))
+  expect_error(
+    icc(
+      d2,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "conflated",
+      type = "consistency"
+    ),
+    class = "intraclass_inapplicable"
+  )
+  # Fixed raters: Eq. 14 is a random-rater collapse (both types refused).
+  d1 <- sim_multilevel(20, 8, 5, 1.0, 1.2, 0.7, 0.16, 0.5, seed = 7)
+  expect_error(
+    icc(
+      d1,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "conflated",
+      type = "consistency",
+      raters = "fixed"
+    ),
+    class = "intraclass_unsupported"
+  )
+  # lavaan is single-level only -- no multilevel (hence no conflated) SEM path.
+  skip_if_not_installed("lavaan")
+  expect_error(
+    icc(
+      d1,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      level = "conflated",
+      type = "consistency",
+      engine = "lavaan"
+    ),
+    class = "intraclass_unsupported"
+  )
+})
+
 # Oracle O-MLRep: multilevel within-cell replicates (M20 Slice 2, ADR-030) --------
 #
 # Crossed Design 1 (six-component) and nested Design 2 (five-component) with more

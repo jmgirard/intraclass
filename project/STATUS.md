@@ -1,6 +1,15 @@
 # Project status
 
-- **Active task: M45 T5 next** (branch `m45-conflated-consistency`). **T1–T4 DONE (2026-07-12, AC1–AC4 ✓):**
+- **Active task: M45 T6 next** (branch `m45-conflated-consistency`). **T1–T5 DONE (2026-07-12, AC1–AC6 ✓):**
+  consistency-conflated ships for glmmTMB/lme4/brms, balanced + ragged; still-out aborts (nested/fixed/lavaan)
+  regression-tested for consistency; spec §6b authored; no conflated `_snaps` exist to regenerate. **T6
+  (next, the finish):** docs — `@param type`/conflated Rd note that the consistency form now ships + a
+  multilevel/conflated vignette mention; a NEWS bullet under the dev heading (`## Minor improvements` or a new
+  conflated line); then the finish-task gate — `air format --check` / `lintr` 0 / `spelling` / `devtools::document`
+  no delta / full CI-mode suite (`NOT_CRAN=true CI=true`) / `devtools::check` CI-parity (`NOT_CRAN=false`) 0/0/0 /
+  `pkgdown::check_pkgdown()` / installed-pkg drive of the new cell — then open the PR from
+  `m45-conflated-consistency`. (Merge stays a separate approval gate.)
+- **T1–T4 detail (2026-07-12, AC1–AC4 ✓):**
   consistency-conflated ships for glmmTMB/lme4/brms, balanced + incomplete/ragged. Core change: estimand map
   (`R/estimand.R:87`) derives the conflated error set by `switch(type, …, consistency=c("cluster_rater",
   "residual"))`; removed the engine-agnostic consistency guard + cross-product skip (T2, brms free → T4 folded
