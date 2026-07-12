@@ -76,7 +76,10 @@ M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M2
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40,
 ADR-051 M41, ADR-052 M42, ADR-053 M43, ADR-054 M44).
-**M44 (ADR-054) is the active planned milestone** (see its board at the end of this file). M43 (ADR-053, cli
+**No milestone is currently in flight** — M44 (ADR-054, vectorize `type` → all four formulations from one fit)
+shipped (PR #50, squash-merged to `main` at `7aff8b3`; full CI matrix green 9/9); its board is at the end of this
+file. A **public-API default-shape change** (#6): no computed value changes, but a default call now reports
+A1/Ak/C1/Ck grouped by type, and `d_study()` projects both curves — DESCRIPTION bumped to **0.2.0**. M43 (ADR-053, cli
 presentation polish) shipped (PR #49, `38e16bd`). Prior milestone M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped
 (PR #48, squash-merged to `main` at `1baf7db`; full CI matrix green 9/9). An **engineering/docs milestone** (cf.
 M4/M13/M35/M40/M41) with a bounded dependency delta: one reader-facing `comparison-with-other-packages.Rmd`
@@ -1778,6 +1781,13 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   fit); **always-four with no scalar filter** (ADR-054 ruled out — the filter stays for
   estimand-named workflows and undefined-by-design cells); the **v0.2.0 release consolidation / CRAN
   upload** (ADR-022); every untouched carryover stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **planned** (2026-07-12; scoped by ADR-054, no retro needed — the decision was recorded
-  2026-07-12). Ready to start at T1. Maintainer chose **implement now** at the plan gate (sequencing
-  note above). **No Fable.**
+- Status: **done — merged, CI green** (PR [#50](https://github.com/jmgirard/intraclass/pull/50),
+  squash-merged to `main` at `7aff8b3`; full CI matrix green 9/9). Scoped by ADR-054 (no retro needed —
+  decision recorded 2026-07-12); planned + implemented in one session (maintainer chose **implement now**
+  at the plan gate). **No Fable** (invariance oracle, not a new coverage claim; API decided in ADR-054; no
+  IP touched). Number-invariance held (every regenerated snapshot diff was a shape change with every
+  retained number identical; the committed `test-icc-type-vector.R` pins defaulted == scalar cell-for-cell).
+  Two mid-implementation user gates: (1) `d_study()` projects **both** curves on a multi-type fit; (2)
+  DESCRIPTION bumped **0.1.0 → 0.2.0** per ADR-054's 0.2.0 framing (final version + `cran-comments` stay the
+  ADR-022 release-consolidation step). CI caught a class of `skip_on_cran` bootstrap D-study tests the local
+  CRAN-mode gate could not ([[skip-on-cran-tests-need-not-cran-true]]) — fixed before merge.

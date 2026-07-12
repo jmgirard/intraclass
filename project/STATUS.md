@@ -1,19 +1,15 @@
 # Project status
 
-- Active milestone: **M44 (ADR-054) — vectorize `type`, default to all four defined formulations (A1/Ak/C1/Ck)
-  from one fit — PLANNED (2026-07-12), ready to start at T1.** Board:
-  [`MILESTONES.md`](MILESTONES.md) M44. `type` becomes vectorizable exactly like `unit`/`level` and defaults to
-  `c("agreement", "consistency")`, so a default two-way call reports ICC(A,1)/ICC(A,k)/ICC(C,1)/ICC(C,k) from the
-  single fit (`type` never reaches an engine; the pipeline already consumes estimand lists). **Public-API change
-  under #6** (default table grows 2→4 rows; multilevel×replicates larger) but **no computed value changes** and
-  every explicit call is untouched. Plan-gate decisions (2026-07-12): (1) target = ADR-054 (confirmed); (2)
-  **implement now** — maintainer is in no rush to submit v0.1.0, accepting `main` → 0.2.0-dev drift from the
-  submission-ready state + a full release-gate re-run later (ADR-054 anticipated this); (3) print **groups rows
-  under type subheaders** ("Absolute agreement" / "Consistency"). Five tasks (T1 vectorize + cross-product · T2
-  drop-vs-abort policy · T3 presentation · T4 invariance + policy tests + snapshot regen · T5 docs/NEWS/gate);
-  invariance oracle (defaulted vector == scalar call cell-for-cell, cf. ADR-053) + inform-and-drop pins (ADR-029
-  precedent). **No Fable** (no new oracle; API decided in ADR-054; no IP touched). **Next action: `/start-task`
-  (T1).**
+- Active milestone: **none** — M44 (ADR-054, vectorize `type` → all four formulations A1/Ak/C1/Ck from one fit)
+  shipped (PR [#50](https://github.com/jmgirard/intraclass/pull/50), squash-merged to `main` at `7aff8b3`; full CI
+  matrix green 9/9). A **public-API default-shape change** (#6): `type` is now vectorized like `unit`/`level` and
+  defaults to both, so a default call reports A1/Ak/C1/Ck grouped by error definition and `d_study()` projects one
+  curve per definition — **no computed value changes**, every explicit single-`type` call byte-identical
+  (committed number-invariance oracle). Drop-vs-abort policy for undefined cells (ADR-029 precedent, incl. the
+  connectedness guard ADR-054 didn't enumerate). **DESCRIPTION bumped 0.1.0 → 0.2.0** per ADR-054's 0.2.0 framing;
+  the final version + `cran-comments` remain the **ADR-022 v0.2.0 release-consolidation** step (now the natural
+  next milestone). **No Fable.** Last green CI: `7aff8b3` (main, 9/9). **Next milestone to plan: the v0.2.0 release
+  consolidation** (or another ROADMAP item) via `/milestone-plan`.
 - Prior milestone: **none active** — M43 (ADR-053, cli presentation polish: styled `print`/`summary` + interactive
   `choose_icc()` decision tree) shipped (PR #49, squash-merged to `main` at `38e16bd`; full CI matrix green 9/9,
   devel clean). A **presentation-only** milestone (cf. M4/M11/M40): no new estimand/engine/argument/dependency,
@@ -346,16 +342,12 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M44 — all tasks DONE; PR [#50](https://github.com/jmgirard/intraclass/pull/50) open, awaiting CI +
-  merge approval.** T1–T5 complete on branch `m44-vectorize-type`: vectorize `type` (default all four
-  formulations), drop-vs-abort policy, presentation (type subheaders), `d_study()` project-both (user gate),
-  invariance + policy tests (`test-icc-type-vector.R`), 5 snapshots regenerated, docs/NEWS/vignettes. **Local gate
-  GREEN:** `air`/`lintr`/`spelling` clean, `document` delta = icc.Rd/d_study.Rd only, `pkgdown` clean,
-  installed-pkg drive OK, **`devtools::check` CI-parity (`NOT_CRAN=false`) 0/0/0**, snapshots pass under
-  `NOT_CRAN=true`. **DESCRIPTION bumped 0.1.0 → 0.2.0** (per ADR-054's 0.2.0 framing — flagged for maintainer;
-  final version + `cran-comments` are the ADR-022 release-consolidation step). **Next: green CI → merge-approval
-  gate → squash-merge → reconcile M44 done.** Release context unchanged (v0.1.0 CRAN handoff is the maintainer's
-  out-of-band act; main is now 0.2.0-dev per the implement-now gate). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
+- Active task: **none — M44 shipped and merged (PR #50, `7aff8b3`, CI 9/9).** The next work is the **v0.2.0
+  release consolidation** (ADR-022): now that main is `0.2.0` with a `# intraclass 0.2.0` NEWS heading, the
+  consolidation reconciles the final version, regenerates `cran-comments.md`, and runs the release checks — its
+  own milestone (the `cairn:cairn-release` skill fits this shape). Plan it via `/milestone-plan`, or pick another
+  ROADMAP item. The v0.1.0 CRAN submission remains the maintainer's out-of-band act (though with main at 0.2.0 the
+  first submission would naturally carry the 0.2.0 line — a maintainer call at the consolidation). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
   the top. *Superseded (M43 S3, DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
   blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
   `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
