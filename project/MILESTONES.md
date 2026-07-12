@@ -75,8 +75,9 @@ ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-02
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40,
-ADR-051 M41, ADR-052 M42).
-**No milestone is currently in flight** — M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped
+ADR-051 M41, ADR-052 M42, ADR-053 M43, ADR-054 M44).
+**M44 (ADR-054) is the active planned milestone** (see its board at the end of this file). M43 (ADR-053, cli
+presentation polish) shipped (PR #49, `38e16bd`). Prior milestone M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped
 (PR #48, squash-merged to `main` at `1baf7db`; full CI matrix green 9/9). An **engineering/docs milestone** (cf.
 M4/M13/M35/M40/M41) with a bounded dependency delta: one reader-facing `comparison-with-other-packages.Rmd`
 showing `intraclass` ≡ `psych`/`irr` across the six-coefficient family on balanced data (max gap 6.7e-6, a
@@ -1656,3 +1657,95 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   `glance()`; `choose_icc` round-trip oracle untouched). The latent `cli_verbatim` blank-line-drop fixed as part
   of S1. One `--no-verify` (S3): README.md regenerated from an unchanged, seeded README.Rmd (restyle-only diff),
   which the `.Rmd`/`.md` sync hook doesn't anticipate.
+
+## M44: vectorize `type` — all defined formulations (A1/Ak/C1/Ck) from one fit (ADR-054)
+- Goal: make `type` a vectorizable argument exactly like `unit`/`level`, defaulting to
+  `c("agreement", "consistency")`, so a default two-way `icc()` call reports **all four defined
+  formulations — ICC(A,1), ICC(A,k), ICC(C,1), ICC(C,k) — from the single fit**. `type` is the lone
+  scalar estimand axis and the only one where seeing the other coefficient means refitting an
+  identical model (a brms fit can cost minutes–hours); it **never reaches an engine** (agreement vs.
+  consistency is post-fit arithmetic on the same variance components — `estimand.R`, McGraw & Wong
+  1996), and the whole downstream pipeline (`icc()` estimand cross-product, MC/bootstrap/posterior
+  intervals) already consumes estimand *lists* (`icc.R:1524-1595`). A scalar `type` remains a filter
+  for a user who has named their estimand (#2). **Public-API change under #6** (default estimate
+  table grows 2→4 rows for a default two-way call; multilevel×replicates grows `level × unit ×
+  occasions × type`) — hence ADR-054; **no computed value changes** and every existing *explicit*
+  call is untouched. Print groups rows under type subheaders to keep the larger default table
+  readable (plan-gate decision, atop the M43/ADR-053 restyle). **Estimand-first (#2) is enforced at
+  the guidance layer, not by output suppression** — `choose_icc()`'s resolve-to-one contract
+  (ADR-021) is unchanged; docs/`choose_icc()` keep teaching the choice.
+- Reference: **ADR-054** (the scoping decision — serves as M44's scoping ADR; no new ADR needed).
+  No estimand-spec (a defaulting/vectorization + presentation change over already-shipped, already-
+  oracle-backed coefficients — cf. M43/M11). McGraw & Wong (1996) for the four formulations reported
+  jointly. **No Fable** — no new oracle (all four formulations are individually oracle-backed
+  already; the milestone adds an *invariance* check, cf. ADR-053's number-invariance pattern), the
+  API decision is already made in ADR-054 (`irreversible-api` resolved), no IP touched.
+- **Sequencing note (user override, 2026-07-12):** ADR-054's recorded sequencing was "plan now,
+  implement after the v0.1.0 CRAN handoff." At this plan gate the maintainer chose **implement now**
+  ("no rush to submit to CRAN"). Consequence, recorded honestly: `main` becomes **0.2.0-dev** and
+  drifts from the `--as-cran`-verified submission-ready 0.1.0 state; if a CRAN reviewer later asks
+  for a 0.1.0 respin the release gate re-runs in full (ADR-054 anticipated this branch). The v0.2.0
+  release consolidation (ADR-022) remains the step that bundles this for release.
+- **Acceptance criteria** (each names the behavior that must be tested):
+  - **AC1** — `type` accepts a character vector and **defaults to `c("agreement", "consistency")`**;
+    a default two-way `icc()` returns exactly the four formulations A1/Ak/C1/Ck (unit × type) from ONE
+    fit. Validation mirrors `validate_unit()` (dedup, order-preserving; an unknown value → a classed
+    abort, #5/#8). A scalar/explicit `type` still filters (e.g. `type = "consistency"` → C-only). The
+    single-level one-way path keeps **no type axis** (`ICC(1)`/`ICC(k)` labels; `type` recorded `NA`).
+  - **AC2** — **Number invariance:** every cell produced by the *defaulted* `type` vector reproduces
+    the corresponding scalar-`type` call **cell-for-cell** (point + both CI bounds, to shown
+    precision) on every design where both types are defined — a claim test (cf. ADR-053) across
+    two-way random & fixed, incomplete (`k_eff`), multilevel subject & cluster, within-cell
+    replicates, both mixed-model engines (glmmTMB/lme4), and one posterior path.
+  - **AC3** — **Drop-vs-abort policy (ADR-054):** an undefined-by-design cell reached via the
+    *default* vector is **dropped with a `cli_inform`** (precedent: the incomplete `ICC(c,k)` drop,
+    ADR-029); an **explicit** request for an undefined cell keeps its classed teaching abort (#5).
+    Tested per agreement-only surface — Design 3 / multilevel one-way (rater effect confounded), the
+    conflated Eq. 14 diagnostic, and the fixed-rater numeric-`unit` agreement projection
+    (`abort_fixed_agr_projection`) — informs-and-drops when defaulted, aborts when explicit.
+  - **AC4** — **Presentation:** `print.icc`/`format.icc` group rows under type subheaders
+    ("Absolute agreement" / "Consistency") and stay readable for the large multilevel×replicates
+    default table; `summary.icc` no longer assumes a scalar `object$design$type` (it emits a per-type
+    note); output degrades to deterministic, column-aligned plain text at 80 columns with ANSI
+    disabled. The affected `_snaps/icc-*.md` regenerate under reproducible cli output
+    ([[verify-against-installed-package]]), each diff a shape change with **every retained number
+    identical**.
+  - **AC5** — `tidy.icc`/`glance.icc` carry the type axis correctly (per-row `type`); `@param type`
+    doc updated to describe the vector default + filter; a NEWS bullet documents the default-shape
+    change **and** that positional indexing of default `tidy()` rows is not stable across it; the
+    relevant vignette(s) note the four-from-one-fit default; `choose_icc()`'s single-recommendation
+    contract (ADR-021) is unchanged; `pkgdown::check_pkgdown()` clean and all vignettes render.
+  - **AC6** — finish-task gate green: `air format --check` / `lintr` 0 lints / `spelling` /
+    `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity (`NOT_CRAN=false`)
+    **0/0/0**; installed-pkg drive of the defaulted `type` vector across representative designs
+    ([[verify-against-installed-package]]).
+- **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
+  - [ ] **T1 — Vectorize the argument + estimand cross-product.** Add `validate_type()` mirroring
+        `validate_unit()` (dedup/order/classed abort); change the default to
+        `type = c("agreement", "consistency")`; thread a `type` loop into every branch of the estimand
+        cross-product (`icc.R:1524-1595` — two-way, multilevel, replicates), leaving the one-way path
+        type-free. *(AC1)*
+  - [ ] **T2 — Drop-vs-abort policy.** Inform-and-drop defaulted undefined cells; keep the classed
+        teaching aborts for *explicit* undefined requests (Design 3 consistency, conflated
+        consistency, fixed-agreement numeric-unit projection). Reuse the ADR-029 inform-and-drop
+        precedent; a `cli_inform` names which cells were dropped and why. *(AC3)*
+  - [ ] **T3 — Presentation.** Type subheaders in `format.icc`; fix `summary.icc`'s scalar-`type`
+        assumption → per-type note; per-row `type` in `tidy.icc`/`glance.icc`. Verify plain-text
+        degradation at 80 cols. *(AC4, AC5 partial)*
+  - [ ] **T4 — Invariance + policy tests + snapshot regen.** Defaulted-vector == scalar-call
+        cell-for-cell across designs/engines/one posterior path (AC2); inform-and-drop vs. abort per
+        agreement-only surface (AC3); regenerate the affected `_snaps/icc-*.md` under reproducible cli
+        output (AC4). *(AC2, AC3, AC4)*
+  - [ ] **T5 — Docs / NEWS / gate.** `@param type` + vignette note; NEWS default-shape bullet + the
+        `tidy()`-row-indexing caveat; WORDLIST if needed; finish-task gate + installed-pkg drive. *(AC5, AC6)*
+- **Coverage (criterion → task):** AC1 → T1 · AC2 → T4 · AC3 → T2, T4 · AC4 → T3, T4 · AC5 → T3, T5 ·
+  AC6 → T5.
+- Deferred out of M44 (record so not rediscovered): a **post-hoc `update(x, type = ...)`
+  recompute-from-stored-fit** method (ADR-054 ruled out — the vectorized argument makes it redundant;
+  revisit only for a real recompute-without-refit need, e.g. changing `conf_level` on a stored brms
+  fit); **always-four with no scalar filter** (ADR-054 ruled out — the filter stays for
+  estimand-named workflows and undefined-by-design cells); the **v0.2.0 release consolidation / CRAN
+  upload** (ADR-022); every untouched carryover stays in [`ROADMAP.md`](ROADMAP.md).
+- Status: **planned** (2026-07-12; scoped by ADR-054, no retro needed — the decision was recorded
+  2026-07-12). Ready to start at T1. Maintainer chose **implement now** at the plan gate (sequencing
+  note above). **No Fable.**

@@ -1,6 +1,20 @@
 # Project status
 
-- Active milestone: **none** — M43 (ADR-053, cli presentation polish: styled `print`/`summary` + interactive
+- Active milestone: **M44 (ADR-054) — vectorize `type`, default to all four defined formulations (A1/Ak/C1/Ck)
+  from one fit — PLANNED (2026-07-12), ready to start at T1.** Board:
+  [`MILESTONES.md`](MILESTONES.md) M44. `type` becomes vectorizable exactly like `unit`/`level` and defaults to
+  `c("agreement", "consistency")`, so a default two-way call reports ICC(A,1)/ICC(A,k)/ICC(C,1)/ICC(C,k) from the
+  single fit (`type` never reaches an engine; the pipeline already consumes estimand lists). **Public-API change
+  under #6** (default table grows 2→4 rows; multilevel×replicates larger) but **no computed value changes** and
+  every explicit call is untouched. Plan-gate decisions (2026-07-12): (1) target = ADR-054 (confirmed); (2)
+  **implement now** — maintainer is in no rush to submit v0.1.0, accepting `main` → 0.2.0-dev drift from the
+  submission-ready state + a full release-gate re-run later (ADR-054 anticipated this); (3) print **groups rows
+  under type subheaders** ("Absolute agreement" / "Consistency"). Five tasks (T1 vectorize + cross-product · T2
+  drop-vs-abort policy · T3 presentation · T4 invariance + policy tests + snapshot regen · T5 docs/NEWS/gate);
+  invariance oracle (defaulted vector == scalar call cell-for-cell, cf. ADR-053) + inform-and-drop pins (ADR-029
+  precedent). **No Fable** (no new oracle; API decided in ADR-054; no IP touched). **Next action: `/start-task`
+  (T1).**
+- Prior milestone: **none active** — M43 (ADR-053, cli presentation polish: styled `print`/`summary` + interactive
   `choose_icc()` decision tree) shipped (PR #49, squash-merged to `main` at `38e16bd`; full CI matrix green 9/9,
   devel clean). A **presentation-only** milestone (cf. M4/M11/M40): no new estimand/engine/argument/dependency,
   **no displayed number changed** (number-invariance claim test + restyle-only snapshot diffs), **no Fable**.
@@ -332,9 +346,11 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — release prep for v0.1.0 done (2026-07-12); the actual CRAN submission is the maintainer's
-  out-of-band act** (`devtools::submit_cran()`, never self-submitted). Version gate kept `0.1.0` (ADR-022; the
-  earlier "v0.2.0" plan framing was declined). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
+- Active task: **M44 T1 — vectorize the `type` argument + estimand cross-product (not yet started; `/start-task`).**
+  M44 (ADR-054) planned this session; see the top bullet + the [`MILESTONES.md`](MILESTONES.md) M44 board. Release
+  context (unchanged): release prep for v0.1.0 is done (2026-07-12); the CRAN submission is the maintainer's
+  out-of-band act (`devtools::submit_cran()`, never self-submitted); version gate kept `0.1.0` (ADR-022; the
+  earlier "v0.2.0" plan framing was declined). M44 lands on `main` as 0.2.0-dev (maintainer chose implement-now). Local as-cran (with manual) 0/0/0; see the Release-prep bullet at
   the top. *Superseded (M43 S3, DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
   blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
   `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
