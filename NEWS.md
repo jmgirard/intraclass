@@ -226,6 +226,9 @@ alternate engines, and seeded simulations.
   new interpretation-band guide (poor / moderate / good / excellent, after Koo & Li
   2016 and Cicchetti 1994) framed as conventions to read against the interval —
   not verdicts the package computes for you.
+* A new *Glossary* article defines the recurring vocabulary — variance component,
+  REML, credible vs. confidence interval, `k_eff`, the zero-variance boundary, and
+  the rest — in one place that the other articles link into.
 
 ## Robustness (pre-release code review)
 

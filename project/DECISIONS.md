@@ -4320,3 +4320,80 @@ consequences → references.
   the v0.2.0 consolidation deferred here). New `REFERENCES.md` entries: **Koo & Li (2016)**, **Cicchetti
   (1994)**. No estimand-spec (docs, not estimand — cf. M4/M13/M35). `project/COVERAGE.md` unaffected (no new
   estimand cell).
+
+## ADR-051: M41 scope — clarity/accessibility pass over the four secondary vignettes + a standalone glossary
+- Date: 2026-07-11
+- Status: accepted
+- Context: A short retro this session (following the M40 ship) confirmed the two strategic facts ADR-050
+  already recorded — the **clean-oracle parity engine is exhausted** (the (C) corner closed at M36–M38; M39/M40
+  were the tail) and the **v0.2.0 release gap** (v0.1.0 "submission-ready" since M13, ~27 milestones of
+  capability — the whole Bayesian engine, lme4/lavaan parity, multilevel fixed, `d_study()` occasions — accreted
+  under an unreleased `0.1.0` NEWS heading). The maintainer chose (plan question gate, this session) to ship
+  **two low-risk, release-strengthening docs/engineering milestones before cutting 0.2.0**: M41 (this ADR — the
+  vignette clarity pass + glossary) then M42 (a benchmark-vs-prior-art suite), then the release at **0.2.0**.
+  M40 applied an applied-reader accessibility treatment to the two *front-door* articles (`getting-started`,
+  `choosing-an-icc`); the other four articles — `engines`, `interval-methods`, `multilevel-designs`,
+  `d-studies-and-replicates` (all M35-era, ADR-045) — are accurate and well-structured but pre-date the M40 bar
+  and assume a methodologist reader. Read for an applied reader, recurring jargon lands cold: **variance
+  component, REML, posterior mode / MAP, credible vs. confidence interval, the zero-variance boundary, FIML,
+  `k_eff` / harmonic mean, finite-population variance, the conflated ICC, connectedness / identification, the
+  dependability coefficient, the indicator-mean estimator**. M40 handled such terms with per-article first-use
+  glosses; across six articles that repeats, so a **single standalone glossary** page is the better home — each
+  article deep-links a term instead of re-glossing it.
+- Decision (maintainer-approved this session, 2026-07-11, via the plan question gate):
+  - **Scope: M41 = a clarity/accessibility pass over the four secondary vignettes (`engines`,
+    `interval-methods`, `multilevel-designs`, `d-studies-and-replicates`), plus a new standalone
+    `glossary.Rmd` vignette.** A **docs milestone** (cf. M4/M13/M35/M40): **no new estimand, engine, fit, CI
+    machinery, or dependency** (#6). Correctness is **live-computed + claim-tested numbers** (#1/#4/#12), not a
+    numerical oracle. **No Fable** (docs milestone, #19).
+  - **Per-article treatment (in place — no filename/URL/`_pkgdown.yml` churn on the four):** a warmer,
+    plain-language on-ramp at the top; **first-use glosses** of the jargon above; cross-links into the glossary;
+    **no change to statistical content, examples, or any printed number**. A gloss that restates a number keeps
+    it live-computed; any printed value that moves updates its `test-vignette-claims.R` claim in the same
+    commit (#16).
+  - **Glossary form: a standalone `glossary.Rmd` article** (maintainer choice, this session) — one alphabetical
+    page defining the recurring terms once, each with a stable anchor (`glossary.html#reml`, …), wired into
+    `_pkgdown.yml`'s **articles** index (not the reference index — [[pkgdown-reference-index-new-exports]]).
+    All **six** articles deep-link it (the two M40 front-door articles are retrofitted with glossary links in
+    S1, replacing or supplementing their inline glosses where it reads better — no numbers touched).
+  - **Slices (thin, #14):** **S1** — the `glossary.Rmd` page + `_pkgdown.yml` wiring + retrofit the two M40
+    front-door articles to link it; **S2** — `engines` + `interval-methods` clarity pass; **S3** —
+    `multilevel-designs` + `d-studies-and-replicates` clarity pass + `test-vignette-claims.R` relabel +
+    finish-task gate.
+  - **Sequenced before M42** (benchmark-vs-prior-art suite) **then the 0.2.0 release** — M41 first because it
+    is the direct continuation of the warm M40 context, and finalizing the articles lets the M42 benchmark
+    article cross-link polished docs.
+- Consequences:
+  - Every applied reader who lands on a secondary article now meets each technical term defined on first use or
+    one click away, matching the M40 front-door bar — the pkgdown site reads as one accessible whole before
+    0.2.0 goes out.
+  - A new `glossary.Rmd` is a seventh article (one more `R CMD build` + pkgdown target, one more navbar entry);
+    the glossary anchors become a maintenance surface (a renamed term must update every deep-link) — accepted as
+    cheaper than repeating glosses across six articles.
+  - Ruled out: the alternative of folding the glossary into `getting-started` (rejected — longer front door,
+    shallower anchors); any statistical/estimand/example change (out of scope — this is prose only); a clarity
+    pass over content the four articles do not already cover.
+  - No `_pkgdown.yml` **reference**-index change and no new `@export`, so `pkgdown::check_pkgdown()` catches only
+    the new article registration; new WORDLIST terms (term spellings, author names) join `inst/WORDLIST` so
+    `spelling` stays clean; `air` / `lintr` clean. `project/COVERAGE.md` unaffected (no new estimand cell).
+  - The other deferred docs work stays parked (#17): a clarity pass over any *further* material and per-term
+    examples beyond first-use glosses are not in M41; M42 (benchmark) and the 0.2.0 consolidation are the
+    sequenced follow-ons, not crept into this milestone.
+- Correctness (a docs milestone's "oracle" is claim-tested live computation, #1 numerically N/A — cf.
+  ADR-045/M35, ADR-050/M40):
+  - Every numeric relationship the prose asserts stays computed live and pinned in `test-vignette-claims.R`
+    (relabelled per-article as needed); no hand-typed coefficient, and no printed number changes silently.
+  - All five (now six) articles + the glossary render standalone under `R CMD build` **and** pkgdown; every
+    inter-article and glossary anchor link resolves against generated ids (verified by reading, not asserted).
+  - The glossary defines terms in plain language traceable to the estimand specs / `REFERENCES.md` already in
+    the package; it introduces **no** new sourced statistical claim (unlike M40's interpretation bands), so it
+    carries no #4 sourcing obligation beyond spelling.
+- References: PRINCIPLES.md #1/#4/#12 (live-computed + claim-tested numbers; no fabricated content), #2/#14
+  (plan before code; thin docs slices), #6 (additive, non-breaking; no new estimand/engine/dependency — cf.
+  M4/M13/M35/M40), #16 (tracking + claim tests in-commit), #17 (M42 + release consolidation parked, not crept),
+  #18 (characterize honestly — glosses stay accurate while simplified), #19 (no Fable — docs milestone).
+  [[milestone-branches-and-prs]] (ships on `m41-vignette-glossary` via PR), [[pkgdown-reference-index-new-exports]]
+  (the new article is registered in `_pkgdown.yml`). ADR-050 (M40 — the front-door accessibility rewrite this
+  extends to the remaining articles), ADR-045 (M35 — split that created the four secondary articles), ADR-022
+  (M13 — the docs/release posture; the v0.2.0 consolidation sequenced after M42). No estimand-spec (docs, not
+  estimand — cf. M4/M13/M35/M40).
