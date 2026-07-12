@@ -300,31 +300,46 @@ which is below the full panel size of 4:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457</span></span></span></code></pre></div>
 <p>The header now reads <em>incomplete</em>, and the report names the
 effective <code>k</code> so the divisor is never a black box.</p>
-<p>At the <strong>cluster</strong> level, the single-rater
-<code>ICC(c,1)</code> is available on ragged data (it needs no averaging
-divisor). Request it with <code>unit = "single"</code>:</p>
+<p>At the <strong>cluster</strong> level, both the single-rater
+<code>ICC(c,1)</code> and the <strong>averaged</strong>
+<code>ICC(c,k)</code> come back on ragged data. The averaged coefficient
+divides the cluster error by its own effective rater count — the raters
+behind each classroom’s observed mean — reported as <code>k_c_eff</code>
+(the inverse-Simpson harmonic mean), which is <em>not</em> the same as
+the per-pupil <code>k_eff</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">school_ragged</span>, <span class="va">score</span>, subject <span class="op">=</span> <span class="va">pupil</span>, rater <span class="op">=</span> <span class="va">rater</span>, cluster <span class="op">=</span> <span class="va">classroom</span>,</span>
-<span>  level <span class="op">=</span> <span class="st">"cluster"</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: multilevel two-way random, consistency</span> ──────────────</span></span>
+<span>  level <span class="op">=</span> <span class="st">"cluster"</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"agreement"</span>, <span class="st">"consistency"</span><span class="op">)</span>,</span>
+<span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"single"</span>, <span class="st">"average"</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: multilevel two-way random, absolute agreement &amp; consi</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  level      index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">  Absolute agreement</span></span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,1)  <span style="font-weight: bold;">   0.892</span>   <span style="font-weight: 100;">[0.000, 0.976]</span></span></span>
+<span><span class="co">#&gt;   cluster    ICC(A,k)  <span style="font-weight: bold;">   0.970</span>   <span style="font-weight: 100;">[0.000, 0.994]</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">  Consistency</span></span></span>
 <span><span class="co">#&gt;   cluster    ICC(C,1)  <span style="font-weight: bold;">   1.000</span>   <span style="font-weight: 100;">[0.000, 1.000]</span></span></span>
+<span><span class="co">#&gt;   cluster    ICC(C,k)  <span style="font-weight: bold;">   1.000</span>   <span style="font-weight: 100;">[0.000, 1.000]</span></span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Cluster ICC(c,k) averages over an effective 3.87 raters (inverse-Simpson k_c^eff).</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457</span></span></span></code></pre></div>
-<p>Two things are deliberately fenced off on incomplete data, each with
-a clear error rather than a silently wrong number. The
-<strong>averaged</strong> cluster-level <code>ICC(c,k)</code> is not yet
-supported: the effective number of raters behind a ragged
-<em>cluster</em> mean is a per-cluster quantity still being validated,
-distinct from the per-pupil <code>k_eff</code>. And when missing cells
-make the crossing pattern <strong>ambiguous</strong> — some raters
-happen to appear in only one classroom, so the design could be read as
-crossed <em>or</em> nested — <code><a href="../reference/icc.html">icc()</a></code> does not guess; you
-resolve it by declaring <code>design = "crossed"</code> (validated
-against the data), or the abort points you at the nested reading.</p>
+<p>One subtlety worth knowing: on ragged data, systematic rater
+differences no longer cancel perfectly from a <em>comparison</em> of
+observed cluster means (they cancel only when every cluster has the same
+rater weighting). If you are ranking clusters by their observed means,
+prefer the <strong>agreement</strong> <code>ICC(c,k)</code>, whose error
+term accounts for that; <code>ICC(c,k)</code> consistency measures
+cluster×rater disagreement only. (The Bayesian <code>brms</code> engine
+reports only <code>ICC(c,1)</code> on incomplete data for now.)</p>
+<p>One thing is still deliberately fenced off, with a clear error rather
+than a silently wrong number: when missing cells make the crossing
+pattern <strong>ambiguous</strong> — some raters happen to appear in
+only one classroom, so the design could be read as crossed <em>or</em>
+nested — <code><a href="../reference/icc.html">icc()</a></code> does not guess; you resolve it by declaring
+<code>design = "crossed"</code> (validated against the data), or the
+abort points you at the nested reading.</p>
 </div>
 <div class="section level2">
 <h2 id="fixed-raters-in-a-multilevel-design">Fixed raters in a multilevel design<a class="anchor" aria-label="anchor" href="#fixed-raters-in-a-multilevel-design"></a>

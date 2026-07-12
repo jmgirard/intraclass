@@ -446,12 +446,13 @@ checked first: each cluster's subject-by-rater layout must be connected, and for
 absolute agreement raters must bridge clusters (otherwise the design is really
 rater-nested). When missing cells make the crossed-vs-nested pattern ambiguous,
 declare it with <code>design</code> (above). On incomplete data the <strong>cluster</strong> level is
-reported as the single-rater <code>ICC(c,1)</code> (when raters bridge clusters); the averaged
-cluster-level <code>ICC(c,k)</code> on incomplete data is not yet supported (its effective
-number of raters per cluster is still being validated). If an averaged unit is
-requested for the cluster level on incomplete data, that row is dropped (with a
-message) rather than failing the whole call, so the subject-level averages and the
-single-rater cluster ICC are still returned. <strong>Fixed raters</strong>
+reported (when raters bridge clusters) as both the single-rater <code>ICC(c,1)</code> and the
+averaged <code>ICC(c,k)</code>: the average divides the cluster error by the effective number
+of raters behind each cluster's observed (cells-pooled) mean, the inverse-Simpson
+harmonic <code>k_c^eff</code> (reported as <code>k_c_eff</code>; equal to the rater count on complete
+data). A rater-balanced cluster mean would have a different (higher) effective
+count. For the <code>brms</code> engine the averaged cluster <code>ICC(c,k)</code> on incomplete data is
+not yet available (the single-rater <code>ICC(c,1)</code> still is). <strong>Fixed raters</strong>
 (<code>raters = "fixed"</code>) are supported for the crossed design at the <strong>subject</strong> level
 on both balanced and <strong>incomplete</strong> data: the rater main effect becomes the
 finite-population variance of the observed raters (McGraw &amp; Wong Case 3A), so on

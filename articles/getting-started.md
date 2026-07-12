@@ -106,13 +106,13 @@ tidy(fit)
 #> # ℹ 1 more variable: method <chr>
 
 glance(fit)
-#> # A tibble: 1 × 17
+#> # A tibble: 1 × 18
 #>   n_subjects n_raters n_clusters n_obs n_cells balanced multilevel ml_design
 #>        <int>    <int>      <int> <int>   <int> <lgl>    <lgl>      <chr>    
 #> 1          6        4         NA    24      24 TRUE     FALSE      NA       
-#> # ℹ 9 more variables: k_eff <dbl>, var_cluster <dbl>, var_subject <dbl>,
-#> #   var_rater <dbl>, var_cluster_rater <dbl>, var_residual <dbl>, engine <chr>,
-#> #   ci_method <chr>, conf.level <dbl>
+#> # ℹ 10 more variables: k_eff <dbl>, k_c_eff <dbl>, var_cluster <dbl>,
+#> #   var_subject <dbl>, var_rater <dbl>, var_cluster_rater <dbl>,
+#> #   var_residual <dbl>, engine <chr>, ci_method <chr>, conf.level <dbl>
 ```
 
 ## Interpret

@@ -247,32 +247,46 @@ icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
 The header now reads *incomplete*, and the report names the effective
 `k` so the divisor is never a black box.
 
-At the **cluster** level, the single-rater `ICC(c,1)` is available on
-ragged data (it needs no averaging divisor). Request it with
-`unit = "single"`:
+At the **cluster** level, both the single-rater `ICC(c,1)` and the
+**averaged** `ICC(c,k)` come back on ragged data. The averaged
+coefficient divides the cluster error by its own effective rater count —
+the raters behind each classroom’s observed mean — reported as `k_c_eff`
+(the inverse-Simpson harmonic mean), which is *not* the same as the
+per-pupil `k_eff`:
 
 ``` r
 
 icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
-  level = "cluster", type = "consistency", unit = "single", seed = 1)
-#> ── Intraclass correlation: multilevel two-way random, consistency ──────────────
+  level = "cluster", type = c("agreement", "consistency"),
+  unit = c("single", "average"), seed = 1)
+#> ── Intraclass correlation: multilevel two-way random, absolute agreement & consi
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
+#>   Absolute agreement
+#>   cluster    ICC(A,1)     0.892   [0.000, 0.976]
+#>   cluster    ICC(A,k)     0.970   [0.000, 0.994]
+#>   Consistency
 #>   cluster    ICC(C,1)     1.000   [0.000, 1.000]
+#>   cluster    ICC(C,k)     1.000   [0.000, 1.000]
 #> 
+#> Cluster ICC(c,k) averages over an effective 3.87 raters (inverse-Simpson k_c^eff).
 #> Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457
 ```
 
-Two things are deliberately fenced off on incomplete data, each with a
-clear error rather than a silently wrong number. The **averaged**
-cluster-level `ICC(c,k)` is not yet supported: the effective number of
-raters behind a ragged *cluster* mean is a per-cluster quantity still
-being validated, distinct from the per-pupil `k_eff`. And when missing
-cells make the crossing pattern **ambiguous** — some raters happen to
-appear in only one classroom, so the design could be read as crossed
-*or* nested —
+One subtlety worth knowing: on ragged data, systematic rater differences
+no longer cancel perfectly from a *comparison* of observed cluster means
+(they cancel only when every cluster has the same rater weighting). If
+you are ranking clusters by their observed means, prefer the
+**agreement** `ICC(c,k)`, whose error term accounts for that; `ICC(c,k)`
+consistency measures cluster×rater disagreement only. (The Bayesian
+`brms` engine reports only `ICC(c,1)` on incomplete data for now.)
+
+One thing is still deliberately fenced off, with a clear error rather
+than a silently wrong number: when missing cells make the crossing
+pattern **ambiguous** — some raters happen to appear in only one
+classroom, so the design could be read as crossed *or* nested —
 [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) does
 not guess; you resolve it by declaring `design = "crossed"` (validated
 against the data), or the abort points you at the nested reading.
