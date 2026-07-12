@@ -76,8 +76,8 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, type = "
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
 #> 
@@ -118,12 +118,12 @@ icc(school, score,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
+#>   subject    ICC(A,1)     0.431   [0.249, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.571, 0.836]
 #>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
 #>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
-#>   conflated  ICC(A,1)     0.705   [0.000, 0.808]
-#>   conflated  ICC(A,k)     0.905   [0.000, 0.944]
+#>   conflated  ICC(A,1)     0.705   [0.000, 0.805]
+#>   conflated  ICC(A,k)     0.905   [0.000, 0.943]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
@@ -172,8 +172,8 @@ icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, type 
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.429   [0.310, 0.549]
-#>   subject    ICC(A,k)     0.751   [0.642, 0.830]
+#>   subject    ICC(A,1)     0.429   [0.309, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.641, 0.830]
 #> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
@@ -192,8 +192,8 @@ icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, type 
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)       0.412   [0.290, 0.546]
-#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#>   subject    ICC(1)       0.412   [0.291, 0.546]
+#>   subject    ICC(k)       0.737   [0.622, 0.828]
 #> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
@@ -280,8 +280,10 @@ no longer cancel perfectly from a *comparison* of observed cluster means
 (they cancel only when every cluster has the same rater weighting). If
 you are ranking clusters by their observed means, prefer the
 **agreement** `ICC(c,k)`, whose error term accounts for that; `ICC(c,k)`
-consistency measures cluster×rater disagreement only. (The Bayesian
-`brms` engine reports only `ICC(c,1)` on incomplete data for now.)
+consistency measures cluster×rater disagreement only. This averaged
+cluster coefficient on ragged data ships for every random-rater engine —
+`glmmTMB`, `lme4`, and the Bayesian `brms` engine (which applies the
+same `k_c_eff` divisor to its posterior draws).
 
 One thing is still deliberately fenced off, with a clear error rather
 than a silently wrong number: when missing cells make the crossing
@@ -319,10 +321,10 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)     0.431   [0.320, 0.555]
-#>   subject    ICC(A,k)     0.751   [0.653, 0.833]
-#>   cluster    ICC(A,1)     0.880   [0.000, 0.945]
-#>   cluster    ICC(A,k)     0.967   [0.000, 0.986]
+#>   subject    ICC(A,1)     0.431   [0.314, 0.550]
+#>   subject    ICC(A,k)     0.751   [0.647, 0.830]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.944]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.985]
 #> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 ```
@@ -341,19 +343,18 @@ data too, at the subject level, exactly as the single-level incomplete
 case above.
 
 Multilevel support now covers **random** raters on the crossed design
-(Design 1), complete or **incomplete**, at the subject level and — for
-`ICC(c,1)` — the cluster level; and the nested designs (Designs 2 and 3,
-subject level), complete **or incomplete**. **Fixed** raters are
-supported at the subject level on the crossed design (complete **and**
-incomplete), at the **cluster** level on the crossed design (complete
-data), and, on complete data, the nested Design 2. What remains open:
-the averaged cluster-level `ICC(c,k)` on incomplete data (the
-per-cluster effective-rater divisor is still being validated),
-incomplete *fixed-rater cluster-level* estimation, and incomplete
-*fixed-rater nested* designs. Design 3 reports no fixed-rater or
-cluster-level coefficient by construction — with raters nested in
-subjects there is no separable rater effect to fix, and no
-crossed-cluster structure to support a cluster mean.
+(Design 1), complete or **incomplete**, at the subject level and the
+cluster level — both the single-rater `ICC(c,1)` and the averaged
+`ICC(c,k)`, across all three engines (`glmmTMB`, `lme4`, `brms`); and
+the nested designs (Designs 2 and 3, subject level), complete **or
+incomplete**. **Fixed** raters are supported at the subject level on the
+crossed design (complete **and** incomplete), at the **cluster** level
+on the crossed design (complete data), and, on complete data, the nested
+Design 2. What remains open: incomplete *fixed-rater cluster-level*
+estimation. Design 3 reports no fixed-rater or cluster-level coefficient
+by construction — with raters nested in subjects there is no separable
+rater effect to fix, and no crossed-cluster structure to support a
+cluster mean.
 
 ## How many raters? A multilevel D-study
 
@@ -375,10 +376,10 @@ d_study(
 #> # D-study projection: multilevel two-way random, absolute agreement
 #> Observed raters: 4 | CI: 95% montecarlo (10000 draws)
 #>     level  m  estimate          95% CI
-#>   subject  1     0.431  [0.251, 0.561]
-#>   subject  2     0.602  [0.402, 0.719]
-#>   subject  4     0.751  [0.573, 0.836]
-#>   subject  8     0.858  [0.729, 0.911]
+#>   subject  1     0.431  [0.249, 0.561]
+#>   subject  2     0.602  [0.399, 0.719]
+#>   subject  4     0.751  [0.571, 0.836]
+#>   subject  8     0.858  [0.727, 0.911]
 #>   cluster  1     0.880  [0.000, 0.972]
 #>   cluster  2     0.936  [0.000, 0.986]
 #>   cluster  4     0.967  [0.000, 0.993]

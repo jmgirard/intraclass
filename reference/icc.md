@@ -431,32 +431,33 @@ the averaged `ICC(c,k)`: the average divides the cluster error by the
 effective number of raters behind each cluster's observed (cells-pooled)
 mean, the inverse-Simpson harmonic `k_c^eff` (reported as `k_c_eff`;
 equal to the rater count on complete data). A rater-balanced cluster
-mean would have a different (higher) effective count. For the `brms`
-engine the averaged cluster `ICC(c,k)` on incomplete data is not yet
-available (the single-rater `ICC(c,1)` still is). **Fixed raters**
-(`raters = "fixed"`) are supported for the crossed design at the
-**subject** level on both balanced and **incomplete** data: the rater
-main effect becomes the finite-population variance of the observed
-raters (McGraw & Wong Case 3A), so on balanced data consistency is
-identical to the random-rater case and absolute agreement differs only
-by that term; on incomplete data both types differ from random (the
-finite-population variance is read from the ragged rater-contrast fit).
-**Nested (Design 2) fixed raters** are likewise supported at the
-**subject** level on both balanced and **incomplete** data (the
-finite-population rater variance is formed **per cluster** – each
-cluster's own raters – and averaged over clusters; on ragged data each
-cluster uses its own effective rater count). The fixed-rater **cluster**
-level is supported for the crossed (Design 1) design on **balanced,
-complete** data (signal \\\sigma^2_c\\, agreement error the
-finite-population \\\theta^2_r\\ plus the cluster-by-rater term
-\\\sigma^2\_{cr}\\); on balanced data it equals the random-rater
-cluster-level ICC. The Bayesian (`engine = "brms"`) fixed-rater
-**cluster** level is likewise supported for the crossed (Design 1)
-design on balanced, complete data, and the Bayesian incomplete/ragged
-fixed-rater **nested** (Design 2) subject level is supported too.
-Incomplete/unbalanced fixed-rater cluster-level estimation and Design-3
-fixed raters (nested in subjects – no separable rater effect) remain for
-later milestones.
+mean would have a different (higher) effective count. This averaged
+cluster `ICC(c,k)` on incomplete data ships for every random-rater
+engine – `glmmTMB`, `lme4`, and `brms` (the divisor is applied to the
+posterior draws' variance components exactly as for the frequentist
+fits). **Fixed raters** (`raters = "fixed"`) are supported for the
+crossed design at the **subject** level on both balanced and
+**incomplete** data: the rater main effect becomes the finite-population
+variance of the observed raters (McGraw & Wong Case 3A), so on balanced
+data consistency is identical to the random-rater case and absolute
+agreement differs only by that term; on incomplete data both types
+differ from random (the finite-population variance is read from the
+ragged rater-contrast fit). **Nested (Design 2) fixed raters** are
+likewise supported at the **subject** level on both balanced and
+**incomplete** data (the finite-population rater variance is formed
+**per cluster** – each cluster's own raters – and averaged over
+clusters; on ragged data each cluster uses its own effective rater
+count). The fixed-rater **cluster** level is supported for the crossed
+(Design 1) design on **balanced, complete** data (signal \\\sigma^2_c\\,
+agreement error the finite-population \\\theta^2_r\\ plus the
+cluster-by-rater term \\\sigma^2\_{cr}\\); on balanced data it equals
+the random-rater cluster-level ICC. The Bayesian (`engine = "brms"`)
+fixed-rater **cluster** level is likewise supported for the crossed
+(Design 1) design on balanced, complete data, and the Bayesian
+incomplete/ragged fixed-rater **nested** (Design 2) subject level is
+supported too. Incomplete/unbalanced fixed-rater cluster-level
+estimation and Design-3 fixed raters (nested in subjects – no separable
+rater effect) remain for later milestones.
 
 ## Within-cell replicates
 
@@ -529,11 +530,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.706]
-#>   ICC(A,k)     0.620   [0.175, 0.906]
+#>   ICC(A,1)     0.290   [0.050, 0.712]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.339, 0.924]
-#>   ICC(C,k)     0.909   [0.672, 0.980]
+#>   ICC(C,1)     0.715   [0.335, 0.925]
+#>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
