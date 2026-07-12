@@ -1967,9 +1967,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   - T5 — Docs + spec §10 + NEWS + finish-task gate (AC6) → PR from `m46-cluster-ck-divisor`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T1 (sim), T2 (lme4/reduction), T3 (ragged); AC4 → T3; AC5 → T4;
   AC6 → T5.
-- Status: **in-progress** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor`. Active task: **T1** (candidate
-  divisors + simulation oracle — the ship-vs-abort decision point). Attempt-then-degrade (ADR-028 — the abort
-  stays if the oracle validates no divisor).
+- Status: **blocked** (2026-07-12, ADR-057) on `m46-cluster-ck-divisor` — awaiting a gated **Fable review**
+  (RB `data-raw/reviews/fable-review-m46-cluster-ck-divisor-brief.md`; maintainer-requested per-instance,
+  #19/D-004). T1 done (divisor validated, ship path); T2 (wire the divisor + lift the `R/icc.R` ~L1188 abort)
+  gated on the RR verdict. Attempt-then-degrade (ADR-028 — the abort stays if the review rejects the divisor).
 - Work log:
   - 2026-07-12 — Planned via the plan gate (retro → direction = Fable-gated research item → item B
     cluster-level `ICC(c,k)`, ship-or-abort acceptance). ADR-057 authored; ROADMAP item marked SCHEDULED.
@@ -1992,3 +1993,12 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     MC across 7 cells), so per ADR-057 it *may* ship without Fable — pending the maintainer's per-instance
     call (#19/D-004). **Next: T2** (wire `k_c^eff` inverse-Simpson into `error_divisors`; lift the `R/icc.R`
     ~L1188 abort) once the Fable call is made.
+  - 2026-07-12 — **Fable review requested (maintainer, per-instance #19/D-004); M46 → blocked pending RR.**
+    RB authored: `data-raw/reviews/fable-review-m46-cluster-ck-divisor-brief.md`. Pre-ship review (T2 gated on
+    the verdict). Load-bearing question surfaced honestly (Q1): the divisor depends on whether the cluster
+    universe score is the **ratings-weighted cell-mean** (→ inverse-Simpson, Opus's proposal) or a
+    **rater-balanced** mean (→ distinct-count harmonic) — the MC oracle assumes the former, so it certifies the
+    divisor *conditional on* the target and cannot adjudicate the target itself. Also flagged: (Q2) the
+    agreement-is-exact claim vs M9 §5's approximation hedge; (Q3) potential circularity of the MC truth; (Q4)
+    divisor→interval interaction for T3. **Fable is manual/out-of-band (never a subagent, #19) — awaiting the
+    maintainer's RR** (`fable-review-m46-cluster-ck-divisor-response.md`), then ingest per the RB/RR protocol.

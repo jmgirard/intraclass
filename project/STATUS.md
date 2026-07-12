@@ -8,8 +8,12 @@
   both Φ and ρ; `data-raw/reviews/m46-cluster-ck-divisor-spike.R`). Agreement is **exact, not approximate**
   (resolves M9 §5's cluster-level hedge); distinct-count harmonic, arithmetic mean, and subject-`k_eff` are
   refuted. **Decision point pending (RB tripwire: no-oracle):** the study is unambiguous, so per ADR-057 it may
-  ship without a Fable review — awaiting the maintainer's per-instance call (#19/D-004). **Active task: T2**
-  (wire the inverse-Simpson `k_c^eff` into `error_divisors`; lift the `R/icc.R` ~L1188 abort) — gated on that call.
+  ship without a Fable review — the maintainer **escalated** (per-instance, #19/D-004). **M46 now BLOCKED**
+  pending the gated Fable review: RB authored (`data-raw/reviews/fable-review-m46-cluster-ck-divisor-brief.md`),
+  pre-ship, T2 gated on the verdict. The RB's load-bearing question (Q1): the divisor depends on whether the
+  cluster universe score is the ratings-weighted cell-mean (→ inverse-Simpson, proposed) or rater-balanced
+  (→ distinct-count harmonic) — the MC oracle assumes the former. **Fable is manual/out-of-band (never a
+  subagent, #19); awaiting the maintainer's RR** (`…-response.md`), then ingest + resume at T2 (or degrade).
 - **M46 planned (2026-07-12, ADR-057):** the *averaged cluster-level `ICC(c,k)` divisor on incomplete data* —
   the last-open per-cluster effective-rater divisor (M9 §3b/§9). On complete data the per-subject and
   per-cluster effective rater counts coincide (M5 ships one divisor); on ragged data they diverge and the
