@@ -261,8 +261,25 @@ d_study <- function(
   # random/consistency and for the one-way designs (which have no fixed raters). It is
   # AXIS-SPECIFIC (M39): the occasion axis holds raters fixed and projects a random
   # facet, so fixed absolute agreement projects freely there (guard skipped).
-  if (!occasion_axis && !oneway && !ml_oneway) {
-    abort_fixed_agr_projection(type, raters)
+  if (
+    !occasion_axis &&
+      !oneway &&
+      !ml_oneway &&
+      raters == "fixed" &&
+      "agreement" %in% type
+  ) {
+    # Fixed-rater absolute agreement cannot be projected to a different rater count. An
+    # explicit single-type agreement fit aborts; a multi-type fit drops the agreement
+    # curve and projects consistency (ADR-054 drop-vs-abort, mirroring icc()).
+    if (identical(type, "agreement")) {
+      abort_fixed_agr_projection("agreement", raters)
+    }
+    cli::cli_inform(c(
+      "!" = "Dropping the {.val agreement} reliability curve: absolute agreement \\
+             cannot be projected to a different rater count for fixed raters. \\
+             Projecting {.val consistency}."
+    ))
+    type <- setdiff(type, "agreement")
   }
 
   # The projected axis: the rater count `m` (default) sweeps `m` holding each fitted
@@ -298,7 +315,7 @@ d_study <- function(
 
   # One estimand per projected coefficient. Single-level: one per `m`. Multilevel:
   # the cross-product level x m (level outer, so rows group by level as in icc()).
-  make_estimand <- function(mm, lv, oc) {
+  make_estimand <- function(mm, lv, oc, ty) {
     if (ml_oneway) {
       icc_estimand(unit = mm, oneway = TRUE, multilevel = TRUE, level = lv)
     } else if (multilevel) {
@@ -306,7 +323,7 @@ d_study <- function(
       # occasion setting (`oc` rescales pure error); the cluster error set has no
       # pure-error term, so it is projected single-occasion (oc = 1, a no-op there).
       icc_estimand(
-        type = type,
+        type = ty,
         unit = mm,
         raters = raters,
         multilevel = TRUE,
@@ -320,7 +337,7 @@ d_study <- function(
       # A replicate fit projects at each occasion setting on the fit; `oc` is the
       # numeric occasion divisor (1 or n_o), which rescales only pure error (M22).
       icc_estimand(
-        type = type,
+        type = ty,
         unit = mm,
         raters = raters,
         replicates = replicates,
@@ -390,11 +407,23 @@ d_study <- function(
     row_level <- NULL
     row_occ <- NULL
   }
+  # Cross the projection grid with the reported error definitions (type-major, so the
+  # curves group by type as icc() reports its table; ADR-054). A one-way fit carries a
+  # single NA `type`; fixed-rater agreement was dropped above where it cannot project.
+  base_n <- length(row_m)
+  row_type <- rep(type, each = base_n)
+  row_m <- rep(row_m, times = length(type))
+  if (!is.null(row_level)) {
+    row_level <- rep(row_level, times = length(type))
+  }
+  if (!is.null(row_occ)) {
+    row_occ <- rep(row_occ, times = length(type))
+  }
   # Single-level/non-replicate: `level`/`occ` are NA and recycled/ignored by the
   # estimand builder.
   levels_arg <- if (is.null(row_level)) NA_character_ else row_level
   occ_arg <- if (is.null(row_occ)) NA_real_ else row_occ
-  estimands <- Map(make_estimand, row_m, levels_arg, occ_arg)
+  estimands <- Map(make_estimand, row_m, levels_arg, occ_arg, row_type)
   points <- vapply(
     estimands,
     function(e) icc_point(x$components, e),
@@ -424,6 +453,7 @@ d_study <- function(
   tbl <- tibble::tibble(
     m = row_m,
     index = vapply(estimands, `[[`, character(1), "label"),
+    type = row_type,
     estimate = points,
     std.error = vapply(intervals, `[[`, numeric(1), "std.error"),
     conf.low = vapply(intervals, `[[`, numeric(1), "conf.low"),
@@ -545,6 +575,13 @@ format.icc_dstudy <- function(x, ...) {
   # On the occasion axis the `occasions` column IS the swept quantity (header `n_o`).
   cols <- list()
   heads <- character()
+  # A projection carrying both error definitions gets a `type` column to disambiguate
+  # the shared index letter across curves (ADR-054), the way `level`/`occ` disambiguate
+  # a multilevel/replicate projection. A single-type projection omits it (unchanged).
+  if (length(unique(x$type[!is.na(x$type)])) >= 2) {
+    cols <- c(cols, list(x$type))
+    heads <- c(heads, "type")
+  }
   if (isTRUE(attr(x, "multilevel"))) {
     cols <- c(cols, list(as.character(x$level)))
     heads <- c(heads, "level")
@@ -608,8 +645,12 @@ tidy.icc_dstudy <- function(x, ...) {
     conf.level = attr(x, "conf.level"),
     method = attr(x, "method")
   )
-  # Carry the level column for a multilevel projection (subject/cluster curves) and the
-  # occasions column for a replicate projection (one curve per occasion setting, M22).
+  # Carry a `type` column when both error definitions are projected (ADR-054), the
+  # `level` column for a multilevel projection (subject/cluster curves), and the
+  # `occasions` column for a replicate projection (one curve per occasion setting, M22).
+  if (length(unique(x$type[!is.na(x$type)])) >= 2) {
+    out <- tibble::add_column(out, type = x$type, .after = "index")
+  }
   if (isTRUE(attr(x, "multilevel"))) {
     out <- tibble::add_column(out, level = x$level, .after = "m")
   }
@@ -623,10 +664,19 @@ tidy.icc_dstudy <- function(x, ...) {
 #' @export
 glance.icc_dstudy <- function(x, ...) {
   tibble::tibble(
-    n_m = nrow(x),
+    n_m = length(unique(x$m)),
     m_min = min(x$m),
     m_max = max(x$m),
-    type = attr(x, "icc_type"),
+    # A projection may carry both error definitions now (ADR-054); name them in one
+    # cell so glance stays a single model-level row (per-curve `type` lives in tidy()).
+    type = {
+      ty <- attr(x, "icc_type")
+      if (all(is.na(ty))) {
+        NA_character_
+      } else {
+        paste(ty[!is.na(ty)], collapse = ", ")
+      }
+    },
     raters = attr(x, "icc_raters"),
     k_observed = attr(x, "k_observed"),
     conf.level = attr(x, "conf.level"),
