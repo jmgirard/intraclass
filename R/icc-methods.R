@@ -214,7 +214,8 @@ format.icc <- function(x, ...) {
   # ratings per subject (harmonic mean, k_eff); surface it so the divisor is not
   # a black box (M3 spec §5, ADR-008). Silent on balanced data (k_eff == k).
   keff_note <- if (
-    !x$design$balanced && any(grepl("k\\)$", e$index) & !(e$level %in% "cluster"))
+    !x$design$balanced &&
+      any(grepl("k\\)$", e$index) & !(e$level %in% "cluster"))
   ) {
     icc_mute(sprintf(
       "ICC(*,k) projects to an effective %s raters (harmonic mean of ratings/subject).",
