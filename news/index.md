@@ -213,7 +213,7 @@ simulations.
   at both moderate and high cluster counts. Incomplete
   within-cell-replicate and numeric-`unit` (D-study) Bayesian fits, and
   the incomplete/unbalanced fixed-rater *cluster* level (open for every
-  engine), remain planned for later milestones.
+  engine), are planned for a future release.
 - A new **`prior`** argument lets you override the sourced half-*t*(4,
   0, 1) prior for `engine = "brms"` with any prior object (from
   [`brms::set_prior()`](https://paulbuerkner.com/brms/reference/set_prior.html)
