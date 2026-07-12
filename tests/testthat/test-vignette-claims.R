@@ -602,3 +602,130 @@ test_that("multilevel-designs.Rmd: nested relabels of `school` infer Designs 2 a
   expect_identical(x3$design$ml_design, "nested_in_subjects")
   expect_setequal(x3$estimates$index, c("ICC(1)", "ICC(k)"))
 })
+
+# Vignette claims (comparison-with-other-packages.Rmd) --------------------
+# The comparison article makes two load-bearing claims, both illustrated with
+# numbers computed live from the shipped datasets, so both must hold on those
+# datasets or the article teaches from stale figures (PRINCIPLES.md #1/#4):
+#   (1) VALIDATION -- on the balanced `ratings` design `intraclass` reproduces
+#       `psych::ICC` and `irr::icc` across the whole McGraw-Wong family to
+#       numerical precision (a REML-vs-ANOVA-mean-squares gap, not error), and a
+#       different-lineage model-based tool (`irrICC`, Gwet) agrees too; and
+#   (2) DIFFERENTIATION -- on `ratings_incomplete` the classical tools must
+#       listwise-delete down to a handful of subjects, while `intraclass` fits
+#       every observed rating. These pin the relationships the article shows,
+#       not exact coefficients (which the article computes live).
+
+test_that("comparison.Rmd: intraclass reproduces psych and irr on balanced `ratings`", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("psych")
+  skip_if_not_installed("irr")
+
+  w <- reshape(
+    ratings,
+    idvar = "subject",
+    timevar = "rater",
+    direction = "wide"
+  )
+  w <- w[order(as.integer(as.character(w$subject))), ]
+  wm <- as.matrix(w[, -1])
+
+  ps <- psych::ICC(wm)$results
+  psv <- stats::setNames(ps$ICC, ps$type)
+  ic <- function(model, type, unit) {
+    icc(
+      ratings,
+      subject = subject,
+      rater = rater,
+      score = score,
+      model = model,
+      type = type,
+      unit = unit
+    )$estimates$estimate[1]
+  }
+
+  rows <- list(
+    c("oneway", "agreement", "single", "ICC1"),
+    c("oneway", "agreement", "average", "ICC1k"),
+    c("twoway", "agreement", "single", "ICC2"),
+    c("twoway", "agreement", "average", "ICC2k"),
+    c("twoway", "consistency", "single", "ICC3"),
+    c("twoway", "consistency", "average", "ICC3k")
+  )
+
+  for (r in rows) {
+    est <- ic(r[1], r[2], r[3])
+    # Matches psych (the in-suite oracle) and irr to a REML-vs-ANOVA tolerance.
+    expect_equal(est, unname(psv[r[4]]), tolerance = 1e-4)
+    expect_equal(
+      est,
+      irr::icc(wm, model = r[1], type = r[2], unit = r[3])$value,
+      tolerance = 1e-4
+    )
+  }
+})
+
+test_that("comparison.Rmd: irrICC (Gwet) agrees with intraclass ICC(A,1)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("irrICC")
+
+  w <- reshape(
+    ratings,
+    idvar = "subject",
+    timevar = "rater",
+    direction = "wide"
+  )
+  w <- w[order(as.integer(as.character(w$subject))), ]
+  gwet_frame <- data.frame(
+    Target = as.integer(as.character(w$subject)),
+    J1 = w$score.1,
+    J2 = w$score.2,
+    J3 = w$score.3,
+    J4 = w$score.4
+  )
+  gwet_agree <- irrICC::icc2.inter.fn(gwet_frame)$icc2r
+  a1 <- icc(
+    ratings,
+    subject = subject,
+    rater = rater,
+    score = score,
+    model = "twoway",
+    type = "agreement",
+    unit = "single"
+  )$estimates$estimate[1]
+
+  expect_equal(gwet_agree, a1, tolerance = 1e-4)
+})
+
+test_that("comparison.Rmd: incomplete data collapses classical tools but not intraclass", {
+  skip_if_not_installed("glmmTMB")
+
+  w <- reshape(
+    ratings_incomplete,
+    idvar = "subject",
+    timevar = "rater",
+    direction = "wide"
+  )
+  w <- w[order(as.integer(as.character(w$subject))), ]
+  wm <- as.matrix(w[, -1])
+
+  # The article's differentiator: listwise deletion keeps far fewer subjects
+  # than the study has, while intraclass uses all of them.
+  surviving <- sum(stats::complete.cases(wm))
+  expect_equal(surviving, 2L)
+
+  fit_inc <- icc(
+    ratings_incomplete,
+    subject = subject,
+    rater = rater,
+    score = score,
+    model = "twoway",
+    type = "agreement",
+    unit = "average"
+  )
+  expect_equal(fit_inc$n$subjects, 6L) # every subject retained
+  expect_equal(fit_inc$n$obs, nrow(ratings_incomplete)) # every observed rating used
+  # k_eff sits between one rating and the full complement of four raters.
+  expect_gt(fit_inc$k_eff, 1)
+  expect_lt(fit_inc$k_eff, 4)
+})

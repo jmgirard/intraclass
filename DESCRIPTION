@@ -32,6 +32,8 @@ Suggests:
     coda,
     covr,
     ggplot2,
+    irr,
+    irrICC,
     knitr,
     lavaan,
     lme4,

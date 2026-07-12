@@ -1519,19 +1519,23 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   premise (this session, `irr::anxiety`): `intraclass` ≡ `psych` ≡ `irr` to 6 dp on ICC(1)=0.175022,
   ICC(A,k)=0.425499, ICC(C,k)=0.452586.
 - **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
-  - [ ] **S1 — validation section + wiring + `irr` dep.** New `comparison-with-other-packages.Rmd` with the
-        balanced-design agreement section: ICC(1)/ICC(A,k)/ICC(C,k) computed **live** across
-        `intraclass`/`psych`/`irr` on a shared dataset, shown to agree to numerical precision (chunks guarded by
-        `requireNamespace()`). Registered in `_pkgdown.yml`'s **articles** index (not the reference index —
-        [[pkgdown-reference-index-new-exports]]); `irr` added to `DESCRIPTION` `Suggests`;
-        `test-vignette-claims.R` gains agreement claims (`skip_if_not_installed()`). Verified: article renders
-        standalone; `pkgdown::check_pkgdown()` clean; claims pass.
-  - [ ] **S2 — differentiation section + `irrICC` dep.** An incomplete/unbalanced worked case contrasting the
-        classical tools' listwise/`NA` behavior with `intraclass`'s `k_eff` handling (with `irrICC` as the
-        model-based foil), plus a **capability matrix** (which packages compute which cell: balanced ANOVA,
-        incomplete, multilevel, boundary-aware CI, selection) citing `gtheory`/`performance` rather than running
-        them. `irrICC` added to `Suggests`; every displayed number live + claim-tested. Verified: renders; claims
-        pass; matrix rows accurate (no strawman, #18).
+  - [x] **S1 — validation section + wiring + `irr` dep.** DONE (S1+S2 shipped together — one coherent `.Rmd`,
+        no value in splitting a single file across commits). New `comparison-with-other-packages.Rmd`
+        validation section: the full six-coefficient family (ICC(1)/ICC(1,k)/ICC(A,1)/ICC(A,k)/ICC(C,1)/ICC(C,k))
+        computed **live** across `intraclass`/`psych`/`irr` on `ratings`, agreeing to ~5 dp (max gap 6.7e-6, a
+        REML-vs-ANOVA-mean-squares gap, explained). Registered in `_pkgdown.yml`'s **articles** index (not the
+        reference index — [[pkgdown-reference-index-new-exports]]); `irr` → `DESCRIPTION` `Suggests`;
+        `test-vignette-claims.R` gains the agreement claims (`skip_if_not_installed(psych/irr)`, tol 1e-4).
+        Verified: renders standalone; `pkgdown::check_pkgdown()` "No problems found"; claims pass.
+  - [x] **S2 — differentiation section + `irrICC` dep.** DONE (with S1). Incomplete/unbalanced worked case on
+        `ratings_incomplete`: classical listwise deletion collapses to **2 of 6 subjects**, while `intraclass`
+        uses all 6 subjects / 20 observed ratings via `k_eff`=3.27; a **capability matrix** (balanced ANOVA /
+        incomplete / multilevel / boundary-aware CI / fixed-vs-random / selection) that **cites**
+        `gtheory`/`performance` rather than running them (#18 — framed as intent, not a scorecard). `irrICC` →
+        `Suggests`, used only for its rock-solid **balanced** point (Gwet `icc2r` ≡ ICC(A,1) to 1e-4) — its
+        incomplete-data output was **not** pinned (its `Mtot` accounting couldn't be cleanly explained, #1/#4).
+        Every displayed number live + claim-tested. Verified: renders; claims pass; six cross-links + five
+        glossary anchors resolve.
   - [ ] **S3 — WORDLIST + NEWS + cross-links + finish-task gate → PR.** WORDLIST (`irrICC`, `Gwet`, term/author
         spellings); NEWS bullet; cross-links from the existing articles/README where natural. Finish-task gate:
         `air format --check` / `lintr` 0 lints / `spelling` clean / `devtools::document` no delta /
@@ -1544,4 +1548,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   archived off CRAN); the broad VPC/NA package sweep (`performance`/`misty`/`irrNA`/`DescTools`, #17); every
   untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, the lavaan
   siblings) stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress** — branch `m42-benchmark-comparison`; ADR-052 + this board committed; S1 next.
+- Status: **in progress** — branch `m42-benchmark-comparison`; ADR-052 + board committed; S1+S2 done (the
+  article + deps + claims committed, local suite 1244/0/51, `air`/`lintr` 0 / `spelling` / `pkgdown` clean).
+  S3 (finish-task `devtools::check` CI-parity gate → PR) in progress.

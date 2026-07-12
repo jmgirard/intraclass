@@ -229,6 +229,12 @@ alternate engines, and seeded simulations.
 * A new *Glossary* article defines the recurring vocabulary — variance component,
   REML, credible vs. confidence interval, `k_eff`, the zero-variance boundary, and
   the rest — in one place that the other articles link into.
+* A new *Comparison with other packages* article shows, with numbers computed live
+  from the shipped datasets, that `intraclass` reproduces `psych::ICC` and
+  `irr::icc` across the McGraw & Wong family on balanced data (and that Gwet's
+  model-based `irrICC` agrees too), then where it goes further — incomplete and
+  unbalanced data, multilevel subject/cluster reliability, boundary-aware intervals,
+  and guidance on which coefficient to report.
 
 ## Robustness (pre-release code review)
 
