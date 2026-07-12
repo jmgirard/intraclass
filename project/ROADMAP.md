@@ -140,14 +140,14 @@ helpers* item below (sample-size / CI-width), where it belongs.
   replicate sibling of the M9 ragged `ICC(c,k)` divisor question. The single-occasion ragged family
   ships (M20 Slice 3).
 - **`d_study()` ragged-replicate occasion projection** — the **rater-count** projection off a within-cell
-  replicate fit **shipped as M22** (PR #27, ADR-032; per-component `error_divisors` thread the interaction ÷
-  `m` and pure error ÷ `m·n_o`). Projecting the **occasion count `n_o`** itself off a **balanced** replicate
-  fit is **scheduled as M39** (ADR-049, in flight — occasion averaging rescales only σ²_e, a thin projection
-  slice; a new `n_o` argument; detailed in [`MILESTONES.md`](MILESTONES.md)). What **remains parked** is
-  projecting `n_o` off a **ragged** replicate fit. **Status: 🟣 blocked.** It needs the effective-`n_o`
-  divisor that is itself open research (the *occasion-averaged coefficient on ragged replicates* 🟣 item
-  above, M20/ADR-030) — the single-occasion ragged family ships, but averaging unequal per-cell replicate
-  counts across projected occasions has no sourced divisor. Promote only once that divisor question resolves.
+  replicate fit **shipped as M22** (PR #27, ADR-032), and the **occasion-count** projection off a **balanced**
+  replicate fit **shipped as M39** (PR #45, ADR-049; the new `n_o` argument — occasion averaging rescales only
+  σ²_e, so a finite ceiling and a fixed-agreement lift; shipped detail in [`MILESTONES.md`](MILESTONES.md), not
+  here per ADR-015). What **remains parked** is projecting `n_o` off a **ragged** replicate fit. **Status: 🟣
+  blocked.** It needs the effective-`n_o` divisor that is itself open research (the *occasion-averaged
+  coefficient on ragged replicates* 🟣 item above, M20/ADR-030) — the single-occasion ragged family ships, but
+  averaging unequal per-cell replicate counts across projected occasions has no sourced divisor. Promote only
+  once that divisor question resolves.
 - **Bayesian engine** (`brms`) + `ci_method = "posterior"` (half-*t* hyperpriors, ten Hove, Jorgensen &
   van der Ark 2020), deferred out of M7 (ADR-014). **Shipped as the M23–M32 arc** (see
   [`MILESTONES.md`](MILESTONES.md)): two-way random (M23), multilevel crossed (M24) + nested Designs 2/3
