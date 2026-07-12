@@ -24,7 +24,7 @@ Ark).
 
 ## Parking lot (unscheduled proposals)
 
-Each item now carries a **Status** line — last reviewed 2026-07-10 — so readiness is
+Each item now carries a **Status** line — last reviewed 2026-07-11 — so readiness is
 visible without re-deriving it. Updated whenever an item's readiness changes;
 `STATUS.md`'s Wave 1–3 sequencing is the authoritative near-term order among the
 ready ones.
@@ -83,16 +83,6 @@ helpers* item below (sample-size / CI-width), where it belongs.
   parametric-bootstrap half of this idea is done (M16). Non-parametric bootstrap
   and profile-likelihood remain a method-comparison nice-to-have, not sequenced
   into Waves 1–3.
-- Benchmark suite vs. prior art across designs. **Status: SCHEDULED as M42** (ADR-052, in flight on branch
-  `m42-benchmark-comparison`). Scoped as one reader-facing comparison article
-  (`comparison-with-other-packages.Rmd`): a **validation** half (`intraclass` ≡ `psych` ≡ `irr` to numerical
-  precision on balanced designs — no new oracle risk, the `psych` cross-check already ships) + a
-  **differentiation** half (incomplete/multilevel/boundary-CI capability the classical tools lack, with `irrICC`
-  as the model-based foil). Two new test/vignette-only `Suggests` (`irr`, `irrICC`); **`gtheory` cannot be a dep
-  (removed from CRAN 2025-03-24)** so its agreement is cited from existing `REFERENCES.md` provenance, and the
-  VPC/NA sweep (`performance`/`misty`/`irrNA`/`DescTools`) stays out (#17). Full scope in
-  [`MILESTONES.md`](MILESTONES.md) M42 (ADR-015 — not re-narrated here); the v0.2.0 consolidation (ADR-022)
-  follows.
 - **Clarity/accessibility rewrite of the teaching vignettes.** The **vignette *reassessment***
   (Update + Split) **shipped as M35** (ADR-045, PR #40): `advanced.Rmd` was retired into four
   focused articles (`multilevel-designs`, `engines`, `interval-methods`, `d-studies-and-replicates`)
@@ -111,8 +101,9 @@ helpers* item below (sample-size / CI-width), where it belongs.
   posture as M40 (no new estimand/engine/dependency; live-computed + claim-tested numbers; no Fable); shipped
   detail in [`MILESTONES.md`](MILESTONES.md) M41 (ADR-015), not re-narrated here. **What remains parked** after
   M41 is a clarity pass over any *further* material and per-term worked examples beyond first-use glosses — later
-  docs passes, not scheduled. (M41 was the first of two release-strengthening milestones the 2026-07-11 retro
-  sequenced before **0.2.0**; M42 = the benchmark-vs-prior-art suite item below, then the release.)
+  docs passes, not scheduled. (M41 + M42 were the two release-strengthening milestones the 2026-07-11 retro
+  sequenced before **0.2.0**; both shipped — M41 clarity/glossary at ADR-051, M42 the benchmark-vs-prior-art
+  comparison article at ADR-052 — so the **next step is the v0.2.0 consolidation** (ADR-022), then the release.)
 - **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
   lme4 interval for singular fits (glmmTMB covers this today via the
   degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted

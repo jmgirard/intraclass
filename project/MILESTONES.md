@@ -76,17 +76,18 @@ M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M2
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40,
 ADR-051 M41, ADR-052 M42).
-**M42 is in flight** (ADR-052, the benchmark-vs-prior-art comparison article — engineering/docs; board below) on
-branch `m42-benchmark-comparison`. Prior milestone M41 (ADR-051, clarity/accessibility pass over the four
-secondary vignettes + a standalone `glossary.Rmd`) shipped (PR #47, squash-merged to `main` at `3e00999`; full
-CI matrix green 9/9). A **docs milestone**
-(cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency; correctness = live-computed +
-claim-tested numbers (#1/#4/#12); **no Fable**. Extended M40's applied-reader treatment to the remaining four
-articles and added a standalone `glossary.Rmd` (26 terms) all six articles deep-link into. **M42** is the second
-of the two release-strengthening milestones the 2026-07-11 retro sequenced before **0.2.0** (M41 clarity ✓ →
-M42 benchmark → cut 0.2.0; the v0.2.0 consolidation + CRAN upload, ADR-022, follow M42) — one reader-facing
-comparison article showing agreement with `psych`/`irr` + the differentiator (`irrICC` foil), two new
-test/vignette-only `Suggests`, no new estimand. Prior milestone **M40** (ADR-050,
+**No milestone is currently in flight** — M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped
+(PR #48, squash-merged to `main` at `1baf7db`; full CI matrix green 9/9). An **engineering/docs milestone** (cf.
+M4/M13/M35/M40/M41) with a bounded dependency delta: one reader-facing `comparison-with-other-packages.Rmd`
+showing `intraclass` ≡ `psych`/`irr` across the six-coefficient family on balanced data (max gap 6.7e-6, a
+REML-vs-ANOVA difference) + the differentiator (incomplete data collapses classical tools to 2/6 subjects vs
+`intraclass`'s `k_eff`; `irrICC` foil; cited capability matrix); two new test/vignette-only `Suggests`
+(`irr`, `irrICC`); no new estimand; **no Fable**. With M42 the two release-strengthening milestones the
+2026-07-11 retro sequenced are both shipped (M41 clarity ✓ → M42 benchmark ✓) — **the next step is the v0.2.0
+release consolidation** (version bump + NEWS + cran-comments; ADR-022), then the CRAN upload. Prior milestone
+M41 (ADR-051, clarity/accessibility pass over the four secondary vignettes + a standalone `glossary.Rmd`)
+shipped (PR #47, squash-merged to `main` at `3e00999`; full CI matrix green 9/9) — a docs milestone extending
+M40's applied-reader treatment to the remaining four articles plus a standalone glossary. Prior milestone **M40** (ADR-050,
 accessibility rewrite of the two front-door vignettes `getting-started` + `choosing-an-icc` for applied readers)
 shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix green 9/9). M40 was
 a **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness =
@@ -1550,8 +1551,6 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   archived off CRAN); the broad VPC/NA package sweep (`performance`/`misty`/`irrNA`/`DescTools`, #17); every
   untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, the lavaan
   siblings) stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress — all 3 slices done, local gate green, PR pending.** Branch `m42-benchmark-comparison`;
-  ADR-052 + board + the article (S1+S2) + WORDLIST/NEWS/gate (S3) all committed. Finish-task gate green
-  (`devtools::check` CI-parity **0/0/0**, all eight vignettes built; suite 1244/0/51; `air`/`lintr`/`spelling`/
-  `pkgdown` clean). **Next: open the PR from `m42-benchmark-comparison`**; on green CI + merge, reconcile M42 →
-  done + set "Last green CI".
+- Status: **done — merged, CI green** (PR #48, squash-merged to `main` at `1baf7db`; full CI matrix green 9/9,
+  incl. `ubuntu-latest (devel)` clean). Shipped in one session (retro → ADR-052 → S1+S2 article → S3 gate →
+  PR #48 → merge); **no Fable review**. Docs/deps-only → no installed-pkg estimator paths driven.

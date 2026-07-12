@@ -1,20 +1,19 @@
 # Project status
 
-- Active milestone: **M42 (ADR-052) — the benchmark-vs-prior-art comparison article — IN FLIGHT** on branch
-  `m42-benchmark-comparison`. Engineering/docs milestone (cf. M4/M13/M35/M40/M41) with a bounded dependency
-  delta: one new reader-facing article `vignettes/comparison-with-other-packages.Rmd` — a **validation** half
-  (`intraclass` ≡ `psych` ≡ `irr` to numerical precision on balanced designs; smoke-tested this session on
-  `irr::anxiety` — ICC(1)=0.175022, ICC(A,k)=0.425499, ICC(C,k)=0.452586, all three agree to 6 dp) + a
-  **differentiation** half (incomplete/multilevel/boundary-CI capability the classical tools lack, `irrICC` as
-  the model-based foil, cited capability matrix). **No new estimand/engine/CI machinery/argument** (#6);
-  correctness = **live-computed + claim-tested numbers** (#1/#4/#12), not a new oracle (the agreement half
-  re-presents the shipped `psych` cross-check); **no Fable** (#19). Two new **test/vignette-only** `Suggests`:
-  `irr`, `irrICC` (`psych` already present); **`gtheory` is NOT a dep** — removed from CRAN 2025-03-24, so its
-  agreement is cited from existing `REFERENCES.md` provenance; the VPC/NA sweep
-  (`performance`/`misty`/`irrNA`/`DescTools`) stays out (#17). Board: [`MILESTONES.md`](MILESTONES.md) M42
-  (S1 validation+`irr`+wiring → S2 differentiation+`irrICC` → S3 WORDLIST/NEWS/gate → PR). **M42 is the second
-  release-strengthening milestone (M41 clarity ✓ → M42 benchmark → cut 0.2.0); the v0.2.0 consolidation
-  (version bump + NEWS + cran-comments; ADR-022) follows M42.**
+- Active milestone: **none** — M42 (ADR-052, the benchmark-vs-prior-art comparison article) shipped (PR #48,
+  squash-merged to `main` at `1baf7db`; full CI matrix green 9/9, devel clean). An **engineering/docs milestone**
+  (cf. M4/M13/M35/M40/M41) with a bounded dependency delta: one reader-facing
+  `vignettes/comparison-with-other-packages.Rmd` — a **validation** half (`intraclass` ≡ `psych` ≡ `irr` across
+  the six-coefficient family on balanced `ratings`, max gap 6.7e-6, a REML-vs-ANOVA difference; Gwet's `irrICC`
+  agrees too) + a **differentiation** half (on `ratings_incomplete` classical listwise deletion collapses to 2/6
+  subjects while `intraclass` uses all 20 cells via `k_eff`=3.27; cited capability matrix). Two new
+  test/vignette-only `Suggests` (`irr`, `irrICC`); **`gtheory` cited not depended on** (removed from CRAN
+  2025-03-24); `irrICC` pinned only on the balanced case it exactly matches (#1/#4). No new estimand;
+  **no Fable**. **With M42 both release-strengthening milestones are shipped (M41 clarity ✓ → M42 benchmark ✓) —
+  the next step is the v0.2.0 release consolidation** (version bump + NEWS heading + cran-comments; ADR-022),
+  then the CRAN upload. **The v0.2.0 consolidation needs its own milestone/ADR** (out-of-band release work,
+  ADR-022) — v0.1.0 has been "submission-ready" since M13 with ~28 milestones of capability accreted under the
+  unreleased `0.1.0` NEWS heading.
 - Prior milestone: **M40** (ADR-050, accessibility rewrite of the two front-door vignettes
   `getting-started` + `choosing-an-icc`) shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix
   green 9/9). A **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness
@@ -294,18 +293,18 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M42 all 3 slices done, local gate green, PR pending.** Branch `m42-benchmark-comparison`:
-  ADR-052 + board + the `comparison-with-other-packages.Rmd` article (S1 validation `intraclass`≡`psych`≡`irr`
-  to ~5 dp on `ratings`, S2 differentiation — listwise deletion collapses to 2/6 subjects vs `intraclass`'s
-  `k_eff`, `irrICC` foil, capability matrix) + `irr`/`irrICC` → Suggests + 3 claim tests + WORDLIST/NEWS/S3 gate
-  all committed. Finish-task gate GREEN: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`)
-  **0/0/0** (all eight vignettes built, new Suggests present), full CI-mode suite **1244/0/51**, `air format
-  --check` / `lintr` 0 lints / `spelling` / `pkgdown::check_pkgdown()` clean, `devtools::document` no delta.
-  **Next action: open the PR from `m42-benchmark-comparison`**; on green CI + merge, reconcile M42 → done + set
-  "Last green CI". Docs/deps-only → no installed-pkg estimator paths to drive. Retro confirmed ADR-050/051
-  sequencing unchanged; maintainer chose the **article + claim tests** deliverable (plan question gate),
-  delegated the package set → `psych`+`irr`+`irrICC` (`gtheory` dropped: removed from CRAN 2025-03-24, cited
-  instead). *Superseded (M41, done):* all
+- Active task: **none — M42 shipped and merged (PR #48, `1baf7db`).** The next work is the **v0.2.0 release
+  consolidation** (out-of-band release milestone, ADR-022): version bump `0.1.0`→`0.2.0`, add a `0.2.0` NEWS
+  heading over the ~28 milestones accreted since M13, `cran-comments.md`, `R CMD check --as-cran`, then the CRAN
+  upload — needs its own kickoff (the `cairn:cairn-release` skill covers this shape). *Superseded (M42, done):*
+  all 3 slices shipped and the full CI matrix came back green 9/9. Gate before the PR: `air format --check` /
+  `lintr` 0 lints / `spelling` clean / `devtools::document` no delta / vignette-claims tests pass (incl. the
+  three new comparison claims) / `pkgdown::check_pkgdown()` clean / `devtools::check` CI-parity
+  (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with all eight vignettes built and `irr`/`irrICC` present.
+  Docs/deps-only → no installed-pkg estimator paths. Retro confirmed ADR-050/051 sequencing unchanged;
+  maintainer chose the **article + claim tests** deliverable (plan question gate), delegated the package set →
+  `psych`+`irr`+`irrICC` (`gtheory` dropped: removed from CRAN 2025-03-24, cited instead). *Superseded (M41,
+  done):* all
   three slices shipped and the full CI matrix came back green 9/9. Gate before the PR: `air format --check` /
   `lintr` 0 lints / `spelling` clean / `devtools::document` no delta / vignette-claims tests pass /
   `pkgdown::check_pkgdown()` clean / `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with
@@ -466,14 +465,18 @@
   fit), **categorical/ordinal GLMM** (needs an estimand pass), **multilevel SEM**, the Wave-3 `ICC(c,k)`
   divisor, occasion/ragged `d_study()`, the **vignette reassessment** (docs), and the out-of-band **CRAN
   upload** (ADR-022).
-- Last green CI: **PR #47 (M41, clarity pass over the four secondary vignettes + a standalone glossary) — full
-  CI matrix green (9/9), squash-merged to `main` at `3e00999`.** format-check / lint / pkgdown / test-coverage /
-  `R CMD check` on macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean).
-  Locally before the PR: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** (all **seven**
-  vignettes built), `lintr` **0 lints**, `spelling` / `air format --check` / `pkgdown::check_pkgdown()` clean,
-  `devtools::document` no delta, `test-vignette-claims.R` re-passes, and all 33 cross-article + glossary anchor
-  links verified against generated ids (incl. the underscore `#…-k_eff`, unicode `#…-θ²_r`, and dotted
-  `#…-vs.-…` anchors). Docs-only milestone — no installed-pkg estimator paths to drive. Prior green: **PR #46
+- Last green CI: **PR #48 (M42, benchmark-vs-prior-art comparison article) — full CI matrix green (9/9),
+  squash-merged to `main` at `1baf7db`.** format-check / lint / pkgdown / test-coverage / `R CMD check` on
+  macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean). Locally before the
+  PR: `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** (all **eight** vignettes built,
+  `irr`/`irrICC` present), full CI-mode suite **1244/0/51** (three new comparison claims pass), `lintr`
+  **0 lints**, `spelling` / `air format --check` / `pkgdown::check_pkgdown()` clean, `devtools::document` no
+  delta, all glossary anchors + four companion-article cross-links in the new article verified against generated
+  ids. Docs/deps-only milestone — no installed-pkg estimator paths to drive. Prior green: **PR #47 (M41, clarity
+  pass over the four secondary vignettes + a standalone glossary) — full CI matrix green (9/9), squash-merged to
+  `main` at `3e00999`.** format-check / lint / pkgdown / test-coverage / `R CMD check` on macOS, Windows, and
+  Ubuntu release·oldrel·**devel** all passed; `devtools::check` CI-parity **0/0/0** (all seven vignettes built),
+  `lintr` 0 lints, `spelling` / `air` / `pkgdown::check_pkgdown()` clean. Prior green: **PR #46
   (M40, accessibility rewrite of the two front-door vignettes) — full CI matrix green
   (9/9), squash-merged to `main` at `e34f037`.** format-check / lint / pkgdown / test-coverage / `R CMD check`
   on macOS, Windows, and Ubuntu release·oldrel·**devel** all passed (no flakes; devel clean). Locally before the
