@@ -115,14 +115,16 @@ reps <- data.frame(
 )
 
 icc(reps, score, subject, rater, occasions = c("single", "average"))
-#> # Intraclass correlation: two-way random, absolute agreement
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 20 | Raters: 4 (random) | 80 cells x 3 replicates (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     occasions estimate   95% CI
-#>   ICC(A,1)          1   0.263   [0.083, 0.489]
-#>   ICC(A,1)          3   0.300   [0.088, 0.562]
-#>   ICC(A,k)          1   0.588   [0.265, 0.793]
-#>   ICC(A,k)          3   0.631   [0.279, 0.837]
+#>   ICC(A,1)          1    0.263   [0.083, 0.489]
+#>   ICC(A,1)          3    0.300   [0.088, 0.562]
+#>   ICC(A,k)          1    0.588   [0.265, 0.793]
+#>   ICC(A,k)          3    0.631   [0.279, 0.837]
+#> 
 #> Variance components: subject 0.631, rater 0.901, subject:rater 0.428, residual 0.443
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```

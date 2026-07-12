@@ -125,14 +125,16 @@ design is <strong>one-way</strong> (<code>model = "oneway"</code>).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oneway</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, model <span class="op">=</span> <span class="st">"oneway"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">oneway</span></span>
-<span><span class="co">#&gt; # Intraclass correlation: one-way random</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Ratings: 24 (4 per subject, balanced) | raters interchangeable</span></span>
-<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   ICC(1)      0.166   [0.008, 0.838]</span></span>
-<span><span class="co">#&gt;   ICC(k)      0.443   [0.032, 0.954]</span></span>
-<span><span class="co">#&gt; Variance components: subject 1.244, residual 6.264 (rater confounded)</span></span>
-<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(1) = ICC(1,1), ICC(k) = ICC(1,k)</span></span></code></pre></div>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: one-way random</span> ──────────────────────────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Ratings: 24 (4 per subject, balanced) | raters interchangeable</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(1)    <span style="font-weight: bold;">   0.166</span>   <span style="font-weight: 100;">[0.008, 0.838]</span></span></span>
+<span><span class="co">#&gt;   ICC(k)    <span style="font-weight: bold;">   0.443</span>   <span style="font-weight: 100;">[0.032, 0.954]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 1.244, residual 6.264 (rater confounded)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(1) = ICC(1,1), ICC(k) = ICC(1,k)</span></span></span></code></pre></div>
 <p>A one-way model cannot separate systematic rater differences from
 error, so it folds them into the residual and reports a single
 <code>ICC(1)</code> / <code>ICC(k)</code>. That makes it the
@@ -155,24 +157,28 @@ offset and asks only whether raters rank subjects the same way.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">agreement</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">agreement</span></span>
-<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
-<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   ICC(A,1)    0.290   [0.050, 0.713]</span></span>
-<span><span class="co">#&gt;   ICC(A,k)    0.620   [0.173, 0.909]</span></span>
-<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
-<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, absolute agreement</span> ──────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span>
 <span></span>
 <span><span class="va">consistency</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">consistency</span></span>
-<span><span class="co">#&gt; # Intraclass correlation: two-way random, consistency</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
-<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   ICC(C,1)    0.715   [0.343, 0.924]</span></span>
-<span><span class="co">#&gt;   ICC(C,k)    0.909   [0.676, 0.980]</span></span>
-<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></code></pre></div>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, consistency</span> ─────────────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span></code></pre></div>
 <p>Here <code>ICC(A,1)</code> is 0.29 but <code>ICC(C,1)</code> is 0.71.
 The gap is not noise – it is a direct read-out of how much the raters
 differ in average level. Consistency is never smaller than agreement,
@@ -252,15 +258,17 @@ leaving four empty cells.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">inc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings_incomplete</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">inc</span></span>
-<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 20 of 24 cells (incomplete)</span></span>
-<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   ICC(A,1)    0.249   [0.038, 0.693]</span></span>
-<span><span class="co">#&gt;   ICC(A,k)    0.521   [0.114, 0.881]</span></span>
-<span><span class="co">#&gt; ICC(*,k) projects to an effective 3.27 raters (harmonic mean of ratings/subject).</span></span>
-<span><span class="co">#&gt; Variance components: subject 2.281, rater 5.532, residual 1.344</span></span>
-<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, absolute agreement</span> ──────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 20 of 24 cells (incomplete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.249</span>   <span style="font-weight: 100;">[0.038, 0.693]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.521</span>   <span style="font-weight: 100;">[0.114, 0.881]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">ICC(*,k) projects to an effective 3.27 raters (harmonic mean of ratings/subject).</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.281, rater 5.532, residual 1.344</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
 <p>The header now reads <code>20 of 24 cells (incomplete)</code>, and
 <code>ICC(*,k)</code> averages over an <em>effective</em> 3.27 raters
 rather than 4 – the harmonic mean of the per-subject counts (four
@@ -421,19 +429,23 @@ fit anything – there is no <code>data</code> argument – so it is a quick
 way to settle the choice before you run the model.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/choose_icc.html">choose_icc</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # Recommended ICC</span></span>
-<span><span class="co">#&gt; Design: two-way random, absolute agreement</span></span>
-<span><span class="co">#&gt; Recommendation: ICC(A,1)</span></span>
-<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span>
-<span><span class="co">#&gt; Why:</span></span>
-<span><span class="co">#&gt;   - Crossed (two-way): the same raters judge every subject.</span></span>
-<span><span class="co">#&gt;   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span>
-<span><span class="co">#&gt;   - Single rater: you will act on one rater's score.</span></span>
-<span><span class="co">#&gt;   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
-<span><span class="co">#&gt; Run this on your data:</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Recommended ICC</span> ─────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Design: two-way random, absolute agreement</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Recommendation: ICC(A,1)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Why:</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Run this on your data:</span></span></span>
 <span><span class="co">#&gt;   icc(data, score, subject, rater, unit = "single")</span></span>
-<span><span class="co">#&gt; Notes:</span></span>
-<span><span class="co">#&gt;   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></code></pre></div>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Notes:</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span></span></code></pre></div>
 <p>Pass the decisions as arguments, as above, or – in an interactive
 session – call <code><a href="../reference/choose_icc.html">choose_icc()</a></code> with them omitted to be asked
 each outstanding question in turn. Answering a choice that does not

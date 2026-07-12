@@ -84,12 +84,14 @@ time.
 icc(ratings, score, subject, rater, engine = "brms", seed = 1)
 ```
 
-    #> # Intraclass correlation: two-way random, absolute agreement
+    #> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
     #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
     #> Engine: brms (MCMC) | CI: 95% posterior credible (4000 draws)
+    #>
     #>   index     estimate   95% CI
-    #>   ICC(A,1)    0.241   [0.066, 0.649]
-    #>   ICC(A,k)    0.679   [0.221, 0.881]
+    #>   ICC(A,1)     0.241   [0.066, 0.649]
+    #>   ICC(A,k)     0.679   [0.221, 0.881]
+    #>
     #> Variance components: subject 1.522, rater 2.653, residual 0.962
     #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 
@@ -113,12 +115,14 @@ icc(ratings, score, subject, rater, engine = "brms",
   posterior_summary = "hpdi", seed = 1)
 ```
 
-    #> # Intraclass correlation: two-way random, absolute agreement
+    #> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
     #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
     #> Engine: brms (MCMC) | CI: 95% posterior credible (HPDI) (4000 draws)
+    #>
     #>   index     estimate   95% CI
-    #>   ICC(A,1)    0.241   [0.040, 0.601]
-    #>   ICC(A,k)    0.679   [0.256, 0.904]
+    #>   ICC(A,1)     0.241   [0.040, 0.601]
+    #>   ICC(A,k)     0.679   [0.256, 0.904]
+    #>
     #> Variance components: subject 1.522, rater 2.653, residual 0.962
     #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 

@@ -153,70 +153,86 @@ unanswered decision (rather than quietly picking one for you).</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Two-way absolute agreement, single rater, random raters (Shrout &amp; Fleiss</span></span></span>
 <span class="r-in"><span><span class="co"># ICC(2,1)): the two structural defaults (crossed, non-multilevel) are implied.</span></span></span>
 <span class="r-in"><span><span class="fu">choose_icc</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Recommended ICC</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Design: two-way random, absolute agreement</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recommendation: ICC(A,1)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Why:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Crossed (two-way): the same raters judge every subject.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Single rater: you will act on one rater's score.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Run this on your data:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Recommended ICC</span> ─────────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Design: two-way random, absolute agreement</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Recommendation: ICC(A,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Why:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Run this on your data:</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   icc(data, score, subject, rater, unit = "single")</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Notes:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Notes:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Consistency of the average of fixed raters -- McGraw &amp; Wong ICC(C,k):</span></span></span>
 <span class="r-in"><span><span class="fu">choose_icc</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"consistency"</span>, unit <span class="op">=</span> <span class="st">"average"</span>, raters <span class="op">=</span> <span class="st">"fixed"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Recommended ICC</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Design: two-way mixed, consistency</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recommendation: ICC(C,k)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Shrout &amp; Fleiss equivalent: ICC(C,k) = ICC(3,k)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Why:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Crossed (two-way): the same raters judge every subject.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Average: you will act on the mean of your raters.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Fixed raters: exactly these judges; the coefficient does not generalize past them.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Run this on your data:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Recommended ICC</span> ─────────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Design: two-way mixed, consistency</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Recommendation: ICC(C,k)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(C,k) = ICC(3,k)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Why:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Consistency: only the rank order must match; a constant per-rater offset is forgiven.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Average: you will act on the mean of your raters.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Fixed raters: exactly these judges; the coefficient does not generalize past them.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Run this on your data:</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   icc(data, score, subject, rater, type = "consistency", raters = "fixed", unit = "average")</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Notes:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Notes:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A one-way design (interchangeable raters): type/raters do not apply.</span></span></span>
 <span class="r-in"><span><span class="fu">choose_icc</span><span class="op">(</span>model <span class="op">=</span> <span class="st">"oneway"</span>, unit <span class="op">=</span> <span class="st">"single"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Recommended ICC</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Design: one-way random</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recommendation: ICC(1)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Shrout &amp; Fleiss equivalent: ICC(1) = ICC(1,1)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Why:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error -- the most conservative ICC.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Single rater: you will act on one rater's score.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Run this on your data:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Recommended ICC</span> ─────────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Design: one-way random</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Recommendation: ICC(1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(1) = ICC(1,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Why:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error -- the most conservative ICC.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Run this on your data:</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   icc(data, score, subject, rater, model = "oneway", unit = "single")</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Notes:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Notes:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A multilevel design, both levels:</span></span></span>
 <span class="r-in"><span><span class="fu">choose_icc</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"agreement"</span>, unit <span class="op">=</span> <span class="st">"single"</span>, raters <span class="op">=</span> <span class="st">"random"</span>,</span></span>
 <span class="r-in"><span>  multilevel <span class="op">=</span> <span class="cn">TRUE</span>, level <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> # Recommended ICC</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Design: multilevel, two-way random, absolute agreement</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Recommendation:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   subject: ICC(A,1)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   cluster: ICC(A,1)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Why:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Crossed (two-way): the same raters judge every subject.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Single rater: you will act on one rater's score.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Run this on your data:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Recommended ICC</span> ─────────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Design: multilevel, two-way random, absolute agreement</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Recommendation:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">  subject: ICC(A,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">  cluster: ICC(A,1)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Why:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Crossed (two-way): the same raters judge every subject.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Single rater: you will act on one rater's score.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Run this on your data:</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   icc(data, score, subject, rater, cluster, unit = "single")</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Notes:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   - See vignette("multilevel-designs") for a worked multilevel example.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Notes:</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  - See vignette("multilevel-designs") for a worked multilevel example.</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

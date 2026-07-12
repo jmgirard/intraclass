@@ -57,15 +57,18 @@ for the complete, balanced design.
 
 ``` r
 summary(icc(ratings_incomplete, score, subject, rater, seed = 2024))
-#> # Intraclass correlation: two-way random, absolute agreement
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 20 of 24 cells (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.249   [0.038, 0.693]
-#>   ICC(A,k)    0.521   [0.114, 0.881]
+#>   ICC(A,1)     0.249   [0.038, 0.693]
+#>   ICC(A,k)     0.521   [0.114, 0.881]
+#> 
 #> ICC(*,k) projects to an effective 3.27 raters (harmonic mean of ratings/subject).
 #> Variance components: subject 2.281, rater 5.532, residual 1.344
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
+#> 
 #> Absolute agreement counts the rater main effect (systematic differences in rater level) as error.
 #> A single rating per cell confounds the subject-by-rater interaction with
 #> residual error.

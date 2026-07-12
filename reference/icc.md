@@ -507,12 +507,14 @@ ratings <- data.frame(
             5, 3, 6, 2, 6, 4, 8, 2, 8, 6, 9, 7)
 )
 icc(ratings, score, subject, rater, seed = 1)
-#> # Intraclass correlation: two-way random, absolute agreement
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.706]
-#>   ICC(A,k)    0.620   [0.175, 0.906]
+#>   ICC(A,1)     0.290   [0.050, 0.706]
+#>   ICC(A,k)     0.620   [0.175, 0.906]
+#> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```

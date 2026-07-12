@@ -71,14 +71,16 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 1
 #>   (crossed with clusters, Design 1).
 #> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
 #>   `design = "nested_in_clusters"`.
-#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)    0.751   [0.573, 0.836]
-#>   cluster    ICC(A,1)    0.880   [0.000, 0.972]
-#>   cluster    ICC(A,k)    0.967   [0.000, 0.993]
+#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
+#> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> 
 #> This message is displayed once per session.
@@ -111,16 +113,18 @@ icc(school, score,
   subject = pupil, rater = rater, cluster = classroom,
   level = c("subject", "cluster", "conflated"), seed = 1
 )
-#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.431   [0.251, 0.561]
-#>   subject    ICC(A,k)    0.751   [0.573, 0.836]
-#>   cluster    ICC(A,1)    0.880   [0.000, 0.972]
-#>   cluster    ICC(A,k)    0.967   [0.000, 0.993]
-#>   conflated  ICC(A,1)    0.705   [0.000, 0.808]
-#>   conflated  ICC(A,k)    0.905   [0.000, 0.944]
+#>   subject    ICC(A,1)     0.431   [0.251, 0.561]
+#>   subject    ICC(A,k)     0.751   [0.573, 0.836]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.972]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.993]
+#>   conflated  ICC(A,1)     0.705   [0.000, 0.808]
+#>   conflated  ICC(A,k)     0.905   [0.000, 0.944]
+#> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 #> Diagnostic contrast: the 'conflated' level ignores the cluster structure
 #> (ten Hove et al. 2022, Eq. 14) -- it shows the bias from a single-level
@@ -159,12 +163,14 @@ Take the same classrooms but give each one its own raters (Design 2):
 school_d2 <- school
 school_d2$rater <- factor(paste(school_d2$classroom, school_d2$rater, sep = "_"))
 icc(school_d2, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
-#> # Intraclass correlation: multilevel (raters nested in clusters) two-way random, absolute agreement
+#> ── Intraclass correlation: multilevel (raters nested in clusters) two-way random
 #> Subjects: 80 in 16 clusters | Raters: 64 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.429   [0.310, 0.549]
-#>   subject    ICC(A,k)    0.751   [0.642, 0.830]
+#>   subject    ICC(A,1)     0.429   [0.310, 0.549]
+#>   subject    ICC(A,k)     0.751   [0.642, 0.830]
+#> 
 #> Variance components: cluster 0.966, subject 0.458, rater:cluster 0.128, residual 0.481
 ```
 
@@ -177,12 +183,14 @@ design is a multilevel one-way (Design 3):
 school_d3 <- school
 school_d3$rater <- factor(paste(school_d3$pupil, school_d3$rater, sep = "_"))
 icc(school_d3, score, subject = pupil, rater = rater, cluster = classroom, seed = 1)
-#> # Intraclass correlation: multilevel (raters nested in subjects) absolute agreement
+#> ── Intraclass correlation: multilevel (raters nested in subjects) absolute agree
 #> Subjects: 80 in 16 clusters | Raters: 320 (random) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(1)      0.412   [0.290, 0.546]
-#>   subject    ICC(k)      0.737   [0.621, 0.828]
+#>   subject    ICC(1)       0.412   [0.290, 0.546]
+#>   subject    ICC(k)       0.737   [0.621, 0.828]
+#> 
 #> Variance components: cluster 0.998, subject 0.426, residual 0.609 (rater confounded)
 ```
 
@@ -220,12 +228,14 @@ size of 4:
 
 icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
   level = "subject", seed = 1)
-#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.413   [0.233, 0.557]
-#>   subject    ICC(A,k)    0.673   [0.471, 0.787]
+#>   subject    ICC(A,1)     0.413   [0.233, 0.557]
+#>   subject    ICC(A,k)     0.673   [0.471, 0.787]
+#> 
 #> ICC(*,k) projects to an effective 2.93 raters (harmonic mean of ratings/subject).
 #> Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457
 ```
@@ -241,11 +251,13 @@ ragged data (it needs no averaging divisor). Request it with
 
 icc(school_ragged, score, subject = pupil, rater = rater, cluster = classroom,
   level = "cluster", type = "consistency", unit = "single", seed = 1)
-#> # Intraclass correlation: multilevel two-way random, consistency
+#> ── Intraclass correlation: multilevel two-way random, consistency ──────────────
 #> Subjects: 80 in 16 clusters | Raters: 4 (random) | Observations: 256 (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   cluster    ICC(C,1)    1.000   [0.000, 1.000]
+#>   cluster    ICC(C,1)     1.000   [0.000, 1.000]
+#> 
 #> Variance components: cluster 1.026, subject 0.409, rater 0.125, cluster:rater 0.000, residual 0.457
 ```
 
@@ -284,14 +296,16 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom,
 #>   the recommended default (ten Hove et al. 2024; McGraw & Wong 1996, Case 2).
 #> ℹ Use "fixed" only when these are the entire population of raters you will ever
 #>   use.
-#> # Intraclass correlation: multilevel two-way mixed, absolute agreement
+#> ── Intraclass correlation: multilevel two-way mixed, absolute agreement ────────
 #> Subjects: 80 in 16 clusters | Raters: 4 (fixed) | Observations: 320 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.431   [0.320, 0.555]
-#>   subject    ICC(A,k)    0.751   [0.653, 0.833]
-#>   cluster    ICC(A,1)    0.880   [0.000, 0.945]
-#>   cluster    ICC(A,k)    0.967   [0.000, 0.986]
+#>   subject    ICC(A,1)     0.431   [0.320, 0.555]
+#>   subject    ICC(A,k)     0.751   [0.653, 0.833]
+#>   cluster    ICC(A,1)     0.880   [0.000, 0.945]
+#>   cluster    ICC(A,k)     0.967   [0.000, 0.986]
+#> 
 #> Variance components: cluster 0.998, subject 0.461, rater 0.136, cluster:rater 0.000, residual 0.473
 ```
 
@@ -397,18 +411,22 @@ without fitting anything:
 
 choose_icc(model = "twoway", multilevel = TRUE, level = "cluster",
   type = "consistency", unit = "single", raters = "random")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: multilevel, two-way random, consistency
+#> 
 #> Recommendation:
 #>   cluster: ICC(C,1)
+#> 
 #> Why:
 #>   - Crossed (two-way): the same raters judge every subject.
 #>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #>   - Cluster level: reliability of the cluster mean.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, cluster, type = "consistency", unit = "single", level = "cluster")
+#> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 #>   - See vignette("multilevel-designs") for a worked multilevel example.

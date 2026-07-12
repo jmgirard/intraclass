@@ -137,14 +137,16 @@ absolute-agreement</strong> coefficients <code>ICC(A,1)</code> and
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
-<span><span class="co">#&gt; # Intraclass correlation: two-way random, absolute agreement</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
-<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   ICC(A,1)    0.290   [0.050, 0.713]</span></span>
-<span><span class="co">#&gt;   ICC(A,k)    0.620   [0.173, 0.909]</span></span>
-<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
-<span><span class="co">#&gt; Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></code></pre></div>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, absolute agreement</span> ──────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="read-the-result-with-the-tidy-verbs">Read the result with the tidy verbs<a class="anchor" aria-label="anchor" href="#read-the-result-with-the-tidy-verbs"></a>
@@ -262,13 +264,15 @@ same number — ask for <strong>consistency</strong> with
 the error, so it is never smaller than the agreement coefficient:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"consistency"</span>, seed <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # Intraclass correlation: two-way random, consistency</span></span>
-<span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
-<span><span class="co">#&gt; Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span>
-<span><span class="co">#&gt;   index     estimate   95% CI</span></span>
-<span><span class="co">#&gt;   ICC(C,1)    0.715   [0.343, 0.924]</span></span>
-<span><span class="co">#&gt;   ICC(C,k)    0.909   [0.676, 0.980]</span></span>
-<span><span class="co">#&gt; Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></code></pre></div>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Intraclass correlation: two-way random, consistency</span> ─────────────────────────</span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span></code></pre></div>
 <p>The gap between the two (here <code>ICC(C,1)</code> = 0.71
 vs. <code>ICC(A,1)</code> = 0.29) is a direct read-out of how much
 systematic rater-level difference is present.</p>

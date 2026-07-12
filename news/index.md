@@ -271,6 +271,16 @@ simulations.
   [`tidy()`](https://generics.r-lib.org/reference/tidy.html) /
   [`glance()`](https://generics.r-lib.org/reference/glance.html) give
   tidy summaries. Plotting needs `ggplot2` (a `Suggests` dependency).
+- Console output is styled with **cli**:
+  [`print()`](https://rdrr.io/r/base/print.html) /
+  [`summary()`](https://rdrr.io/r/base/summary.html) show a rule header
+  and an aligned coefficient table with the point estimate emphasized
+  and the interval dimmed, and
+  [`choose_icc()`](https://jmgirard.github.io/intraclass/reference/choose_icc.md)’s
+  interactive walkthrough is a guided decision tree that displays your
+  choices so far. Styling degrades to plain text wherever it is
+  unavailable (knitr, CRAN, a non-interactive session), so printed
+  values are unchanged.
 
 ### Data and documentation
 

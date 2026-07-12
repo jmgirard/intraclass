@@ -59,12 +59,14 @@ nothing to do with “rater 1” for another – the raters are
 
 oneway <- icc(ratings, score, subject, rater, model = "oneway", seed = 2024)
 oneway
-#> # Intraclass correlation: one-way random
+#> ── Intraclass correlation: one-way random ──────────────────────────────────────
 #> Subjects: 6 | Ratings: 24 (4 per subject, balanced) | raters interchangeable
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(1)      0.166   [0.008, 0.838]
-#>   ICC(k)      0.443   [0.032, 0.954]
+#>   ICC(1)       0.166   [0.008, 0.838]
+#>   ICC(k)       0.443   [0.032, 0.954]
+#> 
 #> Variance components: subject 1.244, residual 6.264 (rater confounded)
 #> Shrout & Fleiss equivalent: ICC(1) = ICC(1,1), ICC(k) = ICC(1,k)
 ```
@@ -90,23 +92,27 @@ subjects the same way.
 
 agreement <- icc(ratings, score, subject, rater, type = "agreement", seed = 2024)
 agreement
-#> # Intraclass correlation: two-way random, absolute agreement
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.050, 0.713]
-#>   ICC(A,k)    0.620   [0.173, 0.909]
+#>   ICC(A,1)     0.290   [0.050, 0.713]
+#>   ICC(A,k)     0.620   [0.173, 0.909]
+#> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 
 consistency <- icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 consistency
-#> # Intraclass correlation: two-way random, consistency
+#> ── Intraclass correlation: two-way random, consistency ─────────────────────────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)    0.715   [0.343, 0.924]
-#>   ICC(C,k)    0.909   [0.676, 0.980]
+#>   ICC(C,1)     0.715   [0.343, 0.924]
+#>   ICC(C,k)     0.909   [0.676, 0.980]
+#> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```
 
@@ -189,12 +195,14 @@ pilot and scored only the first two subjects, leaving four empty cells.
 
 inc <- icc(ratings_incomplete, score, subject, rater, seed = 2024)
 inc
-#> # Intraclass correlation: two-way random, absolute agreement
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 20 of 24 cells (incomplete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.249   [0.038, 0.693]
-#>   ICC(A,k)    0.521   [0.114, 0.881]
+#>   ICC(A,1)     0.249   [0.038, 0.693]
+#>   ICC(A,k)     0.521   [0.114, 0.881]
+#> 
 #> ICC(*,k) projects to an effective 3.27 raters (harmonic mean of ratings/subject).
 #> Variance components: subject 2.281, rater 5.532, residual 1.344
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -331,17 +339,21 @@ model.
 ``` r
 
 choose_icc(type = "agreement", unit = "single", raters = "random")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: two-way random, absolute agreement
+#> 
 #> Recommendation: ICC(A,1)
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
+#> 
 #> Why:
 #>   - Crossed (two-way): the same raters judge every subject.
 #>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, unit = "single")
+#> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 ```

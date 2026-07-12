@@ -108,67 +108,83 @@ for the full decision tree.
 # Two-way absolute agreement, single rater, random raters (Shrout & Fleiss
 # ICC(2,1)): the two structural defaults (crossed, non-multilevel) are implied.
 choose_icc(type = "agreement", unit = "single", raters = "random")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: two-way random, absolute agreement
+#> 
 #> Recommendation: ICC(A,1)
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1)
+#> 
 #> Why:
 #>   - Crossed (two-way): the same raters judge every subject.
 #>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, unit = "single")
+#> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 
 # Consistency of the average of fixed raters -- McGraw & Wong ICC(C,k):
 choose_icc(type = "consistency", unit = "average", raters = "fixed")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: two-way mixed, consistency
+#> 
 #> Recommendation: ICC(C,k)
 #> Shrout & Fleiss equivalent: ICC(C,k) = ICC(3,k)
+#> 
 #> Why:
 #>   - Crossed (two-way): the same raters judge every subject.
 #>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
 #>   - Average: you will act on the mean of your raters.
 #>   - Fixed raters: exactly these judges; the coefficient does not generalize past them.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, type = "consistency", raters = "fixed", unit = "average")
+#> 
 #> Notes:
 #>   - Random raters is the recommended default for interrater reliability; use fixed only when these are the entire population of raters you will ever use.
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 
 # A one-way design (interchangeable raters): type/raters do not apply.
 choose_icc(model = "oneway", unit = "single")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: one-way random
+#> 
 #> Recommendation: ICC(1)
 #> Shrout & Fleiss equivalent: ICC(1) = ICC(1,1)
+#> 
 #> Why:
 #>   - One-way: raters are interchangeable across subjects, so systematic rater differences are absorbed into error -- the most conservative ICC.
 #>   - Single rater: you will act on one rater's score.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, model = "oneway", unit = "single")
+#> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 
 # A multilevel design, both levels:
 choose_icc(type = "agreement", unit = "single", raters = "random",
   multilevel = TRUE, level = "both")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: multilevel, two-way random, absolute agreement
+#> 
 #> Recommendation:
 #>   subject: ICC(A,1)
 #>   cluster: ICC(A,1)
+#> 
 #> Why:
 #>   - Crossed (two-way): the same raters judge every subject.
 #>   - Absolute agreement: the value itself must match; a systematic difference between raters counts as error.
 #>   - Single rater: you will act on one rater's score.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
 #>   - Both levels: within-cluster (subject) and between-cluster (cluster) reliability side by side.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, cluster, unit = "single")
+#> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 #>   - See vignette("multilevel-designs") for a worked multilevel example.
