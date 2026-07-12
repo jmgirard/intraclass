@@ -1,15 +1,20 @@
 # Project status
 
-- Active milestone: **none** — M41 (ADR-051, clarity/accessibility pass over the four secondary vignettes +
-  a standalone `glossary.Rmd`) shipped (PR #47, squash-merged to `main` at `3e00999`; full CI matrix green 9/9,
-  devel clean). A **docs milestone** (cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency;
-  correctness = live-computed + claim-tested numbers (#1/#4/#12); **no Fable**. Extended M40's applied-reader
-  treatment to `engines`, `interval-methods`, `multilevel-designs`, `d-studies-and-replicates` (warm on-ramps +
-  first-use glossary deep-links, no number touched) and added a new standalone `glossary.Rmd` (26 terms) all six
-  articles link into. **The next milestone is M42 — the benchmark-vs-prior-art suite (an engineering milestone)
-  — which needs an ADR after a short retro** (founding brief §7); it is the second of the two
-  release-strengthening milestones the 2026-07-11 retro sequenced before **0.2.0** (M41 clarity ✓ → M42 benchmark
-  → cut 0.2.0). The v0.2.0 release consolidation (version bump + NEWS + cran-comments; ADR-022) follows M42.
+- Active milestone: **M42 (ADR-052) — the benchmark-vs-prior-art comparison article — IN FLIGHT** on branch
+  `m42-benchmark-comparison`. Engineering/docs milestone (cf. M4/M13/M35/M40/M41) with a bounded dependency
+  delta: one new reader-facing article `vignettes/comparison-with-other-packages.Rmd` — a **validation** half
+  (`intraclass` ≡ `psych` ≡ `irr` to numerical precision on balanced designs; smoke-tested this session on
+  `irr::anxiety` — ICC(1)=0.175022, ICC(A,k)=0.425499, ICC(C,k)=0.452586, all three agree to 6 dp) + a
+  **differentiation** half (incomplete/multilevel/boundary-CI capability the classical tools lack, `irrICC` as
+  the model-based foil, cited capability matrix). **No new estimand/engine/CI machinery/argument** (#6);
+  correctness = **live-computed + claim-tested numbers** (#1/#4/#12), not a new oracle (the agreement half
+  re-presents the shipped `psych` cross-check); **no Fable** (#19). Two new **test/vignette-only** `Suggests`:
+  `irr`, `irrICC` (`psych` already present); **`gtheory` is NOT a dep** — removed from CRAN 2025-03-24, so its
+  agreement is cited from existing `REFERENCES.md` provenance; the VPC/NA sweep
+  (`performance`/`misty`/`irrNA`/`DescTools`) stays out (#17). Board: [`MILESTONES.md`](MILESTONES.md) M42
+  (S1 validation+`irr`+wiring → S2 differentiation+`irrICC` → S3 WORDLIST/NEWS/gate → PR). **M42 is the second
+  release-strengthening milestone (M41 clarity ✓ → M42 benchmark → cut 0.2.0); the v0.2.0 consolidation
+  (version bump + NEWS + cran-comments; ADR-022) follows M42.**
 - Prior milestone: **M40** (ADR-050, accessibility rewrite of the two front-door vignettes
   `getting-started` + `choosing-an-icc`) shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix
   green 9/9). A **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness
@@ -289,8 +294,12 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M41 shipped and merged (PR #47, `3e00999`).** The next milestone (M42, benchmark suite)
-  needs an ADR after a short retro (founding brief §7), then the v0.2.0 release. *Superseded (M41, done):* all
+- Active task: **M42 planning done — ADR-052 + board committed on branch `m42-benchmark-comparison`; S1
+  (validation section + `_pkgdown.yml` wiring + `irr` → Suggests + agreement claim tests) next.** Retro this
+  session confirmed the ADR-050/051 sequencing unchanged (parity engine exhausted + v0.2.0 gap → M41 clarity ✓ →
+  M42 benchmark → 0.2.0); maintainer chose the reader-facing **article + claim tests** deliverable (plan
+  question gate) and delegated the package set → `psych` + `irr` + `irrICC` (`gtheory` dropped: archived off
+  CRAN). *Superseded (M41, done):* all
   three slices shipped and the full CI matrix came back green 9/9. Gate before the PR: `air format --check` /
   `lintr` 0 lints / `spelling` clean / `devtools::document` no delta / vignette-claims tests pass /
   `pkgdown::check_pkgdown()` clean / `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`) **0/0/0** with

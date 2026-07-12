@@ -4397,3 +4397,97 @@ consequences → references.
   extends to the remaining articles), ADR-045 (M35 — split that created the four secondary articles), ADR-022
   (M13 — the docs/release posture; the v0.2.0 consolidation sequenced after M42). No estimand-spec (docs, not
   estimand — cf. M4/M13/M35/M40).
+
+## ADR-052: M42 scope — benchmark-vs-prior-art comparison article (`psych` + `irr` + `irrICC`)
+- Date: 2026-07-11
+- Status: accepted
+- Context: A short retro this session (following the M41 ship, PR #47) confirmed the sequencing ADR-050/ADR-051
+  already recorded and did not disturb it: the **clean-oracle parity engine is exhausted** (the (C) corner
+  closed at M36–M38; M39/M40/M41 were the tail), and the **v0.2.0 release gap** stands (v0.1.0
+  "submission-ready" since M13, ~27 milestones of capability accreted under an unreleased NEWS heading). The
+  maintainer's chosen pre-release sequence is **M41 clarity ✓ → M42 benchmark → cut 0.2.0** (then the v0.2.0
+  consolidation + CRAN upload, ADR-022). This ADR opens **M42**, the second release-strengthening milestone: the
+  long-parked **benchmark-vs-prior-art** item ([`ROADMAP.md`](ROADMAP.md), "ready anytime, low priority"). It is
+  **engineering, not new estimand or oracle work** — the package's differentiator vs. prior art is stated in the
+  ROADMAP vision (classical `psych`/`irr`/`irrICC` are ANOVA/mean-squares and balanced-only; model-based
+  `gtheory`/`performance` give a variance-partition coefficient, not the full boundary-aware IRR family with a
+  selection framework) but has **never been shown to a reader** in one place. `psych::ICC()` is already our
+  **live in-suite cross-check oracle** (`REFERENCES.md`; ICC1/2/3 + k-forms), so the *agreement* half carries no
+  new oracle risk — it re-presents an equivalence the test suite already pins. A this-session smoke test on
+  `irr::anxiety` confirmed the premise is real: `intraclass`, `psych`, and `irr` agree to **6 decimals** on
+  ICC(1)=0.175022, ICC(A,k)=0.425499, ICC(C,k)=0.452586.
+  - **A dependency constraint discovered while scoping (recorded so it is not rediscovered): `gtheory` was
+    removed from CRAN (archived 2025-03-24).** It therefore **cannot** be a `Suggests` dependency of a
+    CRAN-bound package (CRAN/CI install Suggests from CRAN and would fail). The package's `gtheory` agreement
+    (G-coef ≤ .001 / D-coef ≤ .005 across 24 real datasets, `REFERENCES.md`) is **already committed provenance**,
+    so the GT/VPC differentiator is carried by **citing that existing result** in a capability matrix, not by a
+    new live dependency.
+- Decision (maintainer-approved this session, 2026-07-11, via the plan question gate — deliverable form chosen
+  directly; package set delegated to the maintainer-recommended default and adjusted for the `gtheory` CRAN
+  constraint):
+  - **Scope: M42 = one new reader-facing comparison article, `vignettes/comparison-with-other-packages.Rmd`,
+    plus its claim tests.** Two halves: (1) **validation** — `intraclass` reproduces the classical tools
+    (`psych`, `irr`) to numerical precision on the balanced designs where they are all defined; (2)
+    **differentiation** — a worked case + a capability matrix showing where prior art cannot follow (incomplete/
+    unbalanced data, multilevel subject/cluster IRR, boundary-aware Monte-Carlo intervals, the fixed-vs-random
+    error framing, a selection framework).
+  - **Posture: a docs milestone (cf. M4/M13/M35/M40/M41) with a bounded dependency delta.** **No new estimand,
+    engine, fit, CI machinery, or public argument** (#6). Correctness is **live-computed + claim-tested numbers**
+    (#1/#4/#12), not a new numerical oracle — the agreement half re-presents the existing `psych` cross-check,
+    and every displayed figure is computed live and pinned in `test-vignette-claims.R`. **No Fable** (#19).
+  - **Package set: `psych` + `irr` + `irrICC`** — `psych` (already in `Suggests`; classical ANOVA ICC, our
+    existing oracle) + **`irr`** (the canonical classical IRR package applied users reach for) carry the
+    exact-agreement validation; **`irrICC`** (Gwet; model-based, handles missing data) carries the incomplete-
+    data differentiator. **`irr` and `irrICC` are added to `Suggests`** (vignette/test-only, light-install
+    principle — never `Imports`; guarded by `requireNamespace()` in vignette chunks and `skip_if_not_installed()`
+    in tests). **`gtheory` (archived off CRAN) and `performance`/`misty`/`irrNA`/`DescTools` are deliberately
+    NOT added** (#17): `gtheory`'s agreement is cited from existing provenance, and the VPC tools' gap is stated
+    in the capability matrix without a live run — no new story the three chosen packages do not already tell.
+  - **Slices (thin, #14):** **S1** — the article's **validation** section (balanced ICC(1)/ICC(A,k)/ICC(C,k)
+    agreement across `intraclass`/`psych`/`irr`, live-computed) + `_pkgdown.yml` **articles**-index wiring +
+    `test-vignette-claims.R` agreement claims + `irr` → `Suggests`. **S2** — the **differentiation** section: an
+    incomplete-data worked case (classical listwise/`NA` behavior vs. `intraclass`'s `k_eff` handling, with
+    `irrICC` as the model-based foil) + the cited capability matrix + its claim tests + `irrICC` → `Suggests`.
+    **S3** — WORDLIST (`irrICC`, `Gwet`, author/term spellings), NEWS bullet, cross-links from the existing
+    articles/README where natural, and the finish-task gate → PR.
+  - **Sequenced after M41, before the 0.2.0 release** — the benchmark article cross-links the now-polished M40/
+    M41 docs, and a shown differentiator strengthens the release's positioning; the v0.2.0 consolidation +
+    CRAN upload (ADR-022) follow.
+- Consequences:
+  - The pkgdown site gains a single page a prospective user can read to see **both** that `intraclass` agrees
+    with the tools they already trust **and** what it does that those tools cannot — the differentiator moves
+    from the ROADMAP vision into shown, reproducible evidence before 0.2.0 goes out.
+  - Two new **test/vignette-only** `Suggests` (`irr`, `irrICC`); CRAN/CI install Suggests so the live chunks and
+    `skip_if_not_installed()` claim tests run there, while the base/light install is unchanged (both stay out of
+    `Imports`). A seventh… (now eighth) article is one more `R CMD build` + pkgdown target.
+  - The comparison numbers become a maintenance surface: a prior-art package changing its formula would move a
+    pinned claim — caught by `test-vignette-claims.R`, which is the intended tripwire (#16).
+  - Ruled out: a `data-raw/` benchmark harness or a **speed** benchmark (out of scope — the maintainer chose the
+    reader-facing agreement/capability article, not a timing study or provenance-only script); adding `gtheory`
+    (impossible — archived off CRAN) or the broad VPC/NA sweep (`performance`/`misty`/`irrNA`/`DescTools`) as
+    live deps (#17 — no distinct story, unnecessary surface); any estimand/engine/example change (this is a
+    presentation milestone over shipped behavior).
+  - No `_pkgdown.yml` **reference**-index change and no new `@export`, so `pkgdown::check_pkgdown()` catches only
+    the new article registration ([[pkgdown-reference-index-new-exports]]); new WORDLIST terms keep `spelling`
+    clean; `air` / `lintr` clean. `project/COVERAGE.md` unaffected (no new estimand cell).
+- Correctness (a docs milestone's "oracle" is claim-tested live computation, #1 numerically N/A — cf.
+  ADR-045/M35, ADR-050/M40, ADR-051/M41):
+  - Every agreement figure the article displays is **computed live** from `intraclass` and the prior-art package
+    in the same chunk and **pinned** in `test-vignette-claims.R` (`skip_if_not_installed()` on the prior-art
+    package); no hand-typed coefficient, and no printed number changes silently.
+  - The agreement half introduces **no new sourced statistical claim** — it re-presents the `psych` equivalence
+    the suite already asserts (`REFERENCES.md`); the `gtheory` capability row **cites** the package's existing
+    committed agreement (no #4 obligation beyond attribution and spelling).
+  - The article renders standalone under `R CMD build` **and** pkgdown; every inter-article anchor link resolves
+    against generated ids (verified by reading, not asserted).
+- References: PRINCIPLES.md #1/#4/#12 (live-computed + claim-tested numbers; no fabricated/unsourced content),
+  #2/#14 (plan before code; thin docs slices), #5/#8 (any new guards classed via `cli`/`rlang` — N/A here, no
+  new code path), #6 (additive, non-breaking; no new estimand/engine/argument — new deps are `Suggests` only),
+  #16 (tracking + claim tests in-commit), #17 (`gtheory`/VPC-sweep parked, not crept; the release parked to
+  ADR-022), #18 (characterize honestly — the differentiator shows where prior art degrades, stated fairly, not
+  strawmanned), #19 (no Fable — docs/engineering milestone, no coverage claim). [[milestone-branches-and-prs]]
+  (ships on `m42-benchmark-comparison` via PR), [[pkgdown-reference-index-new-exports]] (the new article is
+  registered in `_pkgdown.yml`), [[verify-against-installed-package]] (build/check with the new Suggests present).
+  ADR-051 (M41 — the vignette clarity pass this benchmark article cross-links), ADR-045 (M35 — the articles it
+  joins), ADR-022 (M13 — the docs/release posture; the v0.2.0 consolidation sequenced after M42). No
+  estimand-spec (docs, not estimand — cf. M4/M13/M35/M40/M41).
