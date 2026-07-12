@@ -183,24 +183,12 @@ test_that("fixed-rater multilevel warns, and reports at the subject level", {
 test_that("still-deferred fixed-rater multilevel cases abort loudly", {
   skip_if_not_installed("glmmTMB")
   d <- sim_design1(10, 6, 4, 1.0, 0.8, 0.5, 0.3, 0.6, seed = 5)
-  # Balanced crossed CLUSTER level is no longer deferred -- it ships in M37 (ADR-047);
-  # its oracles are the O-FCL section below. The remaining deferred cluster-fixed cells:
-  # brms (engine parity) and incomplete/unbalanced data (double-blocked, ten Hove open
-  # small-k + M9 §9 ICC(c,k) divisor).
-  expect_error(
-    suppressWarnings(icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      raters = "fixed",
-      level = "cluster",
-      engine = "brms",
-      seed = 1
-    )),
-    class = "intraclass_unsupported"
-  )
+  # Balanced crossed CLUSTER level is no longer deferred -- it ships for glmmTMB/lme4 in
+  # M37 (ADR-047; its oracles are the O-FCL section below) and for brms in M38 Cell 1
+  # (ADR-048; the live O-Bayes-FCL fit in test-icc-brms.R). The remaining deferred
+  # cluster-fixed cell is INCOMPLETE/unbalanced data for every engine (double-blocked:
+  # ten Hove's open small-k estimator + the M9 §9 ICC(c,k) divisor); the brms incomplete
+  # boundary is asserted in test-icc-brms.R.
   di <- d[-(1:12), ] # incomplete crossed (missing cells)
   expect_error(
     suppressWarnings(icc(
@@ -711,20 +699,8 @@ test_that("fixed nested scope guards fail loudly (decision C + deferral)", {
   ))
   expect_setequal(fit_i$estimates$index, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(is.finite(fit_i$estimates$estimate)))
-  # brms incomplete fixed-nested is deferred (no Bayesian path yet).
-  expect_error(
-    suppressWarnings(icc(
-      d2i,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      raters = "fixed",
-      design = "nested_in_clusters",
-      engine = "brms"
-    )),
-    class = "intraclass_unsupported"
-  )
+  # brms incomplete/ragged fixed-nested (Design 2) now ships too (M38 Cell 2, ADR-048); the
+  # Bayesian path is exercised by the live O-Bayes-IFNML-agree fit in test-icc-brms.R.
 })
 
 # O-NFI: frequentist nested-fixed theta^2_{r:c} MC-INTERVAL coverage (M28, ADR-038) -

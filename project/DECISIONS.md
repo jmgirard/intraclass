@@ -4045,3 +4045,99 @@ consequences → references.
   `M10-fixed-multilevel.md §7`, `M9-incomplete-multilevel.md §9`. ten Hove, Jorgensen & van der Ark (2022)
   Eq. 13 / Table 3 (cluster-level decomposition); McGraw & Wong (1996) Case 3/3A. `project/COVERAGE.md`
   (#11 fixed, cluster level).
+
+## ADR-048: M38 scope — brms engine parity for the fixed multilevel cells (cluster-level fixed + incomplete/ragged fixed-nested Design 2)
+- Date: 2026-07-11
+- Status: accepted
+- Context: With M36 (ADR-046, PR #41) and M37 (ADR-047, PR #43) shipping the frequentist (glmmTMB/lme4)
+  **incomplete/ragged fixed-rater nested (Design 2)** and **balanced cluster-level fixed** cells, the (C)
+  research/blocked corner is nearly closed. A short retro + a feasibility sweep (this session) of the
+  remaining (C) pieces found three, with sharply different feasibility — a distinction the ROADMAP's
+  blanket "brms/lavaan siblings … unblockable" wording elided:
+  - **brms siblings of M36 + M37 — genuinely cheap parity.** Both are a lift of a single "planned for a
+    later milestone" guard: `R/icc.R:781` (brms cluster-level fixed) and `R/icc.R:810` (brms incomplete
+    fixed-nested). Both have a **frequentist oracle to check against** (glmmTMB M37/M36), so both are
+    engine/interval **parity, not new estimand work** (#6, the M27/M30/M31/M32 posture — no new
+    estimand-spec/argument/dependency). The M27 fixed multilevel fit `fit_brms_multilevel_fixed()`
+    (`score ~ 1 + rater + (1|cluster) + (1|cluster:subject) + (1|cluster:rater)`) already emits the
+    `cluster` (σ²_c), `cluster_rater` (σ²_cr) and θ²_r posterior draws the cluster-level push-forward needs
+    — **no new fit** — and `fit_brms_nested_fixed()` (`score ~ 0 + rater + (1|cluster:subject)`) is
+    structurally fine on ragged data.
+  - **lavaan siblings — NOT unblockable.** lavaan multilevel is entirely unsupported (`R/icc.R:546` aborts
+    every multilevel/one-way SEM path), and multilevel SEM is a "research-flavored heavy lift (two-level
+    SEM-GT)" (ADR-027 note; ROADMAP). The lavaan cluster-fixed / incomplete-fixed-nested siblings are
+    therefore **blocked behind the multilevel-SEM lift**, not cheap parity — the ROADMAP wording was wrong.
+  - **incomplete/unbalanced cluster-level fixed** stays **🟣 genuinely double-blocked** (ten Hove's open
+    small-*k* estimator **and** the M9 §9 open cluster-level `ICC(c,k)` divisor — one half with no sourced
+    route to resolve by reading alone).
+  - **Design 3 fixed** is **⚫ already closed in code** (the by-design abort at `R/icc.R:755` ships and is
+    tested, ADR-029 decision C) — ROADMAP hygiene, not future work.
+- Decision (maintainer-approved this session, 2026-07-11, via the plan question gate):
+  - **Scope: M38 = brms engine parity for BOTH fixed multilevel cells, one milestone** (the maintainer chose
+    "both cells, one milestone" over splitting — mirrors M27's crossed+nested fixed shape). Engine/interval
+    parity, not new estimand work: additive, non-breaking (#6); no new estimand-spec, no new top-level
+    argument, no new dependency (brms stays `Suggests`, live Stan fits `skip_on_ci()`,
+    [[brms-live-fit-skip-on-ci]]).
+    - **Cell 1 — brms cluster-level fixed (M37 sibling).** Balanced/complete crossed Design 1. Lift the
+      `R/icc.R:781` guard for **balanced only**; read the cluster-level `(σ²_c | {θ²_r, σ²_cr}, k)`
+      push-forward off the shipped M27 `fit_brms_multilevel_fixed()` five-component draws — **no new fit**.
+      M37's Outcome-A finding (fixed cluster-level ≡ M5 random cluster-level **exactly**: θ²_r = σ²_r and
+      σ²_cr unbiased under fixing on balanced data) means `b ≈ 0` here — a **variance-ratio push-forward**,
+      no 2b moment correction — so the brms fixed cluster level should read identically to the **shipped
+      M24 brms random cluster level**. **Low risk, no Fable expected** (the M27 parity posture).
+    - **Cell 2 — brms incomplete/ragged fixed-nested Design 2 (M36 sibling).** Subject level, both single
+      `ICC_s(·,1)` + average `ICC_s(·,k)` (divisor = the well-defined subject-level `k_eff`, the M19/M36
+      divisor — **NOT** the open per-cluster `ICC(c,k)`, M9 §9). Lift the `R/icc.R:810` guard; run
+      `fit_brms_nested_fixed()` on ragged data with `brms_theta2r_moment_draws()` — the **2b-under-imbalance
+      moment correction going nested-brms for the first time** (`b ≠ 0`), the milestone's genuine risk. It
+      combines three shipped regimes: M31 (ragged 2b single-level brms, resolved nominal), M27 (nested-fixed
+      2b balanced brms, Fable-fixed) and M32 (incomplete nested brms, random).
+  - **Fable posture (#19): NONE — stop-and-replan.** The maintainer chose **no Fable pre-authorization** for
+    Cell 2. Cell 2 ships **only if** the seeded coverage oracle (O-Bayes-IFNML, n_rep ≥ 240 per
+    [[ragged-coverage-nrep-240]]) comes back nominal (interior + boundary θ²=0) against the committed
+    fixture and the glmmTMB M36 containment holds. **If it under-covers: STOP — do not loosen the pin (#4),
+    do not tune the estimator, do not spawn Fable.** M38 then ships **Cell 1 only** (main stays shippable),
+    and Cell 2 spins out to a re-plan (candidate/blocked) with the honest coverage evidence recorded. The
+    pins are the honest signal, never loosened to pass.
+  - **Remainder dispositions (this same commit updates ROADMAP):**
+    - **lavaan cluster-fixed + lavaan incomplete-fixed-nested** → **candidate rows, blocked on the
+      multilevel-SEM lift**; the ROADMAP "unblockable" wording corrected. Not in M38.
+    - **incomplete/unbalanced cluster-level fixed** → **stays a candidate** (🟣 Wave-3, double-blocked; the
+      M9 §9 divisor half has no sourced route). Explicitly not attempted now — a ROADMAP fact, not a
+      D-rejection.
+    - **Design 3 fixed** → **ROADMAP hygiene note**: already closed in code by the ADR-029 by-design abort;
+      removed from the "still parked / open" bucket (it is neither future work nor blocked).
+  - **Out of scope of M38 (deferred, not dropped):** everything above under "Remainder"; plus the untouched
+    carryovers — categorical/ordinal GLMM, multilevel SEM proper, occasion/ragged `d_study()`, the
+    `ICC(c,k)` incomplete divisor, the teaching-vignette clarity rewrite, the CRAN upload (ADR-022) — all in
+    [`ROADMAP.md`](ROADMAP.md).
+- Consequences: On M38 close (Cell 1 + Cell 2), the **brms** half of the (C) corner is closed — brms reaches
+  full parity with glmmTMB on the fixed multilevel cells at both the cluster level (crossed Design 1
+  balanced) and incomplete/ragged nested Design 2 subject level. The residual (C) bucket is then only the
+  genuinely-open **incomplete cluster-level fixed** (🟣) and the **lavaan siblings** (blocked on multilevel
+  SEM) — both correctly parked candidates, no longer mislabelled "unblockable." If Cell 2 under-covers, M38
+  ships Cell 1 and the bucket also retains a re-plan for the ragged-fixed-nested-brms interval. Risk is
+  concentrated entirely in Cell 2's 2b-under-imbalance-nested-brms coverage (the committed oracle is the
+  gate; no Fable, stop-and-replan). Cell 1 is low-risk variance-ratio parity. Additive, non-breaking (#6);
+  all balanced random + M24/M27 subject brms + glmmTMB/lme4 paths untouched (regression guard: the full
+  M1–M37 suite stays green). This ADR authorizes M38 planning; the `MILESTONES.md` M38 board, the ROADMAP
+  annotations, and the `STATUS.md` flip are the milestone-start companions — **no code has begun (plan
+  before code, #14)**. Next: `/start-task` Task 1 (Cell 1, brms cluster-level fixed).
+- References: PRINCIPLES.md #1 (oracle-first — reduction to the shipped brms random cluster level +
+  glmmTMB containment for Cell 1; committed seeded coverage + glmmTMB M36 containment for Cell 2), #2/#14
+  (name the estimand / thin parity slices; plan before code), #3 (boundary-aware credible interval — Cell 2
+  coverage at θ²=0), #4 (no tuned estimator / no loosened pin — stop-and-replan if Cell 2 under-covers),
+  #5/#8 (classed aborts kept for the still-out-of-scope corners: incomplete cluster fixed, lavaan
+  multilevel, Design 3 fixed), #6 (additive, non-breaking; no new estimand-spec/argument/dependency), #16
+  (tracking in-commit), #18 (characterize honestly — Cell 1 low-risk, Cell 2 the genuine risk; lavaan
+  siblings blocked not unblockable; Design 3 fixed already closed), #19 (Fable — deliberately NOT
+  pre-authorized this milestone; stop-and-replan instead). [[ragged-coverage-nrep-240]],
+  [[fixed-rater-interval-2b-moment-correction]], [[coverage-oracle-cluster-count-axis]] (Cell 2's coverage
+  oracle sweeps a high-C_n cell), [[brms-live-fit-skip-on-ci]], [[milestone-branches-and-prs]] (ships on
+  `m38-brms-fixed-multilevel-parity` via PR). ADR-047 (M37 — the frequentist cluster-level fixed oracle
+  Cell 1 mirrors), ADR-046 (M36 — the frequentist incomplete-fixed-nested oracle Cell 2 mirrors), ADR-037
+  (M27 — `fit_brms_multilevel_fixed()`/`fit_brms_nested_fixed()` + the 2b moment correction), ADR-041 (M31 —
+  ragged 2b single-level brms), ADR-042 (M32 — incomplete nested brms). Estimand-specs (unchanged,
+  referenced not extended): `M37-fixed-cluster-level.md`, `M36-incomplete-fixed-nested.md`,
+  `M5-multilevel.md §3b`. `project/COVERAGE.md` (#11 fixed cluster level; incomplete fixed-nested, brms
+  column).

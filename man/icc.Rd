@@ -154,10 +154,11 @@ two-way \strong{fixed-rater} single-level design (Case-3A finite-population
 \eqn{\theta^2_r}), the crossed (Design 1) multilevel \strong{fixed-rater} design (subject
 level), and the nested \strong{Design 2} (raters nested in clusters) and \strong{Design 3} (raters
 nested in subjects, the multilevel one-way, agreement-only) \emph{random} multilevel designs
-(subject level), and the single-level one-way random design; and, on balanced/complete
-data only, the nested Design 2 \emph{fixed-rater} multilevel design at the subject level, the
-conflated diagnostic, and within-cell replicates. Incomplete/ragged \strong{fixed}-nested and
-within-cell-replicate Bayesian fits, and numeric-\code{unit} (D-study) projection, are planned
+(subject level), and the single-level one-way random design; the nested Design 2
+\emph{fixed-rater} multilevel design at the subject level on both balanced and
+incomplete/ragged data; and, on balanced/complete data only, the crossed Design 1
+\emph{fixed-rater} \strong{cluster} level, the conflated diagnostic, and within-cell replicates.
+Within-cell-replicate Bayesian fits and numeric-\code{unit} (D-study) projection are planned
 for later milestones. \code{"lme4"} requires the
 \pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
 package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}
@@ -351,10 +352,12 @@ data each cluster uses its own effective rater count). The fixed-rater \strong{c
 level is supported for the crossed (Design 1) design on \strong{balanced, complete} data
 (signal \eqn{\sigma^2_c}, agreement error the finite-population \eqn{\theta^2_r} plus
 the cluster-by-rater term \eqn{\sigma^2_{cr}}); on balanced data it equals the
-random-rater cluster-level ICC. Incomplete/unbalanced fixed-rater cluster-level
-estimation, Design-3 fixed raters (nested in subjects -- no separable rater effect),
-and the Bayesian (\code{engine = "brms"}) fixed-rater cluster-level and incomplete
-fixed-nested paths remain for later milestones.
+random-rater cluster-level ICC. The Bayesian (\code{engine = "brms"}) fixed-rater
+\strong{cluster} level is likewise supported for the crossed (Design 1) design on
+balanced, complete data, and the Bayesian incomplete/ragged fixed-rater \strong{nested}
+(Design 2) subject level is supported too. Incomplete/unbalanced fixed-rater
+cluster-level estimation and Design-3 fixed raters (nested in subjects -- no
+separable rater effect) remain for later milestones.
 }
 
 \section{Within-cell replicates}{
