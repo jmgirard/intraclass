@@ -75,15 +75,21 @@ ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-02
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
 ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39, ADR-050 M40).
-**No milestone is currently in flight** — M40 (ADR-050, accessibility rewrite of the two front-door vignettes
-`getting-started` + `choosing-an-icc` for applied readers) shipped (PR #46, squash-merged to `main` at
-`e34f037`; full CI matrix green 9/9); the next one needs an ADR after a short retro (founding brief §7). M40 was
+**Active milestone: M41** (ADR-051, clarity/accessibility pass over the four secondary vignettes + a standalone
+`glossary.Rmd`) — the DoD checklist near the bottom of this file is the live board (ADR-015). A **docs milestone**
+(cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency; correctness = live-computed +
+claim-tested numbers (#1/#4/#12); **no Fable**. Extends M40's applied-reader treatment to the remaining articles
+and homes the recurring jargon in one deep-linkable glossary. First of two release-strengthening milestones
+before **0.2.0** (M42 = benchmark-vs-prior-art suite, then the release). Prior milestone **M40** (ADR-050,
+accessibility rewrite of the two front-door vignettes `getting-started` + `choosing-an-icc` for applied readers)
+shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix green 9/9). M40 was
 a **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness =
 live-computed + claim-tested numbers; it added a sourced, caveated interpretation-band guide (Koo & Li 2016 /
 Cicchetti 1994, "judge the interval not the point", no verdict). Its planning retro (this session) recorded two
-strategic facts for the next scoping: the clean-oracle **parity engine is exhausted** (the (C) corner closed at
-M36–M38; M39/M40 were the tail), and the **v0.2.0 release gap** (v0.1.0 "submission-ready" since M13, ~15
-milestones added since, unreleased; parked to ROADMAP/ADR-022) is the biggest open call.
+strategic facts that scoped M41/M42: the clean-oracle **parity engine is exhausted** (the (C) corner closed at
+M36–M38; M39/M40 were the tail), and the **v0.2.0 release gap** (v0.1.0 "submission-ready" since M13, ~27
+milestones added since, unreleased; parked to ROADMAP/ADR-022) — the maintainer chose two low-risk docs/
+engineering milestones (M41 clarity + M42 benchmark) before cutting the release.
 Prior milestone M39 (ADR-049, `d_study()` occasion-count projection) shipped
 (PR #45, squash-merged to `main` at `91e14e7`; full CI matrix green 9/9, devel clean). M39 was the symmetric
 sibling of the M22 (ADR-032) rater-count
@@ -1434,3 +1440,42 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
 - Status: **done — merged, CI green** (PR #46, squash-merged to `main` at `e34f037`; full CI matrix green 9/9,
   incl. `ubuntu-latest (devel)` clean). Shipped in one session (retro → ADR-050 → S1 → S2 → S3 gate → PR #46 →
   merge); **no Fable review**.
+
+## M41: clarity/accessibility pass over the four secondary vignettes + a standalone glossary (ADR-051)
+- Goal: extend M40's applied-reader accessibility treatment from the two front-door articles to the four
+  **secondary** articles — `engines`, `interval-methods`, `multilevel-designs`, `d-studies-and-replicates` (all
+  M35-era, ADR-045; accurate but methodologist-pitched) — and home the recurring jargon in one new standalone
+  **`glossary.Rmd`** the whole site deep-links. A **docs milestone** (cf. M4/M13/M35/M40): **no new estimand,
+  engine, fit, CI machinery, or dependency** (#6); correctness = **live-computed + claim-tested numbers**
+  (#1/#4/#12), not a numerical oracle; **no Fable** (#19). Per-article treatment: a warmer plain-language
+  on-ramp, **first-use glosses** of the recurring terms (variance component, REML, posterior mode/MAP, credible
+  vs. confidence interval, the zero-variance boundary, FIML, `k_eff`/harmonic mean, finite-population variance,
+  the conflated ICC, connectedness/identification, the dependability coefficient, the indicator-mean estimator),
+  cross-links into the glossary — **no change to statistical content, examples, or any printed number** (a
+  printed value that moves updates its `test-vignette-claims.R` claim in the same commit, #16).
+- Reference: ADR-051; no estimand-spec (docs, not estimand — cf. M4/M13/M35/M40). Correctness (a docs
+  milestone's "oracle" is claim-tested live computation, #1 numerically N/A): every asserted numeric
+  relationship stays computed live + pinned in `test-vignette-claims.R`; all seven articles (six + glossary)
+  render standalone under `R CMD build` **and** pkgdown; every inter-article + glossary anchor link resolves
+  against generated ids (verified by reading). New WORDLIST terms join `inst/WORDLIST`; `air`/`lintr`/
+  `pkgdown::check_pkgdown()` clean.
+- **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
+  - [x] **S1 — glossary page + wiring + front-door retrofit.** DONE. New `vignettes/glossary.Rmd` (26 terms,
+        alphabetical, clean anchors `#variance-component`/`#monte-carlo-interval`/`#estimand`/…) registered under
+        a new **Reference** group in `_pkgdown.yml`'s articles index; the two M40 front-door articles retrofitted
+        with glossary deep-links + a one-line "see the Glossary" pointer (no numbers touched); WORDLIST gains
+        `Wiberg`, NEWS gains a Glossary bullet. Verified: all three touched articles + glossary render
+        standalone; `spelling::spell_check_package()` clean; `pkgdown::check_pkgdown()` "No problems found"; every
+        referenced anchor confirmed against generated ids.
+  - [ ] **S2 — `engines` + `interval-methods` clarity pass.** Warm on-ramp + first-use glosses + glossary
+        cross-links on both; no statistical/example change; claim tests (if any numbers restated) re-pass.
+  - [ ] **S3 — `multilevel-designs` + `d-studies-and-replicates` clarity pass + gate.** Same treatment on both;
+        `test-vignette-claims.R` relabelled per-article as needed; finish-task gate (`devtools::document` no
+        delta, `air format --check`, `lintr` 0 lints, full CI-mode suite, `devtools::check` CI-parity
+        `NOT_CRAN=false` 0/0/0 with all seven vignettes built, `pkgdown::check_pkgdown()` clean) → PR.
+- Deferred out of M41 (record so not rediscovered): **M42** (the benchmark-vs-prior-art suite) and the
+  **v0.2.0 release consolidation / CRAN upload** (ADR-022) — the sequenced follow-ons, not this milestone; a
+  clarity pass over any **further** material or **per-term worked examples** beyond first-use glosses; every
+  untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, the lavaan
+  siblings) stays in [`ROADMAP.md`](ROADMAP.md).
+- Status: **in progress** — branch `m41-vignette-glossary`; S1 active.

@@ -1,6 +1,18 @@
 # Project status
 
-- Active milestone: **none** — M40 (ADR-050, accessibility rewrite of the two front-door vignettes
+- Active milestone: **M41** (ADR-051, clarity/accessibility pass over the four secondary vignettes +
+  a standalone `glossary.Rmd`) — branch `m41-vignette-glossary`, **S1 in progress**. A **docs milestone**
+  (cf. M4/M13/M35/M40): no new estimand/engine/CI machinery/dependency; correctness = live-computed +
+  claim-tested numbers (#1/#4/#12); **no Fable**. Extends M40's applied-reader treatment to `engines`,
+  `interval-methods`, `multilevel-designs`, `d-studies-and-replicates` (all M35-era, methodologist-pitched),
+  and homes the recurring jargon (variance component, REML, MAP, credible vs. confidence interval, the
+  zero-variance boundary, FIML, `k_eff`/harmonic mean, finite-population variance, conflated, connectedness,
+  dependability, indicator-mean estimator) in one deep-linkable glossary. First of two release-strengthening
+  milestones before **0.2.0** (M41 clarity → M42 benchmark → cut 0.2.0). Slices: **S1** glossary page +
+  `_pkgdown.yml` articles wiring + retrofit the two M40 front-door articles to link it; **S2** `engines` +
+  `interval-methods`; **S3** `multilevel-designs` + `d-studies-and-replicates` + claim-test relabel +
+  finish-task gate. Board: [`MILESTONES.md`](MILESTONES.md) M41.
+- Prior milestone: **M40** (ADR-050, accessibility rewrite of the two front-door vignettes
   `getting-started` + `choosing-an-icc`) shipped (PR #46, squash-merged to `main` at `e34f037`; full CI matrix
   green 9/9). A **docs milestone** (cf. M4/M13/M35): no new estimand/engine/CI machinery/dependency; correctness
   = live-computed + claim-tested numbers (#1/#4/#12); **no Fable**. Rewrote both entry-point articles for applied
@@ -279,8 +291,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none — M40 shipped and merged (PR #46, `e34f037`).** The next milestone needs an ADR after a
-  short retro (founding brief §7). *Superseded (M40, done):* S1 `getting-started.Rmd` (`f53165b`; on-ramp +
+- Active task: **M41 Slice 2 next** — clarity/accessibility pass over `engines.Rmd` + `interval-methods.Rmd`
+  (warm plain-language on-ramp, first-use glosses, glossary cross-links; no statistical/example change). Branch
+  `m41-vignette-glossary`. *Superseded (M41 S1, done):* new `vignettes/glossary.Rmd` (26 alphabetical terms with
+  clean anchors) registered under a new **Reference** group in `_pkgdown.yml`; the two M40 front-door articles
+  retrofitted with glossary deep-links + a "see the Glossary" pointer (no numbers touched); WORDLIST +`Wiberg`,
+  NEWS Glossary bullet. Verified: all three touched articles + glossary render standalone; package spell-check
+  clean; `pkgdown::check_pkgdown()` clean; every referenced anchor confirmed. Then S3 (`multilevel-designs` +
+  `d-studies-and-replicates` + claim-test relabel + finish-task gate → PR). *(Retro this session: parity engine
+  exhausted + v0.2.0 gap → M41 clarity / M42 benchmark / release, ADR-051.)* *Superseded (M40, done):* S1 `getting-started.Rmd` (`f53165b`; on-ramp +
   plain "About the confidence interval" + glosses + the canonical "Is this a good ICC?" band guide, Koo & Li
   2016 / Cicchetti 1994, "judge the interval" illustrated live, no verdict; prose numbers → inline `r`;
   REFERENCES + WORDLIST + a claim block). S2 `choosing-an-icc.Rmd` (`6558b50`; warmer "start here" intro +

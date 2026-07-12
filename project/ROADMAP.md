@@ -99,9 +99,14 @@ helpers* item below (sample-size / CI-width), where it belongs.
   front-door articles, no split), adds a **sourced, caveated interpretation-band guide** (Koo & Li 2016 /
   Cicchetti 1994 — #4: cited, not invented), and stays a pure docs milestone (cf. M4/M13/M35 — no new
   estimand or oracle risk; every displayed number computed live + claim-tested, #1/#4/#12). Full scope is in
-  [`MILESTONES.md`](MILESTONES.md) M40 (ADR-015 — not re-narrated here). **What remains parked** after M40 is
-  the **clarity pass over the other four articles** (`engines`, `interval-methods`, `multilevel-designs`,
-  `d-studies-and-replicates`) and a standalone **glossary page** — later docs passes, not scheduled.
+  [`MILESTONES.md`](MILESTONES.md) M40 (ADR-015 — not re-narrated here). The **clarity pass over the other four
+  articles** (`engines`, `interval-methods`, `multilevel-designs`, `d-studies-and-replicates`) plus a standalone
+  **glossary page** is now **SCHEDULED as M41** (ADR-051, planned 2026-07-11; branch `m41-vignette-glossary`) —
+  same docs-milestone posture as M40 (no new estimand/engine/dependency; live-computed + claim-tested numbers;
+  no Fable), full scope in [`MILESTONES.md`](MILESTONES.md) M41 (ADR-015). **What remains parked** after M41 is a
+  clarity pass over any *further* material and per-term worked examples beyond first-use glosses — later docs
+  passes, not scheduled. (M41 is the first of two release-strengthening milestones the 2026-07-11 retro
+  sequenced before **0.2.0**; M42 = the benchmark-vs-prior-art suite item below.)
 - **lme4 engine edge cases** beyond the shipped M14/M15 parity: a boundary-robust
   lme4 interval for singular fits (glmmTMB covers this today via the
   degrade-to-glmmTMB handoff), and merDeriv edge cases beyond the currently fitted

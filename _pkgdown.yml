@@ -14,6 +14,10 @@ articles:
       - engines
       - interval-methods
       - d-studies-and-replicates
+  - title: Reference
+    navbar: Reference
+    contents:
+      - glossary
 
 # Reference index: teaching-first — choose a coefficient, then estimate it, then
 # project and tidy it. Grouped by role, not milestone (the single `icc()` entry
