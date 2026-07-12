@@ -635,6 +635,7 @@ test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit i
     score,
     subject,
     rater,
+    type = "agreement",
     unit = c("single", "average"),
     ci_method = "bootstrap",
     boot_samples = 499,
@@ -665,6 +666,7 @@ test_that("O-Boot-DS: the bootstrap band is deterministic, monotone, and in [0, 
     score,
     subject,
     rater,
+    type = "agreement",
     ci_method = "bootstrap",
     boot_samples = 499,
     seed = 1
@@ -703,11 +705,12 @@ test_that("O-Boot-DS/O2: bootstrap band agrees with the MC band on an interior c
     score,
     subject,
     rater,
+    type = "agreement",
     ci_method = "bootstrap",
     boot_samples = 999,
     seed = 1
   )
-  fm <- icc(d, score, subject, rater, seed = 1)
+  fm <- icc(d, score, subject, rater, type = "agreement", seed = 1)
   for (m in c(2, 4, 12)) {
     db <- d_study(fb, m = m)
     dm <- d_study(fm, m = m)
