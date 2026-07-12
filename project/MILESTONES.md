@@ -74,17 +74,19 @@ detailed M9, ADR-019 M10, ADR-020 M11, ADR-021 M12, ADR-023 M14, ADR-024 M15,
 ADR-025 M16, ADR-026 M17; the M18–M21 completeness arc by ADR-027, with ADR-028 detailing
 M18, ADR-029 M19, ADR-030 M20, and ADR-031 M21; ADR-032 detailed M22, ADR-033 M23, ADR-034 M24,
 ADR-035 M25, ADR-036 M26, ADR-037 M27, ADR-038 M28, ADR-039 M29, ADR-040 M30, ADR-041 M31, ADR-042 M32,
-ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38).
-**No milestone is currently in flight** — M38 (ADR-048, brms engine parity for the fixed multilevel cells)
-shipped (PR #44, squash-merged to `main` at `4124297`); the next one needs an ADR after a short retro (founding
-brief §7). M38 closed the **brms** half of the (C) research/blocked corner — Cell 1 balanced fixed cluster
-level (M37 sibling) + Cell 2 incomplete/ragged fixed-nested Design 2 (M36 sibling), both clean guard-lifts; the
-Cell 2 coverage gate (O-Bayes-IFNML) came back **NOMINAL** (C_n=80 boundary .970, no decay), so the ADR-048
-stop-and-replan branch did not fire and **no Fable** was needed. The residual (C) work is now only the
-genuinely-open **incomplete cluster-level fixed** (🟣 double-blocked) and the **lavaan** siblings (blocked on
-the multilevel-SEM lift — the M38 ROADMAP edit corrected the earlier "unblockable" wording); **Design 3 fixed**
-is already closed in code (the ADR-029 by-design abort). Cross-cutting: cluster-signal-zero (σ²_c→0) interval
-coverage (M5/M9/M37 alike).
+ADR-043 M33, ADR-044 M34, ADR-045 M35, ADR-046 M36, ADR-047 M37, ADR-048 M38, ADR-049 M39).
+**M39 (ADR-049, `d_study()` occasion-count projection) is in flight** — opened after a short retro of the
+M23–M38 arc; the board is below. It is the symmetric sibling of the M22 (ADR-032) rater-count projection:
+projecting the occasion count `n_o` off a balanced within-cell replicate fit (holding raters at the fitted
+count), a thin projection slice, not new estimand work (#6). Prior milestone **M38** (ADR-048, brms engine
+parity for the fixed multilevel cells) shipped (PR #44, squash-merged to `main` at `4124297`); it closed the
+**brms** half of the (C) research/blocked corner — Cell 1 balanced fixed cluster level (M37 sibling) + Cell 2
+incomplete/ragged fixed-nested Design 2 (M36 sibling), both clean guard-lifts; the Cell 2 coverage gate
+(O-Bayes-IFNML) came back **NOMINAL** (C_n=80 boundary .970, no decay), so the ADR-048 stop-and-replan branch
+did not fire and **no Fable** was needed. The residual (C) work is now only the genuinely-open **incomplete
+cluster-level fixed** (🟣 double-blocked) and the **lavaan** siblings (blocked on the multilevel-SEM lift — the
+M38 ROADMAP edit corrected the earlier "unblockable" wording); **Design 3 fixed** is already closed in code (the
+ADR-029 by-design abort). Cross-cutting: cluster-signal-zero (σ²_c→0) interval coverage (M5/M9/M37 alike).
 
 Definition of Done references are to `CLAUDE_CODE_KICKOFF.md` §8.
 
@@ -1355,3 +1357,63 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   incl. `ubuntu-latest (devel)`). Local gate: `devtools::check` (CI-parity) 0/0/0, full CI-mode suite 1175/0,
   `air`/`lintr` clean, installed-pkg both new brms paths driven. Shipped in one session (retro → plan/ADR-048 →
   T1 Cell 1 → T2 Cell 2 code → T3 coverage gate NOMINAL → T4 docs/gate → PR #44); **no Fable review**.
+
+## M39: `d_study()` occasion-count projection off a within-cell replicate fit (ADR-049)
+- Goal: give `d_study()` a **second projection axis** — project the **occasion count `n_o`** off a balanced
+  within-cell replicate fit (holding raters at the fitted count), the symmetric sibling of the **rater-count**
+  projection M22 shipped (ADR-032). Projection machinery, **not new estimand work** (#6): additive,
+  non-breaking; the only spec change is a new §9 in `M4.5-d-study.md`. Occasion averaging rescales **only pure
+  error σ²_e** — a variance-ratio / dependability push-forward with the M22 Monte-Carlo interval reused (no θ²
+  moment correction, no coverage pathology) → **low risk, no Fable**.
+- Reference: ADR-049; estimand-spec **`M4.5-d-study.md` §9 (new)**. Oracles **O-OccDS**
+  (reduction at `n_o` = fitted → shipped `ICC(*,k)` < 1e-4; cross-engine lme4; analytic GT dependability form;
+  the `n_o → ∞` ceiling invariant; seeded-sim recovery + MC coverage; monotone/[0,1]; cluster level flat;
+  fixed-agreement now projects on this axis). Three structural facts drive scope (ADR-049): occasion averaging
+  touches only σ²_e; the curve has a **finite ceiling** (`σ²_s / (σ²_s + (σ²_r + σ²_sr)/m)`, not → 1) — the
+  honest caveat (#18); and it is **well-posed for fixed raters incl. absolute agreement** (the M22 §4 abort is
+  axis-specific — refused for `m`, permitted for `n_o`).
+- DoD (the live board — check off in the same commit as the work, #16):
+  - [x] **T1 — Slice 1: single-level two-way occasion projection. DONE (2026-07-11).** New `n_o` argument
+    (`d_study(x, m = NULL, n_o = NULL, ...)`, exactly one of `m`/`n_o`, both → abort; `n_o` valid only on a
+    balanced replicate fit); occasion projection for random + fixed raters, agreement + consistency (fixed
+    absolute agreement now projects — the §4 abort is now axis-specific, gated on `!occasion_axis`); the swept
+    axis reuses the replicate grid (hold `m = k_eff`, sweep `occ` over `n_o`); `axis` attribute + print (`n_o`
+    header, "Held raters" meta) + autoplot (x = `n_o`) carry it. **O-OccDS single-level** committed (reduction
+    at n_o = fitted → ICC(*,k) both types; analytic GT dependability form; `n_o→∞` ceiling invariant +
+    monotone/[0,1]; the fixed-agreement lift + reduction; lme4 cross-engine; seeded-sim coverage). Classed
+    aborts: both-axes, non-replicate, **multilevel (T2 guard, lifted in T2)**, bad `n_o` (#5/#8). Full suite
+    374/0, `air`/`lintr` (0 lints) clean, docs regenerated.
+  - [x] **T2 — Slice 2: multilevel occasion projection. DONE (2026-07-11).** Crossed Design 1 + nested Design 2.
+    **Subject** level projects across `n_o`; **cluster** level is occasion-invariant → returned as a **flat
+    curve with a documented `cli` note** — the flatness emerges for free from the estimand (the cluster error
+    set `{rater, cluster:rater}` has no pure-error term, so `n_o` never enters its `error_divisors`); the only
+    code was lifting the T1 guard, routing the cluster level through the full `n_o` sweep, and the note.
+    **O-OccDS multilevel** committed (crossed-D1 per-level reduction at n_o = fitted → ICC(*,k); the
+    cluster-flat + subject-rising invariant; lme4 cross-engine; nested-D2 subject-only reduction + monotone).
+    Full suite 378/0, `air`/`lintr` (0 lints) clean, docs regenerated. Note: **Design 3 replicate** is not a
+    shipped `icc()` combination (the multilevel one-way confounds the rater, so there is no pure-error facet to
+    project), so it is N/A here, not deferred.
+  - [x] **T3 — docs + spec + finish-task gate. DONE (2026-07-11).** `M4.5-d-study.md` §9 written (population,
+    finite-ceiling §9.2, axis-specific fixed-agreement §9.3, multilevel cluster-flat §9.4, O-OccDS §9.5);
+    `d-studies-and-replicates` vignette gained a "How many occasions?" section (renders live: rising, plateauing
+    curve) + a backing claim test (ceiling < 1, monotone, the fixed-agreement lift); NEWS / COVERAGE (O-OccDS +
+    the fixed-agreement abort reclassified rater-axis-only) / REFERENCES (O-OccDS item 7) in-commit. **Gate
+    green:** `devtools::document` / `air format --check` / `lintr` (0 lints) / full CI-mode suite **379/0/51** /
+    `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0**; installed-pkg both `n_o` paths driven through
+    `library(intraclass)` (single-level plateaus 0.711→0.764; multilevel subject rises, cluster flat 0.455 +
+    note). Note: a first `devtools::check` at the devtools default `NOT_CRAN=true` ran the live-Stan suite (which
+    CI skips via `skip_on_cran`/`skip_on_ci`) and a brms **credible-interval containment** live test
+    (O-Bayes-FML-agree) flaked on MCMC noise — unrelated to M39 (no brms code touched); the CI-parity run is
+    clean.
+- Deferred out of M39 (record so not rediscovered): **ragged-replicate occasion projection** (blocked on the
+  🟣 effective-`n_o` divisor — the *occasion-averaged coefficient on ragged replicates* research item,
+  M20/ADR-030; the `R/d-study.R` ragged-replicate abort stays); **brms/posterior occasion projection**
+  (`d_study()` projects off frequentist components + MC interval, not posterior draws — an engine-parity item);
+  the **2-D `m × n_o` joint surface** (one axis per call — aborts); the untouched carryovers (categorical/
+  ordinal GLMM, multilevel SEM proper, benchmark suite, teaching-vignette clarity rewrite, CRAN upload ADR-022)
+  stay in [`ROADMAP.md`](ROADMAP.md).
+- Status: **review — all 3 tasks done, local gate green, PR pending.** T1 (single-level, `a23c768`) + T2
+  (multilevel, `e7be0df`) + T3 (docs/spec/gate) complete on branch `m39-occasion-dstudy`. Local gate:
+  `devtools::document` / `air format --check` / `lintr` (0 lints) / full CI-mode suite **379/0/51** /
+  `devtools::check` CI-parity (`NOT_CRAN=false`) **0/0/0**; installed-pkg both `n_o` paths driven. No Fable
+  (variance-ratio push-forward, MC interval reused). Next: open the PR.

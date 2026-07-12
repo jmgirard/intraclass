@@ -131,6 +131,48 @@ test_that("the D-study projection anchors to ICC(A,k) at m = n_raters", {
   expect_true(all(diff(proj$estimate) > 0))
 })
 
+test_that("the occasion D-study rises to a ceiling below 1 and lifts fixed agreement", {
+  skip_if_not_installed("glmmTMB")
+
+  # The article claims (a) d_study(n_o = ...) climbs to a finite ceiling below 1
+  # (occasion averaging cancels only pure error), and (b) fixed absolute agreement
+  # PROJECTS on the occasion axis (unlike the rater axis). Back both numerically (#1).
+  set.seed(20260711)
+  grid <- expand.grid(subject = 1:24, rater = 1:4, occ = 1:3)
+  subj <- rnorm(24, sd = 1.2)[grid$subject]
+  rtr <- rnorm(4, sd = 0.8)[grid$rater]
+  sr <- rnorm(24 * 4, sd = 0.6)[(grid$rater - 1) * 24 + grid$subject]
+  reps <- data.frame(
+    subject = factor(grid$subject),
+    rater = factor(grid$rater),
+    score = 10 + subj + rtr + sr + rnorm(nrow(grid), sd = 0.7)
+  )
+  fit <- icc(reps, score, subject, rater, occasions = "average", seed = 1)
+  k <- fit$k_eff
+  vc <- fit$components
+  ceiling <- vc$subject / (vc$subject + (vc$rater + vc$subject_rater) / k)
+  proj <- d_study(fit, n_o = 1:30, seed = 1)
+  expect_true(all(diff(proj$estimate) > 0)) # rising
+  expect_true(all(proj$estimate < ceiling)) # bounded by the ceiling
+  expect_lt(ceiling, 1) # the ceiling is below 1
+
+  # Fixed absolute agreement is refused on the rater axis but projects on n_o.
+  fixed <- suppressWarnings(
+    icc(
+      reps,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      type = "agreement",
+      occasions = "average",
+      seed = 1
+    )
+  )
+  expect_error(d_study(fixed, m = 1:4), class = "intraclass_unidentified")
+  expect_s3_class(d_study(fixed, n_o = 1:4), "icc_dstudy")
+})
+
 test_that("a disconnected design is rejected, not guessed at", {
   skip_if_not_installed("glmmTMB")
 

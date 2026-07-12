@@ -873,6 +873,160 @@ test_that("d_study defers ragged-replicate projection (#5, #8)", {
   expect_error(d_study(ragged, m = 1:3), class = "intraclass_unsupported")
 })
 
+# Oracle O-OccDS: d_study() occasion-count projection, single-level (M39 Slice 1) ----
+#
+# The symmetric sibling of O-RepDS: instead of projecting the rater count `m` holding
+# occasions fixed, project the occasion count `n_o` holding raters at the observed
+# count (k_eff). Occasion averaging rescales ONLY pure error sigma^2_e (the `m * n_o`
+# divisor), so the curve is well-posed for random AND fixed raters (incl. fixed
+# absolute agreement, which the rater axis refuses), and has a FINITE ceiling
+# sigma^2_s / (sigma^2_s + (sigma^2_r + sigma^2_sr) / m) as n_o -> Inf (ADR-049).
+
+test_that("O-OccDS/reduction: occasion projection at n_o = fitted reproduces ICC(*,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  for (ty in c("agreement", "consistency")) {
+    fit <- icc(
+      d,
+      score,
+      subject,
+      rater,
+      type = ty,
+      occasions = c("single", "average"),
+      seed = 1
+    )
+    ds <- d_study(fit, n_o = c(1, 3))
+    expect_identical(attr(ds, "axis"), "occasions")
+    expect_true("occasions" %in% names(ds))
+    expect_setequal(unique(ds$occasions), c(1, 3))
+    idx <- if (ty == "agreement") "ICC(A,k)" else "ICC(C,k)"
+    for (o in c(1, 3)) {
+      proj <- ds$estimate[ds$occasions == o]
+      fitted_k <- fit$estimates$estimate[
+        fit$estimates$index == idx & fit$estimates$occasions == o
+      ]
+      expect_equal(proj, fitted_k, tolerance = 1e-4)
+    }
+  }
+})
+
+test_that("O-OccDS/GT: occasion projection equals the dependability form", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  vc <- fit$components
+  k <- fit$k_eff
+  ds <- d_study(fit, n_o = c(1, 2, 5, 9))
+  # Only pure error (sigma^2_e = "residual") divides by n_o; rater + interaction hold.
+  # `ds` carries the swept n_o as the `occasions` column.
+  gt <- vc$subject /
+    (vc$subject +
+      (vc$rater + vc$subject_rater) / k +
+      vc$residual / (k * ds$occasions))
+  expect_equal(ds$estimate, gt, tolerance = 1e-9)
+})
+
+test_that("O-OccDS/ceiling: curve is monotone, in [0,1], bounded by the n_o->Inf floor", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  vc <- fit$components
+  k <- fit$k_eff
+  ceiling <- vc$subject /
+    (vc$subject + (vc$rater + vc$subject_rater) / k)
+  ds <- d_study(fit, n_o = 1:20)
+  expect_true(all(diff(ds$estimate) > 0)) # monotone increasing in n_o
+  expect_true(all(ds$estimate >= 0 & ds$estimate <= 1))
+  expect_true(all(ds$estimate < ceiling)) # never reaches the pure-error-removed floor
+  # A very large n_o lands within a whisker of the ceiling.
+  far <- d_study(fit, n_o = 1e5)
+  expect_equal(far$estimate, ceiling, tolerance = 1e-3)
+})
+
+test_that("O-OccDS/lift: fixed absolute agreement PROJECTS on the occasion axis", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fa <- suppressWarnings(icc(
+    d,
+    score,
+    subject,
+    rater,
+    raters = "fixed",
+    type = "agreement",
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  # The rater axis still refuses fixed absolute agreement (well-posedness is
+  # axis-specific); the occasion axis projects it (ADR-049).
+  expect_error(d_study(fa, m = 1:3), class = "intraclass_unidentified")
+  ds <- d_study(fa, n_o = c(1, 3, 8))
+  expect_s3_class(ds, "icc_dstudy")
+  expect_true(all(diff(ds$estimate) > 0))
+  # Reduction at the fitted occasion settings holds for fixed agreement too.
+  for (o in c(1, 3)) {
+    proj <- ds$estimate[ds$occasions == o]
+    fitted_k <- fa$estimates$estimate[
+      fa$estimates$index == "ICC(A,k)" & fa$estimates$occasions == o
+    ]
+    expect_equal(proj, fitted_k, tolerance = 1e-4)
+  }
+})
+
+test_that("O-OccDS/lme4: occasion projection matches an independent lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fg <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  fl <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    occasions = "average",
+    engine = "lme4",
+    seed = 1
+  )
+  dg <- d_study(fg, n_o = c(1, 4, 10))
+  dl <- d_study(fl, n_o = c(1, 4, 10))
+  expect_equal(dg$estimate, dl$estimate, tolerance = 1e-4)
+})
+
+test_that("O-OccDS/sim: population Phi(n_o) recovered and covered at an n_o not run", {
+  skip_if_not_installed("glmmTMB")
+  vs <- 1.2
+  vr <- 0.7
+  vsr <- 0.4
+  ve <- 0.5
+  d <- sim_rep_ds(60, 5, 3, vs, vr, vsr, ve, seed = 424242)
+  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  k <- 5 # raters held at the observed count
+  no <- 8 # not the observed occasion count (3)
+  phi <- vs / (vs + (vr + vsr) / k + ve / (k * no))
+  ds <- d_study(fit, n_o = no, seed = 1)
+  # Recovery by coverage (as O-RepDS/sim): the boundary-aware MC band covers the
+  # population Phi(n_o) at an occasion count not run.
+  expect_gte(phi, ds$conf.low)
+  expect_lte(phi, ds$conf.high)
+})
+
+test_that("O-OccDS: occasion axis guards (both axes / non-replicate / n_o)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_rep_ds(20, 4, 3, 1.2, 0.7, 0.4, 0.5, seed = 20260708)
+  fit <- icc(d, score, subject, rater, occasions = "average", seed = 1)
+  # Exactly one axis per call (no 2-D m x n_o surface).
+  expect_error(
+    d_study(fit, m = 1:3, n_o = 1:3),
+    class = "intraclass_unsupported"
+  )
+  # Occasion projection needs a replicate fit.
+  nonrep <- icc(ratings, score, subject, rater, seed = 1)
+  expect_error(d_study(nonrep, n_o = 1:3), class = "intraclass_unsupported")
+  # n_o must be a numeric vector >= 1.
+  expect_error(d_study(fit, n_o = c(0, 2)), class = "intraclass_error")
+  expect_error(d_study(fit, n_o = "x"), class = "intraclass_error")
+})
+
 # Oracle O-RepDS (multilevel): d_study() off a multilevel replicate fit, M22 Slice 2 -
 #
 # The M20 Slice 2 multilevel replicate fits (crossed Design 1 six-component, nested
@@ -1031,4 +1185,125 @@ test_that("O-RepDS: multilevel replicate curve is monotone and in [0,1]", {
       expect_true(all(est >= 0 & est <= 1))
     }
   }
+})
+
+# Oracle O-OccDS (multilevel): occasion projection off a multilevel replicate fit ----
+#
+# M39 Slice 2: the subject level projects across n_o (only its error set carries pure
+# error); the cluster error set is {rater, cluster:rater} with NO pure-error term, so
+# the cluster occasion curve is INVARIANT (flat) -- returned with a note (ADR-049).
+
+test_that("O-OccDS/ML-reduction: crossed D1 occasion projection reproduces ICC(*,k)", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, n_o = c(1, 3)))
+  expect_identical(attr(ds, "axis"), "occasions")
+  expect_true(all(c("level", "occasions") %in% names(ds)))
+  # Both levels sweep n_o; the subject level reduces at each fitted occasion setting,
+  # the cluster level reduces to its (single-occasion) fitted ICC(A,k) at every n_o.
+  for (i in seq_len(nrow(ds))) {
+    occ_lookup <- if (ds$level[i] == "cluster") 1 else ds$occasions[i]
+    f <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" &
+        fit$estimates$level == ds$level[i] &
+        fit$estimates$occasions == occ_lookup
+    ]
+    expect_equal(ds$estimate[i], f, tolerance = 1e-4)
+  }
+})
+
+test_that("O-OccDS/ML: the cluster occasion curve is flat, the subject curve rises", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = "average",
+    seed = 1
+  ))
+  # The note fires once for a multilevel occasion projection with a cluster level; the
+  # .frequency = "once" note needs verbose verbosity to observe regardless of ordering.
+  withr::local_options(rlib_message_verbosity = "verbose")
+  expect_message(
+    d_study(fit, n_o = 1:6),
+    "cluster-level ICC does not average over occasions"
+  )
+  ds <- suppressMessages(d_study(fit, n_o = 1:6))
+  clus <- ds$estimate[ds$level == "cluster"]
+  subj <- ds$estimate[ds$level == "subject"]
+  expect_equal(diff(range(clus)), 0, tolerance = 1e-9) # flat
+  expect_true(all(diff(subj) > 0)) # rising
+  expect_true(all(ds$estimate >= 0 & ds$estimate <= 1))
+})
+
+test_that("O-OccDS/ML-lme4: crossed D1 occasion projection matches an lme4 fit", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("merDeriv")
+  d <- sim_ml_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.3, 0.4, 0.5, seed = 11)
+  fg <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = "average",
+    seed = 1
+  ))
+  fl <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    level = c("subject", "cluster"),
+    occasions = "average",
+    engine = "lme4",
+    seed = 1
+  ))
+  dg <- suppressMessages(d_study(fg, n_o = c(1, 4, 10)))
+  dl <- suppressMessages(d_study(fl, n_o = c(1, 4, 10)))
+  expect_equal(dg$estimate, dl$estimate, tolerance = 1e-4)
+})
+
+test_that("O-OccDS/ML-nested: nested Design 2 projects the subject level only", {
+  skip_if_not_installed("glmmTMB")
+  d <- sim_nested_rep_ds(4, 6, 4, 3, 0.6, 1.2, 0.5, 0.4, 0.5, seed = 12)
+  fit <- suppressMessages(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    occasions = c("single", "average"),
+    seed = 1
+  ))
+  ds <- suppressMessages(d_study(fit, n_o = c(1, 3)))
+  expect_setequal(unique(ds$level), "subject")
+  for (i in seq_len(nrow(ds))) {
+    f <- fit$estimates$estimate[
+      fit$estimates$index == "ICC(A,k)" &
+        fit$estimates$level == "subject" &
+        fit$estimates$occasions == ds$occasions[i]
+    ]
+    expect_equal(ds$estimate[i], f, tolerance = 1e-4)
+  }
+  # Subject occasion curve rises with n_o.
+  ds2 <- suppressMessages(d_study(fit, n_o = 1:6))
+  expect_true(all(diff(ds2$estimate) > 0))
 })

@@ -169,8 +169,23 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
      monotone/[0,1] with occasion-averaged ≥ single-occasion. Single-level (Slice 1) +
      multilevel crossed D1 / nested D2 (Slice 2, subject across occasions, cluster
      single-occasion). Occasion projection and ragged-replicate projection deferred.
+  7. **O-OccDS — occasion-count projection off a within-cell replicate fit asserted
+     (M39, ADR-049)** — `d_study(n_o = )` projects the occasion count, holding raters at
+     k_eff; only pure error σ²_e divides by `m·n_o` (spec `M4.5-d-study.md` §9). At
+     `n_o ∈ {1, observed}` each curve equals the fitted single-/average-occasion
+     `ICC(*,k)` (<1e-4, both types, single- & multi-level); the curve equals the
+     dependability form from the components (a generalized Spearman–Brown); it is
+     monotone/[0,1] and bounded above by the **finite ceiling**
+     `σ²_s/(σ²_s+(σ²_r+σ²_sr)/m)` (< 1); **fixed absolute agreement projects** on this
+     axis (the rater axis's abort is axis-specific); the curve matches an independent
+     `lme4` replicate fit (cross-engine); a seeded sim recovers a projected `n_o` not
+     run with MC coverage. Multilevel: subject rises, cluster is occasion-invariant
+     (flat); nested D2 subject-level only. **Ragged**-replicate occasion projection
+     stays deferred (🟣 effective-`n_o` divisor).
 - **Decision:** projection is a change of the averaging divisor (ADR-010; estimand
-  spec `M4.5-d-study.md`); fixed-rater absolute agreement is refused as ill-posed.
+  spec `M4.5-d-study.md`); fixed-rater absolute agreement is refused as ill-posed **on
+  the rater axis**, but projects on the occasion axis (occasions are a random facet;
+  ADR-049 §9.3).
 - **Provenance:** `data-raw/oracle-d-study.R` (seeded; regenerates the analytic and
   simulation values). Reproducible; nothing hardcoded.
 

@@ -4141,3 +4141,102 @@ consequences → references.
   referenced not extended): `M37-fixed-cluster-level.md`, `M36-incomplete-fixed-nested.md`,
   `M5-multilevel.md §3b`. `project/COVERAGE.md` (#11 fixed cluster level; incomplete fixed-nested, brms
   column).
+
+## ADR-049: M39 scope — `d_study()` occasion-count projection off a within-cell replicate fit
+- Date: 2026-07-11
+- Status: accepted
+- Context: A short retro after the M23–M38 arc (the Bayesian engine M23–M34 + the (C) research/blocked corner
+  M36–M38) found the estimand family very complete: the remaining ROADMAP candidates split into consolidation
+  (CRAN/benchmark/docs), heavy research lifts (multilevel SEM, categorical GLMM), open 🟣 research questions,
+  and a few thin parked corners. The maintainer chose (plan question gate, this session) to keep the thin-slice
+  cadence with a **small parked corner**, and among those the **`d_study()` occasion-count projection** — the
+  symmetric sibling of the rater-count projection **M22 shipped** (ADR-032). M22 (estimand-spec `M4.5-d-study.md`
+  §8) projects the rater count `m` off a within-cell replicate fit holding the occasion count `n_o` at the
+  fitted value:
+  `Φ(m, n_o) = σ²_s / (σ²_s + (σ²_r + σ²_sr)/m + σ²_e/(m·n_o))`. Projecting `n_o` itself — the *other* axis —
+  was explicitly deferred (M4.5 §7/§8; the guard note at `R/d-study.R:120`). A feasibility read of the shipped
+  machinery (this session) confirmed it is a **thin extension, not new estimand work** (#6): the replicate
+  estimand already carries per-component `error_divisors` (the pure-error term is already `÷ m·n_o`), so an
+  occasion projection is the same divisor change applied to the `n_o` axis instead of `m` — no new fit, no new
+  θ²/moment machinery. Three structural facts settle the risk:
+  - **Occasion averaging rescales ONLY pure error σ²_e.** The rater (σ²_r/θ²_r) and interaction (σ²_sr) terms
+    stay at the fitted `m`. So Φ(`n_o`) is a variance-ratio / dependability push-forward of an ordinary
+    variance component — **no finite-population θ² functional, no 2b moment correction, no incidental-parameters
+    coverage pathology** (unlike the M27/M28 fixed-θ² intervals). **Low risk, no Fable expected.**
+  - **Occasion projection has a finite ceiling, not →1.** As `n_o → ∞`,
+    Φ → `σ²_s / (σ²_s + (σ²_r + σ²_sr)/m)` — more occasions wash out only pure measurement error, never rater or
+    interaction variance. This is the honest caveat the docs must foreground (#18), and it yields a free
+    asymptote oracle.
+  - **It is well-posed for fixed raters too — including absolute agreement.** M22 §4 *refuses* rater-count
+    projection for fixed-rater absolute agreement (no "m freshly sampled raters" for a finite population). That
+    ill-posedness does **not** apply to the occasion axis: occasions are a random facet regardless of how raters
+    are treated, and `m` is held fixed at its finite value. So M39 **lifts** the §4 fixed-agreement abort *on
+    the occasion axis* (fixed-rater rater projection stays refused).
+- Decision (maintainer-approved this session, 2026-07-11, via the plan question gate):
+  - **Scope: M39 = occasion-count projection off a BALANCED within-cell replicate fit**, in two slices mirroring
+    M22. Projection machinery, not new estimand work: additive, non-breaking (#6); no new dependency; the only
+    spec change is a new **§9 in `M4.5-d-study.md`** (the estimand is the *existing* replicate estimand at a
+    projected `n_o` divisor — the M22 §8 posture).
+    - **Slice 1 — single-level two-way replicate fit.** Occasion projection for random + fixed raters,
+      agreement + consistency (fixed absolute agreement now **projects** on this axis, §4 lifted for `n_o`).
+    - **Slice 2 — multilevel replicate fit** (crossed Design 1 + nested Design 2; Design 3 = the multilevel
+      one-way, agreement-only). The **subject** level projects across `n_o`; the **cluster** level has no
+      pure-error term in its error set (`{σ²_r, σ²_cr}`), so it is **occasion-invariant** — returned as a
+      **flat curve with a documented note** (the maintainer chose flat-with-note over omitting it, keeping
+      symmetry with the M22 both-levels output).
+  - **API (maintainer-approved):** a new **`n_o` argument** — `d_study(x, m = NULL, n_o = NULL, ...)` — supply
+    **exactly one** of `m` / `n_o`; supplying both **aborts** (`intraclass_unsupported`; a 2-D `m × n_o` surface
+    is out of scope). `n_o` projects the occasion axis holding raters at the fitted count; the default `m`
+    projection is unchanged (non-breaking). `n_o` is valid **only on a replicate fit** (a non-replicate fit has
+    no occasion axis — aborts pointing to replicated data), and **only on balanced** replicate data (ragged
+    stays refused, below).
+  - **Fable posture (#19): NONE, and none expected.** The projected facet is an ordinary variance component
+    divided by a divisor with the M22 Monte-Carlo interval reused — no coverage pathology is anticipated. If the
+    seeded-sim coverage oracle nonetheless under-covers, **stop and characterize honestly (#4/#18)** rather than
+    tune or loosen; do not spawn Fable without explicit maintainer approval.
+  - **Deferred out of M39 (record so not rediscovered):** **ragged-replicate occasion projection** (still
+    blocked on the 🟣 effective-`n_o` divisor — the *occasion-averaged coefficient on ragged replicates*
+    research item, M20/ADR-030; the `R/d-study.R` ragged-replicate abort stays); **brms/posterior occasion
+    projection** (`d_study()` projects off the frequentist components + MC interval, not posterior draws — an
+    engine-parity item, not attempted now); the **2-D `m × n_o` joint surface** (out of scope — one axis per
+    call); and the untouched carryovers (categorical/ordinal GLMM, multilevel SEM, benchmark suite,
+    teaching-vignette clarity rewrite, CRAN upload ADR-022) stay in [`ROADMAP.md`](ROADMAP.md).
+- Consequences:
+  - `d_study()` gains a second projection axis symmetric to the shipped rater-count projection; every displayed
+    coefficient stays computed live with a boundary-aware Monte-Carlo interval (#3). The estimand abstraction is
+    untouched (projection still moves only the averaging divisor, M4.5 §1) — the change is which per-component
+    divisor the projected `unit` scales.
+  - The fixed-agreement §4 abort is now **axis-specific**: refused for `m`, permitted for `n_o`. The docs and the
+    classed-abort messages must state this distinction so it does not read as an inconsistency (#5/#8/#18).
+  - Users must not over-read an occasion curve: its ceiling is the pure-error-removed dependability at the fitted
+    `m`, **below 1**. Documented in the `d_study()` help + the `d-studies-and-replicates` vignette (#18).
+  - The cluster-level flat curve on an occasion projection is a genuine (occasion-invariant) result, not a
+    missing computation — noted in output + docs.
+- Oracles (**O-OccDS**, PRINCIPLES.md #1, ≥2 independent), mirroring M22's O-RepDS:
+  - **O-OccDS-reduction** — at `n_o =` the fitted occasion count, each level/type curve equals the fitted
+    `ICC(*,k)` for that level (< 1e-4).
+  - **O-OccDS-lme4** — the projected curve matches one built from an independent `lme4::lmer` replicate fit
+    through the same GT dependability form (cross-engine).
+  - **O-OccDS-GT** — the curve equals the dependability form `σ²_s / (σ²_s + (σ²_r + σ²_sr)/m + σ²_e/(m·n_o))`
+    computed directly from the fitted components (the M4.5 O-GT role; occasion projection is a *generalized*
+    Spearman–Brown — only σ²_e scales with `n_o` — so this is the direct analytic oracle, not a plain SB).
+  - **O-OccDS-ceiling** — as `n_o → ∞` (large finite `n_o`) the curve approaches
+    `σ²_s / (σ²_s + (σ²_r + σ²_sr)/m)` and never exceeds it (asymptote invariant; the honest-caveat pin).
+  - **O-OccDS-sim** — a seeded simulation with known components recovers the population Φ(`n_o`) at an `n_o` not
+    run, and the Monte-Carlo band covers it (the M4.5 O-sim pattern).
+  - **Invariants** — each curve is monotone increasing in `n_o` and stays in [0, 1]; the cluster level is flat;
+    fixed-rater absolute agreement now projects (well-posedness assertion, §4 lifted for `n_o`).
+- References: PRINCIPLES.md #1 (oracle-first — reduction + cross-engine + analytic GT form + committed seeded
+  recovery), #2/#14 (name the estimand / thin projection slice; plan before code), #3 (boundary-aware
+  Monte-Carlo interval reused; the wide band when few occasions back the estimate), #4 (no guessed
+  ragged-`n_o` divisor — ragged occasion projection stays refused), #5/#8 (classed aborts: both-axes,
+  non-replicate, ragged; the axis-specific fixed-agreement rule), #6 (additive, non-breaking; no new
+  dependency; only a spec §9), #16 (tracking in-commit), #17 (deferred corners parked, not crept), #18
+  (characterize honestly — the finite ceiling, the flat cluster level, the axis-specific abort), #19 (Fable
+  deliberately NOT pre-authorized; none expected). [[milestone-branches-and-prs]] (ships on
+  `m39-occasion-dstudy` via PR). ADR-032 (M22 — the rater-count replicate projection this mirrors; O-RepDS),
+  ADR-030 (M20 — the within-cell replicate estimand + the ragged occasion-averaged 🟣 divisor that bounds the
+  deferred ragged half), ADR-026 (M17 — per-component `error_divisors`, the multilevel projection), ADR-010
+  (M4.5 — the original `d_study()` estimand + the §4 fixed-agreement ill-posedness this refines).
+  Estimand-spec: **`M4.5-d-study.md` §9 (new)** — occasion-count projection. `project/COVERAGE.md` (d_study
+  occasion axis).

@@ -104,6 +104,32 @@ remains open is the occasion-*averaged* coefficient on ragged replicates — wit
 per-cell counts there is no single effective-occasion divisor with a validated oracle —
 along with the compound fixed-by-ragged and multilevel-by-ragged corners.
 
+## How many occasions do I need? A D-study on the occasion facet
+
+Just as `d_study(m = ...)` projects the number of *raters*, `d_study(n_o = ...)`
+projects the number of *occasions* off a replicate fit — holding the raters fixed and
+asking "how reliable would each rater's mean of `n_o` ratings be?". Supply exactly one
+axis per call (`m` **or** `n_o`).
+
+```{r occasion-dstudy, eval = requireNamespace("glmmTMB", quietly = TRUE)}
+fit_rep <- icc(reps, score, subject, rater, occasions = "average")
+d_study(fit_rep, n_o = 1:6)
+```
+
+Notice the curve **flattens**. Averaging more occasions only cancels *pure error*
+(`residual`); it never touches the rater or `subject:rater` variance. So the occasion
+curve climbs to a **ceiling below 1** — the reliability you would reach with perfectly
+repeatable ratings but the same raters — rather than approaching 1 the way a rater
+projection does. Read it as "how much does re-rating help?", which saturates.
+
+Because occasions are a **random** facet however the raters are treated, the occasion
+projection is defined even where a rater projection is not: **fixed-rater absolute
+agreement projects on the occasion axis** (it is only the *rater* axis that is
+undefined for fixed absolute agreement, having no "freshly sampled rater" to add). On a
+**multilevel** replicate fit the subject-level curve rises with `n_o` while the
+cluster-level curve is **flat** — the cluster-level error set has no pure-error term, so
+occasions cannot change it (`d_study()` says so with a note).
+
 ## Visualizing a fit
 
 Every `icc()` fit carries an `autoplot()` method (with a `plot()` wrapper), so you
