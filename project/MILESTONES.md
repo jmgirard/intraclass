@@ -1898,3 +1898,78 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     `devtools::document` no delta, full CI-mode suite (`NOT_CRAN=true CI=true`) **403 pass / 0 fail / 1 warn
     (pre-existing non-bridging fit) / 23 skip (live Stan)**, installed-pkg drive of the defaulted conflated
     cell OK, **`devtools::check` CI-parity (`NOT_CRAN=false`, no-manual) 0/0/0**. PR pending.
+
+## M46: averaged cluster-level `ICC(c,k)` divisor on incomplete data (ADR-057)
+- Goal: resolve the open **per-cluster effective-rater divisor** for the averaged cluster-level `ICC(c,k)` on
+  incomplete/ragged multilevel data (M9 §3b/§9) against a seeded simulation oracle, and **ship-or-abort**
+  (attempt-then-degrade, ADR-028/ADR-030): if a candidate divisor recovers the population reliability of ragged
+  cluster means, lift the abort and ship the averaged coefficient; if none is defensible, keep the classed abort
+  and document the negative finding. On complete data the per-subject and per-cluster effective rater counts
+  coincide (why M5 ships one divisor); on ragged data they diverge and the cluster divisor is a **per-cluster**
+  quantity with several defensible definitions and no textbook oracle — so M9 shipped only `ICC(c,1)` and
+  deferred the average behind an abort. The only new object is the divisor `k_c^eff`; the five-component fit,
+  the cluster-level rater-bridging gate, `ICC(c,1)`, the boundary-aware MC CI, and complete-data `ICC(c,k)`
+  (M5) are all unchanged. Crossed Design 1, random raters, glmmTMB/lme4 (variance ratio — no θ² correction).
+- Priority: normal. Depends on: none (M9 shipped `ICC(c,1)` + the cluster fit/bridging gate; M5 ships
+  complete-data `ICC(c,k)`).
+- Reference: **ADR-057** (scoping). Spec: resolves `estimand-specs/M9-incomplete-multilevel.md` §3b/§9 (a §10
+  authored at implementation). Source oracle: seeded simulation (no textbook worked example — ten Hove et al.
+  2022 flags the incomplete/small-`k` cluster estimator as open); McGraw & Wong (1996) for the two-way family
+  the divisor generalizes. **Fable: recommended-and-stop if the study is ambiguous** (RB tripwire: `no-oracle`);
+  a cleanly-discriminating study with nominal oracles may ship without it (#19, D-004 — per-instance gate).
+- **Acceptance criteria** (each names the behavior that must be tested):
+  - **AC1 — Simulation oracle discriminates a divisor (attempt-then-degrade, ADR-028).** *(RB tripwire:
+    no-oracle.)* A committed seeded incomplete-multilevel study (`data-raw/oracle-cluster-ck-incomplete.R` +
+    a `data-raw/reviews/` spike) evaluates the candidate per-cluster divisors (harmonic mean of distinct
+    raters/cluster; inverse-Simpson effective count; arithmetic mean; the subject-level `k_eff`) against the
+    **population reliability of the realized ragged cluster means**, across a battery of imbalance patterns and
+    a **swept cluster-count axis** ([[coverage-oracle-cluster-count-axis]]). Outcome is one of: (a) a divisor
+    recovers the population value within tolerance → ships (AC2–AC5); (b) none does → the abort stays, the
+    finding is documented, and AC2/AC4 are moot. *(Expected: per-cluster harmonic-mean `k_c^eff` — exact for
+    consistency, effective-`k` approximation for agreement, mirroring subject-level §5.)*
+  - **AC2 — Coefficient ships (if AC1 validates).** `icc(..., cluster =, level = "cluster", unit = "average")`
+    returns the averaged cluster-level `ICC(c,k)` (agreement + consistency) on incomplete/ragged crossed
+    Design-1 multilevel data instead of aborting; the divisor `k_c^eff` is surfaced in the report; glmmTMB +
+    lme4. *(Conditional on AC1 outcome (a).)*
+  - **AC3 — Oracles (#1, ≥2 independent).** O-cluster-sim (population recovery + divisor discrimination, AC1),
+    O-cluster-lme4 (cross-engine five components on ragged data < 1e-4), O-cluster-reduction (complete data →
+    M5 Design-1 `ICC(c,k)` exact, `k_c^eff = k`). Invariants: ∈[0,1], average ≥ single, CI always present (#3).
+  - **AC4 — Coverage (#12, if AC1 validates).** The boundary-aware MC interval covers the population
+    `ICC(c,k)` at nominal rate, swept across the cluster-count axis with a high-`C_n` cell included
+    ([[coverage-oracle-cluster-count-axis]]; n_rep ≥ 240 — [[ragged-coverage-nrep-240]]). Committed seeded
+    fixtures.
+  - **AC5 — Reduction + regression + abort handling.** Complete data reproduces the M5 Design-1 `ICC(c,k)`
+    exactly; `ICC(c,1)`, subject-level, and every balanced path are byte-unchanged (regression guard); the
+    `R/icc.R` ~L1188 abort is replaced by the shipped average (outcome (a)) or retained with its message
+    updated to cite the study (outcome (b)) — the retained cell is regression-tested either way (#5/#8).
+  - **AC6 — Docs + spec + gate.** M9 spec §10 records the validated divisor (or negative finding) with the
+    battery, tolerances, and anchors; a NEWS bullet (dev heading); `print`/`summary`/`glance` surface the
+    cluster-level `k_c^eff`; the `multilevel-designs` vignette mention; finish-task gate green (`air`/`lintr` 0
+    / `spelling` / `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity 0/0/0;
+    installed-pkg drive of the new cell — [[verify-against-installed-package]]); `pkgdown::check_pkgdown()`
+    clean.
+- **Tasks** (≤ one session each, dependency-ordered):
+  - T1 — Candidate divisors + simulation oracle (AC1, AC3 O-cluster-sim). *(RB tripwire: no-oracle.)* Implement
+    the candidate per-cluster divisors; build `data-raw/oracle-cluster-ck-incomplete.R` computing the
+    population reliability of realized ragged cluster means; evaluate candidates across the imbalance × `C_n`
+    battery. **Decision point:** if the study is ambiguous / weakly discriminating, recommend a Fable review and
+    **stop** for maintainer approval; if it cleanly validates, proceed to T2; if it validates none, jump to the
+    degrade branch (T4 abort-retain + T5 docs).
+  - T2 — Wire the validated divisor (AC2, AC3 lme4/reduction balanced). Add cluster-level `k_c^eff` to
+    `error_divisors` (`R/estimand.R`), threaded when `level = "cluster"` & `unit = "average"` under imbalance;
+    replace the `R/icc.R` ~L1188 abort with the computed average; O-cluster-lme4 + O-cluster-reduction +
+    invariants.
+  - T3 — Ragged recovery + coverage (AC3 ragged, AC4). O-cluster-sim recovery on ragged; the coverage sweep
+    across the cluster-count axis (high-`C_n` cell, n_rep ≥ 240); commit seeded fixtures.
+  - T4 — Reduction/regression + abort/degrade (AC5). Complete → M5 exact; `ICC(c,1)`/subject/balanced
+    unchanged; ship the updated abort message (outcome (a)) or retain the abort citing the study (outcome (b));
+    regression-test the retained/updated cell.
+  - T5 — Docs + spec §10 + NEWS + finish-task gate (AC6) → PR from `m46-cluster-ck-divisor`.
+- **Coverage:** AC1 → T1; AC2 → T2; AC3 → T1 (sim), T2 (lme4/reduction), T3 (ragged); AC4 → T3; AC5 → T4;
+  AC6 → T5.
+- Status: **planned** (2026-07-12, ADR-057). Not started; no active milestone. Ships on
+  `m46-cluster-ck-divisor` via the implement path (attempt-then-degrade, ADR-028 — the abort stays if the
+  oracle fails to validate any divisor).
+- Work log:
+  - 2026-07-12 — Planned via the plan gate (retro → direction = Fable-gated research item → item B
+    cluster-level `ICC(c,k)`, ship-or-abort acceptance). ADR-057 authored; ROADMAP item marked SCHEDULED.

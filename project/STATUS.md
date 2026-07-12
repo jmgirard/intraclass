@@ -1,5 +1,21 @@
 # Project status
 
+- **M46 planned (2026-07-12, ADR-057):** the *averaged cluster-level `ICC(c,k)` divisor on incomplete data* —
+  the last-open per-cluster effective-rater divisor (M9 §3b/§9). On complete data the per-subject and
+  per-cluster effective rater counts coincide (M5 ships one divisor); on ragged data they diverge and the
+  cluster divisor is a per-cluster quantity with several defensible definitions and **no textbook oracle**, so
+  M9 shipped only `ICC(c,1)` and deferred the average behind an abort (`R/icc.R` ~L1188). M46 **resolves it
+  against a seeded simulation oracle** (the population reliability of realized ragged cluster means, over an
+  imbalance × cluster-count battery) and **ships-or-aborts** (attempt-then-degrade, ADR-028/ADR-030): a
+  validated divisor lifts the abort and ships the averaged coefficient (crossed Design 1, random raters,
+  glmmTMB/lme4 — variance ratio, no θ² correction); if none is defensible the abort stays and the finding is
+  documented. Only new object: the divisor `k_c^eff` (fit / bridging gate / `ICC(c,1)` / CI / complete-data
+  `ICC(c,k)` all unchanged). *(Expected: per-cluster harmonic-mean `k_c^eff` — exact for consistency,
+  effective-`k` approximation for agreement, mirroring subject-level §5.)* **Fable recommended-and-stop if the
+  study is ambiguous** (RB tripwire: `no-oracle`, #19/D-004 — per-instance gate). Ships on
+  `m46-cluster-ck-divisor` via the implement path. No active milestone until started. See
+  [`MILESTONES.md`](MILESTONES.md) M46 + ADR-057; the parking-lot item is now SCHEDULED in
+  [`ROADMAP.md`](ROADMAP.md).
 - Active milestone: **none** — **M45 (ADR-056, consistency-conflated single-level ICC) shipped** (PR
   [#51](https://github.com/jmgirard/intraclass/pull/51), squash-merged to `main` at `109a46e`; full CI matrix
   green 9/9). Consistency-conflated ICC (the flat two-way consistency ICC read off the multilevel fit, drop

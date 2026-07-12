@@ -224,10 +224,16 @@ helpers* item below (sample-size / CI-width), where it belongs.
   (`M9-incomplete-multilevel.md` §9); single-rater `ICC(c,1)` ships in M9 Slice 2,
   complete-data `ICC(c,k)` is unaffected (M5). *(Added here 2026-07-08: tracked
   as a carryover since M9 and referenced as living in this file by
-  `MILESTONES.md`, but missing from this list until now.)* **Status: open
-  research question (Wave 3).** Needs a simulation-oracle study — likely with a
-  Fable review (PRINCIPLES.md #19) — before it's schedulable; the open question
-  itself has no sourced route to resolve by reading alone.
+  `MILESTONES.md`, but missing from this list until now.)* **Status: SCHEDULED as
+  M46** (ADR-057, planned 2026-07-12) — resolved against a **seeded simulation
+  oracle**, **ship-or-abort** (attempt-then-degrade, ADR-028/ADR-030): a validated
+  per-cluster divisor ships the averaged coefficient (glmmTMB/lme4), else the abort
+  stays and the negative finding is documented. **Fable recommended-and-stop if the
+  study is ambiguous** (RB tripwire: `no-oracle`, #19/D-004). Full scope in
+  [`MILESTONES.md`](MILESTONES.md) M46 (ADR-015 — not re-narrated here). Lifting the
+  random-rater half **removes one of the two blocks** on the incomplete/unbalanced
+  cluster-level *fixed* sibling (still parked). The occasion-averaged-ragged
+  replicate sibling (ADR-030) stays a separate open item above.
 
 ## Proposals under discussion (open design questions)
 

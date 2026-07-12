@@ -4754,3 +4754,88 @@ consequences → references.
   [[verify-against-installed-package]] (snapshot regeneration).
 - Spec: extends [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) — a §6b authored at
   implementation (the incomplete-agreement extension used the §6a precedent).
+
+## ADR-057: M46 scope — averaged cluster-level `ICC(c,k)` divisor on incomplete data
+- Date: 2026-07-12
+- Status: accepted (opens M46)
+- Context: on complete multilevel data the cluster-level average `ICC(c,k)` ships (M5, Design 1) with the same
+  scalar divisor as every other coefficient, because on complete data the per-subject and per-cluster
+  effective rater counts coincide. On **incomplete/ragged** data they diverge: the effective number of raters
+  behind a ragged *cluster* mean is a **per-cluster** quantity (the raters that rated in each cluster), *not*
+  the per-subject harmonic-mean `k_eff` M9 §5 uses at the subject level. M9 shipped only the single-rater
+  `ICC(c,1)` on incomplete data (unambiguous, no divisor — ADR-018) and **deferred the average** behind a
+  classed abort (`R/icc.R` ~L1188), because several per-cluster divisor definitions are defensible (harmonic
+  mean of distinct raters per cluster; an inverse-Simpson effective count weighted by ratings-per-rater; the
+  arithmetic mean of raters-per-cluster; even the subject-level `k_eff`) and **no textbook worked example**
+  pins one (M9 §3b/§9). Asserting an unvalidated divisor would violate #1/#4. This is the multilevel sibling of
+  the M20/ADR-030 occasion-averaged-ragged divisor question; the 2026-07-11 retro flagged that the remaining
+  ROADMAP work is exactly this class (🟣 research / Fable / heavy lifts), the clean-oracle parity engine being
+  exhausted. The user selected this item and the ship-or-abort acceptance shape at the 2026-07-12 plan gate.
+- Decision — M46 **resolves the open divisor question against a seeded simulation oracle and ships or keeps
+  the abort accordingly** (attempt-then-degrade, ADR-028/ADR-030 precedent):
+  - Estimand (inherited, M5/M9 §3b — unchanged): cluster-level ICC, signal σ²_c; **agreement** error
+    `{σ²_r, σ²_cr}`, **consistency** error `{σ²_cr}`; averaged form `σ²_c / (σ²_c + error / k_c^eff)`. The
+    only new object is the **per-cluster effective divisor `k_c^eff`**. The five-component fit, the
+    cluster-level rater-bridging identifiability gate (already shipped for `ICC(c,1)`), `ICC(c,1)` itself, the
+    boundary-aware MC CI, and the complete-data `ICC(c,k)` (M5) are all **unchanged**.
+  - Scope IN: crossed Design 1, **random raters**, cluster level, **average unit** on **incomplete/ragged**
+    data, glmmTMB + lme4. Add a cluster-level `k_c^eff` to the estimand's per-component `error_divisors`
+    (`R/estimand.R`) threaded when `level = "cluster"` & `unit = "average"` under imbalance; replace the
+    `abort_unsupported` at `R/icc.R` ~L1188 with the computed average; surface `k_c^eff` in the report.
+  - **The research question / oracle strategy (no textbook — #1 requires an independent method).** A committed
+    seeded incomplete-multilevel simulation with **known** σ²_c/σ²_r/σ²_cr/σ²_res (M5 §5 regime + MCAR/MAR cell
+    deletion) computes the **population reliability of the realized ragged cluster means** — the target a single
+    reported `ICC(c,k)` must recover — as a population value given the realized design, and checks **which
+    candidate divisor's plug-in Φ(k_c^eff) recovers it** within tolerance across a battery of imbalance patterns
+    **and a swept cluster-count axis** ([[coverage-oracle-cluster-count-axis]] — the incidental-parameters mode
+    is invisible at few clusters). Expected structural result, mirroring subject-level §5: the **per-cluster
+    harmonic-mean `k_c^eff`** is **exact for consistency** (one error term, σ²_cr) and an **effective-`k`
+    approximation for agreement** (the global rater main effect σ²_r reduces only under the GT "fresh raters"
+    reading); the study confirms-or-refutes this and rules the other candidates in/out (including whether the
+    subject-level `k_eff` coincidentally suffices).
+  - Oracles (#1, ≥2 independent): **O-cluster-sim** (primary — population recovery + divisor discrimination,
+    above); **O-cluster-lme4** (cross-engine — lme4 reproduces the five components on the same ragged data
+    < 1e-4; the divisor is applied post-fit so this pins the components feeding the coefficient);
+    **O-cluster-reduction** (on complete data `k_c^eff = k` and every path reproduces the M5 Design-1
+    `ICC(c,k)` exactly). Coverage: the boundary-aware MC interval covers the population `ICC(c,k)` at nominal
+    rate, swept across the cluster-count axis (n_rep ≥ 240 — [[ragged-coverage-nrep-240]]). Invariants: ∈[0,1],
+    average ≥ single, CI always present (#3).
+  - **Attempt-then-degrade (ADR-028/ADR-030):** if **no** candidate divisor recovers the population reliability
+    within a defensible tolerance across the battery, M46 ships **no** averaged coefficient — the classed abort
+    stays (its message updated to cite the study) and the negative finding is documented in the M9 spec + this
+    ADR's follow-up, exactly as M20/ADR-030 handled the occasion sibling. Deferral is a ROADMAP fact, not a new
+    rejection D-entry.
+  - **RB tripwire: `no-oracle` — Fable escalation is offered, not taken.** The correctness of the divisor
+    choice rests on a simulation study with no textbook oracle (statistical-correctness / no-oracle, #19). Per
+    the gate, the plan tags T1/AC1 inline; `/milestone-implement` (or `/verify-estimator`) **recommends** a
+    Fable review and **stops** for the maintainer's per-instance approval (D-004 — no standing authorization).
+    The review is warranted when the study is ambiguous, discriminates only weakly, or the maintainer wants the
+    correctness call blessed; a cleanly-discriminating study with all oracles nominal may ship without it. This
+    mirrors the M27/M32 gated-review pattern for divisor/correction questions.
+- Scope OUT (where the remainder lives): **brms** cluster-level `ICC(c,k)` parity — the divisor is
+  engine-agnostic (applied post-fit to the posterior draws' components), so it *may* fold in cheaply like
+  M45's T4-into-T2, but it is not a scope commitment; deferred to a candidate row unless it lands for free
+  (ROADMAP). **lavaan** cluster-level average — blocked on the multilevel-SEM lift (ROADMAP, unchanged).
+  **Incomplete/unbalanced cluster-level *fixed*** `ICC(c,k)` — still double-blocked (ten Hove's open small-`k`
+  estimator *and*, until M46 lands, this very divisor); M46 lifting the random-rater half **removes one of its
+  two blocks** but does not schedule it (ROADMAP). **Occasion-averaged ragged replicates** (ADR-030) and the
+  **`d_study()` ragged-replicate occasion projection** (blocked on that) — the replicate sibling, separate item
+  (ROADMAP).
+- Consequences: `ICC(c,1)`, subject-level, and all balanced/complete paths are untouched (regression-guarded).
+  If M46 ships the average, `print`/`summary`/`glance` gain a cluster-level `k_c^eff` display and one new
+  coefficient appears where an abort was (#6 additive — no existing computed value changes); the `d_study()`
+  cluster-level ragged abort (`R/d-study.R` ~L206) may then be revisitable (not in scope here).
+- References: ten Hove, Jorgensen & van der Ark (2022), *Psychological Methods, 27*(4) (the multilevel
+  estimand; its own small-`k`/incomplete cluster estimator is flagged open); McGraw & Wong (1996),
+  *Psychological Methods, 1*(1), 30–46 (the two-way ICC family the divisor generalizes). ADR-008 (subject-level
+  `k_eff` under imbalance — the pattern this extends to the cluster), ADR-018 (M9 — `ICC(c,1)` shipped,
+  `ICC(c,k)` deferred), ADR-028 (attempt-then-degrade), ADR-030 (the occasion sibling's ship-or-abort
+  precedent), ADR-046/047 (M36/M37 — the fixed-nested/cluster divisor resolutions), ADR-054 (defaulted-`type`
+  drop policy — the abort this may turn into a computed cell). PRINCIPLES.md #1/#4 (simulation oracle, no
+  guessed divisor), #2 (estimand named), #3 (boundary-aware CI reused), #5/#8 (abort retained on degrade or for
+  the still-out cells), #12 (coverage), #18 (honest effective-`k` framing), #19 (Fable gate). [[coverage-oracle-cluster-count-axis]],
+  [[ragged-coverage-nrep-240]], [[cluster-icc-no-subject-facet]], [[milestone-branches-and-prs]],
+  [[verify-against-installed-package]].
+- Spec: resolves the open question in [`M9-incomplete-multilevel.md`](estimand-specs/M9-incomplete-multilevel.md)
+  §3b/§9 — a §10 (resolution) authored at implementation recording the validated divisor (or the negative
+  finding) with the battery, tolerances, and page/table anchors.
