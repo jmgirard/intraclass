@@ -166,10 +166,10 @@ defined formulation – <code>ICC(A,1)</code>, <code>ICC(A,k)</code>, <code>ICC(
 the single fit (agreement vs. consistency is post-fit arithmetic on the same
 variance components, so the second definition is free). Pass a single value to
 report just that coefficient once you have named your estimand. A definition
-that is undefined for the design (e.g. <code>"consistency"</code> for the conflated
-diagnostic, or a fixed-rater agreement projection to a different rater count)
-is dropped with a message when reached via the default, and aborts with a
-teaching error when requested explicitly. Not applicable when
+that is undefined for the design (e.g. <code>"consistency"</code> for a Design-3
+nested-in-subjects fit, or a fixed-rater agreement projection to a different
+rater count) is dropped with a message when reached via the default, and aborts
+with a teaching error when requested explicitly. Not applicable when
 <code>model = "oneway"</code>.</p></dd>
 
 
@@ -409,15 +409,17 @@ you will make (about a subject, or about a cluster). The agreement/consistency
 and single/average choices above apply at each level.</p>
 <p><code>level = "conflated"</code> reports the <strong>biased single-level ICC</strong> you would get by
 <em>ignoring</em> the clustering (ten Hove et al. 2022, Eq. 14): between- and
-within-cluster subject variance are both counted as signal, and all three
-rater-related terms as error. It is offered only as a <strong>diagnostic contrast</strong> –
-to quantify how much the nesting distorts reliability – and is never a
-recommended coefficient; <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> flags it as such. It is absolute-agreement
-only (Eq. 14 has no consistency form) and needs a crossed (Design 1) random-rater
-design; it works on both balanced and <strong>incomplete</strong> data (on ragged data it is the
-flat two-way ICC read off the multilevel fit, with the same <code>k_eff</code> divisor).
-Request it alongside the correct levels, e.g.
-<code>level = c("subject", "cluster", "conflated")</code>.</p>
+within-cluster subject variance are both counted as signal, and the rater-related
+terms as error. It is offered only as a <strong>diagnostic contrast</strong> – to quantify how
+much the nesting distorts reliability – and is never a recommended coefficient;
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> flags it as such. It is the <strong>flat two-way ICC</strong> read off the multilevel
+fit, so it comes in both <code>type</code> forms: absolute agreement (Eq. 14) and
+<strong>consistency</strong> (which drops the rater main-effect variance, McGraw &amp; Wong 1996).
+It needs a crossed (Design 1) random-rater design and works on both balanced and
+<strong>incomplete</strong> data (same <code>k_eff</code> divisor). Because it reads the cluster-by-rater
+variance, it needs raters that bridge clusters; without bridging the conflated
+level is dropped (like the cluster level). Request it alongside the correct levels,
+e.g. <code>level = c("subject", "cluster", "conflated")</code>.</p>
 <p>The design is <strong>inferred from the data</strong> (ten Hove et al. 2022, Table 2). If
 raters are crossed with clusters (each rater rates in every cluster) the
 five-component model above is used (Design 1). Because the design is read from
