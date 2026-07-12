@@ -78,8 +78,12 @@ vr <- 0.20
 vcr <- 0.20
 vres <- 0.50
 
-# inverse-Simpson harmonic k_c^eff, computed INDEPENDENTLY of R/design.R (the
-# oracle's own truth, matching data-raw/oracle-cluster-ck-coverage.R).
+# inverse-Simpson harmonic k_c^eff, re-derived inline (matching R/design.R's
+# cluster_k_eff and data-raw/oracle-cluster-ck-coverage.R). The same k_c^eff enters
+# BOTH the population target and the CI-side estimand, so it cancels -- coverage
+# validity does not rest on this divisor (itself Fable-blessed in M46, ADR-057 Am.1);
+# what the oracle tests is the posterior push-forward + interval, against a truth
+# built from the KNOWN DGP components (vc/vr/vcr), which is genuinely fit-independent.
 k_c_eff_ref <- function(d) {
   per <- tapply(seq_len(nrow(d)), d$cluster, function(ix) {
     w <- as.numeric(table(droplevels(d$rater[ix])))

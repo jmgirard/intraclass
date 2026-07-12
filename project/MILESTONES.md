@@ -2183,3 +2183,19 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     `pkgdown::check_pkgdown()` clean / full CI-mode suite (`NOT_CRAN=true CI=true`) **408/0/0** (23 live-Stan skip) /
     `devtools::check` CI-parity (`NOT_CRAN=true CI=true`, no-manual) **0/0/0** / installed-pkg drive of the new brms
     ragged cluster `ICC(c,k)` cell OK (`k_c_eff`=3.90, both types present). PR next.
+  - 2026-07-12 — **REVIEW (PR [#53](https://github.com/jmgirard/intraclass/pull/53)).** Fresh per-AC evidence:
+    **AC1** installed-pkg drive returns brms ragged cluster `ICC(A,k)`/`ICC(C,k)` (`k_c_eff`=3.90) + focused live
+    validation (8/8 glmmTMB M46 points inside the brms CIs); **AC2** CI-mode suite 408/0/0 incl. the untouched
+    fixed-incomplete-cluster refusal test — balanced/`ICC(c,1)`/subject byte-unchanged; **AC3** O-Bayes-cluster-ck
+    reduction cell coverage .946/.963 at `k_c_eff`=5 + live containment; **AC4** committed sweep nominal
+    (.942–.963 across complete/low-/high-`C_n`, n_rep=240, few-cluster bias resolves −7.9%→−1.4%); **AC5** full
+    gate green (above). Consistency gate: `document` no diff, README in sync, `data-raw` `.Rbuildignore`'d, NEWS
+    dev-heading bullet present (no milestone number), pkgdown clean, every AC→existing task. **Independent review
+    — two fresh-context lenses, both clean (0 findings):** [O] diff-bug (control-flow trace: guard removal safe,
+    fixed/nested/non-bridging/D-study all intercepted upstream, no NA-divisor leak; oracle non-circular; tests
+    sound) + [S] blame-history (the guard was an explicitly-temporary M46 fence, ADR-058 pre-authorized the exact
+    lines, test inversion is the planned flip, fixed cell untouched). No findings ≥80 → **scorer not needed.**
+    Three non-blocking observations logged: (1) oracle drives internals not `icc()` end-to-end — routing covered
+    by the live containment test [no action]; (2) the "computed INDEPENDENTLY" divisor comment overstated (it's a
+    re-derivation that cancels) → **fixed** (comment corrected, #4); (3) containment `match()`+`na.rm` can't be
+    exploited (`index` is the literal `"k"`, presence separately asserted) [no action]. Awaiting green CI on #53.
