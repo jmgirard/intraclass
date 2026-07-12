@@ -776,12 +776,69 @@ test_that("O-Bayes-IML: committed reference covers ragged crossed multilevel ran
   expect_gte(rag$coverage_subjk, 0.88)
 
   # (4) CLUSTER ICC(c,1) is CHARACTERIZED, not pinned nominal (the M24 few-cluster caveat):
-  #     ragged coverage tracks the complete cell. ICC(c,k) is dropped-with-note (not tallied).
+  #     ragged coverage tracks the complete cell. This fixture tallies only ICC(c,1); the
+  #     averaged cluster ICC(c,k) now ships for brms (M47) and is pinned in O-Bayes-cluster-ck
+  #     below (its own committed sweep across the cluster-count axis).
   expect_gte(rag$coverage_clus1, cmp$coverage_clus1 - 0.06)
 
   # (5) Subject MAP tracks the population in both cells (small skew, the M23/M26 posture).
   expect_lt(abs(cmp$map_subj1_relbias), 0.10)
   expect_lt(abs(rag$map_subj1_relbias), 0.12)
+})
+
+# --- O-Bayes-cluster-ck: committed ragged CLUSTER ICC(c,k) coverage reference (no brms, M47) ---
+# The averaged cluster-level ICC(c,k) on incomplete/ragged crossed (Design 1) data now ships for
+# brms too (M47, ADR-058 -- the inverse-Simpson k_c^eff applied to the posterior draws' components,
+# a variance-ratio push-forward, so NO theta^2 functional and NO 2b moment correction: the M30
+# regime). data-raw/oracle-bayesian-cluster-ck.R runs the ten Hove (2022) five-component crossed DGP
+# through the SHIPPED brms recipe over a cluster-count SWEEP -- a COMPLETE reduction cell (k_c^eff = k),
+# a low-C_n ragged cell, and a HIGH-C_n ragged cell ([[coverage-oracle-cluster-count-axis]]) -- at
+# n_rep = 240 + per-rep seeding ([[ragged-coverage-nrep-240]]), the design FROZEN per cell so the
+# population target is defined per realized design (the M36 pattern). It commits per-cell agreement +
+# consistency ICC(c,k) coverage + MAP relbias + convergence. The independent point oracle is the
+# frequentist glmmTMB M46 estimator (ADR-057, Fable-blessed); its containment is pinned in the live
+# O-Bayes-cluster-ck-containment test. Fast, no fitting, runs on every CI job. The cluster level
+# inherits the M24 few-cluster caveat, so its ragged coverage is CHARACTERIZED (tracks the complete
+# cell, firms toward nominal as N_c grows), not pinned nominal at small N_c (#18). A real shortfall
+# at the high-C_n cell is REPORTED and gates a Fable review (#19, ADR-058), never tuned away (#4).
+test_that("O-Bayes-cluster-ck: committed reference covers ragged cluster ICC(c,k) random data", {
+  fixture <- test_path("fixtures", "bayesian-cluster-ck-oracle.rds")
+  skip_if_not(
+    file.exists(fixture),
+    "run data-raw/oracle-bayesian-cluster-ck.R (M47_NREP=240) to generate"
+  )
+  s <- readRDS(fixture)$stats
+  cmp <- s[s$complete, ]
+  rlo <- s[s$cell == "ragged low-C_n", ]
+  rhi <- s[s$cell == "ragged high-C_n", ]
+
+  # The ragged cells exercise the divisor: k_c^eff strictly below k = 5; complete equals k.
+  expect_equal(cmp$k_c_eff, 5)
+  expect_lt(rlo$k_c_eff, 5)
+  expect_lt(rhi$k_c_eff, 5)
+  expect_gt(rhi$C_n, rlo$C_n)
+
+  # (1) High convergence at the half-t DGP across the sweep.
+  expect_gte(min(s$converged_frac), 0.85)
+
+  # (2) REDUCTION: on complete data k_c^eff = k, so cluster ICC(c,k) coverage is ~nominal --
+  #     the baseline the ragged cells are judged against (agreement AND consistency).
+  expect_gte(cmp$coverage_A, 0.88)
+  expect_lte(cmp$coverage_A, 1.00)
+  expect_gte(cmp$coverage_C, 0.88)
+
+  # (3) RAGGED COVERAGE (the M47 unknown, #1/#18): random raters give a clean variance-ratio
+  #     push-forward (no 2b), so ragged coverage tracks the complete cell within Monte-Carlo
+  #     error. The M24 few-cluster caveat resolves along the cluster-count axis -- the HIGH-C_n
+  #     cell reaches ~nominal for both agreement and consistency.
+  expect_gte(rlo$coverage_A, cmp$coverage_A - 0.08)
+  expect_gte(rhi$coverage_A, 0.88)
+  expect_gte(rhi$coverage_C, 0.88)
+
+  # (4) MAP tracks the population; the cluster level may skew low at small N_c (the caveat),
+  #     tightening as N_c grows -- the honest posture, not pinned tight at low C_n (#18).
+  expect_lt(abs(cmp$map_A_relbias), 0.10)
+  expect_lt(abs(rhi$map_A_relbias), 0.12)
 })
 
 # --- O-Bayes-INML-clusters: committed ragged NESTED D2 coverage reference (no brms, M32 S1) ---

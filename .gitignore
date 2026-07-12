@@ -10,3 +10,4 @@ tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
 data-raw/.oracle-bayesian-multilevel-checkpoint.rds
 data-raw/.oracle-bayesian-incomplete-fixed-nested-checkpoint.rds
+data-raw/.oracle-bayesian-cluster-ck-checkpoint.rds

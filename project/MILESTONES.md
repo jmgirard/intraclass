@@ -2163,3 +2163,15 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     the untouched balanced brms cluster path (M24 — the guard only ever fired on `!balanced`); the committed
     `data-raw/oracle-bayesian-cluster-ck.R` (reduction + coverage fixture) folds entirely into **T2** rather than
     a near-duplicate of the M30 IML oracle. AC scope unchanged.
+  - 2026-07-12 — **T2 DONE (AC3-reduction, AC4); coverage NOMINAL — the conditional-Fable branch did NOT fire.**
+    `data-raw/oracle-bayesian-cluster-ck.R` (live-Stan, `skip_on_ci` pattern) runs the five-component crossed DGP
+    through the shipped brms recipe over a cluster-count sweep — **complete** (reduction, k_c^eff=5), **ragged
+    low-C_n** (nc=15), **ragged high-C_n** (nc=45) — at **n_rep=240 + per-rep seeding**, design frozen per cell,
+    population target = M46's formula (independent `k_c_eff_ref`). Committed `bayesian-cluster-ck-oracle.rds` +
+    the fast CI test `O-Bayes-cluster-ck` (13 assertions). **Result:** coverage nominal across the sweep —
+    complete .946/.963, low-C_n .946/.946, high-C_n **.942/.946** (agreement/consistency); convergence .97–.99.
+    The M24 few-cluster caveat **resolves along the C_n axis** — MAP rel-bias −7.9% (nc=15) → **−1.4% (nc=45)** —
+    with coverage nominal throughout (the clean variance-ratio regime, no 2b). ALL PINS PASS → **no Fable**
+    (ADR-058 conditional escalation not triggered). Run cost: ~2h (720 live refits, Defender + a concurrent R CMD
+    check contending on 8 cores). `.gitignore` gains the checkpoint; the stale M30 IML comment repointed to this
+    oracle. AC scope unchanged.
