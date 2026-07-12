@@ -60,12 +60,14 @@ the package. The defaults give the two-way random, absolute-agreement
 library(intraclass)
 
 icc(ratings, score, subject, rater, seed = 2024)
-#> # Intraclass correlation: two-way random, absolute agreement
+#> ── Intraclass correlation: two-way random, absolute agreement ──────────────────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   index     estimate   95% CI
-#>   ICC(A,1)    0.290   [0.053, 0.715]
-#>   ICC(A,k)    0.620   [0.182, 0.910]
+#>   ICC(A,1)     0.290   [0.053, 0.715]
+#>   ICC(A,k)     0.620   [0.182, 0.910]
+#> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
 ```
@@ -80,16 +82,20 @@ exact call to run — no data or fitting required:
 
 ``` r
 choose_icc(model = "twoway", type = "consistency", unit = "average", raters = "random")
-#> # Recommended ICC
+#> ── Recommended ICC ─────────────────────────────────────────────────────────────
 #> Design: two-way random, consistency
+#> 
 #> Recommendation: ICC(C,k)
+#> 
 #> Why:
 #>   - Crossed (two-way): the same raters judge every subject.
 #>   - Consistency: only the rank order must match; a constant per-rater offset is forgiven.
 #>   - Average: you will act on the mean of your raters.
 #>   - Random raters: a sample you generalize beyond, to the rater universe they were drawn from.
+#> 
 #> Run this on your data:
 #>   icc(data, score, subject, rater, type = "consistency", unit = "average")
+#> 
 #> Notes:
 #>   - Complete vs. incomplete is automatic: icc() uses whatever ratings are present and projects ICC(*,k) to the effective number of ratings (k_eff). The design must stay connected, or icc() fails loudly.
 ```
@@ -116,14 +122,16 @@ icc(school, score, subject = pupil, rater = rater, cluster = classroom, seed = 2
 #>   (crossed with clusters, Design 1).
 #> ℹ If each cluster has its own raters, give them cluster-unique labels or pass
 #>   `design = "nested_in_clusters"`.
-#> # Intraclass correlation: multilevel two-way random, absolute agreement
+#> ── Intraclass correlation: multilevel two-way random, absolute agreement ───────
 #> Subjects: 60 in 12 clusters | Raters: 4 (random) | Observations: 240 (complete)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
+#> 
 #>   level      index     estimate   95% CI
-#>   subject    ICC(A,1)    0.322   [0.162, 0.484]
-#>   subject    ICC(A,k)    0.655   [0.436, 0.790]
-#>   cluster    ICC(A,1)    0.870   [0.005, 0.973]
-#>   cluster    ICC(A,k)    0.964   [0.018, 0.993]
+#>   subject    ICC(A,1)     0.322   [0.162, 0.484]
+#>   subject    ICC(A,k)     0.655   [0.436, 0.790]
+#>   cluster    ICC(A,1)     0.870   [0.005, 0.973]
+#>   cluster    ICC(A,k)     0.964   [0.018, 0.993]
+#> 
 #> Variance components: cluster 1.036, subject 0.305, rater 0.150, cluster:rater 0.005, residual 0.492
 #> 
 #> This message is displayed once per session.

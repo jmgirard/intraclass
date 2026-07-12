@@ -1,8 +1,9 @@
 # Project status
 
-- Active milestone: **M43 IN PROGRESS** (branch `m43-cli-polish`; 2026-07-11) — **cli presentation polish:
-  interactive `choose_icc()` decision tree + `print`/`summary` aesthetics** (board in
-  [`MILESTONES.md`](MILESTONES.md) M43; **ADR-053 authored** at implement-start after the retro). Scoped from a maintainer request via a four-question plan gate:
+- Active milestone: **M43 IN REVIEW** (branch `m43-cli-polish`; all 3 slices done, local gate green 2026-07-12) —
+  **cli presentation polish: interactive `choose_icc()` decision tree + `print`/`summary` aesthetics** (board in
+  [`MILESTONES.md`](MILESTONES.md) M43; ADR-053 authored). **Next: open the PR from `m43-cli-polish`**; on green
+  CI + merge approval, reconcile M43 → done + set "Last green CI". Scoped from a maintainer request via a four-question plan gate:
   **(S1)** restyle `format.icc()` (shared by `print.icc`/`summary.icc`) from `cli_verbatim` monospace into
   **tasteful medium** cli (rule header, aligned coefficient table, estimate emphasized / CI dimmed, styled
   notes) — degrading to plain deterministic text under no-colour/knitr/CRAN; **(S2)** turn `choose_icc()`'s
@@ -308,8 +309,12 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M43 S3 — ADR-053 + NEWS + vignette/pkgdown re-render + finish-task gate → PR** (next, on
-  `m43-cli-polish`). *Superseded (S2, DONE 2026-07-11):* `choose_icc()` walkthrough restyled — rule intro +
+- Active task: **none — M43 all 3 slices done, local gate green, PR pending.** Next action: **open the PR from
+  `m43-cli-polish`**; on green CI + merge approval, reconcile M43 → done + set "Last green CI". *Superseded (S3,
+  DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
+  blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
+  `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
+  2026-07-11):* `choose_icc()` walkthrough restyled — rule intro +
   per-question pointer/bold header + numbered options + running "So far:" breadcrumb
   (`choose_icc_breadcrumb()`); `format.icc_recommendation()` restyled (rule header, sectioned, print joins `\n`);
   resolver core + `ask=`/`prompt_line` seam untouched (all existing correctness tests pass unmodified); two

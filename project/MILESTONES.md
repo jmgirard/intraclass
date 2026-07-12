@@ -1629,10 +1629,18 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         Two reproducible-output snapshots added (styled walkthrough via mocked `prompt_line`; multilevel
         recommendation print) — captured plain ASCII at width 80, proving clean degradation. `air`/`lintr`
         clean; choose-icc/icc-methods/autoplot suites green (0 fail / 0 warn). *(AC3, AC4)*
-  - [ ] **S3 — ADR-053 + NEWS + vignette/pkgdown re-render + finish-task gate → PR.** Short retro → ADR-053
-        (keep-name, one-milestone/two-slices, medium restyle, breadcrumb tree, presentation-only); NEWS bullet;
-        WORDLIST if new terms; re-render vignettes that display printed objects + `pkgdown::check_pkgdown()`;
-        finish-task gate; open PR from `m43-cli-polish`. *(AC5, AC6)*
+  - [x] **S3 — ADR-053 + NEWS + vignette/pkgdown re-render + finish-task gate → PR.** DONE (2026-07-12).
+        ADR-053 authored at start; NEWS bullet added (styled cli output, degrades to plain — values unchanged);
+        WORDLIST += `cli`/`knitr`/`walkthrough`. Static-output re-render: three hand-pasted `eval=FALSE` **brms**
+        blocks (`engines.Rmd` ×1, `interval-methods.Rmd` ×2) updated to the new rule header + blank-line spacing +
+        1-space column shift; `README.md` **rebuilt** via `build_readme()` (live chunks → new style, incl. the
+        `choose_icc()` rule header). Live vignette chunks re-knit to the new form automatically (verified via a
+        knit probe: unicode `── … ──` rule + blanks). **Finish-task gate GREEN:** `devtools::document` no delta,
+        `air format --check` clean, `lintr::lint_package()` **0 lints**, `spelling` clean,
+        `pkgdown::check_pkgdown()` clean, **`devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`)
+        0/0/0** (all eight vignettes built, full suite passed). Installed-pkg drive: `R CMD INSTALL` +
+        `library(intraclass)` print.icc / choose_icc render correctly ([[verify-against-installed-package]]).
+        *(AC5, AC6)*
 - **Coverage (criterion → slice):** AC1 → S1 · AC2 → S1 · AC3 → S2 · AC4 → S2 · AC5 → S1,S2,S3 · AC6 → S3.
 - Deferred out of M43 (record so not rediscovered): the **v0.2.0 release consolidation / CRAN upload** (ADR-022,
   still the next sequenced step after M43); a `suggest_icc()` **rename/alias** (maintainer kept `choose_icc()` at
@@ -1640,6 +1648,8 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   breadcrumb walkthrough without nav); a **full restyle** (boxes/panels/colour badges — plan gate chose tasteful
   medium); a `fit=`/data-in path, `tidy`/`glance` on the recommendation, GUI/Shiny fronts (all long-parked out of
   ADR-021); every untouched carryover stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress** (branch `m43-cli-polish`; 2026-07-11) — scoped from a maintainer request (interactive
-  tree + prettier print) via a four-question plan gate; **retro done, ADR-053 authored**. Now on **S1**. **No
-  Fable** (no RB tripwire: no new oracle, no exported-API change, no IP touched — presentation only).
+- Status: **review** (branch `m43-cli-polish`; all 3 slices done, local gate green 2026-07-12) — awaiting PR CI +
+  merge approval. Scoped from a maintainer request (interactive tree + prettier print) via a four-question plan
+  gate; retro done, ADR-053 authored. **No Fable** (no RB tripwire: no new oracle, no exported-API change, no IP
+  touched — presentation only). Local finish-task gate GREEN: `devtools::check` CI-parity 0/0/0, `lintr` 0,
+  `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven.

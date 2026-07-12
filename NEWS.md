@@ -208,6 +208,11 @@ alternate engines, and seeded simulations.
 * `autoplot()` / `plot()` methods for `icc` objects draw a coefficient forest plot
   and a variance-component decomposition; `tidy()` / `glance()` give tidy summaries.
   Plotting needs `ggplot2` (a `Suggests` dependency).
+* Console output is styled with **cli**: `print()` / `summary()` show a rule header and
+  an aligned coefficient table with the point estimate emphasized and the interval
+  dimmed, and `choose_icc()`'s interactive walkthrough is a guided decision tree that
+  displays your choices so far. Styling degrades to plain text wherever it is
+  unavailable (knitr, CRAN, a non-interactive session), so printed values are unchanged.
 
 ## Data and documentation
 
