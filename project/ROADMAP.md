@@ -57,11 +57,13 @@ helpers* item below (sample-size / CI-width), where it belongs.
   conflated ICC (`level = "conflated"`), sourced to ten Hove et al. (2022) **Eq. 14**;
   the paper publishes only the agreement form. A *consistency*-conflated number
   (drop σ²_r from the error set) is the natural symmetric extension but is **not in
-  the paper**. **Status: investigate whether a sourced or faithfully-derivable
-  consistency form exists** (an oracle strong enough for #1/#4 — closed form, or a
-  reduction that pins it) before exposing `type = "consistency"` + `level =
-  "conflated"`; today that combination aborts (ADR-026). Do **not** ship a guessed
-  formula (#4).
+  the paper**. **Status: SCHEDULED as M45** (ADR-056, planned 2026-07-12). The plan-gate
+  investigation resolved the #1/#4 oracle question: the conflated collapse is definitionally
+  "treat the data as flat two-way" (M17 §2; M18 §6a proved agreement-conflated ≡ flat two-way
+  *agreement* ICC), so the consistency form is the **flat two-way *consistency* ICC** — the
+  sourced McGraw & Wong (1996) ICC(C,1)/ICC(C,k), dropping σ²_r — read off the multilevel fit,
+  not a guessed formula (#4). Full scope in [`MILESTONES.md`](MILESTONES.md) M45; ships on an
+  attempt-then-degrade posture (ADR-028) with the abort retained if the oracle unexpectedly fails.
 - Design/power helpers (how many raters/subjects for a target CI width).
   **Status: not ready — needs a scope decision first.** The CI-width-target
   flavor has no independent oracle (correctness would rest on simulation

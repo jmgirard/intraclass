@@ -145,9 +145,11 @@ slice adds a `level` value and touches no fit or CI path.
 ## 6. Out of scope (recorded for forward-compatibility)
 
 - **Consistency-conflated ICC** — dropping σ²_r from the error set. Not in the
-  paper; deferred to the ROADMAP investigation item (find a sourced or faithfully-
-  derivable form with an oracle strong enough for #1/#4 before shipping). Aborts
-  today.
+  paper; **SCHEDULED as M45 (ADR-056)** — the plan-gate investigation resolved the
+  #1/#4 oracle question (it is the flat two-way *consistency* ICC read off the fit,
+  sourced McGraw & Wong 1996, the symmetric twin of the §6a agreement derivation;
+  drop σ²_r → error = σ²_cr + σ²_{(s:c)r}). A §6b lands with the M45 implementation.
+  Aborts today until M45 ships.
 - **Conflated ICC for nested Designs 2/3** — no cluster level, no Eq. 14 analogue.
 - **Incomplete-data conflated ICC** — ~~a later question, not opened here~~ **resolved
   and shipped in M18 Slice 2 (ADR-028); see §6a.**

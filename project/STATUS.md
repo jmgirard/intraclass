@@ -1,5 +1,13 @@
 # Project status
 
+- **M45 planned (2026-07-12, ADR-056):** the *consistency-conflated single-level ICC* — drop σ²_r from the
+  agreement-conflated error → the **flat two-way consistency ICC** read off the multilevel fit (sourced
+  McGraw & Wong 1996, the symmetric twin of the M18 §6a agreement derivation; **not a guessed formula**, #4).
+  Scope: crossed Design 1, random raters, single+average, **balanced + incomplete/ragged**, glmmTMB/lme4/brms
+  (variance ratio — no θ² moment correction). Oracles O-cc-Eq14-analogue / O-cc-lme4 / O-cc-population /
+  O-cc-brms; **no Fable** (sourced oracle, additive, no IP). Ships on `m45-conflated-consistency` via the
+  implement path (attempt-then-degrade, ADR-028 — abort stays if the oracle unexpectedly fails). No active
+  milestone until started. See [`MILESTONES.md`](MILESTONES.md) M45 + ADR-056.
 - **Version reverted to dev (2026-07-12, ADR-055):** `DESCRIPTION` `0.2.0 → 0.0.0.9000`; top NEWS heading
   → `# intraclass (development version)`. Real version numbers are applied **only at the actual CRAN
   release**, and the **first CRAN submission is `0.1.0`** (supersedes ADR-054/M44's 0.2.0 framing — M44

@@ -4694,3 +4694,63 @@ consequences → references.
 - References: ADR-022 (release plan / version-at-release — this refines its timing: the sentinel lives at
   dev until the release milestone), ADR-054/M44 (the 0.2.0 framing superseded here; vectorized-`type`
   behavior unchanged). PRINCIPLES.md #16 (tracking travels with the change).
+
+## ADR-056: M45 scope — consistency-conflated single-level ICC
+- Date: 2026-07-12
+- Status: accepted (opens M45)
+- Context: `level = "conflated"` ships the *absolute-agreement* single-level ICC a naive analyst gets by
+  ignoring a multilevel design's clustering (ten Hove et al. 2022, Eq. 14) — M17 Slice 1 (balanced,
+  ADR-026) + M18 Slice 2 (incomplete/ragged, ADR-028), across glmmTMB/lme4, plus the brms variance-ratio
+  push-forward (M29/ADR-039). The **consistency** form — the same collapse with the rater main effect σ²_r
+  dropped from the error set — has never shipped: the paper publishes only the agreement Eq. 14, so
+  `type = "consistency"` + `level = "conflated"` aborts (M17 §6), and under M44's defaulted `type` vector
+  that cell informs-and-drops (ADR-054 AC3). The ROADMAP parked it behind a hard gate: ship only if a
+  **sourced or faithfully-derivable** form with an oracle strong enough for #1/#4 exists — never a guessed
+  formula (#4).
+- Investigation finding (plan, 2026-07-12): the gate is met. The conflated operation is *definitionally*
+  "treat the multilevel data as a flat two-way subject×rater design" (M17 §2; M18 §6a proved the
+  agreement-conflated ICC **equals the flat two-way agreement ICC** read off the five-component fit). The
+  flat two-way design has BOTH agreement and consistency forms — the standard McGraw & Wong (1996)
+  ICC(C,1)/ICC(C,k), already shipped and oracle-backed at the single level. Collapsing the five components,
+  the flat "residual" is σ²_cr + σ²_{(s:c)r} and the rater main effect is σ²_r; flat consistency excludes
+  the rater main effect, so **consistency-conflated error = σ²_cr + σ²_{(s:c)r} (drop σ²_r)** and the
+  coefficient equals the **flat two-way consistency ICC** read off the multilevel fit — the exact symmetric
+  twin of the agreement derivation, on identical footing. It is therefore sourced and faithfully derivable,
+  not a guess. Estimand triple: `(signal = {c, s:c}, error = {cr, (s:c)r}, divisor = 1 | k_eff)`.
+- Decision — M45 lifts the consistency-conflated abort and ships the coefficient:
+  - Scope IN: crossed Design 1, **random raters**, single + average units, on **balanced/complete AND
+    incomplete/ragged** data (matching where agreement-conflated ships), across **glmmTMB, lme4, and brms**
+    (variance-ratio push-forward → no θ² moment correction, the M29 regime). One new component-map entry
+    (conflated × consistency → error set drops σ²_r); the fit, CI, `k_eff`, connectedness, drop-vs-abort,
+    and presentation paths are unchanged and already handle conflated-agreement.
+  - **Attempt-then-degrade posture (ADR-028 precedent):** the milestone's first task confirms the
+    flat-two-way-consistency oracle holds; if — against the analysis — it does not, the abort stays and M45
+    ships only the confirmation + docs, not a guessed number (#4). (Expected: it holds.)
+  - Oracles (mirroring the agreement-conflated set, #1 ≥2 independent): **O-cc-Eq14-analogue** — the shipped
+    value equals the closed-form drop-σ²_r formula on the object's reported five components to ~1e-10
+    (formula wiring); **O-cc-lme4** — cross-engine glmmTMB ≡ lme4 < 1e-4 (balanced + ragged);
+    **O-cc-population** — tracks the flat two-way **consistency** `icc()` (cluster dropped) at a loose
+    population tolerance (different models, #18) and stays visibly biased away from the correctly-partitioned
+    subject-level consistency ICC (the diagnostic's whole point); **O-cc-brms** — the frequentist glmmTMB
+    consistency-conflated point falls inside the brms credible interval (the M29 conflated pattern).
+    Invariants: ∈[0,1], average ≥ single, CI always present (#3), never `choose_icc()`-recommended (ADR-021),
+    rendered under the diagnostic-contrast heading (M17 §4).
+  - **No Fable:** the no-oracle tripwire does not fire (sourced McGraw & Wong consistency + formula identity +
+    cross-engine + population); the change is additive/non-breaking (lifts an abort — no irreversible-api
+    commitment); no IP touched.
+  - #6 note: a new coefficient appears where an abort/drop was; no existing computed value changes and no
+    existing explicit call is altered. Conflated snapshots regenerate (new consistency rows).
+- Consequences / still out (unchanged classed aborts): **fixed-rater** conflated (Eq. 14 is a random-rater
+  collapse — M17 §6), **nested Designs 2/3** conflated (no cluster level / no Eq. 14 analogue), and **lavaan**
+  conflated (lavaan is single-level only). These keep their teaching aborts on both balanced and ragged data.
+- References: ten Hove, Jorgensen & van der Ark (2022), *Psychological Methods, 27*(4), Eq. 14 (the agreement
+  collapse this mirrors); McGraw & Wong (1996), *Psychological Methods, 1*(1), 30–46 (the flat two-way
+  consistency ICC(C,1)/ICC(C,k) that is the sourced oracle). ADR-026 (M17 — agreement-conflated), ADR-028
+  (M18 — incomplete conflated + attempt-then-degrade), ADR-039 (M29 — brms conflated variance-ratio), ADR-054
+  (M44 — the defaulted-`type` drop policy this turns into a computed cell), ADR-021 (`choose_icc()` never
+  recommends it). PRINCIPLES.md #1/#4 (sourced oracle, no guessed formula), #2 (estimand named), #3
+  (boundary-aware CI reused), #5/#8 (aborts retained for the still-out cells), #6 (additive), #18 (honest
+  diagnostic framing). [[milestone-branches-and-prs]] (ships on `m45-conflated-consistency` via PR);
+  [[verify-against-installed-package]] (snapshot regeneration).
+- Spec: extends [`M17-conflated-icc.md`](estimand-specs/M17-conflated-icc.md) — a §6b authored at
+  implementation (the incomplete-agreement extension used the §6a precedent).

@@ -1791,3 +1791,60 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
   DESCRIPTION bumped **0.1.0 → 0.2.0** per ADR-054's 0.2.0 framing (final version + `cran-comments` stay the
   ADR-022 release-consolidation step). CI caught a class of `skip_on_cran` bootstrap D-study tests the local
   CRAN-mode gate could not ([[skip-on-cran-tests-need-not-cran-true]]) — fixed before merge.
+  **Post-ship (2026-07-12, ADR-055):** the 0.2.0 bump was reverted — `main` is `0.0.0.9000` (dev), first
+  CRAN submission `0.1.0`; M44's *behavior* is unchanged.
+
+## M45: consistency-conflated single-level ICC (ADR-056)
+- Goal: lift the `type = "consistency"` + `level = "conflated"` abort and ship the **consistency-conflated**
+  ICC — the flat two-way *consistency* ICC read off the multilevel five-component fit (signal σ²_c + σ²_{s:c};
+  error σ²_cr + σ²_{(s:c)r}, i.e. **drop the rater main effect σ²_r** from the agreement-conflated error). The
+  symmetric twin of the shipped agreement-conflated Eq. 14 (M17/M18): just as agreement-conflated equals the
+  flat two-way *agreement* ICC (M18 §6a), consistency-conflated equals the flat two-way *consistency* ICC —
+  the sourced McGraw & Wong (1996) ICC(C,1)/ICC(C,k) the package already ships at the single level — so it is
+  a **faithfully-derivable, sourced** coefficient, not a guess (#4). A diagnostic contrast (never recommended,
+  ADR-021), rendered under the conflated heading (M17 §4). Random raters, crossed Design 1, single + average,
+  **balanced AND incomplete/ragged**, across glmmTMB/lme4/brms (variance ratio — no θ² moment correction).
+- Priority: normal. Depends on: none (M44 shipped; conflated-agreement already ships across all target engines).
+- Reference: **ADR-056** (scoping). Spec: extends `estimand-specs/M17-conflated-icc.md` (a §6b at
+  implementation, per the §6a incomplete-agreement precedent). Source oracle: McGraw & Wong (1996) flat
+  two-way consistency ICC; ten Hove et al. (2022) Eq. 14 (the agreement collapse mirrored). **No Fable**
+  (sourced oracle; additive; no IP).
+- **Acceptance criteria** (each names the behavior that must be tested):
+  - **AC1 — Investigation confirms the oracle (attempt-then-degrade, ADR-028).** A committed derivation/check
+    establishes consistency-conflated = flat two-way consistency ICC on the reported components (drop σ²_r).
+    If it unexpectedly fails, the abort stays and M45 ships that finding + docs only (no guessed number).
+    *(Expected: holds.)*
+  - **AC2 — Coefficient ships (balanced).** `icc(..., cluster =, level = "conflated", type = "consistency")`
+    returns the consistency-conflated ICC (single + average) on balanced/complete crossed Design-1 data
+    instead of aborting; a default `level = "conflated"` call now reports **both** agreement and consistency
+    conflated (no longer informs-and-drops consistency, ADR-054 AC3). glmmTMB + lme4.
+  - **AC3 — Incomplete/ragged.** The same on incomplete/ragged crossed multilevel data (divisor the flat
+    `k_eff`; same connectedness / agreement-bridging gates as conflated-agreement, M18 §6a).
+  - **AC4 — brms.** `engine = "brms"` reports consistency-conflated (variance-ratio push-forward off the
+    crossed five-component posterior draws; no moment correction — M29 regime).
+  - **AC5 — Oracles (#1, ≥2 independent).** O-cc-Eq14-analogue (formula wiring, ~1e-10), O-cc-lme4
+    (cross-engine < 1e-4, balanced + ragged), O-cc-population (tracks the flat two-way consistency `icc()` at
+    loose tolerance + stays visibly biased vs the correct subject-level consistency ICC), O-cc-brms (glmmTMB
+    point inside the credible interval). Invariants: ∈[0,1], average ≥ single, CI always present (#3), never
+    `choose_icc()`-recommended (ADR-021).
+  - **AC6 — Still-out aborts unchanged.** Fixed-rater conflated, nested Designs 2/3 conflated, and lavaan
+    conflated keep their classed teaching aborts (#5/#8) on both balanced and ragged data — regression-tested.
+  - **AC7 — Docs + gate.** `@param` / conflated docs note the consistency form; a NEWS bullet (under the dev
+    heading); the multilevel/conflated vignette mention; conflated `_snaps` regenerate (new consistency rows,
+    every retained agreement number identical, [[verify-against-installed-package]]); finish-task gate green
+    (`air`/`lintr` 0 / `spelling` / `devtools::document` no delta / full CI-mode suite / `devtools::check`
+    CI-parity 0/0/0; installed-pkg drive of the new cell); `pkgdown::check_pkgdown()` clean.
+- **Tasks** (≤ one session each, dependency-ordered):
+  - T1 — Investigation + derivation check (AC1): confirm drop-σ²_r ≡ flat two-way consistency on the reported
+    components; write the check; if it fails, stop and re-plan as a docs-only "confirmed abort".
+  - T2 — Component map + guard lift (AC2, AC5 balanced): add the conflated × consistency error set (drop σ²_r)
+    to the estimand map; remove conflated-consistency from the agreement-only drop/abort surface; balanced
+    glmmTMB/lme4 + O-cc-Eq14-analogue / O-cc-lme4 / O-cc-population + invariants.
+  - T3 — Incomplete/ragged (AC3, AC5 ragged): route ragged conflated-consistency through the M18 §6a gates;
+    ragged oracles.
+  - T4 — brms (AC4, AC5 brms): extend the conflated brms push-forward to the consistency error set; O-cc-brms.
+  - T5 — Still-out regression + presentation (AC6, part AC7): assert the remaining conflated aborts; regenerate
+    conflated snapshots; author §6b of the spec.
+  - T6 — Docs + NEWS + finish-task gate (AC7) → PR from `m45-conflated-consistency`.
+- **Coverage:** AC1 → T1; AC2 → T2; AC3 → T3; AC4 → T4; AC5 → T2, T3, T4; AC6 → T5; AC7 → T5, T6.
+- Status: **planned** (ADR-056, 2026-07-12). Not started.
