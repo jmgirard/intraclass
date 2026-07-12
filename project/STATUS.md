@@ -1,8 +1,9 @@
 # Project status
 
-- Active milestone: **none in flight; M43 PLANNED** (2026-07-11) — **cli presentation polish: interactive
-  `choose_icc()` decision tree + `print`/`summary` aesthetics** (board in [`MILESTONES.md`](MILESTONES.md) M43;
-  ADR-053 to be authored at implement-start). Scoped from a maintainer request via a four-question plan gate:
+- Active milestone: **M43 IN REVIEW** (branch `m43-cli-polish`; all 3 slices done, local gate green 2026-07-12) —
+  **cli presentation polish: interactive `choose_icc()` decision tree + `print`/`summary` aesthetics** (board in
+  [`MILESTONES.md`](MILESTONES.md) M43; ADR-053 authored). **Next: open the PR from `m43-cli-polish`**; on green
+  CI + merge approval, reconcile M43 → done + set "Last green CI". Scoped from a maintainer request via a four-question plan gate:
   **(S1)** restyle `format.icc()` (shared by `print.icc`/`summary.icc`) from `cli_verbatim` monospace into
   **tasteful medium** cli (rule header, aligned coefficient table, estimate emphasized / CI dimmed, styled
   notes) — degrading to plain deterministic text under no-colour/knitr/CRAN; **(S2)** turn `choose_icc()`'s
@@ -308,8 +309,32 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **none started — M43 PLANNED, awaiting `/start-task` on `m43-cli-polish`** (retro → ADR-053 →
-  S1 print restyle → S2 interactive tree → S3 gate → PR). M42 shipped and merged (PR #48, `1baf7db`). After M43,
+- Active task: **none — M43 all 3 slices done, local gate green, PR pending.** Next action: **open the PR from
+  `m43-cli-polish`**; on green CI + merge approval, reconcile M43 → done + set "Last green CI". *Superseded (S3,
+  DONE 2026-07-12):* ADR-053 + NEWS bullet + WORDLIST (`cli`/`knitr`/`walkthrough`); three static brms vignette
+  blocks + `README.md` re-rendered to the new style; finish-task gate GREEN (`devtools::check` CI-parity 0/0/0,
+  `lintr` 0, `air`/`spelling`/`pkgdown` clean, installed-pkg print/choose_icc driven). *Superseded (S2, DONE
+  2026-07-11):* `choose_icc()` walkthrough restyled — rule intro +
+  per-question pointer/bold header + numbered options + running "So far:" breadcrumb
+  (`choose_icc_breadcrumb()`); `format.icc_recommendation()` restyled (rule header, sectioned, print joins `\n`);
+  resolver core + `ask=`/`prompt_line` seam untouched (all existing correctness tests pass unmodified); two
+  reproducible-output snapshots added (plain ASCII @ 80 cols); `air`/`lintr` clean. ADR-053 already authored at
+  start. *Superseded (S1, DONE 2026-07-11):* `format.icc()` restyled (medium cli — rule header, aligned table with estimate bold /
+  CI dim, muted meta+notes); fixed a latent `cli_verbatim` blank-line-drop so section spacing renders;
+  7 print-format snapshots regenerated (header-rule + blank lines + 1-space shift, **every number identical**,
+  `[CI]` mask kept); number-invariance claim test added; `air`/`lintr` clean; affected + autoplot/choose-icc/
+  multilevel/replicate suites green. S1 detail was: **M43 S1 — `print.icc` / `summary.icc` cli restyle** (started
+  2026-07-11). Retro + ADR-053 done. **Acceptance (S1 → AC1/AC2):** restyle `format.icc()` (shared by
+  `print`/`summary`) to tasteful-medium cli — `cli_rule` header, coefficient table aligned via
+  `cli::ansi_align`/`ansi_nchar` with the estimate emphasized + CI dimmed, styled meta/components/notes;
+  **degrade to deterministic 80-col plain text with ANSI off**; regenerate the 8 `_snaps/icc-*.md` under
+  reproducible cli output (keep the `[CI]` mask); add a claim test pinning every displayed estimate/CI-bound/
+  component to `tidy()`/`glance()` (the number-invariance oracle). Cover all print variants (two-way agreement/
+  consistency, one-way, multilevel subject/cluster/conflated, within-cell replicates, incomplete `k_eff`,
+  lavaan/lme4 headers). **Principles:** #1 (oracle = number-invariance vs `tidy()`), #6 (presentation-only, no
+  behavior change), #7 (explicit methods), #8 (all text via `cli`), #16 (snapshots in-commit),
+  [[verify-against-installed-package]] (reproducible-output snapshots + `[CI]` mask). **No Fable.** After S1: S2
+  interactive tree → S3 gate → PR. M42 shipped and merged (PR #48, `1baf7db`). After M43,
   the **v0.2.0 release consolidation** remains the next work (out-of-band release milestone, ADR-022): version
   bump `0.1.0`→`0.2.0`, add a `0.2.0` NEWS
   heading over the ~28 milestones accreted since M13, `cran-comments.md`, `R CMD check --as-cran`, then the CRAN

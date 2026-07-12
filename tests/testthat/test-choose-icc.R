@@ -378,6 +378,48 @@ test_that("ask_choice maps the entered number to the choice and re-asks on junk"
   )
 })
 
+# --- M43/ADR-053: styled walkthrough + recommendation (presentation) ----------
+#
+# These snapshot the *rendering* (rule header, pointer + question, numbered
+# options, running breadcrumb, sectioned recommendation). expect_snapshot() runs
+# under local_reproducible_output(), so the captured text is plain ASCII at width
+# 80 -- proving the styling degrades cleanly. The resolver + `prompt_line` seam
+# are unchanged; only presentation is asserted here.
+
+test_that("the interactive walkthrough renders a styled tree with a breadcrumb", {
+  replies <- c("1", "1", "2", "1", "1") # twoway, agreement, average, random, no
+  i <- 0L
+  testthat::local_mocked_bindings(
+    prompt_line = function(prompt) {
+      i <<- i + 1L
+      replies[i]
+    }
+  )
+  expect_snapshot(
+    invisible(collect_answers_interactively(
+      list(
+        model = NULL,
+        type = NULL,
+        unit = NULL,
+        raters = NULL,
+        multilevel = NULL,
+        level = NULL
+      )
+    ))
+  )
+})
+
+test_that("the recommendation prints with a rule header and sections", {
+  rec <- choose_icc(
+    type = "agreement",
+    unit = "both",
+    raters = "random",
+    multilevel = TRUE,
+    level = "both"
+  )
+  expect_snapshot(print(rec))
+})
+
 test_that("choose_icc() routes through the shell only when interactive", {
   # Interactive: the shell fires; a bare call is fully answered by the responder.
   testthat::local_mocked_bindings(

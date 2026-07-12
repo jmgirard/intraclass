@@ -31,6 +31,7 @@ Wiberg
 al
 asymptotics
 brms
+cli
 connectedness
 der
 doi
@@ -44,6 +45,7 @@ generalizability
 ggplot
 glmmTMB
 interrater
+knitr
 lavaan
 listwise
 lme
@@ -59,3 +61,4 @@ selectable
 tibble
 toolchain
 undercovered
+walkthrough
