@@ -1741,19 +1741,29 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         `icc_design_phrase` (header reads "…, absolute agreement & consistency"), and added a per-row
         `type` column to `estimates` + `tidy.icc`. Plain-text degradation verified at 80 cols.
         *(AC4, AC5 partial)*
-  - [~] **T4 — Invariance + policy tests + snapshot regen.** IN PROGRESS (2026-07-12). **Whole suite
-        GREEN (0/386, 53 skip).** Fixed every existing test that assumed the old agreement-only default:
-        choose-icc round-trip ×12 (via a real `build_icc_call` fix — the emitted call now always pins
-        `type=` so a copied recommendation reproduces the single coefficient, ADR-021), fixed/incomplete
-        multilevel, replicates, ~24 d-study tests (pinned `type = "agreement"` on their `icc()` inputs,
-        matching each single-type oracle), nested-multilevel, and 2 vignette-claim tests. **Still TODO:**
-        a dedicated invariance test (defaulted == scalar cell-for-cell across designs/engines/one
-        posterior path — verified manually, not yet committed), dedicated inform-and-drop/abort tests
-        per agreement-only surface, and snapshot regen for the grouped default table. *(AC2, AC3, AC4)*
-  - [ ] **T5 — Docs / NEWS / gate.** `@param type` + `d_study()` `@return`/`@section` (both-curves) +
-        vignette note (the d-studies article shows `d_study(icc(...))` — now two curves); NEWS
-        default-shape bullet + the `tidy()`-row-indexing caveat; WORDLIST if needed; finish-task gate +
-        installed-pkg drive. *(AC5, AC6)*
+  - [x] **T4 — Invariance + policy tests + snapshot regen.** DONE (2026-07-12). New
+        `test-icc-type-vector.R` (139 checks): the **number-invariance oracle** (defaulted `type` ==
+        scalar-type calls cell-for-cell — estimate + both CI bounds — across two-way random & fixed,
+        incomplete, multilevel subject & cluster, and the lme4 engine) + **drop-vs-abort tests for all
+        four agreement-only surfaces** (conflated, Design 3, fixed numeric-unit agreement, and the
+        connectedness guard-4 case). Also fixed a `summary.icc` note that had split onto two lines (now
+        rejoined → single-type byte-identical). Regenerated the 5 default-call snapshots under
+        reproducible cli output (methods/incomplete/lavaan/lme4 show the grouped table; choose-icc pins
+        `type=` in the emitted call) — every diff a shape change, every retained number identical. Also
+        fixed every existing test that assumed the old default (choose-icc round-trip ×12 via a real
+        `build_icc_call` fix; fixed/incomplete multilevel; replicates; ~24 d-study; nested-multilevel; 2
+        vignette-claim). **Whole suite GREEN (0/395 CRAN-mode; snapshot tests pass under `NOT_CRAN=true`).**
+        *(AC2, AC3, AC4)*
+  - [x] **T5 — Docs / NEWS / gate.** DONE (2026-07-12). `@param type` (vector default + filter +
+        drop-vs-abort), `d_study()` `@return` (one curve per error definition + `type` column); NEWS
+        **`# intraclass 0.2.0`** heading with the default-shape change + the `tidy()`-row-indexing caveat;
+        **DESCRIPTION bumped 0.1.0 → 0.2.0** (per ADR-054's 0.2.0 framing — flagged for maintainer; the
+        final version + `cran-comments` stay the ADR-022 release-consolidation step). getting-started +
+        README prose describe the four-formulation default (front-door showcase); d-studies (+ note),
+        multilevel, engines, interval-methods vignettes pinned `type = "agreement"` on teaching
+        prints/static output whose prose or `fig.alt` is agreement-focused. Gate: `air`/`lintr`/`spelling`
+        clean, `document` delta = icc.Rd/d_study.Rd only, `pkgdown::check_pkgdown()` clean, installed-pkg
+        drive OK, all vignettes knit. `devtools::check` CI-parity running → then PR. *(AC5, AC6)*
   - [x] **RESOLVED (user gate 2026-07-12): `d_study()` on a multi-type `icc` → project BOTH curves.**
         `d_study()` now threads a `type` axis through the projection grid (type-major), reusing the
         drop-vs-abort policy (fixed-agreement rater projection drops-and-informs under multi-type,

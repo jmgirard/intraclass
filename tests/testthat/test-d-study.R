@@ -907,7 +907,7 @@ test_that("O-RepDS/sim: population Phi(m) recovered and covered at an m not run"
   vsr <- 0.4
   ve <- 0.5
   d <- sim_rep_ds(60, 5, 3, vs, vr, vsr, ve, seed = 424242)
-  fit <- icc(d, score, subject, rater, seed = 1)
+  fit <- icc(d, score, subject, rater, type = "agreement", seed = 1)
   mm <- 8 # not the observed count (5)
   phi <- vs / (vs + (vr + vsr + ve) / mm) # single-occasion agreement at m = 8
   ds <- d_study(fit, m = mm, seed = 1)
