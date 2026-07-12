@@ -98,8 +98,10 @@ icc(school, score,
 The conflated value lands between the two correct levels and matches neither: it
 over- or under-states the reliability of any real decision. It is printed with a
 warning label and is **never** a coefficient to report — it exists only to quantify
-the cost of ignoring the structure. (It is absolute-agreement only, and needs a
-complete, crossed design.)
+the cost of ignoring the structure. (It is the flat two-way ICC read off the fit, so
+it comes in both an absolute-agreement and a consistency form; a default
+`level = "conflated"` call reports both. It needs a crossed, random-rater design with
+raters that bridge the clusters, and works on complete or incomplete data.)
 
 ## When raters are nested
 

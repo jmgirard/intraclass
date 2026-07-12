@@ -16,15 +16,23 @@
 * `d_study()` likewise projects **one reliability curve per error definition** the
   fitted `icc` reports, adding a `type` column to distinguish the curves; a
   single-type fit projects a single curve as before.
-* A definition that is undefined for the design (the conflated-level consistency
-  diagnostic, consistency for a Design-3 nested-in-subjects fit, a fixed-rater
-  absolute-agreement D-study projection, or absolute agreement when raters do not
-  bridge clusters) is dropped with an informative message when reached via the
-  default vector, and still aborts with a teaching error when requested explicitly.
+* A definition that is undefined for the design (consistency for a Design-3
+  nested-in-subjects fit, a fixed-rater absolute-agreement D-study projection, or
+  absolute agreement when raters do not bridge clusters) is dropped with an
+  informative message when reached via the default vector, and still aborts with a
+  teaching error when requested explicitly.
 
 ## Minor improvements
 
 * `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
+* The conflated diagnostic (`level = "conflated"`) now also reports a **consistency**
+  form (`type = "consistency"`), not just absolute agreement. It is the flat two-way
+  consistency ICC read off the multilevel fit (dropping the rater main-effect
+  variance, McGraw & Wong 1996) -- the symmetric twin of the agreement Eq. 14 -- so a
+  default `level = "conflated"` call now reports both. Random raters, crossed Design 1,
+  balanced or incomplete, across the `glmmTMB`, `lme4`, and `brms` engines. Like the
+  cluster level it needs raters that bridge clusters; without bridging the conflated
+  level is dropped (or aborts if it is the only level requested).
 
 # intraclass 0.1.0
 

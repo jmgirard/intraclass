@@ -1847,7 +1847,7 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     conflated snapshots; author §6b of the spec.
   - T6 — Docs + NEWS + finish-task gate (AC7) → PR from `m45-conflated-consistency`.
 - **Coverage:** AC1 → T1; AC2 → T2; AC3 → T3; AC4 → T4; AC5 → T2, T3, T4; AC6 → T5; AC7 → T5, T6.
-- Status: **in-progress** (ADR-056, started 2026-07-12) — branch `m45-conflated-consistency`. T1 active.
+- Status: **review** (ADR-056; branch `m45-conflated-consistency`, all tasks done, local gate green — PR pending).
 - Work log:
   - 2026-07-12 — T1 started (derivation-confirmation spike). Located the mechanism: conflated error set is
     hardcoded agreement-only at `R/estimand.R:94`; every other design derives consistency by dropping
@@ -1887,3 +1887,10 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     AC7's snapshot clause is moot; nothing to regenerate. 30/30 multilevel tests pass. **Next: T6** — docs
     (`@param`/conflated Rd note + vignette mention), NEWS bullet, finish-task gate (`lintr`/`spelling`/
     `devtools::check` CI-parity/installed-pkg drive), then PR from `m45-conflated-consistency`.
+  - 2026-07-12 — **T6 DONE (AC7 ✓); milestone → review.** Docs: roxygen `@param type` + conflated section
+    updated (consistency now ships; bridging requirement), `man/icc.Rd` regenerated; NEWS breaking-change
+    bullet corrected + a Minor-improvements bullet; `multilevel-designs.Rmd` stale "agreement-only /
+    complete-only" claim fixed. **Finish-task gate GREEN:** `air` clean, `spelling` clean, `lintr` 0 lints,
+    `devtools::document` no delta, full CI-mode suite (`NOT_CRAN=true CI=true`) **403 pass / 0 fail / 1 warn
+    (pre-existing non-bridging fit) / 23 skip (live Stan)**, installed-pkg drive of the defaulted conflated
+    cell OK, **`devtools::check` CI-parity (`NOT_CRAN=false`, no-manual) 0/0/0**. PR pending.
