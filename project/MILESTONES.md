@@ -1604,12 +1604,20 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
     unreleased heading, and the finish-task gate is green (`air format --check` / `lintr` 0 lints / `spelling` /
     `devtools::document` no delta / full CI-mode suite / `devtools::check` CI-parity `NOT_CRAN=false` 0/0/0).
 - **DoD checklist (this is the live board — ADR-015; check off in the same commit as the work, #16):**
-  - [ ] **S1 — `print.icc` / `summary.icc` cli restyle.** Restyle `format.icc()` (medium): `cli_rule` header;
-        coefficient table aligned via `cli::ansi_align`/`ansi_nchar` (width-safe with invisible ANSI), estimate
-        bold + CI dimmed; styled meta lines, variance-components line, and the `k_eff` / Shrout–Fleiss /
-        conflated-diagnostic notes; **plain-text degradation** verified (ANSI off → deterministic, 80-col
-        aligned). Regenerate the 8 `_snaps/icc-*.md` under reproducible cli output, keeping the `[CI]` mask. Add
-        the "displayed numbers == `tidy()`/`glance()`" claim test. *(AC1, AC2)*
+  - [x] **S1 — `print.icc` / `summary.icc` cli restyle.** DONE (2026-07-11). `format.icc()` restyled (medium):
+        `cli::rule()` header replacing the `#` line; coefficient table with cells padded to fixed plain widths
+        then estimate **bold** + CI **dim** (styling wraps already-aligned text → columns identical with/without
+        colour); meta lines, variance-components line, and the `k_eff`/Shrout–Fleiss/conflated notes muted.
+        **Latent bug fixed:** `cli_verbatim(char_vector)` silently drops `""` separators — `print.icc`/`summary.icc`
+        now emit `paste(format(x), collapse="\n")` so the section blank lines actually render (they never did
+        before). Degradation verified: under reproducible cli output the 7 print-format snapshots
+        (`icc-methods`/`-twoway-agreement`/`-consistency`/`-oneway`/`-incomplete`/`-lavaan`/`-lme4-engine`)
+        regenerated — **diff is header-rule + blank lines + a 1-space column shift, every number identical**,
+        `[CI]` mask intact (`icc-errors` unaffected — not a print-format snapshot). Multilevel/conflated/
+        replicate variants (deliberately un-snapshotted, [[verify-against-installed-package]]) visually verified.
+        Number-invariance claim test added (`test-icc-methods.R`): every printed estimate/CI-bound/component/
+        `k_eff` equals `tidy()`/`glance()` at shown precision. `air`/`lintr` clean; affected + autoplot/choose-icc/
+        multilevel/replicates suites green. *(AC1, AC2)*
   - [ ] **S2 — interactive `choose_icc()` decision tree.** Restyle `ask_choice()` /
         `collect_answers_interactively()`: per-question header/rule + styled option list + accumulating
         breadcrumb; restyle `format.icc_recommendation()` (rule header + styled Recommendation/Why/Run/Notes).

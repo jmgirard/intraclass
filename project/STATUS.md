@@ -308,7 +308,12 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M43 S1 — `print.icc` / `summary.icc` cli restyle** (in progress on `m43-cli-polish`; started
+- Active task: **M43 S2 — interactive `choose_icc()` decision tree** (next, on `m43-cli-polish`). *Superseded
+  (S1, DONE 2026-07-11):* `format.icc()` restyled (medium cli — rule header, aligned table with estimate bold /
+  CI dim, muted meta+notes); fixed a latent `cli_verbatim` blank-line-drop so section spacing renders;
+  7 print-format snapshots regenerated (header-rule + blank lines + 1-space shift, **every number identical**,
+  `[CI]` mask kept); number-invariance claim test added; `air`/`lintr` clean; affected + autoplot/choose-icc/
+  multilevel/replicate suites green. S1 detail was: **M43 S1 — `print.icc` / `summary.icc` cli restyle** (started
   2026-07-11). Retro + ADR-053 done. **Acceptance (S1 → AC1/AC2):** restyle `format.icc()` (shared by
   `print`/`summary`) to tasteful-medium cli — `cli_rule` header, coefficient table aligned via
   `cli::ansi_align`/`ansi_nchar` with the estimate emphasized + CI dimmed, styled meta/components/notes;
