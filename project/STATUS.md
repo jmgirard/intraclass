@@ -291,10 +291,15 @@
   ≤1.5e-2 vs glmmTMB, the raw-SEM small-sample bias not a FIML artifact; bootstrap gated on
   incomplete data). No new estimand/spec/argument/dependency. **The M18–M21 arc is complete — every
   🔵 not-yet gap in `COVERAGE.md` is closed.** M0–M21 shipped; package at v0.1.0.
-- Active task: **M41 Slice 3 next** — clarity/accessibility pass over `multilevel-designs.Rmd` +
-  `d-studies-and-replicates.Rmd` (warm on-ramp, first-use glosses, glossary cross-links; no statistical/example
-  change) + `test-vignette-claims.R` relabel + finish-task gate → PR. Branch `m41-vignette-glossary`.
-  *Superseded (M41 S2, done):* `engines.Rmd` + `interval-methods.Rmd` got warmer on-ramps + glossary pointers +
+- Active task: **M41 all 3 slices done, local gate green — PR pending.** The finish-task gate is green:
+  `air format --check` clean, `lintr` 0 lints, `spelling` clean, `devtools::document` no delta, vignette-claims
+  tests pass, `pkgdown::check_pkgdown()` clean, `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`)
+  **0/0/0** with all seven vignettes built. Docs-only → no installed-pkg estimator paths. **Next action: open the
+  PR from `m41-vignette-glossary`**; on green CI + merge, reconcile M41 → done + set "Last green CI", then M42
+  (benchmark) → cut 0.2.0. *Superseded (M41 S3, done):* `multilevel-designs.Rmd` + `d-studies-and-replicates.Rmd`
+  got warm on-ramps + glossary pointers + first-use deep-links (7 links verified, incl. the underscore `#…-k_eff`
+  + unicode `#…-θ²_r` + dotted `#fixed-vs.-random-raters` anchors); no number touched; `test-vignette-claims.R`
+  needed no relabel. *Superseded (M41 S2, done):* `engines.Rmd` + `interval-methods.Rmd` got warmer on-ramps + glossary pointers +
   first-use jargon deep-linked (12 `glossary.html#…` links, all verified against generated ids, incl. the dotted
   `#confidence-interval-vs.-credible-interval`) + two inline plain glosses; no number touched; package
   spell-check clean; both render. Also fixed a latent S1 anchor bug (the glossary's

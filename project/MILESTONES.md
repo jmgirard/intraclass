@@ -1476,13 +1476,20 @@ separate `TASKS.md`; `STATUS.md` names the active task and *points* here.
         all 12 `glossary.html#…` links (incl. the dotted `#confidence-interval-vs.-credible-interval`) resolve
         against the glossary's generated ids. Also fixed a latent S1 bug — the glossary's outbound
         `multilevel-designs.html#subject-level-vs.-cluster-level` link needed the "vs." period pandoc keeps.
-  - [ ] **S3 — `multilevel-designs` + `d-studies-and-replicates` clarity pass + gate.** Same treatment on both;
-        `test-vignette-claims.R` relabelled per-article as needed; finish-task gate (`devtools::document` no
-        delta, `air format --check`, `lintr` 0 lints, full CI-mode suite, `devtools::check` CI-parity
-        `NOT_CRAN=false` 0/0/0 with all seven vignettes built, `pkgdown::check_pkgdown()` clean) → PR.
+  - [x] **S3 — `multilevel-designs` + `d-studies-and-replicates` clarity pass + gate.** DONE. Same treatment on
+        both (warm on-ramps + glossary pointers + first-use deep-links: subject/cluster framing, conflated ICC,
+        variance components, `k_eff`, random-vs-fixed, finite-population variance; decision study, dependability
+        coefficient, fixed raters). `test-vignette-claims.R` needed **no** relabel — it already carries
+        per-article labels and no number moved. All 7 glossary links from the two articles resolve (incl. the
+        underscore `#…-k_eff` and unicode `#…-θ²_r` anchors). **Finish-task gate GREEN:** `air format --check`
+        clean, `lintr` 0 lints, `spelling` clean, `devtools::document` no delta, vignette-claims tests pass,
+        `pkgdown::check_pkgdown()` clean, `devtools::check` CI-parity (`NOT_CRAN=false`, `manual=FALSE`)
+        **0/0/0** with all seven vignettes built. Docs-only → no installed-pkg estimator paths to drive.
 - Deferred out of M41 (record so not rediscovered): **M42** (the benchmark-vs-prior-art suite) and the
   **v0.2.0 release consolidation / CRAN upload** (ADR-022) — the sequenced follow-ons, not this milestone; a
   clarity pass over any **further** material or **per-term worked examples** beyond first-use glosses; every
   untouched carryover (categorical/ordinal GLMM, multilevel SEM, the 🟣 divisor research items, the lavaan
   siblings) stays in [`ROADMAP.md`](ROADMAP.md).
-- Status: **in progress** — branch `m41-vignette-glossary`; S1 active.
+- Status: **done (local gate green) — PR pending.** Branch `m41-vignette-glossary` (3 slice commits + planning);
+  **no Fable** (docs milestone). Next: open the PR; on green CI + merge, reconcile M41 → done + set "Last green
+  CI", then M42 (benchmark) → cut 0.2.0.
