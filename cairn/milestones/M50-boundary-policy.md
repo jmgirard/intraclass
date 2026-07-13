@@ -73,12 +73,12 @@ excludes it).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Audit boundary handling — enumerate every near-zero / singular code
+- [x] T1: Audit boundary handling — enumerate every near-zero / singular code
       path across `R/engine-*.R` (lme4 heaviest ~63 hits; glmmTMB ~17; brms,
       lavaan) and `R/ci-*.R`, each with its governing ADR/D-entry and current
       behavior; produce the per-engine × per-CI-method behavior table.
       (RB tripwire: ip-touching)
-- [ ] T2: Write the consolidated boundary-fit policy section in DESIGN.md from
+- [x] T2: Write the consolidated boundary-fit policy section in DESIGN.md from
       the audit table.
 - [ ] T3: Append the consolidating D-entry to `cairn/DECISIONS.md` citing the
       summarized legacy ADRs; resolve the "Boundary-fit convergence policy
@@ -101,6 +101,14 @@ excludes it).
   citations still accurate (`R/engine-lme4.R:79` = `intraclass_singular_fit`).
   AC2 opened from a closed 4-ADR list to "every ADR the T1 audit surfaces" —
   code also cites ADR-030/037/038/044/046 around boundary/floor handling.
+- 2026-07-12 (T1): audit done — 3 behavior classes (smooth log-SD / classed
+  deferral `intraclass_singular_fit` / kept-at-0); governing ADR set 002, 003,
+  012, 014, 025, 031, 033, 037, 038, 044. lme4 isSingular guard at 7 fit shapes;
+  lavaan Heywood `sv/ev≤0`; MC eigenvalue floor + rank-deficient abort. NO
+  code/policy inconsistency — ip-touching tripwire did not fire (pure pin).
+- 2026-07-12 (T2): wrote `DESIGN.md § Boundary-fit policy` — per-engine +
+  per-CI-method tables, 3 behaviors, each cell citing its ADR; θ²_r average-floor
+  cross-engine note. Guard-test home decided at gate: new `test-boundary-policy.R`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

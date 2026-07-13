@@ -152,6 +152,49 @@ D-entry).
   ADR/D-entry, so a future "simplification" fails a test instead of requiring
   archaeology. (E.g. the fixed-rater 2b moment correction.)
 
+## Boundary-fit policy
+
+When a variance component is estimated at or near zero — the boundary of the
+parameter space, and the common applied case for interrater data — every engine
+and CI method resolves it by one of **three documented behaviors**. This section
+is the single home for that policy, consolidating the case law of
+ADR-002/003/012/014/025/031/033/037/038/044 under one statement (recorded as
+D-004). It documents *existing* behavior: changing any cell below is a change to
+the boundary-aware-interval contract (`PRINCIPLES.md #3`) and takes a D-entry.
+
+- **Smooth (log-SD).** The component is carried on an internal log-SD scale, so
+  the boundary maps to −∞ and every back-transformed draw is strictly positive —
+  boundary-aware by construction, no clamp, no abort.
+- **Classed deferral.** A boundary fit whose covariance cannot support an
+  interval aborts with the classed condition `intraclass_singular_fit`, pointing
+  the user at the boundary-robust default engine (glmmTMB).
+- **Kept-at-0.** A boundary draw (a component at exactly 0) is a legitimate draw
+  and is kept, so the interval can reach 0.
+
+Fit-time, per engine:
+
+| Engine | Boundary handling | Source |
+|---|---|---|
+| glmmTMB | Smooth log-SD; the boundary maps to −∞ and the fit stays finite — the reference boundary-robust engine | ADR-002/003 |
+| lme4 | Interval draws delta-transformed to log-SD (Smooth); an exactly-singular fit (`lme4::isSingular`) has a singular merDeriv covariance → classed deferral to glmmTMB (all 7 fit shapes) | ADR-012 |
+| brms | Posterior draws on the natural variance scale, strictly positive → Smooth by construction; the point estimate is the boundary-aware mode of the draws | ADR-033 |
+| lavaan | Variances on the log-SD scale (Smooth); a Heywood boundary (non-positive variance, `sv`/`ev` ≤ 0) → classed deferral to glmmTMB | ADR-014/031 |
+
+Interval-time, per CI method:
+
+| CI method | Boundary handling | Source |
+|---|---|---|
+| Monte-Carlo (default) | Sampled on the engine's internal log scale → boundary-aware by construction; covariance eigenvalues floored at 0 (`pmax`) where a Cholesky factor would fail; a genuinely rank-deficient covariance → classed deferral | ADR-003 |
+| Bootstrap | Parametric refit per resample; a resample landing on the boundary is a valid draw, **kept**; too many failed refits → classed deferral | ADR-025 |
+| Posterior | The engine's own draws (natural scale), **kept**; percentile or HPDI; boundary-aware mode with bounded-density smoothing; degenerate all-equal draws return the common value | ADR-033/044 |
+
+**Fixed-rater θ²_r average-floor (cross-engine).** The fixed-rater θ²_r estimand
+adds a boundary-aware *average-floor*: the 2b-corrected per-group draws are
+averaged and the **average** is floored at 0 — never per group, since per-group
+flooring gives zero boundary coverage. Shared across all four engines' fixed-rater
+paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
+(frequentist) / ADR-037 (brms); GP7-guarded.
+
 ## Known issues
 
 - No cairn-canonical oracle-registry home yet: the working oracle registry lives in
