@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51 | high | milestones/M48-release-v010.md |
-| M49 | Standing cross-engine parity matrix | planned | — | high | milestones/M49-parity-matrix.md |
+| M49 | Standing cross-engine parity matrix | in-progress | — | high | milestones/M49-parity-matrix.md |
 | M50 | Boundary-fit convergence policy consolidation | planned | — | high | milestones/M50-boundary-policy.md |
 | M51 | Statistical-corner guard audit | planned | M50 | high | milestones/M51-corner-guard-audit.md |
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
