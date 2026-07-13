@@ -98,25 +98,17 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 - 2026-07-12: implement gate (in-file matrix test; cross-reference existing
   ad-hoc tests; N/A cells assert the classed abort; principal-variant-per-spec
   granularity) — all four recommendations accepted.
-- 2026-07-12: T1+T2 — probed the surface oracle-first (correcting the stale
-  inline dispatch comment at `R/icc.R:551`; the roxygen at `R/icc.R:230` is
-  authoritative). Disposition (frequentist trio, CI-asserted point estimates;
-  glmmTMB = reference): lme4 agrees on ALL 8 principal cells (two-way
-  random/fixed × complete/incomplete, one-way, crossed random, crossed fixed,
-  nested Design 2) to 1e-4 single-level / 1e-3 multilevel; lavaan agrees on the
-  four two-way cells — consistency exact (1e-4 complete, 3e-3 FIML incomplete),
-  agreement asymptotic (SEM small-sample term: 1e-2 complete, 2e-2 incomplete) —
-  and aborts `intraclass_unsupported` on one-way + all three multilevel cells;
-  brms enumerated in the roster guard, live parity left in test-icc-brms.R
-  (skip_on_ci). New asset `tests/testthat/test-engine-parity-matrix.R` green
-  (73 assertions); roster guard reads icc()'s engine vector from its own body so
-  a 5th engine breaks it (GP4).
-- 2026-07-12: T3 — documented the matrix in DESIGN.md § Architecture + marked
-  the cross-engine-parity wart RESOLVED; new-file lintr clean.
-- 2026-07-12: T4 — gate green. AC4 `devtools::check(--as-cran, NOT_CRAN=false,
-  manual=TRUE)`: 0 errors / 0 warnings / 0 notes. AC5 installed
-  `devtools::check(NOT_CRAN=true, CI=true)` (skip_on_cran active): Status OK,
-  0/0/0. air format --check clean.
+- 2026-07-12: T1+T2 — probed the surface oracle-first (corrected the stale
+  inline dispatch comment `R/icc.R:551`; roxygen `R/icc.R:230` is authoritative).
+  8 principal cells: lme4 agrees on all (1e-4 single / 1e-3 multilevel); lavaan
+  on the four two-way cells (consistency exact, agreement asymptotic per the SEM
+  small-sample term) and aborts on one-way + multilevel; brms in the roster
+  guard, live parity in test-icc-brms.R. Asset green (73 assertions).
+- 2026-07-12: T3 — matrix documented in DESIGN.md § Architecture; wart marked
+  RESOLVED; lintr clean.
+- 2026-07-12: T4 — AC4 `check(--as-cran, NOT_CRAN=false, manual=TRUE)` 0/0/0;
+  AC5 installed `check(NOT_CRAN=true, CI=true)` (skip_on_cran active) Status OK
+  0/0/0; air clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -124,53 +116,34 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 ## Review
 <!-- owner: review · exclusive -->
 
-Reviewed 2026-07-12 (same-session, post-checkpoint). PR #55 (draft).
+Reviewed 2026-07-12 (same-session). PR #55.
 
-**Acceptance-criteria evidence (fresh):**
-- AC1 — PASS. `tests/testthat/test-engine-parity-matrix.R` enumerates 8
-  principal-variant cells; every frequentist engine (glmmTMB reference + lme4 +
-  lavaan) appears in each cell as an `agree` or `na` entry, brms in the roster
-  guard — no (design, engine) pair silently absent. N/A cells now carry an
-  inline one-line reachability reason (added at review); a spec-surface coverage
-  comment maps each cell to its estimand spec (M1/M2/M3/M36/M6/M5/M27/M8) and
-  names the deferred corners.
-- AC2 — PASS. 73 assertions green (fresh `test_file` run). Tolerances calibrated
-  and sourced: lme4↔glmmTMB 1e-4 (single) / 1e-3 (multilevel) both REML;
-  lavaan↔glmmTMB consistency 1e-4 (complete) / 3e-3 (FIML), agreement 1e-2 /
-  2e-2 (documented SEM small-sample term, `icc()` @param engine / ADR-002 /
-  ADR-012). Genuine-disagreement-stops-for-a-gate is stated in the header.
-- AC3 — PASS. Asset header carries the "add a row" extension rule + tolerance
-  rationale; DESIGN.md § Architecture documents the matrix and the
-  cross-engine-parity wart is struck through as RESOLVED; ROADMAP candidate row
-  consumed at plan time.
-- AC4 — PASS (package tree byte-identical since these ran; only `^cairn$`-ignored
-  files changed since). `devtools::check(--as-cran, NOT_CRAN=false, manual=TRUE)`:
-  0 errors / 0 warnings / 0 notes. Installed `devtools::check(NOT_CRAN=true,
-  CI=true)` (skip_on_cran active): Status OK, 0/0/0.
+**AC evidence (fresh):**
+- AC1 PASS — asset enumerates 8 principal-variant cells; every frequentist
+  engine appears per cell as `agree`/`na`, brms in the roster guard — nothing
+  silently absent. N/A cells carry an inline reason (added at review); a
+  spec-coverage comment maps cells to M1/M2/M3/M36/M6/M5/M27/M8 + deferred corners.
+- AC2 PASS — 73 assertions green. Tolerances calibrated/sourced: lme4↔glmmTMB
+  1e-4/1e-3 (REML); lavaan consistency 1e-4/3e-3, agreement 1e-2/2e-2 (SEM
+  small-sample term; ADR-002/ADR-012). Header states disagreement stops for a gate.
+- AC3 PASS — asset header "add a row" rule; DESIGN § Architecture documents it;
+  wart marked RESOLVED; candidate row consumed at plan time.
+- AC4 PASS (tree byte-identical since; only `^cairn$`-ignored files changed) —
+  `check(--as-cran, NOT_CRAN=false, manual=TRUE)` 0/0/0; installed
+  `check(NOT_CRAN=true, CI=true)` Status OK 0/0/0.
 
-**Consistency gate:** `cairn_validate` exit 0 (all 15 checks); `document()` no
-diff; `check_pkgdown()` clean; Coverage map complete (AC1→T1,T2 · AC2→T2 ·
-AC3→T3 · AC4→T4, all tasks exist); GP4's *definition* unchanged (no
-`cairn_impact` reconciliation needed — the 8 GP4 references are consistent
-citations); README.Rmd untouched; no new top-level files (diff confined to
-`cairn/` + `tests/`).
+**Consistency gate:** `cairn_validate` exit 0; `document()` no diff;
+`check_pkgdown()` clean; Coverage complete (AC1→T1,T2 · AC2→T2 · AC3→T3 ·
+AC4→T4); GP4 definition unchanged (no impact reconciliation); README.Rmd
+untouched; diff confined to `cairn/` + `tests/`.
 
-**Independent review (three lenses, inline — not spawned; see note below):**
-- Diff-bug: no correctness findings. Assertion loop non-vacuous
-  (`expect_true(length(keys) > 0)`); N/A loop guarded (`expect_gt(fired, 0)`);
-  roster guard non-vacuous (a 5th engine breaks `expect_setequal`); A/C
-  tolerance dispatch and level-keying correct.
-- Blame/history: DESIGN edits resolve a wart the design-interview flagged; no
-  recorded decision contradicted.
-- Prior-PR-comments: no-op — the test file is new; DESIGN.md's only prior PR
-  (#54, cairn-init migration) raised nothing this diff reintroduces.
-- Findings scored <80 (logged, not actioned): (1) lavaan agreement tolerance
-  (1e-2/2e-2) has generous headroom over the calibrated gap (~3e-3/8e-3),
-  making those cells a weaker drift detector — intentional for cross-platform
-  robustness; consistency cells stay tight. (2) The M27 cell name says "subject
-  level" while `pm_estimates` compares every returned index — harmless (keys are
-  intersected; both engines agree at all levels).
-- **Method note:** the three lenses were run inline by the review session rather
-  than via spawned fresh-context agents (harness policy discourages unprompted
-  subagents; the diff is test+docs only, zero runtime surface). A full
-  multi-agent pass is available on request.
+**Independent review (three lenses, inline — not spawned):** diff-bug: no
+correctness findings (assertion loop, N/A loop, and roster guard all
+non-vacuous; A/C tolerance dispatch + level-keying correct). Blame/history:
+resolves a design-interview wart, no decision contradicted. Prior-PR: no-op
+(new file; PR #54 raised nothing reintroduced). Scored <80 (logged): (1) lavaan
+agreement tolerance has headroom over the calibrated gap — intentional
+cross-platform robustness, consistency cells stay tight; (2) M27 cell name says
+"subject level" but compares all returned indices — harmless. Method note: lenses
+run inline (harness discourages unprompted subagents; test+docs only) — full
+multi-agent pass available on request.
