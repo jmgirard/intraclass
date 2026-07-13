@@ -80,7 +80,7 @@ excludes it).
       (RB tripwire: ip-touching)
 - [x] T2: Write the consolidated boundary-fit policy section in DESIGN.md from
       the audit table.
-- [ ] T3: Append the consolidating D-entry to `cairn/DECISIONS.md` citing the
+- [x] T3: Append the consolidating D-entry to `cairn/DECISIONS.md` citing the
       summarized legacy ADRs; resolve the "Boundary-fit convergence policy
       consolidation" candidate row.
 - [ ] T4: Add / confirm guard tests pinning each documented boundary behavior,
@@ -109,6 +109,9 @@ excludes it).
 - 2026-07-12 (T2): wrote `DESIGN.md § Boundary-fit policy` — per-engine +
   per-CI-method tables, 3 behaviors, each cell citing its ADR; θ²_r average-floor
   cross-engine note. Guard-test home decided at gate: new `test-boundary-policy.R`.
+- 2026-07-12 (T3): appended D-004 (10 ADRs summarized, behavior unchanged). No
+  candidate row to resolve — "Boundary-fit convergence policy consolidation" was
+  already promoted to M50 at plan time, so nothing remains in ROADMAP Candidates.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

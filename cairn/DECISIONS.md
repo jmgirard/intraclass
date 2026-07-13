@@ -45,3 +45,26 @@ rulebook; none has in-code citations.
 stay retired, never reused. #18 stays GP; #19 stays IP.
 **Consequences:** single owner for process rules (cairn); the constitution keeps
 statistical, software, and conduct principles only.
+
+### D-004 (2026-07-12): Consolidated boundary-fit policy — one policy, existing behavior pinned
+
+**Context:** Near-zero / singular variance components — the boundary of the
+parameter space, and the common applied case for interrater data — were handled
+by accumulated per-milestone case law scattered across the four engines and three
+CI methods, governed by ADR-002, ADR-003, ADR-012, ADR-014, ADR-025, ADR-031,
+ADR-033, ADR-037, ADR-038, and ADR-044, with no single statement of the policy
+(the `DESIGN.md § Known issues` wart, confirmed 2026-07-12; M50).
+**Decision:** the consolidated policy lives in one home,
+`DESIGN.md § Boundary-fit policy`, as **three behaviors** — *smooth (log-SD)*,
+*classed deferral* (the `intraclass_singular_fit` condition), and *kept-at-0* —
+mapped per engine (fit-time) and per CI method (interval-time), each cell citing
+its governing ADR. This entry supersedes the "case law" status of those ten ADRs
+by summarizing them under one policy; the ADRs stay valid citation targets. It
+changes **no behavior** — the M50 audit found the engines and methods already
+internally consistent and matching the documented policy (the `ip-touching`
+tripwire did not fire). Guard tests in `tests/testthat/test-boundary-policy.R`
+pin each documented behavior, each naming its ADR/D-entry (GP7).
+**Consequences:** the boundary policy has one authoritative home (DESIGN.md), a
+decision record (this entry), and a standing guard-test asset. Any future change
+to a documented cell touches the boundary-aware-interval contract
+(`PRINCIPLES.md #3`) and requires a new, superseding D-entry — never a silent edit.
