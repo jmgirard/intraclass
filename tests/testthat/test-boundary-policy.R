@@ -8,10 +8,14 @@
 # silently changing the boundary-aware-interval contract (PRINCIPLES.md #3 / GP7).
 # These tests PIN existing behavior; M50 changed none of it.
 #
-# Shared boundary fixture: with no rater effect and few raters, the rater
-# variance collapses to exactly zero -- the boundary. glmmTMB stays finite there;
-# lme4 (singular merDeriv covariance) and lavaan (Heywood) defer; the sampling CI
-# methods keep the 0 draw.
+# Shared boundary fixture `boundary_two_way()`: with no rater effect and few
+# raters, the RATER-variance component collapses to (essentially) exactly zero --
+# the boundary. (The ICC itself is high, ~0.8, since subject variance dominates;
+# it is the rater component, not the coefficient, that sits on the boundary -- so
+# the non-vacuous check is `components$rater ≈ 0`, confirming the boundary was
+# actually reached.) glmmTMB stays finite there; lme4 (singular merDeriv
+# covariance) defers. The lavaan Heywood case (test 4) needs perfectly-agreeing
+# raters instead and builds its own fixture.
 
 boundary_two_way <- function(seed = 7L, n_s = 20L, n_r = 4L) {
   set.seed(seed)
@@ -44,11 +48,16 @@ test_that("glmmTMB gives a finite, boundary-aware Monte-Carlo interval at zero r
     mc_samples = 2000L,
     seed = 1
   ))
+  # Premise: the fixture really did drive the rater component onto the boundary
+  # (~0). Without this the finiteness check below would be vacuous -- an interior
+  # fit is finite too. glmmTMB's log-SD scale keeps it >= 0, never negative.
+  expect_lt(fit$components$rater, 1e-6)
+  expect_gte(fit$components$rater, 0)
+  # Smooth: at that boundary glmmTMB returns a finite interval in [0, 1] -- no
+  # abort (contrast test 3, where lme4 defers on the same data), no NA.
   est <- fit$estimates
   expect_true(all(is.finite(est$conf.low) & is.finite(est$conf.high)))
   expect_true(all(est$conf.low >= 0 & est$conf.high <= 1))
-  # Boundary-aware: the rater-driven interval can reach the floor (never negative).
-  expect_gte(min(est$conf.low), 0)
 })
 
 # --- Kept-at-0: the parametric bootstrap keeps a boundary resample (ADR-025, D-004) ---
@@ -56,10 +65,14 @@ test_that("glmmTMB gives a finite, boundary-aware Monte-Carlo interval at zero r
 test_that("bootstrap keeps a component-at-0 resample rather than dropping it", {
   skip_if_not_installed("glmmTMB")
 
-  # The parametric bootstrap refits per resample; a resample landing on the
-  # boundary returns a variance of exactly 0 and is a VALID draw, kept (not
-  # discarded). So the interval comes back finite and can reach 0 at the boundary
-  # (DESIGN.md § Boundary-fit policy; ADR-025). Only wholesale refit failure aborts.
+  # The parametric bootstrap refits per resample; a singular/boundary refit is a
+  # VALID draw (variance pinned at 0) and is KEPT, not discarded -- the discard
+  # path keys on non-convergence, not on boundary value (ADR-025; DESIGN.md
+  # § Boundary-fit policy). So at a boundary fixture the bootstrap COMPLETES and
+  # returns a finite interval rather than aborting or NA-ing. (The exactly-0
+  # kept-refit is an lme4/bootMer property; glmmTMB refits are near-0 by log-SD
+  # construction. This pins the observable contract: bootstrap completes at the
+  # boundary, with the rater component actually on it.)
   fit <- suppressWarnings(icc(
     boundary_two_way(),
     score,
@@ -70,6 +83,7 @@ test_that("bootstrap keeps a component-at-0 resample rather than dropping it", {
     boot_samples = 199L,
     seed = 1
   ))
+  expect_lt(fit$components$rater, 1e-6) # boundary actually reached
   est <- fit$estimates
   expect_true(all(is.finite(est$conf.low) & is.finite(est$conf.high)))
   expect_true(all(est$conf.low >= 0 & est$conf.high <= 1))
@@ -133,9 +147,12 @@ test_that("fixed-rater theta^2_r is floored at 0, never negative, at the boundar
   skip_if_not_installed("glmmTMB")
 
   # With no rater effect the fixed-rater theta^2_r sits on the boundary. The
-  # boundary-aware AVERAGE-floor (2b-corrected draws averaged, then the average
-  # floored at 0 -- never per group) keeps the reported rater component >= 0
-  # rather than pushing it negative (DESIGN.md § Boundary-fit policy; ADR-038).
+  # boundary-aware floor clamps the reported rater component to exactly 0 -- not
+  # negative, and (crucially) not a spuriously positive value (DESIGN.md
+  # § Boundary-fit policy; ADR-038). This crossed single-group design is where the
+  # AVERAGE-floor and a per-group floor COINCIDE (b ~ 0, whole-sample means); the
+  # average-vs-per-group distinction that matters in the multilevel case is pinned
+  # by the C_n boundary-coverage sentinel in test-icc-fixed-multilevel.R (M28).
   fit <- suppressWarnings(icc(
     boundary_two_way(),
     score,
@@ -146,7 +163,7 @@ test_that("fixed-rater theta^2_r is floored at 0, never negative, at the boundar
     mc_samples = 2000L,
     seed = 1
   ))
-  expect_gte(fit$components$rater, 0)
+  expect_equal(fit$components$rater, 0) # floored to exactly 0, not negative, not positive-biased
   est <- fit$estimates
   expect_true(all(est$conf.low >= 0 & est$conf.high <= 1))
 })

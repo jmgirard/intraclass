@@ -51,19 +51,26 @@ statistical, software, and conduct principles only.
 **Context:** Near-zero / singular variance components — the boundary of the
 parameter space, and the common applied case for interrater data — were handled
 by accumulated per-milestone case law scattered across the four engines and three
-CI methods, governed by ADR-002, ADR-003, ADR-012, ADR-014, ADR-025, ADR-031,
-ADR-033, ADR-037, ADR-038, and ADR-044, with no single statement of the policy
-(the `DESIGN.md § Known issues` wart, confirmed 2026-07-12; M50).
+CI methods, governed by ADR-002, ADR-003, ADR-012, ADR-014, ADR-023, ADR-024,
+ADR-025, ADR-031, ADR-033, ADR-037, ADR-038, and ADR-044 (the lme4 singular-fit
+guard is introduced by ADR-012 and reused per shape via ADR-023/024), with no
+single statement of the policy (the `DESIGN.md § Known issues` wart, confirmed
+2026-07-12; M50).
 **Decision:** the consolidated policy lives in one home,
-`DESIGN.md § Boundary-fit policy`, as **three behaviors** — *smooth (log-SD)*,
-*classed deferral* (the `intraclass_singular_fit` condition), and *kept-at-0* —
-mapped per engine (fit-time) and per CI method (interval-time), each cell citing
-its governing ADR. This entry supersedes the "case law" status of those ten ADRs
-by summarizing them under one policy; the ADRs stay valid citation targets. It
-changes **no behavior** — the M50 audit found the engines and methods already
-internally consistent and matching the documented policy (the `ip-touching`
-tripwire did not fire). Guard tests in `tests/testthat/test-boundary-policy.R`
-pin each documented behavior, each naming its ADR/D-entry (GP7).
+`DESIGN.md § Boundary-fit policy`, as **three behaviors** — *smooth*
+(boundary-aware by construction: log-SD for glmmTMB/lme4/lavaan, natural-scale
+positive draws for brms), *classed deferral* (the `intraclass_singular_fit`
+condition), and *reach-zero* (a boundary draw is kept, or the fixed-rater θ²_r
+average is floored at 0) — mapped per engine (fit-time) and per CI method
+(interval-time), each cell citing its governing ADR. This entry supersedes the
+"case law" status of those ADRs by summarizing them under one policy; the ADRs
+stay valid citation targets. It changes **no behavior**: the M50 audit surfaced
+no behavior that contradicts its governing ADR, so no gate escalation was
+warranted; review (2026-07-12) additionally corrected two documentation gaps in
+the first draft — the omitted ADR-023/024 lme4 citations, and the bootstrap
+row's under-documented non-convergent-refit warning path — without any code
+change. Guard tests in `tests/testthat/test-boundary-policy.R` pin each
+documented behavior, each naming its ADR/D-entry (GP7).
 **Consequences:** the boundary policy has one authoritative home (DESIGN.md), a
 decision record (this entry), and a standing guard-test asset. Any future change
 to a documented cell touches the boundary-aware-interval contract

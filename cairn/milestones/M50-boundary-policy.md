@@ -124,6 +124,14 @@ excludes it).
   2m25s; installed-pkg NOT_CRAN=true CI=true 5m55s (testthat 303s vs 94s → the
   skip_on_cran bootstrap/snapshot paths ran; failed+error=0). lintr on the new
   file: no lints. AC4 met. → status review.
+- 2026-07-12 (review): three-lens review caught real doc/test gaps (all fixed on
+  branch, no code change): DESIGN lme4 row + D-004 omitted ADR-023/024 (guard
+  reused per shape) — added; bootstrap row under-documented the non-convergent
+  warning path — corrected; guard tests strengthened non-vacuously (assert the
+  rater component is actually at the boundary; fixed θ²_r floored to exactly 0);
+  brms "log-SD" label + average-floor framing corrected. Guards 14/14, air+lintr
+  clean. Correction: T1's "no inconsistency" was right on behavior but the first
+  draft had documentation gaps; no behavior/interval-contract change.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
