@@ -152,6 +152,54 @@ D-entry).
   ADR/D-entry, so a future "simplification" fails a test instead of requiring
   archaeology. (E.g. the fixed-rater 2b moment correction.)
 
+## Boundary-fit policy
+
+When a variance component is estimated at or near zero — the boundary of the
+parameter space, and the common applied case for interrater data — every engine
+and CI method resolves it by one of **three documented behaviors**. This section
+is the single home for that policy, consolidating the case law of
+ADR-002/003/012/014/023/024/025/031/033/037/038/044 under one statement (recorded
+as D-004). It documents *existing* behavior: changing any cell below is a change
+to the boundary-aware-interval contract (`PRINCIPLES.md #3`) and takes a D-entry.
+
+- **Smooth (boundary-aware by construction).** The component is held strictly
+  positive by the parameterization, so the boundary is approached smoothly with
+  no clamp and no abort — via an internal log-SD scale that maps the boundary to
+  −∞ (glmmTMB natively; lme4 by delta-transform; lavaan), or via natural-scale
+  posterior draws that are positive by construction (brms).
+- **Classed deferral.** A boundary fit whose covariance cannot support an
+  interval aborts with the classed condition `intraclass_singular_fit`, pointing
+  the user at the boundary-robust default engine (glmmTMB).
+- **Reach-zero (kept or floored).** A boundary value is admitted rather than
+  discarded, so the estimate/interval can reach 0: a resample or posterior draw
+  with a component at exactly 0 is a legitimate draw and is **kept**
+  (bootstrap, posterior); and the fixed-rater θ²_r **average is floored** at 0
+  (never per group; see below).
+
+Fit-time, per engine:
+
+| Engine | Boundary handling | Source |
+|---|---|---|
+| glmmTMB | Smooth log-SD; the boundary maps to −∞ and the fit stays finite — the reference boundary-robust engine | ADR-002/003 |
+| lme4 | Interval draws delta-transformed to log-SD (Smooth); an exactly-singular fit (`lme4::isSingular`) has a singular merDeriv covariance → classed deferral to glmmTMB. The guard was introduced for the two-way-random path (ADR-012) and **reused per shape** as later fits were added (ADR-023 fixed/multilevel; ADR-024 incomplete/ragged) — all 7 fit shapes | ADR-012/023/024 |
+| brms | Posterior draws on the natural variance scale, strictly positive → Smooth by construction; the point estimate is the boundary-aware mode of the draws | ADR-033 |
+| lavaan | Variances on the log-SD scale (Smooth); a Heywood boundary (non-positive variance, `sv`/`ev` ≤ 0) → classed deferral to glmmTMB | ADR-014/031 |
+
+Interval-time, per CI method:
+
+| CI method | Boundary handling | Source |
+|---|---|---|
+| Monte-Carlo (default) | Sampled on the engine's internal log scale → boundary-aware by construction; covariance eigenvalues floored at 0 (`pmax`) where a Cholesky factor would fail; a genuinely rank-deficient covariance → classed deferral | ADR-003 |
+| Bootstrap | Parametric refit per resample; a singular/boundary refit is a valid draw (variance pinned at 0) and is **kept**. Separately, *non-convergent* refits are discarded: past `warn_frac` a classed warning (`intraclass_bootstrap_dropouts`), past `min_frac` a classed abort (`intraclass_singular_fit`) — never a silent NA interval | ADR-025 |
+| Posterior | The engine's own draws (natural scale), **kept**; percentile or HPDI; boundary-aware mode with bounded-density smoothing; degenerate all-equal draws return the common value | ADR-033/044 |
+
+**Fixed-rater θ²_r average-floor (cross-engine).** The fixed-rater θ²_r estimand
+adds a boundary-aware *average-floor*: the 2b-corrected per-group draws are
+averaged and the **average** is floored at 0 — never per group, since per-group
+flooring gives zero boundary coverage. Shared across all four engines' fixed-rater
+paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
+(frequentist) / ADR-037 (brms); GP7-guarded.
+
 ## Known issues
 
 - No cairn-canonical oracle-registry home yet: the working oracle registry lives in
@@ -166,9 +214,10 @@ D-entry).
 - ~~**Cross-engine parity has no standing matrix**~~ — RESOLVED by M49: the
   standing `tests/testthat/test-engine-parity-matrix.R` now enumerates the grid
   and breaks on a silent gap (see Architecture). (Wart confirmed 2026-07-12.)
-- **Boundary-fit convergence handling is accumulated case law**, not one
-  principled policy — near-zero variance components are the common applied case.
-  (Wart confirmed 2026-07-12; → planned M50.)
+- ~~**Boundary-fit convergence handling is accumulated case law**~~ — RESOLVED by
+  M50: one documented policy in § Boundary-fit policy (three behaviors mapped per
+  engine + per CI method, each cell citing its ADR; recorded as D-004) with guard
+  tests in `tests/testthat/test-boundary-policy.R`. (Wart confirmed 2026-07-12.)
 - **Statistical corners are held by ADR memory:** correct-but-non-obvious
   subtleties (e.g. the fixed-rater 2b moment correction in the shared draw
   helper) risk being "simplified" into wrongness by a future contributor or
