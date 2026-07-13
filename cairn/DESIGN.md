@@ -74,6 +74,14 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
 - **Intervals** default to boundary-aware Monte-Carlo CIs from the parameter
   covariance matrix; bootstrap and posterior methods are selectable.
 - **Ill-posed designs fail loudly** through a classed `abort_*()` layer.
+- **Cross-engine parity** is held by one standing asset,
+  `tests/testthat/test-engine-parity-matrix.R` (M49): it enumerates the
+  (estimand × engine) grid, pins frequentist point-estimate agreement to
+  calibrated tolerances, asserts every documented engine refusal fires, and
+  reads `icc()`'s engine roster from its own source so a new engine breaks the
+  matrix until a row is added (GP4). Its header carries the "add a row" rule.
+  Interval parity and the brms engine's live-Stan agreement are cross-referenced
+  to the per-engine tests, not re-run there.
 
 ## Conventions
 
@@ -155,9 +163,9 @@ D-entry).
   coverage sweeps are ~2-hour background jobs. (Wart confirmed 2026-07-12;
   disposition: ROADMAP candidate "brms/Stan verification hardening" — largely
   inherent, mitigate + document.)
-- **Cross-engine parity has no standing matrix:** parity was established
-  milestone-by-milestone, so a new estimator or an upstream engine update could
-  open a silent gap. (Wart confirmed 2026-07-12; → planned M49.)
+- ~~**Cross-engine parity has no standing matrix**~~ — RESOLVED by M49: the
+  standing `tests/testthat/test-engine-parity-matrix.R` now enumerates the grid
+  and breaks on a silent gap (see Architecture). (Wart confirmed 2026-07-12.)
 - **Boundary-fit convergence handling is accumulated case law**, not one
   principled policy — near-zero variance components are the common applied case.
   (Wart confirmed 2026-07-12; → planned M50.)
