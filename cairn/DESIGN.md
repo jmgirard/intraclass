@@ -152,15 +152,17 @@ D-entry).
   (cairn D-024; assessed by cairn M42).
 - **brms/Stan verification is structurally weaker** than the other engines':
   live-Stan tests can't run on CI (no toolchain), flake on MCMC noise locally, and
-  coverage sweeps are ~2-hour background jobs. (Wart confirmed 2026-07-12.)
+  coverage sweeps are ~2-hour background jobs. (Wart confirmed 2026-07-12;
+  disposition: ROADMAP candidate "brms/Stan verification hardening" — largely
+  inherent, mitigate + document.)
 - **Cross-engine parity has no standing matrix:** parity was established
   milestone-by-milestone, so a new estimator or an upstream engine update could
-  open a silent gap. (Wart confirmed 2026-07-12.)
+  open a silent gap. (Wart confirmed 2026-07-12; → planned M49.)
 - **Boundary-fit convergence handling is accumulated case law**, not one
   principled policy — near-zero variance components are the common applied case.
-  (Wart confirmed 2026-07-12.)
+  (Wart confirmed 2026-07-12; → planned M50.)
 - **Statistical corners are held by ADR memory:** correct-but-non-obvious
   subtleties (e.g. the fixed-rater 2b moment correction in the shared draw
   helper) risk being "simplified" into wrongness by a future contributor or
-  session. (Wart confirmed 2026-07-12.)
+  session. (Wart confirmed 2026-07-12; → planned M51, boundary corner → M50.)
 

@@ -5,7 +5,7 @@
 
 - **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
-- **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
+- **Depends on:** M49, M50, M51   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
 - **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
 
@@ -100,6 +100,9 @@ gate before stamping, never folded in silently.
 - 2026-07-12: created by /milestone-plan (promotes the release-consolidation
   candidate; plan gate: milestone-only vehicle, R ≥ 4.0.0, lightweight API
   audit, paper → candidate row).
+- 2026-07-12: Depends-on amended to M49, M50, M51 by /milestone-plan
+  ("address known issues" run; plan gate: the three hardening milestones land
+  before the v0.1.0 release).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
