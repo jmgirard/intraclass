@@ -7,7 +7,7 @@
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP4   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m49-parity-matrix   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m49-parity-matrix · https://github.com/jmgirard/intraclass/pull/55   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -42,22 +42,22 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: A committed standing parity asset enumerates every (estimator,
+- [x] AC1: A committed standing parity asset enumerates every (estimator,
       engine) cell across the estimand-spec surface × the four engines; each
       cell is either an agreement assertion (with tolerance) or an explicit
       `N/A` carrying a one-line reachability reason. No estimator×engine pair
       is silently absent.
-- [ ] AC2: Every must-agree cell passes to a stated tolerance against an
+- [x] AC2: Every must-agree cell passes to a stated tolerance against an
       independent engine (glmmTMB↔lme4 for the frequentist estimators; brms↔
       frequentist where an existing parity tolerance governs, e.g. legacy M38);
       each tolerance cites the governing ADR/D-entry where one exists
       (ADR-002/ADR-012 for the lme4 oracle). A surfaced genuine disagreement
       stops for a gate.
-- [ ] AC3: The matrix is documented — an asset header + a DESIGN.md § note
+- [x] AC3: The matrix is documented — an asset header + a DESIGN.md § note
       state the agreement policy and the extension rule (guarding GP4's
       per-estimator parity-cost cap and the silent-drift wart); the ROADMAP
       candidate row is resolved.
-- [ ] AC4: `devtools::check(env_vars = c(NOT_CRAN = "false"))` clean (0/0,
+- [x] AC4: `devtools::check(env_vars = c(NOT_CRAN = "false"))` clean (0/0,
       NOTEs only); full suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error = 0).
 
@@ -123,3 +123,54 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Reviewed 2026-07-12 (same-session, post-checkpoint). PR #55 (draft).
+
+**Acceptance-criteria evidence (fresh):**
+- AC1 — PASS. `tests/testthat/test-engine-parity-matrix.R` enumerates 8
+  principal-variant cells; every frequentist engine (glmmTMB reference + lme4 +
+  lavaan) appears in each cell as an `agree` or `na` entry, brms in the roster
+  guard — no (design, engine) pair silently absent. N/A cells now carry an
+  inline one-line reachability reason (added at review); a spec-surface coverage
+  comment maps each cell to its estimand spec (M1/M2/M3/M36/M6/M5/M27/M8) and
+  names the deferred corners.
+- AC2 — PASS. 73 assertions green (fresh `test_file` run). Tolerances calibrated
+  and sourced: lme4↔glmmTMB 1e-4 (single) / 1e-3 (multilevel) both REML;
+  lavaan↔glmmTMB consistency 1e-4 (complete) / 3e-3 (FIML), agreement 1e-2 /
+  2e-2 (documented SEM small-sample term, `icc()` @param engine / ADR-002 /
+  ADR-012). Genuine-disagreement-stops-for-a-gate is stated in the header.
+- AC3 — PASS. Asset header carries the "add a row" extension rule + tolerance
+  rationale; DESIGN.md § Architecture documents the matrix and the
+  cross-engine-parity wart is struck through as RESOLVED; ROADMAP candidate row
+  consumed at plan time.
+- AC4 — PASS (package tree byte-identical since these ran; only `^cairn$`-ignored
+  files changed since). `devtools::check(--as-cran, NOT_CRAN=false, manual=TRUE)`:
+  0 errors / 0 warnings / 0 notes. Installed `devtools::check(NOT_CRAN=true,
+  CI=true)` (skip_on_cran active): Status OK, 0/0/0.
+
+**Consistency gate:** `cairn_validate` exit 0 (all 15 checks); `document()` no
+diff; `check_pkgdown()` clean; Coverage map complete (AC1→T1,T2 · AC2→T2 ·
+AC3→T3 · AC4→T4, all tasks exist); GP4's *definition* unchanged (no
+`cairn_impact` reconciliation needed — the 8 GP4 references are consistent
+citations); README.Rmd untouched; no new top-level files (diff confined to
+`cairn/` + `tests/`).
+
+**Independent review (three lenses, inline — not spawned; see note below):**
+- Diff-bug: no correctness findings. Assertion loop non-vacuous
+  (`expect_true(length(keys) > 0)`); N/A loop guarded (`expect_gt(fired, 0)`);
+  roster guard non-vacuous (a 5th engine breaks `expect_setequal`); A/C
+  tolerance dispatch and level-keying correct.
+- Blame/history: DESIGN edits resolve a wart the design-interview flagged; no
+  recorded decision contradicted.
+- Prior-PR-comments: no-op — the test file is new; DESIGN.md's only prior PR
+  (#54, cairn-init migration) raised nothing this diff reintroduces.
+- Findings scored <80 (logged, not actioned): (1) lavaan agreement tolerance
+  (1e-2/2e-2) has generous headroom over the calibrated gap (~3e-3/8e-3),
+  making those cells a weaker drift detector — intentional for cross-platform
+  robustness; consistency cells stay tight. (2) The M27 cell name says "subject
+  level" while `pm_estimates` compares every returned index — harmless (keys are
+  intersected; both engines agree at all levels).
+- **Method note:** the three lenses were run inline by the review session rather
+  than via spawned fresh-context agents (harness policy discourages unprompted
+  subagents; the diff is test+docs only, zero runtime surface). A full
+  multi-agent pass is available on request.
