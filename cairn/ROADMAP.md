@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-13 (M51 shipped, archived; M48 release workable next)_
+_Last hygiene check: 2026-07-13 (M51 shipped, archived; M48 release workable next; two lavaan items promoted out of the parking lot to candidate rows)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -19,6 +19,8 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 ## Candidates
 
 - Companion software/methods paper (JOSS or similar) — after the v0.1.0 release; the M42 comparison article is the seed; venue/framing decided against the released package (design interview + plan gate, 2026-07-12; ADR-022 deferral) — cairn/DESIGN.md § Commitments
-- Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator); multilevel SEM (lavaan); lavaan + within-cell replicates. Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
+- Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator). Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
+- Multilevel SEM (lavaan) — two-level SEM-GT for the multilevel designs (`engine = "lavaan"` with `cluster`). A research-flavored lift, not a mechanical extension of the M7 two-way SEM engine: ten Hove et al. (2022)'s multilevel estimator is Bayesian, not a plain lavaan common-factor model, so a faithful two-level SEM formulation needs its own estimand/oracle pass before it is schedulable. **Blocks** the lavaan cluster-level-fixed and incomplete-fixed-nested siblings (they can't ship as engine parity until this lands). Reclassified from the M21 SEM-parity plan (ADR-027); promoted from the parking lot 2026-07-13 — cairn/legacy/ROADMAP.md
+- lavaan + within-cell replicates — the SEM engine on replicated (σ²_sr/σ²_e-split) data. Niche, low value: would need both a lavaan replicate parameterization and the M20 replicate machinery to intersect. Promote only if a concrete need appears. Reclassified from M21 (ADR-027); promoted from the parking lot 2026-07-13 — cairn/legacy/ROADMAP.md
 - d_study() CI-width precision planning ("how many subjects for a ±.1-wide interval?") — scope boundary resolved by the design interview (2026-07-12): a legitimate future direction, **gated on finding an oracle strategy**; subject-count-for-power as such stays out of scope (`M4.5-d-study.md` §6; DESIGN.md contract boundary) — cairn/estimand-specs/M4.5-d-study.md
 - brms/Stan verification hardening — consolidate and document the offline committed-fixture verification strategy for the brms engine (live-Stan can't run on CI, MCMC flake, ~2h coverage sweeps) into a standing, documented asset; largely inherent, so "address" = mitigate + document. Deferred here per plan gate ("address known issues" run, 2026-07-12); promote via `/milestone-plan` — cairn/DESIGN.md § Known issues
