@@ -42,23 +42,23 @@ excludes it).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: A consolidated boundary-fit policy section exists in DESIGN.md
+- [x] AC1: A consolidated boundary-fit policy section exists in DESIGN.md
       covering, per engine and per CI method, how a near-zero / singular
       variance component is handled (kept-at-0 vs classed deferral vs smooth
       log-SD); every behavior claim cites the governing ADR/D-entry.
-- [ ] AC2: A D-entry in `cairn/DECISIONS.md` records the consolidated policy
+- [x] AC2: A D-entry in `cairn/DECISIONS.md` records the consolidated policy
       and cites **every** legacy ADR the T1 audit surfaces as governing boundary
       behavior — the known core (ADR-002, ADR-003, ADR-012, ADR-025) plus any
       additional boundary-relevant ADRs the audit turns up (the engine/CI files
       also cite ADR-030, ADR-037, ADR-038, ADR-044, ADR-046 around floors and
       boundary handling; the audit confirms which govern) — superseding the
       "case law" status without changing behavior.
-- [ ] AC3: Guard/regression tests pin each engine's documented boundary
+- [x] AC3: Guard/regression tests pin each engine's documented boundary
       behavior — e.g. the lme4 singular-fit classed abort `intraclass_singular_fit`
       (`R/engine-lme4.R:79`), the glmmTMB finite-boundary interval, the
       bootstrap/MC component-at-0 KEPT draw — each test naming its ADR/D-entry
       (GP7). A code/policy mismatch stops for a gate.
-- [ ] AC4: `devtools::check(env_vars = c(NOT_CRAN = "false"))` clean (0/0,
+- [x] AC4: `devtools::check(env_vars = c(NOT_CRAN = "false"))` clean (0/0,
       NOTEs only); full suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error = 0).
 
@@ -93,48 +93,44 @@ excludes it).
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-12: created by /milestone-plan ("address known issues" run; promotes
-  the boundary-policy candidate row). Plan gate: three separate hardening
-  milestones (M49/M50/M51), all sequenced before the M48 release; document +
-  pin existing behavior, escalate any surfaced inconsistency.
-- 2026-07-12: /milestone-plan re-pass (planned-collision) verified code
-  citations still accurate (`R/engine-lme4.R:79` = `intraclass_singular_fit`).
-  AC2 opened from a closed 4-ADR list to "every ADR the T1 audit surfaces" —
-  code also cites ADR-030/037/038/044/046 around boundary/floor handling.
-- 2026-07-12 (T1): audit done — 3 behavior classes (smooth log-SD / classed
-  deferral `intraclass_singular_fit` / kept-at-0); governing ADR set 002, 003,
-  012, 014, 025, 031, 033, 037, 038, 044. lme4 isSingular guard at 7 fit shapes;
-  lavaan Heywood `sv/ev≤0`; MC eigenvalue floor + rank-deficient abort. NO
-  code/policy inconsistency — ip-touching tripwire did not fire (pure pin).
-- 2026-07-12 (T2): wrote `DESIGN.md § Boundary-fit policy` — per-engine +
-  per-CI-method tables, 3 behaviors, each cell citing its ADR; θ²_r average-floor
-  cross-engine note. Guard-test home decided at gate: new `test-boundary-policy.R`.
-- 2026-07-12 (T3): appended D-004 (10 ADRs summarized, behavior unchanged). No
-  candidate row to resolve — "Boundary-fit convergence policy consolidation" was
-  already promoted to M50 at plan time, so nothing remains in ROADMAP Candidates.
-- 2026-07-12 (T4): new `tests/testthat/test-boundary-policy.R` — 6 tests / 12
-  assertions, one per policy cell (glmmTMB smooth + MC, bootstrap kept-at-0, lme4
-  + lavaan classed deferral, fixed θ²_r average-floor, posterior_mode) each citing
-  its ADR + D-004. 12/12 pass locally (no skips), air-clean. No source edits (pin
-  only); no code/policy mismatch surfaced.
-- 2026-07-12 (T5, partial): marked the DESIGN.md § Known-issues boundary wart
-  RESOLVED-by-M50. Full checks (devtools::check NOT_CRAN=false + installed-pkg
-  suite NOT_CRAN=true CI=true) running; results + check-off to follow.
-- 2026-07-12 (T5): both checks Status OK, 0/0/0. `devtools::check` NOT_CRAN=false
-  2m25s; installed-pkg NOT_CRAN=true CI=true 5m55s (testthat 303s vs 94s → the
-  skip_on_cran bootstrap/snapshot paths ran; failed+error=0). lintr on the new
-  file: no lints. AC4 met. → status review.
-- 2026-07-12 (review): three-lens review caught real doc/test gaps (all fixed on
-  branch, no code change): DESIGN lme4 row + D-004 omitted ADR-023/024 (guard
-  reused per shape) — added; bootstrap row under-documented the non-convergent
-  warning path — corrected; guard tests strengthened non-vacuously (assert the
-  rater component is actually at the boundary; fixed θ²_r floored to exactly 0);
-  brms "log-SD" label + average-floor framing corrected. Guards 14/14, air+lintr
-  clean. Correction: T1's "no inconsistency" was right on behavior but the first
-  draft had documentation gaps; no behavior/interval-contract change.
+- 2026-07-12 (plan): created ("address known issues"); promotes the
+  boundary-policy candidate. Re-plan pass opened AC2 to "every ADR the audit
+  surfaces." (Detail in git history.)
+- 2026-07-12 (T1–T2): audited near-zero/singular handling across the 4 engines +
+  3 CI methods; wrote `DESIGN.md § Boundary-fit policy` (per-engine + per-CI
+  tables, 3 behaviors, each cell citing its ADR). Pure pin, no behavior change.
+- 2026-07-12 (T3): D-004 consolidating the governing ADRs. No candidate row left
+  (already promoted at plan time).
+- 2026-07-12 (T4): new `tests/testthat/test-boundary-policy.R` — one guard per
+  policy cell, each citing its ADR + D-004.
+- 2026-07-12 (T5): Known-issues wart marked resolved. check(NOT_CRAN=false) +
+  installed-pkg suite (NOT_CRAN=true CI=true) both 0/0/0; lintr clean. → review.
+- 2026-07-12 (review): fixed doc/test gaps from the three-lens review (added
+  ADR-023/024; documented the bootstrap non-convergent-warning path; strengthened
+  guards to non-vacuous; corrected brms/floor framing). No code change.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Verified 2026-07-12 — fresh evidence, by command (not recall):**
+
+- **AC1 ✓** `DESIGN.md § Boundary-fit policy` exists: per-engine (fit-time) +
+  per-CI-method (interval-time) tables, 3 behaviors, every cell citing its ADR.
+- **AC2 ✓** D-004 records the policy and cites the full governing set
+  (002/003/012/014/023/024/025/031/033/037/038/044) — review added 023/024.
+- **AC3 ✓** `test-boundary-policy.R` 14/14 pass (no skips); one non-vacuous guard
+  per policy cell, each naming its ADR + D-004.
+- **AC4 ✓** `check(NOT_CRAN=false)` 0/0/0 (review re-ran twice, post-fix included);
+  installed-pkg `NOT_CRAN=true CI=true` 0/0/0 (T5, skip_on_cran paths exercised).
+- **Consistency gate:** `cairn_validate` exit 0; `document()` no-diff; NAMESPACE
+  unchanged (no new exports → pkgdown index unaffected); NEWS n/a (no user-visible
+  change); air + lintr clean.
+- **Independent review (3 lenses + verification):** diff-bug [O] and blame-history
+  [S] each surfaced real doc/test gaps — omitted ADR-023/024, under-documented
+  bootstrap warning path, and vacuous guard assertions — all verified against the
+  primary ADRs, scored ≥80, and **fixed on the branch** (no code change).
+  Prior-PR-comments [S] lens: no prior-PR evidence (no-op). 0 findings deferred,
+  0 below-threshold.
