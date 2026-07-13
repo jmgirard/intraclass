@@ -209,9 +209,10 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
 - ~~**Cross-engine parity has no standing matrix**~~ — RESOLVED by M49: the
   standing `tests/testthat/test-engine-parity-matrix.R` now enumerates the grid
   and breaks on a silent gap (see Architecture). (Wart confirmed 2026-07-12.)
-- **Boundary-fit convergence handling is accumulated case law**, not one
-  principled policy — near-zero variance components are the common applied case.
-  (Wart confirmed 2026-07-12; → planned M50.)
+- ~~**Boundary-fit convergence handling is accumulated case law**~~ — RESOLVED by
+  M50: one documented policy in § Boundary-fit policy (three behaviors mapped per
+  engine + per CI method, each cell citing its ADR; recorded as D-004) with guard
+  tests in `tests/testthat/test-boundary-policy.R`. (Wart confirmed 2026-07-12.)
 - **Statistical corners are held by ADR memory:** correct-but-non-obvious
   subtleties (e.g. the fixed-rater 2b moment correction in the shared draw
   helper) risk being "simplified" into wrongness by a future contributor or

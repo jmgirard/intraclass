@@ -117,6 +117,9 @@ excludes it).
   + lavaan classed deferral, fixed θ²_r average-floor, posterior_mode) each citing
   its ADR + D-004. 12/12 pass locally (no skips), air-clean. No source edits (pin
   only); no code/policy mismatch surfaced.
+- 2026-07-12 (T5, partial): marked the DESIGN.md § Known-issues boundary wart
+  RESOLVED-by-M50. Full checks (devtools::check NOT_CRAN=false + installed-pkg
+  suite NOT_CRAN=true CI=true) running; results + check-off to follow.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
