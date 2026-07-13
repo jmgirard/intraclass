@@ -99,47 +99,47 @@ D-entry).
 
 ### Inviolable (IP)
 
-- **IP1 — Faithful implementer.** Every exported statistical method — estimator
+- IP1: **Faithful implementer.** Every exported statistical method — estimator
   *or interval procedure* — traces to a published primary source; the package
   never ships a novel/unpublished method. Parked capabilities stay blocked until
   the literature moves, however tractable a derivation looks. Numerical
   implementation details (optimizer, parameterization) are fenced off: they need
   correctness, not a citation. (Sharpens `PRINCIPLES.md #1/#4`.)
-- **IP2 — ICC-only identity.** The contract boundary is the interrater ICC
+- IP2: **ICC-only identity.** The contract boundary is the interrater ICC
   family, permanently: categorical agreement, internal consistency, and general
   multi-facet G-studies route to other packages. Scope expansion requires a
   constitutional amendment (D-entry + user decision).
-- **IP3 — Which, not how good.** The package never qualitatively labels ICC
+- IP3: **Which, not how good.** The package never qualitatively labels ICC
   magnitude — no poor/good/excellent, no benchmark cutoffs in output, not even
   opt-in. Guidance covers estimand choice and interval reading; vignettes may
   discuss why cutoffs are problematic, with citations.
 
 ### Guiding (GP)
 
-- **GP1 — Applied-first design center.** Defaults, error messages, and
+- GP1: **Applied-first design center.** Defaults, error messages, and
   front-door docs optimize for the applied non-expert; the methodologist tier
   (engines/interval-methods vignettes, estimand specs) is secondary. (Sharpens
   `PRINCIPLES.md #13`.)
-- **GP2 — CRAN is the one-way door.** Exported behavior may change with just a
+- GP2: **CRAN is the one-way door.** Exported behavior may change with just a
   D-entry until the first CRAN submission; from then on, breaking changes take a
   lifecycle deprecation cycle — the companion paper's examples must keep
   running.
-- **GP3 — Platform honesty.** Support commitments are exactly what CI verifies
+- GP3: **Platform honesty.** Support commitments are exactly what CI verifies
   (currently R release/oldrel-1/devel × macOS/Windows/Ubuntu); no declared floor
   CI doesn't test.
-- **GP4 — Engine roster closed at four.** glmmTMB, lme4, brms, lavaan — one per
+- GP4: **Engine roster closed at four.** glmmTMB, lme4, brms, lavaan — one per
   paradigm. A new engine must enable an estimand the four cannot reach, not just
   be another fitter; per-estimator parity cost stays capped at ×4.
-- **GP5 — Fix the evidence, never the bar.** A failing stochastic validation pin
+- GP5: **Fix the evidence, never the bar.** A failing stochastic validation pin
   is answered by strengthening the evidence (more replications, per-rep
   seeding), never by loosening the pin post hoc. A genuinely mis-set pin may be
   corrected prospectively with a D-entry, never to turn a red test green.
   (Canonical citation: legacy ADR-042 Amdt 2.)
-- **GP6 — Sweep the known failure axis.** A simulation-coverage claim includes
+- GP6: **Sweep the known failure axis.** A simulation-coverage claim includes
   cells along whatever axis the known failure mode grows (cluster count,
   incidence, raggedness), not just comfortable interior cells. (Canonical
   citation: legacy ADR-046 Amdt 1.)
-- **GP7 — Guard load-bearing subtleties in code.** A correct-but-non-obvious
+- GP7: **Guard load-bearing subtleties in code.** A correct-but-non-obvious
   statistical corner ships with a guard test plus an in-place comment naming its
   ADR/D-entry, so a future "simplification" fails a test instead of requiring
   archaeology. (E.g. the fixed-rater 2b moment correction.)
