@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M50: Boundary-fit convergence policy consolidation
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -86,7 +86,7 @@ excludes it).
 - [x] T4: Add / confirm guard tests pinning each documented boundary behavior,
       each citing its ADR/D-entry (GP7); a code/policy mismatch stops for a
       gate rather than a silent behavior edit.
-- [ ] T5: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
+- [x] T5: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
       installed-package suite with `NOT_CRAN=true CI=true`; record outputs and
       update the DESIGN.md § Known-issues note to reference M50.
 
@@ -120,6 +120,10 @@ excludes it).
 - 2026-07-12 (T5, partial): marked the DESIGN.md § Known-issues boundary wart
   RESOLVED-by-M50. Full checks (devtools::check NOT_CRAN=false + installed-pkg
   suite NOT_CRAN=true CI=true) running; results + check-off to follow.
+- 2026-07-12 (T5): both checks Status OK, 0/0/0. `devtools::check` NOT_CRAN=false
+  2m25s; installed-pkg NOT_CRAN=true CI=true 5m55s (testthat 303s vs 94s → the
+  skip_on_cran bootstrap/snapshot paths ran; failed+error=0). lintr on the new
+  file: no lints. AC4 met. → status review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
