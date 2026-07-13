@@ -83,7 +83,7 @@ excludes it).
 - [x] T3: Append the consolidating D-entry to `cairn/DECISIONS.md` citing the
       summarized legacy ADRs; resolve the "Boundary-fit convergence policy
       consolidation" candidate row.
-- [ ] T4: Add / confirm guard tests pinning each documented boundary behavior,
+- [x] T4: Add / confirm guard tests pinning each documented boundary behavior,
       each citing its ADR/D-entry (GP7); a code/policy mismatch stops for a
       gate rather than a silent behavior edit.
 - [ ] T5: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
@@ -112,6 +112,11 @@ excludes it).
 - 2026-07-12 (T3): appended D-004 (10 ADRs summarized, behavior unchanged). No
   candidate row to resolve — "Boundary-fit convergence policy consolidation" was
   already promoted to M50 at plan time, so nothing remains in ROADMAP Candidates.
+- 2026-07-12 (T4): new `tests/testthat/test-boundary-policy.R` — 6 tests / 12
+  assertions, one per policy cell (glmmTMB smooth + MC, bootstrap kept-at-0, lme4
+  + lavaan classed deferral, fixed θ²_r average-floor, posterior_mode) each citing
+  its ADR + D-004. 12/12 pass locally (no skips), air-clean. No source edits (pin
+  only); no code/policy mismatch surfaced.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
