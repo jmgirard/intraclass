@@ -11,11 +11,12 @@ lives in `cairn/`, loaded on demand.
 
 ## Read these first
 
-- **`cairn/PRINCIPLES.md`** — the constitution (19 load-bearing
-  principles, `#1`–`#19`). Change-controlled; when it conflicts with
-  instinct, it wins.
-- **`cairn/DESIGN.md`** — purpose, architecture, conventions (a
-  migration seed; deepen via `/design-interview`).
+- **`cairn/PRINCIPLES.md`** — the constitution (`#1`–`#19`,
+  strength-tagged \[IP\]/\[GP\]; \#14–#17 retired into cairn, D-003).
+  Change-controlled; when it conflicts with instinct, it wins.
+- **`cairn/DESIGN.md`** — purpose, contract boundary, architecture, and
+  the interview-derived principles IP1–IP3 / GP1–GP7 (design interview
+  2026-07-12).
 - **`cairn/DECISIONS.md`** — live decisions (D-001…); the full ADR log
   (ADR-001..058) is entombed at `cairn/legacy/DECISIONS.md` and still
   cited by id.
@@ -33,8 +34,8 @@ lives in `cairn/`, loaded on demand.
 - **Oracle-first (#1):** correctness is *established* by numerical
   agreement with ≥2 independent oracles, never by a formula “looking
   right”.
-- **Name the estimand before coding (#2, \#14):** plan before code;
-  respect milestone gates; thin vertical slices.
+- **Name the estimand before coding (#2):** plan before code; respect
+  milestone gates; thin vertical slices (process owned by cairn, D-003).
 - **Intervals are Monte-Carlo and boundary-aware (#3):** never a point
   estimate without an interval; report the method.
 - **No fabricated reference values (#4):** cited source or committed
@@ -45,7 +46,8 @@ lives in `cairn/`, loaded on demand.
   [`rlang::abort()`](https://rlang.r-lib.org/reference/abort.html)
   classed (#8).** No bare
   [`stop()`](https://rdrr.io/r/base/stop.html)/[`warning()`](https://rdrr.io/r/base/warning.html)/[`cat()`](https://rdrr.io/r/base/cat.html)/[`print()`](https://rdrr.io/r/base/print.html).
-- **Tracking files update in the same commit as the work (#16).**
+- **Tracking files update in the same commit as the work** (cairn
+  tracking rules).
 - **Format with `air` before committing** (`air format .`); CI enforces
   `air format --check`. `lintr` owns the semantic linters only. See
   ADR-004.

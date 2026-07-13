@@ -51,9 +51,9 @@
 <div class="section level2">
 <h2 id="read-these-first">Read these first<a class="anchor" aria-label="anchor" href="#read-these-first"></a></h2>
 <ul><li>
-<strong><code>cairn/PRINCIPLES.md</code></strong> — the constitution (19 load-bearing principles, <code>#1</code>–<code>#19</code>). Change-controlled; when it conflicts with instinct, it wins.</li>
+<strong><code>cairn/PRINCIPLES.md</code></strong> — the constitution (<code>#1</code>–<code>#19</code>, strength-tagged [IP]/[GP]; #14–#17 retired into cairn, D-003). Change-controlled; when it conflicts with instinct, it wins.</li>
 <li>
-<strong><code>cairn/DESIGN.md</code></strong> — purpose, architecture, conventions (a migration seed; deepen via <code>/design-interview</code>).</li>
+<strong><code>cairn/DESIGN.md</code></strong> — purpose, contract boundary, architecture, and the interview-derived principles IP1–IP3 / GP1–GP7 (design interview 2026-07-12).</li>
 <li>
 <strong><code>cairn/DECISIONS.md</code></strong> — live decisions (D-001…); the full ADR log (ADR-001..058) is entombed at <code>cairn/legacy/DECISIONS.md</code> and still cited by id.</li>
 <li>
@@ -69,7 +69,7 @@
 <ul><li>
 <strong>Oracle-first (#1):</strong> correctness is <em>established</em> by numerical agreement with ≥2 independent oracles, never by a formula “looking right”.</li>
 <li>
-<strong>Name the estimand before coding (#2, #14):</strong> plan before code; respect milestone gates; thin vertical slices.</li>
+<strong>Name the estimand before coding (#2):</strong> plan before code; respect milestone gates; thin vertical slices (process owned by cairn, D-003).</li>
 <li>
 <strong>Intervals are Monte-Carlo and boundary-aware (#3):</strong> never a point estimate without an interval; report the method.</li>
 <li>
@@ -78,7 +78,8 @@
 <strong>Fail loudly on ill-posed designs (#5)</strong> via the classed <code>abort_*()</code> layer.</li>
 <li>
 <strong>All user messaging via <code>cli</code>; all errors via <code><a href="https://rlang.r-lib.org/reference/abort.html" class="external-link">rlang::abort()</a></code> classed (#8).</strong> No bare <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop()</a></code>/<code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code>/<code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>/<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</li>
-<li><strong>Tracking files update in the same commit as the work (#16).</strong></li>
+<li>
+<strong>Tracking files update in the same commit as the work</strong> (cairn tracking rules).</li>
 <li>
 <strong>Format with <code>air</code> before committing</strong> (<code>air format .</code>); CI enforces <code>air format --check</code>. <code>lintr</code> owns the semantic linters only. See ADR-004.</li>
 </ul></div>
