@@ -126,7 +126,19 @@ pm_tol_for <- function(key, tol) {
 # --- The matrix: one cell per estimand principal variant ----------------------
 # Each cell carries a `fit(engine)` closure (columns hardcoded per design),
 # `agree` (engine -> tolerance the point estimates must meet vs glmmTMB), and
-# `na` (engine -> classed abort that must fire). glmmTMB is the reference.
+# `na` (engine -> classed abort that must fire; the per-line comment is its
+# one-line reachability reason). glmmTMB is the reference and is present in every
+# cell. Every engine (glmmTMB, lme4, lavaan) appears in every cell as either an
+# `agree` or an `na` entry, so no (design, engine) pair is silently absent; brms
+# is covered by the roster guard (its live parity lives in test-icc-brms.R).
+#
+# Spec-surface coverage (granularity = one principal variant per estimand spec,
+# per the M49 plan gate): M1 two-way random, M2 two-way fixed, M3 incomplete
+# random, M36 incomplete fixed, M6 one-way, M5 crossed multilevel (both levels),
+# M27 crossed fixed multilevel, M8 nested (Design 2). Diagnostic/rarely-selected
+# corners (M17 conflated + within-cell replicates, Design 3, cluster-level fixed)
+# stay in their own estimator tests -- add a row here when one becomes a routine
+# selectable design.
 
 pm_cells <- list(
   list(
@@ -163,6 +175,7 @@ pm_cells <- list(
       icc(pm_tw, score, subject, rater, model = "oneway", engine = e, seed = 1)
     },
     agree = list(lme4 = 1e-4),
+    # lavaan: SEM engine fits the two-way design only -- one-way is out of scope.
     na = list(lavaan = "intraclass_unsupported")
   ),
   list(
@@ -171,6 +184,7 @@ pm_cells <- list(
       icc(pm_ml, score, subject, rater, cluster = cluster, engine = e, seed = 1)
     },
     agree = list(lme4 = 1e-3),
+    # lavaan: two-way single-level SEM only -- multilevel is out of scope.
     na = list(lavaan = "intraclass_unsupported")
   ),
   list(
@@ -188,6 +202,7 @@ pm_cells <- list(
       )
     },
     agree = list(lme4 = 1e-3),
+    # lavaan: two-way single-level SEM only -- multilevel is out of scope.
     na = list(lavaan = "intraclass_unsupported")
   ),
   list(
@@ -205,6 +220,7 @@ pm_cells <- list(
       )
     },
     agree = list(lme4 = 1e-3),
+    # lavaan: two-way single-level SEM only -- multilevel is out of scope.
     na = list(lavaan = "intraclass_unsupported")
   )
 )
