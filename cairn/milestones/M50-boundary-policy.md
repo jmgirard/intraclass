@@ -47,8 +47,12 @@ excludes it).
       variance component is handled (kept-at-0 vs classed deferral vs smooth
       log-SD); every behavior claim cites the governing ADR/D-entry.
 - [ ] AC2: A D-entry in `cairn/DECISIONS.md` records the consolidated policy
-      and cites the legacy ADRs it summarizes (ADR-002, ADR-003, ADR-012,
-      ADR-025), superseding the "case law" status without changing behavior.
+      and cites **every** legacy ADR the T1 audit surfaces as governing boundary
+      behavior — the known core (ADR-002, ADR-003, ADR-012, ADR-025) plus any
+      additional boundary-relevant ADRs the audit turns up (the engine/CI files
+      also cite ADR-030, ADR-037, ADR-038, ADR-044, ADR-046 around floors and
+      boundary handling; the audit confirms which govern) — superseding the
+      "case law" status without changing behavior.
 - [ ] AC3: Guard/regression tests pin each engine's documented boundary
       behavior — e.g. the lme4 singular-fit classed abort `intraclass_singular_fit`
       (`R/engine-lme4.R:79`), the glmmTMB finite-boundary interval, the
@@ -93,6 +97,10 @@ excludes it).
   the boundary-policy candidate row). Plan gate: three separate hardening
   milestones (M49/M50/M51), all sequenced before the M48 release; document +
   pin existing behavior, escalate any surfaced inconsistency.
+- 2026-07-12: /milestone-plan re-pass (planned-collision) verified code
+  citations still accurate (`R/engine-lme4.R:79` = `intraclass_singular_fit`).
+  AC2 opened from a closed 4-ADR list to "every ADR the T1 audit surfaces" —
+  code also cites ADR-030/037/038/044/046 around boundary/floor handling.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
