@@ -7,7 +7,7 @@
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M50   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m51-corner-guard-audit   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m51-corner-guard-audit · https://github.com/jmgirard/intraclass/pull/57   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
