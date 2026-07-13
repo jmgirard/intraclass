@@ -72,12 +72,12 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Inventory the estimator×engine surface — the 13 estimand specs in
+- [x] T1: Inventory the estimator×engine surface — the 13 estimand specs in
       `cairn/estimand-specs/` × {glmmTMB, lme4, brms, lavaan}; mark each cell
       reachable / `N/A(reason)` from the `icc.R` dispatch rules (lavaan guard
       `R/icc.R:564`; brms fixed-rater path; the double-blocked cluster-level
       `ICC(c,k)` at `R/icc.R:809`). Output the disposition table.
-- [ ] T2: Author the standing parity asset asserting agreement for every
+- [x] T2: Author the standing parity asset asserting agreement for every
       must-agree cell against an independent engine, folding in / cross-
       referencing the ad-hoc checks in `test-icc-engine-oracle.R` and
       `test-icc-lme4-engine.R`; tolerances cite ADR-002/ADR-012 where
@@ -95,6 +95,22 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 - 2026-07-12: created by /milestone-plan ("address known issues" run; promotes
   the parity-matrix candidate row). Plan gate: three separate hardening
   milestones (M49/M50/M51), all sequenced before the M48 release.
+- 2026-07-12: implement gate (in-file matrix test; cross-reference existing
+  ad-hoc tests; N/A cells assert the classed abort; principal-variant-per-spec
+  granularity) — all four recommendations accepted.
+- 2026-07-12: T1+T2 — probed the surface oracle-first (correcting the stale
+  inline dispatch comment at `R/icc.R:551`; the roxygen at `R/icc.R:230` is
+  authoritative). Disposition (frequentist trio, CI-asserted point estimates;
+  glmmTMB = reference): lme4 agrees on ALL 8 principal cells (two-way
+  random/fixed × complete/incomplete, one-way, crossed random, crossed fixed,
+  nested Design 2) to 1e-4 single-level / 1e-3 multilevel; lavaan agrees on the
+  four two-way cells — consistency exact (1e-4 complete, 3e-3 FIML incomplete),
+  agreement asymptotic (SEM small-sample term: 1e-2 complete, 2e-2 incomplete) —
+  and aborts `intraclass_unsupported` on one-way + all three multilevel cells;
+  brms enumerated in the roster guard, live parity left in test-icc-brms.R
+  (skip_on_ci). New asset `tests/testthat/test-engine-parity-matrix.R` green
+  (73 assertions); roster guard reads icc()'s engine vector from its own body so
+  a 5th engine breaks it (GP4).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
