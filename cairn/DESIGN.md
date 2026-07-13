@@ -218,8 +218,11 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
   M50: one documented policy in § Boundary-fit policy (three behaviors mapped per
   engine + per CI method, each cell citing its ADR; recorded as D-004) with guard
   tests in `tests/testthat/test-boundary-policy.R`. (Wart confirmed 2026-07-12.)
-- **Statistical corners are held by ADR memory:** correct-but-non-obvious
-  subtleties (e.g. the fixed-rater 2b moment correction in the shared draw
-  helper) risk being "simplified" into wrongness by a future contributor or
-  session. (Wart confirmed 2026-07-12; → planned M51, boundary corner → M50.)
+- ~~**Statistical corners are held by ADR memory**~~ — RESOLVED by M51: the
+  audit (inventory in the M51 work log) enumerated the load-bearing corners and
+  pinned the unguarded ones in `tests/testthat/test-corner-guards.R` (the
+  fixed-rater 2b moment family — 2b-not-1b + average- not per-group floor,
+  ADR-037/038 — and the ragged `n_rep ≥ 240` fixture pin, GP5), each with an
+  in-place source comment naming its ADR (GP7); the already-guarded corners are
+  cross-referenced there. (Wart confirmed 2026-07-12; boundary corner → M50.)
 

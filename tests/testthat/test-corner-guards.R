@@ -40,16 +40,16 @@ corner_center2 <- diag(2) - matrix(1 / 2, 2, 2)
 
 test_that("theta2r_moment_draws subtracts 2b, not 1b (frequentist, ADR-038)", {
   # Group A means (1, -1): raw q = 2. Group B means (0.2, -0.1): raw q = 0.045.
-  mA <- matrix(c(1, -1), nrow = 2)
-  mB <- matrix(c(0.2, -0.1), nrow = 2)
-  bA <- 0.25
-  bB <- 0.30
+  m_a <- matrix(c(1, -1), nrow = 2)
+  m_b <- matrix(c(0.2, -0.1), nrow = 2)
+  b_a <- 0.25
+  b_b <- 0.30
 
   # Shipped: mean(2 - 2*0.25, 0.045 - 2*0.30) = mean(1.5, -0.555) = 0.4725, then
   # floored (average is positive, so unchanged). Hand-computed, independent of the
   # implementation.
   expect_equal(
-    theta2r_moment_draws(list(mA, mB), list(bA, bB), corner_center2, 2L),
+    theta2r_moment_draws(list(m_a, m_b), list(b_a, b_b), corner_center2, 2L),
     0.4725
   )
   # 1b would give mean(1.75, -0.255) = 0.7475 -- a DIFFERENT number, so `- b`
@@ -58,20 +58,20 @@ test_that("theta2r_moment_draws subtracts 2b, not 1b (frequentist, ADR-038)", {
 })
 
 test_that("theta2r_moment_draws floors the average, not each group (ADR-038 / #3)", {
-  mA <- matrix(c(1, -1), nrow = 2) # q - 2b = 1.5  (positive)
-  mB <- matrix(c(0.2, -0.1), nrow = 2) # q - 2b = -0.555 (negative)
+  m_a <- matrix(c(1, -1), nrow = 2) # q - 2b = 1.5  (positive)
+  m_b <- matrix(c(0.2, -0.1), nrow = 2) # q - 2b = -0.555 (negative)
 
   # Averaging FIRST keeps the negative group, so the average is 0.4725. Per-group
   # flooring would zero group B first -> mean(1.5, 0) = 0.75. The shipped 0.4725
   # proves the negative group survives into the average.
   expect_equal(
-    theta2r_moment_draws(list(mA, mB), list(0.25, 0.30), corner_center2, 2L),
+    theta2r_moment_draws(list(m_a, m_b), list(0.25, 0.30), corner_center2, 2L),
     0.4725
   )
   # The floor DOES engage on the average: two negative groups -> exactly 0, so the
   # interval can reach the boundary theta^2 = 0 (never below).
   expect_identical(
-    theta2r_moment_draws(list(mB, mB), list(0.30, 0.30), corner_center2, 2L),
+    theta2r_moment_draws(list(m_b, m_b), list(0.30, 0.30), corner_center2, 2L),
     0
   )
 })

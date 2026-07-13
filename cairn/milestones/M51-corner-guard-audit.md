@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M51: Statistical-corner guard audit
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M50   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -88,7 +88,7 @@ dropped.
       the red before the green and record it in the work log.
 - [x] T3: For each in-scope corner lacking one, add the in-place source comment
       in `R/` naming its ADR/D-entry.
-- [ ] T4: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
+- [x] T4: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
       installed-package suite with `NOT_CRAN=true CI=true`; record outputs and
       flip the DESIGN.md § Known-issues "Statistical corners are held by ADR
       memory" bullet to RESOLVED-by-M51 (mirroring the M49/M50 bullets).
@@ -109,35 +109,20 @@ dropped.
   `test-boundary-policy.R`. Principles-touched widened to GP5/GP6/GP7 (those
   corners are in scope). No behavior change; scope unchanged in substance.
 
-- 2026-07-12: T1 inventory (disposition confirmed by reading + one mutation
-  probe). Kept corners (filter = "a plausible simplification silently yields a
-  wrong number", excluding abort paths + M49/M50):
-  - **A. Fixed-rater 2b moment family** — `theta2r_moment_draws` /
-    `theta2r_nested_draws` (engine-glmmtmb.R) + `brms_theta2r_moment_draws`
-    (engine-brms.R); subtlety = subtract **2b not 1b** and floor the **average
-    not per-group** (ADR-037/038). **NEWLY-GUARDED**: mutation probe showed the
-    frozen coverage fixture (O-NFI) can't move and the live containment check
-    (O-NFI/point) stays 1.000 under both 2b→1b and per-group-floor → gap.
-  - **B. brms MAP point** = mode of the ICC-draw vector, not
-    `icc_point(modal components)` (ADR-033). already-guarded — non-Stan live
-    recompute at test-icc-brms.R:386-387.
-  - **C. SEM fixed-agreement Case-3A** θ²_r distinct from raw, reduces to
-    glmmTMB fixed+random (M21). already-guarded — test-icc-lavaan.R:320,357.
-  - **D. Ragged coverage `n_rep ≥ 240` + per-rep seeding** (GP5, ADR-042 Amdt2).
-    Pinned for incomplete-multilevel (test-icc-incomplete-multilevel.R:563) but
-    **NEWLY-GUARDED** for the incomplete-fixed-nested fixture (no n_rep pin;
-    fixture stores n_rep=240 → cheap metadata pin).
-  - **E. Cluster-count sweep axis** high-C_n cell present (GP6, ADR-046 Amdt1).
-    already-guarded — O-NFI `by_cn(80,·)` requires C_n=80 in the grid.
-  - **F. Incomplete-agreement handling** (raw-SEM bias / FIML). already-guarded
-    — live O5 lme4 + recovery at test-icc-incomplete.R:97,147.
-  Excluded (listed, not dropped): boundary/near-zero corner → M50 (D-004);
-  cross-engine parity matrix → M49; abort/identifiability/Heywood/singular
-  deferral paths → they fail loudly (#5), not silently wrong, covered by
-  error-branch tests; choose_icc emitted-type (ADR-021) + warning-not-error
-  (ADR-006) → output-shape/behavior, not a silent numeric subtlety.
-  Net new work: A (3 direct helper guards) + D (one n_rep pin); B/C/E/F cite
-  their existing live guard; in-place R/ ADR comments for A already present.
+- 2026-07-12: T1 inventory (full detail: test-corner-guards.R header + git).
+  Filter = "a plausible simplification silently yields a wrong number", excluding
+  abort paths + M49/M50. Six kept corners — **A** fixed-rater 2b moment family
+  (`theta2r_moment_draws`/`theta2r_nested_draws`/`brms_theta2r_moment_draws`; 2b
+  not 1b + average- not per-group floor, ADR-037/038) and **D** ragged coverage
+  `n_rep≥240` on the incomplete-fixed-nested fixture (GP5) are **NEWLY-GUARDED**;
+  **B** brms MAP=mode-of-ICC-draws (ADR-033), **C** SEM Case-3A (M21), **E**
+  cluster-count axis (GP6), **F** incomplete-agreement are already-guarded (live
+  tests cited in the guard-file header). A's newly-guarded status was mutation-
+  confirmed: the frozen O-NFI fixture can't move and live containment stays 1.000
+  under both simplifications. Excluded (listed, not dropped): boundary → M50
+  (D-004); parity matrix → M49; abort/Heywood/singular-deferral paths (fail
+  loudly #5, not silently wrong); choose_icc type (ADR-021) + warning-not-error
+  (ADR-006) (output-shape, not a silent numeric subtlety).
 
 - 2026-07-13: T2/T3. New `test-corner-guards.R` (10 assertions): A = 3 helper
   guards pinning 2b-not-1b + average-floor-not-per-group with hand-computed
@@ -148,6 +133,14 @@ dropped.
   reverted. Added a one-line guard reference at each of the 3 helper definitions.
   Suite: FAIL 0 | PASS 1655 | SKIP 23 (CI=true NOT_CRAN=true; lone WARN is a
   pre-existing captured glmmTMB convergence msg in test-icc-type-vector.R).
+
+- 2026-07-13: T4. Installed-package `devtools::check` clean BOTH ways —
+  `NOT_CRAN=false` and `NOT_CRAN=true CI=true` (full suite incl. skip_on_cran,
+  live-Stan skipped): 0 errors | 0 warnings | 0 notes each (`manual=FALSE` to
+  skip the known local Courier PDF-manual font gap, [[rcmdcheck-pdf-manual-courier]]).
+  `air format` + `lintr::lint_package()` clean (0). Flipped the DESIGN.md
+  § Known-issues "corners held by ADR memory" bullet to RESOLVED-by-M51.
+  Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
