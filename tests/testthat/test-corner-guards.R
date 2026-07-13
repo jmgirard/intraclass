@@ -52,9 +52,8 @@ test_that("theta2r_moment_draws subtracts 2b, not 1b (frequentist, ADR-038)", {
     theta2r_moment_draws(list(m_a, m_b), list(b_a, b_b), corner_center2, 2L),
     0.4725
   )
-  # 1b would give mean(1.75, -0.255) = 0.7475 -- a DIFFERENT number, so `- b`
-  # instead of `- 2 * b` fails the assertion above.
-  expect_false(isTRUE(all.equal(0.4725, 0.7475)))
+  # (1b would give mean(1.75, -0.255) = 0.7475 -- a DIFFERENT number, so `- b`
+  # instead of `- 2 * b` fails the assertion above.)
 })
 
 test_that("theta2r_moment_draws floors the average, not each group (ADR-038 / #3)", {
@@ -76,7 +75,11 @@ test_that("theta2r_moment_draws floors the average, not each group (ADR-038 / #3
   )
 })
 
-test_that("theta2r_nested_draws applies 2b + average-floor per cluster (ADR-046)", {
+test_that("theta2r_nested_draws applies the ADR-038 2b + average-floor (ADR-046 generalizes to unequal k)", {
+  # The subtlety guarded here -- subtract 2b, floor the AVERAGE not per-cluster --
+  # is ADR-038's (M28). `theta2r_nested_draws()` is ADR-046's (M36) generalization
+  # of that same correction to unequal per-cluster k_c; this fixture is EQUAL-k, so
+  # it exercises the ADR-038 subtlety, not the unequal-k path.
   # The generalized unequal-k nested helper: rows of beta_draws are rater coeffs,
   # grouped by cluster via th$cluster_idx, each with its own center/k/bias. Build
   # two equal-k clusters matching the flat-helper fixture so the value is the same

@@ -46,20 +46,20 @@ dropped.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: A committed audit disposition (a short table in the milestone work
+- [x] AC1: A committed audit disposition (a short table in the milestone work
       log) enumerates the load-bearing statistical corners with an
       already-guarded / newly-guarded status each, and lists the ADRs the filter
       excludes with a one-line reason. The inventory is derived from the ADR/D
       citations in `R/` filtered by the "silently wrong number" bar (see Scope)
       plus the GP5/GP6/GP7 example set + LESSONS/memory, not guesswork, and
       excludes the boundary corner (→ M50) and parity (→ M49).
-- [ ] AC2: Every in-scope corner ends GP7-guarded: either an existing test is
+- [x] AC2: Every in-scope corner ends GP7-guarded: either an existing test is
       shown to go red when the plausible simplification is applied
       (already-guarded — cite the test), or a new guard test that fails on that
       simplification is added to `test-corner-guards.R` (newly-guarded —
       demonstrate the red before the green). Every corner also carries an
       in-place source comment in `R/` naming its ADR/D-entry.
-- [ ] AC3: `devtools::check(env_vars = c(NOT_CRAN = "false"))` clean (0/0,
+- [x] AC3: `devtools::check(env_vars = c(NOT_CRAN = "false"))` clean (0/0,
       NOTEs only); full suite green against the **installed** package with
       `NOT_CRAN=true CI=true` (failed + error = 0).
 
@@ -96,50 +96,33 @@ dropped.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-12: created by /milestone-plan ("address known issues" run). Plan
-  gate: three separate hardening milestones (M49/M50/M51), all sequenced before
-  the M48 release; depends on M50 so the boundary corner is already
-  policy-guarded and excluded from this audit.
-- 2026-07-12: /milestone-plan refinement (M50 now done, M51 workable). Plan gate
-  settled three open scoping decisions (user deferred to recommendations):
-  inventory bounded by a curated-seed + "silently wrong number" filter over the
-  ~40 R/ ADRs (not exhaustive); a corner counts as already-guarded only if an
-  existing test goes red on the plausible simplification (else add a guard); new
-  guards consolidated into one `test-corner-guards.R` mirroring M50's
-  `test-boundary-policy.R`. Principles-touched widened to GP5/GP6/GP7 (those
-  corners are in scope). No behavior change; scope unchanged in substance.
+- 2026-07-12: created by /milestone-plan ("address known issues"); one of three
+  hardening milestones (M49/M50/M51) before the M48 release; depends on M50 (its
+  boundary corner is excluded here).
+- 2026-07-12: /milestone-plan refinement. Gate settled three scoping decisions
+  (user deferred to recommendations): curated-seed + "silently wrong number"
+  filter (not exhaustive); already-guarded = an existing test goes red on the
+  simplification; guards consolidated in one `test-corner-guards.R`. Principles
+  widened to GP5/GP6/GP7. No behavior change.
 
-- 2026-07-12: T1 inventory (full detail: test-corner-guards.R header + git).
-  Filter = "a plausible simplification silently yields a wrong number", excluding
-  abort paths + M49/M50. Six kept corners — **A** fixed-rater 2b moment family
-  (`theta2r_moment_draws`/`theta2r_nested_draws`/`brms_theta2r_moment_draws`; 2b
-  not 1b + average- not per-group floor, ADR-037/038) and **D** ragged coverage
-  `n_rep≥240` on the incomplete-fixed-nested fixture (GP5) are **NEWLY-GUARDED**;
-  **B** brms MAP=mode-of-ICC-draws (ADR-033), **C** SEM Case-3A (M21), **E**
-  cluster-count axis (GP6), **F** incomplete-agreement are already-guarded (live
-  tests cited in the guard-file header). A's newly-guarded status was mutation-
-  confirmed: the frozen O-NFI fixture can't move and live containment stays 1.000
-  under both simplifications. Excluded (listed, not dropped): boundary → M50
-  (D-004); parity matrix → M49; abort/Heywood/singular-deferral paths (fail
-  loudly #5, not silently wrong); choose_icc type (ADR-021) + warning-not-error
-  (ADR-006) (output-shape, not a silent numeric subtlety).
+- 2026-07-12: T1 inventory (full table: test-corner-guards.R header + git).
+  Filter = "plausible simplification → silently wrong number", excluding abort
+  paths + M49/M50. Six kept corners: **A** fixed-rater 2b moment family (2b-not-1b
+  + average- not per-group floor, ADR-037/038) and **D** ragged `n_rep≥240` on the
+  incomplete-fixed-nested fixture (GP5) are **NEWLY-GUARDED** (A mutation-confirmed:
+  frozen O-NFI fixture can't move, live containment stays 1.000 under both
+  simplifications); **B/C/E/F** (brms MAP mode, SEM Case-3A, cluster axis,
+  incomplete-agreement) already-guarded by cited live tests. Excluded, listed:
+  boundary → M50, parity → M49, abort/Heywood paths (fail loudly, not silent),
+  choose_icc/warning (output-shape, not numeric).
 
-- 2026-07-13: T2/T3. New `test-corner-guards.R` (10 assertions): A = 3 helper
-  guards pinning 2b-not-1b + average-floor-not-per-group with hand-computed
-  values (theta2r_moment_draws / theta2r_nested_draws / brms_theta2r_moment_draws)
-  + D = an n_rep≥240 pin on the incomplete-fixed-nested fixture; header
-  cross-references the already-guarded B/C/E/F. Red demonstrated via source
-  patch (2b→1b trips all 5 helper assertions; per-group-floor trips freq+brms),
-  reverted. Added a one-line guard reference at each of the 3 helper definitions.
-  Suite: FAIL 0 | PASS 1655 | SKIP 23 (CI=true NOT_CRAN=true; lone WARN is a
-  pre-existing captured glmmTMB convergence msg in test-icc-type-vector.R).
-
-- 2026-07-13: T4. Installed-package `devtools::check` clean BOTH ways —
-  `NOT_CRAN=false` and `NOT_CRAN=true CI=true` (full suite incl. skip_on_cran,
-  live-Stan skipped): 0 errors | 0 warnings | 0 notes each (`manual=FALSE` to
-  skip the known local Courier PDF-manual font gap, [[rcmdcheck-pdf-manual-courier]]).
-  `air format` + `lintr::lint_package()` clean (0). Flipped the DESIGN.md
-  § Known-issues "corners held by ADR memory" bullet to RESOLVED-by-M51.
+- 2026-07-13: T2/T3. New `test-corner-guards.R`: A = 3 helper guards (2b-not-1b +
+  average-floor, hand-computed) + D = n_rep≥240 pin; header cross-refs B/C/E/F.
+  Red demonstrated via source patch (2b→1b, per-group-floor), reverted. One-line
+  guard reference added at each helper. Suite FAIL 0 | PASS 1655 | SKIP 23.
+- 2026-07-13: T4. Installed `devtools::check` clean both ways (`NOT_CRAN=false`;
+  `NOT_CRAN=true CI=true`): 0/0/0 each (`manual=FALSE`, [[rcmdcheck-pdf-manual-courier]]).
+  `air` + `lint_package` clean. DESIGN.md Known-issues bullet → RESOLVED-by-M51.
   Status → review.
 
 ## Decisions
@@ -147,3 +130,20 @@ dropped.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+- 2026-07-13 (PR #57). **AC1** ✓ — inventory table (6 corners + excluded ADRs
+  with reasons) committed in the work log. **AC2** ✓ — guard file green (9/9);
+  fresh red-demo (2b→1b trips the freq assertions); already-guarded B/C/E/F
+  citations verified live by the diff-bug reviewer; in-place R/ ADR comments
+  present. **AC3** ✓ — fresh installed `devtools::check`: `NOT_CRAN=false`
+  0/0/0 and `NOT_CRAN=true CI=true` 0/0/0.
+- Consistency gate: `cairn_validate` exit 0 (all checks); coverage complete;
+  `cairn_impact` — M51 changed no GP wording (only a Known-issues bullet), all
+  citations valid. `air` + `lintr::lint_package()` clean (0).
+- Three-lens review: [O] diff-bug — no findings (numeric claims re-executed);
+  [S] prior-PR — no-ops (no substantive prior comments on these files); [S]
+  blame-history — 1 finding (scored 85, actioned): nested guard test titled
+  ADR-046 but the 2b/average-floor subtlety is ADR-038's (ADR-046 only
+  generalizes to unequal k; fixture is equal-k) → title + comment corrected.
+  1 sub-80 observation (a tautological `expect_false(all.equal(literal))`)
+  cleaned opportunistically. Post-fix: 0 lints, guards green.
