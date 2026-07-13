@@ -73,7 +73,7 @@ dropped.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Inventory the load-bearing corners. Seed from the GP5/GP6/GP7 example
+- [x] T1: Inventory the load-bearing corners. Seed from the GP5/GP6/GP7 example
       set + `cairn/LESSONS.md` / memory (fixed-rater 2b moment; ragged
       `n_rep ≥ 240`; cluster-count axis; SEM Case-3A parity; incomplete-
       agreement), then sweep the ADR/D citations across `R/` and keep only
@@ -108,6 +108,36 @@ dropped.
   guards consolidated into one `test-corner-guards.R` mirroring M50's
   `test-boundary-policy.R`. Principles-touched widened to GP5/GP6/GP7 (those
   corners are in scope). No behavior change; scope unchanged in substance.
+
+- 2026-07-12: T1 inventory (disposition confirmed by reading + one mutation
+  probe). Kept corners (filter = "a plausible simplification silently yields a
+  wrong number", excluding abort paths + M49/M50):
+  - **A. Fixed-rater 2b moment family** — `theta2r_moment_draws` /
+    `theta2r_nested_draws` (engine-glmmtmb.R) + `brms_theta2r_moment_draws`
+    (engine-brms.R); subtlety = subtract **2b not 1b** and floor the **average
+    not per-group** (ADR-037/038). **NEWLY-GUARDED**: mutation probe showed the
+    frozen coverage fixture (O-NFI) can't move and the live containment check
+    (O-NFI/point) stays 1.000 under both 2b→1b and per-group-floor → gap.
+  - **B. brms MAP point** = mode of the ICC-draw vector, not
+    `icc_point(modal components)` (ADR-033). already-guarded — non-Stan live
+    recompute at test-icc-brms.R:386-387.
+  - **C. SEM fixed-agreement Case-3A** θ²_r distinct from raw, reduces to
+    glmmTMB fixed+random (M21). already-guarded — test-icc-lavaan.R:320,357.
+  - **D. Ragged coverage `n_rep ≥ 240` + per-rep seeding** (GP5, ADR-042 Amdt2).
+    Pinned for incomplete-multilevel (test-icc-incomplete-multilevel.R:563) but
+    **NEWLY-GUARDED** for the incomplete-fixed-nested fixture (no n_rep pin;
+    fixture stores n_rep=240 → cheap metadata pin).
+  - **E. Cluster-count sweep axis** high-C_n cell present (GP6, ADR-046 Amdt1).
+    already-guarded — O-NFI `by_cn(80,·)` requires C_n=80 in the grid.
+  - **F. Incomplete-agreement handling** (raw-SEM bias / FIML). already-guarded
+    — live O5 lme4 + recovery at test-icc-incomplete.R:97,147.
+  Excluded (listed, not dropped): boundary/near-zero corner → M50 (D-004);
+  cross-engine parity matrix → M49; abort/identifiability/Heywood/singular
+  deferral paths → they fail loudly (#5), not silently wrong, covered by
+  error-branch tests; choose_icc emitted-type (ADR-021) + warning-not-error
+  (ADR-006) → output-shape/behavior, not a silent numeric subtlety.
+  Net new work: A (3 direct helper guards) + D (one n_rep pin); B/C/E/F cite
+  their existing live guard; in-place R/ ADR comments for A already present.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
