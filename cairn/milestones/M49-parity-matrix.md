@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M49: Standing cross-engine parity matrix
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP4   <!-- owner: plan · create/amend-via-gate -->
@@ -85,7 +85,7 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
 - [x] T3: Document the matrix + extension rule (asset header + DESIGN.md §
       note); resolve the "Standing engine×estimator parity matrix" candidate
       row and update the DESIGN.md § Known-issues note to reference M49.
-- [ ] T4: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
+- [x] T4: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
       installed-package suite with `NOT_CRAN=true CI=true`; record outputs in
       the work log.
 
@@ -111,6 +111,12 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
   (skip_on_ci). New asset `tests/testthat/test-engine-parity-matrix.R` green
   (73 assertions); roster guard reads icc()'s engine vector from its own body so
   a 5th engine breaks it (GP4).
+- 2026-07-12: T3 — documented the matrix in DESIGN.md § Architecture + marked
+  the cross-engine-parity wart RESOLVED; new-file lintr clean.
+- 2026-07-12: T4 — gate green. AC4 `devtools::check(--as-cran, NOT_CRAN=false,
+  manual=TRUE)`: 0 errors / 0 warnings / 0 notes. AC5 installed
+  `devtools::check(NOT_CRAN=true, CI=true)` (skip_on_cran active): Status OK,
+  0/0/0. air format --check clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
