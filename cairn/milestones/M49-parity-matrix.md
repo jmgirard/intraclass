@@ -82,7 +82,7 @@ gate and is fixed as its own hotfix/milestone, never papered over here.
       referencing the ad-hoc checks in `test-icc-engine-oracle.R` and
       `test-icc-lme4-engine.R`; tolerances cite ADR-002/ADR-012 where
       governing. A genuine disagreement stops for a gate (bug per #1).
-- [ ] T3: Document the matrix + extension rule (asset header + DESIGN.md §
+- [x] T3: Document the matrix + extension rule (asset header + DESIGN.md §
       note); resolve the "Standing engine×estimator parity matrix" candidate
       row and update the DESIGN.md § Known-issues note to reference M49.
 - [ ] T4: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
