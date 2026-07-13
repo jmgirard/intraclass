@@ -82,11 +82,11 @@ dropped.
       simplification and check whether any existing test goes red → record an
       already-guarded (cite the test) / newly-guarded disposition. Write the
       inventory table (kept corners + excluded-ADR reasons) into the work log.
-- [ ] T2: For each newly-guarded corner, add a guard test to a new consolidated
+- [x] T2: For each newly-guarded corner, add a guard test to a new consolidated
       `tests/testthat/test-corner-guards.R` (mirror `test-boundary-policy.R`'s
       header pattern) that fails on the plausible simplification — demonstrate
       the red before the green and record it in the work log.
-- [ ] T3: For each in-scope corner lacking one, add the in-place source comment
+- [x] T3: For each in-scope corner lacking one, add the in-place source comment
       in `R/` naming its ADR/D-entry.
 - [ ] T4: Run `devtools::check(env_vars = c(NOT_CRAN = "false"))` + the
       installed-package suite with `NOT_CRAN=true CI=true`; record outputs and
@@ -138,6 +138,16 @@ dropped.
   (ADR-006) → output-shape/behavior, not a silent numeric subtlety.
   Net new work: A (3 direct helper guards) + D (one n_rep pin); B/C/E/F cite
   their existing live guard; in-place R/ ADR comments for A already present.
+
+- 2026-07-13: T2/T3. New `test-corner-guards.R` (10 assertions): A = 3 helper
+  guards pinning 2b-not-1b + average-floor-not-per-group with hand-computed
+  values (theta2r_moment_draws / theta2r_nested_draws / brms_theta2r_moment_draws)
+  + D = an n_rep≥240 pin on the incomplete-fixed-nested fixture; header
+  cross-references the already-guarded B/C/E/F. Red demonstrated via source
+  patch (2b→1b trips all 5 helper assertions; per-group-floor trips freq+brms),
+  reverted. Added a one-line guard reference at each of the 3 helper definitions.
+  Suite: FAIL 0 | PASS 1655 | SKIP 23 (CI=true NOT_CRAN=true; lone WARN is a
+  pre-existing captured glmmTMB convergence msg in test-icc-type-vector.R).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

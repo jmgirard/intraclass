@@ -659,6 +659,7 @@ theta2r_fixed_nested <- function(
 # equals per-group floor, so this reduces to the M10/M3 behaviour up to a ~b shift.
 # `group_means` is a list of k x ndraw drawn-cell-mean matrices, `group_bias` the
 # matching list of per-group b_g scalars.
+# GP7 guard (2b-not-1b + average-floor): tests/testthat/test-corner-guards.R (M51).
 theta2r_moment_draws <- function(group_means, group_bias, center, k) {
   per <- Map(
     function(m, b) colSums(m * (center %*% m)) / (k - 1) - 2 * b,
@@ -676,6 +677,7 @@ theta2r_moment_draws <- function(group_means, group_bias, center, k) {
 # ADR-046), then averaged over clusters and the AVERAGE floored (never per cluster, #3).
 # On balanced/equal-k data every center_c/k_c is identical, so this reduces to the shared
 # helper's single-group-per-cluster path (O-FNML pins unmoved).
+# GP7 guard (2b-not-1b + average-floor): tests/testthat/test-corner-guards.R (M51).
 theta2r_nested_draws <- function(beta_draws, th) {
   per <- lapply(seq_along(th$cluster_idx), function(j) {
     m <- beta_draws[th$cluster_idx[[j]], , drop = FALSE]

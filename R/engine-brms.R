@@ -381,6 +381,7 @@ fit_brms_oneway <- function(
 # contribution strictly positive, so the group average never reaches 0 and the interval has
 # ZERO coverage at the boundary. Let negative per-group draws cancel across groups; floor
 # only the group AVERAGE. Unbiased at the boundary, and the interval can reach 0.
+# GP7 guard (2b-not-1b + average-floor): tests/testthat/test-corner-guards.R (M51).
 brms_theta2r_moment_draws <- function(mean_draws_list) {
   per <- lapply(mean_draws_list, function(m) {
     k <- nrow(m)
