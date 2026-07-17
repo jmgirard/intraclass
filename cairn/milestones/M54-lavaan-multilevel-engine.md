@@ -104,7 +104,7 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: tests first — cross-engine parity, reduction, and recovery-cell
+- [x] T1: tests first — cross-engine parity, reduction, and recovery-cell
       skeletons (new `test-icc-lavaan-multilevel.R`), failing against the
       current abort.
 - [ ] T2: implement `fit_lavaan_multilevel()` per the pilot mapping —
@@ -129,6 +129,9 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
 - 2026-07-16: created by /milestone-plan (promoted from the ROADMAP
   candidate; lineage ADR-027 → M53 GO → D-005; plan gate: before-release
   sequencing, conflated in, parity+feasibility CI bar, balanced-only).
+- 2026-07-16: T1 done — oracle test file written (pilot-traced pins; MC/
+  conflated pins to be calibration-sized in T2/T4), all paths fail on the
+  current blanket abort as expected.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
