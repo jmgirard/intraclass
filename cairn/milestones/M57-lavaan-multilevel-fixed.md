@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M57: Multilevel SEM (lavaan) — fixed-rater crossed design
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -102,7 +102,7 @@ bootstrap carries a documented cross-platform flake).
       random-reduction identity, the AC3 deterministic correction guard, and the
       AC4 abort-narrowing checks (`skip_on_cran`,
       `skip_if_not_installed("lavaan")`).
-- [ ] T4: Run the `verify` slot; update `@param raters`, the `icc()` engine-roster
+- [x] T4: Run the `verify` slot; update `@param raters`, the `icc()` engine-roster
       prose, and the `fit_lavaan_multilevel()` header (lavaan now covers crossed
       **fixed** multilevel at both levels on balanced/complete data).
 
@@ -124,6 +124,14 @@ bootstrap carries a documented cross-platform flake).
   lavaan case to the fixed-multilevel branch. New test file 21 pass; verified
   vs glmmTMB fixed (subject Δ=6e-5, cluster Δ=1.8e-3) + deterministic 1b/2b/floor
   guard. M54 test's now-invalid fixed-abort block removed.
+- 2026-07-17: T4 done. Docs: `@param engine` lavaan prose + NEWS entry (fixed
+  multilevel, MC-only, the finite-population gap). Regenerated man/icc.Rd. The
+  engine-parity matrix's fixed-multilevel cell moved lavaan from `na` (refusal) to
+  `agree` (both levels, tol c(A=4e-2, C=5e-3); observed .016 A / .0017 C on pm_ml).
+  Verify slot clean: full suite green (0 failures; 2 CI skips, 2 pre-existing
+  warnings incl. the flaky glmmTMB convergence warning at test-icc-type-vector.R:286
+  — an untouched path, passes in isolation), air format --check + lintr clean.
+  Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

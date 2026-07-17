@@ -238,12 +238,18 @@
 #'   finite-population variance, which equals the mixed-model estimate on balanced
 #'   data), on both complete and **incomplete** data (missing cells are estimated by
 #'   full-information maximum likelihood; the parametric bootstrap is unavailable for
-#'   incomplete SEM), and the crossed (Design 1) **multilevel** random design at
-#'   both levels (plus the conflated diagnostic) via a two-level SEM -- on
-#'   complete, balanced data with equal cluster sizes, with either the
-#'   Monte-Carlo interval (the default) or the parametric bootstrap (which
-#'   simulates two-level datasets from the fitted moments and refits per
-#'   resample). lavaan's two-level estimator is full-information ML
+#'   incomplete SEM), and the crossed (Design 1) **multilevel** design at both
+#'   levels (plus the conflated diagnostic) via a two-level SEM -- on complete,
+#'   balanced data with equal cluster sizes. With **random** raters the interval
+#'   is either the Monte-Carlo interval (the default) or the parametric bootstrap
+#'   (which simulates two-level datasets from the fitted moments and refits per
+#'   resample). With **fixed** raters the between-level rater intercepts give the
+#'   Case-3A finite-population \eqn{\theta^2_r} at both levels (Monte-Carlo only;
+#'   the fixed-rater bootstrap is not yet available); because lavaan's
+#'   random-rater term is the raw quadratic form, the fixed-rater ICC differs from
+#'   the random-rater one by the finite-population correction (which the REML-based
+#'   mixed-model engines do not carry into their random estimate). lavaan's
+#'   two-level estimator is full-information ML
 #'   (there is no REML analog), so with few clusters its cluster-level components
 #'   sit slightly below the REML estimates and its absolute-agreement rater term
 #'   slightly above (both differences shrink as clusters grow; consistency ICCs

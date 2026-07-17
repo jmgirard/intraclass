@@ -70,16 +70,34 @@ test_that("O-SEM-ML-FIXED/parity: lavaan fixed matches glmmTMB fixed (agreement)
 
   d <- sim_ml(40, 5, 5, 1, 1.5, 0.4, 0.3, 1, seed = 42)
   lf <- suppressWarnings(icc(
-    d, score, subject, rater,
-    cluster = cluster, engine = "lavaan", raters = "fixed", seed = 1
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lavaan",
+    raters = "fixed",
+    seed = 1
   ))
   lr <- icc(
-    d, score, subject, rater,
-    cluster = cluster, engine = "lavaan", raters = "random", seed = 1
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lavaan",
+    raters = "random",
+    seed = 1
   )
   tf <- suppressWarnings(icc(
-    d, score, subject, rater,
-    cluster = cluster, engine = "glmmTMB", raters = "fixed", seed = 1
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "glmmTMB",
+    raters = "fixed",
+    seed = 1
   ))
 
   # Eight Table-3 coefficients at both levels, engine tag intact.
@@ -175,9 +193,14 @@ test_that("O-SEM-ML-FIXED: fixed lavaan aborts on nested / replicate / incomplet
   dn$rater <- factor(paste(dn$cluster, dn$rater, sep = "_"))
   expect_error(
     suppressWarnings(icc(
-      dn, score, subject, rater,
+      dn,
+      score,
+      subject,
+      rater,
       cluster = cluster,
-      design = "nested_in_clusters", raters = "fixed", engine = "lavaan"
+      design = "nested_in_clusters",
+      raters = "fixed",
+      engine = "lavaan"
     )),
     class = "intraclass_unsupported"
   )
@@ -186,8 +209,13 @@ test_that("O-SEM-ML-FIXED: fixed lavaan aborts on nested / replicate / incomplet
   dr <- rbind(d, d)
   expect_error(
     suppressWarnings(icc(
-      dr, score, subject, rater,
-      cluster = cluster, raters = "fixed", engine = "lavaan"
+      dr,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      engine = "lavaan"
     )),
     class = "intraclass_unsupported"
   )
@@ -196,8 +224,13 @@ test_that("O-SEM-ML-FIXED: fixed lavaan aborts on nested / replicate / incomplet
   di <- d[-3, ]
   expect_error(
     suppressWarnings(icc(
-      di, score, subject, rater,
-      cluster = cluster, raters = "fixed", engine = "lavaan"
+      di,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      engine = "lavaan"
     )),
     class = "intraclass_unsupported"
   )
@@ -206,8 +239,13 @@ test_that("O-SEM-ML-FIXED: fixed lavaan aborts on nested / replicate / incomplet
   du <- d[!(d$cluster == "1" & d$subj > 3), ]
   expect_error(
     suppressWarnings(icc(
-      du, score, subject, rater,
-      cluster = cluster, raters = "fixed", engine = "lavaan"
+      du,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      raters = "fixed",
+      engine = "lavaan"
     )),
     class = "intraclass_unsupported"
   )

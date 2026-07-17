@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55 | high | milestones/M48-release-v010.md |
-| M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | in-progress | — | normal | milestones/M57-lavaan-multilevel-fixed.md |
+| M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | review | — | normal | milestones/M57-lavaan-multilevel-fixed.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | planned | — | normal | milestones/M58-lavaan-multilevel-incomplete.md |
 | M60 | Freeze the lavaan multilevel recovery sweep | done | — | normal | milestones/archive/M60-freeze-lavaan-recovery.md |
 | M59 | Test-suite speed — rigor-invariant levers | done | — | normal | milestones/archive/M59-test-suite-speed.md |
