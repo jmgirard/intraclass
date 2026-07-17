@@ -153,7 +153,15 @@ agreement rater term is the McGraw & Wong Case-3A bias-corrected
 finite-population variance, which equals the mixed-model estimate on balanced
 data), on both complete and \strong{incomplete} data (missing cells are estimated by
 full-information maximum likelihood; the parametric bootstrap is unavailable for
-incomplete SEM). \code{"brms"} fits the \strong{random}-rater model in a Bayesian
+incomplete SEM), and the crossed (Design 1) \strong{multilevel} random design at
+both levels (plus the conflated diagnostic) via a two-level SEM -- on
+complete, balanced data with equal cluster sizes, with the Monte-Carlo
+interval (no bootstrap). lavaan's two-level estimator is full-information ML
+(there is no REML analog), so with few clusters its cluster-level components
+sit slightly below the REML estimates and its absolute-agreement rater term
+slightly above (both differences shrink as clusters grow; consistency ICCs
+are ratios and agree with the mixed-model estimates essentially exactly).
+\code{"brms"} fits the \strong{random}-rater model in a Bayesian
 framework (Stan, via \pkg{brms}) under a sourced half-\emph{t}(4, 0, 1) prior on the
 random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 mode (MAP) and the interval is a percentile \strong{credible} interval

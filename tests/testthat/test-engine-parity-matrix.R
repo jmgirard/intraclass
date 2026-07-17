@@ -183,9 +183,11 @@ pm_cells <- list(
     fit = function(e) {
       icc(pm_ml, score, subject, rater, cluster = cluster, engine = e, seed = 1)
     },
-    agree = list(lme4 = 1e-3),
-    # lavaan: two-way single-level SEM only -- multilevel is out of scope.
-    na = list(lavaan = "intraclass_unsupported")
+    # lavaan (M54, D-005): two-level SEM, ML-only -- at pm_ml's N_c = 15 the
+    # cluster-level agreement carries the ML-vs-REML + tau^2 small-sample
+    # terms (observed max |delta| .020 A / .0017 C; both shrink with N_c).
+    agree = list(lme4 = 1e-3, lavaan = c(A = 4e-2, C = 5e-3)),
+    na = list()
   ),
   list(
     name = "multilevel crossed fixed, subject level (M27)",
@@ -202,7 +204,7 @@ pm_cells <- list(
       )
     },
     agree = list(lme4 = 1e-3),
-    # lavaan: two-way single-level SEM only -- multilevel is out of scope.
+    # lavaan: fixed-rater multilevel SEM is deferred (M54 Out -> siblings).
     na = list(lavaan = "intraclass_unsupported")
   ),
   list(
@@ -220,7 +222,8 @@ pm_cells <- list(
       )
     },
     agree = list(lme4 = 1e-3),
-    # lavaan: two-way single-level SEM only -- multilevel is out of scope.
+    # lavaan: the two-level SEM mapping is crossed (Design 1) only -- no
+    # nested-rater parameterization (M54).
     na = list(lavaan = "intraclass_unsupported")
   )
 )
