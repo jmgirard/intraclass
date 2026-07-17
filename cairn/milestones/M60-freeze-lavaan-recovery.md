@@ -87,7 +87,7 @@ frozen pin so no discriminating power is lost.
 
 ## Tasks
 
-- [ ] T1 — Write `data-raw/oracle-sem-multilevel-recovery.R`: lift the Cell B
+- [x] T1 — Write `data-raw/oracle-sem-multilevel-recovery.R`: lift the Cell B
       (60) + Cell D (40) refit loops verbatim (same pop/geometry/seeds/`n_rep`/
       `mc_samples`), compute the summary the pins consume (Cell B colMeans
       rel-bias; Cell D mean rater rel-bias, mean `parity_d`, predicted
@@ -110,6 +110,11 @@ frozen pin so no discriminating power is lost.
 
 ## Work log
 
+- 2026-07-17 (T1): wrote `data-raw/oracle-sem-multilevel-recovery.R` (verbatim
+  Cell B/D loops, same pop/seeds/n_rep/mc_samples) → committed
+  `fixtures/sem-multilevel-recovery-oracle.rds`. Reproduces the original passing
+  values: Cell B max |rel_bias| .0784 < .10; Cell D parity .00747 vs tau^2
+  .00742 (Δ 5e-5 — same-data differencing is tight, so a few live reps suffice).
 - 2026-07-17: created by /milestone-plan. Promoted from the lever-b candidate
   (test-suite-speed-audit → M59 safe levers a/c/d/e; this is the deferred
   rigor-sensitive lever). Prize: the lavaan file is 137s serial (measured), the
