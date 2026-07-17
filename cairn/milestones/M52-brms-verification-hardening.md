@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m52-brms-verification-hardening   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m52-brms-verification-hardening · https://github.com/jmgirard/intraclass/pull/58   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
