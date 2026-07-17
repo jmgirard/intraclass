@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M52: brms/Stan verification hardening
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m52-brms-verification-hardening   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -80,7 +80,7 @@ ROADMAP candidate row of 2026-07-12).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write `data-raw/README.md` (content per Scope In; harvest the
+- [x] T1: Write `data-raw/README.md` (content per Scope In; harvest the
       operational lore currently only in oracle-script headers and
       `test-icc-brms.R` comments; include the explicit 20-pair map table and
       name the two `ml` abbreviations).
@@ -102,6 +102,9 @@ ROADMAP candidate row of 2026-07-12).
 
 - 2026-07-16: created by /milestone-plan (promoted from the ROADMAP candidate
   row; doc home, guard scope, and wart disposition fixed at the plan gate).
+- 2026-07-16: T1 done — data-raw/README.md (constraints, tiers, lifecycle,
+  regeneration, 20-pair map). Minor plan correction: the ml abbreviation hits
+  THREE fixtures (ml, incomplete-ml, incomplete-fixed-ml), not two.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
