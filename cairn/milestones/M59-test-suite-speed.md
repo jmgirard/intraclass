@@ -105,7 +105,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
       across blocks. Re-measure.
 - [x] T5: Audit `skip_on_cran` / `skip_on_ci` gating across the heavy blocks;
       assemble the gating matrix (block → runs-on) for AC6.
-- [ ] T6: Assemble the GP5 noise-floor table (AC3) and the GP6 failure-axis-
+- [x] T6: Assemble the GP5 noise-floor table (AC3) and the GP6 failure-axis-
       unchanged evidence (AC4); run the AC5 spot mutation-checks (≥1 per fat
       file).
 - [ ] T7: Full verify — `devtools::test()` clean + `devtools::check()` clean;
@@ -168,6 +168,23 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   * Light single-fit correctness oracles (parity/reduction/aborts; d-study O-sim
     single-fit recoveries): ungated ⇒ run on CRAN by design (catch platform
     issues cheaply). No heavy block runs on CRAN; nothing is skipped everywhere.
+- 2026-07-17 (T6): rigor evidence.
+  * AC3 (GP5 noise floor): `git diff main -- tests/` shows the ONLY count
+    changes are `boot_samples` + their asserted `samples` literals — no
+    `tolerance`, no `mc_samples`, no `n_rep` line changed. Every changed count
+    feeds a STRUCTURAL assertion (well-formed/brackets, monotone, coherence
+    1e-9, reproducible-identity), none a stochastic tolerance ⇒ no noise floor
+    applies; AC3 vacuous by construction.
+  * AC4 (GP6 failure axis): the diff contains no `n_rep` and no `240` line; the
+    ragged coverage `n_rep≥240` (ADR-042 Amdt 2) and the cluster-count sweep
+    (M27/M28) are untouched.
+  * AC5 (GP7 non-vacuity, M51 patch→load_all→run→revert): ci-bootstrap — swap
+    the two `two_sided_interval` quantile endpoints (R/ci-montecarlo.R:100) so
+    `conf.low` > estimate; the B=99 "well-formed interval" guard went RED (2
+    fails). d-study — flatten the projection (`resolve_divisor` returns a
+    constant, R/estimand.R:178); the B=99 "deterministic, monotone, in [0,1]"
+    guard went RED (1 fail). Both reverted clean. lavaan-ml had no right-sized
+    pin ⇒ no check owed there.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
