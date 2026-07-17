@@ -92,8 +92,8 @@ indicator intercepts. This [**indicator-mean
 estimator**](glossary.html#indicator-mean-estimator) is a genuinely different
 estimator of the rater variance than the mixed model's random effect: the two are
 asymptotically equivalent and match conventional generalizability-theory software
-(GENOVA, `gtheory`) closely on real data [Vispoel et al. 2022], but on a small
-design they differ by a modest amount — here `ICC(A,1)` is about `0.284` from lavaan
+(GENOVA, and formerly the `gtheory` package) closely on real data
+[Vispoel et al. 2022], but on a small design they differ by a modest amount — here `ICC(A,1)` is about `0.284` from lavaan
 versus `0.290` from the mixed model, because the raw variance of only four estimated
 rater means carries small-sample noise the mixed model shrinks away.
 

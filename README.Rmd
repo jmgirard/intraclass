@@ -111,7 +111,7 @@ and [D-studies and within-cell replicates](https://jmgirard.github.io/intraclass
 
 Classical tools (`psych`, `irr`, `irrNA`, `irrICC`, `ICCDesign`) are ANOVA /
 mean-squares based and mostly assume balanced data; model-based tools
-(`performance::icc`, `gtheory`, `misty`) extract a variance-partition coefficient
+(`performance::icc`, `misty`) extract a variance-partition coefficient
 but not the full interrater-reliability ICC family, the error-variance framing, or
 a selection framework. **intraclass** fills that gap with mixed-model estimation,
 Monte-Carlo confidence intervals, and decision guidance (following ten Hove,
