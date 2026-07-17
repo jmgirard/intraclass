@@ -638,7 +638,7 @@ test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit i
     type = "agreement",
     unit = c("single", "average"),
     ci_method = "bootstrap",
-    boot_samples = 499,
+    boot_samples = 99,
     seed = 1
   ))
   # Balanced SF data: k_eff = n_raters = 4, so the projection to m = 4 IS ICC(A,k).
@@ -648,7 +648,7 @@ test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit i
   expect_equal(ds$conf.high, fit_ak$conf.high, tolerance = 1e-9)
   # The band is labelled bootstrap and carries the resample count.
   expect_identical(attr(ds, "method"), "bootstrap")
-  expect_identical(attr(ds, "samples"), 499L)
+  expect_identical(attr(ds, "samples"), 99L)
 })
 
 test_that("O-Boot-DS: a Monte-Carlo fit still gets a Monte-Carlo band (no regression)", {
@@ -668,7 +668,7 @@ test_that("O-Boot-DS: the bootstrap band is deterministic, monotone, and in [0, 
     rater,
     type = "agreement",
     ci_method = "bootstrap",
-    boot_samples = 499,
+    boot_samples = 99,
     seed = 1
   ))
   # No re-draw or seed: the band is fixed by the stored resamples, so repeat calls
@@ -731,7 +731,7 @@ test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project"
     rater,
     cluster = cluster,
     ci_method = "bootstrap",
-    boot_samples = 199,
+    boot_samples = 99,
     seed = 1
   )
   ds <- d_study(fb, m = c(1, 5, 10))
@@ -747,7 +747,7 @@ test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project"
     rater,
     cluster = cluster,
     ci_method = "bootstrap",
-    boot_samples = 199,
+    boot_samples = 99,
     seed = 1
   )
   dsi <- suppressMessages(d_study(fbi, m = c(1, 5, 10)))

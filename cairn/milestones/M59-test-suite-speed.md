@@ -95,7 +95,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 - [x] T2: Set `Config/testthat/parallel: true` in `DESCRIPTION`; run the full
       suite; fix any ordering / shared-state fallout (helper globals, missing
       `setup-*.R`). Re-measure.
-- [ ] T3: Right-size the over-provisioned counts listed in Scope. For each: re-
+- [x] T3: Right-size the over-provisioned counts listed in Scope. For each: re-
       derive the noise floor, cut the count to the smallest value keeping
       `tol ≥ floor` with margin, adjust `tol` per GP5 if needed. Never touch the
       ragged `n_rep≥240` or the cluster-count sweep.
@@ -130,6 +130,19 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   the 415 s serial baseline (−44%). No shared-state fallout (helpers are pure,
   no `setup-*.R`). WARN 2 pre-existing (deliberate design `cli_warn`s in tests;
   parallelism reschedules files, it cannot introduce test warnings).
+- 2026-07-17 (T3): key finding — `mc_samples` are cheap vcov draws, NOT model
+  refits, so cutting them saves ~0 (left `mc_samples=4000/500` untouched, also
+  rigor-safe). Only `boot_samples` (each = a refit) costs, and only where the
+  assertion is STRUCTURAL (well-formed / monotone / coherence / band-projects) is
+  B arbitrary and safe to cut. Cut those to the reproducibility floor B=99
+  (updating asserted `samples` literals): ci-bootstrap glmmTMB well-formed
+  (199→99), lme4 bootMer ×2 (199→99), lavaan well-formed ×2 (199→99); d-study
+  coherence + deterministic (499→99), multilevel/incomplete bands ×2 (199→99).
+  LEFT every O1/O2 coverage/agreement oracle at its B (its count is load-bearing
+  for a fixed tolerance — cutting it is a rigor tradeoff, not over-provisioning;
+  belongs with the lever-b candidate). No oracle `tol` changed ⇒ AC3 vacuous by
+  construction. Post-T3 full parallel suite: FAIL 0, PASS 1724, 205 s (−51% vs
+  415 s baseline); per-file ci-bootstrap 125→114 s, d-study 90→59 s.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
