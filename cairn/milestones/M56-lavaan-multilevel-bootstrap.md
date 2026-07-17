@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m56-lavaan-multilevel-bootstrap   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m56-lavaan-multilevel-bootstrap · https://github.com/jmgirard/intraclass/pull/62   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -37,20 +37,20 @@ adds the opt-in bootstrap.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `icc(..., engine = "lavaan", cluster, ci_method = "bootstrap")` on a
+- [x] AC1: `icc(..., engine = "lavaan", cluster, ci_method = "bootstrap")` on a
       seeded balanced Design-1 dataset returns finite bootstrap intervals at
       both the subject and cluster levels, each containing its point estimate
       and bounded by 1 — and its endpoints agree with the default Monte-Carlo
       interval within a documented Monte-Carlo tolerance (cross-method oracle;
       single-level M21 / ADR-031 bootstrap pattern).
-- [ ] AC2: a seeded fixture drives ≥1 refit to a between-level Heywood /
+- [x] AC2: a seeded fixture drives ≥1 refit to a between-level Heywood /
       non-convergence; that resample is NA-filled and dropped by the
       `bootstrap_ci()` discard policy, and the reported interval is formed from
       the surviving resamples (guards the two-level discard path, GP7).
-- [ ] AC3: the bootstrap is reproducible and RNG-hygienic — same `seed` →
+- [x] AC3: the bootstrap is reproducible and RNG-hygienic — same `seed` →
       identical interval; the global RNG stream is unchanged across the call
       (`with_rng_seed`, #9/#12).
-- [ ] AC4: the `verify` slot is clean (`cairn/PROFILE.md`) — `devtools::test()`
+- [x] AC4: the `verify` slot is clean (`cairn/PROFILE.md`) — `devtools::test()`
       green (installed-package suite, `NOT_CRAN=true CI=true`), `air format
       --check` and `lintr::lint_package()` clean.
 
@@ -107,3 +107,32 @@ adds the opt-in bootstrap.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-17 · PR #62 · branch cut from main @ 39e330b (main unmoved, no sync merge).**
+
+### Acceptance-criteria evidence (fresh)
+
+- **AC1** — `test-icc-lavaan-multilevel.R` "multilevel lavaan bootstrap agrees
+  with the Monte-Carlo interval": 5/5 pass. Endpoint |Δ| vs the 4000-draw MC
+  interval (n=40/10/5): subject ≤ .01, cluster ≤ .016 — inside the pinned .04 /
+  .07 index-class-split tolerances; all endpoints finite, estimate contained,
+  ≤ 1.
+- **AC2** — "the two-level bootstrap refit NA-fills failed/Heywood resamples":
+  6/6 pass. Direct factory fixture (svb=1e-3, 8 clusters): 14 finite / 26
+  fully-NA columns; NA pattern ∈ {0, k+2} confirms a dropped resample is
+  entirely NA (bootstrap_ci keys the discard on a clean column), finite columns
+  are positive 5-vectors.
+- **AC3** — "reproducible and RNG-hygienic": 3/3 pass. Same seed → identical
+  interval; `.Random.seed` identical across the seeded call.
+- **AC4** — full installed suite (`NOT_CRAN=true CI=true`): 1725 pass, 0 fail,
+  0 error, 23 skip. `air format --check` clean; `lintr::lint_package()` 0 lints.
+
+### Consistency gate
+
+- `cairn_validate.py`: all checks passed (291 advisory pre-migration-ID
+  warnings, not gate failures).
+- `devtools::document()`: no diff (man/, NAMESPACE unchanged).
+- `pkgdown::check_pkgdown()`: OK (no new exports — all three helpers internal).
+- NEWS.md: the M54 multilevel-lavaan bullet amended to record the shipped
+  bootstrap (no milestone numbers in user-facing text).
+- Full R CMD check delegated to the PR CI matrix (the merge gate).
