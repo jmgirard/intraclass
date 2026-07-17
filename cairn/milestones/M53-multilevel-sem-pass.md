@@ -41,28 +41,28 @@ stays 🔴 blocked (ADR-014), untouched.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Source-hunt disposition recorded in the work log: either a primary
+- [x] AC1: Source-hunt disposition recorded in the work log: either a primary
       source ingested per the validation doctrine (PDF in
       `cairn/references/pdf/`, committed `<citekey>.md` + `INDEX.md` line), or
       a recorded "none found" **with the maintainer's explicit IP1
       disposition** (parameterization under the M5 precedent vs blocked)
       obtained before any pilot conclusion is drawn. (RB tripwire:
       ip-touching)
-- [ ] AC2: A committed, seeded pilot script fits the two-level formulation on
+- [x] AC2: A committed, seeded pilot script fits the two-level formulation on
       balanced Design-1 data and recovers all five components against a
       glmmTMB fit of the same data, with stated tolerances split by index
       class (consistency tight, agreement asymptotic — M49 lesson), and shows
       the reduction: zero cluster variances → the current single-level lavaan
       engine's estimates.
-- [ ] AC3: The pilot recovers injected known-population components (ten Hove
+- [x] AC3: The pilot recovers injected known-population components (ten Hove
       DGP template, M5 spec §5) within stated tolerance across ≥3 cells
       including a high-cluster-count cell (GP6), and records an MC-interval
       feasibility finding (log-SD delta route on the two-level vcov, both
       levels).
-- [ ] AC4: A committed `cairn/references/` synthesis note records the mapping,
+- [x] AC4: A committed `cairn/references/` synthesis note records the mapping,
       estimation constraints, pilot results with script pointers, boundary/
       Heywood observations, and the go/no-go; its `INDEX.md` line exists.
-- [ ] AC5: ROADMAP candidate row + `COVERAGE.md` row 162 updated to cite
+- [x] AC5: ROADMAP candidate row + `COVERAGE.md` row 162 updated to cite
       M53's verdict (go → schedulable; no-go → re-tagged blocked with
       rationale).
 
@@ -155,3 +155,40 @@ stays 🔴 blocked (ADR-014), untouched.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+PR: https://github.com/jmgirard/intraclass/pull/59 (draft during review).
+
+**Evidence per criterion (2026-07-16, fresh by command):**
+
+- AC1 ✓ — D-005 in cairn/DECISIONS.md; work-log lines record the source-hunt
+  MISS and the maintainer's ip-touching-gate disposition obtained before any
+  pilot conclusion (T1 stopped at the chip).
+- AC2 ✓ — pilot run 3 (`Rscript data-raw/pilot-sem-multilevel.R`): PILOT
+  PASS; Stage-1 component parity vs REML within stated tolerances (within
+  identical to 4 dp; consistency ICCs identical, agreement ≤ .008); reduction
+  vs the shipped single-level engine < .02, extraction length-guarded (F2).
+- AC3 ✓ — run 3: 4-cell recovery (A/B/C/D incl. N_c=200 and k=25) with pins
+  re-centred on the predicted τ² inflation (F1); MC-feasibility finding
+  recorded (log-SD delta route works on the two-level vcov, both levels'
+  intervals contain their points). Reproducible: runs 2 and 3 agree to 4 dp.
+- AC4 ✓ — synthesis note carries mapping, constraints, Results, GO verdict
+  (F1-sharpened) + the τ² law; INDEX line present (validate references check
+  PASS).
+- AC5 ✓ — ROADMAP candidate row + COVERAGE.md row 162 cite "M53 verdict: GO".
+
+**Consistency gate:** cairn_validate all-PASS (after backfilling the new
+`## changelog` PROFILE slot — plugin-spec drift, not branch damage);
+document() no-diff; .Rbuildignore covers data-raw/cairn; NEWS N/A (no
+user-visible change); pkgdown::check_pkgdown clean; lintr 0;
+devtools::check (NOT_CRAN=false): 0 errors / 0 warnings / 0 notes. No
+principle changed → cairn_impact skipped. Known out-of-scope condition:
+test-icc-brms.R live-Stan tier fails in-suite only on main (flagged
+separately at implement; not introduced here).
+
+**Independent review (3 lenses + scorer):** prior-PR lens — no evidence
+(clean no-op). Blame-history lens — no findings. Diff-bug lens — 3 findings;
+scorer: F1=95 (actioned: fixed — τ² inflation named, ledger corrected, pins
+re-centred, run 3 green), F2=76, F3=66 (sub-threshold, logged: F2 vacuous-
+pass hole in reduction extraction — fixed opportunistically in the same
+edit; F3 0.71σ-vs-1.4σ arithmetic in the records — corrected in the same
+edit). Nothing rejected.
