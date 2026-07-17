@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M52: brms/Stan verification hardening
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -94,7 +94,7 @@ ROADMAP candidate row of 2026-07-12).
 - [x] T4: Update `DESIGN.md § Known issues` (strikethrough + resolution note);
       add a pointer line in the `test-icc-brms.R` file header to
       `data-raw/README.md` as the strategy home.
-- [ ] T5: Run the profile verify (`NOT_CRAN=true` full local suite),
+- [x] T5: Run the profile verify (`NOT_CRAN=true` full local suite),
       `lintr::lint_package()`, `air format .`; fix fallout.
 
 ## Work log
@@ -111,6 +111,9 @@ ROADMAP candidate row of 2026-07-12).
   row tamper FAIL 1; reverted, clean run 4 PASS.
 - 2026-07-16: T4 done — DESIGN wart struck RESOLVED (inherency note kept);
   test-icc-brms.R header points at data-raw/README.md.
+- 2026-07-16: T5 done — NOT_CRAN=true CI=true suite: 0 fail/0 error, 1658
+  pass, 23 skips (gated tiers), 1 pre-existing expected WARN (Design-3 cli
+  message, no R/ code in this diff); lintr 0; air clean. Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
