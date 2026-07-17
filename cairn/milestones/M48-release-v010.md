@@ -5,7 +5,7 @@
 
 - **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
-- **Depends on:** M49, M50, M51, M53, M54   <!-- owner: plan · create/amend-via-gate -->
+- **Depends on:** M49, M50, M51, M53, M54, M55   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
 - **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
 
@@ -108,6 +108,10 @@ gate before stamping, never folded in silently.
   v0.1.0 release).
 - 2026-07-16: Depends-on gains M54 (gated amendment at the M54 plan gate —
   maintainer chose to ship the lavaan multilevel engine before the release).
+- 2026-07-17: Depends-on gains M55 by /milestone-plan (plan gate: the
+  gtheory-reference docs audit lands before the v0.1.0 release — a capability
+  table listing an archived package as an installable peer shouldn't ship in
+  the first CRAN release).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
