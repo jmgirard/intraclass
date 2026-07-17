@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M56: Multilevel SEM (lavaan) — parametric bootstrap CI
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -99,6 +99,8 @@ adds the opt-in bootstrap.
   factory (fully-NA failed columns); AC3 reproducibility + RNG hygiene. Updated
   the stale "bootstrap out of scope" assertion, roxygen, and the M54 NEWS bullet.
   air/lintr clean; both lavaan test files green.
+- 2026-07-17: status → review. Full suite (installed, NOT_CRAN=true CI=true):
+  1725 pass, 0 fail, 0 error, 23 skip; document() no-diff. Ready for review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
