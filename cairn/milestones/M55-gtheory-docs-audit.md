@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M55: gtheory-reference docs audit — historical-citation framing
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1   <!-- owner: plan · create/amend-via-gate -->
@@ -96,7 +96,7 @@ the historical citation — over a minimal in-place reframe.
       model-based-tools list; re-knit to regenerate `README.md`.
 - [x] T4: `R/engine-lavaan.R` (L34) — reframe the engine comment as a historical
       validation citation.
-- [ ] T5: Verification pass — re-grep the four in-scope files for `gtheory`;
+- [x] T5: Verification pass — re-grep the four in-scope files for `gtheory`;
       confirm no installable/peer/live-target framing remains; regenerate
       `README.md`; render both vignettes; run `air format --check`,
       `lintr::lint_package()`, and the spelling check; record the disposition in
@@ -120,6 +120,16 @@ the historical citation — over a minimal in-place reframe.
 - 2026-07-17: T4 done — engine-lavaan.R comment: "the archived `gtheory`
   package" so the Vispoel-2022 agreement reads as a historical citation
   (comment only, no logic change).
+- 2026-07-17: T5 done — re-grep confirms the 3 surviving mentions (comparison
+  vignette, engines.Rmd, engine-lavaan.R) all read as historical citations,
+  README has none (AC1). `air format --check` clean; `lintr::lint_package()`
+  no lints; both edited vignettes render clean; README.md regenerated. Test
+  suite CI-parity (NOT_CRAN=true CI=true): 1712 pass, 0 fail, 0 error, 23 skip
+  (the flaky live-Stan brms suite; a bare `devtools::test()` hits the known
+  MCMC-noise flake, not an M55 regression). Spelling: one PRE-EXISTING flag
+  (`lavaan's`, icc.Rd:159, untouched by M55) owned by M48 AC3; M55's own edits
+  introduce none.
+- 2026-07-17: all tasks done → status review by /milestone-implement.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
