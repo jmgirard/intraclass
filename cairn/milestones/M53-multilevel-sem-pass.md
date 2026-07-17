@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M53: Multilevel SEM (lavaan) — estimand/oracle pass
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m53-multilevel-sem-pass   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -78,7 +78,7 @@ stays 🔴 blocked (ADR-014), untouched.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Source hunt (DOI/publisher/OSF; multilevel SEM-GT in the
+- [x] T1: Source hunt (DOI/publisher/OSF; multilevel SEM-GT in the
       Vispoel/Jorgensen/ten Hove lineage). Hit → ingest (references page +
       INDEX line). Miss → **stop and ask the maintainer** for the IP1
       disposition before proceeding. (RB tripwire: ip-touching)
@@ -103,6 +103,12 @@ stays 🔴 blocked (ADR-014), untouched.
 - 2026-07-16: created by /milestone-plan (promotes the multilevel-SEM
   candidate's research half; plan gate: split research-first, sequenced ahead
   of M48, Design-1 base scope, search-first sourcing with ask-on-miss).
+- 2026-07-16: in-progress on m53-multilevel-sem-pass by /milestone-implement;
+  no open implementation choices (T1's ip-touching gate fires on its outcome).
+- 2026-07-16: T1 done — source hunt MISS (Jorgensen 2021 single-level only;
+  ten Hove 2022 MCMC; Vispoel arc single-level; 2026 MDPI paper is multigroup).
+  Maintainer disposition at the ip-touching gate: proceed under the M5
+  parameterization precedent → D-005.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -75,3 +75,25 @@ documented behavior, each naming its ADR/D-entry (GP7).
 decision record (this entry), and a standing guard-test asset. Any future change
 to a documented cell touches the boundary-aware-interval contract
 (`PRINCIPLES.md #3`) and requires a new, superseding D-entry — never a silent edit.
+
+### D-005 (2026-07-16): Two-level SEM route to the multilevel estimand is an IP1-fenced parameterization
+
+**Context:** M53's source hunt found no primary source composing two-level SEM
+with GT interrater reliability for clustered subjects (Design 1). The published
+pieces: the estimand and decomposition (ten Hove et al. 2022, Eqs. 6–7/12–13,
+Table 3 — MCMC-estimated); the single-level SEM-GT mean-structure device for
+σ²_r (Jorgensen 2021); two-level ML-SEM estimation as generic methodology
+(Muthén 1994; Rosseel's lavaan). One-way SEM stays blocked (ADR-014) because
+its unsourced approximation targeted a *different* (inexact-in-principle)
+quantity.
+**Decision (maintainer, M53 gate):** estimating the published Design-1
+decomposition via a two-level CFA is an estimation-route parameterization under
+IP1's implementation-detail fence — the M5 posture (the lme4 formula was "our
+translation of Eq. 7, to be established by oracle, not assumed") — NOT a novel
+method. Faithfulness is established numerically: the M53 pilot must show
+glmmTMB parity up to documented ML-vs-REML small-sample deltas; systematic
+disagreement is a no-go finding, not a tolerance to widen (GP5).
+**Consequences:** M53 proceeds to the pilot; the implementation milestone (if
+go) inherits this disposition and cites it; the composition ships only with
+the oracle evidence attached. A future primary source, if one appears, is
+ingested and supersedes the engineering framing.
