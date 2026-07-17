@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m55-gtheory-docs-audit   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m55-gtheory-docs-audit · https://github.com/jmgirard/intraclass/pull/61   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -55,20 +55,20 @@ the historical citation — over a minimal in-place reframe.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: In the four in-scope files (`README.Rmd`, the two named vignettes,
+- [x] AC1: In the four in-scope files (`README.Rmd`, the two named vignettes,
       `R/engine-lavaan.R`), no `gtheory` mention presents it as an installable
       package, a capability-matrix peer, or a live/reproducible comparison
       target — established by a re-grep of those files plus a reading pass,
       recorded in the work log.
-- [ ] AC2: Exactly one user-facing location states plainly that `gtheory` was
+- [x] AC2: Exactly one user-facing location states plainly that `gtheory` was
       archived from CRAN (2025-03-24) and is no longer a dependency, so its
       comparison figures cite historical behavior; the other surviving mentions
       inherit or cross-reference that framing.
-- [ ] AC3: The historical validation citation (agreement ≤ .001 G-coef /
+- [x] AC3: The historical validation citation (agreement ≤ .001 G-coef /
       ≤ .005 D-coef, ten Hove/Vispoel et al. 2022 per `references/REFERENCES.md`)
       is retained and reads as a citation of committed reference values, not an
       instruction to re-run `gtheory`.
-- [ ] AC4: `README.md` is regenerated from `README.Rmd`; both edited vignettes
+- [x] AC4: `README.md` is regenerated from `README.Rmd`; both edited vignettes
       render clean; `air format --check`, `lintr::lint_package()`, and the
       spelling check (`inst/WORDLIST`) are clean.
 
@@ -136,3 +136,39 @@ the historical citation — over a minimal in-place reframe.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed:** 2026-07-17 · PR #61 · branch `m55-gtheory-docs-audit` (cut from
+`main` @ 9db07f3, no divergence).
+
+### Acceptance-criteria evidence (fresh)
+
+- **AC1** ✓ — re-grep of the four in-scope files: `README.Rmd` 0 matches; the 3
+  surviving mentions all read as historical citations, none as installable /
+  capability-peer / live target — comparison vignette L191 ("…archived from CRAN
+  in…"), `engines.Rmd` L95 ("…formerly the `gtheory` package…"), `engine-lavaan.R`
+  L34 ("…the archived `gtheory` package…").
+- **AC2** ✓ — one archived-from-CRAN note (comparison vignette L191: archived
+  March 2025, not a dependency); a matching NEWS "Documentation" bullet added at
+  the consistency gate.
+- **AC3** ✓ — the historical validation citation is retained and framed as
+  committed reference values ("…agreeing to within 0.001; those committed
+  reference values live in the package's reference notes"); `engines.Rmd` /
+  `engine-lavaan.R` cite the Vispoel-et-al.-2022 agreement, not a rerun.
+- **AC4** ✓ — README.md regenerated via `build_readme()` (paragraph reflow only,
+  no stranger changes); both edited vignettes render clean; `air format --check`
+  clean; `lintr::lint_package()` no lints; tests (NOT_CRAN=true CI=true):
+  1712 pass, 0 fail, 0 error, 23 skip. Spelling: only the PRE-EXISTING `lavaan's`
+  (icc.Rd:159, untouched by M55, owned by M48 AC3) — M55 introduces none (an
+  "installable" flag from the first NEWS draft was reworded away).
+
+### Consistency gate
+
+- `cairn_validate.py` exit 0; coverage-complete PASS.
+- Toolchain (r-package `consistency-gate`): `devtools::document()` no
+  generated-file drift; README.md in sync; `pkgdown::check_pkgdown()` no
+  problems; NEWS "Documentation" entry present; no new top-level package files.
+  Full `R CMD check` → the PR #61 CI matrix (the authoritative cross-platform
+  run; the local `devtools::check()` has known Courier-PDF / brms-env infra
+  flakes per repo lessons).
+- No `DESIGN.md` principle changed (GP1 is worked-under, not modified) →
+  `cairn_impact` skipped.
