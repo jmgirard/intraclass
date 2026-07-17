@@ -45,6 +45,8 @@ Suggests:
     testthat (>= 3.0.0),
     withr
 Config/testthat/edition: 3
+Config/testthat/parallel: true
+Config/testthat/start-first: icc-lavaan-multilevel, ci-bootstrap, d-study, icc-multilevel
 VignetteBuilder: knitr
 Language: en-US
 URL: https://github.com/jmgirard/intraclass, https://jmgirard.github.io/intraclass/

@@ -24,18 +24,28 @@
 sb_project <- function(rho1, m) m * rho1 / (1 + (m - 1) * rho1)
 gt_project <- function(s, r, res, m) s / (s + (r + res) / m)
 
-fit_ds <- function(type = "agreement", raters = "random") {
-  suppressWarnings(icc(
-    sf_ratings_long(),
-    score,
-    subject,
-    rater,
-    type = type,
-    raters = raters,
-    unit = c("single", "average"),
-    seed = 1
-  ))
-}
+# Memoized (M59 T4): every call is deterministic (seed = 1), so the fit is
+# identical across the ~8 blocks that request it -- cache per (type, raters) and
+# recompute nothing. Copy-on-modify keeps the cached object safe from callers.
+fit_ds <- local({
+  cache <- list()
+  function(type = "agreement", raters = "random") {
+    key <- paste(type, raters, sep = "/")
+    if (is.null(cache[[key]])) {
+      cache[[key]] <<- suppressWarnings(icc(
+        sf_ratings_long(),
+        score,
+        subject,
+        rater,
+        type = type,
+        raters = raters,
+        unit = c("single", "average"),
+        seed = 1
+      ))
+    }
+    cache[[key]]
+  }
+})
 
 test_that("consistency projection matches the Spearman-Brown formula (O-SB)", {
   skip_if_not_installed("glmmTMB")
@@ -638,7 +648,7 @@ test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit i
     type = "agreement",
     unit = c("single", "average"),
     ci_method = "bootstrap",
-    boot_samples = 499,
+    boot_samples = 99,
     seed = 1
   ))
   # Balanced SF data: k_eff = n_raters = 4, so the projection to m = 4 IS ICC(A,k).
@@ -648,7 +658,7 @@ test_that("O-Boot-DS/coherence: at m = k_eff the bootstrap band equals the fit i
   expect_equal(ds$conf.high, fit_ak$conf.high, tolerance = 1e-9)
   # The band is labelled bootstrap and carries the resample count.
   expect_identical(attr(ds, "method"), "bootstrap")
-  expect_identical(attr(ds, "samples"), 499L)
+  expect_identical(attr(ds, "samples"), 99L)
 })
 
 test_that("O-Boot-DS: a Monte-Carlo fit still gets a Monte-Carlo band (no regression)", {
@@ -668,7 +678,7 @@ test_that("O-Boot-DS: the bootstrap band is deterministic, monotone, and in [0, 
     rater,
     type = "agreement",
     ci_method = "bootstrap",
-    boot_samples = 499,
+    boot_samples = 99,
     seed = 1
   ))
   # No re-draw or seed: the band is fixed by the stored resamples, so repeat calls
@@ -731,7 +741,7 @@ test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project"
     rater,
     cluster = cluster,
     ci_method = "bootstrap",
-    boot_samples = 199,
+    boot_samples = 99,
     seed = 1
   )
   ds <- d_study(fb, m = c(1, 5, 10))
@@ -747,7 +757,7 @@ test_that("O-Boot-DS: multilevel and incomplete-subject bootstrap bands project"
     rater,
     cluster = cluster,
     ci_method = "bootstrap",
-    boot_samples = 199,
+    boot_samples = 99,
     seed = 1
   )
   dsi <- suppressMessages(d_study(fbi, m = c(1, 5, 10)))

@@ -18,13 +18,13 @@ test_that("bootstrap returns a well-formed interval around the estimate", {
     subject,
     rater,
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L,
     seed = 1
   )
   td <- tidy(fit)
 
   expect_identical(fit$ci$method, "bootstrap")
-  expect_identical(fit$ci$samples, 199L)
+  expect_identical(fit$ci$samples, 99L)
   # Every reported interval brackets its point estimate and is finite (#3).
   expect_true(all(is.finite(td$conf.low)))
   expect_true(all(is.finite(td$conf.high)))
@@ -189,7 +189,7 @@ test_that("the lme4 engine bootstraps via bootMer with a well-formed interval", 
     rater,
     engine = "lme4",
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L,
     seed = 1
   )
   td <- tidy(fit)
@@ -209,7 +209,7 @@ test_that("the lme4 engine bootstraps via bootMer with a well-formed interval", 
     rater,
     engine = "lme4",
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L,
     seed = 1
   ))
   expect_equal(td$conf.low, b$conf.low)
@@ -415,14 +415,14 @@ test_that("lavaan bootstrap returns a well-formed interval", {
     rater,
     engine = "lavaan",
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L,
     seed = 1
   )
   td <- tidy(fit)
 
   expect_identical(fit$engine, "lavaan")
   expect_identical(fit$ci$method, "bootstrap")
-  expect_identical(fit$ci$samples, 199L)
+  expect_identical(fit$ci$samples, 99L)
   expect_true(all(is.finite(td$conf.low)))
   expect_true(all(is.finite(td$conf.high)))
   expect_true(all(td$conf.low <= td$estimate))
@@ -441,7 +441,7 @@ test_that("lavaan bootstrap returns a well-formed interval", {
     rater,
     engine = "lavaan",
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L,
     seed = 1
   ))
   expect_equal(td$conf.low, b$conf.low)
