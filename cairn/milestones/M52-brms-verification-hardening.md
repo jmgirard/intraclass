@@ -84,12 +84,12 @@ ROADMAP candidate row of 2026-07-12).
       operational lore currently only in oracle-script headers and
       `test-icc-brms.R` comments; include the explicit 20-pair map table and
       name the two `ml` abbreviations).
-- [ ] T2: Write `tests/testthat/test-brms-oracle-map.R`: an explicit named map
+- [x] T2: Write `tests/testthat/test-brms-oracle-map.R`: an explicit named map
       (script → fixture) asserted bidirectionally complete against
       `data-raw/oracle-bayesian-*.R` and `tests/testthat/fixtures/bayesian-*-oracle.rds`
       globs; `skip_if_not(dir.exists("../../data-raw"))`-style guard for built
       packages; source comment citing this milestone + GP7.
-- [ ] T3: Mutation-check T2's guard (drop a map row; add a dummy fixture;
+- [x] T3: Mutation-check T2's guard (drop a map row; add a dummy fixture;
       confirm both go red; revert) — record the evidence line in the work log.
 - [ ] T4: Update `DESIGN.md § Known issues` (strikethrough + resolution note);
       add a pointer line in the `test-icc-brms.R` file header to
@@ -105,6 +105,10 @@ ROADMAP candidate row of 2026-07-12).
 - 2026-07-16: T1 done — data-raw/README.md (constraints, tiers, lifecycle,
   regeneration, 20-pair map). Minor plan correction: the ml abbreviation hits
   THREE fixtures (ml, incomplete-ml, incomplete-fixed-ml), not two.
+- 2026-07-16: T2+T3 done — guard test (4 assertions; also pins the README's
+  map table to the authoritative map, a minor addition strengthening AC1).
+  Mutations: dropped map row FAIL 3, unmapped dummy fixture FAIL 1, README
+  row tamper FAIL 1; reverted, clean run 4 PASS.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
