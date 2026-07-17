@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-17 (M60 planned — freeze the lavaan multilevel recovery sweep; promotes the lever-b candidate off the board; M57/M58 siblings + plotting-polish candidates remain)_
+_Last hygiene check: 2026-07-17 (M60 shipped + archived — lavaan recovery sweep frozen to fixture, PR #64, file 137→64s; M56 rotated out under terminal-row retention, M59 now flagged; M57/M58 siblings + plotting-polish candidates remain)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,13 +12,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55 | high | milestones/M48-release-v010.md |
 | M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | planned | — | normal | milestones/M57-lavaan-multilevel-fixed.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | planned | — | normal | milestones/M58-lavaan-multilevel-incomplete.md |
-| M60 | Freeze the lavaan multilevel recovery sweep | review | — | normal | milestones/M60-freeze-lavaan-recovery.md |
+| M60 | Freeze the lavaan multilevel recovery sweep | done | — | normal | milestones/archive/M60-freeze-lavaan-recovery.md |
 | M59 | Test-suite speed — rigor-invariant levers | done | — | normal | milestones/archive/M59-test-suite-speed.md |
-| M56 | Multilevel SEM (lavaan) — parametric bootstrap CI | done | — | normal | milestones/archive/M56-lavaan-multilevel-bootstrap.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
 | M54 | Multilevel SEM (lavaan) — engine implementation | done | — | high | milestones/archive/M54-lavaan-multilevel-engine.md |
 | M53 | Multilevel SEM (lavaan) — estimand/oracle pass | done | — | high | milestones/archive/M53-multilevel-sem-pass.md |
-<!-- terminal-row retention: M56 rotates out at the next terminal transition (5 most recent kept) -->
+<!-- terminal-row retention: M56 rotated out (M60 shipped); M53/M54/M55 pinned by M48 Depends-on, so M59 rotates out at the next terminal transition (5 most recent kept) -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
