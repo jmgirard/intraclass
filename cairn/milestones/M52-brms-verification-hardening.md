@@ -91,7 +91,7 @@ ROADMAP candidate row of 2026-07-12).
       packages; source comment citing this milestone + GP7.
 - [x] T3: Mutation-check T2's guard (drop a map row; add a dummy fixture;
       confirm both go red; revert) — record the evidence line in the work log.
-- [ ] T4: Update `DESIGN.md § Known issues` (strikethrough + resolution note);
+- [x] T4: Update `DESIGN.md § Known issues` (strikethrough + resolution note);
       add a pointer line in the `test-icc-brms.R` file header to
       `data-raw/README.md` as the strategy home.
 - [ ] T5: Run the profile verify (`NOT_CRAN=true` full local suite),
@@ -109,6 +109,8 @@ ROADMAP candidate row of 2026-07-12).
   map table to the authoritative map, a minor addition strengthening AC1).
   Mutations: dropped map row FAIL 3, unmapped dummy fixture FAIL 1, README
   row tamper FAIL 1; reverted, clean run 4 PASS.
+- 2026-07-16: T4 done — DESIGN wart struck RESOLVED (inherency note kept);
+  test-icc-brms.R header points at data-raw/README.md.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
