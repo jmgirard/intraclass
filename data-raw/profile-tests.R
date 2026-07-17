@@ -20,7 +20,11 @@
 Sys.setenv(NOT_CRAN = "true", CI = "true")
 suppressMessages(devtools::load_all(quiet = TRUE))
 
-files <- list.files("tests/testthat", pattern = "^test-.*\\.R$", full.names = TRUE)
+files <- list.files(
+  "tests/testthat",
+  pattern = "^test-.*\\.R$",
+  full.names = TRUE
+)
 res <- data.frame(file = basename(files), sec = NA_real_)
 
 for (i in seq_along(files)) {
