@@ -90,7 +90,7 @@ the historical citation — over a minimal in-place reframe.
       "validated against `gtheory` to within 0.001" citation (L192–193),
       reframed as historical, and attach the single archived-from-CRAN note
       (AC2's home).
-- [ ] T2: `vignettes/engines.Rmd` (L95) — reframe the "(GENOVA, `gtheory`)
+- [x] T2: `vignettes/engines.Rmd` (L95) — reframe the "(GENOVA, `gtheory`)
       closely on real data" match as a historical citation.
 - [ ] T3: `README.Rmd` "Related work" (~L112–114) — drop `gtheory` from the
       model-based-tools list; re-knit to regenerate `README.md`.
@@ -111,6 +111,9 @@ the historical citation — over a minimal in-place reframe.
 - 2026-07-17: T1 done — comparison vignette: dropped `gtheory` capability-table
   column + incomplete-data live mention; kept the validation citation, reframed
   as historical with the archived-from-CRAN note (AC2 home).
+- 2026-07-17: T2 done — engines.Rmd: "formerly the `gtheory` package" so the
+  Vispoel-2022 agreement reads as a published historical citation, not a live
+  target (GENOVA still carries the "conventional GT software" point).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
