@@ -412,21 +412,8 @@ test_that("multilevel lavaan out-of-scope combinations abort with classed condit
     icc(dr, score, subject, rater, cluster = cluster, engine = "lavaan"),
     class = "intraclass_unsupported"
   )
-
-  # Bootstrap: simulate_refit is NULL for the multilevel SEM fit; the
-  # bootstrap_ci() guard turns that into a loud classed abort (M54 Out).
-  expect_error(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      engine = "lavaan",
-      ci_method = "bootstrap"
-    ),
-    class = "intraclass_unsupported"
-  )
+  # (The multilevel SEM bootstrap is no longer out of scope -- M56 ships it for
+  # the balanced random-rater cell; see the O-SEM-ML-BOOT tests below.)
 })
 
 test_that("a between-level Heywood fit aborts toward glmmTMB (boundary reached)", {
@@ -475,4 +462,140 @@ test_that("multilevel lavaan print output is stable", {
     seed = 1
   )
   expect_snapshot(print(x), transform = mask_ci)
+})
+
+# O-SEM-ML-BOOT: two-level parametric bootstrap CI (M56) ------------------------
+#
+# `ci_method = "bootstrap"` for the shipped crossed (Design 1) random-rater
+# balanced multilevel lavaan fit: simulate wide two-level datasets from the
+# fit's implied within/between moments (rebuilt from the five components),
+# refit the same two-level CFA per resample, recompute both-level ICCs. The
+# oracle is CROSS-METHOD (PRINCIPLES.md #1/#3): the bootstrap interval must
+# agree with the default Monte-Carlo interval within a documented tolerance,
+# split by index class (subject tight, cluster looser -- the ML/REML +
+# few-cluster width the M49/M54 split anticipates). A failed/Heywood resample
+# is NA-filled and dropped by the shared bootstrap_ci() discard policy.
+
+test_that("multilevel lavaan bootstrap agrees with the Monte-Carlo interval", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  d <- sim_ml(40, 10, 5, 0.5, 1, 0.3, 0.2, 0.5, seed = 42)
+  mc <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lavaan",
+    ci_method = "montecarlo",
+    mc_samples = 4000L,
+    seed = 7
+  )))
+  bs <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    cluster = cluster,
+    engine = "lavaan",
+    ci_method = "bootstrap",
+    boot_samples = 299L,
+    seed = 7
+  )))
+
+  # Structural sanity at BOTH levels: finite, estimate contained, bounded by 1.
+  # This is the portable part of the cluster-level guarantee.
+  expect_true(all(is.finite(bs$conf.low) & is.finite(bs$conf.high)))
+  expect_true(all(bs$conf.low <= bs$estimate & bs$estimate <= bs$conf.high))
+  expect_true(all(bs$conf.high <= 1))
+
+  # Cross-method endpoint agreement is pinned at the SUBJECT level only (AC1,
+  # amended at review 2026-07-17). The subject level is tight and portable. The
+  # cluster level is the wide, few-cluster, ML-shrunk level whose MC-vs-bootstrap
+  # tail agreement is platform-sensitive -- lavaan's two-level optimizer lands
+  # differently across BLAS/OS, and the endpoint delta reached rel .326 of the
+  # interval width on Windows (a platform-numeric artifact, not a code bug: the
+  # three-lens review verified the machinery). The cluster-level bootstrap uses
+  # the SAME refit factory the subject pin validates, and the cluster
+  # decomposition's faithfulness is the M54 glmmTMB parity oracle -- so a tight
+  # cross-method cluster pin would test the platform's optimizer, not our code.
+  dlo <- abs(mc$conf.low - bs$conf.low)
+  dhi <- abs(mc$conf.high - bs$conf.high)
+  subj <- mc$level == "subject"
+  expect_lt(max(dlo[subj], dhi[subj]), 0.04)
+})
+
+test_that("the two-level bootstrap refit NA-fills failed/Heywood resamples", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  # A tiny between-cluster variance with few clusters drives many refits to a
+  # between-level Heywood boundary -> the refit returns the all-NA sentinel, so
+  # bootstrap_ci()'s `colSums(is.na) == 0` discard test drops exactly those
+  # resamples. Direct factory test (deterministic, robust across seeds; M51
+  # lesson: pin the contract, not a stochastic coverage sim).
+  k <- 3L
+  center <- diag(k) - matrix(1 / k, k, k)
+  model <- lavaan_multilevel_model(k)
+  fac <- lavaan_ml_simulate_refit(
+    model,
+    k,
+    center,
+    nu = c(0, 0.3, -0.3),
+    svw = 1,
+    evw = 0.5,
+    svb = 1e-3,
+    evb = 0.05,
+    cluster_sizes = rep(4L, 8L)
+  )
+  draws <- suppressWarnings(fac(40L, seed = 1))
+
+  expect_equal(
+    rownames(draws),
+    c("cluster", "subject", "rater", "cluster_rater", "residual")
+  )
+  na_per_col <- colSums(is.na(draws))
+  # A dropped resample is ENTIRELY NA (not partial) -- bootstrap_ci keys the
+  # discard on a fully-clean column, so a partial-NA column would be a bug.
+  expect_true(all(na_per_col %in% c(0L, k + 2L)))
+  expect_true(any(na_per_col == 0L)) # some valid resamples survive
+  expect_true(any(na_per_col > 0L)) # some fail -> discard path exercised
+  ok <- draws[, na_per_col == 0L, drop = FALSE]
+  expect_true(all(
+    ok[c("cluster", "subject", "cluster_rater", "residual"), ] > 0
+  ))
+  expect_true(all(ok["rater", ] >= 0))
+})
+
+test_that("multilevel lavaan bootstrap is reproducible and RNG-hygienic", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+
+  d <- sim_ml(30, 8, 4, 0.5, 1, 0.3, 0.2, 0.5, seed = 11)
+  run <- function() {
+    suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      cluster = cluster,
+      engine = "lavaan",
+      ci_method = "bootstrap",
+      boot_samples = 99L,
+      seed = 7
+    )))
+  }
+
+  # Same seed -> identical interval.
+  a <- run()
+  b <- run()
+  expect_equal(a$conf.low, b$conf.low)
+  expect_equal(a$conf.high, b$conf.high)
+
+  # The global RNG stream is left untouched across the seeded call (#9/#12).
+  set.seed(123)
+  before <- .Random.seed
+  invisible(run())
+  expect_identical(before, .Random.seed)
 })

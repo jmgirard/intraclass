@@ -240,8 +240,10 @@
 #'   full-information maximum likelihood; the parametric bootstrap is unavailable for
 #'   incomplete SEM), and the crossed (Design 1) **multilevel** random design at
 #'   both levels (plus the conflated diagnostic) via a two-level SEM -- on
-#'   complete, balanced data with equal cluster sizes, with the Monte-Carlo
-#'   interval (no bootstrap). lavaan's two-level estimator is full-information ML
+#'   complete, balanced data with equal cluster sizes, with either the
+#'   Monte-Carlo interval (the default) or the parametric bootstrap (which
+#'   simulates two-level datasets from the fitted moments and refits per
+#'   resample). lavaan's two-level estimator is full-information ML
 #'   (there is no REML analog), so with few clusters its cluster-level components
 #'   sit slightly below the REML estimates and its absolute-agreement rater term
 #'   slightly above (both differences shrink as clusters grow; consistency ICCs
@@ -274,8 +276,9 @@
 #'   approximation but is far slower (a refit per resample). It is available for
 #'   every design the `"glmmTMB"` and `"lme4"` engines fit (via `glmmTMB`'s
 #'   `simulate()` + refit and `lme4::bootMer` respectively) and, for the random
-#'   two-way design, the `"lavaan"` engine (which simulates from the fitted SEM's
-#'   implied moments and refits). As with the Monte-Carlo interval, the `"lme4"`
+#'   two-way design and the crossed (Design 1) random-rater multilevel design, the
+#'   `"lavaan"` engine (which simulates from the fitted SEM's implied moments and
+#'   refits). As with the Monte-Carlo interval, the `"lme4"`
 #'   engine defers a singular (boundary) fit to `"glmmTMB"` for either method.
 #'   `"posterior"` is the percentile **credible** interval from the Bayesian
 #'   engine's posterior draws; it is the forced default for, and available only with,

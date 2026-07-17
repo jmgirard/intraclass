@@ -162,6 +162,141 @@ lavaan_simulate_refit <- function(fit, model, k, center, raters = "random") {
   }
 }
 
+# The two-level CFA model string for k rater-indicators (M54): within = subject
+# factor (svw, unit loadings) + equal within residuals (evw); between = cluster
+# factor (svb, unit loadings) + equal between residuals (evb) + free indicator
+# intercepts (the rater main effects; within intercepts stay fixed at 0). Shared
+# by the point fit and the M56 bootstrap refit so both fit the identical model.
+lavaan_multilevel_model <- function(k) {
+  inds <- paste0("v", seq_len(k))
+  loadings <- paste(sprintf("1*%s", inds), collapse = " + ")
+  paste(
+    "level: 1",
+    sprintf("subj =~ %s", loadings),
+    paste(sprintf("%s ~~ evw*%s", inds, inds), collapse = "\n"),
+    "subj ~~ svw*subj",
+    "level: 2",
+    sprintf("clus =~ %s", loadings),
+    paste(sprintf("%s ~~ evb*%s", inds, inds), collapse = "\n"),
+    "clus ~~ svb*clus",
+    paste(sprintf("%s ~ 1", inds), collapse = "\n"),
+    sep = "\n"
+  )
+}
+
+# Pull the five variance components (cluster, subject-in-cluster, rater,
+# cluster-by-rater, residual) from a fitted two-level lavaan model, given `k` and
+# the effects-coding recentring matrix `center`. RANDOM raters only (M56 scope):
+# the rater slot is the raw grand-mean-centred quadratic form on the between-level
+# intercepts (Jorgensen 2021 Eq. 6), carrying the documented tau^2 inflation.
+# Returns NULL on a between- or within-level Heywood boundary (a non-positive
+# variance): the point-estimate path (fit_lavaan_multilevel) turns that into a
+# classed abort (#5/#8), while the bootstrap factory treats it as an invalid
+# resample (NA-filled, subject to the discard policy). The point path computes the
+# same components inline for its Jacobian/estimate block; this reader is the
+# refit's independent, boundary-safe path (cf. lavaan_components for single level).
+lavaan_multilevel_components <- function(fit, k, center) {
+  co <- lavaan::coef(fit)
+  cn <- names(co)
+  svw <- unname(co[[which(cn == "svw")[1]]])
+  evw <- unname(co[[which(cn == "evw")[1]]])
+  svb <- unname(co[[which(cn == "svb")[1]]])
+  evb <- unname(co[[which(cn == "evb")[1]]])
+  if (
+    !is.finite(svw) ||
+      !is.finite(evw) ||
+      !is.finite(svb) ||
+      !is.finite(evb) ||
+      svw <= 0 ||
+      evw <= 0 ||
+      svb <= 0 ||
+      evb <= 0
+  ) {
+    return(NULL)
+  }
+  nu <- unname(co[which(grepl("~1\\.l2$", cn))])
+  sigma2_r <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  c(
+    cluster = svb,
+    subject = svw,
+    rater = sigma2_r,
+    cluster_rater = evb,
+    residual = evw
+  )
+}
+
+# Parametric-bootstrap factory for the two-level lavaan engine (M56). Closes over
+# the fitted model's implied two-level generating moments -- reconstructed from the
+# five components rather than lavInspect(): a cluster's k column-means are
+# MVN(nu, svb*11' + diag(evb)) (the between factor + between residuals + rater
+# intercepts) and a subject's within-cluster deviations are MVN(0, svw*11' +
+# diag(evw)) (the within factor + within residuals) -- and the per-cluster subject
+# counts. Each call simulates `boot_samples` wide two-level datasets (cluster draws
+# broadcast over their subjects + within draws), refits the SAME two-level model
+# with the SAME options, and returns the (component x resample) matrix on the five
+# shared component names -- the `simulate_refit(boot_samples, seed)` contract
+# bootstrap_ci() consumes. A refit that errors, does not converge, or lands on a
+# between-level Heywood boundary is NA-filled and dropped upstream by the discard
+# policy (#5/#8). Seeded via with_rng_seed() so the global RNG stream is left
+# untouched (#9/#12). Random raters only; incomplete/unbalanced data keeps
+# simulate_refit = NULL upstream (resamples cannot reproduce a missingness pattern).
+lavaan_ml_simulate_refit <- function(
+  model,
+  k,
+  center,
+  nu,
+  svw,
+  evw,
+  svb,
+  evb,
+  cluster_sizes
+) {
+  inds <- paste0("v", seq_len(k))
+  na_out <- stats::setNames(
+    rep(NA_real_, 5L),
+    c("cluster", "subject", "rater", "cluster_rater", "residual")
+  )
+  ones <- matrix(1, k, k)
+  cov_between <- svb * ones + diag(evb, k, k)
+  cov_within <- svw * ones + diag(evw, k, k)
+  mu_between <- stats::setNames(nu, inds)
+  mu_within <- stats::setNames(rep(0, k), inds)
+  n_clusters <- length(cluster_sizes)
+  n_total <- sum(cluster_sizes)
+  cluster_id <- factor(rep(seq_len(n_clusters), times = cluster_sizes))
+  cluster_ix <- as.integer(cluster_id)
+  function(boot_samples, seed = NULL) {
+    run <- function() {
+      refit_one <- function(i) {
+        # Cluster means (k x N_c) broadcast to each subject; within deviations
+        # (k x N_total) added on top -> the two-level DGP. Transpose to the wide
+        # one-row-per-subject layout lavaan wants.
+        b <- rmvn(n_clusters, mu_between, cov_between)
+        w <- rmvn(n_total, mu_within, cov_within)
+        obs <- w + b[, cluster_ix, drop = FALSE]
+        wide_df <- as.data.frame(t(obs))
+        names(wide_df) <- inds
+        wide_df$cluster <- cluster_id
+        refit <- tryCatch(
+          suppressWarnings(lavaan::lavaan(
+            model,
+            data = wide_df,
+            cluster = "cluster"
+          )),
+          error = function(e) NULL
+        )
+        if (is.null(refit) || !lavaan::lavInspect(refit, "converged")) {
+          return(na_out)
+        }
+        out <- lavaan_multilevel_components(refit, k, center)
+        if (is.null(out) || anyNA(out) || any(!is.finite(out))) na_out else out
+      }
+      vapply(seq_len(boot_samples), refit_one, na_out)
+    }
+    if (is.null(seed)) run() else with_rng_seed(seed, run())
+  }
+}
+
 # MULTILEVEL (M54, D-005). The crossed (Design 1) multilevel decomposition of
 # ten Hove, Jorgensen & van der Ark (2022, Eq. 7) -- sigma^2_c + sigma^2_{s:c} +
 # sigma^2_r + sigma^2_{cr} + sigma^2_{(s:c)r} -- maps onto a TWO-LEVEL CFA
@@ -202,9 +337,10 @@ lavaan_simulate_refit <- function(fit, model, k, center, raters = "random") {
 # single-level guard does. The MC interval reuses the shared machinery via the
 # same six-field contract: log-SD scale for the four variances, natural scale
 # for the between intercepts feeding the quadratic form per draw (bias = 0,
-# random raters). Bootstrap is deferred (`simulate_refit = NULL` -> the
-# bootstrap_ci() guard aborts loudly); fixed raters, nested designs,
-# replicates, and incomplete/unbalanced data are refused upstream in icc().
+# random raters). The parametric bootstrap (M56) simulates two-level datasets
+# from this fit's implied within/between moments and refits per resample
+# (lavaan_ml_simulate_refit); fixed raters, nested designs, replicates,
+# and incomplete/unbalanced data are refused upstream in icc().
 fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
   rlang::check_installed("lavaan", reason = "to fit the ICC model with lavaan.")
 
@@ -224,20 +360,9 @@ fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
   # The two-level model (pilot ml_sem_model): within = subject factor (svw) +
   # equal residuals (evw); between = cluster factor (svb) + equal residuals
   # (evb) + free intercepts (the rater main effects; within intercepts stay
-  # fixed at 0 -- the mean structure lives between clusters).
-  loadings <- paste(sprintf("1*%s", inds), collapse = " + ")
-  model <- paste(
-    "level: 1",
-    sprintf("subj =~ %s", loadings),
-    paste(sprintf("%s ~~ evw*%s", inds, inds), collapse = "\n"),
-    "subj ~~ svw*subj",
-    "level: 2",
-    sprintf("clus =~ %s", loadings),
-    paste(sprintf("%s ~~ evb*%s", inds, inds), collapse = "\n"),
-    "clus ~~ svb*clus",
-    paste(sprintf("%s ~ 1", inds), collapse = "\n"),
-    sep = "\n"
-  )
+  # fixed at 0 -- the mean structure lives between clusters). Shared with the
+  # bootstrap factory (M56), which refits this same string per resample.
+  model <- lavaan_multilevel_model(k)
 
   fit <- tryCatch(
     withCallingHandlers(
@@ -359,6 +484,10 @@ fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
     )
   }
 
+  # Per-cluster subject counts drive the two-level bootstrap DGP (equal on the
+  # balanced/complete cell this path serves; the vector keeps the factory general).
+  cluster_sizes <- as.integer(table(wide_df$cluster))
+
   list(
     fit = fit,
     engine = "lavaan",
@@ -366,10 +495,22 @@ fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
     estimate = estimate,
     vcov = vcov_log,
     to_components = to_components,
-    # Bootstrap for the multilevel SEM is deferred (M54): simulating wide
-    # two-level data from implied moments + refitting is unestablished; the
-    # NULL routes ci_method = "bootstrap" to bootstrap_ci()'s loud guard.
-    simulate_refit = NULL
+    # Two-level parametric bootstrap (M56): simulate wide two-level datasets from
+    # this fit's implied within/between moments (rebuilt from the five components),
+    # refit the same model, recompute both-level ICCs per resample. Random raters
+    # only; the single-level FIML precedent (resamples cannot reproduce a
+    # missingness pattern) keeps this NULL for the incomplete/unbalanced sibling.
+    simulate_refit = lavaan_ml_simulate_refit(
+      model,
+      k,
+      center,
+      nu,
+      svw,
+      evw,
+      svb,
+      evb,
+      cluster_sizes
+    )
   )
 }
 

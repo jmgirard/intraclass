@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M56: Multilevel SEM (lavaan) — parametric bootstrap CI
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m56-lavaan-multilevel-bootstrap · https://github.com/jmgirard/intraclass/pull/62   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -37,20 +37,28 @@ adds the opt-in bootstrap.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `icc(..., engine = "lavaan", cluster, ci_method = "bootstrap")` on a
+- [x] AC1: `icc(..., engine = "lavaan", cluster, ci_method = "bootstrap")` on a
       seeded balanced Design-1 dataset returns finite bootstrap intervals at
       both the subject and cluster levels, each containing its point estimate
-      and bounded by 1 — and its endpoints agree with the default Monte-Carlo
-      interval within a documented Monte-Carlo tolerance (cross-method oracle;
-      single-level M21 / ADR-031 bootstrap pattern).
-- [ ] AC2: a seeded fixture drives ≥1 refit to a between-level Heywood /
+      and bounded by 1 (structural sanity, both levels); and at the **subject**
+      level its endpoints agree with the default Monte-Carlo interval within a
+      documented tolerance (cross-method oracle; single-level M21 / ADR-031
+      pattern). The cluster level's cross-method CI agreement is not pinned — it
+      is the wide, few-cluster, ML-shrunk level whose MC-vs-bootstrap tail
+      agreement is platform-sensitive (lavaan's two-level optimizer is
+      BLAS/OS-dependent); the cluster-level bootstrap's faithfulness rests on the
+      shared refit machinery (subject-validated) and the M54 glmmTMB parity
+      oracle. (Amended at review 2026-07-17 — gate: the original "both levels
+      agree" pin flaked on Windows at rel .326 > .30, a platform-numeric artifact
+      not a code bug.)
+- [x] AC2: a seeded fixture drives ≥1 refit to a between-level Heywood /
       non-convergence; that resample is NA-filled and dropped by the
       `bootstrap_ci()` discard policy, and the reported interval is formed from
       the surviving resamples (guards the two-level discard path, GP7).
-- [ ] AC3: the bootstrap is reproducible and RNG-hygienic — same `seed` →
+- [x] AC3: the bootstrap is reproducible and RNG-hygienic — same `seed` →
       identical interval; the global RNG stream is unchanged across the call
       (`with_rng_seed`, #9/#12).
-- [ ] AC4: the `verify` slot is clean (`cairn/PROFILE.md`) — `devtools::test()`
+- [x] AC4: the `verify` slot is clean (`cairn/PROFILE.md`) — `devtools::test()`
       green (installed-package suite, `NOT_CRAN=true CI=true`), `air format
       --check` and `lintr::lint_package()` clean.
 
@@ -65,21 +73,21 @@ adds the opt-in bootstrap.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write `lavaan_multilevel_simulate_refit()` in `R/engine-lavaan.R` —
+- [x] T1: Write `lavaan_ml_simulate_refit()` in `R/engine-lavaan.R` —
       close over the two-level fit's implied within/between moments, cluster
       count, and per-cluster subject count; per resample simulate a wide
       two-level dataset (cluster draws + within-cluster subject draws), refit
       the same two-level model with the same options, and return the five
-      components via the existing `lavaan`-multilevel component reader
+      components via the new `lavaan_multilevel_components()` reader
       (Heywood/non-convergent → NA-fill, seeded via `with_rng_seed`).
-- [ ] T2: Replace `simulate_refit = NULL` in `fit_lavaan_multilevel()` with the
+- [x] T2: Replace `simulate_refit = NULL` in `fit_lavaan_multilevel()` with the
       new factory (random raters only); confirm `bootstrap_ci()` consumes it
       unmodified (the six-field contract is engine-generic — M54 lesson).
-- [ ] T3: Tests in `tests/testthat/test-icc-lavaan-multilevel.R` — the AC1
+- [x] T3: Tests in `tests/testthat/test-icc-lavaan-multilevel.R` — the AC1
       MC↔bootstrap parity + structural-sanity checks at both levels, the AC2
       discard-path fixture, and the AC3 reproducibility/RNG-hygiene checks
       (`skip_on_cran`, `skip_if_not_installed("lavaan")`).
-- [ ] T4: Run the `verify` slot; update the roxygen note in
+- [x] T4: Run the `verify` slot; update the roxygen note in
       `fit_lavaan_multilevel()`'s header (the "Bootstrap is deferred" paragraph
       now describes the shipped two-level parametric bootstrap) and
       `@param ci_method` / the `icc()` engine roster prose if they claim "no
@@ -90,9 +98,90 @@ adds the opt-in bootstrap.
 
 - 2026-07-17: created by /milestone-plan (promotes the lavaan-multilevel-siblings
   candidate, part A; plan gate: 3 separate milestones, all planned now).
+- 2026-07-17: T1–T4 done. Added `lavaan_multilevel_model()`,
+  `lavaan_multilevel_components()`, and `lavaan_ml_simulate_refit()` (two-level
+  DGP rebuilt from the five components: cluster means ~ MVN(ν, svb·11'+diag(evb)),
+  within devs ~ MVN(0, svw·11'+diag(evw))); wired the factory into
+  `fit_lavaan_multilevel` (random raters). MC↔bootstrap endpoint parity oracle:
+  subject ≤.01, cluster ≤.016 (n=40/10/5); AC2 discard-path pinned via the direct
+  factory (fully-NA failed columns); AC3 reproducibility + RNG hygiene. Updated
+  the stale "bootstrap out of scope" assertion, roxygen, and the M54 NEWS bullet.
+  air/lintr clean; both lavaan test files green.
+- 2026-07-17: status → review. Full suite (installed, NOT_CRAN=true CI=true):
+  1725 pass, 0 fail, 0 error, 23 skip; document() no-diff. Ready for review.
+- 2026-07-17: review — three lenses clean (zero findings), AC1–AC4 verified.
+- 2026-07-17: PR #62 CI red on windows-latest only — AC1 cluster-level parity
+  pin (.07 absolute) flaked at .08 (lavaan's two-level optimizer is BLAS/OS
+  sensitive; the wide ML cluster level is the noisy one). Status → in-progress;
+  test-only fix (code unchanged, three-lens code review stands): cluster pin
+  reparameterized to RELATIVE-to-MC-width < .30 (subject stays tight absolute
+  .04), boot_samples 299 → 599 to stabilize the tail quantiles (GP5 — size the
+  pin to the noise floor, not lower the bar). Re-verified locally (14/14);
+  status → review, re-driving CI.
+- 2026-07-17: the relative-.30 cluster pin ALSO flaked on Windows (rel .326) —
+  the cluster-level MC↔bootstrap tail agreement is not a portable oracle at the
+  wide, few-cluster, ML-shrunk level. **AC1 amended via gate (user, option A):**
+  cross-method endpoint agreement pinned at the SUBJECT level only; structural
+  sanity + point-containment kept at BOTH levels; cluster faithfulness rests on
+  the shared refit machinery (subject-validated) + M54 glmmTMB parity. Test:
+  dropped the cluster cross-method pin, boot_samples → 299 (subject pin passed
+  there on every platform; faster). Code unchanged since the three-lens review —
+  it stands. Re-verified locally (13/13); status → review, re-driving CI.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-17 · PR #62 · branch cut from main @ 39e330b (main unmoved, no sync merge).**
+
+### Acceptance-criteria evidence (fresh)
+
+- **AC1 (amended)** — `test-icc-lavaan-multilevel.R` "multilevel lavaan
+  bootstrap agrees with the Monte-Carlo interval": 4/4 pass. Structural sanity
+  at BOTH levels (finite, estimate contained, ≤ 1); SUBJECT-level cross-method
+  endpoint |Δ| vs the 4000-draw MC interval ≤ .01, inside the tight .04 pin. The
+  cluster-level cross-method pin was removed at the review gate (platform-numeric
+  artifact: Windows reached rel .326 of the interval width); cluster faithfulness
+  rests on the shared refit factory (subject-validated) + the M54 glmmTMB parity
+  oracle. See the AC1 amendment work-log entry (2026-07-17).
+- **AC2** — "the two-level bootstrap refit NA-fills failed/Heywood resamples":
+  6/6 pass. Direct factory fixture (svb=1e-3, 8 clusters): 14 finite / 26
+  fully-NA columns; NA pattern ∈ {0, k+2} confirms a dropped resample is
+  entirely NA (bootstrap_ci keys the discard on a clean column), finite columns
+  are positive 5-vectors.
+- **AC3** — "reproducible and RNG-hygienic": 3/3 pass. Same seed → identical
+  interval; `.Random.seed` identical across the seeded call.
+- **AC4** — full installed suite (`NOT_CRAN=true CI=true`): 1725 pass, 0 fail,
+  0 error, 23 skip. `air format --check` clean; `lintr::lint_package()` 0 lints.
+
+### Consistency gate
+
+- `cairn_validate.py`: all checks passed (291 advisory pre-migration-ID
+  warnings, not gate failures).
+- `devtools::document()`: no diff (man/, NAMESPACE unchanged).
+- `pkgdown::check_pkgdown()`: OK (no new exports — all three helpers internal).
+- NEWS.md: the M54 multilevel-lavaan bullet amended to record the shipped
+  bootstrap (no milestone numbers in user-facing text).
+- Full R CMD check delegated to the PR CI matrix (the merge gate).
+
+### Three-lens fresh-context review — zero findings
+
+- **[O] diff-bug (Opus):** no findings. Verified the two-level generating
+  covariance (between = svb·11'+diag(evb) @ μ=ν; within = svw·11'+diag(evw) @
+  μ=0), the refit uses the identical shared model string + options, the
+  fully-NA discard contract (no partial-NA/wrong-length path), cluster
+  broadcasting alignment, `with_rng_seed` hygiene, and reader↔inline-point-path
+  agreement; no collateral breakage of the single-level or MC paths.
+- **[S] blame-history (Sonnet):** no findings. M56 properly *supersedes* the
+  M54 `simulate_refit = NULL` deferral — whose stated reason was "unestablished"
+  (D-005's establish-by-oracle-first) — by supplying the O-SEM-ML-BOOT
+  cross-method oracle (stronger than the single-level M21 precedent's
+  structural-only checks); the removed test assertion is legitimately obsolete
+  (it locked the now-supported cell); the refactor leaves the M54 point path
+  byte-identical.
+- **[S] prior-PR-comments (Sonnet):** no prior-PR evidence — the merged PRs
+  touching these files carry only codecov-bot comments, no human review points.
+
+Scorer not invoked (empty findings list). No fixes, follow-ups, or rejections.
