@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55 | high | milestones/M48-release-v010.md |
-| M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | planned | — | normal | milestones/M58-lavaan-multilevel-incomplete.md |
+| M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | in-progress | — | normal | milestones/M58-lavaan-multilevel-incomplete.md |
 | M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | done | — | normal | milestones/archive/M57-lavaan-multilevel-fixed.md |
 | M60 | Freeze the lavaan multilevel recovery sweep | done | — | normal | milestones/archive/M60-freeze-lavaan-recovery.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
