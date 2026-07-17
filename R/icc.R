@@ -238,7 +238,15 @@
 #'   finite-population variance, which equals the mixed-model estimate on balanced
 #'   data), on both complete and **incomplete** data (missing cells are estimated by
 #'   full-information maximum likelihood; the parametric bootstrap is unavailable for
-#'   incomplete SEM). `"brms"` fits the **random**-rater model in a Bayesian
+#'   incomplete SEM), and the crossed (Design 1) **multilevel** random design at
+#'   both levels (plus the conflated diagnostic) via a two-level SEM -- on
+#'   complete, balanced data with equal cluster sizes, with the Monte-Carlo
+#'   interval (no bootstrap). lavaan's two-level estimator is full-information ML
+#'   (there is no REML analog), so with few clusters its cluster-level components
+#'   sit slightly below the REML estimates and its absolute-agreement rater term
+#'   slightly above (both differences shrink as clusters grow; consistency ICCs
+#'   are ratios and agree with the mixed-model estimates essentially exactly).
+#'   `"brms"` fits the **random**-rater model in a Bayesian
 #'   framework (Stan, via \pkg{brms}) under a sourced half-*t*(4, 0, 1) prior on the
 #'   random-effect SDs (ten Hove et al. 2020); the point estimate is the posterior
 #'   mode (MAP) and the interval is a percentile **credible** interval
@@ -557,17 +565,19 @@ icc <- function(
 
   # The lavaan (SEM) engine covers the two-way COMPLETE design -- random raters
   # (M7, ADR-014) and, since M21 Slice 1/2 (ADR-031), fixed raters (Case-3A
-  # theta^2_r) and the parametric bootstrap. One-way, multilevel, and incomplete SEM
-  # stay deferred (recorded, not rediscovered); route them to a loud abort rather
-  # than a silent glmmTMB fallback (PRINCIPLES.md #5). The incomplete-data guard
-  # needs the design summary and lives further down.
-  if (engine == "lavaan" && (multilevel || oneway)) {
-    design <- if (multilevel) "multilevel" else "one-way"
+  # theta^2_r) and the parametric bootstrap -- and, since M54 (D-005), the
+  # crossed (Design 1) random-rater multilevel design on complete/balanced
+  # data via a two-level CFA. One-way SEM stays deferred (recorded, not
+  # rediscovered; ADR-014): route it to a loud abort rather than a silent
+  # glmmTMB fallback (PRINCIPLES.md #5). The multilevel-scope guards (nested,
+  # fixed, replicates, incomplete/unbalanced) need `ml_design`, `raters`, and
+  # balance, so they live further down, as does the incomplete-data guard.
+  if (engine == "lavaan" && oneway) {
     abort_unsupported(c(
-      "The {.pkg lavaan} engine supports only the two-way design so far.",
-      i = "{.code engine = \"lavaan\"} is not available for {design} designs; \\
+      "The {.pkg lavaan} engine does not support the one-way design.",
+      i = "{.code engine = \"lavaan\"} is not available for one-way designs; \\
            use {.code engine = \"glmmTMB\"}.",
-      i = "SEM for one-way and multilevel designs is planned for a later milestone."
+      i = "SEM for one-way designs is planned for a later milestone."
     ))
   }
 
@@ -808,8 +818,8 @@ icc <- function(
     # balance gate below (with `balanced`) defers the INCOMPLETE/unbalanced cluster-fixed cell
     # for every engine (double-blocked: ten Hove's open small-k estimator + the M9 §9 ICC(c,k)
     # divisor), so brms incomplete fixed cluster falls through to it and aborts there, exactly
-    # as glmmTMB/lme4 do -- no brms-specific cluster guard is needed here. (lavaan multilevel
-    # is unsupported, aborted upstream, and cannot reach this block.)
+    # as glmmTMB/lme4 do -- no brms-specific cluster guard is needed here. (lavaan
+    # fixed-rater multilevel is refused by the M54 lavaan scope guard below.)
     # Nested fixed designs (nested_in_clusters) have no cluster level; they fall
     # through to the generic nested guard below (~L805), which drops the default
     # "cluster" / aborts an explicit cluster request and runs the M8/M19/M36
@@ -826,8 +836,8 @@ icc <- function(
     # connectedness, >= 2 ratings/subject) and the pre-dispatch harmonic-mean k_eff divisor
     # protect the ragged fit for every engine. The per-subject k_eff averaging divisor is
     # well-defined (ratings/subject, the M19 random-nested divisor); it is NOT the open
-    # per-cluster ICC(c,k) divisor (M9 §9). lavaan cannot reach here (multilevel SEM is
-    # unsupported, aborted upstream).
+    # per-cluster ICC(c,k) divisor (M9 §9). lavaan cannot fit here (fixed-rater
+    # multilevel SEM is refused by the M54 lavaan scope guard below).
   }
   if (multilevel && ml_design != "crossed") {
     if (!("subject" %in% level)) {
@@ -1238,6 +1248,55 @@ icc <- function(
   # (FIML, M21 Slice 3, ADR-031). Disconnected designs are still rejected by the
   # engine-agnostic connectedness guard below (shared with the mixed-model engines).
 
+  # lavaan (SEM) multilevel scope (M54, D-005): the crossed (Design 1)
+  # random-rater fit on complete, balanced data with equal cluster sizes ships
+  # -- both levels + the conflated diagnostic, montecarlo CI -- via the
+  # two-level CFA parameterization the M53 pilot established numerically
+  # (cairn/references/sem-multilevel-pilot.md). Everything outside that cell
+  # stays a loud classed deferral (#5): nested designs (no two-level CFA
+  # mapping for nested raters), fixed raters, within-cell replicates, and
+  # incomplete/unbalanced data (the pilot's oracle evidence is complete/
+  # balanced; equal n_s enters the documented tau^2 rater-inflation law --
+  # see fit_lavaan_multilevel()'s header).
+  if (engine == "lavaan" && multilevel) {
+    if (ml_design != "crossed") {
+      abort_unsupported(c(
+        "The {.pkg lavaan} engine supports only the crossed (Design 1) \\
+         multilevel design.",
+        i = "With raters nested in clusters or subjects there is no two-level \\
+             SEM parameterization of the decomposition yet; use \\
+             {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
+      ))
+    }
+    if (raters == "fixed") {
+      abort_unsupported(c(
+        "Fixed-rater multilevel ICCs are not available for the {.pkg lavaan} \\
+         engine yet.",
+        i = "Use {.code raters = \"random\"}, or {.code engine = \"glmmTMB\"} \\
+             (default) / {.code \"lme4\"} for fixed-rater multilevel designs; \\
+             the SEM sibling is planned for a later milestone."
+      ))
+    }
+    if (replicates) {
+      abort_unsupported(c(
+        "The {.pkg lavaan} (SEM) engine does not support within-cell \\
+         replicates.",
+        i = "Use {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
+      ))
+    }
+    # `cluster_of` (subject x cluster incidence) is computed by the multilevel
+    # identifiability block above.
+    if (!balanced || length(unique(colSums(cluster_of))) != 1L) {
+      abort_unsupported(c(
+        "The {.pkg lavaan} multilevel engine needs complete, balanced data \\
+         with equal cluster sizes.",
+        i = "Incomplete or unbalanced multilevel SEM is planned for a later \\
+             milestone; use {.code engine = \"glmmTMB\"} (default) or \\
+             {.code \"lme4\"}."
+      ))
+    }
+  }
+
   # Fixed-rater lme4 (M14 Slice 1 balanced; M15 Slice 2 incomplete, ADR-024) covers
   # the two-way fixed-rater design on both balanced and ragged data: fit_lme4_fixed()
   # fits `score ~ 1 + rater + (1 | subject)` (missing cells are fine for lme4) and the
@@ -1478,6 +1537,13 @@ icc <- function(
     } else if (engine == "lme4") {
       # Crossed (Design 1) random raters via lme4 (M14 Slice 2).
       fit_lme4_multilevel(df)
+    } else if (engine == "lavaan") {
+      # Crossed (Design 1) random raters via the two-level SEM (M54, D-005):
+      # the five-component two-level CFA the M53 pilot established. Complete/
+      # balanced, equal cluster sizes, random raters only -- everything else
+      # aborted upstream. Serves both levels + the conflated diagnostic off
+      # the same fit, exactly as the mixed-model engines.
+      fit_lavaan_multilevel(df)
     } else {
       fit_glmmtmb_multilevel(df)
     }

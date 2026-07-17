@@ -107,16 +107,16 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
 - [x] T1: tests first — cross-engine parity, reduction, and recovery-cell
       skeletons (new `test-icc-lavaan-multilevel.R`), failing against the
       current abort.
-- [ ] T2: implement `fit_lavaan_multilevel()` per the pilot mapping —
+- [x] T2: implement `fit_lavaan_multilevel()` per the pilot mapping —
       syntax build, `.l2` intercept extraction, five components,
       Heywood/convergence guards, six-field contract.
-- [ ] T3: dispatch — narrow `R/icc.R:564`, add the multilevel lavaan branch
+- [x] T3: dispatch — narrow `R/icc.R:564`, add the multilevel lavaan branch
       gated to Design 1 + random + complete + balanced; conflated guard
       check; classed-abort tests for every Out combination.
-- [ ] T4: MC interval feasibility + endpoint-parity tests; the τ² invariant
+- [x] T4: MC interval feasibility + endpoint-parity tests; the τ² invariant
       GP7 guard test with hand-computed τ² (LESSONS 2026-07-13: direct
       deterministic check, not a coverage sim).
-- [ ] T5: seeded recovery cells (reuse pilot geometries, e.g. N_c=40/k=5 and
+- [x] T5: seeded recovery cells (reuse pilot geometries, e.g. N_c=40/k=5 and
       the tight-k N_c=30/k=25 cell), `skip_on_cran`, noise-floor-sized pins.
 - [ ] T6: flip the parity-matrix cells; verify installed package with
       `NOT_CRAN=true`; `lintr::lint_package()`.
@@ -132,6 +132,15 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
 - 2026-07-16: T1 done — oracle test file written (pilot-traced pins; MC/
   conflated pins to be calibration-sized in T2/T4), all paths fail on the
   current blanket abort as expected.
+- 2026-07-16: T2–T5 done — engine + dispatch in; full oracle file green incl.
+  recovery + the τ² GP7 pin; print snapshot reproduces the pilot Stage-1
+  numbers exactly. Notables: at a true-zero cluster variance the shipped
+  engine (unlike the pilot's raw extraction) Heywood-aborts ~half of seeds by
+  design (D-004) — reduction test re-seeded (20260724), abort seed (20260718)
+  became the Heywood fixture with glmmTMB-at-0 boundary evidence; MC agreement
+  lower-endpoint deltas (≤.095) match the shipped single-level engine's
+  signature (~.12 benchmark) — an inherited engine property, pins sized
+  accordingly; d_study() works unchanged off the new contract (smoke-tested).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
