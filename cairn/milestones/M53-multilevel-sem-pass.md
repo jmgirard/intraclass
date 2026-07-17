@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M53: Multilevel SEM (lavaan) — estimand/oracle pass
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP6   <!-- owner: plan · create/amend-via-gate -->
@@ -120,6 +120,12 @@ stays 🔴 blocked (ADR-014), untouched.
   failures; cell D rater rel-bias +.039 < .071 tol, parity ≤ .0088; MC probe
   feasible both levels). T5 done — synthesis-note Results + GO verdict;
   ROADMAP candidate row and COVERAGE.md row updated to cite M53.
+- 2026-07-16: verify — full suite 1896 passed; 13 fail + 1 error, ALL in
+  test-icc-brms.R's live-Stan tier, which passes clean in isolation; branch
+  runtime surface identical to origin/main (docs + data-raw only), Stan stack
+  unchanged since 2026-07-08 → pre-existing suite-order/environment condition
+  on main, out of M53 scope; flagged to the maintainer for separate diagnosis
+  (blocks M48 AC5 if unresolved). Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
