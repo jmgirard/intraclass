@@ -206,11 +206,13 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
   [`references/REFERENCES.md`](references/REFERENCES.md) (bibliography + registry).
   Whether cairn adopts a dedicated `ORACLES.md` is an open cairn-side question
   (cairn D-024; assessed by cairn M42).
-- **brms/Stan verification is structurally weaker** than the other engines':
-  live-Stan tests can't run on CI (no toolchain), flake on MCMC noise locally, and
-  coverage sweeps are ~2-hour background jobs. (Wart confirmed 2026-07-12;
-  disposition: ROADMAP candidate "brms/Stan verification hardening" — largely
-  inherent, mitigate + document.)
+- ~~**brms/Stan verification is structurally weaker**~~ — RESOLVED by M52
+  (mitigate + document; the constraint itself is inherent and stands: no Stan
+  toolchain on CI, MCMC flake, ~2-hour sweeps). The offline committed-fixture
+  strategy is now documented in `data-raw/README.md` (constraints, test tiers,
+  fixture lifecycle, regeneration protocol) and the script↔fixture map is
+  mechanically guarded by `tests/testthat/test-brms-oracle-map.R` (GP7).
+  (Wart confirmed 2026-07-12.)
 - ~~**Cross-engine parity has no standing matrix**~~ — RESOLVED by M49: the
   standing `tests/testthat/test-engine-parity-matrix.R` now enumerates the grid
   and breaks on a silent gap (see Architecture). (Wart confirmed 2026-07-12.)

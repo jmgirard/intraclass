@@ -1,5 +1,9 @@
 # brms (Bayesian) engine + ci_method = "posterior" — Slice 1 wiring (M23/ADR-033)
 #
+# The offline verification strategy behind this file's test tiers (no-fit /
+# committed-fixture / live-Stan) is documented in data-raw/README.md (M52);
+# the oracle script <-> fixture map is guarded by test-brms-oracle-map.R.
+#
 # Slice 1 is ENGINE + INTERVAL-METHOD WIRING; the coverage oracle (O-Bayes) is Slice 2.
 # So the tests here split in two:
 #   * The COUPLING and SCOPE aborts, and the posterior_mode()/posterior_summary()
