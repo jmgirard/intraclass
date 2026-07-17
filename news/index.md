@@ -69,6 +69,14 @@
   same divisor to the posterior draws’ variance components, its credible
   interval covering the population value across the cluster-count axis).
 
+### Documentation
+
+- The package comparison and “related work” documentation no longer
+  presents `gtheory` as an alternative package to reach for: it was
+  archived from CRAN in March 2025 and is not a dependency. The
+  historical numerical agreement between the `lavaan` (SEM) engine and
+  `gtheory` is retained as a cited reference.
+
 ## intraclass 0.1.0
 
 First public release. **intraclass** estimates interrater-reliability

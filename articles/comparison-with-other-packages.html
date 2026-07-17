@@ -313,10 +313,9 @@ of ratings</a> (<code>k_eff</code>) that accounts for the imbalance:</p>
 <span><span class="co">#&gt;      estimate subjects_used  ratings_used         k_eff </span></span>
 <span><span class="co">#&gt;     0.5205561     6.0000000    20.0000000     3.2727273</span></span></code></pre></div>
 <p>All six subjects and all twenty observed ratings contribute; nothing
-is thrown away. (<code>irrICC</code> and the generalizability-theory
-package <code>gtheory</code> can also fit incomplete data with their own
-models — see the capability matrix below — but the mean-squares tools
-cannot.)</p>
+is thrown away. (<code>irrICC</code> can also fit incomplete data with
+its own model — see the capability matrix below — but the mean-squares
+tools cannot.)</p>
 </div>
 <div class="section level3">
 <h3 id="the-bigger-picture">The bigger picture<a class="anchor" aria-label="anchor" href="#the-bigger-picture"></a>
@@ -327,19 +326,17 @@ computes; it is a map of intent, not a scorecard — each tool is
 excellent at what it was designed for.</p>
 <table class="table">
 <colgroup>
-<col width="13%">
-<col width="17%">
-<col width="17%">
-<col width="17%">
-<col width="17%">
-<col width="17%">
+<col width="15%">
+<col width="21%">
+<col width="21%">
+<col width="21%">
+<col width="21%">
 </colgroup>
 <thead><tr class="header">
 <th>Capability</th>
 <th align="center"><code>psych</code></th>
 <th align="center"><code>irr</code></th>
 <th align="center"><code>irrICC</code></th>
-<th align="center"><code>gtheory</code></th>
 <th align="center"><code>intraclass</code></th>
 </tr></thead>
 <tbody>
@@ -348,7 +345,6 @@ excellent at what it was designed for.</p>
 <td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">—</td>
 <td align="center">✅</td>
 </tr>
 <tr class="even">
@@ -357,11 +353,9 @@ excellent at what it was designed for.</p>
 <td align="center">—</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="odd">
 <td>Multilevel (subject <strong>and</strong> cluster) IRR</td>
-<td align="center">—</td>
 <td align="center">—</td>
 <td align="center">—</td>
 <td align="center">—</td>
@@ -372,7 +366,6 @@ excellent at what it was designed for.</p>
 <td align="center">—</td>
 <td align="center">—</td>
 <td align="center">partial</td>
-<td align="center">—</td>
 <td align="center">✅</td>
 </tr>
 <tr class="odd">
@@ -383,11 +376,9 @@ rater framing</td>
 <td align="center">partial</td>
 <td align="center">—</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="even">
 <td>Guidance on <em>which</em> ICC to report</td>
-<td align="center">—</td>
 <td align="center">—</td>
 <td align="center">—</td>
 <td align="center">—</td>
@@ -395,16 +386,17 @@ rater framing</td>
 </tr>
 </tbody>
 </table>
-<p>Two rows deserve a word. The generalizability-theory tools —
-<code>gtheory</code>, and model-based extractors such as
-<code>performance::icc</code> — return <strong>variance
+<p>Two rows deserve a word. Model-based extractors such as
+<code>performance::icc</code> return <strong>variance
 components</strong> or a variance-partition coefficient, which is the
 raw material of an ICC but not the inter-rater-reliability coefficient
 family itself, nor the error-variance framing that distinguishes
 agreement from consistency. (<code>intraclass</code>’s own
-generalizability coefficients are validated against <code>gtheory</code>
-to within 0.001; see the package’s reference notes.) And an
-<strong>interval</strong> that is <a href="glossary.html#monte-carlo-interval">boundary-aware</a> — that
+generalizability coefficients were validated against
+<code>gtheory</code> — a generalizability-theory package archived from
+CRAN in March 2025, and not a dependency here — agreeing to within
+0.001; those committed reference values live in the package’s reference
+notes.) And an <strong>interval</strong> that is <a href="glossary.html#monte-carlo-interval">boundary-aware</a> — that
 behaves correctly when a variance component is estimated at its <a href="glossary.html#zero-variance-boundary">zero boundary</a>, where a
 normal-approximation interval silently misbehaves — is something none of
 the classical tools provide.</p>
