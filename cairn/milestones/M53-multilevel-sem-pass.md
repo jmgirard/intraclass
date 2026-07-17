@@ -86,15 +86,15 @@ stays 🔴 blocked (ADR-014), untouched.
       parameter↔component table, identification (effects-coded between-level
       intercepts), lavaan two-level estimation constraints (ML-only, complete
       data, meanstructure), expected small-sample deltas vs REML.
-- [ ] T3: Pilot part 1 (`data-raw/pilot-sem-multilevel.R`, seeded,
+- [x] T3: Pilot part 1 (`data-raw/pilot-sem-multilevel.R`, seeded,
       checkpointed): balanced Design-1 simulation → two-level lavaan fit →
       five components vs glmmTMB; reduction check at σ²_c = σ²_{cr} = 0 vs
       the shipped single-level engine.
-- [ ] T4: Pilot part 2: known-population recovery sweep (≥3 cells incl. a
-      high-N_c cell) + MC-interval feasibility probe (extract two-level vcov,
-      log-SD transform, per-draw ICCs at both levels; note Heywood/boundary
-      behavior).
-- [ ] T5: Finalize the synthesis note (results, go/no-go), log the
+- [x] T4: Pilot part 2: known-population recovery sweep (4 cells incl. a
+      high-N_c cell and a k=25 cell) + MC-interval feasibility probe (extract
+      two-level vcov, log-SD transform, per-draw ICCs at both levels; note
+      Heywood/boundary behavior).
+- [x] T5: Finalize the synthesis note (results, go/no-go), log the
       disposition, update the ROADMAP candidate row + COVERAGE.md row.
 
 ## Work log
@@ -116,6 +116,10 @@ stays 🔴 blocked (ADR-014), untouched.
   Stage-2 pin failed (rater rel-bias +.0995 vs .05 at N_c=200) → diagnosed as
   a mis-set pin (k-governed noise, parity .001), GP5 correction recorded in
   Decisions; pins split + k=25 cell D added; re-run launched.
+- 2026-07-16: T3+T4 done — pilot run 2 PASS, all pins hold (450 fits, 0
+  failures; cell D rater rel-bias +.039 < .071 tol, parity ≤ .0088; MC probe
+  feasible both levels). T5 done — synthesis-note Results + GO verdict;
+  ROADMAP candidate row and COVERAGE.md row updated to cite M53.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

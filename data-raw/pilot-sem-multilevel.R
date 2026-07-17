@@ -9,13 +9,14 @@
 # Stage 1 (T3): one balanced dataset — five components + all eight Table-3 ICCs
 #   from the two-level lavaan fit vs a REML glmmTMB fit; reduction check at
 #   sigma^2_c = sigma^2_cr = 0 vs the shipped single-level lavaan engine.
-# Stage 2 (T4): known-population recovery over 3 cells sweeping the cluster
-#   axis (GP6), n_rep = 100, per-rep seeds; glmmTMB parity deltas on the first
+# Stage 2 (T4): known-population recovery over 4 cells — A-C sweep the cluster
+#   axis, D (k = 25) sweeps sigma^2_r's own axis (GP6/GP5 correction; see the
+#   milestone Decisions) — per-rep seeds; glmmTMB parity deltas on the first
 #   25 reps per cell; MC-interval feasibility probe on the Stage-1 fit.
 #
 # Seeded and reproducible (#4/#12); checkpoint saved BEFORE the stopifnot pins
 # (M47/M52 lessons): data-raw/.oracle-pilot-sem-multilevel-checkpoint.rds.
-# Expected runtime ~10-15 min (cell C fits are the bulk).
+# Expected runtime ~20-25 min (cells C and D are the bulk).
 
 suppressPackageStartupMessages({
   stopifnot(requireNamespace("lavaan", quietly = TRUE))
@@ -25,8 +26,17 @@ suppressPackageStartupMessages({
 
 # Balanced Design-1 generator with known population components (mirrors
 # data-raw/oracle-multilevel.R's sim_multilevel; kept self-contained).
-sim_multilevel <- function(n_clusters, n_subjects, n_raters,
-                           vc, vsc, vr, vcr, vres, seed) {
+sim_multilevel <- function(
+  n_clusters,
+  n_subjects,
+  n_raters,
+  vc,
+  vsc,
+  vr,
+  vcr,
+  vres,
+  seed
+) {
   set.seed(seed)
   cl <- stats::rnorm(n_clusters, 0, sqrt(vc))
   rt <- stats::rnorm(n_raters, 0, sqrt(vr))
@@ -39,7 +49,11 @@ sim_multilevel <- function(n_clusters, n_subjects, n_raters,
   d$sc <- scv[(d$cluster - 1) * n_subjects + d$subj]
   crv <- stats::rnorm(n_clusters * n_raters, 0, sqrt(vcr))
   d$cr <- crv[(d$cluster - 1) * n_raters + d$rater]
-  d$score <- 10 + cl[d$cluster] + d$sc + rt[d$rater] + d$cr +
+  d$score <- 10 +
+    cl[d$cluster] +
+    d$sc +
+    rt[d$rater] +
+    d$cr +
     stats::rnorm(nrow(d), 0, sqrt(vres))
   d$cluster <- factor(d$cluster)
   d$rater <- factor(d$rater)
@@ -114,7 +128,10 @@ fit_ml_sem <- function(wide, k) {
 # REML glmmTMB fit of the same decomposition (the package's spine).
 fit_reml <- function(d) {
   fit <- glmmTMB::glmmTMB(
-    score ~ 1 + (1 | cluster) + (1 | cluster:subject) + (1 | rater) +
+    score ~ 1 +
+      (1 | cluster) +
+      (1 | cluster:subject) +
+      (1 | rater) +
       (1 | cluster:rater),
     data = d,
     REML = TRUE
@@ -139,7 +156,11 @@ iccs_from_components <- function(comp, k) {
       out,
       s_agr = icc_pt(comp["subject"], comp["rater"] + comp["residual"], unit_k),
       s_con = icc_pt(comp["subject"], comp["residual"], unit_k),
-      c_agr = icc_pt(comp["cluster"], comp["rater"] + comp["cluster_rater"], unit_k),
+      c_agr = icc_pt(
+        comp["cluster"],
+        comp["rater"] + comp["cluster_rater"],
+        unit_k
+      ),
       c_con = icc_pt(comp["cluster"], comp["cluster_rater"], unit_k)
     )
   }
@@ -152,21 +173,35 @@ iccs_from_components <- function(comp, k) {
 }
 
 checkpoint <- list()
-ckpt_path <- file.path("data-raw", ".oracle-pilot-sem-multilevel-checkpoint.rds")
+ckpt_path <- file.path(
+  "data-raw",
+  ".oracle-pilot-sem-multilevel-checkpoint.rds"
+)
 
 # --- Stage 1: single balanced dataset, components + ICCs vs glmmTMB ----------
 
 pop1 <- c(vc = 0.4, vsc = 1, vr = 0.16, vcr = 0.16, vres = 0.5)
-d1 <- sim_multilevel(40, 10, 5, pop1["vc"], pop1["vsc"], pop1["vr"],
-                     pop1["vcr"], pop1["vres"], seed = 20260716)
+d1 <- sim_multilevel(
+  40,
+  10,
+  5,
+  pop1["vc"],
+  pop1["vsc"],
+  pop1["vr"],
+  pop1["vcr"],
+  pop1["vres"],
+  seed = 20260716
+)
 sem1 <- fit_ml_sem(to_wide(d1), k = 5)
 stopifnot(!is.null(sem1))
 reml1 <- fit_reml(d1)
 icc_sem1 <- iccs_from_components(sem1$components, k = 5)
 icc_reml1 <- iccs_from_components(reml1, k = 5)
 checkpoint$stage1 <- list(
-  sem = sem1$components, reml = reml1,
-  icc_sem = icc_sem1, icc_reml = icc_reml1
+  sem = sem1$components,
+  reml = reml1,
+  icc_sem = icc_sem1,
+  icc_reml = icc_reml1
 )
 cat("Stage 1 components (SEM / REML):\n")
 print(round(rbind(sem = sem1$components, reml = reml1), 4))
@@ -180,8 +215,12 @@ sem0 <- fit_ml_sem(to_wide(d0), k = 4)
 stopifnot(!is.null(sem0))
 # Shipped single-level engine on the same ratings, ignoring cluster.
 sl <- intraclass::icc(
-  d0, score = score, subject = subject, rater = rater,
-  unit = "single", engine = "lavaan"
+  d0,
+  score = score,
+  subject = subject,
+  rater = rater,
+  unit = "single",
+  engine = "lavaan"
 )$estimates
 red_sem <- iccs_from_components(sem0$components, k = 4)
 checkpoint$reduction <- list(
@@ -212,15 +251,27 @@ n_parity <- 25
 recover_cell <- function(cell, cell_name) {
   n_rep <- cell$n_rep
   comp_mat <- matrix(NA_real_, n_rep, 5)
-  colnames(comp_mat) <- c("cluster", "subject", "rater", "cluster_rater", "residual")
+  colnames(comp_mat) <- c(
+    "cluster",
+    "subject",
+    "rater",
+    "cluster_rater",
+    "residual"
+  )
   parity <- matrix(NA_real_, n_parity, 5)
   colnames(parity) <- colnames(comp_mat)
   n_fail <- 0L
   n_heywood <- 0L
   for (r in seq_len(n_rep)) {
     d <- sim_multilevel(
-      cell$n_c, cell$n_s, cell$k,
-      pop2["vc"], pop2["vsc"], pop2["vr"], pop2["vcr"], pop2["vres"],
+      cell$n_c,
+      cell$n_s,
+      cell$k,
+      pop2["vc"],
+      pop2["vsc"],
+      pop2["vr"],
+      pop2["vcr"],
+      pop2["vres"],
       seed = 53000 + 1000 * match(cell_name, names(cells)) + r
     )
     sem <- fit_ml_sem(to_wide(d), cell$k)
@@ -239,7 +290,8 @@ recover_cell <- function(cell, cell_name) {
   list(
     mean_est = colMeans(comp_mat, na.rm = TRUE),
     rel_bias = colMeans(comp_mat, na.rm = TRUE) /
-      c(pop2["vc"], pop2["vsc"], pop2["vr"], pop2["vcr"], pop2["vres"]) - 1,
+      c(pop2["vc"], pop2["vsc"], pop2["vr"], pop2["vcr"], pop2["vres"]) -
+      1,
     mean_abs_parity = colMeans(abs(parity), na.rm = TRUE),
     n_fail = n_fail,
     n_heywood = n_heywood
@@ -247,8 +299,13 @@ recover_cell <- function(cell, cell_name) {
 }
 
 for (nm in names(cells)) {
-  cat(sprintf("Stage 2 cell %s (n_c=%d, n_s=%d, k=%d)...\n",
-              nm, cells[[nm]]$n_c, cells[[nm]]$n_s, cells[[nm]]$k))
+  cat(sprintf(
+    "Stage 2 cell %s (n_c=%d, n_s=%d, k=%d)...\n",
+    nm,
+    cells[[nm]]$n_c,
+    cells[[nm]]$n_s,
+    cells[[nm]]$k
+  ))
   checkpoint[[paste0("cell_", nm)]] <- recover_cell(cells[[nm]], nm)
   print(lapply(checkpoint[[paste0("cell_", nm)]], function(x) round(x, 4)))
 }
@@ -259,26 +316,39 @@ fit <- sem1$fit
 co <- lavaan::coef(fit)
 cn <- names(co)
 k <- 5
-idx <- c(which(cn == "svw")[1], which(cn == "evw")[1],
-         which(cn == "svb")[1], which(cn == "evb")[1], sem1$nu_i)
+idx <- c(
+  which(cn == "svw")[1],
+  which(cn == "evw")[1],
+  which(cn == "svb")[1],
+  which(cn == "evb")[1],
+  sem1$nu_i
+)
 est <- co[idx]
 vc_raw <- as.matrix(lavaan::vcov(fit))[idx, idx]
 # log-SD scale for the four variances (boundary-aware draws back-transform
 # strictly positive, PRINCIPLES.md #3), identity for the intercepts.
-jac <- diag(c(1 / (2 * est[1]), 1 / (2 * est[2]),
-              1 / (2 * est[3]), 1 / (2 * est[4]), rep(1, k)))
+jac <- diag(c(
+  1 / (2 * est[1]),
+  1 / (2 * est[2]),
+  1 / (2 * est[3]),
+  1 / (2 * est[4]),
+  rep(1, k)
+))
 vc_log <- jac %*% vc_raw %*% t(jac)
 est_log <- c(log(sqrt(est[1:4])), est[-(1:4)])
 set.seed(20260718)
 ch <- chol(vc_log)
-draws <- matrix(stats::rnorm(4000 * length(est_log)), 4000) %*% ch +
+draws <- matrix(stats::rnorm(4000 * length(est_log)), 4000) %*%
+  ch +
   matrix(est_log, 4000, length(est_log), byrow = TRUE)
 center <- diag(k) - matrix(1 / k, k, k)
 per_draw <- apply(draws, 1, function(p) {
   compd <- c(
-    cluster = exp(2 * p[3]), subject = exp(2 * p[1]),
+    cluster = exp(2 * p[3]),
+    subject = exp(2 * p[1]),
     rater = as.numeric(t(p[5:9]) %*% center %*% p[5:9]) / (k - 1),
-    cluster_rater = exp(2 * p[4]), residual = exp(2 * p[2])
+    cluster_rater = exp(2 * p[4]),
+    residual = exp(2 * p[2])
   )
   iccs_from_components(compd, k)[c("s_agr_1", "c_agr_1")]
 })
@@ -305,22 +375,35 @@ cat("Checkpoint saved:", ckpt_path, "\n")
 # Stage 1: within components tight; between components budget ML-vs-REML.
 stopifnot(
   abs(sem1$components["subject"] - reml1["subject"]) / reml1["subject"] < 0.02,
-  abs(sem1$components["residual"] - reml1["residual"]) / reml1["residual"] < 0.02,
+  abs(sem1$components["residual"] - reml1["residual"]) / reml1["residual"] <
+    0.02,
   abs(sem1$components["cluster"] - reml1["cluster"]) / reml1["cluster"] < 0.06,
   abs(sem1$components["cluster_rater"] - reml1["cluster_rater"]) /
-    reml1["cluster_rater"] < 0.06,
+    reml1["cluster_rater"] <
+    0.06,
   abs(sem1$components["rater"] - reml1["rater"]) < 0.05
 )
 # Stage 1 ICCs: consistency tight, agreement looser (M49 index-class split).
 stopifnot(
-  all(abs(icc_sem1[c("s_con_1", "s_con_k")] -
-            icc_reml1[c("s_con_1", "s_con_k")]) < 0.01),
+  all(
+    abs(
+      icc_sem1[c("s_con_1", "s_con_k")] -
+        icc_reml1[c("s_con_1", "s_con_k")]
+    ) <
+      0.01
+  ),
   all(abs(icc_sem1 - icc_reml1) < 0.03)
 )
 # Reduction: subject-level two-level ICCs ~= shipped single-level engine.
 stopifnot(
-  abs(checkpoint$reduction$sem_s_agr_1 - checkpoint$reduction$single_level_agr) < 0.02,
-  abs(checkpoint$reduction$sem_s_con_1 - checkpoint$reduction$single_level_con) < 0.02
+  abs(
+    checkpoint$reduction$sem_s_agr_1 - checkpoint$reduction$single_level_agr
+  ) <
+    0.02,
+  abs(
+    checkpoint$reduction$sem_s_con_1 - checkpoint$reduction$single_level_con
+  ) <
+    0.02
 )
 # Stage 2 pins are split per the milestone GP5 correction (2026-07-16):
 # the four cluster/subject-governed components are pinned on the cluster axis
@@ -330,7 +413,9 @@ stopifnot(
 cs_comp <- c("cluster", "subject", "cluster_rater", "residual")
 rater_tol <- function(cell) 3 * sqrt(2 / (cell$k - 1)) / sqrt(cell$n_rep)
 for (nm in c("A", "B")) {
-  stopifnot(all(abs(checkpoint[[paste0("cell_", nm)]]$rel_bias[cs_comp]) < 0.10))
+  stopifnot(all(
+    abs(checkpoint[[paste0("cell_", nm)]]$rel_bias[cs_comp]) < 0.10
+  ))
 }
 stopifnot(
   all(abs(checkpoint$cell_C$rel_bias[cs_comp]) < 0.05),
@@ -345,7 +430,10 @@ for (nm in names(cells)) {
   )
 }
 stopifnot(
-  all(checkpoint$cell_C$mean_abs_parity <= checkpoint$cell_A$mean_abs_parity + 1e-6)
+  all(
+    checkpoint$cell_C$mean_abs_parity <=
+      checkpoint$cell_A$mean_abs_parity + 1e-6
+  )
 )
 # MC probe: finite draws, both intervals contain their point estimates.
 stopifnot(checkpoint$mc_probe$finite, checkpoint$mc_probe$contained)

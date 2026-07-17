@@ -93,11 +93,43 @@ components unchanged.
   (rides the committed ignore pattern), saved before any `stopifnot` pin
   (M47/M52 lessons).
 
-## Results
+## Results (run 2, corrected pins; checkpoint `.oracle-pilot-sem-multilevel-checkpoint.rds`, seeds in-script; 2026-07-16)
 
-_Pending: filled by T5 after the pilot runs._
+- **Stage 1** (N_c=40, n_s=10, k=5): within components identical to REML to
+  4 dp (subject 1.0364, residual .4971); between components within the
+  documented ML-vs-REML budget (cluster .4049 vs .4180; cluster_rater .2049
+  vs .2115; rater .1597 vs .1531). All four **consistency** ICCs identical to
+  4 dp across engines; **agreement** |Δ| ≤ .008 (M49 index-class split
+  confirmed in the multilevel case).
+- **Reduction** (σ²_c = σ²_{cr} = 0, N_c=50, k=4): two-level subject-level
+  ICC(A,1)/(C,1) = .606/.629 vs the shipped single-level lavaan engine's
+  .614/.636 — within the .02 pin.
+- **Recovery** (cells A–D): cluster/subject/cluster_rater/residual rel-bias
+  ≤ .085 small cells, ≤ .011 at N_c=200; rater +.039 at cell D (k=25,
+  tolerance .071) with REML parity ≤ .0088 in every cell — the small-cell
+  rater deviations sign-flip (−.009/−.056/+.099) exactly as the noise-floor
+  analysis predicts. **Zero fit failures in 450 two-level fits**; one Heywood
+  (cell A, N_c=20), matching the documented boundary posture.
+- **Parity shrinks on the cluster axis**: cluster |Δ| .0248 → .0121 → .0025
+  (A→B→C) — the ML-vs-REML gap closes as it must if the two routes estimate
+  the same decomposition.
+- **MC probe**: 4000 log-SD-scale draws off the two-level `vcov`, all finite;
+  95% intervals s_agr_1 [.562, .655] and c_agr_1 [.365, .678] contain their
+  point estimates (.612, .526). The existing delta/log-SD MC machinery ports
+  unchanged; the between intercepts feed the σ²_r quadratic form per draw as
+  in the single-level engine.
 
 ## Go/no-go
 
-_Pending: recorded by T5; systematic disagreement beyond the documented
-ML-vs-REML deltas is a no-go finding, never a tolerance to widen (GP5/D-005)._
+**GO** (2026-07-16). The two-level CFA is numerically established as an
+estimation-route parameterization of the ten Hove (2022) Design-1
+decomposition (D-005): component-level REML parity within the documented
+ML-vs-REML budget and shrinking with N_c, exact consistency-ICC agreement,
+clean reduction to the shipped single-level engine, unbiased recovery on
+every component's own axis, and a feasible boundary-aware MC interval at both
+levels. Implementation notes for the engine milestone: (a) lavaan two-level
+is ML-only — document the small-sample REML delta as the M7/M49 posture
+already does; (b) between-level Heywood incidence at few clusters → the
+existing `intraclass_singular_fit` abort toward glmmTMB; (c) parity test
+tolerances must split by index class (consistency tight, agreement
+asymptotic) and budget the ML/REML gap at small N_c.
