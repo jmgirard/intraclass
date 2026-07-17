@@ -6,7 +6,7 @@
 - **Priority:** normal
 - **Depends on:** —
 - **Principles touched:** GP5, GP6, GP7
-- **Branch/PR:** m60-freeze-lavaan-recovery
+- **Branch/PR:** m60-freeze-lavaan-recovery · https://github.com/jmgirard/intraclass/pull/64
 
 ## Goal
 
@@ -52,27 +52,27 @@ frozen pin so no discriminating power is lost.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `data-raw/oracle-sem-multilevel-recovery.R` exists, is standalone
+- [x] AC1 — `data-raw/oracle-sem-multilevel-recovery.R` exists, is standalone
       (`Rscript data-raw/...`), seeded and reproducible, has a provenance header
       citing D-005 + ten Hove et al. 2022, and writes
       `fixtures/sem-multilevel-recovery-oracle.rds`; a re-run reproduces the
       committed summary values. (evidence: run it, diff the `.rds` summary)
-- [ ] AC2 — `O-SEM-ML/recovery` reads the fixture and asserts the same Cell B /
+- [x] AC2 — `O-SEM-ML/recovery` reads the fixture and asserts the same Cell B /
       Cell D pins at byte-identical target values and tolerances as the current
       test; the 100 live refits are gone from the test path. (evidence: passing
       test + diff showing targets/tolerances unchanged, refit loops removed)
-- [ ] AC3 — `test-icc-lavaan-multilevel.R` SERIAL time drops materially — no
+- [x] AC3 — `test-icc-lavaan-multilevel.R` SERIAL time drops materially — no
       longer dominated by the recovery sweep (target: ~137s → its non-recovery
       remainder ~30–45s, i.e. no longer the suite tail). Measured serially per
       the M59 lesson. (evidence: `test_file` serial timing before/after)
-- [ ] AC4 — Cell B's live pair `O-SEM-ML/parity` is MUTATION-VERIFIED to go red
+- [x] AC4 — Cell B's live pair `O-SEM-ML/parity` is MUTATION-VERIFIED to go red
       under a representative lavaan component-bias mutation (patch source →
       `load_all` → run → revert). (evidence: mutation log — guard red)
-- [ ] AC5 — Cell D ships EITHER a small live `tau^2`-invariant guard
+- [x] AC5 — Cell D ships EITHER a small live `tau^2`-invariant guard
       mutation-verified red, OR (if no cheap discriminating guard survives) its
       sweep stays live — the file records which (leave-live gate decision).
       (evidence: mutation log, or the retained live Cell-D sweep + rationale)
-- [ ] AC6 — Full suite green under `NOT_CRAN=true CI=true` (FAIL 0), the profile
+- [x] AC6 — Full suite green under `NOT_CRAN=true CI=true` (FAIL 0), the profile
       verify slot clean, `air format --check .` clean incl. the new `data-raw`
       script (M59), lintr clean. (evidence: test summary + check/lint output)
 
@@ -141,3 +141,49 @@ frozen pin so no discriminating power is lost.
 ## Decisions
 
 ## Review
+
+**Reviewed 2026-07-17 · PR #64 · branch m60-freeze-lavaan-recovery**
+
+### Acceptance-criteria evidence (fresh)
+
+- **AC1 ✓** — `data-raw/oracle-sem-multilevel-recovery.R` runs standalone
+  (`Rscript`), clean exit; provenance header cites D-005 + ten Hove 2022 +
+  pilot ledger, records pop/geometry/seeds/n_rep/versions; writes
+  `fixtures/sem-multilevel-recovery-oracle.rds`. Re-run reproduces the committed
+  values **exactly** (Cell B/D max abs diff 0; `all.equal` TRUE).
+- **AC2 ✓** — `O-SEM-ML/recovery` now reads the fixture via `test_path()` and
+  asserts the identical pins (Cell B 4-comp rel-bias < .10; Cell D rater-vs-infl
+  < tol; tau^2-invariant < .005). Targets/tolerances match the generator, which
+  lifted the loops verbatim (GP5). The 60+40 live `icc(... engine="lavaan")`
+  refit loops are gone from the test path. Passes.
+- **AC3 ✓** — file serial `test_file` time 137.2s → 63.8s (−73s / −53%);
+  measured serially (M59 lesson). Residual is the out-of-scope B=99 bootstrap
+  tests, not the recovery sweep.
+- **AC4 ✓** — mutation `svw → svw*1.1` at engine-lavaan.R:441 → `O-SEM-ML/parity`
+  subject rel-delta .10 ≥ .02 tol → RED; source reverted clean.
+- **AC5 ✓** — mutation `/(k-1) → /k` at engine-lavaan.R:437 → `O-SEM-ML/
+  tau2-invariant` |mean−tau^2| .0247 ≥ .004 tol → RED; reverted clean. Both
+  cells cleared the bar — **no leave-live fallback triggered.**
+- **AC6 ✓** — full suite `NOT_CRAN=true CI=true`: **FAIL 0 | WARN 2 | SKIP 23 |
+  PASS 1725** (Duration 177.6s; +1 test vs M59's 1724 = the new guard; the 2
+  WARN are pre-existing Heywood/boundary assert-warning tests). `air format
+  --check .` clean; `lintr` clean on both changed files; `data-raw` already
+  `.Rbuildignore`d, fixture ships under `tests/`.
+
+### Consistency gate
+
+- `cairn_validate` — all checks passed (290 advisories = pre-existing legacy-id
+  citations, not gate failures; none reference M60).
+- `devtools::document()` — no diff (no roxygen/Rd/NAMESPACE change).
+- NEWS / README / pkgdown — no-op: M60 changes no user-visible behavior, adds no
+  exports, touches no README.
+- Full R CMD check — delegated to PR #64 cross-platform CI (local `check()` is
+  documented to flake here on the Courier PDF-manual font + the brms live
+  suite); gated on CI-green at merge.
+
+### Independent three-lens review
+
+_(in progress)_ Lens 3 (prior-PR-comments): **no prior-PR evidence** — the
+merged PRs touching these files (#59/#60/#62) carry only Codecov bot comments,
+no human review points; zero findings. Lenses 1 (diff-bug, Opus) and 2
+(blame-history, Sonnet) still running; scorer + triage to follow.
