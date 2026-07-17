@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-17 (M59 shipped + archived — test-suite parallelism + structural bootstrap right-sizing, PR #63; M52 rotated out under terminal-row retention, M56 now flagged; M57/M58 siblings + lever-b fixture-freeze + plotting-polish candidates remain)_
+_Last hygiene check: 2026-07-17 (M60 planned — freeze the lavaan multilevel recovery sweep; promotes the lever-b candidate off the board; M57/M58 siblings + plotting-polish candidates remain)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,6 +12,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55 | high | milestones/M48-release-v010.md |
 | M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | planned | — | normal | milestones/M57-lavaan-multilevel-fixed.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | planned | — | normal | milestones/M58-lavaan-multilevel-incomplete.md |
+| M60 | Freeze the lavaan multilevel recovery sweep | planned | — | normal | milestones/M60-freeze-lavaan-recovery.md |
 | M59 | Test-suite speed — rigor-invariant levers | done | — | normal | milestones/archive/M59-test-suite-speed.md |
 | M56 | Multilevel SEM (lavaan) — parametric bootstrap CI | done | — | normal | milestones/archive/M56-lavaan-multilevel-bootstrap.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
@@ -27,6 +28,5 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 - Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator). Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
 - Incomplete/unbalanced fixed-rater **subject**-level multilevel lavaan — the SEM sibling that compounds two-level FIML with the Case-3A fixed correction; low priority, promote only on a concrete need. Split off from the lavaan-multilevel-siblings candidate at the M56–M58 plan gate (2026-07-17); the fixed **cluster** level stays double-blocked (parking-lot candidate above). Lineage: ADR-027 → M53 GO (D-005) → M54 → M56–M58
 - Plotting polish — beautify and improve the plotting methods (`R/autoplot.R`: `autoplot.icc` coefficient/component views, `autoplot.icc_dstudy` reliability curves, and their `plot()` wrappers): visual design, labeling/theming, and possible new views (e.g. level-faceted multilevel displays). ggplot2 stays in Suggests (ADR-010 light-install). Added conversationally 2026-07-17
-- Freeze live coverage/recovery sweeps to fixtures (lever b of the former test-suite-speed audit) — freeze the live `n_rep` lavaan-refit recovery loops and the d-study coverage sims into committed `.rds` fixtures (data-raw generator + provenance; extends the M47/M52 checkpoint pattern). Split off from M59 at the plan gate (2026-07-17) as the rigor-sensitive lever: per M51 a frozen coverage fixture can't go red under a live simplification, so each frozen sweep needs a paired live deterministic unit test to preserve its discriminating power. Promote only with that per-pin argument. Lineage: test-suite-speed-audit candidate → M59 (safe levers a/c/d/e)
 - lavaan + within-cell replicates — the SEM engine on replicated (σ²_sr/σ²_e-split) data. Niche, low value: would need both a lavaan replicate parameterization and the M20 replicate machinery to intersect. Promote only if a concrete need appears. Reclassified from M21 (ADR-027); promoted from the parking lot 2026-07-13 — cairn/legacy/ROADMAP.md
 - d_study() CI-width precision planning ("how many subjects for a ±.1-wide interval?") — scope boundary resolved by the design interview (2026-07-12): a legitimate future direction, **gated on finding an oracle strategy**; subject-count-for-power as such stays out of scope (`M4.5-d-study.md` §6; DESIGN.md contract boundary) — cairn/estimand-specs/M4.5-d-study.md
