@@ -347,7 +347,13 @@ Multilevel support now covers **random** raters on the crossed design
 cluster level — both the single-rater `ICC(c,1)` and the averaged
 `ICC(c,k)`, across all three engines (`glmmTMB`, `lme4`, `brms`); and
 the nested designs (Designs 2 and 3, subject level), complete **or
-incomplete**. **Fixed** raters are supported at the subject level on the
+incomplete**. The structural-equation `lavaan` engine joins them on the
+crossed design for **complete, balanced** data with equal cluster sizes:
+a two-level SEM estimates the same five-component decomposition and
+reports both levels (see the [engines
+vignette](https://jmgirard.github.io/intraclass/articles/engines.md) for
+how its estimator differs from the mixed-model one at small cluster
+counts). **Fixed** raters are supported at the subject level on the
 crossed design (complete **and** incomplete), at the **cluster** level
 on the crossed design (complete data), and, on complete data, the nested
 Design 2. What remains open: incomplete *fixed-rater cluster-level*

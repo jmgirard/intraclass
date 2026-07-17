@@ -126,8 +126,16 @@ comparable to that literature. The SEM engine covers the random **and
 fixed-rater** two-way design, on complete **and incomplete**
 ([FIML](https://jmgirard.github.io/intraclass/articles/glossary.html#fiml))
 data — the parametric bootstrap is available on complete data,
-Monte-Carlo throughout. One-way and multilevel designs are still
-directed to the mixed-model engines.
+Monte-Carlo throughout — and the crossed (Design 1) **multilevel**
+design as a two-level SEM (random raters on complete, balanced data with
+equal cluster sizes; Monte-Carlo interval), reporting the subject- and
+cluster-level ICCs off one five-component fit. Two-level SEM estimation
+is full-information ML with no REML analog, so with few clusters its
+cluster-level components sit slightly below the REML estimates and its
+agreement rater term slightly above — both documented differences that
+shrink as the cluster count grows, while consistency ICCs agree
+essentially exactly. One-way designs are still directed to the
+mixed-model engines.
 
 ## A Bayesian engine (`brms`)
 

@@ -395,11 +395,16 @@ the subject level and the cluster level — both the single-rater
 <code>ICC(c,1)</code> and the averaged <code>ICC(c,k)</code>, across all
 three engines (<code>glmmTMB</code>, <code>lme4</code>,
 <code>brms</code>); and the nested designs (Designs 2 and 3, subject
-level), complete <strong>or incomplete</strong>. <strong>Fixed</strong>
-raters are supported at the subject level on the crossed design
-(complete <strong>and</strong> incomplete), at the
-<strong>cluster</strong> level on the crossed design (complete data),
-and, on complete data, the nested Design 2. What remains open:
+level), complete <strong>or incomplete</strong>. The structural-equation
+<code>lavaan</code> engine joins them on the crossed design for
+<strong>complete, balanced</strong> data with equal cluster sizes: a
+two-level SEM estimates the same five-component decomposition and
+reports both levels (see the <a href="engines.html">engines vignette</a>
+for how its estimator differs from the mixed-model one at small cluster
+counts). <strong>Fixed</strong> raters are supported at the subject
+level on the crossed design (complete <strong>and</strong> incomplete),
+at the <strong>cluster</strong> level on the crossed design (complete
+data), and, on complete data, the nested Design 2. What remains open:
 incomplete <em>fixed-rater cluster-level</em> estimation. Design 3
 reports no fixed-rater or cluster-level coefficient by construction —
 with raters nested in subjects there is no separable rater effect to

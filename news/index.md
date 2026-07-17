@@ -34,6 +34,18 @@
 
 ### Minor improvements
 
+- The `lavaan` (SEM) engine now fits the **crossed (Design 1)
+  multilevel** design: `icc(..., engine = "lavaan", cluster = ...)`
+  estimates the five-component decomposition (cluster,
+  subject-in-cluster, rater, cluster-by-rater, residual) via a two-level
+  structural-equation model and reports the subject- and cluster-level
+  ICCs (plus the conflated diagnostic) with the Monte-Carlo interval.
+  Complete, balanced data with equal cluster sizes and random raters;
+  cross-validated against the REML mixed-model engines (consistency ICCs
+  agree essentially exactly; the documented ML-vs-REML and rater-mean
+  small-sample differences shrink as clusters grow). Fixed raters,
+  nested designs, incomplete/unbalanced data, and the bootstrap for this
+  design remain loud, classed refusals.
 - `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
 - The conflated diagnostic (`level = "conflated"`) now also reports a
   **consistency** form (`type = "consistency"`), not just absolute
