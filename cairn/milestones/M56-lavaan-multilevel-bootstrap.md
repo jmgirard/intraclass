@@ -40,9 +40,17 @@ adds the opt-in bootstrap.
 - [x] AC1: `icc(..., engine = "lavaan", cluster, ci_method = "bootstrap")` on a
       seeded balanced Design-1 dataset returns finite bootstrap intervals at
       both the subject and cluster levels, each containing its point estimate
-      and bounded by 1 — and its endpoints agree with the default Monte-Carlo
-      interval within a documented Monte-Carlo tolerance (cross-method oracle;
-      single-level M21 / ADR-031 bootstrap pattern).
+      and bounded by 1 (structural sanity, both levels); and at the **subject**
+      level its endpoints agree with the default Monte-Carlo interval within a
+      documented tolerance (cross-method oracle; single-level M21 / ADR-031
+      pattern). The cluster level's cross-method CI agreement is not pinned — it
+      is the wide, few-cluster, ML-shrunk level whose MC-vs-bootstrap tail
+      agreement is platform-sensitive (lavaan's two-level optimizer is
+      BLAS/OS-dependent); the cluster-level bootstrap's faithfulness rests on the
+      shared refit machinery (subject-validated) and the M54 glmmTMB parity
+      oracle. (Amended at review 2026-07-17 — gate: the original "both levels
+      agree" pin flaked on Windows at rel .326 > .30, a platform-numeric artifact
+      not a code bug.)
 - [x] AC2: a seeded fixture drives ≥1 refit to a between-level Heywood /
       non-convergence; that resample is NA-filled and dropped by the
       `bootstrap_ci()` discard policy, and the reported interval is formed from
@@ -110,6 +118,15 @@ adds the opt-in bootstrap.
   .04), boot_samples 299 → 599 to stabilize the tail quantiles (GP5 — size the
   pin to the noise floor, not lower the bar). Re-verified locally (14/14);
   status → review, re-driving CI.
+- 2026-07-17: the relative-.30 cluster pin ALSO flaked on Windows (rel .326) —
+  the cluster-level MC↔bootstrap tail agreement is not a portable oracle at the
+  wide, few-cluster, ML-shrunk level. **AC1 amended via gate (user, option A):**
+  cross-method endpoint agreement pinned at the SUBJECT level only; structural
+  sanity + point-containment kept at BOTH levels; cluster faithfulness rests on
+  the shared refit machinery (subject-validated) + M54 glmmTMB parity. Test:
+  dropped the cluster cross-method pin, boot_samples → 299 (subject pin passed
+  there on every platform; faster). Code unchanged since the three-lens review —
+  it stands. Re-verified locally (13/13); status → review, re-driving CI.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -121,11 +138,14 @@ adds the opt-in bootstrap.
 
 ### Acceptance-criteria evidence (fresh)
 
-- **AC1** — `test-icc-lavaan-multilevel.R` "multilevel lavaan bootstrap agrees
-  with the Monte-Carlo interval": 5/5 pass. Endpoint |Δ| vs the 4000-draw MC
-  interval (n=40/10/5): subject ≤ .01, cluster ≤ .016 — inside the pinned .04 /
-  .07 index-class-split tolerances; all endpoints finite, estimate contained,
-  ≤ 1.
+- **AC1 (amended)** — `test-icc-lavaan-multilevel.R` "multilevel lavaan
+  bootstrap agrees with the Monte-Carlo interval": 4/4 pass. Structural sanity
+  at BOTH levels (finite, estimate contained, ≤ 1); SUBJECT-level cross-method
+  endpoint |Δ| vs the 4000-draw MC interval ≤ .01, inside the tight .04 pin. The
+  cluster-level cross-method pin was removed at the review gate (platform-numeric
+  artifact: Windows reached rel .326 of the interval width); cluster faithfulness
+  rests on the shared refit factory (subject-validated) + the M54 glmmTMB parity
+  oracle. See the AC1 amendment work-log entry (2026-07-17).
 - **AC2** — "the two-level bootstrap refit NA-fills failed/Heywood resamples":
   6/6 pass. Direct factory fixture (svb=1e-3, 8 clusters): 14 finite / 26
   fully-NA columns; NA pattern ∈ {0, k+2} confirms a dropped resample is
