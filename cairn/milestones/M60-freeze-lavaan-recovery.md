@@ -2,7 +2,7 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M60: Freeze the lavaan multilevel recovery sweep
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Principles touched:** GP5, GP6, GP7
@@ -104,12 +104,21 @@ frozen pin so no discriminating power is lost.
       guard, hand-anchored so the correct value differs from the plausible
       simplification (M51); mutation-verify red. If none survives, leave Cell D
       live and record the finding (gate decision).
-- [ ] T5 — Green-gate: `NOT_CRAN=true CI=true` full suite FAIL 0, verify slot
+- [x] T5 — Green-gate: `NOT_CRAN=true CI=true` full suite FAIL 0, verify slot
       clean, `air format --check .` clean incl. `data-raw`, lintr clean; update
       the work log.
 
 ## Work log
 
+- 2026-07-17 (T5): green-gate `NOT_CRAN=true CI=true` full suite **FAIL 0 |
+  WARN 2 | SKIP 23 | PASS 1725** (Duration 177.6s; +1 test = the new
+  tau2-invariant guard; the 2 WARN are the pre-existing Heywood/boundary
+  assert-warning tests, not introduced here). air format --check + lintr clean;
+  `data-raw` already `.Rbuildignore`d, fixture ships under `tests/`. Status →
+  review. NOTE for review: at 63.8s the lavaan file is no longer the tail —
+  ci-bootstrap (~114s serial, M59) now leads `start-first`; a one-line reorder
+  would realize the parallel gain but is M59/parallel-config scope (plan kept it
+  out) — flag as a possible follow-up, not done here.
 - 2026-07-17 (T2-T4): rewrote `O-SEM-ML/recovery` to read the fixture (same
   pins/targets/tolerances, GP5); added the live `O-SEM-ML/tau2-invariant` guard
   (k=6, n_rep=3 — per-rep parity within .0015 of tau^2, |mean-tau^2| ~1e-4 vs
