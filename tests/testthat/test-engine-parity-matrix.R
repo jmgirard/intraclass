@@ -190,7 +190,7 @@ pm_cells <- list(
     na = list()
   ),
   list(
-    name = "multilevel crossed fixed, subject level (M27)",
+    name = "multilevel crossed fixed, both levels (M27 / M37)",
     fit = function(e) {
       icc(
         pm_ml,
@@ -203,9 +203,11 @@ pm_cells <- list(
         seed = 1
       )
     },
-    agree = list(lme4 = 1e-3),
-    # lavaan: fixed-rater multilevel SEM is deferred (M54 Out -> siblings).
-    na = list(lavaan = "intraclass_unsupported")
+    # lavaan (M57): fixed-rater two-level SEM at both levels via the Case-3A
+    # between-intercept correction, ML-only -- same small-sample A/C budget as
+    # the M5 random cell on pm_ml (observed max |delta| .016 A / .0017 C).
+    agree = list(lme4 = 1e-3, lavaan = c(A = 4e-2, C = 5e-3)),
+    na = list()
   ),
   list(
     name = "multilevel nested (Design 2) random, subject level (M8)",

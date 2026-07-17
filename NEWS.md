@@ -35,8 +35,21 @@
   cross-validated against the REML mixed-model engines (consistency ICCs agree
   essentially exactly; the documented ML-vs-REML and rater-mean small-sample
   differences shrink as clusters grow), and the bootstrap interval agrees with
-  the Monte-Carlo interval within Monte-Carlo tolerance. Fixed raters, nested
-  designs, and incomplete/unbalanced data remain loud, classed refusals.
+  the Monte-Carlo interval within Monte-Carlo tolerance. Nested designs and
+  incomplete/unbalanced data remain loud, classed refusals.
+* The `lavaan` (SEM) engine now also fits the crossed (Design 1) multilevel
+  design with **fixed raters** (`raters = "fixed"`) at both the subject and
+  cluster levels, on complete, balanced data with equal cluster sizes. The rater
+  term is the McGraw & Wong Case-3A finite-population variance read from the
+  between-level rater intercepts; cross-validated against the `glmmTMB`
+  fixed-rater multilevel fits (agreement asymptotic under the ML-vs-REML gap,
+  consistency identical to the random-rater fit). Because lavaan's random-rater
+  estimate is the raw quadratic form, the fixed-rater ICC differs from the
+  random-rater one by the finite-population correction, which the REML mixed-model
+  engines do not carry into their random estimate. Monte-Carlo interval only — the
+  fixed-rater parametric bootstrap is not yet available. Fixed-rater nested,
+  within-cell-replicate, and incomplete/unbalanced multilevel SEM remain loud,
+  classed refusals.
 * `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
 * The conflated diagnostic (`level = "conflated"`) now also reports a **consistency**
   form (`type = "consistency"`), not just absolute agreement. It is the flat two-way
