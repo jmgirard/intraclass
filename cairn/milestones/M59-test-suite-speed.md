@@ -103,7 +103,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 - [x] T4: Dedupe repeated refits in the three fat files — hoist shared pilot-
       geometry / base-model fits into file-top or block-local fixtures reused
       across blocks. Re-measure.
-- [ ] T5: Audit `skip_on_cran` / `skip_on_ci` gating across the heavy blocks;
+- [x] T5: Audit `skip_on_cran` / `skip_on_ci` gating across the heavy blocks;
       assemble the gating matrix (block → runs-on) for AC6.
 - [ ] T6: Assemble the GP5 noise-floor table (AC3) and the GP6 failure-axis-
       unchanged evidence (AC4); run the AC5 spot mutation-checks (≥1 per fat
@@ -152,6 +152,22 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   Freezing those is the out-of-scope lever (b) candidate. Skipped the lavaan-ml
   3× pilot-fit dedup: ~1–2 s gain not worth coupling three independent oracle
   blocks through one shared fixture, and it doesn't move the parallel tail.
+- 2026-07-17 (T5): skip-gating audit — no anomaly, no code change. Gating
+  matrix (block class → environment it runs in):
+  * Live-Stan brms fits (test-icc-brms.R, 23 blocks): `skip_on_cran` +
+    `skip_on_ci` ⇒ run ONLY local-with-Stan (`NOT_CRAN=true`, `CI` unset). The
+    CI-mode run skipped exactly 23 "On CI" with 0 brms failures (no live fit
+    leaked onto a Stan-less runner).
+  * brms fixture comparisons (~committed `.rds`): `skip_if_not_installed` only ⇒
+    run wherever brms is installed (fast, no MCMC).
+  * Heavy bootstrap-refit + recovery sweeps (ci-bootstrap 12 real-refit blocks;
+    lavaan-ml recovery `@208` n_rep=60/40 + 3 bootstrap blocks; d-study 4
+    bootstrap-band blocks): `skip_on_cran` ⇒ run dev/CI (`NOT_CRAN=true`), not
+    CRAN. Verified every real-refit block is gated; the ungated boot blocks are
+    cheap (abort path, input validation, fake-refit discard factory).
+  * Light single-fit correctness oracles (parity/reduction/aborts; d-study O-sim
+    single-fit recoveries): ungated ⇒ run on CRAN by design (catch platform
+    issues cheaply). No heavy block runs on CRAN; nothing is skipped everywhere.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
