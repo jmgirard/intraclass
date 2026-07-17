@@ -136,3 +136,23 @@ adds the opt-in bootstrap.
 - NEWS.md: the M54 multilevel-lavaan bullet amended to record the shipped
   bootstrap (no milestone numbers in user-facing text).
 - Full R CMD check delegated to the PR CI matrix (the merge gate).
+
+### Three-lens fresh-context review — zero findings
+
+- **[O] diff-bug (Opus):** no findings. Verified the two-level generating
+  covariance (between = svb·11'+diag(evb) @ μ=ν; within = svw·11'+diag(evw) @
+  μ=0), the refit uses the identical shared model string + options, the
+  fully-NA discard contract (no partial-NA/wrong-length path), cluster
+  broadcasting alignment, `with_rng_seed` hygiene, and reader↔inline-point-path
+  agreement; no collateral breakage of the single-level or MC paths.
+- **[S] blame-history (Sonnet):** no findings. M56 properly *supersedes* the
+  M54 `simulate_refit = NULL` deferral — whose stated reason was "unestablished"
+  (D-005's establish-by-oracle-first) — by supplying the O-SEM-ML-BOOT
+  cross-method oracle (stronger than the single-level M21 precedent's
+  structural-only checks); the removed test assertion is legitimately obsolete
+  (it locked the now-supported cell); the refactor leaves the M54 point path
+  byte-identical.
+- **[S] prior-PR-comments (Sonnet):** no prior-PR evidence — the merged PRs
+  touching these files carry only codecov-bot comments, no human review points.
+
+Scorer not invoked (empty findings list). No fixes, follow-ups, or rejections.
