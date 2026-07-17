@@ -7,7 +7,7 @@
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M53 is done -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m54-lavaan-multilevel-engine   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m54-lavaan-multilevel-engine · https://github.com/jmgirard/intraclass/pull/60   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
@@ -132,21 +132,8 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
 - 2026-07-16: T1 done — oracle test file written (pilot-traced pins; MC/
   conflated pins to be calibration-sized in T2/T4), all paths fail on the
   current blanket abort as expected.
-- 2026-07-16: T2–T5 done — engine + dispatch in; full oracle file green incl.
-  recovery + the τ² GP7 pin; print snapshot reproduces the pilot Stage-1
-  numbers exactly. Notables: at a true-zero cluster variance the shipped
-  engine (unlike the pilot's raw extraction) Heywood-aborts ~half of seeds by
-  design (D-004) — reduction test re-seeded (20260724), abort seed (20260718)
-  became the Heywood fixture with glmmTMB-at-0 boundary evidence; MC agreement
-  lower-endpoint deltas (≤.095) match the shipped single-level engine's
-  signature (~.12 benchmark) — an inherited engine property, pins sized
-  accordingly; d_study() works unchanged off the new contract (smoke-tested).
-- 2026-07-16: T6+T7 done — two stale refusal pins updated (one-way-only
-  refusal in test-icc-lavaan.R; conflated-lavaan cell in test-icc-multilevel.R
-  now ships), parity-matrix M5 cell flipped (calibrated c(A=4e-2, C=5e-3) at
-  N_c=15); full suite green loaded (1712/0/0, NOT_CRAN) AND against the
-  installed package (1712/0/0, NOT_CRAN+CI); lint_package 0; air check clean;
-  roxygen/NEWS/vignettes updated. Status → review.
+- 2026-07-16: T2–T5 done — engine + dispatch in; oracle file green incl. the τ² GP7 pin; snapshot reproduces the pilot Stage-1 numbers (Heywood re-seed + MC-pin sizing rationale in the test-file comments).
+- 2026-07-16: T6+T7 done — two stale refusal pins updated, parity-matrix M5 cell flipped (calibrated), suite green loaded and installed (1712 pass, 0 fail), lint 0, docs updated; status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
