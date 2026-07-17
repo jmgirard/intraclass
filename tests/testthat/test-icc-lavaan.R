@@ -251,24 +251,15 @@ test_that("lavaan aborts loudly on a degenerate (boundary) fit (#5/#8)", {
   )
 })
 
-test_that("lavaan is refused for one-way and multilevel designs", {
+test_that("lavaan is refused for one-way designs", {
   skip_if_not_installed("lavaan")
 
-  # (Fixed raters and incomplete/FIML data are now supported -- M21 Slices 2/3.)
+  # (Fixed raters and incomplete/FIML data are now supported -- M21 Slices
+  # 2/3 -- and the crossed multilevel design since M54; its scope guards are
+  # pinned in test-icc-lavaan-multilevel.R. One-way stays out, ADR-014.)
   d <- sf_ratings_long()
   expect_error(
     icc(d, score, subject, rater, model = "oneway", engine = "lavaan"),
-    class = "intraclass_unsupported"
-  )
-
-  ml <- expand.grid(
-    subject = factor(1:4),
-    rater = factor(1:3),
-    cluster = factor(1:2)
-  )
-  ml$score <- as.numeric(ml$subject) + as.numeric(ml$rater) + rnorm(nrow(ml))
-  expect_error(
-    icc(ml, score, subject, rater, cluster = cluster, engine = "lavaan"),
     class = "intraclass_unsupported"
   )
 })

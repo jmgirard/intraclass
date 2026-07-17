@@ -898,21 +898,9 @@ test_that("still-out conflated cells stay refused for consistency too (M45 AC6)"
     ),
     class = "intraclass_unsupported"
   )
-  # lavaan is single-level only -- no multilevel (hence no conflated) SEM path.
-  skip_if_not_installed("lavaan")
-  expect_error(
-    icc(
-      d1,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      level = "conflated",
-      type = "consistency",
-      engine = "lavaan"
-    ),
-    class = "intraclass_unsupported"
-  )
+  # (The lavaan conflated cell ships since M54 -- the crossed multilevel SEM
+  # serves Eq. 14 off the same five-component fit; parity-pinned in
+  # test-icc-lavaan-multilevel.R.)
 })
 
 # Oracle O-MLRep: multilevel within-cell replicates (M20 Slice 2, ADR-030) --------

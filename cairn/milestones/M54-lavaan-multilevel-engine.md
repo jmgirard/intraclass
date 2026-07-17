@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M54: Multilevel SEM (lavaan) — engine implementation
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M53 is done -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -118,9 +118,9 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
       deterministic check, not a coverage sim).
 - [x] T5: seeded recovery cells (reuse pilot geometries, e.g. N_c=40/k=5 and
       the tight-k N_c=30/k=25 cell), `skip_on_cran`, noise-floor-sized pins.
-- [ ] T6: flip the parity-matrix cells; verify installed package with
+- [x] T6: flip the parity-matrix cells; verify installed package with
       `NOT_CRAN=true`; `lintr::lint_package()`.
-- [ ] T7: docs — engine-header τ² block, `@param engine` roxygen, NEWS,
+- [x] T7: docs — engine-header τ² block, `@param engine` roxygen, NEWS,
       vignette sections; `devtools::document()`.
 
 ## Work log
@@ -141,6 +141,12 @@ M53 (D-005; pilot ledger `cairn/references/sem-multilevel-pilot.md`).
   lower-endpoint deltas (≤.095) match the shipped single-level engine's
   signature (~.12 benchmark) — an inherited engine property, pins sized
   accordingly; d_study() works unchanged off the new contract (smoke-tested).
+- 2026-07-16: T6+T7 done — two stale refusal pins updated (one-way-only
+  refusal in test-icc-lavaan.R; conflated-lavaan cell in test-icc-multilevel.R
+  now ships), parity-matrix M5 cell flipped (calibrated c(A=4e-2, C=5e-3) at
+  N_c=15); full suite green loaded (1712/0/0, NOT_CRAN) AND against the
+  installed package (1712/0/0, NOT_CRAN+CI); lint_package 0; air check clean;
+  roxygen/NEWS/vignettes updated. Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

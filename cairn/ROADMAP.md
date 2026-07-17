@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54 | high | milestones/M48-release-v010.md |
-| M54 | Multilevel SEM (lavaan) — engine implementation | in-progress | — | high | milestones/M54-lavaan-multilevel-engine.md |
+| M54 | Multilevel SEM (lavaan) — engine implementation | review | — | high | milestones/M54-lavaan-multilevel-engine.md |
 | M53 | Multilevel SEM (lavaan) — estimand/oracle pass | done | — | high | milestones/archive/M53-multilevel-sem-pass.md |
 | M52 | brms/Stan verification hardening | done | — | normal | milestones/archive/M52-brms-verification-hardening.md |
 | M49 | Standing cross-engine parity matrix | done | — | high | milestones/archive/M49-parity-matrix.md |
