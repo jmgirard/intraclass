@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-13 (M51 shipped, archived; M48 release workable next; two lavaan items promoted out of the parking lot to candidate rows)_
+_Last hygiene check: 2026-07-16 (scaffold repaired: backfilled PROFILE.md (r-package), added .merge-approved.pending gitignore entry, fixed references INDEX line; M48 release workable next)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 

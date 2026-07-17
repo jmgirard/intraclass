@@ -3,7 +3,7 @@
 One line per source summary in this directory. Cite `citekey (p. N)` from tests
 and milestones; never restate a value here.
 
-- [`REFERENCES.md`](REFERENCES.md) — the repo's bibliography **and oracle
+- [REFERENCES.md](REFERENCES.md) — the repo's bibliography **and oracle
   registry** (migrated from `project/REFERENCES.md`): every oracle value in the
   test suite traces to an entry here with provenance (a citation or a committed,
   seeded script). Primary sources include ten Hove, Jorgensen & van der Ark (2022)
