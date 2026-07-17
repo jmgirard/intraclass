@@ -112,9 +112,24 @@ stays 🔴 blocked (ADR-014), untouched.
 - 2026-07-16: T2 done — synthesis note drafted (mapping + constraints + pilot
   design; results pending) at cairn/references/sem-multilevel-pilot.md, INDEX
   line added.
+- 2026-07-16: pilot run 1 — Stage 1/reduction/MC-probe pins all hold; one
+  Stage-2 pin failed (rater rel-bias +.0995 vs .05 at N_c=200) → diagnosed as
+  a mis-set pin (k-governed noise, parity .001), GP5 correction recorded in
+  Decisions; pins split + k=25 cell D added; re-run launched.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- 2026-07-16 (implement, GP5): the Stage-2 `.05` rel-bias pin at N_c=200 was
+  mis-set for the rater component — σ²_r's sampling noise is governed by k
+  (df = k−1), not N_c: at k=5, n_rep=100 the mean's rel SE is √(2/4)/10 ≈ .071,
+  so a .05 pin was a ~1.4σ coin flip (observed +.0995 with SEM↔REML parity
+  .001 — shared sampling noise, sign-flipping across cells, not an SEM
+  artifact). Corrected prospectively before any re-run: rater pins split from
+  the four cluster/subject-governed components — (a) per-rep REML-parity pins
+  (the D-005 faithfulness quantity) and (b) a noise-floor-derived 3σ bias
+  tolerance stated in-script; plus a new k=25 cell sweeping σ²_r's own axis
+  (GP6). Failed-run checkpoint preserved in the synthesis-note ledger.
 
 ## Review
 <!-- owner: review · exclusive -->

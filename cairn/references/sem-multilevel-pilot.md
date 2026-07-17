@@ -71,10 +71,19 @@ components unchanged.
   reduction check: data with σ²_c = σ²_{cr} = 0 (many clusters) → two-level
   subject-level ICCs vs the shipped single-level lavaan engine on the same
   ratings ignoring cluster.
-- **Stage 2 (T4):** known-population recovery, 3 cells sweeping the cluster
-  axis (GP6): (N_c=20, n_s=10, k=3), (N_c=40, n_s=10, k=5),
-  (N_c=200, n_s=10, k=5); n_rep = 100 per cell, per-rep seeds; mean relative
-  bias per component and per ICC < .10 in the small cells, < .05 at N_c=200;
+- **Stage 2 (T4):** known-population recovery, 4 cells, per-rep seeds:
+  A (N_c=20, n_s=10, k=3), B (N_c=40, n_s=10, k=5), C (N_c=200, n_s=10, k=5)
+  sweep the cluster axis; D (N_c=30, n_s=8, k=25, n_rep=150) sweeps k. Pins
+  are **split by which axis governs a component's sampling noise** (GP5
+  correction, milestone Decisions 2026-07-16 — the first run's uniform `.05
+  at N_c=200` pin was mis-set for σ²_r, whose noise is df = k−1: at k=5,
+  n_rep=100 the mean's rel SE ≈ .071, so .05 was a ~1.4σ coin flip; observed
+  +.0995 with SEM↔REML parity .001 and cell-to-cell sign flips = shared
+  sampling noise, not an SEM artifact; failed-run checkpoint preserved).
+  Cluster/subject-governed components: rel bias < .10 (A/B/D), < .05 (C).
+  Rater component: per-rep REML parity (mean |Δ| < .02 — the D-005
+  faithfulness quantity) plus rel bias < 3·√(2/(k−1))/√n_rep on every cell
+  (= .0707 at cell D, the tight test on σ²_r's own axis).
   glmmTMB parity deltas on the first 25 reps per cell must shrink with N_c.
   MC-interval feasibility probe on the Stage-1 fit: extract the two-level
   `vcov`, log-SD-transform the four variances (identity for intercepts), draw
