@@ -164,9 +164,8 @@ c(estimate = fit_inc$estimates$estimate[1],
 ```
 
 All six subjects and all twenty observed ratings contribute; nothing is thrown
-away. (`irrICC` and the generalizability-theory package `gtheory` can also fit
-incomplete data with their own models — see the capability matrix below — but the
-mean-squares tools cannot.)
+away. (`irrICC` can also fit incomplete data with its own model — see the
+capability matrix below — but the mean-squares tools cannot.)
 
 ### The bigger picture
 
@@ -175,22 +174,24 @@ in a wider gap. The table below summarizes what each package computes; it is a
 map of intent, not a scorecard — each tool is excellent at what it was designed
 for.
 
-| Capability | `psych` | `irr` | `irrICC` | `gtheory` | `intraclass` |
-|---|:--:|:--:|:--:|:--:|:--:|
-| Balanced ANOVA ICC family | ✅ | ✅ | ✅ | — | ✅ |
-| Incomplete / unbalanced data | — | — | ✅ | ✅ | ✅ |
-| Multilevel (subject **and** cluster) IRR | — | — | — | — | ✅ |
-| Boundary-aware interval | — | — | partial | — | ✅ |
-| [Fixed vs. random](glossary.html#fixed-vs.-random-raters) rater framing | partial | partial | — | ✅ | ✅ |
-| Guidance on *which* ICC to report | — | — | — | — | ✅ |
+| Capability | `psych` | `irr` | `irrICC` | `intraclass` |
+|---|:--:|:--:|:--:|:--:|
+| Balanced ANOVA ICC family | ✅ | ✅ | ✅ | ✅ |
+| Incomplete / unbalanced data | — | — | ✅ | ✅ |
+| Multilevel (subject **and** cluster) IRR | — | — | — | ✅ |
+| Boundary-aware interval | — | — | partial | ✅ |
+| [Fixed vs. random](glossary.html#fixed-vs.-random-raters) rater framing | partial | partial | — | ✅ |
+| Guidance on *which* ICC to report | — | — | — | ✅ |
 
-Two rows deserve a word. The generalizability-theory tools — `gtheory`, and
-model-based extractors such as `performance::icc` — return **variance
-components** or a variance-partition coefficient, which is the raw material of an
-ICC but not the inter-rater-reliability coefficient family itself, nor the
-error-variance framing that distinguishes agreement from consistency.
-(`intraclass`'s own generalizability coefficients are validated against `gtheory`
-to within 0.001; see the package's reference notes.) And an **interval** that is
+Two rows deserve a word. Model-based extractors such as `performance::icc`
+return **variance components** or a variance-partition coefficient, which is the
+raw material of an ICC but not the inter-rater-reliability coefficient family
+itself, nor the error-variance framing that distinguishes agreement from
+consistency. (`intraclass`'s own generalizability coefficients were validated
+against `gtheory` — a generalizability-theory package archived from CRAN in
+March 2025, and not a dependency here — agreeing to within 0.001; those
+committed reference values live in the package's reference notes.) And an
+**interval** that is
 [boundary-aware](glossary.html#monte-carlo-interval) — that behaves correctly when
 a variance component is estimated at its [zero
 boundary](glossary.html#zero-variance-boundary), where a normal-approximation

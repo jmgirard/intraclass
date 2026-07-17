@@ -83,7 +83,7 @@ the historical citation — over a minimal in-place reframe.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: `vignettes/comparison-with-other-packages.Rmd` — remove the `gtheory`
+- [x] T1: `vignettes/comparison-with-other-packages.Rmd` — remove the `gtheory`
       capability-table column (L178) and reconcile the "two rows deserve a word"
       prose (L187–197) and the incomplete-data parenthetical (L167–169) so
       `gtheory` is no longer offered as a live/installable tool; **keep** the
@@ -108,6 +108,9 @@ the historical citation — over a minimal in-place reframe.
 - 2026-07-17: created by /milestone-plan (promotes the gtheory-reference docs-
   audit candidate; plan gate: gate M48 on it, remove-as-peer + keep historical
   citation, user-facing docs only).
+- 2026-07-17: T1 done — comparison vignette: dropped `gtheory` capability-table
+  column + incomplete-data live mention; kept the validation citation, reframed
+  as historical with the archived-from-CRAN note (AC2 home).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
