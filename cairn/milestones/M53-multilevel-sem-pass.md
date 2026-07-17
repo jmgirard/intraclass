@@ -7,7 +7,7 @@
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m53-multilevel-sem-pass   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m53-multilevel-sem-pass · https://github.com/jmgirard/intraclass/pull/59   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
