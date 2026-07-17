@@ -24,18 +24,28 @@
 sb_project <- function(rho1, m) m * rho1 / (1 + (m - 1) * rho1)
 gt_project <- function(s, r, res, m) s / (s + (r + res) / m)
 
-fit_ds <- function(type = "agreement", raters = "random") {
-  suppressWarnings(icc(
-    sf_ratings_long(),
-    score,
-    subject,
-    rater,
-    type = type,
-    raters = raters,
-    unit = c("single", "average"),
-    seed = 1
-  ))
-}
+# Memoized (M59 T4): every call is deterministic (seed = 1), so the fit is
+# identical across the ~8 blocks that request it -- cache per (type, raters) and
+# recompute nothing. Copy-on-modify keeps the cached object safe from callers.
+fit_ds <- local({
+  cache <- list()
+  function(type = "agreement", raters = "random") {
+    key <- paste(type, raters, sep = "/")
+    if (is.null(cache[[key]])) {
+      cache[[key]] <<- suppressWarnings(icc(
+        sf_ratings_long(),
+        score,
+        subject,
+        rater,
+        type = type,
+        raters = raters,
+        unit = c("single", "average"),
+        seed = 1
+      ))
+    }
+    cache[[key]]
+  }
+})
 
 test_that("consistency projection matches the Spearman-Brown formula (O-SB)", {
   skip_if_not_installed("glmmTMB")

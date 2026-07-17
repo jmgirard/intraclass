@@ -100,7 +100,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
       `tol ≥ floor` with margin, adjust `tol` per GP5 if needed. Never touch the
       ragged `n_rep≥240` or the cluster-count sweep.
       (RB tripwire: none — right-sizing under GP5, no new oracle.)
-- [ ] T4: Dedupe repeated refits in the three fat files — hoist shared pilot-
+- [x] T4: Dedupe repeated refits in the three fat files — hoist shared pilot-
       geometry / base-model fits into file-top or block-local fixtures reused
       across blocks. Re-measure.
 - [ ] T5: Audit `skip_on_cran` / `skip_on_ci` gating across the heavy blocks;
@@ -143,6 +143,15 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   belongs with the lever-b candidate). No oracle `tol` changed ⇒ AC3 vacuous by
   construction. Post-T3 full parallel suite: FAIL 0, PASS 1724, 205 s (−51% vs
   415 s baseline); per-file ci-bootstrap 125→114 s, d-study 90→59 s.
+- 2026-07-17 (T4): memoized d-study's `fit_ds` helper (per `(type, raters)`;
+  deterministic `seed=1`, so identical objects — copy-on-modify keeps the cache
+  safe), removing ~6 redundant SF fits. Finding: measurable delta ≈ 0 — those
+  fits are cheap; each fat file's wall-clock is dominated by DISTINCT random-rep
+  coverage/recovery sims (d-study O-sim / O-ML-sim / O-RepDS-sim; lavaan-ml
+  recovery loops n_rep=60/40), which are not duplication and cannot be deduped.
+  Freezing those is the out-of-scope lever (b) candidate. Skipped the lavaan-ml
+  3× pilot-fit dedup: ~1–2 s gain not worth coupling three independent oracle
+  blocks through one shared fixture, and it doesn't move the parallel tail.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
