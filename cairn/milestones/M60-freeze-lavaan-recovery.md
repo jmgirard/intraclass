@@ -2,11 +2,11 @@
      section ownership". A phase skill never rewrites another phase's section. -->
 # M60: Freeze the lavaan multilevel recovery sweep
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Principles touched:** GP5, GP6, GP7
-- **Branch/PR:** —
+- **Branch/PR:** m60-freeze-lavaan-recovery
 
 ## Goal
 
