@@ -101,6 +101,15 @@ adds the opt-in bootstrap.
   air/lintr clean; both lavaan test files green.
 - 2026-07-17: status → review. Full suite (installed, NOT_CRAN=true CI=true):
   1725 pass, 0 fail, 0 error, 23 skip; document() no-diff. Ready for review.
+- 2026-07-17: review — three lenses clean (zero findings), AC1–AC4 verified.
+- 2026-07-17: PR #62 CI red on windows-latest only — AC1 cluster-level parity
+  pin (.07 absolute) flaked at .08 (lavaan's two-level optimizer is BLAS/OS
+  sensitive; the wide ML cluster level is the noisy one). Status → in-progress;
+  test-only fix (code unchanged, three-lens code review stands): cluster pin
+  reparameterized to RELATIVE-to-MC-width < .30 (subject stays tight absolute
+  .04), boot_samples 299 → 599 to stabilize the tail quantiles (GP5 — size the
+  pin to the noise floor, not lower the bar). Re-verified locally (14/14);
+  status → review, re-driving CI.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
