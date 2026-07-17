@@ -250,18 +250,23 @@ test_that("O-SEM-ML/tau2-invariant: the rater tau^2 law holds (live guard for th
   # that DOES). The SEM raw quadratic-form rater estimator carries the
   # deterministic inflation E[sigma2_r_SEM - sigma2_r_REML] = tau^2 =
   # (sigma^2_cr + sigma^2_res/n_s)/N_c (D-005; R/engine-lavaan.R). Differencing
-  # SEM-minus-REML on the SAME data cancels the shared rater-mean sampling noise,
-  # so a few reps resolve tau^2 (the frozen 20-rep sweep matched it to 5e-5).
-  # A modest k = 6 makes the guard bite: a divisor regression /(k-1) -> /k shifts
-  # the difference by ~sigma^2_r/k ~= .027, far outside the .004 tol, so the law
-  # fails a test instead of requiring archaeology (GP7). n_rep = 3 suffices: the
-  # measured per-rep parity sits within .0015 of tau^2 (differencing is that
-  # tight), so 3 reps land |mean - tau^2| ~ 1e-4 while the mutation is ~.027 off.
+  # SEM-minus-REML on the SAME data cancels the shared rater-mean sampling noise.
+  # Geometry = pilot cell B (N_c = 40, n_s = 10, k = 5), the geometry the pilot
+  # ledger verifies same-data differencing lands <= 1e-4 at (NOT the smaller,
+  # noise-dominated cells) -- so the guard sits on recorded-tight ground rather
+  # than an unverified small-N_c cell (M60 review, blame-history lens). A small
+  # k = 5 makes the guard bite: a divisor regression /(k-1) -> /k shifts the
+  # difference by ~sigma^2_r/k ~= .032, far outside the .005 tol, so the law
+  # fails a test instead of requiring archaeology (GP7). Recorded run at this
+  # geometry: per-rep parity within .001 of tau^2 (max |dev| .00092 over 8 reps),
+  # so n_rep = 4 lands |mean - tau^2| ~ 3e-4 -- a two-sided .005 budget that
+  # holds ~15x headroom for legitimate cross-version/BLAS drift (M56) while the
+  # mutation is ~.032 off; the tol is NOT tightened below the frozen sweep's.
   pop <- c(vc = 0.4, vsc = 1, vr = 0.16, vcr = 0.16, vres = 0.5)
-  nc <- 25L
-  ns <- 8L
-  k <- 6L
-  n_rep <- 3L
+  nc <- 40L
+  ns <- 10L
+  k <- 5L
+  n_rep <- 4L
   parity <- numeric(n_rep)
   for (r in seq_len(n_rep)) {
     d <- sim_ml(
@@ -288,7 +293,7 @@ test_that("O-SEM-ML/tau2-invariant: the rater tau^2 law holds (live guard for th
     parity[r] <- fit$components$rater - reml_components(d)[["rater"]]
   }
   tau2 <- unname((pop["vcr"] + pop["vres"] / ns) / nc)
-  expect_lt(abs(mean(parity) - tau2), 0.004)
+  expect_lt(abs(mean(parity) - tau2), 0.005)
 })
 
 test_that("O-SEM-ML/mc: montecarlo intervals at both levels are finite, bracketing, and parity-close", {

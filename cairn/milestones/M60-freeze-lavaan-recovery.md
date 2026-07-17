@@ -110,6 +110,11 @@ frozen pin so no discriminating power is lost.
 
 ## Work log
 
+- 2026-07-17 (review): three-lens review — lens-2 flagged the tau2 guard's
+  unverified small-N_c geometry + tol tightening (scored 62, sub-threshold);
+  actioned as cheap hardening: guard → pilot cell B geometry (N_c=40, n_s=10,
+  k=5), tol 0.004→0.005, n_rep 3→4, recorded spread. Re-verified green +
+  mutation-red. Supersedes the k=6/n_rep=3 choice in the T2-T4 line below.
 - 2026-07-17 (T5): green-gate `NOT_CRAN=true CI=true` full suite **FAIL 0 |
   WARN 2 | SKIP 23 | PASS 1725** (Duration 177.6s; +1 test = the new
   tau2-invariant guard; the 2 WARN are the pre-existing Heywood/boundary
@@ -183,7 +188,27 @@ frozen pin so no discriminating power is lost.
 
 ### Independent three-lens review
 
-_(in progress)_ Lens 3 (prior-PR-comments): **no prior-PR evidence** — the
-merged PRs touching these files (#59/#60/#62) carry only Codecov bot comments,
-no human review points; zero findings. Lenses 1 (diff-bug, Opus) and 2
-(blame-history, Sonnet) still running; scorer + triage to follow.
+- **Lens 1 — diff-bug (Opus): 0 findings.** Verified GP5 (frozen assertions
+  byte-identical to the live sweep), byte-identical fixture reproduction, and
+  judged both live guards discriminating (not vacuous). No correctness/contract/
+  convention defect.
+- **Lens 2 — blame-history (Sonnet): 1 finding.** The `O-SEM-ML/tau2-invariant`
+  guard resolved the tau^2 law at an unverified small-N_c geometry (nc=25, k=6,
+  n_rep=3) with the tol tightened 0.005→0.004 vs the original 20-rep Cell D; the
+  pilot ledger verifies same-data differencing to <=1e-4 only at N_c ∈
+  {40,200,30} (N_c=20 is noise-dominated). One-sided margin fragility to
+  cross-version/BLAS drift (M56) — no false-GREEN risk (mutation .0247 >> tol).
+- **Lens 3 — prior-PR-comments (Sonnet): 0 findings** — no prior-PR evidence
+  (PRs #59/#60/#62 on these files carry only Codecov bot comments).
+
+**Scorer + triage.** One finding (lens 2), scored **62** (plausible but
+arguable — below the 80 action threshold: current margin ~40x, an independent
+lens judged the geometry sound, but the cross-version fragility + tol-tightening
+are legitimate). **Actioned anyway** as a cheap, principled hardening (it serves
+M60's own rigor goal and the guard reads the M56-flaky live two-level lavaan
+path): moved the guard to **pilot cell B geometry** (N_c=40, n_s=10, k=5 —
+ledger-verified differencing), **un-tightened the tol 0.004→0.005** (never below
+the frozen sweep's), bumped n_rep 3→4, and recorded the measured spread
+(max per-rep |dev| .00092 over 8 reps → n_rep=4 |mean−tau^2| ~3e-4; ~15x .005
+headroom). Re-verified: guard green (FAIL 0 | PASS 60); mutation `/(k-1)→/k`
+still RED (|mean−tau^2| .0273 ≥ .005). No other findings survived.
