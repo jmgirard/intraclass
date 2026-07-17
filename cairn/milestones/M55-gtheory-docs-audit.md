@@ -94,7 +94,7 @@ the historical citation — over a minimal in-place reframe.
       closely on real data" match as a historical citation.
 - [x] T3: `README.Rmd` "Related work" (~L112–114) — drop `gtheory` from the
       model-based-tools list; re-knit to regenerate `README.md`.
-- [ ] T4: `R/engine-lavaan.R` (L34) — reframe the engine comment as a historical
+- [x] T4: `R/engine-lavaan.R` (L34) — reframe the engine comment as a historical
       validation citation.
 - [ ] T5: Verification pass — re-grep the four in-scope files for `gtheory`;
       confirm no installable/peer/live-target framing remains; regenerate
@@ -117,6 +117,9 @@ the historical citation — over a minimal in-place reframe.
 - 2026-07-17: T3 done — README.Rmd "Related work": dropped `gtheory` from the
   model-based-tools list; `devtools::build_readme()` regenerated README.md
   (paragraph reflow only, no stranger changes).
+- 2026-07-17: T4 done — engine-lavaan.R comment: "the archived `gtheory`
+  package" so the Vispoel-2022 agreement reads as a historical citation
+  (comment only, no logic change).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -31,7 +31,7 @@
 # This is a DIFFERENT estimator of sigma^2_r than the mixed model's random-effect
 # variance: it is the raw variance of the k estimated rater means, so it omits the
 # ANOVA/REML "- sigma^2_res / n_subjects" term. The two are asymptotically
-# equivalent and match GENOVA / gtheory / lme4 to ~1e-3 on real (large-N) data
+# equivalent and match GENOVA / lme4 / the archived `gtheory` package to ~1e-3 on real (large-N) data
 # (Vispoel et al. 2022, Table 3: they agree to <= .001 on G-coefs, <= .005 on
 # D-coefs), but on a small design the SEM value differs by O(1 / n_subjects). On
 # the 6-subject Shrout & Fleiss data lavaan gives ICC(A,1) = 0.284 vs the
