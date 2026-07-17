@@ -129,7 +129,7 @@
 <h2 id="id_3-modern-tooling-requirements">3. Modern tooling requirements<a class="anchor" aria-label="anchor" href="#id_3-modern-tooling-requirements"></a></h2>
 <p>Scaffold with <code>usethis</code>; prefer generating config via <code>usethis</code>/<code>use_*</code> helpers so versions stay current.</p>
 <ul><li>
-<strong>Package skeleton:</strong> <code>usethis::create_package()</code>, MIT license (confirm with me), <code>use_readme_rmd()</code>, <code>use_news_md()</code>, <code>use_lifecycle()</code> for badges.</li>
+<strong>Package skeleton:</strong> <code><a href="https://usethis.r-lib.org/reference/create_package.html" class="external-link">usethis::create_package()</a></code>, MIT license (confirm with me), <code>use_readme_rmd()</code>, <code>use_news_md()</code>, <code>use_lifecycle()</code> for badges.</li>
 <li>
 <strong>Testing:</strong> testthat <strong>3rd edition</strong> (<code>use_testthat(3)</code>), snapshot tests, <code>use_coverage()</code> (covr → Codecov).</li>
 <li>
@@ -148,7 +148,7 @@
 <em>Advanced / imbalanced &amp; multilevel</em> — incomplete designs, multilevel ICCs, engine choice (LMM vs. SEM vs. Bayesian) and when each matters, CI methods.</li>
 </ul></li>
 <li>
-<strong>CI (GitHub Actions via <code>usethis::use_github_action()</code>):</strong> <code>R-CMD-check</code> (matrix: release + devel + oldrel, at least Linux + macOS + Windows), <code>test-coverage</code>, <code>lint</code>, <code>pkgdown</code> deploy on release/main. Add a scheduled <code>reference-values</code> job that reruns the oracle/simulation scripts and diffs against committed expectations.</li>
+<strong>CI (GitHub Actions via <code><a href="https://usethis.r-lib.org/reference/use_github_action.html" class="external-link">usethis::use_github_action()</a></code>):</strong> <code>R-CMD-check</code> (matrix: release + devel + oldrel, at least Linux + macOS + Windows), <code>test-coverage</code>, <code>lint</code>, <code>pkgdown</code> deploy on release/main. Add a scheduled <code>reference-values</code> job that reruns the oracle/simulation scripts and diffs against committed expectations.</li>
 <li>
 <strong>Style &amp; hygiene:</strong> <code>lintr</code> + <code>air</code> (or <code>styler</code>) formatting; <code>use_pre_commit()</code> if you use pre-commit; <code>use_tidy_description()</code>.</li>
 <li>
@@ -196,7 +196,7 @@
 <li>
 <strong><code>start-task</code></strong> — <em>“Begin the next task on the board.”</em> Selects the next unblocked task, restates its acceptance criteria and the specific PRINCIPLES it must honor, sets <code>STATUS.md</code> to in-progress, and outlines a plan before editing code.</li>
 <li>
-<strong><code>finish-task</code></strong> — <em>“Close out the current task.”</em> Runs <code>devtools::check()</code>, tests, lint, and coverage; only on green, updates <code>TASKS.md</code>/<code>STATUS.md</code>, adds a <code>DECISIONS.md</code> entry if a decision was made, and proposes a conventional commit message. Never marks done on red.</li>
+<strong><code>finish-task</code></strong> — <em>“Close out the current task.”</em> Runs <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code>, tests, lint, and coverage; only on green, updates <code>TASKS.md</code>/<code>STATUS.md</code>, adds a <code>DECISIONS.md</code> entry if a decision was made, and proposes a conventional commit message. Never marks done on red.</li>
 <li>
 <strong><code>verify-estimator</code></strong> — <em>“Verify a statistical estimator against oracles.”</em> Implements §2 principle 1: assembles the oracle set (textbook/analytic, established package, simulation), runs the comparison <strong>on Opus</strong>, and reports agreement to tolerance. Writes results to <code>REFERENCES.md</code>. If a result cannot be pinned by any oracle, it does <strong>not</strong> escalate on its own — it surfaces the gap and <em>recommends</em> I approve a Fable review (§6, principle 19), then stops.</li>
 <li>
