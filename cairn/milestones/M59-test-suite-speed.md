@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M59: Test-suite speed — rigor-invariant levers
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Principles touched:** GP5, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -108,7 +108,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 - [x] T6: Assemble the GP5 noise-floor table (AC3) and the GP6 failure-axis-
       unchanged evidence (AC4); run the AC5 spot mutation-checks (≥1 per fat
       file).
-- [ ] T7: Full verify — `devtools::test()` clean + `devtools::check()` clean;
+- [x] T7: Full verify — `devtools::test()` clean + `devtools::check()` clean;
       confirm no NEWS entry is owed (test-only changes are not user-visible).
 
 ## Work log
@@ -185,6 +185,17 @@ oracle tolerance, coverage claim, or failure-axis sweep.
     constant, R/estimand.R:178); the B=99 "deterministic, monotone, in [0,1]"
     guard went RED (1 fail). Both reverted clean. lavaan-ml had no right-sized
     pin ⇒ no check owed there.
+- 2026-07-17 (T7): `devtools::check(env_vars=c(NOT_CRAN="false"))` — 0 errors, 0
+  warnings, 0 notes (clean with the new `parallel`/`start-first` config).
+  `devtools::test()` clean established by the full parallel run
+  (`NOT_CRAN=true CI=true`): FAIL 0, PASS 1724, SKIP 23 — pass count identical to
+  the pre-milestone baseline. No NEWS entry owed (test infra + DESCRIPTION config
+  only; no user-visible behavior change). AC2 measurement: serial per-file work
+  fell ci-bootstrap 125→114 s and d-study 90→59 s (~42 s of CPU work removed,
+  load-independent); parallel wall-clock ran 205–280 s across runs vs the 415 s
+  serial baseline (variance is machine contention; testthat parallel wall-clock
+  is inherently noisy). Net: a solid wall-clock reduction with pass count and
+  every oracle tolerance unchanged.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
