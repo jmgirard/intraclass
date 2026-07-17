@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Principles touched:** GP5, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m59-test-suite-speed   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m59-test-suite-speed / https://github.com/jmgirard/intraclass/pull/63   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -124,78 +124,19 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   conventions once merged.
 - 2026-07-17 (T1): committed `data-raw/profile-tests.R` (fixed condition
   `NOT_CRAN=true CI=true`, live-Stan skipped); baseline table above is its output.
-- 2026-07-17 (T2): `Config/testthat/parallel: true` + `start-first` (the 3 fat
-  files) in DESCRIPTION. Full parallel `test_local` (8 cores, `NOT_CRAN=true
-  CI=true`): FAIL 0, PASS 1724, SKIP 23 (live-Stan brms), wall-clock 233 s vs
-  the 415 s serial baseline (−44%). No shared-state fallout (helpers are pure,
-  no `setup-*.R`). WARN 2 pre-existing (deliberate design `cli_warn`s in tests;
-  parallelism reschedules files, it cannot introduce test warnings).
-- 2026-07-17 (T3): key finding — `mc_samples` are cheap vcov draws, NOT model
-  refits, so cutting them saves ~0 (left `mc_samples=4000/500` untouched, also
-  rigor-safe). Only `boot_samples` (each = a refit) costs, and only where the
-  assertion is STRUCTURAL (well-formed / monotone / coherence / band-projects) is
-  B arbitrary and safe to cut. Cut those to the reproducibility floor B=99
-  (updating asserted `samples` literals): ci-bootstrap glmmTMB well-formed
-  (199→99), lme4 bootMer ×2 (199→99), lavaan well-formed ×2 (199→99); d-study
-  coherence + deterministic (499→99), multilevel/incomplete bands ×2 (199→99).
-  LEFT every O1/O2 coverage/agreement oracle at its B (its count is load-bearing
-  for a fixed tolerance — cutting it is a rigor tradeoff, not over-provisioning;
-  belongs with the lever-b candidate). No oracle `tol` changed ⇒ AC3 vacuous by
-  construction. Post-T3 full parallel suite: FAIL 0, PASS 1724, 205 s (−51% vs
-  415 s baseline); per-file ci-bootstrap 125→114 s, d-study 90→59 s.
-- 2026-07-17 (T4): memoized d-study's `fit_ds` helper (per `(type, raters)`;
-  deterministic `seed=1`, so identical objects — copy-on-modify keeps the cache
-  safe), removing ~6 redundant SF fits. Finding: measurable delta ≈ 0 — those
-  fits are cheap; each fat file's wall-clock is dominated by DISTINCT random-rep
-  coverage/recovery sims (d-study O-sim / O-ML-sim / O-RepDS-sim; lavaan-ml
-  recovery loops n_rep=60/40), which are not duplication and cannot be deduped.
-  Freezing those is the out-of-scope lever (b) candidate. Skipped the lavaan-ml
-  3× pilot-fit dedup: ~1–2 s gain not worth coupling three independent oracle
-  blocks through one shared fixture, and it doesn't move the parallel tail.
-- 2026-07-17 (T5): skip-gating audit — no anomaly, no code change. Gating
-  matrix (block class → environment it runs in):
-  * Live-Stan brms fits (test-icc-brms.R, 23 blocks): `skip_on_cran` +
-    `skip_on_ci` ⇒ run ONLY local-with-Stan (`NOT_CRAN=true`, `CI` unset). The
-    CI-mode run skipped exactly 23 "On CI" with 0 brms failures (no live fit
-    leaked onto a Stan-less runner).
-  * brms fixture comparisons (~committed `.rds`): `skip_if_not_installed` only ⇒
-    run wherever brms is installed (fast, no MCMC).
-  * Heavy bootstrap-refit + recovery sweeps (ci-bootstrap 12 real-refit blocks;
-    lavaan-ml recovery `@208` n_rep=60/40 + 3 bootstrap blocks; d-study 4
-    bootstrap-band blocks): `skip_on_cran` ⇒ run dev/CI (`NOT_CRAN=true`), not
-    CRAN. Verified every real-refit block is gated; the ungated boot blocks are
-    cheap (abort path, input validation, fake-refit discard factory).
-  * Light single-fit correctness oracles (parity/reduction/aborts; d-study O-sim
-    single-fit recoveries): ungated ⇒ run on CRAN by design (catch platform
-    issues cheaply). No heavy block runs on CRAN; nothing is skipped everywhere.
-- 2026-07-17 (T6): rigor evidence.
-  * AC3 (GP5 noise floor): `git diff main -- tests/` shows the ONLY count
-    changes are `boot_samples` + their asserted `samples` literals — no
-    `tolerance`, no `mc_samples`, no `n_rep` line changed. Every changed count
-    feeds a STRUCTURAL assertion (well-formed/brackets, monotone, coherence
-    1e-9, reproducible-identity), none a stochastic tolerance ⇒ no noise floor
-    applies; AC3 vacuous by construction.
-  * AC4 (GP6 failure axis): the diff contains no `n_rep` and no `240` line; the
-    ragged coverage `n_rep≥240` (ADR-042 Amdt 2) and the cluster-count sweep
-    (M27/M28) are untouched.
-  * AC5 (GP7 non-vacuity, M51 patch→load_all→run→revert): ci-bootstrap — swap
-    the two `two_sided_interval` quantile endpoints (R/ci-montecarlo.R:100) so
-    `conf.low` > estimate; the B=99 "well-formed interval" guard went RED (2
-    fails). d-study — flatten the projection (`resolve_divisor` returns a
-    constant, R/estimand.R:178); the B=99 "deterministic, monotone, in [0,1]"
-    guard went RED (1 fail). Both reverted clean. lavaan-ml had no right-sized
-    pin ⇒ no check owed there.
-- 2026-07-17 (T7): `devtools::check(env_vars=c(NOT_CRAN="false"))` — 0 errors, 0
-  warnings, 0 notes (clean with the new `parallel`/`start-first` config).
-  `devtools::test()` clean established by the full parallel run
-  (`NOT_CRAN=true CI=true`): FAIL 0, PASS 1724, SKIP 23 — pass count identical to
-  the pre-milestone baseline. No NEWS entry owed (test infra + DESCRIPTION config
-  only; no user-visible behavior change). AC2 measurement: serial per-file work
-  fell ci-bootstrap 125→114 s and d-study 90→59 s (~42 s of CPU work removed,
-  load-independent); parallel wall-clock ran 205–280 s across runs vs the 415 s
-  serial baseline (variance is machine contention; testthat parallel wall-clock
-  is inherently noisy). Net: a solid wall-clock reduction with pass count and
-  every oracle tolerance unchanged.
+- 2026-07-17 (T2): DESCRIPTION `parallel: true` + `start-first` (3 fat files).
+  Parallel run FAIL 0 / PASS 1724 / SKIP 23, 233 s vs 415 s serial (−44%); no
+  shared-state fallout; WARN 2 pre-existing. (details → Review)
+- 2026-07-17 (T3): cut only STRUCTURAL `boot_samples` to B=99 (ci-bootstrap ×5,
+  d-study ×4 + literals); left every O1/O2 oracle + all `mc_samples` (cheap
+  draws) untouched. No oracle tol changed. (details → Review)
+- 2026-07-17 (T4): memoized d-study `fit_ds` (deterministic seed=1); measurable
+  Δ≈0 — fat-file cost is distinct random-rep sims (lever b), not duplication.
+- 2026-07-17 (T5): skip-gating audit — no anomaly, matrix in Review.
+- 2026-07-17 (T6): AC3 vacuous (no oracle tol changed), AC4 axis intact, AC5
+  mutations both RED. (details → Review)
+- 2026-07-17 (T7): `check(NOT_CRAN=false)` 0/0/0; `test()` FAIL 0 / PASS 1724;
+  no NEWS owed. (measurements → Review)
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
