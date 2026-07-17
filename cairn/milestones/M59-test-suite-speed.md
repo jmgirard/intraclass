@@ -89,7 +89,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Record the plan-time baseline (the 415 s per-file table below) in the
+- [x] T1: Record the plan-time baseline (the 415 s per-file table below) in the
       work log and commit a small reproducible profiling helper
       (`data-raw/profile-tests.R` or equivalent) so before/after is repeatable.
 - [ ] T2: Set `Config/testthat/parallel: true` in `DESCRIPTION`; run the full
@@ -122,6 +122,8 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   Cross-ref M57/M58 (lavaan multilevel siblings) — they add tests to the hottest
   file; those should follow this milestone's parallelism + right-sizing
   conventions once merged.
+- 2026-07-17 (T1): committed `data-raw/profile-tests.R` (fixed condition
+  `NOT_CRAN=true CI=true`, live-Stan skipped); baseline table above is its output.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
