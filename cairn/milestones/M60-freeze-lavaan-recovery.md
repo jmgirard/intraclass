@@ -93,14 +93,14 @@ frozen pin so no discriminating power is lost.
       rel-bias; Cell D mean rater rel-bias, mean `parity_d`, predicted
       `tau^2`/inflation/tol), write the committed `.rds` with a provenance
       header (D-005, pilot ledger, ten Hove 2022). `air format`.
-- [ ] T2 — Rewrite `O-SEM-ML/recovery` to read the fixture and assert the same
+- [x] T2 — Rewrite `O-SEM-ML/recovery` to read the fixture and assert the same
       pins/tolerances (GP5); add an in-place comment naming the generator +
       D-005 (GP7); confirm the refit loops are gone; record before/after serial
       file timing.
-- [ ] T3 — Cell B guard: mutation-verify `O-SEM-ML/parity` goes red under a
+- [x] T3 — Cell B guard: mutation-verify `O-SEM-ML/parity` goes red under a
       representative component-bias mutation (M51 protocol); comment it as the
       live discriminating pair for the frozen Cell-B recovery (GP7).
-- [ ] T4 — Cell D guard: add a small live same-data `tau^2`-parity-invariant
+- [x] T4 — Cell D guard: add a small live same-data `tau^2`-parity-invariant
       guard, hand-anchored so the correct value differs from the plausible
       simplification (M51); mutation-verify red. If none survives, leave Cell D
       live and record the finding (gate decision).
@@ -110,6 +110,15 @@ frozen pin so no discriminating power is lost.
 
 ## Work log
 
+- 2026-07-17 (T2-T4): rewrote `O-SEM-ML/recovery` to read the fixture (same
+  pins/targets/tolerances, GP5); added the live `O-SEM-ML/tau2-invariant` guard
+  (k=6, n_rep=3 — per-rep parity within .0015 of tau^2, |mean-tau^2| ~1e-4 vs
+  .004 tol); tagged `O-SEM-ML/parity` as the Cell-B live pair. **Both cells
+  cleared the rigor bar — no leave-live fallback.** Mutations (M51 protocol):
+  `/(k-1)->/k` at engine-lavaan.R:437 → tau2 guard dev .0247 ≥ .004 RED;
+  `svw->svw*1.1` at :441 → parity subject rel .10 ≥ .02 RED; both revert clean.
+  File serial time **137s → 63.8s** (−73s / −53%; residual is the out-of-scope
+  B=99 bootstrap tests). air + lintr clean.
 - 2026-07-17 (T1): wrote `data-raw/oracle-sem-multilevel-recovery.R` (verbatim
   Cell B/D loops, same pop/seeds/n_rep/mc_samples) → committed
   `fixtures/sem-multilevel-recovery-oracle.rds`. Reproduces the original passing

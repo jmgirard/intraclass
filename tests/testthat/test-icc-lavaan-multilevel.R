@@ -79,6 +79,12 @@ reml_components <- function(d) {
 }
 
 test_that("O-SEM-ML/parity: lavaan matches glmmTMB REML on the pilot geometry", {
+  # Also the discriminating LIVE guard for the frozen Cell-B recovery pins (M60,
+  # GP7): a single seeded fit compared component-by-component to the
+  # independently-validated glmmTMB REML spine, tight enough (subject/residual
+  # < .02 rel, cluster/cluster_rater < .06 rel) that any systematic lavaan
+  # component regression fails here even though the frozen recovery read cannot
+  # move. Mutation-verified at M60 (svw * 1.1 -> subject parity red).
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lavaan")
 
@@ -205,80 +211,69 @@ test_that("O-SEM-ML/conflated: the Eq. 14 diagnostic composes off the lavaan fit
   }
 })
 
-test_that("O-SEM-ML/recovery: known-population recovery, pins split by governing axis", {
+test_that("O-SEM-ML/recovery: known-population recovery, pins split by governing axis (frozen)", {
+  # FROZEN at M60: the 60 + 40 live lavaan two-level refits (~90-110s, the
+  # test-suite tail) were relocated verbatim -- same populations, seeds, n_rep,
+  # mc_samples -- to data-raw/oracle-sem-multilevel-recovery.R, which writes the
+  # committed fixture read below. Targets and tolerances are byte-identical to
+  # the live sweep (GP5: freeze relocates compute, it never moves the bar). The
+  # estimator's discriminating power is NOT in this frozen read (a fixture can't
+  # go red under a live regression -- M51); it is carried by two LIVE guards in
+  # this file: O-SEM-ML/parity (Cell B component unbiasedness, vs the
+  # independently-validated glmmTMB REML) and O-SEM-ML/tau2-invariant (Cell D).
+  # Estimand + noise-floor derivations: the O-SEM-ML banner above, D-005, and
+  # the generator header.
+  o <- readRDS(test_path("fixtures", "sem-multilevel-recovery-oracle.rds"))
+  vr <- o$meta$pop[["vr"]]
+
+  # Cell B (N_c = 40, n_s = 10, k = 5): the four cluster/subject-governed
+  # components recovered unbiased at the cluster-axis floor
+  # 3*sqrt(2/39)/sqrt(60) ~= .088 < .10.
+  for (nm in c("cluster", "subject", "cluster_rater", "residual")) {
+    expect_lt(abs(o$cell_b$rel_bias[[nm]]), 0.10)
+  }
+
+  # Cell D (N_c = 30, n_s = 8, k = 25): rater rel-bias centred on the predicted
+  # structural inflation tau^2/sigma^2_r at the k-axis floor
+  # 3*sqrt(2/24)/sqrt(40); and the tau^2 law itself pinned as an invariant
+  # (signed mean SEM-minus-REML rater parity within .005 of tau^2).
+  expect_lt(abs(o$cell_d$mean_rater / vr - 1 - o$cell_d$infl), o$cell_d$tol)
+  expect_lt(abs(o$cell_d$mean_parity - o$cell_d$tau2), 0.005)
+})
+
+test_that("O-SEM-ML/tau2-invariant: the rater tau^2 law holds (live guard for the frozen Cell D)", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("lavaan")
-  skip_on_cran()
 
+  # The discriminating LIVE pair for the frozen Cell-D pin (M51: a fixture can't
+  # go red under a live regression, so the tau^2 law needs a cheap live guard
+  # that DOES). The SEM raw quadratic-form rater estimator carries the
+  # deterministic inflation E[sigma2_r_SEM - sigma2_r_REML] = tau^2 =
+  # (sigma^2_cr + sigma^2_res/n_s)/N_c (D-005; R/engine-lavaan.R). Differencing
+  # SEM-minus-REML on the SAME data cancels the shared rater-mean sampling noise,
+  # so a few reps resolve tau^2 (the frozen 20-rep sweep matched it to 5e-5).
+  # A modest k = 6 makes the guard bite: a divisor regression /(k-1) -> /k shifts
+  # the difference by ~sigma^2_r/k ~= .027, far outside the .004 tol, so the law
+  # fails a test instead of requiring archaeology (GP7). n_rep = 3 suffices: the
+  # measured per-rep parity sits within .0015 of tau^2 (differencing is that
+  # tight), so 3 reps land |mean - tau^2| ~ 1e-4 while the mutation is ~.027 off.
   pop <- c(vc = 0.4, vsc = 1, vr = 0.16, vcr = 0.16, vres = 0.5)
-
-  # Cell B (pilot geometry): N_c = 40, n_s = 10, k = 5 -- pins the four
-  # cluster/subject-governed components on the cluster axis. n_rep = 60 sets
-  # the cluster-component noise floor at 3*sqrt(2/39)/sqrt(60) ~= .088 < .10.
-  n_rep_b <- 60L
-  comp_b <- matrix(NA_real_, n_rep_b, 5)
-  colnames(comp_b) <- c(
-    "cluster",
-    "subject",
-    "rater",
-    "cluster_rater",
-    "residual"
-  )
-  for (r in seq_len(n_rep_b)) {
+  nc <- 25L
+  ns <- 8L
+  k <- 6L
+  n_rep <- 3L
+  parity <- numeric(n_rep)
+  for (r in seq_len(n_rep)) {
     d <- sim_ml(
-      40,
-      10,
-      5,
+      nc,
+      ns,
+      k,
       pop["vc"],
       pop["vsc"],
       pop["vr"],
       pop["vcr"],
       pop["vres"],
-      seed = 54000 + r
-    )
-    fit <- icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      engine = "lavaan",
-      # mc_samples floor: the point components are all this cell asserts.
-      mc_samples = 500L,
-      seed = 1
-    )
-    comp_b[r, ] <- unlist(fit$components)[colnames(comp_b)]
-  }
-  rel_bias_b <- colMeans(comp_b) /
-    c(pop["vc"], pop["vsc"], pop["vr"], pop["vcr"], pop["vres"]) -
-    1
-  for (nm in c("cluster", "subject", "cluster_rater", "residual")) {
-    expect_lt(abs(rel_bias_b[[nm]]), 0.10)
-  }
-
-  # Cell D (the tight-k cell): N_c = 30, n_s = 8, k = 25 -- the ONLY cell that
-  # can pin sigma^2_r tightly (its noise is governed by df = k - 1, not N_c).
-  # Pins: (a) rel bias centred on the predicted structural inflation
-  # tau^2/sigma^2_r at the k-axis noise floor 3*sqrt(2/24)/sqrt(n_rep); (b) the
-  # tau^2 law itself as an invariant (GP7, D-005 / sem-multilevel-pilot):
-  # signed mean SEM-minus-REML rater parity within .005 of predicted tau^2
-  # (differencing on the SAME data cancels the shared sampling noise, so ~20
-  # parity reps resolve it; pilot: match <= 1e-4 at n_parity = 25).
-  n_rep_d <- 40L
-  n_parity <- 20L
-  rater_d <- numeric(n_rep_d)
-  parity_d <- numeric(n_parity)
-  for (r in seq_len(n_rep_d)) {
-    d <- sim_ml(
-      30,
-      8,
-      25,
-      pop["vc"],
-      pop["vsc"],
-      pop["vr"],
-      pop["vcr"],
-      pop["vres"],
-      seed = 55000 + r
+      seed = 71000 + r
     )
     fit <- icc(
       d,
@@ -290,18 +285,10 @@ test_that("O-SEM-ML/recovery: known-population recovery, pins split by governing
       mc_samples = 500L,
       seed = 1
     )
-    rater_d[r] <- fit$components$rater
-    if (r <= n_parity) {
-      parity_d[r] <- fit$components$rater - reml_components(d)[["rater"]]
-    }
+    parity[r] <- fit$components$rater - reml_components(d)[["rater"]]
   }
-  tau2_d <- unname((pop["vcr"] + pop["vres"] / 8) / 30)
-  infl_d <- tau2_d / unname(pop["vr"])
-  tol_d <- 3 * sqrt(2 / 24) / sqrt(n_rep_d)
-  expect_lt(abs(mean(rater_d) / pop[["vr"]] - 1 - infl_d), tol_d)
-  # GP7 invariant: the tau^2 law (source comment in R/engine-lavaan.R cites
-  # D-005 + the pilot ledger).
-  expect_lt(abs(mean(parity_d) - tau2_d), 0.005)
+  tau2 <- unname((pop["vcr"] + pop["vres"] / ns) / nc)
+  expect_lt(abs(mean(parity) - tau2), 0.004)
 })
 
 test_that("O-SEM-ML/mc: montecarlo intervals at both levels are finite, bracketing, and parity-close", {
