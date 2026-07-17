@@ -82,7 +82,7 @@ stays 🔴 blocked (ADR-014), untouched.
       Vispoel/Jorgensen/ten Hove lineage). Hit → ingest (references page +
       INDEX line). Miss → **stop and ask the maintainer** for the IP1
       disposition before proceeding. (RB tripwire: ip-touching)
-- [ ] T2: Draft the two-level mapping in the synthesis note: model string,
+- [x] T2: Draft the two-level mapping in the synthesis note: model string,
       parameter↔component table, identification (effects-coded between-level
       intercepts), lavaan two-level estimation constraints (ML-only, complete
       data, meanstructure), expected small-sample deltas vs REML.
@@ -109,6 +109,9 @@ stays 🔴 blocked (ADR-014), untouched.
   ten Hove 2022 MCMC; Vispoel arc single-level; 2026 MDPI paper is multigroup).
   Maintainer disposition at the ip-touching gate: proceed under the M5
   parameterization precedent → D-005.
+- 2026-07-16: T2 done — synthesis note drafted (mapping + constraints + pilot
+  design; results pending) at cairn/references/sem-multilevel-pilot.md, INDEX
+  line added.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
