@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M54: Multilevel SEM (lavaan) — engine implementation
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M53 is done -->
 - **Principles touched:** IP1, GP5, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m54-lavaan-multilevel-engine   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create -->
