@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-16 (M52 shipped + archived; scaffold repaired earlier same day: PROFILE.md backfilled, gitignore marker entry, references INDEX line; M48 release workable next)_
+_Last hygiene check: 2026-07-16 (M53 shipped + archived same day it was planned; PROFILE.md changelog slot backfilled at review; M48 release now fully unblocked; brms in-suite-only live-test condition flagged for separate diagnosis)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,12 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M53 | Multilevel SEM (lavaan) — estimand/oracle pass | review | — | high | milestones/M53-multilevel-sem-pass.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53 | high | milestones/M48-release-v010.md |
+| M53 | Multilevel SEM (lavaan) — estimand/oracle pass | done | — | high | milestones/archive/M53-multilevel-sem-pass.md |
 | M52 | brms/Stan verification hardening | done | — | normal | milestones/archive/M52-brms-verification-hardening.md |
 | M49 | Standing cross-engine parity matrix | done | — | high | milestones/archive/M49-parity-matrix.md |
 | M50 | Boundary-fit convergence policy consolidation | done | — | high | milestones/archive/M50-boundary-policy.md |
 | M51 | Statistical-corner guard audit | done | M50 | high | milestones/archive/M51-corner-guard-audit.md |
+<!-- terminal-row retention: M51 rotates out at the next terminal transition (5 most recent kept) -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
