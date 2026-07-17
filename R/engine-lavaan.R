@@ -336,12 +336,29 @@ lavaan_ml_simulate_refit <- function(
 # where glmmTMB smoothly hits ~0, D-004) aborts loudly toward glmmTMB, as the
 # single-level guard does. The MC interval reuses the shared machinery via the
 # same six-field contract: log-SD scale for the four variances, natural scale
-# for the between intercepts feeding the quadratic form per draw (bias = 0,
-# random raters). The parametric bootstrap (M56) simulates two-level datasets
-# from this fit's implied within/between moments and refits per resample
-# (lavaan_ml_simulate_refit); fixed raters, nested designs, replicates,
-# and incomplete/unbalanced data are refused upstream in icc().
-fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
+# for the between intercepts feeding the quadratic form per draw.
+#
+# FIXED RATERS (M57). `raters = "fixed"` reads the SAME two-level fit: the
+# between-level intercepts nu_j carry the rater main effects, so the rater slot
+# becomes the McGraw & Wong Case-3A finite-population theta^2_r = max(0, raw -
+# bias), bias = tr(C V_nu)/(k-1) on the between-intercept vcov block (the
+# identity contrast of the single-level fixed path). The per-draw correction is
+# the shared theta2r_moment_draws() with bias != 0 (2b + average-floor, GP7);
+# random raters keep bias = 0. Consistency ICCs omit the rater term, so they are
+# identical to the random-rater case; agreement ICCs (which count theta^2_r as
+# error) differ from the raw random estimator by exactly `bias` = the documented
+# tau^2 finite-population correction, matching glmmTMB fixed asymptotically (GP5:
+# the gap is documented, never absorbed into a widened tolerance). Fixed is
+# MC-only: the M56 bootstrap factory is random-only internally, so simulate_refit
+# stays NULL for fixed (bootstrap deferred to a candidate). Crossed (Design 1),
+# balanced/complete, equal cluster sizes only. The parametric bootstrap (M56)
+# serves random raters; nested designs, replicates, incomplete/unbalanced data
+# (and fixed nested / fixed incomplete) are refused upstream in icc().
+fit_lavaan_multilevel <- function(
+  data,
+  raters = "random",
+  call = rlang::caller_env()
+) {
   rlang::check_installed("lavaan", reason = "to fit the ICC model with lavaan.")
 
   k <- nlevels(data$rater)
@@ -430,11 +447,24 @@ fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
   }
 
   # sigma^2_r: the grand-mean-centred quadratic form on the between-level
-  # intercepts (Jorgensen 2021 Eq. 6) -- RANDOM raters only here, so no
-  # finite-population correction (bias = 0); the tau^2 inflation is the
-  # documented raw-estimator property (header note), not a bias to subtract.
+  # intercepts (Jorgensen 2021 Eq. 6). For RANDOM raters bias = 0 -- the tau^2
+  # inflation is the documented raw-estimator property (header note), not a bias
+  # to subtract. For FIXED raters (M57) the rater slot is instead the McGraw &
+  # Wong Case-3A bias-corrected finite-population theta^2_r = max(0, raw - bias),
+  # with `bias` the identity-contrast trace of the BETWEEN-intercept vcov block
+  # (the same correction the single-level fit_lavaan() fixed path applies; here
+  # the between-level intercepts carry the rater main effects). On balanced data
+  # this recovers the mixed-model value glmmTMB fixed reports (M10/M37), which
+  # the raw random estimator does NOT (it is inflated by tau^2 -- exactly the gap
+  # `bias` removes).
   center <- diag(k) - matrix(1 / k, k, k)
-  sigma2_r <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  raw <- as.numeric(t(nu) %*% center %*% nu) / (k - 1)
+  bias <- if (identical(raters, "fixed")) {
+    sum(diag(center %*% vcov_raw[nu_i, nu_i, drop = FALSE])) / (k - 1)
+  } else {
+    0
+  }
+  sigma2_r <- max(0, raw - bias)
 
   components <- list(
     cluster = svb,
@@ -470,15 +500,18 @@ fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
     slots
   )
 
-  # Back-transform internal-scale draws to the five components. The rater
-  # draws reuse the shared moment helper with bias = 0 (random raters), i.e.
-  # the raw quadratic form pmax(0, nu' C nu / (k - 1)) per draw.
+  # Back-transform internal-scale draws to the five components. The rater draws
+  # reuse the shared moment helper: for RANDOM raters `bias` = 0, reducing to the
+  # raw quadratic form pmax(0, nu' C nu / (k - 1)) per draw; for FIXED raters
+  # `bias` > 0, so the draws are 2b-recentered + average-floored (M28/ADR-038,
+  # GP7) exactly as the single-level fixed path. The between-intercept vcov block
+  # that generates the draws is the same block `bias` is computed from.
   to_components <- function(par) {
     means <- par[nu_slots, , drop = FALSE]
     list(
       cluster = exp(2 * par["cluster", ]),
       subject = exp(2 * par["subject", ]),
-      rater = theta2r_moment_draws(list(means), list(0), center, k),
+      rater = theta2r_moment_draws(list(means), list(bias), center, k),
       cluster_rater = exp(2 * par["cluster_rater", ]),
       residual = exp(2 * par["residual", ])
     )
@@ -497,20 +530,27 @@ fit_lavaan_multilevel <- function(data, call = rlang::caller_env()) {
     to_components = to_components,
     # Two-level parametric bootstrap (M56): simulate wide two-level datasets from
     # this fit's implied within/between moments (rebuilt from the five components),
-    # refit the same model, recompute both-level ICCs per resample. Random raters
-    # only; the single-level FIML precedent (resamples cannot reproduce a
-    # missingness pattern) keeps this NULL for the incomplete/unbalanced sibling.
-    simulate_refit = lavaan_ml_simulate_refit(
-      model,
-      k,
-      center,
-      nu,
-      svw,
-      evw,
-      svb,
-      evb,
-      cluster_sizes
-    )
+    # refit the same model, recompute both-level ICCs per resample. RANDOM raters
+    # only: the M56 factory is random-only internally (lavaan_multilevel_components
+    # reads the raw sigma^2_r), so the FIXED cell is MC-only (M57 gate) --
+    # simulate_refit = NULL routes ci_method = "bootstrap" to a loud abort, exactly
+    # as the incomplete/unbalanced sibling does. The single-level FIML precedent
+    # (resamples cannot reproduce a missingness pattern) keeps this NULL there too.
+    simulate_refit = if (identical(raters, "fixed")) {
+      NULL
+    } else {
+      lavaan_ml_simulate_refit(
+        model,
+        k,
+        center,
+        nu,
+        svw,
+        evw,
+        svb,
+        evb,
+        cluster_sizes
+      )
+    }
   )
 }
 

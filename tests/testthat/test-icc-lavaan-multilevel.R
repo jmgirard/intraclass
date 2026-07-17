@@ -353,19 +353,9 @@ test_that("multilevel lavaan out-of-scope combinations abort with classed condit
 
   d <- sim_ml(12, 6, 4, 0.4, 1, 0.16, 0.16, 0.5, seed = 20260716)
 
-  # Fixed raters: deferred to the lavaan-siblings candidate (M54 Out).
-  expect_error(
-    suppressWarnings(icc(
-      d,
-      score,
-      subject,
-      rater,
-      cluster = cluster,
-      raters = "fixed",
-      engine = "lavaan"
-    )),
-    class = "intraclass_unsupported"
-  )
+  # (Crossed fixed raters are now IN scope -- M57 ships them at both levels;
+  # the fixed nested / replicate / incomplete aborts are pinned in
+  # test-icc-fixed-lavaan-multilevel.R.)
 
   # Nested designs (2/3): the two-level CFA mapping is crossed-only (M54 Out).
   dn <- d

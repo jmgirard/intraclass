@@ -1271,15 +1271,12 @@ icc <- function(
              {.code engine = \"glmmTMB\"} (default) or {.code \"lme4\"}."
       ))
     }
-    if (raters == "fixed") {
-      abort_unsupported(c(
-        "Fixed-rater multilevel ICCs are not available for the {.pkg lavaan} \\
-         engine yet.",
-        i = "Use {.code raters = \"random\"}, or {.code engine = \"glmmTMB\"} \\
-             (default) / {.code \"lme4\"} for fixed-rater multilevel designs; \\
-             the SEM sibling is planned for a later milestone."
-      ))
-    }
+    # Fixed raters (M57): the crossed + balanced/complete + equal-cluster-size
+    # cell is admitted -- it falls through to the fixed-multilevel dispatch below,
+    # which routes to fit_lavaan_multilevel(raters = "fixed"). Fixed NESTED is
+    # caught by the crossed guard above, fixed REPLICATES by the guard below, and
+    # fixed INCOMPLETE/UNBALANCED by the balance guard below -- each pointing at
+    # glmmTMB. So no separate fixed abort is needed here.
     if (replicates) {
       abort_unsupported(c(
         "The {.pkg lavaan} (SEM) engine does not support within-cell \\
@@ -1525,6 +1522,14 @@ icc <- function(
         fit_brms_multilevel_fixed(df, seed = seed, brm_args = brm_args)
       } else if (engine == "lme4") {
         fit_lme4_multilevel_fixed(df)
+      } else if (engine == "lavaan") {
+        # Crossed (Design 1) fixed raters via the two-level SEM (M57): the same
+        # two-level CFA as the random path, read with the Case-3A finite-population
+        # correction on the between-level rater intercepts. Both levels + the
+        # conflated diagnostic read off this one fit; complete/balanced, equal
+        # cluster sizes only (fixed nested / replicate / incomplete aborted
+        # upstream). MC-only -- the bootstrap factory is random-only (M56).
+        fit_lavaan_multilevel(df, raters = "fixed")
       } else {
         fit_glmmtmb_multilevel_fixed(df)
       }

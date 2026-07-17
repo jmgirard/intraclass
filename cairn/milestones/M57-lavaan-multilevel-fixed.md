@@ -85,19 +85,19 @@ bootstrap carries a documented cross-platform flake).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Extend `fit_lavaan_multilevel()` (`R/engine-lavaan.R`) to accept
+- [x] T1: Extend `fit_lavaan_multilevel()` (`R/engine-lavaan.R`) to accept
       `raters = "fixed"` — read the between-level intercept `vcov` block, form the
       Case-3A bias-corrected θ²_r for the subject-level rater slot (identity
       contrast, cf. the single-level fixed path and `lavaan_components()`), leave
       the cluster error set (σ²_cr) unbiased, and wire the per-draw correction
       into `to_components` via `theta2r_moment_draws()` with `bias ≠ 0`.
       (RB tripwire: ip-touching)
-- [ ] T2: Narrow the `icc.R:1271` fixed-multilevel-lavaan abort to admit crossed
+- [x] T2: Narrow the `icc.R:1271` fixed-multilevel-lavaan abort to admit crossed
       + balanced/complete + equal cluster sizes; add the lavaan case to the
       fixed-multilevel dispatch branch (`icc.R:1510`), routing to
       `fit_lavaan_multilevel(df, raters = "fixed")`; keep nested / replicate /
       incomplete-unbalanced fixed lavaan aborting.
-- [ ] T3: Tests in a new `tests/testthat/test-icc-fixed-lavaan-multilevel.R` —
+- [x] T3: Tests in a new `tests/testthat/test-icc-fixed-lavaan-multilevel.R` —
       AC1 subject parity + random-consistency identity, AC2 cluster parity + the
       random-reduction identity, the AC3 deterministic correction guard, and the
       AC4 abort-narrowing checks (`skip_on_cran`,
@@ -116,6 +116,14 @@ bootstrap carries a documented cross-platform flake).
   cluster ICC ≠ lavaan's own random cluster ICC — differs by the τ² correction;
   compare to glmmTMB fixed instead); Scope Out — fixed bootstrap deferred to a
   candidate row, MC-only ships.
+- 2026-07-17: T1–T3 done. Engine: `fit_lavaan_multilevel(raters="fixed")` reads
+  the between-intercept vcov → Case-3A θ²_r = max(0, raw−bias), per-draw 2b via
+  the shared `theta2r_moment_draws()`; MC-only (`simulate_refit=NULL` for fixed).
+  Dispatch: removed the blanket fixed-lavaan abort (fixed nested/replicate/
+  incomplete still caught by the crossed/replicate/balance guards), added the
+  lavaan case to the fixed-multilevel branch. New test file 21 pass; verified
+  vs glmmTMB fixed (subject Δ=6e-5, cluster Δ=1.8e-3) + deterministic 1b/2b/floor
+  guard. M54 test's now-invalid fixed-abort block removed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
