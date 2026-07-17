@@ -92,7 +92,7 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 - [x] T1: Record the plan-time baseline (the 415 s per-file table below) in the
       work log and commit a small reproducible profiling helper
       (`data-raw/profile-tests.R` or equivalent) so before/after is repeatable.
-- [ ] T2: Set `Config/testthat/parallel: true` in `DESCRIPTION`; run the full
+- [x] T2: Set `Config/testthat/parallel: true` in `DESCRIPTION`; run the full
       suite; fix any ordering / shared-state fallout (helper globals, missing
       `setup-*.R`). Re-measure.
 - [ ] T3: Right-size the over-provisioned counts listed in Scope. For each: re-
@@ -124,6 +124,12 @@ oracle tolerance, coverage claim, or failure-axis sweep.
   conventions once merged.
 - 2026-07-17 (T1): committed `data-raw/profile-tests.R` (fixed condition
   `NOT_CRAN=true CI=true`, live-Stan skipped); baseline table above is its output.
+- 2026-07-17 (T2): `Config/testthat/parallel: true` + `start-first` (the 3 fat
+  files) in DESCRIPTION. Full parallel `test_local` (8 cores, `NOT_CRAN=true
+  CI=true`): FAIL 0, PASS 1724, SKIP 23 (live-Stan brms), wall-clock 233 s vs
+  the 415 s serial baseline (−44%). No shared-state fallout (helpers are pure,
+  no `setup-*.R`). WARN 2 pre-existing (deliberate design `cli_warn`s in tests;
+  parallelism reschedules files, it cannot introduce test warnings).
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
