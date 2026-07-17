@@ -39,13 +39,17 @@
   estimates the five-component decomposition (cluster,
   subject-in-cluster, rater, cluster-by-rater, residual) via a two-level
   structural-equation model and reports the subject- and cluster-level
-  ICCs (plus the conflated diagnostic) with the Monte-Carlo interval.
-  Complete, balanced data with equal cluster sizes and random raters;
-  cross-validated against the REML mixed-model engines (consistency ICCs
-  agree essentially exactly; the documented ML-vs-REML and rater-mean
-  small-sample differences shrink as clusters grow). Fixed raters,
-  nested designs, incomplete/unbalanced data, and the bootstrap for this
-  design remain loud, classed refusals.
+  ICCs (plus the conflated diagnostic) with either the Monte-Carlo
+  interval (the default) or the parametric bootstrap
+  (`ci_method = "bootstrap"`), which simulates two-level datasets from
+  the fitted moments and refits per resample. Complete, balanced data
+  with equal cluster sizes and random raters; cross-validated against
+  the REML mixed-model engines (consistency ICCs agree essentially
+  exactly; the documented ML-vs-REML and rater-mean small-sample
+  differences shrink as clusters grow), and the bootstrap interval
+  agrees with the Monte-Carlo interval within Monte-Carlo tolerance.
+  Fixed raters, nested designs, and incomplete/unbalanced data remain
+  loud, classed refusals.
 - `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
 - The conflated diagnostic (`level = "conflated"`) now also reports a
   **consistency** form (`type = "consistency"`), not just absolute
