@@ -145,4 +145,18 @@ no user-visible changes (dev docs + test guard only).
 **Independent review:** [S] blame-history — no findings (all cited
 ADR/milestone ids verified against the legacy record; map verified
 bijective). [S] prior-PR-comments — no prior-PR evidence (only automated
-Codecov comments repo-wide), clean no-op. [O] diff-bug — pending.
+Codecov comments repo-wide), clean no-op. [O] diff-bug — 4 findings, all
+scored ≥80 by the [S] scorer (none excluded), all fixed on the branch:
+1. (87) README-pin test vacuous against deletion of the README itself
+   (file.exists skip) → gate on dir.exists + expect_true(file.exists);
+   new mutation evidence: README deleted → FAIL 2; restored → 5 PASS.
+2. (92) Lifecycle steps 2–3 stated as universal but false for the 5
+   earliest scripts (no checkpoint; pins before saveRDS) → README now
+   scopes the pattern to the 15 long-sweep scripts + explicit caveat.
+3. (84) "gitignored checkpoints" false for 12/15 paths (3 literals, no
+   glob; pre-existing gap, new claim) → .gitignore now globs
+   data-raw/.oracle-*-checkpoint.rds (check-ignore verified).
+4. (83) No-fit tier row over-claimed "none — every job incl. CRAN" →
+   now notes the two Suggests-dependent skip_if_not_installed gates.
+Post-fix re-verification: guard clean 5 PASS; data-raw-absent → 2 SKIP;
+lintr 0; air clean.

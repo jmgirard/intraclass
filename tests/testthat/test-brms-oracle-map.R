@@ -59,8 +59,13 @@ test_that("every brms oracle script maps to a committed fixture and vice versa",
 })
 
 test_that("data-raw/README.md's map table matches the authoritative map", {
+  skip_if_not(dir.exists(data_raw_dir), "data-raw/ not present (built package)")
+
+  # The README is the document this guard locks: its absence in a source tree
+  # (where data-raw/ exists) is itself a failure, never a skip -- a skip here
+  # would let the strategy doc be deleted while the suite stays green.
   readme <- file.path(data_raw_dir, "README.md")
-  skip_if_not(file.exists(readme), "data-raw/ not present (built package)")
+  expect_true(file.exists(readme))
 
   lines <- readLines(readme, encoding = "UTF-8")
   rows <- grep("^\\| oracle-bayesian", lines, value = TRUE)

@@ -29,7 +29,7 @@ suite then re-asserts the committed result everywhere, cheaply.
 
 | Tier | Gate | What runs |
 |---|---|---|
-| No-fit | none — every job incl. CRAN | classed coupling/scope aborts, reducers (`posterior_mode()`, `hpdi_interval()` vs the independent coda oracle), deterministic print/tidy structure (never MCMC-numeric snapshots) |
+| No-fit | none beyond `skip_if_not_installed()` on two Suggests-dependent tests (coda, brms) | classed coupling/scope aborts, reducers (`posterior_mode()`, `hpdi_interval()` vs the independent coda oracle), deterministic print/tidy structure (never MCMC-numeric snapshots) |
 | Fixture | `skip_if_not(file.exists(fixture), "run data-raw/… to generate")` | committed `.rds` references re-asserted against each source's qualitative findings (bias/coverage/convergence contrasts) — fast, no fitting; fixtures are committed, so these run on every CI job |
 | Live-Stan | `skip_on_cran()` + `skip_on_ci()` | the one end-to-end Stan smoke fit, plus live parity/reduction oracles (O-Bayes-agree, O-PriorReduce, O-HPDI) — local only, where the toolchain exists |
 
@@ -44,12 +44,17 @@ overridden and the suite then flakes on MCMC noise.
    DGP, and the guardrails (#4/#18: divergences from the source are
    *reported*, never tuned away; the MAP estimator is fixed a priori and
    independent of the source's tool).
-2. **Checkpoint**: long sweeps write a gitignored
+2. **Checkpoint**: the long-sweep scripts (15 of 20) write a gitignored
    `data-raw/.oracle-*-checkpoint.rds` after each rep so a crashed run
    resumes instead of restarting.
-3. **Fixture written *before* the hard assertions** — a 2-hour run is never
+3. **Fixture written *before* the hard assertions** — so a long run is never
    lost to a marginal pin; the script's own validation then runs against the
-   file it just wrote.
+   file it just wrote. **Caveat:** the five earliest two-way scripts
+   (`oracle-bayesian.R`, `-fixed.R`, `-incomplete.R`, `-incomplete-fixed.R`,
+   `-oneway.R`) predate both practices — no checkpoint, pins *before*
+   `saveRDS()`. When regenerating one of those, adopt the save-first +
+   checkpoint pattern in the script first, or a marginal pin aborts the run
+   with nothing written.
 4. **Commit** the fixture (`tests/testthat/fixtures/*.rds`); the test suite
    pins the qualitative findings with tolerances that absorb finite n_rep.
 

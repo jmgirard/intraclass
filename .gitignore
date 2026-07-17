@@ -8,9 +8,7 @@ inst/doc
 figure/
 tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
-data-raw/.oracle-bayesian-multilevel-checkpoint.rds
-data-raw/.oracle-bayesian-incomplete-fixed-nested-checkpoint.rds
-data-raw/.oracle-bayesian-cluster-ck-checkpoint.rds
+data-raw/.oracle-*-checkpoint.rds
 cairn/references/pdf/
 cairn/.merge-approved
 cairn/.merge-approved.pending
