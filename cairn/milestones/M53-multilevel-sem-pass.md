@@ -140,6 +140,18 @@ stays 🔴 blocked (ADR-014), untouched.
   (the D-005 faithfulness quantity) and (b) a noise-floor-derived 3σ bias
   tolerance stated in-script; plus a new k=25 cell sweeping σ²_r's own axis
   (GP6). Failed-run checkpoint preserved in the synthesis-note ledger.
+- 2026-07-16 (review, F1/F3 — supersedes the diagnosis half of the entry
+  above): the run-1 rater deviation is not pure "shared sampling noise" — the
+  raw quadratic-form σ²_r estimator carries a deterministic structural
+  inflation E = σ²_r + τ², τ² = (σ²_{cr} + σ²_{(s:c)r}/n_s)/N_c (the
+  multilevel analog of the single-level engine's documented, deliberately
+  uncorrected "−σ²_res/n" term, ADR-014); the signed SEM−REML parity equals
+  τ² to ≤1e-4 across the B/C/D geometries. Pins re-centred on the predicted
+  inflation; the τ² law itself added as an invariant-type pin. Arithmetic
+  correction: the mis-set .05 pin sat at 0.71σ (≈52% pass probability — the
+  coin flip); 1.4σ is the observed +.0995's z-score, not the pin's. The GP5
+  process conclusion (split pins, prospective correction, evidence
+  strengthened) stands unchanged.
 
 ## Review
 <!-- owner: review · exclusive -->

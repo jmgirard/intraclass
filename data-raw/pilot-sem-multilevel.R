@@ -223,12 +223,18 @@ sl <- intraclass::icc(
   engine = "lavaan"
 )$estimates
 red_sem <- iccs_from_components(sem0$components, k = 4)
+sl_agr <- sl$estimate[sl$index == "ICC(A,1)"]
+sl_con <- sl$estimate[sl$index == "ICC(C,1)"]
+# Guard the extraction: numeric(0) here would make the reduction pins below
+# evaluate over logical(0) and pass vacuously (review F2) -- fail loudly
+# instead if icc()'s estimates-table labels ever change.
+stopifnot(length(sl_agr) == 1, length(sl_con) == 1)
 checkpoint$reduction <- list(
   sem_components = sem0$components,
   sem_s_agr_1 = unname(red_sem["s_agr_1"]),
   sem_s_con_1 = unname(red_sem["s_con_1"]),
-  single_level_agr = sl$estimate[sl$index == "ICC(A,1)"],
-  single_level_con = sl$estimate[sl$index == "ICC(C,1)"]
+  single_level_agr = sl_agr,
+  single_level_con = sl_con
 )
 cat("Reduction: two-level subject-level vs shipped single-level lavaan:\n")
 print(checkpoint$reduction[-1])
@@ -293,6 +299,10 @@ recover_cell <- function(cell, cell_name) {
       c(pop2["vc"], pop2["vsc"], pop2["vr"], pop2["vcr"], pop2["vres"]) -
       1,
     mean_abs_parity = colMeans(abs(parity), na.rm = TRUE),
+    # Signed mean parity: the rater slot's SEM-above-REML offset is the
+    # structural tau^2 inflation (see the tau2 law at the pins), so the sign
+    # carries the information the absolute value hides.
+    mean_parity = colMeans(parity, na.rm = TRUE),
     n_fail = n_fail,
     n_heywood = n_heywood
   )
@@ -405,13 +415,27 @@ stopifnot(
   ) <
     0.02
 )
-# Stage 2 pins are split per the milestone GP5 correction (2026-07-16):
-# the four cluster/subject-governed components are pinned on the cluster axis
-# (.10 small cells, .05 at N_c = 200); sigma^2_r is pinned by (a) per-rep REML
-# parity — the D-005 faithfulness quantity — and (b) a bias tolerance at its
-# own noise floor, 3 * sqrt(2/(k-1)) / sqrt(n_rep), on its own axis (cell D).
+# Stage 2 pins are split per the milestone GP5 correction (2026-07-16) and
+# re-centred per review finding F1 (2026-07-16): the four cluster/subject-
+# governed components are pinned on the cluster axis (.10 small cells, .05 at
+# N_c = 200). The rater slot's raw quadratic-form estimator carries a
+# DETERMINISTIC structural inflation
+#     E[nu' C nu / (k - 1)] = sigma^2_r + tau^2,
+#     tau^2 = (sigma^2_cr + sigma^2_res / n_s) / N_c
+# — the multilevel generalization of the single-level raw estimator's omitted
+# "- sigma^2_res/n" sampling-variance term (R/engine-lavaan.R header; raw by
+# design, ADR-014). REML does not carry it, so the signed SEM-minus-REML rater
+# parity IS tau^2 (matches to <= 1e-4 across the B/C/D geometries). sigma^2_r
+# is therefore pinned by (a) the tau^2 law itself — signed mean parity within
+# .005 of the predicted tau^2, an invariant-type check — and (b) a bias
+# tolerance CENTRED ON the predicted inflation tau^2/sigma^2_r at its own
+# noise floor, 3 * sqrt(2/(k-1)) / sqrt(n_rep), tight on its own axis
+# (cell D).
 cs_comp <- c("cluster", "subject", "cluster_rater", "residual")
 rater_tol <- function(cell) 3 * sqrt(2 / (cell$k - 1)) / sqrt(cell$n_rep)
+tau2 <- function(cell) {
+  unname((pop2["vcr"] + pop2["vres"] / cell$n_s) / cell$n_c)
+}
 for (nm in c("A", "B")) {
   stopifnot(all(
     abs(checkpoint[[paste0("cell_", nm)]]$rel_bias[cs_comp]) < 0.10
@@ -423,9 +447,10 @@ stopifnot(
 )
 for (nm in names(cells)) {
   ck <- checkpoint[[paste0("cell_", nm)]]
+  infl <- tau2(cells[[nm]]) / unname(pop2["vr"])
   stopifnot(
-    abs(ck$rel_bias["rater"]) < rater_tol(cells[[nm]]),
-    ck$mean_abs_parity["rater"] < 0.02,
+    abs(ck$rel_bias["rater"] - infl) < rater_tol(cells[[nm]]),
+    abs(ck$mean_parity["rater"] - tau2(cells[[nm]])) < 0.005,
     ck$n_fail == 0
   )
 }

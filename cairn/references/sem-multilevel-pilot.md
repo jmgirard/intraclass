@@ -77,13 +77,23 @@ components unchanged.
   are **split by which axis governs a component's sampling noise** (GP5
   correction, milestone Decisions 2026-07-16 — the first run's uniform `.05
   at N_c=200` pin was mis-set for σ²_r, whose noise is df = k−1: at k=5,
-  n_rep=100 the mean's rel SE ≈ .071, so .05 was a ~1.4σ coin flip; observed
-  +.0995 with SEM↔REML parity .001 and cell-to-cell sign flips = shared
-  sampling noise, not an SEM artifact; failed-run checkpoint preserved).
-  Cluster/subject-governed components: rel bias < .10 (A/B/D), < .05 (C).
-  Rater component: per-rep REML parity (mean |Δ| < .02 — the D-005
-  faithfulness quantity) plus rel bias < 3·√(2/(k−1))/√n_rep on every cell
-  (= .0707 at cell D, the tight test on σ²_r's own axis).
+  n_rep=100 the mean's rel SE ≈ .071, so the .05 pin sat at 0.71σ, a literal
+  coin flip — ≈52% pass probability under zero bias; the observed +.0995 is
+  1.4σ; failed-run checkpoint preserved) — and **re-centred per review
+  finding F1**: the rater slot's raw quadratic-form estimator carries a
+  *deterministic structural inflation* **E = σ²_r + τ², τ² = (σ²_{cr} +
+  σ²_{(s:c)r}/n_s)/N_c** — the multilevel generalization of the single-level
+  raw estimator's omitted "−σ²_res/n" term (engine header; raw by design,
+  ADR-014). REML does not carry it, so the signed SEM−REML rater parity *is*
+  τ², matching to ≤1e-4 across the B/C/D geometries (.0053/.0010/.0074 vs
+  predicted .00525/.00105/.00742). Run 1's "shared sampling noise" diagnosis
+  was incomplete: noise dominates the small cells (hence the sign flips), but
+  the τ² offset sits under it and the tight cell D measured it.
+  Final pins — cluster/subject-governed components: rel bias < .10 (A/B/D),
+  < .05 (C). Rater: the τ² law itself (signed mean parity within .005 of
+  predicted τ² — an invariant-type check) plus rel bias within
+  3·√(2/(k−1))/√n_rep **of the predicted inflation τ²/σ²_r** on every cell
+  (tightest at cell D: ±.0707 around +.0464).
   glmmTMB parity deltas on the first 25 reps per cell must shrink with N_c.
   MC-interval feasibility probe on the Stage-1 fit: extract the two-level
   `vcov`, log-SD-transform the four variances (identity for intercepts), draw
@@ -96,20 +106,26 @@ components unchanged.
 ## Results (run 2, corrected pins; checkpoint `.oracle-pilot-sem-multilevel-checkpoint.rds`, seeds in-script; 2026-07-16)
 
 - **Stage 1** (N_c=40, n_s=10, k=5): within components identical to REML to
-  4 dp (subject 1.0364, residual .4971); between components within the
-  documented ML-vs-REML budget (cluster .4049 vs .4180; cluster_rater .2049
-  vs .2115; rater .1597 vs .1531). All four **consistency** ICCs identical to
-  4 dp across engines; **agreement** |Δ| ≤ .008 (M49 index-class split
-  confirmed in the multilevel case).
+  4 dp (subject 1.0364, residual .4971); cluster-level covariance components
+  below REML per the ML N-divisor (cluster .4049 vs .4180; cluster_rater
+  .2049 vs .2115); rater *above* REML by ≈τ² (.1597 vs .1531, gap .0066 ≈
+  predicted .00525) — two distinct documented mechanisms (F1). All four
+  **consistency** ICCs identical to 4 dp across engines; **agreement**
+  |Δ| ≤ .008 (M49 index-class split confirmed in the multilevel case).
 - **Reduction** (σ²_c = σ²_{cr} = 0, N_c=50, k=4): two-level subject-level
   ICC(A,1)/(C,1) = .606/.629 vs the shipped single-level lavaan engine's
   .614/.636 — within the .02 pin.
 - **Recovery** (cells A–D): cluster/subject/cluster_rater/residual rel-bias
-  ≤ .085 small cells, ≤ .011 at N_c=200; rater +.039 at cell D (k=25,
-  tolerance .071) with REML parity ≤ .0088 in every cell — the small-cell
-  rater deviations sign-flip (−.009/−.056/+.099) exactly as the noise-floor
-  analysis predicts. **Zero fit failures in 450 two-level fits**; one Heywood
-  (cell A, N_c=20), matching the documented boundary posture.
+  ≤ .085 small cells, ≤ .011 at N_c=200. Rater: observed deviations
+  (−.009/−.056/+.099/+.039) are the predicted structural inflation τ²/σ²_r
+  (+.066/+.033/+.007/+.046) plus k-governed sampling noise — cell D, the
+  tight cell, lands 0.3σ from prediction; the signed parity equals τ² to
+  ≤1e-4 (B/C/D). Note the sign structure: the ML N-divisor story pulls the
+  *cluster-level covariance* components below REML (cluster .4049 vs .4180),
+  while the rater slot sits *above* REML by exactly τ² — two different,
+  both-documented mechanisms, not one "ML-vs-REML budget". **Zero fit
+  failures in 450 two-level fits**; one Heywood (cell A, N_c=20), matching
+  the documented boundary posture.
 - **Parity shrinks on the cluster axis**: cluster |Δ| .0248 → .0121 → .0025
   (A→B→C) — the ML-vs-REML gap closes as it must if the two routes estimate
   the same decomposition.
@@ -121,15 +137,25 @@ components unchanged.
 
 ## Go/no-go
 
-**GO** (2026-07-16). The two-level CFA is numerically established as an
-estimation-route parameterization of the ten Hove (2022) Design-1
-decomposition (D-005): component-level REML parity within the documented
-ML-vs-REML budget and shrinking with N_c, exact consistency-ICC agreement,
-clean reduction to the shipped single-level engine, unbiased recovery on
-every component's own axis, and a feasible boundary-aware MC interval at both
-levels. Implementation notes for the engine milestone: (a) lavaan two-level
-is ML-only — document the small-sample REML delta as the M7/M49 posture
-already does; (b) between-level Heywood incidence at few clusters → the
-existing `intraclass_singular_fit` abort toward glmmTMB; (c) parity test
-tolerances must split by index class (consistency tight, agreement
-asymptotic) and budget the ML/REML gap at small N_c.
+**GO** (2026-07-16, diagnosis sharpened by review F1). The two-level CFA is
+numerically established as an estimation-route parameterization of the
+ten Hove (2022) Design-1 decomposition (D-005): exact consistency-ICC
+agreement, cluster-axis parity shrinking with N_c, clean reduction to the
+shipped single-level engine, recovery matching prediction on every
+component's own axis — where for σ²_r "prediction" includes the
+**deterministic raw-estimator inflation τ² = (σ²_{cr} + σ²_{(s:c)r}/n_s)/N_c**
+(the multilevel analog of the single-level engine's documented,
+deliberately-uncorrected "−σ²_res/n" term, ADR-014) — and a feasible
+boundary-aware MC interval at both levels. The inflation is *named and
+predictable*, not absorbed into tolerance (D-005's own standard).
+Implementation notes for the engine milestone: (a) lavaan two-level is
+ML-only — document the small-sample REML delta as the M7/M49 posture already
+does; (b) **document the τ² inflation in the engine roxygen exactly as the
+single-level header documents its "−σ²_res/n" analog, and centre any
+rater-parity test on τ², never on zero** — a zero-centred parity pin < .02
+breaks structurally at few clusters (e.g. N_c=10, n_s=5 → τ² ≈ .026), which
+is where multilevel users live (paper's own N_c ∈ {20,40}); (c) between-level
+Heywood incidence at few clusters → the existing `intraclass_singular_fit`
+abort toward glmmTMB; (d) parity tolerances split by index class
+(consistency tight, agreement asymptotic) and budget the ML/REML gap at
+small N_c.
