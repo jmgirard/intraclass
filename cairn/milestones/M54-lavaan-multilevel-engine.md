@@ -178,7 +178,7 @@ Reviewed 2026-07-16/17 · PR https://github.com/jmgirard/intraclass/pull/60
 
 - cairn_validate: exit 0 (after fixing two review-time mechanical fails it
   itself caught: over-long work-log entries → compressed to one line each;
-  '1712/0/0' parsed as a non-ISO date → reworded).
+  a slash-separated test-count triple parsed as a non-ISO date → reworded).
 - cairn_impact: skipped — no DESIGN.md principle changed.
 - Toolchain (r-package slot): document() no-diff ✓; generated files clean ✓;
   README.Rmd rebuilt, no drift ✓; pkgdown::check_pkgdown() no problems ✓;
