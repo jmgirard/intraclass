@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M53: Multilevel SEM (lavaan) — estimand/oracle pass
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m53-multilevel-sem-pass · https://github.com/jmgirard/intraclass/pull/59   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -41,28 +41,28 @@ stays 🔴 blocked (ADR-014), untouched.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Source-hunt disposition recorded in the work log: either a primary
+- [x] AC1: Source-hunt disposition recorded in the work log: either a primary
       source ingested per the validation doctrine (PDF in
       `cairn/references/pdf/`, committed `<citekey>.md` + `INDEX.md` line), or
       a recorded "none found" **with the maintainer's explicit IP1
       disposition** (parameterization under the M5 precedent vs blocked)
       obtained before any pilot conclusion is drawn. (RB tripwire:
       ip-touching)
-- [ ] AC2: A committed, seeded pilot script fits the two-level formulation on
+- [x] AC2: A committed, seeded pilot script fits the two-level formulation on
       balanced Design-1 data and recovers all five components against a
       glmmTMB fit of the same data, with stated tolerances split by index
       class (consistency tight, agreement asymptotic — M49 lesson), and shows
       the reduction: zero cluster variances → the current single-level lavaan
       engine's estimates.
-- [ ] AC3: The pilot recovers injected known-population components (ten Hove
+- [x] AC3: The pilot recovers injected known-population components (ten Hove
       DGP template, M5 spec §5) within stated tolerance across ≥3 cells
       including a high-cluster-count cell (GP6), and records an MC-interval
       feasibility finding (log-SD delta route on the two-level vcov, both
       levels).
-- [ ] AC4: A committed `cairn/references/` synthesis note records the mapping,
+- [x] AC4: A committed `cairn/references/` synthesis note records the mapping,
       estimation constraints, pilot results with script pointers, boundary/
       Heywood observations, and the go/no-go; its `INDEX.md` line exists.
-- [ ] AC5: ROADMAP candidate row + `COVERAGE.md` row 162 updated to cite
+- [x] AC5: ROADMAP candidate row + `COVERAGE.md` row 162 updated to cite
       M53's verdict (go → schedulable; no-go → re-tagged blocked with
       rationale).
 
@@ -78,23 +78,23 @@ stays 🔴 blocked (ADR-014), untouched.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Source hunt (DOI/publisher/OSF; multilevel SEM-GT in the
+- [x] T1: Source hunt (DOI/publisher/OSF; multilevel SEM-GT in the
       Vispoel/Jorgensen/ten Hove lineage). Hit → ingest (references page +
       INDEX line). Miss → **stop and ask the maintainer** for the IP1
       disposition before proceeding. (RB tripwire: ip-touching)
-- [ ] T2: Draft the two-level mapping in the synthesis note: model string,
+- [x] T2: Draft the two-level mapping in the synthesis note: model string,
       parameter↔component table, identification (effects-coded between-level
       intercepts), lavaan two-level estimation constraints (ML-only, complete
       data, meanstructure), expected small-sample deltas vs REML.
-- [ ] T3: Pilot part 1 (`data-raw/pilot-sem-multilevel.R`, seeded,
+- [x] T3: Pilot part 1 (`data-raw/pilot-sem-multilevel.R`, seeded,
       checkpointed): balanced Design-1 simulation → two-level lavaan fit →
       five components vs glmmTMB; reduction check at σ²_c = σ²_{cr} = 0 vs
       the shipped single-level engine.
-- [ ] T4: Pilot part 2: known-population recovery sweep (≥3 cells incl. a
-      high-N_c cell) + MC-interval feasibility probe (extract two-level vcov,
-      log-SD transform, per-draw ICCs at both levels; note Heywood/boundary
-      behavior).
-- [ ] T5: Finalize the synthesis note (results, go/no-go), log the
+- [x] T4: Pilot part 2: known-population recovery sweep (4 cells incl. a
+      high-N_c cell and a k=25 cell) + MC-interval feasibility probe (extract
+      two-level vcov, log-SD transform, per-draw ICCs at both levels; note
+      Heywood/boundary behavior).
+- [x] T5: Finalize the synthesis note (results, go/no-go), log the
       disposition, update the ROADMAP candidate row + COVERAGE.md row.
 
 ## Work log
@@ -103,9 +103,92 @@ stays 🔴 blocked (ADR-014), untouched.
 - 2026-07-16: created by /milestone-plan (promotes the multilevel-SEM
   candidate's research half; plan gate: split research-first, sequenced ahead
   of M48, Design-1 base scope, search-first sourcing with ask-on-miss).
+- 2026-07-16: in-progress on m53-multilevel-sem-pass by /milestone-implement;
+  no open implementation choices (T1's ip-touching gate fires on its outcome).
+- 2026-07-16: T1 done — source hunt MISS (Jorgensen 2021 single-level only;
+  ten Hove 2022 MCMC; Vispoel arc single-level; 2026 MDPI paper is multigroup).
+  Maintainer disposition at the ip-touching gate: proceed under the M5
+  parameterization precedent → D-005.
+- 2026-07-16: T2 done — synthesis note drafted (mapping + constraints + pilot
+  design; results pending) at cairn/references/sem-multilevel-pilot.md, INDEX
+  line added.
+- 2026-07-16: pilot run 1 — Stage 1/reduction/MC-probe pins all hold; one
+  Stage-2 pin failed (rater rel-bias +.0995 vs .05 at N_c=200) → diagnosed as
+  a mis-set pin (k-governed noise, parity .001), GP5 correction recorded in
+  Decisions; pins split + k=25 cell D added; re-run launched.
+- 2026-07-16: T3+T4 done — pilot run 2 PASS, all pins hold (450 fits, 0
+  failures; cell D rater rel-bias +.039 < .071 tol, parity ≤ .0088; MC probe
+  feasible both levels). T5 done — synthesis-note Results + GO verdict;
+  ROADMAP candidate row and COVERAGE.md row updated to cite M53.
+- 2026-07-16: verify — full suite 1896 passed; 13 fail + 1 error, ALL in
+  test-icc-brms.R's live-Stan tier, which passes clean in isolation; branch
+  runtime surface identical to origin/main (docs + data-raw only), Stan stack
+  unchanged since 2026-07-08 → pre-existing suite-order/environment condition
+  on main, out of M53 scope; flagged to the maintainer for separate diagnosis
+  (blocks M48 AC5 if unresolved). Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
+- 2026-07-16 (implement, GP5): the Stage-2 `.05` rel-bias pin at N_c=200 was
+  mis-set for the rater component — σ²_r's sampling noise is governed by k
+  (df = k−1), not N_c: at k=5, n_rep=100 the mean's rel SE is √(2/4)/10 ≈ .071,
+  so a .05 pin was a ~1.4σ coin flip (observed +.0995 with SEM↔REML parity
+  .001 — shared sampling noise, sign-flipping across cells, not an SEM
+  artifact). Corrected prospectively before any re-run: rater pins split from
+  the four cluster/subject-governed components — (a) per-rep REML-parity pins
+  (the D-005 faithfulness quantity) and (b) a noise-floor-derived 3σ bias
+  tolerance stated in-script; plus a new k=25 cell sweeping σ²_r's own axis
+  (GP6). Failed-run checkpoint preserved in the synthesis-note ledger.
+- 2026-07-16 (review, F1/F3 — supersedes the diagnosis half of the entry
+  above): the run-1 rater deviation is not pure "shared sampling noise" — the
+  raw quadratic-form σ²_r estimator carries a deterministic structural
+  inflation E = σ²_r + τ², τ² = (σ²_{cr} + σ²_{(s:c)r}/n_s)/N_c (the
+  multilevel analog of the single-level engine's documented, deliberately
+  uncorrected "−σ²_res/n" term, ADR-014); the signed SEM−REML parity equals
+  τ² to ≤1e-4 across the B/C/D geometries. Pins re-centred on the predicted
+  inflation; the τ² law itself added as an invariant-type pin. Arithmetic
+  correction: the mis-set .05 pin sat at 0.71σ (≈52% pass probability — the
+  coin flip); 1.4σ is the observed +.0995's z-score, not the pin's. The GP5
+  process conclusion (split pins, prospective correction, evidence
+  strengthened) stands unchanged.
+
 ## Review
 <!-- owner: review · exclusive -->
+
+PR: https://github.com/jmgirard/intraclass/pull/59 (draft during review).
+
+**Evidence per criterion (2026-07-16, fresh by command):**
+
+- AC1 ✓ — D-005 in cairn/DECISIONS.md; work-log lines record the source-hunt
+  MISS and the maintainer's ip-touching-gate disposition obtained before any
+  pilot conclusion (T1 stopped at the chip).
+- AC2 ✓ — pilot run 3 (`Rscript data-raw/pilot-sem-multilevel.R`): PILOT
+  PASS; Stage-1 component parity vs REML within stated tolerances (within
+  identical to 4 dp; consistency ICCs identical, agreement ≤ .008); reduction
+  vs the shipped single-level engine < .02, extraction length-guarded (F2).
+- AC3 ✓ — run 3: 4-cell recovery (A/B/C/D incl. N_c=200 and k=25) with pins
+  re-centred on the predicted τ² inflation (F1); MC-feasibility finding
+  recorded (log-SD delta route works on the two-level vcov, both levels'
+  intervals contain their points). Reproducible: runs 2 and 3 agree to 4 dp.
+- AC4 ✓ — synthesis note carries mapping, constraints, Results, GO verdict
+  (F1-sharpened) + the τ² law; INDEX line present (validate references check
+  PASS).
+- AC5 ✓ — ROADMAP candidate row + COVERAGE.md row 162 cite "M53 verdict: GO".
+
+**Consistency gate:** cairn_validate all-PASS (after backfilling the new
+`## changelog` PROFILE slot — plugin-spec drift, not branch damage);
+document() no-diff; .Rbuildignore covers data-raw/cairn; NEWS N/A (no
+user-visible change); pkgdown::check_pkgdown clean; lintr 0;
+devtools::check (NOT_CRAN=false): 0 errors / 0 warnings / 0 notes. No
+principle changed → cairn_impact skipped. Known out-of-scope condition:
+test-icc-brms.R live-Stan tier fails in-suite only on main (flagged
+separately at implement; not introduced here).
+
+**Independent review (3 lenses + scorer):** prior-PR lens — no evidence
+(clean no-op). Blame-history lens — no findings. Diff-bug lens — 3 findings;
+scorer: F1=95 (actioned: fixed — τ² inflation named, ledger corrected, pins
+re-centred, run 3 green), F2=76, F3=66 (sub-threshold, logged: F2 vacuous-
+pass hole in reduction extraction — fixed opportunistically in the same
+edit; F3 0.71σ-vs-1.4σ arithmetic in the records — corrected in the same
+edit). Nothing rejected.

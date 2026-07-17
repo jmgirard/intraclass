@@ -63,6 +63,10 @@ rules in tracking-rules:
   content is fixed; the shape is the repo's choice — a `provenance` attribute,
   embedded `.rds`/`.rda` fields, or a header comment naming source + generator + seed.
 
+## changelog
+The repo's changelog file, read by `/hotfix`, the release-walk, and the
+consistency-gate: **`NEWS.md`** (the R-package convention).
+
 ## release-walk
 Followed by `/cairn-release` — a CRAN release walk (never self-submits):
 - Version decision (patch/minor/major) from NEWS.md; pre-1.0 conventions per DESIGN.md.
