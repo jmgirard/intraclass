@@ -172,3 +172,25 @@ the historical citation — over a minimal in-place reframe.
   flakes per repo lessons).
 - No `DESIGN.md` principle changed (GP1 is worked-under, not modified) →
   `cairn_impact` skipped.
+
+### Independent review (three lenses + scorer)
+
+- **[O] diff-bug (Opus):** No findings. Verified the capability table stays
+  well-formed after the column drop (5 cols, 6 rows) and "Two rows deserve a
+  word" still maps to real rows; all 3 surviving mentions historical.
+- **[S] blame-history (Sonnet):** No findings. Confirmed the column removal is a
+  plan-gated continuation of ADR-052's citation-only disposition (not a silent
+  undo); validation citation retained + cross-checked against REFERENCES.md;
+  no test asserts on removed content; all out-of-scope `gtheory` survivors are
+  intended; DESCRIPTION has no `gtheory` dep (consistent with the new wording).
+- **[S] prior-PR comments (Sonnet):** No prior-PR evidence — the touched files'
+  merged PRs carry only Codecov bot comments, no human review points. Clean
+  no-op.
+- **Scorer:** no findings to score (all three lenses clean) → no-op.
+- Dropped cosmetic item (both statistical lenses, surfaced per IP3): one
+  long comment/prose line (`engine-lavaan.R:34`, `engines.Rmd:95`) — excluded,
+  `.lintr` sets `line_length_linter = NULL` and `air` owns layout (lintr clean).
+
+**Verdict:** all four acceptance criteria verified with fresh evidence;
+consistency gate green; zero actionable review findings. Ready to merge on
+CI-green + user approval.
