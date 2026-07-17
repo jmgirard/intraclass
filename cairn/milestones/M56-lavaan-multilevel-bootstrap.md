@@ -65,21 +65,21 @@ adds the opt-in bootstrap.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write `lavaan_multilevel_simulate_refit()` in `R/engine-lavaan.R` —
+- [x] T1: Write `lavaan_ml_simulate_refit()` in `R/engine-lavaan.R` —
       close over the two-level fit's implied within/between moments, cluster
       count, and per-cluster subject count; per resample simulate a wide
       two-level dataset (cluster draws + within-cluster subject draws), refit
       the same two-level model with the same options, and return the five
-      components via the existing `lavaan`-multilevel component reader
+      components via the new `lavaan_multilevel_components()` reader
       (Heywood/non-convergent → NA-fill, seeded via `with_rng_seed`).
-- [ ] T2: Replace `simulate_refit = NULL` in `fit_lavaan_multilevel()` with the
+- [x] T2: Replace `simulate_refit = NULL` in `fit_lavaan_multilevel()` with the
       new factory (random raters only); confirm `bootstrap_ci()` consumes it
       unmodified (the six-field contract is engine-generic — M54 lesson).
-- [ ] T3: Tests in `tests/testthat/test-icc-lavaan-multilevel.R` — the AC1
+- [x] T3: Tests in `tests/testthat/test-icc-lavaan-multilevel.R` — the AC1
       MC↔bootstrap parity + structural-sanity checks at both levels, the AC2
       discard-path fixture, and the AC3 reproducibility/RNG-hygiene checks
       (`skip_on_cran`, `skip_if_not_installed("lavaan")`).
-- [ ] T4: Run the `verify` slot; update the roxygen note in
+- [x] T4: Run the `verify` slot; update the roxygen note in
       `fit_lavaan_multilevel()`'s header (the "Bootstrap is deferred" paragraph
       now describes the shipped two-level parametric bootstrap) and
       `@param ci_method` / the `icc()` engine roster prose if they claim "no
@@ -90,6 +90,15 @@ adds the opt-in bootstrap.
 
 - 2026-07-17: created by /milestone-plan (promotes the lavaan-multilevel-siblings
   candidate, part A; plan gate: 3 separate milestones, all planned now).
+- 2026-07-17: T1–T4 done. Added `lavaan_multilevel_model()`,
+  `lavaan_multilevel_components()`, and `lavaan_ml_simulate_refit()` (two-level
+  DGP rebuilt from the five components: cluster means ~ MVN(ν, svb·11'+diag(evb)),
+  within devs ~ MVN(0, svw·11'+diag(evw))); wired the factory into
+  `fit_lavaan_multilevel` (random raters). MC↔bootstrap endpoint parity oracle:
+  subject ≤.01, cluster ≤.016 (n=40/10/5); AC2 discard-path pinned via the direct
+  factory (fully-NA failed columns); AC3 reproducibility + RNG hygiene. Updated
+  the stale "bootstrap out of scope" assertion, roxygen, and the M54 NEWS bullet.
+  air/lintr clean; both lavaan test files green.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
