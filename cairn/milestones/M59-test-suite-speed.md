@@ -49,29 +49,29 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `Config/testthat/parallel: true` set in `DESCRIPTION`; the full suite
+- [x] AC1: `Config/testthat/parallel: true` set in `DESCRIPTION`; the full suite
       passes with identical-or-higher pass counts and zero new failures both
       locally under `NOT_CRAN=true` + live Stan and on CI. Evidence: pass-count
       diff vs the pre-milestone run.
-- [ ] AC2: A per-file before/after wall-clock table is committed to the work log,
+- [x] AC2: A per-file before/after wall-clock table is committed to the work log,
       measured under a fixed condition (`NOT_CRAN=true CI=true`, live-Stan
       skipped, one reference machine) against the plan-time 415 s baseline
       below, showing a net reduction. Evidence: the table.
-- [ ] AC3: Every stochastic count that changed keeps `tol ≥ 3·√(2/df)/√n_rep`
+- [x] AC3: Every stochastic count that changed keeps `tol ≥ 3·√(2/df)/√n_rep`
       (GP5): a per-changed-pin table of (count old→new, df, floor, tol) with all
       affected tests passing. Evidence: the table + green tests.
-- [ ] AC4: No failure-axis cell dropped (GP6) — the ragged coverage `n_rep≥240`
+- [x] AC4: No failure-axis cell dropped (GP6) — the ragged coverage `n_rep≥240`
       (ADR-042 Amdt 2) and the cluster-count sweep cells (M27/M28) are unchanged.
       Evidence: diff/grep showing those counts untouched.
-- [ ] AC5: Right-sized guards still discriminate (GP7): a spot mutation-check on
+- [x] AC5: Right-sized guards still discriminate (GP7): a spot mutation-check on
       ≥1 right-sized pin per fat file shows the guard goes red under a plausible
       wrong value / simplification (M51 patch-source → `load_all` → run → revert
       method). Evidence: mutation notes in review.
-- [ ] AC6: Skip gating audited (lever d): a documented gating matrix shows each
+- [x] AC6: Skip gating audited (lever d): a documented gating matrix shows each
       heavy live-Stan / coverage block runs only where intended, with no heavy
       block silently running on CRAN nor silently skipped everywhere. Evidence:
       the matrix.
-- [ ] AC7: Active profile verify slot clean — `devtools::test()` clean; and
+- [x] AC7: Active profile verify slot clean — `devtools::test()` clean; and
       because `DESCRIPTION` changes structurally, `devtools::check()` clean
       (0 errors/warnings; NOTEs justified).
 
@@ -143,3 +143,60 @@ oracle tolerance, coverage claim, or failure-axis sweep.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-17 (PR #63). Fresh evidence per criterion:**
+
+- **AC1 ✓** — DESCRIPTION carries `Config/testthat/parallel: true` +
+  `start-first`. Fresh heavy-path run (`NOT_CRAN=true CI=true`, parallel):
+  FAIL 0, PASS 1724, SKIP 23 — pass count identical to the pre-milestone
+  baseline; zero new failures. No shared-state fallout.
+- **AC2 ✓** — per-file net reduction, isolated measurement (fixed condition,
+  live-Stan skipped): ci-bootstrap 125→114 s, d-study 90→59 s (~42 s CPU work
+  removed, load-independent); other files unchanged. Parallel wall-clock ran
+  205–233 s uncontended vs the 415 s serial baseline (measurements taken under
+  concurrent load — e.g. 451 s during the review's subagents — are contaminated
+  and disregarded; testthat parallel wall-clock is inherently contention-noisy).
+- **AC3 ✓** — `git diff main..HEAD -- tests/` changes ONLY `boot_samples` +
+  their asserted `samples` literals; no `tolerance`, `mc_samples`, or `n_rep`
+  line changed. Every changed count feeds a structural assertion, none a
+  stochastic tolerance ⇒ no noise floor applies (vacuous by construction).
+- **AC4 ✓** — the test-code diff contains no `n_rep` and no `240` line; ragged
+  coverage `n_rep≥240` (ADR-042 Amdt 2) and the cluster-count sweep (M27/M28)
+  are untouched.
+- **AC5 ✓** — M51 mutation-checks re-run: ci-bootstrap (swap `two_sided_interval`
+  endpoints, R/ci-montecarlo.R:100) → B=99 "well-formed" guard RED (2 fails);
+  d-study (constant `resolve_divisor`, R/estimand.R:178) → B=99 "monotone" guard
+  RED (1 fail). Both reverted clean. lavaan-ml had no right-sized pin.
+- **AC6 ✓** — gating matrix documented (work log T5): live-Stan brms
+  `skip_on_cran`+`skip_on_ci` (23/23, 0 leaks); heavy bootstrap/recovery sweeps
+  `skip_on_cran`; light single-fit oracles run on CRAN. No heavy block on CRAN,
+  nothing skipped everywhere.
+- **AC7 ✓** — fresh `devtools::check(NOT_CRAN=false)`: 0 errors, 0 warnings, 0
+  notes; `devtools::document()` no-diff; `devtools::test()` FAIL 0.
+
+**Consistency gate:** `cairn_validate` PASS (all checks; 290 advisory
+historical-citation warnings, not gate failures). `document()` no-diff. No
+DESIGN.md principle changed (GP5/GP6/GP7 worked-under, not modified) ⇒
+`cairn_impact` skipped. `check()` 0/0/0. No NEWS entry owed (test infra +
+DESCRIPTION config only; no user-visible change). `data-raw/profile-tests.R`
+covered by the existing `^data-raw$` `.Rbuildignore` entry.
+
+**Independent three-lens review (fresh context, parallel):**
+- [O] diff-bug (Opus): **0 findings** — all 9 reduced blocks assert B-invariant
+  structural properties; every O1/O2 oracle count left untouched; 3 asserted
+  `samples` literals match their reduced fits; `start-first` basenames resolve;
+  `fit_ds` memoization read-only + per-worker safe; no R/ code changed.
+- [S] blame-history (Sonnet): **0 findings** — each reduced count was introduced
+  at its feature commit (M16/M18/M21) and never later raised to cure a flake;
+  no ADR-042/M27/M28 resurrection; memoization contradicts no D-entry.
+- [S] prior-PR-comments (Sonnet): **no prior-PR evidence** — repo has 0 human PR
+  review comments across all 62 merged PRs; clean no-op, 0 findings.
+
+Zero surviving findings across all three lenses ⇒ nothing passed to the scorer;
+actioned list empty, below-80 list empty. Non-finding noted (not actioned):
+`tests/testthat/_problems/` holds stale local testthat artifacts (gitignored +
+`.Rbuildignore`d, not in the diff, not shipped).
+
+**Diffstat (vs main):** DESCRIPTION +2, test-ci-bootstrap.R (14 lines),
+test-d-study.R (44 lines), data-raw/profile-tests.R (new), cairn tracking. No
+`R/` product code.
