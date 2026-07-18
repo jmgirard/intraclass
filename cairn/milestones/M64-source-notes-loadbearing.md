@@ -190,7 +190,10 @@ agent that did not generate the findings.
   the unrounded 0.71484 (O2) but not against the registry's 3-dp 0.715, which
   rounds half-up to .72 where the paper prints .71. The conclusion ("no oracle
   value is contradicted") survives via the unrounded chain. Real but narrow;
-  surfaced to the maintainer at the approval gate as an optional tightening.
+  surfaced at the approval gate, where the **maintainer elected to fix it**
+  (2026-07-18). The sentence now rounds from O2's unrounded 0.71484 and states
+  explicitly that the registry's 3-dp column and the paper's 2-dp column are
+  roundings of the same quantity, not of each other.
 - **F5 (32) — the "wrong-paper/year" breadcrumb was dropped, not migrated.** The
   pre-M64 `BIBLIOGRAPHY.md` ten Hove (2022) entry recorded that
   `choosing-an-icc.Rmd`'s "fifth choice" had been corrected in M5 Slice 2 from a

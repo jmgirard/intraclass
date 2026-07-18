@@ -113,8 +113,12 @@ printed here but not carried in O2.)
 | ICC(2,4) | .62 | 0.620 | ICC(A,k) |
 | ICC(3,4) | .91 | 0.909 | ICC(C,k) |
 
-Every printed value is the correct 2-dp rounding of the corresponding registry
-value — **no oracle value is contradicted**. See Open questions for the
+Every printed value is the correct 2-dp rounding of the **underlying** quantity —
+**no oracle value is contradicted**. Round from the unrounded value, not from the
+registry's 3-dp figure: `ICC(3,1)` is 0.71484 (O2's mean-square chain), which is
+0.715 at 3 dp and **.71** at 2 dp, whereas re-rounding the 3-dp 0.715 would give
+.72. The registry's 3-dp column and the paper's 2-dp column are both roundings of
+the same quantity, not of each other. See Open questions for the
 precision-provenance caveat.
 
 ## Other results the package touches
