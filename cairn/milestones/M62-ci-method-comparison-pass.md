@@ -95,7 +95,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] **T1** — Ingest ukoumunne2003 (resampling variants incl. variance-stabilizing
+- [x] **T1** — Ingest ukoumunne2003 (resampling variants incl. variance-stabilizing
       bootstrap-t + coverage findings) and ohyama2025 (one-way CI-method coverage/
       width table) as `references/` notes with `INDEX.md` lines. (RB tripwire: ip-touching)
 - [ ] **T2** — Pre-register the "not worse" criterion + the anchored one-way cell
@@ -120,6 +120,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-17: T1 done — source notes committed: ukoumunne2003.md (subject-resample + log F transformed bootstrap-t + IJ SE eq.7) and ohyama2025.md (oracle: NBOOT≈SEARLE/slightly worse, REML best) + INDEX lines.
 - 2026-07-17: gate re-cut — M62 narrowed to non-parametric bootstrap ONLY on the one-way ICC (ukoumunne2003 + ohyama2025 oracle); profile-likelihood (MPL two-way, xiao2013) split to its own milestone (candidate; MPL=candidate, naive PL=reference). Title/Goal/Scope/AC/Coverage/Tasks re-authored via the gate.
 - 2026-07-17: T1 complete (7 PDFs triaged). Sources SPLIT BY DESIGN: non-param bootstrap = ukoumunne2003 (one-way, Gaussian, under-covers ≤10 clusters); profile-likelihood = xiao2013 MODIFIED PL (TWO-WAY random, Eq.1; naive PL "too narrow"/under-covers, hence MPL). Bonus oracle: ohyama2025 = published CI-method comparison for one-way ICC (incl. Ukoumunne bootstrap; concludes REML best). Off-anchor: saha2005/saha2012 (binary), bobak2018 (Bayesian), xiao2009 (common-ICC sibling).
 - 2026-07-17: UNBLOCKED — PDFs received.
