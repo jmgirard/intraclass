@@ -42,24 +42,37 @@ autoplot.icc_dstudy <- function(object, ...) {
   ml <- isTRUE(attr(object, "multilevel"))
   pal <- icc_palette()
 
+  # A projection overlays one curve per error definition (absolute agreement vs
+  # consistency); the multilevel projection also splits by level, which the facet
+  # separates. Group + colour by the error definition so the overlaid curves are
+  # drawn as distinct lines rather than connected into a sawtooth. A one-way /
+  # single-definition projection has one curve (`type` absent or a single value).
+  nice <- c(agreement = "Absolute agreement", consistency = "Consistency")
+  curve <- if (is.null(df$type)) rep(NA_character_, nrow(df)) else df$type
+  present <- intersect(names(nice), unique(curve))
+  multi_curve <- length(present) > 1
+  df$curve <- factor(unname(nice[curve]), levels = unname(nice[present]))
+
   p <- ggplot2::ggplot(
     df,
     ggplot2::aes(x = .data[[x_col]], y = .data$estimate)
   )
-  if (ml) {
-    # One curve per level, coloured from the palette; the facets separate them, so
-    # the redundant legend is suppressed by icc_theme().
+  if (multi_curve) {
     p <- p +
       ggplot2::geom_ribbon(
         ggplot2::aes(
           ymin = .data$conf.low,
           ymax = .data$conf.high,
-          fill = .data$level
+          fill = .data$curve,
+          group = .data$curve
         ),
         alpha = 0.18
       ) +
-      ggplot2::geom_line(ggplot2::aes(colour = .data$level), linewidth = 0.8) +
-      ggplot2::geom_point(ggplot2::aes(colour = .data$level), size = 2) +
+      ggplot2::geom_line(
+        ggplot2::aes(colour = .data$curve, group = .data$curve),
+        linewidth = 0.8
+      ) +
+      ggplot2::geom_point(ggplot2::aes(colour = .data$curve), size = 2) +
       ggplot2::scale_colour_manual(values = pal) +
       ggplot2::scale_fill_manual(values = pal)
   } else {
@@ -84,7 +97,14 @@ autoplot.icc_dstudy <- function(object, ...) {
       )
     ) +
     icc_theme()
-  # A multilevel projection has one curve per level; facet so the subject- and
+  # When more than one curve is drawn, colour now carries information (which error
+  # definition), so restore the legend icc_theme() suppresses.
+  if (multi_curve) {
+    p <- p +
+      ggplot2::labs(colour = "Coefficient", fill = "Coefficient") +
+      ggplot2::theme(legend.position = "bottom")
+  }
+  # A multilevel projection has one panel per level; facet so the subject- and
   # cluster-level curves are not overplotted (mirrors autoplot.icc).
   if (ml) {
     p <- p + ggplot2::facet_wrap(ggplot2::vars(.data$level))

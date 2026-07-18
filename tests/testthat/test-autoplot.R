@@ -243,7 +243,33 @@ test_that("plot.icc returns its input invisibly", {
   expect_invisible(plot(fit))
 })
 
-test_that("autoplot.icc_dstudy renders the projected curve faithfully", {
+test_that("autoplot.icc_dstudy renders each projected curve faithfully", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:5, seed = 1) # two curves: agreement + consistency
+  p <- ggplot2::autoplot(ds)
+  expect_s3_class(p, "ggplot")
+
+  line <- built_layer(p, 2) # geom_line
+  # Every projected (m, estimate) point is drawn, across both curves.
+  expect_equal(
+    sort(paste(line$x, round(line$y, 8))),
+    sort(paste(ds$m, round(ds$estimate, 8)))
+  )
+  ribbon <- built_layer(p, 1) # geom_ribbon
+  expect_equal(sort(round(ribbon$ymin, 8)), sort(round(ds$conf.low, 8)))
+  expect_equal(sort(round(ribbon$ymax, 8)), sort(round(ds$conf.high, 8)))
+})
+
+test_that("autoplot.icc_dstudy draws overlaid curves as separate lines", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   fit <- icc(
@@ -255,16 +281,14 @@ test_that("autoplot.icc_dstudy renders the projected curve faithfully", {
     seed = 1
   )
   ds <- d_study(fit, m = 1:5, seed = 1)
-  p <- ggplot2::autoplot(ds)
-  expect_s3_class(p, "ggplot")
-
-  ord <- ds[order(ds$m), , drop = FALSE]
-  ribbon <- built_layer(p, 1) # geom_ribbon
-  line <- built_layer(p, 2) # geom_line
-  expect_equal(line$x, ord$m)
-  expect_equal(line$y, ord$estimate)
-  expect_equal(ribbon$ymin, ord$conf.low)
-  expect_equal(ribbon$ymax, ord$conf.high)
+  line <- built_layer(ggplot2::autoplot(ds), 2)
+  # Agreement and consistency are two grouped lines, not one line zigzagging
+  # between them (the pre-M61 sawtooth).
+  expect_equal(length(unique(line$group)), 2L)
+  # Within each group the x-sequence is monotone (a proper left-to-right curve).
+  for (g in unique(line$group)) {
+    expect_false(is.unsorted(line$x[line$group == g]))
+  }
 })
 
 # --- M61 polish: shared theme, colourblind-safe palette, value labels ---------

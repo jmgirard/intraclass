@@ -60,9 +60,10 @@ recorded manual visual review — not image snapshots.
 - [ ] AC4: No faithful-rendering regression — the existing `test-autoplot.R`
       layer-data assertions (rendered layer == source numbers) still pass — and
       `ggplot2` remains Suggests-only (no new `Imports`; DESCRIPTION grep guard).
-- [ ] AC5: A manual visual review of all three rendered views is recorded at the
-      review gate (committed example renders + a reviewer sign-off note in
-      `## Review`).
+- [ ] AC5: A manual visual review of all three views (single-level + multilevel)
+      is recorded at the review gate — a reviewer sign-off note in `## Review` —
+      reproducible from a committed `data-raw/` render script (`data-raw/` is
+      `.Rbuildignore`d, so no images ship in the package).
 - [ ] AC6: The `verify` slot is clean (`cairn/PROFILE.md`) — full `test-autoplot.R`
       green, `air format --check` clean, `lintr` clean on `R/autoplot.R`.
 
@@ -98,7 +99,7 @@ recorded manual visual review — not image snapshots.
       applied per view, palette fills match, value-label text == source numbers),
       confirm the existing faithful-rendering assertions still pass, and add a
       DESCRIPTION `ggplot2`-in-Suggests guard.
-- [ ] T6: Produce the three rendered views (scratch/`data-raw` render script),
+- [x] T6: Produce the three rendered views (scratch/`data-raw` render script),
       record the manual visual review in `## Review`, and run the `verify` slot
       clean.
 
@@ -112,6 +113,9 @@ recorded manual visual review — not image snapshots.
   test bar (no vdiffr); land before v0.1.0 (M48 depends on M61).
 - 2026-07-17: in-progress; branch m61-plotting-polish cut from main @86d16e8.
 - 2026-07-17: T1-T5 — added R/autoplot-theme.R (icc_theme + Okabe-Ito icc_palette); restyled all three autoplot views (theme, palette fills/level colours, value labels on coefficient/component views); +6 structural tests. test-autoplot.R 31 pass/0 fail; air + lintr clean.
+- 2026-07-17: discovered + fixed a pre-existing d-study defect (within AC3/AC4): autoplot.icc_dstudy drew a single ungrouped geom_line over the overlaid agreement+consistency curves → a sawtooth (also within each level facet). Now grouped/coloured by error definition, faceted by level, with a restored legend; +2 tests incl. an anti-sawtooth group-count guard.
+- 2026-07-17: AC5 amended via mini-gate (evidence = committed data-raw/ render script + review sign-off, not committed PNG binaries; user chose 2026-07-17). Added reproducible data-raw/plot-previews.R (6 views). Implementer visual review PASS on all six renders; formal sign-off deferred to ## Review at the review gate.
+- 2026-07-17: T6 — data-raw/plot-previews.R runs clean into a fresh dir; air format --check clean (covers data-raw). test-autoplot.R 33 pass/0 fail.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
