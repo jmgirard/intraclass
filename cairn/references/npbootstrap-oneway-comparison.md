@@ -89,16 +89,21 @@ prototype `B = 2000`. `boott` = transformed bootstrap-t (primary candidate).
 `n_ok` = datasets on which the method returned an interval (MC defers at the
 boundary via `intraclass_singular_fit`); MC coverage is *conditional* on `n_ok`.
 
-**Oracle cross-check (prototype vs ukoumunne2003 Fig. 2, normal; PRINCIPLES.md #1) — PASS.**
+**Oracle cross-check (prototype vs ukoumunne2003 Table I exact values; PRINCIPLES.md #1) — PASS.**
+Reference coverages are derived from Table I (p. 3815) error rates as
+`100 − lower − upper`; the extracted values live in `ukoumunne2003.md`. Tolerance
+±0.03 (pre-registered).
 
-| cell (k, n=10, ρ=0.05) | perc | boott | bca |
-|---|---|---|---|
-| U10 | 0.770 | 0.921 | 0.820 |
-| U30 | 0.904 | 0.947 | 0.922 |
-| U50 | 0.918 | 0.953 | 0.937 |
+| cell (k, n=10, ρ=0.05) | boott (ours) | boott (Table I) | Δ | bca (ours) | bca (Table I) | Δ |
+|---|---|---|---|---|---|---|
+| U10 | 0.921 | 0.938 | .017 | 0.820 | 0.834 | .014 |
+| U30 | 0.947 | 0.944 | .003 | 0.922 | 0.920 | .002 |
+| U50 | 0.953 | 0.940 | .013 | 0.937 | 0.921 | .016 |
 
-Reproduces the published pattern — untransformed variants under-cover at small k,
-the transformed bootstrap-t stays near nominal, all converge by k=50.
+All six deltas ≤ .017, inside ±0.03. (Percentile — ours .770/.904/.918 — is not
+tabulated in Table I; it tracks the Fig. 2 pattern qualitatively.) The published
+pattern reproduces: untransformed variants under-cover at small k, the
+transformed bootstrap-t stays near nominal, all converge by k=50.
 
 **Comparison cells (coverage / median width; MC `n_ok` in parens).**
 

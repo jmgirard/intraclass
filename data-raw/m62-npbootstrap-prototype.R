@@ -74,7 +74,7 @@ df_to_groups <- function(df) {
 
 # --- non-parametric bootstrap intervals (ukoumunne2003) -----------------------
 # Returns a named list of c(lower, upper) for each variant.
-npboot_oneway <- function(df, B = 2000L, conf = 0.95, seed = NULL) {
+npboot_oneway <- function(df, n_boot = 2000L, conf = 0.95, seed = NULL) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -83,10 +83,10 @@ npboot_oneway <- function(df, B = 2000L, conf = 0.95, seed = NULL) {
   obs <- oneway_anova(groups)
   alpha <- 1 - conf
 
-  # B bootstrap resamples of whole subjects (with replacement).
-  rho_star <- numeric(B)
-  t_star <- numeric(B) # studentized log F, for the bootstrap-t
-  for (b in seq_len(B)) {
+  # n_boot bootstrap resamples of whole subjects (with replacement).
+  rho_star <- numeric(n_boot)
+  t_star <- numeric(n_boot) # studentized log F, for the bootstrap-t
+  for (b in seq_len(n_boot)) {
     idx <- sample.int(k, k, replace = TRUE)
     fit <- oneway_anova(groups[idx])
     rho_star[b] <- fit$rho
@@ -132,7 +132,7 @@ npboot_oneway <- function(df, B = 2000L, conf = 0.95, seed = NULL) {
 # ordered endpoints bracketing rho_hat. NOT a coverage run (that is T4).
 if (interactive()) {
   d <- sim_oneway(k = 30, n = 4, rho = 0.5, seed = 1)
-  out <- npboot_oneway(d, B = 500L, seed = 2)
+  out <- npboot_oneway(d, n_boot = 500L, seed = 2)
   str(out)
   stopifnot(
     is.finite(out$percentile),

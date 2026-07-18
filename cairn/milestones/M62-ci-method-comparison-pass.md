@@ -161,8 +161,11 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
   `m62-coverage-results.rds` (7 cells). Reproducibility: RR01 independently
   re-ran the prototype columns for C4 and U10 from scratch with the harness
   seeding and reproduced the fixture **to 4 decimals**. Oracle: boott
-  U10/U30/U50 = .921/.947/.953 vs ukoumunne2003 Table I exact .938 (k=10,
-  ρ=.05) → Δ .014–.017, inside the pre-registered ±.03; ohyama2025 corroborates
+  U10/U30/U50 = .921/.947/.953 vs ukoumunne2003 Table I (p. 3815, coverage
+  derived as 100−lower−upper) .938/.944/.940, and bca .820/.922/.937 vs
+  .834/.920/.921 — all six Δ ≤ .017, inside the pre-registered ±.03. The Table I
+  values are now committed in `references/ukoumunne2003.md` (review finding 3),
+  so the check is reproducible from the repo; ohyama2025 corroborates
   qualitatively (NBOOT ≈ classical, REML best).
 - **AC3 (failure axis, GP6)** ✅ Grid spans the axis: near-zero-ICC boundary
   cells C2/C4 (ρ=.05) and few-subjects cells C3/C4 (k=12), plus interior C1
@@ -191,3 +194,42 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
   top-level files (additions are under already-ignored `data-raw/` + `cairn/`);
   **no NEWS entry required** — the milestone ships no user-visible change.
   Full `R CMD check` runs on PR #68 CI (merge gated on green).
+- **CI lint failure (fixed).** First push failed the `lint` job:
+  `object_name_linter` on UPPERCASE constants in the two `data-raw/` scripts.
+  Renamed to snake_case (`n_rep`, `b_proto`, `b_boot`, `smoke`, `out_path`,
+  prototype param `B`→`n_boot`), dropped an unused `CONF`. `lintr::lint_package()`
+  now returns **0 lints** locally; numerics unaffected (identifier rename only).
+
+### Independent review — 3 lenses + scorer
+
+- **[S] prior-PR-comments:** *no prior-PR evidence* (8/12 touched files are new;
+  this repo reviews via the cairn RB/RR archive, not GitHub PR comments). 0 findings.
+- **[S] blame-history:** 0 findings. Verified `DECISIONS.md` strictly append-only
+  (D-001–D-005 untouched; D-006 additive, not in tension with D-004 or ADR-025),
+  ROADMAP candidate lineage preserved through the split, INDEX additive.
+- **[O] diff-bug:** 5 findings; independently confirmed every fixture number and
+  the criterion arithmetic, and re-derived the eq. 7 IJ SE identity.
+- **[S] scorer** (fresh agent, did not generate the findings): **all 5 scored
+  below the 80 threshold** → excluded from the actioned list, logged here.
+  Scorer confirmed **none changes the GO/NO-GO verdict** — each affects only the
+  strength/framing of supporting evidence:
+  1. *(20)* Per-cell `seed_base` uses only the cell name's first char, so C1/C2
+     and C3/C4 share a random stream — weakens the "four independent cells"
+     framing; per-cell coverage remains valid/unbiased. Already found + triaged
+     by RR01 ("Beyond the brief" 1) and deferred to the impl milestone.
+  2. *(35)* `icc_ci()` passes a fixed `seed = 1L` per replicate, so incumbent
+     resampling noise is common across reps; affects criterion-2 margins, which
+     RR01 established were never binding (the absolute .93 floor did the work).
+  3. *(30)* AC2 cited ukoumunne Table I "exact values" the source note didn't
+     carry — **fixed now anyway** (values committed; see AC2 evidence).
+  4. *(20)* Width tiebreaker not on a common scale at boundary cells (prototype
+     untruncated vs glmmTMB's structurally non-negative bounds); RR01 already
+     ruled the asymmetry inherent to cross-family comparison, and the tiebreaker
+     is scoped within the candidate's own variants.
+  5. *(25)* Missing `tryCatch` around `npboot_oneway()`; theoretical `numeric(0)`
+     path in `icc_ci()`. Untriggered across the completed 7-cell run; RR01
+     deferred classed guards to the exported implementation.
+- **Triage:** finding 3 **fixed now** (free, and it removed an inconsistency this
+  review itself introduced). Findings 1, 2, 4, 5 **deferred to the exported-
+  implementation milestone**, whose ROADMAP candidate now names them explicitly
+  alongside the D-006 conditions — none is a defect in the GO decision.

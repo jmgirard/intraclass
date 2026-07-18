@@ -14,12 +14,11 @@
 suppressMessages(devtools::load_all(quiet = TRUE))
 source("data-raw/m62-npbootstrap-prototype.R")
 
-CONF <- 0.95
-N_REP <- as.integer(Sys.getenv("M62_NREP", "1000"))
-B_PROTO <- as.integer(Sys.getenv("M62_BPROTO", "2000"))
-B_BOOT <- 199L
-SMOKE <- nzchar(Sys.getenv("M62_SMOKE")) # first comparison + first oracle cell only
-OUT <- if (SMOKE) {
+n_rep <- as.integer(Sys.getenv("M62_NREP", "1000"))
+b_proto <- as.integer(Sys.getenv("M62_BPROTO", "2000"))
+b_boot <- 199L
+smoke <- nzchar(Sys.getenv("M62_SMOKE")) # first comparison + first oracle cell only
+out_path <- if (smoke) {
   "data-raw/m62-coverage-smoke.rds"
 } else {
   "data-raw/m62-coverage-results.rds"
@@ -81,18 +80,18 @@ run_cell <- function(name, cell, incumbents) {
   } else {
     c("perc", "boott", "bca")
   }
-  cov <- matrix(NA, N_REP, length(methods), dimnames = list(NULL, methods))
+  cov <- matrix(NA, n_rep, length(methods), dimnames = list(NULL, methods))
   wid <- matrix(
     NA_real_,
-    N_REP,
+    n_rep,
     length(methods),
     dimnames = list(NULL, methods)
   )
   t0 <- Sys.time()
-  for (r in seq_len(N_REP)) {
+  for (r in seq_len(n_rep)) {
     seed <- seed_base + r
     d <- sim_oneway(k, n, rho, seed = seed)
-    p <- npboot_oneway(d, B = B_PROTO, seed = seed * 7L + 1L)
+    p <- npboot_oneway(d, n_boot = b_proto, seed = seed * 7L + 1L)
     for (v in c("perc", "boott", "bca")) {
       ci <- switch(
         v,
@@ -105,7 +104,7 @@ run_cell <- function(name, cell, incumbents) {
     }
     if (incumbents) {
       mc <- icc_ci(d, "montecarlo")
-      pb <- icc_ci(d, "bootstrap", boot = B_BOOT)
+      pb <- icc_ci(d, "bootstrap", boot = b_boot)
       cov[r, "mc"] <- covered(mc, rho)
       wid[r, "mc"] <- width(mc)
       cov[r, "pboot"] <- covered(pb, rho)
@@ -116,7 +115,7 @@ run_cell <- function(name, cell, incumbents) {
         "  [%s] %d/%d  (%.1f min elapsed)\n",
         name,
         r,
-        N_REP,
+        n_rep,
         as.numeric(Sys.time() - t0, units = "mins")
       ))
     }
@@ -131,7 +130,7 @@ run_cell <- function(name, cell, incumbents) {
   )
 }
 
-if (SMOKE) {
+if (smoke) {
   comparison_cells <- comparison_cells[1]
   oracle_cells <- oracle_cells[1]
 }
@@ -140,11 +139,11 @@ results <- list()
 for (nm in names(comparison_cells)) {
   cat(sprintf("== comparison cell %s ==\n", nm))
   results[[nm]] <- run_cell(nm, comparison_cells[[nm]], incumbents = TRUE)
-  saveRDS(results, OUT) # incremental checkpoint
+  saveRDS(results, out_path) # incremental checkpoint
 }
 for (nm in names(oracle_cells)) {
   cat(sprintf("== oracle-check cell %s ==\n", nm))
   results[[nm]] <- run_cell(nm, oracle_cells[[nm]], incumbents = FALSE)
-  saveRDS(results, OUT)
+  saveRDS(results, out_path)
 }
-cat("DONE — wrote", OUT, "\n")
+cat("DONE — wrote", out_path, "\n")

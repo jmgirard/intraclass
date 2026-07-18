@@ -46,6 +46,30 @@ independent. `ρ = σ²_a / (σ²_a + σ²_e)`. This is the one-way ICC — pack
 - **The `log F`-transformed bootstrap-t is ≈ nominal (0.95) across k**, including
   k = 10 (Fig. 2, ×-marker). It is the paper's recommended method.
 
+## Table I reference values (p. 3815) — the M62 oracle anchor
+
+Table I reports **error rates** (% beyond each bound) for 95 % intervals, normal
+outcomes, n = 10 subjects/cluster. **Coverage is derived as
+`100 − lower − upper`** (stated here so the derivation is explicit, not implied).
+Extracted for ρ = 0.05, the M62 oracle-check cells:
+
+| k | method | lower % | upper % | ⇒ coverage |
+|---|---|---|---|---|
+| 10 | transformed bootstrap-t | 3.25 | 2.95 | **0.938** |
+| 10 | bias-corrected accelerated | 2.4 | 14.2 | **0.834** |
+| 10 | bootstrap-t (untransformed) | 8.1 | 2.3 | 0.896 |
+| 10 | analytical (exact F) | 2.2 | 2.85 | 0.950 |
+| 30 | transformed bootstrap-t | 3.2 | 2.4 | **0.944** |
+| 30 | bias-corrected accelerated | 2.2 | 5.8 | **0.920** |
+| 50 | transformed bootstrap-t | 3.45 | 2.6 | **0.940** |
+| 50 | bias-corrected accelerated | 2.7 | 5.2 | **0.921** |
+
+Note the *tail* asymmetry Table I exposes and two-sided coverage hides: at k=10,
+ρ=0.05 BCa misses 14.2 % on the upper tail vs 2.4 % lower; only the transformed
+bootstrap-t distributes error roughly evenly (3.25/2.95). Percentile is not
+tabulated in Table I. Paper's global claim (p. 3816): transformed bootstrap-t
+coverage "never lower than 3 per cent below the nominal 95".
+
 ## Traces to (M62)
 
 - The prototype non-parametric bootstrap (subject-resampling + transformed
