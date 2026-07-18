@@ -8,7 +8,7 @@ and milestones; never restate a value here.
 - [ORACLES.md](ORACLES.md) — the repo's **declared oracle-registry home**
   (D-007): 39 entries, each naming its oracle ID, type, asserting test, source,
   and provenance. Every oracle value in the test suite traces to an entry here.
-- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (18 entries). Primary
+- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (27 entries). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
@@ -17,6 +17,14 @@ and milestones; never restate a value here.
 
 ## Source notes (`<citekey>.md`)
 
+- [bhandary2006.md](bhandary2006.md) — source note (M65): Gaussian familial
+  `F_max` **equality test** across three populations, unequal family sizes; the
+  asymptotic LRT's size reaches 0.41 against a nominal 0.05 at few families and
+  low ρ. Outside the contract boundary (belongs to the M67 cluster by subject).
+- [bobak2018.md](bobak2018.md) — source note (M65): two-rater **fixed-rater
+  consistency** ICC estimated in a Bayesian hierarchy with a variance function;
+  ignoring bounded-scale heteroscedasticity or pooling across studies inflates the
+  ICC. Reports no coverage.
 - [fleiss1973.md](fleiss1973.md) — source note (M64): weighted kappa with squared
   weights ≡ the two-way random single-rating **agreement** ICC at k = 2; shelf
   evidence for the kappa–ICC boundary, not an oracle.
@@ -29,6 +37,17 @@ and milestones; never restate a value here.
 - [mcgraw1996.md](mcgraw1996.md) — source note (M64): the ICC(A,·)/ICC(C,·) labels,
   the five models, and **Case 3A** (θ²_c = Σc²_j/(k−1)); includes the published
   correction (1(4):390).
+- [mehta2018.md](mehta2018.md) — source note (M65): two-way random `ICC(2,1)`
+  under five subject distributions — convex < uniform < concave at identical rater
+  quality, because subject variance moves and rater error variance does not.
+  Reports no coverage; `N = 80` matches `N = 300` on the point estimate only.
+- [saha2005.md](saha2005.md) — source note (M65): bias-corrected MLE (BCML) of the
+  **binary** beta-binomial ICC; a point-estimation paper with no coverage results.
+  Table I quantifies near-boundary non-convergence (~15 % acceptance at worst).
+  §4 contradicts Appendix A on `var(φ̂_ML)`; Appendix A is correct.
+- [saha2012.md](saha2012.md) — source note (M65): profile-likelihood CI for the
+  **binary** beta-binomial ICC; PL near-nominal where four asymptotic Wald
+  intervals under-cover badly. Outside the contract boundary.
 - [shrout1979.md](shrout1979.md) — source note (M64): the six ICC forms, the three
   cases, and the **O1** worked example (Tables 2–4); Table 4 prints two decimals.
 - [tenhove2020.md](tenhove2020.md) — source note (M64): the **O-Bayes** source —
@@ -49,6 +68,14 @@ and milestones; never restate a value here.
 - [ukoumunne2003.md](ukoumunne2003.md) — source note (M62): the non-parametric
   bootstrap CI for the one-way ICC (subject-resample + `log F` variance-stabilizing
   transformed bootstrap-t + infinitesimal-jackknife SE); under-covers at k=10.
+- [xiao2009.md](xiao2009.md) — source note (M65): profile-likelihood CI for a
+  **common** ICC across populations of unequal-size families. Naive PL covers
+  0.931–0.950 against a nominal 0.95 here — the design contrast that shows PL's
+  under-coverage in `xiao2013` is design-specific, not a property of PL.
+- [xiao2013.md](xiao2013.md) — source note (M65): the **modified profile
+  likelihood** (`κ_m`) for the two-way random interrater ICC — the named source
+  for the PL sibling candidate. Documents naive PL bottoming out at 0.796 vs a
+  nominal 0.90, and calibrates `κ_m` only over ρ ∈ [0.6, 0.9].
 
 ## Synthesis notes
 
@@ -72,22 +99,28 @@ the shelf and which milestone ingests it. 30 PDFs, each verified against its own
 title page (M63/T1). Citekey convention: same-author-same-year takes a letter
 suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
-**Ingested (source/synthesis note exists) — 12:** `fleiss1973`, `jorgensen2021`,
-`koo2016`, `mcgraw1996`, `ohyama2025`, `shrout1979`, `tenhove2020`, `tenhove2022`,
-`tenhove2024`, `tenhove2025a`, `tenhove2025b`, `ukoumunne2003`. The ten
+**Ingested (source/synthesis note exists) — 19:** `bhandary2006`, `bobak2018`,
+`fleiss1973`, `jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`,
+`saha2005`, `saha2012`, `shrout1979`, `tenhove2020`, `tenhove2022`, `tenhove2024`,
+`tenhove2025a`, `tenhove2025b`, `ukoumunne2003`, `xiao2009`, `xiao2013`. The ten
 load-bearing primary sources were ingested by M64; `ohyama2025` and
-`ukoumunne2003` by M62.
+`ukoumunne2003` by M62; the seven interval-methods/robustness sources by M65.
 
 Three shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
 (© 2021 and © 2022 respectively, no journal pagination), and `tenhove2020` is an
 author/accepted manuscript with no publisher fields at all.
 
-**M65 — interval methods & robustness (7):** `xiao2013` (modified profile
-likelihood) · `xiao2009` (profile-likelihood CIs, common ICC) · `saha2012`
-(profile-likelihood CI) · `saha2005` (bias-corrected MLE) · `bhandary2006`
-(small-sample inference) · `mehta2018` (ICC under various distributions) ·
-`bobak2018` (assumption violations).
+**M65 — interval methods & robustness (7): ingested 2026-07-18.** Reading them
+cold established that the cluster is **not** the one-way-interval-methods group
+its name suggests — only `mehta2018` and `bobak2018` are inside the package's
+contract boundary. Design applicability per note: `xiao2013` two-way random
+interrater (modified profile likelihood) · `xiao2009` familial multi-sample
+common ICC · `saha2012` **binary** beta-binomial ICC interval · `saha2005`
+**binary** beta-binomial point estimator · `bhandary2006` Gaussian familial
+**equality test** (M67 territory) · `mehta2018` two-way random `ICC(2,1)` under
+varying subject distributions · `bobak2018` two-rater fixed-rater consistency ICC
+under heteroscedasticity.
 
 **M66 — foundational & interpretation (7):** `bartko1966` · `bartko1976` ·
 `hedges2012` (ICC variance, 3-/4-level) · `jorgensen2019` (planned-missing

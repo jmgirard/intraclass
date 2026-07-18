@@ -76,7 +76,7 @@ the tier-C candidate row; the load-bearing sources → M64.
 - [x] T3: Notes for the distributional-robustness pair — `mehta2018`,
       `bobak2018`; connect each to the GP6 known-failure axes the package
       already sweeps (near-zero ICC, few subjects, non-normality).
-- [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
+- [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
 - [ ] T5: Run the profile `verify` slot; open the PR and drive CI green.
 
@@ -113,9 +113,45 @@ the tier-C candidate row; the load-bearing sources → M64.
   GP6-axis table; T3 also found that "non-normality" names three different axes
   across M62/M65 (error tails / bounded-scale heteroscedasticity / subject-
   distribution shape).
+- 2026-07-18: T4 done — 7 `BIBLIOGRAPHY.md` entries + 7 `INDEX.md` lines added;
+  shelf inventory updated (12 → 19 ingested). `cairn_validate`: **all checks
+  passed**, `PASS references index<->disk`; the 292 advisory warnings are all
+  pre-existing stale-milestone-id references, none from M65.
+- 2026-07-18: out-of-scope hygiene (logged, not swept): `ukoumunne2003` and
+  `ohyama2025` had source notes from M62 but **no `BIBLIOGRAPHY.md` entry**;
+  both added here (2 lines) rather than left as a known gap.
+- 2026-07-18: MD-1 recorded — the Goal's "one-way-ICC interval-method" premise is
+  false for most of the cluster; Goal deliberately not edited (plan-owned), no AC
+  changed, correction recorded in MD-1 + each note + `INDEX.md`.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+### MD-1 (2026-07-18): the Goal's "one-way-ICC interval-method" premise is false; the notes stand, the Goal is not edited
+
+**Context.** The Goal calls these "the seven one-way-ICC interval-method and
+distributional-robustness papers". Reading all seven cold refuted that on both
+counts. Design: three are **two-way** (`xiao2013`, `mehta2018`, `bobak2018`), two
+are **binary** beta-binomial (`saha2012`, `saha2005`), one is a **familial
+multi-sample** common ICC (`xiao2009`), one is a **hypothesis test** rather than
+an estimator or interval (`bhandary2006`). Inferential target: four report no
+confidence interval at all (`saha2005`, `bhandary2006`, `mehta2018`, `bobak2018`).
+Only `xiao2013` is a primary source either open CI candidate can actually use,
+and only `mehta2018`/`bobak2018` sit inside the contract boundary.
+
+**Decision.** The Goal is **not** edited — it is plan-owned and "a wrong goal
+returns to plan, never edited in place" — and this milestone is **not** returned
+to `/milestone-plan`. The Goal's *operative* intent (ingest these seven named
+sources; establish what each covers) was delivered in full, and AC2 exists
+precisely to surface design-specificity, so the refutation is the milestone's
+intended product rather than a failure of it. The correction is recorded here,
+in each note's "Design applicability" table, and in `INDEX.md`'s shelf inventory.
+
+**Consequences.** No acceptance criterion changes; all six stand as written.
+Future readers must not infer scope from the Goal sentence — `INDEX.md` and the
+per-note tables are authoritative on what each source covers. The PL sibling
+candidate should cite `xiao2013` only, and inherits that paper's `ρ ∈ [0.6, 0.9]`
+calibration fence. `bhandary2006` should be read with the M67 cluster.
 
 ## Review
 <!-- owner: review · exclusive -->
