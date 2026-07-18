@@ -77,7 +77,7 @@ the fit work at a gate (records the finding; ships nothing).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Feasibility spike — extend `data-raw/pilot-sem-multilevel.R` (seeded,
+- [x] T1: Feasibility spike — extend `data-raw/pilot-sem-multilevel.R` (seeded,
       checkpoint before pins) to fit two-level FIML on incomplete cells and
       unequal-`n_s` data, compare to glmmTMB, and derive/verify the τ²
       generalization under imbalance; append a GO/NO-GO section to
@@ -106,6 +106,14 @@ the fit work at a gate (records the finding; ships nothing).
 
 - 2026-07-17: created by /milestone-plan (promotes the lavaan-multilevel-siblings
   candidate, part C; plan gate: 3 separate milestones, feasibility spike as T1).
+- 2026-07-17: started /milestone-implement (status → in-progress, branch
+  m58-lavaan-multilevel-incomplete); spike gate resolved "run the spike now"
+  (ip-touching tripwire held in reserve for a NO-GO/surprise).
+- 2026-07-17: T1 done. Spike Stages 3–4 added to `data-raw/pilot-sem-multilevel.R`
+  (full run PILOT PASS). GO: two-level FIML recovers components on incomplete data
+  (index-class split intact); the τ² rater inflation generalizes to the HARMONIC
+  MEAN of per-cluster subject counts, τ² = (σ²_cr + σ²_res/H)/C, strictly beating
+  the size-weighted grand law under imbalance. Evidence in the synthesis note.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
