@@ -21,8 +21,8 @@ Give each primary source the test suite already depends on its own
 **In:** nine `<citekey>.md` source notes, each re-read from
 `cairn/references/pdf/` per the maintainer's plan-gate choice (migrate **and**
 deepen, not text-shuffle): `shrout1979`, `mcgraw1996`, `fleiss1973`, `koo2016`,
-`tenhove2020`, `tenhove2022`, `tenhove2024`, `tenhove2025`, and the renamed
-network-data paper (M63/T1). Each carries the validation-doctrine fields: full
+`tenhove2020`, `tenhove2022`, `tenhove2024`, `tenhove2025a` (network data) and
+`tenhove2025b` (planned incomplete) — the citekey pair assigned by M63/T1. Each carries the validation-doctrine fields: full
 citation, extracted values with page/table anchors, verbatim-critical values
 quoted exactly, what traces to it, open questions. `BIBLIOGRAPHY.md` entries
 shrink to citation + pointer as their annotations move into the notes;
@@ -72,9 +72,9 @@ escalate, never a silent correction.
       exactly.
 - [ ] T2: Notes for the ten Hove family — `tenhove2020` (O-Bayes hyperprior
       DGP), `tenhove2022` (M5 multilevel estimand, Eqs. 6–7/12–13, Table 3),
-      `tenhove2024` (selection guidelines), `tenhove2025` (planned-incomplete;
-      the ADR-002/003 engine + MC-CI basis), and the renamed network-data 2025
-      paper. Note the metadata trap: `tenhove2022.pdf` carries a 2021 copyright
+      `tenhove2024` (selection guidelines), `tenhove2025b` (planned-incomplete;
+      the ADR-002/003 engine + MC-CI basis), and `tenhove2025a` (network data).
+      Note the metadata trap: `tenhove2022.pdf` carries a 2021 copyright
       line but is the 2022 *Psychological Methods* 27(4):650–666 paper.
 - [ ] T3: Note for `koo2016` — the IP3-sensitive interpretation-band source;
       capture the "judge against the CI, not the point" guidance the
@@ -92,6 +92,8 @@ escalate, never a silent correction.
 - 2026-07-18: created by /milestone-plan (plan gate: maintainer chose full
   extraction with a fresh PDF re-read for the load-bearing sources, over a
   text-only migration of the existing bibliography annotations).
+- 2026-07-18: minor amendment by /milestone-implement M63 — `tenhove2025`
+  becomes the `tenhove2025a`/`tenhove2025b` pair (M63 implement gate).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M63: References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m63-references-migration`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -38,14 +38,20 @@ PDF for extraction → same; editing `cairn/legacy/**` or
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
 - [ ] AC1: `cairn/references/ORACLES.md` and `cairn/references/BIBLIOGRAPHY.md`
-      exist; `REFERENCES.md` is gone. Every one of the ~40 oracle entries and
-      every bibliography entry is present in exactly one of the two, with **no
-      numeric value, `Status` line, or citation text altered** — verified by a
-      diff of the concatenated split against the original file.
-- [ ] AC2: No live file references `REFERENCES.md`:
+      exist; `REFERENCES.md` is reduced to a ≤6-line pointer stub naming both
+      successors and the adopting D-entry (retained so the deliberately
+      un-edited links in `cairn/legacy/**`, `CLAUDE_CODE_KICKOFF.md`, and
+      `data-raw/reviews/` still resolve — implement gate 2026-07-18). Every one
+      of the ~40 oracle entries and every bibliography entry is present in
+      exactly one of the two successors, with **no numeric value, `Status`
+      line, or citation text altered** — verified by a diff of the
+      concatenated split against the original file.
+- [ ] AC2: No live file *substantively* references `REFERENCES.md` as a content
+      home:
       `grep -rn "REFERENCES.md" --include="*.R" --include="*.md" --include="*.Rmd" .`
-      returns hits only under `cairn/legacy/`, `CLAUDE_CODE_KICKOFF.md`, and
-      `data-raw/reviews/`. The stale `project/REFERENCES.md` path at
+      returns hits only under `cairn/legacy/`, `CLAUDE_CODE_KICKOFF.md`,
+      `data-raw/reviews/`, the stub itself, and the stub's `INDEX.md` line. The
+      stale `project/REFERENCES.md` path at
       `tests/testthat/test-vignette-claims.R:8` is corrected too.
 - [ ] AC3: `cairn/DESIGN.md` Conventions carries a one-line oracle **registry
       pointer** naming `cairn/references/ORACLES.md`
@@ -58,8 +64,10 @@ PDF for extraction → same; editing `cairn/legacy/**` or
 - [ ] AC5: Citekey reconciliation recorded in the work log: `hove2025.pdf` is
       ten Hove, Jorgensen & van der Ark (2025) *Interrater Reliability for
       Interdependent Social Network Data*, MBR 60(3):444–459,
-      doi:10.1080/00273171.2024.2444940 — renamed to a citekey distinct from
-      `tenhove2025` (the *Planned Incomplete Data* paper, MBR 60(5):1042–1061);
+      doi:10.1080/00273171.2024.2444940 → `tenhove2025a`; the former
+      `tenhove2025.pdf` (*Planned Incomplete Data*, MBR 60(5):1042–1061) →
+      `tenhove2025b` (letter suffixes ordered by issue; implement gate
+      2026-07-18);
       and the absence of a PDF for the load-bearing Jorgensen (2021) *Psych*
       3(2):113–133 SEM absolute-error source (O-SEM) is recorded as an open
       gap with the maintainer asked for it.
@@ -111,6 +119,12 @@ PDF for extraction → same; editing `cairn/legacy/**` or
   cairn-style split" candidate; plan gate: maintainer superseded the candidate's
   "sequence after M48" note — `cairn/` is not in the R package build, so this
   touches no release surface).
+- 2026-07-18: implement gate — citekeys `tenhove2025a` (network data, MBR 60(3))
+  / `tenhove2025b` (planned incomplete, MBR 60(5)), letter suffixes ordered by
+  issue; AC1+AC2 amended (gated) to retain a ≤6-line `REFERENCES.md` pointer
+  stub so the deliberately un-edited entombed links still resolve.
+- 2026-07-18: minor amendment to M64/T2 (renaming `tenhove2025` →
+  `tenhove2025b` churns a citekey its plan names).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
