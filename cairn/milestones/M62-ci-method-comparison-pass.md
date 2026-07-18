@@ -122,6 +122,14 @@ exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-17: T1 (partial) source hunt. Non-param bootstrap: Ukoumunne, Davison,
+  Gulliford & Chinn 2003, Stat Med 22(24):3805-21 — solid but ONE-WAY cluster ICC,
+  not the two-way anchor; documents under-coverage at <=10 clusters (bootstrap-t on
+  variance-stabilizing transform the only near-nominal variant). Profile-likelihood:
+  no confirmed two-way-Gaussian-ICC source (Demetrashvili 2016 is Satterthwaite/Beta,
+  not PL); paywalled lead "Modified profile likelihood…" (Comp Stat) unconfirmed.
+  Stopped at a gate: PDFs needed (IP1, no reconstruction from abstracts) + a
+  two-way-vs-one-way anchor decision the plan didn't foresee.
 - 2026-07-17: in-progress on m62-ci-method-comparison-pass (/milestone-implement).
 - 2026-07-17: created by /milestone-plan. Absorbs the legacy candidate
   (`cairn/legacy/ROADMAP.md:81` — non-parametric bootstrap + profile-likelihood,
