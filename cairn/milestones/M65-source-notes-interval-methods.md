@@ -73,7 +73,7 @@ the tier-C candidate row; the load-bearing sources → M64.
       `saha2012`. `xiao2013` first and in most depth; it is the named candidate
       source for the PL sibling pass.
 - [x] T2: Notes for the estimator-bias pair — `saha2005`, `bhandary2006`.
-- [ ] T3: Notes for the distributional-robustness pair — `mehta2018`,
+- [x] T3: Notes for the distributional-robustness pair — `mehta2018`,
       `bobak2018`; connect each to the GP6 known-failure axes the package
       already sweeps (near-zero ICC, few subjects, non-normality).
 - [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
@@ -103,6 +103,16 @@ the tier-C candidate row; the load-bearing sources → M64.
   subject; recorded in the note, no scope change). Table I of `saha2005` is
   per-cell published evidence that near-boundary non-convergence is
   estimand-intrinsic (~15 % acceptance at the worst cell).
+- 2026-07-18: T3 done — `mehta2018` (two-way random `ICC(2,1)`, Shrout–Fleiss
+  mean squares) and `bobak2018` (two-rater fixed-rater **consistency** ICC,
+  Bayesian, bounded-scale heteroscedasticity). **The only two M65 sources inside
+  the contract boundary.** Neither reports coverage (both stated per AC3). Both
+  converge on the same mechanism from opposite directions: ICC tracks subject
+  heterogeneity, not instrument quality — the strongest published material yet
+  for IP3 and for `koo2016.md`'s open question. Each note carries an explicit
+  GP6-axis table; T3 also found that "non-normality" names three different axes
+  across M62/M65 (error tails / bounded-scale heteroscedasticity / subject-
+  distribution shape).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
