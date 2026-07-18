@@ -120,7 +120,12 @@ coverage ≥ 0.93 AND ≥ min(incumbents) − 0.01:
 | C4 | .934 | ✓ | .836 | ✓ | ✓ |
 
 → **transformed bootstrap-t is "not worse" at every cell.** percentile and BCa
-under-cover at C3/C4 (0.86–0.89 < 0.93) → they fail.
+under-cover at C3/C4 (0.86–0.89 < 0.93) → they fail. Framing (RR01): the
+transformed bootstrap-t is in fact the **only** method of the five that clears
+0.93 at *all four* cells (MC fails C2/C4; parametric bootstrap fails C3;
+perc/BCa fail C3/C4) — the honest statement is "the only near-nominal-everywhere
+method", and the frozen absolute 0.93 floor (not the incumbent-relative clause)
+is what carries the verdict, which is what keeps the comparison non-circular.
 
 **Two findings that flip the prior expectation.**
 1. The prior (ohyama2025: NBOOT slightly worse than SEARLE/REML) was measured
@@ -136,23 +141,46 @@ under-cover at C3/C4 (0.86–0.89 < 0.93) → they fail.
 **Cost:** at the clean interior cell, boott is ~3 % wider than MC (0.369 vs 0.358)
 — a small width price for boundary robustness.
 
-**Marginality caveat (C4).** At n_rep=1000 (coverage SE ≈ 0.7 pp) the corner cell
-C4 is the tightest: boott 0.934 sits ~1 SE above the 0.93 floor — passing, but
-marginal. A confirmatory n_rep=2000 run was launched then cut (~5–6 h, dominated
-by the slow near-boundary parametric-bootstrap refits — disproportionate for a
-1-SE firm-up; maintainer decision 2026-07-18). The **qualitative GO is unaffected**:
-even if C4's true coverage were ~0.925, the decisive contrast stands — boott
-covers ~0.93 where the MC default gives *no interval at all* on 39 % of C4
-datasets. Firming C4 is deferred to the exported-implementation milestone's own
-coverage validation (a larger sweep there is warranted regardless).
+**Marginality caveat (C4).** At n_rep=1000 (SE = √(.934·.066/1000) ≈ 0.0079) the
+corner cell C4 is the tightest: boott 0.934 sits **~0.5 SE** above the 0.93 floor
+(RR01 correction; the earlier "~1 SE" was wrong) — under a flat prior
+P(true coverage < 0.93) ≈ 30 %, so genuinely marginal. A confirmatory n_rep=2000
+run was launched then cut (~5–6 h, dominated by slow near-boundary
+parametric-bootstrap refits; maintainer decision 2026-07-18; RR01 rec 6 concurs
+the cut buys nothing this pass needs). The **qualitative GO is unaffected**: even
+at a true ~0.925, boott gives a near-nominal interval where the MC default
+returns *nothing* on 39 % of C4 datasets. Firming C4 is deferred to the
+exported-implementation milestone, **conditional (RR01 rec 2) on** that milestone
+(i) including a C4-type corner at n_rep ≥ 2000, (ii) tracking lower/upper
+tail-error rates (not just two-sided coverage — ukoumunne Table I shows why),
+and (iii) pre-specifying the below-floor fallback (label the limitation or
+withhold the export — decided before the data, GP5).
+
+**Parametric-bootstrap boundary rows are degenerate, not strong (RR01 rec 4).**
+The pboot 0.99 coverage / narrow width at C2/C4 is genuine but *not* boundary
+merit: at σ̂²_a = 0 the glmmTMB refit simulates pure noise, so (ICC being
+scale-invariant) the resampling distribution of ρ* depends only on (k, n) — the
+percentile interval collapses to the ρ=0 sampling spread (≈ [0, 0.28] at k=12,
+n=4) and, with the harness's fixed seed, is *literally identical* across singular
+datasets. It covers the small true ρ=0.05 by accident of position and would badly
+miss a larger truth; pboot already fails the floor at C3 (0.922). Do not read the
+.99/.19 rows as "pboot excellent at the boundary".
 
 **Side observation (out of scope → candidate):** the MC-default boundary
 abort/under-coverage suggests a boundary-robust classical CI (SEARLE F / Burch
 REML) would also help the one-way default — a separate idea, not this pass.
 
-## Verdict (T6 — TBD)
+## Verdict (T6)
 
-_Recommended: **GO** for the `log F` transformed bootstrap-t on the one-way ICC
-(not worse than incumbents at every cell; boundary-robust; source-backed +
-oracle-validated); **NO-GO** for percentile/BCa. Pending user acceptance +
-optional Fable review (ip-touching) before the GO/NO-GO D-entry is written._
+**GO** for the `log F` transformed bootstrap-t on the balanced one-way ICC;
+**NO-GO** for percentile/BCa. Basis: the only method near-nominal at every cell;
+source-backed (ukoumunne2003) and oracle-validated (RR01 independently reproduced
+C4/U10 to 4 dp; oracle within ±0.03). **RR01 (Fable, 2026-07-18) concurs.**
+
+Framing carried into the decision (RR01 Q3): the GO does **not** claim the
+bootstrap-t fixes the MC default's one-way boundary defect (28–39 % classed
+aborts + 0.85–0.88 conditional coverage). A boundary-robust *classical* default
+(SEARLE exact-F / Burch REML) would likely dominate on normal cells and is now a
+tracked roadmap candidate; the bootstrap-t's residual value is non-normality
+robustness (ukoumunne Fig. 3) and an interval that *exists* where the default
+aborts. Recorded as D-006.

@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M62: Non-parametric bootstrap CI pass — one-way ICC (GO/NO-GO)
 
-- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; independent of M48 (post-1.0, additive) -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
@@ -110,16 +110,17 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
       the bootstrap variants; commit script + results fixture; cross-check the
       incumbent + bootstrap numbers against ohyama2025. Heavy offline job — launch
       in the background from the start (cf. M47 brms coverage lesson).
-- [ ] **T5** — Write the committed `references/` synthesis note: comparison table,
+- [x] **T5** — Write the committed `references/` synthesis note: comparison table,
       pre-registered criterion, ohyama2025 cross-check, GO/NO-GO verdict; INDEX line.
-- [ ] **T6** — Append the GO/NO-GO D-entry; update ROADMAP disposition (exported-
-      impl candidate on GO; recorded rejection on NO-GO).
-- [ ] **T7** — No-export guard: engine-parity matrix green + grep `R/` for any stray
-      `ci_method` literal; profile `verify` clean; `data-raw/` scripts air-formatted.
+- [x] **T6** — Append the GO/NO-GO D-entry (D-006); update ROADMAP disposition
+      (exported one-way boott candidate on GO; perc/BCa rejection; SEARLE-F candidate).
+- [x] **T7** — No-export guard: no R/ changes (diff empty), no `npbootstrap`/new
+      `ci_method` literal in `R/`, parity matrix untouched, `data-raw/` air-formatted.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-18: RR01 ingested (concur-GO) → D-006 written, synthesis note corrected (rec 1-4), candidates updated, RB01/RR01 archived; T5/T6/T7 done. Status → review. All 6 ACs met.
 - 2026-07-18: BLOCKED on RB01 — GO/NO-GO verdict routed to a Fable statistical review (ip-touching tripwire; user chose escalation). Brief: cairn/reviews/RB01-npbootstrap-oneway-go.md.
 - 2026-07-18: confirmatory n_rep=2000 run CUT at user request — boundary cells ran ~4.2s/rep (est. ~5-6h total, not the ~80min I quoted), disproportionate for a 1-SE C4 firm-up. Proceeding on n_rep=1000 with C4 flagged marginal-but-passing (synthesis note caveat); firming C4 deferred to the exported-impl milestone's own coverage validation. → T6 GO/NO-GO gate.
 - 2026-07-18: confirmatory re-run at pre-registered n_rep=2000 RUNNING (bg, tracked; ~80 min) to firm up the marginal C4 (boott .934 was ~1 SE over the .93 bar at n_rep=1000) and drop the n_rep amendment — GP5, executing the pre-reg now that the run is cheap. Resume: read the rds, update T5 table + drop the amendment, then the T6 GO/NO-GO gate.
@@ -139,6 +140,8 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
+
+- MD-1 (2026-07-18): RR01 (Fable) ingested — concur-GO (transformed bootstrap-t GO / percentile+BCa NO-GO). Implementation verified faithful (exact eq.6/7; independent C4/U10 reproduction to 4dp; oracle Δ.014–.017 < .03). Harness sound; conditional MC coverage conservative-for-candidate; the absolute 0.93 floor is the binding, non-circular criterion. Triage: rec 1–4 APPLIED (only-method-≥.93 framing; ~1SE→~0.5SE correction + impl conditions; SEARLE-F/Burch candidate; pboot-degeneracy annotation); rec 5 CONSIDER (per-cell seeds + condition-class logging → impl-milestone harness); rec 6 REJECT (2000 re-run) confirms the maintainer cut. Promoted to D-006. RB01/RR01 archived.
 
 ## Review
 <!-- owner: review · exclusive -->

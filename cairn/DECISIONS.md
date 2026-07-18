@@ -97,3 +97,32 @@ disagreement is a no-go finding, not a tolerance to widen (GP5).
 go) inherits this disposition and cites it; the composition ships only with
 the oracle evidence attached. A future primary source, if one appears, is
 ingested and supersedes the engineering framing.
+
+### D-006 (2026-07-18): M62 GO/NO-GO — transformed bootstrap-t GO, percentile/BCa NO-GO (one-way ICC)
+
+**Context:** M62 assessed whether a non-parametric bootstrap CI for the one-way
+random ICC is "not worse" than the package incumbents (Monte-Carlo default,
+parametric bootstrap), against a pre-registered coverage-band + width criterion
+(GP5), sourced to `ukoumunne2003` and cross-checked against `ohyama2025`. Evidence:
+`cairn/references/npbootstrap-oneway-comparison.md`; independent Fable review RR01
+(archived) concurs.
+**Decision:** **GO** for the `log F` variance-stabilized **transformed
+bootstrap-t** — the only method near-nominal (≥ 0.93) at all four cells, faithful
+to ukoumunne2003 (RR01 verified eq. 6/7 and reproduced the fixture to 4 dp) and
+oracle-validated, and boundary-robust where the glmmTMB MC default aborts
+(`intraclass_singular_fit`) on 28–39 % of near-zero-ICC datasets. **NO-GO** for
+percentile and BCa (under-cover at C3/C4, as ukoumunne found). M62 ships **no
+code**; a future `ci_method = "npbootstrap"` traces to ukoumunne2003 (IP1).
+**Framing (RR01 Q3):** the GO does *not* claim to fix the MC default's one-way
+boundary defect; a boundary-robust *classical* default (SEARLE exact-F / Burch
+REML) is a separate tracked candidate. The bootstrap-t's residual value is
+non-normality robustness (ukoumunne Fig. 3) + an interval that exists where the
+default aborts.
+**Conditions on the implementation milestone (RR01 Q4 / rec 2):** a C4-type corner
+cell at n_rep ≥ 2000, lower/upper tail-error tracking, and a pre-specified
+below-floor fallback (GP5); balanced-only (unbalanced `n_i`/`n₀` is design work
+there).
+**Consequences:** percentile/BCa recorded as rejected for this estimand; the
+transformed bootstrap-t is cleared to be planned as an exported one-way
+`ci_method` (candidate updated with the conditions); the SEARLE-F / Burch-REML
+boundary-robust classical CI is added as a candidate.
