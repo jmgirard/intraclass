@@ -105,7 +105,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
       in a `data-raw/` script (resample subjects/clusters with replacement;
       percentile/basic/BCa + the variance-stabilizing bootstrap-t variant),
       glmmTMB/lme4.
-- [ ] **T4** — Build the seeded comparison harness: at each cell simulate `n_rep`
+- [x] **T4** — Build the seeded comparison harness: at each cell simulate `n_rep`
       datasets, record coverage + median width for MC, parametric bootstrap, and
       the bootstrap variants; commit script + results fixture; cross-check the
       incumbent + bootstrap numbers against ohyama2025. Heavy offline job — launch
@@ -120,6 +120,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-18: T4 done + T5 results written (~40 min run). Oracle cross-check PASSES (boott U10/U30/U50 = .921/.947/.953, reproduces ukoumunne Fig.2). SURPRISE vs the ohyama prior: transformed bootstrap-t not-worse at ALL 4 cells (.934-.940) while the MC default under-covers AND defers on 28-39% of near-zero-boundary datasets (C2/C4 n_ok 716/612). Recommended verdict GO(boott) / NO-GO(perc,bca). Pending user acceptance + optional Fable (ip-touching) before the T6 D-entry.
 - 2026-07-18: T4 RUNNING (background, harness-tracked) — data-raw/m62-coverage-harness.R, n_rep=1000 (prospective amendment from pre-reg 2000; SE ~0.7pp, bar unchanged), incumbent boot B=199, proto B=2000; 4 comparison + 3 oracle-check cells → data-raw/m62-coverage-results.rds (incremental per-cell checkpoint), log data-raw/m62-harness.log. ~4-5h. Resume: read the rds, verify the ohyama/ukoumunne oracle cross-check, then T5 (append results to npbootstrap-oneway-comparison.md) → T6 (GO/NO-GO D-entry) → T7 (guard).
 - 2026-07-17: T3 done — data-raw/m62-npbootstrap-prototype.R (subject-resample; percentile/boott-transformed/BCa; eq.7 IJ SE). Oracle check vs ukoumunne2003 Fig.2 at k=10,n=10,ρ=0.05 (nrep=200,B=400): perc 0.79, BCa 0.835, transformed bootstrap-t 0.95 — reproduces the published under-/near-nominal split (PRINCIPLES.md #1).
 - 2026-07-17: T2 done — pre-registered (GP5, frozen before results) the "not worse" criterion (coverage ≥0.93 AND ≥ incumbents−0.01, width tiebreaker; GO iff not-worse at every cell) + one-way cell grid (C1–C4 comparison + ukoumunne-matched oracle-check cells) in npbootstrap-oneway-comparison.md.

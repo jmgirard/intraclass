@@ -81,12 +81,68 @@ the evidence decides, not the prior).
 
 ---
 
-## Results (T5 — TBD)
+## Results (T5, 2026-07-18)
 
-_Appended after the T4 harness runs. Comparison table (coverage + median width
-per method × cell), the ohyama2025 / ukoumunne2003 oracle cross-check, and the
-criterion applied to give the verdict._
+Source: `data-raw/m62-coverage-harness.R` → `data-raw/m62-coverage-results.rds`.
+`n_rep = 1000` (coverage SE ≈ 0.7 pp), incumbent parametric bootstrap `B = 199`,
+prototype `B = 2000`. `boott` = transformed bootstrap-t (primary candidate).
+`n_ok` = datasets on which the method returned an interval (MC defers at the
+boundary via `intraclass_singular_fit`); MC coverage is *conditional* on `n_ok`.
+
+**Oracle cross-check (prototype vs ukoumunne2003 Fig. 2, normal; PRINCIPLES.md #1) — PASS.**
+
+| cell (k, n=10, ρ=0.05) | perc | boott | bca |
+|---|---|---|---|
+| U10 | 0.770 | 0.921 | 0.820 |
+| U30 | 0.904 | 0.947 | 0.922 |
+| U50 | 0.918 | 0.953 | 0.937 |
+
+Reproduces the published pattern — untransformed variants under-cover at small k,
+the transformed bootstrap-t stays near nominal, all converge by k=50.
+
+**Comparison cells (coverage / median width; MC `n_ok` in parens).**
+
+| cell | MC (default) | param. boot | **boott** | perc | bca |
+|---|---|---|---|---|---|
+| C1 (30,4,.50) | .956 / .358 (1000) | .933 / .362 | **.940 / .369** | .919 / .352 | .923 / .337 |
+| C2 (30,4,.05) | .876 / .445 (716) | .990 / .188 | **.940 / .340** | .918 / .293 | .915 / .302 |
+| C3 (12,4,.50) | .980 / .542 (995) | .922 / .564 | **.937 / .590** | .864 / .537 | .878 / .482 |
+| C4 (12,4,.05) | .846 / .679 (612) | .989 / .307 | **.934 / .580** | .864 / .412 | .890 / .421 |
+
+**Criterion applied (primary candidate = boott).** Not-worse at a cell iff
+coverage ≥ 0.93 AND ≥ min(incumbents) − 0.01:
+
+| cell | boott cov | ≥0.93? | min(MC,pboot)−.01 | ≥incumbent? | not worse? |
+|---|---|---|---|---|---|
+| C1 | .940 | ✓ | .923 | ✓ | ✓ |
+| C2 | .940 | ✓ | .866 | ✓ | ✓ |
+| C3 | .937 | ✓ | .912 | ✓ | ✓ |
+| C4 | .934 | ✓ | .836 | ✓ | ✓ |
+
+→ **transformed bootstrap-t is "not worse" at every cell.** percentile and BCa
+under-cover at C3/C4 (0.86–0.89 < 0.93) → they fail.
+
+**Two findings that flip the prior expectation.**
+1. The prior (ohyama2025: NBOOT slightly worse than SEARLE/REML) was measured
+   against boundary-robust *classical* F/REML CIs. The package's actual default
+   is glmmTMB **MC, which under-covers AND defers on 28–39 % of near-zero-boundary
+   datasets** (C2/C4 `n_ok` 716/612). Against *our* incumbents, the transformed
+   bootstrap-t is not worse — and materially more robust at the boundary (covers
+   ~0.94 where MC gives no interval a third of the time).
+2. Only the **transformed** bootstrap-t clears the bar; the untransformed
+   percentile/BCa under-cover (as ukoumunne2003 found) — so any GO is specifically
+   for the `log F` variance-stabilized bootstrap-t, not "bootstrap" generically.
+
+**Cost:** at the clean interior cell, boott is ~3 % wider than MC (0.369 vs 0.358)
+— a small width price for boundary robustness.
+
+**Side observation (out of scope → candidate):** the MC-default boundary
+abort/under-coverage suggests a boundary-robust classical CI (SEARLE F / Burch
+REML) would also help the one-way default — a separate idea, not this pass.
 
 ## Verdict (T6 — TBD)
 
-_GO / NO-GO with the D-entry reference._
+_Recommended: **GO** for the `log F` transformed bootstrap-t on the one-way ICC
+(not worse than incumbents at every cell; boundary-robust; source-backed +
+oracle-validated); **NO-GO** for percentile/BCa. Pending user acceptance +
+optional Fable review (ip-touching) before the GO/NO-GO D-entry is written._
