@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M63: References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m63-references-migration`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m63-references-migration` / https://github.com/jmgirard/intraclass/pull/69   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -113,7 +113,7 @@ PDF for extraction → same; editing `cairn/legacy/**` or
       resolved Known-issues bullet.
 - [x] T5: Append the D-entry (adoption + D-024 reconciliation).
 - [x] T6: Rebuild `INDEX.md` for the new page set; run `cairn_validate`.
-- [ ] T7: Run the profile `verify` slot; open the PR and drive CI green.
+- [x] T7: Run the profile `verify` slot; open the PR and drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -135,13 +135,16 @@ PDF for extraction → same; editing `cairn/legacy/**` or
   M64 note; ROADMAP candidate row records it.
 - 2026-07-18: T2 — split content-preserving: both bodies byte-identical to the
   original, 39 oracle entries + 16 bibliography items before and after.
-- 2026-07-18: T3 — 12 cross-references retargeted; stale `project/` path fixed
+- 2026-07-18: T3–T6 — 12 cross-references retargeted; stale `project/` path fixed
   at `test-vignette-claims.R:8`; AC2 allowlist widened (gated) for the durable
-  records narrating the migration.
-- 2026-07-18: T4–T6 — DESIGN.md pointer added + Known-issues bullet struck;
-  D-007 appended; `INDEX.md` rebuilt; `cairn_validate` clean.
+  records narrating the migration; DESIGN.md pointer added + Known-issues bullet
+  struck; D-007 appended; `INDEX.md` rebuilt; `cairn_validate` clean.
 - 2026-07-18: T7 — 1802 pass, 0 fail, 0 error, 23 skip
-  (`NOT_CRAN=true CI=true`); `air format --check` and `lintr` clean.
+  (`NOT_CRAN=true CI=true`); `air format --check` + `lintr` clean; PR #69 CI
+  green (11 checks) after re-running the known `ubuntu-latest (devel)` infra
+  flake (`pak` R-4-7 binary 404 at dep-install, before any package code ran).
+  PR opened via REST — `gh pr create` hit the GraphQL rate limit (M61 lesson).
+- 2026-07-18: status → review by /milestone-implement.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
