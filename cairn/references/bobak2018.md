@@ -60,7 +60,7 @@ of a decision aid. **Eq. (6) is the contribution**: the within-encounter
 (rater) variance is not constant but a *binomial-shaped function of the true
 score*, largest at `θ = 0.5` and vanishing at the ends. The stated intuition
 (p. 4): "it is easier to distinguish cases against a baseline level of a trait
-close to 0 % or 100 % than in cases in which the trait is about 50 % present".
+close to 0 % or 100 % than cases in which the trait is about 50 % present".
 Figure 3 (p. 6) is the empirical justification — a smoothing spline through the
 observed between-rater variance against the mean score traces an inverted U that
 the binomial variance function tracks and a constant mean variance plainly does

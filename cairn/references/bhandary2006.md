@@ -108,7 +108,8 @@ Simulation design (§3, p. 774): multivariate normal vectors generated **in R**;
 `K ∈ {5, 15, 30}` family vectors per population, three populations; family sizes
 from a negative binomial with **mean 2.86**, truncated to a minimum of 2 and a
 maximum of 15 siblings (`theta = 41.2552`, matching the success probability
-0.483 used by Srivastava et al. 1977 and Srivastava & Keen 1988);
+0.483 determined by the previous family-size-simulation research the paper
+cites — **Rosner et al. 1977 and Srivastava & Keen 1988**, p. 774);
 `ρ₁, ρ₂, ρ₃` over 0.1–0.9 in steps of 0.1; **10,000 replications** per
 combination; `α = 0.05`.
 

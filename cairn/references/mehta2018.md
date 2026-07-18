@@ -20,7 +20,7 @@ Nothing in the package traces to it; no `ORACLES.md` entry cites it.
 | Axis | What the paper covers |
 |---|---|
 | Design | **Two-way, crossed, balanced** — `k` raters each judging every one of `n` subjects (§2, p. 2736) |
-| Raters | **Random** — "results from a single rater's grade is of interest, and the results … need to be generalized to a larger population of raters" (p. 2736) |
+| Raters | **Random** — "the expected reliability of a single rater's grade is of interest, and the results from the study usually need to be generalized to a larger population of raters" (p. 2736) |
 | Interaction | **Present.** Eq. (1) is `X_ij = μ + a_i + b_j + (ab)_ij + ε_ij` — a genuine interaction term, unlike `xiao2013`'s additive model |
 | Coefficient | **Single-rating absolute agreement**, `ρ = σ²_a/(σ²_a + σ²_b + σ²_ab + σ²_ε)` (Eq. 2). Eq. (3) is **exactly Shrout–Fleiss `ICC(2,1)`** |
 | Outcome scale | **Ordinal, 5-point** (grades 0–4) — Likert-type photonumeric aesthetic scales. Note the paper's own caveat that normality "is not necessary for the valid estimation of `ICC`" (p. 2737) |
@@ -169,6 +169,35 @@ higher `ICC` for severe levels of disagreement" (p. 2746). The safeguard claim i
 that rater error variance is essentially unchanged by sampling, so the procedure
 "does not make an unreliable scale look reliable" (p. 2746).
 
+### Appendices A–C (pp. 2750–2752) — the variance decomposition under sampling
+
+The reference list ends part-way down p. 2750 and the appendices follow it in the
+same PDF. **Appendix A** (p. 2750) gives mean `σ̂²_a` (subject variance) and
+**Appendix B** (p. 2751) mean `σ̂²_b + σ̂²_ab + σ̂²_ε` (rater error variance), both
+with interdecile ranges, for the full distribution *and* each of the three
+sampling methods. They are what substantiates the §4 safeguard claim. Selected
+`σ̂²_a` rows from Appendix A, Case 1 / Case 6:
+
+| Initial distribution | Spec | Case 1 | Case 6 |
+|---|---|---|---|
+| Extreme concave | full, `N = 300` | 2.43 (0.06) | 0.39 (0.09) |
+| Extreme concave | sampling, Mode | 1.85 (0.07) | 0.33 (0.09) |
+| **Uniform** | full, `N = 300` | **1.70 (0.05)** | **0.27 (0.08)** |
+| Extreme convex | full, `N = 300` | 0.70 (0.04) | 0.11 (0.05) |
+| Extreme convex | sampling, Mode | 1.24 (0.10) | 0.22 (0.14) |
+
+Sampling pulls `σ̂²_a` toward the uniform value from both sides — down from 2.43
+to 1.85 (concave) and up from 0.70 to 1.24 (convex), against uniform's 1.70 —
+which is the mechanism behind the Table 7 `ICC` convergence. The matching
+Appendix B rater-error rows barely move (extreme concave Case 1: 0.18 full vs
+0.19 sampled; extreme convex: 0.20 vs 0.19–0.20, against uniform's 0.19),
+**confirming the paper's safeguard claim with its own numbers**: sampling shifts
+subject variance and leaves rater error essentially untouched.
+
+**Appendix C** (p. 2752, Figure C1) plots `ICC` across the six cases for the full
+extreme-concave and extreme-convex populations against their `n = 80` samples and
+the uniform reference.
+
 ## Application (§5, pp. 2746–2748)
 
 The motivating study (Table 1, p. 2735): five photonumeric severity scales
@@ -238,12 +267,12 @@ five cross a `koo2016` band boundary.
   for the skewed distributions are not shown" (p. 2739); conclusions about them
   appear in prose only (pp. 2742, 2748). Do not cite numbers for skewed cases —
   there are none.
-- **Appendices A–C are referenced but not present in the shelf PDF.** p. 2746
-  points to "Appendices A and B" for the `σ̂²_a` and `σ̂²_b + σ̂²_ab + σ̂²_ε` tables
-  under sampling, and Appendix C for a behaviour illustration. The PDF ends at
-  the reference list (p. 2752). They are presumably supplementary material; **not
-  retrieved at M65**. Flagged so a future reader does not assume they were
-  checked.
+- **Appendix C's error bars are the only dispersion measure given for the
+  sampling comparison** (p. 2752): Figure C1's note says they "represent the
+  standard deviation OF THE 10 000 `ICC` estimates", where every table in the
+  paper reports an *interdecile range* instead. The two are not interchangeable
+  and the figure is the only place an SD appears. Minor, recorded so the two
+  spread measures are not conflated.
 - **Sponsor interest.** The work is funded by Allergan plc, six of seven authors
   are Allergan-affiliated, and the application is to Allergan's own aesthetic
   scales — where the proposed method **raises** every reported reliability
