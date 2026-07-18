@@ -1,5 +1,5 @@
 # O2 — package-independent ANOVA mean-squares oracle -------------------------
-# The third, most independent oracle (REFERENCES.md O2): derive the variance
+# The third, most independent oracle (ORACLES.md O2): derive the variance
 # components from base-R ANOVA mean squares via the method-of-moments identities
 # (estimand-spec §4), not from another ICC package, and confirm the mixed-model
 # engine reproduces them (and the resulting ICCs) on balanced data. Everything is

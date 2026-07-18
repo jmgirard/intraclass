@@ -6,7 +6,8 @@
 > implementation; changing one requires an explicit user decision recorded in
 > `DECISIONS.md`) or **[GP]** (guiding — a default stance tradeable with stated
 > justification). Text is verbatim from the brief except where a dated D-entry
-> records an amendment (#11, D-002) or retirement (#14–#17, D-003).
+> records an amendment (#11, D-002) or retirement (#14–#17, D-003), or a
+> citation-path update following a file rename (#12, D-007).
 > **Change-controlled:** altering any principle requires the maintainer's
 > explicit approval and a dated entry in [`DECISIONS.md`](DECISIONS.md).
 > Interview-derived principles (IP1…, GP1…) live in
@@ -77,7 +78,7 @@
 
 12. **[IP] Seeded and sourced.** Any stochastic code (simulation, MC CIs) is seeded in
     tests. Every statistical method in the code and docs cites its source (paper +
-    equation where possible) in a comment and in `REFERENCES.md`.
+    equation where possible) in a comment and in `cairn/references/BIBLIOGRAPHY.md`.
 
 ## Documentation-as-teaching
 

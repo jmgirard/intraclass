@@ -185,7 +185,7 @@ rater effect is the fifth oracle (recovery + MC coverage).
   (recovery + 95% CI coverage).
 - Roxygen "which ICC / when" extended to one-way (incl. the rater-identity-ignored
   and type-not-applicable notes); a `choosing-an-icc.Rmd` / `getting-started` note.
-- `REFERENCES.md` O-OW row; `DECISIONS.md` (ADR-013 already records the scheduling;
+- `ORACLES.md` O-OW row; `DECISIONS.md` (ADR-013 already records the scheduling;
   a new ADR only if an API-shape decision here proves contentious).
 
 ---

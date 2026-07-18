@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-18 (M63–M67 planned — the references migration + full source-note ingestion of all 27 un-noted PDFs; the REFERENCES.md-split and tier-C candidates both graduated; the Jorgensen 2021 PDF gap seeded as a candidate)_
+_Last hygiene check: 2026-07-18 (M63–M67 planned — the references migration + full source-note ingestion of all 27 un-noted PDFs; the references-split and tier-C candidates both graduated; the Jorgensen 2021 PDF gap seeded as a candidate)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | planned | — | high | milestones/M63-references-migration.md |
+| M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | review | — | high | milestones/M63-references-migration.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
 | M64 | Source notes — the nine load-bearing primary sources | planned | M63 | normal | milestones/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | planned | M63 | normal | milestones/M65-source-notes-interval-methods.md |
@@ -30,7 +30,6 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 - Exported one-way transformed-bootstrap-t `ci_method` — **GO confirmed (M62 + RR01, D-006):** implement ukoumunne2003's `log F` variance-stabilized bootstrap-t as an exported one-way interval method. Conditions (D-006): balanced-only; the milestone's coverage validation must include a C4-type corner at n_rep ≥ 2000, track lower/upper tail-error, and pre-specify a below-floor fallback (GP5). Its harness must also fix the M62 review findings (all scored sub-threshold there, deferred here): **distinct per-cell seed bases** (M62's collided on the cell name's first char, coupling C1/C2 and C3/C4), **per-replicate `seed` into `icc()`** (M62 fixed it at 1L, making incumbent resampling noise common across reps), **classed guards** on degenerate resamples (SSA=0) and missing-row extraction, and **truncated-vs-untruncated width reported on a common scale**. percentile/BCa are NO-GO (D-006). Promote via `/milestone-plan`. Lineage: legacy candidate → M62 GO.
 - Boundary-robust classical CI for the one-way default — M62/RR01 found the glmmTMB MC default **aborts** (`intraclass_singular_fit`) on 28–39 % of near-zero-ICC one-way datasets and under-covers (0.85–0.88 conditional); a classical **SEARLE exact-F** (balanced) or **Burch REML** CI would likely dominate on normal cells and fix the *default itself* — distinct from the bootstrap-t, which does not. Assess/adopt as a one-way interval option. Lineage: M62 RR01 Q3/rec 3.
 - Exported profile-likelihood `ci_method` — GO-gated on the PL sibling pass (above); a NO-GO there is a recorded D-entry rejection, not re-litigated. Lineage: legacy candidate → M62 PL sibling.
-- Jorgensen (2021) *Psych* 3(2):113–133 — the M7/O-SEM absolute-error primary source — **has no PDF** in `cairn/references/pdf/` (`jorgensen2019.pdf` is a different paper). Blocked on the maintainer supplying it; until then O-SEM's source note cannot be written (validation-doctrine primary-sources hard stop). Lineage: M63/T1 citekey reconciliation, 2026-07-18.
 - Companion software/methods paper (JOSS or similar) — after the v0.1.0 release; the M42 comparison article is the seed; venue/framing decided against the released package (design interview + plan gate, 2026-07-12; ADR-022 deferral) — cairn/DESIGN.md § Commitments
 - Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator). Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
 - Incomplete/unbalanced fixed-rater **subject**-level multilevel lavaan — the SEM sibling that compounds two-level FIML with the Case-3A fixed correction; low priority, promote only on a concrete need. Split off from the lavaan-multilevel-siblings candidate at the M56–M58 plan gate (2026-07-17); the fixed **cluster** level stays double-blocked (parking-lot candidate above). Lineage: ADR-027 → M53 GO (D-005) → M54 → M56–M58

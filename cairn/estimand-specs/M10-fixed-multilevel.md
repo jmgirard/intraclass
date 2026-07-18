@@ -208,6 +208,6 @@ a Fable review is *recommended*, and work pauses (#1, #19).
   for multilevel data: A generalizability theory approach. *Psychological Methods,
   27*(4), 650–666. (Design 1 subject-level decomposition — inherited from M5; the paper
   itself is a random-effects framework and does not define a fixed-rater coefficient.)
-- (Full provenance for any asserted numeric value is registered in `REFERENCES.md`
+- (Full provenance for any asserted numeric value is registered in `ORACLES.md`
   when the O-FML oracle values are committed, Slice 1.)
 </content>

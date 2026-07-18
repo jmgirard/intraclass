@@ -264,5 +264,5 @@ unification), but the cluster-level interaction error is new territory the spike
   27*(4), 650–666. (Design 1 cluster-level decomposition, Eq. 13 / Table 3 — inherited
   from M5 §3b; the paper is a random-effects framework and does not define a fixed-rater
   cluster-level coefficient, and flags the incomplete/small-k estimator as open.)
-- (Full provenance for any asserted numeric value is registered in `REFERENCES.md` when
+- (Full provenance for any asserted numeric value is registered in `ORACLES.md` when
   the O-FCL oracle values are committed, Slice 2.)
