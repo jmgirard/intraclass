@@ -172,3 +172,25 @@ the fit work at a gate (records the finding; ships nothing).
   skipped. Full `R CMD check` delegated to PR #66 CI (green required at merge).
 
 ### Independent review
+
+Three fresh-context lenses (ref-based, shared tree):
+- **[O] diff-bug (Opus):** no correctness defects in shipped code. Verified: FIML
+  applied conditionally (complete fits byte-identical), MC/vcov machinery holds
+  under FIML, guard narrowing flows random through / aborts fixed, the
+  connectedness+k_c^eff block is engine-agnostic, the harmonic τ² law matches the
+  pilot arithmetic and reduces to the balanced special case, and the removed M54
+  aborts are correctly obsolete. **1 low-severity test finding (F1).**
+- **[S] blame-history (Sonnet):** no findings — `simulate_refit=NULL` is a clean
+  OR-extension of the M57 gate, the balance-guard narrowing has its oracle
+  evidence (M58 pilot), removed asserts genuinely obsolete, D-004/D-005 untouched.
+- **[S] prior-PR (Sonnet):** no prior-PR evidence (merged PRs #59/#60/#62/#64/#65
+  carry only codecov-bot comments; no human review threads).
+
+**Scored + triaged (scorer = fresh Sonnet):**
+- **F1 (score 85, actioned — fixed):** `test-icc-lavaan-multilevel-incomplete.R:159`
+  — `expect_gt(length(unique(as.integer(table(d$subject, d$cluster) > 0))), 0)`
+  was a vacuous assertion (`length(unique(x)) >= 1` always TRUE), so it never
+  verified the intended cluster-size imbalance. Replaced with a real imbalance
+  check: distinct subjects-per-cluster (`colSums` of the incidence) > 1. Test-file
+  re-run 34/34.
+- No findings scored below 80 (nothing logged-only). No follow-ups spawned.

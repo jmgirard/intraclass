@@ -156,7 +156,9 @@ test_that("unequal cluster sizes: components track glmmTMB, MC interval ships", 
     0.5,
     seed = 58210
   )
-  expect_gt(length(unique(as.integer(table(d$subject, d$cluster) > 0))), 0)
+  # The fixture is genuinely unbalanced: subjects-per-cluster (column sums of the
+  # subject-by-cluster incidence) take more than one distinct value.
+  expect_gt(length(unique(colSums(table(d$subject, d$cluster) > 0))), 1L)
 
   x_sem <- icc(
     d,
