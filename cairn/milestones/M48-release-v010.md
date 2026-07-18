@@ -5,7 +5,7 @@
 
 - **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
-- **Depends on:** M49, M50, M51, M53, M54, M55   <!-- owner: plan · create/amend-via-gate -->
+- **Depends on:** M49, M50, M51, M53, M54, M55, M61   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
 - **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
 

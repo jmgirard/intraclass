@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-17 (M58 shipped + archived — lavaan incomplete/unbalanced random multilevel, PR #66; M60 rotated out under terminal-row retention; fixed-subject-lavaan, fixed-bootstrap, and plotting-polish candidates remain)_
+_Last hygiene check: 2026-07-17 (M61 planned — plotting polish, promoted from the plotting-polish candidate and wired as an M48 dependency; two plotting deferrals become candidate rows)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,7 +9,8 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55 | high | milestones/M48-release-v010.md |
+| M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
+| M61 | Plotting polish — cohesive theme, palette, and labels | planned | — | normal | milestones/M61-plotting-polish.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | done | — | normal | milestones/archive/M58-lavaan-multilevel-incomplete.md |
 | M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | done | — | normal | milestones/archive/M57-lavaan-multilevel-fixed.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
@@ -24,7 +25,8 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 - Companion software/methods paper (JOSS or similar) — after the v0.1.0 release; the M42 comparison article is the seed; venue/framing decided against the released package (design interview + plan gate, 2026-07-12; ADR-022 deferral) — cairn/DESIGN.md § Commitments
 - Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator). Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
 - Incomplete/unbalanced fixed-rater **subject**-level multilevel lavaan — the SEM sibling that compounds two-level FIML with the Case-3A fixed correction; low priority, promote only on a concrete need. Split off from the lavaan-multilevel-siblings candidate at the M56–M58 plan gate (2026-07-17); the fixed **cluster** level stays double-blocked (parking-lot candidate above). Lineage: ADR-027 → M53 GO (D-005) → M54 → M56–M58
-- Plotting polish — beautify and improve the plotting methods (`R/autoplot.R`: `autoplot.icc` coefficient/component views, `autoplot.icc_dstudy` reliability curves, and their `plot()` wrappers): visual design, labeling/theming, and possible new views (e.g. level-faceted multilevel displays). ggplot2 stays in Suggests (ADR-010 light-install). Added conversationally 2026-07-17
+- Plotting: exported user-facing `theme_intraclass()` — a composable, exported ggplot2 theme users can add to their own plots. Deferred at the M61 plan gate (2026-07-17) in favor of internal-only styling; promote on a concrete request. Lineage: M61.
+- Plotting: new view types beyond the three current views (e.g. a stacked variance-share / proportion chart). Deferred at the M61 plan gate (2026-07-17); multilevel views are already level-faceted, so a genuinely new display needs a concrete proposal. Lineage: M61.
 - Multilevel lavaan bootstrap CI beyond balanced/complete random — two parked cells: (a) the crossed **fixed** cell (thread the per-refit Case-3A θ²_r correction through the M56 factory `lavaan_ml_simulate_refit`/`lavaan_multilevel_components`, currently random-only); (b) the **random incomplete/unbalanced** cells (the factory takes an unequal `cluster_sizes` vector, but coverage is validated only on balanced data — needs an unbalanced coverage oracle; incomplete can't bootstrap at all, ADR-031). Both MC-only ship; bootstrap parity is nice-to-have and inherits M56's cluster-level cross-platform flake. Lineage: M56 factory → M57 (fixed) → M58/MD-1 (random incomplete/unbalanced).
 - lavaan + within-cell replicates — the SEM engine on replicated (σ²_sr/σ²_e-split) data. Niche, low value: would need both a lavaan replicate parameterization and the M20 replicate machinery to intersect. Promote only if a concrete need appears. Reclassified from M21 (ADR-027); promoted from the parking lot 2026-07-13 — cairn/legacy/ROADMAP.md
 - d_study() CI-width precision planning ("how many subjects for a ±.1-wide interval?") — scope boundary resolved by the design interview (2026-07-12): a legitimate future direction, **gated on finding an oracle strategy**; subject-count-for-power as such stays out of scope (`M4.5-d-study.md` §6; DESIGN.md contract boundary) — cairn/estimand-specs/M4.5-d-study.md
