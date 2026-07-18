@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M62: CI-method comparison pass — non-parametric bootstrap & profile-likelihood (GO/NO-GO)
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; independent of M48 (post-1.0, additive) -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m62-ci-method-comparison-pass   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -122,6 +122,7 @@ exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-17: in-progress on m62-ci-method-comparison-pass (/milestone-implement).
 - 2026-07-17: created by /milestone-plan. Absorbs the legacy candidate
   (`cairn/legacy/ROADMAP.md:81` — non-parametric bootstrap + profile-likelihood,
   "remainder unscheduled"; parametric-bootstrap half shipped M16/ADR-025).
