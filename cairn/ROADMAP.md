@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-17 (M61 shipped + archived — plotting polish, PR #67; M57 rotated out under terminal-row retention; exported-theme + new-view-types plotting candidates remain)_
+_Last hygiene check: 2026-07-17 (M62 planned — CI-method comparison pass, non-parametric bootstrap + profile-likelihood GO/NO-GO; absorbs the legacy method-comparison candidate)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,6 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
+| M62 | CI-method comparison pass — non-parametric bootstrap & profile-likelihood (GO/NO-GO) | planned | — | normal | milestones/M62-ci-method-comparison-pass.md |
 | M61 | Plotting polish — cohesive theme, palette, and labels | done | — | normal | milestones/archive/M61-plotting-polish.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | done | — | normal | milestones/archive/M58-lavaan-multilevel-incomplete.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
@@ -21,6 +22,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 ## Candidates
 
+- Exported non-parametric bootstrap / profile-likelihood `ci_method` — the GO-gated implementation of whichever method M62's comparison pass finds "not worse" than the incumbents. Promote per method only on an M62 GO; a NO-GO is recorded as a D-entry rejection, not re-litigated. Absorbs the legacy "remainder unscheduled" candidate (`cairn/legacy/ROADMAP.md:81`; parametric-bootstrap half shipped M16/ADR-025). Lineage: legacy candidate → M62.
 - Companion software/methods paper (JOSS or similar) — after the v0.1.0 release; the M42 comparison article is the seed; venue/framing decided against the released package (design interview + plan gate, 2026-07-12; ADR-022 deferral) — cairn/DESIGN.md § Commitments
 - Statistical-extension parking lot (grouped; see `cairn/legacy/ROADMAP.md` for the full descriptions + readiness/status per item): the `d_study()` cluster-level / occasion-ragged projection; the occasion-averaged coefficient on ragged replicates (research); incomplete/unbalanced **fixed** cluster-level `ICC(c,k)` (still blocked by ten Hove's small-`k` estimator). Promote individually via `/milestone-plan` — migrated 2026-07-12 — cairn/legacy/ROADMAP.md
 - Incomplete/unbalanced fixed-rater **subject**-level multilevel lavaan — the SEM sibling that compounds two-level FIML with the Case-3A fixed correction; low priority, promote only on a concrete need. Split off from the lavaan-multilevel-siblings candidate at the M56–M58 plan gate (2026-07-17); the fixed **cluster** level stays double-blocked (parking-lot candidate above). Lineage: ADR-027 → M53 GO (D-005) → M54 → M56–M58
