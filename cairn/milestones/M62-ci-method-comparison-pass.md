@@ -66,9 +66,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
       figures agree with a published coverage result within a stated tolerance —
       quantitatively against ukoumunne2003 (Table I / Fig. 2, exact values), with
       ohyama2025 as qualitative corroboration (oracle-first, `PRINCIPLES.md #1`).
-      <!-- amended at review gate 2026-07-18: named ohyama2025 as the quantitative
-           oracle; the actual ±.03 check used ukoumunne2003's exact tabulated
-           values (ohyama only plots). Wording fix, bar unchanged. -->
+      <!-- amended at review gate 2026-07-18 (rationale in work log); bar unchanged. -->
 - [x] **AC3 (failure axis, GP6).** The comparison spans the known-failure axis:
       ≥1 near-zero-ICC boundary cell and ≥1 few-subjects cell, plus the canonical
       interior one-way-random cell.
