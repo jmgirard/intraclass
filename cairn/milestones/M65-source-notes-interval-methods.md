@@ -72,7 +72,7 @@ the tier-C candidate row; the load-bearing sources → M64.
 - [x] T1: Notes for the profile-likelihood trio — `xiao2013`, `xiao2009`,
       `saha2012`. `xiao2013` first and in most depth; it is the named candidate
       source for the PL sibling pass.
-- [ ] T2: Notes for the estimator-bias pair — `saha2005`, `bhandary2006`.
+- [x] T2: Notes for the estimator-bias pair — `saha2005`, `bhandary2006`.
 - [ ] T3: Notes for the distributional-robustness pair — `mehta2018`,
       `bobak2018`; connect each to the GP6 known-failure axes the package
       already sweeps (near-zero ICC, few subjects, non-normality).
@@ -96,6 +96,13 @@ the tier-C candidate row; the load-bearing sources → M64.
   "PL under-covers for ICCs" is design-specific, vindicating the M62 gate split.
   `xiao2013`'s `κ_m` is calibrated only over ρ ∈ [0.6, 0.9], with no near-zero
   evidence at all.
+- 2026-07-18: T2 done — `saha2005` (binary beta-binomial BCML; **no coverage
+  results**, per AC3; §4-vs-Appendix-A contradiction on `var(φ̂_ML)` recorded,
+  Appendix A correct) and `bhandary2006` (Gaussian familial `F_max`
+  **equality test**, not an estimator-bias paper — belongs to the M67 cluster by
+  subject; recorded in the note, no scope change). Table I of `saha2005` is
+  per-cell published evidence that near-boundary non-convergence is
+  estimand-intrinsic (~15 % acceptance at the worst cell).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
