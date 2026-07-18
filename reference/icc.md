@@ -200,38 +200,44 @@ icc(
   **incomplete** data (missing cells are estimated by full-information
   maximum likelihood; the parametric bootstrap is unavailable for
   incomplete SEM), and the crossed (Design 1) **multilevel** design at
-  both levels (plus the conflated diagnostic) via a two-level SEM – on
-  complete, balanced data with equal cluster sizes. With **random**
-  raters the interval is either the Monte-Carlo interval (the default)
-  or the parametric bootstrap (which simulates two-level datasets from
-  the fitted moments and refits per resample). With **fixed** raters the
+  both levels (plus the conflated diagnostic) via a two-level SEM. With
+  **random** raters the multilevel fit covers both complete/balanced
+  data and **incomplete** (missing cells estimated by two-level
+  full-information ML) or **unbalanced** (unequal cluster sizes) data;
+  the interval is the Monte-Carlo interval (the default), or the
+  parametric bootstrap (which simulates two-level datasets from the
+  fitted moments and refits per resample) on balanced/complete data only
+  – incomplete or unbalanced data is Monte-Carlo only (resamples cannot
+  reproduce a missingness pattern, and the bootstrap coverage is
+  validated only on balanced data). With **fixed** raters the
   between-level rater intercepts give the Case-3A finite-population
   \\\theta^2_r\\ at both levels (Monte-Carlo only; the fixed-rater
-  bootstrap is not yet available); because lavaan's random-rater term is
-  the raw quadratic form, the fixed-rater ICC differs from the
-  random-rater one by the finite-population correction (which the
-  REML-based mixed-model engines do not carry into their random
-  estimate). lavaan's two-level estimator is full-information ML (there
-  is no REML analog), so with few clusters its cluster-level components
-  sit slightly below the REML estimates and its absolute-agreement rater
-  term slightly above (both differences shrink as clusters grow;
-  consistency ICCs are ratios and agree with the mixed-model estimates
-  essentially exactly). `"brms"` fits the **random**-rater model in a
-  Bayesian framework (Stan, via brms) under a sourced half-*t*(4, 0, 1)
-  prior on the random-effect SDs (ten Hove et al. 2020); the point
-  estimate is the posterior mode (MAP) and the interval is a percentile
-  **credible** interval (`ci_method = "posterior"`, forced). It covers,
-  on **both balanced/complete and incomplete/ragged** data, the two-way
-  random single-level design, the crossed (Design 1) **multilevel**
-  random design (subject and cluster levels), the two-way
-  **fixed-rater** single-level design (Case-3A finite-population
-  \\\theta^2_r\\), the crossed (Design 1) multilevel **fixed-rater**
-  design (subject level), and the nested **Design 2** (raters nested in
-  clusters) and **Design 3** (raters nested in subjects, the multilevel
-  one-way, agreement-only) *random* multilevel designs (subject level),
-  and the single-level one-way random design; the nested Design 2
-  *fixed-rater* multilevel design at the subject level on both balanced
-  and incomplete/ragged data; and, on balanced/complete data only, the
+  bootstrap is not yet available), on complete, balanced data with equal
+  cluster sizes only; because lavaan's random-rater term is the raw
+  quadratic form, the fixed-rater ICC differs from the random-rater one
+  by the finite-population correction (which the REML-based mixed-model
+  engines do not carry into their random estimate). lavaan's two-level
+  estimator is full-information ML (there is no REML analog), so with
+  few clusters its cluster-level components sit slightly below the REML
+  estimates and its absolute-agreement rater term slightly above (both
+  differences shrink as clusters grow; consistency ICCs are ratios and
+  agree with the mixed-model estimates essentially exactly). `"brms"`
+  fits the **random**-rater model in a Bayesian framework (Stan, via
+  brms) under a sourced half-*t*(4, 0, 1) prior on the random-effect SDs
+  (ten Hove et al. 2020); the point estimate is the posterior mode (MAP)
+  and the interval is a percentile **credible** interval
+  (`ci_method = "posterior"`, forced). It covers, on **both
+  balanced/complete and incomplete/ragged** data, the two-way random
+  single-level design, the crossed (Design 1) **multilevel** random
+  design (subject and cluster levels), the two-way **fixed-rater**
+  single-level design (Case-3A finite-population \\\theta^2_r\\), the
+  crossed (Design 1) multilevel **fixed-rater** design (subject level),
+  and the nested **Design 2** (raters nested in clusters) and **Design
+  3** (raters nested in subjects, the multilevel one-way,
+  agreement-only) *random* multilevel designs (subject level), and the
+  single-level one-way random design; the nested Design 2 *fixed-rater*
+  multilevel design at the subject level on both balanced and
+  incomplete/ragged data; and, on balanced/complete data only, the
   crossed Design 1 *fixed-rater* **cluster** level, the conflated
   diagnostic, and within-cell replicates. Within-cell-replicate Bayesian
   fits and numeric-`unit` (D-study) projection are planned for later

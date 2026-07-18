@@ -42,14 +42,14 @@
   ICCs (plus the conflated diagnostic) with either the Monte-Carlo
   interval (the default) or the parametric bootstrap
   (`ci_method = "bootstrap"`), which simulates two-level datasets from
-  the fitted moments and refits per resample. Complete, balanced data
-  with equal cluster sizes and random raters; cross-validated against
-  the REML mixed-model engines (consistency ICCs agree essentially
-  exactly; the documented ML-vs-REML and rater-mean small-sample
-  differences shrink as clusters grow), and the bootstrap interval
-  agrees with the Monte-Carlo interval within Monte-Carlo tolerance.
-  Nested designs and incomplete/unbalanced data remain loud, classed
-  refusals.
+  the fitted moments and refits per resample (the parametric bootstrap
+  needs complete, balanced data with equal cluster sizes). Random
+  raters; cross-validated against the REML mixed-model engines
+  (consistency ICCs agree essentially exactly; the documented ML-vs-REML
+  and rater-mean small-sample differences shrink as clusters grow), and
+  the bootstrap interval agrees with the Monte-Carlo interval within
+  Monte-Carlo tolerance. Nested designs and within-cell replicates
+  remain loud, classed refusals.
 - The `lavaan` (SEM) engine now also fits the crossed (Design 1)
   multilevel design with **fixed raters** (`raters = "fixed"`) at both
   the subject and cluster levels, on complete, balanced data with equal
@@ -65,6 +65,23 @@
   bootstrap is not yet available. Fixed-rater nested,
   within-cell-replicate, and incomplete/unbalanced multilevel SEM remain
   loud, classed refusals.
+- The `lavaan` (SEM) engine now fits the crossed (Design 1) multilevel
+  design with **random raters** on **incomplete** and **unbalanced**
+  data, not only on complete, balanced data:
+  `icc(..., engine = "lavaan", cluster = ...)` estimates around missing
+  subject-by-rater cells by two-level full-information maximum
+  likelihood and fits unequal cluster sizes natively. The subject- and
+  cluster-level ICCs are cross-validated against the REML mixed-model
+  engines (consistency near-exact; agreement within the documented
+  index-class split), the averaged cluster-level ICC uses the same
+  inverse-Simpson `k_c^eff` divisor, and the rater main-effect variance
+  carries the documented small-sample inflation, which generalizes under
+  unequal cluster sizes to use the harmonic mean of the per-cluster
+  subject counts. The interval is Monte-Carlo only on incomplete or
+  unbalanced data (the parametric bootstrap cannot reproduce a
+  missingness pattern and its coverage is validated only on balanced
+  data); balanced, complete data keeps the bootstrap. Fixed-rater
+  incomplete/unbalanced multilevel SEM remains a loud, classed refusal.
 - `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
 - The conflated diagnostic (`level = "conflated"`) now also reports a
   **consistency** form (`type = "consistency"`), not just absolute
