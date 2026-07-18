@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-18 (M63 shipped + archived — references migration to ORACLES.md + BIBLIOGRAPHY.md, PR #69; M54 rotated out under terminal-row retention; M64–M67 planned for source-note ingestion of all 28 remaining PDFs)_
+_Last hygiene check: 2026-07-18 (M64 shipped + archived — ten load-bearing source notes, PR #70; M55 rotated out under terminal-row retention; M65–M67 remain planned for the other 18 shelf PDFs)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -11,15 +11,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 |---|---|---|---|---|---|
 | M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | done | — | high | milestones/archive/M63-references-migration.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
-| M64 | Source notes — the ten load-bearing primary sources | review | M63 | normal | milestones/M64-source-notes-loadbearing.md |
+| M64 | Source notes — the ten load-bearing primary sources | done | M63 | normal | milestones/archive/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | planned | M63 | normal | milestones/M65-source-notes-interval-methods.md |
 | M66 | Source notes — the foundational and interpretation shelf | planned | M63 | low | milestones/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | planned | M63 | low | milestones/M67-source-notes-equality-testing.md |
 | M62 | Non-parametric bootstrap CI pass — one-way ICC (GO/NO-GO) | done | — | normal | milestones/archive/M62-npbootstrap-oneway-pass.md |
 | M61 | Plotting polish — cohesive theme, palette, and labels | done | — | normal | milestones/archive/M61-plotting-polish.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | done | — | normal | milestones/archive/M58-lavaan-multilevel-incomplete.md |
-| M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
-<!-- terminal-row retention: M63 done (2026-07-18) → M54 rotated out (its archive file + M48's Depends-on still resolve). Kept: M63, M62, M61, M58, M55 (5 most recent terminal). -->
+<!-- terminal-row retention: M64 done (2026-07-18) → M55 rotated out (its archive file + M48's Depends-on still resolve). Kept: M64, M63, M62, M61, M58 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
