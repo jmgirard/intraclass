@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-17 (M61 planned — plotting polish, promoted from the plotting-polish candidate and wired as an M48 dependency; two plotting deferrals become candidate rows)_
+_Last hygiene check: 2026-07-17 (M61 shipped + archived — plotting polish, PR #67; M57 rotated out under terminal-row retention; exported-theme + new-view-types plotting candidates remain)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
-| M61 | Plotting polish — cohesive theme, palette, and labels | review | — | normal | milestones/M61-plotting-polish.md |
+| M61 | Plotting polish — cohesive theme, palette, and labels | done | — | normal | milestones/archive/M61-plotting-polish.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | done | — | normal | milestones/archive/M58-lavaan-multilevel-incomplete.md |
-| M57 | Multilevel SEM (lavaan) — fixed-rater crossed design | done | — | normal | milestones/archive/M57-lavaan-multilevel-fixed.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
 | M54 | Multilevel SEM (lavaan) — engine implementation | done | — | high | milestones/archive/M54-lavaan-multilevel-engine.md |
 | M53 | Multilevel SEM (lavaan) — estimand/oracle pass | done | — | high | milestones/archive/M53-multilevel-sem-pass.md |
-<!-- terminal-row retention: M60 rotated out (M58 shipped); M53/M54/M55 pinned by M48 Depends-on, so M57 rotates out at the next terminal transition (5 most recent kept) -->
+<!-- terminal-row retention: M61 done (2026-07-17) → M57 rotated out; M53/M54/M55 pinned by M48 Depends-on. Kept: M61, M58, M55, M54, M53 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
