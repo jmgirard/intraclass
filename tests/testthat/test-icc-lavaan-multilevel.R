@@ -373,20 +373,10 @@ test_that("multilevel lavaan out-of-scope combinations abort with classed condit
     class = "intraclass_unsupported"
   )
 
-  # Incomplete data: the pilot's oracle evidence is complete-data only.
-  di <- d[-3, ]
-  expect_error(
-    icc(di, score, subject, rater, cluster = cluster, engine = "lavaan"),
-    class = "intraclass_unsupported"
-  )
-
-  # Unbalanced cluster sizes: complete flat grid, unequal subjects/cluster --
-  # outside the pilot's evidence (equal n_s enters the tau^2 law).
-  du <- d[!(d$cluster == "1" & d$subj > 3), ]
-  expect_error(
-    icc(du, score, subject, rater, cluster = cluster, engine = "lavaan"),
-    class = "intraclass_unsupported"
-  )
+  # (Incomplete and unbalanced RANDOM crossed data are now IN scope -- M58 ships
+  # them via two-level FIML + native unequal cluster sizes; their positive-path
+  # parity and the fixed/bootstrap-on-incomplete aborts are pinned in
+  # test-icc-lavaan-multilevel-incomplete.R.)
 
   # Within-cell replicates: no SEM replicate parameterization (M54 Out).
   dr <- rbind(d, d)

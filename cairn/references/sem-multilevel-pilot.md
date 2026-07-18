@@ -159,3 +159,59 @@ Heywood incidence at few clusters → the existing `intraclass_singular_fit`
 abort toward glmmTMB; (d) parity tolerances split by index class
 (consistency tight, agreement asymptotic) and budget the ML/REML gap at
 small N_c.
+
+## M58 extension — incomplete (FIML) + unequal cluster sizes (Stages 3–4)
+
+**Question.** Does the same two-level CFA route (D-005) extend to (a) incomplete
+subject×rater cells via two-level FIML (`missing = "fiml"`), and (b) unequal
+per-cluster subject counts — and if so, how does the documented τ² rater
+inflation generalize under imbalance? Two stages added to the pilot script
+(`data-raw/pilot-sem-multilevel.R`, seeded, checkpoint before pins; full run
+`PILOT PASS`, 2026-07-17).
+
+**Stage 3 — incomplete (FIML).** One balanced C=60, n_s=10, k=5 dataset, ~18%
+of cells deleted MCAR keeping every subject ≥2 raters (2460 of 3000 cells kept),
+fit by two-level FIML vs a REML glmmTMB fit of the same reduced long data. The
+components recover with Stage-1's index-class split intact: subject 1.0083 vs
+1.0084 and residual 0.4736 vs 0.4736 (near-exact within components); cluster
+0.1821 vs 0.1870 and cluster_rater 0.1481 vs 0.1517 (the ML-N-divisor gap);
+rater 0.0723 vs 0.0687 (SEM above REML by τ²). Consistency ICCs |Δ| < .001, all
+ICCs |Δ| ≤ .0066 — the M49 split holds on incomplete data exactly as complete.
+
+**Stage 4 — unequal cluster sizes, τ² harmonic-mean law.** Imbalance sweep at
+C=60, k=5, 60 reps per level (none/mild/severe), measuring the signed SEM−REML
+rater parity (= τ², since REML carries no inflation) against two candidate laws.
+The balanced τ² = (σ²_{cr} + σ²_res/n_s)/N_c **generalizes by replacing n_s with
+the HARMONIC MEAN H of the per-cluster subject counts**:
+
+  **τ² = (σ²_{cr} + σ²_res / H) / C,  H = C / Σ_c (1/m_c)**
+
+reducing exactly to the balanced law when all m_c are equal. Observed parity vs
+the harmonic law vs the size-weighted "grand" law (τ²_grand = σ²_{cr}·Σm²/N² +
+σ²_res/N):
+
+| imbalance | H | mean parity | τ²(harmonic) | τ²(grand) |
+|---|---|---|---|---|
+| none | 10.00 | .00355 | .00350 | .00350 |
+| mild | 8.40 | .00370 | .00366 | .00393 |
+| severe | 6.43 | .00385 | **.00396** | .00485 |
+
+The harmonic law holds on every level (|parity − τ²_harm| < .005, pinned) and
+**strictly beats the grand law under severe imbalance** (a discriminating pin):
+lavaan's between-level mean structure weights clusters equally, not by size, so
+the size-weighted grand law is wrong. Cluster/subject-governed components track
+glmmTMB within the ML-N-divisor gap (< .05 relative); zero fit failures across
+180 two-level fits.
+
+**GO** (2026-07-17). Both extensions are numerically faithful under the D-005
+oracle discipline — the estimand and method are unchanged, only the data shape.
+Implementation notes for the engine milestone: (a) pass `missing = "fiml"` when
+any wide cell is NA (the two-level analog of the single-level incomplete path);
+unequal cluster sizes fit natively (nothing to change in the extraction). (b)
+Document the τ² **harmonic-mean** generalization in the engine header alongside
+the balanced law, centred on τ² never zero (GP5/GP7). (c) The parametric
+bootstrap stays refused on incomplete data (resamples cannot reproduce the
+missingness pattern, ADR-031) — MC only. (d) Connectedness/identifiability and
+the averaged-cluster k_c^eff inverse-Simpson divisor (M46/ADR-057) are the
+engine-agnostic crossed-multilevel guards, already shared with the mixed
+engines.

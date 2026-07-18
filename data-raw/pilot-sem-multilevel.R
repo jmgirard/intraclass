@@ -13,10 +13,18 @@
 #   axis, D (k = 25) sweeps sigma^2_r's own axis (GP6/GP5 correction; see the
 #   milestone Decisions) — per-rep seeds; glmmTMB parity deltas on the first
 #   25 reps per cell; MC-interval feasibility probe on the Stage-1 fit.
+# Stage 3 (M58 T1): does the two-level FIML route (`missing = "fiml"`) recover
+#   the components on INCOMPLETE (connected) data? One dataset, ~18% cells
+#   deleted MCAR, SEM vs glmmTMB with Stage-1's index-class-split parity.
+# Stage 4 (M58 T1): under UNEQUAL cluster sizes, does the tau^2 rater-inflation
+#   law generalize? Imbalance sweep (none/mild/severe) establishing the
+#   HARMONIC-MEAN generalization tau^2 = (sigma^2_cr + sigma^2_res/H)/C,
+#   H = harmonic mean of cluster sizes — and that it beats the size-weighted
+#   grand law under imbalance.
 #
 # Seeded and reproducible (#4/#12); checkpoint saved BEFORE the stopifnot pins
 # (M47/M52 lessons): data-raw/.oracle-pilot-sem-multilevel-checkpoint.rds.
-# Expected runtime ~20-25 min (cells C and D are the bulk).
+# Expected runtime ~22-27 min (cells C and D are the bulk; Stages 3-4 add ~1 min).
 
 suppressPackageStartupMessages({
   stopifnot(requireNamespace("lavaan", quietly = TRUE))
@@ -61,6 +69,52 @@ sim_multilevel <- function(
   d
 }
 
+# UNEQUAL cluster sizes (M58 Stage 4): the balanced generator with a per-cluster
+# subject-count vector `m_per_cluster` instead of a scalar n_subjects. Complete
+# crossing within each cluster (all k raters present); the imbalance is in the
+# number of subjects per cluster, which drives the generalized tau^2 law.
+sim_multilevel_unequal <- function(
+  m_per_cluster,
+  n_raters,
+  vc,
+  vsc,
+  vr,
+  vcr,
+  vres,
+  seed
+) {
+  set.seed(seed)
+  n_clusters <- length(m_per_cluster)
+  cl <- stats::rnorm(n_clusters, 0, sqrt(vc))
+  rt <- stats::rnorm(n_raters, 0, sqrt(vr))
+  crv <- matrix(
+    stats::rnorm(n_clusters * n_raters, 0, sqrt(vcr)),
+    n_clusters,
+    n_raters
+  )
+  d <- do.call(
+    rbind,
+    lapply(seq_len(n_clusters), function(cc) {
+      m <- m_per_cluster[cc]
+      sc <- stats::rnorm(m, 0, sqrt(vsc))
+      ex <- expand.grid(subj = seq_len(m), rater = seq_len(n_raters))
+      ex$cluster <- cc
+      ex$sc <- sc[ex$subj]
+      ex
+    })
+  )
+  d$score <- 10 +
+    cl[d$cluster] +
+    d$sc +
+    rt[d$rater] +
+    crv[cbind(d$cluster, d$rater)] +
+    stats::rnorm(nrow(d), 0, sqrt(vres))
+  d$cluster <- factor(d$cluster)
+  d$rater <- factor(d$rater)
+  d$subject <- factor(paste(d$cluster, d$subj, sep = "_"))
+  d
+}
+
 # Long -> wide (one row per subject, columns v1..vk + cluster id).
 to_wide <- function(d) {
   k <- nlevels(d$rater)
@@ -94,13 +148,16 @@ ml_sem_model <- function(k) {
 # Fit + extract the five components from the two-level SEM. Returns NULL on
 # non-convergence; negative between-level variances (Heywood) are returned
 # as-is so callers can record incidence.
-fit_ml_sem <- function(wide, k) {
+fit_ml_sem <- function(wide, k, fiml = FALSE) {
+  # `fiml = TRUE` (M58 Stage 3) estimates around NA cells by full-information ML
+  # (`missing = "fiml"`), the two-level analog of the single-level incomplete
+  # path; complete/balanced fits (Stages 1-2) keep lavaan's listwise default.
+  args <- list(model = ml_sem_model(k), data = wide, cluster = "cluster")
+  if (fiml) {
+    args$missing <- "fiml"
+  }
   fit <- tryCatch(
-    suppressWarnings(lavaan::lavaan(
-      ml_sem_model(k),
-      data = wide,
-      cluster = "cluster"
-    )),
+    suppressWarnings(do.call(lavaan::lavaan, args)),
     error = function(e) NULL
   )
   if (is.null(fit) || !lavaan::lavInspect(fit, "converged")) {
@@ -375,6 +432,136 @@ checkpoint$mc_probe <- list(
 cat("MC probe (95% intervals, both levels):\n")
 print(round(mc_ci, 4))
 
+# --- Stage 3 (M58): incomplete (FIML) two-level parity -----------------------
+
+# Does the two-level FIML route (`missing = "fiml"`) recover the Design-1
+# components on incomplete (connected) subject x rater data? One moderately-
+# sized balanced dataset, ~18% of cells deleted MCAR (each subject keeps >= 2
+# raters -> connected), fit by two-level FIML vs a REML glmmTMB fit of the same
+# reduced long data. Component/ICC parity mirrors Stage 1's index-class split
+# (consistency tight, agreement absorbs the tau^2 rater inflation).
+d3_full <- sim_multilevel_unequal(
+  rep(10, 60),
+  5,
+  pop1["vc"],
+  pop1["vsc"],
+  pop1["vr"],
+  pop1["vcr"],
+  pop1["vres"],
+  seed = 20260717
+)
+set.seed(58301)
+d3 <- d3_full[stats::runif(nrow(d3_full)) >= 0.18, ]
+d3 <- droplevels(d3[
+  d3$subject %in% names(which(table(d3$subject) >= 2)),
+])
+sem3 <- fit_ml_sem(to_wide(d3), k = 5, fiml = TRUE)
+stopifnot(!is.null(sem3))
+reml3 <- fit_reml(d3)
+icc_sem3 <- iccs_from_components(sem3$components, k = 5)
+icc_reml3 <- iccs_from_components(reml3, k = 5)
+checkpoint$stage3 <- list(
+  cells_kept = c(kept = nrow(d3), full = nrow(d3_full)),
+  sem = sem3$components,
+  reml = reml3,
+  icc_sem = icc_sem3,
+  icc_reml = icc_reml3,
+  rater_parity = unname(sem3$components["rater"] - reml3["rater"])
+)
+cat(sprintf(
+  "Stage 3 incomplete (%d of %d cells kept, %.1f%%): components (SEM / REML):\n",
+  nrow(d3),
+  nrow(d3_full),
+  100 * nrow(d3) / nrow(d3_full)
+))
+print(round(rbind(sem = sem3$components, reml = reml3), 4))
+
+# --- Stage 4 (M58): unequal cluster sizes, tau^2 harmonic-mean law -----------
+
+# Under unequal per-cluster subject counts m_c, the documented rater inflation
+#     E[nu' C nu / (k - 1)] = sigma^2_r + tau^2
+# generalizes by replacing the balanced n_s with the HARMONIC MEAN of the
+# cluster sizes:
+#     tau^2 = (sigma^2_cr + sigma^2_res / H) / C,   H = C / sum(1 / m_c).
+# lavaan's between mean structure weights clusters EQUALLY (not by size), so the
+# size-weighted "grand" law tau2_grand = sigma^2_cr sum(m^2)/N^2 + sigma^2_res/N
+# is WRONG under imbalance; the pilot pins that the harmonic law is right AND
+# that it strictly beats the grand law under severe imbalance (discriminating).
+# The signed SEM-minus-REML rater parity IS tau^2 (REML carries no inflation).
+tau2_harm <- function(m) {
+  h <- length(m) / sum(1 / m)
+  unname((pop2["vcr"] + pop2["vres"] / h) / length(m))
+}
+tau2_grand <- function(m) {
+  unname(pop2["vcr"] * sum(m^2) / sum(m)^2 + pop2["vres"] / sum(m))
+}
+imbalance_sizes <- list(
+  none = rep(10, 60),
+  mild = rep(c(6, 14), length.out = 60),
+  severe = rep(c(4, 6, 20), length.out = 60)
+)
+n_rep4 <- 60
+recover_unequal <- function(m, level) {
+  par <- numeric(n_rep4)
+  csem <- matrix(NA_real_, n_rep4, 5)
+  creml <- csem
+  colnames(csem) <- colnames(creml) <- c(
+    "cluster",
+    "subject",
+    "rater",
+    "cluster_rater",
+    "residual"
+  )
+  n_fail <- 0L
+  for (r in seq_len(n_rep4)) {
+    d <- sim_multilevel_unequal(
+      m,
+      5,
+      pop2["vc"],
+      pop2["vsc"],
+      pop2["vr"],
+      pop2["vcr"],
+      pop2["vres"],
+      seed = 58400 +
+        100 * match(level, names(imbalance_sizes)) +
+        r
+    )
+    sem <- fit_ml_sem(to_wide(d), k = 5)
+    if (is.null(sem)) {
+      n_fail <- n_fail + 1L
+      next
+    }
+    csem[r, ] <- sem$components
+    creml[r, ] <- fit_reml(d)
+    par[r] <- sem$components["rater"] - creml[r, "rater"]
+  }
+  list(
+    H = length(m) / sum(1 / m),
+    mean_parity = mean(par, na.rm = TRUE),
+    tau2_harm = tau2_harm(m),
+    tau2_grand = tau2_grand(m),
+    mean_sem = colMeans(csem, na.rm = TRUE),
+    mean_reml = colMeans(creml, na.rm = TRUE),
+    n_fail = n_fail
+  )
+}
+for (level in names(imbalance_sizes)) {
+  cat(sprintf("Stage 4 imbalance = %s (C=60, k=5)...\n", level))
+  checkpoint[[paste0("unequal_", level)]] <- recover_unequal(
+    imbalance_sizes[[level]],
+    level
+  )
+  x <- checkpoint[[paste0("unequal_", level)]]
+  cat(sprintf(
+    "  H=%.3f  mean signed rater parity=%.5f  tau2_harm=%.5f  tau2_grand=%.5f  n_fail=%d\n",
+    x$H,
+    x$mean_parity,
+    x$tau2_harm,
+    x$tau2_grand,
+    x$n_fail
+  ))
+}
+
 # --- Checkpoint BEFORE pins (M47/M52 lessons) --------------------------------
 
 saveRDS(checkpoint, ckpt_path)
@@ -462,5 +649,51 @@ stopifnot(
 )
 # MC probe: finite draws, both intervals contain their point estimates.
 stopifnot(checkpoint$mc_probe$finite, checkpoint$mc_probe$contained)
+
+# Stage 3 (M58) incomplete FIML: same index-class split as Stage 1 -- within
+# components tight, cluster-level covariance components budget ML-vs-REML, rater
+# within tau^2, consistency ICCs near-exact, all ICCs within the agreement pin.
+s3 <- checkpoint$stage3
+stopifnot(
+  abs(s3$sem["subject"] - s3$reml["subject"]) / s3$reml["subject"] < 0.02,
+  abs(s3$sem["residual"] - s3$reml["residual"]) / s3$reml["residual"] < 0.02,
+  abs(s3$sem["cluster"] - s3$reml["cluster"]) / s3$reml["cluster"] < 0.06,
+  abs(s3$sem["cluster_rater"] - s3$reml["cluster_rater"]) /
+    s3$reml["cluster_rater"] <
+    0.06,
+  abs(s3$sem["rater"] - s3$reml["rater"]) < 0.05,
+  all(
+    abs(
+      s3$icc_sem[c("s_con_1", "s_con_k", "c_con_1", "c_con_k")] -
+        s3$icc_reml[c("s_con_1", "s_con_k", "c_con_1", "c_con_k")]
+    ) <
+      0.01
+  ),
+  all(abs(s3$icc_sem - s3$icc_reml) < 0.03)
+)
+# Stage 4 (M58) unequal cluster sizes: (a) the generalized tau^2 HARMONIC law
+# holds on every imbalance level (signed mean parity within .005 of the
+# predicted harmonic tau^2 -- an invariant-type check, GP5); (b) the harmonic
+# law STRICTLY beats the size-weighted grand law under severe imbalance
+# (discriminating -- confirms the RIGHT law is documented); (c) the
+# cluster/subject-governed components track glmmTMB within the ML-N-divisor gap;
+# (d) zero fit failures.
+cs_comp4 <- c("cluster", "subject", "cluster_rater", "residual")
+for (level in c("none", "mild", "severe")) {
+  x <- checkpoint[[paste0("unequal_", level)]]
+  stopifnot(
+    abs(x$mean_parity - x$tau2_harm) < 0.005,
+    all(
+      abs(x$mean_sem[cs_comp4] - x$mean_reml[cs_comp4]) /
+        x$mean_reml[cs_comp4] <
+        0.05
+    ),
+    x$n_fail == 0
+  )
+}
+sev <- checkpoint$unequal_severe
+stopifnot(
+  abs(sev$mean_parity - sev$tau2_harm) < abs(sev$mean_parity - sev$tau2_grand)
+)
 
 cat("PILOT PASS: all pins hold.\n")
