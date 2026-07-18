@@ -81,20 +81,20 @@ recorded manual visual review — not image snapshots.
 <!-- owner: plan (create) / implement (check-off, minor edits); substantive
      change is amend-via-gate -->
 
-- [ ] T1: Add an internal styling module — an `intraclass` `ggplot2` theme helper
+- [x] T1: Add an internal styling module — an `intraclass` `ggplot2` theme helper
       + an Okabe–Ito colorblind-safe palette constant (internal, not exported;
       new `R/autoplot-theme.R` or a top block in `R/autoplot.R`). Guard both
       behind `ggplot2` availability (they run only inside the `check_installed()`
       methods).
-- [ ] T2: Restyle `autoplot_icc_coefficients()` (`R/autoplot.R:111`) — apply the
+- [x] T2: Restyle `autoplot_icc_coefficients()` (`R/autoplot.R:111`) — apply the
       theme, add direct value labels on the points, refine title/subtitle/axis +
       facet-strip labels.
-- [ ] T3: Restyle `autoplot_icc_components()` (`R/autoplot.R:160`) — palette fills
+- [x] T3: Restyle `autoplot_icc_components()` (`R/autoplot.R:160`) — palette fills
       per component, value labels on the bars, themed, refined labels.
-- [ ] T4: Restyle `autoplot.icc_dstudy()` (`R/autoplot.R:15`) — themed curve,
+- [x] T4: Restyle `autoplot.icc_dstudy()` (`R/autoplot.R:15`) — themed curve,
       palette for the multilevel per-level curves, refined title/axis/facet-strip
       labels; no per-point value clutter on the curve.
-- [ ] T5: Extend `tests/testthat/test-autoplot.R` — structural assertions (theme
+- [x] T5: Extend `tests/testthat/test-autoplot.R` — structural assertions (theme
       applied per view, palette fills match, value-label text == source numbers),
       confirm the existing faithful-rendering assertions still pass, and add a
       DESCRIPTION `ggplot2`-in-Suggests guard.
@@ -111,6 +111,7 @@ recorded manual visual review — not image snapshots.
   gate: theming + labels + colorblind palette; internal-only; structural+manual
   test bar (no vdiffr); land before v0.1.0 (M48 depends on M61).
 - 2026-07-17: in-progress; branch m61-plotting-polish cut from main @86d16e8.
+- 2026-07-17: T1-T5 — added R/autoplot-theme.R (icc_theme + Okabe-Ito icc_palette); restyled all three autoplot views (theme, palette fills/level colours, value labels on coefficient/component views); +6 structural tests. test-autoplot.R 31 pass/0 fail; air + lintr clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

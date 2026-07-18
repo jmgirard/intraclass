@@ -39,16 +39,40 @@ autoplot.icc_dstudy <- function(object, ...) {
     )
   }
 
+  ml <- isTRUE(attr(object, "multilevel"))
+  pal <- icc_palette()
+
   p <- ggplot2::ggplot(
     df,
     ggplot2::aes(x = .data[[x_col]], y = .data$estimate)
-  ) +
-    ggplot2::geom_ribbon(
-      ggplot2::aes(ymin = .data$conf.low, ymax = .data$conf.high),
-      alpha = 0.15
-    ) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point() +
+  )
+  if (ml) {
+    # One curve per level, coloured from the palette; the facets separate them, so
+    # the redundant legend is suppressed by icc_theme().
+    p <- p +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(
+          ymin = .data$conf.low,
+          ymax = .data$conf.high,
+          fill = .data$level
+        ),
+        alpha = 0.18
+      ) +
+      ggplot2::geom_line(ggplot2::aes(colour = .data$level), linewidth = 0.8) +
+      ggplot2::geom_point(ggplot2::aes(colour = .data$level), size = 2) +
+      ggplot2::scale_colour_manual(values = pal) +
+      ggplot2::scale_fill_manual(values = pal)
+  } else {
+    p <- p +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = .data$conf.low, ymax = .data$conf.high),
+        fill = pal[1],
+        alpha = 0.18
+      ) +
+      ggplot2::geom_line(colour = pal[1], linewidth = 0.8) +
+      ggplot2::geom_point(colour = pal[1], size = 2)
+  }
+  p <- p +
     ggplot2::coord_cartesian(ylim = c(0, 1)) +
     ggplot2::labs(
       x = x_lab,
@@ -58,10 +82,11 @@ autoplot.icc_dstudy <- function(object, ...) {
         "Projected reliability with %s%% Monte-Carlo interval",
         ci_pct
       )
-    )
+    ) +
+    icc_theme()
   # A multilevel projection has one curve per level; facet so the subject- and
   # cluster-level curves are not overplotted (mirrors autoplot.icc).
-  if (isTRUE(attr(object, "multilevel"))) {
+  if (ml) {
     p <- p + ggplot2::facet_wrap(ggplot2::vars(.data$level))
   }
   p
@@ -112,6 +137,7 @@ autoplot_icc_coefficients <- function(object) {
   e <- object$estimates
   ml <- isTRUE(object$design$multilevel)
   ci_pct <- format(100 * object$ci$conf_level, trim = TRUE)
+  pal <- icc_palette()
 
   df <- data.frame(
     index = factor(e$index, levels = rev(unique(e$index))),
@@ -122,11 +148,40 @@ autoplot_icc_coefficients <- function(object) {
     stringsAsFactors = FALSE
   )
 
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$estimate, y = .data$index)) +
-    ggplot2::geom_linerange(
-      ggplot2::aes(xmin = .data$conf.low, xmax = .data$conf.high)
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$estimate, y = .data$index))
+  if (ml) {
+    # Colour each level from the palette; the facets already separate the levels,
+    # so the redundant legend is suppressed by icc_theme().
+    p <- p +
+      ggplot2::geom_linerange(
+        ggplot2::aes(
+          xmin = .data$conf.low,
+          xmax = .data$conf.high,
+          colour = .data$level
+        )
+      ) +
+      ggplot2::geom_point(ggplot2::aes(colour = .data$level), size = 2.5) +
+      ggplot2::scale_colour_manual(values = pal)
+  } else {
+    # Single level (`level` is NA): one house colour, no colour mapping.
+    p <- p +
+      ggplot2::geom_linerange(
+        ggplot2::aes(xmin = .data$conf.low, xmax = .data$conf.high),
+        colour = pal[1]
+      ) +
+      ggplot2::geom_point(colour = pal[1], size = 2.5)
+  }
+  # Direct value labels: each estimate to two decimals, nudged above its point so
+  # the number is readable without reading it off the axis.
+  p <- p +
+    ggplot2::geom_text(
+      ggplot2::aes(
+        label = formatC(.data$estimate, format = "f", digits = 2)
+      ),
+      nudge_y = 0.2,
+      size = 3.2,
+      colour = "grey20"
     ) +
-    ggplot2::geom_point() +
     ggplot2::coord_cartesian(xlim = c(0, 1)) +
     ggplot2::labs(
       x = "ICC estimate",
@@ -139,7 +194,8 @@ autoplot_icc_coefficients <- function(object) {
         "Point estimate with %s%% Monte-Carlo interval",
         ci_pct
       )
-    )
+    ) +
+    icc_theme()
   if (ml) {
     # The same index label appears once per level; free the y scale so each facet
     # shows only its own rows (cluster level has fewer than subject level).
@@ -159,6 +215,7 @@ autoplot_icc_coefficients <- function(object) {
 # report, so the bars and the "Variance components:" line always agree.
 autoplot_icc_components <- function(object) {
   view <- icc_components_view(object)
+  pal <- icc_palette()
   df <- data.frame(
     component = factor(view$label, levels = view$label),
     variance = view$variance,
@@ -168,8 +225,28 @@ autoplot_icc_components <- function(object) {
     "Rater variance is confounded into the residual"
   }
 
-  ggplot2::ggplot(df, ggplot2::aes(x = .data$component, y = .data$variance)) +
-    ggplot2::geom_col() +
+  ggplot2::ggplot(
+    df,
+    ggplot2::aes(
+      x = .data$component,
+      y = .data$variance,
+      fill = .data$component
+    )
+  ) +
+    ggplot2::geom_col(width = 0.7) +
+    # Direct value labels above each bar; three significant figures reads the same
+    # scale as the printed "Variance components:" line.
+    ggplot2::geom_text(
+      ggplot2::aes(
+        label = formatC(.data$variance, format = "g", digits = 3)
+      ),
+      vjust = -0.5,
+      size = 3.2,
+      colour = "grey20"
+    ) +
+    ggplot2::scale_fill_manual(values = pal) +
+    # Headroom above the tallest bar so the value label is not clipped.
+    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.1))) +
     ggplot2::labs(
       x = NULL,
       y = "Variance",
@@ -178,7 +255,8 @@ autoplot_icc_components <- function(object) {
         icc_design_label(object$design)
       ),
       subtitle = subtitle
-    )
+    ) +
+    icc_theme()
 }
 
 #' @rdname icc

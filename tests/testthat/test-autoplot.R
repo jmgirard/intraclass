@@ -266,3 +266,85 @@ test_that("autoplot.icc_dstudy renders the projected curve faithfully", {
   expect_equal(ribbon$ymin, ord$conf.low)
   expect_equal(ribbon$ymax, ord$conf.high)
 })
+
+# --- M61 polish: shared theme, colourblind-safe palette, value labels ---------
+# These structural assertions pin the polish (theme applied, palette fills, label
+# text == the object's numbers); the faithful-rendering tests above pin that the
+# polish did not disturb what each layer draws (ADR-020: no image snapshots).
+
+test_that("all three views carry the house theme (icc_theme fingerprint)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:5, seed = 1)
+  # plot.title.position = "plot" is icc_theme()'s fingerprint (ggplot2's default
+  # is "panel"); assert it on each of the three views.
+  expect_identical(ggplot2::autoplot(fit)$theme$plot.title.position, "plot")
+  expect_identical(
+    ggplot2::autoplot(fit, what = "components")$theme$plot.title.position,
+    "plot"
+  )
+  expect_identical(ggplot2::autoplot(ds)$theme$plot.title.position, "plot")
+})
+
+test_that("component bars are filled from the colourblind-safe palette", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
+  fills <- built_layer(ggplot2::autoplot(fit, what = "components"), 1)$fill
+  expect_true(all(fills %in% icc_palette()))
+  # Not the ggplot2 default single grey: distinct fills across components.
+  expect_gt(length(unique(fills)), 1)
+})
+
+test_that("multilevel coefficient points are coloured from the palette", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sim_ml_small(), score, subject, rater, cluster = cluster, seed = 1)
+  cols <- built_layer(ggplot2::autoplot(fit), 2)$colour # geom_point layer
+  expect_true(all(cols %in% icc_palette()))
+  # Subject and cluster levels get distinct palette colours.
+  expect_gt(length(unique(cols)), 1)
+})
+
+test_that("coefficient plot value labels equal the rounded estimates", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  labs <- built_layer(ggplot2::autoplot(fit), 3)$label # geom_text layer
+  expect_equal(sort(as.numeric(labs)), sort(round(fit$estimates$estimate, 2)))
+})
+
+test_that("components plot value labels equal the component variances", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
+  labs <- built_layer(ggplot2::autoplot(fit, what = "components"), 2)$label
+  view <- icc_components_view(fit)
+  expect_equal(
+    sort(as.numeric(labs)),
+    sort(signif(view$variance, 3)),
+    tolerance = 1e-6
+  )
+})
+
+test_that("ggplot2 stays a Suggests dependency (light-install, ADR-010)", {
+  desc <- read.dcf(system.file("DESCRIPTION", package = "intraclass"))
+  expect_match(desc[, "Suggests"], "ggplot2")
+  imports <- if ("Imports" %in% colnames(desc)) desc[, "Imports"] else ""
+  expect_false(grepl("ggplot2", imports))
+})
