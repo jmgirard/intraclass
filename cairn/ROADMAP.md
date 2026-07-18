@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-17 (M62 planned — CI-method comparison pass, non-parametric bootstrap + profile-likelihood GO/NO-GO; absorbs the legacy method-comparison candidate)_
+_Last hygiene check: 2026-07-18 (M62 shipped + archived — non-parametric bootstrap pass, GO for the transformed bootstrap-t, PR #68; M53 rotated out under terminal-row retention; 4 candidates seeded: exported boott ci_method, boundary-robust classical default, PL sibling pass, REFERENCES.md split)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
-| M62 | Non-parametric bootstrap CI pass — one-way ICC (GO/NO-GO) | review | — | normal | milestones/M62-ci-method-comparison-pass.md |
+| M62 | Non-parametric bootstrap CI pass — one-way ICC (GO/NO-GO) | done | — | normal | milestones/archive/M62-npbootstrap-oneway-pass.md |
 | M61 | Plotting polish — cohesive theme, palette, and labels | done | — | normal | milestones/archive/M61-plotting-polish.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | done | — | normal | milestones/archive/M58-lavaan-multilevel-incomplete.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
 | M54 | Multilevel SEM (lavaan) — engine implementation | done | — | high | milestones/archive/M54-lavaan-multilevel-engine.md |
-| M53 | Multilevel SEM (lavaan) — estimand/oracle pass | done | — | high | milestones/archive/M53-multilevel-sem-pass.md |
-<!-- terminal-row retention: M61 done (2026-07-17) → M57 rotated out; M53/M54/M55 pinned by M48 Depends-on. Kept: M61, M58, M55, M54, M53 (5 most recent terminal). -->
+<!-- terminal-row retention: M62 done (2026-07-18) → M53 rotated out (its archive file + M48's Depends-on still resolve). Kept: M62, M61, M58, M55, M54 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
