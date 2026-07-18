@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M62: Non-parametric bootstrap CI pass — one-way ICC (GO/NO-GO)
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; independent of M48 (post-1.0, additive) -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
@@ -120,6 +120,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-18: BLOCKED on RB01 — GO/NO-GO verdict routed to a Fable statistical review (ip-touching tripwire; user chose escalation). Brief: cairn/reviews/RB01-npbootstrap-oneway-go.md.
 - 2026-07-18: confirmatory n_rep=2000 run CUT at user request — boundary cells ran ~4.2s/rep (est. ~5-6h total, not the ~80min I quoted), disproportionate for a 1-SE C4 firm-up. Proceeding on n_rep=1000 with C4 flagged marginal-but-passing (synthesis note caveat); firming C4 deferred to the exported-impl milestone's own coverage validation. → T6 GO/NO-GO gate.
 - 2026-07-18: confirmatory re-run at pre-registered n_rep=2000 RUNNING (bg, tracked; ~80 min) to firm up the marginal C4 (boott .934 was ~1 SE over the .93 bar at n_rep=1000) and drop the n_rep amendment — GP5, executing the pre-reg now that the run is cheap. Resume: read the rds, update T5 table + drop the amendment, then the T6 GO/NO-GO gate.
 - 2026-07-18: T4 done + T5 results written (~40 min run). Oracle cross-check PASSES (boott U10/U30/U50 = .921/.947/.953, reproduces ukoumunne Fig.2). SURPRISE vs the ohyama prior: transformed bootstrap-t not-worse at ALL 4 cells (.934-.940) while the MC default under-covers AND defers on 28-39% of near-zero-boundary datasets (C2/C4 n_ok 716/612). Recommended verdict GO(boott) / NO-GO(perc,bca). Pending user acceptance + optional Fable (ip-touching) before the T6 D-entry.
