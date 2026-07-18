@@ -81,9 +81,9 @@ efficiency) is a *different* paper and belongs to M66, not here.
       `getting-started.Rmd` caveat rests on — and `jorgensen2021`, the O-SEM
       absolute-error source (Eq. 6 defines σ²_i as the raw variance of the
       effects-coded indicator intercepts).
-- [ ] T4: Cross-check each note's extracted values against the corresponding
+- [x] T4: Cross-check each note's extracted values against the corresponding
       `ORACLES.md` entries; log agreements, escalate any disagreement.
-- [ ] T5: Trim the ten `BIBLIOGRAPHY.md` annotations to citation + pointer;
+- [x] T5: Trim the ten `BIBLIOGRAPHY.md` annotations to citation + pointer;
       add the `INDEX.md` lines.
 - [ ] T6: Run `cairn_validate` + the profile `verify` slot; open the PR and
       drive CI green.
@@ -91,108 +91,18 @@ efficiency) is a *different* paper and belongs to M66, not here.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-18: created by /milestone-plan (plan gate: maintainer chose full
-  extraction with a fresh PDF re-read for the load-bearing sources, over a
-  text-only migration of the existing bibliography annotations).
-- 2026-07-18: minor amendment by /milestone-implement M63 — `tenhove2025`
-  becomes the `tenhove2025a`/`tenhove2025b` pair (M63 implement gate).
-- 2026-07-18: amended by /milestone-review M63 — `jorgensen2021.pdf` is present
-  after all (M63's "no PDF" record was wrong), so the O-SEM source joins this
-  milestone: nine → ten notes, no longer blocked.
-- 2026-07-18: /milestone-implement — status in-progress, branch
-  `m64-source-notes-loadbearing` cut from main.
-- 2026-07-18: implement gate — maintainer chose: hybrid delegation (oracle
-  anchors read in-session, the rest by [O] subagents), ukoumunne2003-depth
-  notes, and citation + one-clause role + pointer for the BIBLIOGRAPHY trim.
-- 2026-07-18: T1 done — `shrout1979` (read in-session), `mcgraw1996`,
-  `fleiss1973` (both [O] subagents, diffs verified against the PDFs).
-- 2026-07-18: T4 finding (shrout1979) — Table 4 (p. 424) prints the six ICCs to
-  **two** decimals; O1 and `helper-shrout-fleiss.R` carry three and the helper
-  header calls them "the published Shrout & Fleiss numbers to three decimals".
-  Values agree at the paper's precision; the third decimal traces to
-  `psych`/`DescTools`, not the paper. No oracle value changes — attribution
-  wording only, escalated to the review gate per AC3.
-- 2026-07-18: T4 finding (mcgraw1996) — Case 3A `θ²_c = Σc²_j/(k−1)` confirmed
-  verbatim (Table 1, p. 32); agrees with the repo's `θ²_r` (symbol differs,
-  quantity and divisor identical). Published correction (1(4):390) present as
-  the PDF's final page and extracted. No ORACLES.md disagreement.
-- 2026-07-18: T4 finding (mcgraw1996) — possible **uncorrected** typo in the
-  paper: Table 8 (p. 42) Type-C Type-k F renders `MS_W` where Appendix A §A4
-  (p. 44) derives `MS_E`. Not in the published correction. Package impact
-  believed nil (no test cites Table 8); recorded for the review gate, not
-  reconciled.
-- 2026-07-18: T3 done — `jorgensen2021` (read in-session) and `koo2016` ([O]
-  subagent, verified against p. 161).
-- 2026-07-18: T2 done — `tenhove2022` read in-session; `tenhove2020`,
-  `tenhove2025b`, `tenhove2025a`, `tenhove2024` by [O] subagents, diffs verified
-  against the PDFs.
-- 2026-07-18: T4 finding (tenhove2024) — **source-internal discrepancy,
-  confirmed independently** by re-rendering Figure 2 (p. 8) at 300 dpi: the
-  crossed·absolute·average·**unbalanced** terminal cell prints the error term
-  `σ²_r:s/k̂` — the *nested* component — where its balanced sibling prints
-  `(σ²_r + σ²_sr)/k`, and Table 2 / Eq. 18 give a `σ²_r`/`σ²_sr` form. That cell
-  also carries the paper's footnote e ("ICC has not been defined in the
-  literature"). The package follows Eq. 18; no oracle value affected. Escalate,
-  do not reconcile.
-- 2026-07-18: T4 finding (tenhove2024) — **coverage gap, not a defect.** The
-  paper's updated flowchart routes incomplete + relative to `ICC(Q,k̂)` (with the
-  nonoverlap proportion `q`, Eq. 17); the package implements no `ICC(Q,·)` and no
-  `q` term anywhere in `R/` or the estimand specs, computing `σ²_res/k_eff` —
-  i.e. `ICC(C,k̂)`, a cell Figure 2 does not offer for incomplete data. Candidate
-  milestone material; raised at the review gate, out of scope here.
-- 2026-07-18: T4 note (tenhove2024) — the paper *supports* the package's
-  no-verdict posture (it proposes no cut-offs, p. 2) and demotes fixed raters
-  ("rarely—if ever—appropriate", p. 3), which `R/abort.R::warn_fixed_raters()`
-  already cites. One recommendation the package may not meet: report **all**
-  variance components, not only the ICC (p. 11) — flagged for review against
-  `print()`/`tidy()` output.
-- 2026-07-18: T4 finding (jorgensen2021) — Eq. 6 (p. 117) confirmed verbatim:
-  `σ̂²_i = (1/(n_i−1))·Σν̂²_i`, the **raw** variance of the effects-coded
-  intercepts, no bias correction anywhere in the paper. Matches O-SEM exactly.
-  Bonus: p. 124 documents the SEM-vs-mixed-model discrepancy-function gap that
-  explains O-SEM's recorded 0.284-vs-0.290 agreement difference.
-- 2026-07-18: T4 finding (tenhove2025b) — **ADR-003 sourcing gap, escalate.**
-  ADR-003 describes the MC draws as taken "on the engine's internal
-  (boundary-respecting) scale"; the paper names **no** transformation (pp. 1047,
-  1050, 1057) and its own printed example gives a **negative** lower CI limit for
-  the rater variance (`S_r` CI [−0.5495179, 2.732752], p. 1057). The package's
-  log-SD-scale non-negative variant is a *departure from* the sourced method, not
-  a restatement of it. No oracle value implicated; no change proposed here.
-- 2026-07-18: T4 finding (tenhove2020) — half-*t*(4,0,1) on random-effect **SDs**
-  (not variances) confirmed verbatim (p. 7); DGP N=30, σ²_r ∈ {.01,.04},
-  k ∈ {2,3,5} confirmed. Corrections to repo wording, all escalate-not-edit:
-  (a) `ORACLES.md` anchors §4.1.1/§4.1.2/§4.1.3, which **do not exist** in the
-  shelf PDF (an author manuscript with only §4.1/§4.2) — content matches,
-  numbering unattested; (b) the prior spec lives at §4.1/p. 7, not
-  `BIBLIOGRAPHY.md`'s "§3.3/§4.1"; (c) `ORACLES.md` writes relative bias as
-  `|θ̄−θ|/θ`, the paper prints the signed `(θ̄−θ)/θ` (p. 9); (d) the per-cell
-  population ICCs 0.4950/0.4808 are repo-derived, not printed (the paper gives
-  only the range 0.48–0.83, p. 7) — they fall inside it, so no disagreement.
-  Also: inverse-gamma is *discussed and rejected* (§3.2), never simulated.
-- 2026-07-18: T4 finding (koo2016) — the CI-not-point guidance confirmed verbatim
-  (p. 161): the 95% interval "should be used as the basis to evaluate the level of
-  reliability", not the point estimate. Bands confirmed as printed, with an
-  **inclusivity ambiguity the paper never resolves**: poor is strict `< 0.5`,
-  excellent strict `> 0.90`, but moderate/good are only "between 0.5 and 0.75" /
-  "between 0.75 and 0.9" — so an ICC of exactly 0.90 falls in no band as written.
-  Also: the paper prints no issue number (repo cites "15(2)"); Table 3's one-way
-  single-rater row prints `(k+1)MS_W` where every sibling row has `(k−1)`
-  (nothing in the repo cites it); Fig. 1's one-way branch dead-ends. All escalate,
-  none reconciled.
-- 2026-07-18: T4 finding (tenhove2025a) — the network paper's RESRM is a
-  **seven**-component decomposition (Eq. 16, p. 449) splitting the subject facet
-  into actor/partner/relationship, with consistency-only ICCs (Table 2, p. 449);
-  agreement and fixed raters explicitly discarded. Nothing in the repo traces to
-  it — shelf evidence only. Its own authors warn the ICCs "cannot be trusted for
-  designs with few raters and small subgroups of subjects" (p. 455). Contract
-  boundary: out of scope by design *structure*, though IP2's wording does not on
-  its face exclude it — logged as a boundary question for the review gate.
-- 2026-07-18: T5 input (tenhove2025a) — `BIBLIOGRAPHY.md`'s single "ten Hove …
-  (2025)" entry is the 60(5) paper; the 60(3) network paper has no entry at all.
-  T5 must add one and carry the `2025a`/`2025b` disambiguation into the file.
-- 2026-07-18: T5 input (fleiss1973) — the source has an `INDEX.md` line but **no**
-  `BIBLIOGRAPHY.md` entry; T5 must add one rather than trim. Nothing in `R/`,
-  `tests/`, `vignettes/`, or `ORACLES.md` traces to it (shelf evidence only).
+- 2026-07-18: created by /milestone-plan (gate: full extraction with a fresh PDF re-read, over a text-only migration).
+- 2026-07-18: minor amendment by /milestone-implement M63 — `tenhove2025` becomes the `tenhove2025a`/`tenhove2025b` pair.
+- 2026-07-18: amended by /milestone-review M63 — `jorgensen2021.pdf` present after all, so the O-SEM source joins: nine → ten notes, unblocked.
+- 2026-07-18: /milestone-implement — status in-progress, branch `m64-source-notes-loadbearing` cut from main.
+- 2026-07-18: implement gate — maintainer chose hybrid delegation (oracle anchors in-session, rest by [O] subagents), ukoumunne2003-depth notes, citation + one-clause role + pointer for the trim.
+- 2026-07-18: T1 done — `shrout1979` in-session; `mcgraw1996`, `fleiss1973` by [O] subagents, diffs verified against the PDFs.
+- 2026-07-18: T2 done — `tenhove2022` in-session; `tenhove2020`, `tenhove2024`, `tenhove2025a`, `tenhove2025b` by [O] subagents, diffs verified against the PDFs.
+- 2026-07-18: T3 done — `jorgensen2021` in-session; `koo2016` by [O] subagent, verified against p. 161.
+- 2026-07-18: T4 done — every note cross-checked against `ORACLES.md`; **no oracle value disagrees with any re-read source**, verified mechanically (`git diff main` on `ORACLES.md` and `tests/` is empty). Confirmed as printed: O1 Table 2/3/4 values, Case 3A `θ²_c = Σc²_j/(k−1)`, O-SEM Eq. 6 (raw, ÷ k−1, no bias correction), O-Bayes half-*t*(4,0,1) on SDs + DGP, and the tenhove2022 Eqs. 6–7/12–13 estimand.
+- 2026-07-18: T4 escalations (AC3) — all attribution/citation-hygiene, no value change; substance in each note's `## Open questions`: `shrout1979` (Table 4 prints 2 dp, not the 3 dp the O1 helper header attributes to the paper) · `mcgraw1996` (possible uncorrected typo, Table 8 `MS_W` vs Appendix A `MS_E`) · `tenhove2020` (`ORACLES.md` cites §4.1.1–4.1.3, absent from the shelf manuscript; prior spec is §4.1/p. 7 not "§3.3/§4.1"; relative bias printed signed, not absolute; per-cell population ICCs 0.4950/0.4808 are repo-derived) · `tenhove2025b` (**ADR-003 sourcing gap** — it claims a boundary-respecting MC scale the paper does not describe; the paper's own example prints a negative variance CI limit, p. 1057) · `tenhove2024` (Figure 2's crossed-unbalanced cell prints a nested error term — confirmed independently at 300 dpi) · `koo2016` (band inclusivity ambiguous as printed; no issue number; Table 3 one-way row prints `(k+1)MS_W`) · `tenhove2025a` (round-robin designs out of scope by structure, though IP2's wording does not exclude them on its face).
+- 2026-07-18: T4 coverage gap (tenhove2024) — the package implements no `ICC(Q,·)` and no `q` term; Figure 2 routes incomplete + relative there, while the package computes `ICC(C,k̂)`. Candidate milestone material, raised at the review gate, out of scope here.
+- 2026-07-18: T5 done — the ten `BIBLIOGRAPHY.md` entries trimmed to citation + one-clause role + note pointer; **two were missing entirely and were added** (`fleiss1973`, and the 60(3) `tenhove2025a`), the ten Hove block reordered and given `2025a`/`2025b` suffixes; ten `INDEX.md` lines added and the shelf inventory updated (18 bibliography entries, 12 ingested).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
