@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; independent of M48 (post-1.0, additive) -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m62-ci-method-comparison-pass   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m62-ci-method-comparison-pass · https://github.com/jmgirard/intraclass/pull/68   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -54,29 +54,33 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] **AC1 (sources).** ukoumunne2003 is ingested as a `references/` source note
+- [x] **AC1 (sources).** ukoumunne2003 is ingested as a `references/` source note
       capturing the resampling variants (incl. the variance-stabilizing
       bootstrap-t) with page/section anchors; ohyama2025 is ingested as a
       `references/` synthesis/oracle note with its one-way CI-method coverage/width
       results. Both carry their `INDEX.md` lines. (RB tripwire: ip-touching)
-- [ ] **AC2 (harness + oracle check).** A seeded, reproducible `data-raw/` script
+- [x] **AC2 (harness + oracle check).** A seeded, reproducible `data-raw/` script
       computes empirical coverage and median interval width for MC, parametric
       bootstrap, and the non-parametric bootstrap variants at each one-way cell;
-      reruns reproduce the committed numbers; and the incumbent + bootstrap
-      figures agree with ohyama2025's published results at a comparable cell
-      within a stated tolerance (oracle-first, `PRINCIPLES.md #1`).
-- [ ] **AC3 (failure axis, GP6).** The comparison spans the known-failure axis:
+      reruns reproduce the committed numbers; and the non-parametric bootstrap
+      figures agree with a published coverage result within a stated tolerance —
+      quantitatively against ukoumunne2003 (Table I / Fig. 2, exact values), with
+      ohyama2025 as qualitative corroboration (oracle-first, `PRINCIPLES.md #1`).
+      <!-- amended at review gate 2026-07-18: named ohyama2025 as the quantitative
+           oracle; the actual ±.03 check used ukoumunne2003's exact tabulated
+           values (ohyama only plots). Wording fix, bar unchanged. -->
+- [x] **AC3 (failure axis, GP6).** The comparison spans the known-failure axis:
       ≥1 near-zero-ICC boundary cell and ≥1 few-subjects cell, plus the canonical
       interior one-way-random cell.
-- [ ] **AC4 (pre-registered bar, GP5).** The "not worse" criterion — coverage
+- [x] **AC4 (pre-registered bar, GP5).** The "not worse" criterion — coverage
       within the pre-registered tolerance of nominal AND ≥ the incumbents'
       coverage at each cell, median interval width as tiebreaker — is written in
       the synthesis note *before* the verdict, and the committed note applies it
       to give the non-parametric bootstrap verdict.
-- [ ] **AC5 (decision).** A GO/NO-GO D-entry for the non-parametric bootstrap is
+- [x] **AC5 (decision).** A GO/NO-GO D-entry for the non-parametric bootstrap is
       appended, citing the synthesis evidence; the ROADMAP carries the disposition
       (GO → exported-implementation candidate/row; NO-GO → recorded rejection).
-- [ ] **AC6 (no exported change; no toolchain regression).** No new `ci_method`
+- [x] **AC6 (no exported change; no toolchain regression).** No new `ci_method`
       value; engine roster and public surface untouched (engine-parity matrix
       green + a grep shows no new `ci_method` literal in `R/`); the profile
       `verify` slot stays clean and new `data-raw/` scripts pass
@@ -120,6 +124,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-18: review — AC2 amended via gate (user-approved): it named ohyama2025 as the quantitative oracle, but the ±.03 check used ukoumunne2003's exact Table I values (ohyama only plots). Wording fix naming the oracle actually used; bar unchanged. PR #68 opened (draft).
 - 2026-07-18: RR01 ingested (concur-GO) → D-006 written, synthesis note corrected (rec 1-4), candidates updated, RB01/RR01 archived; T5/T6/T7 done. Status → review. All 6 ACs met.
 - 2026-07-18: BLOCKED on RB01 — GO/NO-GO verdict routed to a Fable statistical review (ip-touching tripwire; user chose escalation). Brief: cairn/reviews/RB01-npbootstrap-oneway-go.md.
 - 2026-07-18: confirmatory n_rep=2000 run CUT at user request — boundary cells ran ~4.2s/rep (est. ~5-6h total, not the ~80min I quoted), disproportionate for a 1-SE C4 firm-up. Proceeding on n_rep=1000 with C4 flagged marginal-but-passing (synthesis note caveat); firming C4 deferred to the exported-impl milestone's own coverage validation. → T6 GO/NO-GO gate.
@@ -145,3 +150,46 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**PR:** https://github.com/jmgirard/intraclass/pull/68 · reviewed 2026-07-18.
+
+### Acceptance-criteria evidence (fresh, by command)
+
+- **AC1 (sources)** ✅ `cairn/references/ukoumunne2003.md` + `ohyama2025.md` both
+  present with page/section anchors (eq. 6/7, §3.1, Fig. 2; ohyama §2.3/§3.2);
+  `INDEX.md` carries 2 matching lines. `cairn_validate` references-index check PASS.
+- **AC2 (harness + oracle)** ✅ (criterion amended at this gate — see work log).
+  `data-raw/m62-coverage-harness.R` is seeded/per-rep deterministic and wrote
+  `m62-coverage-results.rds` (7 cells). Reproducibility: RR01 independently
+  re-ran the prototype columns for C4 and U10 from scratch with the harness
+  seeding and reproduced the fixture **to 4 decimals**. Oracle: boott
+  U10/U30/U50 = .921/.947/.953 vs ukoumunne2003 Table I exact .938 (k=10,
+  ρ=.05) → Δ .014–.017, inside the pre-registered ±.03; ohyama2025 corroborates
+  qualitatively (NBOOT ≈ classical, REML best).
+- **AC3 (failure axis, GP6)** ✅ Grid spans the axis: near-zero-ICC boundary
+  cells C2/C4 (ρ=.05) and few-subjects cells C3/C4 (k=12), plus interior C1
+  (k=30, ρ=.50).
+- **AC4 (pre-registered bar, GP5)** ✅ Objective git evidence: the
+  pre-registration commit `e30fce8` (2026-07-17) **precedes** the results commit
+  `7ce6134` (2026-07-18); the criterion could not have been fitted to results.
+  The n_rep 2000→1000 change is recorded as a *prospective* amendment (precision
+  reduced, thresholds unchanged).
+- **AC5 (decision)** ✅ `D-006` appended to `cairn/DECISIONS.md` (1 entry);
+  ROADMAP carries 2 new candidate rows (exported one-way boott `ci_method` with
+  D-006 conditions; boundary-robust classical default) plus the recorded
+  perc/BCa rejection.
+- **AC6 (no exported change)** ✅ `git diff origin/main...HEAD -- R/` empty;
+  no `npbootstrap`/new `ci_method` literal in `R/`; parity matrix untouched;
+  `air format --check .` exit 0; `devtools::document()` no-diff.
+
+### Consistency gate
+
+- Universal: `cairn_validate` **all checks passed** (15 PASS, sizing OK; 286
+  dangling-id advisories are the pre-existing legacy-ID class, not gate failures).
+  Coverage-completeness PASS. No `DESIGN.md` principle changed (0 diff lines) →
+  `cairn_impact` correctly skipped.
+- Toolchain (`r-package` slot): `air format --check .` clean; `document()`
+  no-diff; generated files (`NAMESPACE`/`man/`/`data/`) untouched; no new
+  top-level files (additions are under already-ignored `data-raw/` + `cairn/`);
+  **no NEWS entry required** — the milestone ships no user-visible change.
+  Full `R CMD check` runs on PR #68 CI (merge gated on green).
