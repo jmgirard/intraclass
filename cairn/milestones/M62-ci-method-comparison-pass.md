@@ -19,11 +19,6 @@ profile-likelihood CI for the one-way random ICC is "not worse" than the
 incumbents, ending in a per-method GO/NO-GO with committed evidence and no
 exported method.
 
-<!-- Anchor re-set two-way random → one-way random at the 2026-07-17 plan gate
-     to match the Ukoumunne 2003 non-parametric-bootstrap source; the milestone
-     purpose (both methods, GO/NO-GO, no exported method) is unchanged. See work
-     log 2026-07-17. -->
-
 
 ## Scope
 <!-- owner: plan · create/amend-via-gate -->
@@ -132,29 +127,11 @@ exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-17: BLOCKED — awaiting maintainer-provided PDFs (Ukoumunne et al. 2003,
-  Stat Med 22(24):3805-21; the profile-likelihood one-way-ICC source). IP1 forbids
-  reconstructing procedures from abstracts (memory: ask-for-inaccessible-sources).
-  T1/T3/T4 resume once the PDFs land under cairn/references/pdf/.
-- 2026-07-17: substantive amendment via plan gate — anchor re-set two-way → one-way
-  random ICC (Ukoumunne source is one-way; two-way → Out/candidate). Goal anchor
-  clause, Scope In/Out, AC2/AC3 amended; purpose unchanged. "Full empirical pass
-  then decide" and "maintainer provides PDFs" also set at the gate.
-- 2026-07-17: T1 (partial) source hunt. Non-param bootstrap: Ukoumunne, Davison,
-  Gulliford & Chinn 2003, Stat Med 22(24):3805-21 — solid but ONE-WAY cluster ICC,
-  not the two-way anchor; documents under-coverage at <=10 clusters (bootstrap-t on
-  variance-stabilizing transform the only near-nominal variant). Profile-likelihood:
-  no confirmed two-way-Gaussian-ICC source (Demetrashvili 2016 is Satterthwaite/Beta,
-  not PL); paywalled lead "Modified profile likelihood…" (Comp Stat) unconfirmed.
-  Stopped at a gate: PDFs needed (IP1, no reconstruction from abstracts) + a
-  two-way-vs-one-way anchor decision the plan didn't foresee.
+- 2026-07-17: BLOCKED — awaiting maintainer PDFs (Ukoumunne et al. 2003, Stat Med 22(24):3805-21; the profile-likelihood one-way-ICC source) under cairn/references/pdf/; IP1 forbids reconstructing procedures from abstracts. T1/T3/T4 resume on arrival.
+- 2026-07-17: gate amendment — anchor re-set two-way → one-way random ICC (Ukoumunne source is one-way; two-way → Out/candidate); Goal/Scope/AC2/AC3 amended, purpose unchanged. Gate also set "full empirical pass then decide" + "maintainer provides PDFs".
+- 2026-07-17: T1 (partial). Non-param bootstrap source = Ukoumunne et al. 2003 (one-way ICC; under-covers at ≤10 clusters, bootstrap-t on variance-stabilizing transform the only near-nominal variant). Profile-likelihood: no confirmed one-way-Gaussian-ICC source yet (Demetrashvili 2016 = Satterthwaite/Beta; paywalled "Modified profile likelihood" lead unconfirmed).
 - 2026-07-17: in-progress on m62-ci-method-comparison-pass (/milestone-implement).
-- 2026-07-17: created by /milestone-plan. Absorbs the legacy candidate
-  (`cairn/legacy/ROADMAP.md:81` — non-parametric bootstrap + profile-likelihood,
-  "remainder unscheduled"; parametric-bootstrap half shipped M16/ADR-025).
-  Shape/methods/designs/bar set at the plan gate (all recommended options):
-  research pass, both methods, anchored two-way-random+GP6 axis,
-  coverage-band+width criterion.
+- 2026-07-17: created by /milestone-plan. Absorbs legacy candidate (cairn/legacy/ROADMAP.md:81; parametric-bootstrap half shipped M16/ADR-025). Plan gate set: research pass, both methods, anchored+GP6 axis, coverage-band+width criterion.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
