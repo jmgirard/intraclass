@@ -42,16 +42,32 @@ autoplot.icc_dstudy <- function(object, ...) {
   ml <- isTRUE(attr(object, "multilevel"))
   pal <- icc_palette()
 
-  # A projection overlays one curve per error definition (absolute agreement vs
-  # consistency); the multilevel projection also splits by level, which the facet
-  # separates. Group + colour by the error definition so the overlaid curves are
-  # drawn as distinct lines rather than connected into a sawtooth. A one-way /
-  # single-definition projection has one curve (`type` absent or a single value).
+  # A projection can overlay several curves within a panel: one per error
+  # definition (`type`: absolute agreement vs consistency) and, for a replicate
+  # fit, one per occasion setting (`occasions`: n_o = 1, the averaged n_o, ...).
+  # The multilevel projection additionally splits by level, which the facet
+  # separates. Group + colour by every such curve-identity column *except* the one
+  # on the x-axis, so the overlaid curves are drawn as distinct lines rather than
+  # connected into a sawtooth. A one-way / single-curve projection has one curve.
   nice <- c(agreement = "Absolute agreement", consistency = "Consistency")
-  curve <- if (is.null(df$type)) rep(NA_character_, nrow(df)) else df$type
-  present <- intersect(names(nice), unique(curve))
-  multi_curve <- length(present) > 1
-  df$curve <- factor(unname(nice[curve]), levels = unname(nice[present]))
+  id_cols <- setdiff(intersect(c("type", "occasions"), names(df)), x_col)
+  parts <- lapply(id_cols, function(col) {
+    if (col == "type") unname(nice[df$type]) else paste0("n_o = ", df$occasions)
+  })
+  keys <- if (length(parts) > 0) {
+    do.call(paste, c(parts, list(sep = ", ")))
+  } else {
+    rep("1", nrow(df))
+  }
+  df$curve <- factor(keys, levels = unique(keys))
+  multi_curve <- nlevels(df$curve) > 1L
+  legend_title <- if (identical(id_cols, "type")) {
+    "Coefficient"
+  } else if (identical(id_cols, "occasions")) {
+    "Averaging (n_o)"
+  } else {
+    "Curve"
+  }
 
   p <- ggplot2::ggplot(
     df,
@@ -97,11 +113,11 @@ autoplot.icc_dstudy <- function(object, ...) {
       )
     ) +
     icc_theme()
-  # When more than one curve is drawn, colour now carries information (which error
-  # definition), so restore the legend icc_theme() suppresses.
+  # When more than one curve is drawn, colour now carries information (which
+  # curve), so restore the legend icc_theme() suppresses.
   if (multi_curve) {
     p <- p +
-      ggplot2::labs(colour = "Coefficient", fill = "Coefficient") +
+      ggplot2::labs(colour = legend_title, fill = legend_title) +
       ggplot2::theme(legend.position = "bottom")
   }
   # A multilevel projection has one panel per level; facet so the subject- and

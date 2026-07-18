@@ -291,6 +291,41 @@ test_that("autoplot.icc_dstudy draws overlaid curves as separate lines", {
   }
 })
 
+test_that("autoplot.icc_dstudy separates replicate occasion curves too", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  # A within-cell replicate fit projects one curve per occasion setting; on the
+  # rater axis those must not be connected into a sawtooth either (the `occasions`
+  # series dimension, not just `type`).
+  set.seed(42)
+  ns <- 25
+  k <- 4
+  reps <- 3
+  d <- expand.grid(subject = seq_len(ns), rater = seq_len(k), r = seq_len(reps))
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  sv <- stats::rnorm(ns, 0, 1.2)
+  rv <- stats::rnorm(k, 0, 0.8)
+  d$score <- 10 + sv[d$subject] + rv[d$rater] + stats::rnorm(nrow(d), 0, 0.6)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    occasions = c("single", "average"),
+    type = "consistency",
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:3, seed = 1)
+  expect_gt(length(unique(ds$occasions)), 1L) # fixture has >1 occasion curve
+  line <- built_layer(ggplot2::autoplot(ds), 2)
+  # One grouped line per occasion setting, each monotone in x.
+  expect_equal(length(unique(line$group)), length(unique(ds$occasions)))
+  for (g in unique(line$group)) {
+    expect_false(is.unsorted(line$x[line$group == g]))
+  }
+})
+
 # --- M61 polish: shared theme, colourblind-safe palette, value labels ---------
 # These structural assertions pin the polish (theme applied, palette fills, label
 # text == the object's numbers); the faithful-rendering tests above pin that the
