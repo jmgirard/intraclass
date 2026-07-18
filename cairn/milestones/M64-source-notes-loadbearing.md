@@ -66,7 +66,7 @@ efficiency) is a *different* paper and belongs to M66, not here.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Notes for the classical trio — `shrout1979`, `mcgraw1996`,
+- [x] T1: Notes for the classical trio — `shrout1979`, `mcgraw1996`,
       `fleiss1973`. `shrout1979` is the O1 worked-example anchor
       (`tests/testthat/helper-shrout-fleiss.R`); anchor its table values
       exactly.
@@ -101,6 +101,29 @@ efficiency) is a *different* paper and belongs to M66, not here.
   milestone: nine → ten notes, no longer blocked.
 - 2026-07-18: /milestone-implement — status in-progress, branch
   `m64-source-notes-loadbearing` cut from main.
+- 2026-07-18: implement gate — maintainer chose: hybrid delegation (oracle
+  anchors read in-session, the rest by [O] subagents), ukoumunne2003-depth
+  notes, and citation + one-clause role + pointer for the BIBLIOGRAPHY trim.
+- 2026-07-18: T1 done — `shrout1979` (read in-session), `mcgraw1996`,
+  `fleiss1973` (both [O] subagents, diffs verified against the PDFs).
+- 2026-07-18: T4 finding (shrout1979) — Table 4 (p. 424) prints the six ICCs to
+  **two** decimals; O1 and `helper-shrout-fleiss.R` carry three and the helper
+  header calls them "the published Shrout & Fleiss numbers to three decimals".
+  Values agree at the paper's precision; the third decimal traces to
+  `psych`/`DescTools`, not the paper. No oracle value changes — attribution
+  wording only, escalated to the review gate per AC3.
+- 2026-07-18: T4 finding (mcgraw1996) — Case 3A `θ²_c = Σc²_j/(k−1)` confirmed
+  verbatim (Table 1, p. 32); agrees with the repo's `θ²_r` (symbol differs,
+  quantity and divisor identical). Published correction (1(4):390) present as
+  the PDF's final page and extracted. No ORACLES.md disagreement.
+- 2026-07-18: T4 finding (mcgraw1996) — possible **uncorrected** typo in the
+  paper: Table 8 (p. 42) Type-C Type-k F renders `MS_W` where Appendix A §A4
+  (p. 44) derives `MS_E`. Not in the published correction. Package impact
+  believed nil (no test cites Table 8); recorded for the review gate, not
+  reconciled.
+- 2026-07-18: T5 input (fleiss1973) — the source has an `INDEX.md` line but **no**
+  `BIBLIOGRAPHY.md` entry; T5 must add one rather than trim. Nothing in `R/`,
+  `tests/`, `vignettes/`, or `ORACLES.md` traces to it (shelf evidence only).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
