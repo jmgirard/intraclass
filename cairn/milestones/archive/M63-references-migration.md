@@ -12,14 +12,14 @@ entombed `legacy/` / kickoff / `data-raw/reviews/` docs still resolve.
 closing the "no cairn-canonical oracle-registry home" issue (repo side; upstream
 cairn D-024 stays open). 12 cross-references retargeted; `INDEX.md` rebuilt with
 a 30-PDF shelf inventory tagged by ingesting milestone (M64–M67).
-
 **Key decisions.** **D-007** — `ORACLES.md` is the declared registry home; split
 by *kind*, NOT a per-citekey shred (entries keyed by oracle ID, tests cite those
-IDs, many span several sources — sharding breaks the ≥2-types audit). Duplicate
-author-years take a letter suffix by issue. Also covers `PRINCIPLES.md` #12.
-
-**Review.** AC5 **failed** first pass: implement miscounted the shelf at 29 PDFs
-and recorded `jorgensen2021.pdf` (the O-SEM source) as missing — it was present.
-Caught by the diff-bug lens (93); AC5 amended via gate, phantom ROADMAP blocker
-dropped, M64 unblocked 9→10. F3/F5 actioned on request; F2/F4 logged. Gate:
-`cairn_validate` PASS · `check(--as-cran)` 0/0/0 · 1802 pass/0 fail · CI 11/11.
+IDs — sharding breaks the ≥2-types audit). Duplicate author-years take a letter
+suffix by issue. Also covers `PRINCIPLES.md` #12.
+**Review.** AC5 **failed** first pass: it required recording `jorgensen2021.pdf`
+(the O-SEM source) as absent, but it was present by review time. Implement was
+*right* at 29 — ctimes show the maintainer supplied it ~2 h later in response to
+the ask (the primary-sources rule working; the diff-bug lens read the stale
+record as a miscount). AC5 amended via gate to an enumerated 30-PDF mapping,
+phantom blocker dropped, M64 unblocked 9→10. F3/F5 actioned; F2/F4 logged. Gate:
+`cairn_validate` PASS · `check(--as-cran)` 0/0/0 · 1802 pass · CI 11/11.
