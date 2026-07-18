@@ -21,4 +21,9 @@ and milestones; never restate a value here.
   width comparison of one-way-ICC CI methods (SEARLE/SMITH/NBOOT/REML/BETA);
   REML best, NBOOT slightly worse than SEARLE — the M62 NBOOT-prototype oracle.
 
+- [npbootstrap-oneway-comparison.md](npbootstrap-oneway-comparison.md) — synthesis
+  note (M62): the pre-registered "not worse" criterion + one-way cell grid, and
+  (later) the coverage/width results + GO/NO-GO verdict for the non-parametric
+  bootstrap vs the incumbent MC / parametric-bootstrap intervals.
+
 <!-- pdf/ is gitignored; add <citekey>.md summaries here as sources are ingested -->
