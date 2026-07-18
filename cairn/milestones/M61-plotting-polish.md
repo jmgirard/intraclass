@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP3, GP1, GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m61-plotting-polish   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m61-plotting-polish · [PR #67](https://github.com/jmgirard/intraclass/pull/67)   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->

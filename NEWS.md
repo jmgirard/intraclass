@@ -84,6 +84,12 @@
   random-rater engine** — `glmmTMB`, `lme4`, and the Bayesian `brms` engine (which applies
   the same divisor to the posterior draws' variance components, its credible interval
   covering the population value across the cluster-count axis).
+* The `autoplot()` / `plot()` methods share a cohesive look: a clean theme, a
+  colourblind-safe (Okabe–Ito) palette for the variance-component bars and the per-level
+  multilevel panels, and direct value labels on the coefficient and component plots. The
+  D-study reliability curve now draws **one line per error definition** (absolute agreement
+  vs. consistency) with a legend, instead of connecting the two projections into a single
+  zig-zag. `ggplot2` remains a `Suggests` dependency.
 
 ## Documentation
 
