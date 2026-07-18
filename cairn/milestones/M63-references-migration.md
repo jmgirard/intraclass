@@ -38,23 +38,18 @@ PDF for extraction → same; editing `cairn/legacy/**` or
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [x] AC1: `cairn/references/ORACLES.md` and `cairn/references/BIBLIOGRAPHY.md`
-      exist; `REFERENCES.md` is reduced to a ≤6-line pointer stub naming both
-      successors and the adopting D-entry (retained so the deliberately
-      un-edited links in `cairn/legacy/**`, `CLAUDE_CODE_KICKOFF.md`, and
-      `data-raw/reviews/` still resolve — implement gate 2026-07-18). Every one
-      of the ~40 oracle entries and every bibliography entry is present in
-      exactly one of the two successors, with **no numeric value, `Status`
-      line, or citation text altered** — verified by a diff of the
-      concatenated split against the original file.
+- [x] AC1: `ORACLES.md` + `BIBLIOGRAPHY.md` exist; `REFERENCES.md` is reduced to
+      a ≤6-line pointer stub naming both successors and the adopting D-entry
+      (retained so the deliberately un-edited entombed links still resolve —
+      implement gate 2026-07-18). Every oracle entry and bibliography entry
+      appears in exactly one successor, with **no numeric value, `Status` line,
+      or citation text altered** — verified by diffing the concatenated split
+      against the original.
 - [x] AC2: No live file *substantively* references `REFERENCES.md` as a content
-      home:
-      `grep -rn "REFERENCES.md" --include="*.R" --include="*.md" --include="*.Rmd" .`
-      returns hits only under `cairn/legacy/`, `CLAUDE_CODE_KICKOFF.md`,
-      `data-raw/reviews/`, the stub itself, and the durable records that
-      document the migration (this milestone file, D-007, the stub's
-      `INDEX.md` line). The
-      stale `project/REFERENCES.md` path at
+      home: `grep -rn "REFERENCES.md" --include="*.R" --include="*.md" --include="*.Rmd" .`
+      hits only `cairn/legacy/`, `CLAUDE_CODE_KICKOFF.md`, `data-raw/reviews/`,
+      the stub, and the records documenting the migration (this file, D-007,
+      the stub's `INDEX.md` line). The stale `project/REFERENCES.md` path at
       `tests/testthat/test-vignette-claims.R:8` is corrected too.
 - [x] AC3: `cairn/DESIGN.md` Conventions carries a one-line oracle **registry
       pointer** naming `cairn/references/ORACLES.md`
