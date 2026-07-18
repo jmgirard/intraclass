@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M61: Plotting polish — cohesive theme, palette, and labels
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP3, GP1, GP2   <!-- owner: plan · create/amend-via-gate -->
@@ -116,6 +116,7 @@ recorded manual visual review — not image snapshots.
 - 2026-07-17: discovered + fixed a pre-existing d-study defect (within AC3/AC4): autoplot.icc_dstudy drew a single ungrouped geom_line over the overlaid agreement+consistency curves → a sawtooth (also within each level facet). Now grouped/coloured by error definition, faceted by level, with a restored legend; +2 tests incl. an anti-sawtooth group-count guard.
 - 2026-07-17: AC5 amended via mini-gate (evidence = committed data-raw/ render script + review sign-off, not committed PNG binaries; user chose 2026-07-17). Added reproducible data-raw/plot-previews.R (6 views). Implementer visual review PASS on all six renders; formal sign-off deferred to ## Review at the review gate.
 - 2026-07-17: T6 — data-raw/plot-previews.R runs clean into a fresh dir; air format --check clean (covers data-raw). test-autoplot.R 33 pass/0 fail.
+- 2026-07-17: → review. Full suite (NOT_CRAN=true CI=true, max_fails=Inf): 1798 pass, 0 fail, 23 skip, 2 warn (both pre-existing, unrelated to autoplot: Design-3 consistency-drop message + a glmmTMB convergence warning). lint_package clean (0). air format --check clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
