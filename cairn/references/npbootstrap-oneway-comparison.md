@@ -20,6 +20,12 @@ One-way random effects, balanced: `y_ij = μ + a_i + e_ij`, `i = 1…k` subjects
 `σ²_a+σ²_e = 1`, `μ = 0`, Gaussian. `n_rep = 2000` datasets/cell (coverage
 Monte-Carlo SE ≈ √(.95·.05/2000) ≈ 0.005 = 0.5 pp; matches ukoumunne/ohyama).
 
+> **Prospective amendment (2026-07-18, before results): `n_rep` 2000 → 1000** for
+> compute tractability (the incumbent parametric bootstrap is ~3.8 s/dataset).
+> Coverage SE ≈ √(.95·.05/1000) ≈ 0.007 = 0.7 pp — still well within the 2 pp
+> tolerance and the 1 pp incumbent slack, so the **criterion thresholds are
+> unchanged** (GP5: estimation precision reduced, the bar is not moved).
+
 ### Cells
 
 **Comparison cells** (interrater-realistic; the verdict rests on these):

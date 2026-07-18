@@ -120,6 +120,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-18: T4 RUNNING (background, harness-tracked) — data-raw/m62-coverage-harness.R, n_rep=1000 (prospective amendment from pre-reg 2000; SE ~0.7pp, bar unchanged), incumbent boot B=199, proto B=2000; 4 comparison + 3 oracle-check cells → data-raw/m62-coverage-results.rds (incremental per-cell checkpoint), log data-raw/m62-harness.log. ~4-5h. Resume: read the rds, verify the ohyama/ukoumunne oracle cross-check, then T5 (append results to npbootstrap-oneway-comparison.md) → T6 (GO/NO-GO D-entry) → T7 (guard).
 - 2026-07-17: T3 done — data-raw/m62-npbootstrap-prototype.R (subject-resample; percentile/boott-transformed/BCa; eq.7 IJ SE). Oracle check vs ukoumunne2003 Fig.2 at k=10,n=10,ρ=0.05 (nrep=200,B=400): perc 0.79, BCa 0.835, transformed bootstrap-t 0.95 — reproduces the published under-/near-nominal split (PRINCIPLES.md #1).
 - 2026-07-17: T2 done — pre-registered (GP5, frozen before results) the "not worse" criterion (coverage ≥0.93 AND ≥ incumbents−0.01, width tiebreaker; GO iff not-worse at every cell) + one-way cell grid (C1–C4 comparison + ukoumunne-matched oracle-check cells) in npbootstrap-oneway-comparison.md.
 - 2026-07-17: T1 done — source notes committed: ukoumunne2003.md (subject-resample + log F transformed bootstrap-t + IJ SE eq.7) and ohyama2025.md (oracle: NBOOT≈SEARLE/slightly worse, REML best) + INDEX lines.
