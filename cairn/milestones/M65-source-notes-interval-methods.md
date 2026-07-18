@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M65: Source notes — the interval-methods and robustness cluster
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP6   <!-- owner: plan · create/amend-via-gate -->
@@ -78,7 +78,7 @@ the tier-C candidate row; the load-bearing sources → M64.
       already sweeps (near-zero ICC, few subjects, non-normality).
 - [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [ ] T5: Run the profile `verify` slot; open the PR and drive CI green.
+- [x] T5: Run the profile `verify` slot; open the PR and drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -123,6 +123,11 @@ the tier-C candidate row; the load-bearing sources → M64.
 - 2026-07-18: MD-1 recorded — the Goal's "one-way-ICC interval-method" premise is
   false for most of the cluster; Goal deliberately not edited (plan-owned), no AC
   changed, correction recorded in MD-1 + each note + `INDEX.md`.
+- 2026-07-18: T5 done — `NOT_CRAN=true CI=true devtools::test()`:
+  `FAIL 0 | WARN 2 | SKIP 23 | PASS 1802`. PR opened
+  (https://github.com/jmgirard/intraclass/pull/71); CI **green on all 11 checks**
+  (R CMD check on macOS/Windows/ubuntu release+devel+oldrel-1, format, lint,
+  pkgdown, coverage). Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
