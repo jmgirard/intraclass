@@ -91,7 +91,7 @@ the fit work at a gate (records the finding; ships nothing).
       random crossed lavaan; keep the fixed-cluster, nested, replicate, and
       incomplete-bootstrap refusals; verify the shared connectedness guard covers
       the lavaan path.
-- [ ] T4: Tests in `tests/testthat/test-icc-incomplete-multilevel.R` (or a new
+- [x] T4: Tests in `tests/testthat/test-icc-incomplete-multilevel.R` (or a new
       `test-icc-lavaan-multilevel-incomplete.R`) — AC2 incomplete parity + the
       `k_c^eff` divisor, AC3 unequal-`n_s` parity sweep + τ²-law guard, AC4 the
       abort/bootstrap-refusal narrowing (`skip_on_cran`,
@@ -123,6 +123,12 @@ the fit work at a gate (records the finding; ships nothing).
   M54 abort assertions (incomplete/unbalanced random) from
   test-icc-lavaan-multilevel.R. Smoke-verified vs glmmTMB: k_c_eff 4.9194 matches,
   ICC(c,k)/ICC(s,·) parity holds, fixed + bootstrap-on-incomplete/unbalanced abort.
+- 2026-07-17: T4 done. New `tests/testthat/test-icc-lavaan-multilevel-incomplete.R`
+  (O-SEM-ML-INC, 4 tests / 34 assertions, skip_on_cran + lavaan/glmmTMB): AC2
+  incomplete FIML parity vs glmmTMB + k_c^eff divisor; AC3 unequal-n_s component
+  parity + the harmonic-τ² discriminating invariant (8-rep mean, beats the grand
+  law); AC4 fixed + bootstrap-on-incomplete/unbalanced aborts, shared
+  connectedness guard, and balanced-random bootstrap retained.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
