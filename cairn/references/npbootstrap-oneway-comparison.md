@@ -136,6 +136,16 @@ under-cover at C3/C4 (0.86–0.89 < 0.93) → they fail.
 **Cost:** at the clean interior cell, boott is ~3 % wider than MC (0.369 vs 0.358)
 — a small width price for boundary robustness.
 
+**Marginality caveat (C4).** At n_rep=1000 (coverage SE ≈ 0.7 pp) the corner cell
+C4 is the tightest: boott 0.934 sits ~1 SE above the 0.93 floor — passing, but
+marginal. A confirmatory n_rep=2000 run was launched then cut (~5–6 h, dominated
+by the slow near-boundary parametric-bootstrap refits — disproportionate for a
+1-SE firm-up; maintainer decision 2026-07-18). The **qualitative GO is unaffected**:
+even if C4's true coverage were ~0.925, the decisive contrast stands — boott
+covers ~0.93 where the MC default gives *no interval at all* on 39 % of C4
+datasets. Firming C4 is deferred to the exported-implementation milestone's own
+coverage validation (a larger sweep there is warranted regardless).
+
 **Side observation (out of scope → candidate):** the MC-default boundary
 abort/under-coverage suggests a boundary-robust classical CI (SEARLE F / Burch
 REML) would also help the one-way default — a separate idea, not this pass.
