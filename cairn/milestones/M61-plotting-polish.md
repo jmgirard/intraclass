@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M61: Plotting polish — cohesive theme, palette, and labels
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP3, GP1, GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m61-plotting-polish   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -110,6 +110,7 @@ recorded manual visual review — not image snapshots.
   M4.5/ADR-010 (d-study curve, lazy-registration pattern). Scope set at the plan
   gate: theming + labels + colorblind palette; internal-only; structural+manual
   test bar (no vdiffr); land before v0.1.0 (M48 depends on M61).
+- 2026-07-17: in-progress; branch m61-plotting-polish cut from main @86d16e8.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
