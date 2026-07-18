@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M62: CI-method comparison pass — non-parametric bootstrap & profile-likelihood (GO/NO-GO)
 
-- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; independent of M48 (post-1.0, additive) -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
@@ -127,7 +127,9 @@ exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-17: BLOCKED — awaiting maintainer PDFs (Ukoumunne et al. 2003, Stat Med 22(24):3805-21; the profile-likelihood one-way-ICC source) under cairn/references/pdf/; IP1 forbids reconstructing procedures from abstracts. T1/T3/T4 resume on arrival.
+- 2026-07-17: T1 complete (7 PDFs triaged). Sources SPLIT BY DESIGN: non-param bootstrap = ukoumunne2003 (one-way, Gaussian, under-covers ≤10 clusters); profile-likelihood = xiao2013 MODIFIED PL (TWO-WAY random, Eq.1; naive PL "too narrow"/under-covers, hence MPL). Bonus oracle: ohyama2025 = published CI-method comparison for one-way ICC (incl. Ukoumunne bootstrap; concludes REML best). Off-anchor: saha2005/saha2012 (binary), bobak2018 (Bayesian), xiao2009 (common-ICC sibling). Anchor splits by method → back to gate.
+- 2026-07-17: UNBLOCKED — PDFs received.
+- 2026-07-17: BLOCKED — awaited maintainer PDFs under cairn/references/pdf/; IP1 forbids reconstructing procedures from abstracts.
 - 2026-07-17: gate amendment — anchor re-set two-way → one-way random ICC (Ukoumunne source is one-way; two-way → Out/candidate); Goal/Scope/AC2/AC3 amended, purpose unchanged. Gate also set "full empirical pass then decide" + "maintainer provides PDFs".
 - 2026-07-17: T1 (partial). Non-param bootstrap source = Ukoumunne et al. 2003 (one-way ICC; under-covers at ≤10 clusters, bootstrap-t on variance-stabilizing transform the only near-nominal variant). Profile-likelihood: no confirmed one-way-Gaussian-ICC source yet (Demetrashvili 2016 = Satterthwaite/Beta; paywalled "Modified profile likelihood" lead unconfirmed).
 - 2026-07-17: in-progress on m62-ci-method-comparison-pass (/milestone-implement).
