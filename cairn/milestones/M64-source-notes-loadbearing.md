@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M64: Source notes — the ten load-bearing primary sources
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m64-source-notes-loadbearing`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -99,6 +99,8 @@ efficiency) is a *different* paper and belongs to M66, not here.
 - 2026-07-18: amended by /milestone-review M63 — `jorgensen2021.pdf` is present
   after all (M63's "no PDF" record was wrong), so the O-SEM source joins this
   milestone: nine → ten notes, no longer blocked.
+- 2026-07-18: /milestone-implement — status in-progress, branch
+  `m64-source-notes-loadbearing` cut from main.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
