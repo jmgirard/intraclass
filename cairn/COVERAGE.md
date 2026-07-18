@@ -15,9 +15,15 @@ per-milestone narrative of *when* each cell shipped) lives in git + `legacy/`, n
 here. **Refresh this file whenever a milestone changes the arg space** — it drifts
 silently (no CI gate reads it, same hazard as `references/INDEX.md`).
 
-**Last synced: 2026-07-13, through M47** (M44 vectorized `type`; M45 shipped
+**Last synced: 2026-07-17, through M61** (M44 vectorized `type`; M45 shipped
 consistency-conflated; M46/M47 shipped the averaged cluster-level `ICC(c,k)` on
-incomplete data, glmmTMB/lme4 then brms). Milestone/ADR ids below are provenance
+incomplete data, glmmTMB/lme4 then brms; **M54/M56/M57/M58 shipped the
+crossed-Design-1 multilevel lavaan engine** — random both levels + conflated,
+balanced then incomplete/unbalanced, fixed both levels balanced, plus a
+balanced-random bootstrap). M48–M61 that left the `icc()`/`d_study()` arg space
+untouched (M49 parity matrix, M50 boundary policy, M51 corner guards, M52 brms
+hardening, M55 gtheory docs, M59 test speed, M60 recovery freeze, M61 plotting)
+are provenance-only, not reflected below. Milestone/ADR ids below are provenance
 tags — follow them to `legacy/` for the full story.
 
 ## Reason taxonomy (why an unsupported case is unsupported)
@@ -44,7 +50,7 @@ tags — follow them to `legacy/` for the full story.
 | `d_study(n_o = )` | numeric `n_o` | occasion D-study; replicates only, one axis per call |
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
-| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `brms` covers a wide surface — see the brms row in Cross-cutting for the exact cells |
+| `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `lavaan` covers single-level two-way + the crossed-D1 multilevel cell (see §④); `brms` covers a wide surface — see the brms row in Cross-cutting for the exact cells |
 | `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | `prior` | `NULL` (sourced half-*t*(4,0,1)) / a \pkg{brms} prior object | brms only; custom = footgun-warned, voids coverage oracle (M34, ADR-044) |
@@ -133,7 +139,7 @@ Design inferred from the crossing pattern (or declared via `design`).
 
 | Sub-design | `level` | `type` | `raters` | balance | `engine` |
 |---|---|---|---|---|---|
-| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject balanced **and** incomplete; **cluster balanced** — M37) | balanced ✅; incomplete ✅ | glmmTMB, lme4, **brms** (random subject+cluster balanced/ragged; fixed subject balanced/ragged; **conflated**; averaged cluster `ICC(c,k)` ragged — M47) |
+| **Design 1** crossed (5-component) | subject, cluster, conflated | agreement, consistency | random (both levels); fixed (subject balanced **and** incomplete; **cluster balanced** — M37) | balanced ✅; incomplete ✅ | glmmTMB, lme4, **brms** (random subject+cluster balanced/ragged; fixed subject balanced/ragged; **conflated**; averaged cluster `ICC(c,k)` ragged — M47), **lavaan** (random both levels + conflated, balanced M54 + incomplete/unbalanced M58; fixed both levels balanced M57; bootstrap CI balanced-random only M56, else MC) |
 | **Design 2** nested-in-clusters (4-component) | subject only | agreement, consistency | random (balanced+incomplete); **fixed** (balanced M19, **incomplete/ragged M36**) | balanced ✅; incomplete ✅ | glmmTMB, lme4 (random+fixed, balanced+incomplete), **brms** (random subject; fixed subject balanced M27 + **incomplete/ragged M38**) |
 | **Design 3** nested-in-subjects (3-component; multilevel one-way) | subject only | agreement only | random only | balanced ✅; incomplete ✅ (M19) | glmmTMB, lme4, **brms** (balanced random, subject — M25) |
 
@@ -159,7 +165,9 @@ Design inferred from the crossing pattern (or declared via `design`).
 | Design 2 / 3, incomplete data | ✅ (M19) — fit formulas are ragged-safe; the averaged divisor is the harmonic-mean `k_eff`, reducing **exactly** to the pinned M3/M6 incomplete divisor. On **ambiguous** ragged data an explicit `design=` is required (never guessed); Design 2 gains a within-cluster connectedness gate. |
 | Design 2, `raters = "fixed"` | ✅ (M19 balanced; **M36 incomplete/ragged** glmmTMB/lme4; **M38 brms**) — θ²_{r:c} is the mean over clusters of each cluster's per-cluster Case-3A finite-population rater variance. **Fixed ≢ random even balanced** (per-cluster finite population). Incomplete generalizes to each cluster's own `k_c` + the per-cluster 2b moment correction; single-rater ICC(A,1) has the load-bearing non-circular finite-population recovery oracle; average ICC(A,k_eff) rides the single-cluster reduction to flat M3 (the M19 random-nested `k_eff`, **not** the open per-cluster `ICC(c,k)` divisor). |
 | Design 3, `raters = "fixed"` | ⚫ **By design** — raters nested in subjects is the multilevel one-way (rater confounded into residual); no separable rater effect to fix. |
-| any multilevel, `engine = "lavaan"` (multilevel SEM) | 🔵 **Not yet** — **M53 verdict: GO (2026-07-16)**: the two-level lavaan formulation is oracle-established as a D-005 parameterization (pilot ledger `cairn/references/sem-multilevel-pilot.md`); the engine implementation is a schedulable **candidate row** in ROADMAP.md (lineage: reclassified from M21, ADR-027). Blocks the lavaan cluster-fixed / incomplete-fixed-nested siblings. |
+| crossed Design 1, `engine = "lavaan"` (multilevel SEM) | ✅ (M54/M56/M57/M58) — two-level CFA, five components, matches glmmTMB within the M49 index-class split. Both levels + conflated; **random** raters balanced (M54) and incomplete/unbalanced via two-level FIML + harmonic-mean τ² law (M58); **fixed** raters both levels balanced/complete (M57, Case-3A θ²_r, MC-only); averaged cluster `ICC(c,k)` uses the shared `k_c^eff` (M46). `ci_method`: MC everywhere, **bootstrap** only on the balanced-random cell (M56; cluster-level MC↔bootstrap tail is BLAS/OS-sensitive, pinned at subject level). ML-only (no REML) ⇒ small-sample cluster-level shrinkage that shrinks with N_c. |
+| nested Design 2 / 3, `engine = "lavaan"` (multilevel SEM) | 🔵 **Not yet** — the multilevel lavaan engine ships crossed-D1 only; the nested SEM parameterizations are unbuilt (schedulable **candidate**, lineage M53/ADR-027). |
+| crossed Design 1, `engine = "lavaan"`, `raters = "fixed"` + incomplete/unbalanced **or** bootstrap | 🔵 **Not yet** — fixed lavaan stays complete/balanced MC-only (M57); the incomplete/unbalanced-fixed and fixed-bootstrap siblings are parked **candidates** (ROADMAP), not the double-blocked cluster-fixed research gap. |
 | any multilevel, `icc(unit = m)` numeric projection | ⚫ **By design (routed elsewhere)** — use `d_study()` for multilevel rater-count projection (M17); `icc()` aborts a numeric multilevel `unit` on purpose. |
 
 ---
