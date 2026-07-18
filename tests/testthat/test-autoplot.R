@@ -243,7 +243,33 @@ test_that("plot.icc returns its input invisibly", {
   expect_invisible(plot(fit))
 })
 
-test_that("autoplot.icc_dstudy renders the projected curve faithfully", {
+test_that("autoplot.icc_dstudy renders each projected curve faithfully", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:5, seed = 1) # two curves: agreement + consistency
+  p <- ggplot2::autoplot(ds)
+  expect_s3_class(p, "ggplot")
+
+  line <- built_layer(p, 2) # geom_line
+  # Every projected (m, estimate) point is drawn, across both curves.
+  expect_equal(
+    sort(paste(line$x, round(line$y, 8))),
+    sort(paste(ds$m, round(ds$estimate, 8)))
+  )
+  ribbon <- built_layer(p, 1) # geom_ribbon
+  expect_equal(sort(round(ribbon$ymin, 8)), sort(round(ds$conf.low, 8)))
+  expect_equal(sort(round(ribbon$ymax, 8)), sort(round(ds$conf.high, 8)))
+})
+
+test_that("autoplot.icc_dstudy draws overlaid curves as separate lines", {
   skip_if_not_installed("glmmTMB")
   skip_if_not_installed("ggplot2")
   fit <- icc(
@@ -255,14 +281,129 @@ test_that("autoplot.icc_dstudy renders the projected curve faithfully", {
     seed = 1
   )
   ds <- d_study(fit, m = 1:5, seed = 1)
-  p <- ggplot2::autoplot(ds)
-  expect_s3_class(p, "ggplot")
+  line <- built_layer(ggplot2::autoplot(ds), 2)
+  # Agreement and consistency are two grouped lines, not one line zigzagging
+  # between them (the pre-M61 sawtooth).
+  expect_equal(length(unique(line$group)), 2L)
+  # Within each group the x-sequence is monotone (a proper left-to-right curve).
+  for (g in unique(line$group)) {
+    expect_false(is.unsorted(line$x[line$group == g]))
+  }
+})
 
-  ord <- ds[order(ds$m), , drop = FALSE]
-  ribbon <- built_layer(p, 1) # geom_ribbon
-  line <- built_layer(p, 2) # geom_line
-  expect_equal(line$x, ord$m)
-  expect_equal(line$y, ord$estimate)
-  expect_equal(ribbon$ymin, ord$conf.low)
-  expect_equal(ribbon$ymax, ord$conf.high)
+test_that("autoplot.icc_dstudy separates replicate occasion curves too", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  # A within-cell replicate fit projects one curve per occasion setting; on the
+  # rater axis those must not be connected into a sawtooth either (the `occasions`
+  # series dimension, not just `type`).
+  set.seed(42)
+  ns <- 25
+  k <- 4
+  reps <- 3
+  d <- expand.grid(subject = seq_len(ns), rater = seq_len(k), r = seq_len(reps))
+  d$subject <- factor(d$subject)
+  d$rater <- factor(d$rater)
+  sv <- stats::rnorm(ns, 0, 1.2)
+  rv <- stats::rnorm(k, 0, 0.8)
+  d$score <- 10 + sv[d$subject] + rv[d$rater] + stats::rnorm(nrow(d), 0, 0.6)
+  fit <- icc(
+    d,
+    score,
+    subject,
+    rater,
+    occasions = c("single", "average"),
+    type = "consistency",
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:3, seed = 1)
+  expect_gt(length(unique(ds$occasions)), 1L) # fixture has >1 occasion curve
+  line <- built_layer(ggplot2::autoplot(ds), 2)
+  # One grouped line per occasion setting, each monotone in x.
+  expect_equal(length(unique(line$group)), length(unique(ds$occasions)))
+  for (g in unique(line$group)) {
+    expect_false(is.unsorted(line$x[line$group == g]))
+  }
+})
+
+# --- M61 polish: shared theme, colourblind-safe palette, value labels ---------
+# These structural assertions pin the polish (theme applied, palette fills, label
+# text == the object's numbers); the faithful-rendering tests above pin that the
+# polish did not disturb what each layer draws (ADR-020: no image snapshots).
+
+test_that("all three views carry the house theme (icc_theme fingerprint)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  ds <- d_study(fit, m = 1:5, seed = 1)
+  # plot.title.position = "plot" is icc_theme()'s fingerprint (ggplot2's default
+  # is "panel"); assert it on each of the three views.
+  expect_identical(ggplot2::autoplot(fit)$theme$plot.title.position, "plot")
+  expect_identical(
+    ggplot2::autoplot(fit, what = "components")$theme$plot.title.position,
+    "plot"
+  )
+  expect_identical(ggplot2::autoplot(ds)$theme$plot.title.position, "plot")
+})
+
+test_that("component bars are filled from the colourblind-safe palette", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
+  fills <- built_layer(ggplot2::autoplot(fit, what = "components"), 1)$fill
+  expect_true(all(fills %in% icc_palette()))
+  # Not the ggplot2 default single grey: distinct fills across components.
+  expect_gt(length(unique(fills)), 1)
+})
+
+test_that("multilevel coefficient points are coloured from the palette", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sim_ml_small(), score, subject, rater, cluster = cluster, seed = 1)
+  cols <- built_layer(ggplot2::autoplot(fit), 2)$colour # geom_point layer
+  expect_true(all(cols %in% icc_palette()))
+  # Subject and cluster levels get distinct palette colours.
+  expect_gt(length(unique(cols)), 1)
+})
+
+test_that("coefficient plot value labels equal the rounded estimates", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(
+    sf_ratings_long(),
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    seed = 1
+  )
+  labs <- built_layer(ggplot2::autoplot(fit), 3)$label # geom_text layer
+  expect_equal(sort(as.numeric(labs)), sort(round(fit$estimates$estimate, 2)))
+})
+
+test_that("components plot value labels equal the component variances", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("ggplot2")
+  fit <- icc(sf_ratings_long(), score, subject, rater, seed = 1)
+  labs <- built_layer(ggplot2::autoplot(fit, what = "components"), 2)$label
+  view <- icc_components_view(fit)
+  expect_equal(
+    sort(as.numeric(labs)),
+    sort(signif(view$variance, 3)),
+    tolerance = 1e-6
+  )
+})
+
+test_that("ggplot2 stays a Suggests dependency (light-install, ADR-010)", {
+  desc <- read.dcf(system.file("DESCRIPTION", package = "intraclass"))
+  expect_match(desc[, "Suggests"], "ggplot2")
+  imports <- if ("Imports" %in% colnames(desc)) desc[, "Imports"] else ""
+  expect_false(grepl("ggplot2", imports))
 })
