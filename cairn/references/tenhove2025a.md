@@ -196,10 +196,10 @@ them to define IRR coefficients for the full design.
 
 **Nothing in the test suite currently traces to this source; it is shelf
 evidence for the contract boundary.** A grep of `cairn/references/ORACLES.md`,
-`cairn/references/BIBLIOGRAPHY.md`, `cairn/DESIGN.md`, `R/`, `tests/`, and
-`vignettes/` for `round-robin`, `social relations`, `network`, `dyadic`,
-`RESRM`, and `tenhove2025a` returned **zero matches**. No oracle entry, no
-estimator, no vignette passage depends on it.
+`cairn/DESIGN.md`, `R/`, `tests/`, and `vignettes/` for `round-robin`,
+`social relations`, `network`, `dyadic`, `RESRM`, and `tenhove2025a` returned
+**zero matches**. No oracle entry, no estimator, no vignette passage depends on
+it. (The only references are the bibliography/index entries M64 itself created.)
 
 Its only live use is **negative**: it documents, from the package's own primary
 author lineage, a GT-framework IRR design that the package does not and (per
@@ -232,7 +232,7 @@ IP2) plausibly should not fit.
   numeric tables corroborate; plotted points were not digitized. Appendix A's
   intermediate algebra (A.1–A.25) is derivation, not reference values. The
   online supplement (OSF `9az5x`, p. 456) has not been retrieved.
-- **Sibling-key hygiene.** `BIBLIOGRAPHY.md` currently lists only the 60(5)
-  planned-incomplete paper under "ten Hove … (2025)"; the two 2025 entries need
-  the `2025a`/`2025b` disambiguation carried into it so a bare "ten Hove et al.
-  (2025)" is never ambiguous.
+- ~~**Sibling-key hygiene.**~~ *Resolved within M64 (T5): `BIBLIOGRAPHY.md` had
+  only the 60(5) paper under a bare "ten Hove … (2025)". T5 added this 60(3)
+  paper and gave both entries the `2025a`/`2025b` suffixes, so a bare "ten Hove
+  et al. (2025)" no longer appears.*

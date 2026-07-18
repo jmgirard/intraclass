@@ -204,7 +204,8 @@ benchmarks — the same posture as the package's no-verdict rule (see
   (coefficients), Table 3 (the coverage grid). Cited by
   `cairn/estimand-specs/M5-*.md` and the multilevel oracle entries in
   `ORACLES.md` (Design-1 five-component decomposition; the nested Design-2
-  entries cite p. 6 of the journal pagination).
+  entries cite "p. 6", which is the **AOP** pagination this note uses — Eqs.
+  12–13, the facet-omission passages, and Table 3 all sit on AOP p. 6).
 - The **facet-omission rule** behind the cluster-level `d_study()` having a
   rater-count axis and no subject-count axis.
 - The **conflated-ICC** framing (Eq. 14) in `choosing-an-icc.Rmd`'s multilevel
@@ -218,8 +219,10 @@ benchmarks — the same posture as the package's no-verdict rule (see
 
 - **Page-anchor basis.** As flagged above, this note's anchors are AOP pages
   1–17. Existing repo citations of "ten Hove et al. (2022) p. 6" (e.g.
-  `ORACLES.md`) appear to use the same AOP pagination, which is self-consistent —
-  but the *journal* p. 6 is a different page. Worth a one-time sweep at review to
+  `ORACLES.md`) use the same AOP pagination — verified at the M64 review gate by
+  confirming Eqs. 12–13 and Table 3 sit on AOP p. 6, and that the journal
+  version's pages run 650–666 (so a bare "journal p. 6" cannot exist). Worth a
+  one-time sweep at review to
   confirm the repo cites one pagination throughout; not an oracle-value issue.
 - **No estimation route the package uses is validated here.** The paper reports
   MCMC only and explicitly sets ANOVA and MLE aside (p. 7). The package's default

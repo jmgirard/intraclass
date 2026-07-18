@@ -106,18 +106,17 @@ Cohen 1967) — from which the paper concludes diagnostic agreement is poorer.
 
 Nothing in the package currently traces to this source. A repo-wide grep for
 `fleiss1973` / "Fleiss & Cohen" / "weighted kappa" over `R/`, `tests/`,
-`vignettes/`, `man/`, `NEWS.md`, `cairn/references/ORACLES.md` and
-`BIBLIOGRAPHY.md` returns hits only in `cairn/milestones/M64-source-notes-loadbearing.md`
-and `cairn/references/INDEX.md`. It is shelf/background evidence for the
-kappa–ICC relationship and the categorical boundary of the package's scope, not
-an oracle and not a test dependency.
+`vignettes/`, `man/`, `NEWS.md`, and `cairn/references/ORACLES.md` returns no
+hits; the only references are the tracking/bibliography ones this milestone
+created (`BIBLIOGRAPHY.md`, `INDEX.md`, and the M64 milestone file). It is
+shelf/background evidence for the kappa–ICC relationship and the categorical
+boundary of the package's scope, not an oracle and not a test dependency.
 
 ## Open questions
 
-- **No `BIBLIOGRAPHY.md` entry.** The source is listed in
-  `cairn/references/INDEX.md` but has no entry in
-  `cairn/references/BIBLIOGRAPHY.md`. Raised for the review gate as a tracking
-  gap, not a content change.
+- ~~**No `BIBLIOGRAPHY.md` entry.**~~ *Resolved within M64 (T5): the source had
+  an `INDEX.md` line but no `BIBLIOGRAPHY.md` entry, so T5 added one rather than
+  trimming an existing entry.*
 - **Form-label mapping is inference, not text.** The paper never uses
   Shrout–Fleiss or McGraw–Wong labels (it predates both). The mapping of Eq. 15
   onto the package's `ICC(A,1)` follows from its stated ingredients (two-way,
