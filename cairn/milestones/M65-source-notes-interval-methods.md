@@ -69,7 +69,7 @@ the tier-C candidate row; the load-bearing sources → M64.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Notes for the profile-likelihood trio — `xiao2013`, `xiao2009`,
+- [x] T1: Notes for the profile-likelihood trio — `xiao2013`, `xiao2009`,
       `saha2012`. `xiao2013` first and in most depth; it is the named candidate
       source for the PL sibling pass.
 - [ ] T2: Notes for the estimator-bias pair — `saha2005`, `bhandary2006`.
@@ -89,6 +89,13 @@ the tier-C candidate row; the load-bearing sources → M64.
 - 2026-07-18: /milestone-implement started; branch
   `m65-source-notes-interval-methods` cut from `main`; all seven PDFs confirmed
   present on the shelf.
+- 2026-07-18: T1 done — `xiao2013`, `xiao2009`, `saha2012` notes written cold
+  from the PDFs. Headline: the three cover **three different designs**
+  (two-way random interrater / familial multi-sample common ICC / binary
+  beta-binomial), and naive PL under-covers only in `xiao2013` — so
+  "PL under-covers for ICCs" is design-specific, vindicating the M62 gate split.
+  `xiao2013`'s `κ_m` is calibrated only over ρ ∈ [0.6, 0.9], with no near-zero
+  evidence at all.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
