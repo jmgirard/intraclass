@@ -1,7 +1,7 @@
 <!-- Section ownership + write-modes: see tracking-rules.md "Milestone-file
      section ownership". A phase skill never rewrites another phase's section.
      Per-section owners are tagged below. -->
-# M64: Source notes — the nine load-bearing primary sources
+# M64: Source notes — the ten load-bearing primary sources
 
 - **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
@@ -18,27 +18,27 @@ Give each primary source the test suite already depends on its own
 ## Scope
 <!-- owner: plan · create/amend-via-gate -->
 
-**In:** nine `<citekey>.md` source notes, each re-read from
+**In:** ten `<citekey>.md` source notes, each re-read from
 `cairn/references/pdf/` per the maintainer's plan-gate choice (migrate **and**
 deepen, not text-shuffle): `shrout1979`, `mcgraw1996`, `fleiss1973`, `koo2016`,
-`tenhove2020`, `tenhove2022`, `tenhove2024`, `tenhove2025a` (network data) and
+`jorgensen2021` (the O-SEM SEM absolute-error source), `tenhove2020`,
+`tenhove2022`, `tenhove2024`, `tenhove2025a` (network data) and
 `tenhove2025b` (planned incomplete) — the citekey pair assigned by M63/T1. Each carries the validation-doctrine fields: full
 citation, extracted values with page/table anchors, verbatim-critical values
 quoted exactly, what traces to it, open questions. `BIBLIOGRAPHY.md` entries
 shrink to citation + pointer as their annotations move into the notes;
 `INDEX.md` gains a line per note.
 
-**Out:** the interval-methods / robustness cluster → M65; the eleven
-foundational + ICC-equality-testing papers → the tier-C candidate row; the
-Jorgensen 2021 SEM source → blocked on the maintainer supplying the PDF (M63/AC5),
-recorded as an open gap rather than written from memory; **any change to an
+**Out:** the interval-methods / robustness cluster → M65; the foundational
+shelf → M66; the ICC-equality-testing cluster → M67; **any change to an
 oracle value** — a note that disagrees with `ORACLES.md` is a finding to
-escalate, never a silent correction.
+escalate, never a silent correction. Note `jorgensen2019` (planned-missing
+efficiency) is a *different* paper and belongs to M66, not here.
 
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Nine `cairn/references/<citekey>.md` source notes exist, one per
+- [ ] AC1: Ten `cairn/references/<citekey>.md` source notes exist, one per
       source named in Scope, each with all five validation-doctrine fields
       populated and every extracted value carrying a page or table anchor.
 - [ ] AC2: Every value quoted in a note is verified against the PDF at the
@@ -48,7 +48,7 @@ escalate, never a silent correction.
       between a re-read source and the registry is recorded in the work log and
       escalated at the review gate, not silently reconciled. (RB tripwire:
       no-oracle)
-- [ ] AC4: `BIBLIOGRAPHY.md` entries for the nine are reduced to citation +
+- [ ] AC4: `BIBLIOGRAPHY.md` entries for the ten are reduced to citation +
       a pointer to the note (no duplicated extraction text), and `INDEX.md`
       carries one line per new note.
 - [ ] AC5: `cairn_validate` passes; the profile `verify` slot is clean
@@ -76,12 +76,14 @@ escalate, never a silent correction.
       the ADR-002/003 engine + MC-CI basis), and `tenhove2025a` (network data).
       Note the metadata trap: `tenhove2022.pdf` carries a 2021 copyright
       line but is the 2022 *Psychological Methods* 27(4):650–666 paper.
-- [ ] T3: Note for `koo2016` — the IP3-sensitive interpretation-band source;
+- [ ] T3: Notes for `koo2016` — the IP3-sensitive interpretation-band source;
       capture the "judge against the CI, not the point" guidance the
-      `getting-started.Rmd` caveat rests on.
+      `getting-started.Rmd` caveat rests on — and `jorgensen2021`, the O-SEM
+      absolute-error source (Eq. 6 defines σ²_i as the raw variance of the
+      effects-coded indicator intercepts).
 - [ ] T4: Cross-check each note's extracted values against the corresponding
       `ORACLES.md` entries; log agreements, escalate any disagreement.
-- [ ] T5: Trim the nine `BIBLIOGRAPHY.md` annotations to citation + pointer;
+- [ ] T5: Trim the ten `BIBLIOGRAPHY.md` annotations to citation + pointer;
       add the `INDEX.md` lines.
 - [ ] T6: Run `cairn_validate` + the profile `verify` slot; open the PR and
       drive CI green.
@@ -94,6 +96,9 @@ escalate, never a silent correction.
   text-only migration of the existing bibliography annotations).
 - 2026-07-18: minor amendment by /milestone-implement M63 — `tenhove2025`
   becomes the `tenhove2025a`/`tenhove2025b` pair (M63 implement gate).
+- 2026-07-18: amended by /milestone-review M63 — `jorgensen2021.pdf` is present
+  after all (M63's "no PDF" record was wrong), so the O-SEM source joins this
+  milestone: nine → ten notes, no longer blocked.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

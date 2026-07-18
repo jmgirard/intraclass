@@ -161,3 +161,9 @@ sources get a `BIBLIOGRAPHY.md` entry plus a `<citekey>.md` note with an
 `INDEX.md` line. Citekeys disambiguate same-author-same-year with letter
 suffixes ordered by issue (`tenhove2025a` = MBR 60(3) network data,
 `tenhove2025b` = MBR 60(5) planned incomplete).
+**Also covers `PRINCIPLES.md` #12** (M63 review, 2026-07-18): the split made #12's
+`REFERENCES.md` citation path stale, so it now names `BIBLIOGRAPHY.md` — #12 is a
+*citation* obligation, and bibliographic detail lives there, not in the oracle
+registry (which D-007 keys by oracle ID and reserves for the ≥2-types audit). The
+principle's substance is unchanged; only the path moved. `PRINCIPLES.md`'s header
+exception list records it as `(#12, D-007)`, per that file's change-control rule.
