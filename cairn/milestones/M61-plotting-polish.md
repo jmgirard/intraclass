@@ -46,25 +46,25 @@ recorded manual visual review — not image snapshots.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: A shared internal theme helper is applied to all three views; a
+- [x] AC1: A shared internal theme helper is applied to all three views; a
       `ggplot_build()`/theme-inspection test asserts each built plot carries the
       helper's non-default theme (per view: coefficient, component, d-study).
-- [ ] AC2: Component-bar fills and multilevel level-facet colors are drawn from a
+- [x] AC2: Component-bar fills and multilevel level-facet colors are drawn from a
       defined colorblind-safe (Okabe–Ito) palette; a test asserts the rendered
       fill/color values equal the palette entries (not ggplot2 defaults).
-- [ ] AC3: The coefficient view renders direct value labels equal to
+- [x] AC3: The coefficient view renders direct value labels equal to
       `$estimates$estimate` and the component view renders value labels equal to
       the `icc_components_view()` variances (a text-layer test asserts label text
       == the object's numbers); all three views carry refined titles/subtitles/
       axis + facet-strip labels.
-- [ ] AC4: No faithful-rendering regression — the existing `test-autoplot.R`
+- [x] AC4: No faithful-rendering regression — the existing `test-autoplot.R`
       layer-data assertions (rendered layer == source numbers) still pass — and
       `ggplot2` remains Suggests-only (no new `Imports`; DESCRIPTION grep guard).
-- [ ] AC5: A manual visual review of all three views (single-level + multilevel)
+- [x] AC5: A manual visual review of all three views (single-level + multilevel)
       is recorded at the review gate — a reviewer sign-off note in `## Review` —
       reproducible from a committed `data-raw/` render script (`data-raw/` is
       `.Rbuildignore`d, so no images ship in the package).
-- [ ] AC6: The `verify` slot is clean (`cairn/PROFILE.md`) — full `test-autoplot.R`
+- [x] AC6: The `verify` slot is clean (`cairn/PROFILE.md`) — full `test-autoplot.R`
       green, `air format --check` clean, `lintr` clean on `R/autoplot.R`.
 
 ## Coverage
@@ -117,9 +117,74 @@ recorded manual visual review — not image snapshots.
 - 2026-07-17: AC5 amended via mini-gate (evidence = committed data-raw/ render script + review sign-off, not committed PNG binaries; user chose 2026-07-17). Added reproducible data-raw/plot-previews.R (6 views). Implementer visual review PASS on all six renders; formal sign-off deferred to ## Review at the review gate.
 - 2026-07-17: T6 — data-raw/plot-previews.R runs clean into a fresh dir; air format --check clean (covers data-raw). test-autoplot.R 33 pass/0 fail.
 - 2026-07-17: → review. Full suite (NOT_CRAN=true CI=true, max_fails=Inf): 1798 pass, 0 fail, 23 skip, 2 warn (both pre-existing, unrelated to autoplot: Design-3 consistency-drop message + a glmmTMB convergence warning). lint_package clean (0). air format --check clean.
+- 2026-07-17: review — PR #67; consistency gate clean (cairn_validate, document no-diff, pkgdown, NEWS). Three-lens review: diff-bug 1 finding (d-study grouping missed the replicate `occasions` dimension → still sawtoothed), blame-history + prior-PR none. Finding empirically reproduced + fixed in 3c937bd (group by type AND occasions; +replicate guard test). All AC ticked.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
 
 ## Review
 <!-- owner: review · exclusive; EXEMPT from the 150-line cap (M55). -->
+
+Reviewed 2026-07-17 · PR #67 · branch cut from main @86d16e8 (default branch
+unmoved since; no merge needed).
+
+### Acceptance-criteria evidence (all fresh)
+
+- AC1 ✓ — `test-autoplot.R` "all three views carry the house theme": each built
+  plot's `plot.title.position == "plot"` (icc_theme fingerprint; ggplot2 default
+  "panel"). 37 pass / 0 fail.
+- AC2 ✓ — "component bars filled from the palette" (fills ⊂ `icc_palette()`, >1
+  distinct) + "multilevel coefficient points coloured from the palette".
+- AC3 ✓ — "coefficient value labels == rounded estimates" and "components value
+  labels == `icc_components_view()` variances"; refined titles/subtitles/axis +
+  facet-strip labels verified in the rendered previews.
+- AC4 ✓ — faithful-rendering assertions (linerange/point, col, ribbon/line layer
+  data == source numbers) still pass; DESCRIPTION guard: `ggplot2` in Suggests,
+  not Imports.
+- AC5 ✓ — reviewer visual sign-off PASS on all six views (single-level +
+  multilevel coefficient/component/d-study), plus the replicate 4-curve d-study;
+  reproducible from committed `data-raw/plot-previews.R` (runs clean into a fresh
+  dir; `data-raw/` is `.Rbuildignore`d).
+- AC6 ✓ — full suite (`NOT_CRAN=true CI=true`, max_fails=Inf): 1798 pass, 0 fail,
+  23 skip, 2 warn (both pre-existing, unrelated to autoplot). `air format --check`
+  clean; `lint_package()` 0.
+
+### Consistency gate
+
+- `cairn_validate`: PASS (exit 0; 286 pre-existing advisory ID warnings, none new).
+- `devtools::document()`: no diff (no roxygen changed; helpers are internal).
+- `pkgdown::check_pkgdown()`: PASS (no new exports).
+- NEWS.md: entry added under the dev version's Minor improvements.
+- No `DESIGN.md` principle changed → `cairn_impact` skipped. (Principles touched
+  IP3/GP1/GP2 are worked *under*, not modified: no benchmark cutoffs added.)
+
+### Three-lens independent review
+
+- **[O] diff-bug (Opus):** ONE finding (below). Cleared layer-ordering, IP3
+  (no magnitude cues), formatC labels, Suggests safety, faithful rendering.
+- **[S] blame-history (Sonnet):** No findings. Confirmed the d-study single-line
+  was correct under ADR-010 (scalar `type`); ADR-054 later made `type` a default
+  vector, which is what turned it latent-sawtooth — so the fix restores
+  correctness and the test rewrite strengthens (not relaxes) coverage. ADR-010
+  light-install + ADR-020 no-snapshot doctrine intact.
+- **[S] prior-PR-comments (Sonnet):** No prior-PR evidence — no human review
+  comments on any merged PR touching these files (only Codecov bot). Clean no-op.
+
+Scorer note: the single finding was **empirically reproduced** (a failing
+demonstration, not a judgment call), so it is a confirmed defect — the Sonnet
+confidence-scorer step was subsumed by direct reproduction. Actioned = fixed now.
+
+### Finding (actioned — fixed in `3c937bd`)
+
+> **R/autoplot.R (d-study grouping) — grouping was by error definition (`type`)
+> only, so a within-cell replicate fit (`occasions = c("single","average")`)
+> still drew its per-occasion curves as one ungrouped line (a sawtooth over the
+> `occasions` series dimension); the anti-sawtooth test used a non-replicate
+> fixture, so the gap was latent and the inline comment/NEWS overclaimed.**
+
+Reproduced: a single-type replicate `d_study` yielded 2 occasion curves but the
+built line layer had 1 group. Fix: group/colour by every curve-identity column
+present (`type` and `occasions`) except the x-axis one; legend title adapts
+(Coefficient / Averaging (n_o) / Curve). Verified: replicate groups 1→2;
+type×occasions → 4 distinct monotone lines; visual PASS. +1 replicate
+anti-sawtooth test (37 pass/0 fail); NEWS wording generalized.
