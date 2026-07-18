@@ -128,25 +128,20 @@ PDF for extraction → same; editing `cairn/legacy/**` or
   stub so the deliberately un-edited entombed links still resolve.
 - 2026-07-18: minor amendment to M64/T2 (renaming `tenhove2025` →
   `tenhove2025b` churns a citekey its plan names).
-- 2026-07-18: T1 — all 29 `pdf/` filenames verified against their PDF title
-  pages; two mismatches fixed (`hove2025`→`tenhove2025a`, `tenhove2025`→
-  `tenhove2025b`, both DOI-confirmed). **Open gap:** Jorgensen (2021) *Psych*
-  3(2):113–133 — the O-SEM absolute-error source — has no PDF; `jorgensen2019.pdf`
-  is a different paper (planned-missing efficiency). Maintainer asked; blocks
-  that one M64 note. ROADMAP candidate row records it.
-- 2026-07-18: T2 — split verified content-preserving: both bodies byte-identical
-  to the original (`diff` clean), 39 oracle entries and 16 bibliography items
-  before and after.
-- 2026-07-18: T3 — 12 live cross-references retargeted (registry→`ORACLES.md`,
-  bibliography→`BIBLIOGRAPHY.md`); stale `project/REFERENCES.md` path fixed at
-  `test-vignette-claims.R:8`. AC2 allowlist widened (gated) to cover the durable
-  records that narrate the migration.
-- 2026-07-18: T4–T6 — DESIGN.md registry pointer added + Known-issues bullet
-  struck as resolved; D-007 appended; `INDEX.md` rebuilt (registry/bibliography,
-  source notes, synthesis notes); `cairn_validate` all checks passed.
-- 2026-07-18: T7 — `devtools::test()` under `NOT_CRAN=true CI=true`:
-  1802 pass, 0 fail, 0 error, 23 skip. `air format --check` clean;
-  `lintr::lint_package()` clean.
+- 2026-07-18: T1 — all 29 `pdf/` filenames checked against title pages; two
+  DOI-confirmed renames (`hove2025`→`tenhove2025a`, `tenhove2025`→`tenhove2025b`).
+  **Open gap:** Jorgensen (2021) *Psych* 3(2):113–133 (the O-SEM source) has no
+  PDF — `jorgensen2019.pdf` is a different paper; maintainer asked; blocks one
+  M64 note; ROADMAP candidate row records it.
+- 2026-07-18: T2 — split content-preserving: both bodies byte-identical to the
+  original, 39 oracle entries + 16 bibliography items before and after.
+- 2026-07-18: T3 — 12 cross-references retargeted; stale `project/` path fixed
+  at `test-vignette-claims.R:8`; AC2 allowlist widened (gated) for the durable
+  records narrating the migration.
+- 2026-07-18: T4–T6 — DESIGN.md pointer added + Known-issues bullet struck;
+  D-007 appended; `INDEX.md` rebuilt; `cairn_validate` clean.
+- 2026-07-18: T7 — 1802 pass, 0 fail, 0 error, 23 skip
+  (`NOT_CRAN=true CI=true`); `air format --check` and `lintr` clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
