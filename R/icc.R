@@ -239,13 +239,19 @@
 #'   data), on both complete and **incomplete** data (missing cells are estimated by
 #'   full-information maximum likelihood; the parametric bootstrap is unavailable for
 #'   incomplete SEM), and the crossed (Design 1) **multilevel** design at both
-#'   levels (plus the conflated diagnostic) via a two-level SEM -- on complete,
-#'   balanced data with equal cluster sizes. With **random** raters the interval
-#'   is either the Monte-Carlo interval (the default) or the parametric bootstrap
-#'   (which simulates two-level datasets from the fitted moments and refits per
-#'   resample). With **fixed** raters the between-level rater intercepts give the
-#'   Case-3A finite-population \eqn{\theta^2_r} at both levels (Monte-Carlo only;
-#'   the fixed-rater bootstrap is not yet available); because lavaan's
+#'   levels (plus the conflated diagnostic) via a two-level SEM. With **random**
+#'   raters the multilevel fit covers both complete/balanced data and
+#'   **incomplete** (missing cells estimated by two-level full-information ML) or
+#'   **unbalanced** (unequal cluster sizes) data; the interval is the Monte-Carlo
+#'   interval (the default), or the parametric bootstrap (which simulates
+#'   two-level datasets from the fitted moments and refits per resample) on
+#'   balanced/complete data only -- incomplete or unbalanced data is Monte-Carlo
+#'   only (resamples cannot reproduce a missingness pattern, and the bootstrap
+#'   coverage is validated only on balanced data). With **fixed** raters the
+#'   between-level rater intercepts give the Case-3A finite-population
+#'   \eqn{\theta^2_r} at both levels (Monte-Carlo only; the fixed-rater bootstrap
+#'   is not yet available), on complete, balanced data with equal cluster sizes
+#'   only; because lavaan's
 #'   random-rater term is the raw quadratic form, the fixed-rater ICC differs from
 #'   the random-rater one by the finite-population correction (which the REML-based
 #'   mixed-model engines do not carry into their random estimate). lavaan's
@@ -1257,16 +1263,16 @@ icc <- function(
   # (FIML, M21 Slice 3, ADR-031). Disconnected designs are still rejected by the
   # engine-agnostic connectedness guard below (shared with the mixed-model engines).
 
-  # lavaan (SEM) multilevel scope (M54, D-005): the crossed (Design 1)
-  # random-rater fit on complete, balanced data with equal cluster sizes ships
-  # -- both levels + the conflated diagnostic, montecarlo CI -- via the
-  # two-level CFA parameterization the M53 pilot established numerically
-  # (cairn/references/sem-multilevel-pilot.md). Everything outside that cell
-  # stays a loud classed deferral (#5): nested designs (no two-level CFA
-  # mapping for nested raters), fixed raters, within-cell replicates, and
-  # incomplete/unbalanced data (the pilot's oracle evidence is complete/
-  # balanced; equal n_s enters the documented tau^2 rater-inflation law --
-  # see fit_lavaan_multilevel()'s header).
+  # lavaan (SEM) multilevel scope (M54, D-005; M58): the crossed (Design 1)
+  # RANDOM-rater fit ships both levels + the conflated diagnostic on complete/
+  # balanced AND incomplete (two-level FIML) / unbalanced (unequal cluster sizes)
+  # data (M58), via the two-level CFA parameterization the pilot established
+  # numerically (cairn/references/sem-multilevel-pilot.md). FIXED raters (M57)
+  # stay complete/balanced/equal-cluster-size. Loud classed deferrals (#5)
+  # remain: nested designs (no two-level CFA mapping for nested raters),
+  # within-cell replicates, and fixed incomplete/unbalanced (the balance guard
+  # below). The tau^2 rater-inflation law generalizes to the harmonic mean of
+  # per-cluster subject counts under imbalance -- see fit_lavaan_multilevel().
   if (engine == "lavaan" && multilevel) {
     if (ml_design != "crossed") {
       abort_unsupported(c(
@@ -1565,10 +1571,10 @@ icc <- function(
       fit_lme4_multilevel(df)
     } else if (engine == "lavaan") {
       # Crossed (Design 1) random raters via the two-level SEM (M54, D-005):
-      # the five-component two-level CFA the M53 pilot established. Complete/
-      # balanced, equal cluster sizes, random raters only -- everything else
-      # aborted upstream. Serves both levels + the conflated diagnostic off
-      # the same fit, exactly as the mixed-model engines.
+      # the five-component two-level CFA the pilot established. Complete/balanced,
+      # incomplete (two-level FIML), or unbalanced (unequal cluster sizes) --
+      # random raters only; fixed and nested aborted upstream. Serves both levels
+      # + the conflated diagnostic off the same fit, as the mixed-model engines.
       fit_lavaan_multilevel(df)
     } else {
       fit_glmmtmb_multilevel(df)

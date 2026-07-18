@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M58: Multilevel SEM (lavaan) — incomplete / unbalanced random design
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
@@ -96,7 +96,7 @@ the fit work at a gate (records the finding; ships nothing).
       `k_c^eff` divisor, AC3 unequal-`n_s` parity sweep + τ²-law guard, AC4 the
       abort/bootstrap-refusal narrowing (`skip_on_cran`,
       `skip_if_not_installed("lavaan")`).
-- [ ] T5: Run the `verify` slot; update `@param` prose, the `icc()` engine roster,
+- [x] T5: Run the `verify` slot; update `@param` prose, the `icc()` engine roster,
       and the `fit_lavaan_multilevel()` header (lavaan crossed random multilevel
       now covers incomplete + unequal cluster sizes; bootstrap still MC-only on
       incomplete data).
@@ -129,6 +129,12 @@ the fit work at a gate (records the finding; ships nothing).
   parity + the harmonic-τ² discriminating invariant (8-rep mean, beats the grand
   law); AC4 fixed + bootstrap-on-incomplete/unbalanced aborts, shared
   connectedness guard, and balanced-random bootstrap retained.
+- 2026-07-17: T5 done. icc() roxygen engine roster + two internal scope comments
+  updated (random multilevel lavaan now incomplete/unbalanced; fixed stays
+  balanced); NEWS.md entry added and the M54 bullet's stale refusal clause fixed;
+  document() regenerated icc.Rd. Verify slot clean: full devtools::test()
+  (NOT_CRAN=true CI=true) 0 fail / 0 error (2 pre-existing expected warnings, brms
+  On-CI skips), air format --check clean, lintr 0 lints. Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
