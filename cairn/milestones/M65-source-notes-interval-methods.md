@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M65: Source notes — the interval-methods and robustness cluster
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m65-source-notes-interval-methods`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -86,6 +86,9 @@ the tier-C candidate row; the load-bearing sources → M64.
 - 2026-07-18: created by /milestone-plan (the newly-added PDFs cluster hard on
   one-way-ICC interval methods — the direct feedstock for the two open CI
   candidates, so they were split out ahead of the foundational shelf).
+- 2026-07-18: /milestone-implement started; branch
+  `m65-source-notes-interval-methods` cut from `main`; all seven PDFs confirmed
+  present on the shelf.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
