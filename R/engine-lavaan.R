@@ -317,26 +317,37 @@ lavaan_ml_simulate_refit <- function(
 # The raw quadratic-form rater estimator here carries a DETERMINISTIC
 # structural inflation:
 #     E[nu' C nu / (k - 1)] = sigma^2_r + tau^2,
-#     tau^2 = (sigma^2_cr + sigma^2_{(s:c)r} / n_s) / N_c,
+#     tau^2 = (sigma^2_cr + sigma^2_{(s:c)r} / n_s) / N_c    (equal cluster sizes),
 # the mean sampling variance of the k estimated rater means over N_c clusters
-# of n_s subjects. REML does not carry it, so the signed SEM-minus-REML rater
-# parity IS tau^2 (pilot: match <= 1e-4 across geometries). Raw by design,
-# exactly as the single-level estimator (ADR-014): documented, predictable,
-# never absorbed into a widened tolerance (GP5) -- rater parity tests are
-# CENTRED on tau^2, never zero (a zero-centred pin breaks structurally at
-# small N_c, e.g. N_c = 10, n_s = 5 -> tau^2 ~ .026).
+# of n_s subjects. Under UNEQUAL cluster sizes (M58) it generalizes by replacing
+# n_s with the HARMONIC MEAN H of the per-cluster subject counts m_c:
+#     tau^2 = (sigma^2_cr + sigma^2_{(s:c)r} / H) / N_c,   H = N_c / sum(1 / m_c),
+# reducing exactly to the balanced form when all m_c are equal. (lavaan's
+# between-level mean structure weights clusters EQUALLY, not by size, so the
+# size-weighted "grand" form sigma^2_cr*sum(m^2)/N^2 + sigma^2_res/N is wrong --
+# the pilot pins the harmonic form and that it beats the grand form under
+# imbalance.) REML does not carry it, so the signed SEM-minus-REML rater parity
+# IS tau^2 (pilot: match <= 1e-4 across geometries, balanced and unbalanced).
+# Raw by design, exactly as the single-level estimator (ADR-014): documented,
+# predictable, never absorbed into a widened tolerance (GP5) -- rater parity
+# tests are CENTRED on tau^2, never zero (a zero-centred pin breaks structurally
+# at small N_c, e.g. N_c = 10, n_s = 5 -> tau^2 ~ .026).
 #
 # ESTIMATION. lavaan's two-level estimator is full-information ML only -- no
 # `likelihood = "wishart"` (N-1) analog -- so the between-level components
 # carry ML's N-divisor shrinkage relative to the REML spine at small N_c
 # (pilot: cluster-axis parity .025 -> .0025 as N_c grows 20 -> 200);
 # consistency ICCs are ratios and absorb it (near-exact, M49 index-class
-# split). Complete/balanced with equal cluster sizes only (guarded in icc());
-# a between-level Heywood (negative variance -- the boundary lavaan reaches
-# where glmmTMB smoothly hits ~0, D-004) aborts loudly toward glmmTMB, as the
+# split). RANDOM raters cover complete/balanced AND incomplete/unbalanced data
+# (M58): a missing subject x rater cell is estimated by FIML (`missing =
+# "fiml"`, set only when the wide frame has NA cells), and unequal cluster sizes
+# fit natively; icc() guards connectedness and the crossed-random scope. A
+# between-level Heywood (negative variance -- the boundary lavaan reaches where
+# glmmTMB smoothly hits ~0, D-004) aborts loudly toward glmmTMB, as the
 # single-level guard does. The MC interval reuses the shared machinery via the
 # same six-field contract: log-SD scale for the four variances, natural scale
-# for the between intercepts feeding the quadratic form per draw.
+# for the between intercepts feeding the quadratic form per draw. On incomplete
+# or unbalanced data the interval is MC-only (simulate_refit = NULL, MD-1).
 #
 # FIXED RATERS (M57). `raters = "fixed"` reads the SAME two-level fit: the
 # between-level intercepts nu_j carry the rater main effects, so the rater slot
@@ -350,10 +361,12 @@ lavaan_ml_simulate_refit <- function(
 # tau^2 finite-population correction, matching glmmTMB fixed asymptotically (GP5:
 # the gap is documented, never absorbed into a widened tolerance). Fixed is
 # MC-only: the M56 bootstrap factory is random-only internally, so simulate_refit
-# stays NULL for fixed (bootstrap deferred to a candidate). Crossed (Design 1),
-# balanced/complete, equal cluster sizes only. The parametric bootstrap (M56)
-# serves random raters; nested designs, replicates, incomplete/unbalanced data
-# (and fixed nested / fixed incomplete) are refused upstream in icc().
+# stays NULL for fixed (bootstrap deferred to a candidate). FIXED is crossed
+# (Design 1), balanced/complete, equal cluster sizes only -- fixed
+# incomplete/unbalanced stays refused upstream in icc() (a parked candidate),
+# unlike the RANDOM path which now admits it (M58). The parametric bootstrap
+# (M56) serves balanced/complete random raters only; nested designs, replicates,
+# fixed incomplete/unbalanced, and fixed nested are refused upstream in icc().
 fit_lavaan_multilevel <- function(
   data,
   raters = "random",
@@ -366,13 +379,19 @@ fit_lavaan_multilevel <- function(
   nu_slots <- paste0("nu", seq_len(k))
 
   # Long -> wide: one row per subject (columns v1..vk), plus its cluster id.
-  # Completeness/balance is guarded in icc(), so every cell is present.
+  # A MISSING subject x rater cell is left as NA (tapply's fill); on incomplete
+  # data `missing = "fiml"` estimates around it (M58, the two-level analog of the
+  # single-level fit_lavaan() FIML path). Unequal cluster sizes fit natively --
+  # nothing in the extraction changes. icc() guards connectedness and the
+  # random-crossed scope; the balance guard now admits incomplete/unbalanced
+  # random data (M58) but still refuses fixed, nested, and replicate designs.
   wide <- tapply(data$score, list(data$subject, data$rater), function(x) x[[1]])
   wide_df <- as.data.frame(wide)
   names(wide_df) <- inds
   wide_df$cluster <- data$cluster[
     match(rownames(wide), as.character(data$subject))
   ]
+  has_missing <- anyNA(wide)
 
   # The two-level model (pilot ml_sem_model): within = subject factor (svw) +
   # equal residuals (evw); between = cluster factor (svb) + equal residuals
@@ -381,9 +400,17 @@ fit_lavaan_multilevel <- function(
   # bootstrap factory (M56), which refits this same string per resample.
   model <- lavaan_multilevel_model(k)
 
+  # `missing = "fiml"` ONLY on incomplete data -- complete/balanced fits keep
+  # lavaan's default so M54/M57 results stay byte-identical (the single-level
+  # path makes the same conditional choice).
+  fit_args <- list(model = model, data = wide_df, cluster = "cluster")
+  if (has_missing) {
+    fit_args$missing <- "fiml"
+  }
+
   fit <- tryCatch(
     withCallingHandlers(
-      lavaan::lavaan(model, data = wide_df, cluster = "cluster"),
+      do.call(lavaan::lavaan, fit_args),
       warning = function(w) {
         cli::cli_warn(c(
           "The {.pkg lavaan} engine reported a fitting warning.",
@@ -518,8 +545,9 @@ fit_lavaan_multilevel <- function(
   }
 
   # Per-cluster subject counts drive the two-level bootstrap DGP (equal on the
-  # balanced/complete cell this path serves; the vector keeps the factory general).
+  # balanced/complete cell; a vector on unequal cluster sizes -- M58).
   cluster_sizes <- as.integer(table(wide_df$cluster))
+  unbalanced <- length(unique(cluster_sizes)) != 1L
 
   list(
     fit = fit,
@@ -530,13 +558,21 @@ fit_lavaan_multilevel <- function(
     to_components = to_components,
     # Two-level parametric bootstrap (M56): simulate wide two-level datasets from
     # this fit's implied within/between moments (rebuilt from the five components),
-    # refit the same model, recompute both-level ICCs per resample. RANDOM raters
-    # only: the M56 factory is random-only internally (lavaan_multilevel_components
-    # reads the raw sigma^2_r), so the FIXED cell is MC-only (M57 gate) --
-    # simulate_refit = NULL routes ci_method = "bootstrap" to a loud abort, exactly
-    # as the incomplete/unbalanced sibling does. The single-level FIML precedent
-    # (resamples cannot reproduce a missingness pattern) keeps this NULL there too.
-    simulate_refit = if (identical(raters, "fixed")) {
+    # refit the same model, recompute both-level ICCs per resample. simulate_refit
+    # = NULL routes ci_method = "bootstrap" to a loud abort, leaving the MC interval
+    # as the sole method. It is NULL for:
+    #   - FIXED raters (M57 gate): the M56 factory is random-only internally
+    #     (lavaan_multilevel_components reads the raw sigma^2_r);
+    #   - INCOMPLETE data: resamples cannot reproduce the missingness pattern
+    #     (single-level FIML precedent, ADR-031);
+    #   - UNEQUAL cluster sizes (M58/MD-1): the factory accepts a cluster_sizes
+    #     vector, but the two-level bootstrap coverage was validated on balanced
+    #     data only (M56) and no unbalanced coverage oracle is in scope --
+    #     oracle-first (#1), so MC-only until one exists (a parked candidate).
+    # Balanced/complete RANDOM keeps the M56 bootstrap unchanged.
+    simulate_refit = if (
+      identical(raters, "fixed") || has_missing || unbalanced
+    ) {
       NULL
     } else {
       lavaan_ml_simulate_refit(

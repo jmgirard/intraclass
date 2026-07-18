@@ -1291,13 +1291,25 @@ icc <- function(
       ))
     }
     # `cluster_of` (subject x cluster incidence) is computed by the multilevel
-    # identifiability block above.
-    if (!balanced || length(unique(colSums(cluster_of))) != 1L) {
+    # identifiability block above; unequal colSums = unequal cluster sizes.
+    # RANDOM raters (M58) now admit incomplete (two-level FIML) and unbalanced
+    # (unequal cluster sizes) crossed data -- the pilot established both routes
+    # numerically (cairn/references/sem-multilevel-pilot.md; D-005). Connectedness
+    # and identifiability are gated by the engine-agnostic crossed-multilevel
+    # block above, shared with the mixed engines; a between-level Heywood aborts
+    # loudly from inside fit_lavaan_multilevel(). FIXED raters stay
+    # complete/balanced/equal-cluster-size only: the incomplete/unbalanced fixed
+    # subject level compounds FIML with the Case-3A correction and is a parked
+    # candidate (no oracle in scope), so it is refused here toward glmmTMB.
+    if (
+      identical(raters, "fixed") &&
+        (!balanced || length(unique(colSums(cluster_of))) != 1L)
+    ) {
       abort_unsupported(c(
         "The {.pkg lavaan} multilevel engine needs complete, balanced data \\
-         with equal cluster sizes.",
-        i = "Incomplete or unbalanced multilevel SEM is planned for a later \\
-             milestone; use {.code engine = \"glmmTMB\"} (default) or \\
+         with equal cluster sizes for fixed raters.",
+        i = "Incomplete or unbalanced fixed-rater multilevel SEM is planned for \\
+             a later milestone; use {.code engine = \"glmmTMB\"} (default) or \\
              {.code \"lme4\"}."
       ))
     }

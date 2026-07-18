@@ -83,11 +83,11 @@ the fit work at a gate (records the finding; ships nothing).
       generalization under imbalance; append a GO/NO-GO section to
       `cairn/references/sem-multilevel-pilot.md`. A NO-GO stops for a gate before
       any fit-path change. (RB tripwire: ip-touching)
-- [ ] T2: (on GO) Extend `fit_lavaan_multilevel()` — build the wide frame with NA
+- [x] T2: (on GO) Extend `fit_lavaan_multilevel()` — build the wide frame with NA
       cells (`tapply` already leaves them), pass `missing = "fiml"` when
       incomplete, confirm unequal cluster sizes fit natively, and generalize the
       τ² documentation/component reads to per-cluster `n_s`.
-- [ ] T3: Narrow the `icc.R:1289` balance guard to admit incomplete/unbalanced
+- [x] T3: Narrow the `icc.R:1289` balance guard to admit incomplete/unbalanced
       random crossed lavaan; keep the fixed-cluster, nested, replicate, and
       incomplete-bootstrap refusals; verify the shared connectedness guard covers
       the lavaan path.
@@ -114,9 +114,31 @@ the fit work at a gate (records the finding; ships nothing).
   (index-class split intact); the τ² rater inflation generalizes to the HARMONIC
   MEAN of per-cluster subject counts, τ² = (σ²_cr + σ²_res/H)/C, strictly beating
   the size-weighted grand law under imbalance. Evidence in the synthesis note.
+- 2026-07-17: T2+T3 done. `fit_lavaan_multilevel()` passes `missing = "fiml"` on
+  incomplete data, fits unequal cluster sizes natively; τ² harmonic-mean law +
+  MD-1 documented in the engine header; `simulate_refit = NULL` on
+  incomplete/unbalanced (MC-only). Narrowed the icc.R balance guard to fixed-only
+  (random crossed incomplete/unbalanced now flows through; connectedness + the
+  k_c^eff divisor are the shared engine-agnostic guards). Removed the two obsolete
+  M54 abort assertions (incomplete/unbalanced random) from
+  test-icc-lavaan-multilevel.R. Smoke-verified vs glmmTMB: k_c_eff 4.9194 matches,
+  ICC(c,k)/ICC(s,·) parity holds, fixed + bootstrap-on-incomplete/unbalanced abort.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- MD-1 (2026-07-17): MC-only for both incomplete and unbalanced random multilevel
+  lavaan. AC4 requires refusing `ci_method = "bootstrap"` on incomplete data
+  (resamples cannot reproduce a missingness pattern — single-level precedent
+  ADR-031). The same MC-only posture extends to unbalanced-**complete** data:
+  although the M56 bootstrap factory (`lavaan_ml_simulate_refit`) natively accepts
+  an unequal `cluster_sizes` vector, its coverage was validated only on balanced
+  data (M56) and no unbalanced coverage oracle is in this milestone's scope —
+  oracle-first (#1) says don't ship an interval whose coverage isn't established.
+  So `simulate_refit = NULL` whenever the data is incomplete **or** has unequal
+  cluster sizes; those cells ship the boundary-aware MC interval only. Bootstrap
+  parity for the new random cells joins the parked lavaan-multilevel-bootstrap
+  candidate. Balanced/complete random keeps the M56 bootstrap unchanged.
 
 ## Review
 <!-- owner: review · exclusive -->
