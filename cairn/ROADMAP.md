@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-18 (M63–M67 planned — the references migration + full source-note ingestion of all 27 un-noted PDFs; the references-split and tier-C candidates both graduated; the Jorgensen 2021 PDF gap seeded as a candidate)_
+_Last hygiene check: 2026-07-18 (M63 shipped + archived — references migration to ORACLES.md + BIBLIOGRAPHY.md, PR #69; M54 rotated out under terminal-row retention; M64–M67 planned for source-note ingestion of all 28 remaining PDFs)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | review | — | high | milestones/M63-references-migration.md |
+| M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | done | — | high | milestones/archive/M63-references-migration.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
 | M64 | Source notes — the nine load-bearing primary sources | planned | M63 | normal | milestones/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | planned | M63 | normal | milestones/M65-source-notes-interval-methods.md |
@@ -19,8 +19,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M61 | Plotting polish — cohesive theme, palette, and labels | done | — | normal | milestones/archive/M61-plotting-polish.md |
 | M58 | Multilevel SEM (lavaan) — incomplete / unbalanced random design | done | — | normal | milestones/archive/M58-lavaan-multilevel-incomplete.md |
 | M55 | gtheory-reference docs audit — historical-citation framing | done | — | normal | milestones/archive/M55-gtheory-docs-audit.md |
-| M54 | Multilevel SEM (lavaan) — engine implementation | done | — | high | milestones/archive/M54-lavaan-multilevel-engine.md |
-<!-- terminal-row retention: M62 done (2026-07-18) → M53 rotated out (its archive file + M48's Depends-on still resolve). Kept: M62, M61, M58, M55, M54 (5 most recent terminal). -->
+<!-- terminal-row retention: M63 done (2026-07-18) → M54 rotated out (its archive file + M48's Depends-on still resolve). Kept: M63, M62, M61, M58, M55 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
