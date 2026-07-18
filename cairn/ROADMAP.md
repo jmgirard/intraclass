@@ -11,7 +11,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 |---|---|---|---|---|---|
 | M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | done | — | high | milestones/archive/M63-references-migration.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61 | high | milestones/M48-release-v010.md |
-| M64 | Source notes — the nine load-bearing primary sources | planned | M63 | normal | milestones/M64-source-notes-loadbearing.md |
+| M64 | Source notes — the ten load-bearing primary sources | planned | M63 | normal | milestones/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | planned | M63 | normal | milestones/M65-source-notes-interval-methods.md |
 | M66 | Source notes — the foundational and interpretation shelf | planned | M63 | low | milestones/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | planned | M63 | low | milestones/M67-source-notes-equality-testing.md |
