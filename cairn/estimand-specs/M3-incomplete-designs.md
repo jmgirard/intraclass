@@ -270,7 +270,7 @@ on independent, reproducible oracles, assembled and run via `/verify-estimator`:
 
 O5/O6 are committed, seeded scripts under `data-raw/` (extending
 `data-raw/oracle-fixed-vs-random.R`, which already reproduces the imbalance
-divergence). Register both in `REFERENCES.md` with provenance when their values are
+divergence). Register both in `ORACLES.md` with provenance when their values are
 asserted (Slices 1–2). **Availability check:** confirm `irrNA`/`gtheory` compute the
 intended coefficients before relying on them; if a coefficient cannot be pinned by ≥2
 independent oracles, it is not shipped and a Fable review is recommended (#19).

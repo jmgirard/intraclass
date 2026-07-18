@@ -126,3 +126,38 @@ there).
 transformed bootstrap-t is cleared to be planned as an exported one-way
 `ci_method` (candidate updated with the conditions); the SEARLE-F / Burch-REML
 boundary-robust classical CI is added as a candidate.
+
+### D-007 (2026-07-18): `ORACLES.md` is the declared oracle-registry home; references split
+
+**Context:** `cairn/references/REFERENCES.md` was the pre-migration single page —
+1346 lines carrying two different things: a 39-entry oracle→provenance registry
+(~94 % of it) and a 16-item bibliography. The validation doctrine requires a repo
+with numeric work to *declare* where its oracle records live, in one line of
+`DESIGN.md` Conventions; this repo had no such line, and `DESIGN.md § Known
+issues` recorded the absence as a standing wart pending the upstream cairn
+`ORACLES.md` question (cairn D-024/M42). Meanwhile the cairn source-note
+convention (`<citekey>.md` + `INDEX.md`) had already started arriving alongside
+it (M62: `ukoumunne2003`, `ohyama2025`), so one directory ran two conventions.
+**Decision:** split by *kind*, not by source — the registry becomes
+`cairn/references/ORACLES.md` (the **declared registry home**, now named in
+`DESIGN.md` Conventions), the bibliography becomes
+`cairn/references/BIBLIOGRAPHY.md`, and per-source extractions migrate
+progressively into `<citekey>.md` source notes (M64–M67). Explicitly **not** a
+file-per-paper shred of the registry: oracle entries are keyed by oracle ID
+(`O1`, `O-SEM`, `O-Bayes-IFNML`), tests cite those IDs, and many entries span
+several sources — sharding them by citekey would break the ≥2-oracle-types audit
+this registry exists to make possible. `REFERENCES.md` is retained as a 6-line
+pointer stub, because `cairn/legacy/**`, `CLAUDE_CODE_KICKOFF.md`, and
+`data-raw/reviews/` link to it and are entombed documents kept verbatim by
+design. The split moved **no numeric value, `Status` line, or citation text** —
+verified by byte-identical diffs of both bodies against the original.
+**Scope fence:** this settles the *repo* side. Whether cairn itself mandates an
+`ORACLES.md` shape stays the upstream open question (cairn D-024); the doctrine
+leaves registry *shape* free and requires only that the location be declared, so
+this choice is compatible with either upstream outcome and does not pre-empt it.
+**Consequences:** the oracle registry has a declared, greppable home and the
+`DESIGN.md` known-issue is struck. New oracles register in `ORACLES.md`; new
+sources get a `BIBLIOGRAPHY.md` entry plus a `<citekey>.md` note with an
+`INDEX.md` line. Citekeys disambiguate same-author-same-year with letter
+suffixes ordered by issue (`tenhove2025a` = MBR 60(3) network data,
+`tenhove2025b` = MBR 60(5) planned incomplete).

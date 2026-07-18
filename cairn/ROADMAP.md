@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-18 (M63–M67 planned — the references migration + full source-note ingestion of all 27 un-noted PDFs; the REFERENCES.md-split and tier-C candidates both graduated; the Jorgensen 2021 PDF gap seeded as a candidate)_
+_Last hygiene check: 2026-07-18 (M63–M67 planned — the references migration + full source-note ingestion of all 27 un-noted PDFs; the references-split and tier-C candidates both graduated; the Jorgensen 2021 PDF gap seeded as a candidate)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 

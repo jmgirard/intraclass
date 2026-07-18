@@ -218,4 +218,4 @@ a Fable review is *recommended* (#19, the ADR-046 conditional posture), and work
   this lifts); ADR-038 (M28 — the 2b `theta2r_moment_draws()` this generalizes); ADR-008
   (M3 `k_eff`/Case-3A); ADR-018 (M9 incomplete crossed + `design` escape hatch); ADR-024
   (M15 incomplete lme4 parity). Full provenance for asserted O-IFNML values is registered
-  in `REFERENCES.md` when the oracle is committed (Slice 1).
+  in `ORACLES.md` when the oracle is committed (Slice 1).

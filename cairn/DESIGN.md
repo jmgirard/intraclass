@@ -87,6 +87,10 @@ vignettes, `cairn/estimand-specs/`). (Design interview, 2026-07-12.)
 
 - **Oracle-first:** every exported estimator passes ≥2 independent oracle types;
   no fabricated reference values (cited source or committed seeded script).
+- **Oracle records:** the central registry `cairn/references/ORACLES.md` (one
+  entry per oracle: ID, type, asserting `test:line`, source, provenance).
+  Sources live in `references/BIBLIOGRAPHY.md` + the `<citekey>.md` source
+  notes indexed by `references/INDEX.md`. (D-007)
 - **Name the estimand before coding;** thin vertical slices; plan before code.
 - **All user messaging via `cli`; all errors classed via `rlang::abort()`** — no
   bare `stop()`/`warning()`/`cat()`/`print()`.
@@ -202,10 +206,12 @@ paths (`theta2r_moment_draws()` / `brms_theta2r_moment_draws()`); ADR-038
 
 ## Known issues
 
-- No cairn-canonical oracle-registry home yet: the working oracle registry lives in
-  [`references/REFERENCES.md`](references/REFERENCES.md) (bibliography + registry).
-  Whether cairn adopts a dedicated `ORACLES.md` is an open cairn-side question
-  (cairn D-024; assessed by cairn M42).
+- ~~No cairn-canonical oracle-registry home yet~~ — RESOLVED by M63 (D-007): the
+  registry is [`references/ORACLES.md`](references/ORACLES.md), declared in the
+  Conventions section above per the validation doctrine's registry-pointer rule.
+  This settles the repo side only; whether *cairn itself* mandates an `ORACLES.md`
+  shape remains the upstream open question (cairn D-024, assessed by cairn M42) —
+  the repo's choice here is compatible with either outcome.
 - ~~**brms/Stan verification is structurally weaker**~~ — RESOLVED by M52
   (mitigate + document; the constraint itself is inherent and stands: no Stan
   toolchain on CI, MCMC flake, ~2-hour sweeps). The offline committed-fixture

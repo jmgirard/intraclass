@@ -77,7 +77,7 @@
 
 12. **[IP] Seeded and sourced.** Any stochastic code (simulation, MC CIs) is seeded in
     tests. Every statistical method in the code and docs cites its source (paper +
-    equation where possible) in a comment and in `REFERENCES.md`.
+    equation where possible) in a comment and in `cairn/references/ORACLES.md`.
 
 ## Documentation-as-teaching
 

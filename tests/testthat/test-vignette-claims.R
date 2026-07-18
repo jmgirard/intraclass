@@ -5,7 +5,7 @@
 # spans from "poor" to "excellent". That is a numeric claim about the shipped
 # example and the vignette's seed -- back it so the caveat is never illustrated by
 # a stale interval (PRINCIPLES.md #1/#4). The interpretation bands (Koo & Li 2016;
-# Cicchetti 1994) trace to `project/REFERENCES.md`.
+# Cicchetti 1994) trace to `cairn/references/BIBLIOGRAPHY.md`.
 
 test_that("getting-started.Rmd: the ICC(A,k) interval spans interpretation bands", {
   skip_if_not_installed("glmmTMB")

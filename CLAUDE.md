@@ -17,8 +17,8 @@ This file is deliberately lean — it is paid for on every turn. Detail lives in
   interview-derived principles IP1–IP3 / GP1–GP7 (design interview 2026-07-12).
 - **`cairn/DECISIONS.md`** — live decisions (D-001…); the full ADR log
   (ADR-001..058) is entombed at `cairn/legacy/DECISIONS.md` and still cited by id.
-- **`cairn/references/REFERENCES.md`** — bibliography + the oracle registry every
-  test value traces to.
+- **`cairn/references/ORACLES.md`** — the oracle registry every test value traces
+  to; `BIBLIOGRAPHY.md` + the `<citekey>.md` source notes carry the sources.
 - **`cairn/estimand-specs/`** — the precise population definition per estimator.
 - **Status & the task board:** `cairn/ROADMAP.md` + the active `cairn/milestones/`
   file — cairn owns status now (see the Project tracking section below).

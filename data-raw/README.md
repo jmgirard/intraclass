@@ -2,7 +2,7 @@
 
 Every committed reference value in the test suite traces to a seeded script
 here (PRINCIPLES.md #4/#12) and an entry in the oracle registry
-(`cairn/references/REFERENCES.md`). Frequentist oracle scripts follow the
+(`cairn/references/ORACLES.md`). Frequentist oracle scripts follow the
 same seeded-provenance pattern and need no special handling; the rest of
 this README documents the **brms/Stan offline verification strategy**, which
 does (M52; `cairn/DESIGN.md § Known issues`).
@@ -72,7 +72,7 @@ seeding, as in the ragged n_rep ≥ 240 lesson, ADR-042 Amdt 2).
   (k = 2 undercoverage) and, for cluster-level claims, a high-cluster-count
   cell (ADR-046 Amdt 1).
 - Update the script header's DGP/findings notes if the design changed, and
-  the oracle registry entry in `cairn/references/REFERENCES.md`.
+  the oracle registry entry in `cairn/references/ORACLES.md`.
 
 ## Script ↔ fixture map
 

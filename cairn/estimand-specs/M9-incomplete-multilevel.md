@@ -417,7 +417,7 @@ yet oracle-validated — a candidate). Incomplete/unbalanced cluster-level **fix
   (Estimability under missing cells; connectedness of a classification.)
 - Weeks, D. L., & Williams, D. R. (1964). A note on the determination of connectedness
   in an N-way cross classification. *Technometrics, 6*(3), 319–324.
-- (Full provenance for any asserted numeric value is registered in `REFERENCES.md`
+- (Full provenance for any asserted numeric value is registered in `ORACLES.md`
   when the O-IML oracle values are committed, Slices 1–2.)
 </content>
 </invoke>

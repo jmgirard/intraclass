@@ -9,13 +9,15 @@ values, ever. Bibliographic detail lives in
 
 This file is the repo's declared **oracle-registry home** (validation-doctrine
 "Registry pointer"; adopted by D-007), split out of the pre-migration
-`REFERENCES.md`.
+single-file references page by M63.
 
 An oracle's **asserted-state is single-sourced to its test file** (ADR-015): the
 `Status` line names the test that asserts it, which is the grep-verifiable truth.
 This registry carries **no independent planned→asserted lifecycle** — an oracle is
 listed here once it is asserted; a not-yet-written oracle is planned in its
 estimand-spec, not here, so there is no "planned" status in this file to fall stale.
+
+## Registry
 
 ### Oracle O1 — Shrout & Fleiss (1979) worked example
 - **Used by:** `tests/testthat/test-icc-twoway-agreement.R`
