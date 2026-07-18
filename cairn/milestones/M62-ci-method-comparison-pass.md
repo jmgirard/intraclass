@@ -101,7 +101,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 - [x] **T2** — Pre-register the "not worse" criterion + the anchored one-way cell
       grid (interior + near-zero-ICC + few-subjects, per ukoumunne's grid) in a
       draft synthesis note, *before* the prototype is run (GP5).
-- [ ] **T3** — Prototype the non-parametric bootstrap interval for the one-way ICC
+- [x] **T3** — Prototype the non-parametric bootstrap interval for the one-way ICC
       in a `data-raw/` script (resample subjects/clusters with replacement;
       percentile/basic/BCa + the variance-stabilizing bootstrap-t variant),
       glmmTMB/lme4.
@@ -120,6 +120,7 @@ incumbents, ending in a GO/NO-GO with committed evidence and no exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-17: T3 done — data-raw/m62-npbootstrap-prototype.R (subject-resample; percentile/boott-transformed/BCa; eq.7 IJ SE). Oracle check vs ukoumunne2003 Fig.2 at k=10,n=10,ρ=0.05 (nrep=200,B=400): perc 0.79, BCa 0.835, transformed bootstrap-t 0.95 — reproduces the published under-/near-nominal split (PRINCIPLES.md #1).
 - 2026-07-17: T2 done — pre-registered (GP5, frozen before results) the "not worse" criterion (coverage ≥0.93 AND ≥ incumbents−0.01, width tiebreaker; GO iff not-worse at every cell) + one-way cell grid (C1–C4 comparison + ukoumunne-matched oracle-check cells) in npbootstrap-oneway-comparison.md.
 - 2026-07-17: T1 done — source notes committed: ukoumunne2003.md (subject-resample + log F transformed bootstrap-t + IJ SE eq.7) and ohyama2025.md (oracle: NBOOT≈SEARLE/slightly worse, REML best) + INDEX lines.
 - 2026-07-17: gate re-cut — M62 narrowed to non-parametric bootstrap ONLY on the one-way ICC (ukoumunne2003 + ohyama2025 oracle); profile-likelihood (MPL two-way, xiao2013) split to its own milestone (candidate; MPL=candidate, naive PL=reference). Title/Goal/Scope/AC/Coverage/Tasks re-authored via the gate.
