@@ -4,6 +4,18 @@ The repo's bibliography. Oracle provenance lives in
 [`ORACLES.md`](ORACLES.md); per-source extractions with page/table anchors live
 in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
 
+- Bhandary, M., & Fujiwara, K. (2006). A small sample test for the equality of
+  intraclass correlation coefficients under unequal family sizes for several
+  populations. *Communications in Statistics — Simulation and Computation, 35*(3),
+  765–778. doi:10.1080/03610910600716894. (Gaussian familial `F_max` equality
+  test; outside the contract boundary, ingested as boundary evidence — see
+  [`bhandary2006.md`](bhandary2006.md).)
+- Bobak, C. A., Barr, P. J., & O'Malley, A. J. (2018). Estimation of an inter-rater
+  intra-class correlation coefficient that overcomes common assumption violations
+  in the assessment of health measurement scales. *BMC Medical Research
+  Methodology, 18*, 93. doi:10.1186/s12874-018-0550-6. (Bounded-scale
+  heteroscedasticity and pooled-study inflation of the inter-rater ICC — see
+  [`bobak2018.md`](bobak2018.md).)
 - Brennan, R. L. (2001). *Generalizability Theory.* Springer.
 - Brooks, M. E., et al. (2017). glmmTMB balances speed and flexibility among
   packages for zero-inflated generalized linear mixed models. *The R Journal,
@@ -36,8 +48,29 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   correlation coefficients. *Psychological Methods, 1*(1), 30–46 (+ correction,
   *1*(4), 390). (The package's ICC(A,·)/ICC(C,·) labels and Case 3A — see
   [`mcgraw1996.md`](mcgraw1996.md).)
+- Mehta, S., Bastero-Caballero, R. F., Sun, Y., Zhu, R., Murphy, D. K., Hardas, B.,
+  & Koch, G. (2018). Performance of intraclass correlation coefficient (ICC) as a
+  reliability index under various distributions in scale reliability studies.
+  *Statistics in Medicine, 37*(18), 2734–2752. doi:10.1002/sim.7679. (How the
+  subject distribution, not scale quality, drives `ICC(2,1)` — see
+  [`mehta2018.md`](mehta2018.md).)
+- Ohyama, T. (2025). A comparison of confidence interval methods for the
+  intraclass correlation coefficient based on the one-way random effects model.
+  *Japanese Journal of Statistics and Data Science, 8*, 587–602.
+  doi:10.1007/s42081-025-00292-3. (Independent published coverage/width comparison
+  of one-way-ICC CI methods; the M62 NBOOT-prototype oracle — see
+  [`ohyama2025.md`](ohyama2025.md).)
 - Rosseel, Y. (2012). lavaan: An R package for structural equation modeling.
   *Journal of Statistical Software, 48*(2), 1–36. (M7 SEM engine.)
+- Saha, K. K. (2012). Profile likelihood-based confidence interval of the
+  intraclass correlation for binary outcome data sampled from clusters.
+  *Statistics in Medicine.* doi:10.1002/sim.5489. (Beta-binomial ICC intervals;
+  binary outcomes, outside the contract boundary — see
+  [`saha2012.md`](saha2012.md).)
+- Saha, K. K., & Paul, S. R. (2005). Bias-corrected maximum likelihood estimator of
+  the intraclass correlation parameter for binary data. *Statistics in Medicine,
+  24*, 3497–3512. doi:10.1002/sim.2197. (The BCML point estimator underlying
+  Saha (2012); binary outcomes — see [`saha2005.md`](saha2005.md).)
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
   rater reliability. *Psychological Bulletin, 86*(2), 420–428. (The six ICC forms
@@ -68,6 +101,11 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   incomplete data. *Multivariate Behavioral Research, 60*(5), 1042–1061.
   doi:10.1080/00273171.2025.2507745. (The engine + CI basis for ADR-002/ADR-003 —
   see [`tenhove2025b.md`](tenhove2025b.md).)
+- Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
+  Non-parametric bootstrap confidence intervals for the intraclass correlation
+  coefficient. *Statistics in Medicine, 22*(24), 3805–3821. doi:10.1002/sim.1643.
+  (The M62 primary source for the transformed bootstrap-t, D-006 — see
+  [`ukoumunne2003.md`](ukoumunne2003.md).)
 - Vispoel, W. P., Hong, H., Lee, H., & Xu, G. (2022). Accuracy of absolute error
   estimates within a G-theory SEM framework. Paper presented at the meeting of the
   National Council on Measurement in Education (NCME), April 9, 2022. (Conference
@@ -76,3 +114,13 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   scales. External corroboration for O-SEM, M7.)
 - Weeks, D. L., & Williams, D. R. (1964). A note on the determination of
   connectedness in an N-way cross classification. *Technometrics, 6*(3), 319–324.
+- Xiao, Y., Liu, J., & Bhandary, M. (2009). Profile likelihood based confidence
+  intervals for common intraclass correlation coefficient. *Communications in
+  Statistics — Simulation and Computation, 39*(1), 111–118.
+  doi:10.1080/03610910903324834. (Familial multi-sample common ICC; naive profile
+  likelihood covers well in *this* design — see [`xiao2009.md`](xiao2009.md).)
+- Xiao, Y., & Liu, H. (2013). Modified profile likelihood approach for certain
+  intraclass correlation coefficients. *Computational Statistics, 28*(5),
+  2241–2265. doi:10.1007/s00180-013-0405-x. (The named source for the
+  profile-likelihood CI candidate — two-way random interrater, and the naive-PL
+  under-coverage finding; see [`xiao2013.md`](xiao2013.md).)
