@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M62: CI-method comparison pass — non-parametric bootstrap & profile-likelihood (GO/NO-GO)
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; independent of M48 (post-1.0, additive) -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
@@ -15,25 +15,32 @@
 Decide — via an IP1 source hunt and a pre-registered coverage-and-width
 comparison against the incumbent Monte-Carlo and parametric-bootstrap
 intervals — whether a non-parametric (case/cluster) bootstrap and/or a
-profile-likelihood CI for the two-way random ICC is "not worse" than the
+profile-likelihood CI for the one-way random ICC is "not worse" than the
 incumbents, ending in a per-method GO/NO-GO with committed evidence and no
 exported method.
+
+<!-- Anchor re-set two-way random → one-way random at the 2026-07-17 plan gate
+     to match the Ukoumunne 2003 non-parametric-bootstrap source; the milestone
+     purpose (both methods, GO/NO-GO, no exported method) is unchanged. See work
+     log 2026-07-17. -->
+
 
 ## Scope
 <!-- owner: plan · create/amend-via-gate -->
 
 **In:**
-- IP1 source hunt per method (non-parametric cluster bootstrap for
-  variance-component ICCs; profile-likelihood for the ICC as a *function* of
+- IP1 source hunt per method (non-parametric cluster bootstrap for the one-way
+  random ICC; profile-likelihood for the one-way ICC as a *function* of its two
   variance components), ingesting any primary source as a `references/` source
   note; a "no primary source found" outcome is a recorded IP1-block finding.
 - Non-exported prototypes under `data-raw/` for each method that clears the
   source gate: a case/cluster non-parametric bootstrap and a profile-likelihood
-  interval for the two-way random ICC (glmmTMB/lme4).
+  interval for the one-way random ICC (glmmTMB/lme4).
 - A seeded comparison harness computing empirical coverage + median interval
   width for four methods (MC, parametric bootstrap, non-parametric bootstrap,
-  profile-likelihood) across anchored cells: a canonical interior two-way-random
-  cell + a near-zero-boundary cell + a few-subjects cell (GP6 axis).
+  profile-likelihood) across anchored one-way-random cells: a canonical interior
+  cell + a near-zero-ICC boundary cell + a few-subjects cell (GP6 axis; aligns
+  with Ukoumunne's cluster-count/ρ grid).
 - A committed `references/` synthesis note: the comparison table, the
   pre-registered "not worse" criterion, and the per-method verdict.
 - A GO/NO-GO D-entry per assessed method.
@@ -41,8 +48,11 @@ exported method.
 **Out:**
 - Any exported `ci_method` value (`"npbootstrap"` / `"profile"`) → a GO-gated
   follow-on implementation milestone (candidate row now; promoted only on GO).
-- Multilevel / nested / fixed-rater / lavaan / brms designs → out; the pass
-  anchors on two-way random where both prototypes are defined. Extension →
+- Two-way random / crossed subject×rater designs → an extension needing a
+  *published* two-way resampling scheme / profile procedure (candidate). This
+  was M62's original anchor; re-anchored to one-way at the 2026-07-17 plan gate
+  to match the Ukoumunne 2003 source.
+- Multilevel / nested / fixed-rater / lavaan / brms designs → out. Extension →
   the same GO-gated candidate.
 - Retuning or re-validating the incumbent MC / parametric-bootstrap methods.
 - Categorical / non-Gaussian designs → the separate parked GLMM estimand
@@ -58,11 +68,11 @@ exported method.
       (RB tripwire: ip-touching)
 - [ ] **AC2 (harness).** A seeded, reproducible script committed under
       `data-raw/` computes empirical coverage and median interval width for
-      every non-IP1-blocked method at each specified cell; rerunning it
-      reproduces the committed numbers.
+      every non-IP1-blocked method at each specified one-way-random cell;
+      rerunning it reproduces the committed numbers.
 - [ ] **AC3 (failure axis, GP6).** The comparison spans the known-failure axis:
-      ≥1 near-zero-variance-boundary cell and ≥1 few-subjects cell, in addition
-      to the canonical interior two-way-random cell.
+      ≥1 near-zero-ICC boundary cell and ≥1 few-subjects cell, in addition
+      to the canonical interior one-way-random cell.
 - [ ] **AC4 (pre-registered bar, GP5).** The "not worse" criterion — coverage
       within the pre-registered tolerance of nominal AND ≥ the incumbents'
       coverage at each cell, median interval width as tiebreaker — is written in
@@ -122,6 +132,14 @@ exported method.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
+- 2026-07-17: BLOCKED — awaiting maintainer-provided PDFs (Ukoumunne et al. 2003,
+  Stat Med 22(24):3805-21; the profile-likelihood one-way-ICC source). IP1 forbids
+  reconstructing procedures from abstracts (memory: ask-for-inaccessible-sources).
+  T1/T3/T4 resume once the PDFs land under cairn/references/pdf/.
+- 2026-07-17: substantive amendment via plan gate — anchor re-set two-way → one-way
+  random ICC (Ukoumunne source is one-way; two-way → Out/candidate). Goal anchor
+  clause, Scope In/Out, AC2/AC3 amended; purpose unchanged. "Full empirical pass
+  then decide" and "maintainer provides PDFs" also set at the gate.
 - 2026-07-17: T1 (partial) source hunt. Non-param bootstrap: Ukoumunne, Davison,
   Gulliford & Chinn 2003, Stat Med 22(24):3805-21 — solid but ONE-WAY cluster ICC,
   not the two-way anchor; documents under-coverage at <=10 clusters (bootstrap-t on
