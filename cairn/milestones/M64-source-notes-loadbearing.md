@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M64: Source notes — the ten load-bearing primary sources
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m64-source-notes-loadbearing`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m64-source-notes-loadbearing` · PR #70   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -85,7 +85,7 @@ efficiency) is a *different* paper and belongs to M66, not here.
       `ORACLES.md` entries; log agreements, escalate any disagreement.
 - [x] T5: Trim the ten `BIBLIOGRAPHY.md` annotations to citation + pointer;
       add the `INDEX.md` lines.
-- [ ] T6: Run `cairn_validate` + the profile `verify` slot; open the PR and
+- [x] T6: Run `cairn_validate` + the profile `verify` slot; open the PR and
       drive CI green.
 
 ## Work log
@@ -103,6 +103,7 @@ efficiency) is a *different* paper and belongs to M66, not here.
 - 2026-07-18: T4 escalations (AC3) — all attribution/citation-hygiene, no value change; substance in each note's `## Open questions`: `shrout1979` (Table 4 prints 2 dp, not the 3 dp the O1 helper header attributes to the paper) · `mcgraw1996` (possible uncorrected typo, Table 8 `MS_W` vs Appendix A `MS_E`) · `tenhove2020` (`ORACLES.md` cites §4.1.1–4.1.3, absent from the shelf manuscript; prior spec is §4.1/p. 7 not "§3.3/§4.1"; relative bias printed signed, not absolute; per-cell population ICCs 0.4950/0.4808 are repo-derived) · `tenhove2025b` (**ADR-003 sourcing gap** — it claims a boundary-respecting MC scale the paper does not describe; the paper's own example prints a negative variance CI limit, p. 1057) · `tenhove2024` (Figure 2's crossed-unbalanced cell prints a nested error term — confirmed independently at 300 dpi) · `koo2016` (band inclusivity ambiguous as printed; no issue number; Table 3 one-way row prints `(k+1)MS_W`) · `tenhove2025a` (round-robin designs out of scope by structure, though IP2's wording does not exclude them on its face).
 - 2026-07-18: T4 coverage gap (tenhove2024) — the package implements no `ICC(Q,·)` and no `q` term; Figure 2 routes incomplete + relative there, while the package computes `ICC(C,k̂)`. Candidate milestone material, raised at the review gate, out of scope here.
 - 2026-07-18: T5 done — the ten `BIBLIOGRAPHY.md` entries trimmed to citation + one-clause role + note pointer; **two were missing entirely and were added** (`fleiss1973`, and the 60(3) `tenhove2025a`), the ten Hove block reordered and given `2025a`/`2025b` suffixes; ten `INDEX.md` lines added and the shelf inventory updated (18 bibliography entries, 12 ingested).
+- 2026-07-18: T6 done — `cairn_validate` all 15 checks pass (292 pre-existing dangling-id advisories, none in the new files); `NOT_CRAN=true CI=true devtools::test()` = FAIL 0 | WARN 2 | SKIP 23 | PASS 1802. PR #70 opened; all 11 CI checks green. Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
