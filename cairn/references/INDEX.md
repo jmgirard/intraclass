@@ -13,4 +13,17 @@ and milestones; never restate a value here.
   two-level lavaan mapping of the ten Hove (2022) Design-1 components, its
   sourcing status (none — D-005 parameterization), and the pilot ledger.
 
+- [ukoumunne2003.md](ukoumunne2003.md) — source note (M62): the non-parametric
+  bootstrap CI for the one-way ICC (subject-resample + `log F` variance-stabilizing
+  transformed bootstrap-t + infinitesimal-jackknife SE); under-covers at k=10.
+
+- [ohyama2025.md](ohyama2025.md) — synthesis/oracle note (M62): published coverage/
+  width comparison of one-way-ICC CI methods (SEARLE/SMITH/NBOOT/REML/BETA);
+  REML best, NBOOT slightly worse than SEARLE — the M62 NBOOT-prototype oracle.
+
+- [npbootstrap-oneway-comparison.md](npbootstrap-oneway-comparison.md) — synthesis
+  note (M62): the pre-registered "not worse" criterion + one-way cell grid, and
+  (later) the coverage/width results + GO/NO-GO verdict for the non-parametric
+  bootstrap vs the incumbent MC / parametric-bootstrap intervals.
+
 <!-- pdf/ is gitignored; add <citekey>.md summaries here as sources are ingested -->
