@@ -70,13 +70,13 @@ efficiency) is a *different* paper and belongs to M66, not here.
       `fleiss1973`. `shrout1979` is the O1 worked-example anchor
       (`tests/testthat/helper-shrout-fleiss.R`); anchor its table values
       exactly.
-- [ ] T2: Notes for the ten Hove family — `tenhove2020` (O-Bayes hyperprior
+- [x] T2: Notes for the ten Hove family — `tenhove2020` (O-Bayes hyperprior
       DGP), `tenhove2022` (M5 multilevel estimand, Eqs. 6–7/12–13, Table 3),
       `tenhove2024` (selection guidelines), `tenhove2025b` (planned-incomplete;
       the ADR-002/003 engine + MC-CI basis), and `tenhove2025a` (network data).
       Note the metadata trap: `tenhove2022.pdf` carries a 2021 copyright
       line but is the 2022 *Psychological Methods* 27(4):650–666 paper.
-- [ ] T3: Notes for `koo2016` — the IP3-sensitive interpretation-band source;
+- [x] T3: Notes for `koo2016` — the IP3-sensitive interpretation-band source;
       capture the "judge against the CI, not the point" guidance the
       `getting-started.Rmd` caveat rests on — and `jorgensen2021`, the O-SEM
       absolute-error source (Eq. 6 defines σ²_i as the raw variance of the
@@ -121,6 +121,75 @@ efficiency) is a *different* paper and belongs to M66, not here.
   (p. 44) derives `MS_E`. Not in the published correction. Package impact
   believed nil (no test cites Table 8); recorded for the review gate, not
   reconciled.
+- 2026-07-18: T3 done — `jorgensen2021` (read in-session) and `koo2016` ([O]
+  subagent, verified against p. 161).
+- 2026-07-18: T2 done — `tenhove2022` read in-session; `tenhove2020`,
+  `tenhove2025b`, `tenhove2025a`, `tenhove2024` by [O] subagents, diffs verified
+  against the PDFs.
+- 2026-07-18: T4 finding (tenhove2024) — **source-internal discrepancy,
+  confirmed independently** by re-rendering Figure 2 (p. 8) at 300 dpi: the
+  crossed·absolute·average·**unbalanced** terminal cell prints the error term
+  `σ²_r:s/k̂` — the *nested* component — where its balanced sibling prints
+  `(σ²_r + σ²_sr)/k`, and Table 2 / Eq. 18 give a `σ²_r`/`σ²_sr` form. That cell
+  also carries the paper's footnote e ("ICC has not been defined in the
+  literature"). The package follows Eq. 18; no oracle value affected. Escalate,
+  do not reconcile.
+- 2026-07-18: T4 finding (tenhove2024) — **coverage gap, not a defect.** The
+  paper's updated flowchart routes incomplete + relative to `ICC(Q,k̂)` (with the
+  nonoverlap proportion `q`, Eq. 17); the package implements no `ICC(Q,·)` and no
+  `q` term anywhere in `R/` or the estimand specs, computing `σ²_res/k_eff` —
+  i.e. `ICC(C,k̂)`, a cell Figure 2 does not offer for incomplete data. Candidate
+  milestone material; raised at the review gate, out of scope here.
+- 2026-07-18: T4 note (tenhove2024) — the paper *supports* the package's
+  no-verdict posture (it proposes no cut-offs, p. 2) and demotes fixed raters
+  ("rarely—if ever—appropriate", p. 3), which `R/abort.R::warn_fixed_raters()`
+  already cites. One recommendation the package may not meet: report **all**
+  variance components, not only the ICC (p. 11) — flagged for review against
+  `print()`/`tidy()` output.
+- 2026-07-18: T4 finding (jorgensen2021) — Eq. 6 (p. 117) confirmed verbatim:
+  `σ̂²_i = (1/(n_i−1))·Σν̂²_i`, the **raw** variance of the effects-coded
+  intercepts, no bias correction anywhere in the paper. Matches O-SEM exactly.
+  Bonus: p. 124 documents the SEM-vs-mixed-model discrepancy-function gap that
+  explains O-SEM's recorded 0.284-vs-0.290 agreement difference.
+- 2026-07-18: T4 finding (tenhove2025b) — **ADR-003 sourcing gap, escalate.**
+  ADR-003 describes the MC draws as taken "on the engine's internal
+  (boundary-respecting) scale"; the paper names **no** transformation (pp. 1047,
+  1050, 1057) and its own printed example gives a **negative** lower CI limit for
+  the rater variance (`S_r` CI [−0.5495179, 2.732752], p. 1057). The package's
+  log-SD-scale non-negative variant is a *departure from* the sourced method, not
+  a restatement of it. No oracle value implicated; no change proposed here.
+- 2026-07-18: T4 finding (tenhove2020) — half-*t*(4,0,1) on random-effect **SDs**
+  (not variances) confirmed verbatim (p. 7); DGP N=30, σ²_r ∈ {.01,.04},
+  k ∈ {2,3,5} confirmed. Corrections to repo wording, all escalate-not-edit:
+  (a) `ORACLES.md` anchors §4.1.1/§4.1.2/§4.1.3, which **do not exist** in the
+  shelf PDF (an author manuscript with only §4.1/§4.2) — content matches,
+  numbering unattested; (b) the prior spec lives at §4.1/p. 7, not
+  `BIBLIOGRAPHY.md`'s "§3.3/§4.1"; (c) `ORACLES.md` writes relative bias as
+  `|θ̄−θ|/θ`, the paper prints the signed `(θ̄−θ)/θ` (p. 9); (d) the per-cell
+  population ICCs 0.4950/0.4808 are repo-derived, not printed (the paper gives
+  only the range 0.48–0.83, p. 7) — they fall inside it, so no disagreement.
+  Also: inverse-gamma is *discussed and rejected* (§3.2), never simulated.
+- 2026-07-18: T4 finding (koo2016) — the CI-not-point guidance confirmed verbatim
+  (p. 161): the 95% interval "should be used as the basis to evaluate the level of
+  reliability", not the point estimate. Bands confirmed as printed, with an
+  **inclusivity ambiguity the paper never resolves**: poor is strict `< 0.5`,
+  excellent strict `> 0.90`, but moderate/good are only "between 0.5 and 0.75" /
+  "between 0.75 and 0.9" — so an ICC of exactly 0.90 falls in no band as written.
+  Also: the paper prints no issue number (repo cites "15(2)"); Table 3's one-way
+  single-rater row prints `(k+1)MS_W` where every sibling row has `(k−1)`
+  (nothing in the repo cites it); Fig. 1's one-way branch dead-ends. All escalate,
+  none reconciled.
+- 2026-07-18: T4 finding (tenhove2025a) — the network paper's RESRM is a
+  **seven**-component decomposition (Eq. 16, p. 449) splitting the subject facet
+  into actor/partner/relationship, with consistency-only ICCs (Table 2, p. 449);
+  agreement and fixed raters explicitly discarded. Nothing in the repo traces to
+  it — shelf evidence only. Its own authors warn the ICCs "cannot be trusted for
+  designs with few raters and small subgroups of subjects" (p. 455). Contract
+  boundary: out of scope by design *structure*, though IP2's wording does not on
+  its face exclude it — logged as a boundary question for the review gate.
+- 2026-07-18: T5 input (tenhove2025a) — `BIBLIOGRAPHY.md`'s single "ten Hove …
+  (2025)" entry is the 60(5) paper; the 60(3) network paper has no entry at all.
+  T5 must add one and carry the `2025a`/`2025b` disambiguation into the file.
 - 2026-07-18: T5 input (fleiss1973) — the source has an `INDEX.md` line but **no**
   `BIBLIOGRAPHY.md` entry; T5 must add one rather than trim. Nothing in `R/`,
   `tests/`, `vignettes/`, or `ORACLES.md` traces to it (shelf evidence only).
