@@ -58,13 +58,13 @@ dischargeable by reading.
 - [x] Every absence claim is settled by a rendered page image at high DPI,
       never the text layer alone, or else is stated as "not checked" and
       asserts nothing further.
-- [ ] No note carries an **undated** time-relative assertion — settled by the
+- [x] No note carries an **undated** time-relative assertion — settled by the
       mechanical grep, which must return zero unresolved hits. (Amended
       2026-07-19: the original criterion asserted every dated observation was
       true at merge; three review attempts each falsified it, and the audit
       that can discharge it corpus-wide is M73's. A criterion this milestone
       cannot discharge is a planning defect, not a work defect.)
-- [ ] Every interpretive claim in the seven notes that review has identified
+- [x] Every interpretive claim in the seven notes that review has identified
       as false is corrected at its source, with the basis of the correction
       recorded — currently attempt 3's F1, F2 and F3.
 - [x] No package value changes: any correction that would move an oracle
@@ -146,12 +146,168 @@ dischargeable by reading.
 - 2026-07-19: /milestone-review attempt 3 FAILED **AC5** and returned the milestone to `in-progress`; **the thrash rule fires** (third trip back) so no fourth retry is queued — routing is `/milestone-plan` for a re-cut. Six criteria pass with fresh evidence (AC1 pdfinfo counts + mehta2018 content past the reference list re-confirmed by per-page extraction; **AC2 now passes** — 187 quotations, 156 matched outright, all 31 remainder adjudicated, the figure-artwork case re-settled at 200 DPI, and attempt 2's F6 fix verified correct with the *review's own assumed form* wrong (the source prints parentheses, not commas); AC3 all in-range anchors resolve incl. the p. 8 → p. 7 fix; AC4 three claims re-settled fresh by render; AC6 diff docs-only 11 files all `cairn/`, fenced by `.Rbuildignore:9`, test baseline unchanged; AC7 validate exit 0, staleness 2, zero of the seven in the advisory). Consistency gate clean. [S] blame-history and [S] prior-PR lenses both clean — the latter's LESSONS substitute pass found the diff *complying* with the four relevant lessons. [O] diff-bug returned 3 findings, scored by a fresh [S] scorer: **F1 = 92, F2 = 90, F3 = 80, all actioned, none below the bar**. **AC5 fails on F1** — `mehta2018.md:290`'s dated observation claims the remaining `ordinal` grep hits "are source notes describing other papers' ordinal work, not this repo's", which a grep falsifies with ~40 hits in `estimand-specs/M6-oneway.md:213`, `legacy/STATUS.md`, `legacy/MILESTONES.md` and `legacy/DECISIONS.md`; the named file is one **attempt 2's own F2 cited**, and the false clause was written *by the fix cycle correcting that finding*, in the same table cell. F2 (saha2005, "both sit in the upper half" — the 1.7x cell ranks 19/40, below the median, and 1.7 is the old range's floor) and F3 (mehta2018, mild convex Case 1 prints the same 0.03 vs 0.02) are over-claims in fix-cycle prose breaking no AC squarely. **Pattern, third round: every numeric correction has survived independent verification all three times; every failure has been interpretive prose, and twice now prose written to fix the previous cycle's prose.** Recorded as a planning boundary, not a defect backlog.
 - 2026-07-19: **re-cut by /milestone-plan** after the thrash rule fired at review attempt 3. Gated amendments: (a) Scope narrowed — M71 owns *source fidelity* (values, quotations, anchors, absence claims, page counts, staleness) plus correcting the specific interpretive defects review has already named; the systematic interpretive-claim audit leaves for **M73** (dated observations made command-settleable corpus-wide, 87 across 30 notes) and **M74** (claims generalizing from cited cells, re-derived over full source tables). (b) AC5 rewritten from "no note asserts anything time-relative that is false at merge" — which three attempts each falsified and which no reading can discharge — to the mechanically checkable "no note carries an *undated* time-relative assertion". (c) New AC6 + T11: the three attempt-3 findings corrected at source with the basis recorded. Plan-gate rationale: across three attempts every value-level correction survived independent verification while interpretive claims failed every time, twice in prose written to fix the prior cycle's prose; the measured cause is that only 2 of 87 dated observations carry the command that settles them, which is a tooling gap, not a care gap. Criterion count goes 7 -> 8, noted against the sizing tripwire and accepted: the milestone's scope strictly shrank at this re-cut.
 - 2026-07-19: T11 done — the three attempt-3 findings corrected, each re-derived at its source before the edit. **F1** `mehta2018.md`: the ordinal-axis row no longer claims the remaining grep hits are source notes about other papers; it now names `COVERAGE.md:196`, `estimand-specs/M6-oneway.md:213` and the pre-migration files (`legacy/ROADMAP.md:77` plus recurring mentions in `legacy/STATUS.md`, `legacy/MILESTONES.md`, `legacy/DECISIONS.md`) as the repo's own standing deferrals, and states the checkable point — the axis is deferred everywhere and swept nowhere. **F2** `saha2005.md`: "both sit in the upper half" replaced with the computed ranks — sorted over the 40 cells the two illustrative ratios rank **37th (3.41x) and 19th (1.70x, just below the median)**, so they straddle rather than bracket; the floor is 1.10 with six cells below 1.20. **F3** `mehta2018.md`: the minimum ratio 1.0 is unique to Case 1 of the two concave distributions, but the 1.5 tier is shared by concave Case 2 (both grades) and **mild convex Case 1**; below-2x cells occur under every shape except uniform, whose six never drop below 2.0. **Two over-claims caught in my own correcting prose before commit, both by computing instead of reasoning**: "narrowness tracks mild disagreement first" (false — uniform and extreme convex Case 1 both sit at 2.0) and "uniform is 2.0 across the board" (false — Case 6 is 2.25). Every number in all three corrections was then re-derived programmatically from the extracted tables rather than by hand, which is the method M73/M74 exist to make routine. Gates: `cairn_validate` all checks passed (staleness 2, both M72 scope); `devtools::test()` under `NOT_CRAN=true CI=true` **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, unchanged baseline; AC5 grep returns zero unresolved hits; AC2 sweep 187 quotations, 0 markup-inside-quotation; diff docs-only. Status -> review.
+- 2026-07-19: /milestone-review attempt 4 — **all eight criteria PASS** with fresh evidence recorded in the Review section. Branch merged `origin/main` (M73/M74 plan rows) before evidence-gathering and the `verify` slot re-run after. [S] blame-history clean, and it specifically judged the re-cut principled rather than goalpost-moving (gated amendment, work genuinely rehomed to M73/M74 as files + rows, criterion count grew 7 -> 8). [S] prior-PR no evidence, clean no-op; its LESSONS substitute pass ruled T11's new counts static facts about a fixed source table rather than the M70 drifting-tally anti-pattern. [O] diff-bug returned **1 finding, scored 85** by a fresh [S] scorer and **fixed at this review**: `saha2005.md`'s p. 3510 quotation lowercased the source's leading capital "As", the same class T1 fixed in `xiao2013` — corrected in place, AC2 sweep re-run (187 quotations, 0 markup-inside-quotation), validate clean. The [O] lens independently re-derived all three T11 corrections digit for digit from the source PDFs.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Attempt 4 — 2026-07-19 — **all eight criteria PASS**
+
+PR https://github.com/jmgirard/intraclass/pull/77. First review under the re-cut
+scope. `origin/main` had moved (the M73/M74 plan commit) and was merged into the
+branch before any evidence was gathered; the r-package `verify` slot was re-run
+after that merge. All evidence below is on the merged state.
+
+**AC1 — read to final page. PASS.** `pdfinfo` page counts match every
+`Extraction:` claim exactly, checked by comparison rather than by eye:
+bhandary2006 14, bobak2018 11, mehta2018 19, saha2005 16, saha2012 21,
+xiao2009 9, xiao2013 25. The case the criterion singles out was re-verified
+independently this attempt: reference **37** (Bartko) ends the reference list
+part-way down PDF p. 17, and `A P P EN D I X A`, `B` and `C` head PDF pp. 17,
+18 and 19, the last printing folio **2752** — content past the reference list,
+as the M65 lesson demands.
+
+**AC2 — every quoted string verbatim. PASS** (after one correction made at this
+review, below). Mechanical multi-line-aware sweep: **187 quotations**, every file
+quote-balanced, **0 markup-inside-quotation**. Each was probed against its own
+source in both `-raw` and `-layout`, dehyphenated and ligature-normalized; 156
+matched outright and the 19 that survived ligature and ellipsis probes were
+adjudicated individually — ~16 are not claims about a source (repo terminology,
+note headings, search terms, and one quoting the note's own superseded wording),
+and the two **cross-file** quotations were re-verified at their source files this
+attempt (`cairn/COVERAGE.md:196` and the `cairn/ROADMAP.md:26` candidate-row
+title, both exact). The figure-artwork case (mehta2018's `"bootstrap sampling
+techniques"`, Figure 2 step 5) stands as verbatim, confirmed by render in
+attempt 3 and re-confirmed independently by the [O] lens here.
+
+**AC3 — anchors resolve. PASS.** Every in-range anchor resolves, checked by
+extracting each claimed page and matching its printed folio: bhandary2006 11,
+saha2005 15, xiao2013 19, xiao2009 8 (cover-sheet offset `PDF N` = journal
+`109 + N`), mehta2018 all via a page-by-page folio map (folio = 2733 + PDF page,
+verified for all 19), and bobak2018 9 against its `Page N of 11` footers
+(identity mapping, including the p. 8 → p. 7 correction). `saha2012` states its
+no-folio basis. The two out-of-range hits are correctly-attributed citations into
+*other* papers (koo2016 p. 158; Cox & Snell 1968 p. 252).
+
+**AC4 — absence claims settled by render. PASS.** Re-settled fresh this attempt:
+`bhandary2006`'s Eq. (2.17) at **400 DPI**, which does print
+`F_{α/6; ppk,rr}` — the stray `k` the note transcribes as printed and argues from
+Eq. (2.16). The prior renders stand (saha2012's missing `ln` at 300 DPI, itself
+re-rendered in attempt 3 and matching the note's transcription line for line;
+xiao2013's missing issue number at 400 DPI; mehta2018's Appendix C capitals at
+250 DPI and its Figure 2 at 200 DPI; xiao2009's index list at 400 DPI;
+saha2005's Figure 1 plot-read at 1200 DPI). No absence claim rests on a text
+layer.
+
+**AC5 — no undated time-relative assertion. PASS.** The mechanical grep over the
+seven notes for `at the time of writing | not yet | today | must be checked |
+not retrieved | as of M<n> | currently | so far | for now | at present` returns
+**one hit and zero unresolved**: `mehta2018.md:295`, which is a quotation of
+`COVERAGE.md`'s `🔵 Not yet` status token *inside* a dated observation carrying
+`observed 2026-07-19` and the grep that settles it. The [O] lens ran the same
+sweep independently and reached the same verdict.
+
+**AC6 — named false claims corrected. PASS.** All three attempt-3 findings are
+corrected at source with the basis recorded, and all three corrections were
+re-derived independently by the [O] lens from the source PDFs:
+- **F1** `mehta2018.md:295` — the ordinal-axis row now names `COVERAGE.md:196`,
+  `estimand-specs/M6-oneway.md:213` and the pre-migration files as the repo's own
+  standing deferrals. All cited locations verified to carry what is claimed; the
+  lens confirmed every non-source-note hit is a deferral line and none records a
+  sweep, so "deferred everywhere and studied nowhere" holds.
+- **F2** `saha2005.md:196–210` — recomputed over all 40 `π = 0.1` cells: range
+  **1.103–4.122**, floor TNBD `m = 50, φ = 0.85` (1191/1080), ceiling ED
+  `m = 10, φ = 0.2` (5523/1340), the two illustrative cells ranking **37th** and
+  **19th** of 40, and **six cells below 1.20**. Every figure reproduced by the
+  lens, including the non-monotone TNBD `m = 50` tail.
+- **F3** `mehta2018.md:155–166` — recomputed over all 30 Table 4 pairs: the 1.0
+  minimum occurs exactly twice, both at Case 1 of the two concave distributions;
+  **mild convex Case 1 does print 0.03 vs 0.02 = 1.5×**; uniform runs five at 2.0
+  with Case 6 at 2.25, never below 2.0.
+
+**AC7 — no package value moved. PASS.** `git diff --name-only main..HEAD` returns
+**zero non-`cairn/` paths**; no `.R`, `.Rd`, `tests/`, `man/`, `NAMESPACE`,
+`DESCRIPTION`, `.rds`/`.rda`. `.Rbuildignore:9` carries `^cairn$`, so the diff
+provably cannot reach the built package. `devtools::document()` produces no
+`man/`/`NAMESPACE` drift. `devtools::test()` under `NOT_CRAN=true CI=true`,
+re-run after the `origin/main` merge: **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**,
+the unchanged M69/M70 baseline.
+
+**AC8 — validate + staleness. PASS.** `cairn_validate` exit 0, all checks passed.
+The `references staleness` advisory stands at **2**, and a grep of the advisory
+output confirms **zero of the seven notes appear in it** — the survivors are
+exactly `ORACLES.md` and `BIBLIOGRAPHY.md` (M72's scope). All seven carry a
+substantive re-read `Extraction:` status, checked by grepping for the re-read
+clause rather than trusting the wording (LESSONS 2026-07-18/M68).
+
+**Consistency gate (r-package profile).** `cairn_validate` all checks passed
+(advisories: 293 dangling pre-migration id tokens, expected; staleness 2;
+sizing tripwire on M71's 8 criteria / 11 tasks, accepted at the re-cut and
+recorded there — 10 of the 11 tasks were already complete, so splitting off a
+one-task remainder would be worse than carrying the advisory) ✓;
+`document()` no-diff ✓; `pkgdown::check_pkgdown()` "No problems found" ✓;
+README.Rmd untouched ✓; no new exports and no new top-level files ✓; NEWS entry
+not owed — the diff touches zero files under `R/` or `tests/` ✓. No `DESIGN.md`
+principle changed, so `cairn_impact` is skipped.
+
+**Independent review — three lenses, then a scorer.**
+- **[S] blame-history: clean, no findings.** Confirmed no correction reverts
+  content a milestone other than M65 had verified; `DECISIONS.md` and
+  `legacy/DECISIONS.md` untouched, so D-006/D-007 are uncontradicted; the
+  profile-likelihood candidate row is byte-identical apart from M71's own status
+  field and `xiao2013.md` reaffirms rather than acts on its premises; the
+  `young1998` discharge lands exactly on bhandary2006's cited p. 777 and p. 774
+  values. **It was asked specifically whether the re-cut was goalpost-moving and
+  concluded it was not**: the amendment went through `/milestone-plan` with
+  recorded rationale, M73 and M74 exist as both files and ROADMAP rows so the
+  excused work was genuinely rehomed, and the criterion count *grew* 7 → 8
+  because AC6/T11 were added to force the three findings to still be fixed.
+- **[S] prior-PR-comments: no prior-PR evidence, clean no-op.** PRs #68–#70
+  return empty comments, reviews and issue comments apart from Codecov bot
+  output. Its substitute `LESSONS.md` pass made two judgment calls explicitly:
+  the counts T11 added ("37th and 19th of 40", "six cells below 1.20") are
+  **static facts about a fixed external source table**, not the drifting
+  meta-count of items-processed the M70 lesson forbids — verified by diffing the
+  underlying table values across every M71 commit and finding them unchanged
+  since first extraction; and AC5's rewrite is the correct *operationalization*
+  of the property, not the M68 form-over-property anti-pattern.
+- **[O] diff-bug: 1 finding**, scored **85** by a fresh [S] scorer that did not
+  generate it — above the 80 bar, actioned. The lens first verified a large body
+  of the milestone independently from the source PDFs: all three T11 corrections
+  digit for digit, saha2012's corrected Table I `m = 73` block (including the
+  physical-vs-caption column-order subtlety), xiao2013's Table 9 erratum against
+  Table 3's one-sided `δ_U = 16` column and Table 2's nine-cell geometry,
+  bobak2018's second pooling penalty and Results erratum, the AC5 grep, and the
+  30-note census behind `INDEX.md`'s backlog-closed claim.
+
+#### Finding (85) — ACTIONED and fixed at this review
+
+`saha2005.md` rendered a p. 3510 quotation as `"as the BCML estimator is based
+on the beta-binomial distribution…"`. The source prints a capital: **"As the
+BCML estimator…"**. Case-only, no word altered, ellipsis properly marked — but
+this milestone's own T1 fixed precisely this class in `xiao2013` (the `κ_corr`
+quotation's silently lowercased leading "A"), and `xiao2013.md:157` now preserves
+`"A tractable expression…"` in an identical mid-sentence position. The milestone
+was applying opposite rules to the same defect class. Read strictly, AC2 says
+"confirmed verbatim or corrected", so this was one uncorrected alteration.
+
+Fixed here rather than waived, on the scorer's recommendation: the capital is
+restored and the note records that it is the source's and is preserved rather
+than lowercased to fit, matching `xiao2013.md`. The AC2 sweep was re-run after
+the fix — 187 quotations, 0 markup-inside-quotation — and `cairn_validate` re-run
+clean.
+
+**Closing note on the milestone's arc.** Four review attempts. Across all of
+them **every numeric correction, table transcription and plot-read survived
+independent verification**; the three failures were all interpretive prose, twice
+in prose written to fix the previous cycle's prose. The re-cut did not make that
+class pass — it moved the systematic audit to M73/M74 with a mechanical bar and
+left M71 owning only what it could discharge, plus the three named defects. The
+one finding this attempt is of the class M71 *does* own (a quotation against its
+source) and was fixed in place, which is the pattern working as intended.
 
 ### Attempt 3 — 2026-07-19 — **AC5 FAILED**, thrash rule fires → `/milestone-plan`
 
