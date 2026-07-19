@@ -87,7 +87,7 @@ qualitative band entering package output → refused outright (IP3).
       `jorgensen2019` (planned-missing efficiency). Flag in `jorgensen2019`'s
       note that it is commonly confused with Jorgensen (2021) — the O-SEM
       source, a different paper.
-- [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
+- [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
 - [ ] T5: Staleness sweep, after T4 lands (M64/M65 lessons — this cost a review
       send-back on both sibling milestones). Grep the seven notes for
@@ -119,6 +119,9 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-19: finding (jorgensen2019) — the citekey year is WRONG and contradicted by the source: the shelf copy is an author manuscript with no venue/year/pagination, its bibliography cites ten Hove et al. 2021 and 2022, and the PDF was typeset 2022-09-27. BIBLIOGRAPHY must not assert 2019 as a publication year; flagged for the maintainer (#4). Pagination basis is chapter-internal ms. pages 1-10.
 - 2026-07-19: resolved while writing jorgensen2019 — its two ten Hove citations are works the repo already holds under LATER citekeys (its "2021 multilevel" = repo tenhove2022; its "2022 updated guidelines" = repo tenhove2024), cited pre-publication. Recorded in the note so neither is chased as an uningested source.
 - 2026-07-19: finding (hedges2012) — largely OUTSIDE the contract boundary (IP2): its ICCs have no rater facet and index levels of nesting, not what is generalized over, so its "multilevel ICC" is a different quantity from tenhove2022's. Recorded in the note as boundary evidence; its symmetric Wald intervals are the contrast case for PRINCIPLES #3.
+
+- 2026-07-19: T4 done — 7 BIBLIOGRAPHY entries (27 -> 34, both stale totals corrected), INDEX shelf inventory updated (19 -> 26 ingested, M66 paragraph rewritten with the three-way split and the source findings); cairn_validate passes.
+- 2026-07-19: BIBLIOGRAPHY's Extraction status records the M66 additions but stays `unverified` overall — 16 split entries were still never read against their sources, so the page keeps its staleness WARN rather than having the wording changed to clear it (M68 lesson).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

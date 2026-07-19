@@ -8,7 +8,7 @@ and milestones; never restate a value here.
 - [ORACLES.md](ORACLES.md) — the repo's **declared oracle-registry home**
   (D-007): 39 entries, each naming its oracle ID, type, asserting test, source,
   and provenance. Every oracle value in the test suite traces to an entry here.
-- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (27 entries). Primary
+- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (34 entries). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
@@ -133,17 +133,30 @@ each verified against its own
 title page (M63/T1). Citekey convention: same-author-same-year takes a letter
 suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
-**Ingested (source/synthesis note exists) — 19:** `bhandary2006`, `bobak2018`,
-`fleiss1973`, `jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`,
-`saha2005`, `saha2012`, `shrout1979`, `tenhove2020`, `tenhove2022`, `tenhove2024`,
-`tenhove2025a`, `tenhove2025b`, `ukoumunne2003`, `xiao2009`, `xiao2013`. The ten
-load-bearing primary sources were ingested by M64; `ohyama2025` and
-`ukoumunne2003` by M62; the seven interval-methods/robustness sources by M65.
+**Ingested (source/synthesis note exists) — 26:** `bartko1966`, `bartko1976`,
+`bhandary2006`, `bobak2018`, `fleiss1973`, `hedges2012`, `jorgensen2019`,
+`jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`, `saha2005`,
+`saha2012`, `shieh2015`, `shrout1979`, `tenhove2018`, `tenhove2020`, `tenhove2022`,
+`tenhove2024`, `tenhove2025a`, `tenhove2025b`, `trevethan2017`, `ukoumunne2003`,
+`xiao2009`, `xiao2013`. The ten load-bearing primary sources were ingested by M64;
+`ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
+sources by M65; the seven foundational/interpretation sources by M66. The four
+remaining shelf PDFs are the M67 equality-testing cluster.
 
-Three shelf PDFs are **not** the issue version of record — each note carries a
+Five shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
-(© 2021 and © 2022 respectively, no journal pagination), and `tenhove2020` is an
-author/accepted manuscript with no publisher fields at all.
+(© 2021 and © 2022 respectively, no journal pagination), `tenhove2020` is an
+author/accepted manuscript with no publisher fields at all, `trevethan2017` is an
+online-first copy with no journal pagination (M66), and `jorgensen2019` is an
+author manuscript with **no year, venue, or pagination at all** (M66).
+
+Two citekeys do **not** match their source's publication year, and neither was
+renamed (renaming would break the milestone Scope lists and every cross-reference):
+`shieh2015` is *Behavior Research Methods* 48(3):994–1003, **2016** — the 2015 is
+the online/copyright year printed on the same page. `jorgensen2019` is worse: the
+shelf copy prints no year at all, its own bibliography cites ten Hove et al. 2021
+and 2022, and the PDF was typeset 2022-09-27, so **2019 is contradicted by the
+source** and `BIBLIOGRAPHY.md` does not assert it (M66; flagged for the maintainer).
 
 **M65 — interval methods & robustness (7): ingested 2026-07-18.** Reading them
 cold established that the cluster is **not** the one-way-interval-methods group
@@ -156,11 +169,23 @@ common ICC · `saha2012` **binary** beta-binomial ICC interval · `saha2005`
 varying subject distributions · `bobak2018` two-rater fixed-rater consistency ICC
 under heteroscedasticity.
 
-**M66 — foundational & interpretation (7):** `bartko1966` · `bartko1976` ·
-`hedges2012` (ICC variance, 3-/4-level) · `jorgensen2019` (planned-missing
-efficiency on a fixed budget — **not** the 2021 SEM paper) · `shieh2015`
-(best average-score index) · `tenhove2018` (20 coefficients compared) ·
-`trevethan2017` (cautions).
+**M66 — foundational & interpretation (7): ingested 2026-07-19.** Read cold, the
+cluster splits three ways rather than being uniformly "guidance": two bear on
+selection (`tenhove2018`, `shieh2015`), two are the package's prehistory
+(`bartko1966`, `bartko1976`), two are design/efficiency
+(`jorgensen2019`, `hedges2012`), and one is a reporting-cautions paper
+(`trevethan2017`). **Nothing in the package traces to any of the seven** — no
+oracle, test, or vignette cites them — which is the honest state, not a gap.
+`hedges2012` is additionally outside the contract boundary (IP2): its ICCs have
+no rater facet. `jorgensen2019` is **not** the 2021 SEM paper. Every note was
+read to its source's final page and carries a dated *verified* extraction status,
+so none joins the re-verify backlog.
+
+Source findings recorded by M66, none affecting a repo value: `bartko1976`
+Table 3 misprints `MSW` for `MSE` in rows 3–4 (found by recomputation);
+`tenhove2018` Table 1 gives the `Vision` scale maximum as 3 where p. 69 says 4
+(unresolved — needs the `irr` package); `shieh2015` Appendix Eq. A2 writes `ρ`
+for `ρ*` (typographical, confirmed by re-deriving Eq. 5).
 
 **M67 — ICC-equality testing (4):** `donner2002` · `konishi1989` · `naik2007` ·
 `young1998`. Outside the contract boundary (IP2); ingested as boundary evidence.
