@@ -110,6 +110,7 @@ act on it. Any change to R code, tests, or oracle values.
 - 2026-07-19: T9 time-relative sweep across the seven notes plus the `Traces to` lead sentences. Seven of eight leads rewritten to dated observations carrying the grep that settles them; `young1998.md`'s lead is left as M70 wrote it — undated, but M70-owned and outside this milestone's gated amendment, so **noticed and deliberately not touched** rather than missed. Substantive find: three claims across `bobak2018` (×2) and `mehta2018` (×1) asserted membership of a **"GP6 list" of known-failure axes that does not exist** — GP6 is a practice ("sweep whatever axis the known failure mode grows") naming cluster count, incidence and raggedness only as examples, and neither `DESIGN.md` nor `PRINCIPLES.md` carries an enumerated axis registry. A standing claim about the repo's own state, read as durable and false; all three rewritten to say what is checkable, and both notes given a clarifier under the inherited "GP6 known-failure axes" heading. Also dated `bhandary2006`'s bidirectional cross-reference claim, re-verified by count (cited by donner2002 x2, konishi1989 x1, naik2007 x3, young1998 x5).
 - 2026-07-19: T10 done. `INDEX.md` updated — the shelf census now reads **all 30 notes dated-verified** and the source-note re-verify backlog is recorded as CLOSED (M72 keeps `ORACLES.md` + `BIBLIOGRAPHY.md`); an M71 findings block added, per note, plus the cross-cutting observation that three notes had silently repaired their source and now transcribe as printed. Gates: `cairn_validate` **15/15 PASS**, all remaining advisories judgment calls (293 dangling pre-migration id tokens, expected) — and the **`references staleness` advisory fell 9 → 2**, the two survivors being exactly `ORACLES.md` and `BIBLIOGRAPHY.md`, i.e. the seven notes cleared by re-reading their sources, not by rewording a status line (AC7, LESSONS 2026-07-18/M68). `devtools::test()` under `NOT_CRAN=true CI=true`: **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, the unchanged M69/M70 baseline. Diff confirmed **docs-only**: 11 files, all under `cairn/`, no R code, test, fixture or oracle value touched. Milestone status -> review.
 - 2026-07-19: /milestone-review attempt 1 FAILED **AC2** and returned the milestone to `in-progress`. Six criteria pass with fresh evidence recorded in the Review section (AC1 page counts vs `pdfinfo` + mehta2018's post-reference appendices; AC3 73 folio-checked anchors; AC4 four render-settled absence claims; AC5 zero unresolved time-relative hits; AC6 diff provably fenced from the package by `.Rbuildignore:9`; AC7 validate 15/15 and staleness 9 → 2). **AC2 fails on one altered quotation**: `bobak2018.md` quotes "may reflect low subject variability" as koo2016 p. 158, which prints "A low ICC could not only reflect the low degree of rater or measurement agreement but also relate to the lack of variability among the sampled subjects" — the string occurs nowhere in koo2016, and both `koo2016.md` and `mehta2018.md` render the same content correctly as an unquoted paraphrase. Pre-existing M65 content, but AC2 is scoped to every quoted string in the seven notes and the implement sweep skipped it on the judgment call that it was "a koo2016 quote, not a bobak2018 claim" — the exact shape the M67 lesson warns about. A mechanical sweep for cross-source quotations found only this one, so the defect set is complete. [S] blame-history and [S] prior-PR lenses both clean; [O] diff-bug was still in flight at send-back and its findings fold into the same fix cycle.
+- 2026-07-19: [O] diff-bug lens reported after the send-back with **5 further findings, all in content M71 introduced**, each re-verified at the source here and then scored by a fresh [S] scorer — **92, 95, 93, 88, 90; all five clear the 80 bar, none below it**. F1 `saha2005` Figure 1: BCML is lowest at `φ = 0.05`, not DEQL (600-DPI render; the coherent reading is that BCML sits closest to zero at both ends, which is what a bias correction should do). F2 `bobak2018`: the 0.944 sentence is on **p. 7**, anchored to p. 8 — in a note whose Extraction line claims every anchor was confirmed by per-page extraction. F3 `xiao2009`: "four lowest GP cells all at `ρ ∈ {0.1, 0.2}`" is false, only two are (0.923 at `ρ=0.5`, 0.925 at `ρ=0.3` sit third and fourth). F4 `saha2012`: the terminology block claims "§5 does not" invert conservative/liberal, but §5 calls HPV-QEE's OVER-coverage "liberal" — the block over-generalizes, and a correction that over-claims is worse than the error it corrects. F5 `INDEX.md`: "except three cells" undercounts — four table cells were corrected, and the `mehta2018` bullet omits its own; the M70 never-pin-a-count lesson violated in the summary of a pass whose T8 entry cites that lesson. **Pattern: all five sit in interpretive prose the milestone ADDED, not in the transcriptions it checked** — every numeric correction survived independent verification. Together with the AC2 failure that is six defects to fix, all in this milestone's own new content.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -217,5 +218,62 @@ Read as written — and criteria are not reinterpreted at review — AC2 is not 
 paraphrase (matching `koo2016.md`'s and `mehta2018.md`'s treatment) or by
 quoting koo2016 verbatim, then re-run the AC2 sweep **extended to cross-source
 quotations**, and re-review. A mechanical sweep of the seven notes for quoted
-strings attributed to a *different* paper found exactly this one, so the defect
-set is complete.
+strings attributed to a *different* paper found exactly this one, so that
+sub-class is complete.
+
+#### [O] diff-bug lens — 5 further findings, all in content M71 introduced
+
+The lens reported after the send-back and **first verified a large body of the
+milestone's work as correct**: every load-bearing table value (`saha2012`'s
+corrected Table I rows and the provenance of the bad ones, `xiao2013`'s Table 9
+vs Table 3 mismatch, `saha2005`'s U-shape at 4683/5635, `mehta2018`'s Table 4
+cell and Table 7 reversals, `bobak2018`'s Results erratum, `bhandary2006`'s
+75-row grid and the young1998 discharge), both render-settled source errata, and
+`xiao2009`'s cover-sheet offset. Each finding below was re-verified
+independently at the source before being recorded, then scored by a fresh [S]
+scorer that did not generate them: **F1 = 92, F2 = 95, F3 = 93, F4 = 88,
+F5 = 90 — all five clear the 80 action bar, none logged below it.** The scorer's
+readings agree with the independent verification on every point (it puts the
+`saha2005` diamond at ≈ 0.07 against ≈ 0.10 here; the ordering, which is the
+defect, is identical). All five are actioned in the fix cycle.
+
+- **F1 — `saha2005.md`, the Figure 1 plot-read.** The bullet says bias at
+  `φ = 0.05` runs "+0.10 to +0.15 … with DEQL lowest". A 600-DPI render of
+  PDF p. 7 (journal 3503), panel (a), gives top-to-bottom `✳` ML ≈ +0.15,
+  `•` Q₂ ≈ +0.14, `△` DEQL ≈ +0.12, `◇` **BCML ≈ +0.10 — BCML is lowest, not
+  DEQL**. The coherent reading, which the note misses, is that BCML sits closest
+  to zero at *both* ends (lowest at small `φ`, highest at large `φ`) — precisely
+  what a bias correction should do, and a better statement of the paper's result
+  than the one recorded.
+- **F2 — `bobak2018.md`, the Table 2 callout.** It anchors the "probability that
+  study 3 has a higher ICC than study 2 = 0.944" sentence to p. 8; per-page
+  extraction shows it on the page whose footer reads **`Page 7 of 11`**. The same
+  note's `Extraction:` line claims "each page anchor was confirmed by extracting
+  that page on its own" — the note asserts a verification standard this anchor
+  did not receive.
+- **F3 — `xiao2009.md`, the GP coverage claim.** "Its four lowest cells are all
+  at `ρ ∈ {0.1, 0.2}`" is false. Sorting all 36 GP coverage values in Table 1
+  (PDF p. 7 = journal 116): 0.913 (`ρ=0.1`), 0.919 (`ρ=0.2`), 0.923 (`ρ=0.5`),
+  0.925 (`ρ=0.3`), 0.925 (`ρ=0.9`). Only the **two** lowest sit at
+  `ρ ∈ {0.1, 0.2}`. The neighbouring floors (GP 0.913, PL 0.931) are correct.
+- **F4 — `saha2012.md`, the terminology-warning block.** It asserts §3 inverts
+  "conservative"/"liberal" but "**§5 does not**", and instructs "Go by the tables
+  and §5, never by §3's labels". §5 repeats the inversion for HPV-QEE: it
+  "had a tendency to have the slightly larger observed coverage probabilities
+  than the nominal level, indicating some liberal behavior" — over-coverage
+  labelled *liberal*. §5 is standard **only for the four asymptotics**; the block
+  over-generalizes, and a correction that over-claims is worse than the error it
+  corrects because it reads as having been checked.
+- **F5 — `INDEX.md`.** "Every transcribed table value … reproduced exactly except
+  three cells" undercounts: the diff corrects **four** — `saha2012` Table I's
+  MLE and EQL at `φ = 0.2` and DEQL at `φ = 0.5`, plus `mehta2018` Table 4's
+  `0.58 (0.03)` → `0.58 (0.04)`, which that block's `mehta2018` bullet omits
+  entirely. This is the M70 "never pin an item count" lesson, violated in the
+  milestone's own summary of a pass whose T8 entry cites that same lesson.
+
+**Pattern worth carrying into the fix.** All five sit in *interpretive prose the
+milestone added*, not in the table transcriptions it checked. Every numeric
+correction survived independent verification; what failed is the narrative
+written around those values, at a lower standard of rigor than the values
+themselves — the same failure shape this milestone was created to find in M65's
+notes, reproduced while correcting it.
