@@ -108,7 +108,8 @@ practice."
 paper.** Any ICC is inflated by widening the subject population — a point
 `koo2016` makes in prose (p. 158, noting that a low ICC may reflect low subject
 variability rather than poor agreement — a paraphrase, not a quotation; the
-source's own sentence is longer and is quoted in `koo2016.md`) and this paper
+source's own sentence is longer, and `koo2016.md:55–57` paraphrases it the same
+way, quoting only the disclaimer sentence that precedes it) and this paper
 makes structurally, with a model and a number.
 
 ## AC3: this paper reports **no coverage results**
@@ -213,7 +214,7 @@ below map this paper onto the axes M65 chose to track, nothing more.
 
 | GP6 axis | What this paper says |
 |---|---|
-| **Non-normality** | Addressed indirectly. The paper does not assume a heavy-tailed or skewed outcome; it assumes a *bounded* one and handles it with a truncated normal `I(0,1)` (Eqs. 3, 7) plus a mean-dependent variance. So the failure it targets is **boundedness-induced heteroscedasticity**, which is a distinct axis from the non-normality M62/`ukoumunne2003` covers (heavy tails). The package's Gaussian mixed model makes *both* assumptions, and only the heavy-tail one has been swept anywhere in the repo — observed 2026-07-19 |
+| **Non-normality** | Addressed indirectly. The paper does not assume a heavy-tailed or skewed outcome; it assumes a *bounded* one and handles it with a truncated normal `I(0,1)` (Eqs. 3, 7) plus a mean-dependent variance. So the failure it targets is **boundedness-induced heteroscedasticity**, which is a distinct axis from the non-normality M62/`ukoumunne2003` covers (heavy tails). The package's Gaussian mixed model makes *both* assumptions, and **neither axis has been swept here**: no non-Gaussian simulation DGP exists in `R/` or `tests/` (`grep -rniE 'rt\(|heavy.tail|rchisq|rgamma\(|lognormal' R/ tests/` returns no DGP, observed 2026-07-19). What the repo has on the heavy-tail axis is `ukoumunne2003`'s *published* sweep, cited rather than reproduced |
 | **Near-zero ICC** | Not addressed. The smallest estimate is 0.295 and there is no boundary discussion, no singular-fit analogue, and no simulation near zero. **A Bayesian fit with proper priors does not hit the frequentist boundary at all** — the D-004 "smooth" behavior — so the paper is silent on the package's hardest case by construction |
 | **Few subjects** | Touched, not studied. Study 3 has `N₃ = 38` encounters and the paper attributes its wide credible intervals to "the relative small sample sizes in two of the studies and the fact that there are only three studies to inform the between-study variance component, ω" (p. 7). `ω`'s interval (0.003, 0.717) is the visible symptom — **three studies is not enough to estimate a between-study variance**, an incidental-parameters observation matching the M27/M28/M36 lesson |
 | **New axis this paper adds** | **Mean-dependent within-subject variance.** Not among the axes GP6 names, and not something the package's engines can express — see Open questions |

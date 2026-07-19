@@ -154,8 +154,10 @@ moderately large specification such as `n = 80` does not have a major impact on
 
 **But read the interdecile ranges, not the means.** At `N = 80` the spread
 **roughly doubles** — about 1–2.5× across the 30 cells, most often almost exactly
-2× (Case 5, uniform: 0.10 vs 0.05; Case 4, extreme convex: 0.08 vs 0.04; the
-narrowest ratios are extreme concave Cases 1–2, 0.01 vs 0.01 and 0.03 vs 0.02). And the spread grows sharply with
+2× (Case 5, uniform: 0.10 vs 0.05; Case 4, extreme convex: 0.08 vs 0.04). The
+narrowest ratios sit in the **concave** Cases 1–2, and they are not unique to the
+extreme grade: extreme concave and mild concave tie exactly there — both print
+0.01 vs 0.01 at Case 1 and 0.03 vs 0.02 at Case 2 (Table 4). And the spread grows sharply with
 disagreement: uniform `N = 80` goes from 0.02 at Case 1 to 0.10 at Case 5. The
 paper says this ("as the number of subjects decreases, more variability in the
 estimates is realized particularly for higher levels of disagreement", p. 2740),
@@ -285,7 +287,7 @@ below map this paper onto the axes M65 chose to track, nothing more.
 | **Non-normality** | **Directly and centrally.** But of the *subject* distribution, not the error distribution — the axis is the shape of the true-score distribution across the scale (convex/concave/uniform/skewed), which is distinct from the heavy-tailed *error* non-normality `ukoumunne2003` studies and from `bobak2018`'s bounded-scale heteroscedasticity. **Three M65/M62 sources, three different things all called "non-normality".** Worth keeping straight |
 | **Few subjects** | Addressed and partly reassuring: the point estimate is stable down to `N = 80` and, per §5, `N = 50`. But interval-relevant spread is not — see the caveat above |
 | **Near-zero ICC** | Reached, at last. Case 6 produces `ICC` = 0.08 (extreme convex, `N = 300`), the **lowest true value anywhere in the M65 cluster**. The paper reports no estimation difficulty there — unsurprising, since it uses closed-form mean squares that cannot fail to converge, unlike the package's mixed-model fits |
-| **Ordinal / discrete outcomes** | An axis no repo document names. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about — observed 2026-07-19 |
+| **Ordinal / discrete outcomes** | Named in the repo as unscheduled future work, not as a swept axis: `cairn/COVERAGE.md:196` carries "categorical / ordinal ratings (GLMM engines)" at status `🔵 Not yet`, and `cairn/legacy/ROADMAP.md:77` carries the same phrase pre-migration (`grep -rni 'ordinal' cairn/`, observed 2026-07-19; the other hits are source notes describing *other papers'* ordinal work, not this repo's). Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about |
 
 ## Traces to
 

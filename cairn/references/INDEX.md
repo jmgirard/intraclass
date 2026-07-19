@@ -313,9 +313,13 @@ the weak layer, not the values.**
 - `xiao2009` — cleanest of the seven; its shelf PDF carries a **T&F cover sheet**,
   so `PDF page N` = `journal page 109 + N`.
 
-Three notes had silently repaired a source (`saha2012`'s missing `ln`,
-`bhandary2006`'s `ppk`, and `xiao2013`'s `c′` for `c`); all now transcribe as
-printed with the defect flagged, so the pages stay checkable against the paper.
+Notes had silently repaired a source in two places — `saha2012`'s missing `ln`
+and `bhandary2006`'s `ppk` — and both now transcribe as printed with the defect
+flagged, so the pages stay checkable against the paper. `xiao2013`'s `c′` runs
+the *other* way and is not an instance: the paper prints a bare `c` at Eq. (7)
+and the note had written `c′`, a transcription error against a clean source
+(corrected at M71 review, which found this block had filed it under the wrong
+direction).
 
 **Backlog status.** The source-note re-verify backlog is **closed** — all 30
 notes dated-verified. `ORACLES.md` and `BIBLIOGRAPHY.md` are tracked separately
