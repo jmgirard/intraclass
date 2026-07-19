@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M68: References provenance backfill + shelf rename to `sources/`
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — the governing principles are PRINCIPLES.md #4 (no fabricated reference values) and #12 (seeded and sourced), the other home under D-001 -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m68-references-provenance`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -56,9 +56,10 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
       its own `— observed YYYY-MM-DD` stamp on one physical line; no page claims
       a verification this milestone did not perform.
 - [ ] AC5: `cairn/references/sources/` replaces `pdf/` — directory, `.gitignore`,
-      `INDEX.md`, `LESSONS.md`, and all 19 note pointers; no live file outside
-      `cairn/legacy/` and `milestones/archive/` names `references/pdf/`, and the
-      `scaffold deprecations` advisory clears.
+      `INDEX.md`, `LESSONS.md`, and all 19 note pointers; no live file names
+      `references/pdf/` outside the never-edited archives (`cairn/legacy/`,
+      `milestones/archive/`, `reviews/archive/`), and the `scaffold
+      deprecations` advisory clears.
 - [ ] AC6: M66 and M67 each carry a gated amendment requiring a conforming
       provenance block on every note they author and naming the `sources/` path,
       each with its own work-log line.
@@ -79,7 +80,7 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Rename the shelf. `mv cairn/references/pdf cairn/references/sources`
+- [x] T1: Rename the shelf. `mv cairn/references/pdf cairn/references/sources`
       (gitignored, so no `git mv`); update `.gitignore:12`, `INDEX.md:97`,
       `LESSONS.md:44` (in-place correction, marked per the corrections rule),
       and the Scope lines at `M66-source-notes-foundational.md:21` and
@@ -107,6 +108,8 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
 - 2026-07-18: created by /milestone-plan, from the /milestone audit's `references index<->disk` FAIL; gate chose honest-unverified extraction status, absorbing the `sources/` rename, and amending M66/M67; the load-bearing-ten re-verification split off as M69.
+- 2026-07-18: T1 done — shelf renamed `pdf/`→`sources/` (30 PDFs), `.gitignore`, `INDEX.md`, `LESSONS.md` (in-place path correction) and all 19 note pointers updated; M66/M67 amended (Scope path + AC1 provenance requirement), each with its own work-log line.
+- 2026-07-18: minor amendment — AC5 named only `legacy/` and `milestones/archive/` as exempt archives; `reviews/archive/RB01` also cites the old path and is equally never-edited (IP4), so the exemption now names all three. No deliverable changed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

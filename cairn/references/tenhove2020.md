@@ -5,7 +5,7 @@ Hyperprior Distributions to Estimate Variance Components for Interrater
 Reliability Coefficients." In M. Wiberg et al. (Eds.), *Quantitative Psychology*
 (Springer Proceedings in Mathematics & Statistics, Vol. 322, pp. 79–93).
 Springer. DOI 10.1007/978-3-030-43469-4_7. OSF: `shkqm`
-(https://osf.io/shkqm/, p. 8). PDF: `cairn/references/pdf/tenhove2020.pdf`
+(https://osf.io/shkqm/, p. 8). PDF: `cairn/references/sources/tenhove2020.pdf`
 (gitignored).
 
 **Role.** The **O-Bayes** source (IP1) for the package's Bayesian (brms/Stan)

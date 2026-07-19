@@ -8,7 +8,7 @@ September 2017; Revised 23 January 2018; Accepted 20 March 2018. **Open Access**
 under CC BY-NC (the copyright line "was changed on 10 September 2018 after
 original online publication", p. 2734). Allergan plc (Irvine CA); University of
 Maryland Baltimore County; University of North Carolina at Chapel Hill. Funded
-by Allergan Inc. PDF: `cairn/references/pdf/mehta2018.pdf` (gitignored).
+by Allergan Inc. PDF: `cairn/references/sources/mehta2018.pdf` (gitignored).
 
 **Role.** Ingested by M65 as half of the distributional-robustness pair.
 **Squarely inside the package's contract** — it studies the two-way random

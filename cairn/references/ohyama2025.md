@@ -3,7 +3,7 @@
 **Citation.** Ohyama T (2025). "A comparison of confidence interval methods for
 the intraclass correlation coefficient based on the one-way random effects
 model." *Japanese Journal of Statistics and Data Science* 8:587–602. DOI
-10.1007/s42081-025-00292-3. PDF: `cairn/references/pdf/ohyama2025.pdf` (gitignored).
+10.1007/s42081-025-00292-3. PDF: `cairn/references/sources/ohyama2025.pdf` (gitignored).
 
 **Role.** M62 synthesis/**oracle** note — an independent published coverage/width
 comparison of one-way-ICC CI methods, including Ukoumunne's non-parametric

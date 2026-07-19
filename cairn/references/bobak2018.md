@@ -7,7 +7,7 @@ Methodology* 18:93. DOI 10.1186/s12874-018-0550-6. Received 23 November 2017;
 Accepted 23 August 2018; Published 12 September 2018. **Open Access**, CC BY 4.0.
 Departments of Quantitative Biomedical Sciences and The Dartmouth Institute,
 Geisel School of Medicine, Dartmouth College. PDF:
-`cairn/references/pdf/bobak2018.pdf` (gitignored). Bobak and O'Malley
+`cairn/references/sources/bobak2018.pdf` (gitignored). Bobak and O'Malley
 "contributed equally".
 
 **Role.** Ingested by M65 as half of the distributional-robustness pair. **This

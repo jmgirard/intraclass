@@ -18,7 +18,7 @@ the package's guidance and coefficient-selection surface but source no estimator
 ## Scope
 <!-- owner: plan · create/amend-via-gate -->
 
-**In:** seven `<citekey>.md` source notes read from `cairn/references/pdf/`:
+**In:** seven `<citekey>.md` source notes read from `cairn/references/sources/`:
 `bartko1966` and `bartko1976` (the foundational ICC-as-reliability papers),
 `tenhove2018` (20 IRR coefficients compared on four datasets), `trevethan2017`
 (cautions, extensions, requests), `hedges2012` (variance of ICCs in three- and
@@ -37,8 +37,10 @@ qualitative band entering package output → refused outright (IP3).
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
 - [ ] AC1: Seven `cairn/references/<citekey>.md` source notes exist, one per
-      source named in Scope, each with the five validation-doctrine fields and
-      page/table anchors on every extracted value.
+      source named in Scope, each with the five validation-doctrine fields,
+      page/table anchors on every extracted value, and a conforming
+      `**Provenance.**` block (ingested date, source pointer, pagination basis,
+      dated `Extraction:` status) per M68.
 - [ ] AC2: Each note's "what traces to it" field is honest — for a source
       nothing currently traces to, it states that explicitly and names what it
       *could* source, rather than manufacturing a connection.
@@ -87,6 +89,7 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-18: created by /milestone-plan (promotes the tier-C candidate row's
   package-relevant half; the maintainer chose at the routing chip to plan the
   shelf as milestones rather than leave it a candidate).
+- 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

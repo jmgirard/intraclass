@@ -4,7 +4,7 @@
 on Selecting an Intraclass Correlation Coefficient for Interrater Reliability,
 With Applications to Incomplete Observational Designs." *Psychological Methods*
 29(5):967–979. DOI 10.1037/met0000516.
-PDF: `cairn/references/pdf/tenhove2024.pdf` (gitignored).
+PDF: `cairn/references/sources/tenhove2024.pdf` (gitignored).
 
 **Role.** The package's primary source for **guidance on choosing an ICC** — the
 material `vignettes/choosing-an-icc.Rmd` and `choose_icc()` render into

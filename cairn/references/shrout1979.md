@@ -2,7 +2,7 @@
 
 **Citation.** Shrout PE, Fleiss JL (1979). "Intraclass correlations: uses in
 assessing rater reliability." *Psychological Bulletin* 86(2):420–428.
-PDF: `cairn/references/pdf/shrout1979.pdf` (gitignored).
+PDF: `cairn/references/sources/shrout1979.pdf` (gitignored).
 
 **Role.** The **O1** oracle source (`ORACLES.md`) — the worked example whose data
 and coefficients seed the whole ICC family in this package — and the origin of

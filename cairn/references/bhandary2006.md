@@ -6,7 +6,7 @@ Several Populations." *Communications in Statistics — Simulation and
 Computation* 35(3):765–778. DOI 10.1080/03610910600716894. Received 9 September
 2004; Accepted 6 January 2006. Department of Statistics, North Dakota State
 University. Published under the journal's "Multivariate Analysis" section
-header. PDF: `cairn/references/pdf/bhandary2006.pdf` (gitignored).
+header. PDF: `cairn/references/sources/bhandary2006.pdf` (gitignored).
 
 **Author link.** Madhusudan Bhandary is the third author of `xiao2009`, which
 cites this line of work (Young & Bhandary 1998; Bhandary & Alam 2000) for the

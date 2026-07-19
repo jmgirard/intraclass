@@ -9,6 +9,6 @@ figure/
 tests/testthat/_problems/
 tests/testthat/testthat-problems.rds
 data-raw/.oracle-*-checkpoint.rds
-cairn/references/pdf/
+cairn/references/sources/
 cairn/.merge-approved
 cairn/.merge-approved.pending

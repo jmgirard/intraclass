@@ -4,7 +4,7 @@
 the intraclass correlation coefficient as measures of reliability."
 *Educational and Psychological Measurement* 1973, 33, 613–619. (The title page
 runner prints only volume and pages — no issue number and no DOI appear on the
-PDF.) PDF: `cairn/references/pdf/fleiss1973.pdf` (gitignored).
+PDF.) PDF: `cairn/references/sources/fleiss1973.pdf` (gitignored).
 
 **Role.** Shelf / background evidence for the categorical-scale boundary of the
 ICC — the bridge between kappa-family agreement indices and the ICC. Not an

@@ -3,7 +3,7 @@
 **Citation.** Ukoumunne OC, Davison AC, Gulliford MC, Chinn S (2003).
 "Non-parametric bootstrap confidence intervals for the intraclass correlation
 coefficient." *Statistics in Medicine* 22(24):3805–3821. DOI 10.1002/sim.1643.
-PDF: `cairn/references/pdf/ukoumunne2003.pdf` (gitignored).
+PDF: `cairn/references/sources/ukoumunne2003.pdf` (gitignored).
 
 **Role.** M62 primary source (IP1) for the non-parametric bootstrap CI candidate.
 
