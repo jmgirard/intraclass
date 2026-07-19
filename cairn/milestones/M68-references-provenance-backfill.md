@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M68: References provenance backfill + shelf rename to `sources/`
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — the governing principles are PRINCIPLES.md #4 (no fabricated reference values) and #12 (seeded and sourced), the other home under D-001 -->
@@ -46,15 +46,18 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
       a source pointer, a pagination basis, and an `Extraction:` status;
       `cairn_validate`'s `references index<->disk` check PASSes.
 - [ ] AC2: Every ingested date and ingesting milestone is derived from evidence,
-      not asserted — the work log names the command and shows the derived
-      page→(date, milestone) table (#4 applied to provenance).
+      not asserted — the work log names the derivation command and records the
+      complete page→(date, milestone) mapping, grouped by ingesting milestone
+      and readable as one-line work-log entries (#4 applied to provenance).
 - [ ] AC3: Pagination basis is stated per page, and the three shelf PDFs that
       are not the version of record — `tenhove2022`, `tenhove2024`
       (advance-online), `tenhove2020` (author manuscript) — each say so in their
       block, consistent with `INDEX.md` and the M64 lesson.
-- [ ] AC4: Every `Extraction:` status reads unverified-first-pass and carries
-      its own `— observed YYYY-MM-DD` stamp on one physical line; no page claims
-      a verification this milestone did not perform.
+- [ ] AC4: No page claims a verification this milestone did not perform. Every
+      `Extraction:` status sits on one physical line and carries its own
+      `— observed YYYY-MM-DD` stamp; the 19 shelf-ingested notes read
+      unverified-first-pass, and the 5 pages with no shelf source of their own
+      read the template's `derived —` / `first-hand record —` forms.
 - [ ] AC5: `cairn/references/sources/` replaces `pdf/` — directory, `.gitignore`,
       `INDEX.md`, `LESSONS.md`, and all 19 note pointers; no live file names
       `references/pdf/` outside the never-edited archives (`cairn/legacy/`,
@@ -119,6 +122,7 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: T6 done — profile `verify` slot clean: 1802 pass, 0 fail, 0 error, 23 skip, 2 warn (both pre-existing engine conditions — a glmmTMB non-positive-definite Hessian inside the test that asserts that message, and the Design-3 drop message; this branch touches no R file). cairn_validate exit 0, 15/15 PASS. All tasks done; status → review.
 - 2026-07-18: PR #72 opened; CI at checkpoint time — format-check, lint, pkgdown all success; the six platform/coverage jobs still in_progress after a ~9 min blocking wait, so nothing is left watching (re-derive with `gh api repos/jmgirard/intraclass/commits/<sha>/check-runs`, per the stateless-resume rule).
 - 2026-07-18: REVIEW SEND-BACK (1st) — two criteria fail as written, no charitable reading applied. AC4 says every Extraction status "reads unverified-first-pass"; 5 of 24 pages correctly read `derived —`/`first-hand record —` (no shelf source to re-read, per the synthesis template) — its substantive clause (no page claims an unperformed verification) DOES hold, 0/24. AC2 requires the work log to "show the derived page→(date, milestone) table"; the command and full mapping are recorded but as a one-line grouped entry, because work-log entries must be one physical line — a one-line entry cannot literally be a table. Both are plan-time drafting errors (criteria assuming a format the rules forbid, and assuming every page is shelf-ingested). Evidence for AC1/AC3/AC5/AC6 and cairn_validate exit 0 all clean. Back to in-progress for a gated amendment.
+- 2026-07-18: gated amendment (user approved at the send-back chip) — AC2 now asks for the derivation command plus the complete page→(date, milestone) mapping grouped by milestone and readable as one-line entries (was: a "table", which the one-line work-log rule forbids); AC4 now leads with the substantive protection (no unperformed verification claimed) and states both legitimate status forms — unverified-first-pass for the 19 shelf notes, `derived —`/`first-hand record —` for the 5 with no shelf source. No deliverable changed; no file on the branch differs. Status → review for a fresh pass.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
