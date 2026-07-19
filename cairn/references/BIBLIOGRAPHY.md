@@ -1,8 +1,8 @@
 # Bibliography
 
-**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries), M65 (→ 27), and M66 (→ 34); M68 added only this block.
+**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries), M65 (→ 27), and M66 (→ 34); M68 added only this block. On 2026-07-19 the `jorgensen2019` entry was replaced in place by `vanderark2023` — the published version of record of the same study, under a different first author — leaving the count at 34.
 Pagination: —.
-Extraction: unverified — the 16 split entries moved as text and were never read against their sources, which is what keeps this page's status unverified as a whole; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since; the 7 added by M66 were authored on 2026-07-19 from shelf copies each read end-to-end, and three of those entries deliberately withhold a field the source does not print (Trevethan's pagination, Jorgensen's year/venue/pagination, and Shieh's citekey-vs-issue year is flagged inline) — observed 2026-07-19.
+Extraction: unverified — the 16 split entries moved as text and were never read against their sources, which is what keeps this page's status unverified as a whole; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since; the 7 added by M66 were authored on 2026-07-19 from shelf copies each read end-to-end, and two of those entries deliberately withhold a field the source does not print (Trevethan's year and pagination), with Shieh's citekey-vs-issue year flagged inline; the third such case, Jorgensen's missing year/venue/pagination, was resolved on 2026-07-19 when the published `vanderark2023` chapter superseded that preprint entry — observed 2026-07-19.
 
 The repo's bibliography. Oracle provenance lives in
 [`ORACLES.md`](ORACLES.md); per-source extractions with page/table anchors live
@@ -49,14 +49,6 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   Measurement, 72*(6), 893–909. doi:10.1177/0013164412445193. (Delta-method
   large-sample variances for variance-share ICCs in nested designs; **outside the
   contract boundary — no rater facet** — see [`hedges2012.md`](hedges2012.md).)
-- Jorgensen, T. D., van der Ark, L. A., & ten Hove, D. *Factors affecting
-  efficiency of interrater reliability estimates from planned missing data
-  designs on a fixed budget.* **Year, venue, and pagination unknown**: the shelf
-  copy is an author manuscript printing none of them, and its own bibliography
-  cites ten Hove et al. (2021, 2022), so the `jorgensen2019` citekey's year is a
-  label rather than a sourced fact and is not asserted here. Supplementary
-  materials: https://osf.io/g5hvs/. (Planned-missing design efficiency for IRR;
-  **not** the 2021 SEM paper below — see [`jorgensen2019.md`](jorgensen2019.md).)
 - Jorgensen, T. D. (2021). How to estimate absolute-error components in structural
   equation models of generalizability theory. *Psych, 3*(2), 113–133.
   doi:10.3390/psych3020011. (The M7 lavaan engine's SEM absolute-error method —
@@ -155,6 +147,15 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   coefficient. *Statistics in Medicine, 22*(24), 3805–3821. doi:10.1002/sim.1643.
   (The M62 primary source for the transformed bootstrap-t, D-006 — see
   [`ukoumunne2003.md`](ukoumunne2003.md).)
+- van der Ark, L. A., Jorgensen, T. D., & ten Hove, D. (2023). Factors affecting
+  efficiency of interrater reliability estimates from planned missing data designs
+  on a fixed budget. In M. Wiberg et al. (Eds.), *Quantitative Psychology*
+  (Springer Proceedings in Mathematics & Statistics, Vol. 422, pp. 1–15). Springer.
+  doi:10.1007/978-3-031-27781-8_1. OSF: `g5hvs`. (Planned-missing design efficiency
+  for IRR — per-cell coverage on `ICC(A,1)` under 83–99 % missingness. Supersedes
+  the `jorgensen2019` preprint entry, whose byline led with a different first
+  author; **not** the 2021 Jorgensen SEM paper above — see
+  [`vanderark2023.md`](vanderark2023.md).)
 - Vispoel, W. P., Hong, H., Lee, H., & Xu, G. (2022). Accuracy of absolute error
   estimates within a G-theory SEM framework. Paper presented at the meeting of the
   National Council on Measurement in Education (NCME), April 9, 2022. (Conference

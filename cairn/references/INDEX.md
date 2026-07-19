@@ -42,11 +42,6 @@ and milestones; never restate a value here.
   (Eqs. 1, 4–6, 10–15) with a worked Kentucky example. **Outside the contract
   boundary (IP2) — no rater facet**; its "multilevel ICC" is not the package's.
   Its symmetric Wald intervals are the contrast case for `PRINCIPLES.md` #3.
-- [jorgensen2019.md](jorgensen2019.md) — source note (M66): optimizing a
-  planned-missing observational design for IRR on a fixed budget — budget /
-  workload / team-size algebra (Table 1) and MCMC coverage holding at 0.94 under
-  83–99 % missingness on `ICC(A,1)`. **Not** the O-SEM paper; and the citekey
-  year is contradicted by the source (it cites 2022 works).
 - [jorgensen2021.md](jorgensen2021.md) — source note (M64): the **O-SEM** source.
   Eq. 6 defines σ²_i as the raw variance of the effects-coded indicator intercepts
   (÷ k−1, no bias correction); p. 124 documents the SEM-vs-mixed-model gap.
@@ -101,6 +96,12 @@ and milestones; never restate a value here.
 - [ukoumunne2003.md](ukoumunne2003.md) — source note (M62): the non-parametric
   bootstrap CI for the one-way ICC (subject-resample + `log F` variance-stabilizing
   transformed bootstrap-t + infinitesimal-jackknife SE); under-covers at k=10.
+- [vanderark2023.md](vanderark2023.md) — source note (M66, corrected 2026-07-19):
+  optimizing a planned-missing observational design for IRR on a fixed budget —
+  budget / workload / team-size algebra (Table 1) and **per-cell** coverage in
+  `[0.934, 0.956]` across 24 cells under 83–99 % missingness on `ICC(A,1)`.
+  Replaces the `jorgensen2019` note, which was written from an author manuscript
+  of this study under a different first author.
 - [xiao2009.md](xiao2009.md) — source note (M65): profile-likelihood CI for a
   **common** ICC across populations of unequal-size families. Naive PL covers
   0.931–0.950 against a nominal 0.95 here — the design contrast that shows PL's
@@ -134,30 +135,29 @@ title page (M63/T1). Citekey convention: same-author-same-year takes a letter
 suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
 **Ingested (source/synthesis note exists) — 26:** `bartko1966`, `bartko1976`,
-`bhandary2006`, `bobak2018`, `fleiss1973`, `hedges2012`, `jorgensen2019`,
-`jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`, `saha2005`,
+`bhandary2006`, `bobak2018`, `fleiss1973`, `hedges2012`, `jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`, `saha2005`,
 `saha2012`, `shieh2015`, `shrout1979`, `tenhove2018`, `tenhove2020`, `tenhove2022`,
 `tenhove2024`, `tenhove2025a`, `tenhove2025b`, `trevethan2017`, `ukoumunne2003`,
-`xiao2009`, `xiao2013`. The ten load-bearing primary sources were ingested by M64;
+`vanderark2023`, `xiao2009`, `xiao2013`. The ten load-bearing primary sources were ingested by M64;
 `ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
 sources by M65; the seven foundational/interpretation sources by M66. The four
 remaining shelf PDFs are the M67 equality-testing cluster.
 
-Five shelf PDFs are **not** the issue version of record — each note carries a
+Four shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
 (© 2021 and © 2022 respectively, no journal pagination), `tenhove2020` is an
-author/accepted manuscript with no publisher fields at all, `trevethan2017` is an
-online-first copy with no journal pagination (M66), and `jorgensen2019` is an
-author manuscript with **no year, venue, or pagination at all** (M66).
+author/accepted manuscript with no publisher fields at all, and `trevethan2017` is
+an online-first copy with no journal pagination (M66). A fifth, `jorgensen2019`,
+was an author manuscript with no year, venue, or pagination at all; the published
+version of record arrived on the shelf as `vanderark2023` and **supersedes it**
+(corrected 2026-07-19) — the preprint PDF is still on the shelf but nothing cites
+it.
 
-Three citekeys are **not** corroborated by their source's printed publication year, and none was
+Two citekeys are **not** corroborated by their source's printed publication year, and neither was
 renamed (renaming would break the milestone Scope lists and every cross-reference):
 `shieh2015` is *Behavior Research Methods* 48(3):994–1003, **2016** — the 2015 is
-the online/copyright year printed on the same page. `jorgensen2019` is worse: the
-shelf copy prints no year at all, its own bibliography cites ten Hove et al. 2021
-and 2022, and the PDF was typeset 2022-09-27, so **2019 is contradicted by the
-source** and `BIBLIOGRAPHY.md` does not assert it (M66; flagged for the maintainer).
-`trevethan2017` is the third and mildest case: its shelf copy prints no publication
+the online/copyright year printed on the same page.
+`trevethan2017` is the second and milder case: its shelf copy prints no publication
 year at all (only © 2016 and an online date), so the `2017` is *uncorroborated*
 rather than contradicted — `BIBLIOGRAPHY.md` withholds the year there too.
 
@@ -176,11 +176,13 @@ under heteroscedasticity.
 cluster splits three ways rather than being uniformly "guidance": two bear on
 selection (`tenhove2018`, `shieh2015`), two are the package's prehistory
 (`bartko1966`, `bartko1976`), two are design/efficiency
-(`jorgensen2019`, `hedges2012`), and one is a reporting-cautions paper
+(`vanderark2023`, `hedges2012`), and one is a reporting-cautions paper
 (`trevethan2017`). **Nothing in the package traces to any of the seven** — no
 oracle, test, or vignette cites them — which is the honest state, not a gap.
 `hedges2012` is additionally outside the contract boundary (IP2): its ICCs have
-no rater facet. `jorgensen2019` is **not** the 2021 SEM paper. Every note was
+no rater facet. `vanderark2023` is **not** the 2021 SEM paper, and it replaced
+M66's `jorgensen2019` note once the published version of record reached the shelf
+(corrected 2026-07-19). Every note was
 read to its source's final page and carries a dated *verified* extraction status,
 so none joins the re-verify backlog.
 

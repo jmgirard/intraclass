@@ -221,8 +221,8 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
   revised/accepted dates, an online-publication date of 23 August 2016, and a
   © 2016 line — but no volume, issue, or page range, so it is an online-first
   copy rather than the issue version of record — `INDEX.md`'s shelf inventory
-  lists this note among five such copies, alongside `tenhove2022`, `tenhove2024`,
-  `tenhove2020`, and `jorgensen2019`. The citekey's
+  lists this note among four such copies, alongside `tenhove2022`, `tenhove2024`,
+  and `tenhove2020`. The citekey's
   `2017` is therefore *not* corroborated by this PDF. `BIBLIOGRAPHY.md`'s entry
   should carry volume/issue/pages from the issue version, which is not on the
   shelf and was not consulted here — flagged for the maintainer rather than

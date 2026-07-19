@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-19 (M66 shipped + archived — the seven foundational/interpretation sources ingested and dated-verified, PR #74; only M67's four shelf PDFs remain uningested; M63 rotated out under terminal-row retention)_
+_Last hygiene check: 2026-07-19 (M66 shipped + archived — the seven foundational/interpretation sources ingested and dated-verified, PR #74; only M67's four shelf PDFs remain uningested; M63 rotated out under terminal-row retention. Post-M66 correction same day: the `jorgensen2019` preprint note was superseded by `vanderark2023`, the published version of record of the same study under a different first author)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
