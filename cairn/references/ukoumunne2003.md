@@ -91,7 +91,7 @@ both the a_i and the e_ij are normally distributed".
   from this level when ρ was 0.001 and there were just 10 or 30 clusters". It is
   still the paper's recommended method, and the only one whose error is spread
   roughly evenly across the two tails.
-- **Caveat the paper itself raises (p. 3818), material to D-006's width
+- **Caveat the paper itself raises (p. 3816), material to D-006's width
   condition:** the transformed bootstrap-t's "intervals produced are quite wide
   relative to the exact analytical method for normal balanced data even in
   scenarios where the latter is known to provide correct coverage". Coverage is
@@ -149,7 +149,7 @@ bootstrap-t milestone whenever it is planned:
   k = 10). A coverage pin set at "≈ nominal" against this source would be
   pinning a value the source does not claim; the paper's own floor is the
   p. 3816 non-normality sentence, not a point claim of 0.95.
-- **Width is the paid cost** (p. 3818) — the source expects wider intervals than
+- **Width is the paid cost** (p. 3816) — the source expects wider intervals than
   the exact analytical method even where the analytical one is correct, so a
   width regression against the analytical baseline is an expected finding, not a
   defect.

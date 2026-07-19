@@ -3,7 +3,7 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/young1998.pdf` (gitignored).
 Pagination: printed journal pages 1363–1373. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: verified 2026-07-19 against the source (all 11 PDF pages read to the final page — the references end p. 1373 and the publication dates sit *below* them; the French Résumé is on p. 1372, before the references, no appendix); every equation anchor and all 11 quotations re-checked, the §3 simulation settings confirmed value by value, the Figs. 1–4 shapes re-read off the page images, and the real-data estimates confirmed digit-for-digit. The M67 review's restoration of `−2 log Λ` to the Eq. (2.6) quotation is confirmed correct against p. 1367 — observed 2026-07-19.
+Extraction: verified 2026-07-19 against the source (all 11 PDF pages read to the final page — the references end p. 1373 and the publication dates sit *below* them; the French Résumé is on p. 1372, before the references, no appendix); every equation anchor and every quoted string re-checked, the §3 simulation settings confirmed value by value, the Figs. 1–4 shapes re-read off the page images, and the real-data estimates confirmed digit-for-digit. The M67 review's restoration of `−2 log Λ` to the Eq. (2.6) quotation is confirmed correct against p. 1367 — observed 2026-07-19.
 
 **Citation.** Young DJ, Bhandary M (1998). "Test for Equality of Intraclass
 Correlation Coefficients Under Unequal Family Sizes." *Biometrics*

@@ -104,6 +104,8 @@ not applied here.
 - 2026-07-19: T6 `young1998` verified (11 pp, all read; references end p. 1373 with the publication dates BELOW them and the French Résumé on p. 1372; 15 quotations swept, all verbatim; absence claim re-grepped, zero hits). The M67 review's restoration of `−2 log Λ` to the Eq. (2.6) quotation is confirmed correct. Additions: the paper RAN all (ρ₁,ρ₂) combinations but Table 1 PRINTS only a subset, so an absent cell means unprinted not unsimulated; Figs. 1–4 label the `Z*` test `STAR05` where Table 1 calls it `NORM*05`; the recommendation recurs at least four times, not three. **Scope flag:** two claims in this note assert `bhandary2006` content (its 0.8804/0.9567/0.8508 estimates and the 0.4089 size inflation at K=5) — that note is unverified and belongs to M71, so both are now marked as inherited rather than verified here; the young1998 halves (negative estimates −0.2917/−0.2504/−0.2682, two samples of seven, k=30 only) are confirmed against this source. Two quotations had backticks inside the quote marks, now outside. No package value affected.
 - 2026-07-19: T7–T9 done. T7 consolidated quotation sweep: 93 quotations across the six notes (ukoumunne2003 13, ohyama2025 9, donner2002 21, konishi1989 15, naik2007 20, young1998 15), all verbatim and markup-free — the sweep caught one residual markup-in-quote in ukoumunne2003 from T1, since T1 predated the markup check. T8 time-relative sweep: 0 hits across all six. T9: INDEX.md updated — the M67 four moved from backlog to dated-verified with per-note findings, the backlog narrative now names the seven M65 notes (M71) and points ORACLES/BIBLIOGRAPHY at M72, the ohyama2025 entry notes the recovered §4 examples and NBOOT width exclusion, and a mechanically-counted 23-verified/7-unverified shelf census added. `cairn_validate` green; `devtools::test()` FAIL 0 / PASS 1802 (M69 baseline, unchanged); diff is docs-only under cairn/.
 
+- 2026-07-19: reviewed by /milestone-review (PR #76). Three lenses: [O] diff-bug confirmed every load-bearing correction against the PDFs and raised 2 findings; [S] blame-history and [S] prior-PR both clean. Scored: Finding 1 (96) — ukoumunne2003's width-caveat quotation mis-anchored to p. 3818 twice, actually p. 3816 — FIXED (re-confirmed against the PDF text layer; the two other p. 3818 refs are the genuine Appendix A location); Finding 2a (88) — ohyama2025 Extraction said "single quotation" for a 9-quotation note — FIXED; 2b (75) and 2c (58) below the action bar, same class, fixed opportunistically by making all three count phrasings count-free. Post-fix: 93 quotations, 0 markup; cairn_validate exit 0.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -156,3 +158,43 @@ https://github.com/jmgirard/intraclass/pull/76. Docs-only, all changes under
   `document()`-no-diff, pkgdown, NEWS-entry, and `R CMD check` checks are no-ops.
   `devtools::test()` at implement: FAIL 0 / PASS 1802, identical to the M69
   baseline.
+
+### Independent review — three lenses + scorer
+
+Three fresh-context reviewers, distinct evidence bases:
+
+- **[O] diff-bug (Opus):** spot-checked every load-bearing correction against the
+  shelf PDFs (ukoumunne2003 0.9320, ohyama2025 §4 examples 0.786/0.585/−0.058,
+  naik2007 25%, konishi1989 scale `c`, donner2002 Table 3 pairs) — all confirmed
+  correct. Raised two findings (below).
+- **[S] blame-history (Sonnet):** no surviving findings — confirmed the M67
+  `−2 log Λ` restoration is preserved byte-identical, no prior M67/M69 correction
+  reverted, and D-006/D-007/the M68 anti-rewording lesson all consistent.
+- **[S] prior-PR-comments (Sonnet):** no-op — the prior PRs touching these files
+  (#68/#72/#75) carry zero human review comments, only Codecov bot output.
+
+**Scored findings** (fresh [S] scorer):
+
+- **Finding 1 (score 96, FIXED)** — *"`ukoumunne2003.md`: the width-caveat
+  quotation is anchored to p. 3818 in two places (the caveat bullet and the D-006
+  Notes 'Width is the paid cost' line); the sentence is actually printed on
+  p. 3816."* Introduced by this diff; independently re-confirmed against the PDF
+  text layer (PDF p. 12 = printed 3816 holds the sentence; p. 3818 holds only the
+  minimum-length discussion and Appendix A). Both anchors corrected to p. 3816;
+  the two *other* p. 3818 refs are the genuine Appendix A location and stay.
+- **Finding 2a (score 88, FIXED)** — *"`ohyama2025.md`: the Extraction line says
+  'the single quotation confirmed verbatim' but the note now carries 9 quoted
+  strings."* Reworded to "every quoted string confirmed verbatim".
+- **Finding 2b (score 75, logged; fixed opportunistically)** — `naik2007.md`'s
+  "all 12 quotations" undercounts the T7 tally of 20. Below the 80 action bar,
+  but the same class as 2a and touched in the same coherence pass: reworded to
+  "every quoted string … confirmed verbatim".
+- **Finding 2c (score 58, logged; fixed opportunistically)** — `young1998.md`'s
+  "all 11 quotations" vs T7's 15; the scorer judged this plausibly a
+  counting-convention artifact. Reworded to "every quoted string re-checked" for
+  consistency with 2a/2b, not because it was a confirmed defect.
+
+The three per-note count phrasings (2a/2b/2c) were all made count-free so the
+Extraction lines cannot drift against the mechanical T7 sweep. Post-fix
+regression check: 93 quotations across the six, still 0 with markup; the only
+remaining p. 3818 references are Appendix A's true location.

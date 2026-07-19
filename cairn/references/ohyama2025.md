@@ -5,7 +5,7 @@ Pagination: printed journal pages 587–602 (16 PDF pages, PDF p. 1 = printed
 p. 587; the version of record, open access).
 Extraction: verified 2026-07-19 against the source (all 16 PDF pages read to the
 final page); the §3.2 simulation settings were confirmed value by value, the
-single quotation confirmed verbatim, and **both §4 worked examples (pp. 599–600)
+every quoted string confirmed verbatim, and **both §4 worked examples (pp. 599–600)
 were recovered — the first pass never reached them** and recomputed from their
 own ANOVA tables, reproducing the printed ICCs to three decimals — observed
 2026-07-19.
