@@ -39,7 +39,7 @@ act on it. Any change to R code, tests, or oracle values.
       source's final page** — `mehta2018` in particular, whose Appendices
       A–C sit at pp. 2750–2752 *after* the reference list and were once
       falsely recorded absent (LESSONS 2026-07-18/M65).
-- [ ] Every quoted string in **every one of the seven notes** has been
+- [x] Every quoted string in **every one of the seven notes** has been
       re-read against its source and confirmed verbatim or corrected. The
       sweep is mechanical and per-note, not driven by prior findings
       (LESSONS 2026-07-19/M67).
@@ -119,6 +119,96 @@ act on it. Any change to R code, tests, or oracle values.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Attempt 2 — 2026-07-19
+
+PR https://github.com/jmgirard/intraclass/pull/77. Branch in sync with
+`origin/main` (`git merge-base --is-ancestor origin/main HEAD`), so all evidence
+below is gathered on the merge-base state.
+
+**AC1 — read to final page. PASS.** `pdfinfo` page counts match every
+`Extraction:` claim exactly: bhandary2006 14, bobak2018 11, mehta2018 19,
+saha2005 16, saha2012 21, xiao2009 9, xiao2013 25. The case the criterion
+singles out re-checked independently: mehta2018's reference 37 and its
+"How to cite this article" box sit on PDF p. 17, appendix table content
+continues on pp. 17–19, and the final page prints folio 2752 — content past the
+reference list, as the M65 lesson demands.
+
+**AC2 — every quoted string verbatim. PASS** (this was attempt 1's failure).
+Mechanical sweep of the seven notes: **184 quotations**, all quote marks
+balanced, **0 markup-inside-quotation**. Each was probed against its own
+source's text layer in both `-raw` and `-layout` modes, dehyphenated across line
+breaks and normalized for ligatures and punctuation; 150 matched outright. The
+34 remainder were adjudicated by hand and **every one resolved**:
+- ~20 are **not claims about a source** — repo terminology (`"GP6 axes"`,
+  `"a CI method's oracle is coverage"`), note headings (`"Author
+  reconciliation"`, `"The ρ_L = 0.6 fence"`), a ROADMAP row title, search terms,
+  and one quoting the note's *own* superseded wording (`"§5 does not [invert]"`).
+- Ellipsis- and math-symbol-bearing quotes (`φ̂_ml`, `θ̂`, `ρ_i`) confirmed by
+  targeted fragment probe.
+- **Ligature drops** — this journal family renders `ffi/fi/fl` as a gap, so
+  `"efficiency"` extracts as `eciency`; three saha2005 quotes and one saha2012
+  quote confirmed verbatim once probed ligature-tolerantly.
+- **Two-column interleaving** — `bobak2018`'s p. 7 quote on small sample sizes
+  is unfindable under `-layout` (BMC's two columns interleave across the page)
+  and verbatim under `-raw`, hyphenated as `sam- ple`.
+- **One quotation lives in figure artwork with no text layer**: mehta2018's
+  `"bootstrap sampling techniques"` returns zero hits in every extraction mode,
+  and a 200-DPI render of PDF p. 11 shows Figure 2 step 5 printing "Apply
+  bootstrap sampling techniques to combine results from `l` samples…" — the
+  note's anchor (Figure 2, step 5) is exactly right. **The text layer alone
+  would have produced a false altered-quotation finding here**, which is the
+  same failure mode AC4 exists to prevent, arriving from the other direction.
+- The one **cross-source** quotation class that failed attempt 1 is clean:
+  `bobak2018`'s koo2016 attribution is now an unquoted paraphrase matching
+  `koo2016.md` and `mehta2018.md`; koo2016's band words `"poor"`/`"moderate"`/
+  `"good"` are confirmed printed in koo2016; and `saha2005`/`saha2012`'s
+  `"Saha and Paul"` is confirmed as saha2012's own §2.1 citation text.
+
+**AC3 — anchors resolve. PASS.** 73 distinct page anchors across the five
+folio-paginated sources checked by extracting each claimed page and matching its
+printed folio: bhandary2006 11, mehta2018 19, saha2005 16, xiao2013 19,
+xiao2009 8 — **all resolve**. The single out-of-range hit is mehta2018's p. 158,
+a correctly-attributed citation into koo2016. `bobak2018`'s 9 anchors verified
+against its `Page N of 11` footers (identity mapping, confirmed page by page),
+**including the fix cycle's p. 8 → p. 7 correction**; `saha2012` states its
+no-folio basis; `xiao2009`'s cover-sheet offset holds.
+
+**AC4 — absence claims settled by render. PASS.** Attempt 1's four
+render-settled claims stand (xiao2013's missing issue number at 400 DPI,
+saha2012's missing `ln` at 300 DPI, bhandary2006's `ppk` typo at 400 DPI,
+mehta2018's Appendix C capitals at 250 DPI). This attempt added a fifth render
+adjudication (mehta2018 Figure 2, 200 DPI, above) and re-settled the fix cycle's
+own plot-read at 1200 DPI. No absence claim in the diff rests on a text layer.
+
+**AC5 — nothing time-relative false at merge. PASS.** Zero unresolved hits
+across the seven notes for `at the time of writing | not yet | today | must be
+checked | not retrieved | as of M<n> | currently | so far | for now | at
+present` (quoted source text excluded); 22 dated observations carry the greps
+that settle them. The `"GP6 list"` correction re-verified against
+`cairn/DESIGN.md:153–156`, which names cluster count, incidence and raggedness
+as *examples* of GP6's practice and enumerates no axis registry — the notes'
+rewrite is accurate.
+
+**AC6 — no package value moved. PASS.** `git diff --name-only main..HEAD`
+touches only `cairn/` (11 files); no `.R`, `.Rd`, `tests/`, `man/`, `NAMESPACE`,
+`DESCRIPTION`, `.rds`/`.rda`; `.Rbuildignore:9` carries `^cairn$`, so the diff
+provably cannot reach the built package. `devtools::document()` produces no
+`man/`/`NAMESPACE` drift. `devtools::test()` under `NOT_CRAN=true CI=true`:
+**FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, the unchanged M69/M70 baseline.
+
+**AC7 — validate + staleness. PASS.** `cairn_validate` exit 0, all checks
+passed. The `references staleness` advisory stands at **2**, both survivors
+exactly `ORACLES.md` and `BIBLIOGRAPHY.md` (M72's scope) — the seven cleared by
+re-reading their sources, verified by reading each `Extraction:` line's re-read
+clause rather than trusting the wording.
+
+**Consistency gate (r-package profile).** `cairn_validate` all checks passed
+(advisories: 293 dangling pre-migration id tokens, expected; staleness 2 as
+above) ✓; `document()` no-diff ✓; `pkgdown::check_pkgdown()` "No problems
+found" ✓; README.Rmd untouched ✓; no new exports and no new top-level files ✓;
+NEWS entry not owed (docs-only, no user-visible change) ✓. No `DESIGN.md`
+principle changed, so `cairn_impact` is skipped.
 
 ### Attempt 1 — 2026-07-19 — **AC2 FAILED**, returned to `in-progress`
 
