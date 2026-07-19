@@ -1,18 +1,22 @@
 # trevethan2017 — cautions on ICC selection, reporting, and the interpretation bands
 
 **Provenance.** Ingested 2026-07-19 by M66 from `cairn/references/sources/trevethan2017.pdf` (gitignored).
-Pagination: **PDF pages 1–17**. The shelf copy is an online-first version carrying no journal pagination at all — no volume, no issue, no page range appears anywhere in it (see Open questions), so every anchor below is a PDF page and is written `PDF p. N` to keep that explicit.
+Pagination: **PDF pages 1–17**. The shelf copy is an online-first version carrying no journal pagination at all — no volume, no issue, no page range appears anywhere in it — so every anchor below is a PDF page and is written `PDF p. N` to keep that explicit. The issue version paginates 127–143 (maintainer-supplied 2026-07-19, M66 corrected 2026-07-19); **the anchors below were not re-mapped onto it** and remain PDF pages, so a `PDF p. N` here is roughly issue page `126 + N`, unverified.
 Extraction: verified 2026-07-19 against the source (all 17 PDF pages read through the reference list); Table 1, Table 2, both figure captions, and the § 4 band criteria confirmed in place — observed 2026-07-19.
 
-**Citation.** Trevethan, R. "Intraclass correlation coefficients: clearing the
-air, extending some cautions, and making some requests." *Health Services and
-Outcomes Research Methodology*. DOI 10.1007/s10742-016-0156-6. The shelf copy
+**Citation.** Trevethan, R. (2017). "Intraclass correlation coefficients: clearing
+the air, extending some cautions, and making some requests." *Health Services and
+Outcomes Research Methodology, 17*, 127–143. DOI 10.1007/s10742-016-0156-6.
+The shelf copy
 prints the running head "Health Serv Outcomes Res Method", the dates "Received:
 28 March 2016 / Revised: 30 July 2016 / Accepted: 18 August 2016", "© Springer
 Science+Business Media New York 2016", and "Published online: 23 August 2016".
 Author affiliation as printed: "Independent academic researcher and author,
-Albury, NSW, Australia". **The 2017 in the citekey is the issue year, which this
-copy does not print** — see Open questions.
+Albury, NSW, Australia". **The year, volume, and page range above come from the
+issue version of record, supplied by the maintainer 2026-07-19, not from the
+shelf copy**, which is online-first and prints none of them (M66, corrected
+2026-07-19). No issue number was supplied, so none is asserted. The `2017`
+citekey is now corroborated.
 
 **Role.** A cautions-and-reporting paper, not a methods paper: it supplies no
 estimator and no reference value. Its relevance to this package is that it is the
@@ -217,16 +221,19 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
 
 ## Open questions
 
-- **The shelf copy has no journal pagination.** It prints a DOI, the received/
-  revised/accepted dates, an online-publication date of 23 August 2016, and a
-  © 2016 line — but no volume, issue, or page range, so it is an online-first
-  copy rather than the issue version of record — `INDEX.md`'s shelf inventory
-  lists this note among four such copies, alongside `tenhove2022`, `tenhove2024`,
-  and `tenhove2020`. The citekey's
-  `2017` is therefore *not* corroborated by this PDF. `BIBLIOGRAPHY.md`'s entry
-  should carry volume/issue/pages from the issue version, which is not on the
-  shelf and was not consulted here — flagged for the maintainer rather than
-  filled in from memory (`PRINCIPLES.md` #4) — observed 2026-07-19.
+- **RESOLVED 2026-07-19 — the shelf copy has no journal pagination, but the issue
+  version's is now recorded.** The PDF prints a DOI, the received/revised/accepted
+  dates, an online-publication date of 23 August 2016, and a © 2016 line — but no
+  volume, issue, or page range, so it is an online-first copy rather than the
+  issue version of record; `INDEX.md`'s shelf inventory lists it among four such
+  copies, alongside `tenhove2022`, `tenhove2024`, and `tenhove2020`. This entry
+  originally flagged the missing year/volume/pages **for the maintainer rather
+  than filling them in from memory** (`PRINCIPLES.md` #4); the maintainer supplied
+  them on 2026-07-19 — *Health Services and Outcomes Research Methodology* **17,
+  127–143 (2017)** — and the Citation above now carries them, corroborating the
+  citekey. Two residuals: no issue number was supplied, and the extraction anchors
+  were **not** re-mapped from PDF pages onto issue pages (M66, corrected
+  2026-07-19).
 - The six Table 2 values rest on unpublished doctoral data (McAra 2015) that the
   paper does not reproduce, so they are recorded as printed and **cannot** be
   independently recomputed — unlike the `bartko1966`/`bartko1976` examples, which

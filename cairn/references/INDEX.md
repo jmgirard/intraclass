@@ -151,7 +151,10 @@ Four shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
 (© 2021 and © 2022 respectively, no journal pagination), `tenhove2020` is an
 author/accepted manuscript with no publisher fields at all, and `trevethan2017` is
-an online-first copy with no journal pagination (M66). A fifth, `jorgensen2019`,
+an online-first copy with no journal pagination (M66) — though for that one the
+issue version's year, volume, and pages are now recorded from a maintainer-supplied
+citation, so only its *anchors* remain PDF-based (corrected 2026-07-19). A fifth,
+`jorgensen2019`,
 was an author manuscript with no year, venue, or pagination at all; the published
 version of record arrived on the shelf as `vanderark2023` and **supersedes it**
 (corrected 2026-07-19) — the preprint PDF is still on the shelf but nothing cites
@@ -161,9 +164,13 @@ Two citekeys are **not** corroborated by their source's printed publication year
 renamed (renaming would break the milestone Scope lists and every cross-reference):
 `shieh2015` is *Behavior Research Methods* 48(3):994–1003, **2016** — the 2015 is
 the online/copyright year printed on the same page.
-`trevethan2017` is the second and milder case: its shelf copy prints no publication
-year at all (only © 2016 and an online date), so the `2017` is *uncorroborated*
-rather than contradicted — `BIBLIOGRAPHY.md` withholds the year there too.
+`trevethan2017` **was** the second and milder case: its shelf copy prints no
+publication year at all (only © 2016 and an online date), leaving the `2017`
+*uncorroborated* rather than contradicted. It is no longer an open case — the
+maintainer supplied the issue version on 2026-07-19 (*Health Services and Outcomes
+Research Methodology* **17, 127–143, 2017**), which corroborates the citekey, and
+`BIBLIOGRAPHY.md` now carries year, volume, and pages (corrected 2026-07-19).
+So `shieh2015` is the only citekey still uncorroborated by its own source.
 
 **M65 — interval methods & robustness (7): ingested 2026-07-18.** Reading them
 cold established that the cluster is **not** the one-way-interval-methods group
