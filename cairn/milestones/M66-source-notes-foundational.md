@@ -83,7 +83,7 @@ qualitative band entering package output → refused outright (IP3).
 - [x] T2: Notes for the selection-relevant pair — `tenhove2018`, `shieh2015`;
       record their bearing on `choose_icc()` and log any divergence from
       current guidance as a finding.
-- [ ] T3: Notes for the design pair — `hedges2012` (multilevel ICC variance),
+- [x] T3: Notes for the design pair — `hedges2012` (multilevel ICC variance),
       `jorgensen2019` (planned-missing efficiency). Flag in `jorgensen2019`'s
       note that it is commonly confused with Jorgensen (2021) — the O-SEM
       source, a different paper.
@@ -115,6 +115,10 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-19: AC3 finding (shieh2015) — FOR A SEPARATE MILESTONE. Shieh shows the conventional average-score ICC(2)=1-1/F* is negatively biased (-2(1-rho*)/(N-3)) and MSE-dominated by four alternatives (p. 997, p. 1001). It critiques an ANOVA plug-in the package does NOT use: unit="average" applies divisor k_eff to REML components (R/estimand.R:182). No choose_icc() change follows (estimand vs estimator are orthogonal axes); whether the REML estimator shares that bias is NOT established by the paper and is the open question worth its own milestone.
 - 2026-07-19: finding (shieh2015 p. 1001) — published support for "groups beat judges at fixed N*K" in the one-way design; adjacent to the parked d_study() CI-width precision-planning candidate but NOT its oracle (Shieh's criterion is point bias/MSE, not interval width). Recorded in the note so the distinction is not rediscovered.
 - 2026-07-19: finding (tenhove2018 Table 1) — the Vision row prints Max=3 while p. 69 states a 1-4 scale; unresolved (checking needs the irr package, not a dependency). Recorded as printed, dated, no repo value affected.
+- 2026-07-19: T3 done — hedges2012 and jorgensen2019 notes written, both read end-to-end and extraction-verified; all seven M66 notes now exist.
+- 2026-07-19: finding (jorgensen2019) — the citekey year is WRONG and contradicted by the source: the shelf copy is an author manuscript with no venue/year/pagination, its bibliography cites ten Hove et al. 2021 and 2022, and the PDF was typeset 2022-09-27. BIBLIOGRAPHY must not assert 2019 as a publication year; flagged for the maintainer (#4). Pagination basis is chapter-internal ms. pages 1-10.
+- 2026-07-19: resolved while writing jorgensen2019 — its two ten Hove citations are works the repo already holds under LATER citekeys (its "2021 multilevel" = repo tenhove2022; its "2022 updated guidelines" = repo tenhove2024), cited pre-publication. Recorded in the note so neither is chased as an uningested source.
+- 2026-07-19: finding (hedges2012) — largely OUTSIDE the contract boundary (IP2): its ICCs have no rater facet and index levels of nesting, not what is generalized over, so its "multilevel ICC" is a different quantity from tenhove2022's. Recorded in the note as boundary evidence; its symmetric Wald intervals are the contrast case for PRINCIPLES #3.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

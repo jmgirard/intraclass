@@ -37,6 +37,16 @@ and milestones; never restate a value here.
 - [fleiss1973.md](fleiss1973.md) — source note (M64): weighted kappa with squared
   weights ≡ the two-way random single-rating **agreement** ICC at k = 2; shelf
   evidence for the kappa–ICC boundary, not an oracle.
+- [hedges2012.md](hedges2012.md) — source note (M66): delta-method large-sample
+  variances of variance-share ICCs in three- and four-level nested designs
+  (Eqs. 1, 4–6, 10–15) with a worked Kentucky example. **Outside the contract
+  boundary (IP2) — no rater facet**; its "multilevel ICC" is not the package's.
+  Its symmetric Wald intervals are the contrast case for `PRINCIPLES.md` #3.
+- [jorgensen2019.md](jorgensen2019.md) — source note (M66): optimizing a
+  planned-missing observational design for IRR on a fixed budget — budget /
+  workload / team-size algebra (Table 1) and MCMC coverage holding at 0.94 under
+  83–99 % missingness on `ICC(A,1)`. **Not** the O-SEM paper; and the citekey
+  year is contradicted by the source (it cites 2022 works).
 - [jorgensen2021.md](jorgensen2021.md) — source note (M64): the **O-SEM** source.
   Eq. 6 defines σ²_i as the raw variance of the effects-coded indicator intercepts
   (÷ k−1, no bias correction); p. 124 documents the SEM-vs-mixed-model gap.
