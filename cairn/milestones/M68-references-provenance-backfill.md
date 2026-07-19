@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M68: References provenance backfill + shelf rename to `sources/`
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — the governing principles are PRINCIPLES.md #4 (no fabricated reference values) and #12 (seeded and sourced), the other home under D-001 -->
@@ -42,31 +42,33 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: All 24 pages carry a `**Provenance.**` block naming an ingested date,
+- [x] AC1: All 24 pages carry a `**Provenance.**` block naming an ingested date,
       a source pointer, a pagination basis, and an `Extraction:` status;
       `cairn_validate`'s `references index<->disk` check PASSes.
-- [ ] AC2: Every ingested date and ingesting milestone is derived from evidence,
+- [x] AC2: Every ingested date and ingesting milestone is derived from evidence,
       not asserted — the work log names the derivation command and records the
       complete page→(date, milestone) mapping, grouped by ingesting milestone
       and readable as one-line work-log entries (#4 applied to provenance).
-- [ ] AC3: Pagination basis is stated per page, and the three shelf PDFs that
+- [x] AC3: Pagination basis is stated per page, and the three shelf PDFs that
       are not the version of record — `tenhove2022`, `tenhove2024`
       (advance-online), `tenhove2020` (author manuscript) — each say so in their
       block, consistent with `INDEX.md` and the M64 lesson.
-- [ ] AC4: No page claims a verification this milestone did not perform. Every
-      `Extraction:` status sits on one physical line and carries its own
-      `— observed YYYY-MM-DD` stamp; the 19 shelf-ingested notes read
-      unverified-first-pass, and the 5 pages with no shelf source of their own
-      read the template's `derived —` / `first-hand record —` forms.
-- [ ] AC5: `cairn/references/sources/` replaces `pdf/` — directory, `.gitignore`,
+- [x] AC4: No page claims a verification this milestone did not perform, and
+      every `Extraction:` status is honest about what was and was not read.
+      Each status sits on one physical line and carries its own
+      `— observed YYYY-MM-DD` stamp. The form a page uses (`unverified —`,
+      `derived —`, `first-hand record —`) follows from that page's actual
+      situation and is never assigned in advance — a criterion that fixes the
+      form breaks whenever a fact is corrected, which is backwards.
+- [x] AC5: `cairn/references/sources/` replaces `pdf/` — directory, `.gitignore`,
       `INDEX.md`, `LESSONS.md`, and all 19 note pointers; no live file names
       `references/pdf/` outside the never-edited archives (`cairn/legacy/`,
       `milestones/archive/`, `reviews/archive/`), and the `scaffold
       deprecations` advisory clears.
-- [ ] AC6: M66 and M67 each carry a gated amendment requiring a conforming
+- [x] AC6: M66 and M67 each carry a gated amendment requiring a conforming
       provenance block on every note they author and naming the `sources/` path,
       each with its own work-log line.
-- [ ] AC7: `cairn_validate` exits 0, and the profile `verify` slot is clean
+- [x] AC7: `cairn_validate` exits 0, and the profile `verify` slot is clean
       (`NOT_CRAN=true CI=true`, failed + error = 0).
 
 ## Coverage
@@ -124,6 +126,8 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: REVIEW SEND-BACK (1st) — two criteria fail as written, no charitable reading applied. AC4 says every Extraction status "reads unverified-first-pass"; 5 of 24 pages correctly read `derived —`/`first-hand record —` (no shelf source to re-read, per the synthesis template) — its substantive clause (no page claims an unperformed verification) DOES hold, 0/24. AC2 requires the work log to "show the derived page→(date, milestone) table"; the command and full mapping are recorded but as a one-line grouped entry, because work-log entries must be one physical line — a one-line entry cannot literally be a table. Both are plan-time drafting errors (criteria assuming a format the rules forbid, and assuming every page is shelf-ingested). Evidence for AC1/AC3/AC5/AC6 and cairn_validate exit 0 all clean. Back to in-progress for a gated amendment.
 - 2026-07-18: gated amendment (user approved at the send-back chip) — AC2 now asks for the derivation command plus the complete page→(date, milestone) mapping grouped by milestone and readable as one-line entries (was: a "table", which the one-line work-log rule forbids); AC4 now leads with the substantive protection (no unperformed verification claimed) and states both legitimate status forms — unverified-first-pass for the 19 shelf notes, `derived —`/`first-hand record —` for the 5 with no shelf source. No deliverable changed; no file on the branch differs. Status → review for a fresh pass.
 - 2026-07-18: REVIEW SEND-BACK (2nd) — the three actioned review fixes (F1 BIBLIOGRAPHY, F2 sem-multilevel-pilot, F3 ORACLES) changed what is true about two pages, so AC4's enumeration clause is false again: ORACLES and BIBLIOGRAPHY now correctly read `unverified —`, not `derived —`. Substantive clauses still hold (0/24 claim a verification; 24/24 one-line dated). Same drafting error as round 1 — the criterion specifies the SURFACE FORM a status must take instead of the PROPERTY it must have, so it breaks every time a fact is corrected. Amending to specify honesty + format and to stop pre-assigning forms.
+- 2026-07-18: gated amendment 2 (user approved at the 2nd send-back chip) — AC4 now specifies the PROPERTY (no unperformed verification claimed; honest about what was read; one physical line; dated) and explicitly refuses to pre-assign a status form, so correcting a fact can no longer falsify it. Root cause of both send-backs recorded. Status → review, round 3.
+- 2026-07-18: CORRECTION to the T6 line above — it recorded `references staleness` WARNing on "exactly 20 pages". After review finding F3 made ORACLES.md's extraction status honest, the count is **21** (the 19 shelf notes + BIBLIOGRAPHY + ORACLES). The 20 was correct when written and is superseded, not edited (D-045).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -131,36 +135,38 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 ## Review
 <!-- owner: review · exclusive -->
 
-**Round 2** (round 1 sent back 2026-07-18 on AC2/AC4 wording; both amended via
-gate, no deliverable changed).
+**Round 3.** Round 1 sent back on AC2/AC4 wording; round 2 sent back on AC4
+again after the actioned findings corrected two pages. Both send-backs were the
+same plan-time drafting error — criteria specifying a surface FORM rather than
+the PROPERTY — now fixed at the root in AC4.
 
 ### Acceptance-criteria evidence (fresh, by command, 2026-07-18)
 
-- **AC1** — 24/24 pages carry `**Provenance.**` with an ISO ingested date,
-  source pointer, `Pagination:`, and `Extraction:`; `cairn_validate`'s
-  `references index<->disk` check PASSes.
-- **AC2** — work log records the derivation command
-  (`git log --diff-filter=A --format='%ad|%s' --date=short -- <page>`) and the
-  complete mapping, all six groups present and summing to 24: cairn-init/
-  2026-07-12 (1), M53/2026-07-16 (1), M62/2026-07-18 (3), M63/2026-07-18 (2),
-  M64/2026-07-18 (10), M65/2026-07-18 (7).
-- **AC3** — 24/24 carry a `Pagination:` line; the three non-version-of-record
-  PDFs each carry an explicit conversion warning (`tenhove2022` AOP 1–17,
-  `tenhove2024` AOP 1–13, `tenhove2020` manuscript 1–14 vs Springer 79–93).
-- **AC4** — 0/24 claim a verification; 24/24 `Extraction:` statuses are one
-  physical line ending `— observed 2026-07-18.`; 19 read unverified-first-pass,
-  the 5 with no shelf source read `derived —` / `first-hand record —`.
-- **AC5** — 0 live files name `references/pdf/` (archives excluded per the
-  criterion); `.gitignore:12` names `sources/`; `sources/` holds all 30 PDFs;
-  `scaffold deprecations` advisory now OK.
-- **AC6** — M66 and M67 each name `references/sources/` in Scope, each require a
-  provenance block in AC1, each carry their own dated amendment work-log line.
-- **AC7** — `cairn_validate` exit 0, 15/15 PASS; profile `verify` slot 1802 pass,
-  0 fail, 0 error, 23 skip, 2 warn (both pre-existing engine conditions; branch
-  touches no R file).
+- **AC1** — 24/24 pages carry `**Provenance.**` with an ISO ingested date, source pointer, `Pagination:`, `Extraction:`; `references index<->disk` PASSes.
+- **AC2** — work log names the derivation command and the complete mapping, six groups summing to 24. Independently re-derived by the [O] reviewer, who confirmed all 24 including the two that only resolve correctly *without* `--follow` (ORACLES/BIBLIOGRAPHY) and REFERENCES, where `--follow` would wrongly report 2026-07-06/M0.
+- **AC3** — 24/24 carry `Pagination:`; the three non-version-of-record PDFs carry explicit conversion warnings. [O] reviewer cross-checked every page's anchor range against its stated basis (tenhove2020 anchors 1–13 ⊂ 1–14; tenhove2022 1–15 ⊂ 1–17; tenhove2024 1–13; saha2012 zero page anchors; bobak2018 3–10, incompatible with `18:93` as a page).
+- **AC4** — 0/24 claim a verification; 24/24 statuses are one physical line ending `— observed 2026-07-18.`; each form matches its page's real situation after findings F1/F3 corrected two of them.
+- **AC5** — 0 live dangles; `.gitignore:12` names `sources/`; all 30 PDFs present under `sources/`; `scaffold deprecations` OK. All 19 pointer folds read by hand and by two reviewers — no prose damaged.
+- **AC6** — M66/M67 each name `references/sources/`, each require a provenance block in AC1, each carry a dated amendment work-log line. [S] blame reviewer confirmed both were still `planned`, so nothing was overridden mid-implementation.
+- **AC7** — `cairn_validate` exit 0, 15/15 PASS; `verify` slot 1802 pass, 0 fail, 0 error. `cairn/` is `.Rbuildignore`d and the review fixes touched only cairn markdown, so the R-side evidence is unaffected by them.
 
 ### Consistency gate
 
 - Universal: `cairn_validate` exit 0. No DESIGN.md principle changed → `cairn_impact` skipped.
-- Toolchain (`r-package` profile `consistency-gate` slot): 0 R/NAMESPACE/man/data/DESCRIPTION/README files in the diff, so generated-file drift is structurally impossible; `devtools::document()` produces no diff; `pkgdown::check_pkgdown()` "No problems found"; README.md current; no user-visible change, so no NEWS entry owed; full `devtools::check()` run at review.
+- Toolchain (`r-package` `consistency-gate`): 0 R/NAMESPACE/man/data/DESCRIPTION/README files in the diff; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; README current; no user-visible change so no NEWS entry owed; `devtools::check()` **0 errors, 0 warnings, 0 notes**.
+
+### Independent review — three lenses + scorer
+
+- **[O] diff-bug (Opus):** 3 findings, all verified against git before triage.
+- **[S] blame-history (Sonnet):** no findings. D-007's byte-identical property intact; M64/M65 pagination traps faithfully restated; LESSONS.md corrected in place per the corrections rule; amend-via-gate used correctly for M66/M67; no IP4 archive touched.
+- **[S] prior-PR-comments (Sonnet):** no findings. Method note worth keeping: PRs #69/#70/#71 carry **zero** GitHub inline review comments — this repo's review record lives in `LESSONS.md` and archived milestone `## Review` sections, which is where this lens must look.
+- **[S] scorer (Sonnet), fresh agent:** F1 = 92, F2 = 85, F3 = 74.
+
+**Actioned — F1 (92), BIBLIOGRAPHY.md provenance factually wrong.** Claimed citations were carried over unchanged at the D-007 split and never re-checked. Git: 16 entries at the split, 18 after M64, 27 after M65, with corrections to survivors (mcgraw1996 errata, tenhove2024 DOI). **Fixed** — block records the real three-milestone history and an extraction status splitting the 16 moved-as-text entries from the 11 authored from PDFs.
+
+**Actioned — F2 (85), sem-multilevel-pilot.md anachronistic inputs.** Named `tenhove2022.md`/`jorgensen2021.md` as inputs to a 2026-07-16 ingestion; M64 created both on 2026-07-18. **Fixed** — block now names the *papers* and states the page is not downstream of those notes.
+
+**Actioned — F3 (74), ORACLES.md claimed an unperformed read.** "none re-read since 2026-07-18" implied a read D-007 says never happened (the split moved text byte-identically), and that wording let the registry escape the staleness WARN its twin correctly received. **Actioned despite scoring below 80:** the scorer's 74 rested solely on being unable to verify the author's intent from git (the pre-commit draft was never committed); the author confirms the wording was changed to silence a validator message, and the defect stands on D-007 alone without that claim. **Fixed** — staleness list correctly goes 20 → 21.
+
+No finding was excluded or dropped. Two lenses reported clean.
 
