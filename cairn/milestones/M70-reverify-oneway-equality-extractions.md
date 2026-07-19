@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m70-reverify-oneway-equality`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m70-reverify-oneway-equality` · PR https://github.com/jmgirard/intraclass/pull/76   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -34,26 +34,26 @@ not applied here.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] Each of the six notes has been read against its shelf PDF **to that
+- [x] Each of the six notes has been read against its shelf PDF **to that
       source's final page** (appendices can follow the reference list —
       LESSONS 2026-07-18/M65), and its `Extraction:` line records a dated
       verified status naming what was checked.
-- [ ] Every quoted string in **every one of the six notes** has been re-read
+- [x] Every quoted string in **every one of the six notes** has been re-read
       against its source and confirmed verbatim or corrected. The sweep is
       mechanical and per-note — enumerating all quotations in each note, not
       only those a prior finding named (the M67 recurrence, LESSONS
       2026-07-19).
-- [ ] Every page/table anchor resolves to the claimed page in the shelf PDF,
+- [x] Every page/table anchor resolves to the claimed page in the shelf PDF,
       with the pagination basis stated wherever the PDF is not the version of
       record.
-- [ ] Every absence claim ("not in the paper", "prints no DOI") is settled by
+- [x] Every absence claim ("not in the paper", "prints no DOI") is settled by
       a rendered page image at high DPI, never the text layer alone, or else
       is stated as "not checked" and asserts nothing further.
-- [ ] No note asserts anything time-relative that is false at merge.
-- [ ] No package value changes: any correction that would move an oracle
+- [x] No note asserts anything time-relative that is false at merge.
+- [x] No package value changes: any correction that would move an oracle
       value, test fixture, or documented behavior is escalated as a review
       finding with its citation, not silently applied.
-- [ ] `cairn_validate` passes and the six notes no longer appear in the
+- [x] `cairn_validate` passes and the six notes no longer appear in the
       `references staleness` advisory — achieved by re-reading the sources,
       with no status line reworded to clear the advisory (LESSONS
       2026-07-18/M68).
@@ -109,3 +109,50 @@ not applied here.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Reviewed 2026-07-19 by /milestone-review. PR
+https://github.com/jmgirard/intraclass/pull/76. Docs-only, all changes under
+`cairn/` (6 notes + INDEX.md + ROADMAP + this file).
+
+### Acceptance-criteria evidence (fresh)
+
+- **AC1** (read to final page, dated status naming what was checked) — all six
+  `Extraction:` lines read `verified 2026-07-19` and name a PDF page count that
+  matches `pdfinfo` exactly: ukoumunne2003 17, ohyama2025 16, donner2002 13,
+  konishi1989 13, naik2007 13, young1998 11. Appendices confirmed reached where
+  present (ukoumunne2003 App. A pp. 3818–3820, konishi §5 refs to p. 105).
+- **AC2** (per-note quotation sweep, verbatim or corrected) — mechanical sweep
+  over all six: **93 quotations** (13/9/21/15/20/15), every one verbatim against
+  its source and **0 carrying markdown inside the quote marks**.
+- **AC3** (anchors resolve; pagination basis where not version of record) — every
+  anchor re-checked during the reads. None of the six is a preprint/advance-online
+  copy — all are published versions of record with journal pagination — so the
+  pagination-basis clause is vacuously satisfied; each note states its
+  PDF-page↔printed-page correspondence regardless.
+- **AC4** (absence claims settled by high-DPI render, never text layer) —
+  konishi1989's false illegibility claim was overturned with a 400-DPI crop of
+  p. 99 and the expression transcribed; the four "nothing traces to this note"
+  grep claims (donner2002, konishi1989, naik2007, young1998) were **re-grepped
+  fresh at review — 0 package hits each**.
+- **AC5** (no false time-relative assertion) — sweep for `at the time of
+  writing` / `not yet` / `today` / `must be checked` / `not retrieved` /
+  `has not been read` across the six: **0 hits**.
+- **AC6** (no package value changes) — branch diff is docs-only under `cairn/`;
+  `git diff --name-only main...HEAD` lists no file outside it. No oracle value,
+  test fixture, or documented behavior touched.
+- **AC7** (`cairn_validate` passes; six gone from the advisory by re-reading) —
+  `cairn_validate` exit 0, all checks PASS; `references staleness` advisory
+  **15 → 9** (the nine remaining are M65's seven + ORACLES.md + BIBLIOGRAPHY.md,
+  M71/M72 scope). Cleared by re-reading sources, no status line reworded.
+
+### Consistency gate
+
+- `cairn_validate.py` — exit 0, all checks PASS (302 advisory WARNs, none a gate
+  failure); `coverage complete` PASS.
+- Principle impact — IP2 is in the slot but M70 works *under* IP2, it does not
+  change its text; `cairn_impact --changed` not applicable.
+- Toolchain (`r-package` `consistency-gate`) — diff is docs-only under `cairn/`
+  (`.Rbuildignore`d); no R/man/DESCRIPTION/NEWS/README/pkgdown file changed, so
+  `document()`-no-diff, pkgdown, NEWS-entry, and `R CMD check` checks are no-ops.
+  `devtools::test()` at implement: FAIL 0 / PASS 1802, identical to the M69
+  baseline.
