@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M71: Re-verify the robustness and interval-methods extractions (7 notes)
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m71-reverify-robustness-extractions`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m71-reverify-robustness-extractions` · https://github.com/jmgirard/intraclass/pull/77   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -35,7 +35,7 @@ act on it. Any change to R code, tests, or oracle values.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] Each of the seven notes has been read against its shelf PDF **to that
+- [x] Each of the seven notes has been read against its shelf PDF **to that
       source's final page** — `mehta2018` in particular, whose Appendices
       A–C sit at pp. 2750–2752 *after* the reference list and were once
       falsely recorded absent (LESSONS 2026-07-18/M65).
@@ -43,17 +43,17 @@ act on it. Any change to R code, tests, or oracle values.
       re-read against its source and confirmed verbatim or corrected. The
       sweep is mechanical and per-note, not driven by prior findings
       (LESSONS 2026-07-19/M67).
-- [ ] Every page/table anchor resolves to the claimed page in the shelf PDF,
+- [x] Every page/table anchor resolves to the claimed page in the shelf PDF,
       with the pagination basis stated wherever the PDF is not the version of
       record.
-- [ ] Every absence claim is settled by a rendered page image at high DPI,
+- [x] Every absence claim is settled by a rendered page image at high DPI,
       never the text layer alone, or else is stated as "not checked" and
       asserts nothing further.
-- [ ] No note asserts anything time-relative that is false at merge.
-- [ ] No package value changes: any correction that would move an oracle
+- [x] No note asserts anything time-relative that is false at merge.
+- [x] No package value changes: any correction that would move an oracle
       value, test fixture, or documented behavior is escalated as a review
       finding with its citation, not silently applied.
-- [ ] `cairn_validate` passes and the seven notes no longer appear in the
+- [x] `cairn_validate` passes and the seven notes no longer appear in the
       `references staleness` advisory — achieved by re-reading the sources,
       with no status line reworded to clear it (LESSONS 2026-07-18/M68).
 
@@ -109,9 +109,113 @@ act on it. Any change to R code, tests, or oracle values.
 - 2026-07-19: T8 consolidated quotation sweep — **193 quoted strings across the eight touched notes** (xiao2013 35, saha2012 30, mehta2018 29, bobak2018 26, saha2005 25, bhandary2006 19, young1998 15, xiao2009 14), every one re-read against its source during T1–T7 and re-checked mechanically here; all quote marks balanced, **0 markup-inside-quotation remaining**. The end-of-milestone re-run earned its keep exactly as the M70 corollary predicts: it found three inherited markup-in-quote instances that per-task checks had passed over (`bobak2018`'s `**consistency**`, `mehta2018`'s abstract clause, `saha2012`'s §3 boundary block), two more in `xiao2009` (`**2010**`, `**95 %**`), and a spurious ellipsis in `xiao2009`'s p. 117 quote. **Correction to my own T7 work-log line, which is history and so superseded rather than edited: it claims "24 quoted strings swept" for `xiao2009`; the mechanical count is 14.** I asserted that number instead of counting it — the precise failure the M70 lesson names, committed in the act of recording compliance with it. The counts above are machine-produced.
 - 2026-07-19: T9 time-relative sweep across the seven notes plus the `Traces to` lead sentences. Seven of eight leads rewritten to dated observations carrying the grep that settles them; `young1998.md`'s lead is left as M70 wrote it — undated, but M70-owned and outside this milestone's gated amendment, so **noticed and deliberately not touched** rather than missed. Substantive find: three claims across `bobak2018` (×2) and `mehta2018` (×1) asserted membership of a **"GP6 list" of known-failure axes that does not exist** — GP6 is a practice ("sweep whatever axis the known failure mode grows") naming cluster count, incidence and raggedness only as examples, and neither `DESIGN.md` nor `PRINCIPLES.md` carries an enumerated axis registry. A standing claim about the repo's own state, read as durable and false; all three rewritten to say what is checkable, and both notes given a clarifier under the inherited "GP6 known-failure axes" heading. Also dated `bhandary2006`'s bidirectional cross-reference claim, re-verified by count (cited by donner2002 x2, konishi1989 x1, naik2007 x3, young1998 x5).
 - 2026-07-19: T10 done. `INDEX.md` updated — the shelf census now reads **all 30 notes dated-verified** and the source-note re-verify backlog is recorded as CLOSED (M72 keeps `ORACLES.md` + `BIBLIOGRAPHY.md`); an M71 findings block added, per note, plus the cross-cutting observation that three notes had silently repaired their source and now transcribe as printed. Gates: `cairn_validate` **15/15 PASS**, all remaining advisories judgment calls (293 dangling pre-migration id tokens, expected) — and the **`references staleness` advisory fell 9 → 2**, the two survivors being exactly `ORACLES.md` and `BIBLIOGRAPHY.md`, i.e. the seven notes cleared by re-reading their sources, not by rewording a status line (AC7, LESSONS 2026-07-18/M68). `devtools::test()` under `NOT_CRAN=true CI=true`: **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, the unchanged M69/M70 baseline. Diff confirmed **docs-only**: 11 files, all under `cairn/`, no R code, test, fixture or oracle value touched. Milestone status -> review.
+- 2026-07-19: /milestone-review attempt 1 FAILED **AC2** and returned the milestone to `in-progress`. Six criteria pass with fresh evidence recorded in the Review section (AC1 page counts vs `pdfinfo` + mehta2018's post-reference appendices; AC3 73 folio-checked anchors; AC4 four render-settled absence claims; AC5 zero unresolved time-relative hits; AC6 diff provably fenced from the package by `.Rbuildignore:9`; AC7 validate 15/15 and staleness 9 → 2). **AC2 fails on one altered quotation**: `bobak2018.md` quotes "may reflect low subject variability" as koo2016 p. 158, which prints "A low ICC could not only reflect the low degree of rater or measurement agreement but also relate to the lack of variability among the sampled subjects" — the string occurs nowhere in koo2016, and both `koo2016.md` and `mehta2018.md` render the same content correctly as an unquoted paraphrase. Pre-existing M65 content, but AC2 is scoped to every quoted string in the seven notes and the implement sweep skipped it on the judgment call that it was "a koo2016 quote, not a bobak2018 claim" — the exact shape the M67 lesson warns about. A mechanical sweep for cross-source quotations found only this one, so the defect set is complete. [S] blame-history and [S] prior-PR lenses both clean; [O] diff-bug was still in flight at send-back and its findings fold into the same fix cycle.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Attempt 1 — 2026-07-19 — **AC2 FAILED**, returned to `in-progress`
+
+PR https://github.com/jmgirard/intraclass/pull/77 (draft).
+
+**AC1 — read to final page. PASS.** All seven `Extraction:` lines claim a page
+count matching `pdfinfo` exactly (25/21/19/16/14/11/9). The case the criterion
+singles out was checked independently: `mehta2018`'s reference 37, its
+"How to cite this article" box, and Appendix A all sit on PDF p. 17 (= p. 2750),
+with Appendix C on the final page 19 (= p. 2752).
+
+**AC2 — every quoted string verbatim. FAIL.** Mechanical sweep: 182 quoted
+strings across the seven notes, all quote marks balanced, 0 markup-inside-
+quotation. Of these, 123 are claims about a source; each was probed against its
+PDF text layer (both `-layout` and `-raw`, dehyphenated, ligature-tolerant —
+these PDFs drop `ffi/fi/fl`), and 119 matched. Four did not resolve
+mechanically: two are non-source strings, and two are math-symbol manglings
+(`φ̂_ml`, `ρ_i`) confirmed verbatim by targeted fragment search.
+**One is a genuine altered quotation** — see the finding below.
+
+**AC3 — anchors resolve. PASS.** 73 distinct page anchors across the five
+folio-paginated sources checked by extracting each claimed page and matching its
+printed folio: all resolve. The two out-of-range hits are correctly-attributed
+citations into *other* papers (koo2016 p. 158; Cox & Snell 1968 p. 252).
+`bobak2018`'s 9 anchors each confirmed against its `Page N of 11` footer;
+`saha2012` states its no-folio basis and its only two page references are
+explicitly marked "of the PDF"; `xiao2009`'s new cover-sheet offset
+(`PDF N` = `journal 109 + N`) verified.
+
+**AC4 — absence claims settled by render. PASS.** The four absence claims M71
+introduced are each settled by a rendered page image, not the text layer:
+`xiao2013`'s missing issue number (400 DPI, header prints only
+`Comput Stat (2013) 28:2241–2265`), `saha2012`'s missing `ln` (300 DPI),
+`bhandary2006`'s `ppk` typo (400 DPI), `mehta2018`'s Appendix C capitals
+(250 DPI). The remaining absence-shaped statements ("no coverage probability
+anywhere in this paper") are pre-existing M65 content and are structural
+readings of the whole source, resting on AC1's verified full read.
+
+**AC5 — nothing time-relative false at merge. PASS.** Zero unresolved hits for
+`at the time of writing | not yet | today | must be checked | not retrieved |
+as of M<n> | currently | so far | for now | at present` across the seven notes
+(quoted source text excluded); 22 dated observations carry the greps that settle
+them.
+
+**AC6 — no package value moved. PASS.** `git diff --name-only main..HEAD`
+touches only `cairn/`; no `.R`, `.Rd`, `tests/`, `man/`, `NAMESPACE`,
+`DESCRIPTION`, `.rds`/`.rda`; `ORACLES.md` untouched; `.Rbuildignore:9` carries
+`^cairn$`, so the diff provably cannot reach the built package.
+`devtools::document()` produces no `man/`/`NAMESPACE` drift.
+
+**AC7 — validate + staleness. PASS.** `cairn_validate` exit 0, 15/15 PASS. The
+`references staleness` advisory falls 9 → 2 and the two survivors are exactly
+`ORACLES.md` and `BIBLIOGRAPHY.md` (M72's scope). Each of the seven carries a
+substantive re-read status, not a reworded one — checked by grepping the
+`Extraction:` lines for the re-read clause rather than trusting the wording.
+
+**Consistency gate (r-package profile).** `document()` no-diff ✓; README.Rmd
+untouched ✓; no new exports, so no `_pkgdown.yml` row owed ✓; no new top-level
+files ✓; NEWS entry not owed (docs-only, no user-visible change) ✓. CI on PR #77:
+`lint`, `pkgdown`, `format-check` pass; the `R CMD check` platform matrix was
+still pending when the milestone was sent back.
+
+**Independent review — three lenses.**
+- **[S] blame-history: clean, no findings.** Verified the `young1998` marker
+  discharge is substantiated by `bhandary2006`'s own p. 777/774 values rather
+  than asserted; confirmed the ROADMAP candidate row is byte-identical; confirmed
+  the "GP6 list" correction is accurate against `DESIGN.md:153`; confirmed D-006
+  and D-007 are untouched.
+- **[S] prior-PR-comments: no prior-PR evidence.** PRs #71/#72/#75/#76 carry no
+  review comments or review bodies (only Codecov bot output) — this repo's
+  reviews are conducted in-session. Zero findings, clean no-op.
+- **[O] diff-bug: still in flight when the milestone was sent back.** Its
+  findings, if any, are to be actioned in the same implement cycle as the AC2
+  fix; the send-back does not wait on it because AC2's failure is independent.
+
+#### Finding 1 — altered quotation in `bobak2018.md` (AC2 failure)
+
+`cairn/references/bobak2018.md` attributes a quoted string to `koo2016` p. 158:
+
+> `koo2016` makes in prose (p. 158: a low ICC "may reflect low subject
+> variability")
+
+koo2016 p. 158 (PDF p. 4) actually prints: "We have to understand that there are
+no standard values for acceptable reliability using ICC. A low ICC could not
+only reflect the low degree of rater or measurement agreement but also relate to
+the lack of variability among the sampled subjects, the small number of
+subjects, and the small number of raters being tested." The quoted string does
+not occur in koo2016 in any extraction mode. `koo2016.md:57` renders the same
+content correctly, as an unquoted paraphrase, as does `mehta2018.md:88`.
+
+The string is pre-existing M65 content, but AC2 is scoped to "every quoted
+string in **every one of the seven notes**", not to the diff, and it cites the
+M67 lesson precisely because a sweep that skips strings on a judgment call is
+how altered quotations survive. The implement pass classified this one as "a
+koo2016 quote, not a bobak2018 claim" and never checked it against koo2016.
+Read as written — and criteria are not reinterpreted at review — AC2 is not met.
+
+**Disposition:** status → `in-progress`. Fix by making the phrase an unquoted
+paraphrase (matching `koo2016.md`'s and `mehta2018.md`'s treatment) or by
+quoting koo2016 verbatim, then re-run the AC2 sweep **extended to cross-source
+quotations**, and re-review. A mechanical sweep of the seven notes for quoted
+strings attributed to a *different* paper found exactly this one, so the defect
+set is complete.
