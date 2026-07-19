@@ -40,7 +40,9 @@ qualitative band entering package output → refused outright (IP3).
       source named in Scope, each with the five validation-doctrine fields,
       page/table anchors on every extracted value, and a conforming
       `**Provenance.**` block (ingested date, source pointer, pagination basis,
-      dated `Extraction:` status) per M68.
+      dated `Extraction:` status) per M68. Each source is read to its final page
+      and its note ships a dated *verified* extraction status — these seven do
+      not join the standing re-verify backlog.
 - [ ] AC2: Each note's "what traces to it" field is honest — for a source
       nothing currently traces to, it states that explicitly and names what it
       *could* source, rather than manufacturing a connection.
@@ -55,6 +57,11 @@ qualitative band entering package output → refused outright (IP3).
       line per note; `cairn_validate` passes.
 - [ ] AC6: The profile `verify` slot is clean (`NOT_CRAN=true CI=true`,
       failed + error = 0).
+- [ ] AC7: No shipped note carries a claim about the repo's own state that is
+      false at merge time: every time-relative phrase and every absence
+      assertion in the seven notes is re-resolved after the last file-editing
+      task lands, absences rest on a read to the source's final page, and any
+      surviving repo-state claim is written as a dated observation.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
@@ -64,7 +71,8 @@ qualitative band entering package output → refused outright (IP3).
 - AC3 → T2
 - AC4 → T1, T2
 - AC5 → T4
-- AC6 → T5
+- AC6 → T6
+- AC7 → T5
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
@@ -81,7 +89,12 @@ qualitative band entering package output → refused outright (IP3).
       source, a different paper.
 - [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [ ] T5: Run the profile `verify` slot; open the PR and drive CI green.
+- [ ] T5: Staleness sweep, after T4 lands (M64/M65 lessons — this cost a review
+      send-back on both sibling milestones). Grep the seven notes for
+      time-relative and absence phrasing (`at the time of writing`, `not yet`,
+      `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
+      against the repo as it now stands; date any claim that survives.
+- [ ] T6: Run the profile `verify` slot; open the PR and drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -90,6 +103,7 @@ qualitative band entering package output → refused outright (IP3).
   package-relevant half; the maintainer chose at the routing chip to plan the
   shelf as milestones rather than leave it a candidate).
 - 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
+- 2026-07-19: gated amendment at a /milestone-plan re-run — AC1 raises the bar to a dated *verified* extraction (read to final page), new AC7 + T5 make the M64/M65 staleness sweep mechanical, old T5 becomes T6.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
