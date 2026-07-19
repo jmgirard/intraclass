@@ -80,7 +80,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - [x] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
 - [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [ ] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
+- [x] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
       review send-back on both sibling milestones). Grep the four notes for
       time-relative and absence phrasing (`at the time of writing`, `not yet`,
       `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
@@ -102,6 +102,8 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T3 done — `DESIGN.md` IP2 gains a pointer sentence naming the cluster as the citable record for the hypothesis-testing side of the boundary; the principle's own wording is unchanged, so this is a cross-reference, not an IP amendment.
 - 2026-07-19: T4 done — 4 `BIBLIOGRAPHY.md` entries (34 → 38, verified by count; three withhold a field the source does not print) + 4 `INDEX.md` source-note lines and an M67 cluster paragraph; `cairn_validate` passes (15 PASS, exit 0), with `references staleness` 11 → 15 as the four unverified notes join the backlog by design.
 - 2026-07-19: T4 also retired two stale INDEX claims found while editing — the shelf is 30 PDFs, not 31 (`jorgensen2019.pdf` has since been deleted, as the M66 correction anticipated, so "still on the shelf" was false), and "five shelf PDFs with no note" is now zero: 30 notes / 30 PDFs, no orphan either way.
+- 2026-07-19: T5 done — staleness sweep clean. The time-relative/absence grep leaves only the four dated `Extraction:` lines; no note makes a `DESIGN.md` claim (that claim lives in `INDEX.md`, where T3 makes it true). The "nothing traces to it" absences were verified by command, not asserted: neither the four citekeys nor any author surname (konishi/gupta/donner/zou/naik/helu/bhandary/srivastava) appears in `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, or `ORACLES.md`. All four sources were read to their final page.
+- 2026-07-19: T5 sharpened two claims now that all four are read — `donner2002`'s `ρ`-floor claim is restated over the full five-paper cluster (0.4 is the highest floor; none reaches 0), and `naik2007` gains a recorded misprint: it spells Huang as "Haung" in both the intro and its reference list (p. 6510), flagged so no citekey is minted from the misspelling. No repo value affected.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

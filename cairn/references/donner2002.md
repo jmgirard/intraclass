@@ -141,7 +141,8 @@ single-design ICC this package's estimand specs define.
   the case where not all subjects are exposed to both panels (p. 379); the
   transformation-based tests are not.
 - **No `ρ = 0` or near-zero cell.** The simulated `ρ` values are 0.4, 0.6, 0.8,
-  0.95 (Tables 1–3), the highest floor in this cluster — `konishi1989` and
-  `bhandary2006` at least reach 0.1 — so the near-zero corner where this
-  package's own known failure modes live is untouched here (observed
-  2026-07-19, against the cluster notes committed by that date).
+  0.95 (Tables 1–3) — **the highest floor of the five cluster papers**, the other
+  four all reaching down to 0.1 (`konishi1989`, `young1998`, `naik2007`,
+  `bhandary2006`; checked against all five notes, observed 2026-07-19). None of
+  them reaches 0, so the near-zero corner where this package's own known failure
+  modes live is untested across the whole cluster.
