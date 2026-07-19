@@ -131,6 +131,8 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-19: T6 done — verify slot clean under NOT_CRAN=true CI=true: FAIL 0, WARN 2, SKIP 23, PASS 1802 (failed + error = 0, AC6). Docs-only branch: cairn/ is .Rbuildignore'd, so no test could move.
 - 2026-07-19: PR #74 opened; status -> review.
 
+- 2026-07-19: CI green on PR #74 — all 11 checks pass (9 workflow jobs + codecov project/patch).
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
