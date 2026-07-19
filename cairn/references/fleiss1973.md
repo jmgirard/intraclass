@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/fleiss1973.pdf` (gitignored).
 Pagination: printed journal pages 613–619.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (all 7 PDF pages = printed 613–619, read through the reference list) by M69; every equation (1–15), page anchor, and quoted phrase confirmed with no correction needed, including the "no worked example anywhere in the paper" claim — observed 2026-07-18.
 
 **Citation.** Fleiss JL, Cohen J (1973). "The equivalence of weighted kappa and
 the intraclass correlation coefficient as measures of reliability."
@@ -108,11 +108,12 @@ Cohen 1967) — from which the paper concludes diagnostic agreement is poorer.
 
 ## Traces to
 
-Nothing in the package currently traces to this source. A repo-wide grep for
+Nothing in the package traces to this source. A repo-wide grep for
 `fleiss1973` / "Fleiss & Cohen" / "weighted kappa" over `R/`, `tests/`,
-`vignettes/`, `man/`, `NEWS.md`, and `cairn/references/ORACLES.md` returns no
-hits; the only references are the tracking/bibliography ones this milestone
-created (`BIBLIOGRAPHY.md`, `INDEX.md`, and the M64 milestone file). It is
+`vignettes/`, `man/`, `NEWS.md`, and `cairn/references/ORACLES.md` returned no
+hits — observed 2026-07-18 (M64, re-run and still true at M69); the only
+references are the tracking/bibliography ones M64 created
+(`BIBLIOGRAPHY.md`, `INDEX.md`, and the M64 milestone file). It is
 shelf/background evidence for the kappa–ICC relationship and the categorical
 boundary of the package's scope, not an oracle and not a test dependency.
 

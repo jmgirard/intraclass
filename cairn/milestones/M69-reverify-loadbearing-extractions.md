@@ -67,7 +67,7 @@ milestone corrects notes, never the estimator surface.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Re-verify the classical trio — `shrout1979` (the **O1** worked
+- [x] T1: Re-verify the classical trio — `shrout1979` (the **O1** worked
       example, Tables 2–4, two-decimal printing), `mcgraw1996` (the Case-3A
       θ²_c formula and the published correction at 1(4):390), `fleiss1973`
       (squared-weight kappa ≡ the k = 2 agreement ICC).
@@ -89,6 +89,10 @@ milestone corrects notes, never the estimator surface.
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
 - 2026-07-18: created by /milestone-plan, split from M68 at the plan gate — the maintainer chose to re-verify the load-bearing ten rather than leave every extraction unverified; the remaining nine stay a candidate row.
+- 2026-07-18: implement gate — maintainer chose main-session re-reading for all ten (no subagent delegation; a subagent blessing a subagent's extraction recycles M64's failure mode), and chose to record the shrout1979 helper-header attribution finding as an AC4 escalation rather than amend Scope to touch a test file.
+- 2026-07-18: T1 done. shrout1979 read 9/9 pages (printed 420–428); 4 corrections — Table 1 Within-target row had Case-2/Case-3 EMS as `—` where the paper prints `σ²_J+σ²_I+σ²_E` and `θ²_J+fσ²_I+σ²_E` (the footnote's "last three entries" only parses with the cell filled), footnote paraphrase, inverted Spearman–Brown star notation, and a `σ²_J = θ²_J` equality the paper does not assert; Table 4 ICC(1,4) cell has an ink blot in the scan, `.44` confirmed arithmetically from Table 3.
+- 2026-07-18: T1 — mcgraw1996 read 18/18 pages (printed 30–46 + the 1(4):390 correction); Case-3A θ²_c and the ICC(A,1) estimand confirmed verbatim; 3 corrections — Table 4 was missing the Case-2A ICC(A,1) row, Table 7's numerator/denominator df swap between lower and upper limits was unrecorded, and M64's "possible" Table 8 `MS_W`-vs-`MS_E` typo is now confirmed against Appendix A section A4 (uncorrected in the literature; package implements no Table 8 statistic).
+- 2026-07-18: T1 — fleiss1973 read 7/7 pages (printed 613–619); clean, no value correction — Eqs. 1–15, all page anchors and quoted phrases confirmed, "no worked example in the paper" verified through the reference list; dated the previously-undated repo-grep absence claim in "Traces to" per the dated-observations rule (grep re-run, still no hits).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

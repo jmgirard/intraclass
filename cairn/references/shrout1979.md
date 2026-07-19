@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/shrout1979.pdf` (gitignored).
 Pagination: printed journal pages 420–428.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (all 9 PDF pages = printed 420–428, read to the final page) by M69; four transcription errors corrected in place, no oracle value affected — observed 2026-07-18.
 
 **Citation.** Shrout PE, Fleiss JL (1979). "Intraclass correlations: uses in
 assessing rater reliability." *Psychological Bulletin* 86(2):420–428.
@@ -22,7 +22,9 @@ A reliability (G) study of *n* targets rated by *k* judges. Three designs:
 - **Case 2** (p. 421, Eq. 2): `x_ij = μ + a_i + b_j + (ab)_ij + e_ij` with `a_i`
   **random**, `a_i ~ N(0, σ²_J)`. Two-way random. Package: `ICC(A,·)`.
 - **Case 3** (p. 422): same Eq. 2, but `a_i` is a **fixed** effect subject to
-  `Σa_i = 0`, so `σ²_J = θ²_J = Σa_i²/(k−1)`, and the interaction components
+  `Σa_i = 0`, so the parameter **corresponding to** `σ²_J` is
+  `θ²_J = Σa_i²/(k−1)` (M64 wrote `σ²_J = θ²_J = …`, an equality the paper does
+  not assert — corrected M69), and the interaction components
   satisfy `Σ_i (ab)_ij = 0` for each target. Two-way mixed. Package: `ICC(C,·)`.
 
 Under Case 3 the interaction correlates *negatively* across judges on the same
@@ -38,11 +40,23 @@ Sitgreaves 1960). Relevant to the boundary-fit policy (`DESIGN.md`).
 | Source | df | MS | Case 1 EMS | Case 2 EMS | Case 3 EMS |
 |---|---|---|---|---|---|
 | Between targets | n−1 | BMS | kσ²_T + σ²_W | kσ²_T + σ²_I + σ²_E | kσ²_T + σ²_E |
-| Within target | n(k−1) | WMS | σ²_W | — | — |
-| Between judges | k−1 | JMS | — | nσ²_J + σ²_I + σ²_E | nθ²_J + fσ²_I + σ²_E |
+| Within target | n(k−1) | WMS | σ²_W | σ²_J + σ²_I + σ²_E | θ²_J + fσ²_I + σ²_E |
+| Between judges | (k−1) | JMS | — | nσ²_J + σ²_I + σ²_E | nθ²_J + fσ²_I + σ²_E |
 | Residual | (n−1)(k−1) | EMS | — | σ²_I + σ²_E | fσ²_I + σ²_E |
 
-with `f = k/(k−1)` for the three Case-3 entries (Table 1 footnote a, p. 421).
+The Case-2 and Case-3 cells of the **Within target** row were transcribed as `—`
+(M64, corrected M69): the paper prints both. "Between judges" and "Residual" are
+indented sub-rows partitioning "Within target", and the printed within-target
+expectations are the df-weighted pools of the two — e.g. Case 2,
+`[(k−1)(nσ²_J + σ²_I + σ²_E) + (n−1)(k−1)(σ²_I + σ²_E)] / n(k−1) = σ²_J + σ²_I + σ²_E`.
+Only the Case-1 column has genuine `—` entries (judge and interaction effects are
+not separable there).
+
+with `f = k/(k−1)` for **the last three entries in the Case-3 column** — i.e.
+Within target, Between judges, and Residual (Table 1 footnote a, p. 421,
+verbatim: "f = k/(k − 1) for the last three entries in this column"). The M64
+wording, "the three Case-3 entries", was a paraphrase that read as if the column
+held only three entries (M64, corrected M69).
 
 ## Estimator formulas (pp. 423, 426)
 
@@ -72,7 +86,11 @@ dichotomous ratings (p. 426).
 - `ICC(3,1)`: exact F on `F_o = BMS/EMS`, Eqs. 8–9 (p. 424).
 - Average forms (p. 426): `1 − 1/F_L < ρ < 1 − 1/F_U` for `ICC(1,k)` and
   `ICC(3,k)`; `ICC(2,k)` via the Spearman–Brown transform of the `ICC(2,1)`
-  bounds, `ρ_L** = kρ_L*/(1 + (k−1)ρ_L*)`.
+  bounds. The paper's notation (p. 426): `ρ_L**` is the lower bound obtained for
+  `ICC(2,1)`, and the `ICC(2,k)` lower bound is
+  `ρ_L = kρ_L**/(1 + (k−1)ρ_L**)`. M64 inverted the stars — writing
+  `ρ_L** = kρ_L*/(1 + (k−1)ρ_L*)`, which makes the starred symbol the output
+  rather than the input (corrected M69). The transform itself is unchanged.
 
 ## Table 2 — the O1 data (p. 423), verbatim
 
@@ -115,6 +133,12 @@ printed here but not carried in O2.)
 | ICC(1,4) | .44 | 0.443 | ICC(k) |
 | ICC(2,4) | .62 | 0.620 | ICC(A,k) |
 | ICC(3,4) | .91 | 0.909 | ICC(C,k) |
+
+**Legibility caveat (M69).** In the shelf scan, the `ICC(1,4)` cell carries an
+ink blot over its final digit; the reading `.44` is confirmed arithmetically from
+Table 3 — `(BMS − WMS)/BMS = (11.24167 − 6.26389)/11.24167 = 0.4428` — where
+`WMS = [3(32.48611) + 15(1.01944)]/18 = 6.26389` reproduces the printed 6.26.
+The other five cells are clean.
 
 Every printed value is the correct 2-dp rounding of the **underlying** quantity —
 **no oracle value is contradicted**. Round from the unrounded value, not from the
