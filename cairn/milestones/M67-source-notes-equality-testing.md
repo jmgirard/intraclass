@@ -91,7 +91,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
       comparison says "a different estimator"; it is the *same* Srivastava (1984)
       estimator. Correct the claim (the real difference is the sample split) and
       reconcile it with this note's own "reuses this paper's estimator…" line.
-- [ ] T8: **(review send-back, finding 2)** `konishi1989.md` and the matching
+- [x] T8: **(review send-back, finding 2)** `konishi1989.md` and the matching
       `INDEX.md` line — "`χ²₁` recovered only at `q = 2` **or** equal dimensions"
       is wrong on both disjuncts. Restate: exact `χ²₁` needs normality **and**
       equal `p` **and** `q = 2`; at `q = 2` in the general case the limit is
@@ -136,6 +136,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T5 sharpened two claims now that all four are read — `donner2002`'s `ρ`-floor claim is restated over the full five-paper cluster (0.4 is the highest floor; none reaches 0), and `naik2007` gains a recorded misprint: it spells Huang as "Haung" in both the intro and its reference list (p. 6510), flagged so no citekey is minted from the misspelling. No repo value affected.
 - 2026-07-19: return-trip question gate — note lengths (107/143/131/165) kept as shipped per maintainer ruling (Scope says only "deliberately short"; the "~60–90" figure was invented at a chip, never planned), and the two unprinted issue numbers will be dropped rather than annotated, so all four M67 bibliography entries follow one rule.
 - 2026-07-19: T7 done — `young1998.md`'s `bhandary2006` comparison corrected: it is the *same* Srivastava (1984) estimator, and the difference is the partition (3 samples of 5/5/4 with sexes pooled vs 2 random samples of 7), not the estimator; now consistent with this note's own "reuses this paper's estimator…" line and with `bhandary2006.md` (p. 777).
+- 2026-07-19: T8 done — re-read pp. 99–101 of the shelf PDF and confirmed the review's reading: exact `χ²₁` needs normality **and** equal `p` **and** `q = 2` jointly (p. 99 gives `c·χ²₁` with an unknown-parameter scale at `q = 2`; p. 100's parameter-free weights still leave a weighted sum, and only "further, for `q = 2`" under normality is it exactly `χ²₁`). Corrected in `konishi1989.md` and the matching `INDEX.md` line; the `c` expression is deliberately not transcribed, the scan being unreliable at that line (#4).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

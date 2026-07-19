@@ -54,8 +54,8 @@ and milestones; never restate a value here.
   (p. 161); band inclusivity is ambiguous as printed.
 - [konishi1989.md](konishi1989.md) — source note (M67): the general `q`-population
   approximate LRT for `H₀: ρ₁ = ⋯ = ρ_q`. Its null distribution is **not** `χ²`
-  but a weighted sum of `χ²₁` variates; `χ²₁` is recovered only at `q = 2` or
-  equal dimensions. Outside the contract boundary.
+  but a weighted sum of `χ²₁` variates; exact `χ²₁` needs normality **and** equal
+  `p` **and** `q = 2` together. Outside the contract boundary.
 - [mcgraw1996.md](mcgraw1996.md) — source note (M64): the ICC(A,·)/ICC(C,·) labels,
   the five models, and **Case 3A** (θ²_c = Σc²_j/(k−1)); includes the published
   correction (1(4):390).

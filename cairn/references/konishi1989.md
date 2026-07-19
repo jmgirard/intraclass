@@ -47,9 +47,17 @@ and need "a complicated iterative procedure which is not readily available"
 distribution under the null hypothesis". Its limit is a **linear combination of
 independent `χ²₁` variates**, `Σ ω_α χ²₁(α)`, whose weights `ω_α` are the latent
 roots of `ΨG` (Theorem 3.1, p. 99; normal case Theorem 3.3, p. 100; elliptic
-case Theorem 3.4, pp. 100–101). Two special cases recover tractability: when
-`p₁ = ⋯ = p_q`, the weights stop depending on unknown parameters, and for `q = 2`
-the asymptotic null is exactly `χ²₁` (p. 100).
+case Theorem 3.4, pp. 100–101). **Exact `χ²₁` requires all three of normality,
+equal `p`, and `q = 2` — neither condition suffices on its own.** In the general
+finite-fourth-cumulant case at `q = 2`, the limit is `c·χ²₁` — the latent roots
+of `ΨG` are `c` and 0 — where the scale `c` is itself a function of the unknown
+`ρ` and the per-population variance and cumulant terms, so it must be estimated
+(p. 99; the printed expression is not transcribed here, the shelf scan being
+unreliable at that line). Under normality
+with `p₁ = ⋯ = p_q = p`, the weights stop depending on unknown parameters
+(Theorem 3.3 and the remark following, p. 100), but the limit remains a weighted
+sum. Only in conjunction — two `p`-variate *normal* samples — is the asymptotic
+null exactly `χ²₁` (p. 100).
 
 **Z-transformation test (ZT), Eq. (4.4), p. 102** — asymptotically `χ²` with
 `q−1` df. Built on the variance-stabilizing transformation
@@ -103,5 +111,5 @@ record rather than re-argued from memory.
 - **The `ω_α` weights must be estimated.** The paper notes the coefficients
   "have to be estimated from the data" (p. 99) and points at the literature on
   distributions of linear combinations of `χ²` variates, but supplies no
-  recommended computational route — one reason the `q = 2` / equal-`p` special
-  cases carry the applied weight.
+  recommended computational route — one reason the normal / equal-`p` / `q = 2`
+  conjunction carries the applied weight.
