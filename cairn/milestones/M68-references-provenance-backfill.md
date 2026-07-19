@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M68: References provenance backfill + shelf rename to `sources/`
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — the governing principles are PRINCIPLES.md #4 (no fabricated reference values) and #12 (seeded and sourced), the other home under D-001 -->
@@ -100,7 +100,7 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
       `ORACLES.md`'s existing block (add ingested date, source pointer,
       extraction status), and author `BIBLIOGRAPHY.md`'s and `REFERENCES.md`'s,
       all derived from M63's split of the pre-migration `REFERENCES.md`.
-- [ ] T6: Run `cairn_validate` to exit 0; confirm `references staleness` WARNs
+- [x] T6: Run `cairn_validate` to exit 0; confirm `references staleness` WARNs
       for exactly the pages left unverified and nothing else; run the profile
       `verify` slot; open the PR and drive CI green.
 
@@ -116,6 +116,7 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: each source note's existing `PDF: …` prose pointer folded into its block rather than duplicated; every seam re-read by hand (the pointer sat mid-sentence or line-wrapped in 8 of 19).
 - 2026-07-18: cairn_validate exit 0, all 15 checks PASS (references index<->disk and scaffold deprecations both clear). `references staleness` now WARNs on exactly 20 pages — the 19 shelf notes + BIBLIOGRAPHY, all "no verified re-check" — which is AC4's intended honest signal; M69 clears ten of them.
 - 2026-07-18: T6 in flight — cairn_validate already exit 0 (15/15 PASS); the profile `verify` slot is running in the background at checkpoint time, so T6 stays unchecked until its result is recorded.
+- 2026-07-18: T6 done — profile `verify` slot clean: 1802 pass, 0 fail, 0 error, 23 skip, 2 warn (both pre-existing engine conditions — a glmmTMB non-positive-definite Hessian inside the test that asserts that message, and the Design-3 drop message; this branch touches no R file). cairn_validate exit 0, 15/15 PASS. All tasks done; status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
