@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-18 (M68 shipped + archived — provenance blocks on all 24 references pages + shelf renamed to `sources/`, PR #72; M61 rotated out under terminal-row retention; M69 now workable, M48 unblocked on its cairn_validate gate)_
+_Last hygiene check: 2026-07-18 (M69 shipped + archived — all ten load-bearing source notes dated-verified against their shelf PDFs, PR #73; M62 rotated out under terminal-row retention; the O1/O-OW three-decimal attribution fix added as a candidate)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,13 +12,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | done | — | high | milestones/archive/M63-references-migration.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M68 | References provenance backfill + shelf rename to `sources/` | done | — | high | milestones/archive/M68-references-provenance-backfill.md |
-| M69 | Re-verify the ten load-bearing source extractions | review | M68 | normal | milestones/M69-reverify-loadbearing-extractions.md |
+| M69 | Re-verify the ten load-bearing source extractions | done | M68 | normal | milestones/archive/M69-reverify-loadbearing-extractions.md |
 | M64 | Source notes — the ten load-bearing primary sources | done | M63 | normal | milestones/archive/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | done | M63 | normal | milestones/archive/M65-source-notes-interval-methods.md |
 | M66 | Source notes — the foundational and interpretation shelf | planned | M63 | low | milestones/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | planned | M63 | low | milestones/M67-source-notes-equality-testing.md |
-| M62 | Non-parametric bootstrap CI pass — one-way ICC (GO/NO-GO) | done | — | normal | milestones/archive/M62-npbootstrap-oneway-pass.md |
-<!-- terminal-row retention: M68 done (2026-07-18) → M61 rotated out (its archive file + M48's Depends-on still resolve). Kept: M68, M65, M64, M63, M62 (5 most recent terminal). -->
+<!-- terminal-row retention: M69 done (2026-07-18) → M62 rotated out (its archive file, its D-006 lineage, and the candidate rows citing it still resolve). Kept: M69, M68, M65, M64, M63 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
