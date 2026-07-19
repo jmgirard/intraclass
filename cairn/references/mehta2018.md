@@ -273,12 +273,19 @@ it contradicts the paper.
 
 ## Connection to the GP6 known-failure axes (T3's explicit requirement)
 
+**A note on "GP6 axes".** GP6 is a *practice* — sweep whatever axis the known
+failure mode grows — and names cluster count, incidence and raggedness only as
+examples. The repo maintains **no enumerated registry of known-failure axes**
+(checked against `DESIGN.md` and `PRINCIPLES.md`, observed 2026-07-19), so
+"on the GP6 list" is not a thing a claim can be true or false against. The rows
+below map this paper onto the axes M65 chose to track, nothing more.
+
 | GP6 axis | What this paper says |
 |---|---|
 | **Non-normality** | **Directly and centrally.** But of the *subject* distribution, not the error distribution — the axis is the shape of the true-score distribution across the scale (convex/concave/uniform/skewed), which is distinct from the heavy-tailed *error* non-normality `ukoumunne2003` studies and from `bobak2018`'s bounded-scale heteroscedasticity. **Three M65/M62 sources, three different things all called "non-normality".** Worth keeping straight |
 | **Few subjects** | Addressed and partly reassuring: the point estimate is stable down to `N = 80` and, per §5, `N = 50`. But interval-relevant spread is not — see the caveat above |
 | **Near-zero ICC** | Reached, at last. Case 6 produces `ICC` = 0.08 (extreme convex, `N = 300`), the **lowest true value anywhere in the M65 cluster**. The paper reports no estimation difficulty there — unsurprising, since it uses closed-form mean squares that cannot fail to converge, unlike the package's mixed-model fits |
-| **Ordinal / discrete outcomes** | An axis the package does not currently list. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about |
+| **Ordinal / discrete outcomes** | An axis no repo document names. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about — observed 2026-07-19 |
 
 ## Traces to
 

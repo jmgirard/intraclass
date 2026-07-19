@@ -198,12 +198,19 @@ a constructed illustration.
 
 ## Connection to the GP6 known-failure axes (T3's explicit requirement)
 
+**A note on "GP6 axes".** GP6 is a *practice* — sweep whatever axis the known
+failure mode grows — and names cluster count, incidence and raggedness only as
+examples. The repo maintains **no enumerated registry of known-failure axes**
+(checked against `DESIGN.md` and `PRINCIPLES.md`, observed 2026-07-19), so
+"on the GP6 list" is not a thing a claim can be true or false against. The rows
+below map this paper onto the axes M65 chose to track, nothing more.
+
 | GP6 axis | What this paper says |
 |---|---|
-| **Non-normality** | Addressed indirectly. The paper does not assume a heavy-tailed or skewed outcome; it assumes a *bounded* one and handles it with a truncated normal `I(0,1)` (Eqs. 3, 7) plus a mean-dependent variance. So the failure it targets is **boundedness-induced heteroscedasticity**, which is a distinct axis from the non-normality M62/`ukoumunne2003` covers (heavy tails). The package's Gaussian mixed model makes *both* assumptions; only the second is currently on the GP6 list |
+| **Non-normality** | Addressed indirectly. The paper does not assume a heavy-tailed or skewed outcome; it assumes a *bounded* one and handles it with a truncated normal `I(0,1)` (Eqs. 3, 7) plus a mean-dependent variance. So the failure it targets is **boundedness-induced heteroscedasticity**, which is a distinct axis from the non-normality M62/`ukoumunne2003` covers (heavy tails). The package's Gaussian mixed model makes *both* assumptions, and only the heavy-tail one has been swept anywhere in the repo — observed 2026-07-19 |
 | **Near-zero ICC** | Not addressed. The smallest estimate is 0.295 and there is no boundary discussion, no singular-fit analogue, and no simulation near zero. **A Bayesian fit with proper priors does not hit the frequentist boundary at all** — the D-004 "smooth" behavior — so the paper is silent on the package's hardest case by construction |
 | **Few subjects** | Touched, not studied. Study 3 has `N₃ = 38` encounters and the paper attributes its wide credible intervals to "the relative small sample sizes in two of the studies and the fact that there are only three studies to inform the between-study variance component, ω" (p. 7). `ω`'s interval (0.003, 0.717) is the visible symptom — **three studies is not enough to estimate a between-study variance**, an incidental-parameters observation matching the M27/M28/M36 lesson |
-| **New axis this paper adds** | **Mean-dependent within-subject variance.** Not currently a GP6 axis and not something the package's engines can express — see Open questions |
+| **New axis this paper adds** | **Mean-dependent within-subject variance.** Not among the axes GP6 names, and not something the package's engines can express — see Open questions |
 
 ## Traces to
 

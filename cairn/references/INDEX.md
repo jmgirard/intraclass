@@ -174,14 +174,15 @@ equality-testing sources by M67. **Every shelf PDF now carries a note, and every
 note has a shelf PDF — 30/30, no orphan in either direction (observed
 2026-07-19).**
 
-**Extraction status across the shelf (2026-07-19).** Of the 30 notes, **23 are
+**Extraction status across the shelf (2026-07-19).** **All 30 notes are now
 dated-verified** — the ten load-bearing ones by M69, the seven
-foundational/interpretation ones at ingest by M66, and six by M70
-(`ukoumunne2003`, `ohyama2025`, `donner2002`, `konishi1989`, `naik2007`,
-`young1998`). The remaining **seven are M65's and stay unverified** until M71:
-`bhandary2006`, `bobak2018`, `mehta2018`, `saha2005`, `saha2012`, `xiao2009`,
-`xiao2013`. A claim sourced to one of those seven is not yet re-read against its
-PDF — `young1998`'s two `bhandary2006` cross-references are marked accordingly.
+foundational/interpretation ones at ingest by M66, six by M70 (`ukoumunne2003`,
+`ohyama2025`, `donner2002`, `konishi1989`, `naik2007`, `young1998`), and M65's
+final seven by M71 (`bhandary2006`, `bobak2018`, `mehta2018`, `saha2005`,
+`saha2012`, `xiao2009`, `xiao2013`). The source-note re-verification backlog is
+closed; `ORACLES.md` and `BIBLIOGRAPHY.md` remain outstanding under M72, on a bar
+split by entry kind. `young1998`'s two `bhandary2006` cross-references, which M70
+marked inherited-not-verified, were discharged against their own source at M71.
 
 Four shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
@@ -273,10 +274,42 @@ found, per note:
   (`g = 3` vs `g = 2`) and only one was recorded; plus a source erratum in §6's
   degrees of freedom.
 - `young1998` — additions only, no error: the M67 restoration of `−2 log Λ` is
-  confirmed correct. Two of its claims about `bhandary2006` are now marked as
-  **inherited, not verified** — that note is M71's.
+  confirmed correct. Its two claims about `bhandary2006` were marked
+  **inherited, not verified**; M71 discharged both against that source.
 
-**Backlog status.** The re-verify backlog now holds **seven** notes, all M65's:
-`bhandary2006`, `bobak2018`, `mehta2018`, `saha2005`, `saha2012`, `xiao2009`,
-`xiao2013` — M71's scope. `ORACLES.md` and `BIBLIOGRAPHY.md` are tracked
-separately under M72, on a bar split by entry kind.
+**M71 (2026-07-19) — the M65 seven, 115 PDF pages.** Every transcribed table
+value in the cluster reproduced exactly except three cells, but a recurring
+*reading* defect ran through it: **a note stating a conclusion more broadly than
+its source supports.**
+- `saha2012` — two of three transcribed Table I `m = 73` rows were cross-
+  contaminated between adjacent `φ` rows; the transcribed log-likelihood had
+  silently **added an `ln` the source does not print**; and the note had
+  inherited §3's inverted "conservative"/"liberal" labels, which §5 uses the
+  standard way round.
+- `xiao2013` — Table 2 is a single `R = 3, S = 50` geometry, not a sweep; the
+  under-coverage result was pinned at "stated four times" when it recurs in six
+  places. A **source erratum**: Table 9's `κ_m` for `R = 5, S = 10` contradicts
+  its own footnote.
+- `bhandary2006` — Table 1 has **75 rows, not 81**, and prints a selected
+  high-`ρ` subset (`ρ₁ ≥ 0.7`), so its `F_max` superiority claim carries a
+  restriction the note had dropped. Eq. (2.17) prints a stray `k` the note had
+  silently repaired.
+- `mehta2018` — the toward-uniform sampling claim holds unconditionally only for
+  the **mode**; the rater-error safeguard is directional, not static.
+- `saha2005` — Table I's rejection counts are **U-shaped in `φ`**: the `π = 0.4`
+  rows blow up at the upper boundary too, so the D-006 support generalizes from
+  *near-zero* to *boundary proximity*. Figure 1's bias is **positive** at small
+  `φ`.
+- `bobak2018` — the abstract carries a second pooling penalty (~0.02) the note
+  lacked; a source erratum misattributes its 0.072/0.066 figures to Tables 3/4
+  instead of 4/5.
+- `xiao2009` — cleanest of the seven; its shelf PDF carries a **T&F cover sheet**,
+  so `PDF page N` = `journal page 109 + N`.
+
+Three notes had silently repaired a source (`saha2012`'s missing `ln`,
+`bhandary2006`'s `ppk`, and `xiao2013`'s `c′` for `c`); all now transcribe as
+printed with the defect flagged, so the pages stay checkable against the paper.
+
+**Backlog status.** The source-note re-verify backlog is **closed** — all 30
+notes dated-verified. `ORACLES.md` and `BIBLIOGRAPHY.md` are tracked separately
+under M72, on a bar split by entry kind.

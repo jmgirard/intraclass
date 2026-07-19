@@ -234,7 +234,9 @@ without the authors — the one thing in the M65 cluster that is.
   this paper belongs to that cluster by subject; see the cluster-reassignment
   finding above. Those four notes shipped 2026-07-19 and each names this page as
   a fifth cluster member under the same IP2 fence, so the cross-reference the
-  finding asked for now resolves in both directions. `young1998.md` is the
+  finding asked for resolves in both directions — re-checked 2026-07-19, with
+  `bhandary2006` cited by `donner2002` (×2), `konishi1989` (×1), `naik2007` (×3)
+  and `young1998` (×5). `young1998.md` is the
   closest sibling: Bhandary co-authors it, and it shares this paper's Srivastava
   estimator, Helmert transformation, simulation design, and worked data set.
 - `cairn/references/BIBLIOGRAPHY.md` and `INDEX.md`.
