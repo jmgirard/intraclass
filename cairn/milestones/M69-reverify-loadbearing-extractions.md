@@ -40,19 +40,19 @@ milestone corrects notes, never the estimator surface.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Every extracted value in the ten notes is re-read against its shelf
+- [x] AC1: Every extracted value in the ten notes is re-read against its shelf
       PDF and its page/table anchor confirmed, or corrected in place with the
       correction marked (`(M64, corrected M69)`) per the corrections rule.
-- [ ] AC2: Each of the ten PDFs is read to its final page, and no note asserts
+- [x] AC2: Each of the ten PDFs is read to its final page, and no note asserts
       an absence that was not actually checked; the work log records the page
       count read per source (the M65 `mehta2018` failure mode).
-- [ ] AC3: Each of the ten `Extraction:` statuses is upgraded to a dated
+- [x] AC3: Each of the ten `Extraction:` statuses is upgraded to a dated
       verified status on one physical line, and `cairn_validate`'s
       `references staleness` advisory no longer names any of the ten.
-- [ ] AC4: Any discrepancy touching a value an `ORACLES.md` entry or a test
+- [x] AC4: Any discrepancy touching a value an `ORACLES.md` entry or a test
       depends on is recorded verbatim in the work log as an escalation finding,
       with the affected oracle ID and test named — never silently changed.
-- [ ] AC5: `cairn_validate` exits 0, and the profile `verify` slot is clean
+- [x] AC5: `cairn_validate` exits 0, and the profile `verify` slot is clean
       (`NOT_CRAN=true CI=true`, failed + error = 0).
 
 ## Coverage
@@ -135,3 +135,78 @@ milestone corrects notes, never the estimator surface.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-18.** PR https://github.com/jmgirard/intraclass/pull/73.
+
+### Acceptance-criteria evidence (fresh, by command)
+
+- **AC1 — values re-read, corrections marked.** Every note carries M69-attributed
+  correction markers (counts per note: fleiss1973 0 — clean pass, jorgensen2021 1,
+  koo2016 2, mcgraw1996 3, shrout1979 5, tenhove2020 2, tenhove2022 9,
+  tenhove2024 6, tenhove2025a 5, tenhove2025b 8). `mcgraw1996`'s three were read
+  against the diff and each is marked and attributed. Marker *wording* varies from
+  AC1's illustrative `(M64, corrected M69)` form — `(corrected M69)`,
+  `(added M69)`, `**corrected M69**` all appear — but every correction is marked
+  and names M69, which is what the corrections rule requires.
+- **AC2 — read to the final page, page counts logged.** The work log records ten
+  page counts; each was checked against `pdfinfo` on the shelf PDF and **all ten
+  match exactly**: fleiss1973 7, jorgensen2021 21, koo2016 9, mcgraw1996 18,
+  shrout1979 9, tenhove2020 14, tenhove2022 17, tenhove2024 13, tenhove2025a 17,
+  tenhove2025b 21 (= 146). Absence-claim scan found four undated claims about repo
+  state; all four fixed at review (see findings 2 and the two below).
+- **AC3 — extraction statuses.** Exactly one `Extraction:` line per note, each a
+  dated verified status, each a single physical line (next line blank in all ten).
+  `cairn_validate`'s `references staleness` advisory names none of the ten; the 11
+  it still names are the out-of-scope nine plus `BIBLIOGRAPHY.md`/`ORACLES.md`.
+- **AC4 — escalation finding.** One finding touches an oracle-backed value and is
+  recorded in the work log with oracle ID and test named. Premise re-verified at
+  review off the shelf PDF: Shrout & Fleiss Table 4 prints **two** decimals
+  (.17 .29 .71 .44 .62 .91) and all six repo values round to it, so no oracle
+  value is wrong. Scope corrected twice during review — see the Decisions entries.
+- **AC5 — gates.** `cairn_validate` exit 0, 15/15 PASS. `devtools::test()` under
+  `NOT_CRAN=true CI=true`: FAIL 0 | WARN 2 | SKIP 23 | PASS 1802 (the 2 warnings
+  are the pre-existing glmmTMB non-positive-definite-Hessian warning fired inside
+  an `expect_message` test). `R CMD check`: 0 errors, 0 warnings, 0 notes.
+
+### Consistency gate
+
+`cairn_validate` exit 0 (incl. `coverage complete` and `scaffold present`). No
+`DESIGN.md` principle changed → `cairn_impact` skipped. Profile `consistency-gate`
+slot: `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems;
+`R CMD check` clean; no NEWS entry owed (no user-visible change — `cairn/` is
+`.Rbuildignore`d). Scope boundary verified mechanically: zero files under `R/`,
+`tests/`, `man/`, `NAMESPACE`, `DESCRIPTION`, or `ORACLES.md` in the diff.
+CI green on PR #73 (11/11 checks).
+
+### Independent review — three lenses + scorer
+
+- **[S] prior-PR lens:** no prior-PR evidence (no human review comments exist on
+  any merged PR touching these files) → zero findings, clean no-op.
+- **[S] blame-history lens:** zero findings. Confirmed M68's provenance blocks and
+  the `sources/` rename intact, `INDEX.md`/`BIBLIOGRAPHY.md`/`ORACLES.md` at zero
+  diff, and — by diffing all commits in the range individually — that the single
+  logged work-log history edit was the only one and was disclosed accurately.
+  It also **caught a reviewer error of my own** (see Decisions, 2nd entry).
+- **[O] diff-bug lens:** four findings, scored by a fresh [S] scorer.
+
+**Actioned (≥80):**
+1. *(92)* `koo2016.md` — M69's own correction of the "confident interval" page
+   list was itself wrong: p. 161 has **four** occurrences (two wrap across a line
+   break, which undercounts them off the text layer), not two, and the p. 162
+   instance is in the closing paragraph, **not** the Fig 3 caption, which contains
+   no interval phrase. Re-counted off the PDF and corrected in place.
+2. *(87)* `tenhove2024.md` and `tenhove2025a.md` — two diff-introduced absence
+   claims about repo state carried no `— observed` date. Both greps actually run
+   at review (only hit is M69's own work log), claims dated.
+3. *(83)* `tenhove2024.md` — "see the citation trap below" pointed *up* to the
+   top pagination block. Redirected.
+
+**Logged, not actioned (<80):**
+4. *(38)* `tenhove2020.md`'s three "Escalate" items (ORACLES.md's non-existent
+   §4.1.1/4.1.2/4.1.3 anchors, BIBLIOGRAPHY.md's "§3.3/§4.1" prior home, and
+   ORACLES.md's `|θ̄ − θ|/θ` vs the paper's signed `(θ̄ − θ)/θ`) create no durable
+   follow-up record. Scored sub-threshold: all three are citation anchors and a
+   sign convention, not values, so they fall outside AC4 as written, and the T4
+   work-log line already reasons through this scope question deliberately.
+   Surfaced here rather than dropped (IP3); a future references milestone can
+   pick them up.

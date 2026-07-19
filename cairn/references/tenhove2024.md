@@ -197,7 +197,7 @@ ICCs" (p. 10, citing Briesch et al. 2014; ten Hove et al. 2020).
 - **The MLE-vs-MCMC agreement claim (p. 12).** "The MCMC and MLE estimation
   methods we provide on the OSF were shown to yield similar point estimates (Ten
   Hove et al., 2021)" — that citation is this repo's `tenhove2022` (see the
-  citation trap below), whose own p. 14 makes the same claim about its
+  citation trap in the pagination block at the top of this note), whose own p. 14 makes the same claim about its
   illustrative example. Both are qualitative; neither prints paired numbers, so
   neither is an oracle for the package's REML route. Added M69.
 
@@ -238,7 +238,9 @@ ICCs" (p. 10, citing Briesch et al. 2014; ten Hove et al. 2020).
   crossed · absolute branch. The correct content is the two-way form given three
   times elsewhere in the paper (Eq. 18 p. 6, the p. 7 prose, Table 2 p. 9), none
   of which contains `σ²_r:s`. **No oracle value is affected** — no repo doc
-  quotes this box. Read Figure 2's structure, not this cell's content.
+  quotes this box (grepped across `cairn/`, `R/`, `tests/`, `vignettes/` and
+  `man/` — the only hit is M69's own work log — observed 2026-07-18). Read
+  Figure 2's structure, not this cell's content.
 - **RESOLVED (M69) — Table 2's absolute-average-incomplete cell is a source
   typo; Eq. 18 is authoritative.** Two separate issues were tangled in M64's
   note, and they resolve differently.

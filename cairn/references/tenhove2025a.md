@@ -137,8 +137,9 @@ estimate was `ICC(2,3) = .87` (p. 451; footnote 8 notes `ICC(2,3)` = the paper's
 > excludes `σ²_R` and is therefore S&F's **ICC(3,k)** (consistency) — as this
 > paper's own p. 447 states, consistency ICCs "do not include … `σ²_R`". So the
 > footnote's identification looks like a slip for ICC(3,3). **Nothing in this
-> repo depends on it** (see "Traces to"); flagged for any reader who cites the
-> footnote. Not reconciled here.
+> repo depends on it** (see "Traces to"; grepped across `cairn/`, `R/` and
+> `tests/` — the only hit is M69's own work log — observed 2026-07-18); flagged
+> for any reader who cites the footnote. Not reconciled here.
 
 Estimation: 3 chains × 1,000 with 500 burn-in, doubled to 3,000 post-burn-in
 draws; `R̂ < 1.10`, `N_eff > 100` (p. 452). Priors: half-*t*(4, 0, 1) on all
