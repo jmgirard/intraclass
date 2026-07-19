@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M66: Source notes — the foundational and interpretation shelf
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, IP3   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m66-source-notes-foundational`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -104,6 +104,7 @@ qualitative band entering package output → refused outright (IP3).
   shelf as milestones rather than leave it a candidate).
 - 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
 - 2026-07-19: gated amendment at a /milestone-plan re-run — AC1 raises the bar to a dated *verified* extraction (read to final page), new AC7 + T5 make the M64/M65 staleness sweep mechanical, old T5 becomes T6.
+- 2026-07-19: /milestone-implement started; status in-progress, branch m66-source-notes-foundational.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
