@@ -7,7 +7,10 @@ shelf PDF, all 11 pages; the reference list ends the document on p. 11 with
 nothing after it. All 13 Table 3 rows, all 3 Table 2 rows and every Table 4/5
 value reproduce exactly, and each page anchor was confirmed by extracting that
 page on its own (the `Page N of 11` footers make this checkable) — observed
-2026-07-19 (M71).
+2026-07-19 (M71). That per-page pass initially missed one prose anchor (the
+0.944 sentence, anchored to p. 8 where its footer reads `Page 7 of 11`), caught
+by independent review and corrected the same day; the table anchors it did check
+all hold.
 
 **Citation.** Bobak CA, Barr PJ, O'Malley AJ (2018). "Estimation of an inter-rater
 intra-class correlation coefficient that overcomes common assumption violations
@@ -103,8 +106,10 @@ practice."
 
 **This is a between-subject-variance argument, and it generalizes past this
 paper.** Any ICC is inflated by widening the subject population — a point
-`koo2016` makes in prose (p. 158: a low ICC "may reflect low subject
-variability") and this paper makes structurally, with a model and a number.
+`koo2016` makes in prose (p. 158, noting that a low ICC may reflect low subject
+variability rather than poor agreement — a paraphrase, not a quotation; the
+source's own sentence is longer and is quoted in `koo2016.md`) and this paper
+makes structurally, with a model and a number.
 
 ## AC3: this paper reports **no coverage results**
 
@@ -160,8 +165,9 @@ ICC **0.640** (0.568, 0.702); pooled ICCb\* **0.706** (0.614, 0.930).
 
 **The last column is printed `p-value`, which it is not.** Table 2's caption
 defines it as "the posterior probability that the difference exceeds 0", and the
-body reads it that way (p. 8 states "probability that study 3 has a higher ICC
-than study 2 = 0.944", i.e. `1 − 0.056` from the last row). The header above is
+body reads it that way — the sentence "probability that study 3 has a higher ICC
+than study 2 = 0.944" is on **p. 7** (footer `Page 7 of 11`), one page before the
+table it reads, i.e. `1 − 0.056` from the last row. The header above is
 therefore the *correct* label, not the printed one — flagged because a posterior
 probability tabulated under `p-value` invites exactly the wrong reading, and
 because the note must not look like it mis-transcribed the header.
