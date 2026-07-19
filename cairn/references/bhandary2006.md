@@ -1,12 +1,16 @@
 # bhandary2006 — Small-sample `F_max` test for equality of ICCs, unequal family sizes
 
+**Provenance.** Ingested 2026-07-18 by M65 from `cairn/references/sources/bhandary2006.pdf` (gitignored).
+Pagination: printed journal pages 765–778.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Bhandary M, Fujiwara K (2006). "A Small Sample Test for the
 Equality of Intraclass Correlation Coefficients Under Unequal Family Sizes for
 Several Populations." *Communications in Statistics — Simulation and
 Computation* 35(3):765–778. DOI 10.1080/03610910600716894. Received 9 September
 2004; Accepted 6 January 2006. Department of Statistics, North Dakota State
 University. Published under the journal's "Multivariate Analysis" section
-header. PDF: `cairn/references/sources/bhandary2006.pdf` (gitignored).
+header.
 
 **Author link.** Madhusudan Bhandary is the third author of `xiao2009`, which
 cites this line of work (Young & Bhandary 1998; Bhandary & Alam 2000) for the

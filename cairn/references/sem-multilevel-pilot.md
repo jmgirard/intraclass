@@ -1,5 +1,9 @@
 # Synthesis note — two-level SEM (lavaan) route to the Design-1 multilevel components (M53)
 
+**Provenance.** Ingested 2026-07-16 by M53 from its own two-level lavaan pilot runs together with `tenhove2022.md` (the estimand) and `jorgensen2021.md` (the mean-structure device).
+Pagination: —.
+Extraction: derived — no external source of its own, only as current as its inputs, none re-read since 2026-07-16 — observed 2026-07-18.
+
 **Type:** synthesis note (cross-source analysis + pilot ledger). No single
 `<citekey>.md` owns this: it composes ten Hove, Jorgensen & van der Ark (2022)
 (the estimand), Jorgensen (2021) (the single-level SEM-GT mean-structure

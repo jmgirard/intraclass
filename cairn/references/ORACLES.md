@@ -1,5 +1,9 @@
 # Oracle registry
 
+**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically.
+Pagination: —.
+Extraction: derived — each entry's values trace to its own cited source or committed seeded script, none re-read since 2026-07-18 — observed 2026-07-18.
+
 The registry of oracle values used in the test suite. **Every oracle value in
 the test suite must trace back to an entry here** with provenance — a citation
 or a committed, seeded script (PRINCIPLES.md #4, #12). No unsourced reference
@@ -32,8 +36,8 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   **one-time manual confirmation** recorded in `helper-shrout-fleiss.R`'s header
   comment only; DescTools is **not** a dependency and is **not** exercised by any
   test — do not read it as a standing oracle. The values themselves trace to the
-  Shrout & Fleiss (1979) textbook (the primary source, #4), so this does not affect
-  provenance.
+  Shrout & Fleiss (1979) textbook (the primary source, #4), so this does not
+  affect provenance.
 - **Values (3 dp):**
 
   | Package label | This package | SF form | Value |

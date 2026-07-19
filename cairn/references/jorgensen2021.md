@@ -1,10 +1,13 @@
 # jorgensen2021 — Absolute-error components in SEM-GT (the O-SEM source)
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/jorgensen2021.pdf` (gitignored).
+Pagination: printed journal pages 113–133.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Jorgensen TD (2021). "How to estimate absolute-error components in
 structural equation models of generalizability theory." *Psych* 3(2):113–133.
 DOI 10.3390/psych3020011. Open access (CC BY). Sole author. Received 10 April
 2021; accepted 26 May 2021; published 29 May 2021.
-PDF: `cairn/references/sources/jorgensen2021.pdf` (gitignored).
 
 **Role.** The **O-SEM** oracle source (`ORACLES.md`) — the primary source (IP1)
 for the lavaan engine's *absolute agreement* estimator. Eq. 6 is what

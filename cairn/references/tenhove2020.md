@@ -1,12 +1,15 @@
 # tenhove2020 — Comparing hyperprior distributions for IRR variance components
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2020.pdf` (gitignored).
+Pagination: author/accepted-manuscript PDF pages 1–14 — NOT the Springer typeset pages 79–93; convert explicitly before citing.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2020). "Comparing
 Hyperprior Distributions to Estimate Variance Components for Interrater
 Reliability Coefficients." In M. Wiberg et al. (Eds.), *Quantitative Psychology*
 (Springer Proceedings in Mathematics & Statistics, Vol. 322, pp. 79–93).
 Springer. DOI 10.1007/978-3-030-43469-4_7. OSF: `shkqm`
-(https://osf.io/shkqm/, p. 8). PDF: `cairn/references/sources/tenhove2020.pdf`
-(gitignored).
+(https://osf.io/shkqm/, p. 8).
 
 **Role.** The **O-Bayes** source (IP1) for the package's Bayesian (brms/Stan)
 engine: it fixes the half-*t*(4, 0, 1) hyperprior on random-effect SDs, the

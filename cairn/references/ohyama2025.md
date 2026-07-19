@@ -1,9 +1,13 @@
 # ohyama2025 — CI methods for the one-way ICC, a comparison (oracle)
 
+**Provenance.** Ingested 2026-07-18 by M62 from `cairn/references/sources/ohyama2025.pdf` (gitignored).
+Pagination: printed journal pages 587–602.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Ohyama T (2025). "A comparison of confidence interval methods for
 the intraclass correlation coefficient based on the one-way random effects
 model." *Japanese Journal of Statistics and Data Science* 8:587–602. DOI
-10.1007/s42081-025-00292-3. PDF: `cairn/references/sources/ohyama2025.pdf` (gitignored).
+10.1007/s42081-025-00292-3.
 
 **Role.** M62 synthesis/**oracle** note — an independent published coverage/width
 comparison of one-way-ICC CI methods, including Ukoumunne's non-parametric

@@ -86,17 +86,17 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
       and the Scope lines at `M66-source-notes-foundational.md:21` and
       `M67-source-notes-equality-testing.md:21` — the latter two as gated
       amendments that also add the provenance requirement (AC6).
-- [ ] T2: Provenance blocks on M64's ten load-bearing notes (`fleiss1973`,
+- [x] T2: Provenance blocks on M64's ten load-bearing notes (`fleiss1973`,
       `jorgensen2021`, `koo2016`, `mcgraw1996`, `shrout1979`, `tenhove2020`,
       `tenhove2022`, `tenhove2024`, `tenhove2025a`, `tenhove2025b`), folding each
       existing `PDF: …` prose line into the block and carrying the three
       pagination-basis callouts.
-- [ ] T3: Provenance blocks on M65's seven notes (`bhandary2006`, `bobak2018`,
+- [x] T3: Provenance blocks on M65's seven notes (`bhandary2006`, `bobak2018`,
       `mehta2018`, `saha2005`, `saha2012`, `xiao2009`, `xiao2013`).
-- [ ] T4: Provenance blocks on the M62/M53 pages — `ukoumunne2003`,
+- [x] T4: Provenance blocks on the M62/M53 pages — `ukoumunne2003`,
       `ohyama2025` (shelf pointers); `npbootstrap-oneway-comparison`,
       `sem-multilevel-pilot` (synthesis: derivation pointer, `Pagination: —`).
-- [ ] T5: Provenance blocks on the three registry/infra pages — repair
+- [x] T5: Provenance blocks on the three registry/infra pages — repair
       `ORACLES.md`'s existing block (add ingested date, source pointer,
       extraction status), and author `BIBLIOGRAPHY.md`'s and `REFERENCES.md`'s,
       all derived from M63's split of the pre-migration `REFERENCES.md`.
@@ -110,6 +110,12 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: created by /milestone-plan, from the /milestone audit's `references index<->disk` FAIL; gate chose honest-unverified extraction status, absorbing the `sources/` rename, and amending M66/M67; the load-bearing-ten re-verification split off as M69.
 - 2026-07-18: T1 done — shelf renamed `pdf/`→`sources/` (30 PDFs), `.gitignore`, `INDEX.md`, `LESSONS.md` (in-place path correction) and all 19 note pointers updated; M66/M67 amended (Scope path + AC1 provenance requirement), each with its own work-log line.
 - 2026-07-18: minor amendment — AC5 named only `legacy/` and `milestones/archive/` as exempt archives; `reviews/archive/RB01` also cites the old path and is equally never-edited (IP4), so the exemption now names all three. No deliverable changed.
+
+- 2026-07-18: T2–T5 done — Provenance blocks on all 24 pages. Dates/milestones DERIVED with `git log --diff-filter=A --format='%ad|%s' --date=short -- <page>`, never asserted: cairn-init/2026-07-12 → REFERENCES; M53/2026-07-16 → sem-multilevel-pilot; M62/2026-07-18 → ukoumunne2003, ohyama2025, npbootstrap-oneway-comparison; M63/2026-07-18 → ORACLES, BIBLIOGRAPHY; M64/2026-07-18 → the ten load-bearing; M65/2026-07-18 → the seven interval-methods.
+- 2026-07-18: pagination basis derived per page from the note's own callout where it had one, else its anchor range cross-checked against its printed citation — four non-standard: tenhove2020 (manuscript pp. 1–14, not Springer 79–93), tenhove2022 (AOP pp. 1–17), tenhove2024 (AOP pp. 1–13), saha2012 (Early View, no folios at all — anchors are section/equation/table only). bobak2018 is BMC per-article pagination (`18:93` is an article number).
+- 2026-07-18: finding — ORACLES.md had NO provenance block; what cairn_validate matched was a false positive, a hard-wrapped prose line inside oracle O1 beginning with the word "provenance" (ORACLES.md:36). Real block added and the decoy line rewrapped.
+- 2026-07-18: each source note's existing `PDF: …` prose pointer folded into its block rather than duplicated; every seam re-read by hand (the pointer sat mid-sentence or line-wrapped in 8 of 19).
+- 2026-07-18: cairn_validate exit 0, all 15 checks PASS (references index<->disk and scaffold deprecations both clear). `references staleness` now WARNs on exactly 20 pages — the 19 shelf notes + BIBLIOGRAPHY, all "no verified re-check" — which is AC4's intended honest signal; M69 clears ten of them.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

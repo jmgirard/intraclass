@@ -1,9 +1,12 @@
 # tenhove2022 — Interrater reliability for multilevel data (the M5 estimand)
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2022.pdf` (gitignored).
+Pagination: advance-online (AOP) PDF pages 1–17 — NOT the journal pages of the version of record, 27(4):650–666.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2022). "Interrater
 reliability for multilevel data: A generalizability theory approach."
 *Psychological Methods* 27(4):650–666. DOI 10.1037/met0000391.
-PDF: `cairn/references/sources/tenhove2022.pdf` (gitignored).
 
 **Role.** The primary source (IP1) for the package's **multilevel estimand** —
 the subject-level and cluster-level IRR ICCs for subjects nested in clusters.

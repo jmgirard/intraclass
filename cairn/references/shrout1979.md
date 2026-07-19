@@ -1,8 +1,11 @@
 # shrout1979 — The six ICC forms and the O1 worked example
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/shrout1979.pdf` (gitignored).
+Pagination: printed journal pages 420–428.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Shrout PE, Fleiss JL (1979). "Intraclass correlations: uses in
 assessing rater reliability." *Psychological Bulletin* 86(2):420–428.
-PDF: `cairn/references/sources/shrout1979.pdf` (gitignored).
 
 **Role.** The **O1** oracle source (`ORACLES.md`) — the worked example whose data
 and coefficients seed the whole ICC family in this package — and the origin of
