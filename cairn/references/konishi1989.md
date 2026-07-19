@@ -2,14 +2,16 @@
 
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/konishi1989.pdf` (gitignored).
 Pagination: printed journal pages 93–105.
-Extraction: unverified — first pass, values not yet re-read against the source. Three passages were spot-corrected across the M67 review send-back and its second review (the title page's AMS classification and journal banner; pp. 99–101's `χ²₁` recovery conditions; the running-head form on pp. 94–105); the page as a whole remains unchecked — observed 2026-07-19.
+Extraction: verified 2026-07-19 against the source (all 13 PDF pages read to the final page — the references end p. 105, no appendix); every equation number, theorem anchor and quoted passage re-checked against the page images, and the Tables 1–2 grids re-read. One correction: the `q = 2` scale `c` on p. 99 had been recorded as untranscribable because the scan was "unreliable at that line" — it renders cleanly at 400 DPI and is now transcribed; the scan's real defect is its text layer, which returns the AMS classification as `62Hl5`/`62HIO` — observed 2026-07-19.
 
 **Citation.** Konishi S, Gupta AK (1989). "Testing the equality of several
 intraclass correlation coefficients." *Journal of Statistical Planning and
 Inference* 21:93–105. The first-page journal banner prints "21 (1989) 93-105"
-(the running head on pp. 94–105 is the truncated title, with no volume or
+(the running head on pp. 94–105 carries the authors *and* a truncated title —
+"S. Konishi, A.K. Gupta / Tests for intraclass correlations" — with no volume or
 pagination) — neither an issue number nor a DOI appears on the article, so
-neither is given here.
+neither is given here. The first-page footer prints
+"0378-3758/89/$3.50 © 1989, Elsevier Science Publishers B.V. (North-Holland)".
 North-Holland (Elsevier). Received 1 June 1987; revised
 manuscript received 29 December 1987; recommended by T. Hayakawa. AMS
 classification 62H15 (primary), 62H10 (secondary) — the title page OCRs both as
@@ -56,10 +58,28 @@ roots of `ΨG` (Theorem 3.1, p. 99; normal case Theorem 3.3, p. 100; elliptic
 case Theorem 3.4, pp. 100–101). **Exact `χ²₁` requires all three of normality,
 equal `p`, and `q = 2` — none of them suffices on its own.** In the general
 finite-fourth-cumulant case at `q = 2`, the limit is `c·χ²₁` — the latent roots
-of `ΨG` are `c` and 0 — where the scale `c` is itself a function of the unknown
-`ρ` and the per-population variance and cumulant terms, so it must be estimated
-(p. 99; the printed expression is not transcribed here, the shelf scan being
-unreliable at that line). Under normality
+of `ΨG` are `c` and 0 — with
+
+```
+c = {√2(1−ρ)}⁻² (a²₁h₂ + a²₂h₁)(φ²₁ + φ²₂)                       (p. 99)
+```
+
+where `a_α` is defined at Eq. (3.2), `h_α = f_α p_α(p_α−1)/{1+(p_α−1)ρ}²`
+(p. 98), and `φ²_α` is the fourth-cumulant term of Eq. (3.10). So `c` depends on
+the unknown `ρ` *and* on per-population cumulants, and must be estimated —
+p. 99 says the coefficients "have to be estimated from the data" and points at
+the literature on linear combinations of `χ²` variates without recommending a
+route.
+
+*(An earlier version of this note declined to transcribe this expression,
+recording that "the shelf scan [was] unreliable at that line". That was wrong:
+the line renders cleanly at 400 DPI and is transcribed above. The scan is in fact
+poor in a different place — the **text layer**, not the image: `pdftotext` returns
+the AMS classification as `62Hl5`/`62HIO`, letters for digits, while the page
+image plainly prints 62H15/62H10. Judge legibility from a rendered image, never
+from the extracted text.)*
+
+Under normality
 with `p₁ = ⋯ = p_q = p`, the weights stop depending on unknown parameters
 (Theorem 3.3 and the remark following, p. 100), but the limit remains a weighted
 sum. Only in conjunction — two `p`-variate *normal* samples — is the asymptotic
@@ -79,7 +99,9 @@ is also `χ²_{q−1}`; **for `q = 2` the two are the same test** (p. 102).
 Table 1 (p. 103) is `p = 3`, Table 2 (p. 104) is `p = 5`, both at
 `(N₁,N₂) = (25,25)` and `(25,50)`, entries ×1000. Findings as stated on p. 103:
 empirical significance levels are "not significantly different from the nominal
-level 0.05" for all `ρ₁ = ρ₂`; the ALR test is more powerful than ZT when
+level 0.05" for all `ρ₁ = ρ₂` — the paper's own yardstick being that no observed
+relative frequency sits more than `2{(0.05)(0.95)/1000}^{1/2}` (≈ 0.0138) from
+0.05; the ALR test is more powerful than ZT when
 `ρ₁ ≠ ρ₂`; and the power of both increases as the dimension `p` increases. Other
 `(N₁, N₂, p, α)` combinations were tried and left the picture "essentially
 unchanged" (p. 103).
@@ -115,7 +137,9 @@ record rather than re-argued from memory.
   package's own known failure modes live is not exercised here.
 - **The admissible `ρ` range is never stated.** Compound symmetry requires
   `ρ ≥ −1/(p−1)` for `Σ_α` to be positive definite, and the sibling papers in
-  this cluster state that bound explicitly; this one does not.
+  this cluster state that bound explicitly; this one does not. Re-checked across
+  all 13 pages (title page through the references ending p. 105, no appendix) —
+  the bound appears nowhere, observed 2026-07-19.
 - **The `ω_α` weights must be estimated.** The paper notes the coefficients
   "have to be estimated from the data" (p. 99) and points at the literature on
   distributions of linear combinations of `χ²` variates, but supplies no
