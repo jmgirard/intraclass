@@ -91,9 +91,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-18: created by /milestone-plan (promotes the tier-C candidate row's
-  out-of-contract half; framed as boundary documentation rather than
-  capability ingestion, since IP2 permanently excludes ICC-equality testing).
+- 2026-07-18: created by /milestone-plan (promotes the tier-C candidate row's out-of-contract half; framed as boundary documentation rather than capability ingestion, since IP2 permanently excludes ICC-equality testing).
 - 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
 - 2026-07-19: gated amendment at a /milestone-plan re-run — new AC7 + T5 make the M64/M65 staleness sweep mechanical (old T5 becomes T6); M66's verified-extraction bar deliberately NOT applied, since AC3 makes these notes non-load-bearing by design.
 

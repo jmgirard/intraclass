@@ -97,21 +97,11 @@ gate before stamping, never folded in silently.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
-- 2026-07-12: created by /milestone-plan (promotes the release-consolidation
-  candidate; plan gate: milestone-only vehicle, R ≥ 4.0.0, lightweight API
-  audit, paper → candidate row).
-- 2026-07-12: Depends-on amended to M49, M50, M51 by /milestone-plan
-  ("address known issues" run; plan gate: the three hardening milestones land
-  before the v0.1.0 release).
-- 2026-07-16: Depends-on amended to add M53 by /milestone-plan (plan gate:
-  maintainer sequenced the multilevel-SEM estimand/oracle pass ahead of the
-  v0.1.0 release).
-- 2026-07-16: Depends-on gains M54 (gated amendment at the M54 plan gate —
-  maintainer chose to ship the lavaan multilevel engine before the release).
-- 2026-07-17: Depends-on gains M55 by /milestone-plan (plan gate: the
-  gtheory-reference docs audit lands before the v0.1.0 release — a capability
-  table listing an archived package as an installable peer shouldn't ship in
-  the first CRAN release).
+- 2026-07-12: created by /milestone-plan (promotes the release-consolidation candidate; plan gate: milestone-only vehicle, R ≥ 4.0.0, lightweight API audit, paper → candidate row).
+- 2026-07-12: Depends-on amended to M49, M50, M51 by /milestone-plan ("address known issues" run; plan gate: the three hardening milestones land before the v0.1.0 release).
+- 2026-07-16: Depends-on amended to add M53 by /milestone-plan (plan gate: maintainer sequenced the multilevel-SEM estimand/oracle pass ahead of the v0.1.0 release).
+- 2026-07-16: Depends-on gains M54 (gated amendment at the M54 plan gate — maintainer chose to ship the lavaan multilevel engine before the release).
+- 2026-07-17: Depends-on gains M55 by /milestone-plan (plan gate: the gtheory-reference docs audit lands before the v0.1.0 release — a capability table listing an archived package as an installable peer shouldn't ship in the first CRAN release).
 - 2026-07-19: mirror catch-up by /milestone — Depends-on gained M61 (86d16e8, 2026-07-17 plan gate) and M68 (5a4a7af, 2026-07-18 plan gate: the references provenance backfill clears cairn_validate before M48's consistency gate); both were recorded in ROADMAP only, so this file's Depends-on and work log were behind.
 
 ## Decisions
