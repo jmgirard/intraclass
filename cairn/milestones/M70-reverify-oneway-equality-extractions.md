@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M70: Re-verify the one-way and equality-testing extractions (6 notes)
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m70-reverify-oneway-equality`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -72,7 +72,7 @@ not applied here.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: `ukoumunne2003` (17 pp) — leads; D-006's GO rests on its `log F`
+- [x] T1: `ukoumunne2003` (17 pp) — leads; D-006's GO rests on its `log F`
       bootstrap-t. Note is thin at 81 lines; expect additions, not just
       corrections.
 - [ ] T2: `ohyama2025` (16 pp) — 61-line note, the thinnest on the shelf.
@@ -96,6 +96,7 @@ not applied here.
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
 - 2026-07-19: created by /milestone-plan (absorbs part of the "remaining nine source extractions" candidate — `ukoumunne2003`, `ohyama2025` — and takes M67's four, which INDEX.md:243 records as backlog members not exempt from re-verification; plan gate: 3-way split, normal priority because `ukoumunne2003` backs D-006).
+- 2026-07-19: T1 `ukoumunne2003` verified (17 pp, all read; Appendix A pp. 3818–3820 found and its Eq. 7 derivation re-run, reproduces exactly; Table I ρ=0.05 block confirmed cell-by-cell; 12 quotations swept, all verbatim). Six corrections, one substantive: the note claimed the transformed bootstrap-t "≈ nominal (0.95) across k, including k=10" when Table I on the page it already cited gives **0.9320** at ρ=0.001/k=10 — and the paper flags that deviation itself (p. 3814). Also: the p. 3816 "3 per cent" sentence was quoted truncated and labelled a *global* claim when it is conditional on non-normal data; eq. 4's anchor was p. 3806, actually p. 3807; normality asserted where p. 3807 calls it inessential for point estimation; a Fig. 2 plot-read replaced by exact Table I values (bootstrap-t 0.8805, BCa 0.8280); "strategy 1" was not the source's label. No package value affected.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
