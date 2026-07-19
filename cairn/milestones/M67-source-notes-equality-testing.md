@@ -73,7 +73,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Notes for the general-case pair — `konishi1989` (several ICCs),
+- [x] T1: Notes for the general-case pair — `konishi1989` (several ICCs),
       `donner2002` (dependent ICCs).
 - [ ] T2: Notes for the unequal-family-size pair — `young1998`, `naik2007`;
       note the overlap between them rather than duplicating the derivation.
@@ -95,6 +95,8 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
 - 2026-07-19: gated amendment at a /milestone-plan re-run — new AC7 + T5 make the M64/M65 staleness sweep mechanical (old T5 becomes T6); M66's verified-extraction bar deliberately NOT applied, since AC3 makes these notes non-load-bearing by design.
 - 2026-07-19: in-progress by /milestone-implement on branch `m67-source-notes-equality-testing`; all four shelf PDFs present (donner2002, konishi1989, naik2007, young1998).
+- 2026-07-19: implement question gate — notes stay short per Scope (no transcribed simulation tables or worked-example reproductions, unlike M65's `bhandary2006`); `bhandary2006` gets a two-way cross-reference as a fifth cluster member, answering the request in its own note without reopening M65's shipped text. No RB tripwire: M67 documents the IP2 fence rather than moving it.
+- 2026-07-19: T1 done — `konishi1989.md` (approximate LRT, `q` populations, non-`χ²` null) and `donner2002.md` (dependent ICCs, same subjects, two observer panels), both read to the final page.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
