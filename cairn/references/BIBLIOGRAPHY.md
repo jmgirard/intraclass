@@ -1,13 +1,23 @@
 # Bibliography
 
-**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries) and M65 (→ 27); M68 added only this block.
+**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries), M65 (→ 27), and M66 (→ 34); M68 added only this block.
 Pagination: —.
-Extraction: unverified — the 16 split entries moved as text and were never read against their sources; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since — observed 2026-07-18.
+Extraction: unverified — the 16 split entries moved as text and were never read against their sources, which is what keeps this page's status unverified as a whole; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since; the 7 added by M66 were authored on 2026-07-19 from shelf copies each read end-to-end, and three of those entries deliberately withhold a field the source does not print (Trevethan's pagination, Jorgensen's year/venue/pagination, and Shieh's citekey-vs-issue year is flagged inline) — observed 2026-07-19.
 
 The repo's bibliography. Oracle provenance lives in
 [`ORACLES.md`](ORACLES.md); per-source extractions with page/table anchors live
 in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
 
+- Bartko, J. J. (1966). The intraclass correlation coefficient as a measure of
+  reliability. *Psychological Reports, 19*, 3–11. (No DOI or issue number is
+  printed on the article.) (The one-way/two-way/mixed ICC formulas and the
+  correlation-coefficient argument; guidance only, no oracle — see
+  [`bartko1966.md`](bartko1966.md).)
+- Bartko, J. J. (1976). On various intraclass correlation reliability
+  coefficients. *Psychological Bulletin, 83*(5), 762–765. (No DOI is printed.)
+  (The case against Winer's anchor-point method; **Table 3 misprints `MSW` for
+  `MSE` in rows 3–4**, found by recomputation, no repo value affected — see
+  [`bartko1976.md`](bartko1976.md).)
 - Bhandary, M., & Fujiwara, K. (2006). A small sample test for the equality of
   intraclass correlation coefficients under unequal family sizes for several
   populations. *Communications in Statistics — Simulation and Computation, 35*(3),
@@ -34,6 +44,19 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   intraclass correlation coefficient as measures of reliability. *Educational and
   Psychological Measurement, 33*, 613–619. (The kappa–ICC boundary; shelf evidence,
   not an oracle — see [`fleiss1973.md`](fleiss1973.md).)
+- Hedges, L. V., Hedberg, E. C., & Kuyper, A. M. (2012). The variance of intraclass
+  correlations in three- and four-level models. *Educational and Psychological
+  Measurement, 72*(6), 893–909. doi:10.1177/0013164412445193. (Delta-method
+  large-sample variances for variance-share ICCs in nested designs; **outside the
+  contract boundary — no rater facet** — see [`hedges2012.md`](hedges2012.md).)
+- Jorgensen, T. D., van der Ark, L. A., & ten Hove, D. *Factors affecting
+  efficiency of interrater reliability estimates from planned missing data
+  designs on a fixed budget.* **Year, venue, and pagination unknown**: the shelf
+  copy is an author manuscript printing none of them, and its own bibliography
+  cites ten Hove et al. (2021, 2022), so the `jorgensen2019` citekey's year is a
+  label rather than a sourced fact and is not asserted here. Supplementary
+  materials: https://osf.io/g5hvs/. (Planned-missing design efficiency for IRR;
+  **not** the 2021 SEM paper below — see [`jorgensen2019.md`](jorgensen2019.md).)
 - Jorgensen, T. D. (2021). How to estimate absolute-error components in structural
   equation models of generalizability theory. *Psych, 3*(2), 113–133.
   doi:10.3390/psych3020011. (The M7 lavaan engine's SEM absolute-error method —
@@ -76,9 +99,22 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   24*, 3497–3512. doi:10.1002/sim.2197. (The BCML point estimator underlying
   Saha (2012); binary outcomes — see [`saha2005.md`](saha2005.md).)
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
+- Shieh, G. (2016). Choosing the best index for the average score intraclass
+  correlation coefficient. *Behavior Research Methods, 48*(3), 994–1003.
+  doi:10.3758/s13428-015-0623-y. (Cited as `shieh2015` after the 2015
+  online-publication/copyright year printed on the same page; the issue year is
+  2016.) (`ICC(2) = 1 − 1/F*` is negatively biased and MSE-dominated by four
+  alternatives — but it is an ANOVA plug-in the package does not use — see
+  [`shieh2015.md`](shieh2015.md).)
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
   rater reliability. *Psychological Bulletin, 86*(2), 420–428. (The six ICC forms
   and the O1 worked example — see [`shrout1979.md`](shrout1979.md).)
+- ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2018). On the usefulness of
+  interrater reliability coefficients. In M. Wiberg et al. (Eds.), *Quantitative
+  Psychology* (Springer Proceedings in Mathematics & Statistics, Vol. 233,
+  pp. 67–75). Springer. doi:10.1007/978-3-319-77249-3_6. (20 IRR coefficients on
+  4 `irr` datasets; the coefficient choice, not the data, drives the reported
+  reliability — see [`tenhove2018.md`](tenhove2018.md).)
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2020). Comparing hyperprior
   distributions to estimate variance components for interrater reliability
   coefficients. In M. Wiberg et al. (Eds.), *Quantitative Psychology* (Springer
@@ -105,6 +141,15 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   incomplete data. *Multivariate Behavioral Research, 60*(5), 1042–1061.
   doi:10.1080/00273171.2025.2507745. (The engine + CI basis for ADR-002/ADR-003 —
   see [`tenhove2025b.md`](tenhove2025b.md).)
+- Trevethan, R. Intraclass correlation coefficients: clearing the air,
+  extending some cautions, and making some requests. *Health Services and
+  Outcomes Research Methodology.* doi:10.1007/s10742-016-0156-6. **Year, volume,
+  issue, and pages are not carried here**: the shelf copy is an online-first
+  version (published online 23 August 2016, © 2016) printing no journal
+  pagination and no publication year, so none is asserted from memory — the
+  `2017` in the citekey is the issue year and is uncorroborated by this copy. (Selection and reporting cautions — Form is
+  not the rater count; surveys three incompatible band schemes, IP3-fenced — see
+  [`trevethan2017.md`](trevethan2017.md).)
 - Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
   Non-parametric bootstrap confidence intervals for the intraclass correlation
   coefficient. *Statistics in Medicine, 22*(24), 3805–3821. doi:10.1002/sim.1643.

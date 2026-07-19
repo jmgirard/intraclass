@@ -8,7 +8,7 @@ and milestones; never restate a value here.
 - [ORACLES.md](ORACLES.md) — the repo's **declared oracle-registry home**
   (D-007): 39 entries, each naming its oracle ID, type, asserting test, source,
   and provenance. Every oracle value in the test suite traces to an entry here.
-- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (27 entries). Primary
+- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (34 entries). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
@@ -17,6 +17,15 @@ and milestones; never restate a value here.
 
 ## Source notes (`<citekey>.md`)
 
+- [bartko1966.md](bartko1966.md) — source note (M66): the one-way/two-way/mixed
+  ICC formulas and the argument that an ICC is a correlation only when the
+  denominator carries an observation's full variance. Its 4×2 Ebel example
+  (one-way 0.1236, two-way-random 0.2778, two-way-mixed 0.4286) is
+  hand-reconstructible; no oracle uses it.
+- [bartko1976.md](bartko1976.md) — source note (M66): three `r = 1.0` data sets
+  that separate agreement from consistency, and the case against Winer's
+  anchor-point method. **Table 3 misprints `MSW` for `MSE` in rows 3–4** (found
+  by recomputation; no repo value affected).
 - [bhandary2006.md](bhandary2006.md) — source note (M65): Gaussian familial
   `F_max` **equality test** across three populations, unequal family sizes; the
   asymptotic LRT's size reaches 0.41 against a nominal 0.05 at few families and
@@ -28,6 +37,16 @@ and milestones; never restate a value here.
 - [fleiss1973.md](fleiss1973.md) — source note (M64): weighted kappa with squared
   weights ≡ the two-way random single-rating **agreement** ICC at k = 2; shelf
   evidence for the kappa–ICC boundary, not an oracle.
+- [hedges2012.md](hedges2012.md) — source note (M66): delta-method large-sample
+  variances of variance-share ICCs in three- and four-level nested designs
+  (Eqs. 1, 4–6, 10–15) with a worked Kentucky example. **Outside the contract
+  boundary (IP2) — no rater facet**; its "multilevel ICC" is not the package's.
+  Its symmetric Wald intervals are the contrast case for `PRINCIPLES.md` #3.
+- [jorgensen2019.md](jorgensen2019.md) — source note (M66): optimizing a
+  planned-missing observational design for IRR on a fixed budget — budget /
+  workload / team-size algebra (Table 1) and MCMC coverage holding at 0.94 under
+  83–99 % missingness on `ICC(A,1)`. **Not** the O-SEM paper; and the citekey
+  year is contradicted by the source (it cites 2022 works).
 - [jorgensen2021.md](jorgensen2021.md) — source note (M64): the **O-SEM** source.
   Eq. 6 defines σ²_i as the raw variance of the effects-coded indicator intercepts
   (÷ k−1, no bias correction); p. 124 documents the SEM-vs-mixed-model gap.
@@ -48,8 +67,17 @@ and milestones; never restate a value here.
 - [saha2012.md](saha2012.md) — source note (M65): profile-likelihood CI for the
   **binary** beta-binomial ICC; PL near-nominal where four asymptotic Wald
   intervals under-cover badly. Outside the contract boundary.
+- [shieh2015.md](shieh2015.md) — source note (M66): the conventional average-score
+  index `ICC(2) = 1 − 1/F*` is negatively biased (`−2(1−ρ*)/(N−3)`) and
+  MSE-dominated by four alternatives in a `ρ̂*(c) = 1 − c/F*` family. **Critiques an
+  ANOVA plug-in the package does not use** (`unit = "average"` is REML
+  component-based); also sources "groups beat judges at fixed `N·K`".
 - [shrout1979.md](shrout1979.md) — source note (M64): the six ICC forms, the three
   cases, and the **O1** worked example (Tables 2–4); Table 4 prints two decimals.
+- [tenhove2018.md](tenhove2018.md) — source note (M66): 20 IRR coefficients on 4
+  `irr` datasets — the *Video* set spans 0.04 to 0.92, so the coefficient choice,
+  not the data, drives the reported reliability. A problem statement with no
+  selection rule; `ICC₂` here is the **two-way** consistency ICC.
 - [tenhove2020.md](tenhove2020.md) — source note (M64): the **O-Bayes** source —
   half-*t*(4,0,1) hyperpriors on random-effect **SDs**, the crossed-random DGP, and
   MAP-over-EAP with percentile BCIs at k > 2.
@@ -65,6 +93,11 @@ and milestones; never restate a value here.
 - [tenhove2025b.md](tenhove2025b.md) — source note (M64): the ADR-002/ADR-003
   basis — MLE of random-effects models with Monte-Carlo CIs preferred for planned
   incomplete data.
+- [trevethan2017.md](trevethan2017.md) — source note (M66): ICC selection and
+  reporting cautions — Form is *not* the rater count, and one data set yields six
+  ICCs from 0.51 to 0.87 (Table 2). A second independent source for judging the
+  interval over the point estimate; surveys three incompatible band schemes
+  (IP3-fenced). Shelf copy is online-first with **no journal pagination**.
 - [ukoumunne2003.md](ukoumunne2003.md) — source note (M62): the non-parametric
   bootstrap CI for the one-way ICC (subject-resample + `log F` variance-stabilizing
   transformed bootstrap-t + infinitesimal-jackknife SE); under-covers at k=10.
@@ -100,17 +133,33 @@ each verified against its own
 title page (M63/T1). Citekey convention: same-author-same-year takes a letter
 suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
-**Ingested (source/synthesis note exists) — 19:** `bhandary2006`, `bobak2018`,
-`fleiss1973`, `jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`,
-`saha2005`, `saha2012`, `shrout1979`, `tenhove2020`, `tenhove2022`, `tenhove2024`,
-`tenhove2025a`, `tenhove2025b`, `ukoumunne2003`, `xiao2009`, `xiao2013`. The ten
-load-bearing primary sources were ingested by M64; `ohyama2025` and
-`ukoumunne2003` by M62; the seven interval-methods/robustness sources by M65.
+**Ingested (source/synthesis note exists) — 26:** `bartko1966`, `bartko1976`,
+`bhandary2006`, `bobak2018`, `fleiss1973`, `hedges2012`, `jorgensen2019`,
+`jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`, `saha2005`,
+`saha2012`, `shieh2015`, `shrout1979`, `tenhove2018`, `tenhove2020`, `tenhove2022`,
+`tenhove2024`, `tenhove2025a`, `tenhove2025b`, `trevethan2017`, `ukoumunne2003`,
+`xiao2009`, `xiao2013`. The ten load-bearing primary sources were ingested by M64;
+`ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
+sources by M65; the seven foundational/interpretation sources by M66. The four
+remaining shelf PDFs are the M67 equality-testing cluster.
 
-Three shelf PDFs are **not** the issue version of record — each note carries a
+Five shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
-(© 2021 and © 2022 respectively, no journal pagination), and `tenhove2020` is an
-author/accepted manuscript with no publisher fields at all.
+(© 2021 and © 2022 respectively, no journal pagination), `tenhove2020` is an
+author/accepted manuscript with no publisher fields at all, `trevethan2017` is an
+online-first copy with no journal pagination (M66), and `jorgensen2019` is an
+author manuscript with **no year, venue, or pagination at all** (M66).
+
+Three citekeys are **not** corroborated by their source's printed publication year, and none was
+renamed (renaming would break the milestone Scope lists and every cross-reference):
+`shieh2015` is *Behavior Research Methods* 48(3):994–1003, **2016** — the 2015 is
+the online/copyright year printed on the same page. `jorgensen2019` is worse: the
+shelf copy prints no year at all, its own bibliography cites ten Hove et al. 2021
+and 2022, and the PDF was typeset 2022-09-27, so **2019 is contradicted by the
+source** and `BIBLIOGRAPHY.md` does not assert it (M66; flagged for the maintainer).
+`trevethan2017` is the third and mildest case: its shelf copy prints no publication
+year at all (only © 2016 and an online date), so the `2017` is *uncorroborated*
+rather than contradicted — `BIBLIOGRAPHY.md` withholds the year there too.
 
 **M65 — interval methods & robustness (7): ingested 2026-07-18.** Reading them
 cold established that the cluster is **not** the one-way-interval-methods group
@@ -123,11 +172,23 @@ common ICC · `saha2012` **binary** beta-binomial ICC interval · `saha2005`
 varying subject distributions · `bobak2018` two-rater fixed-rater consistency ICC
 under heteroscedasticity.
 
-**M66 — foundational & interpretation (7):** `bartko1966` · `bartko1976` ·
-`hedges2012` (ICC variance, 3-/4-level) · `jorgensen2019` (planned-missing
-efficiency on a fixed budget — **not** the 2021 SEM paper) · `shieh2015`
-(best average-score index) · `tenhove2018` (20 coefficients compared) ·
-`trevethan2017` (cautions).
+**M66 — foundational & interpretation (7): ingested 2026-07-19.** Read cold, the
+cluster splits three ways rather than being uniformly "guidance": two bear on
+selection (`tenhove2018`, `shieh2015`), two are the package's prehistory
+(`bartko1966`, `bartko1976`), two are design/efficiency
+(`jorgensen2019`, `hedges2012`), and one is a reporting-cautions paper
+(`trevethan2017`). **Nothing in the package traces to any of the seven** — no
+oracle, test, or vignette cites them — which is the honest state, not a gap.
+`hedges2012` is additionally outside the contract boundary (IP2): its ICCs have
+no rater facet. `jorgensen2019` is **not** the 2021 SEM paper. Every note was
+read to its source's final page and carries a dated *verified* extraction status,
+so none joins the re-verify backlog.
+
+Source findings recorded by M66, none affecting a repo value: `bartko1976`
+Table 3 misprints `MSW` for `MSE` in rows 3–4 (found by recomputation);
+`tenhove2018` Table 1 gives the `Vision` scale maximum as 3 where p. 69 says 4
+(unresolved — needs the `irr` package); `shieh2015` Appendix Eq. A2 writes `ρ`
+for `ρ*` (typographical, confirmed by re-deriving Eq. 5).
 
 **M67 — ICC-equality testing (4):** `donner2002` · `konishi1989` · `naik2007` ·
 `young1998`. Outside the contract boundary (IP2); ingested as boundary evidence.
