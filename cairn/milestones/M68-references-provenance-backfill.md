@@ -129,3 +129,37 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Round 2** (round 1 sent back 2026-07-18 on AC2/AC4 wording; both amended via
+gate, no deliverable changed).
+
+### Acceptance-criteria evidence (fresh, by command, 2026-07-18)
+
+- **AC1** — 24/24 pages carry `**Provenance.**` with an ISO ingested date,
+  source pointer, `Pagination:`, and `Extraction:`; `cairn_validate`'s
+  `references index<->disk` check PASSes.
+- **AC2** — work log records the derivation command
+  (`git log --diff-filter=A --format='%ad|%s' --date=short -- <page>`) and the
+  complete mapping, all six groups present and summing to 24: cairn-init/
+  2026-07-12 (1), M53/2026-07-16 (1), M62/2026-07-18 (3), M63/2026-07-18 (2),
+  M64/2026-07-18 (10), M65/2026-07-18 (7).
+- **AC3** — 24/24 carry a `Pagination:` line; the three non-version-of-record
+  PDFs each carry an explicit conversion warning (`tenhove2022` AOP 1–17,
+  `tenhove2024` AOP 1–13, `tenhove2020` manuscript 1–14 vs Springer 79–93).
+- **AC4** — 0/24 claim a verification; 24/24 `Extraction:` statuses are one
+  physical line ending `— observed 2026-07-18.`; 19 read unverified-first-pass,
+  the 5 with no shelf source read `derived —` / `first-hand record —`.
+- **AC5** — 0 live files name `references/pdf/` (archives excluded per the
+  criterion); `.gitignore:12` names `sources/`; `sources/` holds all 30 PDFs;
+  `scaffold deprecations` advisory now OK.
+- **AC6** — M66 and M67 each name `references/sources/` in Scope, each require a
+  provenance block in AC1, each carry their own dated amendment work-log line.
+- **AC7** — `cairn_validate` exit 0, 15/15 PASS; profile `verify` slot 1802 pass,
+  0 fail, 0 error, 23 skip, 2 warn (both pre-existing engine conditions; branch
+  touches no R file).
+
+### Consistency gate
+
+- Universal: `cairn_validate` exit 0. No DESIGN.md principle changed → `cairn_impact` skipped.
+- Toolchain (`r-package` profile `consistency-gate` slot): 0 R/NAMESPACE/man/data/DESCRIPTION/README files in the diff, so generated-file drift is structurally impossible; `devtools::document()` produces no diff; `pkgdown::check_pkgdown()` "No problems found"; README.md current; no user-visible change, so no NEWS entry owed; full `devtools::check()` run at review.
+
