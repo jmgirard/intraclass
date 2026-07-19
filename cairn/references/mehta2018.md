@@ -69,10 +69,10 @@ that transfers:
 - **Rater error variance is essentially unchanged across distributions**
   (Table 6, p. 2743): 0.18 / 0.19 / 0.20 at Case 1 for extreme-concave /
   uniform / extreme-convex. The scale is equally good in all three.
-- Hence, verbatim from the abstract: "the dissimilarity of `ICC` among
-  distributions is attributed to the study design (ie, distribution of subjects)
-  component of subject variability and **not the scale quality component of rater
-  error variability**."
+- Hence, verbatim from the abstract — and the second half is the load-bearing
+  clause: "the dissimilarity of `ICC` among distributions is attributed to the
+  study design (ie, distribution of subjects) component of subject variability
+  and not the scale quality component of rater error variability."
 
 The interpretation consequence is stated bluntly (p. 2741): under Case 2, the
 same instrument reads as "almost perfect" agreement under the extreme concave
