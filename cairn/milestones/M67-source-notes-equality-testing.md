@@ -35,24 +35,24 @@ tier-C papers → M66; the interval-methods cluster → M65.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Four `cairn/references/<citekey>.md` source notes exist, one per
+- [x] AC1: Four `cairn/references/<citekey>.md` source notes exist, one per
       source named in Scope, each with the five validation-doctrine fields and a
       conforming `**Provenance.**` block (ingested date, source pointer,
       pagination basis, dated `Extraction:` status) per M68; each test statistic
       and its design assumptions carry a page anchor.
-- [ ] AC2: Each note carries an explicit IP2 boundary line stating that
+- [x] AC2: Each note carries an explicit IP2 boundary line stating that
       ICC-equality testing is outside the package's contract, and that adopting
       it would require an IP2 amendment — not a feature request.
-- [ ] AC3: Each note's "what traces to it" field states plainly that nothing in
+- [x] AC3: Each note's "what traces to it" field states plainly that nothing in
       the package traces to it, and that this is by design.
-- [ ] AC4: `DESIGN.md`'s IP2 statement gains a one-line cross-reference to this
+- [x] AC4: `DESIGN.md`'s IP2 statement gains a one-line cross-reference to this
       cluster as the citable record for the boundary (a pointer only — the
       substance stays in the notes).
-- [ ] AC5: `BIBLIOGRAPHY.md` gains an entry per source; `INDEX.md` carries one
+- [x] AC5: `BIBLIOGRAPHY.md` gains an entry per source; `INDEX.md` carries one
       line per note; `cairn_validate` passes.
-- [ ] AC6: The profile `verify` slot is clean (`NOT_CRAN=true CI=true`,
+- [x] AC6: The profile `verify` slot is clean (`NOT_CRAN=true CI=true`,
       failed + error = 0).
-- [ ] AC7: No shipped note carries a claim about the repo's own state that is
+- [x] AC7: No shipped note carries a claim about the repo's own state that is
       false at merge time: every time-relative phrase and every absence
       assertion in the four notes is re-resolved after the last file-editing
       task lands, absences rest on a read to the source's final page, and any
@@ -144,6 +144,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: **caught a false-clean signal while dating the `Extraction:` lines.** Writing them "partly verified" made `cairn_validate`'s clause classifier resolve each to `undated` and skip the page — dropping `references staleness` 15 → 11 and silently exempting the four notes from the re-verify backlog. Reverted to `unverified` as the primary claim with the spot corrections as secondary detail; advisory back to 15, which is the honest count. A spot correction is not a re-verification, and `INDEX.md` now says so.
 - 2026-07-19: return trip complete — all five actioned findings fixed (T7–T10) and the AC7 dating failure resolved (T11); `verify` slot clean (FAIL 0, WARN 2, SKIP 23, PASS 1802; failed + error = 0), `cairn_validate` 15 PASS exit 0. Status → review for a second review attempt. `cairn_validate` WARNs M67 at 11 tasks (>10 split tripwire) — an artifact of the send-back appending T7–T11 to a shipped plan, not emergent internal structure; not actioned on a return trip.
 - 2026-07-19: PR #75 CI on the return trip — 10 of 11 checks green (format-check, lint, pkgdown, macos/ubuntu-release/ubuntu-devel/windows R CMD check, test-coverage, codecov patch + project); `ubuntu-latest (oldrel-1)` still running at hand-off, to be re-derived at review from `gh pr checks 75` per the stateless-resume rule.
+- 2026-07-19: /milestone-review attempt 2 — all seven criteria pass with fresh evidence (AC7, attempt 1's failure, now verified); consistency gate clean; blame-history and prior-PR lenses no finding; diff-bug lens three findings scored 96/92/78, all fixed on the branch (two more altered quotations of the same class T10 missed, plus a mislabeled running-head anchor fixed despite scoring 78, under the correct-a-record-proven-false rule).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -249,6 +250,92 @@ along an axis (inferential target) that IP2's own enumeration (rival *coefficien
 families*) does not use. Its assessment, which this review accepts: an
 application of IP2, not a widening of it — no D-entry owed, but the sentence a
 future reader would point at to argue IP2 grew silently.
+
+### Attempt 2 — 2026-07-19 — PASSED
+
+Evidence gathered fresh by command at `30f7c79` + the three review-side fixes
+below. All seven criteria verified; three findings, all fixed on the branch.
+
+**Criterion evidence (fresh, by command):**
+
+- AC1 ✅ — all four notes carry exactly one each of `**Provenance.**`,
+  `Pagination:`, `Extraction:`, `**Citation.**`, `**Role.**`, `## Traces to`,
+  `## Open questions`, `## Boundary (IP2)` (counted). Page anchors: donner2002 29,
+  konishi1989 26, naik2007 26, young1998 26. `Extraction:` dated on each.
+- AC2 ✅ — each note states "outside this package's contract" (verified
+  unwrapped; konishi1989's and naik2007's are line-wrapped), plus
+  "constitutional amendment" and "not a feature request", 1 each.
+- AC3 ✅ — each `## Traces to` opens `**Nothing in the package**` and says "by
+  design". Re-verified by command: 0 hits for the four citekeys or the author
+  surnames across `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`,
+  `data-raw/`, `ORACLES.md`.
+- AC4 ✅ — `DESIGN.md` IP2 gains a pointer sentence; the principle's operative
+  wording is byte-identical (diff read). `cairn_impact --changed` reports **no
+  changed principles**, independently confirming no D-entry is owed.
+- AC5 ✅ — 1 `BIBLIOGRAPHY.md` entry and 1 `INDEX.md` line per citekey (counted);
+  `cairn_validate` exit 0, 15 PASS.
+- AC6 ✅ — profile `verify` slot re-run fresh: FAIL 0, WARN 2, SKIP 23,
+  PASS 1802; failed + error = 0.
+- AC7 ✅ — **the criterion attempt 1 failed now passes.** All twelve
+  time-relative/absence hits across the four notes carry `— observed
+  2026-07-19`: four `Extraction:` lines, four `**Role.**` echoes, four
+  `## Traces to` bullets (each with the searched surfaces named). The
+  young1998/naik2007 overlap claim AC7 calls out by name is dated in both
+  notes. "Absences rest on a read to the source's final page" verified
+  directly: konishi1989 p. 105 and young1998 p. 1373 are pure reference lists,
+  so nothing there contradicts a source-absence claim — the anchor gap is that
+  bibliographies earn no anchors, not an unread page.
+
+**Consistency gate (all pass):** `cairn_validate` exit 0, 15 PASS (advisories:
+`dangling id tokens` 293 legacy-by-design, `references staleness` 15 — the four
+notes correctly still on the backlog, `sizing` 11 tasks, `release window` M48).
+`cairn_impact --changed`: no changed principles. Profile `consistency-gate` slot:
+`devtools::document()` no diff; branch touches no file outside `cairn/`;
+`.Rbuildignore` carries `^cairn$`; `pkgdown::check_pkgdown()` "No problems
+found"; README in sync; NEWS entry not owed. Full R CMD check covered by CI's
+five-platform matrix, 11/11 green on `30f7c79`.
+
+**Independent review — three lenses + scorer.** Blame-history: **no finding**
+(verified `bhandary2006.md` is purely additive with M65's values intact, the IP2
+edit is pointer-only on the D-007 precedent, and the `764ddd6` merge resolution
+lost neither side). Prior-PR-comments: **no finding** — PRs #69–#75 carry zero
+human review comments, only Codecov bot boilerplate, so no corpus exists to
+regress against. Diff-bug lens: three findings, all re-verified against the shelf
+PDFs by an independent scorer *and* by this review directly.
+
+**Actioned — three, all fixed on the branch:**
+
+1. **(96) `donner2002.md` — altered quotation.** Note quoted "no expressions
+   exist for `μ̂₁, μ̂₂, σ̂²₁` and `σ̂²₂`"; p. 370 reads "Although explicit
+   expressions exist for the maximum likelihood estimators of ρ1, ρ2 and ρ12,
+   **no such** expressions exist for…". The dropped "such" detaches the negative
+   from its antecedent and turns a closed-form claim into an existence claim.
+   Fixed, with the antecedent restored in the surrounding prose.
+2. **(92) `young1998.md` — altered quotation.** Note quoted (2.6) "is an
+   approximation to the true likelihood ratio test statistic. But, in the
+   asymptotic sense…"; p. 1367 reads "…test statistic **−2 log Λ**. But…". The
+   symbol was removed with no ellipsis. Fixed by restoring it.
+3. **(78, below threshold — fixed anyway) `konishi1989.md` — mislabeled anchor.**
+   Note said "The running head prints '21 (1989) 93-105'". That string is the
+   first-page journal banner; the running head on pp. 94–105 is the truncated
+   title with no volume or pagination. Scored 78 so it is formally below the
+   action bar, but it is a verified-false claim about a source, and the
+   correcting-a-record-proven-false rule (tracking-rules, current knowledge
+   fixed in place) governs a references page regardless of triage score. Fixed
+   and logged here rather than shipped known-wrong.
+
+**Logged, below threshold (0 further):** no other sub-80 finding was returned.
+
+**Nit fixed in passing:** T8's new sentence read "neither condition suffices"
+over a three-item list; now "none of them suffices".
+
+**Note on the return-trip fix quality.** Findings 1 and 2 are the same
+defect class as attempt 1's finding 5 (altered quotations). T10's work log
+claimed it "swept the surrounding quotations" in `young1998.md` and
+`naik2007.md` — that sweep was real but incomplete, and it never covered
+`donner2002.md` at all. The lesson is that a quotation sweep must be
+exhaustive per note and cover every note, not just the ones a finding named —
+to be captured in `LESSONS.md` at the post-merge hygiene pass.
 
 **Also noted for the return trip (not a numbered finding):** the four notes run
 107/143/131/165 lines against the "~60–90 lines each" quoted at the implement

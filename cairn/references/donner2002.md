@@ -3,7 +3,7 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/donner2002.pdf` (gitignored).
 Pagination: printed journal pages 367–379. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: unverified — first pass, values not yet re-read against the source. One point was spot-checked at the M67 review send-back (p. 367 prints no DOI); the page as a whole remains unchecked — observed 2026-07-19.
+Extraction: unverified — first pass, values not yet re-read against the source. Two points were spot-checked across the M67 review send-back and its second review (p. 367 prints no DOI; p. 370's "no such expressions exist" quotation, corrected); the page as a whole remains unchecked — observed 2026-07-19.
 
 **Citation.** Donner A, Zou G (2002). "Testing the equality of dependent
 intraclass correlation coefficients." *The Statistician* 51(Part 3):367–379.
@@ -54,8 +54,10 @@ balanced case this paper is written to escape.
   (Eq. 4, p. 369), with the `(7−5k_l)/(N√{18k_l(k_l−1)})` bias correction
   (Eq. 5, p. 370) and the `H₀` covariance (Eq. 7, p. 370) that accounts for the
   dependence.
-- **LR test** — §3.3, p. 370; numerical minimization only, "no expressions exist
-  for `μ̂₁, μ̂₂, σ̂²₁` and `σ̂²₂`"; approximately `χ²` with 1 df.
+- **LR test** — §3.3, p. 370; numerical minimization only. The paper has explicit
+  ML expressions for `ρ₁, ρ₂, ρ₁₂` but "**no such** expressions exist for
+  `μ̂₁, μ̂₂, σ̂²₁` and `σ̂²₂`" — the negative is about *closed form*, not
+  existence. Approximately `χ²` with 1 df.
 - **`T_AF`** — Alsawalmeh & Feldt (1994), an `F`-moment approximation extending
   the Feldt (1980)/Kraemer (1981) Cronbach-α comparison (§3.4, p. 371); accurate
   only for `N ≥ 100` and `k_l ≥ 5`.

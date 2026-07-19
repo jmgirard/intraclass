@@ -3,7 +3,7 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/young1998.pdf` (gitignored).
 Pagination: printed journal pages 1363–1373. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: unverified — first pass, values not yet re-read against the source. One passage was spot-corrected at the M67 review send-back (p. 1363's journal heading and quoted passages); the page as a whole remains unchecked — observed 2026-07-19.
+Extraction: unverified — first pass, values not yet re-read against the source. Two passages were spot-corrected across the M67 review send-back and its second review (p. 1363's journal heading and quoted passages; p. 1367's Eq. (2.6) quotation, restored to include `−2 log Λ`); the page as a whole remains unchecked — observed 2026-07-19.
 
 **Citation.** Young DJ, Bhandary M (1998). "Test for Equality of Intraclass
 Correlation Coefficients Under Unequal Family Sizes." *Biometrics*
@@ -54,8 +54,9 @@ p. 1364; the `Q_{p_i}` matrix is printed in full, with
 
 - **LRT**, Eq. (2.6), pp. 1366–1367 — asymptotically `χ²` with 1 df. It is an
   *approximate* LRT: Srivastava's estimators "are not MLEs but are CAN", so
-  (2.6) "is an approximation to the true likelihood ratio test statistic. But, in
-  the asymptotic sense, it converges to the same distribution" (p. 1367).
+  (2.6) "is an approximation to the true likelihood ratio test statistic
+  `−2 log Λ`. But, in the asymptotic sense, it converges to the same
+  distribution" (p. 1367).
 - **Large-sample `Z`-test**, Eq. (2.8), p. 1367 —
   `Z = (ρ̂₁ − ρ̂₂)/{S√(1/k₁ + 1/k₂)}`, with `S²` the pooled variance estimator
   under `H₀` built from the Srivastava & Katapa (1986) asymptotic variance

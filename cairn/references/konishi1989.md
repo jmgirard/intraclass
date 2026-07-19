@@ -2,12 +2,14 @@
 
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/konishi1989.pdf` (gitignored).
 Pagination: printed journal pages 93–105.
-Extraction: unverified — first pass, values not yet re-read against the source. Two passages were spot-corrected at the M67 review send-back (the title page's AMS classification and journal heading; pp. 99–101's `χ²₁` recovery conditions); the page as a whole remains unchecked — observed 2026-07-19.
+Extraction: unverified — first pass, values not yet re-read against the source. Three passages were spot-corrected across the M67 review send-back and its second review (the title page's AMS classification and journal banner; pp. 99–101's `χ²₁` recovery conditions; the running-head form on pp. 94–105); the page as a whole remains unchecked — observed 2026-07-19.
 
 **Citation.** Konishi S, Gupta AK (1989). "Testing the equality of several
 intraclass correlation coefficients." *Journal of Statistical Planning and
-Inference* 21:93–105. The running head prints "21 (1989) 93-105" — neither an
-issue number nor a DOI appears on the article, so neither is given here.
+Inference* 21:93–105. The first-page journal banner prints "21 (1989) 93-105"
+(the running head on pp. 94–105 is the truncated title, with no volume or
+pagination) — neither an issue number nor a DOI appears on the article, so
+neither is given here.
 North-Holland (Elsevier). Received 1 June 1987; revised
 manuscript received 29 December 1987; recommended by T. Hayakawa. AMS
 classification 62H15 (primary), 62H10 (secondary) — the title page OCRs both as
@@ -52,7 +54,7 @@ distribution under the null hypothesis". Its limit is a **linear combination of
 independent `χ²₁` variates**, `Σ ω_α χ²₁(α)`, whose weights `ω_α` are the latent
 roots of `ΨG` (Theorem 3.1, p. 99; normal case Theorem 3.3, p. 100; elliptic
 case Theorem 3.4, pp. 100–101). **Exact `χ²₁` requires all three of normality,
-equal `p`, and `q = 2` — neither condition suffices on its own.** In the general
+equal `p`, and `q = 2` — none of them suffices on its own.** In the general
 finite-fourth-cumulant case at `q = 2`, the limit is `c·χ²₁` — the latent roots
 of `ΨG` are `c` and 0 — where the scale `c` is itself a function of the unknown
 `ρ` and the per-population variance and cumulant terms, so it must be estimated
