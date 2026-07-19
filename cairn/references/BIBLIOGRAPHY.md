@@ -141,13 +141,14 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   incomplete data. *Multivariate Behavioral Research, 60*(5), 1042–1061.
   doi:10.1080/00273171.2025.2507745. (The engine + CI basis for ADR-002/ADR-003 —
   see [`tenhove2025b.md`](tenhove2025b.md).)
-- Trevethan, R. (2017). Intraclass correlation coefficients: clearing the air,
+- Trevethan, R. Intraclass correlation coefficients: clearing the air,
   extending some cautions, and making some requests. *Health Services and
-  Outcomes Research Methodology.* doi:10.1007/s10742-016-0156-6. **Volume, issue,
-  and pages are not carried here**: the shelf copy is an online-first version
-  (published online 23 August 2016, © 2016) printing no journal pagination, so
-  they are not asserted from memory. (Selection and reporting cautions — Form is
-  not the rater count; surveys four incompatible band schemes, IP3-fenced — see
+  Outcomes Research Methodology.* doi:10.1007/s10742-016-0156-6. **Year, volume,
+  issue, and pages are not carried here**: the shelf copy is an online-first
+  version (published online 23 August 2016, © 2016) printing no journal
+  pagination and no publication year, so none is asserted from memory — the
+  `2017` in the citekey is the issue year and is uncorroborated by this copy. (Selection and reporting cautions — Form is
+  not the rater count; surveys three incompatible band schemes, IP3-fenced — see
   [`trevethan2017.md`](trevethan2017.md).)
 - Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
   Non-parametric bootstrap confidence intervals for the intraclass correlation

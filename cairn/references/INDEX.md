@@ -96,7 +96,7 @@ and milestones; never restate a value here.
 - [trevethan2017.md](trevethan2017.md) — source note (M66): ICC selection and
   reporting cautions — Form is *not* the rater count, and one data set yields six
   ICCs from 0.51 to 0.87 (Table 2). A second independent source for judging the
-  interval over the point estimate; surveys four incompatible band schemes
+  interval over the point estimate; surveys three incompatible band schemes
   (IP3-fenced). Shelf copy is online-first with **no journal pagination**.
 - [ukoumunne2003.md](ukoumunne2003.md) — source note (M62): the non-parametric
   bootstrap CI for the one-way ICC (subject-resample + `log F` variance-stabilizing
@@ -150,13 +150,16 @@ author/accepted manuscript with no publisher fields at all, `trevethan2017` is a
 online-first copy with no journal pagination (M66), and `jorgensen2019` is an
 author manuscript with **no year, venue, or pagination at all** (M66).
 
-Two citekeys do **not** match their source's publication year, and neither was
+Three citekeys are **not** corroborated by their source's printed publication year, and none was
 renamed (renaming would break the milestone Scope lists and every cross-reference):
 `shieh2015` is *Behavior Research Methods* 48(3):994–1003, **2016** — the 2015 is
 the online/copyright year printed on the same page. `jorgensen2019` is worse: the
 shelf copy prints no year at all, its own bibliography cites ten Hove et al. 2021
 and 2022, and the PDF was typeset 2022-09-27, so **2019 is contradicted by the
 source** and `BIBLIOGRAPHY.md` does not assert it (M66; flagged for the maintainer).
+`trevethan2017` is the third and mildest case: its shelf copy prints no publication
+year at all (only © 2016 and an online date), so the `2017` is *uncorroborated*
+rather than contradicted — `BIBLIOGRAPHY.md` withholds the year there too.
 
 **M65 — interval methods & robustness (7): ingested 2026-07-18.** Reading them
 cold established that the cluster is **not** the one-way-interval-methods group

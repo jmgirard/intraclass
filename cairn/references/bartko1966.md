@@ -20,9 +20,9 @@ under "What this could source" below.
 
 ## The three models and their ICC formulas
 
-Bartko's thesis, stated p. 3: the ICC formula "most frequently and commonly used
-is correct only for the case where the underlying model assumed is the one-way
-random effects model", and for the two-way classification "the assumptions of the
+Bartko's thesis, stated p. 3: "the definition of the ICC most frequently and
+commonly **given** is correct only for the case where the underlying model assumed
+is the one-way random effects model", and for the two-way classification "the assumptions of the
 underlying model and the use of the ICC formula are frequently violated".
 
 **One-way random** (model [1], p. 3): `x_ij = μ + p_i + e_ij`, `i = 1…n`
@@ -108,7 +108,7 @@ reconstructible from the printed data — see below.
 
 ## What this could source
 
-Nothing in the package traces here today. Two things in this paper are
+Nothing in the package traces here — observed 2026-07-19. Two things in this paper are
 *available* to be sourced, and neither is claimed by any current oracle:
 
 - **A closed-form / hand-computed oracle fixture.** The 4×2 example above yields
@@ -128,7 +128,7 @@ Neither is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page. Three
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. Three
 sibling `references/` notes cite the paper:
 
 - `cairn/references/tenhove2024.md:95–97` — quotes Bartko's advice that ICC use

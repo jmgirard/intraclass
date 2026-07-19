@@ -157,7 +157,7 @@ Neither is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
 
 - `cairn/references/shrout1979.md:163` — records "Bartko's (1976) position that
   consistency is never an appropriate reliability concept for raters", which

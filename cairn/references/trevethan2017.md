@@ -32,7 +32,7 @@ not the number of raters. Table 1's own summaries:
 
 - **Model 1** — "A range of different raters assess different participants, and
   there is no match between raters and participants. This situation is
-  infrequent. This model will usually produce lower ICCs than do the other
+  infrequent. This model will usually produce lower ICCs than do the other two
   models." SPSS: "Third option 1-way random".
 - **Model 2** — "The same raters assess all participants, and *theoretically* the
   raters are regarded as being randomly selected… It usually produces ICCs that
@@ -40,7 +40,7 @@ not the number of raters. Table 1's own summaries:
   those in Model 3." SPSS: "Second option 2-way random".
 - **Model 3** — "The same raters assess all participants, but the raters are the
   only raters of interest for current purposes (the specific study setting)…
-  It will usually produce higher ICCs." SPSS: "First option 2-way mixed".
+  It will usually produce the highest ICCs." SPSS: "First option 2-way mixed".
 - **Form 1** — "On any occasion, only one reading/measurement is taken by each
   rater from each participant for purposes of analysis." Forms 2 and *k* cover
   averaged readings; "Any form >1 will produce higher ICCs than those under
@@ -171,9 +171,10 @@ The paper's own position is against unqualified use of any of them:
 Note the relationship to the existing shelf: `koo2016.md` records the *Koo & Li*
 bands (the ones `getting-started.Rmd` reproduces) and `BIBLIOGRAPHY.md` records
 Cicchetti (1994) as "the older sibling rule of thumb". Trevethan cites neither —
-his targets are Fleiss (1986) and Portney & Watkins (2009), a third and fourth
-scheme. The four schemes disagree with each other, which is itself the strongest
-available argument for IP3.
+his three are Fleiss (1986), Portney & Watkins (2009), and Nunnally & Bernstein
+(1994), i.e. a third, fourth, and fifth scheme. All five disagree with each
+other, which is itself the strongest available argument for IP3. (`tenhove2018`
+adds Landis & Koch (1977) as a sixth.)
 
 ## What this could source
 
@@ -208,7 +209,7 @@ AC3 pair.
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
 
 - `cairn/references/koo2016.md` — the sibling interpretation source; same
   "judge the interval" stance, a different band scheme.

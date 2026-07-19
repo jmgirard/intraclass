@@ -36,28 +36,28 @@ qualitative band entering package output → refused outright (IP3).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: Seven `cairn/references/<citekey>.md` source notes exist, one per
+- [x] AC1: Seven `cairn/references/<citekey>.md` source notes exist, one per
       source named in Scope, each with the five validation-doctrine fields,
       page/table anchors on every extracted value, and a conforming
       `**Provenance.**` block (ingested date, source pointer, pagination basis,
       dated `Extraction:` status) per M68. Each source is read to its final page
       and its note ships a dated *verified* extraction status — these seven do
       not join the standing re-verify backlog.
-- [ ] AC2: Each note's "what traces to it" field is honest — for a source
+- [x] AC2: Each note's "what traces to it" field is honest — for a source
       nothing currently traces to, it states that explicitly and names what it
       *could* source, rather than manufacturing a connection.
-- [ ] AC3: The `shieh2015` and `tenhove2018` notes each state, with anchors,
+- [x] AC3: The `shieh2015` and `tenhove2018` notes each state, with anchors,
       what they imply for `choose_icc()`'s selection logic — and any divergence
       from the package's current guidance is recorded in the work log as a
       finding for a separate milestone, not acted on here.
-- [ ] AC4: No note introduces a qualitative ICC band into package-facing
+- [x] AC4: No note introduces a qualitative ICC band into package-facing
       material; interpretation content stays in the note and is marked as
       IP3-fenced (`trevethan2017` and `bartko1976` both carry such content).
-- [ ] AC5: `BIBLIOGRAPHY.md` gains an entry per source; `INDEX.md` carries one
+- [x] AC5: `BIBLIOGRAPHY.md` gains an entry per source; `INDEX.md` carries one
       line per note; `cairn_validate` passes.
-- [ ] AC6: The profile `verify` slot is clean (`NOT_CRAN=true CI=true`,
+- [x] AC6: The profile `verify` slot is clean (`NOT_CRAN=true CI=true`,
       failed + error = 0).
-- [ ] AC7: No shipped note carries a claim about the repo's own state that is
+- [x] AC7: No shipped note carries a claim about the repo's own state that is
       false at merge time: every time-relative phrase and every absence
       assertion in the seven notes is re-resolved after the last file-editing
       task lands, absences rest on a read to the source's final page, and any
@@ -133,8 +133,116 @@ qualitative band entering package output → refused outright (IP3).
 
 - 2026-07-19: CI green on PR #74 — all 11 checks pass (9 workflow jobs + codecov project/patch).
 
+- 2026-07-19: /milestone-review — consistency gate clean (cairn_validate exit 0; document() no-diff; pkgdown OK; devtools::check() 0/0/0; verify slot FAIL 0 PASS 1802). Three review lenses: blame-history and prior-PR both no findings; diff-bug returned 9, scored by a fresh scorer.
+- 2026-07-19: review triage — 4 actioned at >=80 (F6 misquotes fixed, F3 false recomputation tick fixed, F1 REJECTED as factually wrong, F7 anchor fixed); 5 sub-threshold (F2 74, F4 78, F8 76, F5/F9 45) independently verified as real and fixed anyway rather than shipping known errors — deviation from the 80 cut, logged here.
+- 2026-07-19: F1 rejection evidence — the trevethan2017 'Published online' footer IS printed on page 1 (400-DPI render); it is absent from the PDF text layer in every pdftotext mode, which misled both the reviewer and the scorer. No change to the note.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-19.** PR [#74](https://github.com/jmgirard/intraclass/pull/74).
+Branch synced: `main` had not moved (merge-base == `origin/main`), so no merge was needed.
+
+### Acceptance-criteria evidence (fresh, by command)
+
+- **AC1** — all 7 notes carry the five doctrine fields, a `Pagination:` basis, and a
+  dated *verified* `Extraction:` status on one physical line (checked per file). Each
+  note's pagination claim was cross-checked against the actual PDF page count and all
+  7 match exactly (9/4/17/9/10/17/10 pp).
+- **AC2** — all 7 carry a `## What this could source` section and an explicit
+  no-trace statement. Truth-checked: grep for every citekey **and** author surname
+  across `R/`, `tests/`, `vignettes/`, `man/`, `ORACLES.md` returns **0** occurrences,
+  so every no-trace claim is true as written.
+- **AC3** — `shieh2015.md` and `tenhove2018.md` both carry an anchored
+  `## Bearing on choose_icc()` section (`trevethan2017.md` carries one too, beyond
+  the requirement). Findings logged in the work log: tenhove2018 = no divergence;
+  shieh2015 = a separate-milestone finding (its critique targets an ANOVA plug-in the
+  package does not use, `R/estimand.R:182`).
+- **AC4** — IP3 fences present in `bartko1976.md`, `trevethan2017.md` (the two AC4
+  names) and additionally `tenhove2018.md`. Package-facing material untouched:
+  `git diff --name-only origin/main..HEAD` shows **0** files outside `cairn/`.
+- **AC5** — all 7 have a `BIBLIOGRAPHY.md` back-link and an `INDEX.md` line;
+  `cairn_validate` exits 0, "all checks passed".
+- **AC6** — profile `verify` slot re-run fresh under `NOT_CRAN=true CI=true`:
+  **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802** (failed + error = 0).
+- **AC7** — fresh sweep over the 7 notes returns **0** undated time-relative phrases;
+  every absence claim carries an inline `— observed 2026-07-19`. Two AC7 gaps found at
+  review (an undated "traces here today", and undated `Traces to` lead sentences) were
+  fixed here, not reinterpreted.
+
+### Consistency gate
+
+Universal: `cairn_validate` exit 0, all CHECKs PASS; 318 advisories, unchanged from
+pre-M66 (14 work-log-format + 293 dangling-id + 11 references-staleness, all
+pre-existing). No `DESIGN.md` principle changed → `cairn_impact` correctly skipped.
+Toolchain (`r-package` slot): `document()` no diff; `NAMESPACE`/`man/` clean;
+README in sync; `pkgdown::check_pkgdown()` no problems; no NEWS entry (0 user-facing
+files touched); no new top-level files; `devtools::check()` **0 errors, 0 warnings,
+0 notes**. CI green on PR #74 (11/11 checks).
+
+### Independent review — three lenses + scorer
+
+Blame-history **[S]**: no findings (independently re-derived the 34/26/30 counts and
+confirmed BIBLIOGRAPHY still fires the staleness advisory rather than having it worded
+away — M68 lesson held). Prior-PR-comments **[S]**: no findings (no inline PR-comment
+history in this repo; fell back to archived Review sections). Diff-bug **[O]**: nine
+findings, scored by a fresh **[S]** scorer.
+
+**Actioned (fixed on the branch):**
+
+- **F6 (94) — three quotations marked verbatim were not.** `bartko1966` "commonly
+  *used*" → source prints "commonly *given*"; `trevethan2017` Model 3 "produce
+  *higher* ICCs" → "the *highest* ICCs", and Model 1 dropped "two" from "the other
+  two models"; `tenhove2018` "behind *the IRR coefficients* … *can we* start" →
+  "behind *IRR* … *we can* start". All three corrected and re-verified against the
+  PDFs. The most serious finding: a verified-extraction stamp is what licenses trust
+  in a verbatim quote.
+- **F3 (93) — a recomputation marked ✓ that did not agree.** `hedges2012`'s
+  three-level `Var(r_2)` recomputes to 4.38e-5 vs the printed 4.05e-5 (~8 %), and
+  SE 0.0066 rounds to 0.007 not the printed 0.006. Replaced the false tick with the
+  rounding explanation (the paper rounds intermediates before summing) and narrowed
+  the Provenance claim: the two-level example reproduces exactly, both three-level
+  examples only up to the paper's displayed rounding.
+- **F1 (92) — REJECTED, reviewer and scorer both wrong.** Both concluded the
+  `Published online:` footer line (dated 2016-08-23) is absent from
+  `trevethan2017.pdf` and is only `CreationDate` metadata. It is **printed on
+  page 1**, bottom-left beside the Springer logo — confirmed by a 400-DPI render of
+  the footer strip. The string is
+  absent from the text layer in *every* `pdftotext` mode (`-layout`, `-raw`,
+  whole-document), which is what misled both agents. The note's claim stands
+  unchanged.
+- **F7 (82) — wrong cross-reference anchor.** `shieh2015.md` and `jorgensen2019.md`
+  cited `M4.5-d-study.md` §6 for the d_study CI-width gating; §6 is the out-of-scope
+  list and states no gate. Re-anchored to `ROADMAP.md:39` / `DESIGN.md:41`.
+
+**Sub-threshold but independently verified and fixed anyway** (a deliberate deviation
+from the 80 cut — these were confirmed by direct recomputation/reading, and leaving
+known errors in place because a scorer said 74 would be worse than the rule protects
+against):
+
+- **F2 (74) — a source erratum reproduced without flagging.** Shieh's p. 1000
+  `K = 10` ranking prints `RAB{UB} < RAB{ME} < RAB{MO}`, contradicting his own
+  Tables 1–4 where `MO` precedes `ME` in all four cells. Re-derived from Eq. (6):
+  `c_MO = 0.7609 → 0.0760`, `c_ME = 0.9339 → 0.7026`. The note now records the
+  erratum with the arithmetic — matching how it already treats the `bartko1976`
+  Table 3 misprint.
+- **F4 (78) / F5 (45) — the #4 withholding was applied inconsistently.**
+  `BIBLIOGRAPHY.md` asserted "Trevethan, R. (2017)" while the note states that year
+  is uncorroborated by the copy. The year is now withheld there as it is for
+  `jorgensen2019`, and `INDEX.md`'s "two citekeys" is now three, distinguishing
+  *contradicted* (shieh, jorgensen) from *uncorroborated* (trevethan).
+- **F8 (76) — band-scheme counts did not reconcile across three files.**
+  `trevethan2017.md` tables three schemes (incl. Nunnally & Bernstein), so Landis &
+  Koch is the sixth on the shelf, not the fifth; and "surveys four" (BIBLIOGRAPHY,
+  INDEX) contradicted the note's own statement that Trevethan cites neither Koo & Li
+  nor Cicchetti. Corrected to three surveyed / sixth on shelf, consistently.
+- **F9 (45) — AC7 read literally.** `bartko1966`'s "traces here today" was
+  time-relative and undated (T5's grep pattern lacked "today"), and the seven
+  `Traces to` lead sentences were undated. All eight now carry
+  `— observed 2026-07-19`.
+
+Post-fix re-verification: all three corrected quotes match their sources word-for-word;
+fresh staleness sweep returns 0; `cairn_validate` exit 0.

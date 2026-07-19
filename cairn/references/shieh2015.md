@@ -105,10 +105,22 @@ Selected values, `N = 10, K = 10` (Table 1, p. 998), `c` then `RAB`:
 | `RAB` | 1.0543 | 0.0761 | 0.0000 | 0.7027 | 1.0000 | 1.1023 | 1.5000 |
 | bias at `ρ* = 0` | 0.3012 | 0.0217 | 0.0000 | −0.2008 | −0.2857 | −0.3149 | −0.4286 |
 
-Rankings. Bias, `K = 10` (p. 1000):
+Rankings. Bias, `K = 10`, **as printed** at p. 1000:
 `RAB{ρ̂*_UB} < RAB{ρ̂*_ME} < RAB{ρ̂*_MO} < RAB{ICC(2)} < RAB{ρ̂*_MS} < RAB{ρ̂*_EF} < RAB{ρ̂*_ML}`;
 at `K = 50` "only the relative absolute biases between `ρ̂*_ME` and `ρ̂*_MO` are
-switched". MSE, identical across all four cells (p. 1001):
+switched", giving `RAB{ρ̂*_UB} < RAB{ρ̂*_MO} < RAB{ρ̂*_ME} < …`.
+
+**Erratum (M66 finding, verified by recomputation).** The `K = 10` ordering above
+contradicts the paper's own tables: `ρ̂*_MO` precedes `ρ̂*_ME` in **all four**
+cells, not just at `K = 50`, so there is no switch to report. Table values
+(`RAB_MO` / `RAB_ME`): 0.0761 / 0.7027 (Table 1), 0.0142 / 0.6771 (Table 2),
+0.1040 / 0.7034 (Table 3), 0.0192 / 0.6741 (Table 4). Re-derived independently
+from Eq. (6), `RAB = |c(N−1) − N + 3|/2`, at `N = 10, K = 10`:
+`c_MO = 0.7609 → |6.8481 − 7|/2 = 0.0760` and
+`c_ME = 0.9339 → |8.4051 − 7|/2 = 0.7026`, matching the table to 4 dp. The two
+sentences on p. 1000 appear transposed. **No repo value is affected** — nothing
+cites this ranking — but the correct reading everywhere is
+`RAB{ρ̂*_UB} < RAB{ρ̂*_MO} < RAB{ρ̂*_ME} < RAB{ICC(2)} < …`. MSE, identical across all four cells (p. 1001):
 `RMSE{ρ̂*_MS} < RMSE{ρ̂*_MO} < RMSE{ρ̂*_UB} < RMSE{ρ̂*_ME} < RMSE{ICC(2)} < RMSE{ρ̂*_EF} < RMSE{ρ̂*_ML}`.
 
 Direction of the biases, p. 1000: "`ρ̂*_MS` and `ρ̂*_MO` are positively biased,
@@ -184,7 +196,9 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
   design-allocation result is a *published* statement that groups dominate judges
   at fixed total `N·K` for the one-way design. The parked "`d_study()` CI-width
   precision planning" candidate is explicitly **gated on finding an oracle
-  strategy** (`cairn/estimand-specs/M4.5-d-study.md` §6); this is adjacent
+  strategy** (`cairn/ROADMAP.md:39`, restated at `cairn/DESIGN.md:41`; that
+  ROADMAP row cites `M4.5-d-study.md` §6 for the scope boundary, but §6 is the
+  out-of-scope list and states no gate of its own); this is adjacent
   evidence but **not** that oracle — Shieh's criterion is point-estimator bias
   and MSE, not interval width, and `d_study()` varies raters `m` only
   (`R/d-study.R:38`). Recorded so the distinction is on file rather than
@@ -192,7 +206,7 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
 
 - `cairn/references/shrout1979.md` and `cairn/references/mcgraw1996.md` — the
   two naming conventions p. 995 reconciles against Bartko/Bliese/James.

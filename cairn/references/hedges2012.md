@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-19 by M66 from `cairn/references/sources/hedges2012.pdf` (gitignored).
 Pagination: printed journal pages 893–909; the 17 PDF pages map one-to-one onto printed 893–909. This copy is the version of record (full volume/issue/pagination and DOI printed); its footer records a SAGE download stamp from 2016.
-Extraction: verified 2026-07-19 against the source (all 17 PDF pages read to the final page — the **Appendix sits at pp. 906–907**, after the software section and before the References, and carries the delta-method derivations behind every formula); the two- and three-level worked examples were recomputed from the Table 1 components and reproduce the printed variances and standard errors — observed 2026-07-19.
+Extraction: verified 2026-07-19 against the source (all 17 PDF pages read to the final page — the **Appendix sits at pp. 906–907**, after the software section and before the References, and carries the delta-method derivations behind every formula); the two-level worked example was recomputed from the Table 1 components and reproduces the printed variance and standard error exactly, while both three-level examples reproduce only up to the paper's own displayed intermediate rounding (documented in the note) — observed 2026-07-19.
 
 **Citation.** Hedges, L. V., Hedberg, E. C., & Kuyper, A. M. (2012). "The Variance
 of Intraclass Correlations in Three- and Four-Level Models." *Educational and
@@ -114,12 +114,15 @@ the same result for the standard error, also rounding to 0.005."
 `27.650² = 764.5225`, quotient `2.616 × 10⁻⁵`, `SE = 0.00512` ✓. Three-level
 `Var(r_2)`: `[2.042(0.888²) + 2(0.112)(0.888)] × 0.040 = 0.07236`, divided by
 `2.042 × 816.931 = 1668.17` gives `4.34 × 10⁻⁵`; plus
-`0.112²(0.030)/816.931 = 4.6 × 10⁻⁷`; total `4.38 × 10⁻⁵`, `SE = 0.0066` ✓
-(printed 0.0000405 and 0.006). Three-level `Var(r_3)` reproduces the printed
-0.000032 only after the paper's own intermediate rounding — carrying full
-precision gives `3.55 × 10⁻⁵` against the printed `3.2 × 10⁻⁵`, and both round to
-the same `SE = 0.006`. Recorded as a rounding artifact of the displayed
-arithmetic, **not** an error in the formulas.
+`0.112²(0.030)/816.931 = 4.6 × 10⁻⁷`; total `4.38 × 10⁻⁵`, `SE = 0.0066`. **This
+does not match the printed 0.0000405 / 0.006 exactly** — it is ~8 % high, and
+`0.0066` rounds to `0.007`, not the printed `0.006`. The gap is the paper's own
+displayed rounding: p. 903 rounds the numerator to `0.072` and the first term to
+`0.00004` before summing, and `0.00004 + 0.0000005 = 0.0000405` is what it
+prints. Three-level `Var(r_3)` behaves the same way — full precision gives
+`3.55 × 10⁻⁵` against the printed `3.2 × 10⁻⁵`. So **both** three-level examples
+reproduce only up to the paper's intermediate rounding, and neither is an error
+in the formulas; the two-level example reproduces exactly.
 
 Figure 1 (p. 905) reproduces the same quantities from the authors' Stata
 `ICCVAR` program at five decimals — two-level school ICC `0.08714`
@@ -152,7 +155,7 @@ completeness, with the boundary caveat above attached to both:
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
 
 - `cairn/references/tenhove2022.md` — the package's actual multilevel estimand
   source; see the boundary note above for why these two "multilevel ICCs" are

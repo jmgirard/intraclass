@@ -115,10 +115,10 @@ values between 0.21 and 0.40 indicate a fair IRR; values between 0.41 and 0.60
 indicate a moderate IRR; values between 0.61 and 0.80 indicate a substantial
 IRR, and values between 0.81 and 1.00 indicate an almost perfect IRR."
 
-**This stays in the note and never enters package output** (IP3). It is a fifth
+**This stays in the note and never enters package output** (IP3). It is the sixth
 band scheme on the shelf, after Koo & Li (`koo2016.md`), Cicchetti
-(`BIBLIOGRAPHY.md`), and the Fleiss (1986) and Portney & Watkins (2009) schemes
-`trevethan2017.md` records — and the paper uses it to make an *anti*-band point
+(`BIBLIOGRAPHY.md`), and the three schemes `trevethan2017.md` records — Fleiss
+(1986), Portney & Watkins (2009), and Nunnally & Bernstein (1994) — and the paper uses it to make an *anti*-band point
 (p. 72): "the interpretation of the IRR of a dataset by means of the benchmarks
 of Landis and Koch (1977) depends on the choice of coefficient. For the dataset
 *Diagnoses*, the IRR could be labelled either slight, fair, or moderate; for the
@@ -155,9 +155,9 @@ coefficients stemming from different conceptualizations of IRR."
    `tenhove2025b.md` (ADR-002/ADR-003), not this paper.
 
 **What it does not supply.** No selection rule. The paper's own conclusion (p. 73)
-is that the question is open — "Only if the theories and models behind the IRR
-coefficients are sorted out, can we start investigating why some IRR coefficients
-produce higher values than others" — and its closing call is for future research
+is that the question is open — "Only if the theories and models behind IRR are
+sorted out, we can start investigating why some IRR coefficients produce higher
+values than others" — and its closing call is for future research
 into per-coefficient benchmarks (p. 74). Its value to `choose_icc()` is as
 citable evidence that a principled selection surface is *needed*, which is the
 premise `choosing-an-icc.Rmd` already assumes.
@@ -180,7 +180,7 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
 
 - `cairn/references/tenhove2024.md` — the later selection-guidance paper by the
   same first author; this one poses the question that one answers.

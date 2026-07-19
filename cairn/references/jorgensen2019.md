@@ -186,12 +186,12 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
   in two different designs by two different criteria (point-estimator MSE vs.
   BCI width). Neither is the oracle the parked `d_study()` CI-width
   precision-planning candidate is gated on
-  (`cairn/estimand-specs/M4.5-d-study.md` §6), but this one is closer, because
+  (`cairn/ROADMAP.md:39`, restated at `cairn/DESIGN.md:41`), but this one is closer, because
   its criterion **is** interval width. Recorded for whoever picks that candidate up.
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
 
 - `cairn/references/jorgensen2021.md` — the *other* Jorgensen paper, cited by
   this one (ms. p. 3); see the confusion warning above.
