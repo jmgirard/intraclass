@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/jorgensen2021.pdf` (gitignored).
 Pagination: printed journal pages 113–133.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (all 21 PDF pages = printed 113–133, read through the reference list) by M69; Eq. 6's `n_i − 1` divisor, the absence of any bias correction anywhere in the paper, the full Table 2 normal/observed block, and the p. 124 discrepancy-function paragraph all confirmed as printed; one page anchor corrected, no value affected — observed 2026-07-18.
 
 **Citation.** Jorgensen TD (2021). "How to estimate absolute-error components in
 structural equation models of generalizability theory." *Psych* 3(2):113–133.
@@ -114,7 +114,8 @@ The paper obtains **delta-method** normal-theory CIs by defining the coefficient
 as new `lavaan` parameters, but warns the delta method "relies on asymptotic
 theory" and "can yield poor coverage and inflated Type I errors in small or
 modest samples" (p. 114). It therefore also demonstrates **Monte Carlo CIs**
-(`semTools::monteCarloCI()`), "a more robust method because it only assumes the
+(named as `semTools::monteCarloCI()` at p. 128 §5.1 — M64 placed the function
+name under the pp. 114/124 anchors, corrected M69), "a more robust method because it only assumes the
 estimated parameters (not complex functions of parameters) have normal sampling
 distributions" (p. 114), which "involves simulating a joint sampling distribution
 of the parameter estimates (like a parametric bootstrap procedure)" (p. 124).

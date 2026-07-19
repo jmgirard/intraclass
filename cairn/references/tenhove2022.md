@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2022.pdf` (gitignored).
 Pagination: advance-online (AOP) PDF pages 1–17 — NOT the journal pages of the version of record, 27(4):650–666.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (M69) — all 17 PDF pages re-read; Tables 4 and 5 confirmed digit-for-digit at 300 DPI, nine prose/anchor claims corrected — observed 2026-07-18.
 
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2022). "Interrater
 reliability for multilevel data: A generalizability theory approach."
@@ -35,9 +35,12 @@ The most elaborated single-level coefficient, **Eq. 5 (p. 3)**:
 
   `ICC(A, k) = σ²_s / (σ²_s + (σ²_r + σ²_sr)/k)`
 
-Table 1 (p. 3) gives the full single-level grid (two-way agreement/consistency ×
-average/single, plus the one-way agreement column). Two framing points the
-package's docs lean on:
+Table 1 (p. 3) gives the full single-level grid: a two-way panel
+(agreement/consistency × average/single) and a one-way panel with the same two
+columns, whose consistency cells are `—` because `σ²_r` and `σ²_r:s` cannot be
+disentangled in a one-way design (M64 recorded a one-way *agreement column*;
+the consistency column is printed, just inestimable — corrected M69). Two
+framing points the package's docs lean on:
 
 - **Agreement vs. consistency** (p. 3): `σ²_r` sits in the denominator of the
   agreement coefficients, treating main-rater effects as a nuisance; removing it
@@ -55,6 +58,14 @@ package's docs lean on:
 Table 2 illustrates: **fully crossed**; **Design 1** = raters crossed with
 clusters (subjects nested in clusters); **Design 2** = raters nested within
 clusters; **Design 3** = raters nested within both subjects and clusters.
+
+> **Erratum in Table 2's own Note (p. 5).** The table note glosses "Design 1 =
+> raters *and subjects* nested within clusters" — which is Design 2's
+> description, not Design 1's. The body-text heading (p. 4) reads "Design 1:
+> Raters Crossed With Clusters", and Table 2's Design-1 columns show all eight
+> raters rating subjects in both clusters (raters crossed with clusters,
+> subjects nested). Read the body text, not the table note. Found M69 at 300
+> DPI; uncorrected in the published paper as far as this repo has checked.
 
 **Design 1 — the package's multilevel design.** Eq. 6 (p. 5):
 
@@ -112,15 +123,21 @@ when working with multilevel data" — it yields biased estimates at each level.
 Three routes are named (p. 7): ANOVA mean squares, MLE (hierarchical linear
 model), and MCMC. The paper "focus[es] only on MCMC and ignore[s] the ANOVA and
 MLE approaches" (p. 7) because MCMC supplies uncertainty measures without
-asymptotic normality assumptions — the delta-method Wald CI is flagged as
-problematic under non-normality and as not parameterization-preserving (p. 4).
+asymptotic normality assumptions — under MLE the delta method "may be
+problematic as the normality assumption may be violated, and the Wald-based CIs
+need not be range preserving" (p. 4). (M64 rendered the second clause as "not
+parameterization-preserving"; the paper's term is *range* preserving — the
+limits need not respect the coefficient's [0, 1] range — corrected M69.)
 
 MCMC specifics (p. 8): Stan via `rstan` 2.18.2 (NUTS). The program is
 parameterized on random-effect **SDs**, with **weakly informative half-*t*
 (df = 4, location = 0, scale = 1)** hyperpriors on them, citing ten Hove et al.
 (2020) (see `tenhove2020.md`). Point estimates are **MAP** (via `modeest`), not
-EAP, "because MAP estimates typically have less bias than expected a posteriori
-(EAP) estimates" (p. 8); 95% BCIs use **percentiles** as limits. Convergence:
+EAP: "Because for ICCs, maximum a posteriori (MAP) estimates typically have less
+bias than expected a posteriori (EAP) estimates (Ten Hove et al., 2020), we used
+the MAP estimates as point estimates" (p. 8; M64's paraphrase dropped the
+ICC-specific "Because for ICCs" qualifier — corrected M69). 95% BCIs use
+**percentiles** as limits. Convergence:
 three chains × 1,000 iterations (half burn-in) → 1,500 retained; R̂ < 1.10;
 N_eff > 100.
 
@@ -139,15 +156,20 @@ level)** (p. 8, Online Supplement S1).
   **47,967** (p. 9).
 - Subject-level ICCs showed negligible bias; **cluster-level ICCs were
   under-estimated**, most severely for agreement coefficients with few raters,
-  improving as *k* rose (p. 9, Fig. 1).
+  improving as *k* rose (p. 9; Fig. 1 itself is on p. 10 — corrected M69).
 - **Few raters, not few subjects, is the failure axis:** "small numbers of raters
   were the main source of bias and inefficiency" (Abstract, p. 1). The number of
   clusters and of subjects per cluster "affected the efficiency only negligibly"
   (p. 9). Among random-effect SDs, `σ_r` showed the largest under-estimation
   (**up to 30%**, p. 9).
-- 95% BCI coverage was near-nominal in all conditions except statistically-but-
-  not-practically-significant low coverage for agreement ICCs with two raters
-  (p. 9).
+- 95% BCI coverage (p. 9) — three departures, all "significantly (but not
+  practically significant)": **low** coverage for subject- *and* cluster-level
+  agreement ICCs in most two-rater conditions; **low** coverage for subject-level
+  agreement ICCs in a few five-rater conditions; and **high** coverage for
+  cluster-level *consistency* ICCs with minimal raters and few clusters. Nearly
+  nominal in all other conditions and for all other ICCs. (M64 recorded only the
+  two-rater agreement case — the five-rater and the high-coverage consistency
+  departures were missing — corrected M69.)
 
 ## Simulation 2 — planned missing data (pp. 9–11)
 
@@ -156,22 +178,34 @@ Same DGP with `σ²_c = σ²_r = 0.16`, smallest sample only (`N_c = 20`,
 each subject's raters randomly drawn from the pool (p. 10). Nonconvergence < 2%;
 3,968 converged replications (p. 10).
 
-Result (p. 11): 95% BCI coverage "was nominal in all conditions" — an improvement
+Result (p. 11): 95% BCI coverage rates of both subject- and cluster-level ICCs
+"were nominal in all conditions" — an improvement
 over Simulation 1 — and bias/efficiency "improved substantially when as few as
 two raters per subject were sampled from a larger pool of raters, rather than
 assigning the same two raters to each subject" (p. 11). Residual defect:
 cluster-level agreement ICCs stayed substantially under-estimated.
 
-## Illustrative example (pp. 13–15) — candidate reference values
+## Illustrative example (pp. 12–15) — candidate reference values
 
 Data: N = 789 upper-elementary students drawing themselves with their teacher;
 `N_C = 35` teachers; 8 ≤ N_s ≤ 29 (M = 21.83, SD = 4.19); 8 relationship
 dimensions on a 7-point Likert scale; K = 8 raters, Design 1 with planned
-missing (each drawing rated by three raters; one rater rated all drawings and
-four raters each rated half) (p. 13). The OSF subsample analyzed is **35 × 8 =
-280** students on the *emotional distance* dimension only; ≈15% of total variance
-was at the teacher level (p. 13). `k = 3` and `k_c = 5` were used as conservative
-rater counts (p. 14). OSF: https://osf.io/bwk5t/
+missing. The rater allocation is **per teacher**: each drawing was assessed by
+three raters, and each teacher's drawings were rated by **five** raters in total
+— for each teacher, one rater rated all of that teacher's drawings and four each
+rated half (p. 13). (M64 read this as one rater rating *all* drawings in the
+study and dropped the five-raters-per-teacher fact — corrected M69.)
+
+The OSF subsample analyzed is **35 × 8 = 280** students on the *emotional
+distance* dimension only; ≈15% of total variance was at the teacher level —
+which per footnote 3 (p. 13) counts **both** the teacher variance and the
+Rater × Cluster variance, so it is not `σ²_c` alone.
+
+For the cluster-level ICCs of average ratings, the unbalanced rater counts were
+handled by reporting two values: `k = 3` as a **conservative** and `k = 5` as a
+**liberal** estimate (p. 14) — Table 5's caption reads "for k = 3, and k_c = 3 or
+k_c = 5". (M64 called both counts "conservative" and recorded only `k_c = 5` —
+corrected M69.) OSF: https://osf.io/bwk5t/
 
 **Table 4 (p. 14)** — variance decomposition, MAP [95% BCI]:
 
@@ -201,6 +235,15 @@ stating a preference for practical-implication interpretation over fixed
 benchmarks — the same posture as the package's no-verdict rule (see
 `koo2016.md`).
 
+**A second reader's disambiguation of the Koo & Li bands (p. 14).** Worth
+recording because `koo2016.md` flags the original bands' inclusivity as
+ambiguous: ten Hove et al. restate them with every cut point resolved —
+"ICC ≤ .50 is poor, .50 < ICC ≤ .75 is moderate, .75 < ICC ≤ .90 is good, and
+ICC > .90 is excellent" (p. 14). This is these authors' reading of Koo & Li, not
+Koo & Li's own wording, so it settles nothing about the source; it does show a
+downstream reader closing the same gap upper-bound-inclusive, which leaves no
+value unbanded. Added M69.
+
 ## Traces to
 
 - **The M5 multilevel estimand** — Eqs. 6–7 (decomposition) and 12–13
@@ -227,12 +270,20 @@ benchmarks — the same posture as the package's no-verdict rule (see
   version's pages run 650–666 (so a bare "journal p. 6" cannot exist). Worth a
   one-time sweep at review to
   confirm the repo cites one pagination throughout; not an oracle-value issue.
-- **No estimation route the package uses is validated here.** The paper reports
-  MCMC only and explicitly sets ANOVA and MLE aside (p. 7). The package's default
-  glmmTMB/lme4 REML route to Eqs. 12–13 is therefore an estimation-route choice
-  established by numerical oracle, not by this source — the same posture D-005
-  records for the two-level SEM route. No disagreement with `ORACLES.md`; noted
-  so the sourcing boundary stays honest.
+- **No estimation route the package uses is validated here — with one
+  qualification M64 missed (corrected M69).** The *simulations* are MCMC only;
+  ANOVA and MLE are explicitly set aside (p. 7). But the *illustrative example*
+  additionally fit MLE point estimates for all random-effect SDs and ICCs "using
+  the R software package lme4" (p. 14), and the paper reports diverting them to
+  Online Supplement S4 "because they resembled the MCMC estimates" (p. 14). That
+  is a qualitative agreement statement about one dataset, with no numbers in the
+  article body — Online Supplement S4 is not on the shelf (checked, no supplement
+  file present — observed 2026-07-18) — so it is **not** an oracle and does not
+  validate the package's route. The package's default glmmTMB/lme4 REML route to
+  Eqs. 12–13 remains an estimation-route choice established by numerical oracle,
+  not by this source — the same posture D-005 records for the two-level SEM
+  route. No disagreement with `ORACLES.md`; noted so the sourcing boundary stays
+  honest. If S4 is ever retrieved it is a candidate lme4-vs-MCMC reference point.
 - The paper's `k` for cluster-level ICCs is raters **per cluster** (p. 6); worth
   confirming at review that the package's cluster-level `d_study()` labels this
   axis unambiguously.

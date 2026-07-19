@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2025a.pdf` (gitignored).
 Pagination: printed journal pages 444–459.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (M69) — all 17 PDF pages (printed 444–459, Appendix A to Eq. A.26) re-read; Tables 3, 4 and 5 and every equation confirmed digit-for-digit, **Tables 6–7 corrected for a column misalignment** (M64 read the `M(SD)` summary column as the substantial/good-design column), four source observations added — observed 2026-07-18.
 
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2025). "Interrater
 Reliability for Interdependent Social Network Data: A Generalizability Theory
@@ -129,9 +129,25 @@ Data from Salazar Kämpf et al. (2018), OSF `b4nvf`: N = 139 German students in
 estimate was `ICC(2,3) = .87` (p. 451; footnote 8 notes `ICC(2,3)` = the paper's
 `ICC(C, K)` of Eq. 3).
 
+> **Observed discrepancy in footnote 8 (M69), recorded not resolved.** The
+> footnote reads verbatim: "The ICC(2,3) as defined by Shrout and Fleiss (1979)
+> is identical to the ICC(C,K) in Equation 3." But Shrout & Fleiss's
+> **ICC(2,k)** is the two-way *random*, **absolute-agreement** form, whose
+> denominator carries `σ²_R`; Eq. 3's `ICC(C,K) = σ²_S/(σ²_S + σ²_SR/K)`
+> excludes `σ²_R` and is therefore S&F's **ICC(3,k)** (consistency) — as this
+> paper's own p. 447 states, consistency ICCs "do not include … `σ²_R`". So the
+> footnote's identification looks like a slip for ICC(3,3). **Nothing in this
+> repo depends on it** (see "Traces to"; grepped across `cairn/`, `R/` and
+> `tests/` — the only hit is M69's own work log — observed 2026-07-18); flagged
+> for any reader who cites the footnote. Not reconciled here.
+
 Estimation: 3 chains × 1,000 with 500 burn-in, doubled to 3,000 post-burn-in
 draws; `R̂ < 1.10`, `N_eff > 100` (p. 452). Priors: half-*t*(4, 0, 1) on all
 SDs, truncated to (0, 3); uniform(−1, 1) on the four correlations (p. 452).
+The truncation is not arbitrary: (0, 3) "is half the range of `Y` and therefore
+the largest a *SD* could possibly be" (p. 452) on the 6-point mimicry scale —
+i.e. a **data-scale-derived** bound, unlike the untruncated half-*t*(4,0,1) of
+`tenhove2020.md`. Added M69.
 
 **Table 3 (p. 452)** — RESRM variance components (MAP [2.5%, 97.5%], % variance):
 `σ²_A` 0.37 [0.26, 0.54], 27%; `σ²_P` 0.09 [0.04, 0.17], 7%; `σ²_E` 0.46
@@ -175,15 +191,34 @@ differs significantly from .95 at 1,000 replications); coverage < .90 called
 
 **Headline results (Table 6 and Table 7, p. 454; Figs. 1–2, pp. 454–455).**
 Good-design conditions are near-unbiased with near-nominal coverage. The failure
-cell is **poor design × substantial parameters**:
+cell is **poor design × substantial parameters**.
 
-- Relative bias, Table 6 (p. 454): `ICC_A(C,1)` +0.11, `ICC_A(C,k)` +0.05 under
-  substantial/good; under substantial/**poor** `ICC_A(C,1)` +0.31 and
-  `ICC_A(C,k)` +0.14, while `ICC_E(C,1)` −0.26 and `ICC_E(C,k)` −0.15.
+> ⚠️ **Column layout — the trap M64 fell into (corrected M69).** Both tables run
+> `ICC | M(SD) | Substantial{Good, Poor} | Varying{Good, Poor}` — **five**
+> numeric columns. The first, `M(SD)`, is the **mean (SD) across all four
+> conditions**, not a condition of its own. Verified arithmetically at 300 DPI:
+> Table 7's `ICC_A(C,1)` row is `.74* (0.25) | .94 | .45* | .94 | .61*`, and
+> mean(.94, .45, .94, .61) = .735 ≈ .74. M64 read `M(SD)` as the
+> substantial/good-design column, shifting every good-design value one column
+> left.
+
+- Relative bias, Table 6 (p. 454), substantial parameters: under **good** design
+  `ICC_A(C,1)` = **−0.02** and `ICC_A(C,k)` = **+0.01** (M64 recorded +0.11 and
+  +0.05, which are the across-condition means — corrected M69); under **poor**
+  design `ICC_A(C,1)` +0.31 and `ICC_A(C,k)` +0.14, while `ICC_E(C,1)` −0.26 and
+  `ICC_E(C,k)` −0.15 (these four were right).
 - Coverage, Table 7 (p. 454): under substantial/poor, `ICC_A` = .45 and
-  `ICC_E` = .06 (both single and averaged); `ICC_Y` = .92 and `ICC_P` = .90.
-  Under substantial/good, `ICC_A` = .74 and `ICC_E` = .72 — already flagged
-  outside the Agresti–Coull interval.
+  `ICC_E` = .06 (both single and averaged); `ICC_Y` = .92 and `ICC_P` = .90 —
+  all four correct as M64 had them. Under substantial/**good**, however,
+  `ICC_A` = **.94** and `ICC_E` = **.96**, **neither flagged** — M64's ".74 and
+  .72 … already flagged outside the Agresti–Coull interval" read the flagged
+  *means* and **inverted the paper's finding**, which states that coverage was
+  near-nominal "especially in the good-design conditions" (p. 455). Corrected
+  M69.
+- **Observed (M69):** in Table 7 the `(C,1)` and `(C,k)` rows are *identical* in
+  all four conditions for every ICC, while Table 6's bias rows differ between
+  single and averaged. Recorded as read; whether the coverage identity is a real
+  result or a duplication in the source is not resolved here.
 
 Diagnosis (p. 455): "few raters, small groups of interacting subjects, and
 highly correlated rater effects" (p. 454) cause under-estimation of `σ²_α`
@@ -191,6 +226,14 @@ highly correlated rater effects" (p. 454) cause under-estimation of `σ²_α`
 conclude the RESRM-based ICCs "cannot be trusted for designs with few raters
 and small subgroups of subjects" (p. 455) and explicitly advise against drawing
 conclusions from their own empirical example's IRR estimates (p. 455).
+
+> **Apparent dropped negation on p. 455 (observed M69).** The full sentence
+> prints as: "We therefore advise against drawing conclusions based on the IRR
+> estimates for the empirical example **and would advise using** the RESRM-based
+> ICCs for studies with similar designs." Read literally the second clause
+> recommends what the first clause and the preceding "cannot be trusted"
+> sentence reject; it is almost certainly a dropped "against". The note's
+> summary above follows the paper's evident intent, not the printed clause.
 
 A practical recommendation (p. 456): run a **validation substudy** — a subsample
 of subjects rated by many raters — estimate the RESRM components there, and use
@@ -234,8 +277,10 @@ IP2) plausibly should not fit.
   *read*, not proposed as oracle values.
 - **Not extracted.** Figures 1–2 (pp. 454–455) were read only as far as the
   numeric tables corroborate; plotted points were not digitized. Appendix A's
-  intermediate algebra (A.1–A.25) is derivation, not reference values. The
-  online supplement (OSF `9az5x`, p. 456) has not been retrieved.
+  intermediate algebra (A.1–A.25) is derivation, not reference values; its
+  terminal result Eq. A.26 (`σ_YY = 2 × σ_AP + σ_RR`) was confirmed at M69. The
+  online supplement (OSF `9az5x`, p. 456) had not been retrieved — observed
+  2026-07-18.
 - ~~**Sibling-key hygiene.**~~ *Resolved within M64 (T5): `BIBLIOGRAPHY.md` had
   only the 60(5) paper under a bare "ten Hove … (2025)". T5 added this 60(3)
   paper and gave both entries the `2025a`/`2025b` suffixes, so a bare "ten Hove

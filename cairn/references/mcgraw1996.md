@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/mcgraw1996.pdf` (gitignored).
 Pagination: printed journal pages 30–46, plus the correction at 1(4):390 carried as the PDF's final page.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (all 18 PDF pages = printed 30–46 plus the 1(4):390 correction, read to the final page) by M69; the Case-3A θ²_c definition and estimand and the erratum text confirmed verbatim, three transcription gaps corrected in place, no oracle value affected — observed 2026-07-18.
 
 **Citation.** McGraw KO, Wong SP (1996). "Forming inferences about some
 intraclass correlation coefficients." *Psychological Methods* 1(1):30–46.
@@ -75,6 +75,7 @@ Table 4, single score (p. 35) — the rows the package reports:
 | 2 | `σ²_r/(σ²_r + (σ²_rc + σ²_e))` | `(MS_R − MS_E)/(MS_R + (k−1)MS_E)` | ICC(C,1) |
 | 2A | `σ²_r/(σ²_r + σ²_e)` | (same as above) | ICC(C,1) |
 | 2 | `σ²_r/(σ²_r + σ²_c + (σ²_rc + σ²_e))` | `(MS_R − MS_E)/(MS_R + (k−1)MS_E + (k/n)(MS_C − MS_E))` | ICC(A,1) |
+| 2A | `σ²_r/(σ²_r + σ²_c + σ²_e)` | (same as above) | ICC(A,1) |
 | 3 | `(σ²_r − σ²_rc/(k−1))/(σ²_r + (σ²_rc + σ²_e))` | `(MS_R − MS_E)/(MS_R + (k−1)MS_E)` | ICC(C,1) |
 | 3A | `σ²_r/(σ²_r + σ²_e)` | (same as above) | ICC(C,1) |
 | 3 | `(σ²_r − σ²_rc/(k−1))/(σ²_r + θ²_c + (σ²_rc + σ²_e))` | `(MS_R − MS_E)/(MS_R + (k−1)MS_E + (k/n)(MS_C − MS_E))` | ICC(A,1) |
@@ -82,6 +83,8 @@ Table 4, single score (p. 35) — the rows the package reports:
 
 The bolded Case-3A row is the package's fixed-rater ICC(A,1) estimand: θ²_c sits
 additively in the denominator exactly where σ²_c sits under Case 2.
+
+(The Case-2A ICC(A,1) row was missing from the M64 transcription — added M69.)
 
 Table 5, average score (p. 36): `ICC(k) = (MS_R − MS_W)/MS_R` for Case 1;
 `ICC(C,k) = (MS_R − MS_E)/MS_R` (Cases 2/2A with ρ = `σ²_r/(σ²_r + (σ²_rc +
@@ -101,9 +104,13 @@ as Cronbach's alpha in psychometrics" (pp. 35–36).
 
 - `ICC(1)`, and `ICC(C,1)` for Cases 2, 2A, 3, 3A: `(F_L − 1)/(F_L + k − 1)` and
   `(F_U − 1)/(F_U + k − 1)`, with `F_L = F_obs/F_tabled`, `F_U = F_obs × F_tabled`
-  and `F_obs` the row-effects F. Degrees of freedom `n−1` and `n(k−1)` (one-way)
-  or `n−1` and `(n−1)(k−1)` (two-way); `F_tabled` is the `(1 − α/2)×100`th
-  percentile (p. 41).
+  and `F_obs` the row-effects F. `F_tabled` is the `(1 − α/2)×100`th percentile
+  (p. 41). **The numerator and denominator df swap between the two limits**
+  (M64 recorded a single df pair per model — corrected M69): the lower limit's
+  `F_tabled` takes `n−1` numerator and `n(k−1)` denominator df (one-way) or
+  `n−1` and `(n−1)(k−1)` (two-way), and the upper limit's takes the same pair
+  **reversed** — `n(k−1)` numerator and `n−1` denominator (one-way),
+  `(n−1)(k−1)` and `n−1` (two-way).
 - `ICC(k)` for Case 1, and `ICC(C,k)` for Cases 2, 2A, and 3A **but not 3**:
   `1 − 1/F_L`, `1 − 1/F_U`.
 - `ICC(A,1)` for Cases 2, 2A, 3, 3A:
@@ -165,13 +172,18 @@ read "Sections A3, A4".
   variance is `θ²_c` (columns); the repo writes `θ²_r` (raters). Same quantity,
   same `(k−1)` divisor — recorded so a future reader does not read the two as
   different parameters.
-- **Possible uncorrected typo in Table 8 (p. 42), to escalate — not reconciled
-  here.** In the "Cases 2 and 2A, 3 and 3A" / "Type C ICCs" row, the Type-k F
-  statistic renders as `(MS_R/MS_W)(1 − ρ₀)`, but Appendix A Eq. A4 (p. 44)
-  derives it by "Replacing σ²_w and MS_W in Equation A2 with σ²_e and MS_E",
-  giving `F = (MS_R/MS_E)(1 − ρ₀)`. The `MS_W` in that Table 8 cell appears
-  inconsistent with the appendix; the published correction does not mention it.
-  Reported as a finding only — no oracle or code change proposed.
+- **Uncorrected typo in Table 8 (p. 42) — confirmed against the source at M69**
+  (M64 raised it as "possible"). In the "Cases 2 and 2A, 3 and 3A" / "Type C
+  ICCs" row, the Type-k F statistic is printed `(MS_R/MS_W)(1 − ρ₀)`, but
+  Appendix A section A4 (p. 44) derives it by "Replacing σ²_w and MS_W in
+  Equation A2 with σ²_e and MS_E", giving `F = (MS_R/MS_E)(1 − ρ₀) =
+  (1 − ρ₀)/(1 − ρ̂)`. Both cells were re-read at 300 DPI: the Table 8 cell does
+  print `MS_W`, and it is inconsistent with the appendix that derives it. The
+  published correction does not mention it, so it stands uncorrected in the
+  literature. A finding only — the package implements no Table 8 test statistic,
+  so no oracle or code change follows. (M64 cited this as "Eq. A4"; per the
+  erratum's own third item, running-text references to the appendix should read
+  "Section A4".)
 - **No rater/judge worked example.** Table 6 is mother–child IQ pairs (k = 2), so
   this paper gives no independent numeric check on the O1 coefficients. Nor does
   it give an *estimator* for θ²_c beyond the Table 3 mean-square identities — the
