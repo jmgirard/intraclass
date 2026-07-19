@@ -17,6 +17,15 @@ and milestones; never restate a value here.
 
 ## Source notes (`<citekey>.md`)
 
+- [bartko1966.md](bartko1966.md) — source note (M66): the one-way/two-way/mixed
+  ICC formulas and the argument that an ICC is a correlation only when the
+  denominator carries an observation's full variance. Its 4×2 Ebel example
+  (one-way 0.1236, two-way-random 0.2778, two-way-mixed 0.4286) is
+  hand-reconstructible; no oracle uses it.
+- [bartko1976.md](bartko1976.md) — source note (M66): three `r = 1.0` data sets
+  that separate agreement from consistency, and the case against Winer's
+  anchor-point method. **Table 3 misprints `MSW` for `MSE` in rows 3–4** (found
+  by recomputation; no repo value affected).
 - [bhandary2006.md](bhandary2006.md) — source note (M65): Gaussian familial
   `F_max` **equality test** across three populations, unequal family sizes; the
   asymptotic LRT's size reaches 0.41 against a nominal 0.05 at few families and
@@ -65,6 +74,11 @@ and milestones; never restate a value here.
 - [tenhove2025b.md](tenhove2025b.md) — source note (M64): the ADR-002/ADR-003
   basis — MLE of random-effects models with Monte-Carlo CIs preferred for planned
   incomplete data.
+- [trevethan2017.md](trevethan2017.md) — source note (M66): ICC selection and
+  reporting cautions — Form is *not* the rater count, and one data set yields six
+  ICCs from 0.51 to 0.87 (Table 2). A second independent source for judging the
+  interval over the point estimate; surveys four incompatible band schemes
+  (IP3-fenced). Shelf copy is online-first with **no journal pagination**.
 - [ukoumunne2003.md](ukoumunne2003.md) — source note (M62): the non-parametric
   bootstrap CI for the one-way ICC (subject-resample + `log F` variance-stabilizing
   transformed bootstrap-t + infinitesimal-jackknife SE); under-covers at k=10.

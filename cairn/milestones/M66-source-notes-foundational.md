@@ -77,7 +77,7 @@ qualitative band entering package output → refused outright (IP3).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Notes for the historical trio — `bartko1966`, `bartko1976`,
+- [x] T1: Notes for the historical trio — `bartko1966`, `bartko1976`,
       `trevethan2017`. These are the package's intellectual prehistory; keep
       them short and anchor the definitional claims.
 - [ ] T2: Notes for the selection-relevant pair — `tenhove2018`, `shieh2015`;
@@ -105,6 +105,11 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
 - 2026-07-19: gated amendment at a /milestone-plan re-run — AC1 raises the bar to a dated *verified* extraction (read to final page), new AC7 + T5 make the M64/M65 staleness sweep mechanical, old T5 becomes T6.
 - 2026-07-19: /milestone-implement started; status in-progress, branch m66-source-notes-foundational.
+- 2026-07-19: gate — maintainer chose main-session reading of all seven PDFs (the verified bar makes extraction a first-hand claim) and depth proportionate to reliance.
+- 2026-07-19: T1 done — bartko1966, bartko1976, trevethan2017 notes written, each read end-to-end and extraction-verified.
+- 2026-07-19: minor amendment — INDEX.md lines are added per note-writing task, not batched into T4, so cairn_validate's references check stays green across checkpoints; T4 keeps BIBLIOGRAPHY, the shelf-inventory counts, and the final validate run.
+- 2026-07-19: finding (bartko1976 Table 3, PDF p. 763) — rows 3-4 print MSW where the tabled values require MSE; found by recomputing Table 3 from Table 2. No repo value affected; nothing cites those formulas. Recorded in the note.
+- 2026-07-19: finding (trevethan2017) — the shelf PDF is online-first with NO journal pagination, so anchors are PDF pages and BIBLIOGRAPHY's volume/issue/pages cannot be sourced from it; flagged for the maintainer, not filled from memory (#4).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
