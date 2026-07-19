@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-19 (M66 shipped + archived — the seven foundational/interpretation sources ingested and dated-verified, PR #74; only M67's four shelf PDFs remain uningested; M63 rotated out under terminal-row retention. Post-M66 correction same day: the `jorgensen2019` preprint note was superseded by `vanderark2023`, the published version of record of the same study under a different first author). Audit same day: M48's milestone-file Depends-on was behind ROADMAP by M61 and M68 — mirror fixed in favor of ROADMAP, catch-up work-log entry added_
+_Last hygiene check: 2026-07-19 (M67 shipped + archived — the four ICC-equality-testing sources ingested as IP2 boundary evidence, PR #75; the shelf is now fully ingested, 30 notes / 30 PDFs, no orphan either way; M64 rotated out under terminal-row retention. Two review attempts: attempt 1 failed AC7 on undated absence assertions, attempt 2 found two further altered quotations of the same class — the quotation lesson is folded into LESSONS.md's M66 entry rather than added as a new line, the file being at its 50-line cap). Prior: 2026-07-19 (M66 shipped + archived — the seven foundational/interpretation sources ingested and dated-verified, PR #74; only M67's four shelf PDFs remain uningested; M63 rotated out under terminal-row retention. Post-M66 correction same day: the `jorgensen2019` preprint note was superseded by `vanderark2023`, the published version of record of the same study under a different first author). Audit same day: M48's milestone-file Depends-on was behind ROADMAP by M61 and M68 — mirror fixed in favor of ROADMAP, catch-up work-log entry added_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,11 +12,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M68 | References provenance backfill + shelf rename to `sources/` | done | — | high | milestones/archive/M68-references-provenance-backfill.md |
 | M69 | Re-verify the ten load-bearing source extractions | done | M68 | normal | milestones/archive/M69-reverify-loadbearing-extractions.md |
-| M64 | Source notes — the ten load-bearing primary sources | done | M63 | normal | milestones/archive/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | done | M63 | normal | milestones/archive/M65-source-notes-interval-methods.md |
 | M66 | Source notes — the foundational and interpretation shelf | done | M63 | low | milestones/archive/M66-source-notes-foundational.md |
-| M67 | Source notes — the ICC-equality-testing cluster | review | M63 | low | milestones/M67-source-notes-equality-testing.md |
-<!-- terminal-row retention: M66 done (2026-07-19) → M63 rotated out (its archive file and its D-007 lineage still resolve; INDEX.md and BIBLIOGRAPHY.md still cite it by id). Kept: M66, M69, M68, M65, M64 (5 most recent terminal). -->
+| M67 | Source notes — the ICC-equality-testing cluster | done | M63 | low | milestones/archive/M67-source-notes-equality-testing.md |
+<!-- terminal-row retention: M67 done (2026-07-19) → M64 rotated out (its archive file still resolves; INDEX.md and BIBLIOGRAPHY.md still cite it by id). Kept: M67, M66, M69, M68, M65 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
