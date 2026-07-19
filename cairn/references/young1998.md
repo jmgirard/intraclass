@@ -117,14 +117,15 @@ variance-components ICC constrained to `[0, 1]`. The three values and the
 two-samples-of-seven partition (Table 2, p. 1372: sample A = families 1, 3, 4, 6,
 8, 11, 12; sample B = 2, 5, 7, 9, 10, 13, 14) are confirmed against this source.
 
-`bhandary2006` is said to apply the **same** Srivastava (1984) estimator to this
-same 14-family data set and report *positive* estimates (0.8804, 0.9567, 0.8508),
+`bhandary2006` applies the **same** Srivastava (1984) estimator to this same
+14-family data set and reports *positive* estimates (0.8804, 0.9567, 0.8508),
 the difference being the partition — three samples of 5/5/4 families with
 daughters' and sons' values put together — rather than the estimator.
-**That half is asserted from the `bhandary2006` note, not from this source, and
-`bhandary2006` is still at unverified extraction status (M71).** The young1998
-side of the comparison is verified; the bhandary2006 side inherits whatever M71
-finds — observed 2026-07-19.
+**Verified against `bhandary2006`'s own source at M71**: the three estimates and
+the pooled `ρ̂ = 0.85847` are printed on its p. 777, and the 5/5/4 split
+(`k₁ = 5, k₂ = 5, k₃ = 4`) is stated there too. The inherited-not-verified marker
+this paragraph previously carried is discharged; both sides of the comparison now
+rest on their own sources.
 
 ## Boundary (IP2)
 
@@ -163,7 +164,11 @@ facet at all, which puts it doubly outside the interrater contract.
   ("Thirty vectors of family data were created for each of the two populations",
   p. 1370; confirmed as the sole sample size across all 11 pages). No small-`k`
   cell, so the paper's LRT recommendation is unsupported at small family counts —
-  the point at which `bhandary2006` is reported to have found asymptotic LRT size
-  inflation as high as 0.4089 at `K = 5`. That figure comes from the
-  `bhandary2006` note, **still unverified (M71)**; the "only k = 30 was tried"
-  half is verified here and stands on its own.
+  the point at which `bhandary2006` finds asymptotic LRT size inflation as high
+  as **0.4089** at `K = 5`, against a nominal 0.05. **Both halves are now
+  verified**: the "only `k = 30` was tried" half against this source at M67, and
+  the 0.4089 figure against `bhandary2006`'s Table 2 (its p. 774) at M71, where
+  it is the `ρ₁ = ρ₂ = ρ₃ = 0.1` cell. Note the two papers test different
+  hypotheses — two populations here, three there — so this is a corroborating
+  pattern (asymptotic LRT size inflation at small family counts and low `ρ`),
+  not a like-for-like replication.
