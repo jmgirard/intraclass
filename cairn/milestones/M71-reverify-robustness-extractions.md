@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M71: Re-verify the robustness and interval-methods extractions (7 notes)
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
@@ -39,7 +39,7 @@ act on it. Any change to R code, tests, or oracle values.
       source's final page** — `mehta2018` in particular, whose Appendices
       A–C sit at pp. 2750–2752 *after* the reference list and were once
       falsely recorded absent (LESSONS 2026-07-18/M65).
-- [ ] Every quoted string in **every one of the seven notes** has been
+- [x] Every quoted string in **every one of the seven notes** has been
       re-read against its source and confirmed verbatim or corrected. The
       sweep is mechanical and per-note, not driven by prior findings
       (LESSONS 2026-07-19/M67).
@@ -117,12 +117,216 @@ act on it. Any change to R code, tests, or oracle values.
 - 2026-07-19: /milestone-review attempt 2 FAILED **AC2 and AC5** and returned the milestone to `in-progress`. Five criteria pass with fresh evidence (AC1 pdfinfo page counts + mehta2018 content past the reference list; AC3 73 folio-checked anchors incl. the p. 8 → p. 7 fix; AC4 five render-settled claims; AC6 diff docs-only and fenced by `.Rbuildignore:9`, test baseline unchanged; AC7 validate clean, staleness 2). Consistency gate clean and **CI on PR #77 fully green across the whole platform matrix**. [S] blame-history and [S] prior-PR lenses both clean. The [O] diff-bug lens returned 9 findings, scored by a fresh [S] scorer: **F1 = 5 (rejected), F2 = 90, F3 = 88, F4 = 90, F5 = 85, F6 = 88, F7 = 90, F8 = 82, F9 = 84** — eight actioned, one rejected on evidence. **F1 rejected**: `mehta2018`'s `"bootstrap sampling techniques"` is verbatim in Figure 2 step 5, confirmed by 200-DPI render here and independently by the scorer; figure artwork has no text layer, so a text-layer sweep can only false-positive there. **AC5 fails on F2/F3** — two dated observations stamped `— observed 2026-07-19` that a grep falsifies (`mehta2018.md:288`'s "axis no repo document names" against three files that name it; `bobak2018.md:216`'s "only the heavy-tail one has been swept" against a repo with no non-Gaussian DGP at all), both produced by T9, the sweep meant to make such claims checkable. **AC2 fails on F6** — `xiao2009.md:60` drops "i = 1, 2, …, K" from inside quotation marks with no ellipsis. F4/F5/F7/F8/F9 are over-claims in M71's own added prose, two of them written by the fix cycle. **Pattern, third round running: every numeric correction has survived independent verification and every defect has been in the interpretive prose around those values.** Next trip back trips the thrash rule → `/milestone-plan`.
 
 - 2026-07-19: fix cycle 2 — all eight actioned findings (F2–F9) corrected, each re-verified at the source in this session before the edit; F1 left alone as the review rejected it on evidence. **AC5 (F2, F3)**: `mehta2018.md`'s ordinal/discrete row no longer claims "an axis no repo document names" — `cairn/COVERAGE.md:196` and `cairn/legacy/ROADMAP.md:77` both carry "categorical / ordinal ratings (GLMM engines)", so the row now says what the repo actually records (unscheduled future work, not a swept axis) and carries the grep; `bobak2018.md`'s non-normality row no longer claims the heavy-tail axis "has been swept anywhere in the repo" — no non-Gaussian DGP exists in `R/` or `tests/`, so **neither** axis has been swept here and what the repo has is `ukoumunne2003`'s published sweep, cited not reproduced. **AC2 (F6)**: `xiao2009.md`'s p. 113 quotation restored to the printed form, `ρ_i (i = 1, 2, …, K)` — parentheses, not the commas the finding assumed; settled at 400 DPI because the text layer mangles the subscripts. **F4** `bobak2018.md`: koo2016's longer sentence is *not* quoted in `koo2016.md` — that note paraphrases it too and quotes only the preceding disclaimer (`koo2016.md:55–57`), now stated that way. **F5** `INDEX.md`: two notes had silently repaired a source (`saha2012`'s `ln`, `bhandary2006`'s `ppk`), not three — `xiao2013`'s `c′` runs the other way (Eq. (7) prints a bare `c`, re-confirmed at source; the note had written `c′`), so the block now records the direction instead of the count. **F7** `saha2005.md`: the PNB-vs-BB penalty recomputed over all 40 `π = 0.1` cells — **1.10–4.12**, floor TNBD `m = 50, φ = 0.85` (1191 vs 1080), ceiling ED `m = 10, φ = 0.2` (5523 vs 1340) — replacing a range read off the two cells the sentence cites; the TNBD `m = 50` row is printed in full rather than characterized. **F8** `xiao2009.md`: the `K = 3`, 25-family block is **not** the smallest design (75 families vs `K = 2`'s 50; p. 115 sets 25 or 50 families *per population*) — reworded to nuisance-parameter density, and the count corrected to 6 vs 4 after checking p. 113 names only `μ_i` and `σ_i` as nuisance (`ρ` is the common estimand), not 3 per population. **F9** `mehta2018.md`: the narrowest interdecile ratios are not unique to extreme concave — mild concave ties exactly at Cases 1–2 (0.01 vs 0.01, 0.03 vs 0.02, Table 4). Sweeps re-run: **187 quotations across the seven notes** (multi-line-aware split, all seven files quote-balanced), 0 markup-inside-quotation; AC5 grep returns one hit, my own dated observation quoting COVERAGE.md's `🔵 Not yet` status token. Gates: `cairn_validate` all checks passed (staleness still 2, `ORACLES.md`/`BIBLIOGRAPHY.md`); `devtools::test()` under `NOT_CRAN=true CI=true` **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, unchanged baseline; diff docs-only, 11 files all under `cairn/`. Two over-claims caught in my *own* new prose before commit and fixed there ("largest exactly where the cited cells sit" — false, the ceiling is a different cell; "falls monotonically" — false, the tail wobbles), which is the attempt-2 pattern finding applied to this cycle's own writing. Status -> review.
+- 2026-07-19: /milestone-review attempt 3 FAILED **AC5** and returned the milestone to `in-progress`; **the thrash rule fires** (third trip back) so no fourth retry is queued — routing is `/milestone-plan` for a re-cut. Six criteria pass with fresh evidence (AC1 pdfinfo counts + mehta2018 content past the reference list re-confirmed by per-page extraction; **AC2 now passes** — 187 quotations, 156 matched outright, all 31 remainder adjudicated, the figure-artwork case re-settled at 200 DPI, and attempt 2's F6 fix verified correct with the *review's own assumed form* wrong (the source prints parentheses, not commas); AC3 all in-range anchors resolve incl. the p. 8 → p. 7 fix; AC4 three claims re-settled fresh by render; AC6 diff docs-only 11 files all `cairn/`, fenced by `.Rbuildignore:9`, test baseline unchanged; AC7 validate exit 0, staleness 2, zero of the seven in the advisory). Consistency gate clean. [S] blame-history and [S] prior-PR lenses both clean — the latter's LESSONS substitute pass found the diff *complying* with the four relevant lessons. [O] diff-bug returned 3 findings, scored by a fresh [S] scorer: **F1 = 92, F2 = 90, F3 = 80, all actioned, none below the bar**. **AC5 fails on F1** — `mehta2018.md:290`'s dated observation claims the remaining `ordinal` grep hits "are source notes describing other papers' ordinal work, not this repo's", which a grep falsifies with ~40 hits in `estimand-specs/M6-oneway.md:213`, `legacy/STATUS.md`, `legacy/MILESTONES.md` and `legacy/DECISIONS.md`; the named file is one **attempt 2's own F2 cited**, and the false clause was written *by the fix cycle correcting that finding*, in the same table cell. F2 (saha2005, "both sit in the upper half" — the 1.7x cell ranks 19/40, below the median, and 1.7 is the old range's floor) and F3 (mehta2018, mild convex Case 1 prints the same 0.03 vs 0.02) are over-claims in fix-cycle prose breaking no AC squarely. **Pattern, third round: every numeric correction has survived independent verification all three times; every failure has been interpretive prose, and twice now prose written to fix the previous cycle's prose.** Recorded as a planning boundary, not a defect backlog.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Attempt 3 — 2026-07-19 — **AC5 FAILED**, thrash rule fires → `/milestone-plan`
+
+PR https://github.com/jmgirard/intraclass/pull/77. Branch verified to contain
+`origin/main` (`git merge-base --is-ancestor`), so all evidence is on the
+merge-base state. **Six of seven criteria pass with fresh evidence; AC5 fails on
+one finding.** This is the milestone's third trip back, so per the tracking-rules
+thrash rule no further retry is queued — M71 is re-planned or split, not retried.
+
+**AC1 — read to final page. PASS.** `pdfinfo` page counts match every
+`Extraction:` claim exactly: bhandary2006 14, bobak2018 11, mehta2018 19,
+saha2005 16, saha2012 21, xiao2009 9, xiao2013 25. The case the criterion singles
+out was re-checked independently by per-page extraction: mehta2018's reference 35
+sits part-way down PDF p. 17 (folio 2750), Appendix B on p. 18 (folio 2751), and
+Appendix C's Figure C1 on p. 19 (folio 2752, the final page) — content past the
+reference list, as the M65 lesson demands.
+
+**AC2 — every quoted string verbatim. PASS.** Mechanical multi-line-aware sweep
+of the seven notes: **187 quotations**, every file quote-balanced, **0
+markup-inside-quotation**. Each was probed against its own source's text layer in
+both `-raw` and `-layout`, dehyphenated across line breaks and normalized for
+ligatures and punctuation; **156 matched outright**. The 31 remainder were
+adjudicated and every one resolved:
+- **~16 are not claims about a source** — repo terminology (`"on the GP6 list"`,
+  `"a CI method's oracle is coverage"`, `"do not prefer the narrower interval"`),
+  note headings (`"Author reconciliation"`), search terms, and one quoting the
+  note's *own* superseded wording (`"§5 does not [invert]"`, explicitly marked).
+- **Two are cross-FILE quotations of repo files, both verified verbatim at
+  source**: `"categorical / ordinal ratings (GLMM engines)"` at
+  `cairn/COVERAGE.md:196`, and the ROADMAP candidate row title at
+  `cairn/ROADMAP.md:26`.
+- Ligature drops (this journal family renders `ffi/fi/fl` as a gap), ellipsis
+  splits, and math-symbol manglings (`φ̂_ml` extracting as `O ml`, `θ̂` as `O`)
+  each resolved by targeted fragment probe.
+- **One quotation lives in figure artwork with no text layer**: mehta2018's
+  `"bootstrap sampling techniques"`. A 200-DPI render of PDF p. 11 shows Figure 2
+  step 5 printing "Apply bootstrap sampling techniques to combine results from
+  `l` samples into a single estimate for `ICC` and its variance components" — the
+  quotation is verbatim and the anchor exact. This independently re-confirms
+  attempt 2's F1 rejection; the body prose says "bootstrapping techniques", which
+  is why a text-layer sweep false-positives here.
+- Block quotes were checked as a separate class in case they carried unquoted
+  source text: only `saha2012` has any (17 lines, the terminology callout), and
+  its internal quotations were already in the sweep. No gap.
+- **Attempt 2's AC2 failure (F6) is fixed and the fix is verified correct** —
+  and the review's own assumed form was wrong. The source prints
+  `ρ_i (i = 1, 2, …, K)` with **parentheses**, not the commas the finding
+  assumed; confirmed here at 400 DPI and independently by the [O] lens at
+  150 DPI. The text layer drops the parentheses, so a text-only check misleads.
+
+**AC3 — anchors resolve. PASS.** Every in-range page anchor across the five
+folio-paginated sources resolves, checked by extracting each claimed page and
+matching its printed folio: bhandary2006 11, saha2005 15, xiao2013 19, xiao2009 8
+(cover-sheet offset `PDF N` = journal `109 + N` holds), and mehta2018's full set
+via a page-by-page folio map (folio = 2733 + PDF page, verified for all 19).
+`bobak2018`'s 9 anchors verified against its `Page N of 11` footers — identity
+mapping confirmed page by page, **including the fix cycle's p. 8 → p. 7
+correction**, re-settled here: the 0.944 sentence is present on PDF p. 7 and
+absent from p. 8. `saha2012` states its no-folio basis. The two out-of-range hits
+are correctly-attributed citations into *other* papers (koo2016 p. 158;
+Cox & Snell 1968 p. 252).
+
+**AC4 — absence claims settled by render. PASS.** No absence or erratum claim in
+the diff rests on a text layer. Re-settled fresh this attempt: saha2012's missing
+`ln` at 300 DPI (the first two sums print `ln{·}`, the third prints `{·}` — and
+the note's transcription matches the render exactly, with the erratum argued from
+Eq. (1)'s product denominator, visible in the same render); mehta2018's Figure 2
+at 200 DPI; xiao2009's parenthesized index list at 400 DPI. The prior attempts'
+renders (xiao2013's missing issue number, bhandary2006's `ppk`, mehta2018's
+Appendix C capitals, saha2005's Figure 1 plot-read) stand.
+
+**AC5 — nothing time-relative false at merge. FAIL.** The grep sweep over
+`at the time of writing | not yet | today | must be checked | not retrieved |
+as of M<n> | currently | so far | for now | at present` returns one hit, itself
+resolved (a dated observation quoting COVERAGE.md's `🔵 Not yet` status token,
+verified verbatim). The 22 dated observations were then verified *mechanically*
+rather than counted — the failure mode of attempt 2. Most check out: all seven
+"nothing in the package traces to it and no `ORACLES.md` entry cites it" claims
+return zero hits over `R/ tests/ man/ vignettes/`; the "no enumerated GP6 axis
+registry" claim is accurate against `cairn/DESIGN.md:153–156`, which names
+cluster count, incidence and raggedness as *examples* of a practice.
+**One does not — see Finding F1 below.**
+
+**AC6 — no package value moved. PASS.** `git diff --name-only main..HEAD` touches
+11 files, **all under `cairn/`** — zero non-`cairn/` paths; no `.R`, `.Rd`,
+`tests/`, `man/`, `NAMESPACE`, `DESCRIPTION`, `.rds`/`.rda`. `.Rbuildignore:9`
+carries `^cairn$`, so the diff provably cannot reach the built package.
+`devtools::document()` produces no `man/`/`NAMESPACE` drift. `devtools::test()`
+under `NOT_CRAN=true CI=true`: **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, the
+unchanged M69/M70 baseline.
+
+**AC7 — validate + staleness. PASS.** `cairn_validate` exit 0, all checks passed.
+The `references staleness` advisory stands at **2**, and a grep of the advisory
+output confirms **zero of the seven notes appear in it** — the two survivors are
+exactly `ORACLES.md` and `BIBLIOGRAPHY.md` (M72's scope). Cleared by re-reading
+the sources: all 30 source notes carry `Extraction: verified` (33 `.md` pages less
+INDEX/ORACLES/BIBLIOGRAPHY, less the two synthesis notes and REFERENCES), which
+also independently confirms `INDEX.md`'s "all 30 notes dated-verified" claim.
+
+**Consistency gate (r-package profile).** `cairn_validate` all checks passed
+(advisories: 293 dangling pre-migration id tokens, expected; staleness 2 as
+above) ✓; `document()` no-diff ✓; `pkgdown::check_pkgdown()` "No problems
+found" ✓; README.Rmd untouched ✓; no new exports and no new top-level files ✓;
+NEWS entry not owed (docs-only, no user-visible change) ✓. No `DESIGN.md`
+principle changed, so `cairn_impact` is skipped. CI on PR #77: `lint`, `pkgdown`,
+`format-check` pass; the `R CMD check` platform matrix was still running at
+send-back and is not load-bearing for a docs-only diff.
+
+**Independent review — three lenses, then a scorer.**
+- **[S] blame-history: clean, no findings.** Confirmed every hunk stays inside
+  content M65 marked unverified; `DECISIONS.md` and `legacy/DECISIONS.md` have an
+  empty diff (D-006/D-007 untouched); the ROADMAP profile-likelihood candidate row
+  is byte-identical apart from M71's own status field; and the `young1998`
+  discharge is substantiated by bhandary2006's own p. 777 values
+  (0.8804/0.9567/0.8508, pooled 0.85847, 5/5/4 split) and p. 774 Table 2 cell
+  (0.4089), with no other changes to that M70-owned file.
+- **[S] prior-PR-comments: no prior-PR evidence, clean no-op.** PRs #68–#76 return
+  empty review comments and review bodies; the only issue comments are Codecov
+  bot output. Its substitute `LESSONS.md` pass found the diff *complying* with the
+  four relevant lessons (item-count pinning, undated absence claims,
+  text-layer-only absence verdicts, reading past the reference list), not
+  regressing them.
+- **[O] diff-bug: 3 findings**, scored by a fresh [S] scorer that did not generate
+  them: **F1 = 92, F2 = 90, F3 = 80 — all three clear the 80 bar; none logged
+  below it.** The lens first verified a large body of the milestone as correct:
+  saha2005's Table I in full (all 40 `π = 0.1` pairs, the U-shape, the 1.10–4.12
+  range and its floor/ceiling cells); mehta2018's Table 4 in full (all 60 cells,
+  including the corrected `0.58 (0.04)`), Table 2 and Table 7 including the
+  mean/median reversal; xiao2009's 72 coverage cells, the five-lowest-GP ordering,
+  the design arithmetic, the nuisance-parameter count, and the cover-sheet offset;
+  bhandary2006's 75-row grid and all four cross-reference counts; saha2012's
+  terminology block; and bobak2018's `koo2016.md` and non-Gaussian-DGP claims.
+  **Every numeric correction survived independent verification for the third
+  round running.**
+
+#### Finding F1 (92) — `mehta2018.md:290`, false dated observation (AC5 failure)
+
+The ordinal/discrete GP6 row asserts, inside a dated observation stamped
+`observed 2026-07-19`:
+
+> the other hits are source notes describing *other papers'* ordinal work, not
+> this repo's
+
+`grep -rni 'ordinal' cairn/` — the grep the note itself cites — falsifies it.
+Beyond the two files the note names, roughly forty hits are **this repo's own
+tracking, not source notes**: `cairn/estimand-specs/M6-oneway.md:213`
+("Categorical/ordinal one-way (GLMM) — ROADMAP."), plus `cairn/legacy/STATUS.md`
+(6), `cairn/legacy/MILESTONES.md` (~20) and `cairn/legacy/DECISIONS.md` (~13),
+all naming "categorical/ordinal GLMM" as this repo's unscheduled carryover — the
+same substance as the two cited files, in more places.
+
+Two things make this worse than a slip. `estimand-specs/M6-oneway.md:213` is a
+file **attempt 2's own F2 named**; the fix dropped it from the list and then
+generalized about the remainder. And the false clause was written **by the fix
+cycle correcting attempt 2's F2**, in the same table cell, in the same shape — a
+dated repo-state assertion a single grep falsifies. AC5 reads "No note asserts
+anything time-relative that is false at merge"; read as written, it is not met.
+
+#### Findings F2 (90) and F3 (80) — over-claims in fix-cycle prose
+
+Neither breaks an acceptance criterion squarely (not time-relative, not a
+quotation, not an anchor), but both are actioned defects in prose this milestone
+added, and both are the pattern's signature shape.
+
+- **F2 (90) — `saha2005.md:198–201`.** Having correctly recomputed the PNB-vs-BB
+  penalty over all 40 `π = 0.1` cells as **1.10–4.12**, the sentence says the two
+  illustrative cells "both sit in the upper half of that spread". The 1.7× cell
+  (TNBD `m = 10, φ = 0.05` = 6600/3890 = 1.697) ranks **19th of 40**, below the
+  median, against a range midpoint of 2.61. Self-undermining as well: 1.7 is the
+  exact floor of the old "1.7–4×" range the sentence exists to correct, so it
+  cannot be in the upper half of the corrected spread. Everything else in the
+  sentence reproduces to the digit.
+- **F3 (80) — `mehta2018.md:157–159`.** The F9 fix says "The narrowest ratios sit
+  in the **concave** Cases 1–2 … extreme concave and mild concave tie exactly
+  there — both print 0.01 vs 0.01 at Case 1 and 0.03 vs 0.02 at Case 2". The
+  unique minimum (1.0, Case 1) is genuinely concave-only, but the second value is
+  not: **mild convex Case 1 also prints 0.02 (`N = 300`) vs 0.03 (`N = 80`)**, the
+  same digits and the same 1.5× ratio, in a non-concave cell. The fix that
+  corrected "not unique to extreme concave" reproduced the defect one level out.
+
+#### Disposition — thrash rule, not a fourth retry
+
+Counting the work log, this is M71's **third** return from review (attempt 1:
+AC2; attempt 2: AC2 + AC5; attempt 3: AC5). The tracking-rules thrash rule
+applies: *do not queue another retry — that's a mis-planned milestone; recommend
+re-plan or split via `/milestone-plan`.*
+
+The evidence across three attempts supports that reading rather than "one more
+fix". **Every numeric correction, table transcription and plot-read has survived
+independent verification in all three attempts.** What has failed, every time, is
+the interpretive prose written around those values — and, decisively, prose
+written by each fix cycle *to correct the previous cycle's prose*. Attempt 2's F2
+and this attempt's F1 are the same defect in the same table cell, one generation
+apart. The milestone as cut treats "re-verify the extractions" as one job, but it
+is two with different verification methods and different failure rates: checking
+values against a source, which this milestone does reliably, and writing
+repo-state and generalizing claims, which needs the same mechanical discipline
+the values get and is not getting it. That is a planning boundary, not a defect
+backlog.
+
+Status → `in-progress`; the routing recommendation is `/milestone-plan`, and the
+three findings above carry forward as inputs to the re-cut rather than as a
+fourth fix list.
 
 ### Attempt 2 — 2026-07-19 — **AC2 + AC5 FAILED**, returned to `in-progress`
 
