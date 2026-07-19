@@ -81,18 +81,19 @@ rising right arm, since `ρ₁ = 0.1` sits at the left edge of the plotted range
 
 ## Real-data illustration (§4, p. 1372)
 
-Srivastava & Katapa's (1986) pattern-intensity-on-soles-of-feet data, 14
-families (Table 2, p. 1372), **randomly split into two samples** — 7 families
-each. `ρ̂₁ = −0.2917`, `ρ̂₂ = −0.2504`, pooled `ρ̂ = −0.2682`; `H₀` is accepted at
-the 1, 5, and 10 % levels by all three tests. The paper notes the test *should*
-accept, "because the data is from one population and we split the data into two
-samples" — so this is a null-case sanity check, not a demonstration of power.
+Srivastava & Katapa's (1986) pattern-intensity-on-soles-of-feet data, 14 families
+(Table 2, p. 1372), **randomly split into two samples**; `H₀` is accepted at all
+three levels by all three tests, which the paper concedes it should be, the two
+samples being one population split in half. A null-case sanity check, not a
+demonstration of power — and not reproduced here, this note being boundary
+evidence rather than an oracle source.
 
-**Note the sign.** All three point estimates are **negative**, which the
-compound-symmetric parameterization admits (see the `ρ` range above) but which a
-variance-components ICC constrained to `[0, 1]` does not. This is the same data
-set `bhandary2006` uses for its worked example, there split into three samples
-and yielding positive estimates under a different estimator.
+**One detail is worth keeping.** All three point estimates are **negative**
+(`ρ̂₁ = −0.2917`, `ρ̂₂ = −0.2504`, pooled `−0.2682`) — admissible under the
+compound-symmetric parameterization (see the `ρ` range above), impossible for a
+variance-components ICC constrained to `[0, 1]`. `bhandary2006` uses this same
+data set, split three ways, and gets positive estimates from a different
+estimator.
 
 ## Boundary (IP2)
 

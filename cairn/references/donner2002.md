@@ -85,19 +85,14 @@ improves as `k` grows.
 
 ## Worked examples (§6, pp. 372–378)
 
-- **CT scans, `N = 50` psychiatric patients** (Turner et al. 1986; Dunn 1989,
-  ch. 5) — logged ventricle–brain ratios, pixel-count vs planimeter measurement,
-  raw data in Table 4 (p. 376). `r₁A = 0.994`, `r₂A = 0.731`, `ρ̂₁₂ = 0.652`;
-  LR `χ²₁ = 104.51` (`P < 0.001`), `T_Z = 11.12`, `T_ZM = 11.35`,
-  `T_AF = 0.022` (two-sided, 33 and 53 df). The paper cautions this is
-  "presented mainly for illustration" and that concluding the pixel method is
-  more reliable would oversimplify (p. 376).
-- **Knee joint angles, `N = 29`, `k₁ = k₂ = 3`** (Eliasziw et al. 1994) — raw
-  data Table 5 (p. 377). `r₁A = 0.987`, `r₂A = 0.981`, `ρ̂₁₂ = 0.961`. Because
-  the two are "clearly homogeneous", **no test is run**; instead the paper
-  pools them, giving `ρ̂_ZMP = 0.985`, `Z̄_M = 3.020`, and an approximate 95 %
-  interval for the common `ρ` of **(0.973, 0.991)** — against (0.972, 0.991)
-  from the classical `Z`, "only slightly wider" (p. 378).
+Two, both with raw data committed to the paper (Tables 4–5, pp. 376–377) and
+neither reproduced here — this note is boundary evidence, not an oracle source.
+The first (CT scans, `N = 50`) is a straightforward rejection the paper itself
+calls illustrative. **The second is the one that matters for the fence:** knee
+joint angles, `N = 29`, `k₁ = k₂ = 3` (Eliasziw et al. 1994), where the two ICCs
+are "clearly homogeneous", **no test is run**, and the paper instead *pools*
+them into an approximate 95 % interval for the common `ρ` of **(0.973, 0.991)**
+(p. 378). See the Boundary section for why that interval is still out of scope.
 
 ## Boundary (IP2)
 
