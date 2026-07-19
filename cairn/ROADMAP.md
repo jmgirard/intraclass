@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-18 (M69 shipped + archived — all ten load-bearing source notes dated-verified against their shelf PDFs, PR #73; M62 rotated out under terminal-row retention; the O1/O-OW three-decimal attribution fix added as a candidate)_
+_Last hygiene check: 2026-07-19 (M66 shipped + archived — the seven foundational/interpretation sources ingested and dated-verified, PR #74; only M67's four shelf PDFs remain uningested; M63 rotated out under terminal-row retention)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,15 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M63 | References migration — ORACLES.md + BIBLIOGRAPHY.md, citekey reconciliation | done | — | high | milestones/archive/M63-references-migration.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | planned | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M68 | References provenance backfill + shelf rename to `sources/` | done | — | high | milestones/archive/M68-references-provenance-backfill.md |
 | M69 | Re-verify the ten load-bearing source extractions | done | M68 | normal | milestones/archive/M69-reverify-loadbearing-extractions.md |
 | M64 | Source notes — the ten load-bearing primary sources | done | M63 | normal | milestones/archive/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | done | M63 | normal | milestones/archive/M65-source-notes-interval-methods.md |
-| M66 | Source notes — the foundational and interpretation shelf | review | M63 | low | milestones/M66-source-notes-foundational.md |
+| M66 | Source notes — the foundational and interpretation shelf | done | M63 | low | milestones/archive/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | planned | M63 | low | milestones/M67-source-notes-equality-testing.md |
-<!-- terminal-row retention: M69 done (2026-07-18) → M62 rotated out (its archive file, its D-006 lineage, and the candidate rows citing it still resolve). Kept: M69, M68, M65, M64, M63 (5 most recent terminal). -->
+<!-- terminal-row retention: M66 done (2026-07-19) → M63 rotated out (its archive file and its D-007 lineage still resolve; INDEX.md and BIBLIOGRAPHY.md still cite it by id). Kept: M66, M69, M68, M65, M64 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 

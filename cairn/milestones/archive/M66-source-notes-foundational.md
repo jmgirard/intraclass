@@ -1,0 +1,11 @@
+# M66: Source notes — the foundational and interpretation shelf (done 2026-07-19)
+
+**Goal.** Ingest the seven historical, selection, and design-oriented ICC papers that inform the package's guidance but source no estimator. PR [#74](https://github.com/jmgirard/intraclass/pull/74). Docs-only; nothing outside `cairn/`.
+
+**Outcome.** Seven `references/<citekey>.md` notes — `bartko1966`, `bartko1976`, `trevethan2017`, `tenhove2018`, `shieh2015`, `hedges2012`, `jorgensen2019` — each read end-to-end and shipped with a dated *verified* extraction status, so none joins the re-verify backlog. `BIBLIOGRAPHY.md` 27 → 34 entries; `INDEX.md` 19 → 26 ingested, leaving only M67's four. **Nothing in the package traces to any of the seven** — the honest state, not a gap. Read cold, `hedges2012` proved **outside the contract boundary** (IP2): its ICCs carry no rater facet, so its "multilevel ICC" is a different quantity from `tenhove2022`'s, sharing only the phrase.
+
+**AC3 — no `choose_icc()` change follows.** `tenhove2018` agrees with the `raters = "random"` default and states no selection rule. `shieh2015`'s critique of the average-score ICC targets an ANOVA plug-in the package does not use (`unit = "average"` applies `k_eff` to REML components, `R/estimand.R:182`); whether the REML estimator shares that bias is logged as a separate-milestone question, not acted on.
+
+**Source findings, none affecting a repo value.** `bartko1976` Table 3 misprints `MSW` for `MSE` (rows 3–4, found by recomputation); `shieh2015` p. 1000's bias ranking contradicts its own Tables 1–4; `jorgensen2019`'s citekey year is contradicted by the source, so `BIBLIOGRAPHY.md` asserts no year; `trevethan2017`'s and `shieh2015`'s citekey years are uncorroborated/off; `tenhove2018`'s `Vision` scale maximum is unresolved. All flagged for the maintainer rather than filled from memory (#4).
+
+**Review.** Three lenses + scorer, 9 findings. Fixed three non-verbatim quotations, a false recomputation tick, a wrong anchor, and five sub-threshold items verified by hand. **Rejected one scoring 92**: the `trevethan2017` "Published online" footer *is* printed on p. 1 but is absent from the PDF text layer, which misled reviewer and scorer alike.
