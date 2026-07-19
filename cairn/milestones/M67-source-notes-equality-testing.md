@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M67: Source notes — the ICC-equality-testing cluster
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, IP2   <!-- owner: plan · create/amend-via-gate -->
@@ -80,13 +80,38 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - [x] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
 - [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [x] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
+- [ ] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
       review send-back on both sibling milestones). Grep the four notes for
       time-relative and absence phrasing (`at the time of writing`, `not yet`,
       `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
       against the repo as it now stands, including each note's claim about the
       `DESIGN.md` IP2 cross-reference T3 adds; date any claim that survives.
 - [x] T6: Run the profile `verify` slot; open the PR and drive CI green.
+- [ ] T7: **(review send-back, finding 1)** `young1998.md` — the `bhandary2006`
+      comparison says "a different estimator"; it is the *same* Srivastava (1984)
+      estimator. Correct the claim (the real difference is the sample split) and
+      reconcile it with this note's own "reuses this paper's estimator…" line.
+- [ ] T8: **(review send-back, finding 2)** `konishi1989.md` and the matching
+      `INDEX.md` line — "`χ²₁` recovered only at `q = 2` **or** equal dimensions"
+      is wrong on both disjuncts. Restate: exact `χ²₁` needs normality **and**
+      equal `p` **and** `q = 2`; at `q = 2` in the general case the limit is
+      `c·χ²₁` with an unknown-parameter scale (p. 99), and equal `p` under
+      normality only makes the weights parameter-free (p. 100).
+- [ ] T9: **(review send-back, findings 3 and 5)** Citation-field accuracy:
+      `konishi1989.md`'s AMS secondary is **62H10**, not 62H20; drop the
+      unprinted issue numbers from `konishi1989` (`21(1)`) and `young1998`
+      (`54(4)`) in `BIBLIOGRAPHY.md` or annotate them as not printed; add the
+      "(No DOI is printed…)" annotation to `donner2002`; and correct the
+      provenance census from "three" to "four".
+- [ ] T10: **(review send-back, finding 6)** Restore the two altered quotations
+      to verbatim — `young1998.md` "In real world research, **having** families
+      of equal size is artificial" (p. 1363), and `naik2007.md` "**thus**
+      modified (negative two times **the**) likelihood ratio" (p. 6503).
+- [ ] T11: **(review send-back, AC7 failure)** Date the absence assertions.
+      Every "Nothing in the package … no `ORACLES.md` entry cites it" claim — in
+      both `## Traces to` and the `**Role.**` echo, all four notes — takes an
+      inline `— observed YYYY-MM-DD`, matching the convention already used by
+      `trevethan2017.md` and `fleiss1973.md`. Then re-run T5 to completion.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -106,6 +131,8 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: worked-example sections in `donner2002`/`young1998`/`naik2007` cut to the one fact each boundary claim needs (the pooled-`ρ` interval, the negative estimates, the bootstrap SE); raw data and reproduced statistics dropped as inappropriate to boundary evidence. Final lengths 107/143/131/165 lines — short against the `bhandary2006` precedent (230) and carrying only Scope/AC-named sections, but above the "~60–90 lines" the implement gate's chip quoted; that figure was invented at the chip, not planned, and is flagged at the completion gate rather than chased.
 - 2026-07-19: T6 — profile `verify` slot clean (`NOT_CRAN=true CI=true`: FAIL 0, WARN 2, SKIP 23, PASS 1802; failed + error = 0); PR #75 opened.
 - 2026-07-19: `main` moved under the branch (maintainer supplied trevethan2017's issue version of record, corrected there as a trivial tracking commit, `c10bf39`) — merged in per the git model, one conflict in `BIBLIOGRAPHY.md`'s provenance sentence resolved to keep both facts (M67's four new entries **and** Trevethan's now-filled year/pages); `verify` re-run clean after the merge, `cairn_validate` passes.
+- 2026-07-19: **/milestone-review attempt 1 — SENT BACK to in-progress.** AC7 fails as literally written: the four notes' "Nothing in the package … no `ORACLES.md` entry cites it" absence assertions carry no `— observed YYYY-MM-DD` stamp, in both `## Traces to` and the `**Role.**` echo, so T5 is un-ticked and T11 added. AC1-AC6 pass with fresh evidence at `9516142`; consistency gate and all three review lenses' mechanical checks pass.
+- 2026-07-19: review fan-out — blame-history and prior-PR lenses returned no finding; the diff-bug lens returned six, all re-verified against the shelf PDFs by an independent scorer (95/83/90/78/90/92). Five actioned as T7-T10: a false "different estimator" claim in `young1998.md`, a wrong `χ²₁` recovery condition in `konishi1989.md` + `INDEX.md`, a wrong AMS secondary class (62H20 → 62H10), a bibliography census that miscounts withheld fields in both directions, and two altered verbatim quotations. The 78 (AC7 dating) is below the action threshold as a *finding* but is recorded as a criterion failure, which is a gate determination and not threshold-gated.
 - 2026-07-19: T5 sharpened two claims now that all four are read — `donner2002`'s `ρ`-floor claim is restated over the full five-paper cluster (0.4 is the highest floor; none reaches 0), and `naik2007` gains a recorded misprint: it spells Huang as "Haung" in both the intro and its reference list (p. 6510), flagged so no citekey is minted from the misspelling. No repo value affected.
 
 ## Decisions
@@ -113,3 +140,108 @@ tier-C papers → M66; the interval-methods cluster → M65.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+### Attempt 1 — 2026-07-19 — SENT BACK (AC7 fails; five actioned findings)
+
+Evidence gathered at `9516142`. **AC7 fails as literally written**, and the
+independent review found factual errors in shipped extraction content. Status
+returned to `in-progress`; not merged.
+
+**Criterion evidence (fresh, by command at `9516142`):**
+
+- AC1 ✅ — all four notes carry `**Provenance.**` / `Pagination:` / `Extraction:`
+  / `**Citation.**` / `**Role.**` / `## Traces to` / `## Open questions`, one each
+  (counted). Page anchors per note: konishi1989 38, donner2002 40, young1998 39,
+  naik2007 34. `Extraction:` is one physical line each, dated.
+- AC2 ✅ — each note has a `## Boundary (IP2)` section stating the contract
+  exclusion, the constitutional-amendment requirement, and "not a feature
+  request" (konishi1989's is line-wrapped, verified by reading the section).
+- AC3 ✅ — each `## Traces to` opens "**Nothing in the package**"; re-verified by
+  command: 0 hits for the four citekeys or their author surnames across `R/`,
+  `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`,
+  `ORACLES.md`.
+- AC4 ✅ — `DESIGN.md` IP2 carries the pointer sentence; the principle's own
+  wording is unchanged (blame-history lens confirmed against the D-007 precedent
+  that a moved path is not a substance change, so no D-entry is owed).
+- AC5 ✅ — 4 `BIBLIOGRAPHY.md` entries and 4 `INDEX.md` lines present (counted);
+  `cairn_validate` exit 0.
+- AC6 ✅ — profile `verify` slot re-run fresh at review: FAIL 0, WARN 2, SKIP 23,
+  PASS 1802; failed + error = 0.
+- AC7 ❌ **FAILS** — the criterion requires "any surviving repo-state claim is
+  written as a dated observation". The four notes' "Nothing in the package … no
+  `ORACLES.md` entry cites it" absence assertions carry **no `— observed
+  YYYY-MM-DD` stamp**, in both the `## Traces to` bullet and the `**Role.**`
+  echo. The verification was genuinely performed (T5) but the shipped text does
+  not surface it, and sibling notes `trevethan2017.md` / `fleiss1973.md` already
+  set the dating convention. `donner2002.md`'s ρ-floor claim *is* dated, so the
+  convention was applied selectively inside one milestone. Not reinterpreted:
+  the criterion is right and the work misses it.
+
+**Consistency gate (all pass):** `cairn_validate` exit 0, 15 PASS (advisories:
+`dangling id tokens` legacy-by-design, `references staleness` 15 as the four
+unverified notes join the backlog by plan-gate choice). Profile
+`consistency-gate` slot: `devtools::document()` no diff; no generated or package
+file touched (branch is `cairn/`-only); `.Rbuildignore` carries `^cairn$`;
+`pkgdown::check_pkgdown()` "No problems found"; README in sync; NEWS entry not
+owed (no user-visible change). Full `R CMD check` is covered by CI's five-platform
+matrix on PR #75.
+
+**Independent review — three lenses + scorer.** Blame-history: **no finding**
+(confirmed `c1d7c1c`'s deletion-safe design worked as intended and the merge
+resolution lost neither side). Prior-PR-comments: **no finding** (no GitHub
+review-comment corpus; confirmed the diff does not regress the M64/M65 dating
+lesson — though see AC7, which it partly does in a form that lens did not cover).
+Diff-bug lens: six findings, all independently re-verified by the scorer against
+the shelf PDFs.
+
+**Actioned (score ≥ 80) — five, all to fix on the return trip:**
+
+1. **(95) `young1998.md` — false "different estimator" claim.** The note says
+   `bhandary2006` "uses this same data set, split three ways, and gets positive
+   estimates from a different estimator." It is the *same* estimator (Srivastava
+   1984, `ρ̂ = 1 − γ̂²/σ̂²`), and the claim contradicts this same note's later line
+   that bhandary2006 "reuses this paper's estimator, transformation, simulation
+   design, and worked data set", plus `bhandary2006.md` itself. The real
+   difference is the split (2 samples of 7 vs 3 of 5/5/4).
+2. **(83) `INDEX.md` + `konishi1989.md` — the `χ²₁` recovery condition is wrong.**
+   Both say `χ²₁` is recovered "only at `q = 2` **or** equal dimensions". Neither
+   disjunct suffices: at `q = 2` in the general/nonnormal case the limit is
+   `c·χ²₁` with an unknown-parameter scale (p. 99); equal `p` under normality only
+   makes the weights parameter-free (p. 100) but leaves a weighted sum. Exact
+   `χ²₁` needs normality **and** equal `p` **and** `q = 2`.
+3. **(90) `konishi1989.md` — wrong AMS secondary classification.** Note prints
+   "62H20 (secondary)"; the title page reads Secondary **62H10** (the OCR
+   `62HIO`). A field presented as "as printed" is wrong.
+4. **(90) `BIBLIOGRAPHY.md:5` — the M67 provenance census miscounts, both ways.**
+   It says "three of them withhold a field"; it is **four** — `donner2002` prints
+   no DOI either and its entry omits it *without* the "(No DOI is printed…)"
+   annotation its siblings carry. In the other direction, `konishi1989`'s `21(1)`
+   and `young1998`'s `54(4)` issue numbers are **not** printed on their title
+   pages (JSPI prints "21 (1989) 93-105"; Biometrics prints "BIOMETRICS 54,
+   1363-1373"), so two entries supply an unprinted field while `naik2007`
+   explicitly refuses to.
+5. **(92) Two altered verbatim quotations.** `young1998.md` quotes "…assuming
+   families of equal size is artificial"; p. 1363 reads "In real world research,
+   **having** families of equal size is artificial." `naik2007.md`'s blockquote
+   reads "the modified (negative two times) likelihood ratio"; p. 6503 reads
+   "**thus** modified (negative two times **the**) likelihood ratio". Both sit
+   inside quotation marks, where the template requires verbatim.
+
+**Logged, below threshold (1):** the AC7 dating gap scored **78** as a *finding*
+— the scorer judged it a documentation-completeness issue since the underlying
+check was really performed. It is nonetheless recorded above as a **criterion
+failure**, which is a gate determination and not subject to the finding
+threshold.
+
+**Reviewer judgment recorded, no action:** the diff-bug lens noted that AC4's
+pointer phrase "the hypothesis-testing side of this boundary" characterizes IP2
+along an axis (inferential target) that IP2's own enumeration (rival *coefficient
+families*) does not use. Its assessment, which this review accepts: an
+application of IP2, not a widening of it — no D-entry owed, but the sentence a
+future reader would point at to argue IP2 grew silently.
+
+**Also noted for the return trip (not a numbered finding):** the four notes run
+107/143/131/165 lines against the "~60–90 lines each" quoted at the implement
+question gate. That figure originated in the chip text, not the plan; Scope says
+only "deliberately short". Flagged for the maintainer to rule on rather than
+silently kept or cut.
