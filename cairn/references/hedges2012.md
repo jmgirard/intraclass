@@ -14,7 +14,8 @@ NORC at the University of Chicago (Hedberg).
 boundary note below — and included on the shelf as design/uncertainty
 background for the multilevel estimand. It supplies standard-error formulas for
 *variance-share* ICCs in nested sampling designs. **No oracle value traces here**
-and nothing in the repo cites it.
+and no test, vignette, or `ORACLES.md` entry reads it — its only in-repo
+citations are the `BIBLIOGRAPHY.md` entry and `INDEX.md` line added by M66 itself.
 
 ## Boundary note (IP2) — a different ICC family
 

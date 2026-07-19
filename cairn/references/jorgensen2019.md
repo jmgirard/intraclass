@@ -31,7 +31,9 @@ this paper **cites** that one (ms. p. 3, on SEM being "problematic for sparse
 data from PMD designs").
 
 **Role.** Design-planning evidence, not an estimator source. **No oracle value
-traces here** and nothing in the repo cites it. Its interest to this package is
+traces here**, and no test, vignette, or `ORACLES.md` entry reads it — its only
+in-repo citations are the `BIBLIOGRAPHY.md` entry and `INDEX.md` line added by
+M66 itself. Its interest to this package is
 that it validates MCMC estimation of exactly the package's `ICC(A,1)` estimand
 under extreme planned missingness (83–99 % missing), and that it is the closest
 thing on the shelf to a sourced answer for "how should I allocate raters and

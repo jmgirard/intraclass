@@ -89,7 +89,7 @@ qualitative band entering package output → refused outright (IP3).
       source, a different paper.
 - [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [ ] T5: Staleness sweep, after T4 lands (M64/M65 lessons — this cost a review
+- [x] T5: Staleness sweep, after T4 lands (M64/M65 lessons — this cost a review
       send-back on both sibling milestones). Grep the seven notes for
       time-relative and absence phrasing (`at the time of writing`, `not yet`,
       `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
@@ -122,6 +122,11 @@ qualitative band entering package output → refused outright (IP3).
 
 - 2026-07-19: T4 done — 7 BIBLIOGRAPHY entries (27 -> 34, both stale totals corrected), INDEX shelf inventory updated (19 -> 26 ingested, M66 paragraph rewritten with the three-way split and the source findings); cairn_validate passes.
 - 2026-07-19: BIBLIOGRAPHY's Extraction status records the M66 additions but stays `unverified` overall — 16 split entries were still never read against their sources, so the page keeps its staleness WARN rather than having the wording changed to clear it (M68 lesson).
+
+- 2026-07-19: T5 done — staleness sweep run over the seven notes; the M64 failure mode HAD recurred and was caught.
+- 2026-07-19: T5 fixes — four notes (trevethan2017, hedges2012, shieh2015, jorgensen2019) claimed "nothing in the repo cites it" while T4 had added a BIBLIOGRAPHY entry and INDEX line for each hours earlier; narrowed to the precise scope (no test/vignette/ORACLES entry) naming M66's own citations.
+- 2026-07-19: T5 fixes — trevethan2017 claimed to be a second source for guidance koo2016 "currently carries alone" (false once this note landed) and said INDEX records three not-version-of-record PDFs (T4 made it five, including trevethan2017 itself). Both re-resolved.
+- 2026-07-19: T5 — four surviving repo-state claims verified against the repo then dated (O1's backing, the boundary-policy fixture, getting-started's band-table ordering, and bartko1976's unused data sets); zero "currently" left in the seven notes. Confirmed by grep that none of the seven citekeys or author names appears in R/, tests/, vignettes/, or ORACLES.md, so every "nothing reads this page" claim is true.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

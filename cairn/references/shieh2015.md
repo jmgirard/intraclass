@@ -17,7 +17,9 @@ Taiwan.
 estimator. It matters to this package because `icc()` exposes
 `unit = "average"`, and this paper argues the *standard* way of computing that
 quantity is both biased and MSE-suboptimal. **No oracle value traces here** and
-nothing in the repo cites it. Its bearing on `choose_icc()` is analysed under
+no test, vignette, or `ORACLES.md` entry reads it — its only in-repo citations
+are the `BIBLIOGRAPHY.md` entry and `INDEX.md` line added by M66 itself. Its
+bearing on `choose_icc()` is analysed under
 AC3 below, where the decisive point is that the package does **not** use the
 estimator Shieh criticises.
 

@@ -114,7 +114,8 @@ Nothing in the package traces here today. Two things in this paper are
 - **A closed-form / hand-computed oracle fixture.** The 4×2 example above yields
   one-way `0.1236`, two-way-random `0.2778`, and two-way-fixed `0.4286` from nine
   integers, all reconstructible by hand (verified above). It is far smaller than
-  the `shrout1979` Table 2 example that currently backs **O1**, which makes it a
+  the `shrout1979` Table 2 example that backs **O1** (`ORACLES.md` § Oracle O1 —
+  observed 2026-07-19), which makes it a
   candidate *second* deterministic fixture rather than a replacement — its value
   would be as an independent small-`n` check, and its weakness is that at
   `n = 4, k = 2` it exercises no boundary behavior.

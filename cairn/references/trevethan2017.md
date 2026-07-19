@@ -20,7 +20,9 @@ clearest published statement of the *selection* misconceptions the
 `choosing-an-icc.Rmd` vignette and `choose_icc()` exist to prevent, and it is a
 second independent source (alongside `koo2016.md`) for judging an ICC against its
 confidence interval rather than its point estimate. **No oracle value traces
-here** and nothing in the repo currently cites it.
+here**, and no test, vignette, or `ORACLES.md` entry reads it — its only
+in-repo citations are the `BIBLIOGRAPHY.md` entry and `INDEX.md` line added by
+M66 itself.
 
 ## The model / form / type scheme (Table 1, PDF p. 4)
 
@@ -130,9 +132,10 @@ Restated as one of the paper's "two main points" (PDF p. 15): "again it seems
 important to inspect data and confidence intervals carefully to gain a sense of
 the conclusions that can be most appropriately drawn from them".
 
-This is an **independent second source** for the guidance `koo2016.md` currently
-carries alone (`koo2016` p. 161), and it is the same stance as `PRINCIPLES.md`
-#3 (never a point estimate without an interval).
+This is an **independent second source** for the stance `koo2016.md` records at
+`koo2016` p. 161 — until M66 that note was the shelf's only source for it — and
+it is the same stance as `PRINCIPLES.md` #3 (never a point estimate without an
+interval).
 
 ## IP3 fence — the interpretation bands in this paper
 
@@ -176,8 +179,9 @@ available argument for IP3.
 
 Nothing is proposed here — M66 writes notes, not code (Scope). Available:
 
-- **Anti-cutoff material for the vignettes.** `getting-started.Rmd` currently
-  leads with the Koo & Li band table and caveats after (a framing question
+- **Anti-cutoff material for the vignettes.** `getting-started.Rmd`
+  leads with the Koo & Li band table (lines ~113–120) and caveats after (~123–128)
+  — observed 2026-07-19 (a framing question
   `koo2016.md` already raises for the maintainer). This paper supplies citable
   evidence that at least four incompatible band schemes are in circulation and
   that two of their own authors disclaimed universality — stronger than a caveat
@@ -215,8 +219,9 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page.
 - **The shelf copy has no journal pagination.** It prints a DOI, the received/
   revised/accepted dates, an online-publication date of 23 August 2016, and a
   © 2016 line — but no volume, issue, or page range, so it is an online-first
-  copy rather than the issue version of record (the same situation `INDEX.md`
-  records for `tenhove2022`, `tenhove2024`, and `tenhove2020`). The citekey's
+  copy rather than the issue version of record — `INDEX.md`'s shelf inventory
+  lists this note among five such copies, alongside `tenhove2022`, `tenhove2024`,
+  `tenhove2020`, and `jorgensen2019`. The citekey's
   `2017` is therefore *not* corroborated by this PDF. `BIBLIOGRAPHY.md`'s entry
   should carry volume/issue/pages from the issue version, which is not on the
   shelf and was not consulted here — flagged for the maintainer rather than

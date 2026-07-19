@@ -146,11 +146,12 @@ adopted.
   discriminate one-way from two-way and consistency from agreement more sharply
   than a random example: 1b has `r = 1.0` and pure additive rater bias, which is
   exactly the configuration where consistency and agreement diverge. Nothing in
-  the package currently uses it.
+  the package uses it — observed 2026-07-19.
 - **A negative-ICC example.** Data set 1b gives `ICC(1) = −.23`, a published
   negative value with printed mean squares behind it — potentially useful to the
-  boundary-policy guard tests, which currently construct their own near-zero
-  fixtures.
+  boundary-policy guard tests, which build their own fixture
+  (`tests/testthat/test-boundary-policy.R`, `boundary_two_way()`) — observed
+  2026-07-19.
 
 Neither is proposed here — M66 writes notes, not code (Scope).
 
