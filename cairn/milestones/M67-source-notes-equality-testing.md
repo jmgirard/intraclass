@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M67: Source notes — the ICC-equality-testing cluster
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m67-source-notes-equality-testing`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m67-source-notes-equality-testing` · https://github.com/jmgirard/intraclass/pull/75   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -86,7 +86,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
       `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
       against the repo as it now stands, including each note's claim about the
       `DESIGN.md` IP2 cross-reference T3 adds; date any claim that survives.
-- [ ] T6: Run the profile `verify` slot; open the PR and drive CI green.
+- [x] T6: Run the profile `verify` slot; open the PR and drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -104,6 +104,8 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T4 also retired two stale INDEX claims found while editing — the shelf is 30 PDFs, not 31 (`jorgensen2019.pdf` has since been deleted, as the M66 correction anticipated, so "still on the shelf" was false), and "five shelf PDFs with no note" is now zero: 30 notes / 30 PDFs, no orphan either way.
 - 2026-07-19: T5 done — staleness sweep clean. The time-relative/absence grep leaves only the four dated `Extraction:` lines; no note makes a `DESIGN.md` claim (that claim lives in `INDEX.md`, where T3 makes it true). The "nothing traces to it" absences were verified by command, not asserted: neither the four citekeys nor any author surname (konishi/gupta/donner/zou/naik/helu/bhandary/srivastava) appears in `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, or `ORACLES.md`. All four sources were read to their final page.
 - 2026-07-19: worked-example sections in `donner2002`/`young1998`/`naik2007` cut to the one fact each boundary claim needs (the pooled-`ρ` interval, the negative estimates, the bootstrap SE); raw data and reproduced statistics dropped as inappropriate to boundary evidence. Final lengths 107/143/131/165 lines — short against the `bhandary2006` precedent (230) and carrying only Scope/AC-named sections, but above the "~60–90 lines" the implement gate's chip quoted; that figure was invented at the chip, not planned, and is flagged at the completion gate rather than chased.
+- 2026-07-19: T6 — profile `verify` slot clean (`NOT_CRAN=true CI=true`: FAIL 0, WARN 2, SKIP 23, PASS 1802; failed + error = 0); PR #75 opened.
+- 2026-07-19: `main` moved under the branch (maintainer supplied trevethan2017's issue version of record, corrected there as a trivial tracking commit, `c10bf39`) — merged in per the git model, one conflict in `BIBLIOGRAPHY.md`'s provenance sentence resolved to keep both facts (M67's four new entries **and** Trevethan's now-filled year/pages); `verify` re-run clean after the merge, `cairn_validate` passes.
 - 2026-07-19: T5 sharpened two claims now that all four are read — `donner2002`'s `ρ`-floor claim is restated over the full five-paper cluster (0.4 is the highest floor; none reaches 0), and `naik2007` gains a recorded misprint: it spells Huang as "Haung" in both the intro and its reference list (p. 6510), flagged so no citekey is minted from the misspelling. No repo value affected.
 
 ## Decisions
