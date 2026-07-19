@@ -71,7 +71,7 @@ milestone corrects notes, never the estimator surface.
       example, Tables 2–4, two-decimal printing), `mcgraw1996` (the Case-3A
       θ²_c formula and the published correction at 1(4):390), `fleiss1973`
       (squared-weight kappa ≡ the k = 2 agreement ICC).
-- [ ] T2: Re-verify `jorgensen2021` (the **O-SEM** source: Eq. 6's σ²_i, the
+- [x] T2: Re-verify `jorgensen2021` (the **O-SEM** source: Eq. 6's σ²_i, the
       p. 124 SEM-vs-mixed-model gap) and `koo2016` (the interpretation bands and
       the p. 161 judge-against-the-CI guidance, whose band inclusivity the note
       records as ambiguous — confirm that reading).
@@ -93,6 +93,8 @@ milestone corrects notes, never the estimator surface.
 - 2026-07-18: T1 done. shrout1979 read 9/9 pages (printed 420–428); 4 corrections — Table 1 Within-target row had Case-2/Case-3 EMS as `—` where the paper prints `σ²_J+σ²_I+σ²_E` and `θ²_J+fσ²_I+σ²_E` (the footnote's "last three entries" only parses with the cell filled), footnote paraphrase, inverted Spearman–Brown star notation, and a `σ²_J = θ²_J` equality the paper does not assert; Table 4 ICC(1,4) cell has an ink blot in the scan, `.44` confirmed arithmetically from Table 3.
 - 2026-07-18: T1 — mcgraw1996 read 18/18 pages (printed 30–46 + the 1(4):390 correction); Case-3A θ²_c and the ICC(A,1) estimand confirmed verbatim; 3 corrections — Table 4 was missing the Case-2A ICC(A,1) row, Table 7's numerator/denominator df swap between lower and upper limits was unrecorded, and M64's "possible" Table 8 `MS_W`-vs-`MS_E` typo is now confirmed against Appendix A section A4 (uncorrected in the literature; package implements no Table 8 statistic).
 - 2026-07-18: T1 — fleiss1973 read 7/7 pages (printed 613–619); clean, no value correction — Eqs. 1–15, all page anchors and quoted phrases confirmed, "no worked example in the paper" verified through the reference list; dated the previously-undated repo-grep absence claim in "Traces to" per the dated-observations rule (grep re-run, still no hits).
+- 2026-07-18: T2 done. jorgensen2021 read 21/21 pages (printed 113–133); the O-SEM load-bearing items all confirmed as printed — Eq. 6's `n_i−1` divisor, no bias correction anywhere in the paper, the full Table 2 normal/observed block (G identical across MS/REML/ML in all three designs, D differing in all three), and the p. 124 discrepancy-function paragraph; 1 anchor corrected (`semTools::monteCarloCI()` is named at p. 128 §5.1, not pp. 114/124).
+- 2026-07-18: T2 — koo2016 read 9/9 pages (printed 155–163); band inclusivity ambiguity **confirmed** as the note records it (strict `<0.5`/`>0.90`, "between" undefined at 0.5/0.75/0.9, and the 0.9-vs-0.90 asymmetry leaving exactly 0.90 in no band under the strict reading); Table 3's `(k+1)` erratum and the Fig 1 one-way dead-end both re-confirmed at 300 DPI; 2 corrections — the "confident interval" page list was wrong (pp. 155/160/161/162, not 159, which writes it correctly) and the four band statements share cut points but not wording (the Abstract restructures the sentence).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
