@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M67: Source notes — the ICC-equality-testing cluster
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, IP2   <!-- owner: plan · create/amend-via-gate -->
@@ -142,6 +142,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T11 + T5 re-run done — the absence verification was re-executed by command after the last editing task (0 hits for the four citekeys or the author surnames konishi/gupta/donner/zou/naik/helu across `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, `ORACLES.md`), then all eight "nothing traces to it" claims stamped `— observed 2026-07-19` in the fleiss1973 shape (naming the surfaces searched), in both `## Traces to` and the `**Role.**` echo of all four notes.
 - 2026-07-19: the re-run sweep found two further undated repo-state claims AC7 covers, both now dated: the cross-note overlap claims in `young1998.md`/`naik2007.md` (AC7 names T2's explicitly), and the four `Extraction:` lines, which after T7–T10 falsely said no passage had been re-read.
 - 2026-07-19: **caught a false-clean signal while dating the `Extraction:` lines.** Writing them "partly verified" made `cairn_validate`'s clause classifier resolve each to `undated` and skip the page — dropping `references staleness` 15 → 11 and silently exempting the four notes from the re-verify backlog. Reverted to `unverified` as the primary claim with the spot corrections as secondary detail; advisory back to 15, which is the honest count. A spot correction is not a re-verification, and `INDEX.md` now says so.
+- 2026-07-19: return trip complete — all five actioned findings fixed (T7–T10) and the AC7 dating failure resolved (T11); `verify` slot clean (FAIL 0, WARN 2, SKIP 23, PASS 1802; failed + error = 0), `cairn_validate` 15 PASS exit 0. Status → review for a second review attempt. `cairn_validate` WARNs M67 at 11 tasks (>10 split tripwire) — an artifact of the send-back appending T7–T11 to a shipped plan, not emergent internal structure; not actioned on a return trip.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
