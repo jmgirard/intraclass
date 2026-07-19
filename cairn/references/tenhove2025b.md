@@ -1,8 +1,8 @@
 # tenhove2025b — MLE-RE + Monte-Carlo CIs for ICCs from planned incomplete data
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2025b.pdf` (gitignored).
-Pagination: printed journal pages 1042–1061 — the Taylor & Francis cover sheet is file page 1, so PDF page = printed page − offset.
-Extraction: verified 2026-07-18 against the source (M69, all 21 PDF pages / printed 1042–1061; references end p. 1061, no appendix) — observed 2026-07-18.
+Pagination: printed journal pages 1042–1061 — the Taylor & Francis cover sheet is file page 1, so PDF page = printed page − 1040 (verified M69: PDF p. 2 carries the running head "2025, VOL. 60, NO. 5, 1042–1061"; M64 wrote "− offset" here, made concrete M69).
+Extraction: verified 2026-07-18 against the source (M69) — all 21 PDF pages (printed 1042–1061; references end p. 1061, no appendix) re-read; the p. 1057 real-data output confirmed digit-for-digit, Table 1's six cells transcribed at 700 DPI, six prose/anchor claims corrected (including MLE-CF's bias direction for ICC(C,1)) and five observations added — observed 2026-07-18.
 
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2025). "How to Estimate
 Intraclass Correlation Coefficients for Interrater Reliability from Planned
