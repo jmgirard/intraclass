@@ -75,7 +75,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 
 - [x] T1: Notes for the general-case pair — `konishi1989` (several ICCs),
       `donner2002` (dependent ICCs).
-- [ ] T2: Notes for the unequal-family-size pair — `young1998`, `naik2007`;
+- [x] T2: Notes for the unequal-family-size pair — `young1998`, `naik2007`;
       note the overlap between them rather than duplicating the derivation.
 - [ ] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
 - [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
@@ -97,6 +97,8 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: in-progress by /milestone-implement on branch `m67-source-notes-equality-testing`; all four shelf PDFs present (donner2002, konishi1989, naik2007, young1998).
 - 2026-07-19: implement question gate — notes stay short per Scope (no transcribed simulation tables or worked-example reproductions, unlike M65's `bhandary2006`); `bhandary2006` gets a two-way cross-reference as a fifth cluster member, answering the request in its own note without reopening M65's shipped text. No RB tripwire: M67 documents the IP2 fence rather than moving it.
 - 2026-07-19: T1 done — `konishi1989.md` (approximate LRT, `q` populations, non-`χ²` null) and `donner2002.md` (dependent ICCs, same subjects, two observer panels), both read to the final page.
+- 2026-07-19: T2 done — `young1998.md` and `naik2007.md`, both read to the final page; the overlap is carried once, as a difference table in `naik2007.md` (the generalizing paper), and cross-referenced from `young1998.md`. Finding: the pair reach opposite recommendations (LRT vs score/`T₀`), because naik2007 p. 6503 reports young1998's Srivastava-into-LRT substitution yielding a negative `−2 log Λ` on up to 25 % of simulated data sets — the notes must not be cited as agreeing.
+- 2026-07-19: `bhandary2006.md` gains the reciprocal cluster cross-reference its M65 cluster-reassignment finding asked for (per the implement question gate); its own framing and extracted values are untouched.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
