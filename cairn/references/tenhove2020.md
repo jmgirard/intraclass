@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2020.pdf` (gitignored).
 Pagination: author/accepted-manuscript PDF pages 1–14 — NOT the Springer typeset pages 79–93; convert explicitly before citing.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (M69) — all 14 manuscript pages re-read; the full DGP table, the half-*t*(4,0,1) spec, the MCMC settings and every quoted finding confirmed verbatim, all five figure plot-reads re-checked against Figs. 1–5, and M64's `σ²_sr`-subscript-slip reading confirmed exactly; no extracted value changed, two nuances added — observed 2026-07-18.
 
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2020). "Comparing
 Hyperprior Distributions to Estimate Variance Components for Interrater
@@ -40,9 +40,13 @@ average of *k* raters}; the consistency forms drop `σ²_r` from the denominator
 Scope (p. 3): raters nested within subjects are set aside — "`μ_r` and `μ_sr`
 cannot be disentangled" (p. 3), so this paper is crossed-only.
 
-Why `σ²_r` is the hard parameter (p. 4): few raters "vary little in the average
-ratings", so its posterior "is overwhelmingly influenced by the specified
-hyperprior distribution" (p. 4).
+Why `σ²_r` is the hard parameter (p. 4): observational studies "often involve few
+raters, and, when these have been trained well, they vary little in the average
+ratings that they provide", so the data "provides little information about
+`σ²_r`" and its posterior "is overwhelmingly influenced by the specified
+hyperprior distribution" (p. 4). (Two causes, not one: **few** raters *and*
+**well-trained** raters. M64's paraphrase attributed the low variation to
+fewness alone — corrected M69.)
 
 ## The hyperpriors compared (§3, pp. 5–6)
 
@@ -62,6 +66,11 @@ Three families are *discussed* (p. 5): **uniform**, **inverse-gamma**, and
   values near zero", a half-*t* "with higher `df` = 4 is slightly more
   informative, and is recommended for variance parameters that are expected to
   have values near the lower bound of zero" (p. 6), citing Gelman (2019).
+  **The sentence immediately following is a caveat M64 omitted** (added M69):
+  "This may, however, be less beneficial for the other random-effect variances in
+  Equation 2" (p. 6) — i.e. the `df = 4` rationale is argued *for `σ_r`*, and the
+  paper flags it as possibly ill-suited to `σ_s` and `σ_sr`. See the
+  scope-of-the-recommendation note below.
 
 **Prior placement — SDs, not variances.** §2.2 (p. 4) says the *exposition* uses
 variances "apart from when we specifically target the estimation of
@@ -84,6 +93,26 @@ The third simulated level is **mixed** (p. 7): "a uniform hyperprior
 distribution for `σ_s` and `σ_sr`, and a half-*t* hyperprior distribution for
 `σ_r`" (p. 7).
 
+### Scope of the half-*t* recommendation — simulated vs concluded (added M69)
+
+The paper applies half-*t*(4,0,1) at two different scopes and the note must not
+blur them:
+
+- **What was simulated (p. 7):** the half-*t* condition specified
+  half-*t*(4,0,1) "for all random-effect *SD*s" — `σ_s`, `σ_sr`, **and** `σ_r`.
+- **What was concluded (p. 13):** "we advice researchers to use an half-*t*
+  hyperprior distribution **for the random-rater effect *SD***" — singular,
+  `σ_r` only. Consistent with §3.3's caveat (p. 6) that `df = 4` "may … be less
+  beneficial for the other random-effect variances".
+
+**Package alignment.** `R/engine-brms.R` sets
+`brms::set_prior("student_t(4, 0, 1)", class = "sd")` with no `coef`/`group`
+restriction, so the prior lands on **every** SD-class parameter — the
+*simulated* configuration, which is what the O-Bayes oracle reproduces, so the
+package is right and **no change is implied**. Recorded because a future reader
+comparing the package against the paper's *closing advice* alone would see a
+mismatch that isn't one.
+
 ## Simulation DGP (§4.1 "Data generation", pp. 6–7) — verified against the repo's claims
 
 Generated from Eq. 1 with the Eq. 2 parameters (p. 6):
@@ -98,12 +127,17 @@ Generated from Eq. 1 with the Eq. 2 parameters (p. 6):
 | `k ∈ {2, 3, 5}` | "`k` = 2, 3, and 5" (p. 7) | ✅ confirmed |
 
 ⚠️ **The `σ²_s` = 0.5 line is a printed subscript slip, not a distinct value.**
-The sentence generating the *subject* effects reads `N`(0, `σ²_sr` = ½) — the
-same subscript used one line later for the interaction. That `σ²_s` is meant is
-settled by p. 7: "The choice to keep `N`, `σ²_s`, and `σ²_sr` constant were
-arbitrary" — `σ²_s` is named a fixed constant and no other value for it is
-printed. The repo's `σ²_s = σ²_sr = 0.5` is consistent with the paper, but the
-anchor is this reading of pp. 6–7, not a clean verbatim `σ²_s = ½`.
+**Re-read at M69 and confirmed exactly as M64 recorded it.** The data-generation
+sentence spans pp. 6–7 and reads, verbatim: "We fixed `μ` to 0, and drew
+`N` = 30 values of `μ_s` from `N`(0, `σ²_sr` = ½), `k` values of `μ_r` from
+`N`(0, `σ²_r`), and 30 × `k` values from from `N`(0, `σ²_sr` = ½)" — the *same*
+subscript `σ²_sr` on both the subject draw and the interaction draw (and note
+the doubled "from from", one of several unproofed slips consistent with this
+being an author manuscript). That `σ²_s` is meant is settled by p. 7: "The choice
+to keep `N`, `σ²_s`, and `σ²_sr` constant were arbitrary" — `σ²_s` is named a
+fixed constant and no other value for it is printed. The repo's
+`σ²_s = σ²_sr = 0.5` is consistent with the paper, but the anchor is this
+reading of pp. 6–7, not a clean verbatim `σ²_s = ½`.
 
 **Population ICCs (p. 7):** "The population ICCs of interrater agreement ranged
 from 0.48 to 0.83". No per-cell values are tabulated. Consistency ICCs were
@@ -189,21 +223,30 @@ should be checked (p. 13).
 
 ## Open questions
 
-- **Published-record fields are unverifiable from this file.** The manuscript PDF
+- **Published-record fields are unverifiable from this file** — re-confirmed
+  M69. The manuscript PDF
   shows no publisher, editors, volume, DOI, or 79–93 pagination (p. 1); those
   fields in the citation above and in `BIBLIOGRAPHY.md` come from outside it.
   Not an oracle-value issue; flagged so the sourcing boundary stays honest.
+  **Dating evidence found M69:** its own reference list (p. 14) cites the
+  multilevel paper (this repo's `tenhove2022`) as "Ten Hove, D., Jorgensen,
+  T. D., & Van der Ark, L. A. (2020) … (Manuscript submitted for publication)",
+  and cites 2019 conference papers as the latest work — so this file is a
+  pre-publication draft from roughly 2019–2020, consistent with the 2020
+  proceedings date and with the unproofed slips noted above.
 - **`ORACLES.md` cites section numbers that do not exist in this version.** The
   O-Bayes entry anchors "§4.1.1" (data generation), "§4.1.2" (prior), "§4.1.3"
-  (MCMC). This PDF has only **§4.1 Methods** with unnumbered bold paragraph
-  headings and **§4.2 Results**. The *content* at each cited anchor matches;
+  (MCMC). Re-confirmed M69: this PDF has only **§4.1 Methods** (with the
+  unnumbered bold paragraph headings Data generation · Independent variables ·
+  Parameter estimation · Software · Dependent variables) and **§4.2 Results**.
+  The *content* at each cited anchor matches;
   only the numbering is unattested. Citation hygiene — **no oracle value is
   affected and none is proposed for change.** Escalate.
 - **The prior's home is §4.1, not §3.3.** `BIBLIOGRAPHY.md` places it at
   "§3.3/§4.1"; the numeric half-*t*(4,0,1) spec appears **only on p. 7 (§4.1)**,
   while §3.3 (p. 6) justifies `df = 4` without location/scale. A tightening, not
   a correction — escalate, do not edit.
-- **Relative-bias sign convention.** The paper prints `(θ̄ − θ)/θ` (p. 9);
+- **Relative-bias sign convention** (re-confirmed M69). The paper prints `(θ̄ − θ)/θ` (p. 9);
   `ORACLES.md` writes `|θ̄ − θ|/θ`. The paper's figures are signed (negative for
   ICC(A,1)), so the absolute-value form may be a transcription artifact.
   Escalate; not a value change.
@@ -215,5 +258,8 @@ should be checked (p. 13).
   pp. 10–12) with no tabulated cell values; every quantitative finding above that
   is not a quoted sentence is labelled **plot-read**. Exact per-cell numbers
   require OSF `shkqm`.
-- **`σ²_s` never appears with its own subscript** (see the DGP table). A clean
-  verbatim anchor for `σ²_s = 0.5` would have to come from the OSF code.
+- **`σ²_s` never appears bound to a value** (see the DGP table) — restated
+  precisely at M69: the symbol `σ²_s` *does* appear in the paper (p. 7, in the
+  list of constants held fixed), so M64's "never appears with its own subscript"
+  was too strong; what never appears is `σ²_s` **carrying the value ½**. A clean
+  verbatim anchor for `σ²_s = 0.5` would still have to come from the OSF code.
