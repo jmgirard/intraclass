@@ -162,7 +162,8 @@ bootstrapping is named but *not* run — "computationally intensive" (p. 1047).
   (p. 1050); convergence rate and estimation time.
 - **Reporting scope (p. 1051).** Figures 3–8 show only the low-error-variance
   conditions (`σ²_r = 0.50`, `σ²_sr = 1.00`); the complete result set is in
-  Supplementary Tables 1–2 (not in this PDF).
+  Supplementary Tables 1–2, which are not in the shelf PDF (— observed
+  2026-07-18; see Open Question 4).
 
 ## Key results (pp. 1051–1054)
 

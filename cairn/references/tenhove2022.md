@@ -277,7 +277,8 @@ value unbanded. Added M69.
   the R software package lme4" (p. 14), and the paper reports diverting them to
   Online Supplement S4 "because they resembled the MCMC estimates" (p. 14). That
   is a qualitative agreement statement about one dataset, with no numbers in the
-  article body — S4 is not on the shelf — so it is **not** an oracle and does not
+  article body — Online Supplement S4 is not on the shelf (checked, no supplement
+  file present — observed 2026-07-18) — so it is **not** an oracle and does not
   validate the package's route. The package's default glmmTMB/lme4 REML route to
   Eqs. 12–13 remains an estimation-route choice established by numerical oracle,
   not by this source — the same posture D-005 records for the two-level SEM

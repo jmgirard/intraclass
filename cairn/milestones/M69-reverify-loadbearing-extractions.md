@@ -129,5 +129,7 @@ milestone corrects notes, never the estimator surface.
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
+- 2026-07-18 (review): the AC4 escalation finding logged on 2026-07-18 stands in substance — Shrout & Fleiss Table 4 prints two decimals (.17, .29, .71, .44, .62, .91, re-read off the shelf PDF at review), the repo's three-decimal values all round to it, and no oracle value is wrong. Two details in that work-log line were **imprecise**, corrected here rather than by editing history (IP4): (a) it named oracle **O1**, but the sharpest false attribution is **O-OW**, which literally says the values are "published to 3 dp" (`ORACLES.md:297`); O1's "Values (3 dp)" (`ORACLES.md:41`) is the softer form. (b) it characterized `helper-shrout-fleiss.R`'s header as calling them "the published Shrout & Fleiss numbers to three decimals" — the header in fact attributes the 3-dp printing to `psych`/`DescTools` ("Both print…") and is already accurate. The ROADMAP candidate row carries the corrected scope.
+
 ## Review
 <!-- owner: review · exclusive -->
