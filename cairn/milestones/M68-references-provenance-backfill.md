@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M68: References provenance backfill + shelf rename to `sources/`
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — the governing principles are PRINCIPLES.md #4 (no fabricated reference values) and #12 (seeded and sourced), the other home under D-001 -->
@@ -118,6 +118,7 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: T6 in flight — cairn_validate already exit 0 (15/15 PASS); the profile `verify` slot is running in the background at checkpoint time, so T6 stays unchecked until its result is recorded.
 - 2026-07-18: T6 done — profile `verify` slot clean: 1802 pass, 0 fail, 0 error, 23 skip, 2 warn (both pre-existing engine conditions — a glmmTMB non-positive-definite Hessian inside the test that asserts that message, and the Design-3 drop message; this branch touches no R file). cairn_validate exit 0, 15/15 PASS. All tasks done; status → review.
 - 2026-07-18: PR #72 opened; CI at checkpoint time — format-check, lint, pkgdown all success; the six platform/coverage jobs still in_progress after a ~9 min blocking wait, so nothing is left watching (re-derive with `gh api repos/jmgirard/intraclass/commits/<sha>/check-runs`, per the stateless-resume rule).
+- 2026-07-18: REVIEW SEND-BACK (1st) — two criteria fail as written, no charitable reading applied. AC4 says every Extraction status "reads unverified-first-pass"; 5 of 24 pages correctly read `derived —`/`first-hand record —` (no shelf source to re-read, per the synthesis template) — its substantive clause (no page claims an unperformed verification) DOES hold, 0/24. AC2 requires the work log to "show the derived page→(date, milestone) table"; the command and full mapping are recorded but as a one-line grouped entry, because work-log entries must be one physical line — a one-line entry cannot literally be a table. Both are plan-time drafting errors (criteria assuming a format the rules forbid, and assuming every page is shelf-ingested). Evidence for AC1/AC3/AC5/AC6 and cairn_validate exit 0 all clean. Back to in-progress for a gated amendment.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
