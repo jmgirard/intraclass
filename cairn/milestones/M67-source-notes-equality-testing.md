@@ -103,7 +103,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
       (`54(4)`) in `BIBLIOGRAPHY.md` or annotate them as not printed; add the
       "(No DOI is printed…)" annotation to `donner2002`; and correct the
       provenance census from "three" to "four".
-- [ ] T10: **(review send-back, finding 6)** Restore the two altered quotations
+- [x] T10: **(review send-back, finding 6)** Restore the two altered quotations
       to verbatim — `young1998.md` "In real world research, **having** families
       of equal size is artificial" (p. 1363), and `naik2007.md` "**thus**
       modified (negative two times **the**) likelihood ratio" (p. 6503).
@@ -138,6 +138,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T7 done — `young1998.md`'s `bhandary2006` comparison corrected: it is the *same* Srivastava (1984) estimator, and the difference is the partition (3 samples of 5/5/4 with sexes pooled vs 2 random samples of 7), not the estimator; now consistent with this note's own "reuses this paper's estimator…" line and with `bhandary2006.md` (p. 777).
 - 2026-07-19: T8 done — re-read pp. 99–101 of the shelf PDF and confirmed the review's reading: exact `χ²₁` needs normality **and** equal `p` **and** `q = 2` jointly (p. 99 gives `c·χ²₁` with an unknown-parameter scale at `q = 2`; p. 100's parameter-free weights still leave a weighted sum, and only "further, for `q = 2`" under normality is it exactly `χ²₁`). Corrected in `konishi1989.md` and the matching `INDEX.md` line; the `c` expression is deliberately not transcribed, the scan being unreliable at that line (#4).
 - 2026-07-19: T9 done — AMS secondary corrected to 62H10 (title page verified: `Primary 62Hl5; Secondary 62HIO`, letter-for-digit OCR in both); the unprinted issue numbers dropped from `konishi1989` and `young1998` in `BIBLIOGRAPHY.md` *and* in the two notes' own citation lines, each now saying what the article actually heads; `donner2002` gains the "(No DOI is printed…)" annotation (verified: no DOI on p. 367); the provenance census corrected three → four in place, with the correction marked.
+- 2026-07-19: T10 done — both quotations restored verbatim against the shelf PDFs (`young1998` p. 1363 "In real world research, having families of equal size is artificial"; `naik2007` p. 6503 "thus modified (negative two times the) likelihood ratio"). Swept the surrounding quotations in both notes while there: `young1998`'s "very little attention" and "none of the above authors…" are verbatim, but `naik2007`'s "may lead to difficulties" was quoted stripped of the qualifier the source attaches ("unless of course, one uses the distribution of the modified test statistics as in Konishi and Gupta (1989)") — restored, since the elided clause names `konishi1989` as the escape route and changes what the caution says.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

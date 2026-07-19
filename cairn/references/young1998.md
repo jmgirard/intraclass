@@ -29,7 +29,8 @@ multisample work that exists — Donner & Bull (1983), `konishi1989`, Huang & Si
 (1993) — **"none of the above authors derived any test for unequal family
 sizes"**. The motivating objection is blunt: "In real practice, we come across
 families with unequal numbers of children and, hence, this is a very important
-practical problem… assuming families of equal size is artificial" (p. 1363).
+practical problem… In real world research, having families of equal size is
+artificial" (p. 1363).
 
 ## Design assumptions
 
