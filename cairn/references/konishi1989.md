@@ -6,9 +6,12 @@ Extraction: unverified — first pass, values not yet re-read against the source
 
 **Citation.** Konishi S, Gupta AK (1989). "Testing the equality of several
 intraclass correlation coefficients." *Journal of Statistical Planning and
-Inference* 21(1):93–105. North-Holland (Elsevier). Received 1 June 1987; revised
+Inference* 21:93–105. The running head prints "21 (1989) 93-105" — neither an
+issue number nor a DOI appears on the article, so neither is given here.
+North-Holland (Elsevier). Received 1 June 1987; revised
 manuscript received 29 December 1987; recommended by T. Hayakawa. AMS
-classification 62H15 (primary), 62H20 (secondary). Konishi: Institute of
+classification 62H15 (primary), 62H10 (secondary) — the title page OCRs both as
+letters (`62Hl5`, `62HIO`). Konishi: Institute of
 Statistical Mathematics, Tokyo; Gupta: Bowling Green State University, Ohio.
 
 **Role.** Ingested by M67 as the general-case member of the equality-testing

@@ -7,7 +7,9 @@ Extraction: unverified — first pass, values not yet re-read against the source
 
 **Citation.** Young DJ, Bhandary M (1998). "Test for Equality of Intraclass
 Correlation Coefficients Under Unequal Family Sizes." *Biometrics*
-54(4):1363–1373, December 1998. Received April 1996; revised September 1997;
+54:1363–1373, December 1998. The article heads "BIOMETRICS 54, 1363-1373" —
+neither an issue number nor a DOI is printed, so neither is given here.
+Received April 1996; revised September 1997;
 accepted November 1997. Young: North Dakota State Department of Health and
 Consolidated Labs, Bismarck; Bhandary (corresponding): Department of Statistics,
 North Dakota State University, Fargo. Carries a French *Résumé* (p. 1372) per

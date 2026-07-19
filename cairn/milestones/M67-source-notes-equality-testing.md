@@ -97,7 +97,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
       equal `p` **and** `q = 2`; at `q = 2` in the general case the limit is
       `c·χ²₁` with an unknown-parameter scale (p. 99), and equal `p` under
       normality only makes the weights parameter-free (p. 100).
-- [ ] T9: **(review send-back, findings 3 and 5)** Citation-field accuracy:
+- [x] T9: **(review send-back, findings 3 and 5)** Citation-field accuracy:
       `konishi1989.md`'s AMS secondary is **62H10**, not 62H20; drop the
       unprinted issue numbers from `konishi1989` (`21(1)`) and `young1998`
       (`54(4)`) in `BIBLIOGRAPHY.md` or annotate them as not printed; add the
@@ -137,6 +137,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: return-trip question gate — note lengths (107/143/131/165) kept as shipped per maintainer ruling (Scope says only "deliberately short"; the "~60–90" figure was invented at a chip, never planned), and the two unprinted issue numbers will be dropped rather than annotated, so all four M67 bibliography entries follow one rule.
 - 2026-07-19: T7 done — `young1998.md`'s `bhandary2006` comparison corrected: it is the *same* Srivastava (1984) estimator, and the difference is the partition (3 samples of 5/5/4 with sexes pooled vs 2 random samples of 7), not the estimator; now consistent with this note's own "reuses this paper's estimator…" line and with `bhandary2006.md` (p. 777).
 - 2026-07-19: T8 done — re-read pp. 99–101 of the shelf PDF and confirmed the review's reading: exact `χ²₁` needs normality **and** equal `p` **and** `q = 2` jointly (p. 99 gives `c·χ²₁` with an unknown-parameter scale at `q = 2`; p. 100's parameter-free weights still leave a weighted sum, and only "further, for `q = 2`" under normality is it exactly `χ²₁`). Corrected in `konishi1989.md` and the matching `INDEX.md` line; the `c` expression is deliberately not transcribed, the scan being unreliable at that line (#4).
+- 2026-07-19: T9 done — AMS secondary corrected to 62H10 (title page verified: `Primary 62Hl5; Secondary 62HIO`, letter-for-digit OCR in both); the unprinted issue numbers dropped from `konishi1989` and `young1998` in `BIBLIOGRAPHY.md` *and* in the two notes' own citation lines, each now saying what the article actually heads; `donner2002` gains the "(No DOI is printed…)" annotation (verified: no DOI on p. 367); the provenance census corrected three → four in place, with the correction marked.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

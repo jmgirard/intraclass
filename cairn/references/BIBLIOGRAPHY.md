@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries), M65 (→ 27), and M66 (→ 34); M68 added only this block. On 2026-07-19 the `jorgensen2019` entry was replaced in place by `vanderark2023` — the published version of record of the same study, under a different first author — leaving the count at 34; M67 then added the four equality-testing entries (→ 38).
 Pagination: —.
-Extraction: unverified — the 16 split entries moved as text and were never read against their sources, which is what keeps this page's status unverified as a whole; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since; the 7 added by M66 were authored on 2026-07-19 from shelf copies each read end-to-end, and two of those entries deliberately withheld a field the source does not print (Trevethan's year and pagination — **since supplied by the maintainer and filled in, 2026-07-19**, leaving only its issue number withheld), with Shieh's citekey-vs-issue year flagged inline; the third such case, Jorgensen's missing year/venue/pagination, was resolved on 2026-07-19 when the published `vanderark2023` chapter superseded that preprint entry; the 4 added by M67 were authored on 2026-07-19 from shelf copies each read end-to-end, and three of them withhold a field the source does not print (no DOI on `konishi1989` or `young1998`, no issue number on `naik2007`) — observed 2026-07-19.
+Extraction: unverified — the 16 split entries moved as text and were never read against their sources, which is what keeps this page's status unverified as a whole; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since; the 7 added by M66 were authored on 2026-07-19 from shelf copies each read end-to-end, and two of those entries deliberately withheld a field the source does not print (Trevethan's year and pagination — **since supplied by the maintainer and filled in, 2026-07-19**, leaving only its issue number withheld), with Shieh's citekey-vs-issue year flagged inline; the third such case, Jorgensen's missing year/venue/pagination, was resolved on 2026-07-19 when the published `vanderark2023` chapter superseded that preprint entry; the 4 added by M67 were authored on 2026-07-19 from shelf copies each read end-to-end, and **all four** withhold a field the source does not print (no DOI on `donner2002`, `konishi1989`, or `young1998`; no issue number on `konishi1989`, `naik2007`, or `young1998`) — census said "three" on first pass and is corrected here, 2026-07-19, the M67 review having found `donner2002`'s missing DOI unannotated and two unprinted issue numbers supplied — observed 2026-07-19.
 
 The repo's bibliography. Oracle provenance lives in
 [`ORACLES.md`](ORACLES.md); per-source extractions with page/table anchors live
@@ -42,7 +42,8 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   among several, with caveats; the package computes no verdict — #4/#18.)
 - Donner, A., & Zou, G. (2002). Testing the equality of dependent intraclass
   correlation coefficients. *The Statistician, 51*(Part 3), 367–379. (Published in
-  the JRSS Series D journal, which prints only the short title.) (Two ICCs from
+  the JRSS Series D journal, which prints only the short title.) (No DOI is
+  printed on the article.) (Two ICCs from
   the same subjects rated by two observer panels — the cluster's only genuinely
   interrater member; outside the contract boundary, ingested as boundary evidence
   — see [`donner2002.md`](donner2002.md).)
@@ -60,8 +61,9 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   doi:10.3390/psych3020011. (The M7 lavaan engine's SEM absolute-error method —
   see [`jorgensen2021.md`](jorgensen2021.md).)
 - Konishi, S., & Gupta, A. K. (1989). Testing the equality of several intraclass
-  correlation coefficients. *Journal of Statistical Planning and Inference, 21*(1),
-  93–105. (No DOI is printed on the article.) (The general `q`-population
+  correlation coefficients. *Journal of Statistical Planning and Inference, 21*,
+  93–105. (Neither a DOI nor an issue number is printed on the article, which
+  heads "21 (1989) 93-105".) (The general `q`-population
   approximate LRT, whose null distribution is a weighted sum of `χ²₁` variates
   rather than `χ²`; outside the contract boundary, ingested as boundary evidence
   — see [`konishi1989.md`](konishi1989.md).)
@@ -200,8 +202,10 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   profile-likelihood CI candidate — two-way random interrater, and the naive-PL
   under-coverage finding; see [`xiao2013.md`](xiao2013.md).)
 - Young, D. J., & Bhandary, M. (1998). Test for equality of intraclass correlation
-  coefficients under unequal family sizes. *Biometrics, 54*(4), 1363–1373. (No DOI
-  is printed on the article.) (Two ICCs, unequal family sizes, equal variances
+  coefficients under unequal family sizes. *Biometrics, 54*, 1363–1373. (Neither a
+  DOI nor an issue number is printed on the article, which heads "BIOMETRICS 54,
+  1363-1373"; it appeared in the December 1998 issue.) (Two ICCs, unequal family
+  sizes, equal variances
   assumed; recommends the LRT — a recommendation `naik2007` later contradicts.
   Outside the contract boundary, ingested as boundary evidence — see
   [`young1998.md`](young1998.md).)
