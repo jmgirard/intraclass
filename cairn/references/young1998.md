@@ -91,9 +91,11 @@ evidence rather than an oracle source.
 **One detail is worth keeping.** All three point estimates are **negative**
 (`ρ̂₁ = −0.2917`, `ρ̂₂ = −0.2504`, pooled `−0.2682`) — admissible under the
 compound-symmetric parameterization (see the `ρ` range above), impossible for a
-variance-components ICC constrained to `[0, 1]`. `bhandary2006` uses this same
-data set, split three ways, and gets positive estimates from a different
-estimator.
+variance-components ICC constrained to `[0, 1]`. `bhandary2006` applies the
+**same** Srivastava (1984) estimator to this same 14-family data set and reports
+*positive* estimates (0.8804, 0.9567, 0.8508). The difference is the partition,
+not the estimator: three samples of 5/5/4 families with daughters' and sons'
+values put together, rather than two random samples of seven.
 
 ## Boundary (IP2)
 
