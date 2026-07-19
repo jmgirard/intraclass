@@ -75,7 +75,7 @@ not applied here.
 - [x] T1: `ukoumunne2003` (17 pp) — leads; D-006's GO rests on its `log F`
       bootstrap-t. Note is thin at 81 lines; expect additions, not just
       corrections.
-- [ ] T2: `ohyama2025` (16 pp) — 61-line note, the thinnest on the shelf.
+- [x] T2: `ohyama2025` (16 pp) — 61-line note, the thinnest on the shelf.
 - [ ] T3: `donner2002` (13 pp) — the only cluster member inside the
       interrater setting; its IP2 fence is stated twice and both must hold.
 - [ ] T4: `konishi1989` (13 pp).
@@ -97,6 +97,7 @@ not applied here.
 
 - 2026-07-19: created by /milestone-plan (absorbs part of the "remaining nine source extractions" candidate — `ukoumunne2003`, `ohyama2025` — and takes M67's four, which INDEX.md:243 records as backlog members not exempt from re-verification; plan gate: 3-way split, normal priority because `ukoumunne2003` backs D-006).
 - 2026-07-19: T1 `ukoumunne2003` verified (17 pp, all read; Appendix A pp. 3818–3820 found and its Eq. 7 derivation re-run, reproduces exactly; Table I ρ=0.05 block confirmed cell-by-cell; 12 quotations swept, all verbatim). Six corrections, one substantive: the note claimed the transformed bootstrap-t "≈ nominal (0.95) across k, including k=10" when Table I on the page it already cited gives **0.9320** at ρ=0.001/k=10 — and the paper flags that deviation itself (p. 3814). Also: the p. 3816 "3 per cent" sentence was quoted truncated and labelled a *global* claim when it is conditional on non-normal data; eq. 4's anchor was p. 3806, actually p. 3807; normality asserted where p. 3807 calls it inessential for point estimation; a Fig. 2 plot-read replaced by exact Table I values (bootstrap-t 0.8805, BCa 0.8280); "strategy 1" was not the source's label. No package value affected.
+- 2026-07-19: T2 `ohyama2025` verified (16 pp, all read; §3.2 settings confirmed value by value; 9 quotations swept, all verbatim). Largest find: **§4's two worked examples (pp. 599–600) were never reached by the first pass**, which recorded the paper as plot-only — they print all five methods' 95% limits from a published ANOVA table, recomputed here and reproducing both printed ICCs (0.786, 0.585) to 3 dp; NBOOT's Example-2 lower limit is negative (−0.058), a published instance of the boundary case D-006 needs a fallback for. Also: **Figs 3–4 (width) omit NBOOT entirely**, so no NBOOT width claim can trace here; Figs 1/2 split balanced/unbalanced (Fig. 1 is the oracle panel), not by quantity; the SEARLE finding had dropped `k = 50`; §5's normality-only fence added — ohyama does not test the non-normal axis that is ukoumunne2003's whole claim. No package value affected.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
