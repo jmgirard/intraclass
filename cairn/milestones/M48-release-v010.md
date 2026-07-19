@@ -5,7 +5,7 @@
 
 - **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
-- **Depends on:** M49, M50, M51, M53, M54, M55, M61   <!-- owner: plan · create/amend-via-gate -->
+- **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
 - **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
 
@@ -112,6 +112,7 @@ gate before stamping, never folded in silently.
   gtheory-reference docs audit lands before the v0.1.0 release — a capability
   table listing an archived package as an installable peer shouldn't ship in
   the first CRAN release).
+- 2026-07-19: mirror catch-up by /milestone — Depends-on gained M61 (86d16e8, 2026-07-17 plan gate) and M68 (5a4a7af, 2026-07-18 plan gate: the references provenance backfill clears cairn_validate before M48's consistency gate); both were recorded in ROADMAP only, so this file's Depends-on and work log were behind.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
