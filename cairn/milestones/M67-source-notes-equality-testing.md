@@ -77,7 +77,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
       `donner2002` (dependent ICCs).
 - [x] T2: Notes for the unequal-family-size pair — `young1998`, `naik2007`;
       note the overlap between them rather than duplicating the derivation.
-- [ ] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
+- [x] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
 - [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
 - [ ] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
@@ -99,6 +99,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T1 done — `konishi1989.md` (approximate LRT, `q` populations, non-`χ²` null) and `donner2002.md` (dependent ICCs, same subjects, two observer panels), both read to the final page.
 - 2026-07-19: T2 done — `young1998.md` and `naik2007.md`, both read to the final page; the overlap is carried once, as a difference table in `naik2007.md` (the generalizing paper), and cross-referenced from `young1998.md`. Finding: the pair reach opposite recommendations (LRT vs score/`T₀`), because naik2007 p. 6503 reports young1998's Srivastava-into-LRT substitution yielding a negative `−2 log Λ` on up to 25 % of simulated data sets — the notes must not be cited as agreeing.
 - 2026-07-19: `bhandary2006.md` gains the reciprocal cluster cross-reference its M65 cluster-reassignment finding asked for (per the implement question gate); its own framing and extracted values are untouched.
+- 2026-07-19: T3 done — `DESIGN.md` IP2 gains a pointer sentence naming the cluster as the citable record for the hypothesis-testing side of the boundary; the principle's own wording is unchanged, so this is a cross-reference, not an IP amendment.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
