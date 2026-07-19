@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M66: Source notes — the foundational and interpretation shelf
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M63   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, IP3   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m66-source-notes-foundational`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m66-source-notes-foundational` / [#74](https://github.com/jmgirard/intraclass/pull/74)   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -94,7 +94,7 @@ qualitative band entering package output → refused outright (IP3).
       time-relative and absence phrasing (`at the time of writing`, `not yet`,
       `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
       against the repo as it now stands; date any claim that survives.
-- [ ] T6: Run the profile `verify` slot; open the PR and drive CI green.
+- [x] T6: Run the profile `verify` slot; open the PR and drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -127,6 +127,9 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-19: T5 fixes — four notes (trevethan2017, hedges2012, shieh2015, jorgensen2019) claimed "nothing in the repo cites it" while T4 had added a BIBLIOGRAPHY entry and INDEX line for each hours earlier; narrowed to the precise scope (no test/vignette/ORACLES entry) naming M66's own citations.
 - 2026-07-19: T5 fixes — trevethan2017 claimed to be a second source for guidance koo2016 "currently carries alone" (false once this note landed) and said INDEX records three not-version-of-record PDFs (T4 made it five, including trevethan2017 itself). Both re-resolved.
 - 2026-07-19: T5 — four surviving repo-state claims verified against the repo then dated (O1's backing, the boundary-policy fixture, getting-started's band-table ordering, and bartko1976's unused data sets); zero "currently" left in the seven notes. Confirmed by grep that none of the seven citekeys or author names appears in R/, tests/, vignettes/, or ORACLES.md, so every "nothing reads this page" claim is true.
+
+- 2026-07-19: T6 done — verify slot clean under NOT_CRAN=true CI=true: FAIL 0, WARN 2, SKIP 23, PASS 1802 (failed + error = 0, AC6). Docs-only branch: cairn/ is .Rbuildignore'd, so no test could move.
+- 2026-07-19: PR #74 opened; status -> review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

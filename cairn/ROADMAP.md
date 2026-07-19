@@ -15,7 +15,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M69 | Re-verify the ten load-bearing source extractions | done | M68 | normal | milestones/archive/M69-reverify-loadbearing-extractions.md |
 | M64 | Source notes — the ten load-bearing primary sources | done | M63 | normal | milestones/archive/M64-source-notes-loadbearing.md |
 | M65 | Source notes — the interval-methods and robustness cluster | done | M63 | normal | milestones/archive/M65-source-notes-interval-methods.md |
-| M66 | Source notes — the foundational and interpretation shelf | in-progress | M63 | low | milestones/M66-source-notes-foundational.md |
+| M66 | Source notes — the foundational and interpretation shelf | review | M63 | low | milestones/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | planned | M63 | low | milestones/M67-source-notes-equality-testing.md |
 <!-- terminal-row retention: M69 done (2026-07-18) → M62 rotated out (its archive file, its D-006 lineage, and the candidate rows citing it still resolve). Kept: M69, M68, M65, M64, M63 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
