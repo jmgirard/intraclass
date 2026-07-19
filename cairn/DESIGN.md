@@ -120,7 +120,10 @@ D-entry).
 - IP2: **ICC-only identity.** The contract boundary is the interrater ICC
   family, permanently: categorical agreement, internal consistency, and general
   multi-facet G-studies route to other packages. Scope expansion requires a
-  constitutional amendment (D-entry + user decision).
+  constitutional amendment (D-entry + user decision). Citable record for the
+  hypothesis-testing side of this boundary: the ICC-equality cluster in
+  `cairn/references/` (`konishi1989`, `donner2002`, `young1998`, `naik2007`,
+  and `bhandary2006` by subject).
 - IP3: **Which, not how good.** The package never qualitatively labels ICC
   magnitude — no poor/good/excellent, no benchmark cutoffs in output, not even
   opt-in. Guidance covers estimand choice and interval reading; vignettes may

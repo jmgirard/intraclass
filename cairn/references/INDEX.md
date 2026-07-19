@@ -34,6 +34,10 @@ and milestones; never restate a value here.
   consistency** ICC estimated in a Bayesian hierarchy with a variance function;
   ignoring bounded-scale heteroscedasticity or pooling across studies inflates the
   ICC. Reports no coverage.
+- [donner2002.md](donner2002.md) — source note (M67): testing `H₀: ρ₁ = ρ₂` for two
+  **dependent** ICCs — two observer panels rating the same subjects, the
+  interobserver case. The cluster's closest approach to package territory, so its
+  IP2 fence is stated twice. Outside the contract boundary.
 - [fleiss1973.md](fleiss1973.md) — source note (M64): weighted kappa with squared
   weights ≡ the two-way random single-rating **agreement** ICC at k = 2; shelf
   evidence for the kappa–ICC boundary, not an oracle.
@@ -48,6 +52,10 @@ and milestones; never restate a value here.
 - [koo2016.md](koo2016.md) — source note (M64): the interpretation bands and the
   load-bearing "judge against the 95% CI, not the point estimate" guidance
   (p. 161); band inclusivity is ambiguous as printed.
+- [konishi1989.md](konishi1989.md) — source note (M67): the general `q`-population
+  approximate LRT for `H₀: ρ₁ = ⋯ = ρ_q`. Its null distribution is **not** `χ²`
+  but a weighted sum of `χ²₁` variates; exact `χ²₁` needs normality **and** equal
+  `p` **and** `q = 2` together. Outside the contract boundary.
 - [mcgraw1996.md](mcgraw1996.md) — source note (M64): the ICC(A,·)/ICC(C,·) labels,
   the five models, and **Case 3A** (θ²_c = Σc²_j/(k−1)); includes the published
   correction (1(4):390).
@@ -55,6 +63,11 @@ and milestones; never restate a value here.
   under five subject distributions — convex < uniform < concave at identical rater
   quality, because subject variance moves and rater error variance does not.
   Reports no coverage; `N = 80` matches `N = 300` on the point estimate only.
+- [naik2007.md](naik2007.md) — source note (M67): equality of `g` ICCs under
+  unequal family sizes **and unequal variances** — five tests, recommending the
+  score test or `T₀`. Reports that substituting Srivastava's estimator into the
+  LRT (as `young1998` does) gives a **negative `−2 log Λ` on up to 25 % of
+  samples**. Outside the contract boundary.
 - [saha2005.md](saha2005.md) — source note (M65): bias-corrected MLE (BCML) of the
   **binary** beta-binomial ICC; a point-estimation paper with no coverage results.
   Table I quantifies near-boundary non-convergence (~15 % acceptance at worst).
@@ -110,6 +123,11 @@ and milestones; never restate a value here.
   likelihood** (`κ_m`) for the two-way random interrater ICC — the named source
   for the PL sibling candidate. Documents naive PL bottoming out at 0.796 vs a
   nominal 0.90, and calibrates `κ_m` only over ρ ∈ [0.6, 0.9].
+- [young1998.md](young1998.md) — source note (M67): equality of **two** ICCs under
+  unequal family sizes, assuming equal variances; recommends the LRT — a
+  recommendation `naik2007` later contradicts. Its real-data example returns
+  **negative** ICC estimates (≈ −0.27), which the compound-symmetric
+  parameterization admits. Outside the contract boundary.
 
 ## Synthesis notes
 
@@ -129,23 +147,27 @@ and milestones; never restate a value here.
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
-committed record of what is on the shelf and which milestone ingests it. **31 PDFs
-as of 2026-07-19**: the 30 verified against their own title pages at M63/T1, plus
-`vanderark2023`, added by the maintainer 2026-07-19 and verified against its title
-page when ingested. One of the 31 — `jorgensen2019.pdf` — is a superseded preprint
-of `vanderark2023` that no committed page depends on; it may be deleted from the
-shelf at any time without affecting this inventory's other counts. Citekey convention: same-author-same-year takes a letter
-suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
+committed record of what is on the shelf and which milestone ingests it. **30 PDFs
+— observed 2026-07-19**: the 30 verified against their own title pages at M63/T1,
+less the superseded `jorgensen2019.pdf` preprint (since deleted, as the M66
+correction anticipated), plus `vanderark2023`, added by the maintainer 2026-07-19
+and verified against its title page when ingested. Citekey convention:
+same-author-same-year takes a letter suffix ordered by issue — `tenhove2025a`
+(MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
-**Ingested (source/synthesis note exists) — 26:** `bartko1966`, `bartko1976`,
-`bhandary2006`, `bobak2018`, `fleiss1973`, `hedges2012`, `jorgensen2021`, `koo2016`, `mcgraw1996`, `mehta2018`, `ohyama2025`, `saha2005`,
+**Ingested (source/synthesis note exists) — 30:** `bartko1966`, `bartko1976`,
+`bhandary2006`, `bobak2018`, `donner2002`, `fleiss1973`, `hedges2012`,
+`jorgensen2021`, `konishi1989`, `koo2016`, `mcgraw1996`, `mehta2018`, `naik2007`,
+`ohyama2025`, `saha2005`,
 `saha2012`, `shieh2015`, `shrout1979`, `tenhove2018`, `tenhove2020`, `tenhove2022`,
 `tenhove2024`, `tenhove2025a`, `tenhove2025b`, `trevethan2017`, `ukoumunne2003`,
-`vanderark2023`, `xiao2009`, `xiao2013`. The ten load-bearing primary sources were ingested by M64;
+`vanderark2023`, `xiao2009`, `xiao2013`, `young1998`. The ten load-bearing primary
+sources were ingested by M64;
 `ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
-sources by M65; the seven foundational/interpretation sources by M66. Of the five
-shelf PDFs with no note, four are the M67 equality-testing cluster and the fifth is
-the superseded `jorgensen2019` preprint.
+sources by M65; the seven foundational/interpretation sources by M66; the four
+equality-testing sources by M67. **Every shelf PDF now carries a note, and every
+note has a shelf PDF — 30/30, no orphan in either direction (observed
+2026-07-19).**
 
 Four shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
@@ -157,8 +179,8 @@ citation, so only its *anchors* remain PDF-based (corrected 2026-07-19). A fifth
 `jorgensen2019`,
 was an author manuscript with no year, venue, or pagination at all; the published
 version of record arrived on the shelf as `vanderark2023` and **supersedes it**
-(corrected 2026-07-19) — the preprint PDF is still on the shelf but nothing cites
-it.
+(corrected 2026-07-19); the preprint PDF has since been removed from the shelf,
+and nothing cited it (observed 2026-07-19).
 
 Two citekeys are **not** corroborated by their source's printed publication year, and neither was
 renamed (renaming would break the milestone Scope lists and every cross-reference):
@@ -203,5 +225,24 @@ Table 3 misprints `MSW` for `MSE` in rows 3–4 (found by recomputation);
 (unresolved — needs the `irr` package); `shieh2015` Appendix Eq. A2 writes `ρ`
 for `ρ*` (typographical, confirmed by re-deriving Eq. 5).
 
-**M67 — ICC-equality testing (4):** `donner2002` · `konishi1989` · `naik2007` ·
-`young1998`. Outside the contract boundary (IP2); ingested as boundary evidence.
+**M67 — ICC-equality testing (4): ingested 2026-07-19.** `donner2002` ·
+`konishi1989` · `naik2007` · `young1998`. Outside the contract boundary (IP2);
+ingested as boundary evidence, and `DESIGN.md`'s IP2 now points here as the
+citable record for it. Read cold, the cluster is **five** papers, not four:
+M65's `bhandary2006` belongs to it by subject, its own note says so, and all
+five now cross-reference each other under one fence.
+
+Two findings. `donner2002` is the only member inside the interrater setting at
+all — same subjects, two observer panels, ANOVA ICC estimators — which is why
+its note states the fence twice, once for the tests and once for the pooled
+interval in its second worked example. And the unequal-family-size pair
+**disagree**: `young1998` recommends the LRT, while `naik2007` (p. 6503) reports
+that same Srivastava-into-LRT substitution producing a negative `−2 log Λ` on up
+to 25 % of simulated data sets and recommends the score test or `T₀` instead —
+so the two must not be cited as a concordant pair. Per the plan gate these four
+notes were shipped at **unverified** first-pass extraction status by design (AC3
+makes them non-load-bearing), unlike M66's; they are the newest members of the
+re-verify backlog, not exempt from it — and they stay there: the review
+send-back spot-corrected one or two passages in each against its shelf PDF
+(2026-07-19), which each note's `Extraction:` line now names, but a spot
+correction is not a re-verification and the status stays **unverified**.
