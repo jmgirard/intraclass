@@ -83,13 +83,13 @@ not applied here.
       load-bearing for INDEX.md's "must not be cited as a concordant pair".
 - [x] T6: `young1998` (11 pp) — its Eq. (2.6) quotation was already corrected
       once at M67 review; re-read the whole page.
-- [ ] T7: mechanical quotation sweep — enumerate every quoted string in all
+- [x] T7: mechanical quotation sweep — enumerate every quoted string in all
       six notes and re-check each against its source; record the count swept
       per note as the evidence.
-- [ ] T8: grep the six notes for time-relative phrasing (`at the time of
+- [x] T8: grep the six notes for time-relative phrasing (`at the time of
       writing`, `not yet`, `today`, `must be checked`, `not retrieved`) plus
       the `Traces to` lead sentence, and re-resolve every hit.
-- [ ] T9: update `INDEX.md`'s backlog narrative and the M67 paragraph; run
+- [x] T9: update `INDEX.md`'s backlog narrative and the M67 paragraph; run
       `cairn_validate` and the r-package `verify` slot; confirm docs-only.
 
 ## Work log
@@ -102,6 +102,7 @@ not applied here.
 - 2026-07-19: T4 `konishi1989` verified (13 pp, all read; references end p. 105, no appendix; 15 quotations swept, all verbatim; the absence claims — no admissible-`ρ` bound anywhere, nothing in the package citing it — both re-checked). One correction, a **false illegibility claim**: the `q = 2` scale `c` (p. 99) had been left untranscribed because the scan was "unreliable at that line", but it renders cleanly at 400 DPI and is now transcribed as `c = {√2(1−ρ)}⁻²(a²₁h₂ + a²₂h₁)(φ²₁ + φ²₂)`. The scan's actual defect is its TEXT LAYER, which returns the AMS classification as `62Hl5`/`62HIO` — the note's separate OCR claim, confirmed. Also: the running head carries authors plus truncated title, not the title alone. No package value affected.
 - 2026-07-19: T5 `naik2007` verified (13 pp, all read; references end p. 6510, no appendix; 20 quotations swept, all verbatim; absence claim re-grepped, still zero hits). The load-bearing p. 6503 negative-LRT finding and its 25% figure are confirmed exactly, so INDEX.md's "must not be cited as a concordant pair" stands. Two corrections: (a) the score-vs-`T₀` verdict is stated TWICE with different outcomes — score "consistently better" at g=3 (p. 6505) but "essentially indistinguishable" with `T₀` sometimes better at g=2 (p. 6507) — and only the first was recorded; (b) the pooled `ρ̂_S` standard error was called intractable where the paper says an approximate expression exists but is "very complicated". Also recorded: a §6 source erratum (p. 6504 says `χ²` with `g` df where every test definition says `g−1`), the paper's own "limited simulation study" caveat, and its k/g notation split. Six quotations had markdown or backticks inside the quote marks — five of them mine, introduced this session — now all markup-free. No package value affected.
 - 2026-07-19: T6 `young1998` verified (11 pp, all read; references end p. 1373 with the publication dates BELOW them and the French Résumé on p. 1372; 15 quotations swept, all verbatim; absence claim re-grepped, zero hits). The M67 review's restoration of `−2 log Λ` to the Eq. (2.6) quotation is confirmed correct. Additions: the paper RAN all (ρ₁,ρ₂) combinations but Table 1 PRINTS only a subset, so an absent cell means unprinted not unsimulated; Figs. 1–4 label the `Z*` test `STAR05` where Table 1 calls it `NORM*05`; the recommendation recurs at least four times, not three. **Scope flag:** two claims in this note assert `bhandary2006` content (its 0.8804/0.9567/0.8508 estimates and the 0.4089 size inflation at K=5) — that note is unverified and belongs to M71, so both are now marked as inherited rather than verified here; the young1998 halves (negative estimates −0.2917/−0.2504/−0.2682, two samples of seven, k=30 only) are confirmed against this source. Two quotations had backticks inside the quote marks, now outside. No package value affected.
+- 2026-07-19: T7–T9 done. T7 consolidated quotation sweep: 93 quotations across the six notes (ukoumunne2003 13, ohyama2025 9, donner2002 21, konishi1989 15, naik2007 20, young1998 15), all verbatim and markup-free — the sweep caught one residual markup-in-quote in ukoumunne2003 from T1, since T1 predated the markup check. T8 time-relative sweep: 0 hits across all six. T9: INDEX.md updated — the M67 four moved from backlog to dated-verified with per-note findings, the backlog narrative now names the seven M65 notes (M71) and points ORACLES/BIBLIOGRAPHY at M72, the ohyama2025 entry notes the recovered §4 examples and NBOOT width exclusion, and a mechanically-counted 23-verified/7-unverified shelf census added. `cairn_validate` green; `devtools::test()` FAIL 0 / PASS 1802 (M69 baseline, unchanged); diff is docs-only under cairn/.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

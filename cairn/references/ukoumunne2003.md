@@ -34,7 +34,7 @@ variances `σ²_a`, `σ²_e` and independent of each other; normality is an
 *additional* assumption it flags as optional — p. 3807 says it "is not essential
 for point estimation of ρ". It *is* essential for the exact analytical interval
 (eq. 5, p. 3807), which the paper says "will only provide correct intervals when
-both the `a_i` and the `e_ij` are normally distributed".
+both the a_i and the e_ij are normally distributed".
 
 ## Procedure (what the prototype must implement)
 

@@ -138,6 +138,11 @@ and milestones; never restate a value here.
 - [ohyama2025.md](ohyama2025.md) — synthesis/oracle note (M62): published coverage/
   width comparison of one-way-ICC CI methods (SEARLE/SMITH/NBOOT/REML/BETA);
   REML best, NBOOT slightly worse than SEARLE — the M62 NBOOT-prototype oracle.
+  **M70 recovered its §4 worked examples** (pp. 599–600), which the first pass
+  never reached: two published ANOVA tables with all five methods' 95 % limits,
+  exact reference values that beat plot-reading Figs. 1–2. Note also that the
+  width figures (Figs. 3–4) **exclude NBOOT**, so no NBOOT width claim traces
+  here — coverage only.
 
 - [npbootstrap-oneway-comparison.md](npbootstrap-oneway-comparison.md) — synthesis
   note (M62): the pre-registered "not worse" criterion + one-way cell grid, and
@@ -168,6 +173,15 @@ sources by M65; the seven foundational/interpretation sources by M66; the four
 equality-testing sources by M67. **Every shelf PDF now carries a note, and every
 note has a shelf PDF — 30/30, no orphan in either direction (observed
 2026-07-19).**
+
+**Extraction status across the shelf (2026-07-19).** Of the 30 notes, **23 are
+dated-verified** — the ten load-bearing ones by M69, the seven
+foundational/interpretation ones at ingest by M66, and six by M70
+(`ukoumunne2003`, `ohyama2025`, `donner2002`, `konishi1989`, `naik2007`,
+`young1998`). The remaining **seven are M65's and stay unverified** until M71:
+`bhandary2006`, `bobak2018`, `mehta2018`, `saha2005`, `saha2012`, `xiao2009`,
+`xiao2013`. A claim sourced to one of those seven is not yet re-read against its
+PDF — `young1998`'s two `bhandary2006` cross-references are marked accordingly.
 
 Four shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies
@@ -239,10 +253,30 @@ interval in its second worked example. And the unequal-family-size pair
 **disagree**: `young1998` recommends the LRT, while `naik2007` (p. 6503) reports
 that same Srivastava-into-LRT substitution producing a negative `−2 log Λ` on up
 to 25 % of simulated data sets and recommends the score test or `T₀` instead —
-so the two must not be cited as a concordant pair. Per the plan gate these four
-notes were shipped at **unverified** first-pass extraction status by design (AC3
-makes them non-load-bearing), unlike M66's; they are the newest members of the
-re-verify backlog, not exempt from it — and they stay there: the review
-send-back spot-corrected one or two passages in each against its shelf PDF
-(2026-07-19), which each note's `Extraction:` line now names, but a spot
-correction is not a re-verification and the status stays **unverified**.
+so the two must not be cited as a concordant pair — **that disagreement was
+re-verified against `naik2007` p. 6503 at M70 and the 25 % figure is exact.**
+
+Per the M67 plan gate these four notes shipped at **unverified** first-pass
+status by design (AC3 made them non-load-bearing), unlike M66's, and joined the
+re-verify backlog rather than being exempt from it. **M70 cleared them
+(2026-07-19): all four are now dated-verified**, each read to its source's final
+page, alongside M62's `ukoumunne2003` and `ohyama2025`. What the re-verification
+found, per note:
+
+- `donner2002` — the simulated-`ρ` enumeration was right for the significance
+  tables and wrong for the power table, which uses unequal *pairs*; the 0.4 floor
+  it was cited for is unaffected.
+- `konishi1989` — a **false illegibility claim**: the `q = 2` scale `c` (p. 99)
+  had been left untranscribed as unreadable, but renders cleanly at 400 DPI. The
+  scan's real defect is its text layer (`62Hl5` for 62H15).
+- `naik2007` — the score-vs-`T₀` verdict is stated twice with different outcomes
+  (`g = 3` vs `g = 2`) and only one was recorded; plus a source erratum in §6's
+  degrees of freedom.
+- `young1998` — additions only, no error: the M67 restoration of `−2 log Λ` is
+  confirmed correct. Two of its claims about `bhandary2006` are now marked as
+  **inherited, not verified** — that note is M71's.
+
+**Backlog status.** The re-verify backlog now holds **seven** notes, all M65's:
+`bhandary2006`, `bobak2018`, `mehta2018`, `saha2005`, `saha2012`, `xiao2009`,
+`xiao2013` — M71's scope. `ORACLES.md` and `BIBLIOGRAPHY.md` are tracked
+separately under M72, on a bar split by entry kind.
