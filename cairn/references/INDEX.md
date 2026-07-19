@@ -129,9 +129,12 @@ and milestones; never restate a value here.
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
-committed record of what is on the shelf and which milestone ingests it. 30 PDFs,
-each verified against its own
-title page (M63/T1). Citekey convention: same-author-same-year takes a letter
+committed record of what is on the shelf and which milestone ingests it. **31 PDFs
+as of 2026-07-19**: the 30 verified against their own title pages at M63/T1, plus
+`vanderark2023`, added by the maintainer 2026-07-19 and verified against its title
+page when ingested. One of the 31 — `jorgensen2019.pdf` — is a superseded preprint
+of `vanderark2023` that no committed page depends on; it may be deleted from the
+shelf at any time without affecting this inventory's other counts. Citekey convention: same-author-same-year takes a letter
 suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
 **Ingested (source/synthesis note exists) — 26:** `bartko1966`, `bartko1976`,
@@ -140,8 +143,9 @@ suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5
 `tenhove2024`, `tenhove2025a`, `tenhove2025b`, `trevethan2017`, `ukoumunne2003`,
 `vanderark2023`, `xiao2009`, `xiao2013`. The ten load-bearing primary sources were ingested by M64;
 `ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
-sources by M65; the seven foundational/interpretation sources by M66. The four
-remaining shelf PDFs are the M67 equality-testing cluster.
+sources by M65; the seven foundational/interpretation sources by M66. Of the five
+shelf PDFs with no note, four are the M67 equality-testing cluster and the fifth is
+the superseded `jorgensen2019` preprint.
 
 Four shelf PDFs are **not** the issue version of record — each note carries a
 pagination callout: `tenhove2022` and `tenhove2024` are advance-online copies

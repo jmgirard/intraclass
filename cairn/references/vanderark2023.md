@@ -54,7 +54,7 @@ cannot absorb quietly:
   (Figs. 1–2), and an Appendix containing the R data-generation functions and the
   Stan model. Anchors below are to the published chapter throughout.
 
-The preprint PDF remains on the gitignored shelf; nothing cites it.
+The preprint PDF was still on the gitignored shelf when this note was written — observed 2026-07-19 — but nothing depends on it: no committed page reads that path, and this note's account of the manuscript rests on the reading done at M66, not on the file's continued presence. It can be deleted freely.
 
 **Role.** Design-planning evidence, not an estimator source. **No oracle value
 traces here**, and no test, vignette, or `ORACLES.md` entry reads it — observed
