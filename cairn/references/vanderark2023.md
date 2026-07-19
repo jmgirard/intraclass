@@ -7,14 +7,31 @@ Extraction: verified 2026-07-19 against the source (all 15 PDF pages read to the
 
 **Citation.** van der Ark, L. A., Jorgensen, T. D., & ten Hove, D. (2023). "Factors
 Affecting Efficiency of Interrater Reliability Estimates from Planned Missing Data
-Designs on a Fixed Budget." In M. Wiberg et al. (Eds.), *Quantitative Psychology*
-(Springer Proceedings in Mathematics & Statistics, Vol. 422, pp. 1–15). Springer.
+Designs on a Fixed Budget." In M. Wiberg, D. Molenaar, J. González, J.-S. Kim, &
+H. Hwang (Eds.), *Quantitative Psychology. IMPS 2022* (Springer Proceedings in
+Mathematics & Statistics, Vol. 422, pp. 1–15). Springer, Cham.
 DOI 10.1007/978-3-031-27781-8_1. "© The Author(s), under exclusive license to
 Springer Nature Switzerland AG 2023." Affiliations: Universiteit van Amsterdam
 (van der Ark, Jorgensen); Universiteit van Amsterdam and Vrije Universiteit
-Amsterdam (ten Hove). Supplementary materials: `https://osf.io/g5hvs/`. The
-chapter does **not** name the meeting the volume came from, so none is asserted
-here.
+Amsterdam (ten Hove). Supplementary materials: `https://osf.io/g5hvs/`.
+
+**Sourcing of the volume metadata.** The chapter PDF itself prints only
+"M. Wiberg et al. (eds.), Quantitative Psychology, Springer Proceedings in
+Mathematics & Statistics 422" and the DOI (p. 1) — it names **no** meeting, no
+full editor list, and no publisher city. The meeting (**IMPS 2022**), the five
+editors, and "Springer, Cham" come from the publisher's own citation for this
+chapter, supplied by the maintainer 2026-07-19 — recorded as maintainer-supplied
+publisher metadata rather than as something read off the shelf copy.
+
+**⚠ Do not copy the publisher's rendering of the two Dutch surnames.** Springer's
+citation generator emits "Ark, L.A.v.d." and "Hove, D.t.", splitting the
+tussenvoegsels *van der* and *ten* off the surnames. The chapter's own byline
+(p. 1) prints "L. Andries van der Ark" and "Debby ten Hove", and the running
+header prints "L. A. van der Ark et al." The correct alphabetization is under
+**V** (van der Ark) and **t/H** (ten Hove) as this repo files them — the citekey
+`vanderark2023` follows the byline, not the generator. Flagged because the
+generator's form is what a reader copying from the publisher page will land on,
+and it would wrongly suggest a citekey of `ark2023`.
 
 ## Relationship to the preprint (why the citekey changed)
 
@@ -230,9 +247,10 @@ observed 2026-07-19.
 
 ## Open questions
 
-- The volume does not name its meeting anywhere in this chapter, so the
-  conference is not recorded here — only the book, series, volume, and DOI as
-  printed — observed 2026-07-19.
+- *(Resolved 2026-07-19.)* The chapter does not name its meeting, so this note
+  first recorded none. The maintainer supplied the publisher's citation, which
+  gives **IMPS 2022**, the five editors, and Springer Cham; these are now in the
+  Citation block, marked as publisher metadata rather than read off the shelf copy.
 - Three different year conventions now coexist for the two ten Hove papers this
   chapter cites (its 2021/2023 vs. the repo's `tenhove2022`/`tenhove2024` vs. the
   preprint's 2021/2022). All four labels denote two works. Recorded so the drift

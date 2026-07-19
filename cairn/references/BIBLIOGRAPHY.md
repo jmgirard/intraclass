@@ -149,9 +149,14 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   [`ukoumunne2003.md`](ukoumunne2003.md).)
 - van der Ark, L. A., Jorgensen, T. D., & ten Hove, D. (2023). Factors affecting
   efficiency of interrater reliability estimates from planned missing data designs
-  on a fixed budget. In M. Wiberg et al. (Eds.), *Quantitative Psychology*
-  (Springer Proceedings in Mathematics & Statistics, Vol. 422, pp. 1–15). Springer.
-  doi:10.1007/978-3-031-27781-8_1. OSF: `g5hvs`. (Planned-missing design efficiency
+  on a fixed budget. In M. Wiberg, D. Molenaar, J. González, J.-S. Kim, & H. Hwang
+  (Eds.), *Quantitative Psychology. IMPS 2022* (Springer Proceedings in Mathematics
+  & Statistics, Vol. 422, pp. 1–15). Springer, Cham.
+  doi:10.1007/978-3-031-27781-8_1. OSF: `g5hvs`. (Meeting, editors, and city are
+  publisher metadata, not printed on the shelf copy. Springer's own citation
+  generator mis-splits the Dutch tussenvoegsels as "Ark, L.A.v.d." and "Hove, D.t.";
+  the chapter byline reads "L. Andries van der Ark" and "Debby ten Hove", which is
+  what is used here.) (Planned-missing design efficiency
   for IRR — per-cell coverage on `ICC(A,1)` under 83–99 % missingness. Supersedes
   the `jorgensen2019` preprint entry, whose byline led with a different first
   author; **not** the 2021 Jorgensen SEM paper above — see
