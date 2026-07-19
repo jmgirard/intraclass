@@ -1,8 +1,8 @@
 # Bibliography
 
-**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose bibliography body moved byte-identically.
+**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries) and M65 (→ 27); M68 added only this block.
 Pagination: —.
-Extraction: derived — citations carried over unchanged at the split and not re-checked against the sources since — observed 2026-07-18.
+Extraction: unverified — the 16 split entries moved as text and were never read against their sources; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since — observed 2026-07-18.
 
 The repo's bibliography. Oracle provenance lives in
 [`ORACLES.md`](ORACLES.md); per-source extractions with page/table anchors live

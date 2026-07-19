@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M68: References provenance backfill + shelf rename to `sources/`
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — the governing principles are PRINCIPLES.md #4 (no fabricated reference values) and #12 (seeded and sourced), the other home under D-001 -->
@@ -123,6 +123,7 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: PR #72 opened; CI at checkpoint time — format-check, lint, pkgdown all success; the six platform/coverage jobs still in_progress after a ~9 min blocking wait, so nothing is left watching (re-derive with `gh api repos/jmgirard/intraclass/commits/<sha>/check-runs`, per the stateless-resume rule).
 - 2026-07-18: REVIEW SEND-BACK (1st) — two criteria fail as written, no charitable reading applied. AC4 says every Extraction status "reads unverified-first-pass"; 5 of 24 pages correctly read `derived —`/`first-hand record —` (no shelf source to re-read, per the synthesis template) — its substantive clause (no page claims an unperformed verification) DOES hold, 0/24. AC2 requires the work log to "show the derived page→(date, milestone) table"; the command and full mapping are recorded but as a one-line grouped entry, because work-log entries must be one physical line — a one-line entry cannot literally be a table. Both are plan-time drafting errors (criteria assuming a format the rules forbid, and assuming every page is shelf-ingested). Evidence for AC1/AC3/AC5/AC6 and cairn_validate exit 0 all clean. Back to in-progress for a gated amendment.
 - 2026-07-18: gated amendment (user approved at the send-back chip) — AC2 now asks for the derivation command plus the complete page→(date, milestone) mapping grouped by milestone and readable as one-line entries (was: a "table", which the one-line work-log rule forbids); AC4 now leads with the substantive protection (no unperformed verification claimed) and states both legitimate status forms — unverified-first-pass for the 19 shelf notes, `derived —`/`first-hand record —` for the 5 with no shelf source. No deliverable changed; no file on the branch differs. Status → review for a fresh pass.
+- 2026-07-18: REVIEW SEND-BACK (2nd) — the three actioned review fixes (F1 BIBLIOGRAPHY, F2 sem-multilevel-pilot, F3 ORACLES) changed what is true about two pages, so AC4's enumeration clause is false again: ORACLES and BIBLIOGRAPHY now correctly read `unverified —`, not `derived —`. Substantive clauses still hold (0/24 claim a verification; 24/24 one-line dated). Same drafting error as round 1 — the criterion specifies the SURFACE FORM a status must take instead of the PROPERTY it must have, so it breaks every time a fact is corrected. Amending to specify honesty + format and to stop pre-assigning forms.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

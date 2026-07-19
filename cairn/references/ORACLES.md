@@ -1,8 +1,8 @@
 # Oracle registry
 
-**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically.
+**Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically — the split **read nothing**, it relocated text (D-007).
 Pagination: —.
-Extraction: derived — each entry's values trace to its own cited source or committed seeded script, none re-read since 2026-07-18 — observed 2026-07-18.
+Extraction: unverified — each entry's values trace to its own cited source or committed seeded script, recorded by the milestone that added it (entries span M1 through M39); the 2026-07-18 split re-read none of them, and no page-level re-check has ever been performed — observed 2026-07-18.
 
 The registry of oracle values used in the test suite. **Every oracle value in
 the test suite must trace back to an entry here** with provenance — a citation
