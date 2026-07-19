@@ -3,14 +3,16 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/young1998.pdf` (gitignored).
 Pagination: printed journal pages 1363–1373. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: unverified — first pass, values not yet re-read against the source. Two passages were spot-corrected across the M67 review send-back and its second review (p. 1363's journal heading and quoted passages; p. 1367's Eq. (2.6) quotation, restored to include `−2 log Λ`); the page as a whole remains unchecked — observed 2026-07-19.
+Extraction: verified 2026-07-19 against the source (all 11 PDF pages read to the final page — the references end p. 1373 and the publication dates sit *below* them; the French Résumé is on p. 1372, before the references, no appendix); every equation anchor and every quoted string re-checked, the §3 simulation settings confirmed value by value, the Figs. 1–4 shapes re-read off the page images, and the real-data estimates confirmed digit-for-digit. The M67 review's restoration of `−2 log Λ` to the Eq. (2.6) quotation is confirmed correct against p. 1367 — observed 2026-07-19.
 
 **Citation.** Young DJ, Bhandary M (1998). "Test for Equality of Intraclass
 Correlation Coefficients Under Unequal Family Sizes." *Biometrics*
 54:1363–1373, December 1998. The article heads "BIOMETRICS 54, 1363-1373" —
 neither an issue number nor a DOI is printed, so neither is given here.
-Received April 1996; revised September 1997;
-accepted November 1997. Young: North Dakota State Department of Health and
+Received April 1996; revised September 1997; accepted November 1997 — these dates
+are printed on the **last page (p. 1373), below the references**, not on the
+title page, which carries no dates at all.
+Young: North Dakota State Department of Health and
 Consolidated Labs, Bismarck; Bhandary (corresponding): Department of Statistics,
 North Dakota State University, Fargo. Carries a French *Résumé* (p. 1372) per
 *Biometrics* convention of the period.
@@ -47,16 +49,16 @@ artificial" (p. 1363).
 
 The machinery is a **Helmert orthogonal transformation** `U_i = Q x_i` (Eq. 2.2,
 p. 1364; the `Q_{p_i}` matrix is printed in full, with
-`c_{p_i} = Σ_{r=1}^{p_i−1} r²` on p. 1365), which is "independent of `ρ`", plus
-**Srivastava's (1984) estimator** `ρ̂ = 1 − γ̂²/σ̂²` (Eq. 2.3, p. 1365).
+`c_{p_i} = Σ_{r=1}^{p_i−1} r²` on p. 1365), of which the paper says the
+transformation from `x` to `u` "is independent of ρ", plus **Srivastava's (1984)
+estimator** `ρ̂ = 1 − γ̂²/σ̂²` (Eq. 2.3, p. 1365).
 
 ## The three tests
 
 - **LRT**, Eq. (2.6), pp. 1366–1367 — asymptotically `χ²` with 1 df. It is an
   *approximate* LRT: Srivastava's estimators "are not MLEs but are CAN", so
-  (2.6) "is an approximation to the true likelihood ratio test statistic
-  `−2 log Λ`. But, in the asymptotic sense, it converges to the same
-  distribution" (p. 1367).
+  (2.6) "is an approximation to the true likelihood ratio test statistic −2 log Λ.
+  But, in the asymptotic sense, it converges to the same distribution" (p. 1367).
 - **Large-sample `Z`-test**, Eq. (2.8), p. 1367 —
   `Z = (ρ̂₁ − ρ̂₂)/{S√(1/k₁ + 1/k₂)}`, with `S²` the pooled variance estimator
   under `H₀` built from the Srivastava & Katapa (1986) asymptotic variance
@@ -70,14 +72,28 @@ p. 1364; the `Q_{p_i}` matrix is printed in full, with
 FORTRAN + IMSL; 30 family vectors per population; family sizes from a truncated
 negative binomial with **mean 2.86 and success probability 0.483**, held to
 2–15 siblings, citing Rosner et al. (1977) and Srivastava & Keen (1988);
-`ρ₁, ρ₂` over all combinations of 0.1–0.9 in steps of 0.1; **10,000
-replications**; `α ∈ {0.01, 0.05, 0.10}`. Table 1 (pp. 1368–1369) gives rejection
-proportions in nine columns, three per test at the three `α` levels: `NORM01`/
-`NORM05`/`NORM10` are the `Z`-test, `CHI01`/`CHI05`/`CHI10` the LRT, and
+`ρ₁, ρ₂` over all combinations of 0.1–0.9 in steps of 0.1 — the paper's words are
+that they "took on all combinations possible over the range of values from 0.1 to
+0.9 at increments of 0.1" (p. 1370); **10,000 replications** per combination
+(p. 1371); `α ∈ {0.01, 0.05, 0.10}`.
+
+**What was run and what is printed are not the same.** All combinations were
+simulated, but Table 1 (pp. 1368–1369) *reports* a selected subset — for each
+`ρ₁` only four or five `ρ₂` values, chosen to straddle `ρ₂ = ρ₁`. So the table is
+a digest of the run, and an absent `(ρ₁, ρ₂)` cell means unprinted, not
+unsimulated. Table 1 gives rejection proportions in nine columns, three per test
+at the three `α` levels: `NORM01`/`NORM05`/`NORM10` are the `Z`-test,
+`CHI01`/`CHI05`/`CHI10` the LRT (the legend calls it "the χ²-test statistic",
+which is the same object — the LRT is asymptotically `χ²₁`), and
 `NORM*01`/`NORM*05`/`NORM*10` the `Z*`-test (legend, p. 1369).
 
-The conclusion is unambiguous and repeated three times (Summary p. 1363, §3
-p. 1371, §4 p. 1372): the **LRT is consistently more powerful** than either
+**Label drift between table and figures.** Figures 1–4 label the `Z*`-test
+**`STAR05`**, not `NORM*05` as Table 1 does; `CHI05` and `NORM05` keep their
+table names. Same three tests, two naming schemes in one paper.
+
+The conclusion is unambiguous and repeated at least four times (Summary p. 1363,
+§1 p. 1364, §3 p. 1371, and twice on p. 1372 — closing §3 and again in §4):
+the **LRT is consistently more powerful** than either
 asymptotic test across the `(ρ₁, ρ₂)` grid, and "we strongly recommend the
 likelihood ratio test for use in practice", its computational complexity being
 "easily overcome" with modern computing. Figures 1–4 (pp. 1370–1371) plot the
@@ -97,11 +113,18 @@ evidence rather than an oracle source.
 **One detail is worth keeping.** All three point estimates are **negative**
 (`ρ̂₁ = −0.2917`, `ρ̂₂ = −0.2504`, pooled `−0.2682`) — admissible under the
 compound-symmetric parameterization (see the `ρ` range above), impossible for a
-variance-components ICC constrained to `[0, 1]`. `bhandary2006` applies the
-**same** Srivastava (1984) estimator to this same 14-family data set and reports
-*positive* estimates (0.8804, 0.9567, 0.8508). The difference is the partition,
-not the estimator: three samples of 5/5/4 families with daughters' and sons'
-values put together, rather than two random samples of seven.
+variance-components ICC constrained to `[0, 1]`. The three values and the
+two-samples-of-seven partition (Table 2, p. 1372: sample A = families 1, 3, 4, 6,
+8, 11, 12; sample B = 2, 5, 7, 9, 10, 13, 14) are confirmed against this source.
+
+`bhandary2006` is said to apply the **same** Srivastava (1984) estimator to this
+same 14-family data set and report *positive* estimates (0.8804, 0.9567, 0.8508),
+the difference being the partition — three samples of 5/5/4 families with
+daughters' and sons' values put together — rather than the estimator.
+**That half is asserted from the `bhandary2006` note, not from this source, and
+`bhandary2006` is still at unverified extraction status (M71).** The young1998
+side of the comparison is verified; the bhandary2006 side inherits whatever M71
+finds — observed 2026-07-19.
 
 ## Boundary (IP2)
 
@@ -136,7 +159,11 @@ facet at all, which puts it doubly outside the interrater contract.
 - **No `ρ = 0` cell.** The grid runs 0.1–0.9, so the boundary is unexercised —
   despite the estimator explicitly admitting negative `ρ`, and despite the real
   data example landing at `ρ̂ ≈ −0.27`, well outside the simulated range.
-- **The `k = 30` families per population is the only sample size tried.** No
-  small-`k` cell, so the paper's LRT recommendation is unsupported at the family
-  counts where `bhandary2006` later found asymptotic LRT size inflation as high
-  as 0.4089 at `K = 5`.
+- **The `k = 30` families per population is the only sample size tried**
+  ("Thirty vectors of family data were created for each of the two populations",
+  p. 1370; confirmed as the sole sample size across all 11 pages). No small-`k`
+  cell, so the paper's LRT recommendation is unsupported at small family counts —
+  the point at which `bhandary2006` is reported to have found asymptotic LRT size
+  inflation as high as 0.4089 at `K = 5`. That figure comes from the
+  `bhandary2006` note, **still unverified (M71)**; the "only k = 30 was tried"
+  half is verified here and stands on its own.

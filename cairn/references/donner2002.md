@@ -3,7 +3,7 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/donner2002.pdf` (gitignored).
 Pagination: printed journal pages 367–379. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: unverified — first pass, values not yet re-read against the source. Two points were spot-checked across the M67 review send-back and its second review (p. 367 prints no DOI; p. 370's "no such expressions exist" quotation, corrected); the page as a whole remains unchecked — observed 2026-07-19.
+Extraction: verified 2026-07-19 against the source (all 13 PDF pages read to the final page — the References end on p. 379 and there is no appendix); every equation, page anchor and quoted passage re-checked, the Tables 1–3 parameter grids re-read off the page images, and the "nothing in the package traces to this note" claim re-grepped the same day and still returns no hits. One correction: the simulated-`ρ` enumeration was right for Tables 1–2 and wrong for Table 3 — observed 2026-07-19.
 
 **Citation.** Donner A, Zou G (2002). "Testing the equality of dependent
 intraclass correlation coefficients." *The Statistician* 51(Part 3):367–379.
@@ -55,19 +55,24 @@ balanced case this paper is written to escape.
   (Eq. 5, p. 370) and the `H₀` covariance (Eq. 7, p. 370) that accounts for the
   dependence.
 - **LR test** — §3.3, p. 370; numerical minimization only. The paper has explicit
-  ML expressions for `ρ₁, ρ₂, ρ₁₂` but "**no such** expressions exist for
-  `μ̂₁, μ̂₂, σ̂²₁` and `σ̂²₂`" — the negative is about *closed form*, not
-  existence. Approximately `χ²` with 1 df.
+  ML expressions for `ρ₁, ρ₂, ρ₁₂` but, as p. 370 puts it, "no such expressions
+  exist for μ̂1, μ̂2, σ̂²1 and σ̂²2" — the negative is about *closed form*, not
+  existence. Computed by setting `ρ₁ = ρ₂` in `−2 ln(L)`, minimizing over the
+  remaining five parameters, and subtracting from the seven-parameter minimum;
+  approximately `χ²` with 1 df.
 - **`T_AF`** — Alsawalmeh & Feldt (1994), an `F`-moment approximation extending
   the Feldt (1980)/Kraemer (1981) Cronbach-α comparison (§3.4, p. 371); accurate
-  only for `N ≥ 100` and `k_l ≥ 5`.
+  only for `N ≥ 100` and `k_l ≥ 5`. *Source typo:* §3.4's opening sentence prints
+  the name as "Alsawalmeh and Feld (1994)", missing the final `t`; the same page's
+  closing sentence and the reference list both give "Feldt" correctly.
 - **`T*_ZM`** — the naive comparator: `T_ZM` with `ρ̂₁₂` set to 0, i.e. ignoring
   the dependence.
 
-**Why the modified transformation.** Fisher's `Z` "is effective only for `k = 2`;
-for `k > 2`, normality and variance stabilization cannot be achieved
-simultaneously" (§7, p. 378) — `Z_M` is what fixes that, and the approximation
-improves as `k` grows.
+**Why the modified transformation.** Fisher's `Z`, per §7 (p. 378), "is effective
+only for k = 2; for k > 2, normality and variance stabilization cannot be
+achieved simultaneously" — `Z_M` is what fixes that. Konishi (1985) is cited as
+showing by numerical integration that `Z_M` gives probability values closer to
+the exact distribution than `Z` does, and the approximation improves as `k` grows.
 
 ## Simulation findings (§4–5, pp. 372, 373–375)
 
@@ -88,14 +93,30 @@ improves as `k` grows.
 
 ## Worked examples (§6, pp. 372–378)
 
-Two, both with raw data committed to the paper (Tables 4–5, pp. 376–377) and
-neither reproduced here — this note is boundary evidence, not an oracle source.
-The first (CT scans, `N = 50`) is a straightforward rejection the paper itself
-calls illustrative. **The second is the one that matters for the fence:** knee
+Two, both with raw data committed to the paper (Tables 4–5, pp. 376–377). Neither
+is *reproduced* here — this note is boundary evidence, not an oracle source — but
+the printed results are recorded so the note stands on its own.
+
+The first (CT scans of 50 psychiatric patients, logged ventricle–brain ratios;
+Turner et al. 1986 via Dunn 1989) is a straightforward rejection the paper itself
+says "is presented mainly for illustration" (p. 376): `r₁A = 0.994` (pixel count)
+against `r₂A = 0.731` (planimeter), `ρ̂₁₂ = 0.652`, LR `χ²₁ = 104.51`
+(`P < 0.001`), with `T_Z = 11.12`, `T_ZM = 11.35` and `T_AF = 0.022` (two-sided;
+33 and 53 df) all significant at `P < 0.001` (p. 374). Dunn is cited as cautioning
+that the pixel method is not simply the more "reliable" one — the planimeter
+readings look less prone to gross error, and the gap may be better handled by an
+explicit measurement model (p. 376).
+
+**The second is the one that matters for the fence:** knee
 joint angles, `N = 29`, `k₁ = k₂ = 3` (Eliasziw et al. 1994), where the two ICCs
-are "clearly homogeneous", **no test is run**, and the paper instead *pools*
-them into an approximate 95 % interval for the common `ρ` of **(0.973, 0.991)**
-(p. 378). See the Boundary section for why that interval is still out of scope.
+are "clearly homogeneous" (`r₁A = 0.987`, `r₂A = 0.981`, `ρ̂₁₂ = 0.961`, p. 376),
+**no test is run**, and the paper instead *pools* them into an approximate 95 %
+interval for the common `ρ` of **(0.973, 0.991)** — from `ρ̂_ZMP = 0.985` and
+`Z̄_M = 3.020` (p. 378). The classical `Z` transformation gives (0.972, 0.991) on
+the same data, which the paper notes "is only slightly wider": the two
+transformations essentially agree here, so this example does not discriminate
+between them. See the Boundary section for why that interval is still out of
+scope.
 
 ## Boundary (IP2)
 
@@ -141,9 +162,22 @@ single-design ICC this package's estimand specs define.
 - **Subjects must be rated by both panels.** The LR test is said to extend to
   the case where not all subjects are exposed to both panels (p. 379); the
   transformation-based tests are not.
-- **No `ρ = 0` or near-zero cell.** The simulated `ρ` values are 0.4, 0.6, 0.8,
-  0.95 (Tables 1–3) — **the highest floor of the five cluster papers**, the other
-  four all reaching down to 0.1 (`konishi1989`, `young1998`, `naik2007`,
+- **No `ρ = 0` or near-zero cell.** The simulated `ρ` **floor is 0.4** across all
+  three tables — **the highest floor of the five cluster papers**, the other four
+  all reaching down to 0.1 (`konishi1989`, `young1998`, `naik2007`,
   `bhandary2006`; checked against all five notes, observed 2026-07-19). None of
   them reaches 0, so the near-zero corner where this package's own known failure
   modes live is untested across the whole cluster.
+
+  The exact grid differs by table, because the significance and power tables ask
+  different questions — a single flat list of `ρ` values does not describe both,
+  and an earlier version of this note gave one ("0.4, 0.6, 0.8, 0.95 (Tables
+  1–3)") that is right for Tables 1–2 and wrong for Table 3:
+  - **Tables 1–2** (significance, `ρ₁ = ρ₂ = ρ` under `H₀`): `ρ ∈ {0.95, 0.8,
+    0.6, 0.4}`, each with three `ρ₁₂` values that shrink as `ρ` falls (0.1/0.5/0.9
+    at `ρ = 0.95` down to 0.05/0.2/0.3 at `ρ = 0.4`) — `ρ₁₂` is bounded by the
+    admissibility inequality above.
+  - **Table 3** (power, necessarily `ρ₁ ≠ ρ₂`): three *pairs* —
+    `(ρ₁, ρ₂) ∈ {(0.4, 0.6), (0.4, 0.7), (0.6, 0.8)}`. So **`ρ = 0.7` does occur
+    here and `ρ = 0.95` does not**, which is the opposite of what the flat list
+    implied. The 0.4 floor is unchanged.
