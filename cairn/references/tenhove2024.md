@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2024.pdf` (gitignored).
 Pagination: advance-online (AOP) PDF pages 1–13 — NOT the journal pages of the version of record, 29(5):967–979.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified 2026-07-18 against the source (M69) — all 13 PDF pages re-read; Eqs. 16–20, Table 1, Table 2 and all ten Figure 2 terminal cells re-read at 300–900 DPI, both M64 open questions about the source's internal consistency resolved, four prose claims corrected — observed 2026-07-18.
 
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2024). "Updated Guidelines
 on Selecting an Intraclass Correlation Coefficient for Interrater Reliability,
@@ -24,14 +24,23 @@ used by M3/M9.
 > 2. **All page anchors below are AOP PDF pages 1–13**, not journal pages
 >    967–979. The title printed on the title page is the long form quoted above;
 >    BIBLIOGRAPHY.md carries the short form.
+> 3. **Citation trap in this paper's own reference list (added M69).** It cites
+>    the multilevel paper — this repo's `tenhove2022` — as **"Ten Hove et al.
+>    (2021)"**, because it was written against that paper's advance-online
+>    posting (its reference entry reads "Psychological Methods. Advance online
+>    publication"). So "Ten Hove et al. (2021)" on pp. 10 and 12 here means
+>    `tenhove2022.md`, not a separate 2021 work. Its "Ten Hove et al. (2020)" is
+>    `tenhove2020.md` and its "Ten Hove et al. (2018)" is `tenhove2018`.
 
 ## Why the article exists — three stated limitations (p. 2)
 
 Current guidelines (Koo & Li 2016; McGraw & Wong 1996; Shrout & Fleiss 1979) are
 faulted on three counts (p. 2): (i) they cover only one-way and **complete**
 two-way designs, while large observational studies routinely use incomplete
-designs; (ii) they give "no clear perspective on the error variance in an ICC"
-(p. 2), clouding the agreement/consistency choice; (iii) they leave the
+designs; (ii) they "do not provide a clear perspective on the error variance in
+an ICC for IRR" (p. 2) — the Abstract puts it as "no coherent perspective"
+(p. 1); M64 quoted a blend of the two — clouding the agreement/consistency
+choice; (iii) they leave the
 fixed-vs-random rater distinction "often misunderstood" (Abstract, p. 1).
 Contributions are listed on p. 3 (five items), including the flowchart and three
 empirical examples.
@@ -113,7 +122,9 @@ Steps are stated in prose on pp. 9–10 and drawn as a flowchart on p. 8:
 
 - **Step 1 — crossed or nested?** (p. 9) Crossed if each rater assessed multiple
   subjects and each subject was assessed by ≥ 2 raters; nested if each rater
-  assesses a single subject. Under nesting, `σ²_r` and `σ²_sr` are confounded, so
+  assesses a single subject **and each subject is assessed by ≥ 2 raters** (M64
+  dropped the second half of the nested definition — corrected M69; the ≥ 2
+  requirement holds on both branches). Under nesting, `σ²_r` and `σ²_sr` are confounded, so
   agreement and consistency "cannot be distinguished either" (p. 9).
 - **Step 2 — absolute or relative inferences?** (p. 9) Absolute if scores are
   compared to a fixed criterion (cut-score, pass/fail); relative if the subject's
@@ -172,11 +183,23 @@ ICCs" (p. 10, citing Briesch et al. 2014; ten Hove et al. 2020).
   (i.e., confidence intervals or standard errors)" (p. 12, citing AERA/APA/NCME
   2018) — the same posture as the package's never-a-point-estimate-alone rule.
 - Describe *which* ICC was used so reviewers can verify appropriateness (p. 12).
-- On estimation (p. 11): MLE via `lme4` or MCMC via `brms`; existing packages
-  `irr`, `gtheory`, GENOVA are named as not covering incomplete/unbalanced
-  two-way designs. Future work should find "the most appropriate estimation
+- On estimation (p. 11): the OSF code estimates ICCs by MLE via `lme4` or MCMC
+  via `brms`. The paper's survey of existing tools names `irr` and **the SPSS
+  `RELIABILITY` command** for complete one- and two-way designs, and `gtheory`
+  and the Windows program GENOVA for variance components and generalizability
+  coefficients; its claim about the gap is its own flat sentence — "Software for
+  estimating IRR in unbalanced or incomplete designs is not yet available"
+  (p. 11), stated as of 2022. (M64 omitted SPSS and attributed the gap to the
+  named packages individually — corrected M69.)
+- Future work should find "the most appropriate estimation
   technique" (p. 12), noting MLE needs Monte-Carlo CIs "specifically useful for
   coefficients such as ICCs" whose sampling distributions are non-normal (p. 12).
+- **The MLE-vs-MCMC agreement claim (p. 12).** "The MCMC and MLE estimation
+  methods we provide on the OSF were shown to yield similar point estimates (Ten
+  Hove et al., 2021)" — that citation is this repo's `tenhove2022` (see the
+  citation trap below), whose own p. 14 makes the same claim about its
+  illustrative example. Both are qualitative; neither prints paired numbers, so
+  neither is an oracle for the package's REML route. Added M69.
 
 ## Traces to
 
@@ -204,24 +227,39 @@ ICCs" (p. 10, citing Briesch et al. 2014; ten Hove et al. 2020).
 
 ## Open questions
 
-- **Figure 2 vs Table 2 — an apparent internal inconsistency in the source.** The
-  crossed · absolute · average · **unbalanced** terminal box on p. 8 prints the
-  error term as `σ²_r:s / k̂` (verified at 300 dpi), i.e. the *nested* component,
-  while Table 2 (p. 9) gives the two-way incomplete absolute-average error as
-  a `σ²_r`-plus-`σ²_sr`-over-`k̂` form and Eq. 18 (p. 6) gives
-  `σ²_r/k̂ + σ²_sr/k̂`; neither contains `σ²_r:s`. Recorded as read;
-  **not reconciled here** and no oracle value is affected — the package follows
-  Eq. 18 / Table 2. Worth an escalation at review if any doc quotes Figure 2's
-  box.
-- **Table 2's `k̂` cells are typeset ambiguously.** In the shelf PDF the
-  division bar before `k̂` does not render in several Table 2 cells (p. 9): the
-  two-way incomplete absolute-average cell prints as `σ²_r + σ²_sr k̂` and the
-  one-way unbalanced cells as `σ²_r:s k̂`, while the relative-average cell
-  `qσ²_r + σ²_sr/k̂` in the same table shows its slash normally. Read as a
-  rendering artifact for `/k̂`; **Eq. 18 (p. 6) `σ̂²_ε.abs = σ²_r/k̂ + σ²_sr/k̂`
-  is taken as the authoritative form** in the body of this note. Even so, Eq. 18
-  divides `σ²_r` by `k̂` and Table 2's cell appears to leave it undivided — a
-  residual discrepancy recorded, not resolved.
+- **RESOLVED (M69) — Figure 2's `ICC(A,k̂)` box is a source erratum.** M64
+  flagged the crossed · absolute · average · **unbalanced** terminal box (p. 8)
+  as printing `σ²_r:s / k̂`, the *nested* component, and asked for a second
+  reader. Re-read at **900 DPI**: the box does read `σ²_r:s / k̂`, and it is
+  **glyph-identical to the `ICC(k̂)` box** at the far right of the same row (the
+  nested · average · unbalanced terminal). The `ICC(1)` and `ICC(k)` boxes
+  beside it read `σ²_r:s` and `σ²_r:s/k` correctly, so the nested branch is
+  fine. Diagnosis: the nested branch's terminal box was duplicated into the
+  crossed · absolute branch. The correct content is the two-way form given three
+  times elsewhere in the paper (Eq. 18 p. 6, the p. 7 prose, Table 2 p. 9), none
+  of which contains `σ²_r:s`. **No oracle value is affected** — no repo doc
+  quotes this box. Read Figure 2's structure, not this cell's content.
+- **RESOLVED (M69) — Table 2's absolute-average-incomplete cell is a source
+  typo; Eq. 18 is authoritative.** Two separate issues were tangled in M64's
+  note, and they resolve differently.
+  1. *The missing division bar is a rendering artifact* — **confirmed**. In
+     Table 2 (p. 9) the slash before `k̂` fails to render in the
+     absolute-average-incomplete cell and in the one-way unbalanced average
+     cells, while the relative-average-incomplete cell `qσ²_r + σ²_sr/k̂` in the
+     **same table** renders its slash normally. The cells that render prove the
+     intended form for the cells that don't.
+  2. *The undivided `σ²_r` is real, and it is the source that is wrong* —
+     **newly resolved**. Even granting the artifact, Table 2's cell reads
+     `σ²_r + σ²_sr/k̂`, leaving `σ²_r` undivided, where Eq. 18 gives
+     `σ²_r/k̂ + σ²_sr/k̂`. Eq. 18 wins on three independent grounds: it is
+     stated twice (Eq. 18, p. 6; and again in prose on p. 7 —
+     "the absolute-error variance was defined as `σ²_ε.abs = σ²_r/k̂ + σ²_sr/k̂`",
+     both terms divided, read at 300 DPI); and only the Eq. 18 form satisfies
+     the reduction the paper explicitly claims on p. 6 — that Eqs. 18–19 reduce
+     to Eqs. 14–15 when `q = 0` and `k̂ = k`, since
+     `σ²_r + σ²_sr/k ≠ (σ²_r + σ²_sr)/k`. **The package follows Eq. 18 and is
+     therefore correct**; M64's phrase "the package follows Eq. 18 / Table 2"
+     was an impossible conjunction for this cell — corrected M69.
 - **Scope: the package does not implement the `q` branch.** No `ICC(Q,·)`,
   and no nonoverlap term `q` (Eq. 17, p. 6), appears anywhere in `R/` or the
   estimand specs; the package computes incomplete *consistency* as `σ²_res/k_eff`
@@ -244,5 +282,8 @@ ICCs" (p. 10, citing Briesch et al. 2014; ten Hove et al. 2020).
   this work (`M1`–`M3`, `M9`, `R/abort.R`) cite the paper without page numbers,
   so no conflict exists today; if page cites are added, state the basis.
 - Figure 2 is a vector figure whose text `pdftotext` does not extract; all its
-  content above was read from a 300 dpi render. Small sub/superscripts were
-  legible, but a second reader confirming the `σ²_r:s/k̂` box would be prudent.
+  content above was read from a 300 dpi render. M64 asked for a second reader on
+  the `σ²_r:s/k̂` box — **done at M69** (900 DPI; see the resolved entry above),
+  along with all ten terminal cells and their footnote markers, which match the
+  table in the body of this note. Eq. 20's `q = 1/k̂` was re-read at 300 DPI with
+  both hats legible.
