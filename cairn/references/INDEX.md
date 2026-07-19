@@ -57,8 +57,17 @@ and milestones; never restate a value here.
 - [saha2012.md](saha2012.md) — source note (M65): profile-likelihood CI for the
   **binary** beta-binomial ICC; PL near-nominal where four asymptotic Wald
   intervals under-cover badly. Outside the contract boundary.
+- [shieh2015.md](shieh2015.md) — source note (M66): the conventional average-score
+  index `ICC(2) = 1 − 1/F*` is negatively biased (`−2(1−ρ*)/(N−3)`) and
+  MSE-dominated by four alternatives in a `ρ̂*(c) = 1 − c/F*` family. **Critiques an
+  ANOVA plug-in the package does not use** (`unit = "average"` is REML
+  component-based); also sources "groups beat judges at fixed `N·K`".
 - [shrout1979.md](shrout1979.md) — source note (M64): the six ICC forms, the three
   cases, and the **O1** worked example (Tables 2–4); Table 4 prints two decimals.
+- [tenhove2018.md](tenhove2018.md) — source note (M66): 20 IRR coefficients on 4
+  `irr` datasets — the *Video* set spans 0.04 to 0.92, so the coefficient choice,
+  not the data, drives the reported reliability. A problem statement with no
+  selection rule; `ICC₂` here is the **two-way** consistency ICC.
 - [tenhove2020.md](tenhove2020.md) — source note (M64): the **O-Bayes** source —
   half-*t*(4,0,1) hyperpriors on random-effect **SDs**, the crossed-random DGP, and
   MAP-over-EAP with percentile BCIs at k > 2.

@@ -80,7 +80,7 @@ qualitative band entering package output → refused outright (IP3).
 - [x] T1: Notes for the historical trio — `bartko1966`, `bartko1976`,
       `trevethan2017`. These are the package's intellectual prehistory; keep
       them short and anchor the definitional claims.
-- [ ] T2: Notes for the selection-relevant pair — `tenhove2018`, `shieh2015`;
+- [x] T2: Notes for the selection-relevant pair — `tenhove2018`, `shieh2015`;
       record their bearing on `choose_icc()` and log any divergence from
       current guidance as a finding.
 - [ ] T3: Notes for the design pair — `hedges2012` (multilevel ICC variance),
@@ -110,6 +110,11 @@ qualitative band entering package output → refused outright (IP3).
 - 2026-07-19: minor amendment — INDEX.md lines are added per note-writing task, not batched into T4, so cairn_validate's references check stays green across checkpoints; T4 keeps BIBLIOGRAPHY, the shelf-inventory counts, and the final validate run.
 - 2026-07-19: finding (bartko1976 Table 3, PDF p. 763) — rows 3-4 print MSW where the tabled values require MSE; found by recomputing Table 3 from Table 2. No repo value affected; nothing cites those formulas. Recorded in the note.
 - 2026-07-19: finding (trevethan2017) — the shelf PDF is online-first with NO journal pagination, so anchors are PDF pages and BIBLIOGRAPHY's volume/issue/pages cannot be sourced from it; flagged for the maintainer, not filled from memory (#4).
+- 2026-07-19: T2 done — tenhove2018 and shieh2015 notes written, both read end-to-end and extraction-verified; AC3 bearing-on-choose_icc sections written with anchors.
+- 2026-07-19: AC3 finding (tenhove2018) — NO divergence from current guidance. Its two-way-random specification (p. 70) agrees with icc()'s raters="random" default; its consistency choice is a comparison-study specification with no stated rationale, not guidance, so nothing follows for choose_icc().
+- 2026-07-19: AC3 finding (shieh2015) — FOR A SEPARATE MILESTONE. Shieh shows the conventional average-score ICC(2)=1-1/F* is negatively biased (-2(1-rho*)/(N-3)) and MSE-dominated by four alternatives (p. 997, p. 1001). It critiques an ANOVA plug-in the package does NOT use: unit="average" applies divisor k_eff to REML components (R/estimand.R:182). No choose_icc() change follows (estimand vs estimator are orthogonal axes); whether the REML estimator shares that bias is NOT established by the paper and is the open question worth its own milestone.
+- 2026-07-19: finding (shieh2015 p. 1001) — published support for "groups beat judges at fixed N*K" in the one-way design; adjacent to the parked d_study() CI-width precision-planning candidate but NOT its oracle (Shieh's criterion is point bias/MSE, not interval width). Recorded in the note so the distinction is not rediscovered.
+- 2026-07-19: finding (tenhove2018 Table 1) — the Vision row prints Max=3 while p. 69 states a 1-4 scale; unresolved (checking needs the irr package, not a dependency). Recorded as printed, dated, no repo value affected.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
