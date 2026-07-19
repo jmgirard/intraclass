@@ -44,8 +44,8 @@ lives in `cairn/`, loaded on demand.
 - **Fail loudly on ill-posed designs (#5)** via the classed `abort_*()`
   layer.
 - **All user messaging via `cli`; all errors via
-  [`rlang::abort()`](https://rdrr.io/pkg/rlang/man/abort.html) classed
-  (#8).** No bare
+  [`rlang::abort()`](https://rlang.r-lib.org/reference/abort.html)
+  classed (#8).** No bare
   [`stop()`](https://rdrr.io/r/base/stop.html)/[`warning()`](https://rdrr.io/r/base/warning.html)/[`cat()`](https://rdrr.io/r/base/cat.html)/[`print()`](https://rdrr.io/r/base/print.html).
 - **Tracking files update in the same commit as the work** (cairn
   tracking rules).
@@ -83,7 +83,7 @@ oracle-verification workflow) is not yet re-expressed in cairn terms.
 - Light-install path: base install pulls only `glmmTMB`, `cli`, `rlang`,
   `generics`. Optional engines (Bayesian/SEM, M5) live in `Suggests`
   behind
-  [`rlang::check_installed()`](https://rdrr.io/pkg/rlang/man/is_installed.html)
+  [`rlang::check_installed()`](https://rlang.r-lib.org/reference/is_installed.html)
   — never `Imports`.
 
 ## Project tracking (cairn)

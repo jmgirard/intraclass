@@ -69,7 +69,7 @@ feasibility and accuracy, so this is the spine. - **Optional engines (in
 `Suggests`, never `Imports`):** `brms` / `rstanarm` (Bayesian) and
 `lavaan` / `blavaan` (SEM / common-factor). Keep the base install light
 and fast; gate optional-engine code behind
-[`rlang::check_installed()`](https://rdrr.io/pkg/rlang/man/is_installed.html).
+[`rlang::check_installed()`](https://rlang.r-lib.org/reference/is_installed.html).
 
 ------------------------------------------------------------------------
 
@@ -121,8 +121,8 @@ in `DECISIONS.md`.
     documented.
 8.  **All user-facing messaging via `cli`.** Progress, warnings, and
     informative notes use `cli`. All errors use
-    [`rlang::abort()`](https://rdrr.io/pkg/rlang/man/abort.html) with a
-    classed condition and an actionable message. No bare
+    [`rlang::abort()`](https://rlang.r-lib.org/reference/abort.html)
+    with a classed condition and an actionable message. No bare
     [`stop()`](https://rdrr.io/r/base/stop.html)/[`warning()`](https://rdrr.io/r/base/warning.html)/[`cat()`](https://rdrr.io/r/base/cat.html)/[`print()`](https://rdrr.io/r/base/print.html)
     for user communication.
 9.  **Pure functions, explicit state.** No reliance on global options
@@ -188,7 +188,7 @@ Scaffold with `usethis`; prefer generating config via `usethis`/`use_*`
 helpers so versions stay current.
 
 - **Package skeleton:**
-  [`usethis::create_package()`](https://rdrr.io/pkg/usethis/man/create_package.html),
+  [`usethis::create_package()`](https://usethis.r-lib.org/reference/create_package.html),
   MIT license (confirm with me), `use_readme_rmd()`, `use_news_md()`,
   `use_lifecycle()` for badges.
 - **Testing:** testthat **3rd edition** (`use_testthat(3)`), snapshot
@@ -213,7 +213,7 @@ helpers so versions stay current.
     multilevel ICCs, engine choice (LMM vs. SEM vs. Bayesian) and when
     each matters, CI methods.
 - **CI (GitHub Actions via
-  [`usethis::use_github_action()`](https://rdrr.io/pkg/usethis/man/use_github_action.html)):**
+  [`usethis::use_github_action()`](https://usethis.r-lib.org/reference/use_github_action.html)):**
   `R-CMD-check` (matrix: release + devel + oldrel, at least Linux +
   macOS + Windows), `test-coverage`, `lint`, `pkgdown` deploy on
   release/main. Add a scheduled `reference-values` job that reruns the
@@ -222,7 +222,7 @@ helpers so versions stay current.
   `use_pre_commit()` if you use pre-commit; `use_tidy_description()`.
 - **Dependency discipline:** minimal `Imports`; optional engines and
   heavy deps in `Suggests` with
-  [`rlang::check_installed()`](https://rdrr.io/pkg/rlang/man/is_installed.html)
+  [`rlang::check_installed()`](https://rlang.r-lib.org/reference/is_installed.html)
   guards; document the light-install path.
 
 ------------------------------------------------------------------------
