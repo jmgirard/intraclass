@@ -1,9 +1,13 @@
 # mcgraw1996 — The ICC(A,·)/ICC(C,·) naming and Case 3A
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/mcgraw1996.pdf` (gitignored).
+Pagination: printed journal pages 30–46, plus the correction at 1(4):390 carried as the PDF's final page.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** McGraw KO, Wong SP (1996). "Forming inferences about some
 intraclass correlation coefficients." *Psychological Methods* 1(1):30–46.
 Correction: *Psychological Methods* 1(4):390 — **included as the final page of the
-PDF** and extracted below. PDF: `cairn/references/pdf/mcgraw1996.pdf` (gitignored).
+PDF** and extracted below.
 
 **Role.** Source of the package's public coefficient labels (`ICC(1)`, `ICC(k)`,
 `ICC(A,1)`, `ICC(A,k)`, `ICC(C,1)`, `ICC(C,k)`) and of **Case 3A** — the

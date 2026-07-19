@@ -1,10 +1,14 @@
 # fleiss1973 — Weighted kappa ≡ the intraclass correlation coefficient
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/fleiss1973.pdf` (gitignored).
+Pagination: printed journal pages 613–619.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Fleiss JL, Cohen J (1973). "The equivalence of weighted kappa and
 the intraclass correlation coefficient as measures of reliability."
 *Educational and Psychological Measurement* 1973, 33, 613–619. (The title page
 runner prints only volume and pages — no issue number and no DOI appear on the
-PDF.) PDF: `cairn/references/pdf/fleiss1973.pdf` (gitignored).
+PDF.)
 
 **Role.** Shelf / background evidence for the categorical-scale boundary of the
 ICC — the bridge between kappa-family agreement indices and the ICC. Not an

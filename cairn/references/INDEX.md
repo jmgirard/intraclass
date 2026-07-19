@@ -92,10 +92,11 @@ and milestones; never restate a value here.
   the coverage/width results + GO/NO-GO verdict for the non-parametric
   bootstrap vs the incumbent MC / parametric-bootstrap intervals.
 
-## PDF shelf inventory
+## Source shelf inventory
 
-`pdf/` is **gitignored**; this inventory is the committed record of what is on
-the shelf and which milestone ingests it. 30 PDFs, each verified against its own
+`sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
+committed record of what is on the shelf and which milestone ingests it. 30 PDFs,
+each verified against its own
 title page (M63/T1). Citekey convention: same-author-same-year takes a letter
 suffix ordered by issue — `tenhove2025a` (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 

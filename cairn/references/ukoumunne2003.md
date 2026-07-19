@@ -1,9 +1,12 @@
 # ukoumunne2003 — Non-parametric bootstrap CIs for the ICC (one-way)
 
+**Provenance.** Ingested 2026-07-18 by M62 from `cairn/references/sources/ukoumunne2003.pdf` (gitignored).
+Pagination: printed journal pages 3805–3821.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Ukoumunne OC, Davison AC, Gulliford MC, Chinn S (2003).
 "Non-parametric bootstrap confidence intervals for the intraclass correlation
 coefficient." *Statistics in Medicine* 22(24):3805–3821. DOI 10.1002/sim.1643.
-PDF: `cairn/references/pdf/ukoumunne2003.pdf` (gitignored).
 
 **Role.** M62 primary source (IP1) for the non-parametric bootstrap CI candidate.
 

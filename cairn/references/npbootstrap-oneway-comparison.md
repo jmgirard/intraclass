@@ -1,5 +1,9 @@
 # Non-parametric bootstrap vs incumbents — one-way ICC (M62 comparison)
 
+**Provenance.** Ingested 2026-07-18 by M62 from the M62 coverage sweep together with `ukoumunne2003.md` (method) and `ohyama2025.md` (published comparison).
+Pagination: —.
+Extraction: derived — no external source of its own, only as current as its inputs, none re-read since 2026-07-18 — observed 2026-07-18.
+
 **Type.** Synthesis note (M62). Pre-registration first (this file, committed
 *before* any results — GP5); results + verdict appended at T5.
 

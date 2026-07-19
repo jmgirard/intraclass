@@ -1,10 +1,14 @@
 # tenhove2025b — MLE-RE + Monte-Carlo CIs for ICCs from planned incomplete data
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2025b.pdf` (gitignored).
+Pagination: printed journal pages 1042–1061 — the Taylor & Francis cover sheet is file page 1, so PDF page = printed page − offset.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2025). "How to Estimate
 Intraclass Correlation Coefficients for Interrater Reliability from Planned
 Incomplete Data." *Multivariate Behavioral Research* 60(5):1042–1061.
 DOI 10.1080/00273171.2025.2507745. Open Access (CC BY-NC-ND 4.0), published
-online 16 Jun 2025. PDF: `cairn/references/pdf/tenhove2025b.pdf` (gitignored).
+online 16 Jun 2025.
 
 **Role.** The simulation source cited by **ADR-002** (MLE random-effects engine)
 and **ADR-003** (Monte-Carlo CIs as the default interval method). This is the

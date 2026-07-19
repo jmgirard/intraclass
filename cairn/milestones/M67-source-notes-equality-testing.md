@@ -18,7 +18,7 @@ document *why* hypothesis tests comparing ICCs sit outside the contract boundary
 ## Scope
 <!-- owner: plan · create/amend-via-gate -->
 
-**In:** four `<citekey>.md` source notes read from `cairn/references/pdf/`:
+**In:** four `<citekey>.md` source notes read from `cairn/references/sources/`:
 `donner2002` (testing equality of dependent ICCs), `konishi1989` (testing
 equality of several ICCs), `naik2007` (equality under unequal family sizes),
 `young1998` (equality under unequal family sizes). Deliberately **short** notes:
@@ -36,8 +36,10 @@ tier-C papers → M66; the interval-methods cluster → M65.
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
 - [ ] AC1: Four `cairn/references/<citekey>.md` source notes exist, one per
-      source named in Scope, each with the five validation-doctrine fields;
-      each test statistic and its design assumptions carry a page anchor.
+      source named in Scope, each with the five validation-doctrine fields and a
+      conforming `**Provenance.**` block (ingested date, source pointer,
+      pagination basis, dated `Extraction:` status) per M68; each test statistic
+      and its design assumptions carry a page anchor.
 - [ ] AC2: Each note carries an explicit IP2 boundary line stating that
       ICC-equality testing is outside the package's contract, and that adopting
       it would require an IP2 amendment — not a feature request.
@@ -79,6 +81,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-18: created by /milestone-plan (promotes the tier-C candidate row's
   out-of-contract half; framed as boundary documentation rather than
   capability ingestion, since IP2 permanently excludes ICC-equality testing).
+- 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -1,5 +1,9 @@
 # mehta2018 — ICC performance under various subject distributions
 
+**Provenance.** Ingested 2026-07-18 by M65 from `cairn/references/sources/mehta2018.pdf` (gitignored).
+Pagination: printed journal pages 2734–2752.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Mehta S, Bastero-Caballero RF, Sun Y, Zhu R, Murphy DK, Hardas B,
 Koch G (2018). "Performance of intraclass correlation coefficient (ICC) as a
 reliability index under various distributions in scale reliability studies."
@@ -8,7 +12,7 @@ September 2017; Revised 23 January 2018; Accepted 20 March 2018. **Open Access**
 under CC BY-NC (the copyright line "was changed on 10 September 2018 after
 original online publication", p. 2734). Allergan plc (Irvine CA); University of
 Maryland Baltimore County; University of North Carolina at Chapel Hill. Funded
-by Allergan Inc. PDF: `cairn/references/pdf/mehta2018.pdf` (gitignored).
+by Allergan Inc.
 
 **Role.** Ingested by M65 as half of the distributional-robustness pair.
 **Squarely inside the package's contract** — it studies the two-way random

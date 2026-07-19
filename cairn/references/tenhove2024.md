@@ -1,10 +1,13 @@
 # tenhove2024 — Updated guidelines on selecting an ICC for IRR
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2024.pdf` (gitignored).
+Pagination: advance-online (AOP) PDF pages 1–13 — NOT the journal pages of the version of record, 29(5):967–979.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2024). "Updated Guidelines
 on Selecting an Intraclass Correlation Coefficient for Interrater Reliability,
 With Applications to Incomplete Observational Designs." *Psychological Methods*
 29(5):967–979. DOI 10.1037/met0000516.
-PDF: `cairn/references/pdf/tenhove2024.pdf` (gitignored).
 
 **Role.** The package's primary source for **guidance on choosing an ICC** — the
 material `vignettes/choosing-an-icc.Rmd` and `choose_icc()` render into

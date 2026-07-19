@@ -1,13 +1,16 @@
 # bobak2018 — Inter-rater ICC under heteroscedasticity and pooled heterogeneity
 
+**Provenance.** Ingested 2026-07-18 by M65 from `cairn/references/sources/bobak2018.pdf` (gitignored).
+Pagination: the article's own printed pages (BMC per-article pagination — `18:93` is an article number, not a page range).
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** Bobak CA, Barr PJ, O'Malley AJ (2018). "Estimation of an inter-rater
 intra-class correlation coefficient that overcomes common assumption violations
 in the assessment of health measurement scales." *BMC Medical Research
 Methodology* 18:93. DOI 10.1186/s12874-018-0550-6. Received 23 November 2017;
 Accepted 23 August 2018; Published 12 September 2018. **Open Access**, CC BY 4.0.
 Departments of Quantitative Biomedical Sciences and The Dartmouth Institute,
-Geisel School of Medicine, Dartmouth College. PDF:
-`cairn/references/pdf/bobak2018.pdf` (gitignored). Bobak and O'Malley
+Geisel School of Medicine, Dartmouth College. Bobak and O'Malley
 "contributed equally".
 
 **Role.** Ingested by M65 as half of the distributional-robustness pair. **This

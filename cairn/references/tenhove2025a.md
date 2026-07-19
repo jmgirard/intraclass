@@ -1,10 +1,14 @@
 # tenhove2025a — IRR for interdependent social network data (the RESRM)
 
+**Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/tenhove2025a.pdf` (gitignored).
+Pagination: printed journal pages 444–459.
+Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+
 **Citation.** ten Hove D, Jorgensen TD, van der Ark LA (2025). "Interrater
 Reliability for Interdependent Social Network Data: A Generalizability Theory
 Approach." *Multivariate Behavioral Research* 60(3):444–459.
 DOI 10.1080/00273171.2024.2444940. Open Access (CC BY 4.0), published online
-03 Feb 2025. PDF: `cairn/references/pdf/tenhove2025a.pdf` (gitignored).
+03 Feb 2025.
 
 Verified against the title page (PDF p. 1) and the running head/masthead
 (PDF p. 2: "2025, VOL. 60, NO. 3, 444–459"). This is the **60(3) network-data**
