@@ -80,7 +80,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - [x] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
 - [x] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [ ] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
+- [x] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
       review send-back on both sibling milestones). Grep the four notes for
       time-relative and absence phrasing (`at the time of writing`, `not yet`,
       `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
@@ -107,7 +107,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
       to verbatim — `young1998.md` "In real world research, **having** families
       of equal size is artificial" (p. 1363), and `naik2007.md` "**thus**
       modified (negative two times **the**) likelihood ratio" (p. 6503).
-- [ ] T11: **(review send-back, AC7 failure)** Date the absence assertions.
+- [x] T11: **(review send-back, AC7 failure)** Date the absence assertions.
       Every "Nothing in the package … no `ORACLES.md` entry cites it" claim — in
       both `## Traces to` and the `**Role.**` echo, all four notes — takes an
       inline `— observed YYYY-MM-DD`, matching the convention already used by
@@ -139,6 +139,9 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - 2026-07-19: T8 done — re-read pp. 99–101 of the shelf PDF and confirmed the review's reading: exact `χ²₁` needs normality **and** equal `p` **and** `q = 2` jointly (p. 99 gives `c·χ²₁` with an unknown-parameter scale at `q = 2`; p. 100's parameter-free weights still leave a weighted sum, and only "further, for `q = 2`" under normality is it exactly `χ²₁`). Corrected in `konishi1989.md` and the matching `INDEX.md` line; the `c` expression is deliberately not transcribed, the scan being unreliable at that line (#4).
 - 2026-07-19: T9 done — AMS secondary corrected to 62H10 (title page verified: `Primary 62Hl5; Secondary 62HIO`, letter-for-digit OCR in both); the unprinted issue numbers dropped from `konishi1989` and `young1998` in `BIBLIOGRAPHY.md` *and* in the two notes' own citation lines, each now saying what the article actually heads; `donner2002` gains the "(No DOI is printed…)" annotation (verified: no DOI on p. 367); the provenance census corrected three → four in place, with the correction marked.
 - 2026-07-19: T10 done — both quotations restored verbatim against the shelf PDFs (`young1998` p. 1363 "In real world research, having families of equal size is artificial"; `naik2007` p. 6503 "thus modified (negative two times the) likelihood ratio"). Swept the surrounding quotations in both notes while there: `young1998`'s "very little attention" and "none of the above authors…" are verbatim, but `naik2007`'s "may lead to difficulties" was quoted stripped of the qualifier the source attaches ("unless of course, one uses the distribution of the modified test statistics as in Konishi and Gupta (1989)") — restored, since the elided clause names `konishi1989` as the escape route and changes what the caution says.
+- 2026-07-19: T11 + T5 re-run done — the absence verification was re-executed by command after the last editing task (0 hits for the four citekeys or the author surnames konishi/gupta/donner/zou/naik/helu across `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, `ORACLES.md`), then all eight "nothing traces to it" claims stamped `— observed 2026-07-19` in the fleiss1973 shape (naming the surfaces searched), in both `## Traces to` and the `**Role.**` echo of all four notes.
+- 2026-07-19: the re-run sweep found two further undated repo-state claims AC7 covers, both now dated: the cross-note overlap claims in `young1998.md`/`naik2007.md` (AC7 names T2's explicitly), and the four `Extraction:` lines, which after T7–T10 falsely said no passage had been re-read.
+- 2026-07-19: **caught a false-clean signal while dating the `Extraction:` lines.** Writing them "partly verified" made `cairn_validate`'s clause classifier resolve each to `undated` and skip the page — dropping `references staleness` 15 → 11 and silently exempting the four notes from the re-verify backlog. Reverted to `unverified` as the primary claim with the spot corrections as secondary detail; advisory back to 15, which is the honest count. A spot correction is not a re-verification, and `INDEX.md` now says so.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -3,7 +3,7 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/donner2002.pdf` (gitignored).
 Pagination: printed journal pages 367–379. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-19.
+Extraction: unverified — first pass, values not yet re-read against the source. One point was spot-checked at the M67 review send-back (p. 367 prints no DOI); the page as a whole remains unchecked — observed 2026-07-19.
 
 **Citation.** Donner A, Zou G (2002). "Testing the equality of dependent
 intraclass correlation coefficients." *The Statistician* 51(Part 3):367–379.
@@ -16,7 +16,8 @@ the series name, so cite it as printed.
 cluster. It is **the cluster's closest approach to this package's own territory**
 — the ICCs it compares are interobserver-agreement ICCs on the same subjects,
 estimated by the familiar ANOVA route — which makes its boundary line the most
-load-bearing of the four. Nothing in the package traces to it.
+load-bearing of the four. Nothing in the package traces to it — observed
+2026-07-19.
 
 ## Why it is in the interrater literature at all
 
@@ -114,6 +115,9 @@ single-design ICC this package's estimand specs define.
 
 - **Nothing in the package** — no estimator, interval method, oracle, or
   documented claim reads this page, by design. No `ORACLES.md` entry cites it.
+  A grep for this citekey and for the author surnames across `R/`, `tests/`,
+  `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, and `ORACLES.md`
+  returned no hits — observed 2026-07-19.
 - `cairn/references/konishi1989.md` — the independent-sample general case this
   paper extends; `Z_M` is Konishi's transformation, and §7 (p. 378) notes
   Konishi & Gupta (1987) "considered only the case in which two intraclass

@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/konishi1989.pdf` (gitignored).
 Pagination: printed journal pages 93–105.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-19.
+Extraction: unverified — first pass, values not yet re-read against the source. Two passages were spot-corrected at the M67 review send-back (the title page's AMS classification and journal heading; pp. 99–101's `χ²₁` recovery conditions); the page as a whole remains unchecked — observed 2026-07-19.
 
 **Citation.** Konishi S, Gupta AK (1989). "Testing the equality of several
 intraclass correlation coefficients." *Journal of Statistical Planning and
@@ -17,7 +17,8 @@ Statistical Mathematics, Tokyo; Gupta: Bowling Green State University, Ohio.
 **Role.** Ingested by M67 as the general-case member of the equality-testing
 cluster — the `q`-population hypothesis test that the rest of the cluster
 specializes. It is here **as evidence of a contract boundary**, not as a
-capability source. Nothing in the package traces to it (see "Traces to").
+capability source. Nothing in the package traces to it (see "Traces to") —
+observed 2026-07-19.
 
 ## The estimand is a hypothesis, not a coefficient
 
@@ -95,7 +96,9 @@ record rather than re-argued from memory.
 
 - **Nothing in the package** — no test, no oracle, no vignette, no documented
   claim reads this page, and that is by design (see Boundary above). No
-  `ORACLES.md` entry cites it.
+  `ORACLES.md` entry cites it. A grep for this citekey and for the author
+  surnames across `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`,
+  `data-raw/`, and `ORACLES.md` returned no hits — observed 2026-07-19.
 - `cairn/references/bhandary2006.md` — a fifth member of this cluster by
   subject; its own cluster-reassignment finding asks that the two be read
   together, and the same IP2 fence covers both.

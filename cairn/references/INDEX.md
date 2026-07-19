@@ -240,6 +240,9 @@ interval in its second worked example. And the unequal-family-size pair
 that same Srivastava-into-LRT substitution producing a negative `−2 log Λ` on up
 to 25 % of simulated data sets and recommends the score test or `T₀` instead —
 so the two must not be cited as a concordant pair. Per the plan gate these four
-notes carry **unverified** first-pass extraction status by design (AC3 makes them
-non-load-bearing), unlike M66's; they are the newest members of the re-verify
-backlog, not exempt from it.
+notes were shipped at **unverified** first-pass extraction status by design (AC3
+makes them non-load-bearing), unlike M66's; they are the newest members of the
+re-verify backlog, not exempt from it — and they stay there: the review
+send-back spot-corrected one or two passages in each against its shelf PDF
+(2026-07-19), which each note's `Extraction:` line now names, but a spot
+correction is not a re-verification and the status stays **unverified**.

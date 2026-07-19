@@ -3,7 +3,7 @@
 **Provenance.** Ingested 2026-07-19 by M67 from `cairn/references/sources/young1998.pdf` (gitignored).
 Pagination: printed journal pages 1363–1373. The shelf copy is a JSTOR scan
 (download stamp 2016-04-15).
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-19.
+Extraction: unverified — first pass, values not yet re-read against the source. One passage was spot-corrected at the M67 review send-back (p. 1363's journal heading and quoted passages); the page as a whole remains unchecked — observed 2026-07-19.
 
 **Citation.** Young DJ, Bhandary M (1998). "Test for Equality of Intraclass
 Correlation Coefficients Under Unequal Family Sizes." *Biometrics*
@@ -17,8 +17,10 @@ North Dakota State University, Fargo. Carries a French *Résumé* (p. 1372) per
 
 **Role.** Ingested by M67 as the first of the unequal-family-size pair. It is the
 **two-population** case; `naik2007` generalizes it, and that note carries the
-full overlap analysis rather than repeating the derivation here. Ingested as
-evidence of a contract boundary; nothing in the package traces to it.
+full overlap analysis (a shared-vs-differs table) rather than repeating the
+derivation here — observed 2026-07-19. Ingested as
+evidence of a contract boundary; nothing in the package traces to it — observed
+2026-07-19.
 
 ## The gap it fills
 
@@ -113,6 +115,9 @@ facet at all, which puts it doubly outside the interrater contract.
 
 - **Nothing in the package** — no estimator, interval method, oracle, or
   documented claim reads this page, by design. No `ORACLES.md` entry cites it.
+  A grep for this citekey and for the author surnames across `R/`, `tests/`,
+  `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, and `ORACLES.md`
+  returned no hits — observed 2026-07-19.
 - `cairn/references/naik2007.md` — the direct generalization (`g` populations,
   unequal variances); **the overlap between the two papers is analyzed there**.
 - `cairn/references/bhandary2006.md` — Bhandary's three-population sibling, which
