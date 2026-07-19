@@ -3,11 +3,11 @@
      Per-section owners are tagged below. -->
 # M71: Re-verify the robustness and interval-methods extractions (7 notes)
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m71-reverify-robustness-extractions`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -22,7 +22,10 @@ interval-methods notes, closing the last of the source-note backlog.
 against their shelf PDFs: `bhandary2006`, `bobak2018`, `mehta2018`,
 `saha2005`, `saha2012`, `xiao2009`, `xiao2013`. Anchors, quotations and
 values corrected in place; each `Extraction:` line upgraded to a dated
-verified status; `INDEX.md`'s M65 paragraph updated to match.
+verified status; `INDEX.md`'s M65 paragraph updated to match. Also in: the
+two `bhandary2006` claims that `young1998.md` currently marks *inherited,
+not verified* (M70's hand-off) — resolved in place once `bhandary2006` is
+verified.
 
 **Out:** the six M62/M67 notes → M70. `ORACLES.md` and `BIBLIOGRAPHY.md` →
 M72. The `xiao2013` profile-likelihood GO/NO-GO assessment stays a
@@ -78,7 +81,8 @@ act on it. Any change to R code, tests, or oracle values.
 - [ ] T4: `saha2005` (16 pp) — reconcile against `saha2012`, its sibling.
 - [ ] T5: `bhandary2006` (14 pp) — INDEX.md places it in the M67
       equality-testing cluster by subject; confirm the cross-references that
-      fence names actually hold.
+      fence names actually hold. Then clear the two inherited-marker claims
+      in `young1998.md` against this source.
 - [ ] T6: `bobak2018` (11 pp).
 - [ ] T7: `xiao2009` (9 pp).
 - [ ] T8: mechanical quotation sweep — enumerate every quoted string in all
@@ -94,6 +98,7 @@ act on it. Any change to R code, tests, or oracle values.
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
 - 2026-07-19: created by /milestone-plan (absorbs the M65 seven from the "remaining nine source extractions" candidate row, whose other two went to M70; plan gate: low priority — nothing in the package traces to these seven and five are outside the IP2 contract boundary).
+- 2026-07-19: gated Scope amendment at the implement question gate — `young1998.md`'s two `bhandary2006` claims, marked inherited-not-verified by M70's T6 hand-off, are resolved in place under T5 (an eighth file, M70-owned). Also gated: notes re-read in the main session, not delegated; a correction falsifying the profile-likelihood candidate row's premise is fixed in the note and escalated as a review finding, never a silent ROADMAP rewrite.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
