@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M48: v0.1.0 release consolidation — CRAN submission-ready
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** high   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M49, M50, M51, M53, M54, M55, M61, M68   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2, GP3   <!-- owner: plan · create/amend-via-gate -->
@@ -103,6 +103,7 @@ gate before stamping, never folded in silently.
 - 2026-07-16: Depends-on gains M54 (gated amendment at the M54 plan gate — maintainer chose to ship the lavaan multilevel engine before the release).
 - 2026-07-17: Depends-on gains M55 by /milestone-plan (plan gate: the gtheory-reference docs audit lands before the v0.1.0 release — a capability table listing an archived package as an installable peer shouldn't ship in the first CRAN release).
 - 2026-07-19: mirror catch-up by /milestone — Depends-on gained M61 (86d16e8, 2026-07-17 plan gate) and M68 (5a4a7af, 2026-07-18 plan gate: the references provenance backfill clears cairn_validate before M48's consistency gate); both were recorded in ROADMAP only, so this file's Depends-on and work log were behind.
+- 2026-07-19: parked as `blocked` by /milestone — every dependency is satisfied so the mechanical next-action kept nominating this release, but the maintainer's v0.1.0 release window is not open; blocker is the unopened window (D-050), reversed only by the maintainer declaring it.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
