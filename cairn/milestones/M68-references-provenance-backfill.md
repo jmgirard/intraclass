@@ -110,12 +110,12 @@ itself (a cairn-upstream question) → out entirely; this repo conforms.
 - 2026-07-18: created by /milestone-plan, from the /milestone audit's `references index<->disk` FAIL; gate chose honest-unverified extraction status, absorbing the `sources/` rename, and amending M66/M67; the load-bearing-ten re-verification split off as M69.
 - 2026-07-18: T1 done — shelf renamed `pdf/`→`sources/` (30 PDFs), `.gitignore`, `INDEX.md`, `LESSONS.md` (in-place path correction) and all 19 note pointers updated; M66/M67 amended (Scope path + AC1 provenance requirement), each with its own work-log line.
 - 2026-07-18: minor amendment — AC5 named only `legacy/` and `milestones/archive/` as exempt archives; `reviews/archive/RB01` also cites the old path and is equally never-edited (IP4), so the exemption now names all three. No deliverable changed.
-
 - 2026-07-18: T2–T5 done — Provenance blocks on all 24 pages. Dates/milestones DERIVED with `git log --diff-filter=A --format='%ad|%s' --date=short -- <page>`, never asserted: cairn-init/2026-07-12 → REFERENCES; M53/2026-07-16 → sem-multilevel-pilot; M62/2026-07-18 → ukoumunne2003, ohyama2025, npbootstrap-oneway-comparison; M63/2026-07-18 → ORACLES, BIBLIOGRAPHY; M64/2026-07-18 → the ten load-bearing; M65/2026-07-18 → the seven interval-methods.
 - 2026-07-18: pagination basis derived per page from the note's own callout where it had one, else its anchor range cross-checked against its printed citation — four non-standard: tenhove2020 (manuscript pp. 1–14, not Springer 79–93), tenhove2022 (AOP pp. 1–17), tenhove2024 (AOP pp. 1–13), saha2012 (Early View, no folios at all — anchors are section/equation/table only). bobak2018 is BMC per-article pagination (`18:93` is an article number).
 - 2026-07-18: finding — ORACLES.md had NO provenance block; what cairn_validate matched was a false positive, a hard-wrapped prose line inside oracle O1 beginning with the word "provenance" (ORACLES.md:36). Real block added and the decoy line rewrapped.
 - 2026-07-18: each source note's existing `PDF: …` prose pointer folded into its block rather than duplicated; every seam re-read by hand (the pointer sat mid-sentence or line-wrapped in 8 of 19).
 - 2026-07-18: cairn_validate exit 0, all 15 checks PASS (references index<->disk and scaffold deprecations both clear). `references staleness` now WARNs on exactly 20 pages — the 19 shelf notes + BIBLIOGRAPHY, all "no verified re-check" — which is AC4's intended honest signal; M69 clears ten of them.
+- 2026-07-18: T6 in flight — cairn_validate already exit 0 (15/15 PASS); the profile `verify` slot is running in the background at checkpoint time, so T6 stays unchecked until its result is recorded.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
