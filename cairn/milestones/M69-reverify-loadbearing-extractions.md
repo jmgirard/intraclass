@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M69: Re-verify the ten load-bearing source extractions
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M68   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** —   <!-- owner: plan · create/amend-via-gate; no DESIGN.md IP/GP — governed by PRINCIPLES.md #1 (oracle-first), #4 (no fabricated reference values), #12 (seeded and sourced) -->
@@ -81,7 +81,7 @@ milestone corrects notes, never the estimator surface.
       Convert every anchor explicitly against the stated pagination basis —
       three of these are not the version of record (M64 lesson); crop figures at
       300 DPI with `pdftoppm` where a claim sits inside one.
-- [ ] T4: Upgrade the ten extraction statuses; record any oracle-affecting
+- [x] T4: Upgrade the ten extraction statuses; record any oracle-affecting
       discrepancy as an escalation finding (AC4); run `cairn_validate` and the
       profile `verify` slot; open the PR and drive CI green.
 
@@ -121,6 +121,9 @@ milestone corrects notes, never the estimator surface.
 - 2026-07-18: T3 — tenhove2025b dated observations refreshed per the dated-observations rule: OQ4 (supplementary A/B not in the shelf PDF) and OQ6 (ORACLES.md does not cite this paper) both re-checked and dated 2026-07-18; OQ1 and OQ2 re-confirmed against ADR-003's text in `cairn/legacy/DECISIONS.md` (the "engine's internal (boundary-respecting) scale" wording is there, and the abstract attribution is correct) — both still standing, nothing changed.
 - 2026-07-18: T4 — history edit, logged per the user-overrides rule: the T3 tenhove2024 work-log line above quoted the source's title-page acceptance date verbatim in the paper's own US long-form style (month name, day, year), which `cairn_validate`'s `iso date format` check FAILs (its exemption for external citation dates covers `cairn/references/` only, not milestone work logs). At the T4 gate the maintainer chose to reformat the quoted date to `2022-05-23` in place rather than amend AC5 or relocate the quote; no fact changed, only a date's format inside a quotation, and the original stands in git. AC5's `cairn_validate` exit-0 requirement is met as written.
 - 2026-07-18: T4 — upstream note (cairn plugin, not this repo): the `iso date format` check has no exemption for a date quoted from an external source inside a milestone work-log line, so quoting a paper's own date string is an unavoidable gate failure. Worth reporting; M69 worked around it locally rather than carrying a red check.
+- 2026-07-18: T4 done. All ten `Extraction:` statuses now read a dated verified status on one physical line (AC3); `cairn_validate` exits 0 with no FAIL, and its `references staleness` advisory names none of the ten — the 11 it still names are the out-of-scope nine plus `BIBLIOGRAPHY.md`/`ORACLES.md` (AC3). Profile `verify` slot clean under `NOT_CRAN=true CI=true`: FAIL 0 | WARN 2 | SKIP 23 | PASS 1802, exit 0 (AC5); the 2 warnings are the pre-existing glmmTMB non-positive-definite-Hessian warning raised inside an `expect_message` test at `test-icc-type-vector.R:286` — M69 changed no R code, so they are baseline, not a regression.
+- 2026-07-18: T4 — AC4 accounting across the whole milestone: exactly **one** finding touches a value an oracle or test depends on (the shrout1979 / O1 three-decimal *attribution*, logged verbatim above on 2026-07-18) and it is an attribution error, not a value error — the six O1 coefficients agree with Shrout & Fleiss Table 4 at the paper's printed two-decimal precision. Given a ROADMAP candidate row this session so it outlives M69's archive summary. The other four source-level findings (tenhove2024's Table 2 cell, tenhove2020's prior-scope nuance, tenhove2025a's Tables 6–7 column misalignment, tenhove2025b's MLE-CF bias direction) are each recorded above as affecting **no** oracle and implying **no** package change.
+- 2026-07-18: T4 — status → `review`. 146 PDF pages read across M69 (T1 34, T2 30, T3 82), ten notes verified, ~30 corrections and ~15 additions, zero package code/test/ORACLES.md changes as Scope requires.
 - 2026-07-18: T3 method note for the resuming session — read the shelf PDF page-images **and** cross-check small details with `pdftotext`; an image read of tenhove2025a p. 451 dropped the word "same-sex" that the text layer carried, i.e. image-only reading can manufacture a false correction as easily as it catches a real one.
 
 ## Decisions
