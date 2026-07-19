@@ -31,6 +31,15 @@ verified.
 M72. The `xiao2013` profile-likelihood GO/NO-GO assessment stays a
 candidate row — this milestone verifies what the note claims, it does not
 act on it. Any change to R code, tests, or oracle values.
+**Also out, re-cut 2026-07-19:** the *systematic* audit of interpretive
+claims. Dated observations about the repo's own state → M73 (which makes
+them command-settleable corpus-wide); claims generalizing from cited cells
+to a range, count, or superlative → M74. This milestone owns
+**source fidelity** — values, quotations, anchors, absence claims, page
+counts, staleness — plus correcting the specific interpretive defects review
+has already identified in the seven notes. It does not own proving the
+interpretive class clean, which three review attempts established is not
+dischargeable by reading.
 
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
@@ -49,7 +58,15 @@ act on it. Any change to R code, tests, or oracle values.
 - [x] Every absence claim is settled by a rendered page image at high DPI,
       never the text layer alone, or else is stated as "not checked" and
       asserts nothing further.
-- [ ] No note asserts anything time-relative that is false at merge.
+- [ ] No note carries an **undated** time-relative assertion — settled by the
+      mechanical grep, which must return zero unresolved hits. (Amended
+      2026-07-19: the original criterion asserted every dated observation was
+      true at merge; three review attempts each falsified it, and the audit
+      that can discharge it corpus-wide is M73's. A criterion this milestone
+      cannot discharge is a planning defect, not a work defect.)
+- [ ] Every interpretive claim in the seven notes that review has identified
+      as false is corrected at its source, with the basis of the correction
+      recorded — currently attempt 3's F1, F2 and F3.
 - [x] No package value changes: any correction that would move an oracle
       value, test fixture, or documented behavior is escalated as a review
       finding with its citation, not silently applied.
@@ -65,8 +82,9 @@ act on it. Any change to R code, tests, or oracle values.
 - AC3 → T1, T2, T3, T4, T5, T6, T7
 - AC4 → T1, T2, T3, T4, T5, T6, T7, T8
 - AC5 → T9
-- AC6 → T1, T2, T3, T4, T5, T6, T7, T10
-- AC7 → T10
+- AC6 → T11
+- AC7 → T1, T2, T3, T4, T5, T6, T7, T10, T11
+- AC8 → T10, T11
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
@@ -93,6 +111,14 @@ act on it. Any change to R code, tests, or oracle values.
       the `Traces to` lead sentence, and re-resolve every hit.
 - [x] T10: update `INDEX.md`'s M65 paragraph and the backlog narrative; run
       `cairn_validate` and the r-package `verify` slot; confirm docs-only.
+- [ ] T11 (added at the 2026-07-19 re-cut): correct the three interpretive
+      defects review attempt 3 identified, each re-derived at its source
+      before the edit, and record the basis of each correction —
+      `mehta2018.md:290`'s ordinal-axis claim about which repo files name the
+      axis; `saha2005.md:198–201`'s "both sit in the upper half"; and
+      `mehta2018.md:157–159`'s "the narrowest ratios sit in the concave
+      Cases 1–2". Then re-run the AC5 grep and the AC8 gates. Do **not**
+      extend into the systematic sweeps — those are M73 and M74.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -118,6 +144,7 @@ act on it. Any change to R code, tests, or oracle values.
 
 - 2026-07-19: fix cycle 2 — all eight actioned findings (F2–F9) corrected, each re-verified at the source in this session before the edit; F1 left alone as the review rejected it on evidence. **AC5 (F2, F3)**: `mehta2018.md`'s ordinal/discrete row no longer claims "an axis no repo document names" — `cairn/COVERAGE.md:196` and `cairn/legacy/ROADMAP.md:77` both carry "categorical / ordinal ratings (GLMM engines)", so the row now says what the repo actually records (unscheduled future work, not a swept axis) and carries the grep; `bobak2018.md`'s non-normality row no longer claims the heavy-tail axis "has been swept anywhere in the repo" — no non-Gaussian DGP exists in `R/` or `tests/`, so **neither** axis has been swept here and what the repo has is `ukoumunne2003`'s published sweep, cited not reproduced. **AC2 (F6)**: `xiao2009.md`'s p. 113 quotation restored to the printed form, `ρ_i (i = 1, 2, …, K)` — parentheses, not the commas the finding assumed; settled at 400 DPI because the text layer mangles the subscripts. **F4** `bobak2018.md`: koo2016's longer sentence is *not* quoted in `koo2016.md` — that note paraphrases it too and quotes only the preceding disclaimer (`koo2016.md:55–57`), now stated that way. **F5** `INDEX.md`: two notes had silently repaired a source (`saha2012`'s `ln`, `bhandary2006`'s `ppk`), not three — `xiao2013`'s `c′` runs the other way (Eq. (7) prints a bare `c`, re-confirmed at source; the note had written `c′`), so the block now records the direction instead of the count. **F7** `saha2005.md`: the PNB-vs-BB penalty recomputed over all 40 `π = 0.1` cells — **1.10–4.12**, floor TNBD `m = 50, φ = 0.85` (1191 vs 1080), ceiling ED `m = 10, φ = 0.2` (5523 vs 1340) — replacing a range read off the two cells the sentence cites; the TNBD `m = 50` row is printed in full rather than characterized. **F8** `xiao2009.md`: the `K = 3`, 25-family block is **not** the smallest design (75 families vs `K = 2`'s 50; p. 115 sets 25 or 50 families *per population*) — reworded to nuisance-parameter density, and the count corrected to 6 vs 4 after checking p. 113 names only `μ_i` and `σ_i` as nuisance (`ρ` is the common estimand), not 3 per population. **F9** `mehta2018.md`: the narrowest interdecile ratios are not unique to extreme concave — mild concave ties exactly at Cases 1–2 (0.01 vs 0.01, 0.03 vs 0.02, Table 4). Sweeps re-run: **187 quotations across the seven notes** (multi-line-aware split, all seven files quote-balanced), 0 markup-inside-quotation; AC5 grep returns one hit, my own dated observation quoting COVERAGE.md's `🔵 Not yet` status token. Gates: `cairn_validate` all checks passed (staleness still 2, `ORACLES.md`/`BIBLIOGRAPHY.md`); `devtools::test()` under `NOT_CRAN=true CI=true` **FAIL 0 | WARN 2 | SKIP 23 | PASS 1802**, unchanged baseline; diff docs-only, 11 files all under `cairn/`. Two over-claims caught in my *own* new prose before commit and fixed there ("largest exactly where the cited cells sit" — false, the ceiling is a different cell; "falls monotonically" — false, the tail wobbles), which is the attempt-2 pattern finding applied to this cycle's own writing. Status -> review.
 - 2026-07-19: /milestone-review attempt 3 FAILED **AC5** and returned the milestone to `in-progress`; **the thrash rule fires** (third trip back) so no fourth retry is queued — routing is `/milestone-plan` for a re-cut. Six criteria pass with fresh evidence (AC1 pdfinfo counts + mehta2018 content past the reference list re-confirmed by per-page extraction; **AC2 now passes** — 187 quotations, 156 matched outright, all 31 remainder adjudicated, the figure-artwork case re-settled at 200 DPI, and attempt 2's F6 fix verified correct with the *review's own assumed form* wrong (the source prints parentheses, not commas); AC3 all in-range anchors resolve incl. the p. 8 → p. 7 fix; AC4 three claims re-settled fresh by render; AC6 diff docs-only 11 files all `cairn/`, fenced by `.Rbuildignore:9`, test baseline unchanged; AC7 validate exit 0, staleness 2, zero of the seven in the advisory). Consistency gate clean. [S] blame-history and [S] prior-PR lenses both clean — the latter's LESSONS substitute pass found the diff *complying* with the four relevant lessons. [O] diff-bug returned 3 findings, scored by a fresh [S] scorer: **F1 = 92, F2 = 90, F3 = 80, all actioned, none below the bar**. **AC5 fails on F1** — `mehta2018.md:290`'s dated observation claims the remaining `ordinal` grep hits "are source notes describing other papers' ordinal work, not this repo's", which a grep falsifies with ~40 hits in `estimand-specs/M6-oneway.md:213`, `legacy/STATUS.md`, `legacy/MILESTONES.md` and `legacy/DECISIONS.md`; the named file is one **attempt 2's own F2 cited**, and the false clause was written *by the fix cycle correcting that finding*, in the same table cell. F2 (saha2005, "both sit in the upper half" — the 1.7x cell ranks 19/40, below the median, and 1.7 is the old range's floor) and F3 (mehta2018, mild convex Case 1 prints the same 0.03 vs 0.02) are over-claims in fix-cycle prose breaking no AC squarely. **Pattern, third round: every numeric correction has survived independent verification all three times; every failure has been interpretive prose, and twice now prose written to fix the previous cycle's prose.** Recorded as a planning boundary, not a defect backlog.
+- 2026-07-19: **re-cut by /milestone-plan** after the thrash rule fired at review attempt 3. Gated amendments: (a) Scope narrowed — M71 owns *source fidelity* (values, quotations, anchors, absence claims, page counts, staleness) plus correcting the specific interpretive defects review has already named; the systematic interpretive-claim audit leaves for **M73** (dated observations made command-settleable corpus-wide, 87 across 30 notes) and **M74** (claims generalizing from cited cells, re-derived over full source tables). (b) AC5 rewritten from "no note asserts anything time-relative that is false at merge" — which three attempts each falsified and which no reading can discharge — to the mechanically checkable "no note carries an *undated* time-relative assertion". (c) New AC6 + T11: the three attempt-3 findings corrected at source with the basis recorded. Plan-gate rationale: across three attempts every value-level correction survived independent verification while interpretive claims failed every time, twice in prose written to fix the prior cycle's prose; the measured cause is that only 2 of 87 dated observations carry the command that settles them, which is a tooling gap, not a care gap. Criterion count goes 7 -> 8, noted against the sizing tripwire and accepted: the milestone's scope strictly shrank at this re-cut.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
