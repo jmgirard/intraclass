@@ -52,6 +52,12 @@ tier-C papers → M66; the interval-methods cluster → M65.
       line per note; `cairn_validate` passes.
 - [ ] AC6: The profile `verify` slot is clean (`NOT_CRAN=true CI=true`,
       failed + error = 0).
+- [ ] AC7: No shipped note carries a claim about the repo's own state that is
+      false at merge time: every time-relative phrase and every absence
+      assertion in the four notes is re-resolved after the last file-editing
+      task lands, absences rest on a read to the source's final page, and any
+      surviving repo-state claim is written as a dated observation. The
+      young1998/naik2007 overlap claim (T2) counts as such an assertion.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
@@ -61,7 +67,8 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - AC3 → T1, T2
 - AC4 → T3
 - AC5 → T4
-- AC6 → T5
+- AC6 → T6
+- AC7 → T5
 
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
@@ -73,7 +80,13 @@ tier-C papers → M66; the interval-methods cluster → M65.
 - [ ] T3: Add the one-line IP2 cross-reference in `cairn/DESIGN.md`.
 - [ ] T4: Add `BIBLIOGRAPHY.md` entries + `INDEX.md` lines; run
       `cairn_validate`.
-- [ ] T5: Run the profile `verify` slot; open the PR and drive CI green.
+- [ ] T5: Staleness sweep, after T3/T4 land (M64/M65 lessons — this cost a
+      review send-back on both sibling milestones). Grep the four notes for
+      time-relative and absence phrasing (`at the time of writing`, `not yet`,
+      `must be checked`, `not retrieved`, `not present`) and re-resolve each hit
+      against the repo as it now stands, including each note's claim about the
+      `DESIGN.md` IP2 cross-reference T3 adds; date any claim that survives.
+- [ ] T6: Run the profile `verify` slot; open the PR and drive CI green.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -82,6 +95,7 @@ tier-C papers → M66; the interval-methods cluster → M65.
   out-of-contract half; framed as boundary documentation rather than
   capability ingestion, since IP2 permanently excludes ICC-equality testing).
 - 2026-07-18: gated amendment by M68 — Scope names `references/sources/` (shelf renamed) and AC1 now requires a conforming Provenance block on each note.
+- 2026-07-19: gated amendment at a /milestone-plan re-run — new AC7 + T5 make the M64/M65 staleness sweep mechanical (old T5 becomes T6); M66's verified-extraction bar deliberately NOT applied, since AC3 makes these notes non-load-bearing by design.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
