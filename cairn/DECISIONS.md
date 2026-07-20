@@ -167,3 +167,77 @@ suffixes ordered by issue (`tenhove2025a` = MBR 60(3) network data,
 registry (which D-007 keys by oracle ID and reserves for the ≥2-types audit). The
 principle's substance is unchanged; only the path moved. `PRINCIPLES.md`'s header
 exception list records it as `(#12, D-007)`, per that file's change-control rule.
+
+### D-008 (2026-07-19): Verification bar for the index pages — three entry kinds, and what a script-derived "verified" does not assert
+
+**Context:** `ORACLES.md` (39 entries) and `BIBLIOGRAPHY.md` (38) are the two
+`cairn/references/` pages the D-007 split moved as text without reading, and the
+last two carrying an unverified extraction status after M69–M71 dated-verified all
+30 source notes. They cannot take the source-note bar unchanged: a source note owns
+one primary source and is re-read against it, whereas most `ORACLES.md` entries
+trace to a committed seeded script under `data-raw/` rather than to a page of a PDF.
+M72's implement gate established that no script *output* is committed — `data-raw/`
+holds zero `.csv`/`.txt` and one `.rds`, `data-raw/.oracle-*-checkpoint.rds` is
+gitignored, 35 of the 41 scripts assert relationships via `stopifnot` rather than
+recording values, and only 4 write a committed fixture under
+`tests/testthat/fixtures/`.
+**Decision:** the bar splits by **entry kind**, three of them.
+*Source-traceable* — values trace to a page of a cited source: re-read against the
+source itself at the cited page, never against a `<citekey>.md` note, and corrected
+in place with the correction cited.
+*Script-derived* — values produced by a committed seeded script: confirm the named
+script exists, and that the entry's values match an inline expected value in the
+script source (hardcoded constant, tolerance target, trailing comment) or a
+committed fixture. Where the script commits neither, the entry is recorded as
+**script-attested, values not independently confirmed** — the honest status, never
+a bare "verified".
+*Mixed* — both legs (O1, O-OW, O-SEM and their like): each leg verified by its own
+rule, because classifying a mixed entry as a single kind necessarily leaves half its
+values unchecked.
+**What a script-derived "verified" asserts:** that the registry agrees with what the
+repo commits — the script exists, is seeded, and its committed expected values match
+the entry. **What it does not assert:** that the script, re-run today, still produces
+those values. That is a *reproducibility* claim and requires execution; engine
+versions (glmmTMB, brms/Stan), BLAS, and RNG streams may all have drifted since the
+entry was written. A script-derived verified status is a **provenance** claim, not a
+reproducibility claim, and must not be read as the latter.
+**Why re-running was refused (plan gate, 2026-07-19):** the Bayesian sweeps are
+multi-hour background jobs (LESSONS 2026-07-19/M47: a live-Stan coverage sweep is
+~2 h, roughly doubling under concurrent-R contention), and re-running them is a
+different milestone's work with a different risk profile. A discrepancy found by the
+confirmation pass is **escalated**, not silently re-run: re-running the implicated
+script becomes its own milestone.
+**Consequences:** both index pages can reach a dated-verified extraction status that
+states what was actually done, closing the last two `references staleness` advisory
+survivors. The provenance-vs-reproducibility distinction is now on the record, so a
+later reader cannot mistake a script-derived verified entry for a re-executed one.
+Reproducibility of the seeded scripts remains a standing, separately-plannable gap
+(PRINCIPLES.md #12) — this entry scopes it out, it does not declare it closed.
+
+### D-008 Amendment 1 (2026-07-19): correcting D-008's Context — 25 committed fixtures exist, not 4
+
+**Context:** D-008's Context asserted that "only 4 write a committed fixture under
+`tests/testthat/fixtures/`". That is **false**, and D-008 is append-only history, so
+it is corrected here rather than edited. The true figure is **25 committed,
+git-tracked `.rds` fixtures** under `tests/testthat/fixtures/`, written by 27 of the
+41 `data-raw/` scripts. The error was methodological: the implement-gate survey
+grepped for `saveRDS(x, "literal-path")` and so missed the dominant form in this
+repo, `saveRDS(out, fixture)`, where the destination is a variable bound earlier in
+the script. The related claims in D-008's Context stand as written and were
+re-checked: `data-raw/` holds zero `.csv`/`.txt` and one `.rds`, and
+`data-raw/.oracle-*-checkpoint.rds` is gitignored (`.gitignore:11`).
+**Effect on the decision:** none. D-008's three-kind bar already names "a committed
+fixture under `tests/testthat/fixtures/`" as a verification target, so the correction
+*widens* what can be verified at the stronger fixture bar rather than changing the
+rule. The **script-attested, values not independently confirmed** status remains
+necessary but applies to a smaller residual than D-008's Context implied — the
+non-Bayes scripts that write no fixture (`oracle-fixed-vs-random.R`,
+`oracle-d-study.R`, `oracle-incomplete.R`, `oracle-multilevel.R`,
+`oracle-fixed-incomplete.R`, `oracle-sem.R`), whose entries are instead confirmed
+against inline expected values where they carry them.
+**Also unchanged:** the provenance-vs-reproducibility distinction. A fixture records
+what the script produced *when it was last run*; confirming an entry against it is
+still a provenance claim, not evidence that a re-run today reproduces it.
+**Consequences:** the count is not restated anywhere else in the record
+(LESSONS 2026-07-19/M70 — a count is a form that breaks when a fact is added); the
+per-entry classification in `ORACLES.md` carries the per-entry truth.

@@ -69,8 +69,11 @@ sf_ratings_long <- function() {
 }
 
 # --- Published oracle values -----------------------------------------------
-# Milestone 1 targets (two-way random, ABSOLUTE agreement). Values are the
-# published Shrout & Fleiss numbers to three decimals.
+# Milestone 1 targets (two-way random, ABSOLUTE agreement). Shrout & Fleiss
+# Table 4 (p. 424) prints these to TWO decimals (.29 / .62); the three-decimal
+# values below are the reproductions by psych::ICC()/DescTools::ICC() recorded
+# in the provenance header above, and each rounds to the printed figure. Do
+# not describe them as published to three decimals (M72, D-008).
 sf_oracle <- list(
   "ICC(A,1)" = 0.290,   # Shrout-Fleiss ICC(2,1)
   "ICC(A,k)" = 0.620    # Shrout-Fleiss ICC(2,k)

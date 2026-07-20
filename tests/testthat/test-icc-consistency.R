@@ -32,8 +32,9 @@ test_that("ICC(C,1)/ICC(C,k) match the published Shrout & Fleiss values", {
   skip_if_not_installed("glmmTMB")
 
   fit <- fit_sf()
-  # Published ICC(3,1) = 0.715, ICC(3,k) = 0.909 (three decimals). Balanced
-  # data => the mixed-model estimate rounds to the published value exactly.
+  # SF Table 4 prints ICC(3,1) = .71, ICC(3,k) = .91 (two decimals); 0.715 /
+  # 0.909 are the psych/DescTools reproductions (M72, D-008). Balanced data =>
+  # the mixed-model estimate rounds to those 3-dp values exactly.
   expect_equal(
     round(icc_estimate(fit, "ICC(C,1)"), 3),
     sf_oracle_all[["ICC(C,1)"]]

@@ -13,9 +13,10 @@ test_that("one-way reproduces the published Shrout & Fleiss values (O-OW textboo
   ow <- tidy(icc(d, score, subject, rater, model = "oneway", seed = 1))
   i1 <- ow$estimate[ow$index == "ICC(1)"]
   ik <- ow$estimate[ow$index == "ICC(k)"]
-  # SF published to 3 d.p. (ICC(1) = 0.166, ICC(1,k) = 0.443); assert the ABSOLUTE
-  # gap so the last-place rounding of the published value is not read as a
-  # relative-tolerance failure (M5.5 lesson).
+  # SF Table 4 prints 2 d.p. (.17 / .44); 0.166 / 0.443 are the psych/DescTools
+  # reproductions and round to those (M72, D-008). Assert the ABSOLUTE gap so
+  # the last-place rounding is not read as a relative-tolerance failure
+  # (M5.5 lesson).
   expect_lt(abs(i1 - sf_oracle_all[["ICC(1)"]]), 1e-3)
   expect_lt(abs(ik - sf_oracle_all[["ICC(k)"]]), 1e-3)
 })
