@@ -169,18 +169,26 @@ added mid-M72 (below).
 
 **Three arrivals during M72 (2026-07-19), none yet carrying a source note.**
 `lee2024a` and `vispoel2022b` are cited by `ORACLES.md` and their source legs were
-verified against them under M72 T3 — they are the two works the "acquire the
-off-shelf sources" candidate row was written for, and it now names only the
-remaining two. `vispoel2022a` is **not cited anywhere in the repo**: it is
+verified against them under M72 T3. `brennan2001_ch3` is **Chapter 3 only** of
+Brennan (2001), supplied so the O-Bayes-Rep decomposition leg could be closed
+(verified, T3); the rest of the book is not on the shelf, so whole-book
+bibliographic fields still come from outside it. Together these closed three of
+the four legs the "acquire the off-shelf sources" candidate row was written for;
+it now names only Cronbach et al. (1972).
+
+A fourth PDF, `vispoel2022a`, arrived and was **removed from the shelf on
+2026-07-19 at the maintainer's instruction**. It was cited nowhere in the repo:
 Vispoel, Lee, Xu & Hong (2022), *Psychological Assessment* 34(12), 1093–1111,
 "Expanding Bifactor Models of Psychological Traits…" — a *different* paper from
 the cited Vispoel, Hong, Lee & Xu (2022) NCME conference paper, sharing four
-authors in a different order. It contains no GENOVA, no 24-scale count, and none
-of the agreement figures, so it does **not** settle O-SEM's external-validation
-pin; `vispoel2022b` does. The suffix pair is a trap for a later reader and is
-flagged here for that reason. **So the "no orphan in either direction" invariant
-below no longer holds**: three shelf PDFs have no note, and `vispoel2022a` has no
-citation either.
+authors in a different order, and containing no GENOVA, no 24-scale count, and
+none of the agreement figures. It did **not** settle O-SEM's external-validation
+pin; `vispoel2022b` does. Recorded here rather than silently dropped, because the
+near-identical citekeys are exactly the confusion a later reader would re-create.
+
+**So the "no orphan in either direction" invariant below no longer holds**: three
+shelf PDFs now have no source note. (A stray non-PDF, `vispoel2022b.txt`, also
+sits in `sources/`; it is not a source and is not inventoried here.)
 
 Citekey convention:
 same-author-same-year takes a letter suffix ordered by issue — `tenhove2025a`
@@ -197,8 +205,8 @@ sources were ingested by M64;
 `ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
 sources by M65; the seven foundational/interpretation sources by M66; the four
 equality-testing sources by M67. Every *note* still has a shelf PDF, but the
-converse no longer holds: the three PDFs that arrived during M72 (`lee2024a`,
-`vispoel2022a`, `vispoel2022b`) carry no note, so the shelf now has note-less
+converse no longer holds: the three PDFs that remain from M72's arrivals
+(`lee2024a`, `vispoel2022b`, `brennan2001_ch3`) carry no note, so the shelf has note-less
 members — **the "no orphan in either direction" state recorded here through
 M71 ended on 2026-07-19** (observed 2026-07-19). Writing notes for the two cited
 arrivals is not M72's scope; M72 verified their *legs* against them directly,

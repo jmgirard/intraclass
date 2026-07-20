@@ -50,7 +50,8 @@ is marked unverified at the point of claim, not silently dropped.
 | Jorgensen (2021) Eq. 6 — raw σ̂²_i = Σν̂²/(n_i−1), no bias correction | printed p. 117 | verified — observed 2026-07-19 |
 | Lee & Vispoel (2024) Eqs. 8/25 — raw σ̂²_i with divisor n_i−1, no bias correction | printed pp. 405/407 | verified — observed 2026-07-19 |
 | Vispoel, Hong, Lee & Xu (2022) — SEM indicator-mean vs 12 R/SAS/SPSS procedures, ≤ .001 (G) / ≤ .005 (global D) across 24 scales | PDF p. 6 (tables pp. 9–10) | verified — observed 2026-07-19; **GENOVA removed from the compared-program list, which the source does not mention** |
-| Cronbach et al. (1972); Brennan (2001) — the GT two-facet decomposition behind O-Bayes-Rep | — | **not verified — off the shelf**; marked in place at the claim, observed 2026-07-19 |
+| Brennan (2001) Ch. 3 — the two-facet decomposition behind O-Bayes-Rep: crossed `p × i × h` into seven effects (Fig. 3.1), and the `i:(p × o)` replicates-within-cell design O-Bayes-Rep actually fits (§3.1.2) | printed pp. 56 / 58 | verified — observed 2026-07-19 |
+| Cronbach et al. (1972) — the same decomposition, co-cited | — | **not verified — off the shelf**; marked in place at the claim, observed 2026-07-19 |
 
 **Pagination basis.** ten Hove et al. (2022) is cited by its **advance-online
 PDF pages 1–17**, *not* the journal pages of the version of record,
@@ -914,9 +915,16 @@ is cited by **PDF page** for that reason.
   frequentist glmmTMB replicate points fall inside the brms credible intervals (differing only by the
   prior; the M26 containment posture).
 - **Sources:** ten Hove et al. (2020) prior/recipe; generalizability theory two-facet (rater × occasion)
-  decomposition (Cronbach et al. 1972; Brennan 2001 — **neither is on the shelf, so this
-  attribution is unverified**; the decomposition is standard GT and is independently pinned
-  by the entry's own oracles, M72, observed 2026-07-19); estimand-spec `M17-within-cell-replicates.md` (§1-2
+  decomposition (Cronbach et al. 1972; Brennan 2001). **Brennan verified against Ch. 3
+  2026-07-19 (M72)**, and the reading is more precise than the phrase "rater × occasion"
+  suggests: Fig. 3.1 (printed p. 56) gives the *fully crossed* `p × i × h` decomposition into
+  seven effects, but this oracle's model is not that one — replicates sit **within** each
+  subject×rater cell, which is Brennan's `i:(p × o)` design (§3.1.2, printed p. 58), named
+  there as "the random effects two-way factorial design with replications (items) within
+  cells". Its four effects — p, o, po, i:po — are exactly this entry's σ²_s, σ²_r, σ²_sr, σ²_e.
+  **Cronbach et al. (1972) is still off the shelf, so that half of the co-citation remains
+  unverified** (M72, observed 2026-07-19); the decomposition is standard GT and is
+  independently pinned by the entry's own oracles; estimand-spec `M17-within-cell-replicates.md` (§1-2
   measurement model + per-component divisors — no new spec, M29 gives the shipped estimand the brms engine).
 - **DGP:** two-way random with within-cell replicates, N_s = 25, k = 4, n_o = 3, σ²_s = 1.0, σ²_r = 0.16,
   σ²_sr = 0.5, σ²_e = 0.7; pop single ICC(A,1) = s²_s/(s²_s+s²_r+s²_sr+s²_e), pop average = the same with

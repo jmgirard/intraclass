@@ -31,13 +31,14 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   Methodology, 18*, 93. doi:10.1186/s12874-018-0550-6. (Bounded-scale
   heteroscedasticity and pooled-study inflation of the inter-rater ICC — see
   [`bobak2018.md`](bobak2018.md).)
-- Brennan, R. L. (2001). *Generalizability Theory.* Springer. (**Not on the shelf —
-  fields not verified against the source**, M72, 2026-07-19. Corroborated only
-  secondarily, by the reference list of `tenhove2020`, which cites it as
-  "Brennan, R. L. (2001). Generalizability theory. New York, NY: Springer" — a
-  citation of the book, not the book. The GT two-facet decomposition this work is
-  cited for in `ORACLES.md` (O-Bayes-Rep) is likewise unverified; see the ROADMAP
-  candidate row.)
+- Brennan, R. L. (2001). *Generalizability Theory.* Springer. (**Chapter 3 is on the
+  shelf** as `brennan2001_ch3`, supplied by the maintainer 2026-07-19; the rest of the
+  book is not, so the *whole-book* fields — publisher, city, year — are still taken
+  from outside it. They are corroborated secondarily by the reference list of
+  `tenhove2020`, which cites "Brennan, R. L. (2001). Generalizability theory.
+  New York, NY: Springer" — a citation of the book, not the book. The two-facet
+  decomposition this work is cited for in `ORACLES.md` (O-Bayes-Rep) **is verified**
+  against Ch. 3, printed pp. 56 and 58, M72, 2026-07-19.)
 - Brooks, M. E., et al. (2017). glmmTMB balances speed and flexibility among
   packages for zero-inflated generalized linear mixed models. *The R Journal,
   9*(2), 378–400. (**Not on the shelf — fields not verified against the source**,
