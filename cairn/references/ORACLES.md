@@ -343,14 +343,18 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
      on balanced data.
   2. **Agreement = SEM indicator-mean estimator (Jorgensen 2021, Eq. 6).**
      σ²_r = Σν²/(k−1), the **raw** variance of the effects-coded indicator intercepts
-     (no bias correction — confirmed by Lee & Vispoel 2024, Eqs. 8/25). Pinned by:
+     (no bias correction — confirmed by Lee & Vispoel 2024, Eqs. 8/25; **that
+     confirmation is not verified: the source is not on the shelf** — M72,
+     observed 2026-07-19). Pinned by:
      (a) the **exact Eq. 6 formula** reproduced independently in-test
      (`components$rater` = Σ(mean_j − grand)²/(k−1) = 5.4144 on SF); (b) a **large-N
      seeded simulation** where lavaan → the known population and lavaan ≈ glmmTMB
      (their asymptotic equivalence, tol 0.02/0.05, #12); (c) **external validation** —
      Vispoel, Hong, Lee & Xu (2022) show the SEM indicator-mean method matches GENOVA
      / `gtheory` / SAS / SPSS to ≤ .001 (G-coef) / ≤ .005 (D-coef) across 24 real
-     scales. On the 6-subject SF data this estimator gives ICC(A,1)=0.284 (not the
+     scales. **This pin is not verified: the source is not on the shelf, so the
+     claimed agreement figures have not been read against it** (M72, observed
+     2026-07-19). On the 6-subject SF data this estimator gives ICC(A,1)=0.284 (not the
      mixed-model 0.290) — a documented small-sample difference, regression-pinned.
   - **Interval:** consistency vs glmmTMB *random* MC CI, agreement vs glmmTMB *fixed*
     MC CI (the SEM recovers the rater effect from a finite set of intercepts —
@@ -813,7 +817,9 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   frequentist glmmTMB replicate points fall inside the brms credible intervals (differing only by the
   prior; the M26 containment posture).
 - **Sources:** ten Hove et al. (2020) prior/recipe; generalizability theory two-facet (rater × occasion)
-  decomposition (Cronbach et al. 1972; Brennan 2001); estimand-spec `M17-within-cell-replicates.md` (§1-2
+  decomposition (Cronbach et al. 1972; Brennan 2001 — **neither is on the shelf, so this
+  attribution is unverified**; the decomposition is standard GT and is independently pinned
+  by the entry's own oracles, M72, observed 2026-07-19); estimand-spec `M17-within-cell-replicates.md` (§1-2
   measurement model + per-component divisors — no new spec, M29 gives the shipped estimand the brms engine).
 - **DGP:** two-way random with within-cell replicates, N_s = 25, k = 4, n_o = 3, σ²_s = 1.0, σ²_r = 0.16,
   σ²_sr = 0.5, σ²_e = 0.7; pop single ICC(A,1) = s²_s/(s²_s+s²_r+s²_sr+s²_e), pop average = the same with
