@@ -109,7 +109,7 @@ settled shelf rather than twice.
       that the entry's values match an inline expected value or a committed
       fixture; where the script commits neither, record the honest
       script-attested status. Escalate any mismatch rather than re-running.
-- [ ] T5: fix the Shrout & Fleiss three-decimal attribution in `ORACLES.md`
+- [x] T5: fix the Shrout & Fleiss three-decimal attribution in `ORACLES.md`
       (O-OW, O1) and in `tests/testthat/helper-shrout-fleiss.R:72–73` —
       that file's *top* provenance header is already accurate and must be
       left alone (LESSONS 2026-07-18/M69).
@@ -134,6 +134,9 @@ settled shelf rather than twice.
 - 2026-07-19: T2 in progress — [S] Explore subagent ran mechanical per-entry extraction over all 39 entries (cited source / script / numeric values / test file / provenance) plus a `data-raw/` script audit; every script path named by an entry confirmed present. Extraction is fact-only; classification calls kept in the main session (LESSONS 2026-07-19/M71 — interpretive prose is where verification fails).
 - 2026-07-19: T2 done — a `- **Kind:**` bullet inserted after each of the 39 headings naming the kind, the D-008 citation, and the legs. Applied by a committed scratch script that asserts the keyed line numbers exactly equal the set of `### ` headings before writing, so no entry could be mislabelled by drift. Split: 25 mixed, 10 script-derived, 4 source-traceable.
 - 2026-07-19: T2 finding for T3/T5 — O6's entry re-derives the SF values 0.290/0.620/0.715/0.909 and `data-raw/oracle-fixed-incomplete.R:79-82` hardcodes them, but neither cites Shrout & Fleiss; the attribution belongs with the T5 three-decimal fix.
+- 2026-07-19: T5 done — SF Table 4 (p. 424) read directly from `cairn/references/sources/shrout1979.pdf` and confirmed to print TWO decimals (.17/.29/.71/.44/.62/.91). Settled by a 400-dpi crop render, not the text layer, which is OCR-damaged here (renders `JCC`/`/CC` for `ICC`) — LESSONS 2026-07-19/M66. The `ICC(1,4)` cell's second digit is ink-blotted and not cleanly legible at render; the text layer reads `.44` and the computed 0.4428 rounds to `.44`, and the two-decimal claim does not depend on that digit.
+- 2026-07-19: T5 sweep found FOUR sites beyond the three AC5 names, all calling the 3-dp values published — `test-icc-oneway.R:16`, `test-icc-consistency.R:35`, `test-icc-twoway-agreement.R:51` and `:62`. Fixed: AC5 protects the property (the six values are no longer called published), not the enumeration (LESSONS 2026-07-18/M68), so the extra sites are in scope, not a scope expansion. The mechanical per-file sweep is what surfaced them (LESSONS 2026-07-19/M67).
+- 2026-07-19: T5 verify — `devtools::test()` with NOT_CRAN=true CI=true: 1802 pass, 0 fail, 0 error, 23 skip (all skip_on_ci brms). `air format --check .` clean; `lintr::lint_package()` no lints. No oracle value changed — the fix is prose attribution only.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

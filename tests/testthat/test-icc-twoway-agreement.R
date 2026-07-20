@@ -48,8 +48,9 @@ test_that("ICC(A,1) matches the published Shrout & Fleiss (1979) value", {
   fit <- fit_sf_agreement()
   est <- icc_estimate(fit, "ICC(A,1)")
 
-  # Published ICC(2,1) = 0.290 (three decimals). Balanced data => the
-  # mixed-model estimate should round to the published value exactly.
+  # SF Table 4 prints ICC(2,1) = .29 (two decimals); 0.290 is the
+  # psych/DescTools reproduction (M72, D-008). Balanced data => the
+  # mixed-model estimate should round to that 3-dp value exactly.
   expect_equal(round(est, 3), sf_oracle[["ICC(A,1)"]])
 })
 
@@ -59,7 +60,8 @@ test_that("ICC(A,k) matches the published Shrout & Fleiss (1979) value", {
   fit <- fit_sf_agreement()
   est <- icc_estimate(fit, "ICC(A,k)")
 
-  # Published ICC(2,k) = 0.620 (three decimals).
+  # SF Table 4 prints ICC(2,k) = .62 (two decimals); 0.620 is the
+  # psych/DescTools reproduction (M72, D-008).
   expect_equal(round(est, 3), sf_oracle[["ICC(A,k)"]])
 })
 

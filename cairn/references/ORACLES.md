@@ -39,7 +39,11 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   test — do not read it as a standing oracle. The values themselves trace to the
   Shrout & Fleiss (1979) textbook (the primary source, #4), so this does not
   affect provenance.
-- **Values (3 dp):**
+- **Values.** Shrout & Fleiss Table 4 (p. 424) prints **two** decimals; the
+  three-decimal values below are the `psych::ICC()`/`DescTools::ICC()`
+  reproductions recorded in `helper-shrout-fleiss.R`'s provenance header, each
+  of which rounds to the printed figure (.17/.29/.71/.44/.62/.91). They are
+  **not** published to 3 dp — verified against the source 2026-07-19 (M72).
 
   | Package label | This package | SF form | Value |
   |---|---|---|---|
@@ -306,7 +310,10 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `M6-oneway.md` §7). Unlike O-ML, a textbook worked example **does** exist (SF
   Case 1), so five oracles pin the estimand:
   1. **Shrout & Fleiss (1979) textbook** — ICC(1) = 0.166, ICC(1,k) = 0.443 (the
-     staged O1 values), asserted on the absolute gap (published to 3 dp).
+     staged O1 values), asserted on the absolute gap. Table 4 (p. 424) prints
+     these to **two** decimals (.17 / .44); the 3-dp values are the
+     `psych`/`DescTools` reproductions and round to the printed figures
+     (verified against the source 2026-07-19, M72).
   2. **`psych::ICC` ICC1/ICC1k** — live in-suite cross-check to 1e-4.
   3. **One-way ANOVA mean squares** — `(MSB−MSW)/(MSB+(k−1)MSW)` and
      `(MSB−MSW)/MSB` from base `stats::aov(score ~ subject)`, package-independent,
