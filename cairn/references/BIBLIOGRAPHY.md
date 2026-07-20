@@ -1,8 +1,8 @@
 # Bibliography
 
 **Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md` (16 entries, body moved byte-identically), then extended and corrected in place by M64 (→ 18 entries), M65 (→ 27), and M66 (→ 34); M68 added only this block. On 2026-07-19 the `jorgensen2019` entry was replaced in place by `vanderark2023` — the published version of record of the same study, under a different first author — leaving the count at 34; M67 then added the four equality-testing entries (→ 38).
-Pagination: —.
-Extraction: unverified — the 16 split entries moved as text and were never read against their sources, which is what keeps this page's status unverified as a whole; the 11 added by M64/M65 were authored from the shelf PDFs on 2026-07-18 and not re-read since; the 7 added by M66 were authored on 2026-07-19 from shelf copies each read end-to-end, and two of those entries deliberately withheld a field the source does not print (Trevethan's year and pagination — **since supplied by the maintainer and filled in, 2026-07-19**, leaving only its issue number withheld), with Shieh's citekey-vs-issue year flagged inline; the third such case, Jorgensen's missing year/venue/pagination, was resolved on 2026-07-19 when the published `vanderark2023` chapter superseded that preprint entry; the 4 added by M67 were authored on 2026-07-19 from shelf copies each read end-to-end, and **all four** withhold a field the source does not print (no DOI on `donner2002`, `konishi1989`, or `young1998`; no issue number on `konishi1989`, `naik2007`, or `young1998`) — census said "three" on first pass and is corrected here, 2026-07-19, the M67 review having found `donner2002`'s missing DOI unannotated and two unprinted issue numbers supplied — observed 2026-07-19.
+Pagination: per-entry; each entry states whether a field is printed on its own source.
+Extraction: **verified 2026-07-19 (M72)**, at a depth set by provenance (D-008). Every entry whose source is on the shelf was checked field-by-field against that source's title page — title, byline, venue, year, volume, issue, pages, DOI — and every field the source does not print is now annotated as unprinted at the entry rather than left to read as transcribed. Entries whose source is **not** on the shelf are marked as such in place and are unverified by construction, not by omission. What the pass changed: `tenhove2024`'s title was restored (it had been abbreviated and its subtitle dropped); the `vispoel2022` entry's compared-program list lost **GENOVA**, which that source never mentions and which belongs to `lee2024a`; `xiao2009` was found to be a **second** citekey-vs-issue-year case alongside `shieh2015` (its own header prints 2010, the cover sheet 2009); and the unprinted-issue-number annotations were added across the MDPI, Elsevier, Wiley, Springer and T&F entries that assert one. `mcgraw1996`'s bound-in correction page carries no folio, volume, or issue of its own, so that correction's `1(4), 390` is publisher-record too. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70).
 
 The repo's bibliography. Oracle provenance lives in
 [`ORACLES.md`](ORACLES.md); per-source extractions with page/table anchors live
@@ -21,7 +21,8 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
 - Bhandary, M., & Fujiwara, K. (2006). A small sample test for the equality of
   intraclass correlation coefficients under unequal family sizes for several
   populations. *Communications in Statistics — Simulation and Computation, 35*(3),
-  765–778. doi:10.1080/03610910600716894. (Gaussian familial `F_max` equality
+  765–778. doi:10.1080/03610910600716894. (The issue number is not printed on the
+  article; it is the publisher's, recorded 2026-07-19, M72.) (Gaussian familial `F_max` equality
   test; outside the contract boundary, ingested as boundary evidence — see
   [`bhandary2006.md`](bhandary2006.md).)
 - Bobak, C. A., Barr, P. J., & O'Malley, A. J. (2018). Estimation of an inter-rater
@@ -30,16 +31,27 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   Methodology, 18*, 93. doi:10.1186/s12874-018-0550-6. (Bounded-scale
   heteroscedasticity and pooled-study inflation of the inter-rater ICC — see
   [`bobak2018.md`](bobak2018.md).)
-- Brennan, R. L. (2001). *Generalizability Theory.* Springer.
+- Brennan, R. L. (2001). *Generalizability Theory.* Springer. (**Not on the shelf —
+  fields not verified against the source**, M72, 2026-07-19. Corroborated only
+  secondarily, by the reference list of `tenhove2020`, which cites it as
+  "Brennan, R. L. (2001). Generalizability theory. New York, NY: Springer" — a
+  citation of the book, not the book. The GT two-facet decomposition this work is
+  cited for in `ORACLES.md` (O-Bayes-Rep) is likewise unverified; see the ROADMAP
+  candidate row.)
 - Brooks, M. E., et al. (2017). glmmTMB balances speed and flexibility among
   packages for zero-inflated generalized linear mixed models. *The R Journal,
-  9*(2), 378–400.
+  9*(2), 378–400. (**Not on the shelf — fields not verified against the source**,
+  M72, 2026-07-19. The byline is also abbreviated "et al." rather than enumerated;
+  the paper has further authors this entry does not name.)
 - Cicchetti, D. V. (1994). Guidelines, criteria, and rules of thumb for evaluating
   normed and standardized assessment instruments in psychology. *Psychological
   Assessment, 6*(4), 284–290. doi:10.1037/1040-3590.6.4.284. (Interpretation-band
   source for `getting-started.Rmd`, M40 — the older sibling rule of thumb: ICC < 0.40
   poor, 0.40–0.59 fair, 0.60–0.74 good, 0.75–1.00 excellent. Cited as one convention
   among several, with caveats; the package computes no verdict — #4/#18.)
+  (**Not on the shelf — fields and bands not verified against the source**, M72,
+  2026-07-19. The bands are load-bearing for `getting-started.Rmd`, so this is the
+  most consequential of the six off-shelf entries.)
 - Donner, A., & Zou, G. (2002). Testing the equality of dependent intraclass
   correlation coefficients. *The Statistician, 51*(Part 3), 367–379. (Published in
   the JRSS Series D journal, which prints only the short title.) (No DOI is
@@ -58,7 +70,10 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   contract boundary — no rater facet** — see [`hedges2012.md`](hedges2012.md).)
 - Jorgensen, T. D. (2021). How to estimate absolute-error components in structural
   equation models of generalizability theory. *Psych, 3*(2), 113–133.
-  doi:10.3390/psych3020011. (The M7 lavaan engine's SEM absolute-error method —
+  doi:10.3390/psych3020011. (The article prints "Psych 2021, 3, 113–133" with **no
+  issue number**; the 2 is decoded from the MDPI DOI, whose `psych3020011` encodes
+  volume 3, issue 02, article 0011 — recorded 2026-07-19, M72.) (The M7 lavaan
+  engine's SEM absolute-error method —
   see [`jorgensen2021.md`](jorgensen2021.md).)
 - Konishi, S., & Gupta, A. K. (1989). Testing the equality of several intraclass
   correlation coefficients. *Journal of Statistical Planning and Inference, 21*,
@@ -69,22 +84,38 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   — see [`konishi1989.md`](konishi1989.md).)
 - Koo, T. K., & Li, M. Y. (2016). A guideline of selecting and reporting intraclass
   correlation coefficients for reliability research. *Journal of Chiropractic
-  Medicine, 15*(2), 155–163. doi:10.1016/j.jcm.2016.02.012. (The primary
+  Medicine, 15*(2), 155–163. doi:10.1016/j.jcm.2016.02.012. (The article heads
+  "Journal of Chiropractic Medicine (2016) 15, 155–163" with **no issue number**;
+  the 2 is the publisher's — recorded 2026-07-19, M72.) (The primary
   interpretation-band source for `getting-started.Rmd` — see
   [`koo2016.md`](koo2016.md).)
 - Lee, H., & Vispoel, W. P. (2024). A robust indicator mean-based method for
   estimating generalizability theory absolute error and related dependability indices
   within structural equation modeling frameworks. *Psych, 6*(1), 401–425.
-  doi:10.3390/psych6010024. (Confirms the raw indicator-mean formula, Eqs. 8/25;
+  doi:10.3390/psych6010024. (The article prints "Psych 2024, 6, 401–425" with **no
+  issue number**; the 1 is decoded from the MDPI DOI, whose `psych6010024` encodes
+  volume 6, issue 01, article 0024 — recorded 2026-07-19, M72.) (Confirms the raw
+  indicator-mean formula, Eqs. 8 (printed p. 405) and 25 (printed p. 407), both
+  dividing by n_i − 1 with no bias correction — **verified against the source**
+  2026-07-19, M72, after the maintainer put the PDF on the shelf mid-milestone;
   "robust" = an ordinal scale-coarseness correction, not a bias correction.)
 - McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass
   correlation coefficients. *Psychological Methods, 1*(1), 30–46 (+ correction,
-  *1*(4), 390). (The package's ICC(A,·)/ICC(C,·) labels and Case 3A — see
+  *1*(4), 390). (Journal, year, volume, issue, and pages of the article itself are
+  printed on its title page and confirmed. The **correction's** own volume, issue,
+  and page are *not*: the correction is bound into the shelf copy as a final page
+  carrying no folio, volume, or issue of its own — it cites only the original
+  article — so `1(4), 390` comes from the publisher record, recorded 2026-07-19,
+  M72. The correction page also misprints the article's title as "Intraclass
+  Correlations Coefficients"; the title page reads "Correlation".) (The package's
+  ICC(A,·)/ICC(C,·) labels and Case 3A — see
   [`mcgraw1996.md`](mcgraw1996.md).)
 - Mehta, S., Bastero-Caballero, R. F., Sun, Y., Zhu, R., Murphy, D. K., Hardas, B.,
   & Koch, G. (2018). Performance of intraclass correlation coefficient (ICC) as a
   reliability index under various distributions in scale reliability studies.
-  *Statistics in Medicine, 37*(18), 2734–2752. doi:10.1002/sim.7679. (How the
+  *Statistics in Medicine, 37*(18), 2734–2752. doi:10.1002/sim.7679. (The issue
+  number is not printed on the article; it is the publisher's, recorded
+  2026-07-19, M72.) (How the
   subject distribution, not scale quality, drives `ICC(2,1)` — see
   [`mehta2018.md`](mehta2018.md).)
 - Naik, D. N., & Helu, A. (2007). On testing equality of intraclass correlations
@@ -101,7 +132,8 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   of one-way-ICC CI methods; the M62 NBOOT-prototype oracle — see
   [`ohyama2025.md`](ohyama2025.md).)
 - Rosseel, Y. (2012). lavaan: An R package for structural equation modeling.
-  *Journal of Statistical Software, 48*(2), 1–36. (M7 SEM engine.)
+  *Journal of Statistical Software, 48*(2), 1–36. (M7 SEM engine.) (**Not on the
+  shelf — fields not verified against the source**, M72, 2026-07-19.)
 - Saha, K. K. (2012). Profile likelihood-based confidence interval of the
   intraclass correlation for binary outcome data sampled from clusters.
   *Statistics in Medicine.* doi:10.1002/sim.5489. (Beta-binomial ICC intervals;
@@ -112,11 +144,14 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   24*, 3497–3512. doi:10.1002/sim.2197. (The BCML point estimator underlying
   Saha (2012); binary outcomes — see [`saha2005.md`](saha2005.md).)
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
+  (**Not on the shelf — fields not verified against the source**, M72, 2026-07-19.)
 - Shieh, G. (2016). Choosing the best index for the average score intraclass
   correlation coefficient. *Behavior Research Methods, 48*(3), 994–1003.
   doi:10.3758/s13428-015-0623-y. (Cited as `shieh2015` after the 2015
   online-publication/copyright year printed on the same page; the issue year is
-  2016.) (`ICC(2) = 1 − 1/F*` is negatively biased and MSE-dominated by four
+  2016. The issue number is not printed on the article — the header reads
+  "Behav Res (2016) 48:994–1003" — and is the publisher's, recorded
+  2026-07-19, M72. See `xiao2009` below for the second citekey-vs-issue-year case.) (`ICC(2) = 1 − 1/F*` is negatively biased and MSE-dominated by four
   alternatives — but it is an ANOVA plug-in the package does not use — see
   [`shieh2015.md`](shieh2015.md).)
 - Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in assessing
@@ -139,9 +174,14 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   *Psychological Methods, 27*(4), 650–666 (advance online publication 2021;
   doi:10.1037/met0000391). (The M5 multilevel estimand — see
   [`tenhove2022.md`](tenhove2022.md).)
-- ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2024). Updated guidelines
-  on selecting an ICC for interrater reliability. *Psychological Methods, 29*(5),
-  967–979. doi:10.1037/met0000516. (The ICC-selection guidance behind
+- ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2024). Updated guidelines on
+  selecting an intraclass correlation coefficient for interrater reliability, with
+  applications to incomplete observational designs. *Psychological Methods, 29*(5),
+  967–979. doi:10.1037/met0000516. (Title corrected against the source 2026-07-19,
+  M72: the entry had abbreviated "intraclass correlation coefficient" to "ICC" and
+  dropped the subtitle entirely. Volume, issue, and pages are the version of record
+  and are **not printed** on the shelf copy, an advance-online PDF marked © 2022.)
+  (The ICC-selection guidance behind
   `choosing-an-icc.Rmd` — see [`tenhove2024.md`](tenhove2024.md).)
 - ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2025a). Interrater
   reliability for interdependent social network data: A generalizability theory
@@ -167,6 +207,8 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
 - Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
   Non-parametric bootstrap confidence intervals for the intraclass correlation
   coefficient. *Statistics in Medicine, 22*(24), 3805–3821. doi:10.1002/sim.1643.
+  (The issue number is not printed on the article; it is the publisher's, recorded
+  2026-07-19, M72.)
   (The M62 primary source for the transformed bootstrap-t, D-006 — see
   [`ukoumunne2003.md`](ukoumunne2003.md).)
 - van der Ark, L. A., Jorgensen, T. D., & ten Hove, D. (2023). Factors affecting
@@ -186,19 +228,37 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
 - Vispoel, W. P., Hong, H., Lee, H., & Xu, G. (2022). Accuracy of absolute error
   estimates within a G-theory SEM framework. Paper presented at the meeting of the
   National Council on Measurement in Education (NCME), April 9, 2022. (Conference
-  paper — validates the SEM indicator-mean absolute-error method against GENOVA /
-  `gtheory` / SAS / SPSS: G-coefs agree to ≤ .001, D-coefs to ≤ .005 across 24 real
-  scales. External corroboration for O-SEM, M7.)
+  paper, unpaginated — cited by PDF page for that reason. Validates the SEM
+  indicator-mean absolute-error method against `lavaan` / `lmer` / `psych` /
+  `gtheory` in R, SAS `PROC VARCOMP`, and SPSS — "12 procedures within R, SAS, and
+  SPSS": G-coefs agree to ≤ .001, global D-coefs to ≤ .005 across 24 real
+  scales (PDF p. 6; tables pp. 9–10). External corroboration for O-SEM, M7.
+  **Verified against the source 2026-07-19, M72**, after the maintainer put the PDF
+  on the shelf mid-milestone. *Correction: this entry previously listed **GENOVA**
+  among the compared programs. The paper never mentions GENOVA; that program
+  belongs to the sibling source Lee & Vispoel (2024), whose abstract cites
+  agreement with GENOVA and `gtheory`. The two validation sets had been conflated;
+  the ≤ .001 / ≤ .005 figures and the 24-scale count are as printed and unchanged.*)
 - Weeks, D. L., & Williams, D. R. (1964). A note on the determination of
   connectedness in an N-way cross classification. *Technometrics, 6*(3), 319–324.
+  (**Not on the shelf — fields not verified against the source**, M72, 2026-07-19.)
 - Xiao, Y., Liu, J., & Bhandary, M. (2009). Profile likelihood based confidence
   intervals for common intraclass correlation coefficient. *Communications in
   Statistics — Simulation and Computation, 39*(1), 111–118.
-  doi:10.1080/03610910903324834. (Familial multi-sample common ICC; naive profile
+  doi:10.1080/03610910903324834. (**Citekey-vs-issue-year case, found 2026-07-19,
+  M72 — the second such case, alongside `shieh2015`.** The shelf copy's Taylor &
+  Francis cover sheet cites the article as "(2009) … 39:1, 111-118" and records
+  "Published online: 10 Nov 2009", but the article's *own* running header on the
+  next page reads "39: 111–118, **2010**". So the issue version of record is 2010
+  and the citekey's `2009` follows the online-publication year. Not renamed —
+  renaming would break the milestone Scope lists and every cross-reference.
+  Volume, issue, and pages come from the cover sheet, not the article header,
+  which omits the issue.) (Familial multi-sample common ICC; naive profile
   likelihood covers well in *this* design — see [`xiao2009.md`](xiao2009.md).)
 - Xiao, Y., & Liu, H. (2013). Modified profile likelihood approach for certain
   intraclass correlation coefficients. *Computational Statistics, 28*(5),
-  2241–2265. doi:10.1007/s00180-013-0405-x. (The named source for the
+  2241–2265. doi:10.1007/s00180-013-0405-x. (The issue number is not printed on the
+  article; it is the publisher's, recorded 2026-07-19, M72.) (The named source for the
   profile-likelihood CI candidate — two-way random interrater, and the naive-PL
   under-coverage finding; see [`xiao2013.md`](xiao2013.md).)
 - Young, D. J., & Bhandary, M. (1998). Test for equality of intraclass correlation
