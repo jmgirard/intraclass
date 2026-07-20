@@ -93,7 +93,7 @@ settled shelf rather than twice.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: draft the D-entry defining the bar for all three kinds; it governs
+- [x] T1: draft the D-entry defining the bar for all three kinds; it governs
       the rest of the milestone, so it lands first.
 - [ ] T2: classify all 39 `ORACLES.md` entries as source-traceable,
       script-derived, or mixed (`cairn/references/ORACLES.md`; entries span
@@ -129,6 +129,7 @@ settled shelf rather than twice.
 - 2026-07-19: gated amendment (implement gate, 3 questions) — AC4 rewritten: no committed script output exists to verify against (data-raw holds zero csv/txt, one rds; `data-raw/.oracle-*-checkpoint.rds` is gitignored; 35 scripts assert via stopifnot, only 4 write a committed fixture), so AC4 now verifies against inline expected values or committed fixtures and records "script-attested, values not independently confirmed" where neither exists. All 28 scripts named in ORACLES.md confirmed present on disk at the gate.
 - 2026-07-19: gated amendment — a third entry kind "mixed" added (AC2/AC3/AC4, Scope, T2–T4): O1, O-OW, O-SEM and their like carry both a source and a script leg, and each leg is verified by its own rule; classifying a mixed entry as one kind would leave half its values unverified.
 - 2026-07-19: gated amendment — AC6/T6 scope set to all 38 BIBLIOGRAPHY entries at a depth set by provenance (field-by-field for the 16 D-007 split entries, consistency pass over the 22 from M64–M67); the plan's "starting with the 16" left the remainder's disposition unstated.
+- 2026-07-19: T1 done — D-008 appended, defining the three-kind bar and recording that a script-derived "verified" is a provenance claim, not a reproducibility claim (the seeded scripts are not re-run; that gap stays separately plannable under #12).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
