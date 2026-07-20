@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-19 (audit: gate green, both GitHub inboxes empty, tree clean; M72 mid-flight with T3 partial. This line replaced its accumulated narrative, clearing the `record density` WARN; remaining advisories are the expected 294 legacy id tokens and the 2 index-page extractions M72 is closing)._
+_Last hygiene check: 2026-07-19 (M72 merged via PR #78; gate green — `check()` 0/0/0, `cairn_validate` exit 0. The two index-page extraction advisories are now closed and the `references staleness` WARN is gone; the 294 legacy id tokens remain the one expected advisory)._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -12,13 +12,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M70 | Re-verify the one-way and equality-testing extractions (6 notes) | done | — | normal | milestones/archive/M70-reverify-oneway-equality-extractions.md |
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
-| M72 | Verify the oracle registry and the bibliography | review | M70, M71 | normal | milestones/M72-verify-oracle-registry-bibliography.md |
+| M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |
 | M73 | Make every dated observation executable | planned | M71 | normal | milestones/M73-executable-dated-observations.md |
 | M74 | Re-derive the generalizing claims over their full source tables | planned | M73 | low | milestones/M74-generalizing-claim-audit.md |
-| M69 | Re-verify the ten load-bearing source extractions | done | M68 | normal | milestones/archive/M69-reverify-loadbearing-extractions.md |
 | M66 | Source notes — the foundational and interpretation shelf | done | M63 | low | milestones/archive/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | done | M63 | low | milestones/archive/M67-source-notes-equality-testing.md |
-<!-- terminal-row retention: M71 done (2026-07-19) → M68 rotated out (oldest terminal, archived 2026-07-18 21:19; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M71, M70, M67, M66, M69 (5 most recent terminal). -->
+<!-- terminal-row retention: M72 done (2026-07-19) → M69 rotated out (oldest terminal, archived 2026-07-18 23:42; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M72, M71, M70, M67, M66 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
