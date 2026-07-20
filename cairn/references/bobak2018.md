@@ -2,7 +2,15 @@
 
 **Provenance.** Ingested 2026-07-18 by M65 from `cairn/references/sources/bobak2018.pdf` (gitignored).
 Pagination: the article's own printed pages (BMC per-article pagination — `18:93` is an article number, not a page range).
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified — every value, anchor and quoted string re-read against the
+shelf PDF, all 11 pages; the reference list ends the document on p. 11 with
+nothing after it. All 13 Table 3 rows, all 3 Table 2 rows and every Table 4/5
+value reproduce exactly, and each page anchor was confirmed by extracting that
+page on its own (the `Page N of 11` footers make this checkable) — observed
+2026-07-19 (M71). That per-page pass initially missed one prose anchor (the
+0.944 sentence, anchored to p. 8 where its footer reads `Page 7 of 11`), caught
+by independent review and corrected the same day; the table anchors it did check
+all hold.
 
 **Citation.** Bobak CA, Barr PJ, O'Malley AJ (2018). "Estimation of an inter-rater
 intra-class correlation coefficient that overcomes common assumption violations
@@ -15,8 +23,10 @@ Geisel School of Medicine, Dartmouth College. Bobak and O'Malley
 
 **Role.** Ingested by M65 as half of the distributional-robustness pair. **This
 is the first M65 source that is genuinely an inter-rater ICC paper** — the same
-estimand family the package computes. Nothing in the package traces to it and no
-`ORACLES.md` entry cites it, but unlike the rest of the cluster it is *inside*
+estimand family the package computes. Nothing in the package traced to it and no
+`ORACLES.md` entry cited it — observed 2026-07-19 (grep for `bobak` over `R/`,
+`tests/`, `man/`, `vignettes/`, `data-raw/` and `ORACLES.md`: no hits) — but
+unlike the rest of the cluster it is *inside*
 the contract boundary and its critique lands on the package's own model
 assumptions.
 
@@ -27,7 +37,7 @@ assumptions.
 | Domain | **Inter-rater reliability** of a health measurement scale — Observer OPTION⁵, two trained raters scoring recorded clinical encounters (Abstract; "Case study design", p. 5) |
 | Design | **Crossed / two-way**: "the recorded encounters from all three studies were re-rated by the same two raters" (p. 5). Subjects are *encounters*; `R = 2` raters score every encounter |
 | Raters | **Fixed, and modelled as a fixed effect** — `β₁(j − 1.5)` in Eq. (5), a single rater contrast, not a random rater variance |
-| Definition | **Consistency, not absolute agreement.** The Discussion states it: "The measurement we've proposed here is an inter-rater, inter-case discriminatory ICC and hence applies for forms of the ICC … emphasizing **consistency** of measurements" (p. 9). Systematic rater difference is absorbed by `β[Rater]`, whose 95 % credible interval (−0.073, −0.051) **excludes zero** — there is a real rater offset, and the ICC is defined to ignore it |
+| Definition | **Consistency, not absolute agreement.** The Discussion states it, and the operative word is *consistency*: "The measurement we've proposed here is an inter-rater, inter-case discriminatory ICC and hence applies for forms of the ICC … emphasizing consistency of measurements" (p. 9). Systematic rater difference is absorbed by `β[Rater]`, whose 95 % credible interval (−0.073, −0.051) **excludes zero** — there is a real rater offset, and the ICC is defined to ignore it |
 | Estimation | **Bayesian** — MCMC via JAGS, driven from R by `rjags` ("Evaluation of Bayesian Estimation", p. 5) |
 | Outcome scale | **Bounded** `(0, 1)` and truncated — Eqs. (3)–(4) put a `Normal(·) I(0,1)` on the rescaled score. The method is aimed at bounded scales specifically |
 | Balance | Balanced in raters (both raters score every encounter), unbalanced across studies (`N₁ = 201`, `N₂ = 72`, `N₃ = 38`) |
@@ -63,7 +73,8 @@ of a decision aid. **Eq. (6) is the contribution**: the within-encounter
 (rater) variance is not constant but a *binomial-shaped function of the true
 score*, largest at `θ = 0.5` and vanishing at the ends. The stated intuition
 (p. 4): "it is easier to distinguish cases against a baseline level of a trait
-close to 0 % or 100 % than cases in which the trait is about 50 % present".
+close to 0% or 100% than cases in which the trait is about 50% present"
+(percent signs unspaced, as printed).
 Figure 3 (p. 6) is the empirical justification — a smoothing spline through the
 observed between-rater variance against the mean score traces an inverted U that
 the binomial variance function tracks and a constant mean variance plainly does
@@ -95,8 +106,11 @@ practice."
 
 **This is a between-subject-variance argument, and it generalizes past this
 paper.** Any ICC is inflated by widening the subject population — a point
-`koo2016` makes in prose (p. 158: a low ICC "may reflect low subject
-variability") and this paper makes structurally, with a model and a number.
+`koo2016` makes in prose (p. 158, noting that a low ICC may reflect low subject
+variability rather than poor agreement — a paraphrase, not a quotation; the
+source's own sentence is longer, and `koo2016.md:55–57` paraphrases it the same
+way, quoting only the disclaimer sentence that precedes it) and this paper
+makes structurally, with a model and a number.
 
 ## AC3: this paper reports **no coverage results**
 
@@ -150,14 +164,36 @@ ICC **0.640** (0.568, 0.702); pooled ICCb\* **0.706** (0.614, 0.930).
 | Study 1 − Study 3 | −0.155 | 0.170 | 0.171 | 0.508 | 0.835 |
 | Study 2 − Study 3 | −0.659 | −0.306 | −0.302 | 0.078 | 0.056 |
 
+**The last column is printed `p-value`, which it is not.** Table 2's caption
+defines it as "the posterior probability that the difference exceeds 0", and the
+body reads it that way — the sentence "probability that study 3 has a higher ICC
+than study 2 = 0.944" is on **p. 7** (footer `Page 7 of 11`), one page before the
+table it reads, i.e. `1 − 0.056` from the last row. The header above is
+therefore the *correct* label, not the printed one — flagged because a posterior
+probability tabulated under `p-value` invites exactly the wrong reading, and
+because the note must not look like it mis-transcribed the header.
+
 ### The headline numbers, read together
 
 The same 311 encounters and the same two raters yield **0.821 / 0.295 / 0.644**
 study-by-study, **0.609** if variances are forced equal across studies, and
-**0.640** if heteroscedasticity is ignored entirely. The abstract's summary:
-ignoring heteroscedasticity inflates the within-study estimate to "as high as
-0.640", and pooling with between-study variation inflates it by "approximately
-0.066 to 0.072 depending on the model".
+**0.640** if heteroscedasticity is ignored entirely. The abstract gives **two
+distinct pooling penalties**, and the note previously carried only the second:
+pooling "without accounting for the variability between studies" inflates
+estimates "by approximately 0.02" — call it the **0.02 penalty** — while
+"formerly allowing for between study variation in the ICC inflated its estimated
+value by approximately 0.066 to 0.072 depending on the model" (the abstract
+prints "formerly" where it plainly means *formally*; quoted as printed).
+Ignoring heteroscedasticity separately inflates the within-study estimate to
+"as high as 0.640".
+
+**Source erratum in the Results text (p. 8).** The sentence deriving those
+figures reads "estimates 0.072 or 0.066 greater depending on whether
+heteroscedasticity was accounted (Table 3) or ignored (Table 4)" — but both
+table numbers are off by one. `0.072` is Table **4**'s `ICCb* − ICC`
+(0.681 − 0.609) and `0.066` is Table **5**'s (0.706 − 0.640); Table 3 has no
+pooled `ICCb*` row at all, being the per-study model. The accounted/ignored
+mapping is right; only the pointers are wrong.
 
 Note what Study 2 does to the story: its ICC is **0.295** — "poor" on
 `koo2016`'s bands — while every pooled or homogenized summary lands in
@@ -169,16 +205,24 @@ a constructed illustration.
 
 ## Connection to the GP6 known-failure axes (T3's explicit requirement)
 
+**A note on "GP6 axes".** GP6 is a *practice* — sweep whatever axis the known
+failure mode grows — and names cluster count, incidence and raggedness only as
+examples. The repo maintains **no enumerated registry of known-failure axes**
+(checked against `DESIGN.md` and `PRINCIPLES.md`, observed 2026-07-19), so
+"on the GP6 list" is not a thing a claim can be true or false against. The rows
+below map this paper onto the axes M65 chose to track, nothing more.
+
 | GP6 axis | What this paper says |
 |---|---|
-| **Non-normality** | Addressed indirectly. The paper does not assume a heavy-tailed or skewed outcome; it assumes a *bounded* one and handles it with a truncated normal `I(0,1)` (Eqs. 3, 7) plus a mean-dependent variance. So the failure it targets is **boundedness-induced heteroscedasticity**, which is a distinct axis from the non-normality M62/`ukoumunne2003` covers (heavy tails). The package's Gaussian mixed model makes *both* assumptions; only the second is currently on the GP6 list |
+| **Non-normality** | Addressed indirectly. The paper does not assume a heavy-tailed or skewed outcome; it assumes a *bounded* one and handles it with a truncated normal `I(0,1)` (Eqs. 3, 7) plus a mean-dependent variance. So the failure it targets is **boundedness-induced heteroscedasticity**, which is a distinct axis from the non-normality M62/`ukoumunne2003` covers (heavy tails). The package's Gaussian mixed model makes *both* assumptions, and **neither axis has been swept here**: no non-Gaussian simulation DGP exists in `R/` or `tests/` (`grep -rniE 'rt\(|heavy.tail|rchisq|rgamma\(|lognormal' R/ tests/` returns no DGP, observed 2026-07-19). What the repo has on the heavy-tail axis is `ukoumunne2003`'s *published* sweep, cited rather than reproduced |
 | **Near-zero ICC** | Not addressed. The smallest estimate is 0.295 and there is no boundary discussion, no singular-fit analogue, and no simulation near zero. **A Bayesian fit with proper priors does not hit the frequentist boundary at all** — the D-004 "smooth" behavior — so the paper is silent on the package's hardest case by construction |
 | **Few subjects** | Touched, not studied. Study 3 has `N₃ = 38` encounters and the paper attributes its wide credible intervals to "the relative small sample sizes in two of the studies and the fact that there are only three studies to inform the between-study variance component, ω" (p. 7). `ω`'s interval (0.003, 0.717) is the visible symptom — **three studies is not enough to estimate a between-study variance**, an incidental-parameters observation matching the M27/M28/M36 lesson |
-| **New axis this paper adds** | **Mean-dependent within-subject variance.** Not currently a GP6 axis and not something the package's engines can express — see Open questions |
+| **New axis this paper adds** | **Mean-dependent within-subject variance.** Not among the axes GP6 names, and not something the package's engines can express — see Open questions |
 
 ## Traces to
 
-- Nothing in the package.
+- Nothing in the package — see the grep recorded under **Role** above
+  (observed 2026-07-19).
 - `cairn/references/koo2016.md` — this paper cites Koo & Li (its ref. 14) for
   the ten ICC forms and uses their bands; the Study-2 result above is strong
   independent material for that note's IP3 open question.
@@ -207,10 +251,14 @@ a constructed illustration.
   only one that could support a **live** oracle rather than a frozen one. Not
   verified at M65: the note records the URL as printed; the repository was **not
   fetched or run**, so its current existence and contents are unconfirmed.
-- **`ω` vs `ω²`.** Table 3 lists the term as `ω` while Eqs. (9)–(10) and the
-  prior specification use `ω²` (and `ω⁻² ~ Gamma`). Whether the tabulated 0.029
-  is the SD or the variance is not stated. Do not reuse that row without
-  resolving it.
+- **Squared-or-not is ambiguous for two parameters, not one.** Table 3 lists the
+  term as `ω` while Eqs. (9)–(10) and the prior specification use `ω²` (and
+  `ω⁻² ~ Gamma`); whether the tabulated 0.029 is the SD or the variance is not
+  stated. **The same ambiguity hits `τ`**: Table 3 tabulates `τ²[Study h]`
+  (0.043 / 0.011 / 0.023) but Tables 4 and 5 tabulate a bare `τ` (0.015, 0.014).
+  Since Table 4 keeps the same variance function as Table 3 and only pools the
+  variances, a `τ²` around 0.015 and a `τ` around 0.015 are very different
+  claims. Do not reuse either row across tables without resolving the exponent.
 - **No coverage evidence** — see the AC3 section. The method's calibration is
   entirely unvalidated: no simulation, and the case study cannot show whether the
   credible intervals have nominal frequentist coverage. For a package governed by

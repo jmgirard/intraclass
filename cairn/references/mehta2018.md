@@ -2,7 +2,11 @@
 
 **Provenance.** Ingested 2026-07-18 by M65 from `cairn/references/sources/mehta2018.pdf` (gitignored).
 Pagination: printed journal pages 2734–2752.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified — every value, anchor and quoted string re-read against the
+shelf PDF, all 19 pages. The reference list ends at reference 37 part-way down
+p. 2750, followed by the "How to cite this article" box, and **Appendices A–C
+then run to p. 2752, the final page** — confirmed, not assumed (M65 once
+recorded them absent; LESSONS 2026-07-18) — observed 2026-07-19 (M71).
 
 **Citation.** Mehta S, Bastero-Caballero RF, Sun Y, Zhu R, Murphy DK, Hardas B,
 Koch G (2018). "Performance of intraclass correlation coefficient (ICC) as a
@@ -17,7 +21,9 @@ by Allergan Inc.
 **Role.** Ingested by M65 as half of the distributional-robustness pair.
 **Squarely inside the package's contract** — it studies the two-way random
 `ICC(2,1)` the package computes, with the classical Shrout–Fleiss estimator.
-Nothing in the package traces to it; no `ORACLES.md` entry cites it.
+Nothing in the package traced to it and no `ORACLES.md` entry cited it —
+observed 2026-07-19 (grep for `mehta` over `R/`, `tests/`, `man/`, `vignettes/`,
+`data-raw/`, `NAMESPACE`, `DESCRIPTION` and `ORACLES.md`: no hits).
 
 ## Design applicability (AC2)
 
@@ -54,8 +60,8 @@ across grades 0–4; extreme convex = 2.3 / 28.7 / 42.7 / 22.7 / 3.6 %.
 
 **The ordering, stated in the abstract and confirmed in Table 4: `ICC` from the
 convex distribution < uniform < concave.** At identical rater quality. The
-mechanism (§3.2, pp. 2740–2741) is decomposed and this is the part that
-transfers:
+mechanism (§3.2, which runs pp. 2740–2743) is decomposed and this is the part
+that transfers:
 
 - **Subject variance `σ̂²_a` drives the whole effect** (Table 5, p. 2742): it is
   highest under concave distributions (2.43 at Case 1, extreme concave,
@@ -63,10 +69,10 @@ transfers:
 - **Rater error variance is essentially unchanged across distributions**
   (Table 6, p. 2743): 0.18 / 0.19 / 0.20 at Case 1 for extreme-concave /
   uniform / extreme-convex. The scale is equally good in all three.
-- Hence, verbatim from the abstract: "the dissimilarity of `ICC` among
-  distributions is attributed to the study design (ie, distribution of subjects)
-  component of subject variability and **not the scale quality component of rater
-  error variability**."
+- Hence, verbatim from the abstract — and the second half is the load-bearing
+  clause: "the dissimilarity of `ICC` among distributions is attributed to the
+  study design (ie, distribution of subjects) component of subject variability
+  and not the scale quality component of rater error variability."
 
 The interpretation consequence is stated bluntly (p. 2741): under Case 2, the
 same instrument reads as "almost perfect" agreement under the extreme concave
@@ -131,7 +137,7 @@ rater main effect is negligible even though the estimator is the two-way one.
 | **Uniform** | **300** | **0.90 (0.01)** | **0.79 (0.02)** | **0.68 (0.03)** | **0.58 (0.03)** | **0.34 (0.05)** | **0.16 (0.04)** |
 | **Uniform** | **80** | **0.90 (0.02)** | **0.79 (0.04)** | **0.68 (0.06)** | **0.58 (0.06)** | **0.35 (0.10)** | **0.17 (0.09)** |
 | Mild convex | 300 | 0.82 (0.02) | 0.65 (0.03) | 0.51 (0.04) | 0.39 (0.04) | 0.26 (0.06) | 0.11 (0.04) |
-| Extreme convex | 300 | 0.78 (0.02) | 0.58 (0.03) | 0.43 (0.04) | 0.30 (0.04) | 0.22 (0.06) | 0.08 (0.04) |
+| Extreme convex | 300 | 0.78 (0.02) | 0.58 (0.04) | 0.43 (0.04) | 0.30 (0.04) | 0.22 (0.06) | 0.08 (0.04) |
 | Extreme convex | 80 | 0.78 (0.04) | 0.58 (0.07) | 0.43 (0.08) | 0.31 (0.08) | 0.23 (0.11) | 0.09 (0.08) |
 
 Companion tables: **Table 5** (p. 2742) mean subject variance `σ̂²_a`; **Table 6**
@@ -141,13 +147,22 @@ give the full variance decomposition per cell.
 ### Sample size: `N = 80` is as good as `N = 300` for the point estimate
 
 Table 4's `N = 300` and `N = 80` rows agree to **0.00–0.01 in every one of the 30
-cells** (p. 2740). The abstract's conclusion: "any increase in the number of
-subjects beyond a moderately large specification such as `n = 80` does not have a
-major impact on `ICC`."
+cells** (5 distributions × 6 cases; checked pair by pair at M71, p. 2740). The
+abstract's conclusion: "any increase in the number of subjects beyond a
+moderately large specification such as `n = 80` does not have a major impact on
+`ICC`."
 
-**But read the interdecile ranges, not the means.** At `N = 80` the spread is
-consistently 2–3× wider than at `N = 300` — Case 5, uniform: 0.10 vs 0.05;
-Case 4, extreme convex: 0.08 vs 0.04. And the spread grows sharply with
+**But read the interdecile ranges, not the means.** At `N = 80` the spread
+**roughly doubles** — about 1–2.5× across the 30 cells, most often almost exactly
+2× (Case 5, uniform: 0.10 vs 0.05; Case 4, extreme convex: 0.08 vs 0.04). The
+**minimum** ratio (1.0, from 0.01 vs 0.01) is unique to **Case 1 of the two
+concave distributions** — extreme concave and mild concave both print it, and no
+other cell in Table 4 reaches it. The next value up is *not* concave-specific:
+the 1.5× at concave Case 2 (0.03 vs 0.02) is matched exactly, same digits, by
+**mild convex Case 1**. Below-2× cells occur under every shape except uniform,
+whose six ratios never drop below 2.0 (five at 2.0, Case 6 at 2.25), so shape
+alone does not order them — computed over all 30 `N = 80` / `N = 300` pairs in
+Table 4, not read off the concave rows. And the spread grows sharply with
 disagreement: uniform `N = 80` goes from 0.02 at Case 1 to 0.10 at Case 5. The
 paper says this ("as the number of subjects decreases, more variability in the
 estimates is realized particularly for higher levels of disagreement", p. 2740),
@@ -165,13 +180,31 @@ per grade where `m` is the minimum across-grade frequency, with a documented
 top-up rule when some grade is too thin; (4) repeat `l` times; (5) **combine the
 `l` `ICC` estimates by bootstrap techniques**.
 
-Results (**Table 7**, p. 2745): sampling moves `ICC` toward the uniform-distribution
-value from both sides — up for convex, down for concave. **The mode is the best
-categorizer**, giving `ICC` closest to uniform across all six disagreement levels;
-mean and median match it only at low disagreement, and the mean "tends to produce
-higher `ICC` for severe levels of disagreement" (p. 2746). The safeguard claim is
-that rater error variance is essentially unchanged by sampling, so the procedure
-"does not make an unreliable scale look reliable" (p. 2746).
+Results (**Table 7**, p. 2745): sampling moves `ICC` toward the
+uniform-distribution value from both sides — up for convex, down for concave.
+
+**That direction claim holds unconditionally only for the mode.** At severe
+disagreement the mean and median *reverse* for concave populations: extreme
+concave Case 4 goes 0.69 (full) → 0.72 (mean), and Case 5 goes 0.39 → 0.56,
+both moving **away** from uniform's 0.58 and 0.34. The paper says so itself —
+"as the levels of disagreement increase, sampling based on mean and median can
+produce higher `ICC` values when compared with those from the population"
+(p. 2745). Mode-sampled values track uniform at every case (Case 5: 0.35 against
+uniform's 0.34; Case 6: 0.18 against 0.16).
+
+**The mode is therefore the best categorizer**, and the paper establishes this in
+two separate places rather than one: for concave populations "the mode provides
+the smallest absolute difference from the uniform distribution across all 6
+levels of disagreement" (p. 2745), and for convex ones "the `ICC` does not exceed
+that of the standard uniform paradigm across all cases when median and mode are
+used. The mean, on the other hand, tends to produce higher `ICC` for severe
+levels of disagreement" (p. 2746). §6 states the combined conclusion: "as the
+levels of disagreement increase in concave and convex distributions, the sampling
+method via the mode is a better measure to categorize" (p. 2748).
+
+The safeguard claim is that rater error variance is essentially unchanged by
+sampling, so the procedure "does not make an unreliable scale look reliable"
+(p. 2746).
 
 ### Appendices A–C (pp. 2750–2752) — the variance decomposition under sampling
 
@@ -192,11 +225,23 @@ sampling methods. They are what substantiates the §4 safeguard claim. Selected
 
 Sampling pulls `σ̂²_a` toward the uniform value from both sides — down from 2.43
 to 1.85 (concave) and up from 0.70 to 1.24 (convex), against uniform's 1.70 —
-which is the mechanism behind the Table 7 `ICC` convergence. The matching
-Appendix B rater-error rows barely move (extreme concave Case 1: 0.18 full vs
-0.19 sampled; extreme convex: 0.20 vs 0.19–0.20, against uniform's 0.19),
-**confirming the paper's safeguard claim with its own numbers**: sampling shifts
-subject variance and leaves rater error essentially untouched.
+which is the mechanism behind the Table 7 `ICC` convergence.
+
+**The safeguard claim checks out at Case 1, but *unchanged* is the wrong word at
+severe disagreement.** At Case 1 the Appendix B rater-error rows barely move
+(extreme concave 0.18 full vs 0.19 sampled; extreme convex 0.20 vs 0.19–0.20,
+against uniform's 0.19). At Cases 5–6 they move materially: extreme concave
+Case 5 goes 1.44 (full) → 1.13 (mean) / 1.26 (mode), and extreme convex Case 6
+goes 1.19 → 1.39 (mode), against uniform's 1.20 and 1.46. The paper flags the
+mean exception ("except for the mean with higher levels of disagreement",
+p. 2746) but not the mode's.
+
+So the accurate statement of the safeguard is **directional, not static**: rater
+error moves *toward the uniform-distribution value* rather than staying put, and
+in the convex case that means it moves **up** — which is the direction that
+argues against artificial inflation, since a higher rater-error estimate lowers
+`ICC`. The claim survives; its usual shorthand — *rater error variance is
+unchanged* — does not.
 
 **Appendix C** (p. 2752, Figure C1) plots `ICC` across the six cases for the full
 extreme-concave and extreme-convex populations against their `n = 80` samples and
@@ -222,20 +267,37 @@ MIANALYZE):
 | Temple hollowing | 0.68 | 0.68 | 0.29 | **0.81 (0.03)** | 1.41 (0.10) | 0.32 (0.05) |
 
 Every scale's `ICC` rises, by up to 0.15 (fine lines, 0.61 → 0.76), and four of
-five cross a `koo2016` band boundary.
+five cross a `koo2016` band boundary (moderate → good; forehead lines starts and
+ends in *good*).
+
+**Mind whose bands.** The paper judges against Landis & Koch (its reference 30),
+not `koo2016`, and under *those* thresholds only **three** of five change
+classification — the paper states that fine lines and forehead lines show "no
+change in qualitative classification" while hand volume deficit, skin roughness
+and temple hollowing gain one (p. 2747). Both counts are correct for their own
+band system; cite the count with the system attached, or the note will look like
+it contradicts the paper.
 
 ## Connection to the GP6 known-failure axes (T3's explicit requirement)
+
+**A note on "GP6 axes".** GP6 is a *practice* — sweep whatever axis the known
+failure mode grows — and names cluster count, incidence and raggedness only as
+examples. The repo maintains **no enumerated registry of known-failure axes**
+(checked against `DESIGN.md` and `PRINCIPLES.md`, observed 2026-07-19), so
+"on the GP6 list" is not a thing a claim can be true or false against. The rows
+below map this paper onto the axes M65 chose to track, nothing more.
 
 | GP6 axis | What this paper says |
 |---|---|
 | **Non-normality** | **Directly and centrally.** But of the *subject* distribution, not the error distribution — the axis is the shape of the true-score distribution across the scale (convex/concave/uniform/skewed), which is distinct from the heavy-tailed *error* non-normality `ukoumunne2003` studies and from `bobak2018`'s bounded-scale heteroscedasticity. **Three M65/M62 sources, three different things all called "non-normality".** Worth keeping straight |
 | **Few subjects** | Addressed and partly reassuring: the point estimate is stable down to `N = 80` and, per §5, `N = 50`. But interval-relevant spread is not — see the caveat above |
 | **Near-zero ICC** | Reached, at last. Case 6 produces `ICC` = 0.08 (extreme convex, `N = 300`), the **lowest true value anywhere in the M65 cluster**. The paper reports no estimation difficulty there — unsurprising, since it uses closed-form mean squares that cannot fail to converge, unlike the package's mixed-model fits |
-| **Ordinal / discrete outcomes** | An axis the package does not currently list. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about |
+| **Ordinal / discrete outcomes** | **Named repeatedly in the repo as unscheduled future work, never as a swept axis.** `cairn/COVERAGE.md:196` carries "categorical / ordinal ratings (GLMM engines)" at status `🔵 Not yet`; `cairn/estimand-specs/M6-oneway.md:213` defers it to the ROADMAP; and the pre-migration files (`cairn/legacy/ROADMAP.md:77`, plus recurring mentions in `legacy/STATUS.md`, `legacy/MILESTONES.md` and `legacy/DECISIONS.md`) carry it as a standing carryover candidate. Settled by `grep -rni 'ordinal' cairn/` — observed 2026-07-19. What no document does is record a *sweep*: the axis is deferred everywhere and studied nowhere. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about |
 
 ## Traces to
 
-- Nothing in the package.
+- Nothing in the package — see the grep recorded under **Role** above
+  (observed 2026-07-19).
 - `cairn/references/shrout1979.md` — Eq. (3) here is `ICC(2,1)`; Shrout & Fleiss
   is this paper's reference 1.
 - `cairn/references/fleiss1973.md` — cited here as reference 29 (the
@@ -266,6 +328,11 @@ five cross a `koo2016` band boundary.
   separately in the text (p. 2739). Reimplementing them exactly is possible but
   fiddly, and any mismatch would silently change the target. If Table 4 is ever
   used as a frozen oracle, the DGP transcription is the risk, not the arithmetic.
+  Two further rules a reimplementation must not miss, both stated only in running
+  text: master grades 1, 2 and 3 have **zero** chance of a 4-point difference
+  (p. 2739), and when a subject's mode is non-unique **the maximum** of the tied
+  modes is taken as `G_mode` (p. 2744) — the latter matters because the mode is
+  the categorizer the paper ends up recommending.
 - **Skewed distributions are described but never tabulated.** Figure 1 defines
   left- and right-skewed cases and §3.1 says they were simulated, but "results
   for the skewed distributions are not shown" (p. 2739); conclusions about them
@@ -276,7 +343,9 @@ five cross a `koo2016` band boundary.
   standard deviation OF THE 10 000 `ICC` estimates", where every table in the
   paper reports an *interdecile range* instead. The two are not interchangeable
   and the figure is the only place an SD appears. Minor, recorded so the two
-  spread measures are not conflated.
+  spread measures are not conflated. (The mid-sentence capitals are **printed
+  that way** — confirmed against a 250-DPI render at M71, not a transcription
+  slip; the appendix headings are set in caps and the run bled into the note.)
 - **Sponsor interest.** The work is funded by Allergan plc, six of seven authors
   are Allergan-affiliated, and the application is to Allergan's own aesthetic
   scales — where the proposed method **raises** every reported reliability
@@ -290,4 +359,8 @@ five cross a `koo2016` band boundary.
   descriptive property of the design. The paper does not discuss the efficiency
   cost, and the `l = 20`-repetition bootstrap recombination (Figure 2, step 5) is
   described only as "bootstrap sampling techniques" with no stated estimator for
-  the combined variance. Recorded as an under-specified step.
+  the combined variance. Recorded as an under-specified step — **partially
+  resolved for the application**, where §5 names SAS 9.3's `PROC MIANALYZE`
+  (a multiple-imputation combining procedure, i.e. Rubin's rules) as what
+  actually combined the 20 samples (p. 2747). The *simulation* chapters still
+  say only "bootstrap".

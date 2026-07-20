@@ -2,7 +2,12 @@
 
 **Provenance.** Ingested 2026-07-18 by M65 from `cairn/references/sources/bhandary2006.pdf` (gitignored).
 Pagination: printed journal pages 765–778.
-Extraction: unverified — first pass, values not yet re-read against the source — observed 2026-07-18.
+Extraction: verified — every value, anchor and quoted string re-read against the
+shelf PDF, all 14 pages; the reference list ends the document on p. 778 (last
+entry Young & Bhandary 1998) with nothing after it. All 54 transcribed Table 2
+values and all 30 transcribed Table 1 values reproduce exactly, as do the worked
+example's estimates, both statistics, and all six critical values — observed
+2026-07-19 (M71).
 
 **Citation.** Bhandary M, Fujiwara K (2006). "A Small Sample Test for the
 Equality of Intraclass Correlation Coefficients Under Unequal Family Sizes for
@@ -17,8 +22,10 @@ cites this line of work (Young & Bhandary 1998; Bhandary & Alam 2000) for the
 equality-testing problem. Same research program, three years earlier.
 
 **Role.** Ingested by M65 as the second half of the "estimator-bias pair". **It
-is not an estimator-bias paper** — see below. Nothing in the package traces to
-it; no `ORACLES.md` entry cites it.
+is not an estimator-bias paper** — see below. Nothing in the package traced to
+it and no `ORACLES.md` entry cited it — observed 2026-07-19 (grep for
+`bhandary` over `R/`, `tests/`, `man/`, `vignettes/`, `data-raw/` and
+`ORACLES.md`: no hits).
 
 ## Design applicability (AC2)
 
@@ -97,11 +104,19 @@ anywhere. The price is multiplicity, handled by a **Bonferroni bound over the
 six statistics** (Eq. 2.17):
 
 ```
-C = max{ F_{α/6; pp,qq}, F_{α/6; pp,rr}, F_{α/6; qq,rr},
+C = max{ F_{α/6; pp,qq}, F_{α/6; ppk,rr}, F_{α/6; qq,rr},
          F_{α/6; qq,pp}, F_{α/6; rr,pp}, F_{α/6; rr,qq} }
 ```
 
-rejecting when `F_max > C` (Eq. 2.18). The authors note (p. 774) that a sharper
+**Transcribed as printed — the second term's `ppk` is a source typo.** Eq. (2.17)
+really does print `F_{α/6; ppk,rr}` (confirmed against a 400-DPI render, not the
+text layer), where the degrees of freedom must be `pp, rr`: Eq. (2.16) gives
+`F₂`'s exact null distribution as `F_{pp,rr}`, and `k` is not a df quantity
+anywhere in the paper — `pp`, `qq`, `rr` are. Read it as `F_{α/6; pp,rr}`.
+Recorded rather than silently repaired, so the note stays checkable against the
+page.
+
+Rejecting when `F_max > C` (Eq. 2.18). The authors note (p. 774) that a sharper
 Bonferroni bound exists but is unusable here because the six `F_i` are all
 correlated and their joint distribution is intractable — **so the test is
 conservative by construction**, which Table 2 confirms.
@@ -115,7 +130,11 @@ maximum of 15 siblings (`theta = 41.2552`, matching the success probability
 0.483 determined by the previous family-size-simulation research the paper
 cites — **Rosner et al. 1977 and Srivastava & Keen 1988**, p. 774);
 `ρ₁, ρ₂, ρ₃` over 0.1–0.9 in steps of 0.1; **10,000 replications** per
-combination; `α = 0.05`.
+combination; `α = 0.05`. (A reproducibility oddity worth knowing: the vectors
+are generated "using R program", but the negative-binomial parameters are quoted
+as the setting for a "FORTRAN IMSL negative binomial subroutine" — the paper
+mixes the two toolchains in one paragraph and never says which produced the
+family sizes.)
 
 **Table 2 (p. 774), "Checking the alpha level"** — the size table, transcribed
 in full. This is the paper's headline result and the most reusable thing in it:
@@ -148,7 +167,7 @@ ICC papers in this milestone, on different estimands, both find `χ²`-calibrate
 asymptotics too liberal at small samples.
 
 **Table 1 (pp. 772–773), "Rejection proportions for alpha = 0.05"** — the power
-table, 81 rows over `(ρ₁, ρ₂, ρ₃)` combinations × `K ∈ {5, 15, 30}`. A slice:
+table: **75 rows**, each carrying all six `K × test` columns. A slice:
 
 | ρ₁ | ρ₂ | ρ₃ | K=5 LRT | K=5 F | K=15 LRT | K=15 F | K=30 LRT | K=30 F |
 |---|---|---|---|---|---|---|---|---|
@@ -158,12 +177,25 @@ table, 81 rows over `(ρ₁, ρ₂, ρ₃)` combinations × `K ∈ {5, 15, 30}`.
 | 0.9 | 0.5 | 0.1 | 0.7530 | 0.5657 | 0.9984 | 1.0000 | 0.9994 | 1.0000 |
 | 0.9 | 0.9 | 0.9 | 0.0150 | 0.0248 | 0.0166 | 0.0284 | 0.0155 | 0.0394 |
 
+**Table 1 prints a deliberately selected high-`ρ` subset, not the design grid.**
+§3 says the `ρ` values "took combinations over the range of values from 0.1 to
+0.9 at increments of 0.1" — 729 combinations — but reports rejection proportions
+"for a sample combinations of `ρ₁, ρ₂`, and `ρ₃`". The 75 printed rows run
+`ρ₁ ∈ {0.7, 0.8, 0.9}` × `ρ₂ ∈ {0.5, 0.6, 0.7, 0.8, 0.9}` ×
+`ρ₃ ∈ {0.1, 0.3, 0.5, 0.7, 0.9}`: `ρ₁` never goes below 0.7 and `ρ₂` never below
+0.5. Table 2 (the size table) is the one that sweeps 0.1–0.9 evenly, and only on
+the null diagonal.
+
 The `K = 5` power comparison is **not interpretable as a like-for-like
 comparison**, because the LRT is running at a true size of up to 0.41 there —
 its apparent power advantage is bought with false positives. At `K = 15` and
 `K = 30`, where both tests are near size, `F_max` matches or beats the LRT in
-essentially every row. That is the paper's claim (p. 766) and Table 1 supports
-it *at the sample sizes where the comparison is fair*.
+essentially every printed row. That is the paper's claim and Table 1 supports it
+*at the sample sizes where the comparison is fair* — but note that the abstract
+fences the claim the same way the table does, to "higher intraclass correlation
+values" (p. 765). **No published row shows the power comparison at low `ρ₁`**,
+which is the region this package cares about, so the superiority claim should
+never be quoted without its `ρ₁ ≥ 0.7` restriction.
 
 Figures 1–4 (pp. 775–776) plot the same material: Figs 1–2 show the alpha level
 against `ρ₁=ρ₂=ρ₃` at `K = 15` and `K = 30`; Figs 3–4 show power. Fig. 3
@@ -193,7 +225,8 @@ without the authors — the one thing in the M65 cluster that is.
 
 ## Traces to
 
-- Nothing in the package.
+- Nothing in the package — see the grep recorded under **Role** above
+  (observed 2026-07-19).
 - `cairn/references/xiao2009.md` — shares author Bhandary; that paper's
   Eqs. (12)–(13) pose this same equality-testing problem and cite this line of
   work. The two notes together cover the familial-ICC corner of the shelf.
@@ -201,7 +234,9 @@ without the authors — the one thing in the M65 cluster that is.
   this paper belongs to that cluster by subject; see the cluster-reassignment
   finding above. Those four notes shipped 2026-07-19 and each names this page as
   a fifth cluster member under the same IP2 fence, so the cross-reference the
-  finding asked for now resolves in both directions. `young1998.md` is the
+  finding asked for resolves in both directions — re-checked 2026-07-19, with
+  `bhandary2006` cited by `donner2002` (×2), `konishi1989` (×1), `naik2007` (×3)
+  and `young1998` (×5). `young1998.md` is the
   closest sibling: Bhandary co-authors it, and it shares this paper's Srivastava
   estimator, Helmert transformation, simulation design, and worked data set.
 - `cairn/references/BIBLIOGRAPHY.md` and `INDEX.md`.
