@@ -24,6 +24,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 ## Registry
 
 ### Oracle O1 — Shrout & Fleiss (1979) worked example
+- **Kind:** source-traceable (D-008) — values are the Shrout & Fleiss (1979) published figures; no generating script.
 - **Used by:** `tests/testthat/test-icc-twoway-agreement.R`
   (data + values in `tests/testthat/helper-shrout-fleiss.R`).
 - **Primary source:** Shrout, P. E., & Fleiss, J. L. (1979). Intraclass
@@ -59,6 +60,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   one-way ANOVA mean squares); see O-OW.
 
 ### Oracle O2 — ANOVA mean-squares (package-independent, hand-derived)
+- **Kind:** script-derived (D-008) — in-suite: mean squares recomputed with `stats::aov()` in the test file; derivation in `estimand-specs/M1-twoway-random-agreement.md` §6.
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-anova-oracle.R`: the
   mean squares are recomputed with base `stats::aov()`, the method-of-moments
   components derived, and the glmmTMB engine's `VarCorr` + reported ICCs matched
@@ -76,12 +78,14 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   σ²_s/(σ²_s+σ²_res) = 0.71484 → 0.715.)
 
 ### Oracle O3 — seeded simulation with known population components
+- **Kind:** script-derived (D-008) — in-suite: seeded simulation in the test file.
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-simulation.R`
   (`set.seed(2024)`, n = 100, k = 8, σ²_s = 4, σ²_r = 1, σ²_res = 2). The point
   ICCs recover the population values within 0.05 and the Monte-Carlo interval
   covers them. Seeded per PRINCIPLES.md #12.
 
 ### Oracle O4 — fixed ≡ random raters on balanced data (M2; superseded by ADR-008)
+- **Kind:** script-derived (D-008) — `data-raw/oracle-fixed-vs-random.R`; no committed fixture and no `stopifnot` — see its status note.
 - **Status:** **asserted** in `tests/testthat/test-icc-consistency.R` ("fixed
   raters reproduce random point estimates on balanced data"). Originally (M2) a
   shared-fit label layer gave *identical* point estimates and CIs (ADR-006).
@@ -98,6 +102,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   caveat behind ADR-006. Reproducible; nothing hardcoded.
 
 ### Oracle O5 — incomplete/imbalanced random-rater ICCs (M3 Slice 1)
+- **Kind:** script-derived (D-008) — `data-raw/oracle-incomplete.R`; tolerance targets are computed, not literal.
 - **Status:** **asserted (M3 Slice 1)** in `tests/testthat/test-icc-incomplete.R`.
   Two independent oracles for the ragged two-way random-rater path, since no
   textbook worked example exists for arbitrary unbalanced data (M3 spec §8):
@@ -122,6 +127,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   required.
 
 ### Oracle O6 — fixed-effect fit path, two-way mixed (Case 3 / 3A) (M3 Slice 2)
+- **Kind:** script-derived (D-008) — `data-raw/oracle-fixed-incomplete.R`, which carries hardcoded expected constants.
 - **Status:** **asserted (M3 Slice 2)** in `tests/testthat/test-icc-fixed-fit.R`.
   The real fixed-effect fit `score ~ 1 + rater + (1 | subject)` for
   `raters = "fixed"` (resolves the ADR-006 debt), pinned by three oracles:
@@ -144,6 +150,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   job, not the unit suite). Reproducible; nothing hardcoded.
 
 ### Oracle O-DS — D-study projection Φ(m) (pre-M5 slice, ADR-010)
+- **Kind:** mixed (D-008) — source leg: ten Hove Eqs. 12/13; script leg: `data-raw/oracle-d-study.R`.
 - **Status:** **asserted** in `tests/testthat/test-d-study.R`. Projection of a
   fitted `icc()` to an arbitrary rater count `m` (`d_study()` and numeric `unit`),
   pinned by closed-form and independent oracles:
@@ -198,6 +205,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   simulation values). Reproducible; nothing hardcoded.
 
 ### Oracle O-ML — multilevel ICCs, subject- & cluster-level (M5)
+- **Kind:** mixed (D-008) — source leg: ten Hove Table 3 (Design 1), transcribed verbatim; script leg: `data-raw/oracle-multilevel.R`.
 - **Status:** **asserted (M5)** in `tests/testthat/test-icc-multilevel.R`
   (ADR-011; spec `M5-multilevel.md` §5). The four (level × type) estimand equations
   are transcribed verbatim from ten Hove Table 3 (Design 1). Three oracles for the
@@ -227,6 +235,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   checks), committed. Reproducible; nothing hardcoded.
 
 ### Oracle O-Conflated — conflated single-level ICC, Eq. 14 (M17 Slice 1)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eq. 14; script leg: in-suite closed-form and seeded recovery.
 - **Status:** **asserted (M17 Slice 1)** in `tests/testthat/test-icc-multilevel.R`
   (ADR-026; spec `M17-conflated-icc.md`). `level = "conflated"` targets ten Hove et
   al. (2022) **Eq. 14** — the biased single-level ICC obtained by ignoring the
@@ -241,6 +250,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   Consistency-conflated is unsourced and parked (ROADMAP).
 
 ### Oracle O-Rep — within-cell replicates, two-way random (M17 Slice 3)
+- **Kind:** script-derived (D-008) — in-suite: `sim_replicates()` in the test file plus ANOVA MoM via `stats::aov`.
 - **Status:** **asserted (M17 Slice 3)** in `tests/testthat/test-replicates.R`
   (ADR-026; spec `M17-within-cell-replicates.md`). Replicated cells split the residual
   into σ²_sr (interaction) and σ²_e (pure error) via `(1 | subject:rater)`; the
@@ -258,6 +268,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `stats::aov`. Reproducible; nothing hardcoded.
 
 ### Oracle O-FRep / O-MLRep / O-RagRep — within-cell replicate completeness (M20)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong Case 3A and the SF labels; script leg: the four in-suite `sim_*()` generators.
 - **Status:** **asserted (M20)** (ADR-030; extends spec `M17-within-cell-replicates.md`
   §7 into the shipped map). Three slices extend O-Rep beyond two-way-random /
   single-level / balanced:
@@ -290,6 +301,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   oracle for lme4 (and vice versa). Reproducible; nothing hardcoded.
 
 ### Oracle O-OW — one-way random ICC(1)/ICC(k) (M6)
+- **Kind:** mixed (D-008) — source leg: the Shrout & Fleiss published ICC(1)/ICC(1,k); script leg: in-suite ANOVA, cross-engine, and seeded simulation.
 - **Status:** **asserted (M6)** in `tests/testthat/test-icc-oneway.R` (spec
   `M6-oneway.md` §7). Unlike O-ML, a textbook worked example **does** exist (SF
   Case 1), so five oracles pin the estimand:
@@ -312,6 +324,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   hardcoded beyond the published 0.166/0.443 (already in `sf_oracle_all`).
 
 ### Oracle O-SEM — lavaan (SEM) engine, two-way (M7 random; M21 fixed/incomplete/bootstrap)
+- **Kind:** mixed (D-008) — source leg: Jorgensen (2021) Eq. 6, Lee & Vispoel (2024) Eqs. 8/25, Vispoel et al. (2022); script leg: `data-raw/oracle-sem.R`.
 - **Status:** **asserted (M7 + M21)** in `tests/testthat/test-icc-lavaan.R` and
   `tests/testthat/test-ci-bootstrap.R`. The lavaan engine fits the generalizability
   model as a common-factor SEM (Jorgensen 2021). It is oracled in **two regimes**,
@@ -367,12 +380,14 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   estimator's SF values, reproducible from Eq. 6).
 
 ### Cross-engine oracle — lme4 (independent implementation)
+- **Kind:** script-derived (D-008) — in-suite: a direct `lme4::lmer` fit in the test file.
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
   `lme4::lmer` fit directly reproduces the glmmTMB engine's point ICCs to 1e-4 on
   the balanced O1 data (ADR-002/005 — lme4 is oracle-only in M1). **M3 extends this
   cross-check to incomplete data** — see O5.
 
 ### Oracle O-Bayes — Bayesian engine + `ci_method = "posterior"` (M23, ADR-033)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2020) §4/§4.2 DGP and reproduced findings; script leg: `data-raw/oracle-bayesian.R` + committed fixture.
 - **Status:** Slice 1 **shipped** (wiring); **O-Bayes coverage oracle is M23 Slice 2**
   (in progress). A CI method's oracle is **coverage** (#1; M16 precedent), and the
   source is a **simulation study**, so there is no single worked-example point to
@@ -421,6 +436,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `skip_if_not_installed("brms")`).
 
 ### Oracle O-Bayes-Fixed — Bayesian fixed-rater two-way (M26 Slice 2, ADR-036)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2020) recipe and McGraw & Wong Case 3A; script leg: `data-raw/oracle-bayesian-fixed.R` + committed fixture.
 
 - **Role:** the fixed-rater sibling of O-Bayes. A CI method's oracle is **coverage** (#1); the
   shipped brms recipe on the fixed-rater fit `score ~ 1 + rater + (1 | subject)` — with θ²_r
@@ -458,6 +474,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   (0.715 / 0.909), each inside the brms credible interval (`skip_on_ci`).
 
 ### Oracle O-Bayes-ML — Bayesian crossed multilevel (M24, ADR-034)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eqs. 12-13 / Table 3 and the (2020) recipe; script leg: `data-raw/oracle-bayesian-multilevel.R` + committed fixture.
 
 - **Role:** the multilevel companion to O-Bayes. A CI method's oracle is **coverage**
   (#1); the source is a simulation study, so the oracle is that the shipped brms +
@@ -492,6 +509,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   live crossed-multilevel fit (MAP ≈ glmmTMB REML at the subject level; `skip_on_ci`).
 
 ### Oracle O-Bayes-NML — Bayesian nested multilevel Designs 2/3 (M25, ADR-035)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eqs. 8-11 / Table 3 and the (2020) recipe; script leg: `data-raw/oracle-bayesian-nested.R` + committed fixture.
 
 - **Role:** the nested companion to O-Bayes-ML. A CI method's oracle is **coverage** (#1);
   the source is a simulation study, so the oracle is that the shipped brms + half-*t*(4, 0, 1)
@@ -529,6 +547,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `skip_on_ci`).
 
 ### Oracle O-Bayes-OW — Bayesian one-way random (M26 Slice 1, ADR-036)
+- **Kind:** mixed (D-008) — source leg: SF / McGraw & Wong Case 1 and the ten Hove (2020) recipe; script leg: `data-raw/oracle-bayesian-oneway.R` + committed fixture.
 
 - **Role:** the one-way (single-level) sibling of O-Bayes. A CI method's oracle is
   **coverage** (#1); the shipped brms + half-*t*(4, 0, 1) recipe on the M6 **one-way**
@@ -567,6 +586,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 ---
 
 ### Oracle O-Bayes-FML — Bayesian crossed fixed-rater multilevel (M27 Slice 1, ADR-037)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2020) recipe + (2022) Design-1 estimands, McGraw & Wong Case 3A; script leg: `data-raw/oracle-bayesian-multilevel-fixed.R` + committed fixture.
 
 - **Role:** the crossed (Design 1) fixed-rater sibling of O-Bayes-ML. A CI method's oracle is
   **coverage** (#1). The shipped brms recipe on the M10 five-component crossed fit with a **fixed**
@@ -590,6 +610,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   for agreement + consistency, lme4 the second REML oracle; `skip_on_ci`).
 
 ### Oracle O-Bayes-FNML — Bayesian nested fixed-rater multilevel (M27 Slice 2, ADR-037)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2020) recipe + (2022) Design-2 estimands, McGraw & Wong Case 3A; script leg: `data-raw/oracle-bayesian-nested-fixed.R` + committed fixture.
 
 - **Role:** the nested (Design 2) fixed-rater sibling of O-Bayes-NML. The rater slot carries
   θ²_{r:c} = the within-cluster finite-population rater variance averaged over clusters. A CI
@@ -624,6 +645,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   fixed fit, glmmTMB inside the CI for agreement + consistency, lme4 the second REML oracle; `skip_on_ci`).
 
 ### Oracle O-NFI — frequentist nested-fixed MC-interval coverage (M28, ADR-038)
+- **Kind:** script-derived (D-008) — `data-raw/oracle-nested-fixed-interval.R` + committed fixture; the sources named are internal ADRs and a Fable review, not a published origin for the values.
 
 - **Role:** the **frequentist** sibling of O-Bayes-FNML — coverage of the shipped nested (Design 2)
   fixed-rater θ²_{r:c} **Monte-Carlo interval** (`theta2r_nested_draws()`, R/engine-glmmtmb.R). A CI
@@ -658,6 +680,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `data-raw/reviews/fable-check-nfi.R`.
 
 ### Oracle O-IFNML — INCOMPLETE/ragged fixed-nested (Design 2) single-rater (M36, ADR-046)
+- **Kind:** script-derived (D-008) — `data-raw/oracle-incomplete-fixed-nested.R` + committed fixture; McGraw-Wong appears only as a reduction tie-back, not the origin of a value here.
 
 - **Role:** correctness of the **incomplete/ragged** fixed-rater nested Design-2 subject-level
   single-rater ICC_s(A,1) — the ragged generalization of the balanced M19 fixed-nested θ²_{r:c}
@@ -698,6 +721,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   seeded from the feasibility spike `data-raw/reviews/m36-feasibility-spike-{point,coverage}.R`.
 
 ### Oracle O-FCL — fixed-rater CLUSTER-level ICC, crossed Design 1, balanced (M37, ADR-047)
+- **Kind:** script-derived (D-008) — `data-raw/oracle-fixed-cluster-level.R` + committed fixture; the cited specs are internal.
 
 - **Role:** correctness of the **balanced/complete crossed Design-1 fixed-rater CLUSTER-level** ICC — signal
   σ²_c, agreement error {θ²_r, σ²_cr}, consistency {σ²_cr}, divisor k (M5 §3b map with θ²_r in the rater
@@ -736,6 +760,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   from the feasibility spike `data-raw/reviews/m37-feasibility-spike-*.R`.
 
 ### Oracle O-Bayes-Conflated — Bayesian conflated diagnostic (M29 Slice 1, ADR-039)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eq. 14 and the (2020) recipe; script leg: `data-raw/oracle-bayesian-conflated.R` + committed fixture.
 
 - **Role:** the Bayesian sibling of the frequentist conflated oracle (M17 Slice 1). The conflated
   single-level ICC (ten Hove et al. 2022, **Eq. 14**) is the biased ignore-the-clustering coefficient
@@ -765,6 +790,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-conflated.R` (seeded; writes the fixture before the hard pins).
 
 ### Oracle O-Bayes-Rep — Bayesian within-cell replicates (M29 Slice 2, ADR-039)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2020) recipe and the GT two-facet decomposition (Cronbach et al. 1972; Brennan 2001); script leg: `data-raw/oracle-bayesian-replicates.R` + committed fixture.
 
 - **Role:** the Bayesian sibling of the frequentist replicate oracle (M17 Slice 3). The
   within-cell-replicate ICC splits σ²_res → σ²_sr (subject:rater interaction) + σ²_e (pure error) via
@@ -795,6 +821,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-replicates.R` (seeded; writes the fixture before the hard pins).
 
 ### Oracle O-Bayes-Incomplete — Bayesian incomplete/ragged two-way random (M30 Slice 1, ADR-040)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2020) recipe/DGP - the entry states the ragged extension is **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete.R` + committed fixture.
 
 - **Role:** the incomplete/ragged sibling of O-Bayes. `engine = "brms"` now fits **incomplete/ragged
   two-way random single-level** data — `fit_brms_twoway()` (`score ~ 1 + (1|subject) + (1|rater)`) run on
@@ -833,6 +860,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 - **Provenance:** `data-raw/oracle-bayesian-incomplete.R` (seeded; writes the fixture before the hard pins).
 
 ### Oracle O-Bayes-IML — Bayesian incomplete/ragged crossed multilevel random (M30 Slice 2, ADR-040)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2022) Design-1 decomposition + (2020) recipe, ragged extension **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete-multilevel.R` + committed fixture.
 
 - **Role:** the incomplete crossed (Design 1) **multilevel** sibling of O-Bayes-Incomplete. `engine =
   "brms"` now fits **incomplete/ragged crossed multilevel random** data — the shipped M5/M24
@@ -875,6 +903,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   hard pins).
 
 ### Oracle O-Bayes-IFixed — Bayesian incomplete/ragged two-way fixed-rater (M31 Slice 1, ADR-041)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong Case 3A and the ten Hove (2020) recipe, ragged extension **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete-fixed.R` + committed fixture.
 
 - **Role:** the incomplete/ragged **FIXED-rater** sibling of O-Bayes-Incomplete (random) and O-Bayes-Fixed
   (balanced). `engine = "brms"` + `raters = "fixed"` now fits **incomplete/ragged two-way fixed-rater** data —
@@ -919,6 +948,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `brms_theta2r_draws()` so it validates the exact 2b path, not a hand recipe).
 
 ### Oracle O-Bayes-IFML-fixed — Bayesian incomplete/ragged crossed fixed multilevel (M31 Slice 2, ADR-041)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2022) Design-1 decomposition, McGraw & Wong Case 3A, (2020) recipe, ragged extension **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete-fixed-multilevel.R` + committed fixture.
 
 - **Role:** the crossed (Design 1) **multilevel** FIXED-rater sibling of O-Bayes-IFixed (single-level fixed)
   and O-Bayes-IML (crossed multilevel random). `engine = "brms"` + `raters = "fixed"` now fits
@@ -964,6 +994,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 ---
 
 ### Oracle O-Bayes-INML-clusters — Bayesian incomplete/ragged nested Design 2 random (M32 Slice 1, ADR-042)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2022) Eqs. 8-11 / Table 3 middle + (2020) recipe, ragged extension **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete-nested.R` + committed fixture.
 
 - **Role:** the incomplete/ragged **nested** Design 2 (raters nested in clusters) **random** sibling of
   O-Bayes-IML (crossed) and the ragged extension of O-Bayes-NML (balanced nested). `engine = "brms"` now fits
@@ -1007,6 +1038,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
 ---
 
 ### Oracle O-Bayes-INML-subjects — Bayesian incomplete/ragged nested Design 3 random (M32 Slice 2, ADR-042)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2022) Eq. 11 / Table 3 right + (2020) recipe, ragged extension **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete-nested-subjects.R` + committed fixture.
 
 - **Role:** the incomplete/ragged **nested** Design 3 (raters nested in subjects, the multilevel **one-way**,
   agreement-only) **random** sibling of O-Bayes-INML-clusters (Design 2). `engine = "brms"` now fits
@@ -1060,6 +1092,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `fit_brms_nested_subjects()` recipe; writes the fixture before the hard pins).
 
 ### Oracle O-Bayes-IOneway — Bayesian incomplete/ragged single-level one-way random (M33 Slice 1, ADR-043)
+- **Kind:** mixed (D-008) — source leg: SF Case 1 / McGraw & Wong one-way + (2020) recipe, ragged extension **not** in the source; script leg: `data-raw/oracle-bayesian-incomplete-oneway.R` + committed fixture.
 
 - **Role:** the incomplete/ragged **single-level one-way** (Shrout & Fleiss Case 1) sibling of
   O-Bayes-Incomplete (two-way). `engine = "brms"` now fits **incomplete/ragged one-way** data
@@ -1097,6 +1130,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `fit_brms_oneway()` recipe; writes the fixture before the hard pins).
 
 ### Oracle O-Bayes-FRep — Bayesian fixed-rater within-cell replicates (M33 Slice 2, ADR-043)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong Case 3A theta-squared formula + the GT replicate decomposition + (2020) recipe; script leg: `data-raw/oracle-bayesian-fixed-replicates.R` + committed fixture.
 
 - **Role:** the **fixed-rater** sibling of O-Bayes-Rep (M29 Slice 2, random replicates) and the Bayesian
   sibling of the frequentist **M20 Slice 1** (`fit_glmmtmb_replicates_fixed`). `engine = "brms"` +
@@ -1132,6 +1166,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `fit_brms_replicates_fixed()` recipe; writes the fixture before the hard pins).
 
 ### Oracle O-Bayes-MLRep — Bayesian multilevel within-cell replicates (M33 Slice 3, ADR-043)
+- **Kind:** mixed (D-008) — source leg: ten Hove (2022) Table 3 + the GT replicate split + (2020) recipe; script leg: `data-raw/oracle-bayesian-multilevel-replicates.R` + committed fixture.
 
 - **Role:** the **multilevel** sibling of O-Bayes-Rep (single-level random replicates) and the Bayesian
   sibling of the frequentist **M20 Slice 2** (`fit_glmmtmb_{ml,nested}_replicates`). `engine = "brms"` now
@@ -1173,6 +1208,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   unstable small-multilevel fit; writes the fixture before the hard pins).
 
 ### Oracle O-PriorReduce — Bayesian user `prior=` override (M34 Slice 1, ADR-044)
+- **Kind:** source-traceable (D-008) — ten Hove et al. (2020) §3.3/§4.1/§4.2; the entry records no committed fixture and names no script.
 
 - **Role:** the customization oracle for the new user **`prior=`** argument on `engine = "brms"`. This is a
   **REDUCTION oracle, not a coverage oracle** — the whole point of `prior=` is to let users leave the sourced
@@ -1201,6 +1237,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `expect_identical`, tight-prior `expect_lt` + classed warning; `skip_on_ci`).
 
 ### Oracle O-HPDI — Bayesian HPDI credible intervals (M34 Slice 2, ADR-044)
+- **Kind:** source-traceable (D-008) — ten Hove et al. (2020) §4.2, with `coda::HPDinterval` as an in-suite reference implementation; the entry records no committed fixture.
 
 - **Role:** the customization oracle for the new **`posterior_summary = c("percentile", "hpdi")`** argument,
   which selects how `ci_method = "posterior"` reduces the posterior ICC draws to a credible interval. Like
@@ -1227,6 +1264,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   `(HPDI)` header; `skip_on_ci`).
 
 ### Oracle O-Bayes-FCL — Bayesian fixed-rater CLUSTER-level ICC, crossed Design 1, balanced (M38 Cell 1, ADR-048)
+- **Kind:** source-traceable (D-008) — ten Hove et al. (2022) Eq. 13 / Table 3 and McGraw & Wong Case 3/3A; the entry records no committed fixture (reduction and containment run live under `skip_on_ci`).
 
 - **Role:** the brms sibling of **O-FCL** (frequentist) and the cluster-level companion of **O-Bayes-FML**
   (brms crossed fixed subject level). Engine/interval **parity, not new estimand work**: removing the
@@ -1251,6 +1289,7 @@ estimand-spec, not here, so there is no "planned" status in this file to fall st
   reduction; `skip_on_ci`) + the fast incomplete-boundary guard (on CI).
 
 ### Oracle O-Bayes-IFNML — Bayesian INCOMPLETE/ragged fixed-nested (Design 2) single-rater (M38 Cell 2, ADR-048)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) p. 6 and McGraw & Wong Case 3A; script leg: `data-raw/oracle-bayesian-incomplete-fixed-nested.R` + committed fixture.
 
 - **Role:** the brms sibling of the frequentist **O-IFNML** (M36) and the ragged sibling of **O-Bayes-FNML**
   (balanced nested fixed). Removing the brms incomplete-fixed-nested guard lets `fit_brms_nested_fixed()`

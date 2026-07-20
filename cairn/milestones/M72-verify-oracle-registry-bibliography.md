@@ -95,7 +95,7 @@ settled shelf rather than twice.
 
 - [x] T1: draft the D-entry defining the bar for all three kinds; it governs
       the rest of the milestone, so it lands first.
-- [ ] T2: classify all 39 `ORACLES.md` entries as source-traceable,
+- [x] T2: classify all 39 `ORACLES.md` entries as source-traceable,
       script-derived, or mixed (`cairn/references/ORACLES.md`; entries span
       M1–M39), and record the kind per entry.
 - [ ] T3: verify the source-traceable entries — and the source leg of each
@@ -132,6 +132,8 @@ settled shelf rather than twice.
 - 2026-07-19: T1 done — D-008 appended, defining the three-kind bar and recording that a script-derived "verified" is a provenance claim, not a reproducibility claim (the seeded scripts are not re-run; that gap stays separately plannable under #12).
 - 2026-07-19: CORRECTION (D-008 Amdt 1) — the implement-gate claim "only 4 write a committed fixture" was false; 25 committed git-tracked fixtures exist under `tests/testthat/fixtures/`, written by 27 scripts. The gate grep matched only `saveRDS(x, "literal")` and missed `saveRDS(out, fixture)` with a variable destination. AC4's text is unaffected (it already names committed fixtures as a target); the honest fallback status now applies to a smaller residual — the six non-Bayes scripts that write no fixture.
 - 2026-07-19: T2 in progress — [S] Explore subagent ran mechanical per-entry extraction over all 39 entries (cited source / script / numeric values / test file / provenance) plus a `data-raw/` script audit; every script path named by an entry confirmed present. Extraction is fact-only; classification calls kept in the main session (LESSONS 2026-07-19/M71 — interpretive prose is where verification fails).
+- 2026-07-19: T2 done — a `- **Kind:**` bullet inserted after each of the 39 headings naming the kind, the D-008 citation, and the legs. Applied by a committed scratch script that asserts the keyed line numbers exactly equal the set of `### ` headings before writing, so no entry could be mislabelled by drift. Split: 25 mixed, 10 script-derived, 4 source-traceable.
+- 2026-07-19: T2 finding for T3/T5 — O6's entry re-derives the SF values 0.290/0.620/0.715/0.909 and `data-raw/oracle-fixed-incomplete.R:79-82` hardcodes them, but neither cites Shrout & Fleiss; the attribution belongs with the T5 three-decimal fix.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
