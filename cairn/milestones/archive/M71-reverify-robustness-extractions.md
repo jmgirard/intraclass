@@ -1,0 +1,11 @@
+# M71: Re-verify the robustness and interval-methods extractions (7 notes)
+
+**Status:** done (2026-07-19) · **PR** https://github.com/jmgirard/intraclass/pull/77 · docs-only
+
+**Goal.** Extend M69's dated-verified extraction bar to M65's seven robustness and interval-methods notes, closing the source-note backlog.
+
+**Outcome.** `bhandary2006`, `bobak2018`, `mehta2018`, `saha2005`, `saha2012`, `xiao2009`, `xiao2013` re-read against their shelf PDFs (115 pp.) and corrected in place; `young1998`'s two inherited-not-verified markers discharged against `bhandary2006`. 187 quotations verified verbatim, every anchor resolved to its printed folio, every absence claim settled by high-DPI render. **`references staleness` fell 9 → 2** (survivors `ORACLES.md`/`BIBLIOGRAPHY.md` → M72); all 30 source notes now dated-verified. No package value moved.
+
+**Notable finds.** Two notes had silently repaired a source (`saha2012`'s missing `ln`, `bhandary2006`'s stray `ppk` in Eq. 2.17) — both now transcribe as printed with the defect flagged. Source errata: `xiao2013` Table 9's `κ_m` at `R=5,S=10` contradicts its own footnote; `bobak2018`'s Results text misattributes its 0.072/0.066 figures. Scope corrections: `bhandary2006` Table 1 is 75 rows on a high-`ρ₁` subset, restricting its `F_max` claim; `saha2005` Table I's rejection counts are U-shaped in `φ`, generalizing the D-006 support from near-zero to boundary proximity.
+
+**Process — four review attempts.** Attempts 1–3 failed (AC2; AC2+AC5; AC5), the third tripping the thrash rule. Across all four, **every numeric correction, transcription and plot-read survived independent verification**; every failure was interpretive prose, twice in prose written to fix the previous cycle's prose. Diagnosed as a tooling gap — only 2 of 87 dated observations carried the command that would settle them — and re-cut via `/milestone-plan`: M71 narrowed to source fidelity, AC5 rewritten to a mechanical bar, the systematic audit rehomed to **M73** (executable dated observations) and **M74** (generalizing claims). Attempt 4 passed all eight criteria; its one finding (85: a lowercased leading capital in a `saha2005` quotation, inconsistent with the same fix made in `xiao2013`) was corrected at review.
