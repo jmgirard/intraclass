@@ -213,3 +213,31 @@ survivors. The provenance-vs-reproducibility distinction is now on the record, s
 later reader cannot mistake a script-derived verified entry for a re-executed one.
 Reproducibility of the seeded scripts remains a standing, separately-plannable gap
 (PRINCIPLES.md #12) — this entry scopes it out, it does not declare it closed.
+
+### D-008 Amendment 1 (2026-07-19): correcting D-008's Context — 25 committed fixtures exist, not 4
+
+**Context:** D-008's Context asserted that "only 4 write a committed fixture under
+`tests/testthat/fixtures/`". That is **false**, and D-008 is append-only history, so
+it is corrected here rather than edited. The true figure is **25 committed,
+git-tracked `.rds` fixtures** under `tests/testthat/fixtures/`, written by 27 of the
+41 `data-raw/` scripts. The error was methodological: the implement-gate survey
+grepped for `saveRDS(x, "literal-path")` and so missed the dominant form in this
+repo, `saveRDS(out, fixture)`, where the destination is a variable bound earlier in
+the script. The related claims in D-008's Context stand as written and were
+re-checked: `data-raw/` holds zero `.csv`/`.txt` and one `.rds`, and
+`data-raw/.oracle-*-checkpoint.rds` is gitignored (`.gitignore:11`).
+**Effect on the decision:** none. D-008's three-kind bar already names "a committed
+fixture under `tests/testthat/fixtures/`" as a verification target, so the correction
+*widens* what can be verified at the stronger fixture bar rather than changing the
+rule. The **script-attested, values not independently confirmed** status remains
+necessary but applies to a smaller residual than D-008's Context implied — the
+non-Bayes scripts that write no fixture (`oracle-fixed-vs-random.R`,
+`oracle-d-study.R`, `oracle-incomplete.R`, `oracle-multilevel.R`,
+`oracle-fixed-incomplete.R`, `oracle-sem.R`), whose entries are instead confirmed
+against inline expected values where they carry them.
+**Also unchanged:** the provenance-vs-reproducibility distinction. A fixture records
+what the script produced *when it was last run*; confirming an entry against it is
+still a provenance claim, not evidence that a re-run today reproduces it.
+**Consequences:** the count is not restated anywhere else in the record
+(LESSONS 2026-07-19/M70 — a count is a form that breaks when a fact is added); the
+per-entry classification in `ORACLES.md` carries the per-entry truth.
