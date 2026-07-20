@@ -48,7 +48,9 @@ is marked unverified at the point of claim, not silently dropped.
 | McGraw & Wong (1996) — the Shrout & Fleiss notation bridge (ICC(A,·) random ≡ ICC(2,·); ICC(C,·) mixed ≡ ICC(3,·)) | pp. 37–38 | verified — observed 2026-07-19 |
 | Shrout & Fleiss (1979) Table 4 — prints **two** decimals | p. 424 | verified — observed 2026-07-19 |
 | Jorgensen (2021) Eq. 6 — raw σ̂²_i = Σν̂²/(n_i−1), no bias correction | printed p. 117 | verified — observed 2026-07-19 |
-| Lee & Vispoel (2024) Eqs. 8/25; Vispoel, Hong, Lee & Xu (2022); Cronbach et al. (1972); Brennan (2001) | — | **not verified — off the shelf**; marked in place at each claim, observed 2026-07-19 |
+| Lee & Vispoel (2024) Eqs. 8/25 — raw σ̂²_i with divisor n_i−1, no bias correction | printed pp. 405/407 | verified — observed 2026-07-19 |
+| Vispoel, Hong, Lee & Xu (2022) — SEM indicator-mean vs 12 R/SAS/SPSS procedures, ≤ .001 (G) / ≤ .005 (global D) across 24 scales | PDF p. 6 (tables pp. 9–10) | verified — observed 2026-07-19; **GENOVA removed from the compared-program list, which the source does not mention** |
+| Cronbach et al. (1972); Brennan (2001) — the GT two-facet decomposition behind O-Bayes-Rep | — | **not verified — off the shelf**; marked in place at the claim, observed 2026-07-19 |
 
 **Pagination basis.** ten Hove et al. (2022) is cited by its **advance-online
 PDF pages 1–17**, *not* the journal pages of the version of record,
@@ -56,8 +58,11 @@ PDF pages 1–17**, *not* the journal pages of the version of record,
 paginated 1–14; its section numbers are §4.1 Methods (with unnumbered bold
 paragraph headings) and §4.2 Results — there are no §4.1.1–§4.1.3
 subsections, and earlier citations to them were corrected under M72. McGraw &
-Wong (1996), Shrout & Fleiss (1979), and Jorgensen (2021) are cited by the
-journal pagination printed on the page.
+Wong (1996), Shrout & Fleiss (1979), Jorgensen (2021), and Lee & Vispoel (2024)
+are cited by the journal pagination printed on the page — for Lee & Vispoel the
+running head gives *Psych* 2024, 6 with the folio, so PDF page N = printed page
+400 + N. Vispoel, Hong, Lee & Xu (2022) is an unpaginated conference paper and
+is cited by **PDF page** for that reason.
 
 ## Registry
 
@@ -406,18 +411,25 @@ journal pagination printed on the page.
      on balanced data.
   2. **Agreement = SEM indicator-mean estimator (Jorgensen 2021, Eq. 6).**
      σ²_r = Σν²/(k−1), the **raw** variance of the effects-coded indicator intercepts
-     (no bias correction — confirmed by Lee & Vispoel 2024, Eqs. 8/25; **that
-     confirmation is not verified: the source is not on the shelf** — M72,
+     (no bias correction — confirmed by Lee & Vispoel 2024, Eqs. 8 (printed
+     p. 405) and 25 (printed p. 407); **verified against the source** — M72,
      observed 2026-07-19). Pinned by:
      (a) the **exact Eq. 6 formula** reproduced independently in-test
      (`components$rater` = Σ(mean_j − grand)²/(k−1) = 5.4144 on SF); (b) a **large-N
      seeded simulation** where lavaan → the known population and lavaan ≈ glmmTMB
      (their asymptotic equivalence, tol 0.02/0.05, #12); (c) **external validation** —
-     Vispoel, Hong, Lee & Xu (2022) show the SEM indicator-mean method matches GENOVA
-     / `gtheory` / SAS / SPSS to ≤ .001 (G-coef) / ≤ .005 (D-coef) across 24 real
-     scales. **This pin is not verified: the source is not on the shelf, so the
-     claimed agreement figures have not been read against it** (M72, observed
-     2026-07-19). On the 6-subject SF data this estimator gives ICC(A,1)=0.284 (not the
+     Vispoel, Hong, Lee & Xu (2022) show the SEM indicator-mean method matches
+     `lavaan` / `lmer` / `psych` / `gtheory` in R, SAS `PROC VARCOMP`, and SPSS —
+     **12 procedures within R, SAS, and SPSS** — to ≤ .001 (G-coef) / ≤ .005
+     (global D-coef) across 24 real scales (PDF p. 6; tables pp. 9–10).
+     **Verified against the source** — M72, observed 2026-07-19. *Correction
+     (M72): this pin previously named **GENOVA** as one of the compared programs.
+     The paper does not mention GENOVA at all; the comparison set is the 12 R/SAS/SPSS
+     procedures above. GENOVA belongs to the sibling source Lee & Vispoel (2024),
+     whose abstract cites agreement with GENOVA and `gtheory` — the two sources'
+     validation sets had been conflated. The ≤ .001 / ≤ .005 figures and the
+     24-scale count are as printed and are unchanged.* On the 6-subject SF data
+     this estimator gives ICC(A,1)=0.284 (not the
      mixed-model 0.290) — a documented small-sample difference, regression-pinned.
   - **Interval:** consistency vs glmmTMB *random* MC CI, agreement vs glmmTMB *fixed*
     MC CI (the SEM recovers the rater effect from a finite set of intercepts —
