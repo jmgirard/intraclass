@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M70, M71   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m72-verify-oracle-registry-bibliography`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m72-verify-oracle-registry-bibliography` · [PR #78](https://github.com/jmgirard/intraclass/pull/78)   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -45,17 +45,17 @@ settled shelf rather than twice.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] A D-entry in `cairn/DECISIONS.md` defines the bar for all three kinds,
+- [x] A D-entry in `cairn/DECISIONS.md` defines the bar for all three kinds,
       states why re-running the seeded scripts was refused, and names what a
       script-derived entry's "verified" status does and does not assert.
-- [ ] All 39 `ORACLES.md` entries are classified as source-traceable,
+- [x] All 39 `ORACLES.md` entries are classified as source-traceable,
       script-derived, or mixed, and the classification is recorded in the
       file itself so a later reader can tell which assurance each entry
       carries.
-- [ ] Every source-traceable entry's values — and the source leg of every
+- [x] Every source-traceable entry's values — and the source leg of every
       mixed entry — are confirmed against the cited source at the cited
       page, or corrected in place with the correction cited.
-- [ ] Every script-derived entry — and the script leg of every mixed entry —
+- [x] Every script-derived entry — and the script leg of every mixed entry —
       names a committed script that exists, and the entry's values are
       confirmed against what the repo actually commits: an inline expected
       value in the script source (hardcoded constant, tolerance target, or
@@ -65,17 +65,17 @@ settled shelf rather than twice.
       naming that confirmation would require re-running (Out of scope) —
       never stamped confirmed. The count of entries in each state is not
       pinned in the record (LESSONS 2026-07-19/M70).
-- [ ] The Shrout & Fleiss values are attributed to what the source actually
+- [x] The Shrout & Fleiss values are attributed to what the source actually
       prints: Table 4 prints **two** decimals, so O-OW, O1, and
       `helper-shrout-fleiss.R:72–73` no longer call the six three-decimal
       values published. No oracle value changes — all six round to the
       printed figure (M69 AC4).
-- [ ] All 38 `BIBLIOGRAPHY.md` entries are checked at a depth set by
+- [x] All 38 `BIBLIOGRAPHY.md` entries are checked at a depth set by
       provenance — field-by-field against sources for the 16 D-007 split
       entries, a consistency pass over the 22 authored from shelf PDFs by
       M64–M67 — with any field the source does not print recorded as
       withheld rather than invented (#4).
-- [ ] The r-package `verify` slot is clean and `cairn_validate` passes, with
+- [x] The r-package `verify` slot is clean and `cairn_validate` passes, with
       both pages' `Extraction:` lines reflecting work actually done — no
       wording change made to clear an advisory (LESSONS 2026-07-18/M68).
 
@@ -178,6 +178,8 @@ settled shelf rather than twice.
 - 2026-07-19: T3 third leg closed (post-gate, maintainer supplied `brennan2001_ch3.pdf`) — Brennan (2001) Ch. 3 verified by render, pagination basis PDF page N = printed 52 + N from the running head. Fig. 3.1 (printed p. 56) gives the fully crossed `p × i × h` two-facet decomposition into seven effects (ν_p, ν_i, ν_h, ν_pi, ν_ph, ν_ih, ν_pih). **The check did not stop there, and should not have:** O-Bayes-Rep has only four components, so the crossed seven-effect model is *not* the one it fits. §3.1.2 (printed p. 58) names the right one — `i:(p × o)`, "the random effects two-way factorial design with replications (items) within cells" — whose four effects p, o, po, i:po are exactly the entry's σ²_s, σ²_r, σ²_sr, σ²_e. The attribution stands and is now stated at the precision the source supports rather than the looser "rater × occasion" phrasing (LESSONS 2026-07-19/M71 — a note stating a conclusion more broadly than its source supports is this repo's recurring defect).
 - 2026-07-19: T3 — Cronbach et al. (1972) remains the single off-shelf leg; the co-citation's Brennan half is verified and its Cronbach half is marked in place. ROADMAP candidate row narrowed four works → one.
 - 2026-07-19: shelf — `vispoel2022a.pdf` removed at the maintainer's instruction (it was cited nowhere; see the T3 shelf finding above). Recorded in `INDEX.md` rather than silently dropped, because the near-identical citekeys are exactly the confusion a later reader would re-create. Noted but not actioned: a stray non-PDF `vispoel2022b.txt` also sits in `sources/`; not mine to delete, and `sources/` is gitignored.
+- 2026-07-19: /milestone-review — PR #78 opened draft. Gate: `devtools::check(env_vars=c(NOT_CRAN="false"))` 0 errors / 0 warnings / 0 notes; `devtools::test()` 0 fail / 1802 pass / 23 skip; `air format --check` clean; `lintr` no lints; `document()` no diff; `pkgdown::check_pkgdown()` clean; `cairn_validate` exit 0 with the `references staleness` WARN gone. Three independent lenses: blame-history and prior-PR returned zero findings; the diff lens returned four, all prose-layer, all scored >=80 by a fresh scorer and all fixed at review (F1 stale/self-contradictory ORACLES Extraction line after the Brennan commit — an AC7 miss; F2 BIBLIOGRAPHY Extraction overclaiming field-by-field depth for the 22 consistency-pass entries; F3 a stale pinned "six off-shelf entries"; F4 the O1 notation bridge generalizing past pp. 37-38). F3 and F4 are this milestone's own logged lessons (M70 counts, M71 overgeneralization) recurring in its own new prose — recorded rather than quietly fixed.
+- 2026-07-19: review re-verified the load-bearing premise independently rather than trusting the implement log — Shrout & Fleiss Table 4 rendered at printed folio 424, printing .17/.29/.71/.44/.62/.91, two decimals. The R-side diff was confirmed comment-only by comparing the multiset of numeric literals removed against those added.
 - 2026-07-19: CORRECTION to this log's own handling — the "T3 remaining" line above was briefly rewritten in place (prefix changed to "T3 superseded") while appending the T3 results. That edits history, which IP4 and the append-only rule forbid; the line was restored verbatim to its original position and this note records the slip rather than hiding it. The same-turn nature of the mistake is why nothing downstream read the altered text.
 
 ## Decisions
@@ -185,3 +187,34 @@ settled shelf rather than twice.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-19** on [PR #78](https://github.com/jmgirard/intraclass/pull/78). Evidence below is fresh, gathered at review, not recalled from the implement session.
+
+### Acceptance criteria
+
+- **AC1 — D-008 defines the bar.** `cairn/DECISIONS.md` D-008 names all three kinds (*Source-traceable* / *Script-derived* / *Mixed*), carries an explicit "**Why re-running was refused (plan gate, 2026-07-19)**" paragraph citing the multi-hour live-Stan cost, and carries the paired "**What a script-derived 'verified' asserts**" / "**What it does not assert**" statements resolving to a provenance-not-reproducibility claim. Amendment 1 corrects the Context's fixture count without touching the rule. **PASS.**
+- **AC2 — all 39 entries classified in the file.** Mechanical: 39 `### ` headings vs 39 `- **Kind:**` bullets, and a per-heading scan reports no heading without one. Distribution 25 mixed / 10 script-derived / 4 source-traceable. **PASS.**
+- **AC3 — source legs confirmed at the cited page or corrected in place.** The `## Source-leg verification` table carries 18 rows stamped verified with page anchors plus a pagination-basis note, and exactly one outstanding row (Cronbach et al. 1972, off the shelf, marked in place at its claim). Five ten Hove (2020) citation defects were corrected in place with the correction cited. Re-verified independently at review: Shrout & Fleiss Table 4 rendered at printed folio **424**, printing `.17 / .29 / .71 / .44 / .62 / .91`. The independent diff reviewer separately re-derived the ten Hove (2022)/(2020) anchors, Lee & Vispoel Eqs. 8/25 at printed pp. 405/407, and `xiao2009`'s 2010 running head. **PASS.**
+- **AC4 — script legs confirmed against what the repo commits.** All 28 distinct `data-raw/` scripts named in the registry exist on disk; all 22 distinct fixtures named are git-tracked. Four entries carry the honest **script-attested, values not independently confirmed** stamp, each with an entry-specific reason, and each reason was spot-checked against its script: `oracle-d-study.R` (0 `stopifnot`, 7 `cat()`, 0 `saveRDS`), `oracle-fixed-vs-random.R` (0/6/0), `oracle-multilevel.R` (8 `stopifnot`, all relational, 0 `saveRDS`), `oracle-incomplete.R` (2/0). The two entries claimed to clear the inline-value bar do: `oracle-sem.R:102` `# 5.4144` and `:116` `# Expected: A1=0.2843 Ak=0.6137 C1=0.7148 Ck=0.9093`; `oracle-fixed-incomplete.R:79-82` hardcodes 0.290/0.620/0.715/0.909. No count is pinned in the record. **PASS.**
+- **AC5 — Shrout & Fleiss attribution, no oracle value changed.** The R-side diff is **comment-only**: the multiset of numeric literals removed equals the multiset added, and every `expect_*` call and tolerance is byte-identical to `main`. A sweep for a surviving affirmative "published to three decimals" claim returns only *corrective* statements. The premise was re-verified at review by render (AC3 above). **PASS.**
+- **AC6 — all 38 bibliography entries at a depth set by provenance.** 38 top-level entries enumerated and accounted for. Corrections landed: `tenhove2024`'s truncated title restored, the `vispoel2022` GENOVA mis-attribution removed, `xiao2009` recorded as a second citekey-vs-issue-year case, `mcgraw1996`'s correction fields marked publisher-record, and unprinted issue numbers annotated across five publishers rather than deleted or left to read as transcribed. **PASS** (after finding F2, below).
+- **AC7 — gate clean, both `Extraction:` lines reflect work done.** `devtools::check(env_vars = c(NOT_CRAN = "false"))` → **0 errors, 0 warnings, 0 notes**; its `testthat.R` leg OK. `devtools::test()` (NOT_CRAN=true CI=true) 0 fail / 1802 pass / 23 skip. `air format --check .` clean; `lintr::lint_package()` no lints; `devtools::document()` produces no diff; `pkgdown::check_pkgdown()` no problems; README.Rmd and the user-visible surface (`R/`, `NAMESPACE`, `man/`) untouched, so no NEWS entry is owed. `cairn_validate` **exit 0**, and the `references staleness` WARN is gone — both index-page advisories are closed. **PASS** (after findings F1/F3, below).
+
+### Consistency gate
+
+Universal: `cairn_validate` exit 0 — every hard check PASS, `coverage complete` PASS, `scaffold present` PASS. The single remaining `WARN dangling id tokens (294)` is the known legacy advisory. No `DESIGN.md` principle changed, so `cairn_impact` was correctly skipped. Toolchain (`r-package` profile `consistency-gate` slot): `document()` no-diff ✓, generated files not hand-edited ✓, README in sync ✓, pkgdown ✓, NEWS not owed ✓, new file `data-raw/m72-classify-oracles.py` covered by the existing `^data-raw$` `.Rbuildignore` entry ✓, `check()` 0/0/0 ✓.
+
+### Independent review — three lenses, then a scorer
+
+- **[O] diff-bug (Opus):** 4 findings, all in the prose layer. Independently confirmed the load-bearing claims: no oracle value or assertion changed; the O-Bayes corrections match `bayesian-oracle.rds` exactly; `vispoel2022b` contains zero "GENOVA" and `lee2024a` sixteen, so the conflation correction is right in both directions.
+- **[S] blame-history (Sonnet):** **no findings.** Confirmed every correction is marked in place rather than overwritten, D-008 is appended not edited, and the entombed `cairn/legacy/DECISIONS.md` was correctly left carrying its original wording.
+- **[S] prior-PR-comments (Sonnet):** **no prior-PR evidence** — PRs #67–#77 carry only Codecov bot comments; the touched test files predate M63. Clean no-op, zero findings.
+
+Scored by a fresh agent that did not generate them. **All four scored ≥80, so all four were actioned; none fell below the bar, so none is logged-only.**
+
+- **F1 (95) — fixed.** `ORACLES.md:5` read *"Two legs whose sources are absent from the shelf (Cronbach et al. 1972; Brennan 2001) carry an in-place status marking at the claim, and are the single outstanding row of the Source-leg verification table below."* Stale after the Brennan commit and self-contradictory on its face ("two legs … the single outstanding row"). Rewritten to name Cronbach alone as outstanding and record that Brennan closed against Ch. 3 late in the milestone. This was an AC7 miss caught only because the reviewer read the header against the table.
+- **F2 (80) — fixed.** `BIBLIOGRAPHY.md:5` read *"Every entry whose source is on the shelf was checked field-by-field against that source's title page — title, byline, venue, year, volume, issue, pages, DOI."* That advertises the field-by-field depth for the 22 consistency-pass entries too. Rewritten to state both depths, which of the 38 took each, that the second's extraction was delegated with findings re-derived in-session, and "Do not read the second depth as the first."
+- **F3 (92) — fixed.** The Cicchetti entry read *"the most consequential of the six off-shelf entries."* A pinned count, stale once Brennan's Ch. 3 reached the shelf — the exact failure mode this milestone logged twice and that its own `Extraction:` line disclaims. Now "the entries whose source is off the shelf".
+- **F4 (85) — fixed.** The O1 notation bridge claimed, on pp. 37–38, that *"the coefficients they add beyond Shrout & Fleiss are exactly the complements — ICC(A,·) for the mixed cases and ICC(C,·) for the random cases."* The source says the **(A,1)** mixed coefficient is novel (singular) and describes type **(C,k)** for random as already widely used; ICC(A,k) is "Not estimable" for Case 3 (Table 5, confirmed in-session), so no ICC(A,·) mixed pair exists to complete. Narrowed to what the page prints, with the superseded claim quoted. The substantive mapping was correct and is unchanged — this was the M71 overgeneralization defect recurring in M72's own new prose.
+
+**Noted, not actioned:** Cronbach et al. (1972) is cited by `ORACLES.md`, the source-leg table, and a ROADMAP row but has **no `BIBLIOGRAPHY.md` entry at all** — a real ORACLES/BIBLIOGRAPHY inconsistency, pre-existing and outside the "verify the 38 that exist" scope. It rides with the existing "acquire Cronbach" candidate row.

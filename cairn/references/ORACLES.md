@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically — the split **read nothing**, it relocated text (D-007).
 Pagination: see the **Source-leg verification** table below and its pagination-basis note.
-Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. Two legs whose sources are absent from the shelf (Cronbach et al. 1972; Brennan 2001) carry an in-place status marking at the claim, and are the single outstanding row of the **Source-leg verification** table below. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth.
+Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. One leg whose source is absent from the shelf (Cronbach et al. 1972) carries an in-place status marking at the claim and is the single outstanding row of the **Source-leg verification** table below; its co-cited half, Brennan (2001), was closed against Ch. 3 late in the milestone. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth.
 
 The registry of oracle values used in the test suite. **Every oracle value in
 the test suite must trace back to an entry here** with provenance — a citation
@@ -100,10 +100,16 @@ is cited by **PDF page** for that reason.
 
 - **Notation bridge:** McGraw & Wong (1996) ICC(A,·) two-way random ≡ Shrout &
   Fleiss ICC(2,·); ICC(C,·) two-way mixed ≡ ICC(3,·). This is the correspondence
-  McGraw & Wong state themselves (pp. 37–38): the coefficients they add *beyond*
-  Shrout & Fleiss are exactly the complements — ICC(A,·) for the mixed cases and
-  ICC(C,·) for the random cases — so the pairing above is the Shrout & Fleiss
-  subset, not a convenience mapping (verified against the source 2026-07-19, M72).
+  McGraw & Wong state themselves (pp. 37–38), so the pairing above is the Shrout &
+  Fleiss subset, not a convenience mapping (verified against the source 2026-07-19,
+  M72). Their §"ICCs Not Defined by Shrout and Fleiss" (p. 38) is narrower than a
+  tidy complement, and is stated here as printed: they call **ICC(A,1)** for the
+  mixed cases novel — singular — and describe type **(C,k)** for random-effects
+  models as already widely used. **ICC(A,k) is "Not estimable" for Case 3**
+  (Table 5), so there is no ICC(A,·) mixed pair to complete. An earlier M72 draft
+  of this bullet claimed the added coefficients were "exactly the complements —
+  ICC(A,·) … and ICC(C,·)"; that generalized past the page and was corrected at
+  review (LESSONS 2026-07-19/M71).
 - **Asserted:** ICC(A,1)=0.290, ICC(A,k)=0.620 (M1,
   `test-icc-twoway-agreement.R`); ICC(C,1)=0.715, ICC(C,k)=0.909 (M2,
   `test-icc-consistency.R`, cross-checked against `psych::ICC` ICC3/ICC3k to
