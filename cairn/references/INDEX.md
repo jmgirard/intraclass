@@ -7,8 +7,16 @@ and milestones; never restate a value here.
 
 - [ORACLES.md](ORACLES.md) — the repo's **declared oracle-registry home**
   (D-007): 39 entries, each naming its oracle ID, type, asserting test, source,
-  and provenance. Every oracle value in the test suite traces to an entry here.
-- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (34 entries). Primary
+  and provenance, and — since M72 — a `**Kind:**` bullet saying whether it is
+  source-traceable, script-derived, or mixed (D-008). Extraction-verified
+  2026-07-19. **Its stated invariant "every oracle value in the test suite
+  traces to an entry here" does not currently hold:** M72 T4 found oracles
+  shipping without an entry (M46/M47 cluster-`ck`, the `O-SEM-ML*` family,
+  `O-Boot-DS`, `O-IDS`, `O-invariance`) — the file's own header scopes it to
+  M1–M39 and oracles kept shipping after. A ROADMAP candidate row tracks
+  completing it.
+- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (38 entries;
+  extraction-verified 2026-07-19, M72). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
@@ -152,11 +160,29 @@ and milestones; never restate a value here.
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
-committed record of what is on the shelf and which milestone ingests it. **30 PDFs
+committed record of what is on the shelf and which milestone ingests it. **33 PDFs
 — observed 2026-07-19**: the 30 verified against their own title pages at M63/T1,
 less the superseded `jorgensen2019.pdf` preprint (since deleted, as the M66
 correction anticipated), plus `vanderark2023`, added by the maintainer 2026-07-19
-and verified against its title page when ingested. Citekey convention:
+and verified against its title page when ingested, plus the three the maintainer
+added mid-M72 (below).
+
+**Three arrivals during M72 (2026-07-19), none yet carrying a source note.**
+`lee2024a` and `vispoel2022b` are cited by `ORACLES.md` and their source legs were
+verified against them under M72 T3 — they are the two works the "acquire the
+off-shelf sources" candidate row was written for, and it now names only the
+remaining two. `vispoel2022a` is **not cited anywhere in the repo**: it is
+Vispoel, Lee, Xu & Hong (2022), *Psychological Assessment* 34(12), 1093–1111,
+"Expanding Bifactor Models of Psychological Traits…" — a *different* paper from
+the cited Vispoel, Hong, Lee & Xu (2022) NCME conference paper, sharing four
+authors in a different order. It contains no GENOVA, no 24-scale count, and none
+of the agreement figures, so it does **not** settle O-SEM's external-validation
+pin; `vispoel2022b` does. The suffix pair is a trap for a later reader and is
+flagged here for that reason. **So the "no orphan in either direction" invariant
+below no longer holds**: three shelf PDFs have no note, and `vispoel2022a` has no
+citation either.
+
+Citekey convention:
 same-author-same-year takes a letter suffix ordered by issue — `tenhove2025a`
 (MBR 60(3)), `tenhove2025b` (MBR 60(5)).
 
@@ -170,9 +196,13 @@ same-author-same-year takes a letter suffix ordered by issue — `tenhove2025a`
 sources were ingested by M64;
 `ohyama2025` and `ukoumunne2003` by M62; the seven interval-methods/robustness
 sources by M65; the seven foundational/interpretation sources by M66; the four
-equality-testing sources by M67. **Every shelf PDF now carries a note, and every
-note has a shelf PDF — 30/30, no orphan in either direction (observed
-2026-07-19).**
+equality-testing sources by M67. Every *note* still has a shelf PDF, but the
+converse no longer holds: the three PDFs that arrived during M72 (`lee2024a`,
+`vispoel2022a`, `vispoel2022b`) carry no note, so the shelf now has note-less
+members — **the "no orphan in either direction" state recorded here through
+M71 ended on 2026-07-19** (observed 2026-07-19). Writing notes for the two cited
+arrivals is not M72's scope; M72 verified their *legs* against them directly,
+which is what D-008's source-traceable rule requires.
 
 **Extraction status across the shelf (2026-07-19).** **All 30 notes are now
 dated-verified** — the ten load-bearing ones by M69, the seven
@@ -207,7 +237,15 @@ publication year at all (only © 2016 and an online date), leaving the `2017`
 maintainer supplied the issue version on 2026-07-19 (*Health Services and Outcomes
 Research Methodology* **17, 127–143, 2017**), which corroborates the citekey, and
 `BIBLIOGRAPHY.md` now carries year, volume, and pages (corrected 2026-07-19).
-So `shieh2015` is the only citekey still uncorroborated by its own source.
+A third case, `xiao2009`, was found by M72's field-by-field pass and **falsifies
+the "only" this paragraph previously claimed for `shieh2015`**: its Taylor &
+Francis cover sheet cites "(2009) … 39:1, 111-118, Published online: 10 Nov 2009"
+while the article's own running header reads *Communications in Statistics —
+Simulation and Computation* **39: 111–118, 2010**. Same shape as `shieh2015` —
+the citekey follows the online-publication year, the issue version of record is a
+year later — and it was likewise not renamed. A uniqueness claim is the same
+fragile form as a pinned count (LESSONS 2026-07-19/M70), so this paragraph now
+enumerates the known cases without asserting it has them all.
 
 **M65 — interval methods & robustness (7): ingested 2026-07-18.** Reading them
 cold established that the cluster is **not** the one-way-interval-methods group

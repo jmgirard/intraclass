@@ -1,8 +1,8 @@
 # Oracle registry
 
 **Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically — the split **read nothing**, it relocated text (D-007).
-Pagination: —.
-Extraction: unverified — each entry's values trace to its own cited source or committed seeded script, recorded by the milestone that added it (entries span M1 through M39); the 2026-07-18 split re-read none of them, and no page-level re-check has ever been performed — observed 2026-07-18.
+Pagination: see the **Source-leg verification** table below and its pagination-basis note.
+Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. Two legs whose sources are absent from the shelf (Cronbach et al. 1972; Brennan 2001) carry an in-place status marking at the claim, and are the single outstanding row of the **Source-leg verification** table below. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth.
 
 The registry of oracle values used in the test suite. **Every oracle value in
 the test suite must trace back to an entry here** with provenance — a citation

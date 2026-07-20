@@ -12,7 +12,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M70 | Re-verify the one-way and equality-testing extractions (6 notes) | done | — | normal | milestones/archive/M70-reverify-oneway-equality-extractions.md |
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
-| M72 | Verify the oracle registry and the bibliography | in-progress | M70, M71 | normal | milestones/M72-verify-oracle-registry-bibliography.md |
+| M72 | Verify the oracle registry and the bibliography | review | M70, M71 | normal | milestones/M72-verify-oracle-registry-bibliography.md |
 | M73 | Make every dated observation executable | planned | M71 | normal | milestones/M73-executable-dated-observations.md |
 | M74 | Re-derive the generalizing claims over their full source tables | planned | M73 | low | milestones/M74-generalizing-claim-audit.md |
 | M69 | Re-verify the ten load-bearing source extractions | done | M68 | normal | milestones/archive/M69-reverify-loadbearing-extractions.md |
