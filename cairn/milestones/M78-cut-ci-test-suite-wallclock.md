@@ -1,11 +1,11 @@
 # M78: Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO)
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3, GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** m78-cut-ci-test-suite-wallclock
 
 ## Goal
 
