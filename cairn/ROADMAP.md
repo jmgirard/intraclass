@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | in-progress | — | normal | milestones/M76-boundary-robust-classical-oneway-ci.md |
+| M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | blocked | — | normal | milestones/M76-boundary-robust-classical-oneway-ci.md |
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
 | M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |
 | M73 | Make every dated observation executable | done | M71 | normal | milestones/archive/M73-executable-dated-observations.md |
