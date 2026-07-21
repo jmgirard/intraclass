@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M73: Make every dated observation executable
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M71   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
@@ -91,12 +91,13 @@ repo, not this one.
       the convention.
 - [x] T7: run the checker over the whole corpus; correct every falsified
       claim at its source, recording the basis of each correction.
-- [ ] T8: run `cairn_validate` and the r-package `verify` slot; confirm the
+- [x] T8: run `cairn_validate` and the r-package `verify` slot; confirm the
       diff touches no package value.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
+- 2026-07-20 (T8, status → review): `cairn_validate` exit 0 (all checks pass; dangling-id advisory 294→295 = tenhove2018's two M42 provenance citations, consistent with existing pre-migration id citations). `devtools::document()` clean, no roxygen drift, no package file touched. `devtools::test()` deliberately not run: docs-only diff (no R/test/DESCRIPTION change) cannot affect it, and the suite carries ~2h flaky brms live-Stan work — flagged for the review consistency-gate's `check()`. Checker exit 0, self-test passes.
 - 2026-07-20 (T6+T7 complete): remaining notes (bartko1966, bartko1976, hedges2012, shieh2015, tenhove2018, trevethan2017, vanderark2023, INDEX) brought to the convention. **One falsified claim corrected (T7/AC5):** tenhove2018 stated "`irr` is not a package dependency" (:57, :199) — `irr` has been a Suggests dependency since **M42** (`DESCRIPTION:35`, added by PR #48 for the comparison vignette), so the claim was already false when M66 wrote it; corrected in place to "a Suggests dependency … not loaded", basis recorded inline, directive now checks `irr` present. Restated as standing facts (source/citation-structure, not repo state): bartko1976:178, trevethan2017:240 (extraction-effort), vanderark2023:257 (citation drift). Final checker: 60 observations, 48 runnable + 12 `none`, 0 unmarked, 0 falsified, exit 0. Branch diff touches no package file (AC6).
 - 2026-07-20 (T5 complete): M69 notes done — fleiss1973 (multi-token grep), young1998 (overlap-in-naik + young trace), tenhove2024 (box absent from code), tenhove2025b:302/329 (legacy-ADR + ORACLES greps); 4 restated to standing facts (konishi1989:142 bound-absent-in-paper; tenhove2025b:165/308/315 source-structure facts about the article PDF); 3 `none` (tenhove2022 S4 shelf, tenhove2025a footnote + OSF-retrieval — all repo-local/gitignored-shelf). Checker: 30 runnable + 7 none, 0 falsified, 24 unmarked (T6).
 - 2026-07-20 (T5, parser fix): position-based parsing — a stamp whose `observed` keyword and date straddle a soft newline (young1998:24, saha2005:29, donner2002:19, bartko1976:153, tenhove2025a:282, tenhove2025b:165/315, vanderark2023:60) was invisible to line scanning; the directive is now the first `<!-- check -->` following the stamp in the same paragraph. True in-scope count rises 57 → 64. Began T5 M70 notes: donner2002, konishi1989 (with :142 restated to a standing fact — the bound's absence is a claim about the source), naik2007.
