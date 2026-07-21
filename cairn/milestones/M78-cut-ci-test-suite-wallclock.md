@@ -56,7 +56,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 - [x] AC5: `git diff` shows no O1/O2 coverage/agreement count changed — only
       structural `boot_samples` (→99 floor) and CI config; the full suite still
       reports `FAIL 0`. Evidence: the diff + the PR run's summary line.
-- [ ] AC6: All PR checks green (R-CMD-check matrix, lint, format, coverage); the
+- [x] AC6: All PR checks green (R-CMD-check matrix, lint, format, coverage); the
       profile `verify` slot clean (`devtools::test()` with `NOT_CRAN=true`,
       `CI=true`, `max_fails=Inf`). Evidence: `gh pr checks` + verify output.
 
@@ -164,7 +164,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 - AC3 ✓ — CI run 29849433692 log shows `Starting 4 test processes.` on BOTH ubuntu and windows check jobs (`TESTTHAT_CPUS`=cores); workflow diff adds the scaling step. GO (no OOM/flake, all green) — NO-GO valve not needed.
 - AC4 ✓ — measured reduction on the PR's own R-CMD-check run: Windows `testthat.R` 18m→15m (~17%; check job 21m20s→18m3s), the PR-matrix long pole → overall CI wall-clock ↓ ~3m. Ubuntu flat 13m→13m (CPU 24m→33m; runner ~2.5-core, saturated at 2 workers). A measured safe reduction exists → GO; NO-GO D-entry not required.
 - AC5 ✓ — `git diff origin/main..HEAD -- tests/` shows ONLY two structural `boot_samples` 199→99 (boundary-policy:83, icc-lavaan:521); grep for O1/O2/coverage/n_rep/299/499/999 in the test diff = none. Full suite `FAIL 0` (local `devtools::test()` FAIL 0 | WARN 2 | SKIP 23 | PASS 1901; the 2 WARN pre-existing lavaan warnings).
-- AC6 — local verify slot `devtools::test()` clean (FAIL 0) at 4 workers; all 8 PR checks green on 0894331 [pending final CI confirmation].
+- AC6 ✓ — local verify slot `devtools::test()` clean (FAIL 0) at 4 workers; all 8 PR checks green on 0894331 (ubuntu/windows R-CMD-check, lint, format, pkgdown, test-coverage, codecov).
 
 **Consistency gate:** `cairn_validate` exit 0 (advisory-only: 42 work-log-wrap WARNs which vanish at archive; 338 pre-existing dangling-id advisories). `cairn_impact` skipped — no DESIGN.md/principle change (GP3/GP5/GP6 worked-under, not modified). Toolchain `consistency-gate`: `document()` no-diff clean; no generated-file edits (NAMESPACE/man/data untouched); no user-visible surface → no NEWS entry required; `devtools::check()` covered by the green cross-platform CI R-CMD-check.
 
