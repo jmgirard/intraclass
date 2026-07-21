@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-19 (M72 merged via PR #78; gate green — `check()` 0/0/0, `cairn_validate` exit 0. The two index-page extraction advisories are now closed and the `references staleness` WARN is gone; the 294 legacy id tokens remain the one expected advisory)._
+_Last hygiene check: 2026-07-21 (M73 merged via PR #79; gate green — full `R CMD check` matrix green on CI, `cairn_validate` exit 0. Docs-only: the 60 references-corpus dated observations are now checker-settled (D-009); dangling id tokens 294→295 from tenhove2018's M42 provenance citation, the one expected advisory)._
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -13,11 +13,10 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M70 | Re-verify the one-way and equality-testing extractions (6 notes) | done | — | normal | milestones/archive/M70-reverify-oneway-equality-extractions.md |
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
 | M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |
-| M73 | Make every dated observation executable | review | M71 | normal | milestones/M73-executable-dated-observations.md |
+| M73 | Make every dated observation executable | done | M71 | normal | milestones/archive/M73-executable-dated-observations.md |
 | M74 | Re-derive the generalizing claims over their full source tables | planned | M73 | low | milestones/M74-generalizing-claim-audit.md |
-| M66 | Source notes — the foundational and interpretation shelf | done | M63 | low | milestones/archive/M66-source-notes-foundational.md |
 | M67 | Source notes — the ICC-equality-testing cluster | done | M63 | low | milestones/archive/M67-source-notes-equality-testing.md |
-<!-- terminal-row retention: M72 done (2026-07-19) → M69 rotated out (oldest terminal, archived 2026-07-18 23:42; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M72, M71, M70, M67, M66 (5 most recent terminal). -->
+<!-- terminal-row retention: M73 done (2026-07-21) → M66 rotated out (oldest terminal; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M73, M72, M71, M70, M67 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
