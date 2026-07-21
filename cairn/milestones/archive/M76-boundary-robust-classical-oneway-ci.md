@@ -1,0 +1,11 @@
+# M76: Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML)
+
+**Status:** done (2026-07-21, PR #85 https://github.com/jmgirard/intraclass/pull/85)
+
+**Goal:** Decide, against a pre-registered coverage/width/abort criterion, whether a classical SEARLE exact-F and/or Burch REML one-way CI should replace or supplement the glmmTMB Monte-Carlo default — assessment only, no exported code.
+
+**Outcome:** Assessment-only, no exported code. Two classical one-way random-ICC intervals prototyped in `data-raw/m76-classical-oneway-prototype.R` — `searle_f_ci*` (exact-F pivot, mcgraw1996 Table 7 / Searle 1971) and `burch_reml_ci*` (Burch 2011 eq. 6/13/15/16/17 kurtosis-adjusted `log(1+nθ̂)` limits) — each oracle-validated to ≥2 independent published worked examples (ohyama2025 §4 + burch2011 §4; a fixed eq.14 transcription bug caught by the self-consistency check). Paired coverage/width/tail sweep (`data-raw/m76-coverage-sweep.R` → `m76-sweep-results.rds`, 16 cells × 2000 reps, Gaussian + t5 leptokurtic cluster effect) vs incumbents (MC / parametric-bootstrap / npbootstrap). Result: SEARLE & Burch each 0 aborts on all 32k datasets where MC aborts 4–44% of near-zero cells; SEARLE near-nominal + symmetric (one leptokurtic high-`k` under-cover 0.924); Burch never under-covers (0.937–0.991) but over-covers/wide at small `k` + n=2 tail-asymmetric. Neither passes the frozen every-cell replacement bar. Ingested `burch2011` (source note + BIBLIOGRAPHY + INDEX); registered oracle O-Classical-OW (prototype-validated, not suite-asserted); comparison synthesis note `classical-oneway-comparison.md`. Follow-on opt-in `ci_method` candidate added.
+
+**Decisions:** D-012 (cross-cutting) — NO-GO default-replace, GO opt-in for both SEARLE + Burch REML; default stays glmmTMB MC, no #3/ADR-003 change.
+
+**Review:** All 6 ACs verified fresh (prototype re-run + every ledger number re-derived from the committed fixture). Fan-out: diff-bug (O) + blame-history (S) clean; prior-review (S) found M74's generalizing-claim `--check` gate regressed by the new references pages (17 un-triaged claims), scored 85, fixed by triaging all rows (+ 1 pre-existing M75 row) → gate green. Lint fix in passing (`burch_P`→`burch_p_term`). 1 sub-threshold obs logged.
