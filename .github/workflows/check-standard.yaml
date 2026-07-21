@@ -3,11 +3,25 @@
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - 'cairn/**'
+      - 'man/**'
+      - 'README.md'
+      - '**/*.Rmd'
   pull_request:
+    paths-ignore:
+      - 'cairn/**'
+      - 'man/**'
+      - 'README.md'
+      - '**/*.Rmd'
 
 name: R-CMD-check.yaml
 
 permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   R-CMD-check:
@@ -18,12 +32,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+        # Full 5-config matrix on push to main; slim ubuntu+windows release on
+        # PRs (the full matrix still runs post-merge on push). Windows is kept
+        # on PRs because some bugs here surface only on Windows CI (M56).
+        config: ${{ github.event_name == 'push' && fromJSON('[{"os":"macos-latest","r":"release"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"devel","http-user-agent":"release"},{"os":"ubuntu-latest","r":"release"},{"os":"ubuntu-latest","r":"oldrel-1"}]') || fromJSON('[{"os":"ubuntu-latest","r":"release"},{"os":"windows-latest","r":"release"}]') }}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
