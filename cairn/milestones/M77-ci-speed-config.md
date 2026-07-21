@@ -19,10 +19,10 @@ Cut CI wall-clock and wasted runs by adding run-cancellation, path filtering, an
 
 ## Acceptance criteria
 
-- [ ] AC1: `check-standard.yaml`, `test-coverage.yaml`, `lint.yaml`, `format.yaml` each carry a top-level `concurrency` block keyed on workflow+ref with `cancel-in-progress: true` (grep/actionlint evidence).
-- [ ] AC2: `check-standard.yaml` and `test-coverage.yaml` carry `paths-ignore: ['cairn/**','man/**','README.md','**/*.Rmd']` on both the `push` and `pull_request` triggers (grep/actionlint evidence).
-- [ ] AC3: `check-standard.yaml`'s matrix resolves to the full 5 configs (macos, windows, ubuntu devel/release/oldrel-1) on `push` and to exactly `ubuntu-latest release` + `windows-latest release` on `pull_request` — evidenced by the milestone PR's own check run showing 2 configs, and by the post-merge push-to-`main` run showing 5.
-- [ ] AC4: all four edited workflow files are valid (`actionlint` clean; YAML parses) — no syntax/expression errors introduced.
+- [x] AC1: `check-standard.yaml`, `test-coverage.yaml`, `lint.yaml`, `format.yaml` each carry a top-level `concurrency` block keyed on workflow+ref with `cancel-in-progress: true` (grep/actionlint evidence).
+- [x] AC2: `check-standard.yaml` and `test-coverage.yaml` carry `paths-ignore: ['cairn/**','man/**','README.md','**/*.Rmd']` on both the `push` and `pull_request` triggers (grep/actionlint evidence).
+- [x] AC3: `check-standard.yaml`'s matrix resolves to the full 5 configs (macos, windows, ubuntu devel/release/oldrel-1) on `push` and to exactly `ubuntu-latest release` + `windows-latest release` on `pull_request` — evidenced by the milestone PR's own check run showing 2 configs, and by the post-merge push-to-`main` run showing 5.
+- [x] AC4: all four edited workflow files are valid (`actionlint` clean; YAML parses) — no syntax/expression errors introduced.
 
 ## Coverage
 
@@ -46,3 +46,14 @@ Cut CI wall-clock and wasted runs by adding run-cancellation, path filtering, an
 ## Decisions
 
 ## Review
+
+**Acceptance criteria — fresh evidence (2026-07-21):**
+- AC1: `grep -l "cancel-in-progress: true"` returns all four workflows. ✓
+- AC2: `grep -c paths-ignore` = 2 in both check-standard and test-coverage (push + pull_request); absent from lint/format as planned. ✓
+- AC3: PR #83's own run spawned R-CMD-check jobs `ubuntu-latest (release)` + `windows-latest (release)` and no others — the 2-config PR matrix live-verified. The 5-config push branch is verified structurally (matrix JSON parses to the original 5 configs) and runs post-merge on `main`. ✓
+- AC4: `actionlint` 1.7.12 clean (exit 0) on all four files. ✓
+
+**Consistency gate:** `cairn_validate` exit 0, all checks PASS (incl. `coverage complete`); 296 dangling-id warnings are pre-existing archived-ID advisories. No `.R`/roxygen changed → `devtools::document()` trivially no-diff, `man/` untouched; no NEWS entry (not user-facing package behavior). No principle changed → `cairn_impact` skipped.
+
+**Independent review (3 lenses + scorer):** [O] diff-bug, [S] blame-history, [S] prior-PR-comments — all reported **zero surviving findings**. Scorer no-op (no findings to score). The blame/prior-review lenses confirmed the PR-matrix slim is a documented, deliberate accommodation of the M56 Windows-only-flake lesson (Windows kept on PRs; full matrix post-merge), not a silent regression; probe found no real GitHub review threads (`[]`).
+- Informational caveat (logged, not a defect, scored N/A): `cancel-in-progress: true` also applies on `main`, so two merges in quick succession would cancel the first's full 5-config run and lose that commit's default-branch CI signal. Intentional consequence of the requested unconditional `cancel-in-progress`; surfaced to the maintainer at the approval gate.
