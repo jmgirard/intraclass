@@ -135,3 +135,13 @@ load-bearing section or relied on by a candidate / D-entry / `ORACLES.md` entry.
 - **AC6** (`cairn_validate` + `verify` slot): `cairn_validate` exit 0; `devtools::test()` **0 failures / 0 errors**; `devtools::document()` no diff; `.Rbuildignore` covers `^data-raw$`; authoritative full `R CMD check` runs on PR #80 CI (merge-gated green). ✓
 
 **Consistency gate:** `cairn_validate` exit 0 (297 pre-existing dangling-id advisories, unchanged); r-package `consistency-gate` — `document()` no diff, new `data-raw/` files build-ignored, `devtools::test()` clean; full `R CMD check` deferred to PR CI (the merge gate). No `DESIGN.md` principle changed → `cairn_impact` skipped.
+
+**Independent fresh-context review — three lenses + scorer (2026-07-20).**
+- **[O] diff-bug (Opus): no defects, recommend ship.** Independently re-extracted both source tables and verified the arithmetic: `saha2005` max generated = 7695 over all 160 cells (1000/7695 = 12.996 % ≈ 13.0 %), runner-ups 6903/6609/6600 exact; `ukoumunne2003` min transformed-boot-t coverage = 0.9310 (k=30, ρ=.001), 0.9320 (k=10) second, all others ≥ 0.9375. `mehta2018` narrowing sound. Enumerator `--check` is a pure completeness gate (honors D-009/MD-1); ledger spot-check of ~30 rows found no OUT row that is a relied-upon external-table generalization.
+- **[S] blame-history (Sonnet): no findings.** The corrected sentences date from M65; M71 never touched them, so M74 corrects them for the first time (not a reversal). M71's own deliberate fixes (saha2005 ratio 1.7–4×→1.10–4.12, xiao2009 four-lowest→two, the Fig 1 bias reads) are untouched. D-009 intact — `donner2002`'s note is not in the diff; only its ledger triage status changed, and the ledger row preserves its `check: none` directive.
+- **[S] prior-review-regression (Sonnet): no findings (clean no-op).** GitHub inline-comment probe returned `[]` (no threads to walk). M71's fixed defects (F2, F9) survive verbatim. Downstream sweep complete; grep found no stale `6609`/`~15 %`/`0.9320`-as-worst outside legitimate remaining uses.
+- **Scorer: no formal findings to score** (all three lenses returned clean).
+
+**Two non-blocking observations, both actioned (author's discretion, not scored findings):**
+1. *saha2005 Table I bolding* (prior-review lens): `6609`/`6600` were still bold as the pre-correction "worst" cells → **synced**: bold moved to `7695` (the recomputed worst) at `saha2005.md:151`.
+2. *orphan ledger rows* (diff-bug lens): `--check` caught un-triaged candidates but not stale rows whose candidate is gone → **hardened**: `--check` now also reports orphan rows and fails on them (symmetric gate; 0 orphans currently). Re-ran: self-test OK, `--check` 237/237, 0 un-triaged, 0 orphan.

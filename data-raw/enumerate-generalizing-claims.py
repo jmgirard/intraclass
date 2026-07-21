@@ -172,17 +172,31 @@ def cmd_check(root):
     enumeration, so review can trust no generalizing claim was skipped."""
     candidates = find_candidates(root)
     ledger = load_ledger(root)
+    cand_keys = {k for (k, _c, _l, _t) in candidates}
     missing = [(k, citekey, lineno, text)
                for (k, citekey, lineno, text) in candidates if k not in ledger]
+    # Orphans: ledger rows whose candidate no longer exists (a note was edited
+    # without refreshing the ledger). Not an AC1 completeness failure, but a
+    # staleness one — a symmetric gate keeps the two in sync as the live notes
+    # change.
+    orphans = [k for k in ledger if k not in cand_keys]
     print(f"candidates: {len(candidates)}   ledger rows: {len(ledger)}   "
-          f"un-triaged: {len(missing)}")
+          f"un-triaged: {len(missing)}   orphan rows: {len(orphans)}")
     if missing:
         print("\nUN-TRIAGED candidates (add a ledger row for each):", file=sys.stderr)
         for k, citekey, lineno, text in missing:
             print(f"  {k}  {REF_DIR}/{citekey}.md:{lineno}\n    {norm(text)[:140]}",
                   file=sys.stderr)
+    if orphans:
+        print("\nORPHAN ledger rows (candidate gone — refresh the ledger):",
+              file=sys.stderr)
+        for k in orphans:
+            print(f"  {k}  {ledger[k][1] if len(ledger[k]) > 1 else '?'}",
+                  file=sys.stderr)
+    if missing or orphans:
         return 1
-    print("OK — every enumerated candidate is classified in the triage ledger.")
+    print("OK — the enumerated candidates and the triage ledger are in sync "
+          "(every candidate classified, no stale rows).")
     print("(This gates enumeration completeness only, never a claim's correctness.)")
     return 0
 
