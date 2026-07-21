@@ -1,11 +1,11 @@
 # M76: Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML)
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** m76-boundary-robust-classical-oneway-ci
 
 ## Goal
 
@@ -87,3 +87,4 @@ candidate; Burch REML natively covers unbalanced, assessed balanced here.
 ## Work log
 
 - 2026-07-21: created by /milestone-plan.
+- 2026-07-21: in-progress; branch m76-boundary-robust-classical-oneway-ci cut from main.
