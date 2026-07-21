@@ -1,11 +1,11 @@
 # M75: Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"`
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP5
-- **Branch/PR:** —
+- **Branch/PR:** m75-npbootstrap-oneway
 
 ## Goal
 
