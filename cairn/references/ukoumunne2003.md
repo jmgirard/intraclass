@@ -85,10 +85,16 @@ both the a_i and the e_ij are normally distributed".
   design cells the figure plots, so no plot-read is needed here. They reach
   ~nominal only near k = 50.
 - **The `log F`-transformed bootstrap-t is close to nominal across k, but not
-  uniformly so.** At its worst tabulated normal cell — ρ = 0.001, k = 10 — it is
-  **0.9320**, not ≈ 0.95; p. 3814 flags exactly this, saying the method
-  "generally provided close to 95 per cent coverage with only a slight deviation
-  from this level when ρ was 0.001 and there were just 10 or 30 clusters". It is
+  uniformly so.** At its worst tabulated normal cell — ρ = 0.001, **k = 30** — it
+  is **0.9310**, not ≈ 0.95; the ρ = 0.001, k = 10 cell (0.9320) sits just above
+  it. Recomputed as `coverage = 100 − lower − upper` over all **12** transformed
+  bootstrap-t normal cells of Table I (`k ∈ {10, 30, 50}` × `ρ ∈ {0.001, 0.01,
+  0.05, 0.3}`, p. 3815): the minimum is 0.9310 (k = 30) then 0.9320 (k = 10),
+  both at ρ = 0.001. (An earlier version of this note gave the worst as 0.9320 at
+  k = 10; corrected at M74 — the k = 30 cell is fractionally worse.) p. 3814 flags
+  exactly this and names both, saying the method "generally provided close to 95
+  per cent coverage with only a slight deviation from this level when ρ was 0.001
+  and there were just 10 or 30 clusters". It is
   still the paper's recommended method, and the only one whose error is spread
   roughly evenly across the two tails.
 - **Caveat the paper itself raises (p. 3816), material to D-006's width
@@ -131,7 +137,8 @@ below the nominal 95 per cent level." A previous version of this note quoted it
 truncated at "the nominal 95" and labelled it the paper's *global* claim, which
 overstated its reach. Read as written it is a **floor for the harder case**: if
 the method holds within 3 points under marked non-normality, the normal case is
-no worse — and Table I's minimum, 0.9320, is consistent with that floor.
+no worse — and Table I's minimum, 0.9310 (k = 30, ρ = 0.001), is consistent with
+that floor.
 
 ## Traces to (M62)
 
@@ -145,8 +152,9 @@ no worse — and Table I's minimum, 0.9320, is consistent with that floor.
 Two things this re-verification sharpened, both bearing on the exported
 bootstrap-t milestone whenever it is planned:
 
-- **The method's own worst tabulated cell is 0.9320** (normal, ρ = 0.001,
-  k = 10). A coverage pin set at "≈ nominal" against this source would be
+- **The method's own worst tabulated cell is 0.9310** (normal, ρ = 0.001,
+  k = 30; the k = 10 cell is 0.9320 — see the full-table recomputation above).
+  A coverage pin set at "≈ nominal" against this source would be
   pinning a value the source does not claim; the paper's own floor is the
   p. 3816 non-normality sentence, not a point claim of 0.95.
 - **Width is the paid cost** (p. 3816) — the source expects wider intervals than

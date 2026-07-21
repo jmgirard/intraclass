@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
 | M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |
 | M73 | Make every dated observation executable | done | M71 | normal | milestones/archive/M73-executable-dated-observations.md |
-| M74 | Re-derive the generalizing claims over their full source tables | planned | M73 | low | milestones/M74-generalizing-claim-audit.md |
+| M74 | Re-derive the generalizing claims over their full source tables | review | M73 | low | milestones/M74-generalizing-claim-audit.md |
 | M67 | Source notes — the ICC-equality-testing cluster | done | M63 | low | milestones/archive/M67-source-notes-equality-testing.md |
 <!-- terminal-row retention: M73 done (2026-07-21) → M66 rotated out (oldest terminal; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M73, M72, M71, M70, M67 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)

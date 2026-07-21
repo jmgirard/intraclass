@@ -78,7 +78,7 @@ and milestones; never restate a value here.
   samples**. Outside the contract boundary.
 - [saha2005.md](saha2005.md) — source note (M65): bias-corrected MLE (BCML) of the
   **binary** beta-binomial ICC; a point-estimation paper with no coverage results.
-  Table I quantifies near-boundary non-convergence (~15 % acceptance at worst).
+  Table I quantifies near-boundary non-convergence (~13 % acceptance at worst).
   §4 contradicts Appendix A on `var(φ̂_ML)`; Appendix A is correct.
 - [saha2012.md](saha2012.md) — source note (M65): profile-likelihood CI for the
   **binary** beta-binomial ICC; PL near-nominal where four asymptotic Wald
