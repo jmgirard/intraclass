@@ -42,6 +42,12 @@ and milestones; never restate a value here.
   consistency** ICC estimated in a Bayesian hierarchy with a variance function;
   ignoring bounded-scale heteroscedasticity or pooling across studies inflates the
   ICC. Reports no coverage.
+- [burch2011.md](burch2011.md) — source note (M76): the **REML-based** one-way ICC
+  CI (eq. 6/13/15/16/17) that ohyama2025 cites secondhand — kurtosis-adjusted
+  `log(1+bθ̂)` limits. Its §4 arsenic example (a=28, b=4) is a published REML ρ
+  interval oracle **(0.73, 0.95)**; its normal-based interval (0.81, 0.94) is a
+  second SEARLE oracle. Notation trap: Burch's `a`=subjects, `b`=per-subject
+  (swapped vs the repo's `k`/`n`).
 - [donner2002.md](donner2002.md) — source note (M67): testing `H₀: ρ₁ = ρ₂` for two
   **dependent** ICCs — two observer panels rating the same subjects, the
   interobserver case. The cluster's closest approach to package territory, so its
@@ -160,12 +166,13 @@ and milestones; never restate a value here.
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
-committed record of what is on the shelf and which milestone ingests it. **33 PDFs
-— observed 2026-07-19**: <!-- check: none — a count of the gitignored shelf (cairn/references/sources/); the shelf varies per working copy, so a PDF count is not settleable from the committed repo --> the 30 verified against their own title pages at M63/T1,
+committed record of what is on the shelf and which milestone ingests it. **34 PDFs
+— observed 2026-07-21**: <!-- check: none — a count of the gitignored shelf (cairn/references/sources/); the shelf varies per working copy, so a PDF count is not settleable from the committed repo --> the 30 verified against their own title pages at M63/T1,
 less the superseded `jorgensen2019.pdf` preprint (since deleted, as the M66
 correction anticipated), plus `vanderark2023`, added by the maintainer 2026-07-19
 and verified against its title page when ingested, plus the three the maintainer
-added mid-M72 (below).
+added mid-M72 (below), plus `burch2011`, added by the maintainer 2026-07-21 for
+M76 and ingested here with a source note (verified against the source).
 
 **Three arrivals during M72 (2026-07-19), none yet carrying a source note.**
 `lee2024a` and `vispoel2022b` are cited by `ORACLES.md` and their source legs were
