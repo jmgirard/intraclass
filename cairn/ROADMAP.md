@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (M74 merged via PR #80; gate green — full `R CMD check` matrix green on CI, `cairn_validate` exit 0. Docs-only: 2 references-note corrections found by full-table recomputation (saha2005 worst-cell ~15 %→~13 %, ukoumunne2003 worst cell 0.9320→0.9310), no package value moved; M67 rotated off the terminal-row window (archive + git hold it)._
+_Last hygiene check: 2026-07-21 (/milestone audit — all mechanical checks green (`cairn_validate` exit 0; the 296 dangling-id advisories are pre-migration M1–M47 citations, benign); git clean, no orphans, both GitHub inboxes empty; M48 remains `blocked` on the maintainer's unopened v0.1.0 release window (D-050). No changes.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
