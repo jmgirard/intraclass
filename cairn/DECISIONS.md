@@ -338,3 +338,25 @@ M75's acceptance criteria (`Driving RR: RR02`); ICC(k) is now in M75 scope. The
 unbalanced candidate must warn that the SB pole/support alignment is balanced-only
 and needs re-derivation under `n₀` (RR02 beyond-brief 2). Confirms and does not
 supersede D-006; extends it with the ICC(k) and point-source rulings.
+
+### D-011 (2026-07-21): CI wall-clock is the testthat suite, not the dependency install — M77 lesson corrected
+
+**Context:** The M77-lineage ROADMAP candidate proposed caching CI R
+dependencies, on the M77 LESSONS claim that "CI wall-clock here is dominated by
+the `needs: check` dep install (~17 min ubuntu, ~23 min Windows)". Planning M78
+measured the R-CMD-check run at step granularity (PR run 29844778408):
+`setup-r-dependencies@v2` restores in 33s (ubuntu) / 52s (Windows) — it already
+caches by default — while `check-r-package` runs 16m/21m, of which
+`Running 'testthat.R'` is 13m elapsed (24m CPU, ~1.85× parallel) on ubuntu and
+18m on Windows (one time, no CPU/elapsed split → parallelism not engaging).
+Examples ~1s; vignette rebuild ~70s; 1896 tests run, 25 skip_on_ci (brms).
+**Decision:** The premise is falsified. Dependency caching and `needs:`-narrowing
+win ≈nothing; the CI wall-clock lever is the testthat suite runtime. The
+dep-caching candidate is retired (superseded by M78); the M77 LESSONS line is
+corrected in place. M78 targets the suite via parallelism (worker-count) and
+residual structural `boot_samples` right-sizing, under the GP5/GP6 constraint
+that no coverage/agreement oracle count is weakened.
+**Consequences:** Any future "speed up CI" work sizes from the check/test step,
+not the install (which is solved). GP3 (platform honesty) governs — the
+parallelism change alters how CI runs, so its stability is verified on the PR's
+own matrix, never asserted.

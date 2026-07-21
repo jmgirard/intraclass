@@ -71,7 +71,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 
 ## Tasks
 
-- [ ] T1: Correct the record — add a `cairn/DECISIONS.md` entry with the measured
+- [x] T1: Correct the record — add a `cairn/DECISIONS.md` entry with the measured
       breakdown superseding the M77 install-cost claim; correct the M77
       `cairn/LESSONS.md` line (2026-07-21). Docs-only.
 - [ ] T2: Profile the testthat suite per-file under R CMD check conditions
@@ -96,6 +96,9 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
   dep install is a cached ~33–52s; the real CI wall-clock is the testthat suite
   (ubuntu 13m/24m CPU, Windows 18m). Disposition (user): full test-suite
   reduction, both levers in one milestone, any-safe-reduction + NO-GO valve.
+- 2026-07-21: T1 — added D-011 (CI wall-clock is the testthat suite, not the dep
+  install) superseding the M77 install-cost claim; corrected the M77 LESSONS line
+  in place with the measured breakdown. Docs-only.
 
 ## Decisions
 
