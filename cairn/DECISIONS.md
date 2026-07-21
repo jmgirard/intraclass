@@ -241,3 +241,57 @@ still a provenance claim, not evidence that a re-run today reproduces it.
 **Consequences:** the count is not restated anywhere else in the record
 (LESSONS 2026-07-19/M70 — a count is a form that breaks when a fact is added); the
 per-entry classification in `ORACLES.md` carries the per-entry truth.
+
+### D-009 (2026-07-20): The dated-observation convention — every repo-state claim on a references page carries an exit-coded settling directive
+
+**Context:** A committed `cairn/references/` page makes two kinds of claim
+(tracking-rules "Standing facts vs. dated observations"): standing facts about a
+*source*, and dated observations about the *repo's own state* ("nothing reads this
+page", "not a dependency", "the only hit is a work log"). M71 returned from review
+three times because its interpretive repo-state claims could not be re-settled except
+by a reader re-deriving them by hand — measured at M73 plan time as only 2 of 87 dated
+observations carrying the command that would settle them. This entry defines the
+convention M73 brings the corpus to and commits a checker that enforces it.
+**Decision — four rules:**
+1. **Every dated observation about repo state carries an exit-coded settling
+   directive.** Immediately after its `— observed YYYY-MM-DD` stamp, on the same line,
+   the claim carries `<!-- check: <shell command> -->`. The command runs from the repo
+   root, reads state only (never writes), and is written so that **exit status 0 means
+   the claim holds** and any nonzero exit means it is falsified. The grep-negation idiom
+   is `! git grep -qlF 'citekey' -- <paths>` (exit 0 when the token is absent, i.e.
+   "nothing reads this page" holds). The command encodes the claim's *specific* asserted
+   scope — the exact paths and tokens the sentence names — so each directive is
+   per-claim, never boilerplate.
+2. **What counts as a settling command:** a deterministic, side-effect-free shell
+   command whose exit code decides the claim — `git grep`, `grep`, `test`, a
+   `python3 -c` / `Rscript -e` predicate. Determinism and read-only are the bar.
+3. **Claims no command can settle, three dispositions:**
+   - **Provenance extraction-statuses are exempt and out of scope.** The
+     `Extraction: … — observed` line in a page's `**Provenance.**` block asserts a human
+     re-read the page against its source; it is settled by the re-verification convention
+     (tracking-rules "Re-verification") and read by `cairn_validate`'s `references
+     staleness` advisory, not by a command. It carries no `check:` directive. The checker
+     excludes any line containing `Extraction:`.
+   - **A source-fact mis-stamped as an observation is restated as a standing fact** —
+     the `— observed` stamp is dropped and it becomes a plain claim about the source.
+   - **A genuinely-dated but un-command-settleable repo-state claim** ("recorded as
+     printed and left open", "flagged for the maintainer") carries an explicit
+     `<!-- check: none — <reason> -->`, the honest record that it was considered and no
+     command settles it.
+4. **Completeness is mechanized.** The committed checker
+   `data-raw/check-reference-observations.py` parses every dated observation in the 30
+   source notes and `INDEX.md` (excluding `Extraction:` lines), requires each to carry a
+   runnable `check:` directive or a `check: none — reason`, runs every runnable
+   directive, and **exits non-zero if any observation is unmarked or any claim is
+   falsified.** A `--self-test` mode injects a known-false directive and asserts the run
+   goes red, registered so a refactor cannot make the checker vacuous.
+**Scope fence:** `ORACLES.md` and `BIBLIOGRAPHY.md` are M72's (they adopt this
+convention rather than M73 revisiting them). Generalizing claims about a *source's*
+table are M74's — they need full-table recomputation, not an exit code. A
+`cairn_validate` check enforcing this convention plugin-side is the cairn repo's, not
+this one's.
+**Consequences:** a false repo-state claim on a references page now fails a re-runnable
+command instead of resting on a reader's care; plan-time harvests can trust a dated
+observation because the checker re-settles it. Supersedes nothing; complements D-008
+(the index-page verification bar) and the tracking-rules standing-fact/dated-observation
+split.

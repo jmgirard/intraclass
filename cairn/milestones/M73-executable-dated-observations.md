@@ -73,7 +73,7 @@ repo, not this one.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: draft the D-entry defining the convention; it governs the rest of
+- [x] T1: draft the D-entry defining the convention; it governs the rest of
       the milestone, so it lands first. Settle there what to do with a claim
       that is true but not command-settleable (the honest options are
       restate-as-standing-fact or delete, not stamp-and-hope).
@@ -97,10 +97,17 @@ repo, not this one.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
+- 2026-07-20 (T1): D-009 drafted and committed defining the dated-observation convention. Implement gate resolved three open choices (HTML-comment directive syntax; Python checker in `data-raw/`; provenance exempt + `check: none — reason` escape) — all recommendations accepted.
 - 2026-07-19: created by /milestone-plan, re-cutting M71 after the thrash rule fired on its third review return. Plan gate: audit all 30 notes (87 observations) rather than M71's seven; mechanize with a committed checker rather than a one-off audit. Rationale from M71's three review attempts — every value-level correction survived independent verification all three times, while interpretive claims about repo state failed every time, twice in prose written to fix the previous cycle's prose; the measured cause is that only 2 of 87 dated observations carry the command that would settle them, so each review re-derives them by hand.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- 2026-07-20 (T1): convention promoted to cross-cutting D-009 (repo-side): HTML-comment
+  `<!-- check: <cmd> -->` directive with exit-0-means-holds semantics; Python checker in
+  `data-raw/`; provenance `Extraction:` lines exempt; `check: none — reason` for the
+  genuinely un-settleable. Three implement-gate choices (syntax, siting, unsettleable
+  handling) confirmed by the user.
 
 ## Review
 <!-- owner: review · exclusive -->
