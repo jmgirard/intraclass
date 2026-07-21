@@ -39,8 +39,12 @@ EXCLUDED = {"ORACLES.md", "BIBLIOGRAPHY.md", "REFERENCES.md"}
 
 # A dated observation is a line carrying an `observed YYYY-MM-DD` stamp ...
 STAMP = re.compile(r"observed\s+\d{4}-\d{2}-\d{2}")
-# ... unless the line is a provenance extraction-status (exempt, D-009).
-EXEMPT_MARK = "Extraction:"
+# ... unless the stamp sits in a provenance paragraph (exempt, D-009). A
+# provenance paragraph is a maximal run of non-blank lines containing an
+# `Extraction:` sentence or a `**Provenance.**` heading; the extraction status
+# is soft-wrapped, so its `— observed` stamp often lands on a continuation line
+# that does not itself carry the keyword.
+PROVENANCE_MARKS = ("Extraction:", "**Provenance.**")
 # The settling directive: <!-- check: <cmd-or-none> -->
 DIRECTIVE = re.compile(r"<!--\s*check:\s*(.*?)\s*-->")
 # A directive whose command is the literal `none` (optionally `none — reason`).
@@ -65,18 +69,37 @@ def in_scope_files(root):
     )
 
 
+def provenance_linenos(lines):
+    """1-indexed line numbers belonging to a provenance paragraph (exempt)."""
+    prov = set()
+    n = len(lines)
+    i = 0
+    while i < n:
+        if lines[i].strip() == "":
+            i += 1
+            continue
+        j = i
+        while j < n and lines[j].strip() != "":
+            j += 1
+        if any(mark in lines[k] for k in range(i, j) for mark in PROVENANCE_MARKS):
+            prov.update(range(i + 1, j + 1))
+        i = j
+    return prov
+
+
 def observations(root):
     """Yield (relpath, lineno, line, directive_body_or_None) for each in-scope
-    dated observation. directive_body is the text after `check:` when present."""
+    dated observation. directive_body is the text after `check:` when present.
+    Stamps inside a provenance paragraph are exempt and not yielded (D-009)."""
     for rel in in_scope_files(root):
         with open(os.path.join(root, rel), encoding="utf-8") as fh:
-            for n, line in enumerate(fh, start=1):
-                if not STAMP.search(line):
-                    continue
-                if EXEMPT_MARK in line:  # provenance extraction-status: exempt
-                    continue
-                m = DIRECTIVE.search(line)
-                yield rel, n, line.rstrip("\n"), (m.group(1) if m else None)
+            lines = fh.readlines()
+        prov = provenance_linenos(lines)
+        for n, line in enumerate(lines, start=1):
+            if not STAMP.search(line) or n in prov:
+                continue
+            m = DIRECTIVE.search(line)
+            yield rel, n, line.rstrip("\n"), (m.group(1) if m else None)
 
 
 def evaluate(cmd, root):
