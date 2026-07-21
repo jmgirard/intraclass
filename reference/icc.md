@@ -270,7 +270,18 @@ icc(
   draws; it is the forced default for, and available only with,
   `engine = "brms"` (and `"brms"` requires it) – the other methods do
   not apply to a Bayesian fit, and `"posterior"` needs posterior draws
-  no other engine produces.
+  no other engine produces. `"npbootstrap"` is the **non-parametric**
+  transformed bootstrap-*t* of Ukoumunne et al. (2003), available **only
+  for the balanced one-way random design** (`model = "oneway"`; it
+  aborts otherwise). It resamples whole subjects with replacement (not
+  from the fitted model), stabilizes the variance with the `log F`
+  transform, studentizes with an infinitesimal-jackknife SE, and
+  back-transforms the endpoints. It is **not** a percentile bootstrap –
+  the percentile and BCa variants were assessed and rejected (they
+  under-cover at small rater counts); reach for it for its boundary
+  robustness (an interval that exists where the Monte-Carlo default
+  aborts) and non-normality robustness. See Details for the ICC(k),
+  endpoint-support, and point-estimate conventions.
 
 - mc_samples:
 
@@ -279,8 +290,9 @@ icc(
 
 - boot_samples:
 
-  Number of resamples for `ci_method = "bootstrap"` (default `999`).
-  Ignored when `ci_method = "montecarlo"`.
+  Number of resamples for `ci_method = "bootstrap"` (the parametric
+  bootstrap) and `"npbootstrap"` (the transformed bootstrap-*t* subject
+  resamples); default `999`. Ignored when `ci_method = "montecarlo"`.
 
 - seed:
 
@@ -520,6 +532,30 @@ covariance on the model's internal (log) scale and back-transformed, so
 the interval is boundary-aware near the common zero-rater-variance case
 where the delta method fails. Pass `seed` for a reproducible interval.
 
+## The `"npbootstrap"` interval (balanced one-way)
+
+For `unit = "average"` (the ICC(k), reliability of the mean of the *k*
+ratings) the transformed bootstrap-*t* interval is the exact monotone
+**Spearman-Brown** image of the single-rating ICC(1) interval,
+`g(rho) = k*rho / (1 + (k-1)*rho)` applied to the two ICC(1) endpoints.
+Because that map is strictly increasing, the ICC(k) interval's coverage
+is **identical to the ICC(1) interval's, by construction** – it is not a
+separate approximation.
+
+Following Ukoumunne et al. (2003, §5.2), the endpoints are **not
+truncated** to `[0, 1]`: they are confined only to the estimator's own
+support (approaching `-1/(k-1)` from above for ICC(1), and unbounded
+below for ICC(k)), so a near-boundary lower endpoint can be negative –
+markedly so for ICC(k). Leaving them untruncated is what makes the
+coverage faithful to the published method.
+
+The reported **point estimate** is the engine (REML) point, exactly as
+for every other `ci_method` – `ci_method` selects the interval, not the
+estimator. At the zero-between-variance boundary the point reads `0`
+while the untruncated interval may extend below `0`; this is the normal
+picture for a boundary-respecting point beside an honest interval, and
+it signals that the data are consistent with values near and below zero.
+
 ## References
 
 McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
@@ -528,6 +564,10 @@ intraclass correlation coefficients. *Psychological Methods, 1*(1),
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.
+
+Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
+Non-parametric bootstrap confidence intervals for the intraclass
+correlation coefficient. *Statistics in Medicine, 22*(24), 3805-3821.
 
 ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
 reliability for multilevel data: A generalizability theory approach.

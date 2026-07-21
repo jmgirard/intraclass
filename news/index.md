@@ -34,6 +34,19 @@
 
 ### Minor improvements
 
+- New `ci_method = "npbootstrap"` for the **balanced one-way random**
+  design: the non-parametric variance-stabilized **transformed
+  bootstrap-*t*** of Ukoumunne et al. (2003). It resamples whole
+  subjects (not the fitted model), so it is boundary robust — it returns
+  an interval where the Monte-Carlo default aborts on near-zero-ICC data
+  — and robust to non-normal subject effects. Validated against the
+  paper’s exact Table I coverage. It is one-way only (aborts otherwise)
+  and **not** a percentile bootstrap (the percentile and BCa variants
+  under-cover and were deliberately not shipped). The `ICC(k)` interval
+  is the exact Spearman-Brown image of the `ICC(1)` interval; endpoints
+  are untruncated (following the source), so a near-boundary lower bound
+  can be negative.
+
 - The `lavaan` (SEM) engine now fits the **crossed (Design 1)
   multilevel** design: `icc(..., engine = "lavaan", cluster = ...)`
   estimates the five-component decomposition (cluster,
@@ -50,6 +63,7 @@
   the bootstrap interval agrees with the Monte-Carlo interval within
   Monte-Carlo tolerance. Nested designs and within-cell replicates
   remain loud, classed refusals.
+
 - The `lavaan` (SEM) engine now also fits the crossed (Design 1)
   multilevel design with **fixed raters** (`raters = "fixed"`) at both
   the subject and cluster levels, on complete, balanced data with equal
@@ -65,6 +79,7 @@
   bootstrap is not yet available. Fixed-rater nested,
   within-cell-replicate, and incomplete/unbalanced multilevel SEM remain
   loud, classed refusals.
+
 - The `lavaan` (SEM) engine now fits the crossed (Design 1) multilevel
   design with **random raters** on **incomplete** and **unbalanced**
   data, not only on complete, balanced data:
@@ -82,7 +97,9 @@
   missingness pattern and its coverage is validated only on balanced
   data); balanced, complete data keeps the bootstrap. Fixed-rater
   incomplete/unbalanced multilevel SEM remains a loud, classed refusal.
+
 - `tidy(icc(...))` and `tidy(d_study(...))` gain a `type` column.
+
 - The conflated diagnostic (`level = "conflated"`) now also reports a
   **consistency** form (`type = "consistency"`), not just absolute
   agreement. It is the flat two-way consistency ICC read off the
@@ -93,6 +110,7 @@
   `brms` engines. Like the cluster level it needs raters that bridge
   clusters; without bridging the conflated level is dropped (or aborts
   if it is the only level requested).
+
 - The **averaged cluster-level ICC** (`level = "cluster"`,
   `unit = "average"`) now ships on **incomplete/ragged** multilevel data
   (crossed Design 1, random raters), where it previously aborted. The
@@ -104,6 +122,7 @@
   — `glmmTMB`, `lme4`, and the Bayesian `brms` engine (which applies the
   same divisor to the posterior draws’ variance components, its credible
   interval covering the population value across the cluster-count axis).
+
 - The
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   / [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods
