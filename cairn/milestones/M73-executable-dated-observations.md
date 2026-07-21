@@ -77,7 +77,7 @@ repo, not this one.
       the milestone, so it lands first. Settle there what to do with a claim
       that is true but not command-settleable (the honest options are
       restate-as-standing-fact or delete, not stamp-and-hope).
-- [ ] T2: write the checker script — parse the references corpus for dated
+- [x] T2: write the checker script — parse the references corpus for dated
       observations, extract each settling command, run it, compare against the
       claim. Site it per repo convention alongside the other `cairn/scripts/`
       tooling or `data-raw/`, whichever the profile's layout indicates.
@@ -97,6 +97,7 @@ repo, not this one.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
+- 2026-07-20 (T2): committed `data-raw/check-reference-observations.py` — parses the in-scope corpus (all `references/*.md` less ORACLES/BIBLIOGRAPHY/REFERENCES), excludes `Extraction:` provenance lines, requires a `check:` directive per observation, runs each (exit 0 = holds), exits nonzero on unmarked/falsified. `--self-test` and `--list-unmarked` modes. Baseline: 62 in-scope observations, all 62 unmarked (pre-authoring); self-test passes.
 - 2026-07-20 (T1): D-009 drafted and committed defining the dated-observation convention. Implement gate resolved three open choices (HTML-comment directive syntax; Python checker in `data-raw/`; provenance exempt + `check: none — reason` escape) — all recommendations accepted.
 - 2026-07-19: created by /milestone-plan, re-cutting M71 after the thrash rule fired on its third review return. Plan gate: audit all 30 notes (87 observations) rather than M71's seven; mechanize with a committed checker rather than a one-off audit. Rationale from M71's three review attempts — every value-level correction survived independent verification all three times, while interpretive claims about repo state failed every time, twice in prose written to fix the previous cycle's prose; the measured cause is that only 2 of 87 dated observations carry the command that would settle them, so each review re-derives them by hand.
 
