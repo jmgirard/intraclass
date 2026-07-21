@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (/milestone audit — all mechanical checks green (`cairn_validate` exit 0; the 296 dangling-id advisories are pre-migration M1–M47 citations, benign); git clean, no orphans, both GitHub inboxes empty; M48 remains `blocked` on the maintainer's unopened v0.1.0 release window (D-050). No changes.)_
+_Last hygiene check: 2026-07-21 (M75 merged (PR #81) — npbootstrap one-way `ci_method` shipped; archived, ROADMAP → done, M70 rotated out of terminal retention. `cairn_validate` exit 0; git clean.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M75 | Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"` | review | — | normal | milestones/M75-npbootstrap-oneway-cimethod.md |
-| M70 | Re-verify the one-way and equality-testing extractions (6 notes) | done | — | normal | milestones/archive/M70-reverify-oneway-equality-extractions.md |
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
 | M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |
 | M73 | Make every dated observation executable | done | M71 | normal | milestones/archive/M73-executable-dated-observations.md |
 | M74 | Re-derive the generalizing claims over their full source tables | done | M73 | low | milestones/archive/M74-generalizing-claim-audit.md |
-<!-- terminal-row retention: M74 done (2026-07-21) → M67 rotated out (oldest terminal; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M74, M73, M72, M71, M70 (5 most recent terminal). -->
+| M75 | Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"` | done | — | normal | milestones/archive/M75-npbootstrap-oneway-cimethod.md |
+<!-- terminal-row retention: M75 done (2026-07-21) → M70 rotated out (oldest terminal; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M75, M74, M73, M72, M71 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 

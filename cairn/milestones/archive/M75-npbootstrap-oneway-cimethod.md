@@ -1,0 +1,11 @@
+# M75: Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"`
+
+**Status:** done (2026-07-21, PR #81 https://github.com/jmgirard/intraclass/pull/81)
+
+**Goal:** Ship the `log F` variance-stabilized transformed bootstrap-t (M62 GO, D-006) as an exported, oracle-validated one-way `ci_method`, balanced-only, with a pre-specified corner-cell fallback.
+
+**Outcome:** Adds `ci_method = "npbootstrap"` for the balanced one-way random ICC — the Ukoumunne et al. (2003) transformed bootstrap-t (`R/ci-npbootstrap.R`: whole-subject resample → one-way ANOVA → eq. 6 `log F` transform → eq. 7 IJ SE → studentized → back-transform, untruncated per §5.2), ported byte-faithfully from the RR01 prototype. `ICC(k)`/`unit = "average"` ships as the exact monotone Spearman-Brown image of the `ICC(1)` interval (composed map `1 − e^(−logF)`); coverage inherits as an event identity. Reported point stays the engine REML point for both estimands (BC5). Dispatch guards abort classed on non-one-way/unbalanced input; degenerate resamples (SSA=0) and missing rows abort loudly (#5/#8). Validated: prototype parity to ≥4 dp; the n_rep=2000 sweep (B=999, `data-raw/m75-npbootstrap-coverage.R`) matches ukoumunne Table I at U10/U30/U50 (.9375/.9355/.9425 vs .938/.944/.9395, ±.03); C4 corner clears the 0.93 floor at .941 (GP5 "else" branch, no limitation). Ships `O-NPBoot` in ORACLES.md, `@param`/@details, NEWS. Unbalanced (`n_i`/`n₀`) deferred → candidate.
+
+**Decisions:** D-010 (confirms D-006) — string `"npbootstrap"` kept; ICC(k) via the monotone Spearman-Brown map (IP1 met by exact proof + BC2/BC3 numeric checks); engine REML point, ANOVA-MoM ρ̂ never surfaced. Driving RR: RR02 (BC1–BC6).
+
+**Review:** Consistency gate green (`cairn_validate` 0; `devtools::check()` 0/0/0; pkgdown clean). Three fresh-context lenses (diff-bug [O], blame-history [S], prior-review [S]) — 0 actioned findings; one noted non-defect (small-k ≤4 trips the AC5 degenerate-resample abort by design). RR02 measured-vs-projected all within tolerance; no shortfall. Hygiene: added a LESSONS line (fit-free balanced-one-way REML=max(0,MoM) coverage sweeps + monotone-image coverage inheritance); pruned the M54 slash-triple/ISO-date lesson as stalest to hold the 50-line cap (git retains it).
