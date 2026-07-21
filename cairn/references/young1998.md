@@ -20,9 +20,9 @@ North Dakota State University, Fargo. Carries a French *Résumé* (p. 1372) per
 **Role.** Ingested by M67 as the first of the unequal-family-size pair. It is the
 **two-population** case; `naik2007` generalizes it, and that note carries the
 full overlap analysis (a shared-vs-differs table) rather than repeating the
-derivation here — observed 2026-07-19. Ingested as
+derivation here — observed 2026-07-19 <!-- check: git grep -qiF 'overlap' -- cairn/references/naik2007.md -->. Ingested as
 evidence of a contract boundary; nothing in the package traces to it — observed
-2026-07-19.
+2026-07-19. <!-- check: ! git grep -qiE 'young' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
 
 ## The gap it fills
 
@@ -142,7 +142,7 @@ facet at all, which puts it doubly outside the interrater contract.
   documented claim reads this page, by design. No `ORACLES.md` entry cites it.
   A grep for this citekey and for the author surnames across `R/`, `tests/`,
   `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, and `ORACLES.md`
-  returned no hits — observed 2026-07-19.
+  returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'young' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
 - `cairn/references/naik2007.md` — the direct generalization (`g` populations,
   unequal variances); **the overlap between the two papers is analyzed there**.
 - `cairn/references/bhandary2006.md` — Bhandary's three-population sibling, which

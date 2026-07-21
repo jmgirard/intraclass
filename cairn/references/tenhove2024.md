@@ -239,7 +239,7 @@ ICCs" (p. 10, citing Briesch et al. 2014; ten Hove et al. 2020).
   times elsewhere in the paper (Eq. 18 p. 6, the p. 7 prose, Table 2 p. 9), none
   of which contains `σ²_r:s`. **No oracle value is affected** — no repo doc
   quotes this box (grepped across `cairn/`, `R/`, `tests/`, `vignettes/` and
-  `man/` — the only hit is M69's own work log — observed 2026-07-18). Read
+  `man/` — the only hit is M69's own work log — observed 2026-07-18 <!-- check: ! git grep -qF 'σ²_r:s' -- R tests vignettes man -->). Read
   Figure 2's structure, not this cell's content.
 - **RESOLVED (M69) — Table 2's absolute-average-incomplete cell is a source
   typo; Eq. 18 is authoritative.** Two separate issues were tangled in M64's

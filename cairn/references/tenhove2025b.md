@@ -162,8 +162,8 @@ bootstrapping is named but *not* run — "computationally intensive" (p. 1047).
   (p. 1050); convergence rate and estimation time.
 - **Reporting scope (p. 1051).** Figures 3–8 show only the low-error-variance
   conditions (`σ²_r = 0.50`, `σ²_sr = 1.00`); the complete result set is in
-  Supplementary Tables 1–2, which are not in the shelf PDF (— observed
-  2026-07-18; see Open Question 4).
+  Supplementary Tables 1–2, which are not in the article PDF (see Open
+  Question 4).
 
 ## Key results (pp. 1051–1054)
 
@@ -299,22 +299,21 @@ rater variance** as printed — the interval is not floored at zero.
    finding for review; no oracle value is implicated and none is proposed here.
    Re-confirmed at M69 against ADR-003 in `cairn/legacy/DECISIONS.md`, whose
    decision text does read "on the engine's internal (boundary-respecting) scale"
-   — observed 2026-07-18. Still standing.
+   — observed 2026-07-18. <!-- check: git grep -qF 'boundary-respecting' -- cairn/legacy/DECISIONS.md --> Still standing.
 2. **ADR-003's quoted sentence is accurate** but is attributed simply to "the
    abstract"; the exact printed location is p. 1042 (abstract), and the paper's
    phrase for the comparison set is MCMC-HL / MLE-RE / MLE-CF with ANOVA as
    benchmark — worth pinning in the ADR if precision matters at review.
    Re-confirmed at M69: ADR-003 attributes the sentence to "(abstract)" and the
-   sentence is printed verbatim in the abstract on p. 1042 — observed 2026-07-18.
+   sentence is printed verbatim in the abstract on p. 1042.
 3. **No boundary-fit policy is stated in this paper.** The nearest thing is
    follow-up simulation 2 (p. 1056): near-zero `σ²_r` is *estimated* badly (up to
    200% overestimation) but the ICC is unaffected because `σ²_s` dominates. The
    package's boundary-fit policy is therefore not sourced here; this paper
    supports only the weaker claim that near-zero rater variance does not spoil the
    ICC point/variability estimates in the tested cells.
-4. **Supplementary Materials A and B are not in the shelf PDF** — observed
-   2026-07-18 (re-confirmed M69: the article file is 21 pages, ending with the
-   reference list on printed p. 1061). The complete
+4. **Supplementary Materials A and B are not in the article PDF** (the article
+   file is 21 pages, ending with the reference list on printed p. 1061). The complete
    result tables (Tables 1–2, all 48 conditions), the anchor-rater Table 3, the
    full data example (Table 4), and follow-up 2's Figures 1–3 are cited (pp. 1051,
    1055, 1056) but unavailable — so no full-grid values can be extracted. OSF:
@@ -326,5 +325,5 @@ rater variance** as printed — the interval is not floored at zero.
    the only fully printed numeric block.
 6. `ORACLES.md` does not cite this paper as an oracle for any entry — grep for
    "ten Hove" returns only 2020, 2022 and Eq.-14 entries, re-run and still true
-   **— observed 2026-07-18** (M69) — which is consistent with its ADR-only role.
+   **— observed 2026-07-18** <!-- check: ! git grep -qiE 'ten Hove[^.]*2025|tenhove2025' -- cairn/references/ORACLES.md --> (M69) — which is consistent with its ADR-only role.
    No disagreement found.

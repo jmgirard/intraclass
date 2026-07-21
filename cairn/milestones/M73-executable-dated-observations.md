@@ -86,7 +86,7 @@ repo, not this one.
       make the checker vacuous.
 - [x] T4: bring the seven M71 notes' 22 observations to the convention (they
       are the best-understood and the ones review already probed).
-- [ ] T5: bring the M69/M70 notes' observations to the convention.
+- [x] T5: bring the M69/M70 notes' observations to the convention.
 - [ ] T6: bring the remaining source notes' and `INDEX.md`'s observations to
       the convention.
 - [ ] T7: run the checker over the whole corpus; correct every falsified
@@ -97,6 +97,7 @@ repo, not this one.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
+- 2026-07-20 (T5 complete): M69 notes done — fleiss1973 (multi-token grep), young1998 (overlap-in-naik + young trace), tenhove2024 (box absent from code), tenhove2025b:302/329 (legacy-ADR + ORACLES greps); 4 restated to standing facts (konishi1989:142 bound-absent-in-paper; tenhove2025b:165/308/315 source-structure facts about the article PDF); 3 `none` (tenhove2022 S4 shelf, tenhove2025a footnote + OSF-retrieval — all repo-local/gitignored-shelf). Checker: 30 runnable + 7 none, 0 falsified, 24 unmarked (T6).
 - 2026-07-20 (T5, parser fix): position-based parsing — a stamp whose `observed` keyword and date straddle a soft newline (young1998:24, saha2005:29, donner2002:19, bartko1976:153, tenhove2025a:282, tenhove2025b:165/315, vanderark2023:60) was invisible to line scanning; the directive is now the first `<!-- check -->` following the stamp in the same paragraph. True in-scope count rises 57 → 64. Began T5 M70 notes: donner2002, konishi1989 (with :142 restated to a standing fact — the bound's absence is a claim about the source), naik2007.
 - 2026-07-20 (T4): brought the seven M71 notes to the convention — 17 body observations (bhandary2006, bobak2018, mehta2018, saha2005, saha2012, xiao2009, xiao2013): 14 runnable `git grep`/`grep` directives (author-token trace claims + the ordinal never-swept compound), 3 `check: none` (bobak/mehta GP6-registry-is-a-concept ×2; bobak non-Gaussian-DGP is a judgment over grep hits). Checker: 0 falsified.
 - 2026-07-20 (T3): proved the checker bites on a real claim — mutated bhandary2006:229's directive to a false assertion (`icc` absent from R/), run reported `falsified: 1` and exit 1, reverted to green. Permanent `--self-test` registers the harness bite so a refactor cannot make it vacuous (AC3).

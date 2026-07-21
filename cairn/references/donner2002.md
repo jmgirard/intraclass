@@ -17,7 +17,7 @@ cluster. It is **the cluster's closest approach to this package's own territory*
 — the ICCs it compares are interobserver-agreement ICCs on the same subjects,
 estimated by the familiar ANOVA route — which makes its boundary line the most
 load-bearing of the four. Nothing in the package traces to it — observed
-2026-07-19.
+2026-07-19. <!-- check: ! git grep -qiE 'donner' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
 
 ## Why it is in the interrater literature at all
 
