@@ -1,6 +1,6 @@
 # M77: Speed up CI with three low-risk workflow-config changes
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -33,14 +33,15 @@ Cut CI wall-clock and wasted runs by adding run-cancellation, path filtering, an
 
 ## Tasks
 
-- [ ] T1: Add the `concurrency` block (`group: ${{ github.workflow }}-${{ github.ref }}`, `cancel-in-progress: true`) to all four workflows.
-- [ ] T2: Add `paths-ignore` to the `push` and `pull_request` triggers of `check-standard.yaml` + `test-coverage.yaml` (expand each bare trigger to carry the filter; keep `push` branch filter).
-- [ ] T3: Replace `check-standard.yaml`'s static `matrix.config` list with a `${{ github.event_name == 'push' && fromJSON('[...5...]') || fromJSON('[...ubuntu+windows release...]') }}` expression.
-- [ ] T4: Run `actionlint` on the four files; confirm clean. At review, read the PR's own check run to confirm 2 configs fired.
+- [x] T1: Add the `concurrency` block (`group: ${{ github.workflow }}-${{ github.ref }}`, `cancel-in-progress: true`) to all four workflows.
+- [x] T2: Add `paths-ignore` to the `push` and `pull_request` triggers of `check-standard.yaml` + `test-coverage.yaml` (expand each bare trigger to carry the filter; keep `push` branch filter).
+- [x] T3: Replace `check-standard.yaml`'s static `matrix.config` list with a `${{ github.event_name == 'push' && fromJSON('[...5...]') || fromJSON('[...ubuntu+windows release...]') }}` expression.
+- [x] T4: Run `actionlint` on the four files; confirm clean. At review, read the PR's own check run to confirm 2 configs fired.
 
 ## Work log
 
 - 2026-07-21: created by /milestone-plan. Gate decisions: PR matrix = ubuntu+windows release (preserves the M56 Windows-only-flake gate before merge); paths-ignore on both push+pull_request of check+coverage (tracking commits land on main directly here); lint/format paths-ignore declined. Branch protection on main is absent → no required-check-vs-paths-ignore hang risk.
+- 2026-07-21: T1–T4 done. Concurrency block on all four workflows; paths-ignore on push+pull_request of check-standard+test-coverage; check-standard matrix now event-conditional via fromJSON ternary (push→5 configs, PR→ubuntu+windows release). `actionlint` clean (1.7.12, exit 0) on all four; matrix JSON verified to parse to 5/2 configs. No R code touched, so devtools verify slot N/A. Status → review.
 
 ## Decisions
 
