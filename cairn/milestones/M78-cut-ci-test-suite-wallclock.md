@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3, GP5, GP6
-- **Branch/PR:** m78-cut-ci-test-suite-wallclock
+- **Branch/PR:** m78-cut-ci-test-suite-wallclock · https://github.com/jmgirard/intraclass/pull/84
 
 ## Goal
 
