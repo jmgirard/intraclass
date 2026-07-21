@@ -110,7 +110,7 @@ width); an ORACLES.md entry; docs/NEWS.
 
 ## Tasks
 
-- [ ] T1: Failing tests first — prototype-parity on the M62 datasets (AC2), the
+- [x] T1: Failing tests first — prototype-parity on the M62 datasets (AC2), the
       Table I coverage assertions (AC3), dispatch + classed-guard tests (AC1, AC5),
       the BC2 identity cross-check, and (consider, RR02 rec 5) the off-boundary
       REML-point = internal MoM ρ̂ parity test.
@@ -123,15 +123,15 @@ width); an ORACLES.md entry; docs/NEWS.
       at `R/icc.R:~1800`; route raw one-way data to the reducer for both estimands,
       abort classed on non-one-way/unbalanced input (not on `unit = "average"`),
       and report the engine REML point via `icc_point()` for both (BC5). (AC1)
-- [ ] T4: Validation harness in `data-raw/` (C1–C4 + U10/U30/U50 at n_rep ≥ 2000;
+- [x] T4: Validation harness in `data-raw/` (C1–C4 + U10/U30/U50 at n_rep ≥ 2000;
       two-sided + lower/upper tail-error; distinct per-cell seeds; per-rep `seed`;
       truncated/untruncated width on a common scale); add the `ICC(k)` rep-by-rep
       inherited-coverage assertion (BC3) and the point-outside-interval rate (BC6);
       run and commit the fixture. (AC3, AC4)
-- [ ] T5: Apply the pre-specified corner branch from the T4 result — add the
+- [x] T5: Apply the pre-specified corner branch from the T4 result — add the
       @details corner limitation if C4 < 0.93, else record the clear in the work
       log. (AC6)
-- [ ] T6: Write the ORACLES.md entry (basis = **inheritance from the ICC(1) Table I
+- [x] T6: Write the ORACLES.md entry (basis = **inheritance from the ICC(1) Table I
       anchor + the BC2 identity cross-check**, not an independent anchor — BC4);
       update roxygen `@param ci_method` (name the variant; state it is **not** a
       percentile bootstrap — BC1) and @details (ICC(k) SB image + untruncated
@@ -168,5 +168,13 @@ width); an ORACLES.md entry; docs/NEWS.
   fixture + generator committed; T1 unit tests (parity/guards/ICC(k) identity)
   green (28/28); T6 docs (@param/@details, O-NPBoot in ORACLES.md, NEWS) drafted.
   Coverage test + fixture (T4) held for the running n_rep=2000 sweep (B=999).
+- 2026-07-21: T4 sweep done (n_rep=2000, B=999, all 7 cells). AC3 coverage
+  U10/U30/U50 = .9375/.9355/.9425 (Table I .938/.944/.9395, all within ±.03); AC4
+  tail split balanced (U10 .0335/.0290) + truncated ≤ untruncated; BC3 zero
+  disagreements (covk = cov1 exactly); BC6 point-outside ≤ upper-tail every cell.
+  Coverage test green (68/68). T1/T4/T6 complete.
+- 2026-07-21: T5 (AC6/GP5, pre-specified branch): the C4 corner clears the 0.93
+  floor at coverage_icc1 = 0.9410 (every cell clears; min 0.934), so NO @details
+  corner limitation is added — the "else" branch. Recorded here per the plan.
 
 ## Review
