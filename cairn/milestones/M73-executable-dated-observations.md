@@ -7,7 +7,7 @@
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M71   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m73-executable-dated-observations   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m73-executable-dated-observations · https://github.com/jmgirard/intraclass/pull/79   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -37,27 +37,27 @@ repo, not this one.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] A `cairn/DECISIONS.md` entry defines the convention: what a dated
+- [x] A `cairn/DECISIONS.md` entry defines the convention: what a dated
       observation must carry, what counts as a settling command, and what to
       do with a claim no command can settle.
-- [ ] A committed checker script re-runs every settling command in the
+- [x] A committed checker script re-runs every settling command in the
       references corpus and reports, per claim, the command and whether the
       claim holds. It **exits non-zero on a falsified claim** — the property
       being protected is that a false claim fails a run, not that a reader
       notices it.
-- [ ] The checker fails when a claim is falsified: demonstrated by mutating a
+- [x] The checker fails when a claim is falsified: demonstrated by mutating a
       true claim to a false one and showing the run go red, not by inspection
       (tracking-rules "a guard must fail when the rule it locks is deleted").
-- [ ] Every dated observation in the 30 source notes and `INDEX.md` either
+- [x] Every dated observation in the 30 source notes and `INDEX.md` either
       carries a settling command, or is restated as a standing fact about its
       source, or is removed — none is left asserting repo state on a reader's
       word.
-- [ ] The checker run is clean, and every claim it falsified along the way was
+- [x] The checker run is clean, and every claim it falsified along the way was
       corrected at its source with the correction's basis recorded.
-- [ ] No package value changes: any correction that would move an oracle
+- [x] No package value changes: any correction that would move an oracle
       value, test fixture, or documented behavior is escalated as a review
       finding with its citation, not silently applied.
-- [ ] `cairn_validate` passes and the r-package `verify` slot is clean.
+- [x] `cairn_validate` passes and the r-package `verify` slot is clean.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
@@ -119,3 +119,41 @@ repo, not this one.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-20 · PR #79 · docs-only + one `data-raw/` tooling script.**
+
+Fresh evidence per acceptance criterion (all by command, not recall):
+
+- **AC1 (D-009 defines the convention).** `cairn/DECISIONS.md:245` — D-009 states
+  the four rules: exit-0-means-holds directive, what counts as a settling command,
+  provenance `Extraction:` exemption + `check: none — reason` for the unsettleable,
+  mechanized completeness.
+- **AC2 (checker re-runs + exits non-zero on falsified).**
+  `data-raw/check-reference-observations.py` run over the corpus: 60 observations,
+  48 runnable + 12 `none`, 0 unmarked, 0 falsified, **exit 0**. Reports per-claim.
+- **AC3 (fails on a falsified claim, by mutation not inspection).** Fresh mutation:
+  flipped hedges2012:158's directive to a false assertion (`icc` absent from R/) →
+  run reported `falsified: 1` and **exit 1**; reverted → exit 0. Plus the permanent
+  `--self-test` (registered harness bite) passes.
+- **AC4 (every observation settled/restated/removed).** Checker: **0 unmarked** of
+  60 in-scope. 5 restated as standing facts (konishi1989:142, tenhove2025b:165/308/315,
+  vanderark2023:257); the ~28 provenance `Extraction:` statuses are exempt by rule.
+- **AC5 (clean run + falsified claims corrected at source).** Checker exit 0. One
+  claim falsified along the way — tenhove2018's "`irr` is not a package dependency"
+  (`irr` in Suggests since M42, `DESCRIPTION:35`) — corrected in place at :56 and
+  :199, basis recorded inline; directive now checks `irr` present.
+- **AC6 (no package value changes).** `git diff --name-only main` touches zero files
+  under `R/ tests/ data/ man/ NAMESPACE DESCRIPTION _pkgdown NEWS`. No oracle value,
+  fixture, or documented behavior moved.
+- **AC7 (`cairn_validate` + verify slot).** `cairn_validate` **exit 0** — all checks
+  pass; the sole advisory is dangling id tokens (294→295 = tenhove2018's two M42
+  provenance citations, consistent with the repo's existing pre-migration id
+  citations). `devtools::document()` clean, no roxygen drift. `devtools::test()` not
+  run: docs-only diff cannot affect it (no R/test/DESCRIPTION change) and the suite
+  carries ~2h flaky brms live-Stan work — the full cross-platform `R CMD check` runs
+  via PR #79 CI, required green before merge.
+
+**Consistency gate.** `cairn_validate` exit 0. Toolchain (r-package): `data-raw/`
+and `cairn/` both `.Rbuildignore`'d (new script raises no check NOTE); no
+R/roxygen/NEWS/README/pkgdown change → no NEWS entry or pkgdown-index obligation;
+`document()` no-diff. Full `R CMD check` delegated to PR #79 CI.
