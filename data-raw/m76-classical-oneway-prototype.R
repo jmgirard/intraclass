@@ -62,14 +62,14 @@ burch_g <- function(kappa_bc) 2.0 * kappa_bc + 0.5 * kappa_bc^2
 # coefficient, so 3P/(k^2 n^2) -> 3 and E(kappa-hat) -> 0 as k grows (the
 # estimator is consistent); a missing cube on (n-1) breaks that and was the
 # transcription bug the self-consistency oracle below caught.
-burch_P <- function(k, n) {
+burch_p_term <- function(k, n) {
   k^3 *
     (n - 1)^3 /
     (k * (n - 1) + 2) +
     2 * k * (n - 1) * (k - 1) +
     (k - 1)^3 / (k + 1)
 }
-burch_ekappa_normal <- function(k, n) 3 * burch_P(k, n) / (k^2 * n^2) - 3
+burch_ekappa_normal <- function(k, n) 3 * burch_p_term(k, n) / (k^2 * n^2) - 3
 
 # eq. 13: kurtosis plug-in from RAW balanced data (needs the individual y_ij),
 # standardized by the dataset's own MSE/MSA.
@@ -84,7 +84,7 @@ burch_kappa_hat <- function(df, msa, mse) {
 
 # eq. 15: bias-corrected kurtosis; E(kappa-hat-hat) = 0 under normality by design.
 burch_kappa_bc <- function(kappa, k, n) {
-  kappa + 3 * (1 - burch_P(k, n) / (k^2 * n^2))
+  kappa + 3 * (1 - burch_p_term(k, n) / (k^2 * n^2))
 }
 
 # Core eq. 16/17: REML CI for rho from (MSA, MSE, k, n) and the eq. 16 g-value.
