@@ -141,7 +141,15 @@ test_that("npbootstrap aborts on a degenerate (zero between-variance) design (AC
     score = rep(c(1, 2), times = 6)
   )
   expect_error(
-    icc(d, score, subject, rater, model = "oneway", ci_method = "npbootstrap", seed = 1),
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      ci_method = "npbootstrap",
+      seed = 1
+    ),
     class = "intraclass_singular_fit"
   )
 })
@@ -168,7 +176,16 @@ test_that("npbootstrap is reproducible and RNG-neutral (#9/#12)", {
   # The seeded interval leaves the global RNG stream untouched (#9).
   set.seed(7)
   before <- .Random.seed
-  icc(d, score, subject, rater, model = "oneway", ci_method = "npbootstrap", boot_samples = 99L, seed = 123)
+  icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "npbootstrap",
+    boot_samples = 99L,
+    seed = 123
+  )
   expect_identical(.Random.seed, before)
 })
 

@@ -38,7 +38,11 @@ test_that("tail-error is recorded and the near-zero tail split is balanced (AC4)
   for (nm in names(oracle)) {
     x <- oracle[[nm]]
     # Two-sided coverage is (approximately) 1 - the two tail errors.
-    expect_equal(x$coverage_icc1, 1 - x$lower_tail - x$upper_tail, tolerance = 1e-8)
+    expect_equal(
+      x$coverage_icc1,
+      1 - x$lower_tail - x$upper_tail,
+      tolerance = 1e-8
+    )
   }
   # At the near-zero corner the transformed bootstrap-t keeps a roughly EVEN tail
   # split (Table I ~3.25/2.95 at U10), unlike the BCa skew (~2.4/14.2). A gap this

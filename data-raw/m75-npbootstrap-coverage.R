@@ -148,7 +148,11 @@ for (nm in names(cells)) {
 attr(results, "provenance") <- paste0(
   "M75 T4 npbootstrap coverage sweep. generator: ",
   "data-raw/m75-npbootstrap-coverage.R; shipped reducer npbootstrap_ci(); ",
-  "n_rep=", n_rep, ", B=", b_boot, "; distinct per-cell seed bases + per-rep ",
+  "n_rep=",
+  n_rep,
+  ", B=",
+  b_boot,
+  "; distinct per-cell seed bases + per-rep ",
   "resample seeds; REML point = max(0, MoM) analytic (balanced one-way). ",
   "Regenerate with that script."
 )
