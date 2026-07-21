@@ -176,8 +176,8 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
 - **Not an oracle.** The `ICC₂` values (0.70 / 0.16 / 0.20) are printed to two
   decimals, computed by `irr` under a consistency specification, on datasets not
   reproduced in the paper. They are neither hand-checkable nor precise enough to
-  pin against, and `irr` is not a dependency. Recorded as evidence, not as a
-  candidate fixture.
+  pin against, and `irr` is only a Suggests dependency (not loaded here).
+  Recorded as evidence, not as a candidate fixture.
 
 ## Traces to
 

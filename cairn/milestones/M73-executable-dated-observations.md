@@ -157,3 +157,26 @@ Fresh evidence per acceptance criterion (all by command, not recall):
 and `cairn/` both `.Rbuildignore`'d (new script raises no check NOTE); no
 R/roxygen/NEWS/README/pkgdown change → no NEWS entry or pkgdown-index obligation;
 `document()` no-diff. Full `R CMD check` delegated to PR #79 CI.
+
+**Independent review (3 fresh-context lenses + scorer).** Blame-history [S]: zero
+findings — every prose change is a faithful correction, valid restatement, or
+read-only directive; scope fence (ORACLES/BIBLIOGRAPHY untouched) respected.
+Diff-bug [O]: no correctness/contract/convention defects — checker parser sound
+(provenance exemption, position-based association, self-test bite all verified),
+directives faithful, `irr` correction accurate; two explicitly-non-defect latent
+observations. Prior-review [S]: no prior-review regressions (GitHub inline-comment
+probe empty; archived `## Review` findings on the touched files not regressed),
+but flagged the finding below for the diff lens.
+
+*Actioned finding (scored 88):* **tenhove2018.md — self-contradiction after the
+`irr` correction.** Lines 56 and 199 were corrected to "`irr` is a Suggests
+dependency", but line 179 still read "`irr` is not a dependency" (no `— observed`
+stamp, so the checker did not track it). Fixed at review: line 179 → "`irr` is only
+a Suggests dependency (not loaded here)"; file now consistent, checker + cairn_validate
+still exit 0.
+
+*Below-threshold, logged not actioned (IP3):* (1) score 44 — `--self-test` exercises
+only `evaluate()`, not the `observations()` parser (matches its D-009-stated scope;
+intentional). (2) score 55 — a negated grep over a mistyped/nonexistent pathspec
+exits 1 → spuriously "holds"; latent authoring fragility, no active instance (all
+current pathspecs verified present).
