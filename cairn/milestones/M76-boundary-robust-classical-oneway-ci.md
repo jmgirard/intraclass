@@ -100,6 +100,7 @@ candidate; Burch REML natively covers unbalanced, assessed balanced here.
 - 2026-07-21: T6 done — O-Classical-OW registered in ORACLES.md (prototype-validated, not suite-asserted, honest per D-008). GO/NO-GO verdict authored as D-012 (ip-touching gate: user ACCEPTED, declined Fable escalation): NO-GO default-replace, GO opt-in for both SEARLE + Burch REML, no #3/ADR-003 change. Follow-on opt-in `ci_method` ROADMAP candidate added (lineage D-006 → M76/D-012). All 6 ACs met. Status → review.
 - 2026-07-21: review — branch synced with main (no drift), draft PR #85 opened. AC1–AC6 verified with fresh evidence (see Review). Consistency gate: cairn_validate exit 0, document() no-diff. Three-lens fan-out spawned.
 - 2026-07-21: review — PR #85 lint job red: `object_name_linter` on `data-raw/m76-classical-oneway-prototype.R:65` (`.lintr` lints data-raw). Fixed on-branch (trivial): renamed `burch_P` → `burch_p_term` (3 uses); oracles re-pass, air + lintr clean locally. Blame-history lens: no findings.
+- 2026-07-21: review — fan-out complete: diff-bug (O) + blame-history (S) clean; prior-review (S) found the M74 generalizing-claim gate regressed (17 new un-triaged claims, `--check` red). Scorer 85 → actioned/fixed: triaged 18 rows in `generalizing-claims-triage.tsv` (17 M76 + 1 pre-existing M75), `--check` now un-triaged:0. 1 sub-threshold obs logged.
 
 ## Review
 
@@ -123,3 +124,16 @@ Every ledger number in `cairn/references/classical-oneway-comparison.md` was rep
 - r-package toolchain gate: `R/`, `man/`, `NAMESPACE`, `DESCRIPTION` byte-identical to main; `devtools::document()` produces no diff; new files build-excluded (`.Rbuildignore` `^data-raw$`, `^cairn$`). No user-visible change → no NEWS entry owed. Full cross-platform R CMD check is PR #85 CI (required green at merge).
 
 ### Independent fresh-context review (three lenses + scorer)
+
+Three distinct-evidence reviewers spawned in fresh context (ref-based git, shared tree):
+
+- **[O] diff-bug (Opus)** — no surviving findings. Re-derived both interval constructions from the sources, executed the prototype (all `stopifnot` oracles pass), and cross-checked every tracking-page number against `m76-sweep-results.rds`. Confirmed the ledger honors the frozen criterion to the letter (the n=2 C3 width is *counted* a fail then caveated, not bent to pass).
+- **[S] blame-history (Sonnet)** — no findings. D-012 correctly parallels D-006's "separate track" framing and touches no D-004 boundary-policy cell; O-Classical-OW is a pure append honoring D-007/D-008; burch2011/INDEX/BIBLIOGRAPHY follow D-009; the follow-on candidate is the single correct successor (search-first).
+- **[S] prior-review (Sonnet)** — one finding (below). Confirmed RR01's cell-seed-collision and tail-asymmetry (Q5) lessons are *applied*, and D-008/D-009 conventions honored. GitHub inline-comment probe empty → PR threads not walked (no-op secondary surface).
+
+**Actioned finding (scored 85 by the [S] scorer, ≥80 → actioned; fixed now):**
+> M76 regresses M74's mechanized generalizing-claim completeness gate: the new/edited references pages add 17 generalizing-shaped claims (`classical-oneway-comparison.md` ×15, `burch2011.md` ×1, `ORACLES.md` O-Classical-OW ×1) without rows in `data-raw/generalizing-claims-triage.tsv`, so `enumerate-generalizing-claims.py --check` reports un-triaged claims.
+
+Verified by execution: `--check` at HEAD reported `un-triaged: 18` (vs `1` on main). **Fixed** by triaging all via M74's own categories — the comparison note as `OUT-repo-analysis` (mirroring M62's sibling `npbootstrap-oneway-comparison.md`), the verbatim Burch §5 quote as `OUT-quote`, the ORACLES characterization as `OUT-oracle-pin`. The 18th row was a **pre-existing M75 omission** (`ORACLES.md:1463`, BC6 npbootstrap line — out of M76 scope per the false-positive taxonomy), triaged here in passing so the gate returns fully green. `--check` now `un-triaged: 0, orphan rows: 0`; `--self-test` OK.
+
+**Sub-threshold, logged not actioned (below 80, IP3):** the diff-bug reviewer noted the SEARLE oracle block's inline comment (`m76-classical-oneway-prototype.R:~101`) calls the mcgraw1996 Table 7 check a "2nd independent type" where it is algebraically the same F-pivot (a self-check). Not a finding: the durable record (`ORACLES.md`) labels it correctly as an "algebraic-identity self-check," and the leg's genuine second independent anchor is the burch arsenic normal-based value (different paper/dataset), so IP1 holds. A loose word in a non-exported research comment.
