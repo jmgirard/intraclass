@@ -73,7 +73,7 @@ re-transcribed.
       corpus for generalizing shapes (quantifiers and superlatives adjacent to
       a numeric claim), triaged into in-scope (load-bearing / relied upon) and
       out. Record the search so review can re-run it.
-- [ ] T2: recompute the enumerated claims in the seven M71 notes, starting
+- [x] T2: recompute the enumerated claims in the seven M71 notes, starting
       with the two review already found false.
 - [ ] T3: recompute the enumerated claims in the M69/M70 notes.
 - [ ] T4: recompute the enumerated claims in the remaining source notes and
@@ -91,6 +91,7 @@ re-transcribed.
 - 2026-07-19: created by /milestone-plan alongside M73, re-cutting M71 after the thrash rule fired. Split from M73 at the plan gate on the sizing tripwire — the user asked for both interpretive-claim shapes in one milestone, but 87 dated observations plus a full-table recomputation of every generalizing claim across 30 notes exceeds the 1–3 session bar, and the two shapes take different remedies (a re-runnable command vs a recomputation). Planned now rather than deferred to a candidate row, with `Depends on: M73` so the enumeration can reuse M73's corpus tooling.
 - 2026-07-20: started (in-progress), branch `m74-generalizing-claim-audit`. Question gate: enumeration recorded as a committed enumerator script; per-claim derivation basis inline in each note (both maintainer-confirmed).
 - 2026-07-20: T1 done. Built `data-raw/enumerate-generalizing-claims.py` (finder + `--check` completeness gate + `--self-test`) and the committed triage ledger `data-raw/generalizing-claims-triage.tsv`. Enumerator recall net = superlative/quantifier/range shapes adjacent to a number, widened for bare decimal/table-cued ranges after it missed `xiao2013`'s "731–862/nine cells"; 234 candidates classified, `--check` green (0 un-triaged). Triage: 16 IN + 20 IN-done + 5 IN-consumer; 193 OUT across documented categories. Scope call recorded as MD-1 (repo synthesis notes + ORACLES pins + figure plot-reads + verbatim source quotes are OUT). `cairn_validate` exit 0.
+- 2026-07-20: T2 done (7 M71 notes). One CORRECTION: `saha2005` Table I worst-acceptance cell — recomputed over all 160 cells the max generated is 7695 (PNB/TNBD,m10,π.1,φ.2) → ~13 %, not 6609 → ~15 % (the small-φ boundary cells 6600/6609/6903 sit behind at ~14-15 %). One NARROWING: `mehta2018` Case 6 ICC 0.08 is the lowest true *ICC* in the M65 cluster (basis: cluster design-minima ranked; saha's φ 0.05 excluded as a binary dispersion parameter). CONFIRMED from full tables: `bobak2018` min 0.295 & pooled/homogenized ⊂ [0.609,0.706]; `saha2012` cross-note near-zero (φ .05 / xiao2009 ρ .1 / xiao2013 ρ .6, none hits boundary); `xiao2009` (36 PL cells ⊂ [.931,.950], GP range .913-.947, five lowest in K3/25 block); `bhandary2006` F_max ⊂ [.0165,.0414] over 27 cells; `xiao2013` Table 2 731-862 over 9 cells; `mehta2018` σ²_a Table-5 ordering. Ledger refreshed (236 candidates, +2 IN-basis derivation lines), `--check` green, `cairn_validate` exit 0. No package value changed. INDEX consumer of saha2005 worst-cell (~15 %) flagged for T5 update.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
