@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M75 | Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"` | in-progress | — | normal | milestones/M75-npbootstrap-oneway-cimethod.md |
+| M75 | Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"` | blocked | — | normal | milestones/M75-npbootstrap-oneway-cimethod.md |
 | M70 | Re-verify the one-way and equality-testing extractions (6 notes) | done | — | normal | milestones/archive/M70-reverify-oneway-equality-extractions.md |
 | M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
 | M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |

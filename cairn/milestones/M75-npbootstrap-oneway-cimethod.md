@@ -1,6 +1,6 @@
 # M75: Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"`
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -117,6 +117,8 @@ registry entry; docs/NEWS.
   tripwire). (3) point-estimate source: user asked for a recommendation; session
   recommends the engine REML point (≥0, package-consistent), folded into the RB.
   Routing to /milestone-brief for a single RB covering all three; milestone paused.
+- 2026-07-21: blocked on RB02 (npbootstrap exported-API scope — public string,
+  ICC(k) support, reported point). Awaiting RR02.
 
 ## Decisions
 
