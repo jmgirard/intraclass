@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** m77-ci-speed-config
+- **Branch/PR:** m77-ci-speed-config · https://github.com/jmgirard/intraclass/pull/83
 
 ## Goal
 
