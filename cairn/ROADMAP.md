@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (reconciled PR #82 — test-only hardening of the npbootstrap guards to 100% coverage, a trivial post-M75 commit direct to main. `cairn_validate` exit 0; git clean; inboxes empty.)_
+_Last hygiene check: 2026-07-21 (M78 shipped via PR #84 — scale testthat parallel workers to runner cores; Windows testthat 18m→15m (long pole), ubuntu flat (core-limited); corrected the M77 CI-cost record (D-011). All 8 PR checks green. `cairn_validate` exit 0.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | blocked | — | normal | milestones/M76-boundary-robust-classical-oneway-ci.md |
-| M71 | Re-verify the robustness and interval-methods extractions (7 notes) | done | — | low | milestones/archive/M71-reverify-robustness-extractions.md |
-| M72 | Verify the oracle registry and the bibliography | done | M70, M71 | normal | milestones/archive/M72-verify-oracle-registry-bibliography.md |
+| M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | in-progress | — | normal | milestones/M76-boundary-robust-classical-oneway-ci.md |
+| M78 | Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO) | done | — | normal | milestones/archive/M78-cut-ci-test-suite-wallclock.md |
+| M77 | Speed up CI — concurrency-cancel, paths-ignore, event-conditional check matrix | done | — | normal | milestones/archive/M77-ci-speed-config.md |
 | M73 | Make every dated observation executable | done | M71 | normal | milestones/archive/M73-executable-dated-observations.md |
 | M74 | Re-derive the generalizing claims over their full source tables | done | M73 | low | milestones/archive/M74-generalizing-claim-audit.md |
 | M75 | Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"` | done | — | normal | milestones/archive/M75-npbootstrap-oneway-cimethod.md |
-<!-- terminal-row retention: M75 done (2026-07-21) → M70 rotated out (oldest terminal; its archive file still resolves and LESSONS/INDEX still cite it by id). Kept: M75, M74, M73, M72, M71 (5 most recent terminal). -->
+<!-- terminal-row retention: M78 done (2026-07-21) → M72 rotated out (oldest terminal; its archive file still resolves and candidate lineage cites it by id). Kept: M78, M77, M75, M74, M73 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
@@ -35,4 +35,5 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 - Plotting: new view types beyond the three current views (e.g. a stacked variance-share / proportion chart). Deferred at the M61 plan gate (2026-07-17); multilevel views are already level-faceted, so a genuinely new display needs a concrete proposal. Lineage: M61.
 - Multilevel lavaan bootstrap CI beyond balanced/complete random — two parked cells: (a) the crossed **fixed** cell (thread the per-refit Case-3A θ²_r correction through the M56 factory `lavaan_ml_simulate_refit`/`lavaan_multilevel_components`, currently random-only); (b) the **random incomplete/unbalanced** cells (the factory takes an unequal `cluster_sizes` vector, but coverage is validated only on balanced data — needs an unbalanced coverage oracle; incomplete can't bootstrap at all, ADR-031). Both MC-only ship; bootstrap parity is nice-to-have and inherits M56's cluster-level cross-platform flake. Lineage: M56 factory → M57 (fixed) → M58/MD-1 (random incomplete/unbalanced).
 - lavaan + within-cell replicates — the SEM engine on replicated (σ²_sr/σ²_e-split) data. Niche, low value: would need both a lavaan replicate parameterization and the M20 replicate machinery to intersect. Promote only if a concrete need appears. Reclassified from M21 (ADR-027); promoted from the parking lot 2026-07-13 — cairn/legacy/ROADMAP.md
+- ~~Cache CI R dependencies to cut per-run install time.~~ **Superseded by M78** (2026-07-21): investigation falsified the premise — `setup-r-dependencies@v2` already caches by default and restores in ~33–52s; the ~17 min ubuntu / ~23 min Windows is the `check-r-package` **testthat suite** (ubuntu 13m/24m CPU, Windows 18m), not dep install. Dep caching / `needs:`-narrowing win ~nothing. The real lever (test-suite runtime) is M78. Lineage: M77 → M78.
 - d_study() CI-width precision planning ("how many subjects for a ±.1-wide interval?") — scope boundary resolved by the design interview (2026-07-12): a legitimate future direction, **gated on finding an oracle strategy**; subject-count-for-power as such stays out of scope (`M4.5-d-study.md` §6; DESIGN.md contract boundary) — cairn/estimand-specs/M4.5-d-study.md

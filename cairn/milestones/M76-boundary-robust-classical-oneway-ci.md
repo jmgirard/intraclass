@@ -1,6 +1,6 @@
 # M76: Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML)
 
-- **Status:** blocked
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -93,3 +93,4 @@ candidate; Burch REML natively covers unbalanced, assessed balanced here.
 - 2026-07-21: amendment (minor) — found ohyama2025 §4 prints deterministic SEARLE+REML limits for two ANOVA tables, so the no-oracle tripwire is resolved for both legs; split T1 (SEARLE-F sourcing, done) from the Burch primary-source acquisition (moved into T3).
 - 2026-07-21: T1+T2 done — SEARLE exact-F prototype in data-raw/m76-classical-oneway-prototype.R reproduces ohyama2025 §4 Ex.1 SEARLE (0.600,0.891) and matches the mcgraw1996 Table 7 ICC(1) form to 1e-9 (2 independent oracle types). Unbalanced Ex.2 is a documented non-match (own eq.6 construction, out of scope).
 - 2026-07-21: BLOCKED on T3 — the Burch REML eq.9 construction needs the primary Burch (2011) source (cited only secondhand in ohyama2025 §2; the κ̂ parameterization is non-obvious, so it cannot be built from memory, IP1/#1). T4–T5 depend on both legs, so the sweep is deferred until the maintainer supplies the PDF to cairn/references/sources/. SEARLE-F leg (T1/T2) complete and oracle-validated.
+- 2026-07-21: RESUMED — blocker cleared: maintainer supplied burch2011.pdf to cairn/references/sources/. Status blocked→in-progress. Merged main into branch (M77/M78, D-011, terminal-row rotation); ROADMAP conflict resolved keeping main's rotation + M76 in-progress.
