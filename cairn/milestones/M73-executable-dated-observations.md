@@ -81,10 +81,10 @@ repo, not this one.
       observations, extract each settling command, run it, compare against the
       claim. Site it per repo convention alongside the other `cairn/scripts/`
       tooling or `data-raw/`, whichever the profile's layout indicates.
-- [ ] T3: prove the checker bites — mutate a true claim to a false one, show
+- [x] T3: prove the checker bites — mutate a true claim to a false one, show
       the run go red, revert. Register the mutation so a later refactor cannot
       make the checker vacuous.
-- [ ] T4: bring the seven M71 notes' 22 observations to the convention (they
+- [x] T4: bring the seven M71 notes' 22 observations to the convention (they
       are the best-understood and the ones review already probed).
 - [ ] T5: bring the M69/M70 notes' observations to the convention.
 - [ ] T6: bring the remaining source notes' and `INDEX.md`'s observations to
@@ -97,6 +97,8 @@ repo, not this one.
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
+- 2026-07-20 (T4): brought the seven M71 notes to the convention — 17 body observations (bhandary2006, bobak2018, mehta2018, saha2005, saha2012, xiao2009, xiao2013): 14 runnable `git grep`/`grep` directives (author-token trace claims + the ordinal never-swept compound), 3 `check: none` (bobak/mehta GP6-registry-is-a-concept ×2; bobak non-Gaussian-DGP is a judgment over grep hits). Checker: 0 falsified.
+- 2026-07-20 (T3): proved the checker bites on a real claim — mutated bhandary2006:229's directive to a false assertion (`icc` absent from R/), run reported `falsified: 1` and exit 1, reverted to green. Permanent `--self-test` registers the harness bite so a refactor cannot make it vacuous (AC3).
 - 2026-07-20 (T2 fix): checker now excludes the whole provenance *paragraph*, not just lines literally containing `Extraction:` — the soft-wrapped extraction status lands its `— observed` stamp on a continuation line (xiao2009:12, xiao2013:7, saha2005:8, saha2012:8, mehta2018:9). In-scope body observations resolve to **57** (the plan's raw 87 less ~28 exempt provenance statuses); T4's "22" is 17 body observations + 5 exempt provenance.
 - 2026-07-20 (T2): committed `data-raw/check-reference-observations.py` — parses the in-scope corpus (all `references/*.md` less ORACLES/BIBLIOGRAPHY/REFERENCES), excludes `Extraction:` provenance lines, requires a `check:` directive per observation, runs each (exit 0 = holds), exits nonzero on unmarked/falsified. `--self-test` and `--list-unmarked` modes. Baseline: 62 in-scope observations, all 62 unmarked (pre-authoring); self-test passes.
 - 2026-07-20 (T1): D-009 drafted and committed defining the dated-observation convention. Implement gate resolved three open choices (HTML-comment directive syntax; Python checker in `data-raw/`; provenance exempt + `check: none — reason` escape) — all recommendations accepted.
