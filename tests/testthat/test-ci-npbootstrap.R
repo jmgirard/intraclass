@@ -219,3 +219,44 @@ test_that("npbootstrap covers a known one-way population (O1 smoke)", {
   expect_lte(i1$conf.low, rho)
   expect_gte(i1$conf.high, rho)
 })
+
+test_that("npbootstrap aborts on a malformed subject extraction (AC5 guard)", {
+  # An unused subject factor level yields an empty group after split(); `icc()`
+  # shields this via droplevels(), so the extraction guard is exercised directly.
+  df_empty <- data.frame(
+    subject = factor(c("a", "a", "b", "b"), levels = c("a", "b", "c")),
+    score = c(1, 2, 3, 4)
+  )
+  expect_error(
+    npb_groups(df_empty),
+    class = "intraclass_unidentified"
+  )
+  # A missing score after grouping is refused on the same guard.
+  df_na <- data.frame(
+    subject = factor(rep(c("a", "b"), each = 2)),
+    score = c(1, NA, 3, 4)
+  )
+  expect_error(
+    npb_groups(df_na),
+    class = "intraclass_unidentified"
+  )
+})
+
+test_that("npbootstrap aborts when resamples are degenerate at tiny k (AC5 guard)", {
+  # k = 3 subjects: the OBSERVED fit is non-degenerate (three distinct means, so
+  # SE > 0), but a whole-subject resample that draws the same subject three times
+  # ({i,i,i}) has SSA = 0 -> non-finite studentized t*. The resample guard refuses
+  # loudly rather than returning a NaN interval (#5/#8). The message text pins this
+  # to the resample guard, not the observed-degeneracy guard above.
+  df <- data.frame(
+    subject = factor(rep(1:3, each = 3)),
+    rater = factor(rep(1:3, times = 3)),
+    score = c(1, 2, 3, 4, 5, 6, 7, 8, 9)
+  )
+  est <- list(icc_estimand(unit = "single", k_eff = 3, oneway = TRUE))
+  expect_error(
+    npbootstrap_ci(df, est, boot_samples = 50L, seed = 1),
+    class = "intraclass_singular_fit",
+    regexp = "resamples were degenerate"
+  )
+})
