@@ -109,6 +109,14 @@ registry entry; docs/NEWS.
   candidate; gate: below-floor fallback = ship + document corner limitation, never
   withhold (GP5); validation = full n_rep ≥ 2000 sweep of the exported method over
   all seven cells; unbalanced support → candidate).
+- 2026-07-21: status → in-progress; branch m75-npbootstrap-oneway cut from origin/main.
+- 2026-07-21: pre-implementation question gate → two tripwire hits routed to Fable.
+  (1) exported API string `npbootstrap` (irreversible-api, T3): user chose Escalate.
+  (2) ICC(k)/unit="average" support: user chose extend via monotone Spearman-Brown of
+  the ρ endpoints — ships an ICC(k) interval with no independent oracle (no-oracle
+  tripwire). (3) point-estimate source: user asked for a recommendation; session
+  recommends the engine REML point (≥0, package-consistent), folded into the RB.
+  Routing to /milestone-brief for a single RB covering all three; milestone paused.
 
 ## Decisions
 
