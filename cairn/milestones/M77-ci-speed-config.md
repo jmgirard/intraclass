@@ -1,11 +1,11 @@
 # M77: Speed up CI with three low-risk workflow-config changes
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** m77-ci-speed-config
 
 ## Goal
 
