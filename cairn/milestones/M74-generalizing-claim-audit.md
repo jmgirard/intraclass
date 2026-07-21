@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M74: Re-derive the generalizing claims over their full source tables
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M73   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
@@ -82,7 +82,7 @@ re-transcribed.
       D-entry, or `ORACLES.md` entry resting on a claim this milestone
       narrowed or corrected, confirm the row still holds or escalate it as a
       review finding rather than editing it here.
-- [ ] T6: run `cairn_validate` and the r-package `verify` slot; confirm the
+- [x] T6: run `cairn_validate` and the r-package `verify` slot; confirm the
       diff touches no package value.
 
 ## Work log
@@ -95,6 +95,8 @@ re-transcribed.
 
 - 2026-07-20: T3+T4 done (non-M71 source notes + INDEX). One CORRECTION: `ukoumunne2003` worst transformed-bootstrap-t normal cell — recomputed `coverage = 100 − lower − upper` over all 12 Table I normal cells (`k ∈ {10,30,50}` × `ρ ∈ {.001,.01,.05,.3}`, p. 3815), the minimum is **0.9310 at k=30, ρ=0.001**, not 0.9320 at k=10 (which sits just above it); the paper's own p. 3814 sentence names "10 or 30 clusters". Not a package value (grep of R/tests/data-raw/man/vignettes for 0.932 is clean → AC5). CONFIRMED: `donner2002` ρ-floor 0.4 across all 3 tables (T3 pairs (.4,.6)/(.4,.7)/(.6,.8)) and highest of the five cluster papers (konishi/young/naik/bhandary all reach 0.1) — the line explicitly flagged "M74 territory"; `vanderark2023` coverage [0.934,0.956] over 24 cells; `naik2007`/`young1998` grids 0.1–0.9.
 - 2026-07-20: T5 done (downstream sweep). No package value moved. Corrected saha2005 worst-cell (~13 %) restated once in `INDEX.md:81` (~15 %→~13 %). ukoumunne 0.9310, mehta 0.08, and saha2005 worst-cell have **no** ROADMAP-candidate / D-entry / `ORACLES.md` consumer (grep clean) — no escalation. Other INDEX consumers (trevethan 0.51–0.87, vanderark [0.934,0.956], xiao2009 0.931–0.950, saha2005 U-shape) are consistent with the confirmed notes. Ledger refreshed to 237 candidates (incl. IN-basis derivation lines + the reclassified donner2002 M74-territory line, previously auto-OUT by the check:none rule); `--check` green; `cairn_validate` exit 0.
+
+- 2026-07-20: T6 done → status `review`. `cairn_validate` exit 0; r-package `verify` slot (`devtools::test()`, `CI=true` to skip the live-Stan brms fits an untouched-code change can't affect) clean — 0 failures, 0 errors, 2 pre-existing warnings. Branch diff touches only `cairn/`, the enumerator, the ledger, and `.gitignore` — no R/tests/man/data/vignettes (AC5). All six tasks complete.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
