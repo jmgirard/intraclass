@@ -163,6 +163,12 @@ and milestones; never restate a value here.
   the coverage/width results + GO/NO-GO verdict for the non-parametric
   bootstrap vs the incumbent MC / parametric-bootstrap intervals.
 
+- [classical-oneway-comparison.md](classical-oneway-comparison.md) — synthesis
+  note (M76): the pre-registered (GP5) coverage/width/tail/abort criterion (C1–C6)
+  and the sweep results + per-method GO/NO-GO for the classical SEARLE exact-F and
+  Burch (2011) REML intervals vs the MC / parametric-bootstrap / npbootstrap
+  incumbents. Results/disposition appended at T5/T6.
+
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
