@@ -1,6 +1,6 @@
 # M78: Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -85,7 +85,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
       (`test-ci-bootstrap.R`, `test-ci-npbootstrap.R`, `test-d-study.R`,
       `test-replicates.R`), updating asserted `samples` literals; leave every
       coverage/agreement count. Verify `FAIL 0` locally.
-- [ ] T5: Open the PR; measure the testthat wall-clock on its own R-CMD-check run
+- [x] T5: Open the PR; measure the testthat wall-clock on its own R-CMD-check run
       vs the 13m/18m baseline; record the NO-GO D-entry if no safe lever helped.
       Confirm all checks green.
 
@@ -128,7 +128,30 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
   B cannot touch the parallel floor (ci-bootstrap's O1/O2 refits, GP5/GP6), so the
   reduction rests on Lever A; the two cuts are floor-alignment, not the driver. No
   O1/O2 count changed (AC5).
+- 2026-07-21: T5 — opened PR #84; measured AC4 on the `bd8daac` R-CMD-check run
+  (all 8 checks green; local `devtools::test()` FAIL 0 | WARN 2 | SKIP 23 | PASS
+  1901 at 4 workers). Both CI jobs launched 4 test processes (`TESTTHAT_CPUS=4`).
+  Windows `testthat.R` 18m→15m (~17%; check job 21m20s→18m3s) — the PR-matrix long
+  pole, so overall CI wall-clock ↓ ~3m. Ubuntu flat: 13m→13m elapsed (CPU 24m→33m
+  — runner ~2.5-core, saturated at 2 workers). GO (modest, Windows-concentrated),
+  no oracle count changed; details in ## Decisions.
+- 2026-07-21: T5 note — retripped the M77 `paths-ignore`/`cancel-in-progress`
+  lesson: a cairn-only header push (bd8daac) cancelled the 2defb9c R-CMD-check run
+  (PR cumulative diff includes non-ignored files). Re-measured on bd8daac (same
+  M78 diff → valid); held further pushes until CI finished. Lesson for review's
+  post-merge hygiene.
 
 ## Decisions
+
+- 2026-07-21 (T5): Lever A is GO but modest and Windows-concentrated. On the
+  `bd8daac` PR run both jobs launched 4 test processes (`TESTTHAT_CPUS=4` via
+  `getconf`). Windows `testthat.R` 18m→15m (~17%); its check job 21m20s→18m3s — and
+  Windows is the PR matrix's long pole, so overall CI wall-clock drops ~3m. Ubuntu
+  `testthat.R` stayed 13m elapsed (CPU 24m→33m): the runner saturates at ~2.5
+  effective cores, already ~reached at 2 workers, so extra workers add CPU without
+  cutting elapsed. The pre-run projection (ubuntu ~13m→6.5m) assumed 4 usable cores
+  and was wrong. Net: a safe critical-path reduction, zero oracle-count change —
+  GO, not the NO-GO valve. Keeping `TESTTHAT_CPUS=getconf` (neutral on ubuntu,
+  positive on Windows).
 
 ## Review
