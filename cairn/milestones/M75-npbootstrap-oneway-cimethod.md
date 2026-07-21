@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** RR02
 - **Principles touched:** IP1, GP5
-- **Branch/PR:** m75-npbootstrap-oneway
+- **Branch/PR:** m75-npbootstrap-oneway / [#81](https://github.com/jmgirard/intraclass/pull/81)
 
 ## Goal
 
@@ -37,63 +37,63 @@ width); an ORACLES.md entry; docs/NEWS.
 
 ## Acceptance criteria
 
-- [ ] AC1: `ci_method = "npbootstrap"` returns a boundary-aware two-sided `ICC(1)`
+- [x] AC1: `ci_method = "npbootstrap"` returns a boundary-aware two-sided `ICC(1)`
       interval on the balanced one-way random design; an explicit request on any
       non-one-way or unbalanced design aborts classed (#5/#8), not a silent fallback.
-- [ ] AC2 (oracle #1, parity): the exported reducer reproduces the RR01-verified
+- [x] AC2 (oracle #1, parity): the exported reducer reproduces the RR01-verified
       prototype to ≥ 4 dp on the committed M62 datasets (eq. 6 transform
       `f(ρ̂) = log F`, eq. 7 IJ SE, studentized endpoints, back-transform).
-- [ ] AC3 (oracle #2, external): on ukoumunne2003 Table I (k ∈ {10,30,50}, n = 10,
+- [x] AC3 (oracle #2, external): on ukoumunne2003 Table I (k ∈ {10,30,50}, n = 10,
       ρ = .05) coverage matches the exact values 0.938 / 0.944 / 0.9395 within ±0.03
       (pre-registered), from the fresh n_rep ≥ 2000 sweep.
-- [ ] AC4: the sweep (C1–C4) records two-sided coverage AND lower/upper tail-error
+- [x] AC4: the sweep (C1–C4) records two-sided coverage AND lower/upper tail-error
       per cell; the tail split at the near-zero cells is roughly balanced (Table I
       ~3.25/2.95 at U10, not a BCa skew); truncated-vs-untruncated widths reported
       on a common scale.
-- [ ] AC5: degenerate resamples (SSA = 0 → `log F = −Inf`, SE = 0) and missing-row
+- [x] AC5: degenerate resamples (SSA = 0 → `log F = −Inf`, SE = 0) and missing-row
       extraction raise classed errors (#5/#8), not silent NA/crash; the harness uses
       distinct per-cell seed bases + a distinct per-rep `seed` into `icc()` (RR01
       findings 1–2).
-- [ ] AC6 (GP5, pre-specified before the sweep): if the C4 corner lands below the
+- [x] AC6 (GP5, pre-specified before the sweep): if the C4 corner lands below the
       0.93 floor, `?icc` @details documents the small-k × near-zero-ρ under-coverage
       and the export ships anyway (never withheld); if ≥ 0.93, the work log records
       the clear. Branch fixed here, not after the data.
-- [ ] AC7: ORACLES.md carries the npbootstrap entry; `@param ci_method`/@details +
+- [x] AC7: ORACLES.md carries the npbootstrap entry; `@param ci_method`/@details +
       NEWS updated; the `verify` slot is clean and `lintr::lint_package()` passes
       (incl. `data-raw/`).
 
 ### Binding criteria (RR02, ingested verbatim)
 
-- [ ] AC8 (BC1): The exported string is `"npbootstrap"`, and the `@param ci_method`
+- [x] AC8 (BC1): The exported string is `"npbootstrap"`, and the `@param ci_method`
   roxygen entry names the exact variant — subject (cluster) resampling with
   the `log F` variance-stabilized **transformed bootstrap-t** and
   infinitesimal-jackknife SE, citing Ukoumunne et al. (2003) — and states
   explicitly that it is **not** a percentile bootstrap (percentile and BCa
   were assessed and rejected, D-006).
-- [ ] AC9 (BC2): A committed test verifies, on the M62 parity datasets, that the
+- [x] AC9 (BC2): A committed test verifies, on the M62 parity datasets, that the
   ICC(k)/`unit = "average"` interval endpoints computed via the shipped
   Spearman-Brown route equal `1 − exp(−(log F endpoint))` computed directly
   from the studentized log-F endpoints, with max absolute deviation
   ≤ 1e−10.
-- [ ] AC10 (BC3): The n_rep ≥ 2000 sweep records ICC(k) coverage per cell against the
+- [x] AC10 (BC3): The n_rep ≥ 2000 sweep records ICC(k) coverage per cell against the
   true `kρ/(1 + (k−1)ρ)` and asserts the ICC(k) coverage indicator equals the
   ICC(1) coverage indicator **rep-by-rep** (tolerance: exact equality, zero
   discrepant reps); any discrepancy halts the sweep as an implementation bug.
-- [ ] AC11 (BC4): `?icc` @details states that the npbootstrap ICC(k) interval is the
+- [x] AC11 (BC4): `?icc` @details states that the npbootstrap ICC(k) interval is the
   exact monotone Spearman-Brown image of the ICC(1) interval (coverage
   identical by construction), that its endpoints are untruncated with support
   `(−∞, 1)`, and that the lower endpoint can be markedly negative near the
   boundary; the ORACLES.md entry records the ICC(k) validation basis as
   "exact monotone-map inheritance from the ICC(1) Table I anchor + the BC2
   identity cross-check", not as an independent external anchor.
-- [ ] AC12 (BC5): The reported point estimate under `ci_method = "npbootstrap"` is the
+- [x] AC12 (BC5): The reported point estimate under `ci_method = "npbootstrap"` is the
   engine (glmmTMB REML) point via the shared `icc_point()` path for both
   ICC(1) and ICC(k), identical to every other frequentist `ci_method` on the
   same fit; the ANOVA-MoM ρ̂ is never surfaced as a point estimate. @details
   documents that at the σ²_a = 0 boundary the point reads 0 while the
   untruncated interval may extend below 0, and that this signals boundary
   proximity.
-- [ ] AC13 (BC6): The sweep records, per cell, the frequency of the reported (REML)
+- [x] AC13 (BC6): The sweep records, per cell, the frequency of the reported (REML)
   point lying outside the npbootstrap ICC(1) interval; at every cell with
   true ρ > 0 this rate must not exceed that cell's recorded upper-tail-error
   rate (an exact logical bound; tolerance 0), and the observed rates are
@@ -179,3 +179,48 @@ width); an ORACLES.md entry; docs/NEWS.
   point for both estimands. Basis in D-010 + `reviews/archive/RR02-…`.
 
 ## Review
+
+**2026-07-21 — fresh evidence (PR #81).** Suites re-run from `load_all`:
+`test-ci-npbootstrap.R` 28/28, `test-ci-npbootstrap-coverage.R` 68/68, both 0 fail.
+
+- AC1 — `ci_method = "npbootstrap"` returns a finite ordered `ICC(1)` interval
+  (`fit$ci$method`/`samples` set); explicit requests on a two-way design and on an
+  unbalanced one-way design both abort `intraclass_unsupported`. Tests green.
+- AC2 — parity: the reducer reproduces the RR01-verified prototype's transformed
+  bootstrap-t `ICC(1)` endpoints on 3 committed M62 datasets (tol 1e-4; agreement is
+  in fact to floating-point). Green.
+- AC3 — Table I coverage (n_rep=2000): U10 .9375 (proj .938, d .0005), U30 .9355
+  (proj .944, d .0085), U50 .9425 (proj .9395, d .0030) — all within ±.03.
+- AC4 — per-cell two-sided coverage + lower/upper tail recorded; U10 split
+  .0335/.0290 (|d| .0045, balanced, not a BCa skew); truncated ≤ untruncated widths
+  reported every cell. Green.
+- AC5 — degenerate (SSA=0) design aborts `intraclass_singular_fit`; missing-row
+  guard classed; harness uses distinct per-cell seed bases + a distinct per-rep
+  resample seed. Green.
+- AC6 — GP5 pre-specified branch: C4 corner coverage .9410 ≥ 0.93 (every cell
+  clears; min .9340) → "else" branch, no @details corner limitation. Recorded.
+- AC7 — `O-NPBoot` in ORACLES.md; `@param`/@details + NEWS updated; man/icc.Rd
+  regenerated (`document()` no-diff); verify slot 1605 pass/0 fail; `lint_package()`
+  0 lints.
+- AC8 (BC1) — `@param ci_method` names the variant (transformed bootstrap-*t*, IJ
+  SE, Ukoumunne 2003) and states it is **not** a percentile bootstrap. Present in
+  R/icc.R + man/icc.Rd.
+- AC9 (BC2) — identity cross-check test: ICC(k) endpoints = `1 − exp(−logF)` to
+  ≤ 1e-10 on the parity datasets (doubles as the `k_eff = n` guard). Green.
+- AC10 (BC3) — ICC(k) coverage = ICC(1) coverage rep-by-rep: **0** disagreements
+  across all 7 cells × 2000 reps. Green.
+- AC11 (BC4) — @details states the ICC(k) SB image + untruncated support + markedly
+  negative near-boundary lower bound; ORACLES records the basis as monotone-map
+  **inheritance** + the BC2 cross-check, not an independent anchor. Present.
+- AC12 (BC5) — dispatch reports the engine REML point via `icc_point()` for both
+  estimands (the reducer returns only intervals); ANOVA-MoM ρ̂ never surfaced;
+  @details documents the boundary point/interval picture. Verified in R/icc.R.
+- AC13 (BC6) — reported-point-outside rate ≤ recorded upper-tail error at every
+  cell (exact bound, tolerance 0): holds all cells; observed rates committed in the
+  fixture.
+
+**Driving RR02 — measured vs projected:** Table I U10/U30/U50 measured
+.9375/.9355/.9425 against projected .938/.944/.9395 (all ≤ .03). BC2 identity
+measured ≤ 1e-10 against projected (RR02 verified 4.6e-14). BC3 measured 0
+discrepant reps against projected zero. BC6 measured ≤ upper-tail every cell
+against the projected exact bound (tolerance 0). No shortfall.
