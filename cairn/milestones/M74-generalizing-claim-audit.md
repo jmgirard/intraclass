@@ -69,7 +69,7 @@ re-transcribed.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: build and record the enumeration — a search over the references
+- [x] T1: build and record the enumeration — a search over the references
       corpus for generalizing shapes (quantifiers and superlatives adjacent to
       a numeric claim), triaged into in-scope (load-bearing / relied upon) and
       out. Record the search so review can re-run it.
@@ -89,9 +89,32 @@ re-transcribed.
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
 
 - 2026-07-19: created by /milestone-plan alongside M73, re-cutting M71 after the thrash rule fired. Split from M73 at the plan gate on the sizing tripwire — the user asked for both interpretive-claim shapes in one milestone, but 87 dated observations plus a full-table recomputation of every generalizing claim across 30 notes exceeds the 1–3 session bar, and the two shapes take different remedies (a re-runnable command vs a recomputation). Planned now rather than deferred to a candidate row, with `Depends on: M73` so the enumeration can reuse M73's corpus tooling.
+- 2026-07-20: started (in-progress), branch `m74-generalizing-claim-audit`. Question gate: enumeration recorded as a committed enumerator script; per-claim derivation basis inline in each note (both maintainer-confirmed).
+- 2026-07-20: T1 done. Built `data-raw/enumerate-generalizing-claims.py` (finder + `--check` completeness gate + `--self-test`) and the committed triage ledger `data-raw/generalizing-claims-triage.tsv`. Enumerator recall net = superlative/quantifier/range shapes adjacent to a number, widened for bare decimal/table-cued ranges after it missed `xiao2013`'s "731–862/nine cells"; 234 candidates classified, `--check` green (0 un-triaged). Triage: 16 IN + 20 IN-done + 5 IN-consumer; 193 OUT across documented categories. Scope call recorded as MD-1 (repo synthesis notes + ORACLES pins + figure plot-reads + verbatim source quotes are OUT). `cairn_validate` exit 0.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+### MD-1 (2026-07-20): Enumeration is a completeness-gated finder, not a claim-truth checker; and what the triage scopes out
+
+The enumerator `data-raw/enumerate-generalizing-claims.py` re-runs the candidate
+search (superlative / quantifier / range shapes adjacent to a number) and its
+`--check` mode asserts every current candidate is classified in
+`data-raw/generalizing-claims-triage.tsv` — an **enumeration-completeness** gate
+for AC1 ("none skipped"), never a statement about a claim's correctness. Claim
+truth is settled only by full-table recomputation recorded inline (D-009's
+fence: M74 claims "need full-table recomputation, not an exit code").
+
+Triage scope calls (reason recorded per ledger row). **OUT:** `ORACLES.md` pins
+(claims about the repo's own committed coverage fixtures, test-enforced under
+D-008; T5 still re-checks any that rest on a source claim M74 corrects); the two
+repo **synthesis notes** (`npbootstrap-oneway-comparison`, `sem-multilevel-pilot`)
+whose ranges are the repo's own analyses validated at M62/RR01 and the SEM pilot,
+not external published source tables; **figure plot-reads** (no table to
+recompute); and **verbatim / source-attributed** superlatives (the source's own
+generalization, cited, not the note over-generalizing). **IN:** a note-authored
+range / count / superlative over an external published source table in a
+load-bearing section or relied on by a candidate / D-entry / `ORACLES.md` entry.
 
 ## Review
 <!-- owner: review · exclusive -->

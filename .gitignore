@@ -12,3 +12,4 @@ data-raw/.oracle-*-checkpoint.rds
 cairn/references/sources/
 cairn/.merge-approved
 cairn/.merge-approved.pending
+__pycache__/
