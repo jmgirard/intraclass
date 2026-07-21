@@ -7,7 +7,7 @@
 - **Priority:** low   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** M73   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m74-generalizing-claim-audit   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m74-generalizing-claim-audit · https://github.com/jmgirard/intraclass/pull/80   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -40,21 +40,21 @@ re-transcribed.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] The claims in scope are enumerated by a recorded, re-runnable search
+- [x] The claims in scope are enumerated by a recorded, re-runnable search
       rather than by reading — the enumeration itself is reproducible, so a
       later reader can confirm none was skipped.
-- [ ] Every enumerated claim is recomputed over its full source table and
+- [x] Every enumerated claim is recomputed over its full source table and
       confirmed, narrowed, or corrected in place.
-- [ ] Each recomputed claim records the basis of its derivation — which table,
+- [x] Each recomputed claim records the basis of its derivation — which table,
       how many cells, what was computed — so the claim can be re-checked
       without redoing the reading.
-- [ ] No claim is left resting on the cells it happens to cite when the full
+- [x] No claim is left resting on the cells it happens to cite when the full
       table contradicts it — the specific defect this milestone exists to
       remove (M71 review attempts 2 and 3, findings F7/F8/F9 and F2/F3).
-- [ ] No package value changes: a correction that would move an oracle value,
+- [x] No package value changes: a correction that would move an oracle value,
       test fixture, or documented behavior is escalated as a review finding
       with its citation, not silently applied.
-- [ ] `cairn_validate` passes and the r-package `verify` slot is clean.
+- [x] `cairn_validate` passes and the r-package `verify` slot is clean.
 
 ## Coverage
 <!-- owner: plan · create/amend-via-gate -->
@@ -124,3 +124,14 @@ load-bearing section or relied on by a candidate / D-entry / `ORACLES.md` entry.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Fresh evidence — 2026-07-20 · PR #80 · branch `m74-generalizing-claim-audit`.**
+
+- **AC1** (enumeration recorded, re-runnable, none skipped): `enumerate-generalizing-claims.py --self-test` → OK; `--check` → 237 candidates / 237 ledger rows / **0 un-triaged**. The finder regex + committed `generalizing-claims-triage.tsv` are the recorded search a reviewer re-runs. ✓
+- **AC2** (every enumerated claim recomputed, confirmed/narrowed/corrected in place): all **45 IN-family** ledger rows carry a recorded M74 result — 2 CORRECTED (`saha2005`, `ukoumunne2003`), 1 NARROWED (`mehta2018`), the remainder CONFIRMED / M71-re-derived; 194 OUT rows each carry a category reason. ✓
+- **AC3** (derivation basis recorded): each recompute records its basis inline — `saha2005` max over all 160 Table I cells; `ukoumunne2003` `coverage = 100 − lower − upper` over 12 cells; `mehta2018` cluster design-minima ranked — and in the ledger reason column. ✓
+- **AC4** (no claim resting on cited cells when the full table contradicts): the two defects removed — `saha2005` worst-acceptance 6609/~15 % → **7695/~13 %** (the φ=0.2 cell was already in the transcribed table, ignored); `ukoumunne2003` worst cell 0.9320/k=10 → **0.9310/k=30**. ✓
+- **AC5** (no package value changes; corrections cited, not silently applied): branch diff touches **0 package files** (only `cairn/`, enumerator, ledger, `.gitignore`); grep for `0.932` across `R/ tests/ man/` = 0 hits; each correction is recorded in-note with its table/page citation and a superseded-value note. ✓
+- **AC6** (`cairn_validate` + `verify` slot): `cairn_validate` exit 0; `devtools::test()` **0 failures / 0 errors**; `devtools::document()` no diff; `.Rbuildignore` covers `^data-raw$`; authoritative full `R CMD check` runs on PR #80 CI (merge-gated green). ✓
+
+**Consistency gate:** `cairn_validate` exit 0 (297 pre-existing dangling-id advisories, unchanged); r-package `consistency-gate` — `document()` no diff, new `data-raw/` files build-ignored, `devtools::test()` clean; full `R CMD check` deferred to PR CI (the merge gate). No `DESIGN.md` principle changed → `cairn_impact` skipped.
