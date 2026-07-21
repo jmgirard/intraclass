@@ -114,12 +114,12 @@ width); an ORACLES.md entry; docs/NEWS.
       Table I coverage assertions (AC3), dispatch + classed-guard tests (AC1, AC5),
       the BC2 identity cross-check, and (consider, RR02 rec 5) the off-boundary
       REML-point = internal MoM ρ̂ parity test.
-- [ ] T2: Reducer in a new `R/ci-npbootstrap.R` — `oneway_anova()` (balanced),
+- [x] T2: Reducer in a new `R/ci-npbootstrap.R` — `oneway_anova()` (balanced),
       `log F` transform + inverse, eq. 7 IJ SE, studentized interval, monotone
       back-transform; also emit the `ICC(k)` endpoints via the Spearman-Brown map
       on the two final ρ endpoints (BC2); classed guards on SSA = 0 / missing rows.
       Port from `data-raw/m62-npbootstrap-prototype.R`. (AC2, AC5)
-- [ ] T3: Add `"npbootstrap"` to the `ci_method` `validate_choice` set + dispatch
+- [x] T3: Add `"npbootstrap"` to the `ci_method` `validate_choice` set + dispatch
       at `R/icc.R:~1800`; route raw one-way data to the reducer for both estimands,
       abort classed on non-one-way/unbalanced input (not on `unit = "average"`),
       and report the engine REML point via `icc_point()` for both (BC5). (AC1)
@@ -164,5 +164,9 @@ width); an ORACLES.md entry; docs/NEWS.
 - 2026-07-21 (RR02 ingest): all three questions resolved → **D-010** (confirms
   D-006): string kept; `ICC(k)` via the monotone Spearman-Brown map; engine REML
   point for both estimands. Basis in D-010 + `reviews/archive/RR02-…`.
+- 2026-07-21: T2 reducer (`R/ci-npbootstrap.R`) + T3 dispatch/guards done; parity
+  fixture + generator committed; T1 unit tests (parity/guards/ICC(k) identity)
+  green (28/28); T6 docs (@param/@details, O-NPBoot in ORACLES.md, NEWS) drafted.
+  Coverage test + fixture (T4) held for the running n_rep=2000 sweep (B=999).
 
 ## Review

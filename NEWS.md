@@ -24,6 +24,17 @@
 
 ## Minor improvements
 
+* New `ci_method = "npbootstrap"` for the **balanced one-way random** design: the
+  non-parametric variance-stabilized **transformed bootstrap-*t*** of Ukoumunne et
+  al. (2003). It resamples whole subjects (not the fitted model), so it is boundary
+  robust — it returns an interval where the Monte-Carlo default aborts on
+  near-zero-ICC data — and robust to non-normal subject effects. Validated against
+  the paper's exact Table I coverage. It is one-way only (aborts otherwise) and
+  **not** a percentile bootstrap (the percentile and BCa variants under-cover and
+  were deliberately not shipped). The `ICC(k)` interval is the exact Spearman-Brown
+  image of the `ICC(1)` interval; endpoints are untruncated (following the source),
+  so a near-boundary lower bound can be negative.
+
 * The `lavaan` (SEM) engine now fits the **crossed (Design 1) multilevel** design:
   `icc(..., engine = "lavaan", cluster = ...)` estimates the five-component
   decomposition (cluster, subject-in-cluster, rater, cluster-by-rater, residual)
