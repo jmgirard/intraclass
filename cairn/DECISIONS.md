@@ -295,3 +295,46 @@ command instead of resting on a reader's care; plan-time harvests can trust a da
 observation because the checker re-settles it. Supersedes nothing; complements D-008
 (the index-page verification bar) and the tracking-rules standing-fact/dated-observation
 split.
+
+### D-010 (2026-07-21): npbootstrap exported-API scope — string confirmed, ICC(k) via monotone map, engine REML point (RR02)
+
+**Context:** M75 exports the ukoumunne2003 transformed bootstrap-t as
+`ci_method = "npbootstrap"` (balanced one-way random). Three implementation-gate
+decisions hit the RB tripwire categories (irreversible-api, no-oracle) and were
+escalated to an independent Fable review (RB02 → RR02, archived): the public
+string, whether to serve `ICC(k)`/`unit = "average"`, and which point estimate to
+report. RR02 answered all three; this entry records the durable outcomes.
+**Decision (Q1 — string, confirms D-006):** ship `"npbootstrap"`. It disambiguates
+against the incumbent *parametric* `"bootstrap"` on the axis that matters (data
+resampled vs simulated-from-fit), and the percentile/BCa reading can never
+materialize because D-006 permanently rejects those variants — the string names a
+family with one member here. `ci_method` strings name families, not algorithms
+(`"montecarlo"` is equally underspecified); the precision duty lives in `@param`
+(RR02 BC1). Renaming to `"bootstrap-t"`/`"npbootstrap-t"`/`"transformed-bootstrap"`
+rejected.
+**Decision (Q2 — ICC(k)):** ship the `unit = "average"` interval via the monotone
+Spearman-Brown endpoint map `g(ρ) = kρ/(1+(k−1)ρ)` applied to the two final ρ
+endpoints. Coverage is an **exact event identity** with the ICC(1) interval
+tail-by-tail (strictly increasing composition; the SB pole sits exactly at the
+excluded support boundary `−1/(k−1)`), so it inherits the Table I anchor exactly.
+The composed map is `h(logf) = 1 − e^(−logf)` (equivalently `g(ρ̂_MoM) = 1 − 1/F`,
+the classical ANOVA ICC(k) estimator, own support `(−∞, 1)`), so the untruncated
+doctrine (RR01 §5) carries over verbatim. IP1 is met by the exact proof **plus two
+committed numeric checks** — an algebraic identity cross-check (BC2, doubling as a
+`k_eff = n` design-consistency guard) and a rep-by-rep inherited-coverage assertion
+in the sweep (BC3) — never the argument alone; ORACLES records the basis as
+inheritance, not an independent anchor (BC4). Withholding (abort on the default
+call) rejected: exact identity, no statistical risk, real ergonomic cost.
+**Decision (Q3 — point):** report the engine (glmmTMB REML) point via the shared
+`icc_point()` path for **both** estimands, identical to every other frequentist
+`ci_method`; the ANOVA-MoM ρ̂ is interval machinery and is never surfaced as a point
+(BC5). `ci_method` selects the interval, not the estimand; a negative MoM point
+would leak a second estimator into the API, flip sign against `montecarlo`, and
+violate the population support. Bounded cost: at the boundary the REML point can lie
+outside an all-negative interval, an event ⊆ the tracked upper-tail misses where
+ρ > 0 (BC6).
+**Consequences:** RR02's six binding criteria (BC1–BC6) are ingested verbatim into
+M75's acceptance criteria (`Driving RR: RR02`); ICC(k) is now in M75 scope. The
+unbalanced candidate must warn that the SB pole/support alignment is balanced-only
+and needs re-derivation under `n₀` (RR02 beyond-brief 2). Confirms and does not
+supersede D-006; extends it with the ICC(k) and point-source rulings.

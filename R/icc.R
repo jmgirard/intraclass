@@ -297,10 +297,21 @@
 #'   `engine = "brms"` (and `"brms"` requires it) -- the other methods do not apply
 #'   to a Bayesian fit, and `"posterior"` needs posterior draws no other engine
 #'   produces.
+#'   `"npbootstrap"` is the **non-parametric** transformed bootstrap-*t* of Ukoumunne
+#'   et al. (2003), available **only for the balanced one-way random design**
+#'   (`model = "oneway"`; it aborts otherwise). It resamples whole subjects with
+#'   replacement (not from the fitted model), stabilizes the variance with the
+#'   `log F` transform, studentizes with an infinitesimal-jackknife SE, and
+#'   back-transforms the endpoints. It is **not** a percentile bootstrap -- the
+#'   percentile and BCa variants were assessed and rejected (they under-cover at
+#'   small rater counts); reach for it for its boundary robustness (an interval that
+#'   exists where the Monte-Carlo default aborts) and non-normality robustness. See
+#'   Details for the ICC(k), endpoint-support, and point-estimate conventions.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
-#' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (default
-#'   `999`). Ignored when `ci_method = "montecarlo"`.
+#' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
+#'   parametric bootstrap) and `"npbootstrap"` (the transformed bootstrap-*t*
+#'   subject resamples); default `999`. Ignored when `ci_method = "montecarlo"`.
 #' @param seed Optional integer seed for a reproducible interval (and, for
 #'   `engine = "brms"`, the Stan sampler seed). The global RNG state is restored
 #'   afterward.
@@ -337,6 +348,29 @@
 #'   `posterior_summary = "hpdi"` requires `ci_method = "posterior"`; the other
 #'   interval methods already report a percentile interval.
 #'
+#' @details
+#' # The `"npbootstrap"` interval (balanced one-way)
+#'
+#' For `unit = "average"` (the ICC(k), reliability of the mean of the *k* ratings)
+#' the transformed bootstrap-*t* interval is the exact monotone **Spearman-Brown**
+#' image of the single-rating ICC(1) interval, `g(rho) = k*rho / (1 + (k-1)*rho)`
+#' applied to the two ICC(1) endpoints. Because that map is strictly increasing, the
+#' ICC(k) interval's coverage is **identical to the ICC(1) interval's, by
+#' construction** -- it is not a separate approximation.
+#'
+#' Following Ukoumunne et al. (2003, §5.2), the endpoints are **not truncated** to
+#' `[0, 1]`: they are confined only to the estimator's own support (approaching
+#' `-1/(k-1)` from above for ICC(1), and unbounded below for ICC(k)), so a
+#' near-boundary lower endpoint can be negative -- markedly so for ICC(k). Leaving
+#' them untruncated is what makes the coverage faithful to the published method.
+#'
+#' The reported **point estimate** is the engine (REML) point, exactly as for every
+#' other `ci_method` -- `ci_method` selects the interval, not the estimator. At the
+#' zero-between-variance boundary the point reads `0` while the untruncated interval
+#' may extend below `0`; this is the normal picture for a boundary-respecting point
+#' beside an honest interval, and it signals that the data are consistent with values
+#' near and below zero.
+#'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
 #'   call. Use [tidy()][generics::tidy], [glance()][generics::glance], and the
@@ -348,6 +382,10 @@
 #'
 #' Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 #' assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.
+#'
+#' Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
+#' Non-parametric bootstrap confidence intervals for the intraclass correlation
+#' coefficient. *Statistics in Medicine, 22*(24), 3805-3821.
 #'
 #' ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
 #' reliability for multilevel data: A generalizability theory approach.
@@ -406,7 +444,7 @@ icc <- function(
   )
   ci_method <- validate_choice(
     ci_method,
-    c("montecarlo", "bootstrap", "posterior"),
+    c("montecarlo", "bootstrap", "posterior", "npbootstrap"),
     "ci_method"
   )
 
@@ -1231,6 +1269,31 @@ icc <- function(
     design_info$balanced
   }
 
+  # The transformed bootstrap-t (`ci_method = "npbootstrap"`, ukoumunne2003; M75,
+  # D-006/D-010) is a BALANCED ONE-WAY method: whole-subject resampling into a
+  # one-way ANOVA on the log F scale (eq. 6/7). An explicit request on any other
+  # design aborts loudly rather than silently falling back (#5/#8). Unbalanced n_i
+  # (eq. 7) / n0 (transform) is deferred design work (a tracked candidate).
+  if (ci_method == "npbootstrap") {
+    if (!oneway) {
+      abort_unsupported(c(
+        "{.code ci_method = \"npbootstrap\"} is available only for the one-way \\
+         random design ({.code model = \"oneway\"}).",
+        i = "It is the transformed bootstrap-t for the one-way ICC \\
+             (Ukoumunne et al. 2003); use {.code ci_method = \"montecarlo\"} for \\
+             two-way, cluster, or multilevel designs."
+      ))
+    }
+    if (!balanced) {
+      abort_unsupported(c(
+        "{.code ci_method = \"npbootstrap\"} requires a balanced one-way design \\
+         (every subject rated the same number of times).",
+        i = "Unbalanced support (per-subject {.var n_i}) is not yet implemented; \\
+             use {.code ci_method = \"montecarlo\"}."
+      ))
+    }
+  }
+
   # Cluster-level fixed raters ship for balanced/complete CROSSED Design 1 only
   # (M37, ADR-047; glmmTMB/lme4). Incomplete/unbalanced cluster-level fixed is
   # deferred -- double-blocked: ten Hove et al. (2022) flag the small-k estimator as
@@ -1805,6 +1868,18 @@ icc <- function(
         boot_samples = boot_samples,
         seed = seed
       )
+    } else if (ci_method == "npbootstrap") {
+      # Non-parametric transformed bootstrap-t: resamples the RAW one-way data
+      # (not the fitted model), so it takes `df` rather than `engine_fit`. The
+      # POINT stays the engine (REML) point computed above (BC5); only the
+      # interval differs. Guarded to balanced one-way upstream.
+      npbootstrap_ci(
+        df,
+        estimands,
+        conf_level = conf_level,
+        boot_samples = boot_samples,
+        seed = seed
+      )
     } else {
       mc_ci(
         engine_fit,
@@ -1881,9 +1956,9 @@ icc <- function(
         method = ci_method,
         conf_level = conf_level,
         # `samples` is the number of draws behind the reported interval: MC draws for
-        # "montecarlo", refits for "bootstrap" (ADR-025), post-warmup posterior draws
-        # for "posterior" (ADR-033).
-        samples = if (ci_method == "bootstrap") {
+        # "montecarlo", refits for "bootstrap" (ADR-025), subject resamples for
+        # "npbootstrap" (M75), post-warmup posterior draws for "posterior" (ADR-033).
+        samples = if (ci_method %in% c("bootstrap", "npbootstrap")) {
           boot_samples
         } else if (ci_method == "posterior") {
           ncol(engine_fit$draws)

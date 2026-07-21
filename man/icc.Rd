@@ -213,13 +213,24 @@ engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.
 engine's posterior draws; it is the forced default for, and available only with,
 \code{engine = "brms"} (and \code{"brms"} requires it) -- the other methods do not apply
 to a Bayesian fit, and \code{"posterior"} needs posterior draws no other engine
-produces.}
+produces.
+\code{"npbootstrap"} is the \strong{non-parametric} transformed bootstrap-\emph{t} of Ukoumunne
+et al. (2003), available \strong{only for the balanced one-way random design}
+(\code{model = "oneway"}; it aborts otherwise). It resamples whole subjects with
+replacement (not from the fitted model), stabilizes the variance with the
+\verb{log F} transform, studentizes with an infinitesimal-jackknife SE, and
+back-transforms the endpoints. It is \strong{not} a percentile bootstrap -- the
+percentile and BCa variants were assessed and rejected (they under-cover at
+small rater counts); reach for it for its boundary robustness (an interval that
+exists where the Monte-Carlo default aborts) and non-normality robustness. See
+Details for the ICC(k), endpoint-support, and point-estimate conventions.}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}
 
-\item{boot_samples}{Number of resamples for \code{ci_method = "bootstrap"} (default
-\code{999}). Ignored when \code{ci_method = "montecarlo"}.}
+\item{boot_samples}{Number of resamples for \code{ci_method = "bootstrap"} (the
+parametric bootstrap) and \code{"npbootstrap"} (the transformed bootstrap-\emph{t}
+subject resamples); default \code{999}. Ignored when \code{ci_method = "montecarlo"}.}
 
 \item{seed}{Optional integer seed for a reproducible interval (and, for
 \code{engine = "brms"}, the Stan sampler seed). The global RNG state is restored
@@ -432,6 +443,28 @@ boundary-aware near the common zero-rater-variance case where the delta method
 fails. Pass \code{seed} for a reproducible interval.
 }
 
+\section{The \code{"npbootstrap"} interval (balanced one-way)}{
+For \code{unit = "average"} (the ICC(k), reliability of the mean of the \emph{k} ratings)
+the transformed bootstrap-\emph{t} interval is the exact monotone \strong{Spearman-Brown}
+image of the single-rating ICC(1) interval, \code{g(rho) = k*rho / (1 + (k-1)*rho)}
+applied to the two ICC(1) endpoints. Because that map is strictly increasing, the
+ICC(k) interval's coverage is \strong{identical to the ICC(1) interval's, by
+construction} -- it is not a separate approximation.
+
+Following Ukoumunne et al. (2003, §5.2), the endpoints are \strong{not truncated} to
+\verb{[0, 1]}: they are confined only to the estimator's own support (approaching
+\code{-1/(k-1)} from above for ICC(1), and unbounded below for ICC(k)), so a
+near-boundary lower endpoint can be negative -- markedly so for ICC(k). Leaving
+them untruncated is what makes the coverage faithful to the published method.
+
+The reported \strong{point estimate} is the engine (REML) point, exactly as for every
+other \code{ci_method} -- \code{ci_method} selects the interval, not the estimator. At the
+zero-between-variance boundary the point reads \code{0} while the untruncated interval
+may extend below \code{0}; this is the normal picture for a boundary-respecting point
+beside an honest interval, and it signals that the data are consistent with values
+near and below zero.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "glmmTMB"))) withAutoprint(\{ # examplesIf}
 fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
@@ -453,6 +486,10 @@ correlation coefficients. \emph{Psychological Methods, 1}(1), 30-46.
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. \emph{Psychological Bulletin, 86}(2), 420-428.
+
+Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
+Non-parametric bootstrap confidence intervals for the intraclass correlation
+coefficient. \emph{Statistics in Medicine, 22}(24), 3805-3821.
 
 ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
 reliability for multilevel data: A generalizability theory approach.
