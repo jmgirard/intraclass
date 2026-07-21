@@ -360,3 +360,49 @@ that no coverage/agreement oracle count is weakened.
 not the install (which is solved). GP3 (platform honesty) governs — the
 parallelism change alters how CI runs, so its stability is verified on the PR's
 own matrix, never asserted.
+
+### D-012 (2026-07-21): M76 GO/NO-GO — classical one-way ICC CIs: NO-GO default-replace, GO opt-in (SEARLE exact-F + Burch REML)
+
+**Context:** M76 assessed whether a classical boundary-robust one-way random-ICC CI
+— SEARLE exact-F and/or Burch (2011) REML — should replace or supplement the
+glmmTMB Monte-Carlo default, against a pre-registered coverage/width/tail/abort
+criterion (C1–C6) frozen before any run (GP5;
+`cairn/references/classical-oneway-comparison.md`). Motivation (D-006): the MC
+default aborts (`intraclass_singular_fit`) on a large fraction of near-zero-ICC
+datasets, where a classical closed-form interval always exists. Both prototypes
+were oracle-validated (IP1) against ≥2 independent published worked examples each
+(ohyama2025 §4 + burch2011 §4; O-Classical-OW). Sweep: 16 cells (ρ∈{.05,.10} ×
+(k,n)∈{(10,5),(30,5),(50,5),(10,2)} × {gaussian, t5 leptokurtic cluster effect}),
+n_rep=2000 for classical/MC/npbootstrap, reduced parametric-bootstrap baseline at
+the two near-zero corners.
+
+**Decision — NO-GO for default replacement; GO for opt-in `ci_method` (both methods):**
+- **Abort defect solved (C1):** SEARLE and Burch each returned a finite interval on
+  100% of 32,000 datasets (0 aborts) where the MC default aborted on 4–44% of
+  near-zero cells (confirms + extends D-006's 28–39%).
+- **SEARLE exact-F:** near-nominal (0.94–0.96) and tail-symmetric across almost the
+  whole grid; NO-GO for replacement on its single leptokurtic high-`k` under-coverage
+  (0.10,50,5,t5 = 0.924, C2/C4) and the n=2 width (C3, measured against a 0.70-covering
+  MC). Best-calibrated + narrowest when data are ≈ normal.
+- **Burch REML:** never under-covers (0.937–0.991), best on the non-normal cells
+  (passes C4 everywhere), but over-covers/wide at small `k` and is tail-asymmetric at
+  n=2 (C5). The robust / guaranteed-coverage choice, bought with width.
+- Neither passes the frozen every-cell bar for replacement, so **the default stays
+  glmmTMB MC — no `#3`/ADR-003 contract change.** Both are cleared to be planned as
+  **opt-in `ci_method`** values (SEARLE for near-normal data, Burch for non-normality
+  robustness), whose primary value is a finite, well-calibrated interval where the MC
+  default aborts — parallel to D-006 → M75 (npbootstrap opt-in).
+
+**Scope fence:** the non-normal axis was one leptokurtic shape (t5), ρ≤0.10, k≤50; a
+replacement verdict would need Burch's wider battery (platykurtic + skewed, Table 2)
+and larger ρ. The opt-in recommendation does not, since it adds an option rather than
+changing the contract. A classical **fallback-on-abort** default behaviour is a
+distinct, later `#3` question, not decided here.
+
+**Consequences:** M76 ships no code. The classical SEARLE and Burch REML one-way CIs
+are recorded GO-for-opt-in / NO-GO-for-replacement; a follow-on implementation
+milestone (ROADMAP candidate) may export one or both as `ci_method`, tracing to
+burch2011/ohyama2025/mcgraw1996 (IP1). O-Classical-OW registers the prototype oracles
+for that milestone to assert. Confirms D-006's framing (a boundary-robust classical
+default is a separate track from the npbootstrap GO) and answers its open question: on
+this evidence the classical route does not clear replacement.

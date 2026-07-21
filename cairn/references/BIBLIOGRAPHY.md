@@ -44,6 +44,13 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   9*(2), 378–400. (**Not on the shelf — fields not verified against the source**,
   M72, 2026-07-19. The byline is also abbreviated "et al." rather than enumerated;
   the paper has further authors this entry does not name.)
+- Burch, B. D. (2011). Assessing the performance of normal-based and REML-based
+  confidence intervals for the intraclass correlation coefficient. *Computational
+  Statistics and Data Analysis, 55*, 1018–1028. doi:10.1016/j.csda.2010.08.007.
+  (Issue number not printed in the PDF; the running foot gives only
+  `55 (2011) 1018–1028`. M76 primary source for the REML-based CI leg — its §4
+  arsenic example is a published REML ρ-interval oracle — see
+  [`burch2011.md`](burch2011.md).)
 - Cicchetti, D. V. (1994). Guidelines, criteria, and rules of thumb for evaluating
   normed and standardized assessment instruments in psychology. *Psychological
   Assessment, 6*(4), 284–290. doi:10.1037/1040-3590.6.4.284. (Interpretation-band
