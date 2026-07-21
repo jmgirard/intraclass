@@ -54,11 +54,11 @@ cannot absorb quietly:
   (Figs. 1–2), and an Appendix containing the R data-generation functions and the
   Stan model. Anchors below are to the published chapter throughout.
 
-The preprint PDF was still on the gitignored shelf when this note was written — observed 2026-07-19 — but nothing depends on it: no committed page reads that path, and this note's account of the manuscript rests on the reading done at M66, not on the file's continued presence. It can be deleted freely.
+The preprint PDF was still on the gitignored shelf when this note was written — observed 2026-07-19 — but nothing depends on it: no committed page reads that path, and this note's account of the manuscript rests on the reading done at M66, not on the file's continued presence. It can be deleted freely. <!-- check: none — an explicit write-time claim about the gitignored shelf (cairn/references/sources/); the note itself states nothing depends on the file and it can be deleted freely, so there is no committed state to settle -->
 
 **Role.** Design-planning evidence, not an estimator source. **No oracle value
 traces here**, and no test, vignette, or `ORACLES.md` entry reads it — observed
-2026-07-19. Its interest to this package is that it validates MCMC estimation of
+2026-07-19. <!-- check: ! git grep -qiF 'vanderark' -- R tests vignettes cairn/references/ORACLES.md --> Its interest to this package is that it validates MCMC estimation of
 exactly the package's `ICC(A,1)` estimand under extreme planned missingness, now
 with per-cell coverage rather than an aggregate, and that it is the closest thing
 on the shelf to a sourced answer for "how should I allocate raters and subjects?"
@@ -228,7 +228,7 @@ of scope.
 ## Traces to
 
 Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page —
-observed 2026-07-19.
+observed 2026-07-19. <!-- check: ! git grep -qiF 'vanderark' -- R tests vignettes cairn/references/ORACLES.md -->
 
 - `cairn/references/jorgensen2021.md` — the *other* Jorgensen paper, cited here
   (p. 3) on SEM being problematic for sparse PMD data. Distinct work; the
@@ -254,4 +254,4 @@ observed 2026-07-19.
 - Three different year conventions now coexist for the two ten Hove papers this
   chapter cites (its 2021/2023 vs. the repo's `tenhove2022`/`tenhove2024` vs. the
   preprint's 2021/2022). All four labels denote two works. Recorded so the drift
-  is not mistaken for four separate sources — observed 2026-07-19.
+  is not mistaken for four separate sources.

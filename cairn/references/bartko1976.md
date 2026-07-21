@@ -146,18 +146,18 @@ adopted.
   discriminate one-way from two-way and consistency from agreement more sharply
   than a random example: 1b has `r = 1.0` and pure additive rater bias, which is
   exactly the configuration where consistency and agreement diverge. Nothing in
-  the package uses it — observed 2026-07-19.
+  the package uses it — observed 2026-07-19. <!-- check: ! git grep -qiF 'bartko' -- R tests vignettes cairn/references/ORACLES.md -->
 - **A negative-ICC example.** Data set 1b gives `ICC(1) = −.23`, a published
   negative value with printed mean squares behind it — potentially useful to the
   boundary-policy guard tests, which build their own fixture
   (`tests/testthat/test-boundary-policy.R`, `boundary_two_way()`) — observed
-  2026-07-19.
+  2026-07-19. <!-- check: git grep -qF 'boundary_two_way' -- tests/testthat/test-boundary-policy.R -->
 
 Neither is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. <!-- check: ! git grep -qiF 'bartko' -- R tests vignettes cairn/references/ORACLES.md -->
 
 - `cairn/references/shrout1979.md:163` — records "Bartko's (1976) position that
   consistency is never an appropriate reliability concept for raters", which
@@ -175,4 +175,4 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
   dichotomous figures are **not reproduced in this paper** and Winer is not on
   the shelf, so the `.3683` / `.1044` / `.081` / `.037` / `.015` / `.6397` values
   above are recorded as this paper prints them and have not been recomputed from
-  underlying data — unlike Tables 2 and 3, which were — observed 2026-07-19.
+  underlying data — unlike Tables 2 and 3, which were — observed 2026-07-19. <!-- check: none — a claim about extraction effort (Winer's dichotomous values transcribed as printed, not recomputed); settled by human re-read like the provenance status, not by a command -->

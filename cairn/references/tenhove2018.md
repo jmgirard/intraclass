@@ -53,8 +53,9 @@ pattern in favour of *observed* rather than *scale* extremes — the text there
 says ratings "could vary from 1 … to 6 … though observed scores only ranged from
 2 to 5", matching its `Min = 2, Max = 5` row. Read that way, `Vision`'s `Max = 3`
 asserts no subject was ever rated 4. **This was not resolved against the `irr`
-data**: `irr` is not a package dependency and was not installed to check, so the
-discrepancy is recorded as printed and left open — observed 2026-07-19. No repo
+data**: `irr` is a Suggests dependency (added at M42 for the comparison vignette,
+corrected here — M66 recorded it as "not a package dependency") but was not loaded
+to check, so the discrepancy is recorded as printed and left open — observed 2026-07-19. <!-- check: git grep -qwF 'irr' -- DESCRIPTION --> No repo
 value depends on it.
 
 ## The 20 coefficients (Table 2, p. 70)
@@ -175,12 +176,12 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
 - **Not an oracle.** The `ICC₂` values (0.70 / 0.16 / 0.20) are printed to two
   decimals, computed by `irr` under a consistency specification, on datasets not
   reproduced in the paper. They are neither hand-checkable nor precise enough to
-  pin against, and `irr` is not a dependency. Recorded as evidence, not as a
-  candidate fixture.
+  pin against, and `irr` is only a Suggests dependency (not loaded here).
+  Recorded as evidence, not as a candidate fixture.
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. <!-- check: ! git grep -qiF 'tenhove2018' -- R tests vignettes cairn/references/ORACLES.md -->
 
 - `cairn/references/tenhove2024.md` — the later selection-guidance paper by the
   same first author; this one poses the question that one answers.
@@ -195,5 +196,5 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
 ## Open questions
 
 - The `Vision` `Max = 3` vs. "scale from 1 … to 4" discrepancy above is
-  unresolved; checking it needs the `irr` package, which is not a dependency and
-  was not installed — observed 2026-07-19.
+  unresolved; checking it needs the `irr` package, a Suggests dependency (M42;
+  corrected here) that was not loaded — observed 2026-07-19. <!-- check: git grep -qwF 'irr' -- DESCRIPTION -->

@@ -111,7 +111,7 @@ Cohen 1967) — from which the paper concludes diagnostic agreement is poorer.
 Nothing in the package traces to this source. A repo-wide grep for
 `fleiss1973` / "Fleiss & Cohen" / "weighted kappa" over `R/`, `tests/`,
 `vignettes/`, `man/`, `NEWS.md`, and `cairn/references/ORACLES.md` returned no
-hits — observed 2026-07-18 (M64, re-run and still true at M69); the only
+hits — observed 2026-07-18 <!-- check: ! git grep -qiE 'fleiss1973|Fleiss & Cohen|weighted kappa' -- R tests vignettes man NEWS.md cairn/references/ORACLES.md --> (M64, re-run and still true at M69); the only
 references are the tracking/bibliography ones M64 created
 (`BIBLIOGRAPHY.md`, `INDEX.md`, and the M64 milestone file). It is
 shelf/background evidence for the kappa–ICC relationship and the categorical

@@ -278,7 +278,7 @@ value unbanded. Added M69.
   Online Supplement S4 "because they resembled the MCMC estimates" (p. 14). That
   is a qualitative agreement statement about one dataset, with no numbers in the
   article body — Online Supplement S4 is not on the shelf (checked, no supplement
-  file present — observed 2026-07-18) — so it is **not** an oracle and does not
+  file present — observed 2026-07-18) <!-- check: none — the shelf (cairn/references/sources/) is gitignored, so "Supplement S4 not on the shelf" is a claim about local working state, not reproducibly settleable across clones --> — so it is **not** an oracle and does not
   validate the package's route. The package's default glmmTMB/lme4 REML route to
   Eqs. 12–13 remains an estimation-route choice established by numerical oracle,
   not by this source — the same posture D-005 records for the two-level SEM

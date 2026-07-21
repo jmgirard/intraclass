@@ -138,7 +138,7 @@ estimate was `ICC(2,3) = .87` (p. 451; footnote 8 notes `ICC(2,3)` = the paper's
 > paper's own p. 447 states, consistency ICCs "do not include … `σ²_R`". So the
 > footnote's identification looks like a slip for ICC(3,3). **Nothing in this
 > repo depends on it** (see "Traces to"; grepped across `cairn/`, `R/` and
-> `tests/` — the only hit is M69's own work log — observed 2026-07-18); flagged
+> `tests/` — the only hit is M69's own work log — observed 2026-07-18 <!-- check: none — the claim is that no code depends on a source footnote's identification slip; a footnote has no distinct repo token, so "only hit is the work log" is not an exit code -->); flagged
 > for any reader who cites the footnote. Not reconciled here.
 
 Estimation: 3 chains × 1,000 with 500 burn-in, doubled to 3,000 post-burn-in
@@ -280,7 +280,7 @@ IP2) plausibly should not fit.
   intermediate algebra (A.1–A.25) is derivation, not reference values; its
   terminal result Eq. A.26 (`σ_YY = 2 × σ_AP + σ_RR`) was confirmed at M69. The
   online supplement (OSF `9az5x`, p. 456) had not been retrieved — observed
-  2026-07-18.
+  2026-07-18. <!-- check: none — retrieval status of an external OSF supplement is repo-local action state with no committed artifact to check -->
 - ~~**Sibling-key hygiene.**~~ *Resolved within M64 (T5): `BIBLIOGRAPHY.md` had
   only the 60(5) paper under a bare "ten Hove … (2025)". T5 added this 60(3)
   paper and gave both entries the `2025a`/`2025b` suffixes, so a bare "ten Hove

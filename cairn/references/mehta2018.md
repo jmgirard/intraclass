@@ -22,7 +22,7 @@ by Allergan Inc.
 **Squarely inside the package's contract** — it studies the two-way random
 `ICC(2,1)` the package computes, with the classical Shrout–Fleiss estimator.
 Nothing in the package traced to it and no `ORACLES.md` entry cited it —
-observed 2026-07-19 (grep for `mehta` over `R/`, `tests/`, `man/`, `vignettes/`,
+observed 2026-07-19 <!-- check: ! git grep -qiF 'mehta' -- R tests man vignettes data-raw NAMESPACE DESCRIPTION cairn/references/ORACLES.md --> (grep for `mehta` over `R/`, `tests/`, `man/`, `vignettes/`,
 `data-raw/`, `NAMESPACE`, `DESCRIPTION` and `ORACLES.md`: no hits).
 
 ## Design applicability (AC2)
@@ -283,7 +283,7 @@ it contradicts the paper.
 **A note on "GP6 axes".** GP6 is a *practice* — sweep whatever axis the known
 failure mode grows — and names cluster count, incidence and raggedness only as
 examples. The repo maintains **no enumerated registry of known-failure axes**
-(checked against `DESIGN.md` and `PRINCIPLES.md`, observed 2026-07-19), so
+(checked against `DESIGN.md` and `PRINCIPLES.md`, observed 2026-07-19), <!-- check: none — same as bobak2018: absence of an enumerated "known-failure axes" registry is a concept, not a token; GP6 is a practice, not a list a grep can confirm absent --> so
 "on the GP6 list" is not a thing a claim can be true or false against. The rows
 below map this paper onto the axes M65 chose to track, nothing more.
 
@@ -292,12 +292,12 @@ below map this paper onto the axes M65 chose to track, nothing more.
 | **Non-normality** | **Directly and centrally.** But of the *subject* distribution, not the error distribution — the axis is the shape of the true-score distribution across the scale (convex/concave/uniform/skewed), which is distinct from the heavy-tailed *error* non-normality `ukoumunne2003` studies and from `bobak2018`'s bounded-scale heteroscedasticity. **Three M65/M62 sources, three different things all called "non-normality".** Worth keeping straight |
 | **Few subjects** | Addressed and partly reassuring: the point estimate is stable down to `N = 80` and, per §5, `N = 50`. But interval-relevant spread is not — see the caveat above |
 | **Near-zero ICC** | Reached, at last. Case 6 produces `ICC` = 0.08 (extreme convex, `N = 300`), the **lowest true value anywhere in the M65 cluster**. The paper reports no estimation difficulty there — unsurprising, since it uses closed-form mean squares that cannot fail to converge, unlike the package's mixed-model fits |
-| **Ordinal / discrete outcomes** | **Named repeatedly in the repo as unscheduled future work, never as a swept axis.** `cairn/COVERAGE.md:196` carries "categorical / ordinal ratings (GLMM engines)" at status `🔵 Not yet`; `cairn/estimand-specs/M6-oneway.md:213` defers it to the ROADMAP; and the pre-migration files (`cairn/legacy/ROADMAP.md:77`, plus recurring mentions in `legacy/STATUS.md`, `legacy/MILESTONES.md` and `legacy/DECISIONS.md`) carry it as a standing carryover candidate. Settled by `grep -rni 'ordinal' cairn/` — observed 2026-07-19. What no document does is record a *sweep*: the axis is deferred everywhere and studied nowhere. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about |
+| **Ordinal / discrete outcomes** | **Named repeatedly in the repo as unscheduled future work, never as a swept axis.** `cairn/COVERAGE.md:196` carries "categorical / ordinal ratings (GLMM engines)" at status `🔵 Not yet`; `cairn/estimand-specs/M6-oneway.md:213` defers it to the ROADMAP; and the pre-migration files (`cairn/legacy/ROADMAP.md:77`, plus recurring mentions in `legacy/STATUS.md`, `legacy/MILESTONES.md` and `legacy/DECISIONS.md`) carry it as a standing carryover candidate. Settled by `grep -rni 'ordinal' cairn/` — observed 2026-07-19. What no document does is record a *sweep*: the axis is deferred everywhere and studied nowhere. Every value here is an integer grade 0–4 treated as continuous — common practice, endorsed by the paper, and not something the package warns about | <!-- check: ! grep -rIqiE 'ordinal' R/ tests/ -->
 
 ## Traces to
 
 - Nothing in the package — see the grep recorded under **Role** above
-  (observed 2026-07-19).
+  (observed 2026-07-19). <!-- check: ! git grep -qiF 'mehta' -- R tests man vignettes data-raw NAMESPACE DESCRIPTION cairn/references/ORACLES.md -->
 - `cairn/references/shrout1979.md` — Eq. (3) here is `ICC(2,1)`; Shrout & Fleiss
   is this paper's reference 1.
 - `cairn/references/fleiss1973.md` — cited here as reference 29 (the

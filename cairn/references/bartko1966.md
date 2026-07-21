@@ -108,14 +108,14 @@ reconstructible from the printed data — see below.
 
 ## What this could source
 
-Nothing in the package traces here — observed 2026-07-19. Two things in this paper are
+Nothing in the package traces here — observed 2026-07-19. <!-- check: ! git grep -qiF 'bartko' -- R tests vignettes cairn/references/ORACLES.md --> Two things in this paper are
 *available* to be sourced, and neither is claimed by any current oracle:
 
 - **A closed-form / hand-computed oracle fixture.** The 4×2 example above yields
   one-way `0.1236`, two-way-random `0.2778`, and two-way-fixed `0.4286` from nine
   integers, all reconstructible by hand (verified above). It is far smaller than
   the `shrout1979` Table 2 example that backs **O1** (`ORACLES.md` § Oracle O1 —
-  observed 2026-07-19), which makes it a
+  observed 2026-07-19 <!-- check: git grep -qF 'Oracle O1' -- cairn/references/ORACLES.md -->), which makes it a
   candidate *second* deterministic fixture rather than a replacement — its value
   would be as an independent small-`n` check, and its weakness is that at
   `n = 4, k = 2` it exercises no boundary behavior.
@@ -128,7 +128,7 @@ Neither is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. Three
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. <!-- check: ! git grep -qiF 'bartko' -- R tests vignettes cairn/references/ORACLES.md --> Three
 sibling `references/` notes cite the paper:
 
 - `cairn/references/tenhove2024.md:95–97` — quotes Bartko's advice that ICC use
