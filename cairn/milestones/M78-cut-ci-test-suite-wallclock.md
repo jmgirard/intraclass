@@ -1,0 +1,102 @@
+# M78: Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO)
+
+- **Status:** planned
+- **Priority:** normal
+- **Depends on:** —
+- **Driving RR:** —
+- **Principles touched:** GP3, GP5, GP6
+- **Branch/PR:** —
+
+## Goal
+
+Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubuntu / 18m Windows), not the already-cached dependency install — without weakening any oracle.
+
+## Scope
+
+**In:**
+- Correct the record: the M77 lesson blamed CI wall-clock on the `needs: check`
+  dependency install; the measured cost is the `check-r-package` testthat suite
+  (install is a cached ~33–52s). Supersede via a `DECISIONS.md` entry + a
+  `LESSONS.md` correction.
+- Profile the testthat suite under R CMD check conditions; name the heaviest
+  files with per-file elapsed evidence.
+- Lever A — parallelism (rigor-free): raise the testthat worker count to the
+  runner core count on the ubuntu + Windows check jobs, and make Windows engage
+  parallelism at all (it prints one `[18m]`, no CPU/elapsed split vs ubuntu's
+  `[24m/13m]`). GO/NO-GO on runner-memory stability.
+- Lever B — residual structural `boot_samples`: cut to the B=99 reproducibility
+  floor in STRUCTURAL cells only (well-formed / monotone / coherence /
+  reproducible), never a coverage or agreement cell.
+- Measure the wall-clock on the PR's own R-CMD-check run vs the 13m/18m baseline.
+
+**Out:**
+- Any O1/O2 coverage/agreement `n_rep`/`boot` count — load-bearing per GP5/GP6;
+  stays untouched.
+- Dependency caching / `needs:` narrowing — falsified (install already
+  ~33–52s cached); dropped, recorded in the D-entry (AC1).
+- brms live-Stan tests — already `skip_on_ci` (25 skipped); untouched.
+- Example (~1s) and vignette (~70s) runtime — negligible; → candidate if needed.
+
+## Acceptance criteria
+
+- [ ] AC1: A `cairn/DECISIONS.md` entry records the measured breakdown (install
+      33–52s cached; testthat 13m ubuntu / 18m Windows) and supersedes the M77
+      install-cost claim; the M77 `LESSONS.md` line is corrected in place.
+      Evidence: the D-entry + the diff.
+- [ ] AC2: The testthat suite is profiled per-file under R CMD check conditions
+      (`NOT_CRAN=true`), heaviest files named with elapsed in the work log.
+      Evidence: the profiling command + its output.
+- [ ] AC3: The ubuntu + Windows check jobs run testthat at the runner core count
+      (worker count set explicitly), OR a D-entry records a NO-GO with the
+      memory/stability evidence. Evidence: the workflow diff + the PR run's
+      testthat CPU/elapsed split (or the NO-GO entry).
+- [ ] AC4: The PR's own R-CMD-check run shows a measured testthat wall-clock
+      reduction vs the 13m/18m baseline, OR a D-entry records the NO-GO with
+      per-lever evidence. Evidence: the PR run's per-step timing vs baseline.
+- [ ] AC5: `git diff` shows no O1/O2 coverage/agreement count changed — only
+      structural `boot_samples` (→99 floor) and CI config; the full suite still
+      reports `FAIL 0`. Evidence: the diff + the PR run's summary line.
+- [ ] AC6: All PR checks green (R-CMD-check matrix, lint, format, coverage); the
+      profile `verify` slot clean (`devtools::test()` with `NOT_CRAN=true`,
+      `CI=true`, `max_fails=Inf`). Evidence: `gh pr checks` + verify output.
+
+## Coverage
+
+- AC1 → T1
+- AC2 → T2
+- AC3 → T3
+- AC4 → T3, T4, T5
+- AC5 → T4, T5
+- AC6 → T5
+
+## Tasks
+
+- [ ] T1: Correct the record — add a `cairn/DECISIONS.md` entry with the measured
+      breakdown superseding the M77 install-cost claim; correct the M77
+      `cairn/LESSONS.md` line (2026-07-21). Docs-only.
+- [ ] T2: Profile the testthat suite per-file under R CMD check conditions
+      (`NOT_CRAN=true`, testthat parallel); record heaviest files + elapsed in
+      the work log; confirm the parallel ceiling (ubuntu ~1.85×, Windows serial).
+- [ ] T3: Lever A — set the testthat worker count to the runner core count in
+      `.github/workflows/check-standard.yaml` (ubuntu + Windows) via
+      `Ncpus`/`TESTTHAT_CPUS` or `Config/testthat`; verify Windows engages
+      parallelism. GO/NO-GO on OOM/flake → D-entry if NO-GO.
+- [ ] T4: Lever B — cut `boot_samples` to the B=99 floor in STRUCTURAL cells only
+      (`test-ci-bootstrap.R`, `test-ci-npbootstrap.R`, `test-d-study.R`,
+      `test-replicates.R`), updating asserted `samples` literals; leave every
+      coverage/agreement count. Verify `FAIL 0` locally.
+- [ ] T5: Open the PR; measure the testthat wall-clock on its own R-CMD-check run
+      vs the 13m/18m baseline; record the NO-GO D-entry if no safe lever helped.
+      Confirm all checks green.
+
+## Work log
+
+- 2026-07-21: created by /milestone-plan. Scope pivoted from the M77-lineage
+  "cache CI R dependencies" candidate after investigation falsified its premise:
+  dep install is a cached ~33–52s; the real CI wall-clock is the testthat suite
+  (ubuntu 13m/24m CPU, Windows 18m). Disposition (user): full test-suite
+  reduction, both levers in one milestone, any-safe-reduction + NO-GO valve.
+
+## Decisions
+
+## Review
