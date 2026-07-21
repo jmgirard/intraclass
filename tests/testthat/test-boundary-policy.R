@@ -80,7 +80,7 @@ test_that("bootstrap keeps a component-at-0 resample rather than dropping it", {
     rater,
     engine = "glmmTMB",
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L, # structural completes-at-boundary check; B arbitrary (M78)
     seed = 1
   ))
   expect_lt(fit$components$rater, 1e-6) # boundary actually reached

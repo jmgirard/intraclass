@@ -81,7 +81,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
       `.github/workflows/check-standard.yaml` (ubuntu + Windows) via
       `Ncpus`/`TESTTHAT_CPUS` or `Config/testthat`; verify Windows engages
       parallelism. GO/NO-GO on OOM/flake → D-entry if NO-GO.
-- [ ] T4: Lever B — cut `boot_samples` to the B=99 floor in STRUCTURAL cells only
+- [x] T4: Lever B — cut `boot_samples` to the B=99 floor in STRUCTURAL cells only
       (`test-ci-bootstrap.R`, `test-ci-npbootstrap.R`, `test-d-study.R`,
       `test-replicates.R`), updating asserted `samples` literals; leave every
       coverage/agreement count. Verify `FAIL 0` locally.
@@ -116,6 +116,18 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
   `default_num_cpus()` = 2 unset → 4 with `TESTTHAT_CPUS=4`. Windows/OOM GO/NO-GO
   resolves on the PR run (AC3/AC4). Coverage job left untouched (covr is not the
   wall-clock concern; runs tests sequentially).
+- 2026-07-21: T4 — Lever B is nearly exhausted. Minor amendment to the plan's
+  file guess: the named files (ci-bootstrap/npbootstrap/d-study/replicates) were
+  already floored by M59 — their structural cells sit at/below B=99 and every
+  heavy cell is load-bearing O1/O2. The only above-floor STRUCTURAL cells are
+  `test-boundary-policy.R:83` (completes-at-boundary) and `test-icc-lavaan.R:521`
+  (fixed-rater serves-the-bootstrap); cut both 199→99 (neither asserts a `samples`
+  literal; FAIL 0 on both files, air-clean). Deliberately LEFT `npbootstrap`
+  L34/L168 (199): the file is 1.1s, L34 hard-asserts `ci$samples == 199L` under an
+  M75 AC, and cutting saves ~nothing (cheap MoM resamples, not refits). Net: Lever
+  B cannot touch the parallel floor (ci-bootstrap's O1/O2 refits, GP5/GP6), so the
+  reduction rests on Lever A; the two cuts are floor-alignment, not the driver. No
+  O1/O2 count changed (AC5).
 
 ## Decisions
 

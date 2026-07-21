@@ -518,7 +518,7 @@ test_that("fixed-rater SEM also serves the parametric bootstrap (Slice 1 x Slice
     raters = "fixed",
     engine = "lavaan",
     ci_method = "bootstrap",
-    boot_samples = 199L,
+    boot_samples = 99L, # structural serves-the-bootstrap check; B arbitrary (M78)
     seed = 1
   )))
   expect_true(all(is.finite(bs$conf.low) & is.finite(bs$conf.high)))
