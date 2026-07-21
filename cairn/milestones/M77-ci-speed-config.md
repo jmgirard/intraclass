@@ -19,7 +19,7 @@ Cut CI wall-clock and wasted runs by adding run-cancellation, path filtering, an
 
 ## Acceptance criteria
 
-- [x] AC1: `check-standard.yaml`, `test-coverage.yaml`, `lint.yaml`, `format.yaml` each carry a top-level `concurrency` block keyed on workflow+ref with `cancel-in-progress: true` (grep/actionlint evidence).
+- [x] AC1: `check-standard.yaml`, `test-coverage.yaml`, `lint.yaml`, `format.yaml` each carry a top-level `concurrency` block keyed on workflow+ref that cancels in-progress runs for non-default-branch refs (`cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}`) — PR/branch runs auto-cancel, `main` runs are never cancelled (amended from literal `true` at the 2026-07-21 merge gate; grep/actionlint evidence).
 - [x] AC2: `check-standard.yaml` and `test-coverage.yaml` carry `paths-ignore: ['cairn/**','man/**','README.md','**/*.Rmd']` on both the `push` and `pull_request` triggers (grep/actionlint evidence).
 - [x] AC3: `check-standard.yaml`'s matrix resolves to the full 5 configs (macos, windows, ubuntu devel/release/oldrel-1) on `push` and to exactly `ubuntu-latest release` + `windows-latest release` on `pull_request` — evidenced by the milestone PR's own check run showing 2 configs, and by the post-merge push-to-`main` run showing 5.
 - [x] AC4: all four edited workflow files are valid (`actionlint` clean; YAML parses) — no syntax/expression errors introduced.
@@ -42,13 +42,14 @@ Cut CI wall-clock and wasted runs by adding run-cancellation, path filtering, an
 
 - 2026-07-21: created by /milestone-plan. Gate decisions: PR matrix = ubuntu+windows release (preserves the M56 Windows-only-flake gate before merge); paths-ignore on both push+pull_request of check+coverage (tracking commits land on main directly here); lint/format paths-ignore declined. Branch protection on main is absent → no required-check-vs-paths-ignore hang risk.
 - 2026-07-21: T1–T4 done. Concurrency block on all four workflows; paths-ignore on push+pull_request of check-standard+test-coverage; check-standard matrix now event-conditional via fromJSON ternary (push→5 configs, PR→ubuntu+windows release). `actionlint` clean (1.7.12, exit 0) on all four; matrix JSON verified to parse to 5/2 configs. No R code touched, so devtools verify slot N/A. Status → review.
+- 2026-07-21: review — ACs verified (AC3 live self-test: PR #83 fired 2 configs), consistency gate green, 3-lens fan-out zero findings. Gated AC1 amendment approved at the merge gate: `cancel-in-progress: true` → `${{ github.ref != 'refs/heads/main' }}` on all four workflows (exempt main from cancellation, addressing the diff-bug reviewer's double-merge caveat); actionlint re-confirmed clean.
 
 ## Decisions
 
 ## Review
 
 **Acceptance criteria — fresh evidence (2026-07-21):**
-- AC1: `grep -l "cancel-in-progress: true"` returns all four workflows. ✓
+- AC1: all four workflows carry `cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}` (grep confirmed 4/4); main exempted so double-merges never lose a default-branch run. ✓ (amended from literal `true` at the merge gate per maintainer choice)
 - AC2: `grep -c paths-ignore` = 2 in both check-standard and test-coverage (push + pull_request); absent from lint/format as planned. ✓
 - AC3: PR #83's own run spawned R-CMD-check jobs `ubuntu-latest (release)` + `windows-latest (release)` and no others — the 2-config PR matrix live-verified. The 5-config push branch is verified structurally (matrix JSON parses to the original 5 configs) and runs post-merge on `main`. ✓
 - AC4: `actionlint` 1.7.12 clean (exit 0) on all four files. ✓
