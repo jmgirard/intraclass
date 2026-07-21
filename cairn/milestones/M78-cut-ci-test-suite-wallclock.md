@@ -74,7 +74,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 - [x] T1: Correct the record — add a `cairn/DECISIONS.md` entry with the measured
       breakdown superseding the M77 install-cost claim; correct the M77
       `cairn/LESSONS.md` line (2026-07-21). Docs-only.
-- [ ] T2: Profile the testthat suite per-file under R CMD check conditions
+- [x] T2: Profile the testthat suite per-file under R CMD check conditions
       (`NOT_CRAN=true`, testthat parallel); record heaviest files + elapsed in
       the work log; confirm the parallel ceiling (ubuntu ~1.85×, Windows serial).
 - [ ] T3: Lever A — set the testthat worker count to the runner core count in
@@ -99,6 +99,16 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 - 2026-07-21: T1 — added D-011 (CI wall-clock is the testthat suite, not the dep
   install) superseding the M77 install-cost claim; corrected the M77 LESSONS line
   in place with the measured breakdown. Docs-only.
+- 2026-07-21: T2 — profiled the suite per-file (local, serial, `NOT_CRAN=true
+  CI=true`, testthat 3e; scratchpad `profile-suite.R`). Total 434s; heaviest:
+  ci-bootstrap 118s, icc-lavaan-multilevel-incomplete 110s, icc-lavaan-multilevel
+  65s, d-study 61s, icc-multilevel 25s. Parallel floor = the single longest file
+  (ci-bootstrap 118s), whose cost is O1/O2 coverage refits (load-bearing, GP5/GP6
+  — Lever B cannot touch it). Root cause of the 2× ceiling: testthat
+  `default_num_cpus()` returns `getOption("Ncpus")` → `TESTTHAT_CPUS` → hard
+  default 2, so workers never exceed 2 regardless of runner cores (explains
+  ubuntu's 24m CPU / 13m elapsed ≈ 1.85×). CI absolute numbers deferred to the PR
+  run (AC4); local macOS is ~3× faster per fit than CI ubuntu.
 
 ## Decisions
 
