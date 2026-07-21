@@ -224,3 +224,19 @@ width); an ORACLES.md entry; docs/NEWS.
 measured ≤ 1e-10 against projected (RR02 verified 4.6e-14). BC3 measured 0
 discrepant reps against projected zero. BC6 measured ≤ upper-tail every cell
 against the projected exact bound (tolerance 0). No shortfall.
+
+**Consistency gate (by command):** `cairn_validate` exit 0; `devtools::check()`
+0 errors / 0 warnings / 0 notes; `document()` no-diff; `pkgdown::check_pkgdown()`
+clean; NEWS entry present.
+
+**Independent fresh-context review (3 lenses) — 0 actioned findings.**
+- [O] diff-bug (Opus): no defects; verified the studentized bootstrap-t, the
+  non-circular cross-implementation parity oracle, the BC2 divisor=n identity, the
+  loud classed guards, and the REML-point dispatch. Noted (not a finding): small k
+  (≤ 4) can trip the degenerate-resample abort — exactly AC5's loud-classed design,
+  consistent with the method's k ≥ 10 target.
+- [S] blame-history (Sonnet): no findings; additive extension, brms coupling /
+  lavaan refusal / choice set / `samples` slot all respected.
+- [S] prior-review (Sonnet): no findings; faithfully realizes RR01/RR02 (D-006/D-010);
+  GitHub PR-comment probe empty.
+Scorer: no surviving findings to score (no-op). No below-threshold findings logged.
