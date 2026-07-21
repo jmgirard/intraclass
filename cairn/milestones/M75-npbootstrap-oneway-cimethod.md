@@ -1,6 +1,6 @@
 # M75: Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** RR02
@@ -158,23 +158,24 @@ width); an ORACLES.md entry; docs/NEWS.
   BC1–BC6 ingested verbatim into AC (Driving RR: RR02); ICC(k) added to scope;
   RB02/RR02 archived; status → in-progress. Tasks T1–T6 + Coverage amended for
   the ICC(k) map and the engine-REML-point ruling.
+- 2026-07-21: T2 reducer (`R/ci-npbootstrap.R`) + T3 dispatch/guards done; parity
+  fixture + generator committed; T1 unit tests (parity/guards/ICC(k) identity)
+  green (28/28); T6 docs (@param/@details, O-NPBoot in ORACLES.md, NEWS) drafted.
+- 2026-07-21: T4 sweep done (n_rep=2000, B=999, all 7 cells). AC3 coverage
+  U10/U30/U50 = .9375/.9355/.9425 (Table I .938/.944/.9395, all within ±.03); AC4
+  tail split balanced (U10 .0335/.0290) + truncated ≤ untruncated; BC3 zero
+  disagreements (covk = cov1 exactly); BC6 point-outside ≤ upper-tail every cell.
+  Coverage test green (68/68).
+- 2026-07-21: T5 (AC6/GP5): the C4 corner CLEARS the 0.93 floor at
+  coverage_icc1 = 0.9410 (every cell clears; min 0.934) — the "else" branch, so no
+  @details corner limitation is added.
+- 2026-07-21: T6 verify — full non-brms suite 1605 pass / 0 fail; `document()`
+  no-diff; `lintr::lint_package()` 0 lints. All tasks done → status review.
 
 ## Decisions
 
 - 2026-07-21 (RR02 ingest): all three questions resolved → **D-010** (confirms
   D-006): string kept; `ICC(k)` via the monotone Spearman-Brown map; engine REML
   point for both estimands. Basis in D-010 + `reviews/archive/RR02-…`.
-- 2026-07-21: T2 reducer (`R/ci-npbootstrap.R`) + T3 dispatch/guards done; parity
-  fixture + generator committed; T1 unit tests (parity/guards/ICC(k) identity)
-  green (28/28); T6 docs (@param/@details, O-NPBoot in ORACLES.md, NEWS) drafted.
-  Coverage test + fixture (T4) held for the running n_rep=2000 sweep (B=999).
-- 2026-07-21: T4 sweep done (n_rep=2000, B=999, all 7 cells). AC3 coverage
-  U10/U30/U50 = .9375/.9355/.9425 (Table I .938/.944/.9395, all within ±.03); AC4
-  tail split balanced (U10 .0335/.0290) + truncated ≤ untruncated; BC3 zero
-  disagreements (covk = cov1 exactly); BC6 point-outside ≤ upper-tail every cell.
-  Coverage test green (68/68). T1/T4/T6 complete.
-- 2026-07-21: T5 (AC6/GP5, pre-specified branch): the C4 corner clears the 0.93
-  floor at coverage_icc1 = 0.9410 (every cell clears; min 0.934), so NO @details
-  corner limitation is added — the "else" branch. Recorded here per the plan.
 
 ## Review
