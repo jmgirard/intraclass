@@ -140,7 +140,7 @@ single-design ICC this package's estimand specs define.
   documented claim reads this page, by design. No `ORACLES.md` entry cites it.
   A grep for this citekey and for the author surnames across `R/`, `tests/`,
   `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, and `ORACLES.md`
-  returned no hits — observed 2026-07-19.
+  returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'donner' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
 - `cairn/references/konishi1989.md` — the independent-sample general case this
   paper extends; `Z_M` is Konishi's transformation, and §7 (p. 378) notes
   Konishi & Gupta (1987) "considered only the case in which two intraclass
@@ -165,7 +165,7 @@ single-design ICC this package's estimand specs define.
 - **No `ρ = 0` or near-zero cell.** The simulated `ρ` **floor is 0.4** across all
   three tables — **the highest floor of the five cluster papers**, the other four
   all reaching down to 0.1 (`konishi1989`, `young1998`, `naik2007`,
-  `bhandary2006`; checked against all five notes, observed 2026-07-19). None of
+  `bhandary2006`; checked against all five notes, observed 2026-07-19 <!-- check: none — comparative reading of five notes' simulated-ρ grids (a source-table generalization, M74 territory), not settleable by one command's exit code -->). None of
   them reaches 0, so the near-zero corner where this package's own known failure
   modes live is untested across the whole cluster.
 

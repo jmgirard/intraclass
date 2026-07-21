@@ -26,6 +26,7 @@ Usage (run from the repo root):
     python3 data-raw/check-reference-observations.py --list-unmarked
     python3 data-raw/check-reference-observations.py --self-test  # harness bite
 """
+import bisect
 import os
 import re
 import subprocess
@@ -87,19 +88,47 @@ def provenance_linenos(lines):
     return prov
 
 
+def _lineno(offsets, idx):
+    """1-indexed line number of character offset idx."""
+    return bisect.bisect_right(offsets, idx)
+
+
 def observations(root):
     """Yield (relpath, lineno, line, directive_body_or_None) for each in-scope
     dated observation. directive_body is the text after `check:` when present.
-    Stamps inside a provenance paragraph are exempt and not yielded (D-009)."""
+
+    Parsing is position-based, not line-based: a stamp's `observed` keyword and
+    its date can straddle a soft line break (e.g. `... — observed\\n2026-07-19`),
+    and STAMP's `\\s+` spans the newline. Each stamp's directive is the first
+    `<!-- check: -->` that follows it within the same paragraph (no blank line
+    between the stamp and the directive, and before the next stamp). Stamps
+    whose keyword sits in a provenance paragraph are exempt (D-009)."""
     for rel in in_scope_files(root):
         with open(os.path.join(root, rel), encoding="utf-8") as fh:
-            lines = fh.readlines()
+            text = fh.read()
+        lines = text.splitlines(keepends=True)
         prov = provenance_linenos(lines)
-        for n, line in enumerate(lines, start=1):
-            if not STAMP.search(line) or n in prov:
+        offsets = []
+        pos = 0
+        for ln in lines:
+            offsets.append(pos)
+            pos += len(ln)
+        stamps = list(STAMP.finditer(text))
+        directives = list(DIRECTIVE.finditer(text))
+        for i, m in enumerate(stamps):
+            lineno = _lineno(offsets, m.start())
+            if lineno in prov:
                 continue
-            m = DIRECTIVE.search(line)
-            yield rel, n, line.rstrip("\n"), (m.group(1) if m else None)
+            nxt = stamps[i + 1].start() if i + 1 < len(stamps) else len(text)
+            body = None
+            for d in directives:
+                if m.end() <= d.start() < nxt:
+                    if "\n\n" in text[m.end():d.start()]:
+                        break  # directive is past the paragraph — not this stamp's
+                    body = d.group(1)
+                    break
+            line_text = lines[lineno - 1].rstrip("\n") if lineno <= len(lines) else ""
+            yield rel, lineno, line_text, body
 
 
 def evaluate(cmd, root):

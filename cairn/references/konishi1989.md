@@ -22,7 +22,7 @@ Statistical Mathematics, Tokyo; Gupta: Bowling Green State University, Ohio.
 cluster — the `q`-population hypothesis test that the rest of the cluster
 specializes. It is here **as evidence of a contract boundary**, not as a
 capability source. Nothing in the package traces to it (see "Traces to") —
-observed 2026-07-19.
+observed 2026-07-19. <!-- check: ! git grep -qiE 'konishi' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
 
 ## The estimand is a hypothesis, not a coefficient
 
@@ -122,7 +122,7 @@ record rather than re-argued from memory.
   claim reads this page, and that is by design (see Boundary above). No
   `ORACLES.md` entry cites it. A grep for this citekey and for the author
   surnames across `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`,
-  `data-raw/`, and `ORACLES.md` returned no hits — observed 2026-07-19.
+  `data-raw/`, and `ORACLES.md` returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'konishi' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
 - `cairn/references/bhandary2006.md` — a fifth member of this cluster by
   subject; its own cluster-reassignment finding asks that the two be read
   together, and the same IP2 fence covers both.
@@ -139,7 +139,7 @@ record rather than re-argued from memory.
   `ρ ≥ −1/(p−1)` for `Σ_α` to be positive definite, and the sibling papers in
   this cluster state that bound explicitly; this one does not. Re-checked across
   all 13 pages (title page through the references ending p. 105, no appendix) —
-  the bound appears nowhere, observed 2026-07-19.
+  the bound appears nowhere in the paper.
 - **The `ω_α` weights must be estimated.** The paper notes the coefficients
   "have to be estimated from the data" (p. 99) and points at the literature on
   distributions of linear combinations of `χ²` variates, but supplies no
