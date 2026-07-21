@@ -1,11 +1,11 @@
 # M78: Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO)
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3, GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** m78-cut-ci-test-suite-wallclock · https://github.com/jmgirard/intraclass/pull/84
 
 ## Goal
 
@@ -39,24 +39,24 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 
 ## Acceptance criteria
 
-- [ ] AC1: A `cairn/DECISIONS.md` entry records the measured breakdown (install
+- [x] AC1: A `cairn/DECISIONS.md` entry records the measured breakdown (install
       33–52s cached; testthat 13m ubuntu / 18m Windows) and supersedes the M77
       install-cost claim; the M77 `LESSONS.md` line is corrected in place.
       Evidence: the D-entry + the diff.
-- [ ] AC2: The testthat suite is profiled per-file under R CMD check conditions
+- [x] AC2: The testthat suite is profiled per-file under R CMD check conditions
       (`NOT_CRAN=true`), heaviest files named with elapsed in the work log.
       Evidence: the profiling command + its output.
-- [ ] AC3: The ubuntu + Windows check jobs run testthat at the runner core count
+- [x] AC3: The ubuntu + Windows check jobs run testthat at the runner core count
       (worker count set explicitly), OR a D-entry records a NO-GO with the
       memory/stability evidence. Evidence: the workflow diff + the PR run's
       testthat CPU/elapsed split (or the NO-GO entry).
-- [ ] AC4: The PR's own R-CMD-check run shows a measured testthat wall-clock
+- [x] AC4: The PR's own R-CMD-check run shows a measured testthat wall-clock
       reduction vs the 13m/18m baseline, OR a D-entry records the NO-GO with
       per-lever evidence. Evidence: the PR run's per-step timing vs baseline.
-- [ ] AC5: `git diff` shows no O1/O2 coverage/agreement count changed — only
+- [x] AC5: `git diff` shows no O1/O2 coverage/agreement count changed — only
       structural `boot_samples` (→99 floor) and CI config; the full suite still
       reports `FAIL 0`. Evidence: the diff + the PR run's summary line.
-- [ ] AC6: All PR checks green (R-CMD-check matrix, lint, format, coverage); the
+- [x] AC6: All PR checks green (R-CMD-check matrix, lint, format, coverage); the
       profile `verify` slot clean (`devtools::test()` with `NOT_CRAN=true`,
       `CI=true`, `max_fails=Inf`). Evidence: `gh pr checks` + verify output.
 
@@ -71,21 +71,21 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 
 ## Tasks
 
-- [ ] T1: Correct the record — add a `cairn/DECISIONS.md` entry with the measured
+- [x] T1: Correct the record — add a `cairn/DECISIONS.md` entry with the measured
       breakdown superseding the M77 install-cost claim; correct the M77
       `cairn/LESSONS.md` line (2026-07-21). Docs-only.
-- [ ] T2: Profile the testthat suite per-file under R CMD check conditions
+- [x] T2: Profile the testthat suite per-file under R CMD check conditions
       (`NOT_CRAN=true`, testthat parallel); record heaviest files + elapsed in
       the work log; confirm the parallel ceiling (ubuntu ~1.85×, Windows serial).
-- [ ] T3: Lever A — set the testthat worker count to the runner core count in
+- [x] T3: Lever A — set the testthat worker count to the runner core count in
       `.github/workflows/check-standard.yaml` (ubuntu + Windows) via
       `Ncpus`/`TESTTHAT_CPUS` or `Config/testthat`; verify Windows engages
       parallelism. GO/NO-GO on OOM/flake → D-entry if NO-GO.
-- [ ] T4: Lever B — cut `boot_samples` to the B=99 floor in STRUCTURAL cells only
+- [x] T4: Lever B — cut `boot_samples` to the B=99 floor in STRUCTURAL cells only
       (`test-ci-bootstrap.R`, `test-ci-npbootstrap.R`, `test-d-study.R`,
       `test-replicates.R`), updating asserted `samples` literals; leave every
       coverage/agreement count. Verify `FAIL 0` locally.
-- [ ] T5: Open the PR; measure the testthat wall-clock on its own R-CMD-check run
+- [x] T5: Open the PR; measure the testthat wall-clock on its own R-CMD-check run
       vs the 13m/18m baseline; record the NO-GO D-entry if no safe lever helped.
       Confirm all checks green.
 
@@ -96,7 +96,79 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
   dep install is a cached ~33–52s; the real CI wall-clock is the testthat suite
   (ubuntu 13m/24m CPU, Windows 18m). Disposition (user): full test-suite
   reduction, both levers in one milestone, any-safe-reduction + NO-GO valve.
+- 2026-07-21: T1 — added D-011 (CI wall-clock is the testthat suite, not the dep
+  install) superseding the M77 install-cost claim; corrected the M77 LESSONS line
+  in place with the measured breakdown. Docs-only.
+- 2026-07-21: T2 — profiled the suite per-file (local, serial, `NOT_CRAN=true
+  CI=true`, testthat 3e; scratchpad `profile-suite.R`). Total 434s; heaviest:
+  ci-bootstrap 118s, icc-lavaan-multilevel-incomplete 110s, icc-lavaan-multilevel
+  65s, d-study 61s, icc-multilevel 25s. Parallel floor = the single longest file
+  (ci-bootstrap 118s), whose cost is O1/O2 coverage refits (load-bearing, GP5/GP6
+  — Lever B cannot touch it). Root cause of the 2× ceiling: testthat
+  `default_num_cpus()` returns `getOption("Ncpus")` → `TESTTHAT_CPUS` → hard
+  default 2, so workers never exceed 2 regardless of runner cores (explains
+  ubuntu's 24m CPU / 13m elapsed ≈ 1.85×). CI absolute numbers deferred to the PR
+  run (AC4); local macOS is ~3× faster per fit than CI ubuntu.
+- 2026-07-21: T3 — added a `Scale testthat parallel workers to the runner core
+  count` step to `check-standard.yaml` setting `TESTTHAT_CPUS=$(getconf
+  _NPROCESSORS_ONLN)` (nproc/2 fallbacks; portable across the Linux/macOS/Windows
+  matrix) before `check-r-package`. actionlint clean. Confirmed locally:
+  `default_num_cpus()` = 2 unset → 4 with `TESTTHAT_CPUS=4`. Windows/OOM GO/NO-GO
+  resolves on the PR run (AC3/AC4). Coverage job left untouched (covr is not the
+  wall-clock concern; runs tests sequentially).
+- 2026-07-21: T4 — Lever B is nearly exhausted. Minor amendment to the plan's
+  file guess: the named files (ci-bootstrap/npbootstrap/d-study/replicates) were
+  already floored by M59 — their structural cells sit at/below B=99 and every
+  heavy cell is load-bearing O1/O2. The only above-floor STRUCTURAL cells are
+  `test-boundary-policy.R:83` (completes-at-boundary) and `test-icc-lavaan.R:521`
+  (fixed-rater serves-the-bootstrap); cut both 199→99 (neither asserts a `samples`
+  literal; FAIL 0 on both files, air-clean). Deliberately LEFT `npbootstrap`
+  L34/L168 (199): the file is 1.1s, L34 hard-asserts `ci$samples == 199L` under an
+  M75 AC, and cutting saves ~nothing (cheap MoM resamples, not refits). Net: Lever
+  B cannot touch the parallel floor (ci-bootstrap's O1/O2 refits, GP5/GP6), so the
+  reduction rests on Lever A; the two cuts are floor-alignment, not the driver. No
+  O1/O2 count changed (AC5).
+- 2026-07-21: T5 — opened PR #84; measured AC4 on the `bd8daac` R-CMD-check run
+  (all 8 checks green; local `devtools::test()` FAIL 0 | WARN 2 | SKIP 23 | PASS
+  1901 at 4 workers). Both CI jobs launched 4 test processes (`TESTTHAT_CPUS=4`).
+  Windows `testthat.R` 18m→15m (~17%; check job 21m20s→18m3s) — the PR-matrix long
+  pole, so overall CI wall-clock ↓ ~3m. Ubuntu flat: 13m→13m elapsed (CPU 24m→33m
+  — runner ~2.5-core, saturated at 2 workers). GO (modest, Windows-concentrated),
+  no oracle count changed; details in ## Decisions.
+- 2026-07-21: T5 note — retripped the M77 `paths-ignore`/`cancel-in-progress`
+  lesson: a cairn-only header push (bd8daac) cancelled the 2defb9c R-CMD-check run
+  (PR cumulative diff includes non-ignored files). Re-measured on bd8daac (same
+  M78 diff → valid); held further pushes until CI finished. Lesson for review's
+  post-merge hygiene.
 
 ## Decisions
 
+- 2026-07-21 (T5): Lever A is GO but modest and Windows-concentrated. On the
+  `bd8daac` PR run both jobs launched 4 test processes (`TESTTHAT_CPUS=4` via
+  `getconf`). Windows `testthat.R` 18m→15m (~17%); its check job 21m20s→18m3s — and
+  Windows is the PR matrix's long pole, so overall CI wall-clock drops ~3m. Ubuntu
+  `testthat.R` stayed 13m elapsed (CPU 24m→33m): the runner saturates at ~2.5
+  effective cores, already ~reached at 2 workers, so extra workers add CPU without
+  cutting elapsed. The pre-run projection (ubuntu ~13m→6.5m) assumed 4 usable cores
+  and was wrong. Net: a safe critical-path reduction, zero oracle-count change —
+  GO, not the NO-GO valve. Keeping `TESTTHAT_CPUS=getconf` (neutral on ubuntu,
+  positive on Windows).
+
 ## Review
+
+**Reviewed:** 2026-07-21, branch `m78-cut-ci-test-suite-wallclock` (PR #84) @ 0894331; origin/main (124ee4c) is an ancestor of HEAD — no merge needed.
+
+**Acceptance criteria — fresh evidence:**
+- AC1 ✓ — `cairn/DECISIONS.md` D-011 present (1 heading) with the measured breakdown (install 33–52s cached; testthat 13m ubuntu / 18m Windows) superseding the M77 install-cost claim; M77 `LESSONS.md` line corrected in place ("Correction (M78…): the 'install dominates' claim is WRONG…").
+- AC2 ✓ — suite profiled per-file (scratchpad `profile-suite.R`, `NOT_CRAN=true CI=true`): total 434s; heaviest ci-bootstrap 118s / icc-lavaan-multilevel-incomplete 110s / icc-lavaan-multilevel 65s / d-study 61s — in the T2 work-log line; parallel ceiling root-caused to `default_num_cpus()`=2.
+- AC3 ✓ — CI run 29849433692 log shows `Starting 4 test processes.` on BOTH ubuntu and windows check jobs (`TESTTHAT_CPUS`=cores); workflow diff adds the scaling step. GO (no OOM/flake, all green) — NO-GO valve not needed.
+- AC4 ✓ — measured reduction on the PR's own R-CMD-check run: Windows `testthat.R` 18m→15m (~17%; check job 21m20s→18m3s), the PR-matrix long pole → overall CI wall-clock ↓ ~3m. Ubuntu flat 13m→13m (CPU 24m→33m; runner ~2.5-core, saturated at 2 workers). A measured safe reduction exists → GO; NO-GO D-entry not required.
+- AC5 ✓ — `git diff origin/main..HEAD -- tests/` shows ONLY two structural `boot_samples` 199→99 (boundary-policy:83, icc-lavaan:521); grep for O1/O2/coverage/n_rep/299/499/999 in the test diff = none. Full suite `FAIL 0` (local `devtools::test()` FAIL 0 | WARN 2 | SKIP 23 | PASS 1901; the 2 WARN pre-existing lavaan warnings).
+- AC6 ✓ — local verify slot `devtools::test()` clean (FAIL 0) at 4 workers; all 8 PR checks green on 0894331 (ubuntu/windows R-CMD-check, lint, format, pkgdown, test-coverage, codecov).
+
+**Consistency gate:** `cairn_validate` exit 0 (advisory-only: 42 work-log-wrap WARNs which vanish at archive; 338 pre-existing dangling-id advisories). `cairn_impact` skipped — no DESIGN.md/principle change (GP3/GP5/GP6 worked-under, not modified). Toolchain `consistency-gate`: `document()` no-diff clean; no generated-file edits (NAMESPACE/man/data untouched); no user-visible surface → no NEWS entry required; `devtools::check()` covered by the green cross-platform CI R-CMD-check.
+
+**Independent review — three lenses + scorer:**
+- [O] diff-bug: 1 finding (F1). [S] blame-history: no findings (cleared all three changes vs their M50/M21 origin, M59's floor, D-002/D-004). [S] prior-review: no findings (M78 honors M59/M75/M50/M51 prior points; probe found no real GitHub review threads).
+- **F1 (scored 35 — excluded, below 80):** the parallelism step has no OS guard, so it also raises workers on macos-latest (push-only), leaving its OOM/flake behavior unverified pre-merge, mildly contradicting D-011's "verified on the PR matrix". Scorer: factually correct but an inherent, accepted tradeoff of the slim PR matrix (equally affects ubuntu-devel/oldrel), self-admittedly low severity — an arguable observation, not a defect to fix. Logged, not actioned.
+- **Net: zero actioned findings** (none scored ≥80).
