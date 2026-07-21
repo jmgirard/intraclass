@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (M75 merged (PR #81) — npbootstrap one-way `ci_method` shipped; archived, ROADMAP → done, M70 rotated out of terminal retention. `cairn_validate` exit 0; git clean.)_
+_Last hygiene check: 2026-07-21 (reconciled PR #82 — test-only hardening of the npbootstrap guards to 100% coverage, a trivial post-M75 commit direct to main. `cairn_validate` exit 0; git clean; inboxes empty.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
