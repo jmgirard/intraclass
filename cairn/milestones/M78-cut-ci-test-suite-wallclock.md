@@ -77,7 +77,7 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
 - [x] T2: Profile the testthat suite per-file under R CMD check conditions
       (`NOT_CRAN=true`, testthat parallel); record heaviest files + elapsed in
       the work log; confirm the parallel ceiling (ubuntu ~1.85×, Windows serial).
-- [ ] T3: Lever A — set the testthat worker count to the runner core count in
+- [x] T3: Lever A — set the testthat worker count to the runner core count in
       `.github/workflows/check-standard.yaml` (ubuntu + Windows) via
       `Ncpus`/`TESTTHAT_CPUS` or `Config/testthat`; verify Windows engages
       parallelism. GO/NO-GO on OOM/flake → D-entry if NO-GO.
@@ -109,6 +109,13 @@ Cut CI wall-clock by shrinking the testthat suite — the measured cost (13m ubu
   default 2, so workers never exceed 2 regardless of runner cores (explains
   ubuntu's 24m CPU / 13m elapsed ≈ 1.85×). CI absolute numbers deferred to the PR
   run (AC4); local macOS is ~3× faster per fit than CI ubuntu.
+- 2026-07-21: T3 — added a `Scale testthat parallel workers to the runner core
+  count` step to `check-standard.yaml` setting `TESTTHAT_CPUS=$(getconf
+  _NPROCESSORS_ONLN)` (nproc/2 fallbacks; portable across the Linux/macOS/Windows
+  matrix) before `check-r-package`. actionlint clean. Confirmed locally:
+  `default_num_cpus()` = 2 unset → 4 with `TESTTHAT_CPUS=4`. Windows/OOM GO/NO-GO
+  resolves on the PR run (AC3/AC4). Coverage job left untouched (covr is not the
+  wall-clock concern; runs tests sequentially).
 
 ## Decisions
 

@@ -56,6 +56,18 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      # testthat's parallel worker count (Config/testthat/parallel: true) defaults
+      # to 2 regardless of runner cores (testthat:::default_num_cpus); GitHub
+      # runners have more. Scale workers to the actual core count so the
+      # testthat.R step (the dominant CI cost — M78/D-011) uses the whole runner.
+      # getconf is portable across Linux/macOS/Git-Bash; nproc/2 are fallbacks.
+      - name: Scale testthat parallel workers to the runner core count
+        run: |
+          cores=$(getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || echo 2)
+          echo "TESTTHAT_CPUS=$cores" >> "$GITHUB_ENV"
+          echo "testthat parallel workers set to $cores"
+        shell: bash
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
