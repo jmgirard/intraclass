@@ -186,7 +186,7 @@ Nothing is proposed here — M66 writes notes, not code (Scope). Available:
 
 - **Anti-cutoff material for the vignettes.** `getting-started.Rmd`
   leads with the Koo & Li band table (lines ~113–120) and caveats after (~123–128)
-  — observed 2026-07-19 (a framing question
+  — observed 2026-07-19 <!-- check: git grep -qiF 'Koo' -- vignettes/getting-started.Rmd --> (a framing question
   `koo2016.md` already raises for the maintainer). This paper supplies citable
   evidence that at least four incompatible band schemes are in circulation and
   that two of their own authors disclaimed universality — stronger than a caveat
@@ -213,7 +213,7 @@ AC3 pair.
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. <!-- check: ! git grep -qiF 'trevethan' -- R tests vignettes cairn/references/ORACLES.md -->
 
 - `cairn/references/koo2016.md` — the sibling interpretation source; same
   "judge the interval" stance, a different band scheme.
@@ -237,4 +237,4 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
 - The six Table 2 values rest on unpublished doctoral data (McAra 2015) that the
   paper does not reproduce, so they are recorded as printed and **cannot** be
   independently recomputed — unlike the `bartko1966`/`bartko1976` examples, which
-  were — observed 2026-07-19.
+  were — observed 2026-07-19. <!-- check: none — a claim about extraction effort (Table 2 values transcribed as printed, not recomputable from unpublished McAra 2015 doctoral data); settled by human re-read like the provenance status, not by a command -->

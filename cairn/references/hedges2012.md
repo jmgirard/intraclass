@@ -155,7 +155,7 @@ completeness, with the boundary caveat above attached to both:
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. <!-- check: ! git grep -qiF 'hedges' -- R tests vignettes cairn/references/ORACLES.md -->
 
 - `cairn/references/tenhove2022.md` — the package's actual multilevel estimand
   source; see the boundary note above for why these two "multilevel ICCs" are
@@ -168,4 +168,4 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
 - The `ICCVAR` Stata program (p. 904) is cited to two URLs at Northwestern and
   RePEc. Neither was retrieved — it is Stata code, outside this package's
   toolchain, and nothing here depends on it, so no live independent
-  implementation was obtained from it — observed 2026-07-19.
+  implementation was obtained from it — observed 2026-07-19. <!-- check: ! git grep -qiF 'ICCVAR' -- R tests vignettes man -->

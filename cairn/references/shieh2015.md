@@ -206,7 +206,7 @@ Nothing is proposed here — M66 writes notes, not code (Scope).
 
 ## Traces to
 
-Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19.
+Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — observed 2026-07-19. <!-- check: ! git grep -qiF 'shieh' -- R tests vignettes cairn/references/ORACLES.md -->
 
 - `cairn/references/shrout1979.md` and `cairn/references/mcgraw1996.md` — the
   two naming conventions p. 995 reconciles against Bartko/Bliese/James.
@@ -223,7 +223,7 @@ Nothing in `R/`, `tests/`, `vignettes/`, or `ORACLES.md` reads this page — obs
   online-publication and copyright year 2015. Both appear on the shelf PDF's
   first page. The citekey is left alone (renaming it would break the M66 plan's
   Scope list and `INDEX.md`), but `BIBLIOGRAPHY.md`'s entry should carry the
-  2016 issue year — flagged for the maintainer — observed 2026-07-19.
+  2016 issue year — flagged for the maintainer — observed 2026-07-19. <!-- check: none — an open recommendation flagged for the maintainer (BIBLIOGRAPHY's entry "should carry" the 2016 issue year); a "should" is not a current-state assertion a command settles, and BIBLIOGRAPHY.md is M72's page -->
 - **Notation slip in Appendix Eq. A2** (p. 1002): the bias is printed as
   `Bias{ρ̂*(c)} = E[ρ̂*(c) − ρ] = (1 − ρ)B_c`, using `ρ` (the single-score ICC)
   where `ρ*` is meant. Confirmed by derivation: p. 1002 gives

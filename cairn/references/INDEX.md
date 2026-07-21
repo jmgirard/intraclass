@@ -161,7 +161,7 @@ and milestones; never restate a value here.
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
 committed record of what is on the shelf and which milestone ingests it. **33 PDFs
-— observed 2026-07-19**: the 30 verified against their own title pages at M63/T1,
+— observed 2026-07-19**: <!-- check: none — a count of the gitignored shelf (cairn/references/sources/); the shelf varies per working copy, so a PDF count is not settleable from the committed repo --> the 30 verified against their own title pages at M63/T1,
 less the superseded `jorgensen2019.pdf` preprint (since deleted, as the M66
 correction anticipated), plus `vanderark2023`, added by the maintainer 2026-07-19
 and verified against its title page when ingested, plus the three the maintainer
@@ -208,7 +208,7 @@ equality-testing sources by M67. Every *note* still has a shelf PDF, but the
 converse no longer holds: the three PDFs that remain from M72's arrivals
 (`lee2024a`, `vispoel2022b`, `brennan2001_ch3`) carry no note, so the shelf has note-less
 members — **the "no orphan in either direction" state recorded here through
-M71 ended on 2026-07-19** (observed 2026-07-19). Writing notes for the two cited
+M71 ended on 2026-07-19** (observed 2026-07-19). <!-- check: test ! -e cairn/references/lee2024a.md && test ! -e cairn/references/vispoel2022b.md && test ! -e cairn/references/brennan2001_ch3.md --> Writing notes for the two cited
 arrivals is not M72's scope; M72 verified their *legs* against them directly,
 which is what D-008's source-traceable rule requires.
 
@@ -233,7 +233,7 @@ citation, so only its *anchors* remain PDF-based (corrected 2026-07-19). A fifth
 was an author manuscript with no year, venue, or pagination at all; the published
 version of record arrived on the shelf as `vanderark2023` and **supersedes it**
 (corrected 2026-07-19); the preprint PDF has since been removed from the shelf,
-and nothing cited it (observed 2026-07-19).
+and nothing cited it (observed 2026-07-19). <!-- check: ! git grep -qiF 'jorgensen2019' -- R tests vignettes cairn/references/ORACLES.md -->
 
 Two citekeys are **not** corroborated by their source's printed publication year, and neither was
 renamed (renaming would break the milestone Scope lists and every cross-reference):
