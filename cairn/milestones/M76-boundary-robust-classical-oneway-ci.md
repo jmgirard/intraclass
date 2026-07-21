@@ -1,6 +1,6 @@
 # M76: Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -83,7 +83,7 @@ candidate; Burch REML natively covers unbalanced, assessed balanced here.
       run** (GP5).
 - [x] T5 — Run the sweep (a near-zero corner cell at n_rep ≥ 2000), save the
       results fixture with `n_ok`/abort + tail-error columns (AC2–AC5).
-- [ ] T6 — Write the comparison note + `ORACLES.md` entry for the new oracle(s);
+- [x] T6 — Write the comparison note + `ORACLES.md` entry for the new oracle(s);
       author the GO/NO-GO + default-recommendation D-entry (AC6).
 
 ## Work log
@@ -97,3 +97,4 @@ candidate; Burch REML natively covers unbalanced, assessed balanced here.
 - 2026-07-21: T3 done — ingested burch2011 (source note + BIBLIOGRAPHY + INDEX; extraction-verified against the PDF). Burch REML CI (eq.6/13/15/16/17) prototyped in data-raw/m76-classical-oneway-prototype.R and validated to ≥2 independent published oracles: ohyama §4 Ex.1 PMOC REML (0.620,0.885) exact, and burch §4 arsenic REML (0.735,0.952)≈(0.73,0.95). Bonus: arsenic normal-based (0.806,0.938)≈(0.81,0.94) is a 2nd independent SEARLE oracle; eq.13/14/15 raw-data kurtosis pipeline self-consistency-checked (mean κ̂̂≈0). Caught + fixed a transcription bug in eq.14's bias term (missing cube on (b−1); the perfect-square/consistency structure disambiguated it).
 - 2026-07-21: T4 done — pre-registration gate (user-confirmed): coverage floor 0.93 (source-grounded), non-normal rule ≥0.93 AND within 0.02 of best incumbent, wider 16-cell grid + reduced parametric-bootstrap baseline (~4.5h). Criterion C1–C6 frozen in cairn/references/classical-oneway-comparison.md BEFORE any run (GP5). Harness data-raw/m76-coverage-sweep.R built + smoke-tested (all 5 methods, pb only in the 2 corner cells, classical 0 aborts + finite widths, MC aborting 25–50% on near-zero — AC2/AC3 directions confirmed). Measured pboot cost 19.3s/dataset (999 refits) → full-grid infeasible, hence the reduced baseline.
 - 2026-07-21: T5 done — sweep ran ~3.2h (16 cells, 129k rows → data-raw/m76-sweep-results.rds). Results + per-cell C1–C5 ledger + disposition written into classical-oneway-comparison.md. Headline (AC2): SEARLE & Burch 0 aborts on all 32k datasets vs MC 4–44% (confirms+extends D-006's 28–39%). SEARLE near-nominal+symmetric except the high-k leptokurtic cell (0.924); Burch never under-covers but over-covers/wide small-k + tail-asymmetric at n=2. Neither passes the every-cell replacement bar; both GO as opt-in.
+- 2026-07-21: T6 done — O-Classical-OW registered in ORACLES.md (prototype-validated, not suite-asserted, honest per D-008). GO/NO-GO verdict authored as D-012 (ip-touching gate: user ACCEPTED, declined Fable escalation): NO-GO default-replace, GO opt-in for both SEARLE + Burch REML, no #3/ADR-003 change. Follow-on opt-in `ci_method` ROADMAP candidate added (lineage D-006 → M76/D-012). All 6 ACs met. Status → review.
