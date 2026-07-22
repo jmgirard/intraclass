@@ -104,7 +104,7 @@ oracle has no entry.
 - [x] T3 — d-study / cluster / misc entries: `O-IDS`, `O-Boot-DS`, `O-cluster-ck`
       (`cluster-ck-coverage-oracle.rds`), `O-cc`, `O-invariance`; and Bayesian
       `O-Bayes-cluster-ck` (`bayesian-cluster-ck-oracle.rds`).
-- [ ] T4 — lavaan-multilevel entries: `O-SEM-ML` (`sem-multilevel-recovery-oracle.rds`),
+- [x] T4 — lavaan-multilevel entries: `O-SEM-ML` (`sem-multilevel-recovery-oracle.rds`),
       `O-SEM-ML-BOOT`, `O-SEM-ML-FIXED`, `O-SEM-ML-INC` (note the D-005 IP1-fenced
       parameterization sourcing).
 - [ ] T5 — Corrections (stale open/dropped language, AC3), INDEX.md + header
@@ -121,6 +121,8 @@ oracle has no entry.
 - 2026-07-21 (T2, checker fix): tightened `registered` to a `###` heading or a bolded `**…**` definition, not any prose mention — a passing cross-reference is not an entry. This exposed a hidden gap, `O-FNML` (masked by the O-NFI entry's "pinned by O-FNML" prose); wrote its entry (the point sibling of the M28 O-NFI interval oracle).
 
 - 2026-07-21 (T3): wrote entries for `O-IDS`, `O-Boot-DS` (d-study, in-suite), `O-cc`, `O-invariance` (in-suite), and — with full D-008 confirmation against their committed fixtures (not re-run) — `O-cluster-ck` (`cluster-ck-coverage-oracle.rds`, M46) and `O-Bayes-cluster-ck` (`bayesian-cluster-ck-oracle.rds`, M47). Checker down to 4 gaps (the lavaan-ML family, T4).
+
+- 2026-07-21 (T4): wrote entries for the lavaan-multilevel family — `O-SEM-ML` (M54, D-005 IP1-fenced route; `/recovery` + `/tau2-invariant` confirmed against the M60-frozen `sem-multilevel-recovery-oracle.rds`, not re-run), `O-SEM-ML-BOOT` (M56), `O-SEM-ML-FIXED` (M57), `O-SEM-ML-INC` (M58). Checker exits 0 — the D-007 invariant now holds and is machine-checked (AC1, AC2).
 
 ## Decisions
 

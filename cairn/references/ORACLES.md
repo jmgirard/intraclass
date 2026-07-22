@@ -690,6 +690,80 @@ is cited by **PDF page** for that reason.
   the only committed constants are the regression pins 0.284/0.614 (the SEM
   estimator's SF values, reproducible from Eq. 6).
 
+### Oracle O-SEM-ML — multilevel SEM (lavaan) engine, crossed Design 1, random (M54, D-005)
+- **Kind:** mixed (D-008) — estimand source leg: ten Hove (2022) Design-1 Table 3 (M72 Source-leg table, p. 6); the two-level CFA **parameterization** is an IP1-fenced estimation route with no published source (D-005), validated numerically; script leg: `data-raw/oracle-sem-multilevel-recovery.R` + committed frozen fixture + the M53 pilot.
+- **Used by:** `tests/testthat/test-icc-lavaan-multilevel.R`.
+- **Status:** **asserted (M54)** (D-005; `cairn/references/sem-multilevel-pilot.md`).
+  `engine = "lavaan"` + `cluster` fits the ten Hove Design-1 five-component
+  decomposition as a two-level CFA. No worked example exists (as with O-ML) and the
+  parameterization is unsourced by design (D-005), so correctness rests on cross-
+  engine parity + recovery: **O-SEM-ML/parity** (lavaan matches glmmTMB REML on the
+  pilot geometry — consistency near-exact, agreement asymptotic, budgeted by index
+  class per the M54 two-level-ML N-divisor gap), **O-SEM-ML/reduction** (zero cluster
+  variances reduce to the single-level engine), **O-SEM-ML/conflated** (the Eq. 14
+  diagnostic composes off the lavaan fit), **O-SEM-ML/mc** (Monte-Carlo intervals at
+  both levels finite, bracketing, parity-close), and the frozen recovery pair below.
+- **Committed reference (`tests/testthat/fixtures/sem-multilevel-recovery-oracle.rds`,
+  frozen at M60; pop σ²_c/σ²_{s:c}/σ²_r/σ²_cr/σ²_res = .4/1/.16/.16/.5).**
+  **O-SEM-ML/recovery** — Cell B (N_c=40, n_s=10, k=5, n_rep 60): all five components'
+  relative bias within ~.08 of zero. **O-SEM-ML/tau2-invariant** — Cell D (N_c=30,
+  n_s=8, k=25, n_rep 40): a live SEM-minus-REML **differencing** guard on the frozen
+  fixture keeps the rater τ² law within its stated tolerance (M60 lesson: the
+  differencing invariant cancels shared sampling noise). Confirmed against the
+  committed fixture (D-008; not re-run).
+- **Provenance:** `data-raw/oracle-sem-multilevel-recovery.R` (seeded; writes the
+  frozen fixture, M60) + the M53 committed pilot `data-raw/pilot-sem-multilevel.R`.
+  Reproducible; nothing hardcoded.
+
+### Oracle O-SEM-ML-BOOT — two-level lavaan parametric bootstrap CI (M56)
+- **Kind:** script-derived (D-008) — in-suite: cross-method (bootstrap↔MC) CI-endpoint agreement + structural checks in the test file.
+- **Used by:** `tests/testthat/test-icc-lavaan-multilevel.R`.
+- **Status:** **asserted (M56)**. `ci_method = "bootstrap"` on the two-level lavaan
+  fit (simulate from the fitted two-level SEM → refit → recompute the ICC per
+  resample), balanced random-rater cell. Oracled by cross-method CI-endpoint
+  agreement with the lavaan MC interval at the **tight** subject/consistency level
+  (the portable oracle, M56 lesson); the wide, few-cluster, ML-shrunk cluster level
+  rests on structural sanity + the M54 component-parity oracle. Balanced/complete
+  random only; the fixed and incomplete/unbalanced bootstrap cells stay deferred
+  (ROADMAP).
+- **Provenance:** in-suite bootstrap↔MC assertions in
+  `test-icc-lavaan-multilevel.R`; no committed fixture. The cluster-level tail
+  agreement is BLAS/OS-sensitive and is pinned only where tight (M56 lesson — run the
+  full CI matrix before merge). Reproducible.
+
+### Oracle O-SEM-ML-FIXED — fixed-rater multilevel SEM (lavaan) (M57)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong (1996) Case-3A (M72 Source-leg table, p. 32); script leg: in-suite cross-engine parity + the 1b/2b split check in the test file.
+- **Used by:** `tests/testthat/test-icc-fixed-lavaan-multilevel.R`.
+- **Status:** **asserted (M57)** (D-005 parameterization). The same two-level CFA the
+  random path fits, read with the Case-3A finite-population correction on the
+  between-level rater intercepts ν_j: θ²_r = max(0, raw − bias), bias =
+  tr(C·V_ν)/(k−1), the identity-contrast trace of the between-intercept vcov block.
+  Oracles: **O-SEM-ML-FIXED/parity** (lavaan fixed matches the glmmTMB fixed
+  multilevel agreement — subject M10/ADR-019, cluster M37/ADR-047) and
+  **O-SEM-ML-FIXED/GP7** (the point uses the 1b correction, the draws use 2b + the
+  average-floor via the shared `theta2r_moment_draws()`, M28/ADR-038, and the
+  fixed−random gap equals the bias — the M57 lesson that lavaan's RAW random σ²_r
+  puts fixed BELOW random by exactly τ², unlike glmmTMB's REML identity). Fixed
+  lavaan aborts on nested / replicate / incomplete.
+- **Provenance:** in-suite cross-engine + 1b/2b assertions in
+  `test-icc-fixed-lavaan-multilevel.R`; no committed fixture. Reproducible.
+
+### Oracle O-SEM-ML-INC — incomplete/unbalanced multilevel SEM (lavaan), random (M58)
+- **Kind:** mixed (D-008) — estimand source leg: ten Hove (2022) Design 1 (M72 table, p. 6); parameterization D-005 (unsourced route); script leg: in-suite glmmTMB cross-engine parity in the test file.
+- **Used by:** `tests/testthat/test-icc-lavaan-multilevel-incomplete.R`.
+- **Status:** **asserted (M58)** (D-005). Extends the M54 crossed random-rater
+  two-level CFA to INCOMPLETE subject×rater cells via two-level FIML (`missing =
+  "fiml"`, the two-level analog of the single-level M21 FIML path) and to UNEQUAL
+  cluster sizes (native to lavaan two-level). No worked example, so the oracle is the
+  independent glmmTMB REML mixed-model engine on the SAME data: consistency
+  near-exact, agreement asymptotic (the M54 index-class budget), with the M46/ADR-057
+  cluster-level k_c^eff engine-agnostic (identical to glmmTMB's, < k on ragged data).
+  MC-only ships; bootstrap on incomplete data cannot reproduce the missingness
+  pattern (ADR-031).
+- **Provenance:** in-suite glmmTMB cross-engine assertions in
+  `test-icc-lavaan-multilevel-incomplete.R`; heavy design-time sweeps stay in the M53
+  pilot. Reproducible; nothing hardcoded.
+
 ### Cross-engine oracle — lme4 (independent implementation)
 - **Kind:** script-derived (D-008) — in-suite: a direct `lme4::lmer` fit in the test file.
 - **Status:** **asserted (M1)** in `tests/testthat/test-icc-engine-oracle.R`:
