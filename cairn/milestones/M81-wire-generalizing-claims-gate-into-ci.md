@@ -1,11 +1,11 @@
 # M81: Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** m81-wire-generalizing-claims-gate-into-ci
+- **Branch/PR:** m81-wire-generalizing-claims-gate-into-ci · https://github.com/jmgirard/intraclass/pull/88
 
 ## Goal
 
@@ -74,7 +74,7 @@ convention is the cairn repo's, not this one's (D-009).
 - [x] T4: Verify R build unaffected — `devtools::test()` clean; confirm the
       built package is byte-identical (`data-raw/` + `.github/` are
       `.Rbuildignore`d).
-- [ ] T5: Open the PR, drive the full CI matrix green, confirm the new steps
+- [x] T5: Open the PR, drive the full CI matrix green, confirm the new steps
       ran and passed in the run log.
 
 ## Work log
@@ -85,6 +85,7 @@ convention is the cairn repo's, not this one's (D-009).
 - 2026-07-21: T2 done — added `--check` + `--self-test` steps for the enumerator to the `check-references` job in `.github/workflows/lint.yaml`; broadened the job comment to cover D-009 + M74. `actionlint` clean; job stays R-free (no `setup-r`).
 - 2026-07-21: T3 done — live-gate demo: injected an un-triaged generalizing claim into `cairn/references/INDEX.md`; `--check` went RED (`un-triaged: 1`, exit 1) naming the line; `git checkout --` restored it and `--check` returned green (258/258). Tree clean; nothing committed.
 - 2026-07-21: T4 done — R build unaffected: only R files changed are none (diff is `.github/` + `data-raw/*.py` + this tracking file, all `.Rbuildignore`d); `R CMD build` on branch vs `origin/main` gave byte-identical payloads bar the `Packaged:` timestamp. `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 23 | PASS 1901 (the 2 WARN are the pre-existing near-singular-Hessian annotations in test-icc-type-vector.R, unchanged from main).
+- 2026-07-21: T5 done — opened PR #88; full CI matrix green (7/7: check-references, format-check, lint, pkgdown, test-coverage, ubuntu + windows R CMD check). The `check-references` job log shows step 5 (M74 `--check`) and step 6 (`--self-test`) both success. Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
