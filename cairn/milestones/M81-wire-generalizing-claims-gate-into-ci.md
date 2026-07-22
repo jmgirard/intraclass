@@ -1,11 +1,11 @@
 # M81: Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** m81-wire-generalizing-claims-gate-into-ci
 
 ## Goal
 
