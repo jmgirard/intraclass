@@ -165,6 +165,22 @@ def cmd_list(root):
         print(f"{k}\t{REF_DIR}/{citekey}.md:{lineno}\t{norm(text)[:120]}")
 
 
+def completeness_diff(candidates, ledger):
+    """The set-difference at the heart of `--check`, factored out so `self_test`
+    can exercise it on synthetic inputs (a vacuity guard: it proves the gate
+    reds on an un-triaged candidate, never silently passes green).
+
+    Returns `(missing, orphans)`: un-triaged candidates (a completeness failure)
+    and orphan ledger keys — rows whose candidate no longer exists because a note
+    was edited without refreshing the ledger (a staleness failure). The symmetric
+    gate keeps the two in sync as the live notes change."""
+    cand_keys = {k for (k, _c, _l, _t) in candidates}
+    missing = [(k, citekey, lineno, text)
+               for (k, citekey, lineno, text) in candidates if k not in ledger]
+    orphans = [k for k in ledger if k not in cand_keys]
+    return missing, orphans
+
+
 def cmd_check(root):
     """Enumeration-completeness gate: every current candidate must be triaged.
 
@@ -172,14 +188,7 @@ def cmd_check(root):
     enumeration, so review can trust no generalizing claim was skipped."""
     candidates = find_candidates(root)
     ledger = load_ledger(root)
-    cand_keys = {k for (k, _c, _l, _t) in candidates}
-    missing = [(k, citekey, lineno, text)
-               for (k, citekey, lineno, text) in candidates if k not in ledger]
-    # Orphans: ledger rows whose candidate no longer exists (a note was edited
-    # without refreshing the ledger). Not an AC1 completeness failure, but a
-    # staleness one — a symmetric gate keeps the two in sync as the live notes
-    # change.
-    orphans = [k for k in ledger if k not in cand_keys]
+    missing, orphans = completeness_diff(candidates, ledger)
     print(f"candidates: {len(candidates)}   ledger rows: {len(ledger)}   "
           f"un-triaged: {len(missing)}   orphan rows: {len(orphans)}")
     if missing:
@@ -244,6 +253,29 @@ def self_test():
         if has_bare_range(s):
             print(f"SELF-TEST FAIL: bare range should NOT match: {s}", file=sys.stderr)
             ok = False
+
+    # Vacuity guard on the --check completeness gate (M81): the set-difference at
+    # its core must red on an un-triaged candidate (and on an orphan ledger row)
+    # and pass only when every key is classified — otherwise a refactor could
+    # make --check always green and the CI gate would assert nothing.
+    cand = [("brennan2001:abc0123456", "brennan2001", 42, "all 40 cells")]
+    row = ["brennan2001:abc0123456", "brennan2001", "OUT-quote", "reason"]
+    missing, _ = completeness_diff(cand, {})  # candidate present, nothing triaged
+    if not missing:
+        print("SELF-TEST FAIL: --check gate did not flag an un-triaged candidate",
+              file=sys.stderr)
+        ok = False
+    missing, orphans = completeness_diff(cand, {row[0]: row})  # fully classified
+    if missing or orphans:
+        print("SELF-TEST FAIL: --check gate flagged a fully-classified corpus",
+              file=sys.stderr)
+        ok = False
+    _, orphans = completeness_diff([], {row[0]: row})  # ledger row, candidate gone
+    if not orphans:
+        print("SELF-TEST FAIL: --check gate did not flag an orphan ledger row",
+              file=sys.stderr)
+        ok = False
+
     print("self-test: OK" if ok else "self-test: FAILED")
     return 0 if ok else 1
 

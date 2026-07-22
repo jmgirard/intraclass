@@ -60,7 +60,7 @@ convention is the cairn repo's, not this one's (D-009).
 
 ## Tasks
 
-- [ ] T1: Extend `self_test()` in
+- [x] T1: Extend `self_test()` in
       `data-raw/enumerate-generalizing-claims.py` to exercise the completeness
       comparison on synthetic inputs — an un-triaged key yields a failure, a
       fully-classified set yields success (factor the set-diff out of
@@ -81,6 +81,7 @@ convention is the cairn repo's, not this one's (D-009).
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
 - 2026-07-21: created by /milestone-plan (promotes the M74-enumerator-CI candidate; lineage M74 → M80 *Out* → M81. Gate: add steps to M80's existing `check-references` job; also harden the `--check` vacuity guard in `self_test()`).
+- 2026-07-21: T1 done — factored the completeness set-diff into `completeness_diff()` and extended `self_test()` to assert it reds on an un-triaged candidate + on an orphan ledger row, passes when fully classified. `--self-test` exit 0; `--check` still exit 0 (258/258 in sync).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
