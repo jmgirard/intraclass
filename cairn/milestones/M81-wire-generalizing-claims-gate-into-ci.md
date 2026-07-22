@@ -1,11 +1,11 @@
 # M81: Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** m81-wire-generalizing-claims-gate-into-ci
+- **Branch/PR:** m81-wire-generalizing-claims-gate-into-ci · https://github.com/jmgirard/intraclass/pull/88
 
 ## Goal
 
@@ -29,23 +29,23 @@ convention is the cairn repo's, not this one's (D-009).
 
 ## Acceptance criteria
 
-- [ ] AC1: The `check-references` job in `.github/workflows/lint.yaml` runs
+- [x] AC1: The `check-references` job in `.github/workflows/lint.yaml` runs
       `python3 data-raw/enumerate-generalizing-claims.py --check` as a step; it
       exits 0 on the current corpus (`un-triaged: 0   orphan rows: 0`), shown
       green in the CI run log.
-- [ ] AC2: The same job runs
+- [x] AC2: The same job runs
       `python3 data-raw/enumerate-generalizing-claims.py --self-test` as a step;
       it exits 0, shown green in the CI run log.
-- [ ] AC3: The job stays R-free — no R setup step is added; the new steps use
+- [x] AC3: The job stays R-free — no R setup step is added; the new steps use
       only `python3` + `git`.
-- [ ] AC4: `self_test()` is extended to assert the `--check` completeness
+- [x] AC4: `self_test()` is extended to assert the `--check` completeness
       comparison returns a failure when a candidate key is absent from the
       ledger and success when every key is classified — a vacuity guard on the
       gate; `--self-test` still exits 0.
-- [ ] AC5: The live gate is demonstrated RED before merge — a synthetic
+- [x] AC5: The live gate is demonstrated RED before merge — a synthetic
       un-triaged candidate (or a dropped ledger row) makes `--check` exit
       non-zero — then reverted; the RED run output is recorded in the work log.
-- [ ] AC6: R build unaffected — `Rscript -e 'devtools::test()'` clean and the
+- [x] AC6: R build unaffected — `Rscript -e 'devtools::test()'` clean and the
       built package byte-identical to pre-change (only `.Rbuildignore`d
       `data-raw/` + `.github/` paths changed); the full CI matrix is green.
 
@@ -60,30 +60,93 @@ convention is the cairn repo's, not this one's (D-009).
 
 ## Tasks
 
-- [ ] T1: Extend `self_test()` in
+- [x] T1: Extend `self_test()` in
       `data-raw/enumerate-generalizing-claims.py` to exercise the completeness
       comparison on synthetic inputs — an un-triaged key yields a failure, a
       fully-classified set yields success (factor the set-diff out of
       `cmd_check` if that keeps it clean). Run `--self-test`; confirm exit 0.
-- [ ] T2: Add two steps to the `check-references` job in
+- [x] T2: Add two steps to the `check-references` job in
       `.github/workflows/lint.yaml` (`--check`, then `--self-test`), and update
       the job comment to cover both D-009 and M74. Keep the job R-free.
-- [ ] T3: Demonstrate the gate is live — introduce a synthetic un-triaged
+- [x] T3: Demonstrate the gate is live — introduce a synthetic un-triaged
       generalizing claim (or drop a ledger row), run `--check`, capture the
       non-zero exit + stderr, revert; record in the work log.
-- [ ] T4: Verify R build unaffected — `devtools::test()` clean; confirm the
+- [x] T4: Verify R build unaffected — `devtools::test()` clean; confirm the
       built package is byte-identical (`data-raw/` + `.github/` are
       `.Rbuildignore`d).
-- [ ] T5: Open the PR, drive the full CI matrix green, confirm the new steps
+- [x] T5: Open the PR, drive the full CI matrix green, confirm the new steps
       ran and passed in the run log.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
 - 2026-07-21: created by /milestone-plan (promotes the M74-enumerator-CI candidate; lineage M74 → M80 *Out* → M81. Gate: add steps to M80's existing `check-references` job; also harden the `--check` vacuity guard in `self_test()`).
+- 2026-07-21: T1 done — factored the completeness set-diff into `completeness_diff()` and extended `self_test()` to assert it reds on an un-triaged candidate + on an orphan ledger row, passes when fully classified. `--self-test` exit 0; `--check` still exit 0 (258/258 in sync).
+- 2026-07-21: T2 done — added `--check` + `--self-test` steps for the enumerator to the `check-references` job in `.github/workflows/lint.yaml`; broadened the job comment to cover D-009 + M74. `actionlint` clean; job stays R-free (no `setup-r`).
+- 2026-07-21: T3 done — live-gate demo: injected an un-triaged generalizing claim into `cairn/references/INDEX.md`; `--check` went RED (`un-triaged: 1`, exit 1) naming the line; `git checkout --` restored it and `--check` returned green (258/258). Tree clean; nothing committed.
+- 2026-07-21: T4 done — R build unaffected: only R files changed are none (diff is `.github/` + `data-raw/*.py` + this tracking file, all `.Rbuildignore`d); `R CMD build` on branch vs `origin/main` gave byte-identical payloads bar the `Packaged:` timestamp. `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 23 | PASS 1901 (the 2 WARN are the pre-existing near-singular-Hessian annotations in test-icc-type-vector.R, unchanged from main).
+- 2026-07-21: T5 done — opened PR #88; full CI matrix green (7/7: check-references, format-check, lint, pkgdown, test-coverage, ubuntu + windows R CMD check). The `check-references` job log shows step 5 (M74 `--check`) and step 6 (`--self-test`) both success. Status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-21 against PR #88, head `9b1d26d`.**
+
+### Acceptance-criteria evidence (fresh)
+- AC1 — `enumerate-generalizing-claims.py --check` exits 0 locally (258
+  candidates / 258 ledger rows, 0 un-triaged, 0 orphans); CI `check-references`
+  step 5 "Check generalizing-claim triage completeness (M74)" = success.
+- AC2 — `--self-test` exits 0 locally; CI `check-references` step 6 = success.
+- AC3 — job R-free: `setup-r` occurrences in the `check-references` job = 0;
+  the two new steps run `python3` only. `actionlint` clean.
+- AC4 — `self_test()` now exercises `completeness_diff()` on synthetic inputs.
+  Mutation proof: sabotaging `completeness_diff` to return `([], [])` makes
+  `--self-test` FAIL (exit 1, "gate did not flag an un-triaged candidate" +
+  "…orphan ledger row"); restored, `--self-test` exits 0. The guard genuinely
+  bites.
+- AC5 — live-gate demo (work log, T3): an injected un-triaged claim drove
+  `--check` RED (`un-triaged: 1`, exit 1); `git checkout --` restored green.
+- AC6 — R build unaffected: `R CMD build` payload byte-identical to
+  `origin/main` bar the `Packaged:` timestamp; `NOT_CRAN=true CI=true
+  devtools::test()` = FAIL 0 | WARN 2 | SKIP 23 | PASS 1901 (the 2 WARN are the
+  pre-existing near-singular-Hessian annotations in test-icc-type-vector.R,
+  unchanged from main); full CI matrix green.
+
+### Consistency gate
+- `cairn_validate.py` exit 0 — all checks PASS (the 321 `dangling id tokens`
+  WARN is the standing historical-reference advisory, exit-neutral, not a gate
+  failure).
+- `cairn_impact` skipped — `Principles touched: —` (no IP/GP change).
+- Profile toolchain checks: `devtools::document()` produces no diff (generated
+  files intact); NEWS.md — no entry required (the diff touches no shipped R
+  code: only `.github/`, Rbuildignored `data-raw/`, and `cairn/`); full
+  multi-platform `R CMD check` = the CI `check-standard` matrix (ubuntu +
+  windows), green.
+
+### Independent review
+Three fresh-context lenses, parallel, distinct evidence bases — **all clean, zero findings**:
+- **[O] diff-bug** — `completeness_diff()` is a faithful pure extraction; the
+  three synthetic self-test assertions are sound; CI steps invoke the right
+  commands, propagate exit codes, and the job stays R-free; clear of the D-009
+  scope fence.
+- **[S] blame-history** — behavior-preserving refactor; M80's D-009 steps
+  untouched and un-reordered; no fixed bug resurrected; broadened job comment
+  accurate.
+- **[S] prior-review** — no prior-review point regressed; specifically does
+  **not** recur the M80 D-009-trip lesson (the synthetic literal `brennan2001`
+  ≠ the real citekey `brennan2001_ch3`); PR-comment probe returned `[]`, no
+  thread walk.
+
+No surviving findings → scorer no-op (nothing to score).
+
+**Considered, not actioned (IP3 — surfaced, not dropped):** the [O] lens noted
+a pre-existing vacuity path — if `find_candidates` returned `[]` and the ledger
+were empty, `--check` would print `candidates: 0` and exit green. It filed this
+as *not a finding* (pre-existing, outside AC4's set-diff scope). Declined for
+follow-up: the empty-corpus state would trip louder alarms first
+(`cairn_validate references index<->disk`, the D-009 checker over 30 notes), so
+a candidate row would be speculative. Recorded here rather than silently
+dropped.
