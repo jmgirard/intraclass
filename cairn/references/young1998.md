@@ -22,7 +22,7 @@ North Dakota State University, Fargo. Carries a French *Résumé* (p. 1372) per
 full overlap analysis (a shared-vs-differs table) rather than repeating the
 derivation here — observed 2026-07-19 <!-- check: git grep -qiF 'overlap' -- cairn/references/naik2007.md -->. Ingested as
 evidence of a contract boundary; nothing in the package traces to it — observed
-2026-07-19. <!-- check: ! git grep -qiE 'young' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
+2026-07-19. <!-- check: ! git grep -qiE 'young' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 
 ## The gap it fills
 
@@ -141,8 +141,9 @@ facet at all, which puts it doubly outside the interrater contract.
 - **Nothing in the package** — no estimator, interval method, oracle, or
   documented claim reads this page, by design. No `ORACLES.md` entry cites it.
   A grep for this citekey and for the author surnames across `R/`, `tests/`,
-  `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, and `ORACLES.md`
-  returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'young' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
+  `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/` (bar the M74 triage
+  ledger `generalizing-claims-triage.tsv`, bookkeeping not a package reference),
+  and `ORACLES.md` returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'young' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 - `cairn/references/naik2007.md` — the direct generalization (`g` populations,
   unequal variances); **the overlap between the two papers is analyzed there**.
 - `cairn/references/bhandary2006.md` — Bhandary's three-population sibling, which

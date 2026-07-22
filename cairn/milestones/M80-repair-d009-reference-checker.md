@@ -60,13 +60,13 @@ never silently sit red on main.
 
 ## Tasks
 
-- [ ] T1 — Append `':(exclude)data-raw/generalizing-claims-triage.tsv'` to each
+- [x] T1 — Append `':(exclude)data-raw/generalizing-claims-triage.tsv'` to each
       of the 22 falsified directives across the 11 notes; leave existing
       tokens/paths and the `-qiF`/`-qiE` mode as-is.
-- [ ] T2 — In each note whose prose enumerates the grep scope or asserts a
+- [x] T2 — In each note whose prose enumerates the grep scope or asserts a
       `data-raw` result, add a short parenthetical that the M74 triage ledger is
       excluded as bookkeeping (not a package reference).
-- [ ] T3 — Run the checker (exit 0, 0 falsified/0 unmarked) and `--self-test`
+- [x] T3 — Run the checker (exit 0, 0 falsified/0 unmarked) and `--self-test`
       (exit 0); record both.
 - [ ] T4 — Add an R-free `check-references` job to `lint.yaml` (checkout +
       checker + `--self-test`); confirm green on the PR run, no R setup.
@@ -80,6 +80,10 @@ never silently sit red on main.
   citekey; excluding it, every claim holds (verified). Lineage: M74 (ledger) →
   M79 T5 (discovered) → D-009. Gate: exclude-ledger form (preserves asserted
   scope, honest prose) + wire checker into CI (M79 lesson root cause).
+- 2026-07-21: T1–T3 — appended the `:(exclude)` ledger pathspec to all 22
+  directives (11 notes × 2) and qualified each note's `data-raw/` enumeration
+  with the exclusion. Checker exits 0 (0 falsified, 0 unmarked); `--self-test`
+  exits 0.
 
 ## Decisions
 

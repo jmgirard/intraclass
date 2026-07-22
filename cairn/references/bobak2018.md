@@ -24,8 +24,10 @@ Geisel School of Medicine, Dartmouth College. Bobak and O'Malley
 **Role.** Ingested by M65 as half of the distributional-robustness pair. **This
 is the first M65 source that is genuinely an inter-rater ICC paper** — the same
 estimand family the package computes. Nothing in the package traced to it and no
-`ORACLES.md` entry cited it — observed 2026-07-19 <!-- check: ! git grep -qiF 'bobak' -- R tests man vignettes data-raw cairn/references/ORACLES.md --> (grep for `bobak` over `R/`,
-`tests/`, `man/`, `vignettes/`, `data-raw/` and `ORACLES.md`: no hits) — but
+`ORACLES.md` entry cited it — observed 2026-07-19 <!-- check: ! git grep -qiF 'bobak' -- R tests man vignettes data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' --> (grep for `bobak` over `R/`,
+`tests/`, `man/`, `vignettes/`, `data-raw/` (bar the M74 triage ledger
+`generalizing-claims-triage.tsv`, bookkeeping not a package reference) and
+`ORACLES.md`: no hits) — but
 unlike the rest of the cluster it is *inside*
 the contract boundary and its critique lands on the package's own model
 assumptions.
@@ -222,7 +224,7 @@ below map this paper onto the axes M65 chose to track, nothing more.
 ## Traces to
 
 - Nothing in the package — see the grep recorded under **Role** above
-  (observed 2026-07-19). <!-- check: ! git grep -qiF 'bobak' -- R tests man vignettes data-raw cairn/references/ORACLES.md -->
+  (observed 2026-07-19). <!-- check: ! git grep -qiF 'bobak' -- R tests man vignettes data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 - `cairn/references/koo2016.md` — this paper cites Koo & Li (its ref. 14) for
   the ten ICC forms and uses their bands; the Study-2 result above is strong
   independent material for that note's IP3 open question.
