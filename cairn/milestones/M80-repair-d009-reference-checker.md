@@ -68,9 +68,9 @@ never silently sit red on main.
       excluded as bookkeeping (not a package reference).
 - [x] T3 — Run the checker (exit 0, 0 falsified/0 unmarked) and `--self-test`
       (exit 0); record both.
-- [ ] T4 — Add an R-free `check-references` job to `lint.yaml` (checkout +
+- [x] T4 — Add an R-free `check-references` job to `lint.yaml` (checkout +
       checker + `--self-test`); confirm green on the PR run, no R setup.
-- [ ] T5 — Scope-diff check: only directives, adjacent prose, and `lint.yaml`
+- [x] T5 — Scope-diff check: only directives, adjacent prose, and `lint.yaml`
       changed — no R source, oracle, fixture, or `Extraction:` line touched.
 
 ## Work log
@@ -84,6 +84,12 @@ never silently sit red on main.
   directives (11 notes × 2) and qualified each note's `data-raw/` enumeration
   with the exclusion. Checker exits 0 (0 falsified, 0 unmarked); `--self-test`
   exits 0.
+- 2026-07-21: T4 — added an R-free `check-references` job to `lint.yaml`
+  (checkout + checker + `--self-test`), push/PR-triggered, no R setup;
+  actionlint clean, both commands pass locally. Live green is review evidence
+  once the PR exists. T5 — branch scope-diff confirms only the 11 notes' `check:`
+  directives + `data-raw` enumerations and `lint.yaml` changed; no R source,
+  fixture, oracle value, or `Extraction:` line touched.
 
 ## Decisions
 

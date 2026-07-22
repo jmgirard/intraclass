@@ -33,3 +33,18 @@ jobs:
         shell: Rscript {0}
         env:
           LINTR_ERROR_ON_LINT: true
+
+  # D-009: every dated repo-state claim on a references page carries an
+  # exit-coded settling directive. This job re-settles them on push/PR so a
+  # falsified or unmarked observation reds a check instead of sitting on main
+  # unnoticed. R-free (python3 + git only), so it does not pay the R setup.
+  check-references:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check reference-page observations (D-009)
+        run: python3 data-raw/check-reference-observations.py
+
+      - name: Self-test the observation checker (vacuity guard)
+        run: python3 data-raw/check-reference-observations.py --self-test
