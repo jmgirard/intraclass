@@ -1,6 +1,6 @@
 # M79: Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant)
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -9,7 +9,7 @@
      unsourced reference values) and #12 (oracle registry), and by
      D-007 (registry home) / D-008 + Amd 1 (three-kind verification bar) /
      D-009 (dated-observation directives) — cited in Scope. -->
-- **Branch/PR:** —
+- **Branch/PR:** `m79-complete-oracle-registry`
 
 ## Goal
 
@@ -35,7 +35,9 @@ oracle has no entry.
   source legs anchored to M72's verified *Source-leg verification* table or
   re-read only if genuinely new; honest status, no pinned counts, no
   time-relative phrasing) for the census gap: the **frequentist multilevel**
-  family (`O-FML` M10, `O-IFML` M18/ADR-028, `O-IML`, `O-NML`); the
+  family (`O-FML` M10, `O-IFML` M18/ADR-028, `O-IML`, `O-NML`, and the
+  lme4-**engine** oracle `O-LME`/`O-LME2` M5.5/ADR-012, distinct from the M1
+  cross-engine `O-lme4`); the
   **d-study / cluster / misc** set (`O-IDS`, `O-Boot-DS`, `O-cluster-ck`
   M46/ADR-057, `O-cc` M45/ADR-056, `O-invariance` ADR-053); the
   **lavaan-multilevel** family (`O-SEM-ML` M53/54/56/60, `O-SEM-ML-BOOT` M56,
@@ -94,11 +96,11 @@ oracle has no entry.
 
 ## Tasks
 
-- [ ] T1 — Write `data-raw/check-oracle-registry.py` (parser + diff + alias
+- [x] T1 — Write `data-raw/check-oracle-registry.py` (parser + diff + alias
       allowlist + `--self-test`); run it RED to freeze the exact gap and alias set.
-- [ ] T2 — Frequentist multilevel entries: `O-FML`, `O-IFML`, `O-IML`, `O-NML`
-      (glmmTMB↔lme4 cross-engine + reduction; confirm against committed fixtures /
-      inline values per D-008).
+- [ ] T2 — Frequentist multilevel + lme4-engine entries: `O-FML`, `O-IFML`,
+      `O-IML`, `O-NML`, `O-LME`/`O-LME2` (glmmTMB↔lme4 cross-engine + reduction;
+      confirm against committed fixtures / inline values per D-008).
 - [ ] T3 — d-study / cluster / misc entries: `O-IDS`, `O-Boot-DS`, `O-cluster-ck`
       (`cluster-ck-coverage-oracle.rds`), `O-cc`, `O-invariance`; and Bayesian
       `O-Bayes-cluster-ck` (`bayesian-cluster-ck-oracle.rds`).
@@ -113,6 +115,8 @@ oracle has no entry.
 
 - 2026-07-21: created by /milestone-plan. Gate: one milestone (tasks by family); census-gate checker built first as the acceptance oracle + regression guard; new entries verified to the full D-008 bar against committed fixtures (no re-run).
 - 2026-07-21: census diff found ~14 un-entried families — larger than the candidate row's 7 (it collapsed the SEM-ML family and missed O-FML/O-IFML/O-IML/O-NML/O-cc); the "M1–M39 header scope" claim (INDEX.md) was falsified — the header has no such scope.
+- 2026-07-21 (T1): shipped `data-raw/check-oracle-registry.py` (exact base-ID coverage, curated sub-check-suffix strip, ALIASES allowlist, `--self-test` harness bite); RED baseline = 16 gaps, self-test green (exit 0).
+- 2026-07-21 (T1, minor amendment): the checker surfaced `O-LME`/`O-LME2` (lme4 as a selectable ENGINE, M5.5/ADR-012) as a genuine un-entried oracle distinct from the M1 cross-engine `O-lme4` — folded into T2 (was provisionally an alias at plan time). `O-WAY` confirmed a regex artifact of "TWO-WAY", excluded by the label left-boundary.
 
 ## Decisions
 
