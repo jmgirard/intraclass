@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3
-- **Branch/PR:** m80-repair-d009-reference-checker
+- **Branch/PR:** m80-repair-d009-reference-checker · https://github.com/jmgirard/intraclass/pull/87
 
 ## Goal
 
@@ -35,18 +35,18 @@ never silently sit red on main.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `python3 data-raw/check-reference-observations.py` exits 0 with 0
+- [x] AC1 — `python3 data-raw/check-reference-observations.py` exits 0 with 0
       falsified and 0 unmarked; the 22 directives each hold via the
       ledger-exclusion pathspec. Evidence: checker output.
-- [ ] AC2 — Directive-scope faithfulness: every note whose prose enumerates the
+- [x] AC2 — Directive-scope faithfulness: every note whose prose enumerates the
       grep scope or asserts a `data-raw` result names the ledger exclusion, so
       prose == directive (M68/D-009). Evidence: diff of the 11 notes.
-- [ ] AC3 — The checker's registered vacuity guard is intact:
+- [x] AC3 — The checker's registered vacuity guard is intact:
       `--self-test` exits 0. Evidence: self-test run.
-- [ ] AC4 — The checker runs in CI on push/PR as an R-free `check-references`
+- [x] AC4 — The checker runs in CI on push/PR as an R-free `check-references`
       job that fails on any falsified or unmarked observation; the PR's own run
       is green and the job sets up no R. Evidence: PR CI run.
-- [ ] AC5 — No R source, oracle value, committed fixture, or `Extraction:`
+- [x] AC5 — No R source, oracle value, committed fixture, or `Extraction:`
       status changed — only `check:` directives, adjacent prose, and CI config.
       Evidence: PR diff scope.
 
@@ -94,3 +94,42 @@ never silently sit red on main.
 ## Decisions
 
 ## Review
+
+**PR:** #87 (draft). **Evidence gathered 2026-07-21 on branch HEAD.**
+
+- AC1 — `check-reference-observations.py`: 63 in-scope observations, 49 runnable
+  directives, 14 `check: none`, **0 unmarked, 0 falsified, exit 0**; 22
+  ledger-exclusion directives present (11 notes × 2). PASS.
+- AC2 — all 11 notes carry the ledger-exclusion note in the prose adjoining
+  their `data-raw/` enumeration (verified multiline; prose == directive). PASS.
+- AC3 — `--self-test` exits 0 ("checker distinguishes a holding claim from a
+  falsified one"), vacuity guard intact. PASS.
+- AC4 — the new R-free `check-references` job **passed on PR #87 in 5s**
+  (no `setup-r` step); `format-check` also green. R-CMD-check matrix pending at
+  review time — required green before merge. PASS (checker leg); CI matrix
+  tracked to merge gate.
+- AC5 — branch diffstat: only `.github/workflows/lint.yaml` (+15), the 11
+  `cairn/references/*.md`, and tracking files. **Every changed file is under an
+  Rbuildignored path** (`^\.github$`, `^cairn$`) → built package byte-identical.
+  No R source, fixture, oracle value, or references-page `Extraction:` status
+  touched (the lone `Extraction:` diff hit is this file's own AC5 wording). PASS.
+
+**Consistency gate:** `cairn_validate` exit 0 (all checks pass; 333 non-gating
+dangling-id-token advisories, long-standing). Toolchain gate (r-package): built
+package unchanged (Rbuildignored-only diff), no roxygen/exports/NEWS-worthy
+user-visible change → `document()`/pkgdown/NEWS checks trivially satisfied; the
+PR's ubuntu+windows R-CMD-check confirms and is required green at merge.
+`cairn_impact` skipped — GP3 is worked-under, not changed.
+
+**Independent review (three lenses, fresh context):**
+- [O] diff-bug (Opus): no findings. Confirmed the `:(exclude)` pathspec settles
+  each claim without masking a genuine reference (ledger is the sole `data-raw`
+  hit for every citekey), prose == directive, CI job R-free and exit-propagating.
+- [S] blame-history (Sonnet): no findings. All 22 directives are M73-authored
+  (D-009), untouched since; the exclusion is a scope bug-fix that preserves the
+  original "nothing references it" intent, not a weakening; no M68/M70/M71/M72
+  prose-drift resurrection; no D-011/M77/M78 CI conflict.
+- [S] prior-review-record (Sonnet): no findings. Diff matches M79's recorded
+  D-009-failure diagnosis; no regression of M68/M70/M71/M72/M73/M79 lessons;
+  GitHub inline-comment probe returned `[]` (no thread walk).
+Scorer not invoked — zero surviving findings to score.
