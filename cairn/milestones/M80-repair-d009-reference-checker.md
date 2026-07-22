@@ -1,6 +1,6 @@
 # M80: Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
