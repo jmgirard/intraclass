@@ -2,12 +2,15 @@
 
 **Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically — the split **read nothing**, it relocated text (D-007).
 Pagination: see the **Source-leg verification** table below and its pagination-basis note.
-Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. One leg whose source is absent from the shelf (Cronbach et al. 1972) carries an in-place status marking at the claim and is the single outstanding row of the **Source-leg verification** table below; its co-cited half, Brennan (2001), was closed against Ch. 3 late in the milestone. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth.
+Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. One leg whose source is absent from the shelf (Cronbach et al. 1972) carries an in-place status marking at the claim and is the single outstanding row of the **Source-leg verification** table below; its co-cited half, Brennan (2001), was closed against Ch. 3 late in the milestone. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth. **M79 (2026-07-21)** wrote entries for every asserted oracle that previously lacked one — the M46/M47 cluster-`ck` pair, the `O-SEM-ML*` lavaan-multilevel family, the frequentist multilevel/d-study oracles, the lme4-engine `O-LME`/`O-LME2`, `O-cc`, `O-invariance`, and the fixed-nested `O-FNML` — each to this same D-008 kind-split bar (script-derived legs confirmed against a committed fixture or inline value without re-running; source legs anchored to the Source-leg table).
 
 The registry of oracle values used in the test suite. **Every oracle value in
 the test suite must trace back to an entry here** with provenance — a citation
 or a committed, seeded script (PRINCIPLES.md #4, #12). No unsourced reference
-values, ever. Bibliographic detail lives in
+values, ever. This invariant is **machine-checked** by
+`data-raw/check-oracle-registry.py` (M79), which fails if any oracle label
+asserted in `tests/testthat/*.R` has no entry here (or an allowlisted-alias
+disposition). Bibliographic detail lives in
 [`BIBLIOGRAPHY.md`](BIBLIOGRAPHY.md); per-source extractions live in the
 `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
 
@@ -1284,8 +1287,10 @@ is cited by **PDF page** for that reason.
   harmonic-mean `k_eff` divisor + crossed-multilevel connectedness (ADR-018) threaded per posterior draw.
   Random raters → **variance-ratio push-forward**, no θ² functional, no 2b correction (the M29/Slice-1
   regime). Subject level (ICC(A,1), ICC(A,k_eff)) + single-rater cluster **ICC(c,1)** ship; the averaged
-  cluster **ICC(c,k)** is undefined on incomplete data (the open per-cluster divisor, M9 §9) and is
-  **dropped-with-note**.
+  cluster **ICC(c,k)** was **dropped-with-note at M30** (raggedness needs an effective rater count, deferred
+  here). **M46/M47 (ADR-057/058) later shipped the averaged cluster ICC(c,k)** on incomplete data via the
+  inverse-Simpson k_c^eff — see **O-cluster-ck** / **O-Bayes-cluster-ck**; only the per-cluster ICC(c,k)
+  divisor of M9 §9 remains open.
 - **Oracles (≥2 independent, #1):** **O-Bayes-IML** (committed reference, no Stan) — a **reduction cell**
   (complete grid, k_eff = k) covers ~nominally (the shipped M24 behaviour), and a **ragged cell** (fixed
   connected incidence, ~12% cells deleted, constant k_eff < 5) covers subject-level ICC(A,1) & ICC(A,k_eff)

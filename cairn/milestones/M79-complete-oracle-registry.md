@@ -1,6 +1,6 @@
 # M79: Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -79,11 +79,16 @@ oracle has no entry.
       currently hold" note is resolved; characterizations avoid pinned counts
       (LESSONS M70). Evidence: grep.
 - [ ] AC5 — any repo-state observation added to INDEX.md carries a D-009
-      `<!-- check: … -->` directive (or `check: none — reason`); and
-      `data-raw/check-reference-observations.py`, `enumerate-generalizing-claims.py
-      --check` (M74), and `air format --check .` all pass. Evidence: the three runs.
+      `<!-- check: … -->` directive, and M79 **does not regress**
+      `check-reference-observations.py` (its added observation is marked and its
+      directive holds — `unmarked: 0`); the 22 falsifications pre-existing on
+      `origin/main` (M74's triage ledger vs source-note directives) are a separate
+      defect, out of scope. `enumerate-generalizing-claims.py --check` (M74) and
+      `air format --check .` pass. Evidence: the runs + the origin/main baseline.
+      <!-- amended 2026-07-21 (T5): D-009 was pre-existing red on origin/main; see work log. -->
 - [ ] AC6 — `Rscript -e 'devtools::test()'` is unaffected (no R behavior changed;
-      docs + one Python checker only). Evidence: test summary.
+      docs + one Python checker only). Evidence: test summary + the branch diff
+      touching no `R/` or `tests/` file.
 
 ## Coverage
 
@@ -107,9 +112,10 @@ oracle has no entry.
 - [x] T4 — lavaan-multilevel entries: `O-SEM-ML` (`sem-multilevel-recovery-oracle.rds`),
       `O-SEM-ML-BOOT`, `O-SEM-ML-FIXED`, `O-SEM-ML-INC` (note the D-005 IP1-fenced
       parameterization sourcing).
-- [ ] T5 — Corrections (stale open/dropped language, AC3), INDEX.md + header
+- [x] T5 — Corrections (stale open/dropped language, AC3), INDEX.md + header
       reconciliation (AC4), finalize the allowlist; then all gates green — census
-      checker, D-009 checker, M74 `--check`, `air format --check`, `devtools::test()`.
+      checker, M74 `--check`, `air format --check`, `devtools::test()` (D-009
+      no-regression per the AC5 amendment).
 
 ## Work log
 
@@ -123,6 +129,8 @@ oracle has no entry.
 - 2026-07-21 (T3): wrote entries for `O-IDS`, `O-Boot-DS` (d-study, in-suite), `O-cc`, `O-invariance` (in-suite), and — with full D-008 confirmation against their committed fixtures (not re-run) — `O-cluster-ck` (`cluster-ck-coverage-oracle.rds`, M46) and `O-Bayes-cluster-ck` (`bayesian-cluster-ck-oracle.rds`, M47). Checker down to 4 gaps (the lavaan-ML family, T4).
 
 - 2026-07-21 (T4): wrote entries for the lavaan-multilevel family — `O-SEM-ML` (M54, D-005 IP1-fenced route; `/recovery` + `/tau2-invariant` confirmed against the M60-frozen `sem-multilevel-recovery-oracle.rds`, not re-run), `O-SEM-ML-BOOT` (M56), `O-SEM-ML-FIXED` (M57), `O-SEM-ML-INC` (M58). Checker exits 0 — the D-007 invariant now holds and is machine-checked (AC1, AC2).
+- 2026-07-21 (T5): AC3 — corrected the one genuinely-stale claim (O-Bayes-IML called the AVERAGED cluster ICC(c,k) "undefined on incomplete data"; M46/M47 shipped it via inverse-Simpson k_c^eff → cross-referenced O-cluster-ck/O-Bayes-cluster-ck); the per-cluster M9 §9 divisor mentions (correctly still-open) left intact. AC4 — reconciled INDEX.md + the ORACLES.md header (dropped the false "M1–M39 scope" and the pinned "39 entries"; the invariant note now reads holds-and-machine-checked, no pinned count). AC5 — INDEX observation carries a `check:` directive running the census checker; `enumerate-generalizing-claims.py --check` regressed 3 new ORACLES claims (LESSONS M76), triaged as OUT-oracle-pin via programmatically-generated ledger rows → green.
+- 2026-07-21 (T5, AC5 amendment, gated): `check-reference-observations.py` (D-009) is pre-existing red on `origin/main` — 22 falsifications from M74's triage ledger tripping unrelated source-note "nothing references me" directives; M79's own observation is marked and holds (`unmarked: 0`). AC5 amended to a no-regression bar (user-approved); the 22 tracked as a `candidate` row + background-task chip, out of M79's scope.
 
 ## Decisions
 
