@@ -40,9 +40,14 @@ LABEL = re.compile(r"(?<![A-Za-z0-9])O-[A-Za-z0-9][A-Za-z0-9/-]*")
 
 # Hyphenated sub-check suffixes: a label like `O-Bayes-ML-agree` is the `-agree`
 # sub-check of the entry `O-Bayes-ML`, written with a hyphen instead of the modern
-# `/` separator. Each is a *verb of checking*, never a segment of any base oracle
-# ID (base IDs use ML/OW/NML/FML/ck/FIXED/INC/BOOT/DS/cc/... — none appear here),
-# so stripping them cannot conflate two distinct oracles. Applied repeatedly.
+# `/` separator. Applied repeatedly. NOTE two of these — `-sim` and `-lme4` — are
+# ALSO whole standalone oracle IDs (`O-sim`, `O-lme4`): stripping `-lme4` off
+# `O-lme4` would leave the bare `"O"` and, because ORACLES.md bolds those two
+# oracles, `"O"` would enter the registry-token set as a wildcard that masks any
+# future gap. `normalize()` guards against this: it never strips a suffix that
+# would reduce the base past `O-XX`, so a standalone suffix-named oracle
+# (`O-lme4`, `O-sim`, or a future `O-coverage`) keeps its own identity and is
+# matched — or flagged — as itself. The `--self-test` exercises this path.
 SUBCHECK_SUFFIXES = (
     "-agree", "-coverage", "-reduction", "-containment", "-wiring",
     "-lme4", "-sim", "-recovery", "-parity", "-ident", "-point",
@@ -75,7 +80,11 @@ def normalize(token):
     while changed:
         changed = False
         for suf in SUBCHECK_SUFFIXES:
-            if base.endswith(suf) and len(base) > len(suf):
+            # Guard: never strip so far that the base collapses to the wildcard
+            # `"O"`/`"O-"`. A standalone suffix-named oracle (`O-lme4`, `O-sim`,
+            # a future `O-coverage`) keeps its own identity rather than melting
+            # into a token that would match anything (finding F1, M79 review).
+            if base.endswith(suf) and len(base) - len(suf) > len("O-"):
                 base = base[: -len(suf)]
                 changed = True
     return base
@@ -130,15 +139,26 @@ def gaps(root):
 
 
 def self_test(root):
-    """Harness bite: a label present in no ORACLES.md token and no ALIASES key
-    must be reported as a gap. If the coverage logic ever stops catching an
-    orphan (a refactor making the checker vacuous), this fails."""
+    """Harness bite: an orphan present in no ORACLES.md token and no ALIASES key
+    must read as uncovered. Two orphans are checked — a plain one, and one whose
+    tail is a curated sub-check suffix (`-coverage`) — so the suffix-stripping
+    path is exercised and the wildcard-`"O"` regression (finding F1) cannot
+    silently return. If the coverage logic ever stops catching either orphan (a
+    refactor making the checker vacuous), this fails."""
     reg = registry_tokens(root)
-    orphan = "O-zzz-no-such-oracle-zzz"
+    orphans = [
+        "O-zzz-no-such-oracle-zzz",  # plain: no suffix, exercises exact match
+        "O-coverage",  # suffix-named standalone: must NOT collapse to a wildcard
+    ]
     real = "O-OW"  # a genuine entry heading — must read as covered
     problems = []
-    if normalize(orphan) in reg or normalize(orphan) in ALIASES:
-        problems.append("orphan token unexpectedly covered: %r" % orphan)
+    if "O" in reg or "O-" in reg:
+        problems.append("wildcard token in registry set (suffix-strip leak): %r"
+                        % ({"O", "O-"} & reg))
+    for orphan in orphans:
+        if normalize(orphan) in reg or normalize(orphan) in ALIASES:
+            problems.append("orphan token unexpectedly covered: %r → %r"
+                            % (orphan, normalize(orphan)))
     if normalize(real) not in reg:
         problems.append("known entry read as a gap: %r" % real)
     if problems:
@@ -146,7 +166,8 @@ def self_test(root):
         for p in problems:
             print("  " + p)
         return 1
-    print("self-test OK: an orphan oracle is flagged, a real entry is covered")
+    print("self-test OK: plain + suffix-named orphans both flagged, a real entry "
+          "is covered, no wildcard token in the registry set")
     return 0
 
 

@@ -168,3 +168,27 @@ Toolchain: `devtools::document()` no diff (no roxygen drift); NAMESPACE/man unto
 `data-raw` is `.Rbuildignore`d (no new top-level file); no `@export` change → no
 user-visible change → no NEWS entry; full `R CMD check` matrix deferred to PR #86 CI
 (no build-included file changed). PR CI: format-check pass, rest pending.
+
+**Independent review — three lenses + scorer.** [O] diff-bug, [S] blame-history,
+[S] prior-review, all fresh-context, ref-based.
+- **[S] blame-history:** clean — the AC3 correction accurately separates the
+  M46/M47 averaged case from the still-open per-cluster M9 §9 divisor; INDEX/header
+  rewrite drops only a caveat M79 itself found false; entries D-005/007/008/009
+  compliant.
+- **[S] prior-review:** no-ops clean — no regression of the M68/M70/M72/M73/M74/M76
+  lessons (re-ran each gate; GitHub threads empty, archive is the record).
+- **[O] diff-bug — 1 finding, F1, scored 82 (≥80 → FIXED):** the checker's
+  `normalize()` stripped the `-lme4`/`-sim` sub-check suffixes off the *standalone*
+  oracles `O-lme4`/`O-sim`, collapsing both (and their bolded registry mentions) to
+  the bare token `"O"` — a wildcard that would mask a *future* gap (a new
+  `O-coverage`/`O-parity` with no entry would match `"O"` and report 0 gaps),
+  silently regressing the very D-007 guard this checker provides. No live
+  false-negative (both sides collapsed identically), but a real latent hole, and
+  the in-code comment falsely called it impossible. **Fix:** guard the strip so it
+  never reduces a base past `O-XX` (so `O-lme4`/`O-sim`/`O-coverage` keep their own
+  identity), correct the comment, and strengthen `--self-test` to check a
+  suffix-named orphan and assert no wildcard token enters the registry set. Verified:
+  `"O"` no longer a registry token; `O-ML-lme4`→`O-ML` etc. still resolve; 0 gaps;
+  self-test green.
+- Fixture fidelity, script-attested stampings, AC3/AC4, and fabrication traps were
+  all verified clean by the diff-bug lens. No sub-threshold findings logged.
