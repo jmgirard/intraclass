@@ -34,10 +34,13 @@ jobs:
         env:
           LINTR_ERROR_ON_LINT: true
 
-  # D-009: every dated repo-state claim on a references page carries an
-  # exit-coded settling directive. This job re-settles them on push/PR so a
-  # falsified or unmarked observation reds a check instead of sitting on main
-  # unnoticed. R-free (python3 + git only), so it does not pay the R setup.
+  # D-009 + M74: the references corpus carries two mechanized completeness gates.
+  # (D-009) every dated repo-state claim carries an exit-coded settling directive,
+  # re-settled here; (M74) every generalizing claim about a source table is
+  # classified in the triage ledger, enumeration-completeness gated here. Running
+  # both on push/PR means a falsified/unmarked observation or an un-triaged claim
+  # reds a check instead of sitting on main unnoticed. R-free (python3 + git only),
+  # so the job does not pay the R setup.
   check-references:
     runs-on: ubuntu-latest
     steps:
@@ -48,3 +51,9 @@ jobs:
 
       - name: Self-test the observation checker (vacuity guard)
         run: python3 data-raw/check-reference-observations.py --self-test
+
+      - name: Check generalizing-claim triage completeness (M74)
+        run: python3 data-raw/enumerate-generalizing-claims.py --check
+
+      - name: Self-test the generalizing-claim gate (vacuity guard)
+        run: python3 data-raw/enumerate-generalizing-claims.py --self-test

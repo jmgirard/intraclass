@@ -65,7 +65,7 @@ convention is the cairn repo's, not this one's (D-009).
       comparison on synthetic inputs — an un-triaged key yields a failure, a
       fully-classified set yields success (factor the set-diff out of
       `cmd_check` if that keeps it clean). Run `--self-test`; confirm exit 0.
-- [ ] T2: Add two steps to the `check-references` job in
+- [x] T2: Add two steps to the `check-references` job in
       `.github/workflows/lint.yaml` (`--check`, then `--self-test`), and update
       the job comment to cover both D-009 and M74. Keep the job R-free.
 - [ ] T3: Demonstrate the gate is live — introduce a synthetic un-triaged
@@ -82,6 +82,7 @@ convention is the cairn repo's, not this one's (D-009).
 
 - 2026-07-21: created by /milestone-plan (promotes the M74-enumerator-CI candidate; lineage M74 → M80 *Out* → M81. Gate: add steps to M80's existing `check-references` job; also harden the `--check` vacuity guard in `self_test()`).
 - 2026-07-21: T1 done — factored the completeness set-diff into `completeness_diff()` and extended `self_test()` to assert it reds on an un-triaged candidate + on an orphan ledger row, passes when fully classified. `--self-test` exit 0; `--check` still exit 0 (258/258 in sync).
+- 2026-07-21: T2 done — added `--check` + `--self-test` steps for the enumerator to the `check-references` job in `.github/workflows/lint.yaml`; broadened the job comment to cover D-009 + M74. `actionlint` clean; job stays R-free (no `setup-r`).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
