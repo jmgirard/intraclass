@@ -71,7 +71,7 @@ convention is the cairn repo's, not this one's (D-009).
 - [x] T3: Demonstrate the gate is live — introduce a synthetic un-triaged
       generalizing claim (or drop a ledger row), run `--check`, capture the
       non-zero exit + stderr, revert; record in the work log.
-- [ ] T4: Verify R build unaffected — `devtools::test()` clean; confirm the
+- [x] T4: Verify R build unaffected — `devtools::test()` clean; confirm the
       built package is byte-identical (`data-raw/` + `.github/` are
       `.Rbuildignore`d).
 - [ ] T5: Open the PR, drive the full CI matrix green, confirm the new steps
@@ -84,6 +84,7 @@ convention is the cairn repo's, not this one's (D-009).
 - 2026-07-21: T1 done — factored the completeness set-diff into `completeness_diff()` and extended `self_test()` to assert it reds on an un-triaged candidate + on an orphan ledger row, passes when fully classified. `--self-test` exit 0; `--check` still exit 0 (258/258 in sync).
 - 2026-07-21: T2 done — added `--check` + `--self-test` steps for the enumerator to the `check-references` job in `.github/workflows/lint.yaml`; broadened the job comment to cover D-009 + M74. `actionlint` clean; job stays R-free (no `setup-r`).
 - 2026-07-21: T3 done — live-gate demo: injected an un-triaged generalizing claim into `cairn/references/INDEX.md`; `--check` went RED (`un-triaged: 1`, exit 1) naming the line; `git checkout --` restored it and `--check` returned green (258/258). Tree clean; nothing committed.
+- 2026-07-21: T4 done — R build unaffected: only R files changed are none (diff is `.github/` + `data-raw/*.py` + this tracking file, all `.Rbuildignore`d); `R CMD build` on branch vs `origin/main` gave byte-identical payloads bar the `Packaged:` timestamp. `NOT_CRAN=true CI=true devtools::test()`: FAIL 0 | WARN 2 | SKIP 23 | PASS 1901 (the 2 WARN are the pre-existing near-singular-Hessian annotations in test-icc-type-vector.R, unchanged from main).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
