@@ -22,8 +22,10 @@ by Allergan Inc.
 **Squarely inside the package's contract** — it studies the two-way random
 `ICC(2,1)` the package computes, with the classical Shrout–Fleiss estimator.
 Nothing in the package traced to it and no `ORACLES.md` entry cited it —
-observed 2026-07-19 <!-- check: ! git grep -qiF 'mehta' -- R tests man vignettes data-raw NAMESPACE DESCRIPTION cairn/references/ORACLES.md --> (grep for `mehta` over `R/`, `tests/`, `man/`, `vignettes/`,
-`data-raw/`, `NAMESPACE`, `DESCRIPTION` and `ORACLES.md`: no hits).
+observed 2026-07-19 <!-- check: ! git grep -qiF 'mehta' -- R tests man vignettes data-raw NAMESPACE DESCRIPTION cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' --> (grep for `mehta` over `R/`, `tests/`, `man/`, `vignettes/`,
+`data-raw/` (bar the M74 triage ledger `generalizing-claims-triage.tsv`,
+bookkeeping not a package reference), `NAMESPACE`, `DESCRIPTION` and
+`ORACLES.md`: no hits).
 
 ## Design applicability (AC2)
 
@@ -297,7 +299,7 @@ below map this paper onto the axes M65 chose to track, nothing more.
 ## Traces to
 
 - Nothing in the package — see the grep recorded under **Role** above
-  (observed 2026-07-19). <!-- check: ! git grep -qiF 'mehta' -- R tests man vignettes data-raw NAMESPACE DESCRIPTION cairn/references/ORACLES.md -->
+  (observed 2026-07-19). <!-- check: ! git grep -qiF 'mehta' -- R tests man vignettes data-raw NAMESPACE DESCRIPTION cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 - `cairn/references/shrout1979.md` — Eq. (3) here is `ICC(2,1)`; Shrout & Fleiss
   is this paper's reference 1.
 - `cairn/references/fleiss1973.md` — cited here as reference 29 (the

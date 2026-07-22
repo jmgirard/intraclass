@@ -17,7 +17,7 @@ cluster. It is **the cluster's closest approach to this package's own territory*
 — the ICCs it compares are interobserver-agreement ICCs on the same subjects,
 estimated by the familiar ANOVA route — which makes its boundary line the most
 load-bearing of the four. Nothing in the package traces to it — observed
-2026-07-19. <!-- check: ! git grep -qiE 'donner' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
+2026-07-19. <!-- check: ! git grep -qiE 'donner' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 
 ## Why it is in the interrater literature at all
 
@@ -139,8 +139,9 @@ single-design ICC this package's estimand specs define.
 - **Nothing in the package** — no estimator, interval method, oracle, or
   documented claim reads this page, by design. No `ORACLES.md` entry cites it.
   A grep for this citekey and for the author surnames across `R/`, `tests/`,
-  `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/`, and `ORACLES.md`
-  returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'donner' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
+  `man/`, `vignettes/`, `NEWS.md`, `README.md`, `data-raw/` (bar the M74 triage
+  ledger `generalizing-claims-triage.tsv`, bookkeeping not a package reference),
+  and `ORACLES.md` returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'donner' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 - `cairn/references/konishi1989.md` — the independent-sample general case this
   paper extends; `Z_M` is Konishi's transformation, and §7 (p. 378) notes
   Konishi & Gupta (1987) "considered only the case in which two intraclass

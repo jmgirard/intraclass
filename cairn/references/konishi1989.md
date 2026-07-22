@@ -22,7 +22,7 @@ Statistical Mathematics, Tokyo; Gupta: Bowling Green State University, Ohio.
 cluster — the `q`-population hypothesis test that the rest of the cluster
 specializes. It is here **as evidence of a contract boundary**, not as a
 capability source. Nothing in the package traces to it (see "Traces to") —
-observed 2026-07-19. <!-- check: ! git grep -qiE 'konishi' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
+observed 2026-07-19. <!-- check: ! git grep -qiE 'konishi' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 
 ## The estimand is a hypothesis, not a coefficient
 
@@ -122,7 +122,9 @@ record rather than re-argued from memory.
   claim reads this page, and that is by design (see Boundary above). No
   `ORACLES.md` entry cites it. A grep for this citekey and for the author
   surnames across `R/`, `tests/`, `man/`, `vignettes/`, `NEWS.md`, `README.md`,
-  `data-raw/`, and `ORACLES.md` returned no hits — observed 2026-07-19. <!-- check: ! git grep -qiE 'konishi' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md -->
+  `data-raw/` (bar the M74 triage ledger `generalizing-claims-triage.tsv`,
+  bookkeeping not a package reference), and `ORACLES.md` returned no hits —
+  observed 2026-07-19. <!-- check: ! git grep -qiE 'konishi' -- R tests man vignettes NEWS.md README.md data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 - `cairn/references/bhandary2006.md` — a fifth member of this cluster by
   subject; its own cluster-reassignment finding asks that the two be read
   together, and the same IP2 fence covers both.

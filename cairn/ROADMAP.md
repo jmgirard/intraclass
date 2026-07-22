@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M80 | Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI | planned | — | normal | milestones/M80-repair-d009-reference-checker.md |
+| M80 | Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI | review | — | normal | milestones/M80-repair-d009-reference-checker.md |
 | M79 | Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant) | done | — | normal | milestones/archive/M79-complete-oracle-registry.md |
 | M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M76-boundary-robust-classical-oneway-ci.md |
 | M78 | Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO) | done | — | normal | milestones/archive/M78-cut-ci-test-suite-wallclock.md |

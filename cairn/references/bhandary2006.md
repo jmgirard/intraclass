@@ -23,9 +23,10 @@ equality-testing problem. Same research program, three years earlier.
 
 **Role.** Ingested by M65 as the second half of the "estimator-bias pair". **It
 is not an estimator-bias paper** — see below. Nothing in the package traced to
-it and no `ORACLES.md` entry cited it — observed 2026-07-19 <!-- check: ! git grep -qiF 'bhandary' -- R tests man vignettes data-raw cairn/references/ORACLES.md --> (grep for
-`bhandary` over `R/`, `tests/`, `man/`, `vignettes/`, `data-raw/` and
-`ORACLES.md`: no hits).
+it and no `ORACLES.md` entry cited it — observed 2026-07-19 <!-- check: ! git grep -qiF 'bhandary' -- R tests man vignettes data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' --> (grep for
+`bhandary` over `R/`, `tests/`, `man/`, `vignettes/`, `data-raw/` (bar the M74
+triage ledger `generalizing-claims-triage.tsv`, bookkeeping not a package
+reference) and `ORACLES.md`: no hits).
 
 ## Design applicability (AC2)
 
@@ -226,7 +227,7 @@ without the authors — the one thing in the M65 cluster that is.
 ## Traces to
 
 - Nothing in the package — see the grep recorded under **Role** above
-  (observed 2026-07-19). <!-- check: ! git grep -qiF 'bhandary' -- R tests man vignettes data-raw cairn/references/ORACLES.md -->
+  (observed 2026-07-19). <!-- check: ! git grep -qiF 'bhandary' -- R tests man vignettes data-raw cairn/references/ORACLES.md ':(exclude)data-raw/generalizing-claims-triage.tsv' -->
 - `cairn/references/xiao2009.md` — shares author Bhandary; that paper's
   Eqs. (12)–(13) pose this same equality-testing problem and cite this line of
   work. The two notes together cover the familial-ICC corner of the shelf.
