@@ -81,12 +81,25 @@ def normalize(token):
     return base
 
 
+BOLD = re.compile(r"\*\*(.+?)\*\*", re.DOTALL)
+
+
 def registry_tokens(root):
-    """Every distinct base oracle ID documented anywhere in ORACLES.md — entry
-    headings and bolded inline sub-oracles alike. Documented == registered."""
+    """Every distinct base oracle ID that ORACLES.md actually *registers*: one
+    named in a `###` entry heading, or defined in a bolded `**...**` span (the
+    convention for an inline sub-oracle — `**O-SB (Spearman–Brown)**`). A bare
+    prose cross-reference ("ships separately as O-cluster-ck") is deliberately
+    NOT coverage — a mention is not an entry, and counting it would let a gap
+    hide behind a passing reference to itself."""
     with open(os.path.join(root, REGISTRY), encoding="utf-8") as fh:
         text = fh.read()
-    return {normalize(m.group(0)) for m in LABEL.finditer(text)}
+    toks = set()
+    for line in text.splitlines():
+        if line.startswith("###"):
+            toks.update(normalize(m.group(0)) for m in LABEL.finditer(line))
+    for b in BOLD.finditer(text):
+        toks.update(normalize(m.group(0)) for m in LABEL.finditer(b.group(1)))
+    return toks
 
 
 def test_labels(root):

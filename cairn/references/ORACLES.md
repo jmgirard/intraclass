@@ -313,6 +313,139 @@ is cited by **PDF page** for that reason.
   fixture, so this entry's numbers have nothing in the repo to be confirmed against.
   The source leg (ten Hove Table 3) is separately verified — observed 2026-07-19.
 
+### Oracle O-NML — nested-rater multilevel ICCs, Designs 2/3 (M8, ADR-029 for ragged)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eqs. 8–9 (Design 2) / Eqs. 10–11 (Design 3) / Table 3 subject level (M72 Source-leg table, p. 5–6); script leg: `data-raw/oracle-nested-multilevel.R` + in-suite generators.
+- **Used by:** `tests/testthat/test-icc-nested-multilevel.R`.
+- **Status:** **asserted (M8)** (spec `M8-nested-multilevel.md`). Design 2 nests raters
+  in clusters (each cluster its own raters, crossed with that cluster's subjects;
+  four components). No textbook worked example exists (as with O-ML), so three
+  oracles pin the subject level: **O-NML/lme4** (independent `lme4::lmer` fit,
+  <1e-4, both designs), **O-NML/sim** (seeded population recovery + MC coverage),
+  and **O-NML/reduction** (Design 2 subject level ≡ the two-way estimand; Design 3
+  reduces to the M6 one-way ICC(1)). Cluster-level IRR is undefined for nested
+  designs (paper p. 6) — subject level only. **O-NML/incomplete** extends the pair
+  to ragged Designs 2/3 with harmonic-mean `k_eff` (M19 Slice 1, ADR-029).
+- **Decision:** signal σ²_{s:c}; error sets per ten Hove Design 2/3 (spec §3);
+  Design 3 is agreement-only, no A/C label. Balanced + ragged random.
+- **Provenance:** `data-raw/oracle-nested-multilevel.R` (seeded; `stopifnot`
+  relationship checks) + in-suite generators. Reproducible; nothing hardcoded.
+- **Script-leg status (D-008):** **script-attested, values not independently
+  confirmed** — every `stopifnot` checks a relationship (glmmTMB≡lme4 <1e-4,
+  population recovery, the two-way / one-way reductions), never a literal reference
+  value, and the script commits no fixture; the source leg (ten Hove Eqs. 8–11,
+  Table 3) is separately verified in the M72 Source-leg table.
+
+### Oracle O-IML — incomplete/ragged crossed (Design 1) multilevel ICCs (M9, ADR-018)
+- **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eq. 12 / Table 3 top-left (M72 Source-leg table, p. 6); script leg: `data-raw/oracle-incomplete-multilevel.R` + in-suite generators.
+- **Used by:** `tests/testthat/test-icc-incomplete-multilevel.R`.
+- **Status:** **asserted (M9)** (ADR-018; spec `M9-incomplete-multilevel.md`).
+  Estimates the M5 Design-1 subject-level ICCs on ragged data (missing
+  subject×rater cells) by generalizing the M3 connectedness + `k_eff` machinery
+  onto the five-component fit; σ²_cr is **not** in the subject-level error (spec
+  §3a). No textbook worked example, so four oracles pin it: **O-IML/lme4**
+  (independent `lme4::lmer` fit on the same ragged data, <1e-4, both levels),
+  **O-IML/reduction** (complete data reproduces the balanced M5 numbers; a single
+  cluster equals the flat M3 incomplete two-way), **O-IML/sim** (seeded recovery +
+  MC coverage), and **O-IML/ident** (the §4b graph guards abort loudly on
+  within-cluster / cluster×rater disconnection). Cluster-level ICC(c,k) on
+  incomplete data ships separately as O-cluster-ck (M46).
+- **Decision:** subject-level agreement error {rater, residual}, consistency
+  {residual}; ragged random, crossed Design 1.
+- **Provenance:** `data-raw/oracle-incomplete-multilevel.R` (seeded; `stopifnot`
+  relationship checks) + in-suite generators. Reproducible; nothing hardcoded.
+- **Script-leg status (D-008):** **script-attested, values not independently
+  confirmed** — the `stopifnot` targets are relationships (cross-engine agreement,
+  the M5/M3 reductions, population recovery), not literals, and the script commits
+  no fixture; the source leg (ten Hove Eq. 12, Table 3) is verified in the M72 table.
+
+### Oracle O-FML — fixed-rater multilevel ICCs, crossed Design 1, balanced (M10)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong Case 3A θ²_r + ten Hove Table 3 Design 1 (M72 Source-leg table, pp. 32 / 6); script leg: `data-raw/oracle-fixed-multilevel.R` + in-suite generators.
+- **Used by:** `tests/testthat/test-icc-fixed-multilevel.R`.
+- **Status:** **asserted (M10)** (spec `M10-fixed-multilevel.md`). Raters are FIXED
+  (McGraw & Wong Case 3/3A) in the M5 subject-level fit: the rater main effect
+  becomes the bias-corrected finite-population θ²_r (shared `theta2r_fixed()`,
+  inherited from M3 §6), filling the σ²_r slot so `icc_point()`/`mc_ci()` are
+  unchanged. No textbook worked example, so four oracles pin it: **O-FML/reduction**
+  (PRIMARY — balanced fixed == the pinned random-rater M5 subject-level estimand),
+  a **single-cluster reduction** to the flat M3 fixed path, **O-FML/lme4**
+  (independent `lme4::lmer` fixed fit, <1e-4), and **O-FML/sim** (seeded recovery of
+  the known subject-level consistency ICC + MC coverage). Consistency ≡ random;
+  agreement differs only by θ²_r.
+- **Decision:** θ²_r = bias-corrected finite-population rater variance (ADR-008);
+  balanced/complete, subject level. Cluster-level fixed is O-FCL (M37); incomplete
+  fixed is O-IFML (M18); Design 3 fixed stays by-design undefined.
+- **Provenance:** `data-raw/oracle-fixed-multilevel.R` (seeded; `stopifnot`
+  relationship checks) + in-suite generators. Reproducible; nothing hardcoded.
+- **Script-leg status (D-008):** **script-attested, values not independently
+  confirmed** — the `stopifnot` checks are relationships (fixed==random reduction,
+  glmmTMB≡lme4, population recovery), never a literal reference value, and the
+  script commits no fixture; the source leg (McGraw & Wong Case 3A, ten Hove
+  Table 3) is verified in the M72 Source-leg table.
+
+### Oracle O-IFML — incomplete/ragged fixed-rater multilevel, subject level (M18 Slice 1, ADR-028)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong Case 3A θ²_r (M72 Source-leg table, p. 32); script leg: in-suite generators in the test file (no dedicated fixture).
+- **Used by:** `tests/testthat/test-icc-fixed-multilevel.R`.
+- **Status:** **asserted (M18 Slice 1)** (ADR-028). Extends O-FML to ragged data —
+  the fixed θ²_r (Case 3A) in the M9 incomplete subject-level fit. Three oracles:
+  **O-IFML/lme4** (independent `lme4::lmer` fixed fit on ragged data matches the
+  glmmTMB subject ICCs, <1e-4, at the well-defined per-subject `k_eff`), a genuine
+  **fixed≠random gap** on ragged data (unlike the balanced case), and **O-IFML/sim**
+  (seeded recovery of the known subject-level consistency ICC on ragged data + MC
+  coverage). Incomplete-fixed identifiability guards fire; a singular ragged fixed
+  fit defers lme4→glmmTMB. Uses the M19/M36 per-subject `k_eff`, **not** the open
+  per-cluster ICC(c,k) divisor.
+- **Decision:** subject level only; θ²_r bias-corrected per Case 3A; ragged fixed.
+- **Provenance:** seeded in-suite generators in `test-icc-fixed-multilevel.R`;
+  glmmTMB↔lme4 the mutual independent oracle. Reproducible; nothing hardcoded.
+- **Script-leg status (D-008):** **script-attested, values not independently
+  confirmed** — the assertions are cross-engine agreement + population recovery,
+  not literal reference values, and no fixture is committed; the source leg
+  (McGraw & Wong Case 3A) is verified in the M72 Source-leg table.
+
+### Oracle O-FNML — fixed-rater nested (Design 2) multilevel, subject level, point (M10 family)
+- **Kind:** mixed (D-008) — source leg: McGraw & Wong Case 3A θ²_r (M72 Source-leg table, p. 32); script leg: `data-raw/oracle-fixed-multilevel.R` + in-suite generators.
+- **Used by:** `tests/testthat/test-icc-fixed-multilevel.R`.
+- **Status:** **asserted** — the fixed-rater analogue of O-NML for nested Design 2:
+  raters FIXED and nested in clusters, so the rater slot holds the bias-corrected
+  finite-population θ²_{r:c} and there is no σ²_c or cluster:rater term (the
+  cell-mean fit absorbs the cluster main effect); subject level only. Three
+  oracles: **O-FNML/reduction** (PRIMARY — θ²_{r:c} equals the per-cluster mean of
+  the flat M3 two-way fixed θ²_r fit on each cluster's data alone, McGraw & Wong
+  Case 3A per cluster), **O-FNML/single-cluster** (components reduce to the flat M3
+  fixed fit), and **O-FNML/lme4** (independent `lme4::lmer` fixed-nested fit,
+  <1e-4). Consistency ≡ random; agreement differs by θ²_{r:c}. This is the **point**
+  sibling; the fixed-nested MC-**interval** coverage is O-NFI (M28, ADR-038).
+- **Decision:** θ²_{r:c} bias-corrected per Case 3A, per-cluster; balanced nested
+  Design 2, subject level. Design 3 fixed stays by-design undefined.
+- **Provenance:** `data-raw/oracle-fixed-multilevel.R` (seeded; `stopifnot`
+  relationship checks) + in-suite generators. Reproducible; nothing hardcoded.
+- **Script-leg status (D-008):** **script-attested, values not independently
+  confirmed** — the `stopifnot` checks are relationships (the per-cluster M3
+  reduction, single-cluster reduction, glmmTMB≡lme4), not literal reference values,
+  and the script commits no fixture; the source leg (McGraw & Wong Case 3A) is
+  verified in the M72 Source-leg table.
+
+### Oracle O-LME / O-LME2 — lme4 as a selectable engine (M5.5/ADR-012; M14/M15 slices)
+- **Kind:** mixed (D-008) — source leg: the published Shrout & Fleiss values the lme4 engine reproduces (M72 Source-leg table, p. 424); script leg: in-suite glmmTMB↔lme4 agreement, implementation in `R/engine-lme4.R`.
+- **Used by:** `tests/testthat/test-icc-lme4-engine.R`.
+- **Status:** **asserted (M5.5)** (ADR-012). lme4 is promoted from oracle-only
+  (ADR-005) to a **selectable engine** for the random two-way path: it must return
+  the same estimates as glmmTMB (two REML implementations of one model) and a
+  Monte-Carlo interval that agrees with glmmTMB's — the payoff of the merDeriv
+  route (lme4's variance-component covariance delta-transformed to glmmTMB's log-SD
+  scale, so both sample the same parameterization). **O-LME** pins the balanced
+  random path: point ≤1e-4, interval agreement, reproduction of the published SF
+  values, boundary-awareness on a near-zero component, and a loud abort on a
+  singular fit (#5). **O-LME2** is the engine across the further shipped cells —
+  incomplete two-way random (M15 Slice 1, ADR-024), fixed-rater two-way (M14 Slice
+  1, ADR-023) and its incomplete case (M15 Slice 2), and crossed/nested multilevel
+  (M15 Slice 3) — each matching glmmTMB and degrading loudly at the boundary.
+- **Decision:** lme4 is a first-class engine on the paths it supports; it reports
+  the `lme4` engine and defers to glmmTMB where a fit goes singular (GP4 roster).
+- **Provenance:** in-suite cross-engine assertions in `test-icc-lme4-engine.R`
+  against `R/engine-lme4.R`; the published SF figures are the fixed source anchor.
+  Reproducible; nothing hardcoded beyond the SF published values (from O1).
+
 ### Oracle O-Conflated — conflated single-level ICC, Eq. 14 (M17 Slice 1)
 - **Kind:** mixed (D-008) — source leg: ten Hove et al. (2022) Eq. 14; script leg: in-suite closed-form and seeded recovery.
 - **Status:** **asserted (M17 Slice 1)** in `tests/testthat/test-icc-multilevel.R`
