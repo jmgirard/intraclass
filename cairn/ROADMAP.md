@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (M79 planned — complete the oracle registry: an `ORACLES.md` entry for every asserted oracle + a census-gate checker enforcing the D-007 invariant. A mechanical census found ~14 un-entried families (larger than the absorbed candidate's 7); "M1–M39 header scope" falsified. Gate: one milestone, checker-first, full D-008 verification against committed fixtures.)_
+_Last hygiene check: 2026-07-21 (M79 shipped via PR #86 — the D-007 registry invariant now holds and is machine-checked by `check-oracle-registry.py`; 16 new `ORACLES.md` entries close the gap to the D-008 bar, the stale averaged-cluster-ICC(c,k) claim corrected, INDEX/header reconciled. Review fixed F1 (checker wildcard). A pre-existing D-009 failure is now a candidate; M74 rotated out.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M79 | Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant) | review | — | normal | milestones/M79-complete-oracle-registry.md |
+| M79 | Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant) | done | — | normal | milestones/archive/M79-complete-oracle-registry.md |
 | M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M76-boundary-robust-classical-oneway-ci.md |
 | M78 | Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO) | done | — | normal | milestones/archive/M78-cut-ci-test-suite-wallclock.md |
 | M77 | Speed up CI — concurrency-cancel, paths-ignore, event-conditional check matrix | done | — | normal | milestones/archive/M77-ci-speed-config.md |
-| M74 | Re-derive the generalizing claims over their full source tables | done | M73 | low | milestones/archive/M74-generalizing-claim-audit.md |
 | M75 | Exported one-way transformed bootstrap-t `ci_method = "npbootstrap"` | done | — | normal | milestones/archive/M75-npbootstrap-oneway-cimethod.md |
-<!-- terminal-row retention: M76 done (2026-07-21) → M73 rotated out (oldest terminal; its archive file still resolves and M74 cites it by Depends-on id). Kept: M76, M78, M77, M75, M74 (5 most recent terminal). -->
+<!-- terminal-row retention: M79 done (2026-07-21) → M74 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M79, M76, M78, M77, M75 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
