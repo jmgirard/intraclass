@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (M79 shipped via PR #86 — the D-007 registry invariant now holds and is machine-checked by `check-oracle-registry.py`; 16 new `ORACLES.md` entries close the gap to the D-008 bar, the stale averaged-cluster-ICC(c,k) claim corrected, INDEX/header reconciled. Review fixed F1 (checker wildcard). A pre-existing D-009 failure is now a candidate; M74 rotated out.)_
+_Last hygiene check: 2026-07-21 (audit re-run post-M79: validate green, tree clean, all 5 done milestones archived, RR01/RR02 ingested, inboxes empty — no fixes needed. Only advisory is COVERAGE.md's 321 dangling historical-milestone id tokens (long-standing, non-gating).)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
