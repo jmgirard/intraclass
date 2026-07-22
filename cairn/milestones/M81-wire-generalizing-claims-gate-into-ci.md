@@ -127,4 +127,26 @@ convention is the cairn repo's, not this one's (D-009).
   windows), green.
 
 ### Independent review
-_(three fresh-context lenses + scorer — recorded below at completion)_
+Three fresh-context lenses, parallel, distinct evidence bases — **all clean, zero findings**:
+- **[O] diff-bug** — `completeness_diff()` is a faithful pure extraction; the
+  three synthetic self-test assertions are sound; CI steps invoke the right
+  commands, propagate exit codes, and the job stays R-free; clear of the D-009
+  scope fence.
+- **[S] blame-history** — behavior-preserving refactor; M80's D-009 steps
+  untouched and un-reordered; no fixed bug resurrected; broadened job comment
+  accurate.
+- **[S] prior-review** — no prior-review point regressed; specifically does
+  **not** recur the M80 D-009-trip lesson (the synthetic literal `brennan2001`
+  ≠ the real citekey `brennan2001_ch3`); PR-comment probe returned `[]`, no
+  thread walk.
+
+No surviving findings → scorer no-op (nothing to score).
+
+**Considered, not actioned (IP3 — surfaced, not dropped):** the [O] lens noted
+a pre-existing vacuity path — if `find_candidates` returned `[]` and the ledger
+were empty, `--check` would print `candidates: 0` and exit green. It filed this
+as *not a finding* (pre-existing, outside AC4's set-diff scope). Declined for
+follow-up: the empty-corpus state would trip louder alarms first
+(`cairn_validate references index<->disk`, the D-009 checker over 30 notes), so
+a candidate row would be speculative. Recorded here rather than silently
+dropped.
