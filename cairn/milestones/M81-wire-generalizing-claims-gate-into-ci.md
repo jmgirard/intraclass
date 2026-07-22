@@ -29,23 +29,23 @@ convention is the cairn repo's, not this one's (D-009).
 
 ## Acceptance criteria
 
-- [ ] AC1: The `check-references` job in `.github/workflows/lint.yaml` runs
+- [x] AC1: The `check-references` job in `.github/workflows/lint.yaml` runs
       `python3 data-raw/enumerate-generalizing-claims.py --check` as a step; it
       exits 0 on the current corpus (`un-triaged: 0   orphan rows: 0`), shown
       green in the CI run log.
-- [ ] AC2: The same job runs
+- [x] AC2: The same job runs
       `python3 data-raw/enumerate-generalizing-claims.py --self-test` as a step;
       it exits 0, shown green in the CI run log.
-- [ ] AC3: The job stays R-free — no R setup step is added; the new steps use
+- [x] AC3: The job stays R-free — no R setup step is added; the new steps use
       only `python3` + `git`.
-- [ ] AC4: `self_test()` is extended to assert the `--check` completeness
+- [x] AC4: `self_test()` is extended to assert the `--check` completeness
       comparison returns a failure when a candidate key is absent from the
       ledger and success when every key is classified — a vacuity guard on the
       gate; `--self-test` still exits 0.
-- [ ] AC5: The live gate is demonstrated RED before merge — a synthetic
+- [x] AC5: The live gate is demonstrated RED before merge — a synthetic
       un-triaged candidate (or a dropped ledger row) makes `--check` exit
       non-zero — then reverted; the RED run output is recorded in the work log.
-- [ ] AC6: R build unaffected — `Rscript -e 'devtools::test()'` clean and the
+- [x] AC6: R build unaffected — `Rscript -e 'devtools::test()'` clean and the
       built package byte-identical to pre-change (only `.Rbuildignore`d
       `data-raw/` + `.github/` paths changed); the full CI matrix is green.
 
@@ -92,3 +92,39 @@ convention is the cairn repo's, not this one's (D-009).
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-07-21 against PR #88, head `9b1d26d`.**
+
+### Acceptance-criteria evidence (fresh)
+- AC1 — `enumerate-generalizing-claims.py --check` exits 0 locally (258
+  candidates / 258 ledger rows, 0 un-triaged, 0 orphans); CI `check-references`
+  step 5 "Check generalizing-claim triage completeness (M74)" = success.
+- AC2 — `--self-test` exits 0 locally; CI `check-references` step 6 = success.
+- AC3 — job R-free: `setup-r` occurrences in the `check-references` job = 0;
+  the two new steps run `python3` only. `actionlint` clean.
+- AC4 — `self_test()` now exercises `completeness_diff()` on synthetic inputs.
+  Mutation proof: sabotaging `completeness_diff` to return `([], [])` makes
+  `--self-test` FAIL (exit 1, "gate did not flag an un-triaged candidate" +
+  "…orphan ledger row"); restored, `--self-test` exits 0. The guard genuinely
+  bites.
+- AC5 — live-gate demo (work log, T3): an injected un-triaged claim drove
+  `--check` RED (`un-triaged: 1`, exit 1); `git checkout --` restored green.
+- AC6 — R build unaffected: `R CMD build` payload byte-identical to
+  `origin/main` bar the `Packaged:` timestamp; `NOT_CRAN=true CI=true
+  devtools::test()` = FAIL 0 | WARN 2 | SKIP 23 | PASS 1901 (the 2 WARN are the
+  pre-existing near-singular-Hessian annotations in test-icc-type-vector.R,
+  unchanged from main); full CI matrix green.
+
+### Consistency gate
+- `cairn_validate.py` exit 0 — all checks PASS (the 321 `dangling id tokens`
+  WARN is the standing historical-reference advisory, exit-neutral, not a gate
+  failure).
+- `cairn_impact` skipped — `Principles touched: —` (no IP/GP change).
+- Profile toolchain checks: `devtools::document()` produces no diff (generated
+  files intact); NEWS.md — no entry required (the diff touches no shipped R
+  code: only `.github/`, Rbuildignored `data-raw/`, and `cairn/`); full
+  multi-platform `R CMD check` = the CI `check-standard` matrix (ubuntu +
+  windows), green.
+
+### Independent review
+_(three fresh-context lenses + scorer — recorded below at completion)_
