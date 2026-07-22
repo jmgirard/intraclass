@@ -1,11 +1,11 @@
 # M80: Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP3
-- **Branch/PR:** —
+- **Branch/PR:** m80-repair-d009-reference-checker
 
 ## Goal
 
