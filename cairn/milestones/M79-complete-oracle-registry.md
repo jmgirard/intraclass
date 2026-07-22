@@ -101,7 +101,7 @@ oracle has no entry.
 - [x] T2 — Frequentist multilevel + lme4-engine entries: `O-FML`, `O-IFML`,
       `O-IML`, `O-NML`, `O-FNML`, `O-LME`/`O-LME2` (glmmTMB↔lme4 cross-engine +
       reduction; confirm against committed fixtures / inline values per D-008).
-- [ ] T3 — d-study / cluster / misc entries: `O-IDS`, `O-Boot-DS`, `O-cluster-ck`
+- [x] T3 — d-study / cluster / misc entries: `O-IDS`, `O-Boot-DS`, `O-cluster-ck`
       (`cluster-ck-coverage-oracle.rds`), `O-cc`, `O-invariance`; and Bayesian
       `O-Bayes-cluster-ck` (`bayesian-cluster-ck-oracle.rds`).
 - [ ] T4 — lavaan-multilevel entries: `O-SEM-ML` (`sem-multilevel-recovery-oracle.rds`),
@@ -119,6 +119,8 @@ oracle has no entry.
 - 2026-07-21 (T1, minor amendment): the checker surfaced `O-LME`/`O-LME2` (lme4 as a selectable ENGINE, M5.5/ADR-012) as a genuine un-entried oracle distinct from the M1 cross-engine `O-lme4` — folded into T2 (was provisionally an alias at plan time). `O-WAY` confirmed a regex artifact of "TWO-WAY", excluded by the label left-boundary.
 - 2026-07-21 (T2): wrote `ORACLES.md` entries for `O-NML`, `O-IML`, `O-FML`, `O-IFML`, `O-FNML`, `O-LME`/`O-LME2` to the D-008 bar — script-attested numerics (no committed fixture; the assertions are cross-engine/reduction/coverage relationships), source legs anchored to the M72 Source-leg table (ten Hove Eqs. 8–12 / Table 3, McGraw & Wong Case 3A, SF published values). Checker down to 10 gaps.
 - 2026-07-21 (T2, checker fix): tightened `registered` to a `###` heading or a bolded `**…**` definition, not any prose mention — a passing cross-reference is not an entry. This exposed a hidden gap, `O-FNML` (masked by the O-NFI entry's "pinned by O-FNML" prose); wrote its entry (the point sibling of the M28 O-NFI interval oracle).
+
+- 2026-07-21 (T3): wrote entries for `O-IDS`, `O-Boot-DS` (d-study, in-suite), `O-cc`, `O-invariance` (in-suite), and — with full D-008 confirmation against their committed fixtures (not re-run) — `O-cluster-ck` (`cluster-ck-coverage-oracle.rds`, M46) and `O-Bayes-cluster-ck` (`bayesian-cluster-ck-oracle.rds`, M47). Checker down to 4 gaps (the lavaan-ML family, T4).
 
 ## Decisions
 
