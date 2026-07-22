@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (audit clean — all 16 mechanical checks PASS; working tree clean, both GitHub inboxes empty, no orphans. M48 stays parked/`blocked` on the unopened v0.1.0 window (D-050). Only standing advisory: 321 dangling historical id tokens (pre-migration M17/M20/M21/M34/M36/M37/M44–M47 refs in COVERAGE + specs) — by design, not a gate failure.)_
+_Last hygiene check: 2026-07-21 (M81 shipped via PR #88 — `enumerate-generalizing-claims.py --check` + `--self-test` now run in the R-free `check-references` CI job, with a mutation-proven vacuity guard; an un-triaged generalizing claim now reds CI. Archived M81, rotated M76 out; retired the M76 lesson's "not wired into CI" clause and the M79 lesson's matching aside. M48 stays parked/`blocked` on the unopened v0.1.0 window (D-050).)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,13 +10,12 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-| M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | review | — | normal | milestones/M81-wire-generalizing-claims-gate-into-ci.md |
+| M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | done | — | normal | milestones/archive/M81-wire-generalizing-claims-gate-into-ci.md |
 | M80 | Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI | done | — | normal | milestones/archive/M80-repair-d009-reference-checker.md |
 | M79 | Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant) | done | — | normal | milestones/archive/M79-complete-oracle-registry.md |
-| M76 | Boundary-robust classical CI for the one-way default — GO/NO-GO (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M76-boundary-robust-classical-oneway-ci.md |
 | M78 | Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO) | done | — | normal | milestones/archive/M78-cut-ci-test-suite-wallclock.md |
 | M77 | Speed up CI — concurrency-cancel, paths-ignore, event-conditional check matrix | done | — | normal | milestones/archive/M77-ci-speed-config.md |
-<!-- terminal-row retention: M80 done (2026-07-21) → M75 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M80, M79, M76, M78, M77 (5 most recent terminal). -->
+<!-- terminal-row retention: M81 done (2026-07-21) → M76 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M81, M80, M79, M78, M77 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
