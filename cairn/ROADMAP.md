@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (M80 shipped via PR #87 — the D-009 checker (`check-reference-observations.py`) is back to exit 0 and now runs in CI as an R-free `check-references` job; the M74 triage ledger is excluded from the 22 off-shelf-note directives. Archived M80, rotated M75 out; retired the M79 lesson's "checker not in CI" clause; added a candidate to wire the M74 enumerator into CI.)_
+_Last hygiene check: 2026-07-21 (audit clean — all 16 mechanical checks PASS; working tree clean, both GitHub inboxes empty, no orphans. M48 stays parked/`blocked` on the unopened v0.1.0 window (D-050). Only standing advisory: 321 dangling historical id tokens (pre-migration M17/M20/M21/M34/M36/M37/M44–M47 refs in COVERAGE + specs) — by design, not a gate failure.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
