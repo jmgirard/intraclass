@@ -6,15 +6,16 @@ and milestones; never restate a value here.
 ## Registry and bibliography
 
 - [ORACLES.md](ORACLES.md) — the repo's **declared oracle-registry home**
-  (D-007): 39 entries, each naming its oracle ID, type, asserting test, source,
+  (D-007): one entry per oracle ID, each naming its type, asserting test, source,
   and provenance, and — since M72 — a `**Kind:**` bullet saying whether it is
   source-traceable, script-derived, or mixed (D-008). Extraction-verified
-  2026-07-19. **Its stated invariant "every oracle value in the test suite
-  traces to an entry here" does not currently hold:** M72 T4 found oracles
-  shipping without an entry (M46/M47 cluster-`ck`, the `O-SEM-ML*` family,
-  `O-Boot-DS`, `O-IDS`, `O-invariance`) — the file's own header scopes it to
-  M1–M39 and oracles kept shipping after. A ROADMAP candidate row tracks
-  completing it.
+  2026-07-19; extended by M79. **Its stated invariant — every oracle value in the
+  test suite traces to an entry here — now holds and is machine-checked:** M79
+  wrote the entries M72 T4 found missing (the M46/M47 cluster-`ck` pair, the
+  `O-SEM-ML*` lavaan-multilevel family, the frequentist multilevel/d-study
+  oracles, `O-cc`, `O-invariance`, `O-FNML`) and committed
+  `data-raw/check-oracle-registry.py`, which fails if any asserted oracle lacks an
+  entry — observed 2026-07-21. <!-- check: python3 data-raw/check-oracle-registry.py -->
 - [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (38 entries;
   extraction-verified 2026-07-19, M72). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
