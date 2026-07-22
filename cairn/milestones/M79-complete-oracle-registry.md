@@ -9,7 +9,7 @@
      unsourced reference values) and #12 (oracle registry), and by
      D-007 (registry home) / D-008 + Amd 1 (three-kind verification bar) /
      D-009 (dated-observation directives) — cited in Scope. -->
-- **Branch/PR:** `m79-complete-oracle-registry`
+- **Branch/PR:** `m79-complete-oracle-registry` · PR #86 (https://github.com/jmgirard/intraclass/pull/86)
 
 ## Goal
 
@@ -61,24 +61,24 @@ oracle has no entry.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `data-raw/check-oracle-registry.py` exits 0 with every `O-*` family
+- [x] AC1 — `data-raw/check-oracle-registry.py` exits 0 with every `O-*` family
       asserted in `tests/testthat/*.R` either matched to an `ORACLES.md` entry or
       listed in its documented alias/sub-label allowlist; `--self-test` injects a
       known gap and the run goes red. Evidence: both command runs.
-- [ ] AC2 — every family in the census gap has an `ORACLES.md` entry carrying a
+- [x] AC2 — every family in the census gap has an `ORACLES.md` entry carrying a
       `**Kind:**` bullet (source-traceable / script-derived / mixed, D-008), a
       `Used by` test, and provenance; each script-derived leg is confirmed against
       its named committed fixture or an inline expected value **without a re-run**
       (D-008), and no entry states a status stronger than what was done
       (LESSONS M65/M68/M70). Evidence: the entries + AC1 green.
-- [ ] AC3 — the "open"/"dropped" characterizations of cluster `ICC(c,k)` on
+- [x] AC3 — the "open"/"dropped" characterizations of cluster `ICC(c,k)` on
       incomplete data are corrected to reflect the M46/M47 closure, cited to those
       milestones/ADRs (ADR-057/058). Evidence: grep before/after + diff.
-- [ ] AC4 — INDEX.md and the `ORACLES.md` registry-invariant header carry no
+- [x] AC4 — INDEX.md and the `ORACLES.md` registry-invariant header carry no
       "M1–M39 scope" claim and no pinned entry count, and the "invariant does not
       currently hold" note is resolved; characterizations avoid pinned counts
       (LESSONS M70). Evidence: grep.
-- [ ] AC5 — any repo-state observation added to INDEX.md carries a D-009
+- [x] AC5 — any repo-state observation added to INDEX.md carries a D-009
       `<!-- check: … -->` directive, and M79 **does not regress**
       `check-reference-observations.py` (its added observation is marked and its
       directive holds — `unmarked: 0`); the 22 falsifications pre-existing on
@@ -86,7 +86,7 @@ oracle has no entry.
       defect, out of scope. `enumerate-generalizing-claims.py --check` (M74) and
       `air format --check .` pass. Evidence: the runs + the origin/main baseline.
       <!-- amended 2026-07-21 (T5): D-009 was pre-existing red on origin/main; see work log. -->
-- [ ] AC6 — `Rscript -e 'devtools::test()'` is unaffected (no R behavior changed;
+- [x] AC6 — `Rscript -e 'devtools::test()'` is unaffected (no R behavior changed;
       docs + one Python checker only). Evidence: test summary + the branch diff
       touching no `R/` or `tests/` file.
 
@@ -135,3 +135,36 @@ oracle has no entry.
 ## Decisions
 
 ## Review
+
+**AC evidence (fresh, 2026-07-21).**
+- **AC1 ✓** — `python3 data-raw/check-oracle-registry.py` exits 0 (61 asserted base
+  oracles, 65 registry tokens, 2 aliases, **0 gaps**); `--self-test` exits 0 (orphan
+  flagged, real entry covered — harness bite intact).
+- **AC2 ✓** — all 16 census-gap families have exactly one `### Oracle` heading
+  (O-FML/IFML/IML/NML/FNML, O-LME, O-IDS/O-Boot-DS, O-cluster-ck, O-cc,
+  O-invariance, O-Bayes-cluster-ck, O-SEM-ML/-BOOT/-FIXED/-INC); every new entry
+  carries a `**Kind:**` bullet + `Used by` (Kind-bullet count 25→57). Fixture-backed
+  entries (O-cluster-ck, O-Bayes-cluster-ck, O-SEM-ML) confirmed against their
+  committed `.rds` without re-running; the rest honestly stamped script-attested.
+- **AC3 ✓** — the one stale claim corrected (O-Bayes-IML: "averaged cluster ICC(c,k)
+  was dropped-with-note at M30" + "M46/M47 later shipped the averaged … via
+  inverse-Simpson k_c^eff"); the 3 per-cluster-M9§9 still-open mentions preserved
+  (grep before/after).
+- **AC4 ✓** — INDEX.md + the ORACLES.md header carry 0 hits for "M1–M39 scope" /
+  "39 entries" / "does not currently hold"; the invariant note reads holds-and-
+  machine-checked, no pinned count.
+- **AC5 ✓ (amended)** — the INDEX observation carries a `check:` directive running
+  the census checker; `check-reference-observations.py` `unmarked: 0` (M79's own
+  observation marked + holding), `falsified: 22` = the `origin/main` baseline (no
+  regression); `enumerate-generalizing-claims.py --check` exit 0 (3 new claims
+  triaged OUT-oracle-pin); `air format --check .` exit 0.
+- **AC6 ✓** — `devtools::test()` FAIL 0 | WARN 2 | SKIP 23 | PASS 1901 (the 2 WARN are
+  pre-existing lavaan `cli_warn` paths); the branch diff touches no `R/` or `tests/`
+  file, so package behavior is byte-identical to `origin/main`.
+
+**Consistency gate.** `cairn_validate` exit 0 (all checks PASS; 327 advisory warnings,
+all pre-existing — the dangling-id tokens are COVERAGE.md → archived milestones).
+Toolchain: `devtools::document()` no diff (no roxygen drift); NAMESPACE/man untouched;
+`data-raw` is `.Rbuildignore`d (no new top-level file); no `@export` change → no
+user-visible change → no NEWS entry; full `R CMD check` matrix deferred to PR #86 CI
+(no build-included file changed). PR CI: format-check pass, rest pending.
