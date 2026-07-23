@@ -216,11 +216,12 @@ to a Bayesian fit, and \code{"posterior"} needs posterior draws no other engine
 produces.
 \code{"npbootstrap"} is the \strong{non-parametric} transformed bootstrap-\emph{t} of Ukoumunne
 et al. (2003), for the \strong{one-way random design} (\code{model = "oneway"}; it aborts
-otherwise). On \strong{balanced} data it serves both \code{unit = "single"} (ICC(1)) and
-\code{unit = "average"} (ICC(k)); on \strong{unbalanced} data (unequal ratings per subject)
-it serves \code{unit = "single"} only -- the effective group size becomes the ANOVA
-\code{n0} of Ohyama (2025) and the unbalanced average/ICC(k) interval is not yet
-available (use \code{ci_method = "montecarlo"} for it). It resamples whole subjects
+otherwise). It serves both \code{unit = "single"} (ICC(1)) and \code{unit = "average"}
+(ICC(k)) on \strong{balanced and unbalanced} data (unequal ratings per subject) alike;
+on unbalanced data the effective group size becomes the ANOVA \code{n0} of Ohyama
+(2025). Only a numeric \code{unit} (a D-study projection to \code{m} raters) is restricted
+to balanced data -- unbalanced use \code{ci_method = "montecarlo"} for a projection.
+It resamples whole subjects
 with replacement (not from the fitted model), stabilizes the variance with the
 \verb{log F} transform, studentizes with an infinitesimal-jackknife SE, and
 back-transforms the endpoints. It is \strong{not} a percentile bootstrap -- the
@@ -461,9 +462,11 @@ fails. Pass \code{seed} for a reproducible interval.
 \section{The \code{"npbootstrap"} interval (one-way)}{
 For \code{unit = "average"} (the ICC(k), reliability of the mean of the \emph{k} ratings)
 the transformed bootstrap-\emph{t} interval is the exact monotone \strong{Spearman-Brown}
-image of the single-rating ICC(1) interval, \code{g(rho) = k*rho / (1 + (k-1)*rho)}
-applied to the two ICC(1) endpoints. Because that map is strictly increasing, the
-ICC(k) interval's coverage is \strong{identical to the ICC(1) interval's, by
+image of the single-rating ICC(1) interval,
+\code{g(rho) = k_eff*rho / (1 + (k_eff-1)*rho)} applied to the two ICC(1) endpoints,
+with \code{k_eff} the effective number of ratings per subject (the harmonic mean, \verb{= k}
+on balanced data). Because that map is strictly increasing on the attainable range,
+the ICC(k) interval's coverage is \strong{identical to the ICC(1) interval's, by
 construction} -- it is not a separate approximation.
 
 On \strong{unbalanced} data (unequal ratings per subject) the reducer uses the ANOVA
@@ -471,14 +474,22 @@ effective group size \code{n0 = (N - sum(n_i^2)/N) / (k - 1)} (Ohyama 2025) in t
 \verb{log F} transform, and studentizes \code{log(SSA) - log(SSE)} -- the pivot the
 infinitesimal-jackknife SE is derived for (Ukoumunne et al. 2003, Appendix A),
 which coincides with the balanced \verb{log F} pivot when subjects are equally rated.
-Only \code{unit = "single"} (ICC(1)) is available unbalanced; the ICC(k) average is
-balanced-only for now (its unbalanced averaging divisor is not yet resolved).
+The Spearman-Brown map stays well-defined unbalanced because \code{k_eff <= n0} for
+every one-way design, so its pole \code{-1/(k_eff-1)} sits at or below the ICC(1)
+support boundary \code{-1/(n0-1)} and never falls inside the interval; coverage
+inheritance therefore holds unbalanced exactly as it does balanced. A numeric
+\code{unit} (D-study projection to \code{m} raters), by contrast, is balanced-only: a chosen
+\code{m} may exceed \code{n0} and push the pole inside the support.
 
 Following Ukoumunne et al. (2003, §5.2), the endpoints are \strong{not truncated} to
 \verb{[0, 1]}: they are confined only to the estimator's own support (approaching
 \code{-1/(n0-1)} from above for ICC(1), and unbounded below for ICC(k)), so a
 near-boundary lower endpoint can be negative -- markedly so for ICC(k). Leaving
-them untruncated is what makes the coverage faithful to the published method.
+them untruncated is what makes the coverage faithful to the published method. On
+unbalanced data the reported ICC(k) \code{std.error} (the spread of the resampled
+ICC(k) values) can likewise be large near the boundary, where a resample close to
+the pole inflates the untruncated ICC(k) scale; this is a faithful disclosure, not
+an error, and the coverage-bearing endpoints are unaffected.
 
 The reported \strong{point estimate} is the engine (REML) point, exactly as for every
 other \code{ci_method} -- \code{ci_method} selects the interval, not the estimator. At the

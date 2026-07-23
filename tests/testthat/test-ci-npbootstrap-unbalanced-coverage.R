@@ -62,3 +62,15 @@ test_that("the few-clusters/many-raters cell dips below the near-nominal cells (
   expect_lt(oracle$D_10_10$coverage_icc1, near_nominal)
   expect_lt(oracle$D_10_10$coverage_icc1, 0.93)
 })
+
+test_that("ICC(k) coverage inherits from ICC(1) rep-by-rep over the full sweep (M85 AC2)", {
+  # The M85 ICC(k) column: because g is strictly monotone and finite (k_eff <= n0,
+  # MD-1), the ICC(k) coverage indicator equals the ICC(1) indicator EVERY rep. Over
+  # the full n_rep >= 2000 sweep the fixture records zero discrepant reps, and the two
+  # coverage columns are byte-identical -- the strongest form of the event identity.
+  for (nm in names(oracle)) {
+    x <- oracle[[nm]]
+    expect_identical(x$n_discrepant, 0L)
+    expect_identical(x$coverage_icck, x$coverage_icc1)
+  }
+})

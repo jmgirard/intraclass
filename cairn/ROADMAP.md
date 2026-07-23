@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | done | — | normal | milestones/archive/M84-unbalanced-npbootstrap-icc1.md |
-| M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | in-progress | M84 | normal | milestones/M85-unbalanced-npbootstrap-icck.md |
+| M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | review | M84 | normal | milestones/M85-unbalanced-npbootstrap-icck.md |
 | M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | done | — | normal | milestones/archive/M83-repair-rotted-brms-test-expectations.md |
 | M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M82-classical-oneway-ci-method.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |

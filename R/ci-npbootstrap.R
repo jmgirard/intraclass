@@ -33,9 +33,13 @@
 # Endpoints are UNTRUNCATED (ukoumunne §5.2; RR01 §5): confined only to the
 # estimator's own support (-1/(n0-1), 1) for ICC(1). The ICC(k) / `unit = "average"`
 # interval is the exact monotone Spearman-Brown image of the ICC(1) interval
-# (RR02 Q2): g(rho) = k*rho/(1+(k-1)rho) applied to the two final rho endpoints --
-# on BALANCED data only (k_eff = n = n0); the unbalanced ICC(k) pole/support
-# re-derivation is M85, so the dispatch aborts `unit = "average"` under imbalance.
+# (RR02 Q2): g(rho) = k_eff*rho/(1+(k_eff-1)rho) applied to the two final rho
+# endpoints, with k_eff the harmonic-mean averaging divisor (== n = n0 on balanced
+# data). This ships for BOTH balanced and unbalanced data (M85): the map is pole-safe
+# unbalanced because k_eff <= n0 for every one-way design (M85 MD-1, AM-GM on triples),
+# so the SB pole -1/(k_eff-1) sits at or below the support boundary -1/(n0-1) and never
+# intrudes. Only a numeric `unit` (D-study projection to m raters) stays balanced-only
+# -- a chosen m may exceed n0 and push the pole inside the support (dispatch aborts it).
 # Coverage is inherited as an exact event identity, so the ICC(k) interval needs
 # no separate oracle -- only the identity cross-check (BC2) and the inherited-
 # coverage assertion (BC3). The reported POINT for both estimands is the engine
