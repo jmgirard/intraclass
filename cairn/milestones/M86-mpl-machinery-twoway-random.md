@@ -73,7 +73,7 @@ published κ_m constants and coverage/length tables in the calibration region
 
 ## Tasks
 
-- [ ] T1 — Confirm the estimand mapping: xiao2013 ρ ↔ package `ICC(A,1)`
+- [x] T1 — Confirm the estimand mapping: xiao2013 ρ ↔ package `ICC(A,1)`
       (σ²_e ≡ σ²_res) against `cairn/estimand-specs/M1-twoway-random-agreement.md`
       and `mcgraw1996`; record it plus the index transposition in the evidence note.
 - [ ] T2 — Implement `l†(ρ)` from the (SMS, RMS, EMS) layout (Eq. 7–8) and the
@@ -91,6 +91,7 @@ published κ_m constants and coverage/length tables in the calibration region
 ## Work log
 
 - 2026-07-23: created by /milestone-plan (split from the PL-CI candidate; sibling M87 owns the verdict).
+- 2026-07-23: T1 — estimand mapping confirmed (xiao2013 ρ = package ICC(A,1), σ²_e ≡ σ²_res) against the M1 spec + mcgraw1996; recorded in `references/mpl-twoway-random-comparison.md` (new synthesis note + INDEX.md row).
 
 ## Decisions
 
