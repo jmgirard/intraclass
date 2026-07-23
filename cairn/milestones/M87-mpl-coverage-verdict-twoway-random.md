@@ -1,10 +1,11 @@
 # M87: MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M86
 - **Driving RR:** —
 - **Principles touched:** IP1, GP5, GP6
+- **Branch:** m87-mpl-coverage-verdict-twoway-random
 
 ## Goal
 
