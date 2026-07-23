@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1
-- **Branch/PR:** `m82-classical-oneway-ci-method`
+- **Branch/PR:** `m82-classical-oneway-ci-method` · [PR #89](https://github.com/jmgirard/intraclass/pull/89)
 
 ## Goal
 
@@ -32,30 +32,30 @@ components-absent (vcov) reprojection path unchanged.
 
 ## Acceptance criteria
 
-- [ ] AC1 — `icc(..., ci_method = "searle")` and `"burch"` return finite ICC(1)
+- [x] AC1 — `icc(..., ci_method = "searle")` and `"burch"` return finite ICC(1)
       intervals on balanced one-way random data, reproducing the O-Classical-OW
       published oracles **in the test suite**: ohyama2025 §4 Ex.1 PMOC — SEARLE
       (0.600, 0.891) and Burch REML (0.620, 0.885) within 0.002; burch2011 §4
       arsenic — SEARLE (0.81, 0.94) and Burch (0.73, 0.95) within 0.005 (≥2
       independent published sources per method — IP1).
-- [ ] AC2 — the two self-checks assert in the suite: the mcgraw1996 Table 7
+- [x] AC2 — the two self-checks assert in the suite: the mcgraw1996 Table 7
       algebraic-identity cross-check (SEARLE ≡ Table 7 F-form, ≤ 1e−9) and the
       Burch eq.13/14/15 raw-data kurtosis-pipeline self-consistency
       (bias-corrected κ̂̂ ≈ 0 under normality).
-- [ ] AC3 — both methods abort loudly (classed `abort_*`, #5/#8) on any
+- [x] AC3 — both methods abort loudly (classed `abort_*`, #5/#8) on any
       non-one-way or unbalanced design, message pointing to `montecarlo`,
       mirroring the `npbootstrap` guards (`R/icc.R:1277`).
-- [ ] AC4 — the `unit = "average"` (ICC(k)) endpoints equal the monotone
+- [x] AC4 — the `unit = "average"` (ICC(k)) endpoints equal the monotone
       Spearman-Brown image of the ICC(1) endpoints, and a committed identity
       cross-check confirms that image equals the direct classical ICC(k) F-form
       (`1 − 1/F_limit`) for both methods (exact, tol 1e−9); ORACLES records the
       ICC(k) basis as inheritance, not an independent anchor (D-010 precedent).
-- [ ] AC5 — the reported **point** for both estimands and both methods is the
+- [x] AC5 — the reported **point** for both estimands and both methods is the
       engine (glmmTMB REML) point via `icc_point()`, identical to every other
       frequentist `ci_method`; `ci$method` records `"searle"`/`"burch"` and
       `ci$samples` is `NA` (deterministic closed form — no resampling, `seed`,
       or draw count), surfaced correctly in `print()`/`glance()`.
-- [ ] AC6 — `@param ci_method` documents both strings with their precision
+- [x] AC6 — `@param ci_method` documents both strings with their precision
       (exact-F near-normal vs kurtosis-robust REML) per D-010/RR02 BC1; NEWS
       records the two new opt-in methods; ORACLES.md O-Classical-OW status flips
       prototype-validated → suite-asserted.
@@ -111,3 +111,36 @@ components-absent (vcov) reprojection path unchanged.
   "closed form"). See `cairn/DECISIONS.md` D-013.
 
 ## Review
+
+**Fresh evidence (2026-07-22, PR #89).** `tests/testthat/test-ci-classical.R`
+run at `NOT_CRAN=true`: **36 pass, 0 fail, 0 skip** (glmmTMB present, so the
+end-to-end paths ran), 1.2 s.
+
+- **AC1** (published oracles in suite) — the four published-example tests pass:
+  SEARLE reproduces ohyama2025 §4 Ex.1 PMOC (0.600, 0.891) ≤0.002 and burch2011
+  §4 arsenic (0.81, 0.94) ≤0.005; Burch reproduces ohyama Ex.1 REML (0.620,
+  0.885) ≤0.002 and arsenic REML (0.73, 0.95) ≤0.005 — ≥2 independent sources
+  per method. Evidence: the ci-classical suite run above.
+- **AC2** (self-checks) — the mcgraw1996 Table 7 algebraic identity (SEARLE ≡
+  Table 7 F-form, ≤1e−9) and the Burch eq.13/14/15 kurtosis-pipeline
+  self-consistency (mean κ̂̂ ≈ 0 under normality, 2000 reps) both pass.
+- **AC3** (guards) — the two guard tests pass: `ci_method = "searle"`/`"burch"`
+  abort `intraclass_unsupported` on a two-way design and on an unbalanced
+  one-way design.
+- **AC4** (ICC(k) identity) — the two SB-identity tests pass: for both methods
+  the `unit = "average"` endpoints equal the direct classical ICC(k) F-form
+  (SEARLE `1−1/g`; Burch `1−1/(1+nθ)`) recovered from the ICC(1) endpoints,
+  ≤1e−9.
+- **AC5** (engine point + metadata) — the end-to-end test passes: the searle/
+  burch ICC(1) point equals the montecarlo point ≤1e−8 (shared REML point),
+  `ci$method` is `"searle"`/`"burch"`, `ci$samples` and `std.error` are `NA`.
+  `print()` renders "closed form" (confirmed at implement).
+- **AC6** (docs) — `@param ci_method` documents both strings with precision;
+  `@details` has a classical subsection; `@references` gains Burch 2011 + Searle
+  1971; NEWS entry added; ORACLES.md O-Classical-OW flipped prototype-validated
+  → suite-asserted. `devtools::document()` produces no diff (man/icc.Rd current).
+
+**Consistency gate.** `cairn_validate.py` exit 0 — all 16 gate checks PASS
+(`coverage complete` PASS; only the pre-existing dangling-id-tokens advisory).
+`devtools::document()` no diff. No `DESIGN.md` principle changed (Principles
+touched: IP1, worked under not altered), so `cairn_impact` N/A.
