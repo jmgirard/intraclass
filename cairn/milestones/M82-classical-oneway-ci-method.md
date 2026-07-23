@@ -59,7 +59,7 @@ components-absent (vcov) reprojection path unchanged.
       (exact-F near-normal vs kurtosis-robust REML) per D-010/RR02 BC1; NEWS
       records the two new opt-in methods; ORACLES.md O-Classical-OW status flips
       prototype-validated → suite-asserted.
-- [ ] AC7 — the active profile's `verify` slot is clean (and its named
+- [x] AC7 — the active profile's `verify` slot is clean (and its named
       pre-review check), including `lintr::lint_package()` and
       `air format --check`.
 
@@ -140,7 +140,16 @@ end-to-end paths ran), 1.2 s.
   1971; NEWS entry added; ORACLES.md O-Classical-OW flipped prototype-validated
   → suite-asserted. `devtools::document()` produces no diff (man/icc.Rd current).
 
+- **AC7** (verify + pre-review check clean) — `lintr::lint_package()` 0 lints;
+  `air format --check` clean; `devtools::check(env=CI parity, --no-manual)`
+  **Status: OK — 0 errors, 0 warnings, 0 notes** (2m38s; testthat.R, examples,
+  vignette rebuild all OK). The `--no-manual` flag sidesteps the known local
+  TinyTeX Courier-font PDF-manual issue (environmental, not an Rd defect).
+
 **Consistency gate.** `cairn_validate.py` exit 0 — all 16 gate checks PASS
 (`coverage complete` PASS; only the pre-existing dangling-id-tokens advisory).
-`devtools::document()` no diff. No `DESIGN.md` principle changed (Principles
-touched: IP1, worked under not altered), so `cairn_impact` N/A.
+`devtools::document()` no diff; `devtools::check()` Status OK (above). No
+`DESIGN.md` principle changed (Principles touched: IP1, worked under not
+altered), so `cairn_impact` N/A.
+
+**Independent review (three lenses + scorer).**
