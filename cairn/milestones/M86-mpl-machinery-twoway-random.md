@@ -1,6 +1,6 @@
 # M86: Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -96,6 +96,7 @@ published κ_m constants and coverage/length tables in the calibration region
 - 2026-07-23: T3 — added `mpl_kappa_corr`/`mpl_kappa_m` (Bartlett-type MC realisation of the seven-step κ_corr; κ_m = grid max). Validated: κ_corr(0.6,16) for (3,50) centers at 0.652±0.029 vs published κ_m 0.67 (the max is at the ρ=0.6/δ=16 corner as the paper predicts); MPL interval path (published κ_m) reproduces Table 6 anchors near-exactly — (3,10,δ0.5,ρ.60) 945/0.570 vs 945/0.569, (3,50,δ4,ρ.60) 902/0.556 vs 908/0.559, (5,50,δ4,ρ.90) 928/0.233 vs 927/0.230. lintr + air clean.
 - 2026-07-23: T4/T5 — `data-raw/m86-mpl-validate.R` seeded run (n_rep=2000, n_mc=3000) → `data-raw/m86-mpl-validation-results.rds`. Table 4 (naive PL) 4/4 coverage+length; Table 6 (MPL, published κ_m) 3/3; Table 3 κ_m 3/3 within ±0.10 (0.328/0.700/0.362 vs 0.32/0.67/0.33); Table 7 one-sided coverage 2/2 (870/865, 966/959). One-sided *average-length* misses at the (3,50,δ4,ρ.90) corner (0.276 vs 0.433) — machinery verified correct (profile = 6000-pt brute-force to 0; coverage + two-sided all reproduce), recorded as an isolated high-ρ discrepancy, not forced (#4).
 - 2026-07-23: T6 — evidence note `references/mpl-twoway-random-comparison.md` completed (mapping + implementation + oracle-validation tables + verdict); INDEX row (T1); M74 triage row (`OUT-repo-analysis`), enumerator `--check` green; `cairn_validate` clean (provenance "Ingested" keyword fix). lintr + air clean.
+- 2026-07-23: all tasks complete → status `review`. Seeded validate re-run byte-identical (deterministic), gated criteria ALL PASS. Verify slot clean: `devtools::test()` at `NOT_CRAN=true CI=true` → FAIL 0 | WARN 2 | SKIP 23 | PASS 4041 (no R/ or tests/ change; 2 WARN are pre-existing captured glmmTMB/vignette warnings).
 
 ## Decisions
 
