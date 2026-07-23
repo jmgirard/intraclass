@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP5
-- **Branch/PR:** m86-mpl-machinery-twoway-random
+- **Branch/PR:** m86-mpl-machinery-twoway-random · https://github.com/jmgirard/intraclass/pull/93
 
 ## Goal
 
