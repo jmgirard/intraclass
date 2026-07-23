@@ -2045,7 +2045,7 @@ test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-I
   expect_identical(fa$ci$method, "posterior")
   expect_identical(fa$design$ml_design, "nested_in_clusters")
   ta <- tidy(fa)
-  # Subject level only (nested designs define no cluster-level IRR); agreement by default.
+  # Subject level only (nested designs define no cluster-level IRR); agreement via explicit `type`.
   expect_setequal(unique(ta$level), "subject")
   expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
@@ -3109,8 +3109,8 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
   # the honest engine-agreement pin -- NOT pointwise equality, since the flat rater-effect
   # prior vs half-t on the SDs perturbs the balanced fixed ~ random identity (#18).
   # Pin the reference to the SUBJECT level: both engines' fixed multilevel now also return the
-  # cluster level on balanced data (M37/M38, ADR-047), so the fit above and this reference are
-  # both pinned to `level = "subject"` to keep the containment a one-row-per-index comparison.
+  # cluster level on balanced data (glmmTMB M37 ADR-047 / brms M38 ADR-048), so the fit above and
+  # this reference are both pinned to `level = "subject"` to keep containment one-row-per-index.
   ga <- suppressWarnings(tidy(icc(
     d,
     score,
