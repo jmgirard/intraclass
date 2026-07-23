@@ -170,6 +170,12 @@ and milestones; never restate a value here.
   Burch (2011) REML intervals vs the MC / parametric-bootstrap / npbootstrap
   incumbents. Results/disposition appended at T5/T6.
 
+- [mpl-twoway-random-comparison.md](mpl-twoway-random-comparison.md) — synthesis
+  note (M86/M87): the estimand mapping (xiao2013 ρ = package `ICC(A,1)`) and the
+  oracle-validation of the from-scratch naive-PL / MPL implementation against
+  xiao2013's Tables 3/4/6/7; M87 appends its pre-registration, package comparison
+  sweep, and GO/NO-GO verdict.
+
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
