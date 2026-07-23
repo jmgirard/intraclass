@@ -64,7 +64,7 @@ unbalanced npbootstrap abort per the branch taken.
 
 ## Tasks
 
-- [ ] T1 (RB tripwire: no-oracle): re-derive the SB pole/support alignment for the
+- [x] T1 (RB tripwire: no-oracle): re-derive the SB pole/support alignment for the
       unbalanced transform (`n₀` vs harmonic-mean `k_eff`); numeric check on a
       worst-case unbalanced design; record GO (aligned) or NO-GO (pole intrudes)
       with the derivation. Fable escalation only if contested.
@@ -83,7 +83,29 @@ unbalanced npbootstrap abort per the branch taken.
 
 - 2026-07-23: created by /milestone-plan (with M84, the ICC(1) predecessor).
 - 2026-07-23: set in-progress; branch `m85-unbalanced-npbootstrap-icck` cut from main.
+- 2026-07-23: T1 — AC1 GO verdict (MD-1): proved k_eff ≤ n₀ (AM-GM on triples), so the SB pole never intrudes; numeric check + re-derived AC4 identity in `test-ci-npbootstrap-unbalanced-icck.R` (2013 pass). Not escalated (maintainer accepted the proof at the gate).
 
 ## Decisions
+
+- **MD-1 (2026-07-23, T1 — AC1 GO/NO-GO: GO).** The unbalanced ICC(k) interval is
+  the Spearman-Brown image `g(ρ) = k_eff·ρ/(1+(k_eff−1)ρ)` of the ICC(1) endpoints,
+  `ρ` on the transform support `(−1/(n₀−1), 1)` (`n₀` = ohyama eq. 3). `g`'s pole
+  `−1/(k_eff−1)` intrudes on the attainable range **iff `k_eff > n₀`**. **Verdict GO:**
+  `k_eff` (harmonic mean of `nᵢ`, the package divisor) `≤ n₀` for every one-way design,
+  so the pole sits at or below the support boundary and never intrudes — `g` is finite
+  and strictly monotone on all attainable `ρ`, and coverage inheritance holds as an exact
+  event identity unbalanced (AC2), as it did balanced (M84/RR02). **Proof:** writing
+  `n₀ = 2Σ_{i<j}nᵢnⱼ/(N(k−1))`, `k_eff ≤ n₀ ⟺ 2Σ_{i<j}nᵢnⱼ·Σ(1/n_l) ≥ k(k−1)N`; expanding
+  and grouping the residual triple sum by unordered triples, each gives
+  `2(n_an_b/n_c + n_an_c/n_b + n_bn_c/n_a) ≥ 2(n_a+n_b+n_c)` by AM-GM, summing to
+  `(k−1)(k−2)N`. Equality iff all `nᵢ` equal (k≥3) / always k=2 — the balanced
+  pole-on-boundary case. Numeric: `min(n₀−k_eff) = −1.4e−14` over 2×10⁵ random +
+  adversarial designs (`test-ci-npbootstrap-unbalanced-icck.R`). The
+  `(RB tripwire: no-oracle)` resolved by the closed-form proof + numeric check
+  (maintainer accepted at the implement gate, 2026-07-23), not escalated to Fable.
+  **Consequence:** the GO branch ships — the abort at `R/icc.R:1352` (unbalanced
+  `unit="average"`) is lifted; the shipped `npbootstrap_ci` already realizes `g` via
+  `npb_sb(ρ, k_eff)`. AC4 identity re-derived (`k_eff≠n₀`):
+  `g(ρ)=k_eff(F−1)/(k_eff(F−1)+n₀)`, `F=exp(logf)` — reduces to `1−1/F` balanced (RR02 BC2).
 
 ## Review
