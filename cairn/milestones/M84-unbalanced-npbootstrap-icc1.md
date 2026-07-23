@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP6, GP7
-- **Branch/PR:** —
+- **Branch/PR:** m84-unbalanced-npbootstrap-icc1
 
 ## Goal
 
@@ -66,10 +66,9 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
 
 ## Tasks
 
-- [ ] T1 (RB tripwire: no-oracle): investigate — recover ohyama2025 §2's unbalanced
+- [x] T1 (RB tripwire: no-oracle): investigate — recover ohyama2025 §2's unbalanced
       NBOOT method (IJ SE vs nested bootstrap) from the shelf PDF; pin `n₀` (ANOVA
-      `n₀` vs harmonic mean) by reproducing Example 2's `ρ̂ = 0.585`. Record findings
-      in `ukoumunne2003.md`/`ohyama2025.md` (+ a D-entry if the SE basis is a choice).
+      `n₀` vs harmonic mean) by reproducing Example 2's `ρ̂ = 0.585`. Recorded in MD-1.
 - [ ] T2: re-derive the eq. 7 IJ SE for unequal `n_i` from ukoumunne Appendix A
       (A1–A10, the `C` term); implement in `R/ci-npbootstrap.R` — generalize
       `npb_anova()` to per-subject `n_i` and `npb_logf_to_rho()` to `n₀`.
@@ -88,7 +87,26 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
 ## Work log
 
 - 2026-07-23: created by /milestone-plan (with M85, the ICC(k) follow-on).
+- 2026-07-23: T1 — recovered ohyama §2.3 (unbalanced NBOOT = eq. 7 with per-`nᵢ`,
+  no nested bootstrap) + eq. 3 `n₀`; verified Example 2 `ρ̂ = 0.585`; re-read
+  ukoumunne Appendix A (C-term). Decision MD-1; not escalated to Fable.
 
 ## Decisions
+
+**MD-1 (T1): unbalanced NBOOT — ANOVA `n₀` transform + C-dropped (Form A) pivot.**
+- `n₀ = (N − Σnᵢ²/N)/(k−1)` (ohyama eq. 3), the ANOVA effective group size — not
+  the harmonic mean `n̂ = k/Σ(1/nᵢ)` (ohyama uses `n̂` only in SEARLE's eq. 6).
+  Verified: `MSA=2.198, MSE=0.272, n₀=5.02 → ρ̂=0.585` (ohyama §4 Example 2).
+  `log F = log[{1+(n₀−1)ρ̂}/(1−ρ̂)] = log(MSA/MSE)` under `n₀`.
+- The IJ SE (ukoumunne eq. 7 = Appendix A A10→A1) already carries per-subject
+  `nᵢ` and is derived for the pivot `log SSA − log SSE`, with the df-constant
+  `C = log[(N−k)/(k−1)]` dropped (A4→A5). Balanced resamples keep `C•=C`, so the
+  M75 code (studentizing `log(MSA/MSE)`) equals the faithful pivot; unbalanced
+  resamples change `N•` so `C•≠C`.
+- **Form A (IP1-faithful):** M84 studentizes the C-dropped pivot — each bootstrap
+  `t*` numerator subtracts `(C•−C_obs) = log[(N•−k)/(N−k)]`; endpoints reconstruct
+  on `log F` with the observed `C`. Reduces to M75 exactly on balanced data (AC2).
+- Not escalated to Fable: Appendix A settles the derivation; the residual (ohyama's
+  exact code) is empirical, covered by the Fig. 2 coverage band (AC4).
 
 ## Review
