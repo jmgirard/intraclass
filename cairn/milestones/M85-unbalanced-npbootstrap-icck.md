@@ -1,6 +1,6 @@
 # M85: Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived Spearman-Brown map
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M84
 - **Driving RR:** —
@@ -76,7 +76,7 @@ unbalanced npbootstrap abort per the branch taken.
 - [x] T4: ICC(k) oracle — extend the M84 sweep with the ICC(k) coverage column
       (rep-by-rep identity, tolerance 0) and the re-derived identity cross-check
       (≤ 1e-10).
-- [ ] T5: docs — `@param ci_method`/@details, the `ORACLES.md` O-NPBoot ICC(k)
+- [x] T5: docs — `@param ci_method`/@details, the `ORACLES.md` O-NPBoot ICC(k)
       basis, NEWS; `devtools::document()`, `devtools::check()`.
 
 ## Work log
@@ -87,6 +87,7 @@ unbalanced npbootstrap abort per the branch taken.
 - 2026-07-23: T2/T3 — GO branch: lifted the `unit="average"` unbalanced npbootstrap abort (`R/icc.R`), so the shipped `npbootstrap_ci` (already `npb_sb(ρ, k_eff)`) serves the unbalanced ICC(k); numeric `unit=m` stays deferred (not pole-safe). Tests: shipped SB-image identity (AC5), rep-by-rep coverage inheritance in-suite (AC2), flipped the old average-aborts test. Verified `std.error` robustly finite over 1977 near-zero designs (heavy-tailed near boundary → doc). Affected test files pass; full `devtools::test()` at completion.
 - 2026-07-23: T5 (docs) — `@param`/@details (pole-safe SB map, numeric-unit balanced-only, near-boundary `std.error`), ORACLES O-NPBoot unbalanced ICC(k) basis, NEWS; `document()` regenerated `man/icc.Rd`.
 - 2026-07-23: T4 — extended the M84 unbalanced sweep generator with the ICC(k) coverage column; regenerated the n_rep=2000 fixture (ICC(1) columns byte-identical to the committed M84 values; `n_discrepant=0` and `coverage_icck==coverage_icc1` on all 4 cells). Coverage-test asserts the full-sweep event identity (AC2). All npbootstrap test files pass.
+- 2026-07-23: completion — `devtools::test()` (`NOT_CRAN=true CI=true`) FAIL 0 / 4041 pass (2 pre-existing WARN captures in `test-vignette-claims.R`, unrelated); `lintr::lint_package()` 0; `devtools::check()` (NOT_CRAN=false) 0 errors / 0 warnings / 0 notes. Status → review.
 
 ## Decisions
 

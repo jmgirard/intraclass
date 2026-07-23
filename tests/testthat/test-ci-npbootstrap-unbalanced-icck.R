@@ -17,9 +17,9 @@
 # R/ci-npbootstrap.R). The GO derivation: pole intrudes iff k_eff > n0.
 keff_hm <- function(n_i) 1 / mean(1 / n_i)
 n0_eq3 <- function(n_i) {
-  N <- sum(n_i)
+  n_tot <- sum(n_i)
   k <- length(n_i)
-  (N - sum(n_i^2) / N) / (k - 1)
+  (n_tot - sum(n_i^2) / n_tot) / (k - 1)
 }
 
 test_that("the SB pole never intrudes: k_eff <= n0 for every one-way design (AC1 GO)", {
