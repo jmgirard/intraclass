@@ -80,7 +80,7 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
       reduces-to-balanced parity (AC2).
 - [x] T5: unbalanced coverage sweep in `data-raw/` (`n_rep ≥ 2000`, ohyama Fig. 2
       cells, MCAR 0.1); commit the fixture; assert the plot-read band (AC4).
-- [ ] T6: docs — `@param ci_method`/@details, the `ORACLES.md` O-NPBoot entry
+- [x] T6: docs — `@param ci_method`/@details, the `ORACLES.md` O-NPBoot entry
       (unbalanced basis: reduces-to-balanced + ohyama Fig. 2 plot-read + Example-2
       point), NEWS; `devtools::document()`, `devtools::check()`.
 
@@ -102,6 +102,10 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
   (A_10_2 .936/.945, A_25_5 .940/.935, A_50_5 .946/.945); the k=10,n=10 dip cell
   .922 sits below them (GP6). `n_ok` ≥ 1957/2000 (MCAR degenerate guard). Fixture +
   `test-ci-npbootstrap-unbalanced-coverage.R` green.
+- 2026-07-23: T6 — `ORACLES.md` O-NPBoot extended with the unbalanced ICC(1) leg
+  (reduces-to-balanced + Example-2 point + Fig. 2 plot-read; no independent SE
+  anchor). Generalizing-claims gate in sync (258/258). @param/@details/NEWS landed
+  in the T2–T4 commit.
 
 ## Decisions
 
