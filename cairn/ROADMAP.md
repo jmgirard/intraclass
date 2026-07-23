@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | in-progress | — | normal | milestones/M82-classical-oneway-ci-method.md |
+| M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | review | — | normal | milestones/M82-classical-oneway-ci-method.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | done | — | normal | milestones/archive/M81-wire-generalizing-claims-gate-into-ci.md |
 | M80 | Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI | done | — | normal | milestones/archive/M80-repair-d009-reference-checker.md |

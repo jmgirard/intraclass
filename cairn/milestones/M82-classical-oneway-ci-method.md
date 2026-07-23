@@ -1,6 +1,6 @@
 # M82: Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -99,6 +99,7 @@ components-absent (vcov) reprojection path unchanged.
 - 2026-07-22: set in-progress; branched `m82-classical-oneway-ci-method`.
 - 2026-07-22: T1–T5 implemented. `R/ci-classical.R` (SEARLE + Burch reducers with exposed `searle_endpoints`/`burch_reml_endpoints` cores); dispatch + guards + `ci$samples`/`print()` handling in `R/icc.R`/`R/icc-methods.R`; `tests/testthat/test-ci-classical.R` (36 assertions, all pass in isolation) migrating the O-Classical-OW oracles from the M76 prototype + the two self-checks + the ICC(k) SB-identity cross-check; `@param`/`@details`/`@references`, NEWS, ORACLES flip. Promoted D-013. `air format` + `document()` clean.
 - 2026-07-22: full-suite run surfaced PRE-EXISTING failures in `tests/testthat/test-icc-brms.R` (stale `skip_on_ci` expectations predating the "all definitions by default" change; M32 vintage, file untouched since M52) — unrelated to M82's diff, invisible to CI/review gate (live-Stan skipped). Filed as a candidate row + chip (task_c96e1259); re-ran the suite at gate parity (`NOT_CRAN=true CI=true`) to verify the rest.
+- 2026-07-22: gate-parity suite clean (`ci-classical` all pass; 23 live-brms skipped on CI; 2 pre-existing convergence/Heywood warnings in unrelated files); `lintr::lint_package()` 0 lints. Set `review`.
 
 ## Decisions
 
