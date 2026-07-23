@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1
-- **Branch/PR:** —
+- **Branch/PR:** `m82-classical-oneway-ci-method`
 
 ## Goal
 
@@ -75,28 +75,38 @@ components-absent (vcov) reprojection path unchanged.
 
 ## Tasks
 
-- [ ] T1 — Add `R/ci-classical.R`: `searle_ci()` and `burch_ci()` reducers
+- [x] T1 — Add `R/ci-classical.R`: `searle_ci()` and `burch_ci()` reducers
       ported from the validated prototype, each returning the per-estimand
       `list(conf.low, conf.high, std.error)` shape that `mc_ci()`/
       `npbootstrap_ci()` return so dispatch consumes them identically.
-- [ ] T2 — Wire dispatch in `R/icc.R`: add `"searle"`, `"burch"` to
+- [x] T2 — Wire dispatch in `R/icc.R`: add `"searle"`, `"burch"` to
       `validate_choice` (`R/icc.R:445`); add the dispatch branch (`R/icc.R:1863`);
       add the balanced-one-way abort guards (mirror `R/icc.R:1277`); set
       `ci$samples = NA` for the closed-form methods (`R/icc.R:1961`).
-- [ ] T3 — Migrate the O-Classical-OW oracles from `data-raw` `stopifnot` into
+- [x] T3 — Migrate the O-Classical-OW oracles from `data-raw` `stopifnot` into
       `tests/testthat/test-ci-classical.R`: both published worked examples per
       method + the Table 7 identity + the Burch kurtosis self-consistency check.
-- [ ] T4 — Implement `unit = "average"` via the shared Spearman-Brown map and
+- [x] T4 — Implement `unit = "average"` via the shared Spearman-Brown map and
       add the committed identity cross-check (SB image ≡ direct ICC(k) F-form)
       for both methods; keep endpoints on the estimator's own support.
-- [ ] T5 — Docs: extend `@param ci_method` (`R/icc.R:283`), add a NEWS entry,
+- [x] T5 — Docs: extend `@param ci_method` (`R/icc.R:283`), add a NEWS entry,
       flip ORACLES.md O-Classical-OW to suite-asserted, confirm `print()`/
       `glance()` surface the method; run `air format` + `lintr`.
 
 ## Work log
 
 - 2026-07-22: created by /milestone-plan. Promoted from the ROADMAP candidate (lineage D-006 → M76/D-012). Gate decisions: ship both methods; strings `"searle"`/`"burch"` decided now under D-010's family-naming doctrine (no fresh RB); ICC(k) via the SB map (algebraic identity to the direct F-form proven for both methods at plan — IP1 by proof + committed cross-check); fallback-on-abort default fenced out to a candidate row.
+- 2026-07-22: set in-progress; branched `m82-classical-oneway-ci-method`.
+- 2026-07-22: T1–T5 implemented. `R/ci-classical.R` (SEARLE + Burch reducers with exposed `searle_endpoints`/`burch_reml_endpoints` cores); dispatch + guards + `ci$samples`/`print()` handling in `R/icc.R`/`R/icc-methods.R`; `tests/testthat/test-ci-classical.R` (36 assertions, all pass in isolation) migrating the O-Classical-OW oracles from the M76 prototype + the two self-checks + the ICC(k) SB-identity cross-check; `@param`/`@details`/`@references`, NEWS, ORACLES flip. Promoted D-013. `air format` + `document()` clean.
+- 2026-07-22: full-suite run surfaced PRE-EXISTING failures in `tests/testthat/test-icc-brms.R` (stale `skip_on_ci` expectations predating the "all definitions by default" change; M32 vintage, file untouched since M52) — unrelated to M82's diff, invisible to CI/review gate (live-Stan skipped). Filed as a candidate row + chip (task_c96e1259); re-ran the suite at gate parity (`NOT_CRAN=true CI=true`) to verify the rest.
 
 ## Decisions
+
+- **D-013 (promoted, cross-cutting):** the classical `ci_method` exported-API
+  scope — `"searle"`/`"burch"` strings (D-010 family-naming doctrine, no fresh
+  RB), ICC(k) via the shared Spearman-Brown map (algebraic identity to the direct
+  F-form proven for both methods; committed cross-check), and deterministic
+  metadata (engine REML point, `ci$samples`/`std.error` = `NA`, `print()` shows
+  "closed form"). See `cairn/DECISIONS.md` D-013.
 
 ## Review

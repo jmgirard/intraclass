@@ -406,3 +406,37 @@ burch2011/ohyama2025/mcgraw1996 (IP1). O-Classical-OW registers the prototype or
 for that milestone to assert. Confirms D-006's framing (a boundary-robust classical
 default is a separate track from the npbootstrap GO) and answers its open question: on
 this evidence the classical route does not clear replacement.
+
+### D-013 (2026-07-22): Classical one-way `ci_method` exported-API scope — `"searle"`/`"burch"` strings, ICC(k) via the SB map, deterministic (no SE/draws)
+
+**Context:** M82 exports the two M76-validated classical one-way random-ICC
+intervals (D-012 GO-for-opt-in) as `ci_method = "searle"` (exact-F) and `"burch"`
+(REML). Three API decisions were settled at the plan/implement gate, parallel to
+the npbootstrap sibling (D-010).
+**Decision (strings):** ship `"searle"` and `"burch"` — author-family names under
+D-010's doctrine that `ci_method` strings name families, precision duty in
+`@param` (RR02 BC1). Two genuinely distinct methods (normal-exact vs
+kurtosis-robust) cannot collapse to one `"classical"` string; per-algorithm
+descriptive names rejected (they re-open the naming debate RR02 closed). No fresh
+Fable RB — D-010 already set the governing doctrine.
+**Decision (ICC(k)):** the `unit = "average"` interval is the monotone
+Spearman-Brown image of the ICC(1) endpoints via the shared `npb_sb()`, identical
+to D-010. For BOTH methods this SB image is algebraically identical,
+endpoint-by-endpoint, to the direct classical ICC(k) F-form — SEARLE:
+`npb_sb(ρ(g), n) = 1 − 1/g` (the mcgraw1996 Table 7 ICC(1,k) limit); Burch:
+`npb_sb(θ/(1+θ), n) = nθ/(1+nθ) = 1 − 1/(1+nθ)`. IP1 is met by that proof plus a
+committed per-method identity cross-check (`test-ci-classical.R`), so ICC(k)
+coverage is inherited as an exact event identity and needs no separate anchor
+(ORACLES basis = inheritance). No separate mcgraw Table 7 ICC(k) oracle shipped.
+**Decision (point + metadata):** the reported point for both estimands and both
+methods is the engine (glmmTMB REML) point via `icc_point()`, identical to every
+other frequentist `ci_method` (D-010 BC5). Being deterministic closed forms they
+consume no `mc_samples`/`boot_samples`/`seed`, `ci$samples` is `NA`, and
+`std.error` is `NA` — no sampling distribution exists, so a fabricated SE is
+refused (#4); `print()` names the interval "closed form".
+**Consequences:** `"searle"`/`"burch"` join the `ci_method` vocabulary, balanced
+one-way only (guarded with `"npbootstrap"`; aborts otherwise — the unbalanced
+`n₀`/`n_i` derivation stays a candidate). O-Classical-OW flips prototype-validated
+→ suite-asserted (M82). A classical fallback-on-abort DEFAULT stays out (a
+`#3`/ADR-003 change; candidate row). Confirms D-012 (GO-for-opt-in) and mirrors
+D-010's exported-API rulings for the classical family.

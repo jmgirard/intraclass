@@ -223,7 +223,18 @@ back-transforms the endpoints. It is \strong{not} a percentile bootstrap -- the
 percentile and BCa variants were assessed and rejected (they under-cover at
 small rater counts); reach for it for its boundary robustness (an interval that
 exists where the Monte-Carlo default aborts) and non-normality robustness. See
-Details for the ICC(k), endpoint-support, and point-estimate conventions.}
+Details for the ICC(k), endpoint-support, and point-estimate conventions.
+\code{"searle"} and \code{"burch"} are two \strong{deterministic classical closed-form}
+intervals, also \strong{only for the balanced one-way random design} (they abort
+otherwise). Both give a finite interval on every dataset -- including the
+near-zero-ICC boundary where the Monte-Carlo default aborts -- and neither
+resamples, so \code{mc_samples}, \code{boot_samples}, and \code{seed} do not apply.
+\code{"searle"} is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7):
+\strong{exact under normality}, best-calibrated and narrowest when the data are
+approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted interval
+of Burch (2011): wider, but robust to non-normality and never under-covering.
+Prefer \code{"searle"} for near-normal data and \code{"burch"} when heavy tails or
+non-normality are a concern.}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}
@@ -465,6 +476,22 @@ beside an honest interval, and it signals that the data are consistent with valu
 near and below zero.
 }
 
+\section{The classical \code{"searle"} and \code{"burch"} intervals (balanced one-way)}{
+Both are deterministic closed forms from the one-way ANOVA. \code{"searle"} inverts the
+exact-F pivot \code{F / (1 + n*lambda) ~ F(k-1, k(n-1))} (Searle 1971; the McGraw & Wong
+1996 Table 7 limits); it is exact under normality. \code{"burch"} builds
+kurtosis-adjusted \code{log(1 + n*theta-hat)} limits (Burch 2011), so its width tracks
+the data's tail weight -- wider but robust to non-normality, and never
+under-covering. Both share the conventions above: the \code{unit = "average"} (ICC(k))
+interval is the same exact monotone \strong{Spearman-Brown} image of the ICC(1)
+endpoints (so its coverage is identical by construction), endpoints are left
+\strong{untruncated} on the estimator's own support, and the reported \strong{point} is the
+engine (REML) point. Being closed forms they take no \code{mc_samples}, \code{boot_samples},
+or \code{seed}, and report no \code{std.error} (there is no sampling distribution). Their
+value is a finite, well-calibrated interval on the near-zero-ICC boundary where the
+Monte-Carlo default aborts.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "glmmTMB"))) withAutoprint(\{ # examplesIf}
 fit <- icc(ratings, score, subject, rater, unit = c("single", "average"), seed = 1)
@@ -481,8 +508,14 @@ icc(ratings, score, subject, rater, seed = 1)
 
 }
 \references{
+Burch, B. D. (2011). Confidence intervals for the intraclass correlation
+coefficient based on the restricted maximum likelihood estimator.
+\emph{Journal of Statistical Computation and Simulation, 81}(9), 1101-1115.
+
 McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass
 correlation coefficients. \emph{Psychological Methods, 1}(1), 30-46.
+
+Searle, S. R. (1971). \emph{Linear Models}. Wiley.
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. \emph{Psychological Bulletin, 86}(2), 420-428.

@@ -307,6 +307,17 @@
 #'   small rater counts); reach for it for its boundary robustness (an interval that
 #'   exists where the Monte-Carlo default aborts) and non-normality robustness. See
 #'   Details for the ICC(k), endpoint-support, and point-estimate conventions.
+#'   `"searle"` and `"burch"` are two **deterministic classical closed-form**
+#'   intervals, also **only for the balanced one-way random design** (they abort
+#'   otherwise). Both give a finite interval on every dataset -- including the
+#'   near-zero-ICC boundary where the Monte-Carlo default aborts -- and neither
+#'   resamples, so `mc_samples`, `boot_samples`, and `seed` do not apply.
+#'   `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7):
+#'   **exact under normality**, best-calibrated and narrowest when the data are
+#'   approximately normal. `"burch"` is the REML-based, kurtosis-adjusted interval
+#'   of Burch (2011): wider, but robust to non-normality and never under-covering.
+#'   Prefer `"searle"` for near-normal data and `"burch"` when heavy tails or
+#'   non-normality are a concern.
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
@@ -371,14 +382,36 @@
 #' beside an honest interval, and it signals that the data are consistent with values
 #' near and below zero.
 #'
+#' # The classical `"searle"` and `"burch"` intervals (balanced one-way)
+#'
+#' Both are deterministic closed forms from the one-way ANOVA. `"searle"` inverts the
+#' exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle 1971; the McGraw & Wong
+#' 1996 Table 7 limits); it is exact under normality. `"burch"` builds
+#' kurtosis-adjusted `log(1 + n*theta-hat)` limits (Burch 2011), so its width tracks
+#' the data's tail weight -- wider but robust to non-normality, and never
+#' under-covering. Both share the conventions above: the `unit = "average"` (ICC(k))
+#' interval is the same exact monotone **Spearman-Brown** image of the ICC(1)
+#' endpoints (so its coverage is identical by construction), endpoints are left
+#' **untruncated** on the estimator's own support, and the reported **point** is the
+#' engine (REML) point. Being closed forms they take no `mc_samples`, `boot_samples`,
+#' or `seed`, and report no `std.error` (there is no sampling distribution). Their
+#' value is a finite, well-calibrated interval on the near-zero-ICC boundary where the
+#' Monte-Carlo default aborts.
+#'
 #' @return An `icc` object: a list with the estimate table, variance components,
 #'   design, engine, interval settings, sample sizes, the fitted model, and the
 #'   call. Use [tidy()][generics::tidy], [glance()][generics::glance], and the
 #'   `print`/`summary` methods.
 #'
 #' @references
+#' Burch, B. D. (2011). Confidence intervals for the intraclass correlation
+#' coefficient based on the restricted maximum likelihood estimator.
+#' *Journal of Statistical Computation and Simulation, 81*(9), 1101-1115.
+#'
 #' McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass
 #' correlation coefficients. *Psychological Methods, 1*(1), 30-46.
+#'
+#' Searle, S. R. (1971). *Linear Models*. Wiley.
 #'
 #' Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 #' assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.
@@ -444,7 +477,7 @@ icc <- function(
   )
   ci_method <- validate_choice(
     ci_method,
-    c("montecarlo", "bootstrap", "posterior", "npbootstrap"),
+    c("montecarlo", "bootstrap", "posterior", "npbootstrap", "searle", "burch"),
     "ci_method"
   )
 
@@ -1270,24 +1303,25 @@ icc <- function(
   }
 
   # The transformed bootstrap-t (`ci_method = "npbootstrap"`, ukoumunne2003; M75,
-  # D-006/D-010) is a BALANCED ONE-WAY method: whole-subject resampling into a
-  # one-way ANOVA on the log F scale (eq. 6/7). An explicit request on any other
-  # design aborts loudly rather than silently falling back (#5/#8). Unbalanced n_i
-  # (eq. 7) / n0 (transform) is deferred design work (a tracked candidate).
-  if (ci_method == "npbootstrap") {
+  # D-006/D-010) and the two classical closed-form intervals (`"searle"` exact-F
+  # and `"burch"` REML, M82/D-012) are all BALANCED ONE-WAY methods: a one-way
+  # ANOVA decomposition on raw subject groups. An explicit request on any other
+  # design aborts loudly rather than silently falling back (#5/#8). Unbalanced
+  # support (per-subject n_i / harmonic n0) is deferred design work (candidates).
+  if (ci_method %in% c("npbootstrap", "searle", "burch")) {
     if (!oneway) {
       abort_unsupported(c(
-        "{.code ci_method = \"npbootstrap\"} is available only for the one-way \\
+        "{.code ci_method = {.val {ci_method}}} is available only for the one-way \\
          random design ({.code model = \"oneway\"}).",
-        i = "It is the transformed bootstrap-t for the one-way ICC \\
-             (Ukoumunne et al. 2003); use {.code ci_method = \"montecarlo\"} for \\
-             two-way, cluster, or multilevel designs."
+        i = "It is a one-way ICC interval method; use \\
+             {.code ci_method = \"montecarlo\"} for two-way, cluster, or \\
+             multilevel designs."
       ))
     }
     if (!balanced) {
       abort_unsupported(c(
-        "{.code ci_method = \"npbootstrap\"} requires a balanced one-way design \\
-         (every subject rated the same number of times).",
+        "{.code ci_method = {.val {ci_method}}} requires a balanced one-way \\
+         design (every subject rated the same number of times).",
         i = "Unbalanced support (per-subject {.var n_i}) is not yet implemented; \\
              use {.code ci_method = \"montecarlo\"}."
       ))
@@ -1880,6 +1914,15 @@ icc <- function(
         boot_samples = boot_samples,
         seed = seed
       )
+    } else if (ci_method == "searle") {
+      # Classical exact-F closed form on the RAW one-way data (M82/D-012); the
+      # POINT stays the engine (REML) point above (BC5), only the interval
+      # differs. Deterministic -- no draws/seed. Guarded to balanced one-way.
+      searle_ci(df, estimands, conf_level = conf_level)
+    } else if (ci_method == "burch") {
+      # Classical Burch (2011) REML closed form on the RAW one-way data
+      # (M82/D-012); same conventions as "searle" (engine point, deterministic).
+      burch_ci(df, estimands, conf_level = conf_level)
     } else {
       mc_ci(
         engine_fit,
@@ -1958,10 +2001,14 @@ icc <- function(
         # `samples` is the number of draws behind the reported interval: MC draws for
         # "montecarlo", refits for "bootstrap" (ADR-025), subject resamples for
         # "npbootstrap" (M75), post-warmup posterior draws for "posterior" (ADR-033).
+        # The classical closed forms ("searle"/"burch", M82) are deterministic --
+        # no draws -- so `samples` is NA.
         samples = if (ci_method %in% c("bootstrap", "npbootstrap")) {
           boot_samples
         } else if (ci_method == "posterior") {
           ncol(engine_fit$draws)
+        } else if (ci_method %in% c("searle", "burch")) {
+          NA_integer_
         } else {
           mc_samples
         },
