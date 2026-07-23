@@ -11,7 +11,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | planned | M86 | normal | milestones/M87-mpl-coverage-verdict-twoway-random.md |
-| M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | planned | — | normal | milestones/M86-mpl-machinery-twoway-random.md |
+| M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | in-progress | — | normal | milestones/M86-mpl-machinery-twoway-random.md |
 | M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | done | M84 | normal | milestones/archive/M85-unbalanced-npbootstrap-icck.md |
 | M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | done | — | normal | milestones/archive/M84-unbalanced-npbootstrap-icc1.md |
 | M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | done | — | normal | milestones/archive/M83-repair-rotted-brms-test-expectations.md |

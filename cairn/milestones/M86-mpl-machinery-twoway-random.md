@@ -1,11 +1,11 @@
 # M86: Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP5
-- **Branch/PR:** —
+- **Branch/PR:** m86-mpl-machinery-twoway-random
 
 ## Goal
 
