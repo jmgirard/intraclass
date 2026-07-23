@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-23 (planned M83 — repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=`; promoted from the M82-discovered candidate, which is now removed. No collision (D-012/D-013 are the M82 sibling, not test policy). M48 stays `blocked` on the unopened v0.1.0 window, D-050.)_
+_Last hygiene check: 2026-07-23 (M83 shipped via PR #90 — pinned explicit `type=`/`level=` on the rotted `skip_on_ci` brms tests, repairing M44/M38 default-change rot; test-only, no `R/` change. Archived M83, rotated M78 out; added the M83 whole-vector-comparison lesson. M48 stays `blocked` on the unopened v0.1.0 window, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | review | — | normal | milestones/M83-repair-rotted-brms-test-expectations.md |
+| M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | done | — | normal | milestones/archive/M83-repair-rotted-brms-test-expectations.md |
 | M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M82-classical-oneway-ci-method.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | done | — | normal | milestones/archive/M81-wire-generalizing-claims-gate-into-ci.md |
 | M80 | Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI | done | — | normal | milestones/archive/M80-repair-d009-reference-checker.md |
 | M79 | Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant) | done | — | normal | milestones/archive/M79-complete-oracle-registry.md |
-| M78 | Cut CI test-suite wall-clock — parallelism + residual boot_samples (GO/NO-GO) | done | — | normal | milestones/archive/M78-cut-ci-test-suite-wallclock.md |
-<!-- terminal-row retention: M82 done (2026-07-22) → M77 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M82, M81, M80, M79, M78 (5 most recent terminal). -->
+<!-- terminal-row retention: M83 done (2026-07-23) → M78 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M83, M82, M81, M80, M79 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
