@@ -1607,6 +1607,7 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
     score,
     subject,
     rater,
+    type = "agreement",
     engine = "brms",
     seed = 1,
     brm_args = list(chains = 2, iter = 1000, refresh = 0)
@@ -1618,8 +1619,8 @@ test_that("brms fits the two-way random ICC end to end (O-Bayes-agree sanity)", 
   # samples = post-warmup draws = chains * (iter/2) = 2 * 500.
   expect_identical(fit$ci$samples, 1000L)
 
-  # A default call reports the agreement family (single + average); consistency is a
-  # separate call. Both rows must be finite probabilities with the point in its interval.
+  # An explicit `type = "agreement"` reports the agreement family (single + average); consistency
+  # is a separate call. Both rows must be finite probabilities with the point in its interval.
   td <- tidy(fit)
   expect_setequal(td$index, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(td$estimate >= 0 & td$estimate <= 1))
@@ -1756,6 +1757,7 @@ test_that("brms fits the fixed-rater two-way ICC end to end (O-Bayes-Fixed-agree
     score,
     subject,
     rater,
+    type = "agreement",
     raters = "fixed",
     engine = "brms",
     seed = 1,
@@ -1860,6 +1862,7 @@ test_that("brms fits the ragged fixed-rater two-way ICC end to end (O-Bayes-IFix
     score,
     subject,
     rater,
+    type = "agreement",
     raters = "fixed",
     engine = "brms",
     seed = 1,
@@ -1948,6 +1951,7 @@ test_that("brms fits the ragged crossed fixed multilevel ICC end to end (O-Bayes
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     raters = "fixed",
     engine = "brms",
     seed = 1,
@@ -2032,6 +2036,7 @@ test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-I
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     engine = "brms",
     seed = 1,
     brm_args = ba
@@ -2040,7 +2045,7 @@ test_that("brms fits the ragged nested Design-2 random ICC end to end (O-Bayes-I
   expect_identical(fa$ci$method, "posterior")
   expect_identical(fa$design$ml_design, "nested_in_clusters")
   ta <- tidy(fa)
-  # Subject level only (nested designs define no cluster-level IRR); agreement by default.
+  # Subject level only (nested designs define no cluster-level IRR); agreement via explicit `type`.
   expect_setequal(unique(ta$level), "subject")
   expect_setequal(ta$index, c("ICC(A,1)", "ICC(A,k)"))
   expect_true(all(ta$estimate >= 0 & ta$estimate <= 1))
@@ -2118,6 +2123,7 @@ test_that("brms fits the ragged nested Design-2 FIXED ICC end to end (O-Bayes-IF
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     raters = "fixed",
     unit = c("single", "average"),
     design = "nested_in_clusters",
@@ -2278,6 +2284,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "brms",
     seed = 1,
     brm_args = list(chains = 2, iter = 1200, refresh = 0)
@@ -2306,6 +2313,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "glmmTMB"
   ))
   g <- g[order(key(g)), ]
@@ -2338,6 +2346,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
       rater,
       subject = subject,
       cluster = cluster,
+      type = "agreement",
       engine = "lme4"
     ))
     l <- l[order(key(l)), ]
@@ -2394,6 +2403,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     raters = "fixed",
     engine = "brms",
     seed = 1,
@@ -2401,7 +2411,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
   ))
 
   # Cell 1's behavioral change: brms FIXED raters now returns BOTH levels (before M38 the
-  # cluster row was dropped for brms fixed). Agreement + the default single/average units.
+  # cluster row was dropped for brms fixed). Explicit `type = "agreement"`: single + average units.
   expect_s3_class(fit_fixed, "icc")
   expect_identical(fit_fixed$engine, "brms")
   td <- tidy(fit_fixed)
@@ -2424,6 +2434,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
     subject = subject,
     cluster = cluster,
     raters = "fixed",
+    type = "agreement",
     engine = "glmmTMB"
   )))
   tf <- cl(td)
@@ -2443,6 +2454,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "brms",
     seed = 1,
     brm_args = br_args
@@ -3051,6 +3063,8 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
+    level = "subject",
     raters = "fixed",
     engine = "brms",
     seed = 1,
@@ -3063,14 +3077,15 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
     subject = subject,
     cluster = cluster,
     type = "consistency",
+    level = "subject",
     raters = "fixed",
     engine = "brms",
     seed = 1,
     brm_args = ba
   ))
 
-  # Structure: the five-component fixed fit yields SUBJECT-level rows only, a posterior
-  # credible interval, the Bayesian engine label, and theta^2_r in the rater slot.
+  # Structure: the five-component fixed fit, pinned to `level = "subject"`, yields subject-level
+  # rows, a posterior credible interval, the Bayesian engine label, and theta^2_r in the rater slot.
   expect_s3_class(fa, "icc")
   expect_identical(fa$engine, "brms")
   expect_identical(fa$ci$method, "posterior")
@@ -3093,9 +3108,9 @@ test_that("brms fits the crossed fixed-rater multilevel ICC end to end (O-Bayes-
   # brms credible interval for every subject-level row (agreement AND consistency). This is
   # the honest engine-agreement pin -- NOT pointwise equality, since the flat rater-effect
   # prior vs half-t on the SDs perturbs the balanced fixed ~ random identity (#18).
-  # Pin the reference to the SUBJECT level: glmmTMB fixed multilevel now also returns the
-  # cluster level on balanced data (M37, ADR-047), but this containment pin is subject-level
-  # (brms is subject-only for fixed multilevel), so subset explicitly to avoid a two-row index.
+  # Pin the reference to the SUBJECT level: both engines' fixed multilevel now also return the
+  # cluster level on balanced data (glmmTMB M37 ADR-047 / brms M38 ADR-048), so the fit above and
+  # this reference are both pinned to `level = "subject"` to keep containment one-row-per-index.
   ga <- suppressWarnings(tidy(icc(
     d,
     score,
@@ -3206,6 +3221,7 @@ test_that("brms fits the nested fixed-rater multilevel ICC end to end (O-Bayes-F
     subject,
     rater,
     cluster = cluster,
+    type = "agreement",
     raters = "fixed",
     engine = "brms",
     seed = 1,
@@ -3349,6 +3365,7 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "brms",
     seed = 1,
     brm_args = list(chains = 2, iter = 1200, refresh = 0)
@@ -3373,6 +3390,7 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "glmmTMB"
   ))
   g <- g[order(key(g)), ]
@@ -3398,6 +3416,7 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
       rater,
       subject = subject,
       cluster = cluster,
+      type = "agreement",
       engine = "lme4"
     ))
     l <- l[order(key(l)), ]
