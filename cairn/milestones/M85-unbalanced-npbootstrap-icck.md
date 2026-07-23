@@ -50,7 +50,7 @@ unbalanced npbootstrap abort per the branch taken.
 - [x] AC5: `unit = "average"` unbalanced no longer aborts (GO) or aborts per AC3
       (NO-GO); the default `icc(unit = c("single", "average"))` on unbalanced
       npbootstrap behaves per the branch, with a directed test.
-- [ ] AC6: `@param ci_method`/@details/`ORACLES.md`/NEWS updated;
+- [x] AC6: `@param ci_method`/@details/`ORACLES.md`/NEWS updated;
       `devtools::test()` clean; `devtools::check()` 0 errors / 0 warnings.
 
 ## Coverage
@@ -149,7 +149,8 @@ No `Driving RR` → projection-vs-outcome no-ops.
 - **AC6 (docs + checks).** `@param`/@details, ORACLES O-NPBoot ICC(k) basis, NEWS updated;
   `devtools::document()` no-diff; `pkgdown::check_pkgdown()` clean; `lintr::lint_package()`
   0; full `devtools::test()` (NOT_CRAN=true CI=true) FAIL 0 / 4041 pass (2 pre-existing
-  WARN captures in `test-vignette-claims.R`, unrelated). `devtools::check()` — see below.
+  WARN captures in `test-vignette-claims.R`, unrelated). `devtools::check()` at the review
+  HEAD (NOT_CRAN=false): **0 errors / 0 warnings / 0 notes**.
 
 ### Consistency gate
 
