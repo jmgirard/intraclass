@@ -161,9 +161,54 @@ test_that("searle/burch abort on an unbalanced one-way design (AC3, #5/#8)", {
   }
 })
 
-# ---- AC4: ICC(k) is the Spearman-Brown image, equal to the direct F-form -----
+# ---- AC4: ICC(k) equals the direct classical ICC(k) form -----
+# NOTE: the "direct" side must be built from raw statistics, NOT by inverting the
+# package's own ICC(1) endpoint -- otherwise `1 - 1/g_of_rho(rho)` collapses to
+# `npb_sb(rho, n)` and the test only re-checks that the divisor is n (M82 review
+# finding). SEARLE has a genuine independent construction (the mcgraw1996 Table 7
+# ICC(1,k) limits computed from the raw ANOVA F via swapped-df F quantiles, so a
+# wrong df/transform in the package would diverge). Burch has NO independent ICC(k)
+# anchor (D-013: inheritance, not an anchor; its core is pinned by AC1), so its
+# check is the exact Spearman-Brown inheritance identity.
 
-test_that("searle ICC(k) endpoints equal the direct classical ICC(k) F-form (AC4)", {
+test_that("searle ICC(k) equals the mcgraw Table 7 ICC(1,k) limits from the raw ANOVA (AC4)", {
+  skip_if_not_installed("glmmTMB")
+
+  d <- sf_ratings_long()
+  td <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    unit = c("single", "average"),
+    ci_method = "searle"
+  ))
+  ik <- td[td$index == "ICC(k)", ]
+
+  # Independent one-way ANOVA from the raw data (not the package's ICC(1) output).
+  groups <- split(d$score, d$subject)
+  k <- length(groups)
+  n <- length(groups[[1]])
+  ybar <- vapply(groups, mean, numeric(1))
+  grand <- mean(d$score)
+  msa <- n * sum((ybar - grand)^2) / (k - 1)
+  mse <- sum(vapply(groups, function(g) sum((g - mean(g))^2), numeric(1))) /
+    (k * (n - 1))
+  f <- msa / mse
+  df1 <- k - 1
+  df2 <- k * (n - 1)
+  # mcgraw1996 Table 7 ICC(1,k) direct limits = 1 - 1/g_lo, 1 - 1/g_hi. Recover the
+  # SAME g limits via the SWAPPED-df identity qf(p,a,b) = 1/qf(1-p,b,a), an
+  # independent F-quantile construction (as AC2 does for ICC(1)): a wrong df or
+  # F-transform in searle_endpoints would break the equality.
+  g_lo <- f * stats::qf(0.025, df2, df1) # = f / qf(0.975, df1, df2)
+  g_hi <- f * stats::qf(0.975, df2, df1) # = f / qf(0.025, df1, df2)
+  expect_equal(ik$conf.low, 1 - 1 / g_lo, tolerance = 1e-9)
+  expect_equal(ik$conf.high, 1 - 1 / g_hi, tolerance = 1e-9)
+})
+
+test_that("burch ICC(k) is the exact Spearman-Brown image of ICC(1), divisor n (AC4)", {
   skip_if_not_installed("glmmTMB")
 
   d <- sf_ratings_long()
@@ -175,42 +220,16 @@ test_that("searle ICC(k) endpoints equal the direct classical ICC(k) F-form (AC4
     rater,
     model = "oneway",
     unit = c("single", "average"),
-    ci_method = "searle"
-  ))
-  i1 <- td[td$index == "ICC(1)", ]
-  ik <- td[td$index == "ICC(k)", ]
-  # The SB image of the ICC(1) rho endpoint must equal the direct ICC(k) F-form
-  # 1 - 1/g, where g is recovered from the ICC(1) endpoint rho via g = 1 + n*rho/(1-rho)
-  # (invert rho(g) = (g-1)/(g+n-1)). Both the SB map and the direct form are exact.
-  g_of_rho <- function(rho) 1 + n * rho / (1 - rho)
-  expect_equal(ik$conf.low, 1 - 1 / g_of_rho(i1$conf.low), tolerance = 1e-9)
-  expect_equal(ik$conf.high, 1 - 1 / g_of_rho(i1$conf.high), tolerance = 1e-9)
-})
-
-test_that("burch ICC(k) endpoints equal the direct averaged-reliability form (AC4)", {
-  skip_if_not_installed("glmmTMB")
-
-  d <- sf_ratings_long()
-  n <- 4L
-  td <- tidy(icc(
-    d,
-    score,
-    subject,
-    rater,
-    model = "oneway",
-    unit = c("single", "average"),
     ci_method = "burch"
   ))
   i1 <- td[td$index == "ICC(1)", ]
   ik <- td[td$index == "ICC(k)", ]
-  # Burch's ICC(1) endpoint is rho(theta) = theta/(1+theta); ICC(k) = n*theta/(1+n*theta)
-  # = 1 - 1/(1+n*theta). Recover theta from the ICC(1) endpoint (theta = rho/(1-rho))
-  # and confirm the SB-mapped ICC(k) equals that direct form.
-  theta_of_rho <- function(rho) rho / (1 - rho)
-  direct <- function(rho) {
-    th <- theta_of_rho(rho)
-    1 - 1 / (1 + n * th)
-  }
-  expect_equal(ik$conf.low, direct(i1$conf.low), tolerance = 1e-9)
-  expect_equal(ik$conf.high, direct(i1$conf.high), tolerance = 1e-9)
+  # Burch's ICC(k) has no independent published anchor (D-013: inheritance, not an
+  # anchor; the ICC(1) core is pinned by AC1). The verifiable property is that
+  # ICC(k) is the exact monotone Spearman-Brown image of ICC(1) with divisor n --
+  # equivalently 1 - 1/(1+n*theta) for theta = rho/(1-rho). Recompute the SB map
+  # independently (not via the package's npb_sb) so a wrong divisor would break it.
+  sb <- function(rho, m) m * rho / (1 + (m - 1) * rho)
+  expect_equal(ik$conf.low, sb(i1$conf.low, n), tolerance = 1e-9)
+  expect_equal(ik$conf.high, sb(i1$conf.high, n), tolerance = 1e-9)
 })

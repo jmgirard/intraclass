@@ -100,6 +100,7 @@ components-absent (vcov) reprojection path unchanged.
 - 2026-07-22: T1–T5 implemented. `R/ci-classical.R` (SEARLE + Burch reducers with exposed `searle_endpoints`/`burch_reml_endpoints` cores); dispatch + guards + `ci$samples`/`print()` handling in `R/icc.R`/`R/icc-methods.R`; `tests/testthat/test-ci-classical.R` (36 assertions, all pass in isolation) migrating the O-Classical-OW oracles from the M76 prototype + the two self-checks + the ICC(k) SB-identity cross-check; `@param`/`@details`/`@references`, NEWS, ORACLES flip. Promoted D-013. `air format` + `document()` clean.
 - 2026-07-22: full-suite run surfaced PRE-EXISTING failures in `tests/testthat/test-icc-brms.R` (stale `skip_on_ci` expectations predating the "all definitions by default" change; M32 vintage, file untouched since M52) — unrelated to M82's diff, invisible to CI/review gate (live-Stan skipped). Filed as a candidate row + chip (task_c96e1259); re-ran the suite at gate parity (`NOT_CRAN=true CI=true`) to verify the rest.
 - 2026-07-22: gate-parity suite clean (`ci-classical` all pass; 23 live-brms skipped on CI; 2 pre-existing convergence/Heywood warnings in unrelated files); `lintr::lint_package()` 0 lints. Set `review`.
+- 2026-07-22: review — AC1–AC7 verified with fresh evidence; `devtools::check()` Status OK (0/0/0); `cairn_validate` exit 0. Three-lens review + scorer: one finding (F1, scored 80) — the AC4 cross-check was circular; fixed the SEARLE AC4 test to build the direct ICC(1,k) limits independently from the raw ANOVA F (mutation-proven) and honestly scoped the Burch AC4 test to the SB inheritance. Suite re-run 36/36.
 
 ## Decisions
 
@@ -128,9 +129,13 @@ end-to-end paths ran), 1.2 s.
   abort `intraclass_unsupported` on a two-way design and on an unbalanced
   one-way design.
 - **AC4** (ICC(k) identity) — the two SB-identity tests pass: for both methods
-  the `unit = "average"` endpoints equal the direct classical ICC(k) F-form
-  (SEARLE `1−1/g`; Burch `1−1/(1+nθ)`) recovered from the ICC(1) endpoints,
-  ≤1e−9.
+  the SEARLE `unit = "average"` endpoints equal the mcgraw1996 Table 7 ICC(1,k)
+  limits computed independently from the raw ANOVA F (swapped-df F quantiles, à
+  la AC2 — a genuine independent construction, ≤1e−9); the Burch endpoints equal
+  the exact Spearman-Brown image of ICC(1) with divisor n (its ICC(k) has no
+  independent anchor per D-013; its core is pinned by AC1). Strengthened from a
+  circular check during review (finding F1 below); mutation-proven to catch a
+  wrong df.
 - **AC5** (engine point + metadata) — the end-to-end test passes: the searle/
   burch ICC(1) point equals the montecarlo point ≤1e−8 (shared REML point),
   `ci$method` is `"searle"`/`"burch"`, `ci$samples` and `std.error` are `NA`.
@@ -152,4 +157,29 @@ end-to-end paths ran), 1.2 s.
 `DESIGN.md` principle changed (Principles touched: IP1, worked under not
 altered), so `cairn_impact` N/A.
 
-**Independent review (three lenses + scorer).**
+**Independent review (three lenses + scorer).** Three fresh-context reviewers
+with distinct evidence bases:
+- **[O] diff-bug** — one finding (F1 below); confirmed the SEARLE/Burch math is a
+  faithful port (eq.14 cube present), the guard allows small-but-positive F
+  (the near-zero boundary it serves) and aborts only on MSE=0/non-finite F, the
+  engine REML point + NA metadata are correct, and `std.error = NA` is consumed
+  safely by tidy/print/glance.
+- **[S] blame-history** — no findings; the print header is byte-identical for the
+  four sampling methods (snapshots unaffected), the `ci$samples` arms are
+  preserved, the reworded guard breaks no test (npbootstrap aborts assert class
+  only), and D-012 records exactly this design.
+- **[S] prior-PR** — no findings; ran the M74 generalizing-claims gate at HEAD
+  (258/258 ledger rows, 0 un-triaged — the ORACLES.md edit added no un-triaged
+  claim), verified `burch_p_term` naming and the M75 conventions are not
+  regressed. GH comment probe empty.
+
+**Finding F1 (diff-bug, scored 80 → fixed).** The AC4 identity cross-check was
+**circular**: it recovered the "direct F-form" by inverting the package's own
+ICC(1) endpoint, so `1 − 1/g_of_rho(ρ)` collapsed to `npb_sb(ρ, n)` and the test
+reduced to `divisor == n` — a wrong ICC(1) core would still pass. **Fix:** the
+SEARLE AC4 test now builds the direct ICC(1,k) limits from the raw ANOVA F via
+independent swapped-df F quantiles (mcgraw1996 Table 7, as AC2 does for ICC(1)),
+mutation-proven to diverge on a wrong df; the Burch AC4 test is honestly scoped to
+the Spearman-Brown inheritance identity (Burch's ICC(k) has no independent anchor
+per D-013; its core is pinned by AC1). Suite re-run 36/36. No other finding scored
+≥80; none logged below 80 (F1 was the only surviving finding).
