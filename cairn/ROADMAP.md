@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-23 (planned M84 + M85 — unbalanced one-way transformed bootstrap-t, splitting the ICC(1) core from the ICC(k) SB pole/support re-derivation per the M75 plan-gate deferral & RR02 finding 2; M85 depends on M84. Absorbed the unbalanced-npbootstrap candidate row into the two files. M83 shipped via PR #90 (explicit `type=`/`level=` on the rotted `skip_on_ci` brms tests). M48 stays `blocked` on the unopened v0.1.0 window, D-050.)_
+_Last hygiene check: 2026-07-23 (M84 shipped via PR #91 — unbalanced one-way `npbootstrap` ICC(1): per-`nᵢ` eq.7 IJ SE, ohyama eq.3 `n₀` transform, C-dropped Form-A pivot; reduces to M75 on balanced data. 3-lens review 0 findings; check 0/0/0. Archived M84, rotated M79 out; added two M84 lessons (the C-term pivot subtlety; the SSE=0-masked-by-engine test gotcha). M85 (ICC(k)) now workable. M48 stays `blocked` on the unopened v0.1.0 window, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,15 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | review | — | normal | milestones/M84-unbalanced-npbootstrap-icc1.md |
+| M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | done | — | normal | milestones/archive/M84-unbalanced-npbootstrap-icc1.md |
 | M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | planned | M84 | normal | milestones/M85-unbalanced-npbootstrap-icck.md |
 | M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | done | — | normal | milestones/archive/M83-repair-rotted-brms-test-expectations.md |
 | M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M82-classical-oneway-ci-method.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | done | — | normal | milestones/archive/M81-wire-generalizing-claims-gate-into-ci.md |
 | M80 | Repair the D-009 reference-observation checker — exclude the M74 triage ledger + wire into CI | done | — | normal | milestones/archive/M80-repair-d009-reference-checker.md |
-| M79 | Complete the oracle registry — an entry for every asserted oracle + a census gate (D-007 invariant) | done | — | normal | milestones/archive/M79-complete-oracle-registry.md |
-<!-- terminal-row retention: M83 done (2026-07-23) → M78 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M83, M82, M81, M80, M79 (5 most recent terminal). -->
+<!-- terminal-row retention: M84 done (2026-07-23) → M79 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M84, M83, M82, M81, M80 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
