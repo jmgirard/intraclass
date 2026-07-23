@@ -159,3 +159,15 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
 failures); `devtools::document()` no diff; `air format --check` clean; lintr 0;
 generalizing-claims gate in sync (258/258). No `DESIGN.md` principle text changed
 (IP1/GP6/GP7 worked *under*, not altered) → `cairn_impact` skipped.
+
+**Independent review — three fresh-context lenses, 0 actioned findings** (scorer a
+no-op with nothing surviving):
+- [O] diff-bug (Opus): Form-A studentization + endpoint back-transform correct;
+  reduces-to-M75 on balanced data holds; dispatch guard correctly scoped; no
+  silent-NaN hole (`std.error` cannot NaN once `t*` all finite); coverage sweep
+  validates what AC4 claims. No file:line defect.
+- [S] blame-history (Sonnet): no silent regression of M75/M82 intent; `npb_anova`
+  signature change breaks no caller; D-006/D-010/D-013 upheld.
+- [S] prior-review (Sonnet): honors RR01/RR02 — the ICC(k) SB-pole re-derivation is
+  deferred to M85 (RR02 finding 2), the `@param` envelope updated (finding 4),
+  degenerate guards and untruncation retained; GitHub PR threads empty.
