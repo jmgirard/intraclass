@@ -167,3 +167,29 @@ test_that("npbootstrap aborts on a degenerate unbalanced design (AC6, #5/#8)", {
     class = "intraclass_singular_fit"
   )
 })
+
+test_that("the reducer aborts classed on unbalanced SSE=0 and tiny-k resamples (AC6)", {
+  # SSE = 0 (no within-subject variance), unbalanced: via icc() the engine point-fit
+  # rejects it first, so exercise the reducer's own guard directly -- it is classed.
+  est <- list(icc_estimand(unit = "single", k_eff = NA_real_, oneway = TRUE))
+  d_sse0 <- data.frame(
+    subject = factor(c(1, 1, 1, 2, 2, 3, 3, 3, 3)),
+    score = c(1, 1, 1, 2, 2, 3, 3, 3, 3) # each subject constant -> SSE = 0
+  )
+  expect_error(
+    npbootstrap_ci(d_sse0, est, boot_samples = 50L, seed = 1),
+    class = "intraclass_singular_fit"
+  )
+
+  # Tiny unbalanced k: the observed fit is fine, but whole-subject resamples that
+  # draw a degenerate set (SSA = 0 / SSE = 0) make t* non-finite -> classed abort.
+  d_tiny <- data.frame(
+    subject = factor(c(1, 1, 2, 2, 2, 3, 3)),
+    score = c(1, 2, 4, 5, 6, 8, 9)
+  )
+  expect_error(
+    npbootstrap_ci(d_tiny, est, boot_samples = 50L, seed = 1),
+    class = "intraclass_singular_fit",
+    regexp = "resamples were degenerate"
+  )
+})

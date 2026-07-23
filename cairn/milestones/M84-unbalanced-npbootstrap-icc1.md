@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP6, GP7
-- **Branch/PR:** m84-unbalanced-npbootstrap-icc1
+- **Branch/PR:** m84-unbalanced-npbootstrap-icc1 · https://github.com/jmgirard/intraclass/pull/91
 
 ## Goal
 
@@ -30,28 +30,28 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
 
 ## Acceptance criteria
 
-- [ ] AC1: `icc(model = "oneway", ci_method = "npbootstrap", unit = "single")` on
+- [x] AC1: `icc(model = "oneway", ci_method = "npbootstrap", unit = "single")` on
       an unbalanced dataset returns a finite, ordered ICC(1) interval; the
       `!balanced` abort (`R/icc.R:1321`) no longer fires for `unit = "single"`.
-- [ ] AC2 (oracle, exact): fed **equal** `n_i`, the unbalanced reducer reproduces
+- [x] AC2 (oracle, exact): fed **equal** `n_i`, the unbalanced reducer reproduces
       the M75 balanced `npbootstrap_ci()` ICC(1) endpoints to ≤ 1e-10 under the
       same seed (reduces-to-balanced; the M75 code is the oracle).
-- [ ] AC3 (oracle, deterministic): the unbalanced MoM point
+- [x] AC3 (oracle, deterministic): the unbalanced MoM point
       `ρ̂ = (MSA − MSE)/(MSA + (n₀ − 1)MSE)` reproduces ohyama2025 §4 Example 2
       (PaCO₂: MSA = 2.198, MSE = 0.272, `n₀ ≈ 5.02`) `ρ̂ = 0.585` to 3 dp — pinning
       the `n₀` definition (`ohyama2025.md:117-134`).
-- [ ] AC4 (oracle, coverage): an `n_rep ≥ 2000` unbalanced coverage sweep in
+- [x] AC4 (oracle, coverage): an `n_rep ≥ 2000` unbalanced coverage sweep in
       `data-raw/` (ohyama Fig. 2 design cells, MCAR 0.1) lands within a plot-read
       band (± .02) of the Fig. 2 NBOOT coverage at 2–3 cells; the fixture is
       committed (GP6).
-- [ ] AC5 (RB tripwire: no-oracle): the unequal-`n_i` IJ SE carries an in-code
+- [x] AC5 (RB tripwire: no-oracle): the unequal-`n_i` IJ SE carries an in-code
       derivation note (Appendix-A `C`-term treatment and/or the ohyama method
       recovered by T1), and the no-direct-oracle basis is recorded in `ORACLES.md`
       (GP7). Fable escalation only if the re-derivation is contested.
-- [ ] AC6: degenerate unbalanced input aborts loudly classed (#5/#8) — `SSA = 0`,
+- [x] AC6: degenerate unbalanced input aborts loudly classed (#5/#8) — `SSA = 0`,
       `SSE = 0`, or a resample too small to studentize — never a silent `NaN`
       interval.
-- [ ] AC7: `@param ci_method`/@details/`ORACLES.md`/NEWS updated;
+- [x] AC7: `@param ci_method`/@details/`ORACLES.md`/NEWS updated;
       `devtools::test()` clean; `devtools::check()` 0 errors / 0 warnings.
 
 ## Coverage
@@ -108,6 +108,9 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
   in the T2–T4 commit.
 - 2026-07-23: all tasks done; `devtools::check()` 0/0/0 (`--no-manual`,
   `NOT_CRAN=false`); status → review.
+- 2026-07-23: review — draft PR #91; fresh AC evidence recorded; added a
+  direct-reducer AC6 test (unbalanced SSE=0 + tiny-k classed abort, the sub-cases
+  `icc()` masks behind the engine point-fit). Consistency gate clean.
 
 ## Decisions
 
@@ -128,3 +131,31 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
   exact code) is empirical, covered by the Fig. 2 coverage band (AC4).
 
 ## Review
+
+**Reviewed 2026-07-23 (PR #91).** Status → done pending merge approval.
+
+**Acceptance-criteria evidence** (fresh run, `devtools::load_all` + `test_file`):
+- AC1 ✓ — `test-ci-npbootstrap.R` "unbalanced serves ICC(1) but aborts the average"
+  + `test-ci-npbootstrap-unbalanced.R` "well-formed, reproducible unbalanced ICC(1)":
+  finite ordered interval, no `!balanced` abort for `unit="single"`.
+- AC2 ✓ — "reduces to the balanced M75 prototype endpoints to 1e-10" passes at the
+  1e-10 bar against `npbootstrap-parity-oracle.rds`; the M75 balanced suite is
+  unchanged.
+- AC3 ✓ — "reproduces ohyama Example 2 rho = 0.585" (arithmetic + `npb_anova`
+  reconstruction); `n₀` matches eq. 3, distinct from the harmonic mean.
+- AC4 ✓ — `test-ci-npbootstrap-unbalanced-coverage.R` green: the three near-nominal
+  cells land within ±0.02 (A_10_2 .936/.945, A_25_5 .940/.935, A_50_5 .946/.945),
+  `n_ok ≥ 1957/2000`; committed fixture.
+- AC5 ✓ — MD-1 + in-code Form-A/`n₀`/`C`-term notes (`R/ci-npbootstrap.R`) +
+  `ORACLES.md` O-NPBoot unbalanced leg (no independent SE anchor recorded honestly);
+  "npb_anova computes eq. 3 n0 (not harmonic) and theta = logF − C" pins it.
+- AC6 ✓ — SSA=0 aborts `intraclass_singular_fit` via `icc()`; the reducer's guard is
+  classed on unbalanced SSE=0 and tiny-k degenerate resamples (direct-reducer test).
+  Via `icc()` the engine point-fit intercepts SSE=0 first (also loud).
+- AC7 ✓ — `devtools::check()` 0/0/0 (`--no-manual`, `NOT_CRAN=false`); gate suite
+  green (`NOT_CRAN=true CI=true` 0/0); `@param`/@details/`ORACLES.md`/NEWS updated.
+
+**Consistency gate:** `cairn_validate` exit 0 (all checks pass; 338 advisories, not
+failures); `devtools::document()` no diff; `air format --check` clean; lintr 0;
+generalizing-claims gate in sync (258/258). No `DESIGN.md` principle text changed
+(IP1/GP6/GP7 worked *under*, not altered) → `cairn_impact` skipped.
