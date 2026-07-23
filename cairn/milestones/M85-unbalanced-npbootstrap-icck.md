@@ -73,7 +73,7 @@ unbalanced npbootstrap abort per the branch taken.
       coverage-inheritance identity (GO) or the fallback abort (NO-GO).
 - [x] T3: drop/adjust the `unit = "average"` unbalanced abort (`R/icc.R:1321`);
       directed tests for the default two-unit call on unbalanced data.
-- [ ] T4: ICC(k) oracle — extend the M84 sweep with the ICC(k) coverage column
+- [x] T4: ICC(k) oracle — extend the M84 sweep with the ICC(k) coverage column
       (rep-by-rep identity, tolerance 0) and the re-derived identity cross-check
       (≤ 1e-10).
 - [ ] T5: docs — `@param ci_method`/@details, the `ORACLES.md` O-NPBoot ICC(k)
@@ -85,6 +85,8 @@ unbalanced npbootstrap abort per the branch taken.
 - 2026-07-23: set in-progress; branch `m85-unbalanced-npbootstrap-icck` cut from main.
 - 2026-07-23: T1 — AC1 GO verdict (MD-1): proved k_eff ≤ n₀ (AM-GM on triples), so the SB pole never intrudes; numeric check + re-derived AC4 identity in `test-ci-npbootstrap-unbalanced-icck.R` (2013 pass). Not escalated (maintainer accepted the proof at the gate).
 - 2026-07-23: T2/T3 — GO branch: lifted the `unit="average"` unbalanced npbootstrap abort (`R/icc.R`), so the shipped `npbootstrap_ci` (already `npb_sb(ρ, k_eff)`) serves the unbalanced ICC(k); numeric `unit=m` stays deferred (not pole-safe). Tests: shipped SB-image identity (AC5), rep-by-rep coverage inheritance in-suite (AC2), flipped the old average-aborts test. Verified `std.error` robustly finite over 1977 near-zero designs (heavy-tailed near boundary → doc). Affected test files pass; full `devtools::test()` at completion.
+- 2026-07-23: T5 (docs) — `@param`/@details (pole-safe SB map, numeric-unit balanced-only, near-boundary `std.error`), ORACLES O-NPBoot unbalanced ICC(k) basis, NEWS; `document()` regenerated `man/icc.Rd`.
+- 2026-07-23: T4 — extended the M84 unbalanced sweep generator with the ICC(k) coverage column; regenerated the n_rep=2000 fixture (ICC(1) columns byte-identical to the committed M84 values; `n_discrepant=0` and `coverage_icck==coverage_icc1` on all 4 cells). Coverage-test asserts the full-sweep event identity (AC2). All npbootstrap test files pass.
 
 ## Decisions
 
