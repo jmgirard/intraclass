@@ -186,3 +186,11 @@ Comment-only; `load_all` parses, lint 0.
 
 **Verdict:** all six ACs verified with fresh evidence; consistency gate clean; one Low-severity
 doc finding fixed. Ready for merge approval.
+
+**Post-approval CI fix (mechanical, no re-approval needed).** The `check-references` CI job's
+M74 generalizing-claim completeness gate (`enumerate-generalizing-claims.py`, not part of
+`cairn_validate`) flagged the two new ORACLES ICC(k) legs (d, f) as un-triaged. Both are
+repo-internal claims (the MD-1 derived result; the committed unbalanced coverage fixture), so
+each got an `OUT-oracle-pin` row in `data-raw/generalizing-claims-triage.tsv` (not external
+source-table generalizations). Gate green locally (un-triaged 0, orphans 0). No code/behavior
+change.
