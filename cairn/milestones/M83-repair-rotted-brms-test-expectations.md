@@ -1,6 +1,6 @@
 # M83: Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -36,7 +36,7 @@ Restore `tests/testthat/test-icc-brms.R` to green under a live-Stan run and pin 
 - [x] T1 — Live-Stan baseline: run `test-icc-brms.R` at `NOT_CRAN=true` (unset `CI`), capture every failing block (line + expected vs actual `index`/`level`), and record the failure list as a work-log ledger. Confirms the rot is real and bounds the fix.
 - [x] T2 — Fix each failing block: add explicit `type=` (and `level=` where multilevel) to the `icc()` call to encode the block's intended formulation, and update the `index`/`level` expectation to match. Sweep both rot causes (M44 `type`-default; M37 level-expansion).
 - [x] T3 — Audit ledger: enumerate every `icc(` call in the file; for each two-way/crossed fit still relying on a default `type=`/`level=` (even if currently green), pin it explicitly so no latent default-dependence remains. One-way fits (which reject `type=`) noted as exempt. Commit the ledger as work-log evidence.
-- [ ] T4 — Verify: full-file `test-icc-brms.R` green under live Stan (`NOT_CRAN=true`); then `devtools::test()` clean under CI parity (`NOT_CRAN=true CI=true`); confirm `git diff --stat` touches only the test file.
+- [x] T4 — Verify: full-file `test-icc-brms.R` green under live Stan (`NOT_CRAN=true`); then `devtools::test()` clean under CI parity (`NOT_CRAN=true CI=true`); confirm `git diff --stat` touches only the test file.
 
 ## Work log
 
@@ -45,6 +45,7 @@ Restore `tests/testthat/test-icc-brms.R` to green under a live-Stan run and pin 
 - 2026-07-23: T2 fix — added `type = "agreement"` to the 11 rot fits; O-Bayes-FML-agree `fa`/`fc` additionally pinned `level = "subject"` (design returns both levels since M38); 4 stale "default"/"brms subject-only" comments corrected. Diff confined to `tests/testthat/test-icc-brms.R` (21 ins / 8 del).
 - 2026-07-23: T3 audit — 45 brms fits: 15 now type-pinned (2 also `level`-pinned), 2 `model="oneway"` exempt, 28 no-type all error-path/argument-validation, non-index diagnostic/replicate/prior, or nested-random/multilevel-one-way (ICC(1)/ICC(k), no A/C). No latent type-default-dependence in any index/level shape assertion.
 - 2026-07-23: T4 verify (1st full run) — 3 residual failures: restricting the primary brms fits to agreement exposed whole-vector `estimate` comparisons in O-Bayes-ML-agree/FCL/NML-agree against glmmTMB/lme4/brms-random references still at all-four. Pinned those 6 reference fits to `type = "agreement"` (merDeriv present, so the lme4 legs run). Re-running full verify.
+- 2026-07-23: T4 verify (2nd full run) GREEN — live Stan `test-icc-brms.R` 67 blocks, 0 failed/0 errored/0 skipped. CI-parity `devtools::test()` (`CI=true`) 478 blocks, 0 failed/0 errored, 23 skipped (the `skip_on_ci` brms blocks), 2 pre-existing glmmTMB convergence warnings. Branch diff vs `origin/main` confined to `tests/testthat/test-icc-brms.R` + this file; no `R/` change. Status → review.
 
 ## Decisions
 
