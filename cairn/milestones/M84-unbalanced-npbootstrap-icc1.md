@@ -69,14 +69,14 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
 - [x] T1 (RB tripwire: no-oracle): investigate — recover ohyama2025 §2's unbalanced
       NBOOT method (IJ SE vs nested bootstrap) from the shelf PDF; pin `n₀` (ANOVA
       `n₀` vs harmonic mean) by reproducing Example 2's `ρ̂ = 0.585`. Recorded in MD-1.
-- [ ] T2: re-derive the eq. 7 IJ SE for unequal `n_i` from ukoumunne Appendix A
+- [x] T2: re-derive the eq. 7 IJ SE for unequal `n_i` from ukoumunne Appendix A
       (A1–A10, the `C` term); implement in `R/ci-npbootstrap.R` — generalize
       `npb_anova()` to per-subject `n_i` and `npb_logf_to_rho()` to `n₀`.
       Tests-first: the reduces-to-balanced equality (AC2).
-- [ ] T3: drop the `!balanced` abort for `unit = "single"` npbootstrap
+- [x] T3: drop the `!balanced` abort for `unit = "single"` npbootstrap
       (`R/icc.R:1321-1328`); keep `unit = "average"` unbalanced aborting (→ M85).
       Guard degenerate unbalanced input (AC6). Directed unit tests.
-- [ ] T4: deterministic oracle tests — Example 2 `ρ̂` recovery (AC3) and the
+- [x] T4: deterministic oracle tests — Example 2 `ρ̂` recovery (AC3) and the
       reduces-to-balanced parity (AC2).
 - [ ] T5: unbalanced coverage sweep in `data-raw/` (`n_rep ≥ 2000`, ohyama Fig. 2
       cells, MCAR 0.1); commit the fixture; assert the plot-read band (AC4).
@@ -90,6 +90,13 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
 - 2026-07-23: T1 — recovered ohyama §2.3 (unbalanced NBOOT = eq. 7 with per-`nᵢ`,
   no nested bootstrap) + eq. 3 `n₀`; verified Example 2 `ρ̂ = 0.585`; re-read
   ukoumunne Appendix A (C-term). Decision MD-1; not escalated to Fable.
+- 2026-07-23: T2–T4 — generalized `npb_anova()` to per-`nᵢ` (eq. 3 `n₀`, `theta`
+  pivot), studentized `theta` (Form A), back-transform via `n₀`; single reducer
+  path (balanced is the special case). Dispatch allows unbalanced `unit="single"`,
+  aborts `"average"`/numeric (→M85); searle/burch stay balanced-only. Tests:
+  reduces-to-balanced ≤1e-10, Example-2 `ρ̂`, `n₀`≠harmonic, `theta`=logF−C, SSA=0
+  abort, well-formed+reproducible unbalanced interval. Gate suite green
+  (`NOT_CRAN=true CI=true`: 0/0); lintr 0; roxygen/@details/NEWS updated.
 
 ## Decisions
 

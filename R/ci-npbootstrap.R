@@ -1,66 +1,94 @@
 # Non-parametric transformed bootstrap-t confidence intervals (one-way) --------
 #
-# The ukoumunne2003 variance-stabilized transformed bootstrap-t for the balanced
-# one-way random ICC, exported as `ci_method = "npbootstrap"` (M75, D-006/D-010;
-# GO/NO-GO in M62/RR01, the exported-API scope in RR02). Unlike the parametric
-# `"bootstrap"` (which simulates FROM the fitted model and refits), this resamples
-# whole subjects with replacement from the raw data -- no reliance on the fitted
-# model being correct, and boundary-robust where the Monte-Carlo default aborts.
+# The ukoumunne2003 variance-stabilized transformed bootstrap-t for the one-way
+# random ICC, exported as `ci_method = "npbootstrap"` (M75, D-006/D-010; GO/NO-GO
+# in M62/RR01, the exported-API scope in RR02). Unlike the parametric `"bootstrap"`
+# (which simulates FROM the fitted model and refits), this resamples whole subjects
+# with replacement from the raw data -- no reliance on the fitted model being
+# correct, and boundary-robust where the Monte-Carlo default aborts.
 #
-# Procedure (ukoumunne2003 §3-§4; ported from the RR01-verified prototype
+# Balanced ICC(1)/ICC(k) shipped in M75; the UNBALANCED (unequal n_i) ICC(1)
+# interval is M84 (ohyama2025 §2.3 + eq. 3; MD-1). The reducer is a single
+# per-subject-n_i path -- balanced n_i == n reduces to the M75 result exactly.
+#
+# Procedure (ukoumunne2003 §3-§4 / Appendix A; ohyama2025 §2.3 for the unbalanced
+# n0 / per-n_i form; ported from the RR01-verified prototype
 # `data-raw/m62-npbootstrap-prototype.R`):
 #   - resample WHOLE SUBJECTS with replacement (§3.1 strategy 1),
-#   - point estimate rho = (MSA-MSE)/(MSA+(n-1)MSE) via one-way ANOVA MoM,
-#   - variance-stabilizing transform f(rho) = log{[1+(n-1)rho]/(1-rho)} = log F
+#   - point estimate rho = (MSA-MSE)/(MSA+(n0-1)MSE) via one-way ANOVA MoM, with
+#     the effective group size n0 = (N - sum(n_i^2)/N)/(k-1) (ohyama2025 eq. 3;
+#     n0 == n on balanced data),
+#   - variance-stabilizing transform f(rho) = log{[1+(n0-1)rho]/(1-rho)} = log F
 #     (eq. 6); note f(rho_hat) = log(MSA/MSE),
 #   - infinitesimal-jackknife SE of log F (eq. 7) for the studentized interval,
-#     avoiding a nested bootstrap,
-#   - studentize on the log F scale, back-transform the endpoints to the ICC scale.
+#     avoiding a nested bootstrap -- the eq. 7 influence value carries n_i, so the
+#     same formula serves unequal sizes (ukoumunne2003 A10),
+#   - studentize the pivot theta = log(SSA) - log(SSE) (log F minus the df-constant
+#     C = log{(N-k)/(k-1)}, which ukoumunne Appendix A A4-A5 drops), and
+#     back-transform the endpoints to the ICC scale with n0. Under imbalance a
+#     resample's N* shifts C, so studentizing theta rather than log F is the
+#     faithful pivot (MD-1, Form A); on balanced data C is invariant and the two
+#     coincide, so this reduces to M75 exactly.
 #
 # Endpoints are UNTRUNCATED (ukoumunne §5.2; RR01 §5): confined only to the
-# estimator's own support (-1/(n-1), 1) for ICC(1). The ICC(k) / `unit = "average"`
+# estimator's own support (-1/(n0-1), 1) for ICC(1). The ICC(k) / `unit = "average"`
 # interval is the exact monotone Spearman-Brown image of the ICC(1) interval
-# (RR02 Q2): g(rho) = k*rho/(1+(k-1)rho) applied to the two final rho endpoints.
+# (RR02 Q2): g(rho) = k*rho/(1+(k-1)rho) applied to the two final rho endpoints --
+# on BALANCED data only (k_eff = n = n0); the unbalanced ICC(k) pole/support
+# re-derivation is M85, so the dispatch aborts `unit = "average"` under imbalance.
 # Coverage is inherited as an exact event identity, so the ICC(k) interval needs
 # no separate oracle -- only the identity cross-check (BC2) and the inherited-
 # coverage assertion (BC3). The reported POINT for both estimands is the engine
 # (REML) point computed upstream (BC5); the ANOVA MoM rho here is interval
 # machinery only and is never surfaced as a point estimate.
 
-# One-way ANOVA summary on a (possibly resampled) balanced set of subject groups.
-# `groups` is a list of numeric vectors (one per subject, each length n). Returns
-# the transform ingredients; a degenerate group set (SSA = 0 -> log F = -Inf, or
-# SSE = 0 -> IJ SE undefined) is a caller-handled condition, flagged via a
-# non-finite `logf` / zero `se_ij_logf` rather than aborting here (a resample may
-# legitimately be degenerate; the observed data is guarded by the caller).
+# One-way ANOVA summary on a (possibly resampled) set of subject groups, balanced
+# or unbalanced. `groups` is a list of numeric vectors (one per subject, lengths
+# n_i). Returns the transform ingredients; a degenerate group set (SSA = 0 ->
+# log F = -Inf, or SSE = 0 -> IJ SE undefined) is a caller-handled condition,
+# flagged via a non-finite `logf` / zero `se_ij_logf` rather than aborting here (a
+# resample may legitimately be degenerate; the observed data is guarded by the caller).
 npb_anova <- function(groups) {
   k <- length(groups)
-  n <- length(groups[[1]])
+  n_i <- lengths(groups)
+  n_tot <- sum(n_i) # N
   ybar_i <- vapply(groups, mean, numeric(1))
   grand <- mean(unlist(groups))
-  ssa <- n * sum((ybar_i - grand)^2) # between, df = k-1
+  ssa <- sum(n_i * (ybar_i - grand)^2) # between, df = k-1
   sse <- sum(vapply(groups, function(g) sum((g - mean(g))^2), numeric(1)))
   msa <- ssa / (k - 1)
-  mse <- sse / (k * (n - 1))
+  mse <- sse / (n_tot - k) # within, df = N-k
   f <- msa / mse
-  rho <- (msa - mse) / (msa + (n - 1) * mse) # = (F-1)/(F+n-1)
+  # ANOVA effective group size (ohyama2025 eq. 3). Balanced n_i == n gives n0 == n
+  # exactly, so the transform and back-transform reduce to the M75 path.
+  n0 <- (n_tot - sum(n_i^2) / n_tot) / (k - 1)
+  rho <- (msa - mse) / (msa + (n0 - 1) * mse) # = (F-1)/(F+n0-1)
   logf <- log(f)
-  # eq. 7: infinitesimal-jackknife SE of log F under resampling of subjects.
+  # The studentized pivot is theta = log(SSA) - log(SSE) = log F - C, dropping the
+  # df-constant C = log{(N-k)/(k-1)} (ukoumunne2003 Appendix A A4-A5; MD-1, Form A).
+  theta <- log(ssa) - log(sse)
+  # eq. 7: infinitesimal-jackknife SE of log F under resampling of subjects, with
+  # per-subject n_i (the eq. 7 / A10 influence value already carries n_i, so this
+  # is the general unequal-size form, not a balanced special case).
   contrib <- vapply(
     seq_len(k),
     function(i) {
-      n * (ybar_i[i] - grand)^2 / ssa - sum((groups[[i]] - ybar_i[i])^2) / sse
+      n_i[i] *
+        (ybar_i[i] - grand)^2 /
+        ssa -
+        sum((groups[[i]] - ybar_i[i])^2) / sse
     },
     numeric(1)
   )
   se_ij_logf <- sqrt(sum(contrib^2))
-  list(rho = rho, logf = logf, se_ij_logf = se_ij_logf, n = n, k = k)
+  list(rho = rho, logf = logf, theta = theta, se_ij_logf = se_ij_logf, n0 = n0)
 }
 
-# f^{-1}: back-transform log F -> rho (monotone increasing), n the group size.
-npb_logf_to_rho <- function(logf, n) {
+# f^{-1}: back-transform log F -> rho (monotone increasing), n0 the effective
+# group size (ohyama2025 eq. 3; == n on balanced data).
+npb_logf_to_rho <- function(logf, n0) {
   f <- exp(logf)
-  (f - 1) / (f + n - 1)
+  (f - 1) / (f + n0 - 1)
 }
 
 # Spearman-Brown map rho (= ICC(1)) -> ICC(m) for an averaging divisor m; the
@@ -130,7 +158,11 @@ npbootstrap_ci <- function(
       idx <- sample.int(k, k, replace = TRUE)
       fit <- npb_anova(groups[idx])
       rho_star[b] <- fit$rho
-      t_star[b] <- (fit$logf - obs$logf) / fit$se_ij_logf
+      # Studentize the C-dropped pivot theta = log(SSA) - log(SSE) (MD-1, Form A):
+      # on balanced resamples theta == logf - C with C invariant, so this equals
+      # the M75 log-F studentization; under imbalance C shifts with N* and theta is
+      # the faithful pivot the IJ SE was derived for (ukoumunne A4-A5).
+      t_star[b] <- (fit$theta - obs$theta) / fit$se_ij_logf
     }
     list(rho_star = rho_star, t_star = t_star)
   }
@@ -157,12 +189,15 @@ npbootstrap_ci <- function(
 
   alpha <- 1 - conf_level
   tq <- stats::quantile(res$t_star, c(alpha / 2, 1 - alpha / 2), names = FALSE)
-  # Studentized endpoints on the log F scale (quantile reversal), back-transformed
-  # to rho = ICC(1). Untruncated (ukoumunne §5.2).
+  # Studentized endpoints (quantile reversal), back-transformed to rho = ICC(1)
+  # with the effective group size n0. The theta-scale endpoints reconstruct the log F
+  # endpoints via the observed C (theta_obs + C_obs = logf_obs), so the log F endpoint
+  # is `logf_obs - tq * se_obs` -- only the tq (theta-based) differs under imbalance.
+  # Untruncated (ukoumunne §5.2).
   lo_logf <- obs$logf - tq[2] * obs$se_ij_logf
   hi_logf <- obs$logf - tq[1] * obs$se_ij_logf
-  rho_lo <- npb_logf_to_rho(lo_logf, obs$n)
-  rho_hi <- npb_logf_to_rho(hi_logf, obs$n)
+  rho_lo <- npb_logf_to_rho(lo_logf, obs$n0)
+  rho_hi <- npb_logf_to_rho(hi_logf, obs$n0)
 
   # Each estimand maps the shared rho endpoints through its averaging divisor:
   # ICC(1) (divisor 1) is rho itself; ICC(k) (divisor k) is the monotone
