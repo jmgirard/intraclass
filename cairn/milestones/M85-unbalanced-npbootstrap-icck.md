@@ -5,7 +5,7 @@
 - **Depends on:** M84
 - **Driving RR:** —
 - **Principles touched:** IP1, GP7
-- **Branch/PR:** m85-unbalanced-npbootstrap-icck
+- **Branch/PR:** m85-unbalanced-npbootstrap-icck / [PR #92](https://github.com/jmgirard/intraclass/pull/92)
 
 ## Goal
 
@@ -29,25 +29,25 @@ unbalanced npbootstrap abort per the branch taken.
 
 ## Acceptance criteria
 
-- [ ] AC1 (analysis, GO/NO-GO): the pole/support alignment is derived — whether
+- [x] AC1 (analysis, GO/NO-GO): the pole/support alignment is derived — whether
       `g(ρ) = k_eff·ρ/(1 + (k_eff − 1)ρ)` is finite and strictly monotone on the
       ρ interval attainable under the `n₀`-transform support `(−1/(n₀−1), 1)`. The
       verdict (aligned = GO / pole intrudes = NO-GO) is recorded with its derivation
       and a numeric check on a worst-case unbalanced design (GP7).
-- [ ] AC2 (GO branch): the unbalanced ICC(k) interval is the SB image of the M84
+- [x] AC2 (GO branch): the unbalanced ICC(k) interval is the SB image of the M84
       ICC(1) endpoints, and coverage inheritance holds as an event identity —
       the M84 sweep, extended with an ICC(k) coverage column against the true
       `k_eff·ρ/(1 + (k_eff − 1)ρ)`, equals the ICC(1) coverage indicator rep-by-rep
       (tolerance 0).
-- [ ] AC3 (NO-GO branch): if the pole intrudes, a D-entry records it and the
+- [x] AC3 (NO-GO branch): if the pole intrudes, a D-entry records it and the
       shipped behavior — truncation at the pole or a loud classed abort on
       `unit = "average"` unbalanced with a `montecarlo` fallback — never a silent
       ±∞ or sign-flipped endpoint.
-- [ ] AC4 (identity cross-check, GO): a second independent construction of the
+- [x] AC4 (identity cross-check, GO): a second independent construction of the
       ICC(k) endpoints (the re-derived unbalanced identity — note `g(ρ̂) = 1 − 1/F`
       no longer holds when `k_eff ≠ n₀`, so it must be re-derived, not carried from
       RR02 BC2) agrees with the shipped endpoints to ≤ 1e-10.
-- [ ] AC5: `unit = "average"` unbalanced no longer aborts (GO) or aborts per AC3
+- [x] AC5: `unit = "average"` unbalanced no longer aborts (GO) or aborts per AC3
       (NO-GO); the default `icc(unit = c("single", "average"))` on unbalanced
       npbootstrap behaves per the branch, with a directed test.
 - [ ] AC6: `@param ci_method`/@details/`ORACLES.md`/NEWS updated;
@@ -113,3 +113,47 @@ unbalanced npbootstrap abort per the branch taken.
   `g(ρ)=k_eff(F−1)/(k_eff(F−1)+n₀)`, `F=exp(logf)` — reduces to `1−1/F` balanced (RR02 BC2).
 
 ## Review
+
+**PR:** [#92](https://github.com/jmgirard/intraclass/pull/92) (draft). Default branch
+(`main`) unmoved since branch cut (merge-base = origin/main); no re-merge needed.
+No `Driving RR` → projection-vs-outcome no-ops.
+
+### Acceptance-criteria evidence (fresh)
+
+- **AC1 (GO/NO-GO analysis) — GO, verified.** MD-1 records the derivation
+  `k_eff ≤ n0` for every one-way design (AM-GM on unordered triples), so the SB pole
+  `−1/(k_eff−1)` sits at or below the support boundary `−1/(n0−1)` and never intrudes;
+  `g` is finite + strictly monotone on the attainable ρ. Numeric check
+  (`test-ci-npbootstrap-unbalanced-icck.R`, fresh F=0): `min(n0−k_eff) ≥ −1e−12` over
+  2×10⁵ random designs + 5 adversarial worst-cases (many singletons + one huge group);
+  balanced + k=2 equality cases confirmed.
+- **AC2 (coverage inheritance, event identity) — verified.** The n_rep=2000 unbalanced
+  sweep, extended with the ICC(k) column against truth `k_eff·ρ/(1+(k_eff−1)ρ)`, records
+  `n_discrepant = 0` and `coverage_icck == coverage_icc1` (byte-identical) on all four
+  cells (A_10_2 .9356, A_25_5 .9400, A_50_5 .9465, D_10_10 .9220); the ICC(1) columns
+  reproduce the committed M84 fixture byte-for-byte. In-suite rep-by-rep identity test
+  also passes (tolerance 0). `test-ci-npbootstrap-unbalanced-coverage.R` F=0.
+- **AC3 (NO-GO branch) — not taken (vacuously satisfied).** GO was proved, so the pole
+  never intrudes: no D-entry, truncation, or abort is owed. The affirmative safety half
+  ("never a silent ±∞ or sign-flipped endpoint") holds — endpoints are pole-safe by AC1
+  and every AC5 interval is finite, ordered, and ≤ 1; `std.error` verified finite over
+  1977 near-zero designs (large but finite near the boundary, documented).
+- **AC4 (identity cross-check, GO) — verified.** The re-derived unbalanced identity
+  `g(ρ) = k_eff(F−1)/(k_eff(F−1)+n0)` (F=exp(logf)) — a second path using `k_eff` and
+  `n0` separately — matches the shipped SB route to ≤ 1e−10 over 2000 draws, and collapses
+  to `1 − 1/F` balanced (RR02 BC2). `test-ci-npbootstrap-unbalanced-icck.R` F=0.
+- **AC5 (dispatch) — verified.** Unbalanced `unit="average"` and the bare default
+  `unit=c("single","average")` now ship a well-formed ordered ICC(k) interval (SB image
+  of ICC(1), equal to `npb_sb(ICC(1) endpoint, k_eff)` to 1e−12); numeric `unit=m` still
+  aborts `intraclass_unsupported` (not pole-safe). `test-ci-npbootstrap.R` F=0.
+- **AC6 (docs + checks).** `@param`/@details, ORACLES O-NPBoot ICC(k) basis, NEWS updated;
+  `devtools::document()` no-diff; `pkgdown::check_pkgdown()` clean; `lintr::lint_package()`
+  0; full `devtools::test()` (NOT_CRAN=true CI=true) FAIL 0 / 4041 pass (2 pre-existing
+  WARN captures in `test-vignette-claims.R`, unrelated). `devtools::check()` — see below.
+
+### Consistency gate
+
+- `cairn_validate` exit 0 (all checks passed; 322 advisories are pre-existing historical
+  `M<NN>`-citation warnings, none from M85). No DESIGN.md principle text changed → no
+  `cairn_impact` run. Toolchain gate (r-package): `document()` no-diff, `pkgdown` clean,
+  NEWS entry present, no new top-level files needing `.Rbuildignore`.
