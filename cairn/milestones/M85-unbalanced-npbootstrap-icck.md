@@ -1,11 +1,11 @@
 # M85: Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived Spearman-Brown map
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M84
 - **Driving RR:** —
 - **Principles touched:** IP1, GP7
-- **Branch/PR:** —
+- **Branch/PR:** m85-unbalanced-npbootstrap-icck
 
 ## Goal
 
@@ -82,6 +82,7 @@ unbalanced npbootstrap abort per the branch taken.
 ## Work log
 
 - 2026-07-23: created by /milestone-plan (with M84, the ICC(1) predecessor).
+- 2026-07-23: set in-progress; branch `m85-unbalanced-npbootstrap-icck` cut from main.
 
 ## Decisions
 
