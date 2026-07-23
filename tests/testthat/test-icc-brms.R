@@ -2313,6 +2313,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "glmmTMB"
   ))
   g <- g[order(key(g)), ]
@@ -2345,6 +2346,7 @@ test_that("brms fits the crossed multilevel ICC end to end (O-Bayes-ML-agree)", 
       rater,
       subject = subject,
       cluster = cluster,
+      type = "agreement",
       engine = "lme4"
     ))
     l <- l[order(key(l)), ]
@@ -2432,6 +2434,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
     subject = subject,
     cluster = cluster,
     raters = "fixed",
+    type = "agreement",
     engine = "glmmTMB"
   )))
   tf <- cl(td)
@@ -2451,6 +2454,7 @@ test_that("brms fits the crossed multilevel FIXED cluster-level ICC (O-Bayes-FCL
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "brms",
     seed = 1,
     brm_args = br_args
@@ -3386,6 +3390,7 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
     rater,
     subject = subject,
     cluster = cluster,
+    type = "agreement",
     engine = "glmmTMB"
   ))
   g <- g[order(key(g)), ]
@@ -3411,6 +3416,7 @@ test_that("brms fits the nested Design 2 ICC end to end (O-Bayes-NML-agree)", {
       rater,
       subject = subject,
       cluster = cluster,
+      type = "agreement",
       engine = "lme4"
     ))
     l <- l[order(key(l)), ]
