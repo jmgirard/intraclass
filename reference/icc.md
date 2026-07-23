@@ -281,7 +281,19 @@ icc(
   under-cover at small rater counts); reach for it for its boundary
   robustness (an interval that exists where the Monte-Carlo default
   aborts) and non-normality robustness. See Details for the ICC(k),
-  endpoint-support, and point-estimate conventions.
+  endpoint-support, and point-estimate conventions. `"searle"` and
+  `"burch"` are two **deterministic classical closed-form** intervals,
+  also **only for the balanced one-way random design** (they abort
+  otherwise). Both give a finite interval on every dataset – including
+  the near-zero-ICC boundary where the Monte-Carlo default aborts – and
+  neither resamples, so `mc_samples`, `boot_samples`, and `seed` do not
+  apply. `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong
+  1996, Table 7): **exact under normality**, best-calibrated and
+  narrowest when the data are approximately normal. `"burch"` is the
+  REML-based, kurtosis-adjusted interval of Burch (2011): wider, but
+  robust to non-normality and never under-covering. Prefer `"searle"`
+  for near-normal data and `"burch"` when heavy tails or non-normality
+  are a concern.
 
 - mc_samples:
 
@@ -556,11 +568,35 @@ while the untruncated interval may extend below `0`; this is the normal
 picture for a boundary-respecting point beside an honest interval, and
 it signals that the data are consistent with values near and below zero.
 
+## The classical `"searle"` and `"burch"` intervals (balanced one-way)
+
+Both are deterministic closed forms from the one-way ANOVA. `"searle"`
+inverts the exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle
+1971; the McGraw & Wong 1996 Table 7 limits); it is exact under
+normality. `"burch"` builds kurtosis-adjusted `log(1 + n*theta-hat)`
+limits (Burch 2011), so its width tracks the data's tail weight – wider
+but robust to non-normality, and never under-covering. Both share the
+conventions above: the `unit = "average"` (ICC(k)) interval is the same
+exact monotone **Spearman-Brown** image of the ICC(1) endpoints (so its
+coverage is identical by construction), endpoints are left
+**untruncated** on the estimator's own support, and the reported
+**point** is the engine (REML) point. Being closed forms they take no
+`mc_samples`, `boot_samples`, or `seed`, and report no `std.error`
+(there is no sampling distribution). Their value is a finite,
+well-calibrated interval on the near-zero-ICC boundary where the
+Monte-Carlo default aborts.
+
 ## References
+
+Burch, B. D. (2011). Confidence intervals for the intraclass correlation
+coefficient based on the restricted maximum likelihood estimator.
+*Journal of Statistical Computation and Simulation, 81*(9), 1101-1115.
 
 McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
 intraclass correlation coefficients. *Psychological Methods, 1*(1),
 30-46.
+
+Searle, S. R. (1971). *Linear Models*. Wiley.
 
 Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. *Psychological Bulletin, 86*(2), 420-428.

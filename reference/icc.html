@@ -319,7 +319,18 @@ back-transforms the endpoints. It is <strong>not</strong> a percentile bootstrap
 percentile and BCa variants were assessed and rejected (they under-cover at
 small rater counts); reach for it for its boundary robustness (an interval that
 exists where the Monte-Carlo default aborts) and non-normality robustness. See
-Details for the ICC(k), endpoint-support, and point-estimate conventions.</p></dd>
+Details for the ICC(k), endpoint-support, and point-estimate conventions.
+<code>"searle"</code> and <code>"burch"</code> are two <strong>deterministic classical closed-form</strong>
+intervals, also <strong>only for the balanced one-way random design</strong> (they abort
+otherwise). Both give a finite interval on every dataset – including the
+near-zero-ICC boundary where the Monte-Carlo default aborts – and neither
+resamples, so <code>mc_samples</code>, <code>boot_samples</code>, and <code>seed</code> do not apply.
+<code>"searle"</code> is the exact-F pivot (Searle 1971; McGraw &amp; Wong 1996, Table 7):
+<strong>exact under normality</strong>, best-calibrated and narrowest when the data are
+approximately normal. <code>"burch"</code> is the REML-based, kurtosis-adjusted interval
+of Burch (2011): wider, but robust to non-normality and never under-covering.
+Prefer <code>"searle"</code> for near-normal data and <code>"burch"</code> when heavy tails or
+non-normality are a concern.</p></dd>
 
 
 <dt id="arg-mc-samples">mc_samples<a class="anchor" aria-label="anchor" href="#arg-mc-samples"></a></dt>
@@ -566,9 +577,29 @@ beside an honest interval, and it signals that the data are consistent with valu
 near and below zero.</p>
     </div>
     <div class="section level2">
+    <h2 id="the-classical-searle-and-burch-intervals-balanced-one-way-">The classical <code>"searle"</code> and <code>"burch"</code> intervals (balanced one-way)<a class="anchor" aria-label="anchor" href="#the-classical-searle-and-burch-intervals-balanced-one-way-"></a></h2>
+    <p>Both are deterministic closed forms from the one-way ANOVA. <code>"searle"</code> inverts the
+exact-F pivot <code>F / (1 + n*lambda) ~ F(k-1, k(n-1))</code> (Searle 1971; the McGraw &amp; Wong
+1996 Table 7 limits); it is exact under normality. <code>"burch"</code> builds
+kurtosis-adjusted <code>log(1 + n*theta-hat)</code> limits (Burch 2011), so its width tracks
+the data's tail weight – wider but robust to non-normality, and never
+under-covering. Both share the conventions above: the <code>unit = "average"</code> (ICC(k))
+interval is the same exact monotone <strong>Spearman-Brown</strong> image of the ICC(1)
+endpoints (so its coverage is identical by construction), endpoints are left
+<strong>untruncated</strong> on the estimator's own support, and the reported <strong>point</strong> is the
+engine (REML) point. Being closed forms they take no <code>mc_samples</code>, <code>boot_samples</code>,
+or <code>seed</code>, and report no <code>std.error</code> (there is no sampling distribution). Their
+value is a finite, well-calibrated interval on the near-zero-ICC boundary where the
+Monte-Carlo default aborts.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about some intraclass
+    <p>Burch, B. D. (2011). Confidence intervals for the intraclass correlation
+coefficient based on the restricted maximum likelihood estimator.
+<em>Journal of Statistical Computation and Simulation, 81</em>(9), 1101-1115.</p>
+<p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about some intraclass
 correlation coefficients. <em>Psychological Methods, 1</em>(1), 30-46.</p>
+<p>Searle, S. R. (1971). <em>Linear Models</em>. Wiley.</p>
 <p>Shrout, P. E., &amp; Fleiss, J. L. (1979). Intraclass correlations: uses in
 assessing rater reliability. <em>Psychological Bulletin, 86</em>(2), 420-428.</p>
 <p>Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., &amp; Chinn, S. (2003).
