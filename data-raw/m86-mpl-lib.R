@@ -176,14 +176,29 @@ mpl_kappa_corr <- function(
   n_mc = 2000
 ) {
   side <- match.arg(side)
-  q <- if (side == "two") 1 - alpha else 1 - 2 * alpha
-  chi <- qchisq(q, 1)
-  dev <- numeric(n_mc)
+  # crit base chi^2: two-sided uses 1-alpha; one-sided lower uses 1-2*alpha
+  # (the same base mpl_interval() uses per side).
+  chi <- if (side == "two") qchisq(1 - alpha, 1) else qchisq(1 - 2 * alpha, 1)
+  stat <- numeric(n_mc)
   for (i in seq_len(n_mc)) {
     ms <- mpl_anova(mpl_simulate(rho, delta, n_r, n_s))
-    dev[i] <- mpl_deviance(rho, ms)
+    fit <- mpl_fit(ms)
+    d <- mpl_deviance(rho, ms, neg2l_min = fit$neg2l_min)
+    # Two-sided coverage = P(D <= crit), so the statistic is the folded deviance D.
+    # One-sided lower coverage = P(rho_true >= rho_hat_L) is a ONE-TAILED event on
+    # the SIGNED likelihood root L = sign(rho_hat - rho_true) * sqrt(D); the folded
+    # D would double-count the upper tail and kappa would not vanish as the design
+    # grows (asymptotic floor ~0.42 != 0). See M86 review Finding 2.
+    stat[i] <- if (side == "two") {
+      d
+    } else {
+      sign(fit$rho_hat - rho) * sqrt(max(d, 0))
+    }
   }
-  as.numeric(quantile(dev, probs = 1 - alpha, names = FALSE) / chi - 1)
+  qhat <- quantile(stat, probs = 1 - alpha, names = FALSE)
+  # Two-sided: (1+kappa) chi = quantile(D). One-sided: (1+kappa) chi = quantile(L)^2.
+  scaled <- if (side == "two") qhat else qhat^2
+  as.numeric(scaled / chi - 1)
 }
 
 # kappa_m = max_{rho in [rho_L, rho_U], delta in [delta_L, delta_U]} kappa_corr

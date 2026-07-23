@@ -296,13 +296,50 @@ cat(sprintf(
   nrow(tbl3)
 ))
 
+# --- Table 3 one-sided kappa_m (95% lower, delta_U=16) (T5, M86-review fix) --
+# Validates the one-sided calibration branch of mpl_kappa_corr (M86 review
+# Finding 2: the signed-root fix). alpha = 0.05 -> 95% one-sided. Published
+# (Table 3 one-sided delta_U=16 col, = Table 9 kappa_m footnote): (3,10) 0.72,
+# (3,50) 1.20, (5,50) 0.77.
+tbl3l <- data.frame(
+  n_r = c(3, 3, 5),
+  n_s = c(10, 50, 50),
+  km_pub = c(0.72, 1.20, 0.77)
+)
+tbl3l$km_ours <- NA_real_
+set.seed(seed + 3)
+for (i in seq_len(nrow(tbl3l))) {
+  km <- mpl_kappa_m(
+    tbl3l$n_r[i],
+    tbl3l$n_s[i],
+    alpha = 0.05,
+    side = "lower",
+    d = 0.1,
+    n_mc = n_mc_k
+  )
+  tbl3l$km_ours[i] <- round(km$kappa_m, 3)
+}
+tbl3l$km_pass <- abs(tbl3l$km_ours - tbl3l$km_pub) <= tol_km
+cat(sprintf(
+  "== Table 3 kappa_m (delta_U=16, 95%% one-sided lower; n_mc=%d, d=0.1) ==\n",
+  n_mc_k
+))
+print(tbl3l, row.names = FALSE)
+cat(sprintf(
+  "   tol +/-%.2f  ->  %d/%d pass\n\n",
+  tol_km,
+  sum(tbl3l$km_pass),
+  nrow(tbl3l)
+))
+
 # --- Commit the validation record ------------------------------------------
 validation <- list(
   anchors = anchors,
   table7 = tbl7,
   kappa3 = tbl3,
+  kappa3_lower = tbl3l,
   meta = list(
-    source = "xiao2013 Tables 3/4/6/7",
+    source = "xiao2013 Tables 3/4/6/7/9",
     generator = "data-raw/m86-mpl-validate.R (sources data-raw/m86-mpl-lib.R)",
     n_rep = n_rep,
     n_mc_kappa = n_mc_k,
@@ -318,7 +355,8 @@ cat("saved data-raw/m86-mpl-validation-results.rds\n")
 all_pass <- all(anchors$cr_pass) &&
   all(anchors$al_pass) &&
   all(tbl7$cr_pass) &&
-  all(tbl3$km_pass)
+  all(tbl3$km_pass) &&
+  all(tbl3l$km_pass)
 cat(sprintf(
   "OVERALL (gated criteria): %s\n",
   if (all_pass) "ALL PASS" else "SOME FAIL"

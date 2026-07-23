@@ -71,11 +71,15 @@ on the balanced (SMS, RMS, EMS) ANOVA layout (Table 1, p. 2244):
   `κ=κ_m` is MPL. A one-sided lower bound uses the `1−2α` critical value (so a
   95% lower bound shares the two-sided 90% lower critical value — confirmed
   against Ex. 1).
-- **`mpl_kappa_corr` / `mpl_kappa_m`** — the calibration, Eqs. (11)–(13). κ_corr
-  is the Bartlett-type MC quantity `quantile_{1−α}(D(ρ_true)) / χ² − 1` (the
-  continuous realisation of the paper's seven-step procedure, pp. 2249–2251,
-  whose step 7 selects the smallest κ giving coverage ≥ 1−α); κ_m is its maximum
-  over the (ρ, δ) grid (ρ ∈ [0.6, 0.9] step 0.1, δ = 2^{−1..4}).
+- **`mpl_kappa_corr` / `mpl_kappa_m`** — the calibration, Eqs. (11)–(13), the
+  continuous realisation of the paper's seven-step procedure (pp. 2249–2251,
+  step 7: the smallest κ giving coverage ≥ 1−α). It is **side-specific**: the
+  two-sided interval covers when the folded deviance `D ≤ crit`, giving
+  `κ_corr = quantile_{1−α}(D) / χ² − 1`; a one-sided lower bound covers on a
+  one-tailed event on the **signed** likelihood root `L = sign(ρ̂−ρ)·√D`, giving
+  `κ_corr = quantile_{1−α}(L)² / χ²_{1−2α} − 1` (M86 review Finding 2 — the folded
+  D would double-count the upper tail and κ would not vanish as the design grows).
+  κ_m is the maximum over the (ρ, δ) grid (ρ ∈ [0.6, 0.9] step 0.1, δ = 2^{−1..4}).
 
 `data-raw/m86-mpl-validate.R` drives the oracle validation and writes
 `data-raw/m86-mpl-validation-results.rds` (seeded; provenance in its `meta`).
