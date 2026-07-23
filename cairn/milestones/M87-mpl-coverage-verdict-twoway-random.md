@@ -72,7 +72,7 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
 
 ## Tasks
 
-- [ ] T1 — Write and commit the pre-registration (design; cells incl. a near-zero-ρ
+- [x] T1 — Write and commit the pre-registration (design; cells incl. a near-zero-ρ
       boundary + few-subjects corner; incumbents = MC default + parametric
       bootstrap; coverage-band + width "not worse" criterion; stated prior) BEFORE
       any comparison run (GP5).
@@ -90,6 +90,8 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
 ## Work log
 
 - 2026-07-23: created by /milestone-plan (split from the PL-CI candidate; depends on M86's validated machinery).
+- 2026-07-23: gate — 95% nominal, 5-cell grid (C1–C5), n_rep=1000 cheap / 500 pboot (B=199) background (all recommended options).
+- 2026-07-23: T1 — froze the M87 pre-registration in `references/mpl-twoway-random-comparison.md` (design, cells, κ_m recalibration + fence continuity anchor, "not worse" criterion, prior) BEFORE any comparison run (GP5); +2 OUT-repo-analysis triage rows for the C3/C4 cell-role labels (enumerator --check green).
 
 ## Decisions
 

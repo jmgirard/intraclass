@@ -161,6 +161,101 @@ two-sided intervals. The one-sided κ_corr, corrected at review (Finding 2), is
 validated by its exact-coverage property. Results:
 `data-raw/m86-mpl-validation-results.rds`.
 
+---
+
+# M87 — the comparison pass
+
+**Question.** Is the modified profile-likelihood (MPL) interval — with κ_m
+**recalibrated over the extended range ρ ∈ [0, 0.9]** — "not worse" than the
+package's incumbent interval methods (Monte-Carlo default; parametric bootstrap)
+for the two-way random `ICC(A,1)`, across the full ρ range **including the
+near-zero boundary** the published κ_m are not calibrated for (xiao2013's
+ρ_L = 0.6 fence)? GO/NO-GO, no exported method. Naive PL (κ = 0) is carried as a
+reference. Correctness of the machinery is already established (M86, above).
+
+## Pre-registration (frozen 2026-07-23, BEFORE any comparison run — GP5)
+
+### Design
+
+Balanced, complete two-way random effects (xiao2013 Eq. 1):
+`Y_ij = μ + r_i + s_j + e_ij`, R raters × S subjects, all mutually independent
+Gaussian, total variance fixed at 1. Estimand `ρ = σ²_s / (σ²_s + σ²_r + σ²_e)` =
+package `ICC(A,1)` (the term-for-term mapping above). DGP = `mpl_simulate(ρ, δ,
+R, S)` with `δ = σ²_r/σ²_e`; `σ²_s = ρ`, `σ²_e = (1−ρ)/(1+δ)`, `σ²_r = δ·σ²_e`.
+**Nominal 95%** two-sided (the package default and the incumbents' operating
+point). Methods evaluated on the **same seeded datasets** per cell (paired).
+`n_rep = 1000` for the cheap methods (MPL, naive PL, MC; coverage MC-SE ≈
+√(.95·.05/1000) ≈ 0.7 pp); the parametric bootstrap runs on the **first 500
+paired reps** of each cell (B = 199), the M76 precedent for an infeasibly slow
+incumbent (~5 s/dataset here).
+
+### Cells (frozen)
+
+R = raters, S = subjects, δ = σ²_r/σ²_e, ρ = true `ICC(A,1)`. Four distinct
+(R,S) geometries; C2/C3 (near-zero boundary and few-subjects corner, GP6) are the
+**decisive** cells.
+
+| cell | R | S | δ | ρ | role |
+|---|---|---|---|---|---|
+| C1 | 3 | 20 | 1.0 | 0.60 | interior anchor (xiao-validated ρ region; sanity) |
+| C2 | 3 | 20 | 1.0 | 0.05 | **near-zero-ρ boundary (σ²_s→0; GP6) — decisive** |
+| C3 | 3 | 10 | 1.0 | 0.05 | **few-subjects × boundary corner (GP6) — worst case** |
+| C4 | 3 | 50 | 4.0 | 0.60 | xiao2013's worst naive-PL geometry (the S↑ stress axis) |
+| C5 | 5 | 20 | 1.0 | 0.75 | breadth (more raters, mid-high ρ) |
+
+### κ_m recalibration (extended range; T2)
+
+Per (R,S) geometry, `κ_m = max{ κ_corr(ρ, δ) : ρ ∈ [0.05, 0.9], δ ∈ {0.5…16} }`
+via M86's `mpl_kappa_corr` (side = "two", **α = 0.05**), reported as κ_corr at the
+grid **argmax corner** (M86's upward-bias correction: the MC grid-max over-estimates
+a maximum). A grid scan locates the argmax (expected at the (ρ_min, δ_U) corner,
+per M86 — but **verified**, not assumed, since the sub-0.6 region is unvalidated).
+
+**Continuity anchor at the fence (AC2).** For the two geometries that overlap
+M86's validated Table 3 set — **(3,10) and (3,50)** — κ_corr(ρ = 0.6, δ = 16)
+recomputed at **α = 0.10** (M86's only published anchor is the 90% two-sided
+table) must match M86's validated values (0.32, 0.67) within ±0.10. This proves
+the extended-grid recalibration reproduces the published-region κ_m at the fence;
+**below 0.6 there is no external oracle** (xiao2013), so continuity at the fence
+is the check the calibration gets, and any near-zero κ_m the scan produces is
+recorded as extrapolation of a validated machinery, never as an oracle-backed
+constant.
+
+### "Not worse" criterion (GP5 — fixed before results)
+
+Nominal 95%. The candidate is **MPL (recalibrated κ_m)**. MC coverage is
+**conditional on non-abort**; `n_ok` and the σ²_s→0 abort rate are recorded per
+cell (AC4). MPL is **"not worse" at a cell** iff BOTH:
+
+1. **Near nominal:** empirical coverage ≥ **0.93** (nominal 0.95 − 2 pp;
+   under-coverage is the failure — over-coverage passes (1) but is penalized on
+   width).
+2. **Not below the incumbents:** MPL coverage ≥ (min of MC and parametric-bootstrap
+   coverage at that cell) − **0.01** (≈ 2·SE paired slack). Where an incumbent
+   **aborts** (returns no interval on a share of datasets), its conditional
+   coverage still enters the min, and the abort share is carried into the verdict
+   framing (an interval that *exists* where MC does not is MPL's boundary value —
+   the M62/D-006 framing).
+
+**Tiebreaker (width):** among methods clearing (1)+(2), prefer smaller **median
+interval width**; a narrower interval that fails (1) or (2) does not win.
+
+**Overall GO** iff MPL is "not worse" at **every** cell, with C2/C3 (boundary /
+few-subjects) decisive. Otherwise **NO-GO**. Naive PL and the width comparison are
+reported for context, not as the GO gate.
+
+### Prior (not the verdict — GP5)
+
+xiao2013 shows naive PL under-covers (Tables 4/7), worsening as S grows at R = 3;
+MPL is deliberately **conservative** (coverage ≥ nominal, narrower than GV). The
+open risk this pass exists to measure: the extended-range κ_m — a max that now
+includes the near-zero corner where κ_corr is largest — may be **much larger** than
+the published-region κ_m, making MPL over-cover and run **wide** at interior cells,
+even as it becomes the only method that returns an interval at the boundary where
+the MC default may abort. Expectation is therefore **mixed / plausibly NO-GO on
+width** even if MPL never under-covers; the pass decides empirically (the evidence
+decides, not the prior).
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the
