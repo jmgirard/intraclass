@@ -157,6 +157,71 @@ mpl_interval <- function(
   c(lower = lower, upper = upper, rho_hat = rho_hat)
 }
 
+# --- kappa_corr / kappa_m calibration (xiao2013 Eqs. 11-13, pp. 2247-2251) --
+# kappa_corr(rho, delta) is the kappa making the (1-alpha) interval exact at
+# that (rho, delta). The naive interval covers rho_true iff D(rho_true) <= crit,
+# so coverage = P(D <= (1+kappa) chi^2). Setting it to 1-alpha gives the
+# Bartlett-type MC estimator
+#   kappa_corr = quantile_{1-alpha}( D(rho_true) ) / chi^2_{1, q} - 1,
+# with q = 1-alpha (two-sided) or 1-2*alpha (one-sided lower) -- the same crit
+# base mpl_interval() uses. This is the MC realisation of xiao2013's seven-step
+# procedure; it is validated against the published Table 3 kappa_m (Eq. 11).
+mpl_kappa_corr <- function(
+  rho,
+  delta,
+  n_r,
+  n_s,
+  alpha = 0.10,
+  side = c("two", "lower"),
+  n_mc = 2000
+) {
+  side <- match.arg(side)
+  q <- if (side == "two") 1 - alpha else 1 - 2 * alpha
+  chi <- qchisq(q, 1)
+  dev <- numeric(n_mc)
+  for (i in seq_len(n_mc)) {
+    ms <- mpl_anova(mpl_simulate(rho, delta, n_r, n_s))
+    dev[i] <- mpl_deviance(rho, ms)
+  }
+  as.numeric(quantile(dev, probs = 1 - alpha, names = FALSE) / chi - 1)
+}
+
+# kappa_m = max_{rho in [rho_L, rho_U], delta in [delta_L, delta_U]} kappa_corr
+# (Eq. 11). Grid defaults follow xiao2013 p. 2248: rho step d = 0.05, delta_j =
+# 2^j over j = -1..4 (so delta in {0.5,1,2,4,8,16}, delta_U = 16). Returns the
+# max plus the per-cell grid for inspection.
+mpl_kappa_m <- function(
+  n_r,
+  n_s,
+  alpha = 0.10,
+  side = c("two", "lower"),
+  rho_l = 0.6,
+  rho_u = 0.9,
+  d = 0.05,
+  deltas = 2^(-1:4),
+  n_mc = 2000
+) {
+  side <- match.arg(side)
+  rhos <- seq(rho_l, rho_u, by = d)
+  grid <- expand.grid(rho = rhos, delta = deltas)
+  grid$kappa_corr <- mapply(
+    function(rho, delta) {
+      mpl_kappa_corr(
+        rho,
+        delta,
+        n_r,
+        n_s,
+        alpha = alpha,
+        side = side,
+        n_mc = n_mc
+      )
+    },
+    grid$rho,
+    grid$delta
+  )
+  list(kappa_m = max(grid$kappa_corr), grid = grid)
+}
+
 # --- DGP: balanced two-way random, absolute agreement -----------------------
 # Given (rho, delta = sigma^2_r/sigma^2_e), total variance fixed at 1:
 #   sigma^2_s = rho ; sigma^2_e = (1-rho)/(1+delta) ; sigma^2_r = delta*sigma^2_e.

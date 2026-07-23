@@ -79,7 +79,7 @@ published κ_m constants and coverage/length tables in the calibration region
 - [x] T2 — Implement `l†(ρ)` from the (SMS, RMS, EMS) layout (Eq. 7–8) and the
       naive-PL interval (Eq. 9/10, κ=0) via 1-D root-finding nesting 1-D
       optimization; unit-check against a §5 worked example.
-- [ ] T3 — Implement the MPL interval (κ = κ_m in Eq. 9/10) and the κ_m grid-search
+- [x] T3 — Implement the MPL interval (κ = κ_m in Eq. 9/10) and the κ_m grid-search
       calibration (Eqs. 11–13 + the seven-step MC κ_corr, pp. 2247–2251).
 - [ ] T4 — Seeded coverage/length harness (xiao2013 DGP, n_rep pre-registered in
       the note); reproduce Table 4 and Table 6 anchor cells within tolerance.
@@ -93,6 +93,7 @@ published κ_m constants and coverage/length tables in the calibration region
 - 2026-07-23: created by /milestone-plan (split from the PL-CI candidate; sibling M87 owns the verdict).
 - 2026-07-23: T1 — estimand mapping confirmed (xiao2013 ρ = package ICC(A,1), σ²_e ≡ σ²_res) against the M1 spec + mcgraw1996; recorded in `references/mpl-twoway-random-comparison.md` (new synthesis note + INDEX.md row).
 - 2026-07-23: T2 — `data-raw/m86-mpl-lib.R` (Eq. 7 −2l, profile, 2-D-polished MLE reference, naive-PL interval, DGP) + `data-raw/m86-mpl-validate.R` worked-example check. Ex. 1 MLE reproduces exactly (0.8987); naive-PL interval (0.7013,0.9620) vs published (0.7120,0.9598) — ~0.011 (xiao's own numerics); one-sided 95% lower = two-sided 90% lower, matching the paper's χ² convention. lintr + air clean.
+- 2026-07-23: T3 — added `mpl_kappa_corr`/`mpl_kappa_m` (Bartlett-type MC realisation of the seven-step κ_corr; κ_m = grid max). Validated: κ_corr(0.6,16) for (3,50) centers at 0.652±0.029 vs published κ_m 0.67 (the max is at the ρ=0.6/δ=16 corner as the paper predicts); MPL interval path (published κ_m) reproduces Table 6 anchors near-exactly — (3,10,δ0.5,ρ.60) 945/0.570 vs 945/0.569, (3,50,δ4,ρ.60) 902/0.556 vs 908/0.559, (5,50,δ4,ρ.90) 928/0.233 vs 927/0.230. lintr + air clean.
 
 ## Decisions
 
