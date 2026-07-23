@@ -271,29 +271,34 @@ icc(
   `engine = "brms"` (and `"brms"` requires it) – the other methods do
   not apply to a Bayesian fit, and `"posterior"` needs posterior draws
   no other engine produces. `"npbootstrap"` is the **non-parametric**
-  transformed bootstrap-*t* of Ukoumunne et al. (2003), available **only
-  for the balanced one-way random design** (`model = "oneway"`; it
-  aborts otherwise). It resamples whole subjects with replacement (not
-  from the fitted model), stabilizes the variance with the `log F`
-  transform, studentizes with an infinitesimal-jackknife SE, and
-  back-transforms the endpoints. It is **not** a percentile bootstrap –
-  the percentile and BCa variants were assessed and rejected (they
-  under-cover at small rater counts); reach for it for its boundary
-  robustness (an interval that exists where the Monte-Carlo default
-  aborts) and non-normality robustness. See Details for the ICC(k),
-  endpoint-support, and point-estimate conventions. `"searle"` and
-  `"burch"` are two **deterministic classical closed-form** intervals,
-  also **only for the balanced one-way random design** (they abort
-  otherwise). Both give a finite interval on every dataset – including
-  the near-zero-ICC boundary where the Monte-Carlo default aborts – and
-  neither resamples, so `mc_samples`, `boot_samples`, and `seed` do not
-  apply. `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong
-  1996, Table 7): **exact under normality**, best-calibrated and
-  narrowest when the data are approximately normal. `"burch"` is the
-  REML-based, kurtosis-adjusted interval of Burch (2011): wider, but
-  robust to non-normality and never under-covering. Prefer `"searle"`
-  for near-normal data and `"burch"` when heavy tails or non-normality
-  are a concern.
+  transformed bootstrap-*t* of Ukoumunne et al. (2003), for the
+  **one-way random design** (`model = "oneway"`; it aborts otherwise).
+  On **balanced** data it serves both `unit = "single"` (ICC(1)) and
+  `unit = "average"` (ICC(k)); on **unbalanced** data (unequal ratings
+  per subject) it serves `unit = "single"` only – the effective group
+  size becomes the ANOVA `n0` of Ohyama (2025) and the unbalanced
+  average/ICC(k) interval is not yet available (use
+  `ci_method = "montecarlo"` for it). It resamples whole subjects with
+  replacement (not from the fitted model), stabilizes the variance with
+  the `log F` transform, studentizes with an infinitesimal-jackknife SE,
+  and back-transforms the endpoints. It is **not** a percentile
+  bootstrap – the percentile and BCa variants were assessed and rejected
+  (they under-cover at small rater counts); reach for it for its
+  boundary robustness (an interval that exists where the Monte-Carlo
+  default aborts) and non-normality robustness. See Details for the
+  ICC(k), endpoint-support, and point-estimate conventions. `"searle"`
+  and `"burch"` are two **deterministic classical closed-form**
+  intervals, also **only for the balanced one-way random design** (they
+  abort otherwise). Both give a finite interval on every dataset –
+  including the near-zero-ICC boundary where the Monte-Carlo default
+  aborts – and neither resamples, so `mc_samples`, `boot_samples`, and
+  `seed` do not apply. `"searle"` is the exact-F pivot (Searle 1971;
+  McGraw & Wong 1996, Table 7): **exact under normality**,
+  best-calibrated and narrowest when the data are approximately normal.
+  `"burch"` is the REML-based, kurtosis-adjusted interval of Burch
+  (2011): wider, but robust to non-normality and never under-covering.
+  Prefer `"searle"` for near-normal data and `"burch"` when heavy tails
+  or non-normality are a concern.
 
 - mc_samples:
 
@@ -544,7 +549,7 @@ covariance on the model's internal (log) scale and back-transformed, so
 the interval is boundary-aware near the common zero-rater-variance case
 where the delta method fails. Pass `seed` for a reproducible interval.
 
-## The `"npbootstrap"` interval (balanced one-way)
+## The `"npbootstrap"` interval (one-way)
 
 For `unit = "average"` (the ICC(k), reliability of the mean of the *k*
 ratings) the transformed bootstrap-*t* interval is the exact monotone
@@ -554,9 +559,19 @@ Because that map is strictly increasing, the ICC(k) interval's coverage
 is **identical to the ICC(1) interval's, by construction** – it is not a
 separate approximation.
 
+On **unbalanced** data (unequal ratings per subject) the reducer uses
+the ANOVA effective group size `n0 = (N - sum(n_i^2)/N) / (k - 1)`
+(Ohyama 2025) in the `log F` transform, and studentizes
+`log(SSA) - log(SSE)` – the pivot the infinitesimal-jackknife SE is
+derived for (Ukoumunne et al. 2003, Appendix A), which coincides with
+the balanced `log F` pivot when subjects are equally rated. Only
+`unit = "single"` (ICC(1)) is available unbalanced; the ICC(k) average
+is balanced-only for now (its unbalanced averaging divisor is not yet
+resolved).
+
 Following Ukoumunne et al. (2003, §5.2), the endpoints are **not
 truncated** to `[0, 1]`: they are confined only to the estimator's own
-support (approaching `-1/(k-1)` from above for ICC(1), and unbounded
+support (approaching `-1/(n0-1)` from above for ICC(1), and unbounded
 below for ICC(k)), so a near-boundary lower endpoint can be negative –
 markedly so for ICC(k). Leaving them untruncated is what makes the
 coverage faithful to the published method.
