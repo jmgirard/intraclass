@@ -44,6 +44,7 @@ Restore `tests/testthat/test-icc-brms.R` to green under a live-Stan run and pin 
 - 2026-07-23: T1 live-Stan baseline (`NOT_CRAN=true`, `CI` unset) — 11 blocks failed, all A-only `index` assertions from no-`type` fits now returning all four formulations (M44/ADR-054); O-Bayes-FML-agree additionally failed on `level` (subject vs subject+cluster, M38) + cascading containment. Enumerated in scratchpad baseline log.
 - 2026-07-23: T2 fix — added `type = "agreement"` to the 11 rot fits; O-Bayes-FML-agree `fa`/`fc` additionally pinned `level = "subject"` (design returns both levels since M38); 4 stale "default"/"brms subject-only" comments corrected. Diff confined to `tests/testthat/test-icc-brms.R` (21 ins / 8 del).
 - 2026-07-23: T3 audit — 45 brms fits: 15 now type-pinned (2 also `level`-pinned), 2 `model="oneway"` exempt, 28 no-type all error-path/argument-validation, non-index diagnostic/replicate/prior, or nested-random/multilevel-one-way (ICC(1)/ICC(k), no A/C). No latent type-default-dependence in any index/level shape assertion.
+- 2026-07-23: T4 verify (1st full run) — 3 residual failures: restricting the primary brms fits to agreement exposed whole-vector `estimate` comparisons in O-Bayes-ML-agree/FCL/NML-agree against glmmTMB/lme4/brms-random references still at all-four. Pinned those 6 reference fits to `type = "agreement"` (merDeriv present, so the lme4 legs run). Re-running full verify.
 
 ## Decisions
 
