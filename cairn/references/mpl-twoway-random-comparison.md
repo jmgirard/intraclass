@@ -1,6 +1,6 @@
 # Modified profile likelihood vs incumbents — two-way random ICC(A,1) (M86/M87)
 
-**Provenance.** Created 2026-07-23 by M86 from the M86 validation harness
+**Provenance.** Ingested 2026-07-23 by M86 from the M86 validation harness
 (`data-raw/m86-mpl-lib.R`, `data-raw/m86-mpl-validate.R`) against
 `xiao2013.md` (the named primary source, IP1). M87 appends its pre-registration,
 comparison sweep, and verdict.
@@ -90,8 +90,55 @@ attributable to xiao2013's own root-finder, since the 20,000-sim coverage tables
 
 ## Oracle validation (M86 T4–T5)
 
-_(pending — filled from `data-raw/m86-mpl-validation-results.rds` once the
-seeded run completes.)_
+Seeded reproduction of xiao2013's published tables (`data-raw/m86-mpl-validate.R`,
+n_rep = 2000, n_mc = 3000 for κ_m; the published values use 20,000 sims).
+Pre-registered tolerances: coverage ±30 (×1000), length ±0.05, κ_m ±0.10. All are
+values our machinery produces vs xiao2013's, so this is a repo-analysis
+reproduction, not a claim about the source tables (which `xiao2013.md` verified).
+
+**Table 4 — naive PL, 90% two-sided (p. 2248).** 4/4 coverage and length.
+
+| R | S | δ | ρ | CR ours | CR pub | AL ours | AL pub |
+|---|---|---|---|---|---|---|---|
+| 3 | 10 | 0.5 | 0.60 | 902 | 902 | 0.498 | 0.498 |
+| 3 | 50 | 4.0 | 0.60 | 796 | 796 | 0.418 | 0.420 |
+| 3 | 50 | 1.0 | 0.60 | 832 | 838 | 0.339 | 0.340 |
+| 5 | 50 | 4.0 | 0.90 | 864 | 875 | 0.184 | 0.186 |
+
+**Table 6 — MPL (published κ_m), 90% two-sided (p. 2250).** 3/3 coverage and length.
+
+| R | S | κ_m | δ | ρ | CR ours | CR pub | AL ours | AL pub |
+|---|---|---|---|---|---|---|---|---|
+| 3 | 10 | 0.32 | 0.5 | 0.60 | 939 | 945 | 0.571 | 0.569 |
+| 3 | 50 | 0.67 | 4.0 | 0.60 | 903 | 908 | 0.556 | 0.559 |
+| 5 | 50 | 0.33 | 4.0 | 0.90 | 924 | 927 | 0.232 | 0.230 |
+
+**Table 3 — κ_m calibration (δ_U=16, two-sided, p. 2247).** 3/3 within ±0.10. The
+grid max sits at the (ρ=0.6, δ=16) corner, as the paper predicts; the max-over-grid
+MC estimate is mildly upward-biased at finite n_mc, hence ours ≥ published.
+
+| R | S | κ_m ours | κ_m pub |
+|---|---|---|---|
+| 3 | 10 | 0.328 | 0.32 |
+| 3 | 50 | 0.700 | 0.67 |
+| 5 | 50 | 0.362 | 0.33 |
+
+**Table 7 — naive PL, 95% one-sided lower (p. 2251).** Coverage 2/2 (the
+calibration-relevant property — it validates the `1−2α` one-sided critical value):
+(3,50,δ4,ρ.90) 870 vs 865; (3,10,δ0.5,ρ.60) 966 vs 959. The one-sided "average
+length" `1 − mean(lower bound)` (xiao2013 p. 2254, "not a length") reproduces at
+(3,10) (0.711 vs 0.707) but **not** at the (3,50,δ4,ρ.90) corner (0.276 vs 0.433):
+our lower bounds cluster higher there. This is not an implementation defect —
+`mpl_prof_neg2l` equals a 6000-point brute-force minimisation to 0 across 200
+datasets, the deviance is smooth and monotone, the two-sided Tables 4/6 and the
+one-sided coverage all reproduce, and the worked-example MLE is exact. It is an
+isolated discrepancy with xiao2013's high-ρ one-sided bound, recorded (not forced
+to agree — PRINCIPLES.md #4); it does not affect the two-sided intervals M87 uses.
+
+**Verdict (M86).** The naive-PL and MPL machinery reproduces xiao2013's published
+oracles across every two-sided coverage/length anchor, the κ_m calibration, and
+the one-sided coverage — establishing correctness (PRINCIPLES.md #1) for the M87
+comparison pass. Results: `data-raw/m86-mpl-validation-results.rds`.
 
 ## Traces to
 
