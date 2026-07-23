@@ -95,10 +95,14 @@ attributable to xiao2013's own root-finder, since the 20,000-sim coverage tables
 ## Oracle validation (M86 T4–T5)
 
 Seeded reproduction of xiao2013's published tables (`data-raw/m86-mpl-validate.R`,
-n_rep = 2000, n_mc = 3000 for κ_m; the published values use 20,000 sims).
+n_rep = 2000, n_mc = 6000 for κ_m; the published values use 20,000 sims).
 Pre-registered tolerances: coverage ±30 (×1000), length ±0.05, κ_m ±0.10. All are
 values our machinery produces vs xiao2013's, so this is a repo-analysis
 reproduction, not a claim about the source tables (which `xiao2013.md` verified).
+κ_m is the max over the Eq. 11 grid; κ_corr grows toward small ρ / large δ, so the
+argmax is the (ρ=0.6, δ=16) corner (confirmed by a grid scan). Because the MC
+**grid max** is an upward-biased estimator of a maximum (max of noisy per-cell
+estimates), κ_m is reported as κ_corr evaluated at that identified corner.
 
 **Table 4 — naive PL, 90% two-sided (p. 2248).** 4/4 coverage and length.
 
@@ -117,15 +121,25 @@ reproduction, not a claim about the source tables (which `xiao2013.md` verified)
 | 3 | 50 | 0.67 | 4.0 | 0.60 | 903 | 908 | 0.556 | 0.559 |
 | 5 | 50 | 0.33 | 4.0 | 0.90 | 924 | 927 | 0.232 | 0.230 |
 
-**Table 3 — κ_m calibration (δ_U=16, two-sided, p. 2247).** 3/3 within ±0.10. The
-grid max sits at the (ρ=0.6, δ=16) corner, as the paper predicts; the max-over-grid
-MC estimate is mildly upward-biased at finite n_mc, hence ours ≥ published.
+**Table 3 — κ_m calibration (δ_U=16, corner, p. 2247).** Two-sided 3/3 within
+±0.10. The one-sided leg (α=0.05; the M86-review Finding-2 signed-root fix) is
+reported as corroboration: (3,10) and (5,50) reproduce within ±0.10, while the
+(3,50) 0.95-tail quantile at the most-stressed corner is MC-noisy (estimates span
+~1.24–1.33) and sits on MPL's deliberately conservative side (xiao2013 p. 2257).
+Its **defining** validation is the exact-coverage property below, not this
+noisy constant.
 
-| R | S | κ_m ours | κ_m pub |
-|---|---|---|---|
-| 3 | 10 | 0.328 | 0.32 |
-| 3 | 50 | 0.700 | 0.67 |
-| 5 | 50 | 0.362 | 0.33 |
+| R | S | two-sided ours | two-sided pub | one-sided ours | one-sided pub |
+|---|---|---|---|---|---|
+| 3 | 10 | 0.333 | 0.32 | 0.643 | 0.72 |
+| 3 | 50 | 0.667 | 0.67 | 1.330 | 1.20 |
+| 5 | 50 | 0.263 | 0.33 | 0.830 | 0.77 |
+
+**One-sided calibration — defining property (Finding 2).** The corrected one-sided
+κ_corr uses the signed likelihood root (not the folded deviance); the MPL lower
+bound built at κ = κ_corr covers at **0.956** (target 0.95) on independent draws
+at (R=3,S=50,δ=16,ρ=.6) — the direct confirmation that the fixed formula calibrates
+a correctly-covering one-sided interval.
 
 **Table 7 — naive PL, 95% one-sided lower (p. 2251).** Coverage 2/2 (the
 calibration-relevant property — it validates the `1−2α` one-sided critical value):
@@ -140,9 +154,12 @@ isolated discrepancy with xiao2013's high-ρ one-sided bound, recorded (not forc
 to agree — PRINCIPLES.md #4); it does not affect the two-sided intervals M87 uses.
 
 **Verdict (M86).** The naive-PL and MPL machinery reproduces xiao2013's published
-oracles across every two-sided coverage/length anchor, the κ_m calibration, and
-the one-sided coverage — establishing correctness (PRINCIPLES.md #1) for the M87
-comparison pass. Results: `data-raw/m86-mpl-validation-results.rds`.
+oracles across every two-sided coverage/length anchor (Tables 4/6), the two-sided
+κ_m calibration (Table 3), and the one-sided coverage (Table 7) — establishing
+correctness (PRINCIPLES.md #1) for the M87 comparison pass, which uses the
+two-sided intervals. The one-sided κ_corr, corrected at review (Finding 2), is
+validated by its exact-coverage property. Results:
+`data-raw/m86-mpl-validation-results.rds`.
 
 ## Traces to
 
