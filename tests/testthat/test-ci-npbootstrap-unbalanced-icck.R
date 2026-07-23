@@ -81,3 +81,91 @@ test_that("the re-derived unbalanced ICC(k) identity matches the shipped SB rout
     tolerance = 1e-12
   )
 })
+
+# A reproducible unbalanced one-way dataset with a known population ICC(1) = rho.
+unbalanced_icck_set <- function(seed, rho = 0.5, k = 12L, sizes = 2:5) {
+  set.seed(seed)
+  n_i <- sample(sizes, k, replace = TRUE)
+  a <- stats::rnorm(k, 0, sqrt(rho))
+  rows <- lapply(seq_len(k), function(i) {
+    data.frame(
+      subject = factor(i, levels = seq_len(k)),
+      rater = factor(seq_len(n_i[i])),
+      score = a[i] + stats::rnorm(n_i[i], 0, sqrt(1 - rho))
+    )
+  })
+  do.call(rbind, rows)
+}
+
+test_that("the shipped unbalanced ICC(k) interval is the exact SB image of ICC(1) (AC5)", {
+  skip_if_not_installed("glmmTMB")
+  # The ICC(k) endpoints must equal npb_sb(ICC(1) endpoint, k_eff), where k_eff is the
+  # design's harmonic mean -- the shipped-code realization of g, to machine precision.
+  for (s in 1:6) {
+    d <- unbalanced_icck_set(seed = s, rho = 0.4)
+    k_eff <- 1 / mean(1 / as.integer(table(d$subject)))
+    td <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      unit = c("single", "average"),
+      ci_method = "npbootstrap",
+      boot_samples = 299L,
+      seed = s
+    ))
+    i1 <- td[td$index == "ICC(1)", ]
+    ik <- td[td$index == "ICC(k)", ]
+    expect_equal(ik$conf.low, npb_sb(i1$conf.low, k_eff), tolerance = 1e-12)
+    expect_equal(ik$conf.high, npb_sb(i1$conf.high, k_eff), tolerance = 1e-12)
+    # Strictly monotone map -> ordered, finite, and bounded above by 1.
+    expect_lt(ik$conf.low, ik$conf.high)
+    expect_true(is.finite(ik$conf.low) && is.finite(ik$conf.high))
+    expect_lte(ik$conf.high, 1)
+  }
+})
+
+test_that("ICC(k) coverage inherits from ICC(1) rep-by-rep, tolerance 0 (AC2 identity)", {
+  skip_if_not_installed("glmmTMB")
+  # Coverage inheritance is an EXACT event identity (MD-1): because g is strictly
+  # monotone and finite on the attainable range, the ICC(k) coverage indicator
+  # (truth = g(rho; k_eff)) equals the ICC(1) coverage indicator (truth = rho) for
+  # every realization. Assert it rep-by-rep with ZERO discrepant reps -- a mechanical
+  # check that the shipped code realizes the identity the coverage proof relies on.
+  rho <- 0.5
+  discrepant <- 0L
+  n_ok <- 0L
+  for (s in seq_len(60L)) {
+    d <- unbalanced_icck_set(seed = 1000L + s, rho = rho)
+    k_eff <- 1 / mean(1 / as.integer(table(d$subject)))
+    td <- tryCatch(
+      tidy(icc(
+        d,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        unit = c("single", "average"),
+        ci_method = "npbootstrap",
+        boot_samples = 199L,
+        seed = 1000L + s
+      )),
+      intraclass_singular_fit = function(e) NULL
+    )
+    if (is.null(td)) {
+      next
+    }
+    n_ok <- n_ok + 1L
+    i1 <- td[td$index == "ICC(1)", ]
+    ik <- td[td$index == "ICC(k)", ]
+    cov1 <- i1$conf.low <= rho && rho <= i1$conf.high
+    truth_k <- npb_sb(rho, k_eff)
+    covk <- ik$conf.low <= truth_k && truth_k <= ik$conf.high
+    if (!identical(cov1, covk)) {
+      discrepant <- discrepant + 1L
+    }
+  }
+  expect_gt(n_ok, 40L) # the sweep actually ran
+  expect_equal(discrepant, 0L) # exact event identity, zero tolerance
+})

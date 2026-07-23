@@ -1331,16 +1331,17 @@ icc <- function(
       ))
     }
     if (!balanced) {
-      # npbootstrap ships the UNBALANCED one-way ICC(1) interval (M84, ohyama2025
-      # eq. 3 / §2.3, MD-1). The unbalanced ICC(k)/D-study averaging divisor
-      # (harmonic-mean k_eff + the Spearman-Brown pole/support re-derivation) is
-      # deferred to M85, so a non-single `unit` still aborts. The classical closed
-      # forms ("searle"/"burch", M82) stay balanced-only.
-      average_requested <- any(vapply(
-        unit,
-        function(u) is.numeric(u) || identical(u, "average"),
-        logical(1)
-      ))
+      # npbootstrap ships the UNBALANCED one-way ICC(1) (M84, ohyama2025 eq. 3 /
+      # §2.3) AND ICC(k)/average (M85, MD-1): the ICC(k) interval is the monotone
+      # Spearman-Brown image g(rho) = k_eff*rho/(1 + (k_eff - 1)rho) of the ICC(1)
+      # endpoints with the harmonic-mean k_eff divisor. This is pole-safe because
+      # k_eff <= n0 for EVERY one-way design (MD-1, AM-GM on triples), so the SB pole
+      # -1/(k_eff - 1) sits at or below the support boundary -1/(n0 - 1) and never
+      # intrudes on the attainable rho -- coverage inheritance is an exact event
+      # identity, unbalanced as balanced. A numeric `unit` (D-study projection to m
+      # raters) is NOT pole-safe -- a user-chosen m > n0 pushes the SB pole inside the
+      # support -- so it stays a deferred candidate. The classical closed forms
+      # ("searle"/"burch", M82) stay balanced-only.
       if (ci_method != "npbootstrap") {
         abort_unsupported(c(
           "{.code ci_method = {.val {ci_method}}} requires a balanced one-way \\
@@ -1349,14 +1350,17 @@ icc <- function(
                use {.code ci_method = \"montecarlo\"}."
         ))
       }
-      if (average_requested) {
+      numeric_unit_requested <- any(vapply(unit, is.numeric, logical(1)))
+      if (numeric_unit_requested) {
         abort_unsupported(c(
           "{.code ci_method = \"npbootstrap\"} on an unbalanced one-way design \\
-           supports {.code unit = \"single\"} (ICC(1)) only.",
-          i = "The unbalanced average/ICC(k) interval (its effective-rater divisor \\
-               and Spearman-Brown support) is not yet implemented; use \\
-               {.code unit = \"single\"}, or {.code ci_method = \"montecarlo\"} for \\
-               the average."
+           supports {.code unit = \"single\"} (ICC(1)) and {.code \"average\"} \\
+           (ICC(k)) only.",
+          i = "A numeric {.arg unit} (D-study projection to {.var m} raters) is not \\
+               yet available unbalanced -- its Spearman-Brown pole is not guaranteed \\
+               interior when {.var m} exceeds the effective size; use \\
+               {.code unit = \"average\"}, or {.code ci_method = \"montecarlo\"} for \\
+               a projection."
         ))
       }
     }

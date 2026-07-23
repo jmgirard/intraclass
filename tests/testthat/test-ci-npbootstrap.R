@@ -54,12 +54,12 @@ test_that("npbootstrap aborts on a non-one-way design (AC1, #5/#8)", {
   )
 })
 
-test_that("npbootstrap unbalanced serves ICC(1) but aborts the average (M84 AC1, #5/#8)", {
+test_that("npbootstrap unbalanced serves ICC(1) and ICC(k) but aborts a numeric projection (M85 AC5, #5/#8)", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(1)
   d <- unbalanced_oneway()
-  # unit = "single" now ships the unbalanced ICC(1) interval (M84).
+  # unit = "single" ships the unbalanced ICC(1) interval (M84).
   td <- tidy(icc(
     d,
     score,
@@ -74,24 +74,26 @@ test_that("npbootstrap unbalanced serves ICC(1) but aborts the average (M84 AC1,
   i1 <- td[td$index == "ICC(1)", ]
   expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
   expect_lt(i1$conf.low, i1$conf.high)
-  # The unbalanced average/ICC(k) is deferred to M85, so it still aborts -- as does
-  # the bare default call (unit = c("single", "average")) and a D-study projection.
-  expect_error(
-    icc(d, score, subject, rater, model = "oneway", ci_method = "npbootstrap"),
-    class = "intraclass_unsupported"
-  )
-  expect_error(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      model = "oneway",
-      unit = "average",
-      ci_method = "npbootstrap"
-    ),
-    class = "intraclass_unsupported"
-  )
+  # unit = "average" now ships the unbalanced ICC(k) interval (M85, GO; MD-1) -- the
+  # SB image with the pole-safe harmonic-mean k_eff -- as does the bare default call
+  # (unit = c("single", "average")).
+  td_def <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "npbootstrap",
+    boot_samples = 199L,
+    seed = 1
+  ))
+  expect_setequal(td_def$index, c("ICC(1)", "ICC(k)"))
+  ik <- td_def[td_def$index == "ICC(k)", ]
+  expect_true(is.finite(ik$conf.low) && is.finite(ik$conf.high))
+  expect_lt(ik$conf.low, ik$conf.high)
+  expect_lte(ik$conf.high, 1)
+  # A numeric D-study projection (unit = m) is NOT pole-safe unbalanced (m may exceed
+  # n0), so it stays deferred -- a loud classed abort.
   expect_error(
     icc(
       d,

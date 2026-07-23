@@ -68,10 +68,10 @@ unbalanced npbootstrap abort per the branch taken.
       unbalanced transform (`n₀` vs harmonic-mean `k_eff`); numeric check on a
       worst-case unbalanced design; record GO (aligned) or NO-GO (pole intrudes)
       with the derivation. Fable escalation only if contested.
-- [ ] T2: implement the branch in `R/ci-npbootstrap.R`/`R/icc.R` — GO: SB image of
+- [x] T2: implement the branch in `R/ci-npbootstrap.R`/`R/icc.R` — GO: SB image of
       the M84 endpoints; NO-GO: the recorded fallback. Tests-first on the
       coverage-inheritance identity (GO) or the fallback abort (NO-GO).
-- [ ] T3: drop/adjust the `unit = "average"` unbalanced abort (`R/icc.R:1321`);
+- [x] T3: drop/adjust the `unit = "average"` unbalanced abort (`R/icc.R:1321`);
       directed tests for the default two-unit call on unbalanced data.
 - [ ] T4: ICC(k) oracle — extend the M84 sweep with the ICC(k) coverage column
       (rep-by-rep identity, tolerance 0) and the re-derived identity cross-check
@@ -84,6 +84,7 @@ unbalanced npbootstrap abort per the branch taken.
 - 2026-07-23: created by /milestone-plan (with M84, the ICC(1) predecessor).
 - 2026-07-23: set in-progress; branch `m85-unbalanced-npbootstrap-icck` cut from main.
 - 2026-07-23: T1 — AC1 GO verdict (MD-1): proved k_eff ≤ n₀ (AM-GM on triples), so the SB pole never intrudes; numeric check + re-derived AC4 identity in `test-ci-npbootstrap-unbalanced-icck.R` (2013 pass). Not escalated (maintainer accepted the proof at the gate).
+- 2026-07-23: T2/T3 — GO branch: lifted the `unit="average"` unbalanced npbootstrap abort (`R/icc.R`), so the shipped `npbootstrap_ci` (already `npb_sb(ρ, k_eff)`) serves the unbalanced ICC(k); numeric `unit=m` stays deferred (not pole-safe). Tests: shipped SB-image identity (AC5), rep-by-rep coverage inheritance in-suite (AC2), flipped the old average-aborts test. Verified `std.error` robustly finite over 1977 near-zero designs (heavy-tailed near boundary → doc). Affected test files pass; full `devtools::test()` at completion.
 
 ## Decisions
 
