@@ -52,11 +52,46 @@ are out of scope (xiao2013's likelihood assumes every `R×S` cell observed).
 
 ## Implementation (M86 T2–T3)
 
-_(pending — filled by T2/T3.)_
+`data-raw/m86-mpl-lib.R` implements xiao2013's method from scratch (no author
+code exists; `xiao2013.md` § "Software availability is by email"). It operates
+on the balanced (SMS, RMS, EMS) ANOVA layout (Table 1, p. 2244):
+
+- **`mpl_neg2l(ρ_s, ρ_r, ms)`** — the −2 log-likelihood, Eq. (7) p. 2245. The
+  four eigenvalues (Appendix Eqs. 37–40) enter the determinant term; the
+  weighted-SS term pairs the subject/rater/error SS with λ₂/λ₃/λ₄ by matching
+  eigenvalue multiplicity. The data- and parameter-free constant `c` (Eq. 66) is
+  dropped — it cancels in every deviance and MLE.
+- **`mpl_prof_neg2l(ρ)`** — the profile −2l†, Eq. (8): minimise over ρ_r ∈
+  (0, 1−ρ) (golden-section + a Brent polish for a tight profile).
+- **`mpl_fit`** — the joint MLE (ρ̂_s, ρ̂_r) and the reference min −2l†(ρ̂), via a
+  1-D scan seeding a 2-D Nelder–Mead polish. This reference must be precise: an
+  imprecise minimum biases every deviance and shifts the interval systematically.
+- **`mpl_interval(ms, κ, α, side)`** — Eqs. (9)/(10): the two roots of
+  `D(ρ) = (1+κ)·χ²_{1,·}`, where `D(ρ) = −2l†(ρ) − min(−2l†)`. `κ=0` is naive PL,
+  `κ=κ_m` is MPL. A one-sided lower bound uses the `1−2α` critical value (so a
+  95% lower bound shares the two-sided 90% lower critical value — confirmed
+  against Ex. 1).
+- **`mpl_kappa_corr` / `mpl_kappa_m`** — the calibration, Eqs. (11)–(13). κ_corr
+  is the Bartlett-type MC quantity `quantile_{1−α}(D(ρ_true)) / χ² − 1` (the
+  continuous realisation of the paper's seven-step procedure, pp. 2249–2251,
+  whose step 7 selects the smallest κ giving coverage ≥ 1−α); κ_m is its maximum
+  over the (ρ, δ) grid (ρ ∈ [0.6, 0.9] step 0.1, δ = 2^{−1..4}).
+
+`data-raw/m86-mpl-validate.R` drives the oracle validation and writes
+`data-raw/m86-mpl-validation-results.rds` (seeded; provenance in its `meta`).
+
+**Worked-example spot check (Ex. 1, R=4, S=10).** The example reports only
+(ρ̂ = 0.8987, δ = 1.26), not the raw teeth data, so the (sms, rms, ems) ratios
+are reconstructed as the ANOVA layout whose joint MLE is that (ρ̂, δ); the MLE
+reproduces exactly, and the independently root-found naive-PL interval is
+(0.7013, 0.9620) against the published (0.7120, 0.9598) — agreement to ~0.011,
+attributable to xiao2013's own root-finder, since the 20,000-sim coverage tables
+(below) reproduce far more tightly.
 
 ## Oracle validation (M86 T4–T5)
 
-_(pending — filled by T4/T5: ours vs xiao2013 Tables 3/4/6/7.)_
+_(pending — filled from `data-raw/m86-mpl-validation-results.rds` once the
+seeded run completes.)_
 
 ## Traces to
 
