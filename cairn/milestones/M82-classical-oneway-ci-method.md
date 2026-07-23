@@ -1,6 +1,6 @@
 # M82: Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML)
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
