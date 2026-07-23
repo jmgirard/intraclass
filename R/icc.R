@@ -298,9 +298,13 @@
 #'   to a Bayesian fit, and `"posterior"` needs posterior draws no other engine
 #'   produces.
 #'   `"npbootstrap"` is the **non-parametric** transformed bootstrap-*t* of Ukoumunne
-#'   et al. (2003), available **only for the balanced one-way random design**
-#'   (`model = "oneway"`; it aborts otherwise). It resamples whole subjects with
-#'   replacement (not from the fitted model), stabilizes the variance with the
+#'   et al. (2003), for the **one-way random design** (`model = "oneway"`; it aborts
+#'   otherwise). On **balanced** data it serves both `unit = "single"` (ICC(1)) and
+#'   `unit = "average"` (ICC(k)); on **unbalanced** data (unequal ratings per subject)
+#'   it serves `unit = "single"` only -- the effective group size becomes the ANOVA
+#'   `n0` of Ohyama (2025) and the unbalanced average/ICC(k) interval is not yet
+#'   available (use `ci_method = "montecarlo"` for it). It resamples whole subjects
+#'   with replacement (not from the fitted model), stabilizes the variance with the
 #'   `log F` transform, studentizes with an infinitesimal-jackknife SE, and
 #'   back-transforms the endpoints. It is **not** a percentile bootstrap -- the
 #'   percentile and BCa variants were assessed and rejected (they under-cover at
@@ -360,7 +364,7 @@
 #'   interval methods already report a percentile interval.
 #'
 #' @details
-#' # The `"npbootstrap"` interval (balanced one-way)
+#' # The `"npbootstrap"` interval (one-way)
 #'
 #' For `unit = "average"` (the ICC(k), reliability of the mean of the *k* ratings)
 #' the transformed bootstrap-*t* interval is the exact monotone **Spearman-Brown**
@@ -369,9 +373,17 @@
 #' ICC(k) interval's coverage is **identical to the ICC(1) interval's, by
 #' construction** -- it is not a separate approximation.
 #'
+#' On **unbalanced** data (unequal ratings per subject) the reducer uses the ANOVA
+#' effective group size `n0 = (N - sum(n_i^2)/N) / (k - 1)` (Ohyama 2025) in the
+#' `log F` transform, and studentizes `log(SSA) - log(SSE)` -- the pivot the
+#' infinitesimal-jackknife SE is derived for (Ukoumunne et al. 2003, Appendix A),
+#' which coincides with the balanced `log F` pivot when subjects are equally rated.
+#' Only `unit = "single"` (ICC(1)) is available unbalanced; the ICC(k) average is
+#' balanced-only for now (its unbalanced averaging divisor is not yet resolved).
+#'
 #' Following Ukoumunne et al. (2003, §5.2), the endpoints are **not truncated** to
 #' `[0, 1]`: they are confined only to the estimator's own support (approaching
-#' `-1/(k-1)` from above for ICC(1), and unbounded below for ICC(k)), so a
+#' `-1/(n0-1)` from above for ICC(1), and unbounded below for ICC(k)), so a
 #' near-boundary lower endpoint can be negative -- markedly so for ICC(k). Leaving
 #' them untruncated is what makes the coverage faithful to the published method.
 #'
@@ -1319,12 +1331,34 @@ icc <- function(
       ))
     }
     if (!balanced) {
-      abort_unsupported(c(
-        "{.code ci_method = {.val {ci_method}}} requires a balanced one-way \\
-         design (every subject rated the same number of times).",
-        i = "Unbalanced support (per-subject {.var n_i}) is not yet implemented; \\
-             use {.code ci_method = \"montecarlo\"}."
+      # npbootstrap ships the UNBALANCED one-way ICC(1) interval (M84, ohyama2025
+      # eq. 3 / §2.3, MD-1). The unbalanced ICC(k)/D-study averaging divisor
+      # (harmonic-mean k_eff + the Spearman-Brown pole/support re-derivation) is
+      # deferred to M85, so a non-single `unit` still aborts. The classical closed
+      # forms ("searle"/"burch", M82) stay balanced-only.
+      average_requested <- any(vapply(
+        unit,
+        function(u) is.numeric(u) || identical(u, "average"),
+        logical(1)
       ))
+      if (ci_method != "npbootstrap") {
+        abort_unsupported(c(
+          "{.code ci_method = {.val {ci_method}}} requires a balanced one-way \\
+           design (every subject rated the same number of times).",
+          i = "Unbalanced support (per-subject {.var n_i}) is not yet implemented; \\
+               use {.code ci_method = \"montecarlo\"}."
+        ))
+      }
+      if (average_requested) {
+        abort_unsupported(c(
+          "{.code ci_method = \"npbootstrap\"} on an unbalanced one-way design \\
+           supports {.code unit = \"single\"} (ICC(1)) only.",
+          i = "The unbalanced average/ICC(k) interval (its effective-rater divisor \\
+               and Spearman-Brown support) is not yet implemented; use \\
+               {.code unit = \"single\"}, or {.code ci_method = \"montecarlo\"} for \\
+               the average."
+        ))
+      }
     }
   }
 

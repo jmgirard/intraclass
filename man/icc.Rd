@@ -215,9 +215,13 @@ engine's posterior draws; it is the forced default for, and available only with,
 to a Bayesian fit, and \code{"posterior"} needs posterior draws no other engine
 produces.
 \code{"npbootstrap"} is the \strong{non-parametric} transformed bootstrap-\emph{t} of Ukoumunne
-et al. (2003), available \strong{only for the balanced one-way random design}
-(\code{model = "oneway"}; it aborts otherwise). It resamples whole subjects with
-replacement (not from the fitted model), stabilizes the variance with the
+et al. (2003), for the \strong{one-way random design} (\code{model = "oneway"}; it aborts
+otherwise). On \strong{balanced} data it serves both \code{unit = "single"} (ICC(1)) and
+\code{unit = "average"} (ICC(k)); on \strong{unbalanced} data (unequal ratings per subject)
+it serves \code{unit = "single"} only -- the effective group size becomes the ANOVA
+\code{n0} of Ohyama (2025) and the unbalanced average/ICC(k) interval is not yet
+available (use \code{ci_method = "montecarlo"} for it). It resamples whole subjects
+with replacement (not from the fitted model), stabilizes the variance with the
 \verb{log F} transform, studentizes with an infinitesimal-jackknife SE, and
 back-transforms the endpoints. It is \strong{not} a percentile bootstrap -- the
 percentile and BCa variants were assessed and rejected (they under-cover at
@@ -454,7 +458,7 @@ boundary-aware near the common zero-rater-variance case where the delta method
 fails. Pass \code{seed} for a reproducible interval.
 }
 
-\section{The \code{"npbootstrap"} interval (balanced one-way)}{
+\section{The \code{"npbootstrap"} interval (one-way)}{
 For \code{unit = "average"} (the ICC(k), reliability of the mean of the \emph{k} ratings)
 the transformed bootstrap-\emph{t} interval is the exact monotone \strong{Spearman-Brown}
 image of the single-rating ICC(1) interval, \code{g(rho) = k*rho / (1 + (k-1)*rho)}
@@ -462,9 +466,17 @@ applied to the two ICC(1) endpoints. Because that map is strictly increasing, th
 ICC(k) interval's coverage is \strong{identical to the ICC(1) interval's, by
 construction} -- it is not a separate approximation.
 
+On \strong{unbalanced} data (unequal ratings per subject) the reducer uses the ANOVA
+effective group size \code{n0 = (N - sum(n_i^2)/N) / (k - 1)} (Ohyama 2025) in the
+\verb{log F} transform, and studentizes \code{log(SSA) - log(SSE)} -- the pivot the
+infinitesimal-jackknife SE is derived for (Ukoumunne et al. 2003, Appendix A),
+which coincides with the balanced \verb{log F} pivot when subjects are equally rated.
+Only \code{unit = "single"} (ICC(1)) is available unbalanced; the ICC(k) average is
+balanced-only for now (its unbalanced averaging divisor is not yet resolved).
+
 Following Ukoumunne et al. (2003, §5.2), the endpoints are \strong{not truncated} to
 \verb{[0, 1]}: they are confined only to the estimator's own support (approaching
-\code{-1/(k-1)} from above for ICC(1), and unbounded below for ICC(k)), so a
+\code{-1/(n0-1)} from above for ICC(1), and unbounded below for ICC(k)), so a
 near-boundary lower endpoint can be negative -- markedly so for ICC(k). Leaving
 them untruncated is what makes the coverage faithful to the published method.
 

@@ -24,6 +24,13 @@
 
 ## Minor improvements
 
+* `ci_method = "npbootstrap"` now also covers **unbalanced one-way** designs
+  (unequal ratings per subject) for `unit = "single"` (ICC(1)): the transform uses
+  the ANOVA effective group size `n0` and the infinitesimal-jackknife SE its
+  per-subject form (Ohyama 2025; Ukoumunne et al. 2003, Appendix A). On balanced
+  data the result is unchanged. The unbalanced **average** (ICC(k)) interval is not
+  yet available — use `ci_method = "montecarlo"` for it.
+
 * New `ci_method = "npbootstrap"` for the **balanced one-way random** design: the
   non-parametric variance-stabilized **transformed bootstrap-*t*** of Ukoumunne et
   al. (2003). It resamples whole subjects (not the fitted model), so it is boundary

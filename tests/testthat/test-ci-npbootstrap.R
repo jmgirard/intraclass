@@ -54,13 +54,54 @@ test_that("npbootstrap aborts on a non-one-way design (AC1, #5/#8)", {
   )
 })
 
-test_that("npbootstrap aborts on an unbalanced one-way design (AC1, #5/#8)", {
+test_that("npbootstrap unbalanced serves ICC(1) but aborts the average (M84 AC1, #5/#8)", {
   skip_if_not_installed("glmmTMB")
 
   set.seed(1)
   d <- unbalanced_oneway()
+  # unit = "single" now ships the unbalanced ICC(1) interval (M84).
+  td <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    unit = "single",
+    ci_method = "npbootstrap",
+    boot_samples = 199L,
+    seed = 1
+  ))
+  i1 <- td[td$index == "ICC(1)", ]
+  expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
+  expect_lt(i1$conf.low, i1$conf.high)
+  # The unbalanced average/ICC(k) is deferred to M85, so it still aborts -- as does
+  # the bare default call (unit = c("single", "average")) and a D-study projection.
   expect_error(
     icc(d, score, subject, rater, model = "oneway", ci_method = "npbootstrap"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      unit = "average",
+      ci_method = "npbootstrap"
+    ),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      unit = 3,
+      ci_method = "npbootstrap"
+    ),
     class = "intraclass_unsupported"
   )
 })
