@@ -80,11 +80,11 @@ fit
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.713]
-#>   ICC(A,k)     0.620   [0.173, 0.909]
+#>   ICC(A,1)     0.290   [0.050, 0.711]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.343, 0.924]
-#>   ICC(C,k)     0.909   [0.676, 0.980]
+#>   ICC(C,1)     0.715   [0.340, 0.926]
+#>   ICC(C,k)     0.909   [0.673, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
@@ -103,10 +103,10 @@ tidy(fit)
 #> # A tibble: 4 × 10
 #>   index    type  level sf_index estimate std.error conf.low conf.high conf.level
 #>   <chr>    <chr> <chr> <chr>       <dbl>     <dbl>    <dbl>     <dbl>      <dbl>
-#> 1 ICC(A,1) agre… NA    ICC(2,1)    0.290    0.180    0.0498     0.713       0.95
-#> 2 ICC(A,k) agre… NA    ICC(2,k)    0.620    0.201    0.173      0.909       0.95
-#> 3 ICC(C,1) cons… NA    NA          0.715    0.155    0.343      0.924       0.95
-#> 4 ICC(C,k) cons… NA    NA          0.909    0.0810   0.676      0.980       0.95
+#> 1 ICC(A,1) agre… NA    ICC(2,1)    0.290    0.180    0.0498     0.711       0.95
+#> 2 ICC(A,k) agre… NA    ICC(2,k)    0.620    0.201    0.173      0.908       0.95
+#> 3 ICC(C,1) cons… NA    NA          0.715    0.155    0.340      0.926       0.95
+#> 4 ICC(C,k) cons… NA    NA          0.909    0.0809   0.673      0.980       0.95
 #> # ℹ 1 more variable: method <chr>
 
 glance(fit)
@@ -203,8 +203,8 @@ icc(ratings, score, subject, rater, type = "consistency", seed = 2024)
 #> Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)
 #> 
 #>   index     estimate   95% CI
-#>   ICC(C,1)     0.715   [0.343, 0.924]
-#>   ICC(C,k)     0.909   [0.676, 0.980]
+#>   ICC(C,1)     0.715   [0.340, 0.926]
+#>   ICC(C,k)     0.909   [0.673, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 ```

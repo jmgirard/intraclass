@@ -150,11 +150,11 @@ so the confidence interval is reproducible.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  Absolute agreement</span></span></span>
-<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.713]</span></span></span>
-<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.909]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.711]</span></span></span>
+<span><span class="co">#&gt;   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.908]</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">  Consistency</span></span></span>
-<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
-<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.340, 0.926]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.673, 0.980]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span></span></code></pre></div>
@@ -170,10 +170,10 @@ one-row model summary including the variance components.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 10</span></span></span>
 <span><span class="co">#&gt;   index    type  level sf_index estimate std.error conf.low conf.high conf.level</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1) agre… <span style="color: #BB0000;">NA</span>    ICC(2,1)    0.290    0.180    0.049<span style="text-decoration: underline;">8</span>     0.713       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k) agre… <span style="color: #BB0000;">NA</span>    ICC(2,k)    0.620    0.201    0.173      0.909       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ICC(C,1) cons… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.715    0.155    0.343      0.924       0.95</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ICC(C,k) cons… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.909    0.081<span style="text-decoration: underline;">0</span>   0.676      0.980       0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ICC(A,1) agre… <span style="color: #BB0000;">NA</span>    ICC(2,1)    0.290    0.180    0.049<span style="text-decoration: underline;">8</span>     0.711       0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ICC(A,k) agre… <span style="color: #BB0000;">NA</span>    ICC(2,k)    0.620    0.201    0.173      0.908       0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ICC(C,1) cons… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.715    0.155    0.340      0.926       0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ICC(C,k) cons… <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>          0.909    0.080<span style="text-decoration: underline;">9</span>   0.673      0.980       0.95</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: method &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -283,8 +283,8 @@ the error, so it is never smaller than the agreement coefficient:</p>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Engine: glmmTMB (REML) | CI: 95% montecarlo (10000 draws)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">  index     estimate   95% CI</span></span></span>
-<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.343, 0.924]</span></span></span>
-<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.676, 0.980]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.340, 0.926]</span></span></span>
+<span><span class="co">#&gt;   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.673, 0.980]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span></span></code></pre></div>
 <p>The gap between the two (here <code>ICC(C,1)</code> = 0.71
