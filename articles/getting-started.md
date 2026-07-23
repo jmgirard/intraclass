@@ -69,6 +69,10 @@ is reproducible.
 ``` r
 
 fit <- icc(ratings, score, subject, rater, seed = 2024)
+#> Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: 
+#> glmmTMB was built with TMB package version 1.9.21
+#> Current TMB package version is 1.9.22
+#> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
 fit
 #> ── Intraclass correlation: two-way random, absolute agreement & consistency ────
 #> Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)

@@ -58,6 +58,10 @@ nothing to do with “rater 1” for another – the raters are
 ``` r
 
 oneway <- icc(ratings, score, subject, rater, model = "oneway", seed = 2024)
+#> Warning in check_dep_version(dep_pkg = "TMB"): package version mismatch: 
+#> glmmTMB was built with TMB package version 1.9.21
+#> Current TMB package version is 1.9.22
+#> Please re-install glmmTMB from source or restore original 'TMB' package (see '?reinstalling' for more information)
 oneway
 #> ── Intraclass correlation: one-way random ──────────────────────────────────────
 #> Subjects: 6 | Ratings: 24 (4 per subject, balanced) | raters interchangeable
