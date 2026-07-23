@@ -107,13 +107,21 @@ format.icc <- function(x, ...) {
   } else {
     x$ci$method
   }
+  # The classical closed forms ("searle"/"burch", M82) are deterministic -- no
+  # draws -- so `ci$samples` is NA; name the interval "closed form" instead of a
+  # meaningless "(NA draws)". Every sampling method reports its draw count.
+  draws_clause <- if (is.na(x$ci$samples)) {
+    "closed form"
+  } else {
+    sprintf("%d draws", x$ci$samples)
+  }
   meta2 <- sprintf(
-    "Engine: %s (%s) | CI: %s%% %s (%d draws)",
+    "Engine: %s (%s) | CI: %s%% %s (%s)",
     x$engine,
     estimator,
     ci_pct,
     ci_label,
-    x$ci$samples
+    draws_clause
   )
 
   e <- x$estimates

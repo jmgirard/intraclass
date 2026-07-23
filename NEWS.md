@@ -35,6 +35,17 @@
   image of the `ICC(1)` interval; endpoints are untruncated (following the source),
   so a near-boundary lower bound can be negative.
 
+* New `ci_method = "searle"` and `ci_method = "burch"` for the **balanced one-way
+  random** design: two **deterministic classical closed-form** intervals. `"searle"`
+  is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7), exact under
+  normality and narrowest on near-normal data; `"burch"` is the REML-based,
+  kurtosis-adjusted interval of Burch (2011), wider but robust to non-normality and
+  never under-covering. Like `"npbootstrap"` they are **boundary robust** — a finite
+  interval where the Monte-Carlo default aborts on near-zero-ICC data — and one-way
+  only (they abort otherwise). Being closed forms they take no `mc_samples`,
+  `boot_samples`, or `seed` and report no standard error; the `ICC(k)` interval is
+  the exact Spearman-Brown image of the `ICC(1)` interval, endpoints untruncated.
+
 * The `lavaan` (SEM) engine now fits the **crossed (Design 1) multilevel** design:
   `icc(..., engine = "lavaan", cluster = ...)` estimates the five-component
   decomposition (cluster, subject-in-cluster, rater, cluster-by-rater, residual)
