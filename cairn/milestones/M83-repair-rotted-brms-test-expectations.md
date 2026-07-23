@@ -33,14 +33,17 @@ Restore `tests/testthat/test-icc-brms.R` to green under a live-Stan run and pin 
 
 ## Tasks
 
-- [ ] T1 — Live-Stan baseline: run `test-icc-brms.R` at `NOT_CRAN=true` (unset `CI`), capture every failing block (line + expected vs actual `index`/`level`), and record the failure list as a work-log ledger. Confirms the rot is real and bounds the fix.
-- [ ] T2 — Fix each failing block: add explicit `type=` (and `level=` where multilevel) to the `icc()` call to encode the block's intended formulation, and update the `index`/`level` expectation to match. Sweep both rot causes (M44 `type`-default; M37 level-expansion).
-- [ ] T3 — Audit ledger: enumerate every `icc(` call in the file; for each two-way/crossed fit still relying on a default `type=`/`level=` (even if currently green), pin it explicitly so no latent default-dependence remains. One-way fits (which reject `type=`) noted as exempt. Commit the ledger as work-log evidence.
+- [x] T1 — Live-Stan baseline: run `test-icc-brms.R` at `NOT_CRAN=true` (unset `CI`), capture every failing block (line + expected vs actual `index`/`level`), and record the failure list as a work-log ledger. Confirms the rot is real and bounds the fix.
+- [x] T2 — Fix each failing block: add explicit `type=` (and `level=` where multilevel) to the `icc()` call to encode the block's intended formulation, and update the `index`/`level` expectation to match. Sweep both rot causes (M44 `type`-default; M37 level-expansion).
+- [x] T3 — Audit ledger: enumerate every `icc(` call in the file; for each two-way/crossed fit still relying on a default `type=`/`level=` (even if currently green), pin it explicitly so no latent default-dependence remains. One-way fits (which reject `type=`) noted as exempt. Commit the ledger as work-log evidence.
 - [ ] T4 — Verify: full-file `test-icc-brms.R` green under live Stan (`NOT_CRAN=true`); then `devtools::test()` clean under CI parity (`NOT_CRAN=true CI=true`); confirm `git diff --stat` touches only the test file.
 
 ## Work log
 
 - 2026-07-23: created by /milestone-plan.
+- 2026-07-23: T1 live-Stan baseline (`NOT_CRAN=true`, `CI` unset) — 11 blocks failed, all A-only `index` assertions from no-`type` fits now returning all four formulations (M44/ADR-054); O-Bayes-FML-agree additionally failed on `level` (subject vs subject+cluster, M38) + cascading containment. Enumerated in scratchpad baseline log.
+- 2026-07-23: T2 fix — added `type = "agreement"` to the 11 rot fits; O-Bayes-FML-agree `fa`/`fc` additionally pinned `level = "subject"` (design returns both levels since M38); 4 stale "default"/"brms subject-only" comments corrected. Diff confined to `tests/testthat/test-icc-brms.R` (21 ins / 8 del).
+- 2026-07-23: T3 audit — 45 brms fits: 15 now type-pinned (2 also `level`-pinned), 2 `model="oneway"` exempt, 28 no-type all error-path/argument-validation, non-index diagnostic/replicate/prior, or nested-random/multilevel-one-way (ICC(1)/ICC(k), no A/C). No latent type-default-dependence in any index/level shape assertion.
 
 ## Decisions
 
