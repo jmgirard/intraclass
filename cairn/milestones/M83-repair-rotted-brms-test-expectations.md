@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** m83-repair-rotted-brms-test-expectations
+- **Branch/PR:** m83-repair-rotted-brms-test-expectations · https://github.com/jmgirard/intraclass/pull/90
 
 ## Goal
 
@@ -19,10 +19,10 @@ Restore `tests/testthat/test-icc-brms.R` to green under a live-Stan run and pin 
 
 ## Acceptance criteria
 
-- [ ] AC1 — A baseline live-Stan run of `test-icc-brms.R` at `NOT_CRAN=true` (unset `CI`) enumerates every failing block; that recorded failure list is now green after the fix.
-- [ ] AC2 — Every two-way/crossed brms `icc()` fit whose block asserts a specific `index`/`level` set passes an explicit `type=` (and `level=` where multilevel); no such assertion is left depending on the package default. Evidence: a committed audit ledger (work-log) listing each `icc(` call in the file and its `type=`/`level=` disposition.
-- [ ] AC3 — Full-file `test-icc-brms.R` is green under a live-Stan run (`NOT_CRAN=true`, `CI` unset); and `Rscript -e 'devtools::test()'` is clean under CI parity (`NOT_CRAN=true CI=true`, the `skip_on_ci` blocks skipped, everything else green).
-- [ ] AC4 — The diff is confined to `tests/testthat/test-icc-brms.R`; `git diff --stat` shows no file under `R/` changed.
+- [x] AC1 — A baseline live-Stan run of `test-icc-brms.R` at `NOT_CRAN=true` (unset `CI`) enumerates every failing block; that recorded failure list is now green after the fix.
+- [x] AC2 — Every two-way/crossed brms `icc()` fit whose block asserts a specific `index`/`level` set passes an explicit `type=` (and `level=` where multilevel); no such assertion is left depending on the package default. Evidence: a committed audit ledger (work-log) listing each `icc(` call in the file and its `type=`/`level=` disposition.
+- [x] AC3 — Full-file `test-icc-brms.R` is green under a live-Stan run (`NOT_CRAN=true`, `CI` unset); and `Rscript -e 'devtools::test()'` is clean under CI parity (`NOT_CRAN=true CI=true`, the `skip_on_ci` blocks skipped, everything else green).
+- [x] AC4 — The diff is confined to `tests/testthat/test-icc-brms.R`; `git diff --stat` shows no file under `R/` changed.
 
 ## Coverage
 
@@ -50,3 +50,11 @@ Restore `tests/testthat/test-icc-brms.R` to green under a live-Stan run and pin 
 ## Decisions
 
 ## Review
+
+**Consistency gate (2026-07-23).** `cairn_validate` exit 0 (all checks pass; 323 advisories, no FAIL). `devtools::document()` — no diff. No `IPn`/`GPn` change → `cairn_impact` skipped.
+
+**AC evidence (fresh, this session, post-fix):**
+- AC1 — Baseline live-Stan run (`NOT_CRAN=true`, `CI` unset) enumerated 11 failing blocks (all A-only `index` from no-`type` fits now returning all four; O-Bayes-FML additionally on `level`). Second full run after the fix: 67 blocks, 0 failed / 0 errored / 0 skipped.
+- AC2 — T3 audit: 45 brms fits — 15 type-pinned (2 also `level`-pinned), 2 `model="oneway"` exempt (no A/C distinction), 28 no-type all either error-path/argument-validation, non-index diagnostic/replicate/prior, or nested-random/multilevel-one-way (ICC(1)/ICC(k)). No index/level shape assertion depends on the package default. Ledger in the work log.
+- AC3 — Live-Stan `test-icc-brms.R`: 67/0/0. CI-parity `devtools::test()` (`NOT_CRAN=true CI=true`): 478 blocks, 0 failed / 0 errored, 23 skipped (the `skip_on_ci` brms blocks), 2 pre-existing glmmTMB convergence warnings.
+- AC4 — `git diff --name-only origin/main...HEAD`: `tests/testthat/test-icc-brms.R` + two tracking files; 0 files under `R/`. Code diff 27 ins / 8 del, test file only.
