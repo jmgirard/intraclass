@@ -158,3 +158,31 @@ No `Driving RR` → projection-vs-outcome no-ops.
   `M<NN>`-citation warnings, none from M85). No DESIGN.md principle text changed → no
   `cairn_impact` run. Toolchain gate (r-package): `document()` no-diff, `pkgdown` clean,
   NEWS entry present, no new top-level files needing `.Rbuildignore`.
+
+### Independent fresh-context review (3 lenses + scorer)
+
+- **[O] diff-bug (Opus):** verdict sound. Independently re-derived the AM-GM `k_eff ≤ n0`
+  proof and brute-forced 200k designs (`min(n0−k_eff) = −1.1e−13`); verified the
+  dispatch/divisor wiring, the AC4 identity's independence (catches a divisor-swap), the
+  AC2 event identity, and that the near-boundary `std.error` is honestly documented
+  (non-finite is measure-zero on continuous data). **1 finding** (below).
+- **[S] blame-history (Sonnet):** no findings. The lifted abort was added by M84 with an
+  inline "deferred to M85" note; the flipped test preserves the numeric-`unit` abort; the
+  regenerated fixture is byte-identical on every pre-existing column. No governing D-entry
+  contradicted.
+- **[S] prior-review (Sonnet):** no regressions. The diff is exactly the re-derivation
+  RR02 beyond-brief 2 called for, done (not assumed); the AC4 identity avoids the M82 F1
+  circular-cross-check anti-pattern; BC2–BC5 doctrine reaffirmed. GitHub comment probe
+  empty (no threads to walk).
+- **[S] scorer (Sonnet):** scored the single finding **92** (≥80 → actioned).
+
+**Finding 1 — actioned (fixed).** *(diff-bug, scored 92)* `R/ci-npbootstrap.R:33-38` header
+comment was stale after the dispatch change: it still stated the ICC(k) SB image is "on
+BALANCED data only … so the dispatch aborts `unit = "average"` under imbalance" and wrote
+`g(rho) = k*rho/…` (pre-M85 `k`, not `k_eff`) — contradicting the shipped behavior. **Fixed
+in the review commit:** the comment now states the map ships balanced + unbalanced (pole-safe
+because `k_eff ≤ n0`, MD-1), uses `k_eff`, and notes only numeric `unit` stays balanced-only.
+Comment-only; `load_all` parses, lint 0.
+
+**Verdict:** all six ACs verified with fresh evidence; consistency gate clean; one Low-severity
+doc finding fixed. Ready for merge approval.
