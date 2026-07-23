@@ -1,8 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-23 (M85 shipped via PR #92 — unbalanced one-way `npbootstrap` **ICC(k)**: the pole-safe Spearman-Brown map, `k_eff ≤ n₀` so the SB pole never intrudes (MD-1); a dispatch unblock, numeric `unit=m` deferred. 3-lens review: 1 stale-comment finding fixed; check 0/0/0. Archived M85, rotated M80 out; +1 lesson, pruned M57 for cap. M48 `blocked`, D-050.)_
-_Last plan: 2026-07-23 — promoted the PL-CI candidate to **M86** (implement + validate the naive-PL/MPL machinery against xiao2013's frozen tables) + **M87** (extended-range κ_m recalibration + comparison sweep vs incumbents → GO/NO-GO verdict); split at the plan gate over the from-scratch κ_m calibration + the near-zero-ρ boundary extension. The exported-`ci_method` sibling stays a candidate, GO-gated on M87._
+_Last hygiene check: 2026-07-23 (M86 shipped via PR #93 — a seeded `data-raw/` prototype of xiao2013's naive-PL/MPL ICC(A,1) interval machinery, validated against Tables 3/4/6/7 (no `R/` surface); unblocks M87. 3-lens review: F1 D-009 `xiao` directives (97) + F2 one-sided `mpl_kappa_corr` signed-root (85) both fixed; below-threshold 0. Archived M86, rotated M81 out; +2 lessons. M87 remains `planned` (depends on M86); exported-`ci_method` sibling stays a candidate, GO-gated on M87. M48 `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -11,14 +10,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | planned | M86 | normal | milestones/M87-mpl-coverage-verdict-twoway-random.md |
-| M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | review | — | normal | milestones/M86-mpl-machinery-twoway-random.md |
+| M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | done | — | normal | milestones/archive/M86-mpl-machinery-twoway-random.md |
 | M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | done | M84 | normal | milestones/archive/M85-unbalanced-npbootstrap-icck.md |
 | M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | done | — | normal | milestones/archive/M84-unbalanced-npbootstrap-icc1.md |
 | M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | done | — | normal | milestones/archive/M83-repair-rotted-brms-test-expectations.md |
 | M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M82-classical-oneway-ci-method.md |
-| M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | done | — | normal | milestones/archive/M81-wire-generalizing-claims-gate-into-ci.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M85 done (2026-07-23) → M80 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M85, M84, M83, M82, M81 (5 most recent terminal). -->
+<!-- terminal-row retention: M86 done (2026-07-23) → M81 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M86, M85, M84, M83, M82 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
