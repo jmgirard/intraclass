@@ -1,6 +1,6 @@
 # M84: Unbalanced one-way transformed bootstrap-t — ICC(1)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -106,6 +106,8 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
   (reduces-to-balanced + Example-2 point + Fig. 2 plot-read; no independent SE
   anchor). Generalizing-claims gate in sync (258/258). @param/@details/NEWS landed
   in the T2–T4 commit.
+- 2026-07-23: all tasks done; `devtools::check()` 0/0/0 (`--no-manual`,
+  `NOT_CRAN=false`); status → review.
 
 ## Decisions
 
