@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-21 (M81 shipped via PR #88 — `enumerate-generalizing-claims.py --check` + `--self-test` now run in the R-free `check-references` CI job, with a mutation-proven vacuity guard; an un-triaged generalizing claim now reds CI. Archived M81, rotated M76 out; retired the M76 lesson's "not wired into CI" clause and the M79 lesson's matching aside. M48 stays parked/`blocked` on the unopened v0.1.0 window (D-050).)_
+_Last hygiene check: 2026-07-22 (audit clean — all 16 gate checks PASS, git tree clean, no open issues/PRs, no in-flight work. Shortened this line to clear the record-density cap it had breached at 437 chars. The dangling-id advisory (321 tokens) is legacy M1–M47 refs in reference/spec notes — expected, not a defect. M48 stays parked/`blocked` on the unopened v0.1.0 window, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
