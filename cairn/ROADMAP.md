@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | planned | — | normal | milestones/M83-repair-rotted-brms-test-expectations.md |
+| M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | in-progress | — | normal | milestones/M83-repair-rotted-brms-test-expectations.md |
 | M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M82-classical-oneway-ci-method.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 | M81 | Wire the M74 generalizing-claim completeness gate into CI + harden its vacuity | done | — | normal | milestones/archive/M81-wire-generalizing-claims-gate-into-ci.md |

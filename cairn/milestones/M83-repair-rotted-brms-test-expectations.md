@@ -1,11 +1,11 @@
 # M83: Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=`
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** m83-repair-rotted-brms-test-expectations
 
 ## Goal
 
