@@ -78,7 +78,7 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
       Guard degenerate unbalanced input (AC6). Directed unit tests.
 - [x] T4: deterministic oracle tests — Example 2 `ρ̂` recovery (AC3) and the
       reduces-to-balanced parity (AC2).
-- [ ] T5: unbalanced coverage sweep in `data-raw/` (`n_rep ≥ 2000`, ohyama Fig. 2
+- [x] T5: unbalanced coverage sweep in `data-raw/` (`n_rep ≥ 2000`, ohyama Fig. 2
       cells, MCAR 0.1); commit the fixture; assert the plot-read band (AC4).
 - [ ] T6: docs — `@param ci_method`/@details, the `ORACLES.md` O-NPBoot entry
       (unbalanced basis: reduces-to-balanced + ohyama Fig. 2 plot-read + Example-2
@@ -97,6 +97,11 @@ candidate untouched). Non-normal robustness (ohyama tests normal only).
   reduces-to-balanced ≤1e-10, Example-2 `ρ̂`, `n₀`≠harmonic, `theta`=logF−C, SSA=0
   abort, well-formed+reproducible unbalanced interval. Gate suite green
   (`NOT_CRAN=true CI=true`: 0/0); lintr 0; roxygen/@details/NEWS updated.
+- 2026-07-23: T5 — unbalanced coverage sweep (`n_rep=2000`, MCAR 0.1, coverage-only,
+  no fits). Three near-nominal cells within ±0.02 of the ohyama Fig. 2 plot-read
+  (A_10_2 .936/.945, A_25_5 .940/.935, A_50_5 .946/.945); the k=10,n=10 dip cell
+  .922 sits below them (GP6). `n_ok` ≥ 1957/2000 (MCAR degenerate guard). Fixture +
+  `test-ci-npbootstrap-unbalanced-coverage.R` green.
 
 ## Decisions
 
