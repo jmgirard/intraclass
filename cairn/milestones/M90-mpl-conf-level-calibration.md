@@ -1,6 +1,6 @@
 # M90: MPL κ_m recalibration + coverage GO/NO-GO at conf_level ∈ {0.90, 0.99}
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -86,6 +86,7 @@ off-grid) → unchanged, separate candidates.
 - 2026-07-24: /milestone-implement start; status → in-progress; branch m90-mpl-conf-level-calibration cut from main.
 - 2026-07-24: amended AC1/AC4 (gate) — conf_level 0.90's κ_m over ρ≥0.6 has a direct external oracle (xiao2013 Table 3/6 at α=0.10, IP1; M86 already reproduced 0.32/0.67/0.33); no-oracle posture now level-specific (0.90 sub-0.6 tail + all 0.99 only). Principles touched += IP1; AC1 coverage += T4.
 - 2026-07-24: escalating to Fable via /milestone-brief (RB tripwire: no-oracle) before freezing the T1 criterion or running any sweep — the α=0.01 (0.99) deep-tail κ_m + sub-0.6 extrapolation have no external oracle; question per the gate. T1–T4 paused pending the RR.
+- 2026-07-24: blocked on RB03 (cairn/reviews/RB03-mpl-conf-level-extrapolation.md).
 
 ## Decisions
 
