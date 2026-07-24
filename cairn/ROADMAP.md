@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | planned | M88 | normal | milestones/M89-mpl-numeric-unit.md |
+| M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | in-progress | M88 | normal | milestones/M89-mpl-numeric-unit.md |
 | M88 | Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k) | done | M86, M87 | normal | milestones/archive/M88-mpl-ci-method-export.md |
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | done | M86 | normal | milestones/archive/M87-mpl-coverage-verdict-twoway-random.md |
 | M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | done | — | normal | milestones/archive/M86-mpl-machinery-twoway-random.md |
