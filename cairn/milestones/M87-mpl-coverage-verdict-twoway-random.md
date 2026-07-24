@@ -148,3 +148,29 @@ subagents). PR #94. No `Driving RR` → projection-vs-outcome no-ops.**
   `data-raw/`, `cairn/`). Full `R CMD check` delegated to PR #94 CI (no package
   code changed; local check risks only the known environmental Courier-font false
   ERROR).
+
+### Independent fresh-context fan-out (3 lenses + scorer)
+
+- **[O] diff-bug (Opus):** no correctness/contract/convention bugs. Independently
+  re-ran the fixtures and cross-checked every reported coverage/width/abort/κ_m
+  number against `m87-sweep-results.rds` + `m87-kappa-recalibration.rds`, verified
+  the paired-seeding + abort-handling + criterion logic, executed both D-009
+  settling greps (PASS), and confirmed the GP5 git-ordering. Raised 2 non-blocking
+  documentation notes (scored below).
+- **[S] blame-history (Sonnet):** no findings. The M86-F1 exclusion extension is
+  load-bearing (the greps re-falsify if the M87 excludes are removed); the M87 note
+  append is pure addition with no M86 contradiction; D-014 is correctly append-only
+  and its numbers match the evidence page; the ROADMAP flip is faithful; the harness
+  mirrors the M76/M62 pattern.
+- **[S] prior-review (Sonnet):** no regressions. F1 (D-009 xiao directives)
+  preserved; F2 (one-sided signed root) untouched (`m86-mpl-lib.R` not in the diff);
+  GitHub PR-thread probe empty (not walked). No prior-review lesson regressed.
+- **[S] scorer (Sonnet):** scored the 2 diff-bug notes **46** and **28** — both
+  **below the 80 threshold → not actioned, logged here** (IP3):
+  - *(46)* note line 169 "ρ ∈ [0, 0.9]" vs the operative spec's "[0.05, 0.9]" —
+    deliberate shorthand matching the milestone title / Goal / AC2, self-corrected
+    two paragraphs later, affects no computed value; left as intentional.
+  - *(28)* D-014's "(AC2, within ±0.01)" describes the *achieved* |Δ| (0.006/0.005),
+    truthful though terse; `DECISIONS.md` is append-only (non-editable). No change.
+
+**Outcome: zero findings scored ≥ 80; nothing to action.**
