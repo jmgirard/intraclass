@@ -96,7 +96,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 
 ## Tasks
 
-- [ ] T1: Freeze the RR03-determined coverage criterion + level-specific oracle
+- [x] T1: Freeze the RR03-determined coverage criterion + level-specific oracle
       disclosure in a references note (extend
       `references/mpl-twoway-random-comparison.md` or a sibling): the BC3 floors
       (0.88 at 0.90; 0.98 at 0.99), BC4 replication (n_rep ≥ 2000 at 0.99,
@@ -124,6 +124,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 - 2026-07-24: amended AC1/AC4 (gate) — conf_level 0.90's κ_m over ρ≥0.6 has a direct external oracle (xiao2013 Table 3/6 at α=0.10, IP1; M86 already reproduced 0.32/0.67/0.33); no-oracle posture now level-specific (0.90 sub-0.6 tail + all 0.99 only). Principles touched += IP1; AC1 coverage += T4.
 - 2026-07-24: escalating to Fable via /milestone-brief (RB tripwire: no-oracle) before freezing the T1 criterion or running any sweep — the α=0.01 (0.99) deep-tail κ_m + sub-0.6 extrapolation have no external oracle; question per the gate. T1–T4 paused pending the RR.
 - 2026-07-24: blocked on RB03 (cairn/reviews/RB03-mpl-conf-level-extrapolation.md).
+- 2026-07-24: T1 done — froze the conf_level 0.90/0.99 pre-registration (BC1–BC7 criterion: cells C1–C8, floors 0.88/0.98, n_rep, oracle posture) in `references/mpl-twoway-random-comparison.md` (GP5, dated 2026-07-24); 2 new generalizing claims triaged OUT-repo-analysis; enumerator/reference-obs/cairn_validate all green.
 - 2026-07-24: ingested RR03 (Fable) → D-017. Verdict: 0.90 GO (external oracle), 0.99 conditional GO under BC1–BC7. Set Driving RR = RR03; ingested BC1–BC7 verbatim as AC4–AC10; dropped the plan's c−0.02 floor (superseded by BC3's 0.98@0.99); refined T1–T4 to the BCs. Status → in-progress. RB03/RR03 archived.
 
 ## Decisions
