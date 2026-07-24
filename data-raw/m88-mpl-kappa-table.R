@@ -54,8 +54,13 @@ kappa_m_one <- function(n_r, n_s, seed_g) {
   grid$kc_scan <- mapply(
     function(rho, delta) {
       mpl_kappa_corr(
-        rho, delta, n_r, n_s,
-        alpha = alpha_pass, side = "two", n_mc = n_mc_scan
+        rho,
+        delta,
+        n_r,
+        n_s,
+        alpha = alpha_pass,
+        side = "two",
+        n_mc = n_mc_scan
       )
     },
     grid$rho,
@@ -66,8 +71,13 @@ kappa_m_one <- function(n_r, n_s, seed_g) {
   top$kc_final <- mapply(
     function(rho, delta) {
       mpl_kappa_corr(
-        rho, delta, n_r, n_s,
-        alpha = alpha_pass, side = "two", n_mc = n_mc_final
+        rho,
+        delta,
+        n_r,
+        n_s,
+        alpha = alpha_pass,
+        side = "two",
+        n_mc = n_mc_final
       )
     },
     top$rho,
@@ -85,8 +95,10 @@ kappa_m_one <- function(n_r, n_s, seed_g) {
 
 cat(sprintf(
   "== M88 T3: kappa_m over rho in [%.2f,%.2f] x delta {%s}, alpha=%.2f two-sided ==\n",
-  min(rho_grid), max(rho_grid),
-  paste(delta_grid, collapse = ","), alpha_pass
+  min(rho_grid),
+  max(rho_grid),
+  paste(delta_grid, collapse = ","),
+  alpha_pass
 ))
 nodes <- expand.grid(n_r = r_grid, n_s = s_grid)
 nodes <- nodes[order(nodes$n_r, nodes$n_s), ]
@@ -106,13 +118,20 @@ for (i in seq_len(nrow(nodes))) {
   ) # incremental checkpoint
   cat(sprintf(
     "  (R=%2d,S=%3d): kappa_m = %.3f at argmax (rho=%.2f, delta=%g)  [%d/%d]\n",
-    res$n_r, res$n_s, res$kappa_m, res$argmax[["rho"]], res$argmax[["delta"]],
-    i, nrow(nodes)
+    res$n_r,
+    res$n_s,
+    res$kappa_m,
+    res$argmax[["rho"]],
+    res$argmax[["delta"]],
+    i,
+    nrow(nodes)
   ))
 }
 
 # --- Cross-check against M87's committed recalibration ----------------------
-cat("\n== Cross-check: shared geometries vs M87 committed kappa_m (tol 0.15) ==\n")
+cat(
+  "\n== Cross-check: shared geometries vs M87 committed kappa_m (tol 0.15) ==\n"
+)
 m87 <- readRDS("data-raw/m87-kappa-recalibration.rds")$results
 tol_x <- 0.15 # two independent MC pipelines (top-3-max here vs single-argmax at M87)
 xcheck <- list()
@@ -124,7 +143,11 @@ for (key in intersect(names(m87), sprintf("%d-%d", nodes$n_r, nodes$n_s))) {
   xcheck[[key]] <- list(ours = ours, m87 = theirs, pass = pass)
   cat(sprintf(
     "  %s: ours %.3f  M87 %.3f  |diff| %.3f  %s\n",
-    key, ours, theirs, abs(ours - theirs), if (pass) "PASS" else "FAIL"
+    key,
+    ours,
+    theirs,
+    abs(ours - theirs),
+    if (pass) "PASS" else "FAIL"
   ))
 }
 xcheck_all_pass <- length(xcheck) > 0 &&

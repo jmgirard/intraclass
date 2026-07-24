@@ -96,3 +96,180 @@ test_that("mpl_matrix reshapes complete long data and aborts on a missing cell",
   df_gap <- df[!(df$subject == "1" & df$rater == "3"), ]
   expect_error(mpl_matrix(df_gap), class = "intraclass_unidentified")
 })
+
+# ---- Shared fixture: a balanced complete two-way random dataset --------------
+# S subjects x R raters, absolute-agreement components (sigma^2_s, sigma^2_r,
+# sigma^2_e). S is kept in the shipped kappa_m grid [10, 100] so the lookup resolves.
+mpl_twoway_long <- function(
+  n_s = 20,
+  n_r = 4,
+  s2s = 0.6,
+  s2r = 0.1,
+  s2e = 0.2,
+  seed = 88
+) {
+  set.seed(seed)
+  s <- stats::rnorm(n_s, sd = sqrt(s2s))
+  r <- stats::rnorm(n_r, sd = sqrt(s2r))
+  y <- outer(s, rep(1, n_r)) +
+    outer(rep(1, n_s), r) +
+    matrix(stats::rnorm(n_s * n_r, sd = sqrt(s2e)), n_s, n_r)
+  data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = as.numeric(y)
+  )
+}
+
+# ---- AC2 + AC5: end-to-end dispatch ------------------------------------------
+
+test_that("mpl reports the engine REML point + deterministic metadata (AC2)", {
+  skip_if_not_installed("glmmTMB")
+
+  d <- mpl_twoway_long()
+  mc <- tidy(icc(d, score, subject, rater, ci_method = "montecarlo", seed = 1))
+  mc1 <- mc[mc$index == "ICC(A,1)", ]
+
+  fit <- icc(d, score, subject, rater, ci_method = "mpl")
+  td <- tidy(fit)
+  i1 <- td[td$index == "ICC(A,1)", ]
+
+  # Deterministic closed form: raw token "mpl", no draws, no SE (D-015).
+  expect_identical(fit$ci$method, "mpl")
+  expect_true(is.na(fit$ci$samples))
+  expect_true(is.na(i1$std.error))
+  # The POINT is the shared engine (REML) point, identical to montecarlo (BC5).
+  expect_equal(i1$estimate, mc1$estimate, tolerance = 1e-8)
+  # A finite, ordered interval in [0, 1].
+  expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
+  expect_lt(i1$conf.low, i1$conf.high)
+  expect_gte(i1$conf.low, 0)
+  expect_lte(i1$conf.high, 1)
+  # print() names the interval (AC2). Assert on the formatted header vector
+  # directly -- cli renders it to a styled/wrapped stream expect_output misses.
+  expect_true(any(grepl(
+    "modified profile likelihood",
+    cli::ansi_strip(format(fit)),
+    fixed = TRUE
+  )))
+})
+
+test_that("mpl returns an interval where the two-way MC default aborts (AC5)", {
+  skip_if_not_installed("glmmTMB")
+
+  # A near-zero-rho boundary cell (sigma^2_s ~ 0): the two-way random MC default aborts
+  # on a sizeable fraction of such datasets (intraclass_singular_fit; D-014 AC4). mpl
+  # returns an interval on 100% of them -- the residual value D-014 ships it for. Find
+  # one dataset (in the kappa_m grid) where MC aborts and assert mpl does not.
+  aborted <- FALSE
+  for (sd in 1:40) {
+    d <- mpl_twoway_long(
+      n_s = 20,
+      n_r = 3,
+      s2s = 1e-4,
+      s2r = 0.3,
+      s2e = 0.6,
+      seed = sd
+    )
+    mc <- tryCatch(
+      icc(d, score, subject, rater, ci_method = "montecarlo", seed = 1),
+      intraclass_singular_fit = function(e) "aborted"
+    )
+    if (identical(mc, "aborted")) {
+      aborted <- TRUE
+      fit <- icc(d, score, subject, rater, ci_method = "mpl")
+      i1 <- tidy(fit)[tidy(fit)$index == "ICC(A,1)", ]
+      expect_true(is.finite(i1$conf.low) && is.finite(i1$conf.high))
+      break
+    }
+  }
+  skip_if_not(aborted, "no MC abort found in the seed sweep (boundary luck)")
+})
+
+# ---- AC3: ICC(A,k) is the exact Spearman-Brown image of ICC(A,1) -------------
+
+test_that("mpl ICC(A,k) is the exact Spearman-Brown image of ICC(A,1), divisor R (AC3)", {
+  skip_if_not_installed("glmmTMB")
+
+  n_r <- 4L
+  d <- mpl_twoway_long(n_s = 20, n_r = n_r)
+  td <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    unit = c("single", "average"),
+    ci_method = "mpl"
+  ))
+  i1 <- td[td$index == "ICC(A,1)", ]
+  ik <- td[td$index == "ICC(A,k)", ]
+  # xiao2013's MPL has no independent ICC(A,k) construction (inheritance, not an anchor
+  # -- the D-013 Burch precedent; a "direct" side built by inverting the package's own
+  # ICC(A,1) endpoint would be tautological, M82 lesson). The verifiable property is the
+  # exact monotone Spearman-Brown image with divisor R: for two-way RANDOM absolute
+  # agreement, ICC(A,k) = k*rho/(1+(k-1)rho) with rho = ICC(A,1) (McGraw & Wong 1996
+  # Table 4). Recompute the SB map INDEPENDENTLY (not via the package's npb_sb) so a
+  # wrong divisor would break the equality.
+  sb <- function(rho, m) m * rho / (1 + (m - 1) * rho)
+  expect_equal(ik$conf.low, sb(i1$conf.low, n_r), tolerance = 1e-9)
+  expect_equal(ik$conf.high, sb(i1$conf.high, n_r), tolerance = 1e-9)
+  # Mutation proof: a wrong divisor (R+1) does NOT reproduce the shipped endpoints.
+  expect_false(isTRUE(all.equal(ik$conf.high, sb(i1$conf.high, n_r + 1))))
+})
+
+# ---- AC4: the two-way-random-agreement fence + off-grid abort ----------------
+
+test_that("mpl aborts outside the two-way random absolute-agreement cell (AC4)", {
+  skip_if_not_installed("glmmTMB")
+
+  d <- mpl_twoway_long()
+  # one-way, consistency, fixed raters, numeric unit, non-0.95 level all abort.
+  expect_error(
+    icc(d, score, subject, rater, model = "oneway", ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(d, score, subject, rater, type = "consistency", ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+  # raters = "fixed" also emits the fixed-rater advisory warning before the abort;
+  # suppress it so the expected abort is what the test asserts on.
+  expect_error(
+    suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      ci_method = "mpl"
+    )),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(d, score, subject, rater, unit = 2, ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+  expect_error(
+    icc(d, score, subject, rater, ci_method = "mpl", conf_level = 0.90),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("mpl aborts on an unbalanced design and off the kappa_m grid (AC4)", {
+  skip_if_not_installed("glmmTMB")
+
+  # Incomplete two-way (a dropped cell) -> not balanced -> abort.
+  d <- mpl_twoway_long()
+  d_gap <- d[!(d$subject == "1" & d$rater == "2"), ]
+  expect_error(
+    icc(d_gap, score, subject, rater, ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+  # Balanced two-way but S = 6 subjects -- below the kappa_m grid's min (10). The fence
+  # passes; the lookup aborts rather than extrapolating an uncalibrated kappa_m (#5).
+  d_small <- mpl_twoway_long(n_s = 6, n_r = 4)
+  expect_error(
+    icc(d_small, score, subject, rater, ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+})

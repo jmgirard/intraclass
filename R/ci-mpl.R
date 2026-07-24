@@ -235,7 +235,12 @@ mpl_kappa_lookup <- function(n_r, n_s, call = rlang::caller_env()) {
 # its exact Spearman-Brown image via the shared `npb_sb()` (est$divisor = k), so both
 # estimands share one deviance-root computation. conf_level is fixed at 0.95 upstream
 # (the table's calibration level). Deterministic -- std.error is NA (#4).
-mpl_ci <- function(df, estimands, conf_level = 0.95, call = rlang::caller_env()) {
+mpl_ci <- function(
+  df,
+  estimands,
+  conf_level = 0.95,
+  call = rlang::caller_env()
+) {
   y <- mpl_matrix(df, call = call)
   ms <- mpl_anova(y)
   km <- mpl_kappa_lookup(ms$n_r, ms$n_s, call = call)

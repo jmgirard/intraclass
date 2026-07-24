@@ -239,7 +239,25 @@ resamples, so \code{mc_samples}, \code{boot_samples}, and \code{seed} do not app
 approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted interval
 of Burch (2011): wider, but robust to non-normality and never under-covering.
 Prefer \code{"searle"} for near-normal data and \code{"burch"} when heavy tails or
-non-normality are a concern.}
+non-normality are a concern.
+\code{"mpl"} is the \strong{modified profile-likelihood} interval of Xiao & Liu (2013),
+\strong{only for the balanced-complete two-way random absolute-agreement ICC(A,1)} (and
+ICC(A,k) via its Spearman-Brown image); it aborts on any other design, on
+consistency (ICC(C,.)) or fixed raters, on unbalanced or incomplete data, and on a
+numeric \code{unit}. It is a \strong{deterministic closed form} (no resampling; \code{mc_samples},
+\code{boot_samples}, and \code{seed} do not apply) that, like \code{"npbootstrap"}, returns an
+interval on \strong{every} dataset -- including the near-zero-ICC boundary where the
+two-way Monte-Carlo default aborts -- and covers at or above nominal across the
+pre-registered grid where the incumbents can under-cover (assessed GO-for-opt-in in
+M87). It is deliberately \strong{conservative} (it over-covers, and is wider than the
+Monte-Carlo interval at interior cells), so it is an opt-in, not the default.
+Two constraints follow from its calibration. It is available \strong{only at
+\code{conf_level = 0.95}} (the level its correction constant is tabulated for; other
+levels abort). And its correction constant is calibrated by simulation over
+\verb{rho in [0.05, 0.9]}, extending below Xiao & Liu's published \code{rho >= 0.6} fence
+into a near-boundary region that \strong{carries no external oracle} -- there, the
+interval's calibration rests on the package's own simulated coverage. It assumes
+approximately Gaussian data (untested for non-normality).}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}

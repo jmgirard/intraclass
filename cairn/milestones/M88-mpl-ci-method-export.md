@@ -1,6 +1,6 @@
 # M88: Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k)
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M86, M87
 - **Driving RR:** —
@@ -78,28 +78,28 @@ two-way *default* (contract change) stays the separate `#3` candidate.
       land with T4/T5/T6.
 - [x] T2: xiao2013 Example 1 deterministic oracle in `tests/testthat/test-ci-mpl.R`
       (AC1, gate-amended; point + endpoints, honest rounding tolerance on the lower).
-- [ ] T3: Author the seeded κ_m table generator in `data-raw/` — per-geometry full
+- [x] T3: Author the seeded κ_m table generator in `data-raw/` — per-geometry full
       (ρ∈[0.05,0.9] × δ=2^-1..4) scan to LOCATE the argmax, then bias-corrected
       re-evaluation of the top-3 cells (max) at high n_mc (M87 T2's method; the argmax
       is NOT universally the corner — it varies with R, so it must be found). Grid
       R=2:10 × S∈{10,15,20,30,50,100}; background job (~2–2.5 h); commit to
       `R/sysdata.rda`. Built-in cross-check vs M87's committed κ_m.
-- [ ] T4: κ_m lookup + bilinear interpolation over the grid; off-grid (R,S) aborts
+- [x] T4: κ_m lookup + bilinear interpolation over the grid; off-grid (R,S) aborts
       loudly (#5/#8) rather than extrapolating an uncalibrated κ_m.
-- [ ] T5: ICC(A,k) via the shared `npb_sb()` image of the ICC(A,1) endpoints, plus the
+- [x] T5: ICC(A,k) via the shared `npb_sb()` image of the ICC(A,1) endpoints, plus the
       committed anti-tautology identity + mutation cross-check (T5 builds the direct
       McGraw-Wong side from raw statistics).
-- [ ] T6: Wire `"mpl"` into `icc()` — add to the `ci_method` vocabulary
+- [x] T6: Wire `"mpl"` into `icc()` — add to the `ci_method` vocabulary
       (`R/icc.R:503`), add the two-way-random-agreement guard (counterpart of the
       one-way guard at `R/icc.R:1334`), add the dispatch branch (mirror `searle_ci`
       at `R/icc.R:1966`), set samples/std.error `NA` + the print label.
-- [ ] T7: Boundary-behavior test — `ci_method="mpl"` returns an interval on a cell
+- [x] T7: Boundary-behavior test — `ci_method="mpl"` returns an interval on a cell
       where the two-way MC default aborts (`test-ci-mpl.R`).
-- [ ] T8: Docs + references — `@param ci_method`, D-014 conditions (i)/(iii), κ_m
+- [x] T8: Docs + references — `@param ci_method`, D-014 conditions (i)/(iii), κ_m
       provenance; update `references/mpl-twoway-random-comparison.md`, add any
       generalizing-claims triage rows, and append `xiao2013.md` exclude directives for
       the new `data-raw/` generator (M85/M86 lessons; `_pkgdown.yml` if a new export).
-- [ ] T9: Full gate — `devtools::check` at CI parity (`NOT_CRAN` per the profile),
+- [x] T9: Full gate — `devtools::check` at CI parity (`NOT_CRAN` per the profile),
       `lintr::lint_package()`, `air format --check`, and `check-references` locally.
 
 ## Work log
@@ -112,6 +112,7 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 - 2026-07-23: T6 wired — `"mpl"` in the ci_method vocabulary + two-way-random-agreement fence guard + dispatch branch + samples=NA metadata + `print()` label "modified profile likelihood". T4/T5 authored (κ_m lookup + `mpl_ci` reducer). Fence detail: `type` defaults to agreement+consistency, so mpl narrows an UNSET type to agreement but aborts an EXPLICIT consistency request (agreement-only method).
 - 2026-07-23: T8 references done — O-MPL registered in ORACLES.md; xiao2013.md/xiao2009.md "traces"/orphan claims updated (paper now exported, not prototype-only; xiao2009 grep narrowed to its own citekey to avoid xiao2013 conflation); mpl-twoway-comparison.md export note; O-MPL decision triage row. Both `check-references` gates green.
 - 2026-07-23: HONEST CHECKPOINT — R wiring + reducer + refs committed; `devtools::load_all` clean, AC1 (deterministic Example 1) 0 failures. T3 κ_m table still generating (~2 h); AC2–AC5 end-to-end tests + T9 gate + `document()` pending its completion (they currently error only on the not-yet-built `kappa_m_table`). Tasks T3–T7 stay unchecked until verified end-to-end.
+- 2026-07-24: T3 table complete (54 nodes, `R/sysdata.rda`) — M87 cross-check ALL PASS (4 shared geometries, |Δ| ≤ 0.045). T4–T7 verified: full `test-ci-mpl.R` 31 pass (AC2 engine-point/metadata/print label, AC3 SB identity + wrong-divisor mutation, AC4 fence + off-grid aborts, AC5 interval where MC aborts). T9 gate clean: CI-parity suite 4072 pass / 0 fail; `R CMD check` 0/0/0; `lintr::lint_package` 0; `air --check` clean; both `check-references` gates green; `document()` regenerated `icc.Rd`. Note for review: κ_m is small + argmax-noisy at high R (R≥8, κ_m≈0.08–0.19), a region beyond M87's validated cells — low-impact (small correction) but un-oracled, per the D-014 (i) caveat. All tasks done → review.
 
 ## Decisions
 
