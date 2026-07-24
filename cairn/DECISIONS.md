@@ -532,3 +532,29 @@ only — consistency, fixed raters, other designs, unbalanced/incomplete all abo
 **Consequences:** `"mpl"` joins the `ci_method` vocabulary. Implements the D-014
 GO-for-opt-in candidate; mirrors D-010/D-013's exported-API rulings; supersedes nothing.
 A classical two-way boundary-robust *default* stays the separate `#3` candidate.
+
+### D-016 (2026-07-24): Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection, no new oracle
+
+**Context:** D-015 exported the MPL interval (xiao2013) as `ci_method = "mpl"` for the
+balanced-complete two-way random ICC(A,1)/ICC(A,k), and parked a numeric `unit` (D-study
+projection to m≠R raters) as a candidate. M89 promotes it.
+
+**Decision:** admit any numeric `unit = m` (m ≥ 1, matching `validate_unit` and the
+montecarlo path) under `ci_method = "mpl"` for the same balanced-complete two-way random
+absolute-agreement cell. ICC(A,m) is the exact Spearman-Brown image `m·ρ/(1+(m−1)ρ)` of the
+ICC(A,1) MPL endpoints (McGraw & Wong 1996 Table 4), computed by the shared `npb_sb()` — the
+same inheritance leg as ICC(A,k), which `mpl_ci()` already applied to any `est$divisor`.
+**Pole-safe unconditionally:** the SB pole ρ = −1/(m−1) is negative for every m ≥ 1 while the
+MPL endpoints are clamped to [0, 1], so the denominator 1+(m−1)ρ ≥ 1 > 0 and the map stays
+monotone in [0, 1] — no fence, unlike the unbalanced one-way npbootstrap case (D-010) where a
+user-chosen m > n0 pushes the pole interior and numeric unit stays deferred.
+
+**Oracle basis:** inheritance, no new external oracle (as D-010/D-013/D-015 for the averaged
+coefficient). O-MPL's inheritance leg extends to ICC(A,m); verified by the exact SB-identity +
+wrong-divisor mutation check (M82 anti-tautology). The reported point is the engine (glmmTMB
+REML) ICC(A,m) point via `icc_point()` (D-010 BC5), already produced for the montecarlo path.
+
+**Consequences:** implements the D-015 parked candidate; the fences are unchanged (conf_level
+≠ 0.95, consistency, fixed raters, one-way/multilevel/replicate, unbalanced/incomplete all
+still abort). Mirrors D-015's exported-API ruling; supersedes nothing. The classical two-way
+boundary-robust default and on-the-fly κ_m calibration stay separate candidates.
