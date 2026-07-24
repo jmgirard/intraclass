@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-23 (M87 shipped via PR #94 — GO-for-opt-in (D-014): MPL with extended-range κ_m is "not worse" than the incumbents for two-way random ICC(A,1), boundary-robust where the two-way MC default aborts 26–31%. No `R/`. 3-lens+scorer: 0 findings ≥80. Archived M87, rotated M82 out. Exported-`ci_method` sibling now GO candidate (D-014). M48 `blocked`, D-050.)_
+_Last hygiene check: 2026-07-23 (audit post-M87: validate all-PASS; tree clean on `main`; both GitHub inboxes empty; no active milestone, none at review. Standing `dangling id tokens` advisory = COVERAGE.md's pre-migration M-id refs (legacy), not a gate failure. M48 stays `blocked` per D-050; next action is plan a milestone. M87 shipped via PR #94 — GO-for-opt-in (D-014); exported-`ci_method` sibling now a GO candidate.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
