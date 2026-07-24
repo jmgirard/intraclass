@@ -440,3 +440,62 @@ one-way only (guarded with `"npbootstrap"`; aborts otherwise — the unbalanced
 → suite-asserted (M82). A classical fallback-on-abort DEFAULT stays out (a
 `#3`/ADR-003 change; candidate row). Confirms D-012 (GO-for-opt-in) and mirrors
 D-010's exported-API rulings for the classical family.
+
+### D-014 (2026-07-23): M87 GO/NO-GO — modified-profile-likelihood two-way random ICC(A,1) CI: GO for opt-in (extends D-006 to the two-way design)
+
+**Context:** M87 assessed whether the modified profile-likelihood (MPL) interval of
+xiao2013 — with the correction constant κ_m **recalibrated over the extended range
+ρ ∈ [0.05, 0.9]** (the published κ_m are maxima over ρ ≥ 0.6 only, xiao2013's
+ρ_L = 0.6 fence, and are not transferable to the near-zero boundary) — is "not
+worse" than the package incumbents (Monte-Carlo default; parametric bootstrap) for
+the balanced two-way random `ICC(A,1)`, against a pre-registered coverage-band +
+width criterion frozen before any run (GP5;
+`cairn/references/mpl-twoway-random-comparison.md`). The naive- and modified-PL
+machinery was implemented from scratch (no author code exists) and oracle-validated
+against xiao2013's Tables 3/4/6/7 at M86 (IP1). Recalibration continuity at the
+fence was checked against M86's validated κ_m (AC2, within ±0.01). Sweep: 5 cells
+(C1 interior; C2/C3 near-zero-ρ boundary + few-subjects corner, GP6, decisive; C4
+xiao's worst naive-PL geometry; C5 breadth), n_rep = 1000 (parametric bootstrap
+B = 199 on the first 500 paired reps/cell), nominal 95 %.
+
+**Decision — GO for an opt-in `ci_method`; NOT a default replacement:**
+- **MPL is "not worse" at every cell**, and is the **only** method of four clearing
+  the frozen 0.93 floor at all five: MC fails C4 (0.904), the parametric bootstrap
+  fails C1 (0.926) and C4 (0.800), naive PL fails C4 (0.880). The absolute floor
+  (not the incumbent-relative clause) carries the verdict, keeping it non-circular
+  (as in D-006).
+- **Boundary abort recurs (AC4):** the two-way random MC default aborts
+  (`intraclass_singular_fit`) on **25.9 %** (C2) / **31.2 %** (C3) of near-zero-ρ
+  datasets — the M62/RR01 one-way 28–39 % finding **carries over to the two-way
+  random design**. MPL returns an interval on 100 % of datasets, covering
+  0.995 / 0.994 at a median width narrower than MC's conditional width.
+- **C4 breaks both incumbents:** at (3,50,δ4,ρ.60) naive PL under-covers (0.880,
+  reproducing xiao2013) and so do both incumbents (MC 0.904, parametric bootstrap
+  0.800); MPL (0.963, κ_m = 0.826) is the sole survivor.
+- **Cost:** MPL over-covers everywhere (0.963–0.995 vs nominal 0.95) and is ~24 %
+  wider than MC at interior cells — deliberately conservative (xiao2013 p. 2257),
+  more so under the extended-range κ_m (~40–80 % above the published-region value).
+  So it is an **opt-in** option, not a default (parallel to D-006/D-010/D-012/D-013).
+
+**Framing (mirrors D-006):** the GO does not claim MPL fixes the MC default's
+two-way boundary defect for the default path; its residual value is (a) near-nominal
+coverage everywhere, including the S↑ regime where the package incumbents themselves
+under-cover, and (b) an interval that *exists* where the MC default aborts. A
+boundary-robust *classical* two-way default remains a separate, undecided `#3`
+question (not opened here).
+
+**Conditions on the implementation milestone (should the sibling be planned):**
+(i) the sub-ρ = 0.6 κ_m has **no external oracle** (xiao2013's fence) — it is an
+extrapolation of the M86-validated machinery, established only by its own simulated
+coverage, and an exported method must document this; (ii) κ_m is **per-(R,S)
+geometry** and each value costs an MC calibration (~minutes), so the sibling must
+decide precomputed tables vs on-the-fly calibration; (iii) **balanced-complete and
+Gaussian only** (xiao2013's likelihood assumes every R×S cell observed; non-normality
+untested here). M87 ships **no exported code**.
+
+**Consequences:** the ROADMAP "exported profile-likelihood `ci_method`" candidate —
+GO-gated on this verdict — flips to GO-for-opt-in and inherits conditions (i)–(iii).
+Extends D-006 (the one-way bootstrap sibling GO) to the two-way random design and
+mirrors its opt-in-not-default framing; supersedes nothing. The M86-validated MPL
+machinery (`data-raw/m86-mpl-lib.R`) and the M87 recalibration/sweep/verdict scripts
+remain the from-scratch reference implementation a future export would trace to (IP1).
