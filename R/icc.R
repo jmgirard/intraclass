@@ -1460,7 +1460,8 @@ icc <- function(
     # monotone in [0, 1]. This is the OPPOSITE of the unbalanced one-way npbootstrap case
     # (a user-chosen m > n0 pushes the pole interior, so numeric unit stays deferred
     # there); here rho >= 0 makes it unconditional, so no fence is needed. Fixed-rater
-    # numeric agreement is already refused upstream (the raters != "random" fence above).
+    # numeric agreement is already refused upstream -- an explicit `type = "agreement"`
+    # at `abort_fixed_agr_projection()`, otherwise at the `raters != "random"` fence above.
     if (!isTRUE(all.equal(conf_level, 0.95))) {
       abort_unsupported(c(
         "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level = 0.95} only.",

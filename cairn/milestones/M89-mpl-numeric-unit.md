@@ -19,12 +19,12 @@ Enable a numeric `unit` (D-study projection `ICC(A,m)`, any `m >= 1`) under `ci_
 
 ## Acceptance criteria
 
-- [ ] AC1: For balanced-complete two-way random, `icc(..., ci_method = "mpl", unit = m)` returns an `ICC(A,m)`-labeled interval whose `(conf.low, conf.high)` **equal** `npb_sb()` of the `ICC(A,1)` MPL endpoints at divisor `m` to tolerance 0, for `m in {1, 2, 3.5, R, 8}` — `m = 1` reduces to `ICC(A,1)`, `m = R` reproduces `ICC(A,k)`. (`npb_sb(rho,m) = m*rho/(1+(m-1)*rho)`, McGraw & Wong 1996 Table 4.)
-- [ ] AC2: The averaging divisor is mutation-proven (M82 anti-tautology): perturbing `m` moves the endpoints — the `ICC(A,m)` interval is not recoverable from a wrong divisor.
-- [ ] AC3: The reported point equals the engine `ICC(A,m)` point (`icc_point` SB image); `std.error` and `samples` are `NA` (deterministic, #4); endpoints lie in `[0,1]` and `conf.low` is monotone increasing in `m` at fixed data (pole-safe: SB pole `rho = -1/(m-1) < 0`, MPL endpoints in `[0,1]`).
-- [ ] AC4: Fences preserved under a numeric `unit` — an explicit consistency request aborts and an unset `type` narrows to agreement with a `cli_inform` (ADR-054); `conf_level != 0.95`, one-way, fixed, multilevel, replicate, and unbalanced each still abort (#5/#8). Regression-tested.
-- [ ] AC5: Docs — the `icc()` roxygen mpl paragraphs (the `@param unit` note and the mpl sections near [R/icc.R:278](R/icc.R:278)/[305](R/icc.R:305)/[406](R/icc.R:406)/[455](R/icc.R:455)) state numeric `unit` is supported via pole-safe SB inheritance; a NEWS entry; the O-MPL entry ([cairn/references/ORACLES.md:1801](cairn/references/ORACLES.md:1801)) notes the `ICC(A,m)` numeric projection shares the inheritance leg (no new oracle); `check-references` + `enumerate-generalizing-claims.py --check` pass (any new generalizing claim carries a triage row, `OUT-oracle-pin`).
-- [ ] AC6: The active profile's `verify` slot is clean — full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`, `air format --check`.
+- [x] AC1: For balanced-complete two-way random, `icc(..., ci_method = "mpl", unit = m)` returns an `ICC(A,m)`-labeled interval whose `(conf.low, conf.high)` **equal** `npb_sb()` of the `ICC(A,1)` MPL endpoints at divisor `m` to tolerance 0, for `m in {1, 2, 3.5, R, 8}` — `m = 1` reduces to `ICC(A,1)`, `m = R` reproduces `ICC(A,k)`. (`npb_sb(rho,m) = m*rho/(1+(m-1)*rho)`, McGraw & Wong 1996 Table 4.)
+- [x] AC2: The averaging divisor is mutation-proven (M82 anti-tautology): perturbing `m` moves the endpoints — the `ICC(A,m)` interval is not recoverable from a wrong divisor.
+- [x] AC3: The reported point equals the engine `ICC(A,m)` point (`icc_point` SB image); `std.error` and `samples` are `NA` (deterministic, #4); endpoints lie in `[0,1]` and `conf.low` is monotone increasing in `m` at fixed data (pole-safe: SB pole `rho = -1/(m-1) < 0`, MPL endpoints in `[0,1]`).
+- [x] AC4: Fences preserved under a numeric `unit` — an explicit consistency request aborts and an unset `type` narrows to agreement with a `cli_inform` (ADR-054); `conf_level != 0.95`, one-way, fixed, multilevel, replicate, and unbalanced each still abort (#5/#8). Regression-tested.
+- [x] AC5: Docs — the `icc()` roxygen mpl paragraphs (the `@param unit` note and the mpl sections near [R/icc.R:278](R/icc.R:278)/[305](R/icc.R:305)/[406](R/icc.R:406)/[455](R/icc.R:455)) state numeric `unit` is supported via pole-safe SB inheritance; a NEWS entry; the O-MPL entry ([cairn/references/ORACLES.md:1801](cairn/references/ORACLES.md:1801)) notes the `ICC(A,m)` numeric projection shares the inheritance leg (no new oracle); `check-references` + `enumerate-generalizing-claims.py --check` pass (any new generalizing claim carries a triage row, `OUT-oracle-pin`).
+- [x] AC6: The active profile's `verify` slot is clean — full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`, `air format --check`.
 
 ## Coverage
 
@@ -50,9 +50,28 @@ Enable a numeric `unit` (D-study projection `ICC(A,m)`, any `m >= 1`) under `ci_
 - 2026-07-24: T2 — lifted the numeric-unit abort in icc.R (mpl block); numeric-unit random-rater agreement now flows to mpl_ci (npb_sb at est$divisor). Added the GP7 pole-safety comment (SB pole negative for m>=1, MPL endpoints in [0,1]). test-ci-mpl.R green (73 pass); full suite NOT_CRAN=true CI=true clean (0 fail / 4114 pass).
 - 2026-07-24: T3 — roxygen @param ci_method mpl paragraph + man/icc.Rd; folded numeric-unit ICC(A,m) into the dev-cycle mpl NEWS entry; extended O-MPL inheritance leg (leg 3) + title to ICC(A,m). enumerate-generalizing-claims.py --check and check-reference-observations.py both clean (no new triage row owed — "monotone"/"m>=1" match no candidate pattern).
 - 2026-07-24: T4 — promoted D-016 to DECISIONS.md; air format --check clean, lintr 0 lints on both touched files. Status → review.
+- 2026-07-24: review — PR #96; all 6 AC verified fresh; consistency gate clean (cairn_validate exit 0, document() no diff, pkgdown clean, devtools::check Status OK). Three-lens review no actionable findings; one sub-threshold [O] comment-imprecision note fixed in review (R/icc.R:1462 fixed-rater refusal path).
 
 ## Decisions
 
 - D-016 (promoted to `cairn/DECISIONS.md`): numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection of the ICC(A,1) MPL endpoints, any m ≥ 1, inheritance-only oracle basis (no new external oracle). Lineage D-015 → M88.
 
 ## Review
+
+**Verified 2026-07-24 (M89), PR #96.** All six acceptance criteria met with fresh evidence; consistency gate clean; three-lens fresh-context review found no actionable findings.
+
+**Acceptance-criteria evidence** (`tests/testthat/test-ci-mpl.R`, run fresh):
+- AC1 — "mpl numeric unit ICC(A,m) is the exact Spearman-Brown image of ICC(A,1) (M89 AC1/AC2)": `(conf.low, conf.high)` equal a locally-recomputed `sb(i1, m)` at tol 1e-9 for m ∈ {1, 2, 3.5, 4, 8}; m=1 reduces to ICC(A,1) (tol 1e-12); m=R matches `unit="average"` ICC(A,k) (tol 1e-12). PASS.
+- AC2 — same test: wrong-divisor mutation proof `expect_false(all.equal(i2$conf.high, sb(i1$conf.high, 3)))`. PASS.
+- AC3 — "mpl numeric unit reports the engine ICC(A,m) point, deterministic + monotone (M89 AC3)": point equals montecarlo ICC(A,6) (tol 1e-8); `samples`/`std.error` NA; `conf.low` monotone over m ∈ {1,2,4,8,20}; vectorized `unit=c("single","average",6)` resolves to the three indices. PASS.
+- AC4 — fence regressions all abort/inform: explicit consistency aborts, unset `type` drops consistency via `cli_inform`, fixed+numeric aborts, `conf_level=0.90` aborts, unbalanced aborts, off-grid S=6 aborts, one-way aborts, within-cell-replicate aborts. PASS.
+- AC5 — roxygen `@param ci_method` + `man/icc.Rd` (`document()` no diff); NEWS mpl entry carries the numeric `ICC(A,m)` projection; O-MPL leg 3 + title extended to ICC(A,m); `enumerate-generalizing-claims.py --check` in sync (273/273, no new triage row owed — "monotone"/"m≥1" match no candidate pattern); `check-reference-observations.py` 0 falsified / 0 unmarked.
+- AC6 — full suite `NOT_CRAN=true CI=true`: 0 fail / 4114 pass / 23 skip (live-Stan); `air format --check` clean; `lintr` 0 lints on touched files; `devtools::check()` **Status OK** (0 error / 0 warning / 0 note).
+
+**Consistency gate:** `cairn_validate` exit 0 (all checks pass; 321 pre-existing cross-reference advisories, none from M89). No `DESIGN.md` principle changed — IP1/GP7 are worked-under, not modified — so `cairn_impact` is skipped. Toolchain slot: `document()` no diff, `pkgdown::check_pkgdown()` clean, NEWS entry present, `devtools::check()` OK.
+
+**Three-lens fresh-context review + scorer** — no finding scored ≥80 (zero surviving findings):
+- [O] diff-bug (Opus): no material defects — pole-safety complete (MPL endpoints strictly in [0,1] → `npb_sb` denominator ≥1, monotone, ordering preserved, pole never reached); no unintended case leaks (consistency/oneway/multilevel/replicate/`raters!="random"`/`!balanced`/`conf_level` fences all intact); point is the engine ICC(A,m) via `icc_point(e$divisor=m)`; tests non-tautological; docs/NEWS/ORACLES/D-016 match code.
+- [S] blame-history (Sonnet): consistent with prior intent — the removed abort was a D-015 "candidate" deferral M89 legitimately promotes (D-016); removed `unit=2`-aborts assertion correctly obsolete; fixed-rater fence preserved; no D-entry contradicted.
+- [S] prior-review (Sonnet): no regression — M88's two actioned findings (replicate-design fence, consistency `cli_inform`) both intact; M82 anti-tautology upheld by the new tests; GitHub PR threads empty (probe returned `[]`, walk skipped).
+- Sub-threshold (logged, not actioned): [O] noted the code comment at R/icc.R:1462 imprecisely attributed the fixed-rater refusal solely to the `raters!="random"` fence, when an explicit `type="agreement"` is refused earlier at `abort_fixed_agr_projection()` — behavior correct on both paths. Fixed in review (comment now names both paths); zero behavioral change.
