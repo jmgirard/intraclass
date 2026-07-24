@@ -1,0 +1,98 @@
+# Exported profile-likelihood ci_method "mpl" -- two-way random ICC(A,1) (M88) ---
+#
+# Opt-in modified-profile-likelihood interval (xiao2013; D-015, GO-for-opt-in per
+# D-014). Oracle O-MPL: the DETERMINISTIC interval core reproduces the xiao2013
+# Example 1 worked example (p. 2255). The MC coverage/kappa_m Tables 3/4/6/7 are the
+# committed M86 offline harness (data-raw/m86-mpl-validate.R) -- inherently MC, a fast
+# suite cannot re-run them (M88 AC1, gate-amended).
+
+# ---- AC1: xiao2013 Example 1 deterministic oracle ----------------------------
+
+test_that("MPL core reproduces the xiao2013 Example 1 worked example (AC1)", {
+  # Ex.1 (p. 2255) reports only the summary estimates (rho_hat = 0.8987,
+  # delta = sigma^2_r/sigma^2_e = 1.26) for R = 4 raters, S = 10 subjects, not the
+  # raw teeth data, so the (sms, rms, ems) ratios are reconstructed as the ANOVA
+  # layout whose joint MLE equals that (rho_hat, delta). This pins the MLE POINT;
+  # the interval is then an independent deviance-root computation, so a matching
+  # interval tests the likelihood's shape, not the reconstruction (as M86 did).
+  invert_ms <- function(rho, delta, n_r, n_s) {
+    rho_r <- delta * (1 - rho) / (1 + delta)
+    grad_sq <- function(par) {
+      ms <- list(
+        sms = exp(par[1]),
+        rms = exp(par[2]),
+        ems = 1,
+        n_r = n_r,
+        n_s = n_s
+      )
+      h <- 1e-6
+      g1 <- (mpl_neg2l(rho + h, rho_r, ms) - mpl_neg2l(rho - h, rho_r, ms)) /
+        (2 * h)
+      g2 <- (mpl_neg2l(rho, rho_r + h, ms) - mpl_neg2l(rho, rho_r - h, ms)) /
+        (2 * h)
+      g1^2 + g2^2
+    }
+    sol <- stats::optim(
+      c(log(80), log(14)),
+      grad_sq,
+      control = list(reltol = 1e-14, maxit = 8000)
+    )
+    list(
+      sms = exp(sol$par[1]),
+      rms = exp(sol$par[2]),
+      ems = 1,
+      n_r = n_r,
+      n_s = n_s
+    )
+  }
+
+  ex1_ms <- invert_ms(rho = 0.8987, delta = 1.26, n_r = 4, n_s = 10)
+  ci <- mpl_interval(ex1_ms, kappa = 0, alpha = 0.10, side = "two")
+  lower_1s <- mpl_interval(ex1_ms, kappa = 0, alpha = 0.05, side = "lower")[[
+    "lower"
+  ]]
+
+  # Published (xiao2013 Ex. 1): rho_hat 0.8987; naive-PL 90% two-sided
+  # (0.7120, 0.9598); 95% one-sided lower 0.7120. The point is pinned by the
+  # reconstruction (a sanity check, not an independent test); the UPPER bound is an
+  # independent deviance-root computation and reproduces to < 5e-3. The LOWER bound
+  # reproduces only to ~0.012: the reconstruction inputs (rho_hat, delta) are 4-/3-
+  # sig-fig rounded in the paper, and an S = 10 lower bound is rounding-sensitive, so
+  # it is NOT forced to the printed digit (#4). M86 likewise treated Ex.1 as a
+  # non-gated spot check; the tight oracle evidence is the MC Tables 3/4/6/7 (offline).
+  expect_lt(abs(ci[["rho_hat"]] - 0.8987), 1e-3)
+  expect_lt(abs(ci[["upper"]] - 0.9598), 5e-3)
+  expect_lt(abs(ci[["lower"]] - 0.7120), 1.5e-2)
+  expect_lt(abs(lower_1s - 0.7120), 1.5e-2)
+  # The two-sided lower and the 95% one-sided lower coincide here (xiao2013's shared
+  # critical value, Ex. 1): both use the 90% two-sided lower crit.
+  expect_equal(ci[["lower"]], lower_1s, tolerance = 1e-6)
+})
+
+# ---- Deterministic interval machinery structural checks ----------------------
+
+test_that("MPL two-sided interval is ordered and brackets the MLE (AC1)", {
+  # A concrete balanced complete matrix; the two-sided interval must satisfy
+  # lower <= rho_hat <= upper with both endpoints in [0, 1].
+  set.seed(88)
+  s <- stats::rnorm(20, sd = sqrt(0.7))
+  r <- stats::rnorm(4, sd = sqrt(0.1))
+  y <- outer(s, rep(1, 4)) +
+    outer(rep(1, 20), r) +
+    matrix(stats::rnorm(80, sd = sqrt(0.2)), 20, 4)
+  ci <- mpl_interval(mpl_anova(y), kappa = 0.3, alpha = 0.05, side = "two")
+  expect_gte(ci[["lower"]], 0)
+  expect_lte(ci[["upper"]], 1)
+  expect_lte(ci[["lower"]], ci[["rho_hat"]])
+  expect_lte(ci[["rho_hat"]], ci[["upper"]])
+})
+
+test_that("mpl_matrix reshapes complete long data and aborts on a missing cell", {
+  df <- expand.grid(subject = factor(1:6), rater = factor(1:3))
+  df$score <- as.numeric(df$subject) + stats::rnorm(nrow(df))
+  y <- mpl_matrix(df)
+  expect_equal(dim(y), c(6L, 3L))
+
+  df_gap <- df[!(df$subject == "1" & df$rater == "3"), ]
+  expect_error(mpl_matrix(df_gap), class = "intraclass_unidentified")
+})

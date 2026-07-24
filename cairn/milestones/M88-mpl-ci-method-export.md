@@ -30,8 +30,12 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 
 ## Acceptance criteria
 
-- [ ] AC1: The ported MPL ICC(A,1) core in `R/ci-mpl.R` reproduces xiao2013 Tables
-      3/4/6/7 within their published tolerances in `test-ci-mpl.R` (IP1; #1).
+- [ ] AC1: The ported MPL interval core in `R/ci-mpl.R` reproduces the xiao2013
+      Example 1 worked example deterministically in `test-ci-mpl.R` (p. 2255:
+      ρ̂ = 0.8987; naive-PL 90% two-sided (0.7120, 0.9598); 95% one-sided lower
+      0.7120), establishing the likelihood/deviance/interval machinery (IP1; #1). The
+      MC coverage/κ_m Tables 3/4/6/7 remain established by the committed M86 offline
+      harness (`data-raw/m86-mpl-validate.R` + `.rds`), which a fast suite cannot re-run.
 - [ ] AC2: `icc(x, model="twoway", raters="random", type="agreement", unit="single",
       ci_method="mpl")` on balanced-complete Gaussian data returns a finite interval
       whose point is the engine (glmmTMB REML) point, with `std.error = NA`,
@@ -68,11 +72,12 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 
 ## Tasks
 
-- [ ] T1: Port `mpl_anova/neg2l/prof_neg2l/fit/deviance/interval` from
-      `data-raw/m86-mpl-lib.R` into `R/ci-mpl.R` as an `mpl_ci()` reducer (point from
-      `icc_point()` upstream; classed aborts; lint-clean snake_case).
-- [ ] T2: Move the xiao2013 Tables 3/4/6/7 oracle checks from
-      `data-raw/m86-mpl-validate.R` into `tests/testthat/test-ci-mpl.R` (IP1).
+- [x] T1: Port `mpl_matrix/anova/neg2l/prof_neg2l/fit/deviance/interval` from
+      `data-raw/m86-mpl-lib.R` into `R/ci-mpl.R` (deterministic interval machinery;
+      classed aborts; lint-clean snake_case). The `mpl_ci()` reducer + κ_m lookup
+      land with T4/T5/T6.
+- [x] T2: xiao2013 Example 1 deterministic oracle in `tests/testthat/test-ci-mpl.R`
+      (AC1, gate-amended; point + endpoints, honest rounding tolerance on the lower).
 - [ ] T3: Author the seeded κ_m table generator in `data-raw/` — extended-range
       ρ∈[0.05,0.9] argmax-corner (ρ=0.05, δ=16) **unbiased** estimator (M86 lesson,
       not the grid max) over an (R,S) grid spanning common designs; run as a
@@ -98,6 +103,9 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 ## Work log
 
 - 2026-07-23: created by /milestone-plan. Scope settled by D-015 — precomputed κ_m table, ICC(A,k) via `npb_sb()` SB inheritance (exact event identity, no new oracle), name `"mpl"`.
+- 2026-07-23: set in-progress; branched m88-mpl-ci-method.
+- 2026-07-23: AC1 amended (gate-approved) — deterministic xiao2013 Example 1 is the in-suite oracle; MC coverage/κ_m Tables 3/4/6/7 stay the committed M86 offline harness (a fast suite can't re-run them). Mirrors the searle/burch sibling pattern; coverage map unchanged.
+- 2026-07-23: T1+T2 — ported deterministic MPL core to `R/ci-mpl.R`; Example 1 oracle in `test-ci-mpl.R` (point ρ̂=0.8987 to 1e-3, upper 0.9598 to 5e-3, lower 0.7120 to 1.5e-2 — published inputs are rounded, #4). CI-parity suite clean (4052 pass, 0 fail). Fence detail: `mpl` will support two-sided conf_level=0.95 (the M87 recalibration level); other levels abort (T6).
 
 ## Decisions
 
