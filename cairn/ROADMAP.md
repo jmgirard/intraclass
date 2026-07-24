@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-24 (M88 shipped via PR #95 — opt-in `ci_method="mpl"` (modified profile-likelihood, two-way random ICC(A,1)/ICC(A,k)); D-015 exported-API scope; O-MPL registered. 3-lens review: 2 findings actioned (replicates fence abort 96, consistency-drop `cli_inform` 87) + regression tests. Archived M88, rotated M83 out. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-24 (M89 shipped via PR #96 — numeric `unit` ICC(A,m) for `ci_method="mpl"`, the pole-safe Spearman-Brown image of the ICC(A,1) MPL endpoints; D-016 (inheritance-only, no new oracle). 3-lens review: no actionable findings, 1 sub-threshold comment fix. Archived M89, rotated M84 out. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | review | M88 | normal | milestones/M89-mpl-numeric-unit.md |
+| M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | done | M88 | normal | milestones/archive/M89-mpl-numeric-unit.md |
 | M88 | Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k) | done | M86, M87 | normal | milestones/archive/M88-mpl-ci-method-export.md |
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | done | M86 | normal | milestones/archive/M87-mpl-coverage-verdict-twoway-random.md |
 | M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | done | — | normal | milestones/archive/M86-mpl-machinery-twoway-random.md |
 | M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | done | M84 | normal | milestones/archive/M85-unbalanced-npbootstrap-icck.md |
-| M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | done | — | normal | milestones/archive/M84-unbalanced-npbootstrap-icc1.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M88 done (2026-07-24) → M83 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M88, M87, M86, M85, M84 (5 most recent terminal). -->
+<!-- terminal-row retention: M89 done (2026-07-24) → M84 rotated out (oldest terminal; its archive file still resolves and M85's Depends-on M84 resolves to that archive). Kept: M89, M88, M87, M86, M85 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
