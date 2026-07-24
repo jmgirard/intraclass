@@ -78,10 +78,12 @@ two-way *default* (contract change) stays the separate `#3` candidate.
       land with T4/T5/T6.
 - [x] T2: xiao2013 Example 1 deterministic oracle in `tests/testthat/test-ci-mpl.R`
       (AC1, gate-amended; point + endpoints, honest rounding tolerance on the lower).
-- [ ] T3: Author the seeded κ_m table generator in `data-raw/` — extended-range
-      ρ∈[0.05,0.9] argmax-corner (ρ=0.05, δ=16) **unbiased** estimator (M86 lesson,
-      not the grid max) over an (R,S) grid spanning common designs; run as a
-      background job; commit the table to `R/sysdata.rda`.
+- [ ] T3: Author the seeded κ_m table generator in `data-raw/` — per-geometry full
+      (ρ∈[0.05,0.9] × δ=2^-1..4) scan to LOCATE the argmax, then bias-corrected
+      re-evaluation of the top-3 cells (max) at high n_mc (M87 T2's method; the argmax
+      is NOT universally the corner — it varies with R, so it must be found). Grid
+      R=2:10 × S∈{10,15,20,30,50,100}; background job (~2–2.5 h); commit to
+      `R/sysdata.rda`. Built-in cross-check vs M87's committed κ_m.
 - [ ] T4: κ_m lookup + bilinear interpolation over the grid; off-grid (R,S) aborts
       loudly (#5/#8) rather than extrapolating an uncalibrated κ_m.
 - [ ] T5: ICC(A,k) via the shared `npb_sb()` image of the ICC(A,1) endpoints, plus the
@@ -106,6 +108,10 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 - 2026-07-23: set in-progress; branched m88-mpl-ci-method.
 - 2026-07-23: AC1 amended (gate-approved) — deterministic xiao2013 Example 1 is the in-suite oracle; MC coverage/κ_m Tables 3/4/6/7 stay the committed M86 offline harness (a fast suite can't re-run them). Mirrors the searle/burch sibling pattern; coverage map unchanged.
 - 2026-07-23: T1+T2 — ported deterministic MPL core to `R/ci-mpl.R`; Example 1 oracle in `test-ci-mpl.R` (point ρ̂=0.8987 to 1e-3, upper 0.9598 to 5e-3, lower 0.7120 to 1.5e-2 — published inputs are rounded, #4). CI-parity suite clean (4052 pass, 0 fail). Fence detail: `mpl` will support two-sided conf_level=0.95 (the M87 recalibration level); other levels abort (T6).
+- 2026-07-23: T3 method correction — a first generator assumed the κ_corr argmax was the (ρ=0.05, δ=16) corner (M86/M87 established that only for R∈{3,5}). An argmax probe falsified it: (2,10)→(0.30,16), (10,10)→(0.90,0.5), (10,100)→(0.60,16). Corner-direct would under-estimate κ_m → under-coverage. Rewrote to M87 T2's per-geometry scan + top-3 re-eval (max), ~2–2.5 h background job; relaunched.
+- 2026-07-23: T6 wired — `"mpl"` in the ci_method vocabulary + two-way-random-agreement fence guard + dispatch branch + samples=NA metadata + `print()` label "modified profile likelihood". T4/T5 authored (κ_m lookup + `mpl_ci` reducer). Fence detail: `type` defaults to agreement+consistency, so mpl narrows an UNSET type to agreement but aborts an EXPLICIT consistency request (agreement-only method).
+- 2026-07-23: T8 references done — O-MPL registered in ORACLES.md; xiao2013.md/xiao2009.md "traces"/orphan claims updated (paper now exported, not prototype-only; xiao2009 grep narrowed to its own citekey to avoid xiao2013 conflation); mpl-twoway-comparison.md export note; O-MPL decision triage row. Both `check-references` gates green.
+- 2026-07-23: HONEST CHECKPOINT — R wiring + reducer + refs committed; `devtools::load_all` clean, AC1 (deterministic Example 1) 0 failures. T3 κ_m table still generating (~2 h); AC2–AC5 end-to-end tests + T9 gate + `document()` pending its completion (they currently error only on the not-yet-built `kappa_m_table`). Tasks T3–T7 stay unchecked until verified end-to-end.
 
 ## Decisions
 

@@ -188,3 +188,64 @@ mpl_interval <- function(
   )
   c(lower = lower, upper = upper, rho_hat = rho_hat)
 }
+
+# --- Precomputed kappa_m lookup + interpolation ------------------------------
+# Look kappa_m up for the (n_r, n_s) geometry from the shipped internal table
+# `kappa_m_table` (data-raw/m88-mpl-kappa-table.R; two-sided, alpha = 0.05). R is an
+# integer node (the table spans 2..10 raters), so only S is ever interpolated: linear
+# between bracketing S nodes, which OVER-estimates kappa_m for the convex-decreasing
+# kappa_m(S) and so errs conservatively (wider interval). An (n_r, n_s) outside the
+# table's grid aborts loudly (#5/#8) -- kappa_m below the grid has no calibration and
+# extrapolating it is exactly the uncalibrated guess D-015 refuses.
+mpl_kappa_lookup <- function(n_r, n_s, call = rlang::caller_env()) {
+  tbl <- kappa_m_table
+  r_nodes <- sort(unique(tbl$n_r))
+  s_nodes <- sort(unique(tbl$n_s))
+  if (!(n_r %in% r_nodes)) {
+    abort_unsupported(
+      c(
+        "{.code ci_method = \"mpl\"} is calibrated for \\
+         {min(r_nodes)}-{max(r_nodes)} raters; this design has {n_r}.",
+        i = "The kappa_m correction table does not cover this rater count; \\
+             use {.code ci_method = \"montecarlo\"}."
+      ),
+      call = call
+    )
+  }
+  if (n_s < min(s_nodes) || n_s > max(s_nodes)) {
+    abort_unsupported(
+      c(
+        "{.code ci_method = \"mpl\"} is calibrated for \\
+         {min(s_nodes)}-{max(s_nodes)} subjects; this design has {n_s}.",
+        i = "kappa_m is not calibrated outside this range and is not extrapolated \\
+             (#5); use {.code ci_method = \"montecarlo\"}."
+      ),
+      call = call
+    )
+  }
+  col <- tbl[tbl$n_r == n_r, c("n_s", "kappa_m")]
+  col <- col[order(col$n_s), ]
+  stats::approx(col$n_s, col$kappa_m, xout = n_s, method = "linear")$y
+}
+
+# --- Reducer: the icc() dispatch entry point (mirrors searle_ci) -------------
+# Takes the RAW two-way data (`df`) -- like npbootstrap/searle, the POINT is the engine
+# (glmmTMB REML) point computed upstream (D-015/D-010 BC5); only the interval is
+# MPL. ICC(A,1) is the deterministic MPL interval at the looked-up kappa_m; ICC(A,k) is
+# its exact Spearman-Brown image via the shared `npb_sb()` (est$divisor = k), so both
+# estimands share one deviance-root computation. conf_level is fixed at 0.95 upstream
+# (the table's calibration level). Deterministic -- std.error is NA (#4).
+mpl_ci <- function(df, estimands, conf_level = 0.95, call = rlang::caller_env()) {
+  y <- mpl_matrix(df, call = call)
+  ms <- mpl_anova(y)
+  km <- mpl_kappa_lookup(ms$n_r, ms$n_s, call = call)
+  ends <- mpl_interval(ms, kappa = km, alpha = 1 - conf_level, side = "two")
+  lapply(estimands, function(est) {
+    m <- est$divisor
+    list(
+      conf.low = npb_sb(ends[["lower"]], m),
+      conf.high = npb_sb(ends[["upper"]], m),
+      std.error = NA_real_
+    )
+  })
+}
