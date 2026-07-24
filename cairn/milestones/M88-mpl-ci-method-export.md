@@ -115,6 +115,7 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 - 2026-07-23: HONEST CHECKPOINT — R wiring + reducer + refs committed; `devtools::load_all` clean, AC1 (deterministic Example 1) 0 failures. T3 κ_m table still generating (~2 h); AC2–AC5 end-to-end tests + T9 gate + `document()` pending its completion (they currently error only on the not-yet-built `kappa_m_table`). Tasks T3–T7 stay unchecked until verified end-to-end.
 - 2026-07-24: T3 table complete (54 nodes, `R/sysdata.rda`) — M87 cross-check ALL PASS (4 shared geometries, |Δ| ≤ 0.045). T4–T7 verified: full `test-ci-mpl.R` 31 pass (AC2 engine-point/metadata/print label, AC3 SB identity + wrong-divisor mutation, AC4 fence + off-grid aborts, AC5 interval where MC aborts). T9 gate clean: CI-parity suite 4072 pass / 0 fail; `R CMD check` 0/0/0; `lintr::lint_package` 0; `air --check` clean; both `check-references` gates green; `document()` regenerated `icc.Rd`. Note for review: κ_m is small + argmax-noisy at high R (R≥8, κ_m≈0.08–0.19), a region beyond M87's validated cells — low-impact (small correction) but un-oracled, per the D-014 (i) caveat. All tasks done → review.
 - 2026-07-24: review — opened draft PR #95; added NEWS.md entry for `ci_method="mpl"`. AC3 wording amended at the review gate (gate-approved): it asked for a "direct McGraw-Wong ICC(A,k) form from raw statistics", but MPL (likelihood-based) has no independent direct ICC(A,k) construction — corrected to the exact SB-inheritance identity + wrong-divisor mutation (D-013 Burch precedent); shipped test already matches (no code change). T5 task text aligned.
+- 2026-07-24: 3-lens review + scorer — 2 findings actioned: fence now aborts within-cell-replicated designs (score 96; was returning a mis-calibrated interval, AC4/#5) and the consistency-drop now emits a `cli_inform` (score 87; ADR-054/ADR-029 convention). 1 finding logged below-bar (score 74, inverted κ_m-interpolation comment) but corrected as a known-false comment. 2 regression tests added. Post-fix: full suite 4074 pass / 0 fail, lintr 0, air clean.
 
 ## Decisions
 
@@ -147,3 +148,27 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 (manual PDF skipped — known TinyTeX Courier infra issue, not code); NEWS.md entry
 added; no new top-level files; no DESIGN.md principle text changed (IP1/GP2/GP7
 worked-under, not modified) → `cairn_impact` n/a. No Driving RR → projection check n/a.
+
+**Independent review — 3 lenses (diff-bug [O], blame-history [S], prior-review [S]) + scorer [S]:**
+
+- **Finding [diff-bug] — score 96 — FIXED.** The mpl fence did not exclude within-cell
+  **replicated** designs: a balanced replicated two-way design (`balanced==TRUE`) passed
+  the fence, `mpl_matrix` collapsed replicates to cell means, and the interval bracketed
+  a different estimand than the reported point (conf.low > point observed). Violated AC4
+  / #5. Fixed: added `|| replicates` to the fence guard (`R/icc.R`); regression test
+  "mpl aborts on a within-cell-replicated two-way design" (`test-ci-mpl.R`).
+- **Finding [blame-history] — score 87 — FIXED.** The mpl `type`-narrowing dropped
+  `consistency` from a defaulted `type` **silently**, breaking the ADR-054/ADR-029
+  drop-vs-abort convention (every other narrowing site emits `cli::cli_inform`). Fixed:
+  added the `cli::cli_inform("Dropping {.val consistency}: …")` message (`R/icc.R`);
+  regression test "mpl informs when it drops consistency from a defaulted type".
+- **Finding [diff-bug] — score 74 — below the action bar; corrected opportunistically.**
+  The `mpl_kappa_lookup` comment claimed κ_m(S) is convex-decreasing (linear interp
+  over-estimates → conservative); the table is increasing/concave (matching xiao2013),
+  so interp mildly under-estimates. A non-exported comment, no shipped value affected —
+  but a known-false statement, so the comment was corrected (`R/ci-mpl.R`).
+- **[prior-review] — no findings** (M82 anti-tautology lesson honored, references-gate
+  directives correct, GitHub probe empty).
+
+Post-fix: `test-ci-mpl.R` 33 pass; full CI-parity suite 4074 pass / 0 fail; `lintr` 0;
+`air --check` clean.

@@ -273,3 +273,34 @@ test_that("mpl aborts on an unbalanced design and off the kappa_m grid (AC4)", {
     class = "intraclass_unsupported"
   )
 })
+
+test_that("mpl aborts on a within-cell-replicated two-way design (AC4)", {
+  skip_if_not_installed("glmmTMB")
+
+  # Uniform within-cell replicates keep balanced == TRUE, but the interval assumes one
+  # rating per subject x rater cell (the M17/M20 replicate estimand is out of scope);
+  # mpl_matrix would silently collapse replicates to cell means, so the fence must
+  # abort rather than return a mis-calibrated interval (#5).
+  set.seed(1)
+  d <- expand.grid(subject = factor(1:15), rater = factor(1:3), rep = 1:4)
+  s <- stats::rnorm(15, sd = sqrt(0.6))
+  r <- stats::rnorm(3, sd = sqrt(0.1))
+  d$score <- s[d$subject] + r[d$rater] + stats::rnorm(nrow(d), sd = sqrt(1.2))
+  expect_error(
+    icc(d, score, subject, rater, ci_method = "mpl"),
+    class = "intraclass_unsupported"
+  )
+})
+
+test_that("mpl informs when it drops consistency from a defaulted type (AC4)", {
+  skip_if_not_installed("glmmTMB")
+
+  # The default type is c("agreement", "consistency"); mpl narrows it to agreement but
+  # must SAY SO (ADR-054/ADR-029 drop-vs-abort convention), like every other
+  # default-vector narrowing in icc().
+  d <- mpl_twoway_long()
+  expect_message(
+    icc(d, score, subject, rater, ci_method = "mpl"),
+    "Dropping.*consistency"
+  )
+})

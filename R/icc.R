@@ -1426,15 +1426,22 @@ icc <- function(
                {.code ci_method = \"montecarlo\"} for consistency."
         ))
       }
+      # An unset default `type` includes consistency; narrow it, but SAY SO -- every
+      # other default-vector narrowing in this file informs (ADR-054/ADR-029).
+      cli::cli_inform(c(
+        "!" = "Dropping {.val consistency}: {.code ci_method = \"mpl\"} is an \\
+               absolute-agreement interval and does not define a consistency \\
+               (ICC(C,.)) interval."
+      ))
       type <- "agreement"
     }
-    if (oneway || multilevel || raters != "random") {
+    if (oneway || multilevel || replicates || raters != "random") {
       abort_unsupported(c(
         "{.code ci_method = \"mpl\"} is available only for the two-way random \\
-         absolute-agreement ICC(A,1)/ICC(A,k).",
-        i = "It is the modified-profile-likelihood interval for the two-way random \\
-             design; use {.code model = \"twoway\"}, {.code raters = \"random\"}, \\
-             or {.code ci_method = \"montecarlo\"}."
+         absolute-agreement ICC(A,1)/ICC(A,k) with one rating per subject-rater cell.",
+        i = "It is the modified-profile-likelihood interval for the balanced-complete \\
+             two-way random design; for one-way, multilevel, fixed-rater, or \\
+             within-cell-replicate designs use {.code ci_method = \"montecarlo\"}."
       ))
     }
     if (!balanced) {

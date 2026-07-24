@@ -193,10 +193,14 @@ mpl_interval <- function(
 # Look kappa_m up for the (n_r, n_s) geometry from the shipped internal table
 # `kappa_m_table` (data-raw/m88-mpl-kappa-table.R; two-sided, alpha = 0.05). R is an
 # integer node (the table spans 2..10 raters), so only S is ever interpolated: linear
-# between bracketing S nodes, which OVER-estimates kappa_m for the convex-decreasing
-# kappa_m(S) and so errs conservatively (wider interval). An (n_r, n_s) outside the
-# table's grid aborts loudly (#5/#8) -- kappa_m below the grid has no calibration and
-# extrapolating it is exactly the uncalibrated guess D-015 refuses.
+# between bracketing S nodes. kappa_m(S) is increasing and roughly concave (matching
+# xiao2013's published values -- e.g. R=3: 0.32 at S=10, 0.67 at S=50), so the chord
+# sits below the curve and linear interpolation slightly UNDER-estimates kappa_m
+# between nodes -- a small, second-order effect (within the table's own MC noise, and
+# well inside the method's deliberate over-coverage margin; the small-S nodes are dense
+# where the curve bends most). An (n_r, n_s) outside the table's grid aborts loudly
+# (#5/#8) -- kappa_m off the grid has no calibration and extrapolating it is exactly
+# the uncalibrated guess D-015 refuses.
 mpl_kappa_lookup <- function(n_r, n_s, call = rlang::caller_env()) {
   tbl <- kappa_m_table
   r_nodes <- sort(unique(tbl$n_r))
