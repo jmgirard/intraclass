@@ -78,7 +78,7 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
       any comparison run (GP5).
 - [x] T2 — Recalibrate κ_m over ρ∈[0,0.9] via M86's calibration function; verify
       continuity at the ρ=0.6 fence against M86's validated value.
-- [ ] T3 — Build the paired comparison harness (M62-style,
+- [x] T3 — Build the paired comparison harness (M62-style,
       `data-raw/npbootstrap-oneway-comparison` as the shape): MPL / naive PL / MC /
       parametric bootstrap on identical seeded datasets across the cells; record MC
       `n_ok` and boundary-abort behavior.
@@ -93,6 +93,7 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
 - 2026-07-23: gate — 95% nominal, 5-cell grid (C1–C5), n_rep=1000 cheap / 500 pboot (B=199) background (all recommended options).
 - 2026-07-23: T1 — froze the M87 pre-registration in `references/mpl-twoway-random-comparison.md` (design, cells, κ_m recalibration + fence continuity anchor, "not worse" criterion, prior) BEFORE any comparison run (GP5); +2 OUT-repo-analysis triage rows for the C3/C4 cell-role labels (enumerator --check green).
 - 2026-07-23: T2 — `m87-mpl-kappa-recalibration.R` recalibrated κ_m over ρ∈[0.05,0.9]×δ at α=0.05 for the 4 geometries: (3,20)=0.676, (3,10)=0.501, (3,50)=0.826, (5,20)=0.340 (argmax at δ=16, ρ=0.05–0.20 — verified, not assumed; ~40–80% above the ρ≥0.6 scan max). AC2 fence continuity PASS: (3,10) 0.326 vs M86 0.32, (3,50) 0.665 vs 0.67 (both |diff|<0.01). Fixture `m87-kappa-recalibration.rds`.
+- 2026-07-23: T3 — `m87-mpl-comparison-sweep.R` paired sweep (n_rep=1000 cheap / 500 pboot B=199, ~3.85 h) across C1–C5 → `m87-sweep-results.rds`. AC4: two-way MC default aborts (`intraclass_singular_fit`) 25.9% (C2) / 31.2% (C3) of near-zero datasets — the one-way M62/RR01 28–39% finding recurs. naive PL under-covers 0.880 at C4 (xiao's S↑ finding reproduces).
 
 ## Decisions
 
