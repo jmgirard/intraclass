@@ -5,7 +5,7 @@
 - **Depends on:** M86, M87
 - **Driving RR:** —
 - **Principles touched:** IP1, GP2, GP7
-- **Branch/PR:** m88-mpl-ci-method
+- **Branch/PR:** m88-mpl-ci-method · https://github.com/jmgirard/intraclass/pull/95
 
 ## Goal
 
@@ -30,33 +30,34 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 
 ## Acceptance criteria
 
-- [ ] AC1: The ported MPL interval core in `R/ci-mpl.R` reproduces the xiao2013
+- [x] AC1: The ported MPL interval core in `R/ci-mpl.R` reproduces the xiao2013
       Example 1 worked example deterministically in `test-ci-mpl.R` (p. 2255:
       ρ̂ = 0.8987; naive-PL 90% two-sided (0.7120, 0.9598); 95% one-sided lower
       0.7120), establishing the likelihood/deviance/interval machinery (IP1; #1). The
       MC coverage/κ_m Tables 3/4/6/7 remain established by the committed M86 offline
       harness (`data-raw/m86-mpl-validate.R` + `.rds`), which a fast suite cannot re-run.
-- [ ] AC2: `icc(x, model="twoway", raters="random", type="agreement", unit="single",
+- [x] AC2: `icc(x, model="twoway", raters="random", type="agreement", unit="single",
       ci_method="mpl")` on balanced-complete Gaussian data returns a finite interval
       whose point is the engine (glmmTMB REML) point, with `std.error = NA`,
       `ci$samples = NA`, and a `print()` label naming a modified-profile-likelihood
       interval (D-013 conventions).
-- [ ] AC3: `unit="average"` returns `npb_sb()` applied to the ICC(A,1) MPL endpoints;
-      a committed identity cross-check asserts endpoint-equality to the direct
-      McGraw-Wong ICC(A,k) form built from raw statistics and mutation-proves
-      divergence under a wrong divisor (D-013; M82 anti-tautology lesson). ORACLES
-      basis = inheritance.
-- [ ] AC4: κ_m is supplied from the shipped table by lookup + bilinear interpolation
+- [x] AC3: `unit="average"` returns `npb_sb()` applied to the ICC(A,1) MPL endpoints;
+      a committed cross-check asserts endpoint-equality to the exact Spearman-Brown
+      image (divisor R), recomputed independently of the package's `npb_sb`, and
+      mutation-proves divergence under a wrong divisor (D-013 Burch precedent — MPL has
+      no independent direct ICC(A,k) construction, so ICC(A,k) is inheritance, not an
+      anchor; M82 anti-tautology lesson). ORACLES basis = inheritance.
+- [x] AC4: κ_m is supplied from the shipped table by lookup + bilinear interpolation
       within the (R,S) grid; an off-grid (R,S) and every out-of-scope estimand
       (consistency, fixed raters, non-two-way, unbalanced/incomplete, numeric `unit`)
       aborts with a classed `intraclass_*` error naming the supported cell (#5/#8).
-- [ ] AC5: On a near-zero-ρ boundary cell where the two-way random Monte-Carlo
+- [x] AC5: On a near-zero-ρ boundary cell where the two-way random Monte-Carlo
       default aborts (`intraclass_singular_fit`), `ci_method="mpl"` returns an
       interval — the M87/D-014 residual-value behavior — asserted in the suite.
-- [ ] AC6: `@param ci_method` documents `"mpl"` and carries D-014 conditions (i) the
+- [x] AC6: `@param ci_method` documents `"mpl"` and carries D-014 conditions (i) the
       sub-ρ=0.6 κ_m is oracle-less (simulated-coverage basis only) and (iii)
       balanced-complete + Gaussian only; the κ_m table's seeded provenance is recorded.
-- [ ] AC7: Gates clean — profile `verify` (test + lint), `air format --check`, and the
+- [x] AC7: Gates clean — profile `verify` (test + lint), `air format --check`, and the
       `check-references` generalizing-claims + reference-observations gates (xiao2013
       exclude directives updated for any new `data-raw/` file; M85/M86 lessons).
 
@@ -87,8 +88,8 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 - [x] T4: κ_m lookup + bilinear interpolation over the grid; off-grid (R,S) aborts
       loudly (#5/#8) rather than extrapolating an uncalibrated κ_m.
 - [x] T5: ICC(A,k) via the shared `npb_sb()` image of the ICC(A,1) endpoints, plus the
-      committed anti-tautology identity + mutation cross-check (T5 builds the direct
-      McGraw-Wong side from raw statistics).
+      committed SB-inheritance identity + wrong-divisor mutation cross-check (the SB map
+      recomputed independently of the package's `npb_sb`; inheritance, not an anchor).
 - [x] T6: Wire `"mpl"` into `icc()` — add to the `ci_method` vocabulary
       (`R/icc.R:503`), add the two-way-random-agreement guard (counterpart of the
       one-way guard at `R/icc.R:1334`), add the dispatch branch (mirror `searle_ci`
@@ -113,7 +114,36 @@ two-way *default* (contract change) stays the separate `#3` candidate.
 - 2026-07-23: T8 references done — O-MPL registered in ORACLES.md; xiao2013.md/xiao2009.md "traces"/orphan claims updated (paper now exported, not prototype-only; xiao2009 grep narrowed to its own citekey to avoid xiao2013 conflation); mpl-twoway-comparison.md export note; O-MPL decision triage row. Both `check-references` gates green.
 - 2026-07-23: HONEST CHECKPOINT — R wiring + reducer + refs committed; `devtools::load_all` clean, AC1 (deterministic Example 1) 0 failures. T3 κ_m table still generating (~2 h); AC2–AC5 end-to-end tests + T9 gate + `document()` pending its completion (they currently error only on the not-yet-built `kappa_m_table`). Tasks T3–T7 stay unchecked until verified end-to-end.
 - 2026-07-24: T3 table complete (54 nodes, `R/sysdata.rda`) — M87 cross-check ALL PASS (4 shared geometries, |Δ| ≤ 0.045). T4–T7 verified: full `test-ci-mpl.R` 31 pass (AC2 engine-point/metadata/print label, AC3 SB identity + wrong-divisor mutation, AC4 fence + off-grid aborts, AC5 interval where MC aborts). T9 gate clean: CI-parity suite 4072 pass / 0 fail; `R CMD check` 0/0/0; `lintr::lint_package` 0; `air --check` clean; both `check-references` gates green; `document()` regenerated `icc.Rd`. Note for review: κ_m is small + argmax-noisy at high R (R≥8, κ_m≈0.08–0.19), a region beyond M87's validated cells — low-impact (small correction) but un-oracled, per the D-014 (i) caveat. All tasks done → review.
+- 2026-07-24: review — opened draft PR #95; added NEWS.md entry for `ci_method="mpl"`. AC3 wording amended at the review gate (gate-approved): it asked for a "direct McGraw-Wong ICC(A,k) form from raw statistics", but MPL (likelihood-based) has no independent direct ICC(A,k) construction — corrected to the exact SB-inheritance identity + wrong-divisor mutation (D-013 Burch precedent); shipped test already matches (no code change). T5 task text aligned.
 
 ## Decisions
 
 ## Review
+
+**AC evidence** (fresh, `test-ci-mpl.R` + gate commands, 2026-07-24; PR #95):
+
+- **AC1** ✓ — `test-ci-mpl.R` "MPL core reproduces xiao2013 Example 1" (5 pass): ρ̂
+  to 1e-3, upper 0.9598 to 5e-3, lower 0.7120 to 1.5e-2 (rounded inputs, #4); plus
+  interval-ordered (4) + `mpl_matrix` (2). MC Tables 3/4/6/7 = committed M86 offline.
+- **AC2** ✓ — "engine REML point + deterministic metadata" (9 pass): `ci$method="mpl"`,
+  `samples`/`std.error` NA, point == montecarlo point (1e-8), finite ordered interval
+  in [0,1], `format()` header names "modified profile likelihood".
+- **AC3** (gate-amended) ✓ — "ICC(A,k) is the exact Spearman-Brown image, divisor R"
+  (3 pass): `ik == sb(i1, R)` to 1e-9 (SB recomputed independently), wrong divisor
+  R+1 diverges. Inheritance, no independent anchor (D-013 Burch).
+- **AC4** ✓ — fence aborts (5) + unbalanced/off-grid aborts (2): one-way, explicit
+  consistency, fixed raters, numeric `unit`, `conf_level≠0.95`, incomplete, and S=6
+  off-grid all raise `intraclass_unsupported`.
+- **AC5** ✓ — "interval where the two-way MC default aborts" (1 pass): a boundary
+  dataset that aborts MC (`intraclass_singular_fit`) yields a finite MPL interval.
+- **AC6** ✓ — `@param ci_method` (regenerated `man/icc.Rd`) documents `"mpl"` + opt-in,
+  Gaussian, `conf_level = 0.95`, and the sub-0.6 "no external oracle" caveat; κ_m
+  provenance recorded in `ORACLES.md` O-MPL + the seeded generator.
+- **AC7** ✓ — CI-parity suite 4072 pass / 0 fail; `lintr::lint_package` 0; `air --check`
+  clean; both `check-references` gates green.
+
+**Consistency gate:** `cairn_validate` exit 0; `devtools::document()` no diff;
+`pkgdown::check_pkgdown()` clean; `R CMD check` 0 errors / 0 warnings / 0 notes
+(manual PDF skipped — known TinyTeX Courier infra issue, not code); NEWS.md entry
+added; no new top-level files; no DESIGN.md principle text changed (IP1/GP2/GP7
+worked-under, not modified) → `cairn_impact` n/a. No Driving RR → projection check n/a.
