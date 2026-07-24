@@ -1,11 +1,11 @@
 # M90: MPL κ_m recalibration + coverage GO/NO-GO at conf_level ∈ {0.90, 0.99}
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** m90-mpl-conf-level-calibration
 
 ## Goal
 
@@ -77,6 +77,7 @@ off-grid) → unchanged, separate candidates.
 ## Work log
 
 - 2026-07-24: created by /milestone-plan (with M91); conf_level {0.90,0.99} for MPL, level set chosen at the plan gate; lineage D-015 → this.
+- 2026-07-24: /milestone-implement start; status → in-progress; branch m90-mpl-conf-level-calibration cut from main.
 
 ## Decisions
 
