@@ -5,7 +5,7 @@
 - **Depends on:** M88
 - **Driving RR:** —
 - **Principles touched:** IP1, GP7
-- **Branch/PR:** m89-mpl-numeric-unit
+- **Branch/PR:** m89-mpl-numeric-unit · https://github.com/jmgirard/intraclass/pull/96
 
 ## Goal
 
