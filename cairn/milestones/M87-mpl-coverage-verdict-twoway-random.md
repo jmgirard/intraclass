@@ -1,6 +1,6 @@
 # M87: MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M86
 - **Driving RR:** —
@@ -96,6 +96,7 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
 - 2026-07-23: T3 — `m87-mpl-comparison-sweep.R` paired sweep (n_rep=1000 cheap / 500 pboot B=199, ~3.85 h) across C1–C5 → `m87-sweep-results.rds`. AC4: two-way MC default aborts (`intraclass_singular_fit`) 25.9% (C2) / 31.2% (C3) of near-zero datasets — the one-way M62/RR01 28–39% finding recurs. naive PL under-covers 0.880 at C4 (xiao's S↑ finding reproduces).
 - 2026-07-23: T4 — `m87-mpl-verdict.R` applied the frozen criterion → **GO**: MPL not worse at every cell; the only method ≥0.93 at all 5 (MC fails C4=0.904; pboot fails C1=0.926, C4=0.800; naive PL fails C4=0.880). Deciding cells: C2/C3 boundary (MPL 0.995/0.994, 0 aborts vs MC 25.9%/31.2%) + C4 stress (MPL 0.963 sole survivor). Cost: over-coverage 0.96–0.995, ~24% wider than MC at interior cells. Fixture `m87-verdict.rds`.
 - 2026-07-23: T5 — appended Results + Verdict to `references/mpl-twoway-random-comparison.md`; wrote **D-014** (GO-for-opt-in, extends D-006 to two-way; conditions on the exported sibling); flipped the ROADMAP exported-`ci_method` candidate GO-gated → GO-for-opt-in. Extended the D-009 settling directives in `xiao2013.md` + `xiao2009.md` to exclude the 3 M87 scripts (M86-F1 class); +7 OUT-repo-analysis triage rows. Checkers green: enumerator `--check`, check-references, `lintr`, `air format --check`.
+- 2026-07-23: completion — `devtools::test()` clean (FAIL 0 | PASS 4303; no `R/`/tests surface changed), `cairn_validate` all checks pass (no new advisories), caps clean (milestone 89/150, ROADMAP 37/60). Status → review.
 
 ## Decisions
 
