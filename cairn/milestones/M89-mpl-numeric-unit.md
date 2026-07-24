@@ -5,7 +5,7 @@
 - **Depends on:** M88
 - **Driving RR:** —
 - **Principles touched:** IP1, GP7
-- **Branch/PR:** —
+- **Branch/PR:** m89-mpl-numeric-unit
 
 ## Goal
 
@@ -37,14 +37,18 @@ Enable a numeric `unit` (D-study projection `ICC(A,m)`, any `m >= 1`) under `ci_
 
 ## Tasks
 
-- [ ] T1: Write failing tests in `tests/testthat/test-ci-mpl.R` — numeric-`unit` `ICC(A,m)` endpoints equal `npb_sb()` of the `ICC(A,1)` endpoints for `m in {1, 2, 3.5, R, 8}`; `m = R` reproduces `ICC(A,k)`; mutation-proof the divisor (AC2); point equals the engine `ICC(A,m)`; `std.error`/`samples` `NA`; `conf.low` monotone in `m`; plus the preserved-fence regressions (AC4).
-- [ ] T2: Replace the numeric-`unit` abort block ([R/icc.R:1454-1462](R/icc.R:1454)) so numeric-`unit` random-rater agreement estimands flow to `mpl_ci`; add a GP7 code comment recording the pole-safety argument. Make T1 green.
-- [ ] T3: Docs — update the `icc()` roxygen mpl paragraphs and `@param unit`; add a NEWS entry; append the `ICC(A,m)` inheritance note to O-MPL; add any needed `generalizing-claims-triage.tsv` row and run `enumerate-generalizing-claims.py --check` + `check-references` locally.
+- [x] T1: Write failing tests in `tests/testthat/test-ci-mpl.R` — numeric-`unit` `ICC(A,m)` endpoints equal `npb_sb()` of the `ICC(A,1)` endpoints for `m in {1, 2, 3.5, R, 8}`; `m = R` reproduces `ICC(A,k)`; mutation-proof the divisor (AC2); point equals the engine `ICC(A,m)`; `std.error`/`samples` `NA`; `conf.low` monotone in `m`; plus the preserved-fence regressions (AC4).
+- [x] T2: Replace the numeric-`unit` abort block ([R/icc.R:1454-1462](R/icc.R:1454)) so numeric-`unit` random-rater agreement estimands flow to `mpl_ci`; add a GP7 code comment recording the pole-safety argument. Make T1 green.
+- [x] T3: Docs — update the `icc()` roxygen mpl paragraphs and `@param unit`; add a NEWS entry; append the `ICC(A,m)` inheritance note to O-MPL; add any needed `generalizing-claims-triage.tsv` row and run `enumerate-generalizing-claims.py --check` + `check-references` locally.
 - [ ] T4: Full verify (`NOT_CRAN=true CI=true`, lintr, `air format --check`); draft `D-016` (pole-safe numeric-`unit` `ICC(A,m)` via SB inheritance, no new oracle; lineage D-015→M88) in this file's Decisions for promotion at review.
 
 ## Work log
 
 - 2026-07-24: created by /milestone-plan.
+- 2026-07-24: set in-progress; branch m89-mpl-numeric-unit.
+- 2026-07-24: T1 — added numeric-unit ICC(A,m) tests to test-ci-mpl.R (SB-identity for m in {1,2,3.5,R,8}, m=1→ICC(A,1), m=R→ICC(A,k), mutation-proof divisor, engine-point/deterministic-metadata, monotone-in-m, vectorized units, fixed+numeric still aborts); confirmed red on the abort.
+- 2026-07-24: T2 — lifted the numeric-unit abort in icc.R (mpl block); numeric-unit random-rater agreement now flows to mpl_ci (npb_sb at est$divisor). Added the GP7 pole-safety comment (SB pole negative for m>=1, MPL endpoints in [0,1]). test-ci-mpl.R green (73 pass); full suite NOT_CRAN=true CI=true clean (0 fail / 4114 pass).
+- 2026-07-24: T3 — roxygen @param ci_method mpl paragraph + man/icc.Rd; folded numeric-unit ICC(A,m) into the dev-cycle mpl NEWS entry; extended O-MPL inheritance leg (leg 3) + title to ICC(A,m). enumerate-generalizing-claims.py --check and check-reference-observations.py both clean (no new triage row owed — "monotone"/"m>=1" match no candidate pattern).
 
 ## Decisions
 

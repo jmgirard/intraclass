@@ -241,10 +241,11 @@ of Burch (2011): wider, but robust to non-normality and never under-covering.
 Prefer \code{"searle"} for near-normal data and \code{"burch"} when heavy tails or
 non-normality are a concern.
 \code{"mpl"} is the \strong{modified profile-likelihood} interval of Xiao & Liu (2013),
-\strong{only for the balanced-complete two-way random absolute-agreement ICC(A,1)} (and
-ICC(A,k) via its Spearman-Brown image); it aborts on any other design, on
-consistency (ICC(C,.)) or fixed raters, on unbalanced or incomplete data, and on a
-numeric \code{unit}. It is a \strong{deterministic closed form} (no resampling; \code{mc_samples},
+\strong{only for the balanced-complete two-way random absolute-agreement ICC(A,1)} (with
+ICC(A,k) and any numeric-\code{unit} projection \code{ICC(A,m)} its Spearman-Brown image,
+pole-safe for every \code{m >= 1}); it aborts on any other design, on consistency
+(ICC(C,.)) or fixed raters, and on unbalanced or incomplete data. It is a
+\strong{deterministic closed form} (no resampling; \code{mc_samples},
 \code{boot_samples}, and \code{seed} do not apply) that, like \code{"npbootstrap"}, returns an
 interval on \strong{every} dataset -- including the near-zero-ICC boundary where the
 two-way Monte-Carlo default aborts -- and covers at or above nominal across the

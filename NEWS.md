@@ -67,8 +67,9 @@
   it is not the default. It applies only to the two-way random absolute-agreement
   design at `conf_level = 0.95` and aborts on any other design, on consistency, on
   fixed raters, and on unbalanced, incomplete, or within-cell-replicated data. The
-  `ICC(A,k)` interval is the
-  exact Spearman-Brown image of the `ICC(A,1)` interval. Its correction constant is
+  averaged `ICC(A,k)` interval, and a numeric `unit` (a D-study projection `ICC(A,m)`
+  to the mean of `m` raters, for any `m >= 1`), are the exact Spearman-Brown image of
+  the `ICC(A,1)` interval. Its correction constant is
   calibrated by simulation and, for intraclass correlations below about 0.6, rests on
   that simulated coverage rather than an external benchmark.
 

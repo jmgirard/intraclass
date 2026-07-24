@@ -324,10 +324,11 @@
 #'   Prefer `"searle"` for near-normal data and `"burch"` when heavy tails or
 #'   non-normality are a concern.
 #'   `"mpl"` is the **modified profile-likelihood** interval of Xiao & Liu (2013),
-#'   **only for the balanced-complete two-way random absolute-agreement ICC(A,1)** (and
-#'   ICC(A,k) via its Spearman-Brown image); it aborts on any other design, on
-#'   consistency (ICC(C,.)) or fixed raters, on unbalanced or incomplete data, and on a
-#'   numeric `unit`. It is a **deterministic closed form** (no resampling; `mc_samples`,
+#'   **only for the balanced-complete two-way random absolute-agreement ICC(A,1)** (with
+#'   ICC(A,k) and any numeric-`unit` projection `ICC(A,m)` its Spearman-Brown image,
+#'   pole-safe for every `m >= 1`); it aborts on any other design, on consistency
+#'   (ICC(C,.)) or fixed raters, and on unbalanced or incomplete data. It is a
+#'   **deterministic closed form** (no resampling; `mc_samples`,
 #'   `boot_samples`, and `seed` do not apply) that, like `"npbootstrap"`, returns an
 #'   interval on **every** dataset -- including the near-zero-ICC boundary where the
 #'   two-way Monte-Carlo default aborts -- and covers at or above nominal across the
@@ -1451,15 +1452,15 @@ icc <- function(
              {.code ci_method = \"montecarlo\"}."
       ))
     }
-    if (any(vapply(unit, is.numeric, logical(1)))) {
-      abort_unsupported(c(
-        "{.code ci_method = \"mpl\"} supports {.code unit = \"single\"} (ICC(A,1)) \\
-         and {.code \"average\"} (ICC(A,k)) only.",
-        i = "A numeric {.arg unit} (D-study projection) is not yet calibrated for \\
-             {.val mpl}; use {.code unit = \"average\"} or \\
-             {.code ci_method = \"montecarlo\"}."
-      ))
-    }
+    # A numeric `unit` (D-study projection ICC(A,m), M89/D-016) is admitted: `mpl_ci`
+    # already maps ANY averaging divisor through the shared `npb_sb()` Spearman-Brown
+    # image of the ICC(A,1) endpoints (est$divisor = m). GP7: this is POLE-SAFE for
+    # every m >= 1 -- the SB pole rho = -1/(m-1) is negative while the MPL endpoints are
+    # clamped to [0, 1], so npb_sb's denominator 1 + (m-1)rho >= 1 > 0 and the map stays
+    # monotone in [0, 1]. This is the OPPOSITE of the unbalanced one-way npbootstrap case
+    # (a user-chosen m > n0 pushes the pole interior, so numeric unit stays deferred
+    # there); here rho >= 0 makes it unconditional, so no fence is needed. Fixed-rater
+    # numeric agreement is already refused upstream (the raters != "random" fence above).
     if (!isTRUE(all.equal(conf_level, 0.95))) {
       abort_unsupported(c(
         "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level = 0.95} only.",

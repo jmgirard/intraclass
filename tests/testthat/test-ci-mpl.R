@@ -217,13 +217,117 @@ test_that("mpl ICC(A,k) is the exact Spearman-Brown image of ICC(A,1), divisor R
   expect_false(isTRUE(all.equal(ik$conf.high, sb(i1$conf.high, n_r + 1))))
 })
 
+# ---- M89: numeric unit ICC(A,m) is the pole-safe SB image --------------------
+
+test_that("mpl numeric unit ICC(A,m) is the exact Spearman-Brown image of ICC(A,1) (M89 AC1/AC2)", {
+  skip_if_not_installed("glmmTMB")
+
+  n_r <- 4L
+  d <- mpl_twoway_long(n_s = 20, n_r = n_r)
+  # A numeric `unit = m` is a D-study projection ICC(A,m): reliability of the mean of m
+  # raters freshly sampled from the same population. For two-way RANDOM absolute
+  # agreement it is the exact Spearman-Brown image ICC(A,m) = m*rho/(1+(m-1)rho) with
+  # rho = ICC(A,1) (McGraw & Wong 1996 Table 4) -- pole-safe for ANY m >= 1, because the
+  # SB pole rho = -1/(m-1) is negative while the MPL endpoints lie in [0, 1] (M89,
+  # D-016). Recompute the SB map INDEPENDENTLY of the package's npb_sb so a wrong
+  # divisor would break the equality (M82 anti-tautology lesson).
+  sb <- function(rho, m) m * rho / (1 + (m - 1) * rho)
+  i1 <- tidy(icc(d, score, subject, rater, ci_method = "mpl"))
+  i1 <- i1[i1$index == "ICC(A,1)", ]
+
+  for (m in c(1, 2, 3.5, n_r, 8)) {
+    label <- paste0("ICC(A,", format(m, trim = TRUE), ")")
+    im <- tidy(icc(d, score, subject, rater, unit = m, ci_method = "mpl"))
+    im <- im[im$index == label, ]
+    expect_equal(nrow(im), 1L)
+    expect_equal(im$conf.low, sb(i1$conf.low, m), tolerance = 1e-9)
+    expect_equal(im$conf.high, sb(i1$conf.high, m), tolerance = 1e-9)
+    # Pole-safe: finite, ordered, inside [0, 1] for every m.
+    expect_gte(im$conf.low, 0)
+    expect_lte(im$conf.high, 1)
+    expect_lte(im$conf.low, im$conf.high)
+  }
+
+  # m = 1 reduces to ICC(A,1) exactly; m = R matches unit = "average" (both divisor R).
+  m1 <- tidy(icc(d, score, subject, rater, unit = 1, ci_method = "mpl"))
+  m1 <- m1[m1$index == "ICC(A,1)", ]
+  expect_equal(m1$conf.low, i1$conf.low, tolerance = 1e-12)
+  expect_equal(m1$conf.high, i1$conf.high, tolerance = 1e-12)
+  avg <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    unit = "average",
+    ci_method = "mpl"
+  ))
+  avg <- avg[avg$index == "ICC(A,k)", ]
+  imr <- tidy(icc(d, score, subject, rater, unit = n_r, ci_method = "mpl"))
+  imr <- imr[imr$index == "ICC(A,4)", ]
+  expect_equal(imr$conf.low, avg$conf.low, tolerance = 1e-12)
+  expect_equal(imr$conf.high, avg$conf.high, tolerance = 1e-12)
+
+  # Mutation proof: the shipped m = 2 endpoint is NOT reproduced by a wrong divisor, so
+  # the equalities above test the divisor, not a tautology.
+  i2 <- tidy(icc(d, score, subject, rater, unit = 2, ci_method = "mpl"))
+  i2 <- i2[i2$index == "ICC(A,2)", ]
+  expect_false(isTRUE(all.equal(i2$conf.high, sb(i1$conf.high, 3))))
+})
+
+test_that("mpl numeric unit reports the engine ICC(A,m) point, deterministic + monotone (M89 AC3)", {
+  skip_if_not_installed("glmmTMB")
+
+  d <- mpl_twoway_long(n_s = 20, n_r = 4)
+  # The reported point is the shared engine (glmmTMB REML) ICC(A,m) point, identical to
+  # what montecarlo reports for the same numeric unit (BC5); metadata is deterministic
+  # (no draws, no SE), mirroring ICC(A,1)/ICC(A,k).
+  mc <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    unit = 6,
+    ci_method = "montecarlo",
+    seed = 1
+  ))
+  mc6 <- mc[mc$index == "ICC(A,6)", ]
+  fit <- icc(d, score, subject, rater, unit = 6, ci_method = "mpl")
+  i6 <- tidy(fit)[tidy(fit)$index == "ICC(A,6)", ]
+  expect_equal(i6$estimate, mc6$estimate, tolerance = 1e-8)
+  expect_true(is.na(fit$ci$samples))
+  expect_true(is.na(i6$std.error))
+
+  # conf.low is monotone increasing in m at fixed data (SB increases in m on [0, 1]).
+  lows <- vapply(
+    c(1, 2, 4, 8, 20),
+    function(m) {
+      tm <- tidy(icc(d, score, subject, rater, unit = m, ci_method = "mpl"))
+      tm$conf.low[tm$index == paste0("ICC(A,", m, ")")]
+    },
+    numeric(1)
+  )
+  expect_false(is.unsorted(lows))
+
+  # Vectorized units resolve together in one call.
+  tv <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    unit = c("single", "average", 6),
+    ci_method = "mpl"
+  ))
+  expect_setequal(tv$index, c("ICC(A,1)", "ICC(A,k)", "ICC(A,6)"))
+})
+
 # ---- AC4: the two-way-random-agreement fence + off-grid abort ----------------
 
 test_that("mpl aborts outside the two-way random absolute-agreement cell (AC4)", {
   skip_if_not_installed("glmmTMB")
 
   d <- mpl_twoway_long()
-  # one-way, consistency, fixed raters, numeric unit, non-0.95 level all abort.
+  # one-way, consistency, fixed raters, non-0.95 level all abort. (A numeric unit is
+  # NOT here -- since M89 it is a supported pole-safe SB projection, tested below.)
   expect_error(
     icc(d, score, subject, rater, model = "oneway", ci_method = "mpl"),
     class = "intraclass_unsupported"
@@ -245,8 +349,18 @@ test_that("mpl aborts outside the two-way random absolute-agreement cell (AC4)",
     )),
     class = "intraclass_unsupported"
   )
+  # A numeric unit under FIXED raters stays unsupported: absolute-agreement projection
+  # to m freshly sampled raters is ill-posed with a finite rater population (#5).
   expect_error(
-    icc(d, score, subject, rater, unit = 2, ci_method = "mpl"),
+    suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      raters = "fixed",
+      unit = 2,
+      ci_method = "mpl"
+    )),
     class = "intraclass_unsupported"
   )
   expect_error(
