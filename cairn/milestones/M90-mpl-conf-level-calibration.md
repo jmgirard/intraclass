@@ -1,9 +1,9 @@
 # M90: MPL κ_m recalibration + coverage GO/NO-GO at conf_level ∈ {0.90, 0.99}
 
-- **Status:** blocked
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
-- **Driving RR:** —
+- **Driving RR:** RR03
 - **Principles touched:** IP1, GP5, GP6
 - **Branch/PR:** m90-mpl-conf-level-calibration
 
@@ -17,13 +17,14 @@ near-zero boundary) at conf_level 0.90 and 0.99 — the prerequisite for M91.
 
 **In:** Recalibrate the MPL correction constant κ_m at two new confidence levels
 so a later milestone can export them. Parametrize the M87/M88 calibration by α;
-generate seeded κ_m tables at α∈{0.10, 0.01} (two-sided) over the shipped (R,S)
-grid (R 2:10 × S {10,15,20,30,50,100}), using M88's scan→top-k bias-corrected
-method with larger n_mc at α=0.01 for its deeper tail (M86 tail-noise lesson).
-Freeze a pre-registered per-level coverage criterion (GP5) in a references note
-before any run, run the paired coverage sweep across the M87 decisive cells, and
-render a per-level GO/NO-GO verdict. κ_m fixtures land in `data-raw/` (`.rds`);
-they are NOT yet wired into `R/sysdata.rda`.
+re-earn xiao2013's published α=0.10 κ_m oracle through the parametrized pipeline
+(BC1), then generate seeded κ_m tables at α∈{0.10, 0.01} (two-sided) over the
+shipped (R,S) grid (R 2:10 × S {10,15,20,30,50,100}) with M88's scan→top-k
+bias-correction (α=0.01 sizes per BC2). Freeze the RR03-determined coverage
+criterion (BC3 floors, BC4 replication, BC5 8-cell set) in a references note
+before any run (GP5), run the coverage sweep recording the BC6 diagnostics, and
+render a per-level GO/NO-GO verdict (BC7). κ_m fixtures land in `data-raw/`
+(`.rds`); they are NOT yet wired into `R/sysdata.rda`.
 
 **Out:** No exported code, no fence lift, no `R/` change → M91 (consumes this
 milestone's fixtures + GO). Levels other than {0.90, 0.99} → candidate row.
@@ -33,52 +34,88 @@ off-grid) → unchanged, separate candidates.
 
 ## Acceptance criteria
 
+Driving RR = RR03; BC1–BC7 are ingested verbatim as AC4–AC10 (`binding
+criteria` string-compares them). No departures — no "Deviations from RR03" table.
+
 - [ ] AC1: Seeded κ_m tables at α=0.10 (conf_level 0.90) and α=0.01 (conf_level
-      0.99) exist over the full shipped (R,S) grid, provenance in `meta`. For
-      **0.90**, the recalibrated κ_m over ρ∈[0.6,0.9] reproduces xiao2013's
-      published two-sided κ_m (Table 3 δ_U=16 / Table 6: 0.32, 0.52, 0.67, 0.13,
-      0.23, 0.33) within the M86/M87 tolerance — a direct external oracle (IP1).
-      For **0.99** (no external oracle) and both levels' sub-0.6 tail, the
-      scan-vs-top-k internal cross-check (M88's guard) agrees within MC
-      tolerance. Recorded in the note.
-- [ ] AC2: At each level, the MPL interval built at the recalibrated κ_m meets
-      the pre-registered coverage criterion (frozen + dated in the references
-      note BEFORE any run, GP5) at every M87 decisive cell — the calibration
-      constant validated by its defining coverage property (M86 lesson), across
-      the near-zero boundary (GP6). Evidence: seeded sweep fixture + verdict.
-- [ ] AC3: A per-level GO/NO-GO verdict applying the frozen criterion to the
-      sweep, with verdict + evidence recorded in the references comparison note;
-      a NO-GO level is named and routed to a candidate row, not exported.
-- [ ] AC4: The note states the **level-specific** oracle posture — conf_level
+      0.99) exist over the full shipped (R,S) grid, provenance in `meta`; the
+      scan-vs-top-k internal cross-check (M88's guard) agrees within MC tolerance
+      (the 0.90 external-oracle reproduction is BC1/AC4).
+- [ ] AC2: A per-level GO/NO-GO verdict applying the frozen BC3/BC4 criterion to
+      the sweep, recorded with evidence in the references comparison note; a
+      NO-GO level is named and routed to a candidate row, not exported (BC7).
+- [ ] AC3: The note states the **level-specific** oracle posture — conf_level
       0.90's κ_m is externally oracle-backed over ρ∈[0.6,0.9] (xiao2013 Table
       3/6, IP1); its sub-0.6 tail and all of conf_level 0.99 have no external
       oracle (D-014(i) inherited), established by simulated coverage only.
+- [ ] AC4 (BC1): Before any α=0.01 production calibration, the α-parametrized
+      pipeline, run at α=0.10 two-sided over ρ ∈ [0.6, 0.9] × δ = 2^(−1..4) with
+      n_mc ≥ 6000, reproduces all six published two-sided κ_m values — 0.32,
+      0.52, 0.67 at (R=3, S=10/25/50) and 0.13, 0.23, 0.33 at (R=5, S=10/25/50)
+      — each within ±0.10 (the M86 tolerance). S = 25 is evaluated explicitly (it
+      is off the shipped `s_grid`).
+- [ ] AC5 (BC2): The α=0.01 table generator uses n_mc_scan ≥ 3000, top_k ≥ 5,
+      n_mc_final ≥ 12000. The fixture records, for at least one representative
+      geometry per R ∈ {2, 3, 10}, a bootstrap SE of the final κ̂_m (resampling
+      the final-cell deviance sample); each recorded SE ≤ 0.05. The α=0.10
+      generator may retain M88's sizes (1500/3/6000).
+- [ ] AC6 (BC3): Per-cell pass floor: empirical coverage ≥ 0.88 at conf_level
+      0.90; ≥ **0.98** at conf_level 0.99 (supersedes the proposed c − 0.02 =
+      0.97). Over-coverage passes at both levels.
+- [ ] AC7 (BC4): n_rep ≥ 2000 per cell at 0.99 (coverage MC-SE at the 0.98 floor
+      ≤ 0.0032); n_rep ≥ 1000 per cell at 0.90. The verdict fixture reports an
+      exact (Clopper–Pearson) 95 % CI for coverage at every cell.
+- [ ] AC8 (BC5): The decisive set at each level is M87's C1–C5 **plus** C6 =
+      (R=3, S=100, δ=4, ρ=0.60), C7 = (R=2, S=15, δ=1, ρ=0.05), and C8 = (R=3,
+      S=20, δ=1, ρ=0.02). All eight are decisive: the floor (BC3) must hold at
+      every one.
+- [ ] AC9 (BC6): The sweep fixture records per cell: miss-below and miss-above
+      counts; median and 90th-percentile interval width; P(lower endpoint = 0);
+      P(upper endpoint ≥ 0.999); vacuous fraction (both clamps simultaneously).
+      These do not gate the verdict, except: the M91 documentation (or the
+      references note if 0.99 is NO-GO) must state the small-geometry width
+      finding wherever a decisive cell's median 0.99-interval width ≥ 0.90.
+- [ ] AC10 (BC7): M91 may export conf_level 0.99 only if BC1–BC6 all pass at that
+      level; conf_level 0.90 gates only on BC1 and on BC3–BC6 at its own level. A
+      BC failure at one level routes that level to a candidate row (NO-GO)
+      without blocking the other. No level deeper than 0.99 is authorized by this
+      review.
 
 ## Coverage
 
-- AC1 → T2, T4
-- AC2 → T1, T3
+- AC1 → T2
+- AC2 → T4
 - AC3 → T1, T4
-- AC4 → T1, T4
+- AC4 (BC1) → T2
+- AC5 (BC2) → T2
+- AC6 (BC3) → T1, T4
+- AC7 (BC4) → T3, T4
+- AC8 (BC5) → T1, T3
+- AC9 (BC6) → T3
+- AC10 (BC7) → T4
 
 ## Tasks
 
-- [ ] T1: Author the pre-registered per-level (0.90, 0.99) coverage criterion +
-      no-oracle disclosure in a references note (extend
-      `references/mpl-twoway-random-comparison.md` or a sibling), frozen + dated
-      before any calibration/sweep run (GP5). (RB tripwire: no-oracle — sub-0.6
-      κ_m at new levels; posture inherited from D-014(i).)
-- [ ] T2: Parametrize the κ_m calibration (`data-raw/m87-mpl-kappa-recalibration.R`,
-      `data-raw/m88-mpl-kappa-table.R`) by α; run a seeded background job
-      generating κ_m at α=0.10 and α=0.01 over the shipped grid (larger n_mc at
-      α=0.01; top-k bias-correction). Background (~2–2.5 h each). → `data-raw/*.rds`.
-- [ ] T3: Coverage sweep at each level across the M87 decisive cells (interior,
-      near-zero boundary, few-subjects corner, xiao worst case, breadth),
-      seeded, paired (mirror `data-raw/m87-mpl-comparison-sweep.R`). Background
-      (~4–6 h each). → sweep fixture.
-- [ ] T4: Apply the frozen criterion → per-level verdict script + fixture; record
-      verdict + evidence in the references note. GO authorizes M91; a NO-GO level
-      → candidate row (the D-entry lands at review, mirroring D-014).
+- [ ] T1: Freeze the RR03-determined coverage criterion + level-specific oracle
+      disclosure in a references note (extend
+      `references/mpl-twoway-random-comparison.md` or a sibling): the BC3 floors
+      (0.88 at 0.90; 0.98 at 0.99), BC4 replication (n_rep ≥ 2000 at 0.99,
+      Clopper–Pearson CIs), and the BC5 8-cell set (C1–C8). Dated before any
+      sweep run (GP5).
+- [ ] T2: Parametrize the κ_m calibration
+      (`data-raw/m87-mpl-kappa-recalibration.R`, `data-raw/m88-mpl-kappa-table.R`)
+      by α. First run the **BC1 precondition** — the α=0.10 published-oracle
+      reproduction (6 geometries incl. off-grid S=25, n_mc ≥ 6000, each within
+      ±0.10). Then generate the production tables at α=0.10 (M88 sizes) and α=0.01
+      (**BC2 sizes:** scan ≥ 3000, top_k ≥ 5, final ≥ 12000; record bootstrap
+      SE ≤ 0.05 for R ∈ {2,3,10}), seeded. Background (~5 h for α=0.01). → `data-raw/*.rds`.
+- [ ] T3: Coverage sweep at each level across the 8 BC5 cells, seeded, at the BC4
+      n_rep; record the BC6 diagnostics (miss-below/above, median + p90 width,
+      P(lower=0), P(upper≥0.999), vacuous fraction) per cell (mirror
+      `data-raw/m87-mpl-comparison-sweep.R`, MPL-only). Background. → sweep fixture.
+- [ ] T4: Verdict script applying the BC3 floors + BC4 Clopper–Pearson CIs per
+      cell → per-level GO/NO-GO (BC7 gating); record verdict + evidence + the BC6
+      width finding in the note. GO authorizes M91; a NO-GO level → candidate row.
 
 ## Work log
 
@@ -87,7 +124,19 @@ off-grid) → unchanged, separate candidates.
 - 2026-07-24: amended AC1/AC4 (gate) — conf_level 0.90's κ_m over ρ≥0.6 has a direct external oracle (xiao2013 Table 3/6 at α=0.10, IP1; M86 already reproduced 0.32/0.67/0.33); no-oracle posture now level-specific (0.90 sub-0.6 tail + all 0.99 only). Principles touched += IP1; AC1 coverage += T4.
 - 2026-07-24: escalating to Fable via /milestone-brief (RB tripwire: no-oracle) before freezing the T1 criterion or running any sweep — the α=0.01 (0.99) deep-tail κ_m + sub-0.6 extrapolation have no external oracle; question per the gate. T1–T4 paused pending the RR.
 - 2026-07-24: blocked on RB03 (cairn/reviews/RB03-mpl-conf-level-extrapolation.md).
+- 2026-07-24: ingested RR03 (Fable) → D-017. Verdict: 0.90 GO (external oracle), 0.99 conditional GO under BC1–BC7. Set Driving RR = RR03; ingested BC1–BC7 verbatim as AC4–AC10; dropped the plan's c−0.02 floor (superseded by BC3's 0.98@0.99); refined T1–T4 to the BCs. Status → in-progress. RB03/RR03 archived.
 
 ## Decisions
+
+- 2026-07-24 (RR03/D-017): Fable review of the no-oracle 0.99 + sub-0.6 ρ
+  extrapolation. **0.90 GO** on the xiao2013 published κ_m oracle; **0.99
+  conditional GO** on simulated-coverage evidence alone, gated on BC1–BC7 (now
+  AC4–AC10). Nothing numeric is extrapolated in α (κ_m recalibrated at the 0.99
+  quantile); the shape-dependence (Q1) and boundary (Q4) risks measured bounded
+  + conservative-direction. Rejected: holding 0.99 back categorically; a
+  tail-model κ_corr estimator (deep tail non-χ²-shaped → anti-conservative). No
+  level deeper than 0.99 authorized. Promoted to D-017. Beyond-brief → M91
+  (non-equal-tailed doc, near-vacuous-width doc, `R/ci-mpl.R` interpolation
+  comment) + a 0.95 sub-grid-floor backfill candidate.
 
 ## Review

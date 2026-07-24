@@ -558,3 +558,47 @@ REML) ICC(A,m) point via `icc_point()` (D-010 BC5), already produced for the mon
 ≠ 0.95, consistency, fixed raters, one-way/multilevel/replicate, unbalanced/incomplete all
 still abort). Mirrors D-015's exported-API ruling; supersedes nothing. The classical two-way
 boundary-robust default and on-the-fly κ_m calibration stay separate candidates.
+
+### D-017 (2026-07-24): RB03/RR03 (Fable) — MPL `conf_level` ∈ {0.90, 0.99}: conditional GO for 0.99, GO for 0.90, no level deeper than 0.99
+
+**Context:** M90 extends the MPL interval (`ci_method = "mpl"`, D-015) from the shipped
+conf_level 0.95 to 0.90 and 0.99. conf_level 0.90 (α=0.10) recovers xiao2013's *published*
+two-sided κ_m table (Table 3/6, ρ∈[0.6,0.9]) as a direct external oracle; 0.99 (α=0.01) is a
+deeper-tail extrapolation than the already-shipped 0.95, with no external oracle. The plan
+gate escalated the no-oracle 0.99 + sub-0.6 ρ extrapolation to a Fable review (RB tripwire:
+no-oracle) before freezing the coverage criterion or running the multi-hour sweeps.
+
+**Decision (RR03, independent statistical review with fresh seeded simulations):**
+- **conf_level 0.90 — GO** on its external oracle (BC1) + coverage validation. Proceeds
+  independently of 0.99's outcome; there is no coupling in that direction.
+- **conf_level 0.99 — conditional GO**, exportable on simulated-coverage evidence alone
+  (as the shipped 0.95 already is), gated on **BC1–BC7** (ingested verbatim into M90's ACs,
+  Driving RR = RR03). The rationale: nothing *numeric* is extrapolated in α — the machinery
+  recalibrates κ_m *at* the 0.99 deviance quantile — and the two structural risks that could
+  make 0.99 different in kind (tail shape-dependence of the correction; a boundary failure
+  invisible above ρ=0.6) both measured out **bounded and conservative-direction** (worst
+  −0.21 pp coverage from *not* recalibrating; near-zero ρ=0.05 is interior, no deviance atom).
+  What remains is the 0.95-precedent posture plus a priced deeper-tail MC-noise burden.
+- **Binding conditions (summary; verbatim BC1–BC7 in M90):** re-earn the published α=0.10
+  oracle through the α-parametrized pipeline first, incl. the off-`s_grid` S=25 geometries
+  (BC1); size the α=0.01 calibration MC (scan≥3000, top_k≥5, final≥12000; recorded SE≤0.05,
+  BC2); tighten the 0.99 coverage floor to **0.98** (not the proposed c−0.02=0.97) at n_rep≥2000
+  with exact binomial CIs (BC3/BC4); sweep C1–C5 **plus** C6=(3,100,δ4,ρ.60), C7=(2,15,δ1,ρ.05),
+  C8=(3,20,δ1,ρ.02 — the sub-grid-floor cell) (BC5); record miss-side/width/clamp diagnostics
+  (BC6); export gating per BC7 (a BC failure routes that level to a candidate, NO-GO, without
+  blocking the other).
+- **Rejected:** (a) holding 0.99 back categorically while 0.90 ships — no failure mode
+  different in kind from the shipped 0.95; the BCs price the difference in degree. (b) a
+  tail-model (GPD/scaled-χ²) κ_corr estimator — the deep tail is demonstrably non-χ²-shaped
+  where the grid max lives, so a model biases κ̂ low (anti-conservative); the raw empirical
+  0.99 quantile stays the estimator, tail-model only as a diagnostic.
+- **Boundary on the claim:** this authorizes conf_level 0.99 *specifically*; κ_corr is still
+  rising at α=0.005 in the boundary cells, so no level deeper than 0.99 (0.995, 0.999) is
+  authorized by analogy — each needs its own tail-estimability review.
+
+**Consequences:** M90 sets Driving RR = RR03 and ingests BC1–BC7; the coverage criterion is
+BC3/BC4/BC5, not the plan's proposed c−0.02. M91's 0.99 export is gated on M90's BC7 verdict.
+Beyond-the-brief items: M91 documents the two-sided interval's non-equal-tailed character (all
+levels, incl. 0.95) and the small-geometry near-vacuous 0.99 width (BC6), and softens the
+`R/ci-mpl.R` interpolation comment ("increasing and roughly concave"), already falsified at
+R≥8 by the shipped table. Extends D-014/D-015 to conf_level 0.90/0.99; supersedes nothing.
