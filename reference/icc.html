@@ -335,7 +335,25 @@ resamples, so <code>mc_samples</code>, <code>boot_samples</code>, and <code>seed
 approximately normal. <code>"burch"</code> is the REML-based, kurtosis-adjusted interval
 of Burch (2011): wider, but robust to non-normality and never under-covering.
 Prefer <code>"searle"</code> for near-normal data and <code>"burch"</code> when heavy tails or
-non-normality are a concern.</p></dd>
+non-normality are a concern.
+<code>"mpl"</code> is the <strong>modified profile-likelihood</strong> interval of Xiao &amp; Liu (2013),
+<strong>only for the balanced-complete two-way random absolute-agreement ICC(A,1)</strong> (and
+ICC(A,k) via its Spearman-Brown image); it aborts on any other design, on
+consistency (ICC(C,.)) or fixed raters, on unbalanced or incomplete data, and on a
+numeric <code>unit</code>. It is a <strong>deterministic closed form</strong> (no resampling; <code>mc_samples</code>,
+<code>boot_samples</code>, and <code>seed</code> do not apply) that, like <code>"npbootstrap"</code>, returns an
+interval on <strong>every</strong> dataset – including the near-zero-ICC boundary where the
+two-way Monte-Carlo default aborts – and covers at or above nominal across the
+pre-registered grid where the incumbents can under-cover (assessed GO-for-opt-in in
+M87). It is deliberately <strong>conservative</strong> (it over-covers, and is wider than the
+Monte-Carlo interval at interior cells), so it is an opt-in, not the default.
+Two constraints follow from its calibration. It is available <strong>only at
+<code>conf_level = 0.95</code></strong> (the level its correction constant is tabulated for; other
+levels abort). And its correction constant is calibrated by simulation over
+<code>rho in [0.05, 0.9]</code>, extending below Xiao &amp; Liu's published <code>rho &gt;= 0.6</code> fence
+into a near-boundary region that <strong>carries no external oracle</strong> – there, the
+interval's calibration rests on the package's own simulated coverage. It assumes
+approximately Gaussian data (untested for non-normality).</p></dd>
 
 
 <dt id="arg-mc-samples">mc_samples<a class="anchor" aria-label="anchor" href="#arg-mc-samples"></a></dt>
@@ -652,11 +670,11 @@ reliability for multilevel data: A generalizability theory approach.
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">  index     estimate   95% CI</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">  Absolute agreement</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.706]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.175, 0.906]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,1)  <span style="font-weight: bold;">   0.290</span>   <span style="font-weight: 100;">[0.050, 0.712]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(A,k)  <span style="font-weight: bold;">   0.620</span>   <span style="font-weight: 100;">[0.173, 0.908]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">  Consistency</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.339, 0.924]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.672, 0.980]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(C,1)  <span style="font-weight: bold;">   0.715</span>   <span style="font-weight: 100;">[0.335, 0.925]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ICC(C,k)  <span style="font-weight: bold;">   0.909</span>   <span style="font-weight: 100;">[0.668, 0.980]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Variance components: subject 2.556, rater 5.244, residual 1.019</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: 100;">Shrout &amp; Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)</span></span>

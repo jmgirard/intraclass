@@ -298,7 +298,28 @@ icc(
   approximately normal. `"burch"` is the REML-based, kurtosis-adjusted
   interval of Burch (2011): wider, but robust to non-normality and never
   under-covering. Prefer `"searle"` for near-normal data and `"burch"`
-  when heavy tails or non-normality are a concern.
+  when heavy tails or non-normality are a concern. `"mpl"` is the
+  **modified profile-likelihood** interval of Xiao & Liu (2013), **only
+  for the balanced-complete two-way random absolute-agreement ICC(A,1)**
+  (and ICC(A,k) via its Spearman-Brown image); it aborts on any other
+  design, on consistency (ICC(C,.)) or fixed raters, on unbalanced or
+  incomplete data, and on a numeric `unit`. It is a **deterministic
+  closed form** (no resampling; `mc_samples`, `boot_samples`, and `seed`
+  do not apply) that, like `"npbootstrap"`, returns an interval on
+  **every** dataset – including the near-zero-ICC boundary where the
+  two-way Monte-Carlo default aborts – and covers at or above nominal
+  across the pre-registered grid where the incumbents can under-cover
+  (assessed GO-for-opt-in in M87). It is deliberately **conservative**
+  (it over-covers, and is wider than the Monte-Carlo interval at
+  interior cells), so it is an opt-in, not the default. Two constraints
+  follow from its calibration. It is available **only at
+  `conf_level = 0.95`** (the level its correction constant is tabulated
+  for; other levels abort). And its correction constant is calibrated by
+  simulation over `rho in [0.05, 0.9]`, extending below Xiao & Liu's
+  published `rho >= 0.6` fence into a near-boundary region that
+  **carries no external oracle** – there, the interval's calibration
+  rests on the package's own simulated coverage. It assumes
+  approximately Gaussian data (untested for non-normality).
 
 - mc_samples:
 
@@ -656,11 +677,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.706]
-#>   ICC(A,k)     0.620   [0.175, 0.906]
+#>   ICC(A,1)     0.290   [0.050, 0.712]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.339, 0.924]
-#>   ICC(C,k)     0.909   [0.672, 0.980]
+#>   ICC(C,1)     0.715   [0.335, 0.925]
+#>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
