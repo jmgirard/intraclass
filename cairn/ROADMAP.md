@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-24 (M89 shipped via PR #96 — numeric `unit` ICC(A,m) for `ci_method="mpl"`, the pole-safe Spearman-Brown image of the ICC(A,1) MPL endpoints; D-016 (inheritance-only, no new oracle). 3-lens review: no actionable findings, 1 sub-threshold comment fix. Archived M89, rotated M84 out. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-24 (planned M90 + M91 — MPL `conf_level` ∈ {0.90, 0.99}: M90 recalibrates κ_m at α∈{0.10,0.01} + renders a per-level coverage GO/NO-GO (no exported code, M87 shape), M91 exports the calibrated set behind the lifted `icc.R:1467` fence (depends on M90's GO). Lineage D-015 → these; level set chosen at the plan gate. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,6 +9,8 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | planned | — | normal | milestones/M90-mpl-conf-level-calibration.md |
+| M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | planned | M90 | normal | milestones/M91-mpl-conf-level-export.md |
 | M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | done | M88 | normal | milestones/archive/M89-mpl-numeric-unit.md |
 | M88 | Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k) | done | M86, M87 | normal | milestones/archive/M88-mpl-ci-method-export.md |
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | done | M86 | normal | milestones/archive/M87-mpl-coverage-verdict-twoway-random.md |
