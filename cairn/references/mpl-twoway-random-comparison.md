@@ -1,5 +1,11 @@
 # Modified profile likelihood vs incumbents — two-way random ICC(A,1) (M86/M87)
 
+**Exported (M88).** The method this note compares now ships as `ci_method = "mpl"`
+(`R/ci-mpl.R`, oracle **O-MPL** in `ORACLES.md`; D-015): the deterministic interval
+core ported from the M86 prototype, with the extended-range `κ_m` shipped as a
+precomputed table (`data-raw/m88-mpl-kappa-table.R` → `R/sysdata.rda`). Opt-in only,
+balanced-complete two-way random absolute-agreement / Gaussian / `conf_level = 0.95`.
+
 **Provenance.** Ingested 2026-07-23 by M86 from the M86 validation harness
 (`data-raw/m86-mpl-lib.R`, `data-raw/m86-mpl-validate.R`) against
 `xiao2013.md` (the named primary source, IP1). M87 appends its pre-registration,

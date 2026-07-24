@@ -323,6 +323,24 @@
 #'   of Burch (2011): wider, but robust to non-normality and never under-covering.
 #'   Prefer `"searle"` for near-normal data and `"burch"` when heavy tails or
 #'   non-normality are a concern.
+#'   `"mpl"` is the **modified profile-likelihood** interval of Xiao & Liu (2013),
+#'   **only for the balanced-complete two-way random absolute-agreement ICC(A,1)** (and
+#'   ICC(A,k) via its Spearman-Brown image); it aborts on any other design, on
+#'   consistency (ICC(C,.)) or fixed raters, on unbalanced or incomplete data, and on a
+#'   numeric `unit`. It is a **deterministic closed form** (no resampling; `mc_samples`,
+#'   `boot_samples`, and `seed` do not apply) that, like `"npbootstrap"`, returns an
+#'   interval on **every** dataset -- including the near-zero-ICC boundary where the
+#'   two-way Monte-Carlo default aborts -- and covers at or above nominal across the
+#'   pre-registered grid where the incumbents can under-cover (assessed GO-for-opt-in in
+#'   M87). It is deliberately **conservative** (it over-covers, and is wider than the
+#'   Monte-Carlo interval at interior cells), so it is an opt-in, not the default.
+#'   Two constraints follow from its calibration. It is available **only at
+#'   `conf_level = 0.95`** (the level its correction constant is tabulated for; other
+#'   levels abort). And its correction constant is calibrated by simulation over
+#'   `rho in [0.05, 0.9]`, extending below Xiao & Liu's published `rho >= 0.6` fence
+#'   into a near-boundary region that **carries no external oracle** -- there, the
+#'   interval's calibration rests on the package's own simulated coverage. It assumes
+#'   approximately Gaussian data (untested for non-normality).
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
@@ -488,6 +506,10 @@ icc <- function(
   # reassigns it, so the Bayesian forced-default coupling can tell an unset `ci_method`
   # (auto-upgrade to "posterior" for a brms fit) from an explicit mismatch (abort).
   ci_method_default <- missing(ci_method)
+  # Capture whether the caller left `type` at its default (both agreement and
+  # consistency), so `ci_method = "mpl"` -- an absolute-agreement-only method -- can
+  # narrow an unset `type` to "agreement" but reject an explicit consistency request.
+  type_supplied <- !missing(type)
 
   # Dimensions not yet implemented fail loudly and point at where they are coming
   # (PRINCIPLES.md #5); implemented multi-value dimensions are arg-matched.
@@ -500,7 +522,15 @@ icc <- function(
   )
   ci_method <- validate_choice(
     ci_method,
-    c("montecarlo", "bootstrap", "posterior", "npbootstrap", "searle", "burch"),
+    c(
+      "montecarlo",
+      "bootstrap",
+      "posterior",
+      "npbootstrap",
+      "searle",
+      "burch",
+      "mpl"
+    ),
     "ci_method"
   )
 
@@ -1377,6 +1407,68 @@ icc <- function(
     }
   }
 
+  # The modified-profile-likelihood interval (`ci_method = "mpl"`, xiao2013; M88,
+  # D-014/D-015) is the OPPOSITE fence to the one-way methods above: defined only for
+  # the balanced-complete two-way RANDOM absolute-agreement ICC(A,1)/ICC(A,k), and only
+  # at the default 95% two-sided level its kappa_m table is calibrated for. Every other
+  # cell aborts loudly (#5/#8) rather than returning an uncalibrated interval.
+  if (ci_method == "mpl") {
+    # mpl is an absolute-agreement method. `type` defaults to both agreement and
+    # consistency; narrow an UNSET type to agreement (mpl selects the agreement
+    # estimand as it selects the interval), but an EXPLICIT consistency request is a
+    # genuine conflict -- mpl has no ICC(C,.) interval -- so abort (#5).
+    if ("consistency" %in% type) {
+      if (type_supplied) {
+        abort_unsupported(c(
+          "{.code ci_method = \"mpl\"} is an absolute-agreement interval; it does \\
+           not define a consistency (ICC(C,.)) interval.",
+          i = "Use {.code type = \"agreement\"}, or \\
+               {.code ci_method = \"montecarlo\"} for consistency."
+        ))
+      }
+      # An unset default `type` includes consistency; narrow it, but SAY SO -- every
+      # other default-vector narrowing in this file informs (ADR-054/ADR-029).
+      cli::cli_inform(c(
+        "!" = "Dropping {.val consistency}: {.code ci_method = \"mpl\"} is an \\
+               absolute-agreement interval and does not define a consistency \\
+               (ICC(C,.)) interval."
+      ))
+      type <- "agreement"
+    }
+    if (oneway || multilevel || replicates || raters != "random") {
+      abort_unsupported(c(
+        "{.code ci_method = \"mpl\"} is available only for the two-way random \\
+         absolute-agreement ICC(A,1)/ICC(A,k) with one rating per subject-rater cell.",
+        i = "It is the modified-profile-likelihood interval for the balanced-complete \\
+             two-way random design; for one-way, multilevel, fixed-rater, or \\
+             within-cell-replicate designs use {.code ci_method = \"montecarlo\"}."
+      ))
+    }
+    if (!balanced) {
+      abort_unsupported(c(
+        "{.code ci_method = \"mpl\"} requires balanced, complete two-way data.",
+        i = "The likelihood assumes every subject x rater cell is observed; use \\
+             {.code ci_method = \"montecarlo\"}."
+      ))
+    }
+    if (any(vapply(unit, is.numeric, logical(1)))) {
+      abort_unsupported(c(
+        "{.code ci_method = \"mpl\"} supports {.code unit = \"single\"} (ICC(A,1)) \\
+         and {.code \"average\"} (ICC(A,k)) only.",
+        i = "A numeric {.arg unit} (D-study projection) is not yet calibrated for \\
+             {.val mpl}; use {.code unit = \"average\"} or \\
+             {.code ci_method = \"montecarlo\"}."
+      ))
+    }
+    if (!isTRUE(all.equal(conf_level, 0.95))) {
+      abort_unsupported(c(
+        "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level = 0.95} only.",
+        i = "The kappa_m table is generated for the 95% two-sided interval; for \\
+             another level use {.code ci_method = \"montecarlo\"}."
+      ))
+    }
+  }
+
   # Cluster-level fixed raters ship for balanced/complete CROSSED Design 1 only
   # (M37, ADR-047; glmmTMB/lme4). Incomplete/unbalanced cluster-level fixed is
   # deferred -- double-blocked: ten Hove et al. (2022) flag the small-k estimator as
@@ -1972,6 +2064,12 @@ icc <- function(
       # Classical Burch (2011) REML closed form on the RAW one-way data
       # (M82/D-012); same conventions as "searle" (engine point, deterministic).
       burch_ci(df, estimands, conf_level = conf_level)
+    } else if (ci_method == "mpl") {
+      # Modified profile likelihood on the RAW two-way data (xiao2013; M88,
+      # D-014/D-015); the POINT stays the engine (REML) point above (BC5), only the
+      # interval differs. Deterministic -- kappa_m looked up, no draws. Guarded to the
+      # balanced two-way random absolute-agreement cell + conf_level 0.95 upstream.
+      mpl_ci(df, estimands, conf_level = conf_level)
     } else {
       mc_ci(
         engine_fit,
@@ -2056,7 +2154,7 @@ icc <- function(
           boot_samples
         } else if (ci_method == "posterior") {
           ncol(engine_fit$draws)
-        } else if (ci_method %in% c("searle", "burch")) {
+        } else if (ci_method %in% c("searle", "burch", "mpl")) {
           NA_integer_
         } else {
           mc_samples

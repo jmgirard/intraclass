@@ -104,6 +104,9 @@ format.icc <- function(x, ...) {
     } else {
       "posterior credible"
     }
+  } else if (identical(x$ci$method, "mpl")) {
+    # The raw token "mpl" is cryptic in a printed header; name the interval (M88).
+    "modified profile likelihood"
   } else {
     x$ci$method
   }
