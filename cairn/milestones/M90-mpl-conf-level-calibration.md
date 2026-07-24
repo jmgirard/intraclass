@@ -4,7 +4,7 @@
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
-- **Principles touched:** GP5, GP6
+- **Principles touched:** IP1, GP5, GP6
 - **Branch/PR:** m90-mpl-conf-level-calibration
 
 ## Goal
@@ -33,9 +33,14 @@ off-grid) → unchanged, separate candidates.
 
 ## Acceptance criteria
 
-- [ ] AC1: Seeded κ_m tables at α=0.10 and α=0.01 exist over the full shipped
-      (R,S) grid, provenance in `meta`; the scan-vs-top-k internal cross-check
-      (M88's built-in guard) agrees within MC tolerance, recorded in the note.
+- [ ] AC1: Seeded κ_m tables at α=0.10 (conf_level 0.90) and α=0.01 (conf_level
+      0.99) exist over the full shipped (R,S) grid, provenance in `meta`. For
+      **0.90**, the recalibrated κ_m over ρ∈[0.6,0.9] reproduces xiao2013's
+      published two-sided κ_m (Table 3 δ_U=16 / Table 6: 0.32, 0.52, 0.67, 0.13,
+      0.23, 0.33) within the M86/M87 tolerance — a direct external oracle (IP1).
+      For **0.99** (no external oracle) and both levels' sub-0.6 tail, the
+      scan-vs-top-k internal cross-check (M88's guard) agrees within MC
+      tolerance. Recorded in the note.
 - [ ] AC2: At each level, the MPL interval built at the recalibrated κ_m meets
       the pre-registered coverage criterion (frozen + dated in the references
       note BEFORE any run, GP5) at every M87 decisive cell — the calibration
@@ -44,13 +49,14 @@ off-grid) → unchanged, separate candidates.
 - [ ] AC3: A per-level GO/NO-GO verdict applying the frozen criterion to the
       sweep, with verdict + evidence recorded in the references comparison note;
       a NO-GO level is named and routed to a candidate row, not exported.
-- [ ] AC4: The note states the no-oracle posture — the sub-ρ=0.6 κ_m at these
-      levels has no external oracle (D-014(i) inherited), established by
-      simulated coverage only.
+- [ ] AC4: The note states the **level-specific** oracle posture — conf_level
+      0.90's κ_m is externally oracle-backed over ρ∈[0.6,0.9] (xiao2013 Table
+      3/6, IP1); its sub-0.6 tail and all of conf_level 0.99 have no external
+      oracle (D-014(i) inherited), established by simulated coverage only.
 
 ## Coverage
 
-- AC1 → T2
+- AC1 → T2, T4
 - AC2 → T1, T3
 - AC3 → T1, T4
 - AC4 → T1, T4
@@ -78,6 +84,8 @@ off-grid) → unchanged, separate candidates.
 
 - 2026-07-24: created by /milestone-plan (with M91); conf_level {0.90,0.99} for MPL, level set chosen at the plan gate; lineage D-015 → this.
 - 2026-07-24: /milestone-implement start; status → in-progress; branch m90-mpl-conf-level-calibration cut from main.
+- 2026-07-24: amended AC1/AC4 (gate) — conf_level 0.90's κ_m over ρ≥0.6 has a direct external oracle (xiao2013 Table 3/6 at α=0.10, IP1; M86 already reproduced 0.32/0.67/0.33); no-oracle posture now level-specific (0.90 sub-0.6 tail + all 0.99 only). Principles touched += IP1; AC1 coverage += T4.
+- 2026-07-24: escalating to Fable via /milestone-brief (RB tripwire: no-oracle) before freezing the T1 criterion or running any sweep — the α=0.01 (0.99) deep-tail κ_m + sub-0.6 extrapolation have no external oracle; question per the gate. T1–T4 paused pending the RR.
 
 ## Decisions
 
