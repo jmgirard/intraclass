@@ -256,6 +256,92 @@ the MC default may abort. Expectation is therefore **mixed / plausibly NO-GO on
 width** even if MPL never under-covers; the pass decides empirically (the evidence
 decides, not the prior).
 
+## Results (T3, 2026-07-23)
+
+Source: `data-raw/m87-mpl-comparison-sweep.R` → `data-raw/m87-sweep-results.rds`
+(n_rep = 1000 cheap methods; parametric bootstrap B = 199 on the first 500 paired
+reps/cell; ~3.85 h). Recalibrated κ_m per cell (T2): C1/C2 = 0.676, C3 = 0.501,
+C4 = 0.826, C5 = 0.340. `n_ok` = datasets on which the method returned an interval;
+**MC coverage is conditional on `n_ok`** (the σ²_s→0 boundary abort,
+`intraclass_singular_fit`). CR = empirical coverage; MW = median interval width.
+
+| cell | (R,S,δ,ρ) | MPL CR / MW | naive PL CR / MW | MC CR / MW (abort) | pboot CR / MW |
+|---|---|---|---|---|---|
+| C1 | (3,20,1,.60) | **.990 / .685** | .947 / .516 | .978 / .552 (0) | .926 / .477 |
+| C2 | (3,20,1,.05) | **.995 / .383** | .965 / .297 | .934 / .512 (**.259**) | .978 / .285 |
+| C3 | (3,10,1,.05) | **.994 / .508** | .983 / .410 | .953 / .698 (**.312**) | .982 / .385 |
+| C4 | (3,50,4,.60) | **.963 / .744** | .880 / .568 | .904 / .606 (0) | .800 / .502 |
+| C5 | (5,20,1,.75) | **.981 / .462** | .959 / .382 | .963 / .378 (0) | .942 / .341 |
+
+**Boundary abort — AC4 (the load-bearing finding).** The two-way random MC default
+aborts (classed `intraclass_singular_fit`) on **25.9 %** of C2 and **31.2 %** of C3
+near-zero-ρ datasets — the M62/RR01 one-way finding (28–39 % classed aborts)
+**recurs in the two-way random design**. On the non-aborting remainder MC covers
+0.934 / 0.953. MPL and naive PL return an interval on **100 %** of datasets (0
+aborts), the closed deviance-root always existing.
+
+**Criterion applied (candidate = MPL).** Not-worse at a cell iff coverage ≥ 0.93
+AND ≥ min(incumbents) − 0.01:
+
+| cell | MPL CR | ≥ 0.93? | min(MC,pboot) − .01 | ≥ incumbent? | not worse? |
+|---|---|---|---|---|---|
+| C1 | .990 | ✓ | .916 | ✓ | ✓ |
+| C2 | .995 | ✓ | .924 | ✓ | ✓ |
+| C3 | .994 | ✓ | .943 | ✓ | ✓ |
+| C4 | .963 | ✓ | .790 | ✓ | ✓ |
+| C5 | .981 | ✓ | .932 | ✓ | ✓ |
+
+→ **MPL is "not worse" at every cell.** As in the M62 sibling, the frozen absolute
+0.93 floor (not the incumbent-relative clause) is what carries the verdict and
+keeps it non-circular: MPL is in fact the **only** method of the four clearing 0.93
+at *all five* cells — MC fails C4 (0.904), the parametric bootstrap fails C1
+(0.926) and C4 (0.800), and naive PL fails C4 (0.880).
+
+**Three findings.**
+1. **The boundary is where MPL earns its keep** (C2/C3, the pre-designated decisive
+   cells). MPL covers 0.995 / 0.994 with **zero aborts** where the MC default gives
+   *no interval* on 26–31 % of datasets, and does so at a median width **narrower**
+   than MC's (0.383 vs 0.512; 0.508 vs 0.698) — because MC's width is conditional on
+   the non-degenerate fits that survive, while MPL floors its lower bound at 0.
+2. **The S↑ stress cell C4 breaks both package incumbents, not just naive PL.** At
+   (3,50,δ4,ρ.60) — xiao2013's worst naive-PL geometry — naive PL under-covers
+   (0.880, reproducing the published finding), *and so do both incumbents* (MC 0.904,
+   parametric bootstrap 0.800). MPL (0.963) is the sole method ≥ 0.93. The recalibrated
+   κ_m = 0.826 is doing exactly the job xiao2013's MPL was designed for.
+3. **The cost is over-coverage and interior width.** MPL over-covers everywhere
+   (0.963–0.995 vs nominal 0.95) — expected, since it is deliberately conservative
+   (xiao2013 p. 2257) and the extended-range κ_m is ~40–80 % larger than the
+   published-region value. At the interior cells C1/C4 it is the **widest** method
+   (~24 % wider than MC). MPL is a conservative, boundary-robust interval, not a
+   tight one.
+
+**Extrapolation caveat (recorded, GP5).** Below ρ = 0.6 the κ_m used at C2/C3 has
+**no external oracle** (xiao2013's ρ_L = 0.6 fence); it is an extrapolation of the
+M86-validated machinery whose fence-continuity was checked (AC2), and the C2/C3
+coverage above is measured against a *known simulated truth*, which is itself the
+validation. No published cell corroborates the near-zero κ_m constant; the coverage
+result does.
+
+## Verdict (T4)
+
+**GO** for MPL (extended-range κ_m) on the balanced two-way random `ICC(A,1)`.
+Basis: the only method near-nominal (≥ 0.93) at every cell; boundary-robust where
+the MC default aborts on a quarter-to-a-third of near-zero datasets; the sole
+method clearing 0.93 at the S↑ stress cell C4 where all three alternatives
+under-cover; machinery M86-oracle-validated against xiao2013 (IP1). Recorded as
+**D-014**.
+
+Framing carried into the decision (mirroring D-006). The GO does **not** claim MPL
+should replace the MC default: it over-covers and runs ~24 % wider at interior
+cells, so it is an **opt-in** option, not a default (parallel to the npbootstrap /
+SEARLE / Burch one-way siblings, D-006/D-010/D-012/D-013). MPL's residual value is
+(a) near-nominal coverage everywhere, including the S↑ regime where the package
+incumbents themselves under-cover, and (b) an interval that *exists* at the
+near-zero boundary where the MC default aborts. The exported-`ci_method` sibling is
+cleared to be planned, with the conditions D-014 records (the sub-0.6 κ_m
+extrapolation, per-geometry κ_m calibration cost, balanced-complete + Gaussian
+scope).
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the

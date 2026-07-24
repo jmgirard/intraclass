@@ -84,7 +84,7 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
       `n_ok` and boundary-abort behavior.
 - [x] T4 — Apply the criterion, tabulate coverage/width per cell, name the deciding
       cells, and write the verdict.
-- [ ] T5 — Append results + verdict to the evidence note; write the D-entry; update
+- [x] T5 — Append results + verdict to the evidence note; write the D-entry; update
       candidate rows; run the enumerator, `lintr`, and `air format --check`.
 
 ## Work log
@@ -95,6 +95,7 @@ boundary, via a pre-registered coverage-band + width pass. No exported method.
 - 2026-07-23: T2 — `m87-mpl-kappa-recalibration.R` recalibrated κ_m over ρ∈[0.05,0.9]×δ at α=0.05 for the 4 geometries: (3,20)=0.676, (3,10)=0.501, (3,50)=0.826, (5,20)=0.340 (argmax at δ=16, ρ=0.05–0.20 — verified, not assumed; ~40–80% above the ρ≥0.6 scan max). AC2 fence continuity PASS: (3,10) 0.326 vs M86 0.32, (3,50) 0.665 vs 0.67 (both |diff|<0.01). Fixture `m87-kappa-recalibration.rds`.
 - 2026-07-23: T3 — `m87-mpl-comparison-sweep.R` paired sweep (n_rep=1000 cheap / 500 pboot B=199, ~3.85 h) across C1–C5 → `m87-sweep-results.rds`. AC4: two-way MC default aborts (`intraclass_singular_fit`) 25.9% (C2) / 31.2% (C3) of near-zero datasets — the one-way M62/RR01 28–39% finding recurs. naive PL under-covers 0.880 at C4 (xiao's S↑ finding reproduces).
 - 2026-07-23: T4 — `m87-mpl-verdict.R` applied the frozen criterion → **GO**: MPL not worse at every cell; the only method ≥0.93 at all 5 (MC fails C4=0.904; pboot fails C1=0.926, C4=0.800; naive PL fails C4=0.880). Deciding cells: C2/C3 boundary (MPL 0.995/0.994, 0 aborts vs MC 25.9%/31.2%) + C4 stress (MPL 0.963 sole survivor). Cost: over-coverage 0.96–0.995, ~24% wider than MC at interior cells. Fixture `m87-verdict.rds`.
+- 2026-07-23: T5 — appended Results + Verdict to `references/mpl-twoway-random-comparison.md`; wrote **D-014** (GO-for-opt-in, extends D-006 to two-way; conditions on the exported sibling); flipped the ROADMAP exported-`ci_method` candidate GO-gated → GO-for-opt-in. Extended the D-009 settling directives in `xiao2013.md` + `xiao2009.md` to exclude the 3 M87 scripts (M86-F1 class); +7 OUT-repo-analysis triage rows. Checkers green: enumerator `--check`, check-references, `lintr`, `air format --check`.
 
 ## Decisions
 
