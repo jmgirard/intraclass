@@ -1,11 +1,11 @@
 # M88: Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k)
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M86, M87
 - **Driving RR:** —
 - **Principles touched:** IP1, GP2, GP7
-- **Branch/PR:** —
+- **Branch/PR:** m88-mpl-ci-method
 
 ## Goal
 
