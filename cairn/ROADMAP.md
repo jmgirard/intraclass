@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-23 (M86 shipped via PR #93 — a seeded `data-raw/` prototype of xiao2013's naive-PL/MPL ICC(A,1) interval machinery, validated against Tables 3/4/6/7 (no `R/` surface); unblocks M87. 3-lens review: F1 D-009 `xiao` directives (97) + F2 one-sided `mpl_kappa_corr` signed-root (85) both fixed; below-threshold 0. Archived M86, rotated M81 out; +2 lessons. M87 remains `planned` (depends on M86); exported-`ci_method` sibling stays a candidate, GO-gated on M87. M48 `blocked`, D-050.)_
+_Last hygiene check: 2026-07-23 (M87 shipped via PR #94 — GO-for-opt-in (D-014): MPL with extended-range κ_m is "not worse" than the incumbents for two-way random ICC(A,1), boundary-robust where the two-way MC default aborts 26–31%. No `R/`. 3-lens+scorer: 0 findings ≥80. Archived M87, rotated M82 out. Exported-`ci_method` sibling now GO candidate (D-014). M48 `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | review | M86 | normal | milestones/M87-mpl-coverage-verdict-twoway-random.md |
+| M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | done | M86 | normal | milestones/archive/M87-mpl-coverage-verdict-twoway-random.md |
 | M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | done | — | normal | milestones/archive/M86-mpl-machinery-twoway-random.md |
 | M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | done | M84 | normal | milestones/archive/M85-unbalanced-npbootstrap-icck.md |
 | M84 | Unbalanced one-way transformed bootstrap-t — ICC(1) | done | — | normal | milestones/archive/M84-unbalanced-npbootstrap-icc1.md |
 | M83 | Repair rotted `skip_on_ci` brms test expectations + pin explicit `type=`/`level=` | done | — | normal | milestones/archive/M83-repair-rotted-brms-test-expectations.md |
-| M82 | Export classical boundary-robust one-way CIs as opt-in `ci_method` (SEARLE exact-F + Burch REML) | done | — | normal | milestones/archive/M82-classical-oneway-ci-method.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M86 done (2026-07-23) → M81 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M86, M85, M84, M83, M82 (5 most recent terminal). -->
+<!-- terminal-row retention: M87 done (2026-07-23) → M82 rotated out (oldest terminal; its archive file still resolves and nothing cites it by Depends-on id). Kept: M87, M86, M85, M84, M83 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
