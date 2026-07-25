@@ -27,7 +27,10 @@ tbl_path <- "data-raw/m90-kappa-tables.rds"
 out_path <- "data-raw/m90-coverage-sweep.rds"
 
 if (!file.exists(tbl_path)) {
-  stop("kappa_m fixture not found: run data-raw/m90-mpl-kappa-tables.R (T2) first.", call. = FALSE)
+  stop(
+    "kappa_m fixture not found: run data-raw/m90-mpl-kappa-tables.R (T2) first.",
+    call. = FALSE
+  )
 }
 fx <- readRDS(tbl_path)
 
@@ -37,7 +40,9 @@ fx <- readRDS(tbl_path)
 kappa_lookup <- function(level, n_r, n_s) {
   t <- fx$tables[[level]]
   col <- t[t$n_r == n_r, c("n_s", "kappa_m")]
-  if (nrow(col) == 0) stop(sprintf("no kappa_m for R=%d at level %s", n_r, level))
+  if (nrow(col) == 0) {
+    stop(sprintf("no kappa_m for R=%d at level %s", n_r, level))
+  }
   col <- col[order(col$n_s), ]
   stats::approx(col$n_s, col$kappa_m, xout = n_s, method = "linear", rule = 1)$y
 }
@@ -58,7 +63,9 @@ levels <- list(
 )
 if (smoke) {
   cells <- cells[cells$id %in% c("C1", "C2", "C8"), ]
-  for (i in seq_along(levels)) levels[[i]]$n_rep <- 60L
+  for (i in seq_along(levels)) {
+    levels[[i]]$n_rep <- 60L
+  }
 }
 
 eps_lo <- 1e-6 # lower endpoint counts as clamped-to-0
@@ -72,7 +79,9 @@ for (lv in levels) {
     km <- kappa_lookup(lv$name, cc$n_r, cc$n_s)
     lo <- up <- numeric(lv$n_rep)
     for (r in seq_len(lv$n_rep)) {
-      set.seed(20260724L + 100000L * match(lv$name, c("0.90", "0.99")) + 1000L * ci + r)
+      set.seed(
+        20260724L + 100000L * match(lv$name, c("0.90", "0.99")) + 1000L * ci + r
+      )
       y <- mpl_simulate(cc$rho, cc$delta, cc$n_r, cc$n_s)
       ms <- mpl_anova(y)
       iv <- tryCatch(
@@ -89,25 +98,58 @@ for (lv in levels) {
     x <- sum(covered)
     cp <- stats::binom.test(x, lv$n_rep)$conf.int
     row <- data.frame(
-      level = lv$name, conf = lv$conf, id = cc$id,
-      n_r = cc$n_r, n_s = cc$n_s, delta = cc$delta, rho = cc$rho,
-      kappa_m = km, n_rep = lv$n_rep,
-      coverage = mean(covered), cp_lo = cp[1], cp_hi = cp[2],
-      miss_below = sum(miss_below), miss_above = sum(miss_above),
-      width_med = stats::median(width), width_p90 = stats::quantile(width, 0.90, names = FALSE),
-      p_lower0 = mean(lo <= eps_lo), p_upper1 = mean(up >= eps_hi),
+      level = lv$name,
+      conf = lv$conf,
+      id = cc$id,
+      n_r = cc$n_r,
+      n_s = cc$n_s,
+      delta = cc$delta,
+      rho = cc$rho,
+      kappa_m = km,
+      n_rep = lv$n_rep,
+      coverage = mean(covered),
+      cp_lo = cp[1],
+      cp_hi = cp[2],
+      miss_below = sum(miss_below),
+      miss_above = sum(miss_above),
+      width_med = stats::median(width),
+      width_p90 = stats::quantile(width, 0.90, names = FALSE),
+      p_lower0 = mean(lo <= eps_lo),
+      p_upper1 = mean(up >= eps_hi),
       vacuous = mean(lo <= eps_lo & up >= eps_hi),
       stringsAsFactors = FALSE
     )
     summ[[sprintf("%s:%s", lv$name, cc$id)]] <- row
-    raw[[sprintf("%s:%s", lv$name, cc$id)]] <- data.frame(lower = lo, upper = up, covered = covered)
+    raw[[sprintf("%s:%s", lv$name, cc$id)]] <- data.frame(
+      lower = lo,
+      upper = up,
+      covered = covered
+    )
     cat(sprintf(
       "  %s %s (R=%d,S=%3d,d=%g,rho=%.2f) km=%.3f: cov=%.4f [%.4f,%.4f] miss -/+ %d/%d  w50=%.3f\n",
-      lv$name, cc$id, cc$n_r, cc$n_s, cc$delta, cc$rho, km,
-      row$coverage, row$cp_lo, row$cp_hi, row$miss_below, row$miss_above, row$width_med
+      lv$name,
+      cc$id,
+      cc$n_r,
+      cc$n_s,
+      cc$delta,
+      cc$rho,
+      km,
+      row$coverage,
+      row$cp_lo,
+      row$cp_hi,
+      row$miss_below,
+      row$miss_above,
+      row$width_med
     ))
-    saveRDS(list(summary = do.call(rbind, summ), raw = raw, cells = cells,
-      done = sprintf("%s:%s", lv$name, cc$id)), out_path)
+    saveRDS(
+      list(
+        summary = do.call(rbind, summ),
+        raw = raw,
+        cells = cells,
+        done = sprintf("%s:%s", lv$name, cc$id)
+      ),
+      out_path
+    )
   }
 }
 
@@ -115,12 +157,18 @@ summary_df <- do.call(rbind, summ)
 rownames(summary_df) <- NULL
 saveRDS(
   list(
-    summary = summary_df, raw = raw, cells = cells,
+    summary = summary_df,
+    raw = raw,
+    cells = cells,
     meta = list(
       generator = "data-raw/m90-mpl-coverage-sweep.R",
       kappa_source = tbl_path,
-      levels = lapply(levels, function(x) x[c("name", "conf", "alpha", "n_rep")]),
-      seed_base = 20260724L, smoke = smoke, date = "2026-07-24"
+      levels = lapply(levels, function(x) {
+        x[c("name", "conf", "alpha", "n_rep")]
+      }),
+      seed_base = 20260724L,
+      smoke = smoke,
+      date = "2026-07-24"
     )
   ),
   out_path

@@ -1,6 +1,6 @@
 # M90: MPL κ_m recalibration + coverage GO/NO-GO at conf_level ∈ {0.90, 0.99}
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** RR03
@@ -37,47 +37,47 @@ off-grid) → unchanged, separate candidates.
 Driving RR = RR03; BC1–BC7 are ingested verbatim as AC4–AC10 (`binding
 criteria` string-compares them). No departures — no "Deviations from RR03" table.
 
-- [ ] AC1: Seeded κ_m tables at α=0.10 (conf_level 0.90) and α=0.01 (conf_level
+- [x] AC1: Seeded κ_m tables at α=0.10 (conf_level 0.90) and α=0.01 (conf_level
       0.99) exist over the full shipped (R,S) grid, provenance in `meta`; the
       generator's `kappa_corr_draws` collector reproduces the oracle-validated
       `mpl_kappa_corr` at a shared seed (equivalence assertion). The 0.90 external
       cross-check is BC1/AC4; the 0.99 table has no external κ_m anchor and is
       validated by coverage (AC6/BC3), per the M86 defining-property doctrine.
-- [ ] AC2: A per-level GO/NO-GO verdict applying the frozen BC3/BC4 criterion to
+- [x] AC2: A per-level GO/NO-GO verdict applying the frozen BC3/BC4 criterion to
       the sweep, recorded with evidence in the references comparison note; a
       NO-GO level is named and routed to a candidate row, not exported (BC7).
-- [ ] AC3: The note states the **level-specific** oracle posture — conf_level
+- [x] AC3: The note states the **level-specific** oracle posture — conf_level
       0.90's κ_m is externally oracle-backed over ρ∈[0.6,0.9] (xiao2013 Table
       3/6, IP1); its sub-0.6 tail and all of conf_level 0.99 have no external
       oracle (D-014(i) inherited), established by simulated coverage only.
-- [ ] AC4 (BC1): Before any α=0.01 production calibration, the α-parametrized
+- [x] AC4 (BC1): Before any α=0.01 production calibration, the α-parametrized
       pipeline, run at α=0.10 two-sided over ρ ∈ [0.6, 0.9] × δ = 2^(−1..4) with
       n_mc ≥ 6000, reproduces all six published two-sided κ_m values — 0.32,
       0.52, 0.67 at (R=3, S=10/25/50) and 0.13, 0.23, 0.33 at (R=5, S=10/25/50)
       — each within ±0.10 (the M86 tolerance). S = 25 is evaluated explicitly (it
       is off the shipped `s_grid`).
-- [ ] AC5 (BC2): The α=0.01 table generator uses n_mc_scan ≥ 3000, top_k ≥ 5,
+- [x] AC5 (BC2): The α=0.01 table generator uses n_mc_scan ≥ 3000, top_k ≥ 5,
       n_mc_final ≥ 12000. The fixture records, for at least one representative
       geometry per R ∈ {2, 3, 10}, a bootstrap SE of the final κ̂_m (resampling
       the final-cell deviance sample); each recorded SE ≤ 0.05. The α=0.10
       generator may retain M88's sizes (1500/3/6000).
-- [ ] AC6 (BC3): Per-cell pass floor: empirical coverage ≥ 0.88 at conf_level
+- [x] AC6 (BC3): Per-cell pass floor: empirical coverage ≥ 0.88 at conf_level
       0.90; ≥ **0.98** at conf_level 0.99 (supersedes the proposed c − 0.02 =
       0.97). Over-coverage passes at both levels.
-- [ ] AC7 (BC4): n_rep ≥ 2000 per cell at 0.99 (coverage MC-SE at the 0.98 floor
+- [x] AC7 (BC4): n_rep ≥ 2000 per cell at 0.99 (coverage MC-SE at the 0.98 floor
       ≤ 0.0032); n_rep ≥ 1000 per cell at 0.90. The verdict fixture reports an
       exact (Clopper–Pearson) 95 % CI for coverage at every cell.
-- [ ] AC8 (BC5): The decisive set at each level is M87's C1–C5 **plus** C6 =
+- [x] AC8 (BC5): The decisive set at each level is M87's C1–C5 **plus** C6 =
       (R=3, S=100, δ=4, ρ=0.60), C7 = (R=2, S=15, δ=1, ρ=0.05), and C8 = (R=3,
       S=20, δ=1, ρ=0.02). All eight are decisive: the floor (BC3) must hold at
       every one.
-- [ ] AC9 (BC6): The sweep fixture records per cell: miss-below and miss-above
+- [x] AC9 (BC6): The sweep fixture records per cell: miss-below and miss-above
       counts; median and 90th-percentile interval width; P(lower endpoint = 0);
       P(upper endpoint ≥ 0.999); vacuous fraction (both clamps simultaneously).
       These do not gate the verdict, except: the M91 documentation (or the
       references note if 0.99 is NO-GO) must state the small-geometry width
       finding wherever a decisive cell's median 0.99-interval width ≥ 0.90.
-- [ ] AC10 (BC7): M91 may export conf_level 0.99 only if BC1–BC6 all pass at that
+- [x] AC10 (BC7): M91 may export conf_level 0.99 only if BC1–BC6 all pass at that
       level; conf_level 0.90 gates only on BC1 and on BC3–BC6 at its own level. A
       BC failure at one level routes that level to a candidate row (NO-GO)
       without blocking the other. No level deeper than 0.99 is authorized by this
@@ -148,3 +148,42 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
   comment) + a 0.95 sub-grid-floor backfill candidate.
 
 ## Review
+
+**Verdict: both conf_level 0.90 and 0.99 GO.** Fresh evidence re-derived from the
+committed fixtures (`data-raw/m90-kappa-tables.rds`, `m90-coverage-sweep.rds`,
+`m90-verdict.rds`) and by re-running `data-raw/m90-mpl-verdict.R`.
+
+Acceptance-criterion evidence (each verified fresh):
+- **AC1** — both tables present, 54 nodes each over R 2:10 × S {10,15,20,30,50,100},
+  `meta` provenance complete (generator/seed/levels/grids, `smoke=FALSE`). The
+  `kappa_corr_draws` collector reproduced `mpl_kappa_corr` at a shared seed
+  (equivalence assertion OK, T2 log). 0.90 external cross-check = AC4; 0.99 = coverage (AC6).
+- **AC2/AC3** — verdict + per-cell coverage table recorded in
+  `references/mpl-twoway-random-comparison.md` § "M90 verdict (T4)"; level-specific
+  oracle posture stated (§ "Oracle posture (level-specific)", note l.360).
+- **AC4/BC1** — 6/6 published κ_m reproduced within ±0.10, S=25 evaluated
+  explicitly; max |diff| **0.020** (0.30/0.535/0.677/0.133/0.219/0.311).
+- **AC5/BC2** — α=0.01 sizes scan=3000/top_k=5/final=12000; bootstrap SE
+  **0.037/0.033/0.026** for R∈{2,3,10}, all ≤ 0.05.
+- **AC6/BC3** — every cell ≥ floor: 0.90 min **0.915** (C4) ≥ 0.88; 0.99 min
+  **0.997** (C6) ≥ 0.98.
+- **AC7/BC4** — n_rep 1000 (0.90) / 2000 (0.99); Clopper–Pearson CIs present per cell.
+- **AC8/BC5** — all 8 cells C1–C8 swept at both levels.
+- **AC9/BC6** — all diagnostic columns present (miss ±, width med/p90, clamp rates,
+  vacuous); no decisive cell median 0.99 width ≥ 0.90 (max 0.852 at C4), so the
+  mandatory width-doc trigger did not fire; the one-sided-miss asymmetry (C4/C6) is
+  carried to M91.
+- **AC10/BC7** — gating logic applied by the verdict script (both GO); "no level
+  deeper than 0.99" recorded in the note.
+
+**Projections vs outcomes (Driving RR = RR03):**
+- BC1 |diff| ≤ 0.10 (projected) → measured max **0.020**.
+- BC2 bootstrap SE ≤ 0.05 (projected) → measured max **0.037**.
+- BC3 floor 0.98 @ 0.99 (projected) → measured min **0.997**; floor 0.88 @ 0.90 → min **0.915**.
+- BC4 MC-SE ≤ 0.0032 at the 0.99 floor (projected) → n_rep=2000 gives SE ≈ 0.0031.
+All measured outcomes clear their projected thresholds; no shortfall.
+
+**Amendment during review:** AC1's original "scan-vs-top-k cross-check within MC
+tolerance" clause was sent back (mis-specified — scan→top-k is a bias correction,
+not a consistency check) and gate-amended to the real internal validation; single
+bounce, AC2–AC10 unaffected.

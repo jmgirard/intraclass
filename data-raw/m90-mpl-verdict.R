@@ -20,7 +20,9 @@ sweep_path <- "data-raw/m90-coverage-sweep.rds"
 tbl_path <- "data-raw/m90-kappa-tables.rds"
 out_path <- "data-raw/m90-verdict.rds"
 for (p in c(sweep_path, tbl_path)) {
-  if (!file.exists(p)) stop(sprintf("missing fixture %s -- run T2/T3 first.", p), call. = FALSE)
+  if (!file.exists(p)) {
+    stop(sprintf("missing fixture %s -- run T2/T3 first.", p), call. = FALSE)
+  }
 }
 sw <- readRDS(sweep_path)$summary
 fx <- readRDS(tbl_path)
@@ -31,11 +33,21 @@ sw$cell_pass <- sw$coverage >= sw$floor
 
 cat("== M90 verdict: per-cell coverage vs BC3 floor ==\n")
 for (i in seq_len(nrow(sw))) {
-  cat(sprintf("  %s %s: cov=%.4f [%.4f,%.4f] floor=%.2f  %s%s\n",
-    sw$level[i], sw$id[i], sw$coverage[i], sw$cp_lo[i], sw$cp_hi[i], sw$floor[i],
+  cat(sprintf(
+    "  %s %s: cov=%.4f [%.4f,%.4f] floor=%.2f  %s%s\n",
+    sw$level[i],
+    sw$id[i],
+    sw$coverage[i],
+    sw$cp_lo[i],
+    sw$cp_hi[i],
+    sw$floor[i],
     if (sw$cell_pass[i]) "PASS" else "FAIL",
-    if (sw$level[i] == "0.99" && sw$width_med[i] >= 0.90)
-      sprintf("  [BC6 wide: w50=%.2f]", sw$width_med[i]) else ""))
+    if (sw$level[i] == "0.99" && sw$width_med[i] >= 0.90) {
+      sprintf("  [BC6 wide: w50=%.2f]", sw$width_med[i])
+    } else {
+      ""
+    }
+  ))
 }
 
 bc1_pass <- isTRUE(fx$bc1_pass)
@@ -48,9 +60,12 @@ verdict <- lapply(names(floors), function(lv) {
   go <- cover_ok && bc1_pass && (lv == "0.90" || bc2_pass)
   wide <- cells_lv[lv == "0.99" & cells_lv$width_med >= 0.90, "id"]
   list(
-    level = lv, go = go, cover_ok = cover_ok,
+    level = lv,
+    go = go,
+    cover_ok = cover_ok,
     failed_cells = cells_lv$id[!cells_lv$cell_pass],
-    bc1_pass = bc1_pass, bc2_pass = if (lv == "0.99") bc2_pass else NA,
+    bc1_pass = bc1_pass,
+    bc2_pass = if (lv == "0.99") bc2_pass else NA,
     wide_cells = if (length(wide)) wide else character(0),
     min_coverage = min(cells_lv$coverage)
   )
@@ -60,16 +75,32 @@ names(verdict) <- names(floors)
 cat("\n== GO/NO-GO (BC7) ==\n")
 for (lv in names(verdict)) {
   v <- verdict[[lv]]
-  cat(sprintf("  conf_level %s: %s  (coverage_ok=%s, BC1=%s%s; min cov %.4f%s)\n",
-    lv, if (v$go) "GO" else "NO-GO",
-    v$cover_ok, v$bc1_pass,
+  cat(sprintf(
+    "  conf_level %s: %s  (coverage_ok=%s, BC1=%s%s; min cov %.4f%s)\n",
+    lv,
+    if (v$go) "GO" else "NO-GO",
+    v$cover_ok,
+    v$bc1_pass,
     if (lv == "0.99") sprintf(", BC2=%s", v$bc2_pass) else "",
     v$min_coverage,
-    if (length(v$failed_cells)) sprintf("; failed: %s", paste(v$failed_cells, collapse = ",")) else ""))
+    if (length(v$failed_cells)) {
+      sprintf("; failed: %s", paste(v$failed_cells, collapse = ","))
+    } else {
+      ""
+    }
+  ))
 }
 cat("  (No level deeper than 0.99 is authorized by RR03/D-017.)\n")
 
-saveRDS(list(verdict = verdict, sweep = sw, bc1_pass = bc1_pass, bc2_pass = bc2_pass,
-  floors = floors, meta = list(generator = "data-raw/m90-mpl-verdict.R", date = "2026-07-24")),
-  out_path)
+saveRDS(
+  list(
+    verdict = verdict,
+    sweep = sw,
+    bc1_pass = bc1_pass,
+    bc2_pass = bc2_pass,
+    floors = floors,
+    meta = list(generator = "data-raw/m90-mpl-verdict.R", date = "2026-07-24")
+  ),
+  out_path
+)
 cat(sprintf("\nsaved %s\n", out_path))

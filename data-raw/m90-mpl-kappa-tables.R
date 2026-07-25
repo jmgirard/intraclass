@@ -84,7 +84,15 @@ kappa_m_one <- function(
   grid <- expand.grid(rho = rho_grid, delta = delta_grid)
   grid$kc_scan <- mapply(
     function(rho, delta) {
-      mpl_kappa_corr(rho, delta, n_r, n_s, alpha = alpha, side = "two", n_mc = n_mc_scan)
+      mpl_kappa_corr(
+        rho,
+        delta,
+        n_r,
+        n_s,
+        alpha = alpha,
+        side = "two",
+        n_mc = n_mc_scan
+      )
     },
     grid$rho,
     grid$delta
@@ -92,7 +100,14 @@ kappa_m_one <- function(
   top <- grid[order(grid$kc_scan, decreasing = TRUE)[seq_len(top_k)], ]
   set.seed(seed_g + 1L)
   fin <- lapply(seq_len(nrow(top)), function(j) {
-    kappa_corr_draws(top$rho[j], top$delta[j], n_r, n_s, alpha = alpha, n_mc = n_mc_final)
+    kappa_corr_draws(
+      top$rho[j],
+      top$delta[j],
+      n_r,
+      n_s,
+      alpha = alpha,
+      n_mc = n_mc_final
+    )
   })
   top$kc_final <- vapply(fin, function(x) x$kappa, numeric(1))
   bi <- which.max(top$kc_final)
@@ -120,8 +135,22 @@ s_grid <- c(10L, 15L, 20L, 30L, 50L, 100L)
 se_nodes <- list(c(2L, 10L), c(3L, 50L), c(10L, 20L))
 
 levels <- list(
-  list(name = "0.90", conf = 0.90, alpha = 0.10, scan = 1500L, top_k = 3L, final = 6000L),
-  list(name = "0.99", conf = 0.99, alpha = 0.01, scan = 3000L, top_k = 5L, final = 12000L)
+  list(
+    name = "0.90",
+    conf = 0.90,
+    alpha = 0.10,
+    scan = 1500L,
+    top_k = 3L,
+    final = 6000L
+  ),
+  list(
+    name = "0.99",
+    conf = 0.99,
+    alpha = 0.01,
+    scan = 3000L,
+    top_k = 5L,
+    final = 12000L
+  )
 )
 
 if (smoke) {
@@ -141,14 +170,34 @@ out_path <- "data-raw/m90-kappa-tables.rds"
 
 # --- Smoke equivalence assertion: kappa_corr_draws == mpl_kappa_corr ----------
 set.seed(999L)
-a <- mpl_kappa_corr(0.6, 16, 3, 50, alpha = 0.10, side = "two", n_mc = if (smoke) 200L else 2000L)
+a <- mpl_kappa_corr(
+  0.6,
+  16,
+  3,
+  50,
+  alpha = 0.10,
+  side = "two",
+  n_mc = if (smoke) 200L else 2000L
+)
 set.seed(999L)
-b <- kappa_corr_draws(0.6, 16, 3, 50, alpha = 0.10, n_mc = if (smoke) 200L else 2000L)$kappa
+b <- kappa_corr_draws(
+  0.6,
+  16,
+  3,
+  50,
+  alpha = 0.10,
+  n_mc = if (smoke) 200L else 2000L
+)$kappa
 stopifnot(isTRUE(all.equal(a, b)))
-cat(sprintf("equivalence check kappa_corr_draws == mpl_kappa_corr: OK (%.5f)\n", b))
+cat(sprintf(
+  "equivalence check kappa_corr_draws == mpl_kappa_corr: OK (%.5f)\n",
+  b
+))
 
 # --- BC1 precondition: reproduce xiao2013's published alpha=0.10 kappa_m ------
-cat("\n== BC1: reproduce published two-sided kappa_m at alpha=0.10 (rho in [0.6,0.9]) ==\n")
+cat(
+  "\n== BC1: reproduce published two-sided kappa_m at alpha=0.10 (rho in [0.6,0.9]) ==\n"
+)
 published <- data.frame(
   n_r = c(3L, 3L, 3L, 5L, 5L, 5L),
   n_s = c(10L, 25L, 50L, 10L, 25L, 50L),
@@ -160,36 +209,59 @@ bc1_topk <- if (smoke) 2L else 5L
 published$kappa_hat <- NA_real_
 for (i in seq_len(nrow(published))) {
   res <- kappa_m_one(
-    published$n_r[i], published$n_s[i],
-    alpha = 0.10, n_mc_scan = bc1_nmc, top_k = bc1_topk, n_mc_final = bc1_nmc,
-    rho_grid = rho_pub, delta_grid = delta_grid, seed_g = seed + 101L * i
+    published$n_r[i],
+    published$n_s[i],
+    alpha = 0.10,
+    n_mc_scan = bc1_nmc,
+    top_k = bc1_topk,
+    n_mc_final = bc1_nmc,
+    rho_grid = rho_pub,
+    delta_grid = delta_grid,
+    seed_g = seed + 101L * i
   )
   published$kappa_hat[i] <- res$kappa_m
   cat(sprintf(
     "  (R=%d,S=%2d): kappa_hat %.3f  published %.2f  |diff| %.3f  %s\n",
-    published$n_r[i], published$n_s[i], res$kappa_m, published$kappa_pub[i],
+    published$n_r[i],
+    published$n_s[i],
+    res$kappa_m,
+    published$kappa_pub[i],
     abs(res$kappa_m - published$kappa_pub[i]),
     if (abs(res$kappa_m - published$kappa_pub[i]) <= 0.10) "PASS" else "FAIL"
   ))
 }
 published$pass <- abs(published$kappa_hat - published$kappa_pub) <= 0.10
 bc1_pass <- all(published$pass)
-cat(sprintf("BC1: %s (%d/%d within +-0.10)\n", if (bc1_pass) "PASS" else "FAIL",
-  sum(published$pass), nrow(published)))
+cat(sprintf(
+  "BC1: %s (%d/%d within +-0.10)\n",
+  if (bc1_pass) "PASS" else "FAIL",
+  sum(published$pass),
+  nrow(published)
+))
 if (!bc1_pass && !smoke) {
-  stop("BC1 precondition FAILED -- not proceeding to alpha=0.01 production (RR03/BC1).")
+  stop(
+    "BC1 precondition FAILED -- not proceeding to alpha=0.01 production (RR03/BC1)."
+  )
 }
 
 # --- Production tables per level ----------------------------------------------
 nodes_all <- expand.grid(n_r = r_grid, n_s = s_grid)
 nodes_all <- nodes_all[order(nodes_all$n_r, nodes_all$n_s), ]
-is_se_node <- function(r, s) any(vapply(se_nodes, function(z) z[1] == r && z[2] == s, logical(1)))
+is_se_node <- function(r, s) {
+  any(vapply(se_nodes, function(z) z[1] == r && z[2] == s, logical(1)))
+}
 
 tables <- list()
 details <- list()
 for (lv in levels) {
-  cat(sprintf("\n== production: conf_level %s (alpha=%.2f), scan=%d top_k=%d final=%d ==\n",
-    lv$name, lv$alpha, lv$scan, lv$top_k, lv$final))
+  cat(sprintf(
+    "\n== production: conf_level %s (alpha=%.2f), scan=%d top_k=%d final=%d ==\n",
+    lv$name,
+    lv$alpha,
+    lv$scan,
+    lv$top_k,
+    lv$final
+  ))
   nd <- nodes_all
   nd$kappa_m <- NA_real_
   nd$argmax_rho <- NA_real_
@@ -198,10 +270,17 @@ for (lv in levels) {
   for (i in seq_len(nrow(nd))) {
     want_se <- is_se_node(nd$n_r[i], nd$n_s[i])
     res <- kappa_m_one(
-      nd$n_r[i], nd$n_s[i],
-      alpha = lv$alpha, n_mc_scan = lv$scan, top_k = lv$top_k, n_mc_final = lv$final,
-      rho_grid = rho_grid_prod, delta_grid = delta_grid,
-      seed_g = seed + 17L * i + 1000L * match(lv$name, vapply(levels, function(x) x$name, "")),
+      nd$n_r[i],
+      nd$n_s[i],
+      alpha = lv$alpha,
+      n_mc_scan = lv$scan,
+      top_k = lv$top_k,
+      n_mc_final = lv$final,
+      rho_grid = rho_grid_prod,
+      delta_grid = delta_grid,
+      seed_g = seed +
+        17L * i +
+        1000L * match(lv$name, vapply(levels, function(x) x$name, "")),
       want_se = want_se
     )
     nd$kappa_m[i] <- res$kappa_m
@@ -209,26 +288,51 @@ for (lv in levels) {
     nd$argmax_delta[i] <- res$argmax[["delta"]]
     nd$se_boot[i] <- res$se_boot
     details[[sprintf("%s:%d-%d", lv$name, nd$n_r[i], nd$n_s[i])]] <- res$top
-    cat(sprintf("  (R=%2d,S=%3d): kappa_m %.3f at (rho=%.2f,delta=%g)%s  [%d/%d]\n",
-      nd$n_r[i], nd$n_s[i], res$kappa_m, res$argmax_rho[i], res$argmax_delta[i],
-      if (want_se) sprintf(" SE=%.3f", res$se_boot) else "", i, nrow(nd)))
+    cat(sprintf(
+      "  (R=%2d,S=%3d): kappa_m %.3f at (rho=%.2f,delta=%g)%s  [%d/%d]\n",
+      nd$n_r[i],
+      nd$n_s[i],
+      res$kappa_m,
+      res$argmax_rho[i],
+      res$argmax_delta[i],
+      if (want_se) sprintf(" SE=%.3f", res$se_boot) else "",
+      i,
+      nrow(nd)
+    ))
     tables[[lv$name]] <- nd
-    saveRDS(list(tables = tables, details = details, published = published,
-      done = list(level = lv$name, i = i, of = nrow(nd))), out_path)
+    saveRDS(
+      list(
+        tables = tables,
+        details = details,
+        published = published,
+        done = list(level = lv$name, i = i, of = nrow(nd))
+      ),
+      out_path
+    )
   }
 }
 
 # --- BC2 SE gate --------------------------------------------------------------
-cat("\n== BC2: bootstrap SE of final kappa_hat_m at one geometry per R in {2,3,10} ==\n")
+cat(
+  "\n== BC2: bootstrap SE of final kappa_hat_m at one geometry per R in {2,3,10} ==\n"
+)
 se99 <- tables[["0.99"]]
 se99 <- se99[!is.na(se99$se_boot), c("n_r", "n_s", "kappa_m", "se_boot")]
 for (i in seq_len(nrow(se99))) {
-  cat(sprintf("  (R=%2d,S=%3d): kappa_m %.3f  SE %.4f  %s\n",
-    se99$n_r[i], se99$n_s[i], se99$kappa_m[i], se99$se_boot[i],
-    if (se99$se_boot[i] <= 0.05) "PASS" else "FAIL"))
+  cat(sprintf(
+    "  (R=%2d,S=%3d): kappa_m %.3f  SE %.4f  %s\n",
+    se99$n_r[i],
+    se99$n_s[i],
+    se99$kappa_m[i],
+    se99$se_boot[i],
+    if (se99$se_boot[i] <= 0.05) "PASS" else "FAIL"
+  ))
 }
 bc2_pass <- all(se99$se_boot <= 0.05)
-cat(sprintf("BC2: %s\n", if (bc2_pass) "PASS" else "FAIL (increase n_mc_final)"))
+cat(sprintf(
+  "BC2: %s\n",
+  if (bc2_pass) "PASS" else "FAIL (increase n_mc_final)"
+))
 
 # --- Commit fixtures (NO sysdata.rda -- that is M91) --------------------------
 saveRDS(
@@ -242,14 +346,25 @@ saveRDS(
     meta = list(
       generator = "data-raw/m90-mpl-kappa-tables.R",
       source = "xiao2013 kappa_m recalibrated per alpha via data-raw/m86-mpl-lib.R (RR03/D-017)",
-      levels = lapply(levels, function(x) x[c("name", "conf", "alpha", "scan", "top_k", "final")]),
-      rho_grid = rho_grid_prod, delta_grid = delta_grid,
-      r_grid = r_grid, s_grid = s_grid, se_nodes = se_nodes,
-      seed = seed, smoke = smoke, date = "2026-07-24"
+      levels = lapply(levels, function(x) {
+        x[c("name", "conf", "alpha", "scan", "top_k", "final")]
+      }),
+      rho_grid = rho_grid_prod,
+      delta_grid = delta_grid,
+      r_grid = r_grid,
+      s_grid = s_grid,
+      se_nodes = se_nodes,
+      seed = seed,
+      smoke = smoke,
+      date = "2026-07-24"
     )
   ),
   out_path
 )
-cat(sprintf("\nsaved %s  (BC1 %s, BC2 %s%s)\n", out_path,
-  if (bc1_pass) "PASS" else "FAIL", if (bc2_pass) "PASS" else "FAIL",
-  if (smoke) "; SMOKE run -- not production fixtures" else ""))
+cat(sprintf(
+  "\nsaved %s  (BC1 %s, BC2 %s%s)\n",
+  out_path,
+  if (bc1_pass) "PASS" else "FAIL",
+  if (bc2_pass) "PASS" else "FAIL",
+  if (smoke) "; SMOKE run -- not production fixtures" else ""
+))
