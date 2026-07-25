@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-24 (planned M90 + M91 — MPL `conf_level` ∈ {0.90, 0.99}: M90 recalibrates κ_m at α∈{0.10,0.01} + renders a per-level coverage GO/NO-GO (no exported code, M87 shape), M91 exports the calibrated set behind the lifted `icc.R:1467` fence (depends on M90's GO). Lineage D-015 → these; level set chosen at the plan gate. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-24 (M90 shipped via PR #97 — κ_m recalibrated at α∈{0.10,0.01}; **conf_level 0.90 and 0.99 both GO** for `ci_method="mpl"` (BC1 reproduces xiao2013's published α=0.10 κ_m 6/6, max |diff| 0.020; BC2 SE ≤0.037; coverage min 0.915@0.90 / 0.997@0.99 across 8 cells). D-017 from the RB03/RR03 Fable review. 3-lens review: 1 actioned finding (F1, 84), 1 logged (F2, 34). Archived M90, rotated M85 out. M91 now workable. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,15 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | review | — | normal | milestones/M90-mpl-conf-level-calibration.md |
 | M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | planned | M90 | normal | milestones/M91-mpl-conf-level-export.md |
+| M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | done | — | normal | milestones/archive/M90-mpl-conf-level-calibration.md |
 | M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | done | M88 | normal | milestones/archive/M89-mpl-numeric-unit.md |
 | M88 | Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k) | done | M86, M87 | normal | milestones/archive/M88-mpl-ci-method-export.md |
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | done | M86 | normal | milestones/archive/M87-mpl-coverage-verdict-twoway-random.md |
 | M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | done | — | normal | milestones/archive/M86-mpl-machinery-twoway-random.md |
-| M85 | Unbalanced one-way transformed bootstrap-t — ICC(k) via re-derived SB map | done | M84 | normal | milestones/archive/M85-unbalanced-npbootstrap-icck.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M89 done (2026-07-24) → M84 rotated out (oldest terminal; its archive file still resolves and M85's Depends-on M84 resolves to that archive). Kept: M89, M88, M87, M86, M85 (5 most recent terminal). -->
+<!-- terminal-row retention: M90 done (2026-07-24) → M85 rotated out (oldest terminal; its archive file still resolves). Kept: M90, M89, M88, M87, M86 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
