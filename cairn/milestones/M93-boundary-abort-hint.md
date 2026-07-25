@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP7
-- **Branch/PR:** `m93-boundary-abort-hint`
+- **Branch/PR:** `m93-boundary-abort-hint` · https://github.com/jmgirard/intraclass/pull/100
 
 ## Goal
 
