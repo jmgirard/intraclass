@@ -1,10 +1,11 @@
 # M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP7
+- **Branch/PR:** `m93-boundary-abort-hint`
 
 ## Goal
 
