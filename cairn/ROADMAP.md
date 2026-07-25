@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-24 (M91 in review, PR #98 — MPL `conf_level` 0.90/0.99 exported; 4 interpolated-S confirmation cells all clear their frozen floors. +2 candidates, absorbed the 0.95 sub-grid-floor row. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-25 (M91 shipped via PR #98 — MPL `conf_level` 0.90/0.99 exported, κ_m table conf_level-keyed; 4 pre-registered cells clear their floors, interpolated S confirmed at 0.90/0.99 but NOT at 0.95 → new candidate. 2 findings actioned (F1 93, F2 88). Archived M91, rotated M86 out. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | review | M90 | normal | milestones/M91-mpl-conf-level-export.md |
+| M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | done | M90 | normal | milestones/archive/M91-mpl-conf-level-export.md |
 | M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | done | — | normal | milestones/archive/M90-mpl-conf-level-calibration.md |
 | M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | done | M88 | normal | milestones/archive/M89-mpl-numeric-unit.md |
 | M88 | Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k) | done | M86, M87 | normal | milestones/archive/M88-mpl-ci-method-export.md |
 | M87 | MPL two-way random ICC(A,1) coverage pass — extended-range recalibration + GO/NO-GO verdict | done | M86 | normal | milestones/archive/M87-mpl-coverage-verdict-twoway-random.md |
-| M86 | Profile-likelihood machinery for two-way random ICC(A,1) — implement + validate against xiao2013 | done | — | normal | milestones/archive/M86-mpl-machinery-twoway-random.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M90 done (2026-07-24) → M85 rotated out (oldest terminal; its archive file still resolves). Kept: M90, M89, M88, M87, M86 (5 most recent terminal). -->
+<!-- terminal-row retention: M91 done (2026-07-25) → M86 rotated out (oldest terminal; its archive file still resolves). Kept: M91, M90, M89, M88, M87 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
