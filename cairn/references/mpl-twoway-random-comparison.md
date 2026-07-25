@@ -477,6 +477,38 @@ only, the other levels and the on-node behavior are untouched. The floor is neve
 loosened and the shipped 0.95 is never restricted on evidence about another level
 (GP5; the M68 fix-the-evidence-never-the-bar lesson).
 
+## M91 verdict (T2) — interpolated S confirmed at all three levels
+
+**Confirmed at every level** against the frozen criterion above. Evidence:
+`data-raw/m91-interp-sweep.rds` (`data-raw/m91-mpl-interp-sweep.R`, seeded),
+κ_m taken through the interpolation rule under test:
+
+| cell | R | S | δ | ρ | level | κ_m (interp) | coverage | Clopper–Pearson 95 % | floor | miss −/+ | median width |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| D1 | 3 | 25 | 4.0 | 0.60 | 0.90 | 0.7767 | 0.9340 | [0.9168, 0.9486] | 0.88 | 65 / 1 | 0.663 |
+| D2 | 3 | 25 | 4.0 | 0.60 | 0.99 | 0.6398 | 0.9995 | [0.9972, 1.0000] | 0.98 | 0 / 1 | 0.874 |
+| D3 | 2 | 40 | 4.0 | 0.60 | 0.99 | 0.8932 | 1.0000 | [0.9982, 1.0000] | 0.98 | 0 / 0 | 0.905 |
+| D4 | 3 | 20 | 1.0 | 0.02 | 0.95 | 0.6315 | 0.9960 | [0.9898, 0.9989] | 0.93 | 4 / 0 | 0.329 |
+
+No cell fell short, so the pre-registered restriction is not triggered: all three
+levels keep the interpolated-S path. Two consequences carried into the M91 exported
+docs.
+
+1. **One-sidedness reconfirmed off-node.** D1's misses are 65 below vs 1 above —
+   the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
+   The two-sided MPL interval is far from equal-tailed at δ = 4 with S rising, at
+   every level; `@param ci_method` says so.
+2. **First cell over the BC6 near-vacuity trigger.** D3's median width is **0.905**
+   on a [0, 1] scale — the first cell in this note to reach BC6's ≥ 0.90
+   documentation threshold (M90's widest decisive cell was 0.852). A 2-rater study
+   at 0.99 buys a bound that excludes almost nothing, which is the honest cost of
+   the deep tail at minimal rater information, not a defect: coverage is 1.0000
+   there. The `"mpl"` `@param` carries the caveat.
+
+D4 also closes the RR03 rec-#9 gap: the sub-grid-floor ρ = 0.02 posture is now
+measured at all three levels (0.991 at 0.90 and 1.000 at 0.99 in M90's C8; 0.996
+here at 0.95).
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the

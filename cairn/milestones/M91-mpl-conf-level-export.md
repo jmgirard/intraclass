@@ -102,7 +102,7 @@ values → candidate row (none of the four is documented there; a method-wide jo
       `references/mpl-twoway-random-comparison.md` § M91 — geometries, floors,
       n_rep, verdict rule, shortfall consequence — and commit it **before** any
       run (GP5, mirroring M90's § M90 pre-registration).
-- [ ] T2: Seeded `data-raw/m91-mpl-interp-sweep.R` running D1–D4 (reuse
+- [x] T2: Seeded `data-raw/m91-mpl-interp-sweep.R` running D1–D4 (reuse
       `m86-mpl-lib.R` + M90's sweep harness), κ_m via the interpolation path
       under test → committed fixture; apply the frozen floors and append the
       verdict to the references page.
@@ -130,6 +130,7 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - 2026-07-24: M90's RR03/D-017 gates this export (BC7 — 0.99 exportable only if BC1–BC6 pass; a NO-GO level stays a candidate). Folded the RR03 beyond-brief doc duties into Scope/T5. BCs are ingested verbatim in M90 (Driving RR there), not re-ingested here.
 - 2026-07-24: re-planned against shipped M90 (`/milestone-plan M91`). Both levels GO, so the 0.99 hedge is gone. Measured the falsified interpolation comment: non-monotone in S at ALL levels (worst step −0.046/−0.068/−0.162 at 0.90/0.95/0.99) — a correction, not a softening. Found M90's 8 coverage cells all on `s_grid` nodes, so interpolated κ_m is unvalidated at the new levels; BC1's S=25 κ_m cannot fill it (published ρ grid, not the extended production grid — interp 0.777 vs BC1 0.535 at R=3 is the deliberate extended-range margin). Gate: raw calibrated values, +3 confirmation cells (2 off-node + the absorbed 0.95 sub-grid-floor candidate), vignette gap → candidate. AC 6→7, T 5→7.
 - 2026-07-24: T1 — pre-registered the four confirmation cells D1–D4 in `references/mpl-twoway-random-comparison.md` § M91 (floors, n_rep, interpolated-κ_m rule, shortfall consequence) and froze it BEFORE any run (GP5). Gate: shortfall → restrict that level to exact `s_grid` S nodes; added D3 (2, 40) @ 0.99 for the −0.154 dip where κ_m ≈ 0.82–0.97 — AC5 gate-amended 3→4 cells (128/149 lines). 6 new generalizing claims triaged `OUT-oracle-pin`; both references gates green.
+- 2026-07-24: T2 — `data-raw/m91-mpl-interp-sweep.R` → `m91-interp-sweep.rds`: all four cells clear their frozen floors (D1 0.934, D2 0.9995, D3 1.0000, D4 0.996), so interpolated S is confirmed at all three levels and the pre-registered restriction does not fire. Two doc consequences: D1's misses are 65/1 (one-sidedness reconfirmed off-node), and D3's median width 0.905 is the FIRST cell to cross BC6's ≥0.90 near-vacuity trigger (M90's widest was 0.852). D4 closes the RR03 rec-#9 sub-grid-floor gap at 0.95. Fixed M90's logged F2 (cross-cell RNG overlap) in the new script's seed stride.
 
 ## Decisions
 
