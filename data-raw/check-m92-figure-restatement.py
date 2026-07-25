@@ -44,6 +44,8 @@ PERMITTED = {
     "cairn/references/mpl-twoway-random-comparison.md",
     "cairn/milestones/M92-mpl-095-interp-probe.md",
     "data-raw/generalizing-claims-triage.tsv",
+    # This file: its docstring quotes figures as examples of what it forbids.
+    "data-raw/check-m92-figure-restatement.py",
 }
 
 FIXTURES = {
@@ -62,6 +64,11 @@ NON_DISCRIMINATING = {
     "0.0000": "trivially common",
     "0.900": "M91's D3 median width discussion",
     "0.9000": "same as 0.900",
+    # 3-dp only. This collides with the `eps_hi <- 0.999` clamp constant in every sweep
+    # generator and with `conf_level = 0.999` in a test grid, so it cannot discriminate.
+    # The 4- and 5-dp forms stay in the probe set, so E3's run-2 coverage (0.999) is
+    # still protected wherever it is written to the precision the note uses.
+    "0.999": "the eps_hi clamp constant in the sweep generators; a conf_level in test-ci-mpl.R:496",
 }
 
 
