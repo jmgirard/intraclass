@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-25 (M91 shipped via PR #98 — MPL `conf_level` 0.90/0.99 exported, κ_m table conf_level-keyed; 4 pre-registered cells clear their floors, interpolated S confirmed at 0.90/0.99 but NOT at 0.95 → new candidate. 2 findings actioned (F1 93, F2 88). Archived M91, rotated M86 out. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-25 (`/milestone` audit — all 16 mechanical checks PASS; nothing in flight, no commits since the M91 review stamp earlier today, no open RB/issues/PRs. The 321 dangling-id advisories are all pre-migration M1–M47 ids in COVERAGE/estimand-specs/archives, not drift. Always-read governance frame complete for all four files. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
