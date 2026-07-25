@@ -628,6 +628,44 @@ test_that("mpl_kappa_lookup interpolates within a level, never across levels (M9
   )
 })
 
+test_that("the 0.95 off-node kappa_m values M92 coverage-validated are what ships (M92 AC5)", {
+  # GP7. M92 measured coverage at conf_level 0.95 at three off-node S geometries
+  # (cairn/references/mpl-twoway-random-comparison.md § M92; the seeded sweep is
+  # data-raw/m92-mpl-095-interp-sweep.R -> data-raw/m92-interp-sweep.rds). The
+  # evidence is only load-bearing while the runtime keeps producing the SAME
+  # constant the sweep fed to mpl_interval(): the sweep reimplements the lookup
+  # rule offline, so a change to either the shipped 0.95 slice or to
+  # mpl_kappa_lookup's interpolation would silently detach the code from its own
+  # coverage evidence. These literals are the kappa_m column of that fixture.
+  #
+  # This is the "no shortfall" branch of § M92's pre-registered consequence: every
+  # cell cleared its 0.93 floor under the SHIPPED linear-in-S rule (0.968 / 0.953 /
+  # 1.000), so the bracket-max rule is NOT adopted and the lookup is unchanged. A
+  # future shortfall at some other geometry would flip that; this test pins what
+  # was actually validated, not the rule in the abstract.
+  expect_equal(
+    mpl_kappa_lookup(3L, 25L, conf_level = 0.95),
+    0.7089067,
+    tolerance = 1e-6
+  )
+  expect_equal(
+    mpl_kappa_lookup(10L, 40L, conf_level = 0.95),
+    0.1517143,
+    tolerance = 1e-6
+  )
+  expect_equal(
+    mpl_kappa_lookup(2L, 40L, conf_level = 0.95),
+    1.3663359,
+    tolerance = 1e-6
+  )
+
+  # Each is genuinely the interpolated chord, not a node value -- if any of these
+  # S became a grid node the cells would stop probing interpolation at all, which
+  # is exactly the gap M92 exists to close (M91 finding F1).
+  s_nodes <- sort(unique(kappa_m_table$n_s))
+  expect_false(any(c(25L, 40L) %in% s_nodes))
+})
+
 test_that("mpl aborts on an unbalanced design and off the kappa_m grid (AC4)", {
   skip_if_not_installed("glmmTMB")
 
