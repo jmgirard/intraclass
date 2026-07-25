@@ -664,6 +664,31 @@ test_that("the 0.95 off-node kappa_m values M92 coverage-validated are what ship
   # is exactly the gap M92 exists to close (M91 finding F1).
   s_nodes <- sort(unique(kappa_m_table$n_s))
   expect_false(any(c(25L, 40L) %in% s_nodes))
+
+  # A NON-midpoint geometry, because all three swept S above are exact bracket
+  # midpoints (25 = mid(20,30); 40 = mid(30,50)) and so equal the MEAN of their
+  # bracketing nodes. Pinning midpoints alone cannot tell linear interpolation from
+  # any bracket-symmetric rule: swapping stats::approx for mean(bracket) would leave
+  # every literal above green while changing every non-midpoint production lookup
+  # (M92 review finding F5, scored 62). S = 22 sits 1/5 of the way across the 20->30
+  # bracket, so the two rules separate by ~0.046 here.
+  slice95 <- kappa_m_table[abs(kappa_m_table$conf_level - 0.95) < 1e-8, ]
+  n20 <- slice95$kappa_m[slice95$n_r == 3L & slice95$n_s == 20L]
+  n30 <- slice95$kappa_m[slice95$n_r == 3L & slice95$n_s == 30L]
+  expect_equal(
+    mpl_kappa_lookup(3L, 22L, conf_level = 0.95),
+    0.6624794,
+    tolerance = 1e-6
+  )
+  expect_equal(
+    mpl_kappa_lookup(3L, 22L, conf_level = 0.95),
+    n20 + (22 - 20) / (30 - 20) * (n30 - n20),
+    tolerance = 1e-12
+  )
+  expect_false(isTRUE(all.equal(
+    mpl_kappa_lookup(3L, 22L, conf_level = 0.95),
+    mean(c(n20, n30))
+  )))
 })
 
 test_that("mpl aborts on an unbalanced design and off the kappa_m grid (AC4)", {

@@ -109,6 +109,11 @@ re-runs at the same `n_rep` against the same floor.
       `R/icc.R`, and the comparison note — then `devtools::document()`.
 - [x] T6: Resolve both ROADMAP candidate rows, run the full AC7 gate (including the
       two references checkers), and open the PR.
+- [x] T7 (review finding F1, 87): make the sweep's seed span disjoint from M91's,
+      re-run all three cells, keep the superseded run committed, and rewrite every
+      independence/monotonicity claim to what the new fixture supports.
+- [x] T8 (review finding F3, 92): correct the "largest 0.95 kappa_m" over-claim in
+      `data-raw/m92-mpl-095-interp-sweep.R`'s header — the fifth site T6 missed.
 
 ## Work log
 
@@ -122,7 +127,10 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: T6 done — envelope candidate row updated with M92's evidence (two passes now find no coverage cost to the dips; promote only on a NEW failure); the probe candidate was already absorbed at the plan gate. Gate: `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` → Status OK, 0 errors / 0 warnings / 0 notes; full suite at `NOT_CRAN=true CI=true` → FAIL 0, PASS 4210, SKIP 23, WARN 2 (pre-existing glmmTMB convergence warnings on the multilevel path — verified not ours: `git diff main..HEAD -- R/` changes zero non-comment lines); air + lintr clean; `document()` no-diff; both references checkers and cairn_validate green. AC1 ordering verified from git log: pre-registration da10025 (08:55:23) precedes the first result 2b984af (08:58:08). Manual built with `--no-manual` locally (known TinyTeX Courier font gap, not an Rd problem); CI builds it.
 - 2026-07-25: all tasks done, gate clean; PR #99 opened, status -> review.
 - 2026-07-25: review FAILED at AC5, status -> in-progress. What failed: finding F1 (scored 87) — the sweep's `seed_base` 20260725 against M91's 20260724 at the same stride and cell order makes E1 and E3 re-simulate M91's D1/D3 datasets bit-for-bit (verified: `mpl_simulate` `identical()` at the aligned seeds), so the shipped "second independent look" / "two independent passes" / "second probe's worth of evidence" claims are not what the fixture carries, and the D1->E1 "monotone in the level" item is forced by crit(E1) > crit(D1) on shared data. Riding along: F3 (92) — the corrected "largest 0.95 kappa_m" over-claim is still live at `data-raw/m92-mpl-095-interp-sweep.R:22-25`, a fifth site the T6 entry's "all four live sites" missed. AC1-AC4, AC6, AC7 verified and stay ticked; AC5 unticked. Four findings scored below 80 are logged in the Review section, not actioned.
-
+- 2026-07-25: minor plan amendment — added T7 and T8 for the two actioned review findings (discovered sub-tasks; no criterion, scope or goal text changed).
+- 2026-07-25: T7 done (F1). `seed_base` 20260725 -> 20920725, chosen so M92's seed span is disjoint from M91's; added a `stopifnot` that recomputes M91's span from ITS committed constants and asserts zero intersection, mutation-verified to error when the old base is restored. Guard pins the FROZEN n_rep 1000, not `cells$n_rep`, so smoke mode cannot relax it. Run 1 preserved at `data-raw/m92-interp-sweep-run1-collided.rds`; re-run written to `data-raw/m92-interp-sweep.rds`. New numbers: E1 0.9670 [0.9540, 0.9772] miss 31/2; E2 0.9440 [0.9279, 0.9574] miss 42/14; E3 0.9990 [0.9944, 1.0000] miss 0/1 — all three still clear the frozen 0.93 floor, and kappa_m is bit-identical across runs (table-derived, not run-derived). GP5 posture recorded explicitly in the note: run 1 ALSO cleared every floor, so no floor result motivated the re-run — the defect was reproducibility, not outcome.
+- 2026-07-25: T8 done (F3) — generator header now states E3 is a large-kappa_m CONCAVE bracket and names the actually-larger (R=2, S 50->100) bracket and the 1.6245 slice maximum, with the correction dated.
+- 2026-07-25: also fixed three sub-80 findings opportunistically while editing the same lines, each verified true first and each noted as such rather than folded in silently — F2 (68): `@param ci_method` no longer attributes the one-sidedness difference to rater count, since the two cited cells differ in R, S and level together; F4 (78): "same evidential footing" -> the interpolated path is coverage-CHECKED at each level at a handful of geometries, while nodes are individually CALIBRATED; F5 (62): added a non-midpoint pin (R=3, S=22 -> 0.6624794) plus an explicit refutation that the value equals the bracket mean, so the test now discriminates any bracket-symmetric rule, not just bracket-max. F6 (35) deliberately left alone — a repo-wide convention inherited from M91's generator, out of M92's scope.
 ## Decisions
 
 

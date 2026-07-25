@@ -589,43 +589,60 @@ bracket-max keeps every subject count working and only widens. The floor is not
 loosened either way, and no evidence here changes 0.90 or 0.99 (GP5; the M68
 fix-the-evidence-never-the-bar lesson). Decided at the M92 plan gate, 2026-07-25.
 
-## M92 verdict (T3) — interpolated S confirmed at 0.95; the level triple is closed
+## M92 verdict (T3, re-run T7) — interpolated S confirmed at 0.95; the level triple is closed
 
 **Every cell clears its floor under the shipped linear-in-S rule**, so the
 pre-registered bracket-max consequence is **not triggered** and `mpl_kappa_lookup`
-is unchanged. Evidence: `data-raw/m92-interp-sweep.rds`
-(`data-raw/m92-mpl-095-interp-sweep.R`, seeded), κ_m taken through the interpolation
-rule under test:
+is unchanged. Authoritative evidence: `data-raw/m92-interp-sweep.rds`
+(`data-raw/m92-mpl-095-interp-sweep.R`, seeded, `seed_base` 20920725), κ_m taken
+through the interpolation rule under test:
 
 | cell | R | S | δ | ρ | level | κ_m (interp) | coverage | Clopper–Pearson 95 % | floor | miss −/+ | median width |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | 0.7089 | 0.9680 | [0.9551, 0.9780] | 0.93 | 32 / 0 | 0.752 |
-| E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | 0.1517 | 0.9530 | [0.9380, 0.9653] | 0.93 | 34 / 13 | 0.415 |
-| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | 1.3663 | 1.0000 | [0.9963, 1.0000] | 0.93 | 0 / 0 | 0.868 |
+| E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | 0.7089 | 0.9670 | [0.9540, 0.9772] | 0.93 | 31 / 2 | 0.752 |
+| E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | 0.1517 | 0.9440 | [0.9279, 0.9574] | 0.93 | 42 / 14 | 0.417 |
+| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | 1.3663 | 0.9990 | [0.9944, 1.0000] | 0.93 | 0 / 1 | 0.871 |
 
 All three cells are off-node and at 0.95, so `interp_ok = TRUE` at that level rests on
 three interpolation probes and no mixed-role aggregation (the M91 F1 failure mode).
-With § M91's D1–D3 this closes the level triple: **interpolated S is now
-coverage-confirmed at 0.90, 0.95 and 0.99.**
+With § M91's D1–D3 this closes the level triple: **interpolated S is coverage-confirmed
+at 0.90, 0.95 and 0.99.**
+
+**Why there are two runs, and why this is not seed-shopping.** The first run
+(`seed_base` 20260725, kept at `data-raw/m92-interp-sweep-run1-collided.rds`) is
+**superseded on a reproducibility defect, not on its result**. Its base sat one
+integer from M91's 20260724 at the same stride and cell order, so M92 cell `ci` rep `r`
+drew M91 cell `ci` rep `r+1`'s seed; because `mpl_simulate` depends only on
+(ρ, δ, R, S), E1 re-simulated D1's datasets and E3 re-simulated D3's, bit-for-bit
+(M92 review finding F1, scored 87). The decisive point for GP5: **run 1 also cleared
+every floor** (0.9680 / 0.9530 / 1.0000), so no floor result motivated the re-run —
+had run 1 failed, re-running on new seeds would have been exactly the
+fix-the-bar move GP5 forbids. Both fixtures are committed; the cells, floors and
+`n_rep` are unchanged; and the generator now carries a `stopifnot` asserting M92's
+seed span is disjoint from M91's, mutation-verified to error on the old base.
 
 Three things the cells establish beyond the headline.
 
-1. **The dips do not cost coverage — a second independent look.** E2 crosses 0.95's
-   worst downward step and lands at 0.9530, essentially nominal; E3 crosses a
-   large-κ_m concave bracket, where the chord sits below the curve (the
-   under-estimating direction), and over-covers at 1.0000. Together with M91's D3
-   (the −0.154 dip at 0.99) that is now two passes finding no coverage cost to
-   non-monotonicity, which is the evidence the κ_m envelope/smoother candidate was
-   waiting on. It stays a candidate; nothing here argues *for* it.
-2. **One-sidedness weakens as raters are added.** D1 (R = 3, δ = 4) missed 65 below
-   vs 1 above; E2 at the same δ and a comparable S but **R = 10** misses 34 below vs
-   13 above. The strong one-sidedness the `@param ci_method` text records is a
-   few-raters phenomenon, not a property of the interval at every geometry, and the
-   exported text now says so rather than leaving the blanket reading in place.
-3. **E1 completes a controlled triple.** At one geometry (R = 3, S = 25, δ = 4,
-   ρ = 0.60) the interval now has an off-node coverage measurement at every level:
-   0.934 (D1, 0.90), 0.968 (E1, 0.95), 0.9995 (D2, 0.99) — monotone in the level, as
-   a correctly-calibrated family should be.
+1. **The dips do not cost coverage — now on genuinely independent data.** E2 crosses
+   0.95's worst downward step and lands at 0.9440, within MC noise of nominal; E3
+   crosses a large-κ_m concave bracket, where the chord sits below the curve (the
+   under-estimating direction), and over-covers at 0.9990. With M91's D3 (the −0.154
+   dip at 0.99) that is two passes finding no coverage cost to non-monotonicity — and
+   after the re-run the two passes rest on disjoint draws, which run 1 could not
+   claim. It stays a candidate; nothing here argues *for* it.
+2. **One-sidedness varies by design, and this corpus cannot say what drives it.**
+   D1 (R = 3, S = 25, δ = 4, level 0.90) missed 65 below vs 1 above; E2 (R = 10,
+   S = 40, δ = 4, level 0.95) misses 42 below vs 14 above. Rater count, subject count
+   and level all differ between them, so the contrast shows the asymmetry is
+   design-dependent and does **not** isolate a rater-count effect; no committed
+   fixture sweeps that axis alone (M92 review finding F2, scored 68). The exported
+   text now reports both observations without attributing the difference.
+3. **E1 completes the level triple at one geometry** — 0.934 (D1, 0.90), 0.967
+   (E1, 0.95), 0.9995 (D2, 0.99). Read it as three per-level measurements at a common
+   design, **not** as evidence of monotonicity in the level: the threshold
+   (1+κ)·χ²₁,₁₋α is larger at each deeper level, so on any shared or similar data the
+   ordering is close to forced. (Run 1 made this worse — E1 and D1 were literally the
+   same datasets, making the ordering arithmetically certain. Corrected here, F1.)
 
 ## Traces to
 

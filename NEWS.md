@@ -76,12 +76,13 @@
   correlations below about 0.6, and at 0.99 throughout, rests on that simulated
   coverage rather than an external benchmark. Within a level the constant is tabulated
   on a grid of rater and subject counts and interpolated between subject nodes; that
-  interpolated path is coverage-validated at all three supported levels, so a subject
-  count between grid points stands on the same evidence as one on it. Two properties to
+  interpolated path is itself coverage-checked at each supported level, at a handful of
+  geometries — grid nodes are individually calibrated, so an interpolated subject count
+  is validated rather than calibrated. Two properties to
   know before quoting a
   limit: the two-sided interval is **not equal-tailed** (where rater variance is large
-  relative to error and subjects are many, non-coverage can be almost all on one side —
-  the asymmetry weakens as raters are added), so
+  relative to error and subjects are many, non-coverage can be almost all on one side,
+  though how lopsided it gets varies by design), so
   a limit is not a one-sided bound at half the complementary level; and at 0.99 with
   very few raters it can be near-vacuous (median width 0.905 at 2 raters and 40
   subjects), which is the cost of a deep tail on little rater information.

@@ -19,10 +19,15 @@
 # E1 is the exact twin of M91's D1 (0.90) and D2 (0.99), completing the level
 # triple at one geometry. E2 crosses the largest 0.95 downward step (kappa_m
 # 0.1858 -> 0.1177 over S 30->50), where the error is largest RELATIVE to the
-# 1 + kappa_m factor scaling the deviance critical value. E3 crosses the largest
-# 0.95 kappa_m (1.2670 -> 1.4657 over the same nodes), locally concave so the
-# chord sits BELOW the curve -- an under-estimated kappa_m narrows the interval,
-# the under-covering direction, and there the absolute error is largest.
+# 1 + kappa_m factor scaling the deviance critical value. E3 crosses a LARGE-kappa_m
+# CONCAVE bracket (1.2670 -> 1.4657 over the same nodes): the slope falls across it,
+# so the chord sits BELOW the curve -- an under-estimated kappa_m narrows the
+# interval, the under-covering direction -- and kappa_m is large enough there for the
+# absolute error to move an endpoint. E3 is NOT the slice's largest kappa_m: the
+# (R=2, S 50->100) bracket is higher (1.4657 -> 1.6245) and the slice maximum is
+# 1.6245 at (2, 100). S = 40 is M91's D3 geometry at the shipped level, which is why
+# it was chosen. (An earlier draft of this header, and of four other sites, said
+# "the largest 0.95 kappa_m"; corrected 2026-07-25 -- M92 review finding F3.)
 #
 # kappa_m is taken through the interpolation rule UNDER TEST, never a
 # directly-evaluated value: the interpolated constant is the object of the test.
@@ -136,10 +141,46 @@ if (smoke) {
 eps_lo <- 1e-6 # lower endpoint counts as clamped-to-0
 eps_hi <- 0.999 # upper endpoint counts as clamped-to-1
 
-# Seeding: a per-cell stride strictly larger than any n_rep, so no two cells
-# share an RNG state (the M90 review F2 defect M91 fixed; inherited here).
-seed_base <- 20260725L
+# Seeding: a per-cell stride strictly larger than any n_rep, so no two cells share
+# an RNG state (the M90 review F2 defect M91 fixed; inherited here).
+#
+# The base ALSO has to be disjoint from M91's, which is a separate hazard and was
+# missed the first time round (M92 review finding F1, scored 87). The first M92 run
+# used base 20260725 against M91's 20260724 at the SAME stride and cell ordering,
+# so M92 cell `ci` rep `r` drew the same integer seed as M91 cell `ci` rep `r + 1`.
+# Two of the three cells share a geometry with an M91 cell -- E1 with D1 (R=3, S=25)
+# and E3 with D3 (R=2, S=40) -- and `mpl_simulate` depends only on
+# (rho, delta, n_r, n_s), so those cells re-simulated M91's datasets bit-for-bit and
+# were not an independent second look at all. That run is kept at
+# data-raw/m92-interp-sweep-run1-collided.rds; this base is disjoint from every M91
+# seed, and the assertion below is the mechanical guard so it cannot recur silently.
+seed_base <- 20920725L
 seed_stride <- 1000000L
+
+# M91's seed span, recomputed from ITS committed constants rather than restated:
+# base 20260724, same stride, 4 cells, max n_rep 2000.
+m91_seed_base <- 20260724L
+m91_seeds <- unlist(lapply(
+  1:4,
+  function(ci) {
+    (m91_seed_base + seed_stride * ci + 1L):(m91_seed_base +
+      seed_stride * ci +
+      2000L)
+  }
+))
+# Guard the FROZEN n_rep (1000), not `cells$n_rep`, which the smoke branch above has
+# already shrunk to 60 -- a guard that relaxes in smoke mode is the one that would let
+# a collision through on the cheap run and only bite on the expensive one.
+m92_seeds <- unlist(lapply(
+  seq_len(nrow(cells)),
+  function(ci) {
+    (seed_base + seed_stride * ci + 1L):(seed_base + seed_stride * ci + 1000L)
+  }
+))
+stopifnot(
+  # No M92 rep may reuse an M91 rep's seed, at any cell or geometry.
+  length(intersect(m91_seeds, m92_seeds)) == 0L
+)
 
 summ <- list()
 raw <- list()
