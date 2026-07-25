@@ -24,6 +24,18 @@
 
 ## Minor improvements
 
+* When the default Monte-Carlo interval cannot be computed near the variance
+  boundary, the error now **names the interval method that applies to your
+  design** instead of only suggesting a refit. A balanced one-way fit is pointed
+  at `ci_method = "searle"`, `"burch"` and `"npbootstrap"` (with a word on what
+  each is good for), an unbalanced one-way fit at `"npbootstrap"`, and a
+  balanced-complete two-way random absolute-agreement fit at `"mpl"`. Designs with
+  no boundary-robust option — fixed raters, multilevel, within-cell replicates,
+  consistency, or a `conf_level` outside the calibrated set — say nothing extra
+  rather than suggest a method that would also abort. The interval methods
+  themselves, and what the default does, are unchanged: this adds guidance to an
+  existing error, and never silently substitutes one method for another.
+
 * `ci_method = "npbootstrap"` now also covers **unbalanced one-way** designs
   (unequal ratings per subject) for both `unit = "single"` (ICC(1)) and
   `unit = "average"` (ICC(k)): the transform uses the ANOVA effective group size

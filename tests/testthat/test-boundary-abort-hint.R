@@ -412,7 +412,7 @@ bh_ok_oneway <- function(sizes = rep(5L, 20L), seed = 11) {
   s <- stats::rnorm(n_s, sd = 1)
   data.frame(
     subject = factor(rep(seq_len(n_s), times = sizes)),
-    rater = factor(unlist(lapply(sizes, seq_len))),
+    rater = factor(sequence(sizes)),
     score = rep(s, times = sizes) + stats::rnorm(sum(sizes), sd = 0.7)
   )
 }
