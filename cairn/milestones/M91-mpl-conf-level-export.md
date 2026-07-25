@@ -21,8 +21,13 @@ fixtures ({0.90, 0.95, 0.99}); key `mpl_kappa_lookup` (`R/ci-mpl.R:204`) on
 (n_r, n_s, conf_level), keeping the per-level S-interpolation; thread conf_level
 through `mpl_ci`. Lift the `conf_level == 0.95`-only fence (`R/icc.R:1467`) to
 admit the calibrated set and abort loudly otherwise (classed, message lists the
-supported levels — mirrors the off-grid abort, #5/#8). Tests, `@param` doc
-updates, NEWS.
+supported levels — mirrors the off-grid abort, #5/#8). The exported set is
+whatever M90's BC7 verdict cleared (0.90 GO; 0.99 conditional — a NO-GO level
+stays a candidate, not exported). Tests, `@param` doc updates, NEWS — including
+the RR03 beyond-brief documentation: the two-sided MPL interval's non-equal-tailed
+character (all levels, incl. 0.95), the small-geometry near-vacuous 0.99 width
+(BC6), and softening the now-falsified `R/ci-mpl.R` "increasing and roughly
+concave" interpolation comment (non-monotone at R≥8).
 
 **Out:** Calibration/coverage evidence → M90 (consumed here as fixtures + GO).
 Levels off {0.90, 0.95, 0.99} → abort; arbitrary continuous conf_level via
@@ -72,12 +77,15 @@ Levels off {0.90, 0.95, 0.99} → abort; arbitrary continuous conf_level via
 - [ ] T4: Tests — new-level endpoints vs `mpl_interval`; SB inheritance at new
       levels + mutation guard; off-level classed abort + message; 0.95
       regression equality.
-- [ ] T5: Docs (`@param conf_level` + `"mpl"` `@param`), NEWS, references-page
+- [ ] T5: Docs (`@param conf_level` + `"mpl"` `@param`; RR03 beyond-brief:
+      non-equal-tailed note, near-vacuous small-geometry 0.99 width per BC6,
+      soften the `R/ci-mpl.R` interpolation comment), NEWS, references-page
       consistency (triage any new generalizing claim); run the verify slot clean.
 
 ## Work log
 
 - 2026-07-24: created by /milestone-plan (with M90); depends on M90's per-level GO; lineage D-015 → this.
+- 2026-07-24: M90's RR03/D-017 gates this export (BC7 — 0.99 exportable only if BC1–BC6 pass; a NO-GO level stays a candidate). Folded the RR03 beyond-brief doc duties into Scope/T5. BCs are ingested verbatim in M90 (Driving RR there), not re-ingested here.
 
 ## Decisions
 

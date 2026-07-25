@@ -4,12 +4,14 @@
 (`R/ci-mpl.R`, oracle **O-MPL** in `ORACLES.md`; D-015): the deterministic interval
 core ported from the M86 prototype, with the extended-range `κ_m` shipped as a
 precomputed table (`data-raw/m88-mpl-kappa-table.R` → `R/sysdata.rda`). Opt-in only,
-balanced-complete two-way random absolute-agreement / Gaussian / `conf_level = 0.95`.
+balanced-complete two-way random absolute-agreement / Gaussian / `conf_level = 0.95`
+(M90 pre-registers the extension to conf_level 0.90 / 0.99 — see that section below).
 
 **Provenance.** Ingested 2026-07-23 by M86 from the M86 validation harness
 (`data-raw/m86-mpl-lib.R`, `data-raw/m86-mpl-validate.R`) against
 `xiao2013.md` (the named primary source, IP1). M87 appends its pre-registration,
-comparison sweep, and verdict.
+comparison sweep, and verdict; M90 appends the conf_level 0.90 / 0.99
+pre-registration and GO verdict (RR03/D-017, frozen 2026-07-24).
 Pagination: —.
 Extraction: derived — no external source of its own, only as current as its
 inputs (`xiao2013.md`, verified 2026-07-19/M71) and the committed harness, none
@@ -348,10 +350,92 @@ cleared to be planned, with the conditions D-014 records (the sub-0.6 κ_m
 extrapolation, per-geometry κ_m calibration cost, balanced-complete + Gaussian
 scope).
 
+## M90 pre-registration — conf_level 0.90 / 0.99 (frozen 2026-07-24, BEFORE any M90 run — GP5)
+
+M90 extends `ci_method = "mpl"` from the shipped conf_level 0.95 to **0.90 and
+0.99**. The criterion below is fixed by the RB03/RR03 Fable review (D-017,
+binding criteria BC1–BC7) and dated before any M90 calibration or coverage run.
+Notation as above (R raters, S subjects, δ = σ²_r/σ²_e, ρ = true `ICC(A,1)`).
+
+**Oracle posture (level-specific).** conf_level **0.90 is α = 0.10** — xiao2013's
+*published* two-sided operating point — so its κ_m over ρ ∈ [0.6, 0.9] has a
+**direct external oracle** (Table 3 δ_U=16 / Table 6; the M86 IP1 leg). conf_level
+**0.99 (α = 0.01)** and the sub-0.6 ρ tail of both levels have **no external
+oracle** (D-014(i) inherited); they are established by simulated coverage only. Per
+RR03 nothing *numeric* is extrapolated in α — the machinery recalibrates κ_m at
+the level's own deviance quantile.
+
+**κ_m recalibration (per α).** Precondition (BC1): the α-parametrized pipeline,
+run at α = 0.10 over ρ ∈ [0.6, 0.9] × δ = 2^(−1..4) with n_mc ≥ 6000, reproduces
+the six published two-sided κ_m — 0.32 / 0.52 / 0.67 at (R=3, S=10/25/50) and
+0.13 / 0.23 / 0.33 at (R=5, S=10/25/50) — each within ±0.10 (S=25 evaluated
+explicitly, off the shipped `s_grid`). Production tables: α = 0.10 at M88 sizes;
+α = 0.01 at scan ≥ 3000, top_k ≥ 5, final ≥ 12000 (BC2; the deep-tail quantile is
+noisier), recording a bootstrap SE ≤ 0.05 of the final κ̂_m for R ∈ {2, 3, 10}.
+The raw empirical 1−α deviance quantile stays the estimator (a tail model is
+rejected as primary — the deep tail is non-χ²-shaped where the grid max lives).
+
+**Cells (frozen).** M87's C1–C5 **plus** the three RR03 stress cells (BC5):
+
+| cell | R | S | δ | ρ | role |
+|---|---|---|---|---|---|
+| C6 | 3 | 100 | 4.0 | 0.60 | S-axis grid edge (extends C4's S↑ stress) |
+| C7 | 2 | 15 | 1.0 | 0.05 | minimal-information × boundary (largest κ_m) |
+| C8 | 3 | 20 | 1.0 | 0.02 | sub-grid-floor ρ (below the κ_m grid's ρ_L = 0.05) |
+
+**Criterion (GP5 — fixed before results).** At each level, MPL is *adequate at a
+cell* iff empirical coverage clears the per-level floor (BC3): **≥ 0.88 at 0.90;
+≥ 0.98 at 0.99** (the additive c − 0.02 is scale-inappropriate at 0.99 — it would
+tolerate 3× nominal non-coverage). Over-coverage passes at both levels (the
+method's documented conservative character, D-014). Replication (BC4): n_rep ≥
+2000 at 0.99 (coverage MC-SE ≤ 0.0032 at the floor), n_rep ≥ 1000 at 0.90; the
+verdict reports an exact (Clopper–Pearson) 95 % CI per cell. **GO** at a level iff
+adequate at every one of C1–C8; C2/C3/C7/C8 (near-zero / few-subjects / sub-floor,
+GP6) are decisive. MPL-only — the incumbent "not worse" comparison is settled
+method-level at D-014. Diagnostics recorded per cell (BC6): miss-below / miss-above
+counts, median + p90 interval width, P(lower = 0), P(upper ≥ 0.999), vacuous
+fraction — reported, not gating (except the M91 width-documentation duty).
+
+**Export gating (BC7).** M91 exports 0.99 only if BC1–BC6 pass at 0.99; 0.90 gates
+on BC1 + BC3–BC6 at its own level. A level's NO-GO routes it to a candidate row
+without blocking the other. No level deeper than 0.99 is authorized (κ_corr is
+still rising at α = 0.005 in the boundary cells).
+
+## M90 verdict (T4) — conf_level 0.90 GO, 0.99 GO
+
+**Both levels GO** against the frozen criterion above. Evidence: κ_m tables
+`data-raw/m90-kappa-tables.rds` (BC1 PASS 6/6, max |diff| 0.020 vs published;
+BC2 PASS, α=0.01 κ̂_m bootstrap SE 0.037/0.033/0.026 for R∈{2,3,10}, all ≤0.05),
+coverage sweep `data-raw/m90-coverage-sweep.rds`, verdict `data-raw/m90-verdict.rds`
+(`data-raw/m90-mpl-verdict.R`). Empirical coverage (Clopper–Pearson 95% CI) per
+decisive cell, n_rep 1000 at 0.90 / 2000 at 0.99:
+
+| cell | R | S | δ | ρ | cov 0.90 (floor .88) | cov 0.99 (floor .98) |
+|---|---|---|---|---|---|---|
+| C1 | 3 | 20 | 1 | 0.60 | 0.969 | 1.000 |
+| C2 | 3 | 20 | 1 | 0.05 | 0.984 | 1.000 |
+| C3 | 3 | 10 | 1 | 0.05 | 0.991 | 0.9995 |
+| C4 | 3 | 50 | 4 | 0.60 | 0.915 | 0.9975 |
+| C5 | 5 | 20 | 1 | 0.75 | 0.938 | 0.998 |
+| C6 | 3 | 100 | 4 | 0.60 | 0.919 | 0.997 |
+| C7 | 2 | 15 | 1 | 0.05 | 0.993 | 0.9995 |
+| C8 | 3 | 20 | 1 | 0.02 | 0.991 | 1.000 |
+
+Every cell clears its floor (0.90 min 0.915 at C4; 0.99 min 0.997 at C6), so
+BC7 authorizes both levels for M91 export. As at 0.95 (D-014), MPL over-covers —
+more so at 0.99, whose grid-max κ_m is dominated by the near-zero corner. Two
+diagnostics carried to M91 (BC6): misses are near-entirely one-sided at the δ=4
+S↑ cells (C4/C6: 84/1 and 75/6 at 0.90 — the two-sided interval is far from
+equal-tailed), and 0.99 intervals run wide (C4/C6 median width 0.852/0.845). No
+decisive cell's median 0.99 width reached the BC6 ≥ 0.90 documentation trigger
+(max 0.852), but the small-geometry / near-vacuity caveat still ships with M91.
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the
   frozen Table 3/4/6/7 oracle values; the ρ_L = 0.6 fence).
+- `cairn/reviews/archive/RR03-mpl-conf-level-extrapolation.md` — the M90
+  conf_level extension review (D-017; binding criteria BC1–BC7).
 - `cairn/estimand-specs/M1-twoway-random-agreement.md` — the package `ICC(A,1)`
   population definition the mapping above targets.
 - `cairn/references/npbootstrap-oneway-comparison.md` — the M62 sibling pass
