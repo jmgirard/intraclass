@@ -105,13 +105,23 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       reachable abort sites from T1 (`bootstrap_ci()` dropped by the AC2 amendment).
 - [x] T4: Add the GP7 guard test: for each design in the AC3 grid, call `icc()` with
       every `ci_method` the hint names and assert it does not abort.
+- [x] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
+      review, full AC7 gate, PR.
 - [ ] T6: Fix `test-boundary-abort-hint.R:158` — the AC2 degenerate-data test must
       tolerate the glmmTMB point fit dying with a RAW unclassed error (M84), not only
       the classed `intraclass_singular_fit`. Re-verify on CI, not just locally: macOS
       completes the fit that Linux/Windows abort on, so a green local gate proves
-      nothing here. Ingest any [O] diff-bug findings as further tasks.
-- [x] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
-      review, full AC7 gate, PR.
+      nothing here.
+- [ ] T7 (review F1, 95): pass `n_s`/`n_r` into `boundary_method_hint()` and gate the
+      `mpl` row on `kappa_m_table`'s node set, so the hint stops naming `mpl` on
+      designs `mpl_kappa_lookup()` refuses; add an off-grid row to the AC3 grid.
+- [ ] T8 (review F2, 90): stop the balanced-one-way hint firing on degenerate data
+      (zero within-subject variance) that reaches MC site A, where `searle`/`burch`/
+      `npbootstrap` all abort. Decide at the implement gate whether AC2/AC3 need a
+      gated amendment or the guard alone settles it.
+- [ ] T9 (review F3, 85): extend the AC3 grid to the enumeration AC3 states —
+      multilevel and within-cell replicates end-to-end through `icc()`, not only as
+      pure-function calls — and vary `n_s`/`n_r` so an off-grid `mpl` design is covered.
 
 ## Work log
 
@@ -125,7 +135,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: gated amendment — AC2 and Scope narrowed to the two reachable Monte-Carlo sites; `R/ci-bootstrap.R:56` moved to Out with its evidence, and its misleading `montecarlo` remedy carried out as a candidate row.
 
 - 2026-07-25: review pass 1 FAILED the gate — PR #100 CI red on 3 of 7 jobs, one cause: `test-boundary-abort-hint.R:158` errors on Linux/Windows because the glmmTMB point fit raises a raw unclassed `LU factorization` error on the degenerate dataset before any classed guard, and `bh_probe()` catches only `intraclass_singular_fit` (the M84 lesson). Test-only defect; local gate is green and structurally cannot catch it. Status -> in-progress. Two of three review lenses reported 0 findings; the [O] diff-bug lens was still running.
-- 2026-07-25: added T6 for the fix.
+- 2026-07-25: [O] diff-bug lens returned 4 findings; independent scorer gave F1 95 / F2 90 / F3 85 (actioned as T7/T8/T9) and F4 63 (logged, not actioned). F1 and F2 are shipped-behaviour defects of the AC3-forbidden kind (the hint names a method that then aborts) — F1 reproduced independently at review on an 8-subject two-way design. T6 added for the CI failure.
 
 ## Decisions
 
@@ -200,3 +210,34 @@ the M92 P6-1 false-"guarded"-claim pattern and found this diff the opposite, sin
 guard is a real end-to-end test with a recorded mutation check). The [O] diff-bug lens
 was still running when this checkpoint was committed; its findings are to be ingested
 as implement tasks.
+
+**[O] diff-bug lens — 4 findings, 3 actioned.** Scored by an independent [S] scorer
+that did not generate them.
+
+- **F1 (95) — actioned, T7.** `R/boundary-hint.R:81-94`: the `mpl` hint ignores
+  `mpl_kappa_lookup()`'s calibration-grid fence (`R/ci-mpl.R:242-278`, `n_r` in 2..10
+  and `n_s` in 10..100), because `icc()` never passes the rater/subject counts to the
+  builder. Reproduced independently at review: two-way random balanced, 8 subjects x 3
+  raters, the default `ci_method` aborts recommending `ci_method = "mpl"`, and `mpl` on
+  that same data aborts `intraclass_unsupported` ("calibrated for 10-100 subjects; this
+  design has 8"). Small-`n_s` designs are exactly the ones sitting at the boundary, so
+  this is the common case. This is the AC3-forbidden "hint points at another abort", in
+  shipped behaviour.
+- **F2 (90) — actioned, T8.** `R/boundary-hint.R:56-63`: degenerate data (zero
+  within-subject variance) reaches MC site A on the DEFAULT one-way path and receives
+  the balanced-one-way hint naming three methods that all abort on it. AC2's exclusion
+  reasoning covered site C only; nothing stopped the same degeneracy arriving at site
+  A, where the hint does fire.
+- **F3 (85) — actioned, T9.** `tests/testthat/test-boundary-abort-hint.R:454-479`: the
+  AC3 grid does not realize the grid AC3 enumerates — multilevel and within-cell
+  replicates are exercised only as pure-function calls, never end-to-end, and the grid
+  never varies `n_s`/`n_r`. That last gap is the mechanism by which F1 shipped green.
+- **F4 (63) — below threshold, logged not actioned.** `:386-398` is titled "d_study()
+  and the lavaan engine are untouched by the threading" but only inspects `formals()`.
+  The scorer judged the title overclaims while the formals checks are genuinely useful
+  and other `d_study()` coverage partially mitigates the regression described.
+
+**Open question for the next implement pass** (review does not reinterpret criteria):
+F2 sits beside AC2's stated rationale, which is literally true of site C but does not
+cover degenerate data arriving at site A. Decide at the implement gate whether AC2/AC3
+need a gated amendment or whether the hint guard alone settles it.
