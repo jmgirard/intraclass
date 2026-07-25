@@ -1,6 +1,6 @@
 # M91: Export conf_level ∈ {0.90, 0.99} for ci_method = "mpl"
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M90
 - **Driving RR:** —
@@ -119,7 +119,7 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - [x] T6: Tests — new-level endpoints vs `mpl_interval` at the fixture κ_m; SB
       inheritance at new levels + mutation guard; off-level classed abort +
       message; 0.95 slice equality + endpoint no-regression.
-- [ ] T7: Docs (`@param conf_level` + `"mpl"` `@param`; the corrected
+- [x] T7: Docs (`@param conf_level` + `"mpl"` `@param`; the corrected
       interpolation comment; non-equal-tailed + 0.99-width notes), NEWS, and the
       references/lint consistency sweep (AC7's three gates); run the verify slot
       clean.
@@ -134,6 +134,7 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - 2026-07-24: T3–T5 — `data-raw/m91-mpl-kappa-sysdata.R` assembles the conf_level-keyed table (162 rows = 3 levels × 54 nodes; 0.95 copied verbatim from `m88-kappa-table.rds`, asserted identical in the generator); `mpl_kappa_lookup` keyed on (n_r, n_s, conf_level) with per-slice S-interpolation + a defensive classed abort; `icc()` fence lifted to the table's own level set. Neutralized M88's now-stale `use_data()` call — re-running it would have overwritten sysdata with the pre-M91 3-column schema and broken every mpl lookup.
 - 2026-07-24: T6 — tests for the level-keyed wiring, SB inheritance at the new levels + wrong-divisor mutation guard, the classed off-level abort (0.80/0.975/0.995/0.999) with the set named, the 0.95 κ_m slice pins, and 0.95 endpoint no-regression against literals recorded pre-change (incl. off-node S=25). Mutation-checked: forcing the lookup back to the 0.95 slice reds 4 assertions in the wiring test and nothing else — the ordering test is honestly scoped as a sanity property (it survives the mutation, as its comment says).
 - 2026-07-24: T7 — corrected my OWN new prose twice before commit (M72 lesson): the dips' κ_m range was written ≈0.10–0.27 in four places when the 18 dips span 0.102–0.970 (5 above 0.27), and the M87 max width was written 0.698 when the table shows 0.744. Both re-derived from the fixtures and fixed; the references-page paragraph carries a marked in-place correction.
+- 2026-07-24: all tasks done; verify slot clean on the final tree — `devtools::test()` FAIL 0 / PASS 4206 (2 pre-existing lavaan negative-variance WARNs, 23 skips), `devtools::document()` no diff, `lintr::lint_package()` clean, `pkgdown::check_pkgdown()` clean, `cairn_validate` exit 0, both references gates green. `devtools::check()` running for AC7. Status → review.
 
 ## Decisions
 
