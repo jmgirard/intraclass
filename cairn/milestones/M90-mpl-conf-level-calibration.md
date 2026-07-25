@@ -102,7 +102,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
       (0.88 at 0.90; 0.98 at 0.99), BC4 replication (n_rep ≥ 2000 at 0.99,
       Clopper–Pearson CIs), and the BC5 8-cell set (C1–C8). Dated before any
       sweep run (GP5).
-- [ ] T2: Parametrize the κ_m calibration
+- [x] T2: Parametrize the κ_m calibration
       (`data-raw/m87-mpl-kappa-recalibration.R`, `data-raw/m88-mpl-kappa-table.R`)
       by α. First run the **BC1 precondition** — the α=0.10 published-oracle
       reproduction (6 geometries incl. off-grid S=25, n_mc ≥ 6000, each within
@@ -126,6 +126,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 - 2026-07-24: blocked on RB03 (cairn/reviews/RB03-mpl-conf-level-extrapolation.md).
 - 2026-07-24: T1 done — froze the conf_level 0.90/0.99 pre-registration (BC1–BC7 criterion: cells C1–C8, floors 0.88/0.98, n_rep, oracle posture) in `references/mpl-twoway-random-comparison.md` (GP5, dated 2026-07-24); 2 new generalizing claims triaged OUT-repo-analysis; enumerator/reference-obs/cairn_validate all green.
 - 2026-07-24: ingested RR03 (Fable) → D-017. Verdict: 0.90 GO (external oracle), 0.99 conditional GO under BC1–BC7. Set Driving RR = RR03; ingested BC1–BC7 verbatim as AC4–AC10; dropped the plan's c−0.02 floor (superseded by BC3's 0.98@0.99); refined T1–T4 to the BCs. Status → in-progress. RB03/RR03 archived.
+- 2026-07-24: T2 done — `data-raw/m90-mpl-kappa-tables.R` generated the α=0.10 (0.90) + α=0.01 (0.99) κ_m tables (54/54 nodes each) → `data-raw/m90-kappa-tables.rds`. **BC1 PASS** 6/6 (max \|diff\| 0.020 vs published). **BC2 PASS** — 0.99 κ̂_m bootstrap SE 0.037/0.033/0.026 for R∈{2,3,10}, all ≤0.05. κ_m ranges 0.90 [0.106,1.742], 0.99 [0.104,0.999]. No sysdata.rda (M91).
 
 ## Decisions
 
