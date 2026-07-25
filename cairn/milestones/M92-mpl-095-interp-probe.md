@@ -1,10 +1,11 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6, GP7
+- **Branch/PR:** `m92-mpl-095-interp-probe`
 
 ## Goal
 
