@@ -109,7 +109,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
       ±0.10). Then generate the production tables at α=0.10 (M88 sizes) and α=0.01
       (**BC2 sizes:** scan ≥ 3000, top_k ≥ 5, final ≥ 12000; record bootstrap
       SE ≤ 0.05 for R ∈ {2,3,10}), seeded. Background (~5 h for α=0.01). → `data-raw/*.rds`.
-- [ ] T3: Coverage sweep at each level across the 8 BC5 cells, seeded, at the BC4
+- [x] T3: Coverage sweep at each level across the 8 BC5 cells, seeded, at the BC4
       n_rep; record the BC6 diagnostics (miss-below/above, median + p90 width,
       P(lower=0), P(upper≥0.999), vacuous fraction) per cell (mirror
       `data-raw/m87-mpl-comparison-sweep.R`, MPL-only). Background. → sweep fixture.
@@ -127,6 +127,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 - 2026-07-24: T1 done — froze the conf_level 0.90/0.99 pre-registration (BC1–BC7 criterion: cells C1–C8, floors 0.88/0.98, n_rep, oracle posture) in `references/mpl-twoway-random-comparison.md` (GP5, dated 2026-07-24); 2 new generalizing claims triaged OUT-repo-analysis; enumerator/reference-obs/cairn_validate all green.
 - 2026-07-24: ingested RR03 (Fable) → D-017. Verdict: 0.90 GO (external oracle), 0.99 conditional GO under BC1–BC7. Set Driving RR = RR03; ingested BC1–BC7 verbatim as AC4–AC10; dropped the plan's c−0.02 floor (superseded by BC3's 0.98@0.99); refined T1–T4 to the BCs. Status → in-progress. RB03/RR03 archived.
 - 2026-07-24: T2 done — `data-raw/m90-mpl-kappa-tables.R` generated the α=0.10 (0.90) + α=0.01 (0.99) κ_m tables (54/54 nodes each) → `data-raw/m90-kappa-tables.rds`. **BC1 PASS** 6/6 (max \|diff\| 0.020 vs published). **BC2 PASS** — 0.99 κ̂_m bootstrap SE 0.037/0.033/0.026 for R∈{2,3,10}, all ≤0.05. κ_m ranges 0.90 [0.106,1.742], 0.99 [0.104,0.999]. No sysdata.rda (M91).
+- 2026-07-24: T3 done — `data-raw/m90-mpl-coverage-sweep.R` swept the 8 BC5 cells × 2 levels (n_rep 1000@0.90, 2000@0.99), recording BC6 diagnostics → `data-raw/m90-coverage-sweep.rds`. Every cell clears its BC3 floor; 0.90 min cov 0.915 (C4), 0.99 min cov 0.997 (C6). No decisive cell's median 0.99 width ≥ 0.90 (max 0.852 at C4), so BC6's mandatory width-doc trigger did not fire.
 
 ## Decisions
 
