@@ -216,21 +216,22 @@ mpl_interval <- function(
 # floor, so its pre-registered consequence -- switching 0.95 to a bracket-max rule --
 # was NOT triggered and this lookup is unchanged.
 #
-# Per-cell coverage, widths and miss splits are NOT restated here. They live in the
-# fixtures (data-raw/m92-interp-sweep.rds, and the superseded
+# Per-cell coverage, widths and miss splits are NOT restated here, and no conclusion is
+# drawn from those figures here. They live in the fixtures
+# (data-raw/m92-interp-sweep.rds, and the superseded
 # m92-interp-sweep-run1-collided.rds) and in § M91 / § M92 of the comparison note.
-# Nor does this comment draw conclusions from them. Both restrictions are the
-# settlement of M92's review history: across four passes every defect was an
-# interpretive claim about a measurement that was correct each time, so the note holds
-# the transcription and this comment holds only the fact that the lookup is unchanged.
+# Both restrictions settle M92's review history: across four review passes every M92
+# defect was an interpretive claim about a measurement that was itself correct each
+# time. (Argument (a) above predates M92 and reasons about the kappa_m table's SHAPE,
+# not about those coverage figures.)
 #
 # The shipped kappa_m values are the raw calibrated ones, deliberately un-smoothed, so
 # each traces to the run whose coverage was validated (M91 plan gate; an envelope or
-# smoother remains a separate candidate -- two passes on DISJOINT simulated data have
-# now found no coverage cost to the dips). `test-ci-mpl.R` pins the three constants
-# M92 validated -- kappa_m is table-derived and does not move when the sweep is
-# re-run -- so a change to the table or to this rule reds a test rather than silently
-# detaching the code from its coverage evidence.
+# smoother remains a separate candidate -- see its ROADMAP row for the promotion
+# criterion). `test-ci-mpl.R` pins the three constants M92 validated -- kappa_m is
+# table-derived and does not move when the sweep is re-run -- so a change to the table
+# or to this rule reds a test rather than silently detaching the code from its
+# coverage evidence.
 #
 # An (n_r, n_s) outside the table's grid aborts loudly (#5/#8) -- kappa_m off the grid
 # has no calibration and extrapolating it is exactly the uncalibrated guess D-015
