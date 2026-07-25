@@ -768,3 +768,132 @@ test_that("degenerate data get NO hint, because every named method aborts (AC3/A
     icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
   )))
 })
+
+# ---- T9/AC3: the grid AC3 actually enumerates ---------------------------------
+# The grid above covers one-way and two-way random at ONE geometry, exercised through
+# icc(); AC3 enumerates more than that, and the gap is how F1 shipped green -- a grid
+# that never varies n_s/n_r cannot see a geometry fence, and a design checked only as
+# a pure-function call never proves icc() agrees with the predicates it is handed.
+
+# Subjects nested in clusters, raters crossed with both (ten Hove Design 1 shape).
+bh_ok_multilevel <- function(n_c = 5L, n_s = 4L, n_r = 3L, seed = 11) {
+  set.seed(seed)
+  g <- expand.grid(
+    subj = seq_len(n_s),
+    cluster = seq_len(n_c),
+    rater = seq_len(n_r)
+  )
+  cl <- stats::rnorm(n_c, sd = 1)
+  rt <- stats::rnorm(n_r, sd = 0.4)
+  sc <- stats::rnorm(n_c * n_s, sd = 0.9)
+  data.frame(
+    subject = factor(paste(g$cluster, g$subj, sep = "_")),
+    rater = factor(g$rater),
+    cluster = factor(g$cluster),
+    score = cl[g$cluster] +
+      sc[(g$cluster - 1L) * n_s + g$subj] +
+      rt[g$rater] +
+      stats::rnorm(nrow(g), sd = 0.6)
+  )
+}
+
+# Two ratings per subject x rater cell: within-cell replicates, auto-detected.
+bh_ok_replicates <- function(n_s = 12L, n_r = 3L, n_o = 2L, seed = 11) {
+  set.seed(seed)
+  g <- expand.grid(
+    subject = seq_len(n_s),
+    rater = seq_len(n_r),
+    occ = seq_len(n_o)
+  )
+  s <- stats::rnorm(n_s, sd = 1)
+  r <- stats::rnorm(n_r, sd = 0.4)
+  sr <- stats::rnorm(n_s * n_r, sd = 0.3)
+  data.frame(
+    subject = factor(g$subject),
+    rater = factor(g$rater),
+    score = s[g$subject] +
+      r[g$rater] +
+      sr[(g$rater - 1L) * n_s + g$subject] +
+      stats::rnorm(nrow(g), sd = 0.6)
+  )
+}
+
+test_that("a hint fires on every kappa_m geometry it claims, end to end (AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Vary the geometry, which the single-geometry grid above never did: the smallest
+  # calibrated design, and a wider one. Both must hint AND be accepted by icc().
+  geoms <- list(c(n_s = 10L, n_r = 2L), c(n_s = 15L, n_r = 5L))
+  for (g in geoms) {
+    lab <- paste0(g[["n_s"]], "x", g[["n_r"]])
+    h <- bh_hint(n_s = g[["n_s"]], n_r = g[["n_r"]])
+    expect_identical(paste(lab, bh_named_methods(h)), paste(lab, "mpl"))
+    d <- bh_ok_twoway(n_s = g[["n_s"]], n_r = g[["n_r"]])
+    status <- tryCatch(
+      {
+        suppressWarnings(suppressMessages(
+          icc(d, score, subject, rater, ci_method = "mpl")
+        ))
+        "accepted"
+      },
+      error = function(e) paste0("ABORTED ", class(e)[[1]])
+    )
+    expect_identical(paste(lab, status), paste(lab, "accepted"))
+  }
+})
+
+test_that("multilevel, replicate and off-grid designs stay silent, and abort (AC3/AC4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # The remaining AC3 rows, each run THROUGH icc() rather than as a predicate call:
+  # the hint is silent, and every opt-in method really does abort there.
+  cases <- list(
+    list(
+      lab = "multilevel",
+      data = bh_ok_multilevel(),
+      args = list(cluster = quote(cluster)),
+      pred = list(multilevel = TRUE)
+    ),
+    list(
+      lab = "within-cell replicates",
+      data = bh_ok_replicates(),
+      args = list(),
+      pred = list(replicates = TRUE)
+    ),
+    list(
+      lab = "two-way off the kappa_m grid",
+      data = bh_ok_twoway(n_s = 8L),
+      args = list(),
+      pred = list(n_s = 8L)
+    )
+  )
+
+  for (case in cases) {
+    expect_length(do.call(bh_hint, case$pred), 0L)
+    for (m in c("mpl", "npbootstrap", "searle", "burch")) {
+      args <- c(
+        list(
+          case$data,
+          quote(score),
+          quote(subject),
+          quote(rater),
+          ci_method = m
+        ),
+        case$args
+      )
+      status <- tryCatch(
+        {
+          suppressWarnings(suppressMessages(do.call(icc, args)))
+          "accepted"
+        },
+        error = function(e) paste0("aborted ", class(e)[[1]])
+      )
+      expect_identical(
+        paste(case$lab, "->", m, ":", status),
+        paste(case$lab, "->", m, ": aborted intraclass_unsupported")
+      )
+    }
+  }
+})

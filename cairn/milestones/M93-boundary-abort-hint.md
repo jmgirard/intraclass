@@ -91,11 +91,11 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 ## Coverage
 
 - AC1 → T1
-- AC2 → T2, T3
-- AC3 → T4
-- AC4 → T2
+- AC2 → T2, T3, T6, T7, T8
+- AC3 → T4, T7, T8, T9
+- AC4 → T2, T8
 - AC5 → T3, T4
-- AC6 → T5
+- AC6 → T5, T7
 - AC7 → T5
 
 ## Tasks
@@ -127,7 +127,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       (zero within-subject variance) that reaches MC site A, where `searle`/`burch`/
       `npbootstrap` all abort. Decide at the implement gate whether AC2/AC3 need a
       gated amendment or the guard alone settles it.
-- [ ] T9 (review F3, 85): extend the AC3 grid to the enumeration AC3 states —
+- [x] T9 (review F3, 85): extend the AC3 grid to the enumeration AC3 states —
       multilevel and within-cell replicates end-to-end through `icc()`, not only as
       pure-function calls — and vary `n_s`/`n_r` so an off-grid `mpl` design is covered.
 
@@ -145,9 +145,10 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: review pass 1 FAILED the gate — PR #100 CI red on 3 of 7 jobs, one cause: `test-boundary-abort-hint.R:158` errors on Linux/Windows because the glmmTMB point fit raises a raw unclassed `LU factorization` error on the degenerate dataset before any classed guard, and `bh_probe()` catches only `intraclass_singular_fit` (the M84 lesson). Test-only defect; local gate is green and structurally cannot catch it. Status -> in-progress. Two of three review lenses reported 0 findings; the [O] diff-bug lens was still running.
 - 2026-07-25: [O] diff-bug lens returned 4 findings; independent scorer gave F1 95 / F2 90 / F3 85 (actioned as T7/T8/T9) and F4 63 (logged, not actioned). F1 and F2 are shipped-behaviour defects of the AC3-forbidden kind (the hint names a method that then aborts) — F1 reproduced independently at review on an 8-subject two-way design. T6 added for the CI failure.
 - 2026-07-25: implement gate (pass 2) — F1/F2 reproduced locally, plus a third case of the same shape the findings missed: one-way with all subject means exactly equal hints three methods of which npbootstrap aborts, and all-constant two-way data hints `mpl`, which then raises a raw optim error. Gate decisions: back the hint off on ANY exact degeneracy; ask `mpl_kappa_lookup()` itself whether the geometry is calibrated (one source of truth); amend Scope/AC2/AC3 rather than stretch them.
-- 2026-07-25: gated amendment (pass 2) — Scope, AC2 and AC3 now name the two non-fence inputs the hint needs (observed subject/rater counts for `mpl`'s κ_m grid; an exact-degeneracy flag) and the widened AC3 grid (end-to-end through `icc()`, on/off grid geometries, degenerate data); mapping table gains the κ_m-grid condition and a degenerate-data row.
+- 2026-07-25: gated amendment (pass 2) — Scope, AC2 and AC3 now name the two non-fence inputs the hint needs (observed subject/rater counts for `mpl`'s κ_m grid; an exact-degeneracy flag) and the widened AC3 grid (end-to-end through `icc()`, on/off grid geometries, degenerate data); mapping table gains the κ_m-grid condition and a degenerate-data row; Coverage rows extended to map T6–T9.
 - 2026-07-25: T6 — the AC2 degenerate-data test now classifies a RAW unclassed point-fit error as "point-fit" and accepts it beside site "C" (`bh_probe_any()`), and the three-method loop no longer pins an abort class glmmTMB does not raise; handler order and raw/classed classification verified by hand. CI is the real check — macOS cannot reproduce the failure.
 - 2026-07-25: T7/T8 — the hint now takes the observed `n_s`/`n_r` and a degeneracy flag. `mpl_kappa_available()` (new, `R/ci-mpl.R`) asks `mpl_kappa_lookup()` itself whether a geometry is calibrated, so the grid gate cannot drift from the table; `boundary_data_degenerate()` evaluates the shipped searle/burch/npbootstrap guards' own conditions one-way, and zero total variance two-way (the only cell where mpl breaks — probed). NEWS's exclusion list updated to match. Mutation-verified: dropping the degeneracy return reds 7 assertions, restoring the old conf_level-only mpl gate reds 6.
+- 2026-07-25: T9 — AC3's grid is now the grid AC3 enumerates: multilevel, within-cell replicates and an off-κ_m-grid two-way design run end-to-end through `icc()` (silent hint + every opt-in method aborting `intraclass_unsupported`), and the accepted half varies the geometry (10x2 and 15x5, both hinting `mpl` and accepted). Mutation-verified: deleting the multilevel/replicate early return reds the new grid row and names it.
 
 ## Decisions
 
