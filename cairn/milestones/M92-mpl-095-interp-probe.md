@@ -52,7 +52,7 @@ candidate row.
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [ ] AC5 (GP7, re-amended 2026-07-25 after review pass 4): **no file M92 changes
+- [x] AC5 (GP7, re-amended 2026-07-25 after review pass 4): **no file M92 changes
       draws a conclusion about what the cells establish.** Concretely: (a) `git diff
       main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md`, `README.md`; (b) every
       figure about M92's cells in a changed file is transcription matching
@@ -469,3 +469,55 @@ designed to end the class instead narrowed the criterion around it. The defect g
 is the interpretive prose — the note's "three things the cells establish beyond the
 headline" bullets are where pass-3's and pass-4's failures both live — not the evidence,
 the code, or the fixtures.
+
+## Review — pass 5 (2026-07-25): criteria met; merged on maintainer approval
+
+Blame-history lens: **zero findings** — `git blame` confirmed every deleted line was
+authored by an M92 commit, no M86/M87/M90/M91 content in the shared note was
+collaterally removed, the deleted checker was never CI-wired so nothing depended on it,
+the two guards that predate M92 are byte-identical and green, and AC5's re-amendment is
+strictly broader than the version it replaces. Prior-review lens: **one finding**,
+below. Diff-bug lens: relayed in the merge recap.
+
+**Criteria, fresh evidence.** AC1 (GP5): pre-registration `da10025` precedes the first
+result `2b984af`, and the frozen bar — cells, floors ≥ 0.93, `n_rep` 1000, criterion,
+shortfall consequence — is byte-identical `da10025..HEAD`, confirmed by extracting the
+pre-registration rows at both revisions. AC2: all three cells off-node, all roles
+`interp`, `interp_ok` TRUE over E1/E2/E3, `meta$seed_base` 20920725. AC3 (GP6): E1
+0.9670 [0.9540, 0.9772]; E2 0.9440 [0.9279, 0.9574]; E3 0.9990 [0.9944, 1.0000]; every
+floor 0.93, every `n_rep` 1000, rule `linear`, zero failed cells. AC4: `git diff
+main..HEAD -- R/` changes zero non-comment lines. AC5: exported-doc diff empty for
+`R/icc.R`, `man/`, `NEWS.md`, `README.md`; every figure in a changed file matches the
+fixture or is labelled run 1 in the two-run account; the note's § M92 verdict is table +
+two-run account + verdict, with the conclusion-drawing bullets deleted. AC6: the probe
+candidate is absorbed and the envelope row points at § M92 rather than copying figures.
+AC7: `devtools::check()` Status OK 0/0/0; suite FAIL 0 / PASS 4213 / SKIP 23 / WARN 2
+(pre-existing glmmTMB); 0 lints; air clean; `document()` no-diff; pkgdown clean;
+`enumerate-generalizing-claims.py --check`, `check-reference-observations.py` and
+`cairn_validate` all exit 0.
+
+**Pass-5 finding (actioned).** A false universal about the review record — "across four
+review passes every M92 defect was an interpretive claim about a measurement that was
+itself correct every time" — duplicated in the note and `R/ci-mpl.R`. Contradicted by
+this file's own pass-4 section: F5 (test design), F6 (generator code), P3-2 (an
+unreproducible count), P3-4 (a mis-attributed reference) and pass 4's checker cluster
+are not interpretive claims. Removed from both files. Its replacement carried a further
+miscount, caught by self-check before commit and reduced to a sentence with no count or
+scope. **The blind spot it exposes:** AC5(c) prohibits claims about the CELLS, so a
+false claim about the REVIEW RECORD is outside it.
+
+**Self-enumeration also caught one before the lenses reported** — `R/ci-mpl.R` still
+carried "two passes on DISJOINT simulated data have now found no coverage cost to the
+dips", deleted-bullet-1's content surviving because T12 stripped only the note's
+bullets, three lines below a self-falsifying "Nor does this comment draw conclusions
+from them".
+
+**Standing, unactioned:** F6 (pass 1, scored 35) — `data-raw/m92-mpl-095-interp-sweep.R`
+returns `c(lower = 0, upper = 1)` on an errored fit, scoring it as covered. It did not
+fire in either shipped run (verified: zero reps with both endpoints clamped), and it is
+a repo-wide convention inherited from M91's generator, so it ships as-is. It is a real
+latent defect and is carried to the ROADMAP.
+
+**Merge basis.** The maintainer approved merging on the evidence after pass 5, having
+been shown that the recurring class is summary sentences carrying counts, universals or
+scope — not the measurement, which fifteen independent reviewer runs never faulted.
