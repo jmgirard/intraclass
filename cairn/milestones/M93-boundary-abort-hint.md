@@ -100,7 +100,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - [x] T2: Add the internal hint builder — a pure function of the fence predicates,
       returning a possibly-empty character vector of `i =` bullets — with unit tests
       covering every row of the mapping table, including the empty-hint designs.
-- [ ] T3: Thread the hint from `icc()` into `mc_ci()`/`mc_components()`/`rmvn()` as an
+- [x] T3: Thread the hint from `icc()` into `mc_ci()`/`mc_components()`/`rmvn()` as an
       argument defaulting to none, so no other caller changes, and append it to the two
       reachable abort sites from T1 (`bootstrap_ci()` dropped by the AC2 amendment).
 - [ ] T4: Add the GP7 guard test: for each design in the AC3 grid, call `icc()` with
@@ -114,6 +114,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: implement gate — hint names each qualifying method with its D-012 one-line character (not a bare list, not a single recommendation); unbalanced one-way is worded as availability, not as "succeeds where the default aborts", since D-012's 0-abort evidence is balanced-only.
 - 2026-07-25: T1 reachability finding — of the three planned abort sites, `R/ci-montecarlo.R:124` (non-finite draws) fires on 21/40 two-way and 19/40 one-way near-zero datasets, `R/ci-montecarlo.R:43` (non-finite covariance) on 1/40, and `R/ci-bootstrap.R:48` on 0/90 across six boundary geometries. Site C is reachable only by degenerate data (σ²_e = 0, all-identical scores), where npbootstrap/searle/burch/mpl and montecarlo all abort too.
 - 2026-07-25: T2 — `R/boundary-hint.R` adds the pure `boundary_method_hint()`; unit tests cover every mapping row plus the empty-hint designs, incl. the unbalanced+numeric-`unit` case (npbootstrap aborts there, so no hint) and the level set read from `kappa_m_table`.
+- 2026-07-25: T3 — `hint` threaded through `mc_ci()`/`mc_components()`/`mc_interval()`/`rmvn()` defaulting to `character(0)`; `icc()` builds it from the fence predicates. `rmvn()`'s new arg sits after `call` so the lavaan engine's positional calls are unaffected, and `d_study()` takes the default. Full suite FAIL 0 / PASS 4281 at `NOT_CRAN=true CI=true`.
 - 2026-07-25: gated amendment — AC2 and Scope narrowed to the two reachable Monte-Carlo sites; `R/ci-bootstrap.R:56` moved to Out with its evidence, and its misleading `montecarlo` remedy carried out as a candidate row.
 
 ## Decisions

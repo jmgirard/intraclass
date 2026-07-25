@@ -2100,12 +2100,28 @@ icc <- function(
       # ({0.90, 0.95, 0.99} since M91/D-017) upstream.
       mpl_ci(df, estimands, conf_level = conf_level)
     } else {
+      # M93: if this boundary-aborts, its classed error names the opt-in
+      # `ci_method` that actually applies to THIS design (or nothing, when none
+      # does). Built from the same fence predicates used above, so the hint and
+      # the fences cannot drift apart silently (GP7 guard in
+      # tests/testthat/test-boundary-abort-hint.R).
       mc_ci(
         engine_fit,
         estimands,
         conf_level = conf_level,
         mc_samples = mc_samples,
-        seed = seed
+        seed = seed,
+        hint = boundary_method_hint(
+          oneway = oneway,
+          multilevel = multilevel,
+          replicates = replicates,
+          raters = raters,
+          balanced = balanced,
+          type = type,
+          type_supplied = type_supplied,
+          conf_level = conf_level,
+          unit = unit
+        )
       )
     }
   }

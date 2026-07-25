@@ -276,3 +276,123 @@ test_that("the hinted conf_level set is READ from the shipped table, not hardcod
   # A level strictly between two calibrated ones is still refused.
   expect_length(bh_hint(conf_level = 0.92), 0L)
 })
+
+# ---- T3/AC2/AC5: threaded end to end, additively --------------------------------
+
+# Render an abort's message to plain text, or NA if icc() did not abort.
+bh_msg <- function(d, ...) {
+  tryCatch(
+    {
+      suppressWarnings(suppressMessages(icc(d, score, subject, rater, ...)))
+      NA_character_
+    },
+    intraclass_singular_fit = function(e) {
+      gsub("[[:space:]]+", " ", cli::ansi_strip(conditionMessage(e)))
+    }
+  )
+}
+
+# The first seed in 1:12 whose default-MC fit aborts, for a given data builder.
+bh_first_abort <- function(build, ...) {
+  for (sd in 1:12) {
+    m <- bh_msg(build(seed = sd), ci_method = "montecarlo", seed = 1, ...)
+    if (!is.na(m)) {
+      return(m)
+    }
+  }
+  NULL
+}
+
+test_that("the hint reaches the real abort for the design in hand (AC2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  m_ow <- bh_first_abort(bh_oneway, model = "oneway")
+  skip_if(
+    is.null(m_ow),
+    "no one-way MC abort in the seed sweep (boundary luck)"
+  )
+  for (s in c("searle", "burch", "npbootstrap")) {
+    expect_match(m_ow, s, fixed = TRUE)
+  }
+
+  m_tw <- bh_first_abort(bh_twoway)
+  skip_if(
+    is.null(m_tw),
+    "no two-way MC abort in the seed sweep (boundary luck)"
+  )
+  expect_match(m_tw, "ci_method = \"mpl\"", fixed = TRUE)
+  # The two-way random hint must NOT offer the one-way methods, and vice versa.
+  for (s in c("searle", "burch")) {
+    expect_no_match(m_tw, s, fixed = TRUE)
+  }
+  expect_no_match(m_ow, "\"mpl\"", fixed = TRUE)
+})
+
+test_that("the hint is ADDITIVE: class, lead and generic remedies unchanged (AC2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  m <- bh_first_abort(bh_twoway)
+  skip_if(is.null(m), "no two-way MC abort in the seed sweep (boundary luck)")
+  # Leading message and BOTH pre-existing generic remedies survive verbatim.
+  expect_match(
+    m,
+    "The Monte-Carlo interval could not be computed",
+    fixed = TRUE
+  )
+  expect_match(m, "which indicates an unstable fit", fixed = TRUE)
+  expect_match(m, "or inspect the model", fixed = TRUE)
+
+  # A design with no opt-in method keeps EXACTLY those remedies and gains nothing --
+  # this is what makes the additivity claim testable rather than asserted.
+  m_fixed <- bh_first_abort(bh_twoway, raters = "fixed")
+  skip_if(is.null(m_fixed), "no fixed-rater MC abort in the seed sweep")
+  expect_match(m_fixed, "or inspect the model", fixed = TRUE)
+  for (s in c("searle", "burch", "npbootstrap", "\"mpl\"")) {
+    expect_no_match(m_fixed, s, fixed = TRUE)
+  }
+})
+
+test_that("the contract is unchanged: still aborts, still returns no interval (AC5)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Nothing here implements the D-012-fenced fallback-on-abort default: the hint
+  # tells the user what to switch to, it does not switch for them.
+  found <- FALSE
+  for (sd in 1:12) {
+    d <- bh_twoway(seed = sd)
+    got <- tryCatch(
+      {
+        suppressWarnings(suppressMessages(
+          icc(d, score, subject, rater, ci_method = "montecarlo", seed = 1)
+        ))
+      },
+      intraclass_singular_fit = function(e) e
+    )
+    if (inherits(got, "condition")) {
+      found <- TRUE
+      expect_s3_class(got, "intraclass_singular_fit")
+      expect_s3_class(got, "rlang_error")
+      # An error, not a value: no interval is produced on this path.
+      expect_false(inherits(got, "icc"))
+      break
+    }
+  }
+  skip_if_not(found, "no two-way MC abort in the seed sweep (boundary luck)")
+})
+
+test_that("d_study() and the lavaan engine are untouched by the threading (AC2)", {
+  # mc_components()/mc_interval()/rmvn() gained a defaulted `hint`; every other
+  # caller passes none, so their behaviour is byte-identical. rmvn() is called
+  # POSITIONALLY by the lavaan engine, so the new argument must sit after `call`.
+  expect_identical(formals(rmvn)$hint, quote(character(0)))
+  expect_identical(
+    names(formals(rmvn))[1:4],
+    c("n", "mu", "covariance", "call")
+  )
+  expect_identical(formals(mc_components)$hint, quote(character(0)))
+  expect_identical(formals(mc_interval)$hint, quote(character(0)))
+  expect_identical(formals(mc_ci)$hint, quote(character(0)))
+})
