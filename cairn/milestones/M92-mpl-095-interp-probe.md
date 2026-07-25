@@ -52,7 +52,7 @@ candidate row.
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [ ] AC5 (GP7, re-amended 2026-07-25 after review pass 5): **every sentence M92
+- [x] AC5 (GP7, re-amended 2026-07-25 after review pass 5): **every sentence M92
       authors about its own work is transcription from a committed fixture or the frozen
       rule applied, and it POINTS at the review record rather than summarizing it.**
       Concretely: (a) `git diff main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md`,
@@ -178,6 +178,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: the P6-1 root cause, recorded because it is the transferable part — at T13 I checked one half of that conjunction by mutation and ARGUED the other half from arithmetic, writing it down as "not mutation-tested ... the weaker of the two". Both halves were falsifiable by the same one-command method. An enforcement claim gets mutation-tested or it does not get written; reasoning about a guard instead of firing it is how pass 4's checker shipped too.
 - 2026-07-25: pass-6 gate answered — maintainer chose DELETE the enforcement clause over rescoping it or adding a whole-table pin, and ruled F-B/F-C no-change. T14 added by review send-back (Tasks amend-via-gate). The 152-cell guard gap P6-1 exposed is carried to a new ROADMAP candidate row rather than fixed here, search-first checked: no existing candidate, archive summary or D-entry covers a whole-table pin (M91's archive records a level-SET pin, which constrains which levels exist, not the values). Dispositions recorded verbatim at the end of the pass-6 Review section.
 - 2026-07-25: T14 done — deleted `R/ci-mpl.R`'s enforcement clause outright (1 insertion, 4 deletions); the comment now ends "`test-ci-mpl.R` pins the three constants M92 validated." and makes no claim about what reds. No replacement claim written, per the gate. Checked the survivor rather than assuming it: the three literals are present in `tests/testthat/test-ci-mpl.R` and equal the shipped fixture's κ_m column, and the GP7 block carries no remaining "reds a test"/"silently detach"/enforcement wording (the one `guarantee` hit is the pre-existing section heading). Gate: `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` Status OK 0/0/0 (2m 1.4s); suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (pre-existing glmmTMB); 0 lints; air clean; `document()` no-diff; pkgdown clean; both references checkers and `cairn_validate` green. Status -> review for a seventh pass; AC5 stays un-ticked until review re-verifies it.
+- 2026-07-25: review pass 7 — all seven criteria verified with fresh evidence; AC5 ticked for the first time, and only after all three lenses had reported (the pass-5 process failure was ticking it with one lens still running). Zero findings from every lens. The diff-bug [O] lens needed two restarts on server-side 529 errors before it completed; recorded because a lens that dies early is not a lens that found nothing. Three advisories recorded in the Review section, none scored a defect by the lens that raised them, one of them (`test-ci-mpl.R:635-639`) explicitly routed to the maintainer. The 10-of-162 pinned-cell count now rests on three independent derivations by two different methods.
 ## Decisions
 
 
@@ -740,3 +741,92 @@ used to say" does not reach a D-045 correction marked in place, and (c) permits 
 transcription and bare pointers, as its own carve-out states, so it does not contradict (d).
 The 152-cell κ_m-table guard gap P6-1 exposed is NOT fixed on this branch (a digest pin was
 weighed and declined at the gate) and is carried to a ROADMAP candidate row instead.
+
+## Review — pass 7 (2026-07-25): all seven criteria verified
+
+`main` unmoved (0 behind). Three fresh-context lenses + a scorer. **Diff-bug [O]: zero
+findings** (twice restarted on server-side 529s before completing; the completed run read
+every declarative sentence in the five changed non-milestone files). **Blame-history [S]:
+zero findings.** **Prior-review [S]: zero findings** (`gh api .../pulls/comments?per_page=1`
+returned `[]`, so the in-file and archived `## Review` sections were the evidence base).
+No finding survived any lens, so the scorer round is a clean no-op rather than a skipped
+step. Three advisories are recorded below, none scored a defect by the lens that raised them.
+
+**AC1 (GP5).** VERIFIED on two independent extractions: the pre-registration cell rows
+reduced to their bar fields (cell, R, S, δ, ρ, level, floor, `n_rep`) `diff` empty
+`da10025..HEAD`, and the § M92 criterion + shortfall-consequence block (21 lines) `diff`
+empty. `da10025` (1784987723) precedes the first result `2b984af` (1784987888).
+
+**AC2.** VERIFIED against the shipped fixture: `n_s` 25/40/40 all off `s_grid`, every role
+`interp`, `verdict[["0.95"]]$interp_ok` a logical TRUE over E1/E2/E3, `meta$seed_base`
+20920725; generator `stopifnot` at `data-raw/m92-mpl-095-interp-sweep.R:130-136`. The
+blame-history lens fired both generator guards rather than reading them — a reintroduced
+seed collision and a mislabelled on-node cell each errored as intended.
+
+**AC3 (GP6).** VERIFIED: E1 0.967 [0.9540, 0.9772]; E2 0.944 [0.9279, 0.9574]; E3 0.999
+[0.9944, 1.0000]; floor 0.93 and `n_rep` 1000 on every cell; `rule` `linear`;
+`all(adequate)` TRUE; zero failed cells.
+
+**AC4.** VERIFIED: `git diff origin/main..HEAD -- R/` filtered to non-comment, non-blank
+lines is 0 lines.
+
+**AC5 (GP7).** **VERIFIED** — the first pass at which it holds. (a) exported-doc diff empty
+for `R/icc.R`, `man/`, `NEWS.md`, `README.md`, `README.Rmd`. (b) all three rows of the note's
+§ M92 table match the fixture on κ_m, coverage, Clopper–Pearson bounds, floor and miss
+split, checked row-by-row by script; the run-1 triple 0.9680 / 0.9530 / 1.0000 occurs at
+exactly one site tree-wide outside the milestone file — note line 617, inside the labelled
+two-run account. (c) every declarative sentence in `R/ci-mpl.R`,
+`tests/testthat/test-ci-mpl.R`, `data-raw/m92-mpl-095-interp-sweep.R`, the note and
+`cairn/ROADMAP.md` read against the criterion by the diff-bug lens and by a
+pattern sweep here: no summary of a review pass's finding, no account of what a deleted
+passage said, no false claim about another file's contents, no self-description its own
+section falsifies. (d) § M92 verdict is intro + table + verdict + two-run account, then
+`## Traces to` — nothing further. **What P6-1 cost and what closed it:** the pass-6 clause
+was deleted, not reworded, and the claim underneath it — that only 10 of the 162
+`kappa_m_table` cells are pinned by a test literal — is now established by three independent
+derivations (per-cell mutation here; an all-at-once shift traced back to distinct cells by
+the prior-review lens; per-cell mutation again by the diff-bug lens), all returning the same
+ten cells, every one at 0.95.
+
+**AC6.** VERIFIED: the "off-node S coverage probe at 0.95" row is absent (absorbed at the
+plan gate); the envelope row carries M92's evidence and a forward promotion rule and points
+at § M92 rather than copying figures. Two new candidate rows were added by this milestone
+and both had their factual claims verified independently by two lenses.
+
+**AC7.** VERIFIED fresh at review: `devtools::check(env_vars = c(NOT_CRAN = "false"),
+manual = FALSE)` 0 errors / 0 warnings / 0 notes (6m 56.4s, slowed by concurrent subagents);
+full suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the pre-existing
+glmmTMB convergence warnings); `lintr::lint_package()` 0 lints; `air format --check .` clean;
+`devtools::document()` no-diff; `pkgdown::check_pkgdown()` no problems; both references
+checkers exit 0. CI 9/9 pass on the review SHA `4f0bb0c`, checked against the PR head oid.
+
+**Consistency gate.** `cairn_validate.py` exit 0, every check PASS. `cairn/DESIGN.md`
+unchanged, so `cairn_impact` is a clean no-op. No `Driving RR`, so the
+projection-vs-outcome step no-ops. Profile `consistency-gate` slot run in full above; no
+NEWS entry is owed because no user-visible behaviour changed.
+
+### Advisories (raised, verified, none scored a defect)
+
+- `tests/testthat/test-ci-mpl.R:635-639` — "a change to either the shipped 0.95 slice or to
+  `mpl_kappa_lookup`'s interpolation would silently detach the code from its own coverage
+  evidence." Six 0.95 cells determine that coupling and all six red this very test, so a
+  present-tense reading is falsified twelve lines below. Both lenses that examined it judged
+  it counterfactual rationale for the pin that follows rather than an enforcement claim:
+  it asserts nothing about what any test does, it sits inside the test file so makes no
+  cross-file claim, its failure direction cannot produce false reliance, and it is true of
+  81 % of the slice. The diff-bug lens declined to recommend an edit, on the pass-6 rule
+  that a reworded claim is a new claim. Surfaced for the maintainer; no change made.
+- `tests/testthat/test-ci-mpl.R:644-645` — "this test pins what was actually validated, not
+  the rule in the abstract", in a block that also pins `mpl_kappa_lookup(3, 22)`, a geometry
+  M92 never coverage-validated. The raising lens judged "in the abstract" carries the
+  intended contrast and did not score it a defect.
+- The two pass-6 sub-threshold items are unchanged and still accurate as logged (note `:615`
+  "bit-for-bit"; `test-ci-mpl.R:677` "every non-midpoint production lookup"). Not re-raised.
+
+### What changed between pass 6 and pass 7
+
+One clause deleted from `R/ci-mpl.R` (1 insertion, 4 deletions) plus tracking. That clause
+was pass 6's whole failure. The blame-history lens confirmed it was authored and rewritten
+entirely inside M92 — `b95e3fb` -> `52bf5e9` -> `f214373` -> `c24ffac` -> deleted at
+`4f0bb0c` — so nothing pre-M92 was disturbed, and M90's "raw calibrated ... deliberately
+un-smoothed" sentence survives verbatim.
