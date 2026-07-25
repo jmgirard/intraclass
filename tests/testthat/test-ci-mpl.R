@@ -639,10 +639,17 @@ test_that("the 0.95 off-node kappa_m values M92 coverage-validated are what ship
   # coverage evidence. These literals are the kappa_m column of that fixture.
   #
   # This is the "no shortfall" branch of § M92's pre-registered consequence: every
-  # cell cleared its 0.93 floor under the SHIPPED linear-in-S rule (0.968 / 0.953 /
-  # 1.000), so the bracket-max rule is NOT adopted and the lookup is unchanged. A
-  # future shortfall at some other geometry would flip that; this test pins what
-  # was actually validated, not the rule in the abstract.
+  # cell cleared its 0.93 floor under the SHIPPED linear-in-S rule, so the
+  # bracket-max rule is NOT adopted and the lookup is unchanged. A future shortfall
+  # at some other geometry would flip that; this test pins what was actually
+  # validated, not the rule in the abstract.
+  #
+  # The per-cell coverage figures live in the fixture and in § M92 of the note, and
+  # are deliberately NOT restated here. Restating them is what went wrong three
+  # times in this milestone: the sweep was re-run on a disjoint seed base (finding
+  # F1) and every copied figure elsewhere in the tree went stale, each surviving a
+  # different grep (findings F3, F-A, F-B). kappa_m is safe to pin because it is
+  # table-derived and does not move when the sweep is re-run.
   expect_equal(
     mpl_kappa_lookup(3L, 25L, conf_level = 0.95),
     0.7089067,

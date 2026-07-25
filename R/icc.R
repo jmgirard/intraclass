@@ -357,10 +357,10 @@
 #'   two-sided interval is **not equal-tailed** -- where rater variance is large
 #'   relative to error and the subject count is high, non-coverage can fall almost
 #'   entirely on one side (65 of 66 misses below the interval in one validated
-#'   cell). How lopsided it gets varies across designs -- another validated cell,
-#'   differing in rater count, subject count and level together, split 34 below
-#'   against 13 above -- so a limit must not be read as a one-sided bound at half
-#'   the complementary level.
+#'   cell). How lopsided it gets varies across designs, and the validated cells
+#'   differ in rater count, subject count and level together, so nothing here
+#'   isolates which of those drives it -- but a limit must not be read as a
+#'   one-sided bound at half the complementary level.
 #'   And at `conf_level = 0.99` with very few raters the interval can be
 #'   **near-vacuous**: median width 0.905 on the `[0, 1]` scale at 2 raters and 40
 #'   subjects. That is the honest cost of a deep tail at minimal rater information,
