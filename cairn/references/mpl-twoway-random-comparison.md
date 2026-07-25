@@ -504,11 +504,12 @@ F1, scored 93).** Only D1–D3 sit at an off-node S (25, 25, 40), so only they p
 interpolation — at conf_level 0.90 (D1) and 0.99 (D2, D3). **D4's S = 20 is an
 `s_grid` node**, so `approx()` returns the node value and no interpolation occurs
 there: D4 licenses the sub-grid-floor ρ posture at the shipped 0.95, and says nothing
-about interpolated S at that level. Interpolated S at **0.95 therefore remains
-unprobed**, as it was before M91, and 0.95's own worst dip (−0.068 at R = 10,
-S 30→50) is untested; the fixture records this as `interp_ok = NA` at 0.95 rather than
-aggregating D4 into an interpolation verdict, and closing the asymmetry is a ROADMAP
-candidate. Two further consequences carried into the M91 exported docs.
+about interpolated S at that level. Interpolated S at **0.95 was therefore unprobed
+as of M91**, as it had been before it, and 0.95's own worst dip (−0.068 at R = 10,
+S 30→50) untested; the M91 fixture records this as `interp_ok = NA` at 0.95 rather
+than aggregating D4 into an interpolation verdict (M91, **superseded 2026-07-25 by
+§ M92 below**, which probes that gap directly with three off-node 0.95 cells,
+including the R = 10 dip). Two further consequences carried into the M91 exported docs.
 
 1. **One-sidedness reconfirmed off-node.** D1's misses are 65 below vs 1 above —
    the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
@@ -526,6 +527,98 @@ candidate. Two further consequences carried into the M91 exported docs.
 D4 also closes the RR03 rec-#9 gap: the sub-grid-floor ρ = 0.02 posture is now
 measured at all three levels (0.991 at 0.90 and 1.000 at 0.99 in M90's C8; 0.996
 here at 0.95).
+
+## M92 pre-registration — off-node S at the shipped conf_level 0.95 (frozen 2026-07-25, BEFORE any M92 run — GP5)
+
+M91's D1–D3 probed interpolated S at 0.90 and 0.99 and confirmed it there. The
+shipped default level was left out: **every M91 cell at 0.95 sits on an `s_grid`
+node**, so `mpl_kappa_lookup`'s linear-in-S rule — the path a user hits at any subject
+count between nodes — still carries no coverage evidence at the level almost every
+call uses — observed 2026-07-25 <!-- check: python3 -c 'import re,sys; t=open("cairn/references/mpl-twoway-random-comparison.md").read(); ss={int(m.group(1)) for m in re.finditer(r"^\| D\d \| \d+ \| (\d+) \| [\d.]+ \| [\d.]+ \| 0\.95 \|", t, re.M)}; sys.exit(0 if ss and ss <= {10,15,20,30,50,100} else 1)' -->.
+M92 closes that asymmetry. Every cell below is at 0.95 and at an off-node S, so all
+three probe interpolation and none is a mixed-role aggregate (M91 finding F1).
+
+**Where interpolation can bite at 0.95** (κ_m from the shipped 0.95 slice,
+`data-raw/m88-kappa-table.rds`). Two distinct failure directions exist and one cell
+cannot cover both, which is why there are three (GP6 — sweep the axis the failure
+mode grows along, here the S-interpolation axis at both ends of the κ_m range):
+
+- the **largest downward step**, R = 10 over S 30→50 (κ_m 0.1858 → 0.1177), where a
+  chord can sit above or below the curve and the error is largest *relative* to the
+  `1 + κ_m` factor that scales the deviance critical value in `mpl_interval`;
+- a **large-κ_m concave bracket**, R = 2 over S 30→50 (1.2670 → 1.4657): the slope
+  falls across it (0.0244 → 0.0099 per subject), so the chord sits below the curve —
+  an under-estimated κ_m narrows the interval, the under-covering direction — and κ_m
+  is large enough there for the absolute error to move an endpoint. **Corrected
+  2026-07-25 (M92 T6):** an earlier draft of this bullet and of E3's table row called
+  this "the largest κ_m at 0.95", which is false — `(R = 2, S 50→100)` is higher
+  (1.4657 → 1.6245) and the slice maximum is 1.6245 at `(2, 100)`. E3 is the largest
+  κ_m among the cells THIS pass sweeps, and S = 40 is the geometry M91's D3 probed at
+  0.99, which is why it was chosen. The cells, floors, and `n_rep` are untouched by
+  this correction — only the mis-stated superlative in the rationale.
+
+**Cells (frozen).** Stress configuration δ = 4, ρ = 0.60 — M90's tightest cells
+(C4/C6) and M91's D1–D3 configuration, so E1 is a controlled twin of D1/D2:
+
+| cell | R | S | δ | ρ | level | floor | n_rep | role |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S (between the 20 and 30 nodes); the exact twin of D1 (0.90) and D2 (0.99), completing the level triple at one geometry |
+| E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across the largest 0.95 downward step (−0.068 over S 30→50) |
+| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across a large-κ_m concave bracket (1.27 → 1.47 over S 30→50), the chord-below-curve direction; D3's geometry at the shipped level (see the correction above) |
+
+**Criterion (GP5 — fixed before results).** Identical in form to § M91: κ_m is taken
+through the **interpolation path under test** (`mpl_kappa_lookup`'s exact linear-in-S
+rule), never a directly-evaluated value. A cell is adequate iff empirical coverage
+clears its floor; the floor is the already-frozen 0.95 value (nominal − 2 pp, § M87
+criterion 1), unchanged from D4. Over-coverage passes (D-014). The verdict reports an
+exact (Clopper–Pearson) 95 % CI per cell, and each cell's `role` is asserted against
+its geometry in the script rather than trusted from the author's label.
+
+**Pre-registered consequence of a shortfall.** A failing cell switches
+`mpl_kappa_lookup` **at conf_level 0.95 only** to a **bracket-max rule**: an off-node
+S takes `max()` of its two bracketing node κ_m values instead of the linear chord.
+That value is ≥ the chord everywhere, so every interpolated interval only ever widens,
+and node lookups are untouched — M91's bit-identical 0.95 node property survives. The
+failing cell then re-runs at the same `n_rep` against the same floor.
+
+This **departs deliberately from § M91's consequence** (restrict the level to exact
+`s_grid` nodes), and the reason is that 0.95 is the shipped default: restricting it
+would turn currently-working calls into aborts, a user-visible regression, where
+bracket-max keeps every subject count working and only widens. The floor is not
+loosened either way, and no evidence here changes 0.90 or 0.99 (GP5; the M68
+fix-the-evidence-never-the-bar lesson). Decided at the M92 plan gate, 2026-07-25.
+
+## M92 verdict (T3, re-run T7) — interpolated S confirmed at 0.95; the level triple is closed
+
+**Every cell clears its floor under the shipped linear-in-S rule**, so the
+pre-registered bracket-max consequence is **not triggered** and `mpl_kappa_lookup`
+is unchanged. Authoritative evidence: `data-raw/m92-interp-sweep.rds`
+(`data-raw/m92-mpl-095-interp-sweep.R`, seeded, `seed_base` 20920725), κ_m taken
+through the interpolation rule under test:
+
+| cell | R | S | δ | ρ | level | κ_m (interp) | coverage | Clopper–Pearson 95 % | floor | miss −/+ | median width |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | 0.7089 | 0.9670 | [0.9540, 0.9772] | 0.93 | 31 / 2 | 0.752 |
+| E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | 0.1517 | 0.9440 | [0.9279, 0.9574] | 0.93 | 42 / 14 | 0.417 |
+| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | 1.3663 | 0.9990 | [0.9944, 1.0000] | 0.93 | 0 / 1 | 0.871 |
+
+All three cells are off-node and at 0.95, so `interp_ok = TRUE` at that level rests on
+three interpolation probes and no mixed-role aggregation (the M91 F1 failure mode).
+With § M91's D1–D3 this closes the level triple: **interpolated S is coverage-confirmed
+at 0.90, 0.95 and 0.99.**
+
+**Why there are two runs, and why this is not seed-shopping.** The first run
+(`seed_base` 20260725, kept at `data-raw/m92-interp-sweep-run1-collided.rds`) is
+**superseded on a reproducibility defect, not on its result**. Its base sat one
+integer from M91's 20260724 at the same stride and cell order, so M92 cell `ci` rep `r`
+drew M91 cell `ci` rep `r+1`'s seed; because `mpl_simulate` depends only on
+(ρ, δ, R, S), E1 re-simulated D1's datasets and E3 re-simulated D3's, bit-for-bit
+(M92 review finding F1, scored 87). The decisive point for GP5: **run 1 also cleared
+every floor** (0.9680 / 0.9530 / 1.0000), so no floor result motivated the re-run —
+had run 1 failed, re-running on new seeds would have been exactly the
+fix-the-bar move GP5 forbids. Both fixtures are committed; the cells, floors and
+`n_rep` are unchanged; and the generator now carries a `stopifnot` asserting M92's
+seed span is disjoint from M91's, mutation-verified to error on the old base.
 
 ## Traces to
 
