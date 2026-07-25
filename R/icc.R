@@ -2123,7 +2123,14 @@ icc <- function(
           type = type,
           type_supplied = type_supplied,
           conf_level = conf_level,
-          unit = unit
+          unit = unit,
+          # The kappa_m grid is keyed on the OBSERVED counts (mpl reshapes the same
+          # droplevels()-ed factors), and the data can be degenerate on a design that
+          # is not -- both are hint inputs the design fences never see (M93 F1/F2).
+          # All of this is lazy: `hint` is forced only inside an abort message.
+          n_s = n_subjects,
+          n_r = n_raters,
+          degenerate = boundary_data_degenerate(df, oneway)
         )
       )
     }

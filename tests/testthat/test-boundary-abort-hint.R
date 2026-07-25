@@ -221,7 +221,12 @@ bh_hint <- function(...) {
     type = c("agreement", "consistency"),
     type_supplied = FALSE,
     conf_level = 0.95,
-    unit = c("single", "average")
+    unit = c("single", "average"),
+    # A geometry ON the kappa_m grid, so a row that should hint does; the F1 tests
+    # below move it off the grid deliberately.
+    n_s = 20L,
+    n_r = 3L,
+    degenerate = FALSE
   )
   do.call(boundary_method_hint, utils::modifyList(defaults, list(...)))
 }
@@ -579,4 +584,187 @@ test_that("designs the hint stays silent on are the ones that would abort (AC3/A
     )),
     class = "intraclass_unsupported"
   )
+})
+
+# ---- T7/T8 (AC2/AC3/AC4): the two inputs that are not design fences -------------
+# Review pass 1 caught the hint naming methods that then abort. Neither cause is
+# visible in the design predicates: F1 is the kappa_m calibration GEOMETRY (icc()'s
+# own mpl fence checks the design and the conf_level, never the (n_r, n_s) grid), and
+# F2 is the DATA (a perfectly ordinary balanced one-way design can carry scores on
+# which searle, burch and npbootstrap all abort).
+
+test_that("the mpl hint is gated on the kappa_m grid, read from the table (AC3, F1)", {
+  # Read the nodes from the shipped table, so this tracks a recalibration instead of
+  # pinning today's 2-10 raters / 10-100 subjects as literals.
+  s_nodes <- sort(unique(kappa_m_table$n_s))
+  r_nodes <- sort(unique(kappa_m_table$n_r))
+
+  # Off the grid -> silence. `n_s` is interpolated WITHIN its range but never
+  # extrapolated, and `n_r` must be an exact node -- the same three conditions
+  # mpl_kappa_lookup() aborts on.
+  expect_length(bh_hint(n_s = min(s_nodes) - 1L), 0L)
+  expect_length(bh_hint(n_s = max(s_nodes) + 1L), 0L)
+  expect_length(bh_hint(n_r = max(r_nodes) + 1L), 0L)
+
+  # On the grid -> the hint stands, at the edges and between subject nodes.
+  expect_length(bh_hint(n_s = min(s_nodes)), 1L)
+  expect_length(bh_hint(n_s = max(s_nodes)), 1L)
+  expect_length(bh_hint(n_s = min(s_nodes) + 1L), 1L)
+  for (r in r_nodes) {
+    expect_length(bh_hint(n_r = r), 1L)
+  }
+
+  # The gate IS the lookup, not a restatement of it: wherever the hint fires the
+  # lookup returns a kappa_m, and wherever it is silent the lookup aborts.
+  for (n_s in c(min(s_nodes) - 1L, min(s_nodes), 37L, max(s_nodes) + 1L)) {
+    hinted <- length(bh_hint(n_s = n_s)) > 0L
+    resolves <- tryCatch(
+      is.finite(mpl_kappa_lookup(3L, n_s, conf_level = 0.95)),
+      intraclass_unsupported = function(e) FALSE
+    )
+    expect_identical(paste("n_s", n_s, hinted), paste("n_s", n_s, resolves))
+  }
+})
+
+test_that("an off-grid mpl design is not hinted end to end (AC3, F1)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # 8 subjects x 3 raters: exactly the design review pass 1 reproduced, where the
+  # default abort recommended `ci_method = "mpl"` and mpl then aborted on the same
+  # data. Small designs are the ones that sit at this boundary, so this is the
+  # common case, not a corner.
+  small <- function(seed) bh_twoway(n_s = 8, seed = seed)
+  m <- bh_first_abort(small)
+  skip_if(
+    is.null(m),
+    "no MC abort at 8 subjects in the seed sweep (boundary luck)"
+  )
+  expect_no_match(m, "mpl", fixed = TRUE)
+  # ...and the reason it must not be named: mpl aborts on that very design.
+  expect_error(
+    suppressWarnings(suppressMessages(
+      icc(small(1), score, subject, rater, ci_method = "mpl")
+    )),
+    class = "intraclass_unsupported"
+  )
+})
+
+# Degenerate builders. bh_degen_within: scores constant within subject (SSE = 0, the
+# F2 case). bh_degen_between: every subject mean identical (SSA = 0), which kills
+# npbootstrap while searle/burch survive -- the hint stays silent anyway, because the
+# balanced bullet names all three in one sentence. bh_degen_flat: no variance at all,
+# the two-way case where mpl's optim dies at its initial parameters.
+bh_degen_within <- function(n_s = 10, n_k = 3) {
+  set.seed(7)
+  data.frame(
+    subject = factor(rep(seq_len(n_s), each = n_k)),
+    rater = factor(rep(seq_len(n_k), times = n_s)),
+    score = rep(stats::rnorm(n_s), each = n_k)
+  )
+}
+bh_degen_between <- function(n_s = 10, n_k = 3) {
+  data.frame(
+    subject = factor(rep(seq_len(n_s), each = n_k)),
+    rater = factor(rep(seq_len(n_k), times = n_s)),
+    score = rep(seq_len(n_k) - mean(seq_len(n_k)), times = n_s)
+  )
+}
+bh_degen_flat <- function(n_s = 20, n_r = 3) {
+  data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = rep(4, n_s * n_r)
+  )
+}
+
+# As bh_msg(), but renders a RAW error's message too (degenerate data can kill the
+# point fit outright, platform-depending). Either way the assertion is the same:
+# whatever the user is told, it names no method.
+bh_msg_any <- function(d, ...) {
+  tryCatch(
+    {
+      suppressWarnings(suppressMessages(icc(d, score, subject, rater, ...)))
+      NA_character_
+    },
+    error = function(e) {
+      gsub("[[:space:]]+", " ", cli::ansi_strip(conditionMessage(e)))
+    }
+  )
+}
+
+test_that("the degeneracy flag fires exactly on the shipped guards' condition (AC2, F2)", {
+  expect_true(boundary_data_degenerate(bh_degen_within(), oneway = TRUE))
+  expect_true(boundary_data_degenerate(bh_degen_between(), oneway = TRUE))
+  expect_true(boundary_data_degenerate(bh_degen_flat(), oneway = FALSE))
+  # Healthy data are not degenerate, on either branch -- including data sitting at
+  # the sigma^2 -> 0 boundary, which is the case the hint exists FOR.
+  expect_false(boundary_data_degenerate(bh_ok_oneway(), oneway = TRUE))
+  expect_false(boundary_data_degenerate(bh_oneway(), oneway = TRUE))
+  expect_false(boundary_data_degenerate(bh_ok_twoway(), oneway = FALSE))
+  expect_false(boundary_data_degenerate(bh_twoway(), oneway = FALSE))
+  # A degenerate flag beats every design row, one-way and two-way alike.
+  expect_length(bh_hint(oneway = TRUE, balanced = TRUE, degenerate = TRUE), 0L)
+  expect_length(bh_hint(oneway = TRUE, balanced = FALSE, degenerate = TRUE), 0L)
+  expect_length(bh_hint(degenerate = TRUE), 0L)
+})
+
+test_that("degenerate data get NO hint, because every named method aborts (AC3/AC4, F2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  cases <- list(
+    list(lab = "within", d = bh_degen_within(), args = list(model = "oneway")),
+    list(
+      lab = "between",
+      d = bh_degen_between(),
+      args = list(model = "oneway")
+    ),
+    list(lab = "flat", d = bh_degen_flat(), args = list())
+  )
+  for (case in cases) {
+    m <- do.call(
+      bh_msg_any,
+      c(list(case$d, ci_method = "montecarlo", seed = 1), case$args)
+    )
+    skip_if(is.na(m), paste("no abort on the", case$lab, "degenerate case"))
+    for (s in c("searle", "burch", "npbootstrap", "mpl")) {
+      expect_identical(
+        paste(case$lab, s, grepl(s, m, fixed = TRUE)),
+        paste(case$lab, s, FALSE)
+      )
+    }
+  }
+
+  # The converse: on each degenerate case the methods its design row WOULD have
+  # named really do abort, so silence is correct rather than merely cautious.
+  for (mm in c("searle", "burch", "npbootstrap")) {
+    expect_error(suppressWarnings(suppressMessages(
+      icc(
+        bh_degen_within(),
+        score,
+        subject,
+        rater,
+        ci_method = mm,
+        model = "oneway",
+        boot_samples = 50L,
+        seed = 1
+      )
+    )))
+  }
+  expect_error(suppressWarnings(suppressMessages(
+    icc(
+      bh_degen_between(),
+      score,
+      subject,
+      rater,
+      ci_method = "npbootstrap",
+      model = "oneway",
+      boot_samples = 50L,
+      seed = 1
+    )
+  )))
+  expect_error(suppressWarnings(suppressMessages(
+    icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
+  )))
 })

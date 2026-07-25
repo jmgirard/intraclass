@@ -29,10 +29,11 @@
   design** instead of only suggesting a refit. A balanced one-way fit is pointed
   at `ci_method = "searle"`, `"burch"` and `"npbootstrap"` (with a word on what
   each is good for), an unbalanced one-way fit at `"npbootstrap"`, and a
-  balanced-complete two-way random absolute-agreement fit at `"mpl"`. Designs with
-  no boundary-robust option — fixed raters, multilevel, within-cell replicates,
-  consistency, or a `conf_level` outside the calibrated set — say nothing extra
-  rather than suggest a method that would also abort. The interval methods
+  balanced-complete two-way random absolute-agreement fit at `"mpl"`. Where no
+  boundary-robust option applies — fixed raters, multilevel, within-cell replicates,
+  consistency, a `conf_level` or a subject/rater count outside the calibrated set,
+  or data so degenerate that every method would fail on it too — the error says
+  nothing extra rather than suggest a method that would also abort. The interval methods
   themselves, and what the default does, are unchanged: this adds guidance to an
   existing error, and never silently substitutes one method for another.
 

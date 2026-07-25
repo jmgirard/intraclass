@@ -120,10 +120,10 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       the classed `intraclass_singular_fit`. Re-verify on CI, not just locally: macOS
       completes the fit that Linux/Windows abort on, so a green local gate proves
       nothing here.
-- [ ] T7 (review F1, 95): pass `n_s`/`n_r` into `boundary_method_hint()` and gate the
+- [x] T7 (review F1, 95): pass `n_s`/`n_r` into `boundary_method_hint()` and gate the
       `mpl` row on `kappa_m_table`'s node set, so the hint stops naming `mpl` on
       designs `mpl_kappa_lookup()` refuses; add an off-grid row to the AC3 grid.
-- [ ] T8 (review F2, 90): stop the balanced-one-way hint firing on degenerate data
+- [x] T8 (review F2, 90): stop the balanced-one-way hint firing on degenerate data
       (zero within-subject variance) that reaches MC site A, where `searle`/`burch`/
       `npbootstrap` all abort. Decide at the implement gate whether AC2/AC3 need a
       gated amendment or the guard alone settles it.
@@ -147,6 +147,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: implement gate (pass 2) — F1/F2 reproduced locally, plus a third case of the same shape the findings missed: one-way with all subject means exactly equal hints three methods of which npbootstrap aborts, and all-constant two-way data hints `mpl`, which then raises a raw optim error. Gate decisions: back the hint off on ANY exact degeneracy; ask `mpl_kappa_lookup()` itself whether the geometry is calibrated (one source of truth); amend Scope/AC2/AC3 rather than stretch them.
 - 2026-07-25: gated amendment (pass 2) — Scope, AC2 and AC3 now name the two non-fence inputs the hint needs (observed subject/rater counts for `mpl`'s κ_m grid; an exact-degeneracy flag) and the widened AC3 grid (end-to-end through `icc()`, on/off grid geometries, degenerate data); mapping table gains the κ_m-grid condition and a degenerate-data row.
 - 2026-07-25: T6 — the AC2 degenerate-data test now classifies a RAW unclassed point-fit error as "point-fit" and accepts it beside site "C" (`bh_probe_any()`), and the three-method loop no longer pins an abort class glmmTMB does not raise; handler order and raw/classed classification verified by hand. CI is the real check — macOS cannot reproduce the failure.
+- 2026-07-25: T7/T8 — the hint now takes the observed `n_s`/`n_r` and a degeneracy flag. `mpl_kappa_available()` (new, `R/ci-mpl.R`) asks `mpl_kappa_lookup()` itself whether a geometry is calibrated, so the grid gate cannot drift from the table; `boundary_data_degenerate()` evaluates the shipped searle/burch/npbootstrap guards' own conditions one-way, and zero total variance two-way (the only cell where mpl breaks — probed). NEWS's exclusion list updated to match. Mutation-verified: dropping the degeneracy return reds 7 assertions, restoring the old conf_level-only mpl gate reds 6.
 
 ## Decisions
 
