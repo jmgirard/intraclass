@@ -46,7 +46,7 @@ levels · re-calibrating any κ_m value → M90's tables are frozen inputs · of
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [ ] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
+- [x] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
       `R/ci-mpl.R`'s interpolation comment, the `@param ci_method`/`conf_level` text,
       and the comparison note — matches what the shipped fixture carries, with a
       test pinning the property the code relies on.
@@ -178,8 +178,9 @@ against the pinned 0.7089 / 0.1517 / 1.3663.
 **AC6 (candidate rows resolved).** VERIFIED: the "off-node S coverage probe at 0.95"
 row is absent from `cairn/ROADMAP.md` (absorbed at the plan gate), and the κ_m
 envelope/smoother row now carries M92's evidence and its `→ M92 T3` lineage —
-narrowed to "promote only on a NEW failure", since two independent passes have now
-found no coverage cost to the dips.
+narrowed to "promote only on a NEW failure". (Pass 2: that row still carried run-1
+figures and the falsified independence claim; corrected in place and marked — see the
+pass-2 AC5 note below.)
 
 **AC7 (full gate).** VERIFIED, fresh at review:
 `devtools::check(env_vars = c(NOT_CRAN = "false"))` → Status OK, 0 errors / 0 warnings
@@ -251,3 +252,53 @@ file the note names as generator of record. **Verified here**: the strings are p
 AC5 requires every such statement to match what the shipped fixture carries. Per the
 review rules a criterion failure returns the milestone to `in-progress` — the criterion
 is not reinterpreted and nothing merges. F3 rides along in the same send-back.
+
+## Review — pass 2 (2026-07-25, after the F1/F3 fixes)
+
+`main` still unmoved. All seven criteria re-executed against the **new** fixture; the
+pass-1 evidence for AC2/AC3 cited run-1 numbers and is superseded by what follows.
+
+**AC1 (GP5)** — re-verified, and this is where the re-run had to be justified. The
+frozen bar is unchanged: `git diff da10025..HEAD` on the note leaves cells, floors
+(0.93), `n_rep` (1000), the criterion and the shortfall consequence untouched — only
+rationale prose moved. `meta$seed_base` in the shipped fixture is 20920725, the
+disjoint base. Decisively for GP5: **run 1 cleared every floor too** (0.9680 / 0.9530 /
+1.0000), so no floor result motivated the re-run — the defect was reproducibility. Both
+fixtures are committed, so the claim is checkable rather than asserted.
+
+**AC2** — re-verified on the new fixture: all three cells off-node, all roles `interp`,
+`verdict[["0.95"]]$interp_ok` TRUE over E1/E2/E3. The generator now carries a second
+`stopifnot` asserting M92's seed span is disjoint from M91's, mutation-verified to error
+when the old base is restored, and pinned to the frozen `n_rep` so smoke mode cannot
+relax it.
+
+**AC3 (GP6)** — re-verified: E1 0.9670 [0.9540, 0.9772]; E2 0.9440 [0.9279, 0.9574];
+E3 0.9990 [0.9944, 1.0000]; floor 0.93 and `n_rep` 1000 on every cell; `rule` = linear;
+`all(adequate)` TRUE. κ_m is bit-identical across runs, as it must be — it is
+table-derived, not run-derived.
+
+**AC4** — unchanged and re-verified: `git diff main..HEAD -- R/` filtered to non-comment
+lines is still empty.
+
+**AC5 (GP7)** — NOW VERIFIED, but only after a correction found in this pass. Sweeping
+every site again turned up one the fix pass missed: `cairn/ROADMAP.md`'s envelope
+candidate row still carried run-1's 0.9530 / 1.0000 and the "two independent passes"
+claim F1 had falsified. Corrected in place and marked (ROADMAP is current knowledge,
+D-045). A full grep for `independent pass|independent look|second probe` and for the
+run-1 figures now returns only pass-1's own review record, which correctly describes
+what was found at the time. The test pin gained a non-midpoint literal (R=3, S=22 →
+0.6624794) plus an explicit refutation that it equals the bracket mean, so it
+discriminates any bracket-symmetric rule, not just bracket-max.
+
+**AC6** — re-verified; the corrected row is the one described above.
+
+**AC7** — re-verified fresh after the fixes: `devtools::check(env_vars =
+c(NOT_CRAN = "false"))` Status OK, 0/0/0 (2m 0.1s); full suite at `NOT_CRAN=true
+CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the same pre-existing glmmTMB warnings);
+0 lints; air clean; `document()` no-diff; `pkgdown::check_pkgdown()` clean; both
+references checkers green. `cairn_validate` exit 0, every check PASS.
+
+**Honest note on this pass.** AC5 failed at pass 1 and required a further correction
+found during pass 2's own evidence sweep — the same "a site was left behind" shape as
+finding F3. The mechanical grep is now recorded above so the next pass repeats it rather
+than re-deriving it.
