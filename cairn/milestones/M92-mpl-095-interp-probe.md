@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,14 +46,14 @@ levels · re-calibrating any κ_m value → M90's tables are frozen inputs · of
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [x] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
+- [ ] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
       `R/ci-mpl.R`'s interpolation comment, the `@param ci_method`/`conf_level` text,
       and the comparison note — matches what the shipped fixture carries, with a
       test pinning the property the code relies on.
 - [x] AC6: the ROADMAP "off-node S coverage probe at 0.95" candidate is absorbed, and
       the "κ_m monotone envelope / smoother" candidate is updated with this
       milestone's evidence (or dropped, if superseded by the applied consequence).
-- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; and both
       references-CI checkers green — `enumerate-generalizing-claims.py --check` and
       `check-reference-observations.py` (M85/M86: `cairn_validate` runs neither, and a
@@ -121,6 +121,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: correction (supersedes the "largest κ_m" wording in the plan-gate and T3 entries above, which are history and stay as written). Ran the M72 self-check — grep own new prose for counts and universals, re-derive each against the source — over everything this milestone wrote. E2's "worst 0.95 downward step" holds (−0.0681 at R=10, S 30→50 is the most negative in the slice). **E3's "largest κ_m at 0.95" does not**: `(R=2, S 50→100)` is higher at 1.4657 → 1.6245 and the slice maximum is 1.6245 at `(2, 100)`. E3 is the largest-κ_m cell THIS pass sweeps, on a concave bracket, at D3's geometry — which is the real reason it was chosen. Corrected at all four live sites (pre-registration bullet + cells row, § M92 verdict, `R/ci-mpl.R`, the AC table), marked in place per D-045; cells, floors and `n_rep` untouched, so the frozen bar is unchanged (GP5).
 - 2026-07-25: T6 done — envelope candidate row updated with M92's evidence (two passes now find no coverage cost to the dips; promote only on a NEW failure); the probe candidate was already absorbed at the plan gate. Gate: `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` → Status OK, 0 errors / 0 warnings / 0 notes; full suite at `NOT_CRAN=true CI=true` → FAIL 0, PASS 4210, SKIP 23, WARN 2 (pre-existing glmmTMB convergence warnings on the multilevel path — verified not ours: `git diff main..HEAD -- R/` changes zero non-comment lines); air + lintr clean; `document()` no-diff; both references checkers and cairn_validate green. AC1 ordering verified from git log: pre-registration da10025 (08:55:23) precedes the first result 2b984af (08:58:08). Manual built with `--no-manual` locally (known TinyTeX Courier font gap, not an Rd problem); CI builds it.
 - 2026-07-25: all tasks done, gate clean; PR #99 opened, status -> review.
+- 2026-07-25: review FAILED at AC5, status -> in-progress. What failed: finding F1 (scored 87) — the sweep's `seed_base` 20260725 against M91's 20260724 at the same stride and cell order makes E1 and E3 re-simulate M91's D1/D3 datasets bit-for-bit (verified: `mpl_simulate` `identical()` at the aligned seeds), so the shipped "second independent look" / "two independent passes" / "second probe's worth of evidence" claims are not what the fixture carries, and the D1->E1 "monotone in the level" item is forced by crit(E1) > crit(D1) on shared data. Riding along: F3 (92) — the corrected "largest 0.95 kappa_m" over-claim is still live at `data-raw/m92-mpl-095-interp-sweep.R:22-25`, a fifth site the T6 entry's "all four live sites" missed. AC1-AC4, AC6, AC7 verified and stay ticked; AC5 unticked. Four findings scored below 80 are logged in the Review section, not actioned.
 
 ## Decisions
 
@@ -155,7 +156,9 @@ below floor, so bracket-max was not adopted. `git diff main..HEAD -- R/` filtere
 non-comment lines is **empty**: the runtime lookup and every other code path are
 untouched, which is the strongest available form of "the lookup is unchanged".
 
-**AC5 (statements match the fixture; a test pins the property).** VERIFIED. Three live
+**AC5 (statements match the fixture; a test pins the property).** **FAILED** — see
+finding F1 below; the sub-check recorded here passed but does not cover the claim F1
+falsifies. Three live
 claim sites — `R/ci-mpl.R:217` (0.968 / 0.953 / 1.000 named per cell), `R/icc.R:351`
 and `NEWS.md:79` (interpolated path validated at all three levels) — each check out
 against the fixture and against M91's D1–D3 for the other two levels. The pin is
@@ -168,3 +171,74 @@ row is absent from `cairn/ROADMAP.md` (absorbed at the plan gate), and the κ_m
 envelope/smoother row now carries M92's evidence and its `→ M92 T3` lineage —
 narrowed to "promote only on a NEW failure", since two independent passes have now
 found no coverage cost to the dips.
+
+**AC7 (full gate).** VERIFIED, fresh at review:
+`devtools::check(env_vars = c(NOT_CRAN = "false"))` → Status OK, 0 errors / 0 warnings
+/ 0 notes (2m 20.7s). Full suite at `NOT_CRAN=true CI=true` → FAIL 0, PASS 4210,
+SKIP 23, WARN 2 (pre-existing glmmTMB convergence warnings; `git diff main..HEAD -- R/`
+changes zero non-comment lines, so not from this diff). `lintr::lint_package()` 0 lints;
+`air format --check .` clean; `devtools::document()` no-diff; `pkgdown::check_pkgdown()`
+"No problems found"; `enumerate-generalizing-claims.py --check` and
+`check-reference-observations.py` both green. CI on `af6aff2`: 9/9 green.
+
+**Consistency gate.** `cairn_validate.py` exit 0 — every check PASS. Coverage-completeness
+included, so the plan's criterion→task map is intact. No `DESIGN.md` principle changed,
+so `cairn_impact` is a clean no-op. Profile `consistency-gate` slot run in full above.
+
+## Review findings
+
+Three fresh-context lenses + an independent scorer.
+**Blame-history [S]: zero findings.** **Prior-review [S]: zero findings**
+(the `gh api .../pulls/comments` probe returned `[]`, so archived `## Review` sections
+were the evidence base — the expected shape for this repo). **Diff-bug [O]: six
+findings**, scored 87 / 68 / 92 / 78 / 62 / 35.
+
+### Actioned (score ≥ 80)
+
+**F1 (87) — `data-raw/m92-mpl-095-interp-sweep.R:141-142`: the seed scheme silently
+re-runs M91's exact datasets, so "second independent look" is false for two of three
+cells.** `seed_base <- 20260725L` with the same `seed_stride <- 1000000L` and the same
+cell ordering as M91's generator (base `20260724L`) makes M92 cell `ci` rep `r` use the
+*same integer seed* as M91 cell `ci` rep `r+1`. E1 (ci=1, R=3, S=25) shares 999 of 1000
+datasets with D1; E3 (ci=3, R=2, S=40) draws entirely inside D3's 2000. Only E2 is new
+data. **Verified here independently**: `mpl_simulate` at the aligned seeds is
+`identical()` TRUE for both pairs at several reps. Consequences — the "second
+independent look" (note § M92 verdict), "two independent passes" (ROADMAP candidate row)
+and "a second probe's worth of evidence" (`R/ci-mpl.R`) claims are unsupported; and the
+note's "0.934 (D1, 0.90) → 0.968 (E1, 0.95) … monotone in the level" item is
+arithmetically forced on shared data, since `crit = (1+κ)·qchisq(1−α,1)` is larger at E1
+(6.56) than D1 (4.81), so E1's interval contains D1's on every shared rep. The per-cell
+coverage numbers stand; the independence and controlled-triple framing does not.
+
+**F3 (92) — `data-raw/m92-mpl-095-interp-sweep.R:22-25`: the false "largest κ_m"
+superlative T6 corrected everywhere else is still live in the committed generator.**
+The header still reads "E3 crosses the largest 0.95 kappa_m (1.2670 -> 1.4657 over the
+same nodes)" and "there the absolute error is largest". Both false: the slice maximum is
+1.6245 at (R=2, S=100) and the (2, 50→100) bracket is higher and wider. The T6 work-log
+entry claims correction "at all four live sites"; this is an uncorrected fifth, in the
+file the note names as generator of record. **Verified here**: the strings are present.
+
+### Logged, not actioned (score < 80 — surfaced, never silently dropped)
+
+- **F2 (68)** — `R/icc.R:357-361`: the new rater-count claim compares M91's D1
+  (conf_level 0.90, S=25, R=3) with E2 (0.95, S=40, R=10), so three factors vary while
+  the sentence credits rater count. Real but narrow; no committed fixture isolates the
+  rater axis.
+- **F4 (78)** — `NEWS.md:80-81`, `R/icc.R:351-353`: "the same evidential footing"
+  overstates — nodes are each individually calibrated, interpolated values nowhere, and
+  only six (R,S,level) off-node points have ever been coverage-checked.
+- **F5 (62)** — `tests/testthat/test-ci-mpl.R:645-659`: all three pinned S values are
+  exact bracket midpoints, so the pin cannot distinguish linear from any
+  bracket-symmetric rule (R=3, S=22 → 0.6625 linear vs 0.7089 bracket-mean). It does
+  discriminate the pre-registered bracket-max alternative, which is what the work log
+  claimed, so the gap is narrower than the finding framed it. **Verified here.**
+- **F6 (35)** — `data-raw/m92-mpl-095-interp-sweep.R:169-173`: the `tryCatch` fallback
+  returns `c(lower=0, upper=1)`, scoring an errored fit as covered. Byte-identical to
+  M91's shipped generator and a repo-wide convention, and no rep errored in this run.
+
+### Gate outcome
+
+**AC5 fails as written.** F1 falsifies an in-repo statement about the 0.95 evidence, and
+AC5 requires every such statement to match what the shipped fixture carries. Per the
+review rules a criterion failure returns the milestone to `in-progress` — the criterion
+is not reinterpreted and nothing merges. F3 rides along in the same send-back.
