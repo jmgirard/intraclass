@@ -547,9 +547,16 @@ mode grows along, here the S-interpolation axis at both ends of the κ_m range):
 - the **largest downward step**, R = 10 over S 30→50 (κ_m 0.1858 → 0.1177), where a
   chord can sit above or below the curve and the error is largest *relative* to the
   `1 + κ_m` factor that scales the deviance critical value in `mpl_interval`;
-- the **largest κ_m**, R = 2 over S 30→50 (1.2670 → 1.4657), locally concave, so the
-  chord sits below the curve — an under-estimated κ_m narrows the interval, the
-  under-covering direction, and here the absolute error is largest.
+- a **large-κ_m concave bracket**, R = 2 over S 30→50 (1.2670 → 1.4657): the slope
+  falls across it (0.0244 → 0.0099 per subject), so the chord sits below the curve —
+  an under-estimated κ_m narrows the interval, the under-covering direction — and κ_m
+  is large enough there for the absolute error to move an endpoint. **Corrected
+  2026-07-25 (M92 T6):** an earlier draft of this bullet and of E3's table row called
+  this "the largest κ_m at 0.95", which is false — `(R = 2, S 50→100)` is higher
+  (1.4657 → 1.6245) and the slice maximum is 1.6245 at `(2, 100)`. E3 is the largest
+  κ_m among the cells THIS pass sweeps, and S = 40 is the geometry M91's D3 probed at
+  0.99, which is why it was chosen. The cells, floors, and `n_rep` are untouched by
+  this correction — only the mis-stated superlative in the rationale.
 
 **Cells (frozen).** Stress configuration δ = 4, ρ = 0.60 — M90's tightest cells
 (C4/C6) and M91's D1–D3 configuration, so E1 is a controlled twin of D1/D2:
@@ -558,7 +565,7 @@ mode grows along, here the S-interpolation axis at both ends of the κ_m range):
 |---|---|---|---|---|---|---|---|---|
 | E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S (between the 20 and 30 nodes); the exact twin of D1 (0.90) and D2 (0.99), completing the level triple at one geometry |
 | E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across the largest 0.95 downward step (−0.068 over S 30→50) |
-| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across the largest 0.95 κ_m (1.27 → 1.47 over S 30→50), the concave chord-below-curve direction |
+| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across a large-κ_m concave bracket (1.27 → 1.47 over S 30→50), the chord-below-curve direction; D3's geometry at the shipped level (see the correction above) |
 
 **Criterion (GP5 — fixed before results).** Identical in form to § M91: κ_m is taken
 through the **interpolation path under test** (`mpl_kappa_lookup`'s exact linear-in-S
@@ -604,8 +611,8 @@ coverage-confirmed at 0.90, 0.95 and 0.99.**
 Three things the cells establish beyond the headline.
 
 1. **The dips do not cost coverage — a second independent look.** E2 crosses 0.95's
-   worst downward step and lands at 0.9530, essentially nominal; E3 crosses the
-   largest κ_m at 0.95, where the chord sits below a concave curve (the
+   worst downward step and lands at 0.9530, essentially nominal; E3 crosses a
+   large-κ_m concave bracket, where the chord sits below the curve (the
    under-estimating direction), and over-covers at 1.0000. Together with M91's D3
    (the −0.154 dip at 0.99) that is now two passes finding no coverage cost to
    non-monotonicity, which is the evidence the κ_m envelope/smoother candidate was

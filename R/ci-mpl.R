@@ -215,8 +215,10 @@ mpl_interval <- function(
 # had sat ON a node (M91's D4 is S = 20, a node -- it probes the sub-grid-floor rho,
 # not interpolation): three off-node cells, each clearing the frozen 0.93 floor --
 # E1 (R=3, S=25) 0.968, E2 (R=10, S=40) 0.953 across 0.95's own worst dip
-# (-0.068 over S 30->50), E3 (R=2, S=40) 1.000 at the largest 0.95 kappa_m, where the
-# chord sits below a concave curve. See § M92 of the note above. Because no cell fell
+# (-0.068 over S 30->50), E3 (R=2, S=40) 1.000 on a large-kappa_m CONCAVE bracket
+# (1.267->1.466), where the chord sits below the curve -- the under-estimating, hence
+# under-covering, direction. (Not the slice's largest kappa_m: R = 2, S 50->100 is
+# higher. See § M92 of the note above.) Because no cell fell
 # short, that pass's pre-registered consequence -- switching 0.95 to a bracket-max
 # rule -- was NOT triggered and this lookup is unchanged.
 # The shipped values are the raw calibrated ones, deliberately un-smoothed, so each
