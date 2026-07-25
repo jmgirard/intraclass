@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -138,6 +138,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: review pass 2 FAILED at AC5, status -> in-progress (trip 2 of the 3 the thrash rule allows). What failed: F-A — `R/icc.R`/`man/icc.Rd` cite E2's run-1 miss split 34/13 against the fixture's 42/14; F-B — `tests/testthat/test-ci-mpl.R:642-643` cites run-1 coverages 0.968/0.953/1.000 against 0.967/0.944/0.999; F-C — the pass-2 Review entry ticked AC5 while certifying a grep sweep that in fact returns F-A and F-B. Root cause across all three trips is restating run-specific figures in scattered prose; the fix removes the restatements rather than correcting them again.
 - 2026-07-25: T9 done. F-A: dropped the second miss-split figure from `@param ci_method` entirely — it existed only to support the rater-count attribution F2 already removed, so with that gone it earned nothing and was pure staleness surface; the qualitative caveat and M91's stable 65-of-66 illustration remain. F-B: dropped the coverage triple from the test comment and pointed it at the note and fixture, with an in-place note saying why restating them is the defect. F-C: replaced the hand-written grep with a mechanical sweep over `git ls-files` x every formatting variant of each superseded figure (19 variants x 129 tracked files, excluding the note, this record and the ledger, which are the three places run-1 legitimately appears) — CLEAN, plus a converse check that the run-2 figures are present in the note. First pass of that sweep also surfaced why the hand greps kept failing: `1.000` matches M91's D3, M91's near-vacuous cell and a README bound, so it is not a discriminating token and was dropped from the probe set.
 - 2026-07-25: T9 gate clean (check Status OK 0/0/0; tests FAIL 0 / PASS 4213; 0 lints; air clean; document() no-diff; pkgdown clean; both references checkers + cairn_validate green). Status -> review for a third pass; AC5 stays unticked until review re-verifies it.
+- 2026-07-25: review pass 3 FAILED at AC5 (trip 3 — thrash rule reached, no further retry queued). What failed: P3-1 — the T9 rewrite of `@param ci_method` claims no validated cell isolates the rater axis, which the shipped fixture falsifies (E2 vs E3 differ only in `n_r`, 10 vs 2). Also P3-2 (an unreproducible sweep count in T9's own entry, F-C's shape again), P3-3 (T9's stated remedy not executed at two sites), P3-4 (low, a mis-attributed finding in a test comment). Two of three lenses returned zero findings. Per the thrash rule this routes to `/milestone-plan` for a re-cut, not back to implement.
 ## Decisions
 
 
@@ -344,3 +345,55 @@ places, miss counts instead of coverages). The defect is the practice of **resta
 run-specific figures in prose scattered across the tree**. The remedy is to stop: the
 fixture and the reference note are the single source, and other sites point at them
 rather than copying numbers out. That removes the class instead of patching instances.
+
+## Review — pass 3 (2026-07-25): FAILED at AC5; thrash rule reached
+
+Blame-history and prior-review lenses: **zero findings** each, both independently
+re-deriving rather than trusting the record (the prior-review lens explicitly re-ran the
+T9 sweep claim rather than accepting it — the F-C remedy working). Diff-bug lens: four
+findings. My own exhaustive sweep this pass — probe set derived FROM the two fixtures
+(every value in run 1 absent from run 2, each decimal form), 33 discriminating variants
+over 336 tracked files — returned zero hits in any of the 12 files this milestone
+changed. That sweep was clean and still missed what follows, which is the point.
+
+**P3-1 (the failure) — `R/icc.R:360-362`, mirrored to `man/icc.Rd`.** T9 rewrote a
+scoped pairwise sentence into a corpus-wide negative: "the validated cells differ in
+rater count, subject count and level together, so nothing here isolates which of those
+drives it". The shipped fixture falsifies it — **E2 and E3 share `n_s` 40, `delta` 4,
+`rho` 0.60 and `conf` 0.95 and differ only in `n_r` (10 vs 2)**, so the corpus contains
+exactly the isolating pair the sentence denies. Verified programmatically here. A reader
+of `?icc` is told not to look for something the milestone's own data contains.
+
+**P3-2 — this record, T9's work-log entry.** It certifies "19 variants x 129 tracked
+files" over `git ls-files` without stating the `R/ tests/ man/ vignettes/ + NEWS +
+README + ROADMAP` filter that produces 129, so the count cannot be re-derived from the
+method as written. Structurally F-C again. The named exclusion set is also wrong both
+ways: the ledger carries no run-1 M92 figure, while
+`data-raw/m92-mpl-095-interp-sweep.R` does carry the superseded seed base (legitimately,
+as collision history) and was not listed.
+
+**P3-3 — `R/ci-mpl.R:217-218` and `cairn/ROADMAP.md:26`.** T9's task text says "stop
+restating run-specific figures outside the note and the fixture"; both sites still
+restate them. They are correct against run 2 today, so this is not an AC5 violation —
+but the class T9 claims to have removed survives at 5 of 7 figures, and any future
+re-run re-opens them.
+
+**P3-4 (low) — `tests/testthat/test-ci-mpl.R:648-651`.** The new comment attributes F3
+to the staleness class; F3 was a kappa_m superlative found before the re-run, not a
+figure staled by it. The causal story would mis-scope a future check.
+
+### Why this stops here
+
+AC5 has now failed at three consecutive reviews — F3, then F-A/F-B/F-C, now P3-1 — and
+each failure was a claim about the fixture written in the prose fixing the previous
+failure. P3-1 was authored by the very task whose purpose was to end the class. The
+tracking rules' thrash rule applies at the third trip back: this is a mis-planned
+milestone, not one needing a fourth patch.
+
+The diagnosis is a scope error made at the plan gate. M92 bundled two unlike things: a
+**coverage measurement**, which has been correct and stable since T7 and survived three
+adversarial passes untouched, and an **exported-prose surface** that must stay
+consistent with a regenerable fixture, which failed every time. The first is finished
+work; the second needs its own milestone with a mechanical rule (user-facing docs
+restate no run-specific figure, and make no universal or negative claim about the
+fixture that a committed check cannot settle).
