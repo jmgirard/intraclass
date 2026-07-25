@@ -430,6 +430,103 @@ equal-tailed), and 0.99 intervals run wide (C4/C6 median width 0.852/0.845). No
 decisive cell's median 0.99 width reached the BC6 ≥ 0.90 documentation trigger
 (max 0.852), but the small-geometry / near-vacuity caveat still ships with M91.
 
+## M91 pre-registration — interpolated-S confirmation cells (frozen 2026-07-24, BEFORE any M91 run — GP5)
+
+M91 exports conf_level 0.90 / 0.99 per BC7. One evidence gap survives M90: **every
+one of M90's C1–C8 sits on an `s_grid` node**, so `mpl_kappa_lookup`'s
+linear-in-S interpolation — the path a user hits at any subject count between
+nodes — has no coverage evidence at any level, the shipped 0.95 included
+— observed 2026-07-24 <!-- check: python3 -c 'import re,sys; ss={int(m.group(1)) for m in re.finditer(r"^\| C[1-8] \| \d+ \| (\d+) \|", open("cairn/references/mpl-twoway-random-comparison.md").read(), re.M)}; sys.exit(0 if ss and ss <= {10,15,20,30,50,100} else 1)' -->.
+M90's BC1 κ_m at the off-`s_grid` S=25 geometries cannot fill the gap: BC1 ran on
+xiao2013's *published* ρ ∈ [0.6, 0.9] grid, the production tables on the extended
+ρ ∈ [0.05, 0.9] grid, so the two are not comparable (at R=3, S=25 the interpolated
+production κ_m is 0.777 against BC1's directly-evaluated 0.535 — the deliberate
+extended-range margin, not interpolation error).
+
+**Where interpolation can bite.** The calibrated κ_m is **non-monotone in S at all
+three levels** — worst adjacent downward step −0.046 (0.90, R=9, S 15→20), −0.068
+(0.95, R=10, S 30→50), −0.162 (0.99, R=2, S 10→15) — so the shipped
+`R/ci-mpl.R` claim that linear interpolation is conservatively biased ("increasing
+and roughly concave", hence a chord below the curve) is false in both directions and
+is corrected by this milestone. Most dips sit at large R where κ_m is itself small —
+13 of the 18 adjacent steps below −0.02 have κ_m under 0.30 at both endpoints of the
+step — and there an absolute error of that size barely moves a bound. The two largest
+steps are also the two at the largest κ_m, both at **R=2, conf_level 0.99**
+(0.729 → 0.566 over S 10→15 and 0.970 → 0.816 over S 30→50): the one geometry where
+an interpolation error is large enough in absolute terms to shift a bound, which is
+what D3 targets. (Counts and steps re-derivable from the shipped table —
+corrected 2026-07-24, M91: an earlier draft of this paragraph mis-stated the dips'
+κ_m as ≈0.10–0.27 throughout.)
+
+**Cells (frozen).** Stress configuration δ = 4, ρ = 0.60 — M90's tightest cells
+(C4/C6) — except D4, which reproduces M90's C8 geometry at the shipped level:
+
+| cell | R | S | δ | ρ | level | floor | n_rep | role |
+|---|---|---|---|---|---|---|---|---|
+| D1 | 3 | 25 | 4.0 | 0.60 | 0.90 | ≥ 0.88 | 1000 | interpolated S (between the 20 and 30 nodes) |
+| D2 | 3 | 25 | 4.0 | 0.60 | 0.99 | ≥ 0.98 | 2000 | same, deep tail |
+| D3 | 2 | 40 | 4.0 | 0.60 | 0.99 | ≥ 0.98 | 2000 | interpolated S across the largest absolute dip (−0.154 over S 30→50, κ_m ≈ 0.82–0.97) |
+| D4 | 3 | 20 | 1.0 | 0.02 | 0.95 | ≥ 0.93 | 1000 | sub-grid-floor ρ at the shipped level (M90's C8 geometry; makes the below-grid posture uniform across levels) |
+
+**Criterion (GP5 — fixed before results).** κ_m is taken through the **interpolation
+path under test** (`mpl_kappa_lookup`'s exact linear-in-S rule), never a
+directly-evaluated value — the interpolated constant is the object of the test. A
+cell is adequate iff empirical coverage clears its floor above; the floors are the
+already-frozen per-level values (0.90 / 0.99 from BC3, § M90; 0.95 from M87's
+nominal − 2 pp, § M87 criterion 1). Over-coverage passes, as at every prior pass
+(D-014). The verdict reports an exact (Clopper–Pearson) 95 % CI per cell.
+
+**Pre-registered consequence of a shortfall.** A level with a failing cell is
+**restricted to exact `s_grid` S nodes** — an interpolated S aborts at that level
+only, the other levels and the on-node behavior are untouched. The floor is never
+loosened and the shipped 0.95 is never restricted on evidence about another level
+(GP5; the M68 fix-the-evidence-never-the-bar lesson).
+
+## M91 verdict (T2) — interpolated S confirmed at 0.90 and 0.99; not probed at 0.95
+
+**Every cell clears its floor**, and the interpolation claim holds for the two levels
+M91 adds. Evidence:
+`data-raw/m91-interp-sweep.rds` (`data-raw/m91-mpl-interp-sweep.R`, seeded),
+κ_m taken through the interpolation rule under test:
+
+| cell | R | S | δ | ρ | level | κ_m (interp) | coverage | Clopper–Pearson 95 % | floor | miss −/+ | median width |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| D1 | 3 | 25 | 4.0 | 0.60 | 0.90 | 0.7767 | 0.9340 | [0.9168, 0.9486] | 0.88 | 65 / 1 | 0.663 |
+| D2 | 3 | 25 | 4.0 | 0.60 | 0.99 | 0.6398 | 0.9995 | [0.9972, 1.0000] | 0.98 | 0 / 1 | 0.874 |
+| D3 | 2 | 40 | 4.0 | 0.60 | 0.99 | 0.8932 | 1.0000 | [0.9982, 1.0000] | 0.98 | 0 / 0 | 0.905 |
+| D4 | 3 | 20 | 1.0 | 0.02 | 0.95 | 0.6315 | 0.9960 | [0.9898, 0.9989] | 0.93 | 4 / 0 | 0.329 |
+
+No cell fell short, so the pre-registered restriction is not triggered and every level
+keeps the interpolated-S path.
+
+**What each cell does and does not license (corrected 2026-07-25, M91 review finding
+F1, scored 93).** Only D1–D3 sit at an off-node S (25, 25, 40), so only they probe
+interpolation — at conf_level 0.90 (D1) and 0.99 (D2, D3). **D4's S = 20 is an
+`s_grid` node**, so `approx()` returns the node value and no interpolation occurs
+there: D4 licenses the sub-grid-floor ρ posture at the shipped 0.95, and says nothing
+about interpolated S at that level. Interpolated S at **0.95 therefore remains
+unprobed**, as it was before M91, and 0.95's own worst dip (−0.068 at R = 10,
+S 30→50) is untested; the fixture records this as `interp_ok = NA` at 0.95 rather than
+aggregating D4 into an interpolation verdict, and closing the asymmetry is a ROADMAP
+candidate. Two further consequences carried into the M91 exported docs.
+
+1. **One-sidedness reconfirmed off-node.** D1's misses are 65 below vs 1 above —
+   the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
+   The two-sided MPL interval is far from equal-tailed at δ = 4 with S rising, at
+   every level; `@param ci_method` says so.
+2. **The only cell over the BC6 near-vacuity trigger.** D3's median width is
+   **0.905** on a [0, 1] scale — the only cell anywhere in this note at or above
+   BC6's ≥ 0.90 documentation threshold (M90's widest was 0.852 at C4/0.99; M91's
+   next-widest is D2 at 0.874; the widest MPL width in the M87 sweep table above is
+   0.744 at C4). A 2-rater study
+   at 0.99 buys a bound that excludes almost nothing, which is the honest cost of
+   the deep tail at minimal rater information, not a defect: coverage is 1.0000
+   there. The `"mpl"` `@param` carries the caveat.
+
+D4 also closes the RR03 rec-#9 gap: the sub-grid-floor ρ = 0.02 posture is now
+measured at all three levels (0.991 at 0.90 and 1.000 at 0.99 in M90's C8; 0.996
+here at 0.95).
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the
