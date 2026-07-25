@@ -644,16 +644,10 @@ test_that("the 0.95 off-node kappa_m values M92 coverage-validated are what ship
   # at some other geometry would flip that; this test pins what was actually
   # validated, not the rule in the abstract.
   #
-  # The per-cell coverage figures live in the fixture and in § M92 of the note, and
-  # are deliberately NOT restated here. Restating them is what went wrong: the sweep
-  # was re-run on a disjoint seed base (finding F1) and every copied figure elsewhere
-  # in the tree went stale, each surviving a different grep (findings F-A, F-B).
+  # The per-cell coverage figures live in the fixture and in § M92 of the note.
   # kappa_m is safe to pin because it is table-derived and does not move when the
   # sweep is re-run -- which is exactly why it, and not a coverage figure, is what a
   # test may pin.
-  # (F3 was a separate defect -- a kappa_m-table superlative in the generator header,
-  # found before the re-run -- not a figure staled by it; mis-attributing it here was
-  # review finding P3-4.)
   expect_equal(
     mpl_kappa_lookup(3L, 25L, conf_level = 0.95),
     0.7089067,

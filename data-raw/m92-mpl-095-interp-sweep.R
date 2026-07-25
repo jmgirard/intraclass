@@ -26,8 +26,8 @@
 # absolute error to move an endpoint. E3 is NOT the slice's largest kappa_m: the
 # (R=2, S 50->100) bracket is higher (1.4657 -> 1.6245) and the slice maximum is
 # 1.6245 at (2, 100). S = 40 is M91's D3 geometry at the shipped level, which is why
-# it was chosen. (An earlier draft of this header, and of four other sites, said
-# "the largest 0.95 kappa_m"; corrected 2026-07-25 -- M92 review finding F3.)
+# it was chosen. (An earlier draft of this header said "the largest 0.95 kappa_m";
+# corrected 2026-07-25 -- M92 review finding F3.)
 #
 # kappa_m is taken through the interpolation rule UNDER TEST, never a
 # directly-evaluated value: the interpolated constant is the object of the test.

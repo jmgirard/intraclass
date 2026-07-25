@@ -216,14 +216,9 @@ mpl_interval <- function(
 # floor, so its pre-registered consequence -- switching 0.95 to a bracket-max rule --
 # was NOT triggered and this lookup is unchanged.
 #
-# Per-cell coverage, widths and miss splits are NOT restated here, and no conclusion is
-# drawn from those figures here. They live in the fixtures
+# Per-cell coverage, widths and miss splits live in the fixtures
 # (data-raw/m92-interp-sweep.rds, and the superseded
 # m92-interp-sweep-run1-collided.rds) and in § M91 / § M92 of the comparison note.
-# Both restrictions were settled by M92's review history; the findings themselves are
-# recorded in that milestone's Review sections and are not summarized here.
-# (Argument (a) above predates M92 and reasons about the kappa_m table's SHAPE, not
-# about those coverage figures.)
 #
 # The shipped kappa_m values are the raw calibrated ones, deliberately un-smoothed, so
 # each traces to the run whose coverage was validated (M91 plan gate; an envelope or

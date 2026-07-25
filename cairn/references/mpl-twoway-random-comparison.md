@@ -509,8 +509,7 @@ as of M91**, as it had been before it, and 0.95's own worst dip (−0.068 at R =
 S 30→50) untested; the M91 fixture records this as `interp_ok = NA` at 0.95 rather
 than aggregating D4 into an interpolation verdict (M91, **superseded 2026-07-25 by
 § M92 below**, which probes that gap directly with three off-node 0.95 cells,
-including the R = 10 dip, and confirms it — the candidate row this sentence used to
-carry is absorbed there). Two further consequences carried into the M91 exported docs.
+including the R = 10 dip). Two further consequences carried into the M91 exported docs.
 
 1. **One-sidedness reconfirmed off-node.** D1's misses are 65 below vs 1 above —
    the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
@@ -620,22 +619,6 @@ had run 1 failed, re-running on new seeds would have been exactly the
 fix-the-bar move GP5 forbids. Both fixtures are committed; the cells, floors and
 `n_rep` are unchanged; and the generator now carries a `stopifnot` asserting M92's
 seed span is disjoint from M91's, mutation-verified to error on the old base.
-
-**Nothing further is claimed here.** Earlier drafts of this section carried three
-bullets drawing conclusions from the cells — about what the dips cost, what the corpus
-can and cannot isolate about rater count, and how the levels order. One of the three
-(the rater-count bullet) carried two sentences this table falsifies: "no committed
-fixture sweeps that axis alone", and a claim about what the exported text then said
-(M92 review pass 4, findings 1 and 2). All three are deleted rather than the false one
-corrected, so that the section keeps only what can be checked against the fixture. It
-is now the table, the two-run account, and the verdict above. A reader wanting more
-should read the fixture; M92's review record is in its milestone file.
-
-Two facts a later pass will want, stated as transcription rather than inference:
-E2 and E3 share `n_s` 40, `delta` 4, `rho` 0.60 and `conf` 0.95 and differ only in
-`n_r` (10 vs 2); D1 and E1 share (R = 3, S = 25, δ = 4, ρ = 0.60) and differ only in
-level. What either pair licenses is for M94 to establish under its fixture-reading
-check, not for this note to assert.
 
 ## Traces to
 
