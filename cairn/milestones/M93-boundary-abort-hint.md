@@ -1,6 +1,6 @@
 # M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -105,6 +105,11 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       reachable abort sites from T1 (`bootstrap_ci()` dropped by the AC2 amendment).
 - [x] T4: Add the GP7 guard test: for each design in the AC3 grid, call `icc()` with
       every `ci_method` the hint names and assert it does not abort.
+- [ ] T6: Fix `test-boundary-abort-hint.R:158` — the AC2 degenerate-data test must
+      tolerate the glmmTMB point fit dying with a RAW unclassed error (M84), not only
+      the classed `intraclass_singular_fit`. Re-verify on CI, not just locally: macOS
+      completes the fit that Linux/Windows abort on, so a green local gate proves
+      nothing here. Ingest any [O] diff-bug findings as further tasks.
 - [x] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
       review, full AC7 gate, PR.
 
@@ -119,6 +124,79 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: T5 — NEWS entry + `@param ci_method` note that the abort names the applicable method (the per-method boundary-robustness prose AC6 asks about was already there, so only the pointer was added). Gate: `devtools::check()` 0/0/0, `devtools::test()` FAIL 0 / PASS 4300, `lintr::lint_package()` clean, `air format --check` clean, `document()` no-diff. No message snapshot changed, so none was accepted.
 - 2026-07-25: gated amendment — AC2 and Scope narrowed to the two reachable Monte-Carlo sites; `R/ci-bootstrap.R:56` moved to Out with its evidence, and its misleading `montecarlo` remedy carried out as a candidate row.
 
+- 2026-07-25: review pass 1 FAILED the gate — PR #100 CI red on 3 of 7 jobs, one cause: `test-boundary-abort-hint.R:158` errors on Linux/Windows because the glmmTMB point fit raises a raw unclassed `LU factorization` error on the degenerate dataset before any classed guard, and `bh_probe()` catches only `intraclass_singular_fit` (the M84 lesson). Test-only defect; local gate is green and structurally cannot catch it. Status -> in-progress. Two of three review lenses reported 0 findings; the [O] diff-bug lens was still running.
+- 2026-07-25: added T6 for the fix.
+
 ## Decisions
 
 ## Review
+
+**Branch state.** `main` in sync with `origin/main` (0/0); branch 8 ahead / 0 behind,
+so no merge was needed before gathering evidence. PR #100.
+
+**Fresh per-criterion evidence** (all from commands run this phase; the M93 test file
+runs FAIL 0 / PASS 87 / SKIP 0 at `NOT_CRAN=true CI=true`, 8.5 s):
+
+- AC1 — `test-boundary-abort-hint.R:80` builds the near-σ²→0 dataset and confirms the
+  DEFAULT MC path aborts on both designs, that every abort reached is a Monte-Carlo
+  site, and that site B is among them. The site enumeration is in this file's work log
+  (T1 line, 2026-07-25): `:124` 21/40 two-way + 19/40 one-way, `:43` 1/40,
+  `R/ci-bootstrap.R:48` 0/90.
+- AC2 — the hint reaches the real abort per design (`:306`), the abort's class, leading
+  message and BOTH pre-existing generic remedies survive verbatim while a no-opt-in
+  design gains nothing (`:332`), and the bootstrap exclusion carries its own evidence
+  (`:122` unreachable at the boundary; `:146` reachable only on degenerate data where
+  every named method also aborts). `:386` pins `hint` as defaulted on all four helpers
+  and pins `rmvn()`'s argument order so the lavaan engine's positional calls are safe.
+- AC3 — the GP7 grid (`:449`) asserts every method the hint names is ACCEPTED by
+  `icc()` on that design, across one-way balanced/unbalanced and two-way random with
+  both supplied and unset `type`; `:517` asserts the converse, that each design the
+  hint stays silent on really does abort for all four opt-in methods.
+- AC4 — no-hint designs pinned at `:250` (fixed raters, multilevel, replicates,
+  explicit consistency, unbalanced two-way), `:270` (level set read from
+  `kappa_m_table`, uncalibrated levels refused), and `:226` (unbalanced one-way with a
+  numeric `unit`, where npbootstrap itself aborts).
+- AC5 — `:357` confirms the boundary case still raises `intraclass_singular_fit`,
+  still returns no `icc` object, and so implements no fallback-on-abort default.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements;
+  `@param ci_method` gained the pointer that the abort names the applicable method
+  (the per-method boundary-robustness prose AC6 makes conditional was already present,
+  so only the pointer was owed); `man/icc.Rd` regenerated.
+
+**Consistency gate.** `cairn_validate` exit 0 — all checks PASS including
+`coverage complete`; 321 advisory `dangling id tokens`, all pre-existing pre-migration
+ids. Profile `consistency-gate` slot: `devtools::document()` no-diff · no generated
+file hand-edited · `README.Rmd` untouched · `pkgdown::check_pkgdown()` "No problems
+found" · `NEWS.md` entry present · no new top-level files, so no `.Rbuildignore` entry
+owed. No `DESIGN.md` principle changed, so `cairn_impact` does not apply.
+
+**GATE FAILURE — CI red, returned to `in-progress` (review pass 1).** 3 of 7 PR #100
+jobs fail on ONE cause: `test-boundary-abort-hint.R:158`, the AC2 test asserting the
+degenerate 3x2 constant-within-subject dataset reaches the bootstrap abort site.
+`test-coverage`, `ubuntu-latest (release)` and `windows-latest (release)` all report
+`Error in .local(x, ...): LU factorization of .gCMatrix failed: out of memory or
+near-singular`, raised inside `fit_glmmtmb_oneway()` -> `glmmTMB()` -> `TMB::sdreport`
+— the glmmTMB POINT fit dies with a RAW, unclassed error before any CI-stage guard
+runs, and the test helper `bh_probe()` catches only `intraclass_singular_fit`, so it
+escapes. This is exactly the M84 lesson, cited in this test file's own header and then
+walked into anyway. `check-references`, `format-check`, `lint` and `pkgdown` pass.
+
+Scope of the defect: TEST-ONLY. No shipped behaviour depends on that assertion, and
+the AC2 exclusion of `R/ci-bootstrap.R:48` is strengthened rather than weakened — on
+Linux/Windows that dataset does not even reach the bootstrap guard. Note the local
+gate CANNOT catch this: macOS glmmTMB completes the same fit, so `devtools::check()`
+and the full suite are green locally while three CI jobs are red.
+
+Acceptance checkboxes are deliberately left UNTICKED despite the AC1–AC6 evidence
+above: the milestone returns to `in-progress`, and the next review pass re-verifies
+from scratch rather than inheriting this pass's evidence.
+
+**Independent review — 2 of 3 lenses reported, both clean.** [S] blame-history: 0
+findings (verified the hint is additive at both abort sites, that all four signature
+changes stay back-compatible with `engine-lavaan.R`'s positional `rmvn()` calls and
+`d-study.R`, and that D-012's fallback-on-abort fence is not crossed). [S]
+prior-PR-comments: 0 findings (GitHub inline-comment surface empty by probe; checked
+the M92 P6-1 false-"guarded"-claim pattern and found this diff the opposite, since the
+guard is a real end-to-end test with a recorded mutation check). The [O] diff-bug lens
+was still running when this checkpoint was committed; its findings are to be ingested
+as implement tasks.

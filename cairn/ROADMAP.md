@@ -12,7 +12,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M96 | Failure accounting in the three MPL coverage-sweep generators | planned | — | normal | milestones/M96-mpl-sweep-failure-accounting.md |
 | M95 | Whole-table pin for the shipped κ_m calibration table | planned | — | normal | milestones/M95-kappa-table-whole-pin.md |
 | M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | planned | M92 | normal | milestones/M94-mpl-doc-surface.md |
-| M93 | Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand | review | — | normal | milestones/M93-boundary-abort-hint.md |
+| M93 | Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand | in-progress | — | normal | milestones/M93-boundary-abort-hint.md |
 | M92 | Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95` | done | — | normal | milestones/archive/M92-mpl-095-interp-probe.md |
 | M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | done | M90 | normal | milestones/archive/M91-mpl-conf-level-export.md |
 | M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | done | — | normal | milestones/archive/M90-mpl-conf-level-calibration.md |
