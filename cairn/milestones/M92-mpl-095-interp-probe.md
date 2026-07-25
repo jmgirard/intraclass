@@ -131,6 +131,9 @@ untouched) and re-runs that cell at the same floor.
 - [x] T13 (review pass 5): delete the record-summarizing and self-describing prose at
       every site rather than correct it (P5-1 through P5-5), strip the inference from the
       ROADMAP row, and carry F6 to a candidate row.
+- [ ] T14 (review pass 6, P6-1): delete `R/ci-mpl.R`'s false enforcement clause. Keep the
+      bare pointer; write no replacement claim — a reworded claim is a new claim, which is
+      the class that has failed six passes.
 
 ## Work log
 
@@ -173,6 +176,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: T13 done; gate clean — `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` Status OK 0/0/0 (2m 40.4s); full suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the pre-existing glmmTMB convergence warnings on the multilevel path); 0 lints; air clean; `document()` no-diff; pkgdown clean; both references checkers and `cairn_validate` green (weight caps PASS, record density OK, dangling-id advisories unchanged at 321 — the new F6 candidate row adds none). Status -> review for a sixth pass. One reading recorded for review rather than left to guess: three `earlier draft` marks survive the sweep — M91's at the note's line 458 (predates M92), M92 T6's at line 553, and the generator header's. All three are D-045 corrections IN PLACE, which D-045 requires be marked; AC5(c) names "a deleted passage", and a corrected passage is the other side of exactly that D-045 split, so they are outside (c) as written. If review reads (c) wider, each is a one-line trim.
 - 2026-07-25: review pass 6 FAILED at AC5, status -> in-progress; merge approval never requested and no marker written. What failed: P6-1 (scored 92) — `R/ci-mpl.R:226-229` claims "a change to the table or to this rule reds a test"; the rule half holds, the table half is false and I confirmed it by mutation, shifting all 152 non-literal-pinned `kappa_m_table` cells by +0.5 and getting FAIL 0 / PASS 172. It entered at `c24ffac`, in prose written to fix pass 5's prose. AC1, AC2, AC3, AC4, AC6 and AC7 re-verified with fresh evidence this pass and stay ticked; AC5 stays un-ticked. Two lenses returned zero findings and every mechanical check passed, including CI 9/9 on the review SHA `341a0de`. Two findings scored below 80 are logged in the Review section as maintainer wording calls rather than author errors: the D-045 correction-mark collision (F-B, 42 — its charge that D-045 is a fabricated id is refuted there) and three verified-true cross-file claims, one of which sits inside the account AC5(d) blesses (F-C, 48). Thrash: this is far past the rule's third trip, so no self-directed retry is queued — routing to the maintainer.
 - 2026-07-25: the P6-1 root cause, recorded because it is the transferable part — at T13 I checked one half of that conjunction by mutation and ARGUED the other half from arithmetic, writing it down as "not mutation-tested ... the weaker of the two". Both halves were falsifiable by the same one-command method. An enforcement claim gets mutation-tested or it does not get written; reasoning about a guard instead of firing it is how pass 4's checker shipped too.
+- 2026-07-25: pass-6 gate answered — maintainer chose DELETE the enforcement clause over rescoping it or adding a whole-table pin, and ruled F-B/F-C no-change. T14 added by review send-back (Tasks amend-via-gate). The 152-cell guard gap P6-1 exposed is carried to a new ROADMAP candidate row rather than fixed here, search-first checked: no existing candidate, archive summary or D-entry covers a whole-table pin (M91's archive records a level-SET pin, which constrains which levels exist, not the values). Dispositions recorded verbatim at the end of the pass-6 Review section.
 ## Decisions
 
 
@@ -727,3 +731,11 @@ record: at T13 the same claim was reasoned about instead of tested, and written 
 "arithmetic ... not mutation-tested; recorded as the weaker of the two". The mutation that
 falsifies it takes one `Rscript` call. Both halves of that sentence were checkable by the
 same method, one half was checked, the other was argued.
+
+**Pass-6 dispositions (maintainer, 2026-07-25).** P6-1: fix by DELETING the enforcement
+clause, not rescoping it — a reworded claim is a new claim. Logged as T14. F-B and F-C:
+**no change**, ruled so no later pass re-litigates them — AC5(c)'s "what a deleted passage
+used to say" does not reach a D-045 correction marked in place, and (c) permits verifiable
+transcription and bare pointers, as its own carve-out states, so it does not contradict (d).
+The 152-cell κ_m-table guard gap P6-1 exposed is NOT fixed on this branch (a digest pin was
+weighed and declined at the gate) and is carried to a ROADMAP candidate row instead.
