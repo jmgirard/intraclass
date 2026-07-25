@@ -5,7 +5,7 @@
 - **Depends on:** M90
 - **Driving RR:** —
 - **Principles touched:** IP1, GP5, GP7
-- **Branch/PR:** `m91-mpl-conf-level-export`
+- **Branch/PR:** `m91-mpl-conf-level-export` / https://github.com/jmgirard/intraclass/pull/98
 
 ## Goal
 
@@ -48,23 +48,23 @@ values → candidate row (none of the four is documented there; a method-wide jo
 
 ## Acceptance criteria
 
-- [ ] AC1: `icc(..., ci_method = "mpl", conf_level = c)` for c ∈ {0.90, 0.99}
+- [x] AC1: `icc(..., ci_method = "mpl", conf_level = c)` for c ∈ {0.90, 0.99}
       returns an ICC(A,1) interval on the balanced-complete two-way random
       absolute-agreement cell whose endpoints equal `mpl_interval` at the κ_m
       committed in `m90-kappa-tables.rds` for that (R, S, c) — a table→endpoint
       wiring identity; the κ_m values themselves are validated in M90 by BC1's
       published oracle and the coverage sweep, not here (test).
-- [ ] AC2: ICC(A,k) and ICC(A,m) at the new levels equal the `npb_sb()`
+- [x] AC2: ICC(A,k) and ICC(A,m) at the new levels equal the `npb_sb()`
       Spearman-Brown image of the ICC(A,1) endpoints at that level — inheritance
       identity + a mutation guard that diverges on a wrong divisor (M82
       anti-tautology lesson) (test).
-- [ ] AC3: conf_level outside {0.90, 0.95, 0.99} aborts with a classed
+- [x] AC3: conf_level outside {0.90, 0.95, 0.99} aborts with a classed
       `intraclass_unsupported` error whose message names the supported set
       (test) — mirrors the off-grid abort.
-- [ ] AC4: no 0.95 regression — the shipped 0.95 κ_m slice equals
+- [x] AC4: no 0.95 regression — the shipped 0.95 κ_m slice equals
       `m88-kappa-table.rds` exactly (tolerance 0), and 0.95 endpoints on a fixed
       dataset equal the pre-M91 values recorded before the schema change (test).
-- [ ] AC5: the confirmation sweep clears the floors frozen **before** it runs
+- [x] AC5: the confirmation sweep clears the floors frozen **before** it runs
       (GP5), at δ=4, ρ=0.60 — M90's tightest configuration (C4/C6) — for **D1**
       (R=3, S=25) @ 0.90 (floor ≥ 0.88, n_rep ≥ 1000); **D2** (3, 25) @ 0.99
       (≥ 0.98, n_rep ≥ 2000); **D3** (2, 40) @ 0.99 (same floor/n_rep — the dip
@@ -76,11 +76,11 @@ values → candidate row (none of the four is documented there; a method-wide jo
       affected level is restricted to exact `s_grid` S nodes (interpolated S
       aborts at that level only) — never a loosened floor, never a change to the
       other levels.
-- [ ] AC6: `@param conf_level` and the `"mpl"` `@param` note state the supported
+- [x] AC6: `@param conf_level` and the `"mpl"` `@param` note state the supported
       set; the D-017 beyond-brief items documented (non-equal-tailed; 0.99 width);
       the `R/ci-mpl.R` interpolation comment corrected with the measured
       per-level worst downward step (GP7); NEWS entry.
-- [ ] AC7: `devtools::check()` Status OK; `cairn_validate` exit 0; the
+- [x] AC7: `devtools::check()` Status OK; `cairn_validate` exit 0; the
       `check-references` job green — including
       `check-reference-observations.py` for the new `data-raw/` files naming
       `xiao2013` (M86 lesson) and a triage row for any new generalizing claim
@@ -135,7 +135,62 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - 2026-07-24: T6 — tests for the level-keyed wiring, SB inheritance at the new levels + wrong-divisor mutation guard, the classed off-level abort (0.80/0.975/0.995/0.999) with the set named, the 0.95 κ_m slice pins, and 0.95 endpoint no-regression against literals recorded pre-change (incl. off-node S=25). Mutation-checked: forcing the lookup back to the 0.95 slice reds 4 assertions in the wiring test and nothing else — the ordering test is honestly scoped as a sanity property (it survives the mutation, as its comment says).
 - 2026-07-24: T7 — corrected my OWN new prose twice before commit (M72 lesson): the dips' κ_m range was written ≈0.10–0.27 in four places when the 18 dips span 0.102–0.970 (5 above 0.27), and the M87 max width was written 0.698 when the table shows 0.744. Both re-derived from the fixtures and fixed; the references-page paragraph carries a marked in-place correction.
 - 2026-07-24: all tasks done; verify slot clean on the final tree — `devtools::test()` FAIL 0 / PASS 4206 (2 pre-existing lavaan negative-variance WARNs, 23 skips), `devtools::document()` no diff, `lintr::lint_package()` clean, `pkgdown::check_pkgdown()` clean, `cairn_validate` exit 0, both references gates green. `devtools::check()` running for AC7. Status → review.
+- 2026-07-25: review gate — PR #98 CI caught a defect the local gate structurally cannot see: T1's settling directive called `Rscript`, but the `check-references` job is Python-only, so the claim could never settle there (`Rscript: command not found` → falsified). Rewrote it as a text-only python3 check over the note's own frozen-cells table, mutation-verified (drop 100 from the node set → exit 1). No other `check: Rscript` directive exists in the corpus.
 
 ## Decisions
 
 ## Review
+
+**Gate run 2026-07-24 on `m91-mpl-conf-level-export` @ ae67880, PR #98.**
+`origin/main` had not moved since the branch was cut (no merge needed).
+
+Acceptance criteria — fresh evidence, one line each:
+
+- **AC1** — at (R=4, S=20), `icc(..., conf_level = c)` endpoints equal
+  `mpl_interval()` at the κ_m committed in `m90-kappa-tables.rds` with
+  **max |diff| = 0.00e+00** at both new levels (0.90: κ 0.4531423 →
+  [0.4946612344, 0.8450400826]; 0.99: κ 0.4801807 → [0.2287657997,
+  0.9028120184]). Mutation-verified: forcing the lookup back to the 0.95 slice
+  reds exactly these assertions (4) and nothing else.
+- **AC2** — ICC(A,k)/ICC(A,m) equal an *independently recomputed* Spearman-Brown
+  image, max |diff| **0.00e+00** over m ∈ {2, 3.5, 4, 8} at both new levels; the
+  wrong-divisor guard separates by ≥ 0.0113 (0.90) and ≥ 0.0240 (0.99), so the
+  equality pins the divisor rather than mere monotonicity.
+- **AC3** — conf_level 0.80 / 0.975 / 0.995 / 0.999 each abort with class
+  `intraclass_unsupported`; the message names the set (`"0.90"`, `"0.95"`, and
+  `"0.99"`). 0.995/0.999 cover D-017's no-deeper-than-0.99 boundary.
+- **AC4** — the shipped 0.95 κ_m slice is `identical()` to
+  `m88-kappa-table.rds` (54 rows, tolerance 0), and 0.95 endpoints reproduce the
+  pre-change literals exactly: ICC(A,1) [0.42467599012062407,
+  0.86530180057602046], ICC(A,k) [0.74700222803863625, 0.96254122832062028].
+- **AC5** — `m91-interp-sweep.rds` (seeded, `smoke=FALSE`, seed_base 20260724,
+  per-cell stride 1e6): D1 0.9340 [0.9168, 0.9486] ≥ .88 · D2 0.9995 [0.9972,
+  1.0000] ≥ .98 · D3 1.0000 [0.9982, 1.0000] ≥ .98 · D4 0.9960 [0.9898, 0.9989]
+  ≥ .93 — all `adequate = TRUE`, Clopper–Pearson per cell, floors frozen in a
+  commit (f848057) that precedes the run. `interp_ok` TRUE at all three levels,
+  so the pre-registered `s_grid` restriction did not fire.
+- **AC6** — `man/icc.Rd` carries the level set, `not equal-tailed`, and the
+  `near-vacuous` 0.905 width; NEWS.md likewise; `R/ci-mpl.R` states `NOT
+  monotone` with the per-level worst steps (−0.046 / −0.068 / −0.162) and the
+  falsified "roughly concave" text is gone (0 occurrences). No milestone numbers
+  leak into user-facing text.
+- **AC7** — `devtools::check()` **0 errors, 0 warnings, 0 notes**;
+  `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 / PASS 4206 (2
+  pre-existing lavaan negative-variance WARNs, 23 skips) — both bases run, so
+  `skip_on_cran` tests are not hidden behind the CRAN-parity check;
+  `cairn_validate` exit 0; `enumerate-generalizing-claims.py --check` and
+  `check-reference-observations.py` both green (0 unmarked, 0 falsified, 0
+  orphan rows — after fixing a directive CI caught that local runs could not, see
+  the work log for 2026-07-25); `lintr::lint_package()` and
+  `pkgdown::check_pkgdown()` clean.
+
+**Consistency gate.** `cairn_validate` exit 0 — all 16 PASS checks including
+`coverage complete`, `binding criteria`, `weight caps`, and `principles slot
+valid`. Two advisories: `dangling id tokens` (321) is pre-existing stale
+milestone-ids in `COVERAGE.md`/`estimand-specs` and fell by one over this
+milestone; `record density` flagged the ROADMAP hygiene stamp at 528 chars and
+was fixed by rewriting it, not appending. No principle text changed, so
+`cairn_impact` does not apply (the `Principles touched` slot records IP1/GP5/GP7
+as *worked under*). Profile `consistency-gate` slot: `document()` no diff,
+README.md in sync with README.Rmd, pkgdown clean, NEWS entry present,
+`data-raw/` covered by `.Rbuildignore`, full `check()` clean.

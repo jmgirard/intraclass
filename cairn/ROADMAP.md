@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-24 (M91 re-planned against shipped M90 — both levels GO, so the 0.99 hedge is gone; +4 interpolation-confirmation cells (M90's 8 cells all sat on `s_grid` nodes; a 4th added at the implement gate) and the falsified κ_m interpolation comment corrected, not softened; AC 6→7, T 5→7. M91 now at `review`. Absorbed the 0.95 sub-grid-floor candidate; +2 candidates (κ_m envelope/smoother, opt-in-`ci_method` vignette section). M90 shipped via PR #97 under D-017 (RB03/RR03). M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-24 (M91 in review, PR #98 — MPL `conf_level` 0.90/0.99 exported; 4 interpolated-S confirmation cells all clear their frozen floors. +2 candidates, absorbed the 0.95 sub-grid-floor row. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 

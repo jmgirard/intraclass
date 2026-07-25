@@ -436,7 +436,7 @@ M91 exports conf_level 0.90 / 0.99 per BC7. One evidence gap survives M90: **eve
 one of M90's C1–C8 sits on an `s_grid` node**, so `mpl_kappa_lookup`'s
 linear-in-S interpolation — the path a user hits at any subject count between
 nodes — has no coverage evidence at any level, the shipped 0.95 included
-— observed 2026-07-24 <!-- check: Rscript -e 'q(status = as.integer(!all(readRDS("data-raw/m90-verdict.rds")$sweep$n_s %in% readRDS("data-raw/m90-kappa-tables.rds")$meta$s_grid)))' -->.
+— observed 2026-07-24 <!-- check: python3 -c 'import re,sys; ss={int(m.group(1)) for m in re.finditer(r"^\| C[1-8] \| \d+ \| (\d+) \|", open("cairn/references/mpl-twoway-random-comparison.md").read(), re.M)}; sys.exit(0 if ss and ss <= {10,15,20,30,50,100} else 1)' -->.
 M90's BC1 κ_m at the off-`s_grid` S=25 geometries cannot fill the gap: BC1 ran on
 xiao2013's *published* ρ ∈ [0.6, 0.9] grid, the production tables on the extended
 ρ ∈ [0.05, 0.9] grid, so the two are not comparable (at R=3, S=25 the interpolated
