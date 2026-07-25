@@ -113,7 +113,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
       n_rep; record the BC6 diagnostics (miss-below/above, median + p90 width,
       P(lower=0), P(upper≥0.999), vacuous fraction) per cell (mirror
       `data-raw/m87-mpl-comparison-sweep.R`, MPL-only). Background. → sweep fixture.
-- [ ] T4: Verdict script applying the BC3 floors + BC4 Clopper–Pearson CIs per
+- [x] T4: Verdict script applying the BC3 floors + BC4 Clopper–Pearson CIs per
       cell → per-level GO/NO-GO (BC7 gating); record verdict + evidence + the BC6
       width finding in the note. GO authorizes M91; a NO-GO level → candidate row.
 
@@ -128,6 +128,7 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 - 2026-07-24: ingested RR03 (Fable) → D-017. Verdict: 0.90 GO (external oracle), 0.99 conditional GO under BC1–BC7. Set Driving RR = RR03; ingested BC1–BC7 verbatim as AC4–AC10; dropped the plan's c−0.02 floor (superseded by BC3's 0.98@0.99); refined T1–T4 to the BCs. Status → in-progress. RB03/RR03 archived.
 - 2026-07-24: T2 done — `data-raw/m90-mpl-kappa-tables.R` generated the α=0.10 (0.90) + α=0.01 (0.99) κ_m tables (54/54 nodes each) → `data-raw/m90-kappa-tables.rds`. **BC1 PASS** 6/6 (max \|diff\| 0.020 vs published). **BC2 PASS** — 0.99 κ̂_m bootstrap SE 0.037/0.033/0.026 for R∈{2,3,10}, all ≤0.05. κ_m ranges 0.90 [0.106,1.742], 0.99 [0.104,0.999]. No sysdata.rda (M91).
 - 2026-07-24: T3 done — `data-raw/m90-mpl-coverage-sweep.R` swept the 8 BC5 cells × 2 levels (n_rep 1000@0.90, 2000@0.99), recording BC6 diagnostics → `data-raw/m90-coverage-sweep.rds`. Every cell clears its BC3 floor; 0.90 min cov 0.915 (C4), 0.99 min cov 0.997 (C6). No decisive cell's median 0.99 width ≥ 0.90 (max 0.852 at C4), so BC6's mandatory width-doc trigger did not fire.
+- 2026-07-24: T4 done — `data-raw/m90-mpl-verdict.R` applied BC3/BC7 → **conf_level 0.90 GO, 0.99 GO** (both: every cell ≥ floor, BC1 ✓; 0.99 also BC2 ✓) → `data-raw/m90-verdict.rds`. Verdict + per-cell coverage table + the BC6 one-sided-miss/width diagnostics recorded in `references/mpl-twoway-random-comparison.md` (§ M90 verdict); 1 generalizing claim triaged OUT-repo-analysis. D-017's conditional GO conditions met; M91 export authorized for both levels. All gates green.
 
 ## Decisions
 

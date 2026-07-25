@@ -401,6 +401,35 @@ on BC1 + BC3–BC6 at its own level. A level's NO-GO routes it to a candidate ro
 without blocking the other. No level deeper than 0.99 is authorized (κ_corr is
 still rising at α = 0.005 in the boundary cells).
 
+## M90 verdict (T4) — conf_level 0.90 GO, 0.99 GO
+
+**Both levels GO** against the frozen criterion above. Evidence: κ_m tables
+`data-raw/m90-kappa-tables.rds` (BC1 PASS 6/6, max |diff| 0.020 vs published;
+BC2 PASS, α=0.01 κ̂_m bootstrap SE 0.037/0.033/0.026 for R∈{2,3,10}, all ≤0.05),
+coverage sweep `data-raw/m90-coverage-sweep.rds`, verdict `data-raw/m90-verdict.rds`
+(`data-raw/m90-mpl-verdict.R`). Empirical coverage (Clopper–Pearson 95% CI) per
+decisive cell, n_rep 1000 at 0.90 / 2000 at 0.99:
+
+| cell | R | S | δ | ρ | cov 0.90 (floor .88) | cov 0.99 (floor .98) |
+|---|---|---|---|---|---|---|
+| C1 | 3 | 20 | 1 | 0.60 | 0.969 | 1.000 |
+| C2 | 3 | 20 | 1 | 0.05 | 0.984 | 1.000 |
+| C3 | 3 | 10 | 1 | 0.05 | 0.991 | 0.9995 |
+| C4 | 3 | 50 | 4 | 0.60 | 0.915 | 0.9975 |
+| C5 | 5 | 20 | 1 | 0.75 | 0.938 | 0.998 |
+| C6 | 3 | 100 | 4 | 0.60 | 0.919 | 0.997 |
+| C7 | 2 | 15 | 1 | 0.05 | 0.993 | 0.9995 |
+| C8 | 3 | 20 | 1 | 0.02 | 0.991 | 1.000 |
+
+Every cell clears its floor (0.90 min 0.915 at C4; 0.99 min 0.997 at C6), so
+BC7 authorizes both levels for M91 export. As at 0.95 (D-014), MPL over-covers —
+more so at 0.99, whose grid-max κ_m is dominated by the near-zero corner. Two
+diagnostics carried to M91 (BC6): misses are near-entirely one-sided at the δ=4
+S↑ cells (C4/C6: 84/1 and 75/6 at 0.90 — the two-sided interval is far from
+equal-tailed), and 0.99 intervals run wide (C4/C6 median width 0.852/0.845). No
+decisive cell's median 0.99 width reached the BC6 ≥ 0.90 documentation trigger
+(max 0.852), but the small-geometry / near-vacuity caveat still ships with M91.
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the
