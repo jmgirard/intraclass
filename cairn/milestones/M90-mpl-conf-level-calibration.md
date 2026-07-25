@@ -1,11 +1,11 @@
 # M90: MPL κ_m recalibration + coverage GO/NO-GO at conf_level ∈ {0.90, 0.99}
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** RR03
 - **Principles touched:** IP1, GP5, GP6
-- **Branch/PR:** m90-mpl-conf-level-calibration
+- **Branch/PR:** m90-mpl-conf-level-calibration · https://github.com/jmgirard/intraclass/pull/97
 
 ## Goal
 
@@ -39,8 +39,10 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 
 - [ ] AC1: Seeded κ_m tables at α=0.10 (conf_level 0.90) and α=0.01 (conf_level
       0.99) exist over the full shipped (R,S) grid, provenance in `meta`; the
-      scan-vs-top-k internal cross-check (M88's guard) agrees within MC tolerance
-      (the 0.90 external-oracle reproduction is BC1/AC4).
+      generator's `kappa_corr_draws` collector reproduces the oracle-validated
+      `mpl_kappa_corr` at a shared seed (equivalence assertion). The 0.90 external
+      cross-check is BC1/AC4; the 0.99 table has no external κ_m anchor and is
+      validated by coverage (AC6/BC3), per the M86 defining-property doctrine.
 - [ ] AC2: A per-level GO/NO-GO verdict applying the frozen BC3/BC4 criterion to
       the sweep, recorded with evidence in the references comparison note; a
       NO-GO level is named and routed to a candidate row, not exported (BC7).
@@ -129,7 +131,8 @@ criteria` string-compares them). No departures — no "Deviations from RR03" tab
 - 2026-07-24: T2 done — `data-raw/m90-mpl-kappa-tables.R` generated the α=0.10 (0.90) + α=0.01 (0.99) κ_m tables (54/54 nodes each) → `data-raw/m90-kappa-tables.rds`. **BC1 PASS** 6/6 (max \|diff\| 0.020 vs published). **BC2 PASS** — 0.99 κ̂_m bootstrap SE 0.037/0.033/0.026 for R∈{2,3,10}, all ≤0.05. κ_m ranges 0.90 [0.106,1.742], 0.99 [0.104,0.999]. No sysdata.rda (M91).
 - 2026-07-24: T3 done — `data-raw/m90-mpl-coverage-sweep.R` swept the 8 BC5 cells × 2 levels (n_rep 1000@0.90, 2000@0.99), recording BC6 diagnostics → `data-raw/m90-coverage-sweep.rds`. Every cell clears its BC3 floor; 0.90 min cov 0.915 (C4), 0.99 min cov 0.997 (C6). No decisive cell's median 0.99 width ≥ 0.90 (max 0.852 at C4), so BC6's mandatory width-doc trigger did not fire.
 - 2026-07-24: T4 done — `data-raw/m90-mpl-verdict.R` applied BC3/BC7 → **conf_level 0.90 GO, 0.99 GO** (both: every cell ≥ floor, BC1 ✓; 0.99 also BC2 ✓) → `data-raw/m90-verdict.rds`. Verdict + per-cell coverage table + the BC6 one-sided-miss/width diagnostics recorded in `references/mpl-twoway-random-comparison.md` (§ M90 verdict); 1 generalizing claim triaged OUT-repo-analysis. D-017's conditional GO conditions met; M91 export authorized for both levels. All gates green.
-- 2026-07-24: all tasks (T1–T4) done; `devtools::test()` clean (FAIL 0, PASS 3947; M90 touched no R/ code); enumerator + reference-obs + cairn_validate green. Status → review.
+- 2026-07-24: all tasks (T1–T4) done; `devtools::test()` clean (FAIL 0, PASS 3947; M90 touched no R/ code); enumerator + reference-obs + cairn_validate green. Status → review. Draft PR #97.
+- 2026-07-24: review sent back — AC1 defect. Its "scan-vs-top-k internal cross-check (M88's guard) agrees within MC tolerance" clause mis-specified: scan→top-k is a winner's-curse bias correction (scan−final up to 0.21 by design), not a consistency check; M88's actual guard was cross-pipeline vs M87. Amended AC1 (gate-approved) to the real internal validation — the `kappa_corr_draws==mpl_kappa_corr` equivalence assertion + BC1 (0.90 external) + coverage (0.99). AC2–AC10 all had fresh passing evidence; single bounce. Status → in-progress.
 
 ## Decisions
 
