@@ -136,6 +136,7 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - 2026-07-24: T7 — corrected my OWN new prose twice before commit (M72 lesson): the dips' κ_m range was written ≈0.10–0.27 in four places when the 18 dips span 0.102–0.970 (5 above 0.27), and the M87 max width was written 0.698 when the table shows 0.744. Both re-derived from the fixtures and fixed; the references-page paragraph carries a marked in-place correction.
 - 2026-07-24: all tasks done; verify slot clean on the final tree — `devtools::test()` FAIL 0 / PASS 4206 (2 pre-existing lavaan negative-variance WARNs, 23 skips), `devtools::document()` no diff, `lintr::lint_package()` clean, `pkgdown::check_pkgdown()` clean, `cairn_validate` exit 0, both references gates green. `devtools::check()` running for AC7. Status → review.
 - 2026-07-25: review gate — PR #98 CI caught a defect the local gate structurally cannot see: T1's settling directive called `Rscript`, but the `check-references` job is Python-only, so the claim could never settle there (`Rscript: command not found` → falsified). Rewrote it as a text-only python3 check over the note's own frozen-cells table, mutation-verified (drop 100 from the node set → exit 1). No other `check: Rscript` directive exists in the corpus.
+- 2026-07-25: 3-lens review + scorer — 2 findings, both actioned (F1 93, F2 88), none sub-threshold. F1 is the substantive one: D4's S=20 is an `s_grid` NODE, so the "interpolated S confirmed at all three levels" claim was false at the shipped 0.95 — fixed at the root (per-cell `role`, geometry-asserted; `interp_ok = NA` where unprobed) plus all four prose sites, and the residual 0.95 gap filed as a candidate. Seeded re-run reproduced every measured column identically.
 
 ## Decisions
 
@@ -167,8 +168,11 @@ Acceptance criteria — fresh evidence, one line each:
   per-cell stride 1e6): D1 0.9340 [0.9168, 0.9486] ≥ .88 · D2 0.9995 [0.9972,
   1.0000] ≥ .98 · D3 1.0000 [0.9982, 1.0000] ≥ .98 · D4 0.9960 [0.9898, 0.9989]
   ≥ .93 — all `adequate = TRUE`, Clopper–Pearson per cell, floors frozen in a
-  commit (f848057) that precedes the run. `interp_ok` TRUE at all three levels,
-  so the pre-registered `s_grid` restriction did not fire.
+  commit (f848057) that precedes the run, so no cell triggers the pre-registered
+  `s_grid` restriction. Interpolation itself is confirmed at 0.90 (D1) and 0.99
+  (D2, D3) only — D4's S=20 is a node, so the fixture records `interp_ok = NA`
+  at 0.95 (finding F1). A seeded re-run reproduced every measured column
+  `identical()`.
 - **AC6** — `man/icc.Rd` carries the level set, `not equal-tailed`, and the
   `near-vacuous` 0.905 width; NEWS.md likewise; `R/ci-mpl.R` states `NOT
   monotone` with the per-level worst steps (−0.046 / −0.068 / −0.162) and the
@@ -194,3 +198,43 @@ was fixed by rewriting it, not appending. No principle text changed, so
 as *worked under*). Profile `consistency-gate` slot: `document()` no diff,
 README.md in sync with README.Rmd, pkgdown clean, NEWS entry present,
 `data-raw/` covered by `.Rbuildignore`, full `check()` clean.
+**Independent review — three lenses + scorer.** [O] diff-bug (Opus, full diff vs the
+criteria, DECISIONS and conventions): 2 findings, both documentation. [S]
+blame-history (Sonnet, `git log`/`blame` on the modified lines): no findings — it
+independently established that RR03 had already flagged the interpolation comment as
+false, so correcting it restores a claim rather than removing a safeguard, and that
+the removed M88 `use_data()` call leaves the fixture→sysdata chain intact via the new
+generator. [S] prior-review (Sonnet): no findings; its probe found the GitHub inline
+comment surface empty (`pulls/comments` → `[]`), so archived `## Review` sections and
+`LESSONS.md` were the evidence base. Nothing scored below 80, so nothing was logged
+sub-threshold.
+
+Actioned findings, verbatim:
+
+- **F1 (93)** — `R/ci-mpl.R:211`: the comment claimed "M91's cells D1-D4 sweep
+  off-node S at all three levels ... every one clears its frozen floor (0.934 at
+  0.90, 0.9995/1.000 at 0.99, 0.996 at 0.95)". The 0.996 comes from D4, whose S=20
+  is an exact `s_grid` node, so no interpolation occurs there — interpolated S at the
+  **default** 0.95 has no coverage evidence, and 0.95's worst dip (−0.068 at R=10,
+  S 30→50) is unprobed. The overclaim had propagated to the references-page verdict
+  heading and body, the sweep script's per-level printout, and a ROADMAP candidate
+  row. **Fixed at the root, not just in prose:** the sweep script now carries a
+  per-cell `role` (`interp` vs `subgrid_rho`) asserted against the geometry, and
+  reports `interp_ok = NA` where a level has no off-node cell — absence of a probe is
+  no longer reportable as confirmation. All four prose sites corrected; the residual
+  0.95 gap is now a candidate row. (Fixing this exposed a second-order bug in my own
+  fix — `role` was missing from the summary row, so the first re-run reported "NOT
+  PROBED" at *every* level; caught by reading the output, corrected, and the seeded
+  re-run reproduced all measured numbers identically.)
+- **F2 (88)** — `R/icc.R:1429` and `R/icc.R:2098`: two comments accurate before this
+  diff and falsified by it, neither updated — "only at the default 95% two-sided
+  level its kappa_m table is calibrated for" and "conf_level 0.95 upstream" — now
+  contradicting the fence three lines below. A maintainer auditing the fence could
+  read them as evidence that 0.90/0.99 reaching `mpl_ci` is a guard leak and revert
+  the milestone's purpose. Both corrected to name the calibrated set and its source.
+
+Also fixed during the gate: PR CI's `check-references` job failed where local runs
+could not — T1's settling directive called `Rscript` and that job is Python-only
+(`Rscript: command not found` → falsified). Rewritten as a text-only `python3` check
+over the note's own frozen-cells table and mutation-verified; no other
+`check: Rscript` directive exists in the corpus.

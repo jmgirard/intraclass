@@ -1427,8 +1427,9 @@ icc <- function(
   # The modified-profile-likelihood interval (`ci_method = "mpl"`, xiao2013; M88,
   # D-014/D-015) is the OPPOSITE fence to the one-way methods above: defined only for
   # the balanced-complete two-way RANDOM absolute-agreement ICC(A,1)/ICC(A,k), and only
-  # at the default 95% two-sided level its kappa_m table is calibrated for. Every other
-  # cell aborts loudly (#5/#8) rather than returning an uncalibrated interval.
+  # at a two-sided level its kappa_m table is calibrated for -- since M91/D-017 that is
+  # {0.90, 0.95, 0.99}, read from the table itself below rather than hardcoded. Every
+  # other cell aborts loudly (#5/#8) rather than returning an uncalibrated interval.
   if (ci_method == "mpl") {
     # mpl is an absolute-agreement method. `type` defaults to both agreement and
     # consistency; narrow an UNSET type to agreement (mpl selects the agreement
@@ -2095,7 +2096,8 @@ icc <- function(
       # Modified profile likelihood on the RAW two-way data (xiao2013; M88,
       # D-014/D-015); the POINT stays the engine (REML) point above (BC5), only the
       # interval differs. Deterministic -- kappa_m looked up, no draws. Guarded to the
-      # balanced two-way random absolute-agreement cell + conf_level 0.95 upstream.
+      # balanced two-way random absolute-agreement cell + a calibrated conf_level
+      # ({0.90, 0.95, 0.99} since M91/D-017) upstream.
       mpl_ci(df, estimands, conf_level = conf_level)
     } else {
       mc_ci(

@@ -81,7 +81,20 @@ cells <- data.frame(
   rho = c(0.60, 0.60, 0.60, 0.02),
   floor = c(0.88, 0.98, 0.98, 0.93),
   n_rep = c(1000L, 2000L, 2000L, 1000L),
+  # `role` keeps the two questions separate, because only ONE of them is about
+  # interpolation. D1-D3 sit at an off-node S, so their kappa_m is interpolated and
+  # they are the interpolation probe. D4's S = 20 IS an s_grid node, so approx()
+  # returns the node value and NO interpolation happens: D4 tests the sub-grid-floor
+  # rho posture at the shipped level, and says nothing about interpolated S there.
+  # Aggregating the two would claim interpolation evidence at 0.95 that no cell
+  # produced (M91 review finding F1, scored 93).
+  role = c("interp", "interp", "interp", "subgrid_rho"),
   stringsAsFactors = FALSE
+)
+s_nodes_shipped <- c(10L, 15L, 20L, 30L, 50L, 100L)
+stopifnot(
+  # The role labels must match the geometry, not the author's intent.
+  identical(!(cells$n_s %in% s_nodes_shipped), cells$role == "interp")
 )
 if (smoke) {
   cells$n_rep <- 60L
@@ -121,6 +134,7 @@ for (ci in seq_len(nrow(cells))) {
     id = cc$id,
     level = cc$level,
     conf = cc$conf,
+    role = cc$role,
     n_r = cc$n_r,
     n_s = cc$n_s,
     delta = cc$delta,
@@ -179,25 +193,38 @@ rownames(summary_df) <- NULL
 # nodes (the pre-registered consequence) -- never a loosened floor, never a
 # change to another level.
 verdict <- lapply(split(summary_df, summary_df$level), function(d) {
+  ip <- d[d$role == "interp", ]
   list(
     level = d$level[1],
     cells = d$id,
     min_coverage = min(d$coverage),
     failed_cells = d$id[!d$adequate],
-    interp_ok = all(d$adequate)
+    all_adequate = all(d$adequate),
+    # interp_ok is NA where the level has no off-node cell -- absence of an
+    # interpolation probe is not confirmation of interpolation (finding F1).
+    interp_cells = ip$id,
+    interp_ok = if (nrow(ip) == 0L) NA else all(ip$adequate)
   )
 })
 cat("\n== verdict (frozen floors, § M91 pre-registration) ==\n")
 for (v in verdict) {
   cat(sprintf(
-    "  %s: interpolated-S %s (min coverage %.4f%s)\n",
+    "  %s: %d/%d cells adequate (min coverage %.4f%s); interpolated S %s\n",
     v$level,
-    if (v$interp_ok) "CONFIRMED" else "NOT confirmed",
+    sum(summary_df$adequate[summary_df$level == v$level]),
+    sum(summary_df$level == v$level),
     v$min_coverage,
     if (length(v$failed_cells)) {
       sprintf("; failed: %s", paste(v$failed_cells, collapse = ", "))
     } else {
       ""
+    },
+    if (is.na(v$interp_ok)) {
+      "NOT PROBED at this level (no off-node cell)"
+    } else if (v$interp_ok) {
+      sprintf("CONFIRMED (%s)", paste(v$interp_cells, collapse = ", "))
+    } else {
+      "NOT confirmed"
     }
   ))
 }

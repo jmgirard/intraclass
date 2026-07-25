@@ -482,9 +482,10 @@ only, the other levels and the on-node behavior are untouched. The floor is neve
 loosened and the shipped 0.95 is never restricted on evidence about another level
 (GP5; the M68 fix-the-evidence-never-the-bar lesson).
 
-## M91 verdict (T2) — interpolated S confirmed at all three levels
+## M91 verdict (T2) — interpolated S confirmed at 0.90 and 0.99; not probed at 0.95
 
-**Confirmed at every level** against the frozen criterion above. Evidence:
+**Every cell clears its floor**, and the interpolation claim holds for the two levels
+M91 adds. Evidence:
 `data-raw/m91-interp-sweep.rds` (`data-raw/m91-mpl-interp-sweep.R`, seeded),
 κ_m taken through the interpolation rule under test:
 
@@ -495,9 +496,19 @@ loosened and the shipped 0.95 is never restricted on evidence about another leve
 | D3 | 2 | 40 | 4.0 | 0.60 | 0.99 | 0.8932 | 1.0000 | [0.9982, 1.0000] | 0.98 | 0 / 0 | 0.905 |
 | D4 | 3 | 20 | 1.0 | 0.02 | 0.95 | 0.6315 | 0.9960 | [0.9898, 0.9989] | 0.93 | 4 / 0 | 0.329 |
 
-No cell fell short, so the pre-registered restriction is not triggered: all three
-levels keep the interpolated-S path. Two consequences carried into the M91 exported
-docs.
+No cell fell short, so the pre-registered restriction is not triggered and every level
+keeps the interpolated-S path.
+
+**What each cell does and does not license (corrected 2026-07-25, M91 review finding
+F1, scored 93).** Only D1–D3 sit at an off-node S (25, 25, 40), so only they probe
+interpolation — at conf_level 0.90 (D1) and 0.99 (D2, D3). **D4's S = 20 is an
+`s_grid` node**, so `approx()` returns the node value and no interpolation occurs
+there: D4 licenses the sub-grid-floor ρ posture at the shipped 0.95, and says nothing
+about interpolated S at that level. Interpolated S at **0.95 therefore remains
+unprobed**, as it was before M91, and 0.95's own worst dip (−0.068 at R = 10,
+S 30→50) is untested; the fixture records this as `interp_ok = NA` at 0.95 rather than
+aggregating D4 into an interpolation verdict, and closing the asymmetry is a ROADMAP
+candidate. Two further consequences carried into the M91 exported docs.
 
 1. **One-sidedness reconfirmed off-node.** D1's misses are 65 below vs 1 above —
    the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
