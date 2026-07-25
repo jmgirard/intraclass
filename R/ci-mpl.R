@@ -208,16 +208,23 @@ mpl_interval <- function(
 # is itself small (13 of the 18 steps below -0.02 stay under 0.30), so an absolute
 # error of that size barely moves an endpoint; the two largest steps are also the two
 # at the largest kappa_m, both at R = 2 at 0.99 (0.729->0.566 and 0.970->0.816).
-# (b) At the two levels M91 added, interpolated S is coverage-CONFIRMED rather than
-# assumed: cells D1-D3 sweep an off-node S -- including that R = 2 case -- and each
-# clears its frozen floor (0.934 at 0.90; 0.9995 and 1.000 at 0.99).
-# NOT confirmed at 0.95: every 0.95 cell ever swept sits ON a node (M91's D4 is
-# S = 20, a node -- it probes the sub-grid-floor rho, not interpolation), so at the
-# DEFAULT level an interpolated kappa_m still rests on argument (a) alone, and 0.95's
-# own worst dip (-0.068 at R = 10, S 30->50) is unprobed. Closing that asymmetry is a
-# ROADMAP candidate. The shipped values are the raw calibrated ones, deliberately
-# un-smoothed, so each traces to the run whose coverage was validated (M91 plan gate;
-# an envelope or smoother is a separate candidate).
+# (b) Interpolated S is coverage-CONFIRMED at EVERY supported level rather than
+# assumed. M91's cells D1-D3 swept an off-node S at 0.90 and 0.99 -- including that
+# R = 2 case -- each clearing its frozen floor (0.934 at 0.90; 0.9995 and 1.000 at
+# 0.99). M92 closed the remaining gap at the DEFAULT 0.95, where every earlier cell
+# had sat ON a node (M91's D4 is S = 20, a node -- it probes the sub-grid-floor rho,
+# not interpolation): three off-node cells, each clearing the frozen 0.93 floor --
+# E1 (R=3, S=25) 0.968, E2 (R=10, S=40) 0.953 across 0.95's own worst dip
+# (-0.068 over S 30->50), E3 (R=2, S=40) 1.000 at the largest 0.95 kappa_m, where the
+# chord sits below a concave curve. See § M92 of the note above. Because no cell fell
+# short, that pass's pre-registered consequence -- switching 0.95 to a bracket-max
+# rule -- was NOT triggered and this lookup is unchanged.
+# The shipped values are the raw calibrated ones, deliberately un-smoothed, so each
+# traces to the run whose coverage was validated (M91 plan gate; an envelope or
+# smoother remains a separate candidate, now with a second probe's worth of evidence
+# that the dips do not cost coverage). `test-ci-mpl.R` pins the three constants M92
+# validated, so a change to the table or to this rule reds a test rather than
+# silently detaching the code from its coverage evidence.
 #
 # An (n_r, n_s) outside the table's grid aborts loudly (#5/#8) -- kappa_m off the grid
 # has no calibration and extrapolating it is exactly the uncalibrated guess D-015

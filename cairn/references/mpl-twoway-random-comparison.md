@@ -504,11 +504,13 @@ F1, scored 93).** Only D1–D3 sit at an off-node S (25, 25, 40), so only they p
 interpolation — at conf_level 0.90 (D1) and 0.99 (D2, D3). **D4's S = 20 is an
 `s_grid` node**, so `approx()` returns the node value and no interpolation occurs
 there: D4 licenses the sub-grid-floor ρ posture at the shipped 0.95, and says nothing
-about interpolated S at that level. Interpolated S at **0.95 therefore remains
-unprobed**, as it was before M91, and 0.95's own worst dip (−0.068 at R = 10,
-S 30→50) is untested; the fixture records this as `interp_ok = NA` at 0.95 rather than
-aggregating D4 into an interpolation verdict, and closing the asymmetry is a ROADMAP
-candidate. Two further consequences carried into the M91 exported docs.
+about interpolated S at that level. Interpolated S at **0.95 was therefore unprobed
+as of M91**, as it had been before it, and 0.95's own worst dip (−0.068 at R = 10,
+S 30→50) untested; the M91 fixture records this as `interp_ok = NA` at 0.95 rather
+than aggregating D4 into an interpolation verdict (M91, **superseded 2026-07-25 by
+§ M92 below**, which probes that gap directly with three off-node 0.95 cells,
+including the R = 10 dip, and confirms it — the candidate row this sentence used to
+carry is absorbed there). Two further consequences carried into the M91 exported docs.
 
 1. **One-sidedness reconfirmed off-node.** D1's misses are 65 below vs 1 above —
    the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
@@ -579,6 +581,44 @@ would turn currently-working calls into aborts, a user-visible regression, where
 bracket-max keeps every subject count working and only widens. The floor is not
 loosened either way, and no evidence here changes 0.90 or 0.99 (GP5; the M68
 fix-the-evidence-never-the-bar lesson). Decided at the M92 plan gate, 2026-07-25.
+
+## M92 verdict (T3) — interpolated S confirmed at 0.95; the level triple is closed
+
+**Every cell clears its floor under the shipped linear-in-S rule**, so the
+pre-registered bracket-max consequence is **not triggered** and `mpl_kappa_lookup`
+is unchanged. Evidence: `data-raw/m92-interp-sweep.rds`
+(`data-raw/m92-mpl-095-interp-sweep.R`, seeded), κ_m taken through the interpolation
+rule under test:
+
+| cell | R | S | δ | ρ | level | κ_m (interp) | coverage | Clopper–Pearson 95 % | floor | miss −/+ | median width |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | 0.7089 | 0.9680 | [0.9551, 0.9780] | 0.93 | 32 / 0 | 0.752 |
+| E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | 0.1517 | 0.9530 | [0.9380, 0.9653] | 0.93 | 34 / 13 | 0.415 |
+| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | 1.3663 | 1.0000 | [0.9963, 1.0000] | 0.93 | 0 / 0 | 0.868 |
+
+All three cells are off-node and at 0.95, so `interp_ok = TRUE` at that level rests on
+three interpolation probes and no mixed-role aggregation (the M91 F1 failure mode).
+With § M91's D1–D3 this closes the level triple: **interpolated S is now
+coverage-confirmed at 0.90, 0.95 and 0.99.**
+
+Three things the cells establish beyond the headline.
+
+1. **The dips do not cost coverage — a second independent look.** E2 crosses 0.95's
+   worst downward step and lands at 0.9530, essentially nominal; E3 crosses the
+   largest κ_m at 0.95, where the chord sits below a concave curve (the
+   under-estimating direction), and over-covers at 1.0000. Together with M91's D3
+   (the −0.154 dip at 0.99) that is now two passes finding no coverage cost to
+   non-monotonicity, which is the evidence the κ_m envelope/smoother candidate was
+   waiting on. It stays a candidate; nothing here argues *for* it.
+2. **One-sidedness weakens as raters are added.** D1 (R = 3, δ = 4) missed 65 below
+   vs 1 above; E2 at the same δ and a comparable S but **R = 10** misses 34 below vs
+   13 above. The strong one-sidedness the `@param ci_method` text records is a
+   few-raters phenomenon, not a property of the interval at every geometry, and the
+   exported text now says so rather than leaving the blanket reading in place.
+3. **E1 completes a controlled triple.** At one geometry (R = 3, S = 25, δ = 4,
+   ρ = 0.60) the interval now has an off-node coverage measurement at every level:
+   0.934 (D1, 0.90), 0.968 (E1, 0.95), 0.9995 (D2, 0.99) — monotone in the level, as
+   a correctly-calibrated family should be.
 
 ## Traces to
 
