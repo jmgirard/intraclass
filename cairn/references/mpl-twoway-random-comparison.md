@@ -430,6 +430,53 @@ equal-tailed), and 0.99 intervals run wide (C4/C6 median width 0.852/0.845). No
 decisive cell's median 0.99 width reached the BC6 ≥ 0.90 documentation trigger
 (max 0.852), but the small-geometry / near-vacuity caveat still ships with M91.
 
+## M91 pre-registration — interpolated-S confirmation cells (frozen 2026-07-24, BEFORE any M91 run — GP5)
+
+M91 exports conf_level 0.90 / 0.99 per BC7. One evidence gap survives M90: **every
+one of M90's C1–C8 sits on an `s_grid` node**, so `mpl_kappa_lookup`'s
+linear-in-S interpolation — the path a user hits at any subject count between
+nodes — has no coverage evidence at any level, the shipped 0.95 included
+— observed 2026-07-24 <!-- check: Rscript -e 'q(status = as.integer(!all(readRDS("data-raw/m90-verdict.rds")$sweep$n_s %in% readRDS("data-raw/m90-kappa-tables.rds")$meta$s_grid)))' -->.
+M90's BC1 κ_m at the off-`s_grid` S=25 geometries cannot fill the gap: BC1 ran on
+xiao2013's *published* ρ ∈ [0.6, 0.9] grid, the production tables on the extended
+ρ ∈ [0.05, 0.9] grid, so the two are not comparable (at R=3, S=25 the interpolated
+production κ_m is 0.777 against BC1's directly-evaluated 0.535 — the deliberate
+extended-range margin, not interpolation error).
+
+**Where interpolation can bite.** The calibrated κ_m is **non-monotone in S at all
+three levels** — worst adjacent downward step −0.046 (0.90, R=9, S 15→20), −0.068
+(0.95, R=10, S 30→50), −0.162 (0.99, R=2, S 10→15) — so the shipped
+`R/ci-mpl.R` claim that linear interpolation is conservatively biased ("increasing
+and roughly concave", hence a chord below the curve) is false in both directions and
+is corrected by this milestone. Nearly every dip sits at large R where κ_m is itself
+small (≈0.10–0.27), where an absolute error of that size barely moves an endpoint.
+The exception is **R=2 at 0.99** (κ_m ≈ 0.57–0.97), the one geometry where an
+interpolation error is large enough in absolute terms to shift a bound; D3 targets it.
+
+**Cells (frozen).** Stress configuration δ = 4, ρ = 0.60 — M90's tightest cells
+(C4/C6) — except D4, which reproduces M90's C8 geometry at the shipped level:
+
+| cell | R | S | δ | ρ | level | floor | n_rep | role |
+|---|---|---|---|---|---|---|---|---|
+| D1 | 3 | 25 | 4.0 | 0.60 | 0.90 | ≥ 0.88 | 1000 | interpolated S (between the 20 and 30 nodes) |
+| D2 | 3 | 25 | 4.0 | 0.60 | 0.99 | ≥ 0.98 | 2000 | same, deep tail |
+| D3 | 2 | 40 | 4.0 | 0.60 | 0.99 | ≥ 0.98 | 2000 | interpolated S across the largest absolute dip (−0.154 over S 30→50, κ_m ≈ 0.82–0.97) |
+| D4 | 3 | 20 | 1.0 | 0.02 | 0.95 | ≥ 0.93 | 1000 | sub-grid-floor ρ at the shipped level (M90's C8 geometry; makes the below-grid posture uniform across levels) |
+
+**Criterion (GP5 — fixed before results).** κ_m is taken through the **interpolation
+path under test** (`mpl_kappa_lookup`'s exact linear-in-S rule), never a
+directly-evaluated value — the interpolated constant is the object of the test. A
+cell is adequate iff empirical coverage clears its floor above; the floors are the
+already-frozen per-level values (0.90 / 0.99 from BC3, § M90; 0.95 from M87's
+nominal − 2 pp, § M87 criterion 1). Over-coverage passes, as at every prior pass
+(D-014). The verdict reports an exact (Clopper–Pearson) 95 % CI per cell.
+
+**Pre-registered consequence of a shortfall.** A level with a failing cell is
+**restricted to exact `s_grid` S nodes** — an interpolated S aborts at that level
+only, the other levels and the on-node behavior are untouched. The floor is never
+loosened and the shipped 0.95 is never restricted on evidence about another level
+(GP5; the M68 fix-the-evidence-never-the-bar lesson).
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the
