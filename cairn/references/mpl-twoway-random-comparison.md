@@ -448,10 +448,15 @@ three levels** — worst adjacent downward step −0.046 (0.90, R=9, S 15→20),
 (0.95, R=10, S 30→50), −0.162 (0.99, R=2, S 10→15) — so the shipped
 `R/ci-mpl.R` claim that linear interpolation is conservatively biased ("increasing
 and roughly concave", hence a chord below the curve) is false in both directions and
-is corrected by this milestone. Nearly every dip sits at large R where κ_m is itself
-small (≈0.10–0.27), where an absolute error of that size barely moves an endpoint.
-The exception is **R=2 at 0.99** (κ_m ≈ 0.57–0.97), the one geometry where an
-interpolation error is large enough in absolute terms to shift a bound; D3 targets it.
+is corrected by this milestone. Most dips sit at large R where κ_m is itself small —
+13 of the 18 adjacent steps below −0.02 have κ_m under 0.30 at both endpoints of the
+step — and there an absolute error of that size barely moves a bound. The two largest
+steps are also the two at the largest κ_m, both at **R=2, conf_level 0.99**
+(0.729 → 0.566 over S 10→15 and 0.970 → 0.816 over S 30→50): the one geometry where
+an interpolation error is large enough in absolute terms to shift a bound, which is
+what D3 targets. (Counts and steps re-derivable from the shipped table —
+corrected 2026-07-24, M91: an earlier draft of this paragraph mis-stated the dips'
+κ_m as ≈0.10–0.27 throughout.)
 
 **Cells (frozen).** Stress configuration δ = 4, ρ = 0.60 — M90's tightest cells
 (C4/C6) — except D4, which reproduces M90's C8 geometry at the shipped level:
@@ -498,9 +503,11 @@ docs.
    the same near-total one-sidedness M90 measured on-node at C4/C6 (84/1, 75/6).
    The two-sided MPL interval is far from equal-tailed at δ = 4 with S rising, at
    every level; `@param ci_method` says so.
-2. **First cell over the BC6 near-vacuity trigger.** D3's median width is **0.905**
-   on a [0, 1] scale — the first cell in this note to reach BC6's ≥ 0.90
-   documentation threshold (M90's widest decisive cell was 0.852). A 2-rater study
+2. **The only cell over the BC6 near-vacuity trigger.** D3's median width is
+   **0.905** on a [0, 1] scale — the only cell anywhere in this note at or above
+   BC6's ≥ 0.90 documentation threshold (M90's widest was 0.852 at C4/0.99; M91's
+   next-widest is D2 at 0.874; the widest MPL width in the M87 sweep table above is
+   0.744 at C4). A 2-rater study
    at 0.99 buys a bound that excludes almost nothing, which is the honest cost of
    the deep tail at minimal rater information, not a defect: coverage is 1.0000
    there. The `"mpl"` `@param` carries the caveat.

@@ -78,7 +78,10 @@ stopifnot(
   identical(new_095$n_s, as.integer(old_095$n_s))
 )
 # 3. Every kappa_m is finite and non-negative (a correction, never a shrinkage).
-stopifnot(all(is.finite(kappa_m_table$kappa_m)), all(kappa_m_table$kappa_m >= 0))
+stopifnot(
+  all(is.finite(kappa_m_table$kappa_m)),
+  all(kappa_m_table$kappa_m >= 0)
+)
 
 cat("== M91 T3: conf_level-keyed kappa_m table ==\n")
 for (lv in sort(unique(kappa_m_table$conf_level))) {
@@ -99,9 +102,21 @@ assembly <- list(
     generator = "data-raw/m91-mpl-kappa-sysdata.R",
     role = "assembly only -- no calibration; every value copied from a committed fixture",
     sources = list(
-      "0.90" = list(file = src_new, milestone = "M90", oracle = "BC1 published alpha=0.10 kappa_m + simulated coverage"),
-      "0.95" = list(file = src_095, milestone = "M88", oracle = "simulated coverage (D-014 GO)"),
-      "0.99" = list(file = src_new, milestone = "M90", oracle = "simulated coverage only (no external oracle)")
+      "0.90" = list(
+        file = src_new,
+        milestone = "M90",
+        oracle = "BC1 published alpha=0.10 kappa_m + simulated coverage"
+      ),
+      "0.95" = list(
+        file = src_095,
+        milestone = "M88",
+        oracle = "simulated coverage (D-014 GO)"
+      ),
+      "0.99" = list(
+        file = src_new,
+        milestone = "M90",
+        oracle = "simulated coverage only (no external oracle)"
+      )
     ),
     schema = c("n_r", "n_s", "conf_level", "kappa_m"),
     lookup = "slice by (n_r, conf_level); linear interpolation in S; no extrapolation",

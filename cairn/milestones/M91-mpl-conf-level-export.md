@@ -67,9 +67,9 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - [ ] AC5: the confirmation sweep clears the floors frozen **before** it runs
       (GP5), at δ=4, ρ=0.60 — M90's tightest configuration (C4/C6) — for **D1**
       (R=3, S=25) @ 0.90 (floor ≥ 0.88, n_rep ≥ 1000); **D2** (3, 25) @ 0.99
-      (≥ 0.98, n_rep ≥ 2000); **D3** (2, 40) @ 0.99 (same floor/n_rep — the sole
-      dip large enough in absolute κ_m to move an endpoint: −0.154 over S 30→50
-      where κ_m ≈ 0.82–0.97, vs ≈0.10–0.27 at the large-R dips); plus **D4**,
+      (≥ 0.98, n_rep ≥ 2000); **D3** (2, 40) @ 0.99 (same floor/n_rep — the dip
+      large enough in absolute κ_m to move an endpoint: −0.154 over S 30→50, from
+      κ_m 0.970 to 0.816, while most dips sit under 0.30); plus **D4**,
       M90's C8 geometry (3, 20, δ1, ρ=0.02) @ 0.95 (≥ 0.93 — M87's frozen
       nominal−2 pp floor, `references/mpl-twoway-random-comparison.md` § M87).
       Exact binomial CI per cell. Pre-registered consequence of a shortfall: the
@@ -106,17 +106,17 @@ values → candidate row (none of the four is documented there; a method-wide jo
       `m86-mpl-lib.R` + M90's sweep harness), κ_m via the interpolation path
       under test → committed fixture; apply the frozen floors and append the
       verdict to the references page.
-- [ ] T3: Assemble the conf_level-keyed κ_m table — 0.95 verbatim from
+- [x] T3: Assemble the conf_level-keyed κ_m table — 0.95 verbatim from
       `m88-kappa-table.rds`, 0.90/0.99 from `m90-kappa-tables.rds` — and
       regenerate `R/sysdata.rda` from a `data-raw/` generator carrying
       provenance `meta` (source fixture + level per slice).
-- [ ] T4: Key `mpl_kappa_lookup` (`R/ci-mpl.R:204`) on (n_r, n_s, conf_level),
+- [x] T4: Key `mpl_kappa_lookup` (`R/ci-mpl.R:204`) on (n_r, n_s, conf_level),
       keeping per-level S-interpolation; confirm `mpl_ci` (already receives
       conf_level) selects the right slice.
-- [ ] T5: Lift the `R/icc.R:1465` fence to conf_level ∈ {0.90, 0.95, 0.99};
+- [x] T5: Lift the `R/icc.R:1465` fence to conf_level ∈ {0.90, 0.95, 0.99};
       abort otherwise via a classed `intraclass_unsupported` error listing the
       set (mirror the `mpl_kappa_lookup` off-grid abort).
-- [ ] T6: Tests — new-level endpoints vs `mpl_interval` at the fixture κ_m; SB
+- [x] T6: Tests — new-level endpoints vs `mpl_interval` at the fixture κ_m; SB
       inheritance at new levels + mutation guard; off-level classed abort +
       message; 0.95 slice equality + endpoint no-regression.
 - [ ] T7: Docs (`@param conf_level` + `"mpl"` `@param`; the corrected
@@ -131,6 +131,9 @@ values → candidate row (none of the four is documented there; a method-wide jo
 - 2026-07-24: re-planned against shipped M90 (`/milestone-plan M91`). Both levels GO, so the 0.99 hedge is gone. Measured the falsified interpolation comment: non-monotone in S at ALL levels (worst step −0.046/−0.068/−0.162 at 0.90/0.95/0.99) — a correction, not a softening. Found M90's 8 coverage cells all on `s_grid` nodes, so interpolated κ_m is unvalidated at the new levels; BC1's S=25 κ_m cannot fill it (published ρ grid, not the extended production grid — interp 0.777 vs BC1 0.535 at R=3 is the deliberate extended-range margin). Gate: raw calibrated values, +3 confirmation cells (2 off-node + the absorbed 0.95 sub-grid-floor candidate), vignette gap → candidate. AC 6→7, T 5→7.
 - 2026-07-24: T1 — pre-registered the four confirmation cells D1–D4 in `references/mpl-twoway-random-comparison.md` § M91 (floors, n_rep, interpolated-κ_m rule, shortfall consequence) and froze it BEFORE any run (GP5). Gate: shortfall → restrict that level to exact `s_grid` S nodes; added D3 (2, 40) @ 0.99 for the −0.154 dip where κ_m ≈ 0.82–0.97 — AC5 gate-amended 3→4 cells (128/149 lines). 6 new generalizing claims triaged `OUT-oracle-pin`; both references gates green.
 - 2026-07-24: T2 — `data-raw/m91-mpl-interp-sweep.R` → `m91-interp-sweep.rds`: all four cells clear their frozen floors (D1 0.934, D2 0.9995, D3 1.0000, D4 0.996), so interpolated S is confirmed at all three levels and the pre-registered restriction does not fire. Two doc consequences: D1's misses are 65/1 (one-sidedness reconfirmed off-node), and D3's median width 0.905 is the FIRST cell to cross BC6's ≥0.90 near-vacuity trigger (M90's widest was 0.852). D4 closes the RR03 rec-#9 sub-grid-floor gap at 0.95. Fixed M90's logged F2 (cross-cell RNG overlap) in the new script's seed stride.
+- 2026-07-24: T3–T5 — `data-raw/m91-mpl-kappa-sysdata.R` assembles the conf_level-keyed table (162 rows = 3 levels × 54 nodes; 0.95 copied verbatim from `m88-kappa-table.rds`, asserted identical in the generator); `mpl_kappa_lookup` keyed on (n_r, n_s, conf_level) with per-slice S-interpolation + a defensive classed abort; `icc()` fence lifted to the table's own level set. Neutralized M88's now-stale `use_data()` call — re-running it would have overwritten sysdata with the pre-M91 3-column schema and broken every mpl lookup.
+- 2026-07-24: T6 — tests for the level-keyed wiring, SB inheritance at the new levels + wrong-divisor mutation guard, the classed off-level abort (0.80/0.975/0.995/0.999) with the set named, the 0.95 κ_m slice pins, and 0.95 endpoint no-regression against literals recorded pre-change (incl. off-node S=25). Mutation-checked: forcing the lookup back to the 0.95 slice reds 4 assertions in the wiring test and nothing else — the ordering test is honestly scoped as a sanity property (it survives the mutation, as its comment says).
+- 2026-07-24: T7 — corrected my OWN new prose twice before commit (M72 lesson): the dips' κ_m range was written ≈0.10–0.27 in four places when the 18 dips span 0.102–0.970 (5 above 0.27), and the M87 max width was written 0.698 when the table shows 0.744. Both re-derived from the fixtures and fixed; the references-page paragraph carries a marked in-place correction.
 
 ## Decisions
 

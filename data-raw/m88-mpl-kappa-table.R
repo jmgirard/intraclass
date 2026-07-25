@@ -1,7 +1,8 @@
 # data-raw/m88-mpl-kappa-table.R
 #
-# M88 T3: generate the precomputed kappa_m table shipped as internal package data
-# (R/sysdata.rda) behind ci_method = "mpl". kappa_m is the modified-profile-likelihood
+# M88 T3: calibrate the precomputed kappa_m table behind ci_method = "mpl" at the
+# conf_level 0.95 operating point (since M91 this is one SLICE of the shipped table --
+# see the note on R/sysdata.rda below). kappa_m is the modified-profile-likelihood
 # correction constant (xiao2013) that makes the two-way random ICC(A,1) interval cover
 # at nominal; it is per-(R, S) geometry and has NO external oracle below rho = 0.6
 # (D-014 condition (i)) -- established by simulated coverage only, using M86's
@@ -26,8 +27,10 @@
 #
 # Run (background; ~2-2.5 h):
 #   Rscript data-raw/m88-mpl-kappa-table.R
-# Writes data-raw/m88-kappa-table.rds (seeded; provenance in `meta`) and R/sysdata.rda
-# via usethis::use_data(kappa_m_table, internal = TRUE, overwrite = TRUE).
+# Writes data-raw/m88-kappa-table.rds (seeded; provenance in `meta`). It NO LONGER
+# writes R/sysdata.rda: since M91 the shipped table is conf_level-KEYED (a 4th column)
+# and is assembled from this fixture plus M90's by data-raw/m91-mpl-kappa-sysdata.R.
+# This script remains the source of record for the conf_level 0.95 slice.
 
 source("data-raw/m86-mpl-lib.R")
 
@@ -179,9 +182,11 @@ validation <- list(
   )
 )
 saveRDS(validation, "data-raw/m88-kappa-table.rds")
-usethis::use_data(kappa_m_table, internal = TRUE, overwrite = TRUE)
+# R/sysdata.rda is written by data-raw/m91-mpl-kappa-sysdata.R, which reads the
+# fixture saved above. Calling use_data() here would overwrite the shipped table with
+# this script's pre-M91 3-column schema and break every mpl lookup, so it does not.
 
 cat(sprintf(
-  "\nM87 cross-check: %s\nsaved data-raw/m88-kappa-table.rds + R/sysdata.rda\n",
+  "\nM87 cross-check: %s\nsaved data-raw/m88-kappa-table.rds\n  (re-run data-raw/m91-mpl-kappa-sysdata.R to rebuild R/sysdata.rda)\n",
   if (xcheck_all_pass) "ALL PASS" else "SOME FAIL"
 ))

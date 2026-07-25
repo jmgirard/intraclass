@@ -190,19 +190,56 @@ mpl_interval <- function(
 }
 
 # --- Precomputed kappa_m lookup + interpolation ------------------------------
-# Look kappa_m up for the (n_r, n_s) geometry from the shipped internal table
-# `kappa_m_table` (data-raw/m88-mpl-kappa-table.R; two-sided, alpha = 0.05). R is an
-# integer node (the table spans 2..10 raters), so only S is ever interpolated: linear
-# between bracketing S nodes. kappa_m(S) is increasing and roughly concave (matching
-# xiao2013's published values -- e.g. R=3: 0.32 at S=10, 0.67 at S=50), so the chord
-# sits below the curve and linear interpolation slightly UNDER-estimates kappa_m
-# between nodes -- a small, second-order effect (within the table's own MC noise, and
-# well inside the method's deliberate over-coverage margin; the small-S nodes are dense
-# where the curve bends most). An (n_r, n_s) outside the table's grid aborts loudly
-# (#5/#8) -- kappa_m off the grid has no calibration and extrapolating it is exactly
-# the uncalibrated guess D-015 refuses.
-mpl_kappa_lookup <- function(n_r, n_s, call = rlang::caller_env()) {
+# Look kappa_m up for the (n_r, n_s, conf_level) node from the shipped internal table
+# `kappa_m_table` (data-raw/m91-mpl-kappa-sysdata.R; two-sided). The table carries one
+# slice per calibrated level -- 0.95 from M88 (D-015), 0.90 and 0.99 from M90's
+# per-alpha recalibration (D-017) -- so the level is a KEY, never an argument to a
+# 0.95 constant: kappa_m is the correction at its own deviance quantile and is not
+# interpolable in alpha. R is an integer node (the table spans 2..10 raters), so only S
+# is ever interpolated: linear between bracketing S nodes, within the level's slice.
+#
+# GP7 -- what interpolation in S does and does NOT guarantee. kappa_m(S) rises overall
+# but is NOT monotone: MC noise in the calibration leaves small downward steps between
+# adjacent nodes at every level (worst adjacent step -0.046 at 0.90, -0.068 at 0.95,
+# -0.162 at 0.99; see cairn/references/mpl-twoway-random-comparison.md § M91). So the
+# chord does NOT sit uniformly below the curve and linear interpolation is NOT
+# conservatively biased -- it can land either side of the true kappa_m. Two reasons
+# this is second-order rather than a defect. (a) Most dips sit at large R where kappa_m
+# is itself small (13 of the 18 steps below -0.02 stay under 0.30), so an absolute
+# error of that size barely moves an endpoint; the two largest steps are also the two
+# at the largest kappa_m, both at R = 2 at 0.99 (0.729->0.566 and 0.970->0.816).
+# (b) Interpolated S is coverage-CONFIRMED, not assumed: M91's
+# cells D1-D4 sweep off-node S at all three levels -- including that R = 2 case -- and
+# every one clears its frozen floor (0.934 at 0.90, 0.9995/1.000 at 0.99, 0.996 at
+# 0.95). The shipped values are the raw calibrated ones, deliberately un-smoothed, so
+# each traces to the run whose coverage was validated (M91 plan gate; an envelope or
+# smoother is a ROADMAP candidate).
+#
+# An (n_r, n_s) outside the table's grid aborts loudly (#5/#8) -- kappa_m off the grid
+# has no calibration and extrapolating it is exactly the uncalibrated guess D-015
+# refuses. An uncalibrated conf_level is fenced upstream in `icc()`; the defensive
+# abort here keeps a direct internal call from silently returning an empty slice.
+mpl_kappa_lookup <- function(
+  n_r,
+  n_s,
+  conf_level = 0.95,
+  call = rlang::caller_env()
+) {
   tbl <- kappa_m_table
+  levels_ok <- sort(unique(tbl$conf_level))
+  hit <- which(abs(levels_ok - conf_level) < 1e-8)
+  if (length(hit) != 1L) {
+    abort_unsupported(
+      c(
+        "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level} \\
+         {.val {format(levels_ok, nsmall = 2L)}} only.",
+        i = "kappa_m is calibrated per level and is not interpolated across \\
+             levels (#5); use {.code ci_method = \"montecarlo\"}."
+      ),
+      call = call
+    )
+  }
+  tbl <- tbl[abs(tbl$conf_level - levels_ok[hit]) < 1e-8, ]
   r_nodes <- sort(unique(tbl$n_r))
   s_nodes <- sort(unique(tbl$n_s))
   if (!(n_r %in% r_nodes)) {
@@ -237,8 +274,9 @@ mpl_kappa_lookup <- function(n_r, n_s, call = rlang::caller_env()) {
 # (glmmTMB REML) point computed upstream (D-015/D-010 BC5); only the interval is
 # MPL. ICC(A,1) is the deterministic MPL interval at the looked-up kappa_m; ICC(A,k) is
 # its exact Spearman-Brown image via the shared `npb_sb()` (est$divisor = k), so both
-# estimands share one deviance-root computation. conf_level is fixed at 0.95 upstream
-# (the table's calibration level). Deterministic -- std.error is NA (#4).
+# estimands share one deviance-root computation. conf_level is fenced upstream to the
+# table's calibrated levels (M91/D-017) and keys the kappa_m slice as well as setting
+# alpha -- both must move together. Deterministic -- std.error is NA (#4).
 mpl_ci <- function(
   df,
   estimands,
@@ -247,7 +285,7 @@ mpl_ci <- function(
 ) {
   y <- mpl_matrix(df, call = call)
   ms <- mpl_anova(y)
-  km <- mpl_kappa_lookup(ms$n_r, ms$n_s, call = call)
+  km <- mpl_kappa_lookup(ms$n_r, ms$n_s, conf_level = conf_level, call = call)
   ends <- mpl_interval(ms, kappa = km, alpha = 1 - conf_level, side = "two")
   lapply(estimands, function(est) {
     m <- est$divisor

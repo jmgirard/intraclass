@@ -195,7 +195,9 @@ for later milestones. \code{"lme4"} requires the
 \pkg{lme4} and \pkg{merDeriv} packages; \code{"lavaan"} requires the \pkg{lavaan}
 package; \code{"brms"} requires the \pkg{brms} package (and a working Stan toolchain).}
 
-\item{conf_level}{Confidence level for the interval (default \code{0.95}).}
+\item{conf_level}{Confidence level for the interval (default \code{0.95}). Any level
+in \verb{(0, 1)} is accepted, except under \code{ci_method = "mpl"}, which is calibrated
+at 0.90, 0.95, and 0.99 only (see \code{ci_method}).}
 
 \item{ci_method}{Interval method. \code{"montecarlo"} (default) simulates from the
 fitted parameter covariance on the engine's log scale (fast, boundary-aware).
@@ -249,16 +251,30 @@ pole-safe for every \code{m >= 1}); it aborts on any other design, on consistenc
 \code{boot_samples}, and \code{seed} do not apply) that, like \code{"npbootstrap"}, returns an
 interval on \strong{every} dataset -- including the near-zero-ICC boundary where the
 two-way Monte-Carlo default aborts -- and covers at or above nominal across the
-pre-registered grid where the incumbents can under-cover (assessed GO-for-opt-in in
-M87). It is deliberately \strong{conservative} (it over-covers, and is wider than the
-Monte-Carlo interval at interior cells), so it is an opt-in, not the default.
+pre-registered grid where the incumbents can under-cover (assessed as
+GO-for-opt-in against that grid). It is deliberately \strong{conservative} (it
+over-covers, and is wider than the Monte-Carlo interval at interior cells), so it
+is an opt-in, not the default.
+
 Two constraints follow from its calibration. It is available \strong{only at
-\code{conf_level = 0.95}} (the level its correction constant is tabulated for; other
-levels abort). And its correction constant is calibrated by simulation over
-\verb{rho in [0.05, 0.9]}, extending below Xiao & Liu's published \code{rho >= 0.6} fence
-into a near-boundary region that \strong{carries no external oracle} -- there, the
-interval's calibration rests on the package's own simulated coverage. It assumes
-approximately Gaussian data (untested for non-normality).}
+\code{conf_level} 0.90, 0.95, or 0.99} -- the correction constant is calibrated
+separately at each level's own deviance quantile and is never interpolated
+between levels, so any other level aborts. And that constant is calibrated by
+simulation over \verb{rho in [0.05, 0.9]}, extending below Xiao & Liu's published
+\code{rho >= 0.6} fence into a near-boundary region that \strong{carries no external
+oracle}; there, and at \code{conf_level = 0.99} throughout, its calibration rests on
+the package's own simulated coverage.
+
+Two further characteristics are worth knowing before reporting an endpoint. The
+two-sided interval is \strong{not equal-tailed} -- where rater variance is large
+relative to error and the subject count is high, non-coverage falls almost
+entirely on one side (65 of 66 misses below the interval in one validated cell) --
+so a limit must not be read as a one-sided bound at half the complementary level.
+And at \code{conf_level = 0.99} with very few raters the interval can be
+\strong{near-vacuous}: median width 0.905 on the \verb{[0, 1]} scale at 2 raters and 40
+subjects. That is the honest cost of a deep tail at minimal rater information,
+not a defect (coverage there is 1.000), but such an interval excludes little.
+It assumes approximately Gaussian data (untested for non-normality).}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
 (default \code{10000}).}

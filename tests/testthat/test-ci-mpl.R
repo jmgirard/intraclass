@@ -363,8 +363,267 @@ test_that("mpl aborts outside the two-way random absolute-agreement cell (AC4)",
     )),
     class = "intraclass_unsupported"
   )
+  # conf_level 0.90 / 0.95 / 0.99 are calibrated and supported since M91; an
+  # UNcalibrated level still aborts (covered in the M91 block below).
+})
+
+# ---- M91: conf_level 0.90 / 0.99 ---------------------------------------------
+# The kappa_m table carries one calibrated slice per level (0.95 from M88/D-015;
+# 0.90 and 0.99 recalibrated + coverage-validated in M90 under D-017), so
+# conf_level KEYS the correction as well as setting alpha. Coverage itself is
+# established offline (M90's sweep + M91's interpolated-S cells D1-D4); the tests
+# here pin the table -> endpoint wiring, the inheritance identity, the fence, and
+# the absence of a 0.95 regression.
+
+test_that("mpl at conf_level 0.90/0.99 uses that level's calibrated kappa_m (M91 AC1)", {
+  skip_if_not_installed("glmmTMB")
+
+  n_s <- 20L
+  n_r <- 4L
+  d <- mpl_twoway_long(n_s = n_s, n_r = n_r)
+  ms <- mpl_anova(mpl_matrix(d))
+
+  for (cl in c(0.90, 0.95, 0.99)) {
+    # kappa_m read straight from the shipped table's slice for this (R, S, level) --
+    # an ON-node geometry, so no interpolation is involved in the expectation.
+    slice <- kappa_m_table[
+      kappa_m_table$n_r == n_r &
+        kappa_m_table$n_s == n_s &
+        abs(kappa_m_table$conf_level - cl) < 1e-8,
+    ]
+    expect_equal(nrow(slice), 1L)
+    want <- mpl_interval(
+      ms,
+      kappa = slice$kappa_m,
+      alpha = 1 - cl,
+      side = "two"
+    )
+
+    got <- suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      ci_method = "mpl",
+      conf_level = cl
+    )))
+    got <- got[got$index == "ICC(A,1)", ]
+    expect_equal(got$conf.low, unname(want[["lower"]]), tolerance = 1e-10)
+    expect_equal(got$conf.high, unname(want[["upper"]]), tolerance = 1e-10)
+    # Deterministic at every level (D-015): no draws, no SE.
+    expect_true(is.na(got$std.error))
+  }
+})
+
+test_that("mpl kappa_m and interval width are strictly ordered in conf_level (M91 AC1)", {
+  skip_if_not_installed("glmmTMB")
+
+  d <- mpl_twoway_long(n_s = 20L, n_r = 4L)
+  ends <- lapply(c(0.90, 0.95, 0.99), function(cl) {
+    a <- suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      ci_method = "mpl",
+      conf_level = cl
+    )))
+    a[a$index == "ICC(A,1)", c("conf.low", "conf.high")]
+  })
+
+  # A deeper level is a strictly wider interval and strictly nests the shallower
+  # ones. This is a property of the deviance-quantile machinery and holds whatever
+  # kappa_m is: a wrong-slice lookup that returned, say, the 0.95 constant at 0.99
+  # would still nest, so this is a sanity property, NOT the wiring test above.
+  expect_lt(ends[[2]]$conf.low, ends[[1]]$conf.low)
+  expect_gt(ends[[2]]$conf.high, ends[[1]]$conf.high)
+  expect_lt(ends[[3]]$conf.low, ends[[2]]$conf.low)
+  expect_gt(ends[[3]]$conf.high, ends[[2]]$conf.high)
+})
+
+test_that("mpl ICC(A,k)/ICC(A,m) inherit the new levels via Spearman-Brown (M91 AC2)", {
+  skip_if_not_installed("glmmTMB")
+
+  n_r <- 4L
+  d <- mpl_twoway_long(n_s = 20L, n_r = n_r)
+  # Recompute the SB map INDEPENDENTLY of the package's npb_sb, so a wrong divisor
+  # breaks the equality (M82 anti-tautology lesson) -- as the M89 block does at 0.95.
+  sb <- function(rho, m) m * rho / (1 + (m - 1) * rho)
+
+  for (cl in c(0.90, 0.99)) {
+    i1 <- suppressWarnings(tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      ci_method = "mpl",
+      conf_level = cl
+    )))
+    i1 <- i1[i1$index == "ICC(A,1)", ]
+
+    for (m in c(2, 3.5, n_r, 8)) {
+      label <- paste0("ICC(A,", format(m, trim = TRUE), ")")
+      im <- suppressWarnings(tidy(icc(
+        d,
+        score,
+        subject,
+        rater,
+        unit = m,
+        ci_method = "mpl",
+        conf_level = cl
+      )))
+      im <- im[im$index == label, ]
+      expect_equal(nrow(im), 1L)
+      expect_equal(im$conf.low, sb(i1$conf.low, m), tolerance = 1e-9)
+      expect_equal(im$conf.high, sb(i1$conf.high, m), tolerance = 1e-9)
+      # Mutation guard: the SB image at the WRONG divisor must differ, so the
+      # equality above is testing the divisor and not just monotonicity.
+      expect_false(isTRUE(all.equal(im$conf.low, sb(i1$conf.low, m + 1))))
+      expect_gte(im$conf.low, 0)
+      expect_lte(im$conf.high, 1)
+    }
+  }
+})
+
+test_that("mpl aborts on an uncalibrated conf_level, naming the supported set (M91 AC3)", {
+  skip_if_not_installed("glmmTMB")
+
+  d <- mpl_twoway_long()
+  # A level between calibrated ones, a shallower one, and a DEEPER one: kappa_m is
+  # calibrated at its own deviance quantile and is not interpolated in alpha, and
+  # D-017 authorizes no level deeper than 0.99 (kappa_corr is still rising at
+  # alpha = 0.005 in the boundary cells).
+  for (cl in c(0.80, 0.975, 0.995, 0.999)) {
+    expect_error(
+      suppressWarnings(icc(
+        d,
+        score,
+        subject,
+        rater,
+        ci_method = "mpl",
+        conf_level = cl
+      )),
+      class = "intraclass_unsupported"
+    )
+  }
+  # The message names the supported set, so a user can act on it (#8).
+  err <- tryCatch(
+    suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      ci_method = "mpl",
+      conf_level = 0.975
+    )),
+    intraclass_unsupported = function(e) conditionMessage(e)
+  )
+  expect_match(err, "0\\.90")
+  expect_match(err, "0\\.95")
+  expect_match(err, "0\\.99")
+})
+
+test_that("the shipped kappa_m table keeps M88's 0.95 slice unchanged (M91 AC4)", {
+  # The 0.95 slice is copied VERBATIM from M88's committed calibration
+  # (data-raw/m88-kappa-table.rds via data-raw/m91-mpl-kappa-sysdata.R) -- M91
+  # re-keys the table, it does not recalibrate any level.
+  expect_named(
+    kappa_m_table,
+    c("n_r", "n_s", "conf_level", "kappa_m"),
+    ignore.order = TRUE
+  )
+  # Every level shares one (R, S) grid: 2..10 raters x 6 subject nodes.
+  grids <- lapply(
+    split(kappa_m_table, kappa_m_table$conf_level),
+    function(d) sort(paste(d$n_r, d$n_s, sep = "-"))
+  )
+  expect_length(unique(grids), 1L)
+  expect_equal(sort(unique(kappa_m_table$conf_level)), c(0.90, 0.95, 0.99))
+  expect_true(all(is.finite(kappa_m_table$kappa_m)))
+  expect_true(all(kappa_m_table$kappa_m >= 0))
+
+  # Spot-pin four 0.95 nodes against M88's shipped values (recorded pre-M91).
+  km95 <- function(n_r, n_s) {
+    kappa_m_table$kappa_m[
+      kappa_m_table$n_r == n_r &
+        kappa_m_table$n_s == n_s &
+        abs(kappa_m_table$conf_level - 0.95) < 1e-8
+    ]
+  }
+  expect_equal(km95(2L, 10L), 0.8155326, tolerance = 1e-6)
+  expect_equal(km95(2L, 100L), 1.6245186, tolerance = 1e-6)
+  expect_equal(km95(4L, 20L), 0.4348870, tolerance = 1e-6)
+  expect_equal(km95(10L, 50L), 0.1176505, tolerance = 1e-6)
+})
+
+test_that("mpl at conf_level 0.95 reproduces the pre-M91 endpoints (M91 AC4)", {
+  skip_if_not_installed("glmmTMB")
+
+  # Endpoint no-regression. These literals were recorded from the shipped package
+  # BEFORE the table was re-keyed (M91 T3), on the fixture below at its default
+  # geometry (S = 20, R = 4) and at the off-node S = 25 that exercises the
+  # interpolation path -- so a wrong slice, a wrong interpolation, or a changed
+  # 0.95 value all break this test.
+  d <- mpl_twoway_long()
+  a <- suppressWarnings(tidy(icc(d, score, subject, rater, ci_method = "mpl")))
+  a1 <- a[a$index == "ICC(A,1)", ]
+  ak <- a[a$index == "ICC(A,k)", ]
+  expect_equal(a1$conf.low, 0.42467599012062407, tolerance = 1e-12)
+  expect_equal(a1$conf.high, 0.86530180057602046, tolerance = 1e-12)
+  expect_equal(ak$conf.low, 0.74700222803863625, tolerance = 1e-12)
+  expect_equal(ak$conf.high, 0.96254122832062028, tolerance = 1e-12)
+
+  u2 <- suppressWarnings(tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    unit = 2,
+    ci_method = "mpl"
+  )))
+  u2 <- u2[u2$index == "ICC(A,2)", ]
+  expect_equal(u2$conf.low, 0.5961720321891123, tolerance = 1e-12)
+  expect_equal(u2$conf.high, 0.92778745006176289, tolerance = 1e-12)
+
+  # Off-node S = 25: linear-in-S interpolation inside the 0.95 slice.
+  d25 <- mpl_twoway_long(n_s = 25L)
+  a25 <- suppressWarnings(tidy(icc(
+    d25,
+    score,
+    subject,
+    rater,
+    ci_method = "mpl"
+  )))
+  a25 <- a25[a25$index == "ICC(A,1)", ]
+  expect_equal(a25$conf.low, 0.47848269350346301, tolerance = 1e-12)
+  expect_equal(a25$conf.high, 0.89826274702687159, tolerance = 1e-12)
+})
+
+test_that("mpl_kappa_lookup interpolates within a level, never across levels (M91 AC1)", {
+  # S is interpolated inside the level's own slice: the value at an off-node S must
+  # be the chord between ITS level's bracketing nodes, and must not coincide with a
+  # neighbouring level's value (which is what a slice mix-up would produce).
+  for (cl in c(0.90, 0.95, 0.99)) {
+    slice <- kappa_m_table[abs(kappa_m_table$conf_level - cl) < 1e-8, ]
+    node20 <- slice$kappa_m[slice$n_r == 3L & slice$n_s == 20L]
+    node30 <- slice$kappa_m[slice$n_r == 3L & slice$n_s == 30L]
+    expect_equal(
+      mpl_kappa_lookup(3L, 25L, conf_level = cl),
+      mean(c(node20, node30)),
+      tolerance = 1e-12
+    )
+  }
+  # The three levels give three different constants at the same geometry.
+  got <- vapply(
+    c(0.90, 0.95, 0.99),
+    function(cl) mpl_kappa_lookup(3L, 25L, conf_level = cl),
+    numeric(1)
+  )
+  expect_length(unique(got), 3L)
+  # A defensive internal guard: an uncalibrated level aborts here too, so a direct
+  # internal call cannot silently select an empty slice.
   expect_error(
-    icc(d, score, subject, rater, ci_method = "mpl", conf_level = 0.90),
+    mpl_kappa_lookup(3L, 25L, conf_level = 0.975),
     class = "intraclass_unsupported"
   )
 })

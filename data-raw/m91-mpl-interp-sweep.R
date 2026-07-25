@@ -18,9 +18,9 @@
 #   D3 (R=2, S=40, d=4, rho=.60) @ 0.99  floor >= 0.98  n_rep 2000
 #   D4 (R=3, S=20, d=1, rho=.02) @ 0.95  floor >= 0.93  n_rep 1000
 # S=25 lies between the 20 and 30 nodes; S=40 between 30 and 50, spanning the
-# largest absolute dip in the whole corpus (-0.154 at R=2 @ 0.99, where kappa_m
-# is 0.82-0.97 -- big enough for an interpolation error to move an endpoint,
-# unlike the large-R dips where kappa_m itself is only ~0.10-0.27). D4 is M90's
+# largest absolute dip in the whole corpus (-0.154, from kappa_m 0.970 to 0.816 at
+# R=2 @ 0.99) -- big enough for an interpolation error to move an endpoint, unlike
+# the majority of dips, which sit where kappa_m is under 0.30. D4 is M90's
 # C8 geometry at the SHIPPED level, making the sub-grid-floor rho posture
 # uniform across levels (absorbs the RR03 rec-#9 candidate row).
 #
@@ -162,7 +162,12 @@ for (ci in seq_len(nrow(cells))) {
     row$width_med
   ))
   saveRDS(
-    list(summary = do.call(rbind, summ), raw = raw, cells = cells, done = cc$id),
+    list(
+      summary = do.call(rbind, summ),
+      raw = raw,
+      cells = cells,
+      done = cc$id
+    ),
     out_path
   )
 }
@@ -205,7 +210,11 @@ saveRDS(
     verdict = verdict,
     meta = list(
       generator = "data-raw/m91-mpl-interp-sweep.R",
-      kappa_sources = list("0.90" = tbl_new, "0.95" = tbl_095, "0.99" = tbl_new),
+      kappa_sources = list(
+        "0.90" = tbl_new,
+        "0.95" = tbl_095,
+        "0.99" = tbl_new
+      ),
       kappa_rule = "linear-in-S interpolation under test (mirrors R/ci-mpl.R mpl_kappa_lookup)",
       preregistration = "cairn/references/mpl-twoway-random-comparison.md § M91 pre-registration",
       seed_base = seed_base,

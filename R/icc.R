@@ -279,7 +279,9 @@
 #'   for later milestones. `"lme4"` requires the
 #'   \pkg{lme4} and \pkg{merDeriv} packages; `"lavaan"` requires the \pkg{lavaan}
 #'   package; `"brms"` requires the \pkg{brms} package (and a working Stan toolchain).
-#' @param conf_level Confidence level for the interval (default `0.95`).
+#' @param conf_level Confidence level for the interval (default `0.95`). Any level
+#'   in `(0, 1)` is accepted, except under `ci_method = "mpl"`, which is calibrated
+#'   at 0.90, 0.95, and 0.99 only (see `ci_method`).
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
 #'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
@@ -332,16 +334,30 @@
 #'   `boot_samples`, and `seed` do not apply) that, like `"npbootstrap"`, returns an
 #'   interval on **every** dataset -- including the near-zero-ICC boundary where the
 #'   two-way Monte-Carlo default aborts -- and covers at or above nominal across the
-#'   pre-registered grid where the incumbents can under-cover (assessed GO-for-opt-in in
-#'   M87). It is deliberately **conservative** (it over-covers, and is wider than the
-#'   Monte-Carlo interval at interior cells), so it is an opt-in, not the default.
+#'   pre-registered grid where the incumbents can under-cover (assessed as
+#'   GO-for-opt-in against that grid). It is deliberately **conservative** (it
+#'   over-covers, and is wider than the Monte-Carlo interval at interior cells), so it
+#'   is an opt-in, not the default.
+#'
 #'   Two constraints follow from its calibration. It is available **only at
-#'   `conf_level = 0.95`** (the level its correction constant is tabulated for; other
-#'   levels abort). And its correction constant is calibrated by simulation over
-#'   `rho in [0.05, 0.9]`, extending below Xiao & Liu's published `rho >= 0.6` fence
-#'   into a near-boundary region that **carries no external oracle** -- there, the
-#'   interval's calibration rests on the package's own simulated coverage. It assumes
-#'   approximately Gaussian data (untested for non-normality).
+#'   `conf_level` 0.90, 0.95, or 0.99** -- the correction constant is calibrated
+#'   separately at each level's own deviance quantile and is never interpolated
+#'   between levels, so any other level aborts. And that constant is calibrated by
+#'   simulation over `rho in [0.05, 0.9]`, extending below Xiao & Liu's published
+#'   `rho >= 0.6` fence into a near-boundary region that **carries no external
+#'   oracle**; there, and at `conf_level = 0.99` throughout, its calibration rests on
+#'   the package's own simulated coverage.
+#'
+#'   Two further characteristics are worth knowing before reporting an endpoint. The
+#'   two-sided interval is **not equal-tailed** -- where rater variance is large
+#'   relative to error and the subject count is high, non-coverage falls almost
+#'   entirely on one side (65 of 66 misses below the interval in one validated cell) --
+#'   so a limit must not be read as a one-sided bound at half the complementary level.
+#'   And at `conf_level = 0.99` with very few raters the interval can be
+#'   **near-vacuous**: median width 0.905 on the `[0, 1]` scale at 2 raters and 40
+#'   subjects. That is the honest cost of a deep tail at minimal rater information,
+#'   not a defect (coverage there is 1.000), but such an interval excludes little.
+#'   It assumes approximately Gaussian data (untested for non-normality).
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
 #'   (default `10000`).
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
@@ -1462,11 +1478,20 @@ icc <- function(
     # there); here rho >= 0 makes it unconditional, so no fence is needed. Fixed-rater
     # numeric agreement is already refused upstream -- an explicit `type = "agreement"`
     # at `abort_fixed_agr_projection()`, otherwise at the `raters != "random"` fence above.
-    if (!isTRUE(all.equal(conf_level, 0.95))) {
+    # conf_level keys the kappa_m slice (M91): the correction is calibrated at its
+    # own deviance quantile per level, so it is not interpolable in alpha and an
+    # uncalibrated level aborts rather than borrowing a neighbour's constant. 0.90
+    # and 0.99 were recalibrated and coverage-validated in M90 (D-017); no level
+    # deeper than 0.99 is authorized -- kappa_corr is still rising at alpha = 0.005
+    # in the boundary cells, so 0.995/0.999 need their own tail-estimability review.
+    mpl_levels <- sort(unique(kappa_m_table$conf_level))
+    if (!any(abs(mpl_levels - conf_level) < 1e-8)) {
       abort_unsupported(c(
-        "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level = 0.95} only.",
-        i = "The kappa_m table is generated for the 95% two-sided interval; for \\
-             another level use {.code ci_method = \"montecarlo\"}."
+        "{.code ci_method = \"mpl\"} is calibrated at {.code conf_level} \\
+         {.val {format(mpl_levels, nsmall = 2L)}} only.",
+        i = "Its kappa_m correction is calibrated separately for each level and is \\
+             not interpolated between them; for another level use \\
+             {.code ci_method = \"montecarlo\"}."
       ))
     }
   }
