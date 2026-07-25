@@ -87,7 +87,7 @@ re-runs at the same `n_rep` against the same floor.
 
 ## Tasks
 
-- [ ] T1: Write and commit the E1–E3 pre-registration into
+- [x] T1: Write and commit the E1–E3 pre-registration into
       `cairn/references/mpl-twoway-random-comparison.md` (mirroring the § M91 block at
       line 433) — cells, floors, `n_rep`, roles, the criterion, and the bracket-max
       shortfall consequence — as a standalone docs commit BEFORE any script runs. Any
@@ -113,6 +113,7 @@ re-runs at the same `n_rep` against the same floor.
 ## Work log
 
 - 2026-07-25: created by /milestone-plan (promotes the M91-review-F1 candidate; plan gate froze three cells — the D1/D2 twin, the worst 0.95 dip, and the largest-κ_m geometry — and chose the bracket-max rule over node-restriction as the shortfall consequence, so no currently-working call breaks).
+- 2026-07-25: T1 done — § M92 pre-registration frozen in `mpl-twoway-random-comparison.md` (E1–E3, floors, criterion, bracket-max consequence + why it departs from § M91's node-restriction for the shipped level); its dated observation carries a python3-only settling directive, mutation-verified to exit 1 when D4's S is changed off-node; 5 generalizing-claim candidates triaged `OUT-repo-analysis` by generated rows; both references checkers green.
 
 ## Decisions
 

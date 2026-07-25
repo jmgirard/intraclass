@@ -527,6 +527,59 @@ D4 also closes the RR03 rec-#9 gap: the sub-grid-floor ρ = 0.02 posture is now
 measured at all three levels (0.991 at 0.90 and 1.000 at 0.99 in M90's C8; 0.996
 here at 0.95).
 
+## M92 pre-registration — off-node S at the shipped conf_level 0.95 (frozen 2026-07-25, BEFORE any M92 run — GP5)
+
+M91's D1–D3 probed interpolated S at 0.90 and 0.99 and confirmed it there. The
+shipped default level was left out: **every M91 cell at 0.95 sits on an `s_grid`
+node**, so `mpl_kappa_lookup`'s linear-in-S rule — the path a user hits at any subject
+count between nodes — still carries no coverage evidence at the level almost every
+call uses — observed 2026-07-25 <!-- check: python3 -c 'import re,sys; t=open("cairn/references/mpl-twoway-random-comparison.md").read(); ss={int(m.group(1)) for m in re.finditer(r"^\| D\d \| \d+ \| (\d+) \| [\d.]+ \| [\d.]+ \| 0\.95 \|", t, re.M)}; sys.exit(0 if ss and ss <= {10,15,20,30,50,100} else 1)' -->.
+M92 closes that asymmetry. Every cell below is at 0.95 and at an off-node S, so all
+three probe interpolation and none is a mixed-role aggregate (M91 finding F1).
+
+**Where interpolation can bite at 0.95** (κ_m from the shipped 0.95 slice,
+`data-raw/m88-kappa-table.rds`). Two distinct failure directions exist and one cell
+cannot cover both, which is why there are three (GP6 — sweep the axis the failure
+mode grows along, here the S-interpolation axis at both ends of the κ_m range):
+
+- the **largest downward step**, R = 10 over S 30→50 (κ_m 0.1858 → 0.1177), where a
+  chord can sit above or below the curve and the error is largest *relative* to the
+  `1 + κ_m` factor that scales the deviance critical value in `mpl_interval`;
+- the **largest κ_m**, R = 2 over S 30→50 (1.2670 → 1.4657), locally concave, so the
+  chord sits below the curve — an under-estimated κ_m narrows the interval, the
+  under-covering direction, and here the absolute error is largest.
+
+**Cells (frozen).** Stress configuration δ = 4, ρ = 0.60 — M90's tightest cells
+(C4/C6) and M91's D1–D3 configuration, so E1 is a controlled twin of D1/D2:
+
+| cell | R | S | δ | ρ | level | floor | n_rep | role |
+|---|---|---|---|---|---|---|---|---|
+| E1 | 3 | 25 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S (between the 20 and 30 nodes); the exact twin of D1 (0.90) and D2 (0.99), completing the level triple at one geometry |
+| E2 | 10 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across the largest 0.95 downward step (−0.068 over S 30→50) |
+| E3 | 2 | 40 | 4.0 | 0.60 | 0.95 | ≥ 0.93 | 1000 | interpolated S across the largest 0.95 κ_m (1.27 → 1.47 over S 30→50), the concave chord-below-curve direction |
+
+**Criterion (GP5 — fixed before results).** Identical in form to § M91: κ_m is taken
+through the **interpolation path under test** (`mpl_kappa_lookup`'s exact linear-in-S
+rule), never a directly-evaluated value. A cell is adequate iff empirical coverage
+clears its floor; the floor is the already-frozen 0.95 value (nominal − 2 pp, § M87
+criterion 1), unchanged from D4. Over-coverage passes (D-014). The verdict reports an
+exact (Clopper–Pearson) 95 % CI per cell, and each cell's `role` is asserted against
+its geometry in the script rather than trusted from the author's label.
+
+**Pre-registered consequence of a shortfall.** A failing cell switches
+`mpl_kappa_lookup` **at conf_level 0.95 only** to a **bracket-max rule**: an off-node
+S takes `max()` of its two bracketing node κ_m values instead of the linear chord.
+That value is ≥ the chord everywhere, so every interpolated interval only ever widens,
+and node lookups are untouched — M91's bit-identical 0.95 node property survives. The
+failing cell then re-runs at the same `n_rep` against the same floor.
+
+This **departs deliberately from § M91's consequence** (restrict the level to exact
+`s_grid` nodes), and the reason is that 0.95 is the shipped default: restricting it
+would turn currently-working calls into aborts, a user-visible regression, where
+bracket-max keeps every subject count working and only widens. The floor is not
+loosened either way, and no evidence here changes 0.90 or 0.99 (GP5; the M68
+fix-the-evidence-never-the-bar lesson). Decided at the M92 plan gate, 2026-07-25.
+
 ## Traces to
 
 - `cairn/references/xiao2013.md` — the primary source (method, Eqs. 1–13; the
