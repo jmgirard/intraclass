@@ -396,3 +396,156 @@ test_that("d_study() and the lavaan engine are untouched by the threading (AC2)"
   expect_identical(formals(mc_interval)$hint, quote(character(0)))
   expect_identical(formals(mc_ci)$hint, quote(character(0)))
 })
+
+# ---- T4/AC3: the GP7 guard -- every method the hint names is ACCEPTED ----------
+# The mapping table in the milestone mirrors icc()'s ci_method fences. Mirroring
+# rots silently: a later fence change would leave the hint pointing at a method
+# that now aborts, which is worse than no hint at all. So for every design in the
+# grid, this asserts icc() genuinely accepts each method the hint names for it --
+# on HEALTHY data, so an abort here means the fence moved, not that the fit is at
+# the boundary.
+
+# Healthy (non-boundary) builders: sigma^2_subject well away from 0.
+bh_ok_oneway <- function(sizes = rep(5L, 20L), seed = 11) {
+  set.seed(seed)
+  n_s <- length(sizes)
+  s <- stats::rnorm(n_s, sd = 1)
+  data.frame(
+    subject = factor(rep(seq_len(n_s), times = sizes)),
+    rater = factor(unlist(lapply(sizes, seq_len))),
+    score = rep(s, times = sizes) + stats::rnorm(sum(sizes), sd = 0.7)
+  )
+}
+
+bh_ok_twoway <- function(n_s = 20L, n_r = 3L, seed = 11) {
+  set.seed(seed)
+  s <- stats::rnorm(n_s, sd = 1)
+  r <- stats::rnorm(n_r, sd = 0.4)
+  y <- outer(s, rep(1, n_r)) +
+    outer(rep(1, n_s), r) +
+    matrix(stats::rnorm(n_s * n_r, sd = 0.7), n_s, n_r)
+  data.frame(
+    subject = factor(rep(seq_len(n_s), times = n_r)),
+    rater = factor(rep(seq_len(n_r), each = n_s)),
+    score = as.numeric(y)
+  )
+}
+
+# Pull the method strings out of a rendered hint.
+bh_named_methods <- function(h) {
+  if (!length(h)) {
+    return(character(0))
+  }
+  all <- c("npbootstrap", "searle", "burch", "mpl")
+  all[vapply(
+    all,
+    function(m) {
+      grepl(paste0("\"", m, "\""), h[["i"]], fixed = TRUE)
+    },
+    logical(1)
+  )]
+}
+
+test_that("every ci_method the hint names is ACCEPTED on that design (AC3, GP7)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Each row carries the predicates icc() computes for that design, by construction.
+  grid <- list(
+    list(
+      lab = "one-way balanced",
+      data = bh_ok_oneway(),
+      args = list(model = "oneway"),
+      pred = list(oneway = TRUE, balanced = TRUE)
+    ),
+    list(
+      lab = "one-way unbalanced",
+      data = bh_ok_oneway(sizes = c(rep(5L, 15L), rep(3L, 5L))),
+      args = list(model = "oneway"),
+      pred = list(oneway = TRUE, balanced = FALSE)
+    ),
+    list(
+      lab = "two-way random agreement",
+      data = bh_ok_twoway(),
+      args = list(type = "agreement"),
+      pred = list(type = "agreement", type_supplied = TRUE)
+    ),
+    list(
+      lab = "two-way random, unset type",
+      data = bh_ok_twoway(),
+      args = list(),
+      pred = list()
+    )
+  )
+
+  for (row in grid) {
+    h <- do.call(bh_hint, row$pred)
+    methods <- bh_named_methods(h)
+    expect_gt(length(methods), 0L) # every row above SHOULD get a hint
+    for (m in methods) {
+      args <- c(
+        list(
+          row$data,
+          quote(score),
+          quote(subject),
+          quote(rater),
+          ci_method = m
+        ),
+        row$args
+      )
+      if (m == "npbootstrap") {
+        args$boot_samples <- 50L
+        args$seed <- 1L
+      }
+      # Fold the row label into the compared value: expect_no_error() takes no
+      # `info` in 3e, and a bare failure would not say WHICH design/method broke.
+      status <- tryCatch(
+        {
+          suppressWarnings(suppressMessages(do.call(icc, args)))
+          "accepted"
+        },
+        error = function(e) paste0("ABORTED ", class(e)[[1]])
+      )
+      expect_identical(
+        paste(row$lab, "->", m, ":", status),
+        paste(row$lab, "->", m, ": accepted")
+      )
+    }
+  }
+})
+
+test_that("designs the hint stays silent on are the ones that would abort (AC3/AC4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # The converse half of the guard: where the hint says nothing, every opt-in method
+  # really does abort -- so silence is correct, not merely cautious.
+  d <- bh_ok_twoway()
+  expect_length(bh_hint(raters = "fixed"), 0L)
+  for (m in c("mpl", "npbootstrap", "searle", "burch")) {
+    expect_error(
+      suppressWarnings(suppressMessages(
+        icc(d, score, subject, rater, raters = "fixed", ci_method = m)
+      )),
+      class = "intraclass_unsupported"
+    )
+  }
+
+  # Explicit consistency: mpl has no ICC(C,.) interval.
+  expect_length(bh_hint(type = "consistency", type_supplied = TRUE), 0L)
+  expect_error(
+    suppressWarnings(suppressMessages(
+      icc(d, score, subject, rater, type = "consistency", ci_method = "mpl")
+    )),
+    class = "intraclass_unsupported"
+  )
+
+  # An uncalibrated conf_level.
+  expect_length(bh_hint(conf_level = 0.80), 0L)
+  expect_error(
+    suppressWarnings(suppressMessages(
+      icc(d, score, subject, rater, ci_method = "mpl", conf_level = 0.80)
+    )),
+    class = "intraclass_unsupported"
+  )
+})
