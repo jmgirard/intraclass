@@ -20,9 +20,9 @@ before any run (GP5) into `cairn/references/mpl-twoway-random-comparison.md`; a
 seeded `data-raw/` sweep script + committed fixtures, per-cell `role` asserted against
 geometry and the seed span asserted disjoint from M91's; the frozen verdict APPLIED,
 including the shortfall consequence; the `R/ci-mpl.R` interpolation comment pointed at
-the note **without restating figures**; the κ_m test pin; both affected ROADMAP
-candidate rows resolved; and a committed script that settles the no-restated-figures
-rule mechanically.
+the note **without restating figures**; the κ_m test pin; and both affected ROADMAP
+candidate rows resolved (amended 2026-07-25: the committed no-restated-figures checker
+this promised was deleted at T12 — see the work log).
 
 **Out:** **all exported documentation of the result** — `@param ci_method` /
 `@param conf_level` in `R/icc.R`, `man/`, `NEWS.md`, `README.md` → **M94**, which owns
@@ -52,18 +52,24 @@ candidate row.
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [ ] AC5 (GP7, re-amended 2026-07-25 after review pass 4): **no file M92 changes
-      draws a conclusion about what the cells establish.** Concretely: (a) `git diff
-      main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md`, `README.md`; (b) every
-      figure about M92's cells in a changed file is transcription matching
-      `data-raw/m92-interp-sweep.rds`, or is explicitly labelled as run 1 inside the
-      two-run account; (c) the note's § M92 verdict contains the table, the two-run
-      GP5 account and the one-sentence verdict, and states **no** claim about what the
-      corpus does or does not isolate, no cross-level comparison, and no
-      characterization of one-sidedness. Review verifies (c) by reading every
-      declarative sentence in the changed files against the fixture. Why this form:
-      the previous amendment checked only figures, and a **false negative claim** is
-      not a figure — that gap let the pass-3 defect survive into pass 4.
+- [ ] AC5 (GP7, re-amended 2026-07-25 after review pass 5): **every sentence M92
+      authors about its own work is transcription from a committed fixture or the frozen
+      rule applied, and it POINTS at the review record rather than summarizing it.**
+      Concretely: (a) `git diff main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md`,
+      `README.md`; (b) every figure about M92's cells in a changed file matches
+      `data-raw/m92-interp-sweep.rds`, or is labelled run 1 inside the two-run account;
+      (c) no changed file outside `cairn/milestones/` summarizes what an M92 review pass
+      found, what a deleted passage used to say, what another file does or does not
+      contain, or what the containing comment/section does or does not itself claim — a
+      bare pointer (finding id, file path, section name) is not a summary; (d) the note's
+      § M92 verdict is the table, the two-run GP5 account and the verdict, with no
+      further paragraph. Review verifies (c) and (d) by reading every declarative
+      sentence in the changed files. What this changes, stated both ways: it TIGHTENS
+      the axis pass 5 failed on — claims about the review record and about neighbouring
+      files, which every earlier amendment left uncovered and which twice falsified a
+      file's own self-description — and it LOOSENS the pass-4 ban on cross-level and
+      isolation claims, which as written also forbade correcting `R/ci-mpl.R`'s stale
+      pre-M92 claim that 0.95 was unconfirmed.
 
 - [x] AC6: the ROADMAP "off-node S coverage probe at 0.95" candidate is absorbed, and
       the "κ_m monotone envelope / smoother" candidate is updated with this
@@ -88,7 +94,7 @@ untouched) and re-runs that cell at the same floor.
 - AC2 → T2
 - AC3 → T2, T3
 - AC4 → T4
-- AC5 → T10, T12
+- AC5 → T10, T12, T13
 - AC6 → T6, T10
 - AC7 → T3, T4, T5, T6, T10, T12
 
@@ -122,6 +128,9 @@ untouched) and re-runs that cell at the same floor.
       the note's three conclusion-drawing bullets (where the pass-3 and pass-4 defects
       both lived), delete the checker and every pointer to it, and re-amend AC5 to
       forbid conclusions rather than only stale figures.
+- [ ] T13 (review pass 5): delete the record-summarizing and self-describing prose at
+      every site rather than correct it (P5-1 through P5-5), strip the inference from the
+      ROADMAP row, and carry F6 to a candidate row.
 
 ## Work log
 
@@ -158,6 +167,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: self-check of that replacement caught a further miscount before commit — the first rewrite said interpretive claims in the note "were falsified at two separate reviews", but only pass 4 falsified claims in that section (P3-1 lived in `R/icc.R`). Reduced to a statement carrying no count or scope claim at all. Every summary sentence written this milestone that carried a number or a scope has been wrong; the working rule is now to not write them.
 - 2026-07-25: pass-5 diff-bug lens reported after the Review section was written and returned seven findings; six verified. AC5 un-ticked, status -> in-progress, merge approval NOT used. The decisive one is P5-6: my "correction" of the note's history sentence turned a TRUE statement false — pass 1's F1 did falsify claims in § M92 verdict, so "two separate reviews" was right and "only pass 4" is wrong — and the work-log entry recording that correction claimed credit for catching an error that did not exist. Also P5-1 (the stripped conclusion still live in the ROADMAP row, with `R/ci-mpl.R` now pointing at it), P5-2/P5-3 (two more false or self-falsifying sentences in the note), P5-5 (Scope promises the deleted checker), P5-7 (the AC5 re-amendment loosened two axes while I described it as a tightening). P5-4 needs a maintainer ruling on what AC5(c) bars.
 - 2026-07-25: maintainer directed M92 to a fresh session. Handoff block appended; no further changes made in this session. Supersedes the 2026-07-25 entry beginning "self-check of that replacement", which is false per P5-6: pass 1's F1 falsified claims in § M92 verdict, so the wording that entry replaced was correct and its replacement was the error.
+- 2026-07-25 (fresh session, resumed at `/milestone-implement`): substantive plan amendment at the question gate — AC5 re-amended and the Scope **In** clause promising the deleted checker removed (P5-5). Why: AC5 as written is unsatisfiable, and I verified the bind rather than argued it — the pre-M92 `R/ci-mpl.R` comment asserted "NOT confirmed at 0.95", which this milestone's evidence falsifies, so leaving it ships a false comment while correcting it is "a conclusion about what the cells establish"; AC6 puts the candidate row in the same bind. The new AC5 bans summarizing the review record, a deleted passage, another file's contents, or the containing section's own claims (a bare pointer is not a summary) — the class pass 5 failed on and every earlier amendment left uncovered. Stated to the maintainer as a tightening on that axis and a deliberate LOOSENING of pass 4's cross-level/isolation ban, per P5-7. Maintainer also ruled the note's level-triple verdict sentence stays (P5-4's cross-level half). T13 added; Coverage AC5 → T10, T12, T13. `cairn_budget` 128 → 137 of 149 lines.
 ## Decisions
 
 
