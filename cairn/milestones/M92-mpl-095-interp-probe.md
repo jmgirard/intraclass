@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -171,6 +171,8 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: T13 in progress — checkpoint, NOT done: the edits are in but the full suite and `devtools::check()` have not reported yet, so the task stays unticked. Deleted rather than corrected at six sites: the note's "Nothing further is claimed here" paragraph (P5-2, P5-3) and its "Two facts" paragraph (P5-4); the § M91 clause about what the superseded sentence used to carry, keeping the D-045 supersede mark itself; `R/ci-mpl.R`'s self-describing paragraph, left as a bare pointer to the fixtures and the note; the review-record summary and the P3-4 parenthetical in the test comment; and the "and of four other sites" count in the generator header. ROADMAP envelope row (P5-1) reduced to transcription plus a forward promotion rule, and F6 carried to its own candidate row (search-first: no overlapping candidate, archive row or D-entry). Triage ledger orphan row removed. Half of P5-6 was already superseded at `a4d8d04`; its other half sits in the review-owned `## Review` section, which implement does not write — flagged for review, not edited.
 - 2026-07-25: verified first-hand rather than inherited, because superlatives and universals are where this milestone keeps failing — the most negative 0.95 step IS (R=10, S 30→50, −0.0681); the slice maximum IS 1.6245 at (2, 100); the three pinned literals ARE the fixture's κ_m column; the generator reimplements the rule offline (`stats::approx`, not `mpl_kappa_lookup`); zero of 3000 reps clamp to [0,1] in either M92 run (the F6 row's "latent" claim); and "every earlier 0.95 cell sat ON a node" holds across the committed M87 (n_s 10/20/50), M90 (no 0.95 rows) and M91 (one, on-node) fixtures. The one enforcement claim kept in `R/ci-mpl.R` was mutation-verified, not argued: replacing the interpolation with a nearest-two-node mean reds `test-ci-mpl.R`, and only through the non-midpoint S = 22 pin — the midpoint literals stayed green, which is F5's fix earning its place. The table half of that claim is arithmetic (the literals derive from the (3,20)/(3,30) nodes), not mutation-tested; recorded as the weaker of the two.
 - 2026-07-25: T13 done; gate clean — `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` Status OK 0/0/0 (2m 40.4s); full suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the pre-existing glmmTMB convergence warnings on the multilevel path); 0 lints; air clean; `document()` no-diff; pkgdown clean; both references checkers and `cairn_validate` green (weight caps PASS, record density OK, dangling-id advisories unchanged at 321 — the new F6 candidate row adds none). Status -> review for a sixth pass. One reading recorded for review rather than left to guess: three `earlier draft` marks survive the sweep — M91's at the note's line 458 (predates M92), M92 T6's at line 553, and the generator header's. All three are D-045 corrections IN PLACE, which D-045 requires be marked; AC5(c) names "a deleted passage", and a corrected passage is the other side of exactly that D-045 split, so they are outside (c) as written. If review reads (c) wider, each is a one-line trim.
+- 2026-07-25: review pass 6 FAILED at AC5, status -> in-progress; merge approval never requested and no marker written. What failed: P6-1 (scored 92) — `R/ci-mpl.R:226-229` claims "a change to the table or to this rule reds a test"; the rule half holds, the table half is false and I confirmed it by mutation, shifting all 152 non-literal-pinned `kappa_m_table` cells by +0.5 and getting FAIL 0 / PASS 172. It entered at `c24ffac`, in prose written to fix pass 5's prose. AC1, AC2, AC3, AC4, AC6 and AC7 re-verified with fresh evidence this pass and stay ticked; AC5 stays un-ticked. Two lenses returned zero findings and every mechanical check passed, including CI 9/9 on the review SHA `341a0de`. Two findings scored below 80 are logged in the Review section as maintainer wording calls rather than author errors: the D-045 correction-mark collision (F-B, 42 — its charge that D-045 is a fabricated id is refuted there) and three verified-true cross-file claims, one of which sits inside the account AC5(d) blesses (F-C, 48). Thrash: this is far past the rule's third trip, so no self-directed retry is queued — routing to the maintainer.
+- 2026-07-25: the P6-1 root cause, recorded because it is the transferable part — at T13 I checked one half of that conjunction by mutation and ARGUED the other half from arithmetic, writing it down as "not mutation-tested ... the weaker of the two". Both halves were falsifiable by the same one-command method. An enforcement claim gets mutation-tested or it does not get written; reasoning about a guard instead of firing it is how pass 4's checker shipped too.
 ## Decisions
 
 
@@ -619,3 +621,109 @@ the fixtures — including prose written to correct the previous pass's prose, a
 including a correction that falsified a true sentence (P5-6). Sentences carrying a count,
 a universal, or a scope claim are where it lands. Pointing at the record beats
 summarizing it.
+
+## Review — pass 6 (2026-07-25): FAILED at AC5; one actioned finding, confirmed by mutation
+
+`main` unmoved (0 commits behind at review). Three fresh-context lenses + an independent
+scorer. **Blame-history [S]: zero findings. Prior-review [S]: zero findings**
+(`gh api .../pulls/comments?per_page=1` returned `[]`, so the archived and in-file
+`## Review` sections were the evidence base). **Diff-bug [O]: three findings**, scored
+92 / 42 / 48. Every lens re-derived rather than trusted the record, as pass 3 established.
+
+**AC1 (GP5).** VERIFIED. `da10025` (commit time 1784987723) precedes the first result
+`2b984af` (1784987888). The frozen bar is byte-identical `da10025..HEAD` on two separate
+extractions: the cell rows reduced to their bar fields (cell, R, S, δ, ρ, level, floor,
+`n_rep`) `diff` empty, and the § M92 criterion + shortfall-consequence block (21 lines)
+`diff` empty. The only changes in that section since freeze are E3's rationale prose and
+its role-cell prose — the documented T6 correction.
+
+**AC2.** VERIFIED against the shipped fixture: `n_s` 25/40/40 all off `s_grid`, every
+`role` is `interp`, `verdict[["0.95"]]$interp_ok` is a logical TRUE over `interp_cells`
+E1/E2/E3, `meta$seed_base` 20920725. The generator's role `stopifnot`
+(`data-raw/m92-mpl-095-interp-sweep.R:130-136`) asserts role against geometry, that no
+cell sits on a node, and that every cell is at 0.95.
+
+**AC3 (GP6).** VERIFIED: E1 0.967 [0.9540, 0.9772]; E2 0.944 [0.9279, 0.9574]; E3 0.999
+[0.9944, 1.0000]; every floor 0.93, every `n_rep` 1000, `rule` `linear`, `all(adequate)`
+TRUE, zero failed cells.
+
+**AC4.** VERIFIED: `git diff origin/main..HEAD -- R/` filtered to non-comment, non-blank
+lines is empty.
+
+**AC5 (GP7).** **FAILED** — finding P6-1 below. The two mechanical sub-clauses do pass and
+are recorded here because they are what the next pass need not re-derive: (a) the exported-doc
+diff is empty for `R/icc.R`, `man/`, `NEWS.md`, `README.md`, `README.Rmd`; (b) all three
+rows of the note's § M92 table match the fixture on κ_m, coverage, Clopper–Pearson bounds,
+floor and miss split, and the run-1 triple 0.9680 / 0.9530 / 1.0000 occurs at exactly one
+site in the tree outside the milestone file — note line 617, inside the labelled two-run
+account. (d) also holds: nothing follows the two-run account before `## Traces to`.
+What fails is (c) and the headline, at a site none of the mechanical checks look at.
+
+**AC6.** VERIFIED: the "off-node S coverage probe at 0.95" row is absent from
+`cairn/ROADMAP.md` (absorbed at the plan gate), and the envelope/smoother row points at
+§ M92 of the note rather than copying figures.
+
+**AC7.** VERIFIED fresh at review: `devtools::check(env_vars = c(NOT_CRAN = "false"),
+manual = FALSE)` Status OK, 0 errors / 0 warnings / 0 notes (2m 2.9s); full suite at
+`NOT_CRAN=true CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the pre-existing glmmTMB
+convergence warnings on the multilevel path); `lintr::lint_package()` 0 lints; `air format
+--check .` clean; `devtools::document()` no-diff; `pkgdown::check_pkgdown()` no problems;
+`enumerate-generalizing-claims.py --check` and `check-reference-observations.py` both
+green. CI 9/9 green on the review SHA `341a0de`, confirmed against the PR head oid.
+
+**Consistency gate.** `cairn_validate.py` exit 0, every check PASS. `cairn/DESIGN.md`
+unchanged, so `cairn_impact` is a clean no-op. Profile `consistency-gate` slot run in full
+above; no NEWS entry is owed because no user-visible behaviour changed.
+
+### Actioned (score >= 80)
+
+**P6-1 (92) — `R/ci-mpl.R:226-229`: the GP7 comment claims a test guard that does not
+exist for most of the table.** Verbatim: "`test-ci-mpl.R` pins the three constants M92
+validated -- kappa_m is table-derived and does not move when the sweep is re-run -- so a
+change to the table or to this rule reds a test rather than silently detaching the code
+from its coverage evidence." The "or to this rule" half is true. The "a change to the
+table ... reds a test" half is false: **confirmed by mutation here — shifting all 152
+`kappa_m_table` cells not pinned by a test literal by +0.5 leaves `test-ci-mpl.R` at
+FAIL 0 / PASS 172.** Ten cells are literal-pinned, all at 0.95. The sentence is neither
+transcription from a fixture nor the frozen rule applied, so it fails AC5's headline, and
+it asserts what another file will do, past (c)'s bare-pointer carve-out. `test-ci-mpl.R`
+says the opposite of it three lines from the pin it describes. The sentence entered at
+`c24ffac` — prose written to fix pass 5's prose, which is the pattern, not the sentence.
+Not fixed in this pass: a criterion failure returns the milestone to `in-progress` and the
+thrash count is long past the rule's third trip, so the remedy is the maintainer's call.
+
+### Logged, not actioned (score < 80 — surfaced, never silently dropped)
+
+- **F-B (42)** — the three surviving "an earlier draft said ..." correction marks
+  (`cairn/references/mpl-twoway-random-comparison.md:552-558`,
+  `data-raw/m92-mpl-095-interp-sweep.R:29-30`). They match (c)'s "what a deleted passage
+  used to say" literally while D-045 requires a current-knowledge correction be marked in
+  place. Both the scorer and the blame-history lens read this as a wording collision for
+  the maintainer, not an author error; the T13 work log routed it that way rather than
+  asserting an answer. One part of the finding is refuted: it charged that D-045 is a
+  fabricated id. D-045 is the cairn plugin's decision "Tracking files split into history
+  and current knowledge; current-knowledge records are corrected in place, marked", cited
+  seven times in the rulebook this session obeys. The residue is real but small — a bare
+  `D-045` is ambiguous in a repo whose own log runs D-001..D-017.
+- **F-C (48)** — three cross-file content claims, each independently verified TRUE
+  (`...comparison.md:620-621` on the seed guard; `cairn/ROADMAP.md:28`'s new F6 row;
+  `tests/testthat/test-ci-mpl.R:636-637` on the offline reimplementation). One of the
+  three sits inside the two-run account (d) explicitly blesses, so reading (c) at full
+  strictness makes (c) contradict (d). That is a defect in AC5's wording, not in the prose.
+- Three sub-threshold notes from the diff-bug lens, each verified and left alone: note
+  `:615`'s "bit-for-bit" overstates M92's own seed defect (999 of 1000 for E1, and the
+  r->r+1 offset is given in the same sentence, so a reader can derive it);
+  `test-ci-mpl.R:677`'s "every non-midpoint production lookup" is over-literal (exact-node
+  lookups are non-midpoint and unchanged); and the seed guard's "recomputed from ITS
+  committed constants" sits beside those constants as literals — logged sub-threshold at
+  pass 2 as well.
+
+### What this pass establishes about the failure, and what it does not
+
+The measurement is untouched for the sixth pass running, and this pass is the first where
+two of three lenses and every mechanical check came back clean. The one failure is again a
+sentence authored about the work rather than a result — and its proximate cause is on the
+record: at T13 the same claim was reasoned about instead of tested, and written down as
+"arithmetic ... not mutation-tested; recorded as the weaker of the two". The mutation that
+falsifies it takes one `Rscript` call. Both halves of that sentence were checkable by the
+same method, one half was checked, the other was argued.
