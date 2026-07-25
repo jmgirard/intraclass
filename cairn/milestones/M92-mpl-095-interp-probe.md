@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -137,6 +137,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: T7/T8 done, gate re-run clean (check Status OK 0/0/0; tests FAIL 0 / PASS 4213; 0 lints; air clean; document() no-diff; pkgdown clean; both references checkers + cairn_validate green). Status -> review for a second pass; AC5 stays unticked until review re-verifies it against the new fixture.
 - 2026-07-25: review pass 2 FAILED at AC5, status -> in-progress (trip 2 of the 3 the thrash rule allows). What failed: F-A — `R/icc.R`/`man/icc.Rd` cite E2's run-1 miss split 34/13 against the fixture's 42/14; F-B — `tests/testthat/test-ci-mpl.R:642-643` cites run-1 coverages 0.968/0.953/1.000 against 0.967/0.944/0.999; F-C — the pass-2 Review entry ticked AC5 while certifying a grep sweep that in fact returns F-A and F-B. Root cause across all three trips is restating run-specific figures in scattered prose; the fix removes the restatements rather than correcting them again.
 - 2026-07-25: T9 done. F-A: dropped the second miss-split figure from `@param ci_method` entirely — it existed only to support the rater-count attribution F2 already removed, so with that gone it earned nothing and was pure staleness surface; the qualitative caveat and M91's stable 65-of-66 illustration remain. F-B: dropped the coverage triple from the test comment and pointed it at the note and fixture, with an in-place note saying why restating them is the defect. F-C: replaced the hand-written grep with a mechanical sweep over `git ls-files` x every formatting variant of each superseded figure (19 variants x 129 tracked files, excluding the note, this record and the ledger, which are the three places run-1 legitimately appears) — CLEAN, plus a converse check that the run-2 figures are present in the note. First pass of that sweep also surfaced why the hand greps kept failing: `1.000` matches M91's D3, M91's near-vacuous cell and a README bound, so it is not a discriminating token and was dropped from the probe set.
+- 2026-07-25: T9 gate clean (check Status OK 0/0/0; tests FAIL 0 / PASS 4213; 0 lints; air clean; document() no-diff; pkgdown clean; both references checkers + cairn_validate green). Status -> review for a third pass; AC5 stays unticked until review re-verifies it.
 ## Decisions
 
 
