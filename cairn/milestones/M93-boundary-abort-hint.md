@@ -97,7 +97,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       `R/ci-montecarlo.R:54`, `R/ci-montecarlo.R:131` and `R/ci-bootstrap.R:56` that
       reproduction actually fires, and log it — M84 showed an engine point-fit can
       crash first and leave a downstream guard unreachable.
-- [ ] T2: Add the internal hint builder — a pure function of the fence predicates,
+- [x] T2: Add the internal hint builder — a pure function of the fence predicates,
       returning a possibly-empty character vector of `i =` bullets — with unit tests
       covering every row of the mapping table, including the empty-hint designs.
 - [ ] T3: Thread the hint from `icc()` into `mc_ci()`/`mc_components()`/`rmvn()` as an
@@ -113,6 +113,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: created by /milestone-plan (promotes the design-aware boundary-abort-hint candidate; plan gate confirmed D-012's fence bites only the fallback DEFAULT, not a message, and scoped engine-stage aborts out pending T1's reachability finding).
 - 2026-07-25: implement gate — hint names each qualifying method with its D-012 one-line character (not a bare list, not a single recommendation); unbalanced one-way is worded as availability, not as "succeeds where the default aborts", since D-012's 0-abort evidence is balanced-only.
 - 2026-07-25: T1 reachability finding — of the three planned abort sites, `R/ci-montecarlo.R:124` (non-finite draws) fires on 21/40 two-way and 19/40 one-way near-zero datasets, `R/ci-montecarlo.R:43` (non-finite covariance) on 1/40, and `R/ci-bootstrap.R:48` on 0/90 across six boundary geometries. Site C is reachable only by degenerate data (σ²_e = 0, all-identical scores), where npbootstrap/searle/burch/mpl and montecarlo all abort too.
+- 2026-07-25: T2 — `R/boundary-hint.R` adds the pure `boundary_method_hint()`; unit tests cover every mapping row plus the empty-hint designs, incl. the unbalanced+numeric-`unit` case (npbootstrap aborts there, so no hint) and the level set read from `kappa_m_table`.
 - 2026-07-25: gated amendment — AC2 and Scope narrowed to the two reachable Monte-Carlo sites; `R/ci-bootstrap.R:56` moved to Out with its evidence, and its misleading `montecarlo` remedy carried out as a candidate row.
 
 ## Decisions

@@ -174,3 +174,105 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
     )
   }
 })
+
+# ---- T2/AC2/AC4: the hint builder, every row of the mapping table -------------
+# boundary_method_hint() is a PURE function of the fence predicates, so it is
+# exercised directly here; the AC3 grid below then proves the methods it names are
+# genuinely accepted by icc() end to end.
+
+bh_hint <- function(...) {
+  defaults <- list(
+    oneway = FALSE,
+    multilevel = FALSE,
+    replicates = FALSE,
+    raters = "random",
+    balanced = TRUE,
+    type = c("agreement", "consistency"),
+    type_supplied = FALSE,
+    conf_level = 0.95,
+    unit = c("single", "average")
+  )
+  do.call(boundary_method_hint, utils::modifyList(defaults, list(...)))
+}
+
+test_that("balanced one-way is hinted at all three one-way methods (AC2)", {
+  h <- bh_hint(oneway = TRUE, balanced = TRUE)
+  expect_length(h, 1L)
+  expect_named(h, "i")
+  for (m in c("searle", "burch", "npbootstrap")) {
+    expect_match(h[["i"]], m, fixed = TRUE)
+  }
+  expect_no_match(h[["i"]], "mpl", fixed = TRUE)
+})
+
+test_that("unbalanced one-way names npbootstrap only, as AVAILABLE not boundary-proof (AC2)", {
+  h <- bh_hint(oneway = TRUE, balanced = FALSE)
+  expect_length(h, 1L)
+  expect_match(h[["i"]], "npbootstrap", fixed = TRUE)
+  expect_no_match(h[["i"]], "searle", fixed = TRUE)
+  expect_no_match(h[["i"]], "burch", fixed = TRUE)
+  # D-012's 0-abort evidence is balanced-only, so the unbalanced wording must not
+  # borrow the stronger "where the default cannot" claim (implement gate 2026-07-25).
+  expect_match(h[["i"]], "available", fixed = TRUE)
+  expect_no_match(h[["i"]], "default cannot", fixed = TRUE)
+  # ...and the balanced wording DOES make that claim, so the two are distinguishable.
+  expect_match(
+    bh_hint(oneway = TRUE, balanced = TRUE)[["i"]],
+    "default cannot",
+    fixed = TRUE
+  )
+})
+
+test_that("unbalanced one-way with a numeric unit gets NO hint (AC3/AC4)", {
+  # npbootstrap aborts on a numeric `unit` when unbalanced (its SB pole is not
+  # guaranteed interior), so naming it would point at another abort.
+  expect_length(bh_hint(oneway = TRUE, balanced = FALSE, unit = list(3)), 0L)
+  expect_length(
+    bh_hint(oneway = TRUE, balanced = FALSE, unit = list("single", 3)),
+    0L
+  )
+  # Balanced one-way is unaffected -- that fence has no numeric-unit restriction.
+  expect_length(bh_hint(oneway = TRUE, balanced = TRUE, unit = list(3)), 1L)
+})
+
+test_that("the balanced two-way random agreement cell is hinted at mpl (AC2)", {
+  h <- bh_hint()
+  expect_length(h, 1L)
+  expect_match(h[["i"]], "mpl", fixed = TRUE)
+  # An unset `type` still resolves: icc() narrows the default to agreement for mpl.
+  expect_length(
+    bh_hint(type = c("agreement", "consistency"), type_supplied = FALSE),
+    1L
+  )
+  expect_length(bh_hint(type = "agreement", type_supplied = TRUE), 1L)
+})
+
+test_that("designs with no boundary-robust opt-in get NO method hint (AC4)", {
+  # Each of these is a genuine fence: naming any method here would be an abort.
+  expect_length(bh_hint(raters = "fixed"), 0L)
+  expect_length(bh_hint(multilevel = TRUE), 0L)
+  expect_length(bh_hint(replicates = TRUE), 0L)
+  expect_length(bh_hint(type = "consistency", type_supplied = TRUE), 0L)
+  expect_length(
+    bh_hint(type = c("agreement", "consistency"), type_supplied = TRUE),
+    0L
+  )
+  expect_length(bh_hint(balanced = FALSE), 0L)
+  # An mpl-shaped design at an UNCALIBRATED conf_level: the kappa_m correction is
+  # calibrated per level and never interpolated across levels (M91/D-017).
+  expect_length(bh_hint(conf_level = 0.80), 0L)
+  expect_length(bh_hint(conf_level = 0.975), 0L)
+  # A cluster or replicate facet dominates every other predicate, one-way included.
+  expect_length(bh_hint(oneway = TRUE, multilevel = TRUE), 0L)
+  expect_length(bh_hint(oneway = TRUE, replicates = TRUE), 0L)
+})
+
+test_that("the hinted conf_level set is READ from the shipped table, not hardcoded (AC4)", {
+  # Every calibrated level hints; the guard is that this tracks the table, so adding
+  # or removing a level cannot leave the hint claiming a level that no longer exists.
+  for (cl in sort(unique(kappa_m_table$conf_level))) {
+    expect_length(bh_hint(conf_level = cl), 1L)
+  }
+  # A level strictly between two calibrated ones is still refused.
+  expect_length(bh_hint(conf_level = 0.92), 0L)
+})
