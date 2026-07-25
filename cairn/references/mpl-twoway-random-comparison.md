@@ -11,7 +11,7 @@ balanced-complete two-way random absolute-agreement / Gaussian / `conf_level = 0
 (`data-raw/m86-mpl-lib.R`, `data-raw/m86-mpl-validate.R`) against
 `xiao2013.md` (the named primary source, IP1). M87 appends its pre-registration,
 comparison sweep, and verdict; M90 appends the conf_level 0.90 / 0.99
-pre-registration (RR03/D-017, frozen 2026-07-24).
+pre-registration and GO verdict (RR03/D-017, frozen 2026-07-24).
 Pagination: —.
 Extraction: derived — no external source of its own, only as current as its
 inputs (`xiao2013.md`, verified 2026-07-19/M71) and the committed harness, none

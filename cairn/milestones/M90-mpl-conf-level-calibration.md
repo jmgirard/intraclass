@@ -187,3 +187,25 @@ All measured outcomes clear their projected thresholds; no shortfall.
 tolerance" clause was sent back (mis-specified — scan→top-k is a bias correction,
 not a consistency check) and gate-amended to the real internal validation; single
 bounce, AC2–AC10 unaffected.
+
+**Consistency gate:** `cairn_validate` exit 0 (binding criteria, coverage
+complete, scaffold, roadmap↔disk all PASS); `enumerate-generalizing-claims --check`
++ `check-reference-observations` green; `devtools::document()` no diff; no `R/` or
+`DESIGN.md` change (so `cairn_impact` no-ops; full R CMD check delegated to PR #97
+cross-platform CI, required green before merge). PR #97 format-check initially
+failed (new `data-raw/*.R` un-air-formatted) → `air format` applied, verdict
+re-runs identically, pushed.
+
+**Independent 3-lens review + scorer:** diff-bug [O] — no defects (all 3 scripts
+verified correct incl. the `kappa_corr_draws`≡`mpl_kappa_corr` mirror run live at
+both α; every note number matches the fixtures). blame-history [S] — method
+fidelity + decisions consistent; 1 finding. prior-review [S] — zero regressions
+(M86-F1 gates green, M86-F2 κ_m recalibrated per level, PR probe empty). Two
+findings scored:
+- **F1 (84, actioned+fixed):** the note's Provenance line (l.13) named only M90's
+  pre-registration, omitting the verdict section M90 also appended (M72
+  stale-summary pattern) → corrected to "pre-registration and GO verdict".
+- **F2 (34, below threshold — logged):** `m90-mpl-coverage-sweep.R:83` per-rep seed
+  overlaps RNG state across adjacent 0.99 cells (C1 r2000 ≡ C2 r1000); result-neutral
+  (within-cell seeds distinct, per-cell coverage independent) — cosmetic, in a
+  data-raw research script; not actioned.
