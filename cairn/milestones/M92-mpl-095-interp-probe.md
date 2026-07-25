@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -46,7 +46,7 @@ levels · re-calibrating any κ_m value → M90's tables are frozen inputs · of
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [x] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
+- [ ] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
       `R/ci-mpl.R`'s interpolation comment, the `@param ci_method`/`conf_level` text,
       and the comparison note — matches what the shipped fixture carries, with a
       test pinning the property the code relies on.
@@ -132,6 +132,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: T8 done (F3) — generator header now states E3 is a large-kappa_m CONCAVE bracket and names the actually-larger (R=2, S 50->100) bracket and the 1.6245 slice maximum, with the correction dated.
 - 2026-07-25: also fixed three sub-80 findings opportunistically while editing the same lines, each verified true first and each noted as such rather than folded in silently — F2 (68): `@param ci_method` no longer attributes the one-sidedness difference to rater count, since the two cited cells differ in R, S and level together; F4 (78): "same evidential footing" -> the interpolated path is coverage-CHECKED at each level at a handful of geometries, while nodes are individually CALIBRATED; F5 (62): added a non-midpoint pin (R=3, S=22 -> 0.6624794) plus an explicit refutation that the value equals the bracket mean, so the test now discriminates any bracket-symmetric rule, not just bracket-max. F6 (35) deliberately left alone — a repo-wide convention inherited from M91's generator, out of M92's scope.
 - 2026-07-25: T7/T8 done, gate re-run clean (check Status OK 0/0/0; tests FAIL 0 / PASS 4213; 0 lints; air clean; document() no-diff; pkgdown clean; both references checkers + cairn_validate green). Status -> review for a second pass; AC5 stays unticked until review re-verifies it against the new fixture.
+- 2026-07-25: review pass 2 FAILED at AC5, status -> in-progress (trip 2 of the 3 the thrash rule allows). What failed: F-A — `R/icc.R`/`man/icc.Rd` cite E2's run-1 miss split 34/13 against the fixture's 42/14; F-B — `tests/testthat/test-ci-mpl.R:642-643` cites run-1 coverages 0.968/0.953/1.000 against 0.967/0.944/0.999; F-C — the pass-2 Review entry ticked AC5 while certifying a grep sweep that in fact returns F-A and F-B. Root cause across all three trips is restating run-specific figures in scattered prose; the fix removes the restatements rather than correcting them again.
 ## Decisions
 
 
@@ -280,7 +281,8 @@ table-derived, not run-derived.
 **AC4** — unchanged and re-verified: `git diff main..HEAD -- R/` filtered to non-comment
 lines is still empty.
 
-**AC5 (GP7)** — NOW VERIFIED, but only after a correction found in this pass. Sweeping
+**AC5 (GP7)** — **FAILED** (see the pass-2 findings below; this entry's own sweep claim
+is finding F-C). The correction described here was real but incomplete. Sweeping
 every site again turned up one the fix pass missed: `cairn/ROADMAP.md`'s envelope
 candidate row still carried run-1's 0.9530 / 1.0000 and the "two independent passes"
 claim F1 had falsified. Corrected in place and marked (ROADMAP is current knowledge,
@@ -298,7 +300,42 @@ CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the same pre-existing glmmTMB wa
 0 lints; air clean; `document()` no-diff; `pkgdown::check_pkgdown()` clean; both
 references checkers green. `cairn_validate` exit 0, every check PASS.
 
-**Honest note on this pass.** AC5 failed at pass 1 and required a further correction
-found during pass 2's own evidence sweep — the same "a site was left behind" shape as
-finding F3. The mechanical grep is now recorded above so the next pass repeats it rather
-than re-deriving it.
+### Pass-2 findings (all three lenses)
+
+Blame-history and prior-review each independently found the stale test comment;
+diff-bug found both stale sites plus the defect in this section's own record. No
+scorer round: these are the content of an acceptance-criterion failure (review step 4),
+not discretionary findings needing a triage threshold, and each was verified directly
+against the shipped fixture before being recorded.
+
+**F-A — `R/icc.R:361-362`, mirrored to `man/icc.Rd`.** The `@param ci_method` text cites
+E2's miss split as "34 below against 13 above". The shipped fixture gives **42 / 14**;
+a scan of every committed `data-raw/*.rds` finds 34/13 only in
+`m92-interp-sweep-run1-collided.rds`. A user quoting `?icc` would cite a figure no
+re-run of the committed generator can reproduce.
+
+**F-B — `tests/testthat/test-ci-mpl.R:642-643`.** The AC5 pin's own comment says the
+cells cleared the floor at "0.968 / 0.953 / 1.000"; the fixture says
+**0.967 / 0.944 / 0.999**. Nothing goes red because the assertions pin κ_m, which is
+table-derived and bit-identical across runs.
+
+**F-C — this Review section, and the AC5 tick it supported.** The pass-2 AC5 entry
+certified that a full grep "returns only pass-1's own review record". It does not: it
+returns F-A and F-B. A wrong figure is recoverable; a tracking record affirmatively
+certifying a clean mechanical sweep is worse, because the next pass inherits it instead
+of repeating it.
+
+**Sub-threshold, logged not actioned.** The blame-history lens noted that the seed guard
+hardcodes M91's constants (base, stride, cell count, `n_rep`) rather than reading
+`data-raw/m91-mpl-interp-sweep.R`, so a future edit to M91's generator would leave the
+assertion checking a stale snapshot. Harmless while that file is frozen (it is committed
+history), and the guard's span is a strict superset of M91's real `n_rep` vector.
+
+### Root cause, and why the fix is not "correct three more numbers"
+
+Three rounds have each ended with a site left behind — F3, then the ROADMAP row, now
+F-A/F-B — and every sweep failed for a different formatting reason (spaces, decimal
+places, miss counts instead of coverages). The defect is the practice of **restating
+run-specific figures in prose scattered across the tree**. The remedy is to stop: the
+fixture and the reference note are the single source, and other sites point at them
+rather than copying numbers out. That removes the class instead of patching instances.
