@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -152,6 +152,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: review pass 4 FAILED. The P3-1 false claim is still live at `mpl-twoway-random-comparison.md:638` ("no committed fixture sweeps that axis alone"; E2 vs E3 differ only in `n_r`) — the re-cut moved it from `R/icc.R` into a file M92 keeps, and the amended AC5 cannot see it because a false negative claim is not a restated figure. Also: the T11 checker has no slash-paired probes (cannot catch `miss 42/14`), goes green when `origin/main` is unresolvable, no-ops after merge, and is not in CI, while `R/ci-mpl.R:224` cites it as enforcement. Two lenses returned zero findings; the diff-bug lens returned eight. Not queuing another self-directed fix — the interpretive prose is the defect generator and my judgment on it has failed four times.
 - 2026-07-25: T12 done (maintainer chose "strip the interpretive prose"). Deleted the note's three conclusion-drawing bullets outright — including the one carrying pass-4's two falsified sentences — rather than correcting the false one, since across four passes the defects were always interpretation and never measurement. § M92 verdict is now the table, the two-run GP5 account and the verdict sentence. Deleted `data-raw/check-m92-figure-restatement.py` and both pointers to it (`R/ci-mpl.R`, the test comment): it had no slash-paired probes so could not catch the house-style `miss 42/14`, reported green on an unresolvable `origin/main`, became a permanent no-op after merge, and was never wired into CI, while `R/ci-mpl.R` cited it as enforcement — a guard that overpromises is worse than none. AC5 re-amended to forbid CONCLUSIONS, not merely stale figures, because a false negative claim is not a figure and that gap let the pass-3 defect survive into pass 4.
 - 2026-07-25: self-audit of the T12 prose caught one more before review did — the replacement paragraph said "Two of the three [bullets] were false", which is wrong: exactly ONE bullet (the rater-count one) carried the two falsified sentences, and P3-1 lived in `R/icc.R`, not in a bullet. Corrected before commit. The two transcription facts kept in its place were both verified against the fixtures first: E2/E3 differ only in `n_r` (10 vs 2), and D1/E1 differ only in level (0.90 vs 0.95).
+- 2026-07-25: T12 gate clean (check Status OK 0/0/0; tests FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 pre-existing; 0 lints; air clean; document() no-diff; pkgdown clean; both remaining references checkers + cairn_validate green). Status -> review for a fifth pass against the CONCLUSION-forbidding AC5.
 ## Decisions
 
 
