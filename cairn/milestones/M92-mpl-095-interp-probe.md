@@ -97,7 +97,7 @@ re-runs at the same `n_rep` against the same floor.
       through the interpolation rule under test, per-cell seed stride, the role
       `stopifnot`, and `interp_ok = NA` where a level has no off-node cell. Smoke-run
       it first (`M92_SMOKE=1`).
-- [ ] T3: Run the sweep (~15 min), commit `data-raw/m92-interp-sweep.rds`, and record
+- [x] T3: Run the sweep (~15 min), commit `data-raw/m92-interp-sweep.rds`, and record
       the applied verdict per cell in the work log.
 - [ ] T4: Execute the frozen consequence. No shortfall → add a test pinning that a
       0.95 off-node lookup equals the linear chord. Shortfall → implement bracket-max
@@ -115,6 +115,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: created by /milestone-plan (promotes the M91-review-F1 candidate; plan gate froze three cells — the D1/D2 twin, the worst 0.95 dip, and the largest-κ_m geometry — and chose the bracket-max rule over node-restriction as the shortfall consequence, so no currently-working call breaks).
 - 2026-07-25: T1 done — § M92 pre-registration frozen in `mpl-twoway-random-comparison.md` (E1–E3, floors, criterion, bracket-max consequence + why it departs from § M91's node-restriction for the shipped level); its dated observation carries a python3-only settling directive, mutation-verified to exit 1 when D4's S is changed off-node; 5 generalizing-claim candidates triaged `OUT-repo-analysis` by generated rows; both references checkers green.
 - 2026-07-25: T2 done — `data-raw/m92-mpl-095-interp-sweep.R` added; mirrors the M91 generator (m86-mpl-lib machinery, per-cell seed stride, role `stopifnot`) and adds two extra assertions (no cell on an `s_grid` node, every cell at 0.95) plus an `M92_RULE=linear|bracketmax` switch so the pre-registered shortfall re-run uses the same generator. Smoke run clean; air + lintr clean; no citekey named, so no D-009 directive is re-tripped.
+- 2026-07-25: T3 done — sweep run, `data-raw/m92-interp-sweep.rds` committed. All three cells clear the frozen 0.93 floor under the SHIPPED linear rule, so the pre-registered bracket-max consequence is NOT triggered: E1 (R=3,S=25) κ_m 0.7089 cov 0.9680 [0.9551, 0.9780] miss 32/0; E2 (R=10,S=40, the worst 0.95 dip) κ_m 0.1517 cov 0.9530 [0.9380, 0.9653] miss 34/13; E3 (R=2,S=40, largest κ_m) κ_m 1.3663 cov 1.0000 [0.9963, 1.0000] miss 0/0. `interp_ok = TRUE` at 0.95 on three off-node cells, no mixed-role aggregation.
 
 ## Decisions
 
