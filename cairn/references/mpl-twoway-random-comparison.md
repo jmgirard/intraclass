@@ -621,28 +621,22 @@ fix-the-bar move GP5 forbids. Both fixtures are committed; the cells, floors and
 `n_rep` are unchanged; and the generator now carries a `stopifnot` asserting M92's
 seed span is disjoint from M91's, mutation-verified to error on the old base.
 
-Three things the cells establish beyond the headline.
+**Nothing further is claimed here.** Earlier drafts of this section carried three
+bullets drawing conclusions from the cells — about what the dips cost, what the corpus
+can and cannot isolate about rater count, and how the levels order. One of the three
+(the rater-count bullet) carried two sentences this table falsifies: "no committed
+fixture sweeps that axis alone", and a claim about what the exported text then said
+(M92 review pass 4, findings 1 and 2). All three are deleted rather than the false one
+corrected, because across four review passes every M92 defect was an interpretive claim
+about a measurement that was itself correct every time — including claims written to
+correct the previous pass's claims. The section is now the table, the two-run account,
+and the verdict above. A reader wanting more should read the fixture.
 
-1. **The dips do not cost coverage — now on genuinely independent data.** E2 crosses
-   0.95's worst downward step and lands at 0.9440, within MC noise of nominal; E3
-   crosses a large-κ_m concave bracket, where the chord sits below the curve (the
-   under-estimating direction), and over-covers at 0.9990. With M91's D3 (the −0.154
-   dip at 0.99) that is two passes finding no coverage cost to non-monotonicity — and
-   after the re-run the two passes rest on disjoint draws, which run 1 could not
-   claim. It stays a candidate; nothing here argues *for* it.
-2. **One-sidedness varies by design, and this corpus cannot say what drives it.**
-   D1 (R = 3, S = 25, δ = 4, level 0.90) missed 65 below vs 1 above; E2 (R = 10,
-   S = 40, δ = 4, level 0.95) misses 42 below vs 14 above. Rater count, subject count
-   and level all differ between them, so the contrast shows the asymmetry is
-   design-dependent and does **not** isolate a rater-count effect; no committed
-   fixture sweeps that axis alone (M92 review finding F2, scored 68). The exported
-   text now reports both observations without attributing the difference.
-3. **E1 completes the level triple at one geometry** — 0.934 (D1, 0.90), 0.967
-   (E1, 0.95), 0.9995 (D2, 0.99). Read it as three per-level measurements at a common
-   design, **not** as evidence of monotonicity in the level: the threshold
-   (1+κ)·χ²₁,₁₋α is larger at each deeper level, so on any shared or similar data the
-   ordering is close to forced. (Run 1 made this worse — E1 and D1 were literally the
-   same datasets, making the ordering arithmetically certain. Corrected here, F1.)
+Two facts a later pass will want, stated as transcription rather than inference:
+E2 and E3 share `n_s` 40, `delta` 4, `rho` 0.60 and `conf` 0.95 and differ only in
+`n_r` (10 vs 2); D1 and E1 share (R = 3, S = 25, δ = 4, ρ = 0.60) and differ only in
+level. What either pair licenses is for M94 to establish under its fixture-reading
+check, not for this note to assert.
 
 ## Traces to
 

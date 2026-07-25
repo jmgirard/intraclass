@@ -219,9 +219,10 @@ mpl_interval <- function(
 # Per-cell coverage, widths and miss splits are NOT restated here. They live in the
 # fixtures (data-raw/m92-interp-sweep.rds, and the superseded
 # m92-interp-sweep-run1-collided.rds) and in § M91 / § M92 of the comparison note.
-# Restating them is a defect this milestone hit three times: the sweep was re-run on a
-# disjoint seed base, and every copied figure elsewhere went stale while surviving a
-# different grep. data-raw/check-m92-figure-restatement.py enforces the rule.
+# Nor does this comment draw conclusions from them. Both restrictions are the
+# settlement of M92's review history: across four passes every defect was an
+# interpretive claim about a measurement that was correct each time, so the note holds
+# the transcription and this comment holds only the fact that the lookup is unchanged.
 #
 # The shipped kappa_m values are the raw calibrated ones, deliberately un-smoothed, so
 # each traces to the run whose coverage was validated (M91 plan gate; an envelope or

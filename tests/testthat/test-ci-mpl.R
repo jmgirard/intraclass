@@ -649,7 +649,8 @@ test_that("the 0.95 off-node kappa_m values M92 coverage-validated are what ship
   # was re-run on a disjoint seed base (finding F1) and every copied figure elsewhere
   # in the tree went stale, each surviving a different grep (findings F-A, F-B).
   # kappa_m is safe to pin because it is table-derived and does not move when the
-  # sweep is re-run. data-raw/check-m92-figure-restatement.py now enforces the rule.
+  # sweep is re-run -- which is exactly why it, and not a coverage figure, is what a
+  # test may pin.
   # (F3 was a separate defect -- a kappa_m-table superlative in the generator header,
   # found before the re-run -- not a figure staled by it; mis-attributing it here was
   # review finding P3-4.)

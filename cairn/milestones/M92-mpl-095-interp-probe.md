@@ -52,14 +52,19 @@ candidate row.
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [ ] AC5 (GP7, amended 2026-07-25): M92 ships **no exported-documentation change** —
-      `git diff main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md` and `README.md` —
-      and no file it does change restates a run-specific coverage figure outside the
-      comparison note, this milestone record, and the two committed fixtures. Both
-      halves are settled by a committed script run in the gate, not by reading. The
-      κ_m test pin stays (κ_m is table-derived and does not move when the sweep is
-      re-run). Rationale for the amendment: the original criterion spanned an exported
-      prose surface that failed review three times; that surface is now M94's.
+- [ ] AC5 (GP7, re-amended 2026-07-25 after review pass 4): **no file M92 changes
+      draws a conclusion about what the cells establish.** Concretely: (a) `git diff
+      main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md`, `README.md`; (b) every
+      figure about M92's cells in a changed file is transcription matching
+      `data-raw/m92-interp-sweep.rds`, or is explicitly labelled as run 1 inside the
+      two-run account; (c) the note's § M92 verdict contains the table, the two-run
+      GP5 account and the one-sentence verdict, and states **no** claim about what the
+      corpus does or does not isolate, no cross-level comparison, and no
+      characterization of one-sidedness. Review verifies (c) by reading every
+      declarative sentence in the changed files against the fixture. Why this form:
+      the previous amendment checked only figures, and a **false negative claim** is
+      not a figure — that gap let the pass-3 defect survive into pass 4.
+
 - [x] AC6: the ROADMAP "off-node S coverage probe at 0.95" candidate is absorbed, and
       the "κ_m monotone envelope / smoother" candidate is updated with this
       milestone's evidence (or dropped, if superseded by the applied consequence).
@@ -83,9 +88,9 @@ untouched) and re-runs that cell at the same floor.
 - AC2 → T2
 - AC3 → T2, T3
 - AC4 → T4
-- AC5 → T10, T11
+- AC5 → T10, T12
 - AC6 → T6, T10
-- AC7 → T3, T4, T5, T6, T10, T11
+- AC7 → T3, T4, T5, T6, T10, T12
 
 ## Tasks
 <!-- T1-T9 are done; their detail is in the work log. Compressed at the 2026-07-25
@@ -109,11 +114,14 @@ untouched) and re-runs that cell at the same floor.
       absent from this milestone; then remove the restated coverage triple from
       `R/ci-mpl.R`'s comment and from the ROADMAP candidate row (both point at the note
       instead), and fix the mis-attributed finding reference in the test comment (P3-4).
-- [x] T11: commit `data-raw/check-m92-figure-restatement.py` — asserts the exported-doc
-      diff is empty and that no run-1-or-run-2 figure appears outside the three
-      permitted sites, deriving its probe set FROM the two fixtures rather than a
-      hand-written list; mutation-verify it reds on a reintroduced figure; run it in
-      the gate.
+- [x] T11: ~~commit `data-raw/check-m92-figure-restatement.py`~~ — **reverted at T12.**
+      The checker shipped real defects (no slash-paired probes, green on an
+      unresolvable `origin/main`, a permanent no-op after merge, absent from CI) while
+      `R/ci-mpl.R` cited it as enforcement. A guard that overpromises is worse than none.
+- [x] T12 (review pass 4): delete the interpretive layer rather than police it — remove
+      the note's three conclusion-drawing bullets (where the pass-3 and pass-4 defects
+      both lived), delete the checker and every pointer to it, and re-amend AC5 to
+      forbid conclusions rather than only stale figures.
 
 ## Work log
 
@@ -142,6 +150,8 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: T11 mutation-verified. Reintroducing a run-2 figure (`0.9440`) into `R/ci-mpl.R` reds it; reintroducing a run-1 figure (`34 below`) reds it. The exported-doc assertion reads COMMITTED state, so an uncommitted edit does not trip it — verified instead against real history: evaluated at 3ef3ec1 (pre-revert) it fails on NEWS.md, R/icc.R and man/icc.Rd, and at HEAD it passes. Both observed, not argued.
 - 2026-07-25: T11 follow-up — the new script's docstring named two citekeys as examples, which tripped `xiao2009.md`'s D-009 "nothing references me" settling directive and reddened `check-reference-observations.py` (the M80/M86 lesson, hit by the very file written to stop a different recurring defect). Fixed by naming no source note rather than by adding an exclusion pathspec, so that guard stays fully intact; the reason is recorded in the docstring. All four checkers now green. Gate after the re-cut: `devtools::check(env_vars = c(NOT_CRAN = "false"))` Status OK 0/0/0; tests FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the pre-existing glmmTMB warnings); 0 lints; air clean; `document()` no-diff; pkgdown clean. That check ran before this docstring edit, which touches only a python comment under `data-raw/` — build-ignored via `.Rbuildignore:4`, so it cannot reach R CMD check. Status -> review for a fourth pass against the NARROWED AC5.
 - 2026-07-25: review pass 4 FAILED. The P3-1 false claim is still live at `mpl-twoway-random-comparison.md:638` ("no committed fixture sweeps that axis alone"; E2 vs E3 differ only in `n_r`) — the re-cut moved it from `R/icc.R` into a file M92 keeps, and the amended AC5 cannot see it because a false negative claim is not a restated figure. Also: the T11 checker has no slash-paired probes (cannot catch `miss 42/14`), goes green when `origin/main` is unresolvable, no-ops after merge, and is not in CI, while `R/ci-mpl.R:224` cites it as enforcement. Two lenses returned zero findings; the diff-bug lens returned eight. Not queuing another self-directed fix — the interpretive prose is the defect generator and my judgment on it has failed four times.
+- 2026-07-25: T12 done (maintainer chose "strip the interpretive prose"). Deleted the note's three conclusion-drawing bullets outright — including the one carrying pass-4's two falsified sentences — rather than correcting the false one, since across four passes the defects were always interpretation and never measurement. § M92 verdict is now the table, the two-run GP5 account and the verdict sentence. Deleted `data-raw/check-m92-figure-restatement.py` and both pointers to it (`R/ci-mpl.R`, the test comment): it had no slash-paired probes so could not catch the house-style `miss 42/14`, reported green on an unresolvable `origin/main`, became a permanent no-op after merge, and was never wired into CI, while `R/ci-mpl.R` cited it as enforcement — a guard that overpromises is worse than none. AC5 re-amended to forbid CONCLUSIONS, not merely stale figures, because a false negative claim is not a figure and that gap let the pass-3 defect survive into pass 4.
+- 2026-07-25: self-audit of the T12 prose caught one more before review did — the replacement paragraph said "Two of the three [bullets] were false", which is wrong: exactly ONE bullet (the rater-count one) carried the two falsified sentences, and P3-1 lived in `R/icc.R`, not in a bullet. Corrected before commit. The two transcription facts kept in its place were both verified against the fixtures first: E2/E3 differ only in `n_r` (10 vs 2), and D1/E1 differ only in level (0.90 vs 0.95).
 ## Decisions
 
 
