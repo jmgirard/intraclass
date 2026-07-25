@@ -13,13 +13,19 @@ Two independent assertions, both mechanical:
    (which carries the two-run account), the milestone record (which carries the review
    history), and the ledger.
 
-   The sweep is scoped to the diff deliberately, and that is not a weakening. Values
-   like `0.944` and `0.938` are ordinary content across this repo -- published Table I
-   coverages in `ukoumunne2003.md`, `xiao2009.md`'s simulation tables, other
-   milestones' fixtures -- so a whole-tree value match cannot discriminate an M92
-   restatement from a decade of unrelated statistics, and a checker that cries wolf on
-   80 pre-existing lines is one nobody runs. M92 can only introduce a restatement into
-   a file it edits, which is exactly what AC5 says.
+   The sweep is scoped to the diff deliberately, and that is not a weakening. Coverage
+   values in the high 0.9s are ordinary content across this repo -- published
+   simulation tables in several source notes, and other milestones' committed
+   fixtures -- so a whole-tree value match cannot discriminate an M92 restatement from
+   a decade of unrelated statistics (the first draft of this checker flagged ~80
+   pre-existing lines), and a checker that cries wolf is one nobody runs. M92 can only
+   introduce a restatement into a file it edits, which is exactly what AC5 says.
+
+   Source notes are deliberately NOT named here: a `data-raw/` file mentioning a
+   citekey trips that note's D-009 "nothing references me" settling directive, which
+   is how this very file first reddened `check-reference-observations.py` (the M80/M86
+   lesson). Naming none keeps that guard fully intact rather than growing its
+   exclusion list.
 
 Why this exists. M92 re-ran its sweep on a disjoint seed base, and every figure copied
 out to another file went stale. Three hand-written greps each missed a different site,
