@@ -30,27 +30,27 @@ levels · re-calibrating any κ_m value → M90's tables are frozen inputs · of
 
 ## Acceptance criteria
 
-- [ ] AC1 (GP5): the E1–E3 pre-registration — geometry, floor, `n_rep`, role, and the
+- [x] AC1 (GP5): the E1–E3 pre-registration — geometry, floor, `n_rep`, role, and the
       shortfall consequence — is committed to
       `cairn/references/mpl-twoway-random-comparison.md` in a commit strictly EARLIER
       than the one adding any result, demonstrable from `git log` on the two paths.
-- [ ] AC2: a committed seeded script writes a fixture in which each cell's `role` is
+- [x] AC2: a committed seeded script writes a fixture in which each cell's `role` is
       asserted against its geometry (a `stopifnot` mirroring
       `data-raw/m91-mpl-interp-sweep.R:94-98`), and the 0.95 verdict reports
       `interp_ok` as a measured value — never an aggregate over mixed-role cells
       (M91 finding F1).
-- [ ] AC3 (GP6): E1, E2 and E3 each report coverage with an exact binomial CI against
+- [x] AC3 (GP6): E1, E2 and E3 each report coverage with an exact binomial CI against
       the frozen floor, and the recorded verdict is the frozen rule applied — no floor
       moved after seeing a result.
-- [ ] AC4: the frozen shortfall consequence is executed as written — if any cell falls
+- [x] AC4: the frozen shortfall consequence is executed as written — if any cell falls
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [ ] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
+- [x] AC5 (GP7): every in-repo statement about interpolated-S evidence at 0.95 —
       `R/ci-mpl.R`'s interpolation comment, the `@param ci_method`/`conf_level` text,
       and the comparison note — matches what the shipped fixture carries, with a
       test pinning the property the code relies on.
-- [ ] AC6: the ROADMAP "off-node S coverage probe at 0.95" candidate is absorbed, and
+- [x] AC6: the ROADMAP "off-node S coverage probe at 0.95" candidate is absorbed, and
       the "κ_m monotone envelope / smoother" candidate is updated with this
       milestone's evidence (or dropped, if superseded by the applied consequence).
 - [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
@@ -126,3 +126,45 @@ re-runs at the same `n_rep` against the same floor.
 
 
 ## Review
+
+Reviewed 2026-07-25 on `m92-mpl-095-interp-probe` @ PR #99. `main` had not moved
+since the branch was cut (0 commits behind), so all evidence is against a current base.
+
+**AC1 (GP5 — pre-registration precedes results).** VERIFIED by `git log` on the two
+paths: the pre-registration lands in `da10025` (commit time 1784987723), the first
+result fixture in `2b984af` (1784987888) — strictly earlier, 165 s apart. Stronger
+check run beyond the criterion: `git show da10025:...` against HEAD shows the frozen
+bar (R, S, δ, ρ, level, floor ≥ 0.93, `n_rep` 1000) **byte-identical** for all three
+cells; only E3's rationale prose changed, as the documented T6 correction.
+
+**AC2 (role asserted, `interp_ok` measured).** VERIFIED against the committed fixture:
+all three cells off-node (`n_s` ∉ {10,15,20,30,50,100}) → TRUE, all roles `interp` →
+TRUE, and `verdict[["0.95"]]$interp_ok` is the logical TRUE over `interp_cells` =
+E1, E2, E3 — a measured value over three same-role cells, not an aggregate across
+mixed roles. The script's own `stopifnot` (m92-mpl-095-interp-sweep.R:125-131) asserts
+the role labels against geometry and additionally that no cell sits on a node.
+
+**AC3 (GP6 — coverage with exact CI against the frozen floor).** VERIFIED:
+E1 0.9680 [0.9551, 0.9780]; E2 0.9530 [0.9380, 0.9653]; E3 1.0000 [0.9963, 1.0000];
+floor 0.93 and `n_rep` 1000 on every cell, matching the pre-registration exactly;
+`all(adequate)` TRUE, `failed_cells` empty. Rule recorded in the fixture is `linear`
+— the shipped rule, so the frozen bar was applied, not a substitute.
+
+**AC4 (frozen consequence executed).** VERIFIED — no-shortfall branch. Zero cells
+below floor, so bracket-max was not adopted. `git diff main..HEAD -- R/` filtered to
+non-comment lines is **empty**: the runtime lookup and every other code path are
+untouched, which is the strongest available form of "the lookup is unchanged".
+
+**AC5 (statements match the fixture; a test pins the property).** VERIFIED. Three live
+claim sites — `R/ci-mpl.R:217` (0.968 / 0.953 / 1.000 named per cell), `R/icc.R:351`
+and `NEWS.md:79` (interpolated path validated at all three levels) — each check out
+against the fixture and against M91's D1–D3 for the other two levels. The pin is
+`test-ci-mpl.R:631`, and it discriminates the two candidate RULES rather than only a
+table edit: bracket-max would return 0.7863 / 0.1858 / 1.4657 at the same geometries
+against the pinned 0.7089 / 0.1517 / 1.3663.
+
+**AC6 (candidate rows resolved).** VERIFIED: the "off-node S coverage probe at 0.95"
+row is absent from `cairn/ROADMAP.md` (absorbed at the plan gate), and the κ_m
+envelope/smoother row now carries M92's evidence and its `→ M92 T3` lineage —
+narrowed to "promote only on a NEW failure", since two independent passes have now
+found no coverage cost to the dips.
