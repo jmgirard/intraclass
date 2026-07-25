@@ -92,7 +92,7 @@ re-runs at the same `n_rep` against the same floor.
       line 433) — cells, floors, `n_rep`, roles, the criterion, and the bracket-max
       shortfall consequence — as a standalone docs commit BEFORE any script runs. Any
       settling directive uses python3/shell/git only.
-- [ ] T2: Add `data-raw/m92-mpl-095-interp-sweep.R`, modelled on
+- [x] T2: Add `data-raw/m92-mpl-095-interp-sweep.R`, modelled on
       `data-raw/m91-mpl-interp-sweep.R` — same `m86-mpl-lib.R` machinery, κ_m taken
       through the interpolation rule under test, per-cell seed stride, the role
       `stopifnot`, and `interp_ok = NA` where a level has no off-node cell. Smoke-run
@@ -114,7 +114,9 @@ re-runs at the same `n_rep` against the same floor.
 
 - 2026-07-25: created by /milestone-plan (promotes the M91-review-F1 candidate; plan gate froze three cells — the D1/D2 twin, the worst 0.95 dip, and the largest-κ_m geometry — and chose the bracket-max rule over node-restriction as the shortfall consequence, so no currently-working call breaks).
 - 2026-07-25: T1 done — § M92 pre-registration frozen in `mpl-twoway-random-comparison.md` (E1–E3, floors, criterion, bracket-max consequence + why it departs from § M91's node-restriction for the shipped level); its dated observation carries a python3-only settling directive, mutation-verified to exit 1 when D4's S is changed off-node; 5 generalizing-claim candidates triaged `OUT-repo-analysis` by generated rows; both references checkers green.
+- 2026-07-25: T2 done — `data-raw/m92-mpl-095-interp-sweep.R` added; mirrors the M91 generator (m86-mpl-lib machinery, per-cell seed stride, role `stopifnot`) and adds two extra assertions (no cell on an `s_grid` node, every cell at 0.95) plus an `M92_RULE=linear|bracketmax` switch so the pre-registered shortfall re-run uses the same generator. Smoke run clean; air + lintr clean; no citekey named, so no D-009 directive is re-tripped.
 
 ## Decisions
+
 
 ## Review
