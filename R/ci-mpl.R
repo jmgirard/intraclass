@@ -208,25 +208,28 @@ mpl_interval <- function(
 # is itself small (13 of the 18 steps below -0.02 stay under 0.30), so an absolute
 # error of that size barely moves an endpoint; the two largest steps are also the two
 # at the largest kappa_m, both at R = 2 at 0.99 (0.729->0.566 and 0.970->0.816).
-# (b) Interpolated S is coverage-CONFIRMED at EVERY supported level rather than
-# assumed. M91's cells D1-D3 swept an off-node S at 0.90 and 0.99 -- including that
-# R = 2 case -- each clearing its frozen floor (0.934 at 0.90; 0.9995 and 1.000 at
-# 0.99). M92 closed the remaining gap at the DEFAULT 0.95, where every earlier cell
-# had sat ON a node (M91's D4 is S = 20, a node -- it probes the sub-grid-floor rho,
-# not interpolation): three off-node cells, each clearing the frozen 0.93 floor --
-# E1 (R=3, S=25) 0.967, E2 (R=10, S=40) 0.944 across 0.95's own worst dip
-# (-0.068 over S 30->50), E3 (R=2, S=40) 0.999 on a large-kappa_m CONCAVE bracket
-# (1.267->1.466), where the chord sits below the curve -- the under-estimating, hence
-# under-covering, direction. (Not the slice's largest kappa_m: R = 2, S 50->100 is
-# higher. See § M92 of the note above.) Because no cell fell
-# short, that pass's pre-registered consequence -- switching 0.95 to a bracket-max
-# rule -- was NOT triggered and this lookup is unchanged.
-# The shipped values are the raw calibrated ones, deliberately un-smoothed, so each
-# traces to the run whose coverage was validated (M91 plan gate; an envelope or
+# (b) Interpolated S is coverage-CONFIRMED at every supported level rather than
+# assumed. M91's cells D1-D3 swept an off-node S at 0.90 and 0.99, including that
+# R = 2 case; M92 closed the remaining gap at the DEFAULT 0.95, where every earlier
+# cell had sat ON a node (M91's D4 is S = 20, a node -- it probes the sub-grid-floor
+# rho, not interpolation). M92's three off-node cells each cleared their frozen
+# floor, so its pre-registered consequence -- switching 0.95 to a bracket-max rule --
+# was NOT triggered and this lookup is unchanged.
+#
+# Per-cell coverage, widths and miss splits are NOT restated here. They live in the
+# fixtures (data-raw/m92-interp-sweep.rds, and the superseded
+# m92-interp-sweep-run1-collided.rds) and in § M91 / § M92 of the comparison note.
+# Restating them is a defect this milestone hit three times: the sweep was re-run on a
+# disjoint seed base, and every copied figure elsewhere went stale while surviving a
+# different grep. data-raw/check-m92-figure-restatement.py enforces the rule.
+#
+# The shipped kappa_m values are the raw calibrated ones, deliberately un-smoothed, so
+# each traces to the run whose coverage was validated (M91 plan gate; an envelope or
 # smoother remains a separate candidate -- two passes on DISJOINT simulated data have
 # now found no coverage cost to the dips). `test-ci-mpl.R` pins the three constants
-# M92 validated, so a change to the table or to this rule reds a test rather than
-# silently detaching the code from its coverage evidence.
+# M92 validated -- kappa_m is table-derived and does not move when the sweep is
+# re-run -- so a change to the table or to this rule reds a test rather than silently
+# detaching the code from its coverage evidence.
 #
 # An (n_r, n_s) outside the table's grid aborts loudly (#5/#8) -- kappa_m off the grid
 # has no calibration and extrapolating it is exactly the uncalibrated guess D-015

@@ -263,21 +263,13 @@ between levels, so any other level aborts. And that constant is calibrated by
 simulation over \verb{rho in [0.05, 0.9]}, extending below Xiao & Liu's published
 \code{rho >= 0.6} fence into a near-boundary region that \strong{carries no external
 oracle}; there, and at \code{conf_level = 0.99} throughout, its calibration rests on
-the package's own simulated coverage. The constant is tabulated on a grid of
-rater and subject counts and interpolated between subject nodes; that
-interpolated path is itself coverage-checked at \strong{each} supported level,
-at a handful of geometries rather than at every one -- grid nodes are each
-individually calibrated, so an interpolated subject count is validated, not
-calibrated.
+the package's own simulated coverage.
 
 Two further characteristics are worth knowing before reporting an endpoint. The
 two-sided interval is \strong{not equal-tailed} -- where rater variance is large
-relative to error and the subject count is high, non-coverage can fall almost
-entirely on one side (65 of 66 misses below the interval in one validated
-cell). How lopsided it gets varies across designs, and the validated cells
-differ in rater count, subject count and level together, so nothing here
-isolates which of those drives it -- but a limit must not be read as a
-one-sided bound at half the complementary level.
+relative to error and the subject count is high, non-coverage falls almost
+entirely on one side (65 of 66 misses below the interval in one validated cell) --
+so a limit must not be read as a one-sided bound at half the complementary level.
 And at \code{conf_level = 0.99} with very few raters the interval can be
 \strong{near-vacuous}: median width 0.905 on the \verb{[0, 1]} scale at 2 raters and 40
 subjects. That is the honest cost of a deep tail at minimal rater information,
