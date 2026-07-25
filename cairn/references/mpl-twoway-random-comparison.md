@@ -627,10 +627,9 @@ can and cannot isolate about rater count, and how the levels order. One of the t
 (the rater-count bullet) carried two sentences this table falsifies: "no committed
 fixture sweeps that axis alone", and a claim about what the exported text then said
 (M92 review pass 4, findings 1 and 2). All three are deleted rather than the false one
-corrected, because across four review passes every M92 defect was an interpretive claim
-about a measurement that was itself correct every time — including claims written to
-correct the previous pass's claims. The section is now the table, the two-run account,
-and the verdict above. A reader wanting more should read the fixture.
+corrected, so that the section keeps only what can be checked against the fixture. It
+is now the table, the two-run account, and the verdict above. A reader wanting more
+should read the fixture; M92's review record is in its milestone file.
 
 Two facts a later pass will want, stated as transcription rather than inference:
 E2 and E3 share `n_s` 40, `delta` 4, `rho` 0.60 and `conf` 0.95 and differ only in
