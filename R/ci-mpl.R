@@ -223,10 +223,7 @@ mpl_interval <- function(
 # The shipped kappa_m values are the raw calibrated ones, deliberately un-smoothed, so
 # each traces to the run whose coverage was validated (M91 plan gate; an envelope or
 # smoother remains a separate candidate -- see its ROADMAP row for the promotion
-# criterion). `test-ci-mpl.R` pins the three constants M92 validated -- kappa_m is
-# table-derived and does not move when the sweep is re-run -- so a change to the table
-# or to this rule reds a test rather than silently detaching the code from its
-# coverage evidence.
+# criterion). `test-ci-mpl.R` pins the three constants M92 validated.
 #
 # An (n_r, n_s) outside the table's grid aborts loudly (#5/#8) -- kappa_m off the grid
 # has no calibration and extrapolating it is exactly the uncalibrated guess D-015

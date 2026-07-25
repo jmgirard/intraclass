@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -131,7 +131,7 @@ untouched) and re-runs that cell at the same floor.
 - [x] T13 (review pass 5): delete the record-summarizing and self-describing prose at
       every site rather than correct it (P5-1 through P5-5), strip the inference from the
       ROADMAP row, and carry F6 to a candidate row.
-- [ ] T14 (review pass 6, P6-1): delete `R/ci-mpl.R`'s false enforcement clause. Keep the
+- [x] T14 (review pass 6, P6-1): delete `R/ci-mpl.R`'s false enforcement clause. Keep the
       bare pointer; write no replacement claim — a reworded claim is a new claim, which is
       the class that has failed six passes.
 
@@ -177,6 +177,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: review pass 6 FAILED at AC5, status -> in-progress; merge approval never requested and no marker written. What failed: P6-1 (scored 92) — `R/ci-mpl.R:226-229` claims "a change to the table or to this rule reds a test"; the rule half holds, the table half is false and I confirmed it by mutation, shifting all 152 non-literal-pinned `kappa_m_table` cells by +0.5 and getting FAIL 0 / PASS 172. It entered at `c24ffac`, in prose written to fix pass 5's prose. AC1, AC2, AC3, AC4, AC6 and AC7 re-verified with fresh evidence this pass and stay ticked; AC5 stays un-ticked. Two lenses returned zero findings and every mechanical check passed, including CI 9/9 on the review SHA `341a0de`. Two findings scored below 80 are logged in the Review section as maintainer wording calls rather than author errors: the D-045 correction-mark collision (F-B, 42 — its charge that D-045 is a fabricated id is refuted there) and three verified-true cross-file claims, one of which sits inside the account AC5(d) blesses (F-C, 48). Thrash: this is far past the rule's third trip, so no self-directed retry is queued — routing to the maintainer.
 - 2026-07-25: the P6-1 root cause, recorded because it is the transferable part — at T13 I checked one half of that conjunction by mutation and ARGUED the other half from arithmetic, writing it down as "not mutation-tested ... the weaker of the two". Both halves were falsifiable by the same one-command method. An enforcement claim gets mutation-tested or it does not get written; reasoning about a guard instead of firing it is how pass 4's checker shipped too.
 - 2026-07-25: pass-6 gate answered — maintainer chose DELETE the enforcement clause over rescoping it or adding a whole-table pin, and ruled F-B/F-C no-change. T14 added by review send-back (Tasks amend-via-gate). The 152-cell guard gap P6-1 exposed is carried to a new ROADMAP candidate row rather than fixed here, search-first checked: no existing candidate, archive summary or D-entry covers a whole-table pin (M91's archive records a level-SET pin, which constrains which levels exist, not the values). Dispositions recorded verbatim at the end of the pass-6 Review section.
+- 2026-07-25: T14 done — deleted `R/ci-mpl.R`'s enforcement clause outright (1 insertion, 4 deletions); the comment now ends "`test-ci-mpl.R` pins the three constants M92 validated." and makes no claim about what reds. No replacement claim written, per the gate. Checked the survivor rather than assuming it: the three literals are present in `tests/testthat/test-ci-mpl.R` and equal the shipped fixture's κ_m column, and the GP7 block carries no remaining "reds a test"/"silently detach"/enforcement wording (the one `guarantee` hit is the pre-existing section heading). Gate: `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` Status OK 0/0/0 (2m 1.4s); suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (pre-existing glmmTMB); 0 lints; air clean; `document()` no-diff; pkgdown clean; both references checkers and `cairn_validate` green. Status -> review for a seventh pass; AC5 stays un-ticked until review re-verifies it.
 ## Decisions
 
 
