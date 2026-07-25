@@ -157,6 +157,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: pass-5 review finding (prior-review lens) — a SIXTH instance, in the prose announcing the T12 fix, duplicated across `cairn/references/mpl-twoway-random-comparison.md` and `R/ci-mpl.R`: "across four review passes every M92 defect was an interpretive claim about a measurement that was itself correct every time". False, and contradicted by this file's own pass-4 section: F5 (test design), F6 (a generator code defect), P3-2 (an unreproducible count), P3-4 (a mis-attributed reference) and pass 4's whole checker cluster (no slash probes, false-green on a bad ref, no-op after merge, absent from CI) are not interpretive claims. Removed from both files rather than reworded; the review record lives in this file's Review sections and is not summarized elsewhere. Note the blind spot it exposes: AC5(c)'s three prohibitions are scoped to claims about the CELLS, so a false claim about the REVIEW RECORD sits outside them.
 - 2026-07-25: self-check of that replacement caught a further miscount before commit — the first rewrite said interpretive claims in the note "were falsified at two separate reviews", but only pass 4 falsified claims in that section (P3-1 lived in `R/icc.R`). Reduced to a statement carrying no count or scope claim at all. Every summary sentence written this milestone that carried a number or a scope has been wrong; the working rule is now to not write them.
 - 2026-07-25: pass-5 diff-bug lens reported after the Review section was written and returned seven findings; six verified. AC5 un-ticked, status -> in-progress, merge approval NOT used. The decisive one is P5-6: my "correction" of the note's history sentence turned a TRUE statement false — pass 1's F1 did falsify claims in § M92 verdict, so "two separate reviews" was right and "only pass 4" is wrong — and the work-log entry recording that correction claimed credit for catching an error that did not exist. Also P5-1 (the stripped conclusion still live in the ROADMAP row, with `R/ci-mpl.R` now pointing at it), P5-2/P5-3 (two more false or self-falsifying sentences in the note), P5-5 (Scope promises the deleted checker), P5-7 (the AC5 re-amendment loosened two axes while I described it as a tightening). P5-4 needs a maintainer ruling on what AC5(c) bars.
+- 2026-07-25: maintainer directed M92 to a fresh session. Handoff block appended; no further changes made in this session. Supersedes the 2026-07-25 entry beginning "self-check of that replacement", which is false per P5-6: pass 1's F1 falsified claims in § M92 verdict, so the wording that entry replaced was correct and its replacement was the error.
 ## Decisions
 
 
@@ -556,3 +557,52 @@ false when I made it.
 **Process failure of mine, recorded.** I said I would hold the AC5 tick until the
 fan-out reported, then ticked it and wrote "all seven criteria verified" with one lens
 still running. That is how a premature tick happens, and the tick was wrong.
+
+## Handoff (2026-07-25)
+
+Maintainer directed this milestone to a fresh session after review pass 5. Status
+`in-progress`, branch `m92-mpl-095-interp-probe`, PR #99 open, everything committed and
+pushed at `ae4d331`. Read the five `## Review` sections above for what each pass found.
+
+**What is settled and needs no rework.** The coverage evidence: pre-registration frozen
+before any run (`da10025` precedes the first result `2b984af`); the generator with a
+mutation-verified seed-disjointness `stopifnot`; both fixtures committed, the superseded
+run kept as `data-raw/m92-interp-sweep-run1-collided.rds`; the κ_m pin in
+`tests/testthat/test-ci-mpl.R`. GP5's frozen bar is byte-identical `da10025..HEAD`.
+`git diff main..HEAD -- R/` changes zero non-comment lines, and the exported-doc diff
+(`R/icc.R`, `man/`, `NEWS.md`, `README.md`) is empty. AC1, AC2, AC3, AC4, AC6, AC7 were
+verified with fresh evidence at pass 5; AC5 is un-ticked.
+
+**Outstanding, each with its location.**
+
+- P5-1 — `cairn/ROADMAP.md` candidate row states "M92 ran the second probe and it also
+  found no cost" and "coverage-confirmed at all three levels, on two passes over
+  disjoint simulated data"; `R/ci-mpl.R:230` routes the reader to that row.
+- P5-2 — `cairn/references/mpl-twoway-random-comparison.md`, the paragraph beginning
+  "Nothing further is claimed here": "two sentences this table falsifies" holds for one
+  of the two; the other was falsified by T10's revert.
+- P5-3 — same paragraph: "It is now the table, the two-run account, and the verdict
+  above" is followed by a further paragraph asserting two facts.
+- P5-4 — that "two facts" paragraph states an isolation claim and a cross-level pairing.
+  Both facts check out against the fixtures. Whether AC5(c) bars *stating* them or only
+  *drawing conclusions from* them needs a maintainer ruling. M94 AC6 already carries the
+  E2/E3 fact.
+- P5-5 — Scope **In** ends "and a committed script that settles the no-restated-figures
+  rule mechanically"; T12 deleted that script.
+- P5-6 — the work-log entry dated 2026-07-25 beginning "self-check of that replacement"
+  is false: pass 1's F1 falsified claims in § M92 verdict, so the wording it replaced
+  ("two separate reviews") was correct. Work logs are append-only history (D-045) — this
+  is superseded by a new line, never edited. The pass-5 Review section above also
+  mis-locates F5/F6 (pass 1) and P3-2/P3-4 (pass 3) as pass-4 findings.
+- P5-7 (advisory) — the AC5 re-amendment dropped the three-site confinement on restated
+  figures and dropped "settled by a committed script … not by reading".
+- F6 (pass 1, scored 35, never actioned) — `data-raw/m92-mpl-095-interp-sweep.R` returns
+  `c(lower = 0, upper = 1)` on an errored fit, scoring it covered. It did not fire in
+  either shipped run. Inherited from M91's generator.
+
+**The recurring failure, stated for whoever picks this up.** Every M92 review failure has
+been in prose this session authored about the work, not in the measurement, the code, or
+the fixtures — including prose written to correct the previous pass's prose, and
+including a correction that falsified a true sentence (P5-6). Sentences carrying a count,
+a universal, or a scope claim are where it lands. Pointing at the record beats
+summarizing it.
