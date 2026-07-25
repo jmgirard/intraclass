@@ -17,10 +17,13 @@ design, instead of only the generic refit/aggregate remedies.
 
 **In:** an internal design→method mapping computed from the predicates `icc()` already
 holds at its `ci_method` fences (`R/icc.R:1381-1497`) — `oneway`, `multilevel`,
-`replicates`, `raters`, `balanced`, `type`, `conf_level` — threaded as extra `i =`
-bullets into the CI-stage `intraclass_singular_fit` aborts in `R/ci-montecarlo.R` that
-T1 showed reachable at the boundary; a guard test that every method the hint names is
-actually accepted on that design; NEWS + `@param` docs.
+`replicates`, `raters`, `balanced`, `type`, `conf_level` — plus two inputs review pass 1
+proved the mapping cannot be right without: the observed subject/rater counts (the `mpl`
+row must respect `mpl_kappa_lookup()`'s κ_m calibration grid) and an exact-degeneracy
+flag read from the data, where every method a row would name aborts; threaded as extra
+`i =` bullets into the CI-stage `intraclass_singular_fit` aborts in `R/ci-montecarlo.R`
+that T1 showed reachable at the boundary; a guard test that every method the hint names
+is actually accepted on that design; NEWS + `@param` docs.
 
 **Out:** fallback or auto-routing — the default still aborts; replacing the abort with
 a classical interval is the `#3`/ADR-003 contract change D-012 fenced out ("A classical
@@ -49,12 +52,16 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       including exact-zero σ²_s at 5 subjects × 2) and is reached only by degenerate
       data (σ²_e = 0, all-identical scores) on which every method the mapping table
       would name ALSO aborts — so a hint there would point at another abort, which AC3
-      forbids.
+      forbids. The hint's inputs also include the observed subject/rater counts and an
+      exact-degeneracy flag, not the fence predicates alone (review pass 1, F1/F2): a row
+      is named only when the design AND the data in hand accept it.
 - [ ] AC3 (GP7): a test asserts over a design grid — one-way balanced and unbalanced,
       two-way random agreement and consistency, fixed-rater, multilevel, and
-      within-cell-replicate — that every `ci_method` the hint names for a design is
-      ACCEPTED by `icc()` on that design. A hint that points at another abort is a
-      test failure, so a later fence change cannot silently rot the mapping.
+      within-cell-replicate, each exercised end-to-end through `icc()`, at subject/rater
+      counts both on and off `mpl`'s κ_m calibration grid, and on exactly-degenerate
+      data — that every `ci_method` the hint names is ACCEPTED by `icc()` there. A hint
+      that points at another abort is a test failure, so a later fence change cannot
+      silently rot the mapping.
 - [ ] AC4: designs with no boundary-robust opt-in — fixed raters, multilevel,
       replicates, two-way consistency, and an `mpl`-shaped design at a `conf_level`
       outside the calibrated set — receive NO method hint; a test pins the message to
@@ -77,7 +84,8 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 |---|---|
 | one-way random, balanced | `"npbootstrap"`, `"searle"`, `"burch"` (D-006/D-010, D-012/D-013) |
 | one-way random, unbalanced | `"npbootstrap"` only — `"searle"`/`"burch"` are balanced-only |
-| two-way random, agreement, balanced+complete, calibrated `conf_level` | `"mpl"` (D-014/D-015) |
+| two-way random, agreement, balanced+complete, calibrated `conf_level` **and a geometry on the κ_m grid** | `"mpl"` (D-014/D-015) |
+| exactly-degenerate data (zero within- or between-subject SS one-way; constant scores two-way) | nothing — every method above aborts (F2) |
 | anything else | nothing — generic remedies only |
 
 ## Coverage
@@ -107,7 +115,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       every `ci_method` the hint names and assert it does not abort.
 - [x] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
       review, full AC7 gate, PR.
-- [ ] T6: Fix `test-boundary-abort-hint.R:158` — the AC2 degenerate-data test must
+- [x] T6: Fix `test-boundary-abort-hint.R:158` — the AC2 degenerate-data test must
       tolerate the glmmTMB point fit dying with a RAW unclassed error (M84), not only
       the classed `intraclass_singular_fit`. Re-verify on CI, not just locally: macOS
       completes the fit that Linux/Windows abort on, so a green local gate proves
@@ -136,6 +144,9 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 
 - 2026-07-25: review pass 1 FAILED the gate — PR #100 CI red on 3 of 7 jobs, one cause: `test-boundary-abort-hint.R:158` errors on Linux/Windows because the glmmTMB point fit raises a raw unclassed `LU factorization` error on the degenerate dataset before any classed guard, and `bh_probe()` catches only `intraclass_singular_fit` (the M84 lesson). Test-only defect; local gate is green and structurally cannot catch it. Status -> in-progress. Two of three review lenses reported 0 findings; the [O] diff-bug lens was still running.
 - 2026-07-25: [O] diff-bug lens returned 4 findings; independent scorer gave F1 95 / F2 90 / F3 85 (actioned as T7/T8/T9) and F4 63 (logged, not actioned). F1 and F2 are shipped-behaviour defects of the AC3-forbidden kind (the hint names a method that then aborts) — F1 reproduced independently at review on an 8-subject two-way design. T6 added for the CI failure.
+- 2026-07-25: implement gate (pass 2) — F1/F2 reproduced locally, plus a third case of the same shape the findings missed: one-way with all subject means exactly equal hints three methods of which npbootstrap aborts, and all-constant two-way data hints `mpl`, which then raises a raw optim error. Gate decisions: back the hint off on ANY exact degeneracy; ask `mpl_kappa_lookup()` itself whether the geometry is calibrated (one source of truth); amend Scope/AC2/AC3 rather than stretch them.
+- 2026-07-25: gated amendment (pass 2) — Scope, AC2 and AC3 now name the two non-fence inputs the hint needs (observed subject/rater counts for `mpl`'s κ_m grid; an exact-degeneracy flag) and the widened AC3 grid (end-to-end through `icc()`, on/off grid geometries, degenerate data); mapping table gains the κ_m-grid condition and a degenerate-data row.
+- 2026-07-25: T6 — the AC2 degenerate-data test now classifies a RAW unclassed point-fit error as "point-fit" and accepts it beside site "C" (`bh_probe_any()`), and the three-method loop no longer pins an abort class glmmTMB does not raise; handler order and raw/classed classification verified by hand. CI is the real check — macOS cannot reproduce the failure.
 
 ## Decisions
 
