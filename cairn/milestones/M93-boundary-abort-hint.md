@@ -1,6 +1,6 @@
 # M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -105,7 +105,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       reachable abort sites from T1 (`bootstrap_ci()` dropped by the AC2 amendment).
 - [x] T4: Add the GP7 guard test: for each design in the AC3 grid, call `icc()` with
       every `ci_method` the hint names and assert it does not abort.
-- [ ] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
+- [x] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
       review, full AC7 gate, PR.
 
 ## Work log
@@ -116,6 +116,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: T2 — `R/boundary-hint.R` adds the pure `boundary_method_hint()`; unit tests cover every mapping row plus the empty-hint designs, incl. the unbalanced+numeric-`unit` case (npbootstrap aborts there, so no hint) and the level set read from `kappa_m_table`.
 - 2026-07-25: T3 — `hint` threaded through `mc_ci()`/`mc_components()`/`mc_interval()`/`rmvn()` defaulting to `character(0)`; `icc()` builds it from the fence predicates. `rmvn()`'s new arg sits after `call` so the lavaan engine's positional calls are unaffected, and `d_study()` takes the default. Full suite FAIL 0 / PASS 4281 at `NOT_CRAN=true CI=true`.
 - 2026-07-25: T4 — AC3 grid guard added (both halves: every named method is accepted, and every silent design's methods really do abort). Mutation-verified: naming `searle` in the two-way random hint reds 4 assertions, and the grid names the offending row.
+- 2026-07-25: T5 — NEWS entry + `@param ci_method` note that the abort names the applicable method (the per-method boundary-robustness prose AC6 asks about was already there, so only the pointer was added). Gate: `devtools::check()` 0/0/0, `devtools::test()` FAIL 0 / PASS 4300, `lintr::lint_package()` clean, `air format --check` clean, `document()` no-diff. No message snapshot changed, so none was accepted.
 - 2026-07-25: gated amendment — AC2 and Scope narrowed to the two reachable Monte-Carlo sites; `R/ci-bootstrap.R:56` moved to Out with its evidence, and its misleading `montecarlo` remedy carried out as a candidate row.
 
 ## Decisions
