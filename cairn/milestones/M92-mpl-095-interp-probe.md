@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -141,6 +141,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: T11 done — `data-raw/check-m92-figure-restatement.py` committed. Two assertions: the exported-doc diff is empty, and no file in M92's own diff restates a per-cell figure from either run outside the three permitted sites. Probe set is derived FROM both fixtures via Rscript (97 probes), so a re-run updates it without anyone editing the script — the failure mode that beat three hand-written greps. Scoped to the diff deliberately: values like 0.944/0.938 are ordinary content repo-wide (ukoumunne2003 Table I, xiao2009's tables), so a whole-tree match flagged ~80 pre-existing lines and could not discriminate; M92 can only introduce a restatement in a file it edits, which is what AC5 says. Two tokens excluded as non-discriminating, each with its reason recorded in the script: `1.000` (M91's D3, a README bound) and the 3-dp `0.999` (the `eps_hi` clamp constant; a `conf_level` in a test grid) — the 4-/5-dp forms stay live, so E3's coverage is still protected at the precision the note uses.
 - 2026-07-25: T11 mutation-verified. Reintroducing a run-2 figure (`0.9440`) into `R/ci-mpl.R` reds it; reintroducing a run-1 figure (`34 below`) reds it. The exported-doc assertion reads COMMITTED state, so an uncommitted edit does not trip it — verified instead against real history: evaluated at 3ef3ec1 (pre-revert) it fails on NEWS.md, R/icc.R and man/icc.Rd, and at HEAD it passes. Both observed, not argued.
 - 2026-07-25: T11 follow-up — the new script's docstring named two citekeys as examples, which tripped `xiao2009.md`'s D-009 "nothing references me" settling directive and reddened `check-reference-observations.py` (the M80/M86 lesson, hit by the very file written to stop a different recurring defect). Fixed by naming no source note rather than by adding an exclusion pathspec, so that guard stays fully intact; the reason is recorded in the docstring. All four checkers now green. Gate after the re-cut: `devtools::check(env_vars = c(NOT_CRAN = "false"))` Status OK 0/0/0; tests FAIL 0 / PASS 4213 / SKIP 23 / WARN 2 (the pre-existing glmmTMB warnings); 0 lints; air clean; `document()` no-diff; pkgdown clean. That check ran before this docstring edit, which touches only a python comment under `data-raw/` — build-ignored via `.Rbuildignore:4`, so it cannot reach R CMD check. Status -> review for a fourth pass against the NARROWED AC5.
+- 2026-07-25: review pass 4 FAILED. The P3-1 false claim is still live at `mpl-twoway-random-comparison.md:638` ("no committed fixture sweeps that axis alone"; E2 vs E3 differ only in `n_r`) — the re-cut moved it from `R/icc.R` into a file M92 keeps, and the amended AC5 cannot see it because a false negative claim is not a restated figure. Also: the T11 checker has no slash-paired probes (cannot catch `miss 42/14`), goes green when `origin/main` is unresolvable, no-ops after merge, and is not in CI, while `R/ci-mpl.R:224` cites it as enforcement. Two lenses returned zero findings; the diff-bug lens returned eight. Not queuing another self-directed fix — the interpretive prose is the defect generator and my judgment on it has failed four times.
 ## Decisions
 
 
@@ -399,3 +400,58 @@ consistent with a regenerable fixture, which failed every time. The first is fin
 work; the second needs its own milestone with a mechanical rule (user-facing docs
 restate no run-specific figure, and make no universal or negative claim about the
 fixture that a committed check cannot settle).
+
+## Review — pass 4 (2026-07-25): FAILED; the re-cut excused the defect it was meant to fix
+
+Blame-history and prior-review lenses: **zero findings** each, both verifying rather than
+trusting (the prior-review lens reproduced the "97 probes" count; blame-history confirmed
+the revert landed byte-for-byte at the pre-M92 tree and found the M71 precedent for this
+exact thrash→re-cut path). Diff-bug lens: **eight findings**. The mechanical half of the
+re-cut does hold — the exported-doc diff is genuinely empty, GP5's frozen bar is
+byte-identical across all four rounds, and every figure in every kept file checks out
+against the fixture. What fails is the judgment behind the re-cut.
+
+**The decisive finding.** `cairn/references/mpl-twoway-random-comparison.md:638` still
+says "no committed fixture sweeps that axis alone". **E2 and E3 differ only in rater
+count** (`n_s` 40, `delta` 4, `rho` 0.60, `conf` 0.95; `n_r` 10 vs 2) — verified
+programmatically here, as at pass 3. This is verbatim the claim that ended pass 3. The
+re-cut did not remove it; it moved it out of `R/icc.R` into the note, which M92 keeps.
+M94 cannot cover it either: M94's Scope In is the exported surface, so the note's copy
+has no owner.
+
+**Why the amendment is the failure, not the prose.** Original AC5 required *every in-repo
+statement* about the 0.95 evidence to match the fixture. Amended AC5 requires an empty
+exported-doc diff plus no restated figures. The amended form passes while the falsified
+statement above sits in a kept file, because a false *negative claim* is not a restated
+*figure*. The narrowing I wrote at the plan gate therefore excused a real defect rather
+than only relocating one — the reviewer's judgment, and it is correct.
+
+**The enforcement addresses the wrong class.** Of three prior failures, only pass 2 was
+figure-staleness. Pass 1 was a seed collision falsifying independence; pass 3 — the trip
+that reached the thrash rule — was a false claim about the fixture, which no figure grep
+of any formatting variant can detect. The checker built at T11 targets the class that
+failed once, not the class that ended the milestone twice.
+
+**The checker also overpromises, and `R/ci-mpl.R:224` points users at it as enforcement.**
+Verified defects: no probe contains a slash, so the house-style `miss 42/14` is
+undetectable (its own docstring names "42 / 14" as a historical miss); an unresolvable
+`origin/main` makes both halves report green rather than error; `changed_files()` becomes
+empty at merge, so the restatement half no-ops permanently once M92 lands; it is not
+wired into the CI job carrying its two sibling checkers; `PERMITTED` is broader than AC5
+and the script exempts itself while containing a live probe string; and four of seven
+`NON_DISCRIMINATING` entries never fire, `1.000`/`1.0000` being inert while hiding E3's
+run-1 coverage and its run-2 `cp_hi`.
+
+**One claim the revert itself falsified** (finding 2): the note at :638-639 says "the
+exported text now reports both observations without attributing the difference" — after
+T10 restored `R/icc.R`, the exported text reports only D1's, and E2's split appears in no
+exported file.
+
+### Assessment
+
+Four passes; the coverage measurement was correct and stable in all four. Every failure
+has been an interpretive claim I authored about that measurement, and the re-cut I
+designed to end the class instead narrowed the criterion around it. The defect generator
+is the interpretive prose — the note's "three things the cells establish beyond the
+headline" bullets are where pass-3's and pass-4's failures both live — not the evidence,
+the code, or the fixtures.
