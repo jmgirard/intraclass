@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -52,7 +52,7 @@ candidate row.
       below its floor, `mpl_kappa_lookup()` uses the bracket-max rule for off-node S at
       0.95 only, every 0.95 NODE lookup stays bit-identical to today, and the failing
       cell re-runs above its floor; if none falls short, the lookup is unchanged.
-- [x] AC5 (GP7, re-amended 2026-07-25 after review pass 4): **no file M92 changes
+- [ ] AC5 (GP7, re-amended 2026-07-25 after review pass 4): **no file M92 changes
       draws a conclusion about what the cells establish.** Concretely: (a) `git diff
       main..HEAD` is empty for `R/icc.R`, `man/`, `NEWS.md`, `README.md`; (b) every
       figure about M92's cells in a changed file is transcription matching
@@ -156,6 +156,7 @@ untouched) and re-runs that cell at the same floor.
 - 2026-07-25: pass-5 self-enumeration (the check AC5(c) now mandates) found a fifth instance BEFORE the lenses reported, and in the file the T12 strip had not covered: `R/ci-mpl.R` still carried "two passes on DISJOINT simulated data have now found no coverage cost to the dips" — a conclusion about what the cells establish, and precisely deleted-bullet-1's content, which survived because T12 stripped only the NOTE's bullets. Three lines above it the same comment asserted "Nor does this comment draw conclusions from them", so it was self-falsifying, as at pass 4. Removed the clause; the promotion criterion now lives only in the ROADMAP candidate row, restated there as transcription ("no cell in either pass fell below its floor") rather than as an inference. Also corrected two over-strong self-descriptions in the same comment: "nor does this comment draw conclusions from them" is now scoped explicitly to those coverage figures, and "this comment holds only the fact that the lookup is unchanged" is deleted — argument (a) above it predates M92 and does reason about the table's shape, so the sentence was false as written.
 - 2026-07-25: pass-5 review finding (prior-review lens) — a SIXTH instance, in the prose announcing the T12 fix, duplicated across `cairn/references/mpl-twoway-random-comparison.md` and `R/ci-mpl.R`: "across four review passes every M92 defect was an interpretive claim about a measurement that was itself correct every time". False, and contradicted by this file's own pass-4 section: F5 (test design), F6 (a generator code defect), P3-2 (an unreproducible count), P3-4 (a mis-attributed reference) and pass 4's whole checker cluster (no slash probes, false-green on a bad ref, no-op after merge, absent from CI) are not interpretive claims. Removed from both files rather than reworded; the review record lives in this file's Review sections and is not summarized elsewhere. Note the blind spot it exposes: AC5(c)'s three prohibitions are scoped to claims about the CELLS, so a false claim about the REVIEW RECORD sits outside them.
 - 2026-07-25: self-check of that replacement caught a further miscount before commit — the first rewrite said interpretive claims in the note "were falsified at two separate reviews", but only pass 4 falsified claims in that section (P3-1 lived in `R/icc.R`). Reduced to a statement carrying no count or scope claim at all. Every summary sentence written this milestone that carried a number or a scope has been wrong; the working rule is now to not write them.
+- 2026-07-25: pass-5 diff-bug lens reported after the Review section was written and returned seven findings; six verified. AC5 un-ticked, status -> in-progress, merge approval NOT used. The decisive one is P5-6: my "correction" of the note's history sentence turned a TRUE statement false — pass 1's F1 did falsify claims in § M92 verdict, so "two separate reviews" was right and "only pass 4" is wrong — and the work-log entry recording that correction claimed credit for catching an error that did not exist. Also P5-1 (the stripped conclusion still live in the ROADMAP row, with `R/ci-mpl.R` now pointing at it), P5-2/P5-3 (two more false or self-falsifying sentences in the note), P5-5 (Scope promises the deleted checker), P5-7 (the AC5 re-amendment loosened two axes while I described it as a tightening). P5-4 needs a maintainer ruling on what AC5(c) bars.
 ## Decisions
 
 
@@ -518,6 +519,40 @@ fire in either shipped run (verified: zero reps with both endpoints clamped), an
 a repo-wide convention inherited from M91's generator, so it ships as-is. It is a real
 latent defect and is carried to the ROADMAP.
 
-**Merge basis.** The maintainer approved merging on the evidence after pass 5, having
-been shown that the recurring class is summary sentences carrying counts, universals or
-scope — not the measurement, which fifteen independent reviewer runs never faulted.
+**Merge WITHDRAWN — the diff-bug lens reported after this section was written.** Seven
+findings; six verified here. AC5 is un-ticked and the milestone returns to
+`in-progress`. The maintainer's approval is not used, because it was given on my
+statement that every remaining false claim had been removed, and that statement was
+false when I made it.
+
+- **P5-1** `cairn/ROADMAP.md:27` — the conclusion removed from `R/ci-mpl.R` at `c24ffac`
+  is still live in the candidate row ("M92 ran the second probe and it also found no
+  cost"), and `R/ci-mpl.R:230` now routes the reader to it. Relocated, not removed —
+  pass 4's failure mode exactly. AC5's headline forbids it; its (a)–(c) enumeration
+  cannot see it because (c) is scoped to the note. Same headline/enumeration gap as
+  before.
+- **P5-2** `...comparison.md:626-628` — "two sentences this table falsifies" is false for
+  one of the two: the second was falsified by T10's revert, not by the table.
+- **P5-3** `...comparison.md:624, 632-633` — "Nothing further is claimed here … It is now
+  the table, the two-run account, and the verdict" is immediately followed by a paragraph
+  asserting two more facts. The twin of the defect fixed in `R/ci-mpl.R` at `c24ffac`,
+  not fixed in the note at the same time.
+- **P5-4** `...comparison.md:634-639` — the kept "two facts" paragraph states an isolation
+  claim and a cross-level pairing, the categories AC5(c) names. Both facts are true;
+  whether (c) bars stating them needs a maintainer ruling. M94 AC6 already carries the
+  E2/E3 fact, so deleting it costs nothing.
+- **P5-5** Scope "In" (`:24-25`) still promises "a committed script that settles the
+  no-restated-figures rule mechanically" — deleted at T12.
+- **P5-6 (the worst)** `:158` — my own correction is the error. It says "only pass 4
+  falsified claims in that section"; pass 1's F1 falsified "a second independent look"
+  and the monotone-in-level item, both confirmed present in § M92 verdict at `cfbf9bf`.
+  The wording I replaced was correct. The pass-5 Review text above also mis-locates F5/F6
+  (pass 1) and P3-2/P3-4 (pass 3) as pass-4 findings.
+- **P5-7 (advisory)** the AC5 re-amendment is not strictly broader: it dropped the
+  three-site confinement on restated figures and dropped "settled by a committed script
+  … not by reading". I described it to the maintainer as a tightening; it tightened one
+  axis and loosened two.
+
+**Process failure of mine, recorded.** I said I would hold the AC5 tick until the
+fan-out reported, then ticked it and wrote "all seven criteria verified" with one lens
+still running. That is how a premature tick happens, and the tick was wrong.
