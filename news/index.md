@@ -83,14 +83,24 @@
   deliberately **conservative** opt-in (it over-covers and is wider than
   the Monte-Carlo interval at interior settings), so it is not the
   default. It applies only to the two-way random absolute-agreement
-  design at `conf_level = 0.95` and aborts on any other design, on
-  consistency, on fixed raters, and on unbalanced, incomplete, or
-  within-cell-replicated data. The averaged `ICC(A,k)` interval, and a
-  numeric `unit` (a D-study projection `ICC(A,m)` to the mean of `m`
-  raters, for any `m >= 1`), are the exact Spearman-Brown image of the
-  `ICC(A,1)` interval. Its correction constant is calibrated by
-  simulation and, for intraclass correlations below about 0.6, rests on
-  that simulated coverage rather than an external benchmark.
+  design, at `conf_level` 0.90, 0.95, or 0.99, and aborts on any other
+  design or level, on consistency, on fixed raters, and on unbalanced,
+  incomplete, or within-cell-replicated data. The averaged `ICC(A,k)`
+  interval, and a numeric `unit` (a D-study projection `ICC(A,m)` to the
+  mean of `m` raters, for any `m >= 1`), are the exact Spearman-Brown
+  image of the `ICC(A,1)` interval. Its correction constant is
+  calibrated by simulation separately for each supported level — it is
+  never interpolated between levels, which is why other levels abort
+  rather than approximating one — and for intraclass correlations below
+  about 0.6, and at 0.99 throughout, rests on that simulated coverage
+  rather than an external benchmark. Two properties to know before
+  quoting a limit: the two-sided interval is **not equal-tailed** (where
+  rater variance is large relative to error and subjects are many,
+  non-coverage is almost all on one side), so a limit is not a one-sided
+  bound at half the complementary level; and at 0.99 with very few
+  raters it can be near-vacuous (median width 0.905 at 2 raters and 40
+  subjects), which is the cost of a deep tail on little rater
+  information.
 
 - The `lavaan` (SEM) engine now fits the **crossed (Design 1)
   multilevel** design: `icc(..., engine = "lavaan", cluster = ...)`

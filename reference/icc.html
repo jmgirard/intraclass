@@ -289,7 +289,9 @@ package; <code>"brms"</code> requires the <span class="pkg">brms</span> package 
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
-<dd><p>Confidence level for the interval (default <code>0.95</code>).</p></dd>
+<dd><p>Confidence level for the interval (default <code>0.95</code>). Any level
+in <code>(0, 1)</code> is accepted, except under <code>ci_method = "mpl"</code>, which is calibrated
+at 0.90, 0.95, and 0.99 only (see <code>ci_method</code>).</p></dd>
 
 
 <dt id="arg-ci-method">ci_method<a class="anchor" aria-label="anchor" href="#arg-ci-method"></a></dt>
@@ -345,16 +347,28 @@ pole-safe for every <code>m &gt;= 1</code>); it aborts on any other design, on c
 <code>boot_samples</code>, and <code>seed</code> do not apply) that, like <code>"npbootstrap"</code>, returns an
 interval on <strong>every</strong> dataset – including the near-zero-ICC boundary where the
 two-way Monte-Carlo default aborts – and covers at or above nominal across the
-pre-registered grid where the incumbents can under-cover (assessed GO-for-opt-in in
-M87). It is deliberately <strong>conservative</strong> (it over-covers, and is wider than the
-Monte-Carlo interval at interior cells), so it is an opt-in, not the default.
-Two constraints follow from its calibration. It is available <strong>only at
-<code>conf_level = 0.95</code></strong> (the level its correction constant is tabulated for; other
-levels abort). And its correction constant is calibrated by simulation over
-<code>rho in [0.05, 0.9]</code>, extending below Xiao &amp; Liu's published <code>rho &gt;= 0.6</code> fence
-into a near-boundary region that <strong>carries no external oracle</strong> – there, the
-interval's calibration rests on the package's own simulated coverage. It assumes
-approximately Gaussian data (untested for non-normality).</p></dd>
+pre-registered grid where the incumbents can under-cover (assessed as
+GO-for-opt-in against that grid). It is deliberately <strong>conservative</strong> (it
+over-covers, and is wider than the Monte-Carlo interval at interior cells), so it
+is an opt-in, not the default.</p>
+<p>Two constraints follow from its calibration. It is available <strong>only at
+<code>conf_level</code> 0.90, 0.95, or 0.99</strong> – the correction constant is calibrated
+separately at each level's own deviance quantile and is never interpolated
+between levels, so any other level aborts. And that constant is calibrated by
+simulation over <code>rho in [0.05, 0.9]</code>, extending below Xiao &amp; Liu's published
+<code>rho &gt;= 0.6</code> fence into a near-boundary region that <strong>carries no external
+oracle</strong>; there, and at <code>conf_level = 0.99</code> throughout, its calibration rests on
+the package's own simulated coverage.</p>
+<p>Two further characteristics are worth knowing before reporting an endpoint. The
+two-sided interval is <strong>not equal-tailed</strong> – where rater variance is large
+relative to error and the subject count is high, non-coverage falls almost
+entirely on one side (65 of 66 misses below the interval in one validated cell) –
+so a limit must not be read as a one-sided bound at half the complementary level.
+And at <code>conf_level = 0.99</code> with very few raters the interval can be
+<strong>near-vacuous</strong>: median width 0.905 on the <code>[0, 1]</code> scale at 2 raters and 40
+subjects. That is the honest cost of a deep tail at minimal rater information,
+not a defect (coverage there is 1.000), but such an interval excludes little.
+It assumes approximately Gaussian data (untested for non-normality).</p></dd>
 
 
 <dt id="arg-mc-samples">mc_samples<a class="anchor" aria-label="anchor" href="#arg-mc-samples"></a></dt>
