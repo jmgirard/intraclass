@@ -238,3 +238,5 @@ could not — T1's settling directive called `Rscript` and that job is Python-on
 (`Rscript: command not found` → falsified). Rewritten as a text-only `python3` check
 over the note's own frozen-cells table and mutation-verified; no other
 `check: Rscript` directive exists in the corpus.
+
+**PR #98 CI: green 9/9** on d3523e3 — `check-references`, `format-check`, `lint`, `pkgdown`, `test-coverage`, `ubuntu-latest (release)`, `windows-latest (release)`, `codecov/patch`, `codecov/project`; `mergeable=MERGEABLE`, `mergeStateStatus=CLEAN`. (The heavy jobs on the preceding commit were cancelled by the findings push — the documented `cancel-in-progress` behavior, M78 — so this run is the authoritative one.)
