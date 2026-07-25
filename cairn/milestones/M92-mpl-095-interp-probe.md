@@ -1,6 +1,6 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -131,6 +131,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: T7 done (F1). `seed_base` 20260725 -> 20920725, chosen so M92's seed span is disjoint from M91's; added a `stopifnot` that recomputes M91's span from ITS committed constants and asserts zero intersection, mutation-verified to error when the old base is restored. Guard pins the FROZEN n_rep 1000, not `cells$n_rep`, so smoke mode cannot relax it. Run 1 preserved at `data-raw/m92-interp-sweep-run1-collided.rds`; re-run written to `data-raw/m92-interp-sweep.rds`. New numbers: E1 0.9670 [0.9540, 0.9772] miss 31/2; E2 0.9440 [0.9279, 0.9574] miss 42/14; E3 0.9990 [0.9944, 1.0000] miss 0/1 — all three still clear the frozen 0.93 floor, and kappa_m is bit-identical across runs (table-derived, not run-derived). GP5 posture recorded explicitly in the note: run 1 ALSO cleared every floor, so no floor result motivated the re-run — the defect was reproducibility, not outcome.
 - 2026-07-25: T8 done (F3) — generator header now states E3 is a large-kappa_m CONCAVE bracket and names the actually-larger (R=2, S 50->100) bracket and the 1.6245 slice maximum, with the correction dated.
 - 2026-07-25: also fixed three sub-80 findings opportunistically while editing the same lines, each verified true first and each noted as such rather than folded in silently — F2 (68): `@param ci_method` no longer attributes the one-sidedness difference to rater count, since the two cited cells differ in R, S and level together; F4 (78): "same evidential footing" -> the interpolated path is coverage-CHECKED at each level at a handful of geometries, while nodes are individually CALIBRATED; F5 (62): added a non-midpoint pin (R=3, S=22 -> 0.6624794) plus an explicit refutation that the value equals the bracket mean, so the test now discriminates any bracket-symmetric rule, not just bracket-max. F6 (35) deliberately left alone — a repo-wide convention inherited from M91's generator, out of M92's scope.
+- 2026-07-25: T7/T8 done, gate re-run clean (check Status OK 0/0/0; tests FAIL 0 / PASS 4213; 0 lints; air clean; document() no-diff; pkgdown clean; both references checkers + cairn_validate green). Status -> review for a second pass; AC5 stays unticked until review re-verifies it against the new fixture.
 ## Decisions
 
 

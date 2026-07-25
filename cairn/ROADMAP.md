@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M92 | Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95` | in-progress | — | normal | milestones/M92-mpl-095-interp-probe.md |
+| M92 | Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95` | review | — | normal | milestones/M92-mpl-095-interp-probe.md |
 | M93 | Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand | planned | — | normal | milestones/M93-boundary-abort-hint.md |
 | M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | done | M90 | normal | milestones/archive/M91-mpl-conf-level-export.md |
 | M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | done | — | normal | milestones/archive/M90-mpl-conf-level-calibration.md |
