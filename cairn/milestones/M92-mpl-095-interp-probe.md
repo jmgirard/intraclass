@@ -1,11 +1,11 @@
 # M92: Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95`
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6, GP7
-- **Branch/PR:** `m92-mpl-095-interp-probe`
+- **Branch/PR:** `m92-mpl-095-interp-probe` · https://github.com/jmgirard/intraclass/pull/99
 
 ## Goal
 
@@ -120,6 +120,7 @@ re-runs at the same `n_rep` against the same floor.
 - 2026-07-25: T5 done — restated the evidence status at five sites: `R/ci-mpl.R`'s GP7 interpolation comment (0.95 now confirmed, with the three cells and the untriggered consequence named), `@param ci_method` in `R/icc.R` (adds the interpolated-path guarantee), `NEWS.md` (same, user-facing), the note's new § M92 verdict, and § M91's now-false standing claim that 0.95 remains unprobed — corrected in place and marked superseded, not rewritten (D-045). Also narrowed the one-sidedness wording everywhere it appeared: E2 measured 34/13 at R = 10 against D1's 65/1 at R = 3, so the blanket reading was wrong. `document()` re-run (man/icc.Rd), ledger refreshed (1 orphan row dropped, 5 added), both references checkers + cairn_validate green, 169 mpl tests pass.
 - 2026-07-25: correction (supersedes the "largest κ_m" wording in the plan-gate and T3 entries above, which are history and stay as written). Ran the M72 self-check — grep own new prose for counts and universals, re-derive each against the source — over everything this milestone wrote. E2's "worst 0.95 downward step" holds (−0.0681 at R=10, S 30→50 is the most negative in the slice). **E3's "largest κ_m at 0.95" does not**: `(R=2, S 50→100)` is higher at 1.4657 → 1.6245 and the slice maximum is 1.6245 at `(2, 100)`. E3 is the largest-κ_m cell THIS pass sweeps, on a concave bracket, at D3's geometry — which is the real reason it was chosen. Corrected at all four live sites (pre-registration bullet + cells row, § M92 verdict, `R/ci-mpl.R`, the AC table), marked in place per D-045; cells, floors and `n_rep` untouched, so the frozen bar is unchanged (GP5).
 - 2026-07-25: T6 done — envelope candidate row updated with M92's evidence (two passes now find no coverage cost to the dips; promote only on a NEW failure); the probe candidate was already absorbed at the plan gate. Gate: `devtools::check(env_vars = c(NOT_CRAN = "false"), manual = FALSE)` → Status OK, 0 errors / 0 warnings / 0 notes; full suite at `NOT_CRAN=true CI=true` → FAIL 0, PASS 4210, SKIP 23, WARN 2 (pre-existing glmmTMB convergence warnings on the multilevel path — verified not ours: `git diff main..HEAD -- R/` changes zero non-comment lines); air + lintr clean; `document()` no-diff; both references checkers and cairn_validate green. AC1 ordering verified from git log: pre-registration da10025 (08:55:23) precedes the first result 2b984af (08:58:08). Manual built with `--no-manual` locally (known TinyTeX Courier font gap, not an Rd problem); CI builds it.
+- 2026-07-25: all tasks done, gate clean; PR #99 opened, status -> review.
 
 ## Decisions
 
