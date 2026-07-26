@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -182,6 +182,8 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 - 2026-07-26: T1-T4 — `boundary_data_degenerate()` now wraps extraction and both guards inside its `tryCatch`, so a probe that cannot be built reads as "this row's methods fail here" instead of replacing the user's abort; `complete = !anyNA(df$score)` gates every row; `isTRUE(ss$msa == 0)` joins the one-way condition; and `boundary_classical_sb_ok()` returns a per-method verdict from each method's own ICC(1) lower endpoint, letting the pair split. End-to-end: `unit = 6` now names burch only, `unit = 10` names neither, an NA score names nothing on either design and keeps class `intraclass_singular_fit`, SSA = 0 names nothing — while healthy one-way still names both and healthy two-way still names mpl 6/6 aborts.
 - 2026-07-26: T5 — the sweep's acceptance predicate is now `bh_usable()` (every reported interval finite and `conf.low <= conf.high`), defined once and used by the flag test too; the grid gained the two shapes no earlier sweep had, missing scores and numeric `unit`, plus an AC2 never-raise test over 16 NA-carrying designs. The non-vacuity pin moved onto a two-way cell that must fire, because the SSA = 0 cell that used to carry it is now correctly silent. Mutation-verified, all four fixes: probe-error-not-degenerate reds 3, no completeness gate reds 6, MSA = 0 ignored reds 2, pole test disabled reds 10.
 - 2026-07-26: T6 — `NEWS.md` and `@param ci_method` now say a method is named only where it would return a usable interval on that data, checked per method, and name missing scores and the projection limit among the silent cases; `man/icc.Rd` regenerated. M93 test file: 408 assertions, FAIL 0, SKIP 0.
+
+- 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0), `devtools::test()` FAIL 0 / PASS 4613 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync.
 
 ## Decisions
 
