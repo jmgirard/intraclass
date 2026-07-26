@@ -160,6 +160,8 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 
 - 2026-07-25: review pass 4 FAILED the gate — the forbidden shape is back, via a mechanism no earlier pass touched: a MISSING SCORE. F2 (95) the hint's own degeneracy probe throws `intraclass_unidentified` and replaces the boundary abort (AC2); F1 (94) an NA-carrying two-way design is `balanced` by cell counts, so the hint names `mpl` and `mpl` aborts (AC3); F4 (88) numeric `unit` is no longer an input, so the balanced row steers it into a reversed interval; F3 (87) on the SSA = 0 data this pass deliberately un-suppressed, `searle` returns [-0.5, -0.5] / [-Inf, -Inf] and `burch` returns NaN, so the shipped "return a result" sentence is false — and the plan-gate evidence for that change tested only that no error was raised, never the values. AC2/AC3 ticks withdrawn; AC1, AC4-AC7 stand. Neither my sweep nor the committed one constructs an NA, and both score a method "accepted" iff `icc()` does not raise. FOURTH return from review; thrash-rule disposition left to the maintainer. Status -> in-progress.
 
+- 2026-07-25: CI footnote for the record — on the pass-4 evidence head `349d4bd`, 8 of 9 checks passed (both codecov, `check-references`, `format-check`, `lint`, `pkgdown`, `test-coverage`, `ubuntu-latest`); `windows-latest` shows `cancelled`, killed by the next push rather than failing (the M77/M78 cancel-in-progress behaviour). Moot for the verdict — the gate failed on AC2/AC3, not on CI.
+
 ## Decisions
 
 ## Review
