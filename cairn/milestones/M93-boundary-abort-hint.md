@@ -50,7 +50,7 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [ ] AC2: `icc()` derives the hint from the fence predicates plus the observed
+- [x] AC2: `icc()` derives the hint from the fence predicates plus the observed
       subject/rater counts, a per-row degeneracy check, the scores' completeness and the
       requested `unit`, and passes it to the two reachable Monte-Carlo aborts
       (`R/ci-montecarlo.R:43`, `:124`); the abort class, leading message and existing
@@ -60,7 +60,7 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
       test drives the hint over inputs that make each probe fail and asserts the abort
       keeps class `intraclass_singular_fit`. No design names `"npbootstrap"` (→ M97);
       `R/ci-bootstrap.R:48` excluded on T1 evidence.
-- [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
+- [x] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
       from hand-written expectations — trigger the real `icc()` abort, parse the method
       names out of the message that fired, run each on that same data, and require a
       USABLE interval: finite and `conf.low <= conf.high` on every estimand returned.
@@ -640,3 +640,78 @@ produced this re-cut, so the count is ambiguous and the disposition is the maint
 counting from the re-cut this is the first failure, but counting the milestone it is the
 fourth. What is not ambiguous is that F3 is a scope question rather than a bug — whether
 the hint should fire on SSA = 0 data at all — and that belongs at a plan gate.
+
+---
+
+## Review pass 5 (2026-07-26) — the second re-cut
+
+**Branch state.** `main` 0/0 with `origin/main`; branch 35 ahead / 0 behind, so no merge
+was needed before gathering evidence. PR #100, head `7f78b26`, all 9 CI checks green.
+
+**Fresh per-criterion evidence.** All from commands run this phase. The M93 file runs
+**400 assertions, FAIL 0, SKIP 0** at `NOT_CRAN=true CI=true` (18.8 s); the zero skip
+count matters, because several tests carry a `skip_if()` on boundary luck.
+- AC1 — `:125` builds the near-σ²→0 datasets over 12 seeds each and asserts the DEFAULT
+  MC path aborts on both one-way and two-way, that every abort reached is a Monte-Carlo
+  site (A or B) and never the bootstrap site, and that site B occurs. The site
+  enumeration AC1 asks the work log to record is there (T1 line, 2026-07-25): `:124`
+  21/40 two-way + 19/40 one-way, `:43` 1/40, `R/ci-bootstrap.R:48` 0/90. Untouched by
+  either re-cut.
+- AC2 — the four non-fence inputs are each evidenced: counts at `:626`, the degeneracy
+  flag at `:729`, completeness at `:1168`, and the per-method Spearman-Brown verdict at
+  `:1228`. Additivity at `:392` (class, leading message and BOTH pre-existing remedies
+  survive verbatim while a no-opt-in design gains nothing) and `:446` (`hint` defaulted
+  on all four helpers, `rmvn()`'s argument order pinned so `engine-lavaan.R`'s
+  positional calls stay safe). The NEVER-RAISE clause — the sharper half, and the one
+  pass 4 failed — is at `:1168`: 16 NA-carrying designs across both models, every abort
+  reached asserted to be `intraclass_singular_fit` and nothing else. I confirmed the
+  same by hand: pre-re-cut code gives `intraclass_unidentified` on that data, HEAD gives
+  `intraclass_singular_fit`. `"npbootstrap"` is named on no design (`:262`, `:283`).
+- AC3 — I ran my own sweep, written from the criterion and not from the test file, in
+  BOTH directions: for every design where the default aborts, parse the method names out
+  of the real message, run each on the same data, and require a finite ordered interval
+  from `generics::tidy()`; then, for every method the design fence admits that was NOT
+  named, check it would not have worked either. **252 aborts, 367 method-names, 0
+  named-but-unusable, 0 silent-but-usable.** Cells: one-way at 6 subject counts × 3
+  rater counts × 5 data kinds (integer, gaussian, binary, 1e6-scaled, 1e-8-scaled) × 3
+  seeds; 9 `unit` variants incl. vectors and numerics; 5 `conf_level`s; two-way at 7
+  subject counts × 5 rater counts on and off the κ_m grid, plus type/unit/conf_level/
+  fixed-rater variants; `NA` at 4 positions on each model; 3 imbalance shapes at 3
+  sizes; and the three degenerate shapes. The committed sweep asserting the same
+  property is at `:1040` and `:1078`, with the two shapes no earlier sweep had at
+  `:1168` and `:1228`; `bh_usable()` is its single acceptance predicate, used by the
+  degeneracy test too.
+- AC4 — no-opt-in designs pinned at `:306` (fixed raters, multilevel, replicates,
+  explicit consistency, unbalanced two-way, unbalanced one-way) and `:327` (the level
+  set read from `kappa_m_table`, so it tracks a recalibration). `:392` is what makes
+  "generic remedies alone" testable rather than asserted, and my sweep's zero
+  silent-but-usable count is the converse evidence over 252 aborts: no design was
+  silenced where a method the fence admits would have delivered.
+- AC5 — `:417` confirms the boundary case still raises `intraclass_singular_fit`, is an
+  `rlang_error` and not an `icc` object, so no interval is returned and the D-012-fenced
+  fallback-on-abort default is not implemented. Worth stating explicitly because this
+  pass computes interval ENDPOINTS inside the abort path for the pole test: they decide
+  whether to NAME a method and are then discarded, and no code path returns them.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, rewritten
+  this pass: it now says a method is named only where it would return a usable interval
+  on that data, checked per method, and lists missing scores and the projection limit
+  among the silent cases. `@param ci_method` carries the matching wording;
+  `man/icc.Rd` is regenerated in the diff.
+- AC7 — all run this phase on the final tree: `devtools::check(env_vars = c(NOT_CRAN =
+  "false"))` **Status: OK** (0 errors / 0 warnings / 0 notes), full suite FAIL 0 / PASS
+  4613 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` "No lints found",
+  `air format --check .` clean, `devtools::document()` empty `git status`. The snapshot
+  clause is vacuous by inspection: `git diff --name-only main..HEAD` contains no
+  `_snaps/` path. PR #100 all 9 checks green on `dca709a`.
+
+**Consistency gate.** `cairn_validate` exit 0 — 16 PASS including `coverage complete`,
+`weight caps`, `mirror agreement`, `at most one in-progress` and `sizing (split
+tripwires)`; advisories only (321 `dangling id tokens`, all pre-existing pre-migration
+ids, unchanged by this diff). Profile `consistency-gate` slot: `devtools::document()`
+no-diff · no generated file hand-edited (`man/icc.Rd` regenerated from roxygen) ·
+`README.Rmd` untouched · `pkgdown::check_pkgdown()` "No problems found" · `NEWS.md`
+entry present and rewritten this pass · no new top-level file in the diff, so no
+`.Rbuildignore` entry owed · `devtools::check()` Status OK. Also clean: the
+`check-references` CI job's two gates locally (`check-reference-observations.py` 0
+falsified, the M74 claim enumerator in sync). No `DESIGN.md` principle changed, so
+`cairn_impact` does not apply.
