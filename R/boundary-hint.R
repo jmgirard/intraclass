@@ -58,14 +58,94 @@
 # because the glmmTMB POINT fit dies on it first (all probed at the M93 implement gate).
 boundary_data_degenerate <- function(df, oneway) {
   if (isTRUE(oneway)) {
-    ss <- classical_oneway_ss(npb_groups(df))
-    probe <- tryCatch(
-      classical_guard_observed(ss, "SEARLE exact-F", rlang::current_env()),
-      error = function(e) e
-    )
-    return(inherits(probe, "condition"))
+    # EVERYTHING is inside the tryCatch, extraction included. `npb_groups()` raises
+    # `intraclass_unidentified` on an NA score, and this runs while the boundary abort's
+    # message vector is being built -- so a probe that throws does not report a
+    # degeneracy, it REPLACES the user's `intraclass_singular_fit` with an unrelated
+    # error about a bootstrap they never asked for (M93 pass-4 F2, scored 95). Any
+    # failure here means "this row's methods cannot work on this data", which is exactly
+    # the answer the check exists to give, so it is caught and reported as TRUE.
+    return(tryCatch(
+      {
+        ss <- classical_oneway_ss(npb_groups(df))
+        classical_guard_observed(ss, "SEARLE exact-F", rlang::current_env())
+        # MSA = 0 (every subject mean exactly equal) passes both shipped guards and
+        # still breaks both methods: `burch_kappa_hat()` divides by sqrt(msa) -> NaN,
+        # and searle's averaged endpoint is -Inf (pass-4 F3, scored 87). searle's
+        # ICC(1) alone survives as [-1/(n-1), -1/(n-1)], a zero-width interval pinned
+        # at the support floor; the implement gate chose to stay silent rather than
+        # offer that, so the whole row goes quiet here.
+        isTRUE(ss$msa == 0)
+      },
+      error = function(e) TRUE
+    ))
   }
   isTRUE(stats::var(df$score) == 0)
+}
+
+# Does the Spearman-Brown projection to each requested divisor stay well-posed for this
+# method's own ICC(1) interval? `npb_sb(rho, m) = m*rho/(1 + (m-1)*rho)` has a pole at
+# `rho = -1/(m-1)`; a lower endpoint below the pole is mapped ABOVE +1 and the interval
+# comes back reversed -- `searle` gives ICC(6) = [4.594, 0.602] on ordinary boundary
+# data (pass-4 F4, scored 88). `icc()` fences a numeric `unit` off the unbalanced
+# npbootstrap path for this same reason (`R/icc.R:1417-1431`); the balanced classical
+# path never had such a fence.
+#
+# The test is exact and per method, not a blanket numeric-`unit` refusal: measured at
+# the implement gate against the real intervals at m = 2, 3, 4, 5, 6, 10, 20, it agrees
+# with observed reversal in every cell for BOTH methods -- and the two methods differ
+# (searle reverses from m = 5, burch only from m = 10 on the same data), so a shared
+# rule would have to over-suppress one of them.
+boundary_sb_safe <- function(rho_lower, divisors) {
+  if (!is.finite(rho_lower)) {
+    return(FALSE)
+  }
+  all(vapply(
+    divisors,
+    function(m) !is.finite(m) || m <= 1 || rho_lower > -1 / (m - 1),
+    logical(1)
+  ))
+}
+
+# Per-method verdict for the balanced one-way row: is this method's ICC(1) interval
+# projectable to every divisor the caller asked for? Returns a named logical, one entry
+# per method, in the order the message names them. Each method's OWN ICC(1) lower
+# endpoint is used -- they differ (searle's exact-F limit is more negative than burch's
+# REML one on the same data), which is why the pair can split. Wrapped whole: like
+# `boundary_data_degenerate()`, this runs while an abort message is being built, so a
+# failure must read as "cannot offer this method", never escape (pass-4 F2).
+boundary_classical_sb_ok <- function(df, conf_level, divisors) {
+  out <- c(searle = FALSE, burch = FALSE)
+  tryCatch(
+    {
+      ss <- classical_oneway_ss(npb_groups(df))
+      s_lo <- searle_endpoints(
+        ss$msa,
+        ss$mse,
+        ss$df1,
+        ss$df2,
+        ss$n,
+        conf_level
+      )[["lower"]]
+      kappa_bc <- burch_kappa_bc(
+        burch_kappa_hat(npb_groups(df), ss$msa, ss$mse),
+        ss$k,
+        ss$n
+      )
+      b_lo <- burch_reml_endpoints(
+        ss$msa,
+        ss$mse,
+        ss$k,
+        ss$n,
+        burch_g(kappa_bc),
+        conf_level
+      )[["lower"]]
+      out[["searle"]] <- boundary_sb_safe(s_lo, divisors)
+      out[["burch"]] <- boundary_sb_safe(b_lo, divisors)
+    },
+    error = function(e) NULL
+  )
+  out
 }
 
 # Build the design-aware `i =` bullets for a boundary abort. Returns a named
@@ -73,12 +153,19 @@ boundary_data_degenerate <- function(df, oneway) {
 # character(0) when no opt-in method applies to this design -- in which case the
 # abort keeps its generic remedies alone (AC4).
 #
-# `n_s`/`n_r` are the observed subject and rater counts and `degenerate` is
-# `boundary_data_degenerate()` above: the two inputs that are NOT design fences, added
-# after review pass 1 found the hint naming methods that then abort (F1: `mpl` off its
-# kappa_m calibration grid; F2: the one-way methods on degenerate data). `degenerate`
-# is a PROMISE carrying the row-appropriate condition, forced inside whichever branch
-# names a method and nowhere else.
+# Four inputs are NOT design fences, each added after a review pass found the hint
+# naming a method that then failed: `n_s`/`n_r` (the kappa_m calibration grid, pass-1
+# F1), `degenerate` (data on which the row's own methods abort, pass-1 F2 and pass-4
+# F3), `complete` (pass-4 F1) and `sb_ok` (pass-4 F4). `degenerate` and `sb_ok` are
+# PROMISES, forced inside whichever branch names a method and nowhere else.
+#
+# `complete` is FALSE when any score is `NA`. It gates every row, before the design
+# split, because no method survives such data: `balanced` is computed from
+# `table(subject, rater)` CELL COUNTS (`R/design.R:53`), which count an NA-scored row
+# as an observed cell, so a design carrying NAs looks complete to every fence here
+# while `mpl` aborts on the reshaped cell and the classical pair's summary goes NA
+# (pass-4 F1, scored 94). One gate for one input beat two mechanisms guarding the same
+# hole (implement gate, 2026-07-26).
 boundary_method_hint <- function(
   oneway,
   multilevel,
@@ -90,11 +177,16 @@ boundary_method_hint <- function(
   conf_level,
   n_s,
   n_r,
-  degenerate
+  complete,
+  degenerate,
+  sb_ok
 ) {
   # A cluster facet or within-cell replicates put the design outside EVERY opt-in
   # method's fence, whatever else is true, so neither branch below can apply.
   if (isTRUE(multilevel) || isTRUE(replicates)) {
+    return(character(0))
+  }
+  if (!isTRUE(complete)) {
     return(character(0))
   }
 
@@ -111,11 +203,28 @@ boundary_method_hint <- function(
     if (isTRUE(degenerate)) {
       return(character(0))
     }
+    # Each method is named only where its own Spearman-Brown projection stays well
+    # posed for every requested divisor, so the pair can split: at a numeric `unit`
+    # searle drops out before burch does.
+    named <- names(sb_ok)[vapply(sb_ok, isTRUE, logical(1))]
+    if (!length(named)) {
+      return(character(0))
+    }
+    blurb <- c(
+      searle = "{.code ci_method = \"searle\"} (best calibrated when the data are \\
+                close to normal, and narrowest)",
+      burch = "{.code ci_method = \"burch\"} (never under-covers, at the cost of a \\
+               wider interval)"
+    )
+    lead <- if (length(named) > 1L) {
+      "Two interval methods return a result for this design where the default \\
+       cannot: "
+    } else {
+      "An interval method returns a result for this design where the default \\
+       cannot: "
+    }
     return(c(
-      i = "Two interval methods return a result for this design where the \\
-           default cannot: {.code ci_method = \"searle\"} (best calibrated when \\
-           the data are close to normal, and narrowest) and {.code \"burch\"} \\
-           (never under-covers, at the cost of a wider interval)."
+      i = paste0(lead, paste(blurb[named], collapse = " and "), ".")
     ))
   }
 

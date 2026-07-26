@@ -93,6 +93,33 @@ bh_probe_any <- function(d, ...) {
   )
 }
 
+# THE acceptance predicate, defined once. A method is accepted only if `icc()` returns
+# AND every interval it reports is finite and correctly ordered. "Did not raise" is NOT
+# acceptance: M93 pass 4 shipped `burch` returning NaN and `searle` returning
+# [4.594, 0.602] through a green suite that only checked for an error (F3, F4).
+bh_usable <- function(d, method, args = list()) {
+  fit <- tryCatch(
+    suppressWarnings(suppressMessages(do.call(
+      icc,
+      c(
+        list(d, quote(score), quote(subject), quote(rater)),
+        args,
+        list(ci_method = method)
+      )
+    ))),
+    error = function(e) NULL
+  )
+  if (is.null(fit)) {
+    return(FALSE)
+  }
+  tb <- generics::tidy(fit)
+  all(
+    is.finite(tb$conf.low) &
+      is.finite(tb$conf.high) &
+      tb$conf.low <= tb$conf.high
+  )
+}
+
 # ---- AC1: the reproduction, and which sites it reaches -----------------------
 
 test_that("a near-zero-variance dataset aborts through the DEFAULT MC path (AC1)", {
@@ -225,7 +252,9 @@ bh_hint <- function(...) {
     # below move it off the grid deliberately.
     n_s = 20L,
     n_r = 3L,
-    degenerate = FALSE
+    complete = TRUE,
+    degenerate = FALSE,
+    sb_ok = c(searle = TRUE, burch = TRUE)
   )
   do.call(boundary_method_hint, utils::modifyList(defaults, list(...)))
 }
@@ -701,45 +730,35 @@ test_that("the degeneracy flag fires exactly where the row's OWN guard fires (AC
   # One-way: the flag IS `classical_guard_observed()`, asked rather than restated, so
   # it must agree with that guard case by case -- including where it must NOT fire.
   expect_true(boundary_data_degenerate(bh_degen_within(), oneway = TRUE))
-  expect_false(boundary_data_degenerate(bh_degen_between(), oneway = TRUE))
+  # MSA = 0 is degenerate FOR THIS ROW: it passes both shipped guards, and still
+  # leaves burch at NaN and searle's averaged endpoint at -Inf (pass-4 F3).
+  expect_true(boundary_data_degenerate(bh_degen_between(), oneway = TRUE))
   expect_true(boundary_data_degenerate(bh_degen_flat(), oneway = FALSE))
+  # ...and a probe that cannot even be built reads as degenerate rather than escaping:
+  # an NA score makes npb_groups() abort, which used to REPLACE the boundary error.
+  na_scores <- bh_ok_oneway()
+  na_scores$score[3] <- NA
+  expect_true(boundary_data_degenerate(na_scores, oneway = TRUE))
   # Healthy data are not degenerate, on either branch -- including data sitting at
   # the sigma^2 -> 0 boundary, which is the case the hint exists FOR.
   expect_false(boundary_data_degenerate(bh_ok_oneway(), oneway = TRUE))
   expect_false(boundary_data_degenerate(bh_oneway(), oneway = TRUE))
   expect_false(boundary_data_degenerate(bh_ok_twoway(), oneway = FALSE))
   expect_false(boundary_data_degenerate(bh_twoway(), oneway = FALSE))
-  # The flag agrees with the shipped guard's own verdict, not with a copy of its
-  # condition: run searle on each case and require the two to match. This is what
-  # makes "asked, not restated" testable -- a drifting restatement reds here.
+  # The flag states the property the row needs: TRUE exactly where the row's methods
+  # cannot both deliver a USABLE interval. That is broader than "searle's guard fired"
+  # -- at MSA = 0 searle returns [-0.5, -0.5] without raising while burch is NaN -- so
+  # the comparison is against the acceptance predicate, not against an abort.
   for (case in list(
     list(lab = "within", d = bh_degen_within()),
     list(lab = "between", d = bh_degen_between()),
     list(lab = "healthy", d = bh_ok_oneway())
   )) {
-    # Catch ANY error, not just the classed one: on MSE = 0 data the glmmTMB point
-    # fit can die with a raw unclassed error before the classical guard is reached,
-    # platform-depending (M84). Either way the user gets no interval, which is the
-    # thing the flag has to agree with.
-    aborts <- inherits(
-      tryCatch(
-        suppressWarnings(suppressMessages(
-          icc(
-            case$d,
-            score,
-            subject,
-            rater,
-            model = "oneway",
-            ci_method = "searle"
-          )
-        )),
-        error = function(e) e
-      ),
-      "condition"
-    )
+    both_usable <- bh_usable(case$d, "searle", list(model = "oneway")) &&
+      bh_usable(case$d, "burch", list(model = "oneway"))
     expect_identical(
       paste(case$lab, boundary_data_degenerate(case$d, oneway = TRUE)),
-      paste(case$lab, aborts)
+      paste(case$lab, !both_usable)
     )
   }
   # A degenerate flag beats its own design row, one-way and two-way alike.
@@ -785,47 +804,25 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
     icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
   )))
 
-  # The other direction, and the pass-3 F2 regression this pins: SSA = 0 balanced
-  # one-way (every subject mean exactly equal, MSE > 0) is NOT degenerate for the
-  # classical row. The default aborts there, searle and burch both return intervals,
-  # and a shared gate ORing npbootstrap's own conditions in used to silence the hint
-  # on exactly this data -- the case the milestone exists to serve.
+  # SSA = 0 (every subject mean exactly equal, MSE > 0) is silenced too, and the
+  # REASON matters because the first re-cut un-suppressed this very cell. It did so
+  # on the finding that "searle and burch both return intervals" -- true only in the
+  # sense that neither RAISES. burch returns NaN throughout and searle's averaged
+  # endpoint is -Inf, so the shipped sentence "return a result" was false here
+  # (pass-4 F3, scored 87). Silence is now on this row's own evidence, not on
+  # npbootstrap's borrowed conditions, and the assertion is the usability predicate
+  # rather than an abort check -- an abort check is what missed it twice.
   db <- bh_degen_between()
   m <- bh_msg_any(db, ci_method = "montecarlo", model = "oneway", seed = 1)
   skip_if(is.na(m), "no abort on the SSA = 0 case")
-  for (s in c("searle", "burch")) {
+  for (meth in c("searle", "burch", "npbootstrap", "mpl")) {
     expect_identical(
-      paste("between", s, grepl(s, m, fixed = TRUE)),
-      paste("between", s, TRUE)
-    )
-    status <- tryCatch(
-      {
-        suppressWarnings(suppressMessages(
-          icc(db, score, subject, rater, model = "oneway", ci_method = s)
-        ))
-        "accepted"
-      },
-      error = function(e) paste0("ABORTED ", class(e)[[1]])
-    )
-    expect_identical(
-      paste("between", s, status),
-      paste("between", s, "accepted")
+      paste("between", meth, grepl(meth, m, fixed = TRUE)),
+      paste("between", meth, FALSE)
     )
   }
-  # The bootstrap does abort on it, and is correctly not named.
-  expect_false(grepl("npbootstrap", m, fixed = TRUE))
-  expect_error(suppressWarnings(suppressMessages(
-    icc(
-      db,
-      score,
-      subject,
-      rater,
-      ci_method = "npbootstrap",
-      model = "oneway",
-      boot_samples = 50L,
-      seed = 1
-    )
-  )))
+  expect_false(bh_usable(db, "burch", list(model = "oneway")))
+  expect_false(bh_usable(db, "searle", list(model = "oneway")))
 })
 
 # ---- AC3: the designs the criterion enumerates, end to end -------------------
@@ -1028,23 +1025,12 @@ bh_sweep_cell <- function(
     }
     for (meth in named) {
       checked <- checked + 1L
-      status <- tryCatch(
-        {
-          suppressWarnings(suppressMessages(do.call(
-            icc,
-            c(
-              list(d, quote(score), quote(subject), quote(rater)),
-              args,
-              list(ci_method = meth, seed = 1)
-            )
-          )))
-          "accepted"
-        },
-        error = function(e) paste0("ABORTED ", class(e)[[1]])
-      )
+      # `bh_usable()`, never a bare error check: the method must come back with a
+      # finite, correctly ordered interval on every estimand it reports.
+      status <- if (bh_usable(d, meth, args)) "usable" else "NOT usable"
       expect_identical(
         paste(tag, "->", meth, ":", status),
-        paste(tag, "->", meth, ": accepted")
+        paste(tag, "->", meth, ": usable")
       )
     }
   }
@@ -1098,8 +1084,20 @@ test_that("every method the REAL abort names is accepted, two-way and degenerate
 
   # Two-way random: on the kappa_m grid at two geometries, off it below the grid's
   # smallest subject count, with `type` both unset and supplied.
+  # Non-vacuity, pinned on a cell that must NAME something: this sweep asserts
+  # "named => usable", under which total silence passes for free, so at least one
+  # cell has to be shown firing (the pass-3 lesson, kept after the SSA = 0 cell that
+  # used to carry it went correctly silent).
+  live <- bh_sweep_cell(
+    lab = "two-way 20x3 on-grid (non-vacuity)",
+    build = function(sd) bh_twoway(n_s = 20L, seed = sd),
+    args = list(),
+    forbid = c("searle", "burch", "npbootstrap")
+  )
+  expect_gt(live, 0L)
+  checked <- checked + live
+
   for (cell in list(
-    list(lab = "two-way 20x3 on-grid", n_s = 20L, args = list()),
     list(lab = "two-way 10x3 on-grid", n_s = 10L, args = list()),
     list(
       lab = "two-way 20x3 type supplied",
@@ -1131,19 +1129,17 @@ test_that("every method the REAL abort names is accepted, two-way and degenerate
       forbid = c("mpl", "searle", "burch", "npbootstrap")
     )
 
-  # Degenerate data, both branches: whatever is named must still be accepted. SSA = 0
-  # is the case where searle/burch ARE named (pass-3 F2), so it is asserted NON-vacuous
-  # -- this sweep tests "named => accepted", under which a silenced hint passes for
-  # free, and over-suppression is exactly how that cell would go quiet.
-  ssa0 <- bh_sweep_cell(
-    lab = "one-way SSA = 0",
-    build = function(sd) bh_degen_between(),
-    args = list(model = "oneway"),
-    seeds = 1L,
-    forbid = c("mpl", "npbootstrap")
-  )
-  expect_gt(ssa0, 0L)
-  checked <- checked + ssa0
+  # Degenerate data, all three shapes: every one is silent now, each for its own
+  # reason (MSE = 0 breaks the shipped guard, MSA = 0 leaves burch at NaN, constant
+  # two-way data kills mpl's optim), so `forbid` covers every method.
+  checked <- checked +
+    bh_sweep_cell(
+      lab = "one-way SSA = 0",
+      build = function(sd) bh_degen_between(),
+      args = list(model = "oneway"),
+      seeds = 1L,
+      forbid = c("mpl", "searle", "burch", "npbootstrap")
+    )
   checked <- checked +
     bh_sweep_cell(
       lab = "one-way MSE = 0",
@@ -1162,4 +1158,121 @@ test_that("every method the REAL abort names is accepted, two-way and degenerate
     )
 
   expect_gt(checked, 0L)
+})
+
+# ---- AC3: the four shapes review pass 4 came through -------------------------
+# None of these existed in any earlier sweep. Two of the four pass-4 findings were
+# reachable only through a missing score, and one only through a numeric `unit`; the
+# grid varied designs but never the data's completeness or the requested divisor.
+
+test_that("a missing score silences every row, and never breaks the abort (AC2/AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # `balanced` counts an NA-scored row as an observed cell, so these designs look
+  # complete to every design fence while no method survives them.
+  na_ow <- function(sd) {
+    d <- bh_smallint(20L, 3L, sd)
+    d$score[5] <- NA
+    d
+  }
+  na_tw <- function(sd) {
+    d <- bh_twoway(n_s = 15L, seed = sd)
+    d$score[4] <- NA
+    d
+  }
+  bh_sweep_cell(
+    lab = "one-way + NA score",
+    build = na_ow,
+    args = list(model = "oneway"),
+    forbid = c("searle", "burch", "mpl", "npbootstrap")
+  )
+  bh_sweep_cell(
+    lab = "two-way + NA score",
+    build = na_tw,
+    args = list(),
+    forbid = c("searle", "burch", "mpl", "npbootstrap")
+  )
+
+  # AC2's never-raise clause, which is the sharper half: building the hint must not
+  # turn the boundary abort into a DIFFERENT error. Pass 4 replaced it with
+  # `intraclass_unidentified` from a bootstrap the caller never asked for.
+  seen <- character(0)
+  for (sd in 1:8) {
+    for (build in list(na_ow, na_tw)) {
+      d <- build(sd)
+      args <- if (identical(build, na_ow)) list(model = "oneway") else list()
+      got <- tryCatch(
+        {
+          suppressWarnings(suppressMessages(do.call(
+            icc,
+            c(
+              list(d, quote(score), quote(subject), quote(rater)),
+              args,
+              list(ci_method = "montecarlo", seed = 1)
+            )
+          )))
+          NULL
+        },
+        error = function(e) e
+      )
+      if (!is.null(got)) {
+        seen <- c(seen, class(got)[[1]])
+      }
+    }
+  }
+  skip_if(!length(seen), "no abort on the NA-score designs (boundary luck)")
+  expect_setequal(unique(seen), "intraclass_singular_fit")
+})
+
+test_that("a numeric unit splits the pair at its own Spearman-Brown pole (AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # The projection `npb_sb(rho, m)` has a pole at `rho = -1/(m-1)`; a lower endpoint
+  # below it comes back above +1 and the interval reverses. The two methods cross at
+  # different m on the same data, so this is asserted per method, not per design.
+  for (m in c(2, 3, 6, 10, 20)) {
+    checked <- bh_sweep_cell(
+      lab = paste("one-way unit =", m),
+      build = function(sd) bh_smallint(20L, 3L, sd),
+      args = list(model = "oneway", unit = m),
+      forbid = c("mpl", "npbootstrap")
+    )
+    expect_gte(checked, 0L)
+  }
+
+  # ...and the split is real rather than an all-or-nothing fence: on one dataset there
+  # is an m where burch is still offered and searle is not.
+  d <- bh_smallint(20L, 3L, 1L)
+  split_seen <- FALSE
+  for (m in c(5, 6, 8)) {
+    msg <- bh_msg_any(
+      d,
+      ci_method = "montecarlo",
+      model = "oneway",
+      unit = m,
+      seed = 1
+    )
+    if (is.na(msg)) {
+      next
+    }
+    named <- bh_msg_methods(msg)
+    if (identical(named, "burch")) {
+      split_seen <- TRUE
+    }
+    # Whatever is named must be usable at that unit.
+    for (meth in named) {
+      expect_identical(
+        paste(
+          "unit",
+          m,
+          meth,
+          bh_usable(d, meth, list(model = "oneway", unit = m))
+        ),
+        paste("unit", m, meth, TRUE)
+      )
+    }
+  }
+  expect_true(split_seen)
 })

@@ -31,9 +31,14 @@
   a word on what each is good for), and a balanced-complete two-way random
   absolute-agreement fit at `"mpl"`. Where no such option applies — fixed raters,
   multilevel, within-cell replicates, consistency, unbalanced one-way data, a
-  `conf_level` or a subject/rater count outside the calibrated set, or data so
-  degenerate that the methods for that design would fail on it too — the error says
-  nothing extra rather than suggest a method that would also abort. Only methods
+  `conf_level` or a subject/rater count outside the calibrated set, any missing
+  score, or data so degenerate that the methods for that design would fail on it
+  too — the error says nothing extra rather than suggest a method that would also
+  fail. A method is named only where it would return a usable interval on your data,
+  which is checked per method rather than per design: projecting to a large number of
+  raters can push one of the two closed forms past the point where its projection
+  formula breaks down while the other still works, and only the one that works is
+  named. Only methods
   with a measured record of returning an interval on such data are named, which for
   now excludes `"npbootstrap"`: it resamples, so whether it succeeds is a property
   of the resampling rather than of your design, and it is left out until that can be

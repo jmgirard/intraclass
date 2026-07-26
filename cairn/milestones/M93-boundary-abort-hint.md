@@ -110,28 +110,28 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 <!-- Second re-cut 2026-07-26 after the pass-4 gate failure; T1-T12 and the first
      re-cut's T1-T5 are superseded, and what they shipped is in the work log. -->
 
-- [ ] T1 (pass-4 F2, 95): move `npb_groups()`/`classical_oneway_ss()` INSIDE
+- [x] T1 (pass-4 F2, 95): move `npb_groups()`/`classical_oneway_ss()` INSIDE
       `boundary_data_degenerate()`'s `tryCatch` so the probe can never throw; any error
       from it means "this row's methods fail here", which is the answer the check exists
       to give. Add the AC2 never-raise test.
-- [ ] T2 (pass-4 F1, 94): give the hint the scores' completeness, since `balanced` comes
+- [x] T2 (pass-4 F1, 94): give the hint the scores' completeness, since `balanced` comes
       from `table(subject, rater)` cell counts and counts an `NA`-scored row as observed.
       Implement gate decides where completeness is computed (in `icc()` beside the other
       predicates, or inside the hint) and whether incomplete scores silence every row or
       only the two-way one.
-- [ ] T3 (pass-4 F3, 87): silence the one-way row when MSA = 0, for the stated reason —
+- [x] T3 (pass-4 F3, 87): silence the one-way row when MSA = 0, for the stated reason —
       `burch` is `NaN` there and `searle`'s ICC(k) is `-Inf`. This re-suppresses the cell
       the first re-cut un-suppressed, now on its own evidence rather than on borrowed
       npbootstrap conditions.
-- [ ] T4 (pass-4 F4, 88): restore `unit` as a hint input and stop naming `searle` where
+- [x] T4 (pass-4 F4, 88): restore `unit` as a hint input and stop naming `searle` where
       the Spearman-Brown map reverses its interval. Implement gate decides between the
       exact pole test (`rho_L < -1/(m-1)`, computed from `searle_endpoints()`) and the
       blanket numeric-`unit` fence `icc()` already applies to npbootstrap
       (`R/icc.R:1417-1431`); `burch` is named either way (D-010 untruncated support).
-- [ ] T5: rewrite the AC3 sweep — acceptance becomes a finite, ordered interval on every
+- [x] T5: rewrite the AC3 sweep — acceptance becomes a finite, ordered interval on every
       estimand, and the grid gains `NA` scores, a numeric `unit`, SSA = 0 and MSE = 0.
       Mutation-verify each of the four fixes reds it.
-- [ ] T6: `NEWS.md` and `@param ci_method` updated to the narrowed surface,
+- [x] T6: `NEWS.md` and `@param ci_method` updated to the narrowed surface,
       `devtools::document()`, full AC7 gate, PR #100 green on every job.
 
 ## Work log
@@ -177,6 +177,11 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 - 2026-07-25: CI footnote for the record — on the pass-4 evidence head `349d4bd`, 8 of 9 checks passed (both codecov, `check-references`, `format-check`, `lint`, `pkgdown`, `test-coverage`, `ubuntu-latest`); `windows-latest` shows `cancelled`, killed by the next push rather than failing (the M77/M78 cancel-in-progress behaviour). Moot for the verdict — the gate failed on AC2/AC3, not on CI.
 
 - 2026-07-26: second re-cut by /milestone-plan after the pass-4 gate failure. Gate: PATCH the four findings rather than replace the design→method prediction with running each candidate — verification was measured feasible here (searle 0.17 ms, burch 0.29 ms, mpl 3.5-5.6 ms on an already-failed, lazily-forced path) and prototyped correct on all four findings and both healthy cases, but the maintainer chose the smaller diff; it is now recorded in Scope Out with its measurements, and M97 adopts it for the bootstrap. Two facts settled at the gate: the acceptance predicate is finite-and-ORDERED with no [-1,1] bound, because `searle`'s ICC(3) limit is legitimately -1.771 on healthy data under D-010's `(-∞, 1]` untruncated support; and pass-4 F4 narrows — `searle` reverses at `unit = 6` (`[4.594, 0.602]`) but `burch` returns `[-15.653, 0.639]`, ordered and finite, so `burch` is still named there. Tasks re-cut to T1-T6, one per finding plus the sweep and the gate; AC2 gains a never-raise obligation and AC3 an interval-USABILITY predicate, which is the blind spot both pass-4 sweeps shared.
+
+- 2026-07-26: implement gate (second re-cut) — three decisions, each measured first. (1) The numeric-`unit` rule is the EXACT per-method Spearman-Brown pole test, not a blanket refusal: checked against the real intervals at m = 2,3,4,5,6,10,20 it matches observed reversal in every cell for both methods, and the two differ (searle reverses from m = 5, burch only from m = 10 on the same data), so a shared rule would have to over-suppress one. This corrects the plan-gate line that `burch` is named "either way" — it reverses too, just later. (2) Score completeness gates EVERY row before the design split, one input for one hole. (3) MSA = 0 silences the whole one-way row rather than offering searle's zero-width [-1/(n-1), -1/(n-1)] for the single-rater index alone.
+- 2026-07-26: T1-T4 — `boundary_data_degenerate()` now wraps extraction and both guards inside its `tryCatch`, so a probe that cannot be built reads as "this row's methods fail here" instead of replacing the user's abort; `complete = !anyNA(df$score)` gates every row; `isTRUE(ss$msa == 0)` joins the one-way condition; and `boundary_classical_sb_ok()` returns a per-method verdict from each method's own ICC(1) lower endpoint, letting the pair split. End-to-end: `unit = 6` now names burch only, `unit = 10` names neither, an NA score names nothing on either design and keeps class `intraclass_singular_fit`, SSA = 0 names nothing — while healthy one-way still names both and healthy two-way still names mpl 6/6 aborts.
+- 2026-07-26: T5 — the sweep's acceptance predicate is now `bh_usable()` (every reported interval finite and `conf.low <= conf.high`), defined once and used by the flag test too; the grid gained the two shapes no earlier sweep had, missing scores and numeric `unit`, plus an AC2 never-raise test over 16 NA-carrying designs. The non-vacuity pin moved onto a two-way cell that must fire, because the SSA = 0 cell that used to carry it is now correctly silent. Mutation-verified, all four fixes: probe-error-not-degenerate reds 3, no completeness gate reds 6, MSA = 0 ignored reds 2, pole test disabled reds 10.
+- 2026-07-26: T6 — `NEWS.md` and `@param ci_method` now say a method is named only where it would return a usable interval on that data, checked per method, and name missing scores and the projection limit among the silent cases; `man/icc.Rd` regenerated. M93 test file: 408 assertions, FAIL 0, SKIP 0.
 
 ## Decisions
 

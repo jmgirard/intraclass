@@ -202,11 +202,13 @@ at 0.90, 0.95, and 0.99 only (see \code{ci_method}).}
 \item{ci_method}{Interval method. \code{"montecarlo"} (default) simulates from the
 fitted parameter covariance on the engine's log scale (fast, boundary-aware).
 Near the variance boundary it can fail to produce an interval and aborts; when
-it does, the error names a deterministic opt-in method below that fits the
-design in hand, so there is no need to work that out from this list. It stays
-silent where no such method applies, and never names \code{"npbootstrap"}, whose
-resampling can fail on data no design fence describes — check that one against
-its own entry below.
+it does, the error names a deterministic opt-in method below that both fits the
+design in hand and would return a usable interval on that data, so there is no
+need to work that out from this list. It stays silent where no such method
+applies — including when any score is missing, and when a numeric \code{unit}
+projects past the point where a method's Spearman-Brown map breaks down — and
+never names \code{"npbootstrap"}, whose resampling can fail on data no design fence
+describes; check that one against its own entry below.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
