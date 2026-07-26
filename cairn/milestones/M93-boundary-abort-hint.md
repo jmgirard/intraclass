@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -155,6 +155,8 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 - 2026-07-25: T4 — `NEWS.md` and `@param ci_method` now state the narrowed surface and say WHY the bootstrap is excluded in the user's own terms (whether it succeeds is a property of the resampling, not of their design), rather than listing it among the designs that get nothing; `man/icc.Rd` regenerated. Suite at `NOT_CRAN=true CI=true`: FAIL 0 / PASS 4515 / SKIP 23; `lintr` no lints; `air format` reformatted the rewritten test file and `--check` is clean after.
 
 - 2026-07-25: T5 — gate clean on the final tree: `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, its `checking tests` step running the whole suite in 134s), `devtools::test()` FAIL 0 / PASS 4515 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved and none was accepted. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync, so the `check-references` CI job is covered locally. Also retired the superseded task numbers from the test file's section headers, which now name the criteria they serve.
+
+- 2026-07-25: PR #100 all 9 checks green on `5fa3e1c` — `ubuntu-latest (release)`, `windows-latest (release)`, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov checks. Status -> review; this is the re-cut's first review pass, and the fourth for the milestone.
 
 ## Decisions
 
