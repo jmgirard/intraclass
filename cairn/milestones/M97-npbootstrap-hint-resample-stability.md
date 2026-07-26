@@ -15,9 +15,11 @@ the design whether its resampling will hold up.
 
 ## Scope
 
-**In:** an internal check that runs `npbootstrap_ci()` at the shipped `boot_samples`
-under the seed the user's own call would use, catches every error, and accepts only a
-finite, correctly ordered interval on every estimand; the unbalanced one-way row
+**In:** `"npbootstrap"` added to M93's verification helper — the same run-it-and-look-at-
+the-interval check, extended to a method that resamples: run `npbootstrap_ci()` at the
+shipped `boot_samples` under the seed the user's own call would use, catch every error,
+accept only a finite, correctly ordered, in-support interval on every estimand (M93's
+predicate, unchanged); the unbalanced one-way row
 restored in `boundary_method_hint()` behind it; RNG neutrality (#9) via the existing
 `with_rng_seed()`, so a hint that fires cannot perturb the user's stream; a decision,
 recorded in this file, on what to do when the caller set no `seed` — a run that succeeds
@@ -30,18 +32,22 @@ k >= 10") corrected against measurement; NEWS + `@param`.
 carrying within-subject variance, ties among subject means) — this milestone's original
 premise, dropped at the 2026-07-26 gate once running the bootstrap was measured at
 135 ms, which answers the same question exactly rather than approximately; revive only
-if the seed question makes running it unworkable · changing `npbootstrap_ci()`'s own
+if the seed question makes running it unworkable · a SECOND verification helper — M93
+ships the generic one and M97 registers a method with it; a divergent copy is the
+drift pattern that produced M93's pass-2 finding · changing `npbootstrap_ci()`'s own
 guards, message or design fence — this evaluates the shipped guard, it does not move it
-→ ROADMAP candidate · the deterministic rows and their four pass-4 fixes → M93 ·
-fallback or auto-routing on abort, the `#3`/ADR-003 change D-012 fenced out → standing
+→ ROADMAP candidate · the deterministic rows → M93 · fallback or auto-routing on abort,
+the `#3`/ADR-003 change D-012 fenced out and D-018 draws the line against → standing
 ROADMAP candidate.
 
 ## Acceptance criteria
 
-- [ ] AC1: an internal check runs `npbootstrap_ci()` on the data in hand and returns
-      TRUE only when every estimand comes back finite with `conf.low <= conf.high`;
-      every error is caught, so the check itself can never turn the boundary abort into
-      a different error (the M93 pass-4 F2 failure mode, in a new place).
+- [ ] AC1: `"npbootstrap"` is registered with M93's verification helper rather than
+      given a second one — it runs `npbootstrap_ci()` on the data in hand and returns
+      TRUE only under M93's unchanged predicate (every estimand finite,
+      `conf.low <= conf.high`, in support); every error is caught, so the check itself
+      can never turn the boundary abort into a different error (the M93 pass-4 F2
+      failure mode, in a new place). A test asserts one helper serves both families.
 - [ ] AC2 (#9): the check is RNG-neutral — a committed test captures `.Random.seed`
       across an `icc()` call that fires it and asserts the stream is unchanged, so a
       user who never asked for a bootstrap cannot have their draws perturbed by one.
@@ -77,10 +83,10 @@ ROADMAP candidate.
 
 ## Tasks
 
-- [ ] T1: Add the internal check — run `npbootstrap_ci()` at the shipped
-      `boot_samples`, catch everything, accept only finite and ordered intervals on
-      every estimand — with unit tests over designs where it succeeds and where it
-      fails, and record its measured cost.
+- [ ] T1: Register `"npbootstrap"` with M93's verification helper — run
+      `npbootstrap_ci()` at the shipped `boot_samples`, catch everything, accept only
+      under M93's unchanged predicate — with unit tests over designs where it succeeds
+      and where it fails, and record its measured cost.
 - [ ] T2: Wrap it RNG-neutral via `with_rng_seed()`, and add the AC2 test capturing
       `.Random.seed` across a firing `icc()` call.
 - [ ] T3: Settle the no-seed case at the implement gate and record it here: name it
@@ -98,6 +104,7 @@ ROADMAP candidate.
 
 - 2026-07-25: created by /milestone-plan as the remainder of the M93 re-cut — the half three M93 review passes could not fence with design predicates (pass-2 F1: raw subject count; pass-3 F1: the count is decoupled from the effective one under imbalance). Depends on M93 because both edit `R/boundary-hint.R` and its test file.
 - 2026-07-26: re-scoped at the second M93 re-cut gate — the analytic stability predicate is dropped in favour of RUNNING the bootstrap (135 ms at 999 resamples, on an already-failed path), which answers the same question exactly rather than approximately. The seed question is what keeps this separate from M93: 8/8 seeds succeed on a 20×3 design, 1/8 on a 6×2, so a run is evidence about that seed, not about every seed. GP6 drops from the header slot — the failure axis is no longer swept for a formula, it is run directly.
+- 2026-07-26: amended at the M93 third re-cut gate — M93 now adopts verification for the deterministic methods too, and ships the helper generic over a method name, so M97's own T1/AC1 narrow from "add an internal check" to "register `npbootstrap` with M93's helper"; a second copy is explicitly out (the M93 pass-2 drift pattern). M93's acceptance predicate gains an in-support clause (D-010) that M97 inherits unchanged, and D-018 records why running a candidate inside an abort path is not D-012's fenced fallback.
 
 ## Decisions
 

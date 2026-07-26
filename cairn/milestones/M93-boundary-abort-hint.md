@@ -9,129 +9,125 @@
 
 ## Goal
 
-When the Monte-Carlo default aborts near the σ²→0 boundary, have the classed error
-name an opt-in `ci_method` PROVEN to return an interval on the user's design — the
-deterministic closed forms only, never a resampling method whose failures are not a
-function of the design.
+When the Monte-Carlo default aborts near the σ²→0 boundary, have the classed error name
+an opt-in `ci_method` only after RUNNING that method on the data in hand and seeing a
+usable interval — never from a design predicate that tries to anticipate whether it will
+work.
 
 ## Scope
 
-**In:** an internal design→method mapping over the predicates `icc()` already holds at
-its `ci_method` fences (`R/icc.R:1381-1497`), plus four inputs the fences do not carry —
-the observed subject/rater counts (for `mpl`'s κ_m grid), a per-row data degeneracy
-check, the DATA COMPLETENESS of the scores, and the requested `unit`; threaded as extra
-`i =` bullets into the two CI-stage `intraclass_singular_fit` aborts in
-`R/ci-montecarlo.R` that T1 showed reachable; a message-driven sweep whose acceptance
-predicate is a USABLE interval (finite and correctly ordered on every estimand), not
-merely a call that does not raise; NEWS + `@param` docs.
+**In:** a verification step in the abort path that calls the SAME reducer `icc()` would
+dispatch to (`searle_ci()`/`burch_ci()`/`mpl_ci()`, `R/icc.R:2098-2109`) with the
+`(df, estimands, conf_level)` already in scope, catches every condition, and clears a
+method only when every reported endpoint is finite, ordered and in support; the helper
+generic over the method name, so M97 adds `npbootstrap` behind it; the design rows kept
+as the ADMISSIBILITY filter alone — which strings `icc()` would accept on this design —
+with the four predictive inputs (`n_s`/`n_r` for the κ_m grid, `degenerate`, `complete`,
+`sb_ok`) deleted; the hint spliced as extra `i =` bullets into the two reachable
+Monte-Carlo aborts; NEWS + `@param` docs.
 
-**Out:** `ci_method = "npbootstrap"` in the hint, on any design → **M97**. Its
-resample-stage guard (`R/ci-npbootstrap.R:178-191`) is stochastic and not a property of
-the observed data, and two rounds of design predicates failed to fence it (review
-passes 2 and 3). With it out the unbalanced one-way row is empty — `npbootstrap` is the
-only method shipping that cell (D-013) — so unbalanced one-way leaves with it ·
-fallback or auto-routing: the default still aborts, and replacing it is the
-`#3`/ADR-003 contract change D-012 fenced out ("A classical **fallback-on-abort**
-default behaviour is a distinct, later `#3` question, not decided here") → ROADMAP
-candidate · engine-stage aborts in `R/engine-lme4.R` / `R/engine-lavaan.R`, where the
-POINT fit failed and no `ci_method` is a remedy · `R/ci-bootstrap.R:48`, excluded on T1
-evidence (0/90 at the boundary); its own generic remedy names `"montecarlo"`, which
+**Out:** `ci_method = "npbootstrap"` → **M97**, which adds it behind this helper plus
+the two things unique to a resampling method (RNG neutrality under #9, and what a run
+under one seed says about another); the unbalanced one-way row leaves with it, since
+`npbootstrap` is the only method shipping that cell (D-013) · re-entering `icc()` per
+candidate rather than its reducer — declined at the gate: it re-fits the model and builds
+a user-facing result object inside the abort path · fallback or auto-routing on abort,
+the `#3`/ADR-003 change D-012 fenced out and D-018 draws the line against → standing
+ROADMAP candidate · engine-stage aborts in `R/engine-lme4.R` / `R/engine-lavaan.R`, where
+the POINT fit failed and no `ci_method` is a remedy · `R/ci-bootstrap.R:48`, excluded on
+T1 evidence (0/90 at the boundary); its own generic remedy names `"montecarlo"`, which
 also aborts on the degenerate data reaching it → ROADMAP candidate · identifiability
-aborts, which no interval method fixes · any new `ci_method` or a widened fence ·
-**verifying instead of predicting** (run each candidate, name it only if the interval is
-usable) — measured feasible at the second re-cut gate (0.17/0.29/3.5-5.6 ms) and
-declined there in favour of patching the four pass-4 findings; M97 adopts it · a width
-screen on a valid interval: `burch` at `unit = 6` gives `[-15.653, 0.639]`, wide but
-ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
+aborts, which no interval method fixes · any new `ci_method` or a widened fence · a width
+or plausibility screen beyond finite/ordered/in-support: `burch` at `unit = 6` gives
+`[-15.653, 0.639]`, wide but usable, and D-010's untruncated support admits `searle`'s
+legitimate ICC(3) = -1.771 on healthy data.
 
 ## Acceptance criteria
 
-- [x] AC1: a committed reproduction test builds a near-zero-variance dataset on which
+- [ ] AC1: a committed reproduction test builds a near-zero-variance dataset on which
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [x] AC2: `icc()` derives the hint from the fence predicates plus the observed
-      subject/rater counts, a per-row degeneracy check, the scores' completeness and the
-      requested `unit`, and passes it to the two reachable Monte-Carlo aborts
-      (`R/ci-montecarlo.R:43`, `:124`); the abort class, leading message and existing
-      generic remedies are unchanged — the hint is additive. **Building the hint can
-      never raise**: every probe it runs is caught, so no input turns the boundary abort
-      into a different error (pass-4 F2 did exactly that on a score containing `NA`). A
-      test drives the hint over inputs that make each probe fail and asserts the abort
-      keeps class `intraclass_singular_fit`. No design names `"npbootstrap"` (→ M97);
-      `R/ci-bootstrap.R:48` excluded on T1 evidence.
-- [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
-      from hand-written expectations — trigger the real `icc()` abort, parse the method
-      names out of the message that fired, run each on that same data, and require a
-      USABLE interval: finite and `conf.low <= conf.high` on every estimand returned.
-      A call that merely does not raise is NOT acceptance — that predicate is how
-      pass-4's `NaN` and reversed intervals passed a green suite. Grid: one-way balanced
-      over several subject counts; two-way random with `type` supplied and unset, on and
-      off `mpl`'s κ_m grid; the silent designs (unbalanced one-way, consistency, fixed
-      raters, multilevel, replicates, uncalibrated `conf_level`); and the four shapes
-      pass 4 came through — scores containing `NA`, a numeric `unit`, SSA = 0 and
-      MSE = 0 — each end-to-end through `icc()`, with a converse half asserting every
-      opt-in method really does fail where the hint stays silent.
-- [x] AC4: designs with no applicable opt-in receive NO method hint; a test pins the
-      message to its generic remedies alone (a blanket "try mpl" is wrong off two-way
-      random agreement).
-- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
-      with class `intraclass_singular_fit` and returns no interval, so nothing here
-      implements the D-012-fenced fallback default.
-- [x] AC6: the change is documented where users meet it — a `NEWS.md` entry naming the
-      methods the hint can name and the designs it stays silent on, and the
-      `@param ci_method` boundary-robustness note.
-- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [ ] AC2: a method is named only after the verification step returned TRUE for it on
+      this data; the abort class, leading message and existing generic remedies are
+      unchanged, and a design with nothing to name gains nothing — the hint is additive.
+      **Verification can never raise**: every condition a reducer emits is caught, so no
+      input turns the boundary abort into a different error (pass-4 F2 did exactly that).
+      It is also LAZY — forced only inside an abort message, so a successful call never
+      pays for it; a test pins that, and the work log records the measured cost. No
+      design names `"npbootstrap"` (→ M97); `R/ci-bootstrap.R:48` excluded on T1 evidence.
+- [ ] AC3 (GP7): for every design where the default aborts, every method the message
+      names returns a USABLE interval on that same data, and every ADMISSIBLE method the
+      message omits really is unusable there. Usable = every reported endpoint finite,
+      `conf.low <= conf.high`, and inside the estimand's support under D-010 (ICC(1)
+      `(-1/(n₀-1), 1)`; the averaged/projected form `(-∞, 1)`). The in-support clause is
+      load-bearing here and was not in the pass-5 predicate: pass-5 F3 (logged at 20) is
+      benign only while the MSA = 0 gate and the lower-endpoint pole test exist, and this
+      re-cut deletes both — `searle` gives ICC(15) `[1.250, 1.250]` at 100×3, finite and
+      ordered and out of support. Asserted by a message-driven sweep that parses the
+      names out of the abort `icc()` really raises, over one-way and two-way geometries,
+      the silent designs, and the shapes the five review passes came through. **Every
+      declared cell asserts a positive number of checks**: a cell that checks nothing
+      fails rather than passing silently — pass-3 F4, pass-4 F4 and pass-5 F2 were each a
+      tautological or vacuous assertion in this sweep.
+- [ ] AC4: the verification cannot drift from the real call — a committed test asserts
+      the endpoints it inspects ARE the ones `icc(ci_method = <name>)` reports for that
+      method on that data, and that every method an admissibility row offers is accepted
+      by `icc()`'s own fence (a named-but-inadmissible method would abort
+      `intraclass_unsupported`).
+- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+      with class `intraclass_singular_fit` and returns no interval, and that no interval
+      computed during verification reaches the message text or any returned object, so
+      nothing here implements the D-012-fenced fallback default (D-018).
+- [ ] AC6: the change is documented where users meet it — a `NEWS.md` entry saying a
+      method is named only after being run on that data, naming the methods and the
+      silent designs, and the matching `@param ci_method` note.
+- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; any changed message
       snapshot reviewed deliberately via `testthat::snapshot_review()`, never accepted
       blind; PR #100 green on every job.
 
-**Mapping to implement** (each row mirrors a shipped fence; AC3 is what keeps it true):
+**Admissibility rows** (which candidates get RUN; only a usable interval earns a mention):
 
-| design in hand | hint names |
+| design in hand | candidates verified |
 |---|---|
-| one-way random, balanced, complete scores, MSE > 0 **and MSA > 0** | `"searle"` and `"burch"` — D-012's 0-abort evidence (0/32,000) is stated for exactly these two. MSA = 0 silences the row: `burch` returns `NaN` and `searle`'s averaged form `-Inf` (pass-4 F3) |
-| ...and a numeric `unit` past `searle`'s Spearman-Brown pole | `"burch"` only — `searle` reverses there (`[4.594, 0.602]` at `unit = 6`); `burch` stays ordered and finite (pass-4 F4, narrowed at the plan gate) |
-| two-way random, agreement, balanced+complete **scores**, calibrated `conf_level` and a geometry on the κ_m grid | `"mpl"` (D-014/D-015). Cell-count completeness is not score completeness: an `NA` score counts as an observed cell, and `mpl` then aborts (pass-4 F1) |
-| anything else, incl. EVERY unbalanced one-way design | nothing — generic remedies only (M97 revisits unbalanced) |
+| one-way random, balanced | `"searle"`, `"burch"` — D-013's shipped fence |
+| two-way random, agreement (`type` unset or agreement), balanced | `"mpl"` — D-014/D-015 |
+| anything else, incl. EVERY unbalanced one-way design | none — generic remedies only (M97 revisits unbalanced) |
 
 ## Coverage
 
-- AC1 → T5
-- AC2 → T1, T2, T6
-- AC3 → T3, T4, T5
-- AC4 → T5
-- AC5 → T1, T5
-- AC6 → T6
-- AC7 → T6
+- AC1 → T4
+- AC2 → T1, T2
+- AC3 → T4
+- AC4 → T3
+- AC5 → T2, T4
+- AC6 → T5
+- AC7 → T5
 
 ## Tasks
 
-<!-- Second re-cut 2026-07-26 after the pass-4 gate failure; T1-T12 and the first
-     re-cut's T1-T5 are superseded, and what they shipped is in the work log. -->
+<!-- Third re-cut 2026-07-26 after the pass-5 gate failure. T1-T12, the first re-cut's
+     T1-T5 and the second's T1-T6 are superseded; what they shipped is in the work log. -->
 
-- [x] T1 (pass-4 F2, 95): move `npb_groups()`/`classical_oneway_ss()` INSIDE
-      `boundary_data_degenerate()`'s `tryCatch` so the probe can never throw; any error
-      from it means "this row's methods fail here", which is the answer the check exists
-      to give. Add the AC2 never-raise test.
-- [x] T2 (pass-4 F1, 94): give the hint the scores' completeness, since `balanced` comes
-      from `table(subject, rater)` cell counts and counts an `NA`-scored row as observed.
-      Implement gate decides where completeness is computed (in `icc()` beside the other
-      predicates, or inside the hint) and whether incomplete scores silence every row or
-      only the two-way one.
-- [x] T3 (pass-4 F3, 87): silence the one-way row when MSA = 0, for the stated reason —
-      `burch` is `NaN` there and `searle`'s ICC(k) is `-Inf`. This re-suppresses the cell
-      the first re-cut un-suppressed, now on its own evidence rather than on borrowed
-      npbootstrap conditions.
-- [x] T4 (pass-4 F4, 88): restore `unit` as a hint input and stop naming `searle` where
-      the Spearman-Brown map reverses its interval. Implement gate decides between the
-      exact pole test (`rho_L < -1/(m-1)`, computed from `searle_endpoints()`) and the
-      blanket numeric-`unit` fence `icc()` already applies to npbootstrap
-      (`R/icc.R:1417-1431`); `burch` is named either way (D-010 untruncated support).
-- [x] T5: rewrite the AC3 sweep — acceptance becomes a finite, ordered interval on every
-      estimand, and the grid gains `NA` scores, a numeric `unit`, SSA = 0 and MSE = 0.
-      Mutation-verify each of the four fixes reds it.
-- [x] T6: `NEWS.md` and `@param ci_method` updated to the narrowed surface,
+- [ ] T1: add the verification helper — generic over a method name, calling the reducer
+      `icc()` dispatches to with the same `(df, estimands, conf_level)`, catching every
+      condition, returning TRUE only on finite, ordered, in-support endpoints for every
+      estimand. Unit tests for each verdict incl. the never-raise obligation; record the
+      measured cost.
+- [ ] T2: re-cut `boundary_method_hint()` to admissibility + verification — delete
+      `boundary_data_degenerate()`, `boundary_sb_safe()`, `boundary_classical_sb_ok()`,
+      the `complete` gate and the hint-path `mpl_kappa_available()` call (the lookup
+      stays where `R/ci-mpl.R` uses it); keep the design rows as the candidate filter and
+      the verdict lazy.
+- [ ] T3: the AC4 tests — verified endpoints equal `icc(ci_method = )`'s reported
+      interval across a grid of designs, and each admissibility row's methods are
+      accepted by `icc()`'s fence.
+- [ ] T4: re-cut the AC3 sweep to the new predicate; add the per-cell non-vacuity
+      assertion and remove the pass-5 F2 tautology (`expect_gte(checked, 0L)`) and its
+      two zero-check `unit` cells. Mutation-verify that dropping verification, dropping
+      the in-support clause, and neutering non-vacuity each red it.
+- [ ] T5: `NEWS.md` and `@param ci_method` rewritten to the run-it-first surface,
       `devtools::document()`, full AC7 gate, PR #100 green on every job.
 
 ## Work log
@@ -188,6 +184,8 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 - 2026-07-26: PR #100 all 9 checks green on `dca709a` — `ubuntu-latest (release)`, `windows-latest (release)`, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 5.
 
 - 2026-07-26: review pass 5 FAILED the gate — a fifth mechanism, on an axis no pass had varied. F1 (92): `boundary_sb_safe()` validates only the LOWER endpoint, so at exactly 2 subjects with `conf_level` at or past `1 - 2e-8` the hint names `searle`, whose upper endpoint is `NaN` (reproduced here; no violation at 3+ subjects down to `1 - 1e-12`). F2 (88): `expect_gte(checked, 0L)` is a tautology and two of five `unit` sweep cells check nothing — mine, from T5. F3 (20) logged. AC3 tick withdrawn; AC1, AC2, AC4-AC7 stand. Two lenses clean, and the [O] lens ruled out ~1,100 other cells including every axis pass 4 exposed. FIFTH return from review, which is the promotion condition the 2026-07-26 gate recorded verbatim on the verify-instead-of-predict candidate. Status -> in-progress.
+
+- 2026-07-26: third re-cut by /milestone-plan after the pass-5 gate failure. Gate: adopt VERIFY-instead-of-predict for the deterministic methods — the ROADMAP candidate whose recorded promotion condition ("Promote if a fifth mechanism appears") pass-5 F1 meets; the row is absorbed and its lineage ends here. Verification calls the shipped reducers `icc()` dispatches to, not a re-entrant `icc()` per candidate (which would re-fit the model and build a user-facing object inside the abort path); the helper is generic over the method name so M97 adds `npbootstrap` behind it; D-018 records why computing-and-discarding an interval is not D-012's fenced fallback. AC3 gains an in-support clause because pass-5 F3 (logged at 20) is benign only while the MSA = 0 gate and the lower-endpoint pole test exist, and this re-cut deletes both. Every AC box unticked — the code changes, so each criterion re-verifies from scratch.
 
 ## Decisions
 
