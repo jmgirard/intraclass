@@ -185,6 +185,8 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 
 - 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0), `devtools::test()` FAIL 0 / PASS 4613 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync.
 
+- 2026-07-26: PR #100 all 9 checks green on `dca709a` — `ubuntu-latest (release)`, `windows-latest (release)`, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 5.
+
 ## Decisions
 
 ## Review
