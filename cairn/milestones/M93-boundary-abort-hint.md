@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -199,6 +199,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: T5 — `NEWS.md` and `@param ci_method` rewritten to the run-it-first surface: they now say the error names a method by RUNNING each candidate the design allows and keeping only those whose reported endpoints are all finite, ordered and in range, with the silent cases stated as a CONSEQUENCE of that check rather than as an enumeration a future mechanism could fall outside of. `man/icc.Rd` regenerated. Gate on the final tree: `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, its `checking tests` step running the suite in 138s), `devtools::test()` FAIL 0 / PASS 4872 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved and none was accepted. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync, so the `check-references` CI job is covered locally.
 
 - 2026-07-26: T3 fixture hardened before CI could find it — the AC4 out-of-support cell was a 2×2 glmmTMB fit, which is the M84 shape that failed review pass 1 (a tiny fit dies with a RAW unclassed error on Linux/Windows and completes on macOS, so the local gate is structurally blind to it). Moved to 8×2 at `unit = 10`, `conf_level = 0.80`, where searle reports [1.276702, 1.824471] — same property, ordinary fit. Re-verified: the `pmin(1, .)` reporting-path clamp still reds the test.
+
+- 2026-07-26: PR #100 all 9 checks green on `8dd7ae4` — `ubuntu-latest (release)` 19m42s, `windows-latest (release)` 21m4s, `test-coverage` 20m23s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. The two R CMD check platforms are the ones that can see the M84 raw-point-fit failure at all, so the hardened AC4 fixture is verified where it matters. Status -> review; this is the third re-cut's first review pass, and the sixth for the milestone.
 
 ## Decisions
 
