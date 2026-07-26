@@ -1,4 +1,4 @@
-# M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
+# M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
 - **Status:** in-progress
 - **Priority:** normal
@@ -10,138 +10,115 @@
 ## Goal
 
 When the Monte-Carlo default aborts near the σ²→0 boundary, have the classed error
-name the boundary-robust opt-in `ci_method` that actually applies to the user's
-design, instead of only the generic refit/aggregate remedies.
+name an opt-in `ci_method` PROVEN to return an interval on the user's design — the
+deterministic closed forms only, never a resampling method whose failures are not a
+function of the design.
 
 ## Scope
 
-**In:** an internal design→method mapping computed from the predicates `icc()` already
-holds at its `ci_method` fences (`R/icc.R:1381-1497`) — `oneway`, `multilevel`,
-`replicates`, `raters`, `balanced`, `type`, `conf_level` — plus two inputs review pass 1
-proved the mapping cannot be right without: the observed subject/rater counts (the `mpl`
-row must respect `mpl_kappa_lookup()`'s κ_m calibration grid) and an exact-degeneracy
-flag read from the data, where every method a row would name aborts; threaded as extra
-`i =` bullets into the CI-stage `intraclass_singular_fit` aborts in `R/ci-montecarlo.R`
-that T1 showed reachable at the boundary; a guard test that every method the hint names
-is actually accepted on that design; NEWS + `@param` docs.
+**In:** an internal design→method mapping over the predicates `icc()` already holds at
+its `ci_method` fences (`R/icc.R:1381-1497`), plus the observed subject/rater counts
+(the `mpl` row must respect `mpl_kappa_lookup()`'s κ_m grid) and a PER-ROW data
+degeneracy check evaluating the condition each row's own methods' shipped guards raise
+on; threaded as extra `i =` bullets into the two CI-stage `intraclass_singular_fit`
+aborts in `R/ci-montecarlo.R` that T1 showed reachable; a message-driven guard sweep
+that parses the method names out of the abort `icc()` really raises and runs each on
+the same data; NEWS + `@param` docs.
 
-**Out:** fallback or auto-routing — the default still aborts; replacing the abort with
-a classical interval is the `#3`/ADR-003 contract change D-012 fenced out ("A classical
-**fallback-on-abort** default behaviour is a distinct, later `#3` question, not decided
-here") and stays its own ROADMAP candidate · engine-stage `intraclass_singular_fit`
-aborts in `R/engine-lme4.R` / `R/engine-lavaan.R`, where the POINT fit failed and no
-`ci_method` is a remedy → candidate row if T1 shows they matter · `R/ci-bootstrap.R:56`,
-excluded on T1 evidence (see AC2); that site's own generic remedy names
-`ci_method = "montecarlo"`, which also aborts on the degenerate data reaching it →
-ROADMAP candidate row · identifiability
-aborts (`intraclass_unidentified`), which no interval method fixes · any new
-`ci_method`, or widening an existing one's design fence.
+**Out:** `ci_method = "npbootstrap"` in the hint, on any design → **M97**. Its
+resample-stage guard (`R/ci-npbootstrap.R:178-191`) is stochastic and not a property of
+the observed data, and two rounds of design predicates failed to fence it (review
+passes 2 and 3). With it out the unbalanced one-way row is empty — `npbootstrap` is the
+only method shipping that cell (D-013) — so unbalanced one-way leaves with it ·
+fallback or auto-routing: the default still aborts, and replacing it is the
+`#3`/ADR-003 contract change D-012 fenced out ("A classical **fallback-on-abort**
+default behaviour is a distinct, later `#3` question, not decided here") → ROADMAP
+candidate · engine-stage aborts in `R/engine-lme4.R` / `R/engine-lavaan.R`, where the
+POINT fit failed and no `ci_method` is a remedy · `R/ci-bootstrap.R:48`, excluded on T1
+evidence (0/90 at the boundary); its own generic remedy names `"montecarlo"`, which
+also aborts on the degenerate data reaching it → ROADMAP candidate · identifiability
+aborts, which no interval method fixes · any new `ci_method` or a widened fence.
 
 ## Acceptance criteria
 
-- [x] AC1: a committed reproduction test builds a near-zero-variance dataset on which
+- [ ] AC1: a committed reproduction test builds a near-zero-variance dataset on which
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [x] AC2: `icc()` derives the hint from the predicates it already computes and passes
-      it to the two Monte-Carlo boundary aborts T1 showed reachable
-      (`R/ci-montecarlo.R:43` non-finite covariance, `:124` non-finite draws); the abort
-      class, the leading message, and the existing generic remedies are all unchanged —
-      the hint is additive. `R/ci-bootstrap.R:48` is excluded on T1 evidence: it is
-      unreachable at the σ²→0 boundary (90/90 refits converged across six geometries
-      including exact-zero σ²_s at 5 subjects × 2) and is reached only by degenerate
-      data (σ²_e = 0, all-identical scores) on which every method the mapping table
-      would name ALSO aborts — so a hint there would point at another abort, which AC3
-      forbids. The hint's inputs also include the observed subject/rater counts and an
-      exact-degeneracy flag, not the fence predicates alone (review pass 1, F1/F2): a row
-      is named only when the design AND the data in hand accept it.
-- [ ] AC3 (GP7): a test asserts over a design grid — one-way balanced and unbalanced,
-      two-way random agreement and consistency, fixed-rater, multilevel, and
-      within-cell-replicate, each exercised end-to-end through `icc()`, at subject/rater
-      counts both on and off `mpl`'s κ_m calibration grid, and on exactly-degenerate
-      data — that every `ci_method` the hint names is ACCEPTED by `icc()` there. A hint
-      that points at another abort is a test failure, so a later fence change cannot
-      silently rot the mapping.
-- [x] AC4: designs with no boundary-robust opt-in — fixed raters, multilevel,
-      replicates, two-way consistency, and an `mpl`-shaped design at a `conf_level`
-      outside the calibrated set — receive NO method hint; a test pins the message to
-      its generic remedies alone (a blanket "try mpl" is wrong off two-way random
-      agreement).
-- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [ ] AC2: `icc()` derives the hint from the fence predicates, the observed
+      subject/rater counts and a per-row degeneracy check, and passes it to the two
+      reachable Monte-Carlo aborts (`R/ci-montecarlo.R:43`, `:124`); the abort class,
+      leading message and existing generic remedies are unchanged — the hint is
+      additive. Each row's degeneracy check is the condition its OWN methods' shipped
+      guards raise on (`mse == 0` for the classical row, `classical_guard_observed()`;
+      zero total variance for `mpl`), so a row falls silent only where its own methods
+      abort. No design names `"npbootstrap"` (→ M97); `R/ci-bootstrap.R:48` excluded on
+      T1 evidence.
+- [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
+      from hand-written expectations — over a design grid, trigger the real `icc()`
+      abort, parse the method names out of the message that fired, run each on that
+      same data, and require that none aborts. Grid: one-way balanced at several
+      subject counts, incl. SSA = 0 and MSE = 0 data; two-way random agreement with
+      `type` supplied and unset, on and off `mpl`'s κ_m grid; and the silent designs
+      (unbalanced one-way, two-way consistency, fixed raters, multilevel, replicates,
+      uncalibrated `conf_level`) end-to-end through `icc()`, with a converse half
+      asserting every opt-in method really does abort there.
+- [ ] AC4: designs with no applicable opt-in receive NO method hint; a test pins the
+      message to its generic remedies alone (a blanket "try mpl" is wrong off two-way
+      random agreement).
+- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, so nothing here
       implements the D-012-fenced fallback default.
-- [x] AC6: the change is documented where users meet it — a `NEWS.md` entry, and the
-      `@param ci_method` boundary-robustness note updated if it does not already say
-      an opt-in method exists for the aborting cases.
-- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [ ] AC6: the change is documented where users meet it — a `NEWS.md` entry naming the
+      methods the hint can name and the designs it stays silent on, and the
+      `@param ci_method` boundary-robustness note.
+- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; any changed message
       snapshot reviewed deliberately via `testthat::snapshot_review()`, never accepted
-      blind.
+      blind; PR #100 green on every job.
 
 **Mapping to implement** (each row mirrors a shipped fence; AC3 is what keeps it true):
 
 | design in hand | hint names |
 |---|---|
-| one-way random, balanced | `"searle"`, `"burch"` — D-012's 0-abort evidence (0/32,000) covers exactly these two; NOT `"npbootstrap"`, whose resample guard fires below 15 subjects |
-| one-way random, unbalanced, ≥15 subjects | `"npbootstrap"` only, as availability (D-013) |
-| one-way random, unbalanced, <15 subjects | nothing — the resample guard fires (13/13 at 5 subjects, 7/13 at 8, 1/11 at 10, 0 at 12+) |
+| one-way random, balanced, MSE > 0 | `"searle"` (best calibrated near normality, narrowest) and `"burch"` (never under-covers, wider) — D-012's 0-abort evidence (0/32,000) is stated for exactly these two |
 | two-way random, agreement, balanced+complete, calibrated `conf_level` **and a geometry on the κ_m grid** | `"mpl"` (D-014/D-015) |
-| exactly-degenerate data (zero within- or between-subject SS one-way; constant scores two-way) | nothing — every method above aborts (F2) |
-| anything else | nothing — generic remedies only |
+| anything else, incl. EVERY unbalanced one-way design | nothing — generic remedies only (M97 revisits unbalanced) |
 
 ## Coverage
 
-- AC1 → T1
-- AC2 → T2, T3, T6, T7, T8, T11
-- AC3 → T4, T7, T8, T9, T10, T11, T12
-- AC4 → T2, T8
-- AC5 → T3, T4
-- AC6 → T5, T7
+- AC1 → T3
+- AC2 → T1, T2, T4
+- AC3 → T2, T3
+- AC4 → T3
+- AC5 → T3
+- AC6 → T4
 - AC7 → T5
 
 ## Tasks
 
-- [x] T1: Write the failing reproduction test first: a near-σ²→0 dataset that reaches
-      `intraclass_singular_fit` via the default MC path. Then enumerate which of
-      `R/ci-montecarlo.R:54`, `R/ci-montecarlo.R:131` and `R/ci-bootstrap.R:56` that
-      reproduction actually fires, and log it — M84 showed an engine point-fit can
-      crash first and leave a downstream guard unreachable.
-- [x] T2: Add the internal hint builder — a pure function of the fence predicates,
-      returning a possibly-empty character vector of `i =` bullets — with unit tests
-      covering every row of the mapping table, including the empty-hint designs.
-- [x] T3: Thread the hint from `icc()` into `mc_ci()`/`mc_components()`/`rmvn()` as an
-      argument defaulting to none, so no other caller changes, and append it to the two
-      reachable abort sites from T1 (`bootstrap_ci()` dropped by the AC2 amendment).
-- [x] T4: Add the GP7 guard test: for each design in the AC3 grid, call `icc()` with
-      every `ci_method` the hint names and assert it does not abort.
-- [x] T5: NEWS entry, `@param ci_method` touch-up, `devtools::document()`, snapshot
-      review, full AC7 gate, PR.
-- [x] T6: Fix `test-boundary-abort-hint.R:158` — the AC2 degenerate-data test must
-      tolerate the glmmTMB point fit dying with a RAW unclassed error (M84), not only
-      the classed `intraclass_singular_fit`. Re-verify on CI, not just locally: macOS
-      completes the fit that Linux/Windows abort on, so a green local gate proves
-      nothing here.
-- [x] T7 (review F1, 95): pass `n_s`/`n_r` into `boundary_method_hint()` and gate the
-      `mpl` row on `kappa_m_table`'s node set, so the hint stops naming `mpl` on
-      designs `mpl_kappa_lookup()` refuses; add an off-grid row to the AC3 grid.
-- [x] T8 (review F2, 90): stop the balanced-one-way hint firing on degenerate data
-      (zero within-subject variance) that reaches MC site A, where `searle`/`burch`/
-      `npbootstrap` all abort. Decide at the implement gate whether AC2/AC3 need a
-      gated amendment or the guard alone settles it.
-- [x] T10 (pass-2 F1, 95): stop the one-way rows naming `npbootstrap` where its
-      resample-degeneracy guard (`R/ci-npbootstrap.R:178-191`) fires — a subject-count
-      gate, or split the balanced bullet so npbootstrap can be dropped while
-      `searle`/`burch` are still named. Needs an implement-gate decision on which.
-- [x] T11 (pass-2 F2, 93): add `npbootstrap_ci()`'s `se_ij_logf == 0` disjunct to
-      `boundary_data_degenerate()`, and correct the comment + work-log claim that it
-      evaluates the shipped guards rather than restating them.
-- [x] T12 (pass-2 F4, 90): vary the one-way subject count in the AC3 grid so a size
-      fence is visible to the suite (this gap is why F1 shipped green), and derive the
-      grid's hint from the predicates `icc()` computes rather than hand-written `pred`
-      lists.
-- [x] T9 (review F3, 85): extend the AC3 grid to the enumeration AC3 states —
-      multilevel and within-cell replicates end-to-end through `icc()`, not only as
-      pure-function calls — and vary `n_s`/`n_r` so an off-grid `mpl` design is covered.
+<!-- Re-cut 2026-07-25 after the third review send-back; the superseded T1-T12 and
+     what they shipped are in the work log below. These are the remaining tasks. -->
+
+- [ ] T1: Drop `npbootstrap` from `R/boundary-hint.R` entirely — the unbalanced one-way
+      row, the `npb_hint_min_subjects` floor (`:36`), and the comment prose asserting a
+      floor the code no longer has. The one-way branch becomes balanced-only.
+- [ ] T2: Split the degeneracy check per row: the classical row gates on `mse == 0`
+      alone (`classical_guard_observed()`'s own condition — verified at the plan gate:
+      on balanced SSA = 0 data the default aborts while `searle` and `burch` both
+      return intervals, which the shared gate currently suppresses, pass-3 F2), the
+      two-way row keeps zero total variance; the npbootstrap-only disjuncts retire with
+      the method.
+- [ ] T3: Rewrite the grid in `tests/testthat/test-boundary-abort-hint.R` as AC3's
+      message-driven sweep — fire the real abort, parse the named methods out of it,
+      run each on the same data — over the enumerated grid, keeping the AC1
+      reproduction test and the AC4/AC5 pins; delete the pass-3 F4 tautology (`:998`,
+      `expect_identical(x, x)`) and every npbootstrap-specific cell.
+- [ ] T4: Align the hint's unit tests, the mapping table, `NEWS.md` and
+      `@param ci_method` with the narrowed set (no bootstrap named; unbalanced one-way
+      silent); `devtools::document()`.
+- [ ] T5: Full AC7 gate, snapshot review if any message snapshot moved, PR #100 green
+      on every job.
 
 ## Work log
 
@@ -170,6 +147,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: CI caught a self-inflicted `check-references` failure — the new test fixture was named for the discrete-outcome axis, falsifying a committed references-page observation that the token is absent from R/ and tests/ (D-009). The claim is TRUE (nothing here handles or studies that axis), so the fixture was renamed rather than the observation weakened; the first rewrite then tripped two more checks by naming both tokens in its own comment.
 - 2026-07-25: PR #100 all 7 jobs pass on `3da69d5` — `ubuntu-latest` 16m38s, `windows-latest` 19m25s, `test-coverage` 17m42s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov checks. Ready for review pass 3.
 - 2026-07-25: review pass 3 FAILED the gate — AC3 again, on the one-way half. The `n_s >= 15` floor is on the wrong quantity: the resample guard tracks subjects carrying within-subject variance, so the ordinary double-code design (most subjects rated once, a few twice) hints `npbootstrap` and then aborts at EVERY subject count 15-60. T10 also introduced over-suppression: the balanced bullet now stays silent on SSA = 0 data where searle/burch both work. F1 96 / F2 90 / F4 95 actioned-in-principle, F3 76 logged. Two-way/`mpl` clean across 919 hinted runs. THIRD return from review — thrash rule fires, so this is not queued for another implement pass; it goes to `/milestone-plan` for a re-cut. Status -> in-progress.
+- 2026-07-25: re-cut by /milestone-plan (gate: split at deterministic-vs-bootstrap). The hint keeps only the deterministic families — `searle`/`burch` balanced one-way, `mpl` two-way — while `npbootstrap` and the whole unbalanced one-way row move to M97 behind a resample-stability predicate; the degeneracy gate goes per-row (pass-3 F2, reproduced at the plan gate on balanced 12x2 SSA=0 data: default aborts, searle/burch both return intervals), and AC3 becomes a message-driven sweep. T1-T12 are superseded but shipped and stay on the branch; T1-T5 are the remainder. Every AC box unticked — the code changes, so each criterion re-verifies from scratch.
 
 ## Decisions
 
