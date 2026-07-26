@@ -232,6 +232,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: T10 — the AC5 leak enumeration now runs over BOTH branches that render a bullet from a computed interval, not just the one-way one. Each branch fires its own real abort, asserts its own bullet is in the text being read (so the branch was genuinely exercised), enumerates the numeric tokens, and drives the same three-rendering positive controls off that branch's own reducers; a `checked == 2L` pin at the end means half the surface can no longer go unread with the file green, and a fixture drifting off the boundary FAILS rather than skips. Mutation-verified three ways: `round(conf.high, 3)` into the mpl bullet reds it (pass-8 F1's exact mutation, 2 tokens vs 1), `round(conf.low, 3)` into the one-way bullet still reds it, and silencing the mpl branch reds both the per-branch bullet pin and the `checked` pin. M93 file FAIL 0 / PASS 720 / SKIP 0.
 - 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, 2m54s), `devtools::test()` FAIL 0 / PASS 4933 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in the branch diff, so no message snapshot moved and none was accepted. Only the test file changed in `R/`-visible terms — no shipped code touched since pass 6. Status -> review.
 
+- 2026-07-26: PR #100 all 9 checks green on `e876434` — `ubuntu-latest (release)` 17m8s, `windows-latest (release)` 16m9s, `test-coverage` 17m48s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 9.
+
 ## Decisions
 
 ## Review
