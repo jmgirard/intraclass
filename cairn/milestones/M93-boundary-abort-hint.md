@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -48,7 +48,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [x] AC2: a method is named only after the verification step returned TRUE for it on
+- [ ] AC2: a method is named only after the verification step returned TRUE for it on
       this data; the abort class, leading message and existing generic remedies are
       unchanged, and a design with nothing to name gains nothing — the hint is additive.
       **Verification can never raise**: every condition a reducer emits is caught, so no
@@ -75,7 +75,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       method on that data, and that every method an admissibility row offers is accepted
       by `icc()`'s own fence (a named-but-inadmissible method would abort
       `intraclass_unsupported`).
-- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, and that no interval
       computed during verification reaches the message text or any returned object, so
       nothing here implements the D-012-fenced fallback default (D-018).
@@ -98,10 +98,10 @@ legitimate ICC(3) = -1.771 on healthy data.
 ## Coverage
 
 - AC1 → T4
-- AC2 → T1, T2
+- AC2 → T1, T2, T6
 - AC3 → T4
-- AC4 → T3
-- AC5 → T2, T4
+- AC4 → T3, T7
+- AC5 → T2, T4, T8
 - AC6 → T5
 - AC7 → T5
 
@@ -129,6 +129,19 @@ legitimate ICC(3) = -1.771 on healthy data.
       the in-support clause, and neutering non-vacuity each red it.
 - [x] T5: `NEWS.md` and `@param ci_method` rewritten to the run-it-first surface,
       `devtools::document()`, full AC7 gate, PR #100 green on every job.
+- [ ] T6 (pass-6 F1, 92): add the AC2 LAZINESS test the criterion names — assert
+      verification does not run on a successful `icc()` call and does run on the
+      aborting one. Mutation-verify: forcing `hint` eagerly in `mc_ci()` must red it
+      (measured: it currently leaves the file at FAIL 0 / PASS 659, unchanged).
+- [ ] T7 (pass-6 F2, 86): pin the `n0` WIRING end to end — a test that observes the
+      value `icc()` actually passes, not one that hard-codes it. Must red on a wrong
+      `n0` in the OVER-NAMING direction: `n0 = 2` on the SSA = 0 fixture with
+      `unit = "single"` alone makes the hint name `searle` at `[-0.5, -0.5]` on the
+      open support floor, and the suite stays green.
+- [ ] T8 (AC5's second clause; pass-6 F3 scored 65 and is logged, but the CRITERION
+      compels this): assert no interval computed during verification reaches the
+      message text or any returned object — e.g. that no digit sequence of the
+      endpoints the candidates would return appears in the rendered abort.
 
 ## Work log
 
@@ -201,6 +214,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: T3 fixture hardened before CI could find it — the AC4 out-of-support cell was a 2×2 glmmTMB fit, which is the M84 shape that failed review pass 1 (a tiny fit dies with a RAW unclassed error on Linux/Windows and completes on macOS, so the local gate is structurally blind to it). Moved to 8×2 at `unit = 10`, `conf_level = 0.80`, where searle reports [1.276702, 1.824471] — same property, ordinary fit. Re-verified: the `pmin(1, .)` reporting-path clamp still reds the test.
 
 - 2026-07-26: PR #100 all 9 checks green on `8dd7ae4` — `ubuntu-latest (release)` 19m42s, `windows-latest (release)` 21m4s, `test-coverage` 20m23s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. The two R CMD check platforms are the ones that can see the M84 raw-point-fit failure at all, so the hardened AC4 fixture is verified where it matters. Status -> review; this is the third re-cut's first review pass, and the sixth for the milestone.
+
+- 2026-07-26: review pass 6 FAILED the gate — but not on the behaviour. Three lenses plus my own 441-cell sweep searched ~33,000 adversarial cells for a hint naming a method that then fails, including the `conf_level` tail at 2 subjects that pass 5 died on, and found ZERO: no sixth mechanism. What failed is two criteria as written. AC2 says "a test pins that" of the laziness obligation and no test does — rebinding `mc_ci()` to force the hint eagerly leaves the file at FAIL 0 / PASS 659, reproduced independently (F1, 92). AC5's second clause asks a test to assert no computed interval reaches the message text, and none does (F3, 65 — logged as a finding, but the criterion compels the test). F2 (86) is actioned too: the `n0` wiring is pinned only in the over-suppressing direction, and the passing direction is the forbidden one — a wrong `n0 = 2` makes the hint name `searle` at `[-0.5, -0.5]` on the open support floor with the suite green. AC2/AC5 ticks withdrawn; AC1, AC3, AC4, AC6, AC7 stand. T6-T8 added. Status -> in-progress; sixth return, first since the third re-cut.
 
 ## Decisions
 
@@ -882,3 +897,63 @@ regenerated from roxygen) · `README.Rmd` untouched · `pkgdown::check_pkgdown()
 problems found" · `NEWS.md` entry present · no new top-level file, so no
 `.Rbuildignore` entry owed · `devtools::check()` Status OK. No `DESIGN.md` principle
 changed, so `cairn_impact` does not apply.
+
+**Independent review — 3 lenses.** [S] blame-history: 0 findings — it traced every
+deleted guard (`boundary_data_degenerate()`, `boundary_sb_safe()`,
+`boundary_classical_sb_ok()`, `mpl_kappa_available()`, and the five dropped hint
+arguments) back to the finding that motivated it and REPRODUCED each case live under
+the new mechanism, confirming the subsumption claim per item rather than in aggregate;
+it also verified `rmvn()`/`d_study()`/`engine-lavaan.R` back-compat and that D-018's
+line matches what the code does. [S] prior-review: 0 findings — GitHub inline-comment
+surface empty by probe (`[]`), every actioned finding from passes 1-5 verified still
+closed, the below-threshold ones not worsened, and no new instance of the
+tautological/vacuous assertion class. [O] diff-bug: **no sixth mechanism found** —
+message-driven in both directions over ~9,072 one-way cells (6,510 aborts, 7,427
+names) and ~24,000 two-way cells (13,100 aborts, 1,410 names), plus 960 hostile
+never-raise cells where the error class with the hint live is identical to the class
+with the hint neutered; zero violations anywhere. It returned 3 findings, all in the
+TEST layer, scored by an independent [S] scorer that did not generate them.
+
+- **F1 (92) — actioned, T6.** AC2 says verbatim "a test pins that" of the laziness
+  obligation. No such test exists (grep for trace/force/counter patterns returns
+  nothing). Rebinding `mc_ci()` to `force(hint)` first — making every SUCCESSFUL
+  `icc()` call run the verification reducers — leaves the M93 file at FAIL 0 / PASS
+  659, identical to baseline. I reproduced this independently. The property holds
+  today (0 calls on a successful fit, 1-2 on an aborting one), but it is unguarded,
+  and M97 registers `npbootstrap` behind this same helper at 135 ms.
+- **F2 (86) — actioned, T7.** `R/icc.R:2145` passes `n0 = design_info$k_eff` into the
+  support floor, and the value is correct — but only a pure-function test exercises
+  the floor, hard-coding `n0`. Forwarding a wrong `n0 = 2` leaves the suite green
+  while `n0 = 100` reds it, and the PASSING direction is the one that reproduces the
+  milestone's central forbidden behaviour: I confirmed that with `n0 = 2` on the
+  SSA = 0 fixture at `unit = "single"`, the hint names `searle`, whose interval is the
+  zero-width `[-0.5, -0.5]` sitting exactly on the open support floor that AC3's
+  in-support clause exists to reject.
+- **F3 (65) — below threshold, logged not actioned as a FINDING** (the property is
+  structurally true: the hint bullets are fixed prose with no interpolated values, so
+  there is no near-term regression path). **The criterion still compels a test**, which
+  is why T8 exists: AC5's second clause asks a test to assert that no computed
+  interval reaches the message text, and none does. I verified the property by hand
+  this phase; a hand check at the gate is not what the criterion asks for.
+
+**GATE FAILURE — returned to `in-progress` (review pass 6).** Not the central
+behaviour this time: two criteria are unmet AS WRITTEN, and criteria are never read
+charitably here.
+- **AC2** requires a test pinning laziness; no test pins it, and the eager mutation
+  passes.
+- **AC5** requires a test asserting no computed interval reaches the message text or a
+  returned object; the test asserts the class and that the result is not an `icc`
+  object, and nothing about the message.
+
+**AC2 and AC5 ticks withdrawn**; AC1, AC3, AC4, AC6 and AC7 were verified this pass and
+stand as recorded above. F2 does not withdraw a tick — AC4's literal words are about
+endpoint equality and admissibility, both of which are tested — but it is actioned as
+T7 because the guard it asks for protects the milestone's own central property.
+
+**Thrash rule.** This is the SIXTH return from review, and the third re-cut's first.
+The disposition is the maintainer's, and the evidence says something different from
+the previous five times: the failing item is no longer the behaviour. Three lenses
+plus my own sweep searched roughly 33,000 adversarial cells for a hint that names a
+method which then fails, and found none — the axis pass 5 died on included. What is
+missing is three guards, one of which (T6) the criterion named explicitly and the
+implementation did not write.
