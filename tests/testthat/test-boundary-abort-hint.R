@@ -1,6 +1,6 @@
 # M93: the design-aware hint appended to the CI-stage boundary aborts.
 #
-# T1 (AC1) lives here: the reproduction that establishes WHICH abort sites a
+# AC1 lives here: the reproduction that establishes WHICH abort sites a
 # near-sigma^2 -> 0 dataset actually reaches. The hint is added only to sites shown
 # reachable (M84: an engine point-fit can crash first and leave a downstream guard
 # unreachable), so this file is the evidence the AC2 scope rests on.
@@ -206,7 +206,7 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
   }
 })
 
-# ---- T2/AC2/AC4: the hint builder, every row of the mapping table -------------
+# ---- AC2/AC4: the hint builder, every row of the mapping table ----------------
 # boundary_method_hint() is a PURE function of the fence predicates, so it is
 # exercised directly here; the AC3 grid below then proves the methods it names are
 # genuinely accepted by icc() end to end.
@@ -305,7 +305,7 @@ test_that("the hinted conf_level set is READ from the shipped table, not hardcod
   expect_length(bh_hint(conf_level = 0.92), 0L)
 })
 
-# ---- T3/AC2/AC5: threaded end to end, additively --------------------------------
+# ---- AC2/AC5: threaded end to end, additively --------------------------------
 
 # Render an abort's message to plain text, or NA if icc() did not abort.
 bh_msg <- function(d, ...) {
@@ -428,7 +428,7 @@ test_that("d_study() and the lavaan engine are untouched by the threading (AC2)"
   expect_identical(formals(mc_ci)$hint, quote(character(0)))
 })
 
-# ---- T4/AC3: the GP7 guard -- every method the hint names is ACCEPTED ----------
+# ---- AC3: the GP7 guard -- every method the hint names is ACCEPTED ------------
 # The mapping table in the milestone mirrors icc()'s ci_method fences. Mirroring
 # rots silently: a later fence change would leave the hint pointing at a method
 # that now aborts, which is worse than no hint at all. So for every design in the
@@ -587,7 +587,7 @@ test_that("designs the hint stays silent on are the ones that would abort (AC3/A
   }
 })
 
-# ---- T7/T8 (AC2/AC3/AC4): the two inputs that are not design fences -------------
+# ---- AC2/AC3/AC4: the two inputs that are not design fences ------------------
 # Review pass 1 caught the hint naming methods that then abort. Neither cause is
 # visible in the design predicates: F1 is the kappa_m calibration GEOMETRY (icc()'s
 # own mpl fence checks the design and the conf_level, never the (n_r, n_s) grid), and
@@ -828,7 +828,7 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
   )))
 })
 
-# ---- T9/AC3: the grid AC3 actually enumerates ---------------------------------
+# ---- AC3: the designs the criterion enumerates, end to end -------------------
 # The grid above covers one-way and two-way random at ONE geometry, exercised through
 # icc(); AC3 enumerates more than that, and the gap is how F1 shipped green -- a grid
 # that never varies n_s/n_r cannot see a geometry fence, and a design checked only as

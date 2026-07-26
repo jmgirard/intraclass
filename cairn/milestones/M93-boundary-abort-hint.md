@@ -117,7 +117,7 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 - [x] T4: Align the hint's unit tests, the mapping table, `NEWS.md` and
       `@param ci_method` with the narrowed set (no bootstrap named; unbalanced one-way
       silent); `devtools::document()`.
-- [ ] T5: Full AC7 gate, snapshot review if any message snapshot moved, PR #100 green
+- [x] T5: Full AC7 gate, snapshot review if any message snapshot moved, PR #100 green
       on every job.
 
 ## Work log
@@ -153,6 +153,8 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 - 2026-07-25: T3 — AC3's sweep is one `bh_sweep_cell()` helper applied to one-way sizes, two-way geometries on and off the κ_m grid, the no-opt-in designs and all three degenerate shapes: fire the real abort, parse the method names out of the message, run each on the same data. The pass-3 F4 tautology and every npbootstrap-specific test are gone. The SSA = 0 cell asserts it is NON-vacuous, because a "named ⇒ accepted" sweep passes for free on a silenced hint — which is precisely how over-suppression would hide. Measured per cell: balanced one-way names 2 methods per abort across 5 size cells, unbalanced names 0, two-way on-grid names `mpl`, off-grid names 0.
 
 - 2026-07-25: T4 — `NEWS.md` and `@param ci_method` now state the narrowed surface and say WHY the bootstrap is excluded in the user's own terms (whether it succeeds is a property of the resampling, not of their design), rather than listing it among the designs that get nothing; `man/icc.Rd` regenerated. Suite at `NOT_CRAN=true CI=true`: FAIL 0 / PASS 4515 / SKIP 23; `lintr` no lints; `air format` reformatted the rewritten test file and `--check` is clean after.
+
+- 2026-07-25: T5 — gate clean on the final tree: `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, its `checking tests` step running the whole suite in 134s), `devtools::test()` FAIL 0 / PASS 4515 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved and none was accepted. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync, so the `check-references` CI job is covered locally. Also retired the superseded task numbers from the test file's section headers, which now name the criteria they serve.
 
 ## Decisions
 
