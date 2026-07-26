@@ -1,6 +1,6 @@
 # M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -55,7 +55,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       forbids. The hint's inputs also include the observed subject/rater counts and an
       exact-degeneracy flag, not the fence predicates alone (review pass 1, F1/F2): a row
       is named only when the design AND the data in hand accept it.
-- [x] AC3 (GP7): a test asserts over a design grid — one-way balanced and unbalanced,
+- [ ] AC3 (GP7): a test asserts over a design grid — one-way balanced and unbalanced,
       two-way random agreement and consistency, fixed-rater, multilevel, and
       within-cell-replicate, each exercised end-to-end through `icc()`, at subject/rater
       counts both on and off `mpl`'s κ_m calibration grid, and on exactly-degenerate
@@ -91,8 +91,8 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 ## Coverage
 
 - AC1 → T1
-- AC2 → T2, T3, T6, T7, T8
-- AC3 → T4, T7, T8, T9
+- AC2 → T2, T3, T6, T7, T8, T11
+- AC3 → T4, T7, T8, T9, T10, T11, T12
 - AC4 → T2, T8
 - AC5 → T3, T4
 - AC6 → T5, T7
@@ -127,6 +127,17 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       (zero within-subject variance) that reaches MC site A, where `searle`/`burch`/
       `npbootstrap` all abort. Decide at the implement gate whether AC2/AC3 need a
       gated amendment or the guard alone settles it.
+- [ ] T10 (pass-2 F1, 95): stop the one-way rows naming `npbootstrap` where its
+      resample-degeneracy guard (`R/ci-npbootstrap.R:178-191`) fires — a subject-count
+      gate, or split the balanced bullet so npbootstrap can be dropped while
+      `searle`/`burch` are still named. Needs an implement-gate decision on which.
+- [ ] T11 (pass-2 F2, 93): add `npbootstrap_ci()`'s `se_ij_logf == 0` disjunct to
+      `boundary_data_degenerate()`, and correct the comment + work-log claim that it
+      evaluates the shipped guards rather than restating them.
+- [ ] T12 (pass-2 F4, 90): vary the one-way subject count in the AC3 grid so a size
+      fence is visible to the suite (this gap is why F1 shipped green), and derive the
+      grid's hint from the predicates `icc()` computes rather than hand-written `pred`
+      lists.
 - [x] T9 (review F3, 85): extend the AC3 grid to the enumeration AC3 states —
       multilevel and within-cell replicates end-to-end through `icc()`, not only as
       pure-function calls — and vary `n_s`/`n_r` so an off-grid `mpl` design is covered.
@@ -150,6 +161,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: T7/T8 — the hint now takes the observed `n_s`/`n_r` and a degeneracy flag. `mpl_kappa_available()` (new, `R/ci-mpl.R`) asks `mpl_kappa_lookup()` itself whether a geometry is calibrated, so the grid gate cannot drift from the table; `boundary_data_degenerate()` evaluates the shipped searle/burch/npbootstrap guards' own conditions one-way, and zero total variance two-way (the only cell where mpl breaks — probed). NEWS's exclusion list updated to match. Mutation-verified: dropping the degeneracy return reds 7 assertions, restoring the old conf_level-only mpl gate reds 6.
 - 2026-07-25: T9 — AC3's grid is now the grid AC3 enumerates: multilevel, within-cell replicates and an off-κ_m-grid two-way design run end-to-end through `icc()` (silent hint + every opt-in method aborting `intraclass_unsupported`), and the accepted half varies the geometry (10x2 and 15x5, both hinting `mpl` and accepted). Mutation-verified: deleting the multilevel/replicate early return reds the new grid row and names it.
 - 2026-07-25: gate green and CI green. Local: `devtools::test()` FAIL 0 / PASS 4367 at `NOT_CRAN=true CI=true`, `devtools::check()` Status OK, `lintr::lint_package()` no lints, `air format --check` clean, `document()` no-diff. PR #100 all 7 jobs pass on 45a4667 — including `ubuntu-latest`, `windows-latest` and `test-coverage`, the three that review pass 1 failed on. Status -> review.
+- 2026-07-25: review pass 2 FAILED the gate — the [O] diff-bug lens found the hint still names a `ci_method` that then aborts, on the ONE-WAY rows: `npbootstrap`'s resample-degeneracy guard fires routinely below ~12 subjects (16/16 hinted-then-aborting at n_s=5), and `boundary_data_degenerate()` omits its `se_ij_logf == 0` disjunct. Reproduced by the lens, the independent scorer, and again at the gate. F1 95 / F2 93 / F4 90 actioned as T10-T12; F3 40 logged. AC3 tick withdrawn; the other six criteria verified this pass and stand. Status -> in-progress; second return from review.
 
 ## Decisions
 
@@ -292,6 +304,11 @@ one would pass vacuously; none fired.
   and with replicated cells rather than as pure-function calls; geometry varied on the
   grid at `:821` (10×2 and 15×5, both hinting `mpl` and accepted) and off it at `:629`
   (8 subjects, silent, and `mpl` confirmed to abort there); degenerate data at `:712`.
+  **Tick withdrawn — see the gate failure below.** The enumerated grid does pass, but
+  AC3's second sentence states the property the grid exists to protect ("a hint that
+  points at another abort is a test failure"), and the independent review reproduced
+  exactly that in shipped behaviour on the ONE-WAY rows, which the grid never varies in
+  size. The criterion is read as written, and as written it is not met.
 - AC4 — the five no-opt-in designs the criterion names are each pinned: fixed raters,
   multilevel, replicates and two-way consistency at `:286`, and an `mpl`-shaped design
   at an uncalibrated `conf_level` at `:286`/`:306` (the level set read from
@@ -325,3 +342,58 @@ has no `DESIGN.md`), so `cairn_impact` does not apply.
 **CI.** PR #100 on head `ea91d09`: all 7 jobs pass — `ubuntu-latest (release)` 17m21s,
 `windows-latest (release)` 20m19s and `test-coverage` 23m54s are the three that failed
 review pass 1, and they are the only platforms where the T6 defect reproduces at all.
+T6 is therefore verified on the only platforms that can verify it.
+
+**Independent review — 3 lenses.** [S] blame-history: 0 findings (checked D-012/D-013/
+D-014/D-015/D-017 against the shipped fences, `rmvn()`/`d_study()`/`engine-lavaan.R`
+back-compat, and judged the T6 assertion loosening correct rather than lost coverage —
+a class-pinned assertion would be actively wrong on Linux/Windows for that data).
+[S] prior-PR-comments: 0 findings (GitHub inline-comment surface empty by probe; F1/F2/
+F3 of pass 1 each verified addressed; pass 1's below-threshold F4 carried forward
+unchanged, neither regressed nor worsened). [O] diff-bug: 4 findings, scored by an
+independent [S] scorer that did not generate them.
+
+**GATE FAILURE — returned to `in-progress` (review pass 2).** The milestone's central
+forbidden behaviour is present in shipped code: the hint names a `ci_method` that then
+aborts on the same data. Reproduced by the [O] lens, independently by the scorer, and a
+third time by me at the gate.
+
+- **F1 (95) — actioned, T10.** `R/boundary-hint.R:97-104` (balanced) and `:109-112`
+  (unbalanced) name `ci_method = "npbootstrap"` from the design predicates and the
+  exact-degeneracy flag alone, but `npbootstrap_ci()` has a SECOND, non-exact abort —
+  the resample-degeneracy guard at `R/ci-npbootstrap.R:178-191`, whose own comment says
+  it is "negligibly rare at k >= 10". Below that, it fires routinely. Measured over 25
+  seeds/cell on ordinal 1-3 ratings, counting only runs where the default aborted AND
+  the hint named npbootstrap, then re-running with npbootstrap: n_s=5 16 hinted/16 then
+  abort · n_s=6 15/15 · n_s=8 15/15 · n_s=10 17/12 · n_s=12 18/5 · n_s=15 14/0. Also 9
+  of 16 on unbalanced 8-subject data, where npbootstrap is the ONLY method named so the
+  whole bullet is wrong. `searle`/`burch` are accepted throughout, so the fix is a size
+  gate or splitting the balanced bullet so npbootstrap can be dropped independently —
+  the one-sentence, all-three wording is what currently forces all-or-nothing.
+- **F2 (93) — actioned, T11.** `R/boundary-hint.R:44-56`: the comment claims it
+  evaluates "the shipped guards themselves rather than restate them", but it omits
+  `npbootstrap_ci()`'s independent disjunct `obs$se_ij_logf == 0`
+  (`R/ci-npbootstrap.R:144`). Any k=2 one-way design with equal within-subject SS hits
+  it exactly. The scorer went further than the finding and reached it end-to-end through
+  the real hint-firing path, not only by hand construction. Distinct root cause from F1
+  (formula gap vs. missing size gate), so it needs its own fix — and the guard-
+  equivalence claim in the comment and the T7/T8 work-log line must stop being asserted.
+- **F3 (40) — below threshold, logged not actioned.** `R/ci-mpl.R:288-297`:
+  `mpl_kappa_available()`'s "cannot drift" comment overclaims, because
+  `mpl_kappa_lookup()` checks `n_r` against the global node set and `n_s` against the
+  global min/max, then interpolates within the `n_r` column — a ragged table would make
+  `approx()` return NA with no condition raised. The scorer verified the shipped table
+  is a complete rectangular 9x6 grid at all three levels with an assembly-time
+  `stopifnot` in `data-raw/m91-mpl-kappa-sysdata.R`, so there is no live bug; it scored
+  40 as fragility against a future edit, not a present defect.
+- **F4 (90) — actioned, T12.** `tests/testthat/test-boundary-abort-hint.R:445-454` and
+  `:485-551`: pass 1 diagnosed "the grid never varies n_s/n_r" as the mechanism by which
+  its own F1 shipped green; T9 fixed that for the two-way/`mpl` rows only.
+  `bh_ok_oneway()` is hard-wired to 20 subjects in BOTH the balanced and unbalanced
+  rows, which is exactly why F1 above is invisible to a green suite. Secondary: the grid
+  computes the hint from hand-written `pred` lists rather than from the predicates
+  `icc()` actually derives for that data, so a mis-wiring between the two would not red.
+
+Gate-failure note: this is the milestone's SECOND return from review. A third makes it a
+mis-planned milestone under the thrash rule, and the response then is re-plan or split
+via `/milestone-plan`, not another retry.
