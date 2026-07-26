@@ -1,64 +1,66 @@
-# M97: `npbootstrap` in the boundary hint — a resample-stability predicate for unbalanced one-way
+# M97: `npbootstrap` in the boundary hint — verified by running it, not predicted
 
 - **Status:** planned
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
-- **Principles touched:** GP1, GP6, GP7
+- **Principles touched:** GP1, GP7
 
 ## Goal
 
 Let the boundary abort name `ci_method = "npbootstrap"` on unbalanced one-way designs —
-the only method shipping that cell (D-013) — without ever naming it where its
-resample-stage guard then fires, by predicting resample stability from the observed
-data rather than from the design.
+the only method shipping that cell (D-013) — by RUNNING the bootstrap on the data in
+hand and naming it only if it returned a usable interval, rather than predicting from
+the design whether its resampling will hold up.
 
 ## Scope
 
-**In:** a measured characterization of when `npbootstrap_ci()`'s resample-degeneracy
-guard (`R/ci-npbootstrap.R:178-191`) fires, swept along the axis the failure grows on —
-imbalance SHAPE, not just subject count (GP6); an internal predicate computable from
-the observed data (the count of subjects carrying within-subject variance, ties among
-subject means, `k`, `boot_samples`) with a stated failure-probability target; the
-unbalanced one-way row restored in `boundary_method_hint()` behind it; M93's
-message-driven AC3 sweep extended over imbalance shape at the shipped
-`boot_samples = 999`; the stale `R/ci-npbootstrap.R:177` comment ("negligibly rare at
-k >= 10") corrected against the measurement; NEWS + `@param`.
+**In:** an internal check that runs `npbootstrap_ci()` at the shipped `boot_samples`
+under the seed the user's own call would use, catches every error, and accepts only a
+finite, correctly ordered interval on every estimand; the unbalanced one-way row
+restored in `boundary_method_hint()` behind it; RNG neutrality (#9) via the existing
+`with_rng_seed()`, so a hint that fires cannot perturb the user's stream; a decision,
+recorded in this file, on what to do when the caller set no `seed` — a run that succeeds
+under one seed can fail under another, measured at this gate as 8/8 seeds succeeding on
+a 20×3 design and 1/8 on a 6×2; M93's AC3 sweep extended over imbalance shape incl. the
+double-code design; the stale `R/ci-npbootstrap.R:177` comment ("negligibly rare at
+k >= 10") corrected against measurement; NEWS + `@param`.
 
-**Out:** changing `npbootstrap_ci()`'s own guard, its abort message, or its design
-fence — this milestone predicts the shipped guard, it does not move it; a case for
-moving it → ROADMAP candidate · the balanced one-way row, which names the deterministic
-pair and gains nothing from a bootstrap (M93, and D-012's 0-abort evidence is
-`searle`/`burch`-only) · the `mpl` and classical rows and the per-row degeneracy check →
-M93 · fallback or auto-routing on abort, the `#3`/ADR-003 contract change D-012 fenced
-out → standing ROADMAP candidate.
+**Out:** deriving an ANALYTIC stability predicate from the observed data (subjects
+carrying within-subject variance, ties among subject means) — this milestone's original
+premise, dropped at the 2026-07-26 gate once running the bootstrap was measured at
+135 ms, which answers the same question exactly rather than approximately; revive only
+if the seed question makes running it unworkable · changing `npbootstrap_ci()`'s own
+guards, message or design fence — this evaluates the shipped guard, it does not move it
+→ ROADMAP candidate · the deterministic rows and their four pass-4 fixes → M93 ·
+fallback or auto-routing on abort, the `#3`/ADR-003 change D-012 fenced out → standing
+ROADMAP candidate.
 
 ## Acceptance criteria
 
-- [ ] AC1 (GP6): a committed seeded sweep measures the guard's firing rate over subject
-      count × imbalance shape × number of subjects carrying within-subject variance, at
-      the shipped `boot_samples = 999`, and includes the double-code shape that defeated
-      M93's subject-count floor (most subjects rated once, a few doubled — measured
-      there at 100% hinted-then-aborting for every `n_s` from 15 to 60). The fixture is
-      committed with its script (#4); per-cell rates are recorded, not summarized.
-- [ ] AC2: an internal predicate, a pure function of the observed data and
-      `boot_samples`, decides whether the resample is stable enough to name the method.
-      Its criterion is stated numerically before it is fitted (GP5) — an expected count
-      of degenerate resamples over `boot_samples`, below a named threshold — and its
-      derivation is either cited or committed as a seeded script, never asserted (#4).
-- [ ] AC3: the predicate is validated against AC1's measurement — no swept cell where
-      the predicate says "stable" and the measured abort rate exceeds the AC2
-      threshold; the double-code shape is checked by name, not by aggregate.
-- [ ] AC4 (GP7): M93's message-driven sweep, re-run with `npbootstrap` back in the
-      mapping and extended over imbalance shape, records ZERO hinted-then-aborting runs
-      at the shipped `boot_samples = 999` — not a reduced count, which masks a guard
-      firing on any degenerate resample (M93 pass-3 F3).
-- [ ] AC5: designs the predicate rejects get no bootstrap hint, pinned by a test; the
-      contract is unchanged — the boundary case still aborts `intraclass_singular_fit`
-      and returns no interval.
+- [ ] AC1: an internal check runs `npbootstrap_ci()` on the data in hand and returns
+      TRUE only when every estimand comes back finite with `conf.low <= conf.high`;
+      every error is caught, so the check itself can never turn the boundary abort into
+      a different error (the M93 pass-4 F2 failure mode, in a new place).
+- [ ] AC2 (#9): the check is RNG-neutral — a committed test captures `.Random.seed`
+      across an `icc()` call that fires it and asserts the stream is unchanged, so a
+      user who never asked for a bootstrap cannot have their draws perturbed by one.
+- [ ] AC3: the no-seed case is decided, and the decision recorded in this file with its
+      rationale; a test pins whatever behaviour is chosen. Measured at the plan gate:
+      `npbootstrap_ci()` succeeded at 8/8 seeds on a 20×3 design and 1/8 on a 6×2, so
+      the risk is real and size-dependent, not theoretical.
+- [ ] AC4 (GP7): M93's message-driven sweep, re-run with `npbootstrap` in the mapping
+      and extended over imbalance SHAPE (balanced, mildly ragged, and the double-code
+      design that defeated M93 pass 3), records ZERO hinted-then-unusable runs at the
+      shipped `boot_samples = 999` — never a reduced count, which lowers the chance of
+      tripping a guard that fires on any degenerate resample (M93 pass-3 F3).
+- [ ] AC5: the added cost is measured and recorded — the check runs only on a path that
+      has already failed, and this gate measured 135 ms at 999 resamples; a recorded
+      measurement confirms the success path is untouched, the hint being a promise
+      forced only inside an abort message.
 - [ ] AC6: documented where users meet it — a `NEWS.md` entry, the `@param ci_method`
       note, and `R/ci-npbootstrap.R:177`'s "negligibly rare at k >= 10" comment
-      corrected against AC1's measurement (contradicted by it, and pre-existing).
+      corrected against AC4's measurement (contradicted by it, and pre-existing).
 - [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; snapshot changes
       reviewed via `testthat::snapshot_review()`, never accepted blind; CI green.
@@ -66,35 +68,36 @@ out → standing ROADMAP candidate.
 ## Coverage
 
 - AC1 → T1
-- AC2 → T2, T3
+- AC2 → T2
 - AC3 → T3
 - AC4 → T5
-- AC5 → T4, T5
+- AC5 → T1, T5
 - AC6 → T6
 - AC7 → T6
 
 ## Tasks
 
-- [ ] T1: Write the `data-raw/` seeded sweep and commit its fixture — guard firing rate
-      over subject count × imbalance shape (balanced, mildly ragged, double-code) ×
-      subjects carrying within-subject variance, at `boot_samples = 999`.
-- [ ] T2: Derive the stability criterion analytically — for a whole-subject resample of
-      `k` with replacement, the probability that no drawn subject carries within-subject
-      variance is `(1 - j/k)^k` for `j` such subjects, plus the subject-mean-tie route
-      to `SSA* = 0` — and fix the numeric threshold before fitting it to T1 (GP5).
-- [ ] T3: Implement the predicate as a pure internal function with unit tests over T1's
-      measured cells, and assert AC3's no-false-"stable" property against the fixture.
+- [ ] T1: Add the internal check — run `npbootstrap_ci()` at the shipped
+      `boot_samples`, catch everything, accept only finite and ordered intervals on
+      every estimand — with unit tests over designs where it succeeds and where it
+      fails, and record its measured cost.
+- [ ] T2: Wrap it RNG-neutral via `with_rng_seed()`, and add the AC2 test capturing
+      `.Random.seed` across a firing `icc()` call.
+- [ ] T3: Settle the no-seed case at the implement gate and record it here: name it
+      anyway with the run as evidence, stay silent unless the caller set a `seed`, or
+      name it and say which seed reproduces the run. Pin the choice.
 - [ ] T4: Restore the unbalanced one-way row in `boundary_method_hint()` behind the
-      predicate, wording it as availability (D-012's 0-abort evidence is not an
-      npbootstrap result), with unit tests for both branches.
-- [ ] T5: Extend M93's message-driven AC3 sweep over imbalance shape at
-      `boot_samples = 999`; require zero hinted-then-aborting runs.
+      check, worded as availability (D-012's 0-abort evidence is a searle/burch result,
+      never an npbootstrap one).
+- [ ] T5: Extend M93's sweep over imbalance shape at `boot_samples = 999`; require zero
+      hinted-then-unusable runs.
 - [ ] T6: NEWS, `@param`, the `R/ci-npbootstrap.R:177` comment correction,
       `devtools::document()`, full AC7 gate, PR.
 
 ## Work log
 
 - 2026-07-25: created by /milestone-plan as the remainder of the M93 re-cut — the half three M93 review passes could not fence with design predicates (pass-2 F1: raw subject count; pass-3 F1: the count is decoupled from the effective one under imbalance). Depends on M93 because both edit `R/boundary-hint.R` and its test file.
+- 2026-07-26: re-scoped at the second M93 re-cut gate — the analytic stability predicate is dropped in favour of RUNNING the bootstrap (135 ms at 999 resamples, on an already-failed path), which answers the same question exactly rather than approximately. The seed question is what keeps this separate from M93: 8/8 seeds succeed on a 20×3 design, 1/8 on a 6×2, so a run is evidence about that seed, not about every seed. GP6 drops from the header slot — the failure axis is no longer swept for a formula, it is run directly.
 
 ## Decisions
 

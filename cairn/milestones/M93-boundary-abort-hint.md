@@ -17,13 +17,13 @@ function of the design.
 ## Scope
 
 **In:** an internal design→method mapping over the predicates `icc()` already holds at
-its `ci_method` fences (`R/icc.R:1381-1497`), plus the observed subject/rater counts
-(the `mpl` row must respect `mpl_kappa_lookup()`'s κ_m grid) and a PER-ROW data
-degeneracy check evaluating the condition each row's own methods' shipped guards raise
-on; threaded as extra `i =` bullets into the two CI-stage `intraclass_singular_fit`
-aborts in `R/ci-montecarlo.R` that T1 showed reachable; a message-driven guard sweep
-that parses the method names out of the abort `icc()` really raises and runs each on
-the same data; NEWS + `@param` docs.
+its `ci_method` fences (`R/icc.R:1381-1497`), plus four inputs the fences do not carry —
+the observed subject/rater counts (for `mpl`'s κ_m grid), a per-row data degeneracy
+check, the DATA COMPLETENESS of the scores, and the requested `unit`; threaded as extra
+`i =` bullets into the two CI-stage `intraclass_singular_fit` aborts in
+`R/ci-montecarlo.R` that T1 showed reachable; a message-driven sweep whose acceptance
+predicate is a USABLE interval (finite and correctly ordered on every estimand), not
+merely a call that does not raise; NEWS + `@param` docs.
 
 **Out:** `ci_method = "npbootstrap"` in the hint, on any design → **M97**. Its
 resample-stage guard (`R/ci-npbootstrap.R:178-191`) is stochastic and not a property of
@@ -37,7 +37,12 @@ candidate · engine-stage aborts in `R/engine-lme4.R` / `R/engine-lavaan.R`, whe
 POINT fit failed and no `ci_method` is a remedy · `R/ci-bootstrap.R:48`, excluded on T1
 evidence (0/90 at the boundary); its own generic remedy names `"montecarlo"`, which
 also aborts on the degenerate data reaching it → ROADMAP candidate · identifiability
-aborts, which no interval method fixes · any new `ci_method` or a widened fence.
+aborts, which no interval method fixes · any new `ci_method` or a widened fence ·
+**verifying instead of predicting** (run each candidate, name it only if the interval is
+usable) — measured feasible at the second re-cut gate (0.17/0.29/3.5-5.6 ms) and
+declined there in favour of patching the four pass-4 findings; M97 adopts it · a width
+screen on a valid interval: `burch` at `unit = 6` gives `[-15.653, 0.639]`, wide but
+ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 
 ## Acceptance criteria
 
@@ -45,24 +50,28 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [ ] AC2: `icc()` derives the hint from the fence predicates, the observed
-      subject/rater counts and a per-row degeneracy check, and passes it to the two
-      reachable Monte-Carlo aborts (`R/ci-montecarlo.R:43`, `:124`); the abort class,
-      leading message and existing generic remedies are unchanged — the hint is
-      additive. Each row's degeneracy check is the condition its OWN methods' shipped
-      guards raise on (`mse == 0` for the classical row, `classical_guard_observed()`;
-      zero total variance for `mpl`), so a row falls silent only where its own methods
-      abort. No design names `"npbootstrap"` (→ M97); `R/ci-bootstrap.R:48` excluded on
-      T1 evidence.
+- [ ] AC2: `icc()` derives the hint from the fence predicates plus the observed
+      subject/rater counts, a per-row degeneracy check, the scores' completeness and the
+      requested `unit`, and passes it to the two reachable Monte-Carlo aborts
+      (`R/ci-montecarlo.R:43`, `:124`); the abort class, leading message and existing
+      generic remedies are unchanged — the hint is additive. **Building the hint can
+      never raise**: every probe it runs is caught, so no input turns the boundary abort
+      into a different error (pass-4 F2 did exactly that on a score containing `NA`). A
+      test drives the hint over inputs that make each probe fail and asserts the abort
+      keeps class `intraclass_singular_fit`. No design names `"npbootstrap"` (→ M97);
+      `R/ci-bootstrap.R:48` excluded on T1 evidence.
 - [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
-      from hand-written expectations — over a design grid, trigger the real `icc()`
-      abort, parse the method names out of the message that fired, run each on that
-      same data, and require that none aborts. Grid: one-way balanced at several
-      subject counts, incl. SSA = 0 and MSE = 0 data; two-way random agreement with
-      `type` supplied and unset, on and off `mpl`'s κ_m grid; and the silent designs
-      (unbalanced one-way, two-way consistency, fixed raters, multilevel, replicates,
-      uncalibrated `conf_level`) end-to-end through `icc()`, with a converse half
-      asserting every opt-in method really does abort there.
+      from hand-written expectations — trigger the real `icc()` abort, parse the method
+      names out of the message that fired, run each on that same data, and require a
+      USABLE interval: finite and `conf.low <= conf.high` on every estimand returned.
+      A call that merely does not raise is NOT acceptance — that predicate is how
+      pass-4's `NaN` and reversed intervals passed a green suite. Grid: one-way balanced
+      over several subject counts; two-way random with `type` supplied and unset, on and
+      off `mpl`'s κ_m grid; the silent designs (unbalanced one-way, consistency, fixed
+      raters, multilevel, replicates, uncalibrated `conf_level`); and the four shapes
+      pass 4 came through — scores containing `NA`, a numeric `unit`, SSA = 0 and
+      MSE = 0 — each end-to-end through `icc()`, with a converse half asserting every
+      opt-in method really does fail where the hint stays silent.
 - [x] AC4: designs with no applicable opt-in receive NO method hint; a test pins the
       message to its generic remedies alone (a blanket "try mpl" is wrong off two-way
       random agreement).
@@ -81,44 +90,49 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 
 | design in hand | hint names |
 |---|---|
-| one-way random, balanced, MSE > 0 | `"searle"` (best calibrated near normality, narrowest) and `"burch"` (never under-covers, wider) — D-012's 0-abort evidence (0/32,000) is stated for exactly these two |
-| two-way random, agreement, balanced+complete, calibrated `conf_level` **and a geometry on the κ_m grid** | `"mpl"` (D-014/D-015) |
+| one-way random, balanced, complete scores, MSE > 0 **and MSA > 0** | `"searle"` and `"burch"` — D-012's 0-abort evidence (0/32,000) is stated for exactly these two. MSA = 0 silences the row: `burch` returns `NaN` and `searle`'s averaged form `-Inf` (pass-4 F3) |
+| ...and a numeric `unit` past `searle`'s Spearman-Brown pole | `"burch"` only — `searle` reverses there (`[4.594, 0.602]` at `unit = 6`); `burch` stays ordered and finite (pass-4 F4, narrowed at the plan gate) |
+| two-way random, agreement, balanced+complete **scores**, calibrated `conf_level` and a geometry on the κ_m grid | `"mpl"` (D-014/D-015). Cell-count completeness is not score completeness: an `NA` score counts as an observed cell, and `mpl` then aborts (pass-4 F1) |
 | anything else, incl. EVERY unbalanced one-way design | nothing — generic remedies only (M97 revisits unbalanced) |
 
 ## Coverage
 
-- AC1 → T3
-- AC2 → T1, T2, T4
-- AC3 → T2, T3
-- AC4 → T3
-- AC5 → T3
-- AC6 → T4
-- AC7 → T5
+- AC1 → T5
+- AC2 → T1, T2, T6
+- AC3 → T3, T4, T5
+- AC4 → T5
+- AC5 → T1, T5
+- AC6 → T6
+- AC7 → T6
 
 ## Tasks
 
-<!-- Re-cut 2026-07-25 after the third review send-back; the superseded T1-T12 and
-     what they shipped are in the work log below. These are the remaining tasks. -->
+<!-- Second re-cut 2026-07-26 after the pass-4 gate failure; T1-T12 and the first
+     re-cut's T1-T5 are superseded, and what they shipped is in the work log. -->
 
-- [x] T1: Drop `npbootstrap` from `R/boundary-hint.R` entirely — the unbalanced one-way
-      row, the `npb_hint_min_subjects` floor (`:36`), and the comment prose asserting a
-      floor the code no longer has. The one-way branch becomes balanced-only.
-- [x] T2: Split the degeneracy check per row: the classical row gates on `mse == 0`
-      alone (`classical_guard_observed()`'s own condition — verified at the plan gate:
-      on balanced SSA = 0 data the default aborts while `searle` and `burch` both
-      return intervals, which the shared gate currently suppresses, pass-3 F2), the
-      two-way row keeps zero total variance; the npbootstrap-only disjuncts retire with
-      the method.
-- [x] T3: Rewrite the grid in `tests/testthat/test-boundary-abort-hint.R` as AC3's
-      message-driven sweep — fire the real abort, parse the named methods out of it,
-      run each on the same data — over the enumerated grid, keeping the AC1
-      reproduction test and the AC4/AC5 pins; delete the pass-3 F4 tautology (`:998`,
-      `expect_identical(x, x)`) and every npbootstrap-specific cell.
-- [x] T4: Align the hint's unit tests, the mapping table, `NEWS.md` and
-      `@param ci_method` with the narrowed set (no bootstrap named; unbalanced one-way
-      silent); `devtools::document()`.
-- [x] T5: Full AC7 gate, snapshot review if any message snapshot moved, PR #100 green
-      on every job.
+- [ ] T1 (pass-4 F2, 95): move `npb_groups()`/`classical_oneway_ss()` INSIDE
+      `boundary_data_degenerate()`'s `tryCatch` so the probe can never throw; any error
+      from it means "this row's methods fail here", which is the answer the check exists
+      to give. Add the AC2 never-raise test.
+- [ ] T2 (pass-4 F1, 94): give the hint the scores' completeness, since `balanced` comes
+      from `table(subject, rater)` cell counts and counts an `NA`-scored row as observed.
+      Implement gate decides where completeness is computed (in `icc()` beside the other
+      predicates, or inside the hint) and whether incomplete scores silence every row or
+      only the two-way one.
+- [ ] T3 (pass-4 F3, 87): silence the one-way row when MSA = 0, for the stated reason —
+      `burch` is `NaN` there and `searle`'s ICC(k) is `-Inf`. This re-suppresses the cell
+      the first re-cut un-suppressed, now on its own evidence rather than on borrowed
+      npbootstrap conditions.
+- [ ] T4 (pass-4 F4, 88): restore `unit` as a hint input and stop naming `searle` where
+      the Spearman-Brown map reverses its interval. Implement gate decides between the
+      exact pole test (`rho_L < -1/(m-1)`, computed from `searle_endpoints()`) and the
+      blanket numeric-`unit` fence `icc()` already applies to npbootstrap
+      (`R/icc.R:1417-1431`); `burch` is named either way (D-010 untruncated support).
+- [ ] T5: rewrite the AC3 sweep — acceptance becomes a finite, ordered interval on every
+      estimand, and the grid gains `NA` scores, a numeric `unit`, SSA = 0 and MSE = 0.
+      Mutation-verify each of the four fixes reds it.
+- [ ] T6: `NEWS.md` and `@param ci_method` updated to the narrowed surface,
+      `devtools::document()`, full AC7 gate, PR #100 green on every job.
 
 ## Work log
 
@@ -161,6 +175,8 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 - 2026-07-25: review pass 4 FAILED the gate — the forbidden shape is back, via a mechanism no earlier pass touched: a MISSING SCORE. F2 (95) the hint's own degeneracy probe throws `intraclass_unidentified` and replaces the boundary abort (AC2); F1 (94) an NA-carrying two-way design is `balanced` by cell counts, so the hint names `mpl` and `mpl` aborts (AC3); F4 (88) numeric `unit` is no longer an input, so the balanced row steers it into a reversed interval; F3 (87) on the SSA = 0 data this pass deliberately un-suppressed, `searle` returns [-0.5, -0.5] / [-Inf, -Inf] and `burch` returns NaN, so the shipped "return a result" sentence is false — and the plan-gate evidence for that change tested only that no error was raised, never the values. AC2/AC3 ticks withdrawn; AC1, AC4-AC7 stand. Neither my sweep nor the committed one constructs an NA, and both score a method "accepted" iff `icc()` does not raise. FOURTH return from review; thrash-rule disposition left to the maintainer. Status -> in-progress.
 
 - 2026-07-25: CI footnote for the record — on the pass-4 evidence head `349d4bd`, 8 of 9 checks passed (both codecov, `check-references`, `format-check`, `lint`, `pkgdown`, `test-coverage`, `ubuntu-latest`); `windows-latest` shows `cancelled`, killed by the next push rather than failing (the M77/M78 cancel-in-progress behaviour). Moot for the verdict — the gate failed on AC2/AC3, not on CI.
+
+- 2026-07-26: second re-cut by /milestone-plan after the pass-4 gate failure. Gate: PATCH the four findings rather than replace the design→method prediction with running each candidate — verification was measured feasible here (searle 0.17 ms, burch 0.29 ms, mpl 3.5-5.6 ms on an already-failed, lazily-forced path) and prototyped correct on all four findings and both healthy cases, but the maintainer chose the smaller diff; it is now recorded in Scope Out with its measurements, and M97 adopts it for the bootstrap. Two facts settled at the gate: the acceptance predicate is finite-and-ORDERED with no [-1,1] bound, because `searle`'s ICC(3) limit is legitimately -1.771 on healthy data under D-010's `(-∞, 1]` untruncated support; and pass-4 F4 narrows — `searle` reverses at `unit = 6` (`[4.594, 0.602]`) but `burch` returns `[-15.653, 0.639]`, ordered and finite, so `burch` is still named there. Tasks re-cut to T1-T6, one per finding plus the sweep and the gate; AC2 gains a never-raise obligation and AC3 an interval-USABILITY predicate, which is the blind spot both pass-4 sweeps shared.
 
 ## Decisions
 
