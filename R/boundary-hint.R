@@ -20,53 +20,50 @@
 # D-012 fenced out ("A classical fallback-on-abort default behaviour is a distinct,
 # later `#3` question, not decided here").
 #
-# Evidential note on the wording. For BALANCED one-way, D-012 measured all three
-# named methods returning a finite interval on 100% of 32,000 datasets (0 aborts)
-# where the MC default aborted on 4-44% -- so "returns a result where the default
-# cannot" is earned, and each method's parenthetical is D-012's own one-line
-# characterization. For UNBALANCED one-way that sweep does not apply (it was
-# balanced-only), so the hint says npbootstrap is AVAILABLE and deliberately does
-# not claim it survives the boundary (implement gate, 2026-07-25).
+# Evidential note on the wording, and on what is NOT named. Every method named here
+# is a DETERMINISTIC closed form whose 0-abort record is measured: D-012 measured
+# SEARLE and Burch returning a finite interval on 100% of 32,000 balanced one-way
+# datasets where the MC default aborted on 4-44%, and each method's parenthetical is
+# D-012's own one-line characterization. `ci_method = "npbootstrap"` is named on NO
+# design, which also empties the unbalanced one-way row (it is the only method
+# shipping that cell, D-013). Its second abort is a RESAMPLE-stage guard
+# (`R/ci-npbootstrap.R:178-191`) that is stochastic and not a property of the observed
+# data at all, so no design predicate can fence it -- two M93 review passes tried, with
+# a raw subject count and then a subject-count floor, and the ordinary double-code
+# design (most subjects rated once, a few doubled) defeated both at every size. M97
+# takes it up behind a predicate derived from the data rather than the design.
 
-# The subject count below which the unbalanced one-way hint stays silent about
-# `npbootstrap`. Its resample guard (`R/ci-npbootstrap.R:178-191`) says of itself only
-# that degenerate resamples are "negligibly rare at k >= 10"; measured at the M93
-# pass-3 gate, k = 10 is not enough (12 of 17 hinted balanced 2-rater designs then
-# aborted), and every cell at 15+ was clean. An empirical floor, not a theoretical one.
-npb_hint_min_subjects <- 15L
-
-# Exact ANOVA degeneracy: TRUE when the DATA (not the design) are degenerate enough
-# that every method a row below could name aborts on them. The design predicates alone
-# cannot see this -- a balanced one-way design whose scores are constant within subject
-# is a perfectly ordinary design carrying data on which searle, burch and npbootstrap
-# all abort, and the M93 hint named all three (review F2).
+# Exact data degeneracy, PER ROW: TRUE when the data are degenerate enough that the
+# methods THAT ROW names abort on them. The design predicates alone cannot see this --
+# a balanced one-way design whose scores are constant within subject is a perfectly
+# ordinary design carrying data on which searle and burch both abort (M93 review F2).
 #
-# One-way: this restates the shipped guards' OBSERVED-data conditions, evaluated off the
-# same `npb_anova()` summary they use -- MSE = 0 (`classical_guard_observed()`, for
-# searle/burch), and a non-finite log F or a zero jackknife SE (`npbootstrap_ci()`'s two
-# disjuncts, `R/ci-npbootstrap.R:144`). The `se_ij_logf == 0` disjunct is independent of
-# the other two and was missed at first (M93 pass-2 review, F2): any k = 2 one-way design
-# with equal within-subject sums of squares hits it exactly while log F stays finite.
-# It restates rather than calls, so it is a copy that can drift -- it deliberately does
-# NOT cover npbootstrap's second, RESAMPLE-stage guard, which is stochastic and not a
-# property of the observed data at all; that one is handled by the subject-count floor
-# above. Exact zero, matching the guards' own convention -- a small-but-positive F is the
-# near-zero ICC these methods exist to serve, not a degeneracy.
+# The check is per row and never shared, because the rows fail on different data. A
+# shared check that ORed every row's condition together suppressed the classical row on
+# data where `searle` and `burch` both return intervals (M93 pass-3 F2): the disjuncts
+# it borrowed belonged to `npbootstrap`, which no row names any more. A row falls
+# silent only where its OWN methods abort.
 #
-# Two-way: only all-constant data break `mpl` (its optim dies at the initial
+# One-way (searle/burch): ASK the shipped guard rather than restate it, by running
+# `classical_guard_observed()` on the same `classical_oneway_ss()` summary both
+# reducers build and catching its abort. A restatement is a copy that drifts -- the
+# copy is how pass-2's F2 shipped -- and this is the `mpl_kappa_available()` pattern
+# from the same review: one source of truth, the shipped code itself. Forced only on
+# the balanced branch, which is the only one that names a method, so
+# `classical_oneway_ss()`'s balanced assumption always holds where it runs.
+#
+# Two-way (mpl): only all-constant data break it (its optim dies at the initial
 # parameters). Zero error MS with a healthy subject or rater MS is fine -- mpl returns
 # an interval there -- and the exactly-additive cell never reaches this code at all,
 # because the glmmTMB POINT fit dies on it first (all probed at the M93 implement gate).
 boundary_data_degenerate <- function(df, oneway) {
   if (isTRUE(oneway)) {
-    a <- npb_anova(split(df$score, df$subject))
-    # isTRUE(): with one rating per subject MSE is NaN, but icc() has already aborted
-    # on that design (unidentified), so this is belt-and-braces, never the live path.
-    return(
-      isTRUE(a$mse == 0) ||
-        !is.finite(a$logf) ||
-        isTRUE(a$se_ij_logf == 0)
+    ss <- classical_oneway_ss(npb_groups(df))
+    probe <- tryCatch(
+      classical_guard_observed(ss, "SEARLE exact-F", rlang::current_env()),
+      error = function(e) e
     )
+    return(inherits(probe, "condition"))
   }
   isTRUE(stats::var(df$score) == 0)
 }
@@ -79,7 +76,9 @@ boundary_data_degenerate <- function(df, oneway) {
 # `n_s`/`n_r` are the observed subject and rater counts and `degenerate` is
 # `boundary_data_degenerate()` above: the two inputs that are NOT design fences, added
 # after review pass 1 found the hint naming methods that then abort (F1: `mpl` off its
-# kappa_m calibration grid; F2: every one-way method on degenerate data).
+# kappa_m calibration grid; F2: the one-way methods on degenerate data). `degenerate`
+# is a PROMISE carrying the row-appropriate condition, forced inside whichever branch
+# names a method and nowhere else.
 boundary_method_hint <- function(
   oneway,
   multilevel,
@@ -89,7 +88,6 @@ boundary_method_hint <- function(
   type,
   type_supplied,
   conf_level,
-  unit,
   n_s,
   n_r,
   degenerate
@@ -99,46 +97,25 @@ boundary_method_hint <- function(
   if (isTRUE(multilevel) || isTRUE(replicates)) {
     return(character(0))
   }
-  # Degenerate data disqualify every row below, so this precedes the design split.
-  if (isTRUE(degenerate)) {
-    return(character(0))
-  }
 
   if (isTRUE(oneway)) {
-    # BALANCED: name the two DETERMINISTIC closed forms only. D-012's 0-abort evidence
-    # -- a finite interval on 100% of 32,000 datasets where the MC default aborted on
-    # 4-44% -- is stated for SEARLE and Burch, and for them alone; it is not an
-    # npbootstrap result, and the M93 hint originally borrowed it for all three.
-    # npbootstrap is a BOOTSTRAP: `npbootstrap_ci()`'s own resample guard aborts when a
-    # resample comes out degenerate, which below ~15 subjects is not rare but routine
-    # (measured at the M93 pass-3 gate: 16/16 hinted-then-aborting at 5 subjects x 2
-    # raters, 12/17 at 10, 5/18 at 12, 0/14 at 15+). searle/burch aborted 0 times in
-    # every one of those cells, and Burch already carries the non-normal case D-012
-    # would otherwise want npbootstrap for, so dropping it here costs nothing.
-    if (isTRUE(balanced)) {
-      return(c(
-        i = "Two interval methods return a result for this design where the \\
-             default cannot: {.code ci_method = \"searle\"} (best calibrated when \\
-             the data are close to normal, and narrowest) and {.code \"burch\"} \\
-             (never under-covers, at the cost of a wider interval)."
-      ))
-    }
-    # UNBALANCED: only npbootstrap ships this cell (M84/M85), so it is name-it-or-stay-
-    # silent. It takes "single"/"average" units only here -- a numeric `unit` aborts.
-    if (any(vapply(unit, is.numeric, logical(1)))) {
+    # UNBALANCED: nothing to name. `searle`/`burch` are balanced-only (D-013), and
+    # `npbootstrap` -- the only method shipping this cell -- is out (see the header).
+    if (!isTRUE(balanced)) {
       return(character(0))
     }
-    # ...and it is named only above the subject count where its resample guard goes
-    # quiet (0 aborts at 12+ unbalanced, 0 at 15+ balanced; 13/13 at 5, 7/13 at 8,
-    # 1/11 at 10). The floor is empirical and the guard is stochastic, so this makes
-    # naming npbootstrap rare-to-fail rather than certain -- which is why the wording
-    # below claims AVAILABILITY and never D-012's "where the default cannot".
-    if (!isTRUE(n_s >= npb_hint_min_subjects)) {
+    # ...and BALANCED only where the classical pair's own guard stays quiet. Forcing
+    # `degenerate` here rather than above the design split is what keeps the check
+    # per-row: this branch forces the one-way condition, the `mpl` branch below forces
+    # the two-way one, and no other design forces either.
+    if (isTRUE(degenerate)) {
       return(character(0))
     }
     return(c(
-      i = "{.code ci_method = \"npbootstrap\"} is available for unbalanced one-way \\
-           data, with {.code unit = \"single\"} or {.code \"average\"}."
+      i = "Two interval methods return a result for this design where the \\
+           default cannot: {.code ci_method = \"searle\"} (best calibrated when \\
+           the data are close to normal, and narrowest) and {.code \"burch\"} \\
+           (never under-covers, at the cost of a wider interval)."
     ))
   }
 
@@ -153,6 +130,9 @@ boundary_method_hint <- function(
     return(character(0))
   }
   if (isTRUE(type_supplied) && "consistency" %in% type) {
+    return(character(0))
+  }
+  if (isTRUE(degenerate)) {
     return(character(0))
   }
   # The level set AND the rater/subject grid are read from the shipped table via the

@@ -221,7 +221,6 @@ bh_hint <- function(...) {
     type = c("agreement", "consistency"),
     type_supplied = FALSE,
     conf_level = 0.95,
-    unit = c("single", "average"),
     # A geometry ON the kappa_m grid, so a row that should hint does; the F1 tests
     # below move it off the grid deliberately.
     n_s = 20L,
@@ -252,47 +251,15 @@ test_that("balanced one-way is hinted at the two DETERMINISTIC methods (AC2)", {
   }
 })
 
-test_that("the unbalanced npbootstrap hint is floored on subject count (AC3, F1)", {
-  # Below the floor it is silent, at and above it names npbootstrap. The floor is where
-  # the resample guard measurably goes quiet, not a theoretical bound.
-  for (n in c(2L, 5L, 8L, 10L, npb_hint_min_subjects - 1L)) {
+test_that("unbalanced one-way gets NO hint, at any subject count (AC2/AC4)", {
+  # `searle`/`burch` are balanced-only (D-013) and `npbootstrap` -- the only method
+  # shipping this cell -- is named on no design at all: its second abort is a
+  # RESAMPLE-stage guard, stochastic and invisible to any design predicate, which is
+  # why two review passes fenced it wrongly. M97 revisits it behind a data-derived
+  # stability predicate; until then the row is silent everywhere.
+  for (n in c(2L, 5L, 10L, 15L, 20L, 60L)) {
     expect_length(bh_hint(oneway = TRUE, balanced = FALSE, n_s = n), 0L)
   }
-  for (n in c(npb_hint_min_subjects, 20L, 50L)) {
-    h <- bh_hint(oneway = TRUE, balanced = FALSE, n_s = n)
-    expect_length(h, 1L)
-    expect_match(h[["i"]], "npbootstrap", fixed = TRUE)
-  }
-})
-
-test_that("unbalanced one-way names npbootstrap only, as AVAILABLE not boundary-proof (AC2)", {
-  h <- bh_hint(oneway = TRUE, balanced = FALSE)
-  expect_length(h, 1L)
-  expect_match(h[["i"]], "npbootstrap", fixed = TRUE)
-  expect_no_match(h[["i"]], "searle", fixed = TRUE)
-  expect_no_match(h[["i"]], "burch", fixed = TRUE)
-  # D-012's 0-abort evidence is balanced-only, so the unbalanced wording must not
-  # borrow the stronger "where the default cannot" claim (implement gate 2026-07-25).
-  expect_match(h[["i"]], "available", fixed = TRUE)
-  expect_no_match(h[["i"]], "default cannot", fixed = TRUE)
-  # ...and the balanced wording DOES make that claim, so the two are distinguishable.
-  expect_match(
-    bh_hint(oneway = TRUE, balanced = TRUE)[["i"]],
-    "default cannot",
-    fixed = TRUE
-  )
-})
-
-test_that("unbalanced one-way with a numeric unit gets NO hint (AC3/AC4)", {
-  # npbootstrap aborts on a numeric `unit` when unbalanced (its SB pole is not
-  # guaranteed interior), so naming it would point at another abort.
-  expect_length(bh_hint(oneway = TRUE, balanced = FALSE, unit = list(3)), 0L)
-  expect_length(
-    bh_hint(oneway = TRUE, balanced = FALSE, unit = list("single", 3)),
-    0L
-  )
-  # Balanced one-way is unaffected -- that fence has no numeric-unit restriction.
-  expect_length(bh_hint(oneway = TRUE, balanced = TRUE, unit = list(3)), 1L)
 })
 
 test_that("the balanced two-way random agreement cell is hinted at mpl (AC2)", {
@@ -318,6 +285,7 @@ test_that("designs with no boundary-robust opt-in get NO method hint (AC4)", {
     0L
   )
   expect_length(bh_hint(balanced = FALSE), 0L)
+  expect_length(bh_hint(oneway = TRUE, balanced = FALSE), 0L)
   # An mpl-shaped design at an UNCALIBRATED conf_level: the kappa_m correction is
   # calibrated per level and never interpolated across levels (M91/D-017).
   expect_length(bh_hint(conf_level = 0.80), 0L)
@@ -522,12 +490,6 @@ test_that("every ci_method the hint names is ACCEPTED on that design (AC3, GP7)"
       pred = list(oneway = TRUE, balanced = TRUE)
     ),
     list(
-      lab = "one-way unbalanced",
-      data = bh_ok_oneway(sizes = c(rep(5L, 15L), rep(3L, 5L))),
-      args = list(model = "oneway"),
-      pred = list(oneway = TRUE, balanced = FALSE)
-    ),
-    list(
       lab = "two-way random agreement",
       data = bh_ok_twoway(),
       args = list(type = "agreement"),
@@ -556,10 +518,6 @@ test_that("every ci_method the hint names is ACCEPTED on that design (AC3, GP7)"
         ),
         row$args
       )
-      if (m == "npbootstrap") {
-        args$boot_samples <- 50L
-        args$seed <- 1L
-      }
       # Fold the row label into the compared value: expect_no_error() takes no
       # `info` in 3e, and a bare failure would not say WHICH design/method broke.
       status <- tryCatch(
@@ -611,6 +569,22 @@ test_that("designs the hint stays silent on are the ones that would abort (AC3/A
     )),
     class = "intraclass_unsupported"
   )
+
+  # Unbalanced one-way: silent, and the two deterministic methods really are refused
+  # there (D-013 fences them to balanced), so silence is a fence and not caution.
+  # `npbootstrap` is the exception the silence is NOT justified by -- icc() accepts it
+  # here -- which is exactly why M97 owns that row rather than this milestone: what
+  # disqualifies it is a resample-stage guard, not the fence this loop can see.
+  du <- bh_ok_oneway(sizes = c(rep(5L, 15L), rep(3L, 5L)))
+  expect_length(bh_hint(oneway = TRUE, balanced = FALSE), 0L)
+  for (m in c("searle", "burch")) {
+    expect_error(
+      suppressWarnings(suppressMessages(
+        icc(du, score, subject, rater, model = "oneway", ci_method = m)
+      )),
+      class = "intraclass_unsupported"
+    )
+  }
 })
 
 # ---- T7/T8 (AC2/AC3/AC4): the two inputs that are not design fences -------------
@@ -677,11 +651,14 @@ test_that("an off-grid mpl design is not hinted end to end (AC3, F1)", {
   )
 })
 
-# Degenerate builders. bh_degen_within: scores constant within subject (SSE = 0, the
-# F2 case). bh_degen_between: every subject mean identical (SSA = 0), which kills
-# npbootstrap while searle/burch survive -- the hint stays silent anyway, because the
-# balanced bullet names all three in one sentence. bh_degen_flat: no variance at all,
-# the two-way case where mpl's optim dies at its initial parameters.
+# Degenerate builders, and the distinction that pass-3 F2 turned on. bh_degen_within:
+# scores constant within subject (MSE = 0), where `classical_guard_observed()` fires and
+# both searle and burch abort -- genuinely degenerate FOR THIS ROW. bh_degen_between:
+# every subject mean identical (SSA = 0, MSE > 0), where searle and burch both return
+# intervals -- NOT degenerate for this row, though it does kill `npbootstrap`, and a
+# gate that ORed npbootstrap's conditions in silenced the hint on ordinary boundary
+# data. bh_degen_flat: no variance at all, the two-way case where mpl's optim dies at
+# its initial parameters.
 bh_degen_within <- function(n_s = 10, n_k = 3) {
   set.seed(7)
   data.frame(
@@ -720,9 +697,11 @@ bh_msg_any <- function(d, ...) {
   )
 }
 
-test_that("the degeneracy flag fires exactly on the shipped guards' condition (AC2, F2)", {
+test_that("the degeneracy flag fires exactly where the row's OWN guard fires (AC2, F2)", {
+  # One-way: the flag IS `classical_guard_observed()`, asked rather than restated, so
+  # it must agree with that guard case by case -- including where it must NOT fire.
   expect_true(boundary_data_degenerate(bh_degen_within(), oneway = TRUE))
-  expect_true(boundary_data_degenerate(bh_degen_between(), oneway = TRUE))
+  expect_false(boundary_data_degenerate(bh_degen_between(), oneway = TRUE))
   expect_true(boundary_data_degenerate(bh_degen_flat(), oneway = FALSE))
   # Healthy data are not degenerate, on either branch -- including data sitting at
   # the sigma^2 -> 0 boundary, which is the case the hint exists FOR.
@@ -730,26 +709,53 @@ test_that("the degeneracy flag fires exactly on the shipped guards' condition (A
   expect_false(boundary_data_degenerate(bh_oneway(), oneway = TRUE))
   expect_false(boundary_data_degenerate(bh_ok_twoway(), oneway = FALSE))
   expect_false(boundary_data_degenerate(bh_twoway(), oneway = FALSE))
-  # A degenerate flag beats every design row, one-way and two-way alike.
+  # The flag agrees with the shipped guard's own verdict, not with a copy of its
+  # condition: run searle on each case and require the two to match. This is what
+  # makes "asked, not restated" testable -- a drifting restatement reds here.
+  for (case in list(
+    list(lab = "within", d = bh_degen_within()),
+    list(lab = "between", d = bh_degen_between()),
+    list(lab = "healthy", d = bh_ok_oneway())
+  )) {
+    # Catch ANY error, not just the classed one: on MSE = 0 data the glmmTMB point
+    # fit can die with a raw unclassed error before the classical guard is reached,
+    # platform-depending (M84). Either way the user gets no interval, which is the
+    # thing the flag has to agree with.
+    aborts <- inherits(
+      tryCatch(
+        suppressWarnings(suppressMessages(
+          icc(
+            case$d,
+            score,
+            subject,
+            rater,
+            model = "oneway",
+            ci_method = "searle"
+          )
+        )),
+        error = function(e) e
+      ),
+      "condition"
+    )
+    expect_identical(
+      paste(case$lab, boundary_data_degenerate(case$d, oneway = TRUE)),
+      paste(case$lab, aborts)
+    )
+  }
+  # A degenerate flag beats its own design row, one-way and two-way alike.
   expect_length(bh_hint(oneway = TRUE, balanced = TRUE, degenerate = TRUE), 0L)
-  expect_length(bh_hint(oneway = TRUE, balanced = FALSE, degenerate = TRUE), 0L)
   expect_length(bh_hint(degenerate = TRUE), 0L)
 })
 
-test_that("degenerate data get NO hint, because every named method aborts (AC3/AC4, F2)", {
+test_that("data degenerate FOR THE ROW get no hint; data that are not still do (AC3/AC4, F2)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
-  cases <- list(
+  # Where the row's own methods abort, the abort names nothing.
+  for (case in list(
     list(lab = "within", d = bh_degen_within(), args = list(model = "oneway")),
-    list(
-      lab = "between",
-      d = bh_degen_between(),
-      args = list(model = "oneway")
-    ),
     list(lab = "flat", d = bh_degen_flat(), args = list())
-  )
-  for (case in cases) {
+  )) {
     m <- do.call(
       bh_msg_any,
       c(list(case$d, ci_method = "montecarlo", seed = 1), case$args)
@@ -762,10 +768,8 @@ test_that("degenerate data get NO hint, because every named method aborts (AC3/A
       )
     }
   }
-
-  # The converse: on each degenerate case the methods its design row WOULD have
-  # named really do abort, so silence is correct rather than merely cautious.
-  for (mm in c("searle", "burch", "npbootstrap")) {
+  # ...and they abort, so the silence is a fence rather than caution.
+  for (mm in c("searle", "burch")) {
     expect_error(suppressWarnings(suppressMessages(
       icc(
         bh_degen_within(),
@@ -773,15 +777,46 @@ test_that("degenerate data get NO hint, because every named method aborts (AC3/A
         subject,
         rater,
         ci_method = mm,
-        model = "oneway",
-        boot_samples = 50L,
-        seed = 1
+        model = "oneway"
       )
     )))
   }
   expect_error(suppressWarnings(suppressMessages(
+    icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
+  )))
+
+  # The other direction, and the pass-3 F2 regression this pins: SSA = 0 balanced
+  # one-way (every subject mean exactly equal, MSE > 0) is NOT degenerate for the
+  # classical row. The default aborts there, searle and burch both return intervals,
+  # and a shared gate ORing npbootstrap's own conditions in used to silence the hint
+  # on exactly this data -- the case the milestone exists to serve.
+  db <- bh_degen_between()
+  m <- bh_msg_any(db, ci_method = "montecarlo", model = "oneway", seed = 1)
+  skip_if(is.na(m), "no abort on the SSA = 0 case")
+  for (s in c("searle", "burch")) {
+    expect_identical(
+      paste("between", s, grepl(s, m, fixed = TRUE)),
+      paste("between", s, TRUE)
+    )
+    status <- tryCatch(
+      {
+        suppressWarnings(suppressMessages(
+          icc(db, score, subject, rater, model = "oneway", ci_method = s)
+        ))
+        "accepted"
+      },
+      error = function(e) paste0("ABORTED ", class(e)[[1]])
+    )
+    expect_identical(
+      paste("between", s, status),
+      paste("between", s, "accepted")
+    )
+  }
+  # The bootstrap does abort on it, and is correctly not named.
+  expect_false(grepl("npbootstrap", m, fixed = TRUE))
+  expect_error(suppressWarnings(suppressMessages(
     icc(
-      bh_degen_between(),
+      db,
       score,
       subject,
       rater,
@@ -790,9 +825,6 @@ test_that("degenerate data get NO hint, because every named method aborts (AC3/A
       boot_samples = 50L,
       seed = 1
     )
-  )))
-  expect_error(suppressWarnings(suppressMessages(
-    icc(bh_degen_flat(), score, subject, rater, ci_method = "mpl")
   )))
 })
 
@@ -925,13 +957,14 @@ test_that("multilevel, replicate and off-grid designs stay silent, and abort (AC
   }
 })
 
-# ---- T12/AC3: the grid, driven by the REAL message across one-way sizes --------
-# Review pass 2 (F1/F4) showed the grid above cannot see a one-way size fence: it holds
-# the subject count at 20 and computes the hint from hand-written `pred` lists, so a
-# method that aborts only at small n -- and a mis-wiring between icc() and
-# boundary_method_hint() -- both stay invisible. This closes both gaps: nothing here is
-# hand-derived, the method names are parsed out of the abort icc() actually raises, and
-# each one is then run on the SAME data.
+# ---- AC3: the sweep, driven by the REAL message -------------------------------
+# This is the criterion's central evidence, and the only test here that derives nothing
+# by hand. Everything above computes the hint from a predicate list; three review passes
+# showed that is how a wrong hint ships green, because the grid asserts what the author
+# believed icc() would compute rather than what it does. So: build a design, fire the
+# real default abort, PARSE the method names out of the message it actually raised, and
+# run each one on that same data. A method named and then aborting is a failure, which
+# is the property AC3 states.
 
 # Small-integer 1-3 ratings treated as continuous: ordinary interrater data sitting at
 # the sigma^2 -> 0 boundary, which is where the default MC aborts and where small-n
@@ -954,7 +987,71 @@ bh_smallint <- function(n_s, n_k, seed, balanced = TRUE) {
   )
 }
 
-test_that("across one-way sizes, every method the REAL abort names is accepted (AC3)", {
+# Parse the `ci_method = "x"` names out of a rendered abort message.
+bh_msg_methods <- function(m) {
+  all <- c("npbootstrap", "searle", "burch", "mpl")
+  all[vapply(
+    all,
+    function(x) grepl(paste0("\"", x, "\""), m, fixed = TRUE),
+    logical(1)
+  )]
+}
+
+# One sweep cell: `build(seed)` -> a data frame, `args` -> the icc() arguments that
+# design needs. Returns the cells checked, so a vacuous pass is visible.
+bh_sweep_cell <- function(
+  lab,
+  build,
+  args,
+  seeds = 1:6,
+  forbid = character(0)
+) {
+  checked <- 0L
+  for (sd in seeds) {
+    d <- build(sd)
+    m <- do.call(
+      bh_msg_any,
+      c(list(d, ci_method = "montecarlo", seed = 1), args)
+    )
+    if (is.na(m)) {
+      next
+    }
+    named <- bh_msg_methods(m)
+    tag <- paste(lab, "seed", sd)
+    # Methods this design must never be offered (e.g. a two-way method on a one-way
+    # fit), asserted on the parsed names rather than on the predicate list.
+    for (bad in forbid) {
+      expect_identical(
+        paste(tag, bad, "named:", bad %in% named),
+        paste(tag, bad, "named:", FALSE)
+      )
+    }
+    for (meth in named) {
+      checked <- checked + 1L
+      status <- tryCatch(
+        {
+          suppressWarnings(suppressMessages(do.call(
+            icc,
+            c(
+              list(d, quote(score), quote(subject), quote(rater)),
+              args,
+              list(ci_method = meth, seed = 1)
+            )
+          )))
+          "accepted"
+        },
+        error = function(e) paste0("ABORTED ", class(e)[[1]])
+      )
+      expect_identical(
+        paste(tag, "->", meth, ":", status),
+        paste(tag, "->", meth, ": accepted")
+      )
+    }
+  }
+  checked
+}
+
+test_that("every method the REAL abort names is accepted, across one-way sizes (AC3)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
@@ -971,58 +1068,98 @@ test_that("across one-way sizes, every method the REAL abort names is accepted (
 
   checked <- 0L
   for (cell in cells) {
-    for (sd in 1:6) {
-      d <- bh_smallint(cell$n_s, cell$n_k, sd, balanced = cell$bal)
-      m <- bh_msg_any(d, ci_method = "montecarlo", model = "oneway", seed = 1)
-      if (is.na(m)) {
-        next
-      }
-      # Parse the methods out of the message icc() really produced -- never from a
-      # hand-written predicate list, so a wiring break between icc() and the builder
-      # shows up here.
-      named <- c("npbootstrap", "searle", "burch", "mpl")
-      named <- named[vapply(
-        named,
-        function(x) grepl(paste0("\"", x, "\""), m, fixed = TRUE),
-        logical(1)
-      )]
-      lab <- paste0(
-        if (cell$bal) "balanced " else "unbalanced ",
-        cell$n_s,
-        "x",
-        cell$n_k,
-        " seed ",
-        sd
+    checked <- checked +
+      bh_sweep_cell(
+        lab = paste0(
+          if (cell$bal) "balanced " else "unbalanced ",
+          cell$n_s,
+          "x",
+          cell$n_k
+        ),
+        build = function(sd) {
+          bh_smallint(cell$n_s, cell$n_k, sd, balanced = cell$bal)
+        },
+        args = list(model = "oneway"),
+        # A two-way method must never be named on a one-way fit; and the bootstrap
+        # is named on no design at all until M97 lands its stability predicate.
+        forbid = c("mpl", "npbootstrap")
       )
-      # A two-way method must never be named on a one-way fit.
-      expect_identical(paste(lab, "mpl named:"), paste(lab, "mpl named:"))
-      expect_false("mpl" %in% named)
-      for (meth in named) {
-        checked <- checked + 1L
-        status <- tryCatch(
-          {
-            suppressWarnings(suppressMessages(
-              icc(
-                d,
-                score,
-                subject,
-                rater,
-                model = "oneway",
-                ci_method = meth,
-                seed = 1
-              )
-            ))
-            "accepted"
-          },
-          error = function(e) paste0("ABORTED ", class(e)[[1]])
-        )
-        expect_identical(
-          paste(lab, "->", meth, ":", status),
-          paste(lab, "->", meth, ": accepted")
-        )
-      }
-    }
   }
-  # The sweep must actually have exercised something; a silent zero would pass vacuously.
+  # The sweep must actually have exercised something; a silent zero passes vacuously.
+  expect_gt(checked, 0L)
+})
+
+test_that("every method the REAL abort names is accepted, two-way and degenerate (AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  s_nodes <- sort(unique(kappa_m_table$n_s))
+  checked <- 0L
+
+  # Two-way random: on the kappa_m grid at two geometries, off it below the grid's
+  # smallest subject count, with `type` both unset and supplied.
+  for (cell in list(
+    list(lab = "two-way 20x3 on-grid", n_s = 20L, args = list()),
+    list(lab = "two-way 10x3 on-grid", n_s = 10L, args = list()),
+    list(
+      lab = "two-way 20x3 type supplied",
+      n_s = 20L,
+      args = list(type = "agreement")
+    ),
+    list(
+      lab = "two-way off-grid",
+      n_s = min(s_nodes) - 2L,
+      args = list()
+    )
+  )) {
+    checked <- checked +
+      bh_sweep_cell(
+        lab = cell$lab,
+        build = function(sd) bh_twoway(n_s = cell$n_s, seed = sd),
+        args = cell$args,
+        forbid = c("searle", "burch", "npbootstrap")
+      )
+  }
+
+  # Designs with no opt-in at all: the abort must name nothing, so `forbid` covers
+  # every method and the accepted loop has nothing to run.
+  checked <- checked +
+    bh_sweep_cell(
+      lab = "fixed raters",
+      build = function(sd) bh_twoway(seed = sd),
+      args = list(raters = "fixed"),
+      forbid = c("mpl", "searle", "burch", "npbootstrap")
+    )
+
+  # Degenerate data, both branches: whatever is named must still be accepted. SSA = 0
+  # is the case where searle/burch ARE named (pass-3 F2), so it is asserted NON-vacuous
+  # -- this sweep tests "named => accepted", under which a silenced hint passes for
+  # free, and over-suppression is exactly how that cell would go quiet.
+  ssa0 <- bh_sweep_cell(
+    lab = "one-way SSA = 0",
+    build = function(sd) bh_degen_between(),
+    args = list(model = "oneway"),
+    seeds = 1L,
+    forbid = c("mpl", "npbootstrap")
+  )
+  expect_gt(ssa0, 0L)
+  checked <- checked + ssa0
+  checked <- checked +
+    bh_sweep_cell(
+      lab = "one-way MSE = 0",
+      build = function(sd) bh_degen_within(),
+      args = list(model = "oneway"),
+      seeds = 1L,
+      forbid = c("mpl", "searle", "burch", "npbootstrap")
+    )
+  checked <- checked +
+    bh_sweep_cell(
+      lab = "two-way constant",
+      build = function(sd) bh_degen_flat(),
+      args = list(),
+      seeds = 1L,
+      forbid = c("mpl", "searle", "burch", "npbootstrap")
+    )
+
   expect_gt(checked, 0L)
 })

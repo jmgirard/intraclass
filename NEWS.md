@@ -28,15 +28,18 @@
   boundary, the error now **names the interval method that applies to your
   design** instead of only suggesting a refit. A balanced one-way fit is pointed
   at the two deterministic closed forms `ci_method = "searle"` and `"burch"` (with
-  a word on what each is good for), an unbalanced one-way fit with enough subjects
-  at `"npbootstrap"`, and a balanced-complete two-way random absolute-agreement fit
-  at `"mpl"`. Where no boundary-robust option applies — fixed raters, multilevel,
-  within-cell replicates, consistency, a `conf_level` or a subject/rater count
-  outside the calibrated set, a design too small for the bootstrap to resample
-  stably, or data so degenerate that every method would fail on it too — the error
-  says nothing extra rather than suggest a method that would also abort. The interval methods
-  themselves, and what the default does, are unchanged: this adds guidance to an
-  existing error, and never silently substitutes one method for another.
+  a word on what each is good for), and a balanced-complete two-way random
+  absolute-agreement fit at `"mpl"`. Where no such option applies — fixed raters,
+  multilevel, within-cell replicates, consistency, unbalanced one-way data, a
+  `conf_level` or a subject/rater count outside the calibrated set, or data so
+  degenerate that the methods for that design would fail on it too — the error says
+  nothing extra rather than suggest a method that would also abort. Only methods
+  with a measured record of returning an interval on such data are named, which for
+  now excludes `"npbootstrap"`: it resamples, so whether it succeeds is a property
+  of the resampling rather than of your design, and it is left out until that can be
+  predicted rather than guessed. The interval methods themselves, and what the
+  default does, are unchanged: this adds guidance to an existing error, and never
+  silently substitutes one method for another.
 
 * `ci_method = "npbootstrap"` now also covers **unbalanced one-way** designs
   (unequal ratings per subject) for both `unit = "single"` (ICC(1)) and

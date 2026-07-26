@@ -285,8 +285,11 @@
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
 #'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
 #'   Near the variance boundary it can fail to produce an interval and aborts; when
-#'   it does, the error names whichever of the opt-in methods below actually applies
-#'   to the design in hand, so there is no need to work that out from this list.
+#'   it does, the error names a deterministic opt-in method below that fits the
+#'   design in hand, so there is no need to work that out from this list. It stays
+#'   silent where no such method applies, and never names `"npbootstrap"`, whose
+#'   resampling can fail on data no design fence describes — check that one against
+#'   its own entry below.
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
 #'   fitted model, refits, and takes percentile quantiles of the resampled
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -2123,7 +2126,6 @@ icc <- function(
           type = type,
           type_supplied = type_supplied,
           conf_level = conf_level,
-          unit = unit,
           # The kappa_m grid is keyed on the OBSERVED counts (mpl reshapes the same
           # droplevels()-ed factors), and the data can be degenerate on a design that
           # is not -- both are hint inputs the design fences never see (M93 F1/F2).

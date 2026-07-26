@@ -100,21 +100,21 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 <!-- Re-cut 2026-07-25 after the third review send-back; the superseded T1-T12 and
      what they shipped are in the work log below. These are the remaining tasks. -->
 
-- [ ] T1: Drop `npbootstrap` from `R/boundary-hint.R` entirely — the unbalanced one-way
+- [x] T1: Drop `npbootstrap` from `R/boundary-hint.R` entirely — the unbalanced one-way
       row, the `npb_hint_min_subjects` floor (`:36`), and the comment prose asserting a
       floor the code no longer has. The one-way branch becomes balanced-only.
-- [ ] T2: Split the degeneracy check per row: the classical row gates on `mse == 0`
+- [x] T2: Split the degeneracy check per row: the classical row gates on `mse == 0`
       alone (`classical_guard_observed()`'s own condition — verified at the plan gate:
       on balanced SSA = 0 data the default aborts while `searle` and `burch` both
       return intervals, which the shared gate currently suppresses, pass-3 F2), the
       two-way row keeps zero total variance; the npbootstrap-only disjuncts retire with
       the method.
-- [ ] T3: Rewrite the grid in `tests/testthat/test-boundary-abort-hint.R` as AC3's
+- [x] T3: Rewrite the grid in `tests/testthat/test-boundary-abort-hint.R` as AC3's
       message-driven sweep — fire the real abort, parse the named methods out of it,
       run each on the same data — over the enumerated grid, keeping the AC1
       reproduction test and the AC4/AC5 pins; delete the pass-3 F4 tautology (`:998`,
       `expect_identical(x, x)`) and every npbootstrap-specific cell.
-- [ ] T4: Align the hint's unit tests, the mapping table, `NEWS.md` and
+- [x] T4: Align the hint's unit tests, the mapping table, `NEWS.md` and
       `@param ci_method` with the narrowed set (no bootstrap named; unbalanced one-way
       silent); `devtools::document()`.
 - [ ] T5: Full AC7 gate, snapshot review if any message snapshot moved, PR #100 green
@@ -148,6 +148,11 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 - 2026-07-25: PR #100 all 7 jobs pass on `3da69d5` — `ubuntu-latest` 16m38s, `windows-latest` 19m25s, `test-coverage` 17m42s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov checks. Ready for review pass 3.
 - 2026-07-25: review pass 3 FAILED the gate — AC3 again, on the one-way half. The `n_s >= 15` floor is on the wrong quantity: the resample guard tracks subjects carrying within-subject variance, so the ordinary double-code design (most subjects rated once, a few twice) hints `npbootstrap` and then aborts at EVERY subject count 15-60. T10 also introduced over-suppression: the balanced bullet now stays silent on SSA = 0 data where searle/burch both work. F1 96 / F2 90 / F4 95 actioned-in-principle, F3 76 logged. Two-way/`mpl` clean across 919 hinted runs. THIRD return from review — thrash rule fires, so this is not queued for another implement pass; it goes to `/milestone-plan` for a re-cut. Status -> in-progress.
 - 2026-07-25: re-cut by /milestone-plan (gate: split at deterministic-vs-bootstrap). The hint keeps only the deterministic families — `searle`/`burch` balanced one-way, `mpl` two-way — while `npbootstrap` and the whole unbalanced one-way row move to M97 behind a resample-stability predicate; the degeneracy gate goes per-row (pass-3 F2, reproduced at the plan gate on balanced 12x2 SSA=0 data: default aborts, searle/burch both return intervals), and AC3 becomes a message-driven sweep. T1-T12 are superseded but shipped and stay on the branch; T1-T5 are the remainder. Every AC box unticked — the code changes, so each criterion re-verifies from scratch.
+
+- 2026-07-25: T1/T2 (one commit — they rewrite the same twenty lines, so splitting them would have left the suite red at the checkpoint) — `npbootstrap` is named on no design; the unbalanced one-way row, the `npb_hint_min_subjects` floor and the now-unused `unit` argument go with it. The degeneracy check is per-row and forced INSIDE the branch that names a method: the one-way row ASKS `classical_guard_observed()` on a `classical_oneway_ss()` summary instead of restating its condition (the restatement is what drifted at pass 2), the two-way row keeps zero total variance. Mutation-verified: re-naming `npbootstrap` in the balanced bullet reds 30 assertions including the message-driven sweep; restoring the shared OR-gate reds 5, including the SSA = 0 non-vacuity pin.
+- 2026-07-25: T3 — AC3's sweep is one `bh_sweep_cell()` helper applied to one-way sizes, two-way geometries on and off the κ_m grid, the no-opt-in designs and all three degenerate shapes: fire the real abort, parse the method names out of the message, run each on the same data. The pass-3 F4 tautology and every npbootstrap-specific test are gone. The SSA = 0 cell asserts it is NON-vacuous, because a "named ⇒ accepted" sweep passes for free on a silenced hint — which is precisely how over-suppression would hide. Measured per cell: balanced one-way names 2 methods per abort across 5 size cells, unbalanced names 0, two-way on-grid names `mpl`, off-grid names 0.
+
+- 2026-07-25: T4 — `NEWS.md` and `@param ci_method` now state the narrowed surface and say WHY the bootstrap is excluded in the user's own terms (whether it succeeds is a property of the resampling, not of their design), rather than listing it among the designs that get nothing; `man/icc.Rd` regenerated. Suite at `NOT_CRAN=true CI=true`: FAIL 0 / PASS 4515 / SKIP 23; `lintr` no lints; `air format` reformatted the rewritten test file and `--check` is clean after.
 
 ## Decisions
 
