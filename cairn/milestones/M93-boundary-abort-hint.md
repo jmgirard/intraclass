@@ -44,11 +44,11 @@ legitimate ICC(3) = -1.771 on healthy data.
 
 ## Acceptance criteria
 
-- [ ] AC1: a committed reproduction test builds a near-zero-variance dataset on which
+- [x] AC1: a committed reproduction test builds a near-zero-variance dataset on which
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [ ] AC2: a method is named only after the verification step returned TRUE for it on
+- [x] AC2: a method is named only after the verification step returned TRUE for it on
       this data; the abort class, leading message and existing generic remedies are
       unchanged, and a design with nothing to name gains nothing — the hint is additive.
       **Verification can never raise**: every condition a reducer emits is caught, so no
@@ -56,7 +56,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       It is also LAZY — forced only inside an abort message, so a successful call never
       pays for it; a test pins that, and the work log records the measured cost. No
       design names `"npbootstrap"` (→ M97); `R/ci-bootstrap.R:48` excluded on T1 evidence.
-- [ ] AC3 (GP7): for every design where the default aborts, every method the message
+- [x] AC3 (GP7): for every design where the default aborts, every method the message
       names returns a USABLE interval on that same data, and every ADMISSIBLE method the
       message omits really is unusable there. Usable = every reported endpoint finite,
       `conf.low <= conf.high`, and inside the estimand's support under D-010 (ICC(1)
@@ -70,19 +70,19 @@ legitimate ICC(3) = -1.771 on healthy data.
       declared cell asserts a positive number of checks**: a cell that checks nothing
       fails rather than passing silently — pass-3 F4, pass-4 F4 and pass-5 F2 were each a
       tautological or vacuous assertion in this sweep.
-- [ ] AC4: the verification cannot drift from the real call — a committed test asserts
+- [x] AC4: the verification cannot drift from the real call — a committed test asserts
       the endpoints it inspects ARE the ones `icc(ci_method = <name>)` reports for that
       method on that data, and that every method an admissibility row offers is accepted
       by `icc()`'s own fence (a named-but-inadmissible method would abort
       `intraclass_unsupported`).
-- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, and that no interval
       computed during verification reaches the message text or any returned object, so
       nothing here implements the D-012-fenced fallback default (D-018).
-- [ ] AC6: the change is documented where users meet it — a `NEWS.md` entry saying a
+- [x] AC6: the change is documented where users meet it — a `NEWS.md` entry saying a
       method is named only after being run on that data, naming the methods and the
       silent designs, and the matching `@param ci_method` note.
-- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; any changed message
       snapshot reviewed deliberately via `testthat::snapshot_review()`, never accepted
       blind; PR #100 green on every job.
@@ -799,3 +799,86 @@ predictor deriving a TWO-endpoint property from ONE endpoint. Verification would
 caught it without anyone anticipating the axis, because it inspects the interval the user
 would actually get. The disposition is the maintainer's; the evidence for it is no longer
 an argument from principle.
+
+---
+
+## Review pass 6 (2026-07-26) — the third re-cut
+
+**Branch state.** `main` 0/0 with `origin/main`; branch 46 ahead / 0 behind, so no
+merge was needed before gathering evidence. PR #100, head `0ceb27d`.
+
+**Fresh per-criterion evidence.** All from commands run this phase. The M93 file runs
+**659 assertions, FAIL 0, SKIP 0** at `NOT_CRAN=true CI=true`; the zero skip count
+matters, because several tests carry a `skip_if()` on boundary luck and a skipped one
+would pass vacuously.
+
+- AC1 — `:151` builds the near-σ²→0 datasets over 12 seeds on each design and asserts
+  the DEFAULT MC path aborts on both, that every abort reached is a Monte-Carlo site
+  (A or B) and never the bootstrap site, and that site B occurs. The site enumeration
+  AC1 asks the work log to record is there (T1 line, 2026-07-25): `:124` 21/40 two-way
+  + 19/40 one-way, `:43` 1/40, `R/ci-bootstrap.R:48` 0/90. Untouched by any re-cut.
+- AC2 — the naming-after-verification clause is evidenced at `:1445` (each verdict
+  matched against the interval the reducer really returns, per method and per data
+  shape) and the predicate itself at `:1411`. Additivity at `:392`, where the class,
+  leading message and BOTH pre-existing remedies survive verbatim while a no-opt-in
+  design gains nothing. The NEVER-RAISE clause is at `:1531`, driven over 11 hostile
+  inputs (all-NA scores, one-row and empty frames, all three degenerate shapes) with
+  `expect_no_error` AND `expect_no_warning`, plus `:1276` end-to-end over 16
+  NA-carrying designs asserting the abort class stays `intraclass_singular_fit`.
+  The LAZINESS clause I measured directly rather than by inspection: tracing
+  `searle_ci` across a SUCCESSFUL `icc(ci_method = "montecarlo")` call gives **0**
+  invocations, and across the aborting call on the same geometry gives exactly **1**
+  — so the success path does not pay for verification. Measured cost per method:
+  searle 0.32 ms, burch 0.44 ms, mpl 3.55 ms on-grid / 8.17 ms off-grid.
+  `"npbootstrap"` is named on no design (`:1109`, `:1156` sweeps).
+- AC3 — I ran my own sweep, written from the criterion and not from the test file, in
+  both directions: for every design where the default aborts, parse the method names
+  out of the real message, run each on that same data, and require every reported
+  endpoint finite, ordered, and in support under D-010; then, for every ADMISSIBLE
+  method NOT named, confirm it would not have worked either. **441 cells, 264 aborts,
+  408 method-names, 0 named-but-unusable, 0 silent-but-usable.** Cells: one-way
+  balanced at 7 subject counts × 3 rater counts × 5 data kinds (gaussian, Likert,
+  binary, 1e6-scaled, 1e-8-scaled) × 2 seeds; `conf_level` across the whole legal
+  range at 5 subject counts — 0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1−1e-6, **1−2e-8 and
+  1−1e-10 at n_s = 2**, which is the exact axis pass-5 F1 died on; 9 `unit` variants
+  incl. numerics and a vector; 4 imbalance shapes incl. the double-code design that
+  defeated pass 3; two-way at 8 subject counts × 5 rater counts on and off the κ_m
+  grid, plus type/raters/conf_level/unit variants; `NA` at 3 positions on each model;
+  and all three degenerate shapes. The committed sweep asserting the same property is
+  at `:1109` and `:1156`, with the shapes no earlier sweep had at `:1276` and `:1344`.
+- AC4 — `:1619` compares each reducer's endpoints against `tidy(icc(ci_method = ))`
+  at `tolerance = 0` across 21 cells, refusing on one side and computing on the other
+  counted as a divergence, with `checked`, `compared` and `out_of_support_seen` all
+  pinned so a cell dropped from the grid reds. `:1724` asserts each admissibility row
+  is accepted by `icc()`'s own fence and each excluded design really is refused
+  `intraclass_unsupported`. Mutation-verified this pass by the implementer and
+  re-checked here: a `pmin(1, .)` clamp in the reporting path reds `:1619`.
+- AC5 — `:472` confirms the boundary case still raises `intraclass_singular_fit` and
+  returns no `icc` object. The discard clause I verified directly rather than by
+  reading: on a 30×5 boundary abort the eight endpoints searle and burch would return
+  are `-0.127272 0.073428 -1.296282 0.283789 -0.087737 0.119081 -0.675889 0.403302`,
+  and **none of their digits appears anywhere in the rendered abort message** — so the
+  computed intervals feed a boolean and reach neither the message nor a returned
+  object, which is the line D-018 draws against D-012's fenced fallback.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, rewritten
+  this milestone: it leads with the error naming a method that works on your data, says
+  it does so BY RUNNING each method the design allows, and states the silent cases as a
+  consequence of that check rather than as an enumeration. `@param ci_method` carries
+  the matching wording; `man/icc.Rd` regenerated. No milestone numbers in user-facing
+  text.
+- AC7 — all run this phase on the final tree: `devtools::check(env_vars = c(NOT_CRAN =
+  "false"))` **Status: OK** (0 errors / 0 warnings / 0 notes, 3m53s), full suite FAIL 0
+  / PASS 4872 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` "No lints
+  found", `air format --check .` clean, `devtools::document()` empty `git status`. The
+  snapshot clause is vacuous by inspection, not assumption: `git diff --name-only
+  main..HEAD` contains no `_snaps/` path.
+
+**Consistency gate.** `cairn_validate` exit 0 — 16 PASS including `coverage complete`,
+`weight caps`, `mirror agreement`, `at most one in-progress`, `binding criteria` and
+`sizing (split tripwires)`; advisories only (321 `dangling id tokens`, all pre-existing
+pre-migration ids, unchanged by this diff). Profile `consistency-gate` slot:
+`devtools::document()` no-diff · no generated file hand-edited (`man/icc.Rd`
+regenerated from roxygen) · `README.Rmd` untouched · `pkgdown::check_pkgdown()` "No
+problems found" · `NEWS.md` entry present · no new top-level file, so no
+`.Rbuildignore` entry owed · `devtools::check()` Status OK. No `DESIGN.md` principle
+changed, so `cairn_impact` does not apply.
