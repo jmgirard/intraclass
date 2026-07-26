@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -218,6 +218,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: review pass 6 FAILED the gate — but not on the behaviour. Three lenses plus my own 441-cell sweep searched ~33,000 adversarial cells for a hint naming a method that then fails, including the `conf_level` tail at 2 subjects that pass 5 died on, and found ZERO: no sixth mechanism. What failed is two criteria as written. AC2 says "a test pins that" of the laziness obligation and no test does — rebinding `mc_ci()` to force the hint eagerly leaves the file at FAIL 0 / PASS 659, reproduced independently (F1, 92). AC5's second clause asks a test to assert no computed interval reaches the message text, and none does (F3, 65 — logged as a finding, but the criterion compels the test). F2 (86) is actioned too: the `n0` wiring is pinned only in the over-suppressing direction, and the passing direction is the forbidden one — a wrong `n0 = 2` makes the hint name `searle` at `[-0.5, -0.5]` on the open support floor with the suite green. AC2/AC5 ticks withdrawn; AC1, AC3, AC4, AC6, AC7 stand. T6-T8 added. Status -> in-progress; sixth return, first since the third re-cut.
 
 - 2026-07-26: T6-T8 — the three guards pass 6 found missing, each written so the mutation that breaks its property reds it. T6 counts verification calls through `local_mocked_bindings()`: 0 on a successful `icc()`, >0 on the aborting one, the second half present so the first cannot pass by the helper simply being unreachable. T7 captures the `n0` icc() actually passes (5 on a balanced 30×5) and is paired with a load-bearing check that at n0=3 the SSA=0/`unit="single"` cell is silent while at n0=2 it names `searle` — so the silence is an assertion about n0, not an accident of the data. T8 asserts no candidate endpoint's leading digits appear in the rendered abort, with a pin that the message is the real one so the loop cannot pass vacuously. Mutation-verified: eager force reds 1, endpoint leak reds 1, and the call-site `n0 = 2` reds 1. Worth recording that my FIRST T7 mutation did NOT red — replacing `boundary_method_hint` in the namespace defeats a test that observes what icc() passes INTO it; the realistic regression F2 describes is at the call site, and that is the one that reds. Suite FAIL 0 / PASS 4891 / SKIP 23; `devtools::check()` Status OK (0/0/0); lintr, air, document() clean.
+
+- 2026-07-26: PR #100 all 9 checks green on `64e79d6` — both R CMD check platforms, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. `test-coverage` and the two check platforms run the INSTALLED package, so T6/T7's `local_mocked_bindings()` is verified where it could plausibly differ from `load_all()`. Status -> review (pass 7).
 
 ## Decisions
 
