@@ -2128,22 +2128,17 @@ icc <- function(
           type = type,
           type_supplied = type_supplied,
           conf_level = conf_level,
-          # The kappa_m grid is keyed on the OBSERVED counts (mpl reshapes the same
-          # droplevels()-ed factors), and the data can be degenerate on a design that
-          # is not -- both are hint inputs the design fences never see (M93 F1/F2).
-          # All of this is lazy: `hint` is forced only inside an abort message.
-          n_s = n_subjects,
-          n_r = n_raters,
-          # An NA score counts as an observed cell in `balanced`, so completeness is
-          # its own input; the two promises below are forced only by the branch that
-          # names a method.
-          complete = !anyNA(df$score),
-          degenerate = boundary_data_degenerate(df, oneway),
-          sb_ok = boundary_classical_sb_ok(
-            df,
-            conf_level,
-            vapply(estimands, function(e) as.numeric(e$divisor), numeric(1))
-          )
+          # The hint no longer PREDICTS whether a method will work on this data; it
+          # runs the method. So it takes exactly what the dispatch above hands a
+          # reducer -- the same `df`, `estimands` and `conf_level` -- and the
+          # interval it inspects is the one the user's own `ci_method =` call would
+          # return. All of this is lazy: `hint` is a promise forced only inside an
+          # abort message, so a successful call never pays for it.
+          df = df,
+          estimands = estimands,
+          # The effective group size the ICC(1) support floor -1/(n0-1) is defined
+          # against (D-010). A support constant, not a design predicate.
+          n0 = design_info$k_eff
         )
       )
     }

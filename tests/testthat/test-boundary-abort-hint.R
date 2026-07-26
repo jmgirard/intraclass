@@ -113,11 +113,37 @@ bh_usable <- function(d, method, args = list()) {
     return(FALSE)
   }
   tb <- generics::tidy(fit)
+  if (!nrow(tb)) {
+    return(FALSE)
+  }
+  # AC3's predicate, written from the criterion and from `tidy()`'s own output --
+  # never by calling the package function it exists to check, which is the pass-3 F4 /
+  # pass-5 F2 tautology trap. Every reported endpoint finite, correctly ordered, and
+  # inside the estimand's support under D-010: (-Inf, 1) in general, tightened to
+  # (-1/(n0-1), 1) for ICC(1). Both ends OPEN.
+  #
+  # `conf.high < 1` is the clause pass 5's predicate lacked. Without it `searle` at a
+  # numeric `unit` past its Spearman-Brown pole passes as "usable" while returning an
+  # interval lying entirely ABOVE +1 -- finite and ordered, and wrong.
+  n0 <- length(unique(d$rater))
+  floor_rho <- ifelse(tb$index == "ICC(1)" & n0 > 1L, -1 / (n0 - 1), -Inf)
   all(
     is.finite(tb$conf.low) &
       is.finite(tb$conf.high) &
-      tb$conf.low <= tb$conf.high
+      tb$conf.low <= tb$conf.high &
+      tb$conf.high < 1 &
+      tb$conf.low > floor_rho
   )
+}
+
+# Parse the `ci_method = "x"` names out of a rendered abort message.
+bh_msg_methods <- function(m) {
+  all <- c("npbootstrap", "searle", "burch", "mpl")
+  all[vapply(
+    all,
+    function(x) grepl(paste0("\"", x, "\""), m, fixed = TRUE),
+    logical(1)
+  )]
 }
 
 # ---- AC1: the reproduction, and which sites it reaches -----------------------
@@ -238,7 +264,38 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
 # exercised directly here; the AC3 grid below then proves the methods it names are
 # genuinely accepted by icc() end to end.
 
-bh_hint <- function(...) {
+bh_hint <- function(
+  ...,
+  df = NULL,
+  n_s = NULL,
+  n_r = NULL,
+  units = list("single", "average"),
+  n0 = NULL
+) {
+  # Drive the hint exactly as icc() does -- with real data and real estimands. The
+  # hint RUNS each candidate now, so a hand-written predicate list can no longer
+  # stand in for the data: a geometry is expressed by BUILDING that geometry, not by
+  # passing a count alongside data that contradicts it. That substitution is what
+  # pass-2 F4 caught (the grid computed the hint from hand-written preds rather than
+  # from what icc() derives), and it is structurally impossible here now.
+  args <- list(...)
+  oneway <- isTRUE(args$oneway)
+  if (is.null(df)) {
+    # Default geometry sits ON the kappa_m grid, so a row that should hint does; the
+    # grid tests below move it off deliberately.
+    df <- if (oneway) {
+      bh_oneway(
+        n_s = if (is.null(n_s)) 20L else n_s,
+        n_k = if (is.null(n_r)) 3L else n_r
+      )
+    } else {
+      bh_twoway(
+        n_s = if (is.null(n_s)) 20L else n_s,
+        n_r = if (is.null(n_r)) 3L else n_r
+      )
+    }
+  }
+  k <- length(unique(df$rater))
   defaults <- list(
     oneway = FALSE,
     multilevel = FALSE,
@@ -248,15 +305,13 @@ bh_hint <- function(...) {
     type = c("agreement", "consistency"),
     type_supplied = FALSE,
     conf_level = 0.95,
-    # A geometry ON the kappa_m grid, so a row that should hint does; the F1 tests
-    # below move it off the grid deliberately.
-    n_s = 20L,
-    n_r = 3L,
-    complete = TRUE,
-    degenerate = FALSE,
-    sb_ok = c(searle = TRUE, burch = TRUE)
+    df = df,
+    estimands = lapply(units, function(u) {
+      icc_estimand(unit = u, k_eff = k, oneway = oneway)
+    }),
+    n0 = if (is.null(n0)) k else n0
   )
-  do.call(boundary_method_hint, utils::modifyList(defaults, list(...)))
+  do.call(boundary_method_hint, utils::modifyList(defaults, args))
 }
 
 test_that("balanced one-way is hinted at the two DETERMINISTIC methods (AC2)", {
@@ -726,44 +781,48 @@ bh_msg_any <- function(d, ...) {
   )
 }
 
-test_that("the degeneracy flag fires exactly where the row's OWN guard fires (AC2, F2)", {
-  # One-way: the flag IS `classical_guard_observed()`, asked rather than restated, so
-  # it must agree with that guard case by case -- including where it must NOT fire.
-  expect_true(boundary_data_degenerate(bh_degen_within(), oneway = TRUE))
-  # MSA = 0 is degenerate FOR THIS ROW: it passes both shipped guards, and still
-  # leaves burch at NaN and searle's averaged endpoint at -Inf (pass-4 F3).
-  expect_true(boundary_data_degenerate(bh_degen_between(), oneway = TRUE))
-  expect_true(boundary_data_degenerate(bh_degen_flat(), oneway = FALSE))
-  # ...and a probe that cannot even be built reads as degenerate rather than escaping:
-  # an NA score makes npb_groups() abort, which used to REPLACE the boundary error.
-  na_scores <- bh_ok_oneway()
-  na_scores$score[3] <- NA
-  expect_true(boundary_data_degenerate(na_scores, oneway = TRUE))
-  # Healthy data are not degenerate, on either branch -- including data sitting at
-  # the sigma^2 -> 0 boundary, which is the case the hint exists FOR.
-  expect_false(boundary_data_degenerate(bh_ok_oneway(), oneway = TRUE))
-  expect_false(boundary_data_degenerate(bh_oneway(), oneway = TRUE))
-  expect_false(boundary_data_degenerate(bh_ok_twoway(), oneway = FALSE))
-  expect_false(boundary_data_degenerate(bh_twoway(), oneway = FALSE))
-  # The flag states the property the row needs: TRUE exactly where the row's methods
-  # cannot both deliver a USABLE interval. That is broader than "searle's guard fired"
-  # -- at MSA = 0 searle returns [-0.5, -0.5] without raising while burch is NaN -- so
-  # the comparison is against the acceptance predicate, not against an abort.
+test_that("silence on degenerate data agrees with the interval, case by case (AC2/AC3)", {
+  # The degeneracy FLAG is gone. A row now falls silent because running its methods
+  # returned nothing usable, not because a predicate said so -- which means the
+  # property the old flag-vs-guard test protected is now checkable in its sharpest
+  # form: the set of methods NAMED must equal the set that is USABLE, on every kind
+  # of data, with no rule in between to drift.
   for (case in list(
-    list(lab = "within", d = bh_degen_within()),
-    list(lab = "between", d = bh_degen_between()),
-    list(lab = "healthy", d = bh_ok_oneway())
+    list(lab = "MSE = 0 (constant within subject)", d = bh_degen_within()),
+    list(lab = "SSA = 0 (subject means identical)", d = bh_degen_between()),
+    list(lab = "healthy one-way", d = bh_ok_oneway()),
+    list(lab = "sigma^2 -> 0 boundary", d = bh_oneway())
   )) {
-    both_usable <- bh_usable(case$d, "searle", list(model = "oneway")) &&
-      bh_usable(case$d, "burch", list(model = "oneway"))
+    usable <- Filter(
+      function(m) bh_usable(case$d, m, list(model = "oneway")),
+      c("searle", "burch")
+    )
+    h <- bh_hint(df = case$d, oneway = TRUE, balanced = TRUE)
+    named <- if (length(h)) bh_msg_methods(h[["i"]]) else character(0)
     expect_identical(
-      paste(case$lab, boundary_data_degenerate(case$d, oneway = TRUE)),
-      paste(case$lab, !both_usable)
+      paste(case$lab, "named:", paste(named, collapse = "+")),
+      paste(case$lab, "named:", paste(usable, collapse = "+"))
     )
   }
-  # A degenerate flag beats its own design row, one-way and two-way alike.
-  expect_length(bh_hint(oneway = TRUE, balanced = TRUE, degenerate = TRUE), 0L)
-  expect_length(bh_hint(degenerate = TRUE), 0L)
+  # SSA = 0 is the cell pass-3 F2 and pass-4 F3 disagreed about, and it is now
+  # settled by looking rather than by ruling: searle returns ICC(1) [-0.5, -0.5],
+  # exactly on the open support floor, and ICC(k) [-Inf, -Inf]; burch is NaN
+  # throughout. So the row is silent -- and silent for a reason the test can state.
+  expect_length(
+    bh_hint(df = bh_degen_between(), oneway = TRUE, balanced = TRUE),
+    0L
+  )
+  # Two-way: all-constant data kill mpl's optim at its initial parameters.
+  expect_length(bh_hint(df = bh_degen_flat()), 0L)
+  # A missing score silences every row, because every reducer aborts on it -- the
+  # hole pass-4 needed two separate mechanisms (`complete` and the probe tryCatch) to
+  # cover, and that no longer needs any mechanism of its own.
+  na_oneway <- bh_ok_oneway()
+  na_oneway$score[3] <- NA
+  expect_length(bh_hint(df = na_oneway, oneway = TRUE, balanced = TRUE), 0L)
+  na_twoway <- bh_twoway()
+  na_twoway$score[5] <- NA
+  expect_length(bh_hint(df = na_twoway), 0L)
 })
 
 test_that("data degenerate FOR THE ROW get no hint; data that are not still do (AC3/AC4, F2)", {
@@ -982,16 +1041,6 @@ bh_smallint <- function(n_s, n_k, seed, balanced = TRUE) {
     rater = factor(sequence(sizes)),
     score = sample(1:3, sum(sizes), replace = TRUE)
   )
-}
-
-# Parse the `ci_method = "x"` names out of a rendered abort message.
-bh_msg_methods <- function(m) {
-  all <- c("npbootstrap", "searle", "burch", "mpl")
-  all[vapply(
-    all,
-    function(x) grepl(paste0("\"", x, "\""), m, fixed = TRUE),
-    logical(1)
-  )]
 }
 
 # One sweep cell: `build(seed)` -> a data frame, `args` -> the icc() arguments that

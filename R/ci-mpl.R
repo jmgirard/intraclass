@@ -279,23 +279,6 @@ mpl_kappa_lookup <- function(
   stats::approx(col$n_s, col$kappa_m, xout = n_s, method = "linear")$y
 }
 
-# TRUE iff `mpl_kappa_lookup()` above RESOLVES for this geometry and level -- asked of
-# the lookup itself rather than restating its three fences, so there is one source of
-# truth and the answer cannot drift when the table gains or loses nodes. Used by the
-# M93 boundary hint, which must not name `ci_method = "mpl"` on a design the lookup
-# would then refuse: icc()'s own mpl fence checks the DESIGN and the conf_level but
-# never the (n_r, n_s) grid, so the hint at 8 subjects pointed straight at an
-# `intraclass_unsupported` abort (M93 review F1). Pure -- no fit, one table lookup.
-mpl_kappa_available <- function(n_r, n_s, conf_level) {
-  !inherits(
-    tryCatch(
-      mpl_kappa_lookup(n_r, n_s, conf_level = conf_level),
-      intraclass_unsupported = function(e) e
-    ),
-    "condition"
-  )
-}
-
 # --- Reducer: the icc() dispatch entry point (mirrors searle_ci) -------------
 # Takes the RAW two-way data (`df`) -- like npbootstrap/searle, the POINT is the engine
 # (glmmTMB REML) point computed upstream (D-015/D-010 BC5); only the interval is
