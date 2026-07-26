@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -101,7 +101,7 @@ legitimate ICC(3) = -1.771 on healthy data.
 - AC2 → T1, T2, T6
 - AC3 → T4
 - AC4 → T3, T7
-- AC5 → T2, T4, T8, T9
+- AC5 → T2, T4, T8, T9, T10
 - AC6 → T5
 - AC7 → T5
 
@@ -136,6 +136,11 @@ legitimate ICC(3) = -1.771 on healthy data.
       with an enumeration of the numeric tokens the message contains, asserting the set
       is exactly the legitimate one. Mutation-verify with `round(lo, 3)`, not only full
       precision.
+- [x] T10 (pass-8 F1, 90): the AC5 enumeration runs on the ONE-WAY abort only, so a leak
+      in the `mpl` bullet — the hint's other interval-rendering branch — passes at
+      FAIL 0. Run the same enumeration over BOTH designs, pinning that each branch was
+      actually exercised so a fixture that stops aborting cannot silence it. Mutation:
+      `round(conf.high, 3)` into the `mpl` bullet must red it.
 
 ## Work log
 
@@ -222,6 +227,10 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, 2m27s), `devtools::test()` FAIL 0 / PASS 4910 / SKIP 23 at `NOT_CRAN=true CI=true` (the 2 WARN are the pre-existing expected-warning tests in `test-vignette-claims.R`), `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. Only `tests/testthat/test-boundary-abort-hint.R` changed this pass, so no `_snaps/` path moved and no snapshot was accepted. Status -> review.
 - 2026-07-26: review pass 8 FAILED the gate — AC5, on evidence for the fourth consecutive pass. The [O] lens found (F1, 90, reproduced independently here) that T9's token enumeration only ever inspects the ONE-WAY abort: `boundary_method_hint()` renders a bullet from a computed interval in two branches, and a `round(conf.high, 3)` leak in the `mpl` branch leaves the file at FAIL 0 / PASS 697 while the user's abort reads "(upper limit 0.263)". The same leak in the one-way bullet does red it, so the detector works and the gap is the BRANCH, not the precision. Two lenses clean. AC1-AC4, AC6, AC7 verified this pass and stand; behaviour swept twice more this phase (112 + ~560 aborts) with zero AC3 violations. Eighth return; thrash rule fires, disposition to the maintainer. Status -> in-progress.
 - 2026-07-26: PR #100 all 9 checks green on `a853b00` — `ubuntu-latest (release)` 16m52s, `windows-latest (release)` 19m33s, `test-coverage` 17m52s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 8.
+
+- 2026-07-26: maintainer OVERRODE the thrash rule at the pass-8 routing chip — M93 stays on the implement path rather than returning to /milestone-plan, on the grounds that the goal and scope are not implicated and the finding is one line of test grid. Logged, not resisted.
+- 2026-07-26: T10 — the AC5 leak enumeration now runs over BOTH branches that render a bullet from a computed interval, not just the one-way one. Each branch fires its own real abort, asserts its own bullet is in the text being read (so the branch was genuinely exercised), enumerates the numeric tokens, and drives the same three-rendering positive controls off that branch's own reducers; a `checked == 2L` pin at the end means half the surface can no longer go unread with the file green, and a fixture drifting off the boundary FAILS rather than skips. Mutation-verified three ways: `round(conf.high, 3)` into the mpl bullet reds it (pass-8 F1's exact mutation, 2 tokens vs 1), `round(conf.low, 3)` into the one-way bullet still reds it, and silencing the mpl branch reds both the per-branch bullet pin and the `checked` pin. M93 file FAIL 0 / PASS 720 / SKIP 0.
+- 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, 2m54s), `devtools::test()` FAIL 0 / PASS 4933 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in the branch diff, so no message snapshot moved and none was accepted. Only the test file changed in `R/`-visible terms — no shipped code touched since pass 6. Status -> review.
 
 ## Decisions
 
