@@ -933,9 +933,14 @@ test_that("multilevel, replicate and off-grid designs stay silent, and abort (AC
 # hand-derived, the method names are parsed out of the abort icc() actually raises, and
 # each one is then run on the SAME data.
 
-# Ordinal 1-3 ratings: ordinary interrater data sitting at the sigma^2 -> 0 boundary,
-# which is where the default MC aborts and small-n bootstrap resamples go degenerate.
-bh_ordinal <- function(n_s, n_k, seed, balanced = TRUE) {
+# Small-integer 1-3 ratings treated as continuous: ordinary interrater data sitting at
+# the sigma^2 -> 0 boundary, which is where the default MC aborts and where small-n
+# bootstrap resamples go degenerate. Named for what it is -- small integers analysed as
+# continuous scores -- and deliberately NOT for the discrete-outcome axis the package
+# neither handles nor studies: a committed references page carries a CI-checked
+# observation that that axis's name is absent from R/ and tests/, and borrowing the word
+# for a fixture would falsify a true claim (`data-raw/check-reference-observations.py`).
+bh_smallint <- function(n_s, n_k, seed, balanced = TRUE) {
   set.seed(seed)
   sizes <- if (balanced) {
     rep(n_k, n_s)
@@ -967,7 +972,7 @@ test_that("across one-way sizes, every method the REAL abort names is accepted (
   checked <- 0L
   for (cell in cells) {
     for (sd in 1:6) {
-      d <- bh_ordinal(cell$n_s, cell$n_k, sd, balanced = cell$bal)
+      d <- bh_smallint(cell$n_s, cell$n_k, sd, balanced = cell$bal)
       m <- bh_msg_any(d, ci_method = "montecarlo", model = "oneway", seed = 1)
       if (is.na(m)) {
         next
