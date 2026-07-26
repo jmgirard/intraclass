@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -220,6 +220,7 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: adding T9 took the plan-owned body to 153/149; Tasks was the heaviest trimmable section, so it was compressed in a single rewrite (T1-T5 to one line each — their detail is in this log) rather than nibbled. Now 141/149. The over-cap commit was pushed before the check ran; this is the fix, not a second attempt.
 - 2026-07-26: T9 — the AC5 leak detector no longer greps for endpoint digits; it ENUMERATES every numeric token in the rendered abort and asserts the set is exactly the legitimate one (site B's `<int>%` share, or nothing at site A — the remedies and hint bullets are digit-free), so a leak at any precision is a token that does not belong and no rendering can evade it. In-test positive controls append each real endpoint at full precision, `round(v, 3)` and `signif(v, 3)` and require the enumeration to see each one, so the negative assertion cannot pass by blindness — which is how its predecessor passed. Mutation-verified on the SHIPPED message, both renderings: leaking `round(conf.low, 3)` into the one-way bullet reds it (2 tokens vs 1), and so does `format(., digits = 15)`.
 - 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, 2m27s), `devtools::test()` FAIL 0 / PASS 4910 / SKIP 23 at `NOT_CRAN=true CI=true` (the 2 WARN are the pre-existing expected-warning tests in `test-vignette-claims.R`), `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. Only `tests/testthat/test-boundary-abort-hint.R` changed this pass, so no `_snaps/` path moved and no snapshot was accepted. Status -> review.
+- 2026-07-26: review pass 8 FAILED the gate — AC5, on evidence for the fourth consecutive pass. The [O] lens found (F1, 90, reproduced independently here) that T9's token enumeration only ever inspects the ONE-WAY abort: `boundary_method_hint()` renders a bullet from a computed interval in two branches, and a `round(conf.high, 3)` leak in the `mpl` branch leaves the file at FAIL 0 / PASS 697 while the user's abort reads "(upper limit 0.263)". The same leak in the one-way bullet does red it, so the detector works and the gap is the BRANCH, not the precision. Two lenses clean. AC1-AC4, AC6, AC7 verified this pass and stand; behaviour swept twice more this phase (112 + ~560 aborts) with zero AC3 violations. Eighth return; thrash rule fires, disposition to the maintainer. Status -> in-progress.
 - 2026-07-26: PR #100 all 9 checks green on `a853b00` — `ubuntu-latest (release)` 16m52s, `windows-latest (release)` 19m33s, `test-coverage` 17m52s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 8.
 
 ## Decisions
@@ -1068,3 +1069,104 @@ result is unchanged.
 **Seventh return.** The failing item has now been evidence quality, not behaviour, for
 three consecutive passes, and twice it has been a test of mine that could not fail. The
 disposition is the maintainer's.
+
+---
+
+## Review pass 8 (2026-07-26)
+
+**Branch state.** `main` in sync with `origin/main` (0/0); branch 55 ahead / 0 behind,
+so no merge was needed before gathering evidence. PR #100, head `3ac90c3`.
+
+**Fresh per-criterion evidence.** All from commands run this phase, on a working tree
+verified clean immediately before and after each run (the [O] lens mutates and restores
+files in this same checkout, so an unguarded run could have read a mutated tree). The
+M93 file runs **FAIL 0 / PASS 697 / SKIP 0** at `NOT_CRAN=true CI=true`; the zero skip
+count matters, because several tests carry a `skip_if()` on boundary luck.
+
+- AC1 — `:151` builds the near-σ²→0 datasets, confirms the DEFAULT MC path aborts on
+  both geometries, that every abort reached is a Monte-Carlo site and never the
+  bootstrap site, and that site B occurs. The site enumeration AC1 asks the work log to
+  record is there (T1 line, 2026-07-25): `:124` 21/40 two-way + 19/40 one-way, `:43`
+  1/40, `R/ci-bootstrap.R:48` 0/90.
+- AC2 — the hint reaches the real abort per design (`:418`); the abort's class, leading
+  message and BOTH pre-existing generic remedies survive verbatim while a no-opt-in
+  design gains nothing (`:447`); the never-raise obligation at `:1531`; the LAZINESS
+  obligation at `:1760`, counting verification calls through `local_mocked_bindings()`
+  — 0 on a successful `icc()`, >0 on the aborting one. Bootstrap exclusion carries its
+  own evidence (`:193` unreachable at the boundary, `:217` reachable only on degenerate
+  data). Independently confirmed across 112 real aborts this phase: `boundary_method_usable()`
+  leaked no condition and the class and both remedies survived in every one.
+- AC3 — the message-driven sweeps at `:1109` (one-way) and `:1156` (two-way) assert
+  `named == usable` among the methods each design ADMITS, with per-cell non-vacuity.
+  Independently re-derived this phase on a 112-abort / 155-method-mention sweep of my
+  own (one-way and two-way, 4–60 subjects × 2/3/5 raters, numeric `unit` ∈ {2, 6, 15},
+  `conf_level` ∈ {0.80, 0.90, 0.95, 0.99}, 4 seeds per cell), scoring usability through
+  `icc(ci_method = )` itself: **0 named-but-unusable and 0 admissible-usable-but-omitted.**
+- AC4 — the equivalence half at `:1619` compares each reducer's endpoints against
+  `tidy(icc(ci_method = ))` at `tolerance = 0`, carried by the out-of-support cell
+  `bh_pole_oneway()` that makes a reporting-path clamp visible; the admissibility half
+  at `:1724` asserts each row's methods are accepted by `icc()`'s fence and the excluded
+  designs refused `intraclass_unsupported`. The `n0` wiring is pinned at `:1822` against
+  the value `icc()` actually passes, and shown load-bearing at `:1867`.
+- AC5 — **FAILS, see the gate failure below.** Its first clause holds: `:472` confirms
+  the boundary case still raises `intraclass_singular_fit` and returns no `icc` object,
+  re-confirmed on all 112 aborts in my own sweep. Its second clause does not.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, stating that a
+  method is named by RUNNING each candidate and keeping only those whose endpoints are
+  finite, ordered and in range, naming `searle`/`burch`/`mpl` and the silent cases as a
+  consequence of that check; `@param ci_method` carries the matching note; `man/icc.Rd`
+  regenerated. No milestone numbers in user-facing text.
+- AC7 — all run this phase: `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+  **Status: OK** (0 errors / 0 warnings / 0 notes, 4m43s), `lintr::lint_package()` "No
+  lints found", `air format --check .` clean, `devtools::document()` produced an empty
+  `git status`. The snapshot clause is vacuous by inspection, not assumption:
+  `git diff --name-only origin/main..HEAD` contains no `_snaps/` path. PR #100 all 9
+  checks green on `3ac90c3` — `ubuntu-latest (release)` 16m23s, `windows-latest (release)`
+  18m49s, `test-coverage` 17m17s, plus `check-references`, `format-check`, `lint`,
+  `pkgdown` and both codecov.
+
+**Consistency gate.** `cairn_validate` exit 0 — all 16 checks PASS including
+`weight caps` and `coverage complete`; 321 advisory `dangling id tokens`, all
+pre-existing pre-migration ids. Profile `consistency-gate` slot: `devtools::document()`
+no-diff · no generated file hand-edited (`NAMESPACE` and `README` absent from the diff)
+· `pkgdown::check_pkgdown()` "No problems found" · `NEWS.md` entry present · the two
+added files are under `R/` and `tests/`, so no `.Rbuildignore` entry is owed. No
+`DESIGN.md` principle changed, so `cairn_impact` does not apply.
+
+**Independent review — three lenses, 1 finding.** [S] blame-history: 0 findings
+(verified the four `hint` signature changes stay back-compatible with
+`engine-lavaan.R`'s positional `rmvn()` calls and `d-study.R`, that every helper
+deleted across the re-cuts is gone with no dangling reference, and that the diff stays
+on D-018's side of D-012/D-013's fence). [S] prior-PR-comments: 0 findings (the GitHub
+inline-comment surface is empty by probe — `pulls/comments?per_page=1` returns `[]` —
+so the archived `## Review` sections were the evidence; confirmed the pass-7 detector
+is gone rather than diffed around, and that the AC4 fixture stayed at the M84-hardened
+8×2 shape). [O] diff-bug: 1 finding, scored 90 by an independent [S] scorer that did
+not generate it. The [O] lens also mutation-verified the other three new guards (each
+reds) and ran its own ~560-abort behaviour sweep with 0 forward and 0 reverse
+violations.
+
+**F1 (90) — actioned.** `tests/testthat/test-boundary-abort-hint.R:1911`. AC5's second
+clause is carried by exactly one test, and that test builds its message from
+`bh_oneway()` only. `boundary_method_hint()` has TWO branches that compute an interval
+and then render a bullet — the one-way `searle`/`burch` branch (`R/boundary-hint.R:196-215`)
+and the two-way `mpl` branch (`R/boundary-hint.R:233-240`) — so the leak T9 exists to
+prevent is undetectable on half the hint surface. Reproduced independently here:
+rendering `round(mpl_ci(...)[[1]]$conf.high, 3)` into the `mpl` bullet leaves the file
+at **FAIL 0 / PASS 697** while the user's abort reads "…returns an interval where the
+default cannot (upper limit 0.263): the modified profile-likelihood interval…". The
+identical leak in the one-way bullet DOES red the test at `:1977`, so the detector
+works and the gap is the branch, not the precision. No snapshot covers that message
+either. Fix is one line of grid: drive the T9 block over the two-way design as well.
+
+**GATE FAILURE — returned to `in-progress` (review pass 8).** AC5, and for the fourth
+consecutive pass the failing item is evidence quality rather than shipped behaviour.
+**AC5's tick stays withdrawn**; AC1, AC2, AC3, AC4, AC6 and AC7 were verified this pass
+with the fresh evidence above and stand. No shipped code is implicated — behaviour was
+independently swept twice this phase (my 112 aborts, the [O] lens's ~560) with zero
+violations of the AC3 property, and `git diff` shows no `R/` change since pass 7.
+
+**Eighth return — the thrash rule fires, and has since pass 3.** The disposition is the
+maintainer's. Recorded for that decision: the finding is a one-line widening of one
+test's grid, the goal and scope are not implicated, and the shipped behaviour has now
+survived roughly 34,000 adversarial cells across passes 6–8 without a violation.
