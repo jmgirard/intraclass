@@ -1,6 +1,6 @@
 # M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -169,6 +169,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: pass-3 gate — `devtools::test()` FAIL 0 / PASS 4453 at `NOT_CRAN=true CI=true`, `devtools::check()` Status OK, `lintr::lint_package()` no lints (it caught the new constant's SCREAMING_CASE name; renamed to `npb_hint_min_subjects`), `air format --check` clean, `document()` no-diff. Status -> review.
 - 2026-07-25: CI caught a self-inflicted `check-references` failure — the new test fixture was named for the discrete-outcome axis, falsifying a committed references-page observation that the token is absent from R/ and tests/ (D-009). The claim is TRUE (nothing here handles or studies that axis), so the fixture was renamed rather than the observation weakened; the first rewrite then tripped two more checks by naming both tokens in its own comment.
 - 2026-07-25: PR #100 all 7 jobs pass on `3da69d5` — `ubuntu-latest` 16m38s, `windows-latest` 19m25s, `test-coverage` 17m42s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov checks. Ready for review pass 3.
+- 2026-07-25: review pass 3 FAILED the gate — AC3 again, on the one-way half. The `n_s >= 15` floor is on the wrong quantity: the resample guard tracks subjects carrying within-subject variance, so the ordinary double-code design (most subjects rated once, a few twice) hints `npbootstrap` and then aborts at EVERY subject count 15-60. T10 also introduced over-suppression: the balanced bullet now stays silent on SSA = 0 data where searle/burch both work. F1 96 / F2 90 / F4 95 actioned-in-principle, F3 76 logged. Two-way/`mpl` clean across 919 hinted runs. THIRD return from review — thrash rule fires, so this is not queued for another implement pass; it goes to `/milestone-plan` for a re-cut. Status -> in-progress.
 
 ## Decisions
 
@@ -404,3 +405,71 @@ third time by me at the gate.
 Gate-failure note: this is the milestone's SECOND return from review. A third makes it a
 mis-planned milestone under the thrash rule, and the response then is re-plan or split
 via `/milestone-plan`, not another retry.
+
+---
+
+## Review pass 3 (2026-07-25)
+
+**Branch state.** `main` 0/0 with `origin/main`; branch 20 ahead / 0 behind. PR #100, head
+`3a53993`, all 7 CI jobs green.
+
+**Gate results, all run this phase.** `cairn_validate` exit 0 — 16 PASS including
+`coverage complete` and `weight caps`; advisories only, but one is new and pertinent:
+`sizing (split tripwires)` now WARNs that M93 carries 12 tasks, past the >10 tripwire.
+Profile `consistency-gate`: `devtools::check()` Status OK · `lintr` no lints · `air
+format --check` clean · `document()` no-diff · `pkgdown::check_pkgdown()` "No problems
+found" · NEWS entry present. M93 test file: 23 tests, 240 assertions, FAIL 0, SKIP 0.
+No `DESIGN.md` principle changed, so `cairn_impact` does not apply.
+
+**AC1, AC2, AC4, AC5, AC6, AC7 re-verified and stand** (evidence as recorded in pass 2,
+re-run this phase; the test file is green with no skip firing, and the toolchain gate is
+clean).
+
+**GATE FAILURE on AC3 — third return from review.** I ran my own sweep, written from the
+criterion rather than from the test file: for every design where the DEFAULT aborts, parse
+the method names out of the real message and run each on the same data. One-way: 342
+aborts, 396 method-names, **4 violations**. Two-way: 151 aborts, 70 method-names, 0
+violations. The [O] diff-bug lens found the same class independently and much worse, and
+an independent [S] scorer reproduced both.
+
+- **F1 (96) — the floor is on the wrong quantity.** `R/boundary-hint.R:136`. The resample
+  guard depends on how many subjects carry within-subject variance, which on unbalanced
+  data is decoupled from `n_s`, so `n_s >= 15` never bites. The damning shape is the
+  ordinary double-code design — most subjects rated once, a few twice: at 60 subjects with
+  3 doubled, the default aborts, names `npbootstrap`, and `npbootstrap` then aborts with
+  "115 of 999 resamples were degenerate", at **every** subject count 15-60. My own sweep hit
+  it at the floor itself (alternating sizes 2,1 at `n_s` = 15). The suite is green because
+  the new sweep's only unbalanced cells are `n_k = 3` (sizes 3,2) — the one imbalance shape
+  that never trips the guard. Structurally the same blind spot as pass 2's F4, one level up:
+  the grid varies subject COUNT but not imbalance SHAPE.
+- **F2 (90) — over-suppression introduced by T10, this pass.** `R/boundary-hint.R:60-72`.
+  T10 removed `npbootstrap` from the balanced bullet but left `boundary_data_degenerate()`
+  ORing npbootstrap-only disjuncts and gating the WHOLE hint. On balanced data with SSA = 0
+  (every subject mean exactly equal, MSE > 0) the hint now says nothing while `searle` and
+  `burch` both return intervals. The comment claiming "every method a row below could name
+  aborts on them" is false for the balanced row as it now stands.
+- **F3 (76) — below threshold, logged not actioned.** `test-boundary-abort-hint.R:559-561`
+  runs the hinted `npbootstrap` at `boot_samples = 50L` instead of the shipped 999, cutting
+  the chance of tripping a guard that fires on ANY degenerate resample. The scorer confirmed
+  the premise but found it masks no live failure on that row today.
+- **F4 (95) — actioned.** `test-boundary-abort-hint.R:998` is a tautology
+  (`expect_identical(x, x)`) that can never fail; the real check is the next line. Mine,
+  from T12. Both the [S] prior-review lens and the scorer flagged it.
+
+**Two lenses clean.** [S] blame-history: 0 findings — it verified against `DECISIONS.md`
+and `milestones/archive/M76` that D-012's 0-abort statistic really is SEARLE/Burch-only
+(npbootstrap was a comparison incumbent in that sweep), so the two-vs-three split rests on
+sound ground; it also noted `R/ci-npbootstrap.R:177`'s "negligibly rare at k >= 10" comment
+is now contradicted by measurement, but pre-existing and not introduced here. [S]
+prior-review: no regression of any pass-1 or pass-2 finding.
+
+**The two-way half is done; the one-way half is not.** Across this pass's sweeps the `mpl`
+row took 849 hinted runs (the lens) plus 70 (mine) with **zero** aborts, at every calibrated
+level and on and off the grid. Every failure in all three passes has been one-way, and each
+was a different mechanism: the κ_m grid (pass 1), raw subject count (pass 2), effective
+subject count and over-suppression (pass 3).
+
+**Thrash rule fires.** This is the third trip back from review, so the response is not
+another retry — M93 is mis-cut. The evidence points at the split: ship the two-way/`mpl`
+half, and re-plan the one-way half around a predicate for "will the bootstrap resample
+stably", which is the question that has defeated three attempts.
