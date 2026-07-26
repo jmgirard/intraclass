@@ -1276,3 +1276,169 @@ test_that("a numeric unit splits the pair at its own Spearman-Brown pole (AC3)",
   }
   expect_true(split_seen)
 })
+
+# ---- T1: the verification helper (AC2) --------------------------------------
+# The re-cut's core: a method is named only after its own shipped reducer has been
+# run on the data in hand and the interval inspected. These pin the two pure
+# functions directly; the end-to-end property is AC3's sweep.
+
+test_that("boundary_interval_usable() accepts exactly the in-support intervals (AC2)", {
+  ok <- function(lo, hi) list(conf.low = lo, conf.high = hi)
+  # Finite, ordered, inside (-Inf, 1) for an averaged/projected estimand.
+  expect_true(boundary_interval_usable(ok(-0.4, 0.6), divisor = 3, n0 = 3))
+  expect_true(boundary_interval_usable(ok(-2.6e5, 0.99), divisor = 3, n0 = 3))
+  # ...and inside (-1/(n0-1), 1) for ICC(1).
+  expect_true(boundary_interval_usable(ok(-0.49, 0.2), divisor = 1, n0 = 3))
+
+  # Non-finite in either endpoint. `searle` returns [-Inf, -Inf] for ICC(k) on
+  # SSA = 0 data and `burch` returns NaN throughout (pass-4 F3).
+  expect_false(boundary_interval_usable(ok(-Inf, -Inf), divisor = 3, n0 = 3))
+  expect_false(boundary_interval_usable(ok(NaN, NaN), divisor = 1, n0 = 3))
+  expect_false(boundary_interval_usable(ok(0.1, NA_real_), divisor = 1, n0 = 3))
+  # Reversed: `searle` at a numeric unit past the pole (pass-4 F4).
+  expect_false(boundary_interval_usable(ok(4.594, 0.602), divisor = 6, n0 = 3))
+  # Out of support ABOVE +1, the pass-5 F3 shape this re-cut had to add: finite AND
+  # ordered, so a finite-and-ordered-only predicate would have accepted it.
+  expect_false(boundary_interval_usable(ok(1.154, 1.164), divisor = 15, n0 = 2))
+  expect_false(boundary_interval_usable(ok(1.25, 1.25), divisor = 15, n0 = 3))
+  # The support is OPEN at 1, so an endpoint sitting exactly on it is out.
+  expect_false(boundary_interval_usable(ok(0.5, 1), divisor = 1, n0 = 3))
+  # ...and open at the ICC(1) floor, which the classical estimator ATTAINS at
+  # MSA = 0: searle's [-0.5, -0.5] at k = 3 is a zero-width interval pinned there.
+  expect_false(boundary_interval_usable(ok(-0.5, -0.5), divisor = 1, n0 = 3))
+  # The same floor does NOT gate an averaged estimand, whose support is (-Inf, 1).
+  expect_true(boundary_interval_usable(ok(-0.5, -0.5), divisor = 3, n0 = 3))
+  # A malformed entry is unusable rather than an error.
+  expect_false(boundary_interval_usable(
+    list(conf.low = numeric(0), conf.high = 0.5),
+    divisor = 1,
+    n0 = 3
+  ))
+})
+
+test_that("boundary_method_usable() verdicts match the intervals the reducers return (AC2)", {
+  ests <- function(units, k, oneway = TRUE) {
+    lapply(units, function(u) {
+      icc_estimand(unit = u, k_eff = k, oneway = oneway)
+    })
+  }
+  d1 <- bh_oneway()
+  e_default <- ests(list("single", "average"), 5)
+
+  # Healthy boundary one-way: both classical methods return usable intervals, so
+  # both verify. (Measured at the implement gate: searle single [-0.060, 0.206],
+  # average [-0.397, 0.564]; burch single [-0.066, 0.186], average [-0.445, 0.532].)
+  expect_true(boundary_method_usable("searle", d1, e_default, 0.95, n0 = 5))
+  expect_true(boundary_method_usable("burch", d1, e_default, 0.95, n0 = 5))
+
+  # MSE = 0: both shipped guards abort, so both fail verification.
+  d_mse0 <- bh_degen_within()
+  expect_false(boundary_method_usable(
+    "searle",
+    d_mse0,
+    ests(list("single"), 3),
+    0.95,
+    3
+  ))
+  expect_false(boundary_method_usable(
+    "burch",
+    d_mse0,
+    ests(list("single"), 3),
+    0.95,
+    3
+  ))
+
+  # SSA = 0: neither method raises, and the VALUES are what decide. searle gives
+  # ICC(1) [-0.5, -0.5] (on the open support floor) and ICC(k) [-Inf, -Inf]; burch
+  # gives NaN. So both fail, on the default call and on ICC(1) alone -- the cell
+  # pass-3 F2 and pass-4 F3 disagreed about, settled by looking rather than ruling.
+  d_ssa0 <- bh_degen_between()
+  expect_false(boundary_method_usable(
+    "searle",
+    d_ssa0,
+    ests(list("single", "average"), 3),
+    0.95,
+    3
+  ))
+  expect_false(boundary_method_usable(
+    "searle",
+    d_ssa0,
+    ests(list("single"), 3),
+    0.95,
+    3
+  ))
+  expect_false(boundary_method_usable(
+    "burch",
+    d_ssa0,
+    ests(list("single"), 3),
+    0.95,
+    3
+  ))
+
+  # A missing score aborts every reducer, which is why no separate completeness
+  # input is needed any more (pass-4 F1/F2 were two mechanisms for this one hole).
+  d_na <- d1
+  d_na$score[3] <- NA_real_
+  expect_false(boundary_method_usable("searle", d_na, e_default, 0.95, 5))
+  expect_false(boundary_method_usable("burch", d_na, e_default, 0.95, 5))
+
+  # mpl ON its kappa_m grid verifies; OFF the grid the lookup aborts, which is why
+  # no separate grid gate is needed any more (pass-1 F1).
+  d2 <- bh_twoway()
+  e2 <- ests(list("single", "average"), 3, oneway = FALSE)
+  expect_true(boundary_method_usable("mpl", d2, e2, 0.95, n0 = 3))
+  expect_false(boundary_method_usable(
+    "mpl",
+    bh_twoway(n_s = 8),
+    e2,
+    0.95,
+    n0 = 3
+  ))
+  # ...and at an uncalibrated conf_level, likewise (M91/D-017).
+  expect_false(boundary_method_usable("mpl", d2, e2, 0.975, n0 = 3))
+
+  # An unregistered method is never usable -- `npbootstrap` is M97's to add.
+  expect_false(boundary_method_usable("npbootstrap", d1, e_default, 0.95, 5))
+  expect_false(boundary_method_usable("montecarlo", d1, e_default, 0.95, 5))
+})
+
+test_that("verification never raises and never leaks a condition (AC2)", {
+  # The obligation pass-4 F2 broke: this runs while the boundary abort's message
+  # vector is being built, so a condition escaping here replaces the user's error.
+  # Drive it over inputs that make the reducers abort, warn, or return garbage.
+  ests <- function(units, k, oneway = TRUE) {
+    lapply(units, function(u) {
+      icc_estimand(unit = u, k_eff = k, oneway = oneway)
+    })
+  }
+  e1 <- ests(list("single", "average"), 3)
+  e2 <- ests(list("single", "average"), 3, oneway = FALSE)
+
+  d_na_all <- bh_oneway(n_s = 10, n_k = 3)
+  d_na_all$score <- NA_real_
+  d_one_row <- bh_oneway(n_s = 10, n_k = 3)[1, , drop = FALSE]
+  d_empty <- bh_oneway(n_s = 10, n_k = 3)[0, , drop = FALSE]
+
+  hostile <- list(
+    list("searle", bh_degen_within()),
+    list("burch", bh_degen_within()),
+    list("searle", bh_degen_between()),
+    list("burch", bh_degen_flat()),
+    list("searle", d_na_all),
+    list("burch", d_na_all),
+    list("searle", d_one_row),
+    list("burch", d_empty),
+    list("mpl", bh_degen_flat()),
+    list("mpl", d_na_all),
+    list("mpl", d_empty)
+  )
+  for (h in hostile) {
+    meth <- h[[1]]
+    dat <- h[[2]]
+    e <- if (identical(meth, "mpl")) e2 else e1
+    # No error, no warning, no message -- and a bare logical either way.
+    expect_no_error(v <- boundary_method_usable(meth, dat, e, 0.95, n0 = 3))
+    expect_no_warning(boundary_method_usable(meth, dat, e, 0.95, n0 = 3))
+    expect_true(is.logical(v) && length(v) == 1L && !is.na(v))
+  }
+})

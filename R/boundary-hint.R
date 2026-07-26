@@ -33,6 +33,101 @@
 # design (most subjects rated once, a few doubled) defeated both at every size. M97
 # takes it up behind a predicate derived from the data rather than the design.
 
+# --- Verification: run the candidate method, then look at the interval --------
+#
+# Five review passes each closed one mechanism by which a design PREDICATE named a
+# method that then failed on the user's data, and each patch shipped a new one: the
+# kappa_m calibration grid, a raw subject count, an effective subject count, a
+# missing score / numeric `unit` / MSA = 0, and a verdict reading one of the two
+# endpoints. Prediction was abandoned at the M93 third re-cut (2026-07-26) for
+# something that cannot have a sixth mechanism -- run the candidate's OWN shipped
+# reducer on the data in hand, and name it only if the interval it returns is usable.
+# `icc()` reports these endpoints verbatim (no clamping anywhere in the reporting
+# path, verified at the implement gate), so the check cannot disagree with what the
+# user's own `ci_method =` call would produce (AC4).
+#
+# D-018 draws the line against the fallback-on-abort default D-012 fenced out: the
+# interval computed here decides whether to NAME a method and is then discarded. It
+# reaches neither the message text nor any returned object -- the call still aborts
+# `intraclass_singular_fit` and still returns no interval.
+
+# Is one reported interval usable? Finite, correctly ordered, and inside the
+# estimand's support under D-010 -- `(-1/(n0-1), 1)` for ICC(1), `(-Inf, 1)` for the
+# averaged/projected form -- both OPEN.
+#
+# Out-of-support is not hypothetical. `searle` at a numeric `unit` past `npb_sb()`'s
+# pole (`rho = -1/(m-1)`) returns intervals lying entirely ABOVE +1: measured at the
+# implement gate on 28 of 12,600 healthy cells, values 1.16 to 13.1, one of them an
+# 80% interval of [1.154, 1.164] around a point of 5.9e-09 (the shipped defect itself
+# is a ROADMAP candidate; M93 only stops the hint pointing at it). Pole-crossed values
+# have infimum `m/(m-1) > 1`, so the `< 1` cut separates them from legitimate ones
+# with no tolerance band to tune -- legitimate endpoints approach 1 only from below.
+#
+# The ICC(1) floor is the classical estimator's ATTAINED minimum (MSA = 0 gives
+# exactly `-1/(n0-1)`), not an asymptote, so this does reject a limit sitting on it:
+# a zero-width interval pinned at the support boundary. Deliberate -- the support is
+# open there, it never bound on healthy data (0 of 12,600 cells), and the default
+# two-estimand call is silenced on that data anyway by ICC(k) coming back `-Inf`.
+boundary_interval_usable <- function(ci, divisor, n0) {
+  lo <- ci$conf.low
+  hi <- ci$conf.high
+  if (length(lo) != 1L || length(hi) != 1L) {
+    return(FALSE)
+  }
+  if (!is.finite(lo) || !is.finite(hi) || lo > hi || hi >= 1) {
+    return(FALSE)
+  }
+  floor_rho <- if (isTRUE(divisor == 1) && is.finite(n0) && n0 > 1) {
+    -1 / (n0 - 1)
+  } else {
+    -Inf
+  }
+  lo > floor_rho
+}
+
+# Run one candidate `ci_method` and report whether EVERY estimand it returns is
+# usable. This NEVER raises and never leaks a condition. The reducers abort by design
+# (`intraclass_unidentified` on a missing score, `intraclass_unsupported` off mpl's
+# kappa_m grid or at an uncalibrated level, the classical guards on degenerate data)
+# and can warn; it runs while the boundary abort's own message vector is being built,
+# where an escaping error would REPLACE the user's `intraclass_singular_fit` with an
+# unrelated one (pass-4 F2, scored 95) and an escaping warning would attach itself to
+# their abort. Any failure means "this method cannot serve this data", which is
+# exactly the answer the check exists to give.
+#
+# Keyed by the `ci_method` string, so M97 registers `npbootstrap` by adding a row
+# here rather than by writing a second checker (M97 AC1).
+boundary_method_usable <- function(method, df, estimands, conf_level, n0) {
+  reducer <- switch(
+    method,
+    searle = searle_ci,
+    burch = burch_ci,
+    mpl = mpl_ci,
+    NULL
+  )
+  if (is.null(reducer)) {
+    return(FALSE)
+  }
+  isTRUE(tryCatch(
+    withCallingHandlers(
+      {
+        ci <- reducer(df, estimands, conf_level = conf_level)
+        length(ci) >= 1L &&
+          all(vapply(
+            seq_along(ci),
+            function(i) {
+              boundary_interval_usable(ci[[i]], estimands[[i]]$divisor, n0)
+            },
+            logical(1)
+          ))
+      },
+      warning = function(w) invokeRestart("muffleWarning"),
+      message = function(m) invokeRestart("muffleMessage")
+    ),
+    error = function(e) FALSE
+  ))
+}
+
 # Exact data degeneracy, PER ROW: TRUE when the data are degenerate enough that the
 # methods THAT ROW names abort on them. The design predicates alone cannot see this --
 # a balanced one-way design whose scores are constant within subject is a perfectly
