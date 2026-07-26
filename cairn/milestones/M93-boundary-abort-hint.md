@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -45,7 +45,7 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [x] AC2: `icc()` derives the hint from the fence predicates, the observed
+- [ ] AC2: `icc()` derives the hint from the fence predicates, the observed
       subject/rater counts and a per-row degeneracy check, and passes it to the two
       reachable Monte-Carlo aborts (`R/ci-montecarlo.R:43`, `:124`); the abort class,
       leading message and existing generic remedies are unchanged — the hint is
@@ -54,7 +54,7 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
       zero total variance for `mpl`), so a row falls silent only where its own methods
       abort. No design names `"npbootstrap"` (→ M97); `R/ci-bootstrap.R:48` excluded on
       T1 evidence.
-- [x] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
+- [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
       from hand-written expectations — over a design grid, trigger the real `icc()`
       abort, parse the method names out of the message that fired, run each on that
       same data, and require that none aborts. Grid: one-way balanced at several
@@ -157,6 +157,8 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 - 2026-07-25: T5 — gate clean on the final tree: `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, its `checking tests` step running the whole suite in 134s), `devtools::test()` FAIL 0 / PASS 4515 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved and none was accepted. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync, so the `check-references` CI job is covered locally. Also retired the superseded task numbers from the test file's section headers, which now name the criteria they serve.
 
 - 2026-07-25: PR #100 all 9 checks green on `5fa3e1c` — `ubuntu-latest (release)`, `windows-latest (release)`, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov checks. Status -> review; this is the re-cut's first review pass, and the fourth for the milestone.
+
+- 2026-07-25: review pass 4 FAILED the gate — the forbidden shape is back, via a mechanism no earlier pass touched: a MISSING SCORE. F2 (95) the hint's own degeneracy probe throws `intraclass_unidentified` and replaces the boundary abort (AC2); F1 (94) an NA-carrying two-way design is `balanced` by cell counts, so the hint names `mpl` and `mpl` aborts (AC3); F4 (88) numeric `unit` is no longer an input, so the balanced row steers it into a reversed interval; F3 (87) on the SSA = 0 data this pass deliberately un-suppressed, `searle` returns [-0.5, -0.5] / [-Inf, -Inf] and `burch` returns NaN, so the shipped "return a result" sentence is false — and the plan-gate evidence for that change tested only that no error was raised, never the values. AC2/AC3 ticks withdrawn; AC1, AC4-AC7 stand. Neither my sweep nor the committed one constructs an NA, and both score a method "accepted" iff `icc()` does not raise. FOURTH return from review; thrash-rule disposition left to the maintainer. Status -> in-progress.
 
 ## Decisions
 
@@ -544,3 +546,70 @@ hand-edited (`man/icc.Rd` regenerated from roxygen) · `README.Rmd` untouched ·
 this pass · no new top-level file in the diff, so no `.Rbuildignore` entry owed ·
 `devtools::check()` Status OK. No `DESIGN.md` principle changed (`git diff --name-only`
 has no `DESIGN.md`), so `cairn_impact` does not apply.
+
+**Independent review — 3 lenses.** [S] blame-history: 0 findings (verified every removed
+piece is moot rather than load-bearing, that `classical_oneway_ss()`'s balanced
+assumption holds on every path that forces it, and that D-010/D-012/D-013/D-014/D-015
+are all still respected). [S] prior-review: 0 findings (the GitHub inline-comment probe
+returned `[]`, confirming pass 1's reading of that surface; every actioned finding from
+passes 1-3 verified still closed, and the two below-threshold ones not worsened). [O]
+diff-bug: 4 findings, every one reproduced by an independent [S] scorer that did not
+generate them.
+
+**GATE FAILURE — returned to `in-progress` (review pass 4).** The milestone's central
+forbidden behaviour is present again, by a mechanism none of the four passes had
+touched: a missing score. All four findings score at or above the action threshold.
+
+- **F2 (95) — the hint machinery destroys the abort it was meant to annotate.**
+  `R/boundary-hint.R:59-69`. `npb_groups(df)` and `classical_oneway_ss()` sit OUTSIDE
+  the `tryCatch`, so on balanced one-way boundary data carrying an `NA` score, forcing
+  the `degenerate` promise inside the abort-message vector raises
+  `intraclass_unidentified` ("The one-way bootstrap could not extract complete subject
+  rows") and REPLACES the `intraclass_singular_fit` abort — naming a bootstrap the user
+  never requested. 8 of 12 cells over `n_s` in {10,20} x `k` in {2,3} x 3 seeds. Breaks
+  AC2's "the abort class ... unchanged — the hint is additive". Introduced by T2 this
+  pass: swapping in the pre-re-cut `R/boundary-hint.R` gives `intraclass_singular_fit`
+  on the same four seeds. Found at this gate and independently by the [O] lens.
+- **F1 (94) — the hint names `mpl`, and `mpl` then aborts.** `R/boundary-hint.R:129-150`.
+  A two-way random agreement design complete in CELL COUNTS but carrying an `NA` score:
+  `balanced` comes from `table(subject, rater)`, which counts the `NA` row as observed,
+  and the degeneracy gate misses it because `var(score)` is `NA` so `isTRUE(NA == 0)` is
+  FALSE. `mpl_matrix()` then aborts `intraclass_unidentified` on the reshaped cell. 8 of
+  8 aborting cells named `mpl` and `mpl` aborted on all 8. This is the AC3-forbidden
+  shape in shipped behaviour, on the row three passes had certified clean.
+- **F4 (88) — the hint steers a numeric `unit` into a reversed interval.**
+  `R/boundary-hint.R:101-119`. T1 removed `unit` from the builder's inputs, so the
+  balanced one-way row names `searle`/`burch` unconditionally; with `unit = 6` on
+  ordinary boundary data `searle` returns ICC(6) `[1.579, 0.517]` — lower above upper
+  and above 1. The pole-crossing arithmetic is pre-existing, but `icc()` fences numeric
+  `unit` off the unbalanced npbootstrap path for exactly this reason (`R/icc.R:1417-1431`)
+  and the balanced classical path has no such fence. The test file never exercises
+  `unit` at all.
+- **F3 (87) — "return a result" is false on the data this pass deliberately
+  un-suppressed.** `R/boundary-hint.R:36-45`. On the committed SSA = 0 fixture `searle`
+  returns ICC(1) `[-0.500, -0.500]` and ICC(k) `[-Inf, -Inf]`, and `burch` returns `NaN`
+  throughout, while the message says "Two interval methods return a result for this
+  design where the default cannot". **The plan-gate evidence for this change was wrong:
+  it tested only that no error was raised and never inspected the returned values** —
+  the same error pass-3's own F2 made when it reported that searle and burch "both
+  return intervals". DESIGN.md's boundary-fit policy forbids a silent NA interval, so
+  the honest reading is that the old suppression was right on this cell for a reason
+  nobody had stated.
+
+**Why the pass-4 sweep missed all of this.** My own AC3 sweep (153 aborts, 183
+method-names, 0 violations) and the committed one share two blind spots the findings
+walk straight through: neither constructs an `NA` score anywhere, and `bh_sweep_cell()`
+scores a method "accepted" iff `icc()` does not raise, so a `NaN` or reversed interval
+passes. The grid varied designs; it never varied the ACCEPTANCE PREDICATE or the data's
+completeness. That is the pass-2 F4 pattern one level along, for the third time.
+
+**AC2 and AC3 ticks withdrawn**; AC1, AC4, AC5, AC6 and AC7 were verified this pass and
+stand as recorded above (AC5 is met as written — a test does assert the classed abort on
+non-NA boundary data, and no fallback default is implemented; F2's class change is AC2's
+business, not AC5's).
+
+**Thrash rule.** This is the FOURTH return from review. The rule fired at the third and
+produced this re-cut, so the count is ambiguous and the disposition is the maintainer's:
+counting from the re-cut this is the first failure, but counting the milestone it is the
+fourth. What is not ambiguous is that F3 is a scope question rather than a bug — whether
+the hint should fire on SSA = 0 data at all — and that belongs at a plan gate.
