@@ -25,26 +25,27 @@
 ## Minor improvements
 
 * When the default Monte-Carlo interval cannot be computed near the variance
-  boundary, the error now **names the interval method that applies to your
-  design** instead of only suggesting a refit. A balanced one-way fit is pointed
-  at the two deterministic closed forms `ci_method = "searle"` and `"burch"` (with
-  a word on what each is good for), and a balanced-complete two-way random
-  absolute-agreement fit at `"mpl"`. Where no such option applies — fixed raters,
-  multilevel, within-cell replicates, consistency, unbalanced one-way data, a
-  `conf_level` or a subject/rater count outside the calibrated set, any missing
-  score, or data so degenerate that the methods for that design would fail on it
-  too — the error says nothing extra rather than suggest a method that would also
-  fail. A method is named only where it would return a usable interval on your data,
-  which is checked per method rather than per design: projecting to a large number of
-  raters can push one of the two closed forms past the point where its projection
-  formula breaks down while the other still works, and only the one that works is
-  named. Only methods
-  with a measured record of returning an interval on such data are named, which for
-  now excludes `"npbootstrap"`: it resamples, so whether it succeeds is a property
-  of the resampling rather than of your design, and it is left out until that can be
-  predicted rather than guessed. The interval methods themselves, and what the
-  default does, are unchanged: this adds guidance to an existing error, and never
-  silently substitutes one method for another.
+  boundary, the error now **names an interval method that works on your data**
+  instead of only suggesting a refit. It does this by running each method your
+  design allows and looking at the interval that comes back: a method is named only
+  when every endpoint it reports is finite, correctly ordered, and inside the
+  coefficient's range. A balanced one-way fit can be pointed at the deterministic
+  closed forms `ci_method = "searle"` and `"burch"` (with a word on what each is
+  good for), and a two-way random absolute-agreement fit at `"mpl"`.
+
+  Because the check runs the method rather than reasoning about your design, it
+  falls silent in every case where the method would not in fact help — fixed
+  raters, multilevel, within-cell replicates, consistency, unbalanced one-way data,
+  a `conf_level` or a subject/rater count outside the calibrated set, any missing
+  score, degenerate data, or a projection to so many raters that a method's
+  projection formula breaks down. The two closed forms are asked separately, so
+  where one breaks down and the other does not, only the one that works is named.
+  `ci_method = "npbootstrap"` is named on no design: it resamples, so a successful
+  run is evidence about that random seed rather than about your data.
+
+  The interval methods themselves, and what the default does, are unchanged. This
+  adds guidance to an existing error and never silently substitutes one method for
+  another: the call still fails, and still returns no interval.
 
 * `ci_method = "npbootstrap"` now also covers **unbalanced one-way** designs
   (unequal ratings per subject) for both `unit = "single"` (ICC(1)) and
