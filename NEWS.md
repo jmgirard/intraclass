@@ -27,13 +27,14 @@
 * When the default Monte-Carlo interval cannot be computed near the variance
   boundary, the error now **names the interval method that applies to your
   design** instead of only suggesting a refit. A balanced one-way fit is pointed
-  at `ci_method = "searle"`, `"burch"` and `"npbootstrap"` (with a word on what
-  each is good for), an unbalanced one-way fit at `"npbootstrap"`, and a
-  balanced-complete two-way random absolute-agreement fit at `"mpl"`. Where no
-  boundary-robust option applies — fixed raters, multilevel, within-cell replicates,
-  consistency, a `conf_level` or a subject/rater count outside the calibrated set,
-  or data so degenerate that every method would fail on it too — the error says
-  nothing extra rather than suggest a method that would also abort. The interval methods
+  at the two deterministic closed forms `ci_method = "searle"` and `"burch"` (with
+  a word on what each is good for), an unbalanced one-way fit with enough subjects
+  at `"npbootstrap"`, and a balanced-complete two-way random absolute-agreement fit
+  at `"mpl"`. Where no boundary-robust option applies — fixed raters, multilevel,
+  within-cell replicates, consistency, a `conf_level` or a subject/rater count
+  outside the calibrated set, a design too small for the bootstrap to resample
+  stably, or data so degenerate that every method would fail on it too — the error
+  says nothing extra rather than suggest a method that would also abort. The interval methods
   themselves, and what the default does, are unchanged: this adds guidance to an
   existing error, and never silently substitutes one method for another.
 

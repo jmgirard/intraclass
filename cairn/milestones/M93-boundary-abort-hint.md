@@ -82,8 +82,9 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 
 | design in hand | hint names |
 |---|---|
-| one-way random, balanced | `"npbootstrap"`, `"searle"`, `"burch"` (D-006/D-010, D-012/D-013) |
-| one-way random, unbalanced | `"npbootstrap"` only — `"searle"`/`"burch"` are balanced-only |
+| one-way random, balanced | `"searle"`, `"burch"` — D-012's 0-abort evidence (0/32,000) covers exactly these two; NOT `"npbootstrap"`, whose resample guard fires below 15 subjects |
+| one-way random, unbalanced, ≥15 subjects | `"npbootstrap"` only, as availability (D-013) |
+| one-way random, unbalanced, <15 subjects | nothing — the resample guard fires (13/13 at 5 subjects, 7/13 at 8, 1/11 at 10, 0 at 12+) |
 | two-way random, agreement, balanced+complete, calibrated `conf_level` **and a geometry on the κ_m grid** | `"mpl"` (D-014/D-015) |
 | exactly-degenerate data (zero within- or between-subject SS one-way; constant scores two-way) | nothing — every method above aborts (F2) |
 | anything else | nothing — generic remedies only |
@@ -127,14 +128,14 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       (zero within-subject variance) that reaches MC site A, where `searle`/`burch`/
       `npbootstrap` all abort. Decide at the implement gate whether AC2/AC3 need a
       gated amendment or the guard alone settles it.
-- [ ] T10 (pass-2 F1, 95): stop the one-way rows naming `npbootstrap` where its
+- [x] T10 (pass-2 F1, 95): stop the one-way rows naming `npbootstrap` where its
       resample-degeneracy guard (`R/ci-npbootstrap.R:178-191`) fires — a subject-count
       gate, or split the balanced bullet so npbootstrap can be dropped while
       `searle`/`burch` are still named. Needs an implement-gate decision on which.
-- [ ] T11 (pass-2 F2, 93): add `npbootstrap_ci()`'s `se_ij_logf == 0` disjunct to
+- [x] T11 (pass-2 F2, 93): add `npbootstrap_ci()`'s `se_ij_logf == 0` disjunct to
       `boundary_data_degenerate()`, and correct the comment + work-log claim that it
       evaluates the shipped guards rather than restating them.
-- [ ] T12 (pass-2 F4, 90): vary the one-way subject count in the AC3 grid so a size
+- [x] T12 (pass-2 F4, 90): vary the one-way subject count in the AC3 grid so a size
       fence is visible to the suite (this gap is why F1 shipped green), and derive the
       grid's hint from the predicates `icc()` computes rather than hand-written `pred`
       lists.
@@ -162,6 +163,9 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: T9 — AC3's grid is now the grid AC3 enumerates: multilevel, within-cell replicates and an off-κ_m-grid two-way design run end-to-end through `icc()` (silent hint + every opt-in method aborting `intraclass_unsupported`), and the accepted half varies the geometry (10x2 and 15x5, both hinting `mpl` and accepted). Mutation-verified: deleting the multilevel/replicate early return reds the new grid row and names it.
 - 2026-07-25: gate green and CI green. Local: `devtools::test()` FAIL 0 / PASS 4367 at `NOT_CRAN=true CI=true`, `devtools::check()` Status OK, `lintr::lint_package()` no lints, `air format --check` clean, `document()` no-diff. PR #100 all 7 jobs pass on 45a4667 — including `ubuntu-latest`, `windows-latest` and `test-coverage`, the three that review pass 1 failed on. Status -> review.
 - 2026-07-25: review pass 2 FAILED the gate — the [O] diff-bug lens found the hint still names a `ci_method` that then aborts, on the ONE-WAY rows: `npbootstrap`'s resample-degeneracy guard fires routinely below ~12 subjects (16/16 hinted-then-aborting at n_s=5), and `boundary_data_degenerate()` omits its `se_ij_logf == 0` disjunct. Reproduced by the lens, the independent scorer, and again at the gate. F1 95 / F2 93 / F4 90 actioned as T10-T12; F3 40 logged. AC3 tick withdrawn; the other six criteria verified this pass and stand. Status -> in-progress; second return from review.
+- 2026-07-25: implement gate (pass 3) — measured where `npbootstrap`'s resample guard actually bites (25 seeds x 24 balanced cells + 16 unbalanced): it fires routinely below 15 subjects and never at 15+, while `searle`/`burch` aborted 0 times in ~320 hinted runs. Decisive finding: D-012's 0-abort line is a SEARLE/Burch result and was never an npbootstrap result, so the shipped "three interval methods" sentence borrowed evidence that does not exist. Gate: split by evidence (deterministic pair carries the strong claim; npbootstrap only where it is the sole option) with a 15-subject floor.
+- 2026-07-25: gated amendment — mapping table split into three one-way rows: balanced names `searle`/`burch` only, unbalanced ≥15 subjects names `npbootstrap` as availability, unbalanced <15 names nothing. AC1-AC7 wording untouched; NEWS updated to match.
+- 2026-07-25: T10/T11/T12 — balanced one-way no longer names the bootstrap at any size; unbalanced is floored at `NPB_HINT_MIN_SUBJECTS` (15); `boundary_data_degenerate()` gained npbootstrap's third disjunct `se_ij_logf == 0` and its comment now says it RESTATES the observed-data guards rather than evaluating them, and says why the resample guard is out of its reach. The AC3 grid gained a message-driven one-way sweep over 8 size cells that parses the method names out of the abort `icc()` really raises, so nothing is hand-derived. Mutation-verified: removing the floor reds 6 assertions and restoring the three-method sentence reds 8, both including the new end-to-end grid.
 
 ## Decisions
 

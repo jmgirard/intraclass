@@ -231,14 +231,38 @@ bh_hint <- function(...) {
   do.call(boundary_method_hint, utils::modifyList(defaults, list(...)))
 }
 
-test_that("balanced one-way is hinted at all three one-way methods (AC2)", {
+test_that("balanced one-way is hinted at the two DETERMINISTIC methods (AC2)", {
   h <- bh_hint(oneway = TRUE, balanced = TRUE)
   expect_length(h, 1L)
   expect_named(h, "i")
-  for (m in c("searle", "burch", "npbootstrap")) {
+  for (m in c("searle", "burch")) {
     expect_match(h[["i"]], m, fixed = TRUE)
   }
   expect_no_match(h[["i"]], "mpl", fixed = TRUE)
+  # npbootstrap is deliberately NOT named here, at any subject count. D-012's 0-abort
+  # evidence is a searle/burch result, and npbootstrap's resample guard fires routinely
+  # below 15 subjects -- the AC3-forbidden shape (M93 pass-2 F1).
+  expect_no_match(h[["i"]], "npbootstrap", fixed = TRUE)
+  for (n in c(5L, 10L, 15L, 30L, 100L)) {
+    expect_no_match(
+      bh_hint(oneway = TRUE, balanced = TRUE, n_s = n)[["i"]],
+      "npbootstrap",
+      fixed = TRUE
+    )
+  }
+})
+
+test_that("the unbalanced npbootstrap hint is floored on subject count (AC3, F1)", {
+  # Below the floor it is silent, at and above it names npbootstrap. The floor is where
+  # the resample guard measurably goes quiet, not a theoretical bound.
+  for (n in c(2L, 5L, 8L, 10L, npb_hint_min_subjects - 1L)) {
+    expect_length(bh_hint(oneway = TRUE, balanced = FALSE, n_s = n), 0L)
+  }
+  for (n in c(npb_hint_min_subjects, 20L, 50L)) {
+    h <- bh_hint(oneway = TRUE, balanced = FALSE, n_s = n)
+    expect_length(h, 1L)
+    expect_match(h[["i"]], "npbootstrap", fixed = TRUE)
+  }
 })
 
 test_that("unbalanced one-way names npbootstrap only, as AVAILABLE not boundary-proof (AC2)", {
@@ -348,9 +372,12 @@ test_that("the hint reaches the real abort for the design in hand (AC2)", {
     is.null(m_ow),
     "no one-way MC abort in the seed sweep (boundary luck)"
   )
-  for (s in c("searle", "burch", "npbootstrap")) {
+  # `bh_oneway()` is a BALANCED 30x5 design, so the hint names the two deterministic
+  # closed forms and deliberately not the bootstrap (M93 pass-2 F1).
+  for (s in c("searle", "burch")) {
     expect_match(m_ow, s, fixed = TRUE)
   }
+  expect_no_match(m_ow, "npbootstrap", fixed = TRUE)
 
   m_tw <- bh_first_abort(bh_twoway)
   skip_if(
@@ -896,4 +923,101 @@ test_that("multilevel, replicate and off-grid designs stay silent, and abort (AC
       )
     }
   }
+})
+
+# ---- T12/AC3: the grid, driven by the REAL message across one-way sizes --------
+# Review pass 2 (F1/F4) showed the grid above cannot see a one-way size fence: it holds
+# the subject count at 20 and computes the hint from hand-written `pred` lists, so a
+# method that aborts only at small n -- and a mis-wiring between icc() and
+# boundary_method_hint() -- both stay invisible. This closes both gaps: nothing here is
+# hand-derived, the method names are parsed out of the abort icc() actually raises, and
+# each one is then run on the SAME data.
+
+# Ordinal 1-3 ratings: ordinary interrater data sitting at the sigma^2 -> 0 boundary,
+# which is where the default MC aborts and small-n bootstrap resamples go degenerate.
+bh_ordinal <- function(n_s, n_k, seed, balanced = TRUE) {
+  set.seed(seed)
+  sizes <- if (balanced) {
+    rep(n_k, n_s)
+  } else {
+    rep(c(n_k, n_k - 1L), length.out = n_s)
+  }
+  data.frame(
+    subject = factor(rep(seq_len(n_s), times = sizes)),
+    rater = factor(sequence(sizes)),
+    score = sample(1:3, sum(sizes), replace = TRUE)
+  )
+}
+
+test_that("across one-way sizes, every method the REAL abort names is accepted (AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  cells <- list(
+    list(n_s = 5L, n_k = 2L, bal = TRUE),
+    list(n_s = 8L, n_k = 3L, bal = TRUE),
+    list(n_s = 10L, n_k = 2L, bal = TRUE),
+    list(n_s = 12L, n_k = 2L, bal = TRUE),
+    list(n_s = 20L, n_k = 3L, bal = TRUE),
+    list(n_s = 5L, n_k = 3L, bal = FALSE),
+    list(n_s = 10L, n_k = 3L, bal = FALSE),
+    list(n_s = 20L, n_k = 3L, bal = FALSE)
+  )
+
+  checked <- 0L
+  for (cell in cells) {
+    for (sd in 1:6) {
+      d <- bh_ordinal(cell$n_s, cell$n_k, sd, balanced = cell$bal)
+      m <- bh_msg_any(d, ci_method = "montecarlo", model = "oneway", seed = 1)
+      if (is.na(m)) {
+        next
+      }
+      # Parse the methods out of the message icc() really produced -- never from a
+      # hand-written predicate list, so a wiring break between icc() and the builder
+      # shows up here.
+      named <- c("npbootstrap", "searle", "burch", "mpl")
+      named <- named[vapply(
+        named,
+        function(x) grepl(paste0("\"", x, "\""), m, fixed = TRUE),
+        logical(1)
+      )]
+      lab <- paste0(
+        if (cell$bal) "balanced " else "unbalanced ",
+        cell$n_s,
+        "x",
+        cell$n_k,
+        " seed ",
+        sd
+      )
+      # A two-way method must never be named on a one-way fit.
+      expect_identical(paste(lab, "mpl named:"), paste(lab, "mpl named:"))
+      expect_false("mpl" %in% named)
+      for (meth in named) {
+        checked <- checked + 1L
+        status <- tryCatch(
+          {
+            suppressWarnings(suppressMessages(
+              icc(
+                d,
+                score,
+                subject,
+                rater,
+                model = "oneway",
+                ci_method = meth,
+                seed = 1
+              )
+            ))
+            "accepted"
+          },
+          error = function(e) paste0("ABORTED ", class(e)[[1]])
+        )
+        expect_identical(
+          paste(lab, "->", meth, ":", status),
+          paste(lab, "->", meth, ": accepted")
+        )
+      }
+    }
+  }
+  # The sweep must actually have exercised something; a silent zero would pass vacuously.
+  expect_gt(checked, 0L)
 })
