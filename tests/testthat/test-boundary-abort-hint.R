@@ -1043,16 +1043,29 @@ bh_smallint <- function(n_s, n_k, seed, balanced = TRUE) {
   )
 }
 
-# One sweep cell: `build(seed)` -> a data frame, `args` -> the icc() arguments that
-# design needs. Returns the cells checked, so a vacuous pass is visible.
+# One sweep cell. Fires the REAL abort, parses the method names out of the message
+# `icc()` actually raised, and asserts the named set is EXACTLY the usable set among
+# the methods this design ADMITS. That is both AC3 halves in one assertion:
+#   named but not usable -> the failure all five review passes kept finding
+#   usable but not named -> over-suppression (pass-3 F2, in the other direction)
+#
+# It follows that a SILENT cell is not vacuous: it asserts that nothing admissible
+# would have worked on that data. This is what makes the previously-empty `unit`
+# cells real rather than cells to delete -- pass-5 F2 measured `unit = 10` and
+# `unit = 20` checking nothing, and under "named == usable" they check the converse.
+#
+# Returns its counts rather than one number, because a cell whose default never
+# aborted asserted NOTHING and the caller has to be able to see that.
 bh_sweep_cell <- function(
   lab,
   build,
   args,
+  candidates,
   seeds = 1:6,
   forbid = character(0)
 ) {
-  checked <- 0L
+  aborts <- 0L
+  named_total <- 0L
   for (sd in seeds) {
     d <- build(sd)
     m <- do.call(
@@ -1062,31 +1075,38 @@ bh_sweep_cell <- function(
     if (is.na(m)) {
       next
     }
+    aborts <- aborts + 1L
     named <- bh_msg_methods(m)
     tag <- paste(lab, "seed", sd)
-    # Methods this design must never be offered (e.g. a two-way method on a one-way
-    # fit), asserted on the parsed names rather than on the predicate list.
+    # Nothing outside this design's admissible set may EVER be named, whatever the
+    # data says -- `icc()` would refuse the string (AC4).
+    expect_identical(
+      paste(
+        tag,
+        "outside admissible:",
+        paste(setdiff(named, candidates), collapse = "+")
+      ),
+      paste(tag, "outside admissible:", "")
+    )
     for (bad in forbid) {
       expect_identical(
         paste(tag, bad, "named:", bad %in% named),
         paste(tag, bad, "named:", FALSE)
       )
     }
-    for (meth in named) {
-      checked <- checked + 1L
-      # `bh_usable()`, never a bare error check: the method must come back with a
-      # finite, correctly ordered interval on every estimand it reports.
-      status <- if (bh_usable(d, meth, args)) "usable" else "NOT usable"
-      expect_identical(
-        paste(tag, "->", meth, ":", status),
-        paste(tag, "->", meth, ": usable")
-      )
-    }
+    # `bh_usable()`, never a bare error check: the method must come back with an
+    # interval that is finite, correctly ordered AND in support on every estimand.
+    usable <- Filter(function(x) bh_usable(d, x, args), candidates)
+    expect_identical(
+      paste(tag, "named:", paste(sort(named), collapse = "+")),
+      paste(tag, "named:", paste(sort(usable), collapse = "+"))
+    )
+    named_total <- named_total + length(named)
   }
-  checked
+  list(aborts = aborts, named = named_total)
 }
 
-test_that("every method the REAL abort names is accepted, across one-way sizes (AC3)", {
+test_that("the names the REAL abort gives are exactly the usable set, one-way (AC3)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
@@ -1101,118 +1121,157 @@ test_that("every method the REAL abort names is accepted, across one-way sizes (
     list(n_s = 20L, n_k = 3L, bal = FALSE)
   )
 
-  checked <- 0L
+  named_total <- 0L
   for (cell in cells) {
-    checked <- checked +
-      bh_sweep_cell(
-        lab = paste0(
-          if (cell$bal) "balanced " else "unbalanced ",
-          cell$n_s,
-          "x",
-          cell$n_k
-        ),
-        build = function(sd) {
-          bh_smallint(cell$n_s, cell$n_k, sd, balanced = cell$bal)
-        },
-        args = list(model = "oneway"),
-        # A two-way method must never be named on a one-way fit; and the bootstrap
-        # is named on no design at all until M97 lands its stability predicate.
-        forbid = c("mpl", "npbootstrap")
-      )
+    lab <- paste0(
+      if (cell$bal) "balanced " else "unbalanced ",
+      cell$n_s,
+      "x",
+      cell$n_k
+    )
+    r <- bh_sweep_cell(
+      lab = lab,
+      build = function(sd) {
+        bh_smallint(cell$n_s, cell$n_k, sd, balanced = cell$bal)
+      },
+      args = list(model = "oneway"),
+      # Unbalanced admits NOTHING: searle/burch are balanced-only (D-013) and the
+      # bootstrap that ships that cell is named on no design until M97.
+      candidates = if (cell$bal) c("searle", "burch") else character(0),
+      forbid = c("mpl", "npbootstrap")
+    )
+    # Every DECLARED cell must have fired the abort at least once. Without this a
+    # cell that never aborts contributes nothing while reading as covered.
+    expect_identical(
+      paste(lab, "aborted:", r$aborts > 0L),
+      paste(lab, "aborted:", TRUE)
+    )
+    named_total <- named_total + r$named
   }
-  # The sweep must actually have exercised something; a silent zero passes vacuously.
-  expect_gt(checked, 0L)
+  # ...and somewhere in the sweep a method must actually have been NAMED, or
+  # "named == usable" would hold everywhere by universal silence.
+  expect_gt(named_total, 0L)
 })
 
-test_that("every method the REAL abort names is accepted, two-way and degenerate (AC3)", {
+test_that("the names the REAL abort gives are exactly the usable set, two-way (AC3)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
   s_nodes <- sort(unique(kappa_m_table$n_s))
-  checked <- 0L
+  named_total <- 0L
 
-  # Two-way random: on the kappa_m grid at two geometries, off it below the grid's
-  # smallest subject count, with `type` both unset and supplied.
-  # Non-vacuity, pinned on a cell that must NAME something: this sweep asserts
-  # "named => usable", under which total silence passes for free, so at least one
-  # cell has to be shown firing (the pass-3 lesson, kept after the SSA = 0 cell that
-  # used to carry it went correctly silent).
-  live <- bh_sweep_cell(
-    lab = "two-way 20x3 on-grid (non-vacuity)",
-    build = function(sd) bh_twoway(n_s = 20L, seed = sd),
-    args = list(),
-    forbid = c("searle", "burch", "npbootstrap")
-  )
-  expect_gt(live, 0L)
-  checked <- checked + live
-
-  for (cell in list(
-    list(lab = "two-way 10x3 on-grid", n_s = 10L, args = list()),
-    list(
-      lab = "two-way 20x3 type supplied",
-      n_s = 20L,
-      args = list(type = "agreement")
-    ),
-    list(
-      lab = "two-way off-grid",
-      n_s = min(s_nodes) - 2L,
-      args = list()
+  run <- function(lab, build, args, candidates, seeds = 1:6) {
+    r <- bh_sweep_cell(
+      lab = lab,
+      build = build,
+      args = args,
+      candidates = candidates,
+      seeds = seeds,
+      forbid = setdiff(c("searle", "burch", "mpl", "npbootstrap"), candidates)
     )
-  )) {
-    checked <- checked +
-      bh_sweep_cell(
-        lab = cell$lab,
-        build = function(sd) bh_twoway(n_s = cell$n_s, seed = sd),
-        args = cell$args,
-        forbid = c("searle", "burch", "npbootstrap")
-      )
+    expect_identical(
+      paste(lab, "aborted:", r$aborts > 0L),
+      paste(lab, "aborted:", TRUE)
+    )
+    r$named
   }
 
-  # Designs with no opt-in at all: the abort must name nothing, so `forbid` covers
-  # every method and the accepted loop has nothing to run.
-  checked <- checked +
-    bh_sweep_cell(
-      lab = "fixed raters",
-      build = function(sd) bh_twoway(seed = sd),
-      args = list(raters = "fixed"),
-      forbid = c("mpl", "searle", "burch", "npbootstrap")
+  # Two-way random: on the kappa_m grid at two geometries, off it below the grid's
+  # smallest subject count, with `type` unset and supplied.
+  named_total <- named_total +
+    run(
+      "two-way 20x3 on-grid",
+      function(sd) bh_twoway(n_s = 20L, seed = sd),
+      list(),
+      "mpl"
+    )
+  named_total <- named_total +
+    run(
+      "two-way 10x3 on-grid",
+      function(sd) bh_twoway(n_s = 10L, seed = sd),
+      list(),
+      "mpl"
+    )
+  named_total <- named_total +
+    run(
+      "two-way 20x3 type supplied",
+      function(sd) bh_twoway(n_s = 20L, seed = sd),
+      list(type = "agreement"),
+      "mpl"
+    )
+  # OFF the grid mpl is still ADMISSIBLE (icc() accepts the string on this design);
+  # it is the lookup's own abort that makes it unusable, so the converse half is what
+  # carries this cell. That is the pass-1 F1 mechanism, now checked rather than fenced.
+  named_total <- named_total +
+    run(
+      "two-way off-grid",
+      function(sd) bh_twoway(n_s = min(s_nodes) - 2L, seed = sd),
+      list(),
+      "mpl"
+    )
+  # An uncalibrated conf_level, likewise settled by the lookup rather than by a rule.
+  named_total <- named_total +
+    run(
+      "two-way uncalibrated conf_level",
+      function(sd) bh_twoway(n_s = 20L, seed = sd),
+      list(conf_level = 0.975),
+      "mpl"
     )
 
-  # Degenerate data, all three shapes: every one is silent now, each for its own
-  # reason (MSE = 0 breaks the shipped guard, MSA = 0 leaves burch at NaN, constant
-  # two-way data kills mpl's optim), so `forbid` covers every method.
-  checked <- checked +
-    bh_sweep_cell(
-      lab = "one-way SSA = 0",
-      build = function(sd) bh_degen_between(),
-      args = list(model = "oneway"),
-      seeds = 1L,
-      forbid = c("mpl", "searle", "burch", "npbootstrap")
+  # Designs that admit nothing at all: the abort must name nothing, and `candidates`
+  # being empty makes "named == usable" say exactly that.
+  named_total <- named_total +
+    run(
+      "fixed raters",
+      function(sd) bh_twoway(seed = sd),
+      list(raters = "fixed"),
+      character(0)
     )
-  checked <- checked +
-    bh_sweep_cell(
-      lab = "one-way MSE = 0",
-      build = function(sd) bh_degen_within(),
-      args = list(model = "oneway"),
-      seeds = 1L,
-      forbid = c("mpl", "searle", "burch", "npbootstrap")
-    )
-  checked <- checked +
-    bh_sweep_cell(
-      lab = "two-way constant",
-      build = function(sd) bh_degen_flat(),
-      args = list(),
-      seeds = 1L,
-      forbid = c("mpl", "searle", "burch", "npbootstrap")
+  named_total <- named_total +
+    run(
+      "explicit consistency",
+      function(sd) bh_twoway(seed = sd),
+      list(type = "consistency"),
+      character(0)
     )
 
-  expect_gt(checked, 0L)
+  # Degenerate data, all three shapes. Each is silent for its OWN reason (MSE = 0
+  # trips the shipped guard, SSA = 0 leaves burch at NaN and searle's ICC(k) at -Inf,
+  # constant two-way data kills mpl's optim) -- and the converse half is what states
+  # that, rather than a `forbid` list asserting silence by fiat.
+  named_total <- named_total +
+    run(
+      "one-way SSA = 0",
+      function(sd) bh_degen_between(),
+      list(model = "oneway"),
+      c("searle", "burch"),
+      seeds = 1L
+    )
+  named_total <- named_total +
+    run(
+      "one-way MSE = 0",
+      function(sd) bh_degen_within(),
+      list(model = "oneway"),
+      c("searle", "burch"),
+      seeds = 1L
+    )
+  named_total <- named_total +
+    run(
+      "two-way constant",
+      function(sd) bh_degen_flat(),
+      list(),
+      "mpl",
+      seeds = 1L
+    )
+
+  # The two-way half must be shown FIRING, not merely consistent.
+  expect_gt(named_total, 0L)
 })
 
-# ---- AC3: the four shapes review pass 4 came through -------------------------
-# None of these existed in any earlier sweep. Two of the four pass-4 findings were
-# reachable only through a missing score, and one only through a numeric `unit`; the
-# grid varied designs but never the data's completeness or the requested divisor.
+# ---- AC3: the shapes the review passes came through --------------------------
+# None of these existed in any earlier sweep. Two pass-4 findings were reachable only
+# through a missing score and one only through a numeric `unit`; the grid varied
+# designs but never the data's completeness or the requested divisor.
 
 test_that("a missing score silences every row, and never breaks the abort (AC2/AC3)", {
   skip_if_not_installed("glmmTMB")
@@ -1230,21 +1289,29 @@ test_that("a missing score silences every row, and never breaks the abort (AC2/A
     d$score[4] <- NA
     d
   }
-  bh_sweep_cell(
+  r_ow <- bh_sweep_cell(
     lab = "one-way + NA score",
     build = na_ow,
     args = list(model = "oneway"),
-    forbid = c("searle", "burch", "mpl", "npbootstrap")
+    candidates = c("searle", "burch"),
+    forbid = c("mpl", "npbootstrap")
   )
-  bh_sweep_cell(
+  r_tw <- bh_sweep_cell(
     lab = "two-way + NA score",
     build = na_tw,
     args = list(),
-    forbid = c("searle", "burch", "mpl", "npbootstrap")
+    candidates = "mpl",
+    forbid = c("searle", "burch", "npbootstrap")
   )
+  expect_gt(r_ow$aborts, 0L)
+  expect_gt(r_tw$aborts, 0L)
+  # Silence here is an assertion, not an absence: the converse half above has already
+  # confirmed no admissible method was usable on that data.
+  expect_identical(r_ow$named, 0L)
+  expect_identical(r_tw$named, 0L)
 
-  # AC2's never-raise clause, which is the sharper half: building the hint must not
-  # turn the boundary abort into a DIFFERENT error. Pass 4 replaced it with
+  # AC2's never-raise clause, the sharper half: building the hint must not turn the
+  # boundary abort into a DIFFERENT error. Pass 4 replaced it with
   # `intraclass_unidentified` from a bootstrap the caller never asked for.
   seen <- character(0)
   for (sd in 1:8) {
@@ -1274,25 +1341,36 @@ test_that("a missing score silences every row, and never breaks the abort (AC2/A
   expect_setequal(unique(seen), "intraclass_singular_fit")
 })
 
-test_that("a numeric unit splits the pair at its own Spearman-Brown pole (AC3)", {
+test_that("a numeric unit splits the pair at its own projection pole (AC3)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
-  # The projection `npb_sb(rho, m)` has a pole at `rho = -1/(m-1)`; a lower endpoint
-  # below it comes back above +1 and the interval reverses. The two methods cross at
-  # different m on the same data, so this is asserted per method, not per design.
+  # The projection `npb_sb(rho, m)` has a pole at `rho = -1/(m-1)`; past it the
+  # interval comes back reversed or entirely above +1. The two methods cross at
+  # different m on the same data, so naming is per method -- and no rule in the code
+  # says so any more, it falls out of running each one.
+  #
+  # Pass-5 F2 measured two of these cells checking nothing under the old
+  # "named => usable" predicate. Under "named == usable" a silent cell asserts the
+  # converse, so every cell carries an assertion and the tautological
+  # `expect_gte(checked, 0L)` that used to sit here is gone.
   for (m in c(2, 3, 6, 10, 20)) {
-    checked <- bh_sweep_cell(
-      lab = paste("one-way unit =", m),
+    lab <- paste("one-way unit =", m)
+    r <- bh_sweep_cell(
+      lab = lab,
       build = function(sd) bh_smallint(20L, 3L, sd),
       args = list(model = "oneway", unit = m),
+      candidates = c("searle", "burch"),
       forbid = c("mpl", "npbootstrap")
     )
-    expect_gte(checked, 0L)
+    expect_identical(
+      paste(lab, "aborted:", r$aborts > 0L),
+      paste(lab, "aborted:", TRUE)
+    )
   }
 
-  # ...and the split is real rather than an all-or-nothing fence: on one dataset there
-  # is an m where burch is still offered and searle is not.
+  # ...and the split is real rather than all-or-nothing: on one dataset there is an m
+  # where burch is still offered and searle is not.
   d <- bh_smallint(20L, 3L, 1L)
   split_seen <- FALSE
   for (m in c(5, 6, 8)) {
@@ -1310,7 +1388,6 @@ test_that("a numeric unit splits the pair at its own Spearman-Brown pole (AC3)",
     if (identical(named, "burch")) {
       split_seen <- TRUE
     }
-    # Whatever is named must be usable at that unit.
     for (meth in named) {
       expect_identical(
         paste(
