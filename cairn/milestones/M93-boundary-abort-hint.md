@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -60,7 +60,7 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
       test drives the hint over inputs that make each probe fail and asserts the abort
       keeps class `intraclass_singular_fit`. No design names `"npbootstrap"` (→ M97);
       `R/ci-bootstrap.R:48` excluded on T1 evidence.
-- [x] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
+- [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
       from hand-written expectations — trigger the real `icc()` abort, parse the method
       names out of the message that fired, run each on that same data, and require a
       USABLE interval: finite and `conf.low <= conf.high` on every estimand returned.
@@ -186,6 +186,8 @@ ordered and finite, and D-010 gives the averaged form the support `(-∞, 1]`.
 - 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0), `devtools::test()` FAIL 0 / PASS 4613 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in `git diff --name-only main..HEAD`, so no message snapshot moved. `check-reference-observations.py` 0 falsified and the M74 claim enumerator in sync.
 
 - 2026-07-26: PR #100 all 9 checks green on `dca709a` — `ubuntu-latest (release)`, `windows-latest (release)`, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 5.
+
+- 2026-07-26: review pass 5 FAILED the gate — a fifth mechanism, on an axis no pass had varied. F1 (92): `boundary_sb_safe()` validates only the LOWER endpoint, so at exactly 2 subjects with `conf_level` at or past `1 - 2e-8` the hint names `searle`, whose upper endpoint is `NaN` (reproduced here; no violation at 3+ subjects down to `1 - 1e-12`). F2 (88): `expect_gte(checked, 0L)` is a tautology and two of five `unit` sweep cells check nothing — mine, from T5. F3 (20) logged. AC3 tick withdrawn; AC1, AC2, AC4-AC7 stand. Two lenses clean, and the [O] lens ruled out ~1,100 other cells including every axis pass 4 exposed. FIFTH return from review, which is the promotion condition the 2026-07-26 gate recorded verbatim on the verify-instead-of-predict candidate. Status -> in-progress.
 
 ## Decisions
 
@@ -715,3 +717,72 @@ entry present and rewritten this pass · no new top-level file in the diff, so n
 `check-references` CI job's two gates locally (`check-reference-observations.py` 0
 falsified, the M74 claim enumerator in sync). No `DESIGN.md` principle changed, so
 `cairn_impact` does not apply.
+
+**Independent review — 3 lenses.** [S] blame-history: 0 findings (independently
+reproduced the SSA = 0 values, judged the re-suppression a correction rather than a
+revert, confirmed the blanket `tryCatch` is what AC2 now demands, verified the `complete`
+gate silences nothing a method could serve — every named-able method already aborts on
+an NA score — and traced D-012's fence as approached but not crossed: the endpoints feed
+a boolean and never reach the message or a returned object). [S] prior-review: 0 findings
+(GitHub inline-comment probe returned `[]`; every actioned finding from passes 1-4
+verified still closed, the three below-threshold ones not worsened, and the pass-3/pass-4
+oscillation adjudicated as corrected because the test now checks VALUES rather than
+repeating the unverified "they return intervals" claim). [O] diff-bug: 3 findings, all
+reproduced by an independent [S] scorer that did not generate them.
+
+**GATE FAILURE — returned to `in-progress` (review pass 5).** A fifth mechanism, on an
+axis no earlier pass varied: the confidence level's upper tail at the minimum legal
+subject count.
+
+- **F1 (92) — the per-method verdict validates ONE of the two endpoints.**
+  `R/boundary-hint.R:99-108` and `:129`/`:142`. `boundary_classical_sb_ok()` extracts
+  each method's ICC(1) `[["lower"]]` only; nothing anywhere inspects `[["upper"]]`, while
+  AC3's predicate is stated over every reported endpoint. `searle_endpoints()` computes
+  `g_hi <- f / qf(alpha/2, df1, df2)`; with `df1 = n_s - 1`, at 2 subjects `df1 = 1` and
+  `qf` underflows to exactly 0 once `alpha/2 <~ 1e-8`, so `g_hi` is `Inf` and the ICC is
+  `NaN`. Reproduced at this gate: 2 subjects x 4 raters, balanced, complete,
+  `conf_level = 1 - 2e-8` — the default aborts, the message names BOTH methods, and
+  `searle` returns ICC(1) `[-0.333, NaN]` and ICC(k) `[-72985, NaN]`. My reachability
+  map: violations at `n_s = 2` for every `conf_level` at or past `1 - 2e-8`, and none at
+  `n_s` in {3, 4, 5, 10} down to `1 - 1e-12` — `icc()`'s validator accepts any level in
+  `(0, 1)`, so the input is legal. It also falsifies the `NEWS.md` sentence written this
+  pass ("named only where it would return a usable interval on your data, which is
+  checked per method"), which becomes true again only once F1 is fixed.
+- **F2 (88) — a tautological assertion, and two vacuous sweep cells.**
+  `tests/testthat/test-boundary-abort-hint.R:1242`: `expect_gte(checked, 0L)` where
+  `checked` counts up from `0L`, so it can never fail. Measured by replaying the cell
+  builder: `unit = 2` checks 8 methods, `unit = 3` 8, `unit = 6` 4, `unit = 10` **0**,
+  `unit = 20` **0** — two of the five declared cells assert nothing about naming, and the
+  pin cannot say so. Mine, from T5, and the same defect class as pass-3 F4 and pass-4 F4.
+  The adjacent `split_seen` assertion is real, so the test is not wholly vacuous.
+- **F3 (20) — below threshold, logged not actioned.** AC3's finite-and-ordered predicate
+  admits an interval lying entirely above +1 (100 subjects x 3, `unit = 15`, searle gives
+  `ICC(15) = [1.250, 1.250]`), so the criterion's literal wording is an incomplete
+  characterization of "usable". The scorer confirmed the shipped code is correct there —
+  that case is caught upstream by the MSA = 0 gate, and monotonicity means a
+  lower-endpoint pole test always suppresses when the upper is also past the pole — so no
+  code or test change is indicated. Worth knowing when AC3 is next reworded.
+
+**AC3 tick withdrawn**; AC1, AC2, AC4, AC5, AC6 and AC7 were verified this pass and
+stand. AC6 is met as written — the entry names the methods and the silent designs — but
+its "checked per method" sentence is the claim F1 falsifies, so it is re-verified when F1
+lands.
+
+**What the [O] lens ruled out**, so the next pass need not re-tread it: ~1,100 aborting
+cells / ~1,600 hinted runs, message-driven, zero other violations — across binary,
+Likert, log-normal, t(3), rounded, 1e3- and 1e-3-scaled scores and a single 1e6 outlier;
+exact-additive, rater-only, subject-only, constant-rater, constant-subject, all-constant
+and `Inf` data; `NA` in the subject/rater LABEL columns as well as in `score`; `n_s`
+2-120 x `n_r` 2-12 on and off both κ_m grid edges; three imbalance shapes; replicates and
+multilevel; all four engines; and 600 seeded cells comparing the hint live against
+`boundary_method_hint()` neutered, with 0 differing error classes — the pass-4 F2 shape
+is closed. `mpl` took 4,000 boundary datasets with 0 non-finite or reversed intervals.
+
+**Thrash rule, and what the evidence now says.** This is the FIFTH return from review.
+The 2026-07-26 plan gate declined verification for M93 in favour of patching, and
+recorded the condition for revisiting verbatim on the ROADMAP candidate: "Promote if a
+fifth mechanism appears." One has — and F1 is a textbook instance of the class, a
+predictor deriving a TWO-endpoint property from ONE endpoint. Verification would have
+caught it without anyone anticipating the axis, because it inspects the interval the user
+would actually get. The disposition is the maintainer's; the evidence for it is no longer
+an argument from principle.
