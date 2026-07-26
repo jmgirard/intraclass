@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -130,7 +130,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       silent). Mutation: a wrong call-site `n0` must red it.
 - [x] T8 (AC5's second clause): assert no interval computed during verification reaches
       the message text or any returned object.
-- [ ] T9 (pass-7 F1, 91): T8's detector matches ~4 significant digits, so a leak
+- [x] T9 (pass-7 F1, 91): T8's detector matches ~4 significant digits, so a leak
       rendered ROUNDED — this package's house style for a number in a cli message,
       including the abort the hint attaches to — passes it. Replace the endpoint-grep
       with an enumeration of the numeric tokens the message contains, asserting the set
@@ -218,6 +218,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: review pass 7 FAILED the gate — AC5, on evidence again. An [O] lens on the four new test blocks ran seven mutations, found three of them sound, and caught F1 (91): T8's leak detector matches ~4 significant digits, so a leak rendered `round(lo, 3)` — the package's own house style for a number in a cli message, used by the very abort the hint attaches to — passes at FAIL 0, while full precision reds. Reproduced independently here. AC5 tick withdrawn, T9 added; AC1-AC4, AC6, AC7 stand. Shipped code unchanged and still clean across the ~33,000-cell behaviour sweep. Status -> in-progress; seventh return, third consecutive one on evidence quality rather than behaviour.
 
 - 2026-07-26: adding T9 took the plan-owned body to 153/149; Tasks was the heaviest trimmable section, so it was compressed in a single rewrite (T1-T5 to one line each — their detail is in this log) rather than nibbled. Now 141/149. The over-cap commit was pushed before the check ran; this is the fix, not a second attempt.
+- 2026-07-26: T9 — the AC5 leak detector no longer greps for endpoint digits; it ENUMERATES every numeric token in the rendered abort and asserts the set is exactly the legitimate one (site B's `<int>%` share, or nothing at site A — the remedies and hint bullets are digit-free), so a leak at any precision is a token that does not belong and no rendering can evade it. In-test positive controls append each real endpoint at full precision, `round(v, 3)` and `signif(v, 3)` and require the enumeration to see each one, so the negative assertion cannot pass by blindness — which is how its predecessor passed. Mutation-verified on the SHIPPED message, both renderings: leaking `round(conf.low, 3)` into the one-way bullet reds it (2 tokens vs 1), and so does `format(., digits = 15)`.
+- 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, 2m27s), `devtools::test()` FAIL 0 / PASS 4910 / SKIP 23 at `NOT_CRAN=true CI=true` (the 2 WARN are the pre-existing expected-warning tests in `test-vignette-claims.R`), `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. Only `tests/testthat/test-boundary-abort-hint.R` changed this pass, so no `_snaps/` path moved and no snapshot was accepted. Status -> review.
 
 ## Decisions
 

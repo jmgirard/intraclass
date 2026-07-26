@@ -1934,7 +1934,9 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   }
   skip_if(is.na(msg), "no one-way MC abort in the seed sweep (boundary luck)")
 
-  # The endpoints the two candidates really return on this data...
+  # The endpoints the two candidates really return on this data. They are computed
+  # only to drive the positive controls at the end; the assertion itself never looks
+  # for their values.
   ests <- lapply(list("single", "average"), function(u) {
     icc_estimand(unit = u, k_eff = 5, oneway = TRUE)
   })
@@ -1948,20 +1950,48 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   expect_gt(length(ends), 0L)
   expect_true(all(is.finite(ends)))
 
-  # ...none of which may appear in what the user is shown. Matched on the leading
-  # significant digits, so a reformatted or rounded leak is caught too.
-  for (v in ends) {
-    digits <- substr(format(abs(v), digits = 6, scientific = FALSE), 1, 6)
-    expect_identical(
-      paste(
-        "endpoint",
-        digits,
-        "in message:",
-        grepl(digits, msg, fixed = TRUE)
-      ),
-      paste("endpoint", digits, "in message:", FALSE)
-    )
+  # ENUMERATE the numbers the user is shown, rather than grepping for the endpoint
+  # values. A grep only catches a leak rendered at the precision it greps for:
+  # pass-7 F1 showed a leak printed `round(lo, 3)` -- this package's house style for
+  # a number in a cli message, used by the very abort the hint attaches to --
+  # slipping past a ~4-significant-digit match. Listing every numeric token in the
+  # message and requiring the set to be EXACTLY the legitimate one has no precision
+  # to evade: any leaked number, at any rendering, is a token that does not belong.
+  num_tokens <- function(text) {
+    regmatches(
+      text,
+      gregexpr("[0-9]+(?:[.][0-9]+)?(?:[eE][-+]?[0-9]+)?", text, perl = TRUE)
+    )[[1]]
   }
-  # The message must still be the real one, or the loop above passes vacuously.
+  tokens <- num_tokens(msg)
+
+  # The legitimate set, enumerated per abort site: site B reports the share of
+  # non-finite draws and nothing else, site A carries no number at all. Neither the
+  # generic remedies nor the hint bullets contain a digit (`ci_method`, `searle`,
+  # `burch`, `glmmTMB` are all digit-free), so the legitimate set is that small.
+  site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
+  expect_true(
+    site_b || grepl("parameter covariance is not finite", msg, fixed = TRUE)
+  )
+  if (site_b) {
+    expect_identical(length(tokens), 1L)
+    # ...and that one token is the share, not a number that merely counted right.
+    expect_true(grepl(paste0(tokens[[1]], "% of draws"), msg, fixed = TRUE))
+  } else {
+    expect_identical(length(tokens), 0L)
+  }
+
+  # Positive controls: the enumeration must SEE a leaked endpoint at every rendering
+  # a leak could plausibly take -- full precision, `round(v, 3)` and `signif(v, 3)`
+  # -- so the assertion above cannot pass by being blind, which is exactly how its
+  # predecessor passed.
+  for (v in ends) {
+    for (rendered in c(format(v), format(round(v, 3)), format(signif(v, 3)))) {
+      leaked <- paste0(msg, " i ", rendered)
+      expect_gt(length(num_tokens(leaked)), length(tokens))
+    }
+  }
+
+  # The message must still be the real one, or everything above reads a stub.
   expect_match(msg, "could not be computed", fixed = TRUE)
 })
