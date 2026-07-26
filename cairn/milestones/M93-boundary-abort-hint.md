@@ -41,11 +41,11 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
 
 ## Acceptance criteria
 
-- [ ] AC1: a committed reproduction test builds a near-zero-variance dataset on which
+- [x] AC1: a committed reproduction test builds a near-zero-variance dataset on which
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [ ] AC2: `icc()` derives the hint from the fence predicates, the observed
+- [x] AC2: `icc()` derives the hint from the fence predicates, the observed
       subject/rater counts and a per-row degeneracy check, and passes it to the two
       reachable Monte-Carlo aborts (`R/ci-montecarlo.R:43`, `:124`); the abort class,
       leading message and existing generic remedies are unchanged — the hint is
@@ -54,7 +54,7 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
       zero total variance for `mpl`), so a row falls silent only where its own methods
       abort. No design names `"npbootstrap"` (→ M97); `R/ci-bootstrap.R:48` excluded on
       T1 evidence.
-- [ ] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
+- [x] AC3 (GP7): a committed sweep asserts the central property from the MESSAGE, not
       from hand-written expectations — over a design grid, trigger the real `icc()`
       abort, parse the method names out of the message that fired, run each on that
       same data, and require that none aborts. Grid: one-way balanced at several
@@ -63,16 +63,16 @@ aborts, which no interval method fixes · any new `ci_method` or a widened fence
       (unbalanced one-way, two-way consistency, fixed raters, multilevel, replicates,
       uncalibrated `conf_level`) end-to-end through `icc()`, with a converse half
       asserting every opt-in method really does abort there.
-- [ ] AC4: designs with no applicable opt-in receive NO method hint; a test pins the
+- [x] AC4: designs with no applicable opt-in receive NO method hint; a test pins the
       message to its generic remedies alone (a blanket "try mpl" is wrong off two-way
       random agreement).
-- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, so nothing here
       implements the D-012-fenced fallback default.
-- [ ] AC6: the change is documented where users meet it — a `NEWS.md` entry naming the
+- [x] AC6: the change is documented where users meet it — a `NEWS.md` entry naming the
       methods the hint can name and the designs it stays silent on, and the
       `@param ci_method` boundary-robustness note.
-- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; any changed message
       snapshot reviewed deliberately via `testthat::snapshot_review()`, never accepted
       blind; PR #100 green on every job.
@@ -460,3 +460,87 @@ subject count and over-suppression (pass 3).
 another retry — M93 is mis-cut. The evidence points at the split: ship the two-way/`mpl`
 half, and re-plan the one-way half around a predicate for "will the bootstrap resample
 stably", which is the question that has defeated three attempts.
+
+---
+
+## Review pass 4 (2026-07-25) — the re-cut
+
+**Branch state.** `main` 0/0 with `origin/main`; branch 27 ahead / 0 behind, so no
+merge was needed before gathering evidence. PR #100, head `1064b18`.
+
+**Fresh per-criterion evidence.** All from commands run this phase. The M93 file runs
+**302 assertions, FAIL 0, SKIP 0** at `NOT_CRAN=true CI=true` (17.2 s) — the zero skip
+count matters, because several tests carry a `skip_if()` on boundary luck and a skipped
+one would pass vacuously; none fired.
+- AC1 — `:98` builds the near-σ²→0 datasets over 12 seeds each and asserts the DEFAULT
+  MC path aborts on both one-way and two-way, that every abort reached is a Monte-Carlo
+  site (A or B) and never the bootstrap site, and that site B occurs. The site
+  enumeration AC1 asks the work log to record is there (T1 line, 2026-07-25): `:124`
+  21/40 two-way + 19/40 one-way, `:43` 1/40, `R/ci-bootstrap.R:48` 0/90. The re-cut did
+  not touch this reproduction or its finding.
+- AC2 — observed directly this phase, not only through the suite: on a balanced 20×3
+  one-way abort the message reads `The Monte-Carlo interval could not be computed: 47%
+  of draws were non-finite` with BOTH pre-existing remedies intact (`A variance
+  component overflowed…`, `Refit with engine = "glmmTMB" or inspect the model`) and the
+  hint appended as a further `i` bullet; the two-way abort carries the `mpl` bullet
+  instead; the same two-way data with `raters = "fixed"` aborts with the two generic
+  remedies and NOTHING added, which is what makes additivity testable rather than
+  asserted. Class `intraclass_singular_fit` throughout. Pinned at `:334` (right hint per
+  design), `:363` (additive), `:417` (`hint` defaulted on all four helpers and `rmvn()`'s
+  argument order held, so `engine-lavaan.R`'s positional calls stay safe). The per-row
+  degeneracy clause is evidenced at `:700`, which asserts the flag agrees with
+  `classical_guard_observed()`'s OWN verdict case by case rather than with a copy of its
+  condition. `"npbootstrap"` appears in no hint on any design: `:254` sweeps six subject
+  counts on unbalanced one-way and `:233` five on balanced, all silent about it.
+- AC3 — I ran my own sweep, written from the criterion rather than from the test file:
+  for every design where the DEFAULT aborts, parse the method names out of the real
+  message and run each on the same data. **153 aborts, 183 method-names, 0 violations.**
+  Cells: one-way balanced at 8 subject counts × 3 rater counts × 4 seeds × 2 data kinds;
+  one-way unbalanced at 4 subject counts × 3 imbalance SHAPES including the double-code
+  shape (most subjects rated once, a few doubled) that defeated pass 3 at every count
+  15–60; two-way at 8 subject counts × 5 rater counts, on and off the κ_m grid;
+  `conf_level` ∈ {0.80, 0.90, 0.95, 0.975, 0.99}; `type` supplied and unset; fixed
+  raters; numeric and string `unit`; and all three degenerate shapes. The committed
+  sweep asserting the same property is at `:1054` (one-way sizes) and `:1092` (two-way,
+  no-opt-in and degenerate), both driving off `bh_sweep_cell()`, which parses the names
+  out of the abort `icc()` really raises. Enumerated designs covered end to end
+  elsewhere in the file: multilevel and within-cell replicates at `:905`, geometry
+  varied on the grid at `:880` and off it at `:630`, degenerate data at `:750`.
+- AC4 — no-opt-in designs pinned at `:277` (fixed raters, multilevel, replicates,
+  explicit consistency, unbalanced two-way, unbalanced one-way) and `:298` (the level
+  set read from `kappa_m_table`, so it tracks a recalibration rather than pinning
+  today's literals). `:363` is what makes "generic remedies alone" testable: the
+  fixed-rater abort keeps both pre-existing remedies and gains no method name, which I
+  also observed directly above.
+- AC5 — `:388` confirms the boundary case still raises `intraclass_singular_fit`, is an
+  `rlang_error` and not an `icc` object, so no interval is returned and the D-012-fenced
+  fallback-on-abort default is not implemented. The test did not skip (SKIP 0 above), so
+  its assertions actually ran.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, rewritten
+  this milestone to the narrowed surface: it names `searle`/`burch` and `mpl`, lists the
+  designs that get nothing (now including unbalanced one-way), and states in the user's
+  own terms why the bootstrap is excluded — whether it succeeds is a property of the
+  resampling rather than of their design. `@param ci_method` carries the matching
+  pointer and says the abort never names `"npbootstrap"`; `man/icc.Rd` is regenerated in
+  the diff.
+- AC7 — all run this phase on the final tree: `devtools::check(env_vars = c(NOT_CRAN =
+  "false"))` **Status: OK** (0 errors / 0 warnings / 0 notes; its `checking tests` step
+  ran the suite in 134s), full suite FAIL 0 / PASS 4515 / SKIP 23 at `NOT_CRAN=true
+  CI=true`, `lintr::lint_package()` "No lints found", `air format --check .` clean,
+  `devtools::document()` produced an empty `git status`. The snapshot clause is vacuous
+  by inspection, not assumption: `git diff --name-only main..HEAD` contains no `_snaps/`
+  path, so no message snapshot changed and none was accepted. PR #100 CI: all 9 checks
+  green on `5fa3e1c` (both R CMD check platforms, `test-coverage`, `check-references`,
+  `format-check`, `lint`, `pkgdown`, both codecov); the four long jobs are re-running on
+  the docs-only head `1064b18` and the four fast ones are already green there.
+
+**Consistency gate.** `cairn_validate` exit 0 — 16 PASS including `coverage complete`,
+`weight caps`, `mirror agreement`, `at most one in-progress` and `sizing (split
+tripwires)`, which the re-cut cleared by going from 12 tasks to 5; advisories only (321
+`dangling id tokens`, all pre-existing pre-migration ids, unchanged by this diff).
+Profile `consistency-gate` slot: `devtools::document()` no-diff · no generated file
+hand-edited (`man/icc.Rd` regenerated from roxygen) · `README.Rmd` untouched ·
+`pkgdown::check_pkgdown()` "No problems found" · `NEWS.md` entry present and rewritten
+this pass · no new top-level file in the diff, so no `.Rbuildignore` entry owed ·
+`devtools::check()` Status OK. No `DESIGN.md` principle changed (`git diff --name-only`
+has no `DESIGN.md`), so `cairn_impact` does not apply.
