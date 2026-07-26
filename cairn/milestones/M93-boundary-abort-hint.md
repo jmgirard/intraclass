@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -75,7 +75,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       method on that data, and that every method an admissibility row offers is accepted
       by `icc()`'s own fence (a named-but-inadmissible method would abort
       `intraclass_unsupported`).
-- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, and that no interval
       computed during verification reaches the message text or any returned object, so
       nothing here implements the D-012-fenced fallback default (D-018).
@@ -101,7 +101,7 @@ legitimate ICC(3) = -1.771 on healthy data.
 - AC2 → T1, T2, T6
 - AC3 → T4
 - AC4 → T3, T7
-- AC5 → T2, T4, T8
+- AC5 → T2, T4, T8, T9
 - AC6 → T5
 - AC7 → T5
 
@@ -142,6 +142,12 @@ legitimate ICC(3) = -1.771 on healthy data.
       compels this): assert no interval computed during verification reaches the
       message text or any returned object — e.g. that no digit sequence of the
       endpoints the candidates would return appears in the rendered abort.
+- [ ] T9 (pass-7 F1, 91): T8's leak detector matches ~4 significant digits, so a leak
+      rendered ROUNDED — this package's house style for a number in a cli message,
+      including the very abort the hint attaches to — passes it. Replace the
+      endpoint-grep with an enumeration of the numeric tokens the message contains,
+      asserting the set is exactly the legitimate one. Mutation-verify with
+      `round(lo, 3)`, not only full precision.
 
 ## Work log
 
@@ -220,6 +226,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: T6-T8 — the three guards pass 6 found missing, each written so the mutation that breaks its property reds it. T6 counts verification calls through `local_mocked_bindings()`: 0 on a successful `icc()`, >0 on the aborting one, the second half present so the first cannot pass by the helper simply being unreachable. T7 captures the `n0` icc() actually passes (5 on a balanced 30×5) and is paired with a load-bearing check that at n0=3 the SSA=0/`unit="single"` cell is silent while at n0=2 it names `searle` — so the silence is an assertion about n0, not an accident of the data. T8 asserts no candidate endpoint's leading digits appear in the rendered abort, with a pin that the message is the real one so the loop cannot pass vacuously. Mutation-verified: eager force reds 1, endpoint leak reds 1, and the call-site `n0 = 2` reds 1. Worth recording that my FIRST T7 mutation did NOT red — replacing `boundary_method_hint` in the namespace defeats a test that observes what icc() passes INTO it; the realistic regression F2 describes is at the call site, and that is the one that reds. Suite FAIL 0 / PASS 4891 / SKIP 23; `devtools::check()` Status OK (0/0/0); lintr, air, document() clean.
 
 - 2026-07-26: PR #100 all 9 checks green on `64e79d6` — both R CMD check platforms, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. `test-coverage` and the two check platforms run the INSTALLED package, so T6/T7's `local_mocked_bindings()` is verified where it could plausibly differ from `load_all()`. Status -> review (pass 7).
+
+- 2026-07-26: review pass 7 FAILED the gate — AC5, on evidence again. An [O] lens on the four new test blocks ran seven mutations, found three of them sound, and caught F1 (91): T8's leak detector matches ~4 significant digits, so a leak rendered `round(lo, 3)` — the package's own house style for a number in a cli message, used by the very abort the hint attaches to — passes at FAIL 0, while full precision reds. Reproduced independently here. AC5 tick withdrawn, T9 added; AC1-AC4, AC6, AC7 stand. Shipped code unchanged and still clean across the ~33,000-cell behaviour sweep. Status -> in-progress; seventh return, third consecutive one on evidence quality rather than behaviour.
 
 ## Decisions
 
@@ -1024,3 +1032,46 @@ only (321 `dangling id tokens`, all pre-existing). Profile `consistency-gate` sl
 top-level file · `devtools::check()` Status OK. The `check-references` CI job's two
 gates pass locally (0 falsified, enumerator in sync). No `DESIGN.md` principle changed,
 so `cairn_impact` does not apply.
+
+**Independent review — the new guards.** Shipped code was byte-identical to what pass
+6's three lenses cleared, so this pass put one **[O]** lens on the only unreviewed
+code: the four test blocks T6-T8 added. It ran seven mutations and confirmed three of
+the four tests sound — `force(hint)` in `mc_ci()` reds T6 (`calls` 2, expected 0), a
+call-site `n0 = 2` reds T7 (`seen` 2 vs 5), disabling the support floor reds the
+load-bearing pair, and dropping `hint` from the abort vector reds two of them. It also
+verified SKIP 0 holds against the INSTALLED package, that `local_mocked_bindings()`
+restores both bindings and behaves identically under `R CMD check`, and that no new
+assertion is tautological. Scored by an independent **[S]** scorer that did not
+generate the finding.
+
+- **F1 (91) — actioned, T9.** `tests/testthat/test-boundary-abort-hint.R:1954`. T8's
+  leak detector takes `substr(format(abs(v), digits = 6), 1, 6)` — six CHARACTERS, not
+  six significant digits, and the `"0."` prefix eats two of them, so it matches about
+  four significant figures. A leak rendered at fewer digits is invisible. Reproduced
+  by the lens and again by me end to end: interpolating the verified `searle` lower
+  endpoint at full precision reds the file, while `round(lo, 3)` — rendering
+  `-0.127` — leaves it at **FAIL 0**. That is a real AC5 violation passing. The
+  rounded form is the likely one: it is this package's house style for a number in a
+  cli message (`R/engine-brms.R:206`), and the abort the hint attaches to already
+  renders `round(100 * mean(!finite))%`. The test's own comment claims the opposite
+  ("so a reformatted or rounded leak is caught too"), which is the M92 lesson —
+  mutation-test an enforcement claim before writing it — recurring in my own work.
+
+**Two observations, not actioned.** T7 pins one point on the `n0` axis (`k_eff == 5`
+on a 30×5 design), so a hard-coded `n0 = 5` survives the four new tests; the
+pre-existing AC3 sweep catches it via its 12×2 cells, so the property is protected,
+but a second cell at a different rater count would close it locally. And AC5's "or any
+returned object" clause rests on the pre-existing `expect_false(inherits(got, "icc"))`
+— a value stashed in a condition field rather than the message would be seen by
+neither test. Both are recorded rather than actioned.
+
+**GATE FAILURE — returned to `in-progress` (review pass 7).** AC5 again, and again on
+evidence rather than behaviour: a test asserts the property, but not strongly enough
+to fail on the rendering the package actually uses. **AC5's tick withdrawn**; AC1,
+AC2, AC3, AC4, AC6 and AC7 were verified this pass and stand. No shipped code is
+implicated — `git diff 0ceb27d..HEAD -- R/` is empty and the ~33,000-cell behaviour
+result is unchanged.
+
+**Seventh return.** The failing item has now been evidence quality, not behaviour, for
+three consecutive passes, and twice it has been a test of mine that could not fail. The
+disposition is the maintainer's.
