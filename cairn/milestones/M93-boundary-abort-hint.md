@@ -107,47 +107,35 @@ legitimate ICC(3) = -1.771 on healthy data.
 
 ## Tasks
 
-<!-- Third re-cut 2026-07-26 after the pass-5 gate failure. T1-T12, the first re-cut's
-     T1-T5 and the second's T1-T6 are superseded; what they shipped is in the work log. -->
+<!-- Third re-cut 2026-07-26 after the pass-5 gate failure; T1-T12, the first re-cut's
+     T1-T5 and the second's T1-T6 are superseded. T1-T5 below are complete and their
+     detail is in the work log; T6-T9 answer review passes 6 and 7. -->
 
-- [x] T1: add the verification helper — generic over a method name, calling the reducer
+- [x] T1: the verification helper — generic over a method name, calling the reducer
       `icc()` dispatches to with the same `(df, estimands, conf_level)`, catching every
-      condition, returning TRUE only on finite, ordered, in-support endpoints for every
-      estimand. Unit tests for each verdict incl. the never-raise obligation; record the
-      measured cost.
-- [x] T2: re-cut `boundary_method_hint()` to admissibility + verification — delete
-      `boundary_data_degenerate()`, `boundary_sb_safe()`, `boundary_classical_sb_ok()`,
-      the `complete` gate and the hint-path `mpl_kappa_available()` call (the lookup
-      stays where `R/ci-mpl.R` uses it); keep the design rows as the candidate filter and
-      the verdict lazy.
-- [x] T3: the AC4 tests — verified endpoints equal `icc(ci_method = )`'s reported
-      interval across a grid of designs, and each admissibility row's methods are
-      accepted by `icc()`'s fence.
-- [x] T4: re-cut the AC3 sweep to the new predicate; add the per-cell non-vacuity
-      assertion and remove the pass-5 F2 tautology (`expect_gte(checked, 0L)`) and its
-      two zero-check `unit` cells. Mutation-verify that dropping verification, dropping
-      the in-support clause, and neutering non-vacuity each red it.
+      condition, accepting only finite, ordered, in-support endpoints on every estimand.
+- [x] T2: `boundary_method_hint()` re-cut to admissibility + verification; the four
+      predictive inputs and their helpers deleted, the verdict kept lazy.
+- [x] T3: the AC4 anti-drift tests — verified endpoints equal what `icc(ci_method = )`
+      reports, and each admissibility row matches `icc()`'s own fence.
+- [x] T4: the AC3 sweep re-cut to `named == usable`, with per-cell non-vacuity.
 - [x] T5: `NEWS.md` and `@param ci_method` rewritten to the run-it-first surface,
-      `devtools::document()`, full AC7 gate, PR #100 green on every job.
-- [x] T6 (pass-6 F1, 92): add the AC2 LAZINESS test the criterion names — assert
-      verification does not run on a successful `icc()` call and does run on the
-      aborting one. Mutation-verify: forcing `hint` eagerly in `mc_ci()` must red it
-      (measured: it currently leaves the file at FAIL 0 / PASS 659, unchanged).
-- [x] T7 (pass-6 F2, 86): pin the `n0` WIRING end to end — a test that observes the
-      value `icc()` actually passes, not one that hard-codes it. Must red on a wrong
-      `n0` in the OVER-NAMING direction: `n0 = 2` on the SSA = 0 fixture with
-      `unit = "single"` alone makes the hint name `searle` at `[-0.5, -0.5]` on the
-      open support floor, and the suite stays green.
-- [x] T8 (AC5's second clause; pass-6 F3 scored 65 and is logged, but the CRITERION
-      compels this): assert no interval computed during verification reaches the
-      message text or any returned object — e.g. that no digit sequence of the
-      endpoints the candidates would return appears in the rendered abort.
-- [ ] T9 (pass-7 F1, 91): T8's leak detector matches ~4 significant digits, so a leak
+      `devtools::document()`, full AC7 gate.
+- [x] T6 (pass-6 F1, 92): the AC2 LAZINESS test — verification runs 0 times on a
+      successful `icc()` and >0 on the aborting one. Mutation: forcing `hint` eagerly
+      must red it.
+- [x] T7 (pass-6 F2, 86): pin the `n0` WIRING end to end — observe the value `icc()`
+      passes, not a hard-coded one, and show it is load-bearing (at n0 = 2 the SSA = 0
+      / `unit = "single"` cell names `searle` at `[-0.5, -0.5]`, at n0 = 3 it is
+      silent). Mutation: a wrong call-site `n0` must red it.
+- [x] T8 (AC5's second clause): assert no interval computed during verification reaches
+      the message text or any returned object.
+- [ ] T9 (pass-7 F1, 91): T8's detector matches ~4 significant digits, so a leak
       rendered ROUNDED — this package's house style for a number in a cli message,
-      including the very abort the hint attaches to — passes it. Replace the
-      endpoint-grep with an enumeration of the numeric tokens the message contains,
-      asserting the set is exactly the legitimate one. Mutation-verify with
-      `round(lo, 3)`, not only full precision.
+      including the abort the hint attaches to — passes it. Replace the endpoint-grep
+      with an enumeration of the numeric tokens the message contains, asserting the set
+      is exactly the legitimate one. Mutation-verify with `round(lo, 3)`, not only full
+      precision.
 
 ## Work log
 
@@ -228,6 +216,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: PR #100 all 9 checks green on `64e79d6` — both R CMD check platforms, `test-coverage`, `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. `test-coverage` and the two check platforms run the INSTALLED package, so T6/T7's `local_mocked_bindings()` is verified where it could plausibly differ from `load_all()`. Status -> review (pass 7).
 
 - 2026-07-26: review pass 7 FAILED the gate — AC5, on evidence again. An [O] lens on the four new test blocks ran seven mutations, found three of them sound, and caught F1 (91): T8's leak detector matches ~4 significant digits, so a leak rendered `round(lo, 3)` — the package's own house style for a number in a cli message, used by the very abort the hint attaches to — passes at FAIL 0, while full precision reds. Reproduced independently here. AC5 tick withdrawn, T9 added; AC1-AC4, AC6, AC7 stand. Shipped code unchanged and still clean across the ~33,000-cell behaviour sweep. Status -> in-progress; seventh return, third consecutive one on evidence quality rather than behaviour.
+
+- 2026-07-26: adding T9 took the plan-owned body to 153/149; Tasks was the heaviest trimmable section, so it was compressed in a single rewrite (T1-T5 to one line each — their detail is in this log) rather than nibbled. Now 141/149. The over-cap commit was pushed before the check ran; this is the fix, not a second attempt.
 
 ## Decisions
 
