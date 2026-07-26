@@ -1,6 +1,6 @@
 # M93: Boundary-abort hint for the deterministic boundary-robust `ci_method` families
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -233,6 +233,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: gate clean on the final tree — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **Status: OK** (0/0/0, 2m54s), `devtools::test()` FAIL 0 / PASS 4933 / SKIP 23 at `NOT_CRAN=true CI=true`, `lintr::lint_package()` no lints, `air format --check` clean, `devtools::document()` no-diff. No `_snaps/` path in the branch diff, so no message snapshot moved and none was accepted. Only the test file changed in `R/`-visible terms — no shipped code touched since pass 6. Status -> review.
 
 - 2026-07-26: PR #100 all 9 checks green on `e876434` — `ubuntu-latest (release)` 17m8s, `windows-latest (release)` 16m9s, `test-coverage` 17m48s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 9.
+
+- 2026-07-26: review pass 9 FAILED the gate — AC5 for the fourth consecutive pass. The [O] lens found (F1, 91, reproduced here) that `boundary_method_hint()` renders THREE message literals, not two: T10's `branches` list reads the two-way `mpl` bullet and the one-way PLURAL lead, but never the one-way SINGULAR lead that fires when the numeric-`unit` pole splits the pair (74 of 1,680 real aborts, ~4%). A leak placed only there leaves the file at FAIL 0 / PASS 720 while the user's abort reads "(upper 0.749)". `checked == 2L` cannot catch it — it counts hand-listed entries, not renderings. Two lenses clean; behaviour re-swept over 2,372 real aborts with 0 violations; no `R/` change since pass 6. AC1-AC4, AC6, AC7 verified this pass and stand. NINTH return, and the thrash rule's SECOND trigger (same criterion, new mechanism of the same shape, four times) rather than its first. Status -> in-progress.
 
 ## Decisions
 
@@ -1181,3 +1183,113 @@ violations of the AC3 property, and `git diff` shows no `R/` change since pass 7
 maintainer's. Recorded for that decision: the finding is a one-line widening of one
 test's grid, the goal and scope are not implicated, and the shipped behaviour has now
 survived roughly 34,000 adversarial cells across passes 6–8 without a violation.
+
+---
+
+## Review pass 9 (2026-07-26)
+
+**Branch state.** `main` in sync with `origin/main` (0/0); branch 58 ahead / 0 behind,
+so no merge was needed before gathering evidence. PR #100, head `2b5d097`.
+
+**Fresh per-criterion evidence.** All from commands run this phase, on a working tree
+verified clean before and after each run. The M93 file runs **FAIL 0 / PASS 720 /
+SKIP 0** at `NOT_CRAN=true CI=true`; the zero skip count matters, because a skipped
+boundary test would pass vacuously.
+
+- AC1 — `:151` builds the near-σ²→0 datasets, confirms the DEFAULT MC path aborts on
+  both geometries, that every abort reached is a Monte-Carlo site and never the
+  bootstrap site, and that site B occurs. The site enumeration AC1 asks the work log to
+  record is there (T1 line, 2026-07-25).
+- AC2 — hint reaches the real abort per design (`:418`); class, leading message and
+  BOTH generic remedies survive verbatim while a no-opt-in design gains nothing
+  (`:447`); never-raise at `:1531`; laziness at `:1760`. The [O] lens mutation-verified
+  all three this pass (dropping `boundary_method_usable()`'s `muffleWarning` handler
+  reds with 7,172 escaped warnings; `force(hint)` in `mc_ci()` reds the laziness pin)
+  and observed no leaked condition across 2,372 real aborts.
+- AC3 — the message-driven sweeps at `:1109` / `:1156` assert `named == usable` among
+  the methods each design ADMITS, with per-cell non-vacuity. Independently re-derived
+  this pass by the [O] lens over ~2,950 cells / **2,372 real boundary aborts**, with an
+  acceptance predicate written from AC3's text rather than by calling the shipped
+  helper: one-way balanced/unbalanced 3–40 subjects × 2–5 raters × σ²_s ∈ {0, 1e-8,
+  1e-6, 1e-4}; `unit` keyword/numeric/vector; `conf_level` 0.80–0.99; two-way 5–120 ×
+  2/3/5/11 on and off the κ_m grid; `type` unset/agreement/consistency; fixed raters;
+  missing scores; degenerate data; `engine = "lme4"`. **0 forward and 0 reverse
+  violations**, and every abort was `intraclass_singular_fit`.
+- AC4 — equivalence at `:1619` against `tidy(icc(ci_method = ))` at `tolerance = 0`,
+  carried by the out-of-support `bh_pole_oneway()` cell that makes a reporting-path
+  clamp visible; admissibility rows at `:1724`; `n0` wiring pinned at `:1822` against
+  the value `icc()` really passes and shown load-bearing at `:1867`. The [O] lens
+  mutation-verified the wiring (call-site `n0 = 2` reds) and confirmed the
+  `checked`/`compared`/`out_of_support_seen` pins are real assertions, not tautologies.
+- AC5 — **FAILS, see the gate failure below.** First clause holds (`:472`: still
+  `intraclass_singular_fit`, still no `icc` object, re-confirmed across all 2,372
+  aborts). Second clause does not.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, stating a
+  method is named by RUNNING each candidate and keeping only those whose endpoints are
+  finite, ordered and in range, with the silent cases as a consequence of that check;
+  `@param ci_method` carries the matching note; `man/icc.Rd` regenerated; no milestone
+  numbers in user-facing text.
+- AC7 — all run this phase: `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+  **Status: OK** (0/0/0, 3m33s), `lintr::lint_package()` "No lints found",
+  `air format --check .` clean, `devtools::document()` empty `git status`. Snapshot
+  clause vacuous by inspection: no `_snaps/` path in `git diff --name-only
+  origin/main..HEAD`. PR #100 all 9 checks green on `2b5d097` — `ubuntu-latest
+  (release)` 17m9s, `windows-latest (release)` 16m16s, `test-coverage` 17m42s, plus
+  `check-references`, `format-check`, `lint`, `pkgdown` and both codecov.
+
+**Consistency gate.** `cairn_validate` exit 0 — all 16 checks PASS including
+`weight caps` and `coverage complete`; 321 advisory `dangling id tokens`, all
+pre-existing pre-migration ids. Profile `consistency-gate` slot:
+`devtools::document()` no-diff · no generated file hand-edited (`NAMESPACE`/`README`
+absent from the diff) · `pkgdown::check_pkgdown()` "No problems found" · `NEWS.md`
+entry present · both added files sit under `R/` and `tests/`, so no `.Rbuildignore`
+entry is owed. No `DESIGN.md` principle changed, so `cairn_impact` does not apply.
+
+**Independent review — three lenses, 1 finding.** [S] blame-history: 0 findings
+(signature back-compat re-verified live — `character(0)` splices zero elements, so
+every non-hint path's abort text is byte-identical to `origin/main`; every helper
+deleted across the re-cuts is gone with no live reference; T10 confirmed to strengthen
+rather than weaken, having replaced a `skip_if()` with a hard failure). [S]
+prior-PR-comments: 0 findings (GitHub inline-comment surface empty by probe;
+`git diff 64e79d6..HEAD -- R/` empty, so the pass-5 in-support clause and the pass-6
+guards are byte-identical to what those passes cleared; T10 confirmed an in-place
+rewrite with no orphaned duplicate). [O] diff-bug: 1 finding, scored 91 by an
+independent [S] scorer that did not generate it.
+
+**F1 (91) — actioned.** `tests/testthat/test-boundary-abort-hint.R:1964-1990` and
+`:2056`; leaking site `R/boundary-hint.R:207-213`. `boundary_method_hint()` renders
+THREE distinct message literals, not two: the two-way `mpl` bullet, the one-way PLURAL
+lead used when both `searle` and `burch` verify, and the one-way SINGULAR lead used
+when exactly one of the pair verifies. T10's `branches` list fires `bh_oneway()` at the
+default `unit`, where the pair never splits, so the singular lead is in no text the
+enumeration ever reads — and `checked == 2L` cannot see it, because it counts the two
+hand-listed entries rather than the renderings the hint has. The singular lead is
+ordinary shipped behaviour: it fires wherever the numeric-`unit` Spearman-Brown pole
+splits the pair, measured by the lens at **74 of 1,680 real aborts (~4%)**. Reproduced
+independently here: `round(burch_ci(...)[[1]]$conf.high, 3)` placed in ONLY the
+singular lead leaves the file at **FAIL 0 / PASS 720** while the user's abort reads
+"An interval method (upper 0.749), run on your data, returns an interval where the
+default cannot: `ci_method = "burch"`…".
+
+**GATE FAILURE — returned to `in-progress` (review pass 9).** AC5, for the fourth
+consecutive pass, and for the fifth pass running the failing item is evidence quality
+rather than shipped behaviour. **AC5 stays unticked**; AC1, AC2, AC3, AC4, AC6 and AC7
+were verified this pass with the evidence above and stand. No shipped code is
+implicated — no `R/` file has changed since pass 6, and behaviour was swept again this
+pass over 2,372 real aborts with zero violations.
+
+**Thrash rule — the SECOND trigger fires, not the first.** AC5 has now failed at passes
+6, 7, 8 and 9, each time by a new mechanism of the SAME shape: a leak guard that cannot
+see part of the surface it claims to cover (no test at all → a detector blind to a
+rounded rendering → a detector blind to the `mpl` branch → a detector blind to the
+singular one-way lead). That is the wrong-approach trigger, not the mis-sized one, and
+its remedy is not another hand-listed cell — a fourth entry buys the fifth mechanism.
+The approach itself is what is wrong: the guard enumerates hand-picked DESIGNS and
+hopes they cover every RENDERING. No plan gate recorded an alternative for this
+question (the three re-cuts all argued the hint's mechanism, never how to guard the
+leak), so per the rule escalation via `/milestone-brief` is offered, alongside the
+structural alternative visible here: sweep `boundary_method_hint()`'s own returned
+bullets for numeric tokens across a grid of designs and data, asserting the invariant
+"a rendered bullet contains no number" rather than enumerating branches — which is
+rendering-agnostic and covers renderings not yet written, with one end-to-end abort per
+design retained to prove the bullets reach the real message unchanged.
