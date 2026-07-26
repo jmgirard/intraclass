@@ -1575,19 +1575,24 @@ test_that("verification never raises and never leaks a condition (AC2)", {
 # is a property to pin, not to assume: if it ever stopped holding, the hint would be
 # deciding on numbers the user never sees, and every AC3 sweep would still pass.
 
-# A balanced one-way design on which `searle` projected to `unit = 15` crosses
+# A balanced one-way design on which `searle`, projected to `unit = 10`, crosses
 # `npb_sb()`'s pole and reports an interval lying entirely ABOVE +1 -- measured
-# [1.153869, 1.164311] at `conf_level = 0.80`, around a point of 5.9e-09. Healthy
-# data, a legal call, no abort: the shipped defect M93 routes the hint around rather
-# than fixes (ROADMAP candidate). Used here to give the AC4 grid a cell where
-# out-of-support post-processing would actually show.
-bh_pole_oneway <- function(n_s = 2L, n_k = 2L, seed = 2L) {
+# [1.276702, 1.824471] at `conf_level = 0.80`. Healthy data, a legal call, no abort:
+# the shipped defect M93 routes the hint around rather than fixes (ROADMAP
+# candidate). Used here to give the AC4 grid a cell where out-of-support
+# post-processing would actually show.
+#
+# 8x2 rather than the smallest cell that exhibits this (2x2): the M84 lesson is that
+# a tiny glmmTMB fit can die with a RAW unclassed error on Linux/Windows while
+# completing on macOS, which is precisely how M93 review pass 1 went red on CI with
+# a green local gate. 8 subjects keeps the property and keeps the fit ordinary.
+bh_pole_oneway <- function(n_s = 8L, n_k = 2L, seed = 6L) {
   set.seed(seed)
-  a <- stats::rnorm(n_s, sd = sqrt(0.05))
+  a <- stats::rnorm(n_s, sd = sqrt(0.001))
   data.frame(
     subject = factor(rep(seq_len(n_s), each = n_k)),
     rater = factor(rep(seq_len(n_k), times = n_s)),
-    score = rep(a, each = n_k) + stats::rnorm(n_s * n_k, sd = sqrt(0.95))
+    score = rep(a, each = n_k) + stats::rnorm(n_s * n_k, sd = sqrt(0.999))
   )
 }
 
@@ -1641,17 +1646,17 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
     # comfortably in-support endpoints, so any post-processing that only bites out of
     # support -- a `pmin(1, .)` clamp in the reporting path, say -- would be invisible
     # to them, and the test would pass while the hint decided on numbers the user
-    # never sees. Here `searle` at 2 subjects, `unit = 15`, `conf_level = 0.80`
-    # genuinely reports [1.153869, 1.164311]: above +1, and the shipped defect this
+    # never sees. Here `searle` at 8 subjects, `unit = 10`, `conf_level = 0.80`
+    # genuinely reports [1.276702, 1.824471]: above +1, and the shipped defect this
     # milestone routes around (ROADMAP candidate).
     list(
-      lab = "one-way 2x2 past the projection pole",
+      lab = "one-way 8x2 past the projection pole",
       d = bh_pole_oneway(),
       args = list(model = "oneway", conf_level = 0.80),
       methods = "searle",
       oneway = TRUE,
       conf_level = 0.80,
-      units = list(15)
+      units = list(10)
     )
   )
   units <- list("single", "average", 2, 6)
