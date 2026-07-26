@@ -48,7 +48,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [ ] AC2: a method is named only after the verification step returned TRUE for it on
+- [x] AC2: a method is named only after the verification step returned TRUE for it on
       this data; the abort class, leading message and existing generic remedies are
       unchanged, and a design with nothing to name gains nothing — the hint is additive.
       **Verification can never raise**: every condition a reducer emits is caught, so no
@@ -75,7 +75,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       method on that data, and that every method an admissibility row offers is accepted
       by `icc()`'s own fence (a named-but-inadmissible method would abort
       `intraclass_unsupported`).
-- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, and that no interval
       computed during verification reaches the message text or any returned object, so
       nothing here implements the D-012-fenced fallback default (D-018).
@@ -961,3 +961,66 @@ plus my own sweep searched roughly 33,000 adversarial cells for a hint that name
 method which then fails, and found none — the axis pass 5 died on included. What is
 missing is three guards, one of which (T6) the criterion named explicitly and the
 implementation did not write.
+
+---
+
+## Review pass 7 (2026-07-26)
+
+**Branch state.** `main` 0/0 with `origin/main`; branch 50 ahead / 0 behind. PR #100,
+head `02499cd`.
+
+**Scope of this pass.** `git diff 0ceb27d..HEAD -- R/ NEWS.md man/` is EMPTY — the
+shipped code is byte-identical to what pass 6 verified across ~33,000 adversarial
+cells. Only the test file and this file changed, adding the three guards pass 6 found
+missing. So AC2 and AC5 are re-verified from scratch (their ticks were withdrawn) and
+the remaining five are re-run rather than inherited.
+
+**Fresh per-criterion evidence.** All from commands run this phase. The M93 file runs
+**678 assertions, FAIL 0, SKIP 0**; the zero skip count is load-bearing here, because
+all three new tests carry a `skip_if_not(fired, ...)` on boundary luck and a skipped
+one would pass vacuously.
+
+- AC1 — `:151` unchanged and re-run; the site enumeration stands in the work log.
+- AC2 — **re-verified.** The naming-after-verification and never-raise clauses are as
+  in pass 6 (`:1445`, `:1411`, `:1531`, `:1276`). The LAZINESS clause, which pass 6
+  failed, is now pinned by a committed test at `:1760`: it counts calls to
+  `boundary_method_usable()` through `local_mocked_bindings()` and asserts **0** across
+  a successful `icc()` call, then asserts **>0** across an aborting one — the second
+  half present so the first cannot pass by the helper merely being unreachable.
+  Mutation-verified: forcing `hint` eagerly in `mc_ci()` reds it (pass 6 measured the
+  same mutation leaving the file at FAIL 0 / PASS 659). I also re-measured directly
+  this phase: 0 `searle_ci` calls on a successful fit, 1 on the aborting one.
+- AC3 — I re-ran my own sweep, written from the criterion: **441 cells, 264 aborts,
+  408 method-names, 0 named-but-unusable, 0 silent-but-usable**, same grid as pass 6
+  including the `conf_level` tail at 2 subjects. The committed sweeps are at `:1109`
+  and `:1156`.
+- AC4 — `:1619` and `:1724` as in pass 6, plus the wiring gap pass-6 F2 found is now
+  closed: `:1822` captures the `n0` value `icc()` actually passes (5 on a balanced
+  30×5) rather than hard-coding it, and `:1867` makes that assertion load-bearing by
+  showing the SSA = 0 / `unit = "single"` cell is silent at n0 = 3 and NAMES `searle`
+  at n0 = 2 — so the silence asserts something about `n0` rather than about the data.
+  Mutation-verified at the call site: `n0 = 2` in `R/icc.R` reds the file.
+- AC5 — **re-verified.** `:472` carries the contract half. The discard half, which
+  pass 6 failed, is now pinned at `:1900`: it fires the real abort, computes what the
+  candidates would return on that same data, and asserts none of their leading digits
+  appears in the rendered message, with a pin that the message is the real one so the
+  loop cannot pass vacuously. Mutation-verified: interpolating a computed endpoint
+  into the hint reds it. Measured again directly this phase — the eight endpoints
+  `-0.127272 0.073428 -1.296282 0.283789 -0.087737 0.119081 -0.675889 0.403302` appear
+  nowhere in the abort text.
+- AC6 — `NEWS.md` and `@param ci_method` unchanged since pass 6 and re-read this phase;
+  `man/icc.Rd` in the diff; no milestone numbers in user-facing text.
+- AC7 — all run this phase: `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+  **Status: OK** (0/0/0, 2m7s), suite FAIL 0 / PASS 4891 / SKIP 23 at `NOT_CRAN=true
+  CI=true`, `lintr::lint_package()` "No lints found", `air format --check .` clean,
+  `devtools::document()` no diff. No `_snaps/` path in `git diff --name-only
+  main..HEAD`.
+
+**Consistency gate.** `cairn_validate` exit 0 — 16 PASS including `coverage complete`
+(T6-T8 mapped), `weight caps`, `mirror agreement` and `binding criteria`; advisories
+only (321 `dangling id tokens`, all pre-existing). Profile `consistency-gate` slot:
+`document()` no-diff · no generated file hand-edited · `README.Rmd` untouched ·
+`pkgdown::check_pkgdown()` "No problems found" · `NEWS.md` entry present · no new
+top-level file · `devtools::check()` Status OK. The `check-references` CI job's two
+gates pass locally (0 falsified, enumerator in sync). No `DESIGN.md` principle changed,
+so `cairn_impact` does not apply.
