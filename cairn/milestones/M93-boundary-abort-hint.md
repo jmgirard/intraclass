@@ -39,11 +39,11 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 
 ## Acceptance criteria
 
-- [ ] AC1: a committed reproduction test builds a near-zero-variance dataset on which
+- [x] AC1: a committed reproduction test builds a near-zero-variance dataset on which
       `icc()` aborts `intraclass_singular_fit` through the DEFAULT Monte-Carlo path,
       and the work log records which abort sites that reproduction actually reaches —
       the hint is added only to sites shown reachable, never to sites assumed so.
-- [ ] AC2: `icc()` derives the hint from the predicates it already computes and passes
+- [x] AC2: `icc()` derives the hint from the predicates it already computes and passes
       it to the two Monte-Carlo boundary aborts T1 showed reachable
       (`R/ci-montecarlo.R:43` non-finite covariance, `:124` non-finite draws); the abort
       class, the leading message, and the existing generic remedies are all unchanged —
@@ -55,25 +55,25 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
       forbids. The hint's inputs also include the observed subject/rater counts and an
       exact-degeneracy flag, not the fence predicates alone (review pass 1, F1/F2): a row
       is named only when the design AND the data in hand accept it.
-- [ ] AC3 (GP7): a test asserts over a design grid — one-way balanced and unbalanced,
+- [x] AC3 (GP7): a test asserts over a design grid — one-way balanced and unbalanced,
       two-way random agreement and consistency, fixed-rater, multilevel, and
       within-cell-replicate, each exercised end-to-end through `icc()`, at subject/rater
       counts both on and off `mpl`'s κ_m calibration grid, and on exactly-degenerate
       data — that every `ci_method` the hint names is ACCEPTED by `icc()` there. A hint
       that points at another abort is a test failure, so a later fence change cannot
       silently rot the mapping.
-- [ ] AC4: designs with no boundary-robust opt-in — fixed raters, multilevel,
+- [x] AC4: designs with no boundary-robust opt-in — fixed raters, multilevel,
       replicates, two-way consistency, and an `mpl`-shaped design at a `conf_level`
       outside the calibrated set — receive NO method hint; a test pins the message to
       its generic remedies alone (a blanket "try mpl" is wrong off two-way random
       agreement).
-- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, so nothing here
       implements the D-012-fenced fallback default.
-- [ ] AC6: the change is documented where users meet it — a `NEWS.md` entry, and the
+- [x] AC6: the change is documented where users meet it — a `NEWS.md` entry, and the
       `@param ci_method` boundary-robustness note updated if it does not already say
       an opt-in method exists for the aborting cases.
-- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; any changed message
       snapshot reviewed deliberately via `testthat::snapshot_review()`, never accepted
       blind.
@@ -255,3 +255,73 @@ that did not generate them.
 F2 sits beside AC2's stated rationale, which is literally true of site C but does not
 cover degenerate data arriving at site A. Decide at the implement gate whether AC2/AC3
 need a gated amendment or whether the hint guard alone settles it.
+
+---
+
+## Review pass 2 (2026-07-25)
+
+**Branch state.** `main` 0/0 with `origin/main`; branch 14 ahead / 0 behind, so no merge
+was needed before gathering evidence. PR #100, head `ea91d09`.
+
+**Fresh per-criterion evidence.** All from commands run this phase. The M93 file runs
+**21 tests, 154 assertions, FAIL 0, SKIP 0** at `NOT_CRAN=true CI=true` — the zero skip
+count matters, because several tests carry a `skip_if()` on boundary luck and a skipped
+one would pass vacuously; none fired.
+
+- AC1 — `:98` builds the near-σ²→0 datasets and asserts the DEFAULT MC path aborts on
+  both one-way and two-way, that every abort reached is a Monte-Carlo site (A or B) and
+  never the bootstrap site, and that site B occurs. The site enumeration AC1 asks the
+  work log to record is there (T1 line, 2026-07-25): `:124` 21/40 two-way + 19/40
+  one-way, `:43` 1/40, `R/ci-bootstrap.R:48` 0/90.
+- AC2 — the hint reaches the real abort per design (`:342`); the abort's class, leading
+  message and BOTH pre-existing generic remedies survive verbatim while a no-opt-in
+  design gains nothing (`:368`); the bootstrap exclusion carries its own evidence
+  (`:140` unreachable at the boundary, `:164` reachable only on degenerate data where
+  every named method also fails). The amended clause — inputs beyond the fence
+  predicates — is evidenced at `:596` (counts gate the `mpl` row) and `:696` (the
+  degeneracy flag fires exactly where the shipped guards fire, and NOT on σ²→0 boundary
+  data, which is the case the hint exists for). `:422` pins `hint` as defaulted on all
+  four helpers and pins `rmvn()`'s argument order, so `engine-lavaan.R`'s positional
+  calls stay safe.
+- AC3 — every design the amended criterion enumerates is exercised END TO END through
+  `icc()`, and I checked the enumeration item by item against the file rather than
+  trusting the test titles: one-way balanced + unbalanced and two-way random agreement
+  (both supplied and unset `type`) at `:485`, each named method actually called and
+  accepted; fixed-rater, explicit consistency and an uncalibrated `conf_level` at `:553`;
+  multilevel and within-cell replicates at `:846`, run through `icc()` with `cluster =`
+  and with replicated cells rather than as pure-function calls; geometry varied on the
+  grid at `:821` (10×2 and 15×5, both hinting `mpl` and accepted) and off it at `:629`
+  (8 subjects, silent, and `mpl` confirmed to abort there); degenerate data at `:712`.
+- AC4 — the five no-opt-in designs the criterion names are each pinned: fixed raters,
+  multilevel, replicates and two-way consistency at `:286`, and an `mpl`-shaped design
+  at an uncalibrated `conf_level` at `:286`/`:306` (the level set read from
+  `kappa_m_table`, so it tracks a recalibration). `:368` is what makes "generic remedies
+  alone" testable rather than asserted: a no-opt-in design still carries the pre-existing
+  remedies and gains no method name.
+- AC5 — `:393` confirms the boundary case still raises `intraclass_singular_fit`, is an
+  `rlang_error` and not an `icc` object, so no interval is returned and the
+  D-012-fenced fallback-on-abort default is not implemented. The test did not skip
+  (SKIP 0 above), so the assertions actually ran.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, updated this
+  pass so its no-hint list matches shipped behaviour (it now names a subject/rater count
+  outside the calibrated set and degenerate data); `@param ci_method` carries the pointer
+  that the abort names the applicable method, with `man/icc.Rd` regenerated in the diff.
+- AC7 — all run this phase: `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+  **Status: OK** (0 errors / 0 warnings / 0 notes; its `checking tests` step ran the
+  suite), `lintr::lint_package()` "No lints found", `air format --check .` clean,
+  `devtools::document()` produced an empty `git status`. The snapshot clause is vacuous
+  by inspection, not by assumption: `git diff --name-only main..HEAD` contains no
+  `_snaps/` path, so no message snapshot changed and none was accepted.
+
+**Consistency gate.** `cairn_validate` exit 0 — 16 PASS including `coverage complete`,
+`weight caps`, `mirror agreement` and `at most one in-progress`; advisories only
+(`dangling id tokens` 321, all pre-existing pre-migration ids, unchanged by this diff).
+Profile `consistency-gate` slot: `document()` no-diff · no generated file hand-edited
+(`man/icc.Rd` regenerated from roxygen) · `README.Rmd` untouched · `pkgdown` job green
+on PR #100 · `NEWS.md` entry present and updated this pass · no new top-level files, so
+no `.Rbuildignore` entry owed. No `DESIGN.md` principle changed (`git diff --name-only`
+has no `DESIGN.md`), so `cairn_impact` does not apply.
+
+**CI.** PR #100 on head `ea91d09`: all 7 jobs pass — `ubuntu-latest (release)` 17m21s,
+`windows-latest (release)` 20m19s and `test-coverage` 23m54s are the three that failed
+review pass 1, and they are the only platforms where the T6 defect reproduces at all.
