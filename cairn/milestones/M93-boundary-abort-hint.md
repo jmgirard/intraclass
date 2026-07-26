@@ -1,6 +1,6 @@
 # M93: Design-aware boundary-abort hint — name the boundary-robust `ci_method` for the design in hand
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -166,6 +166,7 @@ aborts (`intraclass_unidentified`), which no interval method fixes · any new
 - 2026-07-25: implement gate (pass 3) — measured where `npbootstrap`'s resample guard actually bites (25 seeds x 24 balanced cells + 16 unbalanced): it fires routinely below 15 subjects and never at 15+, while `searle`/`burch` aborted 0 times in ~320 hinted runs. Decisive finding: D-012's 0-abort line is a SEARLE/Burch result and was never an npbootstrap result, so the shipped "three interval methods" sentence borrowed evidence that does not exist. Gate: split by evidence (deterministic pair carries the strong claim; npbootstrap only where it is the sole option) with a 15-subject floor.
 - 2026-07-25: gated amendment — mapping table split into three one-way rows: balanced names `searle`/`burch` only, unbalanced ≥15 subjects names `npbootstrap` as availability, unbalanced <15 names nothing. AC1-AC7 wording untouched; NEWS updated to match.
 - 2026-07-25: T10/T11/T12 — balanced one-way no longer names the bootstrap at any size; unbalanced is floored at `NPB_HINT_MIN_SUBJECTS` (15); `boundary_data_degenerate()` gained npbootstrap's third disjunct `se_ij_logf == 0` and its comment now says it RESTATES the observed-data guards rather than evaluating them, and says why the resample guard is out of its reach. The AC3 grid gained a message-driven one-way sweep over 8 size cells that parses the method names out of the abort `icc()` really raises, so nothing is hand-derived. Mutation-verified: removing the floor reds 6 assertions and restoring the three-method sentence reds 8, both including the new end-to-end grid.
+- 2026-07-25: pass-3 gate — `devtools::test()` FAIL 0 / PASS 4453 at `NOT_CRAN=true CI=true`, `devtools::check()` Status OK, `lintr::lint_package()` no lints (it caught the new constant's SCREAMING_CASE name; renamed to `npb_hint_min_subjects`), `air format --check` clean, `document()` no-diff. Status -> review.
 
 ## Decisions
 
