@@ -1491,3 +1491,181 @@ test_that("verification never raises and never leaks a condition (AC2)", {
     expect_true(is.logical(v) && length(v) == 1L && !is.na(v))
   }
 })
+
+# ---- T3/AC4: the check cannot drift from the real call ----------------------
+# Verification runs the REDUCER, while the user runs `icc()`. Those are the same
+# endpoints today -- nothing in the reporting path clamps or rounds them -- but that
+# is a property to pin, not to assume: if it ever stopped holding, the hint would be
+# deciding on numbers the user never sees, and every AC3 sweep would still pass.
+
+# A balanced one-way design on which `searle` projected to `unit = 15` crosses
+# `npb_sb()`'s pole and reports an interval lying entirely ABOVE +1 -- measured
+# [1.153869, 1.164311] at `conf_level = 0.80`, around a point of 5.9e-09. Healthy
+# data, a legal call, no abort: the shipped defect M93 routes the hint around rather
+# than fixes (ROADMAP candidate). Used here to give the AC4 grid a cell where
+# out-of-support post-processing would actually show.
+bh_pole_oneway <- function(n_s = 2L, n_k = 2L, seed = 2L) {
+  set.seed(seed)
+  a <- stats::rnorm(n_s, sd = sqrt(0.05))
+  data.frame(
+    subject = factor(rep(seq_len(n_s), each = n_k)),
+    rater = factor(rep(seq_len(n_k), times = n_s)),
+    score = rep(a, each = n_k) + stats::rnorm(n_s * n_k, sd = sqrt(0.95))
+  )
+}
+
+# Does icc() REFUSE this ci_method on this design? (Admissibility, as the shipped
+# fence answers it -- distinct from whether the method works on the data.)
+bh_unsupported <- function(d, method, args = list()) {
+  tryCatch(
+    {
+      suppressWarnings(suppressMessages(do.call(
+        icc,
+        c(
+          list(d, quote(score), quote(subject), quote(rater)),
+          args,
+          list(ci_method = method)
+        )
+      )))
+      FALSE
+    },
+    intraclass_unsupported = function(e) TRUE,
+    error = function(e) FALSE
+  )
+}
+
+test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  cases <- list(
+    list(
+      lab = "one-way balanced 20x5",
+      d = bh_ok_oneway(),
+      args = list(model = "oneway"),
+      methods = c("searle", "burch"),
+      oneway = TRUE
+    ),
+    list(
+      lab = "one-way boundary 30x5",
+      d = bh_oneway(),
+      args = list(model = "oneway"),
+      methods = c("searle", "burch"),
+      oneway = TRUE
+    ),
+    list(
+      lab = "two-way on-grid 20x3",
+      d = bh_twoway(),
+      args = list(),
+      methods = "mpl",
+      oneway = FALSE
+    ),
+    # The cell that makes this test able to FAIL. Every case above returns
+    # comfortably in-support endpoints, so any post-processing that only bites out of
+    # support -- a `pmin(1, .)` clamp in the reporting path, say -- would be invisible
+    # to them, and the test would pass while the hint decided on numbers the user
+    # never sees. Here `searle` at 2 subjects, `unit = 15`, `conf_level = 0.80`
+    # genuinely reports [1.153869, 1.164311]: above +1, and the shipped defect this
+    # milestone routes around (ROADMAP candidate).
+    list(
+      lab = "one-way 2x2 past the projection pole",
+      d = bh_pole_oneway(),
+      args = list(model = "oneway", conf_level = 0.80),
+      methods = "searle",
+      oneway = TRUE,
+      conf_level = 0.80,
+      units = list(15)
+    )
+  )
+  units <- list("single", "average", 2, 6)
+
+  checked <- 0L
+  compared <- 0L
+  out_of_support_seen <- FALSE
+  for (case in cases) {
+    k <- length(unique(case$d$rater))
+    cl <- if (is.null(case$conf_level)) 0.95 else case$conf_level
+    case_units <- if (is.null(case$units)) units else case$units
+    for (m in case$methods) {
+      reducer <- switch(m, searle = searle_ci, burch = burch_ci, mpl = mpl_ci)
+      for (u in case_units) {
+        e <- list(icc_estimand(unit = u, k_eff = k, oneway = case$oneway))
+        red <- tryCatch(
+          suppressWarnings(suppressMessages(
+            reducer(case$d, e, conf_level = cl)
+          )),
+          error = function(err) NULL
+        )
+        tb <- tryCatch(
+          generics::tidy(suppressWarnings(suppressMessages(do.call(
+            icc,
+            c(
+              list(case$d, quote(score), quote(subject), quote(rater)),
+              case$args,
+              list(unit = u, ci_method = m)
+            )
+          )))),
+          error = function(err) NULL
+        )
+        lab <- paste(case$lab, m, "unit", as.character(u))
+        # Refusing on one side and computing on the other is itself a divergence.
+        expect_identical(
+          paste(lab, "computed:", is.null(red)),
+          paste(lab, "computed:", is.null(tb))
+        )
+        if (!is.null(red) && !is.null(tb)) {
+          expect_identical(nrow(tb), 1L)
+          expect_equal(red[[1]]$conf.low, tb$conf.low[[1]], tolerance = 0)
+          expect_equal(red[[1]]$conf.high, tb$conf.high[[1]], tolerance = 0)
+          if (red[[1]]$conf.high > 1) {
+            out_of_support_seen <- TRUE
+          }
+          compared <- compared + 1L
+        }
+        checked <- checked + 1L
+      }
+    }
+  }
+  # The exact cell count, not `>= 0`: a cell silently dropped from the loop must red
+  # rather than pass on a smaller grid (pass-5 F2 was exactly that assertion).
+  expect_identical(checked, length(units) * 5L + 1L)
+  # ...and every cell must reach the NUMERIC comparison. Without this the test would
+  # still pass if every cell degenerated to "both refused", which asserts nothing
+  # about endpoint equality -- the vacuity that keeps recurring in this file.
+  expect_identical(compared, length(units) * 5L + 1L)
+  # ...and at least one compared cell must sit OUT of support, or the grid cannot
+  # detect post-processing that only bites there. Verified by mutation: clamping the
+  # reported endpoint with `pmin(1, .)` reds this test only because of that cell.
+  expect_true(out_of_support_seen)
+})
+
+test_that("the admissibility rows mirror icc()'s own ci_method fences (AC4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # What the rows OFFER, icc() must accept -- otherwise the hint names a string the
+  # dispatch then refuses with `intraclass_unsupported` (the shape of pass-1 F1).
+  for (m in c("searle", "burch")) {
+    expect_false(bh_unsupported(bh_ok_oneway(), m, list(model = "oneway")))
+  }
+  expect_false(bh_unsupported(bh_ok_twoway(), "mpl", list()))
+  expect_false(bh_unsupported(
+    bh_ok_twoway(),
+    "mpl",
+    list(type = "agreement")
+  ))
+
+  # ...and what the rows EXCLUDE, icc() must really refuse -- otherwise the exclusion
+  # is over-suppression rather than a mirror of the fence, which is the failure
+  # pass-3 F2 caught in the other direction.
+  ragged <- bh_ok_oneway(sizes = c(rep(5L, 15L), rep(3L, 5L)))
+  for (m in c("searle", "burch")) {
+    expect_true(bh_unsupported(ragged, m, list(model = "oneway")))
+  }
+  expect_true(bh_unsupported(bh_ok_twoway(), "mpl", list(raters = "fixed")))
+  expect_true(bh_unsupported(
+    bh_ok_twoway(),
+    "mpl",
+    list(type = "consistency")
+  ))
+})
