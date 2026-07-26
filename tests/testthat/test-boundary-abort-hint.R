@@ -1751,3 +1751,217 @@ test_that("the admissibility rows mirror icc()'s own ci_method fences (AC4)", {
     list(type = "consistency")
   ))
 })
+
+# ---- T6/T7/T8: the three guards review pass 6 found missing ------------------
+# Each of these pins a property the code already had and nothing asserted. Pass 6
+# reproduced all three by mutation: the suite stayed green while the property was
+# broken, which is the same shape as the tautologies passes 3-5 found here.
+
+test_that("verification never runs on a successful call, only on the aborting one (AC2)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # AC2's laziness clause: `hint` is a promise forced only inside an abort message,
+  # so a successful call must not pay for running the candidate methods. This matters
+  # beyond tidiness -- M97 registers `npbootstrap` behind this same helper at ~135 ms,
+  # and an accidental eager force would charge every successful icc() call for a
+  # bootstrap the caller never asked for.
+  calls <- 0L
+  real <- boundary_method_usable
+  local_mocked_bindings(
+    boundary_method_usable = function(...) {
+      calls <<- calls + 1L
+      real(...)
+    }
+  )
+
+  # A healthy fit: the MC interval succeeds, so the hint is never forced.
+  invisible(suppressWarnings(suppressMessages(
+    icc(
+      bh_ok_oneway(),
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      ci_method = "montecarlo",
+      seed = 1
+    )
+  )))
+  expect_identical(calls, 0L)
+
+  # ...and the same instrumentation must show it DOES run when the abort fires, or
+  # the zero above would be satisfied by the helper simply never being reachable.
+  fired <- FALSE
+  for (sd in 1:12) {
+    got <- tryCatch(
+      {
+        suppressWarnings(suppressMessages(
+          icc(
+            bh_oneway(seed = sd),
+            score,
+            subject,
+            rater,
+            model = "oneway",
+            ci_method = "montecarlo",
+            seed = 1
+          )
+        ))
+        NULL
+      },
+      intraclass_singular_fit = function(e) e
+    )
+    if (!is.null(got)) {
+      fired <- TRUE
+      break
+    }
+  }
+  skip_if_not(fired, "no one-way MC abort in the seed sweep (boundary luck)")
+  expect_gt(calls, 0L)
+})
+
+test_that("icc() passes the effective group size as the support floor's n0 (AC4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # The ICC(1) support floor is -1/(n0-1) (D-010), and `n0` comes from icc() as
+  # `design_info$k_eff`. Only a pure-function test exercised the floor, hard-coding
+  # n0 -- so a mis-wiring was invisible, and invisible in the OVER-NAMING direction:
+  # too small an n0 lowers the floor and admits intervals sitting on it.
+  seen <- NULL
+  real <- boundary_method_hint
+  local_mocked_bindings(
+    boundary_method_hint = function(..., n0) {
+      seen <<- n0
+      real(..., n0 = n0)
+    }
+  )
+  fired <- FALSE
+  for (sd in 1:12) {
+    got <- tryCatch(
+      {
+        suppressWarnings(suppressMessages(
+          icc(
+            bh_oneway(n_s = 30, n_k = 5, seed = sd),
+            score,
+            subject,
+            rater,
+            model = "oneway",
+            ci_method = "montecarlo",
+            seed = 1
+          )
+        ))
+        NULL
+      },
+      intraclass_singular_fit = function(e) e
+    )
+    if (!is.null(got)) {
+      fired <- TRUE
+      break
+    }
+  }
+  skip_if_not(fired, "no one-way MC abort in the seed sweep (boundary luck)")
+  # Balanced 30x5: k_eff is the rater count, which is searle's group size n.
+  expect_identical(seen, 5)
+})
+
+test_that("the support floor is load-bearing at the value icc() supplies (AC4)", {
+  # The assertion above pins WHICH value is passed; this pins that the value MATTERS,
+  # so the pair cannot both pass on a floor that never bites. SSA = 0 at k = 3 with
+  # `unit = "single"` alone is the cell where searle returns [-0.5, -0.5] -- finite
+  # and ordered, and sitting exactly on the open support floor -1/(k-1).
+  d <- bh_degen_between()
+  e <- list(icc_estimand(unit = "single", k_eff = 3, oneway = TRUE))
+  ends <- searle_ci(d, e, conf_level = 0.95)[[1]]
+  expect_identical(ends$conf.low, -0.5)
+  expect_identical(ends$conf.high, -0.5)
+
+  args <- list(
+    oneway = TRUE,
+    multilevel = FALSE,
+    replicates = FALSE,
+    raters = "random",
+    balanced = TRUE,
+    type = c("agreement", "consistency"),
+    type_supplied = FALSE,
+    conf_level = 0.95,
+    df = d,
+    estimands = e
+  )
+  # At the correct n0 the interval is OUT of support and the row stays silent...
+  expect_length(do.call(boundary_method_hint, c(args, list(n0 = 3))), 0L)
+  # ...and at a wrong, smaller n0 the floor drops below it and `searle` gets named --
+  # the AC3-forbidden shape. This is what makes the silence above an assertion about
+  # n0 rather than an accident of the data.
+  wrong <- do.call(boundary_method_hint, c(args, list(n0 = 2)))
+  expect_length(wrong, 1L)
+  expect_match(wrong[["i"]], "searle", fixed = TRUE)
+})
+
+test_that("no interval computed during verification reaches the message (AC5)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # AC5's second clause, and the line D-018 draws against D-012's fenced
+  # fallback-on-abort default: verification computes real intervals and DISCARDS
+  # them. They decide whether to name a method and must reach neither the message
+  # text nor any returned object.
+  msg <- NA_character_
+  d <- NULL
+  for (sd in 1:12) {
+    cand <- bh_oneway(seed = sd)
+    got <- tryCatch(
+      {
+        suppressWarnings(suppressMessages(
+          icc(
+            cand,
+            score,
+            subject,
+            rater,
+            model = "oneway",
+            ci_method = "montecarlo",
+            seed = 1
+          )
+        ))
+        NULL
+      },
+      intraclass_singular_fit = function(e) e
+    )
+    if (!is.null(got)) {
+      msg <- gsub("[[:space:]]+", " ", cli::ansi_strip(conditionMessage(got)))
+      d <- cand
+      break
+    }
+  }
+  skip_if(is.na(msg), "no one-way MC abort in the seed sweep (boundary luck)")
+
+  # The endpoints the two candidates really return on this data...
+  ests <- lapply(list("single", "average"), function(u) {
+    icc_estimand(unit = u, k_eff = 5, oneway = TRUE)
+  })
+  ends <- unlist(lapply(
+    c(
+      searle_ci(d, ests, conf_level = 0.95),
+      burch_ci(d, ests, conf_level = 0.95)
+    ),
+    function(x) c(x$conf.low, x$conf.high)
+  ))
+  expect_gt(length(ends), 0L)
+  expect_true(all(is.finite(ends)))
+
+  # ...none of which may appear in what the user is shown. Matched on the leading
+  # significant digits, so a reformatted or rounded leak is caught too.
+  for (v in ends) {
+    digits <- substr(format(abs(v), digits = 6, scientific = FALSE), 1, 6)
+    expect_identical(
+      paste(
+        "endpoint",
+        digits,
+        "in message:",
+        grepl(digits, msg, fixed = TRUE)
+      ),
+      paste("endpoint", digits, "in message:", FALSE)
+    )
+  }
+  # The message must still be the real one, or the loop above passes vacuously.
+  expect_match(msg, "could not be computed", fixed = TRUE)
+})
