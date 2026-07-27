@@ -475,7 +475,15 @@ test_that("the contract is unchanged: still aborts, still returns no interval (A
 
   # Nothing here implements the D-012-fenced fallback-on-abort default: the hint
   # tells the user what to switch to, it does not switch for them.
-  found <- FALSE
+  #
+  # The seed sweep FAILS rather than skips when nothing aborts, and the returned value
+  # is inspected outside the condition branch. Both matter for the same reason: the
+  # violation this criterion forbids is `icc()` RETURNING an interval where it should
+  # abort, and a `skip_if_not(found, ...)` ending is green on exactly that -- no seed
+  # aborts, `found` stays FALSE, and the test skips over the fallback default it exists
+  # to forbid. An `expect_false(inherits(got, "icc"))` reached only when `got` is
+  # already a condition is a tautology for the same reason.
+  got <- NULL
   for (sd in 1:12) {
     d <- bh_twoway(seed = sd)
     got <- tryCatch(
@@ -487,15 +495,13 @@ test_that("the contract is unchanged: still aborts, still returns no interval (A
       intraclass_singular_fit = function(e) e
     )
     if (inherits(got, "condition")) {
-      found <- TRUE
-      expect_s3_class(got, "intraclass_singular_fit")
-      expect_s3_class(got, "rlang_error")
-      # An error, not a value: no interval is produced on this path.
-      expect_false(inherits(got, "icc"))
       break
     }
   }
-  skip_if_not(found, "no two-way MC abort in the seed sweep (boundary luck)")
+  # An error, not a value: whatever the sweep ended on must NOT be an interval.
+  expect_false(inherits(got, "icc"))
+  expect_s3_class(got, "intraclass_singular_fit")
+  expect_s3_class(got, "rlang_error")
 })
 
 test_that("d_study() and the lavaan engine are untouched by the threading (AC2)", {
@@ -1905,7 +1911,7 @@ test_that("the support floor is load-bearing at the value icc() supplies (AC4)",
 #             `round(v, 3)`, which is this package's own house style for a number in a
 #             cli message and is used by the very abort the hint attaches to;
 #   pass 8 -- an enumeration reading only the one-way abort, blind to the `mpl` bullet;
-#   pass 9 -- a `branches` list naming two of the THREE message literals
+#   pass 9 -- a `branches` list naming two of the THREE bullet forms
 #             `boundary_method_hint()` renders, blind to the one-way SINGULAR lead that
 #             fires when a numeric `unit` splits the pair (74 of 1,680 real aborts).
 #             `checked == 2L` could not see it: it counted the author's list, not the
@@ -1948,12 +1954,14 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   flat <- function(x) {
     gsub("[[:space:]]+", " ", cli::ansi_strip(paste(x, collapse = " ")))
   }
-  # Render a bullet the way the user really sees it. `cli::format_message()` is the
-  # formatter `cli_abort()` itself applies to a message vector, so the rendered text is
-  # faithful by construction rather than by resemblance -- `format_inline()` leaves
-  # cli's `\\` line-continuations in the string, and a renderer disagreeing with the
-  # real one would make the end-to-end comparison below untestable. That comparison is
-  # also what keeps this helper honest: a stub renderer fails it.
+  # Render a bullet the way the user really sees it. `cli::format_message()` reproduces
+  # the inline + wrap + `\\`-continuation stripping cli applies on the abort path;
+  # `cli_abort()` itself runs only `format_inline()` and rlang wraps afterwards, so
+  # this is NOT the identical call and faithfulness is not by construction. What
+  # establishes it is the end-to-end substring comparison below, which fails if the two
+  # disagree -- and that comparison is also what keeps this helper honest: a stub
+  # renderer fails it. `format_inline()` alone would not do: it leaves the `\\`
+  # continuations in the string, so the comparison could never match.
   render <- function(b) flat(cli::format_message(b))
 
   # Both recorders read the PRODUCER, never a list of designs. `boundary_method_hint()`
@@ -2054,6 +2062,12 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     # site: site B reports the share of non-finite draws and nothing else; site A
     # carries no number at all. The hint bullets and both generic remedies are
     # digit-free, so the legitimate set really is that small.
+    #
+    # Every cell of this grid lands on site B in practice (site A is the rare
+    # non-finite-covariance abort, ~1 in 40 at these geometries), so the site-A arm
+    # below is reachable but not currently exercised, and its anchor could rot without
+    # reddening. Kept rather than dropped because a fixture shifting onto site A must
+    # meet an assertion rather than an unhandled branch.
     tokens <- num_tokens(msg)
     site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
     expect_true(
@@ -2099,16 +2113,26 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   }
 
   # Non-vacuity, and the pass-9 hole stated as a property of the OUTPUT rather than as
-  # a list of branches: the grid saw a bullet naming one method and a bullet naming
-  # two, so the singular and plural one-way leads were both read. A guard that only
-  # ever reaches the plural lead is what shipped pass-9 F1.
-  named_counts <- vapply(
-    distinct,
-    function(b) length(bh_msg_methods(b)),
-    integer(1)
+  # a list of branches: among the bullets naming CLASSICAL methods -- the row that has
+  # two leads -- the grid saw one naming a single method and one naming both, so the
+  # singular and plural one-way leads were both read. A guard that only ever reaches
+  # the plural lead is what shipped pass-9 F1.
+  #
+  # Restricting to the classical row is load-bearing, not tidiness. Over ALL bullets a
+  # count of 1 is also produced by the `mpl` bullet, which names one method too, so the
+  # unrestricted form is satisfied with the singular one-way lead never rendered --
+  # the very shape it claims to close. Which bullets are classical is read off the
+  # method names in the output, never from a list of branches.
+  method_names <- lapply(distinct, bh_msg_methods)
+  classical <- vapply(
+    method_names,
+    function(m) length(m) > 0L && all(m %in% c("searle", "burch")),
+    logical(1)
   )
-  expect_true(1L %in% named_counts)
-  expect_true(2L %in% named_counts)
+  expect_true(any(classical))
+  oneway_counts <- lengths(method_names[classical])
+  expect_true(1L %in% oneway_counts)
+  expect_true(2L %in% oneway_counts)
 
   # A pin on the number of DISTINCT renderings observed -- the producer's, not a list
   # of the author's. It reds in both directions that matter: a grid drifting off a
@@ -2117,9 +2141,13 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   expect_identical(length(distinct), 3L)
 
   # Positive controls, driven off the intervals verification really computed. The
-  # invariant above asserts an ABSENCE, so it must be shown capable of seeing the thing
-  # it denies -- at every rendering a leak could plausibly take. Both predecessors of
-  # this guard passed precisely by being blind.
+  # invariant above asserts an ABSENCE, so its DETECTOR must be shown capable of seeing
+  # the thing it denies -- at every numeric rendering a leak could plausibly take. Both
+  # predecessors of this guard passed precisely by being blind to one.
+  #
+  # Scope, exactly: these control `num_tokens()`, appending each value to an
+  # already-rendered bullet. They say nothing about `render()`, which is controlled
+  # instead by the end-to-end substring comparison above.
   finite_ends <- unique(ends[is.finite(ends)])
   expect_gt(length(finite_ends), 0L)
   for (b in distinct) {
