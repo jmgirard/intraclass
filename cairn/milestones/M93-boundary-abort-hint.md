@@ -139,7 +139,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       one end-to-end abort per design pins that those bullets are the text the user
       is shown, and the whole-message token enumeration stays. Non-vacuity pins the
       count of DISTINCT bullets observed — the producer's renderings, not the
-      author's list, so a rendering added later reds instead of going unread.
+      author's list, so a rendering the grid reaches cannot arrive unread.
       Mutation: a `round(., 3)` leak in EACH of the three message literals must red
       it, including the singular one-way lead that is pass-9 F1's own.
 

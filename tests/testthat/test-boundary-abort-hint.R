@@ -1897,45 +1897,131 @@ test_that("the support floor is load-bearing at the value icc() supplies (AC4)",
   expect_match(wrong[["i"]], "searle", fixed = TRUE)
 })
 
+
+# ---- T11/AC5: the leak guard, as an invariant over the producer ---------------
+# Three predecessors of this guard each enumerated a hand-picked set, and each set was
+# short by one:
+#   pass 7 -- a detector matching ~4 significant digits, blind to a leak rendered
+#             `round(v, 3)`, which is this package's own house style for a number in a
+#             cli message and is used by the very abort the hint attaches to;
+#   pass 8 -- an enumeration reading only the one-way abort, blind to the `mpl` bullet;
+#   pass 9 -- a `branches` list naming two of the THREE message literals
+#             `boundary_method_hint()` renders, blind to the one-way SINGULAR lead that
+#             fires when a numeric `unit` splits the pair (74 of 1,680 real aborts).
+#             `checked == 2L` could not see it: it counted the author's list, not the
+#             surface the hint has.
+#
+# A list cannot be repaired by adding to it. The author of a detector is exactly who
+# cannot enumerate the renderings it misses, so this guard lists nothing: it varies the
+# hint's INPUTS and checks whatever bullets come back, whatever they say.
+#
+# What that does and does not buy, stated exactly. Every rendering the grid's inputs
+# REACH is checked, including one written after this guard was. A rendering reachable
+# only through an input axis the grid does not vary would still go unread -- the
+# residual cost of any input grid, answered by widening the grid rather than by listing
+# literals. A rendering nothing reaches is not a leak surface at all, because no user
+# can be shown it either: a searle-only lead is unreachable, measured across 11 `unit`
+# values x 2 data shapes x 6 seeds, where only the burch-only and searle+burch forms
+# ever occur.
+
 test_that("no interval computed during verification reaches the message (AC5)", {
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
-  # AC5's second clause, and the line D-018 draws against D-012's fenced
-  # fallback-on-abort default: verification computes real intervals and DISCARDS
-  # them. They decide whether to name a method and must reach neither the message
-  # text nor any returned object.
-  #
-  # Driven over BOTH branches that render a bullet from a computed interval --
-  # `boundary_method_hint()`'s one-way searle/burch branch and its two-way mpl
-  # branch. A detector that only ever reads one of them cannot see a leak in the
-  # other: pass-8 F1 rendered `round(conf.high, 3)` into the mpl bullet and this
-  # file stayed at FAIL 0 while the user's abort carried the number.
+  # AC5's second clause, and the line D-018 draws against the fallback-on-abort default
+  # D-012 fenced out: verification computes real intervals and DISCARDS them. They
+  # decide whether to NAME a method, and must reach neither the message text nor any
+  # returned object.
 
-  # ENUMERATE the numbers the user is shown, rather than grepping for the endpoint
-  # values. A grep only catches a leak rendered at the precision it greps for:
-  # pass-7 F1 showed a leak printed `round(lo, 3)` -- this package's house style for
-  # a number in a cli message, used by the very abort the hint attaches to --
-  # slipping past a ~4-significant-digit match. Listing every numeric token in the
-  # message and requiring the set to be EXACTLY the legitimate one has no precision
-  # to evade: any leaked number, at any rendering, is a token that does not belong.
+  # THE invariant, asserted on every bullet the producer returns: a hint bullet carries
+  # no digit. Deliberately stronger than "no leaked endpoint" -- every shipped bullet is
+  # digit-free already (`ci_method`, `searle`, `burch`, `mpl` and the prose around them
+  # all are), so there is no precision to match and no rendering to evade. A future
+  # bullet that wants a number -- M97's `npbootstrap` one included -- is a deliberate
+  # decision to make here, not something that slips through.
   num_tokens <- function(text) {
     regmatches(
       text,
       gregexpr("[0-9]+(?:[.][0-9]+)?(?:[eE][-+]?[0-9]+)?", text, perl = TRUE)
     )[[1]]
   }
+  flat <- function(x) {
+    gsub("[[:space:]]+", " ", cli::ansi_strip(paste(x, collapse = " ")))
+  }
+  # Render a bullet the way the user really sees it. `cli::format_message()` is the
+  # formatter `cli_abort()` itself applies to a message vector, so the rendered text is
+  # faithful by construction rather than by resemblance -- `format_inline()` leaves
+  # cli's `\\` line-continuations in the string, and a renderer disagreeing with the
+  # real one would make the end-to-end comparison below untestable. That comparison is
+  # also what keeps this helper honest: a stub renderer fails it.
+  render <- function(b) flat(cli::format_message(b))
 
-  # Fire the REAL abort for one design and hand back what the user is shown.
+  # Both recorders read the PRODUCER, never a list of designs. `boundary_method_hint()`
+  # hands back every bullet it renders, whatever branch built it, and
+  # `boundary_interval_usable()` sees every interval verification inspects -- which is
+  # exactly the set of values AC5 says must not reach the user, so the positive controls
+  # below are driven off those rather than off reducers named per design. Naming
+  # reducers per design would be the same hand-listing in another place.
+  bullets <- character(0)
+  ends <- numeric(0)
+  real_hint <- boundary_method_hint
+  real_usable <- boundary_interval_usable
+  local_mocked_bindings(
+    boundary_method_hint = function(...) {
+      out <- real_hint(...)
+      bullets <<- c(bullets, unname(out))
+      out
+    },
+    boundary_interval_usable = function(ci, ...) {
+      ends <<- c(ends, ci$conf.low, ci$conf.high)
+      real_usable(ci, ...)
+    }
+  )
+
+  # A grid over the hint's INPUTS -- design, balance, `unit`, `type` -- chosen to reach
+  # different branches without naming what any of them renders. Which literals this
+  # exercises is measured below, never declared here.
+  grid <- list(
+    list(
+      lab = "one-way, default unit",
+      build = function(sd) bh_oneway(seed = sd),
+      args = list(model = "oneway")
+    ),
+    list(
+      lab = "one-way, unit = 6",
+      build = function(sd) bh_smallint(20L, 3L, sd),
+      args = list(model = "oneway", unit = 6)
+    ),
+    list(
+      lab = "one-way, unit = 20",
+      build = function(sd) bh_smallint(20L, 3L, sd),
+      args = list(model = "oneway", unit = 20)
+    ),
+    list(
+      lab = "one-way, unbalanced",
+      build = function(sd) bh_smallint(20L, 3L, sd, balanced = FALSE),
+      args = list(model = "oneway")
+    ),
+    list(
+      lab = "two-way, type unset",
+      build = function(sd) bh_twoway(seed = sd),
+      args = list()
+    ),
+    list(
+      lab = "two-way, agreement supplied",
+      build = function(sd) bh_twoway(seed = sd),
+      args = list(type = "agreement")
+    )
+  )
+
   fire <- function(build, args) {
-    for (sd in 1:12) {
-      cand <- build(seed = sd)
+    for (sd in 1:10) {
       got <- tryCatch(
         {
           suppressWarnings(suppressMessages(do.call(
             icc,
             c(
-              list(cand, quote(score), quote(subject), quote(rater)),
+              list(build(sd), quote(score), quote(subject), quote(rater)),
               args,
               list(ci_method = "montecarlo", seed = 1)
             )
@@ -1945,113 +2031,107 @@ test_that("no interval computed during verification reaches the message (AC5)", 
         intraclass_singular_fit = function(e) e
       )
       if (!is.null(got)) {
-        return(list(
-          msg = gsub(
-            "[[:space:]]+",
-            " ",
-            cli::ansi_strip(conditionMessage(got))
-          ),
-          data = cand
-        ))
+        return(flat(conditionMessage(got)))
       }
     }
     NULL
   }
 
-  # `ends` per branch are the endpoints THAT branch's candidates really return on
-  # that data. They drive the positive controls only; no assertion below looks for
-  # their values.
-  branches <- list(
-    list(
-      bullet = "ci_method = \"searle\"",
-      build = bh_oneway,
-      args = list(model = "oneway"),
-      ends = function(d) {
-        ests <- lapply(list("single", "average"), function(u) {
-          icc_estimand(unit = u, k_eff = 5, oneway = TRUE)
-        })
-        c(
-          searle_ci(d, ests, conf_level = 0.95),
-          burch_ci(d, ests, conf_level = 0.95)
-        )
-      }
-    ),
-    list(
-      bullet = "ci_method = \"mpl\"",
-      build = bh_twoway,
-      args = list(),
-      ends = function(d) {
-        ests <- lapply(list("single", "average"), function(u) {
-          icc_estimand(unit = u, k_eff = 3, oneway = FALSE)
-        })
-        mpl_ci(d, ests, conf_level = 0.95)
-      }
+  # Per cell: the abort must fire (a fixture drifting off the boundary FAILS rather
+  # than skipping), and whatever the user is shown carries only its legitimate numbers.
+  for (cell in grid) {
+    before <- length(bullets)
+    msg <- fire(cell$build, cell$args)
+    expect_identical(
+      paste(cell$lab, "aborted:", !is.null(msg)),
+      paste(cell$lab, "aborted:", TRUE)
     )
-  )
-
-  checked <- 0L
-  for (br in branches) {
-    hit <- fire(br$build, br$args)
-    # No abort means this branch went unread, which is the hole itself -- fail
-    # rather than skip, so a fixture drifting off the boundary cannot silence it.
-    expect_false(is.null(hit))
-    if (is.null(hit)) {
-      next
-    }
-    msg <- hit$msg
-    # ...and the branch really was exercised: its own bullet is in the text read.
-    expect_true(grepl(br$bullet, msg, fixed = TRUE))
-    if (!grepl(br$bullet, msg, fixed = TRUE)) {
+    if (is.null(msg)) {
       next
     }
 
-    ends <- unlist(lapply(
-      br$ends(hit$data),
-      function(x) c(x$conf.low, x$conf.high)
-    ))
-    expect_gt(length(ends), 0L)
-    expect_true(all(is.finite(ends)))
-
+    # The whole-message enumeration, kept from T9/T10. The legitimate set per abort
+    # site: site B reports the share of non-finite draws and nothing else; site A
+    # carries no number at all. The hint bullets and both generic remedies are
+    # digit-free, so the legitimate set really is that small.
     tokens <- num_tokens(msg)
-
-    # The legitimate set, enumerated per abort site: site B reports the share of
-    # non-finite draws and nothing else, site A carries no number at all. Neither
-    # the generic remedies nor the hint bullets contain a digit (`ci_method`,
-    # `searle`, `burch`, `mpl`, `glmmTMB` are all digit-free), so the legitimate
-    # set is that small.
     site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
     expect_true(
       site_b || grepl("parameter covariance is not finite", msg, fixed = TRUE)
     )
     if (site_b) {
       expect_identical(length(tokens), 1L)
-      # ...and that token is the share, not a number that merely counted right.
       expect_true(grepl(paste0(tokens[[1]], "% of draws"), msg, fixed = TRUE))
     } else {
       expect_identical(length(tokens), 0L)
     }
+    expect_match(msg, "could not be computed", fixed = TRUE)
 
-    # Positive controls: the enumeration must SEE a leaked endpoint at every
-    # rendering a leak could plausibly take -- full precision, `round(v, 3)` and
-    # `signif(v, 3)` -- so the assertion above cannot pass by being blind, which
-    # is exactly how both of its predecessors passed.
-    for (v in ends) {
+    # ...and the bullets this cell produced are the text the user was actually shown.
+    # This is the end-to-end half: without it the invariant would hold over strings
+    # that never reach a message.
+    for (b in unique(bullets[seq_len(length(bullets) - before) + before])) {
+      rendered <- NULL
+      expect_no_error(rendered <- render(b))
+      expect_true(!is.null(rendered) && nzchar(rendered))
+      if (!is.null(rendered)) {
+        expect_true(grepl(rendered, msg, fixed = TRUE))
+      }
+    }
+  }
+
+  # The sweep read something. Without this every assertion below is over an empty set.
+  expect_gt(length(bullets), 0L)
+  expect_gt(length(ends), 0L)
+  distinct <- unique(bullets)
+
+  # THE invariant, over every rendering the grid produced -- raw and cli-rendered. The
+  # rendered form closes a leak interpolated at render time rather than pasted in: a
+  # `{...}` expression can be digit-free as a template and numeric on screen. No
+  # mutation below demonstrates that shape, because a bullet is spliced as a finished
+  # string into a message glued in another frame, where such an expression would not
+  # resolve; the clause is cheap insurance against a future design where the hint
+  # returns templates evaluated in scope, and is stated as that rather than as a
+  # defended hole.
+  for (b in distinct) {
+    expect_identical(num_tokens(b), character(0))
+    expect_identical(num_tokens(render(b)), character(0))
+  }
+
+  # Non-vacuity, and the pass-9 hole stated as a property of the OUTPUT rather than as
+  # a list of branches: the grid saw a bullet naming one method and a bullet naming
+  # two, so the singular and plural one-way leads were both read. A guard that only
+  # ever reaches the plural lead is what shipped pass-9 F1.
+  named_counts <- vapply(
+    distinct,
+    function(b) length(bh_msg_methods(b)),
+    integer(1)
+  )
+  expect_true(1L %in% named_counts)
+  expect_true(2L %in% named_counts)
+
+  # A pin on the number of DISTINCT renderings observed -- the producer's, not a list
+  # of the author's. It reds in both directions that matter: a grid drifting off a
+  # branch drops the count, and a REACHABLE rendering added to the hint raises it, so a
+  # new literal cannot arrive unread the way pass-9's did.
+  expect_identical(length(distinct), 3L)
+
+  # Positive controls, driven off the intervals verification really computed. The
+  # invariant above asserts an ABSENCE, so it must be shown capable of seeing the thing
+  # it denies -- at every rendering a leak could plausibly take. Both predecessors of
+  # this guard passed precisely by being blind.
+  finite_ends <- unique(ends[is.finite(ends)])
+  expect_gt(length(finite_ends), 0L)
+  for (b in distinct) {
+    base <- render(b)
+    for (v in finite_ends) {
       for (rendered in c(
         format(v),
         format(round(v, 3)),
         format(signif(v, 3))
       )) {
-        leaked <- paste0(msg, " i ", rendered)
-        expect_gt(length(num_tokens(leaked)), length(tokens))
+        expect_gt(length(num_tokens(paste0(base, " (", rendered, ")"))), 0L)
       }
     }
-
-    # The message must still be the real one, or everything above reads a stub.
-    expect_match(msg, "could not be computed", fixed = TRUE)
-    checked <- checked + 1L
   }
-
-  # Both interval-rendering branches were read. This is the pin pass-8 F1 needed:
-  # without it, half the hint surface can go unchecked with the file at FAIL 0.
-  expect_identical(checked, 2L)
 })
