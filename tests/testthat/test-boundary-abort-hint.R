@@ -2063,11 +2063,12 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     # carries no number at all. The hint bullets and both generic remedies are
     # digit-free, so the legitimate set really is that small.
     #
-    # Every cell of this grid lands on site B in practice (site A is the rare
-    # non-finite-covariance abort, ~1 in 40 at these geometries), so the site-A arm
-    # below is reachable but not currently exercised, and its anchor could rot without
-    # reddening. Kept rather than dropped because a fixture shifting onto site A must
-    # meet an assertion rather than an unhandled branch.
+    # Every cell of this grid lands on site B, so the site-A arm below is reachable
+    # but not currently exercised, and its anchor could rot without reddening. (Site A
+    # is the rare non-finite-covariance abort; no rate for THIS grid is measured here,
+    # and T1's committed site enumeration is over its own six boundary geometries, not
+    # these fixtures.) The arm is kept rather than dropped because a fixture shifting
+    # onto site A must meet an assertion rather than an unhandled branch.
     tokens <- num_tokens(msg)
     site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
     expect_true(
@@ -2142,8 +2143,9 @@ test_that("no interval computed during verification reaches the message (AC5)", 
 
   # Positive controls, driven off the intervals verification really computed. The
   # invariant above asserts an ABSENCE, so its DETECTOR must be shown capable of seeing
-  # the thing it denies -- at every numeric rendering a leak could plausibly take. Both
-  # predecessors of this guard passed precisely by being blind to one.
+  # the thing it denies -- at every numeric rendering a leak could plausibly take.
+  # Pass 7 passed precisely by being blind to one of those renderings; passes 8 and 9
+  # passed by being blind to a whole bullet form, which is what the grid above answers.
   #
   # Scope, exactly: these control `num_tokens()`, appending each value to an
   # already-rendered bullet. They say nothing about `render()`, which is controlled
