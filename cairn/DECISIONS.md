@@ -602,3 +602,31 @@ Beyond-the-brief items: M91 documents the two-sided interval's non-equal-tailed 
 levels, incl. 0.95) and the small-geometry near-vacuous 0.99 width (BC6), and softens the
 `R/ci-mpl.R` interpolation comment ("increasing and roughly concave"), already falsified at
 R≥8 by the shipped table. Extends D-014/D-015 to conf_level 0.90/0.99; supersedes nothing.
+
+### D-018 (2026-07-26): Running a candidate method inside an abort path to decide whether to name it is not the fallback-on-abort default D-012 fenced out
+
+**Context:** M93's boundary hint names an applicable opt-in `ci_method` inside the classed
+`intraclass_singular_fit` abort the Monte-Carlo default raises near the σ²→0 boundary.
+Five review passes each closed one mechanism by which a *design predicate* named a method
+that then aborted or returned an unusable interval, and each patch shipped a new one: the
+κ_m calibration grid, a raw subject count, an effective subject count, a missing score /
+numeric `unit` / MSA = 0, and a verdict validating one of two endpoints. The M93 plan gate
+(2026-07-26) adopted verification instead — run the candidate's own shipped reducer on the
+data in hand and name it only if the interval is usable — which computes an interval inside
+a path whose whole purpose is to raise an error. That approaches the fence D-012 drew and
+D-013 re-stated: "A classical **fallback-on-abort** default behaviour is a distinct, later
+`#3` question, not decided here."
+
+**Decision:** computing a candidate interval to decide whether to NAME its method, then
+discarding it, is not the fenced behaviour. The line is what the user receives: the call
+still aborts `intraclass_singular_fit`, still returns no interval, and no computed endpoint
+reaches the message text or any returned object. D-012/D-013's actual question — whether
+the default should return a classical interval instead of aborting — stays open, stays a
+`#3`/ADR-003 contract change, and stays a ROADMAP candidate needing its own every-cell
+replacement-grade assessment. What this entry licenses is the diagnostic use alone.
+
+**Consequences:** M93 names a method only after running it, and its AC5 asserts the
+discard rather than assuming it. M97 inherits the same line for `npbootstrap`, where the
+run additionally consumes randomness and so must be RNG-neutral (#9). The cost is bounded
+by construction: verification is forced only inside an abort message, so a successful call
+never pays for it. Confirms and does not supersede D-012 or D-013.

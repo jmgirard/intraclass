@@ -284,6 +284,18 @@
 #'   at 0.90, 0.95, and 0.99 only (see `ci_method`).
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
 #'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
+#'   Near the variance boundary it can fail to produce an interval and aborts; when
+#'   it does, the error names a deterministic opt-in method below that fits the
+#'   design in hand — chosen by RUNNING each candidate on your data and keeping only
+#'   those whose reported endpoints are all finite, correctly ordered and in range —
+#'   so there is no need to work that out from this list. Being a check on the data
+#'   rather than on the design, it falls silent wherever a method would not in fact
+#'   deliver, including a missing score, degenerate data, an uncalibrated
+#'   `conf_level` or geometry, and a numeric `unit` projected past the point where a
+#'   method's Spearman-Brown map breaks down; the two closed forms are asked
+#'   separately, so one can be named where the other is not. It never names
+#'   `"npbootstrap"`, whose resampling can fail for reasons a single run does not
+#'   settle; check that one against its own entry below.
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
 #'   fitted model, refits, and takes percentile quantiles of the resampled
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -2100,12 +2112,40 @@ icc <- function(
       # ({0.90, 0.95, 0.99} since M91/D-017) upstream.
       mpl_ci(df, estimands, conf_level = conf_level)
     } else {
+      # M93: if this boundary-aborts, its classed error names the opt-in
+      # `ci_method` that actually applies to THIS design and DATA (or nothing,
+      # when none does). Two stages: which strings the design ADMITS is built
+      # from the same fence predicates used above, so the rows and the fences
+      # cannot drift apart silently; whether an admitted method is USABLE is
+      # settled by running it, never predicted (GP7 guard in
+      # tests/testthat/test-boundary-abort-hint.R).
       mc_ci(
         engine_fit,
         estimands,
         conf_level = conf_level,
         mc_samples = mc_samples,
-        seed = seed
+        seed = seed,
+        hint = boundary_method_hint(
+          oneway = oneway,
+          multilevel = multilevel,
+          replicates = replicates,
+          raters = raters,
+          balanced = balanced,
+          type = type,
+          type_supplied = type_supplied,
+          conf_level = conf_level,
+          # The hint no longer PREDICTS whether a method will work on this data; it
+          # runs the method. So it takes exactly what the dispatch above hands a
+          # reducer -- the same `df`, `estimands` and `conf_level` -- and the
+          # interval it inspects is the one the user's own `ci_method =` call would
+          # return. All of this is lazy: `hint` is a promise forced only inside an
+          # abort message, so a successful call never pays for it.
+          df = df,
+          estimands = estimands,
+          # The effective group size the ICC(1) support floor -1/(n0-1) is defined
+          # against (D-010). A support constant, not a design predicate.
+          n0 = design_info$k_eff
+        )
       )
     }
   }

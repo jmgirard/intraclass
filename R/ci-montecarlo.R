@@ -33,7 +33,13 @@ with_rng_seed <- function(seed, code) {
 # Draw from a multivariate normal via a symmetric eigen-decomposition, which
 # tolerates a numerically semidefinite covariance (tiny negative eigenvalues
 # clamped to 0) at the boundary, where a Cholesky factor would fail.
-rmvn <- function(n, mu, covariance, call = rlang::caller_env()) {
+rmvn <- function(
+  n,
+  mu,
+  covariance,
+  call = rlang::caller_env(),
+  hint = character(0)
+) {
   p <- length(mu)
   # A non-finite parameter covariance means the fit did not identify some component
   # (an over-parameterized or degenerate model -- e.g. a ragged replicate design with
@@ -49,7 +55,9 @@ rmvn <- function(n, mu, covariance, call = rlang::caller_env()) {
              few cells rated more than once to separate the interaction from pure \\
              error).",
         i = "Provide more replicated cells (or a less degenerate design), or \\
-             aggregate to one rating per subject-by-rater cell."
+             aggregate to one rating per subject-by-rater cell.",
+        # M93: the design-aware opt-in `ci_method` bullet, or nothing.
+        hint
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -79,9 +87,14 @@ rmvn <- function(n, mu, covariance, call = rlang::caller_env()) {
 # `mc` is a list with `estimate`, `vcov`, and `to_components` (from the engine
 # fit, stored on the `icc` object). Seeded via `with_rng_seed()` (PRINCIPLES.md
 # #9, #12); the global RNG stream is left untouched.
-mc_components <- function(mc, mc_samples = 10000L, seed = NULL) {
+mc_components <- function(
+  mc,
+  mc_samples = 10000L,
+  seed = NULL,
+  hint = character(0)
+) {
   draw <- function() {
-    par <- rmvn(mc_samples, mc$estimate, mc$vcov)
+    par <- rmvn(mc_samples, mc$estimate, mc$vcov, hint = hint)
     mc$to_components(par)
   }
   if (is.null(seed)) {
@@ -111,7 +124,8 @@ mc_interval <- function(
   components,
   estimand,
   conf_level = 0.95,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  hint = character(0)
 ) {
   vals <- icc_point(components, estimand)
   finite <- is.finite(vals)
@@ -126,7 +140,9 @@ mc_interval <- function(
         "The Monte-Carlo interval could not be computed: \\
          {.val {round(100 * mean(!finite))}}% of draws were non-finite.",
         i = "A variance component overflowed, which indicates an unstable fit.",
-        i = "Refit with {.code engine = \"glmmTMB\"} or inspect the model."
+        i = "Refit with {.code engine = \"glmmTMB\"} or inspect the model.",
+        # M93: the design-aware opt-in `ci_method` bullet, or nothing.
+        hint
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -140,8 +156,16 @@ mc_ci <- function(
   estimands,
   conf_level = 0.95,
   mc_samples = 10000L,
-  seed = NULL
+  seed = NULL,
+  hint = character(0)
 ) {
-  components <- mc_components(engine, mc_samples = mc_samples, seed = seed)
-  lapply(estimands, function(est) mc_interval(components, est, conf_level))
+  components <- mc_components(
+    engine,
+    mc_samples = mc_samples,
+    seed = seed,
+    hint = hint
+  )
+  lapply(estimands, function(est) {
+    mc_interval(components, est, conf_level, hint = hint)
+  })
 }
