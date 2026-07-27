@@ -1427,3 +1427,53 @@ hint, 0 token violations**, the only number shown anywhere being site B's own
 `<int>%` share, and every abort classed `intraclass_singular_fit`. Across both this
 probe and the AC3 sweep, 1,296 real aborts produced no returned interval and no leaked
 endpoint, which is D-018's line holding in shipped behaviour.
+
+**Independent review — three lenses, 0 findings.** No finding survived any lens, so the
+confidence scorer had nothing to rank and was not spawned; that is recorded rather than
+left as an unexplained absence.
+
+- [O] diff-bug: 0 findings. Wrote its own acceptance predicate from AC3's text and
+  swept ~4,400 real aborts — one-way 2,030 (1,273 naming ≥1 method) over `n_s` 2-30 ×
+  `n_k` 2-6 × two data shapes × `conf_level` 0.5-(1−1e−8) × seven `unit` values, and
+  two-way 2,346 (330 naming `mpl`) over `n_s` 8-110 on and off both ends of the κ_m
+  grid × `n_r` 2-11 × five `conf_level` × five `unit` × four `type` states × fixed
+  raters, plus degenerate/NA/replicate/multilevel/incomplete/`lme4` corners and the
+  pass-5 `conf_level` tail at 2-4 subjects. **0 named-but-unusable and 0
+  omitted-but-usable.** It also traced the structural routes by which verification
+  could diverge from the user's call and found the `mpl` `type` narrowing makes
+  verification's `estimands` a SUPERSET of the real call's, so it can only
+  over-suppress, never over-name. On the AC5 guard it instrumented the 6-cell grid
+  outside the test file and established what no earlier pass could: the 3 distinct
+  bullets collectively exercise **all 5 message literals** in `boundary-hint.R`, so no
+  shipped literal goes unread — then mutation-verified on a scratch copy, including a
+  leak into the `searle` blurb, a mutation this session had not run.
+- [S] blame-history: 0 findings. Verified the D-018 fence holds in shipped code, all
+  four helper signatures stay back-compatible with `engine-lavaan.R`'s positional
+  `rmvn()` calls and `d-study.R`, the no-hint abort is byte-identical to `main`, and
+  every helper deleted across the three re-cuts was both introduced and removed inside
+  this branch rather than resurrecting anything `main` shipped.
+- [S] prior-review-record: 0 findings. Checked the diff against all nine prior passes'
+  findings; none reintroduced. GitHub inline-comment surface empty by probe.
+
+**Triage of the [O] lens's three "noted, not findings".** None is a finding under the
+taxonomy; two were actioned anyway, because this milestone's four-pass failure mode was
+records describing the artefact wrongly.
+
+1. `num_tokens()` matches digit strings only, so a leaked NON-finite endpoint (`Inf`,
+   `NaN`, `NA`) would be invisible to the guard. Unreachable in M93 by construction —
+   a bullet is built only for a method whose every endpoint is finite (0 of 28
+   inspected were non-finite). **Actioned as a follow-up on M97**, whose work log now
+   carries it as an inherited constraint to settle at its implement gate; it goes live
+   only if an `npbootstrap` bullet quotes a rejected candidate, which M97's own T3
+   wording invites. Not fixed here: changing the detector now would alter a guard
+   already certified across three §8 rounds, to close a hole this milestone cannot
+   reach.
+2. `R/icc.R:2115-2119` still described the hint as "Built from the same fence
+   predicates used above", which after the third re-cut describes only the
+   ADMISSIBILITY half. **Fixed now** — the comment now names both stages and says the
+   usability half is settled by running the method, never predicted. Cosmetic in
+   effect, but shipping a comment that misdescribes the milestone's central design
+   change is the same defect class the §8 rounds kept finding.
+3. The site-A arm being unexercised, and a future rendering reachable only off-grid:
+   **rejected as already handled** — both are stated explicitly in the test's own
+   comments as documented residuals, which is what item 2's standard asks for.
