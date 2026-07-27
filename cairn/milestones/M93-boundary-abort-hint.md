@@ -75,7 +75,7 @@ legitimate ICC(3) = -1.771 on healthy data.
       method on that data, and that every method an admissibility row offers is accepted
       by `icc()`'s own fence (a named-but-inadmissible method would abort
       `intraclass_unsupported`).
-- [ ] AC5: the contract is unchanged — a test asserts the boundary case still aborts
+- [x] AC5: the contract is unchanged — a test asserts the boundary case still aborts
       with class `intraclass_singular_fit` and returns no interval, and that no interval
       computed during verification reaches the message text or any returned object, so
       nothing here implements the D-012-fenced fallback default (D-018).
@@ -1381,3 +1381,49 @@ byte-identical to `main`, and every helper deleted across the re-cuts was both
 introduced and removed inside this branch) and [S] prior-review-record (checked the
 diff against all nine prior passes' findings; none reintroduced, and the guard-doctrine
 §8 D1 fix is present and closes the hole it names).
+
+**AC3 — verified.** Committed evidence: the message-driven sweeps at `:1115` (85
+assertions, one-way), `:1162` (141, two-way), `:1350` (88, at a numeric `unit`), plus
+`:570` and `:628` for the accepted/silent halves; every declared cell asserts it fired
+the abort at least once, so a cell that checked nothing fails rather than passing.
+Independently re-derived this phase with an acceptance predicate written from AC3's
+text — every reported endpoint finite, `conf.low <= conf.high`, `conf.high < 1`, and
+`conf.low > -1/(n0-1)` for ICC(1) — never by calling the package's own helper, which is
+the pass-3 F4 / pass-5 F2 tautology trap. Grid: one-way balanced and unbalanced,
+`n_s` ∈ {4,8,15,30} × `n_k` ∈ {2,3,5} × σ²_s ∈ {0, 1e-8, 1e-6} × `unit` ∈
+{single, average, 2, 6, 15}; two-way `n_s` ∈ {6,12,20,60} × `n_r` ∈ {2,3,5,11} ×
+σ²_s ∈ {0, 1e-6, 1e-4}, `type` unset and agreement, `conf_level` 0.95 and 0.90; six
+seeds. **1,872 cells / 1,008 real boundary aborts, 0 forward violations**, and every
+abort classed `intraclass_singular_fit`.
+
+The reverse half needed care and is recorded in full. A first run flagged 314 reverse
+hits; a re-run instrumented per method (1,248 cells / 702 aborts, 4 seeds) attributes
+**every one of the 219 it saw to `npbootstrap`, and none to `searle`, `burch` or
+`mpl`**. That is a defect in my predicate, not in the code: I read ADMISSIBLE as "a
+string `icc()`'s fence accepts", whereas this section's own Admissibility rows define
+it as which candidates get RUN, and `npbootstrap` sits on no row — AC2 says so
+("No design names `"npbootstrap"` (→ M97)"), Scope fences it Out to M97, and AC4
+distinguishes the two notions ("every method an admissibility row offers is accepted by
+`icc()`'s own fence", so rows ⊆ fence). Under AC3 as written both halves hold with 0
+violations. Recorded for the maintainer rather than filed away: the user-facing
+consequence is that an unbalanced one-way design at the boundary is often one where
+`npbootstrap` WOULD return a usable interval and the abort names nothing — the gap M97
+exists to close, deliberate under D-013 and the third re-cut's reasoning that bootstrap
+success is a property of the resampling rather than of the design.
+
+**AC5 — verified.** First clause at `:472` (3 assertions): the boundary case still
+raises `intraclass_singular_fit` and still returns no `icc` object. That test no longer
+degrades to a skip — the guard-doctrine §8 round-1 read found it ending in
+`skip_if_not(found, ...)`, which went green on the one violation the clause forbids
+(`icc()` returning an interval instead of aborting); it now fails, mutation-verified
+this milestone (healthy fixture → FAIL 3 / SKIP 0). Second clause at `:1933` (226
+assertions): the invariant that every bullet `boundary_method_hint()` returns carries
+no digit, raw and cli-rendered, swept over a 6-cell input grid with each cell's bullets
+pinned as substrings of the real abort it fired. Independently re-derived this phase
+over a separate grid — 5 seeds × one-way {5,12,30}×{2,3,5}×σ²_s{0,1e-6}×`unit`
+{single, average, 4, 6, 15} and two-way {8,20,40}×{2,3,5} — enumerating every numeric
+token in the abort `icc()` really raised: **288 real aborts, 178 of them carrying a
+hint, 0 token violations**, the only number shown anywhere being site B's own
+`<int>%` share, and every abort classed `intraclass_singular_fit`. Across both this
+probe and the AC3 sweep, 1,296 real aborts produced no returned interval and no leaked
+endpoint, which is D-018's line holding in shipped behaviour.
