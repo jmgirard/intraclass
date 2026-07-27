@@ -101,19 +101,18 @@ legitimate ICC(3) = -1.771 on healthy data.
 - AC2 → T1, T2, T6
 - AC3 → T4
 - AC4 → T3, T7
-- AC5 → T2, T4, T8, T9, T10
+- AC5 → T2, T4, T8, T9, T10, T11
 - AC6 → T5
 - AC7 → T5
 
 ## Tasks
 
 <!-- Third re-cut 2026-07-26 after the pass-5 gate failure; T1-T12, the first re-cut's
-     T1-T5 and the second's T1-T6 are superseded. T1-T5 below are complete and their
-     detail is in the work log; T6-T9 answer review passes 6 and 7. -->
+     T1-T5 and the second's T1-T6 are superseded. Task detail — mutations included —
+     is in the work log; T6-T11 answer review passes 6-9. -->
 
-- [x] T1: the verification helper — generic over a method name, calling the reducer
-      `icc()` dispatches to with the same `(df, estimands, conf_level)`, catching every
-      condition, accepting only finite, ordered, in-support endpoints on every estimand.
+- [x] T1: the verification helper — generic over a method name, running the reducer
+      `icc()` dispatches to, catching every condition, accepting only usable endpoints.
 - [x] T2: `boundary_method_hint()` re-cut to admissibility + verification; the four
       predictive inputs and their helpers deleted, the verdict kept lazy.
 - [x] T3: the AC4 anti-drift tests — verified endpoints equal what `icc(ci_method = )`
@@ -122,25 +121,27 @@ legitimate ICC(3) = -1.771 on healthy data.
 - [x] T5: `NEWS.md` and `@param ci_method` rewritten to the run-it-first surface,
       `devtools::document()`, full AC7 gate.
 - [x] T6 (pass-6 F1, 92): the AC2 LAZINESS test — verification runs 0 times on a
-      successful `icc()` and >0 on the aborting one. Mutation: forcing `hint` eagerly
-      must red it.
-- [x] T7 (pass-6 F2, 86): pin the `n0` WIRING end to end — observe the value `icc()`
-      passes, not a hard-coded one, and show it is load-bearing (at n0 = 2 the SSA = 0
-      / `unit = "single"` cell names `searle` at `[-0.5, -0.5]`, at n0 = 3 it is
-      silent). Mutation: a wrong call-site `n0` must red it.
+      successful `icc()` and >0 on the aborting one.
+- [x] T7 (pass-6 F2, 86): pin the `n0` WIRING end to end against the value `icc()`
+      really passes, and show that value load-bearing in both directions.
 - [x] T8 (AC5's second clause): assert no interval computed during verification reaches
       the message text or any returned object.
-- [x] T9 (pass-7 F1, 91): T8's detector matches ~4 significant digits, so a leak
-      rendered ROUNDED — this package's house style for a number in a cli message,
-      including the abort the hint attaches to — passes it. Replace the endpoint-grep
-      with an enumeration of the numeric tokens the message contains, asserting the set
-      is exactly the legitimate one. Mutation-verify with `round(lo, 3)`, not only full
-      precision.
-- [x] T10 (pass-8 F1, 90): the AC5 enumeration runs on the ONE-WAY abort only, so a leak
-      in the `mpl` bullet — the hint's other interval-rendering branch — passes at
-      FAIL 0. Run the same enumeration over BOTH designs, pinning that each branch was
-      actually exercised so a fixture that stops aborting cannot silence it. Mutation:
-      `round(conf.high, 3)` into the `mpl` bullet must red it.
+- [x] T9 (pass-7 F1, 91): replace T8's endpoint-grep, blind to a rounded rendering,
+      with an enumeration of the message's numeric tokens against the legitimate set.
+- [x] T10 (pass-8 F1, 90): run T9's enumeration over the `mpl` branch as well as the
+      one-way one, each pinned as actually exercised.
+- [ ] T11 (pass-9 F1, 91; thrash trigger 2): the AC5 leak guard asserts a
+      rendering-agnostic INVARIANT over the producer's own output instead of
+      enumerating hand-listed branches. Sweep the bullets `boundary_method_hint()`
+      returns across a grid of designs and data driven through real `icc()` calls;
+      assert every bullet carries no digit, raw and cli-rendered. Positive controls
+      drive off each swept bullet (full precision, `round(v, 3)`, `signif(v, 3)`);
+      one end-to-end abort per design pins that those bullets are the text the user
+      is shown, and the whole-message token enumeration stays. Non-vacuity pins the
+      count of DISTINCT bullets observed — the producer's renderings, not the
+      author's list, so a rendering added later reds instead of going unread.
+      Mutation: a `round(., 3)` leak in EACH of the three message literals must red
+      it, including the singular one-way lead that is pass-9 F1's own.
 
 ## Work log
 
@@ -235,6 +236,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 - 2026-07-26: PR #100 all 9 checks green on `e876434` — `ubuntu-latest (release)` 17m8s, `windows-latest (release)` 16m9s, `test-coverage` 17m48s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. Ready for review pass 9.
 
 - 2026-07-26: review pass 9 FAILED the gate — AC5 for the fourth consecutive pass. The [O] lens found (F1, 91, reproduced here) that `boundary_method_hint()` renders THREE message literals, not two: T10's `branches` list reads the two-way `mpl` bullet and the one-way PLURAL lead, but never the one-way SINGULAR lead that fires when the numeric-`unit` pole splits the pair (74 of 1,680 real aborts, ~4%). A leak placed only there leaves the file at FAIL 0 / PASS 720 while the user's abort reads "(upper 0.749)". `checked == 2L` cannot catch it — it counts hand-listed entries, not renderings. Two lenses clean; behaviour re-swept over 2,372 real aborts with 0 violations; no `R/` change since pass 6. AC1-AC4, AC6, AC7 verified this pass and stand. NINTH return, and the thrash rule's SECOND trigger (same criterion, new mechanism of the same shape, four times) rather than its first. Status -> in-progress.
+
+- 2026-07-27: gated amendment (pass-9 disposition) — maintainer chose the STRUCTURAL alternative over `/milestone-brief` escalation or a fourth hand-listed cell, so T11 replaces branch enumeration with an invariant swept over `boundary_method_hint()`'s own returned bullets; Coverage gains T11 on AC5; no acceptance criterion changed, since AC5 already asks for this test and only the mechanism moves. Two further gate decisions: the invariant is the STRICT digit-free form (nothing numeric may appear in a bullet, which constrains M97's npbootstrap wording too) rather than an endpoint comparison that would reinherit pass-7's precision problem; and guard-doctrine §8's description-layer certification runs before `status -> review`, AC5 having failed four passes on exactly the author-certifies-own-guard shape. Adding T11 took the plan-owned body over cap, so Tasks was compressed in one rewrite (T1, T6-T10 to one line each — detail is in this log): 147/149.
 
 ## Decisions
 
