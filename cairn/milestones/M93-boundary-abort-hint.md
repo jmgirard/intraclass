@@ -1307,3 +1307,77 @@ bullets for numeric tokens across a grid of designs and data, asserting the inva
 "a rendered bullet contains no number" rather than enumerating branches — which is
 rendering-agnostic and covers renderings not yet written, with one end-to-end abort per
 design retained to prove the bullets reach the real message unchanged.
+
+---
+
+## Review pass 10 (2026-07-27)
+
+**Branch state.** `main` in sync with `origin/main` (0/0); branch 66 ahead / 0 behind,
+so no merge was needed before gathering evidence. PR #100, head `b81d606`, which is
+code-identical to `b5faad8` — the two differ only in `cairn/` tracking lines.
+
+**Fresh per-criterion evidence.** All from commands run this phase. The M93 file runs
+**FAIL 0 / ERROR 0 / PASS 893 / SKIP 0** in 27.6 s at `NOT_CRAN=true CI=true`; the zero
+skip count is load-bearing, because a boundary test that skipped would pass vacuously.
+
+- AC1 — `:151` builds the near-σ²→0 datasets, confirms the DEFAULT MC path aborts on
+  both geometries, that every abort reached is a Monte-Carlo site and never the
+  bootstrap site, and that site B occurs (6 assertions). The site enumeration AC1 asks
+  the work log to record is there (T1 line, 2026-07-25): `R/ci-montecarlo.R:124`
+  21/40 two-way + 19/40 one-way, `:43` 1/40, `R/ci-bootstrap.R:48` 0/90.
+- AC2 — naming-after-verification at `:317`/`:349`; additivity at `:447`; never-raise
+  at `:1537` (33 assertions); laziness at `:1766`, with the measured cost in the work
+  log (T1 line, 2026-07-26: searle 0.32 ms, burch 0.44 ms, mpl 3.55 ms on-grid /
+  8.17 ms off-grid). The bootstrap exclusion carries its own evidence at `:193`/`:217`.
+  Checked independently this phase rather than taken from the tests: `grep` finds NO
+  code reference to `npbootstrap` in `R/boundary-hint.R` (comments only), so no design
+  can name it; and an unbalanced one-way boundary abort — a no-hint row — renders
+  exactly the pre-existing message, leading line plus both generic remedies, with no
+  method named and no third bullet.
+- AC4 — equivalence at `:1625` (87 assertions) against `tidy(icc(ci_method = ))` at
+  `tolerance = 0`, carried by the out-of-support `bh_pole_oneway()` cell that makes a
+  reporting-path clamp visible; admissibility rows against `icc()`'s own fence at
+  `:1730`; `n0` wiring at `:1828` against the value `icc()` really passes, shown
+  load-bearing at `:1873`.
+- AC6 — `NEWS.md` carries the user-facing entry under Minor improvements, stating that
+  a method is named by RUNNING each candidate the design allows and keeping only those
+  whose endpoints are all finite, correctly ordered and in range, with the silent cases
+  stated as a consequence of that check; `@param ci_method` carries the matching note;
+  `man/icc.Rd` regenerated. Scanned this phase: no milestone number appears in any
+  user-facing text in the diff.
+- AC7 — run this phase on the final tree: `devtools::check(env_vars = c(NOT_CRAN =
+  "false"))` **Status: OK** (0 errors / 0 warnings / 0 notes), `devtools::test()`
+  FAIL 0 / ERROR 0 / PASS 5106 / SKIP 23 at `NOT_CRAN=true CI=true` (the 2 WARN are the
+  pre-existing expected-warning tests in `test-vignette-claims.R`),
+  `lintr::lint_package()` "No lints found", `air format --check .` clean,
+  `devtools::document()` empty `git status`. Snapshot clause vacuous by inspection: no
+  `_snaps/` path in `git diff --name-only main..HEAD`, so none moved and none was
+  accepted. PR #100 was all 9 checks green on `b5faad8`; the tracking-only head
+  `b81d606` is re-running and is confirmed before merge.
+
+**Consistency gate.** `cairn_validate` exit 0 — all 16 CHECKs PASS including
+`coverage complete` and `weight caps`. Two advisories, neither a gate failure:
+`sizing (split tripwires)` flags M93 at 11 tasks against a >10 tripwire — an artefact
+of three re-cuts accumulating task numbers against one unchanged goal, not two
+milestones in one — and 321 `dangling id tokens`, all pre-existing pre-migration ids.
+Profile `consistency-gate` slot: `devtools::document()` no-diff · `NAMESPACE` and
+`data/` absent from the diff, so no generated file was hand-edited · `README.Rmd`
+untouched · `pkgdown::check_pkgdown()` "No problems found" · `NEWS.md` entry present ·
+no new top-level files, so no `.Rbuildignore` entry is owed. No `DESIGN.md` principle
+changed, so `cairn_impact` does not apply.
+
+**Pass 10 is IN PROGRESS at this checkpoint.** AC1, AC2, AC4, AC6 and AC7 have their
+fresh evidence above and their boxes stand. AC3 and AC5 are deliberately NOT ticked
+yet: AC5 has 288 real aborts with 0 numeric-token violations and every abort classed
+`intraclass_singular_fit` from an independent probe run this phase, and AC3 has the
+committed message-driven sweeps (`:1115` 85 assertions one-way, `:1162` 141 two-way,
+`:1350` 88 at a numeric `unit`), but both wait on the [O] diff-bug lens and on an
+independent `named == usable` sweep still running — whose acceptance predicate is
+written from AC3's text rather than by calling the package's own helper. Two of the
+three lenses have reported, both 0 findings: [S] blame-history (verified the D-018
+fence holds in shipped code, the four helper signatures stay back-compatible with
+`engine-lavaan.R`'s positional `rmvn()` calls and `d-study.R`, the no-hint abort is
+byte-identical to `main`, and every helper deleted across the re-cuts was both
+introduced and removed inside this branch) and [S] prior-review-record (checked the
+diff against all nine prior passes' findings; none reintroduced, and the guard-doctrine
+§8 D1 fix is present and closes the hole it names).
