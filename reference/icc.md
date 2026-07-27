@@ -255,12 +255,25 @@ icc(
 
   Interval method. `"montecarlo"` (default) simulates from the fitted
   parameter covariance on the engine's log scale (fast, boundary-aware).
-  `"bootstrap"` is a parametric bootstrap: it simulates response vectors
-  from the fitted model, refits, and takes percentile quantiles of the
-  resampled coefficients. The bootstrap does not rely on the
-  asymptotic-normal covariance approximation but is far slower (a refit
-  per resample). It is available for every design the `"glmmTMB"` and
-  `"lme4"` engines fit (via `glmmTMB`'s
+  Near the variance boundary it can fail to produce an interval and
+  aborts; when it does, the error names a deterministic opt-in method
+  below that fits the design in hand — chosen by RUNNING each candidate
+  on your data and keeping only those whose reported endpoints are all
+  finite, correctly ordered and in range — so there is no need to work
+  that out from this list. Being a check on the data rather than on the
+  design, it falls silent wherever a method would not in fact deliver,
+  including a missing score, degenerate data, an uncalibrated
+  `conf_level` or geometry, and a numeric `unit` projected past the
+  point where a method's Spearman-Brown map breaks down; the two closed
+  forms are asked separately, so one can be named where the other is
+  not. It never names `"npbootstrap"`, whose resampling can fail for
+  reasons a single run does not settle; check that one against its own
+  entry below. `"bootstrap"` is a parametric bootstrap: it simulates
+  response vectors from the fitted model, refits, and takes percentile
+  quantiles of the resampled coefficients. The bootstrap does not rely
+  on the asymptotic-normal covariance approximation but is far slower (a
+  refit per resample). It is available for every design the `"glmmTMB"`
+  and `"lme4"` engines fit (via `glmmTMB`'s
   [`simulate()`](https://rdrr.io/r/stats/simulate.html) + refit and
   [`lme4::bootMer`](https://rdrr.io/pkg/lme4/man/bootMer.html)
   respectively) and, for the random two-way design and the crossed
@@ -695,11 +708,11 @@ icc(ratings, score, subject, rater, seed = 1)
 #> 
 #>   index     estimate   95% CI
 #>   Absolute agreement
-#>   ICC(A,1)     0.290   [0.050, 0.706]
-#>   ICC(A,k)     0.620   [0.175, 0.906]
+#>   ICC(A,1)     0.290   [0.050, 0.712]
+#>   ICC(A,k)     0.620   [0.173, 0.908]
 #>   Consistency
-#>   ICC(C,1)     0.715   [0.339, 0.924]
-#>   ICC(C,k)     0.909   [0.672, 0.980]
+#>   ICC(C,1)     0.715   [0.335, 0.925]
+#>   ICC(C,k)     0.909   [0.668, 0.980]
 #> 
 #> Variance components: subject 2.556, rater 5.244, residual 1.019
 #> Shrout & Fleiss equivalent: ICC(A,1) = ICC(2,1), ICC(A,k) = ICC(2,k)
