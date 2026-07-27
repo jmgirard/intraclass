@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-26 (M93 re-cut a third time on its pass-5 failure — the verify-instead-of-predict candidate met its promotion condition and is absorbed, so that row is gone; D-018 added; M97 amended. One candidate added: a shipped out-of-support `searle` interval at a numeric `unit`. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-27 (M93 merged and archived after review pass 10 — three lenses, 0 findings; M88 rotated out under terminal-row retention. One M93 lesson captured; its guard-craft family retired into cairn's `guard-doctrine.md` (D-055 maturation). M97 is now unblocked. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -13,14 +13,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M96 | Failure accounting in the three MPL coverage-sweep generators | planned | — | normal | milestones/M96-mpl-sweep-failure-accounting.md |
 | M95 | Whole-table pin for the shipped κ_m calibration table | planned | — | normal | milestones/M95-kappa-table-whole-pin.md |
 | M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | planned | M92 | normal | milestones/M94-mpl-doc-surface.md |
-| M93 | Boundary-abort hint for the deterministic boundary-robust `ci_method` families | review | — | normal | milestones/M93-boundary-abort-hint.md |
+| M93 | Boundary-abort hint for the deterministic boundary-robust `ci_method` families | done | — | normal | milestones/archive/M93-boundary-abort-hint.md |
 | M92 | Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95` | done | — | normal | milestones/archive/M92-mpl-095-interp-probe.md |
 | M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | done | M90 | normal | milestones/archive/M91-mpl-conf-level-export.md |
 | M90 | MPL κ_m recalibration + coverage GO/NO-GO at `conf_level` ∈ {0.90, 0.99} | done | — | normal | milestones/archive/M90-mpl-conf-level-calibration.md |
 | M89 | Numeric `unit` (ICC(A,m)) for `ci_method = "mpl"` — pole-safe Spearman-Brown projection | done | M88 | normal | milestones/archive/M89-mpl-numeric-unit.md |
-| M88 | Exported profile-likelihood `ci_method = "mpl"` — two-way random ICC(A,1)/ICC(A,k) | done | M86, M87 | normal | milestones/archive/M88-mpl-ci-method-export.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M92 done (2026-07-25) → M87 rotated out (oldest terminal; its archive file still resolves). Kept: M92, M91, M90, M89, M88 (5 most recent terminal). -->
+<!-- terminal-row retention: M93 done (2026-07-27) → M88 rotated out (oldest terminal; its archive file still resolves). Kept: M93, M92, M91, M90, M89 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
