@@ -248,6 +248,8 @@ legitimate ICC(3) = -1.771 on healthy data.
 
 - 2026-07-27: correction to the §8 round-2 line above, and to `26364eb`'s message — "both in comments the fix commit itself added" is wrong about the second one. Only the site-A frequency was ADDED by that commit; the "Both predecessors" sentence dates from the T11 commit `d2a09d1`, and the fix commit merely narrowed it with the word `numeric`, which is what made it describe pass 7 alone. Round 3 (narrow, scoped to `5131210..26364eb`) is otherwise CLEAN: both corrected comments make only supported claims, the pass-7 / passes-8-9 split matches this file's own header and the pass entries above, and every cell of the grid was independently re-measured to land on site B (39 site-B aborts, 0 site-A, over the six cells × seeds 1-12). §8 gate reached at zero unresolved.
 
+- 2026-07-27: PR #100 all 9 checks green on `b5faad8` — `ubuntu-latest (release)` 16m57s, `windows-latest (release)` 20m30s, `test-coverage` 16m53s, plus `check-references`, `format-check`, `lint`, `pkgdown` and both codecov. The two R CMD check platforms and `test-coverage` run the INSTALLED package, which is where T11's `local_mocked_bindings()` recorders could plausibly diverge from `load_all()`, so the new guard is verified where that matters. Ready for review pass 10.
+
 ## Decisions
 
 ## Review
