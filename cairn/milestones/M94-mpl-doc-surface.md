@@ -75,7 +75,7 @@ about 0.90/0.99, which M91 already documents.
       P3-1 was written.
 - [x] T2: Write the `@param ci_method` / `@param conf_level` text and the `NEWS.md`
       entry against the ledger; `devtools::document()`.
-- [ ] T3: Implement `data-raw/check-mpl-doc-claims.py` — parse the ledger, evaluate each
+- [x] T3: Implement `data-raw/check-mpl-doc-claims.py` — parse the ledger, evaluate each
       assertion against the fixture, and cross-check ledger↔docs both ways.
 - [ ] T4: Mutation-verify: invert each claim in turn, and point the script at the
       collided fixture; record that each reds.
@@ -89,6 +89,8 @@ about 0.90/0.99, which M91 already documents.
 - 2026-07-31: T1 done — fixture enumerated (single single-factor pair: E2 vs E3, n_r only; all cells δ=4/ρ=0.60/0.95; floors clear at min 0.944; miss direction non-uniform: 31/2, 42/14, 0/1; no endpoint saturation); ledger drafted at `data-raw/mpl-doc-claims.tsv` (9 settle + 1 absent row, keys recomputed at T3). Gate choices: stdlib RDS parser in-script (no new dep), committed TSV ledger.
 
 - 2026-07-31: T2 done — interpolation paragraph added to `@param ci_method`, one sentence to `@param conf_level`, NEWS bullet added (no milestone numbers, per tracking rules); every ledger quote appears verbatim; `devtools::document()` clean, `man/icc.Rd` regenerated.
+
+- 2026-07-31: T3 done — checker implemented with a stdlib-only RDS reader (no R, no pip in the R-free CI job); wide-recall sentence enumerator over the two `@param` blocks + the NEWS bullet found 30 candidates; ledger finalized (12 settle, 2 absent AC6-refusal, 21 out rows); check green both directions.
 
 ## Decisions
 
