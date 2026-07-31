@@ -1,0 +1,33 @@
+# M94 MPL doc-claims ledger (cairn/LESSONS.md M71 rule made mechanical on the
+# roxygen surface). One row per universal/negative/numeric claim candidate that
+# `python3 data-raw/check-mpl-doc-claims.py` enumerates in the M94 doc scope
+# (the `@param conf_level` + `@param ci_method` blocks of R/icc.R and the M94
+# NEWS.md entry). Columns: key, file, disposition, quote, assertion, reason.
+#   key         sha1[:12] of "file\tnormalized claim sentence" (recomputed by
+#               the enumerator; a changed sentence must be re-triaged).
+#   disposition settle  — the assertion column is evaluated against
+#                         data-raw/m92-interp-sweep.rds; nonzero exit on falsity.
+#               out     — not settleable by the M92 fixture; reason says why and
+#                         where it IS settled.
+#               absent  — the quote is a REGEX that must match nowhere in the
+#                         doc scope (AC6 refusal rows); assertion empty.
+#   quote       verbatim substring of the claim sentence (whitespace-normalized)
+#               that must appear in the doc scope (settle/out), or the forbidden
+#               regex (absent).
+#   assertion   a Python expression over the parsed fixture: `cell(id, col)`,
+#               `col(name)` (list over E1,E2,E3), `verdict` (the 0.95 verdict
+#               dict), `meta`. True = claim holds.
+# Rows below are seeded from the fixture enumeration (M94 T1); the enumerator's
+# cross-check requires every candidate to carry a row and every settle/absent
+# row to bind (quote found / regex absent).
+key	file	disposition	quote	assertion	reason
+TBD	R/icc.R	settle	validated -- not calibrated -- by coverage probes at a handful of off-node geometries	len(col('id')) == 3 and all(r == 'interp' for r in col('role')) and all(c == 0.95 for c in col('conf')) and all(s not in (10, 15, 20, 30, 50, 100) for s in col('n_s'))	three cells, all off-node interpolation probes at 0.95
+TBD	R/icc.R	settle	each clears the pre-registered 0.93 floor	all(col('adequate')) and all(f == 0.93 for f in col('floor')) and verdict['all_adequate'] and len(verdict['failed_cells']) == 0	floor-clearing is the validated property
+TBD	R/icc.R	settle	one validated cell measured 0.944	abs(min(col('coverage')) - 0.944) < 5e-4 and 0.93 <= min(col('coverage')) < 0.95	floor is a tolerance, not at-or-above-nominal; also reds on the collided fixture (run-1 min 0.953)
+TBD	R/icc.R	settle	only the rater and subject counts vary	len(set(col('delta'))) == 1 and 4.0 in set(col('delta')) and len(set(col('rho'))) == 1 and 0.6 in set(col('rho')) and len(set(col('conf'))) == 1 and len(set(zip(col('n_r'), col('n_s')))) == 3	single stress configuration (delta 4, rho 0.60)
+TBD	R/icc.R	settle	no validated cell pinned an endpoint at 0 or 1	all(p == 0 for p in col('p_lower0')) and all(p == 0 for p in col('p_upper1')) and all(v == 0 for v in col('vacuous'))	universal negative over the three cells
+TBD	R/icc.R	settle	31/2 and 42/14	cell('E1', 'miss_below') == 31 and cell('E1', 'miss_above') == 2 and cell('E2', 'miss_below') == 42 and cell('E2', 'miss_above') == 14 and cell('E1', 'miss_below') > cell('E1', 'miss_above') and cell('E2', 'miss_below') > cell('E2', 'miss_above')	below-dominant misses in the two multi-rater cells; reds on the collided fixture
+TBD	R/icc.R	settle	the 2-rater cell missed only once, above	cell('E3', 'n_r') == 2 and cell('E3', 'miss_below') == 0 and cell('E3', 'miss_above') == 1	universal-negative about E3; reds on the collided fixture (run-1 E3 coverage 1.000)
+TBD	R/icc.R	settle	not uniform across rater counts	cell('E2', 'n_s') == cell('E3', 'n_s') and cell('E2', 'delta') == cell('E3', 'delta') and cell('E2', 'rho') == cell('E3', 'rho') and cell('E2', 'conf') == cell('E3', 'conf') and cell('E2', 'n_r') == 10 and cell('E3', 'n_r') == 2 and (cell('E2', 'miss_below') > cell('E2', 'miss_above')) != (cell('E3', 'miss_below') > cell('E3', 'miss_above'))	AC6: the across-raters wording rests on the E2/E3 single-factor pair, which the fixture contains
+TBD	R/icc.R	absent	nothing\s+(?:\w+\s+){0,3}isolates(?:\s+\w+){0,3}\s+rater|no\s+(?:pair|cell)s?\s+(?:\w+\s+){0,3}isolat\w*\s+(?:the\s+)?rater		AC6: the claim M92's review found false (P3-1) is refused outright; E2 vs E3 isolates the rater axis
+TBD	NEWS.md	settle	each clearing its pre-registered coverage floor	all(col('adequate')) and verdict['all_adequate']	NEWS restatement of the floor-clearing claim

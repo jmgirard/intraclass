@@ -69,7 +69,7 @@ about 0.90/0.99, which M91 already documents.
 
 ## Tasks
 
-- [ ] T1: Enumerate, from `data-raw/m92-interp-sweep.rds`, what the cells actually
+- [x] T1: Enumerate, from `data-raw/m92-interp-sweep.rds`, what the cells actually
       license — including which pairs vary in one factor alone — and draft the claim
       ledger from that, before writing any prose. Reversing this order is how M92's
       P3-1 was written.
@@ -85,6 +85,8 @@ about 0.90/0.99, which M91 already documents.
 ## Work log
 
 - 2026-07-25: created by /milestone-plan as the second half of M92's re-cut (M92 failed review three times, every failure in this exported prose surface; the thrash rule sent it back to plan). The rule this milestone exists to enforce — a universal or negative claim about the repo's own fixture must carry the command that settles it — is `cairn/LESSONS.md:30` (M71), which until now had no enforcement on the roxygen surface.
+
+- 2026-07-31: T1 done — fixture enumerated (single single-factor pair: E2 vs E3, n_r only; all cells δ=4/ρ=0.60/0.95; floors clear at min 0.944; miss direction non-uniform: 31/2, 42/14, 0/1; no endpoint saturation); ledger drafted at `data-raw/mpl-doc-claims.tsv` (9 settle + 1 absent row, keys recomputed at T3). Gate choices: stdlib RDS parser in-script (no new dep), committed TSV ledger.
 
 ## Decisions
 
