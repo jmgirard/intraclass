@@ -73,7 +73,7 @@ about 0.90/0.99, which M91 already documents.
       license — including which pairs vary in one factor alone — and draft the claim
       ledger from that, before writing any prose. Reversing this order is how M92's
       P3-1 was written.
-- [ ] T2: Write the `@param ci_method` / `@param conf_level` text and the `NEWS.md`
+- [x] T2: Write the `@param ci_method` / `@param conf_level` text and the `NEWS.md`
       entry against the ledger; `devtools::document()`.
 - [ ] T3: Implement `data-raw/check-mpl-doc-claims.py` — parse the ledger, evaluate each
       assertion against the fixture, and cross-check ledger↔docs both ways.
@@ -87,6 +87,8 @@ about 0.90/0.99, which M91 already documents.
 - 2026-07-25: created by /milestone-plan as the second half of M92's re-cut (M92 failed review three times, every failure in this exported prose surface; the thrash rule sent it back to plan). The rule this milestone exists to enforce — a universal or negative claim about the repo's own fixture must carry the command that settles it — is `cairn/LESSONS.md:30` (M71), which until now had no enforcement on the roxygen surface.
 
 - 2026-07-31: T1 done — fixture enumerated (single single-factor pair: E2 vs E3, n_r only; all cells δ=4/ρ=0.60/0.95; floors clear at min 0.944; miss direction non-uniform: 31/2, 42/14, 0/1; no endpoint saturation); ledger drafted at `data-raw/mpl-doc-claims.tsv` (9 settle + 1 absent row, keys recomputed at T3). Gate choices: stdlib RDS parser in-script (no new dep), committed TSV ledger.
+
+- 2026-07-31: T2 done — interpolation paragraph added to `@param ci_method`, one sentence to `@param conf_level`, NEWS bullet added (no milestone numbers, per tracking rules); every ledger quote appears verbatim; `devtools::document()` clean, `man/icc.Rd` regenerated.
 
 ## Decisions
 
