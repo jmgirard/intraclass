@@ -34,6 +34,20 @@
 
 ### Minor improvements
 
+- The `ci_method = "mpl"` documentation now states the interpolation
+  evidence behind off-node subject counts: the correction constant is
+  calibrated at subject-count nodes and linearly interpolated between
+  them, and the interpolated path is coverage-validated at each
+  supported confidence level — at the default 0.95 by three off-node
+  cells, each clearing its pre-registered coverage floor. The
+  documentation also says what that validation does not establish
+  (interpolated values are validated at a handful of geometries, not
+  calibrated, and the interval’s asymmetry direction is not uniform
+  across rater counts). Every universal or negative claim this
+  documentation makes about the validated cells is settled mechanically,
+  in CI, against the committed coverage fixture
+  (`data-raw/check-mpl-doc-claims.py`).
+
 - When the default Monte-Carlo interval cannot be computed near the
   variance boundary, the error now **names an interval method that works
   on your data** instead of only suggesting a refit. It does this by

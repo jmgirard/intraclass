@@ -249,7 +249,9 @@ icc(
 
   Confidence level for the interval (default `0.95`). Any level in
   `(0, 1)` is accepted, except under `ci_method = "mpl"`, which is
-  calibrated at 0.90, 0.95, and 0.99 only (see `ci_method`).
+  calibrated at 0.90, 0.95, and 0.99 only; at each of those levels the
+  between-node subject-count interpolation is coverage-checked (see
+  `ci_method`).
 
 - ci_method:
 
@@ -338,6 +340,27 @@ icc(
   near-boundary region that **carries no external oracle**; there, and
   at `conf_level = 0.99` throughout, its calibration rests on the
   package's own simulated coverage.
+
+  The constant's subject-count dimension is tabulated, not continuous:
+  it is calibrated at subject-count **nodes** (10, 15, 20, 30, 50, and
+  100 subjects, per rater count and level) and **linearly interpolated
+  in the subject count** between them; at a node the tabulated value is
+  used exactly. The nodes are individually calibrated; the interpolated
+  path is validated – not calibrated – by coverage probes at a handful
+  of off-node geometries at each supported level. At the default 0.95
+  the validated cells are three – 3 raters with 25 subjects, and 10 and
+  2 raters with 40 subjects – all at one stress configuration (rater
+  variance four times error variance, true ICC 0.60) in which only the
+  rater and subject counts vary; each clears the pre-registered 0.93
+  floor there. That floor is a nominal-minus-2-percentage-point
+  tolerance, not at-or-above-nominal coverage: one validated cell
+  measured 0.944. No validated cell pinned an endpoint at 0 or 1. And
+  the one-sidedness described below is not uniform across rater counts:
+  in the 3- and 10-rater cells misses fall mostly below the interval
+  (31/2 and 42/14 of 1000 replicates), while the 2-rater cell missed
+  only once, above. So an off-node subject count is safe to use at every
+  supported level, but an asymmetry or width figure observed at one
+  geometry must not be carried to another.
 
   Two further characteristics are worth knowing before reporting an
   endpoint. The two-sided interval is **not equal-tailed** – where rater
