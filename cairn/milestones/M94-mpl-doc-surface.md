@@ -1,6 +1,7 @@
 # M94: Exported documentation of the MPL interpolation evidence, with a fixture-reading check
 
-- **Status:** planned
+- **Status:** in-progress
+- **Branch:** m94-mpl-doc-surface
 - **Priority:** normal
 - **Depends on:** M92
 - **Driving RR:** —
