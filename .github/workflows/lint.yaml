@@ -57,3 +57,12 @@ jobs:
 
       - name: Self-test the generalizing-claim gate (vacuity guard)
         run: python3 data-raw/enumerate-generalizing-claims.py --self-test
+
+      # M94: every universal/negative claim the exported MPL interpolation docs
+      # make about the M92 validated cells is settled against the committed
+      # fixture (ledger: data-raw/mpl-doc-claims.tsv). Stdlib-only, R-free.
+      - name: Check MPL doc claims against the M92 fixture (M94)
+        run: python3 data-raw/check-mpl-doc-claims.py
+
+      - name: Self-test the MPL doc-claims check (mutation harness)
+        run: python3 data-raw/check-mpl-doc-claims.py --self-test

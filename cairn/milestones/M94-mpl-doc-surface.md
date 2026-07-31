@@ -1,6 +1,6 @@
 # M94: Exported documentation of the MPL interpolation evidence, with a fixture-reading check
 
-- **Status:** in-progress
+- **Status:** review
 - **Branch:** m94-mpl-doc-surface
 - **Priority:** normal
 - **Depends on:** M92
@@ -79,7 +79,7 @@ about 0.90/0.99, which M91 already documents.
       assertion against the fixture, and cross-check ledger↔docs both ways.
 - [x] T4: Mutation-verify: invert each claim in turn, and point the script at the
       collided fixture; record that each reds.
-- [ ] T5: Wire the check into the CI job that already runs the references checkers, run
+- [x] T5: Wire the check into the CI job that already runs the references checkers, run
       the full gate, open the PR.
 
 ## Work log
@@ -93,6 +93,8 @@ about 0.90/0.99, which M91 already documents.
 - 2026-07-31: T3 done — checker implemented with a stdlib-only RDS reader (no R, no pip in the R-free CI job); wide-recall sentence enumerator over the two `@param` blocks + the NEWS bullet found 30 candidates; ledger finalized (12 settle, 2 absent AC6-refusal, 21 out rows); check green both directions.
 
 - 2026-07-31: T4 done — mutation verification is the automated `--self-test` (no by-hand record needed): inverting each of the 12 settle assertions reds, deleting each settled claim sentence from the docs reds, injecting the refused rater-axis wording reds, an unledgered universal reds, and the collided run-1 fixture reds on exactly the three number-citing rows (0.944; 31/2 and 42/14; E3 missed once, above).
+
+- 2026-07-31: T5 done — check + its self-test wired into lint.yaml's R-free `check-references` job; full gate green: `devtools::test()` (NOT_CRAN=true CI=true) 0 fail/0 error/5106 pass, `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0/0/0, `lintr::lint_package()` 0 lints, `air format --check` clean, `devtools::document()` no-diff, `pkgdown::check_pkgdown()` clean, all references-CI checkers green. Status → review, PR opened.
 
 ## Decisions
 
