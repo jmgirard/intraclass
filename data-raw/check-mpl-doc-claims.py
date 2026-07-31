@@ -336,6 +336,10 @@ def read_ledger(path=LEDGER):
             key, fname, disp, quote, assertion, reason = parts
             if disp not in ("settle", "out", "absent"):
                 raise ValueError(f"{path}:{lineno}: unknown disposition {disp!r}")
+            if not quote.strip():
+                # an empty quote would substring-match every sentence and
+                # silently disable the enumeration gate for that file
+                raise ValueError(f"{path}:{lineno}: empty quote")
             rows.append(
                 {"line": lineno, "key": key, "file": fname, "disp": disp,
                  "quote": quote, "assertion": assertion, "reason": reason}
@@ -363,7 +367,12 @@ def run_check(fixture=FIXTURE, ledger_rows=None, scopes=None, verbose=True):
     covered = set()
     for row in ledger_rows:
         tag = f"ledger:{row['line']} [{row['disp']}]"
-        scope_norm = normalize(scopes.get(row["file"], ""))
+        if row["file"] not in scopes:
+            # an unrecognized file value would fail open: an absent row's
+            # regex can never match an empty scope
+            failures.append(f"{tag} unknown file {row['file']!r}")
+            continue
+        scope_norm = normalize(scopes[row["file"]])
         if row["disp"] == "absent":
             if re.search(row["quote"], scope_norm, re.I):
                 failures.append(

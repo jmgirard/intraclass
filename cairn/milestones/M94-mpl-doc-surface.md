@@ -97,6 +97,8 @@ about 0.90/0.99, which M91 already documents.
 
 - 2026-07-31: T5 done — check + its self-test wired into lint.yaml's R-free `check-references` job; full gate green: `devtools::test()` (NOT_CRAN=true CI=true) 0 fail/0 error/5106 pass, `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0/0/0, `lintr::lint_package()` 0 lints, `air format --check` clean, `devtools::document()` no-diff, `pkgdown::check_pkgdown()` clean, all references-CI checkers green. Status → review, PR opened.
 
+- 2026-07-31: merge gate — approved as "fix 3 items, then merge": O-12 empty-quote guard and O-13 unknown-file guard added to the checker (both verified fail-closed by mutation), O-7's false ledger reason corrected (test-ci-mpl.R pins spot values only; whole-table pin is M95). Checker, self-test, air, lintr re-run green; no R surface touched.
+
 ## Decisions
 
 ## Review
