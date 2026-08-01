@@ -199,6 +199,7 @@ Interval-time, per CI method:
 | Monte-Carlo (default) | Sampled on the engine's internal log scale → boundary-aware by construction; covariance eigenvalues floored at 0 (`pmax`) where a Cholesky factor would fail; a genuinely rank-deficient covariance → classed deferral | ADR-003 |
 | Bootstrap | Parametric refit per resample; a singular/boundary refit is a valid draw (variance pinned at 0) and is **kept**. Separately, *non-convergent* refits are discarded: past `warn_frac` a classed warning (`intraclass_bootstrap_dropouts`), past `min_frac` a classed abort (`intraclass_singular_fit`) — never a silent NA interval | ADR-025 |
 | Posterior | The engine's own draws (natural scale), **kept**; percentile or HPDI; boundary-aware mode with bounded-density smoothing; degenerate all-equal draws return the common value | ADR-033/044 |
+| MPL (deterministic deviance roots) | A side whose profile deviance never reaches the critical value has its limit AT the [0,1] boundary and reports it on that evidence (explicit sign test); a crossing-indicated root-finding failure aborts classed (`intraclass_engine_error`), never silently reported as a boundary limit | D-019 (M99); D-014/D-015 |
 
 **Fixed-rater θ²_r average-floor (cross-engine).** The fixed-rater θ²_r estimand
 adds a boundary-aware *average-floor*: the 2b-corrected per-group draws are

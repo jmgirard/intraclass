@@ -136,6 +136,7 @@ region).
 - 2026-08-01: plan gate chose fixing the offline twin in lockstep over shipped-only because the twin is the IP1 reference implementation and committed fixtures are unaffected (failure region unreachable for the seeded sweeps); falsified by a calibration re-run whose accounting shows the twin aborting where the shipped code does not.
 
 - 2026-08-01: T1 done — two M99 tests appended to test-ci-mpl.R; mocked-seam abort test red as intended (no mpl_uniroot binding yet), no-crossing boundary test green (value-identical to the swallow until T2 removes the pattern); suite otherwise 181 pass.
+- 2026-08-01: checkpoint (T2–T5 code + records drafted, verification pending) — sign-test rewrite in R/ci-mpl.R with mpl_uniroot seam + classed abort; twin mirrored (stop() idiom); 4 claim surfaces + NEWS + man/ + tsv re-triage done, all three data-raw checkers green; D-019 appended + DESIGN.md interval-time MPL row added (previewed in chat); MPL test file green (183); full suite + lintr running in background — tasks stay unticked until the verify slot is green.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

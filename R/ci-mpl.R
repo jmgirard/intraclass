@@ -156,14 +156,27 @@ mpl_deviance <- function(rho, ms, neg2l_min = NULL) {
 # CI = { rho : D(rho) <= (1+kappa) * chi^2_{1,1-alpha} }.  kappa = 0 is naive PL;
 # kappa = kappa_m is MPL. `side = "lower"` gives a one-sided lower bound; per the LRT
 # one-sided convention its crit uses 1-2*alpha, so a 95% lower bound (alpha = 0.05)
-# shares the two-sided 90% lower critical value (xiao2013 Ex. 1). A root that runs off
-# the parameter space clamps to the [0,1] boundary -- the interval EXISTS on every
-# dataset (the residual value D-014 ships mpl for), unlike the MC default's abort.
+# shares the two-sided 90% lower critical value (xiao2013 Ex. 1). A side whose
+# deviance never reaches the critical value has its true limit AT the [0,1]
+# boundary and returns it on that evidence (the sign test below, M99); with the
+# likelihood well-behaved the interval exists on every dataset the method admits,
+# unlike the MC default's abort (the residual value D-014 ships mpl for). A
+# genuine root-finding failure -- a crossing indicated but no root located --
+# aborts classed instead of fabricating a boundary limit (#5/#8; M99, D-019).
+
+# The uniroot seam: a one-line wrapper so tests can force a root-finding failure
+# via local_mocked_bindings(). With real non-degenerate data the sign test always
+# resolves the bracket before uniroot can fail (M99).
+mpl_uniroot <- function(f, interval) {
+  stats::uniroot(f, interval, tol = 1e-10)$root
+}
+
 mpl_interval <- function(
   ms,
   kappa = 0,
   alpha = 0.10,
-  side = c("two", "lower")
+  side = c("two", "lower"),
+  call = rlang::caller_env()
 ) {
   side <- match.arg(side)
   fit <- mpl_fit(ms)
@@ -175,17 +188,42 @@ mpl_interval <- function(
   }
   f <- function(rho) mpl_deviance(rho, ms, neg2l_min = fit$neg2l_min) - crit
   eps <- 1e-7
-  lower <- tryCatch(
-    stats::uniroot(f, c(eps, rho_hat), tol = 1e-10)$root,
-    error = function(e) 0
-  )
+
+  # Boundary vs failure (M99): f(rho_hat) = -crit < 0 always, so a side has a
+  # deviance crossing iff f at its outer bracket edge is >= 0 (or non-finite:
+  # the deviance blows up inside the bracket). No crossing -> the whole side
+  # sits inside the confidence set and the boundary IS the limit. A crossing
+  # with failed root-finding is a numerical failure, never a boundary limit.
+  side_root <- function(outer, boundary, label) {
+    f_outer <- f(outer)
+    if (is.finite(f_outer) && f_outer <= 0) {
+      return(boundary)
+    }
+    tryCatch(
+      mpl_uniroot(f, sort(c(outer, rho_hat))),
+      error = function(e) {
+        abort_intraclass(
+          c(
+            "The modified-profile-likelihood {label} limit could not be \\
+             located.",
+            i = "The profile deviance indicates a crossing on that side, but \\
+                 root-finding failed: a numerical failure, not a boundary \\
+                 limit.",
+            i = "Try {.code ci_method = \"montecarlo\"} or \\
+                 {.code ci_method = \"bootstrap\"}."
+          ),
+          class = "intraclass_engine_error",
+          call = call
+        )
+      }
+    )
+  }
+
+  lower <- side_root(eps, 0, "lower")
   if (side == "lower") {
     return(c(lower = lower, upper = NA_real_, rho_hat = rho_hat))
   }
-  upper <- tryCatch(
-    stats::uniroot(f, c(rho_hat, 1 - eps), tol = 1e-10)$root,
-    error = function(e) 1
-  )
+  upper <- side_root(1 - eps, 1, "upper")
   c(lower = lower, upper = upper, rho_hat = rho_hat)
 }
 
@@ -296,7 +334,13 @@ mpl_ci <- function(
   y <- mpl_matrix(df, call = call)
   ms <- mpl_anova(y)
   km <- mpl_kappa_lookup(ms$n_r, ms$n_s, conf_level = conf_level, call = call)
-  ends <- mpl_interval(ms, kappa = km, alpha = 1 - conf_level, side = "two")
+  ends <- mpl_interval(
+    ms,
+    kappa = km,
+    alpha = 1 - conf_level,
+    side = "two",
+    call = call
+  )
   lapply(estimands, function(est) {
     m <- est$divisor
     list(

@@ -630,3 +630,39 @@ discard rather than assuming it. M97 inherits the same line for `npbootstrap`, w
 run additionally consumes randomness and so must be RNG-neutral (#9). The cost is bounded
 by construction: verification is forced only inside an abort message, so a successful call
 never pays for it. Confirms and does not supersede D-012 or D-013.
+
+### D-019 (2026-08-01): MPL boundary endpoints are evidence-based; a genuine root-finding failure aborts classed — narrows the D-014/D-015 "interval on every dataset" framing
+
+**Context:** `mpl_interval()` (`R/ci-mpl.R`) returned endpoint `0`/`1` from
+`tryCatch(stats::uniroot(...), error = ...)`, so a genuine root-finding failure was
+indistinguishable from a confidence limit truly at the boundary (ROADMAP candidate
+since the M95/M96 plan gate, 2026-07-25; lineage M86 lib → M88 port). Low severity
+by construction: `f(rho_hat) = -crit < 0` always, so `uniroot` errors precisely when
+the deviance never crosses the critical value on that side, and the boundary answer
+is correct in that dominant case. But D-014/D-015 framed the shipped method as
+returning "an interval on **every** dataset", and the M99 plan-gate audit found that
+introducing any abort path narrows that exported contract — a change the
+Boundary-fit policy (DESIGN.md) says takes a D-entry.
+
+**Decision (M99 plan gate, 2026-08-01):** each side of the interval decides
+boundary-vs-failure by an explicit sign test: the boundary endpoint is returned only
+when the profile deviance at that side's outer bracket edge is finite and does not
+exceed the critical value (no crossing — the confidence set provably reaches the
+boundary); a crossing-indicated root-finding failure raises a classed
+`intraclass_engine_error` via `abort_intraclass()`, its message naming MPL
+root-finding (first non-engine use of the class — reuse chosen over a new class
+because the branch is unreachable with real non-degenerate data and a new class
+would grow exported vocabulary for it). A warning-plus-boundary-value alternative
+was rejected: a wrong endpoint would still reach downstream code (#5 fail-loudly).
+The offline reference implementation (`data-raw/m86-mpl-lib.R`) carries the same
+decision logic in lockstep (plain `stop()` — the classed layer governs package code
+only); committed calibration fixtures are unaffected (the failure region is
+unreachable for the seeded sweeps' non-degenerate Gaussian data).
+
+**Consequences:** narrows the D-014/D-015 framing prospectively — neither entry is
+edited; D-014's measured "interval on 100 % of datasets" stays true as a sweep
+result, and the residual value D-014 ships mpl for (an interval where the MC default
+aborts) is unchanged, since every such boundary case is the no-crossing branch.
+DESIGN.md's interval-time boundary table gains an MPL row citing this entry. Doc
+surfaces updated in M99 (roxygen, NEWS, comments, `data-raw/mpl-doc-claims.tsv`
+re-triage).

@@ -159,8 +159,10 @@ test_that("mpl returns an interval where the two-way MC default aborts (AC5)", {
 
   # A near-zero-rho boundary cell (sigma^2_s ~ 0): the two-way random MC default aborts
   # on a sizeable fraction of such datasets (intraclass_singular_fit; D-014 AC4). mpl
-  # returns an interval on 100% of them -- the residual value D-014 ships it for. Find
-  # one dataset (in the kappa_m grid) where MC aborts and assert mpl does not.
+  # returned an interval on 100% of them in the D-014 sweep -- the residual value it
+  # ships for (since M99 a genuine root-finding failure aborts classed instead, a
+  # branch unreachable on such data). Find one dataset (in the kappa_m grid) where
+  # MC aborts and assert mpl does not.
   aborted <- FALSE
   for (sd in 1:40) {
     d <- mpl_twoway_long(
@@ -801,7 +803,14 @@ test_that("mpl boundary endpoints come from the sign test, not a swallowed error
   # Near-zero-rho boundary cell: the profile deviance at eps never reaches the
   # critical value (no crossing), so lower = 0 IS the limit and must be returned
   # by the explicit no-crossing branch, on both the two-sided and one-sided paths.
-  d <- mpl_twoway_long(n_s = 20, n_r = 3, s2s = 1e-4, s2r = 0.3, s2e = 0.6, seed = 7)
+  d <- mpl_twoway_long(
+    n_s = 20,
+    n_r = 3,
+    s2s = 1e-4,
+    s2r = 0.3,
+    s2e = 0.6,
+    seed = 7
+  )
   ms <- mpl_anova(mpl_matrix(d))
   ci <- mpl_interval(ms, kappa = 0.5, alpha = 0.05, side = "two")
   expect_identical(ci[["lower"]], 0)

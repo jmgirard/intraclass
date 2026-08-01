@@ -24,6 +24,14 @@
 
 ## Minor improvements
 
+* `ci_method = "mpl"` now distinguishes a confidence limit truly at the `[0, 1]`
+  boundary from a root-finding failure. A boundary endpoint is reported only when
+  the profile deviance shows the confidence set reaching that boundary; a genuine
+  root-finding failure (a crossing indicated but no root located — not observed
+  on real non-degenerate data) now raises a classed `intraclass_engine_error`
+  instead of silently reporting `0` or `1`. Intervals on all previously
+  supported data are unchanged.
+
 * The `ci_method = "mpl"` documentation now states the interpolation evidence
   behind off-node subject counts: the correction constant is calibrated at
   subject-count nodes and linearly interpolated between them, and the
