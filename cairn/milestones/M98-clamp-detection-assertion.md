@@ -54,7 +54,7 @@ change would be its own hotfix.
       integer literals — never expressions derived from `cases`, which would
       self-adjust and assert nothing — and still red on a silently dropped
       cell, verified by removing one unit from the new case.
-- [ ] AC5 The comment heading these cells states truthfully which clamp classes
+- [x] AC5 The comment heading these cells states truthfully which clamp classes
       the grid detects and which cells supply each — recording that the
       finite-below-−1 class had a single, **seeded** supplier at HEAD (the
       npbootstrap `unit = "average"` cell, `seed = 4`) and that this milestone's
@@ -224,3 +224,40 @@ confirmations. Diff-bug lens: 11 findings.
   verified identical to `HEAD` afterwards.
 
 **Returns so far: 1.**
+
+### Pass 2 (2026-08-01) — evidence at HEAD `563af84`
+
+All removal and mutation legs re-run fresh at the final HEAD, **before** any
+reviewer was spawned (the return-1 process lesson), tree verified clean after
+each:
+
+- **AC1 ✅** — per-cell census re-run this session against the final grid: 25
+  compared cells, SSA = 0 case reaches the numeric comparison on all three
+  units (`single` −0.5, `average` −Inf, `2` −2), the `average` cell the sole
+  non-finite; `bh_degen_between()` makes no RNG call.
+- **AC2 ✅** — dropping BOTH finite-below-−1 suppliers fails
+  `seen_finite_below_neg1` **by name** (FAIL 3, with the two count literals);
+  dropping the sole non-finite supplier fails `seen_nonfinite` by name
+  (FAIL 3).
+- **AC3 ✅** — non-finite-only clamp at the `conf.low` assembly: PRE (acd5610
+  grid) FAIL 0 → POST FAIL 1. `pmax(-1, .)`: PRE 1 → POST 3. `pmax(0, .)`:
+  PRE 10 → POST 13 (re-run with `testthat.progress.max_fails` raised — the
+  default cap of 10 terminates the run at exactly the PRE count, so the first
+  background run was censored at 10; the raised-cap run is the measurement).
+- **AC4 ✅** — dropping one non-supplier unit (SSA `single`) fails the two
+  count literals ALONE (FAIL 2), both class assertions still passing.
+- **AC5 ✅** — every ledger figure verified against this pass's own
+  measurements: 13 post / 10 pre `pmax(0, .)` detectors, grid min finite
+  `conf.low` −2.533756, three `pmax(-1, .)` detectors incl. the `-Inf` cell,
+  two finite-below-−1 census suppliers (one seeded, one seed-free), sole
+  non-finite supplier; the `unit = 6` both-sides abort stated by the fixed F3
+  sentence verified by running it. F4, F5, F3, F11 all confirmed fixed.
+- **AC6 ✅** — `air format --check` silent; `lintr::lint_package()` 0 lints;
+  `devtools::test()` at `NOT_CRAN=true CI=true` exit 0, zero failures;
+  `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings /
+  0 notes.
+
+**Consistency gate (pass 2):** `cairn_validate` all 16 checks PASS (standing
+pre-migration dangling-id advisory only); `devtools::document()` no diff;
+`pkgdown::check_pkgdown()` no problems; NEWS correctly absent (test-only
+diff); no new top-level files.
