@@ -129,3 +129,38 @@ Fresh evidence, 2026-07-31, all by command on the branch tip:
   0 notes; `check-reference-observations.py` exit 0 (0 falsified);
   `enumerate-generalizing-claims.py --check` exit 0.
 - Driving RR: none — projection-vs-outcome no-ops.
+
+Consistency gate (2026-07-31): `cairn_validate` exit 0 (321 pre-existing dangling-id
+advisories, WARN only); no principle changed → `cairn_impact` skipped; `document()`
+no diff; `pkgdown::check_pkgdown()` clean; README untouched by branch; NEWS not owed
+(no user-visible change); `devtools::check()` 0/0/0 (AC6 run, same tree).
+
+Independent review (three fresh-context lenses + scorer, 2026-07-31): diff-bug [O]
+18 items, blame-history [S] 2, prior-review [S] 0 (archives searched M86–M95; GitHub
+probe found no real threads — the diff is the fix for M92 F6, not a regression).
+Scored 17 distinct findings; 1 actioned (≥80), 16 logged sub-threshold:
+
+- **ACTIONED — D2 (83), fixed on the branch:** the fault-injection recipe documented
+  in the `m86-mpl-lib.R` header, followed verbatim from the repo root, either deletes
+  a committed fixture (guard fires) or overwrites it with smoke data (injection
+  misses) — the sandbox discipline the M96 evidence runs used lived only in the work
+  log. Fix: the header now prescribes running injection/smoke against a disposable
+  copy, never the real `data-raw/` tree, and names the hazard (comment-only change).
+- Sub-threshold, logged (score — one line): B1 (78) `file.remove` targets the
+  committed fixture path — substance addressed by the D2 comment fix; deletion is
+  git-recoverable. D1 (68) same root, local-CI consequence. D3 (55) unmatched
+  injection spec is a silent no-op. D5 (55) checkpoint deletion loses multi-hour
+  partial results and diagnostics — alternate design, AC3 mandates no-fixture.
+  D4 (45) failing cell printed to stdout, abort message on stderr. D6 (35) failures
+  column structurally always zero in any written fixture — AC3 asked for it. D9 (35)
+  audit not NA-safe (cannot trigger on the frozen fixtures). D14 (35) no guard
+  against a stale MPL_INJECT_FAILURE in a production shell. B2 (25) cumulative vs
+  cell-scoped assert — behaviorally equivalent today. D10 (25) audit not wired into
+  CI — one-off retrospective by design. D12 (25) sprintf %d on a double rep_i,
+  latent. D7 (20) final pre-write assert redundant with per-cell assert — deliberate
+  defense-in-depth per AC3. D13 (20) catches error only, class dropped — pre-existing
+  shape. D11 (15) audit's exact 0/1 signature vs the generators' eps thresholds —
+  documented as an upper bound on purpose. D15 (15) empty-summ degenerate guard,
+  unreachable. D16 (10) `log`/`rep` shadow base names, no live conflict. D8 (5)
+  `mpl_interval()`'s internal uniroot clamp — explicitly Scope OUT, the recorded
+  ROADMAP candidate.

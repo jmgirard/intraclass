@@ -255,6 +255,13 @@ mpl_kappa_m <- function(
 # (m90 cells are keyed "<level>:<id>", so e.g. MPL_INJECT_FAILURE=0.90:C1:3).
 # The observed abort under injection -- not this comment -- is what establishes
 # that the guard fires (M92 P6-1).
+#
+# Run injection (and any smoke run) against a DISPOSABLE COPY of the repo,
+# never the real data-raw/ tree: each generator writes, and on failure removes,
+# its committed fixture path (`out_path`) in place, so from the repo root a
+# smoke run overwrites the committed full-run fixture and a firing guard
+# deletes it (recoverable via git, but avoid it). The M96 evidence runs used a
+# scratch copy containing data-raw/ plus the kappa fixtures; do the same.
 
 mpl_failure_log <- function() {
   log <- new.env(parent = emptyenv())
