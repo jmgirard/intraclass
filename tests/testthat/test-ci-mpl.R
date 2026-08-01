@@ -696,6 +696,48 @@ test_that("the 0.95 off-node kappa_m values M92 coverage-validated are what ship
   )))
 })
 
+test_that("the shipped kappa_m table matches its whole-table fixture, every cell (M95 AC2)", {
+  # GP7. Whole-table pin: any change to ANY cell of the shipped kappa_m_table --
+  # a perturbed value, an added node, a dropped node, at any level -- must red
+  # this test, so the table every MPL coverage claim rests on cannot silently
+  # detach from its calibration runs. The table's CONTENTS are owned by
+  # D-015/D-017: a legitimate change goes through recalibration, then the
+  # fixture is regenerated (data-raw/m95-kappa-fixture.R). The spot pins above
+  # leave most cells un-literal -- M92's pass-6 mutation (finding P6-1)
+  # perturbed the 152 unpinned cells by +0.5 and this file stayed green
+  # (FAIL 0 / PASS 172); this test closes that gap. The fixture is generated
+  # from the COMMITTED CALIBRATION fixtures, never from R/sysdata.rda, so
+  # agreement here ties the shipped table to the calibration evidence rather
+  # than to a copy of the thing it checks.
+  fixture <- utils::read.table(
+    test_path("fixtures", "kappa-m-table.txt"),
+    header = TRUE,
+    sep = "\t",
+    comment.char = "#",
+    colClasses = c("integer", "integer", "numeric", "character", "character")
+  )
+  # The kappa_m column is a C99 hex float: the double's bits verbatim, immune
+  # to the 1-ulp decimal-parse drift the generator measured under %.17g.
+  fixture$kappa_m <- as.numeric(fixture$kappa_m)
+
+  shipped <- kappa_m_table[
+    order(kappa_m_table$conf_level, kappa_m_table$n_r, kappa_m_table$n_s),
+  ]
+  rownames(shipped) <- NULL
+
+  # Key set, compared as sets: an added or dropped (n_r, n_s, conf_level) node
+  # fails as loudly as a changed value.
+  key <- function(d) sort(sprintf("%d|%d|%.2f", d$n_r, d$n_s, d$conf_level))
+  expect_identical(key(shipped), key(fixture))
+
+  # Values: identical(), never a tolerance, with both sides in the fixture's
+  # own (conf_level, n_r, n_s) order.
+  expect_identical(shipped$n_r, fixture$n_r)
+  expect_identical(shipped$n_s, fixture$n_s)
+  expect_identical(shipped$conf_level, fixture$conf_level)
+  expect_identical(shipped$kappa_m, fixture$kappa_m)
+})
+
 test_that("mpl aborts on an unbalanced design and off the kappa_m grid (AC4)", {
   skip_if_not_installed("glmmTMB")
 
