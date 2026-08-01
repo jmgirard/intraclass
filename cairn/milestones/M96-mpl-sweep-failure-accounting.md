@@ -2,6 +2,7 @@
 
 - **Status:** review
 - **Branch:** m96-mpl-sweep-failure-accounting
+- **PR:** https://github.com/jmgirard/intraclass/pull/103
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -35,30 +36,30 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 
 ## Acceptance criteria
 
-- [ ] AC1: the retrospective audit ships as committed evidence — a scan of the raw
+- [x] AC1: the retrospective audit ships as committed evidence — a scan of the raw
       per-rep endpoints in `m90-coverage-sweep.rds`, `m91-interp-sweep.rds`,
       `m92-interp-sweep.rds` and `m92-interp-sweep-run1-collided.rds` for the
       `lower <= 0 & upper >= 1` sentinel, reporting a count per fixture. A non-zero
       count anywhere invalidates the frozen-fixtures decision and stops for a gate
       amendment rather than being absorbed.
-- [ ] AC2: all three generators route a failed `mpl_interval()` through one shared
+- [x] AC2: all three generators route a failed `mpl_interval()` through one shared
       helper in `data-raw/m86-mpl-lib.R` that RECORDS the failure; no generator retains
       a literal `c(lower = 0, upper = 1)` error handler.
-- [ ] AC3 (GP5): each generator carries a per-cell failure count in its summary row and
+- [x] AC3 (GP5): each generator carries a per-cell failure count in its summary row and
       a `stopifnot()` that the total across cells is zero, placed BEFORE the fixture is
       written — a run with any failure produces no fixture at all, rather than a
       fixture carrying a footnote a later reader must notice.
-- [ ] AC4: the guard is mutation-verified, never argued — a fault-injection mode makes
+- [x] AC4: the guard is mutation-verified, never argued — a fault-injection mode makes
       `mpl_interval()` fail on a chosen replication, and each of the three generators,
       run in its existing smoke mode under that injection, aborts with the failing cell
       named. Shipped as a `--self-test`-style flag mirroring
       `data-raw/check-reference-observations.py --self-test`, or a committed by-hand
       record if no flag fits. No comment claims more guarding than this establishes
       (M92 P6-1).
-- [ ] AC5: the change is accounting-only — each generator run in smoke mode WITHOUT
+- [x] AC5: the change is accounting-only — each generator run in smoke mode WITHOUT
       injection completes and yields per-cell coverage equal to the pre-change code on
       the same seeds, so no measured number moves.
-- [ ] AC6: `lintr::lint_package()` (it lints `data-raw/` and rejects UPPERCASE
+- [x] AC6: `lintr::lint_package()` (it lints `data-raw/` and rejects UPPERCASE
       constants, M62) and `air format --check` clean; `devtools::test()` and
       `devtools::check()` clean; `python3 data-raw/check-reference-observations.py` and
       `python3 data-raw/enumerate-generalizing-claims.py --check` green.
@@ -99,3 +100,32 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 ## Decisions
 
 ## Review
+
+Fresh evidence, 2026-07-31, all by command on the branch tip:
+
+- AC1: `Rscript data-raw/m96-sentinel-audit.R` re-run at review — 0 sentinel reps in
+  all four fixtures (24000 + 6000 + 3000 + 3000 = 36000 reps), exit 0. Frozen-fixtures
+  decision confirmed unaffected.
+- AC2: grep at review — no `error = function(e) c(lower` handler in any generator
+  (grep exit 1); exactly one `mpl_interval_counted(` call site per generator; all four
+  helpers defined once in `data-raw/m86-mpl-lib.R` (lines 259/278/301/309).
+- AC3: per generator, verified by line listing — `failures = mpl_cell_failures(...)`
+  in the summary row, `mpl_assert_no_failures(fail_log, out_path)` after each cell's
+  rep loop AND before the final write, plus `stopifnot(sum(summary_df$failures) == 0L)`
+  before the final `saveRDS`. A failing run removes any on-disk checkpoint, so no
+  fixture survives.
+- AC4: injections re-run at review with NEW target cells (independent of implement's):
+  m90 `0.90:C2:3`, m91 `D1:2`, m92 `E2:4` — each exits 1, prints "cell <id> rep <n>:
+  injected failure", and leaves no fixture on disk. Env-var mode (`MPL_INJECT_FAILURE`)
+  is AC4's "or" alternative to a `--self-test` flag, matching the generators' existing
+  `M90_SMOKE` idiom.
+- AC5: post-change smoke runs re-executed at review in a sandbox and compared to the
+  committed pre-change baselines on the same seeds: raw per-rep endpoints `identical()`
+  for all three fixtures; all shared summary columns `identical()`; the only new column
+  is `failures`, all zeros. Committed fixtures untouched (`git status` clean).
+- AC6: this session, by command — `air format --check` clean; `lintr::lint_package()`
+  0 lints; `devtools::test()` FAIL 0 / WARN 3 (pre-existing, untouched files) /
+  PASS 5373; `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings /
+  0 notes; `check-reference-observations.py` exit 0 (0 falsified);
+  `enumerate-generalizing-claims.py --check` exit 0.
+- Driving RR: none — projection-vs-outcome no-ops.
