@@ -74,7 +74,7 @@ this ships no user-visible change.
       `stopifnot()` each is `identical()` to the shipped `kappa_m_table` slice, write
       the fixture at full precision, and re-read it asserting a bit-identical round
       trip. Fails loudly if a calibration fixture is missing.
-- [ ] T2: Add the whole-table pin to `tests/testthat/test-ci-mpl.R` (key set + exact
+- [x] T2: Add the whole-table pin to `tests/testthat/test-ci-mpl.R` (key set + exact
       values) with the GP7 in-place comment naming D-015 and the M92 P6-1 finding it
       closes.
 - [ ] T3: Mutation-verify and commit the record — one perturbed cell per level slice,
@@ -89,6 +89,7 @@ this ships no user-visible change.
 
 - 2026-07-25: created by /milestone-plan (promotes the "no whole-table κ_m guard" candidate from M92's review; plan gate chose a readable full-precision text fixture over a binary one or a checksum, and verified all shipped cells are `identical()` to the two committed calibration fixtures).
 - 2026-07-31: T1 done — `data-raw/m95-kappa-fixture.R` writes `tests/testthat/fixtures/kappa-m-table.txt` (162 rows) from the two calibration fixtures, `stopifnot()`s each level slice `identical()` to the shipped slice, and asserts a bit-identical re-read. Found: `%.17g` decimal does NOT round-trip through R's parser (`R_strtod` lands 1 ulp off on 10 of 162 values), so the pin column is a C99 hex float (`%a`, bit-exact) with a `%.17g` decimal column kept for the human reader. Suite FAIL 0 | PASS 5368.
+- 2026-07-31: T2 done — whole-table pin added to `test-ci-mpl.R`: key-set equality (sorted `(n_r, n_s, conf_level)` keys, both directions) + `expect_identical()` on all four columns; GP7 comment names D-015/D-017 ownership and the M92 P6-1 gap it closes. Full suite FAIL 0 | PASS 5373 (3 pre-existing brms warnings).
 
 ## Decisions
 
