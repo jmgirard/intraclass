@@ -55,11 +55,13 @@ change would be its own hotfix.
       self-adjust and assert nothing — and still red on a silently dropped
       cell, verified by removing one unit from the new case.
 - [ ] AC5 The comment heading these cells states truthfully which clamp classes
-      the grid detects and which cells supply each — naming the npbootstrap
-      `unit = "average"` cell as the **sole** supplier of the finite-below-−1
-      class and that it is **seeded** (`seed = 4`); that low-side detection
-      predates this milestone and was unasserted; and that high-side detection
-      is unreachable through any shipped `ci_method`. Endpoints below −1 or
+      the grid detects and which cells supply each — recording that the
+      finite-below-−1 class had a single, **seeded** supplier at HEAD (the
+      npbootstrap `unit = "average"` cell, `seed = 4`) and that this milestone's
+      SSA = 0 `unit = 2` cell adds a **seed-free** second supplier of the same
+      class; that low-side detection predates this milestone and was unasserted;
+      and that high-side detection is unreachable through any shipped
+      `ci_method`. Endpoints below −1 or
       non-finite are **not** called "out of support" — under D-010 the
       projected form's support is `(-Inf, 1)`, so the honest phrase is outside
       the conventional `[-1, 1]` range.
@@ -91,9 +93,10 @@ change would be its own hotfix.
       new case's three units, but measure rather than assume.
 - [x] T3 Mutation-prove AC3's three legs at `R/icc.R:2209`, restoring the file
       after each; paste the pass/red lines into the work log.
-- [ ] T4 Removal checks: drop each class's supplying cell in turn and confirm
-      the matching assertion reds; drop one unit and confirm the count
-      assertion reds; restore.
+- [ ] T4 Removal checks: drop **every** supplier of each class in turn and
+      confirm the matching assertion reds — recording that the class assertion
+      itself failed, not merely that the file went red; drop one unit and
+      confirm the count assertion reds; restore.
 - [ ] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
 - [ ] T6 Gate: `air format .`, `lintr::lint_package()`, `devtools::test()` at
       `NOT_CRAN=true CI=true`, `devtools::check()` with
@@ -115,6 +118,8 @@ change would be its own hotfix.
 - 2026-08-01: T1+T2 landed in ONE checkpoint (minor amendment) — T1 alone leaves the count literals stale and the suite red, so the profile's "verify clean before check-off" rule cannot be satisfied at a T1-only boundary. Measured endpoints for the new case, reducer and `icc()` identical at `tolerance = 0`: `single` −0.5/−0.5, `average` −Inf/−Inf, `2` −2/−2. Counts moved 23→26 `checked`, 22→25 `compared`, written as integer literals (the prior `length(units) * 5L + …` form was derived, which AC4 forbids). Verify slot clean: FAIL 0 | WARN 2 | SKIP 23 | PASS 5427.
 
 - 2026-08-01: T3 mutation legs run at `R/icc.R:2209`, pre-M98 grid (`acd5610`'s test file) vs post-M98, `R/icc.R` restored after each and the tree verified clean. Non-finite-only clamp `ifelse(is.finite(x), x, -1e6)`: PRE 0 failed → POST 1 failed — the discriminating leg, so the new cell is what carries non-finite detection. `pmax(-1, x)`: PRE 1 → POST 3. `pmax(0, x)`: PRE 10 → POST 13. The PRE count of exactly 1 for `pmax(-1, .)` independently corroborates the second audit's finding that the finite-below-−1 class had a single supplier at HEAD.
+
+- 2026-08-01: SUBSTANTIVE AMENDMENT (gated, user-approved) — AC5 was false as written once T1 landed. It required the comment to name the npbootstrap `unit = "average"` cell as the SOLE supplier of the finite-below-−1 class, but the new case's `unit = 2` cell reports −2, a finite value below −1, so post-M98 that class has two suppliers and the second is seed-free. AC5 now records the HEAD state (one seeded supplier) and the change (a seed-free second one); the alternative of narrowing the new case to drop `unit = 2` was offered and declined, since it would discard a free de-risking of the class that was most fragile. T4 amended in consequence: a class's removal test must drop EVERY supplier, not one cell.
 
 ## Decisions
 
