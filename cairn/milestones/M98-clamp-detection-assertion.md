@@ -1,6 +1,6 @@
 # M98: Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
@@ -98,7 +98,7 @@ change would be its own hotfix.
       itself failed, not merely that the file went red; drop one unit and
       confirm the count assertion reds; restore.
 - [x] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
-- [ ] T6 Gate: `air format .`, `lintr::lint_package()`, `devtools::test()` at
+- [x] T6 Gate: `air format .`, `lintr::lint_package()`, `devtools::test()` at
       `NOT_CRAN=true CI=true`, `devtools::check()` with
       `env_vars = c(NOT_CRAN = "false")`.
 
@@ -124,6 +124,8 @@ change would be its own hotfix.
 - 2026-08-01: T4 removal checks, each restoring the file afterwards and the tree verified clean. Dropping BOTH class-(a) suppliers (npbootstrap `average` and the SSA = 0 `unit = 2`) fails `Expected seen_finite_below_neg1 to be TRUE` at `:2219` alongside the two count literals; dropping the sole class-(b) supplier (SSA = 0 `average`) fails `Expected seen_nonfinite to be TRUE` at `:2220` alongside the counts; dropping one unit fails the counts ALONE at `:2205`/`:2212` with both class assertions still passing, which shows the count assertion is load-bearing independently of the class census. The named-assertion failure in each case satisfies the second audit's confounding caveat — the class assertion itself failed, not merely the file.
 
 - 2026-08-01: T5 rewrote the comment to a per-class ledger — which mutation each class corresponds to, which cells supply it, and the measured values — plus the reason the class assertions exist (the high side had none, so its only supplier was removed silently) and the D-010 wording fence (below the conventional [-1, 1] range, never "out of support"). Every figure in it is measured, none carried over from the plan. `air format .` clean; file re-run green.
+
+- 2026-08-01: T6 gate clean — `air format --check .` silent, `lintr::lint_package()` clean, `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 | WARN 2 | SKIP 23 | PASS 5427, `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m47s. Status → review.
 
 ## Decisions
 

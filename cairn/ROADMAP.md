@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M95 | Whole-table pin for the shipped κ_m calibration table | done | — | normal | milestones/archive/M95-kappa-table-whole-pin.md |
 | M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | done | M92 | normal | milestones/archive/M94-mpl-doc-surface.md |
 | M93 | Boundary-abort hint for the deterministic boundary-robust `ci_method` families | done | — | normal | milestones/archive/M93-boundary-abort-hint.md |
-| M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | in-progress | M93 | normal | milestones/M98-clamp-detection-assertion.md |
+| M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | review | M93 | normal | milestones/M98-clamp-detection-assertion.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M97 done (2026-07-31) → M92 rotated out (oldest terminal; its archive file still resolves). Kept: M97, M96, M95, M94, M93 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
