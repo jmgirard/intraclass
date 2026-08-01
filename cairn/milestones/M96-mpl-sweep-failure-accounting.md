@@ -1,6 +1,7 @@
 # M96: Failure accounting in the three MPL coverage-sweep generators
 
-- **Status:** planned
+- **Status:** in-progress
+- **Branch:** m96-mpl-sweep-failure-accounting
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
