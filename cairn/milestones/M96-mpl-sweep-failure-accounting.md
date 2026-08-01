@@ -82,7 +82,7 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
       and the pre-write `stopifnot`.
 - [x] T3: Add the fault-injection mode; run each generator in smoke mode under it and
       confirm each aborts naming the failing cell. Record per generator.
-- [ ] T4: Run each generator in smoke mode without injection and show per-cell coverage
+- [x] T4: Run each generator in smoke mode without injection and show per-cell coverage
       equals the pre-change code on the same seeds; record the comparison.
 - [ ] T5: Gate — `air format --check`, `lintr::lint_package()`, `devtools::test()`,
       `devtools::check()`, both references checkers; open the PR.
@@ -93,6 +93,7 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 - 2026-07-31: T1 done — `data-raw/m96-sentinel-audit.R` committed; run clean: m90-coverage-sweep 0/24000, m91-interp-sweep 0/6000, m92-interp-sweep 0/3000, m92-interp-sweep-run1-collided 0/3000 (0 sentinel hits / 36000 reps; exit 0). Frozen-fixtures decision stands.
 - 2026-07-31: T2 done — `mpl_failure_log()`/`mpl_interval_counted()`/`mpl_cell_failures()`/`mpl_assert_no_failures()` added to `data-raw/m86-mpl-lib.R`; all three generators routed through them (no literal covering-sentinel handler remains, grep-verified); per-cell `failures` column in every summary row; assert after each cell's rep loop + pre-final-write `stopifnot(sum(failures) == 0L)`; on failure any on-disk checkpoint is removed so no fixture survives. The MPL_INJECT_FAILURE env-var hook (T3's mode) lives in the same helper, mirroring the generators' existing M90_SMOKE env-var idiom.
 - 2026-07-31: T3 done — each generator run in smoke mode in a scratchpad sandbox under injection: m90 (`MPL_INJECT_FAILURE=0.99:C1:5`), m91 (`D2:10`), m92 (`E3:7`). All three: exit 1, abort message names the injected cell and rep ("cell 0.99:C1 rep 5: injected failure" etc.), and no fixture file on disk afterward — the m91/m92 targets sat mid-run, so earlier cells' checkpoints were written and then removed, exercising the no-fixture-survives path. Env-var mode chosen over a `--self-test` flag as the generators' existing idiom (AC4's "or" clause).
+- 2026-07-31: T4 done — pre-change (commit c7796d5's tree) and post-change smoke runs of all three generators in sandbox copies, same seeds, no injection: raw per-rep endpoints `identical()` per fixture, all shared summary columns `identical()`, the only difference the new `failures` column (all zero). Accounting-only confirmed (AC5); committed fixtures untouched (sandbox runs, `git status` clean).
 
 ## Decisions
 
