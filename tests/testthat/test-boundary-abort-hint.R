@@ -2070,13 +2070,18 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
       methods = "mpl",
       oneway = FALSE
     ),
-    # The cell that makes this test able to FAIL. Every case above returns
-    # comfortably in-support endpoints, so any post-processing that only bites out of
-    # support -- a `pmin(1, .)` clamp in the reporting path, say -- would be invisible
-    # to them, and the test would pass while the hint decided on numbers the user
-    # never sees. Here `searle` at 8 subjects, `unit = 10`, `conf_level = 0.80`
-    # genuinely reports [1.276702, 1.824471]: above +1, and the shipped defect this
-    # milestone routes around (ROADMAP candidate).
+    # Originally the cell that made this test able to FAIL: `searle` at 8 subjects,
+    # `unit = 10`, `conf_level = 0.80` genuinely reported [1.276702, 1.824471] --
+    # above +1, the shipped defect M93 routed around. That defect is now FIXED: the
+    # projection past `npb_sb()`'s pole aborts in the reducer (`npb_guard_sb_pole`),
+    # so this cell exercises refusal parity -- reducer and `icc()` must decline it
+    # together -- rather than endpoint equality.
+    #
+    # The cost is recorded honestly rather than papered over: no shipped `ci_method`
+    # can return an out-of-support endpoint any more, so this test no longer has a
+    # cell where a high-side clamp in the reporting path (`pmin(1, .)`) would bind,
+    # and that mutation would now pass. Restoring the anti-clamp probe without a
+    # live defect to ride on is a ROADMAP candidate.
     list(
       lab = "one-way 8x2 past the projection pole",
       d = bh_pole_oneway(),
@@ -2103,7 +2108,6 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
 
   checked <- 0L
   compared <- 0L
-  out_of_support_seen <- FALSE
   for (case in cases) {
     # The averaging divisor icc() itself uses: the HARMONIC mean of the per-subject
     # sizes (k_eff), computed with summarize_design()'s own expression so the
@@ -2154,9 +2158,7 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
           expect_identical(nrow(tb), 1L)
           expect_equal(red[[1]]$conf.low, tb$conf.low[[1]], tolerance = 0)
           expect_equal(red[[1]]$conf.high, tb$conf.high[[1]], tolerance = 0)
-          if (red[[1]]$conf.high > 1) {
-            out_of_support_seen <- TRUE
-          }
+          expect_lte(red[[1]]$conf.high, 1)
           compared <- compared + 1L
         }
         checked <- checked + 1L
@@ -2167,14 +2169,13 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
   # rather than pass on a smaller grid (pass-5 F2 was exactly that assertion).
   # 5 method-cases x 4 units, + 1 pole cell, + 2 npbootstrap cells (M97).
   expect_identical(checked, length(units) * 5L + 1L + 2L)
-  # ...and every cell must reach the NUMERIC comparison. Without this the test would
-  # still pass if every cell degenerated to "both refused", which asserts nothing
-  # about endpoint equality -- the vacuity that keeps recurring in this file.
-  expect_identical(compared, length(units) * 5L + 1L + 2L)
-  # ...and at least one compared cell must sit OUT of support, or the grid cannot
-  # detect post-processing that only bites there. Verified by mutation: clamping the
-  # reported endpoint with `pmin(1, .)` reds this test only because of that cell.
-  expect_true(out_of_support_seen)
+  # ...and every cell but the pole cell must reach the NUMERIC comparison. Without
+  # this the test would still pass if every cell degenerated to "both refused", which
+  # asserts nothing about endpoint equality -- the vacuity that keeps recurring in
+  # this file. The pole cell is the ONE deliberate refusal, and it is pinned as such
+  # by `expect_identical(checked, ...)` above plus the computed/refused parity
+  # assertion inside the loop; a second silent refusal would red this count.
+  expect_identical(compared, length(units) * 5L + 2L)
 })
 
 test_that("the admissibility rows mirror icc()'s own ci_method fences (AC4)", {

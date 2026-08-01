@@ -193,6 +193,22 @@
   occasion setting — with a legend, instead of connecting the overlaid projections into a
   single zig-zag. `ggplot2` remains a `Suggests` dependency.
 
+## Bug fixes
+
+* Projecting a one-way interval to a numeric `unit` (a D-study projection to `m`
+  raters) could return a confidence interval lying **entirely above 1** — outside
+  the ICC's range, sometimes with the limits reversed, and not containing its own
+  point estimate — with no error. It affected `ci_method = "searle"`, `"burch"`,
+  and `"npbootstrap"` on balanced one-way data whenever the requested `m` was large
+  relative to the number of ratings per subject and the lower confidence limit fell
+  low enough: the Spearman-Brown projection has a pole that such a limit crosses,
+  flipping the sign of the result. Reaching it needed no unusual data — the
+  package's own `sf_ratings` example hits it at `unit = 10`. These projections now
+  fail with a classed error naming the pole and pointing at
+  `ci_method = "montecarlo"`, which projects them correctly. Projections that do
+  not cross the pole are unchanged, including every `unit = "single"` and
+  `unit = "average"` result.
+
 ## Documentation
 
 * The package comparison and "related work" documentation no longer presents

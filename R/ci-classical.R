@@ -94,6 +94,7 @@ searle_ci <- function(
 
   lapply(estimands, function(est) {
     m <- est$divisor
+    npb_guard_sb_pole(ends, m, "SEARLE exact-F", call)
     list(
       conf.low = npb_sb(ends[["lower"]], m),
       conf.high = npb_sb(ends[["upper"]], m),
@@ -187,6 +188,7 @@ burch_ci <- function(
 
   lapply(estimands, function(est) {
     m <- est$divisor
+    npb_guard_sb_pole(ends, m, "Burch REML", call)
     list(
       conf.low = npb_sb(ends[["lower"]], m),
       conf.high = npb_sb(ends[["upper"]], m),

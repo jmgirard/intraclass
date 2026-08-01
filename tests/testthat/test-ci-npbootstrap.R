@@ -303,3 +303,84 @@ test_that("npbootstrap aborts when resamples are degenerate at tiny k (AC5 guard
     regexp = "resamples were degenerate"
   )
 })
+
+# ---- Regression: the Spearman-Brown pole at a numeric `unit` ------------------
+#
+# The balanced counterpart of the fence `icc()` already applies to a numeric
+# `unit` on the UNBALANCED npbootstrap path (D-010). The transformed bootstrap-t
+# ICC(1) endpoints are unclamped and reach the support floor -1/(n0-1), so a
+# user-chosen m > n0 puts `npb_sb()`'s pole rho = -1/(m-1) inside the attainable
+# support; an endpoint past it maps through the pole to a value above +1. Reported
+# with no abort before this fix -- the same defect as `searle`/`burch`, sharing
+# `npb_guard_sb_pole()` with them.
+
+test_that("a pole-crossing numeric `unit` aborts instead of returning a > 1 interval", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  bad <- 0L
+  aborted <- 0L
+  for (ns in c(3L, 5L, 8L)) {
+    for (m in c(6, 15)) {
+      for (s in 1:3) {
+        set.seed(s * 100L + ns)
+        d <- data.frame(
+          subject = rep(seq_len(ns), each = 2),
+          rater = rep(1:2, times = ns),
+          score = stats::rnorm(2 * ns)
+        )
+        got <- tryCatch(
+          tidy(icc(
+            d,
+            score,
+            subject,
+            rater,
+            model = "oneway",
+            unit = m,
+            ci_method = "npbootstrap",
+            conf_level = 0.80,
+            seed = 7
+          )),
+          intraclass_error = function(e) {
+            aborted <<- aborted + 1L
+            NULL
+          }
+        )
+        if (is.null(got)) {
+          next
+        }
+        if (
+          got$conf.low > got$conf.high || got$conf.low > 1 || got$conf.high > 1
+        ) {
+          bad <- bad + 1L
+        }
+      }
+    }
+  }
+  expect_identical(bad, 0L)
+  # ...and the grid is not vacuous: it must actually reach the pole, or a fence
+  # that never fires would pass this test for the wrong reason.
+  expect_gt(aborted, 0L)
+})
+
+test_that("a pole-safe numeric `unit` still returns its bootstrap interval", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # The guard reads the endpoint, not m vs n0: a high-ICC design projects to
+  # m = 10 with every endpoint far above the pole, and is untouched.
+  d <- sf_ratings_long()
+  td <- tidy(icc(
+    d,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    unit = 3,
+    ci_method = "npbootstrap",
+    seed = 4
+  ))
+  expect_lt(td$conf.low, td$conf.high)
+  expect_lt(td$conf.high, 1)
+  expect_true(is.finite(td$std.error))
+})
