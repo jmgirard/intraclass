@@ -80,12 +80,12 @@ change would be its own hotfix.
 
 ## Tasks
 
-- [ ] T1 Add the seed-free SSA = 0 `searle` case to the `cases` list
+- [x] T1 Add the seed-free SSA = 0 `searle` case to the `cases` list
       (`test-boundary-abort-hint.R:2062`) with its own `units` list —
       `"single"`, `"average"`, `2`; `unit = 5` is excluded deliberately, it
       refuses on both sides and would be a second refusal cell the `compared`
       count does not admit. Record the reported endpoints from a real run.
-- [ ] T2 Add the two per-class assertions in place of the deleted
+- [x] T2 Add the two per-class assertions in place of the deleted
       `out_of_support_seen` flag; update the `checked` / `compared` counts
       (`:2170-2180`) as integer literals — 23/22 today, expected 26/25 with the
       new case's three units, but measure rather than assume.
@@ -111,6 +111,8 @@ change would be its own hotfix.
 - 2026-08-01: CORRECTION to the first audit entry above, caught by the second audit and confirmed by re-measuring — the figures "`bnd30x5 searle average` −1.296, `unit = 6` −2.100" were produced by a probe script that FABRICATED `bh_oneway()` (seed 2, invented construction) instead of reading the real fixture at `test-boundary-abort-hint.R:18` (seed 1, `s2s = 1e-6`); the real values are −0.397034 and −0.517537, and no `searle`/`burch` cell reaches below −1. Consequence for this plan: the finite-below-−1 class has exactly ONE supplier at HEAD — the npbootstrap `unit = "average"` cell at `seed = 4` — so detection of that class rests entirely on a seeded bootstrap cell, which AC5 must state and which strengthens rather than weakens the case for asserting it. The commit message of `9e94bac` carries the same wrong "three cells" claim and cannot be rewritten; this entry is the correction of record.
 
 - 2026-08-01: status in-progress, branch `m98-clamp-detection-assertion` cut from `fbd6bfa`; no implementation question gate — the plan settled T1's units list, T3's three mutation instances and AC5's content, leaving nothing genuinely open.
+
+- 2026-08-01: T1+T2 landed in ONE checkpoint (minor amendment) — T1 alone leaves the count literals stale and the suite red, so the profile's "verify clean before check-off" rule cannot be satisfied at a T1-only boundary. Measured endpoints for the new case, reducer and `icc()` identical at `tolerance = 0`: `single` −0.5/−0.5, `average` −Inf/−Inf, `2` −2/−2. Counts moved 23→26 `checked`, 22→25 `compared`, written as integer literals (the prior `length(units) * 5L + …` form was derived, which AC4 forbids). Verify slot clean: FAIL 0 | WARN 2 | SKIP 23 | PASS 5427.
 
 ## Decisions
 

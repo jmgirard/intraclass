@@ -2102,12 +2102,36 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
       methods = "npbootstrap",
       oneway = TRUE,
       units = list("single", "average")
+    ),
+    # M98: the NON-FINITE class, which no other cell supplies. SSA = 0 (every
+    # subject mean exactly equal, MSE > 0) puts searle's ICC(1) limits exactly on
+    # the open support floor -1/(n0-1); `npb_sb()`'s pole sits at that same value
+    # when the divisor is n0, so the projection returns -Inf -- the correct limit,
+    # and IN support for the averaged/projected form under D-010 ((-Inf, 1)), which
+    # is why `npb_guard_sb_pole()` (strictly `< 0`) deliberately permits it.
+    # Seed-free by construction: `bh_degen_between()` makes no RNG call, so this
+    # class does not rest on a seed the way the npbootstrap cell above does.
+    # `unit = 5` is excluded on purpose -- there the pole is CROSSED rather than
+    # reached, both sides abort, and it would be a second refusal cell the
+    # `compared` count below does not admit.
+    list(
+      lab = "one-way SSA = 0 searle (non-finite)",
+      d = bh_degen_between(),
+      args = list(model = "oneway"),
+      methods = "searle",
+      oneway = TRUE,
+      units = list("single", "average", 2)
     )
   )
   units <- list("single", "average", 2, 6)
 
   checked <- 0L
   compared <- 0L
+  # One census flag per CLAMP CLASS, read off the reducer side so the census still
+  # describes what the grid covers even while a mutation is perturbing the icc()
+  # side. Each is asserted separately after the loop (M98).
+  seen_finite_below_neg1 <- FALSE
+  seen_nonfinite <- FALSE
   for (case in cases) {
     # The averaging divisor icc() itself uses: the HARMONIC mean of the per-subject
     # sizes (k_eff), computed with summarize_design()'s own expression so the
@@ -2159,6 +2183,13 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
           expect_equal(red[[1]]$conf.low, tb$conf.low[[1]], tolerance = 0)
           expect_equal(red[[1]]$conf.high, tb$conf.high[[1]], tolerance = 0)
           expect_lte(red[[1]]$conf.high, 1)
+          lo <- red[[1]]$conf.low
+          if (is.finite(lo) && lo < -1) {
+            seen_finite_below_neg1 <- TRUE
+          }
+          if (!is.finite(lo)) {
+            seen_nonfinite <- TRUE
+          }
           compared <- compared + 1L
         }
         checked <- checked + 1L
@@ -2166,16 +2197,27 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
     }
   }
   # The exact cell count, not `>= 0`: a cell silently dropped from the loop must red
-  # rather than pass on a smaller grid (pass-5 F2 was exactly that assertion).
-  # 5 method-cases x 4 units, + 1 pole cell, + 2 npbootstrap cells (M97).
-  expect_identical(checked, length(units) * 5L + 1L + 2L)
+  # rather than pass on a smaller grid (pass-5 F2 was exactly that assertion). An
+  # INTEGER LITERAL, deliberately, not an expression over `cases`/`units` -- a
+  # derived count self-adjusts to whatever the grid happens to be and so asserts
+  # nothing (M98). 5 method-cases x 4 units = 20, + 1 pole cell, + 2 npbootstrap
+  # cells (M97), + 3 SSA = 0 cells (M98).
+  expect_identical(checked, 26L)
   # ...and every cell but the pole cell must reach the NUMERIC comparison. Without
   # this the test would still pass if every cell degenerated to "both refused", which
   # asserts nothing about endpoint equality -- the vacuity that keeps recurring in
   # this file. The pole cell is the ONE deliberate refusal, and it is pinned as such
   # by `expect_identical(checked, ...)` above plus the computed/refused parity
   # assertion inside the loop; a second silent refusal would red this count.
-  expect_identical(compared, length(units) * 5L + 2L)
+  expect_identical(compared, 25L)
+  # ...and each CLAMP CLASS must still have a live supplier, asserted SEPARATELY.
+  # One combined "something lies outside [-1, 1]" assertion would keep passing on a
+  # grid that had lost the non-finite class -- and losing a class silently is not
+  # hypothetical: it is exactly what happened on the HIGH side, where the only cell
+  # that could detect a `pmin(1, .)` clamp was the out-of-support `searle` pole cell
+  # and the 2026-08-01 hotfix fenced it away with nothing pinning it (M98).
+  expect_true(seen_finite_below_neg1)
+  expect_true(seen_nonfinite)
 })
 
 test_that("the admissibility rows mirror icc()'s own ci_method fences (AC4)", {
