@@ -2077,11 +2077,31 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
     # so this cell exercises refusal parity -- reducer and `icc()` must decline it
     # together -- rather than endpoint equality.
     #
-    # The cost is recorded honestly rather than papered over: no shipped `ci_method`
-    # can return an out-of-support endpoint any more, so this test no longer has a
-    # cell where a high-side clamp in the reporting path (`pmin(1, .)`) would bind,
-    # and that mutation would now pass. Restoring the anti-clamp probe without a
-    # live defect to ride on is a ROADMAP candidate.
+    # WHAT THIS GRID DETECTS, and what supplies each class (M98, all measured by
+    # mutating `conf.low` at the reporting-path assembly, R/icc.R:2209):
+    #   - a clamp binding at 0 (`pmax(0, .)`): eight boundary cells, min -0.5855.
+    #   - a clamp binding at -1 (`pmax(-1, .)`): at HEAD this had exactly ONE
+    #     supplier, the M97 npbootstrap `unit = "average"` cell at -2.5338 -- and
+    #     that cell is SEEDED (`seed = 4`), so the whole class rode on one seed.
+    #     The M98 SSA = 0 `unit = 2` cell (-2) adds a seed-free second supplier.
+    #   - a clamp binding only on NON-FINITE endpoints: the M98 SSA = 0
+    #     `unit = "average"` cell (-Inf) is the sole supplier. Before it, that
+    #     mutation passed against the whole grid.
+    #   - a HIGH-side clamp (`pmin(1, .)`): NOT detected, and not detectable here.
+    #     The pole cell above was the only supplier, and since the 2026-08-01
+    #     hotfix fenced `npb_sb()`'s pole no shipped `ci_method` can report an
+    #     endpoint above +1 at all. A probe would need a synthetic reducer or an
+    #     injected endpoint, neither of which exercises the reporting path this
+    #     test exists to pin -- so it is a ROADMAP candidate, not a gap to paper
+    #     over with a weaker probe.
+    #
+    # The two class assertions after the loop exist because losing a class
+    # SILENTLY is the failure mode actually observed here: the high side had no
+    # assertion, so the hotfix removed its only supplier and every test still
+    # passed. Note the wording -- these endpoints are BELOW the conventional
+    # [-1, 1] range, NOT "out of support": under D-010 the averaged/projected
+    # form's support is (-Inf, 1), which is why `npb_guard_sb_pole()` permits
+    # -Inf (the pole reached exactly) while refusing values past the pole.
     list(
       lab = "one-way 8x2 past the projection pole",
       d = bh_pole_oneway(),

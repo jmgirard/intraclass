@@ -97,7 +97,7 @@ change would be its own hotfix.
       confirm the matching assertion reds — recording that the class assertion
       itself failed, not merely that the file went red; drop one unit and
       confirm the count assertion reds; restore.
-- [ ] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
+- [x] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
 - [ ] T6 Gate: `air format .`, `lintr::lint_package()`, `devtools::test()` at
       `NOT_CRAN=true CI=true`, `devtools::check()` with
       `env_vars = c(NOT_CRAN = "false")`.
@@ -122,6 +122,8 @@ change would be its own hotfix.
 - 2026-08-01: SUBSTANTIVE AMENDMENT (gated, user-approved) — AC5 was false as written once T1 landed. It required the comment to name the npbootstrap `unit = "average"` cell as the SOLE supplier of the finite-below-−1 class, but the new case's `unit = 2` cell reports −2, a finite value below −1, so post-M98 that class has two suppliers and the second is seed-free. AC5 now records the HEAD state (one seeded supplier) and the change (a seed-free second one); the alternative of narrowing the new case to drop `unit = 2` was offered and declined, since it would discard a free de-risking of the class that was most fragile. T4 amended in consequence: a class's removal test must drop EVERY supplier, not one cell.
 
 - 2026-08-01: T4 removal checks, each restoring the file afterwards and the tree verified clean. Dropping BOTH class-(a) suppliers (npbootstrap `average` and the SSA = 0 `unit = 2`) fails `Expected seen_finite_below_neg1 to be TRUE` at `:2219` alongside the two count literals; dropping the sole class-(b) supplier (SSA = 0 `average`) fails `Expected seen_nonfinite to be TRUE` at `:2220` alongside the counts; dropping one unit fails the counts ALONE at `:2205`/`:2212` with both class assertions still passing, which shows the count assertion is load-bearing independently of the class census. The named-assertion failure in each case satisfies the second audit's confounding caveat — the class assertion itself failed, not merely the file.
+
+- 2026-08-01: T5 rewrote the comment to a per-class ledger — which mutation each class corresponds to, which cells supply it, and the measured values — plus the reason the class assertions exist (the high side had none, so its only supplier was removed silently) and the D-010 wording fence (below the conventional [-1, 1] range, never "out of support"). Every figure in it is measured, none carried over from the plan. `air format .` clean; file re-run green.
 
 ## Decisions
 
