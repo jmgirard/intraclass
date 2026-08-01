@@ -77,7 +77,7 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 - [x] T1: Commit the retrospective audit script and record its per-fixture sentinel
       counts in the work log. Any non-zero count stops for a gate amendment before the
       rest of the milestone proceeds.
-- [ ] T2: Add the shared counted-failure helper to `data-raw/m86-mpl-lib.R`; route all
+- [x] T2: Add the shared counted-failure helper to `data-raw/m86-mpl-lib.R`; route all
       three generators through it; add the per-cell failure count to each summary row
       and the pre-write `stopifnot`.
 - [ ] T3: Add the fault-injection mode; run each generator in smoke mode under it and
@@ -91,6 +91,7 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 
 - 2026-07-25: created by /milestone-plan (promotes M92 review finding F6; plan gate froze the existing fixtures — the audit run during planning found 0 sentinel reps across all four fixtures, 36000 reps — and sent the shipped `uniroot` clamp to a candidate row rather than folding it in).
 - 2026-07-31: T1 done — `data-raw/m96-sentinel-audit.R` committed; run clean: m90-coverage-sweep 0/24000, m91-interp-sweep 0/6000, m92-interp-sweep 0/3000, m92-interp-sweep-run1-collided 0/3000 (0 sentinel hits / 36000 reps; exit 0). Frozen-fixtures decision stands.
+- 2026-07-31: T2 done — `mpl_failure_log()`/`mpl_interval_counted()`/`mpl_cell_failures()`/`mpl_assert_no_failures()` added to `data-raw/m86-mpl-lib.R`; all three generators routed through them (no literal covering-sentinel handler remains, grep-verified); per-cell `failures` column in every summary row; assert after each cell's rep loop + pre-final-write `stopifnot(sum(failures) == 0L)`; on failure any on-disk checkpoint is removed so no fixture survives. The MPL_INJECT_FAILURE env-var hook (T3's mode) lives in the same helper, mirroring the generators' existing M90_SMOKE env-var idiom.
 
 ## Decisions
 

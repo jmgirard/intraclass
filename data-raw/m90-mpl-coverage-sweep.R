@@ -73,9 +73,11 @@ eps_hi <- 0.999 # upper endpoint counts as clamped-to-1
 
 summ <- list()
 raw <- list()
+fail_log <- mpl_failure_log()
 for (lv in levels) {
   for (ci in seq_len(nrow(cells))) {
     cc <- cells[ci, ]
+    key <- sprintf("%s:%s", lv$name, cc$id)
     km <- kappa_lookup(lv$name, cc$n_r, cc$n_s)
     lo <- up <- numeric(lv$n_rep)
     for (r in seq_len(lv$n_rep)) {
@@ -84,13 +86,21 @@ for (lv in levels) {
       )
       y <- mpl_simulate(cc$rho, cc$delta, cc$n_r, cc$n_s)
       ms <- mpl_anova(y)
-      iv <- tryCatch(
-        mpl_interval(ms, kappa = km, alpha = lv$alpha, side = "two"),
-        error = function(e) c(lower = 0, upper = 1, rho_hat = NA_real_)
+      iv <- mpl_interval_counted(
+        ms,
+        kappa = km,
+        alpha = lv$alpha,
+        side = "two",
+        log = fail_log,
+        cell = key,
+        rep_i = r
       )
       lo[r] <- unname(iv["lower"])
       up[r] <- unname(iv["upper"])
     }
+    # M96: a failed fit is recorded, never scored -- abort (naming the cell)
+    # before any summary stat or fixture write can see an NA endpoint.
+    mpl_assert_no_failures(fail_log, out_path)
     covered <- (lo <= cc$rho) & (cc$rho <= up)
     miss_below <- cc$rho < lo # true rho below interval
     miss_above <- cc$rho > up
@@ -117,10 +127,11 @@ for (lv in levels) {
       p_lower0 = mean(lo <= eps_lo),
       p_upper1 = mean(up >= eps_hi),
       vacuous = mean(lo <= eps_lo & up >= eps_hi),
+      failures = mpl_cell_failures(fail_log, key),
       stringsAsFactors = FALSE
     )
-    summ[[sprintf("%s:%s", lv$name, cc$id)]] <- row
-    raw[[sprintf("%s:%s", lv$name, cc$id)]] <- data.frame(
+    summ[[key]] <- row
+    raw[[key]] <- data.frame(
       lower = lo,
       upper = up,
       covered = covered
@@ -146,7 +157,7 @@ for (lv in levels) {
         summary = do.call(rbind, summ),
         raw = raw,
         cells = cells,
-        done = sprintf("%s:%s", lv$name, cc$id)
+        done = key
       ),
       out_path
     )
@@ -155,6 +166,10 @@ for (lv in levels) {
 
 summary_df <- do.call(rbind, summ)
 rownames(summary_df) <- NULL
+# M96 (AC3): total failures across cells must be zero before the fixture is
+# written -- a run with any failure produces no fixture at all.
+mpl_assert_no_failures(fail_log, out_path)
+stopifnot(sum(summary_df$failures) == 0L)
 saveRDS(
   list(
     summary = summary_df,

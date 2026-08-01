@@ -237,6 +237,97 @@ mpl_kappa_m <- function(
   list(kappa_m = max(grid$kappa_corr), grid = grid)
 }
 
+# --- M96: counted-failure accounting for the coverage-sweep generators ------
+# Before M96 the three sweep generators (m90-mpl-coverage-sweep.R,
+# m91-mpl-interp-sweep.R, m92-mpl-095-interp-sweep.R) mapped a failed
+# mpl_interval() fit to the covering sentinel c(lower = 0, upper = 1), which
+# covers any rho in [0, 1] -- a failed rep was scored as a covered replication
+# (M92 review finding F6; the committed fixtures are audited unaffected by
+# data-raw/m96-sentinel-audit.R). The helpers below replace that handler: a
+# failure is RECORDED (cell, rep, condition message) and yields NA endpoints,
+# and the generator asserts zero recorded failures after each cell's rep loop,
+# BEFORE any fixture write -- a run with a failure aborts naming the failing
+# cell and leaves no fixture behind.
+#
+# Fault injection: set MPL_INJECT_FAILURE="<cell>:<rep>" to force exactly that
+# replication to fail, e.g.
+#   MPL_INJECT_FAILURE=D1:3 M91_SMOKE=1 Rscript data-raw/m91-mpl-interp-sweep.R
+# (m90 cells are keyed "<level>:<id>", so e.g. MPL_INJECT_FAILURE=0.90:C1:3).
+# The observed abort under injection -- not this comment -- is what establishes
+# that the guard fires (M92 P6-1).
+
+mpl_failure_log <- function() {
+  log <- new.env(parent = emptyenv())
+  log$failures <- data.frame(
+    cell = character(),
+    rep = integer(),
+    message = character(),
+    stringsAsFactors = FALSE
+  )
+  log
+}
+
+mpl_injected_failure <- function(cell, rep_i) {
+  spec <- Sys.getenv("MPL_INJECT_FAILURE")
+  nzchar(spec) && identical(spec, sprintf("%s:%d", cell, rep_i))
+}
+
+# Drop-in replacement for the generators' tryCatch(mpl_interval(...)) call:
+# on failure, append to `log` and return NA endpoints (which can never be
+# scored as covered), never a covering sentinel.
+mpl_interval_counted <- function(ms, kappa, alpha, side, log, cell, rep_i) {
+  tryCatch(
+    {
+      if (mpl_injected_failure(cell, rep_i)) {
+        stop("injected failure (MPL_INJECT_FAILURE)", call. = FALSE)
+      }
+      mpl_interval(ms, kappa = kappa, alpha = alpha, side = side)
+    },
+    error = function(e) {
+      log$failures <- rbind(
+        log$failures,
+        data.frame(
+          cell = cell,
+          rep = rep_i,
+          message = conditionMessage(e),
+          stringsAsFactors = FALSE
+        )
+      )
+      c(lower = NA_real_, upper = NA_real_, rho_hat = NA_real_)
+    }
+  )
+}
+
+mpl_cell_failures <- function(log, cell) {
+  sum(log$failures$cell == cell)
+}
+
+# The pre-write guard: called after each cell's rep loop and again before the
+# final fixture write. On any recorded failure it names every failing cell and
+# rep, removes any per-cell checkpoint already on disk (a failing run produces
+# no fixture at all), and aborts via stopifnot.
+mpl_assert_no_failures <- function(log, out_path) {
+  n_fail <- nrow(log$failures)
+  if (n_fail > 0L) {
+    cat(sprintf("!! %d mpl_interval() failure(s) recorded:\n", n_fail))
+    for (i in seq_len(n_fail)) {
+      cat(sprintf(
+        "!!   cell %s rep %d: %s\n",
+        log$failures$cell[i],
+        log$failures$rep[i],
+        log$failures$message[i]
+      ))
+    }
+    if (file.exists(out_path)) {
+      file.remove(out_path)
+    }
+  }
+  stopifnot(
+    "mpl_interval() failure(s) recorded -- no fixture written; see the cell(s) named above" = n_fail ==
+      0L
+  )
+}
+
 # --- DGP: balanced two-way random, absolute agreement -----------------------
 # Given (rho, delta = sigma^2_r/sigma^2_e), total variance fixed at 1:
 #   sigma^2_s = rho ; sigma^2_e = (1-rho)/(1+delta) ; sigma^2_r = delta*sigma^2_e.
