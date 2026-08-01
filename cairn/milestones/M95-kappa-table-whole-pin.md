@@ -80,7 +80,7 @@ this ships no user-visible change.
 - [x] T3: Mutation-verify and commit the record — one perturbed cell per level slice,
       one perturbation confined to previously-unpinned cells, one added row, one
       dropped row; each must red T2's test.
-- [ ] T4: Full gate — `devtools::document()`, `air format --check`,
+- [x] T4: Full gate — `devtools::document()`, `air format --check`,
       `lintr::lint_package()` (it lints `data-raw/` and rejects UPPERCASE constants,
       M62), `devtools::check()`, installed-package suite at `NOT_CRAN=true CI=true`;
       open the PR.
@@ -91,6 +91,7 @@ this ships no user-visible change.
 - 2026-07-31: T1 done — `data-raw/m95-kappa-fixture.R` writes `tests/testthat/fixtures/kappa-m-table.txt` (162 rows) from the two calibration fixtures, `stopifnot()`s each level slice `identical()` to the shipped slice, and asserts a bit-identical re-read. Found: `%.17g` decimal does NOT round-trip through R's parser (`R_strtod` lands 1 ulp off on 10 of 162 values), so the pin column is a C99 hex float (`%a`, bit-exact) with a `%.17g` decimal column kept for the human reader. Suite FAIL 0 | PASS 5368.
 - 2026-07-31: T2 done — whole-table pin added to `test-ci-mpl.R`: key-set equality (sorted `(n_r, n_s, conf_level)` keys, both directions) + `expect_identical()` on all four columns; GP7 comment names D-015/D-017 ownership and the M92 P6-1 gap it closes. Full suite FAIL 0 | PASS 5373 (3 pre-existing brms warnings).
 - 2026-07-31: T3 done — scripted mutation harness `data-raw/m95-mutation-check.R` → committed record `data-raw/m95-mutation-record.md`: 6 cases all red the pin and only the pin (one +0.5 cell per level slice incl. the unpinned AC5 cell (6,15,0.95); added row; dropped row; plus a shipped-side `R/sysdata.rda` mutation with the fixture intact), green baseline before and after. First harness run invalidated: a global `kappa_m_table` shadowed the package table inside the test env — fixed to a scratch env and rerun whole.
+- 2026-07-31: T4 done — `devtools::document()` no-diff; `air format --check .` clean; `lintr::lint_package()` 0; `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes; installed-package suite at `NOT_CRAN=true CI=true`: FAIL 0 | WARN 2 | SKIP 23 | PASS 5111. PR opened.
 
 ## Decisions
 
