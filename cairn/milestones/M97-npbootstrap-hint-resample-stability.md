@@ -44,32 +44,32 @@ ROADMAP candidate.
 
 ## Acceptance criteria
 
-- [ ] AC1: `"npbootstrap"` is registered with M93's verification helper rather than
+- [x] AC1: `"npbootstrap"` is registered with M93's verification helper rather than
       given a second one — it runs `npbootstrap_ci()` on the data in hand and returns
       TRUE only under M93's unchanged predicate (every estimand finite,
       `conf.low <= conf.high`, in support); every error is caught, so the check itself
       can never turn the boundary abort into a different error (the M93 pass-4 F2
       failure mode, in a new place). A test asserts one helper serves both families.
-- [ ] AC2 (#9): the check is RNG-neutral — a committed test captures `.Random.seed`
+- [x] AC2 (#9): the check is RNG-neutral — a committed test captures `.Random.seed`
       across an `icc()` call that fires it and asserts the stream is unchanged, so a
       user who never asked for a bootstrap cannot have their draws perturbed by one.
-- [ ] AC3: the no-seed case is decided, and the decision recorded in this file with its
+- [x] AC3: the no-seed case is decided, and the decision recorded in this file with its
       rationale; a test pins whatever behaviour is chosen. Measured at the plan gate:
       `npbootstrap_ci()` succeeded at 8/8 seeds on a 20×3 design and 1/8 on a 6×2, so
       the risk is real and size-dependent, not theoretical.
-- [ ] AC4 (GP7): M93's message-driven sweep, re-run with `npbootstrap` in the mapping
+- [x] AC4 (GP7): M93's message-driven sweep, re-run with `npbootstrap` in the mapping
       and extended over imbalance SHAPE (balanced, mildly ragged, and the double-code
       design that defeated M93 pass 3), records ZERO hinted-then-unusable runs at the
       shipped `boot_samples = 999` — never a reduced count, which lowers the chance of
       tripping a guard that fires on any degenerate resample (M93 pass-3 F3).
-- [ ] AC5: the added cost is measured and recorded — the check runs only on a path that
+- [x] AC5: the added cost is measured and recorded — the check runs only on a path that
       has already failed, and this gate measured 135 ms at 999 resamples; a recorded
       measurement confirms the success path is untouched, the hint being a promise
       forced only inside an abort message.
-- [ ] AC6: documented where users meet it — a `NEWS.md` entry, the `@param ci_method`
+- [x] AC6: documented where users meet it — a `NEWS.md` entry, the `@param ci_method`
       note, and `R/ci-npbootstrap.R:177`'s "negligibly rare at k >= 10" comment
       corrected against AC4's measurement (contradicted by it, and pre-existing).
-- [ ] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
+- [x] AC7: `devtools::test()`, `devtools::check()`, `lintr::lint_package()` and
       `air format --check` clean; `devtools::document()` no-diff; snapshot changes
       reviewed via `testthat::snapshot_review()`, never accepted blind; CI green.
 
@@ -123,3 +123,63 @@ ROADMAP candidate.
 - 2026-07-31 (M93 pass-10 carry-in, question gate): **Bullets stay free of candidate-derived values AND the leak detector widens to non-finite tokens.** The named seed is a producer-chosen input, never a value the verification run returned (those stay discarded, D-018), and the whole-message invariant enumerates it as the one licensed literal. `num_tokens()` now also matches `Inf`/`NaN`/`NA` word-tokens, with positive controls, so a leaked non-finite endpoint — invisible to the digit-only detector — reds the invariant.
 
 ## Review
+
+Fresh evidence gathered 2026-07-31, this session, on the branch head (post ledger
+re-triage; code identical to the gated tree). "Fresh hint-file run" = the full
+`test-boundary-abort-hint.R` file with its CRAN-skipped sweeps active
+(`NOT_CRAN=true CI=true`): **FAIL 0 / ERROR 0 / SKIP 0 / PASS 1237**.
+
+- AC1 — `boundary_method_usable()` gains an `npbootstrap` row calling the shipped
+  `npbootstrap_ci()` (shipped `boot_samples` default, every condition swallowed to a
+  bare logical); the "ONE verification helper serves both method families (AC1)"
+  test pins the namespace to exactly the two `*_usable` functions and drives both
+  families through the same helper; the no-leak test's hostile list adds five
+  npbootstrap abort surfaces (observed-data degeneracy, NA, empty, resample guard)
+  so the check can never replace the user's boundary abort. Fresh hint-file run
+  green.
+- AC2 — committed tests capture `.Random.seed` across firing calls: direct
+  (no-seed, seeded, and a FAILING run), end-to-end seeded (`icc()` abort whose
+  message names npbootstrap leaves the stream bit-identical), and end-to-end
+  unseeded (stream state equals a hint-disabled mock of the same call, isolating
+  the verification's contribution to exactly zero). Fresh hint-file run green.
+- AC3 — decision recorded in this file's Decisions (2026-07-31, question-gate
+  approved): caller seed when set, else fixed `npb_hint_seed = 1L` named in the
+  bullet. Pinned: the same 8×3 dataset is hinted under `seed = 8`, silent under
+  `seed = 1` and with no seed; verdict-level pins at seeds {1,2,7} FALSE / 8 TRUE,
+  plus the no-seed verdict equalling the seed-1 verdict. Fresh hint-file run green.
+- AC4 — the message-driven sweep (named == usable identity, asked under the abort's
+  own `seed = 1`) now spans imbalance SHAPE: balanced, mildly-ragged (sizes 3,2),
+  and double-code at 15/30/60 subjects, all at the shipped `boot_samples = 999`
+  (the row calls the reducer's shipped default; no reduced count anywhere); zero
+  hinted-then-unusable runs (the identity held in every aborting cell of the fresh
+  run) and the row is shown FIRING (`named_unbal > 0` pin).
+- AC5 — measured cost recorded in the work log: 124 ms median at 999 resamples on a
+  20×3 unbalanced design; the "verification never runs on a successful call" guard
+  passes in the fresh run, so the success path is untouched and the run is forced
+  only inside the abort message promise.
+- AC6 — NEWS.md boundary-hint entry rewritten (npbootstrap named on unbalanced
+  one-way, the seed story in user terms); `@param ci_method` updated the same way;
+  `R/ci-npbootstrap.R` "negligibly rare at k >= 10" comment corrected against
+  measurement (double-code trips the guard under every probed seed; 8×3 under 7/8);
+  `man/icc.Rd` regenerated.
+- AC7 — this session, by command: `devtools::test()` at `NOT_CRAN=true CI=true`
+  FAIL 0 / PASS 5455 / SKIP 23; `devtools::check(env_vars = c(NOT_CRAN="false"))`
+  0 errors / 0 warnings / 0 notes; `lintr::lint_package()` 0 lints;
+  `air format --check` clean; `devtools::document()` no-diff; no `_snaps/` path in
+  the branch diff (no snapshot moved or accepted). CI: first run caught the M94
+  doc-claims ledger drift (fixed above, logged); green CI on the final head is
+  verified at the merge step's blocking watch.
+
+Consistency gate (by command, this session): `cairn_validate` exit 0 (all checks
+PASS; the 321-token "dangling id tokens" WARN is the standing pre-migration
+COVERAGE.md advisory, untouched by this diff); no DESIGN.md principle changed →
+`cairn_impact` skipped; profile slot: `document()` no-diff ✓, generated files
+untouched by hand ✓, README.Rmd/md in sync ✓, `pkgdown::check_pkgdown()` no
+problems ✓, NEWS entry present ✓, no new top-level files ✓, full `check()` clean ✓.
+
+Independent fresh-context review: [S] blame-history — **no findings** (planned
+M93→M97 reversal, guards strengthened, no unplanned regressions); [S]
+prior-review-record — **no findings** (each M93 pass-closed shape verified as
+guarded, not reintroduced: pass-2 F1/pass-3 F1 predicates replaced by the run,
+pass-4 F2 condition-escape covered for the new row, pass-10 non-finite carry-in
+closed with positive controls); [O] diff-bug + [S] scorer recorded below.
