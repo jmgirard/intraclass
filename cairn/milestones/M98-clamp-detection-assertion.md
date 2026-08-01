@@ -89,7 +89,7 @@ change would be its own hotfix.
       `out_of_support_seen` flag; update the `checked` / `compared` counts
       (`:2170-2180`) as integer literals — 23/22 today, expected 26/25 with the
       new case's three units, but measure rather than assume.
-- [ ] T3 Mutation-prove AC3's three legs at `R/icc.R:2209`, restoring the file
+- [x] T3 Mutation-prove AC3's three legs at `R/icc.R:2209`, restoring the file
       after each; paste the pass/red lines into the work log.
 - [ ] T4 Removal checks: drop each class's supplying cell in turn and confirm
       the matching assertion reds; drop one unit and confirm the count
@@ -113,6 +113,8 @@ change would be its own hotfix.
 - 2026-08-01: status in-progress, branch `m98-clamp-detection-assertion` cut from `fbd6bfa`; no implementation question gate — the plan settled T1's units list, T3's three mutation instances and AC5's content, leaving nothing genuinely open.
 
 - 2026-08-01: T1+T2 landed in ONE checkpoint (minor amendment) — T1 alone leaves the count literals stale and the suite red, so the profile's "verify clean before check-off" rule cannot be satisfied at a T1-only boundary. Measured endpoints for the new case, reducer and `icc()` identical at `tolerance = 0`: `single` −0.5/−0.5, `average` −Inf/−Inf, `2` −2/−2. Counts moved 23→26 `checked`, 22→25 `compared`, written as integer literals (the prior `length(units) * 5L + …` form was derived, which AC4 forbids). Verify slot clean: FAIL 0 | WARN 2 | SKIP 23 | PASS 5427.
+
+- 2026-08-01: T3 mutation legs run at `R/icc.R:2209`, pre-M98 grid (`acd5610`'s test file) vs post-M98, `R/icc.R` restored after each and the tree verified clean. Non-finite-only clamp `ifelse(is.finite(x), x, -1e6)`: PRE 0 failed → POST 1 failed — the discriminating leg, so the new cell is what carries non-finite detection. `pmax(-1, x)`: PRE 1 → POST 3. `pmax(0, x)`: PRE 10 → POST 13. The PRE count of exactly 1 for `pmax(-1, .)` independently corroborates the second audit's finding that the finite-below-−1 class had a single supplier at HEAD.
 
 ## Decisions
 
