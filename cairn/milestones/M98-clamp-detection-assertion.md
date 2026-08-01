@@ -261,3 +261,48 @@ each:
 pre-migration dangling-id advisory only); `devtools::document()` no diff;
 `pkgdown::check_pkgdown()` no problems; NEWS correctly absent (test-only
 diff); no new top-level files.
+
+**CI:** PR #106 fully green at `563af84` — including `ubuntu-latest (release)`
+and `windows-latest (release)` — whose test-file content is identical to the
+final HEAD (the later commits are tracking-only). This is the confirmation
+F8 required: the SSA = 0 case's three glmmTMB fits complete on Linux and
+Windows.
+
+**Independent review (pass 2) — three lenses, then a scorer.** All
+tree-mutating verification ran and the tree was verified clean BEFORE the
+lenses were spawned (the return-1 process lesson). Prior-PR-comments lens: no
+regressions — the return-1 fixes (F3/F4/F5/F11) confirmed present in the diff
+itself, the `pulls/comments` probe again returned `[]`. Blame-history lens: no
+contradiction with recorded decisions or prior deliberate work; 7 areas
+checked clean. Diff-bug lens: 13 candidate findings. Scorer verdict:
+**no finding reached the 80 action threshold** — actioned list empty.
+
+**LOGGED (all sub-80, surfaced not dropped — 15 scored):**
+
+- DB5 (62) — AC5's "low-side detection was unasserted" element is stated only
+  via the assertions being new-in-M98 (the "(M98)" tags and the
+  assertions-exist-because paragraph), not in an explicit sentence about the
+  low side; judged conveyed in substance, surfaced verbatim at the gate.
+- DB11 (58) — the ROADMAP hygiene stamp ("nothing in flight") is falsified by
+  M98 moving to `review` in the same diff; the stamp is replaced at post-merge
+  hygiene, which resolves it.
+- DB12 (48) — the ledger's "13 cells" is re-measurable only with
+  `testthat.progress.max_fails` raised (default 10 censors the run); identity
+  cells↔failures real but undocumented.
+- DB10 (42) — the `unit = 6` exclusion sentence attributes the exclusion to
+  the count literal rather than the one-deliberate-refusal invariant.
+- DB4 (35) — ledger block physically attached to the pole-cell entry; "the
+  pole cell above" refers to the prose paragraph, which is above.
+- DB6 (33) — `!is.finite()` admits NaN/NA (F1 carried, 35 at return 1).
+- DB2 (32) — "-Inf IN support of (-Inf, 1)" open-interval imprecision (F6
+  carried, inherited phrasing).
+- DB3 (22) — in/out-of-support comments describe different estimand objects
+  (F7/F9 carried).
+- DB1 (18) — T1's plan text still says `unit = 5`; plan-owned task prose,
+  historical record of what the plan believed.
+- DB7 (18) — census flags read the reducer side; deliberate, pinned
+  transitively (F2 carried, 20).
+- DB8 (15) / BH1 (15) / PR1 (15) — the F8 CI-fragility trio, resolved by the
+  verified green ubuntu/windows runs above.
+- DB9 (15) — stale line pointers in milestone task prose.
+- DB13 (12) — single-fixture dependency observation, no incorrectness claimed.
