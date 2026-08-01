@@ -1,6 +1,6 @@
 # M95: Whole-table pin for the shipped κ_m calibration table
 
-- **Status:** in-progress
+- **Status:** review
 - **Branch:** m95-kappa-table-whole-pin
 - **Priority:** normal
 - **Depends on:** —
