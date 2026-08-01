@@ -1,7 +1,8 @@
 # M97: `npbootstrap` in the boundary hint — verified by running it, not predicted
 
-- **Status:** in-progress
+- **Status:** review
 - **Branch:** m97-npbootstrap-hint
+- **PR:** https://github.com/jmgirard/intraclass/pull/104
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
@@ -98,7 +99,7 @@ ROADMAP candidate.
       never an npbootstrap one).
 - [x] T5: Extend M93's sweep over imbalance shape at `boot_samples = 999`; require zero
       hinted-then-unusable runs.
-- [ ] T6: NEWS, `@param`, the `R/ci-npbootstrap.R:177` comment correction,
+- [x] T6: NEWS, `@param`, the `R/ci-npbootstrap.R:177` comment correction,
       `devtools::document()`, full AC7 gate, PR.
 
 ## Work log
@@ -113,6 +114,7 @@ ROADMAP candidate.
 - 2026-07-31: T1+T2+T3+T4+T5 in one commit (they rewrite the same two functions and one test file, and T2's end-to-end test needs T4's restored row, so per-task splitting would leave the suite red at a checkpoint — the M93 T1/T2 precedent): `npbootstrap` registered as a row in `boundary_method_usable()` (shipped `boot_samples` default, caller seed else `npb_hint_seed = 1L`); the unbalanced one-way row restored behind the run with the numeric-`unit` fence mirrored; the message-driven sweep extended over imbalance shape (balanced / mildly-ragged / double-code at 15–60 subjects) with the named==usable identity asked under the abort's own seed; leak guard rebuilt: two npbootstrap renderings pinned (distinct-count 3→5), `num_tokens()` widened to non-finite word-tokens with positive controls, whole-message enumeration licenses exactly the named seed; RNG neutrality pinned direct and end-to-end (seeded: stream unchanged; unseeded: stream equal to a hint-disabled mock of the same call). AC5 cost: 124 ms median at 999 resamples on a 20×3 unbalanced design, and the existing laziness guard shows the success path untouched. Hint test file green with its CRAN-skipped sweeps active, `lintr` 0, `air format --check` clean; the full-suite `NOT_CRAN=true CI=true` run was still executing at this checkpoint — its result gets its own line.
 
 - 2026-07-31: full suite at `NOT_CRAN=true CI=true`: FAIL 0 / ERROR 0 / SKIP 23 / PASS 5455 on the T1–T5 checkpoint tree; no `_snaps/` path in `git diff main..HEAD`, so no snapshot moved and none was accepted.
+- 2026-07-31: T6 gate — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **0 errors / 0 warnings / 0 notes** (2m09s); `devtools::document()` no-diff; NEWS/`@param`/comment-correction landed with the T1–T5 commit (same files). PR #104 opened. Status -> review.
 
 ## Decisions
 
