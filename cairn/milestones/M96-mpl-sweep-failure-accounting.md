@@ -74,7 +74,7 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 
 ## Tasks
 
-- [ ] T1: Commit the retrospective audit script and record its per-fixture sentinel
+- [x] T1: Commit the retrospective audit script and record its per-fixture sentinel
       counts in the work log. Any non-zero count stops for a gate amendment before the
       rest of the milestone proceeds.
 - [ ] T2: Add the shared counted-failure helper to `data-raw/m86-mpl-lib.R`; route all
@@ -90,6 +90,7 @@ change to a committed coverage figure · the whole-table κ_m pin → M95.
 ## Work log
 
 - 2026-07-25: created by /milestone-plan (promotes M92 review finding F6; plan gate froze the existing fixtures — the audit run during planning found 0 sentinel reps across all four fixtures, 36000 reps — and sent the shipped `uniroot` clamp to a candidate row rather than folding it in).
+- 2026-07-31: T1 done — `data-raw/m96-sentinel-audit.R` committed; run clean: m90-coverage-sweep 0/24000, m91-interp-sweep 0/6000, m92-interp-sweep 0/3000, m92-interp-sweep-run1-collided 0/3000 (0 sentinel hits / 36000 reps; exit 0). Frozen-fixtures decision stands.
 
 ## Decisions
 
