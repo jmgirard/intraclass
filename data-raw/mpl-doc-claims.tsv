@@ -37,9 +37,9 @@ b4fbd95986f0	R/icc.R	out	calibrated at subject-count nodes (10, 15, 20, 30, 50, 
 87f0dfc36b75	NEWS.md	settle	each clearing its pre-registered coverage floor	all(col('adequate')) and verdict['all_adequate'] and len(col('id')) == 3	NEWS restatement of the floor-clearing claim, incl. the three-cells count
 f00273a96e77	NEWS.md	settle	what that validation does not establish	all(r == 'interp' for r in col('role')) and (cell('E2', 'miss_below') > cell('E2', 'miss_above')) != (cell('E3', 'miss_below') > cell('E3', 'miss_above'))	NEWS restatement of validated-not-calibrated + non-uniform asymmetry direction
 c6eb48429ddb	NEWS.md	out	settled mechanically, in CI		self-referential: enforced by this script's own two-way cross-check, its --self-test, and the CI wiring in .github/workflows/lint.yaml
-6dd67d402a31	R/icc.R	out	the error names a deterministic opt-in method below that fits the design in hand		pre-M94 boundary-hint claim (M93), settled by the M93 hint tests, not about the M92 cells
+b41deb261c52	R/icc.R	out	the error names an opt-in method below that fits the design in hand		pre-M94 boundary-hint claim (M93, reworded M97: npbootstrap now nameable on unbalanced one-way), settled by the M93/M97 hint tests, not about the M92 cells
+8f56da2702ff	R/icc.R	out	On unbalanced one-way data it can name "npbootstrap"		M97 boundary-hint claim (seed/boot_samples reproduction contract), settled by the M97 hint tests (AC3/AC4), not about the M92 cells
 8db1b2fa7bfc	R/icc.R	out	it falls silent wherever a method would not in fact deliver		pre-M94 boundary-hint claim (M93), settled by the M93 hint tests
-5b6e4f50258c	R/icc.R	out	It never names "npbootstrap"		pre-M94 boundary-hint claim (M93), settled by the M93 hint tests
 c47de06ef61e	R/icc.R	out	The bootstrap does not rely on the asymptotic-normal covariance approximation		pre-M94 parametric-bootstrap description, not about the M92 cells
 c758cbdd0ac4	R/icc.R	out	It is available for every design the "glmmTMB" and "lme4" engines fit		pre-M94 engine-availability claim, exercised by the engine test suites
 b416fc8bdfe6	R/icc.R	out	available only with, engine = "brms"		pre-M94 posterior-method claim, settled by the brms dispatch tests

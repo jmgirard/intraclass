@@ -203,7 +203,7 @@ subject-count interpolation is coverage-checked (see \code{ci_method}).}
 \item{ci_method}{Interval method. \code{"montecarlo"} (default) simulates from the
 fitted parameter covariance on the engine's log scale (fast, boundary-aware).
 Near the variance boundary it can fail to produce an interval and aborts; when
-it does, the error names a deterministic opt-in method below that fits the
+it does, the error names an opt-in method below that fits the
 design in hand — chosen by RUNNING each candidate on your data and keeping only
 those whose reported endpoints are all finite, correctly ordered and in range —
 so there is no need to work that out from this list. Being a check on the data
@@ -211,9 +211,14 @@ rather than on the design, it falls silent wherever a method would not in fact
 deliver, including a missing score, degenerate data, an uncalibrated
 \code{conf_level} or geometry, and a numeric \code{unit} projected past the point where a
 method's Spearman-Brown map breaks down; the two closed forms are asked
-separately, so one can be named where the other is not. It never names
-\code{"npbootstrap"}, whose resampling can fail for reasons a single run does not
-settle; check that one against its own entry below.
+separately, so one can be named where the other is not. On unbalanced one-way
+data it can name \code{"npbootstrap"}; because that method resamples, its trial run
+is evidence about one run rather than about the data, so the trial uses your
+call's own \code{boot_samples} and your own \code{seed} when you set one (your retry
+reproduces it exactly) — with no seed set it uses a
+fixed seed the message then names, and an unseeded retry draws fresh resamples
+and can fail where the verified run succeeded, especially on small designs.
+The trial run leaves the session's random-number stream untouched.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
