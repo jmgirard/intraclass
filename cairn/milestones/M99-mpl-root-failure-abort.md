@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M99: MPL interval — distinguish a true boundary limit from a root-finding failure
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m99-mpl-root-failure-abort   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -103,7 +103,7 @@ region).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Tests first in `test-ci-mpl.R`: (a) a seeded near-zero-ρ two-way
+- [x] T1: Tests first in `test-ci-mpl.R`: (a) a seeded near-zero-ρ two-way
       dataset whose lower side has no crossing returns lower = 0 via the sign
       test (direct `mpl_interval()` call, M84 lesson); (b) the failure branch
       via `local_mocked_bindings()` on the new root-finding wrapper, asserting
@@ -134,6 +134,8 @@ region).
 - 2026-08-01: plan gate chose classed abort over warning+boundary-value because a wrong endpoint would still reach downstream code (#5 fail-loudly); falsified by evidence a classed abort breaks a legitimate downstream workflow a warning would serve.
 - 2026-08-01: plan gate chose reusing `intraclass_engine_error` over a new dedicated class because the branch is unreachable with real data and a new class grows exported vocabulary for it; falsified by a user need to discriminate root-finding failure from engine failure in `tryCatch()`.
 - 2026-08-01: plan gate chose fixing the offline twin in lockstep over shipped-only because the twin is the IP1 reference implementation and committed fixtures are unaffected (failure region unreachable for the seeded sweeps); falsified by a calibration re-run whose accounting shows the twin aborting where the shipped code does not.
+
+- 2026-08-01: T1 done — two M99 tests appended to test-ci-mpl.R; mocked-seam abort test red as intended (no mpl_uniroot binding yet), no-crossing boundary test green (value-identical to the swallow until T2 removes the pattern); suite otherwise 181 pass.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -787,3 +787,45 @@ test_that("mpl informs when it drops consistency from a defaulted type (AC4)", {
     "Dropping.*consistency"
   )
 })
+
+# ---- M99: a boundary endpoint is evidence-based; a root failure aborts -------
+# The sign test (M99 AC1/AC2): f(rho_hat) = -crit < 0 always, so a side has a
+# deviance crossing iff f at its outer bracket edge is >= 0 (or non-finite).
+# Only the no-crossing case may return the boundary endpoint; a crossing-
+# indicated root-finding failure aborts classed instead of silently reporting
+# 0/1. The failure branch is unreachable with real non-degenerate data (a real
+# ms gives a finite continuous deviance, so a bracketed root cannot fail),
+# hence the mocked seam (mpl_uniroot) rather than a constructed dataset.
+
+test_that("mpl boundary endpoints come from the sign test, not a swallowed error (M99)", {
+  # Near-zero-rho boundary cell: the profile deviance at eps never reaches the
+  # critical value (no crossing), so lower = 0 IS the limit and must be returned
+  # by the explicit no-crossing branch, on both the two-sided and one-sided paths.
+  d <- mpl_twoway_long(n_s = 20, n_r = 3, s2s = 1e-4, s2r = 0.3, s2e = 0.6, seed = 7)
+  ms <- mpl_anova(mpl_matrix(d))
+  ci <- mpl_interval(ms, kappa = 0.5, alpha = 0.05, side = "two")
+  expect_identical(ci[["lower"]], 0)
+  expect_gt(ci[["upper"]], 0)
+  expect_lte(ci[["upper"]], 1)
+  lo <- mpl_interval(ms, kappa = 0.5, alpha = 0.025, side = "lower")
+  expect_identical(lo[["lower"]], 0)
+})
+
+test_that("a crossing-indicated root-finding failure aborts classed (M99)", {
+  # Interior data: both sides have deviance crossings, so a root-finding failure
+  # here is a genuine numerical failure. Force one through the seam; the result
+  # must be the classed abort, never a fabricated boundary endpoint.
+  d <- mpl_twoway_long()
+  ms <- mpl_anova(mpl_matrix(d))
+  local_mocked_bindings(
+    mpl_uniroot = function(...) stop("synthetic root failure")
+  )
+  expect_error(
+    mpl_interval(ms, kappa = 0.3, alpha = 0.05, side = "two"),
+    class = "intraclass_engine_error"
+  )
+  expect_error(
+    mpl_interval(ms, kappa = 0.3, alpha = 0.05, side = "lower"),
+    class = "intraclass_engine_error"
+  )
+})
