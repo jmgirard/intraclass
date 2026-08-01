@@ -102,6 +102,56 @@ npb_sb <- function(rho, m) {
   m * rho / (1 + (m - 1) * rho)
 }
 
+# Loud guard (#5/#8) for the Spearman-Brown pole at a numeric `unit`, shared by
+# every one-way reducer that maps raw ICC(1) endpoints through `npb_sb()`:
+# `npbootstrap` here and `searle`/`burch` in ci-classical.R.
+#
+# `npb_sb()` has a pole at rho = -1/(m-1). Unlike the MPL sibling (D-016), these
+# ICC(1) endpoints are NOT clamped to [0, 1] -- the exact-F limit, Burch's
+# log-theta limit and the transformed bootstrap-t limit all reach down to the
+# estimator's support floor -1/(n0-1) -- so a user-chosen m > n0 puts the pole
+# INSIDE the attainable support. An endpoint past it maps THROUGH the pole to a
+# value with infimum m/(m-1) > 1: an interval lying entirely above the ICC's upper
+# support bound, sometimes inverted, and not containing its own point. All three
+# methods returned that with no abort before this guard.
+#
+# `icc()` already refuses a numeric `unit` on the UNBALANCED npbootstrap path for
+# exactly this reason (D-010) -- it could not establish pole-safety there, where
+# n0 is a harmonic mean. This is the same fence for the balanced case, where the
+# pole is equally reachable but the endpoint is known exactly, so the test is on
+# the ACTUAL computed endpoint rather than on m > n0. m > n0 is only where the pole
+# becomes reachable; whether it is crossed depends on the data, and refusing every
+# m > n0 would reject the many projections that are perfectly well-posed.
+#
+# Strictly `< 0`. At exactly the pole the denominator is +0 and `npb_sb()` returns
+# -Inf -- the correct limit, and in-support for the averaged/projected form under
+# D-010 ((-Inf, 1)) -- so that case is left alone. This fires only where the map has
+# passed THROUGH the pole and the sign flip has made the reported answer wrong.
+npb_guard_sb_pole <- function(ends, m, method, call) {
+  if (m <= 1) {
+    return(invisible(NULL))
+  }
+  denom <- 1 + (m - 1) * ends
+  if (!any(denom < 0)) {
+    return(invisible(NULL))
+  }
+  pole <- -1 / (m - 1)
+  crossed <- ends[denom < 0]
+  abort_unsupported(
+    c(
+      "The one-way {method} interval cannot be projected to \\
+       {.code unit = {.val {m}}} on this data.",
+      i = "The Spearman-Brown projection has a pole at \\
+           {.field rho = {.val {round(pole, 4)}}}, and an ICC(1) confidence limit \\
+           of {.val {round(unname(crossed[[1]]), 4)}} lies past it -- the projected \\
+           limit would fall outside the ICC's support rather than inside it.",
+      i = "Project to a smaller {.arg unit}, use {.code unit = \"average\"}, or use \\
+           {.code ci_method = \"montecarlo\"} for this projection."
+    ),
+    call = call
+  )
+}
+
 # Split the raw one-way data into per-subject score vectors, guarding a degenerate
 # extraction loudly (#5/#8): a subject with no rows or a non-finite score would
 # silently corrupt the ANOVA. Balance is guaranteed by the caller's dispatch guard.
@@ -214,6 +264,7 @@ npbootstrap_ci <- function(
   # ICC values, the same disclosure mc_ci()/bootstrap_ci() make.
   lapply(estimands, function(est) {
     m <- est$divisor
+    npb_guard_sb_pole(c(rho_lo, rho_hi), m, "transformed bootstrap-t", call)
     list(
       conf.low = npb_sb(rho_lo, m),
       conf.high = npb_sb(rho_hi, m),

@@ -233,3 +233,133 @@ test_that("burch ICC(k) is the exact Spearman-Brown image of ICC(1), divisor n (
   expect_equal(ik$conf.low, sb(i1$conf.low, n), tolerance = 1e-9)
   expect_equal(ik$conf.high, sb(i1$conf.high, n), tolerance = 1e-9)
 })
+
+# ---- Regression: the Spearman-Brown pole at a numeric `unit` ------------------
+#
+# Both classical reducers map their ICC(1) endpoints through the shared
+# `npb_sb()` with the estimand's averaging divisor m. Unlike the MPL sibling
+# (D-016), the classical ICC(1) endpoints are NOT clamped to [0, 1]: the exact-F
+# lower limit reaches down to the estimator's support floor -1/(n-1), and Burch's
+# log-theta limit does the same. So a user-chosen m > n puts the SB pole
+# rho = -1/(m-1) INSIDE the attainable support, and an endpoint below it maps
+# through the pole to a value with infimum m/(m-1) > 1 -- an interval lying
+# entirely above the ICC's upper support bound, sometimes inverted, and not
+# containing its own point. Reported with no abort before this fix.
+#
+# The contract restored: a returned interval is in-support and correctly ordered,
+# or the call fails loudly (#5/#8) -- never a wrong answer.
+
+test_that("a pole-crossing numeric `unit` aborts instead of returning a > 1 interval", {
+  skip_if_not_installed("glmmTMB")
+
+  # The shipped defect verbatim: balanced one-way, 2 ratings per subject, the
+  # near-zero-ICC boundary the classical methods exist to serve. At m = 15 the
+  # pole sits at rho = -1/14, well inside the attainable support [-1, 1].
+  d <- data.frame(
+    subject = rep(1:2, each = 2),
+    rater = rep(1:2, times = 2),
+    score = c(1, 2, 1.5, 2.4)
+  )
+  for (meth in c("searle", "burch")) {
+    expect_error(
+      icc(
+        d,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        unit = 15,
+        ci_method = meth,
+        conf_level = 0.80
+      ),
+      class = "intraclass_unsupported"
+    )
+  }
+})
+
+test_that("no classical numeric-`unit` cell returns an out-of-support interval", {
+  skip_if_not_installed("glmmTMB")
+
+  # Property sweep over the geometry that reaches the pole (few ratings per
+  # subject, a projection divisor well above it). Every cell either aborts or
+  # returns an ordered interval inside the ICC(m) support -- there is no third
+  # outcome. Before the fix 264 of these 288 cells returned a wrong answer.
+  bad <- 0L
+  for (meth in c("searle", "burch")) {
+    for (ns in c(2L, 3L, 5L, 10L)) {
+      for (m in c(6, 15)) {
+        for (cl in c(0.80, 0.90, 0.95)) {
+          for (s in 1:6) {
+            set.seed(s * 100L + ns)
+            d <- data.frame(
+              subject = rep(seq_len(ns), each = 2),
+              rater = rep(1:2, times = ns),
+              score = stats::rnorm(2 * ns)
+            )
+            got <- tryCatch(
+              tidy(icc(
+                d,
+                score,
+                subject,
+                rater,
+                model = "oneway",
+                unit = m,
+                ci_method = meth,
+                conf_level = cl
+              )),
+              intraclass_error = function(e) NULL
+            )
+            if (is.null(got)) {
+              next # aborted loudly -- the acceptable outcome
+            }
+            if (
+              got$conf.low > got$conf.high ||
+                got$conf.low > 1 ||
+                got$conf.high > 1
+            ) {
+              bad <- bad + 1L
+            }
+          }
+        }
+      }
+    }
+  }
+  expect_identical(bad, 0L)
+})
+
+test_that("a pole-safe numeric `unit` is unaffected by the fence", {
+  skip_if_not_installed("glmmTMB")
+
+  # The fence is on the ACTUAL endpoint, not on m > n: a projection whose ICC(1)
+  # lower limit stays above the pole still returns its interval, m > n and all.
+  # sf_ratings_long is balanced 4-rater with a one-way ICC(1) lower limit near
+  # -0.133, so m = 6 (pole -0.2) is safe while m = 10 (pole -0.111) is not --
+  # which is why the fence has to read the endpoint rather than compare m to n.
+  d <- sf_ratings_long()
+  for (meth in c("searle", "burch")) {
+    td <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      unit = 6,
+      ci_method = meth
+    ))
+    expect_lt(td$conf.low, td$conf.high)
+    expect_lt(td$conf.high, 1)
+    # and it is exactly the Spearman-Brown image of the ICC(1) endpoints
+    i1 <- tidy(icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      unit = "single",
+      ci_method = meth
+    ))
+    sb <- function(rho, m) m * rho / (1 + (m - 1) * rho)
+    expect_equal(td$conf.low, sb(i1$conf.low, 6), tolerance = 1e-9)
+    expect_equal(td$conf.high, sb(i1$conf.high, 6), tolerance = 1e-9)
+  }
+})
