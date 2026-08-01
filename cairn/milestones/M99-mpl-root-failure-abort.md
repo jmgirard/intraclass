@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M99: MPL interval — distinguish a true boundary limit from a root-finding failure
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -109,19 +109,19 @@ region).
       via `local_mocked_bindings()` on the new root-finding wrapper, asserting
       `intraclass_engine_error`; both red against current code where they
       should be.
-- [ ] T2: Rewrite `R/ci-mpl.R:178-189`: extract the per-side `uniroot` call
+- [x] T2: Rewrite `R/ci-mpl.R:178-189`: extract the per-side `uniroot` call
       into a package-internal wrapper (the mockable seam), evaluate the sign
       condition explicitly, return the boundary only on no-crossing, abort
       classed otherwise.
-- [ ] T3: Mirror the sign-test decision logic in
+- [x] T3: Mirror the sign-test decision logic in
       `data-raw/m86-mpl-lib.R:131-158` (both sides, both `side=` modes,
       `stop()` idiom).
-- [ ] T4: Update the four claim surfaces + NEWS; regenerate `man/`; re-triage
+- [x] T4: Update the four claim surfaces + NEWS; regenerate `man/`; re-triage
       `data-raw/mpl-doc-claims.tsv`; run all three data-raw checkers locally
       (M85/M97 lessons).
-- [ ] T5: Author the narrowing D-entry and the DESIGN.md boundary-table mpl
+- [x] T5: Author the narrowing D-entry and the DESIGN.md boundary-table mpl
       row (durable-record preview before the commit that lands them).
-- [ ] T6: Full local verify per the r-package profile (document/air/lintr +
+- [x] T6: Full local verify per the r-package profile (document/air/lintr +
       installed-package suite at `NOT_CRAN=true CI=true`), and record
       pre-vs-post endpoint identity on the seeded boundary dataset (run the
       snippet on the default branch and on the milestone branch).
@@ -137,6 +137,7 @@ region).
 
 - 2026-08-01: T1 done — two M99 tests appended to test-ci-mpl.R; mocked-seam abort test red as intended (no mpl_uniroot binding yet), no-crossing boundary test green (value-identical to the swallow until T2 removes the pattern); suite otherwise 181 pass.
 - 2026-08-01: checkpoint (T2–T5 code + records drafted, verification pending) — sign-test rewrite in R/ci-mpl.R with mpl_uniroot seam + classed abort; twin mirrored (stop() idiom); 4 claim surfaces + NEWS + man/ + tsv re-triage done, all three data-raw checkers green; D-019 appended + DESIGN.md interval-time MPL row added (previewed in chat); MPL test file green (183); full suite + lintr running in background — tasks stay unticked until the verify slot is green.
+- 2026-08-01: T2-T6 done, verify green — installed-pkg suite NOT_CRAN=true CI=true: failed 0 / error 0 / passed 5433 / skipped 23; lintr 0; air --check clean; document() no delta; endpoint identity pre-vs-post bit-exact on 3 geometries (boundary-lo clamp, interior, high-rho), both interval paths (evidence for review). Status -> review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

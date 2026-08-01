@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | in-progress | — | normal | milestones/M99-mpl-root-failure-abort.md |
+| M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | review | — | normal | milestones/M99-mpl-root-failure-abort.md |
 | M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | done | M93 | normal | milestones/archive/M98-clamp-detection-assertion.md |
 | M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | done | M93 | normal | milestones/archive/M97-npbootstrap-hint-resample-stability.md |
 | M96 | Failure accounting in the three MPL coverage-sweep generators | done | — | normal | milestones/archive/M96-mpl-sweep-failure-accounting.md |
