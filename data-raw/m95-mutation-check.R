@@ -109,9 +109,9 @@ mutate_cell <- function(lines, n_r, n_s, conf_level, delta) {
 }
 
 cases <- list()
-add_case <- function(label, side, cell, perturbation, out) {
+add_case <- function(cases, label, side, cell, perturbation, out) {
   stopifnot(out$n_fail >= 1L, length(out$other_failed) == 0L)
-  cases[[length(cases) + 1L]] <<- list(
+  cases[[length(cases) + 1L]] <- list(
     label = label,
     side = side,
     cell = cell,
@@ -125,6 +125,7 @@ add_case <- function(label, side, cell, perturbation, out) {
     out$n_fail,
     if (out$n_fail > 1L) "s" else ""
   ))
+  cases
 }
 
 cat("baseline (untouched): ")
@@ -143,7 +144,8 @@ for (case in list(
     mutate_cell(fixture_lines, case$n_r, case$n_s, case$cl, 0.5),
     fixture_path
   )
-  add_case(
+  cases <- add_case(
+    cases,
     case$label,
     "fixture",
     sprintf("(%d, %d, %.2f)", case$n_r, case$n_s, case$cl),
@@ -159,7 +161,8 @@ for (case in list(
 # (6, 15) is in the +0.5-on-unpinned-cells set M92's pass-6 mutation showed
 # leaves the pre-M95 file at FAIL 0 (finding P6-1).
 writeLines(mutate_cell(fixture_lines, 6L, 15L, 0.95, 0.5), fixture_path)
-add_case(
+cases <- add_case(
+  cases,
   "perturb (6,15,0.95) [AC5]",
   "fixture",
   "(6, 15, 0.95) -- covered by NO pre-M95 literal pin",
@@ -173,7 +176,8 @@ writeLines(
   append(fixture_lines, added, after = data_start - 1L),
   fixture_path
 )
-add_case(
+cases <- add_case(
+  cases,
   "add row (2,12,0.95)",
   "fixture",
   "(2, 12, 0.95) -- not a shipped node",
@@ -194,7 +198,8 @@ is_dropped <- vapply(
 )
 stopifnot(sum(is_dropped) == 1L)
 writeLines(fixture_lines[!is_dropped], fixture_path)
-add_case(
+cases <- add_case(
+  cases,
   "drop row (3,20,0.90)",
   "fixture",
   "(3, 20, 0.90)",
@@ -226,7 +231,8 @@ save(
   version = 2
 )
 suppressMessages(devtools::load_all(quiet = TRUE))
-add_case(
+cases <- add_case(
+  cases,
   "perturb shipped (6,15,0.95)",
   "shipped (R/sysdata.rda)",
   "(6, 15, 0.95) in the shipped table itself",
