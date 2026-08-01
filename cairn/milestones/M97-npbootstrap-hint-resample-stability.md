@@ -115,6 +115,7 @@ ROADMAP candidate.
 
 - 2026-07-31: full suite at `NOT_CRAN=true CI=true`: FAIL 0 / ERROR 0 / SKIP 23 / PASS 5455 on the T1–T5 checkpoint tree; no `_snaps/` path in `git diff main..HEAD`, so no snapshot moved and none was accepted.
 - 2026-07-31: T6 gate — `devtools::check(env_vars = c(NOT_CRAN = "false"))` **0 errors / 0 warnings / 0 notes** (2m09s); `devtools::document()` no-diff; NEWS/`@param`/comment-correction landed with the T1–T5 commit (same files). PR #104 opened. Status -> review.
+- 2026-07-31: review-time CI catch, fixed on the branch rather than a status flip (no runtime surface; the M93 precedent for a check-references trip) — the `@param ci_method` rewrite changed two sentences the M94 doc-claims ledger pins: row 40's quote+key re-triaged to the reworded sentence, row 42 ("It never names npbootstrap") deleted with its claim; `check-mpl-doc-claims.py` 0 failures + self-test OK and `check-reference-observations.py` 0 falsified locally. The M94 checker is CI-only, not in the local verify slot — which is why the local gate missed it.
 
 ## Decisions
 
