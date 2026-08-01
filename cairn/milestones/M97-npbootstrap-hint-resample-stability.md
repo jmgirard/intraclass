@@ -169,13 +169,14 @@ re-triage; code identical to the gated tree). "Fresh hint-file run" = the full
   corrected against measurement — figures re-corrected at review pass 1 (F3):
   double-code trips the guard under every probed seed, the unbalanced 8×3 under
   3 of 8 (2,5,6); `man/icc.Rd` regenerated.
-- AC7 — this session, by command: `devtools::test()` at `NOT_CRAN=true CI=true`
-  FAIL 0 / PASS 5455 / SKIP 23; `devtools::check(env_vars = c(NOT_CRAN="false"))`
-  0 errors / 0 warnings / 0 notes; `lintr::lint_package()` 0 lints;
-  `air format --check` clean; `devtools::document()` no-diff; no `_snaps/` path in
-  the branch diff (no snapshot moved or accepted). CI: first run caught the M94
-  doc-claims ledger drift (fixed above, logged); green CI on the final head is
-  verified at the merge step's blocking watch.
+- AC7 — re-run in full on the FINAL post-fix tree (b56da5a), by command:
+  `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5466 / SKIP 23;
+  `devtools::check(env_vars = c(NOT_CRAN="false"))` 0 errors / 0 warnings /
+  0 notes; `lintr::lint_package()` 0 lints; `air format --check` clean;
+  `devtools::document()` no-diff; no `_snaps/` path in the branch diff (no
+  snapshot moved or accepted). CI: first run caught the M94 doc-claims ledger
+  drift (fixed above, logged); green CI on the final head is verified at the
+  merge step's blocking watch.
 
 Consistency gate (by command, this session): `cairn_validate` exit 0 (all checks
 PASS; the 321-token "dangling id tokens" WARN is the standing pre-migration
