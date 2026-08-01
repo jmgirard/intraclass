@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-31 (audit — all 16 gate checks PASS, nothing to fix; nothing in flight, M48 stays `blocked` (D-050); both GitHub inboxes empty; one reported gap: `cairn/PROFILE.md` is session-injected but absent from the always-read governance table.)_
+_Last hygiene check: 2026-08-01 (audit — all 16 gate checks PASS, nothing to fix; the 2026-08-01 `hotfix-searle-pole-out-of-support` (PR #105) is already reconciled as the anti-clamp-probe candidate; nothing in flight, M48 stays `blocked` (D-050); both GitHub inboxes empty; the `cairn/PROFILE.md` always-read-frame gap persists unchanged.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
