@@ -56,19 +56,27 @@
   is finite, correctly ordered, and inside the coefficient’s range. A
   balanced one-way fit can be pointed at the deterministic closed forms
   `ci_method = "searle"` and `"burch"` (with a word on what each is good
-  for), and a two-way random absolute-agreement fit at `"mpl"`.
+  for), a two-way random absolute-agreement fit at `"mpl"`, and an
+  unbalanced one-way fit at `ci_method = "npbootstrap"` — the one
+  interval method available there.
 
   Because the check runs the method rather than reasoning about your
   design, it falls silent in every case where the method would not in
   fact help — fixed raters, multilevel, within-cell replicates,
-  consistency, unbalanced one-way data, a `conf_level` or a
-  subject/rater count outside the calibrated set, any missing score,
-  degenerate data, or a projection to so many raters that a method’s
-  projection formula breaks down. The two closed forms are asked
-  separately, so where one breaks down and the other does not, only the
-  one that works is named. `ci_method = "npbootstrap"` is named on no
-  design: it resamples, so a successful run is evidence about that
-  random seed rather than about your data.
+  consistency, a `conf_level` or a subject/rater count outside the
+  calibrated set, any missing score, degenerate data, or a projection to
+  so many raters that a method’s projection formula breaks down. The two
+  closed forms are asked separately, so where one breaks down and the
+  other does not, only the one that works is named.
+
+  `"npbootstrap"` resamples, so its trial run is evidence about one run
+  rather than about your data. The hint therefore runs it under your
+  call’s own `boot_samples` and the `seed` your own call set, so the run
+  it verified is the run you would reproduce — and when no seed was set,
+  it verifies under a fixed seed and the message tells you which
+  `seed =` value reproduces that verified interval (an unseeded retry
+  draws fresh resamples and can fail on a small design). The trial run
+  never touches the random-number stream your session goes on to use.
 
   The interval methods themselves, and what the default does, are
   unchanged. This adds guidance to an existing error and never silently
