@@ -1,6 +1,7 @@
 # M97: `npbootstrap` in the boundary hint — verified by running it, not predicted
 
-- **Status:** planned
+- **Status:** in-progress
+- **Branch:** m97-npbootstrap-hint
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
