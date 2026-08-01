@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-31 (M97 merged and archived — 6 of 12 review findings ≥80, all fixed on the branch; M92 rotated out under terminal-row retention; 1 lesson added + the M85 CI-checker family line extended, the stalest line (M63 amendment-cap) pruned to meet the cap, none retired. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-31 (audit — all 16 gate checks PASS, nothing to fix; nothing in flight, M48 stays `blocked` (D-050); both GitHub inboxes empty; one reported gap: `cairn/PROFILE.md` is session-injected but absent from the always-read governance table.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
