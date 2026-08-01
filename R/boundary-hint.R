@@ -43,8 +43,10 @@
 # balanced one-way datasets where the MC default aborted on 4-44%). The
 # `npbootstrap` bullet (M97) claims only what its run showed -- "run on your data
 # ... returns an interval" -- because its second abort is a RESAMPLE-stage guard
-# (`R/ci-npbootstrap.R:179-192`) that is stochastic: a run is evidence about that
-# SEED, not about the design. So verification runs under the seed the user's own
+# (the `n_bad` block in `R/ci-npbootstrap.R`) that is stochastic: a run is evidence
+# about that SEED, not about the design (the same unbalanced 8x3 dataset verifies
+# under five of eight probed seeds and trips the guard under the other three). So
+# verification runs under the seed AND `boot_samples` the user's own
 # retry would use -- their `seed` when set, else the fixed `npb_hint_seed`, which
 # the bullet then names so the promised call is exactly the verified one. The run
 # consumes randomness inside an abort path, so it is RNG-neutral by construction:
@@ -122,17 +124,21 @@ npb_hint_seed <- 1L
 #
 # Keyed by the `ci_method` string: M97 registered `npbootstrap` by adding a row here
 # rather than by writing a second checker (M97 AC1). Its row runs the shipped reducer
-# at the shipped `boot_samples` default -- never a reduced count, which would lower
-# the chance of tripping a guard that fires on any degenerate resample (M93 pass-3
-# F3) -- under the caller's own `seed` when set, else under `npb_hint_seed` (the seed
-# the bullet then names, so the verified run is the promised one).
+# at the CALLER's own `boot_samples` -- the count their retry would use, never a
+# reduced one, which would lower the chance of tripping a guard that fires on any
+# degenerate resample (M93 pass-3 F3; the M97 review measured a run that succeeded
+# at 999 aborting at a caller's 2000, so a hardcoded default here would hint a
+# retry that fails) -- and under the caller's own `seed` when set, else under
+# `npb_hint_seed` (the seed the bullet then names, so the verified run is the
+# promised one).
 boundary_method_usable <- function(
   method,
   df,
   estimands,
   conf_level,
   n0,
-  seed = NULL
+  seed = NULL,
+  boot_samples = 999L
 ) {
   run <- switch(
     method,
@@ -144,6 +150,7 @@ boundary_method_usable <- function(
         df,
         estimands,
         conf_level = conf_level,
+        boot_samples = boot_samples,
         seed = if (is.null(seed)) npb_hint_seed else seed
       )
     },
@@ -201,10 +208,19 @@ boundary_method_hint <- function(
   df,
   estimands,
   n0,
-  seed = NULL
+  seed = NULL,
+  boot_samples = 999L
 ) {
   usable <- function(method) {
-    boundary_method_usable(method, df, estimands, conf_level, n0, seed = seed)
+    boundary_method_usable(
+      method,
+      df,
+      estimands,
+      conf_level,
+      n0,
+      seed = seed,
+      boot_samples = boot_samples
+    )
   }
 
   # A cluster facet or within-cell replicates put the design outside EVERY opt-in
@@ -228,8 +244,9 @@ boundary_method_hint <- function(
         return(character(0))
       }
       # A bootstrap run is evidence about ONE seed's resamples, not all of them
-      # (M97 AC3: the same 8x3 dataset verifies under seed 8 and fails under seeds
-      # 1-7). Under the caller's own `seed` the promise is exact -- their retry
+      # (M97 AC3: the same unbalanced 8x3 dataset, under the production estimands,
+      # verifies under five of eight probed seeds and trips the resample guard
+      # under the other three). Under the caller's own `seed` the promise is exact -- their retry
       # re-runs the verified draws, so the bullet stays seed-free. With no caller
       # seed the run used the fixed `npb_hint_seed`, and the bullet NAMES it: the
       # promised call is exactly the verified one, never a fresh ambient draw that

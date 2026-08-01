@@ -213,9 +213,10 @@ deliver, including a missing score, degenerate data, an uncalibrated
 method's Spearman-Brown map breaks down; the two closed forms are asked
 separately, so one can be named where the other is not. On unbalanced one-way
 data it can name \code{"npbootstrap"}; because that method resamples, its trial run
-is evidence about one seed rather than about the data, so the run uses your
-own \code{seed} when you set one (your retry reproduces it exactly) and otherwise a
-fixed seed the message then names — an unseeded retry draws fresh resamples
+is evidence about one run rather than about the data, so the trial uses your
+call's own \code{boot_samples} and your own \code{seed} when you set one (your retry
+reproduces it exactly) — with no seed set it uses a
+fixed seed the message then names, and an unseeded retry draws fresh resamples
 and can fail where the verified run succeeded, especially on small designs.
 The trial run leaves the session's random-number stream untouched.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the

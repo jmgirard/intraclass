@@ -296,9 +296,10 @@
 #'   method's Spearman-Brown map breaks down; the two closed forms are asked
 #'   separately, so one can be named where the other is not. On unbalanced one-way
 #'   data it can name `"npbootstrap"`; because that method resamples, its trial run
-#'   is evidence about one seed rather than about the data, so the run uses your
-#'   own `seed` when you set one (your retry reproduces it exactly) and otherwise a
-#'   fixed seed the message then names — an unseeded retry draws fresh resamples
+#'   is evidence about one run rather than about the data, so the trial uses your
+#'   call's own `boot_samples` and your own `seed` when you set one (your retry
+#'   reproduces it exactly) — with no seed set it uses a
+#'   fixed seed the message then names, and an unseeded retry draws fresh resamples
 #'   and can fail where the verified run succeeded, especially on small designs.
 #'   The trial run leaves the session's random-number stream untouched.
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
@@ -2158,11 +2159,13 @@ icc <- function(
           type = type,
           type_supplied = type_supplied,
           # `unit` feeds the admissibility mirror of the numeric-unit fence on the
-          # unbalanced npbootstrap path; `seed` is the one the user's own retry
-          # would run under, so the verified bootstrap run is the promised one
-          # (M97; a NULL seed falls back to the fixed, named `npb_hint_seed`).
+          # unbalanced npbootstrap path; `seed` and `boot_samples` are the ones the
+          # user's own retry would run under, so the verified bootstrap run is the
+          # promised one (M97; a NULL seed falls back to the fixed, named
+          # `npb_hint_seed`).
           unit = unit,
           seed = seed,
+          boot_samples = boot_samples,
           conf_level = conf_level,
           # The hint no longer PREDICTS whether a method will work on this data; it
           # runs the method. So it takes exactly what the dispatch above hands a

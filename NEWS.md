@@ -55,8 +55,9 @@
   projection formula breaks down. The two closed forms are asked separately, so
   where one breaks down and the other does not, only the one that works is named.
 
-  `"npbootstrap"` resamples, so its trial run is evidence about one random seed
-  rather than about your data. The hint therefore runs it under the `seed` your
+  `"npbootstrap"` resamples, so its trial run is evidence about one run rather
+  than about your data. The hint therefore runs it under your call's own
+  `boot_samples` and the `seed` your
   own call set, so the run it verified is the run you would reproduce — and when
   no seed was set, it verifies under a fixed seed and the message tells you which
   `seed =` value reproduces that verified interval (an unseeded retry draws fresh

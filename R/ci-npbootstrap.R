@@ -178,7 +178,7 @@ npbootstrap_ci <- function(
   # carry within-subject variance, not by raw k (this comment once said
   # "negligibly rare at k >= 10", contradicted by measurement at the M97 gate): a
   # 30-subject double-code design (3 subjects rated twice, the rest once) trips it
-  # under every probed seed, and an unbalanced 8x3 under 7 of 8. An exported
+  # under every probed seed, and an unbalanced 8x3 under 3 of 8. An exported
   # method fails loudly on it rather than returning a quietly broken interval
   # (#5/#8, AC5/RR01).
   n_bad <- sum(!is.finite(res$t_star))

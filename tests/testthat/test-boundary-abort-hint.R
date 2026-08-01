@@ -163,8 +163,12 @@ bh_usable <- function(d, method, args = list()) {
   # `conf.high < 1` is the clause pass 5's predicate lacked. Without it `searle` at a
   # numeric `unit` past its Spearman-Brown pole passes as "usable" while returning an
   # interval lying entirely ABOVE +1 -- finite and ordered, and wrong.
-  n0 <- length(unique(d$rater))
-  floor_rho <- ifelse(tb$index == "ICC(1)" & n0 > 1L, -1 / (n0 - 1), -Inf)
+  # The D-010 floor at the n0 production uses: the harmonic-mean effective group
+  # size (== the rater count on balanced data). The raw rater count gave a
+  # STRICTER floor than production's on unbalanced cells, so the named == usable
+  # identity was judged against a mis-specified predicate (M97 review F6).
+  n0 <- 1 / mean(1 / as.numeric(table(d$subject)))
+  floor_rho <- ifelse(tb$index == "ICC(1)" & n0 > 1, -1 / (n0 - 1), -Inf)
   all(
     is.finite(tb$conf.low) &
       is.finite(tb$conf.high) &
@@ -298,8 +302,10 @@ test_that("the reachable bootstrap abort takes DEGENERATE data, where no method 
 })
 
 # ---- AC2/AC4: the hint builder, every row of the mapping table ----------------
-# boundary_method_hint() is a PURE function of the fence predicates, so it is
-# exercised directly here; the AC3 grid below then proves the methods it names are
+# boundary_method_hint()'s ADMISSIBILITY stage is a pure function of the fence
+# predicates; its USABILITY stage runs the candidate reducers (a 999-resample
+# bootstrap included, since M97), so these direct tests drive it with real data
+# and real estimands; the AC3 grid below then proves the methods it names are
 # genuinely accepted by icc() end to end.
 
 bh_hint <- function(
@@ -333,7 +339,14 @@ bh_hint <- function(
       )
     }
   }
-  k <- length(unique(df$rater))
+  # The averaging divisor icc() itself passes: the HARMONIC mean of the
+  # per-subject sizes (summarize_design()'s k_eff, its own expression so the
+  # value is bit-identical), which equals the rater count on balanced data. The
+  # raw rater count here made every unbalanced cell verify a DIFFERENT estimand
+  # than production -- a different Spearman-Brown pole and D-010 floor -- which
+  # is what the M97 review's F1 caught: the pinned seed-split was a
+  # pole-crossing artifact, not resample instability.
+  k <- 1 / mean(1 / as.numeric(table(df$subject)))
   defaults <- list(
     oneway = FALSE,
     multilevel = FALSE,
@@ -351,7 +364,8 @@ bh_hint <- function(
       icc_estimand(unit = u, k_eff = k, oneway = oneway)
     }),
     n0 = if (is.null(n0)) k else n0,
-    seed = NULL
+    seed = NULL,
+    boot_samples = 999L
   )
   do.call(boundary_method_hint, utils::modifyList(defaults, args))
 }
@@ -407,19 +421,38 @@ test_that("unbalanced one-way hints npbootstrap only when the RUN verifies (AC2/
   expect_no_match(h_seeded[["i"]], "seed = ", fixed = TRUE)
   expect_no_match(h_seeded[["i"]], "[0-9]")
 
-  # Seed-specificity (AC3): the same dataset verifies under seed 8 and fails under
-  # seed 1, so it is hinted under the one and silent under the other -- and silent
-  # with NO seed, because the fixed verification seed is 1 and it fails there too.
+  # Seed-specificity (AC3): under the production estimands the same 8x3 dataset
+  # verifies under seed 1 and trips the resample guard under seed 2 (measured at
+  # the review pass: usable under seeds 1,3,4,7,8; the guard fires under 2,5,6) --
+  # so it is hinted under the one and silent under the other, and the NO-seed
+  # verdict equals the fixed-seed-1 one, because that is the seed the run used.
   d_split <- bh_smallint(8L, 3L, 1L, balanced = FALSE)
   expect_length(
-    bh_hint(oneway = TRUE, balanced = FALSE, df = d_split, seed = 8L),
+    bh_hint(oneway = TRUE, balanced = FALSE, df = d_split, seed = 1L),
     1L
   )
   expect_length(
-    bh_hint(oneway = TRUE, balanced = FALSE, df = d_split, seed = 1L),
+    bh_hint(oneway = TRUE, balanced = FALSE, df = d_split, seed = 2L),
     0L
   )
-  expect_length(bh_hint(oneway = TRUE, balanced = FALSE, df = d_split), 0L)
+  expect_length(bh_hint(oneway = TRUE, balanced = FALSE, df = d_split), 1L)
+
+  # The caller's `boot_samples` is threaded through the verification exactly like
+  # the seed (M97 review F5): a run that succeeds at the default 999 can abort at
+  # a caller's larger count -- more resamples, more chances for a degenerate one
+  # -- and a hint verified at a count the retry will not use is the
+  # hinted-then-unusable failure AC4 forbids. Same data, same seed: hinted at the
+  # default, silent at the caller's 2000.
+  expect_length(
+    bh_hint(
+      oneway = TRUE,
+      balanced = FALSE,
+      df = d_split,
+      seed = 1L,
+      boot_samples = 2000L
+    ),
+    0L
+  )
 
   # The double-code shape that defeated M93 pass 3: silent at EVERY probed size,
   # because the run itself trips the resample guard -- at 999 resamples, never a
@@ -1681,49 +1714,77 @@ test_that("boundary_method_usable() verdicts match the intervals the reducers re
   # ...and at an uncalibrated conf_level, likewise (M91/D-017).
   expect_false(boundary_method_usable("mpl", d2, e2, 0.975, n0 = 3))
 
-  # npbootstrap (M97): the verdict is about the RUN, so it carries the seed the run
-  # used. On a healthy unbalanced 20x3 every probed seed verifies; on the same
-  # dataset shrunk to 8x3 the SAME data verifies under seed 8 and fails under
-  # seeds 1-7 (the resample guard trips), which is exactly why the check runs under
-  # the seed the user's own call would use rather than treating one run as evidence
-  # about every seed (AC3).
-  e3 <- ests(list("single", "average"), 3)
+  # npbootstrap (M97): the verdict is about the RUN, so it carries the seed the
+  # run used. Estimands and n0 use the HARMONIC k_eff production passes (2.4 for
+  # alternating sizes 3,2) -- the raw rater count verified a different estimand
+  # (the M97 review's F1). On a healthy unbalanced 20x3 every probed seed
+  # verifies; on the same generator shrunk to 8x3 the SAME data verifies under
+  # seeds 1,3,4,7,8 and fails under 2,5,6 (the resample guard trips), which is
+  # exactly why the check runs under the seed the user's own call would use
+  # rather than treating one run as evidence about every seed (AC3).
+  keff_u <- function(d) 1 / mean(1 / as.numeric(table(d$subject)))
   d_unbal <- bh_smallint(20L, 3L, 1L, balanced = FALSE)
+  e_u <- ests(list("single", "average"), keff_u(d_unbal))
   for (s in c(1L, 5L, 8L)) {
     expect_true(boundary_method_usable(
       "npbootstrap",
       d_unbal,
-      e3,
+      e_u,
       0.95,
-      n0 = 3,
+      n0 = keff_u(d_unbal),
       seed = s
     ))
   }
   d_split <- bh_smallint(8L, 3L, 1L, balanced = FALSE)
-  expect_true(boundary_method_usable(
-    "npbootstrap",
-    d_split,
-    e3,
-    0.95,
-    n0 = 3,
-    seed = 8L
-  ))
-  for (s in c(1L, 2L, 7L)) {
-    expect_false(boundary_method_usable(
+  e_s <- ests(list("single", "average"), keff_u(d_split))
+  for (s in c(1L, 4L, 8L)) {
+    expect_true(boundary_method_usable(
       "npbootstrap",
       d_split,
-      e3,
+      e_s,
       0.95,
-      n0 = 3,
+      n0 = keff_u(d_split),
       seed = s
     ))
   }
-  # No seed argument -> the run uses the fixed `npb_hint_seed` the bullet names.
-  # On the split dataset that seed (1) fails, so the no-seed verdict is FALSE and
-  # agrees with the seed = npb_hint_seed one; on the healthy data both are TRUE.
+  for (s in c(2L, 5L, 6L)) {
+    expect_false(boundary_method_usable(
+      "npbootstrap",
+      d_split,
+      e_s,
+      0.95,
+      n0 = keff_u(d_split),
+      seed = s
+    ))
+  }
+  # No seed argument -> the run uses the fixed `npb_hint_seed` the bullet names,
+  # so the no-seed verdict EQUALS the seed-1 verdict on both datasets.
   expect_identical(npb_hint_seed, 1L)
-  expect_false(boundary_method_usable("npbootstrap", d_split, e3, 0.95, 3))
-  expect_true(boundary_method_usable("npbootstrap", d_unbal, e3, 0.95, 3))
+  expect_true(boundary_method_usable(
+    "npbootstrap",
+    d_split,
+    e_s,
+    0.95,
+    keff_u(d_split)
+  ))
+  expect_true(boundary_method_usable(
+    "npbootstrap",
+    d_unbal,
+    e_u,
+    0.95,
+    keff_u(d_unbal)
+  ))
+  # ...and the caller's boot_samples is part of the run's identity too (review
+  # F5): the same data + seed that verify at the default 999 fail at 2000.
+  expect_false(boundary_method_usable(
+    "npbootstrap",
+    d_split,
+    e_s,
+    0.95,
+    keff_u(d_split),
+    seed = 1L,
+    boot_samples = 2000L
+  ))
 
   # The double-code shape that defeated M93 pass 3 (most subjects rated once, a few
   # twice): the resample guard fires under every probed seed, so verification says
@@ -1740,9 +1801,9 @@ test_that("boundary_method_usable() verdicts match the intervals the reducers re
     expect_false(boundary_method_usable(
       "npbootstrap",
       d_dc,
-      e3,
+      ests(list("single", "average"), keff_u(d_dc)),
       0.95,
-      n0 = 3,
+      n0 = keff_u(d_dc),
       seed = s
     ))
   }
@@ -2506,6 +2567,11 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     bullet_tokens <- unlist(lapply(cell_bullets, function(b) {
       num_tokens(render(b))
     }))
+    # Anchor the bullet side of the enumeration to the LICENSED constant, not to
+    # whatever the bullets carry -- computed from the bullets alone, a leaked
+    # token would appear on both sides of the multiset comparison below and pass
+    # (M97 review F8). Every token a bullet contributes must BE the seed literal.
+    expect_true(all(bullet_tokens == as.character(npb_hint_seed)))
     site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
     expect_true(
       site_b || grepl("parameter covariance is not finite", msg, fixed = TRUE)
@@ -2551,15 +2617,17 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     ) {
       # The seed-exception arm (M97 T3): the no-seed npbootstrap bullet names the
       # fixed verification seed so the promised call is the verified run. Exactly
-      # that literal, and nothing else, raw and rendered -- a producer-chosen
+      # that literal, exactly TWICE (the bullet's two `seed =` mentions), raw and
+      # rendered -- `unique()` here would let a leaked value that happens to
+      # equal the literal hide behind it (M97 review F9). A producer-chosen
       # INPUT; every value the run RETURNED stays discarded (D-018).
       expect_identical(
-        unique(num_tokens(b)),
-        as.character(npb_hint_seed)
+        num_tokens(b),
+        rep(as.character(npb_hint_seed), 2L)
       )
       expect_identical(
-        unique(num_tokens(render(b))),
-        as.character(npb_hint_seed)
+        num_tokens(render(b)),
+        rep(as.character(npb_hint_seed), 2L)
       )
     } else {
       expect_identical(num_tokens(b), character(0))
