@@ -5,7 +5,7 @@
 - **Depends on:** M93
 - **Driving RR:** —
 - **Principles touched:** GP5, GP7
-- **Branch/PR:** `m98-clamp-detection-assertion`
+- **Branch/PR:** `m98-clamp-detection-assertion` · https://github.com/jmgirard/intraclass/pull/106
 
 ## Goal
 
