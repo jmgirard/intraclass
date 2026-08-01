@@ -1,6 +1,6 @@
 # M98: Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
@@ -136,6 +136,8 @@ change would be its own hotfix.
 - 2026-08-01: REVIEW-PROCESS ERROR, recorded so it is not repeated — mutation and removal scripts were run in the shared working tree while three fresh-context reviewers were concurrently reading it, and one lens reported a CRITICAL finding (the `units` list missing `"average"`) that was purely an artifact of sampling the tree mid-script. The tree was verified identical to `HEAD` afterwards. Reviewers are told to use ref-based git precisely because the tree is shared; the orchestrator must hold tree-mutating verification until the lenses have returned, or run it before spawning them.
 
 - 2026-08-01: T5 redone after review return 1 — every ledger figure re-measured by a per-cell census of the final grid's reducer-side `conf.low` (scratchpad script, 25 compared cells): `pmax(0, .)` reds 13 cells post-M98 / 10 pre (eight boundary 30x5 + two npbootstrap + three SSA = 0), grid min finite `conf.low` −2.533756 (npbootstrap `average`); `pmax(-1, .)` reds 3 cells incl. the `-Inf` cell since `pmax(-1, -Inf)` is `-1` (F5); finite-below-−1 census suppliers two (seeded npbootstrap −2.533756, seed-free SSA = 0 `unit = 2` −2); non-finite sole supplier SSA = 0 `average`. F3's `unit = 5` slip fixed to `unit = 6`, and the both-sides abort at `unit = 6` verified by running it, not assumed. F11's stale ROADMAP row figures corrected in place, marked. Test file green; full verify suite re-run below.
+
+- 2026-08-01: gate re-run after the T5 redo — `air format --check .` silent, `lintr::lint_package()` 0 lints, `devtools::test()` at `NOT_CRAN=true CI=true` exit 0 / zero failures, `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes. Status → review (return 1 addressed).
 
 ## Decisions
 
