@@ -1,11 +1,11 @@
 # M98: Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
 - **Principles touched:** GP5, GP7
-- **Branch/PR:** —
+- **Branch/PR:** `m98-clamp-detection-assertion`
 
 ## Goal
 
@@ -109,6 +109,8 @@ change would be its own hotfix.
 - 2026-08-01: CHECKPOINT (now closed by the entry below) — a second criteria-audit pass over the re-cut criteria was dispatched and had not returned when the plan was first committed (`9e94bac`).
 - 2026-08-01: second criteria audit returned all six criteria SATISFIABLE and confirmed the three pressure-tests: no cell in the grid reports a non-finite `conf.low` at HEAD (the `mpl` row reports exactly `0` at all four units; the pole cell aborts on both sides); T4's removals are temporary-and-restore so the exact-count doctrine is untouched; and a non-finite-only clamp at `R/icc.R:2209` does red after the new cell, because it changes only the `icc()` side while `searle_ci` still returns `-Inf`, with the clamp inert suite-wide (the only other `-Inf` mentions, `test-ci-npbootstrap.R:179` and `test-ci-npbootstrap-unbalanced.R:146`, are abort tests that never reach a reported endpoint).
 - 2026-08-01: CORRECTION to the first audit entry above, caught by the second audit and confirmed by re-measuring — the figures "`bnd30x5 searle average` −1.296, `unit = 6` −2.100" were produced by a probe script that FABRICATED `bh_oneway()` (seed 2, invented construction) instead of reading the real fixture at `test-boundary-abort-hint.R:18` (seed 1, `s2s = 1e-6`); the real values are −0.397034 and −0.517537, and no `searle`/`burch` cell reaches below −1. Consequence for this plan: the finite-below-−1 class has exactly ONE supplier at HEAD — the npbootstrap `unit = "average"` cell at `seed = 4` — so detection of that class rests entirely on a seeded bootstrap cell, which AC5 must state and which strengthens rather than weakens the case for asserting it. The commit message of `9e94bac` carries the same wrong "three cells" claim and cannot be rewritten; this entry is the correction of record.
+
+- 2026-08-01: status in-progress, branch `m98-clamp-detection-assertion` cut from `fbd6bfa`; no implementation question gate — the plan settled T1's units list, T3's three mutation instances and AC5's content, leaving nothing genuinely open.
 
 ## Decisions
 
