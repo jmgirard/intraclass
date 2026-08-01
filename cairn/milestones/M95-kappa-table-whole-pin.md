@@ -69,7 +69,7 @@ this ships no user-visible change.
 
 ## Tasks
 
-- [ ] T1: Add the fixture generator under `data-raw/`: read the 0.95 slice from
+- [x] T1: Add the fixture generator under `data-raw/`: read the 0.95 slice from
       `m88-kappa-table.rds` and the 0.90/0.99 slices from `m90-kappa-tables.rds`,
       `stopifnot()` each is `identical()` to the shipped `kappa_m_table` slice, write
       the fixture at full precision, and re-read it asserting a bit-identical round
@@ -88,6 +88,7 @@ this ships no user-visible change.
 ## Work log
 
 - 2026-07-25: created by /milestone-plan (promotes the "no whole-table κ_m guard" candidate from M92's review; plan gate chose a readable full-precision text fixture over a binary one or a checksum, and verified all shipped cells are `identical()` to the two committed calibration fixtures).
+- 2026-07-31: T1 done — `data-raw/m95-kappa-fixture.R` writes `tests/testthat/fixtures/kappa-m-table.txt` (162 rows) from the two calibration fixtures, `stopifnot()`s each level slice `identical()` to the shipped slice, and asserts a bit-identical re-read. Found: `%.17g` decimal does NOT round-trip through R's parser (`R_strtod` lands 1 ulp off on 10 of 162 values), so the pin column is a C99 hex float (`%a`, bit-exact) with a `%.17g` decimal column kept for the human reader. Suite FAIL 0 | PASS 5368.
 
 ## Decisions
 
