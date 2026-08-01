@@ -93,7 +93,7 @@ change would be its own hotfix.
       new case's three units, but measure rather than assume.
 - [x] T3 Mutation-prove AC3's three legs at `R/icc.R:2209`, restoring the file
       after each; paste the pass/red lines into the work log.
-- [ ] T4 Removal checks: drop **every** supplier of each class in turn and
+- [x] T4 Removal checks: drop **every** supplier of each class in turn and
       confirm the matching assertion reds — recording that the class assertion
       itself failed, not merely that the file went red; drop one unit and
       confirm the count assertion reds; restore.
@@ -120,6 +120,8 @@ change would be its own hotfix.
 - 2026-08-01: T3 mutation legs run at `R/icc.R:2209`, pre-M98 grid (`acd5610`'s test file) vs post-M98, `R/icc.R` restored after each and the tree verified clean. Non-finite-only clamp `ifelse(is.finite(x), x, -1e6)`: PRE 0 failed → POST 1 failed — the discriminating leg, so the new cell is what carries non-finite detection. `pmax(-1, x)`: PRE 1 → POST 3. `pmax(0, x)`: PRE 10 → POST 13. The PRE count of exactly 1 for `pmax(-1, .)` independently corroborates the second audit's finding that the finite-below-−1 class had a single supplier at HEAD.
 
 - 2026-08-01: SUBSTANTIVE AMENDMENT (gated, user-approved) — AC5 was false as written once T1 landed. It required the comment to name the npbootstrap `unit = "average"` cell as the SOLE supplier of the finite-below-−1 class, but the new case's `unit = 2` cell reports −2, a finite value below −1, so post-M98 that class has two suppliers and the second is seed-free. AC5 now records the HEAD state (one seeded supplier) and the change (a seed-free second one); the alternative of narrowing the new case to drop `unit = 2` was offered and declined, since it would discard a free de-risking of the class that was most fragile. T4 amended in consequence: a class's removal test must drop EVERY supplier, not one cell.
+
+- 2026-08-01: T4 removal checks, each restoring the file afterwards and the tree verified clean. Dropping BOTH class-(a) suppliers (npbootstrap `average` and the SSA = 0 `unit = 2`) fails `Expected seen_finite_below_neg1 to be TRUE` at `:2219` alongside the two count literals; dropping the sole class-(b) supplier (SSA = 0 `average`) fails `Expected seen_nonfinite to be TRUE` at `:2220` alongside the counts; dropping one unit fails the counts ALONE at `:2205`/`:2212` with both class assertions still passing, which shows the count assertion is load-bearing independently of the class census. The named-assertion failure in each case satisfies the second audit's confounding caveat — the class assertion itself failed, not merely the file.
 
 ## Decisions
 
