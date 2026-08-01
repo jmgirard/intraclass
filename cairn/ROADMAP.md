@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-31 (M95 merged and archived — 2 of 15 review findings ≥80, both fixed on the branch; M90 rotated out under terminal-row retention; one lesson added + one extended, the M70 anchor lesson pruned at the 50-line cap. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-31 (M96 merged and archived — 1 of 17 review findings ≥80, fixed on the branch; M91 rotated out under terminal-row retention; no lesson added or retired. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,14 +10,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | planned | M93 | normal | milestones/M97-npbootstrap-hint-resample-stability.md |
-| M96 | Failure accounting in the three MPL coverage-sweep generators | review | — | normal | milestones/M96-mpl-sweep-failure-accounting.md |
+| M96 | Failure accounting in the three MPL coverage-sweep generators | done | — | normal | milestones/archive/M96-mpl-sweep-failure-accounting.md |
 | M95 | Whole-table pin for the shipped κ_m calibration table | done | — | normal | milestones/archive/M95-kappa-table-whole-pin.md |
 | M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | done | M92 | normal | milestones/archive/M94-mpl-doc-surface.md |
 | M93 | Boundary-abort hint for the deterministic boundary-robust `ci_method` families | done | — | normal | milestones/archive/M93-boundary-abort-hint.md |
 | M92 | Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95` | done | — | normal | milestones/archive/M92-mpl-095-interp-probe.md |
-| M91 | Export `conf_level` ∈ {0.90, 0.99} for `ci_method = "mpl"` | done | M90 | normal | milestones/archive/M91-mpl-conf-level-export.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M95 done (2026-07-31) → M90 rotated out (oldest terminal; its archive file still resolves). Kept: M95, M94, M93, M92, M91 (5 most recent terminal). -->
+<!-- terminal-row retention: M96 done (2026-07-31) → M91 rotated out (oldest terminal; its archive file still resolves). Kept: M96, M95, M94, M93, M92 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
