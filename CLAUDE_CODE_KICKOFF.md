@@ -188,7 +188,7 @@ Scaffold with `usethis`; prefer generating config via `usethis`/`use_*`
 helpers so versions stay current.
 
 - **Package skeleton:**
-  [`usethis::create_package()`](https://rdrr.io/pkg/usethis/man/create_package.html),
+  [`usethis::create_package()`](https://usethis.r-lib.org/reference/create_package.html),
   MIT license (confirm with me), `use_readme_rmd()`, `use_news_md()`,
   `use_lifecycle()` for badges.
 - **Testing:** testthat **3rd edition** (`use_testthat(3)`), snapshot
@@ -213,7 +213,7 @@ helpers so versions stay current.
     multilevel ICCs, engine choice (LMM vs. SEM vs. Bayesian) and when
     each matters, CI methods.
 - **CI (GitHub Actions via
-  [`usethis::use_github_action()`](https://rdrr.io/pkg/usethis/man/use_github_action.html)):**
+  [`usethis::use_github_action()`](https://usethis.r-lib.org/reference/use_github_action.html)):**
   `R-CMD-check` (matrix: release + devel + oldrel, at least Linux +
   macOS + Windows), `test-coverage`, `lint`, `pkgdown` deploy on
   release/main. Add a scheduled `reference-values` job that reruns the
@@ -303,7 +303,7 @@ out bodies during bootstrap following these specs.
   PRINCIPLES it must honor, sets `STATUS.md` to in-progress, and
   outlines a plan before editing code.
 - **`finish-task`** — *“Close out the current task.”* Runs
-  [`devtools::check()`](https://rdrr.io/pkg/devtools/man/check.html),
+  [`devtools::check()`](https://devtools.r-lib.org/reference/check.html),
   tests, lint, and coverage; only on green, updates
   `TASKS.md`/`STATUS.md`, adds a `DECISIONS.md` entry if a decision was
   made, and proposes a conventional commit message. Never marks done on
