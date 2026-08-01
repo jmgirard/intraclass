@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | planned | M93 | normal | milestones/M97-npbootstrap-hint-resample-stability.md |
-| M96 | Failure accounting in the three MPL coverage-sweep generators | in-progress | — | normal | milestones/M96-mpl-sweep-failure-accounting.md |
+| M96 | Failure accounting in the three MPL coverage-sweep generators | review | — | normal | milestones/M96-mpl-sweep-failure-accounting.md |
 | M95 | Whole-table pin for the shipped κ_m calibration table | done | — | normal | milestones/archive/M95-kappa-table-whole-pin.md |
 | M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | done | M92 | normal | milestones/archive/M94-mpl-doc-surface.md |
 | M93 | Boundary-abort hint for the deterministic boundary-robust `ci_method` families | done | — | normal | milestones/archive/M93-boundary-abort-hint.md |
