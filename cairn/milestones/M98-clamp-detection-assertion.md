@@ -1,6 +1,6 @@
 # M98: Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M93
 - **Driving RR:** —
@@ -37,20 +37,20 @@ change would be its own hotfix.
 
 ## Acceptance criteria
 
-- [ ] AC1 The AC4 grid reaches the numeric reducer-vs-`icc()` comparison
+- [x] AC1 The AC4 grid reaches the numeric reducer-vs-`icc()` comparison
       (`tolerance = 0`) on at least one cell whose reported `conf.low` is
       **non-finite**, supplied by a **seed-free** fixture. No cell does at HEAD.
-- [ ] AC2 The test asserts **per class** that a compared cell exists with (a) a
+- [x] AC2 The test asserts **per class** that a compared cell exists with (a) a
       finite `conf.low` strictly below −1 and (b) a non-finite `conf.low`. Each
       assertion reds when its own class is removed from the grid — established
       by removal, not by inspection, and recording that the **class assertion
       itself** failed, since removing a cell also reds the count literals.
-- [ ] AC3 Mutation evidence at the reporting-path assembly (`R/icc.R:2209`),
+- [x] AC3 Mutation evidence at the reporting-path assembly (`R/icc.R:2209`),
       recorded from real runs: a clamp binding **only** on non-finite endpoints
       passes at HEAD and reds after this milestone; `pmax(-1, .)` and
       `pmax(0, .)` red both before and after. The first leg is the one that
       establishes the new cell adds detection rather than duplicating it.
-- [ ] AC4 The `checked` / `compared` exact-count assertions are updated as
+- [x] AC4 The `checked` / `compared` exact-count assertions are updated as
       integer literals — never expressions derived from `cases`, which would
       self-adjust and assert nothing — and still red on a silently dropped
       cell, verified by removing one unit from the new case.
@@ -65,7 +65,7 @@ change would be its own hotfix.
       non-finite are **not** called "out of support" — under D-010 the
       projected form's support is `(-Inf, 1)`, so the honest phrase is outside
       the conventional `[-1, 1]` range.
-- [ ] AC6 The PROFILE `verify` slot is clean — `devtools::test()` at
+- [x] AC6 The PROFILE `verify` slot is clean — `devtools::test()` at
       `NOT_CRAN=true CI=true` for gate parity — plus `lintr::lint_package()`
       clean and `devtools::check()` clean run with
       `env_vars = c(NOT_CRAN = "false")`, or the live-Stan brms suite runs
@@ -97,7 +97,12 @@ change would be its own hotfix.
       confirm the matching assertion reds — recording that the class assertion
       itself failed, not merely that the file went red; drop one unit and
       confirm the count assertion reds; restore.
-- [x] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
+- [ ] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
+      REOPENED at review return 1: every figure in the ledger must be MEASURED
+      against the final grid, not carried from the plan or the candidate row —
+      the `pmax(0, .)` line (13 cells post / 10 pre, true min −2.533756) and the
+      `pmax(-1, .)` supplier list (three, incl. the `-Inf` cell, since
+      `pmax(-1, -Inf)` is `-1`). Fix F3's `unit = 5`/`6` slip in the same pass.
 - [x] T6 Gate: `air format .`, `lintr::lint_package()`, `devtools::test()` at
       `NOT_CRAN=true CI=true`, `devtools::check()` with
       `env_vars = c(NOT_CRAN = "false")`.
@@ -127,6 +132,91 @@ change would be its own hotfix.
 
 - 2026-08-01: T6 gate clean — `air format --check .` silent, `lintr::lint_package()` clean, `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 | WARN 2 | SKIP 23 | PASS 5427, `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m47s. Status → review.
 
+- 2026-08-01: REVIEW RETURN 1 — AC5 fails. The comment's `pmax(0, .)` ledger line (`test-boundary-abort-hint.R:2088`) states "eight boundary cells, min -0.5855"; measured, 13 cells detect that mutation post-M98 (10 pre) and the true minimum `conf.low` is −2.533756. The figure was carried from the ROADMAP candidate row rather than measured, which also falsifies T5's own work-log claim that every figure in the comment was measured. F5 (78, logged) should be fixed in the same pass: `pmax(-1, -Inf)` is `-1`, so the `-Inf` cell supplies that class too — three suppliers, matching T3's measured POST 3, not the two the comment names. AC1/AC2/AC3/AC4/AC6 all verified with fresh evidence and ticked; the consistency gate is clean. Status → in-progress; T5 reopens.
+- 2026-08-01: REVIEW-PROCESS ERROR, recorded so it is not repeated — mutation and removal scripts were run in the shared working tree while three fresh-context reviewers were concurrently reading it, and one lens reported a CRITICAL finding (the `units` list missing `"average"`) that was purely an artifact of sampling the tree mid-script. The tree was verified identical to `HEAD` afterwards. Reviewers are told to use ref-based git precisely because the tree is shared; the orchestrator must hold tree-mutating verification until the lenses have returned, or run it before spawning them.
+
 ## Decisions
 
 ## Review
+
+### Return 1 (2026-08-01) — AC5 fails; back to `in-progress`
+
+**Evidence per criterion** (fresh, run against final `HEAD` `dd13a09`; AC2/AC3/AC4
+legs re-run after T5 so no result predates the comment rewrite):
+
+- **AC1 ✅** — SSA = 0 case reaches the numeric comparison on all three units,
+  reducer and `icc()` bit-identical (`identical()` TRUE): `single` −0.5,
+  `average` −Inf, `2` −2. Fixture `bh_degen_between()` makes no RNG call, so
+  seed-free as required. No other grid cell is non-finite (measured, 25 cells).
+- **AC2 ✅** — dropping every class-(a) supplier fails `seen_finite_below_neg1`
+  at `:2239` **by name**; dropping the class-(b) supplier fails `seen_nonfinite`
+  at `:2240`. The named-assertion failure satisfies the confounding caveat.
+- **AC3 ✅** — non-finite-only clamp at `R/icc.R:2209`: 0 failed pre-M98, 1
+  failed post. `pmax(-1, x)` 1 → 3; `pmax(0, x)` 10 → 13. Tree restored and
+  verified clean after each.
+- **AC4 ✅** — literals are `26L`/`25L`, independently recomputed as
+  8+8+4+1+2+3 = 26 checked, 25 compared. Dropping one unit fails the counts
+  **alone**, both class assertions still passing.
+- **AC5 ❌ FAILS** — see F4 below. The comment's `pmax(0, .)` ledger line is
+  factually wrong, so the criterion's truthfulness requirement is unmet.
+- **AC6 ✅** — `air format --check` silent; `lintr::lint_package()` clean;
+  `devtools::test()` at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5427;
+  `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings /
+  0 notes.
+
+**Consistency gate:** `cairn_validate` exit 0, all checks pass (one standing
+advisory, pre-migration dangling ids). `devtools::document()` no diff.
+`pkgdown::check_pkgdown()` no problems. NEWS correctly absent — the diff is
+test-only with no user-visible change.
+
+**Independent review — three lenses, then a scorer.** Prior-PR-comments lens:
+zero findings (checked M93's full pre-archive review via `git show` and M97's
+archive against the diff; the `pulls/comments` probe returned `[]`, so the
+thread walk was correctly skipped). Blame-history lens: 1 finding, 5 clean
+confirmations. Diff-bug lens: 11 findings.
+
+**ACTIONED (scored ≥ 80):**
+
+- **F4 (82) — the `pmax(0, .)` ledger line undercounts its suppliers and the
+  figure was carried over rather than measured.**
+  `test-boundary-abort-hint.R:2088` reads "eight boundary cells, min -0.5855".
+  Measured: 13 cells detect that mutation post-M98 (10 pre-M98), and the true
+  minimum `conf.low` is −2.533756, not −0.5855 (which is only the minimum among
+  the `searle`/`burch` cells). The figure was lifted from the ROADMAP candidate
+  row, which contradicts T5's own work-log claim that "every figure in it is
+  measured, none carried over from the plan". → **fix now**, via return to
+  `in-progress`; it is an AC5 failure, not a review-side patch.
+
+**LOGGED (scored < 80, surfaced not dropped — 11 findings):**
+
+- F5 (78) — the `pmax(-1, .)` line names two suppliers, but `pmax(-1, -Inf)`
+  is `-1`, so the SSA = 0 `average` cell reds it too: three, matching T3's
+  measured POST 3. Independently confirmed at review. Should be fixed with F4.
+- F3 (68) — the comment says `unit = 5` is excluded, but the unit the case
+  declines to inherit from the shared list is `6`. Both refuse, so the
+  substance holds; the sentence names a unit the list never held.
+- F8 (68) — the new case requires three live glmmTMB fits on an exactly
+  degenerate design to COMPLETE, unlike every other `bh_degen_between()` route
+  in this file, which is error-tolerant by design. The file's own comment at
+  `:2014-2017` records this failure mode (raw unclassed error on Linux/Windows,
+  green locally). All gate evidence is local macOS. **Must be confirmed on CI.**
+- F11 (50) — `cairn/ROADMAP.md:26` still says "sole supplier" and "eight
+  boundary cells", both stale after this milestone.
+- F1 (35) — `seen_nonfinite` uses `!is.finite()`, admitting NaN; `burch`
+  returns NaN on this fixture but never runs on this case today.
+- F6 (30) — "−Inf is IN support … `(-Inf, 1)`" is imprecise (open at the left);
+  inherited verbatim from `R/ci-npbootstrap.R:126-128`.
+- F7 (25) — the "not out of support" fence sits near a correct pre-existing
+  "OUT of support" comment at `:2422`; scorer judged them different objects.
+- F2 (20) — class flags read the reducer side; reportedness is pinned
+  transitively by the `tolerance = 0` equality.
+- F9 (15) — the cell pins `[-Inf, -Inf]` as a reported interval that
+  `boundary_method_usable()` calls unusable; pre-existing shipped behavior,
+  explicitly out of this milestone's scope.
+- F10 (3) — milestone file dirty at review; committed as `c528483`.
+- B1 (3) — a reviewer saw the `units` list mid-mutation. **Review-process
+  error, not a code defect:** removal/mutation scripts were run in the shared
+  working tree while three fresh-context reviewers were reading it. Tree
+  verified identical to `HEAD` afterwards.
+
+**Returns so far: 1.**
