@@ -2077,16 +2077,24 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
     # so this cell exercises refusal parity -- reducer and `icc()` must decline it
     # together -- rather than endpoint equality.
     #
-    # WHAT THIS GRID DETECTS, and what supplies each class (M98, all measured by
-    # mutating `conf.low` at the reporting-path assembly, R/icc.R:2209):
-    #   - a clamp binding at 0 (`pmax(0, .)`): eight boundary cells, min -0.5855.
-    #   - a clamp binding at -1 (`pmax(-1, .)`): at HEAD this had exactly ONE
-    #     supplier, the M97 npbootstrap `unit = "average"` cell at -2.5338 -- and
-    #     that cell is SEEDED (`seed = 4`), so the whole class rode on one seed.
-    #     The M98 SSA = 0 `unit = 2` cell (-2) adds a seed-free second supplier.
+    # WHAT THIS GRID DETECTS, and what supplies each class (M98, every figure
+    # measured against THIS grid on 2026-08-01 -- per-cell census of the
+    # reducer-side `conf.low` plus mutation runs at the reporting-path assembly,
+    # R/icc.R:2209):
+    #   - a clamp binding at 0 (`pmax(0, .)`): 13 cells red it (10 before M98) --
+    #     the eight `one-way boundary 30x5` searle/burch cells, both npbootstrap
+    #     cells, and all three SSA = 0 cells. The grid's minimum finite
+    #     `conf.low` is -2.533756 (npbootstrap `unit = "average"`).
+    #   - a clamp binding at -1 (`pmax(-1, .)`): 3 cells red it -- the npbootstrap
+    #     `unit = "average"` cell (-2.533756), the SSA = 0 `unit = 2` cell (-2),
+    #     and the SSA = 0 `unit = "average"` cell, because `pmax(-1, -Inf)` is
+    #     -1. The FINITE-below--1 class census (`seen_finite_below_neg1`) has
+    #     two suppliers: at HEAD it had exactly ONE, the M97 npbootstrap cell,
+    #     which is SEEDED (`seed = 4`) so the whole class rode on one seed; the
+    #     M98 SSA = 0 `unit = 2` cell adds a seed-free second.
     #   - a clamp binding only on NON-FINITE endpoints: the M98 SSA = 0
     #     `unit = "average"` cell (-Inf) is the sole supplier. Before it, that
-    #     mutation passed against the whole grid.
+    #     mutation passed against the whole grid (0 failures pre-M98, 1 post).
     #   - a HIGH-side clamp (`pmin(1, .)`): NOT detected, and not detectable here.
     #     The pole cell above was the only supplier, and since the 2026-08-01
     #     hotfix fenced `npb_sb()`'s pole no shipped `ci_method` can report an
@@ -2131,9 +2139,10 @@ test_that("verification inspects exactly the endpoints icc() reports (AC4)", {
     # is why `npb_guard_sb_pole()` (strictly `< 0`) deliberately permits it.
     # Seed-free by construction: `bh_degen_between()` makes no RNG call, so this
     # class does not rest on a seed the way the npbootstrap cell above does.
-    # `unit = 5` is excluded on purpose -- there the pole is CROSSED rather than
-    # reached, both sides abort, and it would be a second refusal cell the
-    # `compared` count below does not admit.
+    # `unit = 6` -- the shared list's other numeric unit -- is excluded on
+    # purpose: there the pole is CROSSED rather than reached, both sides abort,
+    # and it would be a second refusal cell the `compared` count below does not
+    # admit.
     list(
       lab = "one-way SSA = 0 searle (non-finite)",
       d = bh_degen_between(),

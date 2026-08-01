@@ -97,7 +97,7 @@ change would be its own hotfix.
       confirm the matching assertion reds — recording that the class assertion
       itself failed, not merely that the file went red; drop one unit and
       confirm the count assertion reds; restore.
-- [ ] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
+- [x] T5 Rewrite the comment block (`:2073-2087`) to the post-M98 state per AC5.
       REOPENED at review return 1: every figure in the ledger must be MEASURED
       against the final grid, not carried from the plan or the candidate row —
       the `pmax(0, .)` line (13 cells post / 10 pre, true min −2.533756) and the
@@ -134,6 +134,8 @@ change would be its own hotfix.
 
 - 2026-08-01: REVIEW RETURN 1 — AC5 fails. The comment's `pmax(0, .)` ledger line (`test-boundary-abort-hint.R:2088`) states "eight boundary cells, min -0.5855"; measured, 13 cells detect that mutation post-M98 (10 pre) and the true minimum `conf.low` is −2.533756. The figure was carried from the ROADMAP candidate row rather than measured, which also falsifies T5's own work-log claim that every figure in the comment was measured. F5 (78, logged) should be fixed in the same pass: `pmax(-1, -Inf)` is `-1`, so the `-Inf` cell supplies that class too — three suppliers, matching T3's measured POST 3, not the two the comment names. AC1/AC2/AC3/AC4/AC6 all verified with fresh evidence and ticked; the consistency gate is clean. Status → in-progress; T5 reopens.
 - 2026-08-01: REVIEW-PROCESS ERROR, recorded so it is not repeated — mutation and removal scripts were run in the shared working tree while three fresh-context reviewers were concurrently reading it, and one lens reported a CRITICAL finding (the `units` list missing `"average"`) that was purely an artifact of sampling the tree mid-script. The tree was verified identical to `HEAD` afterwards. Reviewers are told to use ref-based git precisely because the tree is shared; the orchestrator must hold tree-mutating verification until the lenses have returned, or run it before spawning them.
+
+- 2026-08-01: T5 redone after review return 1 — every ledger figure re-measured by a per-cell census of the final grid's reducer-side `conf.low` (scratchpad script, 25 compared cells): `pmax(0, .)` reds 13 cells post-M98 / 10 pre (eight boundary 30x5 + two npbootstrap + three SSA = 0), grid min finite `conf.low` −2.533756 (npbootstrap `average`); `pmax(-1, .)` reds 3 cells incl. the `-Inf` cell since `pmax(-1, -Inf)` is `-1` (F5); finite-below-−1 census suppliers two (seeded npbootstrap −2.533756, seed-free SSA = 0 `unit = 2` −2); non-finite sole supplier SSA = 0 `average`. F3's `unit = 5` slip fixed to `unit = 6`, and the both-sides abort at `unit = 6` verified by running it, not assumed. F11's stale ROADMAP row figures corrected in place, marked. Test file green; full verify suite re-run below.
 
 ## Decisions
 
