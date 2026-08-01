@@ -34,7 +34,17 @@ restore_all <- function() {
   writeLines(fixture_lines, fixture_path)
   writeBin(sysdata_bytes, sysdata_path)
 }
-on.exit(restore_all(), add = TRUE)
+# on.exit() is a no-op at script top level (it binds to a function frame), so
+# the abort path is covered by options(error = ...): an aborted run -- e.g.
+# add_case()'s stopifnot firing because a mutation FAILED to red the pin, the
+# most important abort of all -- must not leave a perturbed R/sysdata.rda or
+# fixture on disk to be committed by accident (M95 review finding 1; the
+# handler mechanism is verified to fire under Rscript in that finding's fix).
+options(error = function() {
+  restore_all()
+  cat("aborted: fixture and R/sysdata.rda restored from in-memory copies\n")
+  quit(save = "no", status = 1L)
+})
 
 # Run the test file and return the pin test's results: n failed expectations,
 # first failure message, and any OTHER test in the file that failed (the

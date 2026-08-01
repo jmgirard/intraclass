@@ -18,7 +18,7 @@
 # Output: tests/testthat/fixtures/kappa-m-table.txt -- a human-readable TSV,
 # one row per (n_r, n_s, conf_level) node. kappa_m is carried twice: as a C99
 # hex float (%a, the column the pin reads -- R's decimal parser R_strtod can
-# land 1 ulp off a 17-digit decimal, measured on 10 of these 162 values, while
+# land 1 ulp off a 17-digit decimal, measured on 31 of these 162 values, while
 # the hex representation is the double's bits verbatim) and as %.17g decimal
 # for the human reader (informational only). conf_level is %.2f (the three
 # levels are the doubles nearest 0.90/0.95/0.99, which %.2f re-parses to the
@@ -95,7 +95,8 @@ header <- c(
   "# fixtures; generator: data-raw/m95-kappa-fixture.R (deterministic assembly,",
   "# no seed). kappa_m is the bit-exact value (C99 hex float, what the pin",
   "# reads); kappa_m_dec is the same double printed %.17g for the human reader",
-  "# (informational only -- R's decimal parser can be 1 ulp off). The generator",
+  "# (informational only -- R's decimal parser lands 1 ulp off on 31 of these",
+  "# 162 values). The generator",
   "# asserts a bit-identical write->read round trip and that every level slice",
   "# is identical() to the shipped table. Do not hand-edit: any change to any",
   "# cell of the shipped table goes through recalibration (D-015/D-017), then",
@@ -126,6 +127,13 @@ stopifnot(
   identical(reread$conf_level, fixture$conf_level),
   identical(as.numeric(reread$kappa_m), fixture$kappa_m)
 )
+
+# The "31 of these 162 values" in the headers above is measured, never
+# asserted from memory (the first draft said 10, which was the 0.95 slice
+# alone -- M95 review finding 2): count the values whose %.17g decimal does
+# not survive R's parser, and fail loudly if the headers have gone stale.
+n_drift <- sum(as.numeric(sprintf("%.17g", fixture$kappa_m)) != fixture$kappa_m)
+stopifnot(identical(n_drift, 31L))
 
 cat(sprintf(
   "wrote %s: %d rows, %d per level; round trip identical() on all columns\n",

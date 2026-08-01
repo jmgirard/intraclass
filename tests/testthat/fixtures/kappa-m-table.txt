@@ -4,7 +4,8 @@
 # fixtures; generator: data-raw/m95-kappa-fixture.R (deterministic assembly,
 # no seed). kappa_m is the bit-exact value (C99 hex float, what the pin
 # reads); kappa_m_dec is the same double printed %.17g for the human reader
-# (informational only -- R's decimal parser can be 1 ulp off). The generator
+# (informational only -- R's decimal parser lands 1 ulp off on 31 of these
+# 162 values). The generator
 # asserts a bit-identical write->read round trip and that every level slice
 # is identical() to the shipped table. Do not hand-edit: any change to any
 # cell of the shipped table goes through recalibration (D-015/D-017), then
