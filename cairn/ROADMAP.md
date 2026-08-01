@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-07-31 (M96 merged and archived — 1 of 17 review findings ≥80, fixed on the branch; M91 rotated out under terminal-row retention; no lesson added or retired. M48 stays `blocked`, D-050.)_
+_Last hygiene check: 2026-07-31 (M97 merged and archived — 6 of 12 review findings ≥80, all fixed on the branch; M92 rotated out under terminal-row retention; 1 lesson added + the M85 CI-checker family line extended, the stalest line (M63 amendment-cap) pruned to meet the cap, none retired. M48 stays `blocked`, D-050.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | review | M93 | normal | milestones/M97-npbootstrap-hint-resample-stability.md |
+| M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | done | M93 | normal | milestones/archive/M97-npbootstrap-hint-resample-stability.md |
 | M96 | Failure accounting in the three MPL coverage-sweep generators | done | — | normal | milestones/archive/M96-mpl-sweep-failure-accounting.md |
 | M95 | Whole-table pin for the shipped κ_m calibration table | done | — | normal | milestones/archive/M95-kappa-table-whole-pin.md |
 | M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | done | M92 | normal | milestones/archive/M94-mpl-doc-surface.md |
 | M93 | Boundary-abort hint for the deterministic boundary-robust `ci_method` families | done | — | normal | milestones/archive/M93-boundary-abort-hint.md |
-| M92 | Off-node S coverage probe for `ci_method = "mpl"` at the shipped `conf_level = 0.95` | done | — | normal | milestones/archive/M92-mpl-095-interp-probe.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M96 done (2026-07-31) → M91 rotated out (oldest terminal; its archive file still resolves). Kept: M96, M95, M94, M93, M92 (5 most recent terminal). -->
+<!-- terminal-row retention: M97 done (2026-07-31) → M92 rotated out (oldest terminal; its archive file still resolves). Kept: M97, M96, M95, M94, M93 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
