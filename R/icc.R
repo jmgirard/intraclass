@@ -286,7 +286,7 @@
 #' @param ci_method Interval method. `"montecarlo"` (default) simulates from the
 #'   fitted parameter covariance on the engine's log scale (fast, boundary-aware).
 #'   Near the variance boundary it can fail to produce an interval and aborts; when
-#'   it does, the error names a deterministic opt-in method below that fits the
+#'   it does, the error names an opt-in method below that fits the
 #'   design in hand — chosen by RUNNING each candidate on your data and keeping only
 #'   those whose reported endpoints are all finite, correctly ordered and in range —
 #'   so there is no need to work that out from this list. Being a check on the data
@@ -294,9 +294,13 @@
 #'   deliver, including a missing score, degenerate data, an uncalibrated
 #'   `conf_level` or geometry, and a numeric `unit` projected past the point where a
 #'   method's Spearman-Brown map breaks down; the two closed forms are asked
-#'   separately, so one can be named where the other is not. It never names
-#'   `"npbootstrap"`, whose resampling can fail for reasons a single run does not
-#'   settle; check that one against its own entry below.
+#'   separately, so one can be named where the other is not. On unbalanced one-way
+#'   data it can name `"npbootstrap"`; because that method resamples, its trial run
+#'   is evidence about one seed rather than about the data, so the run uses your
+#'   own `seed` when you set one (your retry reproduces it exactly) and otherwise a
+#'   fixed seed the message then names — an unseeded retry draws fresh resamples
+#'   and can fail where the verified run succeeded, especially on small designs.
+#'   The trial run leaves the session's random-number stream untouched.
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
 #'   fitted model, refits, and takes percentile quantiles of the resampled
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -2153,6 +2157,12 @@ icc <- function(
           balanced = balanced,
           type = type,
           type_supplied = type_supplied,
+          # `unit` feeds the admissibility mirror of the numeric-unit fence on the
+          # unbalanced npbootstrap path; `seed` is the one the user's own retry
+          # would run under, so the verified bootstrap run is the promised one
+          # (M97; a NULL seed falls back to the fixed, named `npb_hint_seed`).
+          unit = unit,
+          seed = seed,
           conf_level = conf_level,
           # The hint no longer PREDICTS whether a method will work on this data; it
           # runs the method. So it takes exactly what the dispatch above hands a

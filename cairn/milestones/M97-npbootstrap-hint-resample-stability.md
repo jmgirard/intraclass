@@ -84,19 +84,19 @@ ROADMAP candidate.
 
 ## Tasks
 
-- [ ] T1: Register `"npbootstrap"` with M93's verification helper — run
+- [x] T1: Register `"npbootstrap"` with M93's verification helper — run
       `npbootstrap_ci()` at the shipped `boot_samples`, catch everything, accept only
       under M93's unchanged predicate — with unit tests over designs where it succeeds
       and where it fails, and record its measured cost.
-- [ ] T2: Wrap it RNG-neutral via `with_rng_seed()`, and add the AC2 test capturing
+- [x] T2: Wrap it RNG-neutral via `with_rng_seed()`, and add the AC2 test capturing
       `.Random.seed` across a firing `icc()` call.
-- [ ] T3: Settle the no-seed case at the implement gate and record it here: name it
+- [x] T3: Settle the no-seed case at the implement gate and record it here: name it
       anyway with the run as evidence, stay silent unless the caller set a `seed`, or
       name it and say which seed reproduces the run. Pin the choice.
-- [ ] T4: Restore the unbalanced one-way row in `boundary_method_hint()` behind the
+- [x] T4: Restore the unbalanced one-way row in `boundary_method_hint()` behind the
       check, worded as availability (D-012's 0-abort evidence is a searle/burch result,
       never an npbootstrap one).
-- [ ] T5: Extend M93's sweep over imbalance shape at `boot_samples = 999`; require zero
+- [x] T5: Extend M93's sweep over imbalance shape at `boot_samples = 999`; require zero
       hinted-then-unusable runs.
 - [ ] T6: NEWS, `@param`, the `R/ci-npbootstrap.R:177` comment correction,
       `devtools::document()`, full AC7 gate, PR.
@@ -109,6 +109,12 @@ ROADMAP candidate.
 
 - 2026-07-27: inherited constraint, carried in from the M93 review pass-10 [O] lens so it is not rediscovered here — M93's AC5 leak detector (`num_tokens()`) matches DIGIT strings only, so a leaked NON-finite endpoint (`Inf`, `-Inf`, `NaN`, `NA`) is invisible to both the bullet invariant and the whole-message enumeration. Unreachable in M93 by construction, because a bullet is built only for a method whose every reported endpoint is finite (measured: 0 of 28 endpoints inspected across the guard's grid were non-finite). It becomes live the moment an `npbootstrap` bullet quotes or characterises a REJECTED candidate, which is exactly the shape T3's "name it and say which seed reproduces the run" wording invites. Settle at the M97 implement gate: either keep bullets free of any candidate-derived value, or widen the detector to non-finite tokens before adding such a bullet.
 
+- 2026-07-31: question gate — both recommendations accepted: the no-seed case verifies under a fixed seed the bullet then names (AC3), and the leak-detector carry-in gets both remedies (value-free bullets + non-finite widening); rationale in Decisions below.
+- 2026-07-31: T1+T2+T3+T4+T5 in one commit (they rewrite the same two functions and one test file, and T2's end-to-end test needs T4's restored row, so per-task splitting would leave the suite red at a checkpoint — the M93 T1/T2 precedent): `npbootstrap` registered as a row in `boundary_method_usable()` (shipped `boot_samples` default, caller seed else `npb_hint_seed = 1L`); the unbalanced one-way row restored behind the run with the numeric-`unit` fence mirrored; the message-driven sweep extended over imbalance shape (balanced / mildly-ragged / double-code at 15–60 subjects) with the named==usable identity asked under the abort's own seed; leak guard rebuilt: two npbootstrap renderings pinned (distinct-count 3→5), `num_tokens()` widened to non-finite word-tokens with positive controls, whole-message enumeration licenses exactly the named seed; RNG neutrality pinned direct and end-to-end (seeded: stream unchanged; unseeded: stream equal to a hint-disabled mock of the same call). AC5 cost: 124 ms median at 999 resamples on a 20×3 unbalanced design, and the existing laziness guard shows the success path untouched. Hint test file green with its CRAN-skipped sweeps active, `lintr` 0, `air format --check` clean; the full-suite `NOT_CRAN=true CI=true` run was still executing at this checkpoint — its result gets its own line.
+
 ## Decisions
+
+- 2026-07-31 (T3/AC3, question gate): **No caller `seed` → verify under the fixed `npb_hint_seed = 1L` and name that seed in the bullet.** A bootstrap run is evidence about one seed's resamples, not all of them (measured this session: the same unbalanced 8×3 dataset verifies under seed 8 and fails under seeds 1–7), so an unqualified hint after an ambient run could promise an interval the user's own unseeded retry fails to produce — the hinted-then-unusable failure five M93 passes closed. With a caller seed the bullet stays seed-free: their own retry re-runs the verified draws. Rejected: staying silent without a caller seed (most callers set none, and npbootstrap is the only method shipping the unbalanced one-way cell, so the hint would rarely fire where it matters most); naming unqualified off an ambient-stream run (re-opens hinted-then-unusable on small designs).
+- 2026-07-31 (M93 pass-10 carry-in, question gate): **Bullets stay free of candidate-derived values AND the leak detector widens to non-finite tokens.** The named seed is a producer-chosen input, never a value the verification run returned (those stay discarded, D-018), and the whole-message invariant enumerates it as the one licensed literal. `num_tokens()` now also matches `Inf`/`NaN`/`NA` word-tokens, with positive controls, so a leaked non-finite endpoint — invisible to the digit-only detector — reds the invariant.
 
 ## Review

@@ -174,8 +174,13 @@ npbootstrap_ci <- function(
 
   # A degenerate resample (all resampled subject means equal -> log F = -Inf, or a
   # zero resample SE) makes t* non-finite; the studentized quantiles would then be
-  # silent NaN. Negligibly rare at k >= 10, but an exported method fails loudly on
-  # it rather than returning a quietly broken interval (#5/#8, AC5/RR01).
+  # silent NaN. NOT rare in general -- the rate is governed by how many subjects
+  # carry within-subject variance, not by raw k (this comment once said
+  # "negligibly rare at k >= 10", contradicted by measurement at the M97 gate): a
+  # 30-subject double-code design (3 subjects rated twice, the rest once) trips it
+  # under every probed seed, and an unbalanced 8x3 under 7 of 8. An exported
+  # method fails loudly on it rather than returning a quietly broken interval
+  # (#5/#8, AC5/RR01).
   n_bad <- sum(!is.finite(res$t_star))
   if (n_bad > 0L) {
     abort_intraclass(
