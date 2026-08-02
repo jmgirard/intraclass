@@ -38,13 +38,13 @@ returns an interval, only message text changes.
 
 ## Acceptance criteria
 
-- [ ] AC1 A committed script enumerates the CI-stage aborts under `R/` whose
+- [x] AC1 A committed script enumerates the CI-stage aborts under `R/` whose
       trigger is observed-data or resample degeneracy and whose remedy bullets
       name a `ci_method` value, emitting per site the file, the triggering
       condition, and the method string(s) named. The committed enumeration is
       that script's own output. Its site predicate is the reducer-stage
       degeneracy trigger, so `icc()`'s pre-dispatch design fences do not appear.
-- [ ] AC2 For each enumerated site, a committed seeded script sweeps several
+- [x] AC2 For each enumerated site, a committed seeded script sweeps several
       geometries satisfying that site's trigger condition and records, per
       dataset, that the abort fires — caught as its classed condition from the
       reducer called directly — and, for each `ci_method` that site's remedy
@@ -52,22 +52,22 @@ returns an interval, only message text changes.
       judged by the shipped `boundary_interval_usable()` (`R/boundary-hint.R`)
       rather than a predicate written for this milestone. Every outcome in the
       record comes from a run.
-- [ ] AC3 No shipped remedy bullet at an enumerated site names a `ci_method`
+- [x] AC3 No shipped remedy bullet at an enumerated site names a `ci_method`
       that the AC2 sweep found failing on any of that site's swept datasets.
-- [ ] AC4 Each site whose bullets change keeps the condition class and the
+- [x] AC4 Each site whose bullets change keeps the condition class and the
       leading message line it signalled before this milestone, and its message
       still tells the user something to act on — what about their data is
       degenerate, or a method the sweep found usable there.
-- [ ] AC5 Each changed message is pinned by a test that fires the abort at its
+- [x] AC5 Each changed message is pinned by a test that fires the abort at its
       reducer directly rather than through `icc()`, asserting the property AC3
       states rather than the literal sentence; each pin is mutation-verified by
       restoring the pre-milestone bullet and recording that the suite reds.
-- [ ] AC6 `NEWS.md` records the changed messages, and `cairn/DECISIONS.md` gains
+- [x] AC6 `NEWS.md` records the changed messages, and `cairn/DECISIONS.md` gains
       an entry setting the evidence bar for *static* remedy text naming a
       `ci_method` — a sweep over that abort's trigger class — and stating how it
       stands to D-018's runtime-verification route and D-019's name-no-method
       precedent.
-- [ ] AC7 The profile `verify` slot is clean, plus the fuller pre-review check it
+- [x] AC7 The profile `verify` slot is clean, plus the fuller pre-review check it
       names, with the three `data-raw` checkers run locally.
 
 ## Coverage
@@ -276,3 +276,50 @@ D4 22 a strict pin behaving strictly.
 
 Acceptance checkboxes are unticked despite the AC1-AC7 evidence above: the next
 pass re-verifies from scratch rather than inheriting this pass's evidence.
+
+**Review pass 2 — 2026-08-01.** PR #108, head `f3f1a8a`. `main` still unmoved.
+
+**AC1 — enumeration.** `--check` exits 0: 6 sites, all classified (1 sweep, 5
+fence), committed enumeration current; tampering with it exits 1. `--self-test`
+passes, now including two synthetic `_slice_call` probes (an unmatched paren in a
+comment; a string continuation carrying `(#5)`) and a probe that no site reports
+class `(default)`. `grep -c "R/icc.R"` on the enumeration = 0.
+
+**AC2 — sweep.** 210 rows over 4 sites x 5 methods, four named generators
+(`gen_mse0`, `gen_ssa0`, `gen_se_zero`, `gen_resample_degenerate` — the third
+added because review A1 showed the SE-zero branch had never been swept), all at
+the shipped `boot_samples = 999`. 0 reached rows carry an outcome with no run.
+`point_fit_ok` is recorded and gates `reached`, excluding 6 cells whose glmmTMB
+point fit dies before any CI-stage guard — data on which no user could meet the
+message.
+
+**AC3 — no condemned method named.** Mechanical cross-check of the live
+enumeration against the corrected sweep: violations none. The only swept site
+still naming a method is the degenerate-resample guard, `montecarlo`, 0 failures
+over 9 datasets.
+
+**AC4 — class and leading line unchanged.** Byte-compared across `main..HEAD`:
+the leading message line and every `class =` argument are IDENTICAL in all three
+files (the classical file's diff shows the leading line moving position inside the
+restructured call, not changing). Each message still closes on an imperative.
+
+**AC5 — pinned and mutation-verified, re-run at review.** 45 assertions, up from
+23. Restoring pass 1's false npbootstrap branch reds 6; restoring its false
+bootstrap cause reds 2; baseline and restored both 45/0, tree clean afterwards.
+
+**AC6 — records.** `NEWS.md` carries the corrected bullets (0 milestone-number
+leaks); `cairn/DECISIONS.md:683` carries D-020.
+
+**AC7 — toolchain gate.** `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+0 errors / 0 warnings / 0 notes. Suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5480
+/ SKIP 23. `lintr::lint_package()` no lints; `air format --check` clean; all five
+`data-raw` checkers pass. `cairn_validate` 16 PASS / 0 FAIL.
+
+**Independent review — three fresh lenses.** [S] prior-review verified each of
+pass 1's nine actioned findings against the current code rather than the work log,
+and reported all nine genuinely fixed with no sub-threshold finding made worse.
+[S] blame-history: 0 findings — it confirmed the `se_ij_logf == 0` disjunct dates
+to M75 with a loose comment that conflated it with variance degeneracy, so the
+rewrite corrects an imprecision standing since then; that the M97 999-vs-reduced
+lesson says what the sweep now cites; and that D-020 contradicts none of
+D-012/D-013/D-018/D-019.
