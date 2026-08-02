@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-01 (post-merge M98 — PR #106 squash-merged after one review return; archive written, M93 row rotated out, LESSONS gained the testthat max_fails line and pruned the stalest (M62 sweep-sizing); nothing in flight, M48 stays `blocked` (D-050); the `cairn/PROFILE.md` always-read-frame gap persists unchanged.)_
+_Last hygiene check: 2026-08-01 (post-merge M99 — PR #107 squash-merged after one review return; archive written, M94 row rotated out, LESSONS gained the degenerate-corner-probe line; nothing in flight, M48 stays `blocked` (D-050); the `cairn/PROFILE.md` always-read-frame gap persists unchanged.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | review | — | normal | milestones/M99-mpl-root-failure-abort.md |
+| M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | done | — | normal | milestones/archive/M99-mpl-root-failure-abort.md |
 | M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | done | M93 | normal | milestones/archive/M98-clamp-detection-assertion.md |
 | M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | done | M93 | normal | milestones/archive/M97-npbootstrap-hint-resample-stability.md |
 | M96 | Failure accounting in the three MPL coverage-sweep generators | done | — | normal | milestones/archive/M96-mpl-sweep-failure-accounting.md |
 | M95 | Whole-table pin for the shipped κ_m calibration table | done | — | normal | milestones/archive/M95-kappa-table-whole-pin.md |
-| M94 | Exported documentation of the MPL interpolation evidence, with a fixture-reading check | done | M92 | normal | milestones/archive/M94-mpl-doc-surface.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M98 done (2026-08-01) → M93 rotated out (oldest terminal; its archive file still resolves). Kept: M98, M97, M96, M95, M94 (5 most recent terminal). -->
+<!-- terminal-row retention: M99 done (2026-08-01) → M94 rotated out (oldest terminal; its archive file still resolves). Kept: M99, M98, M97, M96, M95 (5 most recent terminal). -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
