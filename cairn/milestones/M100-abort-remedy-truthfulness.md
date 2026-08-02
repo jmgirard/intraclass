@@ -87,7 +87,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       `cairn/DECISIONS.md`, and remove the message pins from
       `tests/testthat/test-abort-remedy-truthfulness.R` (they pin reverted text).
       Everything removed here is re-authored in M101.
-- [ ] T2 Anchor the enumerator: assert in `--self-test` that the four measured
+- [x] T2 Anchor the enumerator: assert in `--self-test` that the four measured
       guards appear, keyed on their guarding conditions.
 - [ ] T3 Automate the three `--check` failure modes as self-test probes (they are
       currently hand-mutated in the work log), and state the predicate's limits in
@@ -170,6 +170,8 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 - 2026-08-01: T1 — branch stripped to tooling and evidence. `R/`, `NEWS.md` and `cairn/DECISIONS.md` reverted to `main`; `tests/testthat/test-abort-remedy-truthfulness.R` deleted (52 assertions, all pinning reverted text). Locate: `git diff main..HEAD --name-only`, which must list no `R/` path and neither of the two files (AC4).
 - 2026-08-01: T1 — with main's messages back, three sites name `ci_method` again, so the ledger regains their rows and the enumeration is 9 sites, 4 `sweep` + 5 `fence`. The `sweep` rows are dispositions only: this milestone records what the sweep measured, never what a bullet should say. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --check`.
 - 2026-08-01: CORRECTION, superseding the pre-re-cut work-log lines that stated enumeration counts and de-naming outcomes. Every "6 sites (1 sweep, 5 fence)" figure, and every claim that three bullets name no method or that their ledger rows were removed, described the branch's now-reverted `R/` and is false of the tree from T1 on. The current figures come from `python3 data-raw/enumerate-ci-method-remedies.py --check`. The pass-3 review also proved two specific record claims false and neither is repeated here: the `## Decisions` line saying the bootstrap guard "drew no truthfulness finding in either pass" (pass 1's A2 is one, scored 90), and D-020 Amendment 1's "three disjuncts, not two" for a guard with two disjuncts and three causes — locate both with `grep -n "drew no truthfulness\|three disjuncts" cairn/milestones/M100-abort-remedy-truthfulness.md`. Those lines are history and stay unedited (IP4).
+
+- 2026-08-01: T2 — the four swept guards are anchored in `--self-test` on fragments of their own `if (...)` conditions (`n_ok < min_frac`, `ss$mse == 0`, `se_ij_logf == 0`, `n_bad > 0`), so a predicate that stopped matching one could not leave it unswept with `--check` still printing OK. Mutation-verified: narrowing the file glob to `R/ci-n*.R` reds 5 assertions naming the two dropped guards, and breaking `BULLET_RE` reds 7. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
 
 ## Decisions
 

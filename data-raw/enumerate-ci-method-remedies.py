@@ -67,6 +67,25 @@ CLASS_RE = re.compile(r'class\s*=\s*"([a-z_]+)"')
 ABORT_R = "R/abort.R"
 IF_RE = re.compile(r"^\s*(if|\} else if)\s*\(")
 
+# The four degeneracy guards `data-raw/sweep-abort-remedies.R` measures, each
+# anchored on a fragment of its own `if (...)` condition. Anchoring on the
+# condition rather than a line number or a message string survives the file
+# moving and the message being reworded, and reds if the guard's own test
+# changes -- which is the event that would invalidate the sweep evidence.
+MEASURED_GUARDS = (
+    ("R/ci-bootstrap.R", "n_ok < min_frac", "bootstrap refit-convergence"),
+    ("R/ci-classical.R", "ss$mse == 0", "classical_guard_observed"),
+    ("R/ci-npbootstrap.R", "se_ij_logf == 0", "npbootstrap observed-data"),
+    ("R/ci-npbootstrap.R", "n_bad > 0", "npbootstrap degenerate-resample"),
+)
+
+# Three of the five `fence` sites, anchored the same way, so a predicate change
+# that dropped the non-degenerate half of the enumeration is caught too.
+FENCE_GUARDS = {
+    "R/ci-bootstrap.R": ["is.null(engine$simulate_refit)"],
+    "R/ci-mpl.R": ["n_r %in% r_nodes", "n_s < min(s_nodes)"],
+}
+
 
 # Aborts whose message vector deliberately splices a variable rather than listing
 # its bullets inline. `mc_ci()`'s `hint` is the runtime-verified boundary hint
@@ -389,13 +408,23 @@ def self_test():
 
     # 2. Two-sided, because a finder that finds nothing passes a one-sided probe.
     #    Sites that DO name a method must be found, anchored on their guard text
-    #    rather than a line number so the probe survives the file moving...
-    wanted = {
-        "R/ci-npbootstrap.R": ["n_bad > 0"],
-        "R/ci-bootstrap.R": ["is.null(engine$simulate_refit)"],
-        "R/ci-mpl.R": ["n_r %in% r_nodes"],
-    }
-    for path, needles in wanted.items():
+    #    rather than a line number so the probe survives the file moving.
+    #
+    #    MEASURED_GUARDS is the load-bearing half. `data-raw/sweep-abort-remedies.R`
+    #    measures exactly these four sites, and every verdict this milestone records
+    #    is a verdict about one of them. A predicate that quietly stopped matching
+    #    one of them would leave that site unswept and unclassified while `--check`
+    #    still printed OK, so the enumeration is anchored on each guard's own
+    #    condition text: the four are found, or the self-test fails.
+    for path, needle, label in MEASURED_GUARDS:
+        conditions = " || ".join(s["condition"] for s in by_file.get(path, []))
+        if needle not in conditions:
+            fails.append(
+                "the swept %s guard is NOT enumerated: no site in %s guards on "
+                "%r, so the sweep measures a site this enumeration does not cover"
+                % (label, path, needle)
+            )
+    for path, needles in FENCE_GUARDS.items():
         conditions = " || ".join(s["condition"] for s in by_file.get(path, []))
         for needle in needles:
             if needle not in conditions:
