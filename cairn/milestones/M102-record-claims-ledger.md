@@ -1,11 +1,11 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP7
-- **Branch/PR:** —
+- **Branch/PR:** `m102-record-claims-ledger`
 
 ## Goal
 
@@ -144,6 +144,7 @@ candidate row, whose subject is M101's messages.
 
 ## Work log
 
+- 2026-08-02: start — branch `m102-record-claims-ledger` cut from `main` at 53dde1c, status -> in-progress.
 - 2026-08-02: created by /milestone-plan; promotes the ROADMAP candidate row "Claims ledger + checker for tracking prose" (lineage M100 passes 1–4 → RB04/RR04 → M100 ingest audit → M100 pass-5 disposition).
 - 2026-08-02: plan gate chose seeding the ledger with four main-resident figures over registering RR04 BC2's figure set, because `abort-remedy-sweep.tsv` and the enumerator exist only on M100's branch and a branch cut from main cannot settle a row against them; falsified by M100's evidence artifacts reaching the default branch before this milestone is implemented.
 - 2026-08-02: plan gate chose requiring a committed falsifier for absence-shaped rows only over requiring one for every row and over requiring none, because M100's pass-5 F1 was a certifying grep whose pattern could not match its own violation while a positive-figure row's falsifier is near-trivial; falsified by a presence-shaped row that passes while proving nothing.
