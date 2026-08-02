@@ -50,7 +50,7 @@ dd465dc0313c	R/icc.R	out	also only for the balanced one-way random design		pre-M
 267aa2ca9c6e	R/icc.R	out	Both give a finite interval on every dataset		pre-M94 classical closed-form claim (D-012 assessment)
 d25a8b790ea6	R/icc.R	out	wider, but robust to non-normality and never under-covering		pre-M94 Burch (2011) claim from the D-012 assessment grid
 e6dd36bdbe46	R/icc.R	out	it aborts on any other design		pre-M94 mpl design fence (D-015), settled by its abort tests
-76d9b57e857a	R/icc.R	out	only when the profile deviance shows the confidence set reaching it		M99 boundary-vs-failure contract (D-019): a boundary limit is evidence-based (sign test) and a genuine root-finding failure aborts classed; settled by the M99 tests in test-ci-mpl.R, not the M92 fixture
+2cde0f315ee3	R/icc.R	out	only when the profile deviance shows the confidence set reaching it		M99 boundary-vs-failure contract (D-019): a boundary limit is evidence-based (sign test) and a genuine root-finding failure aborts classed; settled by the M99 tests in test-ci-mpl.R, not the M92 fixture
 d445b858554b	R/icc.R	out	It is deliberately conservative		pre-M94 mpl claim from the M87/M90 assessment grid (D-014)
 e428d688f11e	R/icc.R	out	never interpolated between levels	 	pre-M94 level fence (D-017/M90), settled by the conf_level abort tests
 ed14557ba228	R/icc.R	out	carries no external oracle		pre-M94 calibration-provenance claim (D-014/D-017), recorded in cairn/references/mpl-twoway-random-comparison.md

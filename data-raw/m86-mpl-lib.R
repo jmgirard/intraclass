@@ -127,11 +127,13 @@ mpl_deviance <- function(rho, ms, neg2l_min = NULL) {
 # PL; kappa = kappa_m is MPL. `side = "lower"` gives a one-sided lower bound; per
 # the LRT one-sided convention its crit uses 1-2*alpha, so a 95% lower bound
 # (alpha = 0.05) shares the two-sided 90% lower critical value (xiao2013 Ex. 1).
-# Boundary vs failure (M99, mirroring the shipped R/ci-mpl.R): f(rho_hat) =
-# -crit < 0 always, so a side has a deviance crossing iff f at its outer edge
-# is >= 0 (or non-finite). No crossing -> the boundary IS the limit; a crossing
-# with failed root-finding is a numerical failure and stops (plain stop() --
-# the classed-abort layer governs package code only).
+# Boundary vs failure (M99, mirroring the shipped R/ci-mpl.R): a sanity guard
+# aborts when the deviance reference is degenerate at rho_hat (f(rho_hat) > 0
+# or non-finite -- near-zero error MS, e.g. perfect agreement); past the guard,
+# a side has a deviance crossing iff f at its outer edge is >= 0 (or
+# non-finite). No crossing -> the boundary IS the limit; a crossing with
+# failed root-finding is a numerical failure and stops (plain stop() -- the
+# classed-abort layer governs package code only).
 mpl_interval <- function(
   ms,
   kappa = 0,
@@ -148,6 +150,17 @@ mpl_interval <- function(
   }
   f <- function(rho) mpl_deviance(rho, ms, neg2l_min = fit$neg2l_min) - crit
   eps <- 1e-7
+  f_hat <- f(rho_hat)
+  if (!is.finite(f_hat) || f_hat > 0) {
+    stop(
+      "MPL interval undefined: profile deviance degenerate at rho_hat ",
+      "(f(rho_hat) = ",
+      format(f_hat),
+      "; near-zero error MS / ",
+      "perfect-agreement data)",
+      call. = FALSE
+    )
+  }
   side_root <- function(outer, boundary, label) {
     f_outer <- f(outer)
     if (is.finite(f_outer) && f_outer <= 0) {

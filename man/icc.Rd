@@ -269,8 +269,9 @@ pole-safe for every \code{m >= 1}); it aborts on any other design, on consistenc
 \code{boot_samples}, and \code{seed} do not apply) that, like \code{"npbootstrap"}, returns an
 interval at the near-zero-ICC boundary where the two-way Monte-Carlo default
 aborts -- a limit is reported at the \verb{[0, 1]} boundary only when the profile
-deviance shows the confidence set reaching it, and a genuine root-finding
-failure raises a classed error rather than a boundary value -- and covers at
+deviance shows the confidence set reaching it, and a degenerate fit (raters
+in near-perfect agreement) or a failed root search raises a classed error
+rather than a fabricated boundary value -- and covers at
 or above nominal across the pre-registered grid where the incumbents can
 under-cover (assessed as GO-for-opt-in against that grid). It is deliberately \strong{conservative} (it
 over-covers, and is wider than the Monte-Carlo interval at interior cells), so it

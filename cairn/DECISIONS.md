@@ -644,25 +644,38 @@ returning "an interval on **every** dataset", and the M99 plan-gate audit found 
 introducing any abort path narrows that exported contract — a change the
 Boundary-fit policy (DESIGN.md) says takes a D-entry.
 
-**Decision (M99 plan gate, 2026-08-01):** each side of the interval decides
-boundary-vs-failure by an explicit sign test: the boundary endpoint is returned only
-when the profile deviance at that side's outer bracket edge is finite and does not
-exceed the critical value (no crossing — the confidence set provably reaches the
-boundary); a crossing-indicated root-finding failure raises a classed
+**Decision (M99 plan gate 2026-08-01; refined at the M99 review return, same
+date):** each side of the interval decides boundary-vs-failure by an explicit sign
+test: the boundary endpoint is returned only when the profile deviance at that
+side's outer bracket edge is finite and does not exceed the critical value (no
+crossing — the confidence set provably reaches the boundary); a
+crossing-indicated root-finding failure raises a classed
 `intraclass_engine_error` via `abort_intraclass()`, its message naming MPL
-root-finding (first non-engine use of the class — reuse chosen over a new class
-because the branch is unreachable with real non-degenerate data and a new class
-would grow exported vocabulary for it). A warning-plus-boundary-value alternative
-was rejected: a wrong endpoint would still reach downstream code (#5 fail-loudly).
-The offline reference implementation (`data-raw/m86-mpl-lib.R`) carries the same
-decision logic in lockstep (plain `stop()` — the classed layer governs package code
-only); committed calibration fixtures are unaffected (the failure region is
-unreachable for the seeded sweeps' non-degenerate Gaussian data).
+root-finding (first non-engine use of the class; reuse chosen over minting a new
+class). The review's diff-bug lens falsified the plan's premise that the abort is
+unreachable with real data: on a **degenerate fit** (near-zero error MS — perfect
+or near-perfect rater agreement, still failing at jitter SD 1e-6) `mpl_fit()`'s
+joint minimum and the profile disagree, f(rho_hat) > 0, and the pre-M99 code
+returned the vacuous fabricated interval [0, 1]. The maintainer chose (review
+gate) to abort there too, via a sanity guard on the deviance reference whose
+message names the degenerate fit, not root-finding; and the abort names **no
+alternative method** — the methods the draft named also fail on the triggering
+data, and D-018 forbids naming a method inside an abort without running it. A
+warning-plus-boundary-value alternative was rejected: a wrong endpoint would
+still reach downstream code (#5 fail-loudly). The offline reference
+implementation (`data-raw/m86-mpl-lib.R`) carries the same decision logic in
+lockstep (plain `stop()` — the classed layer governs package code only).
 
 **Consequences:** narrows the D-014/D-015 framing prospectively — neither entry is
 edited; D-014's measured "interval on 100 % of datasets" stays true as a sweep
 result, and the residual value D-014 ships mpl for (an interval where the MC default
-aborts) is unchanged, since every such boundary case is the no-crossing branch.
-DESIGN.md's interval-time boundary table gains an MPL row citing this entry. Doc
-surfaces updated in M99 (roxygen, NEWS, comments, `data-raw/mpl-doc-claims.tsv`
-re-triage).
+aborts) is unchanged: a review-time 240-rep sweep across four near-zero-ρ
+geometries produced 0 aborts and 179 legitimate lower clamps, so the near-zero-ρ
+boundary regime is entirely the no-crossing branch. Committed calibration
+fixtures need no regeneration on that same evidence; a **future** sweep re-run
+that did hit the abort would be caught by the M96 failure accounting and
+`mpl_assert_no_failures()` would hard-stop the sweep rather than clamp a rep —
+intended under #5. Perfect/near-perfect-agreement data now errors where it got
+[0, 1] (documented in NEWS). DESIGN.md's interval-time boundary table gains an
+MPL row citing this entry. Doc surfaces updated in M99 (roxygen, NEWS, comments,
+the boundary-hint sentence, `data-raw/mpl-doc-claims.tsv` re-triage).

@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M99: MPL interval — distinguish a true boundary limit from a root-finding failure
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -50,12 +50,15 @@ region).
       naming MPL root-finding, not an engine — is raised instead of an
       endpoint. No `tryCatch(stats::uniroot(...), error = function(e)
       <endpoint>)` pattern remains in `R/ci-mpl.R`.
-- [x] AC2: Tests exercise both branches against the interval machinery
+- [ ] AC2: Tests exercise both branches against the interval machinery
       directly (not only through `icc()`): a real-data no-crossing input
-      returns the boundary endpoint, and the failure abort is exercised
-      through a mockable root-finding seam (a package-internal wrapper mocked
-      via `testthat::local_mocked_bindings()`), since the failure branch is
-      unreachable with real non-degenerate data.
+      returns the boundary endpoint, and still returns it with root-finding
+      mocked to fail (proving the short-circuit precedes the seam); the abort
+      paths are exercised three ways — the mocked seam on the lower side, the
+      mocked seam on the upper side, and a real degenerate-fit input (perfect
+      rater agreement) that reaches an abort without any mock — each
+      asserting the classed error, with at least one assertion pinning the
+      MPL-specific message text.
 - [x] AC3: Behavior in the legitimate-boundary case is unchanged: every
       existing MPL test (including the pinned κ_m constants and the
       near-zero-ρ boundary cell in `test-ci-mpl.R`) passes with no assertion
@@ -138,6 +141,9 @@ region).
 - 2026-08-01: T1 done — two M99 tests appended to test-ci-mpl.R; mocked-seam abort test red as intended (no mpl_uniroot binding yet), no-crossing boundary test green (value-identical to the swallow until T2 removes the pattern); suite otherwise 181 pass.
 - 2026-08-01: checkpoint (T2–T5 code + records drafted, verification pending) — sign-test rewrite in R/ci-mpl.R with mpl_uniroot seam + classed abort; twin mirrored (stop() idiom); 4 claim surfaces + NEWS + man/ + tsv re-triage done, all three data-raw checkers green; D-019 appended + DESIGN.md interval-time MPL row added (previewed in chat); MPL test file green (183); full suite + lintr running in background — tasks stay unticked until the verify slot is green.
 - 2026-08-01: T2-T6 done, verify green — installed-pkg suite NOT_CRAN=true CI=true: failed 0 / error 0 / passed 5433 / skipped 23; lintr 0; air --check clean; document() no delta; endpoint identity pre-vs-post bit-exact on 3 geometries (boundary-lo clamp, interior, high-rho), both interval paths (evidence for review). Status -> review.
+- 2026-08-01: review return #1 — [O] diff-bug lens falsified the sign test's premise (f(rho_hat) < 0 fails on degenerate fits: perfect-agreement 20x3 reaches the abort via icc(), where main returned a vacuous [0,1]); actioned >=80: F1 95, F2 95, F3 90, F8 82, F11 88, F12 90, F13 80; 12 sub-80 logged in Review. Status back to in-progress for the fix cluster + gated AC2 amendment.
+- 2026-08-01: gated amendment (review return #1, user-approved): AC2 reworded — falsified "unreachable with real non-degenerate data" clause replaced by the three-way abort-path test obligation (mocked lower, mocked upper, real degenerate-fit input) + message-text pin; AC2 unticked pending fresh evidence. Gate also chose: degenerate fit aborts with a fit-degeneracy diagnosis (over preserving the vacuous [0,1]), and the abort names no alternative method (D-018 run-before-naming; over wiring hint machinery).
+- 2026-08-01: review fix cluster landed — degenerate-fit sanity guard (f(rho_hat) check) with fit-naming message, no method named in either abort (D-018); side-aware upper mock + message regexps + real-data degenerate test + short-circuit mock proof (amended AC2); NEWS/roxygen/boundary-hint (5th surface) reworded; D-019 draft corrected (reachability, fixture evidence, sweep hard-stop consequence); tsv re-keyed 2cde0f315ee3; mpl file 185 green, targeted lintr 0, checkers OK.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -152,25 +152,23 @@ mpl_deviance <- function(rho, ms, neg2l_min = NULL) {
   mpl_prof_neg2l(rho, ms) - neg2l_min
 }
 
-# Interval, Eq. (9) two-sided / Eq. (10) one-sided, p. 2245.
-# CI = { rho : D(rho) <= (1+kappa) * chi^2_{1,1-alpha} }.  kappa = 0 is naive PL;
-# kappa = kappa_m is MPL. `side = "lower"` gives a one-sided lower bound; per the LRT
-# one-sided convention its crit uses 1-2*alpha, so a 95% lower bound (alpha = 0.05)
-# shares the two-sided 90% lower critical value (xiao2013 Ex. 1). A side whose
-# deviance never reaches the critical value has its true limit AT the [0,1]
-# boundary and returns it on that evidence (the sign test below, M99); with the
-# likelihood well-behaved the interval exists on every dataset the method admits,
-# unlike the MC default's abort (the residual value D-014 ships mpl for). A
-# genuine root-finding failure -- a crossing indicated but no root located --
-# aborts classed instead of fabricating a boundary limit (#5/#8; M99, D-019).
-
 # The uniroot seam: a one-line wrapper so tests can force a root-finding failure
-# via local_mocked_bindings(). With real non-degenerate data the sign test always
-# resolves the bracket before uniroot can fail (M99).
+# via local_mocked_bindings() -- with a sane deviance reference the sign test
+# resolves every real-data bracket before uniroot can fail (M99).
 mpl_uniroot <- function(f, interval) {
   stats::uniroot(f, interval, tol = 1e-10)$root
 }
 
+# Interval, Eq. (9) two-sided / Eq. (10) one-sided, p. 2245.
+# CI = { rho : D(rho) <= (1+kappa) * chi^2_{1,1-alpha} }.  kappa = 0 is naive PL;
+# kappa = kappa_m is MPL. `side = "lower"` gives a one-sided lower bound; per the LRT
+# one-sided convention its crit uses 1-2*alpha, so a 95% lower bound (alpha = 0.05)
+# shares the two-sided 90% lower critical value (xiao2013 Ex. 1). Boundary vs
+# failure (M99, D-019): a boundary endpoint is returned only on EVIDENCE of no
+# deviance crossing on that side; a degenerate fit or a failed root search
+# aborts classed (#5/#8) instead of fabricating an endpoint -- the pre-M99 code
+# swallowed both into 0/1, which on a degenerate fit (perfect agreement,
+# error MS ~ 0) fabricated the vacuous interval [0, 1].
 mpl_interval <- function(
   ms,
   kappa = 0,
@@ -189,11 +187,35 @@ mpl_interval <- function(
   f <- function(rho) mpl_deviance(rho, ms, neg2l_min = fit$neg2l_min) - crit
   eps <- 1e-7
 
-  # Boundary vs failure (M99): f(rho_hat) = -crit < 0 always, so a side has a
-  # deviance crossing iff f at its outer bracket edge is >= 0 (or non-finite:
-  # the deviance blows up inside the bracket). No crossing -> the whole side
-  # sits inside the confidence set and the boundary IS the limit. A crossing
-  # with failed root-finding is a numerical failure, never a boundary limit.
+  # Sanity guard on the deviance reference: by construction D(rho_hat) = 0 so
+  # f(rho_hat) = -crit < 0 -- but on a degenerate fit (near-zero error MS, e.g.
+  # perfect rater agreement) mpl_fit()'s joint minimum and the profile disagree
+  # by orders of magnitude and f is large or non-finite everywhere. No deviance
+  # root is trustworthy off a broken reference, so abort naming the fit -- the
+  # data, not the root search, is what failed (M99 review finding F1/F4/F5).
+  f_hat <- f(rho_hat)
+  if (!is.finite(f_hat) || f_hat > 0) {
+    abort_intraclass(
+      c(
+        "The modified-profile-likelihood interval is not defined for this \\
+         fit: the profile deviance is degenerate at its own maximum-likelihood \\
+         estimate.",
+        i = "This happens when a variance component is estimated at or near \\
+             zero -- for example, raters in perfect or near-perfect agreement \\
+             (error variance ~ 0). Inspect the ratings; an interrater interval \\
+             is not estimable from near-constant disagreement."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  # Sign test per side: f(rho_hat) < 0 (guarded above), so a side has a
+  # deviance crossing iff f at its outer bracket edge is >= 0, or is
+  # non-finite at that edge (the deviance blows up at or before it). No
+  # crossing -> the whole side sits inside the confidence set and the
+  # boundary IS the limit. A crossing with failed root-finding is a numerical
+  # failure, never a boundary limit.
   side_root <- function(outer, boundary, label) {
     f_outer <- f(outer)
     if (is.finite(f_outer) && f_outer <= 0) {
@@ -205,12 +227,11 @@ mpl_interval <- function(
         abort_intraclass(
           c(
             "The modified-profile-likelihood {label} limit could not be \\
-             located.",
-            i = "The profile deviance indicates a crossing on that side, but \\
-                 root-finding failed: a numerical failure, not a boundary \\
-                 limit.",
-            i = "Try {.code ci_method = \"montecarlo\"} or \\
-                 {.code ci_method = \"bootstrap\"}."
+             located: the profile deviance crosses the critical value on \\
+             that side, but root-finding failed.",
+            i = "This is a numerical failure, not a boundary limit; the \\
+                 endpoint is not reported as 0 or 1. Inspect the data for \\
+                 near-degenerate structure before trying another method."
           ),
           class = "intraclass_engine_error",
           call = call
