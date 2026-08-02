@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M101 | What a degeneracy message may assert, and the messages made to obey it | planned | M100 | normal | milestones/M101-degeneracy-message-claims.md |
-| M102 | A registered claims ledger, and the CI checker that re-derives it | in-progress | — | normal | milestones/M102-record-claims-ledger.md |
+| M102 | A registered claims ledger, and the CI checker that re-derives it | review | — | normal | milestones/M102-record-claims-ledger.md |
 | M100 | Abort remedies name only a `ci_method` measured to work on the data that triggers them | blocked | M102 | normal | milestones/M100-abort-remedy-truthfulness.md |
 | M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | done | — | normal | milestones/archive/M99-mpl-root-failure-abort.md |
 | M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | done | M93 | normal | milestones/archive/M98-clamp-detection-assertion.md |
