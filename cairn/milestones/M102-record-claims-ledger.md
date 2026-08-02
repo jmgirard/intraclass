@@ -1,6 +1,6 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -42,7 +42,7 @@ candidate row, whose subject is M101's messages.
       no network; `--self-test` PARSES that list and asserts SET equality with the
       shape ids the code dispatches on, so a docstring shape with no code and a
       code shape with no docstring line each exit non-zero.
-- [x] AC2 A command naming any of an enumerated set of history-dependent forms —
+- [ ] AC2 A command naming any of an enumerated set of history-dependent forms —
       a `git log`/`blame`/`rev-list`/`show` subcommand, a `<rev>..<rev>` range, or
       a ref other than `HEAD` — is refused with its reason, that checkout being
       depth-1 with no `main` ref. The set is stated in the docstring and each form
@@ -169,6 +169,8 @@ candidate row, whose subject is M101's messages.
 - 2026-08-02: pass 2 — the two actioned findings fixed, with the three sub-80 findings nearest the bar taken alongside at the maintainer's direction. O1 (AC2): "a ref other than `HEAD`" is now stated POSITIVELY over the revision slot instead of as a blacklist of ref spellings — a `git grep` must name its pattern with `-e` and delimit its pathspec with `--`, and every operand left between them must be `HEAD`. Re-measured at this commit: `HEAD~1`, `HEAD^`, a raw SHA `53dde1c`, the tag `v0.1.0`, `upstream/main` and a bare `some-branch` are each refused `non-head-ref`, `main..HEAD` is refused `rev-range`, plain `HEAD` is allowed, and a `git grep` lacking either delimiter is refused by a fourth stated form, `ambiguous-operands`, with its own sample. `git grep -c -e main -- f` is no longer refused, so the flag-argument false positive (O20) went with it. O2: `check_falsifiers()` now runs over validated rows only — `execute_row` trusts the grammar, so a malformed row reached it and raised instead of reporting; the grammar failure is now printed. O13: `read_ledger` carries each row's TRUE file line, measured 3 and 4 for the first two rows against a previously reported 2 and 3. O11: the absence row now searches `cairn/milestones/archive/` as well as `cairn/DECISIONS.md`, and the `data-raw/README.md` sentence states exactly that pair rather than "History ... at all". O12: the terminal-row row now settles the five milestone IDs in order (`M99 M98 M97 M96 M95`), not just the count, so rotating a row without renaming it reds. Gate: all five `data-raw` checkers pass in both modes, route/probe parity 16/16 and refused-form parity 4/4, `air format --check .` clean, `lintr::lint_package()` 0 lints, `cairn_validate` all checks passed.
 
 - 2026-08-02: pass 2 CI green on `8ee0131` — all nine checks pass, `check-references` in 25s with both M102 steps `success` in that run's log. The R suite and `R CMD check` results recorded at the T9 gate stand unchanged: `git diff main..HEAD --name-only` lists nine paths and not one is under `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION`, so no R-visible content changed in this pass. Status -> review.
+
+- 2026-08-02: review pass 2 FAILED the gate — SECOND return, and thrash trigger (b) fires. [O] diff-bug 30 findings, [S] blame-history 1 substantive, [S] prior-review 4 (GitHub inline-comment probe `[]` again); an [S] scorer scored 31 and exactly one reached 80. AC2 fails a second time by a NEW mechanism of the same shape: in `rev_operands()` the `--` test precedes the flag-value test, so `git grep -c -e -- main -- data-raw/README.md` is accepted and really does resolve the ref (`main:data-raw/README.md:2`, rc 0) — reproduced independently at this commit. Four further parsing defects share the cause (`-m 5` read as a ref, bundled `-ce` refused as lacking `-e`, `-e` after `--` accepted, `git --no-pager log` misclassified). Pass-1's other four fixes (O2, O11, O12, O13) verified holding by all three lenses. 30 sub-80 findings logged; the heaviest is D-020 rule 10's prose falling out of sync with the fourth refused form the fix pass added, repairable only by a superseding entry since IP4 forbids editing the entry. AC2's tick withdrawn. Status -> in-progress.
 
 ## Decisions
 
@@ -411,3 +413,70 @@ append-only history.
 recorded at the first gate stand unchanged: `git diff main..HEAD --name-only`
 lists nine paths, none under `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION`,
 so no R-visible content changed in the fix pass.
+
+**Findings — pass 2.** [O] diff-bug returned 30, [S] blame-history 1 substantive
+(plus 3 checked-and-clear), [S] prior-review 4 (one substantive, reached
+independently; the GitHub inline-comment probe returned `[]` again). An [S]
+scorer that generated none of them scored 31; exactly one reached 80.
+
+**ACTIONED (>= 80).**
+
+- **P1 (93) — AC2 FAILS again, by a new mechanism.** In `rev_operands()` the
+  `if tok == "--"` test precedes the `expect_value` test, so a `--` that is a
+  FLAG'S VALUE is consumed as the pathspec separator and the scan breaks before
+  reaching the real revision operand. Reproduced end to end at this commit:
+  `git grep -c -e -- main -- data-raw/README.md` returns no failure from
+  `validate_row` or `execute_row`, and run for real it resolves the ref —
+  `main:data-raw/README.md:2`, rc 0. On the depth-1 CI checkout `main` does not
+  exist, so it exits 128 and the row reds as `rc-mismatch` carrying "fault the
+  record, not the run" — the exact local/CI divergence AC2 exists to prevent,
+  under the exact misleading diagnosis. AC2's tick is withdrawn a second time.
+
+**Four more parsing defects, confirmed but sub-80, that share P1's cause.** They
+matter here less individually than as evidence about the approach: `-m 5`,
+`-A 2` and `-C 3` have their values read as refs, so a legitimate row is refused
+and the operator is told their `5` is a git ref (P2, 65); a bundled `-ce` is
+refused as lacking `-e`, which it carries (P4, 68); a `-e` appearing after `--`
+satisfies the delimiter test, so classification depends on a filename (P5, 45);
+and `argv[1]` is read as the subcommand, so `git --no-pager log` is refused as a
+non-HEAD ref rather than as a history subcommand and `git -C dir grep` draws two
+spurious hits (P6, 72). Each is a distinct hole in the same hand-written parse of
+git's command line.
+
+**Verified fixed, and holding (pass-1 O2, O11, O12, O13).** Both [S] lenses and
+the [O] lens independently re-ran the pass-1 counterexamples: a malformed row now
+prints its grammar failure instead of raising; row line numbers report 3-7
+against true file lines 3-7; the absence row's widened search passes live against
+every archived milestone; the terminal-row row settles the five ids in order. No
+fix reintroduced its defect.
+
+**LOGGED, sub-80 (30).** Beyond the four above: Q1/R1 (75) D-020 rule 10 names
+three refused forms and the fix pass added a fourth, `ambiguous-operands`, so the
+entry's prose no longer describes the code — and `cairn/DECISIONS.md` being
+append-only under IP4, the only legal repair is a superseding entry, which pass 2
+did not add; nothing diffs that prose against the code, which is pass-1 finding
+O17's blind spot made concrete. Then P16 (58) `reason = -` satisfies the reason
+gate; P9 (55) the absence row covers two of D-020 rule 4's three history
+surfaces; P3 (52) `ambiguous-operands` returns early and masks a co-present form;
+P14 (50) an `OSError` `rc-mismatch` emission sits outside its sentinel; P17 (50)
+the inventory row's claim says "stdlib-only", which `ls` cannot settle; P13 (48)
+a missing scope file raises instead of failing with a route id; P11 (45) the
+D-009 relation sits outside D-020's numbered list; P22 (45) the κ_m helper seeds
+its worst step at 0.0 and would print a monotone level as `0.000`; P18 (45)
+the README's "stdlib-only" is itself unregistered; P5 (45); P15 (42) `--probes`
+always exits 0 and a mistyped flag runs the ordinary check; P20 (42), P25 (42),
+P26 (40), P24 (40), P23 (38), P30 (38), P8 (35) the widened absence row as a
+future tripwire over immutable archive text, P21 (33), P27 (30), P28 (30), P10
+(30) AC3's two self-referential figures, P29 (28), P12 (25) the D-020 id M101's
+plan names, P19 (22), plus R3's note that the refused-form samples are tuned to
+the implementation's control flow.
+
+**Gate: FAILED — second return, thrash trigger (b) fires.** AC2 has now failed
+twice, each time by a different mechanism of the same shape: a way of naming a
+non-HEAD ref that the hand-written parse of git's command line does not reach.
+The thrash rule reads that as a wrong approach rather than a mis-sized one, and
+its remedy is to reconsider the alternative the plan gate recorded against
+(2026-08-02: deepening the CI checkout to `fetch-depth: 0`, refused because a
+pull-request checkout is a synthetic merge commit). Trigger (a) does not fire —
+this is the second defect return, not the third. Status -> `in-progress`; the
+disposition goes to the maintainer.
