@@ -16,18 +16,31 @@
 # next milestone's.
 #
 # WHAT THIS LEDGER DOES NOT COVER. It is complete over what the enumerator
-# matches, and the enumerator is a line scanner with stated edges: a bullet in a
-# single-quoted string, a named splice (`i = cause`), a quoted bullet name
-# (`"i" = `), a method named without the literal `ci_method = "value"` adjacency,
-# an abort raised by a wrapper outside the scanner's list, an abort call that
-# does not open its line, and anything outside `R/ci-*.R`. Each of those shapes
-# is CONSTRUCTED and shown unmatched by a probe in
-# `enumerate-ci-method-remedies.py --self-test`; the script's docstring lists
-# them as L1-L6. So "every site is classified here" means every site the
-# predicate matches, and a bullet written in one of those shapes is not gated by
-# this file. The splice reporter narrows the second of them to one shape -- a
-# whole line that is a bare identifier -- and is not a gate on spliced variables
-# in general.
+# matches, and the enumerator is a line scanner with stated edges.
+#
+# PROBED LIMITS: 6 predicate shapes (L1-L6), 5 unreported splice shapes; file
+# scope stated, no probe.
+#
+# That line is parsed by `enumerate-ci-method-remedies.py --self-test`, which
+# compares its two counts against the script's own probe lists and fails on a
+# divergence; the identical line appears in the script docstring and is parsed
+# there too.
+#
+# The six PROBED predicate shapes are: a bullet in a single-quoted string, a
+# named splice (`i = cause`), a quoted bullet name (`"i" = `), a method named
+# without the literal `ci_method = "value"` adjacency, an abort raised by a
+# wrapper outside the scanner's list, and an abort call that does not open its
+# line. Each of the six is CONSTRUCTED and shown unmatched by a probe; the
+# script's docstring lists them as L1-L6.
+#
+# File scope -- anything outside `R/ci-*.R` -- is a further limit, and the one
+# NO probe demonstrates. It is stated here and not counted among the six.
+#
+# So "every site is classified here" means every site the predicate matches, and
+# a bullet written in one of those shapes is not gated by this file. The splice
+# reporter narrows the second of the six to one shape -- a whole line that is a
+# bare identifier -- and is not a gate on spliced variables in general; the five
+# shapes it stays blind to are probed the same way.
 #
 # key	disposition	reason
 R/ci-bootstrap.R:6c20062478	fence	Engine capability: this engine/design pair ships no simulate_refit contract. Nothing about the data is degenerate, so the Monte-Carlo default it names is unaffected.

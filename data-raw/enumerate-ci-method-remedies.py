@@ -34,12 +34,20 @@ only follow a genuine change of what the abort says it is.
 
 What the predicate does NOT match
 --------------------------------
+PROBED LIMITS: 6 predicate shapes (L1-L6), 5 unreported splice shapes; file
+scope stated, no probe.
+
+That line is parsed by `--self-test`, which compares its two counts against
+`len(_limit_shapes())` and `len(_unreported_splices())` and fails on a
+divergence, so this record cannot drift from the probes that back it. The
+identical line appears in the ledger header and is parsed there too.
+
 This is a line-oriented scanner over R source, not an R parser, so its reach has
-edges. Each edge below is a STATED LIMIT with a probe in `--self-test` that
-constructs the shape and shows it unmatched (`_limit_shapes`), because the
-recurring failure in this area has been a record claiming a gate catches more
-than it does. A site written in any of these shapes carries a `ci_method` name
-past the gate:
+edges. Each of the six edges below is a STATED LIMIT with a probe in
+`--self-test` that constructs the shape and shows it unmatched (`_limit_shapes`),
+because the recurring failure in this area has been a record claiming a gate
+catches more than it does. A site written in any of these shapes carries a
+`ci_method` name past the gate:
 
   L1  a bullet written as a single-quoted R string -- the method matcher wants
       the backslash-escaped inner quotes a double-quoted R string produces;
@@ -53,14 +61,19 @@ past the gate:
       bare `rlang::abort()`;
   L6  an abort call that does not OPEN its line, e.g. assigned or nested.
 
-Scope is a limit of the same kind: only `R/ci-*.R` is read, so a `ci_method`
-named by an abort anywhere else in the package is out of the enumeration.
+File scope is a limit too, and it is the one limit here that NO probe
+demonstrates: only `R/ci-*.R` is read, so a `ci_method` named by an abort
+anywhere else in the package is out of the enumeration. A probe would have to
+construct a file outside the glob and show it unread, which is a property of the
+glob rather than of the predicate; it is stated and left unprobed, and it is not
+counted among the six.
 
 `spliced_message_sites()` narrows L2 rather than closing it. It reports exactly
 ONE shape -- a whole line that is a bare identifier -- and `_unreported_splices`
-probes the shapes it stays blind to (`i = cause`, `!!!bullets`, a `paste0()`
-bullet, a symbol sharing a line, a message vector spliced on the call's own
-line). It is not, and must not be described as, a gate on any spliced variable.
+probes the five shapes it stays blind to (`i = cause`, `!!!bullets`, a
+`paste0()` bullet, a symbol sharing a line, a message vector spliced on the
+call's own line). It is not, and must not be described as, a gate on any spliced
+variable.
 
 Usage (run from the repo root):
     python3 data-raw/enumerate-ci-method-remedies.py            # print the enumeration
@@ -512,6 +525,36 @@ def _check_probes():
     ]
 
 
+# The canonical limits line every record about this predicate must carry, parsed
+# rather than eyeballed. AC2's failure was a record enumerating SEVEN probed
+# shapes where `_limit_shapes()` holds six -- a divergence no gate could see
+# because the counts lived in prose. Both records now state the counts in this
+# one shape, and `--self-test` binds them to the probe lists below.
+PARITY_RE = re.compile(
+    r"PROBED LIMITS: (\d+) predicate shapes \(L1-L(\d+)\), (\d+) unreported "
+    r"splice shapes; file scope stated, no probe\."
+)
+
+
+def _stated_limit_counts(text):
+    """The (predicate, L-range end, splice) counts a record states, or None.
+
+    The record is normalized first -- comment markers dropped and every run of
+    whitespace collapsed -- so the line may wrap wherever its record wraps.
+    """
+    flat = re.sub(r"\s+", " ", re.sub(r"(?m)^\s*#\s?", "", text))
+    m = PARITY_RE.search(flat)
+    if m is None:
+        return None
+    return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+
+
+def _ledger_header():
+    """The ledger's comment header -- the record `--self-test` parses."""
+    with open(LEDGER, encoding="utf-8") as fh:
+        return "\n".join(ln for ln in fh.read().splitlines() if ln.startswith("#"))
+
+
 def _limit_shapes():
     """Message shapes carrying a `ci_method` name that the predicate MISSES.
 
@@ -824,6 +867,31 @@ def self_test():
     ]
     if not spliced_in("R/ci-probe.R", control):
         fails.append("spliced_in reports nothing on a bare-symbol splice")
+
+    # 2g. The RECORDS about those probes must state the set the probes
+    #     demonstrate. Pass 4's AC2 failure was exactly this gap: the ledger
+    #     header and a milestone Decisions entry each enumerated SEVEN probed
+    #     shapes -- L1-L6 plus file scope -- where `_limit_shapes()` holds six
+    #     and no probe constructs a file outside the glob. Both counts are read
+    #     out of the records here and compared with the probe lists, so a record
+    #     claiming more (or fewer) probed limits than exist fails the gate rather
+    #     than surviving another review.
+    want = (len(_limit_shapes()), len(_limit_shapes()), len(_unreported_splices()))
+    for label, text in (
+        ("the module docstring", __doc__),
+        ("the ledger header (%s)" % LEDGER, _ledger_header()),
+    ):
+        got = _stated_limit_counts(text)
+        if got is None:
+            fails.append(
+                "%s states no PROBED LIMITS line; the record cannot be tied to "
+                "the probe lists" % label
+            )
+        elif got != want:
+            fails.append(
+                "%s states %d predicate shapes (L1-L%d) and %d splice shapes; "
+                "the probes demonstrate %d and %d" % ((label,) + got + (want[0], want[2]))
+            )
 
     # 3. Keys are stable and unique -- a collision would let one ledger row
     #    silently classify two sites.

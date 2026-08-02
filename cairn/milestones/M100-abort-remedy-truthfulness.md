@@ -131,7 +131,7 @@ Pass-4 scope, complete; detail in the work log.
 
 RR04 ingestion, pass 5.
 
-- [ ] T7 Repair the limits records: state the six probed predicate shapes and the
+- [x] T7 Repair the limits records: state the six probed predicate shapes and the
       five probed splice shapes, mark file scope as a limit with no probe, and add
       the parsing parity assertion to `--self-test`.
 - [ ] T8 Append the dated supersession entry to `## Decisions` covering D-020's
@@ -242,6 +242,8 @@ RR04 ingestion, pass 5.
 
 - 2026-08-02: ingested RR04 (split, with named departures — maintainer's choice at the ingest gate). `Driving RR:` set; AC2 and AC5 retired as superseded and replaced by RR04's BC1 (repaired) and BC4/BC5/BC7/BC8/BC9/BC10; BC2/BC3/BC6 deferred to a ROADMAP candidate row. Tasks T7-T12 added. The plan-owned body needed two compressions to fit the 149-line cap (Scope's re-cut narrative, then the completed tasks' detail — both now carried by the work log), and `cairn_validate` still WARNs two split tripwires at 10 criteria and 12 tasks: the size concern the ingest audit raised is real and unresolved. RR04's BC list was normalized to the canonical `- BC<n>:` form so the `binding criteria` check could parse it; it now PASSes.
 
+- 2026-08-02: T7 — the limits records now state six PROBED predicate shapes and five PROBED splice shapes, with file scope stated as the one limit no probe demonstrates, in all three surfaces (script docstring, ledger header, an appended `## Decisions` note superseding the frozen entry). Both machine-readable surfaces carry one canonical `PROBED LIMITS:` line that `--self-test` PARSES and binds to `len(_limit_shapes())` / `len(_unreported_splices())`. Mutation-verified: stating seven in the ledger reds it, deleting the docstring line reds it, and adding a sixth splice probe reds BOTH records; all restored green, tree clean. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
+
 ## Decisions
 
 - 2026-08-01 (D-020, promoted to `cairn/DECISIONS.md`): static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class. Promoted rather than kept local because it binds every future abort in the package, not just these four.
@@ -265,6 +267,22 @@ RR04 ingestion, pass 5.
   is three durable records describing that reporter as a gate on any spliced
   variable, which the `i = cause` probe falsifies. An honest narrow gate is
   citable where a broad claim was not. Recompute:
+  `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
+
+- 2026-08-02 (supersedes, in part, the 2026-08-01 limits entry above): that entry
+  states file scope as "a seventh" limit beside L1-L6 and says each stated shape is
+  CONSTRUCTED and shown unmatched by a probe. That is wrong by one: `_limit_shapes()`
+  holds SIX predicate shapes and `_unreported_splices()` five splice shapes, and no
+  probe constructs an abort outside `R/ci-*.R` — none can, the glob being a property
+  of the search rather than of the predicate. The live limit set is therefore six
+  PROBED predicate shapes (L1-L6), five PROBED unreported splice shapes, and file
+  scope STATED WITH NO PROBE. The earlier entry is history and stays unedited (IP4);
+  this note is the live statement, and the ledger header and script docstring now
+  state the same set. Both carry one canonical `PROBED LIMITS:` line whose two counts
+  `--self-test` PARSES and compares with the probe lists, so a record claiming more
+  probed limits than exist reds instead of surviving a review — mutation-verified:
+  stating seven in the ledger, deleting the line from the docstring, and adding a
+  sixth splice probe each red it, and each restored green. Recompute:
   `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
 
 - 2026-08-02 (RR04, ingested): the four-pass recurrence is primarily an ENFORCEMENT
