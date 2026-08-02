@@ -1,6 +1,6 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -174,6 +174,8 @@ candidate row, whose subject is M101's messages.
 
 - 2026-08-02: pass 3 — at the maintainer's direction the refusal rule stops parsing git's command line. It is now decided by one test, `argv[0] == "git"`, and by nothing after it: EVERY git command is refused, the `git-grep` shape is removed so no shape maps to git, and the one row that used it writes `grep -r`, which reads the working tree — the only tree a claim is ever about. The recognised forms no longer decide refusal and only name its reason, with a fourth form `git-command` covering what they do not recognise, so being wrong about which applies costs a vaguer sentence and never an acceptance. Re-measured at this commit over the whole pass-2 defect family: pass-2's escape `git grep -c -e -- main -- data-raw/README.md` is refused `non-head-ref`; `-m 5`, bundled `-ce`, `-e` after `--`, `git -C dir grep` and `git describe` are all refused `git-command`; `git --no-pager log` is refused `git-history-subcommand`; plain `HEAD`, previously allowed, is refused too; and a non-git command is untouched. P1 through P7 close by construction rather than by another patch. `rev_operands()` and `VALUE_FLAGS` are deleted with the parse they served.
 - 2026-08-02: pass 3 — `cairn/DECISIONS.md` gains `D-020 Amendment 1`, superseding rule 10 only and recording why the parse was abandoned; an amendment rather than an edit because rule 4 of the entry it amends says this file is history and IP4 forbids editing it, and a convention that exempted its own record would not be one. This answers the pass-2 sub-80 finding (75) that rule 10's prose had drifted from the code, which two lenses reached independently. `read_d_entry()` now reads the entry AND every `### D-0NN Amendment N`, so the parity checks read what the log actually says rather than text the log has superseded; measured at this commit, the amendment is included, the citation scope still parses from the base entry, and all 16 route ids the rules name exist. Gate: five `data-raw` checkers pass in both modes, routes/probes 16/16, shapes 4/4, refused forms 4/4, `air format --check .` clean, `lintr::lint_package()` 0 lints, `cairn_validate` all checks passed.
+
+- 2026-08-02: review pass 3 FAILED the gate — THIRD return; thrash triggers (a) and (b) both fire. AC2 fails a third time, by a channel that is not a git command: an `awk` row running `awk 'BEGIN{ "git rev-list --count main..HEAD" | getline x; print x }'` validates, is not refused, and passes, printing `commits:11` — awk's `| getline` and `system()` spawn a shell, so the docstring's "there is no shell ... inexpressible" and D-020 rule 9 are both false as shipped. A second channel is open beside it: a `grep`/`ls`/`awk` row reads `.git/` directly. Pass 3 did close the entire pass-1/pass-2 git-parsing family by construction, verified independently by all three lenses, and repaired the D-020 drift legally via Amendment 1. The three failures are three different channels, not variations: AC2 asks for a guarantee about what a command DOES and every implementation has delivered a rule about what a command NAMES. Closing it needs an allowlist over capability — dropping `awk`/`ls`, restricting `python3` to committed helpers, refusing `.git/` paths — which changes the shape set AC1 and AC3 rest on and is not implement's to decide. No scorer pass was run (the gate stops at criterion verification, before triage); all findings are logged in the Review section instead. AC2's tick withdrawn. Status -> in-progress.
 
 ## Decisions
 
@@ -483,3 +485,103 @@ its remedy is to reconsider the alternative the plan gate recorded against
 pull-request checkout is a synthetic merge commit). Trigger (a) does not fire —
 this is the second defect return, not the third. Status -> `in-progress`; the
 disposition goes to the maintainer.
+
+**Review pass 3 — 2026-08-02.** PR #109, head `87181a0`, `main` unmoved. All
+nine CI checks green on this head. [O] diff-bug returned 18 findings, [S]
+blame-history 1 substantive, [S] prior-review 2 aggravated + 7 verified-fixed;
+the GitHub inline-comment probe returned `[]` a third time. No scorer pass was
+run: the gate fails at criterion verification, which is a stop before triage,
+and the findings below are recorded in full for the re-plan to consume rather
+than filtered by a confidence bar. That is a deviation from the review
+procedure's scorer step and is stated rather than glossed.
+
+**AC2 — FAILS a third time, by a channel that is not a git command at all.**
+Reproduced independently at this commit: a row with `shape = awk` and command
+`awk 'BEGIN{ "git rev-list --count main..HEAD" | getline x; print "commits:" x }'`
+returns NO FAILURES from `validate_row`, is not refused, and passes
+`execute_row`; run for real it prints `commits:11`. awk's `| getline` and
+`system()` spawn a shell. Two shipped records are therefore false: the module
+docstring's "there is no shell, so a pipeline, a redirection, a substitution or a
+chained second command is not merely discouraged but inexpressible", and D-020
+rule 9, which states the same. The command names two of the three forms AC2
+enumerates — a `rev-list` subcommand and a `main..HEAD` range — and is not
+refused, so AC2 fails as written. A second channel is open beside it: a `grep`,
+`ls` or `awk` row can read `.git/` directly (`grep -c refs/remotes/origin/main
+.git/packed-refs` validates and passes here, and returns different output on a
+depth-1 clone), which no rule mentions.
+
+**What three passes have established about the approach.** AC2 has now failed
+three times, and the three mechanisms are not variations — they are different
+channels: ref spellings the blacklist did not enumerate; a `--` that git's own
+CLI treats as an argument; and a non-git program that spawns a shell. Each fix
+closed its channel completely and the next pass found another. The pattern is
+that AC2 asks for a guarantee about what a command DOES ("does not read
+history") and every implementation has delivered a rule about what a command
+NAMES. A blocklist over names cannot reach a channel nobody has thought of yet,
+and that is a plan-level property of the criterion, not a coding defect in any
+one pass. What would close it is an allowlist over capability — for instance
+dropping `awk` and `ls`, restricting `python3` to committed helper scripts under
+`data-raw/`, and refusing any path under `.git/` — which changes the shape set
+AC1 and AC3 both rest on and is therefore not implement's to decide.
+
+**What pass 3 did close, verified by all three lenses independently.** The
+entire pass-1 and pass-2 defect family is gone by construction: `git grep -c -e
+-- main -- <path>` is refused `non-head-ref`, and `-m 5`, bundled `-ce`, `-e`
+after `--`, `git -C dir grep`, `git describe` and bare `HEAD` are all refused.
+`rev_operands()` and `VALUE_FLAGS` are deleted with the parse they served. The
+pass-2 finding that D-020 rule 10 had drifted from the code is repaired the
+legal way, by `D-020 Amendment 1` rather than an edit, matching this file's
+existing `D-008 Amendment 1` precedent; `read_d_entry()` now reads the entry and
+its amendments, so the parity checks read what the log says rather than text it
+has superseded.
+
+**Findings, recorded in full.** From [O]: the awk shell escape and the `.git/`
+path channel (above); AC2's refusal is now redundant with the four-program shape
+whitelist, so deleting `refused_hits()` would change no reachable ledger outcome
+and its probes demonstrate a rule that cannot alter one; `parse_scope` takes the
+FIRST `Citation scope:` line and the base entry always precedes its amendments,
+so an amendment can never amend the scope — the checker would enforce the
+superseded list while reporting green; `read_d_entry`'s prefix match absorbs a
+future `### D-0200` or `### D-020-bis`; its correctness depends on document
+order rather than on knowing which chunk is the base; the docstring's and
+`lint.yaml`'s "history-free by construction" claims are falsified by the two
+channels above; `refused_hits` silently returns nothing on an unbalanced quote,
+masked only by a separate `unknown-shape` path; refusal keys on the literal
+token `git`, so `/usr/bin/git`, `./git`, `env git` and a shlex-empty `argv[0]`
+bypass it (all currently caught by the shape whitelist instead);
+`git-history-subcommand` now scans every token, so `git grep -e log` is named a
+history subcommand and `git show HEAD~1` emits two failures for one command;
+`REF_SHAPED` covers only some ref spellings, so `git ls-tree v0.1.0` and
+`git ls-tree some-branch` are refused as `git-command` rather than with the
+reason AC2 names; `grep -r` widens the absence row to untracked and ignored
+files where `git grep` walked the index (also reached by [S] blame-history —
+currently zero such files exist under either searched path, so it is latent);
+`refused-parity` still derives its coded set from the samples rather than the
+detector; `read_scope`, `read_d_entry` and a mistyped flag still reach non-zero
+or misleading exits with no route id; `data-raw/README.md`'s new prose carries
+four unregistered figures ("all stdlib-only", "four of the five are wired",
+"each wired checker twice", "run locally only") beside its two registered ones;
+the κ_m helper conflates a monotone level with a zero step and reaches another
+checker's underscore-private API; and the docstring's stated refused set is no
+longer AC2's set verbatim, `non-head-ref` having been narrowed to "a recognised
+ref spelling" with a fourth non-history form added. From [S] prior-review, two
+previously-logged findings are aggravated rather than fixed: the D-020 id
+collision M101's committed plan sets up is no longer inert, because
+`read_d_entry` now merges a colliding entry's rules and scope instead of
+ignoring them; and the archive tripwire changed character with the `grep -r`
+swap.
+
+**Record repair.** The pass-2 log recorded several sub-80 findings as an id and
+a score with no description, which does not surface them. Their content is
+carried above where pass 3 touched it, and the full text of every pass-2 finding
+is in this session's transcript and the commit record; the re-plan should
+re-derive rather than rely on the abbreviated list.
+
+**Gate: FAILED — third return. Thrash triggers (a) and (b) both fire.** (a) at
+the third return: no further retry under the current plan; the milestone routes
+through `/milestone-plan`. (b) because the same criterion has failed three
+times, each by a new mechanism of the same shape; its diagnosis — a blocklist
+over what a command names cannot deliver a guarantee about what a command does —
+carries into that routing, as does the option of escalating the design question.
+No re-plan or split has been spent on M102, so (a)'s standard remedy applies.
+Status -> `in-progress`; the disposition goes to the maintainer.
