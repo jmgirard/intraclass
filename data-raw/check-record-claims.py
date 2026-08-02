@@ -46,42 +46,47 @@ COMMAND SHAPES
 A command is tokenized with `shlex.split` and executed directly -- there is no
 shell, so a pipeline, a redirection, a substitution or a chained second command
 is not merely discouraged but inexpressible. The leading token must be the
-shape's program (and its subcommand, where the shape names one). Everything
-here runs on the `check-references` runner, which has `python3`, the POSIX
-utilities and a working-tree `git`, and has neither R nor network access:
+shape's program. Everything here runs on the `check-references` runner, which
+has `python3` and the POSIX utilities and has neither R nor network access:
 
   shape: ls -- list committed paths; tokens containing `*`/`?` are globbed
-  shape: grep -- search a file's text, usually with `-c` for a count
+  shape: grep -- search text, `-c` for a count and `-r` to walk a directory
   shape: awk -- arithmetic or field selection over a committed table
   shape: python3 -- a `-c` predicate, or a helper script under `data-raw/`
-  shape: git-grep -- `git grep` over the working tree (never over history)
+
+There is deliberately no `git` shape. See below.
 
 REFUSED COMMAND FORMS
 ---------------------
 The CI checkout is depth-1 and has no `main` ref, so a command that reads
 repository history would pass locally and fail there for reasons that have
-nothing to do with the claim. A `git` command naming any of these is refused
-with its reason before it is ever run:
+nothing to do with the claim -- and it would fail as a claim failure, telling
+its reader the record is wrong when the record is fine. Every `git` command is
+therefore refused before it is ever run, whatever its flags spell:
 
   refused: git-history-subcommand -- a `log`, `blame`, `rev-list` or `show`
   refused: rev-range -- a `<rev>..<rev>` or `<rev>...<rev>` range
-  refused: non-head-ref -- any revision operand other than `HEAD`
-  refused: ambiguous-operands -- a `git grep` lacking `-e <pattern>` or `--`
+  refused: non-head-ref -- a recognised ref spelling other than `HEAD`
+  refused: git-command -- any other `git` command; none may run from a row
 
-The last two work together. A `git grep` must name its pattern with `-e` and
-delimit its pathspec with `--`; everything left between them is a revision
-operand, which git accepts and this checker refuses unless it is `HEAD`. Stating
-the rule positively over that slot is what makes it the rule AC2 asks for rather
-than a blacklist of ref spellings: `HEAD~1`, `HEAD^`, a raw SHA, a tag and a bare
-branch name are all refused because none of them is `HEAD`, not because any of
-them was enumerated. Requiring the two delimiters is the price -- without them a
-bare token could be the search pattern or a revision, and nothing here can tell.
+Refusal is decided by ONE test -- is the program `git`? -- and by nothing after
+it. The first three forms exist only to NAME the reason where the reason is
+recognisable; being wrong about which of them applies costs a vaguer sentence
+and never an acceptance. Two review passes bought this design. Each earlier
+attempt had to decide which token of a git command line was a revision, and each
+was defeated by a spelling it did not reach: first a blacklist that missed
+`HEAD~1`, a raw SHA and a bare branch name; then a positive rule over the
+revision slot, defeated by `git grep -c -e -- main -- <path>`, where the `--`
+belongs to `-e` and `main` sits behind it. Git's command line has global
+options, bundled short flags, value-taking flags and a `--` that is sometimes an
+argument; a checker that must parse it correctly to stay safe will keep losing
+that race, and the ledger loses nothing by not running git at all.
 
 Refusal is scoped to `git` commands, so a `grep` pattern containing `..` is
-untouched; a `git grep` pattern that needs `..` writes it as `\\.\\.` or moves to
-the `grep` shape. A `python3` row can of course shell out to git itself; the
-refusal is syntactic over the ledger cell, and that limit is stated rather than
-papered over.
+untouched. Anything a row wanted `git grep` for, plain `grep -r` does over the
+working tree, which is the only tree a claim is ever about. One limit stays and
+is stated rather than papered over: a `python3` row can shell out to git itself,
+so this is a syntactic rule over the ledger cell, not a sandbox.
 
 FAILURE ROUTES
 --------------
@@ -145,7 +150,6 @@ SHAPES = {
     "grep": ("grep", None, False),
     "awk": ("awk", None, False),
     "python3": ("python3", None, False),
-    "git-grep": ("git", "grep", False),
 }
 
 CITATION_RE = re.compile(r"\[claim:([a-z][a-z0-9-]*)\]")
@@ -157,9 +161,9 @@ ABSENCE_PATTERNS = {"^$", "^0$", "0", "^0+$", "^\\s*$"}
 # a form stated in the docstring but detected by no sample is a dead rule.
 REFUSED_SAMPLES = {
     "git-history-subcommand": "git log --oneline",
-    "rev-range": "git grep -c -e token main..HEAD -- data-raw/README.md",
-    "non-head-ref": "git grep -c -e token HEAD~1 -- data-raw/README.md",
-    "ambiguous-operands": "git grep -c token data-raw/README.md",
+    "rev-range": "git diff main..HEAD",
+    "non-head-ref": "git ls-tree origin/main",
+    "git-command": "git status --short",
 }
 
 
@@ -182,37 +186,27 @@ COLUMNS = doc_list("column")
 # --------------------------------------------------------------------------
 
 
-# Flags whose NEXT token is a value rather than an operand. Without this a
-# `git grep -e main -- f` would read its own search pattern as a revision.
-VALUE_FLAGS = ("-e", "-f", "--max-depth", "--threads")
-
-
-def rev_operands(argv):
-    """(operands, saw_separator) for a git command's revision slot.
-
-    An operand is a token after the subcommand and before `--` that is neither
-    a flag nor a flag's value. That is exactly where git accepts a revision, so
-    the rule below can be stated positively -- every operand here must be
-    `HEAD` -- instead of as a blacklist of ref spellings, which is what let
-    `HEAD~1`, a raw SHA, a tag and a bare branch name through (review pass 1, O1).
-    """
-    operands, saw_separator, expect_value = [], False, False
-    for tok in argv[2:]:
-        if tok == "--":
-            saw_separator = True
-            break
-        if expect_value:
-            expect_value = False
-            continue
-        if tok.startswith("-"):
-            expect_value = tok in VALUE_FLAGS
-            continue
-        operands.append(tok)
-    return operands, saw_separator
+# Ref spellings recognised well enough to NAME in a refusal message. This list
+# is deliberately not load-bearing: refusal does not depend on it, because
+# `git` is refused whatever it says. Two review passes established why -- twice
+# a rule that had to decide which token of a git command line was a revision was
+# met by a spelling it did not reach (a blacklist missing `HEAD~1`; then a `--`
+# consumed as `-e`'s value, hiding `main` behind it). The list only picks the
+# words for the message, so being wrong here costs a vaguer sentence.
+REF_SHAPED = re.compile(
+    r"^(origin/|upstream/|refs/|HEAD[~^@]|[0-9a-f]{7,40}$|main$|master$)"
+)
 
 
 def refused_hits(command):
-    """(form-id, why) for every refused history-dependent form in `command`."""
+    """(form-id, why) for a refused command -- every `git` command is refused.
+
+    The rule is decided by one test, `argv[0] == "git"`, and nothing after it:
+    a command that cannot run git cannot read history, whatever its flags spell.
+    The clauses below only choose which form the message names, so that the
+    reason a row is refused is the specific one where it can be recognised and
+    an honest general one where it cannot.
+    """
     try:
         argv = shlex.split(command)
     except ValueError:
@@ -220,22 +214,16 @@ def refused_hits(command):
     if not argv or argv[0] != "git":
         return []
     hits = []
-    sub = argv[1] if len(argv) > 1 else ""
-    if sub in ("log", "blame", "rev-list", "show"):
-        hits.append(("git-history-subcommand", f"`git {sub}` reads repository history"))
-    operands, saw_separator = rev_operands(argv)
-    if sub == "grep" and ("-e" not in argv or not saw_separator):
-        hits.append(
-            ("ambiguous-operands", "a `git grep` without both `-e <pattern>` and a "
-             "`--` separator has bare operands that cannot be told apart from "
-             "revisions, so the rule below cannot be applied to it")
-        )
-        return hits
-    for tok in operands:
-        if re.search(r"\w\.\.\.?\w", tok):
+    if any(tok in ("log", "blame", "rev-list", "show") for tok in argv[1:]):
+        hits.append(("git-history-subcommand", "a `git log`/`blame`/`rev-list`/"
+                     "`show` reads repository history"))
+    for tok in argv[1:]:
+        if re.search(r"\w\.\.\.?\w", tok) and not tok.startswith("-"):
             hits.append(("rev-range", f"{tok!r} is a revision range"))
-        elif tok != "HEAD":
+        elif REF_SHAPED.match(tok) and tok != "HEAD":
             hits.append(("non-head-ref", f"{tok!r} names a ref other than HEAD"))
+    if not hits:
+        hits.append(("git-command", "a ledger row cannot run `git` at all"))
     return hits
 
 
@@ -522,14 +510,17 @@ def check_citations(rows, scope_texts):
 
 
 def read_d_entry(path=DECISIONS, anchor=D_ENTRY):
+    """The decision entry AND every amendment to it, concatenated.
+
+    `cairn/DECISIONS.md` is append-only, so an entry is corrected by a separate
+    `### D-0NN Amendment N` rather than in place. A parser that read only the
+    base entry would therefore enforce a rule the log had already amended, and
+    would keep reporting parity against text its own repo calls superseded.
+    """
     with open(path, encoding="utf-8") as fh:
-        text = fh.read()
-    start = text.find(anchor)
-    if start < 0:
-        return ""
-    rest = text[start + len(anchor):]
-    end = rest.find("\n### D-")
-    return anchor + (rest if end < 0 else rest[:end])
+        chunks = fh.read().split("\n### ")
+    key = anchor.removeprefix("### ")
+    return "\n".join(c for c in chunks if c.startswith(key))
 
 
 def parse_scope(entry):
@@ -703,7 +694,7 @@ PROBES = {
     "grammar": lambda: validate_row(_row(id="Not A Slug")),
     "unknown-shape": lambda: validate_row(_row(shape="perl")),
     "refused-form": lambda: validate_row(
-        _row(shape="git-grep", command="git log --oneline")
+        _row(shape="grep", command="git log --oneline")
     ),
     "rc-mismatch": lambda: execute_row(
         _row(command="grep -c zzz-absent-token data-raw/README.md")
@@ -788,7 +779,7 @@ def self_test(root=None):
             problems.append(
                 f"refused form {form!r} was NOT refused on its own sample {sample!r}"
             )
-        row = _row(shape="git-grep", command=sample)
+        row = _row(shape="grep", command=sample)
         if not any(route == "refused-form" for route, _ in validate_row(row)):
             problems.append(f"a ledger row carrying {sample!r} was not refused")
 

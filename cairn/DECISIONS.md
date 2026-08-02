@@ -730,3 +730,32 @@ coverage is exactly what authors register, so a green run asserts nothing about
 figures nobody registered. The standing ROADMAP candidate row for an
 abort-remedy-truthfulness ledger builds on this row schema and checker idiom
 rather than designing a second.
+
+### D-020 Amendment 1 (2026-08-02): the refusal rule is one test, not a parse — no ledger command may run `git`
+
+**Context:** D-020 rule 10 refused "a `git` command naming a history-dependent
+form ... a revision range, or a ref other than `HEAD`". Meeting that required
+deciding which token of a git command line was a revision, and two review passes
+of M102 each defeated an implementation of it. The first enumerated ref
+spellings and missed `HEAD~1`, `HEAD^`, a raw SHA, a tag and a bare branch name.
+The second stated the rule positively over git's revision slot — pattern behind
+`-e`, pathspec behind `--`, every operand between them must be `HEAD` — and was
+defeated by `git grep -c -e -- main -- <path>`, where the `--` is `-e`'s own
+argument, so the scan took it for the separator and never saw `main` behind it.
+That command is accepted, resolves the ref locally, and on the depth-1 CI
+checkout exits 128 — reported to its reader as the record being wrong.
+**Decision:** the rule is decided by one test, `argv[0] == "git"`, and by nothing
+after it. Every `git` command is refused; the `git-grep` shape is removed, so no
+shape maps to git at all; and a row that wanted `git grep` writes `grep -r`,
+which reads the working tree — the only tree a claim is ever about.
+1. No registered command may run `git`, whatever its flags spell. probe: refused-form
+2. The recognised forms — a history subcommand, a revision range, a ref spelling other than `HEAD` — no longer decide refusal and only name its reason, with `git-command` covering every command they do not recognise. Being wrong about which applies costs a vaguer sentence and never an acceptance. probe: refused-form
+3. No command shape maps to `git`; a row naming one fails on the shape as well as the refusal. probe: unknown-shape
+**What this does not claim:** it is a syntactic rule over the ledger cell, not a
+sandbox. A `python3` row can still shell out to git, and D-020's rule 5 limit
+applies here too — this is stated rather than papered over.
+**Supersedes:** D-020 rule 10 only. Rules 1–9 and 11–17 stand unchanged, as do
+the citation scope, the registration-not-detection limit, and the relation to
+D-009. The reason an amendment rather than an edit: rule 4 of the entry it
+amends says this file is history and IP4 forbids editing it, and a convention
+that exempted its own record would not be one.
