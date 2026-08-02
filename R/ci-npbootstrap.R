@@ -189,25 +189,47 @@ npbootstrap_ci <- function(
   k <- length(groups)
   obs <- npb_anova(groups)
   # The OBSERVED data must be non-degenerate: SSA = 0 (every subject mean equal ->
-  # log F = -Inf) or SSE = 0 (no within-subject variance -> IJ SE undefined) leaves
-  # the transform / studentization ill-posed. Fail loudly (#5/#8).
+  # log F = -Inf), SSE = 0 (no within-subject variance -> log F non-finite), or a
+  # zero jackknife SE leaves the transform / studentization ill-posed. Fail loudly
+  # (#5/#8). The third case is NOT a variance degeneracy and this comment used to
+  # omit it (M100 review A1).
+  # THREE distinguishable causes, and the message names the one that fired.
+  # M100's first attempt asserted the two variance degeneracies for all of them,
+  # which is false whenever the third fires: `se_ij_logf == 0` needs no degeneracy
+  # at all, only that every subject's share of SSA equals its share of SSE, and it
+  # is reachable on healthy data with a finite log F (review finding A1). Naming a
+  # cause the data does not have is the defect M100 exists to remove, so the cause
+  # is read off the condition rather than assumed. No `ci_method` is named on any
+  # branch: the sweep found none usable across this guard's trigger class (D-020).
+  ssa_zero <- identical(obs$logf, -Inf)
+  mse_zero <- is.nan(obs$logf) || identical(obs$logf, Inf)
   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
+    cause <- if (mse_zero) {
+      c(
+        i = "Within-subject variance is exactly zero, so {.field log F} is not \\
+             finite and the transform does not exist.",
+        i = "Inspect the ratings: every rater gave each subject the same score."
+      )
+    } else if (ssa_zero) {
+      c(
+        i = "Between-subject variance is exactly zero, so {.field log F} is \\
+             {.val {-Inf}} and the transform does not exist.",
+        i = "Inspect the ratings: every subject has the same mean score."
+      )
+    } else {
+      c(
+        i = "The jackknife standard error of {.field log F} is exactly zero \\
+             even though {.field log F} = {.val {obs$logf}} is finite, so the \\
+             studentized pivot has no scale.",
+        i = "Inspect the ratings: every subject contributes the same share of \\
+             the between-subject sum of squares as of the within-subject sum of \\
+             squares, which leaves every influence value at zero."
+      )
+    }
     abort_intraclass(
       c(
         "The one-way transformed bootstrap-t interval is undefined for this data.",
-        i = "Between- or within-subject variance is exactly zero \\
-             (log F = {.val {obs$logf}}), so the {.field log F} transform and its \\
-             jackknife SE do not exist.",
-        # M100: this bullet used to offer `ci_method = "montecarlo"`, measured
-        # FALSE -- across the datasets that reached this guard in
-        # data-raw/sweep-abort-remedies.R the default was usable on none of them,
-        # over both of the disjuncts above. Nor is any other method nameable: the
-        # parametric bootstrap survives the SSA = 0 half and fails the SE = 0
-        # half, and static text has to hold for the whole trigger class it is
-        # shown on (D-020). So the bullet claims nothing about methods and states
-        # only what the guard's own condition establishes.
-        i = "Inspect the ratings: either every subject has the same mean score, \\
-             or every rater agreed exactly within each subject."
+        cause
       ),
       class = "intraclass_singular_fit",
       call = call

@@ -58,19 +58,65 @@ BULLET_RE = re.compile(r"^\s*i = ")
 # quotes, so the file bytes carry backslash-quote: ci_method = \"montecarlo\".
 METHOD_RE = re.compile(r'ci_method\s*=\s*\\"([a-z]+)\\"')
 CLASS_RE = re.compile(r'class\s*=\s*"([a-z_]+)"')
+# `abort_unsupported()` and friends set the condition class INSIDE the wrapper
+# (R/abort.R), so a call site carrying no `class =` still raises a classed
+# condition. Reading only the call site printed `(default)` for 5 of 6 sites that
+# actually carry `intraclass_unsupported` — committed evidence with a wrong
+# column (review finding B5). The wrapper's own class is resolved from R/abort.R
+# so this map cannot drift from it silently.
+ABORT_R = "R/abort.R"
 IF_RE = re.compile(r"^\s*(if|\} else if)\s*\(")
+
+
+def wrapper_classes():
+    """Map each `abort_*` wrapper to the condition class it sets internally.
+
+    Parsed from R/abort.R rather than hardcoded, so a wrapper that changes its
+    class cannot leave this enumeration quietly stale.
+    """
+    out = {}
+    if not os.path.exists(ABORT_R):
+        return out
+    with open(ABORT_R, encoding="utf-8") as fh:
+        lines = fh.read().splitlines()
+    current = None
+    for line in lines:
+        m = re.match(r"(abort_[a-z_]+)\s*<-\s*function", line)
+        if m:
+            current = m.group(1)
+            continue
+        if current:
+            m = CLASS_RE.search(line)
+            if m and "c(class," not in line.replace(" ", ""):
+                out[current] = m.group(1)
+                current = None
+            elif re.match(r"^\}", line):
+                current = None
+    return out
 
 
 def _slice_call(lines, start):
     """Return the line range [start, end] of a call opening on line `start`.
 
-    Balances parentheses, ignoring those inside R string literals (which may
-    carry escaped quotes) so a message containing `(` does not truncate it.
+    One scanner, carrying string state ACROSS lines, because both things it must
+    ignore span lines in this codebase:
+
+    - String literals. A message containing `(` must not close the call, and an
+      R string continues across lines via a trailing `\\`.
+    - Comments. Balancing over raw comment text let an unmatched `(` swallow the
+      following abort into one site, which then inherited the first site's ledger
+      row and passed `--check` (review finding B1) — and M100 itself added prose
+      comments inside three abort calls.
+
+    A line-local comment stripper is NOT sufficient and was the first attempt's
+    bug: `R/ci-mpl.R`'s level fence carries the literal `(#5)` on a CONTINUATION
+    line of a string, so stripping per line truncated mid-string, unbalanced the
+    slice, and merged two mpl sites into one.
     """
     depth = 0
+    in_str = False
     i = start
     while i < len(lines):
-        in_str = False
         prev = ""
         for ch in lines[i]:
             if in_str:
@@ -78,6 +124,8 @@ def _slice_call(lines, start):
                     in_str = False
             elif ch == '"':
                 in_str = True
+            elif ch == "#":
+                break  # comment runs to end of line; strings are handled above
             elif ch == "(":
                 depth += 1
             elif ch == ")":
@@ -144,6 +192,7 @@ def _leading_line(body):
 def enumerate_sites():
     """Every `R/ci-*.R` abort whose REMEDY bullets name a `ci_method` value."""
     sites = []
+    wrappers = wrapper_classes()
     for path in sorted(glob.glob(R_GLOB)):
         with open(path, encoding="utf-8") as fh:
             lines = fh.read().splitlines()
@@ -166,13 +215,18 @@ def enumerate_sites():
             methods = sorted(set(METHOD_RE.findall("\n".join(bullet_text))))
             if not methods:
                 continue
+            wrapper = ABORT_RE.match(line).group(1)
             cls = CLASS_RE.search("\n".join(body))
             lead = _leading_line(body)
             sites.append(
                 {
                     "file": path,
                     "line": first + 1,
-                    "class": cls.group(1) if cls else "(default)",
+                    "class": (
+                        cls.group(1)
+                        if cls
+                        else wrappers.get(wrapper, "(default)")
+                    ),
                     "condition": _condition(lines, first),
                     "methods": methods,
                     "lead": lead,
@@ -311,6 +365,58 @@ def self_test():
                     "that name for want of evidence; re-measure before restoring"
                     % (path, needle)
                 )
+
+    # 2b. The two `_slice_call` hazards, probed directly on synthetic source
+    #     because both were live defects rather than hypotheses: an unmatched
+    #     paren in a COMMENT used to swallow the next abort into this one
+    #     (review B1), and a line-local fix for that then truncated a STRING
+    #     continuation carrying `(#5)` and merged two mpl sites.
+    commented = [
+        "    abort_intraclass(",
+        "      c(",
+        '        "Leading.",',
+        "        # a comment with an unmatched paren :-(",
+        '        i = "Use {.code ci_method = \\"searle\\"}."',
+        "      ),",
+        "      call = call",
+        "    )",
+        "    more_code()",
+    ]
+    if _slice_call(commented, 0) != (0, 7):
+        fails.append(
+            "_slice_call spans past the call when a comment holds an unmatched "
+            "paren: got %r, want (0, 7)" % (_slice_call(commented, 0),)
+        )
+    continued = [
+        "    abort_unsupported(",
+        "      c(",
+        '        "Leading.",',
+        '        i = "calibrated per level and not interpolated across \\\\',
+        '             levels (#5); use {.code ci_method = \\"montecarlo\\"}."',
+        "      ),",
+        "      call = call",
+        "    )",
+    ]
+    if _slice_call(continued, 0) != (0, 7):
+        fails.append(
+            "_slice_call truncates on a string continuation carrying '(#5)': "
+            "got %r, want (0, 7)" % (_slice_call(continued, 0),)
+        )
+
+    # 2c. Wrapper classes resolve, or the `class` column is decoration. The
+    #     committed enumeration printed `(default)` for every `abort_unsupported`
+    #     site until this was wired through R/abort.R (review B5).
+    wc = wrapper_classes()
+    if wc.get("abort_unsupported") != "intraclass_unsupported":
+        fails.append(
+            "abort_unsupported's class did not resolve from %s: got %r"
+            % (ABORT_R, wc.get("abort_unsupported"))
+        )
+    if any(s["class"] == "(default)" for s in sites):
+        fails.append(
+            "a site still reports class '(default)': %s"
+            % [s["key"] for s in sites if s["class"] == "(default)"]
+        )
 
     # 3. Keys are stable and unique -- a collision would let one ledger row
     #    silently classify two sites.

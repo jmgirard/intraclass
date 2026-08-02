@@ -16,9 +16,14 @@
 # would give them something they can use, and that helper is already the repo's
 # answer to it (finite, ordered, inside D-010 support).
 #
-# The sites are the `sweep`-dispositioned rows of data-raw/abort-remedy-sites.tsv,
-# enumerated by data-raw/enumerate-ci-method-remedies.py. This script MEASURES
-# only; the message rewrites it licenses are a separate task.
+# The sites are the reducer-stage guards whose trigger is degenerate DATA. That
+# set is fixed by the code, not by the ledger: a guard stays worth measuring after
+# its message stops naming a method, and three of these four de-named at M100, so
+# reading the site list off `data-raw/abort-remedy-sites.tsv` would silently
+# shrink the evidence base to the sites that still name something (review C7).
+# What IS read from the ledger and the enumeration is which sites still name a
+# method today -- the `named_by_remedy` column below -- so that column cannot go
+# stale against the shipped text. This script MEASURES only.
 #
 # Run from the repo root (~1 min):
 #   Rscript data-raw/sweep-abort-remedies.R
@@ -27,7 +32,12 @@
 suppressMessages(devtools::load_all(quiet = TRUE))
 
 out_path <- "data-raw/abort-remedy-sweep.tsv"
-boot_samples_n <- 99L
+# The SHIPPED default, not a reduced count. M97 measured a run that succeeded at
+# 999 and aborted at a caller's 2000, and `R/boundary-hint.R` records the rule it
+# settled: verification runs at the count the user's own retry would use. A sweep
+# at 99 measures a different experiment from the one the message speaks to
+# (review finding C3).
+boot_samples_n <- 999L
 conf_level_n <- 0.95
 
 # ---- data generators ---------------------------------------------------------
@@ -82,6 +92,19 @@ gen_resample_degenerate <- function(n_s, n_r, n_varying = 2L, seed = 1) {
   )
 }
 
+# NEITHER variance degenerate, yet the npbootstrap observed-data guard fires:
+# every subject's share of SSA equals its share of SSE, so all influence values
+# are zero and `se_ij_logf == 0` while `log F` stays finite. M100's first sweep
+# never generated this branch, which is how a message false on it reached review
+# (finding A1). Subject means -1/0/1, within-subject ranges 1/0/1.
+gen_se_zero <- function(n_s, n_r, seed = 1) {
+  data.frame(
+    subject = rep(1:3, each = 2),
+    rater = rep(1:2, times = 3),
+    score = c(-1.5, -0.5, 0, 0, 0.5, 1.5)
+  )
+}
+
 # The alternatives measured at every site. A remedy may only name a method the
 # sweep found usable across the WHOLE trigger class, so the rewrite needs each
 # candidate measured, not just the one the current text happens to name.
@@ -110,7 +133,6 @@ sites <- list(
   list(
     key = "R/ci-bootstrap.R:f3b08ac552",
     label = "bootstrap refit convergence",
-    names = "montecarlo",
     class = "intraclass_singular_fit",
     fire = function(df, k) {
       # The point fit is inside the catch on purpose: on degenerate data glmmTMB
@@ -132,7 +154,6 @@ sites <- list(
   list(
     key = "R/ci-classical.R:990cd66e44",
     label = "classical MSE = 0",
-    names = "montecarlo",
     class = "intraclass_singular_fit",
     fire = function(df, k) {
       catch(searle_ci(df, ests_oneway(k), conf_level = conf_level_n))
@@ -141,7 +162,6 @@ sites <- list(
   list(
     key = "R/ci-npbootstrap.R:bf1a802a9c",
     label = "npbootstrap observed degeneracy",
-    names = "montecarlo",
     class = "intraclass_singular_fit",
     fire = function(df, k) {
       catch(npbootstrap_ci(
@@ -156,7 +176,6 @@ sites <- list(
   list(
     key = "R/ci-npbootstrap.R:01b75d1a61",
     label = "npbootstrap degenerate resamples",
-    names = "montecarlo",
     class = "intraclass_singular_fit",
     fire = function(df, k) {
       catch(npbootstrap_ci(
@@ -235,10 +254,11 @@ run_remedy <- function(df, method, k) {
 # whose `assignment_linter` rejects `<<-`, and a local `lint_package()` stays
 # silent about it (the M95 lesson).
 grid <- list()
-cell_spec <- function(site_key, gen, n_s, n_r, seed, note, ...) {
+cell_spec <- function(site_key, gen_name, n_s, n_r, seed, note, ...) {
   list(
     site = site_key,
-    gen = gen,
+    gen_name = gen_name,
+    gen = get(gen_name),
     n_s = n_s,
     n_r = n_r,
     seed = seed,
@@ -259,7 +279,7 @@ for (geom in list(c(6, 3), c(10, 2), c(15, 4), c(30, 3))) {
         grid,
         list(cell_spec(
           key,
-          gen_mse0,
+          "gen_mse0",
           geom[1],
           geom[2],
           1L,
@@ -272,7 +292,7 @@ for (geom in list(c(6, 3), c(10, 2), c(15, 4), c(30, 3))) {
       grid,
       list(cell_spec(
         "R/ci-npbootstrap.R:bf1a802a9c",
-        gen_ssa0,
+        "gen_ssa0",
         geom[1],
         geom[2],
         1L,
@@ -282,13 +302,24 @@ for (geom in list(c(6, 3), c(10, 2), c(15, 4), c(30, 3))) {
     )
   }
 }
+grid <- c(
+  grid,
+  list(cell_spec(
+    "R/ci-npbootstrap.R:bf1a802a9c",
+    "gen_se_zero",
+    3L,
+    2L,
+    1L,
+    "SE=0, both variances healthy"
+  ))
+)
 for (geom in list(c(12, 3), c(20, 3), c(30, 2))) {
   for (sd in 1:3) {
     grid <- c(
       grid,
       list(cell_spec(
         "R/ci-npbootstrap.R:01b75d1a61",
-        gen_resample_degenerate,
+        "gen_resample_degenerate",
         geom[1],
         geom[2],
         sd,
@@ -300,6 +331,30 @@ for (geom in list(c(12, 3), c(20, 3), c(30, 2))) {
 }
 
 # ---- run ---------------------------------------------------------------------
+# Which sites still name a method TODAY, read from the committed enumeration so
+# the column cannot drift from the shipped text (review C7). A site absent from
+# the enumeration names nothing -- which is exactly what M100 did to three of
+# these four.
+named_now <- local({
+  path <- "data-raw/abort-remedy-enumeration.txt"
+  out <- list()
+  if (file.exists(path)) {
+    txt <- readLines(path, warn = FALSE)
+    key <- NULL
+    for (ln in txt) {
+      k <- regmatches(ln, regexpr("(?<=key:\\s{7})\\S+", ln, perl = TRUE))
+      if (length(k)) {
+        key <- k
+      }
+      n <- regmatches(ln, regexpr("(?<=names:\\s{5})\\S.*", ln, perl = TRUE))
+      if (length(n) && !is.null(key)) {
+        out[[key]] <- trimws(strsplit(n, ",")[[1]])
+      }
+    }
+  }
+  out
+})
+
 sites_by_key <- stats::setNames(sites, vapply(sites, `[[`, character(1), "key"))
 rows <- list()
 for (cell in grid) {
@@ -311,16 +366,30 @@ for (cell in grid) {
       cell$args
     )
   )
+  # `fire` calls the reducer directly, bypassing the point fit -- necessary,
+  # because on some geometries glmmTMB dies with a raw error before any CI-stage
+  # guard runs. But a user only ever meets this message through `icc()`, so a
+  # cell whose POINT FIT dies is not a dataset on which the message is shown:
+  # counting it inflated two verdict denominators (review finding C2). Recorded
+  # separately so the distinction is in the evidence rather than in a footnote.
+  point_fit_ok <- !inherits(
+    catch(fit_glmmtmb_oneway(df)),
+    "condition"
+  )
   fired <- site$fire(df, cell$n_r)
-  reached <- inherits(fired, "condition") && inherits(fired, site$class)
+  reached <- inherits(fired, "condition") &&
+    inherits(fired, site$class) &&
+    point_fit_ok
   why <- if (reached) {
     ""
+  } else if (!point_fit_ok) {
+    "point fit failed: a user could not reach this message on this data"
   } else if (inherits(fired, "condition")) {
     paste("other condition:", class(fired)[[1]])
   } else {
     "reducer returned an interval"
   }
-  for (method in union(strsplit(site$names, ",")[[1]], candidates)) {
+  for (method in candidates) {
     remedy <- if (reached) {
       run_remedy(df, trimws(method), cell$n_r)
     } else {
@@ -329,17 +398,23 @@ for (cell in grid) {
     rows[[length(rows) + 1]] <- data.frame(
       site = cell$site,
       label = site$label,
-      named_by_remedy = trimws(method) %in% strsplit(site$names, ",")[[1]],
+      named_by_remedy = trimws(method) %in%
+        (if (is.null(named_now[[cell$site]])) {
+          character(0)
+        } else {
+          named_now[[cell$site]]
+        }),
       n_s = cell$n_s,
       n_r = cell$n_r,
       seed = cell$seed,
       trigger = cell$note,
       reached = reached,
+      point_fit_ok = point_fit_ok,
       remedy = trimws(method),
       outcome = remedy$outcome,
       remedy_usable = remedy$usable,
       detail = remedy$detail,
-      generator = deparse(substitute(cell$gen)),
+      generator = cell$gen_name,
       boot_samples = boot_samples_n,
       conf_level = conf_level_n,
       r_version = as.character(getRversion()),

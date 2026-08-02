@@ -34,18 +34,30 @@
   likelihood are unchanged.
 
 * Three errors raised on degenerate data no longer tell you to switch to
-  `ci_method = "montecarlo"`. Across the datasets that reached each of those
-  errors in a committed sweep — a parametric bootstrap whose refits will not
-  converge, a one-way dataset with no within-subject variance, and a transformed
-  bootstrap-t whose `log F` transform is undefined — the Monte-Carlo default
-  returned a usable interval on none of them, so the one remedy those messages
-  offered was the one that could not work. Each now points at the ratings and says
-  what to look for: subjects scored identically by every rater, or every subject
-  sharing one mean score. The error class and the opening sentence of each message
-  are unchanged. The nearby "the design is too small to resample stably" error
-  **keeps** its `ci_method = "montecarlo"` suggestion, because there the observed
-  data is sound — only the resamples degenerate — and the default was measured
-  returning a usable interval on every dataset that reached it.
+  `ci_method = "montecarlo"` — a parametric bootstrap whose refits will not
+  converge, a one-way interval whose `F = MSA/MSE` pivot does not exist, and a
+  transformed bootstrap-t whose studentized pivot does not exist. A committed
+  sweep ran every interval method the package ships on the data that reaches each
+  of those errors, and none of them worked across the whole range of data an error
+  covers: at the first two the Monte-Carlo default returned a usable interval on
+  no dataset at all, and at the third on only one of eight. Since these messages
+  are fixed text shown to everyone who hits them, a suggestion that helps almost
+  nobody is worse than none. The error class and the opening sentence of each
+  message are unchanged.
+
+* Those same errors now name the cause that actually fired rather than a
+  representative one. The transformed bootstrap-t guard has three: every subject
+  sharing one mean score, every rater agreeing exactly within each subject, or a
+  jackknife standard error of zero — which needs no degenerate variance at all
+  and can occur while `log F` is perfectly finite. Each is now reported in its own
+  terms, so the message no longer describes a variance as zero when it is not.
+  The classical guard likewise separates a zero within-subject variance from a
+  non-finite pivot.
+
+* The nearby "the design is too small to resample stably" error **keeps** its
+  `ci_method = "montecarlo"` suggestion, because there the observed data is sound
+  — only the resamples degenerate — and the default was measured returning a
+  usable interval on every dataset that reached it.
 
 * The `ci_method = "mpl"` documentation now states the interpolation evidence
   behind off-node subject counts: the correction constant is calibrated at

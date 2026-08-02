@@ -42,6 +42,20 @@ art_ssa0 <- function(n_s = 8, n_r = 3) {
   )
 }
 
+# NEITHER variance is degenerate, yet the npbootstrap observed-data guard still
+# fires: every subject's share of SSA equals its share of SSE, so all influence
+# values are zero and `se_ij_logf == 0` while `log F` stays finite (1.79 here).
+# Subject means are -1/0/1 and within-subject ranges 1/0/1, so a message claiming
+# either "every subject has the same mean score" or "every rater agreed exactly"
+# is false on this data. That is what M100's first attempt shipped (review A1).
+art_se_zero <- function() {
+  data.frame(
+    subject = rep(1:3, each = 2),
+    rater = rep(1:2, times = 3),
+    score = c(-1.5, -0.5, 0, 0, 0.5, 1.5)
+  )
+}
+
 art_ests <- function(k_eff = 3) {
   list(icc_estimand(unit = "single", k_eff = k_eff, oneway = TRUE))
 }
@@ -141,8 +155,12 @@ test_that("aborts on degenerate data name no ci_method as a remedy", {
 test_that("the de-named aborts still tell the user what to do", {
   # Naming no method must not degrade into naming nothing: #8 asks for an
   # actionable message, and GP1 puts the applied reader first. Each rewritten
-  # bullet points at the ratings, which is the thing the user can actually go and
-  # look at. Pinned by the ACTION word, not by the sentence.
+  # bullet directs the user at something they can go and look at.
+  #
+  # Pinned by the IMPERATIVE alone, not by what follows it. The first draft
+  # asserted the literal "Inspect the ratings" and went red the moment the
+  # bootstrap bullet correctly became "Inspect the fitted model and the ratings
+  # behind it" -- a form pinned where a property was meant (the M68 lesson).
   texts <- c(
     art_message(bootstrap_ci(
       art_stub_engine(),
@@ -160,7 +178,7 @@ test_that("the de-named aborts still tell the user what to do", {
     ))
   )
   for (txt in texts) {
-    expect_match(txt, "[Ii]nspect the ratings")
+    expect_match(txt, "\\bInspect\\b")
   }
 })
 
@@ -194,4 +212,101 @@ test_that("the resample guard keeps the remedy the sweep confirmed", {
   ))
   expect_match(txt, "resamples were degenerate", fixed = TRUE)
   expect_identical(art_named_methods(txt), "montecarlo")
+})
+
+test_that("each degeneracy guard names the cause that actually fired", {
+  # Review finding A1: the npbootstrap observed-data guard has THREE causes and
+  # M100's first attempt asserted the two variance degeneracies for all of them,
+  # so the message was false on the third. A message that names a cause the data
+  # does not have is the same defect as a remedy naming a method that does not
+  # work, which is what this milestone exists to remove.
+  se_zero <- art_message(npbootstrap_ci(
+    art_se_zero(),
+    art_ests(2),
+    conf_level = 0.95,
+    boot_samples = 49L,
+    seed = 1L
+  ))
+  # The discriminating assertion: on this data NEITHER variance is zero, so the
+  # message must not say one is.
+  expect_no_match(se_zero, "variance is exactly zero")
+  expect_match(se_zero, "jackknife standard error", fixed = TRUE)
+  expect_match(se_zero, "is finite", fixed = TRUE)
+
+  ssa_zero <- art_message(npbootstrap_ci(
+    art_ssa0(),
+    art_ests(),
+    conf_level = 0.95,
+    boot_samples = 49L,
+    seed = 1L
+  ))
+  expect_match(
+    ssa_zero,
+    "Between-subject variance is exactly zero",
+    fixed = TRUE
+  )
+  expect_match(ssa_zero, "every subject has the same mean score", fixed = TRUE)
+
+  mse_zero <- art_message(npbootstrap_ci(
+    art_mse0(),
+    art_ests(),
+    conf_level = 0.95,
+    boot_samples = 49L,
+    seed = 1L
+  ))
+  expect_match(
+    mse_zero,
+    "Within-subject variance is exactly zero",
+    fixed = TRUE
+  )
+  expect_match(
+    mse_zero,
+    "every rater gave each subject the same score",
+    fixed = TRUE
+  )
+
+  # The three branches are mutually exclusive in what they claim, so no two of
+  # them can be satisfied by one message.
+  expect_no_match(ssa_zero, "Within-subject variance is exactly zero")
+  expect_no_match(mse_zero, "Between-subject variance is exactly zero")
+
+  # ...and the same discipline on the classical guard's second disjunct (A4):
+  # a zero-MSE dataset gets the zero-MSE sentence, not the non-finite-F one.
+  classical <- art_message(searle_ci(art_mse0(), art_ests(), conf_level = 0.95))
+  expect_match(
+    classical,
+    "Within-subject variance is exactly zero",
+    fixed = TRUE
+  )
+  expect_no_match(classical, "not finite")
+})
+
+test_that("the SE-zero guard still names no ci_method", {
+  # AC3 over the branch the sweep never generated. Its own case, because the
+  # earlier no-method test only covered branches the sweep had exercised.
+  txt <- art_message(npbootstrap_ci(
+    art_se_zero(),
+    art_ests(2),
+    conf_level = 0.95,
+    boot_samples = 49L,
+    seed = 1L
+  ))
+  expect_identical(art_named_methods(txt), character(0))
+  expect_match(txt, "[Ii]nspect the ratings")
+})
+
+test_that("the bootstrap convergence guard asserts no single cause", {
+  # Review finding A2: the guard fires on a refit COUNT, which no one data fact
+  # entails -- the milestone's own sweep reached it on jittered cells where
+  # subjects are not identical. So the message must not claim they are.
+  txt <- art_message(bootstrap_ci(
+    art_stub_engine(),
+    art_ests(),
+    conf_level = 0.95,
+    boot_samples = 99L
+  ))
+  expect_no_match(txt, "scored identically")
+  # ...and must not describe the PARAMETRIC bootstrap as resampling ratings.
+  expect_no_match(txt, "to resample\\.")
+  expect_match(txt, "near a variance boundary", fixed = TRUE)
 })

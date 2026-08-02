@@ -55,13 +55,21 @@ bootstrap_ci <- function(
         # -- across the datasets that reached this guard in
         # data-raw/sweep-abort-remedies.R the Monte-Carlo default was usable on
         # none of them, and neither was any other shipped method (M93 T1 first
-        # found the site reachable only on degenerate data). It now names no
-        # method: the bullet claims only what the guard's own condition
-        # establishes, so it cannot be falsified by a method that turns out to
-        # work. Naming one again needs sweep evidence over this guard's whole
-        # trigger class (D-020), not an intuition that it should work.
-        i = "Inspect the ratings: subjects scored identically by every rater \\
-             leave no within-subject variance to resample."
+        # found the site reachable only on degenerate data). Naming one again
+        # needs sweep evidence over this guard's whole trigger class (D-020).
+        #
+        # It asserts NO cause. Unlike the two guards next door, this one fires on
+        # a refit-convergence COUNT, which no single data fact entails: M100's
+        # first attempt claimed "subjects scored identically by every rater" and
+        # the milestone's own sweep contradicted it on the jittered cells, where
+        # subjects differ and the refits fail anyway (review A2). The hedged
+        # bullet above already carries the usual causes. Note also that this is
+        # the PARAMETRIC bootstrap -- it simulates responses from the fitted
+        # model rather than resampling the ratings, so "no variance to resample"
+        # was the wrong mechanism as well as an unsupported claim.
+        i = "Inspect the fitted model and the ratings behind it -- variance \\
+             components estimated at or near zero are the usual reason simulated \\
+             responses fail to refit."
       ),
       class = "intraclass_singular_fit",
       call = call

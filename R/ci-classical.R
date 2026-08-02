@@ -45,18 +45,30 @@ classical_oneway_ss <- function(groups) {
 classical_guard_observed <- function(ss, method, call) {
   f <- ss$msa / ss$mse
   if (ss$mse == 0 || !is.finite(f)) {
+    # Two disjuncts, two different facts about the data. The zero-MSE branch is
+    # the common one; a non-finite F with a positive MSE is a different failure
+    # and must not be described as zero within-subject variance (review A4, the
+    # same shape as A1 next door). No `ci_method` is named: the sweep found none
+    # usable across this guard's trigger class (D-020).
+    cause <- if (ss$mse == 0) {
+      c(
+        i = "Within-subject variance is exactly zero (MSE = {.val {ss$mse}}), so \\
+             the {.field F = MSA/MSE} pivot does not exist.",
+        i = "Inspect the ratings: every rater gave each subject the same score."
+      )
+    } else {
+      c(
+        i = "The {.field F = MSA/MSE} pivot is not finite \\
+             (MSA = {.val {ss$msa}}, MSE = {.val {ss$mse}}), so the exact-F \\
+             interval is not defined.",
+        i = "Inspect the ratings for non-finite scores or a scale extreme enough \\
+             to overflow the mean squares."
+      )
+    }
     abort_intraclass(
       c(
         "The classical one-way {method} interval is undefined for this data.",
-        i = "Within-subject variance is exactly zero (MSE = {.val {ss$mse}}), so \\
-             the {.field F = MSA/MSE} pivot does not exist.",
-        # M100: this bullet used to offer `ci_method = "montecarlo"`, measured
-        # FALSE -- across the datasets that reached this guard in
-        # data-raw/sweep-abort-remedies.R no shipped method was usable, and on
-        # some geometries the point fit died before any of them ran. It now names
-        # no method and states only what the guard's own condition establishes
-        # (D-020).
-        i = "Inspect the ratings: every rater gave each subject the same score."
+        cause
       ),
       class = "intraclass_singular_fit",
       call = call
