@@ -27,10 +27,12 @@ data-triggered, with the reason), and `--check` fails when a site carries no row
 That is the completeness gate: a new `ci_method`-naming abort cannot reach a
 release without someone classifying it.
 
-Ledger keys are `<file>:<sha1(leading message line)[:10]>`. The leading line is
-the stable identifier here by construction: the milestone that rewrites these
-remedies is required to leave every leading line unchanged, so a re-keying can
-only follow a genuine change of what the abort says it is.
+Ledger keys are `<file>:<sha1(leading message line)[:10]>`. No milestone is under
+any obligation this script can assert; what the key gives is a mechanical
+consequence. Changing an abort's leading line RE-KEYS its site, so its committed
+ledger row matches no site and `--check` fails on both counts (UNCLASSIFIED for
+the new key, STALE for the old) until someone renews the row. Reworded guidance
+below the leading line costs nothing; a changed leading line costs a decision.
 
 What the predicate does NOT match
 --------------------------------
@@ -84,7 +86,9 @@ Usage (run from the repo root):
 `--check` fails on an unclassified site, on a ledger row matching no site, and on
 a committed enumeration that is not this run's own output. All three are driven
 by probes in `--self-test` (`_check_probes`), against a passing control, rather
-than asserted from a hand-mutation someone once ran.
+than asserted from a hand-mutation someone once ran. A reported splice is a
+fourth route to a non-zero exit, probed differently (`_unreported_splices`); see
+`check()`'s own docstring for all four.
 """
 
 import contextlib
@@ -409,7 +413,18 @@ def render(sites, ledger):
 
 
 def check(sites, ledger, committed=_UNREAD, spliced=None):
-    """The completeness gate. Three failure modes, each probed in `--self-test`.
+    """The completeness gate. FOUR routes to a non-zero exit:
+
+      1. an UNCLASSIFIED site -- a current site with no ledger row;
+      2. a STALE ledger row -- a row matching no current site;
+      3. a SPLICED message vector -- an abort whose bullets this scanner cannot
+         see, reported by `spliced_message_sites()` for exactly one shape;
+      4. a stale committed enumeration -- one that is not this run's own output.
+
+    Routes 1, 2 and 4 are driven on constructed input by `_check_probes()`.
+    Route 3 is the narrow one: `_unreported_splices()` probes the five splice
+    shapes it does NOT report, so the gate is never described as catching any
+    spliced variable.
 
     `committed` is the enumeration text on disk and `spliced` the splice report;
     both are parameters rather than reads so a probe can drive every branch
