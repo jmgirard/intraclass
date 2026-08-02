@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M99: MPL interval — distinguish a true boundary limit from a root-finding failure
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -87,7 +87,7 @@ region).
       boundary clamp — the case D-014 actually measured — is unchanged, and
       an mpl row is added to DESIGN.md's interval-time boundary table.
       Neither D-014 nor D-015 is edited.
-- [ ] AC7: The active profile's verify slot is clean: `devtools::document()`
+- [x] AC7: The active profile's verify slot is clean: `devtools::document()`
       no delta, `air format --check`, `lintr::lint_package()`, and the full
       suite green against the installed package with `NOT_CRAN=true CI=true`
       (failed + error sum = 0).
@@ -169,4 +169,4 @@ Driving RR: — (no numeric projections to juxtapose).
 
 **Triage:** F1/F2 → fixed (degenerate-fit sanity guard `f(rho_hat)`; behavior decided at the mini gate: abort with fit diagnosis, user-approved); F3 → fixed (no method named); F8/F11 → fixed (side-aware upper mock; real perfect-agreement test, no mock); F12/F13 → fixed (NEWS + boundary-hint reworded; roxygen broadened, tsv re-keyed 2cde0f315ee3). Sub-80 folded into the same fixes: F4/F5 (guard + message), F9 (message regexps pinned), F10 (short-circuit mock proof), F14/F16 (D-019 draft corrected pre-merge: reachability, 240-rep sweep evidence, sweep hard-stop consequence), F15 (identity evidence scoped: three geometries identical; the degenerate corner deliberately differs, documented), F19 (comment reunited with its function). Rejected with reason: F6 (sort() bracket — subsumed by the guard: a sane reference makes the reversed-bracket state a no-crossing short-circuit; magnitude ~1e-7), F7 (non-finite edge not constructible with real data past the guard; comment corrected, mock covers the branch), F17 (scorer falsified the premise — pre-existing >94-char lines exist; style), F18 (searle/burch "every dataset" claims are pre-existing unmodified lines, accurate for closed forms).
 
-**Post-return re-verification (2026-08-01, after aabbb70):** AC1 — no endpoint-returning handler (grep: abort handlers only); sign test + degenerate-fit guard; abort messages name MPL ("modified-profile-likelihood … limit could not be located" / "… degenerate at its own maximum-likelihood estimate"), no engine, no unrun method. AC2 — fresh `test_file`: failed 0 / error 0 / passed 185, covering: no-crossing both paths, short-circuit with root-finding mocked to fail, mocked lower abort (message regexp), mocked upper abort via side-aware mock (message regexp), real-data degenerate abort without mock (message regexp). AC4 — five surfaces now updated (adds boundary-hint.R:321); all three checkers re-run OK post-re-key. AC5 — twin smoke: degenerate input stops with fit diagnosis; boundary/interior unchanged. AC6 — D-019 corrected on the branch pre-merge (reachability, evidence basis, sweep consequence); still zero deletions vs main in DECISIONS.md above the append. AC7 — re-run below after the fix cluster.
+**Post-return re-verification (2026-08-01, after aabbb70):** AC1 — no endpoint-returning handler (grep: abort handlers only); sign test + degenerate-fit guard; abort messages name MPL ("modified-profile-likelihood … limit could not be located" / "… degenerate at its own maximum-likelihood estimate"), no engine, no unrun method. AC2 — fresh `test_file`: failed 0 / error 0 / passed 185, covering: no-crossing both paths, short-circuit with root-finding mocked to fail, mocked lower abort (message regexp), mocked upper abort via side-aware mock (message regexp), real-data degenerate abort without mock (message regexp). AC4 — five surfaces now updated (adds boundary-hint.R:321); all three checkers re-run OK post-re-key. AC5 — twin smoke: degenerate input stops with fit diagnosis; boundary/interior unchanged. AC6 — D-019 corrected on the branch pre-merge (reachability, evidence basis, sweep consequence); still zero deletions vs main in DECISIONS.md above the append. AC7 — fresh post-fix: reinstall + installed-package suite at NOT_CRAN=true CI=true → failed 0 / error 0 / passed 5435 / skipped 23; targeted lintr 0; air --check clean; document() no delta; endpoint identity re-probed post-fix, bit-exact on all three geometries.
