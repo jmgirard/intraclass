@@ -138,6 +138,8 @@ returns an interval, only message text changes.
 
 - 2026-08-01: CI lint red on `data-raw/sweep-abort-remedies.R:234` — `assignment_linter` rejecting `<<-`, the M95 lesson biting exactly as written (local `lintr::lint_package()` said no lints; CI's newer lintr flags it). The grid builder now accumulates with `grid <- c(grid, list(cell_spec(...)))` instead of a helper superassigning to an enclosing `grid`. The `<<-` uses in `tests/` are untouched and were not flagged: they write to a counter in an enclosing `test_that()` closure, while this one wrote to a top-level binding. Re-run reproduces the sweep TSV byte-identically (205 rows), so the refactor is behavior-preserving.
 
+- 2026-08-01: CI green on `3caaa7e` — all nine checks pass (lint, check-references, format-check, pkgdown, test-coverage, codecov patch+project, ubuntu-latest and windows-latest release). The branch is CI-clean; what remains open is the review gate's own findings, not the toolchain.
+
 ## Decisions
 
 ## Review
