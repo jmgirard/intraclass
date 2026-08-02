@@ -189,6 +189,8 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 - 2026-08-01: T6 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 / SKIP 23 (identical to `main`'s baseline, since this milestone adds no R test and T1 removed the one the branch had); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m49s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; all five `data-raw` checkers pass plus `enumerate-ci-method-remedies.py --check` and `--self-test`; `cairn_validate` all checks passed, 321 pre-existing dangling-id advisories. Status -> review.
 
+- 2026-08-01: CI green on `6a8d51c` — all nine checks pass (format-check, check-references, lint, pkgdown, test-coverage, codecov patch + project, ubuntu-latest and windows-latest release). Recompute: `gh pr checks 108`.
+
 ## Decisions
 
 - 2026-08-01 (D-020, promoted to `cairn/DECISIONS.md`): static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class. Promoted rather than kept local because it binds every future abort in the package, not just these four.
