@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M99: MPL interval — distinguish a true boundary limit from a root-finding failure
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m99-mpl-root-failure-abort · https://github.com/jmgirard/intraclass/pull/107   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -39,7 +39,7 @@ region).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `mpl_interval()` in `R/ci-mpl.R` decides boundary-vs-failure by an
+- [x] AC1: `mpl_interval()` in `R/ci-mpl.R` decides boundary-vs-failure by an
       explicit sign test on each side (two-sided and one-sided paths alike):
       the boundary endpoint (0 lower / 1 upper) is returned only when the
       profile deviance at that side's outer bracket edge is finite and does
@@ -50,19 +50,22 @@ region).
       naming MPL root-finding, not an engine — is raised instead of an
       endpoint. No `tryCatch(stats::uniroot(...), error = function(e)
       <endpoint>)` pattern remains in `R/ci-mpl.R`.
-- [ ] AC2: Tests exercise both branches against the interval machinery
+- [x] AC2: Tests exercise both branches against the interval machinery
       directly (not only through `icc()`): a real-data no-crossing input
-      returns the boundary endpoint, and the failure abort is exercised
-      through a mockable root-finding seam (a package-internal wrapper mocked
-      via `testthat::local_mocked_bindings()`), since the failure branch is
-      unreachable with real non-degenerate data.
-- [ ] AC3: Behavior in the legitimate-boundary case is unchanged: every
+      returns the boundary endpoint, and still returns it with root-finding
+      mocked to fail (proving the short-circuit precedes the seam); the abort
+      paths are exercised three ways — the mocked seam on the lower side, the
+      mocked seam on the upper side, and a real degenerate-fit input (perfect
+      rater agreement) that reaches an abort without any mock — each
+      asserting the classed error, with at least one assertion pinning the
+      MPL-specific message text.
+- [x] AC3: Behavior in the legitimate-boundary case is unchanged: every
       existing MPL test (including the pinned κ_m constants and the
       near-zero-ρ boundary cell in `test-ci-mpl.R`) passes with no assertion
       changed, and review evidence records endpoint identity on a seeded
       near-zero-ρ boundary dataset between the pre-change and post-change
       code.
-- [ ] AC4: The four shipped claim surfaces stating the MPL interval exists on
+- [x] AC4: The four shipped claim surfaces stating the MPL interval exists on
       every dataset are updated to the narrowed contract — the `R/ci-mpl.R`
       interval comment (lines 159–161), the roxygen sentence "returns an
       interval on every dataset" in `R/icc.R` (with `man/` regenerated), the
@@ -73,18 +76,18 @@ region).
       other two data-raw checkers (`enumerate-generalizing-claims.py
       --check`, `check-reference-observations.py`) are also run locally and
       pass.
-- [ ] AC5: `data-raw/m86-mpl-lib.R`'s `mpl_interval()` carries the same
+- [x] AC5: `data-raw/m86-mpl-lib.R`'s `mpl_interval()` carries the same
       sign-test decision logic on both sides and both `side=` modes, with
       plain `stop()` as its failure idiom (the classed-abort layer governs
       package code only), keeping the reference implementation and the
       shipped code in decision-logic lockstep.
-- [ ] AC6: The contract narrowing is recorded before merge: a new
+- [x] AC6: The contract narrowing is recorded before merge: a new
       `DECISIONS.md` entry states that a genuine root-finding failure in the
       MPL interval now aborts classed (`intraclass_engine_error`) while the
       boundary clamp — the case D-014 actually measured — is unchanged, and
       an mpl row is added to DESIGN.md's interval-time boundary table.
       Neither D-014 nor D-015 is edited.
-- [ ] AC7: The active profile's verify slot is clean: `devtools::document()`
+- [x] AC7: The active profile's verify slot is clean: `devtools::document()`
       no delta, `air format --check`, `lintr::lint_package()`, and the full
       suite green against the installed package with `NOT_CRAN=true CI=true`
       (failed + error sum = 0).
@@ -103,25 +106,25 @@ region).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Tests first in `test-ci-mpl.R`: (a) a seeded near-zero-ρ two-way
+- [x] T1: Tests first in `test-ci-mpl.R`: (a) a seeded near-zero-ρ two-way
       dataset whose lower side has no crossing returns lower = 0 via the sign
       test (direct `mpl_interval()` call, M84 lesson); (b) the failure branch
       via `local_mocked_bindings()` on the new root-finding wrapper, asserting
       `intraclass_engine_error`; both red against current code where they
       should be.
-- [ ] T2: Rewrite `R/ci-mpl.R:178-189`: extract the per-side `uniroot` call
+- [x] T2: Rewrite `R/ci-mpl.R:178-189`: extract the per-side `uniroot` call
       into a package-internal wrapper (the mockable seam), evaluate the sign
       condition explicitly, return the boundary only on no-crossing, abort
       classed otherwise.
-- [ ] T3: Mirror the sign-test decision logic in
+- [x] T3: Mirror the sign-test decision logic in
       `data-raw/m86-mpl-lib.R:131-158` (both sides, both `side=` modes,
       `stop()` idiom).
-- [ ] T4: Update the four claim surfaces + NEWS; regenerate `man/`; re-triage
+- [x] T4: Update the four claim surfaces + NEWS; regenerate `man/`; re-triage
       `data-raw/mpl-doc-claims.tsv`; run all three data-raw checkers locally
       (M85/M97 lessons).
-- [ ] T5: Author the narrowing D-entry and the DESIGN.md boundary-table mpl
+- [x] T5: Author the narrowing D-entry and the DESIGN.md boundary-table mpl
       row (durable-record preview before the commit that lands them).
-- [ ] T6: Full local verify per the r-package profile (document/air/lintr +
+- [x] T6: Full local verify per the r-package profile (document/air/lintr +
       installed-package suite at `NOT_CRAN=true CI=true`), and record
       pre-vs-post endpoint identity on the seeded boundary dataset (run the
       snippet on the default branch and on the milestone branch).
@@ -135,8 +138,35 @@ region).
 - 2026-08-01: plan gate chose reusing `intraclass_engine_error` over a new dedicated class because the branch is unreachable with real data and a new class grows exported vocabulary for it; falsified by a user need to discriminate root-finding failure from engine failure in `tryCatch()`.
 - 2026-08-01: plan gate chose fixing the offline twin in lockstep over shipped-only because the twin is the IP1 reference implementation and committed fixtures are unaffected (failure region unreachable for the seeded sweeps); falsified by a calibration re-run whose accounting shows the twin aborting where the shipped code does not.
 
+- 2026-08-01: T1 done — two M99 tests appended to test-ci-mpl.R; mocked-seam abort test red as intended (no mpl_uniroot binding yet), no-crossing boundary test green (value-identical to the swallow until T2 removes the pattern); suite otherwise 181 pass.
+- 2026-08-01: checkpoint (T2–T5 code + records drafted, verification pending) — sign-test rewrite in R/ci-mpl.R with mpl_uniroot seam + classed abort; twin mirrored (stop() idiom); 4 claim surfaces + NEWS + man/ + tsv re-triage done, all three data-raw checkers green; D-019 appended + DESIGN.md interval-time MPL row added (previewed in chat); MPL test file green (183); full suite + lintr running in background — tasks stay unticked until the verify slot is green.
+- 2026-08-01: T2-T6 done, verify green — installed-pkg suite NOT_CRAN=true CI=true: failed 0 / error 0 / passed 5433 / skipped 23; lintr 0; air --check clean; document() no delta; endpoint identity pre-vs-post bit-exact on 3 geometries (boundary-lo clamp, interior, high-rho), both interval paths (evidence for review). Status -> review.
+- 2026-08-01: review return #1 — [O] diff-bug lens falsified the sign test's premise (f(rho_hat) < 0 fails on degenerate fits: perfect-agreement 20x3 reaches the abort via icc(), where main returned a vacuous [0,1]); actioned >=80: F1 95, F2 95, F3 90, F8 82, F11 88, F12 90, F13 80; 12 sub-80 logged in Review. Status back to in-progress for the fix cluster + gated AC2 amendment.
+- 2026-08-01: gated amendment (review return #1, user-approved): AC2 reworded — falsified "unreachable with real non-degenerate data" clause replaced by the three-way abort-path test obligation (mocked lower, mocked upper, real degenerate-fit input) + message-text pin; AC2 unticked pending fresh evidence. Gate also chose: degenerate fit aborts with a fit-degeneracy diagnosis (over preserving the vacuous [0,1]), and the abort names no alternative method (D-018 run-before-naming; over wiring hint machinery).
+- 2026-08-01: review fix cluster landed — degenerate-fit sanity guard (f(rho_hat) check) with fit-naming message, no method named in either abort (D-018); side-aware upper mock + message regexps + real-data degenerate test + short-circuit mock proof (amended AC2); NEWS/roxygen/boundary-hint (5th surface) reworded; D-019 draft corrected (reachability, fixture evidence, sweep hard-stop consequence); tsv re-keyed 2cde0f315ee3; mpl file 185 green, targeted lintr 0, checkers OK.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Evidence gathered 2026-08-01 on branch m99-mpl-root-failure-abort (PR #107), by command.
+
+- AC1: `grep -n "error = function(e)" R/ci-mpl.R` → one hit, the classed abort handler (line 204); no endpoint-returning handler remains; sign test present (`f_outer <= 0`, both sides via `side_root`); abort message names "modified-profile-likelihood … root-finding", class `intraclass_engine_error`. ✔
+- AC2: fresh `test_file("tests/testthat/test-ci-mpl.R")` → failed 0 / error 0 / passed 183, including the two M99 tests (real-data no-crossing boundary on both paths; mocked `mpl_uniroot` seam aborting classed on both paths). ✔
+- AC3: diff of test-ci-mpl.R vs main removes comment lines only (0 non-comment deletions — assertions untouched); endpoint identity pre-vs-post: bit-exact (`identical()` TRUE) on 3 geometries (near-zero-ρ clamp, interior, high-ρ), two-sided and one-sided, old code sourced from `main:R/ci-mpl.R`. ✔
+- AC4: all four surfaces updated (R/ci-mpl.R comment, R/icc.R roxygen + man/icc.Rd regenerated, test-ci-mpl.R:163 comment, NEWS bullet); tsv row eb69ce6b0e01 replaced by 76d9b57e857a; fresh runs: check-mpl-doc-claims.py OK (30 candidates, 0 failures), enumerate-generalizing-claims.py --check OK, check-reference-observations.py 0 unmarked / 0 falsified. ✔
+- AC5: twin carries `side_root`/sign test (m86-mpl-lib.R:151-176), `stop()` idiom, both sides and both `side=` modes; smoke-run: interior interval sane, boundary lower = 0. ✔
+- AC6: D-019 appended (DECISIONS.md:634); DESIGN.md interval-time table gains the MPL row citing D-019; `git diff main..HEAD -- cairn/DECISIONS.md` shows 0 removed lines (pure append — D-014/D-015 unedited). ✔
+- AC7: `devtools::document()` no delta (git status clean after run); `air format --check` exit 0; `lintr::lint_package()` → 0 lints; installed-package suite (`R CMD INSTALL` + `test_local(load_package="installed")` at `NOT_CRAN=true CI=true`) → failed 0 / error 0 / passed 5433 / skipped 23. ✔
+
+Consistency gate: `cairn_validate` exit 0 (all checks PASS; pre-existing `dangling id tokens` WARN is advisory, legacy COVERAGE.md ids); no IP/GP changed → `cairn_impact` skipped; `pkgdown::check_pkgdown()` no problems; NEWS entry present, no milestone numbers user-facing; no new top-level files; README.Rmd untouched by the diff; `devtools::check()` and independent review recorded below.
+
+Driving RR: — (no numeric projections to juxtapose).
+
+**Independent review (2026-08-01):** three lenses — [S] prior-PR-comments: no prior-review evidence contradicted (confirmed the twin's stop() feeds M96 accounting); [S] blame-history: no conflicts (clamp census unaffected, tsv replaced not orphaned, class reuse deliberate); [O] diff-bug: 19 findings. [S] scorer: 7 actioned (≥80): F1 95 (sign-test premise false on degenerate fits), F2 95 (icc() abort where main returned vacuous [0,1]; jitter 1e-6 still aborts), F3 90 (abort named unrun remedies, D-018), F8 82 (upper mock path unexercised), F11 88 (no real-data failure test), F12 90 (false NEWS universals), F13 80 (5th claim surface in boundary-hint.R). 12 logged sub-80: F4 78, F9 78, F14 78, F5 75, F15 75, F16 72, F18 65, F6 62, F7 60, F10 55, F19 50, F17 25.
+
+**Triage:** F1/F2 → fixed (degenerate-fit sanity guard `f(rho_hat)`; behavior decided at the mini gate: abort with fit diagnosis, user-approved); F3 → fixed (no method named); F8/F11 → fixed (side-aware upper mock; real perfect-agreement test, no mock); F12/F13 → fixed (NEWS + boundary-hint reworded; roxygen broadened, tsv re-keyed 2cde0f315ee3). Sub-80 folded into the same fixes: F4/F5 (guard + message), F9 (message regexps pinned), F10 (short-circuit mock proof), F14/F16 (D-019 draft corrected pre-merge: reachability, 240-rep sweep evidence, sweep hard-stop consequence), F15 (identity evidence scoped: three geometries identical; the degenerate corner deliberately differs, documented), F19 (comment reunited with its function). Rejected with reason: F6 (sort() bracket — subsumed by the guard: a sane reference makes the reversed-bracket state a no-crossing short-circuit; magnitude ~1e-7), F7 (non-finite edge not constructible with real data past the guard; comment corrected, mock covers the branch), F17 (scorer falsified the premise — pre-existing >94-char lines exist; style), F18 (searle/burch "every dataset" claims are pre-existing unmodified lines, accurate for closed forms).
+
+**Post-return re-verification (2026-08-01, after aabbb70):** AC1 — no endpoint-returning handler (grep: abort handlers only); sign test + degenerate-fit guard; abort messages name MPL ("modified-profile-likelihood … limit could not be located" / "… degenerate at its own maximum-likelihood estimate"), no engine, no unrun method. AC2 — fresh `test_file`: failed 0 / error 0 / passed 185, covering: no-crossing both paths, short-circuit with root-finding mocked to fail, mocked lower abort (message regexp), mocked upper abort via side-aware mock (message regexp), real-data degenerate abort without mock (message regexp). AC4 — five surfaces now updated (adds boundary-hint.R:321); all three checkers re-run OK post-re-key. AC5 — twin smoke: degenerate input stops with fit diagnosis; boundary/interior unchanged. AC6 — D-019 corrected on the branch pre-merge (reachability, evidence basis, sweep consequence); still zero deletions vs main in DECISIONS.md above the append. AC7 — fresh post-fix: reinstall + installed-package suite at NOT_CRAN=true CI=true → failed 0 / error 0 / passed 5435 / skipped 23; targeted lintr 0; air --check clean; document() no delta; endpoint identity re-probed post-fix, bit-exact on all three geometries.

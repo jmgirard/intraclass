@@ -152,18 +152,29 @@ mpl_deviance <- function(rho, ms, neg2l_min = NULL) {
   mpl_prof_neg2l(rho, ms) - neg2l_min
 }
 
+# The uniroot seam: a one-line wrapper so tests can force a root-finding failure
+# via local_mocked_bindings() -- with a sane deviance reference the sign test
+# resolves every real-data bracket before uniroot can fail (M99).
+mpl_uniroot <- function(f, interval) {
+  stats::uniroot(f, interval, tol = 1e-10)$root
+}
+
 # Interval, Eq. (9) two-sided / Eq. (10) one-sided, p. 2245.
 # CI = { rho : D(rho) <= (1+kappa) * chi^2_{1,1-alpha} }.  kappa = 0 is naive PL;
 # kappa = kappa_m is MPL. `side = "lower"` gives a one-sided lower bound; per the LRT
 # one-sided convention its crit uses 1-2*alpha, so a 95% lower bound (alpha = 0.05)
-# shares the two-sided 90% lower critical value (xiao2013 Ex. 1). A root that runs off
-# the parameter space clamps to the [0,1] boundary -- the interval EXISTS on every
-# dataset (the residual value D-014 ships mpl for), unlike the MC default's abort.
+# shares the two-sided 90% lower critical value (xiao2013 Ex. 1). Boundary vs
+# failure (M99, D-019): a boundary endpoint is returned only on EVIDENCE of no
+# deviance crossing on that side; a degenerate fit or a failed root search
+# aborts classed (#5/#8) instead of fabricating an endpoint -- the pre-M99 code
+# swallowed both into 0/1, which on a degenerate fit (perfect agreement,
+# error MS ~ 0) fabricated the vacuous interval [0, 1].
 mpl_interval <- function(
   ms,
   kappa = 0,
   alpha = 0.10,
-  side = c("two", "lower")
+  side = c("two", "lower"),
+  call = rlang::caller_env()
 ) {
   side <- match.arg(side)
   fit <- mpl_fit(ms)
@@ -175,17 +186,65 @@ mpl_interval <- function(
   }
   f <- function(rho) mpl_deviance(rho, ms, neg2l_min = fit$neg2l_min) - crit
   eps <- 1e-7
-  lower <- tryCatch(
-    stats::uniroot(f, c(eps, rho_hat), tol = 1e-10)$root,
-    error = function(e) 0
-  )
+
+  # Sanity guard on the deviance reference: by construction D(rho_hat) = 0 so
+  # f(rho_hat) = -crit < 0 -- but on a degenerate fit (near-zero error MS, e.g.
+  # perfect rater agreement) mpl_fit()'s joint minimum and the profile disagree
+  # by orders of magnitude and f is large or non-finite everywhere. No deviance
+  # root is trustworthy off a broken reference, so abort naming the fit -- the
+  # data, not the root search, is what failed (M99 review finding F1/F4/F5).
+  f_hat <- f(rho_hat)
+  if (!is.finite(f_hat) || f_hat > 0) {
+    abort_intraclass(
+      c(
+        "The modified-profile-likelihood interval is not defined for this \\
+         fit: the profile deviance is degenerate at its own maximum-likelihood \\
+         estimate.",
+        i = "This happens when a variance component is estimated at or near \\
+             zero -- for example, raters in perfect or near-perfect agreement \\
+             (error variance ~ 0). Inspect the ratings; an interrater interval \\
+             is not estimable from near-constant disagreement."
+      ),
+      class = "intraclass_engine_error",
+      call = call
+    )
+  }
+
+  # Sign test per side: f(rho_hat) < 0 (guarded above), so a side has a
+  # deviance crossing iff f at its outer bracket edge is >= 0, or is
+  # non-finite at that edge (the deviance blows up at or before it). No
+  # crossing -> the whole side sits inside the confidence set and the
+  # boundary IS the limit. A crossing with failed root-finding is a numerical
+  # failure, never a boundary limit.
+  side_root <- function(outer, boundary, label) {
+    f_outer <- f(outer)
+    if (is.finite(f_outer) && f_outer <= 0) {
+      return(boundary)
+    }
+    tryCatch(
+      mpl_uniroot(f, sort(c(outer, rho_hat))),
+      error = function(e) {
+        abort_intraclass(
+          c(
+            "The modified-profile-likelihood {label} limit could not be \\
+             located: the profile deviance crosses the critical value on \\
+             that side, but root-finding failed.",
+            i = "This is a numerical failure, not a boundary limit; the \\
+                 endpoint is not reported as 0 or 1. Inspect the data for \\
+                 near-degenerate structure before trying another method."
+          ),
+          class = "intraclass_engine_error",
+          call = call
+        )
+      }
+    )
+  }
+
+  lower <- side_root(eps, 0, "lower")
   if (side == "lower") {
     return(c(lower = lower, upper = NA_real_, rho_hat = rho_hat))
   }
-  upper <- tryCatch(
-    stats::uniroot(f, c(rho_hat, 1 - eps), tol = 1e-10)$root,
-    error = function(e) 1
-  )
+  upper <- side_root(1 - eps, 1, "upper")
   c(lower = lower, upper = upper, rho_hat = rho_hat)
 }
 
@@ -296,7 +355,13 @@ mpl_ci <- function(
   y <- mpl_matrix(df, call = call)
   ms <- mpl_anova(y)
   km <- mpl_kappa_lookup(ms$n_r, ms$n_s, conf_level = conf_level, call = call)
-  ends <- mpl_interval(ms, kappa = km, alpha = 1 - conf_level, side = "two")
+  ends <- mpl_interval(
+    ms,
+    kappa = km,
+    alpha = 1 - conf_level,
+    side = "two",
+    call = call
+  )
   lapply(estimands, function(est) {
     m <- est$divisor
     list(

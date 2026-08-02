@@ -159,8 +159,10 @@ test_that("mpl returns an interval where the two-way MC default aborts (AC5)", {
 
   # A near-zero-rho boundary cell (sigma^2_s ~ 0): the two-way random MC default aborts
   # on a sizeable fraction of such datasets (intraclass_singular_fit; D-014 AC4). mpl
-  # returns an interval on 100% of them -- the residual value D-014 ships it for. Find
-  # one dataset (in the kappa_m grid) where MC aborts and assert mpl does not.
+  # returned an interval on 100% of them in the D-014 sweep -- the residual value it
+  # ships for (since M99 a genuine root-finding failure aborts classed instead, a
+  # branch unreachable on such data). Find one dataset (in the kappa_m grid) where
+  # MC aborts and assert mpl does not.
   aborted <- FALSE
   for (sd in 1:40) {
     d <- mpl_twoway_long(
@@ -785,5 +787,96 @@ test_that("mpl informs when it drops consistency from a defaulted type (AC4)", {
   expect_message(
     icc(d, score, subject, rater, ci_method = "mpl"),
     "Dropping.*consistency"
+  )
+})
+
+# ---- M99: a boundary endpoint is evidence-based; a root failure aborts -------
+# Boundary vs failure (M99 AC1/AC2, D-019). A sanity guard aborts when the
+# deviance reference is degenerate at rho_hat (reachable with real data:
+# perfect rater agreement / near-zero error MS -- tested below, no mock).
+# Past the guard, a side has a deviance crossing iff f at its outer bracket
+# edge is >= 0 (or non-finite); only the no-crossing case may return the
+# boundary endpoint, and a crossing-indicated root-finding failure aborts
+# classed instead of silently reporting 0/1. Past the guard that failure
+# branch needs the mocked seam (mpl_uniroot): a sane finite bracket cannot
+# make uniroot error with real data.
+
+test_that("mpl boundary endpoints come from the sign test, not a swallowed error (M99)", {
+  # Near-zero-rho boundary cell: the profile deviance at eps never reaches the
+  # critical value (no crossing), so lower = 0 IS the limit and must be returned
+  # by the explicit no-crossing branch, on both the two-sided and one-sided paths.
+  d <- mpl_twoway_long(
+    n_s = 20,
+    n_r = 3,
+    s2s = 1e-4,
+    s2r = 0.3,
+    s2e = 0.6,
+    seed = 7
+  )
+  ms <- mpl_anova(mpl_matrix(d))
+  ci <- mpl_interval(ms, kappa = 0.5, alpha = 0.05, side = "two")
+  expect_identical(ci[["lower"]], 0)
+  expect_gt(ci[["upper"]], 0)
+  expect_lte(ci[["upper"]], 1)
+  # One-sided path, with root-finding mocked to fail: lower = 0 must still be
+  # returned, proving the no-crossing short-circuit precedes the seam (the
+  # one-sided call computes no upper limit, so the mock must never fire).
+  local_mocked_bindings(
+    mpl_uniroot = function(...) stop("must not be called")
+  )
+  lo <- mpl_interval(ms, kappa = 0.5, alpha = 0.025, side = "lower")
+  expect_identical(lo[["lower"]], 0)
+})
+
+test_that("a crossing-indicated root-finding failure aborts classed, per side (M99)", {
+  # Interior data: both sides have deviance crossings, so a root-finding failure
+  # here is a genuine numerical failure. Force one through the seam per side;
+  # the result must be the classed abort with the MPL-specific message, never a
+  # fabricated boundary endpoint.
+  d <- mpl_twoway_long()
+  ms <- mpl_anova(mpl_matrix(d))
+  # Lower side: unconditional failure trips on the first (lower) root call.
+  local_mocked_bindings(
+    mpl_uniroot = function(...) stop("synthetic root failure")
+  )
+  expect_error(
+    mpl_interval(ms, kappa = 0.3, alpha = 0.05, side = "two"),
+    regexp = "lower limit could not be located",
+    class = "intraclass_engine_error"
+  )
+  expect_error(
+    mpl_interval(ms, kappa = 0.3, alpha = 0.05, side = "lower"),
+    class = "intraclass_engine_error"
+  )
+  # Upper side: a side-aware mock returns a real root for the lower bracket
+  # (its interval ends at rho_hat < 1 - eps) and fails only on the upper one,
+  # so execution reaches side_root(1 - eps, ...) and its "upper" label.
+  local_mocked_bindings(
+    mpl_uniroot = function(f, interval) {
+      if (interval[2] > 0.99) {
+        stop("synthetic upper root failure")
+      }
+      stats::uniroot(f, interval, tol = 1e-10)$root
+    }
+  )
+  expect_error(
+    mpl_interval(ms, kappa = 0.3, alpha = 0.05, side = "two"),
+    regexp = "upper limit could not be located",
+    class = "intraclass_engine_error"
+  )
+})
+
+test_that("a degenerate fit aborts with a fit diagnosis, without any mock (M99)", {
+  # Perfect rater agreement: every rater gives the subject's own score, so the
+  # error MS is ~0, the likelihood is unbounded, and mpl_fit()'s joint minimum
+  # disagrees with the profile -- f(rho_hat) >> 0, the broken-reference state
+  # the sanity guard exists to catch (review finding F1/F2: pre-M99 this
+  # returned the vacuous fabricated interval [0, 1]).
+  y <- matrix(rep(seq_len(20), times = 3), nrow = 20, ncol = 3)
+  ms <- mpl_anova(y)
+  expect_error(
+    mpl_interval(ms, kappa = 0.6, alpha = 0.05, side = "two"),
+    regexp = "degenerate at its own maximum-likelihood estimate",
+    class = "intraclass_engine_error"
   )
 })

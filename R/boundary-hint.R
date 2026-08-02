@@ -319,7 +319,8 @@ boundary_method_hint <- function(
   }
   c(
     i = "{.code ci_method = \"mpl\"}, run on your data, returns an interval where \\
-         the default cannot: the modified profile-likelihood interval is defined on \\
-         every dataset at this boundary, at the cost of being conservative."
+         the default cannot: the modified profile-likelihood interval was just \\
+         verified on this dataset at this boundary, at the cost of being \\
+         conservative."
   )
 }

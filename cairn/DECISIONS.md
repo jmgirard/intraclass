@@ -630,3 +630,52 @@ discard rather than assuming it. M97 inherits the same line for `npbootstrap`, w
 run additionally consumes randomness and so must be RNG-neutral (#9). The cost is bounded
 by construction: verification is forced only inside an abort message, so a successful call
 never pays for it. Confirms and does not supersede D-012 or D-013.
+
+### D-019 (2026-08-01): MPL boundary endpoints are evidence-based; a genuine root-finding failure aborts classed — narrows the D-014/D-015 "interval on every dataset" framing
+
+**Context:** `mpl_interval()` (`R/ci-mpl.R`) returned endpoint `0`/`1` from
+`tryCatch(stats::uniroot(...), error = ...)`, so a genuine root-finding failure was
+indistinguishable from a confidence limit truly at the boundary (ROADMAP candidate
+since the M95/M96 plan gate, 2026-07-25; lineage M86 lib → M88 port). Low severity
+by construction: `f(rho_hat) = -crit < 0` always, so `uniroot` errors precisely when
+the deviance never crosses the critical value on that side, and the boundary answer
+is correct in that dominant case. But D-014/D-015 framed the shipped method as
+returning "an interval on **every** dataset", and the M99 plan-gate audit found that
+introducing any abort path narrows that exported contract — a change the
+Boundary-fit policy (DESIGN.md) says takes a D-entry.
+
+**Decision (M99 plan gate 2026-08-01; refined at the M99 review return, same
+date):** each side of the interval decides boundary-vs-failure by an explicit sign
+test: the boundary endpoint is returned only when the profile deviance at that
+side's outer bracket edge is finite and does not exceed the critical value (no
+crossing — the confidence set provably reaches the boundary); a
+crossing-indicated root-finding failure raises a classed
+`intraclass_engine_error` via `abort_intraclass()`, its message naming MPL
+root-finding (first non-engine use of the class; reuse chosen over minting a new
+class). The review's diff-bug lens falsified the plan's premise that the abort is
+unreachable with real data: on a **degenerate fit** (near-zero error MS — perfect
+or near-perfect rater agreement, still failing at jitter SD 1e-6) `mpl_fit()`'s
+joint minimum and the profile disagree, f(rho_hat) > 0, and the pre-M99 code
+returned the vacuous fabricated interval [0, 1]. The maintainer chose (review
+gate) to abort there too, via a sanity guard on the deviance reference whose
+message names the degenerate fit, not root-finding; and the abort names **no
+alternative method** — the methods the draft named also fail on the triggering
+data, and D-018 forbids naming a method inside an abort without running it. A
+warning-plus-boundary-value alternative was rejected: a wrong endpoint would
+still reach downstream code (#5 fail-loudly). The offline reference
+implementation (`data-raw/m86-mpl-lib.R`) carries the same decision logic in
+lockstep (plain `stop()` — the classed layer governs package code only).
+
+**Consequences:** narrows the D-014/D-015 framing prospectively — neither entry is
+edited; D-014's measured "interval on 100 % of datasets" stays true as a sweep
+result, and the residual value D-014 ships mpl for (an interval where the MC default
+aborts) is unchanged: a review-time 240-rep sweep across four near-zero-ρ
+geometries produced 0 aborts and 179 legitimate lower clamps, so the near-zero-ρ
+boundary regime is entirely the no-crossing branch. Committed calibration
+fixtures need no regeneration on that same evidence; a **future** sweep re-run
+that did hit the abort would be caught by the M96 failure accounting and
+`mpl_assert_no_failures()` would hard-stop the sweep rather than clamp a rep —
+intended under #5. Perfect/near-perfect-agreement data now errors where it got
+[0, 1] (documented in NEWS). DESIGN.md's interval-time boundary table gains an
+MPL row citing this entry. Doc surfaces updated in M99 (roxygen, NEWS, comments,
+the boundary-hint sentence, `data-raw/mpl-doc-claims.tsv` re-triage).

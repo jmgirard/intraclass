@@ -127,6 +127,13 @@ mpl_deviance <- function(rho, ms, neg2l_min = NULL) {
 # PL; kappa = kappa_m is MPL. `side = "lower"` gives a one-sided lower bound; per
 # the LRT one-sided convention its crit uses 1-2*alpha, so a 95% lower bound
 # (alpha = 0.05) shares the two-sided 90% lower critical value (xiao2013 Ex. 1).
+# Boundary vs failure (M99, mirroring the shipped R/ci-mpl.R): a sanity guard
+# aborts when the deviance reference is degenerate at rho_hat (f(rho_hat) > 0
+# or non-finite -- near-zero error MS, e.g. perfect agreement); past the guard,
+# a side has a deviance crossing iff f at its outer edge is >= 0 (or
+# non-finite). No crossing -> the boundary IS the limit; a crossing with
+# failed root-finding is a numerical failure and stops (plain stop() -- the
+# classed-abort layer governs package code only).
 mpl_interval <- function(
   ms,
   kappa = 0,
@@ -143,17 +150,42 @@ mpl_interval <- function(
   }
   f <- function(rho) mpl_deviance(rho, ms, neg2l_min = fit$neg2l_min) - crit
   eps <- 1e-7
-  lower <- tryCatch(
-    uniroot(f, c(eps, rho_hat), tol = 1e-10)$root,
-    error = function(e) 0
-  )
+  f_hat <- f(rho_hat)
+  if (!is.finite(f_hat) || f_hat > 0) {
+    stop(
+      "MPL interval undefined: profile deviance degenerate at rho_hat ",
+      "(f(rho_hat) = ",
+      format(f_hat),
+      "; near-zero error MS / ",
+      "perfect-agreement data)",
+      call. = FALSE
+    )
+  }
+  side_root <- function(outer, boundary, label) {
+    f_outer <- f(outer)
+    if (is.finite(f_outer) && f_outer <= 0) {
+      return(boundary)
+    }
+    tryCatch(
+      uniroot(f, sort(c(outer, rho_hat)), tol = 1e-10)$root,
+      error = function(e) {
+        stop(
+          "MPL ",
+          label,
+          " limit: root-finding failed although the profile ",
+          "deviance indicates a crossing (a numerical failure, not a ",
+          "boundary limit): ",
+          conditionMessage(e),
+          call. = FALSE
+        )
+      }
+    )
+  }
+  lower <- side_root(eps, 0, "lower")
   if (side == "lower") {
     return(c(lower = lower, upper = NA_real_, rho_hat = rho_hat))
   }
-  upper <- tryCatch(
-    uniroot(f, c(rho_hat, 1 - eps), tol = 1e-10)$root,
-    error = function(e) 1
-  )
+  upper <- side_root(1 - eps, 1, "upper")
   c(lower = lower, upper = upper, rho_hat = rho_hat)
 }
 
