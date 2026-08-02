@@ -6,14 +6,48 @@
 # and every message change they bear on, are the next milestone's work.
 #
 # An abort's remedy bullet ("use `ci_method = \"montecarlo\"`") is STATIC text: it
-# makes the same claim to every user who reaches it. So it must hold across the
-# whole class of data that triggers the abort, not on one dataset somebody tried.
-# This script measures that class per site: it generates several geometries
-# satisfying each site's trigger condition, confirms the abort really fires by
-# catching its classed condition from the reducer called DIRECTLY (`icc()` cannot
-# be the instrument -- M93's review found the glmmTMB point fit dying with a raw,
-# unclassed error before the CI-stage guard is reached on some platforms), and
-# then runs every method that site's remedy names on the same data.
+# makes the same claim to every user who reaches it, so one dataset somebody tried
+# is not evidence about it. This script samples each site's trigger condition over
+# several geometries, confirms the abort really fires by catching its classed
+# condition from the reducer called DIRECTLY (`icc()` cannot be the instrument --
+# M93's review found the glmmTMB point fit dying with a raw, unclassed error
+# before the CI-stage guard is reached on some platforms), and then runs every
+# candidate method on the same data.
+#
+# WHAT THE GRID GENERATES, AND WHAT IT DOES NOT. A sample is not a class, and the
+# claim that it was one is a defect this milestone's own review found (pass 4,
+# O6). So, per swept site, the disjuncts of the trigger condition this grid does
+# and does not reach:
+#
+#   bootstrap refit convergence -- `n_ok < min_frac * boot_samples || n_ok < 2`.
+#     GENERATED: refit failure driven by exact and near zero within-subject
+#     variance (`gen_mse0`, 4 geometries x jitter 0 / 1e-8). NOT GENERATED: every
+#     other route to a low converged-refit count -- the guard counts refits, and
+#     no data fact entails that count, so refits failing on data that is not
+#     MSE=0-degenerate are outside this grid entirely.
+#
+#   classical MSE = 0 -- `ss$mse == 0 || !is.finite(f)`, `f = msa / mse`.
+#     GENERATED: the FIRST disjunct only (`gen_mse0`). NOT GENERATED: the second
+#     disjunct reached with MSE finite and non-zero -- MSA overflowing to `Inf`,
+#     which makes `f` non-finite on data whose within-subject variance is healthy.
+#     Nothing below measures that corner.
+#
+#   npbootstrap observed degeneracy -- `!is.finite(obs$logf) || se_ij_logf == 0`.
+#     GENERATED: both disjuncts -- `log F = -Inf` from zero between-subject
+#     variance (`gen_ssa0`) and `log F = +Inf` from zero within-subject variance
+#     (`gen_mse0`), both measured on a 6x3 exact cell, plus a zero jackknife SE
+#     with a FINITE log F (`gen_se_zero`). NOT GENERATED: `log F` non-finite by
+#     overflow or by `NaN` rather than by an exactly zero sum of squares.
+#
+#   npbootstrap degenerate resamples -- `n_bad > 0` over the resample statistics.
+#     GENERATED: the few-varying-subjects shape (`gen_resample_degenerate`, 3
+#     geometries x 3 seeds). NOT GENERATED: any other data shape whose resamples
+#     go degenerate -- heavy tie structure, and the unbalanced and double-code
+#     designs M97 measured, none of which this balanced grid contains.
+#
+# Across all four: the grid is BALANCED one-way data only. No unbalanced design,
+# no two-way design, and no missing values appear anywhere in it, so no verdict
+# below is evidence about those.
 #
 # Usability is judged by the SHIPPED `boundary_interval_usable()` (R/boundary-hint.R),
 # not by a predicate written here: the question is whether a user's own retry
@@ -115,9 +149,11 @@ gen_se_zero <- function(n_s, n_r, seed = 1) {
   )
 }
 
-# The alternatives measured at every site. A remedy may only name a method the
-# sweep found usable across the WHOLE trigger class, so the rewrite needs each
-# candidate measured, not just the one the current text happens to name.
+# The alternatives measured at every site. Every candidate is measured, not just
+# the one a site's current text happens to name, so that a later milestone
+# weighing what a message may say has a verdict for each of them rather than for
+# one. This script states no rule about what a remedy may name; that judgment is
+# M101's.
 # Five of the seven `ci_method` values. `mpl` is excluded because it is fenced to
 # the balanced two-way random agreement cell and aborts `intraclass_unsupported`
 # on every one-way dataset here; `posterior` because it requires the brms engine,

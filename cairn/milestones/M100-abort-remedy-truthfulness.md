@@ -136,7 +136,7 @@ RR04 ingestion, pass 5.
       the parsing parity assertion to `--self-test`.
 - [x] T8 Append the dated supersession entry to `## Decisions` covering D-020's
       absence and the two rule statements; re-verify the git-diff clause.
-- [ ] T9 Rewrite the sweep header to state generated vs ungenerated disjuncts per
+- [x] T9 Rewrite the sweep header to state generated vs ungenerated disjuncts per
       swept site, with no whole-class claim; confirm the TSV byte-unchanged.
 - [ ] T10 Append CORRECTION lines for the "reds 7", "all five checkers" and
       rows-vs-cells figures, preserving the reproducing half of each line.
@@ -245,6 +245,8 @@ RR04 ingestion, pass 5.
 - 2026-08-02: T7 — the limits records now state six PROBED predicate shapes and five PROBED splice shapes, with file scope stated as the one limit no probe demonstrates, in all three surfaces (script docstring, ledger header, an appended `## Decisions` note superseding the frozen entry). Both machine-readable surfaces carry one canonical `PROBED LIMITS:` line that `--self-test` PARSES and binds to `len(_limit_shapes())` / `len(_unreported_splices())`. Mutation-verified: stating seven in the ledger reds it, deleting the docstring line reds it, and adding a sixth splice probe reds BOTH records; all restored green, tree clean. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
 
 - 2026-08-02: T8 — the `## Decisions` section now carries a dated note recording that D-020 and its amendment are absent from `cairn/DECISIONS.md` on this branch, never reached `main`, and are M101 T2's to re-author, and that the two rule statements in the frozen entries bind nothing here. Re-verified at this commit: `grep -c 'D-020' cairn/DECISIONS.md` = 0, `git diff main..HEAD -- cairn/DECISIONS.md` empty, `git diff main..HEAD -- R/` empty, and `git diff main..HEAD --name-only` lists 9 paths — none under `R/`, and neither `NEWS.md` nor `cairn/DECISIONS.md` (AC4's first clause). The fix commit's diff inside `## Decisions` is additions only.
+
+- 2026-08-02: T9 — the sweep header states, per swept site, which disjuncts of the trigger condition the grid generates and which it does not (the classical guard's `!is.finite(f)` disjunct with MSE finite and non-zero, and every bootstrap refit-failure route other than MSE=0-degenerate data, both named as NOT GENERATED), plus the grid-wide limit that it is balanced one-way data only. The "must hold across the whole class" sentence is gone, and so is the candidate comment's rule about what a remedy may name — a rule statement binding beyond this milestone, which is M101's (AC4). Self-caught while writing it: the first draft attributed `log F = -Inf` to `gen_mse0`; measured on a 6x3 exact cell, `gen_mse0` gives `+Inf` and `gen_ssa0` `-Inf`, and the header records the measured values. The committed TSV is byte-unchanged: `git diff 12cba54..HEAD -- data-raw/abort-remedy-sweep.tsv` is empty.
 
 ## Decisions
 
