@@ -329,13 +329,17 @@ icc(
   other design, on consistency (ICC(C,.)) or fixed raters, and on
   unbalanced or incomplete data. It is a **deterministic closed form**
   (no resampling; `mc_samples`, `boot_samples`, and `seed` do not apply)
-  that, like `"npbootstrap"`, returns an interval on **every** dataset –
-  including the near-zero-ICC boundary where the two-way Monte-Carlo
-  default aborts – and covers at or above nominal across the
-  pre-registered grid where the incumbents can under-cover (assessed as
-  GO-for-opt-in against that grid). It is deliberately **conservative**
-  (it over-covers, and is wider than the Monte-Carlo interval at
-  interior cells), so it is an opt-in, not the default.
+  that, like `"npbootstrap"`, returns an interval at the near-zero-ICC
+  boundary where the two-way Monte-Carlo default aborts – a limit is
+  reported at the `[0, 1]` boundary only when the profile deviance shows
+  the confidence set reaching it, and a degenerate fit (raters in
+  near-perfect agreement) or a failed root search raises a classed error
+  rather than a fabricated boundary value – and covers at or above
+  nominal across the pre-registered grid where the incumbents can
+  under-cover (assessed as GO-for-opt-in against that grid). It is
+  deliberately **conservative** (it over-covers, and is wider than the
+  Monte-Carlo interval at interior cells), so it is an opt-in, not the
+  default.
 
   Two constraints follow from its calibration. It is available **only at
   `conf_level` 0.90, 0.95, or 0.99** – the correction constant is

@@ -34,6 +34,15 @@
 
 ### Minor improvements
 
+- `ci_method = "mpl"` now distinguishes a confidence limit truly at the
+  `[0, 1]` boundary from a numerical failure. A boundary endpoint is
+  reported only when the profile deviance shows the confidence set
+  reaching that boundary; a degenerate fit (near-zero error variance —
+  e.g. raters in perfect or near-perfect agreement, where the old code
+  silently reported the vacuous interval `[0, 1]`) or a failed root
+  search now raises a classed `intraclass_engine_error` instead.
+  Intervals on data with a well-defined likelihood are unchanged.
+
 - The `ci_method = "mpl"` documentation now states the interpolation
   evidence behind off-node subject counts: the correction constant is
   calibrated at subject-count nodes and linearly interpolated between
