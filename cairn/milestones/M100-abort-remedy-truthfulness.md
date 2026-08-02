@@ -1,6 +1,6 @@
 # M100: Measure which abort remedies are untruthful, and gate the enumeration
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -99,7 +99,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       per-exclusion reasons.
 - [x] T5 Add the recompute/locate command beside every factual claim in this
       milestone's records, and run each.
-- [ ] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
+- [x] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
       `lintr::lint_package()`, `air format --check`, every `data-raw` checker.
 
 ## Work log
@@ -186,6 +186,8 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 - 2026-08-01: T5 — every command this milestone's post-re-cut records cite was RUN, and two of them faulted the records rather than confirming them, which is the whole point of the criterion. (i) `grep -c 'another guard in the same reducer' ...` exits 1 when the count is 0, so a true claim was cited by a command that reports failure; restated as `awk '/another guard in the same reducer/' data-raw/abort-remedy-sweep.tsv | wc -l`, which prints 0 and exits 0. (ii) the CORRECTION line above says its grep locates D-020 Amendment 1's error; the grep locates the milestone-local `## Decisions` claim and the review's record of that error, but NOT the amendment text, which T1 removed from this branch with the rest of `cairn/DECISIONS.md` and which never reached `main` — `git diff main..HEAD -- cairn/DECISIONS.md` prints nothing. M101 re-authors D-020 and its amendment as one correct entry. The line stands as written (IP4); this supersedes its locate clause.
 - 2026-08-01: T5 — the two ROADMAP candidate rows that cite this milestone's sweep were re-verified against the clean re-run and each now carries the command that recomputes it: `burch` raises a raw unclassed error on all four SSA = 0 exact cells at `bf1a802a9c`, and the `gen_se_zero` cell has `montecarlo`, `searle`, `burch` and `bootstrap` all returning usable intervals with `npbootstrap` aborting classed. Both hold on the committed TSV.
 - 2026-08-01: T5 — commands run clean at this point: `git diff main..HEAD --name-only` (7 paths, none under `R/`, neither `NEWS.md` nor `cairn/DECISIONS.md`, so AC4 holds), `--check` (9 sites, 4 sweep + 5 fence), `--self-test`, the candidate-set locate, and the two sweep queries above.
+
+- 2026-08-01: T6 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 / SKIP 23 (identical to `main`'s baseline, since this milestone adds no R test and T1 removed the one the branch had); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m49s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; all five `data-raw` checkers pass plus `enumerate-ci-method-remedies.py --check` and `--self-test`; `cairn_validate` all checks passed, 321 pre-existing dangling-id advisories. Status -> review.
 
 ## Decisions
 
