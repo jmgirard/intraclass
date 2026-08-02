@@ -65,12 +65,23 @@ with its reason before it is ever run:
 
   refused: git-history-subcommand -- a `log`, `blame`, `rev-list` or `show`
   refused: rev-range -- a `<rev>..<rev>` or `<rev>...<rev>` range
-  refused: non-head-ref -- a ref other than `HEAD` (`origin/...`, `refs/...`,
-    `main`, `master`, or an `@{...}` reflog form)
+  refused: non-head-ref -- any revision operand other than `HEAD`
+  refused: ambiguous-operands -- a `git grep` lacking `-e <pattern>` or `--`
+
+The last two work together. A `git grep` must name its pattern with `-e` and
+delimit its pathspec with `--`; everything left between them is a revision
+operand, which git accepts and this checker refuses unless it is `HEAD`. Stating
+the rule positively over that slot is what makes it the rule AC2 asks for rather
+than a blacklist of ref spellings: `HEAD~1`, `HEAD^`, a raw SHA, a tag and a bare
+branch name are all refused because none of them is `HEAD`, not because any of
+them was enumerated. Requiring the two delimiters is the price -- without them a
+bare token could be the search pattern or a revision, and nothing here can tell.
 
 Refusal is scoped to `git` commands, so a `grep` pattern containing `..` is
 untouched; a `git grep` pattern that needs `..` writes it as `\\.\\.` or moves to
-the `grep` shape.
+the `grep` shape. A `python3` row can of course shell out to git itself; the
+refusal is syntactic over the ledger cell, and that limit is stated rather than
+papered over.
 
 FAILURE ROUTES
 --------------
@@ -146,8 +157,9 @@ ABSENCE_PATTERNS = {"^$", "^0$", "0", "^0+$", "^\\s*$"}
 # a form stated in the docstring but detected by no sample is a dead rule.
 REFUSED_SAMPLES = {
     "git-history-subcommand": "git log --oneline",
-    "rev-range": "git grep -c token main..HEAD",
-    "non-head-ref": "git grep -c token origin/main",
+    "rev-range": "git grep -c -e token main..HEAD -- data-raw/README.md",
+    "non-head-ref": "git grep -c -e token HEAD~1 -- data-raw/README.md",
+    "ambiguous-operands": "git grep -c token data-raw/README.md",
 }
 
 
@@ -170,6 +182,35 @@ COLUMNS = doc_list("column")
 # --------------------------------------------------------------------------
 
 
+# Flags whose NEXT token is a value rather than an operand. Without this a
+# `git grep -e main -- f` would read its own search pattern as a revision.
+VALUE_FLAGS = ("-e", "-f", "--max-depth", "--threads")
+
+
+def rev_operands(argv):
+    """(operands, saw_separator) for a git command's revision slot.
+
+    An operand is a token after the subcommand and before `--` that is neither
+    a flag nor a flag's value. That is exactly where git accepts a revision, so
+    the rule below can be stated positively -- every operand here must be
+    `HEAD` -- instead of as a blacklist of ref spellings, which is what let
+    `HEAD~1`, a raw SHA, a tag and a bare branch name through (review pass 1, O1).
+    """
+    operands, saw_separator, expect_value = [], False, False
+    for tok in argv[2:]:
+        if tok == "--":
+            saw_separator = True
+            break
+        if expect_value:
+            expect_value = False
+            continue
+        if tok.startswith("-"):
+            expect_value = tok in VALUE_FLAGS
+            continue
+        operands.append(tok)
+    return operands, saw_separator
+
+
 def refused_hits(command):
     """(form-id, why) for every refused history-dependent form in `command`."""
     try:
@@ -179,25 +220,21 @@ def refused_hits(command):
     if not argv or argv[0] != "git":
         return []
     hits = []
-    if len(argv) > 1 and argv[1] in ("log", "blame", "rev-list", "show"):
+    sub = argv[1] if len(argv) > 1 else ""
+    if sub in ("log", "blame", "rev-list", "show"):
+        hits.append(("git-history-subcommand", f"`git {sub}` reads repository history"))
+    operands, saw_separator = rev_operands(argv)
+    if sub == "grep" and ("-e" not in argv or not saw_separator):
         hits.append(
-            ("git-history-subcommand", f"`git {argv[1]}` reads repository history")
+            ("ambiguous-operands", "a `git grep` without both `-e <pattern>` and a "
+             "`--` separator has bare operands that cannot be told apart from "
+             "revisions, so the rule below cannot be applied to it")
         )
-    revs = []
-    for tok in argv[2:]:
-        if tok == "--":
-            break
-        if not tok.startswith("-"):
-            revs.append(tok)
-    for tok in revs:
+        return hits
+    for tok in operands:
         if re.search(r"\w\.\.\.?\w", tok):
             hits.append(("rev-range", f"{tok!r} is a revision range"))
-        if (
-            tok.startswith("origin/")
-            or tok.startswith("refs/")
-            or tok in ("main", "master")
-            or "@{" in tok
-        ):
+        elif tok != "HEAD":
             hits.append(("non-head-ref", f"{tok!r} names a ref other than HEAD"))
     return hits
 
@@ -212,12 +249,22 @@ def read_ledger(path=LEDGER, text=None):
     if text is None:
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
-    lines = [ln for ln in text.splitlines() if ln.strip() and not ln.startswith("#")]
+    # Carry each kept line's TRUE file line number: comment and blank lines are
+    # skipped for parsing but still occupy lines, and numbering the filtered
+    # list made every diagnostic name the wrong line (pass 1, O13).
+    lines = [
+        (n, ln)
+        for n, ln in enumerate(text.splitlines(), 1)
+        if ln.strip() and not ln.startswith("#")
+    ]
     fails = []
+    # --- route:grammar ---
     if not lines:
         fails.append(("grammar", f"{path}: no rows"))
+    # --- /route:grammar ---
+    if not lines:
         return [], fails
-    header = lines[0].split("\t")
+    header = lines[0][1].split("\t")
     # --- route:grammar ---
     if header != COLUMNS:
         fails.append(
@@ -227,21 +274,21 @@ def read_ledger(path=LEDGER, text=None):
     # --- /route:grammar ---
     rows = []
     seen = set()
-    for offset, ln in enumerate(lines[1:], 2):
+    for lineno, ln in lines[1:]:
         parts = ln.split("\t")
         # --- route:grammar ---
         if len(parts) != len(COLUMNS):
             fails.append(
-                ("grammar", f"{path}:{offset}: {len(parts)} fields, expected "
+                ("grammar", f"{path}:{lineno}: {len(parts)} fields, expected "
                  f"{len(COLUMNS)}")
             )
             continue
         # --- /route:grammar ---
         row = dict(zip(COLUMNS, parts))
-        row["_line"] = offset
+        row["_line"] = lineno
         # --- route:grammar ---
         if row["id"] in seen:
-            fails.append(("grammar", f"{path}:{offset}: duplicate id {row['id']!r}"))
+            fails.append(("grammar", f"{path}:{lineno}: duplicate id {row['id']!r}"))
         # --- /route:grammar ---
         seen.add(row["id"])
         rows.append(row)
@@ -598,12 +645,18 @@ def check_rule_probes(entry=None, probes=None):
 def run_check(timeout=DEFAULT_TIMEOUT, root=None, verbose=True):
     rows, fails = read_ledger()
     fails = list(fails)
+    valid = []
     for row in rows:
         row_fails = validate_row(row)
         fails.extend(row_fails)
         if not row_fails:
+            valid.append(row)
             fails.extend(execute_row(row, timeout=timeout, root=root))
-    fails.extend(check_falsifiers(rows, timeout=timeout, root=root))
+    # Only validated rows reach execution -- `execute_row` trusts the grammar
+    # (it does `int(expected_rc)` and compiles `expected_match`), so running it
+    # over a row already reported as malformed raises instead of reporting, and
+    # the grammar failure that WAS detected never gets printed (pass 1, O2).
+    fails.extend(check_falsifiers(valid, timeout=timeout, root=root))
     fails.extend(check_citations(rows, read_scope(root=root)))
     fails.extend(check_shape_parity())
     fails.extend(check_refused_parity())

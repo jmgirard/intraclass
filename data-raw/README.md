@@ -15,11 +15,12 @@ locally only.
 `record-claims.tsv`. A record states a load-bearing figure by citing the row
 that settles it — a `[claim:<id>]` marker — and the checker reads those
 citations from the four correctable tracking records the convention names, and
-from nowhere else. History carries no claim citation at all
-[claim:no-citations-in-decisions], because a decision entry proven wrong is
-superseded rather than corrected, so a citation could neither be added to one
-later nor a drifted figure repaired in place. Run it, and its `--self-test`,
-before pushing an edit to a registered figure.
+from nowhere else. `cairn/DECISIONS.md` and `cairn/milestones/archive/` carry no
+claim citation [claim:no-citations-in-decisions], because a decision entry or an
+archived milestone proven wrong is superseded rather than corrected, so a
+citation could neither be added to one later nor a drifted figure repaired in
+place. Run it, and its `--self-test`, before pushing an edit to a registered
+figure.
 
 Every committed reference value in the test suite traces to a seeded script
 here (PRINCIPLES.md #4/#12) and an entry in the oracle registry
