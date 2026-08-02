@@ -50,7 +50,7 @@ region).
       naming MPL root-finding, not an engine — is raised instead of an
       endpoint. No `tryCatch(stats::uniroot(...), error = function(e)
       <endpoint>)` pattern remains in `R/ci-mpl.R`.
-- [ ] AC2: Tests exercise both branches against the interval machinery
+- [x] AC2: Tests exercise both branches against the interval machinery
       directly (not only through `icc()`): a real-data no-crossing input
       returns the boundary endpoint, and still returns it with root-finding
       mocked to fail (proving the short-circuit precedes the seam); the abort
@@ -87,7 +87,7 @@ region).
       boundary clamp — the case D-014 actually measured — is unchanged, and
       an mpl row is added to DESIGN.md's interval-time boundary table.
       Neither D-014 nor D-015 is edited.
-- [x] AC7: The active profile's verify slot is clean: `devtools::document()`
+- [ ] AC7: The active profile's verify slot is clean: `devtools::document()`
       no delta, `air format --check`, `lintr::lint_package()`, and the full
       suite green against the installed package with `NOT_CRAN=true CI=true`
       (failed + error sum = 0).
@@ -164,3 +164,9 @@ Evidence gathered 2026-08-01 on branch m99-mpl-root-failure-abort (PR #107), by 
 Consistency gate: `cairn_validate` exit 0 (all checks PASS; pre-existing `dangling id tokens` WARN is advisory, legacy COVERAGE.md ids); no IP/GP changed → `cairn_impact` skipped; `pkgdown::check_pkgdown()` no problems; NEWS entry present, no milestone numbers user-facing; no new top-level files; README.Rmd untouched by the diff; `devtools::check()` and independent review recorded below.
 
 Driving RR: — (no numeric projections to juxtapose).
+
+**Independent review (2026-08-01):** three lenses — [S] prior-PR-comments: no prior-review evidence contradicted (confirmed the twin's stop() feeds M96 accounting); [S] blame-history: no conflicts (clamp census unaffected, tsv replaced not orphaned, class reuse deliberate); [O] diff-bug: 19 findings. [S] scorer: 7 actioned (≥80): F1 95 (sign-test premise false on degenerate fits), F2 95 (icc() abort where main returned vacuous [0,1]; jitter 1e-6 still aborts), F3 90 (abort named unrun remedies, D-018), F8 82 (upper mock path unexercised), F11 88 (no real-data failure test), F12 90 (false NEWS universals), F13 80 (5th claim surface in boundary-hint.R). 12 logged sub-80: F4 78, F9 78, F14 78, F5 75, F15 75, F16 72, F18 65, F6 62, F7 60, F10 55, F19 50, F17 25.
+
+**Triage:** F1/F2 → fixed (degenerate-fit sanity guard `f(rho_hat)`; behavior decided at the mini gate: abort with fit diagnosis, user-approved); F3 → fixed (no method named); F8/F11 → fixed (side-aware upper mock; real perfect-agreement test, no mock); F12/F13 → fixed (NEWS + boundary-hint reworded; roxygen broadened, tsv re-keyed 2cde0f315ee3). Sub-80 folded into the same fixes: F4/F5 (guard + message), F9 (message regexps pinned), F10 (short-circuit mock proof), F14/F16 (D-019 draft corrected pre-merge: reachability, 240-rep sweep evidence, sweep hard-stop consequence), F15 (identity evidence scoped: three geometries identical; the degenerate corner deliberately differs, documented), F19 (comment reunited with its function). Rejected with reason: F6 (sort() bracket — subsumed by the guard: a sane reference makes the reversed-bracket state a no-crossing short-circuit; magnitude ~1e-7), F7 (non-finite edge not constructible with real data past the guard; comment corrected, mock covers the branch), F17 (scorer falsified the premise — pre-existing >94-char lines exist; style), F18 (searle/burch "every dataset" claims are pre-existing unmodified lines, accurate for closed forms).
+
+**Post-return re-verification (2026-08-01, after aabbb70):** AC1 — no endpoint-returning handler (grep: abort handlers only); sign test + degenerate-fit guard; abort messages name MPL ("modified-profile-likelihood … limit could not be located" / "… degenerate at its own maximum-likelihood estimate"), no engine, no unrun method. AC2 — fresh `test_file`: failed 0 / error 0 / passed 185, covering: no-crossing both paths, short-circuit with root-finding mocked to fail, mocked lower abort (message regexp), mocked upper abort via side-aware mock (message regexp), real-data degenerate abort without mock (message regexp). AC4 — five surfaces now updated (adds boundary-hint.R:321); all three checkers re-run OK post-re-key. AC5 — twin smoke: degenerate input stops with fit diagnosis; boundary/interior unchanged. AC6 — D-019 corrected on the branch pre-merge (reachability, evidence basis, sweep consequence); still zero deletions vs main in DECISIONS.md above the append. AC7 — re-run below after the fix cluster.
