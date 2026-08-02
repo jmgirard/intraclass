@@ -198,7 +198,16 @@ npbootstrap_ci <- function(
         i = "Between- or within-subject variance is exactly zero \\
              (log F = {.val {obs$logf}}), so the {.field log F} transform and its \\
              jackknife SE do not exist.",
-        i = "Inspect the data or use {.code ci_method = \"montecarlo\"}."
+        # M100: this bullet used to offer `ci_method = "montecarlo"`, measured
+        # FALSE -- the default aborts on every dataset that reaches this guard,
+        # across both its disjuncts (data-raw/sweep-abort-remedies.R). The
+        # parametric bootstrap survives the SSA = 0 half but not the SE = 0 half,
+        # so it is not nameable in static text either: a bullet here has to hold
+        # for the whole trigger class.
+        i = "A different {.code ci_method} will not rescue this -- the package's \\
+             other interval methods were measured failing on data that reaches \\
+             this guard. Inspect the ratings: either every subject has the same \\
+             mean score, or every rater agreed exactly within each subject."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -238,6 +247,11 @@ npbootstrap_ci <- function(
         "The one-way transformed bootstrap-t interval could not be computed: \\
          {.val {n_bad}} of {.val {boot_samples}} resamples were degenerate \\
          (SSA = 0 or SE = 0).",
+        # M100: this bullet KEEPS its method name, unlike the observed-data guard
+        # above, and the difference is measured rather than assumed. Here the
+        # OBSERVED data is healthy -- only the resamples degenerate -- so the
+        # Monte-Carlo default returns a usable interval on every dataset that
+        # reached this guard in data-raw/sweep-abort-remedies.R.
         i = "The design is too small to resample stably; use a larger design or \\
              {.code ci_method = \"montecarlo\"}."
       ),

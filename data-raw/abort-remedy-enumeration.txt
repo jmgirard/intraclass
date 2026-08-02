@@ -8,20 +8,6 @@ R/ci-bootstrap.R  [fence]  (default)
     leading:   {.code ci_method = "bootstrap"} is not yet available for this design/engine combination.
     reason:    Engine capability: this engine/design pair ships no simulate_refit contract. Nothing about the data is degenerate, so the Monte-Carlo default it names is unaffected.
 
-R/ci-bootstrap.R  [sweep]  intraclass_singular_fit
-    key:       R/ci-bootstrap.R:f3b08ac552
-    names:     montecarlo
-    trigger:   if (n_ok < min_frac * boot_samples || n_ok < 2L) {
-    leading:   The bootstrap interval could not be computed: only {.val {n_ok}} of {.val {boot_samples}} refits converged.
-    reason:    Data: too few of the parametric-bootstrap refits converged. M93 T1 measured this site 0/90 at the sigma^2 -> 0 boundary and reachable only on degenerate data.
-
-R/ci-classical.R  [sweep]  intraclass_singular_fit
-    key:       R/ci-classical.R:990cd66e44
-    names:     montecarlo
-    trigger:   if (ss$mse == 0 || !is.finite(f)) {
-    leading:   The classical one-way {method} interval is undefined for this data.
-    reason:    Data: within-subject variance is exactly zero, so the F = MSA/MSE pivot does not exist.
-
 R/ci-mpl.R  [fence]  (default)
     key:       R/ci-mpl.R:eebe6172e6
     names:     montecarlo
@@ -49,13 +35,6 @@ R/ci-npbootstrap.R  [fence]  (default)
     trigger:   (unguarded)
     leading:   The one-way {method} interval cannot be projected to {.code unit = {.val {m}}} on this data.
     reason:    Projection: a numeric `unit` whose Spearman-Brown map has passed through its pole. Measured at the M93 implement gate on 28 of 12,600 HEALTHY cells -- the fit is fine, the projection is not.
-
-R/ci-npbootstrap.R  [sweep]  intraclass_singular_fit
-    key:       R/ci-npbootstrap.R:bf1a802a9c
-    names:     montecarlo
-    trigger:   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
-    leading:   The one-way transformed bootstrap-t interval is undefined for this data.
-    reason:    Data: between- or within-subject variance is exactly zero, so the log F transform and its jackknife SE do not exist.
 
 R/ci-npbootstrap.R  [sweep]  intraclass_singular_fit
     key:       R/ci-npbootstrap.R:01b75d1a61

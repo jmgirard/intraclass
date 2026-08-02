@@ -51,7 +51,17 @@ bootstrap_ci <- function(
          {.val {n_ok}} of {.val {boot_samples}} refits converged.",
         i = "This usually means the model is near a variance boundary or the \\
              design is too small to resample stably.",
-        i = "Use {.code ci_method = \"montecarlo\"} or inspect the model."
+        # M100: this bullet used to say `ci_method = "montecarlo"`, which was
+        # measured FALSE -- the Monte-Carlo default aborts on every dataset that
+        # reaches here (data-raw/sweep-abort-remedies.R; M93 T1 first found the
+        # site reachable only on degenerate data). Naming any method again needs
+        # sweep evidence that it survives this guard's whole trigger class, not
+        # an intuition that it should.
+        i = "A different {.code ci_method} will not rescue this -- the package's \\
+             other interval methods were measured failing on data that reaches \\
+             this guard. Inspect the ratings instead: subjects scored \\
+             identically by every rater leave no within-subject variance to \\
+             resample."
       ),
       class = "intraclass_singular_fit",
       call = call

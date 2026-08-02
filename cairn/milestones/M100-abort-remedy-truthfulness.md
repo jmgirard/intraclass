@@ -89,7 +89,7 @@ returns an interval, only message text changes.
       several geometries meeting its trigger condition, confirm the abort fires
       from the reducer called directly, run each named method, and classify the
       result through `boundary_interval_usable()`; commit the results table.
-- [ ] T3 Rewrite the remedies T2 condemns, at each site keeping its abort class
+- [x] T3 Rewrite the remedies T2 condemns, at each site keeping its abort class
       and leading line: `bootstrap_ci()` (`R/ci-bootstrap.R:48`),
       `classical_guard_observed()` (`R/ci-classical.R`), and the two
       `npbootstrap_ci()` degeneracy guards (`R/ci-npbootstrap.R`).
@@ -120,6 +120,10 @@ returns an interval, only message text changes.
 - 2026-08-01: T2 decisive finding — three of the four `sweep` sites can name NO method truthfully, and the fourth's shipped `montecarlo` remedy is TRUE and needs no rewrite. The observed data at the resample-guard site is healthy (only the resamples degenerate), which is why the default still works there. T3 rewrites three messages, not four.
 - 2026-08-01: T2 — near-degenerate cells (jitter SD 1e-8) do not reach the exact-equality guards at all, and one exact cell (10x2 MSE = 0) killed the glmmTMB point fit with a raw unclassed error before the bootstrap guard, reproducing M93's platform finding on macOS. Both are recorded as "site not reached" with the reason rather than counted as evidence either way.
 - 2026-08-01: T2 — constants renamed to snake_case before commit per the M62 lesson (`lintr`'s `object_name_linter` rejects UPPERCASE in `data-raw/` and `air` does not catch it); `lintr::lint()` clean on the new script, `air format --check` clean repo-wide.
+
+- 2026-08-01: T3 — the three condemned bullets now name no method and point at the data instead ("Inspect the ratings: every rater gave each subject the same score"), each keeping its class and leading line; each site carries a comment recording that the old name was measured false and that re-naming needs sweep evidence (GP7). The resample-guard site keeps its `montecarlo` bullet with a comment recording why it survived — its observed data is healthy.
+- 2026-08-01: T3 — the three rewritten sites leave the enumeration by the same predicate that admitted them (they no longer name a `ci_method`), so their ledger rows were removed rather than re-dispositioned; a future edit restoring a method name reappears UNCLASSIFIED and reds `--check`. The enumerator's self-test is now two-sided: it pins that method-naming sites are found AND that these three stay out.
+- 2026-08-01: T3 — suite green at `NOT_CRAN=true CI=true` (FAIL 0, PASS 5435, SKIP 23) with no test touched, because NO test pinned the remedy text at any of the three sites. That absence is how the untruthful text shipped and survived M93's ten review passes; T4 closes it.
 
 ## Decisions
 
