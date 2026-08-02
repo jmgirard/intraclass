@@ -1,8 +1,8 @@
 # M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
 
-- **Status:** planned
+- **Status:** blocked
 - **Priority:** normal
-- **Depends on:** —
+- **Depends on:** M102
 - **Driving RR:** —
 - **Principles touched:** GP1, GP6, GP7
 - **Branch/PR:** —
