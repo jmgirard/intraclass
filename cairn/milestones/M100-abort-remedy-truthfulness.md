@@ -1,6 +1,6 @@
 # M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -159,6 +159,8 @@ returns an interval, only message text changes.
 - 2026-08-01: implement pass 3 — F5/F10 NEWS and the sweep script now record that the candidate list is five of seven `ci_method` values, with `mpl` and `posterior` excluded for stated reasons; F8 `art_message()` asserts the SPECIFIC condition class (the classical guard had no class test anywhere in the suite); F9 values print at `signif(, 6)`; F17 checker counts reconciled; F18 the milestone `## Decisions` section now records D-020, its amendment, and the local approach decision; F19 the sweep's runtime note updated for boot_samples 999.
 - 2026-08-01: implement pass 3 — F20 carried out to a ROADMAP candidate row (search-first, no existing row): `burch_ci()` raises a RAW unclassed error on SSA = 0 data, a #5/#8 violation the sweep discovered incidentally and no record mentioned. Out of this milestone's scope.
 - 2026-08-01: implement pass 3 gate — suite FAIL 0 / PASS 5487 / SKIP 23 (52 in the milestone's own file); `devtools::check()` 0/0/0; `lintr::lint_package()` no lints; `air format --check` clean; `devtools::document()` no diff; every `data-raw` checker passes. The committed sweep TSV is untouched by this pass: pass 3 changed message text and tooling, not measurements.
+
+- 2026-08-01: review pass 3 FAILED the gate — THIRD return, thrash trigger (a) fires and (b) fires for the third consecutive pass. Two gate-reproduced findings of the milestone's own defect class: the classical message states a requirement the guard does not test (MSA can be the non-finite one, MSE finite and non-zero), and the splice guard catches one splice shape while three records claim it catches any (`i = cause` passes both gates). Plus six findings against this milestone's own records, including a false claim about its own review history and an error inside D-020 Amendment 1's correction. [S] prior-review 0 findings and confirmed passes 1-2 fully fixed. Per the thrash rule this is NOT queued for a fourth implement pass; it routes to /milestone-plan for a re-cut. Status -> in-progress.
 
 ## Decisions
 
@@ -392,3 +394,65 @@ lives. None covers how a message should describe a cause. So the disposition goe
 to the maintainer with an escalation offer, per (b) and D-004.
 
 Every acceptance box unticked; the next pass re-verifies from scratch.
+
+**GATE FAILURE — THIRD RETURN. Thrash trigger (a) fires; routed to
+`/milestone-plan`, not to another implement pass.** [S] prior-review: 0 findings,
+and it independently confirmed every actioned finding from passes 1 and 2 fixed.
+[O] diff-bug: 26 findings. Two were reproduced at the gate and are the same defect
+class this milestone exists to remove, now in its third distinct form:
+
+- **C1 — the classical message states a requirement the guard does not test.**
+  The bullet says "The `F = MSA/MSE` pivot needs a finite, non-zero MSE", but `F`
+  goes non-finite when *MSA* does, with MSE finite and non-zero. Reproduced at the
+  gate on overflow-scale scores: the user is told the pivot needs a finite,
+  non-zero MSE and shown `MSE = 2.5e+199`, which is both. Value-reporting removed
+  the false *diagnosis*; it did not stop the message asserting a false
+  *requirement*. The npbootstrap sibling states its condition disjunct-for-
+  disjunct and is correct.
+- **E1 — the splice guard catches one shape and three records claim it catches
+  any.** `spliced_message_sites()` requires a whole line to be a bare identifier.
+  Reproduced at the gate: `i = cause` — a NAMED bullet splice — passes both
+  `--check` and `--self-test`. So do a spliced whole message vector, a bare symbol
+  sharing a line with the leading string, `!!!bullets`, and a `paste0()` bullet.
+  Meanwhile the ledger header, the self-test comment, and D-020 Amendment 1
+  Correction 2 each say "any abort that splices a variable into its message
+  vector". This is pass 2's F3 repaired narrowly and re-advertised broadly — the
+  identical "record outruns the code" pattern the amendment was written to correct.
+
+**Further findings against this milestone's own records.** P6: the `## Decisions`
+section claims the bootstrap guard "drew no truthfulness finding in either pass",
+which pass 1's A2 (scored 90) is. D2: D-020 Amendment 1 says the npbootstrap guard
+has "three disjuncts, not two" — it has two disjuncts and three causes, an error
+inside the correction of an error. N1: NEWS says all three errors now report
+quantities; the bootstrap error reports none and still hedges a cause (U3). P4:
+the new `burch_ci()` candidate row cites site `990cd66e44`, but those rows are at
+`bf1a802a9c`. P5: a live ROADMAP row's stated falsifier has FIRED inside this
+milestone — the `gen_se_zero` cell is a measured trigger dataset where four
+shipped methods return usable intervals — and neither the row nor the work log
+records it. P9: a source comment attributes the report-values decision to the plan
+gate; it was the maintainer's at the review pass-2 gate.
+
+**Also logged:** T1 the `diagnosis` regex is three literals under a comment
+claiming it catches any cause sentence · T2 nothing pins the reported NUMBERS, so
+swapping the two `signif()` arguments leaves the suite green · T3 those pins are
+console-width dependent · E2 `SPLICE_ALLOWED` is keyed by file, exempting two
+sites where the amendment says one · N2 NEWS calls five methods "applicable" where
+one exclusion is a sweep artefact · E3/E4 single-quoted strings and alternate
+`ci_method` spellings still escape · C2 the npbootstrap guard is `isTRUE()`-free
+and safe only by an unstated invariant · P7 F6 and P8 F11 unfixed from pass 2 ·
+T6 pass-1 leftovers · C3/C4/N4 cosmetic.
+
+**Why this is a re-plan and not a fourth patch.** Trigger (a) is mechanical — the
+third return — and trigger (b) fires for the third consecutive pass: the same
+criterion failing by a new mechanism of the same shape each time. The shape has
+been constant across all three passes and has migrated freely between artifacts:
+a false cause in a message (pass 1), a false cause in its repair plus a gate
+claim that outran its code (pass 2), and now a false requirement in a message
+plus a gate claim that outran its code again (pass 3). The plan gate recorded no
+alternative on how these messages should be written, because it never framed
+"what may this milestone assert, and what checks each assertion" as a question.
+That is a scoping defect, not an implementation one, and it is what a re-cut needs
+to settle. Local gate and CI are otherwise green throughout, which is the point:
+nothing mechanical has ever caught this class.
+
+Every acceptance box unticked.
