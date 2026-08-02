@@ -229,9 +229,14 @@ run_remedy <- function(df, method, k) {
 # Several geometries per trigger, exact and near-degenerate, plus seed variation
 # where the site is stochastic (the resample guard: a run is evidence about ONE
 # seed, so a static bullet needs more than one).
+#
+# Cells are built by a function that RETURNS one and accumulated with `c()`, not
+# by a helper writing to an enclosing `grid` with `<<-`: CI runs a newer lintr
+# whose `assignment_linter` rejects `<<-`, and a local `lint_package()` stays
+# silent about it (the M95 lesson).
 grid <- list()
-add <- function(site_key, gen, n_s, n_r, seed, note, ...) {
-  grid[[length(grid) + 1]] <<- list(
+cell_spec <- function(site_key, gen, n_s, n_r, seed, note, ...) {
+  list(
     site = site_key,
     gen = gen,
     n_s = n_s,
@@ -250,37 +255,46 @@ for (geom in list(c(6, 3), c(10, 2), c(15, 4), c(30, 3))) {
       "R/ci-classical.R:990cd66e44",
       "R/ci-npbootstrap.R:bf1a802a9c"
     )) {
-      add(
-        key,
-        gen_mse0,
+      grid <- c(
+        grid,
+        list(cell_spec(
+          key,
+          gen_mse0,
+          geom[1],
+          geom[2],
+          1L,
+          paste("MSE=0", note),
+          jitter_sd = jit
+        ))
+      )
+    }
+    grid <- c(
+      grid,
+      list(cell_spec(
+        "R/ci-npbootstrap.R:bf1a802a9c",
+        gen_ssa0,
         geom[1],
         geom[2],
         1L,
-        paste("MSE=0", note),
+        paste("SSA=0", note),
         jitter_sd = jit
-      )
-    }
-    add(
-      "R/ci-npbootstrap.R:bf1a802a9c",
-      gen_ssa0,
-      geom[1],
-      geom[2],
-      1L,
-      paste("SSA=0", note),
-      jitter_sd = jit
+      ))
     )
   }
 }
 for (geom in list(c(12, 3), c(20, 3), c(30, 2))) {
   for (sd in 1:3) {
-    add(
-      "R/ci-npbootstrap.R:01b75d1a61",
-      gen_resample_degenerate,
-      geom[1],
-      geom[2],
-      sd,
-      "few varying subjects",
-      n_varying = 2L
+    grid <- c(
+      grid,
+      list(cell_spec(
+        "R/ci-npbootstrap.R:01b75d1a61",
+        gen_resample_degenerate,
+        geom[1],
+        geom[2],
+        sd,
+        "few varying subjects",
+        n_varying = 2L
+      ))
     )
   }
 }

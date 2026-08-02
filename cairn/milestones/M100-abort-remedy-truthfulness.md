@@ -136,6 +136,8 @@ returns an interval, only message text changes.
 
 - 2026-08-01: review pass 1 FAILED the gate (first return). [O] diff-bug found the milestone's own defect class surviving in its output: the npbootstrap observed-data bullet is false on healthy data (`se_ij_logf == 0` fires with a finite log F — reproduced at review, scored 93) and the bootstrap bullet asserts a single cause the milestone's OWN sweep contradicts on its jitter cells (90). Seven further >=80 findings are evidence-quality: a wrong `class` column (92), a broken `generator` provenance column (94), a stale sweep header whose keys no longer resolve (92), reached-vs-usable measured on inconsistent paths so two verdict denominators are overstated (82), `boot_samples = 99` against a shipped 999 contradicting the M97 lesson (80), a paren-in-comment parser defect (82), and NEWS inheriting the first error (82). 19 sub-80 findings logged in the Review section. [S] blame-history and [S] prior-review: 0 findings each. Every acceptance box unticked; the next pass re-verifies from scratch. Status -> in-progress.
 
+- 2026-08-01: CI lint red on `data-raw/sweep-abort-remedies.R:234` — `assignment_linter` rejecting `<<-`, the M95 lesson biting exactly as written (local `lintr::lint_package()` said no lints; CI's newer lintr flags it). The grid builder now accumulates with `grid <- c(grid, list(cell_spec(...)))` instead of a helper superassigning to an enclosing `grid`. The `<<-` uses in `tests/` are untouched and were not flagged: they write to a counter in an enclosing `test_that()` closure, while this one wrote to a top-level binding. Re-run reproduces the sweep TSV byte-identically (205 rows), so the refactor is behavior-preserving.
+
 ## Decisions
 
 ## Review
