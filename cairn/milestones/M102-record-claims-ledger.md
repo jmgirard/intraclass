@@ -1,6 +1,6 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -42,7 +42,7 @@ candidate row, whose subject is M101's messages.
       no network; `--self-test` PARSES that list and asserts SET equality with the
       shape ids the code dispatches on, so a docstring shape with no code and a
       code shape with no docstring line each exit non-zero.
-- [x] AC2 A command naming any of an enumerated set of history-dependent forms —
+- [ ] AC2 A command naming any of an enumerated set of history-dependent forms —
       a `git log`/`blame`/`rev-list`/`show` subcommand, a `<rev>..<rev>` range, or
       a ref other than `HEAD` — is refused with its reason, that checkout being
       depth-1 with no `main` ref. The set is stated in the docstring and each form
@@ -163,6 +163,8 @@ candidate row, whose subject is M101's messages.
 
 - 2026-08-02: T8 — both steps run in `check-references` on PR #109, in the stated order and behind a comment naming this milestone and the ledger path. Job green in 24s with both steps `success` in that run's own log; recompute: `gh api repos/jmgirard/intraclass/actions/jobs/91544700240 --jq '.steps[] | "\(.number) \(.conclusion) \(.name)"'` — step 9 "Re-derive the registered record claims (M102)", step 10 "Self-test the record-claims checker (route excision)". The self-test, route excision included, therefore passes on the depth-1 CI checkout and not only locally.
 - 2026-08-02: T9 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / ERROR 0 / SKIP 23 / PASS 5435 (identical to `main`'s baseline; this branch changes no R code and adds no R test); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m54s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; all five `data-raw` checkers pass locally in both their check and self-test modes (ten invocations, enumerated by `ls data-raw/check-*.py data-raw/enumerate-*.py`); `cairn_validate` all checks passed, WARNs only `sizing (split tripwires)` (1 — nine criteria, kept whole at the plan gate) and `dangling id tokens` (321, pre-existing). CI green on PR #109: all nine checks pass. `check-reference-observations.py` specifically re-run per T9's note — no new `data-raw` file names a citekey, so no `':(exclude)...'` pathspec was needed. Status -> review.
+
+- 2026-08-02: review pass 1 FAILED the gate — FIRST return. [O] diff-bug 24 findings, [S] blame-history 2, [S] prior-PR-comments 0 (GitHub inline-comment probe returned `[]`; no archived `## Review` finding is regressed); an [S] scorer scored all 26, two at >= 80. AC2 fails as written: `refused_hits()` implements "a ref other than `HEAD`" as a four-item blacklist, so `HEAD~1`, `HEAD^`, a raw SHA, a tag, `upstream/main` and a bare branch name are each accepted (re-measured independently at this commit) and would break only on the depth-1 CI checkout. Also actioned: `check_falsifiers()` runs ungated on grammar-failed rows and raises instead of reporting (82). AC2's tick withdrawn. 24 sub-80 findings logged in the Review section; O13/O11/O12 sit closest to the bar and bear on this milestone's own subject. Status -> in-progress.
 
 ## Decisions
 
@@ -293,3 +295,69 @@ ERROR 0 / SKIP 23 / PASS 5435, identical to `main`'s baseline, and
 0 notes in 2m54s; both ran before the final tracking-only commit, and nothing
 outside `cairn/` (which is `.Rbuildignore`d) changed after them, so neither is
 stale. `lintr::lint_package()` 0 lints.
+
+**Findings — three fresh-context lenses, then a scorer.** [O] diff-bug returned
+24 findings, [S] blame-history 2 (plus 5 checked-and-clear), [S] prior-PR-comments
+0 — its GitHub probe returned `[]` (no inline review comments exist in this repo
+at all), and the archived `## Review` sections of M73, M74, M79, M80, M81, M85,
+M91 and M94 show nothing this diff regresses. An [S] scorer that generated none
+of them scored all 26 against the rubric; 2 scored ≥ 80.
+
+**ACTIONED (≥ 80).**
+
+- **O1 (85) — AC2 FAILS as written.** `refused_hits()` implements "a ref other
+  than `HEAD`" as a four-item blacklist (`origin/`, `refs/`, exactly
+  `main`/`master`, `@{`) rather than as the rule AC2 states. Re-measured
+  independently at this commit: `git grep -c token HEAD~1`, `HEAD^`, `53dde1c`,
+  `v0.1.0`, `upstream/main` and `some-branch` are each a ref other than `HEAD`
+  and each returns NOT REFUSED; only `origin/main` and `main..HEAD` are caught.
+  A ledger row registering `git grep -c pattern HEAD~1` is therefore accepted,
+  passes locally on a full clone, and fails on the depth-1 CI checkout — the exact
+  divergence the refusal mechanism exists to prevent. AC2's tick is withdrawn:
+  the pass-1 evidence recorded above measured only the three committed samples,
+  which is what made a blacklist look like the rule.
+- **O2 (82) — a grammar-failed row crashes the run.** `check_falsifiers()` is
+  called unconditionally in `run_check()`, unlike the row loop above it which
+  gates execution behind `if not row_fails:`. Re-measured: an `absence` row with
+  `expected_rc = abc` is correctly detected by `validate_row` as a `grammar`
+  failure, and `check_falsifiers` then raises an uncaught
+  `ValueError: invalid literal for int()`. The process still exits non-zero, so
+  AC1's letter holds, but the grammar failure that was correctly detected is never
+  printed and the operator sees a traceback instead of a report.
+
+**LOGGED, sub-80 (24).** Excluded from the actioned list, surfaced here, none
+silently dropped. Three are close to the bar and bear on this milestone's own
+subject, so they are named first:
+- O13 (78) the ledger's `_line` numbers are off by the count of comment/blank
+  lines, so today every diagnostic names the wrong TSV line.
+- O11 (75) `data-raw/README.md` says "History carries no claim citation at all"
+  while the certifying row searches only `cairn/DECISIONS.md`; D-020 rule 4 also
+  counts work logs and `milestones/archive/` as history.
+- O12 (72) the ROADMAP comment the terminal-row citation sits on asserts both a
+  count and five specific milestone ids; the row re-derives only the count.
+- O3 (68) `reason = -` satisfies the uncited-row reason gate, `-` being the file's
+  own null sentinel. O5 (60) a falsifier need only fail the expectation, not be
+  the row's own command against a constructed input. O8 (60) D-020 states the
+  D-009 relation in a paragraph after the numbered list rather than in it.
+- O6 (55) the `record` column is never bound to which scope file cites the row.
+  O7 (55) two route emissions sit outside their sentinels and survive excision.
+  O15 (55) `--probes` always exits 0 and an unknown flag falls through to the
+  default check. O20 (50) `git grep -e main` false-positives as a ref.
+- O10 (45) the invocation-count command is not scoped to the job its claim names.
+  O19 (45) the absence row's regex misses D-020's literal `[claim:<id>]` only
+  because `<` is not `[a-z]`. O21 (45) a missing scope file crashes rather than
+  fails. O24 (45) the κ_m helper uses another checker's underscore-private API.
+- O4 (40) nothing forbids a tautological `expected_match`. O14 (40) the checker is
+  not repo-root-safe and honours `root=` inconsistently. O9 (35) the inventory and
+  invocation-count figures are self-referential. O16 (35) `parse_scope` keys on an
+  em dash. O18 (35) refused-parity derives its coded set from the samples, not the
+  detector. O22 (35) the `python3` shape can reach history internally. O17 (32)
+  `check_rule_probes` checks one direction only. O23 (30) the self-test replays the
+  timeout probe 16 times. B1 (30) D-020 takes the id M101's committed plan names —
+  judged sequencing for a different milestone, not a defect here. B2 (20)
+  `cairn_validate` does not check decision-id uniqueness — a pre-existing gap.
+
+**Gate: FAILED — first return.** O1 demonstrates AC2 failing, which is a return
+under the M130 floor. Status -> `in-progress`; the fix and re-review are the
+resumed pass's work. O2 rides along as an actioned fix. The thrash count stands
+at one return, well below the third-return threshold.
