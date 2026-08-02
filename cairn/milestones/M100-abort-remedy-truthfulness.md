@@ -1,9 +1,9 @@
 # M100: Measure which abort remedies are untruthful, and gate the enumeration
 
-- **Status:** blocked
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
-- **Driving RR:** —
+- **Driving RR:** RR04
 - **Principles touched:** GP1, GP6, GP7
 - **Branch/PR:** `m100-abort-remedy-truthfulness` · https://github.com/jmgirard/intraclass/pull/108
 
@@ -15,23 +15,15 @@ untruthful, and gate the enumeration of sites that make such a claim.
 ## Scope
 
 **In:** the enumerator (`data-raw/enumerate-ci-method-remedies.py`), its committed
-enumeration and classification ledger, and the seeded sweep
-(`data-raw/sweep-abort-remedies.R`) with its committed results. Evidence and
-tooling only.
+enumeration and classification ledger, the seeded sweep
+(`data-raw/sweep-abort-remedies.R`) with its committed results, and the accuracy
+of the records describing all of them. Evidence and tooling only.
 
-**Out — and this is the re-cut's whole point.** Every message change goes to
-**M101**: removing the untruthful `ci_method` names, and correcting the two
-diagnostic bullets this milestone's review proved false on `main` (the npbootstrap
-"between- or within-subject variance is exactly zero" sentence, false on the
-zero-jackknife-SE disjunct; the classical "within-subject variance is exactly
-zero" sentence, false when `!is.finite(f)` fires through MSA). Shipping the name
-removals alone would leave those two on `main` under a NEWS entry about
-truthfulness, which the re-cut audit found forbidden by #5/#8. The rule governing
-what a message may assert, and the `cairn/DECISIONS.md` entry stating it, are
-M101's too, so the rule never sits on `main` while the code breaks it. The
-branch's D-020, its amendment, its NEWS bullet and its message pins are removed
-from this branch and re-authored in M101 — none has reached `main`, so nothing
-history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
+**Out:** every message change and the rule governing what a message may assert →
+**M101**, so no rule sits on `main` while the code breaks it (re-cut gate
+2026-08-01; rationale in the work log). The claims ledger, its checker and the CI
+wiring RR04 asks for → a successor milestone (RR04 BC2/BC3/BC6; ingest audit
+2026-08-02).
 
 ## Acceptance criteria
 
@@ -47,11 +39,15 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       `classical_guard_observed()`, and `npbootstrap_ci()`'s observed-data and
       degenerate-resample guards — identified by their guarding conditions, so a
       predicate that matched nothing could not satisfy this criterion.
-- [ ] AC2 The script's docstring, the ledger header and this milestone's records
-      state the predicate's LIMITS — the message shapes the script does not match
-      — and each stated limit is demonstrated by a self-test probe that
-      constructs that shape and shows it unmatched. No record claims detection
-      coverage broader than a probe demonstrates.
+- [ ] AC2 (BC1): The ledger header, the enumerator docstring, and the milestone's
+      live limits record each state exactly the probe-demonstrated limit set: six
+      predicate shapes (L1-L6) and five unreported splice shapes, with the
+      `R/ci-*.R` file scope stated as a limit explicitly not demonstrated by a
+      probe. `--self-test` contains an assertion tying the stated count to
+      `len(_limit_shapes())` by PARSING the ledger header and the docstring, so a
+      divergence between record and probe list exits non-zero. A record frozen
+      under IP4 satisfies this by carrying an appended dated supersession note.
+      Tolerance: exact counts.
 - [ ] AC3 For each site the ledger marks `sweep`, a committed seeded script
       records, across several geometries of that site's trigger condition and at
       the shipped `boot_samples` default, whether each swept `ci_method` returns a
@@ -61,45 +57,92 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       candidate set is named in the script with a stated reason for every
       `ci_method` value excluded. A cell whose point fit fails before the guard is
       excluded from the denominator and recorded as excluded.
-- [ ] AC4 This milestone changes nothing user-facing and states no rule:
-      `git diff main..HEAD --name-only` lists no path under `R/`, and lists
-      neither `NEWS.md` nor `cairn/DECISIONS.md`.
-- [ ] AC5 Every factual claim this milestone's records make about a measured
-      result, a count, a ledger key, or this milestone's own review history is
-      accompanied by a command that recomputes or locates it, and that command
-      reproduces the stated figure or string.
+- [ ] AC4 (BC5): AC4 is evaluated as: `git diff main..HEAD --name-only` lists no
+      path under `R/` and neither `NEWS.md` nor `cairn/DECISIONS.md`; and no
+      *live* record statement — one not followed by a dated supersession note —
+      purports to bind conduct beyond this milestone. With BC4's entry appended,
+      both clauses hold.
+- [ ] AC5 (BC4): The milestone `## Decisions` section carries an appended, dated
+      supersession entry stating that D-020 and its amendment exist nowhere in
+      `cairn/DECISIONS.md` on this branch (`grep -c 'D-020' cairn/DECISIONS.md`
+      = 0), never reached `main`, and are re-authored by M101; and that the two
+      rule statements in prior entries bind nothing on this branch. No existing
+      line in that section is modified: `git diff` for the fix commit shows only
+      additions within it.
 - [ ] AC6 The profile `verify` slot is clean, plus the fuller pre-review check it
       names, with every `data-raw` checker run locally.
+- [ ] AC7 (BC7): The sweep script header states, per swept site, which disjuncts
+      of the trigger condition the grid generates and which it does not — at
+      minimum that the classical guard's `!is.finite(f)` disjunct (MSA overflow,
+      MSE finite non-zero) and bootstrap refit-failure triggers other than
+      MSE=0-degenerate data are not generated — and no header sentence claims
+      coverage of a whole trigger class. The committed sweep TSV is unchanged:
+      `git diff 12cba54..HEAD -- data-raw/abort-remedy-sweep.tsv` is empty.
+- [ ] AC8 (BC8): Each work-log figure a review proved wrong (the "reds 7" clause;
+      "all five `data-raw` checkers"; the 80/30/50 unit slips) is superseded by an
+      appended CORRECTION line citing a committed probe or a command over a
+      committed artifact; the reproducing half of the "narrowing the glob reds 5"
+      clause is preserved as stated. Original lines unedited.
+- [ ] AC9 (BC9): The enumerator docstring makes no requirement claim about M101
+      that M101's milestone file does not contain: the docstring's "is required
+      to" clause is replaced by the mechanical fact (a changed leading line
+      re-keys the site and `--check` fails until the ledger row is renewed).
+      `check()`'s docstring states four failure routes and attributes the splice
+      route's probes to `_unreported_splices()`.
+- [ ] AC10 (BC10): The ROADMAP runtime-hint row's "all nine resample-guard
+      datasets" clause carries its own reproducing command over the committed
+      sweep TSV, yielding nine `usable interval` lines. Tolerance: exact.
+
+### Deviations from RR04
+
+| BC | Departure | Ground (ingest audit, fresh context, 2026-08-02) |
+|---|---|---|
+| BC1 | struck the "or a seventh self-test probe" disjunct; parity assertion must PARSE the record surfaces; frozen records satisfy by supersession note | the struck disjunct makes the records say seven probed limits while `len(_limit_shapes())` stays six, reinstating the finding it closes; a bare `assert len(...) == 6` ties a literal to the code, not the record to the probe list; the live limits record is IP4-frozen and otherwise unreachable |
+| BC2 | deferred to a successor milestone | its first clause ("every figure the post-re-cut records state about ...") is an unbounded universal over a domain no procedure it names enumerates — the defect that sank AC5 — and RR04 §3 itself forbids building the detector that would bound it |
+| BC3 | deferred with BC2 | jointly unsatisfiable with BC8 (one mandates preserving a figure the other bans) and with retained AC6 (whose gate figures fall outside BC2's ledger domain and cannot be cheaply recomputed); enforceable only once BC2's ledger exists |
+| BC6 | deferred with BC2 | certifies "cannot reach a release" as true of a lint-job wiring that only reds CI, and the wiring is the same deliverable as the checker it would run |
+| BC7 | `<fix-base>` bound to `12cba54` | the placeholder is not a runnable command, and `main..HEAD` is the wrong base, the TSV being new on this branch |
+| BC9 | struck disjunct 1 ("either M101 gains the leading-line-stability criterion") | places satisfaction of an M100 criterion inside another milestone's plan-owned body, and keeping the docstring clause violates BC5 |
+| BC10 | inlined the command's description rather than its literal text | the criterion's example carries literal tabs inside backticks that do not survive into this file; T11 records the exact command |
 
 ## Coverage
 
 - AC1 → T2, T3
-- AC2 → T3
+- AC2 → T7
 - AC3 → T4
-- AC4 → T1
-- AC5 → T5
-- AC6 → T6
+- AC4 → T1, T8
+- AC5 → T8
+- AC6 → T12
+- AC7 → T9
+- AC8 → T10
+- AC9 → T11
+- AC10 → T11
 
 ## Tasks
 
-- [x] T1 Strip this branch back to tooling and evidence: revert every file under
-      `R/` to `main`, drop the `NEWS.md` bullet, drop D-020 and its amendment from
-      `cairn/DECISIONS.md`, and remove the message pins from
-      `tests/testthat/test-abort-remedy-truthfulness.R` (they pin reverted text).
-      Everything removed here is re-authored in M101.
-- [x] T2 Anchor the enumerator: assert in `--self-test` that the four measured
-      guards appear, keyed on their guarding conditions.
-- [x] T3 Automate the three `--check` failure modes as self-test probes (they are
-      currently hand-mutated in the work log), and state the predicate's limits in
-      the docstring, the ledger header and the milestone records, one probe per
-      stated limit — including the splice shapes `spliced_message_sites()` does
-      not match.
-- [x] T4 Re-run the sweep and confirm each recorded reach is the site's own
-      classed condition from the reducer; keep the named candidate set with its
-      per-exclusion reasons.
-- [x] T5 Add the recompute/locate command beside every factual claim in this
-      milestone's records, and run each.
-- [x] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
+Pass-4 scope, complete; detail in the work log.
+
+- [x] T1 Strip the branch to tooling and evidence; revert `R/`, `NEWS.md`, `cairn/DECISIONS.md`.
+- [x] T2 Anchor the enumerator on the four measured guards, keyed on their conditions.
+- [x] T3 Probe the three `--check` failure modes and each stated predicate limit.
+- [x] T4 Re-run the sweep; confirm each reach by the site's own classed condition.
+- [x] T5 Add the recompute/locate command beside every factual claim, and run each.
+- [x] T6 Gate: suite, `devtools::check()`, `lintr`, `air`, every `data-raw` checker.
+
+RR04 ingestion, pass 5.
+
+- [ ] T7 Repair the limits records: state the six probed predicate shapes and the
+      five probed splice shapes, mark file scope as a limit with no probe, and add
+      the parsing parity assertion to `--self-test`.
+- [ ] T8 Append the dated supersession entry to `## Decisions` covering D-020's
+      absence and the two rule statements; re-verify the git-diff clause.
+- [ ] T9 Rewrite the sweep header to state generated vs ungenerated disjuncts per
+      swept site, with no whole-class claim; confirm the TSV byte-unchanged.
+- [ ] T10 Append CORRECTION lines for the "reds 7", "all five checkers" and
+      rows-vs-cells figures, preserving the reproducing half of each line.
+- [ ] T11 Fix the two docstring claims (the M101 requirement, `check()`'s route
+      count) and add the ROADMAP row's second recompute command.
+- [ ] T12 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
       `lintr::lint_package()`, `air format --check`, every `data-raw` checker.
 
 ## Work log
@@ -197,6 +240,8 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 - 2026-08-01: blocked on RB04 (why this milestone's records keep overclaiming, and what would stop it). Committed to the milestone BRANCH rather than the default branch, a logged deviation from the skill's docs-only-on-main step: M100's tracking state — its status mirror, work log and review sections — lives on the branch with an open PR, and splitting the brief from it would put the milestone's own record in two places.
 
+- 2026-08-02: ingested RR04 (split, with named departures — maintainer's choice at the ingest gate). `Driving RR:` set; AC2 and AC5 retired as superseded and replaced by RR04's BC1 (repaired) and BC4/BC5/BC7/BC8/BC9/BC10; BC2/BC3/BC6 deferred to a ROADMAP candidate row. Tasks T7-T12 added. The plan-owned body needed two compressions to fit the 149-line cap (Scope's re-cut narrative, then the completed tasks' detail — both now carried by the work log), and `cairn_validate` still WARNs two split tripwires at 10 criteria and 12 tasks: the size concern the ingest audit raised is real and unresolved. RR04's BC list was normalized to the canonical `- BC<n>:` form so the `binding criteria` check could parse it; it now PASSes.
+
 ## Decisions
 
 - 2026-08-01 (D-020, promoted to `cairn/DECISIONS.md`): static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class. Promoted rather than kept local because it binds every future abort in the package, not just these four.
@@ -221,6 +266,44 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
   variable, which the `i = cause` probe falsifies. An honest narrow gate is
   citable where a broad claim was not. Recompute:
   `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
+
+- 2026-08-02 (RR04, ingested): the four-pass recurrence is primarily an ENFORCEMENT
+  defect, not a criteria or authoring one. Every pass was CI-green and
+  `cairn_validate`-green throughout, and this repo's own pattern — four `data-raw`
+  checkers wired into `lint.yaml` — exists because human gate-reading does not hold
+  claims to artifacts at this density. This milestone's checker is the only one of
+  the five not wired in. The dominant failure mode is nameable: a figure observed
+  once at a terminal, transcribed into prose, never re-derived. Nothing in the
+  toolchain distinguishes a transcribed figure from a recomputed one.
+- 2026-08-02 (RR04, ingested): AC5 was NOT achievable as written and is retired,
+  superseded by RR04's ledger form. Three independent impossibilities: IP4 forbids
+  retrofitting commands into historical lines; one claim class ("identical to the
+  pre-confirmation run") is unrecomputable in principle because the referent was
+  never committed; and mutation red-counts are properties of a mutation, not of the
+  tree, so no command over the tree reproduces them. Its real scope lived in a
+  work-log line rather than in its own text, so any strict reading failed it. AC2
+  WAS achievable — the script docstring already satisfied it — and is retained in
+  RR04's parity form, which ties the records to the probe list mechanically.
+- 2026-08-02 (RR04, ingested): a re-cut owes a supersession sweep. A re-cut that
+  reverts files or moves scope must enumerate the live record surfaces — the
+  milestone `## Decisions`, ROADMAP rows, and the file headers of surviving
+  artifacts — and append a dated supersession note to each entry the reversion
+  falsifies, in the re-cut commit. Criteria quantifying over "this milestone's
+  records" are then evaluated over the latest dated statement on each topic. This
+  milestone's re-cut did the sweep for the work log and the ROADMAP but not for
+  `## Decisions`; that omission is the whole of two pass-4 findings. It edits
+  nothing history-protected: supersession is already how amendments work.
+- 2026-08-02 (ingest audit, [O] fresh context): RR04's binding set was NOT ingested
+  verbatim. The audit found it jointly unsatisfiable in four places and over every
+  size limit, with two criteria reproducing the very defect the review diagnosed —
+  BC2's "every figure the post-re-cut records state" is an unbounded universal over
+  a domain no procedure it names enumerates, and RR04 itself forbids building the
+  detector that would bound it. BC2/BC3/BC6 are deferred to a successor milestone;
+  BC1, BC7 and BC9 are ingested repaired. Every departure is a row in the
+  "Deviations from RR04" table with its ground. The audit independently re-verified
+  RR04's factual base (the 210/130/30/50 census, the per-site verdicts,
+  `grep -c 'D-020'` = 0, BC10's command), so the departures concern criteria
+  structure, never the measurement.
 
 ## Review
 
