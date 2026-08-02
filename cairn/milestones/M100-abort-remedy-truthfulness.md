@@ -1,6 +1,6 @@
 # M100: Measure which abort remedies are untruthful, and gate the enumeration
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -194,6 +194,8 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 - 2026-08-01: review pass 4 FAILED the gate — FOURTH return. [O] diff-bug returned 20 findings, 8 scoring >= 80; both [S] lenses effectively 0 (prior-review confirmed passes 1-3 fixed; blame-history's single finding scored 25). The tooling verified CORRECT — two sweep cells re-run end-to-end byte-matched their committed rows — and the defect class migrated entirely into the records about it: AC2 fails (two records claim a probe for a seventh limit where six exist), AC5 fails four ways (a mutation count no reading reproduces, a wrong checker count, a rows/cells unit slip, and claims with no reproducing command), AC4 fails its `states no rule` clause (the live `## Decisions` section states D-020's rule while the reverted tree breaks it), and O2 (90) says D-020 was promoted to `cairn/DECISIONS.md` where `grep -c 'D-020' cairn/DECISIONS.md` = 0. Thrash trigger (a) fires on the fourth return with a re-cut already spent, so the disposition goes to the maintainer rather than to a fifth pass. Status -> in-progress.
 
 - 2026-08-01: pass-4 gate disposition, maintainer's choice: ESCALATE for an independent review rather than a fifth fix pass, a park, or a drop. The question to be settled is not which claims are wrong — those are enumerated and individually small — but what structure would stop a milestone whose records have overclaimed in four consecutive passes, twice inside the very text written to correct the previous overclaim. Status stays `in-progress`; no work proceeds until the review returns.
+
+- 2026-08-01: blocked on RB04 (why this milestone's records keep overclaiming, and what would stop it). Committed to the milestone BRANCH rather than the default branch, a logged deviation from the skill's docs-only-on-main step: M100's tracking state — its status mirror, work log and review sections — lives on the branch with an open PR, and splitting the brief from it would put the milestone's own record in two places.
 
 ## Decisions
 
