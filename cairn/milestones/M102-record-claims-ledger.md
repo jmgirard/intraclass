@@ -42,7 +42,7 @@ candidate row, whose subject is M101's messages.
       no network; `--self-test` PARSES that list and asserts SET equality with the
       shape ids the code dispatches on, so a docstring shape with no code and a
       code shape with no docstring line each exit non-zero.
-- [ ] AC2 A command naming any of an enumerated set of history-dependent forms —
+- [x] AC2 A command naming any of an enumerated set of history-dependent forms —
       a `git log`/`blame`/`rev-list`/`show` subcommand, a `<rev>..<rev>` range, or
       a ref other than `HEAD` — is refused with its reason, that checkout being
       depth-1 with no `main` ref. The set is stated in the docstring and each form
@@ -365,3 +365,49 @@ subject, so they are named first:
 under the M130 floor. Status -> `in-progress`; the fix and re-review are the
 resumed pass's work. O2 rides along as an actioned fix. The thrash count stands
 at one return, well below the third-return threshold.
+
+**Review pass 2 — 2026-08-02 (after the pass-1 fix).** PR #109, head `8ee0131`;
+`main` still unmoved (`git rev-list --count HEAD..origin/main` = 0). All nine CI
+checks pass on this head, `check-references` in 25s with both M102 steps
+`success` in that run's log (steps 9 and 10 of job 91549891345).
+
+**AC2 — RE-VERIFIED, now met as written.** The pass-1 failure was that "a ref
+other than `HEAD`" was implemented as a four-item blacklist. It is now stated
+positively over git's revision slot: a `git grep` must carry `-e <pattern>` and a
+`--` separator, and every operand between them must be `HEAD`. Re-measured at
+this commit over eleven distinct ref spellings — `HEAD~1`, `HEAD^`, `HEAD@{1}`,
+the raw SHA `53dde1c`, the tag `v0.1.0`, `origin/main`, `upstream/main`,
+`some-branch`, `refs/heads/main`, `main`, `master` — every one is refused
+`non-head-ref`, and bare `HEAD` alone is allowed. `main..HEAD` is refused
+`rev-range`; `git log --oneline` `git-history-subcommand`. The two delimiters
+this requires are enforced by a fourth stated form, `ambiguous-operands`, because
+without them a bare token could be the search pattern or a revision and nothing
+here can tell. Four forms are stated in the docstring, four samples construct
+them, `--self-test` runs each both bare and as a ledger row, and refused-parity
+holds at 4/4 so a stated form no sample triggers would itself fail.
+
+**AC1, AC3, AC4, AC5, AC6, AC7 — re-verified against the changed tree.** The
+ledger's row numbering now reports `[3, 4, 5, 6, 7]` against true data lines
+`[3, 4, 5, 6, 7]` (pass 1 measured 2–6 for the same rows). `run_check()` passes
+only grammar-validated rows to `check_falsifiers()`, so a malformed row is
+reported rather than raising. Five rows still cover the five dispatched shapes
+one-for-one and `python3 data-raw/check-record-claims.py` returns `OK: 5
+registered claim(s) re-derived, 0 failure(s)`. The one `absence` row's falsifier
+still fails that row's own expectation, on both counts (`rc-mismatch` and
+`match-mismatch`), now against a search widened to `cairn/milestones/archive/`
+as well as `cairn/DECISIONS.md` — with `data-raw/README.md`'s sentence narrowed
+to state exactly that pair rather than "History ... at all", which was the pass-1
+overclaim. The terminal-row row now settles the five milestone ids in order
+rather than only their count. Routes and probes remain 16/16, and the excision
+harness still shows each probe load-bearing for exactly its own route. D-020 is
+unchanged; its rule 10 states the refusal principle rather than the form list, so
+the new mechanism satisfies it without an edit — which matters, the entry being
+append-only history.
+
+**AC8, AC9 — re-verified.** All nine CI checks green on `8ee0131`. All five
+`data-raw` checkers pass locally in both modes; `air format --check .` clean;
+`lintr::lint_package()` 0 lints; `cairn_validate` all checks passed. The R suite
+(FAIL 0 / ERROR 0 / SKIP 23 / PASS 5435) and `devtools::check` (0/0/0) results
+recorded at the first gate stand unchanged: `git diff main..HEAD --name-only`
+lists nine paths, none under `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION`,
+so no R-visible content changed in the fix pass.
