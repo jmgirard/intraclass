@@ -1,6 +1,6 @@
 # M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -38,13 +38,13 @@ returns an interval, only message text changes.
 
 ## Acceptance criteria
 
-- [x] AC1 A committed script enumerates the CI-stage aborts under `R/` whose
+- [ ] AC1 A committed script enumerates the CI-stage aborts under `R/` whose
       trigger is observed-data or resample degeneracy and whose remedy bullets
       name a `ci_method` value, emitting per site the file, the triggering
       condition, and the method string(s) named. The committed enumeration is
       that script's own output. Its site predicate is the reducer-stage
       degeneracy trigger, so `icc()`'s pre-dispatch design fences do not appear.
-- [x] AC2 For each enumerated site, a committed seeded script sweeps several
+- [ ] AC2 For each enumerated site, a committed seeded script sweeps several
       geometries satisfying that site's trigger condition and records, per
       dataset, that the abort fires — caught as its classed condition from the
       reducer called directly — and, for each `ci_method` that site's remedy
@@ -52,22 +52,22 @@ returns an interval, only message text changes.
       judged by the shipped `boundary_interval_usable()` (`R/boundary-hint.R`)
       rather than a predicate written for this milestone. Every outcome in the
       record comes from a run.
-- [x] AC3 No shipped remedy bullet at an enumerated site names a `ci_method`
+- [ ] AC3 No shipped remedy bullet at an enumerated site names a `ci_method`
       that the AC2 sweep found failing on any of that site's swept datasets.
-- [x] AC4 Each site whose bullets change keeps the condition class and the
+- [ ] AC4 Each site whose bullets change keeps the condition class and the
       leading message line it signalled before this milestone, and its message
       still tells the user something to act on — what about their data is
       degenerate, or a method the sweep found usable there.
-- [x] AC5 Each changed message is pinned by a test that fires the abort at its
+- [ ] AC5 Each changed message is pinned by a test that fires the abort at its
       reducer directly rather than through `icc()`, asserting the property AC3
       states rather than the literal sentence; each pin is mutation-verified by
       restoring the pre-milestone bullet and recording that the suite reds.
-- [x] AC6 `NEWS.md` records the changed messages, and `cairn/DECISIONS.md` gains
+- [ ] AC6 `NEWS.md` records the changed messages, and `cairn/DECISIONS.md` gains
       an entry setting the evidence bar for *static* remedy text naming a
       `ci_method` — a sweep over that abort's trigger class — and stating how it
       stands to D-018's runtime-verification route and D-019's name-no-method
       precedent.
-- [x] AC7 The profile `verify` slot is clean, plus the fuller pre-review check it
+- [ ] AC7 The profile `verify` slot is clean, plus the fuller pre-review check it
       names, with the three `data-raw` checkers run locally.
 
 ## Coverage
@@ -150,6 +150,8 @@ returns an interval, only message text changes.
 - 2026-08-01: implement pass 2 — corrected sweep verdicts (210 rows, boot_samples 999, point-fit-gated denominators). Bootstrap refit-convergence: 6 reached, all five candidates 0/6. Classical MSE = 0: 3 reached (was 4 — the 10x2 cell's point fit dies, so no user could meet that message there), all five 0/3. npbootstrap observed-degeneracy: 8 reached, `montecarlo` 1/8, `searle` 1/8, `burch` 1/8, `bootstrap` 5/8, `npbootstrap` 0/8 — every one PARTIAL, so still nameable by none. npbootstrap degenerate-resamples: 9 reached, `montecarlo` 9/9, unchanged.
 - 2026-08-01: implement pass 2 — the new `gen_se_zero` cell changed a verdict, which is why the gap mattered: `montecarlo` is usable on it (the data is healthy), so the npbootstrap observed-degeneracy site is no longer '0 of 8' but '1 of 8'. The shipped text is unaffected — partial is not nameable — but the RATIONALE was: the NEWS bullet's blanket 'usable on none of them' was false for that site and is rewritten to say what the sweep actually found. The source comment survived unedited because it already said 'none usable ACROSS this guard's trigger class', which 1/8 satisfies.
 - 2026-08-01: implement pass 2 gate — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5480 / SKIP 23 (45 in the new file, up from 23); `lintr::lint_package()` no lints; `air format --check` clean; all four other `data-raw` checkers pass; `cairn_validate` no FAILs.
+
+- 2026-08-01: review pass 2 FAILED the gate (SECOND return). [O] diff-bug found 3 findings >=80: a crash this milestone introduced (`if (NA)` on a NaN MSE, unclassed `simpleError` where main raised a classed abort, 96, reproduced at the gate); the completeness gate blind at the two refactored sites while the ledger, the self-test comment and D-020 all claim it guards them (92, reproduced at the gate); and the pass-1 false-cause defect surviving inside its own repair, NaN conflated with overflow (80). 17 sub-80 findings logged, incl. D-020's sweep parenthetical being backwards (78). Both [S] lenses 0 findings. Thrash trigger (b) fires on AC4 -- twice failed, same shape, new mechanism -- and the plan gate recorded no alternative for how a message should describe a cause, so the disposition goes to the maintainer with an escalation offer. Status -> in-progress.
 
 ## Decisions
 
@@ -323,3 +325,59 @@ to M75 with a loose comment that conflated it with variance degeneracy, so the
 rewrite corrects an imprecision standing since then; that the M97 999-vs-reduced
 lesson says what the sweep now cites; and that D-020 contradicts none of
 D-012/D-013/D-018/D-019.
+
+**GATE FAILURE — returned to `in-progress` (review pass 2, SECOND return).**
+[S] prior-review and [S] blame-history both reported 0 findings; the [O] diff-bug
+lens reported 20, of which 3 score >= 80. Two were reproduced independently at
+the gate before being recorded.
+
+- **F1 (96) — a crash this milestone introduced.** `R/ci-classical.R`'s new branch
+  selector `cause <- if (ss$mse == 0)` evaluates `if (NA)` when MSE is NaN, so the
+  guard dies with an unclassed `simpleError` ("missing value where TRUE/FALSE
+  needed") where `main` raised a classed `intraclass_singular_fit`. Reproduced at
+  the gate through `searle_ci()` on a frame carrying one `Inf` score. Violates #5
+  and #8, and AC4's class-preservation directly. `burch_ci()` shares the guard.
+  The one-character fix is `isTRUE(ss$mse == 0)`.
+- **F3 (92) — the completeness gate is blind at the sites this milestone
+  repaired, and three durable records say otherwise.** Moving the bullets out of
+  the abort call into a `cause <- if (...)` variable put them outside
+  `_slice_call`'s slice. Reproduced at the gate: re-adding
+  `ci_method = "montecarlo"` to the classical `cause` block leaves BOTH `--check`
+  and `--self-test` at rc 0, while the R test file catches it. So the property is
+  defended, but the ledger header ("it reappears here UNCLASSIFIED and `--check`
+  fails"), the self-test comment, and D-020's citation of the enumerator as the
+  enforcement mechanism are each false for 2 of the 3 de-named sites.
+- **F2 (80) — the A1 defect surviving inside the A1 repair.**
+  `mse_zero <- is.nan(obs$logf) || identical(obs$logf, Inf)` conflates 0/0 (a real
+  zero MSE) with Inf/Inf (overflow), so on healthy-but-overflowing data the
+  message asserts "Within-subject variance is exactly zero ... every rater gave
+  each subject the same score" — false. The classical sibling repaired under A4
+  does carry an overflow branch, so the two guards now disagree about what NaN
+  means. Reducer-reachable only today; `icc()` dies in the point fit first.
+
+**Logged below threshold (17).** F4 78 D-020's parenthetical ("the parametric
+bootstrap survives SSA = 0 but not SE = 0") is backwards against its own committed
+sweep, which shows bootstrap usable on SSA = 0 (4/4) and SE = 0 (1/1) and failing
+MSE = 0 (0/3), and says "two disjuncts" where there are now three · F8 75 AC4's
+class requirement is still unpinned for the classical guard · F7 65 the classical
+`else` branch is unreachable via `icc()` and untested · F5 65 NEWS says "every
+interval method the package ships" for a sweep covering five of seven · F20 55 the
+sweep incidentally recorded `burch` raising a RAW unclassed error on all four
+SSA = 0 cells, a #5/#8 violation no record mentions · F6 30 `npb_groups()`
+documents a non-finite fence `anyNA()` does not implement · F11 30 `named_now`'s
+lookbehinds fail silently · F15 30 two form-pins in a property-pin file · F9 25 a
+15-digit log F in user-facing text · F16 25, F13 20, F10 20, F17 20, F12 15,
+F18 15, F19 15.
+
+**Thrash trigger (b) FIRES.** AC4 has now failed twice, each time by a new
+mechanism of the same shape: a message asserting a fact about the user's data that
+is false in a corner (pass 1 A1/A2 — the wrong degeneracy and a single invented
+cause; pass 2 F2 — NaN conflated with overflow). Trigger (a) has NOT fired: this
+is the second return, not the third. The rulebook's remedy for (b) is to
+reconsider the alternative the plan gate recorded against, and the gate recorded
+none for this question — its four recorded alternatives concern which sites to
+cover, the evidence bar, static-vs-runtime method naming, and where the checker
+lives. None covers how a message should describe a cause. So the disposition goes
+to the maintainer with an escalation offer, per (b) and D-004.
+
+Every acceptance box unticked; the next pass re-verifies from scratch.
