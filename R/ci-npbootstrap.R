@@ -193,43 +193,28 @@ npbootstrap_ci <- function(
   # zero jackknife SE leaves the transform / studentization ill-posed. Fail loudly
   # (#5/#8). The third case is NOT a variance degeneracy and this comment used to
   # omit it (M100 review A1).
-  # THREE distinguishable causes, and the message names the one that fired.
-  # M100's first attempt asserted the two variance degeneracies for all of them,
-  # which is false whenever the third fires: `se_ij_logf == 0` needs no degeneracy
-  # at all, only that every subject's share of SSA equals its share of SSE, and it
-  # is reachable on healthy data with a finite log F (review finding A1). Naming a
-  # cause the data does not have is the defect M100 exists to remove, so the cause
-  # is read off the condition rather than assumed. No `ci_method` is named on any
-  # branch: the sweep found none usable across this guard's trigger class (D-020).
-  ssa_zero <- identical(obs$logf, -Inf)
-  mse_zero <- is.nan(obs$logf) || identical(obs$logf, Inf)
+  # The message REPORTS the two quantities that failed and diagnoses nothing.
+  #
+  # M100 reached this wording after twice shipping a message that asserted a fact
+  # about the user's data which was false in a corner: first the wrong degeneracy
+  # (the guard has a third cause, a zero jackknife SE, that needs no degenerate
+  # variance at all — review A1), then NaN conflated with overflow (review F2).
+  # Each fix was correct about the corner it knew of and wrong about the next one,
+  # because a prose cause is an inference and the guard's own condition is not.
+  # Printing `log F` and its standard error cannot be false: they are the numbers
+  # the guard tested. The maintainer chose this over completing the case analysis
+  # (plan gate, 2026-08-01). No `ci_method` is named — the sweep found none usable
+  # across this guard's trigger class (D-020).
   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
-    cause <- if (mse_zero) {
-      c(
-        i = "Within-subject variance is exactly zero, so {.field log F} is not \\
-             finite and the transform does not exist.",
-        i = "Inspect the ratings: every rater gave each subject the same score."
-      )
-    } else if (ssa_zero) {
-      c(
-        i = "Between-subject variance is exactly zero, so {.field log F} is \\
-             {.val {-Inf}} and the transform does not exist.",
-        i = "Inspect the ratings: every subject has the same mean score."
-      )
-    } else {
-      c(
-        i = "The jackknife standard error of {.field log F} is exactly zero \\
-             even though {.field log F} = {.val {obs$logf}} is finite, so the \\
-             studentized pivot has no scale.",
-        i = "Inspect the ratings: every subject contributes the same share of \\
-             the between-subject sum of squares as of the within-subject sum of \\
-             squares, which leaves every influence value at zero."
-      )
-    }
     abort_intraclass(
       c(
         "The one-way transformed bootstrap-t interval is undefined for this data.",
-        cause
+        i = "The studentized pivot needs a finite {.field log F} and a non-zero \\
+             jackknife standard error; here {.field log F} = \\
+             {.val {signif(obs$logf, 6)}} and its standard error = \\
+             {.val {signif(obs$se_ij_logf, 6)}}.",
+        i = "Inspect the ratings and the between- and within-subject mean \\
+             squares behind them."
       ),
       class = "intraclass_singular_fit",
       call = call

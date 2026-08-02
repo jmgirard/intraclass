@@ -36,23 +36,23 @@
 * Three errors raised on degenerate data no longer tell you to switch to
   `ci_method = "montecarlo"` — a parametric bootstrap whose refits will not
   converge, a one-way interval whose `F = MSA/MSE` pivot does not exist, and a
-  transformed bootstrap-t whose studentized pivot does not exist. A committed
-  sweep ran every interval method the package ships on the data that reaches each
-  of those errors, and none of them worked across the whole range of data an error
+  transformed bootstrap-t whose studentized pivot does not exist. A committed sweep ran the
+  five interval methods applicable to these one-way designs on the data that
+  reaches each of those errors, and none of them worked across the whole range of data an error
   covers: at the first two the Monte-Carlo default returned a usable interval on
   no dataset at all, and at the third on only one of eight. Since these messages
   are fixed text shown to everyone who hits them, a suggestion that helps almost
   nobody is worse than none. The error class and the opening sentence of each
   message are unchanged.
 
-* Those same errors now name the cause that actually fired rather than a
-  representative one. The transformed bootstrap-t guard has three: every subject
-  sharing one mean score, every rater agreeing exactly within each subject, or a
-  jackknife standard error of zero — which needs no degenerate variance at all
-  and can occur while `log F` is perfectly finite. Each is now reported in its own
-  terms, so the message no longer describes a variance as zero when it is not.
-  The classical guard likewise separates a zero within-subject variance from a
-  non-finite pivot.
+* Those same errors now **report the quantities that failed** instead of
+  describing what your data must look like. The transformed bootstrap-t error
+  prints the computed `log F` and its jackknife standard error; the classical
+  error prints `MSA`, `MSE` and `F`. Each then points at the ratings behind those
+  mean squares. The previous wording named a likely cause, which was wrong
+  whenever a less common one had fired — the bootstrap-t error can trigger with a
+  perfectly finite `log F` and no degenerate variance anywhere, and the printed
+  numbers say so plainly where a description could not.
 
 * The nearby "the design is too small to resample stably" error **keeps** its
   `ci_method = "montecarlo"` suggestion, because there the observed data is sound

@@ -1,6 +1,6 @@
 # M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -68,7 +68,7 @@ returns an interval, only message text changes.
       stands to D-018's runtime-verification route and D-019's name-no-method
       precedent.
 - [ ] AC7 The profile `verify` slot is clean, plus the fuller pre-review check it
-      names, with the three `data-raw` checkers run locally.
+      names, with every `data-raw` checker run locally.
 
 ## Coverage
 
@@ -100,7 +100,7 @@ returns an interval, only message text changes.
 - [x] T5 `NEWS.md` entry, the `cairn/DECISIONS.md` entry, and any snapshot
       refreshed by the changed text.
 - [x] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`,
-      `air format --check`, and the three `data-raw` checkers.
+      `air format --check`, and every `data-raw` checker.
 
 ## Work log
 
@@ -153,7 +153,18 @@ returns an interval, only message text changes.
 
 - 2026-08-01: review pass 2 FAILED the gate (SECOND return). [O] diff-bug found 3 findings >=80: a crash this milestone introduced (`if (NA)` on a NaN MSE, unclassed `simpleError` where main raised a classed abort, 96, reproduced at the gate); the completeness gate blind at the two refactored sites while the ledger, the self-test comment and D-020 all claim it guards them (92, reproduced at the gate); and the pass-1 false-cause defect surviving inside its own repair, NaN conflated with overflow (80). 17 sub-80 findings logged, incl. D-020's sweep parenthetical being backwards (78). Both [S] lenses 0 findings. Thrash trigger (b) fires on AC4 -- twice failed, same shape, new mechanism -- and the plan gate recorded no alternative for how a message should describe a cause, so the disposition goes to the maintainer with an escalation offer. Status -> in-progress.
 
+- 2026-08-01: implement pass 3 (second review return). Maintainer's disposition at the pass-2 gate: these guards REPORT the quantities that failed and diagnose nothing. Both messages lost their branching entirely, which removes F1 and F2 by CONSTRUCTION rather than by patching their corners — there is no second predicate left to evaluate on a NaN, and no prose cause left to be false. The classical guard's remaining comparison is `isTRUE(ss$mse == 0)`, and the guard verified classed on the exact `Inf`-score input that crashed it at review.
+- 2026-08-01: implement pass 3 — F3 closed durably rather than incidentally. Bullets are inline again, so the concrete blindness is gone, but the enumerator now also FAILS on any abort splicing a variable into its message vector (`spliced_message_sites()`), with `R/ci-montecarlo.R`'s runtime `hint` allow-listed as the one deliberate splice D-018 governs. Mutation-verified: rebuilding the classical bullets in a `cause` variable reds both `--check` and `--self-test`, where before it passed both.
+- 2026-08-01: implement pass 3 — F4 corrected by `D-020 Amendment 1` (append, never edit): D-020's parenthetical had the bootstrap surviving SSA = 0 but not SE = 0, where the sweep shows it usable on both and failing MSE = 0, and said 'two disjuncts' where there are three. The amendment also records that D-020's enforcement claim outran the code until the splice guard landed. D-020's rule and dispositions are unaffected.
+- 2026-08-01: implement pass 3 — F5/F10 NEWS and the sweep script now record that the candidate list is five of seven `ci_method` values, with `mpl` and `posterior` excluded for stated reasons; F8 `art_message()` asserts the SPECIFIC condition class (the classical guard had no class test anywhere in the suite); F9 values print at `signif(, 6)`; F17 checker counts reconciled; F18 the milestone `## Decisions` section now records D-020, its amendment, and the local approach decision; F19 the sweep's runtime note updated for boot_samples 999.
+- 2026-08-01: implement pass 3 — F20 carried out to a ROADMAP candidate row (search-first, no existing row): `burch_ci()` raises a RAW unclassed error on SSA = 0 data, a #5/#8 violation the sweep discovered incidentally and no record mentioned. Out of this milestone's scope.
+- 2026-08-01: implement pass 3 gate — suite FAIL 0 / PASS 5487 / SKIP 23 (52 in the milestone's own file); `devtools::check()` 0/0/0; `lintr::lint_package()` no lints; `air format --check` clean; `devtools::document()` no diff; every `data-raw` checker passes. The committed sweep TSV is untouched by this pass: pass 3 changed message text and tooling, not measurements.
+
 ## Decisions
+
+- 2026-08-01 (D-020, promoted to `cairn/DECISIONS.md`): static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class. Promoted rather than kept local because it binds every future abort in the package, not just these four.
+- 2026-08-01 (D-020 Amendment 1, promoted): D-020's bootstrap parenthetical was backwards against its own sweep, and its enforcement claim named a guard the enumerator did not yet have. Corrected by amendment because DECISIONS.md is history and is never edited.
+- 2026-08-01 (milestone-local): these guards REPORT the quantities that failed and diagnose nothing. Chosen by the maintainer at the review pass-2 gate after two returns in which a described cause was false in a corner; the alternative, completing the case analysis, was rejected as the approach that had already failed twice. The bootstrap guard, which never diagnosed, is the one that drew no truthfulness finding in either pass.
 
 ## Review
 

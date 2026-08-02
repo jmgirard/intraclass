@@ -44,31 +44,23 @@ classical_oneway_ss <- function(groups) {
 # exist to serve (small-but-positive F passes and returns a finite interval).
 classical_guard_observed <- function(ss, method, call) {
   f <- ss$msa / ss$mse
-  if (ss$mse == 0 || !is.finite(f)) {
-    # Two disjuncts, two different facts about the data. The zero-MSE branch is
-    # the common one; a non-finite F with a positive MSE is a different failure
-    # and must not be described as zero within-subject variance (review A4, the
-    # same shape as A1 next door). No `ci_method` is named: the sweep found none
-    # usable across this guard's trigger class (D-020).
-    cause <- if (ss$mse == 0) {
-      c(
-        i = "Within-subject variance is exactly zero (MSE = {.val {ss$mse}}), so \\
-             the {.field F = MSA/MSE} pivot does not exist.",
-        i = "Inspect the ratings: every rater gave each subject the same score."
-      )
-    } else {
-      c(
-        i = "The {.field F = MSA/MSE} pivot is not finite \\
-             (MSA = {.val {ss$msa}}, MSE = {.val {ss$mse}}), so the exact-F \\
-             interval is not defined.",
-        i = "Inspect the ratings for non-finite scores or a scale extreme enough \\
-             to overflow the mean squares."
-      )
-    }
+  if (isTRUE(ss$mse == 0) || !is.finite(f)) {
+    # REPORTS the mean squares and diagnoses nothing -- the same discipline as the
+    # npbootstrap guard next door, and for the same reason (M100 reviews A1/A4/F2).
+    #
+    # `isTRUE()` is load-bearing, not defensive noise: `ss$mse` can be NaN, and a
+    # bare `ss$mse == 0` is then NA. The outer `||` survives that (NA || TRUE is
+    # TRUE), but M100's first repair branched a second time on the same bare
+    # comparison and `if (NA)` killed the guard with an unclassed simpleError
+    # where a classed abort belongs (review F1, #5/#8). There is no second branch
+    # here now, and this guard is the only place the comparison is made.
     abort_intraclass(
       c(
         "The classical one-way {method} interval is undefined for this data.",
-        cause
+        i = "The {.field F = MSA/MSE} pivot needs a finite, non-zero MSE; here \\
+             MSA = {.val {signif(ss$msa, 6)}}, MSE = {.val {signif(ss$mse, 6)}} \\
+             and F = {.val {signif(f, 6)}}.",
+        i = "Inspect the ratings behind those mean squares."
       ),
       class = "intraclass_singular_fit",
       call = call

@@ -25,7 +25,7 @@
 # method today -- the `named_by_remedy` column below -- so that column cannot go
 # stale against the shipped text. This script MEASURES only.
 #
-# Run from the repo root (~1 min):
+# Run from the repo root (~25 min at boot_samples = 999):
 #   Rscript data-raw/sweep-abort-remedies.R
 # Writes data-raw/abort-remedy-sweep.tsv (one row per site x dataset x method).
 
@@ -108,6 +108,10 @@ gen_se_zero <- function(n_s, n_r, seed = 1) {
 # The alternatives measured at every site. A remedy may only name a method the
 # sweep found usable across the WHOLE trigger class, so the rewrite needs each
 # candidate measured, not just the one the current text happens to name.
+# Five of the seven `ci_method` values. `mpl` is excluded because it is fenced to
+# the balanced two-way random agreement cell and aborts `intraclass_unsupported`
+# on every one-way dataset here; `posterior` because it requires the brms engine,
+# which these fits do not use. Recorded rather than assumed (review F5/F10).
 candidates <- c("montecarlo", "searle", "burch", "npbootstrap", "bootstrap")
 
 # ---- the site register -------------------------------------------------------

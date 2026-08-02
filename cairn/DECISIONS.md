@@ -726,3 +726,36 @@ changed. `icc()`'s pre-dispatch design and argument fences are out of scope —
 they refuse a design rather than degenerate data, so the default they name is not
 being asked to survive anything. A CI checker enforcing this rule against future
 edits is a ROADMAP candidate, not built here.
+
+### D-020 Amendment 1 (2026-08-01): correcting D-020's bootstrap parenthetical and naming the splice guard behind its enforcement claim
+
+**Context:** M100's review pass 2 found two statements in D-020 that its own
+committed evidence does not support. D-020 is history and is never edited
+(IP4/D-045), so the corrections are recorded here and this amendment governs.
+
+**Correction 1 — the parenthetical is backwards.** D-020's Decision paragraph
+justifies "a method usable on only part of a trigger class is not nameable" with
+"the npbootstrap observed-data guard's two disjuncts disagree (the parametric
+bootstrap survives SSA = 0 but not SE = 0)". Against `abort-remedy-sweep.tsv` at
+site `bf1a802a9c`, the parametric bootstrap is usable on SSA = 0 (4 of 4 cells)
+**and** on SE = 0 (1 of 1); what it fails is MSE = 0 (0 of 3). The guard also has
+**three** disjuncts, not two — the third, a zero jackknife standard error with a
+finite `log F`, is the one M100's review pass 1 found the shipped message
+misdescribing. The rule D-020 states is unaffected: `bootstrap` is usable on 5 of
+the 8 datasets that reached that guard, which is still partial and still not
+nameable. Only the illustration was wrong.
+
+**Correction 2 — the enforcement claim needed a guard it did not have.** D-020
+cites `data-raw/enumerate-ci-method-remedies.py` as the mechanism that stops a
+future remedy naming an unswept method. Review pass 2 measured that the scanner
+reads bullets only from inside the abort call, so bullets built in a `cause`
+variable are invisible to it — as two of M100's own guards briefly were, passing
+`--check` with a re-added `ci_method` name. The enumerator now fails on any abort
+that splices a variable into its message vector (`spliced_message_sites()`), with
+`R/ci-montecarlo.R`'s runtime `hint` allow-listed as the one deliberate splice
+D-018 governs. The cited enforcement is real as of this amendment; before it, the
+claim outran the code.
+
+**Consequences:** D-020's rule, its scope, and its dispositions all stand. Neither
+correction changes what shipped: the three de-named sites name no method, and the
+resample guard keeps `montecarlo` on 9-of-9 evidence. Supersedes nothing else.

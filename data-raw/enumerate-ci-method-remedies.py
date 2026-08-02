@@ -68,6 +68,50 @@ ABORT_R = "R/abort.R"
 IF_RE = re.compile(r"^\s*(if|\} else if)\s*\(")
 
 
+# Aborts whose message vector deliberately splices a variable rather than listing
+# its bullets inline. `mc_ci()`'s `hint` is the runtime-verified boundary hint
+# (M93/M97, governed by D-018): it is BUILT by `boundary_method_hint()`, which
+# names methods only after running them, so it is out of this static gate's remit
+# by design. Anything else spliced is a gap — see `spliced_message_sites()`.
+SPLICE_ALLOWED = {("R/ci-montecarlo.R", "hint")}
+
+
+def spliced_message_sites():
+    """Aborts whose bullets are NOT inline, which this enumerator cannot see.
+
+    The scanner reads bullets out of the abort call itself. That assumption held
+    until M100 refactored two guards to build their bullets in a `cause <- if
+    (...)` variable — after which re-adding a `ci_method` name to either passed
+    both `--check` and `--self-test` (review finding F3), while the ledger, the
+    self-test and D-020 all advertised that it would fail.
+
+    Rather than leave the assumption silent, this makes it CHECKED: any abort
+    splicing a bare symbol into its message vector is reported, so the gap
+    announces itself instead of being discovered by a reviewer. Extending the
+    scanner to resolve such a variable would be the alternative; refusing the
+    shape is cheaper and keeps one way to write these messages.
+    """
+    out = []
+    for path in sorted(glob.glob(R_GLOB)):
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+        for idx, line in enumerate(lines):
+            if not ABORT_RE.match(line):
+                continue
+            first, last = _slice_call(lines, idx)
+            for raw in lines[first : last + 1]:
+                stripped = raw.split("#")[0].strip().rstrip(",")
+                # A bare identifier on its own line inside the message vector:
+                # not a string, not `name = value`, not punctuation.
+                if re.fullmatch(r"[a-zA-Z._][a-zA-Z0-9._]*", stripped):
+                    if stripped in ("c", "call"):
+                        continue
+                    if (path, stripped) in SPLICE_ALLOWED:
+                        continue
+                    out.append((path, first + 1, stripped))
+    return out
+
+
 def wrapper_classes():
     """Map each `abort_*` wrapper to the condition class it sets internally.
 
@@ -289,7 +333,16 @@ def check(sites, ledger):
             "changed its leading line, or stopped naming a ci_method" % key,
             file=sys.stderr,
         )
-    if missing or stale:
+    spliced = spliced_message_sites()
+    for path, line, sym in spliced:
+        print(
+            "SPLICED %s:%d builds its bullets in `%s` rather than inline -- this "
+            "scanner cannot see them, so a `ci_method` named there would escape "
+            "the gate. Inline the bullets, or extend the scanner and add the site "
+            "to SPLICE_ALLOWED with a reason." % (path, line, sym),
+            file=sys.stderr,
+        )
+    if missing or stale or spliced:
         return 1
     # The committed enumeration must be this run's own output, or it is a
     # hand-list wearing a generated file's name.
@@ -416,6 +469,13 @@ def self_test():
         fails.append(
             "a site still reports class '(default)': %s"
             % [s["key"] for s in sites if s["class"] == "(default)"]
+        )
+
+    # 2d. The scanner's own assumption, checked rather than assumed (review F3).
+    for path, line, sym in spliced_message_sites():
+        fails.append(
+            "%s:%d splices `%s` into its message vector; bullets there are "
+            "invisible to this enumerator" % (path, line, sym)
         )
 
     # 3. Keys are stable and unique -- a collision would let one ledger row

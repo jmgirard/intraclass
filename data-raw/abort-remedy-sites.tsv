@@ -16,7 +16,10 @@
 # because the sweep found no method usable across their trigger classes. They are
 # out of the enumeration by the same predicate that admitted them. Should one
 # ever name a method again, it reappears here UNCLASSIFIED and `--check` fails
-# until someone re-measures it.
+# until someone re-measures it. That claim holds only while the bullets are
+# INLINE in the abort call -- it was briefly false when two guards built theirs in
+# a `cause` variable (M100 review F3) -- so `--check` now also fails on any abort
+# that splices a variable into its message vector.
 #
 # key	disposition	reason
 R/ci-bootstrap.R:6c20062478	fence	Engine capability: this engine/design pair ships no simulate_refit contract. Nothing about the data is degenerate, so the Monte-Carlo default it names is unaffected.

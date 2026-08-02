@@ -56,6 +56,19 @@ art_se_zero <- function() {
   )
 }
 
+# One non-finite score drives both mean squares to NaN, so `ss$mse == 0` is NA.
+# This is the input that crashed the guard at review pass 2 (finding F1).
+art_nan_mse <- function(n_s = 6, n_r = 3) {
+  set.seed(1)
+  score <- stats::rnorm(n_s * n_r)
+  score[1] <- Inf
+  data.frame(
+    subject = rep(seq_len(n_s), each = n_r),
+    rater = rep(seq_len(n_r), times = n_s),
+    score = score
+  )
+}
+
 art_ests <- function(k_eff = 3) {
   list(icc_estimand(unit = "single", k_eff = k_eff, oneway = TRUE))
 }
@@ -79,9 +92,13 @@ art_stub_engine <- function(n_fail = 99L) {
 
 # The rendered text a user really sees, bullets included. `conditionMessage()` on
 # an rlang condition carries the body; the message vector alone does not (M93).
-art_message <- function(expr) {
+# Asserts the SPECIFIC condition class, not just the `intraclass_error` parent.
+# AC4 requires each guard to keep the class it signalled, and the parent is shared
+# by every abort in the package, so pinning it pinned nothing (review F8/D1): the
+# classical guard has no other test of its class anywhere in the suite.
+art_message <- function(expr, class = "intraclass_singular_fit") {
   cnd <- tryCatch(expr, error = function(e) e)
-  expect_s3_class(cnd, "intraclass_error")
+  expect_s3_class(cnd, class)
   conditionMessage(cnd)
 }
 
@@ -214,71 +231,76 @@ test_that("the resample guard keeps the remedy the sweep confirmed", {
   expect_identical(art_named_methods(txt), "montecarlo")
 })
 
-test_that("each degeneracy guard names the cause that actually fired", {
-  # Review finding A1: the npbootstrap observed-data guard has THREE causes and
-  # M100's first attempt asserted the two variance degeneracies for all of them,
-  # so the message was false on the third. A message that names a cause the data
-  # does not have is the same defect as a remedy naming a method that does not
-  # work, which is what this milestone exists to remove.
-  se_zero <- art_message(npbootstrap_ci(
-    art_se_zero(),
-    art_ests(2),
-    conf_level = 0.95,
-    boot_samples = 49L,
-    seed = 1L
-  ))
-  # The discriminating assertion: on this data NEITHER variance is zero, so the
-  # message must not say one is.
-  expect_no_match(se_zero, "variance is exactly zero")
-  expect_match(se_zero, "jackknife standard error", fixed = TRUE)
-  expect_match(se_zero, "is finite", fixed = TRUE)
+test_that("the degeneracy guards report values and diagnose nothing", {
+  # The property that cost this milestone two review returns. Twice a message
+  # asserted a fact about the user's data -- which degeneracy had occurred -- and
+  # twice it was false in a corner the author had not thought of (review A1: the
+  # guard has a third cause needing no degenerate variance; review F2: NaN from
+  # overflow read as NaN from 0/0). The maintainer's disposition was to stop
+  # diagnosing: print the quantities the guard actually tested, which cannot be
+  # false because they ARE the test.
+  #
+  # So this asserts the ABSENCE of a diagnosis, over inputs that hit different
+  # causes. A future author who reintroduces a cause sentence reds this, whatever
+  # the sentence says, because the pattern is what it claims to know.
+  diagnosis <- "variance is exactly zero|every rater gave each subject|every subject has the same mean"
 
-  ssa_zero <- art_message(npbootstrap_ci(
-    art_ssa0(),
-    art_ests(),
-    conf_level = 0.95,
-    boot_samples = 49L,
-    seed = 1L
-  ))
-  expect_match(
-    ssa_zero,
-    "Between-subject variance is exactly zero",
-    fixed = TRUE
+  cases <- list(
+    npb_se_zero = art_message(npbootstrap_ci(
+      art_se_zero(),
+      art_ests(2),
+      conf_level = 0.95,
+      boot_samples = 49L,
+      seed = 1L
+    )),
+    npb_ssa0 = art_message(npbootstrap_ci(
+      art_ssa0(),
+      art_ests(),
+      conf_level = 0.95,
+      boot_samples = 49L,
+      seed = 1L
+    )),
+    npb_mse0 = art_message(npbootstrap_ci(
+      art_mse0(),
+      art_ests(),
+      conf_level = 0.95,
+      boot_samples = 49L,
+      seed = 1L
+    )),
+    classical_mse0 = art_message(
+      searle_ci(art_mse0(), art_ests(), conf_level = 0.95)
+    ),
+    classical_nan = art_message(
+      searle_ci(art_nan_mse(), art_ests(), conf_level = 0.95)
+    )
   )
-  expect_match(ssa_zero, "every subject has the same mean score", fixed = TRUE)
+  for (nm in names(cases)) {
+    expect_no_match(cases[[nm]], diagnosis, info = nm)
+  }
 
-  mse_zero <- art_message(npbootstrap_ci(
-    art_mse0(),
-    art_ests(),
-    conf_level = 0.95,
-    boot_samples = 49L,
-    seed = 1L
-  ))
-  expect_match(
-    mse_zero,
-    "Within-subject variance is exactly zero",
-    fixed = TRUE
-  )
-  expect_match(
-    mse_zero,
-    "every rater gave each subject the same score",
-    fixed = TRUE
-  )
+  # ...and each does report the quantities it tested, so refusing to diagnose has
+  # not left the user with nothing (#8, GP1).
+  for (nm in c("npb_se_zero", "npb_ssa0", "npb_mse0")) {
+    expect_match(cases[[nm]], "log F = ", fixed = TRUE, info = nm)
+    expect_match(cases[[nm]], "standard error = ", fixed = TRUE, info = nm)
+  }
+  for (nm in c("classical_mse0", "classical_nan")) {
+    expect_match(cases[[nm]], "MSA = ", fixed = TRUE, info = nm)
+    expect_match(cases[[nm]], "MSE = ", fixed = TRUE, info = nm)
+  }
+})
 
-  # The three branches are mutually exclusive in what they claim, so no two of
-  # them can be satisfied by one message.
-  expect_no_match(ssa_zero, "Within-subject variance is exactly zero")
-  expect_no_match(mse_zero, "Between-subject variance is exactly zero")
-
-  # ...and the same discipline on the classical guard's second disjunct (A4):
-  # a zero-MSE dataset gets the zero-MSE sentence, not the non-finite-F one.
-  classical <- art_message(searle_ci(art_mse0(), art_ests(), conf_level = 0.95))
-  expect_match(
-    classical,
-    "Within-subject variance is exactly zero",
-    fixed = TRUE
+test_that("a NaN mean square still aborts classed, not with a bare R error", {
+  # Review finding F1: M100's own first repair branched a second time on
+  # `ss$mse == 0`, which is NA when MSE is NaN, so `if (NA)` killed the guard with
+  # an unclassed simpleError where `main` had raised a classed abort -- a #5/#8
+  # regression introduced by a truthfulness fix. One `Inf` score reaches it.
+  cnd <- tryCatch(
+    searle_ci(art_nan_mse(), art_ests(), conf_level = 0.95),
+    error = function(e) e
   )
-  expect_no_match(classical, "not finite")
+  expect_s3_class(cnd, "intraclass_singular_fit")
+  expect_false(inherits(cnd, "simpleError"))
 })
 
 test_that("the SE-zero guard still names no ci_method", {
