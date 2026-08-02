@@ -1,4 +1,4 @@
-# M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
+# M100: Measure which abort remedies are untruthful, and gate the enumeration
 
 - **Status:** in-progress
 - **Priority:** normal
@@ -9,98 +9,98 @@
 
 ## Goal
 
-Every CI-stage abort raised by data degeneracy names an alternative `ci_method`
-only where a seeded sweep of that abort's own trigger condition shows the named
-method returning a usable interval.
+Measure which `ci_method` names the CI-reducer degeneracy aborts offer are
+untruthful, and gate the enumeration of sites that make such a claim.
 
 ## Scope
 
-**In:** the four reducer-stage aborts whose remedy bullets name
-`ci_method = "montecarlo"` on data that has already defeated a variance-based
-method — `bootstrap_ci()`'s refit-convergence guard (`R/ci-bootstrap.R:48`),
-`classical_guard_observed()`'s MSE = 0 / non-finite-F guard (`R/ci-classical.R`),
-and `npbootstrap_ci()`'s observed-data and degenerate-resample guards
-(`R/ci-npbootstrap.R`). A committed enumeration of those sites, a committed
-seeded sweep measuring each named method against each site's trigger class, the
-message rewrites the sweep condemns, direct-at-reducer regression tests, a NEWS
-entry, and a D-entry setting the evidence bar for static remedy text.
+**In:** the enumerator (`data-raw/enumerate-ci-method-remedies.py`), its committed
+enumeration and classification ledger, and the seeded sweep
+(`data-raw/sweep-abort-remedies.R`) with its committed results. Evidence and
+tooling only.
 
-**Out:** `icc()`'s pre-dispatch design and argument fences (`R/icc.R:605`, `615`,
-`1423`, `1444`, `1453`, `1480` and siblings) — they refuse a *design*, not
-degenerate data, and the default they name works there; excluded at the plan
-gate (2026-08-01) and not revisited absent evidence one of them misleads.
-Extending M93's runtime `boundary_method_hint()` to these sites → rejected at the
-plan gate, ROADMAP candidate row with its promotion condition. A committed ledger
-plus CI checker pinning this rule against future edits → ROADMAP candidate row
-(user's choice at the plan gate over a follow-on milestone). The
-fallback-on-abort default D-012/D-013 fenced out stays fenced: no abort here
-returns an interval, only message text changes.
+**Out — and this is the re-cut's whole point.** Every message change goes to
+**M101**: removing the untruthful `ci_method` names, and correcting the two
+diagnostic bullets this milestone's review proved false on `main` (the npbootstrap
+"between- or within-subject variance is exactly zero" sentence, false on the
+zero-jackknife-SE disjunct; the classical "within-subject variance is exactly
+zero" sentence, false when `!is.finite(f)` fires through MSA). Shipping the name
+removals alone would leave those two on `main` under a NEWS entry about
+truthfulness, which the re-cut audit found forbidden by #5/#8. The rule governing
+what a message may assert, and the `cairn/DECISIONS.md` entry stating it, are
+M101's too, so the rule never sits on `main` while the code breaks it. The
+branch's D-020, its amendment, its NEWS bullet and its message pins are removed
+from this branch and re-authored in M101 — none has reached `main`, so nothing
+history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 ## Acceptance criteria
 
-- [ ] AC1 A committed script enumerates the CI-stage aborts under `R/` whose
-      trigger is observed-data or resample degeneracy and whose remedy bullets
-      name a `ci_method` value, emitting per site the file, the triggering
-      condition, and the method string(s) named. The committed enumeration is
-      that script's own output. Its site predicate is the reducer-stage
-      degeneracy trigger, so `icc()`'s pre-dispatch design fences do not appear.
-- [ ] AC2 For each enumerated site, a committed seeded script sweeps several
-      geometries satisfying that site's trigger condition and records, per
-      dataset, that the abort fires — caught as its classed condition from the
-      reducer called directly — and, for each `ci_method` that site's remedy
-      names, whether that method returns a usable interval on the same data,
-      judged by the shipped `boundary_interval_usable()` (`R/boundary-hint.R`)
-      rather than a predicate written for this milestone. Every outcome in the
-      record comes from a run.
-- [ ] AC3 No shipped remedy bullet at an enumerated site names a `ci_method`
-      that the AC2 sweep found failing on any of that site's swept datasets.
-- [ ] AC4 Each site whose bullets change keeps the condition class and the
-      leading message line it signalled before this milestone, and its message
-      still tells the user something to act on — what about their data is
-      degenerate, or a method the sweep found usable there.
-- [ ] AC5 Each changed message is pinned by a test that fires the abort at its
-      reducer directly rather than through `icc()`, asserting the property AC3
-      states rather than the literal sentence; each pin is mutation-verified by
-      restoring the pre-milestone bullet and recording that the suite reds.
-- [ ] AC6 `NEWS.md` records the changed messages, and `cairn/DECISIONS.md` gains
-      an entry setting the evidence bar for *static* remedy text naming a
-      `ci_method` — a sweep over that abort's trigger class — and stating how it
-      stands to D-018's runtime-verification route and D-019's name-no-method
-      precedent.
-- [ ] AC7 The profile `verify` slot is clean, plus the fuller pre-review check it
+- [ ] AC1 A committed script enumerates the aborts under `R/ci-*.R` matching its
+      stated predicate, emitting per site the file, the triggering condition and
+      the `ci_method` string(s) its remedy bullets name; the committed enumeration
+      is that script's own output; a committed ledger classifies every emitted
+      site; and `--check` exits non-zero on an unclassified site, on a ledger row
+      matching no site, and on a stale committed enumeration. Each of those three
+      failure modes is demonstrated by a self-test probe that reds when that
+      failure is introduced. The enumeration contains at least the four guards
+      this milestone measured — `bootstrap_ci()`'s refit-convergence guard,
+      `classical_guard_observed()`, and `npbootstrap_ci()`'s observed-data and
+      degenerate-resample guards — identified by their guarding conditions, so a
+      predicate that matched nothing could not satisfy this criterion.
+- [ ] AC2 The script's docstring, the ledger header and this milestone's records
+      state the predicate's LIMITS — the message shapes the script does not match
+      — and each stated limit is demonstrated by a self-test probe that
+      constructs that shape and shows it unmatched. No record claims detection
+      coverage broader than a probe demonstrates.
+- [ ] AC3 For each site the ledger marks `sweep`, a committed seeded script
+      records, across several geometries of that site's trigger condition and at
+      the shipped `boot_samples` default, whether each swept `ci_method` returns a
+      usable interval on data that reached the abort, judged by the shipped
+      `boundary_interval_usable()`. Reaching the abort is confirmed by catching
+      its own classed condition from the reducer called directly. The swept
+      candidate set is named in the script with a stated reason for every
+      `ci_method` value excluded. A cell whose point fit fails before the guard is
+      excluded from the denominator and recorded as excluded.
+- [ ] AC4 This milestone changes nothing user-facing and states no rule:
+      `git diff main..HEAD --name-only` lists no path under `R/`, and lists
+      neither `NEWS.md` nor `cairn/DECISIONS.md`.
+- [ ] AC5 Every factual claim this milestone's records make about a measured
+      result, a count, a ledger key, or this milestone's own review history is
+      accompanied by a command that recomputes or locates it, and that command
+      reproduces the stated figure or string.
+- [ ] AC6 The profile `verify` slot is clean, plus the fuller pre-review check it
       names, with every `data-raw` checker run locally.
 
 ## Coverage
 
-- AC1 → T1
-- AC2 → T2
-- AC3 → T2, T3
-- AC4 → T3
-- AC5 → T4
-- AC6 → T5
-- AC7 → T6
+- AC1 → T2, T3
+- AC2 → T3
+- AC3 → T4
+- AC4 → T1
+- AC5 → T5
+- AC6 → T6
 
 ## Tasks
 
-- [x] T1 `data-raw/enumerate-ci-method-remedies.py` — scan `R/ci-*.R` for classed
-      aborts whose message bullets name a `ci_method` value and whose trigger is
-      observed-data or resample degeneracy; commit its output table.
-- [x] T2 `data-raw/sweep-abort-remedies.R` — per enumerated site, generate
-      several geometries meeting its trigger condition, confirm the abort fires
-      from the reducer called directly, run each named method, and classify the
-      result through `boundary_interval_usable()`; commit the results table.
-- [x] T3 Rewrite the remedies T2 condemns, at each site keeping its abort class
-      and leading line: `bootstrap_ci()` (`R/ci-bootstrap.R:48`),
-      `classical_guard_observed()` (`R/ci-classical.R`), and the two
-      `npbootstrap_ci()` degeneracy guards (`R/ci-npbootstrap.R`).
-- [x] T4 Tests firing each rewritten abort at its reducer directly — a stub
-      `simulate_refit` for the bootstrap site, raw degenerate frames for the
-      others — asserting no condemned method is named; mutation-verify each by
-      restoring the old bullet.
-- [x] T5 `NEWS.md` entry, the `cairn/DECISIONS.md` entry, and any snapshot
-      refreshed by the changed text.
-- [x] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`,
-      `air format --check`, and every `data-raw` checker.
+- [ ] T1 Strip this branch back to tooling and evidence: revert every file under
+      `R/` to `main`, drop the `NEWS.md` bullet, drop D-020 and its amendment from
+      `cairn/DECISIONS.md`, and remove the message pins from
+      `tests/testthat/test-abort-remedy-truthfulness.R` (they pin reverted text).
+      Everything removed here is re-authored in M101.
+- [ ] T2 Anchor the enumerator: assert in `--self-test` that the four measured
+      guards appear, keyed on their guarding conditions.
+- [ ] T3 Automate the three `--check` failure modes as self-test probes (they are
+      currently hand-mutated in the work log), and state the predicate's limits in
+      the docstring, the ledger header and the milestone records, one probe per
+      stated limit — including the splice shapes `spliced_message_sites()` does
+      not match.
+- [ ] T4 Re-run the sweep and confirm each recorded reach is the site's own
+      classed condition from the reducer; keep the named candidate set with its
+      per-exclusion reasons.
+- [ ] T5 Add the recompute/locate command beside every factual claim in this
+      milestone's records, and run each.
+- [ ] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
+      `lintr::lint_package()`, `air format --check`, every `data-raw` checker.
 
 ## Work log
 
@@ -161,6 +161,9 @@ returns an interval, only message text changes.
 - 2026-08-01: implement pass 3 gate — suite FAIL 0 / PASS 5487 / SKIP 23 (52 in the milestone's own file); `devtools::check()` 0/0/0; `lintr::lint_package()` no lints; `air format --check` clean; `devtools::document()` no diff; every `data-raw` checker passes. The committed sweep TSV is untouched by this pass: pass 3 changed message text and tooling, not measurements.
 
 - 2026-08-01: review pass 3 FAILED the gate — THIRD return, thrash trigger (a) fires and (b) fires for the third consecutive pass. Two gate-reproduced findings of the milestone's own defect class: the classical message states a requirement the guard does not test (MSA can be the non-finite one, MSE finite and non-zero), and the splice guard catches one splice shape while three records claim it catches any (`i = cause` passes both gates). Plus six findings against this milestone's own records, including a false claim about its own review history and an error inside D-020 Amendment 1's correction. [S] prior-review 0 findings and confirmed passes 1-2 fully fixed. Per the thrash rule this is NOT queued for a fourth implement pass; it routes to /milestone-plan for a re-cut. Status -> in-progress.
+
+- 2026-08-01: RE-CUT by /milestone-plan after the third review return. M100 keeps measurement and tooling only and ships nothing user-facing; every message change and the rule governing them move to M101. Gate decisions: the first milestone ships no message changes at all, because a deletion-only diff would leave on `main` the two diagnostic bullets this milestone's own review proved false, under a NEWS entry about truthfulness (re-cut audit; #5/#8); the rule lands with the messages it governs; and D-020 plus its amendment, neither of which has reached `main`, are removed from this branch and re-authored as one correct entry in M101. Tasks re-cut to T1-T6; every acceptance box unticked -- the criteria changed, so each re-verifies from scratch. The prior tasks are superseded but their work stays on the branch.
+- 2026-08-01: re-cut criteria audit ([O], fresh context) returned three gaps, all fixed before the file was written: an unanchored enumeration predicate (AC1 now names the four measured guards by their conditions, so a predicate matching nothing cannot satisfy it), a recompute rule scoped only to sweep numbers (AC5 now covers counts, ledger keys and this milestone's own review-history claims, which is where most of pass 3's record errors were), and the three `--check` failure modes being hand-mutated rather than probed (T3).
 
 ## Decisions
 
