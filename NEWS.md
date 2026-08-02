@@ -33,6 +33,20 @@
   `intraclass_engine_error` instead. Intervals on data with a well-defined
   likelihood are unchanged.
 
+* Three errors raised on degenerate data no longer tell you to switch to
+  `ci_method = "montecarlo"`. Across the datasets that reached each of those
+  errors in a committed sweep — a parametric bootstrap whose refits will not
+  converge, a one-way dataset with no within-subject variance, and a transformed
+  bootstrap-t whose `log F` transform is undefined — the Monte-Carlo default
+  returned a usable interval on none of them, so the one remedy those messages
+  offered was the one that could not work. Each now points at the ratings and says
+  what to look for: subjects scored identically by every rater, or every subject
+  sharing one mean score. The error class and the opening sentence of each message
+  are unchanged. The nearby "the design is too small to resample stably" error
+  **keeps** its `ci_method = "montecarlo"` suggestion, because there the observed
+  data is sound — only the resamples degenerate — and the default was measured
+  returning a usable interval on every dataset that reached it.
+
 * The `ci_method = "mpl"` documentation now states the interpolation evidence
   behind off-node subject counts: the correction constant is calibrated at
   subject-count nodes and linearly interpolated between them, and the

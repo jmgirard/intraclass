@@ -199,15 +199,15 @@ npbootstrap_ci <- function(
              (log F = {.val {obs$logf}}), so the {.field log F} transform and its \\
              jackknife SE do not exist.",
         # M100: this bullet used to offer `ci_method = "montecarlo"`, measured
-        # FALSE -- the default aborts on every dataset that reaches this guard,
-        # across both its disjuncts (data-raw/sweep-abort-remedies.R). The
-        # parametric bootstrap survives the SSA = 0 half but not the SE = 0 half,
-        # so it is not nameable in static text either: a bullet here has to hold
-        # for the whole trigger class.
-        i = "A different {.code ci_method} will not rescue this -- the package's \\
-             other interval methods were measured failing on data that reaches \\
-             this guard. Inspect the ratings: either every subject has the same \\
-             mean score, or every rater agreed exactly within each subject."
+        # FALSE -- across the datasets that reached this guard in
+        # data-raw/sweep-abort-remedies.R the default was usable on none of them,
+        # over both of the disjuncts above. Nor is any other method nameable: the
+        # parametric bootstrap survives the SSA = 0 half and fails the SE = 0
+        # half, and static text has to hold for the whole trigger class it is
+        # shown on (D-020). So the bullet claims nothing about methods and states
+        # only what the guard's own condition establishes.
+        i = "Inspect the ratings: either every subject has the same mean score, \\
+             or every rater agreed exactly within each subject."
       ),
       class = "intraclass_singular_fit",
       call = call

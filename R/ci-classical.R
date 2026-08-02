@@ -51,14 +51,12 @@ classical_guard_observed <- function(ss, method, call) {
         i = "Within-subject variance is exactly zero (MSE = {.val {ss$mse}}), so \\
              the {.field F = MSA/MSE} pivot does not exist.",
         # M100: this bullet used to offer `ci_method = "montecarlo"`, measured
-        # FALSE -- with no within-subject variance the Monte-Carlo default aborts
-        # too, and on some geometries the point fit dies before it
-        # (data-raw/sweep-abort-remedies.R). Re-naming a method needs sweep
-        # evidence over this guard's trigger class.
-        i = "A different {.code ci_method} will not rescue this -- the package's \\
-             other interval methods were measured failing on data with no \\
-             within-subject variance. Inspect the ratings: every rater gave each \\
-             subject the same score."
+        # FALSE -- across the datasets that reached this guard in
+        # data-raw/sweep-abort-remedies.R no shipped method was usable, and on
+        # some geometries the point fit died before any of them ran. It now names
+        # no method and states only what the guard's own condition establishes
+        # (D-020).
+        i = "Inspect the ratings: every rater gave each subject the same score."
       ),
       class = "intraclass_singular_fit",
       call = call

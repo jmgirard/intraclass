@@ -97,7 +97,7 @@ returns an interval, only message text changes.
       `simulate_refit` for the bootstrap site, raw degenerate frames for the
       others — asserting no condemned method is named; mutation-verify each by
       restoring the old bullet.
-- [ ] T5 `NEWS.md` entry, the `cairn/DECISIONS.md` entry, and any snapshot
+- [x] T5 `NEWS.md` entry, the `cairn/DECISIONS.md` entry, and any snapshot
       refreshed by the changed text.
 - [ ] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`,
       `air format --check`, and the three `data-raw` checkers.
@@ -127,6 +127,10 @@ returns an interval, only message text changes.
 
 - 2026-08-01: T4 — `tests/testthat/test-abort-remedy-truthfulness.R` (23 assertions) fires every site at its reducer: a stub `simulate_refit` for the bootstrap guard (arithmetic only, no fit, so no platform dependence) and raw degenerate frames for the rest, covering both disjuncts of the npbootstrap observed-data guard. Assertions are on the PROPERTY — `art_named_methods()` returns the methods a message sends the user to — so rewording the guidance stays free while re-naming a method reds (the M68 pin-the-property lesson).
 - 2026-08-01: T4 mutation-verified, `testthat.progress.max_fails` raised per the M98 lesson: restoring the old bootstrap bullet reds 2, the classical bullet 2, the npbootstrap bullet 3, and stripping the KEPT `montecarlo` bullet off the resample guard reds 1. All four restored green; full suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5458 / SKIP 23.
+
+- 2026-08-01: T5 — self-caught before commit, the M72 trap (violating a lesson in the prose written to record it): the first drafts of all three bullets and the NEWS entry claimed "every other interval method was measured failing", which the sweep falsifies at the npbootstrap observed-degeneracy site, where the parametric bootstrap is usable on 4 of 8. Rewritten so the bullets claim NOTHING about other methods and state only what each guard's own condition establishes; the measurement, with its partial case, lives in the source comments and D-020. The bullets are now unfalsifiable by a method that later turns out to work.
+- 2026-08-01: T5 — `NEWS.md` bullet added; `cairn/DECISIONS.md` gains D-020 (static remedy text needs swept evidence over the whole trigger class; confirms D-018's runtime route and generalizes D-019's name-no-method precedent; D-012/D-013's fallback fence untouched). No snapshot referenced the changed text, so none needed refreshing.
+- 2026-08-01: T5 — mutations re-run against the FINAL wording, since the earlier evidence described superseded text: restoring each pre-milestone bullet reds 2 / 2 / 3 and stripping the kept bullet reds 1; restored green. Full suite FAIL 0 / PASS 5458; all four `data-raw` checkers and `air format --check` clean.
 
 ## Decisions
 

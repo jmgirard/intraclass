@@ -679,3 +679,50 @@ intended under #5. Perfect/near-perfect-agreement data now errors where it got
 [0, 1] (documented in NEWS). DESIGN.md's interval-time boundary table gains an
 MPL row citing this entry. Doc surfaces updated in M99 (roxygen, NEWS, comments,
 the boundary-hint sentence, `data-raw/mpl-doc-claims.tsv` re-triage).
+
+### D-020 (2026-08-01): Static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class — the static counterpart to D-018's runtime route
+
+**Context:** an abort's remedy bullet is fixed text: it makes the same claim to
+every user who reaches that abort. Three CI-reducer aborts ended with "use
+`ci_method = "montecarlo"`" on data where the Monte-Carlo default aborts too —
+the parametric bootstrap's refit-convergence guard (`R/ci-bootstrap.R`), the
+classical MSE = 0 guard (`R/ci-classical.R`), and the npbootstrap observed-data
+degeneracy guard (`R/ci-npbootstrap.R`). M93 T1 first measured the bootstrap site
+(0/90 at the sigma^2 -> 0 boundary; reachable only on degenerate data) and carried
+the defect out to a ROADMAP candidate rather than fixing it in that milestone.
+D-018 had already settled the RUNTIME case — the Monte-Carlo path's hint names a
+method only after running it on the caller's own data — but said nothing about
+text that cannot run anything, and the M100 plan-gate criteria audit found that a
+rule worded to cover both would have contradicted D-018, whose bullets rest on a
+runtime run and no recorded evidence at all.
+
+**Decision (M100 plan gate and implementation, 2026-08-01):** static remedy text
+may name a `ci_method` only where a committed sweep shows that method returning a
+usable interval on **every** dataset that reached the abort, across several
+geometries of its trigger condition — usability judged by the shipped
+`boundary_interval_usable()`, not a predicate written for the occasion. One
+triggering dataset is not enough: D-018 already records that a run is evidence
+about one seed, not about a design. A method usable on only part of a trigger
+class is not nameable either — the npbootstrap observed-data guard's two disjuncts
+disagree (the parametric bootstrap survives SSA = 0 but not SE = 0), and static
+text cannot split what the class joins. Where no method qualifies, the abort names
+none and stays actionable by pointing at the data instead (#8, GP1) — the shape
+D-019 chose for MPL's degenerate-fit abort on the same reasoning, that the methods
+a draft named also failed on the triggering data. The evidence lives in
+`data-raw/sweep-abort-remedies.R` + `abort-remedy-sweep.tsv`; the set of sites
+making such a claim is enumerated by `data-raw/enumerate-ci-method-remedies.py`
+against the `data-raw/abort-remedy-sites.tsv` ledger, which fails on an
+unclassified site.
+
+**Consequences:** the three sites above name no method; the neighbouring
+degenerate-resample guard KEEPS its `montecarlo` bullet, because its observed data
+is healthy and the sweep found the default usable on every dataset that reached it
+— the asymmetry is measured, not assumed, and is pinned by a test so a later tidy-up
+cannot erase it. Confirms and does not supersede D-018, which continues to govern
+the runtime-verified hint, or D-019, whose name-no-method precedent this
+generalizes from one abort to a rule. It does not touch D-012/D-013's
+fallback-on-abort fence: no abort here returns an interval, only message text
+changed. `icc()`'s pre-dispatch design and argument fences are out of scope —
+they refuse a design rather than degenerate data, so the default they name is not
+being asked to survive anything. A CI checker enforcing this rule against future
+edits is a ROADMAP candidate, not built here.
