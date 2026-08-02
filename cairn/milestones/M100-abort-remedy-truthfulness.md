@@ -85,7 +85,7 @@ returns an interval, only message text changes.
 - [x] T1 `data-raw/enumerate-ci-method-remedies.py` — scan `R/ci-*.R` for classed
       aborts whose message bullets name a `ci_method` value and whose trigger is
       observed-data or resample degeneracy; commit its output table.
-- [ ] T2 `data-raw/sweep-abort-remedies.R` — per enumerated site, generate
+- [x] T2 `data-raw/sweep-abort-remedies.R` — per enumerated site, generate
       several geometries meeting its trigger condition, confirm the abort fires
       from the reducer called directly, run each named method, and classify the
       result through `boundary_interval_usable()`; commit the results table.
@@ -115,6 +115,11 @@ returns an interval, only message text changes.
 - 2026-08-01: T1 minor plan refinement — the enumerator emits ALL `ci_method`-naming reducer aborts and the ledger records each one's disposition, rather than a regex encoding "degeneracy-triggered" and silently omitting the rest. AC1's property is unchanged (`icc()`'s pre-dispatch fences do not appear — they are out of file scope) and a new abort can no longer escape unclassified.
 - 2026-08-01: T1 parser defect found and fixed before commit — the first draft reported an early-return guard as an abort's trigger, INVERTING it (`npb_guard_sb_pole()` aborts when `any(denom < 0)`, above which sits `if (!any(denom < 0)) return(...)`); the condition scan now accepts only an `if` block still open at the abort line.
 - 2026-08-01: T1 mutation-verified — leaking the leading line into the remedy scan reds 3 self-test assertions, narrowing the file glob reds 4, deleting a ledger row reds `--check`, and tampering with the committed enumeration reds the freshness gate. All four restored green.
+
+- 2026-08-01: T2 — the sweep measures every candidate method at each `sweep` site, not only the one the shipped text names, so a rewrite can name a working method where one exists. Verdicts over the datasets that reached each site: bootstrap refit-convergence 6 reached, all five candidates usable on 0; classical MSE = 0, 4 reached, all five usable on 0; npbootstrap observed-degeneracy 8 reached, four candidates usable on 0 and `bootstrap` on 4 of 8 (partial, so not nameable in static text); npbootstrap degenerate-resamples 9 reached, `montecarlo` usable on 9 of 9.
+- 2026-08-01: T2 decisive finding — three of the four `sweep` sites can name NO method truthfully, and the fourth's shipped `montecarlo` remedy is TRUE and needs no rewrite. The observed data at the resample-guard site is healthy (only the resamples degenerate), which is why the default still works there. T3 rewrites three messages, not four.
+- 2026-08-01: T2 — near-degenerate cells (jitter SD 1e-8) do not reach the exact-equality guards at all, and one exact cell (10x2 MSE = 0) killed the glmmTMB point fit with a raw unclassed error before the bootstrap guard, reproducing M93's platform finding on macOS. Both are recorded as "site not reached" with the reason rather than counted as evidence either way.
+- 2026-08-01: T2 — constants renamed to snake_case before commit per the M62 lesson (`lintr`'s `object_name_linter` rejects UPPERCASE in `data-raw/` and `air` does not catch it); `lintr::lint()` clean on the new script, `air format --check` clean repo-wide.
 
 ## Decisions
 
