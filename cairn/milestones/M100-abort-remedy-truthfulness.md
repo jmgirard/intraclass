@@ -134,7 +134,7 @@ RR04 ingestion, pass 5.
 - [x] T7 Repair the limits records: state the six probed predicate shapes and the
       five probed splice shapes, mark file scope as a limit with no probe, and add
       the parsing parity assertion to `--self-test`.
-- [ ] T8 Append the dated supersession entry to `## Decisions` covering D-020's
+- [x] T8 Append the dated supersession entry to `## Decisions` covering D-020's
       absence and the two rule statements; re-verify the git-diff clause.
 - [ ] T9 Rewrite the sweep header to state generated vs ungenerated disjuncts per
       swept site, with no whole-class claim; confirm the TSV byte-unchanged.
@@ -244,6 +244,8 @@ RR04 ingestion, pass 5.
 
 - 2026-08-02: T7 — the limits records now state six PROBED predicate shapes and five PROBED splice shapes, with file scope stated as the one limit no probe demonstrates, in all three surfaces (script docstring, ledger header, an appended `## Decisions` note superseding the frozen entry). Both machine-readable surfaces carry one canonical `PROBED LIMITS:` line that `--self-test` PARSES and binds to `len(_limit_shapes())` / `len(_unreported_splices())`. Mutation-verified: stating seven in the ledger reds it, deleting the docstring line reds it, and adding a sixth splice probe reds BOTH records; all restored green, tree clean. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
 
+- 2026-08-02: T8 — the `## Decisions` section now carries a dated note recording that D-020 and its amendment are absent from `cairn/DECISIONS.md` on this branch, never reached `main`, and are M101 T2's to re-author, and that the two rule statements in the frozen entries bind nothing here. Re-verified at this commit: `grep -c 'D-020' cairn/DECISIONS.md` = 0, `git diff main..HEAD -- cairn/DECISIONS.md` empty, `git diff main..HEAD -- R/` empty, and `git diff main..HEAD --name-only` lists 9 paths — none under `R/`, and neither `NEWS.md` nor `cairn/DECISIONS.md` (AC4's first clause). The fix commit's diff inside `## Decisions` is additions only.
+
 ## Decisions
 
 - 2026-08-01 (D-020, promoted to `cairn/DECISIONS.md`): static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class. Promoted rather than kept local because it binds every future abort in the package, not just these four.
@@ -268,6 +270,22 @@ RR04 ingestion, pass 5.
   variable, which the `i = cause` probe falsifies. An honest narrow gate is
   citable where a broad claim was not. Recompute:
   `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
+
+- 2026-08-02 (supersedes the status, not the history, of the three 2026-08-01 entries
+  above): D-020 and D-020 Amendment 1 exist NOWHERE in `cairn/DECISIONS.md` on this
+  branch — `grep -c 'D-020' cairn/DECISIONS.md` = 0 — and neither ever reached `main`:
+  `git diff main..HEAD -- cairn/DECISIONS.md` is empty, T1's re-cut revert having
+  removed them with the rest of that file. The first entry above therefore describes a
+  promotion that no longer stands, and M101 T2 re-authors D-020 and its amendment as
+  ONE correct entry. The two rule statements those entries carry bind NOTHING on this
+  branch: D-020's rule (static remedy text may name a `ci_method` only on swept
+  evidence over the abort's whole trigger class) and the maintainer's pass-2
+  disposition (these guards REPORT the quantities that failed and diagnose nothing).
+  Both govern message text; this branch changes no message and `git diff main..HEAD --
+  R/` is empty, so neither is live conduct here. Both are M101's to state beside the
+  messages they govern — which is what the re-cut moved them for, so that no rule sits
+  on `main` while the code breaks it. The entries above are history and stay unedited
+  (IP4).
 
 - 2026-08-02 (supersedes, in part, the 2026-08-01 limits entry above): that entry
   states file scope as "a seventh" limit beside L1-L6 and says each stated shape is
