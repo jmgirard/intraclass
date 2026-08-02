@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-01 (M100 planned — the `R/ci-bootstrap.R:48` untruthful-remedy candidate absorbed into it and widened to all four reducer-stage degeneracy aborts; two candidate rows added (ledger+checker, runtime-hint alternative with its falsifier); M48 stays `blocked` (D-050); the `cairn/PROFILE.md` always-read-frame gap persists unchanged.)_
+_Last hygiene check: 2026-08-01 (M101 planned — the M100 re-cut splits measurement/tooling (M100) from every message change plus the rule governing them (M101); M100's own re-cut lands with its branch. Earlier: M100 planned — the `R/ci-bootstrap.R:48` untruthful-remedy candidate absorbed into it and widened to all four reducer-stage degeneracy aborts; two candidate rows added (ledger+checker, runtime-hint alternative with its falsifier); M48 stays `blocked` (D-050); the `cairn/PROFILE.md` always-read-frame gap persists unchanged.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,6 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M101 | What a degeneracy message may assert, and the messages made to obey it | planned | M100 | normal | milestones/M101-degeneracy-message-claims.md |
 | M100 | Abort remedies name only a `ci_method` measured to work on the data that triggers them | planned | — | normal | milestones/M100-abort-remedy-truthfulness.md |
 | M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | done | — | normal | milestones/archive/M99-mpl-root-failure-abort.md |
 | M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | done | M93 | normal | milestones/archive/M98-clamp-detection-assertion.md |
