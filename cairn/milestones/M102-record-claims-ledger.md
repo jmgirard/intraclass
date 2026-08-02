@@ -115,12 +115,12 @@ candidate row, whose subject is M101's messages.
 
 ## Tasks
 
-- [ ] T1 Checker skeleton: row-grammar reader and validation, bash runner
+- [x] T1 Checker skeleton: row-grammar reader and validation, bash runner
       (`cwd` = repo root, bounded timeout), `expected_rc`/`expected_match`
       comparison, the docstring shape list and its parsed set-equality assertion.
       Every input injectable as a parameter so each branch can be probed
       (`check-mpl-doc-claims.py` idiom).
-- [ ] T2 The refused-form set: enumerate the history-dependent forms, refuse with
+- [x] T2 The refused-form set: enumerate the history-dependent forms, refuse with
       the reason, and construct each in `--self-test`.
 - [ ] T3 Seed the ledger with the four named figures plus one row per shape; run
       every row. The κ_m row reads `data-raw/m88-kappa-table.rds` via M94's stdlib
@@ -153,6 +153,9 @@ candidate row, whose subject is M101's messages.
 - 2026-08-02: plan gate chose registration over detection for a row's absence-shape (`kind` is author-declared, the classifier is only a mis-registration trap), because an output-shape classifier misses `^0 problems$` and `test !` forms and would rebuild F1's failure mode inside the new tool; falsified by authors mis-declaring `kind` more often than the classifier misclassifies.
 - 2026-08-02: the criteria-count split tripwire fires at 9 and the plan-owned body lands at 144/149. Kept whole deliberately: the only natural cut separates the citation gate and the convention entry from the checker they gate, which would ship a checker with no convention behind it and a successor amending a just-shipped script. Revisit if implement finds the tasks shippable independently.
 - 2026-08-02: criteria audit ([O], fresh context, authored none of the draft) returned eleven single-answer findings and five either-way calls; all eleven fixed before the gate — docstring↔code shape parity, the enumerated refused-form set replacing an undecidable "depends on git history", a stated row grammar behind "malformed", an `expected_rc` column (without which `grep -c 'D-020' … ` = 0 exiting 1 makes every absence row unrepresentable), route parity by label-set rather than count (M100 pass-5 F13), the route list covering timeout and absence-falsifier, author-declared `kind`, a named `falsifier_command` mechanism, the AC2×AC6 joint unsatisfiability broken by D-009 rule 3's `probe: none — <ground>` idiom, the self-declared scope closed by parsing it out of the D-entry, and concrete gate checks plus the command enumerating them. The audit's headline finding — "the whole set is satisfiable by a green ledger that registers nothing load-bearing" — became AC3's four named figures and the gate's first question. Either-way calls: route excision over a `--disable-route` flag (decided here, AC6), and the seed set (to the gate).
+
+- 2026-08-02: T1/T2 — `data-raw/check-record-claims.py` lands whole (both tasks are the same file, committed together): stdlib-only, no shell (commands are `shlex.split` + `subprocess.run` argv, so a pipeline/redirection/chained command is inexpressible), 11-column grammar parsed OUT of the docstring so columns cannot drift from their statement, five dispatched shapes, three refused history-dependent forms each with a constructing sample, and 16 sentinel-delimited failure routes with a probe apiece. Measured at this commit: `--probes` reports all 16 DETECTED, and excising each route's block from a temp copy silences exactly that route (0 problems over 16 excisions).
+- 2026-08-02: implement question gate — citation scope set to the four correctable records (`cairn/ROADMAP.md`, `cairn/LESSONS.md`, `cairn/DESIGN.md`, `data-raw/README.md`) over adding the live milestone file or ROADMAP alone, because history files cannot take a citation later nor have a drifted figure corrected (IP4); command shapes set to the five the AC3 figures need (`ls`, `grep`, `awk`, `python3`, `git-grep`) over dropping `git-grep`, which would leave the refused-history-form rule guarding a shape no row can use; and the checker-inventory + CI-invocation-count figures homed in a new `data-raw/README.md` section over a lessons line or the decision entry, the last rejected because a decision entry can never be edited when a sixth checker lands.
 
 ## Decisions
 
