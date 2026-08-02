@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-01 (M100 re-cut after its third review return — split into M100 (measurement + tooling, ships nothing user-facing) and M101 (every message change + the rule governing them); the runtime-hint candidate row corrected, its falsifier having fired; `burch_ci()` unclassed-error row added. Earlier: M100 planned — the `R/ci-bootstrap.R:48` untruthful-remedy candidate absorbed into it and widened to all four reducer-stage degeneracy aborts; two candidate rows added (ledger+checker, runtime-hint alternative with its falsifier); M48 stays `blocked` (D-050); the `cairn/PROFILE.md` always-read-frame gap persists unchanged.)_
+_Last hygiene check: 2026-08-01 (M100 re-cut after its third review return — split into M100 (measurement + tooling, ships nothing user-facing) and M101 (every message change plus the rule governing them, planned on main); the runtime-hint candidate row corrected, its stated falsifier having fired; `burch_ci()` unclassed-error row added; M48 stays `blocked` (D-050).)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
