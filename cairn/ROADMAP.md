@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-02 (M100 review pass 4 failed on record accuracy, fourth return; escalated via RB04/RR04, whose binding criteria were ingested split after a fresh-context audit — the claims-ledger half parked as a new candidate row. M100 back to `in-progress`; M48 stays `blocked` (D-050).)_
+_Last hygiene check: 2026-08-02 (M100 review pass 5 failed on record accuracy, fifth return: AC4's no-rule clause broken by a rule the sweep script prints at runtime. M100 `in-progress` pending the maintainer's disposition; M48 stays `blocked` (D-050).)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -10,7 +10,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
 | M101 | What a degeneracy message may assert, and the messages made to obey it | planned | M100 | normal | milestones/M101-degeneracy-message-claims.md |
-| M100 | Measure which abort remedies are untruthful, and gate the enumeration | review | — | normal | milestones/M100-abort-remedy-truthfulness.md |
+| M100 | Measure which abort remedies are untruthful, and gate the enumeration | in-progress | — | normal | milestones/M100-abort-remedy-truthfulness.md |
 | M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | done | — | normal | milestones/archive/M99-mpl-root-failure-abort.md |
 | M98 | Assert the endpoint-parity test's clamp-detection classes, and add the non-finite one | done | M93 | normal | milestones/archive/M98-clamp-detection-assertion.md |
 | M97 | `npbootstrap` in the boundary hint — verified by running it, not predicted | done | M93 | normal | milestones/archive/M97-npbootstrap-hint-resample-stability.md |

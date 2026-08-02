@@ -1,6 +1,6 @@
 # M100: Measure which abort remedies are untruthful, and gate the enumeration
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** RR04
@@ -256,6 +256,8 @@ RR04 ingestion, pass 5.
 
 - 2026-08-02: T12 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 / SKIP 23 (identical to `main`'s baseline; this pass adds no R test and changes no R code); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m39s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; all five `data-raw` checkers pass (four others plus this milestone's `--check` and `--self-test`); `cairn_validate` 16 PASS / 0 FAIL, WARNs only `sizing (split tripwires)` (2 — the maintainer chose at the pass-5 gate to keep the milestone whole) and `dangling id tokens` (321, pre-existing). The suite and `R CMD check` ran before this pass's last docstring-only edits to the Python enumerator; `data-raw/` is `.Rbuildignore`d and no R file changed after them, so neither result is stale.
 - 2026-08-02: T12 — AC4's second clause re-swept over the live records rather than assumed: three statements binding conduct beyond this milestone were found and removed. The sweep script's candidate comment stated what a remedy may name (T9); the enumerator docstring required M101 to freeze every leading line (T11); and its ledger-semantics paragraph claimed an unclassified abort "cannot reach a release", which no CI job enforces (pass-4 O4) — now stated as what it is, a local exit code. Locate: `grep -n "must \|may only\|is required\|cannot reach" data-raw/enumerate-ci-method-remedies.py data-raw/sweep-abort-remedies.R data-raw/abort-remedy-sites.tsv`, whose remaining hits all describe this tooling's own behaviour. Status -> review.
+
+- 2026-08-02: review pass 5 FAILED the gate — FIFTH return. [O] diff-bug returned 21 findings, 6 scoring >= 80; both [S] lenses 0 findings (prior-review re-verified every pass-4 fix against the code, blame-history found no IP4 edit across 33 commits). AC4 fails its second clause: `data-raw/sweep-abort-remedies.R:579` PRINTS "Only a method usable on all of them may be named" on every run — a live rule binding conduct beyond this milestone — and T12's certifying grep could not match it. Also actioned: the ROADMAP hygiene stamp contradicting its own table (92), `gen_se_zero()` ignoring all three parameters (90), a comment claiming M100 de-named three sites it reverted (85), `SPLICE_ALLOWED`'s comment naming the wrong function (80), and a Coverage gap under AC4 (80). 15 sub-80 findings logged in the Review section. Thrash trigger (a) holds at the fifth return and (b) fires on AC4 for the second time, with both a re-cut and an RB/RR escalation already spent; disposition to the maintainer. Status -> in-progress.
 
 - 2026-08-02: CI green on `a705cbf` — all nine checks pass (format-check, check-references, lint, pkgdown, test-coverage, codecov patch + project, ubuntu-latest and windows-latest release). Recompute: `gh pr checks 108`.
 
@@ -805,5 +807,183 @@ gate claim (pass 3), and now in the criteria written specifically to stop it.
 Because the work log already records a re-plan spent here, the rulebook's remedy
 is no longer re-plan-or-split: the disposition goes to the maintainer, with
 escalation offered.
+
+Every acceptance box unticked; the next pass re-verifies from scratch.
+
+**Review pass 5 — 2026-08-02 (first pass after the RR04 ingestion).** PR #108, head
+`3981b99`. `main` unmoved since the branch was cut
+(`git rev-list --count HEAD..origin/main` = 0), so all evidence below is current.
+Criteria are the post-ingest set AC1-AC10; passes 1-4 measured superseded sets and
+none of their evidence is inherited.
+
+**AC1 — enumeration and gate.** `--check` exits 0: 9 `ci_method`-naming reducer
+aborts under `R/ci-*.R`, all classified (4 `sweep`, 5 `fence`). Every site carries
+its file, trigger condition and named methods (9 each of `key:`, `trigger:`,
+`names:`); the ledger carries 9 rows. The committed enumeration is the script's own
+output, checked by equality rather than by eye: `render(sites, ledger)` compared to
+the file on disk is `True`. The three `--check` failure modes are driven on
+constructed input by `_check_probes()` (`a site with no ledger row`, `a ledger row
+matching no site`, `a stale committed enumeration`), each returning rc 1 against an
+rc 0 control; the [O] lens independently neutered each branch and reddened exactly
+its own probe. The four measured guards appear with their own conditions —
+`n_ok < min_frac * boot_samples`, `ss$mse == 0`, `obs$se_ij_logf == 0`,
+`n_bad > 0L`. One gap against the criterion's "emitting per site … the triggering
+condition": site `6edd0f7409` emits `(unguarded)`, its guard being early returns
+(finding 11, scored 75, pass-4 O18 unfixed).
+
+**AC2 — the limit set, parsed.** `_limit_shapes()` returns 6 and
+`_unreported_splices()` 5; both records parse to `(6, 6, 5)` —
+`_stated_limit_counts()` over the script docstring and over the ledger header. Each
+states file scope as a limit no probe demonstrates. The parity assertion is
+falsifiable: stating seven in the ledger, deleting the docstring line, adding a
+sixth splice probe and deleting an L-shape each red it (four mutations, three run at
+implement and all four re-run independently by the [O] lens), every one restored.
+
+**AC3 — sweep.** 210 rows over 42 cells, all at `boot_samples = 999` and
+`conf_level = 0.95`, over five candidate methods and four generators. Reach is
+confirmed from the reducer called directly (`bootstrap_ci`, `searle_ci`,
+`npbootstrap_ci` x2 — no `icc()`) and by the site's own leading line. Verdicts over
+reached cells: bootstrap refit-convergence 6 reached, 0 usable for all five;
+classical MSE = 0, 3 reached, 0 for all five; npbootstrap observed-degeneracy 8
+reached, `montecarlo`/`searle`/`burch` 1 each and `bootstrap` 5; npbootstrap
+degenerate-resamples 9 reached, `montecarlo`/`searle`/`burch`/`bootstrap` 9 each.
+Usability is the shipped `boundary_interval_usable()`. The candidate set is named in
+the script as five of seven with a stated reason per exclusion. 30 point-fit-failed
+rows carry the exclusion reason and are outside every denominator.
+
+**AC4 — FAILS its second clause.** The git-diff half passes and is stronger than
+asked: `git diff main..HEAD --name-only` lists 9 paths, none under `R/`, and
+`git diff main..HEAD -- R/`, `-- NEWS.md` and `-- cairn/DECISIONS.md` are each
+empty. The "no live record binding conduct beyond this milestone" half fails —
+see the gate failure below.
+
+**AC5 — D-020's absence recorded.** The `## Decisions` section carries the dated
+2026-08-02 entry stating that D-020 and its amendment are absent
+(`grep -c 'D-020' cairn/DECISIONS.md` = 0, re-run at this head), never reached
+`main`, and are M101 T2's to re-author, and that the two rule statements in the
+frozen entries bind nothing here. The fix commit `81df106` carries one deletion in
+the whole file and it is the T8 task checkbox, outside `## Decisions`; the [S]
+blame-history lens independently diffed all 33 branch commits and found no removed
+or altered line inside `## Work log` or `## Decisions`.
+
+**AC6 — toolchain gate.** Suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 /
+SKIP 23, identical to `main`'s baseline as expected of a milestone adding no R test.
+`devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes
+in 2m14s. `pkgdown::check_pkgdown()` no problems; `devtools::document()` no diff;
+`air format --check .` clean; `lintr::lint_package()` 0 lints. All five `data-raw`
+checkers pass (four others, plus this milestone's `--check` and `--self-test`).
+
+**AC7 — generated vs ungenerated disjuncts.** The sweep header states, per swept
+site, which disjuncts the grid reaches and which it does not, naming explicitly the
+classical guard's `!is.finite(f)` disjunct with MSE finite and non-zero, and every
+bootstrap refit-failure route other than MSE=0-degenerate data, plus the grid-wide
+balanced-one-way limit. The generators per site in the committed TSV match those
+clauses exactly (bootstrap and classical `gen_mse0` only; npbootstrap-observed
+`gen_mse0` + `gen_ssa0` + `gen_se_zero`; resample guard `gen_resample_degenerate`).
+No whole-class sentence survives. `git diff 12cba54..HEAD -- data-raw/abort-remedy-sweep.tsv`
+is empty.
+
+**AC8 — corrected figures.** Three CORRECTION lines, each re-measured at the gate by
+the [O] lens rather than read: the named `BULLET_RE` mutation reds 8; the preserved
+half, narrowing `R_GLOB` to `R/ci-n*.R`, reds 5 as originally stated; `ls
+data-raw/check-*.py data-raw/enumerate-*.py` = 5 paths with
+`grep -c 'run: python3 data-raw' lint.yaml` = 6 (three checkers, twice each); the
+awk over the committed TSV prints `80 30 50` rows, 16/6/10 cells of 42 cells and 210
+rows. Originals unedited (blame lens, above).
+
+**AC9 — docstring claims.** `grep -c "is required to"` on the enumerator = 0 and it
+names M101 nowhere; the leading line is now stated as a re-keying consequence.
+`check()`'s docstring states four routes to a non-zero exit and attributes the splice
+route's probes to `_unreported_splices()`.
+
+**AC10 — ROADMAP command.** The runtime-hint row's "all nine resample-guard
+datasets" clause carries its own command over the committed TSV, which prints nine
+`usable interval` lines — exact, as the criterion requires.
+
+**Universal cairn checks.** `cairn_validate` exit 0 — 16 PASS including `coverage
+complete`, `weight caps`, `mirror agreement`, `binding criteria`; WARNs only `sizing
+(split tripwires)` (2 — the maintainer chose at the pass-5 implement gate to keep the
+milestone whole) and `dangling id tokens` (321, pre-existing). No `DESIGN.md`
+principle changed, so `cairn_impact` does not apply. **Driving RR (RR04).** RR04
+states no numeric projection; its factual base is measurement, re-verified here
+rather than juxtaposed — the 210-row / 130-reached / 30 / 50 census, the four
+per-site verdicts, and `grep -c 'D-020'` = 0 all reproduce.
+
+**CI.** All nine checks pass on `a705cbf` (format-check, check-references, lint,
+pkgdown, test-coverage, codecov patch + project, ubuntu-latest and windows-latest
+release); head `3981b99` differs from it by one tracking-only commit.
+
+**GATE FAILURE — returned to `in-progress` (review pass 5, FIFTH return).** Three
+fresh-context lenses ran. [S] prior-review: 0 findings — it verified each pass-4
+actioned finding (O1, O2, O5, O6, O9, O10, O11, O14) and RR04's N1-N4 fixed against
+the current code and artifacts rather than the work log, reproduced the corrected
+figures itself, and found the GitHub inline-comment surface empty again. [S]
+blame-history: 0 findings — no IP4 edit anywhere in 33 commits, no reverted lesson
+(M95's `<<-` and M97's 999 both still honoured), no contradiction of a live D-entry.
+[O] diff-bug: 21 findings, 6 scoring >= 80, all of them in records rather than in
+what the tooling does.
+
+**The criterion that fails.**
+
+- **F1 (90) — AC4's second clause, in the sweep script's own stdout.**
+  `data-raw/sweep-abort-remedies.R:579` prints
+  "Only a method usable on all of them may be named" on every run. That is a live,
+  unsuperseded record statement binding conduct beyond this milestone, which AC4
+  forbids in terms. It contradicts three statements in the same deliverable — the
+  header's "concludes nothing about what a message should say", "licenses no edit
+  … the next milestone's", and T9's own "This script states no rule about what a
+  remedy may name" — and the ledger header. Compounding it: T12's work-log line
+  claims the AC4 sweep was run, and its locate command
+  (`grep -n "must \|may only\|is required\|cannot reach"`) cannot match
+  "may be named", so the sweep that certified the clause could not have found the
+  violation. Reproduced at the gate.
+
+**Also actioned (>= 80).**
+
+- **F8 (92)** — `cairn/ROADMAP.md:4`'s hygiene stamp says "M100 back to
+  `in-progress`" while line 13 of the same file, changed in the same commit, says
+  `review`. Self-contradiction introduced by this branch.
+- **F17 (90)** — `gen_se_zero(n_s, n_r, seed = 1)` ignores all three parameters and
+  returns a hardcoded 3x2 frame; the grid's arguments happen to agree today, so a
+  geometry edit would be silently ignored while the TSV's `n_s`/`n_r` columns
+  claimed otherwise (pass-4 O15, unfixed).
+- **F2 (85)** — `sweep-abort-remedies.R:464-465` says a site absent from the
+  enumeration "names nothing -- which is exactly what M100 did to three of these
+  four". M100 de-names nothing after the re-cut: `git diff main..HEAD -- R/` is
+  empty and all four sweep sites still carry `names:`. Reproduced.
+- **F10 (80)** — `SPLICE_ALLOWED`'s comment names `mc_ci()` where the two
+  allow-listed splices sit in `rmvn()` and `mc_interval()`, and one file-keyed entry
+  exempts two sites while the records call it "the one deliberate splice" (pass-3
+  E2 / pass-4 O7, unfixed).
+- **F21 (80)** — the Coverage map lists AC4 -> T1, T8 while T12 performed AC4's
+  second-clause sweep; a Coverage amendment, implement-side and gated.
+
+**Logged below threshold (15, not actioned).** F3 75 the ledger header says every
+`sweep` row records what the sweep found about the method its bullet names, where the
+rows carry classification reasons only · F4 75 the sweep prints a normative
+`NAMEABLE` label · F11 75 the `(unguarded)` trigger above · F5 68 AC8's departure
+from BC8's citation clause carries no row in the Deviations table · F15 65
+`_encloses()` counts braces inside strings and comments, unlike the hardened
+`_slice_call` · F16 65 `_slice_call` tracks double-quoted strings only · F6 58 the
+BC3 deviation's stated ground is arguable against BC3's own text · F19 58
+`spliced_in` silently exempts `c` and `call` · F7 50 Scope says BC2/BC3/BC6 went to
+a successor milestone where the ROADMAP has a candidate row · F9 50 the docstring's
+"fires only on degenerate data" universalizes a negative sample · F14 50 `BULLET_RE`
+misses cli's other bullet names · F12 45 the BC1 deviation's ground · F20 40 two
+overlapping candidate rows · F18 25 route 3 has no rc-1 probe, which the docstring
+states · F13 20 the parity gate binds counts, not identity — AC2's stated tolerance
+is exact counts, so this is the criterion as written.
+
+**Thrash: trigger (a) holds, trigger (b) fires on AC4 for the second time, and both
+a re-cut and an escalation are already spent.** This is the fifth return, counted
+per milestone. AC4 has now failed twice by a new mechanism of the same shape: at
+pass 4 the rule sat in the milestone's live `## Decisions` section (O11); here it
+sits in a deliverable's printed output, past a certification sweep whose own locate
+pattern could not reach it. The rulebook's remedy at (a) with a re-plan spent is not
+another retry, and RR04's structural answer — the claims ledger and its CI checker,
+BC2/BC3/BC6 — was deferred at ingestion to a ROADMAP candidate row. That deferred
+enforcement is what would have caught F1: the sweep that certified AC4 was a
+hand-run grep, exactly the "transcribed, never re-derived" mode RR04 named. The
+disposition goes to the maintainer.
 
 Every acceptance box unticked; the next pass re-verifies from scratch.
