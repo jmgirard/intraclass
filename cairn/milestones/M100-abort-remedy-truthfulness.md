@@ -1,6 +1,6 @@
 # M100: Measure which abort remedies are untruthful, and gate the enumeration
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -35,7 +35,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 ## Acceptance criteria
 
-- [x] AC1 A committed script enumerates the aborts under `R/ci-*.R` matching its
+- [ ] AC1 A committed script enumerates the aborts under `R/ci-*.R` matching its
       stated predicate, emitting per site the file, the triggering condition and
       the `ci_method` string(s) its remedy bullets name; the committed enumeration
       is that script's own output; a committed ledger classifies every emitted
@@ -47,12 +47,12 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       `classical_guard_observed()`, and `npbootstrap_ci()`'s observed-data and
       degenerate-resample guards — identified by their guarding conditions, so a
       predicate that matched nothing could not satisfy this criterion.
-- [x] AC2 The script's docstring, the ledger header and this milestone's records
+- [ ] AC2 The script's docstring, the ledger header and this milestone's records
       state the predicate's LIMITS — the message shapes the script does not match
       — and each stated limit is demonstrated by a self-test probe that
       constructs that shape and shows it unmatched. No record claims detection
       coverage broader than a probe demonstrates.
-- [x] AC3 For each site the ledger marks `sweep`, a committed seeded script
+- [ ] AC3 For each site the ledger marks `sweep`, a committed seeded script
       records, across several geometries of that site's trigger condition and at
       the shipped `boot_samples` default, whether each swept `ci_method` returns a
       usable interval on data that reached the abort, judged by the shipped
@@ -61,14 +61,14 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       candidate set is named in the script with a stated reason for every
       `ci_method` value excluded. A cell whose point fit fails before the guard is
       excluded from the denominator and recorded as excluded.
-- [x] AC4 This milestone changes nothing user-facing and states no rule:
+- [ ] AC4 This milestone changes nothing user-facing and states no rule:
       `git diff main..HEAD --name-only` lists no path under `R/`, and lists
       neither `NEWS.md` nor `cairn/DECISIONS.md`.
 - [ ] AC5 Every factual claim this milestone's records make about a measured
       result, a count, a ledger key, or this milestone's own review history is
       accompanied by a command that recomputes or locates it, and that command
       reproduces the stated figure or string.
-- [x] AC6 The profile `verify` slot is clean, plus the fuller pre-review check it
+- [ ] AC6 The profile `verify` slot is clean, plus the fuller pre-review check it
       names, with every `data-raw` checker run locally.
 
 ## Coverage
@@ -190,6 +190,8 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 - 2026-08-01: T6 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 / SKIP 23 (identical to `main`'s baseline, since this milestone adds no R test and T1 removed the one the branch had); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m49s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; all five `data-raw` checkers pass plus `enumerate-ci-method-remedies.py --check` and `--self-test`; `cairn_validate` all checks passed, 321 pre-existing dangling-id advisories. Status -> review.
 
 - 2026-08-01: CI green on `6a8d51c` — all nine checks pass (format-check, check-references, lint, pkgdown, test-coverage, codecov patch + project, ubuntu-latest and windows-latest release). Recompute: `gh pr checks 108`.
+
+- 2026-08-01: review pass 4 FAILED the gate — FOURTH return. [O] diff-bug returned 20 findings, 8 scoring >= 80; both [S] lenses effectively 0 (prior-review confirmed passes 1-3 fixed; blame-history's single finding scored 25). The tooling verified CORRECT — two sweep cells re-run end-to-end byte-matched their committed rows — and the defect class migrated entirely into the records about it: AC2 fails (two records claim a probe for a seventh limit where six exist), AC5 fails four ways (a mutation count no reading reproduces, a wrong checker count, a rows/cells unit slip, and claims with no reproducing command), AC4 fails its `states no rule` clause (the live `## Decisions` section states D-020's rule while the reverted tree breaks it), and O2 (90) says D-020 was promoted to `cairn/DECISIONS.md` where `grep -c 'D-020' cairn/DECISIONS.md` = 0. Thrash trigger (a) fires on the fourth return with a re-cut already spent, so the disposition goes to the maintainer rather than to a fifth pass. Status -> in-progress.
 
 ## Decisions
 
@@ -580,3 +582,92 @@ user-visible change, which AC4 requires.
 pkgdown, test-coverage, codecov patch + project, ubuntu-latest and windows-latest
 release).
 
+**GATE FAILURE — returned to `in-progress` (review pass 4, FOURTH return).**
+Three fresh-context lenses ran. [S] prior-review: 0 findings — it verified every
+in-scope actioned finding from passes 1-3 (B5, B1, C5, C7, C2, C3, E1/F3, P4, P5,
+P6/D2) genuinely fixed against the current code rather than against the work log,
+recomputed the four verdicts from the committed TSV, and skipped the GitHub thread
+surface after probing it empty. [S] blame-history: 1 finding, scored 25 — the
+revert is clean (all five reverted paths byte-identical to `main`, the deleted test
+file never existed on `main`, no other milestone's work clobbered), and its one
+substantive claim was reconciled against this milestone's own evidence. [O]
+diff-bug: 20 findings, 8 scoring >= 80.
+
+**The milestone's own defect class survives, now entirely inside its records.**
+Every prior pass found a message or a gate claiming more than the code supported.
+This pass finds no such defect in the tooling's behaviour — the enumerator, the
+sweep and the committed evidence all verified correct, including an independent
+end-to-end re-run of two sweep cells that byte-matched their committed rows. The
+defect has migrated wholesale into the records ABOUT that tooling, which is what
+AC2 and AC5 were written to prevent, on their first outing.
+
+**Four criteria fail as written.**
+
+- **AC2 fails — O1 (93).** The ledger header enumerates SEVEN shapes the predicate
+  misses (L1-L6 plus "anything outside `R/ci-*.R`") and then asserts "Each of those
+  shapes is CONSTRUCTED and shown unmatched by a probe"; the milestone `## Decisions`
+  entry makes the same claim. `_limit_shapes()` returns SIX. There is no probe
+  constructing an abort outside `R/ci-*.R`. AC2's "No record claims detection
+  coverage broader than a probe demonstrates" is violated by two durable records —
+  the identical shape as pass 3's E1, in the text written to correct pass 3's E1.
+  The script docstring is careful here, which makes it a record error, not a code
+  error.
+- **AC5 fails — O5 (92), O9 (82), O10 (88), O14 (85).** O5: the T2 work-log line
+  states "breaking `BULLET_RE` reds 7"; three plausible mutations red 8, 8 and 14,
+  and its cited `Recompute:` is `--self-test`, which reproduces neither that figure
+  nor the paired "reds 5". O10: "all five `data-raw` checkers pass" where four
+  exist besides this milestone's own — the recurrence of pass 1's E5 (68), now
+  under a criterion that forbids it. O14: "The 80 unreached rows split 30 point-fit
+  failures and 50 cells" — both are row counts; in cells they are 6 and 10. O9: a
+  broader pattern of claims carrying no reproducing command, including "Verified
+  diagonal on live conditions" and "the per-site reach counts are identical to the
+  pre-confirmation run", the latter unrecomputable in principle because that run
+  was never committed.
+- **AC4 fails on its "states no rule" clause — O11 (82).** The git-diff half
+  passes. But the milestone's live `## Decisions` section states D-020's rule
+  verbatim, and the maintainer's "these guards REPORT the quantities that failed
+  and diagnose nothing" — and the tree, reverted to `main`, breaks both. On merge
+  this puts exactly that rule on `main` while the code contradicts it, which the
+  Scope section names as the thing the re-cut exists to prevent.
+- **AC3 is arguably met but its evidence is narrower than the sweep claims —
+  O6 (85).** The classical guard fires on `ss$mse == 0 || !is.finite(f)`; the grid
+  feeds it `gen_mse0` alone, so the second disjunct — MSA overflow, precisely
+  pass 3's C1 corner — is never generated, while the script header claims coverage
+  "across the whole class of data that triggers the abort". Four geometries do
+  satisfy AC3's literal "several geometries", so this is recorded as an
+  overstatement rather than a criterion failure, and actioned either way.
+
+**Also actioned (>= 80).** O2 (90): the `## Decisions` section says D-020 was
+"promoted to `cairn/DECISIONS.md`" and it is not there — `grep -c 'D-020'
+cairn/DECISIONS.md` = 0 — a flat falsehood in a live section that no mechanical
+check catches.
+
+**Logged below threshold (12, not actioned).** O4 78 nothing runs `--check`, so the
+"completeness gate ... cannot reach a release" claim names an enforcement the
+toolchain lacks · O12 65 `BULLET_RE` misses cli's other bullet names (`x = `,
+`"!" = `), an unstated seventh limit · O3 62 the docstring asserts a leading-line
+requirement on M101 that M101 does not impose · O19 62 `_encloses()` counts braces
+inside strings and comments, unlike the hardened `_slice_call` · O7 55
+`SPLICE_ALLOWED` is keyed by file so it exempts two sites, and its comment names
+`mc_ci()` where the splices sit in `rmvn()` and `mc_interval()` (pass 3's E2,
+unfixed) · O20 55 single-quoted R strings can desynchronise `_slice_call` ·
+O15 52 `gen_se_zero()` ignores all three parameters · O8 50 `check()`'s docstring
+says three failure modes where it has four · O16 48 `run_remedy()` re-derives
+`divisor` from the printed index rather than the estimand, currently inert
+(pass 1's C6) · O13 42 `spliced_in()` silently exempts `c` and `call` · O17 42 no
+freshness gate ties the sweep TSV to the guards it measured · O18 32 the
+enumeration reports `(unguarded)` for a guard expressed as early returns
+(pass 1's B4) · B1 25 the "reachable on macOS too" comment reads as contradicting
+M93 but is true and supported by this milestone's own TSV, merely uncited.
+
+**Thrash: trigger (a) fires, and a re-cut has already been spent.** This is the
+fourth return on this milestone, counted per milestone and never reset by the
+re-cut. Trigger (b) also fires in substance: the same shape — a record asserting
+more than the artifact supports — has now failed in four consecutive passes, in a
+message (pass 1), in a repair and a gate claim (pass 2), in a requirement and a
+gate claim (pass 3), and now in the criteria written specifically to stop it.
+Because the work log already records a re-plan spent here, the rulebook's remedy
+is no longer re-plan-or-split: the disposition goes to the maintainer, with
+escalation offered.
+
+Every acceptance box unticked; the next pass re-verifies from scratch.
