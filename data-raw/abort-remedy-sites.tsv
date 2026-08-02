@@ -10,21 +10,32 @@
 #             capability, not by the data being degenerate. The named default is
 #             not being asked to survive anything, so there is nothing to sweep.
 #
-# Three sites left this ledger at M100 rather than gaining a row: the parametric
-# bootstrap's refit-convergence guard, the classical MSE = 0 guard, and the
-# npbootstrap observed-degeneracy guard each stopped naming a `ci_method` at all,
-# because the sweep found no method usable across their trigger classes. They are
-# out of the enumeration by the same predicate that admitted them. Should one
-# ever name a method again, it reappears here UNCLASSIFIED and `--check` fails
-# until someone re-measures it. That claim holds only while the bullets are
-# INLINE in the abort call -- it was briefly false when two guards built theirs in
-# a `cause` variable (M100 review F3) -- so `--check` now also fails on any abort
-# that splices a variable into its message vector.
+# This milestone measures; it changes no message. Every `sweep` row below records
+# what the sweep found about the method its shipped bullet names, and NOT what the
+# bullet should therefore say -- that judgment, and every edit it licenses, is the
+# next milestone's.
+#
+# WHAT THIS LEDGER DOES NOT COVER. It is complete over what the enumerator
+# matches, and the enumerator is a line scanner with stated edges: a bullet in a
+# single-quoted string, a named splice (`i = cause`), a quoted bullet name
+# (`"i" = `), a method named without the literal `ci_method = "value"` adjacency,
+# an abort raised by a wrapper outside the scanner's list, an abort call that
+# does not open its line, and anything outside `R/ci-*.R`. Each of those shapes
+# is CONSTRUCTED and shown unmatched by a probe in
+# `enumerate-ci-method-remedies.py --self-test`; the script's docstring lists
+# them as L1-L6. So "every site is classified here" means every site the
+# predicate matches, and a bullet written in one of those shapes is not gated by
+# this file. The splice reporter narrows the second of them to one shape -- a
+# whole line that is a bare identifier -- and is not a gate on spliced variables
+# in general.
 #
 # key	disposition	reason
 R/ci-bootstrap.R:6c20062478	fence	Engine capability: this engine/design pair ships no simulate_refit contract. Nothing about the data is degenerate, so the Monte-Carlo default it names is unaffected.
+R/ci-bootstrap.R:f3b08ac552	sweep	Data: too few parametric-bootstrap refits converged. The count is not entailed by any single data fact, so the trigger class is swept over geometries and jitter rather than reasoned about.
+R/ci-classical.R:990cd66e44	sweep	Data: the one-way F = MSA/MSE pivot is undefined -- MSE = 0, or F non-finite. Shared by searle_ci() and burch_ci().
 R/ci-mpl.R:eebe6172e6	fence	Argument: kappa_m is calibrated per conf_level and not interpolated across levels. The data is untouched by this refusal.
 R/ci-mpl.R:12d6a184eb	fence	Design: the rater count falls outside the calibrated kappa_m grid.
 R/ci-mpl.R:afb9765670	fence	Design: the subject count falls outside the calibrated kappa_m grid.
 R/ci-npbootstrap.R:6edd0f7409	fence	Projection: a numeric `unit` whose Spearman-Brown map has passed through its pole. Measured at the M93 implement gate on 28 of 12,600 HEALTHY cells -- the fit is fine, the projection is not.
+R/ci-npbootstrap.R:bf1a802a9c	sweep	Data: the observed log F is non-finite, or its jackknife standard error is zero. Two disjuncts, and the second fires on data with no degenerate variance at all.
 R/ci-npbootstrap.R:01b75d1a61	sweep	Data: resampled subjects produced degenerate resamples (SSA = 0 or SE = 0). Stochastic -- a run is evidence about one seed, so the sweep varies seeds as well as geometries.

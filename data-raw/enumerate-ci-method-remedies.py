@@ -401,24 +401,6 @@ def self_test():
             if needle not in conditions:
                 fails.append("no enumerated site in %s guards on %r" % (path, needle))
 
-    # ...and sites that name NO method must stay out. M100 de-named these three
-    # because no method survived their trigger class; if one silently regains a
-    # `ci_method` bullet, this probe fails and the ledger demands a re-measurement.
-    unwanted = {
-        "R/ci-bootstrap.R": ["n_ok < min_frac"],
-        "R/ci-classical.R": ["ss$mse == 0"],
-        "R/ci-npbootstrap.R": ["se_ij_logf == 0"],
-    }
-    for path, needles in unwanted.items():
-        conditions = " || ".join(s["condition"] for s in by_file.get(path, []))
-        for needle in needles:
-            if needle in conditions:
-                fails.append(
-                    "%s guards on %r and names a ci_method again -- M100 removed "
-                    "that name for want of evidence; re-measure before restoring"
-                    % (path, needle)
-                )
-
     # 2b. The two `_slice_call` hazards, probed directly on synthetic source
     #     because both were live defects rather than hypotheses: an unmatched
     #     paren in a COMMENT used to swallow the next abort into this one

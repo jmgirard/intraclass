@@ -51,25 +51,7 @@ bootstrap_ci <- function(
          {.val {n_ok}} of {.val {boot_samples}} refits converged.",
         i = "This usually means the model is near a variance boundary or the \\
              design is too small to resample stably.",
-        # M100: this bullet used to say `ci_method = "montecarlo"`, measured FALSE
-        # -- across the datasets that reached this guard in
-        # data-raw/sweep-abort-remedies.R the Monte-Carlo default was usable on
-        # none of them, and neither was any other shipped method (M93 T1 first
-        # found the site reachable only on degenerate data). Naming one again
-        # needs sweep evidence over this guard's whole trigger class (D-020).
-        #
-        # It asserts NO cause. Unlike the two guards next door, this one fires on
-        # a refit-convergence COUNT, which no single data fact entails: M100's
-        # first attempt claimed "subjects scored identically by every rater" and
-        # the milestone's own sweep contradicted it on the jittered cells, where
-        # subjects differ and the refits fail anyway (review A2). The hedged
-        # bullet above already carries the usual causes. Note also that this is
-        # the PARAMETRIC bootstrap -- it simulates responses from the fitted
-        # model rather than resampling the ratings, so "no variance to resample"
-        # was the wrong mechanism as well as an unsupported claim.
-        i = "Inspect the fitted model and the ratings behind it -- variance \\
-             components estimated at or near zero are the usual reason simulated \\
-             responses fail to refit."
+        i = "Use {.code ci_method = \"montecarlo\"} or inspect the model."
       ),
       class = "intraclass_singular_fit",
       call = call

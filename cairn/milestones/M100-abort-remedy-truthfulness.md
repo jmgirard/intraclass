@@ -82,7 +82,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 ## Tasks
 
-- [ ] T1 Strip this branch back to tooling and evidence: revert every file under
+- [x] T1 Strip this branch back to tooling and evidence: revert every file under
       `R/` to `main`, drop the `NEWS.md` bullet, drop D-020 and its amendment from
       `cairn/DECISIONS.md`, and remove the message pins from
       `tests/testthat/test-abort-remedy-truthfulness.R` (they pin reverted text).
@@ -164,6 +164,12 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 - 2026-08-01: RE-CUT by /milestone-plan after the third review return. M100 keeps measurement and tooling only and ships nothing user-facing; every message change and the rule governing them move to M101. Gate decisions: the first milestone ships no message changes at all, because a deletion-only diff would leave on `main` the two diagnostic bullets this milestone's own review proved false, under a NEWS entry about truthfulness (re-cut audit; #5/#8); the rule lands with the messages it governs; and D-020 plus its amendment, neither of which has reached `main`, are removed from this branch and re-authored as one correct entry in M101. Tasks re-cut to T1-T6; every acceptance box unticked -- the criteria changed, so each re-verifies from scratch. The prior tasks are superseded but their work stays on the branch.
 - 2026-08-01: re-cut criteria audit ([O], fresh context) returned three gaps, all fixed before the file was written: an unanchored enumeration predicate (AC1 now names the four measured guards by their conditions, so a predicate matching nothing cannot satisfy it), a recompute rule scoped only to sweep numbers (AC5 now covers counts, ledger keys and this milestone's own review-history claims, which is where most of pass 3's record errors were), and the three `--check` failure modes being hand-mutated rather than probed (T3).
+
+- 2026-08-01: implement gate (re-cut) chose deleting `tests/testthat/test-abort-remedy-truthfulness.R` outright over retargeting its fixtures at main's messages, because every one of its assertions pins text T1 reverts and M101 AC3 authors the per-guard fixtures and tests; falsified by a message property this milestone owns that no other test covers.
+- 2026-08-01: implement gate (re-cut) chose applying AC5's recompute rule to records written from the re-cut forward, plus one work-log line correcting the specific pre-re-cut figures a later review proved false, over retrofitting commands into every historical line, which IP4 forbids editing.
+- 2026-08-01: T1 — branch stripped to tooling and evidence. `R/`, `NEWS.md` and `cairn/DECISIONS.md` reverted to `main`; `tests/testthat/test-abort-remedy-truthfulness.R` deleted (52 assertions, all pinning reverted text). Locate: `git diff main..HEAD --name-only`, which must list no `R/` path and neither of the two files (AC4).
+- 2026-08-01: T1 — with main's messages back, three sites name `ci_method` again, so the ledger regains their rows and the enumeration is 9 sites, 4 `sweep` + 5 `fence`. The `sweep` rows are dispositions only: this milestone records what the sweep measured, never what a bullet should say. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --check`.
+- 2026-08-01: CORRECTION, superseding the pre-re-cut work-log lines that stated enumeration counts and de-naming outcomes. Every "6 sites (1 sweep, 5 fence)" figure, and every claim that three bullets name no method or that their ledger rows were removed, described the branch's now-reverted `R/` and is false of the tree from T1 on. The current figures come from `python3 data-raw/enumerate-ci-method-remedies.py --check`. The pass-3 review also proved two specific record claims false and neither is repeated here: the `## Decisions` line saying the bootstrap guard "drew no truthfulness finding in either pass" (pass 1's A2 is one, scored 90), and D-020 Amendment 1's "three disjuncts, not two" for a guard with two disjuncts and three causes — locate both with `grep -n "drew no truthfulness\|three disjuncts" cairn/milestones/M100-abort-remedy-truthfulness.md`. Those lines are history and stay unedited (IP4).
 
 ## Decisions
 

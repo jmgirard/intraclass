@@ -8,6 +8,20 @@ R/ci-bootstrap.R  [fence]  intraclass_unsupported
     leading:   {.code ci_method = "bootstrap"} is not yet available for this design/engine combination.
     reason:    Engine capability: this engine/design pair ships no simulate_refit contract. Nothing about the data is degenerate, so the Monte-Carlo default it names is unaffected.
 
+R/ci-bootstrap.R  [sweep]  intraclass_singular_fit
+    key:       R/ci-bootstrap.R:f3b08ac552
+    names:     montecarlo
+    trigger:   if (n_ok < min_frac * boot_samples || n_ok < 2L) {
+    leading:   The bootstrap interval could not be computed: only {.val {n_ok}} of {.val {boot_samples}} refits converged.
+    reason:    Data: too few parametric-bootstrap refits converged. The count is not entailed by any single data fact, so the trigger class is swept over geometries and jitter rather than reasoned about.
+
+R/ci-classical.R  [sweep]  intraclass_singular_fit
+    key:       R/ci-classical.R:990cd66e44
+    names:     montecarlo
+    trigger:   if (ss$mse == 0 || !is.finite(f)) {
+    leading:   The classical one-way {method} interval is undefined for this data.
+    reason:    Data: the one-way F = MSA/MSE pivot is undefined -- MSE = 0, or F non-finite. Shared by searle_ci() and burch_ci().
+
 R/ci-mpl.R  [fence]  intraclass_unsupported
     key:       R/ci-mpl.R:eebe6172e6
     names:     montecarlo
@@ -35,6 +49,13 @@ R/ci-npbootstrap.R  [fence]  intraclass_unsupported
     trigger:   (unguarded)
     leading:   The one-way {method} interval cannot be projected to {.code unit = {.val {m}}} on this data.
     reason:    Projection: a numeric `unit` whose Spearman-Brown map has passed through its pole. Measured at the M93 implement gate on 28 of 12,600 HEALTHY cells -- the fit is fine, the projection is not.
+
+R/ci-npbootstrap.R  [sweep]  intraclass_singular_fit
+    key:       R/ci-npbootstrap.R:bf1a802a9c
+    names:     montecarlo
+    trigger:   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
+    leading:   The one-way transformed bootstrap-t interval is undefined for this data.
+    reason:    Data: the observed log F is non-finite, or its jackknife standard error is zero. Two disjuncts, and the second fires on data with no degenerate variance at all.
 
 R/ci-npbootstrap.R  [sweep]  intraclass_singular_fit
     key:       R/ci-npbootstrap.R:01b75d1a61

@@ -189,32 +189,16 @@ npbootstrap_ci <- function(
   k <- length(groups)
   obs <- npb_anova(groups)
   # The OBSERVED data must be non-degenerate: SSA = 0 (every subject mean equal ->
-  # log F = -Inf), SSE = 0 (no within-subject variance -> log F non-finite), or a
-  # zero jackknife SE leaves the transform / studentization ill-posed. Fail loudly
-  # (#5/#8). The third case is NOT a variance degeneracy and this comment used to
-  # omit it (M100 review A1).
-  # The message REPORTS the two quantities that failed and diagnoses nothing.
-  #
-  # M100 reached this wording after twice shipping a message that asserted a fact
-  # about the user's data which was false in a corner: first the wrong degeneracy
-  # (the guard has a third cause, a zero jackknife SE, that needs no degenerate
-  # variance at all — review A1), then NaN conflated with overflow (review F2).
-  # Each fix was correct about the corner it knew of and wrong about the next one,
-  # because a prose cause is an inference and the guard's own condition is not.
-  # Printing `log F` and its standard error cannot be false: they are the numbers
-  # the guard tested. The maintainer chose this over completing the case analysis
-  # (plan gate, 2026-08-01). No `ci_method` is named — the sweep found none usable
-  # across this guard's trigger class (D-020).
+  # log F = -Inf) or SSE = 0 (no within-subject variance -> IJ SE undefined) leaves
+  # the transform / studentization ill-posed. Fail loudly (#5/#8).
   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
     abort_intraclass(
       c(
         "The one-way transformed bootstrap-t interval is undefined for this data.",
-        i = "The studentized pivot needs a finite {.field log F} and a non-zero \\
-             jackknife standard error; here {.field log F} = \\
-             {.val {signif(obs$logf, 6)}} and its standard error = \\
-             {.val {signif(obs$se_ij_logf, 6)}}.",
-        i = "Inspect the ratings and the between- and within-subject mean \\
-             squares behind them."
+        i = "Between- or within-subject variance is exactly zero \\
+             (log F = {.val {obs$logf}}), so the {.field log F} transform and its \\
+             jackknife SE do not exist.",
+        i = "Inspect the data or use {.code ci_method = \"montecarlo\"}."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -254,11 +238,6 @@ npbootstrap_ci <- function(
         "The one-way transformed bootstrap-t interval could not be computed: \\
          {.val {n_bad}} of {.val {boot_samples}} resamples were degenerate \\
          (SSA = 0 or SE = 0).",
-        # M100: this bullet KEEPS its method name, unlike the observed-data guard
-        # above, and the difference is measured rather than assumed. Here the
-        # OBSERVED data is healthy -- only the resamples degenerate -- so the
-        # Monte-Carlo default returns a usable interval on every dataset that
-        # reached this guard in data-raw/sweep-abort-remedies.R.
         i = "The design is too small to resample stably; use a larger design or \\
              {.code ci_method = \"montecarlo\"}."
       ),

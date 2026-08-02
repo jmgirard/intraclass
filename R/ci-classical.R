@@ -44,23 +44,13 @@ classical_oneway_ss <- function(groups) {
 # exist to serve (small-but-positive F passes and returns a finite interval).
 classical_guard_observed <- function(ss, method, call) {
   f <- ss$msa / ss$mse
-  if (isTRUE(ss$mse == 0) || !is.finite(f)) {
-    # REPORTS the mean squares and diagnoses nothing -- the same discipline as the
-    # npbootstrap guard next door, and for the same reason (M100 reviews A1/A4/F2).
-    #
-    # `isTRUE()` is load-bearing, not defensive noise: `ss$mse` can be NaN, and a
-    # bare `ss$mse == 0` is then NA. The outer `||` survives that (NA || TRUE is
-    # TRUE), but M100's first repair branched a second time on the same bare
-    # comparison and `if (NA)` killed the guard with an unclassed simpleError
-    # where a classed abort belongs (review F1, #5/#8). There is no second branch
-    # here now, and this guard is the only place the comparison is made.
+  if (ss$mse == 0 || !is.finite(f)) {
     abort_intraclass(
       c(
         "The classical one-way {method} interval is undefined for this data.",
-        i = "The {.field F = MSA/MSE} pivot needs a finite, non-zero MSE; here \\
-             MSA = {.val {signif(ss$msa, 6)}}, MSE = {.val {signif(ss$mse, 6)}} \\
-             and F = {.val {signif(f, 6)}}.",
-        i = "Inspect the ratings behind those mean squares."
+        i = "Within-subject variance is exactly zero (MSE = {.val {ss$mse}}), so \\
+             the {.field F = MSA/MSE} pivot does not exist.",
+        i = "Inspect the data or use {.code ci_method = \"montecarlo\"}."
       ),
       class = "intraclass_singular_fit",
       call = call
