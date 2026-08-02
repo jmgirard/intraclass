@@ -1,5 +1,9 @@
-# M100 T2 -- does each abort's named `ci_method` actually work on the data that
+# M100 -- does each abort's named `ci_method` actually work on the data that
 # reaches that abort?
+#
+# This script MEASURES and concludes nothing about what a message should say. It
+# changes no message and licenses no edit: the rule for reading these results,
+# and every message change they bear on, are the next milestone's work.
 #
 # An abort's remedy bullet ("use `ci_method = \"montecarlo\"`") is STATIC text: it
 # makes the same claim to every user who reaches it. So it must hold across the
@@ -18,18 +22,24 @@
 #
 # The sites are the reducer-stage guards whose trigger is degenerate DATA. That
 # set is fixed by the code, not by the ledger: a guard stays worth measuring after
-# its message stops naming a method, and three of these four de-named at M100, so
-# reading the site list off `data-raw/abort-remedy-sites.tsv` would silently
-# shrink the evidence base to the sites that still name something (review C7).
-# What IS read from the ledger and the enumeration is which sites still name a
-# method today -- the `named_by_remedy` column below -- so that column cannot go
-# stale against the shipped text. This script MEASURES only.
+# its message stops naming a method, so reading the site list off
+# `data-raw/abort-remedy-sites.tsv` would shrink the evidence base the moment a
+# bullet was de-named -- which is exactly when the evidence matters (review C7).
+# What IS read from the enumeration is which sites name a method today -- the
+# `named_by_remedy` column below -- so that column cannot go stale against the
+# shipped text.
 #
 # Run from the repo root (~25 min at boot_samples = 999):
 #   Rscript data-raw/sweep-abort-remedies.R
 # Writes data-raw/abort-remedy-sweep.tsv (one row per site x dataset x method).
 
 suppressMessages(devtools::load_all(quiet = TRUE))
+
+# Site identity is read off the rendered message (see `lead_fragments()`), so the
+# renderer must not hard-wrap it at the console width. Belt and braces: the match
+# also normalizes whitespace, because a pin that depends on how wide the terminal
+# happened to be is not evidence about anything.
+options(cli.width = 10000L)
 
 out_path <- "data-raw/abort-remedy-sweep.tsv"
 # The SHIPPED default, not a reduced count. M97 measured a run that succeeded at
@@ -113,6 +123,84 @@ gen_se_zero <- function(n_s, n_r, seed = 1) {
 # on every one-way dataset here; `posterior` because it requires the brms engine,
 # which these fits do not use. Recorded rather than assumed (review F5/F10).
 candidates <- c("montecarlo", "searle", "burch", "npbootstrap", "bootstrap")
+
+# ---- confirming WHICH guard fired --------------------------------------------
+# The condition class alone cannot identify a site. Both npbootstrap guards raise
+# `intraclass_singular_fit` from the same reducer, so a cell aimed at the
+# observed-degeneracy guard that actually tripped the resample guard would have
+# been recorded as evidence about the first. Every verdict below therefore also
+# requires the fired message to carry that site's own leading line.
+#
+# The fragments are DERIVED from the committed enumeration rather than written
+# here, so the identity test cannot drift from the shipped text: the leading line
+# is the same string the ledger key hashes. Glue spans (`{.val {n_ok}}`) are cut
+# out and the static text between them is what must appear -- ALL of it, not the
+# longest piece, because " interval is undefined for this data." alone is shared
+# by the classical and npbootstrap-observed guards and only "The classical
+# one-way" separates them.
+enumeration_leads <- local({
+  path <- "data-raw/abort-remedy-enumeration.txt"
+  out <- list()
+  if (file.exists(path)) {
+    key <- NULL
+    for (ln in readLines(path, warn = FALSE)) {
+      k <- regmatches(ln, regexpr("(?<=key:\\s{7})\\S+", ln, perl = TRUE))
+      if (length(k)) {
+        key <- k
+      }
+      l <- regmatches(ln, regexpr("(?<=leading:\\s{3})\\S.*", ln, perl = TRUE))
+      if (length(l) && !is.null(key)) {
+        out[[key]] <- l
+      }
+    }
+  }
+  out
+})
+
+# Static text of a leading line: everything outside a `{...}` glue span, brace
+# depth tracked because cli nests them (`{.val {n_ok}}`). Fragments shorter than
+# 8 non-space characters are dropped -- " of " identifies nothing and would only
+# make the test fragile.
+lead_fragments <- function(lead) {
+  chars <- strsplit(lead, "", fixed = TRUE)[[1]]
+  depth <- 0L
+  keep <- character(0)
+  buf <- character(0)
+  for (ch in chars) {
+    if (ch == "{") {
+      depth <- depth + 1L
+      keep <- c(keep, paste(buf, collapse = ""))
+      buf <- character(0)
+    } else if (ch == "}") {
+      depth <- max(0L, depth - 1L)
+    } else if (depth == 0L) {
+      buf <- c(buf, ch)
+    }
+  }
+  keep <- c(keep, paste(buf, collapse = ""))
+  keep <- trimws(keep)
+  keep[nchar(gsub("\\s", "", keep)) >= 8L]
+}
+
+squash <- function(x) gsub("\\s+", " ", trimws(x))
+
+# Does this condition carry the leading line of the site we aimed at?
+is_site <- function(cnd, key) {
+  lead <- enumeration_leads[[key]]
+  if (is.null(lead)) {
+    return(NA)
+  }
+  frags <- lead_fragments(lead)
+  if (!length(frags)) {
+    return(NA)
+  }
+  msg <- squash(conditionMessage(cnd))
+  all(vapply(
+    frags,
+    function(f) grepl(squash(f), msg, fixed = TRUE),
+    logical(1)
+  ))
+}
 
 # ---- the site register -------------------------------------------------------
 # `fire` calls the reducer that owns the site DIRECTLY and returns the condition
@@ -381,13 +469,20 @@ for (cell in grid) {
     "condition"
   )
   fired <- site$fire(df, cell$n_r)
-  reached <- inherits(fired, "condition") &&
-    inherits(fired, site$class) &&
-    point_fit_ok
+  classed_ok <- inherits(fired, "condition") && inherits(fired, site$class)
+  # The site's OWN message, not merely its class -- see `is_site()`.
+  site_ok <- isTRUE(classed_ok && isTRUE(is_site(fired, cell$site)))
+  reached <- site_ok && point_fit_ok
   why <- if (reached) {
     ""
   } else if (!point_fit_ok) {
     "point fit failed: a user could not reach this message on this data"
+  } else if (classed_ok && !site_ok) {
+    paste0(
+      "another guard in the same reducer raised ",
+      site$class,
+      ": the message is not this site's"
+    )
   } else if (inherits(fired, "condition")) {
     paste("other condition:", class(fired)[[1]])
   } else {
@@ -414,6 +509,7 @@ for (cell in grid) {
       trigger = cell$note,
       reached = reached,
       point_fit_ok = point_fit_ok,
+      site_confirmed = site_ok,
       remedy = trimws(method),
       outcome = remedy$outcome,
       remedy_usable = remedy$usable,
