@@ -1,11 +1,11 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP7
-- **Branch/PR:** `m102-record-claims-ledger`
+- **Branch/PR:** `m102-record-claims-ledger` · https://github.com/jmgirard/intraclass/pull/109
 
 ## Goal
 
@@ -136,9 +136,9 @@ candidate row, whose subject is M101's messages.
       copy and confirm exactly its own probe reds.
 - [x] T7 Append the D-entry: numbered rule list, each line naming its probe id or
       `none — <ground>`; state the D-009 relation and the scope list.
-- [ ] T8 Wire both steps into `check-references` with the milestone comment; push
+- [x] T8 Wire both steps into `check-references` with the milestone comment; push
       and confirm the job green on the PR.
-- [ ] T9 Gate per AC9. Run `check-reference-observations.py` specifically — a new
+- [x] T9 Gate per AC9. Run `check-reference-observations.py` specifically — a new
       `data-raw` file naming a citekey trips that source note's `git grep`
       directives (M80/M86); add a `':(exclude)…'` pathspec if the ledger quotes one.
 
@@ -160,6 +160,9 @@ candidate row, whose subject is M101's messages.
 - 2026-08-02: T3 — `data-raw/record-claims.tsv` seeded with five rows, one per shape and covering all four named figures; all five pass at this commit (`python3 data-raw/check-record-claims.py` → `OK: 5 registered claim(s) re-derived, 0 failure(s)`). Two plan refinements, both minor: the κ_m row reads BOTH `m88-kappa-table.rds` (the shipped 0.95 table) and `m90-kappa-tables.rds` (0.90 and 0.99) via the new helper `data-raw/record-claims-kappa-steps.py`, T3's naming of the M88 fixture alone having missed that the three figures span three levels, only one of which M88 calibrated; and T8's `lint.yaml` wiring landed here rather than after, so the invocation-count figure was true at the moment it was written rather than written false and fixed later. T8 remains open for its green-CI evidence.
 - 2026-08-02: T4/T5/T6 — citation gate, falsifier mechanism and self-test verified together on the seeded ledger. Citations: the two ROADMAP figures cite their rows inline, `data-raw/README.md` gains a Record-claim checkers section carrying the other three, and both directions red on constructed input. Falsifier: the one absence row certifies that `cairn/DECISIONS.md` carries no claim citation, and its falsifier points the same `git grep` at the committed `data-raw/record-claims-fixtures/citation-present.md`, which does carry one — measured to fail the row's expectation (rc 0 against an expected 1). Self-test: `--self-test` green, 16/16 probes drive their own route, and 16/16 route excisions silence exactly their own probe.
 - 2026-08-02: T7 — `cairn/DECISIONS.md` gains D-020: 17 numbered rules, each naming the route that probes it except rule 5 (registration-not-detection), which records `none` with its ground, a limit on what the checker reads rather than a condition any input can drive. Two parser corrections found by running the entry through the checker rather than by reading it: a rule's probe token is read immediately after `probe:` and not at end of line (a `none` rule ends with its ground), and the scope list is read only up to the rule's em dash (the sentence arguing for the scope names the EXCLUDED paths in backticks too, and the first draft parsed `milestones/archive/` into the scope).
+
+- 2026-08-02: T8 — both steps run in `check-references` on PR #109, in the stated order and behind a comment naming this milestone and the ledger path. Job green in 24s with both steps `success` in that run's own log; recompute: `gh api repos/jmgirard/intraclass/actions/jobs/91544700240 --jq '.steps[] | "\(.number) \(.conclusion) \(.name)"'` — step 9 "Re-derive the registered record claims (M102)", step 10 "Self-test the record-claims checker (route excision)". The self-test, route excision included, therefore passes on the depth-1 CI checkout and not only locally.
+- 2026-08-02: T9 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / ERROR 0 / SKIP 23 / PASS 5435 (identical to `main`'s baseline; this branch changes no R code and adds no R test); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m54s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; all five `data-raw` checkers pass locally in both their check and self-test modes (ten invocations, enumerated by `ls data-raw/check-*.py data-raw/enumerate-*.py`); `cairn_validate` all checks passed, WARNs only `sizing (split tripwires)` (1 — nine criteria, kept whole at the plan gate) and `dangling id tokens` (321, pre-existing). CI green on PR #109: all nine checks pass. `check-reference-observations.py` specifically re-run per T9's note — no new `data-raw` file names a citekey, so no `':(exclude)...'` pathspec was needed. Status -> review.
 
 ## Decisions
 
