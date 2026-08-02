@@ -89,7 +89,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       Everything removed here is re-authored in M101.
 - [x] T2 Anchor the enumerator: assert in `--self-test` that the four measured
       guards appear, keyed on their guarding conditions.
-- [ ] T3 Automate the three `--check` failure modes as self-test probes (they are
+- [x] T3 Automate the three `--check` failure modes as self-test probes (they are
       currently hand-mutated in the work log), and state the predicate's limits in
       the docstring, the ledger header and the milestone records, one probe per
       stated limit — including the splice shapes `spliced_message_sites()` does
@@ -173,11 +173,34 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 - 2026-08-01: T2 — the four swept guards are anchored in `--self-test` on fragments of their own `if (...)` conditions (`n_ok < min_frac`, `ss$mse == 0`, `se_ij_logf == 0`, `n_bad > 0`), so a predicate that stopped matching one could not leave it unswept with `--check` still printing OK. Mutation-verified: narrowing the file glob to `R/ci-n*.R` reds 5 assertions naming the two dropped guards, and breaking `BULLET_RE` reds 7. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
 
+- 2026-08-01: T3 — `check()` and the two scanners now take their inputs as parameters, so `--self-test` DRIVES the three `--check` failure modes on constructed input and reads the exit code, against a passing control. Mutation-verified one gate at a time: removing the missing-row branch, the stale-row branch and the freshness branch each reds exactly its own probe.
+- 2026-08-01: T3 self-caught, and the reason the probes were worth building: the unclassified-site probe first passed for the WRONG reason — its `committed` text did not match its own input, so it was failing on freshness, and deleting the missing-row branch left it green. Fixed by rendering `committed` from the same input; the mutation then reds. A second probe caught an overstatement in the same pass: a whole message vector spliced on its own line IS reported, so the limit was narrowed to the shape that actually escapes, the vector spliced on the call's own line.
+- 2026-08-01: T3 — the predicate's limits L1-L6 plus file scope are stated in the script docstring, the ledger header and the `## Decisions` section below, each with a probe that constructs the shape and shows it unmatched. Mutation-verified: widening the method matcher to accept single quotes reds L1's probe, and widening the splice reporter to see `i = cause` reds that splice limit — a limit closed reds its own probe rather than leaving a record overstating the gate. Recompute: `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
+
 ## Decisions
 
 - 2026-08-01 (D-020, promoted to `cairn/DECISIONS.md`): static remedy text may name a `ci_method` only on swept evidence over the abort's whole trigger class. Promoted rather than kept local because it binds every future abort in the package, not just these four.
 - 2026-08-01 (D-020 Amendment 1, promoted): D-020's bootstrap parenthetical was backwards against its own sweep, and its enforcement claim named a guard the enumerator did not yet have. Corrected by amendment because DECISIONS.md is history and is never edited.
 - 2026-08-01 (milestone-local): these guards REPORT the quantities that failed and diagnose nothing. Chosen by the maintainer at the review pass-2 gate after two returns in which a described cause was false in a corner; the alternative, completing the case analysis, was rejected as the approach that had already failed twice. The bootstrap guard, which never diagnosed, is the one that drew no truthfulness finding in either pass.
+
+- 2026-08-01 (milestone-local): the enumeration predicate's LIMITS are stated and
+  probed rather than assumed. The scanner is line-oriented over R source, so a
+  `ci_method` named in any of six shapes passes ungated: a single-quoted bullet
+  string (L1); a named splice, `i = cause` (L2); a quoted bullet name, `"i" = `
+  (L3); the method named without the literal `ci_method = "value"` adjacency
+  (L4); an abort raised outside the scanner's wrapper list, e.g. `rlang::abort()`
+  (L5); an abort call that does not open its line (L6). File scope is a seventh:
+  only `R/ci-*.R` is read. Each shape is CONSTRUCTED in `--self-test` and shown
+  unmatched, so a limit later closed reds its own probe instead of quietly
+  leaving the docstring wrong — verified by widening the method matcher to
+  single quotes, which reds L1's probe. `spliced_message_sites()` narrows L2 to
+  exactly one shape, a whole line that is a bare identifier, and the five shapes
+  it stays blind to are probed the same way. Chosen over widening the scanner:
+  widening means resolving R variables, and this milestone's own review history
+  is three durable records describing that reporter as a gate on any spliced
+  variable, which the `i = cause` probe falsifies. An honest narrow gate is
+  citable where a broad claim was not. Recompute:
+  `python3 data-raw/enumerate-ci-method-remedies.py --self-test`.
 
 ## Review
 

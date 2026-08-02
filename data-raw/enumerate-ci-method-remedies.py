@@ -32,6 +32,36 @@ the stable identifier here by construction: the milestone that rewrites these
 remedies is required to leave every leading line unchanged, so a re-keying can
 only follow a genuine change of what the abort says it is.
 
+What the predicate does NOT match
+--------------------------------
+This is a line-oriented scanner over R source, not an R parser, so its reach has
+edges. Each edge below is a STATED LIMIT with a probe in `--self-test` that
+constructs the shape and shows it unmatched (`_limit_shapes`), because the
+recurring failure in this area has been a record claiming a gate catches more
+than it does. A site written in any of these shapes carries a `ci_method` name
+past the gate:
+
+  L1  a bullet written as a single-quoted R string -- the method matcher wants
+      the backslash-escaped inner quotes a double-quoted R string produces;
+  L2  a NAMED splice, `i = cause`, where the bullets are built elsewhere;
+  L3  a bullet whose name is quoted, `"i" = ` -- only a bare `i = ` at the start
+      of a line is read as a bullet, and everything before the first one is
+      treated as the leading message;
+  L4  the method named without the literal `ci_method = "value"` adjacency, e.g.
+      `{.val "montecarlo"}` beside `{.arg ci_method}`;
+  L5  an abort raised by something outside this scanner's wrapper list, e.g. a
+      bare `rlang::abort()`;
+  L6  an abort call that does not OPEN its line, e.g. assigned or nested.
+
+Scope is a limit of the same kind: only `R/ci-*.R` is read, so a `ci_method`
+named by an abort anywhere else in the package is out of the enumeration.
+
+`spliced_message_sites()` narrows L2 rather than closing it. It reports exactly
+ONE shape -- a whole line that is a bare identifier -- and `_unreported_splices`
+probes the shapes it stays blind to (`i = cause`, `!!!bullets`, a `paste0()`
+bullet, a symbol sharing a line, a message vector spliced on the call's own
+line). It is not, and must not be described as, a gate on any spliced variable.
+
 Usage (run from the repo root):
     python3 data-raw/enumerate-ci-method-remedies.py            # print the enumeration
     python3 data-raw/enumerate-ci-method-remedies.py --emit     # write it to disk
@@ -39,11 +69,15 @@ Usage (run from the repo root):
     python3 data-raw/enumerate-ci-method-remedies.py --self-test
 
 `--check` fails on an unclassified site, on a ledger row matching no site, and on
-a committed enumeration that is not this run's own output.
+a committed enumeration that is not this run's own output. All three are driven
+by probes in `--self-test` (`_check_probes`), against a passing control, rather
+than asserted from a hand-mutation someone once ran.
 """
 
+import contextlib
 import glob
 import hashlib
+import io
 import os
 import re
 import sys
@@ -94,40 +128,50 @@ FENCE_GUARDS = {
 # by design. Anything else spliced is a gap — see `spliced_message_sites()`.
 SPLICE_ALLOWED = {("R/ci-montecarlo.R", "hint")}
 
+# Sentinel: "read the committed enumeration from disk". `None` cannot serve,
+# because a probe must be able to say "there is no committed enumeration".
+_UNREAD = object()
+
+
+def spliced_in(path, lines):
+    """ONE splice shape, named exactly: a WHOLE LINE that is a bare identifier.
+
+    The scanner reads bullets out of the abort call itself, so bullets built
+    elsewhere and spliced in are invisible to it. Rather than leave that
+    assumption silent, this reports the one splice shape it can recognize.
+
+    What it does NOT recognize is stated here and probed in `--self-test`, so no
+    record can call this a general splice gate again: a NAMED splice (`i = cause`)
+    passes, and so do `!!!bullets`, a `paste0()` bullet, a bare symbol sharing a
+    line with another element, and a spliced whole message vector. Widening the
+    match to any of those means resolving the variable, which is a different and
+    much larger scanner; refusing to overstate what this one does is the cheap
+    half, and it is the half a durable record can safely cite.
+    """
+    out = []
+    for idx, line in enumerate(lines):
+        if not ABORT_RE.match(line):
+            continue
+        first, last = _slice_call(lines, idx)
+        for raw in lines[first : last + 1]:
+            stripped = raw.split("#")[0].strip().rstrip(",")
+            # A bare identifier on its own line inside the message vector:
+            # not a string, not `name = value`, not punctuation.
+            if re.fullmatch(r"[a-zA-Z._][a-zA-Z0-9._]*", stripped):
+                if stripped in ("c", "call"):
+                    continue
+                if (path, stripped) in SPLICE_ALLOWED:
+                    continue
+                out.append((path, first + 1, stripped))
+    return out
+
 
 def spliced_message_sites():
-    """Aborts whose bullets are NOT inline, which this enumerator cannot see.
-
-    The scanner reads bullets out of the abort call itself. That assumption held
-    until M100 refactored two guards to build their bullets in a `cause <- if
-    (...)` variable — after which re-adding a `ci_method` name to either passed
-    both `--check` and `--self-test` (review finding F3), while the ledger, the
-    self-test and D-020 all advertised that it would fail.
-
-    Rather than leave the assumption silent, this makes it CHECKED: any abort
-    splicing a bare symbol into its message vector is reported, so the gap
-    announces itself instead of being discovered by a reviewer. Extending the
-    scanner to resolve such a variable would be the alternative; refusing the
-    shape is cheaper and keeps one way to write these messages.
-    """
+    """`spliced_in` over the shipped sources."""
     out = []
     for path in sorted(glob.glob(R_GLOB)):
         with open(path, encoding="utf-8") as fh:
-            lines = fh.read().splitlines()
-        for idx, line in enumerate(lines):
-            if not ABORT_RE.match(line):
-                continue
-            first, last = _slice_call(lines, idx)
-            for raw in lines[first : last + 1]:
-                stripped = raw.split("#")[0].strip().rstrip(",")
-                # A bare identifier on its own line inside the message vector:
-                # not a string, not `name = value`, not punctuation.
-                if re.fullmatch(r"[a-zA-Z._][a-zA-Z0-9._]*", stripped):
-                    if stripped in ("c", "call"):
-                        continue
-                    if (path, stripped) in SPLICE_ALLOWED:
-                        continue
-                    out.append((path, first + 1, stripped))
+            out.extend(spliced_in(path, fh.read().splitlines()))
     return out
 
 
@@ -258,45 +302,59 @@ def enumerate_sites():
     wrappers = wrapper_classes()
     for path in sorted(glob.glob(R_GLOB)):
         with open(path, encoding="utf-8") as fh:
-            lines = fh.read().splitlines()
-        for idx, line in enumerate(lines):
-            if not ABORT_RE.match(line):
-                continue
-            first, last = _slice_call(lines, idx)
-            body = lines[first : last + 1]
-            # Only bullets are remedies. A leading line naming its own method
-            # ("`ci_method = \"mpl\"` is calibrated at ...") states what failed,
-            # it does not send the user anywhere, so it is not a claim about
-            # another method surviving this data.
-            bullet_text = []
-            seen_bullet = False
-            for raw in body:
-                if BULLET_RE.match(raw):
-                    seen_bullet = True
-                if seen_bullet:
-                    bullet_text.append(raw)
-            methods = sorted(set(METHOD_RE.findall("\n".join(bullet_text))))
-            if not methods:
-                continue
-            wrapper = ABORT_RE.match(line).group(1)
-            cls = CLASS_RE.search("\n".join(body))
-            lead = _leading_line(body)
-            sites.append(
-                {
-                    "file": path,
-                    "line": first + 1,
-                    "class": (
-                        cls.group(1)
-                        if cls
-                        else wrappers.get(wrapper, "(default)")
-                    ),
-                    "condition": _condition(lines, first),
-                    "methods": methods,
-                    "lead": lead,
-                    "key": "%s:%s"
-                    % (path, hashlib.sha1(lead.encode("utf-8")).hexdigest()[:10]),
-                }
-            )
+            sites.extend(sites_in(path, fh.read().splitlines(), wrappers))
+    return sites
+
+
+def sites_in(path, lines, wrappers=None):
+    """`enumerate_sites` for one file's lines, so a probe can feed it source.
+
+    The predicate lives here and nowhere else, which is what lets `--self-test`
+    demonstrate its LIMITS on constructed source rather than assert them in
+    prose. Every shape listed in this module's docstring under "What the
+    predicate does not match" has a probe that runs it through this function.
+    """
+    sites = []
+    if wrappers is None:
+        wrappers = wrapper_classes()
+    for idx, line in enumerate(lines):
+        if not ABORT_RE.match(line):
+            continue
+        first, last = _slice_call(lines, idx)
+        body = lines[first : last + 1]
+        # Only bullets are remedies. A leading line naming its own method
+        # ("`ci_method = \"mpl\"` is calibrated at ...") states what failed,
+        # it does not send the user anywhere, so it is not a claim about
+        # another method surviving this data.
+        bullet_text = []
+        seen_bullet = False
+        for raw in body:
+            if BULLET_RE.match(raw):
+                seen_bullet = True
+            if seen_bullet:
+                bullet_text.append(raw)
+        methods = sorted(set(METHOD_RE.findall("\n".join(bullet_text))))
+        if not methods:
+            continue
+        wrapper = ABORT_RE.match(line).group(1)
+        cls = CLASS_RE.search("\n".join(body))
+        lead = _leading_line(body)
+        sites.append(
+            {
+                "file": path,
+                "line": first + 1,
+                "class": (
+                    cls.group(1)
+                    if cls
+                    else wrappers.get(wrapper, "(default)")
+                ),
+                "condition": _condition(lines, first),
+                "methods": methods,
+                "lead": lead,
+                "key": "%s:%s"
+                % (path, hashlib.sha1(lead.encode("utf-8")).hexdigest()[:10]),
+            }
+        )
     return sites
 
 
@@ -337,7 +395,20 @@ def render(sites, ledger):
     return "\n".join(out)
 
 
-def check(sites, ledger):
+def check(sites, ledger, committed=_UNREAD, spliced=None):
+    """The completeness gate. Three failure modes, each probed in `--self-test`.
+
+    `committed` is the enumeration text on disk and `spliced` the splice report;
+    both are parameters rather than reads so a probe can drive every branch
+    without touching a committed file. They default to the real ones.
+    """
+    if committed is _UNREAD:
+        committed = None
+        if os.path.exists(ENUMERATION):
+            with open(ENUMERATION, encoding="utf-8") as fh:
+                committed = fh.read()
+    if spliced is None:
+        spliced = spliced_message_sites()
     missing = [s for s in sites if s["key"] not in ledger]
     stale = set(ledger) - {s["key"] for s in sites}
     for s in missing:
@@ -352,7 +423,6 @@ def check(sites, ledger):
             "changed its leading line, or stopped naming a ci_method" % key,
             file=sys.stderr,
         )
-    spliced = spliced_message_sites()
     for path, line, sym in spliced:
         print(
             "SPLICED %s:%d builds its bullets in `%s` rather than inline -- this "
@@ -366,10 +436,6 @@ def check(sites, ledger):
     # The committed enumeration must be this run's own output, or it is a
     # hand-list wearing a generated file's name.
     fresh = render(sites, ledger)
-    committed = None
-    if os.path.exists(ENUMERATION):
-        with open(ENUMERATION, encoding="utf-8") as fh:
-            committed = fh.read()
     if committed != fresh:
         print(
             "%s is stale or absent -- regenerate with "
@@ -377,13 +443,231 @@ def check(sites, ledger):
             file=sys.stderr,
         )
         return 1
-    swept = [s for s in sites if ledger[s["key"]]["disposition"] == "sweep"]
+    # `.get`, not `[]`: every site is classified by the time this line runs, but
+    # a KeyError here would mask a removed gate as a crash instead of a verdict.
+    swept = [
+        s for s in sites if ledger.get(s["key"], {}).get("disposition") == "sweep"
+    ]
     print(
         "OK %d ci_method-naming reducer aborts, all classified "
         "(%d sweep, %d fence); %s current"
         % (len(sites), len(swept), len(sites) - len(swept), ENUMERATION)
     )
     return 0
+
+
+def _quiet_check(sites, ledger, committed):
+    """`check()` with its diagnostics swallowed -- a probe wants the exit code."""
+    buf = io.StringIO()
+    with contextlib.redirect_stderr(buf), contextlib.redirect_stdout(buf):
+        return check(sites, ledger, committed=committed, spliced=[])
+
+
+def _probe_site_and_row():
+    """One synthetic site and the ledger row that classifies it."""
+    lines = [
+        "    abort_intraclass(",
+        "      c(",
+        '        "A probe abort.",',
+        '        i = "Use {.code ci_method = \\"montecarlo\\"} instead."',
+        "      ),",
+        "      call = call",
+        "    )",
+    ]
+    sites = sites_in("R/ci-probe.R", lines, {})
+    ledger = {
+        s["key"]: {"disposition": "fence", "reason": "probe"} for s in sites
+    }
+    return sites, ledger
+
+
+def _check_probes():
+    """The three ways `--check` must fail, as (label, sites, ledger, committed).
+
+    Stated in the module docstring and gated here: an unclassified site, a ledger
+    row matching no site, and a committed enumeration that is not this run's
+    output.
+    """
+    sites, ledger = _probe_site_and_row()
+    current = render(sites, ledger)
+    return [
+        # `committed` is the enumeration this input really renders, so the
+        # freshness branch is SATISFIED and only the unclassified branch can
+        # fail. A probe that fails by a second route is evidence about that
+        # route -- removing the missing-row branch left this one green until the
+        # committed text was matched to the input (caught mutating M3).
+        ("a site with no ledger row", sites, {}, render(sites, {})),
+        (
+            "a ledger row matching no site",
+            [],
+            {"R/ci-gone.R:0000000000": {"disposition": "fence", "reason": "x"}},
+            render([], {}),
+        ),
+        (
+            "a stale committed enumeration",
+            sites,
+            ledger,
+            current + "\n# hand-edited after the fact\n",
+        ),
+    ]
+
+
+def _limit_shapes():
+    """Message shapes carrying a `ci_method` name that the predicate MISSES.
+
+    One entry per limit stated in the module docstring. Each is real R that could
+    be written tomorrow; none is matched today.
+    """
+    return [
+        # L1 single-quoted R string: METHOD_RE requires the backslash-escaped
+        # inner quotes a double-quoted R string produces.
+        (
+            "single-quoted bullet string",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                "        'A probe abort.',",
+                "        i = 'Use {.code ci_method = \"montecarlo\"} instead.'",
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        # L2 a NAMED splice. `spliced_in` wants a whole line that is a bare
+        # identifier, so the `i = ` prefix hides it from both scanners.
+        (
+            "named bullet splice (`i = cause`)",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                "        i = cause",
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        # L3 a bullet not written as `i = `. Everything before the first `i = `
+        # is read as the leading line, and a leading line's methods are excluded
+        # on purpose -- so a method named in a `"i" = ` bullet is simply lost.
+        (
+            "quoted bullet name (`\"i\" = `)",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                '        "i" = "Use {.code ci_method = \\"montecarlo\\"} instead."',
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        # L4 an alternate spelling: the argument named and the value quoted
+        # apart, which reads identically to a user and not at all to METHOD_RE.
+        (
+            "method named without the `ci_method = ` adjacency",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                '        i = "Pass {.val \\"montecarlo\\"} to {.arg ci_method}."',
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        # L5 an abort this scanner does not recognize as one. ABORT_RE lists the
+        # package's own wrappers plus cli_abort; a bare rlang::abort() is missed.
+        (
+            "`rlang::abort()` rather than a package wrapper",
+            [
+                "    rlang::abort(",
+                "      c(",
+                '        "A probe abort.",',
+                '        i = "Use {.code ci_method = \\"montecarlo\\"} instead."',
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        # L6 an abort call that does not OPEN its line. ABORT_RE anchors at the
+        # start, so a nested or assigned call is invisible.
+        (
+            "abort call nested inside another expression",
+            [
+                "    cnd <- abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                '        i = "Use {.code ci_method = \\"montecarlo\\"} instead."',
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+    ]
+
+
+def _unreported_splices():
+    """Splice shapes `spliced_in` does NOT report, one per stated limit.
+
+    This list is why the gate is described as catching one shape and not "any
+    variable spliced into a message vector": that broader claim was made by three
+    durable records at once and was false of every shape below.
+    """
+    return [
+        (
+            "named splice (`i = cause`)",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                "        i = cause",
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        (
+            "tidy-eval splice (`!!!bullets`)",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                "        !!!bullets",
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        (
+            "bullet built by a call (`paste0(...)`)",
+            [
+                "    abort_intraclass(",
+                "      c(",
+                '        "A probe abort.",',
+                '        i = paste0("Use ", best_method, " instead.")',
+                "      ),",
+                "      call = call",
+                "    )",
+            ],
+        ),
+        (
+            "bare symbol sharing a line with the leading string",
+            [
+                "    abort_intraclass(",
+                '      c("A probe abort.", bullets),',
+                "      call = call",
+                "    )",
+            ],
+        ),
+        # A message vector spliced on a line of its OWN is reported (the control
+        # below relies on that). It escapes only when it shares the call's line,
+        # which is how a one-line abort is ordinarily written.
+        (
+            "the whole message vector spliced on the call's own line",
+            ["    abort_intraclass(msg, call = call)"],
+        ),
+    ]
 
 
 def self_test():
@@ -488,6 +772,58 @@ def self_test():
             "%s:%d splices `%s` into its message vector; bullets there are "
             "invisible to this enumerator" % (path, line, sym)
         )
+
+    # 2e. The three `--check` failure modes, driven rather than described. Each
+    #     was hand-mutated once at an implement gate and then asserted in prose,
+    #     which is a claim about a run nobody can repeat. Here `check()` is called
+    #     on constructed inputs and its exit code read.
+    for label, probe_sites, probe_ledger, committed in _check_probes():
+        rc = _quiet_check(probe_sites, probe_ledger, committed)
+        if rc == 0:
+            fails.append(
+                "`--check` returns 0 on %s; that failure mode is not gated" % label
+            )
+    ok_sites, ok_ledger = _probe_site_and_row()
+    rc = _quiet_check(ok_sites, ok_ledger, render(ok_sites, ok_ledger))
+    if rc != 0:
+        fails.append(
+            "`--check` returns %d on a classified site with a current "
+            "enumeration; the gate rejects the passing case" % rc
+        )
+
+    # 2f. What the predicate does NOT match. Each shape below is listed in this
+    #     module's docstring as a stated limit, and each is CONSTRUCTED here and
+    #     shown unmatched, so a record can never claim coverage the code does not
+    #     have. A limit that gets fixed makes its probe fail -- which is the
+    #     prompt to delete the limit from the docstring, not to loosen the probe.
+    for label, lines in _limit_shapes():
+        found = sites_in("R/ci-probe.R", lines, {})
+        if found:
+            fails.append(
+                "the documented limit %r is no longer a limit: the predicate now "
+                "matches it (%r). Remove it from the docstring." % (label, found)
+            )
+    #     ...and the splice shapes `spliced_in` does not report, which is the
+    #     narrower claim replacing "any abort that splices a variable".
+    for label, lines in _unreported_splices():
+        if spliced_in("R/ci-probe.R", lines):
+            fails.append(
+                "the documented splice limit %r is reported after all; the "
+                "docstring understates the gate" % label
+            )
+    #     ...against a positive control, or the probes above pass by the reporter
+    #     being broken rather than by the shape being exotic.
+    control = [
+        "    abort_intraclass(",
+        "      c(",
+        '        "Leading.",',
+        "        bullets",
+        "      ),",
+        "      call = call",
+        "    )",
+    ]
+    if not spliced_in("R/ci-probe.R", control):
+        fails.append("spliced_in reports nothing on a bare-symbol splice")
 
     # 3. Keys are stable and unique -- a collision would let one ledger row
     #    silently classify two sites.
