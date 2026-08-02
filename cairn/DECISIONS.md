@@ -679,3 +679,54 @@ intended under #5. Perfect/near-perfect-agreement data now errors where it got
 [0, 1] (documented in NEWS). DESIGN.md's interval-time boundary table gains an
 MPL row citing this entry. Doc surfaces updated in M99 (roxygen, NEWS, comments,
 the boundary-hint sentence, `data-raw/mpl-doc-claims.tsv` re-triage).
+
+### D-020 (2026-08-02): Registered record claims — a load-bearing figure in tracking prose cites the ledger row that re-derives it, and CI re-runs every row
+
+**Context:** A figure transcribed out of an artifact and into tracking prose — a
+count, a worst-case step, an inventory — is read on every later pass and
+re-derived on none. M100 returned from review five times over records asserting
+more than their evidence established, and its fifth failure was this shape
+exactly: a criterion certified by a hand-written `grep` whose pattern could not
+match the violation it was certifying, green because it was vacuous. D-009
+already closed the same gap for `cairn/references/` pages, where every dated
+repo-state claim carries an inline exit-coded settling directive. This entry
+closes it for the tracking records, whose claims are figures rather than dated
+observations and which every milestone edits.
+**Decision — the convention, as numbered rules.** The committed ledger
+`data-raw/record-claims.tsv` and the checker `data-raw/check-record-claims.py`
+implement it. Each rule names the checker's failure route that probes it, or
+records that no input drives one and why.
+1. A ledger row is tab-separated under a header naming exactly `id`, `record`, `kind`, `shape`, `claim`, `command`, `expected_rc`, `expected_match`, `falsifier_command`, `disposition`, `reason`; the checker's module docstring states that grammar and the checker parses its own column list back out of the statement, so the two cannot drift. probe: grammar
+2. A record states a load-bearing figure by citing, inline, the ledger row that settles it — the marker `[claim:<id>]`. A citation naming no row is an error. probe: unresolved-citation
+3. A row whose `disposition` is `cited` must be cited by some record in scope; a row deliberately registered without a citation declares `uncited` and gives its reason. probe: uncited-row
+4. Citation scope: `cairn/ROADMAP.md`, `cairn/LESSONS.md`, `cairn/DESIGN.md`, `data-raw/README.md` — the four records that are current knowledge and so correctable in place. History (this file, work logs, `milestones/archive/`) is excluded because IP4 forbids editing it: a citation could not be added to it later, nor a figure proven wrong repaired where it sits. The checker asserts its own scope list equals the one this rule states, so the artifact under test cannot choose its own scope. probe: scope-parity
+5. Registration, not detection: the checker's only inputs are ledger rows and citations, and it never scans prose for unregistered figures — an unregistered figure is unchecked and this tool will never say one exists. probe: none — a limit on what the checker reads rather than a condition it can meet, so no constructed input drives it to a failure; it is stated here so the limit is on the record instead of being discovered by a reader who trusted a green check
+6. A `kind = absence` row carries a `falsifier_command`: the row's own command against a committed constructed input, under which the row must not pass. A certifying command that cannot be shown to fail certifies nothing. probe: absence-no-falsifier
+7. That falsifier is run, and must fail the row's own expectation. probe: falsifier-passes
+8. `kind` is author-declared and never inferred; declaring `presence` over an absence-shaped expectation (a non-zero exit status, a zero count, an empty result) is a mis-registration and an error. An output-shape classifier is a trap for mis-registration only, never the source of `kind` — it would miss the `^0 problems$` and `test !` forms and so rebuild the vacuity it exists to catch. probe: kind-misregistered
+9. A command is one of the shapes the docstring states, tokenized and run without a shell — a pipeline, a redirection, a substitution or a chained second command is inexpressible rather than merely discouraged. probe: unknown-shape
+10. A `git` command naming a history-dependent form — a `log`/`blame`/`rev-list`/`show`, a revision range, or a ref other than `HEAD` — is refused with its reason, the CI checkout being depth-1 with no `main` ref, so such a command would pass locally and fail there for reasons unrelated to the claim. probe: refused-form
+11. A row's command must exit with its `expected_rc`. probe: rc-mismatch
+12. Its stdout must fullmatch its `expected_match`; when the two disagree it is the record that is at fault, not the run. probe: match-mismatch
+13. Every command runs under a bounded per-row timeout. probe: timeout
+14. Every failure route the docstring states has a probe and every probe has a stated route, compared as sets rather than counts; and each probe is shown load-bearing by excising its route's sentinel-delimited block and confirming exactly that probe goes quiet. probe: route-parity
+15. The shapes the docstring states equal the shapes the code dispatches on. probe: shape-parity
+16. The refused forms the docstring states equal the forms the detectors fire on, one constructed sample apiece — a stated form no sample triggers is a dead rule. probe: refused-parity
+17. A rule in this list naming a route the checker does not implement is an error. probe: rule-probe-unknown
+**Relation to D-009:** the two conventions divide by surface and by claim type,
+not by strength. D-009 governs `cairn/references/` pages and their *dated
+observations* about repo state, settled by a directive written inline beside the
+claim, enforced by `check-reference-observations.py`. This entry governs the four
+correctable *tracking* records and their *figures*, settled by a row in a
+separate registry that the prose cites, enforced by `check-record-claims.py`.
+The registry is separate here because a figure's settling command is often
+longer than the sentence and is reused across records, where a dated
+observation's directive is per-claim by construction (D-009 rule 1). Neither
+supersedes the other, and a `references/` page stays D-009's.
+**Consequences:** a registered figure that drifts from its artifact reds the
+`check-references` job instead of surviving review passes; the ledger is the
+place a milestone registers a figure it wants held. The honest limit is rule 5's:
+coverage is exactly what authors register, so a green run asserts nothing about
+figures nobody registered. The standing ROADMAP candidate row for an
+abort-remedy-truthfulness ledger builds on this row schema and checker idiom
+rather than designing a second.

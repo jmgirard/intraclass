@@ -66,3 +66,15 @@ jobs:
 
       - name: Self-test the MPL doc-claims check (mutation harness)
         run: python3 data-raw/check-mpl-doc-claims.py --self-test
+
+      # M102: every load-bearing figure a tracking record registers in
+      # data-raw/record-claims.tsv is re-derived from its artifact here, so a
+      # transcribed number that drifts reds this job instead of surviving
+      # review passes. Stdlib-only, R-free, and history-free by construction
+      # (this checkout is depth-1, so the checker refuses commands that read
+      # repository history).
+      - name: Re-derive the registered record claims (M102)
+        run: python3 data-raw/check-record-claims.py
+
+      - name: Self-test the record-claims checker (route excision)
+        run: python3 data-raw/check-record-claims.py --self-test

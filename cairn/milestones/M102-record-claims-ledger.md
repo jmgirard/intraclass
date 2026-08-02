@@ -122,19 +122,19 @@ candidate row, whose subject is M101's messages.
       (`check-mpl-doc-claims.py` idiom).
 - [x] T2 The refused-form set: enumerate the history-dependent forms, refuse with
       the reason, and construct each in `--self-test`.
-- [ ] T3 Seed the ledger with the four named figures plus one row per shape; run
+- [x] T3 Seed the ledger with the four named figures plus one row per shape; run
       every row. The κ_m row reads `data-raw/m88-kappa-table.rds` via M94's stdlib
       RDS reader (`sys.path.insert(0, 'data-raw')`) — no R in that job. Fault the
       record, not the run, if a figure disagrees.
-- [ ] T4 Citation gate: parse the scope list from the D-entry, extract
+- [x] T4 Citation gate: parse the scope list from the D-entry, extract
       `[claim:<id>]` over that scope, symmetric missing/orphan diff, `uncited`
       disposition.
-- [ ] T5 `kind` column, `falsifier_command` execution, and the mis-registration
+- [x] T5 `kind` column, `falsifier_command` execution, and the mis-registration
       trap; author a falsifier for every `absence` seed row.
-- [ ] T6 `--self-test`: one probe per route against a passing control; the route-id
+- [x] T6 `--self-test`: one probe per route against a passing control; the route-id
       set-equality assertion; excise each sentinel-delimited route block from a temp
       copy and confirm exactly its own probe reds.
-- [ ] T7 Append the D-entry: numbered rule list, each line naming its probe id or
+- [x] T7 Append the D-entry: numbered rule list, each line naming its probe id or
       `none — <ground>`; state the D-009 relation and the scope list.
 - [ ] T8 Wire both steps into `check-references` with the milestone comment; push
       and confirm the job green on the PR.
@@ -156,6 +156,10 @@ candidate row, whose subject is M101's messages.
 
 - 2026-08-02: T1/T2 — `data-raw/check-record-claims.py` lands whole (both tasks are the same file, committed together): stdlib-only, no shell (commands are `shlex.split` + `subprocess.run` argv, so a pipeline/redirection/chained command is inexpressible), 11-column grammar parsed OUT of the docstring so columns cannot drift from their statement, five dispatched shapes, three refused history-dependent forms each with a constructing sample, and 16 sentinel-delimited failure routes with a probe apiece. Measured at this commit: `--probes` reports all 16 DETECTED, and excising each route's block from a temp copy silences exactly that route (0 problems over 16 excisions).
 - 2026-08-02: implement question gate — citation scope set to the four correctable records (`cairn/ROADMAP.md`, `cairn/LESSONS.md`, `cairn/DESIGN.md`, `data-raw/README.md`) over adding the live milestone file or ROADMAP alone, because history files cannot take a citation later nor have a drifted figure corrected (IP4); command shapes set to the five the AC3 figures need (`ls`, `grep`, `awk`, `python3`, `git-grep`) over dropping `git-grep`, which would leave the refused-history-form rule guarding a shape no row can use; and the checker-inventory + CI-invocation-count figures homed in a new `data-raw/README.md` section over a lessons line or the decision entry, the last rejected because a decision entry can never be edited when a sixth checker lands.
+
+- 2026-08-02: T3 — `data-raw/record-claims.tsv` seeded with five rows, one per shape and covering all four named figures; all five pass at this commit (`python3 data-raw/check-record-claims.py` → `OK: 5 registered claim(s) re-derived, 0 failure(s)`). Two plan refinements, both minor: the κ_m row reads BOTH `m88-kappa-table.rds` (the shipped 0.95 table) and `m90-kappa-tables.rds` (0.90 and 0.99) via the new helper `data-raw/record-claims-kappa-steps.py`, T3's naming of the M88 fixture alone having missed that the three figures span three levels, only one of which M88 calibrated; and T8's `lint.yaml` wiring landed here rather than after, so the invocation-count figure was true at the moment it was written rather than written false and fixed later. T8 remains open for its green-CI evidence.
+- 2026-08-02: T4/T5/T6 — citation gate, falsifier mechanism and self-test verified together on the seeded ledger. Citations: the two ROADMAP figures cite their rows inline, `data-raw/README.md` gains a Record-claim checkers section carrying the other three, and both directions red on constructed input. Falsifier: the one absence row certifies that `cairn/DECISIONS.md` carries no claim citation, and its falsifier points the same `git grep` at the committed `data-raw/record-claims-fixtures/citation-present.md`, which does carry one — measured to fail the row's expectation (rc 0 against an expected 1). Self-test: `--self-test` green, 16/16 probes drive their own route, and 16/16 route excisions silence exactly their own probe.
+- 2026-08-02: T7 — `cairn/DECISIONS.md` gains D-020: 17 numbered rules, each naming the route that probes it except rule 5 (registration-not-detection), which records `none` with its ground, a limit on what the checker reads rather than a condition any input can drive. Two parser corrections found by running the entry through the checker rather than by reading it: a rule's probe token is read immediately after `probe:` and not at end of line (a `none` rule ends with its ground), and the scope list is read only up to the rule's em dash (the sentence arguing for the scope names the EXCLUDED paths in backticks too, and the first draft parsed `milestones/archive/` into the scope).
 
 ## Decisions
 

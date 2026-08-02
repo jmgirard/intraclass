@@ -486,16 +486,26 @@ def read_d_entry(path=DECISIONS, anchor=D_ENTRY):
 
 
 def parse_scope(entry):
+    """Backticked paths between `Citation scope:` and that rule's first dash.
+
+    The rule states the scope and then argues for it, and the argument names
+    excluded paths in backticks too -- so the list ends where the enumeration
+    does, at the em dash, not at the end of the line.
+    """
     for line in entry.splitlines():
         if "Citation scope:" in line:
-            return [m.group(1) for m in re.finditer(r"`([^`]+)`", line)]
+            listing = line.split("Citation scope:", 1)[1].split("—", 1)[0]
+            return [m.group(1) for m in re.finditer(r"`([^`]+)`", listing)]
     return []
 
 
 def parse_rule_probes(entry):
     named = set()
     for line in entry.splitlines():
-        match = re.search(r"probe:\s*(\S+)\s*$", line.rstrip())
+        # The token immediately after `probe:`, not the line's last word: a
+        # rule with no probe records its ground after `none`, and that ground
+        # is prose, not a route id.
+        match = re.search(r"probe:\s*(\S+)", line)
         if match and match.group(1) != "none":
             named.add(match.group(1))
     return named
