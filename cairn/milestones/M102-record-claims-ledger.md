@@ -29,7 +29,7 @@ candidate row, whose subject is M101's messages.
 
 ## Acceptance criteria
 
-- [ ] AC1 A committed stdlib-only `data-raw/check-record-claims.py` reads
+- [x] AC1 A committed stdlib-only `data-raw/check-record-claims.py` reads
       `data-raw/record-claims.tsv`. The row grammar — named columns, at minimum
       `id`, `record`, `kind` (`presence`|`absence`), `claim`, `command`,
       `expected_rc`, `expected_match`, `falsifier_command`, `disposition`,
@@ -42,19 +42,19 @@ candidate row, whose subject is M101's messages.
       no network; `--self-test` PARSES that list and asserts SET equality with the
       shape ids the code dispatches on, so a docstring shape with no code and a
       code shape with no docstring line each exit non-zero.
-- [ ] AC2 A command naming any of an enumerated set of history-dependent forms —
+- [x] AC2 A command naming any of an enumerated set of history-dependent forms —
       a `git log`/`blame`/`rev-list`/`show` subcommand, a `<rev>..<rev>` range, or
       a ref other than `HEAD` — is refused with its reason, that checkout being
       depth-1 with no `main` ref. The set is stated in the docstring and each form
       carries a `--self-test` probe constructing it and showing the refusal.
-- [ ] AC3 The committed ledger carries a passing row for each of these four
+- [x] AC3 The committed ledger carries a passing row for each of these four
       figures, every one settled from an artifact committed on the default branch:
       the `data-raw` checker inventory by name; the count of `data-raw` checker
       invocations in `.github/workflows/lint.yaml`; the three κ_m worst-downward-step
       figures (−0.046, −0.068, −0.162) the ROADMAP's MPL-envelope candidate row
       states; and the ROADMAP's terminal-row retention count. Plus at least one
       passing row per docstring-listed command shape. Tolerance: exact figures.
-- [ ] AC4 Registration is symmetric over a file set the `cairn/DECISIONS.md`
+- [x] AC4 Registration is symmetric over a file set the `cairn/DECISIONS.md`
       convention entry names: `--self-test` PARSES that scope list out of the entry
       and asserts set equality with the checker's own list, so the artifact under
       test cannot choose its own scope. Within that scope every `[claim:<id>]`
@@ -63,7 +63,7 @@ candidate row, whose subject is M101's messages.
       failing exits non-zero. The checker's only inputs are ledger rows and
       `[claim:<id>]` citations — it never scans prose for unregistered figures —
       and the docstring states that limit with its ground.
-- [ ] AC5 A row's `kind` is author-declared, never inferred. Every `kind = absence`
+- [x] AC5 A row's `kind` is author-declared, never inferred. Every `kind = absence`
       row carries a `falsifier_command` — the row's command against a committed
       constructed input under which it must produce a non-passing result — which
       `--self-test` runs and requires to fail the row's expectation; an `absence`
@@ -71,7 +71,7 @@ candidate row, whose subject is M101's messages.
       is absence-shaped (zero count, empty result, non-match) while `kind = presence`
       exits non-zero as a mis-registration. Ground: a certifying pattern that cannot
       match the violation it certifies passes vacuously (M100 review pass 5, F1).
-- [ ] AC6 `--self-test` drives every route the checker has to a non-zero exit on
+- [x] AC6 `--self-test` drives every route the checker has to a non-zero exit on
       constructed input against a passing control. Each route carries an id;
       `--self-test` PARSES the docstring's route ids and asserts SET equality with
       the probe registry's ids, so a stated route with no probe and a probe with no
@@ -82,7 +82,7 @@ candidate row, whose subject is M101's messages.
       `expected_match`, timeout, refused history-dependent form, unresolved
       `[claim:<id>]`, uncited-and-undispositioned row, `absence` row with no
       falsifier, and mis-registered `kind`.
-- [ ] AC7 `cairn/DECISIONS.md` carries an entry recording the convention as an
+- [x] AC7 `cairn/DECISIONS.md` carries an entry recording the convention as an
       explicitly numbered rule list, each line ending `probe: <route-id>` or
       `probe: none — <ground>`; `--self-test` parses that list and asserts each
       named route id exists in the probe registry. The list states at minimum: the
@@ -90,12 +90,12 @@ candidate row, whose subject is M101's messages.
       the registration-not-detection limit; the absence-falsifier rule; the AC4
       scope list; and the relation to D-009's inline settling directives for
       `cairn/references/` pages.
-- [ ] AC8 `.github/workflows/lint.yaml`'s `check-references` job runs
+- [x] AC8 `.github/workflows/lint.yaml`'s `check-references` job runs
       `python3 data-raw/check-record-claims.py` then the same with `--self-test`,
       in that order, preceded by a comment naming this milestone and the ledger
       path; the job is green on a CI run of this milestone's PR with both steps in
       that run's log.
-- [ ] AC9 Gate clean: suite at `NOT_CRAN=true CI=true`;
+- [x] AC9 Gate clean: suite at `NOT_CRAN=true CI=true`;
       `devtools::check(env_vars = c(NOT_CRAN = "false"))`; `lintr::lint_package()`;
       `air format --check .`; `devtools::document()` no diff; and every `data-raw`
       checker — enumerated by `ls data-raw/check-*.py data-raw/enumerate-*.py` —
@@ -167,3 +167,129 @@ candidate row, whose subject is M101's messages.
 ## Decisions
 
 ## Review
+
+**Review pass 1 — 2026-08-02.** PR #109, head `5eac8d1`, branch
+`m102-record-claims-ledger` cut from `main` at `53dde1c`; `main` has not moved
+since (`git rev-list --count HEAD..origin/main` = 0), so no merge-in was needed
+and this evidence is not stale. All figures below come from commands run at this
+commit, never from recall.
+
+**AC1 — checker, grammar, execution, shape parity.** `data-raw/check-record-claims.py`
+imports `glob`, `os`, `re`, `shlex`, `subprocess`, `sys`, `tempfile` and nothing
+else: stdlib only. `COLUMNS` is PARSED out of the module docstring's `column:`
+lines rather than declared beside it, so the stated grammar and the enforced one
+cannot differ; it parses to the eleven columns AC1 names, in order. Grammar
+violations exit non-zero, measured one route at a time: a non-slug `id`, an
+`expected_rc` of 999, an `uncited` row with no reason, and a header not matching
+the stated columns each return a `grammar` failure. Execution: a command exiting
+1 against `expected_rc = 0` returns `rc-mismatch`; stdout not fullmatching
+returns `match-mismatch`; a `python3 -c "import time; time.sleep(9)"` row under a
+1s timeout returns `timeout`. Commands are tokenized with `shlex.split` and run
+with `subprocess.run(argv)` — no shell, so a pipeline, redirection, substitution
+or chained second command is inexpressible rather than merely discouraged. Shape
+parity was driven in BOTH directions AC1 names: a docstring listing a sixth
+`ghost` shape and a docstring omitting `git-grep` each return `shape-parity`.
+
+**AC2 — refused history-dependent forms.** Three forms are stated in the
+docstring, and each is constructed by its own committed sample and shown refused:
+`git log --oneline` → `git-history-subcommand`; `git grep -c token main..HEAD` →
+`rev-range`; `git grep -c token origin/main` → `non-head-ref`. Each sample
+triggers exactly its own form and no other. `--self-test` runs all three, both as
+bare commands and as ledger rows carrying them, and a stated form that no sample
+triggers is itself a failure (`refused-parity`), so a dead rule cannot sit in the
+docstring unnoticed.
+
+**AC3 — the four named figures, and one row per shape.**
+`python3 data-raw/check-record-claims.py` → `OK: 5 registered claim(s)
+re-derived, 0 failure(s)`. The five rows cover the five dispatched shapes
+one-for-one (`ls`, `grep`, `python3`, `awk`, `git-grep`) and carry all four named
+figures: the `data-raw` checker inventory by name (`ls`, exact five paths); the
+count of `data-raw` checker invocations in `.github/workflows/lint.yaml` (`grep -c`,
+exactly 8); the three κ_m worst-downward-step figures (`python3`, exactly
+`-0.046`/`-0.068`/`-0.162`); and the ROADMAP terminal-row count (`awk`, exactly
+5). Every expected value is an exact figure, never a range or a bare `.*`. Each
+row settles against an artifact committed on the default branch — verified per
+row with `git cat-file -e origin/main:<path>`: `data-raw`,
+`.github/workflows/lint.yaml`, `m88-kappa-table.rds`, `m90-kappa-tables.rds` and
+`cairn/ROADMAP.md` are all present there. The two rows whose figures this
+milestone itself changes (the inventory and the invocation count) settle against
+main-resident artifacts whose CONTENT this merge updates — the case AC3's clause
+excludes is M100's, where the artifact itself exists only on a branch and no
+merge would bring it.
+
+**AC4 — symmetric registration over a parsed scope.**
+`parse_scope(read_d_entry())` returns exactly `cairn/ROADMAP.md`,
+`cairn/LESSONS.md`, `cairn/DESIGN.md`, `data-raw/README.md` — read out of D-020's
+rule 4, not declared by the checker, so the artifact under test cannot choose its
+own scope; a D-entry listing fewer and a D-entry listing an extra path each
+return `scope-parity`. Both citation directions fail as required: a
+`[claim:<id>]` naming no row returns `unresolved-citation`, and a row whose
+`disposition` is `cited` that no scope file cites returns `uncited-row`. Live
+state: five citations across the scope, one per row, each resolving. The
+registration-not-detection limit is stated in the docstring under its own heading
+WITH its ground (a prose detector either misses unanticipated claim classes or
+floods the author, and both end with it switched off) and again as D-020 rule 5,
+including the honest consequence that an unregistered figure is unchecked and the
+tool will never say one exists.
+
+**AC5 — author-declared `kind`, and a falsifier that must fail.** `kind` is read
+from the row and never inferred; the shape classifier is a mis-registration trap
+only, and D-020 rule 8 records why (an output-shape classifier misses the
+`^0 problems$` and `test !` forms and would rebuild the vacuity it exists to
+catch). Measured: an `absence` row with no `falsifier_command` returns
+`absence-no-falsifier`; a `presence` row whose `expected_rc` is 1 returns
+`kind-misregistered`, as does one whose `expected_match` is `^0$`; a falsifier
+that MEETS its row's expectation returns `falsifier-passes`. The one shipped
+`absence` row certifies that `cairn/DECISIONS.md` carries no claim citation, and
+its falsifier points that same `git grep` at the committed
+`data-raw/record-claims-fixtures/citation-present.md`, which does carry one —
+run at this commit, it exits 0 against the row's expected 1 and so fails the
+row's expectation, which is the property AC5 requires and the direct answer to
+M100 pass-5 F1.
+
+**AC6 — every route probed, every probe load-bearing.** The docstring states 16
+routes and the probe registry holds 16, asserted as SETS and not counts: a
+docstring naming a 17th `ghost` route and a docstring naming only `grammar` each
+return `route-parity`. `--self-test` drives all 16 probes against a passing
+control row (the control returns no failure) and then excises each route's
+sentinel-delimited block from a temp copy of the script, running that copy's
+`--probes`: across all 16 excisions, exactly the excised route's own probe goes
+MISSED and no other — 0 problems, so no probe is passing for a reason other than
+the route it claims. The route set covers all nine AC6 names — grammar,
+rc-mismatch, match-mismatch, timeout, refused-form, unresolved-citation,
+uncited-row, absence-no-falsifier, kind-misregistered — plus seven more.
+
+**AC7 — the convention entry.** `cairn/DECISIONS.md` gains D-020 with 17
+explicitly numbered rules, each carrying a probe token: 16 name a route id and
+one (rule 5, registration-not-detection) records `probe: none` with its ground,
+that it is a limit on what the checker reads rather than a condition any input
+can drive. `--self-test` parses that list and asserts every named route id exists
+in the probe registry — all 16 do — and a rule naming a route the checker does
+not implement returns `rule-probe-unknown`. The list states each minimum AC7
+requires: the row grammar (rule 1), that a record states a load-bearing figure by
+citing a row id (rule 2), the registration-not-detection limit (rule 5), the
+absence-falsifier rule (rules 6–7), the citation scope list (rule 4), and the
+relation to D-009 in its own paragraph — the two divide by surface and claim
+type, `references/` pages and dated observations against tracking records and
+figures, with neither superseding the other.
+
+**AC8 — CI.** The `check-references` job runs `python3 data-raw/check-record-claims.py`
+then the same with `--self-test`, in that order, behind a comment naming M102 and
+the ledger path. Green on the PR with both steps in that run's own log: `gh api
+repos/jmgirard/intraclass/actions/jobs/91544700240` lists step 9 "Re-derive the
+registered record claims (M102)" and step 10 "Self-test the record-claims checker
+(route excision)", both `success`, job green in 24s; re-confirmed green on head
+`5eac8d1` (job 91546936198, 24s). The route-excision self-test therefore passes on
+the depth-1 CI checkout, not only locally.
+
+**AC9 — gate.** Re-run at this commit: all five `data-raw` checkers pass in both
+check and self-test modes (ten invocations, enumerated by
+`ls data-raw/check-*.py data-raw/enumerate-*.py`); `air format --check .` clean;
+`devtools::document()` no diff; `cairn_validate` all checks passed with two WARNs
+(`sizing (split tripwires)` 1 — nine criteria, kept whole at the plan gate; and
+`dangling id tokens` 321, pre-existing). Suite `NOT_CRAN=true CI=true` FAIL 0 /
+ERROR 0 / SKIP 23 / PASS 5435, identical to `main`'s baseline, and
+`devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings /
+0 notes in 2m54s; both ran before the final tracking-only commit, and nothing
+outside `cairn/` (which is `.Rbuildignore`d) changed after them, so neither is
+stale. `lintr::lint_package()` 0 lints.
