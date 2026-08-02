@@ -22,10 +22,11 @@ the default they name is not being asked to survive degenerate data.
 Not every reducer-stage site is data-triggered either -- some are argument or
 capability fences that happen to live in a reducer. The committed ledger
 `data-raw/abort-remedy-sites.tsv` records the disposition of every enumerated
-site (`sweep` = data-triggered, the sweep must measure it; `fence` = not
-data-triggered, with the reason), and `--check` fails when a site carries no row.
-That is the completeness gate: a new `ci_method`-naming abort cannot reach a
-release without someone classifying it.
+site (`sweep` = data-triggered, and `data-raw/sweep-abort-remedies.R` measures
+it; `fence` = not data-triggered, with the reason), and `--check` fails when a
+site carries no row. That is the completeness gate, and its reach is exactly its
+exit code: nothing in CI runs `--check` today, so an unclassified site reds a
+LOCAL run and nothing else. It does not stop a release.
 
 Ledger keys are `<file>:<sha1(leading message line)[:10]>`. No milestone is under
 any obligation this script can assert; what the key gives is a mechanical
@@ -510,7 +511,7 @@ def _probe_site_and_row():
 
 
 def _check_probes():
-    """The three ways `--check` must fail, as (label, sites, ledger, committed).
+    """Three of `check()`'s four failure routes, as (label, sites, ledger, committed).
 
     Stated in the module docstring and gated here: an unclassified site, a ledger
     row matching no site, and a committed enumeration that is not this run's
@@ -540,8 +541,8 @@ def _check_probes():
     ]
 
 
-# The canonical limits line every record about this predicate must carry, parsed
-# rather than eyeballed. AC2's failure was a record enumerating SEVEN probed
+# The canonical limits line, parsed out of the two records below rather than
+# eyeballed. AC2's failure was a record enumerating SEVEN probed
 # shapes where `_limit_shapes()` holds six -- a divergence no gate could see
 # because the counts lived in prose. Both records now state the counts in this
 # one shape, and `--self-test` binds them to the probe lists below.

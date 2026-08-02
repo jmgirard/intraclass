@@ -1,6 +1,6 @@
 # M100: Measure which abort remedies are untruthful, and gate the enumeration
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** RR04
@@ -142,7 +142,7 @@ RR04 ingestion, pass 5.
       rows-vs-cells figures, preserving the reproducing half of each line.
 - [x] T11 Fix the two docstring claims (the M101 requirement, `check()`'s route
       count) and add the ROADMAP row's second recompute command.
-- [ ] T12 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
+- [x] T12 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
       `lintr::lint_package()`, `air format --check`, every `data-raw` checker.
 
 ## Work log
@@ -253,6 +253,9 @@ RR04 ingestion, pass 5.
 - 2026-08-02: T10 CORRECTION superseding the 2026-08-01 T4 line's "The 80 unreached rows split 30 point-fit failures and 50 cells": all three figures are ROW counts and the last is labelled cells. In cells the split is 6 and 10. Recompute over the committed TSV: `awk -F'\t' 'NR>1 && $8!="TRUE" {r++; if ($9=="FALSE") p++} END {print r, p, r-p}' data-raw/abort-remedy-sweep.tsv` prints `80 30 50` (rows); the same predicate deduplicated on site+generator+geometry+seed+trigger gives 16, 6 and 10 cells, of 42 cells and 210 rows total. The line's claim that no unreached row carries an outcome with a run behind it is unaffected.
 
 - 2026-08-02: T11 — the docstring's "the milestone that rewrites these remedies is required to leave every leading line unchanged" is replaced by the mechanical fact it was standing in for: a changed leading line re-keys the site, so `--check` fails UNCLASSIFIED for the new key and STALE for the old until the ledger row is renewed. The script now imposes nothing on M101. `check()`'s docstring states FOUR routes to a non-zero exit (unclassified, stale row, reported splice, stale enumeration) where it said three, and attributes the splice route's probes to `_unreported_splices()`; the module docstring's three-probed statement is qualified to match. ROADMAP: the runtime-hint row's "all nine resample-guard datasets" clause gained its own command — `awk -F'\t' '$1=="R/ci-npbootstrap.R:01b75d1a61" && $11=="montecarlo" && $8=="TRUE" {print $12}' data-raw/abort-remedy-sweep.tsv`, run at this commit, nine `usable interval` lines — and the same row's "the static swept text M100 ships" was corrected in place: M100 ships no text after the re-cut.
+
+- 2026-08-02: T12 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 / SKIP 23 (identical to `main`'s baseline; this pass adds no R test and changes no R code); `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings / 0 notes in 2m39s; `lintr::lint_package()` 0 lints; `air format --check .` clean; `devtools::document()` no diff; all five `data-raw` checkers pass (four others plus this milestone's `--check` and `--self-test`); `cairn_validate` 16 PASS / 0 FAIL, WARNs only `sizing (split tripwires)` (2 — the maintainer chose at the pass-5 gate to keep the milestone whole) and `dangling id tokens` (321, pre-existing). The suite and `R CMD check` ran before this pass's last docstring-only edits to the Python enumerator; `data-raw/` is `.Rbuildignore`d and no R file changed after them, so neither result is stale.
+- 2026-08-02: T12 — AC4's second clause re-swept over the live records rather than assumed: three statements binding conduct beyond this milestone were found and removed. The sweep script's candidate comment stated what a remedy may name (T9); the enumerator docstring required M101 to freeze every leading line (T11); and its ledger-semantics paragraph claimed an unclassified abort "cannot reach a release", which no CI job enforces (pass-4 O4) — now stated as what it is, a local exit code. Locate: `grep -n "must \|may only\|is required\|cannot reach" data-raw/enumerate-ci-method-remedies.py data-raw/sweep-abort-remedies.R data-raw/abort-remedy-sites.tsv`, whose remaining hits all describe this tooling's own behaviour. Status -> review.
 
 ## Decisions
 
