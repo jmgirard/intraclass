@@ -93,7 +93,7 @@ returns an interval, only message text changes.
       and leading line: `bootstrap_ci()` (`R/ci-bootstrap.R:48`),
       `classical_guard_observed()` (`R/ci-classical.R`), and the two
       `npbootstrap_ci()` degeneracy guards (`R/ci-npbootstrap.R`).
-- [ ] T4 Tests firing each rewritten abort at its reducer directly — a stub
+- [x] T4 Tests firing each rewritten abort at its reducer directly — a stub
       `simulate_refit` for the bootstrap site, raw degenerate frames for the
       others — asserting no condemned method is named; mutation-verify each by
       restoring the old bullet.
@@ -124,6 +124,9 @@ returns an interval, only message text changes.
 - 2026-08-01: T3 — the three condemned bullets now name no method and point at the data instead ("Inspect the ratings: every rater gave each subject the same score"), each keeping its class and leading line; each site carries a comment recording that the old name was measured false and that re-naming needs sweep evidence (GP7). The resample-guard site keeps its `montecarlo` bullet with a comment recording why it survived — its observed data is healthy.
 - 2026-08-01: T3 — the three rewritten sites leave the enumeration by the same predicate that admitted them (they no longer name a `ci_method`), so their ledger rows were removed rather than re-dispositioned; a future edit restoring a method name reappears UNCLASSIFIED and reds `--check`. The enumerator's self-test is now two-sided: it pins that method-naming sites are found AND that these three stay out.
 - 2026-08-01: T3 — suite green at `NOT_CRAN=true CI=true` (FAIL 0, PASS 5435, SKIP 23) with no test touched, because NO test pinned the remedy text at any of the three sites. That absence is how the untruthful text shipped and survived M93's ten review passes; T4 closes it.
+
+- 2026-08-01: T4 — `tests/testthat/test-abort-remedy-truthfulness.R` (23 assertions) fires every site at its reducer: a stub `simulate_refit` for the bootstrap guard (arithmetic only, no fit, so no platform dependence) and raw degenerate frames for the rest, covering both disjuncts of the npbootstrap observed-data guard. Assertions are on the PROPERTY — `art_named_methods()` returns the methods a message sends the user to — so rewording the guidance stays free while re-naming a method reds (the M68 pin-the-property lesson).
+- 2026-08-01: T4 mutation-verified, `testthat.progress.max_fails` raised per the M98 lesson: restoring the old bootstrap bullet reds 2, the classical bullet 2, the npbootstrap bullet 3, and stripping the KEPT `montecarlo` bullet off the resample guard reds 1. All four restored green; full suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5458 / SKIP 23.
 
 ## Decisions
 
