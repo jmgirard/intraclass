@@ -97,7 +97,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 - [x] T4 Re-run the sweep and confirm each recorded reach is the site's own
       classed condition from the reducer; keep the named candidate set with its
       per-exclusion reasons.
-- [ ] T5 Add the recompute/locate command beside every factual claim in this
+- [x] T5 Add the recompute/locate command beside every factual claim in this
       milestone's records, and run each.
 - [ ] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `devtools::check()`,
       `lintr::lint_package()`, `air format --check`, every `data-raw` checker.
@@ -182,6 +182,10 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 - 2026-08-01: T4 — the confirmation reclassified NOTHING on this grid: `grep -c 'another guard in the same reducer' data-raw/abort-remedy-sweep.tsv` = 0, and the per-site reach counts are identical to the pre-confirmation run. It is a guard against a future grid or a future message edit, not a correction to these numbers. The 80 unreached rows split 30 point-fit failures and 50 cells where the reducer returned an interval; no unreached row carries an outcome with a run behind it.
 - 2026-08-01: T4 — the candidate set stays five of the seven `ci_method` values with the exclusions stated in the script (`mpl` fenced to the balanced two-way random cell and aborting `intraclass_unsupported` on every one-way dataset here; `posterior` needing the brms engine these fits do not use). Locate: `grep -n 'Five of the seven' -A 4 data-raw/sweep-abort-remedies.R`.
 - 2026-08-01: T4 — the first re-run died after writing its results with `object 'ion' not found`, because `air format` reformatted the script WHILE `Rscript` was still reading it: `Rscript` consumes a file expression by expression, so an edit mid-run shifts the offsets it has yet to read. Results discarded rather than trusted and the sweep re-run on a frozen script (`md5` identical before and after, exit 0), which reproduced every verdict.
+
+- 2026-08-01: T5 — every command this milestone's post-re-cut records cite was RUN, and two of them faulted the records rather than confirming them, which is the whole point of the criterion. (i) `grep -c 'another guard in the same reducer' ...` exits 1 when the count is 0, so a true claim was cited by a command that reports failure; restated as `awk '/another guard in the same reducer/' data-raw/abort-remedy-sweep.tsv | wc -l`, which prints 0 and exits 0. (ii) the CORRECTION line above says its grep locates D-020 Amendment 1's error; the grep locates the milestone-local `## Decisions` claim and the review's record of that error, but NOT the amendment text, which T1 removed from this branch with the rest of `cairn/DECISIONS.md` and which never reached `main` — `git diff main..HEAD -- cairn/DECISIONS.md` prints nothing. M101 re-authors D-020 and its amendment as one correct entry. The line stands as written (IP4); this supersedes its locate clause.
+- 2026-08-01: T5 — the two ROADMAP candidate rows that cite this milestone's sweep were re-verified against the clean re-run and each now carries the command that recomputes it: `burch` raises a raw unclassed error on all four SSA = 0 exact cells at `bf1a802a9c`, and the `gen_se_zero` cell has `montecarlo`, `searle`, `burch` and `bootstrap` all returning usable intervals with `npbootstrap` aborting classed. Both hold on the committed TSV.
+- 2026-08-01: T5 — commands run clean at this point: `git diff main..HEAD --name-only` (7 paths, none under `R/`, neither `NEWS.md` nor `cairn/DECISIONS.md`, so AC4 holds), `--check` (9 sites, 4 sweep + 5 fence), `--self-test`, the candidate-set locate, and the two sweep queries above.
 
 ## Decisions
 
