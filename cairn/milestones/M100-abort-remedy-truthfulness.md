@@ -1,6 +1,6 @@
 # M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -99,7 +99,7 @@ returns an interval, only message text changes.
       restoring the old bullet.
 - [x] T5 `NEWS.md` entry, the `cairn/DECISIONS.md` entry, and any snapshot
       refreshed by the changed text.
-- [ ] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`,
+- [x] T6 Gate: full suite at `NOT_CRAN=true CI=true`, `lintr::lint_package()`,
       `air format --check`, and the three `data-raw` checkers.
 
 ## Work log
@@ -131,6 +131,8 @@ returns an interval, only message text changes.
 - 2026-08-01: T5 — self-caught before commit, the M72 trap (violating a lesson in the prose written to record it): the first drafts of all three bullets and the NEWS entry claimed "every other interval method was measured failing", which the sweep falsifies at the npbootstrap observed-degeneracy site, where the parametric bootstrap is usable on 4 of 8. Rewritten so the bullets claim NOTHING about other methods and state only what each guard's own condition establishes; the measurement, with its partial case, lives in the source comments and D-020. The bullets are now unfalsifiable by a method that later turns out to work.
 - 2026-08-01: T5 — `NEWS.md` bullet added; `cairn/DECISIONS.md` gains D-020 (static remedy text needs swept evidence over the whole trigger class; confirms D-018's runtime route and generalizes D-019's name-no-method precedent; D-012/D-013's fallback fence untouched). No snapshot referenced the changed text, so none needed refreshing.
 - 2026-08-01: T5 — mutations re-run against the FINAL wording, since the earlier evidence described superseded text: restoring each pre-milestone bullet reds 2 / 2 / 3 and stripping the kept bullet reds 1; restored green. Full suite FAIL 0 / PASS 5458; all four `data-raw` checkers and `air format --check` clean.
+
+- 2026-08-01: T6 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5458 / SKIP 23; `lintr::lint_package()` no lints; `air format --check` clean; `devtools::document()` no diff; all five `data-raw` checkers pass; `cairn_validate` 7 OK / 0 FAIL (321 pre-existing dangling-id advisories); plan-owned body 104/149. `data-raw/` is already `.Rbuildignore`d, so the new scripts owe no entry. Status -> review.
 
 ## Decisions
 
