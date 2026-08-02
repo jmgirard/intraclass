@@ -35,7 +35,7 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
 
 ## Acceptance criteria
 
-- [ ] AC1 A committed script enumerates the aborts under `R/ci-*.R` matching its
+- [x] AC1 A committed script enumerates the aborts under `R/ci-*.R` matching its
       stated predicate, emitting per site the file, the triggering condition and
       the `ci_method` string(s) its remedy bullets name; the committed enumeration
       is that script's own output; a committed ledger classifies every emitted
@@ -47,12 +47,12 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       `classical_guard_observed()`, and `npbootstrap_ci()`'s observed-data and
       degenerate-resample guards — identified by their guarding conditions, so a
       predicate that matched nothing could not satisfy this criterion.
-- [ ] AC2 The script's docstring, the ledger header and this milestone's records
+- [x] AC2 The script's docstring, the ledger header and this milestone's records
       state the predicate's LIMITS — the message shapes the script does not match
       — and each stated limit is demonstrated by a self-test probe that
       constructs that shape and shows it unmatched. No record claims detection
       coverage broader than a probe demonstrates.
-- [ ] AC3 For each site the ledger marks `sweep`, a committed seeded script
+- [x] AC3 For each site the ledger marks `sweep`, a committed seeded script
       records, across several geometries of that site's trigger condition and at
       the shipped `boot_samples` default, whether each swept `ci_method` returns a
       usable interval on data that reached the abort, judged by the shipped
@@ -61,14 +61,14 @@ history-protected is edited (maintainer's disposition, re-cut gate 2026-08-01).
       candidate set is named in the script with a stated reason for every
       `ci_method` value excluded. A cell whose point fit fails before the guard is
       excluded from the denominator and recorded as excluded.
-- [ ] AC4 This milestone changes nothing user-facing and states no rule:
+- [x] AC4 This milestone changes nothing user-facing and states no rule:
       `git diff main..HEAD --name-only` lists no path under `R/`, and lists
       neither `NEWS.md` nor `cairn/DECISIONS.md`.
 - [ ] AC5 Every factual claim this milestone's records make about a measured
       result, a count, a ledger key, or this milestone's own review history is
       accompanied by a command that recomputes or locates it, and that command
       reproduces the stated figure or string.
-- [ ] AC6 The profile `verify` slot is clean, plus the fuller pre-review check it
+- [x] AC6 The profile `verify` slot is clean, plus the fuller pre-review check it
       names, with every `data-raw` checker run locally.
 
 ## Coverage
@@ -504,3 +504,79 @@ to settle. Local gate and CI are otherwise green throughout, which is the point:
 nothing mechanical has ever caught this class.
 
 Every acceptance box unticked.
+
+**Review pass 4 — 2026-08-01 (first pass after the re-cut).** PR #108, head
+`12cba54`. `main` unmoved since the branch was cut
+(`git rev-list --count HEAD..origin/main` = 0), so all evidence below is current.
+Criteria are the RE-CUT set AC1-AC6; the passes above measured a different,
+superseded set and none of their evidence is inherited.
+
+**AC1 — enumeration and gate.** `--check` exits 0: 9 `ci_method`-naming reducer
+aborts under `R/ci-*.R`, all classified (4 `sweep`, 5 `fence`), committed
+enumeration current. Every emitted site carries its file, trigger condition and
+named methods (9 each of `key:`, `trigger:`, `names:`); the ledger carries 9 rows;
+`grep -c 'R/icc.R'` on the enumeration = 0, so no pre-dispatch design fence
+appears. The three `--check` failure modes were DRIVEN, not described: calling
+`check()` on each probe's constructed input returns rc 1 for an unclassified site,
+rc 1 for a ledger row matching no site, rc 1 for a stale committed enumeration,
+and rc 0 on the passing control. The four measured guards are present and anchored
+on their own conditions — `n_ok < min_frac * boot_samples`, `ss$mse == 0`,
+`obs$se_ij_logf == 0`, `n_bad > 0L` — and are exactly the ledger's four `sweep`
+rows, exactly the four keys the sweep script registers, and exactly the four keys
+in the committed TSV.
+
+**AC2 — stated limits, each probed.** The predicate's limits are stated in all
+three required places: L1-L6 in the script docstring (6 lines), the
+`WHAT THIS LEDGER DOES NOT COVER` block in the ledger header, and a
+milestone-local `## Decisions` entry. Each of the six is CONSTRUCTED and shown
+unmatched by its probe (all six `matched=False`), and the five splice shapes the
+reporter does not report are shown likewise (`reported=False`) against a positive
+control that IS reported. No record claims broader coverage: the docstring, the
+ledger header and the Decisions entry each state the reporter catches one shape
+and is not a gate on spliced variables generally.
+
+**AC3 — sweep.** 210 rows over 42 cells (4 sites x 5 methods x geometries), all at
+the shipped `boot_samples = 999` (`R/icc.R:552`) and `conf_level = 0.95`.
+Geometries per site: 6x3, 10x2, 15x4, 30x3 at exact and near-degenerate triggers
+for the three deterministic sites, plus the `SE=0` cell at 3x2; 12x3, 20x3, 30x2
+at three seeds for the stochastic resample guard. Usability is the shipped
+`boundary_interval_usable()`. Reach is confirmed by the site's own classed
+condition from the reducer called DIRECTLY (four `*_ci()` call sites, no `icc()`),
+AND by the site's own leading line — necessary because both npbootstrap guards
+raise `intraclass_singular_fit` from one reducer. Row census:
+130 `reached=TRUE` all with `site_confirmed=TRUE` and `point_fit_ok=TRUE`;
+10 site-confirmed but point-fit-failed, excluded; 20 neither; 50 where the reducer
+returned an interval. The candidate set is named in the script as five of the
+seven shipped `ci_method` values with a stated reason per exclusion (`mpl` fenced
+to the balanced two-way random cell; `posterior` needing the brms engine). The six
+point-fit-failed cells are excluded from the denominator and each recorded with
+the reason "point fit failed: a user could not reach this message on this data".
+
+**AC4 — nothing user-facing, no rule stated.** `git diff main..HEAD --name-only`
+lists 7 paths: `cairn/ROADMAP.md`, the milestone file, and five under `data-raw/`.
+No path under `R/`, and neither `NEWS.md` nor `cairn/DECISIONS.md`. Stronger than
+the criterion asks: `git diff main..HEAD -- R/` is empty, and each of
+`R/ci-bootstrap.R`, `R/ci-classical.R`, `R/ci-npbootstrap.R`, `NEWS.md` and
+`cairn/DECISIONS.md` is byte-identical to `main`.
+
+**AC6 — toolchain gate.** Suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5435 /
+SKIP 23 — identical to `main`'s baseline, as expected of a milestone that adds no
+R test. `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings
+/ 0 notes. `lintr::lint_package()` 0 lints; `air format --check .` clean;
+`devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems. All four
+other `data-raw` checkers pass, plus this milestone's `--check` and `--self-test`.
+Tree clean after every probe.
+
+**Universal cairn checks.** `cairn_validate` exit 0 — 16 PASS including
+`coverage complete`, `weight caps`, `mirror agreement`, `binding criteria`;
+5 advisory OK; 1 WARN (`dangling id tokens`, 321, pre-existing pre-migration ids).
+No `DESIGN.md` principle changed (`git diff main..HEAD -- cairn/DESIGN.md` empty),
+so `cairn_impact` does not apply. Profile consistency-gate: no generated file in
+the diff, README untouched, no new top-level path, `data-raw` already
+`.Rbuildignore`d, and NEWS correctly carries NO entry — this milestone ships no
+user-visible change, which AC4 requires.
+
+**CI.** All nine checks pass on `12cba54` (format-check, check-references, lint,
+pkgdown, test-coverage, codecov patch + project, ubuntu-latest and windows-latest
+release).
+
