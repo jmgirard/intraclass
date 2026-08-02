@@ -82,7 +82,7 @@ returns an interval, only message text changes.
 
 ## Tasks
 
-- [ ] T1 `data-raw/enumerate-ci-method-remedies.py` — scan `R/ci-*.R` for classed
+- [x] T1 `data-raw/enumerate-ci-method-remedies.py` — scan `R/ci-*.R` for classed
       aborts whose message bullets name a `ci_method` value and whose trigger is
       observed-data or resample degeneracy; commit its output table.
 - [ ] T2 `data-raw/sweep-abort-remedies.R` — per enumerated site, generate
@@ -110,6 +110,11 @@ returns an interval, only message text changes.
 - 2026-08-01: plan gate chose rewriting static message text over splicing M93's runtime `boundary_method_hint()` into these sites because M93 T1 measured the bootstrap site 0/90 at the boundary and every candidate method aborting on the degenerate data that does reach it, so the machinery would emit nothing; falsified by a measured trigger dataset where some shipped `ci_method` returns a usable interval.
 - 2026-08-01: plan gate chose a ROADMAP candidate row over a follow-on milestone for the ledger + CI checker, at the user's direction.
 - 2026-08-01: criteria audit ([O], fresh context) returned six findings; five fixed before the gate — scope narrowed to reducer-stage degeneracy aborts (the `icc()`-body fences have no reducer, so the draft AC2 was unsatisfiable there), the invented three-way outcome classification replaced by the shipped `boundary_interval_usable()`, AC4's vacuous "each rewritten abort" quantifier bound to the audited set, the rewritten remedy required to stay actionable (#8/GP1) rather than merely losing a bullet, and AC6's rule scoped to static text so it cannot contradict D-018's runtime route. The sixth (evidence bar) went to the gate as a question.
+
+- 2026-08-01: T1 — the enumerator finds 9 `ci_method`-naming aborts in `R/ci-*.R`; the committed ledger classifies 4 `sweep` (bootstrap refit-convergence, classical MSE = 0, npbootstrap observed-degeneracy and degenerate-resample) and 5 `fence` (bootstrap engine capability, three mpl grid/level fences, the npbootstrap Spearman-Brown pole — the last on M93's measurement that it fires on healthy cells). Ledger keys are sha1 of the leading message line, stable under this milestone by AC4.
+- 2026-08-01: T1 minor plan refinement — the enumerator emits ALL `ci_method`-naming reducer aborts and the ledger records each one's disposition, rather than a regex encoding "degeneracy-triggered" and silently omitting the rest. AC1's property is unchanged (`icc()`'s pre-dispatch fences do not appear — they are out of file scope) and a new abort can no longer escape unclassified.
+- 2026-08-01: T1 parser defect found and fixed before commit — the first draft reported an early-return guard as an abort's trigger, INVERTING it (`npb_guard_sb_pole()` aborts when `any(denom < 0)`, above which sits `if (!any(denom < 0)) return(...)`); the condition scan now accepts only an `if` block still open at the abort line.
+- 2026-08-01: T1 mutation-verified — leaking the leading line into the remedy scan reds 3 self-test assertions, narrowing the file glob reds 4, deleting a ledger row reds `--check`, and tampering with the committed enumeration reds the freshness gate. All four restored green.
 
 ## Decisions
 

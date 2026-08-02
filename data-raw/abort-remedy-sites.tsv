@@ -1,0 +1,22 @@
+# Disposition of every CI-reducer abort whose remedy bullets name a `ci_method`
+# (M100). Enumerated by data-raw/enumerate-ci-method-remedies.py; `--check` fails
+# when a current site carries no row here, or when a row matches no site.
+#
+# disposition:
+#   sweep  -- the abort is triggered by DEGENERATE DATA, so a bullet naming
+#             another ci_method claims that method survives data which has
+#             already defeated one. data-raw/sweep-abort-remedies.R measures it.
+#   fence  -- the abort is triggered by a design, an argument, or an engine
+#             capability, not by the data being degenerate. The named default is
+#             not being asked to survive anything, so there is nothing to sweep.
+#
+# key	disposition	reason
+R/ci-bootstrap.R:6c20062478	fence	Engine capability: this engine/design pair ships no simulate_refit contract. Nothing about the data is degenerate, so the Monte-Carlo default it names is unaffected.
+R/ci-bootstrap.R:f3b08ac552	sweep	Data: too few of the parametric-bootstrap refits converged. M93 T1 measured this site 0/90 at the sigma^2 -> 0 boundary and reachable only on degenerate data.
+R/ci-classical.R:990cd66e44	sweep	Data: within-subject variance is exactly zero, so the F = MSA/MSE pivot does not exist.
+R/ci-mpl.R:eebe6172e6	fence	Argument: kappa_m is calibrated per conf_level and not interpolated across levels. The data is untouched by this refusal.
+R/ci-mpl.R:12d6a184eb	fence	Design: the rater count falls outside the calibrated kappa_m grid.
+R/ci-mpl.R:afb9765670	fence	Design: the subject count falls outside the calibrated kappa_m grid.
+R/ci-npbootstrap.R:6edd0f7409	fence	Projection: a numeric `unit` whose Spearman-Brown map has passed through its pole. Measured at the M93 implement gate on 28 of 12,600 HEALTHY cells -- the fit is fine, the projection is not.
+R/ci-npbootstrap.R:bf1a802a9c	sweep	Data: between- or within-subject variance is exactly zero, so the log F transform and its jackknife SE do not exist.
+R/ci-npbootstrap.R:01b75d1a61	sweep	Data: resampled subjects produced degenerate resamples (SSA = 0 or SE = 0). Stochastic -- a run is evidence about one seed, so the sweep varies seeds as well as geometries.
