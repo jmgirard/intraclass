@@ -1,11 +1,11 @@
 # M100: Abort remedies name only a `ci_method` measured to work on the data that triggers them
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP6, GP7
-- **Branch/PR:** `m100-abort-remedy-truthfulness`
+- **Branch/PR:** `m100-abort-remedy-truthfulness` · https://github.com/jmgirard/intraclass/pull/108
 
 ## Goal
 
@@ -134,6 +134,130 @@ returns an interval, only message text changes.
 
 - 2026-08-01: T6 gate clean — suite `NOT_CRAN=true CI=true` FAIL 0 / PASS 5458 / SKIP 23; `lintr::lint_package()` no lints; `air format --check` clean; `devtools::document()` no diff; all five `data-raw` checkers pass; `cairn_validate` 7 OK / 0 FAIL (321 pre-existing dangling-id advisories); plan-owned body 104/149. `data-raw/` is already `.Rbuildignore`d, so the new scripts owe no entry. Status -> review.
 
+- 2026-08-01: review pass 1 FAILED the gate (first return). [O] diff-bug found the milestone's own defect class surviving in its output: the npbootstrap observed-data bullet is false on healthy data (`se_ij_logf == 0` fires with a finite log F — reproduced at review, scored 93) and the bootstrap bullet asserts a single cause the milestone's OWN sweep contradicts on its jitter cells (90). Seven further >=80 findings are evidence-quality: a wrong `class` column (92), a broken `generator` provenance column (94), a stale sweep header whose keys no longer resolve (92), reached-vs-usable measured on inconsistent paths so two verdict denominators are overstated (82), `boot_samples = 99` against a shipped 999 contradicting the M97 lesson (80), a paren-in-comment parser defect (82), and NEWS inheriting the first error (82). 19 sub-80 findings logged in the Review section. [S] blame-history and [S] prior-review: 0 findings each. Every acceptance box unticked; the next pass re-verifies from scratch. Status -> in-progress.
+
 ## Decisions
 
 ## Review
+
+**Review pass 1 — 2026-08-01.** PR #108. `main` unmoved since the branch was cut
+(`git rev-list --count HEAD..origin/main` = 0), so all evidence below is current.
+
+**AC1 — enumeration.** `enumerate-ci-method-remedies.py --check` exits 0: 6
+`ci_method`-naming reducer aborts, all classified (1 sweep, 5 fence), committed
+enumeration current. Each emitted site carries its file, trigger condition and
+named methods (6 `trigger:` and 6 `names:` lines). `grep -c "R/icc.R"` on the
+enumeration returns 0, so no pre-dispatch design fence appears. The committed
+enumeration is the script's own output, verified by tampering: appending one line
+makes `--check` exit 1, restoring it exits 0.
+
+**AC2 — sweep.** `abort-remedy-sweep.tsv` holds 205 rows over 4 sites x 5 methods,
+7 geometries (6x3, 10x2, 15x4, 30x3, 12x3, 20x3, 30x2), exact and near-degenerate
+triggers, seeds 1-3 at the stochastic site. Outcome vocabulary is exactly
+`usable interval | unusable interval | classed abort | raw error | (site not
+reached)`; 0 reached rows carry an outcome with no run behind it. Usability is
+`boundary_interval_usable()`, the shipped helper. Provenance columns (`r_version`,
+`glmmtmb_version`, `platform`, `boot_samples`, `conf_level`) are on every row.
+
+**AC3 — no condemned method named.** Mechanical cross-check of the live
+enumeration against the sweep: for every method a shipped site still names, the
+sweep's failure count at that site is 0 or the site is a fence never swept.
+Violations: none. The one swept site still naming a method
+(`R/ci-npbootstrap.R:01b75d1a61`, `montecarlo`) has 0 failures over 9 datasets;
+the three condemned sites name nothing and have left the enumeration.
+
+**AC4 — class and leading line unchanged, still actionable.** The `main..HEAD`
+diff of the three files touches no `class = "..."` line and no leading message
+line. Rendered live, each abort keeps its opening sentence and its diagnostic
+bullet, and closes on an imperative the user can act on ("Inspect the ratings:
+every rater gave each subject the same score").
+
+**AC5 — pinned and mutation-verified, re-run at review.** Baseline
+`test-abort-remedy-truthfulness.R` 23 pass / 0 fail. Restoring each pre-milestone
+bullet reds the pin: bootstrap 2 failures, classical 2, npbootstrap 3; stripping
+the deliberately KEPT `montecarlo` bullet reds 1. Restored to 23/0, and
+`git diff --quiet R/` confirms the tree is clean after the probes. Assertions are
+on the property (`art_named_methods()`), not the sentence, and every abort is
+fired at its reducer — stub `simulate_refit` for the bootstrap guard, raw
+degenerate frames elsewhere — never through `icc()`.
+
+**AC6 — records.** `NEWS.md` gains the user-visible bullet (15 added lines, 0
+milestone-number leaks). `cairn/DECISIONS.md:683` carries D-020, which references
+D-018 (5x), D-019 (2x), D-012 and D-013 (1x each) and states its relation to each.
+
+**AC7 — toolchain gate.** `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+Status OK — 0 errors, 0 warnings, 0 notes. Suite at `NOT_CRAN=true CI=true`
+FAIL 0 / PASS 5458 / SKIP 23. `devtools::document()` no diff; `pkgdown::check_pkgdown()`
+"No problems found"; `README.md` untouched by the branch; `air format --check` clean;
+`lintr::lint_package()` no lints; all six `data-raw` checkers pass.
+
+**Universal cairn checks.** `cairn_validate` exit 0 — 16 PASS including
+`coverage complete`, `weight caps`, `mirror agreement`, `binding criteria`,
+`principles slot valid`; 7 advisory OK; 1 WARN (`dangling id tokens`, 321,
+pre-existing pre-migration ids). No `DESIGN.md` principle changed, so
+`cairn_impact` does not apply.
+
+**GATE FAILURE — returned to `in-progress` (review pass 1).** Three fresh-context
+lenses ran. [S] blame-history: 0 findings — it established that the three removed
+bullets originated as boilerplate in ordinary feature commits (`b63c471c`,
+`b7ca3f58`, `a37ef90e`), never as text a milestone deliberately decided, so
+removing them corrects an unverified claim rather than undoing considered work.
+[S] prior-review: 0 findings; the GitHub inline-comment surface probed empty, and
+the M93/M97/M98/M99 archives show this diff respecting each lesson it inherits.
+[O] diff-bug: 28 findings, 9 scoring >= 80.
+
+**The two that fail the gate.** The milestone's own defect class survives in the
+text it shipped:
+
+- **A1 (93)** — `npbootstrap_ci()`'s observed-data guard is
+  `!is.finite(obs$logf) || obs$se_ij_logf == 0`, and the second disjunct fires on
+  healthy data. Reproduced at review: subject means -1/0/1 and within-subject
+  ranges 1/0/1 give a finite `log F` = 1.79 and `se_ij_logf` = 0, so the abort
+  fires and the new bullet's "either every subject has the same mean score, or
+  every rater agreed exactly within each subject" is false on BOTH disjuncts. The
+  rewrite claimed to state only what the guard establishes and mis-read the guard.
+  The sweep never generated this branch (`gen_mse0`/`gen_ssa0` only).
+- **A2 (90)** — `bootstrap_ci()`'s guard fires on a refit-convergence count with
+  many causes; the new bullet asserts one ("subjects scored identically by every
+  rater"), which the milestone's OWN sweep contradicts on its `MSE=0 near` cells
+  (jitter SD 1e-8, subjects not identical). It also misdescribes the mechanism:
+  the parametric bootstrap simulates from the fitted model rather than resampling
+  ratings.
+
+**Actioned, evidence-quality (>= 80).** B5 (92) the enumeration's `class` column
+reads `(default)` for 5 of 6 sites because `CLASS_RE` looks for a literal
+`class =` that `abort_unsupported()` sets inside the wrapper. C5 (94) every sweep
+row's `generator` provenance reads the literal `cell$gen`
+(`deparse(substitute())` inside a loop), so no row traces to its generator. C7
+(92) the sweep's header claims its sites are the ledger's `sweep` rows while three
+of its four hardcoded keys no longer exist there, and `names = "montecarlo"` is
+hardcoded at all four. C2 (82) `fire()` skips the point fit while `run_remedy()`
+goes through `icc()`, so cells are counted "reached" whose message no user could
+see — the classical verdict is 0/3 not 0/4 and npbootstrap-observed 0/7 not 0/8;
+the conclusion survives, the counts in the work log and D-020 do not. C3 (80) the
+sweep measures at `boot_samples = 99` against a shipped default of 999,
+contradicting the M97 lesson quoted in `R/boundary-hint.R`. B1 (82) the
+enumerator's `_slice_call` balances parens over comment text, so an unmatched `(`
+in a comment merges the following abort into one site that inherits the first's
+ledger row — and this milestone added prose comments inside three abort calls.
+E4 (82) the NEWS bullet inherits A1's error.
+
+**Logged below threshold (19, not actioned).** A4 78 the classical bullet is
+entailed only by the `mse == 0` disjunct · D1 76 `art_message()` asserts only the
+parent `intraclass_error`, so AC4's class requirement is not pinned · C4 72 the
+bootstrap site is swept at one seed though its refits are stochastic · E5 68 the
+milestone says three/four/five `data-raw` checkers in three places · A5 66 the
+regex pins one spelling of a method name · D2 66 both leading-line assertions
+share a substring · E3 63 D-019 and D-020 read D-018's reach differently · B7 62
+ledger keys churn on a pure refactor · B2 58 `"i" = ` bullets are invisible ·
+C6 55 hardcoded `divisor = 2`, currently inert · E1 55 D-020's rule reads as
+universal while five `fence` sites name a method unswept · B3 52 one method
+spelling · C1 50 the two npbootstrap sites are indistinguishable to `reached` ·
+A3 40 the KEPT bullet's "use a larger design" half is wrong at 30 subjects
+(pre-existing text, out of scope here) · D3 32 dead stub parameter · E2 32 the
+specific fence reproduction did not reproduce · B6 28 AC1's stated predicate vs
+the implemented one · B4 22 the `(unguarded)` fallback is honest, not false ·
+D4 22 a strict pin behaving strictly.
+
+Acceptance checkboxes are unticked despite the AC1-AC7 evidence above: the next
+pass re-verifies from scratch rather than inheriting this pass's evidence.
