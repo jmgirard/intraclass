@@ -43,11 +43,17 @@ A differing exit status, a non-matching output, or a timeout exits non-zero.
 
 COMMAND SHAPES
 --------------
-A command is tokenized with `shlex.split` and executed directly -- there is no
-shell, so a pipeline, a redirection, a substitution or a chained second command
-is not merely discouraged but inexpressible. The leading token must be the
-shape's program. Everything here runs on the `check-references` runner, which
-has `python3` and the POSIX utilities and has neither R nor network access:
+A command is tokenized with `shlex.split` and executed directly, so THIS layer
+interprets no shell metacharacter: a pipeline, a redirection, a substitution or
+a chained second command written in a ledger cell is not a shell construct here,
+it is argument text. That is a rule over the cell and NOT a sandbox, and the
+difference is load-bearing -- a shape's own program can still reach a shell from
+the inside (`awk`'s `| getline` and `system()` do; a `python3` row can
+`subprocess`), so nothing here constrains what an accepted command DOES, only
+what the checker accepts. D-020 Amendment 2 records the same limit. The leading
+token must be the shape's program. Everything here runs on the
+`check-references` runner, which has `python3` and the POSIX utilities and has
+neither R nor network access:
 
   shape: ls -- list committed paths; tokens containing `*`/`?` are globbed
   shape: grep -- search text, `-c` for a count and `-r` to walk a directory

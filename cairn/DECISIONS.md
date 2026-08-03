@@ -759,3 +759,83 @@ the citation scope, the registration-not-detection limit, and the relation to
 D-009. The reason an amendment rather than an edit: rule 4 of the entry it
 amends says this file is history and IP4 forbids editing it, and a convention
 that exempted its own record would not be one.
+
+### D-020 Amendment 2 (2026-08-03): rule 9's "inexpressible" is false — the no-shell claim is narrowed to the checker's own layer
+
+**Context:** Rule 9 states that a command "is one of the shapes the docstring
+states, tokenized and run without a shell — a pipeline, a redirection, a
+substitution or a chained second command is inexpressible rather than merely
+discouraged." M102's third review pass falsified it. An `awk` row running
+`awk 'BEGIN{ "git rev-list --count main..HEAD" | getline x; print x }'`
+validates, is not refused, and passes, printing `commits:11` — awk's `| getline`
+and `system()` spawn a shell from inside a shape the checker allows, and a
+`grep`/`ls`/`awk` row can read `.git/` directly beside it. The claim was true of
+the checker's own tokenizer and false of the system. Amendment 1 had already
+conceded exactly this for one shape ("a `python3` row can still shell out to
+git"); rule 9 kept asserting the general form.
+
+**Decision:** rule 9 is narrowed to the layer it is true of. The checker
+tokenizes with `shlex.split` and executes directly, so it interprets no shell
+metacharacter — a pipeline or redirection written in a ledger cell is argument
+text, not a shell construct. It does not follow, and is no longer claimed, that
+a shell is unreachable: an accepted shape's own program may spawn one. The rule
+is over the cell, never over what an accepted command does at runtime. Three
+consequences are stated rather than papered over: `awk` and `ls` shapes can read
+`.git/`; a `python3` row can `subprocess`; and rule 1's "no registered command
+may run `git`" is therefore a syntactic guarantee about `argv[0]`, not a
+behavioural one about history access.
+
+**What this does not do:** it does not close the capability channels, which
+would need an allowlist over what a shape may DO — dropping `awk` and `ls`,
+restricting `python3` to committed helpers, refusing `.git/` paths — re-cutting
+the shape set M102's AC1 and AC3 rest on. That was weighed at the M102 gate
+(2026-08-03) and declined in favour of narrowing the promise, per the plan-gate
+rule that a counterexample defeating an enumeration is not answered by a wider
+enumeration. Promote the allowlist if a ledger row is ever found reaching
+history in a way that makes a shipped figure wrong — the falsifier — never on a
+further count of channels.
+
+**Supersedes:** D-020 rule 9 only. Rules 1–8 and 11–17 stand, as does
+Amendment 1 in full.
+
+### D-021 (2026-08-03): Records-verification work needs a trigger in what the package computes — cairn's D-090 door, adopted here
+
+**Context:** Eight of the last nine milestones — M94, M95, M96, M97, M98, M100,
+M101, M102 — have as their subject whether this repo's own prose, messages and
+records tell the truth; only M99 is about what the package computes. D-020
+(2026-08-02) is the first decision entry whose subject is tracking prose. The
+thrash concentrates in exactly that class: M92 ran seven passes where 1–6 each
+failed on prose authored about the work and never on the code; M93 ran eight,
+its last three with shipped code byte-identical; M100 ran three returns, passes
+2 and 3 each finding a fresh false claim inside the previous pass's own fix;
+M102 ran three and parked. The class is self-feeding — a repair to prose is new
+prose, which is a new claim that can be false — and it never runs out of
+subject matter, so it fills any gap in the queue. It is not worthless: M97 found
+a hint naming a method that then failed, and M98's plan gate falsified a claim
+that the pole hotfix had removed the endpoint test's anti-clamp coverage. What
+it lacks is a door. cairn closed the same program on itself at its D-090 after
+four consecutive apparatus milestones.
+
+**Decision:** No milestone is planned whose deliverable is verification of this
+repo's own records, prose or messages — a ledger over tracking figures, a guard
+over doc claims, a truthfulness audit — unless its trigger is a defect in what
+the package computes for its users: a wrong number, a wrong interval, a wrong
+abort, a wrong exported behaviour. A false or unbacked claim in a record is
+corrected in place, in the milestone that finds it, and never promoted into a
+milestone of its own. Untouched: guards that pin a NUMERIC result or an exported
+behaviour, which are ordinary verification of what the package does; the oracle
+discipline under PRINCIPLES.md #1; and repairs to existing checkers surfaced as
+ordinary work.
+
+**In-flight disposition, taken at this entry rather than grandfathered.** M102
+finishes on the narrowed AC2 above — its checker and ledger are built, eight of
+nine criteria are green, and withdrawing an over-claim costs less than dropping
+working machinery. M100 and M101 are re-judged against this door before either
+resumes: each must name the wrong user-facing behaviour that motivates it, or it
+is dropped and its content becomes a note in the milestone that next touches
+those abort paths.
+
+**Consequences:** the plan-time collision check surfaces this on any
+records-verification scope, and the standing-rejection discipline applies —
+supersede, don't ignore. If a wrong shipped number is ever traced to a record
+defect this door turned away, this is the entry to supersede.

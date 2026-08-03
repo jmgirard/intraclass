@@ -1,6 +1,6 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** blocked
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -42,11 +42,16 @@ candidate row, whose subject is M101's messages.
       no network; `--self-test` PARSES that list and asserts SET equality with the
       shape ids the code dispatches on, so a docstring shape with no code and a
       code shape with no docstring line each exit non-zero.
-- [ ] AC2 A command naming any of an enumerated set of history-dependent forms —
-      a `git log`/`blame`/`rev-list`/`show` subcommand, a `<rev>..<rev>` range, or
-      a ref other than `HEAD` — is refused with its reason, that checkout being
-      depth-1 with no `main` ref. The set is stated in the docstring and each form
-      carries a `--self-test` probe constructing it and showing the refusal.
+- [ ] AC2 Refusal is decided by one test — `argv[0] == "git"` — so every `git`
+      command is refused whatever its flags spell (D-020 Amendment 1 rule 1), the
+      enumerated history-dependent forms (a `log`/`blame`/`rev-list`/`show`
+      subcommand, a `<rev>..<rev>` range, a ref other than `HEAD`) only naming the
+      reason and `git-command` covering the rest; that checkout is depth-1 with no
+      `main` ref. The set is stated in the docstring, each form carrying a
+      `--self-test` probe constructing it and showing the refusal. The docstring
+      and D-020 Amendment 2 state what this does NOT claim: a syntactic rule over
+      the ledger cell, not a sandbox — an accepted shape's own program can still
+      reach a shell or `.git/`, and no criterion here promises otherwise.
 - [x] AC3 The committed ledger carries a passing row for each of these four
       figures, every one settled from an artifact committed on the default branch:
       the `data-raw` checker inventory by name; the count of `data-raw` checker
@@ -178,6 +183,7 @@ candidate row, whose subject is M101's messages.
 - 2026-08-02: review pass 3 FAILED the gate — THIRD return; thrash triggers (a) and (b) both fire. AC2 fails a third time, by a channel that is not a git command: an `awk` row running `awk 'BEGIN{ "git rev-list --count main..HEAD" | getline x; print x }'` validates, is not refused, and passes, printing `commits:11` — awk's `| getline` and `system()` spawn a shell, so the docstring's "there is no shell ... inexpressible" and D-020 rule 9 are both false as shipped. A second channel is open beside it: a `grep`/`ls`/`awk` row reads `.git/` directly. Pass 3 did close the entire pass-1/pass-2 git-parsing family by construction, verified independently by all three lenses, and repaired the D-020 drift legally via Amendment 1. The three failures are three different channels, not variations: AC2 asks for a guarantee about what a command DOES and every implementation has delivered a rule about what a command NAMES. Closing it needs an allowlist over capability — dropping `awk`/`ls`, restricting `python3` to committed helpers, refusing `.git/` paths — which changes the shape set AC1 and AC3 rest on and is not implement's to decide. No scorer pass was run (the gate stops at criterion verification, before triage); all findings are logged in the Review section instead. AC2's tick withdrawn. Status -> in-progress.
 
 - 2026-08-02: pass-3 gate disposition, maintainer's choice: PARKED as `blocked` rather than re-planned, escalated, or re-scoped. The blocker is a maintainer decision on how the history-reading guarantee should be met — the three passes established that a blocklist over what a command NAMES cannot deliver it, and the candidate answer is an allowlist over what a command may DO (drop the `awk` and `ls` shapes, restrict `python3` to committed helpers under `data-raw/`, refuse any path under `.git/`), which re-cuts the shape set AC1 and AC3 rest on and so is a plan-level call. Nothing proceeds on this branch meanwhile. What is done and green: the ledger, the checker with 16 probed and excision-verified routes, five registered rows over four figures, the citation gate, D-020 and its Amendment 1, the CI wiring, and all nine CI checks on `87181a0`/`b1e4090` — eight of nine criteria carry fresh evidence. What is open: AC2 (unticked), the `awk`/`.git` capability channels, and the pass-3 finding list in the Review section. M100 stays blocked behind this milestone.
+- 2026-08-03: amendment return: AC2 — "Refusal is decided by one test — `argv[0] == \"git\"` — so every `git` command is refused whatever its flags spell (D-020 Amendment 1 rule 1), and the enumerated history-dependent forms ... only name the reason, `git-command` covering the rest ... The docstring and D-020 Amendment 2 state what this does NOT claim — it is a syntactic rule over the ledger cell, not a sandbox". Maintainer decision at the 2026-08-03 gate unparks the milestone: the blocker was which of two routes met the history-reading guarantee, and the answer is neither — the guarantee is withdrawn rather than met. What failed at pass 3 was not AC2's enumeration but a claim asserted BESIDE it (D-020 rule 9 and the docstring: a shell is "inexpressible"), which `awk`'s `| getline` falsifies. Narrowing the promise to what a stated procedure settles is the repair cairn's plan gate now prescribes; the capability allowlist is declined and recorded as a falsifiable candidate in D-020 Amendment 2. Status blocked -> in-progress.
 
 ## Decisions
 
