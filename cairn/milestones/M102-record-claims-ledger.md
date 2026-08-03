@@ -185,6 +185,8 @@ candidate row, whose subject is M101's messages.
 - 2026-08-02: pass-3 gate disposition, maintainer's choice: PARKED as `blocked` rather than re-planned, escalated, or re-scoped. The blocker is a maintainer decision on how the history-reading guarantee should be met — the three passes established that a blocklist over what a command NAMES cannot deliver it, and the candidate answer is an allowlist over what a command may DO (drop the `awk` and `ls` shapes, restrict `python3` to committed helpers under `data-raw/`, refuse any path under `.git/`), which re-cuts the shape set AC1 and AC3 rest on and so is a plan-level call. Nothing proceeds on this branch meanwhile. What is done and green: the ledger, the checker with 16 probed and excision-verified routes, five registered rows over four figures, the citation gate, D-020 and its Amendment 1, the CI wiring, and all nine CI checks on `87181a0`/`b1e4090` — eight of nine criteria carry fresh evidence. What is open: AC2 (unticked), the `awk`/`.git` capability channels, and the pass-3 finding list in the Review section. M100 stays blocked behind this milestone.
 - 2026-08-03: amendment return: AC2 — "Refusal is decided by one test — `argv[0] == \"git\"` — so every `git` command is refused whatever its flags spell (D-020 Amendment 1 rule 1), and the enumerated history-dependent forms ... only name the reason, `git-command` covering the rest ... The docstring and D-020 Amendment 2 state what this does NOT claim — it is a syntactic rule over the ledger cell, not a sandbox". Maintainer decision at the 2026-08-03 gate unparks the milestone: the blocker was which of two routes met the history-reading guarantee, and the answer is neither — the guarantee is withdrawn rather than met. What failed at pass 3 was not AC2's enumeration but a claim asserted BESIDE it (D-020 rule 9 and the docstring: a shell is "inexpressible"), which `awk`'s `| getline` falsifies. Narrowing the promise to what a stated procedure settles is the repair cairn's plan gate now prescribes; the capability allowlist is declined and recorded as a falsifiable candidate in D-020 Amendment 2. Status blocked -> in-progress.
 
+- 2026-08-03: review pass 4 FAILED the gate — FOURTH defect return; thrash trigger (a) holds from the third. Status read `in-progress` on entry (the amendment return set it there and `a946df1` landed the amendment without flipping the mirror); this pass treated the maintainer's invocation as that transition. AC2 fails as amended on its docstring half: `grep -n "\.git" data-raw/check-record-claims.py` returns no match, so the docstring never states the `.git/` channel AC2 requires it and D-020 Amendment 2 to state jointly — the refusal machinery itself passed over nineteen git spellings including every pass-1/2/3 escape. [O] diff-bug 25 findings, [S] blame-history 2, [S] prior-review 3 (GitHub inline-comment probe `[]` a fourth time); an [S] scorer scored all 27 and six reached 80: O4 (the gate failure), O1/B2 `lint.yaml` still asserting the withdrawn history-free guarantee, O25/B1 AC1's text describing the deleted `git` shape, O3 D-021's M93/M100 pass counts contradicting the archive and D-020, O7/R1 the dangling `D-045` reference in the checker, O6 the dangling `IP4` reference behind the citation scope. 21 sub-80 findings logged in the Review section. AC9 re-run clean at this head (suite FAIL 0 / PASS 5435; check 0/0/0; lintr 0; air clean; five checkers green both modes; `cairn_validate` all checks passed, new `record density` advisory on the ROADMAP stamp at 418 chars). No fixes applied this pass — the floor return stops at criterion verification. Disposition to the maintainer.
+
 ## Decisions
 
 ## Review
@@ -593,3 +595,169 @@ over what a command names cannot deliver a guarantee about what a command does �
 carries into that routing, as does the option of escalating the design question.
 No re-plan or split has been spent on M102, so (a)'s standard remedy applies.
 Status -> `in-progress`; the disposition goes to the maintainer.
+
+**Review pass 4 — 2026-08-03 (after the AC2 amendment return).** PR #109, head
+`a946df1`; `main` unmoved (`git rev-list --count HEAD..origin/main` = 0), so no
+merge-in was needed and this evidence is not stale. The milestone file read
+`in-progress` on entry: the amendment return set it there, `a946df1` landed the
+only work that return convened, and nothing flipped the mirror back to `review`.
+This pass treats the maintainer's `/milestone-review` invocation as that
+transition rather than as an override of a criterion. All figures below are from
+commands run at this commit.
+
+**AC2 — FAILS as amended, on the docstring half of its own disclaimer clause.**
+The refusal machinery itself is met and was re-measured over nineteen `git`
+command spellings, including every one that defeated passes 1–3: `git log`,
+`git blame`, `git show HEAD`, `git rev-list --count main..HEAD`, pass-2's escape
+`git grep -c -e -- main -- f`, `HEAD~1`, `HEAD^`, the raw SHA `53dde1c`, the tag
+`v0.1.0`, `upstream/main`, a bare `some-branch`, plain `HEAD`, `git -C dir grep`,
+`git --no-pager log`, `git describe`, `git ls-tree v0.1.0`, `git status` and bare
+`git` — all nineteen refused, and a non-git command untouched. Four forms are
+stated in the docstring, four samples construct them, `refused-parity` holds 4/4,
+and `--self-test` runs each sample both bare and as a ledger row. What fails is
+the last sentence: AC2 requires that "the docstring AND D-020 Amendment 2 state
+what this does NOT claim … an accepted shape's own program can still reach a
+shell or `.git/`". Measured: `grep -n "\.git" data-raw/check-record-claims.py`
+returns NO match. The docstring states the shell channel twice and states the
+general form ("nothing here constrains what an accepted command DOES"), but never
+the `.git/` channel that AC2 enumerates; D-020 Amendment 2 states both. Reading
+the general clause as covering the enumerated one is the charitable reading the
+never-reinterpret rule forbids, so AC2 is unmet and its tick is not taken. The
+repair is one sentence in the docstring, not a redesign.
+
+**AC1 — operative requirement re-verified; its descriptive clause is stale.**
+`COLUMNS` still parses out of the docstring to the eleven named columns in order;
+`SHAPES` is `{ls, grep, awk, python3}` and shape parity is driven in both
+directions (`shape-parity` on a docstring-only sixth shape and on an omitted one);
+grammar, `rc-mismatch`, `match-mismatch` and `timeout` each fire on constructed
+input; the checker imports `glob`, `os`, `re`, `shlex`, `subprocess`, `sys`,
+`tempfile` and nothing else. The tick stands on that operative clause. It does not
+stand on AC1's descriptive aside "runs with `python3`, POSIX shell and
+working-tree `git` alone": pass 3 deleted the `git-grep` shape and the docstring
+now reads "There is deliberately no `git` shape", so no shape runs `git` at all.
+That is criterion text falsified outside its named procedure's domain — an
+amendment matter for the plan, recorded here and not patched review-side.
+
+**AC3–AC7 — re-verified at this head.** `python3 data-raw/check-record-claims.py`
+→ `OK: 5 registered claim(s) re-derived, 0 failure(s)`; the five rows cover the
+four dispatched shapes and carry all four named figures (inventory by name;
+invocation count 8; the three κ_m steps −0.046/−0.068/−0.162; the five terminal
+milestone ids in order), every expected value an exact figure. `parse_scope`
+returns exactly the four correctable records, read out of D-020 rule 4, and
+`scope-parity` fires on both a short and a long list. Five citations across the
+scope, one per row, each resolving; both citation directions red on constructed
+input. The one `absence` row's falsifier still fails that row's own expectation.
+Routes and probes hold at 16/16 as SETS, `--self-test` is green, and each of the
+16 route excisions silences exactly its own probe. D-020's rule list parses to 17
+rules, every named route id present; `read_d_entry` reads the base entry plus both
+amendments.
+
+**AC8 — CI green on the amendment head.** `check-references` passed in 25s on
+`a946df1`; job 91699794725 lists step 9 "Re-derive the registered record claims
+(M102)" and step 10 "Self-test the record-claims checker (route excision)", both
+`success`, in that run's own log. Route excision therefore passes on the depth-1
+CI checkout.
+
+**AC9 — gate clean, run fresh at this head.** Suite `NOT_CRAN=true CI=true`
+FAIL 0 / WARN 2 / SKIP 23 / PASS 5435, identical to `main`'s baseline;
+`devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings /
+0 notes in 2m24s; `lintr::lint_package()` 0 lints; `air format --check .` clean;
+`devtools::document()` no diff; `pkgdown::check_pkgdown()` no problems; all five
+`data-raw` checkers pass in both check and self-test modes (ten invocations,
+enumerated by `ls data-raw/check-*.py data-raw/enumerate-*.py`). `cairn_validate`
+all checks passed, with a NEW advisory this pass: `record density` on
+`cairn/ROADMAP.md:4`, the hygiene stamp at 418 characters against the <400 cap.
+No NEWS entry is owed — the diff touches no `R/`, `tests/`, `man/`, `NAMESPACE`
+or `DESCRIPTION` path, so nothing user-visible changed.
+
+**Findings — three fresh-context lenses, then a scorer.** [O] diff-bug returned
+25, [S] blame-history 2 substantive (plus 5 checked-and-clear), [S] prior-review 3
+substantive; the GitHub inline-comment probe returned `[]` a fourth time, and the
+archived `## Review` sections show nothing this diff regresses. An [S] scorer that
+generated none of them scored all 27; six reached 80.
+
+**ACTIONED (≥ 80).**
+
+- **O4 (85) — AC2 fails as amended.** The docstring does not state the `.git/`
+  half of the disclaimer AC2 requires it and D-020 Amendment 2 to state jointly;
+  `grep -n "\.git" data-raw/check-record-claims.py` returns nothing. Reached by
+  the [O] lens, re-measured independently at this commit. This is the gate
+  failure.
+- **O1/B2 (88) — `lint.yaml` still asserts the guarantee the amendment withdrew.**
+  `.github/workflows/lint.yaml:73-75` reads "Stdlib-only, R-free, and history-free
+  by construction (this checkout is depth-1, so the checker refuses commands that
+  read repository history)". Pass 3 named `lint.yaml` beside the docstring as
+  carrying this claim; `a946df1` repaired the docstring and D-020 and left this
+  comment untouched. Reached independently by the [O] and [S] blame lenses.
+- **O25/B1 (82) — AC1's committed text describes a shape set that no longer
+  exists.** "runs with `python3`, POSIX shell and working-tree `git` alone",
+  against a docstring that now says "There is deliberately no `git` shape". The
+  T3 work-log note at line 163 likewise still lists five shapes including
+  `git-grep`. Reached independently by the [O] and [S] blame lenses.
+- **O3 (82) — D-021's motivating figures contradict the committed record and each
+  other.** D-021 says "M93 ran eight" where
+  `cairn/milestones/archive/M93-boundary-abort-hint.md:19` records "Ten passes,
+  three re-cuts"; D-021 says "M100 ran three returns" where D-020, added by this
+  same milestone, says M100 "returned from review five times" and the checker
+  docstring says "M100 passes 1-5" — three figures for one quantity, two of them
+  in one file. Its census also names M95 and M98 as prose-verification milestones
+  while its own Untouched clause exempts numeric and behavioural pins, which is
+  what both are.
+- **O7/R1 (82) — `D-045` is a dangling decision reference** in the checker's own
+  SCOPE comment (`data-raw/check-record-claims.py:141`). This repo's
+  `cairn/DECISIONS.md` holds D-001…D-021; `grep -rn "D-045" cairn/` returns
+  nothing. The rule it means is D-020 rule 4. Reached independently by the [O] and
+  [S] prior-review lenses.
+- **O6 (80) — `IP4` is a dangling principle reference**, and it is the sole stated
+  justification for excluding history from the citation scope. `cairn/DESIGN.md`
+  defines IP1–IP3 only and `cairn/PRINCIPLES.md` names no IP4; IP4 is cited in
+  D-020 rule 4, in Amendment 1, in the checker, and in three work-log lines.
+
+**Triage.** All six are recorded for the disposition rather than fixed in this
+pass: the gate stops at criterion verification under the return floor, and O4 is
+the criterion failure itself. O1, O3, O7 and O6 are prose-drift and dangling-
+reference defects of exactly the class this milestone exists to catch, each a
+one-line or one-sentence repair. O25 is criterion text falsified outside its
+procedure's domain and is an amendment matter for the plan, not a review-side
+patch.
+
+**LOGGED, sub-80 (21).** Excluded from the actioned list, surfaced here, none
+silently dropped. O10 (72) a mistyped flag falls through to the ordinary check and
+exits 0, so a renamed CI flag would silently void AC8's self-test step. O8 (70)
+D-021 does not supersede the abort-remedy-ledger candidate row it now bars, though
+its own Consequences clause says supersede rather than ignore. O2 (65) a falsifier
+is accepted on ANY failure, so a deleted fixture or a typo'd path keeps certifying
+— the AC5 vacuity one layer up, latent because the shipped falsifier is genuine.
+O12 (55) a missing scope file raises instead of failing with a route id. O22 (55)
+D-021's "the narrowed AC2 above" is a cross-document dangling deictic, and its
+"first decision entry whose subject is tracking prose" is contested by D-009.
+O23 (55) the amendment's own work-log line misquotes the AC2 it records, closing
+before the `.git/` clause. O5 (55) Amendment 2 supersedes rule 9 whole, dropping
+the shape-membership half, and carries no `probe:` token, so the superseded text
+still supplies `probe: unknown-shape` to the parser. O24 (50) a duplicate-id row
+is reported and still executed, its citation state satisfied by its twin. O13 (50)
+`refused_hits()` cannot change a reachable outcome now that no shape maps to git,
+and `/usr/bin/git`, `./git` and `env git` bypass the literal-token test. O11 (45)
+`--probes` always exits 0. O14 (45) `parse_scope` takes the first `Citation
+scope:` line, so no amendment can ever amend the scope. O15 (40) `read_d_entry`'s
+prefix match would absorb a colliding `D-020`, which M101's committed plan
+reserves. O9 (35) the M100/M101 re-judgement gate is stated in the ROADMAP hygiene
+stamp but not on the rows. O16 (35) an `OSError` `rc-mismatch` emission sits
+outside its sentinel. O18 (35) the invocation-count row is scoped to the whole
+file, not the job its claim names. O20 (35) the `record` column is never bound to
+the citing file. O19 (30) the README section adds four unregistered figures beside
+its two registered ones. B3 (25) `grep -r` widens the absence row to untracked
+files, latent at zero. O21 (15) `check_rule_probes` checks one direction, which is
+what AC7 asks for. O17 (15) moot, self-resolved by this pass. B4 (15) the
+`record density` advisory above.
+
+**Gate: FAILED — fourth defect return.** O4 demonstrates AC2 failing as amended,
+which is a return under the M130 floor. Status stays `in-progress`. Thrash trigger
+(a) holds — it was reached at the third return and is a threshold, not a moment —
+so no further retry is queued under the current plan and the milestone routes
+through `/milestone-plan`. Trigger (b) does not fire fresh: this failure is a
+missing sentence in a record, not another channel defeating the refusal rule,
+which passes 1–3 were. The composition rule leaves (a)'s standard remedy in force,
+no re-plan or split having been spent on M102 — the pass-3 disposition was a park,
+and the 2026-08-03 return was an amendment. The disposition goes to the
+maintainer.
