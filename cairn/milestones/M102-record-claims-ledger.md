@@ -200,6 +200,8 @@ candidate row, whose subject is M101's messages.
 
 - 2026-08-03: review pass 5 PASSED the gate — all nine criteria verified with fresh evidence at `05866f6`, AC2 met for the first time (21 git spellings refused, both disclaimer channels stated). [O] diff-bug 24 findings, [S] blame-history 0, [S] prior-review 0 (GitHub probe `[]` a fifth time, all six pass-4 fixes verified holding); an [S] scorer scored all 24 and NONE reached 80, the highest being F2 at 78, and none demonstrates a criterion failing. Fifteen are restatements of findings already logged sub-80 in passes 1-4. Gate clean: suite FAIL 0 / PASS 5435, check 0/0/0, lintr 0, air clean, document no diff, five checkers green both modes, `cairn_validate` all checks passed with dangling ids unchanged at 321. CI green on this head (job 91855894527, both M102 steps `success`). To the maintainer at the merge gate.
 
+- 2026-08-03: F2 fixed at the maintainer's merge-gate direction rather than left logged sub-80 (78) — a false sentence this pass itself authored is not shipped by a milestone whose subject is records telling the truth. Re-measuring every site before writing the correction found the sentence wrong on TWO of its three ids, not one: `D-024` is bare at `cairn/PROFILE.md:7` as well as `D-025`, and only `D-090` is qualified everywhere. D-020 Amendment 4 records the corrected reading and leaves `cairn/PROFILE.md` alone, that comment being cairn-init scaffold output rather than a record this repo authored. Amendment 3's conclusion is untouched — it never rested on the miscount. Re-run at this commit: checker and self-test green, `cairn_validate` all checks passed, dangling ids still 321.
+
 ## Decisions
 
 ## Review

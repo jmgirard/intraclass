@@ -904,3 +904,30 @@ edited into the entry, that file being history.
 **Supersedes:** D-021's Context paragraph figures only. The Decision, the
 Untouched clause, the in-flight disposition for M100/M101/M102 and the
 Consequences stand in full.
+
+### D-020 Amendment 4 (2026-08-03): Amendment 3's own count of the qualified ids is wrong — corrected against every site
+
+**Context:** Amendment 3 states "`D-024`, `D-025` and `D-090` are already
+written as cairn's". M102's fifth review pass falsified it, and re-measuring
+every site shows it wrong on two of the three. `D-090` is qualified at all three
+of its sites (`cairn/ROADMAP.md:4`, and D-021's heading and body). `D-024` is
+qualified at every site this repo authored — `cairn/DESIGN.md:217`,
+`cairn/DECISIONS.md:138` and `:155`,
+`cairn/milestones/archive/M63-references-migration.md:13` — but NOT at
+`cairn/PROFILE.md:7`, which reads a bare `(D-024/D-025)`. `D-025` occurs exactly
+once in this repo, at that same bare site. So the sentence is true of `D-090`,
+true of `D-024` only where this repo wrote it, and false of `D-025` outright.
+
+**Decision:** the sentence is corrected to read: `D-090` is written as cairn's
+everywhere it appears; `D-024` is written as cairn's at every site this repo
+authored; and both `D-024` and `D-025` appear bare exactly once, in
+`cairn/PROFILE.md`'s scaffold comment. That comment is `cairn-init` template
+output describing the plugin's own doctrine, not a record this repo authored or
+this milestone owns, so it is left alone rather than repaired here. Amendment 3's
+conclusion is unchanged and does not rest on the miscount: the only live,
+unqualified ids in records this repo wrote were the checker's `D-045` and `IP4`,
+and both are corrected there.
+
+**Supersedes:** one sentence of Amendment 3. Its decision, its correction to the
+checker's SCOPE comment, and its annotation of rule 4 and Amendment 1 stand in
+full.
