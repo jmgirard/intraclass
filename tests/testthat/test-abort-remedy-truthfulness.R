@@ -177,14 +177,23 @@ test_that("the npbootstrap observed-data abort asserts no cause its guard does n
   expect_match(msg, "SE", fixed = TRUE)
 })
 
-test_that("the classical F-pivot abort names no method its sweep condemned (AC3)", {
-  skip_if_not_installed("glmmTMB")
+# The two guards below are reached through their REDUCERS, not through `icc()`,
+# because `gen_mse0` (exactly zero within-subject variance) sits at the numerical
+# edge of the engine fit: glmmTMB survives it on some platforms and dies first
+# with an unclassed "LU factorization ... near-singular" on others, so an
+# `icc()`-level test of these two messages is platform-dependent. M100's sweep
+# reached every site the same way -- "caught as its classed condition from the
+# reducer called directly". The three sites whose fit IS robust (`gen_ssa0`,
+# `gen_se_zero`, `gen_resample_degenerate`) stay end-to-end above and below.
 
+test_that("the classical F-pivot abort names no method its sweep condemned (AC3)", {
   # Sweep verdict, gen_mse0 at classical_guard_observed(): montecarlo usable
   # 0/3, and no other shipped method is usable there either.
-  d <- gen_mse0()
+  ss <- classical_oneway_ss(split(gen_mse0()$score, gen_mse0()$subject))
+  expect_identical(ss$mse, 0) # the guard's first disjunct, fired exactly
+
   msg <- abort_message(
-    icc(d, score, subject, rater, model = "oneway", ci_method = "searle")
+    classical_guard_observed(ss, "SEARLE exact-F", rlang::current_env())
   )
 
   expect_match(msg, "interval is undefined for this data", fixed = TRUE)
@@ -193,22 +202,24 @@ test_that("the classical F-pivot abort names no method its sweep condemned (AC3)
 })
 
 test_that("the bootstrap refit-convergence abort names no method its sweep condemned (AC4)", {
-  skip_if_not_installed("glmmTMB")
-
   # Sweep verdict, gen_mse0 at bootstrap_ci()'s refit guard: montecarlo usable
   # 0/6. The old text also asserted a single cause ("near a variance boundary or
   # the design is too small") that the sweep's jitter cells contradict.
-  d <- gen_mse0()
+  #
+  # The guard counts refits whose draws are non-finite, so a stub engine whose
+  # `simulate_refit` returns all-NA draws fires it deterministically -- what the
+  # message says is the subject here, not how the draws came to be NA.
+  stub <- list(
+    simulate_refit = function(n, seed = NULL) {
+      matrix(NA_real_, nrow = 2L, ncol = n)
+    }
+  )
   msg <- abort_message(
-    icc(
-      d,
-      score,
-      subject,
-      rater,
-      model = "oneway",
-      ci_method = "bootstrap",
+    bootstrap_ci(
+      stub,
+      estimands = list(list(divisor = 1)),
       boot_samples = 99L,
-      seed = 1
+      call = rlang::current_env()
     )
   )
 
@@ -247,8 +258,6 @@ test_that("every touched degeneracy guard keeps its condition class (AC6)", {
   sites <- list(
     list(d = gen_ssa0(), m = "npbootstrap"),
     list(d = gen_se_zero(), m = "npbootstrap"),
-    list(d = gen_mse0(), m = "searle"),
-    list(d = gen_mse0(), m = "bootstrap"),
     list(d = gen_resample_degenerate(), m = "npbootstrap")
   )
   for (s in sites) {
@@ -268,4 +277,22 @@ test_that("every touched degeneracy guard keeps its condition class (AC6)", {
       class = "intraclass_singular_fit"
     )
   }
+
+  # The two `gen_mse0` guards, at their reducers (see AC3/AC4 above for why).
+  ss <- classical_oneway_ss(split(gen_mse0()$score, gen_mse0()$subject))
+  expect_error(
+    classical_guard_observed(ss, "SEARLE exact-F", rlang::current_env()),
+    class = "intraclass_singular_fit"
+  )
+  expect_error(
+    bootstrap_ci(
+      list(simulate_refit = function(n, seed = NULL) {
+        matrix(NA_real_, nrow = 2L, ncol = n)
+      }),
+      estimands = list(list(divisor = 1)),
+      boot_samples = 99L,
+      call = rlang::current_env()
+    ),
+    class = "intraclass_singular_fit"
+  )
 })
