@@ -1,6 +1,6 @@
 # M102: A registered claims ledger, and the CI checker that re-derives it
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -191,6 +191,8 @@ candidate row, whose subject is M101's messages.
 - 2026-08-03: amendment gate, AC1 — "Every command shape the checker supports is listed in the docstring and runs with `python3` and the runner's POSIX utilities alone — the `check-references` job has no R and no network, and no shape runs `git`". Approved by the maintainer at the pass-5 gate, answering O25/B1: pass 3 deleted the `git-grep` shape, so the committed clause described a shape set that no longer exists. Operative content unchanged — the descriptive aside is corrected to the shipped four shapes. The T3 work-log line naming five shapes stands as written: it was true on 2026-08-02 and is history.
 - 2026-08-03: repo-wide sweep for the withdrawn history-reading guarantee found a SEVENTH site the pass-4 review did not name — `refused_hits()`'s own docstring asserted "a command that cannot run git cannot read history, whatever its flags spell", the withdrawn claim inside the function implementing the rule. Fixed with the six. Sweep command: `grep -rn -i "history-free\|inexpressible\|no shell\|without a shell\|reads no history\|cannot read history" --include="*.py" --include="*.md" --include="*.yaml" .` excluding `cairn/legacy/`; every remaining hit is history (superseded rule 9, work logs, review sections) or the ROADMAP stamp, which describes the withdrawal correctly.
 - 2026-08-03: dangling-id check over the whole repo confirmed the six's scope and added nothing. Ids referenced but not defined here: `D-024`, `D-025`, `D-045`, `D-050`, `D-055`, `D-090`, `IP4`. Of these only the checker's `D-045` and `IP4` were live, unqualified and fixable — `D-024`/`D-090`/`D-025` are already written as cairn's, and `D-050`/`D-055` sit in a work log and an archive summary, both history.
+
+- 2026-08-03: pass-5 gate — all five `data-raw` checkers pass in both check and self-test modes, `cairn_validate` all checks passed with the dangling-id advisory UNCHANGED at 321 (the two amendments introduce no new unresolved token) and the two known WARNs, `air format --check .` clean. No `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION` path is touched by this pass, so no R-visible content changed; review re-runs AC9 fresh. Status -> review.
 
 ## Decisions
 
