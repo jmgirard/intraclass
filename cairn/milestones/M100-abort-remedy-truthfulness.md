@@ -2,10 +2,10 @@
 
 - **Status:** blocked
 - **Priority:** normal
-- **Depends on:** M102
+- **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP6, GP7
-- **Branch/PR:** —
+- **Branch/PR:** `m100-abort-remedy-truthfulness` / https://github.com/jmgirard/intraclass/pull/108 (draft)
 
 ## Goal
 
@@ -110,6 +110,9 @@ returns an interval, only message text changes.
 - 2026-08-01: plan gate chose rewriting static message text over splicing M93's runtime `boundary_method_hint()` into these sites because M93 T1 measured the bootstrap site 0/90 at the boundary and every candidate method aborting on the degenerate data that does reach it, so the machinery would emit nothing; falsified by a measured trigger dataset where some shipped `ci_method` returns a usable interval.
 - 2026-08-01: plan gate chose a ROADMAP candidate row over a follow-on milestone for the ledger + CI checker, at the user's direction.
 - 2026-08-01: criteria audit ([O], fresh context) returned six findings; five fixed before the gate — scope narrowed to reducer-stage degeneracy aborts (the `icc()`-body fences have no reducer, so the draft AC2 was unsatisfiable there), the invented three-way outcome classification replaced by the shipped `boundary_interval_usable()`, AC4's vacuous "each rewritten abort" quantifier bound to the audited set, the rewritten remedy required to stay actionable (#8/GP1) rather than merely losing a bullet, and AC6's rule scoped to static text so it cannot contradict D-018's runtime route. The sixth (evidence bar) went to the gate as a question.
+- 2026-08-03: mirror catch-up by /milestone — ROADMAP carries `Depends on: —` for this milestone (M102 discharged its blocker at M102 done, 2026-08-03) while this header still read M102; ROADMAP wins, so the header is aligned. Bookkeeping only, no work performed.
+- 2026-08-03: git-reconciliation catch-up by /milestone — branch `m100-abort-remedy-truthfulness` and draft PR #108 (opened 2026-08-02) existed with this header reading `Branch/PR: —`; header now records both. Bookkeeping only, no work performed.
+- 2026-08-03: blocker recorded by /milestone — status has been `blocked` since D-021 (2026-08-03) barred records-verification milestones without a trigger in what the package computes; this milestone resumes only once it names the wrong user-facing behaviour motivating it, otherwise it is dropped and its content folds into the milestone that next touches these abort paths. Bookkeeping only, no work performed.
 
 ## Decisions
 

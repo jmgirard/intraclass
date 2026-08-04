@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-03 (M102 done — the claims ledger and its CI checker ship; M95 rotates out of terminal retention and the registered figure moved with it. M100 and M101 must each name the wrong user-facing behaviour motivating it before resuming, per D-021's door.)_
+_Last hygiene check: 2026-08-03 (audit pass: M100's header mirror aligned to this table's `Depends on: —`, its branch + draft PR #108 recorded, and its D-021 blocker logged. All gate checks green; nothing in flight. M100 and M101 still need a wrong user-facing behaviour named before resuming, per D-021's door.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
