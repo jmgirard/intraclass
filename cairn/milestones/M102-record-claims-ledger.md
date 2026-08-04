@@ -194,6 +194,8 @@ candidate row, whose subject is M101's messages.
 
 - 2026-08-03: pass-5 gate — all five `data-raw` checkers pass in both check and self-test modes, `cairn_validate` all checks passed with the dangling-id advisory UNCHANGED at 321 (the two amendments introduce no new unresolved token) and the two known WARNs, `air format --check .` clean. No `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION` path is touched by this pass, so no R-visible content changed; review re-runs AC9 fresh. Status -> review.
 
+- 2026-08-03: pass-5 CI green on `ddb7edf` — all nine checks pass; `check-references` in 25s (run 30864304764, job 91852713954), so both M102 steps run against the amended docstring and the corrected `lint.yaml` comment on the depth-1 checkout.
+
 ## Decisions
 
 ## Review
