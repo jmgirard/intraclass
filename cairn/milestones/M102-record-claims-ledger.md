@@ -42,7 +42,7 @@ candidate row, whose subject is M101's messages.
       network, and no shape runs `git`; `--self-test` PARSES that list and asserts SET equality with the
       shape ids the code dispatches on, so a docstring shape with no code and a
       code shape with no docstring line each exit non-zero.
-- [ ] AC2 Refusal is decided by one test — `argv[0] == "git"` — so every `git`
+- [x] AC2 Refusal is decided by one test — `argv[0] == "git"` — so every `git`
       command is refused whatever its flags spell (D-020 Amendment 1 rule 1), the
       enumerated history-dependent forms (a `log`/`blame`/`rev-list`/`show`
       subcommand, a `<rev>..<rev>` range, a ref other than `HEAD`) only naming the
@@ -195,6 +195,8 @@ candidate row, whose subject is M101's messages.
 - 2026-08-03: pass-5 gate — all five `data-raw` checkers pass in both check and self-test modes, `cairn_validate` all checks passed with the dangling-id advisory UNCHANGED at 321 (the two amendments introduce no new unresolved token) and the two known WARNs, `air format --check .` clean. No `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION` path is touched by this pass, so no R-visible content changed; review re-runs AC9 fresh. Status -> review.
 
 - 2026-08-03: pass-5 CI green on `ddb7edf` — all nine checks pass; `check-references` in 25s (run 30864304764, job 91852713954), so both M102 steps run against the amended docstring and the corrected `lint.yaml` comment on the depth-1 checkout.
+
+- 2026-08-03: review pass 5 IN PROGRESS (honest checkpoint, not a verdict) — `main` unmoved, PR #109 head `05866f6`. Fresh evidence recorded for AC1-AC7 and AC2's box ticked: 21 git spellings all refused with a non-git control untouched, and the docstring now states both disclaimer channels (`.git/` x3) against `a946df1`'s zero, which was the pass-4 gate failure. Consistency gate clean — `cairn_validate` all checks passed, dangling id tokens UNCHANGED at 321. `lintr::lint_package()` 0 lints, `air format --check .` clean, `devtools::document()` no diff. Still outstanding at this checkpoint: the R suite and `devtools::check` (AC9), CI on this head (AC8), and the [O] diff-bug and [S] blame-history lenses; the [S] prior-review lens has reported zero findings with its GitHub probe `[]` a fifth time.
 
 ## Decisions
 
@@ -770,3 +772,66 @@ which passes 1–3 were. The composition rule leaves (a)'s standard remedy in fo
 no re-plan or split having been spent on M102 — the pass-3 disposition was a park,
 and the 2026-08-03 return was an amendment. The disposition goes to the
 maintainer.
+
+**Review pass 5 — 2026-08-03 (after the six pass-4 findings were fixed in
+place).** PR #109, head `05866f6`; `main` unmoved (`git rev-list --count
+HEAD..origin/main` = 0), so no merge-in was needed and this evidence is not
+stale. The maintainer directed the fix in place rather than the `/milestone-plan`
+routing thrash trigger (a) prescribes — a logged override, recorded on the
+2026-08-03 work-log line. All figures below are from commands run at this commit.
+
+**AC2 — MET, both halves, for the first time.** The refusal machinery: 21 `git`
+spellings driven through `refused_hits()` at this commit, including every escape
+that defeated passes 1-3 — `git log --oneline`, `git blame`, `git show HEAD`,
+`git rev-list --count main..HEAD`, pass-2's `git grep -c -e -- main -- f`,
+`HEAD~1`, `HEAD^`, the raw SHA `53dde1c`, the tag `v0.1.0`, `upstream/main`, a
+bare `some-branch`, plain `HEAD`, `git -C dir grep`, `git --no-pager log`,
+`git describe`, `git ls-tree v0.1.0`, `git status`, bare `git`, `-m 5`, a bundled
+`-ce`, and `-e` before `--`. All 21 refused, none escaping; a non-git control
+(`grep -c x f`) is untouched. Four forms are stated, four samples construct them,
+`refused-parity` holds 4/4. The disclaimer clause, which is what failed at pass
+4: the docstring now states BOTH channels AC2 enumerates — `.git/` appears three
+times in it against `grep -n "\.git" data-raw/check-record-claims.py` returning
+NO match at `a946df1`, and the shell channel is stated with it under "Two
+channels are open through an ACCEPTED shape". D-020 Amendment 2 states both
+(three `.git/` mentions). The pass-4 measurement is reversed by its own command.
+
+**AC1 — met on the amended text.** `SHAPES` is exactly `{awk, grep, ls, python3}`
+and no shape runs `git`, which is what the amended clause now says; the committed
+text at pass 4 still named `git-grep`, deleted at pass 3. `COLUMNS` parses out of
+the docstring to the eleven named columns in order. Imports are `glob`, `os`,
+`re`, `shlex`, `subprocess`, `sys`, `tempfile` — stdlib only. Grammar,
+`rc-mismatch`, `match-mismatch`, `timeout` and both directions of `shape-parity`
+each fire on constructed input via `--self-test`.
+
+**AC3 — re-verified.** `python3 data-raw/check-record-claims.py` → `OK: 5
+registered claim(s) re-derived, 0 failure(s)`. The five rows cover all four
+dispatched shapes and carry the four named figures, every expected value exact:
+the `data-raw` checker inventory as five literal paths; the `lint.yaml`
+invocation count 8 (unchanged by this pass, which edited a comment and no
+invocation); the three κ_m worst-downward-steps `0.90 -0.046` / `0.95 -0.068` /
+`0.99 -0.162`; and the ROADMAP's five terminal rows in order `M99 M98 M97 M96
+M95`.
+
+**AC4 — re-verified, and the new amendment does not disturb it.** `parse_scope`
+reads exactly `cairn/ROADMAP.md`, `cairn/LESSONS.md`, `cairn/DESIGN.md`,
+`data-raw/README.md` out of D-020 rule 4 and equals the checker's own `SCOPE`;
+`read_d_entry()` now takes in three amendments (the entry text holds seven
+`Amendment` mentions) and the scope still parses from the base entry unchanged.
+Five live citations across the scope, one per row, each resolving; both
+directions red on constructed input.
+
+**AC5 — re-verified.** The one `absence` row certifies that `cairn/DECISIONS.md`
+and `cairn/milestones/archive/` carry no claim citation — run at this commit it
+exits 1 against its expected 1. Its falsifier points the same regex at the
+committed `data-raw/record-claims-fixtures/citation-present.md` and exits 0,
+failing the row's own expectation, which is the property AC5 requires.
+
+**AC6 — re-verified.** `--probes` reports all 16 routes DETECTED, and
+`--self-test` is green: every probe drives its own route against a passing
+control, and each of the 16 route excisions silences exactly its own probe.
+
+**AC7 — re-verified, including the two new amendments.** D-020's rule list still
+parses with every named route id present, `rule-probe-unknown` fires on a rule
+naming an absent probe, and the checker passes with Amendment 3 in the read —
+that amendment adds no numbered rule and so owes no probe token.
