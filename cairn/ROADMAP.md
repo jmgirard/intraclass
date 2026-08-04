@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-03 (audit pass, then the D-021 disposition: M100 and M101 both dropped and archived, their measured abort-remedy defect routed to a hotfix; M97/M96 rotated out of terminal retention; the runtime-hint candidate corrected — its falsifier fired — and the `burch_ci()` unclassed-error finding spun out as a candidate.)_
+_Last hygiene check: 2026-08-03 (M100/M101 dropped per D-021 and their measured abort-remedy defect shipped as a hotfix, PR #110: three degeneracy messages no longer name a ci_method measured not to work there. Terminal rows re-registered in the claims ledger; M84 lesson corrected — its "the fit crashes first" is platform-dependent.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
