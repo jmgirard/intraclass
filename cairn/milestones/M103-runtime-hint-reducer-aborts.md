@@ -1,6 +1,6 @@
 # M103: Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -164,6 +164,8 @@ error) → ROADMAP candidate row.
 - 2026-08-04: reconciling M93's suite with the two new behaviours took four rounds and is the milestone's main churn. Four distinct causes, each a real gap rather than a rename: its leak guard's seed exception was keyed on the `npbootstrap` method rather than on the seed mention, so the new bullet form fell to the token-free branch; its distinct-rendering pin went 5 -> 6, which is that pin doing its job; two sites matched a method by bare substring, and `boot_samples` contains "mpl"; and its "named == everything usable" invariant is no longer the contract now that bullets are tiered.
 
 - 2026-08-04: T12 gate clean, status -> review (second time). Suite at `NOT_CRAN=true CI=true`: 5756 pass, 0 fail, 0 error, 23 skip (5603 before this return). `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0/0/0; `lintr` 0; `air format --check`, `document()`, `cairn_validate` all clean; `data-raw/check-abort-remedy-verdicts.R` 52 cells, 0 disagreements. The MPL doc-claims checker caught the `@details` rewrite in both directions -- two ledger rows orphaned and four claims uncovered -- and its four replacement `out` rows bind; checker and `--self-test` green.
+
+- 2026-08-04: review pass 2 FAILED (second defect return), status -> in-progress. Two actioned findings demonstrate a criterion failing: AC6's test extracts `seed` from the message with a digits pattern, but the seeded bullet says "run under your `seed`" with no digits, so the re-run is UNSEEDED and AC6's "the promised call is the verified one" is not what it tests; and AC2's only evidence for the `bootstrap`/`montecarlo` rows now compares `boundary_method_usable()` (screened at 25, capped at 199) against a fixture column measured at 999, so "0 disagreements" is coincidence rather than the designed identity. Also actioned: a NEWS sentence false in the seeded case, and a code comment still asserting the withholding this milestone superseded. Thirteen further findings logged below the bar. The recurring shape across both passes is prose -- comments, NEWS, `@details`, evidence lines -- drifting from the code it describes.
 
 ## Decisions
 
@@ -384,3 +386,59 @@ milestone). F5 and F11 are defects in what the package does for its users,
 scored 95, so the M130 return floor is met. Both sit outside every acceptance
 criterion — no criterion covers abort latency or the default-path hint — which
 is itself the coverage lesson to carry into the fix.
+
+### Second pass, 2026-08-04 (PR #111, at d89024f)
+
+Criterion evidence re-run fresh: `test-reducer-abort-hint.R` 158 assertions, 0
+failures, covering AC1-AC9 (AC8 3 cells all under 1.0 s; AC9 the default call
+naming `bootstrap`). Full suite 5756 pass / 0 fail / 0 error. `R CMD check`
+0/0/0; `lintr` 0; `air`, `document()`, `pkgdown`, `cairn_validate` clean; the
+verdict checker 52 cells, 0 disagreements. CI on #111: `lint`,
+`check-references`, `format-check`, `pkgdown` green; the platform matrix and
+`test-coverage` still running at the gate.
+
+Three fresh-context reviewers, then a scorer holding the diff and the plan. 17
+candidate findings; 4 scored >= 80. Two of them demonstrate an acceptance
+criterion failing, so the M130 return floor is met again.
+
+**Actioned (>= 80).** Both >= 90-adjacent ones re-confirmed by this session's own
+commands rather than accepted from the reviewer:
+
+- **G1 (93) — AC6 does not test the promised call.** When the caller supplied a
+  seed the bullet reads "run under your `seed` and `boot_samples = 199`" with no
+  `seed = <digits>`, so the test's `promised_args(msg, "seed")` returns `NULL`
+  and it re-runs `icc()` UNSEEDED. AC6 requires the re-run to be the promised
+  call; an unseeded fresh draw is the very thing M97's seed discipline exists to
+  prevent, and it makes the assertion stochastic. The first-pass evidence line
+  claiming it ran "at the named seed" was wrong.
+- **G5 (85) — AC2's evidence for the two new rows compares two experiments.**
+  `data-raw/check-abort-remedy-verdicts.R` is AC2's only cover for `bootstrap`
+  and `montecarlo`, and it now checks `boundary_method_usable()` (screened at 25,
+  capped at 199) against a fixture column measured by a full `icc()` at 999. The
+  "0 disagreements" is coincidental agreement, not the designed identity. Its
+  header's cost figures describe a run that no longer happens.
+- **G2 (80)** — `NEWS.md` claims a `bootstrap` suggestion "names the `seed` and
+  `boot_samples` the trial ran at". False whenever the caller set a seed, where
+  the message names only `boot_samples`.
+- **G7 (80)** — `R/icc.R:2129` still says the engine-fit tier "is deliberately
+  withheld on the Monte-Carlo default path", left from the superseded decision,
+  contradicting both the code and a correct comment 100 lines below.
+
+**Logged, not actioned (13 below 80):** G3 (76) `@details` calls `montecarlo`
+"model-refitting" and tier 1 "closed form", both false; G4 (78) `@details` says
+"every interval method" but `mpl` splices no hint; G6 (76) the
+`boundary_method_usable()` header now reads as asserting the engine rows use the
+caller's own count, which the cap overturned; G16 (76) three of AC3's six cases
+are vacuous on `gen_mse0` and tier-2 self-exclusion is untested; G14 (78) 199 is
+a bootstrap-test convention, not an interval one, and the measured 199-vs-999
+upper limit differs ~4%; G13 (68) the cap has no floor, so a caller at
+`boot_samples = 20` is promised a 20-refit bootstrap; G15 (68) the rewritten
+hotfix test would mis-fail if tier 2 were ever named there; G12 (66) the
+two-method bullet says "That run" of two runs and attributes `boot_samples` to
+`montecarlo`; G9 (60) the sweep helper models the cap but not the screen, a
+latent false-failure; G11 (60) the rendering-count comment understates how many
+engine-tier forms exist; G8 (45) AC8's wall-clock threshold may flake on slower
+runners; G17 (40) `invoked` has a default; G10 (38) the leak guard's re-keying.
+
+**Gate outcome: returned to `in-progress`** (second defect return). One further
+return trips the thrash rule.
