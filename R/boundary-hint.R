@@ -114,6 +114,54 @@ boundary_interval_usable <- function(ci, divisor, n0) {
 # concrete seed, and would consume it when handed `NULL`.
 hint_verify_seed <- 1L
 
+# The resample count the CHEAP NEGATIVE SCREEN runs at (M103 review, F11).
+#
+# Verification costs what the method costs, and `bootstrap` costs a refit per
+# resample: 27 s at the shipped 999 on a 6x3 cell. That is spent inside an abort
+# message, and it is spent whether or not the method turns out to help -- which
+# made a previously instant `searle` abort take 25.6 s to print a message with no
+# bullet in it at all. The classical guard is the worst cell by construction:
+# `searle_ci()` and `burch_ci()` share one guard on the same `ss`, so whenever one
+# aborts the other does, and the cheap tier there is empty by construction rather
+# than by data.
+#
+# So the expensive candidate is screened first at this count, and abandoned if the
+# screen fails. Measured on 6x3 cells: a hopeless dataset (`gen_mse0`) is rejected
+# in 0.69 s instead of 27.20 s, and a dataset where `bootstrap` works (`gen_ssa0`)
+# passes the screen in 0.45 s and then pays the full 18.02 s.
+#
+# The screen can only ever cause SILENCE, never a name: nothing it accepts is
+# named until the full run at the caller's own count has also succeeded. So it
+# cannot make a bullet less true -- the promise M97 settled, that the verified run
+# is the promised one, is untouched. What it can do is stay quiet where a full run
+# would have succeeded and the screen's smaller one did not, which is the
+# conservative direction and the one an abort path should fail in.
+hint_screen_samples <- 25L
+
+# The resample count the FULL verification of `bootstrap` is capped at.
+#
+# The screen above bounds the case where nothing works. This bounds the case
+# where something does: a candidate that passes the screen still has to be run in
+# full before it may be named, and at the shipped 999 that is ~18 s inside an
+# abort message -- on the DEFAULT path, the most common call in the package.
+#
+# So the full run is capped here, and the bullet NAMES the count it verified at.
+# That keeps M97's rule rather than bending it: the rule is that the promised
+# call is the verified one, and a bullet reading
+# `ci_method = "bootstrap", seed = 1, boot_samples = 199` promises exactly the
+# run that was made. What changes is which call is recommended, not whether the
+# recommendation was earned -- and 199 resamples is a serviceable percentile
+# bootstrap in its own right, which is why the cap sits here rather than at the
+# screen's 25.
+hint_verify_boot_cap <- 199L
+
+# The count `bootstrap` is actually verified at for a caller who passed
+# `boot_samples`: their own value, or the cap, whichever is smaller. A caller
+# already below the cap is verified at their own count and the bullet names it.
+hint_verify_boot_samples <- function(boot_samples) {
+  min(as.integer(boot_samples), hint_verify_boot_cap)
+}
+
 # Run one candidate `ci_method` and report whether EVERY estimand it returns is
 # usable. This NEVER raises and never leaks a condition. The reducers abort by design
 # (`intraclass_unidentified` on a missing score, `intraclass_unsupported` off mpl's
@@ -179,7 +227,9 @@ boundary_method_usable <- function(
           engine,
           estimands,
           conf_level = conf_level,
-          boot_samples = boot_samples,
+          # Capped, and the bullet names what this resolves to -- see
+          # `hint_verify_boot_cap`.
+          boot_samples = hint_verify_boot_samples(boot_samples),
           seed = if (is.null(seed)) hint_verify_seed else seed
         )
       }
@@ -201,6 +251,27 @@ boundary_method_usable <- function(
   )
   if (is.null(run)) {
     return(FALSE)
+  }
+  # Screen the expensive candidate before paying for it (see
+  # `hint_screen_samples`). The recursion terminates immediately: the inner call
+  # runs at `hint_screen_samples`, which fails this same condition.
+  if (
+    identical(method, "bootstrap") && isTRUE(boot_samples > hint_screen_samples)
+  ) {
+    screened <- boundary_method_usable(
+      method,
+      df,
+      estimands,
+      conf_level,
+      n0,
+      seed = seed,
+      boot_samples = hint_screen_samples,
+      engine = engine,
+      mc_samples = mc_samples
+    )
+    if (!screened) {
+      return(FALSE)
+    }
   }
   isTRUE(tryCatch(
     withCallingHandlers(
@@ -252,7 +323,7 @@ boundary_method_usable <- function(
 #      where a fenced method works they add nothing. Where none of tier 1 works
 #      they are the whole point: on zero-between-variance data (`gen_ssa0`)
 #      `bootstrap` is the only shipped method that returns a usable interval at
-#      all, 4 of 4 datasets in `data-raw/abort-remedy-sweep.tsv`.
+#      all, 4 of 4 datasets in `tests/testthat/fixtures/abort-remedy-sweep.tsv`.
 #
 # `invoked` is the `ci_method` the CALLER asked for, and it does two things. It is
 # excluded from both tiers -- a guard that just aborted may not recommend itself,
@@ -320,7 +391,12 @@ boundary_method_hint <- function(
   if (length(tier1)) {
     return(tier1)
   }
-  boundary_engine_hint(usable = usable, contrast = contrast, seed = seed)
+  boundary_engine_hint(
+    usable = usable,
+    contrast = contrast,
+    seed = seed,
+    boot_samples = boot_samples
+  )
 }
 
 # TIER 1 -- the design-fenced opt-in methods. `usable()` carries the run, the
@@ -467,7 +543,12 @@ boundary_fenced_hint <- function(
 # draws and the bullet stays seed-free; with no caller seed the verification ran
 # under `hint_verify_seed`, and the bullet names it so the promised call is the
 # verified one.
-boundary_engine_hint <- function(usable, contrast, seed = NULL) {
+boundary_engine_hint <- function(
+  usable,
+  contrast,
+  seed = NULL,
+  boot_samples = 999L
+) {
   named <- Filter(usable, c("bootstrap", "montecarlo"))
   if (!length(named)) {
     return(character(0))
@@ -494,15 +575,35 @@ boundary_engine_hint <- function(usable, contrast, seed = NULL) {
       " cannot: "
     )
   }
+  # `boot_samples` means DIFFERENT things to different methods -- subject
+  # resamples to `npbootstrap`, model refits to `bootstrap` -- so a cross-method
+  # recommendation may not leave it implicit (M103 review, F8). It is also the
+  # count the verification was capped at, which is rarely the caller's own. Both
+  # reasons point the same way: the `bootstrap` bullet always names the count it
+  # was verified at, so the call it promises is the call that was run.
+  spec <- character(0)
+  if ("bootstrap" %in% named) {
+    spec <- paste0(
+      "{.code boot_samples = ",
+      hint_verify_boot_samples(boot_samples),
+      "}"
+    )
+  }
   tail <- if (is.null(seed)) {
     paste0(
       ". That run used {.code seed = ",
       hint_verify_seed,
-      "}; pass the same seed to reproduce it, as an unseeded call draws \\
-       differently and can fail on a small design."
+      "}",
+      if (length(spec)) paste0(" and ", spec) else "",
+      "; pass the same to reproduce it, as an unseeded call draws differently \\
+       and can fail on a small design."
     )
   } else {
-    ", run under your {.code seed}."
+    paste0(
+      ", run under your {.code seed}",
+      if (length(spec)) paste0(" and ", spec) else "",
+      "."
+    )
   }
   c(i = paste0(lead, paste(blurb[named], collapse = " and "), tail))
 }

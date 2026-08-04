@@ -81,6 +81,14 @@ error) → ROADMAP candidate row.
 - [x] AC7 `data-raw/sweep-abort-remedies.R` and its committed result land on the
       default branch with provenance naming their origin, and every figure AC2's
       test asserts is read from that result rather than transcribed.
+- [ ] AC8 No degeneracy abort that ultimately names no method costs materially
+      more than the guard that raised it. A test measures `icc()` on `gen_mse0`
+      data for `ci_method = "searle"`, `"burch"` and the default, and asserts
+      each abort returns in under 5 seconds.
+- [ ] AC9 The default `icc()` call receives the same verified naming as an
+      opt-in one. A test asserts that on `gen_ssa0` data the default call's
+      abort names `ci_method = "bootstrap"`, and that re-running with that
+      string returns an interval `boundary_interval_usable()` accepts.
 
 ## Coverage
 
@@ -91,6 +99,8 @@ error) → ROADMAP candidate row.
 - AC5 → T6
 - AC6 → T3, T6
 - AC7 → T1
+- AC8 → T8, T11
+- AC9 → T9, T11
 
 ## Tasks
 
@@ -111,6 +121,17 @@ error) → ROADMAP candidate row.
 - [x] T7 NEWS, `@details`, and the gate: suite at `NOT_CRAN=true CI=true`,
       `devtools::check()`, `lintr`, `air format --check`, all `data-raw`
       checkers.
+- [x] T8 Bound the expensive candidate with a cheap negative screen: verify
+      `bootstrap` at a small resample count first and abandon it on failure,
+      re-running at the caller's own count before any bullet names it.
+- [x] T9 Give the Monte-Carlo default path the engine-fit tier, superseding the
+      withholding decision; reconcile M93's silence tests.
+- [x] T10 Review follow-ups: the bullet names `boot_samples` when it is not the
+      default (F8); hedge the `@details` naming claim (F7); repair three stale
+      fixture paths (F19); stop pinning a glmmTMB convergence count (F20).
+- [x] T11 Tests: AC8 abort latency, AC9 the default path end to end, and the
+      unseeded self-exclusion case AC3's cases never reach (F1).
+- [ ] T12 Re-run the gate and return to review.
 
 ## Work log
 
@@ -136,6 +157,12 @@ error) → ROADMAP candidate row.
 
 - 2026-08-04: review gate FAILED (first defect return), status -> in-progress. Two confirmed user-facing defects, both outside every acceptance criterion: (F5) the milestone's own withholding decision is falsified by its own AC6 fixture — on `gen_ssa0` the DEFAULT `icc()` call aborts with no bullet while `ci_method = "bootstrap"` returns a usable interval, so the motivating benefit never reaches the default path and the Decisions entry's "holds no evidence either way" is false; (F11) `searle_ci()`/`burch_ci()` share one guard on identical `ss`, so tier 1 there is empty by construction and every classical degeneracy abort now pays a 999-refit bootstrap — measured 25.6 s to emit a message with no bullet, against instant before this branch. Also actioned: F8 (`boot_samples` means different things across methods, so the promised retry is not the verified run), F7 (unconditional `@details` claim that an error names a method, false in 3 of 6 measured cases), F1 (AC3's test green with self-exclusion deleted). AC1-AC7 evidence stands as recorded; the gap is in what the criteria cover.
 
+- 2026-08-04: return gate chose, with recommendations, (1) bounding the expensive candidate with a cheap negative screen rather than dropping it or accepting the wait, (2) giving the Monte-Carlo default path the engine-fit tier, and (3) adding AC8 and AC9 so both review defects are pinned by criteria rather than by hand. Plan amendment (substantive): AC8/AC9 added with Coverage rows and tasks T8-T12; plan-owned body 135/149 after the amendment.
+- 2026-08-04: T8/T9 measured. Screen at 25 refits: a hopeless dataset is rejected in 0.69 s where the full run took 27.20 s, and `gen_ssa0` passes it in 0.45 s. Default path on `gen_ssa0` now names `bootstrap`; `searle` on `gen_mse0` returns in 0.93 s against 25.6 s at the failed gate.
+- 2026-08-04: second cost gate. The T9 change made the M93 hint suite ~4x slower (three files ~55 min against ~10), because every default-path abort now verifies. Chose capping the full `bootstrap` verification at 199 resamples and NAMING that count in the bullet, over leaving it uncapped or making the old fixtures cheap: the promise stays exactly as strong (the call the message gives is the call that ran), while the default abort drops 20.5 s -> 4.36 s. Falsified by 199 resamples proving too few to be worth recommending.
+- 2026-08-04: T10 done — the bullet names `boot_samples`; the `@details` naming claim is hedged and its cost sentence rewritten; three stale fixture paths repaired; the AC5 pin no longer hard-codes a glmmTMB convergence count.
+- 2026-08-04: reconciling M93's suite with the two new behaviours took four rounds and is the milestone's main churn. Four distinct causes, each a real gap rather than a rename: its leak guard's seed exception was keyed on the `npbootstrap` method rather than on the seed mention, so the new bullet form fell to the token-free branch; its distinct-rendering pin went 5 -> 6, which is that pin doing its job; two sites matched a method by bare substring, and `boot_samples` contains "mpl"; and its "named == everything usable" invariant is no longer the contract now that bullets are tiered.
+
 ## Decisions
 
 ### 2026-08-04: remedy bullets are tiered by cost, and the fenced methods go first
@@ -160,7 +187,32 @@ works.
 **Falsifier.** A case where a fenced method is usable but materially worse advice
 than an engine-fit one, so that returning early recommends the weaker method.
 
-### 2026-08-04: the engine-fit tier is withheld from the Monte-Carlo default path
+### 2026-08-04 (supersedes the withholding entry below): the default path gets the engine-fit tier, and verification is bounded at both ends
+
+**Context.** The entry below withheld the engine-fit tier from the Monte-Carlo
+default path and named its falsifier: a dataset where that default aborts and
+`ci_method = "bootstrap"` returns a usable interval. It asserted the sweep grid
+held no such case. The M103 review found one, and it is this milestone's own AC6
+fixture: on `gen_ssa0(6, 3)` the default aborts with "49% of draws were
+non-finite" and `bootstrap` returns a usable interval. That assertion was false
+when written, and checking it would have cost one command.
+
+**Decision.** The default path builds its hint with the engine fit like every
+other guard. The cost that motivated withholding is bounded instead, at both
+ends: a candidate is screened at 25 resamples before the full run, and the full
+run is capped at 199 with the bullet naming that count.
+
+**Why the promise survives the cap.** M97's rule is that the promised call is the
+verified one, not that verification runs at any particular size. A bullet reading
+`ci_method = "bootstrap"`, `seed = 1`, `boot_samples = 199` promises exactly the
+run that was made. Measured: the default abort on `gen_ssa0` goes 20.5 s -> 4.36 s
+and still names `bootstrap`; a `searle` abort on `gen_mse0`, which names nothing,
+goes 25.6 s -> 0.93 s.
+
+**Falsifier.** 199 resamples proving too few for the recommendation to be worth
+making — a percentile bootstrap that a user should not be pointed at.
+
+### 2026-08-04 (SUPERSEDED, see above): the engine-fit tier is withheld from the Monte-Carlo default path
 
 **Context.** The hint is shared by all six guards. On the default path
 `montecarlo` self-excludes, so what the new tier would add there is `bootstrap`.

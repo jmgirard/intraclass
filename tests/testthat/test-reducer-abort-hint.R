@@ -86,6 +86,21 @@ abort_message <- function(expr) {
 
 first_line <- function(msg) strsplit(msg, "\n", fixed = TRUE)[[1]][[1]]
 
+# The arguments a bullet PROMISES, read out of the message itself rather than
+# written down here. A test that re-runs the author's idea of the promised call
+# cannot catch a message that promises something else, which is the whole failure
+# mode "the promised call is the verified one" exists to prevent.
+promised_args <- function(msg, name) {
+  hit <- regmatches(
+    msg,
+    regexpr(paste0(name, " = [0-9]+"), msg)
+  )
+  if (!length(hit)) {
+    return(NULL)
+  }
+  as.integer(sub(paste0(name, " = "), "", hit))
+}
+
 read_sweep <- function() {
   path <- test_path("fixtures", "abort-remedy-sweep.tsv")
   utils::read.delim(path, comment.char = "#", stringsAsFactors = FALSE)
@@ -463,10 +478,18 @@ test_that("no usable candidate leaves the shipped message untouched (AC5)", {
   #
   # The expected text is frozen at 703fc1b. The resample guard is outside this
   # criterion by construction: `gen_mse0` never reaches it.
+  # The bootstrap guard reports a glmmTMB CONVERGENCE COUNT, which is a property
+  # of the optimizer on this platform's BLAS rather than of the message. Pinning
+  # the integer would make the pin a flake candidate on another platform, so the
+  # count alone is normalized to `<n>` on both sides and every other byte is
+  # pinned as-is.
   df <- gen_mse0(6, 3)
+  normalize_count <- function(x) {
+    sub("only [0-9]+ of 999 refits", "only <n> of 999 refits", x)
+  }
   expected <- list(
     bootstrap = paste0(
-      "The bootstrap interval could not be computed: only 55 of 999 refits ",
+      "The bootstrap interval could not be computed: only <n> of 999 refits ",
       "converged.\n",
       "i A refit counts as converged only when every variance component ",
       "it returned is finite.\n",
@@ -497,7 +520,131 @@ test_that("no usable candidate leaves the shipped message untouched (AC5)", {
       ci_method = m,
       seed = 1L
     ))
-    expect_identical(msg, expected[[m]], info = m)
+    expect_identical(normalize_count(msg), expected[[m]], info = m)
+  }
+})
+
+# --- AC3 (cont.): the case self-exclusion is actually load-bearing ------------
+
+test_that("self-exclusion, and not the data, is what silences a method (AC3)", {
+  skip_on_cran()
+  # Every AC3 case above passes `seed = 1L` and lands on data where the invoked
+  # method is not a candidate anyway, so all six stay green with self-exclusion
+  # deleted (M103 review, F1). This test isolates the term itself: one dataset,
+  # two hints differing ONLY in `invoked`.
+  #
+  # The case is real rather than contrived. With no caller `seed` the failing run
+  # drew from the ambient stream while verification re-runs under the fixed
+  # `hint_verify_seed`, so a stochastic method can verify on the very data it
+  # just aborted on -- and without the exclusion the message would recommend the
+  # call that had just failed.
+  set.seed(7)
+  n_s <- 12L
+  n_r <- 3L
+  mu <- stats::rnorm(n_s, 0, 3)
+  df <- data.frame(
+    subject = rep(seq_len(n_s), each = n_r),
+    rater = rep(seq_len(n_r), times = n_s),
+    score = rep(mu, each = n_r) + stats::rnorm(n_s * n_r, 0, 1)
+  )
+  df <- df[-1, ] # unbalanced: the branch where npbootstrap is the candidate
+  hint_for <- function(invoked) {
+    boundary_method_hint(
+      oneway = TRUE,
+      multilevel = FALSE,
+      replicates = FALSE,
+      raters = "random",
+      balanced = FALSE,
+      type = "agreement",
+      type_supplied = FALSE,
+      unit = list("single"),
+      conf_level = 0.95,
+      df = df,
+      estimands = oneway_ests(3),
+      n0 = 3,
+      seed = NULL,
+      boot_samples = 99L,
+      invoked = invoked,
+      # No engine: this isolates tier 1, so the only difference between the two
+      # calls is the exclusion.
+      engine = NULL
+    )
+  }
+  # Invoked as something else, `npbootstrap` verifies and is named...
+  expect_true(any(grepl("npbootstrap", hint_for("montecarlo"), fixed = TRUE)))
+  # ...and invoked as itself, on the same data, it is named by nothing. Deleting
+  # `!identical(method, invoked)` makes these two calls agree, reddening this.
+  expect_length(hint_for("npbootstrap"), 0L)
+})
+
+# --- AC8: an abort that names nothing stays as fast as its guard -------------
+
+test_that("aborts that name no method are not slowed by verification (AC8)", {
+  skip_on_cran()
+  # Verification costs what the method costs, and `bootstrap` costs a refit per
+  # resample. Before the screen, `icc(gen_mse0(6,3), ci_method = "searle")` took
+  # 25.6 s to print a message with no bullet in it: the classical guard's cheap
+  # tier is empty by construction (both classical reducers share one guard on the
+  # same `ss`), so every such abort fell through to a full 999-refit bootstrap
+  # that could not help either. The screen bounds that.
+  df <- gen_mse0(6, 3)
+  for (m in list("searle", "burch", NULL)) {
+    call_args <- list(
+      df,
+      quote(score),
+      quote(subject),
+      quote(rater),
+      model = "oneway"
+    )
+    if (!is.null(m)) {
+      call_args$ci_method <- m
+    }
+    elapsed <- system.time({
+      msg <- abort_message(do.call(icc, call_args))
+    })[["elapsed"]]
+    label <- if (is.null(m)) "default" else m
+    # It named nothing (no method is usable on this data)...
+    expect_false(grepl("ci_method = ", msg, fixed = TRUE), info = label)
+    # ...so it must not have paid a full bootstrap to find that out.
+    expect_lt(elapsed, 5)
+  }
+})
+
+# --- AC9: the default call is hinted on the same terms as an opt-in one -------
+
+test_that("the DEFAULT icc() call gets the same verified naming (AC9)", {
+  skip_on_cran()
+  # The engine-fit tier was withheld from the default path at first, on its cost;
+  # the M103 review found that left the plain call silent on exactly the data the
+  # milestone exists for, while `bootstrap` returns a usable interval on it.
+  df <- gen_ssa0(6, 3)
+  msg <- abort_message(icc(df, score, subject, rater, model = "oneway"))
+  expect_true(grepl('ci_method = "bootstrap"', msg, fixed = TRUE))
+  # `montecarlo` is what aborted, so it is never named here (AC3 holds on the
+  # default path too).
+  expect_false(grepl('ci_method = "montecarlo"', msg, fixed = TRUE))
+
+  # Run exactly what the message promises, with its own named arguments.
+  fit <- icc(
+    df,
+    score,
+    subject,
+    rater,
+    model = "oneway",
+    ci_method = "bootstrap",
+    seed = promised_args(msg, "seed"),
+    boot_samples = promised_args(msg, "boot_samples")
+  )
+  est <- fit$estimates
+  for (i in seq_len(nrow(est))) {
+    expect_true(
+      boundary_interval_usable(
+        list(conf.low = est$conf.low[i], conf.high = est$conf.high[i]),
+        divisor = if (identical(est$index[i], "ICC(1)")) 1 else 3,
+        n0 = 3
+      ),
+      info = est$index[i]
+    )
   }
 })
 
@@ -519,8 +666,9 @@ test_that("the gen_ssa0 abort names bootstrap, and that call delivers (AC6)", {
   ))
   expect_true(grepl("ci_method = \"bootstrap\"", msg, fixed = TRUE))
 
-  # ...and the promise is kept: the same call, on the same data, at the seed the
-  # message names, returns intervals `boundary_interval_usable()` accepts.
+  # ...and the promise is kept: the same call on the same data, at the seed AND
+  # resample count the message itself names, returns intervals
+  # `boundary_interval_usable()` accepts.
   fit <- icc(
     df,
     score,
@@ -528,7 +676,8 @@ test_that("the gen_ssa0 abort names bootstrap, and that call delivers (AC6)", {
     rater,
     model = "oneway",
     ci_method = "bootstrap",
-    seed = 1L
+    seed = promised_args(msg, "seed"),
+    boot_samples = promised_args(msg, "boot_samples")
   )
   est <- fit$estimates
   for (i in seq_len(nrow(est))) {

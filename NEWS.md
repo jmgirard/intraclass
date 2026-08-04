@@ -27,14 +27,15 @@
 * When an interval method aborts on degenerate data, the error now names another
   `ci_method` that works — verified by running it on your data first, so the
   suggestion is a call that was just shown to succeed rather than a guess. This
-  already happened when the default Monte-Carlo interval aborted; it now happens
-  for the `"bootstrap"`, `"searle"`, `"burch"` and `"npbootstrap"` intervals too.
-  It matters most on data with no between-subject variance, where `"bootstrap"`
-  is usually the only method that returns anything usable and previous versions
-  said only "inspect the data". Where nothing works the message is unchanged, and
-  no message ever suggests the method you just asked for. Candidates are tried
-  cheapest first; where only a model-refitting method serves, the error takes as
-  long as that bootstrap to appear.
+  already happened for some of the aborts raised by the default Monte-Carlo
+  interval; it now happens for all of them, and for the `"bootstrap"`,
+  `"searle"`, `"burch"` and `"npbootstrap"` intervals too. It matters most on
+  data with no between-subject variance, where `"bootstrap"` is usually the only
+  method that returns anything usable and previous versions said only "inspect
+  the data". Where nothing works the message is unchanged, and no message ever
+  suggests the method you just asked for. When a suggestion names
+  `ci_method = "bootstrap"` it also names the `seed` and `boot_samples` the trial
+  ran at, so the call you are given is exactly the call that was checked.
 
 * `ci_method = "mpl"` now distinguishes a confidence limit truly at the `[0, 1]`
   boundary from a numerical failure. A boundary endpoint is reported only when

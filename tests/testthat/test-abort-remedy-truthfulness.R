@@ -16,7 +16,7 @@
 #      variance.
 #
 # Provenance of the fixtures and the usability verdicts: the seeded sweep
-# `data-raw/sweep-abort-remedies.R` -> `data-raw/abort-remedy-sweep.tsv`
+# `data-raw/sweep-abort-remedies.R` -> `tests/testthat/fixtures/abort-remedy-sweep.tsv`
 # (210 rows) on branch `m100-abort-remedy-truthfulness`; the generators below are
 # that script's `gen_mse0`, `gen_ssa0`, `gen_se_zero` and
 # `gen_resample_degenerate`. Per-site verdicts are quoted at each test.

@@ -89,7 +89,8 @@
 # (see the provenance note), and since M103 the question it answered no longer has
 # a static answer -- what a guard names now depends on the caller's own data.
 #
-# Writes data-raw/abort-remedy-sweep.tsv (one row per site x dataset x method);
+# Writes tests/testthat/fixtures/abort-remedy-sweep.tsv (one row per site x
+# dataset x method);
 # the re-run command is in the provenance note at the top.
 
 suppressMessages(devtools::load_all(quiet = TRUE))

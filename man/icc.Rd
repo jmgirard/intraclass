@@ -219,16 +219,22 @@ reproduces it exactly) — with no seed set it uses a
 fixed seed the message then names, and an unseeded retry draws fresh resamples
 and can fail where the verified run succeeded, especially on small designs.
 The trial run leaves the session's random-number stream untouched.
-The same holds in reverse. When an opt-in method you asked for aborts on
-degenerate data, its error names a method verified on that same data, by the
-same trial runs and under the same rules — and never the method you asked
-for, which just failed. Data with no between-subject variance is the case
+The same holds in reverse, and on every interval method rather than only the
+default. When a method you asked for aborts on degenerate data, its error
+names a method verified on that same data by the same trial runs and under
+the same rules — or, where no method serves that data, names none, leaving
+the message exactly as it would otherwise read. It never names the method
+you asked for, which just failed. Data with no between-subject variance is the case
 this matters most on: there \code{"bootstrap"} is typically the only method that
 returns anything usable, and it is now named rather than left for you to
 find. Candidates are tried cheapest first, so the two model-refitting
-methods are reached only where no closed form serves this design and data;
-in that case the error message takes as long as a full bootstrap to appear
-(tens of seconds), because that bootstrap is what earned the recommendation.
+methods are reached only where no closed form serves this design and data,
+and the costliest of them is both screened at a small resample count and
+capped when run in full, so an error stays a few seconds rather than tens of
+them. That cap is why a bullet naming \code{"bootstrap"} also names a
+\code{boot_samples} value: it is the count the trial actually ran at, and the
+call the message gives you is the one that was verified rather than a
+heavier one nobody tried.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
