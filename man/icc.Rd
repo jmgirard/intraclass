@@ -219,6 +219,16 @@ reproduces it exactly) — with no seed set it uses a
 fixed seed the message then names, and an unseeded retry draws fresh resamples
 and can fail where the verified run succeeded, especially on small designs.
 The trial run leaves the session's random-number stream untouched.
+The same holds in reverse. When an opt-in method you asked for aborts on
+degenerate data, its error names a method verified on that same data, by the
+same trial runs and under the same rules — and never the method you asked
+for, which just failed. Data with no between-subject variance is the case
+this matters most on: there \code{"bootstrap"} is typically the only method that
+returns anything usable, and it is now named rather than left for you to
+find. Candidates are tried cheapest first, so the two model-refitting
+methods are reached only where no closed form serves this design and data;
+in that case the error message takes as long as a full bootstrap to appear
+(tens of seconds), because that bootstrap is what earned the recommendation.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance

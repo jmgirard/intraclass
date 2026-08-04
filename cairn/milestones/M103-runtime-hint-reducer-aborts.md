@@ -102,11 +102,11 @@ error) → ROADMAP candidate row.
       `boundary_method_hint()`.
 - [x] T3 Thread the engine fit and a lazy `hint` from `icc()`'s dispatch into
       the four reducer-stage guards.
-- [ ] T4 Tests: the six-guard wiring, class and leading-line preservation; the
+- [x] T4 Tests: the six-guard wiring, class and leading-line preservation; the
       verdict table against the committed sweep result.
-- [ ] T5 Tests: self-exclusion per invoking method; no re-entry through the
+- [x] T5 Tests: self-exclusion per invoking method; no re-entry through the
       shared classical guard.
-- [ ] T6 Tests: byte-identity where no candidate is usable; the `gen_ssa0`
+- [x] T6 Tests: byte-identity where no candidate is usable; the `gen_ssa0`
       promise end to end.
 - [ ] T7 NEWS, `@details`, and the gate: suite at `NOT_CRAN=true CI=true`,
       `devtools::check()`, `lintr`, `air format --check`, all `data-raw`
@@ -126,6 +126,9 @@ error) → ROADMAP candidate row.
 
 - 2026-08-04: T2/T3 wired the hint through all four reducer-stage guards and added the two engine-fit candidate rows. `npb_hint_seed` renamed `hint_verify_seed` (it now seeds three stochastic verifications, not one). M93/M97's whole `boundary-abort-hint` suite passes unchanged, as do `ci-classical`, `ci-npbootstrap*`, `ci-bootstrap` and `ci-montecarlo` — the default Monte-Carlo path is untouched by construction (see the Decisions entry on withholding the engine tier). NEWS and the `ci_method` `@details` written here rather than at T7; T7 keeps the gate.
 - 2026-08-04: T1 amendment (minor) — the sweep result is written to `tests/testthat/fixtures/`, not `data-raw/`. `data-raw/` is `.Rbuildignore`d, so a result left there is absent under `R CMD check` and AC2's cell-by-cell assertion would skip in CI rather than run. The generator stays in `data-raw/`, and now emits a fixture provenance header per the profile's test-doctrine.
+
+- 2026-08-04: T4/T5/T6 — `tests/testthat/test-reducer-abort-hint.R`, 142 assertions, 0 failures, 245 s. AC2's mutation clause verified by hand: making `boundary_method_usable()` return `TRUE` unconditionally reds the verdict table (10+ failures at the same assertion), source restored. The AC5 pins render through a fixed renderer (`cli.width`, `cli.unicode`) after the first run failed on nothing but the bullet glyph — a pin that varies with the terminal is evidence about the terminal.
+- 2026-08-04: sweep re-run under the M103 code writes `tests/testthat/fixtures/abort-remedy-sweep.tsv` with `reached`, `point_fit_ok`, `site_confirmed`, `outcome` and `remedy_usable` identical row for row to the pre-M103 run — the feature changes what the guards *say*, not what the methods *do*. The script's own runtime roughly doubled (~25 → ~60 min) because each `icc()` retry it makes now pays for a hint; noted in its header.
 
 ## Decisions
 

@@ -19,8 +19,13 @@
 # result stays diffable against the one M100 committed. They are ids here, not
 # digests of anything this script computes.
 #
-# Re-run (~25 min at boot_samples = 999, from the repo root):
+# Re-run (from the repo root; ~60 min at boot_samples = 999 on an M-series Mac):
 #   Rscript data-raw/sweep-abort-remedies.R
+# It cost ~25 min before M103 and roughly doubled after: every `icc()` retry the
+# script makes is now a call whose abort builds a hint, and a hint verifies
+# candidates by running them. The script measures the same thing either way --
+# the re-run at M103 T1 reproduced M100's result row for row -- it just pays the
+# feature's own cost while doing it.
 #
 # This script MEASURES and concludes nothing about what a message should say. It
 # changes no message and licenses no edit: the rule for reading these results,
@@ -80,9 +85,9 @@
 # its message stops naming a method, so reading the site list off
 # `data-raw/abort-remedy-sites.tsv` would shrink the evidence base the moment a
 # bullet was de-named -- which is exactly when the evidence matters (review C7).
-# What IS read from the enumeration is which sites name a method today -- the
-# `named_by_remedy` column below -- so that column cannot go stale against the
-# shipped text.
+# M100 also recorded which sites named a method at run time; that column is gone
+# (see the provenance note), and since M103 the question it answered no longer has
+# a static answer -- what a guard names now depends on the caller's own data.
 #
 # Writes data-raw/abort-remedy-sweep.tsv (one row per site x dataset x method);
 # the re-run command is in the provenance note at the top.

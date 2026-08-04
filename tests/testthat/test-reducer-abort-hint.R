@@ -71,10 +71,14 @@ oneway_ests <- function(k_eff) {
   )
 }
 
-# Render a condition's message with the terminal width taken out of it: a pin
-# that depends on how wide the console happened to be is evidence about nothing.
+# Render a condition's message with the RENDERER pinned, not merely observed: a
+# pin that depends on how wide the console happened to be, or on whether cli
+# decided the terminal could show `ℹ`, is evidence about the environment
+# rather than about the message. Width is fixed so nothing hard-wraps, and the
+# bullet is fixed to its ASCII form -- which is what testthat renders anyway, and
+# what the expected text below is written in.
 abort_message <- function(expr) {
-  withr::local_options(cli.width = 10000L)
+  withr::local_options(cli.width = 10000L, cli.unicode = FALSE)
   e <- suppressWarnings(tryCatch(expr, error = function(e) e))
   expect_s3_class(e, "condition")
   conditionMessage(e)
@@ -464,23 +468,23 @@ test_that("no usable candidate leaves the shipped message untouched (AC5)", {
     bootstrap = paste0(
       "The bootstrap interval could not be computed: only 55 of 999 refits ",
       "converged.\n",
-      "ℹ A refit counts as converged only when every variance component ",
+      "i A refit counts as converged only when every variance component ",
       "it returned is finite.\n",
-      "ℹ Inspect the model fit and the data before retrying."
+      "i Inspect the model fit and the data before retrying."
     ),
     searle = paste0(
       "The classical one-way SEARLE exact-F interval is undefined for this ",
       "data.\n",
-      "ℹ The F = MSA/MSE pivot is not usable here: MSA = 24.0087, ",
+      "i The F = MSA/MSE pivot is not usable here: MSA = 24.0087, ",
       "MSE = 0.\n",
-      "ℹ Inspect the data before retrying."
+      "i Inspect the data before retrying."
     ),
     npbootstrap = paste0(
       "The one-way transformed bootstrap-t interval is undefined for this ",
       "data.\n",
-      "ℹ The studentized pivot needs a finite log F and a non-zero ",
+      "i The studentized pivot needs a finite log F and a non-zero ",
       "jackknife SE; this data gives log F = Inf and jackknife SE = NaN.\n",
-      "ℹ Inspect the data before retrying."
+      "i Inspect the data before retrying."
     )
   )
   for (m in names(expected)) {

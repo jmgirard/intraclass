@@ -1,3 +1,12 @@
+# abort-remedy-sweep.tsv -- which shipped `ci_method` values return a usable
+# interval on the data that reaches each reducer-stage degeneracy abort.
+# Source: generated data only, no external oracle -- every dataset comes from
+# the four generators in the generator below. Generator:
+# data-raw/sweep-abort-remedies.R (re-run: Rscript data-raw/sweep-abort-remedies.R).
+# Seeds: each cell's `seed` column seeds its generator; every stochastic
+# reducer runs at seed = 1 and boot_samples = 999 (both recorded per row).
+# Do not hand-edit: regenerate with the script above.
+# Written by that script under R 4.6.1, glmmTMB 1.1.14, aarch64-apple-darwin25.4.0.
 site	label	n_s	n_r	seed	trigger	reached	point_fit_ok	site_confirmed	remedy	outcome	remedy_usable	detail	generator	boot_samples	conf_level	r_version	glmmtmb_version	platform
 R/ci-bootstrap.R:f3b08ac552	bootstrap refit convergence	6	3	1	MSE=0 exact	TRUE	TRUE	TRUE	montecarlo	classed abort	FALSE	intraclass_singular_fit	gen_mse0	999	0.95	4.6.1	1.1.14	aarch64-apple-darwin25.4.0
 R/ci-bootstrap.R:f3b08ac552	bootstrap refit convergence	6	3	1	MSE=0 exact	TRUE	TRUE	TRUE	searle	classed abort	FALSE	intraclass_singular_fit	gen_mse0	999	0.95	4.6.1	1.1.14	aarch64-apple-darwin25.4.0
