@@ -198,6 +198,8 @@ candidate row, whose subject is M101's messages.
 
 - 2026-08-03: review pass 5 IN PROGRESS (honest checkpoint, not a verdict) — `main` unmoved, PR #109 head `05866f6`. Fresh evidence recorded for AC1-AC7 and AC2's box ticked: 21 git spellings all refused with a non-git control untouched, and the docstring now states both disclaimer channels (`.git/` x3) against `a946df1`'s zero, which was the pass-4 gate failure. Consistency gate clean — `cairn_validate` all checks passed, dangling id tokens UNCHANGED at 321. `lintr::lint_package()` 0 lints, `air format --check .` clean, `devtools::document()` no diff. Still outstanding at this checkpoint: the R suite and `devtools::check` (AC9), CI on this head (AC8), and the [O] diff-bug and [S] blame-history lenses; the [S] prior-review lens has reported zero findings with its GitHub probe `[]` a fifth time.
 
+- 2026-08-03: review pass 5 PASSED the gate — all nine criteria verified with fresh evidence at `05866f6`, AC2 met for the first time (21 git spellings refused, both disclaimer channels stated). [O] diff-bug 24 findings, [S] blame-history 0, [S] prior-review 0 (GitHub probe `[]` a fifth time, all six pass-4 fixes verified holding); an [S] scorer scored all 24 and NONE reached 80, the highest being F2 at 78, and none demonstrates a criterion failing. Fifteen are restatements of findings already logged sub-80 in passes 1-4. Gate clean: suite FAIL 0 / PASS 5435, check 0/0/0, lintr 0, air clean, document no diff, five checkers green both modes, `cairn_validate` all checks passed with dangling ids unchanged at 321. CI green on this head (job 91855894527, both M102 steps `success`). To the maintainer at the merge gate.
+
 ## Decisions
 
 ## Review
@@ -835,3 +837,77 @@ control, and each of the 16 route excisions silences exactly its own probe.
 parses with every named route id present, `rule-probe-unknown` fires on a rule
 naming an absent probe, and the checker passes with Amendment 3 in the read —
 that amendment adds no numbered rule and so owes no probe token.
+
+**AC8 — CI green on this head.** `check-references` job 91855894527, `head_sha`
+`05866f6`, conclusion `success`, with step 9 "Re-derive the registered record
+claims (M102)" and step 10 "Self-test the record-claims checker (route excision)"
+both `success` in that run's own log. Route excision therefore passes on the
+depth-1 CI checkout against the amended docstring and the corrected `lint.yaml`
+comment, not only locally.
+
+**AC9 — gate clean, run fresh at this head.** Suite `NOT_CRAN=true CI=true`
+FAIL 0 / WARN 2 / SKIP 23 / PASS 5435, identical to `main`'s baseline;
+`devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors / 0 warnings /
+0 notes in 2m21s; `lintr::lint_package()` 0 lints; `air format --check .` clean;
+`devtools::document()` no diff; all five `data-raw` checkers pass in both check
+and self-test modes (ten invocations, enumerated by `ls data-raw/check-*.py
+data-raw/enumerate-*.py`). `cairn_validate` all checks passed, with the same
+three advisories as pass 4 and `dangling id tokens` UNCHANGED at 321 — the two
+new amendments introduce no unresolved token. No NEWS entry is owed: the diff
+touches no `R/`, `tests/`, `man/`, `NAMESPACE` or `DESCRIPTION` path.
+
+**Findings — three fresh-context lenses, then a scorer.** [O] diff-bug returned
+24; [S] blame-history returned ZERO defects over eight items checked clean, having
+re-derived every factual claim the fix pass makes; [S] prior-review returned ZERO,
+its GitHub inline-comment probe `[]` a fifth time, and verified all six pass-4
+findings genuinely fixed and holding with no previously-logged finding aggravated.
+An [S] scorer that generated none of them scored all 24 against the rubric, with
+the diff and the plan in hand. **None reached 80** — the highest is F2 at 78 —
+and none demonstrates a named acceptance criterion failing as written. Fifteen of
+the 24 (F1, F4–F14, F17–F19, F21–F24) are near-verbatim restatements of findings
+already surfaced and scored sub-80 in passes 1–4, untouched because the fix pass
+scoped itself to the six named findings plus the sweep site.
+
+**ACTIONED (≥ 80): none.**
+
+**LOGGED, sub-80 (24).** Surfaced, none silently dropped. F2 (78) D-020
+Amendment 3's own sentence "`D-024`, `D-025` and `D-090` are already written as
+cairn's" is false for `D-025`: `cairn/PROFILE.md:7` carries a bare
+`(D-024/D-025)` in live current knowledge — a new false figure authored by this
+pass, of exactly the class the milestone exists to catch, verified independently
+by the review session and the scorer. F7 (68) `--probes` always exits 0 and a
+mistyped flag falls through to the ordinary check, so a renamed CI flag would
+silently void AC8's self-test step (pass-4 O10, unchanged). F19 (60) D-021 says
+"supersede, don't ignore" yet the abort-remedy candidate row it bars carries no
+D-021 annotation and neither M100's nor M101's ROADMAP row records the
+re-judgement gate (pass-4 O8/O9, unchanged). F15 (58) the corrected census still
+counts M96, arguably exempt on the same ground as M95/M98. F14 (55) `reason = -`
+satisfies the uncited-reason gate and a tautological `expected_match` passes.
+F6 (52) Amendment 2 carries no `probe:` token, so the parser still harvests the
+superseded rule 9's. F10 (50) a duplicate-id row is reported and still executed.
+F4 (48) the `python3` shape's stated `-c`/helper limit is unenforced. F17 (48)
+D-021's "first decision entry whose subject is tracking prose" is contested by
+D-009. F18 (48) "the narrowed AC2 above" is a cross-document dangling deictic.
+F5 (45) the `ls`/`awk` shapes read the working tree, not "committed paths".
+F8 (45) three FileNotFoundError exits carry no route id. F22 (45) the κ_m helper
+seeds its worst step at 0.0 and reaches another checker's private API. F24 (45)
+the `record` column is never bound to the citing file. F9 (42) `root=` is honoured
+inconsistently. F23 (40) the README section carries four unregistered figures.
+F11 (38) refused-parity derives its coded set from the samples. F12 (38) the
+reason clauses scan every token. F13 (38) `refused_hits()` is silent on an
+unbalanced quote and on `/usr/bin/git` — inert behind the shape whitelist.
+F1 (35) the docstring's `non-head-ref` wording is not AC2's phrase verbatim.
+F16 (30) Amendment 3's "work log and archive summary" reading of `D-050`.
+F20 (28) D-021 is landed by a milestone whose Scope In names only D-020.
+F3 (20) the bare `IP4` sites Amendment 3 deliberately leaves as history.
+F21 (20) the amended AC1 line wraps at 104 characters.
+
+**Gate: PASSED.** All nine criteria carry fresh evidence at this head and all
+nine boxes are ticked, AC2 for the first time in five passes. No actioned
+finding exists and the return floor is not met: no finding demonstrates a
+criterion failing, and none scores ≥90 on what the package computes. The thrash
+count stands at four defect returns plus one amendment return, all historical —
+trigger (a)'s threshold holds from the third return, but it governs whether to
+queue another retry under the current plan, and there is nothing left to retry:
+the plan's criteria are met. F2 is put to the maintainer at the merge gate rather
+than fixed silently, being a false sentence this pass itself authored.
