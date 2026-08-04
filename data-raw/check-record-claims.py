@@ -47,10 +47,13 @@ A command is tokenized with `shlex.split` and executed directly, so THIS layer
 interprets no shell metacharacter: a pipeline, a redirection, a substitution or
 a chained second command written in a ledger cell is not a shell construct here,
 it is argument text. That is a rule over the cell and NOT a sandbox, and the
-difference is load-bearing -- a shape's own program can still reach a shell from
-the inside (`awk`'s `| getline` and `system()` do; a `python3` row can
-`subprocess`), so nothing here constrains what an accepted command DOES, only
-what the checker accepts. D-020 Amendment 2 records the same limit. The leading
+difference is load-bearing. Two channels are open through an ACCEPTED shape and
+are stated rather than papered over: a shape's own program can reach a shell
+from the inside (`awk`'s `| getline` and `system()` do; a `python3` row can
+`subprocess`), and any shape that takes a path can read `.git/` directly, since
+`.git/` is an ordinary directory to `ls`, `grep` and `awk` and no rule here
+excludes it. So nothing here constrains what an accepted command DOES, only what
+the checker accepts. D-020 Amendment 2 records the same two limits. The leading
 token must be the shape's program. Everything here runs on the
 `check-references` runner, which has `python3` and the POSIX utilities and has
 neither R nor network access:
@@ -90,9 +93,12 @@ that race, and the ledger loses nothing by not running git at all.
 
 Refusal is scoped to `git` commands, so a `grep` pattern containing `..` is
 untouched. Anything a row wanted `git grep` for, plain `grep -r` does over the
-working tree, which is the only tree a claim is ever about. One limit stays and
-is stated rather than papered over: a `python3` row can shell out to git itself,
-so this is a syntactic rule over the ledger cell, not a sandbox.
+working tree, which is the only tree a claim is ever about. What this refusal
+does NOT claim is stated rather than papered over: it is a syntactic rule over
+the ledger cell, not a sandbox, and it does not put history out of reach. A
+`python3` or `awk` row can shell out to git itself, and an `ls`, `grep` or
+`awk` row can read `.git/` as a path without invoking git at all. What is
+guaranteed is only that no ledger cell's own `argv[0]` is `git`.
 
 FAILURE ROUTES
 --------------
@@ -138,10 +144,14 @@ D_ENTRY = "### D-020"
 DEFAULT_TIMEOUT = 60
 
 # The files whose `[claim:<id>]` citations this checker reads. All four are
-# current knowledge under D-045 -- a figure proven wrong in them is corrected
-# where it sits. History (decision entries, work logs, archives) is excluded
-# because IP4 forbids editing it: a citation could not be added later, and a
-# drifted figure could never be repaired. Asserted equal to the list the
+# CURRENT KNOWLEDGE -- they record what is true now, so a figure proven wrong in
+# them is corrected where it sits. HISTORY (decision entries, work logs,
+# archives) records what was decided at a time and is never edited, so it is
+# excluded: a citation could not be added to it later, and a drifted figure
+# could never be repaired. That split is the cairn tracking rulebook's, not this
+# repo's own numbering -- see cairn D-045 and its history rule (cairn IP4), both
+# of which live in the plugin and neither of which is an id in
+# `cairn/DECISIONS.md` or `cairn/DESIGN.md` here. Asserted equal to the list the
 # decision entry states, so the artifact under test cannot pick its own scope.
 SCOPE = (
     "cairn/ROADMAP.md",
@@ -207,8 +217,11 @@ REF_SHAPED = re.compile(
 def refused_hits(command):
     """(form-id, why) for a refused command -- every `git` command is refused.
 
-    The rule is decided by one test, `argv[0] == "git"`, and nothing after it:
-    a command that cannot run git cannot read history, whatever its flags spell.
+    The rule is decided by one test, `argv[0] == "git"`, and nothing after it,
+    so no flag spelling can smuggle a git command past it. It does NOT follow
+    that an accepted row cannot read history: an `ls`, `grep` or `awk` row can
+    read `.git/` as a path, and `awk` and `python3` can spawn a shell that runs
+    git (D-020 Amendment 2). This refuses a program name, not a capability.
     The clauses below only choose which form the message names, so that the
     reason a row is refused is the specific one where it can be recognised and
     an honest general one where it cannot.

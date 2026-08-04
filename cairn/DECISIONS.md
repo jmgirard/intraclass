@@ -839,3 +839,68 @@ those abort paths.
 records-verification scope, and the standing-rejection discipline applies —
 supersede, don't ignore. If a wrong shipped number is ever traced to a record
 defect this door turned away, this is the entry to supersede.
+
+### D-020 Amendment 3 (2026-08-03): the checker's `D-045` and `IP4` citations name ids this repo does not define — the rule is restated in its own words
+
+**Context:** M102's fourth review pass found two dangling references behind the
+citation scope. Rule 4 of the base entry justifies excluding history from the
+scope with "IP4 forbids editing it", and `check-record-claims.py` carried the
+same citation beside a second one, "current knowledge under D-045". Neither id
+exists in this repo: `cairn/DECISIONS.md` holds D-001…D-021 and `cairn/DESIGN.md`
+defines IP1–IP3. Both are the cairn plugin's own numbering — its D-045 splits
+tracking files into current knowledge and history, and its IP4 is the rule that
+history is never edited. A reader of this repo resolving either id against this
+repo's records finds nothing, and the sole stated ground for the scope's shape
+therefore reads as unbacked. A repo-wide dangling-id check at the pass-5 fix
+found no other live case: `D-024`, `D-025` and `D-090` are already written as
+cairn's, and `D-050` and `D-055` appear only in a work log and an archive
+summary.
+
+**Decision:** the rule stands unchanged and its justification is restated
+without the borrowed ids. History — decision entries, work logs,
+`milestones/archive/` — is excluded from the citation scope because it records
+what was decided at a time and is never edited, so a citation could not be added
+to it later and a figure proven wrong in it could never be repaired where it
+sits. The four scope files are current knowledge: they record what is true now,
+so a wrong figure is corrected in place. That is the cairn tracking rulebook's
+split, and where this repo's records name it they qualify it as the plugin's —
+"cairn D-045", "cairn IP4" — matching the existing `cairn D-024` convention,
+rather than writing a bare id that collides with this repo's own numbering.
+`check-record-claims.py`'s SCOPE comment is corrected in place, being current
+knowledge; rule 4 and Amendment 1 are history and stand as written, corrected by
+this entry.
+
+**Supersedes:** nothing operative. It annotates rule 4's and Amendment 1's
+justifying citations; the scope list, the parity assertion and every probe are
+untouched.
+
+### D-021 Amendment 1 (2026-08-03): three figures in the motivating census are wrong — corrected against the committed records
+
+**Context:** M102's fourth review pass found D-021's motivating paragraph
+contradicting the committed record and, on one quantity, itself. Three
+corrections, each re-derived at the pass-5 fix:
+
+1. "M93 ran eight" — `cairn/milestones/archive/M93-boundary-abort-hint.md:19`
+   records "Ten passes, three re-cuts". The figure is ten.
+2. "M100 ran three returns" — M100 reached a fifth review pass
+   (`a10d64e` "M100 review pass 5: gate failed (fifth return)"), and D-020,
+   added by the same milestone as this entry, already says M100 "returned from
+   review five times", as does `check-record-claims.py`'s "M100 passes 1-5".
+   The figure is five, and D-021 was the only record disagreeing.
+3. The census "Eight of the last nine milestones — M94, M95, M96, M97, M98,
+   M100, M101, M102" counts M95 and M98, which this entry's own Untouched clause
+   exempts: M95 pins a numeric result (all 162 cells of the shipped κ_m table)
+   and M98 pins a behavioural one (the endpoint-parity test's clamp-detection
+   classes). Both are ordinary verification of what the package does. The census
+   is six of the last nine — M94, M96, M97, M100, M101, M102.
+
+**Decision:** the three figures are corrected as above. The decision itself is
+unchanged and none of the three disturbs it: six of nine consecutive milestones
+taking the repo's own records as their subject, with M93 at ten passes and M100
+at five returns, states the concentration the door exists to stop at least as
+strongly as the wrong figures did. The correction is recorded here rather than
+edited into the entry, that file being history.
+
+**Supersedes:** D-021's Context paragraph figures only. The Decision, the
+Untouched clause, the in-flight disposition for M100/M101/M102 and the
+Consequences stand in full.
