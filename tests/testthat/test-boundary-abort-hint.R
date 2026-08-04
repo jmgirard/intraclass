@@ -400,13 +400,13 @@ test_that("unbalanced one-way hints npbootstrap only when the RUN verifies (AC2/
   # design predicates and why the run is the only evidence accepted.
   d_ok <- bh_smallint(20L, 3L, 1L, balanced = FALSE)
 
-  # No caller seed: verification ran under the fixed `npb_hint_seed`, and the
+  # No caller seed: verification ran under the fixed `hint_verify_seed`, and the
   # bullet NAMES that seed -- the promised call is exactly the verified run.
   h <- bh_hint(oneway = TRUE, balanced = FALSE, df = d_ok)
   expect_length(h, 1L)
   expect_named(h, "i")
   expect_match(h[["i"]], "npbootstrap", fixed = TRUE)
-  expect_match(h[["i"]], paste0("seed = ", npb_hint_seed), fixed = TRUE)
+  expect_match(h[["i"]], paste0("seed = ", hint_verify_seed), fixed = TRUE)
   # Quoted method strings, as bh_msg_methods() parses them: bare "mpl" would also
   # match inside the word "resamples".
   for (m in c("searle", "burch", "mpl")) {
@@ -833,7 +833,7 @@ test_that("designs the hint stays silent on are the ones that would abort (AC3/A
         rater,
         model = "oneway",
         ci_method = "npbootstrap",
-        seed = npb_hint_seed
+        seed = hint_verify_seed
       )
     )),
     class = "intraclass_singular_fit"
@@ -1757,9 +1757,9 @@ test_that("boundary_method_usable() verdicts match the intervals the reducers re
       seed = s
     ))
   }
-  # No seed argument -> the run uses the fixed `npb_hint_seed` the bullet names,
+  # No seed argument -> the run uses the fixed `hint_verify_seed` the bullet names,
   # so the no-seed verdict EQUALS the seed-1 verdict on both datasets.
-  expect_identical(npb_hint_seed, 1L)
+  expect_identical(hint_verify_seed, 1L)
   expect_true(boundary_method_usable(
     "npbootstrap",
     d_split,
@@ -1895,7 +1895,7 @@ test_that("verification never raises and never leaks a condition (AC2)", {
 # ---- M97 T2/AC2: the verification run is RNG-neutral (#9) --------------------
 # The npbootstrap verification CONSUMES randomness inside an abort path. #9 says a
 # user who never asked for a bootstrap cannot have their draws perturbed by one, so
-# the run always receives a concrete seed (the caller's, else `npb_hint_seed`) and
+# the run always receives a concrete seed (the caller's, else `hint_verify_seed`) and
 # goes through `with_rng_seed()`, which restores the ambient stream. Pinned here
 # rather than assumed -- an unseeded `npbootstrap_ci()` call would draw from the
 # ambient stream, so a refactor dropping the seed fallback reds these.
@@ -2643,7 +2643,7 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     # whatever the bullets carry -- computed from the bullets alone, a leaked
     # token would appear on both sides of the multiset comparison below and pass
     # (M97 review F8). Every token a bullet contributes must BE the seed literal.
-    expect_true(all(bullet_tokens == as.character(npb_hint_seed)))
+    expect_true(all(bullet_tokens == as.character(hint_verify_seed)))
     site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
     expect_true(
       site_b || grepl("parameter covariance is not finite", msg, fixed = TRUE)
@@ -2695,11 +2695,11 @@ test_that("no interval computed during verification reaches the message (AC5)", 
       # INPUT; every value the run RETURNED stays discarded (D-018).
       expect_identical(
         num_tokens(b),
-        rep(as.character(npb_hint_seed), 2L)
+        rep(as.character(hint_verify_seed), 2L)
       )
       expect_identical(
         num_tokens(render(b)),
-        rep(as.character(npb_hint_seed), 2L)
+        rep(as.character(hint_verify_seed), 2L)
       )
     } else {
       expect_identical(num_tokens(b), character(0))

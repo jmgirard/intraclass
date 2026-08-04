@@ -97,10 +97,10 @@ error) → ROADMAP candidate row.
 - [x] T1 Land M100's sweep generator and its 210-row result under `data-raw/`
       with a provenance header naming the branch they came from and the run
       that produced them.
-- [ ] T2 Add `bootstrap` and `montecarlo` rows to `boundary_method_usable()`
+- [x] T2 Add `bootstrap` and `montecarlo` rows to `boundary_method_usable()`
       (both take the engine fit, not `df`), and an `exclude` argument to
       `boundary_method_hint()`.
-- [ ] T3 Thread the engine fit and a lazy `hint` from `icc()`'s dispatch into
+- [x] T3 Thread the engine fit and a lazy `hint` from `icc()`'s dispatch into
       the four reducer-stage guards.
 - [ ] T4 Tests: the six-guard wiring, class and leading-line preservation; the
       verdict table against the committed sweep result.
@@ -124,6 +124,56 @@ error) → ROADMAP candidate row.
 - 2026-08-04: implement gate settled three open choices, all as recommended. (1) The AC2 verdict table is split: the three cheap methods assert in the suite on every reached cell, the `bootstrap` column re-derives via a committed `data-raw` script at the gate — measured 16.8 s per dataset for a 999-refit bootstrap, so a full in-suite table would add ~8 min per platform to a suite M78 exists to shrink. (2) The sweep script's two reads of M100's unshipped source-enumerator artifact are replaced by inline literals, so it runs from a clean checkout without importing the machinery D-021 closed. (3) Bullets are tiered — deterministic fenced methods verified first, the engine-fit pair only when none of them serves.
 - 2026-08-04: T1 landed `data-raw/sweep-abort-remedies.R` + `abort-remedy-sweep.tsv`. Re-run on this branch reproduces M100's committed result exactly: all 210 rows key-aligned, and `reached`, `point_fit_ok`, `site_confirmed`, `outcome` and `remedy_usable` identical row for row; the only schema change is the dropped `named_by_remedy` column.
 
+- 2026-08-04: T2/T3 wired the hint through all four reducer-stage guards and added the two engine-fit candidate rows. `npb_hint_seed` renamed `hint_verify_seed` (it now seeds three stochastic verifications, not one). M93/M97's whole `boundary-abort-hint` suite passes unchanged, as do `ci-classical`, `ci-npbootstrap*`, `ci-bootstrap` and `ci-montecarlo` — the default Monte-Carlo path is untouched by construction (see the Decisions entry on withholding the engine tier). NEWS and the `ci_method` `@details` written here rather than at T7; T7 keeps the gate.
+- 2026-08-04: T1 amendment (minor) — the sweep result is written to `tests/testthat/fixtures/`, not `data-raw/`. `data-raw/` is `.Rbuildignore`d, so a result left there is absent under `R CMD check` and AC2's cell-by-cell assertion would skip in CI rather than run. The generator stays in `data-raw/`, and now emits a fixture provenance header per the profile's test-doctrine.
+
 ## Decisions
+
+### 2026-08-04: remedy bullets are tiered by cost, and the fenced methods go first
+
+**Context.** With `bootstrap` and `montecarlo` added to the candidate set, a
+balanced one-way guard can have four usable alternatives at once. A 999-refit
+parametric bootstrap costs 16.8 s measured on a 30x2 cell, against ~5 ms for
+either closed form, and every candidate is run inside an abort message.
+
+**Decision.** `boundary_method_hint()` verifies the design-fenced opt-in methods
+(`searle`, `burch`, `npbootstrap`, `mpl`) first and returns as soon as any of them
+is usable; the engine-fit pair (`bootstrap`, `montecarlo`) is reached only when
+none of them serves this design and data.
+
+**Why.** Three things fall out at once. M93's shipped wording stays byte-identical
+wherever it already fired, which is what AC5 pins. A message carries at most two
+suggestions instead of four. And on the sweep's nine resample-guard datasets,
+where `searle` and `burch` are usable 9/9, the 17 s bootstrap is never run — the
+cost lands only on the cells that motivated the milestone, where nothing cheaper
+works.
+
+**Falsifier.** A case where a fenced method is usable but materially worse advice
+than an engine-fit one, so that returning early recommends the weaker method.
+
+### 2026-08-04: the engine-fit tier is withheld from the Monte-Carlo default path
+
+**Context.** The hint is shared by all six guards. On the default path
+`montecarlo` self-excludes, so what the new tier would add there is `bootstrap`.
+
+**Decision.** `icc()` builds the two `mc_ci()` guards' hint with `engine = NULL`,
+which makes both engine-fit rows return `FALSE` and leaves M93's default-path
+behaviour exactly as it shipped. The four reducer-stage guards get the fit and
+reach the tier.
+
+**Why.** The two kinds of guard fail for different reasons. The `mc_ci()` guards
+fire because the *fitted model* came back unusable — a non-finite parameter
+covariance, or draws overflowing — and `bootstrap` refits that same model, making
+it the least promising candidate there; the sweep measured it usable on 0 of 6
+datasets at the sibling engine-fit guard. The reducer-stage guards fire on
+degenerate *raw data* with a healthy fit behind them, where `bootstrap` is a
+genuinely different instrument: usable on 5 of 8 datasets at the npbootstrap
+observed-data guard, 4 of 4 on the zero-between-variance cells. Against a weak
+prospect stands a 17 s wait added to the package's default abort path.
+
+**Falsifier.** A dataset where the Monte-Carlo default aborts and
+`ci_method = "bootstrap"` returns a usable interval. The sweep's grid does not
+generate that combination, so it holds no evidence either way; one such dataset
+reopens the withholding.
 
 ## Review

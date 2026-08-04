@@ -183,7 +183,8 @@ npbootstrap_ci <- function(
   conf_level = 0.95,
   boot_samples = 999L,
   seed = NULL,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  hint = character(0)
 ) {
   groups <- npb_groups(df, call = call)
   k <- length(groups)
@@ -201,8 +202,12 @@ npbootstrap_ci <- function(
   # measured usable on 0 of 4 zero-SSA datasets and 0 of 3 zero-MSE ones -- while
   # `ci_method = "bootstrap"` is usable on 4 of 4 of the zero-SSA cells, so the
   # bullet pointed away from a method that works. No single method is usable
-  # across this guard's whole trigger class, so none is named; naming one again
-  # needs sweep evidence covering every dataset that reaches here.
+  # across this guard's whole trigger class, so no STATIC name can be given.
+  # `hint` is not static (M103): it runs each candidate on THIS caller's data, so
+  # on the zero-SSA cells it names `bootstrap` -- the method that works there --
+  # and on the zero-MSE cells, where nothing works, it stays empty and this
+  # message is byte-identical to the one that shipped without it. This guard is
+  # the milestone's motivating case.
   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
     abort_intraclass(
       c(
@@ -210,7 +215,8 @@ npbootstrap_ci <- function(
         i = "The studentized pivot needs a finite {.field log F} and a non-zero \\
              jackknife SE; this data gives log F = {.val {signif(obs$logf, 6)}} \\
              and jackknife SE = {.val {signif(obs$se_ij_logf, 6)}}.",
-        i = "Inspect the data before retrying."
+        i = "Inspect the data before retrying.",
+        hint
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -243,10 +249,15 @@ npbootstrap_ci <- function(
   # under every probed seed, and an unbalanced 8x3 under 3 of 8. An exported
   # method fails loudly on it rather than returning a quietly broken interval
   # (#5/#8, AC5/RR01).
-  # This bullet KEEPS its `ci_method = "montecarlo"` name, unlike its three
-  # siblings: the observed data here is healthy (it passed the guard above) and a
-  # seeded sweep of this trigger class measured montecarlo usable on 9 of 9
-  # datasets that reach it. Truthful, so it survives.
+  # This bullet named `ci_method = "montecarlo"` in a hard-coded literal, unlike
+  # its three siblings: the observed data here is healthy (it passed the guard
+  # above) and a seeded sweep of this trigger class measured montecarlo usable on
+  # 9 of 9 datasets that reach it, so the claim was true -- but true by a sweep
+  # somebody ran once, not by anything this call knows. M103 replaces the literal
+  # with the same runtime verification the other five guards use, so the method
+  # named here is one that was just run on the caller's own data. On the sweep's
+  # nine datasets the classical pair is usable 9/9 too, and being deterministic
+  # they are what the hint reaches first.
   n_bad <- sum(!is.finite(res$t_star))
   if (n_bad > 0L) {
     abort_intraclass(
@@ -254,8 +265,8 @@ npbootstrap_ci <- function(
         "The one-way transformed bootstrap-t interval could not be computed: \\
          {.val {n_bad}} of {.val {boot_samples}} resamples were degenerate \\
          (SSA = 0 or SE = 0).",
-        i = "The design is too small to resample stably; use a larger design or \\
-             {.code ci_method = \"montecarlo\"}."
+        i = "The design is too small to resample stably; use a larger design.",
+        hint
       ),
       class = "intraclass_singular_fit",
       call = call

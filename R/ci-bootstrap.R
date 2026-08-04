@@ -26,7 +26,8 @@ bootstrap_ci <- function(
   seed = NULL,
   warn_frac = 0.10,
   min_frac = 0.50,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  hint = character(0)
 ) {
   if (is.null(engine$simulate_refit)) {
     abort_unsupported(
@@ -49,8 +50,11 @@ bootstrap_ci <- function(
   # measured montecarlo usable on 0 of 6 datasets that reach it (and every other
   # shipped method on 0 of 6 too), and asserted a single cause -- "near a
   # variance boundary or the design is too small" -- that the same sweep's jitter
-  # cells contradict. Naming a method here again needs sweep evidence that the
-  # method is usable on every dataset reaching this guard.
+  # cells contradict. A STATIC name would still need sweep evidence covering
+  # every dataset that reaches here. `hint` is not static (M103): it names a
+  # method only after running it on THIS caller's data, so on the sweep's own six
+  # datasets it stays empty and this message is byte-identical to the one that
+  # shipped without it.
   if (n_ok < min_frac * boot_samples || n_ok < 2L) {
     abort_intraclass(
       c(
@@ -58,7 +62,8 @@ bootstrap_ci <- function(
          {.val {n_ok}} of {.val {boot_samples}} refits converged.",
         i = "A refit counts as converged only when every variance component it \\
              returned is finite.",
-        i = "Inspect the model fit and the data before retrying."
+        i = "Inspect the model fit and the data before retrying.",
+        hint
       ),
       class = "intraclass_singular_fit",
       call = call

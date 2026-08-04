@@ -95,7 +95,11 @@ suppressMessages(devtools::load_all(quiet = TRUE))
 # happened to be is not evidence about anything.
 options(cli.width = 10000L)
 
-out_path <- "data-raw/abort-remedy-sweep.tsv"
+# The result is a committed TEST FIXTURE, not a `data-raw` by-product: the suite
+# reads it to assert `boundary_method_usable()`'s verdict cell by cell (M103 AC2),
+# and `data-raw/` is `.Rbuildignore`d, so a result left there would be invisible
+# under `R CMD check` and the assertion would silently skip in CI.
+out_path <- "tests/testthat/fixtures/abort-remedy-sweep.tsv"
 # The SHIPPED default, not a reduced count. M97 measured a run that succeeded at
 # 999 and aborted at a caller's 2000, and `R/boundary-hint.R` records the rule it
 # settled: verification runs at the count the user's own retry would use. A sweep
@@ -203,10 +207,8 @@ enumeration_leads <- list(
     "The bootstrap interval could not be computed: only {.val {n_ok}} of",
     "{.val {boot_samples}} refits converged."
   ),
-  "R/ci-classical.R:990cd66e44" =
-    "The classical one-way {method} interval is undefined for this data.",
-  "R/ci-npbootstrap.R:bf1a802a9c" =
-    "The one-way transformed bootstrap-t interval is undefined for this data.",
+  "R/ci-classical.R:990cd66e44" = "The classical one-way {method} interval is undefined for this data.",
+  "R/ci-npbootstrap.R:bf1a802a9c" = "The one-way transformed bootstrap-t interval is undefined for this data.",
   "R/ci-npbootstrap.R:01b75d1a61" = paste(
     "The one-way transformed bootstrap-t interval could not be computed:",
     "{.val {n_bad}} of {.val {boot_samples}} resamples were degenerate",
@@ -563,14 +565,47 @@ for (cell in grid) {
 }
 
 res <- do.call(rbind, rows)
-utils::write.table(res, out_path, sep = "\t", row.names = FALSE, quote = FALSE)
+# Fixture provenance header (PROFILE.md test-doctrine): source, generator, seeds.
+# `read.delim(..., comment.char = "#")` skips it; the suite reads it that way.
+writeLines(
+  c(
+    "# abort-remedy-sweep.tsv -- which shipped `ci_method` values return a usable",
+    "# interval on the data that reaches each reducer-stage degeneracy abort.",
+    "# Source: generated data only, no external oracle -- every dataset comes from",
+    "# the four generators in the generator below. Generator:",
+    "# data-raw/sweep-abort-remedies.R (re-run: Rscript data-raw/sweep-abort-remedies.R).",
+    "# Seeds: each cell's `seed` column seeds its generator; every stochastic",
+    "# reducer runs at seed = 1 and boot_samples = 999 (both recorded per row).",
+    "# Do not hand-edit: regenerate with the script above.",
+    paste0(
+      "# Written by that script under R ",
+      getRversion(),
+      ", glmmTMB ",
+      utils::packageVersion("glmmTMB"),
+      ", ",
+      R.version$platform,
+      "."
+    )
+  ),
+  out_path
+)
+utils::write.table(
+  res,
+  out_path,
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE,
+  append = TRUE
+)
 
 # The all-of-them column is what a STATIC bullet would need, and it is why three
 # of these four guards name nothing today. M103's guards do not read it: they run
 # the candidate on the caller's own dataset, so the row-level `remedy_usable`
 # column is the one their verdicts must agree with. Both are printed.
 cat("\n---- per site: is each candidate method usable on EVERY dataset that\n")
-cat("     reached this abort (the bar a STATIC bullet would have to clear)? ----\n")
+cat(
+  "     reached this abort (the bar a STATIC bullet would have to clear)? ----\n"
+)
 hit <- res[res$reached, ]
 for (key in unique(hit$site)) {
   sub <- hit[hit$site == key, ]
