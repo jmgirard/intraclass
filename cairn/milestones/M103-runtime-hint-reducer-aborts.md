@@ -1,6 +1,6 @@
 # M103: Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -121,9 +121,9 @@ error) → ROADMAP candidate row.
 - [x] T7 NEWS, `@details`, and the gate: suite at `NOT_CRAN=true CI=true`,
       `devtools::check()`, `lintr`, `air format --check`, all `data-raw`
       checkers.
-- [x] T8 Bound the expensive candidate with a cheap negative screen: verify
-      `bootstrap` at a small resample count first and abandon it on failure,
-      re-running at the caller's own count before any bullet names it.
+- [x] T8 Bound the expensive candidate at both ends: screen `bootstrap` at a
+      small resample count and abandon it on failure, then run it in full at a
+      capped count that the bullet names, so the promised call is the run.
 - [x] T9 Give the Monte-Carlo default path the engine-fit tier, superseding the
       withholding decision; reconcile M93's silence tests.
 - [x] T10 Review follow-ups: the bullet names `boot_samples` when it is not the
@@ -131,7 +131,7 @@ error) → ROADMAP candidate row.
       fixture paths (F19); stop pinning a glmmTMB convergence count (F20).
 - [x] T11 Tests: AC8 abort latency, AC9 the default path end to end, and the
       unseeded self-exclusion case AC3's cases never reach (F1).
-- [ ] T12 Re-run the gate and return to review.
+- [x] T12 Re-run the gate and return to review.
 
 ## Work log
 
@@ -162,6 +162,8 @@ error) → ROADMAP candidate row.
 - 2026-08-04: second cost gate. The T9 change made the M93 hint suite ~4x slower (three files ~55 min against ~10), because every default-path abort now verifies. Chose capping the full `bootstrap` verification at 199 resamples and NAMING that count in the bullet, over leaving it uncapped or making the old fixtures cheap: the promise stays exactly as strong (the call the message gives is the call that ran), while the default abort drops 20.5 s -> 4.36 s. Falsified by 199 resamples proving too few to be worth recommending.
 - 2026-08-04: T10 done — the bullet names `boot_samples`; the `@details` naming claim is hedged and its cost sentence rewritten; three stale fixture paths repaired; the AC5 pin no longer hard-codes a glmmTMB convergence count.
 - 2026-08-04: reconciling M93's suite with the two new behaviours took four rounds and is the milestone's main churn. Four distinct causes, each a real gap rather than a rename: its leak guard's seed exception was keyed on the `npbootstrap` method rather than on the seed mention, so the new bullet form fell to the token-free branch; its distinct-rendering pin went 5 -> 6, which is that pin doing its job; two sites matched a method by bare substring, and `boot_samples` contains "mpl"; and its "named == everything usable" invariant is no longer the contract now that bullets are tiered.
+
+- 2026-08-04: T12 gate clean, status -> review (second time). Suite at `NOT_CRAN=true CI=true`: 5756 pass, 0 fail, 0 error, 23 skip (5603 before this return). `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0/0/0; `lintr` 0; `air format --check`, `document()`, `cairn_validate` all clean; `data-raw/check-abort-remedy-verdicts.R` 52 cells, 0 disagreements. The MPL doc-claims checker caught the `@details` rewrite in both directions -- two ledger rows orphaned and four claims uncovered -- and its four replacement `out` rows bind; checker and `--self-test` green.
 
 ## Decisions
 
