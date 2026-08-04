@@ -1,11 +1,11 @@
 # M103: Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP7
-- **Branch/PR:** —
+- **Branch/PR:** `m103-runtime-hint-reducer-aborts`
 
 ## Goal
 
@@ -94,7 +94,7 @@ error) → ROADMAP candidate row.
 
 ## Tasks
 
-- [ ] T1 Land M100's sweep generator and its 210-row result under `data-raw/`
+- [x] T1 Land M100's sweep generator and its 210-row result under `data-raw/`
       with a provenance header naming the branch they came from and the run
       that produced them.
 - [ ] T2 Add `bootstrap` and `montecarlo` rows to `boundary_method_usable()`
@@ -120,6 +120,9 @@ error) → ROADMAP candidate row.
 - 2026-08-04: plan gate chose bounding AC1's promise to six named guards over a `data-raw` source census asserting no seventh can be added unwired, because a checker whose subject is this repo's own source text is the class D-021 closed; falsified by a seventh such guard shipping unwired. Accepted cost: that drift is not mechanically caught.
 - 2026-08-04: plan gate chose landing M100's sweep generator and result on the default branch over re-deriving fixtures in the test file, so every usability verdict cites a committed re-runnable artifact rather than a branch nothing protects; falsified by the sweep proving too costly to re-run in CI, which it is not asked to do.
 - 2026-08-04: plan chose extending M93's `boundary_method_hint()` over writing a second hint mechanism for the reducer stage, because D-018 already licenses computing a candidate interval to decide whether to name it and the two stages (admissibility, usability) transfer unchanged; falsified by the reducer guards needing an admissibility rule M93's design split cannot express.
+
+- 2026-08-04: implement gate settled three open choices, all as recommended. (1) The AC2 verdict table is split: the three cheap methods assert in the suite on every reached cell, the `bootstrap` column re-derives via a committed `data-raw` script at the gate — measured 16.8 s per dataset for a 999-refit bootstrap, so a full in-suite table would add ~8 min per platform to a suite M78 exists to shrink. (2) The sweep script's two reads of M100's unshipped source-enumerator artifact are replaced by inline literals, so it runs from a clean checkout without importing the machinery D-021 closed. (3) Bullets are tiered — deterministic fenced methods verified first, the engine-fit pair only when none of them serves.
+- 2026-08-04: T1 landed `data-raw/sweep-abort-remedies.R` + `abort-remedy-sweep.tsv`. Re-run on this branch reproduces M100's committed result exactly: all 210 rows key-aligned, and `reached`, `point_fit_ok`, `site_confirmed`, `outcome` and `remedy_usable` identical row for row; the only schema change is the dropped `named_by_remedy` column.
 
 ## Decisions
 
