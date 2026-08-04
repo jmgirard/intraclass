@@ -191,14 +191,26 @@ npbootstrap_ci <- function(
   # The OBSERVED data must be non-degenerate: SSA = 0 (every subject mean equal ->
   # log F = -Inf) or SSE = 0 (no within-subject variance -> IJ SE undefined) leaves
   # the transform / studentization ill-posed. Fail loudly (#5/#8).
+  # This guard REPORTS the quantities that failed and diagnoses nothing. Its
+  # message asserted "between- or within-subject variance is exactly zero", which
+  # is false on the SECOND disjunct: `se_ij_logf == 0` fires on data whose log F
+  # is finite and whose variances are both healthy (every subject's share of SSA
+  # equals its share of SSE, so all influence values vanish), and the message
+  # printed that finite log F inside the sentence claiming zero variance. It also
+  # named `ci_method = "montecarlo"`, which a seeded sweep of this trigger class
+  # measured usable on 0 of 4 zero-SSA datasets and 0 of 3 zero-MSE ones -- while
+  # `ci_method = "bootstrap"` is usable on 4 of 4 of the zero-SSA cells, so the
+  # bullet pointed away from a method that works. No single method is usable
+  # across this guard's whole trigger class, so none is named; naming one again
+  # needs sweep evidence covering every dataset that reaches here.
   if (!is.finite(obs$logf) || obs$se_ij_logf == 0) {
     abort_intraclass(
       c(
         "The one-way transformed bootstrap-t interval is undefined for this data.",
-        i = "Between- or within-subject variance is exactly zero \\
-             (log F = {.val {obs$logf}}), so the {.field log F} transform and its \\
-             jackknife SE do not exist.",
-        i = "Inspect the data or use {.code ci_method = \"montecarlo\"}."
+        i = "The studentized pivot needs a finite {.field log F} and a non-zero \\
+             jackknife SE; this data gives log F = {.val {signif(obs$logf, 6)}} \\
+             and jackknife SE = {.val {signif(obs$se_ij_logf, 6)}}.",
+        i = "Inspect the data before retrying."
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -231,6 +243,10 @@ npbootstrap_ci <- function(
   # under every probed seed, and an unbalanced 8x3 under 3 of 8. An exported
   # method fails loudly on it rather than returning a quietly broken interval
   # (#5/#8, AC5/RR01).
+  # This bullet KEEPS its `ci_method = "montecarlo"` name, unlike its three
+  # siblings: the observed data here is healthy (it passed the guard above) and a
+  # seeded sweep of this trigger class measured montecarlo usable on 9 of 9
+  # datasets that reach it. Truthful, so it survives.
   n_bad <- sum(!is.finite(res$t_star))
   if (n_bad > 0L) {
     abort_intraclass(

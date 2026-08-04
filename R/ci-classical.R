@@ -44,13 +44,19 @@ classical_oneway_ss <- function(groups) {
 # exist to serve (small-but-positive F passes and returns a finite interval).
 classical_guard_observed <- function(ss, method, call) {
   f <- ss$msa / ss$mse
+  # This guard REPORTS the quantities that failed and diagnoses nothing. Its
+  # condition has two disjuncts but its message described only the first, and it
+  # named `ci_method = "montecarlo"` until a seeded sweep of its trigger class
+  # measured montecarlo usable on 0 of 3 datasets that reach it. Naming a method
+  # here again needs sweep evidence that the method is usable on every dataset
+  # reaching this guard.
   if (ss$mse == 0 || !is.finite(f)) {
     abort_intraclass(
       c(
         "The classical one-way {method} interval is undefined for this data.",
-        i = "Within-subject variance is exactly zero (MSE = {.val {ss$mse}}), so \\
-             the {.field F = MSA/MSE} pivot does not exist.",
-        i = "Inspect the data or use {.code ci_method = \"montecarlo\"}."
+        i = "The {.field F = MSA/MSE} pivot is not usable here: \\
+             MSA = {.val {signif(ss$msa, 6)}}, MSE = {.val {signif(ss$mse, 6)}}.",
+        i = "Inspect the data before retrying."
       ),
       class = "intraclass_singular_fit",
       call = call
