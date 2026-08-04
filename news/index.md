@@ -250,6 +250,29 @@
 
 ### Bug fixes
 
+- Three error messages raised on degenerate data told you to retry with
+  `ci_method = "montecarlo"` on data where that method also fails. In
+  the worst case the advice pointed **away** from a method that works:
+  when every subject has the same score profile,
+  `ci_method = "npbootstrap"` would suggest `"montecarlo"`, which also
+  errors, while `ci_method = "bootstrap"` returns a usable interval on
+  that same data. A seeded sweep of each error’s own trigger condition
+  measured every available method against it; the messages raised by
+  `"bootstrap"`, `"searle"`, `"burch"` and `"npbootstrap"` on degenerate
+  data now name another method only where it was measured to work there.
+  The one message whose suggestion the sweep confirmed keeps it.
+
+- The error raised by `ci_method = "npbootstrap"` on degenerate observed
+  data stated that between- or within-subject variance was exactly zero.
+  That was false for one of the two conditions it guards: the interval
+  is also undefined when the jackknife standard error is zero, which
+  happens on data whose variances are both perfectly healthy — the
+  message then reported a finite `log F` inside a sentence claiming zero
+  variance. These messages now report the quantities that failed the
+  check rather than asserting a cause, so what they say holds on every
+  dataset that reaches them. The errors’ conditions, classes and opening
+  lines are unchanged.
+
 - Projecting a one-way interval to a numeric `unit` (a D-study
   projection to `m` raters) could return a confidence interval lying
   **entirely above 1** — outside the ICC’s range, sometimes with the
