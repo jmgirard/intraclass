@@ -44,14 +44,21 @@ bootstrap_ci <- function(
   n_ok <- sum(ok)
   n_fail <- length(ok) - n_ok
 
+  # This guard REPORTS the quantity that failed and diagnoses nothing. It named
+  # `ci_method = "montecarlo"` until a seeded sweep of its own trigger class
+  # measured montecarlo usable on 0 of 6 datasets that reach it (and every other
+  # shipped method on 0 of 6 too), and asserted a single cause -- "near a
+  # variance boundary or the design is too small" -- that the same sweep's jitter
+  # cells contradict. Naming a method here again needs sweep evidence that the
+  # method is usable on every dataset reaching this guard.
   if (n_ok < min_frac * boot_samples || n_ok < 2L) {
     abort_intraclass(
       c(
         "The bootstrap interval could not be computed: only \\
          {.val {n_ok}} of {.val {boot_samples}} refits converged.",
-        i = "This usually means the model is near a variance boundary or the \\
-             design is too small to resample stably.",
-        i = "Use {.code ci_method = \"montecarlo\"} or inspect the model."
+        i = "A refit counts as converged only when every variance component it \\
+             returned is finite.",
+        i = "Inspect the model fit and the data before retrying."
       ),
       class = "intraclass_singular_fit",
       call = call
