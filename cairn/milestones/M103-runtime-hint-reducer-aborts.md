@@ -1,6 +1,6 @@
 # M103: Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -108,7 +108,7 @@ error) → ROADMAP candidate row.
       shared classical guard.
 - [x] T6 Tests: byte-identity where no candidate is usable; the `gen_ssa0`
       promise end to end.
-- [ ] T7 NEWS, `@details`, and the gate: suite at `NOT_CRAN=true CI=true`,
+- [x] T7 NEWS, `@details`, and the gate: suite at `NOT_CRAN=true CI=true`,
       `devtools::check()`, `lintr`, `air format --check`, all `data-raw`
       checkers.
 
@@ -129,6 +129,10 @@ error) → ROADMAP candidate row.
 
 - 2026-08-04: T4/T5/T6 — `tests/testthat/test-reducer-abort-hint.R`, 142 assertions, 0 failures, 245 s. AC2's mutation clause verified by hand: making `boundary_method_usable()` return `TRUE` unconditionally reds the verdict table (10+ failures at the same assertion), source restored. The AC5 pins render through a fixed renderer (`cli.width`, `cli.unicode`) after the first run failed on nothing but the bullet glyph — a pin that varies with the terminal is evidence about the terminal.
 - 2026-08-04: sweep re-run under the M103 code writes `tests/testthat/fixtures/abort-remedy-sweep.tsv` with `reached`, `point_fit_ok`, `site_confirmed`, `outcome` and `remedy_usable` identical row for row to the pre-M103 run — the feature changes what the guards *say*, not what the methods *do*. The script's own runtime roughly doubled (~25 → ~60 min) because each `icc()` retry it makes now pays for a hint; noted in its header.
+
+- 2026-08-04: T7 gate. Suite at `NOT_CRAN=true CI=true`: 5603 pass, 0 fail, 0 error, 23 skip. `devtools::check(env_vars = c(NOT_CRAN = "false"))`: 0 errors, 0 warnings, 0 notes. `lintr::lint_package()` 0 lints; `air format --check` clean; `pkgdown::check_pkgdown()` clean; `document()` no diff. `data-raw/check-abort-remedy-verdicts.R`: 52 engine-fit cells, 0 disagreements. The three Python checkers and their `--self-test`s pass; `cairn_validate` all checks passed.
+- 2026-08-04: the hotfix regression test `test-abort-remedy-truthfulness.R` "the npbootstrap resample-degeneracy abort KEEPS its montecarlo remedy" is superseded, not deleted. Its intent — the hotfix de-named only condemned sites, so a blanket de-naming sweep reds — is preserved and strengthened: the test now asserts the guard names at least one method AND that every method it names passes `boundary_method_usable()` on that data. The literal `montecarlo` no longer holds because AC2 replaced that hard-coded name with verification, and on this generator the deterministic pair verifies first; pinning the literal would pin the tier order rather than the truthfulness.
+- 2026-08-04: the three new `@details` sentences needed rows in `data-raw/mpl-doc-claims.tsv` — the M94 checker enumerates every claim in the `@param ci_method` block. Filed as `out` rows (the M92 fixture cannot settle a boundary-hint claim), each naming where it IS settled, following the existing `b41deb261c52` row for M93's claim. Checker and `--self-test` green.
 
 ## Decisions
 
