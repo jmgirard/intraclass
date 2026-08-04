@@ -66,3 +66,18 @@ jobs:
 
       - name: Self-test the MPL doc-claims check (mutation harness)
         run: python3 data-raw/check-mpl-doc-claims.py --self-test
+
+      # M102: every load-bearing figure a tracking record registers in
+      # data-raw/record-claims.tsv is re-derived from its artifact here, so a
+      # transcribed number that drifts reds this job instead of surviving
+      # review passes. Stdlib-only and R-free. It refuses every `git` command a
+      # ledger row spells, because this checkout is depth-1 and has no `main`
+      # ref, so such a row would red as a claim failure for a reason that is not
+      # about the claim. That is a rule over the ledger cell and not a sandbox:
+      # an accepted row can still read `.git/` as a path, or shell out from
+      # inside `awk`/`python3` (D-020 Amendment 2).
+      - name: Re-derive the registered record claims (M102)
+        run: python3 data-raw/check-record-claims.py
+
+      - name: Self-test the record-claims checker (route excision)
+        run: python3 data-raw/check-record-claims.py --self-test

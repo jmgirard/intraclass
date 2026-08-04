@@ -1,5 +1,27 @@
 # data-raw/ — oracle provenance scripts
 
+## Record-claim checkers
+
+Five checkers live here — `check-mpl-doc-claims.py`, `check-oracle-registry.py`,
+`check-record-claims.py`, `check-reference-observations.py` and
+`enumerate-generalizing-claims.py` [claim:data-raw-checker-inventory] — all
+stdlib-only `python3` so the R-free `check-references` CI job can run them.
+Four of the five are wired into that job, which invokes a `data-raw` checker
+eight times [claim:lint-checker-invocations]: each wired checker twice, once for
+the check and once for its vacuity self-test. `check-oracle-registry.py` is run
+locally only.
+
+`check-record-claims.py` (M102) re-derives the figures registered in
+`record-claims.tsv`. A record states a load-bearing figure by citing the row
+that settles it — a `[claim:<id>]` marker — and the checker reads those
+citations from the four correctable tracking records the convention names, and
+from nowhere else. `cairn/DECISIONS.md` and `cairn/milestones/archive/` carry no
+claim citation [claim:no-citations-in-decisions], because a decision entry or an
+archived milestone proven wrong is superseded rather than corrected, so a
+citation could neither be added to one later nor a drifted figure repaired in
+place. Run it, and its `--self-test`, before pushing an edit to a registered
+figure.
+
 Every committed reference value in the test suite traces to a seeded script
 here (PRINCIPLES.md #4/#12) and an entry in the oracle registry
 (`cairn/references/ORACLES.md`). Frequentist oracle scripts follow the

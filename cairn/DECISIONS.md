@@ -679,3 +679,255 @@ intended under #5. Perfect/near-perfect-agreement data now errors where it got
 [0, 1] (documented in NEWS). DESIGN.md's interval-time boundary table gains an
 MPL row citing this entry. Doc surfaces updated in M99 (roxygen, NEWS, comments,
 the boundary-hint sentence, `data-raw/mpl-doc-claims.tsv` re-triage).
+
+### D-020 (2026-08-02): Registered record claims — a load-bearing figure in tracking prose cites the ledger row that re-derives it, and CI re-runs every row
+
+**Context:** A figure transcribed out of an artifact and into tracking prose — a
+count, a worst-case step, an inventory — is read on every later pass and
+re-derived on none. M100 returned from review five times over records asserting
+more than their evidence established, and its fifth failure was this shape
+exactly: a criterion certified by a hand-written `grep` whose pattern could not
+match the violation it was certifying, green because it was vacuous. D-009
+already closed the same gap for `cairn/references/` pages, where every dated
+repo-state claim carries an inline exit-coded settling directive. This entry
+closes it for the tracking records, whose claims are figures rather than dated
+observations and which every milestone edits.
+**Decision — the convention, as numbered rules.** The committed ledger
+`data-raw/record-claims.tsv` and the checker `data-raw/check-record-claims.py`
+implement it. Each rule names the checker's failure route that probes it, or
+records that no input drives one and why.
+1. A ledger row is tab-separated under a header naming exactly `id`, `record`, `kind`, `shape`, `claim`, `command`, `expected_rc`, `expected_match`, `falsifier_command`, `disposition`, `reason`; the checker's module docstring states that grammar and the checker parses its own column list back out of the statement, so the two cannot drift. probe: grammar
+2. A record states a load-bearing figure by citing, inline, the ledger row that settles it — the marker `[claim:<id>]`. A citation naming no row is an error. probe: unresolved-citation
+3. A row whose `disposition` is `cited` must be cited by some record in scope; a row deliberately registered without a citation declares `uncited` and gives its reason. probe: uncited-row
+4. Citation scope: `cairn/ROADMAP.md`, `cairn/LESSONS.md`, `cairn/DESIGN.md`, `data-raw/README.md` — the four records that are current knowledge and so correctable in place. History (this file, work logs, `milestones/archive/`) is excluded because IP4 forbids editing it: a citation could not be added to it later, nor a figure proven wrong repaired where it sits. The checker asserts its own scope list equals the one this rule states, so the artifact under test cannot choose its own scope. probe: scope-parity
+5. Registration, not detection: the checker's only inputs are ledger rows and citations, and it never scans prose for unregistered figures — an unregistered figure is unchecked and this tool will never say one exists. probe: none — a limit on what the checker reads rather than a condition it can meet, so no constructed input drives it to a failure; it is stated here so the limit is on the record instead of being discovered by a reader who trusted a green check
+6. A `kind = absence` row carries a `falsifier_command`: the row's own command against a committed constructed input, under which the row must not pass. A certifying command that cannot be shown to fail certifies nothing. probe: absence-no-falsifier
+7. That falsifier is run, and must fail the row's own expectation. probe: falsifier-passes
+8. `kind` is author-declared and never inferred; declaring `presence` over an absence-shaped expectation (a non-zero exit status, a zero count, an empty result) is a mis-registration and an error. An output-shape classifier is a trap for mis-registration only, never the source of `kind` — it would miss the `^0 problems$` and `test !` forms and so rebuild the vacuity it exists to catch. probe: kind-misregistered
+9. A command is one of the shapes the docstring states, tokenized and run without a shell — a pipeline, a redirection, a substitution or a chained second command is inexpressible rather than merely discouraged. probe: unknown-shape
+10. A `git` command naming a history-dependent form — a `log`/`blame`/`rev-list`/`show`, a revision range, or a ref other than `HEAD` — is refused with its reason, the CI checkout being depth-1 with no `main` ref, so such a command would pass locally and fail there for reasons unrelated to the claim. probe: refused-form
+11. A row's command must exit with its `expected_rc`. probe: rc-mismatch
+12. Its stdout must fullmatch its `expected_match`; when the two disagree it is the record that is at fault, not the run. probe: match-mismatch
+13. Every command runs under a bounded per-row timeout. probe: timeout
+14. Every failure route the docstring states has a probe and every probe has a stated route, compared as sets rather than counts; and each probe is shown load-bearing by excising its route's sentinel-delimited block and confirming exactly that probe goes quiet. probe: route-parity
+15. The shapes the docstring states equal the shapes the code dispatches on. probe: shape-parity
+16. The refused forms the docstring states equal the forms the detectors fire on, one constructed sample apiece — a stated form no sample triggers is a dead rule. probe: refused-parity
+17. A rule in this list naming a route the checker does not implement is an error. probe: rule-probe-unknown
+**Relation to D-009:** the two conventions divide by surface and by claim type,
+not by strength. D-009 governs `cairn/references/` pages and their *dated
+observations* about repo state, settled by a directive written inline beside the
+claim, enforced by `check-reference-observations.py`. This entry governs the four
+correctable *tracking* records and their *figures*, settled by a row in a
+separate registry that the prose cites, enforced by `check-record-claims.py`.
+The registry is separate here because a figure's settling command is often
+longer than the sentence and is reused across records, where a dated
+observation's directive is per-claim by construction (D-009 rule 1). Neither
+supersedes the other, and a `references/` page stays D-009's.
+**Consequences:** a registered figure that drifts from its artifact reds the
+`check-references` job instead of surviving review passes; the ledger is the
+place a milestone registers a figure it wants held. The honest limit is rule 5's:
+coverage is exactly what authors register, so a green run asserts nothing about
+figures nobody registered. The standing ROADMAP candidate row for an
+abort-remedy-truthfulness ledger builds on this row schema and checker idiom
+rather than designing a second.
+
+### D-020 Amendment 1 (2026-08-02): the refusal rule is one test, not a parse — no ledger command may run `git`
+
+**Context:** D-020 rule 10 refused "a `git` command naming a history-dependent
+form ... a revision range, or a ref other than `HEAD`". Meeting that required
+deciding which token of a git command line was a revision, and two review passes
+of M102 each defeated an implementation of it. The first enumerated ref
+spellings and missed `HEAD~1`, `HEAD^`, a raw SHA, a tag and a bare branch name.
+The second stated the rule positively over git's revision slot — pattern behind
+`-e`, pathspec behind `--`, every operand between them must be `HEAD` — and was
+defeated by `git grep -c -e -- main -- <path>`, where the `--` is `-e`'s own
+argument, so the scan took it for the separator and never saw `main` behind it.
+That command is accepted, resolves the ref locally, and on the depth-1 CI
+checkout exits 128 — reported to its reader as the record being wrong.
+**Decision:** the rule is decided by one test, `argv[0] == "git"`, and by nothing
+after it. Every `git` command is refused; the `git-grep` shape is removed, so no
+shape maps to git at all; and a row that wanted `git grep` writes `grep -r`,
+which reads the working tree — the only tree a claim is ever about.
+1. No registered command may run `git`, whatever its flags spell. probe: refused-form
+2. The recognised forms — a history subcommand, a revision range, a ref spelling other than `HEAD` — no longer decide refusal and only name its reason, with `git-command` covering every command they do not recognise. Being wrong about which applies costs a vaguer sentence and never an acceptance. probe: refused-form
+3. No command shape maps to `git`; a row naming one fails on the shape as well as the refusal. probe: unknown-shape
+**What this does not claim:** it is a syntactic rule over the ledger cell, not a
+sandbox. A `python3` row can still shell out to git, and D-020's rule 5 limit
+applies here too — this is stated rather than papered over.
+**Supersedes:** D-020 rule 10 only. Rules 1–9 and 11–17 stand unchanged, as do
+the citation scope, the registration-not-detection limit, and the relation to
+D-009. The reason an amendment rather than an edit: rule 4 of the entry it
+amends says this file is history and IP4 forbids editing it, and a convention
+that exempted its own record would not be one.
+
+### D-020 Amendment 2 (2026-08-03): rule 9's "inexpressible" is false — the no-shell claim is narrowed to the checker's own layer
+
+**Context:** Rule 9 states that a command "is one of the shapes the docstring
+states, tokenized and run without a shell — a pipeline, a redirection, a
+substitution or a chained second command is inexpressible rather than merely
+discouraged." M102's third review pass falsified it. An `awk` row running
+`awk 'BEGIN{ "git rev-list --count main..HEAD" | getline x; print x }'`
+validates, is not refused, and passes, printing `commits:11` — awk's `| getline`
+and `system()` spawn a shell from inside a shape the checker allows, and a
+`grep`/`ls`/`awk` row can read `.git/` directly beside it. The claim was true of
+the checker's own tokenizer and false of the system. Amendment 1 had already
+conceded exactly this for one shape ("a `python3` row can still shell out to
+git"); rule 9 kept asserting the general form.
+
+**Decision:** rule 9 is narrowed to the layer it is true of. The checker
+tokenizes with `shlex.split` and executes directly, so it interprets no shell
+metacharacter — a pipeline or redirection written in a ledger cell is argument
+text, not a shell construct. It does not follow, and is no longer claimed, that
+a shell is unreachable: an accepted shape's own program may spawn one. The rule
+is over the cell, never over what an accepted command does at runtime. Three
+consequences are stated rather than papered over: `awk` and `ls` shapes can read
+`.git/`; a `python3` row can `subprocess`; and rule 1's "no registered command
+may run `git`" is therefore a syntactic guarantee about `argv[0]`, not a
+behavioural one about history access.
+
+**What this does not do:** it does not close the capability channels, which
+would need an allowlist over what a shape may DO — dropping `awk` and `ls`,
+restricting `python3` to committed helpers, refusing `.git/` paths — re-cutting
+the shape set M102's AC1 and AC3 rest on. That was weighed at the M102 gate
+(2026-08-03) and declined in favour of narrowing the promise, per the plan-gate
+rule that a counterexample defeating an enumeration is not answered by a wider
+enumeration. Promote the allowlist if a ledger row is ever found reaching
+history in a way that makes a shipped figure wrong — the falsifier — never on a
+further count of channels.
+
+**Supersedes:** D-020 rule 9 only. Rules 1–8 and 11–17 stand, as does
+Amendment 1 in full.
+
+### D-021 (2026-08-03): Records-verification work needs a trigger in what the package computes — cairn's D-090 door, adopted here
+
+**Context:** Eight of the last nine milestones — M94, M95, M96, M97, M98, M100,
+M101, M102 — have as their subject whether this repo's own prose, messages and
+records tell the truth; only M99 is about what the package computes. D-020
+(2026-08-02) is the first decision entry whose subject is tracking prose. The
+thrash concentrates in exactly that class: M92 ran seven passes where 1–6 each
+failed on prose authored about the work and never on the code; M93 ran eight,
+its last three with shipped code byte-identical; M100 ran three returns, passes
+2 and 3 each finding a fresh false claim inside the previous pass's own fix;
+M102 ran three and parked. The class is self-feeding — a repair to prose is new
+prose, which is a new claim that can be false — and it never runs out of
+subject matter, so it fills any gap in the queue. It is not worthless: M97 found
+a hint naming a method that then failed, and M98's plan gate falsified a claim
+that the pole hotfix had removed the endpoint test's anti-clamp coverage. What
+it lacks is a door. cairn closed the same program on itself at its D-090 after
+four consecutive apparatus milestones.
+
+**Decision:** No milestone is planned whose deliverable is verification of this
+repo's own records, prose or messages — a ledger over tracking figures, a guard
+over doc claims, a truthfulness audit — unless its trigger is a defect in what
+the package computes for its users: a wrong number, a wrong interval, a wrong
+abort, a wrong exported behaviour. A false or unbacked claim in a record is
+corrected in place, in the milestone that finds it, and never promoted into a
+milestone of its own. Untouched: guards that pin a NUMERIC result or an exported
+behaviour, which are ordinary verification of what the package does; the oracle
+discipline under PRINCIPLES.md #1; and repairs to existing checkers surfaced as
+ordinary work.
+
+**In-flight disposition, taken at this entry rather than grandfathered.** M102
+finishes on the narrowed AC2 above — its checker and ledger are built, eight of
+nine criteria are green, and withdrawing an over-claim costs less than dropping
+working machinery. M100 and M101 are re-judged against this door before either
+resumes: each must name the wrong user-facing behaviour that motivates it, or it
+is dropped and its content becomes a note in the milestone that next touches
+those abort paths.
+
+**Consequences:** the plan-time collision check surfaces this on any
+records-verification scope, and the standing-rejection discipline applies —
+supersede, don't ignore. If a wrong shipped number is ever traced to a record
+defect this door turned away, this is the entry to supersede.
+
+### D-020 Amendment 3 (2026-08-03): the checker's `D-045` and `IP4` citations name ids this repo does not define — the rule is restated in its own words
+
+**Context:** M102's fourth review pass found two dangling references behind the
+citation scope. Rule 4 of the base entry justifies excluding history from the
+scope with "IP4 forbids editing it", and `check-record-claims.py` carried the
+same citation beside a second one, "current knowledge under D-045". Neither id
+exists in this repo: `cairn/DECISIONS.md` holds D-001…D-021 and `cairn/DESIGN.md`
+defines IP1–IP3. Both are the cairn plugin's own numbering — its D-045 splits
+tracking files into current knowledge and history, and its IP4 is the rule that
+history is never edited. A reader of this repo resolving either id against this
+repo's records finds nothing, and the sole stated ground for the scope's shape
+therefore reads as unbacked. A repo-wide dangling-id check at the pass-5 fix
+found no other live case: `D-024`, `D-025` and `D-090` are already written as
+cairn's, and `D-050` and `D-055` appear only in a work log and an archive
+summary.
+
+**Decision:** the rule stands unchanged and its justification is restated
+without the borrowed ids. History — decision entries, work logs,
+`milestones/archive/` — is excluded from the citation scope because it records
+what was decided at a time and is never edited, so a citation could not be added
+to it later and a figure proven wrong in it could never be repaired where it
+sits. The four scope files are current knowledge: they record what is true now,
+so a wrong figure is corrected in place. That is the cairn tracking rulebook's
+split, and where this repo's records name it they qualify it as the plugin's —
+"cairn D-045", "cairn IP4" — matching the existing `cairn D-024` convention,
+rather than writing a bare id that collides with this repo's own numbering.
+`check-record-claims.py`'s SCOPE comment is corrected in place, being current
+knowledge; rule 4 and Amendment 1 are history and stand as written, corrected by
+this entry.
+
+**Supersedes:** nothing operative. It annotates rule 4's and Amendment 1's
+justifying citations; the scope list, the parity assertion and every probe are
+untouched.
+
+### D-021 Amendment 1 (2026-08-03): three figures in the motivating census are wrong — corrected against the committed records
+
+**Context:** M102's fourth review pass found D-021's motivating paragraph
+contradicting the committed record and, on one quantity, itself. Three
+corrections, each re-derived at the pass-5 fix:
+
+1. "M93 ran eight" — `cairn/milestones/archive/M93-boundary-abort-hint.md:19`
+   records "Ten passes, three re-cuts". The figure is ten.
+2. "M100 ran three returns" — M100 reached a fifth review pass
+   (`a10d64e` "M100 review pass 5: gate failed (fifth return)"), and D-020,
+   added by the same milestone as this entry, already says M100 "returned from
+   review five times", as does `check-record-claims.py`'s "M100 passes 1-5".
+   The figure is five, and D-021 was the only record disagreeing.
+3. The census "Eight of the last nine milestones — M94, M95, M96, M97, M98,
+   M100, M101, M102" counts M95 and M98, which this entry's own Untouched clause
+   exempts: M95 pins a numeric result (all 162 cells of the shipped κ_m table)
+   and M98 pins a behavioural one (the endpoint-parity test's clamp-detection
+   classes). Both are ordinary verification of what the package does. The census
+   is six of the last nine — M94, M96, M97, M100, M101, M102.
+
+**Decision:** the three figures are corrected as above. The decision itself is
+unchanged and none of the three disturbs it: six of nine consecutive milestones
+taking the repo's own records as their subject, with M93 at ten passes and M100
+at five returns, states the concentration the door exists to stop at least as
+strongly as the wrong figures did. The correction is recorded here rather than
+edited into the entry, that file being history.
+
+**Supersedes:** D-021's Context paragraph figures only. The Decision, the
+Untouched clause, the in-flight disposition for M100/M101/M102 and the
+Consequences stand in full.
+
+### D-020 Amendment 4 (2026-08-03): Amendment 3's own count of the qualified ids is wrong — corrected against every site
+
+**Context:** Amendment 3 states "`D-024`, `D-025` and `D-090` are already
+written as cairn's". M102's fifth review pass falsified it, and re-measuring
+every site shows it wrong on two of the three. `D-090` is qualified at all three
+of its sites (`cairn/ROADMAP.md:4`, and D-021's heading and body). `D-024` is
+qualified at every site this repo authored — `cairn/DESIGN.md:217`,
+`cairn/DECISIONS.md:138` and `:155`,
+`cairn/milestones/archive/M63-references-migration.md:13` — but NOT at
+`cairn/PROFILE.md:7`, which reads a bare `(D-024/D-025)`. `D-025` occurs exactly
+once in this repo, at that same bare site. So the sentence is true of `D-090`,
+true of `D-024` only where this repo wrote it, and false of `D-025` outright.
+
+**Decision:** the sentence is corrected to read: `D-090` is written as cairn's
+everywhere it appears; `D-024` is written as cairn's at every site this repo
+authored; and both `D-024` and `D-025` appear bare exactly once, in
+`cairn/PROFILE.md`'s scaffold comment. That comment is `cairn-init` template
+output describing the plugin's own doctrine, not a record this repo authored or
+this milestone owns, so it is left alone rather than repaired here. Amendment 3's
+conclusion is unchanged and does not rest on the miscount: the only live,
+unqualified ids in records this repo wrote were the checker's `D-045` and `IP4`,
+and both are corrected there.
+
+**Supersedes:** one sentence of Amendment 3. Its decision, its correction to the
+checker's SCOPE comment, and its annotation of rule 4 and Amendment 1 stand in
+full.
