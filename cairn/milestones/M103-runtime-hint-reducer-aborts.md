@@ -1,11 +1,11 @@
 # M103: Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP1, GP7
-- **Branch/PR:** `m103-runtime-hint-reducer-aborts`
+- **Branch/PR:** `m103-runtime-hint-reducer-aborts` / https://github.com/jmgirard/intraclass/pull/111
 
 ## Goal
 
@@ -39,7 +39,7 @@ error) → ROADMAP candidate row.
 
 ## Acceptance criteria
 
-- [ ] AC1 Each of the six `intraclass_singular_fit` guards under `R/ci-*.R` —
+- [x] AC1 Each of the six `intraclass_singular_fit` guards under `R/ci-*.R` —
       the two `mc_ci()` guards M93 wired, plus `bootstrap_ci()`'s
       refit-convergence guard, `classical_guard_observed()`, and
       `npbootstrap_ci()`'s observed-data and degenerate-resample guards —
@@ -47,7 +47,7 @@ error) → ROADMAP candidate row.
       message. A test fires each of the six with a synthetic one-bullet hint and
       asserts the bullet appears, and asserts each guard's condition class and
       leading message line are the ones it shipped at 703fc1b.
-- [ ] AC2 No remedy bullet names a `ci_method` that `boundary_method_usable()`
+- [x] AC2 No remedy bullet names a `ci_method` that `boundary_method_usable()`
       did not accept by running that method's shipped reducer and finding every
       returned interval usable by `boundary_interval_usable()`. A committed test
       asserts `boundary_method_usable()`'s verdict for every (guard, data,
@@ -56,29 +56,29 @@ error) → ROADMAP candidate row.
       returning `TRUE` reds it. The resample guard's `montecarlo` bullet,
       hard-coded before this milestone, becomes verification-backed like the
       rest.
-- [ ] AC3 No remedy bullet names the `ci_method` the caller invoked. A test
+- [x] AC3 No remedy bullet names the `ci_method` the caller invoked. A test
       fires each guard once per invoking value it lists — `bootstrap` for the
       refit guard, `searle` and `burch` for the classical guard, `npbootstrap`
       for both npbootstrap guards, `montecarlo` for the two `mc_ci()` guards —
       and asserts that value appears in no `ci_method = "…"` rendering in the
       message. A guard's own leading line is not a remedy bullet and is exempt:
       `bootstrap_ci()`'s names "bootstrap" by construction and AC1 freezes it.
-- [ ] AC4 Forcing a guard's hint never re-enters that guard's own abort path.
+- [x] AC4 Forcing a guard's hint never re-enters that guard's own abort path.
       `burch_ci()` and `searle_ci()` share `classical_guard_observed()`, so
       verifying `burch` from a `searle` abort re-enters it; a test asserts that
       call terminates, raising one classed abort rather than recursing, and that
       `boundary_method_usable()` passes no hint to any candidate it runs.
-- [ ] AC5 On data where no candidate is usable, each guard's message is exactly
+- [x] AC5 On data where no candidate is usable, each guard's message is exactly
       the one it shipped at 703fc1b. Pinned for the three guards the sweep's
       `gen_mse0` cells reach, each fired with a non-empty `hint` argument so the
       pin reds if verification wrongly accepts a method. The resample guard is
       outside this criterion by construction — `gen_mse0` never reaches it.
-- [ ] AC6 On `gen_ssa0` data `npbootstrap_ci()`'s observed-data guard names
+- [x] AC6 On `gen_ssa0` data `npbootstrap_ci()`'s observed-data guard names
       `ci_method = "bootstrap"`, and a test re-runs `icc()` with that string on
       the same data and asserts the returned interval is one
       `boundary_interval_usable()` accepts — the promised call is the verified
       one.
-- [ ] AC7 `data-raw/sweep-abort-remedies.R` and its committed result land on the
+- [x] AC7 `data-raw/sweep-abort-remedies.R` and its committed result land on the
       default branch with provenance naming their origin, and every figure AC2's
       test asserts is read from that result rather than transcribed.
 
@@ -134,6 +134,8 @@ error) → ROADMAP candidate row.
 - 2026-08-04: the hotfix regression test `test-abort-remedy-truthfulness.R` "the npbootstrap resample-degeneracy abort KEEPS its montecarlo remedy" is superseded, not deleted. Its intent — the hotfix de-named only condemned sites, so a blanket de-naming sweep reds — is preserved and strengthened: the test now asserts the guard names at least one method AND that every method it names passes `boundary_method_usable()` on that data. The literal `montecarlo` no longer holds because AC2 replaced that hard-coded name with verification, and on this generator the deterministic pair verifies first; pinning the literal would pin the tier order rather than the truthfulness.
 - 2026-08-04: the three new `@details` sentences needed rows in `data-raw/mpl-doc-claims.tsv` — the M94 checker enumerates every claim in the `@param ci_method` block. Filed as `out` rows (the M92 fixture cannot settle a boundary-hint claim), each naming where it IS settled, following the existing `b41deb261c52` row for M93's claim. Checker and `--self-test` green.
 
+- 2026-08-04: review gate FAILED (first defect return), status -> in-progress. Two confirmed user-facing defects, both outside every acceptance criterion: (F5) the milestone's own withholding decision is falsified by its own AC6 fixture — on `gen_ssa0` the DEFAULT `icc()` call aborts with no bullet while `ci_method = "bootstrap"` returns a usable interval, so the motivating benefit never reaches the default path and the Decisions entry's "holds no evidence either way" is false; (F11) `searle_ci()`/`burch_ci()` share one guard on identical `ss`, so tier 1 there is empty by construction and every classical degeneracy abort now pays a 999-refit bootstrap — measured 25.6 s to emit a message with no bullet, against instant before this branch. Also actioned: F8 (`boot_samples` means different things across methods, so the promised retry is not the verified run), F7 (unconditional `@details` claim that an error names a method, false in 3 of 6 measured cases), F1 (AC3's test green with self-exclusion deleted). AC1-AC7 evidence stands as recorded; the gap is in what the criteria cover.
+
 ## Decisions
 
 ### 2026-08-04: remedy bullets are tiered by cost, and the fenced methods go first
@@ -184,3 +186,147 @@ generate that combination, so it holds no evidence either way; one such dataset
 reopens the withholding.
 
 ## Review
+
+2026-08-04, PR #111. All evidence below is from runs made in this review session
+on `m103-runtime-hint-reducer-aborts` at eb98e4a, not recalled from implement.
+
+### Criterion evidence
+
+- AC1 — `test-reducer-abort-hint.R` "each of the six degeneracy guards splices a
+  lazily-built hint": 30 assertions, 0 failures. Fires all six guards at the
+  function that owns each (`rmvn`, `mc_interval`, `bootstrap_ci` with a stubbed
+  all-NA `simulate_refit`, `searle_ci`, and both `npbootstrap_ci` guards) with a
+  synthetic bullet; asserts the bullet appears, the leading line equals the
+  703fc1b text, and the class is `intraclass_singular_fit`. Companion test "a
+  hint is never forced on a call that succeeds": 2 assertions — `hint =
+  stop(...)` passed to two reducers that succeed raises nothing, so the promise
+  is genuinely lazy.
+- AC2 — "boundary_method_usable() agrees with the sweep, cell by cell": 80
+  assertions, 0 failures, one per (reached cell x method) for `searle`, `burch`
+  and `npbootstrap`, each expecting `isTRUE(row$remedy_usable)` read from the
+  fixture. The `bootstrap` and `montecarlo` columns re-derive via
+  `Rscript data-raw/check-abort-remedy-verdicts.R`: 52 cells, 0 disagreements,
+  exit 0. Mutation clause exercised directly — inserting an unconditional
+  `return(TRUE)` at the head of `boundary_method_usable()` reds the verdict
+  table (10+ failures at the same assertion); source restored and re-verified
+  green. Companion test "the engine-fit rows refuse to verify with no fit in
+  hand": 2 assertions. The resample guard's hard-coded `montecarlo` literal is
+  gone from `R/ci-npbootstrap.R` and that site now splices the verified hint.
+- AC3 — "no remedy bullet names the ci_method the caller invoked": 12
+  assertions, 0 failures. Six cases, one per (guard, invoking value): `bootstrap`
+  at the refit guard, `searle` and `burch` at the classical guard, `npbootstrap`
+  at both npbootstrap guards, `montecarlo` at the Monte-Carlo guards. Each fires
+  through `icc()` and asserts the invoking value appears in no
+  `ci_method = "…"` rendering after the leading line, which the criterion
+  exempts.
+- AC4 — "verifying burch from a searle abort terminates, not recurses": 2
+  assertions. The call returns (non-termination would hang the suite, which is
+  the substantive check) and the escaping condition is one
+  `intraclass_singular_fit` carrying the classical guard's leading text exactly
+  once. "verification passes no hint to any candidate it runs": 4 assertions —
+  `local_mocked_bindings()` captures the dots of `searle_ci`/`burch_ci` as
+  `boundary_method_usable()` calls them and asserts no `hint` argument is
+  present at all, not merely that an empty one is.
+- AC5 — "no usable candidate leaves the shipped message untouched": 6
+  assertions, 0 failures. The three guards `gen_mse0` reaches are fired through
+  `icc()` — so each builds and forces its real hint, running every candidate —
+  and each rendered message is `expect_identical` to the 703fc1b text. The
+  renderer is pinned (`cli.width`, `cli.unicode`) so the pin measures the
+  message, not the terminal. Cross-checked against the diff: `git diff 703fc1b`
+  over the four `R/ci-*.R` files shows the only message-text change is the
+  resample guard's own bullet, which this criterion excludes by construction.
+- AC6 — "the gen_ssa0 abort names bootstrap, and that call delivers": 4
+  assertions. The `npbootstrap` abort on `gen_ssa0` 6x3 names
+  `ci_method = "bootstrap"`, and re-running `icc()` with that string at the
+  named seed returns ICC(1) and ICC(k) intervals `boundary_interval_usable()`
+  accepts. Consistent with the fixture, where `bootstrap` is usable on 4 of 4
+  `gen_ssa0` cells and `searle`/`burch`/`montecarlo` on 0 of 4.
+- AC7 — `data-raw/sweep-abort-remedies.R` is on the branch at 5abdd05 with a
+  provenance header naming its origin branch, the two edits made in landing it,
+  and the re-run command; its result is at
+  `tests/testthat/fixtures/abort-remedy-sweep.tsv` (220 lines: 9 provenance
+  lines + header + 210 rows). Re-running the script under the M103 code
+  reproduced the pre-M103 result row for row on `reached`, `point_fit_ok`,
+  `site_confirmed`, `outcome` and `remedy_usable`. No verdict figure is
+  transcribed into the AC2 test: its expected value is `isTRUE(row$remedy_usable)`
+  read from the file, and the dataset for each row is rebuilt from that row's own
+  `generator`/`n_s`/`n_r`/`seed`/`trigger` columns.
+
+### Consistency gate
+
+`cairn_validate` exit 0 — `weight caps`, `status vocabulary`,
+`roadmap<->disk orphans`, `scaffold present`, `coverage complete`,
+`record density`, `sizing`, `work-log format`, `decisions format`,
+`references staleness`, `release window` all pass; the one WARN is the
+pre-existing `dangling id tokens` advisory (321, unchanged by this branch). No
+DESIGN principle changed, so `cairn_impact` is skipped. Toolchain slot
+(`r-package`): `devtools::check(env_vars = c(NOT_CRAN = "false"))` 0 errors /
+0 warnings / 0 notes; `devtools::document()` no diff; `pkgdown::check_pkgdown()`
+clean; `lintr::lint_package()` 0; `air format --check` clean; NEWS.md carries a
+user-visible entry with no milestone numbers; README.Rmd/README.md untouched by
+this branch. CI on PR #111: `lint`, `check-references`, `format-check`,
+`pkgdown` green; platform matrix still running at the time of this gate.
+
+### Independent review — three lenses, then a scorer
+
+Three fresh-context reviewers with distinct evidence bases (diff / blame-history
+/ prior-review record), then a separate Sonnet scorer holding the diff and the
+plan. 22 candidate findings; 5 scored >= 80. The prior-review lens probed for
+GitHub inline review comments, found none real, and correctly skipped the walk;
+its evidence is the archived `## Review` sections.
+
+**Actioned (>= 80).** Two clear the M130 return floor at 95, both re-confirmed by
+this session's own commands rather than taken from the reviewer:
+
+- **F5 (95) — the milestone's own falsifier has fired.** The Decisions entry
+  "the engine-fit tier is withheld from the Monte-Carlo default path" claims the
+  sweep grid "does not generate that combination, so it holds no evidence either
+  way". `gen_ssa0(6,3)` is that combination and is this milestone's own AC6
+  fixture. Measured: `icc(gen_ssa0(6,3), ...)` on the default path aborts with
+  "49% of draws were non-finite" and no bullet, while
+  `ci_method = "bootstrap"` returns a usable interval on the same data. So the
+  motivating benefit does not reach the default call, and a durable record
+  states something false.
+- **F11 (95) — the classical guard's tier 1 is structurally dead, at a 25.6 s
+  cost.** `searle_ci()` and `burch_ci()` compute the same `ss` and both call
+  `classical_guard_observed()` on it, so whenever one aborts the other does:
+  `Filter(usable, c("searle", "burch"))` at that guard is always empty by
+  construction, never by data. Every classical degeneracy abort therefore falls
+  through to tier 2 and pays a 999-refit bootstrap. Measured:
+  `icc(gen_mse0(6,3), ci_method = "searle")` takes 25.6 s to produce a message
+  containing no bullet at all. It was instant before this branch.
+- **F8 (85)** — the promised retry is not the verified run when `boot_samples`
+  differs in meaning across methods: verification runs `bootstrap_ci()` at the
+  caller's `boot_samples` (which meant *subject* resamples for `npbootstrap`),
+  while the bullet's promised retry runs at the `bootstrap` default 999.
+- **F7 (82)** — the new `@details` sentence asserts unconditionally that the
+  error "names a method verified on that same data"; in 3 of 6 measured cases it
+  names none. On a milestone about message truthfulness, an unhedged doc claim.
+- **F1 (80)** — AC3's test is vacuous: deleting the self-exclusion term leaves
+  all six assertions green, because no tested case has the invoked method as a
+  candidate. The case where self-exclusion is load-bearing (no caller `seed`,
+  verification re-running under `hint_verify_seed`) is untested.
+
+**Logged, not actioned (17 below 80),** one line each: F2 (25) in-suite verdict
+table excludes exactly the two new rows — the implement gate's recorded split;
+F3 (55) engine-fit-refusal test passes on main for a different reason; F4 (55)
+both AC4 tests pass on main; F6 (60) NEWS reads as a default-path improvement;
+F9 (50) "That run" singular when two runs occurred; F10 (45) "cannot" framing at
+a stochastic guard, inherited from M93; F12 (62) the `@details` cost sentence
+frames as exceptional what F11 makes the only case; F13 (55) the
+"drift is caught, not trusted" comment overstates what triplicated generators
+catch; F14 (45) `sweep_data()` transcribes the jitter magnitude and `n_varying`;
+F15 (38) the fixture is a reproducibility check, not an independent oracle;
+F16 (32) `run_remedy()` hardcodes `divisor = 2`; F17 (65) the rewritten hotfix
+test's per-method loop is near-tautological; F18 (55) that test would mis-fail
+if tier-2 methods were ever named there; F19 (68) three stale
+`data-raw/abort-remedy-sweep.tsv` path references left by the T1 move; F20 (70)
+the AC5 pin hard-codes a glmmTMB convergence count ("55 of 999"), a
+cross-platform flake candidate; F21 (60) design-consistency echo of F5;
+F22 (28) the hotfix test could have pinned the named set.
+
+**Gate outcome: returned to `in-progress`** (first defect return for this
+milestone). F5 and F11 are defects in what the package does for its users,
+scored 95, so the M130 return floor is met. Both sit outside every acceptance
+criterion — no criterion covers abort latency or the default-path hint — which
+is itself the coverage lesson to carry into the fix.
