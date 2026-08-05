@@ -148,6 +148,8 @@ error) → ROADMAP candidate row.
       Windows, where the point fit dies before the guard.
 - [x] T18 Fix the third bare-substring method match (`grepl("mpl")` matches
       `boot_samples`), which reddens ubuntu only.
+- [x] T19 Cut the suite cost this branch added: the abort-firing grid tests ask
+      at the screen count, and the usability side mirrors verification exactly.
 - [ ] T16 Re-run the gate and return to review.
 
 ## Work log
@@ -193,6 +195,7 @@ error) → ROADMAP candidate row.
 - 2026-08-05: T17 verified by CI — windows-latest, test-coverage, lint, pkgdown, format-check and check-references all pass at bc05641; the five reducer-abort failures are gone. One failure left, ubuntu only: `test-boundary-abort-hint.R:1017` matched the bare substring `mpl`, which occurs inside `boot_samples` — the third site of the trap `bh_msg_methods()`'s own comment says it fixed at two. It reds only where the flat two-way point fit survives and an engine-tier bullet is emitted; on macOS that fit dies, there is no bullet, and the line passes.
 - 2026-08-05: T18 — that site now reads through `bh_msg_methods()`, and its assertion is scoped to the four design-fenced methods: the engine-fit pair is not fenced by design, so where the fit survives, `bootstrap` may verify and be named there, which AC2 owns rather than this test. File re-run locally: 0 failures, 835 s.
 - 2026-08-05: measured suite cost after this branch, per test in `test-boundary-abort-hint.R`: 835 s total, of which four grid tests that fire REAL `icc()` aborts carry 781 s — 226.8 s (one-way names-vs-usable), 220.4 s (two-way), 208.8 s (missing score), 125.2 s (numeric-unit pole). Those are the tests whose aborts get an engine fit, so each abort pays a screened-and-capped bootstrap verification. CI wall-clock on PR #111: ubuntu 39m47s, windows 41m11s, test-coverage 49m49s, against the 17-24 min M78 recorded before this branch.
+- 2026-08-05: T19 (minor amendment: discovered task, at the maintainer's direction that a ~40 min suite is not acceptable). `bh_sweep_cell()` takes `boot_samples`, defaulting to `hint_screen_samples` rather than the shipped 999, and passes it to the `icc()` call it fires; the usability side goes through one new helper that asks exactly as `boundary_method_usable()` does — screen first, then the capped run, and no screen where the caller's count is already at or below it. What the cells assert is which methods are named against which are usable, and both sides read the same value, so the invariant is untouched by its size. Measured on `test-boundary-abort-hint.R`: 835 s -> 143 s, 0 failures, with the four grid tests going 781 s -> 93 s. Full suite 14.6 min, 5780 pass, 0 fail, 23 skip, against ~40 min before.
 - 2026-08-04: plan amendment (substantive) — AC2 now states both halves of its evidence: the fixture column for `searle`/`burch`/`npbootstrap`, the forward promise check for `bootstrap`/`montecarlo`, which the screen and cap made incomparable to that column. Tasks T13-T16 added.
 
 ## Decisions

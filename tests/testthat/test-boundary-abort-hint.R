@@ -1226,13 +1226,39 @@ test_that("multilevel, replicate and off-grid designs stay silent, and abort (AC
 #
 # Returns its counts rather than one number, because a cell whose default never
 # aborted asserted NOTHING and the caller has to be able to see that.
+# Is this method usable here, asked EXACTLY as `boundary_method_usable()` asks it?
+# For `bootstrap` that means the cheap screen at `hint_screen_samples` first and
+# only then the full run at the capped count -- and no screen at all when the
+# caller's own count is already at or below it, which is the branch verification
+# takes too. Modelling the cap alone would call a method usable that verification
+# had abandoned at the screen (pass-2 G9); modelling neither would ask at a count
+# nobody runs.
+bh_verified_usable <- function(d, method, args, boot_samples) {
+  ask <- function(n) {
+    bh_usable(d, method, c(args, list(seed = 1, boot_samples = n)))
+  }
+  if (!identical(method, "bootstrap")) {
+    return(ask(boot_samples))
+  }
+  screened <- boot_samples <= hint_screen_samples || ask(hint_screen_samples)
+  screened && ask(hint_verify_boot_samples(boot_samples))
+}
+
+# `boot_samples` defaults to the screen count rather than the shipped 999. What
+# these cells assert is WHICH methods an abort names against which are usable, and
+# both sides are asked at this same value, so the invariant is untouched by its
+# size. Its size is most of the file's cost: a verification at the default runs a
+# 25-refit screen and then a 199-refit bootstrap for every abort in every cell,
+# and at this value it runs one 25-refit bootstrap instead (M103, after CI came in
+# at ~40 min per platform against the 17-24 min before this branch).
 bh_sweep_cell <- function(
   lab,
   build,
   args,
   candidates,
   seeds = 1:6,
-  forbid = character(0)
+  forbid = character(0),
+  boot_samples = hint_screen_samples
 ) {
   aborts <- 0L
   named_total <- 0L
@@ -1241,7 +1267,15 @@ bh_sweep_cell <- function(
     d <- build(sd)
     m <- do.call(
       bh_msg_any,
-      c(list(d, ci_method = "montecarlo", seed = 1), args)
+      c(
+        list(
+          d,
+          ci_method = "montecarlo",
+          seed = 1,
+          boot_samples = boot_samples
+        ),
+        args
+      )
     )
     if (is.na(m)) {
       next
@@ -1270,32 +1304,11 @@ bh_sweep_cell <- function(
     # Asked under the SAME `seed = 1` the abort above was fired with: for
     # `npbootstrap` the verdict is seed-specific (M97 AC3), so usability under a
     # different seed would not be the property the hint promised.
-    # `bootstrap` is asked exactly as verification asks it (M103): the cheap screen
-    # at `hint_screen_samples` FIRST, and only then the full run at
-    # `hint_verify_boot_cap`, which is the call the bullet promises. Modelling the
-    # cap alone would call a method usable that verification had already abandoned
-    # at the screen, and the assertion below -- nothing usable in the winning tier
-    # is left out -- would then fail on a message that is perfectly truthful
-    # (pass-2 G9). Asking at the shipped 999 would be a third call again, one
-    # nobody is told to make.
+    # Every method is asked exactly as verification asks it, at the same
+    # `boot_samples` the abort above was fired with -- see `bh_verified_usable()`.
     usable_of <- function(set) {
       Filter(
-        function(x) {
-          if (identical(x, "bootstrap")) {
-            bh_usable(
-              d,
-              x,
-              c(args, list(seed = 1, boot_samples = hint_screen_samples))
-            ) &&
-              bh_usable(
-                d,
-                x,
-                c(args, list(seed = 1, boot_samples = hint_verify_boot_cap))
-              )
-          } else {
-            bh_usable(d, x, c(args, list(seed = 1)))
-          }
-        },
+        function(x) bh_verified_usable(d, x, args, boot_samples),
         set
       )
     }
@@ -1652,7 +1665,8 @@ test_that("a numeric unit splits the pair at its own projection pole (AC3)", {
       ci_method = "montecarlo",
       model = "oneway",
       unit = m,
-      seed = 1
+      seed = 1,
+      boot_samples = hint_screen_samples
     )
     if (is.na(msg)) {
       next
@@ -1667,7 +1681,12 @@ test_that("a numeric unit splits the pair at its own projection pole (AC3)", {
           "unit",
           m,
           meth,
-          bh_usable(d, meth, list(model = "oneway", unit = m))
+          bh_verified_usable(
+            d,
+            meth,
+            list(model = "oneway", unit = m),
+            hint_screen_samples
+          )
         ),
         paste("unit", m, meth, TRUE)
       )
