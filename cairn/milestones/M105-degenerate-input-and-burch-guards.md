@@ -1,6 +1,6 @@
 # M105: Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -157,6 +157,7 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: DEVIATION -- re-ran `data-raw/sweep-degenerate-classical.R`, which its own header forbids after the source change because it would erase AC4's before-baseline. Verified inert before proceeding: `git diff` on the fixture shows only header comment lines changed and every data row byte-identical, so the searle_* baseline is intact.
 - 2026-08-05: fix-commit reviewer ([O], fresh context, scoped to a244012) found the F21/NEWS fix INCOMPLETE -- the same falsified claim ("it falls silent wherever a method would not in fact deliver, including a missing score") was still live in `@param ci_method`, i.e. in `?icc`, the more user-facing of the two surfaces. Struck, `document()` re-run. Also fixed from that review: a miscounted ordinal in my own boundary-hint correction (M70's never-pin-a-count, in the prose written to fix a prose defect); a second shared-guard claim at `R/boundary-hint.R:342` left uncorrected, whose failure mode is a reader folding Burch's MSA=0 guard into the shared one and re-breaking D-022; an ANSI-fragile `expect_match` that passes only because testthat pins `cli.num_colors = 1`; and skips I over-applied to a test that fits no model, which needlessly dropped a cheap contract check on CRAN.
 - 2026-08-05: striking that roxygen sentence reddened `check-mpl-doc-claims` (M97/M104 lesson, third recurrence in this milestone's family): the `@param ci_method` block's claims are key-hashed in `data-raw/mpl-doc-claims.tsv`, so any rewording stales its row. Row 42 re-keyed 8db1b2fa7bfc -> 074c3c56971e with the reason recorded; checker and self-test now pass.
+- 2026-08-05: gates after the AC3 fix -- devtools::test() FAIL 0 WARN 2 SKIP 23 PASS 5854; document() no diff; air clean; lintr no lints; all four data-raw checkers and self-tests pass. Status -> review. Windows CI is the check that matters this pass: it is the only surface that exercises the exact-zero branch for the 8x4 cell.
 
 ## Review
 
