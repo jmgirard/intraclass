@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m104-bootstrap-point-containment`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m104-bootstrap-point-containment` / https://github.com/jmgirard/intraclass/pull/112   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -38,7 +38,7 @@ sweep covers `"bootstrap"`, the method the observation came from).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `data-raw/sweep-bootstrap-point-containment.R` is committed and writes
+- [x] AC1: `data-raw/sweep-bootstrap-point-containment.R` is committed and writes
       `tests/testthat/fixtures/bootstrap-point-containment.tsv`, one row per
       (arm, n_s, n_r, spread, seed, index) cell carrying the point estimate, both
       endpoints, `conf.low > estimate`, and a `status` column whose value records
@@ -46,35 +46,35 @@ sweep covers `"bootstrap"`, the method the observation came from).
       `R/ci-bootstrap.R:58` appears as a row rather than leaving the fixture. The
       grid contains >= 12 returned cells per arm, spanning a zero-between-subject-
       variance generator and a nonzero-between-subject-variance generator (GP6).
-- [ ] AC2: A test reading the committed fixture asserts, over exactly the
+- [x] AC2: A test reading the committed fixture asserts, over exactly the
       `status == "ok"` rows that fixture contains and claiming nothing about cells
       outside it: every such row with `conf.low > estimate` has both
       `conf.low - estimate < 1e-8` and `estimate < 1e-8`; and every such row with
       `estimate >= 1e-8` has `conf.low <= estimate`.
-- [ ] AC3: The `"bootstrap"` documentation surface in `R/icc.R` (the parametric
+- [x] AC3: The `"bootstrap"` documentation surface in `R/icc.R` (the parametric
       bootstrap, described from `R/icc.R:323`; NOT the `"npbootstrap"` section
       whose heading is `R/icc.R:467`) states that at the zero-between-variance
       boundary the reported interval may sit entirely above the reported point.
       The paragraph carries exactly two quantitative items and no others: the
       `1e-8` bound AC2 asserts, and the fixture path AC1 names.
-- [ ] AC4: The sentence at `R/icc.R:502` asserting that the point "reads `0`" at
+- [x] AC4: The sentence at `R/icc.R:502` asserting that the point "reads `0`" at
       the zero-between-variance boundary is corrected in place to what the engine
       returns — a value at or numerically indistinguishable from zero — because
       the AC1 fixture records that point as nonzero, and its being nonzero is the
       mechanism AC3 documents. Corrected, not appended beside (D-045: roxygen is
       current knowledge).
-- [ ] AC5: The Bootstrap row of the interval-time boundary table in
+- [x] AC5: The Bootstrap row of the interval-time boundary table in
       `cairn/DESIGN.md` (line 200 at plan time) states the point/interval relation
       AC3 documents, since `cairn/DESIGN.md` declares that section the single home
       for boundary policy.
-- [ ] AC6: A test calls `icc()` on the zero-between-variance dataset built by the
+- [x] AC6: A test calls `icc()` on the zero-between-variance dataset built by the
       generator at `tests/testthat/test-reducer-abort-hint.R:34` with
       `n_s = 6, n_r = 3, jitter_sd = 0, seed = 1`, passing
       `model = "oneway", ci_method = "bootstrap", seed = 1L, boot_samples = 999L`
       and the shipped defaults for `engine`, `unit` and `conf_level`, and asserts
       on the returned ICC(1) row that `conf.low > estimate` and that both are
       below `1e-8` — the motivating observation itself.
-- [ ] AC7: The `r-package` profile's `verify` slot is clean, plus
+- [x] AC7: The `r-package` profile's `verify` slot is clean, plus
       `lintr::lint_package()` and `air format --check`.
 
 ## Coverage
@@ -129,8 +129,46 @@ sweep covers `"bootstrap"`, the method the observation came from).
 - 2026-08-05: T6 done — NEWS entry under Documentation; local gate clean: `air format --check` exit 0, `lintr::lint_package()` 0 lints, `devtools::document()` no delta, and the full suite against the INSTALLED package under `NOT_CRAN=true CI=true` with failed + error = 0 (23 skips, the live-Stan brms set plus skip_on_cran).
 - 2026-08-05: all tasks done; status -> review.
 
+- 2026-08-05: review found CI red on `check-references` — `data-raw/check-mpl-doc-claims.py` rejected AC3's two new sentences as generalizing claims with no ledger row. Fixed on the branch: both registered `out` (that ledger settles against the M92 MPL interpolation fixture, which cannot speak to a bootstrap sweep), each reason naming `test-bootstrap-point-containment.R` as the instrument that does settle it. Checker and its `--self-test` both green.
+- 2026-08-05: review collision found that the plan gate missed — RR02's BC6 already required measuring "the frequency of the reported (REML) point lying outside the npbootstrap ICC(1) interval", committed as `point_outside_rate` in the npbootstrap coverage fixture. Same phenomenon, different reducer and a rate rather than a magnitude bound; recorded as prior art, no scope change. The plan-time sweep covered ROADMAP, archive and DECISIONS but not `cairn/reviews/archive/`.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Criterion evidence** (fresh, by command, 2026-08-05; branch at 77b882d, PR #112).
+
+- AC1 — `git ls-files` confirms both artifacts tracked. Fixture schema read back:
+  all AC1-named columns present (`arm, n_s, n_r, spread, seed, index, status,
+  estimate, conf_low, conf_high, excludes_point, gap`) plus the two refinement
+  columns. Returned cells per arm: 12 zero-between, 12 nonzero-between; 0 aborted.
+  The nonzero arm carries three distinct `spread` rungs (0.05, 0.3, 1), so the
+  between-variance axis is walked, not sampled at one point (GP6).
+- AC2 — the fixture-reading test passes. Non-vacuity checked separately: 22
+  excluding rows and 17 rows with a point at or above 1e-8 exercise both
+  assertions, and a mutated-gap probe reds the bound as required.
+- AC3 — paragraph read back verbatim from `R/icc.R`; a grep for numeric literals
+  and paths inside it returns exactly two items, `1e-8` and the fixture path, as
+  the criterion requires. It sits in the `@param ci_method` `"bootstrap"`
+  description, not the `"npbootstrap"` `@details` section.
+- AC4 — the corrected sentence reads "sits at, or numerically indistinguishable
+  from, `0`"; `grep -n 'point reads' R/icc.R` returns nothing, so the falsified
+  claim does not survive anywhere in the file.
+- AC5 — the `cairn/DESIGN.md` interval-time Bootstrap row states the relation and
+  cites the fixture path; its Source cell now reads `ADR-025; M104`.
+- AC6 — the live test passes against the installed package under
+  `NOT_CRAN=true CI=true`; it asserts `conf.low > estimate` and both below 1e-8 on
+  the pinned 6x3 call.
+- AC7 — `devtools::document()` no diff; `lintr::lint_package()` 0 lints;
+  `air format --check` exit 0; full suite against the installed package under
+  `NOT_CRAN=true CI=true` with failed + error = 0 (23 skips: the live-Stan brms
+  set plus `skip_on_cran`).
+
+**Consistency gate.** `cairn_validate` exit 0, all checks passed (the standing
+`dangling id tokens` advisory is pre-migration M1-M47 ids, unrelated). No
+principle changed, so `cairn_impact` was not run. Profile `consistency-gate`
+slot: `document()` no diff, `pkgdown::check_pkgdown()` no problems, NEWS entry
+present and free of milestone numbers, new paths covered by existing
+`.Rbuildignore` entries (`^data-raw$`).
