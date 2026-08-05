@@ -1,21 +1,35 @@
-# The `bootstrap` half of M103 AC2's verdict table.
+# The engine-fit half of M103 AC2's verdict table -- `bootstrap` and `montecarlo`.
 #
 # `tests/testthat/test-reducer-abort-hint.R` asserts, cell by cell, that
 # `boundary_method_usable()` returns what the committed sweep measured -- but only
-# for `searle`, `burch` and `npbootstrap`. `bootstrap` is left to this script: at
-# the 999 refits the fixture was measured under it costs ~17 s per dataset, ~8 min
-# over the table, on a suite that already runs 13-24 min per platform. That is not
-# a per-push cost, so the split was taken deliberately at the M103 implement gate
-# (2026-08-04) with the consequence stated: a regression in the `bootstrap` row of
-# `boundary_method_usable()` is caught here, at a milestone gate, not by CI.
+# for `searle`, `burch` and `npbootstrap`. The two engine-fit methods are left to
+# this script, for two reasons that are now different from each other.
 #
-# The `montecarlo` row is checked here too. It is cheap, but it needs an engine
-# fit exactly as `bootstrap` does, and fitting one per cell is the part the suite
-# is avoiding.
+# COST. Both need an engine fit per cell, and `bootstrap` refits that model once
+# per resample. That is not a per-push cost, so the split was taken deliberately at
+# the M103 implement gate (2026-08-04) with the consequence stated: a regression in
+# the engine-fit rows of `boundary_method_usable()` is caught here, at a milestone
+# gate, not by CI.
 #
-# Run from the repo root (~10 min):
+# WHAT IS COMPARED, AND WHY NOT THE FIXTURE COLUMN. The sweep's `remedy_usable`
+# records a full `icc()` retry at the caller's own `boot_samples` (999 in the
+# committed run). `boundary_method_usable()` no longer runs `bootstrap` that way:
+# it screens at `hint_screen_samples` and caps the full run at
+# `hint_verify_boot_cap`, and the bullet names that capped count. Holding the two
+# side by side would compare two experiments, and their agreeing would be luck
+# (M103 review pass 2, G5). So this script checks AC2's rule read forward, which is
+# the property a user actually gets: wherever `boundary_method_usable()` accepts a
+# method, the call its bullet promises -- that method, that seed, that
+# `boot_samples` -- is run as an `icc()` call and every interval it returns must be
+# one `boundary_interval_usable()` accepts. A refusal asserts nothing: staying
+# silent about a method that would have worked is the conservative direction the
+# screen deliberately fails in. The fixture column is still printed beside each
+# verdict, as context and to surface how often the cap and the screen change the
+# answer, but no exit code depends on it.
+#
+# Run from the repo root (~15 min):
 #   Rscript data-raw/check-abort-remedy-verdicts.R
-# Exits non-zero on any disagreement, and prints every cell it checked.
+# Exits non-zero on any broken promise, and prints every cell it checked.
 
 suppressMessages(devtools::load_all(quiet = TRUE))
 
@@ -103,7 +117,52 @@ if (!nrow(reached)) {
   stop("no engine-fit cells found in ", fixture)
 }
 
-bad <- 0L
+# The call the bullet promises for an accepted method, run as the user would run
+# it: `icc()`, at the seed the verification used and -- for `bootstrap` -- at the
+# capped count the bullet names. Returns TRUE when every interval it returns is
+# usable, FALSE on any abort, error or unusable endpoint, which is exactly the
+# failure this script exists to catch.
+promise_kept <- function(df, method, row) {
+  fit <- tryCatch(
+    withCallingHandlers(
+      icc(
+        df,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = method,
+        conf_level = row$conf_level,
+        seed = 1L,
+        boot_samples = hint_verify_boot_samples(row$boot_samples)
+      ),
+      warning = function(w) invokeRestart("muffleWarning"),
+      message = function(m) invokeRestart("muffleMessage")
+    ),
+    error = function(e) e
+  )
+  if (inherits(fit, "condition")) {
+    return(FALSE)
+  }
+  est <- fit$estimates
+  # Each estimand's own support floor, never a hardcoded one: `divisor` is 1 for
+  # ICC(1) and the effective rater count for ICC(k) (`resolve_divisor()`).
+  ests <- ests_oneway(row$n_r)
+  all(vapply(
+    seq_len(nrow(est)),
+    function(i) {
+      boundary_interval_usable(
+        list(conf.low = est$conf.low[i], conf.high = est$conf.high[i]),
+        divisor = ests[[i]]$divisor,
+        n0 = row$n_r
+      )
+    },
+    logical(1)
+  ))
+}
+
+broken <- 0L
+named <- 0L
 for (i in seq_len(nrow(reached))) {
   row <- reached[i, ]
   df <- sweep_data(row)
@@ -114,7 +173,7 @@ for (i in seq_len(nrow(reached))) {
     tryCatch(fit_glmmtmb_oneway(df), error = function(e) e),
     warning = function(w) invokeRestart("muffleWarning")
   )
-  got <- if (inherits(fit, "condition")) {
+  accepted <- if (inherits(fit, "condition")) {
     FALSE
   } else {
     boundary_method_usable(
@@ -128,32 +187,51 @@ for (i in seq_len(nrow(reached))) {
       engine = fit
     )
   }
-  want <- isTRUE(row$remedy_usable)
-  ok <- identical(got, want)
-  if (!ok) {
-    bad <- bad + 1L
+  # Only an acceptance carries a promise. A refusal is checked against nothing --
+  # see the header.
+  kept <- if (accepted) promise_kept(df, row$remedy, row) else NA
+  if (accepted) {
+    named <- named + 1L
+    if (!isTRUE(kept)) {
+      broken <- broken + 1L
+    }
   }
   cat(sprintf(
-    "%-34s %-24s %2dx%-2d seed %d %-11s recorded=%-5s rerun=%-5s %s\n",
+    "%-34s %-24s %2dx%-2d seed %d %-11s accepted=%-5s promise=%-5s (sweep@%d=%s)\n",
     row$label,
     row$generator,
     row$n_s,
     row$n_r,
     row$seed,
     row$remedy,
-    want,
-    got,
-    if (ok) "ok" else "MISMATCH"
+    accepted,
+    if (is.na(kept)) "-" else if (isTRUE(kept)) "kept" else "BROKEN",
+    row$boot_samples,
+    isTRUE(row$remedy_usable)
   ))
 }
 
-cat(sprintf("\n%d cells checked, %d disagreements\n", nrow(reached), bad))
+cat(sprintf(
+  "\n%d cells checked, %d accepted, %d broken promises\n",
+  nrow(reached),
+  named,
+  broken
+))
 cat(sprintf(
   "R %s, glmmTMB %s, platform %s\n",
   getRversion(),
   utils::packageVersion("glmmTMB"),
   R.version$platform
 ))
-if (bad > 0L) {
-  stop(bad, " cell(s) disagree with ", fixture)
+# A check that accepts nothing asserts nothing. The sweep's own cells include
+# ones where `bootstrap` is the only method that works at all, so zero
+# acceptances means the verification stopped running, not that the data changed.
+if (named == 0L) {
+  stop("no engine-fit cell was accepted -- the forward check is vacuous")
+}
+if (broken > 0L) {
+  stop(
+    broken,
+    " accepted cell(s) whose promised call did not return a usable interval"
+  )
 }

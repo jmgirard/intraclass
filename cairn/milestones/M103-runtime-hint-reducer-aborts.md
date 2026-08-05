@@ -138,7 +138,7 @@ error) → ROADMAP candidate row.
 - [x] T11 Tests: AC8 abort latency, AC9 the default path end to end, and the
       unseeded self-exclusion case AC3's cases never reach (F1).
 - [x] T12 Re-run the gate and return to review.
-- [ ] T13 The engine-fit checker asserts the promised call directly (G5), and
+- [x] T13 The engine-fit checker asserts the promised call directly (G5), and
       its header's cost figures describe the run it now makes.
 - [ ] T14 AC6/AC9 re-run the seeded promise: a helper that reads either bullet
       form and fails on neither, plus a case per form (G1).
@@ -181,6 +181,7 @@ error) → ROADMAP candidate row.
 - 2026-08-04: review pass 2 FAILED (second defect return), status -> in-progress. Two actioned findings demonstrate a criterion failing: AC6's test extracts `seed` from the message with a digits pattern, but the seeded bullet says "run under your `seed`" with no digits, so the re-run is UNSEEDED and AC6's "the promised call is the verified one" is not what it tests; and AC2's only evidence for the `bootstrap`/`montecarlo` rows now compares `boundary_method_usable()` (screened at 25, capped at 199) against a fixture column measured at 999, so "0 disagreements" is coincidence rather than the designed identity. Also actioned: a NEWS sentence false in the seeded case, and a code comment still asserting the withholding this milestone superseded. Thirteen further findings logged below the bar. The recurring shape across both passes is prose -- comments, NEWS, `@details`, evidence lines -- drifting from the code it describes.
 
 - 2026-08-04: second return gate settled three choices, all as recommended. (1) G1 is repaired test-side — the seeded bullet's "run under your `seed`" is correct advice and M97's own wording, so the test learns to read both forms rather than the message dropping one. (2) G5's checker stops consulting the fixture column for the two engine-fit methods and asserts the promise forward instead: for every cell it accepts, the promised call is run and its intervals must be usable. (3) The below-bar findings that are simply false prose are fixed; the design ones (G13 floor, G14 the 199 choice, G15/G16 test strength) are not.
+- 2026-08-04: T13 — `data-raw/check-abort-remedy-verdicts.R` now runs the promised call for every cell `boundary_method_usable()` accepts and requires its intervals to be usable; a refusal asserts nothing, and the fixture column is printed as context only. Run: 52 cells checked, 24 accepted, 0 broken promises, exit 0. Falsifiability checked directly rather than assumed: on a refused cell (`gen_mse0` 6x3, `bootstrap`) the promised `icc()` call raises `intraclass_singular_fit`, so a wrongly-accepted cell breaks its promise and exits non-zero. A vacuity guard fails the script if nothing is accepted at all.
 - 2026-08-04: plan amendment (substantive) — AC2 now states both halves of its evidence: the fixture column for `searle`/`burch`/`npbootstrap`, the forward promise check for `bootstrap`/`montecarlo`, which the screen and cap made incomparable to that column. Tasks T13-T16 added.
 
 ## Decisions
