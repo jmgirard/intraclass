@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-05 (M105 returned from review to `planned` at the maintainer's decision — its Goal is falsified by behaviour the milestone itself pins; one new candidate row records the pre-existing Burch roundoff interval found at that review.)_
+_Last hygiene check: 2026-08-05 (M105's Goal re-cut after the review return — it no longer claims a property the milestone's own AC4 falsifies; criteria, tasks and branch untouched. One candidate row carries the pre-existing Burch roundoff interval.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 

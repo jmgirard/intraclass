@@ -9,9 +9,11 @@
 
 ## Goal
 
-On any data a user can supply, `icc()` either returns finite ordered endpoints
-or raises a condition inheriting `intraclass_error` — never a bare
-`simpleError` from an engine, and never a silent `NaN` interval.
+Where `icc()` failed with a raw, unclassed error or reported a `NaN` interval
+— on a non-finite `score`, and on `ci_method = "burch"` at exactly zero
+between-subject variance — it now raises a classed condition instead; and an
+`NA` score is dropped and analysed as the incomplete design the package
+already fits.
 
 ## Scope
 
@@ -141,6 +143,9 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: review complete. 22 findings from three lenses, scored independently; 3 at >=80 all fixed on the branch, plus 4 sub-80 fixed with reasons recorded, plus one orchestrator-found stale NEWS claim. F1 and F2 referred to the maintainer at the merge gate. Full suite re-run after the fixes: FAIL 0 PASS 5855; all four data-raw checkers and self-tests pass; cairn_validate all checks passed.
 - 2026-08-05: CI on the review head (a244012) -- check-references, lint, format-check and pkgdown green; the two platform test jobs and coverage still running at the 10-minute blocking-wait timeout. Merge held until green.
 - 2026-08-05: REVIEW RETURNED at the maintainer's decision at the merge gate. Not a criterion or gate failure -- all six criteria verified with fresh evidence and every mechanical gate is green. The return is finding F2: the Goal claims `icc()` "either returns finite ordered endpoints or raises a condition inheriting `intraclass_error`", which the milestone's own AC4 falsifies (`searle` at `unit = "average"` returns -Inf/-Inf with no error on all four fixture cells). A wrong Goal is plan-owned and returns to plan rather than being edited in place, so status -> planned for a re-cut of the Goal sentence. Branch and PR #113 stay open; no merge approval was written. F1 (pre-existing Burch roundoff interval) captured as a ROADMAP candidate row so it survives the re-cut.
+- 2026-08-05: Goal re-cut by /milestone-plan after the review return (F2). New wording carries no count that can drift, no universal over `ci_method` values or engines, and makes no claim about `searle` at the projection pole -- the clause AC4 falsified. Scope, all six criteria, Coverage, tasks and the branch are untouched.
+- 2026-08-05: re-cut gate chose Goal-only over also narrowing AC3 so it stops certifying the near-zero Burch interval, and over changing the guard to refuse that cell; both declined by the maintainer at the gate. The behaviour predates M105 and is carried by its own ROADMAP candidate row, whose promotion condition names this re-cut as one trigger; falsified by a user reporting such an interval as a defect.
+- 2026-08-05: the [O] criteria audit was NOT re-run: no criterion text changed in this re-cut, so the audited bytes are the ones already read at the M105 plan gate. Recorded explicitly because an absent line would otherwise read as an audit that ran and returned nothing. The Goal is outside that instrument's reach by construction -- it reads acceptance criteria only -- which is the gap F2 exposed; that belongs to the cairn plugin, not this repo, so no row is filed here.
 
 ## Review
 
