@@ -110,46 +110,32 @@ error) → ROADMAP candidate row.
 
 ## Tasks
 
-- [x] T1 Land M100's sweep generator and its 210-row result under `data-raw/`
-      with a provenance header naming the branch they came from and the run
-      that produced them.
-- [x] T2 Add `bootstrap` and `montecarlo` rows to `boundary_method_usable()`
-      (both take the engine fit, not `df`), and an `exclude` argument to
-      `boundary_method_hint()`.
-- [x] T3 Thread the engine fit and a lazy `hint` from `icc()`'s dispatch into
-      the four reducer-stage guards.
-- [x] T4 Tests: the six-guard wiring, class and leading-line preservation; the
-      verdict table against the committed sweep result.
-- [x] T5 Tests: self-exclusion per invoking method; no re-entry through the
-      shared classical guard.
-- [x] T6 Tests: byte-identity where no candidate is usable; the `gen_ssa0`
-      promise end to end.
-- [x] T7 NEWS, `@details`, and the gate: suite at `NOT_CRAN=true CI=true`,
-      `devtools::check()`, `lintr`, `air format --check`, all `data-raw`
-      checkers.
-- [x] T8 Bound the expensive candidate at both ends: screen `bootstrap` at a
-      small resample count and abandon it on failure, then run it in full at a
-      capped count that the bullet names, so the promised call is the run.
+- [x] T1 Land M100's sweep generator and its 210-row result, with provenance.
+- [x] T2 `boundary_method_usable()` gains the two engine-fit rows (both take the
+      fit, not `df`); `boundary_method_hint()` gains self-exclusion.
+- [x] T3 Thread the engine fit and a lazy `hint` into the four reducer guards.
+- [x] T4 Tests: six-guard wiring, class and leading line; the verdict table.
+- [x] T5 Tests: self-exclusion per invoking method; no re-entry via the shared
+      classical guard.
+- [x] T6 Tests: byte-identity where nothing is usable; `gen_ssa0` end to end.
+- [x] T7 NEWS, `@details`, and the gate.
+- [x] T8 Bound the expensive candidate at both ends: screen it, then cap the full
+      run at a count the bullet names, so the promised call is the run.
 - [x] T9 Give the Monte-Carlo default path the engine-fit tier, superseding the
       withholding decision; reconcile M93's silence tests.
-- [x] T10 Review follow-ups: the bullet names `boot_samples` when it is not the
-      default (F8); hedge the `@details` naming claim (F7); repair three stale
-      fixture paths (F19); stop pinning a glmmTMB convergence count (F20).
-- [x] T11 Tests: AC8 abort latency, AC9 the default path end to end, and the
-      unseeded self-exclusion case AC3's cases never reach (F1).
+- [x] T10 Review follow-ups F8, F7, F19, F20.
+- [x] T11 Tests: AC8 latency, AC9 the default path, the unseeded case (F1).
 - [x] T12 Re-run the gate and return to review.
-- [x] T13 The engine-fit checker asserts the promised call directly (G5), and
-      its header's cost figures describe the run it now makes.
-- [x] T14 AC6/AC9 re-run the seeded promise: a helper that reads either bullet
-      form and fails on neither, plus a case per form (G1).
-- [x] T15 Prose repairs: NEWS's seed claim (G2), the withheld-tier comment (G7),
-      the `@details` method descriptions (G3, G4), and G6, G9, G11, G12.
-- [x] T17 Fire the `gen_mse0` guards at their reducers: CI is red on Linux and
+- [x] T13 The engine-fit checker asserts the promised call forward (G5).
+- [x] T14 AC6/AC9 re-run the seeded promise: read either bullet form, fail on
+      neither, a case per form (G1).
+- [x] T15 Prose repairs: G2, G7, G3, G4, G6, G9, G11, G12.
+- [x] T17 Fire the `gen_mse0` guards at their reducers — CI is red on Linux and
       Windows, where the point fit dies before the guard.
-- [x] T18 Fix the third bare-substring method match (`grepl("mpl")` matches
-      `boot_samples`), which reddens ubuntu only.
-- [x] T19 Cut the suite cost this branch added: the abort-firing grid tests ask
-      at the screen count, and the usability side mirrors verification exactly.
+- [x] T18 Match a method by its quoted rendering, not a bare substring (`mpl`
+      occurs inside `boot_samples`); reddens ubuntu only.
+- [x] T19 Cut the suite cost this branch added: the grid tests fire at the screen
+      count, and the usability side mirrors verification exactly.
 - [ ] T16 Re-run the gate and return to review.
 
 ## Work log
