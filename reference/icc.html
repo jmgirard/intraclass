@@ -135,7 +135,11 @@ plot of each ICC index with its Monte-Carlo confidence interval, or
 
 <dt id="arg-score-subject-rater">score, subject, rater<a class="anchor" aria-label="anchor" href="#arg-score-subject-rater"></a></dt>
 <dd><p>Columns of <code>data</code> (unquoted): the numeric rating,
-the subject (object of measurement), and the rater (judge).</p></dd>
+the subject (object of measurement), and the rater (judge). A non-finite
+<code>score</code> (<code>Inf</code>, <code>-Inf</code>, <code>NaN</code>) is an error. An <code>NA</code> <code>score</code> is treated as a
+rating that did not happen: the row is dropped with a suppressible
+<code>intraclass_dropped_rows</code> warning and the rest is analyzed as an incomplete
+design, so a missing rating and an absent row give the same answer.</p></dd>
 
 
 <dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
@@ -304,7 +308,7 @@ design in hand — chosen by RUNNING each candidate on your data and keeping onl
 those whose reported endpoints are all finite, correctly ordered and in range —
 so there is no need to work that out from this list. Being a check on the data
 rather than on the design, it falls silent wherever a method would not in fact
-deliver, including a missing score, degenerate data, an uncalibrated
+deliver, including degenerate data, an uncalibrated
 <code>conf_level</code> or geometry, and a numeric <code>unit</code> projected past the point where a
 method's Spearman-Brown map breaks down; the two closed forms are asked
 separately, so one can be named where the other is not. On unbalanced one-way

@@ -79,7 +79,12 @@ icc(
 - score, subject, rater:
 
   Columns of `data` (unquoted): the numeric rating, the subject (object
-  of measurement), and the rater (judge).
+  of measurement), and the rater (judge). A non-finite `score` (`Inf`,
+  `-Inf`, `NaN`) is an error. An `NA` `score` is treated as a rating
+  that did not happen: the row is dropped with a suppressible
+  `intraclass_dropped_rows` warning and the rest is analyzed as an
+  incomplete design, so a missing rating and an absent row give the same
+  answer.
 
 - cluster:
 
@@ -263,16 +268,16 @@ icc(
   keeping only those whose reported endpoints are all finite, correctly
   ordered and in range — so there is no need to work that out from this
   list. Being a check on the data rather than on the design, it falls
-  silent wherever a method would not in fact deliver, including a
-  missing score, degenerate data, an uncalibrated `conf_level` or
-  geometry, and a numeric `unit` projected past the point where a
-  method's Spearman-Brown map breaks down; the two closed forms are
-  asked separately, so one can be named where the other is not. On
-  unbalanced one-way data it can name `"npbootstrap"`; because that
-  method resamples, its trial run is evidence about one run rather than
-  about the data, so the trial uses your call's own `boot_samples` and
-  your own `seed` when you set one (your retry reproduces it exactly) —
-  with no seed set it uses a fixed seed the message then names, and an
+  silent wherever a method would not in fact deliver, including
+  degenerate data, an uncalibrated `conf_level` or geometry, and a
+  numeric `unit` projected past the point where a method's
+  Spearman-Brown map breaks down; the two closed forms are asked
+  separately, so one can be named where the other is not. On unbalanced
+  one-way data it can name `"npbootstrap"`; because that method
+  resamples, its trial run is evidence about one run rather than about
+  the data, so the trial uses your call's own `boot_samples` and your
+  own `seed` when you set one (your retry reproduces it exactly) — with
+  no seed set it uses a fixed seed the message then names, and an
   unseeded retry draws fresh resamples and can fail where the verified
   run succeeded, especially on small designs. The trial run leaves the
   session's random-number stream untouched. The same holds in reverse,
