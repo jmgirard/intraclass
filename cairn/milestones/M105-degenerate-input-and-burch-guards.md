@@ -63,12 +63,15 @@ hardening candidate → unrelated, stays a candidate row.
 - [ ] AC3. For each case its test loops over — the four committed
       zero-between-variance fixture cells (6×3, 10×2, 20×3, 8×4 from `gen_ssa0`)
       × `unit` ∈ {`"single"`, `"average"`} — `icc(..., ci_method = "burch")`
-      matches that case's committed expectation, each of which is either a
-      condition inheriting `intraclass_error` whose message names zero
-      between-subject variance as the cause, or finite endpoints with
-      `conf.low <= conf.high`. The three cells whose MSA is `identical(., 0)`
-      (6×3, 10×2, 20×3) carry the abort expectation; 8×4, whose MSA is 3.5e-33,
-      carries the finite one.
+      matches the expectation the test derives from MSA **recomputed on the
+      running platform**: a condition inheriting `intraclass_error` whose
+      message names zero between-subject variance as the cause where
+      `identical(MSA, 0)`, and finite endpoints with `conf.low <= conf.high`
+      otherwise. Which cells fall on which side is accumulated floating-point
+      roundoff and varies by platform — measured 3.5e-33 for 8×4 on
+      macOS/aarch64 and exactly 0 on the Windows runner — so no cell's side is
+      pinned; the test asserts at least six of the eight cases take the abort
+      side, the floor both observed platforms clear.
 - [x] AC4. Over that same eight-case enumeration, `ci_method = "searle"` returns
       what it returns on `main` today, asserted against endpoint values recorded
       from `main` in T1 before any source change.
@@ -149,6 +152,11 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: resumed on the existing branch after the Goal re-cut; `origin/main` is an ancestor of the branch head, so no merge was needed and no code changed. DEVIATION, logged not hidden: the review-return and Goal-re-cut commits are docs-only and the tracking rules route those directly to the default branch, but both landed on this branch instead (the session never left it). Left there rather than cherry-picked, since cherry-picking would duplicate them at the squash-merge; `main`'s tracking picture is stale until this merges.
 - 2026-08-05: verify slot re-run on the unchanged branch -- devtools::test() FAIL 0 WARN 2 SKIP 23 PASS 5855, devtools::document() no diff. All six tasks remain complete; status -> review. The Review section below was written at the first review pass and its evidence stands: no code changed in the re-cut.
 - 2026-08-05: REVIEW PASS 2 FAILED on AC3 -- returned to in-progress. Windows CI (job 92440641801, `R CMD check` ERROR, FAIL 1 PASS 5829): `test-degenerate-classical.R:89` expected a finite interval for the 8x4 cell and got the new classed Burch abort from `R/ci-classical.R:213`. Cause: MSA at that cell is exactly 0 on the Windows runner and 3.52e-33 on macOS/aarch64 where the fixture was generated, so `msa_exact_zero` is a PLATFORM-DEPENDENT quantity that the committed fixture records as a constant and the test derives its expectation from. AC3 states "8x4, whose MSA is 3.5e-33, carries the finite one" as a platform-independent fact; it is not one. AC1, AC2, AC4, AC5, AC6 all re-verified green in this pass, and every local gate is clean -- this failure is reachable only on a runner with different summation order.
+- 2026-08-05: AC3 amended via the implement gate after the pass-2 return. Approach settled at the review chip (decide per platform at test time); amended text shown verbatim in chat before this commit. The test now recomputes MSA on the running platform instead of reading the fixture's `msa_exact_zero` column, and the anti-vacuity assertion becomes a floor of >=6 of 8 cases on the abort side rather than an exact 6/2 split -- macOS/aarch64 gives 6, the Windows runner 8.
+- 2026-08-05: verified the amended rule handles the branch Windows took, which no macOS run can reach: an 8x4 cell with an integer profile has MSA identical to 0 by construction (subject means exactly 2.5), and `icc(..., ci_method = "burch")` there aborts classed under BOTH units with a message naming between-subject variance.
+- 2026-08-05: DEVIATION -- re-ran `data-raw/sweep-degenerate-classical.R`, which its own header forbids after the source change because it would erase AC4's before-baseline. Verified inert before proceeding: `git diff` on the fixture shows only header comment lines changed and every data row byte-identical, so the searle_* baseline is intact.
+- 2026-08-05: fix-commit reviewer ([O], fresh context, scoped to a244012) found the F21/NEWS fix INCOMPLETE -- the same falsified claim ("it falls silent wherever a method would not in fact deliver, including a missing score") was still live in `@param ci_method`, i.e. in `?icc`, the more user-facing of the two surfaces. Struck, `document()` re-run. Also fixed from that review: a miscounted ordinal in my own boundary-hint correction (M70's never-pin-a-count, in the prose written to fix a prose defect); a second shared-guard claim at `R/boundary-hint.R:342` left uncorrected, whose failure mode is a reader folding Burch's MSA=0 guard into the shared one and re-breaking D-022; an ANSI-fragile `expect_match` that passes only because testthat pins `cli.num_colors = 1`; and skips I over-applied to a test that fits no model, which needlessly dropped a cheap contract check on CRAN.
+- 2026-08-05: striking that roxygen sentence reddened `check-mpl-doc-claims` (M97/M104 lesson, third recurrence in this milestone's family): the `@param ci_method` block's claims are key-hashed in `data-raw/mpl-doc-claims.tsv`, so any rewording stales its row. Row 42 re-keyed 8db1b2fa7bfc -> 074c3c56971e with the reason recorded; checker and self-test now pass.
 
 ## Review
 

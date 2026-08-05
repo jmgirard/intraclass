@@ -9,8 +9,10 @@
 # non-finite values are written as Inf/-Inf/NaN literals.
 # The searle_* columns are a BEFORE-baseline measured on the default branch
 # prior to M105's source changes -- do not regenerate them after the change.
-# msa_exact_zero, not a recorded Burch outcome, is what the suite derives its
-# per-cell Burch expectation from.
+# msa_exact_zero records THIS platform's outcome and is provenance only:
+# whether MSA reaches exactly 0 is summation roundoff and differs by machine
+# (the 8x4 cell is 3.5e-33 here, exactly 0 on the Windows runner). The suite
+# recomputes MSA locally and never reads this column for an expectation.
 # Do not hand-edit: regenerate with the script above.
 # Written by that script under R version 4.6.1 (2026-06-24), aarch64-apple-darwin25.4.0.
 n_s	n_r	seed	unit	msa	msa_exact_zero	mse	searle_conf_low	searle_conf_high

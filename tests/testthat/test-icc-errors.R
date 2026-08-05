@@ -119,14 +119,18 @@ test_that("a non-finite score aborts classed on every model and engine", {
 })
 
 test_that("the non-finite abort names the column and the offending rows", {
-  skip_if_not_installed("glmmTMB")
-  skip_on_cran()
-
+  # No skips here on purpose: the non-finite check aborts before any engine call,
+  # so this test fits nothing and needs no engine. Skipping it on CRAN would drop
+  # a cheap message-contract check for no benefit.
   d <- sf_ratings_long()
   d$score[[2L]] <- Inf
   d$score[[7L]] <- NaN
   cnd <- rlang::catch_cnd(icc(d, score, subject, rater), classes = "error")
-  rendered <- cli::format_message(conditionMessage(cnd))
+  # `ansi_strip()` before matching, as the repo's other message assertions do:
+  # the phrase below spans two `{.val}` spans, so with colour enabled cli wraps
+  # each number in escape codes and splits it. It passes unstripped only because
+  # `test_that()` pins `cli.num_colors = 1`.
+  rendered <- cli::ansi_strip(cli::format_message(conditionMessage(cnd)))
   expect_match(rendered, "score", fixed = TRUE)
   # Match the POSITIONS as a phrase, not the bare digits: the message also
   # carries the count (2), so `expect_match(rendered, "2")` alone would be

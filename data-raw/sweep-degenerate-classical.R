@@ -8,12 +8,16 @@
 # `simpleError` at `unit = "average"`, and a silently reported NaN interval at
 # `unit = "single"`. M105 replaces both with a classed abort.
 #
-# MSA = 0 is a floating-point fact, not a design fact: three of the four cells
-# below reach it exactly and the fourth lands at ~3.5e-33, where kappa-hat is
-# finite and Burch returns an interval. The `msa_exact_zero` column records
-# which, and the suite derives its per-cell expectation FROM that column rather
-# than from a recorded Burch outcome -- an expectation regenerated alongside the
-# behaviour it checks would pass over any regression.
+# MSA = 0 is a floating-point fact, not a design fact, and it is not even a fact
+# about the cell: it depends on the accumulated summation roundoff of the machine
+# doing the arithmetic. On this generating platform three of the four cells below
+# reach exactly 0 and the fourth lands at ~3.5e-33, where kappa-hat is finite and
+# Burch returns an interval; on the Windows CI runner the fourth reaches exactly 0
+# too. The `msa_exact_zero` column therefore records THIS PLATFORM's outcome, for
+# provenance only. The suite must not derive an expectation from it and does not
+# -- it recomputes MSA on whatever machine is running (M105 review pass 2, where
+# reading the column reddened Windows CI). What the suite pins is the rule:
+# exactly 0 aborts, anything else returns an interval.
 #
 # THE SEARLE COLUMNS ARE A BEFORE-BASELINE (M105 AC4). They are measured on the
 # default branch BEFORE M105 changes any source, and pin that this milestone
@@ -112,8 +116,10 @@ header <- c(
   "# non-finite values are written as Inf/-Inf/NaN literals.",
   "# The searle_* columns are a BEFORE-baseline measured on the default branch",
   "# prior to M105's source changes -- do not regenerate them after the change.",
-  "# msa_exact_zero, not a recorded Burch outcome, is what the suite derives its",
-  "# per-cell Burch expectation from.",
+  "# msa_exact_zero records THIS platform's outcome and is provenance only:",
+  "# whether MSA reaches exactly 0 is summation roundoff and differs by machine",
+  "# (the 8x4 cell is 3.5e-33 here, exactly 0 on the Windows runner). The suite",
+  "# recomputes MSA locally and never reads this column for an expectation.",
   "# Do not hand-edit: regenerate with the script above.",
   paste0(
     "# Written by that script under ",

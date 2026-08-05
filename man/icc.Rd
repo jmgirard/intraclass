@@ -212,7 +212,7 @@ design in hand — chosen by RUNNING each candidate on your data and keeping onl
 those whose reported endpoints are all finite, correctly ordered and in range —
 so there is no need to work that out from this list. Being a check on the data
 rather than on the design, it falls silent wherever a method would not in fact
-deliver, including a missing score, degenerate data, an uncalibrated
+deliver, including degenerate data, an uncalibrated
 \code{conf_level} or geometry, and a numeric \code{unit} projected past the point where a
 method's Spearman-Brown map breaks down; the two closed forms are asked
 separately, so one can be named where the other is not. On unbalanced one-way
