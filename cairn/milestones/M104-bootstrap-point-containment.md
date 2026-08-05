@@ -132,6 +132,8 @@ sweep covers `"bootstrap"`, the method the observation came from).
 - 2026-08-05: review found CI red on `check-references` — `data-raw/check-mpl-doc-claims.py` rejected AC3's two new sentences as generalizing claims with no ledger row. Fixed on the branch: both registered `out` (that ledger settles against the M92 MPL interpolation fixture, which cannot speak to a bootstrap sweep), each reason naming `test-bootstrap-point-containment.R` as the instrument that does settle it. Checker and its `--self-test` both green.
 - 2026-08-05: review collision found that the plan gate missed — RR02's BC6 already required measuring "the frequency of the reported (REML) point lying outside the npbootstrap ICC(1) interval", committed as `point_outside_rate` in the npbootstrap coverage fixture. Same phenomenon, different reducer and a rate rather than a magnitude bound; recorded as prior art, no scope change. The plan-time sweep covered ROADMAP, archive and DECISIONS but not `cairn/reviews/archive/`.
 
+- 2026-08-05: review fan-out — 15 candidate findings across three lenses, one scored >= 80 (F1, 88) and fixed on the branch: the AC4 correction had acquired an unbacked causal clause describing the parametric bootstrap's mechanism inside the `"npbootstrap"` section, where npbootstrap aborts at the boundary and lands strictly below the point just off it. F2 (76) fixed by the same edit, having been verified false against `engine = "lme4"`. F3/F4/F8 logged and carried to a candidate row.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 
@@ -172,3 +174,60 @@ principle changed, so `cairn_impact` was not run. Profile `consistency-gate`
 slot: `document()` no diff, `pkgdown::check_pkgdown()` no problems, NEWS entry
 present and free of milestone numbers, new paths covered by existing
 `.Rbuildignore` entries (`^data-raw$`).
+
+**Independent review** (three fresh-context lenses + a separate [S] scorer).
+
+- Diff-bug lens **[O]**: 14 candidate findings. Blame-history lens **[S]**: 1
+  (F15). Prior-review lens **[S]**: zero findings — it recomputed every numeric
+  doc claim against the fixture and confirmed them, and its cheap probe found no
+  real inline PR threads on this repo, so the per-PR walk was skipped.
+- Scored: one finding at or above 80.
+
+**Actioned — F1 (88), fixed on the branch.** The AC4 correction had gained a
+causal clause, "the engine returns a value near but not exactly zero, which is
+why a resampled limit can land on either side of it". That is the *parametric*
+bootstrap's mechanism, and it sat in the `"npbootstrap"` `@details` section,
+whose method is a studentized log-F pivot. Verified live at review: npbootstrap
+ABORTS at the exact zero boundary, and just off it (jitter 1e-4, 6x3, seeds 1-3)
+`conf.low` is -0.5 against points of ~3e-10 — strictly below the point, never
+above. The committed fixture holds zero npbootstrap rows, so the clause was
+unbacked (IP1) and directionally false for the method it documented. Removed;
+AC4's required correction survives, and RR02 BC5's substance (the unclamped
+engine REML point, boundary picture documented) is preserved.
+
+**F2 (76) — below the actioned bar, fixed anyway** by the same edit. The clause
+also asserted engine-agnostically that the engine returns a nonzero value, while
+`engine = "lme4"` reports "a variance component was estimated at exactly zero"
+(verified live). A sentence measured false does not ship on a score.
+
+**Logged, not actioned** (below 80): F4 (70) and F3 (68), the fixture test's
+`all()` assertions pass vacuously on zero rows and its anti-vacuity guard checks
+a total rather than AC1's per-arm minimum; F14 (52) NEWS omits the AC4
+correction; F7 (42) 7 of 24 nonzero-arm rows realize a point below 1e-8, so the
+arm label does not track realized variance; F8 (42) `identical()` on a
+`data.frame` string column would route the whole grid to the wrong generator
+under the declared `R (>= 3.5)` floor; F15 (38) the rewritten sentence was the
+literal deliverable of Fable binding condition BC5 (RR02 -> D-010), altered
+without a new RB/RR — substance preserved, no test or vignette pins the wording;
+F6 (35) the reducer seed is held at 1 across all cells while the data seed
+varies; F11 (32) the fixture's `seed` column is the data seed, the reducer seed
+lives only in the prose header; F5 (30) the test reads derived columns rather
+than recomputing from primitives; F13 (28), F12 (22), F9 (22), F10 (18).
+
+F3, F4 and F8 carry real latent risk and go to a candidate row rather than being
+dropped.
+
+**Prior art the plan gate missed.** RR02's BC6 already required recording "the
+frequency of the reported (REML) point lying outside the npbootstrap ICC(1)
+interval", shipped as `point_outside_rate` in the npbootstrap coverage fixture —
+the same phenomenon on the other reducer, bounding a rate where M104 bounds a
+magnitude. The plan-time collision sweep covered ROADMAP, archive and DECISIONS
+but not `cairn/reviews/archive/`.
+
+**CI defect found and fixed.** `check-references` red: the doc-claims checker
+rejected AC3's two sentences as generalizing claims with no ledger row. Both
+registered `out` with reasons naming the test that settles them; checker and
+`--self-test` green.
+
+**Full check.** `devtools::check(env_vars = c(NOT_CRAN = "false"))` — Status: OK
+(0 errors, 0 warnings, 0 notes).

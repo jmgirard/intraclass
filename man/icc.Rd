@@ -602,8 +602,7 @@ an error, and the coverage-bearing endpoints are unaffected.
 The reported \strong{point estimate} is the engine (REML) point, exactly as for every
 other \code{ci_method} -- \code{ci_method} selects the interval, not the estimator. At the
 zero-between-variance boundary the point sits at, or numerically indistinguishable
-from, \code{0} -- the engine returns a value near but not exactly zero, which is why a
-resampled limit can land on either side of it -- while the untruncated interval
+from, \code{0}, while the untruncated interval
 may extend below \code{0}; this is the normal picture for a boundary-respecting point
 beside an honest interval, and it signals that the data are consistent with values
 near and below zero.
