@@ -87,11 +87,11 @@ error) → ROADMAP candidate row.
 - [x] AC7 `data-raw/sweep-abort-remedies.R` and its committed result land on the
       default branch with provenance naming their origin, and every figure AC2's
       test asserts is read from that result rather than transcribed.
-- [ ] AC8 No degeneracy abort that ultimately names no method costs materially
+- [x] AC8 No degeneracy abort that ultimately names no method costs materially
       more than the guard that raised it. A test measures `icc()` on `gen_mse0`
       data for `ci_method = "searle"`, `"burch"` and the default, and asserts
       each abort returns in under 5 seconds.
-- [ ] AC9 The default `icc()` call receives the same verified naming as an
+- [x] AC9 The default `icc()` call receives the same verified naming as an
       opt-in one. A test asserts that on `gen_ssa0` data the default call's
       abort names `ci_method = "bootstrap"`, and that re-running with that
       string returns an interval `boundary_interval_usable()` accepts.
@@ -460,3 +460,146 @@ runners; G17 (40) `invoked` has a default; G10 (38) the leak guard's re-keying.
 
 **Gate outcome: returned to `in-progress`** (second defect return). One further
 return trips the thrash rule.
+
+### Third pass, 2026-08-05 (PR #111, at 7d89411 + the fixes below)
+
+All evidence below is from runs made in this review session on
+`m103-runtime-hint-reducer-aborts`, not recalled from implement. Branch is 16
+ahead of `main` and 0 behind, so no merge was needed. Full suite at
+`NOT_CRAN=true CI=true`: 5780 pass, 0 fail, 0 error, 23 skip, 15.0 min.
+
+#### Criterion evidence
+
+- AC1 — "each of the six degeneracy guards splices a lazily-built hint": 30
+  assertions, 0 failures, 0 skips, 0.7 s. Fires all six guards at the function
+  owning each, asserts the synthetic bullet appears, the leading line equals the
+  703fc1b text and the class is `intraclass_singular_fit`. Companion "a hint is
+  never forced on a call that succeeds": 2 assertions — `hint = stop(...)` on two
+  succeeding reducers raises nothing.
+- AC2 — "boundary_method_usable() agrees with the sweep, cell by cell": 80
+  assertions, 0 failures, one per (reached cell x method) for `searle`, `burch`
+  and `npbootstrap`, each expecting `isTRUE(row$remedy_usable)` read from the
+  fixture. The two engine-fit methods are covered by
+  `Rscript data-raw/check-abort-remedy-verdicts.R` under AC2's amended second
+  half: 52 cells, 24 accepted, 0 broken promises, exit 0. Its falsifiability was
+  checked directly rather than assumed — on a refused cell (`gen_mse0` 6x3,
+  `bootstrap`) the promised `icc()` call raises `intraclass_singular_fit`, so a
+  wrongly-accepted cell exits non-zero; a vacuity guard fails the script if
+  nothing is accepted at all. Companion "the engine-fit rows refuse to verify
+  with no fit in hand": 2 assertions.
+- AC3 — "no remedy bullet names the ci_method the caller invoked": 12
+  assertions, 0 failures, 35.0 s. Six cases, one per (guard, invoking value).
+  Companion "self-exclusion, and not the data, is what silences a method": 2
+  assertions, isolating the exclusion term on one dataset.
+- AC4 — "verifying burch from a searle abort terminates, not recurses": 2
+  assertions; the call returns and the escaping condition is one
+  `intraclass_singular_fit` carrying the classical guard's text exactly once.
+  "verification passes no hint to any candidate it runs": 4 assertions via
+  `local_mocked_bindings()`, asserting no `hint` argument is present at all.
+- AC5 — "no usable candidate leaves the shipped message untouched": 6
+  assertions, 0 failures, 26.8 s, each guard fired with its real forced hint and
+  `expect_identical` to the 703fc1b text through a pinned renderer. Companion
+  "where the fit survives, icc() delivers that same message": 6 assertions, 26.6
+  s, ran here (did not skip) — so the end-to-end path is evidenced on this
+  platform and the reducer-level pins carry every platform.
+- AC6 — "the gen_ssa0 abort names bootstrap, and that call delivers": 7
+  assertions, 8.2 s. The re-run now uses the seed the message actually promises:
+  the caller set one, so the bullet points at theirs and names no number, and
+  the test asserts that form rather than silently re-running unseeded.
+  Companion "an engine-fit bullet promises a readable seed in both forms": 7
+  assertions, 8.4 s.
+- AC7 — `data-raw/sweep-abort-remedies.R` and
+  `tests/testthat/fixtures/abort-remedy-sweep.tsv` are on the branch with
+  provenance headers; AC2's expected values are `isTRUE(row$remedy_usable)` read
+  from the file, and each row's dataset is rebuilt from its own
+  `generator`/`n_s`/`n_r`/`seed`/`trigger` columns.
+- AC8 — "aborts that name no method are not slowed by verification": 9
+  assertions, 0 failures, 2.5 s total for three abort cells, each well inside the
+  5 s bound (before the screen, the same `searle` abort measured 25.6 s).
+- AC9 — "the DEFAULT icc() call gets the same verified naming": 6 assertions,
+  7.6 s. The plain call on `gen_ssa0` names `ci_method = "bootstrap"`, never
+  `montecarlo`, and re-running at the named seed and count returns intervals
+  `boundary_interval_usable()` accepts.
+
+#### Consistency gate
+
+`cairn_validate` exit 0 — all checks passed, including `weight caps` (140/149
+after the Tasks section was compressed), `coverage complete`, `status
+vocabulary`, `roadmap<->disk orphans`, `sizing`, `work-log format`, `decisions
+format`; the one WARN is the pre-existing `dangling id tokens` advisory (321,
+unchanged by this branch). No DESIGN principle changed, so `cairn_impact` is
+skipped. Toolchain slot (`r-package`): `devtools::check(env_vars = c(NOT_CRAN =
+"false"))` 0 errors / 0 warnings / 0 notes; `devtools::document()` no diff;
+`pkgdown::check_pkgdown()` clean; `lintr::lint_package()` 0; `air format
+--check` clean. All four `data-raw` Python checkers and their `--self-test`s
+green. CI on PR #111 at a4692a5: every job passed — `ubuntu-latest (release)`
+19m34s, `windows-latest (release)` 23m25s, `test-coverage` 18m53s, plus `lint`,
+`check-references`, `format-check`, `pkgdown` and both codecov gates.
+
+#### Independent review — three lenses, then a scorer
+
+Three fresh-context reviewers with distinct evidence bases (diff / blame-history
+/ prior-review), then a separate Sonnet scorer holding the diff and the plan. 30
+candidate findings; 3 scored >= 80. The prior-review lens probed for GitHub
+inline review comments, found none real, correctly skipped the walk, and
+returned ZERO findings after verifying all ten previously actioned findings
+(F1, F5, F7, F8, F11, G1, G2, G5, G7, G12) are still fixed at HEAD.
+
+**Actioned (>= 80) — all three fixed in this review session.** None of the three
+demonstrates an acceptance criterion failing, and none is a defect in what the
+package computes, so the M130 return floor is not met and the milestone did not
+return. All three are the same shape the two earlier passes kept finding: prose
+that no longer matches the code.
+
+- **D1 (82) — `@param boot_samples` said it is "Ignored when
+  `ci_method = "montecarlo"`", which this branch made false.** The default path
+  now threads `boot_samples` into verification, where it decides whether
+  `bootstrap` is screened, caps the trial, and is the number printed in the
+  user's bullet. Fixed: the parameter now says it does not change a
+  `"montecarlo"` interval but is the count the suggestion machinery trials
+  `"bootstrap"` at and names.
+- **D2 (83) — NEWS said "Where nothing works the message is unchanged", and one
+  guard's message did change.** At 703fc1b the resample-degeneracy guard read
+  "...use a larger design or `ci_method = "montecarlo"`"; AC2 replaced that
+  hard-coded name with verification, so where nothing verifies the user now gets
+  strictly less than before. Fixed: NEWS states the exception and why.
+- **D18 (80) — `@param seed` and `@param mc_samples` changed meaning silently.**
+  `seed` now seeds the trial runs behind a suggestion, so it can decide which
+  method an error names — including for `"searle"` and `"burch"`, whose own
+  values ignore it; `mc_samples` is the count a `"montecarlo"` candidate is
+  trialled at. Fixed: both parameters say so.
+
+Also fixed while rewriting that NEWS sentence, though scored below the bar:
+**D14 (68)**, "it now happens for all of them", which read as though the default
+path gained the behaviour outright when both `mc_ci()` guards were already
+wired at M93. The sentence now says what actually changed there — the default
+path can now reach `"bootstrap"`.
+
+**Logged, not actioned (26 below 80),** one line each: D3 (62) no test pins the
+resample guard's new text, which AC5 scopes out by construction; D4/H4 (42) on
+Linux and Windows the tier-2 half of AC5/AC3 cannot red, the disclosed
+consequence of T17; D5 (72) AC8 skips on both PR-matrix platforms, so its 5 s
+bound has CI evidence only post-merge on macOS; D6 (55) AC8/AC9 were unticked
+here at review entry (ticked above against the evidence recorded); D7 (45)
+tier 1's `npbootstrap` candidate is neither screened nor capped; D8/H6 (55) the
+cap has no floor, so a caller at `boot_samples = 5` is promised a 5-refit
+bootstrap (previously G13); D9/H1 (55) the rewritten hotfix test re-derives
+usability with the same predicate production just used (previously F17); D10
+(45) that test would mis-fail if tier 2 were ever named there; D11 (68) tier-2
+self-exclusion is untested; D12 (58) the both-forms seed test does not assert
+the bullet is the engine-fit one; D13 (52) two doc-claims ledger rows describe
+the pre-T17 tests; D15 (42) `sweep_data()` transcribes the jitter and
+`n_varying`, and `gen_se_zero()` ignores its arguments; D16 (38) the sweep
+generator still hardcodes `divisor = 2` where the checker was fixed to read the
+estimand's own; D17 (50) the screen can silently suppress a method a full run
+would have named; D19 (50) the `@details` promise does not reach fit-stage
+`intraclass_singular_fit` raises in the lme4 and lavaan engines; D20 (38) tier 2
+has no admissibility mirror; D21 (35) `promised_args()` was not hardened the way
+`promised_seed()` was; D22 (30) one test lacks `skip_on_cran()`; D23 (30) the
+superseded Decisions entry keeps its falsified sentence behind its header; H2
+(30) and H3 (35) are this milestone's own recorded decisions; H5 (40) further
+`@details` sentences may want ledger rows; H7 (35) the milestone increases user
+exposure to the bootstrap point-vs-interval quirk it logged as a candidate.
+
+**Gate outcome: PASSED.** Nine criteria verified with fresh evidence, gate
+clean, CI green on every job, three actioned findings fixed in session.

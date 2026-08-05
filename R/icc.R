@@ -417,13 +417,19 @@
 #'   not a defect (coverage there is 1.000), but such an interval excludes little.
 #'   It assumes approximately Gaussian data (untested for non-normality).
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
-#'   (default `10000`).
+#'   (default `10000`). It is also the count at which a `"montecarlo"` interval is
+#'   trialled when some *other* method's error considers suggesting it.
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
 #'   parametric bootstrap) and `"npbootstrap"` (the transformed bootstrap-*t*
-#'   subject resamples); default `999`. Ignored when `ci_method = "montecarlo"`.
+#'   subject resamples); default `999`. It does not change a
+#'   `ci_method = "montecarlo"` interval, but it is not unused on that path: when
+#'   that interval aborts, it is the count the suggestion machinery trials
+#'   `"bootstrap"` at (capped) and names in the message.
 #' @param seed Optional integer seed for a reproducible interval (and, for
 #'   `engine = "brms"`, the Stan sampler seed). The global RNG state is restored
-#'   afterward.
+#'   afterward. It also seeds the trial runs behind an error's suggestion, so it
+#'   can decide which method that error names — including for the deterministic
+#'   `"searle"` and `"burch"` intervals, whose own values ignore it.
 #' @param brm_args A named list of extra arguments forwarded to [brms::brm()] when
 #'   `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`, `control`). The
 #'   default (rstan backend, brms defaults) needs none. By default brms samples the

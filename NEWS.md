@@ -26,14 +26,18 @@
 
 * When an interval method aborts on degenerate data, the error now names another
   `ci_method` that works — verified by running it on your data first, so the
-  suggestion is a call that was just shown to succeed rather than a guess. This
-  already happened for some of the aborts raised by the default Monte-Carlo
-  interval; it now happens for all of them, and for the `"bootstrap"`,
-  `"searle"`, `"burch"` and `"npbootstrap"` intervals too. It matters most on
+  suggestion is a call that was just shown to succeed rather than a guess. The
+  default Monte-Carlo interval already did this for the methods fenced to your
+  design, and can now reach `"bootstrap"` as well; the `"bootstrap"`,
+  `"searle"`, `"burch"` and `"npbootstrap"` intervals gain the behaviour
+  outright. It matters most on
   data with no between-subject variance, where `"bootstrap"` is usually the only
   method that returns anything usable and previous versions said only "inspect
-  the data". Where nothing works the message is unchanged, and no message ever
-  suggests the method you just asked for. When a suggestion names
+  the data". Where nothing works, nothing is named and the message keeps its own
+  wording — with one change: the abort for degenerate resamples no longer
+  carries a fixed `ci_method = "montecarlo"` suggestion, because that method is
+  now named there only when a trial run confirms it on your data. No message
+  ever suggests the method you just asked for. When a suggestion names
   `ci_method = "bootstrap"` it also names the `boot_samples` the trial ran at,
   and — when you set no seed of your own — the `seed` it used, so the call you
   are given is exactly the call that was checked. If you did set a seed, the
