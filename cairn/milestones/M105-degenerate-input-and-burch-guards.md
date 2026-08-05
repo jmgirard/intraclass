@@ -139,6 +139,7 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: all six tasks complete, gates clean; status -> review.
 - 2026-08-05: review in progress -- draft PR #113 opened; consistency gate clean (cairn_validate all checks passed, devtools::check() 0/0/0, document() no-diff, pkgdown OK, README in sync, no milestone numbers in user-facing text; cairn_impact skipped, no IP/GP text changed). Criterion evidence gathered but NOT yet ticked, pending the third reviewer. Two prose defects queued to fix: R/boundary-hint.R:29 and :167 assert in the present tense that a missing score is caught by the extractors, which this branch makes unreachable via icc() (lines 24 and 61 are historical and stay); and a NEWS claim that such a frame "previously reached the fitting engine and failed there" is wrong -- the fit succeeded and the failure was downstream at the interval stage.
 - 2026-08-05: review complete. 22 findings from three lenses, scored independently; 3 at >=80 all fixed on the branch, plus 4 sub-80 fixed with reasons recorded, plus one orchestrator-found stale NEWS claim. F1 and F2 referred to the maintainer at the merge gate. Full suite re-run after the fixes: FAIL 0 PASS 5855; all four data-raw checkers and self-tests pass; cairn_validate all checks passed.
+- 2026-08-05: CI on the review head (a244012) -- check-references, lint, format-check and pkgdown green; the two platform test jobs and coverage still running at the 10-minute blocking-wait timeout. Merge held until green.
 
 ## Review
 
