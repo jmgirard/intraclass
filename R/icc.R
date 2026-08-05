@@ -155,7 +155,11 @@
 #'
 #' @param data A data frame with one rating per row.
 #' @param score,subject,rater Columns of `data` (unquoted): the numeric rating,
-#'   the subject (object of measurement), and the rater (judge).
+#'   the subject (object of measurement), and the rater (judge). A non-finite
+#'   `score` (`Inf`, `-Inf`, `NaN`) is an error. An `NA` `score` is treated as a
+#'   rating that did not happen: the row is dropped with a suppressible
+#'   `intraclass_dropped_rows` warning and the rest is analyzed as an incomplete
+#'   design, so a missing rating and an absent row give the same answer.
 #' @param cluster Optional column of `data` (unquoted) giving the higher-level
 #'   unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
 #'   on the **multilevel** ICC (ten Hove et al. 2022): reliability is reported at

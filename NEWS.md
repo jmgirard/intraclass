@@ -22,8 +22,25 @@
   informative message when reached via the default vector, and still aborts with a
   teaching error when requested explicitly.
 
+* `icc()` now **drops rows whose `score` is `NA`** and analyzes the rest as an
+  incomplete design, warning with the suppressible `intraclass_dropped_rows`
+  class. Such a frame previously reached the fitting engine and failed there. A
+  missing rating and an absent row now give the same answer. One consequence is
+  worth knowing: a dropped row no longer counts toward the design, so a frame
+  that looked balanced because of it is now correctly seen as unbalanced —
+  `ci_method = "searle"` and `"burch"` are refused on it (they require balance),
+  while `"npbootstrap"` becomes available.
+
 ## Minor improvements
 
+* `icc()` now rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed
+  error naming the column and the offending rows, instead of passing it to the
+  fitting engine and surfacing that engine's own unclassed message.
+* `ci_method = "burch"` now aborts with the classed `intraclass_singular_fit`
+  condition on data with no between-subject variance at all, where it previously
+  reported an interval of `NaN` to `NaN` (or failed with an unclassed error,
+  depending on `unit`). The Burch width depends on a kurtosis term that divides
+  by the between-subject mean square, so it has no value there.
 * When an interval method aborts on degenerate data, the error now names another
   `ci_method` that works — verified by running it on your data first, so the
   suggestion is a call that was just shown to succeed rather than a guess. The

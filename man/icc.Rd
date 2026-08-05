@@ -61,7 +61,11 @@ plot of each ICC index with its Monte-Carlo confidence interval, or
 \item{data}{A data frame with one rating per row.}
 
 \item{score, subject, rater}{Columns of \code{data} (unquoted): the numeric rating,
-the subject (object of measurement), and the rater (judge).}
+the subject (object of measurement), and the rater (judge). A non-finite
+\code{score} (\code{Inf}, \code{-Inf}, \code{NaN}) is an error. An \code{NA} \code{score} is treated as a
+rating that did not happen: the row is dropped with a suppressible
+\code{intraclass_dropped_rows} warning and the rest is analyzed as an incomplete
+design, so a missing rating and an absent row give the same answer.}
 
 \item{cluster}{Optional column of \code{data} (unquoted) giving the higher-level
 unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
