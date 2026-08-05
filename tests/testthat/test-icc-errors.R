@@ -83,3 +83,79 @@ test_that("error messages are stable and actionable", {
     error = TRUE
   )
 })
+
+# Degenerate INPUT and degenerate DATA (M105) ----------------------------------
+#
+# Two failure families that reached the user raw rather than classed. A
+# non-finite `score` flowed into whichever engine was selected and surfaced that
+# engine's own `simpleError` -- a different message per engine, none of them
+# catchable by class (#8). And `ci_method = "burch"` on data with no
+# between-subject variance divided by `sqrt(MSA) = 0` in `burch_kappa_hat()`,
+# producing NaN endpoints that either crashed the Spearman-Brown pole guard
+# (`unit = "average"`) or shipped as a silent NaN interval (`unit = "single"`)
+# -- a reported non-interval, which #3 and #5 both refuse.
+
+test_that("a non-finite score aborts classed on every model and engine", {
+  d <- sf_ratings_long()
+  # The enumeration IS the domain this criterion quantifies over (M105 AC1):
+  # every pair the loop runs, every non-finite value the loop injects.
+  models <- c("oneway", "twoway")
+  engines <- c("glmmTMB", "lme4")
+  bad_values <- list(`Inf` = Inf, `-Inf` = -Inf, `NaN` = NaN)
+
+  for (model in models) {
+    for (engine in engines) {
+      for (label in names(bad_values)) {
+        spoiled <- d
+        spoiled$score[[4L]] <- bad_values[[label]]
+        expect_error(
+          icc(spoiled, score, subject, rater, model = model, engine = engine),
+          class = "intraclass_error",
+          info = paste(model, engine, label)
+        )
+      }
+    }
+  }
+})
+
+test_that("the non-finite abort names the column and the offending rows", {
+  d <- sf_ratings_long()
+  d$score[[2L]] <- Inf
+  d$score[[7L]] <- NaN
+  cnd <- rlang::catch_cnd(icc(d, score, subject, rater))
+  rendered <- cli::format_message(conditionMessage(cnd))
+  expect_match(rendered, "score", fixed = TRUE)
+  expect_match(rendered, "2", fixed = TRUE)
+  expect_match(rendered, "7", fixed = TRUE)
+})
+
+test_that("NA scores are dropped with a suppressible classed warning", {
+  d <- sf_ratings_long()
+  dropped <- d
+  # Two ratings that did not happen. Removing them leaves every subject rated by
+  # more than one rater and the subject x rater graph connected, so the remainder
+  # is an ordinary incomplete design the package already fits.
+  dropped$score[c(2L, 7L)] <- NA_real_
+  absent <- d[-c(2L, 7L), ]
+
+  expect_warning(
+    icc(dropped, score, subject, rater),
+    class = "intraclass_dropped_rows"
+  )
+
+  from_na <- suppressWarnings(icc(dropped, score, subject, rater))
+  from_absent <- icc(absent, score, subject, rater)
+  # Dropping a row and never supplying it must be the same analysis, to the bit.
+  expect_identical(
+    generics::tidy(from_na)$estimate,
+    generics::tidy(from_absent)$estimate
+  )
+  expect_identical(
+    generics::tidy(from_na)$conf.low,
+    generics::tidy(from_absent)$conf.low
+  )
+  expect_identical(
+    generics::tidy(from_na)$conf.high,
+    generics::tidy(from_absent)$conf.high
+  )
+})

@@ -1,0 +1,24 @@
+# degenerate-classical-cells.tsv -- what the classical one-way reducers meet
+# on zero-between-subject-variance data. Source: generated data only, no
+# external oracle -- every cell comes from the gen_ssa0 generator in the
+# script below. Generator: data-raw/sweep-degenerate-classical.R
+# (re-run: Rscript data-raw/sweep-degenerate-classical.R).
+# Seeds: every cell is generated at seed = 1; both reducers are deterministic
+# and consume no seed of their own.
+# msa/mse/searle_* are C99 hex floats (as.numeric() reads them exactly);
+# non-finite values are written as Inf/-Inf/NaN literals.
+# The searle_* columns are a BEFORE-baseline measured on the default branch
+# prior to M105's source changes -- do not regenerate them after the change.
+# msa_exact_zero, not a recorded Burch outcome, is what the suite derives its
+# per-cell Burch expectation from.
+# Do not hand-edit: regenerate with the script above.
+# Written by that script under R version 4.6.1 (2026-06-24), aarch64-apple-darwin25.4.0.
+n_s	n_r	seed	unit	msa	msa_exact_zero	mse	searle_conf_low	searle_conf_high
+6	3	1	single	0x0p+0	TRUE	0x1.4ddfba39e2579p+1	-0x1p-1	-0x1p-1
+6	3	1	average	0x0p+0	TRUE	0x1.4ddfba39e2579p+1	-Inf	-Inf
+10	2	1	single	0x0p+0	TRUE	0x1.7a011622b79f9p+1	-0x1p+0	-0x1p+0
+10	2	1	average	0x0p+0	TRUE	0x1.7a011622b79f9p+1	-Inf	-Inf
+20	3	1	single	0x0p+0	TRUE	0x1.4ddfba39e257bp+1	-0x1p-1	-0x1p-1
+20	3	1	average	0x0p+0	TRUE	0x1.4ddfba39e257bp+1	-Inf	-Inf
+8	4	1	single	0x1.2492492492492p-108	FALSE	0x1.5dd988622f4dcp+3	-0x1.5555555555555p-2	-0x1.5555555555555p-2
+8	4	1	average	0x1.2492492492492p-108	FALSE	0x1.5dd988622f4dcp+3	-Inf	-Inf

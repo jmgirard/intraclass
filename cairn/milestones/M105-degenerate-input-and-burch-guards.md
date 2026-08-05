@@ -1,11 +1,11 @@
 # M105: Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1, GP7
-- **Branch/PR:** —
+- **Branch/PR:** `m105-degenerate-input-and-burch-guards`
 
 ## Goal
 
@@ -88,7 +88,7 @@ hardening candidate → unrelated, stays a candidate row.
 
 ## Tasks
 
-- [ ] T1. Tests first. Commit the four `gen_ssa0` cells as a fixture with their
+- [x] T1. Tests first. Commit the four `gen_ssa0` cells as a fixture with their
       MSA values and per-case expectations; record `searle`'s current endpoints
       on all eight cases from `main` (AC4's baseline). Add the non-finite, NA,
       and Burch cases to `tests/testthat/test-icc-errors.R` and assert each one
@@ -118,3 +118,4 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: plan gate chose dropping NA-score rows with a classed warning over rejecting them outright because absent ratings are already a supported incomplete design, and the two spellings should not diverge; falsified by a case where dropping leaves a design that fits without aborting yet answers a different estimand than the user asked for.
 - 2026-08-05: plan chose input-side validation over wrapping the engine error in a classed condition because the raw message differs per engine (glmmTMB vs lme4 measured) and a wrapper would have to match on text; falsified by an engine whose non-finite failure is not reachable before the fit.
 - 2026-08-05: criteria audit ([O], fresh context) returned findings on five of six drafted criteria. Two verified against source and actioned as scope cuts: the exact-pole and `searle` `-Inf` behaviors are recorded deliberate decisions (`R/ci-npbootstrap.R:126`, D-010) — dropped to Out. Three actioned as wording fixes: `boundary_interval_usable()` replaced by a directly stated finite-and-ordered condition (the predicate is M93/D-018's is-it-worth-naming test and deliberately rejects the attained floor MSA = 0 produces, `R/boundary-hint.R:86`); the `searle` criterion recast as a regression pin; the NEWS criterion's unverifiable mutation claim replaced by the red-then-green work-log record.
+- 2026-08-05: T1 red-before-fix recorded. `test-icc-errors.R` FAIL 8 + ERROR 1 (non-finite score on all 12 model x engine x value cases; the column/row-naming message; the NA-drop warning class and the three identical() comparisons). `test-degenerate-classical.R` FAIL 2 (burch at 6x3 unit=single returns NaN silently, so no condition is raised to classify). Fixture `degenerate-classical-cells.tsv` written from `main` before any source change; 6 of 8 rows have MSA identical(.,0), 2 do not.
