@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-05 (audit clean; the D-021 disposition comment moved out from between table rows to below the table — an HTML block there interrupts the GFM table, so the M102/M99/M48 rows had stopped rendering as rows.)_
+_Last hygiene check: 2026-08-05 (M104 done and archived — the parametric bootstrap's boundary point/interval relation is measured, documented and pinned; M99 rotates out of the terminal-row window.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,19 +9,18 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M104 | What the parametric bootstrap reports when its interval sits above its own point | review | — | normal | milestones/M104-bootstrap-point-containment.md |
+| M104 | What the parametric bootstrap reports when its interval sits above its own point | done | — | normal | milestones/archive/M104-bootstrap-point-containment.md |
 | M103 | Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data | done | — | normal | milestones/archive/M103-runtime-hint-reducer-aborts.md |
 | M101 | What a degeneracy message may assert, and the messages made to obey it | dropped | — | normal | milestones/archive/M101-degeneracy-message-claims.md |
 | M100 | Abort remedies name only a `ci_method` measured to work on the data that triggers them | dropped | — | normal | milestones/archive/M100-abort-remedy-truthfulness.md |
 | M102 | A registered claims ledger, and the CI checker that re-derives it | done | — | normal | milestones/archive/M102-record-claims-ledger.md |
-| M99 | MPL interval — distinguish a true boundary limit from a root-finding failure | done | — | normal | milestones/archive/M99-mpl-root-failure-abort.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- D-021 disposition, 2026-08-03 (M100, M101): both dropped at the /milestone audit
      gate. The measured defect (a remedy naming a method usable 0/4 where `bootstrap`
      is 4/4) ships via hotfix; the ledger, the may-assert rule and the assertion
      tables are dropped. Evidence on branch `m100-abort-remedy-truthfulness`; PR #108
      closed. -->
-<!-- terminal-row retention: M103 done (2026-08-05) → M98 rotated out (oldest terminal; its archive file still resolves). Kept: M103, M101, M100, M102, M99 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M104 done (2026-08-05) → M99 rotated out (oldest terminal; its archive file still resolves). Kept: M104, M103, M101, M100, M102 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
