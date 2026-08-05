@@ -1,6 +1,6 @@
 # M105: Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently
 
-- **Status:** review
+- **Status:** planned
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -140,6 +140,7 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: review in progress -- draft PR #113 opened; consistency gate clean (cairn_validate all checks passed, devtools::check() 0/0/0, document() no-diff, pkgdown OK, README in sync, no milestone numbers in user-facing text; cairn_impact skipped, no IP/GP text changed). Criterion evidence gathered but NOT yet ticked, pending the third reviewer. Two prose defects queued to fix: R/boundary-hint.R:29 and :167 assert in the present tense that a missing score is caught by the extractors, which this branch makes unreachable via icc() (lines 24 and 61 are historical and stay); and a NEWS claim that such a frame "previously reached the fitting engine and failed there" is wrong -- the fit succeeded and the failure was downstream at the interval stage.
 - 2026-08-05: review complete. 22 findings from three lenses, scored independently; 3 at >=80 all fixed on the branch, plus 4 sub-80 fixed with reasons recorded, plus one orchestrator-found stale NEWS claim. F1 and F2 referred to the maintainer at the merge gate. Full suite re-run after the fixes: FAIL 0 PASS 5855; all four data-raw checkers and self-tests pass; cairn_validate all checks passed.
 - 2026-08-05: CI on the review head (a244012) -- check-references, lint, format-check and pkgdown green; the two platform test jobs and coverage still running at the 10-minute blocking-wait timeout. Merge held until green.
+- 2026-08-05: REVIEW RETURNED at the maintainer's decision at the merge gate. Not a criterion or gate failure -- all six criteria verified with fresh evidence and every mechanical gate is green. The return is finding F2: the Goal claims `icc()` "either returns finite ordered endpoints or raises a condition inheriting `intraclass_error`", which the milestone's own AC4 falsifies (`searle` at `unit = "average"` returns -Inf/-Inf with no error on all four fixture cells). A wrong Goal is plan-owned and returns to plan rather than being edited in place, so status -> planned for a re-cut of the Goal sentence. Branch and PR #113 stay open; no merge approval was written. F1 (pre-existing Burch roundoff interval) captured as a ROADMAP candidate row so it survives the re-cut.
 
 ## Review
 
