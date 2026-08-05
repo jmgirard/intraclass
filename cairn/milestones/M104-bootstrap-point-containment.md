@@ -91,20 +91,20 @@ sweep covers `"bootstrap"`, the method the observation came from).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write `data-raw/sweep-bootstrap-point-containment.R` over both arms
+- [x] T1: Write `data-raw/sweep-bootstrap-point-containment.R` over both arms
       (zero-between-variance and nonzero-between-variance generators), run it, and
       commit the script with its fixture. Follow the committed-sweep idiom already
       used by `data-raw/sweep-abort-remedies.R` +
       `tests/testthat/fixtures/abort-remedy-sweep.tsv`. Lessons: `lintr` lints
       `data-raw/` and rejects UPPERCASE constants, so run `lint_package()` before
       pushing.
-- [ ] T2: Add the fixture-reading test asserting AC2's two closed-scope claims.
+- [x] T2: Add the fixture-reading test asserting AC2's two closed-scope claims.
 - [x] T3: Add the boundary point/interval paragraph to the `"bootstrap"` docs
       (`R/icc.R:323` onward) and correct the `R/icc.R:502` "reads `0`" sentence;
       `devtools::document()`.
 - [x] T4: Update the Bootstrap row of the `cairn/DESIGN.md` interval-time boundary
       table.
-- [ ] T5: Add the live regression test pinning the AC6 call.
+- [x] T5: Add the live regression test pinning the AC6 call.
 - [ ] T6: NEWS entry; run the local gate (`document()` no delta,
       `air format --check`, `lintr::lint_package()`, tests against the installed
       package with `NOT_CRAN=true CI=true`).
@@ -122,6 +122,9 @@ sweep covers `"bootstrap"`, the method the observation came from).
 - 2026-08-05: T4 done — the DESIGN.md interval-time Bootstrap row states the relation and cites the fixture path.
 - 2026-08-05: implement gate chose to sweep at the shipped `boot_samples = 999` over the faster 199 the plan-gate probe used, so the fixture and AC6's live call measure the same experiment (the rule `data-raw/sweep-abort-remedies.R` already records); falsified by a cell whose containment verdict differs between the two counts.
 - 2026-08-05: minor plan refinement — the fixture gains `boot_samples` and `conf_level` columns beyond AC1's named schema, so the recorded bound is scoped to the count it was measured at.
+
+- 2026-08-05: T1/T2/T5 done — the sweep wrote 48 rows (48 ok, 0 aborted, 24 per arm); `conf.low > estimate` in 22, all 22 in the zero-between arm and none in the nonzero arm; largest gap 2.12e-09 and largest point estimate among them 2.90e-09, both inside the 1e-8 bound AC3 documents. All 17 rows with a point at or above 1e-8 contain their point. Tests green (9 assertions).
+- 2026-08-05: the fixture's first row reproduces the candidate row's 2026-08-04 observation exactly (point 3.40890543108706e-10, conf.low 4.80452439535659e-10).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
