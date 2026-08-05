@@ -889,6 +889,50 @@ icc <- function(
   if (!is.numeric(score_v)) {
     abort_intraclass("{.arg score} must be a numeric column.")
   }
+  # Non-finite scores are rejected HERE rather than wrapped at the engine (#8,
+  # M105/D-022). Every engine fails on them, but each fails in its own words --
+  # glmmTMB "negative log-likelihood is NaN at starting parameter values", lme4
+  # "NA/NaN/Inf in 'y'" -- and none of those is classed, so a caller could not
+  # `tryCatch()` the family. Catching it before any fit makes one message serve
+  # all four engines and keeps the check independent of engine internals.
+  # `NA` is deliberately NOT in this test: it is handled just below as a rating
+  # that did not happen, which is a different thing from a corrupt one. `NaN` IS
+  # in it, and the split has to be written explicitly because `is.na(NaN)` is
+  # TRUE in R -- a plain `!is.na()` filter silently routes every NaN into the
+  # drop branch, which would report a number where a corrupt score was supplied.
+  nonfinite <- which(is.nan(score_v) | (!is.na(score_v) & !is.finite(score_v)))
+  if (length(nonfinite) > 0L) {
+    abort_intraclass(c(
+      "{.arg score} must be finite.",
+      i = "Non-finite {.val {length(nonfinite)}} value{?s} at row{?s} \\
+           {.val {nonfinite}}.",
+      i = "Remove or correct {cli::qty(length(nonfinite))}{?that row/those rows} \\
+           before estimating an ICC."
+    ))
+  }
+  # A missing score is a rating that did not happen, which is exactly the
+  # incomplete design this package already fits (M3) -- the only difference is
+  # whether the absence is spelled as an absent row or as an `NA` in a present
+  # one, and the two should not give different answers (M105/D-022). So the rows
+  # are dropped and the remainder goes through the ordinary incomplete path;
+  # the identifiability guards below still fire if a drop leaves the design
+  # unidentified. Warned, never silent, and classed so a user working with
+  # routinely-incomplete data can suppress this one warning by class without
+  # silencing the rest (the `intraclass_fixed_raters` precedent).
+  # Scope is `score` only: a row missing its SUBJECT or RATER identity cannot be
+  # placed in the design at all, so dropping it would hide a data-preparation
+  # error rather than accommodate a missing rating (M105 gate, 2026-08-05).
+  na_scores <- which(is.na(score_v) & !is.nan(score_v))
+  if (length(na_scores) > 0L) {
+    warn_dropped_rows(length(na_scores))
+    keep <- -na_scores
+    score_v <- score_v[keep]
+    subject_v <- subject_v[keep]
+    rater_v <- rater_v[keep]
+    if (multilevel) {
+      cluster_v <- cluster_v[keep]
+    }
+  }
   # droplevels() so identifiability checks count observed raters/subjects, not
   # empty factor levels left over from subsetting.
   df <- data.frame(

@@ -143,8 +143,11 @@ test_that("NA scores are dropped with a suppressible classed warning", {
     class = "intraclass_dropped_rows"
   )
 
-  from_na <- suppressWarnings(icc(dropped, score, subject, rater))
-  from_absent <- icc(absent, score, subject, rater)
+  # The default interval is Monte-Carlo, so both calls are seeded: an unseeded
+  # pair would differ on the endpoints for reasons that have nothing to do with
+  # how the missing ratings were spelled.
+  from_na <- suppressWarnings(icc(dropped, score, subject, rater, seed = 1L))
+  from_absent <- icc(absent, score, subject, rater, seed = 1L)
   # Dropping a row and never supplying it must be the same analysis, to the bit.
   expect_identical(
     generics::tidy(from_na)$estimate,
