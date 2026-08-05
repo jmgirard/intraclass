@@ -162,3 +162,48 @@ test_that("NA scores are dropped with a suppressible classed warning", {
     generics::tidy(from_absent)$conf.high
   )
 })
+
+test_that("dropping NA scores leaves exactly the methods the design supports", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
+  # Before M105 an NA-scored row counted as an observed cell, so this design read
+  # as BALANCED to every design fence while no reducer could actually use it.
+  # With the row dropped it is a genuinely unbalanced one-way design, and the
+  # fences now say so: the two balanced-only classical methods are refused up
+  # front rather than aborting deep inside their extractors, and `npbootstrap`,
+  # which supports unbalanced one-way data, works.
+  set.seed(11)
+  d <- data.frame(
+    subject = rep(1:20, each = 3),
+    rater = rep(1:3, times = 20),
+    score = round(stats::rnorm(60), 1)
+  )
+  d$score[[5L]] <- NA_real_
+
+  call_with <- function(method) {
+    suppressWarnings(icc(
+      d,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      ci_method = method,
+      seed = 1L
+    ))
+  }
+
+  # The enumeration IS the domain this clause quantifies over (M105 AC2).
+  for (method in c("searle", "burch")) {
+    expect_error(
+      call_with(method),
+      class = "intraclass_unsupported",
+      info = method
+    )
+  }
+  for (method in c("npbootstrap", "montecarlo")) {
+    tidied <- generics::tidy(call_with(method))
+    expect_true(is.finite(tidied$conf.low[[1L]]), info = method)
+    expect_true(is.finite(tidied$conf.high[[1L]]), info = method)
+  }
+})

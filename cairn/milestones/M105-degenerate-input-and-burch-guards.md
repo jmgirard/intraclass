@@ -52,7 +52,12 @@ hardening candidate → unrelated, stays a candidate row.
       condition inheriting `intraclass_warning` naming the number dropped; on a
       frame whose NA removal leaves a connected two-way design, the returned
       estimate and both endpoints are `identical()` to those from the same call
-      on a frame with those rows physically absent.
+      on a frame with those rows physically absent; and on a one-way frame with
+      a missing score, the `ci_method` values reachable after the drop are
+      exactly those the resulting unbalanced design supports — `searle` and
+      `burch` refused by their existing balance fence with
+      `intraclass_unsupported`, `npbootstrap` and `montecarlo` each returning an
+      interval — asserted by a test enumerating those four.
 - [ ] AC3. For each case its test loops over — the four committed
       zero-between-variance fixture cells (6×3, 10×2, 20×3, 8×4 from `gen_ssa0`)
       × `unit` ∈ {`"single"`, `"average"`} — `icc(..., ci_method = "burch")`
@@ -93,10 +98,10 @@ hardening candidate → unrelated, stays a candidate row.
       on all eight cases from `main` (AC4's baseline). Add the non-finite, NA,
       and Burch cases to `tests/testthat/test-icc-errors.R` and assert each one
       red against current behavior before any source change.
-- [ ] T2. Classed abort for non-finite `score` in `icc()`'s canonicalization,
+- [x] T2. Classed abort for non-finite `score` in `icc()`'s canonicalization,
       before `summarize_design()` (`R/icc.R:1170`) and before any engine call, so
       it is engine-independent; message names the column and the row positions.
-- [ ] T3. Drop `NA`-score rows at the same site with a classed
+- [x] T3. Drop `NA`-score rows at the same site with a classed
       `warn_intraclass()` naming the count, then let the existing
       incomplete-design path handle the remainder. Confirm the existing
       connectivity and per-subject guards still fire when a drop leaves the
@@ -121,3 +126,6 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: T1 red-before-fix recorded. `test-icc-errors.R` FAIL 8 + ERROR 1 (non-finite score on all 12 model x engine x value cases; the column/row-naming message; the NA-drop warning class and the three identical() comparisons). `test-degenerate-classical.R` FAIL 2 (burch at 6x3 unit=single returns NaN silently, so no condition is raised to classify). Fixture `degenerate-classical-cells.tsv` written from `main` before any source change; 6 of 8 rows have MSA identical(.,0), 2 do not.
 - 2026-08-05: T2 + T3 code landed, their own tests green (test-icc-errors.R FAIL 0 PASS 29). Tasks NOT yet checked off: the full suite reds 13 assertions in test-boundary-abort-hint.R, whose NA-scored fixture cells were built on the premise T3 removes. Measured consequence on a one-way frame with one NA score: before, the NA row counted as an observed cell so the design looked balanced and searle/burch/npbootstrap all aborted inside their extractors; after, the design is genuinely unbalanced, searle/burch are refused up front by their balance fence (intraclass_unsupported) and npbootstrap returns an interval. Wider than AC2 describes -- gated.
 - 2026-08-05: T2 implementation note -- `is.na(NaN)` is TRUE in R, so the first draft's `!is.na()` filter routed every NaN into the drop branch and reported a number for a corrupt score; the split is now written explicitly with `is.nan()` on both sides.
+- 2026-08-05: AC2 amended via the implement gate -- added the availability clause after measurement showed the drop changes which `ci_method` values are reachable, which the plan did not anticipate. Amended text shown verbatim in chat before this commit.
+- 2026-08-05: amended the one-way NA-scored cell in test-boundary-abort-hint.R ("a missing score silences every row"). Its forbid/candidates lists encoded that an NA row fences searle/burch/npbootstrap out; after T3 the design is unbalanced, so npbootstrap is genuinely usable and searle/burch are genuinely design-fenced. Lists corrected to the measured truth, not relaxed. The `expect_identical(fenced_named(r_ow), 0L)` line flips to `expect_gt(..., 0L)`: it only ever counted whether the fenced tier fired, and the property that no UNUSABLE method is named stays enforced by the unchanged per-seed `named == usable` assertion. The two-way cell is unmoved.
+- 2026-08-05: T2/T3 green -- test-icc-errors.R FAIL 0 PASS 37, test-boundary-abort-hint.R FAIL 0 PASS 1331. Only outstanding reds in the suite are test-degenerate-classical.R's two, which are T4's planned tests-first reds.

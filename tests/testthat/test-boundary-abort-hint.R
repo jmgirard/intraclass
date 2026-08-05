@@ -1554,8 +1554,15 @@ test_that("a missing score silences every row, and never breaks the abort (AC2/A
   skip_if_not_installed("glmmTMB")
   skip_on_cran()
 
-  # `balanced` counts an NA-scored row as an observed cell, so these designs look
-  # complete to every design fence while no method survives them.
+  # Until M105, `balanced` counted an NA-scored row as an observed cell, so these
+  # designs looked complete to every design fence while no method survived them.
+  # `icc()` now drops the row, so what reaches the fences is a genuinely
+  # UNBALANCED design and the fences answer accordingly: on the one-way cell the
+  # two balanced-only classical methods are refused up front and `npbootstrap`,
+  # which supports unbalanced one-way data, becomes usable. The two-way cell is
+  # unchanged -- all three of those methods are one-way-only either way.
+  # The lists below are corrected to that measured truth, not relaxed: the cell
+  # still asserts the hint names every usable method and no fenced one.
   na_ow <- function(sd) {
     d <- bh_smallint(20L, 3L, sd)
     d$score[5] <- NA
@@ -1570,8 +1577,8 @@ test_that("a missing score silences every row, and never breaks the abort (AC2/A
     lab = "one-way + NA score",
     build = na_ow,
     args = list(model = "oneway"),
-    candidates = c("searle", "burch", "bootstrap"),
-    forbid = c("mpl", "npbootstrap")
+    candidates = c("bootstrap", "npbootstrap"),
+    forbid = c("mpl", "searle", "burch")
   )
   r_tw <- bh_sweep_cell(
     lab = "two-way + NA score",
@@ -1586,14 +1593,24 @@ test_that("a missing score silences every row, and never breaks the abort (AC2/A
   # confirmed no admissible method was usable on that data.
   #
   # Scoped to the DESIGN-FENCED methods since M103, and the narrowing is a fact
-  # about the data rather than a concession. Their extractors abort on an NA, so
-  # a missing score silences all four. `bootstrap` reduces the fitted model, and
-  # the fit simply drops the incomplete row -- measured, it returns an ordinary
-  # usable interval on this data (ICC(1) 0.0696, [8.4e-10, 0.365] on the one-way
-  # cell). Naming it there is therefore true, and asserting universal silence
-  # would be asserting that a working method must not be offered.
+  # about the data rather than a concession. Since M105 the fencing is done by
+  # the design fences on unbalanced data rather than by an extractor choking on
+  # an NA, but the assertion is the same one: a fenced method is never named.
+  # `bootstrap` reduces the fitted model, and the fit simply drops the incomplete
+  # row -- measured, it returns an ordinary usable interval on this data (ICC(1)
+  # 0.0696, [8.4e-10, 0.365] on the one-way cell). Naming it there is therefore
+  # true, and asserting universal silence would be asserting that a working
+  # method must not be offered.
   fenced_named <- function(r) r$named_fenced
-  expect_identical(fenced_named(r_ow), 0L)
+  # The one-way cell FLIPS at M105 and the direction is the point: `npbootstrap`
+  # now survives this data, so the design-fenced tier is expected to fire rather
+  # than stay silent, and a zero here would mean a usable method was withheld.
+  # What still guards against naming an UNUSABLE method is the per-seed
+  # `named == usable` assertion inside `bh_sweep_cell()`, which is unchanged --
+  # this line only ever counted whether the tier fired at all.
+  expect_gt(fenced_named(r_ow), 0L)
+  # The two-way cell is unmoved: `searle`, `burch` and `npbootstrap` are all
+  # one-way-only, so nothing in the fenced tier is admissible there either way.
   expect_identical(fenced_named(r_tw), 0L)
 
   # AC2's never-raise clause, the sharper half: building the hint must not turn the
