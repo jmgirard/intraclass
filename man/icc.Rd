@@ -219,6 +219,24 @@ reproduces it exactly) — with no seed set it uses a
 fixed seed the message then names, and an unseeded retry draws fresh resamples
 and can fail where the verified run succeeded, especially on small designs.
 The trial run leaves the session's random-number stream untouched.
+The same holds in reverse, and on \code{"bootstrap"}, \code{"searle"}, \code{"burch"} and
+\code{"npbootstrap"} as well as on the default (\code{"mpl"} raises its own kind of
+error and is not covered). When a method you asked for aborts on degenerate data, its error
+names a method verified on that same data by the same trial runs and under
+the same rules — or, where no method serves that data, names none, leaving
+the message exactly as it would otherwise read. It never names the method
+you asked for, which just failed. Data with no between-subject variance is the case
+this matters most on: there \code{"bootstrap"} is typically the only method that
+returns anything usable, and it is now named rather than left for you to
+find. Candidates are tried cheapest first, so the two methods that reduce the
+fitted model rather than your raw data — \code{"bootstrap"} and \code{"montecarlo"} —
+are reached only where no method fenced to your design serves the data,
+and the costliest of them is both screened at a small resample count and
+capped when run in full, so an error stays a few seconds rather than tens of
+them. That cap is why a bullet naming \code{"bootstrap"} also names a
+\code{boot_samples} value: it is the count the trial actually ran at, and the
+call the message gives you is the one that was verified rather than a
+heavier one nobody tried.
 \code{"bootstrap"} is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -317,15 +335,21 @@ not a defect (coverage there is 1.000), but such an interval excludes little.
 It assumes approximately Gaussian data (untested for non-normality).}
 
 \item{mc_samples}{Number of Monte-Carlo draws for \code{ci_method = "montecarlo"}
-(default \code{10000}).}
+(default \code{10000}). It is also the count at which a \code{"montecarlo"} interval is
+trialled when some \emph{other} method's error considers suggesting it.}
 
 \item{boot_samples}{Number of resamples for \code{ci_method = "bootstrap"} (the
 parametric bootstrap) and \code{"npbootstrap"} (the transformed bootstrap-\emph{t}
-subject resamples); default \code{999}. Ignored when \code{ci_method = "montecarlo"}.}
+subject resamples); default \code{999}. It does not change a
+\code{ci_method = "montecarlo"} interval, but it is not unused on that path: when
+that interval aborts, it is the count the suggestion machinery trials
+\code{"bootstrap"} at (capped) and names in the message.}
 
 \item{seed}{Optional integer seed for a reproducible interval (and, for
 \code{engine = "brms"}, the Stan sampler seed). The global RNG state is restored
-afterward.}
+afterward. It also seeds the trial runs behind an error's suggestion, so it
+can decide which method that error names — including for the deterministic
+\code{"searle"} and \code{"burch"} intervals, whose own values ignore it.}
 
 \item{brm_args}{A named list of extra arguments forwarded to \code{\link[brms:brm]{brms::brm()}} when
 \code{engine = "brms"} (e.g. \code{backend}, \code{chains}, \code{iter}, \code{cores}, \code{control}). The

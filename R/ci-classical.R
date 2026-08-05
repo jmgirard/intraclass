@@ -42,21 +42,29 @@ classical_oneway_ss <- function(groups) {
 # (no within-subject variance) or a non-finite F leaves the interval ill-posed.
 # This is the pathological exact-zero boundary, NOT the near-zero ICC the methods
 # exist to serve (small-but-positive F passes and returns a finite interval).
-classical_guard_observed <- function(ss, method, call) {
+classical_guard_observed <- function(ss, method, call, hint = character(0)) {
   f <- ss$msa / ss$mse
   # This guard REPORTS the quantities that failed and diagnoses nothing. Its
   # condition has two disjuncts but its message described only the first, and it
   # named `ci_method = "montecarlo"` until a seeded sweep of its trigger class
-  # measured montecarlo usable on 0 of 3 datasets that reach it. Naming a method
-  # here again needs sweep evidence that the method is usable on every dataset
-  # reaching this guard.
+  # measured montecarlo usable on 0 of 3 datasets that reach it. A STATIC name
+  # would still need sweep evidence covering every dataset that reaches here.
+  # `hint` is not static (M103): it names a method only after running it on THIS
+  # caller's data, so on the sweep's own three datasets it stays empty and this
+  # message is byte-identical to the one that shipped without it.
+  #
+  # `searle_ci()` and `burch_ci()` SHARE this guard, so verifying `burch` from a
+  # `searle` abort re-enters it. That terminates rather than recursing: the
+  # verification run passes no hint of its own, so the re-entered guard aborts
+  # with the message alone and `boundary_method_usable()` catches it (M103 AC4).
   if (ss$mse == 0 || !is.finite(f)) {
     abort_intraclass(
       c(
         "The classical one-way {method} interval is undefined for this data.",
         i = "The {.field F = MSA/MSE} pivot is not usable here: \\
              MSA = {.val {signif(ss$msa, 6)}}, MSE = {.val {signif(ss$mse, 6)}}.",
-        i = "Inspect the data before retrying."
+        i = "Inspect the data before retrying.",
+        hint
       ),
       class = "intraclass_singular_fit",
       call = call
@@ -91,11 +99,12 @@ searle_ci <- function(
   df,
   estimands,
   conf_level = 0.95,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  hint = character(0)
 ) {
   groups <- npb_groups(df, call = call)
   ss <- classical_oneway_ss(groups)
-  classical_guard_observed(ss, "SEARLE exact-F", call)
+  classical_guard_observed(ss, "SEARLE exact-F", call, hint)
   ends <- searle_endpoints(ss$msa, ss$mse, ss$df1, ss$df2, ss$n, conf_level)
 
   lapply(estimands, function(est) {
@@ -172,11 +181,12 @@ burch_ci <- function(
   df,
   estimands,
   conf_level = 0.95,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  hint = character(0)
 ) {
   groups <- npb_groups(df, call = call)
   ss <- classical_oneway_ss(groups)
-  classical_guard_observed(ss, "Burch REML", call)
+  classical_guard_observed(ss, "Burch REML", call, hint)
 
   kappa_bc <- burch_kappa_bc(
     burch_kappa_hat(groups, ss$msa, ss$mse),

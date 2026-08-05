@@ -16,7 +16,7 @@
 #      variance.
 #
 # Provenance of the fixtures and the usability verdicts: the seeded sweep
-# `data-raw/sweep-abort-remedies.R` -> `data-raw/abort-remedy-sweep.tsv`
+# `data-raw/sweep-abort-remedies.R` -> `tests/testthat/fixtures/abort-remedy-sweep.tsv`
 # (210 rows) on branch `m100-abort-remedy-truthfulness`; the generators below are
 # that script's `gen_mse0`, `gen_ssa0`, `gen_se_zero` and
 # `gen_resample_degenerate`. Per-site verdicts are quoted at each test.
@@ -228,12 +228,24 @@ test_that("the bootstrap refit-convergence abort names no method its sweep conde
   expect_false(grepl("This usually means", msg, fixed = TRUE))
 })
 
-test_that("the npbootstrap resample-degeneracy abort KEEPS its montecarlo remedy (AC5)", {
+test_that("the npbootstrap resample-degeneracy abort still NAMES a remedy (AC5)", {
   skip_if_not_installed("glmmTMB")
 
-  # Sweep verdict, gen_resample_degenerate: montecarlo usable 9/9. This bullet
-  # is truthful and must survive -- the fix de-names only condemned sites, and
-  # this test reds on a blanket de-naming sweep.
+  # What this test guards is that the hotfix de-named only the CONDEMNED sites:
+  # it reds on a blanket de-naming sweep across every guard. That intent is
+  # unchanged. What changed is how the name is earned.
+  #
+  # The hotfix asserted the literal "montecarlo", because this bullet was the one
+  # hard-coded name the sweep had vindicated (usable 9/9 on this generator) and
+  # so the one the hotfix left standing. M103 replaced that literal with the same
+  # runtime verification the other five guards now use, and on this data the
+  # deterministic pair is usable too, so verification reaches `searle`/`burch`
+  # first and never runs the costlier `montecarlo`. Pinning the literal would now
+  # pin the tier order rather than the truthfulness the test exists for.
+  #
+  # So the assertion is the stronger one M103 makes available: the guard names at
+  # least one method, and every method it names is one that actually works on
+  # this data.
   d <- gen_resample_degenerate()
   msg <- abort_message(
     icc(
@@ -249,7 +261,29 @@ test_that("the npbootstrap resample-degeneracy abort KEEPS its montecarlo remedy
   )
 
   expect_match(msg, "resamples were degenerate", fixed = TRUE)
-  expect_match(msg, "montecarlo", fixed = TRUE)
+  named <- unique(unlist(regmatches(
+    msg,
+    gregexpr('(?<=ci_method = ")[a-z]+(?=")', msg, perl = TRUE)
+  )))
+  expect_gt(length(named), 0L)
+  ests <- list(
+    icc_estimand(unit = "single", k_eff = 3, oneway = TRUE),
+    icc_estimand(unit = "average", k_eff = 3, oneway = TRUE)
+  )
+  for (m in named) {
+    expect_true(
+      boundary_method_usable(
+        m,
+        d,
+        ests,
+        conf_level = 0.95,
+        n0 = 3,
+        seed = 1,
+        boot_samples = 99L
+      ),
+      info = m
+    )
+  }
 })
 
 test_that("every touched degeneracy guard keeps its condition class (AC6)", {

@@ -302,6 +302,24 @@
 #'   fixed seed the message then names, and an unseeded retry draws fresh resamples
 #'   and can fail where the verified run succeeded, especially on small designs.
 #'   The trial run leaves the session's random-number stream untouched.
+#'   The same holds in reverse, and on `"bootstrap"`, `"searle"`, `"burch"` and
+#'   `"npbootstrap"` as well as on the default (`"mpl"` raises its own kind of
+#'   error and is not covered). When a method you asked for aborts on degenerate data, its error
+#'   names a method verified on that same data by the same trial runs and under
+#'   the same rules — or, where no method serves that data, names none, leaving
+#'   the message exactly as it would otherwise read. It never names the method
+#'   you asked for, which just failed. Data with no between-subject variance is the case
+#'   this matters most on: there `"bootstrap"` is typically the only method that
+#'   returns anything usable, and it is now named rather than left for you to
+#'   find. Candidates are tried cheapest first, so the two methods that reduce the
+#'   fitted model rather than your raw data — `"bootstrap"` and `"montecarlo"` —
+#'   are reached only where no method fenced to your design serves the data,
+#'   and the costliest of them is both screened at a small resample count and
+#'   capped when run in full, so an error stays a few seconds rather than tens of
+#'   them. That cap is why a bullet naming `"bootstrap"` also names a
+#'   `boot_samples` value: it is the count the trial actually ran at, and the
+#'   call the message gives you is the one that was verified rather than a
+#'   heavier one nobody tried.
 #'   `"bootstrap"` is a parametric bootstrap: it simulates response vectors from the
 #'   fitted model, refits, and takes percentile quantiles of the resampled
 #'   coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -399,13 +417,19 @@
 #'   not a defect (coverage there is 1.000), but such an interval excludes little.
 #'   It assumes approximately Gaussian data (untested for non-normality).
 #' @param mc_samples Number of Monte-Carlo draws for `ci_method = "montecarlo"`
-#'   (default `10000`).
+#'   (default `10000`). It is also the count at which a `"montecarlo"` interval is
+#'   trialled when some *other* method's error considers suggesting it.
 #' @param boot_samples Number of resamples for `ci_method = "bootstrap"` (the
 #'   parametric bootstrap) and `"npbootstrap"` (the transformed bootstrap-*t*
-#'   subject resamples); default `999`. Ignored when `ci_method = "montecarlo"`.
+#'   subject resamples); default `999`. It does not change a
+#'   `ci_method = "montecarlo"` interval, but it is not unused on that path: when
+#'   that interval aborts, it is the count the suggestion machinery trials
+#'   `"bootstrap"` at (capped) and names in the message.
 #' @param seed Optional integer seed for a reproducible interval (and, for
 #'   `engine = "brms"`, the Stan sampler seed). The global RNG state is restored
-#'   afterward.
+#'   afterward. It also seeds the trial runs behind an error's suggestion, so it
+#'   can decide which method that error names — including for the deterministic
+#'   `"searle"` and `"burch"` intervals, whose own values ignore it.
 #' @param brm_args A named list of extra arguments forwarded to [brms::brm()] when
 #'   `engine = "brms"` (e.g. `backend`, `chains`, `iter`, `cores`, `control`). The
 #'   default (rstan backend, brms defaults) needs none. By default brms samples the
@@ -2103,13 +2127,58 @@ icc <- function(
       function(e) icc_point(engine_fit$components, e),
       numeric(1)
     )
+    # The design-aware opt-in bullet, built for whichever reducer is dispatched
+    # (M93 for the Monte-Carlo default; M103 for the four reducer-stage guards).
+    # ALL of this is lazy: `hint` is a promise forced only inside an abort
+    # message, so a successful call never pays for the verification runs.
+    #
+    # `invoked` excludes the dispatched method from its own remedy and selects the
+    # bullet's contrast clause. `engine` is what makes the engine-fit tier
+    # (`bootstrap`, `montecarlo`) available, and every guard gets it -- the
+    # default path included, which is where the motivating case lives. Its cost is
+    # bounded by the screen and the cap rather than by withholding the tier (the
+    # M103 review found a default-path abort on data where `bootstrap` works).
+    boundary_hint_for <- function(method, engine = engine_fit) {
+      boundary_method_hint(
+        oneway = oneway,
+        multilevel = multilevel,
+        replicates = replicates,
+        raters = raters,
+        balanced = balanced,
+        type = type,
+        type_supplied = type_supplied,
+        # `unit` feeds the admissibility mirror of the numeric-unit fence on the
+        # unbalanced npbootstrap path; `seed` and `boot_samples` are the ones the
+        # user's own retry would run under, so the verified run is the promised
+        # one (M97; a NULL seed falls back to the fixed, named
+        # `hint_verify_seed`).
+        unit = unit,
+        seed = seed,
+        boot_samples = boot_samples,
+        mc_samples = mc_samples,
+        conf_level = conf_level,
+        # The hint does not PREDICT whether a method will work on this data; it
+        # runs the method. So it takes exactly what the dispatch hands a reducer
+        # -- the same `df`, `estimands` and `conf_level` -- and the interval it
+        # inspects is the one the user's own `ci_method =` call would return.
+        df = df,
+        estimands = estimands,
+        # The effective group size the ICC(1) support floor -1/(n0-1) is defined
+        # against (D-010). A support constant, not a design predicate.
+        n0 = design_info$k_eff,
+        invoked = method,
+        engine = engine
+      )
+    }
+
     intervals <- if (ci_method == "bootstrap") {
       bootstrap_ci(
         engine_fit,
         estimands,
         conf_level = conf_level,
         boot_samples = boot_samples,
-        seed = seed
+        seed = seed,
+        hint = boundary_hint_for("bootstrap")
       )
     } else if (ci_method == "npbootstrap") {
       # Non-parametric transformed bootstrap-t: resamples the RAW one-way data
@@ -2121,17 +2190,28 @@ icc <- function(
         estimands,
         conf_level = conf_level,
         boot_samples = boot_samples,
-        seed = seed
+        seed = seed,
+        hint = boundary_hint_for("npbootstrap")
       )
     } else if (ci_method == "searle") {
       # Classical exact-F closed form on the RAW one-way data (M82/D-012); the
       # POINT stays the engine (REML) point above (BC5), only the interval
       # differs. Deterministic -- no draws/seed. Guarded to balanced one-way.
-      searle_ci(df, estimands, conf_level = conf_level)
+      searle_ci(
+        df,
+        estimands,
+        conf_level = conf_level,
+        hint = boundary_hint_for("searle")
+      )
     } else if (ci_method == "burch") {
       # Classical Burch (2011) REML closed form on the RAW one-way data
       # (M82/D-012); same conventions as "searle" (engine point, deterministic).
-      burch_ci(df, estimands, conf_level = conf_level)
+      burch_ci(
+        df,
+        estimands,
+        conf_level = conf_level,
+        hint = boundary_hint_for("burch")
+      )
     } else if (ci_method == "mpl") {
       # Modified profile likelihood on the RAW two-way data (xiao2013; M88,
       # D-014/D-015); the POINT stays the engine (REML) point above (BC5), only the
@@ -2153,35 +2233,15 @@ icc <- function(
         conf_level = conf_level,
         mc_samples = mc_samples,
         seed = seed,
-        hint = boundary_method_hint(
-          oneway = oneway,
-          multilevel = multilevel,
-          replicates = replicates,
-          raters = raters,
-          balanced = balanced,
-          type = type,
-          type_supplied = type_supplied,
-          # `unit` feeds the admissibility mirror of the numeric-unit fence on the
-          # unbalanced npbootstrap path; `seed` and `boot_samples` are the ones the
-          # user's own retry would run under, so the verified bootstrap run is the
-          # promised one (M97; a NULL seed falls back to the fixed, named
-          # `npb_hint_seed`).
-          unit = unit,
-          seed = seed,
-          boot_samples = boot_samples,
-          conf_level = conf_level,
-          # The hint no longer PREDICTS whether a method will work on this data; it
-          # runs the method. So it takes exactly what the dispatch above hands a
-          # reducer -- the same `df`, `estimands` and `conf_level` -- and the
-          # interval it inspects is the one the user's own `ci_method =` call would
-          # return. All of this is lazy: `hint` is a promise forced only inside an
-          # abort message, so a successful call never pays for it.
-          df = df,
-          estimands = estimands,
-          # The effective group size the ICC(1) support floor -1/(n0-1) is defined
-          # against (D-010). A support constant, not a design predicate.
-          n0 = design_info$k_eff
-        )
+        # The DEFAULT path gets the engine-fit tier on the same terms as every
+        # other guard. It was withheld here at first, on the cost of running a
+        # 999-refit bootstrap inside the package's default abort; the M103 review
+        # falsified that trade twice over -- the cost is bounded by the screen in
+        # `boundary_method_usable()`, and withholding it left the plain
+        # `icc(df, score, subject, rater, model = "oneway")` call silent on
+        # zero-between-variance data where `bootstrap` returns a usable interval.
+        # `montecarlo` self-excludes here, so what this restores is `bootstrap`.
+        hint = boundary_hint_for("montecarlo")
       )
     }
   }

@@ -180,7 +180,12 @@ bh_usable <- function(d, method, args = list()) {
 
 # Parse the `ci_method = "x"` names out of a rendered abort message.
 bh_msg_methods <- function(m) {
-  all <- c("npbootstrap", "searle", "burch", "mpl")
+  # Every `ci_method` a bullet can name, matched WITH its quotes. The quotes are
+  # what make this a method check rather than a substring check: since M103 a
+  # bullet can carry `boot_samples`, and a bare `grepl("mpl", ...)` matches the
+  # "mpl" inside "samples" -- which is a false report of the mpl method being
+  # named, and did exactly that at two sites here.
+  all <- c("npbootstrap", "searle", "burch", "mpl", "bootstrap", "montecarlo")
   all[vapply(
     all,
     function(x) grepl(paste0("\"", x, "\""), m, fixed = TRUE),
@@ -400,13 +405,13 @@ test_that("unbalanced one-way hints npbootstrap only when the RUN verifies (AC2/
   # design predicates and why the run is the only evidence accepted.
   d_ok <- bh_smallint(20L, 3L, 1L, balanced = FALSE)
 
-  # No caller seed: verification ran under the fixed `npb_hint_seed`, and the
+  # No caller seed: verification ran under the fixed `hint_verify_seed`, and the
   # bullet NAMES that seed -- the promised call is exactly the verified run.
   h <- bh_hint(oneway = TRUE, balanced = FALSE, df = d_ok)
   expect_length(h, 1L)
   expect_named(h, "i")
   expect_match(h[["i"]], "npbootstrap", fixed = TRUE)
-  expect_match(h[["i"]], paste0("seed = ", npb_hint_seed), fixed = TRUE)
+  expect_match(h[["i"]], paste0("seed = ", hint_verify_seed), fixed = TRUE)
   # Quoted method strings, as bh_msg_methods() parses them: bare "mpl" would also
   # match inside the word "resamples".
   for (m in c("searle", "burch", "mpl")) {
@@ -833,7 +838,7 @@ test_that("designs the hint stays silent on are the ones that would abort (AC3/A
         rater,
         model = "oneway",
         ci_method = "npbootstrap",
-        seed = npb_hint_seed
+        seed = hint_verify_seed
       )
     )),
     class = "intraclass_singular_fit"
@@ -894,7 +899,7 @@ test_that("an off-grid mpl design is not hinted end to end (AC3, F1)", {
     is.null(m),
     "no MC abort at 8 subjects in the seed sweep (boundary luck)"
   )
-  expect_no_match(m, "mpl", fixed = TRUE)
+  expect_false("mpl" %in% bh_msg_methods(m))
   # ...and the reason it must not be named: mpl aborts on that very design.
   expect_error(
     suppressWarnings(suppressMessages(
@@ -1008,9 +1013,22 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
       c(list(case$d, ci_method = "montecarlo", seed = 1), case$args)
     )
     skip_if(is.na(m), paste("no abort on the", case$lab, "degenerate case"))
+    # Read through `bh_msg_methods()`, never a bare `grepl`: a bullet can carry
+    # `boot_samples` since M103, whose "mpl" substring reported the mpl method as
+    # named and reddened this line on Linux while macOS -- where the point fit
+    # dies on the flat case and there is no bullet at all -- stayed green (CI on
+    # PR #111, 2026-08-05). The third site of the trap the helper's own comment
+    # describes.
+    #
+    # Scoped to the DESIGN-FENCED methods. They are the ones whose own fence this
+    # data defeats, which is what "degenerate for the row" means here. The
+    # engine-fit pair is not fenced by design, so where the fit survives this data
+    # `bootstrap` can verify and be named, and that naming is earned by a run
+    # rather than asserted -- the tier-2 assertion belongs to AC2, not here.
+    named <- bh_msg_methods(m)
     for (s in c("searle", "burch", "npbootstrap", "mpl")) {
       expect_identical(
-        paste(case$lab, s, grepl(s, m, fixed = TRUE)),
+        paste(case$lab, s, s %in% named),
         paste(case$lab, s, FALSE)
       )
     }
@@ -1043,9 +1061,13 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
   db <- bh_degen_between()
   m <- bh_msg_any(db, ci_method = "montecarlo", model = "oneway", seed = 1)
   skip_if(is.na(m), "no abort on the SSA = 0 case")
+  # Read off the message's own `ci_method = "..."` renderings, not by substring:
+  # "samples" contains "mpl" (M103). `bootstrap` is deliberately NOT in this set
+  # -- on this SSA = 0 data it IS named now, verified, which is M103's AC9.
+  named_here <- bh_msg_methods(m)
   for (meth in c("searle", "burch", "npbootstrap", "mpl")) {
     expect_identical(
-      paste("between", meth, grepl(meth, m, fixed = TRUE)),
+      paste("between", meth, meth %in% named_here),
       paste("between", meth, FALSE)
     )
   }
@@ -1204,21 +1226,56 @@ test_that("multilevel, replicate and off-grid designs stay silent, and abort (AC
 #
 # Returns its counts rather than one number, because a cell whose default never
 # aborted asserted NOTHING and the caller has to be able to see that.
+# Is this method usable here, asked EXACTLY as `boundary_method_usable()` asks it?
+# For `bootstrap` that means the cheap screen at `hint_screen_samples` first and
+# only then the full run at the capped count -- and no screen at all when the
+# caller's own count is already at or below it, which is the branch verification
+# takes too. Modelling the cap alone would call a method usable that verification
+# had abandoned at the screen (pass-2 G9); modelling neither would ask at a count
+# nobody runs.
+bh_verified_usable <- function(d, method, args, boot_samples) {
+  ask <- function(n) {
+    bh_usable(d, method, c(args, list(seed = 1, boot_samples = n)))
+  }
+  if (!identical(method, "bootstrap")) {
+    return(ask(boot_samples))
+  }
+  screened <- boot_samples <= hint_screen_samples || ask(hint_screen_samples)
+  screened && ask(hint_verify_boot_samples(boot_samples))
+}
+
+# `boot_samples` defaults to the screen count rather than the shipped 999. What
+# these cells assert is WHICH methods an abort names against which are usable, and
+# both sides are asked at this same value, so the invariant is untouched by its
+# size. Its size is most of the file's cost: a verification at the default runs a
+# 25-refit screen and then a 199-refit bootstrap for every abort in every cell,
+# and at this value it runs one 25-refit bootstrap instead (M103, after CI came in
+# at ~40 min per platform against the 17-24 min before this branch).
 bh_sweep_cell <- function(
   lab,
   build,
   args,
   candidates,
   seeds = 1:6,
-  forbid = character(0)
+  forbid = character(0),
+  boot_samples = hint_screen_samples
 ) {
   aborts <- 0L
   named_total <- 0L
+  fenced_total <- 0L
   for (sd in seeds) {
     d <- build(sd)
     m <- do.call(
       bh_msg_any,
-      c(list(d, ci_method = "montecarlo", seed = 1), args)
+      c(
+        list(
+          d,
+          ci_method = "montecarlo",
+          seed = 1,
+          boot_samples = boot_samples
+        ),
+        args
+      )
     )
     if (is.na(m)) {
       next
@@ -1247,17 +1304,39 @@ bh_sweep_cell <- function(
     # Asked under the SAME `seed = 1` the abort above was fired with: for
     # `npbootstrap` the verdict is seed-specific (M97 AC3), so usability under a
     # different seed would not be the property the hint promised.
-    usable <- Filter(
-      function(x) bh_usable(d, x, c(args, list(seed = 1))),
-      candidates
-    )
+    # Every method is asked exactly as verification asks it, at the same
+    # `boot_samples` the abort above was fired with -- see `bh_verified_usable()`.
+    usable_of <- function(set) {
+      Filter(
+        function(x) bh_verified_usable(d, x, args, boot_samples),
+        set
+      )
+    }
+    # The named set is TIERED since M103, so "named == everything usable" is no
+    # longer the contract and asserting it would fail on data where both tiers
+    # work. The design-fenced methods are verified first and win outright; the
+    # engine-fit pair is reached only when none of them serves. What stays
+    # unchanged is the part that matters -- everything named was run and found
+    # usable, and nothing usable in the winning tier is left out.
+    fenced <- usable_of(setdiff(candidates, c("bootstrap", "montecarlo")))
+    usable <- if (length(fenced)) {
+      fenced
+    } else {
+      usable_of(intersect(candidates, c("bootstrap", "montecarlo")))
+    }
     expect_identical(
       paste(tag, "named:", paste(sort(named), collapse = "+")),
       paste(tag, "named:", paste(sort(usable), collapse = "+"))
     )
     named_total <- named_total + length(named)
+    # Counted apart from the total: the engine-fit tier is not design-fenced, so
+    # a caller asking "was any FENCED method named here" (the missing-score row)
+    # needs its own count rather than a total that a truthful `bootstrap` bullet
+    # can move (M103).
+    fenced_total <- fenced_total +
+      length(setdiff(named, c("bootstrap", "montecarlo")))
   }
-  list(aborts = aborts, named = named_total)
+  list(aborts = aborts, named = named_total, named_fenced = fenced_total)
 }
 
 test_that("the names the REAL abort gives are exactly the usable set, one-way (AC3)", {
@@ -1294,7 +1373,11 @@ test_that("the names the REAL abort gives are exactly the usable set, one-way (A
       # `npbootstrap` -- the only method shipping that cell (D-013), named since
       # M97 when its own run verifies. "named == usable" carries both halves:
       # a hinted-then-unusable run AND over-suppression each red.
-      candidates = if (cell$bal) c("searle", "burch") else "npbootstrap",
+      candidates = c(
+        if (cell$bal) c("searle", "burch") else "npbootstrap",
+        # M103: the engine-fit tier is admissible on every design with a fit.
+        "bootstrap"
+      ),
       forbid = if (cell$bal) {
         c("mpl", "npbootstrap")
       } else {
@@ -1328,7 +1411,7 @@ test_that("the names the REAL abort gives are exactly the usable set, one-way (A
       lab = lab,
       build = function(sd) bh_doublecode(n, seed = sd),
       args = list(model = "oneway"),
-      candidates = "npbootstrap",
+      candidates = c("npbootstrap", "bootstrap"),
       forbid = c("mpl", "searle", "burch")
     )
     expect_identical(
@@ -1356,7 +1439,10 @@ test_that("the names the REAL abort gives are exactly the usable set, two-way (A
       lab = lab,
       build = build,
       args = args,
-      candidates = candidates,
+      # `bootstrap` is admissible wherever there is a fit, so it joins every
+      # cell's candidate set rather than each call site repeating it (M103). It
+      # is not design-fenced, so it never belongs in `forbid` below either.
+      candidates = c(candidates, "bootstrap"),
       seeds = seeds,
       forbid = setdiff(c("searle", "burch", "mpl", "npbootstrap"), candidates)
     )
@@ -1484,22 +1570,31 @@ test_that("a missing score silences every row, and never breaks the abort (AC2/A
     lab = "one-way + NA score",
     build = na_ow,
     args = list(model = "oneway"),
-    candidates = c("searle", "burch"),
+    candidates = c("searle", "burch", "bootstrap"),
     forbid = c("mpl", "npbootstrap")
   )
   r_tw <- bh_sweep_cell(
     lab = "two-way + NA score",
     build = na_tw,
     args = list(),
-    candidates = "mpl",
+    candidates = c("mpl", "bootstrap"),
     forbid = c("searle", "burch", "npbootstrap")
   )
   expect_gt(r_ow$aborts, 0L)
   expect_gt(r_tw$aborts, 0L)
   # Silence here is an assertion, not an absence: the converse half above has already
   # confirmed no admissible method was usable on that data.
-  expect_identical(r_ow$named, 0L)
-  expect_identical(r_tw$named, 0L)
+  #
+  # Scoped to the DESIGN-FENCED methods since M103, and the narrowing is a fact
+  # about the data rather than a concession. Their extractors abort on an NA, so
+  # a missing score silences all four. `bootstrap` reduces the fitted model, and
+  # the fit simply drops the incomplete row -- measured, it returns an ordinary
+  # usable interval on this data (ICC(1) 0.0696, [8.4e-10, 0.365] on the one-way
+  # cell). Naming it there is therefore true, and asserting universal silence
+  # would be asserting that a working method must not be offered.
+  fenced_named <- function(r) r$named_fenced
+  expect_identical(fenced_named(r_ow), 0L)
+  expect_identical(fenced_named(r_tw), 0L)
 
   # AC2's never-raise clause, the sharper half: building the hint must not turn the
   # boundary abort into a DIFFERENT error. Pass 4 replaced it with
@@ -1551,7 +1646,7 @@ test_that("a numeric unit splits the pair at its own projection pole (AC3)", {
       lab = lab,
       build = function(sd) bh_smallint(20L, 3L, sd),
       args = list(model = "oneway", unit = m),
-      candidates = c("searle", "burch"),
+      candidates = c("searle", "burch", "bootstrap"),
       forbid = c("mpl", "npbootstrap")
     )
     expect_identical(
@@ -1570,7 +1665,8 @@ test_that("a numeric unit splits the pair at its own projection pole (AC3)", {
       ci_method = "montecarlo",
       model = "oneway",
       unit = m,
-      seed = 1
+      seed = 1,
+      boot_samples = hint_screen_samples
     )
     if (is.na(msg)) {
       next
@@ -1585,7 +1681,12 @@ test_that("a numeric unit splits the pair at its own projection pole (AC3)", {
           "unit",
           m,
           meth,
-          bh_usable(d, meth, list(model = "oneway", unit = m))
+          bh_verified_usable(
+            d,
+            meth,
+            list(model = "oneway", unit = m),
+            hint_screen_samples
+          )
         ),
         paste("unit", m, meth, TRUE)
       )
@@ -1757,9 +1858,9 @@ test_that("boundary_method_usable() verdicts match the intervals the reducers re
       seed = s
     ))
   }
-  # No seed argument -> the run uses the fixed `npb_hint_seed` the bullet names,
+  # No seed argument -> the run uses the fixed `hint_verify_seed` the bullet names,
   # so the no-seed verdict EQUALS the seed-1 verdict on both datasets.
-  expect_identical(npb_hint_seed, 1L)
+  expect_identical(hint_verify_seed, 1L)
   expect_true(boundary_method_usable(
     "npbootstrap",
     d_split,
@@ -1895,7 +1996,7 @@ test_that("verification never raises and never leaks a condition (AC2)", {
 # ---- M97 T2/AC2: the verification run is RNG-neutral (#9) --------------------
 # The npbootstrap verification CONSUMES randomness inside an abort path. #9 says a
 # user who never asked for a bootstrap cannot have their draws perturbed by one, so
-# the run always receives a concrete seed (the caller's, else `npb_hint_seed`) and
+# the run always receives a concrete seed (the caller's, else `hint_verify_seed`) and
 # goes through `with_rng_seed()`, which restores the ambient stream. Pinned here
 # rather than assumed -- an unseeded `npbootstrap_ci()` call would draw from the
 # ambient stream, so a refactor dropping the seed fallback reds these.
@@ -2639,11 +2740,16 @@ test_that("no interval computed during verification reaches the message (AC5)", 
     bullet_tokens <- unlist(lapply(cell_bullets, function(b) {
       num_tokens(render(b))
     }))
-    # Anchor the bullet side of the enumeration to the LICENSED constant, not to
+    # Anchor the bullet side of the enumeration to the LICENSED constants, not to
     # whatever the bullets carry -- computed from the bullets alone, a leaked
     # token would appear on both sides of the multiset comparison below and pass
-    # (M97 review F8). Every token a bullet contributes must BE the seed literal.
-    expect_true(all(bullet_tokens == as.character(npb_hint_seed)))
+    # (M97 review F8). Every token a bullet contributes must BE one of the two
+    # producer-chosen inputs: the verification seed, or the capped resample count
+    # the engine-fit bullet promises (M103).
+    expect_true(all(
+      bullet_tokens %in%
+        as.character(c(hint_verify_seed, hint_verify_boot_cap))
+    ))
     site_b <- grepl("% of draws were non-finite", msg, fixed = TRUE)
     expect_true(
       site_b || grepl("parameter covariance is not finite", msg, fixed = TRUE)
@@ -2685,22 +2791,43 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   # defended hole.
   for (b in distinct) {
     if (
-      grepl("npbootstrap", b, fixed = TRUE) && grepl("seed = ", b, fixed = TRUE)
+      grepl("seed = ", b, fixed = TRUE) ||
+        grepl("boot_samples = ", b, fixed = TRUE)
     ) {
-      # The seed-exception arm (M97 T3): the no-seed npbootstrap bullet names the
-      # fixed verification seed so the promised call is the verified run. Exactly
-      # that literal, exactly TWICE (the bullet's two `seed =` mentions), raw and
+      # The seed-exception arm (M97 T3): a no-seed bullet names the fixed
+      # verification seed so the promised call is the verified run. Exactly that
+      # literal, exactly as many times as the bullet mentions `seed =`, raw and
       # rendered -- `unique()` here would let a leaked value that happens to
       # equal the literal hide behind it (M97 review F9). A producer-chosen
       # INPUT; every value the run RETURNED stays discarded (D-018).
-      expect_identical(
-        num_tokens(b),
-        rep(as.character(npb_hint_seed), 2L)
+      #
+      # Keyed on the SEED MENTION, not on the method (M103). M97's arm tested for
+      # "npbootstrap", which was every seed-naming bullet there was; M103's
+      # engine-fit tier adds a second one, and a method-keyed arm would have sent
+      # it to the token-free branch below and red for carrying its own licensed
+      # seed. The mention count generalizes with it: npbootstrap names the seed
+      # twice, the engine-fit bullet once.
+      #
+      # The engine-fit bullet also names the `boot_samples` its verification was
+      # capped at, so that literal is licensed alongside the seed -- another
+      # producer-chosen INPUT, and the count the promised call runs at. It is
+      # licensed as the CONSTANT, never as whatever the bullet happens to carry:
+      # reading the expected value off the bullet is how a leaked token appears
+      # on both sides of the comparison and passes (M97 review F8). Every cell of
+      # this grid leaves `boot_samples` at its default, so the cap is what the
+      # bullet must name.
+      licensed <- c(
+        rep(
+          as.character(hint_verify_seed),
+          lengths(regmatches(b, gregexpr("seed = ", b, fixed = TRUE)))
+        ),
+        rep(
+          as.character(hint_verify_boot_cap),
+          lengths(regmatches(b, gregexpr("boot_samples = ", b, fixed = TRUE)))
+        )
       )
-      expect_identical(
-        num_tokens(render(b)),
-        rep(as.character(npb_hint_seed), 2L)
-      )
+      expect_identical(sort(num_tokens(b)), sort(licensed))
+      expect_identical(sort(num_tokens(render(b))), sort(licensed))
     } else {
       expect_identical(num_tokens(b), character(0))
       expect_identical(num_tokens(render(b)), character(0))
@@ -2748,8 +2875,16 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   # branch drops the count, and a REACHABLE rendering added to the hint raises it, so a
   # new literal cannot arrive unread the way pass-9's did.
   # 3 from M93 (mpl, classical singular, classical plural) + the 2 npbootstrap
-  # forms M97 added.
-  expect_identical(length(distinct), 5L)
+  # forms M97 added + the 1 engine-fit form THIS GRID REACHES. The engine tier can
+  # render more than one -- either method alone or both together, each with a
+  # seeded and an unseeded tail -- and the count is of what the grid produced, not
+  # of what the producer can produce; a grid that reached another would raise it,
+  # which is the direction this pin exists to catch. That sixth rendering is
+  # this pin doing its job rather than an inconvenience: M103 made the engine-fit
+  # tier reachable from the default path, the count went 5 -> 6, and the new
+  # rendering was read (it names `bootstrap`, carries no token when the caller
+  # seeds, and is covered by the seed arm above when they do not).
+  expect_identical(length(distinct), 6L)
 
   # Positive controls, driven off the intervals verification really computed. The
   # invariant above asserts an ABSENCE, so its DETECTOR must be shown capable of seeing
