@@ -1,6 +1,6 @@
 # M105: Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -60,7 +60,7 @@ hardening candidate → unrelated, stays a candidate row.
       `burch` refused by their existing balance fence with
       `intraclass_unsupported`, `npbootstrap` and `montecarlo` each returning an
       interval — asserted by a test enumerating those four.
-- [x] AC3. For each case its test loops over — the four committed
+- [ ] AC3. For each case its test loops over — the four committed
       zero-between-variance fixture cells (6×3, 10×2, 20×3, 8×4 from `gen_ssa0`)
       × `unit` ∈ {`"single"`, `"average"`} — `icc(..., ci_method = "burch")`
       matches that case's committed expectation, each of which is either a
@@ -148,6 +148,7 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: the [O] criteria audit was NOT re-run: no criterion text changed in this re-cut, so the audited bytes are the ones already read at the M105 plan gate. Recorded explicitly because an absent line would otherwise read as an audit that ran and returned nothing. The Goal is outside that instrument's reach by construction -- it reads acceptance criteria only -- which is the gap F2 exposed; that belongs to the cairn plugin, not this repo, so no row is filed here.
 - 2026-08-05: resumed on the existing branch after the Goal re-cut; `origin/main` is an ancestor of the branch head, so no merge was needed and no code changed. DEVIATION, logged not hidden: the review-return and Goal-re-cut commits are docs-only and the tracking rules route those directly to the default branch, but both landed on this branch instead (the session never left it). Left there rather than cherry-picked, since cherry-picking would duplicate them at the squash-merge; `main`'s tracking picture is stale until this merges.
 - 2026-08-05: verify slot re-run on the unchanged branch -- devtools::test() FAIL 0 WARN 2 SKIP 23 PASS 5855, devtools::document() no diff. All six tasks remain complete; status -> review. The Review section below was written at the first review pass and its evidence stands: no code changed in the re-cut.
+- 2026-08-05: REVIEW PASS 2 FAILED on AC3 -- returned to in-progress. Windows CI (job 92440641801, `R CMD check` ERROR, FAIL 1 PASS 5829): `test-degenerate-classical.R:89` expected a finite interval for the 8x4 cell and got the new classed Burch abort from `R/ci-classical.R:213`. Cause: MSA at that cell is exactly 0 on the Windows runner and 3.52e-33 on macOS/aarch64 where the fixture was generated, so `msa_exact_zero` is a PLATFORM-DEPENDENT quantity that the committed fixture records as a constant and the test derives its expectation from. AC3 states "8x4, whose MSA is 3.5e-33, carries the finite one" as a platform-independent fact; it is not one. AC1, AC2, AC4, AC5, AC6 all re-verified green in this pass, and every local gate is clean -- this failure is reachable only on a runner with different summation order.
 
 ## Review
 
@@ -184,3 +185,11 @@ Three fresh-context lenses (diff-bug [O], blame-history [S], prior-review [S]) p
 - **F2 (40)** The Goal reads "`icc()` either returns finite ordered endpoints or raises a condition inheriting `intraclass_error`", which the milestone's own AC4 falsifies: `searle` at `unit = "average"` returns `-Inf`/`-Inf` with no error on all four fixture cells. The scorer's 40 rested on "Out sections routinely leave the Goal unnarrowed", an appeal to habit that was rejected. It does not meet the return floor (no criterion fails; not a user-facing defect) and the Goal is plan-owned, so it cannot be edited here -- put to the maintainer at the merge gate.
 
 **Logged, not actioned (scored below 80):** F3 (45) dead `.envir` parameter in `warn_dropped_rows()`. F4 (55) all-constant data hits the shared F-pivot guard first, so the new message does not fire on that class -- verified true. F5 (5) verified FALSE, does not reproduce. F7 (58) unmeasured abort-latency cost from the new `hint` splice. F11 (50) AC1's 12 cases execute identical code. F12 (30) the non-finite abort carries no subclass. F15 (55) D-022 cites no `Supersedes:` and does not name D-012. F16 (35) double `format_message()`. F17 (55) missing `info` label on one `expect_lte()`. F18 (55) the amended test's `test_that()` label is now stale. F19 (35) AC6's checker list is a hand-list, under-inclusive against the eight invocations CI runs. F20 (35) the repaired ledger claim embeds changelog prose.
+
+### Pass 2 (2026-08-05) — returned
+
+Re-verified green: AC1 (12/12, 2/2), AC2 (4/4, 6/6), AC4 (16/16 at tolerance 0), AC5 (by command), AC6 (`cairn_validate` all checks passed, all four `data-raw` checkers and self-tests pass, no milestone numbers in user-facing text). The re-cut Goal was checked clause by clause against the committed fixture and holds: 0 raw unclassed errors and 0 NaN intervals across all eight Burch cases, the non-finite path classed, the NA path returning an `icc`. It makes no claim about `searle`, which is what falsified its predecessor.
+
+**AC3 FAILED on Windows CI.** Local runs and `devtools::check()` are clean; the failure needs a platform whose floating-point summation differs. The defect is that both the fixture's `msa_exact_zero` column and AC3's per-cell expectation treat an accumulated-roundoff quantity as a fixed property of the cell. The repair is to derive the expectation from MSA computed at test time on the running platform, so the invariant checked is "MSA exactly 0 implies abort, otherwise finite" rather than a recorded verdict from the generating machine; AC3's wording needs the same narrowing, which is a gated amendment.
+
+This strengthens review finding F1, which was dispositioned as pre-existing and out of scope. That was right about the behaviour and wrong about the criterion: the noise-derived interval predates M105, but AC3's dependence on it being stable does not.
