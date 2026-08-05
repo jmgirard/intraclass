@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M105 | Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently | planned | — | normal | milestones/M105-degenerate-input-and-burch-guards.md |
+| M105 | Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently | review | — | normal | milestones/M105-degenerate-input-and-burch-guards.md |
 | M104 | What the parametric bootstrap reports when its interval sits above its own point | done | — | normal | milestones/archive/M104-bootstrap-point-containment.md |
 | M103 | Reducer-stage degeneracy aborts name a `ci_method` verified on the caller's own data | done | — | normal | milestones/archive/M103-runtime-hint-reducer-aborts.md |
 | M101 | What a degeneracy message may assert, and the messages made to obey it | dropped | — | normal | milestones/archive/M101-degeneracy-message-claims.md |

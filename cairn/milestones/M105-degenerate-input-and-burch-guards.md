@@ -1,6 +1,6 @@
 # M105: Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -146,6 +146,8 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: Goal re-cut by /milestone-plan after the review return (F2). New wording carries no count that can drift, no universal over `ci_method` values or engines, and makes no claim about `searle` at the projection pole -- the clause AC4 falsified. Scope, all six criteria, Coverage, tasks and the branch are untouched.
 - 2026-08-05: re-cut gate chose Goal-only over also narrowing AC3 so it stops certifying the near-zero Burch interval, and over changing the guard to refuse that cell; both declined by the maintainer at the gate. The behaviour predates M105 and is carried by its own ROADMAP candidate row, whose promotion condition names this re-cut as one trigger; falsified by a user reporting such an interval as a defect.
 - 2026-08-05: the [O] criteria audit was NOT re-run: no criterion text changed in this re-cut, so the audited bytes are the ones already read at the M105 plan gate. Recorded explicitly because an absent line would otherwise read as an audit that ran and returned nothing. The Goal is outside that instrument's reach by construction -- it reads acceptance criteria only -- which is the gap F2 exposed; that belongs to the cairn plugin, not this repo, so no row is filed here.
+- 2026-08-05: resumed on the existing branch after the Goal re-cut; `origin/main` is an ancestor of the branch head, so no merge was needed and no code changed. DEVIATION, logged not hidden: the review-return and Goal-re-cut commits are docs-only and the tracking rules route those directly to the default branch, but both landed on this branch instead (the session never left it). Left there rather than cherry-picked, since cherry-picking would duplicate them at the squash-merge; `main`'s tracking picture is stale until this merges.
+- 2026-08-05: verify slot re-run on the unchanged branch -- devtools::test() FAIL 0 WARN 2 SKIP 23 PASS 5855, devtools::document() no diff. All six tasks remain complete; status -> review. The Review section below was written at the first review pass and its evidence stands: no code changed in the re-cut.
 
 ## Review
 
