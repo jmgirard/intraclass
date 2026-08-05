@@ -330,6 +330,15 @@
 #'   `"lavaan"` engine (which simulates from the fitted SEM's implied moments and
 #'   refits). As with the Monte-Carlo interval, the `"lme4"`
 #'   engine defers a singular (boundary) fit to `"glmmTMB"` for either method.
+#'   At the zero-between-subject-variance boundary the point estimate and the
+#'   interval come from different computations -- the point from the engine's REML
+#'   fit, the endpoints from quantiles of the refits -- so the reported `conf.low`
+#'   can sit slightly *above* the reported point instead of below it. Both numbers
+#'   are zero to any reading when that happens: over every cell of the sweep
+#'   committed at `tests/testthat/fixtures/bootstrap-point-containment.tsv`, each
+#'   such gap and each such point estimate is below `1e-8`. Nothing is clamped and
+#'   no error is raised; in that sweep's cells with real between-subject signal the
+#'   interval contains its point.
 #'   `"posterior"` is the percentile **credible** interval from the Bayesian
 #'   engine's posterior draws; it is the forced default for, and available only with,
 #'   `engine = "brms"` (and `"brms"` requires it) -- the other methods do not apply
@@ -499,7 +508,8 @@
 #'
 #' The reported **point estimate** is the engine (REML) point, exactly as for every
 #' other `ci_method` -- `ci_method` selects the interval, not the estimator. At the
-#' zero-between-variance boundary the point reads `0` while the untruncated interval
+#' zero-between-variance boundary the point sits at, or numerically indistinguishable
+#' from, `0`, while the untruncated interval
 #' may extend below `0`; this is the normal picture for a boundary-respecting point
 #' beside an honest interval, and it signals that the data are consistent with values
 #' near and below zero.
