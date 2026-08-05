@@ -119,17 +119,26 @@ test_that("a non-finite score aborts classed on every model and engine", {
 })
 
 test_that("the non-finite abort names the column and the offending rows", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
   d <- sf_ratings_long()
   d$score[[2L]] <- Inf
   d$score[[7L]] <- NaN
-  cnd <- rlang::catch_cnd(icc(d, score, subject, rater))
+  cnd <- rlang::catch_cnd(icc(d, score, subject, rater), classes = "error")
   rendered <- cli::format_message(conditionMessage(cnd))
   expect_match(rendered, "score", fixed = TRUE)
-  expect_match(rendered, "2", fixed = TRUE)
-  expect_match(rendered, "7", fixed = TRUE)
+  # Match the POSITIONS as a phrase, not the bare digits: the message also
+  # carries the count (2), so `expect_match(rendered, "2")` alone would be
+  # satisfied by the count and would still pass if the first row position were
+  # reported wrongly.
+  expect_match(rendered, "rows 2 and 7", fixed = TRUE)
 })
 
 test_that("NA scores are dropped with a suppressible classed warning", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
   d <- sf_ratings_long()
   dropped <- d
   # Two ratings that did not happen. Removing them leaves every subject rated by

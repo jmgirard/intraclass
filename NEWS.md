@@ -24,23 +24,26 @@
 
 * `icc()` now **drops rows whose `score` is `NA`** and analyzes the rest as an
   incomplete design, warning with the suppressible `intraclass_dropped_rows`
-  class. Such a frame previously reached the fitting engine and failed there. A
-  missing rating and an absent row now give the same answer. One consequence is
-  worth knowing: a dropped row no longer counts toward the design, so a frame
+  class. Such a frame previously fit without complaint and then failed further
+  down, when the interval was computed. A missing rating and an absent row now
+  give the same answer. One consequence is worth knowing: a dropped row no
+  longer counts toward the design, so a frame
   that looked balanced because of it is now correctly seen as unbalanced —
   `ci_method = "searle"` and `"burch"` are refused on it (they require balance),
   while `"npbootstrap"` becomes available.
+
+* `ci_method = "burch"` now aborts with the classed `intraclass_singular_fit`
+  condition when the between-subject mean square is exactly zero, where it
+  previously reported an interval of `NaN` to `NaN` (or failed with an unclassed
+  error, depending on `unit`). The Burch width depends on a kurtosis term that
+  divides by that mean square, so it has no value there. Data that is constant
+  throughout already aborted, via the guard both classical methods share.
 
 ## Minor improvements
 
 * `icc()` now rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed
   error naming the column and the offending rows, instead of passing it to the
   fitting engine and surfacing that engine's own unclassed message.
-* `ci_method = "burch"` now aborts with the classed `intraclass_singular_fit`
-  condition on data with no between-subject variance at all, where it previously
-  reported an interval of `NaN` to `NaN` (or failed with an unclassed error,
-  depending on `unit`). The Burch width depends on a kurtosis term that divides
-  by the between-subject mean square, so it has no value there.
 * When an interval method aborts on degenerate data, the error now names another
   `ci_method` that works — verified by running it on your data first, so the
   suggestion is a call that was just shown to succeed rather than a guess. The
@@ -96,9 +99,11 @@
   Because the check runs the method rather than reasoning about your design, it
   falls silent in every case where the method would not in fact help — fixed
   raters, multilevel, within-cell replicates, consistency,
-  a `conf_level` or a subject/rater count outside the calibrated set, any missing
-  score, degenerate data, or a projection to so many raters that a method's
-  projection formula breaks down. The two closed forms are asked separately, so
+  a `conf_level` or a subject/rater count outside the calibrated set,
+  degenerate data, or a projection to so many raters that a method's
+  projection formula breaks down. (Missing scores were once in that list too;
+  they are not any more, because such rows are now dropped and the remaining
+  design is one some methods genuinely serve.) The two closed forms are asked separately, so
   where one breaks down and the other does not, only the one that works is named.
 
   `"npbootstrap"` resamples, so its trial run is evidence about one run rather

@@ -52,6 +52,9 @@ test_that("the committed fixture still describes the grid AC3/AC4 assume", {
 })
 
 test_that("burch either aborts classed or reports finite ordered limits (AC3)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
   cells <- read_degenerate_cells()
 
   for (i in seq_len(nrow(cells))) {
@@ -92,6 +95,9 @@ test_that("burch either aborts classed or reports finite ordered limits (AC3)", 
 })
 
 test_that("searle reports exactly what it reported before M105 (AC4)", {
+  skip_if_not_installed("glmmTMB")
+  skip_on_cran()
+
   cells <- read_degenerate_cells()
 
   for (i in seq_len(nrow(cells))) {

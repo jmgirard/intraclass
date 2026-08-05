@@ -908,7 +908,7 @@ icc <- function(
   if (length(nonfinite) > 0L) {
     abort_intraclass(c(
       "{.arg score} must be finite.",
-      i = "Non-finite {.val {length(nonfinite)}} value{?s} at row{?s} \\
+      i = "{.val {length(nonfinite)}} non-finite value{?s} at row{?s} \\
            {.val {nonfinite}}.",
       i = "Remove or correct {cli::qty(length(nonfinite))}{?that row/those rows} \\
            before estimating an ICC."

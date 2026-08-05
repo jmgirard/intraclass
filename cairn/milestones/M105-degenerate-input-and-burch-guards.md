@@ -43,12 +43,12 @@ hardening candidate → unrelated, stays a candidate row.
 
 ## Acceptance criteria
 
-- [ ] AC1. For each case its test loops over — the four pairs of
+- [x] AC1. For each case its test loops over — the four pairs of
       `model` ∈ {`"oneway"`, `"twoway"`} × `engine` ∈ {`"glmmTMB"`, `"lme4"`},
       each with `Inf`, `-Inf`, and `NaN` in turn placed in `score` — `icc()`
       raises a condition inheriting `intraclass_error` whose message names the
       `score` column and the offending row positions.
-- [ ] AC2. `icc()` drops rows whose `score` is `NA` before fitting and emits a
+- [x] AC2. `icc()` drops rows whose `score` is `NA` before fitting and emits a
       condition inheriting `intraclass_warning` naming the number dropped; on a
       frame whose NA removal leaves a connected two-way design, the returned
       estimate and both endpoints are `identical()` to those from the same call
@@ -58,7 +58,7 @@ hardening candidate → unrelated, stays a candidate row.
       `burch` refused by their existing balance fence with
       `intraclass_unsupported`, `npbootstrap` and `montecarlo` each returning an
       interval — asserted by a test enumerating those four.
-- [ ] AC3. For each case its test loops over — the four committed
+- [x] AC3. For each case its test loops over — the four committed
       zero-between-variance fixture cells (6×3, 10×2, 20×3, 8×4 from `gen_ssa0`)
       × `unit` ∈ {`"single"`, `"average"`} — `icc(..., ci_method = "burch")`
       matches that case's committed expectation, each of which is either a
@@ -67,14 +67,14 @@ hardening candidate → unrelated, stays a candidate row.
       `conf.low <= conf.high`. The three cells whose MSA is `identical(., 0)`
       (6×3, 10×2, 20×3) carry the abort expectation; 8×4, whose MSA is 3.5e-33,
       carries the finite one.
-- [ ] AC4. Over that same eight-case enumeration, `ci_method = "searle"` returns
+- [x] AC4. Over that same eight-case enumeration, `ci_method = "searle"` returns
       what it returns on `main` today, asserted against endpoint values recorded
       from `main` in T1 before any source change.
-- [ ] AC5. `cairn/DECISIONS.md` gains an entry recording the exported-contract
+- [x] AC5. `cairn/DECISIONS.md` gains an entry recording the exported-contract
       change, listing exactly the refusals AC1–AC3 introduce and no others, and
       `cairn/DESIGN.md § Boundary-fit policy`'s interval-time table gains a
       classical-family (SEARLE/Burch) row citing it as classed deferral.
-- [ ] AC6. The `verify` slot is clean (`devtools::test()`, `devtools::document()`),
+- [x] AC6. The `verify` slot is clean (`devtools::test()`, `devtools::document()`),
       and all three `data-raw` checkers pass locally
       (`check-reference-observations.py`, `enumerate-generalizing-claims.py --check`,
       `check-mpl-doc-claims.py`). Each line this milestone adds to `NEWS.md`,
@@ -138,3 +138,40 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: gates -- full suite NOT_CRAN=true CI=true FAIL 0 WARN 2 SKIP 23 PASS 5856; `air format .` clean; `lintr::lint_package()` no lints; `cairn_validate` all checks passed; plan-owned body 118/149.
 - 2026-08-05: all six tasks complete, gates clean; status -> review.
 - 2026-08-05: review in progress -- draft PR #113 opened; consistency gate clean (cairn_validate all checks passed, devtools::check() 0/0/0, document() no-diff, pkgdown OK, README in sync, no milestone numbers in user-facing text; cairn_impact skipped, no IP/GP text changed). Criterion evidence gathered but NOT yet ticked, pending the third reviewer. Two prose defects queued to fix: R/boundary-hint.R:29 and :167 assert in the present tense that a missing score is caught by the extractors, which this branch makes unreachable via icc() (lines 24 and 61 are historical and stay); and a NEWS claim that such a frame "previously reached the fitting engine and failed there" is wrong -- the fit succeeded and the failure was downstream at the interval stage.
+- 2026-08-05: review complete. 22 findings from three lenses, scored independently; 3 at >=80 all fixed on the branch, plus 4 sub-80 fixed with reasons recorded, plus one orchestrator-found stale NEWS claim. F1 and F2 referred to the maintainer at the merge gate. Full suite re-run after the fixes: FAIL 0 PASS 5855; all four data-raw checkers and self-tests pass; cairn_validate all checks passed.
+
+## Review
+
+**Reviewed 2026-08-05. PR #113. Verdict: criteria met; two structural findings referred to the maintainer (see Findings F1, F2).**
+
+### Criterion evidence (fresh runs, 2026-08-05)
+
+- **AC1** — `test-icc-errors.R:"a non-finite score aborts classed on every model and engine"` 12/12 assertions pass, exactly the 4 model x engine pairs x 3 non-finite values the criterion enumerates. `"the non-finite abort names the column and the offending rows"` 2/2. The second was strengthened at review (finding F8): it asserted the bare digit `2`, which the message's own COUNT satisfies; it now asserts the phrase `rows 2 and 7`.
+- **AC2** — `"NA scores are dropped with a suppressible classed warning"` 4/4, including the three tolerance-0 `identical()` comparisons of estimate and both endpoints against the physically-absent-rows frame. `"dropping NA scores leaves exactly the methods the design supports"` 6/6, enumerating the four `ci_method` values the amended clause names.
+- **AC3** — `"burch either aborts classed or reports finite ordered limits (AC3)"` 18/18 over the 8 fixture cases; `"the committed fixture still describes the grid AC3/AC4 assume"` 4/4 (anti-vacuity: pins 8 rows and that both arms of the rule are populated, 6 exact-zero and 2 not).
+- **AC4** — `"searle reports exactly what it reported before M105 (AC4)"` 16/16, tolerance 0 against the hex-float baseline measured on the default branch before any source change. Nothing moved on the sibling reducer.
+- **AC5** — `cairn/DECISIONS.md` carries D-022 (1 heading); `cairn/DESIGN.md` carries the classical-family interval-time row citing it (1 match). Checked against the criterion's "exactly the refusals AC1-AC3 introduce and no others": D-022 lists two refusals (non-finite scores, Burch at MSA = 0) and one widened acceptance (NA frames). Verified no third refusal is introduced -- `searle`/`burch` on NA data errored before and error now, so their class changing is not a new refusal.
+- **AC6** — `devtools::test()` FAIL 0 WARN 2 SKIP 23 PASS 5855; `devtools::document()` no diff; the 2 warnings are the pre-existing glmmTMB convergence warnings in `test-icc-type-vector.R`. All four `data-raw` checkers and all four `--self-test` routes pass (AC6 names three; see F19). Each of the four added NEWS behaviour claims has a red-then-green record in the work log.
+
+### Consistency gate
+
+`cairn_validate` all checks passed. `devtools::check(env_vars=c(NOT_CRAN="false"))` 0 errors, 0 warnings, 0 notes. `document()` no-diff, `pkgdown::check_pkgdown()` no problems, README in sync, no milestone numbers in user-facing text, `air format` clean, `lintr::lint_package()` no lints. `cairn_impact` not run: the diff changes no IP/GP text (verified by command over the DESIGN.md diff).
+
+### Independent review
+
+Three fresh-context lenses (diff-bug [O], blame-history [S], prior-review [S]) produced 22 findings; an independent [S] scorer that generated none of them scored each. Three scored >= 80, none >= 90, so no finding met the return floor.
+
+**Actioned (>= 80), all fixed on the branch:**
+- **F6 (80)** `R/boundary-hint.R` -- "`searle_ci()` and `burch_ci()` share one guard on the same `ss`, so whenever one aborts the other does, and the cheap tier there is empty by construction rather than by data" is falsified by this branch: Burch now aborts where SEARLE does not. Rewritten to scope the shared-guard claim to the MSE = 0 trigger and name the new divergence.
+- **F21 (88)** `R/boundary-hint.R:29` and `:167` -- two present-tense claims that a missing score is caught by the extractors ("score completeness (the extractors abort on an NA)"; "`intraclass_unidentified` on a missing score") are unreachable via `icc()` after this branch. Both corrected; the historical lists at lines 24 and 61 record which predicates were killed and remain true, so they were deliberately left alone.
+- **F22 (88)** `NEWS.md` -- "Such a frame previously reached the fitting engine and failed there" is wrong: the fit succeeded and the failure was downstream at the interval stage. Corrected to what was measured.
+
+**Also fixed though scored below the bar, with reasons:** F8 (70) and F9 (60) were fixed because they weaken the evidence backing AC1, a criterion this review ticks -- a vacuous half-check and a `catch_cnd()` that could catch a non-error. F10 (68) was fixed because it is a portability defect this branch introduced: four new model-fitting tests lacked the `skip_if_not_installed("glmmTMB")`/`skip_on_cran()` pair their siblings carry. F13 (45) and F14 (65) were fixed as one-line user-facing text errors on the NEWS surface already being edited for F22 -- an ungrammatical message, and the Burch bullet filed under "Minor improvements" when it is a breaking change (`unit = "single"` previously returned an interval).
+
+**Found by the orchestrator while verifying F21, fixed:** an existing NEWS bullet claimed the boundary hint "falls silent in every case where the method would not in fact help -- ... any missing score". This branch falsifies that (npbootstrap is now named on missing-score data, pinned by the amended `test-boundary-abort-hint.R` cell). Corrected.
+
+**Referred to the maintainer, not fixed:**
+- **F1 (30)** The Burch guard tests `identical(ss$msa, 0)`, so the fixture's 8x4 cell (MSA = 3.52e-33) proceeds and returns `[-0.1865, 0.2974]`. Verified: every subject-mean deviation there is exactly -2.78e-17 (summation roundoff) against `sqrt(MSA) = 5.93e-17`, so their ratio -0.468 is entirely roundoff and `kappa_hat = -1.7395` is a floating-point artifact -- the returned interval is computed from noise, and AC3 blesses it. The scorer's stated reason (the predicate was deliberated) is the wrong ground and was rejected; the right ground is that the behaviour is PRE-EXISTING -- the same cell returned the same interval before any M105 change -- so it is out of scope for this diff. What is new is the criterion certifying it. Candidate row, not a return.
+- **F2 (40)** The Goal reads "`icc()` either returns finite ordered endpoints or raises a condition inheriting `intraclass_error`", which the milestone's own AC4 falsifies: `searle` at `unit = "average"` returns `-Inf`/`-Inf` with no error on all four fixture cells. The scorer's 40 rested on "Out sections routinely leave the Goal unnarrowed", an appeal to habit that was rejected. It does not meet the return floor (no criterion fails; not a user-facing defect) and the Goal is plan-owned, so it cannot be edited here -- put to the maintainer at the merge gate.
+
+**Logged, not actioned (scored below 80):** F3 (45) dead `.envir` parameter in `warn_dropped_rows()`. F4 (55) all-constant data hits the shared F-pivot guard first, so the new message does not fire on that class -- verified true. F5 (5) verified FALSE, does not reproduce. F7 (58) unmeasured abort-latency cost from the new `hint` splice. F11 (50) AC1's 12 cases execute identical code. F12 (30) the non-finite abort carries no subclass. F15 (55) D-022 cites no `Supersedes:` and does not name D-012. F16 (35) double `format_message()`. F17 (55) missing `info` label on one `expect_lte()`. F18 (55) the amended test's `test_that()` label is now stale. F19 (35) AC6's checker list is a hand-list, under-inclusive against the eight invocations CI runs. F20 (35) the repaired ledger claim embeds changelog prose.
