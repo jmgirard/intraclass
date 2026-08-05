@@ -317,6 +317,13 @@
   archived from CRAN in March 2025 and is not a dependency. The
   historical numerical agreement between the `lavaan` (SEM) engine and
   `gtheory` is retained as a cited reference.
+- `ci_method = "bootstrap"` now documents what its interval and its
+  point estimate do at the zero-between-subject-variance boundary:
+  because the point comes from the model fit and the endpoints from
+  quantiles of the refits, the reported lower limit can sit just *above*
+  the reported point. Both numbers are zero to any reading where that
+  happens, and **no reported value changed** — a committed sweep records
+  the measurement the documentation cites.
 
 ## intraclass 0.1.0
 

@@ -343,6 +343,15 @@ two-way design and the crossed (Design 1) random-rater multilevel design, the
 <code>"lavaan"</code> engine (which simulates from the fitted SEM's implied moments and
 refits). As with the Monte-Carlo interval, the <code>"lme4"</code>
 engine defers a singular (boundary) fit to <code>"glmmTMB"</code> for either method.
+At the zero-between-subject-variance boundary the point estimate and the
+interval come from different computations – the point from the engine's REML
+fit, the endpoints from quantiles of the refits – so the reported <code>conf.low</code>
+can sit slightly <em>above</em> the reported point instead of below it. Both numbers
+are zero to any reading when that happens: over every cell of the sweep
+committed at <code>tests/testthat/fixtures/bootstrap-point-containment.tsv</code>, each
+such gap and each such point estimate is below <code>1e-8</code>. Nothing is clamped and
+no error is raised; in that sweep's cells with real between-subject signal the
+interval contains its point.
 <code>"posterior"</code> is the percentile <strong>credible</strong> interval from the Bayesian
 engine's posterior draws; it is the forced default for, and available only with,
 <code>engine = "brms"</code> (and <code>"brms"</code> requires it) – the other methods do not apply
@@ -689,7 +698,8 @@ the pole inflates the untruncated ICC(k) scale; this is a faithful disclosure, n
 an error, and the coverage-bearing endpoints are unaffected.</p>
 <p>The reported <strong>point estimate</strong> is the engine (REML) point, exactly as for every
 other <code>ci_method</code> – <code>ci_method</code> selects the interval, not the estimator. At the
-zero-between-variance boundary the point reads <code>0</code> while the untruncated interval
+zero-between-variance boundary the point sits at, or numerically indistinguishable
+from, <code>0</code>, while the untruncated interval
 may extend below <code>0</code>; this is the normal picture for a boundary-respecting point
 beside an honest interval, and it signals that the data are consistent with values
 near and below zero.</p>

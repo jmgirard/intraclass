@@ -307,36 +307,46 @@ icc(
   (Design 1) random-rater multilevel design, the `"lavaan"` engine
   (which simulates from the fitted SEM's implied moments and refits). As
   with the Monte-Carlo interval, the `"lme4"` engine defers a singular
-  (boundary) fit to `"glmmTMB"` for either method. `"posterior"` is the
-  percentile **credible** interval from the Bayesian engine's posterior
-  draws; it is the forced default for, and available only with,
-  `engine = "brms"` (and `"brms"` requires it) – the other methods do
-  not apply to a Bayesian fit, and `"posterior"` needs posterior draws
-  no other engine produces. `"npbootstrap"` is the **non-parametric**
-  transformed bootstrap-*t* of Ukoumunne et al. (2003), for the
-  **one-way random design** (`model = "oneway"`; it aborts otherwise).
-  It serves both `unit = "single"` (ICC(1)) and `unit = "average"`
-  (ICC(k)) on **balanced and unbalanced** data (unequal ratings per
-  subject) alike; on unbalanced data the effective group size becomes
-  the ANOVA `n0` of Ohyama (2025). Only a numeric `unit` (a D-study
-  projection to `m` raters) is restricted to balanced data – unbalanced
-  use `ci_method = "montecarlo"` for a projection. It resamples whole
-  subjects with replacement (not from the fitted model), stabilizes the
-  variance with the `log F` transform, studentizes with an
-  infinitesimal-jackknife SE, and back-transforms the endpoints. It is
-  **not** a percentile bootstrap – the percentile and BCa variants were
-  assessed and rejected (they under-cover at small rater counts); reach
-  for it for its boundary robustness (an interval that exists where the
-  Monte-Carlo default aborts) and non-normality robustness. See Details
-  for the ICC(k), endpoint-support, and point-estimate conventions.
-  `"searle"` and `"burch"` are two **deterministic classical
-  closed-form** intervals, also **only for the balanced one-way random
-  design** (they abort otherwise). Both give a finite interval on every
-  dataset – including the near-zero-ICC boundary where the Monte-Carlo
-  default aborts – and neither resamples, so `mc_samples`,
-  `boot_samples`, and `seed` do not apply. `"searle"` is the exact-F
-  pivot (Searle 1971; McGraw & Wong 1996, Table 7): **exact under
-  normality**, best-calibrated and narrowest when the data are
+  (boundary) fit to `"glmmTMB"` for either method. At the
+  zero-between-subject-variance boundary the point estimate and the
+  interval come from different computations – the point from the
+  engine's REML fit, the endpoints from quantiles of the refits – so the
+  reported `conf.low` can sit slightly *above* the reported point
+  instead of below it. Both numbers are zero to any reading when that
+  happens: over every cell of the sweep committed at
+  `tests/testthat/fixtures/bootstrap-point-containment.tsv`, each such
+  gap and each such point estimate is below `1e-8`. Nothing is clamped
+  and no error is raised; in that sweep's cells with real
+  between-subject signal the interval contains its point. `"posterior"`
+  is the percentile **credible** interval from the Bayesian engine's
+  posterior draws; it is the forced default for, and available only
+  with, `engine = "brms"` (and `"brms"` requires it) – the other methods
+  do not apply to a Bayesian fit, and `"posterior"` needs posterior
+  draws no other engine produces. `"npbootstrap"` is the
+  **non-parametric** transformed bootstrap-*t* of Ukoumunne et al.
+  (2003), for the **one-way random design** (`model = "oneway"`; it
+  aborts otherwise). It serves both `unit = "single"` (ICC(1)) and
+  `unit = "average"` (ICC(k)) on **balanced and unbalanced** data
+  (unequal ratings per subject) alike; on unbalanced data the effective
+  group size becomes the ANOVA `n0` of Ohyama (2025). Only a numeric
+  `unit` (a D-study projection to `m` raters) is restricted to balanced
+  data – unbalanced use `ci_method = "montecarlo"` for a projection. It
+  resamples whole subjects with replacement (not from the fitted model),
+  stabilizes the variance with the `log F` transform, studentizes with
+  an infinitesimal-jackknife SE, and back-transforms the endpoints. It
+  is **not** a percentile bootstrap – the percentile and BCa variants
+  were assessed and rejected (they under-cover at small rater counts);
+  reach for it for its boundary robustness (an interval that exists
+  where the Monte-Carlo default aborts) and non-normality robustness.
+  See Details for the ICC(k), endpoint-support, and point-estimate
+  conventions. `"searle"` and `"burch"` are two **deterministic
+  classical closed-form** intervals, also **only for the balanced
+  one-way random design** (they abort otherwise). Both give a finite
+  interval on every dataset – including the near-zero-ICC boundary where
+  the Monte-Carlo default aborts – and neither resamples, so
+  `mc_samples`, `boot_samples`, and `seed` do not apply. `"searle"` is
+  the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7): **exact
+  under normality**, best-calibrated and narrowest when the data are
   approximately normal. `"burch"` is the REML-based, kurtosis-adjusted
   interval of Burch (2011): wider, but robust to non-normality and never
   under-covering. Prefer `"searle"` for near-normal data and `"burch"`
@@ -700,10 +710,11 @@ unaffected.
 
 The reported **point estimate** is the engine (REML) point, exactly as
 for every other `ci_method` – `ci_method` selects the interval, not the
-estimator. At the zero-between-variance boundary the point reads `0`
-while the untruncated interval may extend below `0`; this is the normal
-picture for a boundary-respecting point beside an honest interval, and
-it signals that the data are consistent with values near and below zero.
+estimator. At the zero-between-variance boundary the point sits at, or
+numerically indistinguishable from, `0`, while the untruncated interval
+may extend below `0`; this is the normal picture for a
+boundary-respecting point beside an honest interval, and it signals that
+the data are consistent with values near and below zero.
 
 ## The classical `"searle"` and `"burch"` intervals (balanced one-way)
 
