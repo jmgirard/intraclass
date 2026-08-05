@@ -146,6 +146,8 @@ error) → ROADMAP candidate row.
       the `@details` method descriptions (G3, G4), and G6, G9, G11, G12.
 - [x] T17 Fire the `gen_mse0` guards at their reducers: CI is red on Linux and
       Windows, where the point fit dies before the guard.
+- [x] T18 Fix the third bare-substring method match (`grepl("mpl")` matches
+      `boot_samples`), which reddens ubuntu only.
 - [ ] T16 Re-run the gate and return to review.
 
 ## Work log
@@ -188,6 +190,9 @@ error) → ROADMAP candidate row.
 - 2026-08-04: the two-method engine bullet's new plural wording is reached by no sweep dataset, so it is pinned directly against `boundary_engine_hint()` rather than left as untested user-facing text — both runs named, the count attributed to the bootstrap, and the caller-seed form for both.
 - 2026-08-04: CI on PR #111 at 5f90d8b is RED — `ubuntu-latest (release)`, `windows-latest (release)` and `test-coverage` all fail with 5 failures in `test-reducer-abort-hint.R` (AC4 x2, AC5 x3). Cause: on those platforms glmmTMB's point fit on `gen_mse0` dies with a raw `NA/NaN gradient evaluation` before any CI-stage guard is reached, so a test routed through `icc()` there measures the engine, not the guard. macOS reaches the guard, which is why every local gate was green. Not a defect in the shipped feature; the second review pass recorded the matrix as "still running" and it landed red after.
 - 2026-08-04: T17 — the `gen_mse0` cases of AC3, AC4 and AC5 now fire at their owning reducer with `icc_hint()`, the hint the dispatch would have built (engine fit where the platform has one, none where it does not) — the same reason AC1 has always fired at the owner. AC5 keeps an end-to-end companion and AC8 keeps its `icc()` measurement, both skipping with a stated reason where the fit dies first, rather than passing on an engine error that happens to contain no bullet. 182 assertions, 0 failures, 0 skips locally (both halves ran).
+- 2026-08-05: T17 verified by CI — windows-latest, test-coverage, lint, pkgdown, format-check and check-references all pass at bc05641; the five reducer-abort failures are gone. One failure left, ubuntu only: `test-boundary-abort-hint.R:1017` matched the bare substring `mpl`, which occurs inside `boot_samples` — the third site of the trap `bh_msg_methods()`'s own comment says it fixed at two. It reds only where the flat two-way point fit survives and an engine-tier bullet is emitted; on macOS that fit dies, there is no bullet, and the line passes.
+- 2026-08-05: T18 — that site now reads through `bh_msg_methods()`, and its assertion is scoped to the four design-fenced methods: the engine-fit pair is not fenced by design, so where the fit survives, `bootstrap` may verify and be named there, which AC2 owns rather than this test. File re-run locally: 0 failures, 835 s.
+- 2026-08-05: measured suite cost after this branch, per test in `test-boundary-abort-hint.R`: 835 s total, of which four grid tests that fire REAL `icc()` aborts carry 781 s — 226.8 s (one-way names-vs-usable), 220.4 s (two-way), 208.8 s (missing score), 125.2 s (numeric-unit pole). Those are the tests whose aborts get an engine fit, so each abort pays a screened-and-capped bootstrap verification. CI wall-clock on PR #111: ubuntu 39m47s, windows 41m11s, test-coverage 49m49s, against the 17-24 min M78 recorded before this branch.
 - 2026-08-04: plan amendment (substantive) — AC2 now states both halves of its evidence: the fixture column for `searle`/`burch`/`npbootstrap`, the forward promise check for `bootstrap`/`montecarlo`, which the screen and cap made incomparable to that column. Tasks T13-T16 added.
 
 ## Decisions

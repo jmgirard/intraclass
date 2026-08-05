@@ -1013,9 +1013,22 @@ test_that("data degenerate FOR THE ROW get no hint; data that are not still do (
       c(list(case$d, ci_method = "montecarlo", seed = 1), case$args)
     )
     skip_if(is.na(m), paste("no abort on the", case$lab, "degenerate case"))
+    # Read through `bh_msg_methods()`, never a bare `grepl`: a bullet can carry
+    # `boot_samples` since M103, whose "mpl" substring reported the mpl method as
+    # named and reddened this line on Linux while macOS -- where the point fit
+    # dies on the flat case and there is no bullet at all -- stayed green (CI on
+    # PR #111, 2026-08-05). The third site of the trap the helper's own comment
+    # describes.
+    #
+    # Scoped to the DESIGN-FENCED methods. They are the ones whose own fence this
+    # data defeats, which is what "degenerate for the row" means here. The
+    # engine-fit pair is not fenced by design, so where the fit survives this data
+    # `bootstrap` can verify and be named, and that naming is earned by a run
+    # rather than asserted -- the tier-2 assertion belongs to AC2, not here.
+    named <- bh_msg_methods(m)
     for (s in c("searle", "burch", "npbootstrap", "mpl")) {
       expect_identical(
-        paste(case$lab, s, grepl(s, m, fixed = TRUE)),
+        paste(case$lab, s, s %in% named),
         paste(case$lab, s, FALSE)
       )
     }
