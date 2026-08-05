@@ -140,9 +140,9 @@ error) → ROADMAP candidate row.
 - [x] T12 Re-run the gate and return to review.
 - [x] T13 The engine-fit checker asserts the promised call directly (G5), and
       its header's cost figures describe the run it now makes.
-- [ ] T14 AC6/AC9 re-run the seeded promise: a helper that reads either bullet
+- [x] T14 AC6/AC9 re-run the seeded promise: a helper that reads either bullet
       form and fails on neither, plus a case per form (G1).
-- [ ] T15 Prose repairs: NEWS's seed claim (G2), the withheld-tier comment (G7),
+- [x] T15 Prose repairs: NEWS's seed claim (G2), the withheld-tier comment (G7),
       the `@details` method descriptions (G3, G4), and G6, G9, G11, G12.
 - [ ] T16 Re-run the gate and return to review.
 
@@ -182,6 +182,8 @@ error) → ROADMAP candidate row.
 
 - 2026-08-04: second return gate settled three choices, all as recommended. (1) G1 is repaired test-side — the seeded bullet's "run under your `seed`" is correct advice and M97's own wording, so the test learns to read both forms rather than the message dropping one. (2) G5's checker stops consulting the fixture column for the two engine-fit methods and asserts the promise forward instead: for every cell it accepts, the promised call is run and its intervals must be usable. (3) The below-bar findings that are simply false prose are fixed; the design ones (G13 floor, G14 the 199 choice, G15/G16 test strength) are not.
 - 2026-08-04: T13 — `data-raw/check-abort-remedy-verdicts.R` now runs the promised call for every cell `boundary_method_usable()` accepts and requires its intervals to be usable; a refusal asserts nothing, and the fixture column is printed as context only. Run: 52 cells checked, 24 accepted, 0 broken promises, exit 0. Falsifiability checked directly rather than assumed: on a refused cell (`gen_mse0` 6x3, `bootstrap`) the promised `icc()` call raises `intraclass_singular_fit`, so a wrongly-accepted cell breaks its promise and exits non-zero. A vacuity guard fails the script if nothing is accepted at all.
+- 2026-08-04: T14/T15 — `promised_seed()` resolves both bullet forms and accepts a number-free one only where the message really points at the caller's seed; AC6 now asserts the seeded form and re-runs at seed 1, AC9 asserts the numbered form. Prose repaired at eight sites: NEWS's seed claim, the withheld-tier comment in `R/icc.R`, two `@details` descriptions (`montecarlo` is not model-refitting and tier 1 is not all closed forms; the covered set is the four guarded methods, not "every"), the `boundary_method_usable()` header's count rule, the two-method bullet's "That run", the rendering-count comment, and the boundary-hint helper that modelled the cap without the screen. Two doc-claims ledger rows re-keyed; checker and `--self-test` green. `test-reducer-abort-hint.R` 176 assertions and `test-boundary-abort-hint.R` both clean.
+- 2026-08-04: the two-method engine bullet's new plural wording is reached by no sweep dataset, so it is pinned directly against `boundary_engine_hint()` rather than left as untested user-facing text — both runs named, the count attributed to the bootstrap, and the caller-seed form for both.
 - 2026-08-04: plan amendment (substantive) — AC2 now states both halves of its evidence: the fixture column for `searle`/`burch`/`npbootstrap`, the forward promise check for `bootstrap`/`montecarlo`, which the screen and cap made incomparable to that column. Tasks T13-T16 added.
 
 ## Decisions

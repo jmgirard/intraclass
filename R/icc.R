@@ -302,16 +302,18 @@
 #'   fixed seed the message then names, and an unseeded retry draws fresh resamples
 #'   and can fail where the verified run succeeded, especially on small designs.
 #'   The trial run leaves the session's random-number stream untouched.
-#'   The same holds in reverse, and on every interval method rather than only the
-#'   default. When a method you asked for aborts on degenerate data, its error
+#'   The same holds in reverse, and on `"bootstrap"`, `"searle"`, `"burch"` and
+#'   `"npbootstrap"` as well as on the default (`"mpl"` raises its own kind of
+#'   error and is not covered). When a method you asked for aborts on degenerate data, its error
 #'   names a method verified on that same data by the same trial runs and under
 #'   the same rules — or, where no method serves that data, names none, leaving
 #'   the message exactly as it would otherwise read. It never names the method
 #'   you asked for, which just failed. Data with no between-subject variance is the case
 #'   this matters most on: there `"bootstrap"` is typically the only method that
 #'   returns anything usable, and it is now named rather than left for you to
-#'   find. Candidates are tried cheapest first, so the two model-refitting
-#'   methods are reached only where no closed form serves this design and data,
+#'   find. Candidates are tried cheapest first, so the two methods that reduce the
+#'   fitted model rather than your raw data — `"bootstrap"` and `"montecarlo"` —
+#'   are reached only where no method fenced to your design serves the data,
 #'   and the costliest of them is both screened at a small resample count and
 #'   capped when run in full, so an error stays a few seconds rather than tens of
 #'   them. That cap is why a bullet naming `"bootstrap"` also names a
@@ -2126,8 +2128,10 @@ icc <- function(
     #
     # `invoked` excludes the dispatched method from its own remedy and selects the
     # bullet's contrast clause. `engine` is what makes the engine-fit tier
-    # (`bootstrap`, `montecarlo`) available; it is deliberately withheld on the
-    # Monte-Carlo default path below -- see the M103 Decisions entry.
+    # (`bootstrap`, `montecarlo`) available, and every guard gets it -- the
+    # default path included, which is where the motivating case lives. Its cost is
+    # bounded by the screen and the cap rather than by withholding the tier (the
+    # M103 review found a default-path abort on data where `bootstrap` works).
     boundary_hint_for <- function(method, engine = engine_fit) {
       boundary_method_hint(
         oneway = oneway,

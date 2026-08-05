@@ -34,8 +34,11 @@
   method that returns anything usable and previous versions said only "inspect
   the data". Where nothing works the message is unchanged, and no message ever
   suggests the method you just asked for. When a suggestion names
-  `ci_method = "bootstrap"` it also names the `seed` and `boot_samples` the trial
-  ran at, so the call you are given is exactly the call that was checked.
+  `ci_method = "bootstrap"` it also names the `boot_samples` the trial ran at,
+  and — when you set no seed of your own — the `seed` it used, so the call you
+  are given is exactly the call that was checked. If you did set a seed, the
+  trial ran under yours and the message points back at it rather than naming
+  another one.
 
 * `ci_method = "mpl"` now distinguishes a confidence limit truly at the `[0, 1]`
   boundary from a numerical failure. A boundary endpoint is reported only when

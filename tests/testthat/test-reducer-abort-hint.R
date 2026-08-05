@@ -101,6 +101,23 @@ promised_args <- function(msg, name) {
   as.integer(sub(paste0(name, " = "), "", hit))
 }
 
+# The seed a bullet promises, in EITHER form it can take. With no caller seed the
+# verification ran under `hint_verify_seed` and the bullet names it as a number;
+# with a caller seed it ran under theirs, and the bullet says to run under it
+# rather than repeating a value the caller already has. A test that reads only the
+# numeric form finds nothing in the second case and re-runs UNSEEDED -- a fresh
+# draw, which is the one thing "the promised call is the verified one" exists to
+# rule out (M103 review pass 2, G1). So the seed-free form is accepted only when
+# the message really does point at the caller's own seed.
+promised_seed <- function(msg, caller_seed) {
+  named <- promised_args(msg, "seed")
+  if (!is.null(named)) {
+    return(named)
+  }
+  expect_match(msg, "run under your", fixed = TRUE)
+  caller_seed
+}
+
 read_sweep <- function() {
   path <- test_path("fixtures", "abort-remedy-sweep.tsv")
   utils::read.delim(path, comment.char = "#", stringsAsFactors = FALSE)
@@ -624,7 +641,11 @@ test_that("the DEFAULT icc() call gets the same verified naming (AC9)", {
   # default path too).
   expect_false(grepl('ci_method = "montecarlo"', msg, fixed = TRUE))
 
-  # Run exactly what the message promises, with its own named arguments.
+  # Run exactly what the message promises, with its own named arguments. This
+  # call set no seed, so the verification ran under `hint_verify_seed` and the
+  # bullet must name it as a number -- an unseeded retry would draw differently.
+  seed <- promised_seed(msg, NULL)
+  expect_identical(seed, as.integer(hint_verify_seed))
   fit <- icc(
     df,
     score,
@@ -632,7 +653,7 @@ test_that("the DEFAULT icc() call gets the same verified naming (AC9)", {
     rater,
     model = "oneway",
     ci_method = "bootstrap",
-    seed = promised_args(msg, "seed"),
+    seed = seed,
     boot_samples = promised_args(msg, "boot_samples")
   )
   est <- fit$estimates
@@ -667,8 +688,13 @@ test_that("the gen_ssa0 abort names bootstrap, and that call delivers (AC6)", {
   expect_true(grepl("ci_method = \"bootstrap\"", msg, fixed = TRUE))
 
   # ...and the promise is kept: the same call on the same data, at the seed AND
-  # resample count the message itself names, returns intervals
-  # `boundary_interval_usable()` accepts.
+  # resample count the message itself promises, returns intervals
+  # `boundary_interval_usable()` accepts. The caller set a seed here, so the
+  # promised seed is theirs and the bullet names no number -- reading only a
+  # number would re-run this unseeded.
+  seed <- promised_seed(msg, 1L)
+  expect_identical(seed, 1L)
+  expect_null(promised_args(msg, "seed"))
   fit <- icc(
     df,
     score,
@@ -676,7 +702,7 @@ test_that("the gen_ssa0 abort names bootstrap, and that call delivers (AC6)", {
     rater,
     model = "oneway",
     ci_method = "bootstrap",
-    seed = promised_args(msg, "seed"),
+    seed = seed,
     boot_samples = promised_args(msg, "boot_samples")
   )
   est <- fit$estimates
@@ -690,4 +716,67 @@ test_that("the gen_ssa0 abort names bootstrap, and that call delivers (AC6)", {
       info = est$index[i]
     )
   }
+})
+
+test_that("an engine-fit bullet promises a readable seed in both forms (AC6)", {
+  skip_on_cran()
+  # The two forms the promise can take, pinned so neither can quietly become
+  # unreadable. Whichever it is, a reader must be able to reconstruct the seed the
+  # verification ran under; a bullet naming no number AND not pointing at the
+  # caller's own seed promises a call nobody can reproduce.
+  df <- gen_ssa0(6, 3)
+  abort_at <- function(...) {
+    abort_message(icc(
+      df,
+      score,
+      subject,
+      rater,
+      model = "oneway",
+      ci_method = "npbootstrap",
+      ...
+    ))
+  }
+  seeded <- abort_at(seed = 7L)
+  # The caller's own seed is what ran, so the bullet points at it rather than
+  # repeating the value...
+  expect_match(seeded, "run under your", fixed = TRUE)
+  expect_null(promised_args(seeded, "seed"))
+  expect_identical(promised_seed(seeded, 7L), 7L)
+  # ...and with no caller seed the fixed verification seed is named as a number.
+  unseeded <- abort_at()
+  expect_identical(promised_seed(unseeded, NULL), as.integer(hint_verify_seed))
+})
+
+test_that("a two-method engine bullet says whose resample count it names", {
+  # Both engine-fit methods usable at once: the bullet then describes TWO runs,
+  # and `boot_samples` belongs to only one of them -- `montecarlo` takes none at
+  # all. Built directly, because the sweep's data never makes both usable where
+  # tier 1 has already failed.
+  both <- boundary_engine_hint(
+    usable = function(m) TRUE,
+    contrast = "the default",
+    seed = NULL,
+    boot_samples = 999L
+  )
+  expect_length(both, 1L)
+  expect_match(both, "Both runs used", fixed = TRUE)
+  expect_match(both, "the bootstrap at", fixed = TRUE)
+  expect_match(both, "reproduce them", fixed = TRUE)
+  # One method named, one run: the singular wording, and the count reads as its
+  # own without needing an owner.
+  one <- boundary_engine_hint(
+    usable = function(m) identical(m, "bootstrap"),
+    contrast = "the default",
+    seed = NULL,
+    boot_samples = 999L
+  )
+  expect_match(one, "That run used", fixed = TRUE)
+  expect_match(one, "and {.code boot_samples = 199}", fixed = TRUE)
+  # And with the caller's own seed, both forms point back at it rather than
+  # naming a number.
+  expect_match(
+    boundary_engine_hint(function(m) TRUE, "the default", seed = 3L),
+    "both run under your",
+    fixed = TRUE
+  )
 })

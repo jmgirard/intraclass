@@ -41,8 +41,9 @@ sweep <- utils::read.delim(
 )
 
 # The sweep's own generators. A copy that drifted from
-# `data-raw/sweep-abort-remedies.R` would build different data and disagree with
-# the recorded verdicts, which is what this script fails on.
+# `data-raw/sweep-abort-remedies.R` would build different data from the row it
+# claims to describe -- so the cells below would stop being the cells the fixture
+# enumerates, and the promise checked would be about data no user reached.
 gen_mse0 <- function(n_s, n_r, jitter_sd = 0, seed = 1) {
   set.seed(seed)
   mu <- stats::rnorm(n_s, 0, 3)
@@ -205,7 +206,13 @@ for (i in seq_len(nrow(reached))) {
     row$seed,
     row$remedy,
     accepted,
-    if (is.na(kept)) "-" else if (isTRUE(kept)) "kept" else "BROKEN",
+    if (is.na(kept)) {
+      "-"
+    } else if (isTRUE(kept)) {
+      "kept"
+    } else {
+      "BROKEN"
+    },
     row$boot_samples,
     isTRUE(row$remedy_usable)
   ))

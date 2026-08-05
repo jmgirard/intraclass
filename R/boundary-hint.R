@@ -181,14 +181,20 @@ hint_verify_boot_samples <- function(boot_samples) {
 # had no fit to hand down. Both are stochastic, so both take a concrete seed for
 # the same reasons the `npbootstrap` row does.
 #
-# Their row runs the shipped reducer
-# at the CALLER's own `boot_samples` -- the count their retry would use, never a
-# reduced one, which would lower the chance of tripping a guard that fires on any
-# degenerate resample (M93 pass-3 F3; the M97 review measured a run that succeeded
-# at 999 aborting at a caller's 2000, so a hardcoded default here would hint a
-# retry that fails) -- and under the caller's own `seed` when set, else under
+# Every stochastic row runs under the caller's own `seed` when set, else under
 # `hint_verify_seed` (the seed the bullet then names, so the verified run is the
 # promised one).
+#
+# The RESAMPLE COUNT differs between them, and the difference is deliberate. The
+# `npbootstrap` row runs at the CALLER's own `boot_samples` -- the count their
+# retry would use, never a reduced one, which would lower the chance of tripping a
+# guard that fires on any degenerate resample (M93 pass-3 F3; the M97 review
+# measured a run that succeeded at 999 aborting at a caller's 2000, so a hardcoded
+# default here would hint a retry that fails). The `bootstrap` row cannot afford
+# that: a refit per resample is what made an abort take 25.6 s, so it screens and
+# then caps at `hint_verify_boot_cap`. The promise is kept the other way round
+# there -- the bullet names the capped count, so the call it promises is still the
+# call that ran (M103 review pass 2, G6).
 boundary_method_usable <- function(
   method,
   df,
@@ -581,27 +587,44 @@ boundary_engine_hint <- function(
   # count the verification was capped at, which is rarely the caller's own. Both
   # reasons point the same way: the `bootstrap` bullet always names the count it
   # was verified at, so the call it promises is the call that was run.
-  spec <- character(0)
-  if ("bootstrap" %in% named) {
-    spec <- paste0(
+  #
+  # With BOTH methods named there were two runs, not one, and the count belongs to
+  # only one of them -- `montecarlo` takes no `boot_samples` at all. So the plural
+  # form says so rather than leaving a reader to guess which run the number
+  # describes (M103 review pass 2, G12).
+  many <- length(named) > 1L
+  spec <- if ("bootstrap" %in% named) {
+    paste0(
+      if (many) ", the bootstrap at " else " and ",
       "{.code boot_samples = ",
       hint_verify_boot_samples(boot_samples),
       "}"
     )
+  } else {
+    character(0)
   }
   tail <- if (is.null(seed)) {
     paste0(
-      ". That run used {.code seed = ",
+      if (many) {
+        ". Both runs used {.code seed = "
+      } else {
+        ". That run used {.code seed = "
+      },
       hint_verify_seed,
       "}",
-      if (length(spec)) paste0(" and ", spec) else "",
-      "; pass the same to reproduce it, as an unseeded call draws differently \\
-       and can fail on a small design."
+      spec,
+      "; pass the same to reproduce ",
+      if (many) "them" else "it",
+      ", as an unseeded call draws differently and can fail on a small design."
     )
   } else {
     paste0(
-      ", run under your {.code seed}",
-      if (length(spec)) paste0(" and ", spec) else "",
+      if (many) {
+        ", both run under your {.code seed}"
+      } else {
+        ", run under your {.code seed}"
+      },
+      spec,
       "."
     )
   }

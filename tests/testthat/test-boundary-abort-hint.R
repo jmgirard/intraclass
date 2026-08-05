@@ -1257,19 +1257,31 @@ bh_sweep_cell <- function(
     # Asked under the SAME `seed = 1` the abort above was fired with: for
     # `npbootstrap` the verdict is seed-specific (M97 AC3), so usability under a
     # different seed would not be the property the hint promised.
-    # `bootstrap` is asked at the CAPPED resample count, because that is the call
-    # its bullet promises (M103): verification runs at `hint_verify_boot_cap`, so
-    # asking at the shipped 999 here would be testing a different call from the
-    # one the message tells the user to make.
+    # `bootstrap` is asked exactly as verification asks it (M103): the cheap screen
+    # at `hint_screen_samples` FIRST, and only then the full run at
+    # `hint_verify_boot_cap`, which is the call the bullet promises. Modelling the
+    # cap alone would call a method usable that verification had already abandoned
+    # at the screen, and the assertion below -- nothing usable in the winning tier
+    # is left out -- would then fail on a message that is perfectly truthful
+    # (pass-2 G9). Asking at the shipped 999 would be a third call again, one
+    # nobody is told to make.
     usable_of <- function(set) {
       Filter(
         function(x) {
-          extra <- if (identical(x, "bootstrap")) {
-            list(seed = 1, boot_samples = hint_verify_boot_cap)
+          if (identical(x, "bootstrap")) {
+            bh_usable(
+              d,
+              x,
+              c(args, list(seed = 1, boot_samples = hint_screen_samples))
+            ) &&
+              bh_usable(
+                d,
+                x,
+                c(args, list(seed = 1, boot_samples = hint_verify_boot_cap))
+              )
           } else {
-            list(seed = 1)
+            bh_usable(d, x, c(args, list(seed = 1)))
           }
-          bh_usable(d, x, c(args, extra))
         },
         set
       )
@@ -2831,7 +2843,11 @@ test_that("no interval computed during verification reaches the message (AC5)", 
   # branch drops the count, and a REACHABLE rendering added to the hint raises it, so a
   # new literal cannot arrive unread the way pass-9's did.
   # 3 from M93 (mpl, classical singular, classical plural) + the 2 npbootstrap
-  # forms M97 added + the 1 engine-fit form M103 added. That sixth rendering is
+  # forms M97 added + the 1 engine-fit form THIS GRID REACHES. The engine tier can
+  # render more than one -- either method alone or both together, each with a
+  # seeded and an unseeded tail -- and the count is of what the grid produced, not
+  # of what the producer can produce; a grid that reached another would raise it,
+  # which is the direction this pin exists to catch. That sixth rendering is
   # this pin doing its job rather than an inconvenience: M103 made the engine-fit
   # tier reachable from the default path, the count went 5 -> 6, and the new
   # rendering was read (it names `bootstrap`, carries no token when the caller
