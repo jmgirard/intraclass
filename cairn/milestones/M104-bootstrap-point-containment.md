@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M104: What the parametric bootstrap reports when its interval sits above its own point
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP6, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m104-bootstrap-point-containment`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -99,10 +99,10 @@ sweep covers `"bootstrap"`, the method the observation came from).
       `data-raw/` and rejects UPPERCASE constants, so run `lint_package()` before
       pushing.
 - [ ] T2: Add the fixture-reading test asserting AC2's two closed-scope claims.
-- [ ] T3: Add the boundary point/interval paragraph to the `"bootstrap"` docs
+- [x] T3: Add the boundary point/interval paragraph to the `"bootstrap"` docs
       (`R/icc.R:323` onward) and correct the `R/icc.R:502` "reads `0`" sentence;
       `devtools::document()`.
-- [ ] T4: Update the Bootstrap row of the `cairn/DESIGN.md` interval-time boundary
+- [x] T4: Update the Bootstrap row of the `cairn/DESIGN.md` interval-time boundary
       table.
 - [ ] T5: Add the live regression test pinning the AC6 call.
 - [ ] T6: NEWS entry; run the local gate (`document()` no delta,
@@ -118,6 +118,10 @@ sweep covers `"bootstrap"`, the method the observation came from).
 - 2026-08-05: plan gate chose a `"bootstrap"`-only sweep over an all-six-reducer sweep, because the observation came from that reducer and the refit-per-resample cost dominates; falsified by the same shape being reported against another `ci_method`.
 - 2026-08-05: criteria audit ran ([O], fresh context) and returned 8 findings, all actioned at the gate — AC3 was retargeted from the `"npbootstrap"` section to the `"bootstrap"` surface, AC4 added to correct a sentence the fixture falsifies, AC5 added for the DESIGN.md row, AC6 given a pinned generator and full argument list plus the ordering assertion nothing had pinned, AC1 given per-arm minimum cells and a status column, and two unenumerated universals removed.
 - 2026-08-05: collision check — D-006's percentile/BCa NO-GO is scoped to the non-parametric `npbootstrap` reducer, not this parametric one, and nothing here adds a bias-corrected variant, so the scopes are recorded as distinct and cross-referenced rather than superseded.
+- 2026-08-05: T3 done — the `@param ci_method` bootstrap description gains the boundary point/interval paragraph, and the `R/icc.R` npbootstrap-section sentence asserting the point "reads `0`" is corrected in place to "at, or numerically indistinguishable from, `0`"; `document()` clean.
+- 2026-08-05: T4 done — the DESIGN.md interval-time Bootstrap row states the relation and cites the fixture path.
+- 2026-08-05: implement gate chose to sweep at the shipped `boot_samples = 999` over the faster 199 the plan-gate probe used, so the fixture and AC6's live call measure the same experiment (the rule `data-raw/sweep-abort-remedies.R` already records); falsified by a cell whose containment verdict differs between the two counts.
+- 2026-08-05: minor plan refinement — the fixture gains `boot_samples` and `conf_level` columns beyond AC1's named schema, so the recorded bound is scoped to the count it was measured at.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

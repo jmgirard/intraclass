@@ -247,6 +247,15 @@ two-way design and the crossed (Design 1) random-rater multilevel design, the
 \code{"lavaan"} engine (which simulates from the fitted SEM's implied moments and
 refits). As with the Monte-Carlo interval, the \code{"lme4"}
 engine defers a singular (boundary) fit to \code{"glmmTMB"} for either method.
+At the zero-between-subject-variance boundary the point estimate and the
+interval come from different computations -- the point from the engine's REML
+fit, the endpoints from quantiles of the refits -- so the reported \code{conf.low}
+can sit slightly \emph{above} the reported point instead of below it. Both numbers
+are zero to any reading when that happens: over every cell of the sweep
+committed at \code{tests/testthat/fixtures/bootstrap-point-containment.tsv}, each
+such gap and each such point estimate is below \code{1e-8}. Nothing is clamped and
+no error is raised; in that sweep's cells with real between-subject signal the
+interval contains its point.
 \code{"posterior"} is the percentile \strong{credible} interval from the Bayesian
 engine's posterior draws; it is the forced default for, and available only with,
 \code{engine = "brms"} (and \code{"brms"} requires it) -- the other methods do not apply
@@ -592,7 +601,9 @@ an error, and the coverage-bearing endpoints are unaffected.
 
 The reported \strong{point estimate} is the engine (REML) point, exactly as for every
 other \code{ci_method} -- \code{ci_method} selects the interval, not the estimator. At the
-zero-between-variance boundary the point reads \code{0} while the untruncated interval
+zero-between-variance boundary the point sits at, or numerically indistinguishable
+from, \code{0} -- the engine returns a value near but not exactly zero, which is why a
+resampled limit can land on either side of it -- while the untruncated interval
 may extend below \code{0}; this is the normal picture for a boundary-respecting point
 beside an honest interval, and it signals that the data are consistent with values
 near and below zero.
