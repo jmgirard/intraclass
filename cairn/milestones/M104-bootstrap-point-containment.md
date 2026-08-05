@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M104: What the parametric bootstrap reports when its interval sits above its own point
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -105,7 +105,7 @@ sweep covers `"bootstrap"`, the method the observation came from).
 - [x] T4: Update the Bootstrap row of the `cairn/DESIGN.md` interval-time boundary
       table.
 - [x] T5: Add the live regression test pinning the AC6 call.
-- [ ] T6: NEWS entry; run the local gate (`document()` no delta,
+- [x] T6: NEWS entry; run the local gate (`document()` no delta,
       `air format --check`, `lintr::lint_package()`, tests against the installed
       package with `NOT_CRAN=true CI=true`).
 
@@ -125,6 +125,9 @@ sweep covers `"bootstrap"`, the method the observation came from).
 
 - 2026-08-05: T1/T2/T5 done — the sweep wrote 48 rows (48 ok, 0 aborted, 24 per arm); `conf.low > estimate` in 22, all 22 in the zero-between arm and none in the nonzero arm; largest gap 2.12e-09 and largest point estimate among them 2.90e-09, both inside the 1e-8 bound AC3 documents. All 17 rows with a point at or above 1e-8 contain their point. Tests green (9 assertions).
 - 2026-08-05: the fixture's first row reproduces the candidate row's 2026-08-04 observation exactly (point 3.40890543108706e-10, conf.low 4.80452439535659e-10).
+
+- 2026-08-05: T6 done — NEWS entry under Documentation; local gate clean: `air format --check` exit 0, `lintr::lint_package()` 0 lints, `devtools::document()` no delta, and the full suite against the INSTALLED package under `NOT_CRAN=true CI=true` with failed + error = 0 (23 skips, the live-Stan brms set plus skip_on_cran).
+- 2026-08-05: all tasks done; status -> review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
