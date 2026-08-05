@@ -106,11 +106,11 @@ hardening candidate → unrelated, stays a candidate row.
       incomplete-design path handle the remainder. Confirm the existing
       connectivity and per-subject guards still fire when a drop leaves the
       design unidentified. (RB tripwire: irreversible-api)
-- [ ] T4. Guard `burch_ci()` on `identical(ss$msa, 0)` before `burch_kappa_hat()`
+- [x] T4. Guard `burch_ci()` on `identical(ss$msa, 0)` before `burch_kappa_hat()`
       (`R/ci-classical.R:191`) with a classed abort naming the cause, threading
       the M103 runtime `hint` already carried by the sibling guard at
       `R/ci-classical.R:61`; GP7 in-place comment naming the new D-entry.
-- [ ] T5. Run the AC4 `searle` pin and the full `devtools::test()`; confirm no
+- [x] T5. Run the AC4 `searle` pin and the full `devtools::test()`; confirm no
       other reducer's behavior moved on the fixture cells.
 - [ ] T6. D-entry, `DESIGN.md` boundary-table row, `NEWS.md`, roxygen for the
       new input contract; re-run all three `data-raw` checkers (M85/M97/M104 —
@@ -129,3 +129,5 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: AC2 amended via the implement gate -- added the availability clause after measurement showed the drop changes which `ci_method` values are reachable, which the plan did not anticipate. Amended text shown verbatim in chat before this commit.
 - 2026-08-05: amended the one-way NA-scored cell in test-boundary-abort-hint.R ("a missing score silences every row"). Its forbid/candidates lists encoded that an NA row fences searle/burch/npbootstrap out; after T3 the design is unbalanced, so npbootstrap is genuinely usable and searle/burch are genuinely design-fenced. Lists corrected to the measured truth, not relaxed. The `expect_identical(fenced_named(r_ow), 0L)` line flips to `expect_gt(..., 0L)`: it only ever counted whether the fenced tier fired, and the property that no UNUSABLE method is named stays enforced by the unchanged per-seed `named == usable` assertion. The two-way cell is unmoved.
 - 2026-08-05: T2/T3 green -- test-icc-errors.R FAIL 0 PASS 37, test-boundary-abort-hint.R FAIL 0 PASS 1331. Only outstanding reds in the suite are test-degenerate-classical.R's two, which are T4's planned tests-first reds.
+- 2026-08-05: T4 green -- test-degenerate-classical.R FAIL 0 PASS 38 (was FAIL 1 ERROR 1 at T1). The guard is burch-only and tests `identical(ss$msa, 0)`, not a tolerance: the fixture's 8x4 cell sits at 3.5e-33 and returns [-1.693, 0.629], so any tolerance wide enough to catch it would abort a case Burch answers.
+- 2026-08-05: T5 -- full suite at NOT_CRAN=true CI=true: FAIL 0, WARN 2, SKIP 23, PASS 5856. The 2 warnings are the pre-existing glmmTMB convergence warnings in test-icc-type-vector.R, present in the pre-change baseline run. AC4's searle pin green on all 8 fixture cells at tolerance 0, so nothing moved on the sibling reducer.
