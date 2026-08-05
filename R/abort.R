@@ -114,6 +114,33 @@ warn_fixed_raters <- function(.envir = rlang::caller_env()) {
   )
 }
 
+#' Warn that rows with a missing score were dropped before fitting
+#'
+#' Fired when `icc()` removes rows whose `score` is `NA` (M105, D-022). A missing
+#' score is a rating that did not happen — the incomplete design this package
+#' already fits — so this is well-posed and returns a valid number, making it a
+#' warning rather than an `abort_*()` (PRINCIPLES.md #5 governs ill-posed
+#' designs). Classed `intraclass_dropped_rows` so a user working with
+#' routinely-incomplete data can suppress this one warning by class without
+#' silencing the rest, exactly as `warn_fixed_raters()` allows.
+#'
+#' @param n_dropped Integer count of removed rows.
+#' @keywords internal
+#' @noRd
+warn_dropped_rows <- function(n_dropped, .envir = rlang::caller_env()) {
+  warn_intraclass(
+    c(
+      "Dropped {.val {n_dropped}} row{?s} with a missing {.arg score}.",
+      i = "The remaining ratings are analyzed as an incomplete design.",
+      i = "Remove {cli::qty(n_dropped)}{?that row/those rows} yourself to \\
+           silence this, or suppress the {.cls intraclass_dropped_rows} \\
+           warning class."
+    ),
+    class = "intraclass_dropped_rows",
+    .envir = environment()
+  )
+}
+
 #' Abort because a decision axis does not apply to the chosen design
 #'
 #' Used by `choose_icc()` (M12, ADR-021): e.g. a `type`/`raters` answer supplied

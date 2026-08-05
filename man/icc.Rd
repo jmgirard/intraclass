@@ -61,7 +61,11 @@ plot of each ICC index with its Monte-Carlo confidence interval, or
 \item{data}{A data frame with one rating per row.}
 
 \item{score, subject, rater}{Columns of \code{data} (unquoted): the numeric rating,
-the subject (object of measurement), and the rater (judge).}
+the subject (object of measurement), and the rater (judge). A non-finite
+\code{score} (\code{Inf}, \code{-Inf}, \code{NaN}) is an error. An \code{NA} \code{score} is treated as a
+rating that did not happen: the row is dropped with a suppressible
+\code{intraclass_dropped_rows} warning and the rest is analyzed as an incomplete
+design, so a missing rating and an absent row give the same answer.}
 
 \item{cluster}{Optional column of \code{data} (unquoted) giving the higher-level
 unit each subject is nested in (e.g. classroom, clinic). Supplying it switches
@@ -208,7 +212,7 @@ design in hand — chosen by RUNNING each candidate on your data and keeping onl
 those whose reported endpoints are all finite, correctly ordered and in range —
 so there is no need to work that out from this list. Being a check on the data
 rather than on the design, it falls silent wherever a method would not in fact
-deliver, including a missing score, degenerate data, an uncalibrated
+deliver, including degenerate data, an uncalibrated
 \code{conf_level} or geometry, and a numeric \code{unit} projected past the point where a
 method's Spearman-Brown map breaks down; the two closed forms are asked
 separately, so one can be named where the other is not. On unbalanced one-way

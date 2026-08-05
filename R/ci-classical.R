@@ -188,6 +188,42 @@ burch_ci <- function(
   ss <- classical_oneway_ss(groups)
   classical_guard_observed(ss, "Burch REML", call, hint)
 
+  # BURCH-ONLY, and it must not move into the shared guard above (M105, D-022).
+  # `burch_kappa_hat()` standardizes the eq. 13 kurtosis plug-in by `sqrt(MSA)`,
+  # so at MSA = 0 kappa-hat is NaN and both endpoints follow it -- while SEARLE,
+  # which reads MSA only through F = MSA/MSE, returns its ordinary attained
+  # minimum on the same data. Folding this into the shared guard would abort a
+  # sibling that has a correct answer.
+  #
+  # The test is `identical(., 0)` and NOT a near-zero tolerance: MSA = 0 exactly
+  # is the whole failure, and just above it the construction is defined and its
+  # interval ordinary. Measured on the committed fixture, three cells reach
+  # exactly 0 while a fourth lands at 3.5e-33 and returns [-1.693, 0.629] --
+  # a tolerance wide enough to catch that cell would abort a case Burch answers
+  # (`tests/testthat/fixtures/degenerate-classical-cells.tsv`).
+  #
+  # Before M105 this returned NaN endpoints: a bare `simpleError` out of
+  # `npb_guard_sb_pole()`'s non-NaN-safe `!any(denom < 0)` at `unit = "average"`,
+  # and a SILENTLY reported NaN interval at `unit = "single"`. #3 and #5 refuse a
+  # reported non-interval, and #4 refuses substituting a number this estimator
+  # did not produce, so the answer is a classed abort. `hint` carries M103's
+  # runtime verification -- it names a method only after running it on THIS
+  # caller's data -- so nothing here asserts an alternative works (D-018).
+  if (identical(ss$msa, 0)) {
+    abort_intraclass(
+      c(
+        "The Burch REML interval is undefined for this data.",
+        i = "There is no between-subject variance at all \\
+             ({.field MSA = 0}), and the kurtosis term the Burch width \\
+             depends on divides by {.field sqrt(MSA)}.",
+        i = "Inspect the data before retrying.",
+        hint
+      ),
+      class = "intraclass_singular_fit",
+      call = call
+    )
+  }
+
   kappa_bc <- burch_kappa_bc(
     burch_kappa_hat(groups, ss$msa, ss$mse),
     ss$k,

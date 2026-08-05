@@ -26,9 +26,12 @@
 # mechanism and shipped a new one, because a predicate can only encode failures
 # somebody already thought of. Running the method has no such horizon, and it
 # subsumes every one of those predicates: the kappa_m gate (the lookup aborts off
-# grid), the degeneracy checks (the shipped guards abort), score completeness (the
-# extractors abort on an NA), and the Spearman-Brown pole test (the interval comes
-# back reversed or above +1, and is rejected on its values).
+# grid), the degeneracy checks (the shipped guards abort), and the Spearman-Brown
+# pole test (the interval comes back reversed or above +1, and is rejected on its
+# values). Score completeness was on this list until M105, which removed it as a
+# mechanism rather than subsuming it: `icc()` now drops `NA`-scored rows during
+# canonicalization, so no reducer is handed one (D-022). The historical list above
+# is unchanged -- it records which predicates were killed, not which are reachable.
 #
 # The hint is ADDITIVE: the abort class, its leading message, and its existing
 # generic remedies are untouched (AC2/AC5). Nothing here implements a
@@ -121,9 +124,12 @@ hint_verify_seed <- 1L
 # message, and it is spent whether or not the method turns out to help -- which
 # made a previously instant `searle` abort take 25.6 s to print a message with no
 # bullet in it at all. The classical guard is the worst cell by construction:
-# `searle_ci()` and `burch_ci()` share one guard on the same `ss`, so whenever one
-# aborts the other does, and the cheap tier there is empty by construction rather
-# than by data.
+# `searle_ci()` and `burch_ci()` share the MSE = 0 / non-finite-F guard on the same
+# `ss`, so on that trigger whenever one aborts the other does, and the cheap tier
+# there is empty by construction rather than by data. Since M105 the two no longer
+# abort together on EVERY trigger: Burch has its own MSA = 0 guard where SEARLE
+# returns its attained minimum (D-022), so on that trigger the cheap tier is empty
+# by data rather than by construction.
 #
 # So the expensive candidate is screened first at this count, and abandoned if the
 # screen fails. Measured on 6x3 cells: a hopeless dataset (`gen_mse0`) is rejected
@@ -164,8 +170,8 @@ hint_verify_boot_samples <- function(boot_samples) {
 
 # Run one candidate `ci_method` and report whether EVERY estimand it returns is
 # usable. This NEVER raises and never leaks a condition. The reducers abort by design
-# (`intraclass_unidentified` on a missing score, `intraclass_unsupported` off mpl's
-# kappa_m grid or at an uncalibrated level, the classical guards on degenerate data,
+# (`intraclass_unsupported` off mpl's kappa_m grid or at an uncalibrated level,
+# the classical guards on degenerate data,
 # `npbootstrap`'s resample-stage guard on a degenerate resample) and can warn; it
 # runs while the boundary abort's own message vector is being built,
 # where an escaping error would REPLACE the user's `intraclass_singular_fit` with an
@@ -333,8 +339,10 @@ boundary_method_usable <- function(
 #
 # `invoked` is the `ci_method` the CALLER asked for, and it does two things. It is
 # excluded from both tiers -- a guard that just aborted may not recommend itself,
-# and for the classical pair, which share one guard, running it again would re-enter
-# that guard (caught, not recursive). And it selects the contrast clause: M93's
+# and for the classical pair, which share the MSE = 0 / non-finite-F guard,
+# running it again would re-enter that guard (caught, not recursive). Since M105
+# Burch also has an MSA = 0 guard of its own that SEARLE does not share (D-022) --
+# do not fold the two together, which is what that entry decided against. And it selects the contrast clause: M93's
 # bullets were written for the Monte-Carlo default and say the named method works
 # "where the default cannot", which is a claim about `montecarlo` that is verified
 # only when `montecarlo` is what aborted. Off the default path the clause names no

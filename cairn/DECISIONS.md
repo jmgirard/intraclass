@@ -931,3 +931,62 @@ and both are corrected there.
 **Supersedes:** one sentence of Amendment 3. Its decision, its correction to the
 checker's SCOPE comment, and its annotation of rule 4 and Amendment 1 stand in
 full.
+
+### D-022 (2026-08-05): Degenerate input and the zero-between-variance Burch interval are refused classed, and a missing score is a rating that did not happen
+
+**Context:** three measured paths through `icc()` returned something other than a
+classed condition or a usable interval (M105 plan gate, 2026-08-05). A
+non-finite `score` reached whichever engine was selected and surfaced that
+engine's own error — `negative log-likelihood is NaN at starting parameter
+values` (glmmTMB), `NA/NaN/Inf in 'y'` (lme4) — on all four `model` × `engine`
+combinations, so a caller could not `tryCatch()` the family by class as
+PRINCIPLES.md #8 promises. `ci_method = "burch"` on data with no between-subject
+variance divided by `sqrt(MSA) = 0` inside `burch_kappa_hat()` (eq. 13's kurtosis
+standardization), producing NaN endpoints that raised a bare `simpleError` out of
+`npb_guard_sb_pole()`'s non-NaN-safe `!any(denom < 0)` at `unit = "average"` and
+shipped as a silently reported NaN interval at `unit = "single"`. And an `NA`
+score reached the engine as well, where it counted as an observed cell — so an
+incomplete design read as balanced to every design fence while no reducer could
+use it.
+
+**Decision (three parts).**
+*Non-finite scores are refused at input validation*, before any fit, with a
+classed condition naming the column and the offending rows. Input-side rather
+than a classed wrapper around the engine error: the raw message differs per
+engine, so a wrapper would have to match on text, and one check serves all four
+engines.
+*Burch at MSA exactly 0 aborts classed* (`intraclass_singular_fit`), where it
+previously reported NaN. The guard is Burch-only and must not move into the
+shared `classical_guard_observed()`: SEARLE reads MSA only through F = MSA/MSE
+and returns its ordinary attained minimum on the same data, so a shared guard
+would abort a sibling that has a correct answer. The test is `identical(., 0)`
+and not a tolerance — the committed fixture has a cell at MSA = 3.5e-33 that
+returns an ordinary interval, so any tolerance wide enough to catch it would
+refuse a case Burch answers. Returning the attained floor instead was rejected
+under IP1 and #4: that number comes from SEARLE's formula, not Burch's.
+Warn-plus-NaN was rejected on D-019's ground — a wrong endpoint still reaches
+downstream code (#5).
+*An `NA` score is a rating that did not happen*: the row is dropped and the
+remainder analysed as the incomplete design this package already fits, with a
+classed `intraclass_dropped_rows` warning naming the count, suppressible by class
+on the `intraclass_fixed_raters` precedent. Scope is `score` only — a row missing
+its subject or rater identity cannot be placed in the design at all, so dropping
+it would hide a data-preparation error rather than accommodate a missing rating.
+
+**Consequences:** the exported contract refuses exactly two things it previously
+reported — a fit on non-finite scores, and a Burch interval at MSA = 0 — and
+accepts one thing it previously rejected, an `NA`-containing frame. The last of
+those changes which `ci_method` values are reachable on such data, because the
+phantom observed cell is gone: measured on a one-way frame with one `NA`,
+`searle` and `burch` are now refused up front by their existing balance fence
+(`intraclass_unsupported`) instead of aborting inside their extractors, and
+`npbootstrap`, which supports unbalanced one-way data, returns an interval. That
+is a truer answer in every case — the design really is unbalanced — but it is a
+behavioural change and is what the amended M105 AC2 pins.
+`DESIGN.md § Boundary-fit policy` gains a classical-family interval-time row
+citing this entry as classed deferral (D-004 requires a superseding entry for any
+change to a documented cell). **Untouched:** `searle` reporting `-Inf` at the
+Spearman-Brown pole on the same data, and `npb_guard_sb_pole()` tolerating the
+pole itself — both recorded as correct in place at `R/ci-npbootstrap.R:126` and
+in-support for the projected form under D-010; reopening either supersedes D-010
+and reaches all three methods sharing that guard (ROADMAP candidate).
