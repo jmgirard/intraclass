@@ -151,6 +151,89 @@ sweep_data <- function(row) {
   )
 }
 
+# The engine fit `icc()` would hand a guard on this data -- or NULL where this
+# platform's glmmTMB dies on the data before any CI-stage guard is reached.
+#
+# That is not hypothetical, and it is why the tests below fire each guard at its
+# OWNING REDUCER rather than through `icc()`, exactly as AC1 already does. On
+# `gen_mse0` the Linux and Windows runners raise a raw `NA/NaN gradient
+# evaluation` from the point fit while macOS reaches the guard (CI on PR #111,
+# 2026-08-05, 5 failures in this file). A test routed through `icc()` on that
+# data is therefore evidence about the ENGINE on those platforms and not about
+# the guard it names -- it reds where the fit dies, and worse, an assertion that
+# a message does NOT contain something passes there for the wrong reason.
+engine_or_null <- function(df) {
+  suppressWarnings(tryCatch(fit_glmmtmb_oneway(df), error = function(e) NULL))
+}
+
+# The hint `icc()` builds for a one-way random call on this data, argument for
+# argument with `boundary_hint_for()` in `R/icc.R`. Fired at a reducer this is
+# the same promise the dispatch would have passed it, including the engine tier
+# when the platform has a fit to give.
+icc_hint <- function(
+  df,
+  invoked,
+  engine = engine_or_null(df),
+  n_r = 3L,
+  seed = 1L,
+  boot_samples = 999L
+) {
+  boundary_method_hint(
+    oneway = TRUE,
+    multilevel = FALSE,
+    replicates = FALSE,
+    raters = "random",
+    balanced = TRUE,
+    type = "agreement",
+    type_supplied = FALSE,
+    unit = c("single", "average"),
+    seed = seed,
+    boot_samples = boot_samples,
+    mc_samples = 10000L,
+    conf_level = 0.95,
+    df = df,
+    estimands = oneway_ests(n_r),
+    n0 = n_r,
+    invoked = invoked,
+    engine = engine
+  )
+}
+
+# The bootstrap refit-convergence guard, fired with the engine `icc()` would have
+# used -- or, where this platform's fit died on the data, with a refit stub
+# returning the all-NA draws such a fit yields. The guard fires on zero converged
+# refits either way, which is the condition under test.
+fire_bootstrap_guard <- function(
+  df,
+  hint,
+  engine = engine_or_null(df),
+  boot_samples = 999L,
+  n_r = 3L
+) {
+  eng <- if (is.null(engine)) {
+    list(
+      simulate_refit = function(n, seed = NULL) {
+        matrix(
+          NA_real_,
+          nrow = 2L,
+          ncol = n,
+          dimnames = list(c("subject", "residual"), NULL)
+        )
+      }
+    )
+  } else {
+    engine
+  }
+  bootstrap_ci(
+    eng,
+    oneway_ests(n_r),
+    conf_level = 0.95,
+    boot_samples = boot_samples,
+    seed = 1L,
+    hint = hint
+  )
+}
+
 # --- AC1: every degeneracy guard splices the hint it is handed ----------------
 
 # The six guards, each fired directly at the function that owns it, and each
@@ -373,27 +456,50 @@ test_that("the engine-fit rows refuse to verify with no fit in hand (AC2)", {
 
 test_that("no remedy bullet names the ci_method the caller invoked (AC3)", {
   skip_on_cran()
-  # One case per (guard, invoking value). Each fires through `icc()`, which is
-  # the only path a user meets these messages on and the only one that supplies
-  # the engine fit the hint's second tier needs.
+  # One case per (guard, invoking value). The `gen_ssa0` and resample cases fire
+  # through `icc()`, the path a user meets them on. The `gen_mse0` cases cannot:
+  # the point fit dies before the guard on some platforms (see `engine_or_null()`
+  # above), and an assertion that a message does not name a method would then
+  # hold of an engine error rather than of the guard. Those fire at the reducer,
+  # handed the hint the dispatch would have built.
+  mse0 <- gen_mse0(6, 3)
   cases <- list(
-    list(method = "bootstrap", df = gen_mse0(6, 3)),
-    list(method = "searle", df = gen_mse0(6, 3)),
-    list(method = "burch", df = gen_mse0(6, 3)),
+    list(
+      method = "bootstrap",
+      fire = function() {
+        fire_bootstrap_guard(mse0, icc_hint(mse0, "bootstrap"))
+      }
+    ),
+    list(
+      method = "searle",
+      fire = function() {
+        searle_ci(mse0, oneway_ests(3), hint = icc_hint(mse0, "searle"))
+      }
+    ),
+    list(
+      method = "burch",
+      fire = function() {
+        burch_ci(mse0, oneway_ests(3), hint = icc_hint(mse0, "burch"))
+      }
+    ),
     list(method = "npbootstrap", df = gen_ssa0(6, 3)),
     list(method = "npbootstrap", df = gen_resample_degenerate(30, 2)),
     list(method = "montecarlo", df = gen_ssa0(6, 3))
   )
   for (case in cases) {
-    msg <- abort_message(icc(
-      case$df,
-      score,
-      subject,
-      rater,
-      model = "oneway",
-      ci_method = case$method,
-      seed = 1L
-    ))
+    msg <- if (is.null(case$fire)) {
+      abort_message(icc(
+        case$df,
+        score,
+        subject,
+        rater,
+        model = "oneway",
+        ci_method = case$method,
+        seed = 1L
+      ))
+    } else {
+      abort_message(case$fire())
+    }
     # The guard's own leading line is exempt (AC3): `bootstrap_ci()`'s names
     # "bootstrap" by construction, and AC1 freezes it. Everything after it is
     # remedy text.
@@ -417,16 +523,12 @@ test_that("verifying burch from a searle abort terminates, not recurses (AC4)", 
   # `searle` abort's own hint runs `burch`, which re-enters that guard. The run
   # carries no hint of its own, so the re-entered guard aborts once and is
   # caught -- one classed condition out, no recursion.
+  # Fired at the reducer with the hint the dispatch would have built, so the
+  # re-entry is exercised on every platform rather than only where the point fit
+  # survives this data (`engine_or_null()` above).
+  df <- gen_mse0(6, 3)
   cnd <- suppressWarnings(tryCatch(
-    icc(
-      gen_mse0(6, 3),
-      score,
-      subject,
-      rater,
-      model = "oneway",
-      ci_method = "searle",
-      seed = 1L
-    ),
+    searle_ci(df, oneway_ests(3), hint = icc_hint(df, "searle")),
     error = function(e) e
   ))
   # Reaching this line at all IS the assertion: were the verification run to
@@ -483,51 +585,92 @@ test_that("verification passes no hint to any candidate it runs (AC4)", {
   expect_false("hint" %in% names(seen[["burch"]]))
 })
 
+# The three shipped messages AC5 freezes, at 703fc1b. The resample guard is
+# outside this criterion by construction: `gen_mse0` never reaches it. The
+# bootstrap guard reports a glmmTMB CONVERGENCE COUNT, a property of the
+# optimizer on this platform's BLAS rather than of the message, so that integer
+# alone is normalized on both sides and every other byte is pinned as-is.
+normalize_count <- function(x) {
+  sub("only [0-9]+ of 999 refits", "only <n> of 999 refits", x)
+}
+
+ac5_expected <- list(
+  bootstrap = paste0(
+    "The bootstrap interval could not be computed: only <n> of 999 refits ",
+    "converged.\n",
+    "i A refit counts as converged only when every variance component ",
+    "it returned is finite.\n",
+    "i Inspect the model fit and the data before retrying."
+  ),
+  searle = paste0(
+    "The classical one-way SEARLE exact-F interval is undefined for this ",
+    "data.\n",
+    "i The F = MSA/MSE pivot is not usable here: MSA = 24.0087, ",
+    "MSE = 0.\n",
+    "i Inspect the data before retrying."
+  ),
+  npbootstrap = paste0(
+    "The one-way transformed bootstrap-t interval is undefined for this ",
+    "data.\n",
+    "i The studentized pivot needs a finite log F and a non-zero ",
+    "jackknife SE; this data gives log F = Inf and jackknife SE = NaN.\n",
+    "i Inspect the data before retrying."
+  )
+)
+
 # --- AC5: where nothing works, the message is the one that shipped ------------
 
 test_that("no usable candidate leaves the shipped message untouched (AC5)", {
   skip_on_cran()
-  # Fired through `icc()`, so each guard's `hint` is the REAL one -- forced,
-  # every candidate actually run. It evaluates to nothing on this data because
-  # nothing works on it (the sweep's `gen_mse0` cells: 0 usable of every method
-  # at all three of these guards). Were verification to accept a method wrongly,
-  # a bullet would appear here and these pins would red.
-  #
-  # The expected text is frozen at 703fc1b. The resample guard is outside this
-  # criterion by construction: `gen_mse0` never reaches it.
-  # The bootstrap guard reports a glmmTMB CONVERGENCE COUNT, which is a property
-  # of the optimizer on this platform's BLAS rather than of the message. Pinning
-  # the integer would make the pin a flake candidate on another platform, so the
-  # count alone is normalized to `<n>` on both sides and every other byte is
-  # pinned as-is.
+  # Each guard's `hint` is the REAL one the dispatch would build -- forced, every
+  # candidate actually run. It evaluates to nothing on this data because nothing
+  # works on it (the sweep's `gen_mse0` cells: 0 usable of every method at all
+  # three of these guards). Were verification to accept a method wrongly, a
+  # bullet would appear here and these pins would red. Fired at the reducers
+  # rather than through `icc()`, which cannot reach them on every platform (see
+  # `engine_or_null()`); the end-to-end path is asserted by the companion test
+  # below, where the fit survives.
   df <- gen_mse0(6, 3)
-  normalize_count <- function(x) {
-    sub("only [0-9]+ of 999 refits", "only <n> of 999 refits", x)
-  }
-  expected <- list(
-    bootstrap = paste0(
-      "The bootstrap interval could not be computed: only <n> of 999 refits ",
-      "converged.\n",
-      "i A refit counts as converged only when every variance component ",
-      "it returned is finite.\n",
-      "i Inspect the model fit and the data before retrying."
-    ),
-    searle = paste0(
-      "The classical one-way SEARLE exact-F interval is undefined for this ",
-      "data.\n",
-      "i The F = MSA/MSE pivot is not usable here: MSA = 24.0087, ",
-      "MSE = 0.\n",
-      "i Inspect the data before retrying."
-    ),
-    npbootstrap = paste0(
-      "The one-way transformed bootstrap-t interval is undefined for this ",
-      "data.\n",
-      "i The studentized pivot needs a finite log F and a non-zero ",
-      "jackknife SE; this data gives log F = Inf and jackknife SE = NaN.\n",
-      "i Inspect the data before retrying."
-    )
+  expected <- ac5_expected
+  fire <- list(
+    bootstrap = function() {
+      fire_bootstrap_guard(df, icc_hint(df, "bootstrap"))
+    },
+    searle = function() {
+      searle_ci(df, oneway_ests(3), hint = icc_hint(df, "searle"))
+    },
+    npbootstrap = function() {
+      npbootstrap_ci(
+        df,
+        oneway_ests(3),
+        boot_samples = 999L,
+        seed = 1L,
+        hint = icc_hint(df, "npbootstrap")
+      )
+    }
   )
   for (m in names(expected)) {
+    expect_identical(
+      normalize_count(abort_message(fire[[m]]())),
+      expected[[m]],
+      info = m
+    )
+  }
+})
+
+test_that("where the fit survives, icc() delivers that same message (AC5)", {
+  skip_on_cran()
+  # The end-to-end half of the criterion above: on a platform whose glmmTMB
+  # survives `gen_mse0`, the message a user actually meets is byte-identical to
+  # the one the reducer produced. Where the fit dies first this has nothing to
+  # say, and says so rather than passing on an engine error that happens to
+  # contain no bullet.
+  df <- gen_mse0(6, 3)
+  skip_if(
+    is.null(engine_or_null(df)),
+    "glmmTMB's point fit dies on this data here, before any CI-stage guard"
+  )
+  for (m in names(ac5_expected)) {
     msg <- abort_message(icc(
       df,
       score,
@@ -537,7 +680,7 @@ test_that("no usable candidate leaves the shipped message untouched (AC5)", {
       ci_method = m,
       seed = 1L
     ))
-    expect_identical(normalize_count(msg), expected[[m]], info = m)
+    expect_identical(normalize_count(msg), ac5_expected[[m]], info = m)
   }
 })
 
@@ -605,6 +748,13 @@ test_that("aborts that name no method are not slowed by verification (AC8)", {
   # same `ss`), so every such abort fell through to a full 999-refit bootstrap
   # that could not help either. The screen bounds that.
   df <- gen_mse0(6, 3)
+  # The criterion measures `icc()`, so where the point fit dies on this data
+  # before any guard there is no degeneracy abort here to time -- and the engine's
+  # own error would satisfy both assertions for the wrong reason.
+  skip_if(
+    is.null(engine_or_null(df)),
+    "glmmTMB's point fit dies on this data here, before any CI-stage guard"
+  )
   for (m in list("searle", "burch", NULL)) {
     call_args <- list(
       df,
