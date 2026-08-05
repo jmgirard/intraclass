@@ -275,13 +275,32 @@ icc(
   with no seed set it uses a fixed seed the message then names, and an
   unseeded retry draws fresh resamples and can fail where the verified
   run succeeded, especially on small designs. The trial run leaves the
-  session's random-number stream untouched. `"bootstrap"` is a
-  parametric bootstrap: it simulates response vectors from the fitted
-  model, refits, and takes percentile quantiles of the resampled
-  coefficients. The bootstrap does not rely on the asymptotic-normal
-  covariance approximation but is far slower (a refit per resample). It
-  is available for every design the `"glmmTMB"` and `"lme4"` engines fit
-  (via `glmmTMB`'s
+  session's random-number stream untouched. The same holds in reverse,
+  and on `"bootstrap"`, `"searle"`, `"burch"` and `"npbootstrap"` as
+  well as on the default (`"mpl"` raises its own kind of error and is
+  not covered). When a method you asked for aborts on degenerate data,
+  its error names a method verified on that same data by the same trial
+  runs and under the same rules — or, where no method serves that data,
+  names none, leaving the message exactly as it would otherwise read. It
+  never names the method you asked for, which just failed. Data with no
+  between-subject variance is the case this matters most on: there
+  `"bootstrap"` is typically the only method that returns anything
+  usable, and it is now named rather than left for you to find.
+  Candidates are tried cheapest first, so the two methods that reduce
+  the fitted model rather than your raw data — `"bootstrap"` and
+  `"montecarlo"` — are reached only where no method fenced to your
+  design serves the data, and the costliest of them is both screened at
+  a small resample count and capped when run in full, so an error stays
+  a few seconds rather than tens of them. That cap is why a bullet
+  naming `"bootstrap"` also names a `boot_samples` value: it is the
+  count the trial actually ran at, and the call the message gives you is
+  the one that was verified rather than a heavier one nobody tried.
+  `"bootstrap"` is a parametric bootstrap: it simulates response vectors
+  from the fitted model, refits, and takes percentile quantiles of the
+  resampled coefficients. The bootstrap does not rely on the
+  asymptotic-normal covariance approximation but is far slower (a refit
+  per resample). It is available for every design the `"glmmTMB"` and
+  `"lme4"` engines fit (via `glmmTMB`'s
   [`simulate()`](https://rdrr.io/r/stats/simulate.html) + refit and
   [`lme4::bootMer`](https://rdrr.io/pkg/lme4/man/bootMer.html)
   respectively) and, for the random two-way design and the crossed
@@ -388,19 +407,26 @@ icc(
 - mc_samples:
 
   Number of Monte-Carlo draws for `ci_method = "montecarlo"` (default
-  `10000`).
+  `10000`). It is also the count at which a `"montecarlo"` interval is
+  trialled when some *other* method's error considers suggesting it.
 
 - boot_samples:
 
   Number of resamples for `ci_method = "bootstrap"` (the parametric
   bootstrap) and `"npbootstrap"` (the transformed bootstrap-*t* subject
-  resamples); default `999`. Ignored when `ci_method = "montecarlo"`.
+  resamples); default `999`. It does not change a
+  `ci_method = "montecarlo"` interval, but it is not unused on that
+  path: when that interval aborts, it is the count the suggestion
+  machinery trials `"bootstrap"` at (capped) and names in the message.
 
 - seed:
 
   Optional integer seed for a reproducible interval (and, for
   `engine = "brms"`, the Stan sampler seed). The global RNG state is
-  restored afterward.
+  restored afterward. It also seeds the trial runs behind an error's
+  suggestion, so it can decide which method that error names — including
+  for the deterministic `"searle"` and `"burch"` intervals, whose own
+  values ignore it.
 
 - brm_args:
 

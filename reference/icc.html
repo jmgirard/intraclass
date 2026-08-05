@@ -315,6 +315,24 @@ reproduces it exactly) — with no seed set it uses a
 fixed seed the message then names, and an unseeded retry draws fresh resamples
 and can fail where the verified run succeeded, especially on small designs.
 The trial run leaves the session's random-number stream untouched.
+The same holds in reverse, and on <code>"bootstrap"</code>, <code>"searle"</code>, <code>"burch"</code> and
+<code>"npbootstrap"</code> as well as on the default (<code>"mpl"</code> raises its own kind of
+error and is not covered). When a method you asked for aborts on degenerate data, its error
+names a method verified on that same data by the same trial runs and under
+the same rules — or, where no method serves that data, names none, leaving
+the message exactly as it would otherwise read. It never names the method
+you asked for, which just failed. Data with no between-subject variance is the case
+this matters most on: there <code>"bootstrap"</code> is typically the only method that
+returns anything usable, and it is now named rather than left for you to
+find. Candidates are tried cheapest first, so the two methods that reduce the
+fitted model rather than your raw data — <code>"bootstrap"</code> and <code>"montecarlo"</code> —
+are reached only where no method fenced to your design serves the data,
+and the costliest of them is both screened at a small resample count and
+capped when run in full, so an error stays a few seconds rather than tens of
+them. That cap is why a bullet naming <code>"bootstrap"</code> also names a
+<code>boot_samples</code> value: it is the count the trial actually ran at, and the
+call the message gives you is the one that was verified rather than a
+heavier one nobody tried.
 <code>"bootstrap"</code> is a parametric bootstrap: it simulates response vectors from the
 fitted model, refits, and takes percentile quantiles of the resampled
 coefficients. The bootstrap does not rely on the asymptotic-normal covariance
@@ -412,19 +430,25 @@ It assumes approximately Gaussian data (untested for non-normality).</p></dd>
 
 <dt id="arg-mc-samples">mc_samples<a class="anchor" aria-label="anchor" href="#arg-mc-samples"></a></dt>
 <dd><p>Number of Monte-Carlo draws for <code>ci_method = "montecarlo"</code>
-(default <code>10000</code>).</p></dd>
+(default <code>10000</code>). It is also the count at which a <code>"montecarlo"</code> interval is
+trialled when some <em>other</em> method's error considers suggesting it.</p></dd>
 
 
 <dt id="arg-boot-samples">boot_samples<a class="anchor" aria-label="anchor" href="#arg-boot-samples"></a></dt>
 <dd><p>Number of resamples for <code>ci_method = "bootstrap"</code> (the
 parametric bootstrap) and <code>"npbootstrap"</code> (the transformed bootstrap-<em>t</em>
-subject resamples); default <code>999</code>. Ignored when <code>ci_method = "montecarlo"</code>.</p></dd>
+subject resamples); default <code>999</code>. It does not change a
+<code>ci_method = "montecarlo"</code> interval, but it is not unused on that path: when
+that interval aborts, it is the count the suggestion machinery trials
+<code>"bootstrap"</code> at (capped) and names in the message.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional integer seed for a reproducible interval (and, for
 <code>engine = "brms"</code>, the Stan sampler seed). The global RNG state is restored
-afterward.</p></dd>
+afterward. It also seeds the trial runs behind an error's suggestion, so it
+can decide which method that error names — including for the deterministic
+<code>"searle"</code> and <code>"burch"</code> intervals, whose own values ignore it.</p></dd>
 
 
 <dt id="arg-brm-args">brm_args<a class="anchor" aria-label="anchor" href="#arg-brm-args"></a></dt>
