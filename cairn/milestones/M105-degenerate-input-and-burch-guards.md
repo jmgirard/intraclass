@@ -1,6 +1,6 @@
 # M105: Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -136,3 +136,4 @@ hardening candidate → unrelated, stays a candidate row.
 - 2026-08-05: running the fourth checker caught a PRE-EXISTING failure, not one this branch caused: `check-record-claims.py` reds on `record-claims.tsv:6 [roadmap-terminal-rows]`, whose expected figure still reads M103/M101/M100/M102/M99 while the ROADMAP holds M104/M103/M101/M100/M102. Reproduced at `f3199b0`, before M105 existed -- M104's post-merge hygiene updated the ROADMAP retention comment but not the ledger row that re-derives it, so `main`'s lint job is red today. Corrected in place here per D-021 (a false record is fixed in the milestone that finds it, never promoted to its own); checker and self-test now pass.
 - 2026-08-05: AC6 red-then-green record. NEWS non-finite claim -> test-icc-errors.R:"a non-finite score aborts classed on every model and engine" + "the non-finite abort names the column and the offending rows", red at T1, green at T2. NEWS NA-drop claim -> test-icc-errors.R:"NA scores are dropped with a suppressible classed warning", red at T1, green at T3. NEWS Burch claim -> test-degenerate-classical.R:"burch either aborts classed or reports finite ordered limits (AC3)", red at T1, green at T4. NEWS method-availability claim -> test-icc-errors.R:"dropping NA scores leaves exactly the methods the design supports", authored after the fix so its red was recorded by mutation: disabling the drop (`na_scores <- integer(0)`) reds it FAIL 1 PASS 0 with the pre-M105 error verbatim ("The one-way bootstrap could not extract complete subject rows"); source restored and re-verified.
 - 2026-08-05: gates -- full suite NOT_CRAN=true CI=true FAIL 0 WARN 2 SKIP 23 PASS 5856; `air format .` clean; `lintr::lint_package()` no lints; `cairn_validate` all checks passed; plan-owned body 118/149.
+- 2026-08-05: all six tasks complete, gates clean; status -> review.
