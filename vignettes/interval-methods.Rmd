@@ -104,7 +104,9 @@ Wong 1996 Table 7 limits) is exact under normality: best-calibrated and narrowes
 when the data are approximately normal. The [**Burch
 interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is REML-based
 and kurtosis-adjusted: wider, but robust to non-normality. Prefer `"searle"` for
-near-normal data and `"burch"` when heavy tails are a concern. One asymmetry
+near-normal data and `"burch"` when heavy tails are a concern. Their value over
+the default is a finite, well-calibrated interval at the near-zero-ICC boundary
+where the Monte-Carlo default aborts. One asymmetry
 between the siblings: on data with *no* between-subject variance at all,
 `"burch"` aborts (its kurtosis standardization divides by zero there) while
 `"searle"` still returns its attained minimum.
