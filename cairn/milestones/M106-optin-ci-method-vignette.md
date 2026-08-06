@@ -105,7 +105,7 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
       `seed = 1, boot_samples = 199` — `test-ci-npbootstrap.R:23-45`); mpl on
       a seeded synthetic balanced two-way dataset ≥10 subjects (pattern:
       `test-ci-mpl.R`).
-- [ ] T3: Extend `check-mpl-doc-claims.py`: a vignette-scope extractor for the
+- [x] T3: Extend `check-mpl-doc-claims.py`: a vignette-scope extractor for the
       new MPL subsection, fixture rows for its reported claim candidates, and
       the self-test's hardcoded `scopes0` (`:459-464`) made equal to the live
       check's scope build; run both to exit 0.
@@ -123,6 +123,7 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 - 2026-08-06: plan gate chose extending `interval-methods.Rmd` over a new vignette because one canonical interval article beats a split topic and needs no pkgdown index change; falsified by the article growing past its siblings (~300 lines is the current ceiling, `multilevel-designs.Rmd`) or reader feedback that the article is too long to navigate.
 - 2026-08-06: plan gate chose checker scope-extension over folding the hardening candidate in because the hardening defects (recall vocabulary, self-test injection, anchors) bite only under future edits and are orthogonal to writing docs; the row's fired promotion condition is answered by this deliberate re-deferral, recorded on the row; falsified by a vignette claim the token net demonstrably misses shipping unchecked.
 - 2026-08-06: plan gate chose writing MPL vignette claims into the checker's scope over a write-around (no checkable claims in the vignette) because the write-around would make the vignette vaguer to keep a script simple; falsified by the scope extension proving brittle enough to red CI on innocent prose edits.
+- 2026-08-06: T3 done — one `build_scopes()` now feeds the live check, the self-test, and `--list` (stronger than the equal-sets requirement: the duplicate `scopes0` is gone), a `vignette_scope()` extracts the MPL subsection prose (code chunks excluded), 4 new candidates all dispositioned `out` (each names where its claim IS settled) + 1 vignette refusal row; checker 41 candidates/0 failures, self-test green.
 - 2026-08-06: T1+T2 done in one edit (prose and chunks interleave): four subsections + re-scoped lead-in + two live chunks; both chunks executed before their interpretive prose was written — the measured one-way output falsified the drafted "burch widest" reading (burch is narrowest there; the untruncated negative lower limits are the real story) and caught a silent recycling bug in the mpl table (mpl returns 2 agreement rows against montecarlo's 4; fixed with explicit `type = "agreement"`); vignette renders clean against the installed package.
 
 ## Decisions
