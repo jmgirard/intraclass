@@ -54,7 +54,7 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: `vignettes/interval-methods.Rmd` documents each opt-in method
+- [x] AC1: `vignettes/interval-methods.Rmd` documents each opt-in method
       (`"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`) in a dedicated
       subsection — `"searle"` and `"burch"` sharing the classical
       closed-forms subsection — each subsection stating five things per
@@ -65,18 +65,18 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
       five-item checklist recorded in the Review section, each item anchored
       to its subsection heading plus a short quoted phrase (never a bare line
       number).
-- [ ] AC2: the vignette's lead-in paragraph no longer scopes the article to
+- [x] AC2: the vignette's lead-in paragraph no longer scopes the article to
       the Monte-Carlo/bootstrap/posterior trio — it names the opt-in methods
       and routes to their subsections.
-- [ ] AC3: the new MPL subsection is inside `data-raw/check-mpl-doc-claims.py`'s
+- [x] AC3: the new MPL subsection is inside `data-raw/check-mpl-doc-claims.py`'s
       swept doc scope; every claim candidate the script's own enumerator
       reports in that scope has a row in the committed fixture; the self-test's
       scope set equals the live check's (no hardcoded stale duplicate); and
       both the checker and its self-test exit 0.
-- [ ] AC4: `vignettes/glossary.Rmd` has an entry for each of the four methods,
+- [x] AC4: `vignettes/glossary.Rmd` has an entry for each of the four methods,
       and the new interval-methods subsections link to them via the existing
       `glossary.html#<anchor>` idiom.
-- [ ] AC5: all new example chunks evaluate live at vignette build time
+- [x] AC5: all new example chunks evaluate live at vignette build time
       (guarded by `requireNamespace("glmmTMB", quietly = TRUE)` like the
       existing `ci-bootstrap` chunk); the `npbootstrap` chunk — the only
       method taking a `seed` — pins an explicit seed and `boot_samples`, and
@@ -137,3 +137,16 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**AC1 evidence (2026-08-06).** Per-subsection five-item checklist, anchored heading + quoted phrase:
+- "The transformed bootstrap-*t*": fence "serves the **one-way random design** (`model = "oneway"`), on balanced and unbalanced data alike" · determinism "the only opt-in method that takes a `seed` (and `boot_samples`)" · level "Any `conf_level` in `(0, 1)` is accepted" · unit "exact monotone Spearman-Brown image of the ICC(1) endpoints … a numeric `unit` (a D-study projection) is restricted to balanced data" · when "Reach for it for boundary robustness — an interval that exists where the Monte-Carlo default aborts".
+- "The classical closed forms" (searle + burch, shared per the gated AC1 amendment): fence "for the **balanced one-way random design**" · determinism "no resampling, so `mc_samples`, `boot_samples`, and `seed` do not apply and no `std.error` is reported" · level "Any `conf_level` in `(0, 1)` is accepted" · unit "both project ICC(k) — and a numeric `unit` — through the same Spearman-Brown image" · when "Their value over the default is a finite, well-calibrated interval at the near-zero-ICC boundary where the Monte-Carlo default aborts" (restored at defect return 1) plus the within-pair "Prefer `"searle"` for near-normal data and `"burch"` when heavy tails are a concern".
+- "The modified profile likelihood": fence "serves the **balanced, complete two-way random absolute-agreement** ICC(A,1) … aborts on any other design" · determinism "deterministic closed form — no resampling, no `seed`" · level "`conf_level` must be 0.90, 0.95, or 0.99" · unit "ICC(A,k) and any numeric-`unit` projection its pole-safe Spearman-Brown image" · when "returns an interval at the near-zero-ICC boundary where the two-way Monte-Carlo default aborts; it is deliberately conservative … opt-in and not the default".
+
+**AC2 evidence (2026-08-06).** Lead-in read fresh (`sed -n '18,28p'`): it names the two default frequentist methods, all four opt-in methods by name and `ci_method` string with an in-page link to the section, and the Bayesian credible interval — the montecarlo/bootstrap/posterior-only scoping sentence is gone.
+
+**AC3 evidence (2026-08-06).** `python3 data-raw/check-mpl-doc-claims.py` → "OK: 41 claim candidates, 12 settled … 0 failure(s)" including 4 vignette candidates + 1 vignette refusal row, each `out` row naming where its claim is settled; `--self-test` → "OK — every mutation reds, baseline green". Scope parity is structural, stronger than equal-sets: the former hardcoded `scopes0` duplicate is deleted and one `build_scopes()` feeds the live check, the self-test, and `--list`.
+
+**AC4 evidence (2026-08-06).** Built site greps: 4/4 entry ids present in `docs/articles/glossary.html` (`burch-interval`, `exact-f-interval`, `modified-profile-likelihood`, `transformed-bootstrap-t`); 4/4 `glossary.html#<anchor>` links present in `docs/articles/interval-methods.html`; the parent section id the entries link back to is present (1/1).
+
+**AC5 evidence (2026-08-06).** All three evaluated chunks carry `eval = requireNamespace("glmmTMB", quietly = TRUE)` (lines 44/114/166); the npbootstrap call pins `boot_samples = 199, seed = 1` (the test-proven pair); the mpl simulation chunk opens with `set.seed(88)`. Doc gate, all fresh post-fix: `air format --check` exit 0 · `lintr::lint_package()` 0 lints · `pkgdown::check_pkgdown()` no problems · `pkgdown::build_site()` finished clean · `interval-methods.Rmd` renders against the installed package. Both chunks were executed standalone during implement and their printed tables match the interpretive prose (work log, T1+T2 line).
