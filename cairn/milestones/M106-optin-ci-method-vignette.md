@@ -17,12 +17,12 @@
      measured, never assumed (D-049). /milestone-plan step 4 names the counter. -->
 # M106: The opt-in `ci_method` values are documented in the vignettes
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m106-optin-ci-method-vignette   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -95,12 +95,12 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write the four subsections in `interval-methods.Rmd` (after the
+- [x] T1: Write the four subsections in `interval-methods.Rmd` (after the
       Monte-Carlo/bootstrap section, before the Bayesian one) and re-scope the
       lead-in (`interval-methods.Rmd:17-24`); source every fence/determinism/
       level/unit claim from `R/icc.R:286-431` and the Details blocks at
       `R/icc.R:480-535`.
-- [ ] T2: Add the example chunks: the one-way trio on `ratings` with
+- [x] T2: Add the example chunks: the one-way trio on `ratings` with
       `model = "oneway"` (npbootstrap pinned at the test-proven
       `seed = 1, boot_samples = 199` — `test-ci-npbootstrap.R:23-45`); mpl on
       a seeded synthetic balanced two-way dataset ≥10 subjects (pattern:
@@ -123,6 +123,7 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 - 2026-08-06: plan gate chose extending `interval-methods.Rmd` over a new vignette because one canonical interval article beats a split topic and needs no pkgdown index change; falsified by the article growing past its siblings (~300 lines is the current ceiling, `multilevel-designs.Rmd`) or reader feedback that the article is too long to navigate.
 - 2026-08-06: plan gate chose checker scope-extension over folding the hardening candidate in because the hardening defects (recall vocabulary, self-test injection, anchors) bite only under future edits and are orthogonal to writing docs; the row's fired promotion condition is answered by this deliberate re-deferral, recorded on the row; falsified by a vignette claim the token net demonstrably misses shipping unchecked.
 - 2026-08-06: plan gate chose writing MPL vignette claims into the checker's scope over a write-around (no checkable claims in the vignette) because the write-around would make the vignette vaguer to keep a script simple; falsified by the scope extension proving brittle enough to red CI on innocent prose edits.
+- 2026-08-06: T1+T2 done in one edit (prose and chunks interleave): four subsections + re-scoped lead-in + two live chunks; both chunks executed before their interpretive prose was written — the measured one-way output falsified the drafted "burch widest" reading (burch is narrowest there; the untruncated negative lower limits are the real story) and caught a silent recycling bug in the mpl table (mpl returns 2 agreement rows against montecarlo's 4; fixed with explicit `type = "agreement"`); vignette renders clean against the installed package.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
