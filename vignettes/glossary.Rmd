@@ -268,9 +268,9 @@ the recommended engine. See [*Confidence-interval methods*](interval-methods.htm
 
 ## References
 
-Burch, B. D. (2011). Confidence intervals for the intraclass correlation
-coefficient based on the restricted maximum likelihood estimator. *Journal of
-Statistical Computation and Simulation, 81*(9), 1101--1115.
+Burch, B. D. (2011). Assessing the performance of normal-based and REML-based
+confidence intervals for the intraclass correlation coefficient. *Computational
+Statistics and Data Analysis, 55*, 1018--1028.
 
 Jorgensen, T. D. (2021). How to estimate absolute-error components in structural
 equation models of generalizability theory. *Psych, 3*(2), 113--133.

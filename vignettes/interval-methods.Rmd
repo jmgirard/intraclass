@@ -18,8 +18,8 @@ library(intraclass)
 A point estimate on its own can mislead — with a handful of subjects the same ICC
 could be "poor" or "excellent" and you would not know it. So every `icc()` coefficient
 comes with an interval, never a bare number, and the `ci_method` argument selects how
-that interval is built. This article covers the two default frequentist methods —
-Monte-Carlo and the parametric bootstrap; the [four opt-in
+that interval is built. This article covers the Monte-Carlo default and the
+parametric bootstrap; the [four opt-in
 methods](#the-opt-in-boundary-robust-methods) for the near-boundary terrain the
 default struggles on — the transformed bootstrap-*t* (`"npbootstrap"`), the exact-F
 (`"searle"`) and Burch (`"burch"`) closed forms, and the modified profile likelihood
@@ -79,8 +79,8 @@ anywhere else.
 The non-parametric [**transformed
 bootstrap-*t***](glossary.html#transformed-bootstrap-t) of Ukoumunne et al. (2003)
 serves the **one-way random design** (`model = "oneway"`), on balanced and
-unbalanced data alike — on an unbalanced one-way design it is the one interval
-method available. It resamples whole subjects with replacement rather than
+unbalanced data alike — of the four opt-in methods it is the only one that
+serves unbalanced one-way data. It resamples whole subjects with replacement rather than
 simulating from the fitted model, so it is the only opt-in method that takes a
 `seed` (and `boot_samples`); pin both for a reproducible interval. Any
 `conf_level` in `(0, 1)` is accepted. `unit = "average"` — the ICC(k) — is the
@@ -103,7 +103,8 @@ interval**](glossary.html#exact-f-interval) (`"searle"`; Searle 1971, the McGraw
 Wong 1996 Table 7 limits) is exact under normality: best-calibrated and narrowest
 when the data are approximately normal. The [**Burch
 interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is REML-based
-and kurtosis-adjusted: wider, but robust to non-normality. Prefer `"searle"` for
+and kurtosis-adjusted: its width tracks the data's tail weight, and it is
+robust to non-normality. Prefer `"searle"` for
 near-normal data and `"burch"` when heavy tails are a concern. Their value over
 the default is a finite, well-calibrated interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts. One asymmetry
