@@ -22,7 +22,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m106-optin-ci-method-vignette   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m106-optin-ci-method-vignette · https://github.com/jmgirard/intraclass/pull/114   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -54,9 +54,11 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets. -->
 
-- [ ] AC1: `vignettes/interval-methods.Rmd` has one subsection per opt-in
-      method (`"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`), each stating
-      five things: the supported design (the method's fence), determinism
+- [ ] AC1: `vignettes/interval-methods.Rmd` documents each opt-in method
+      (`"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`) in a dedicated
+      subsection — `"searle"` and `"burch"` sharing the classical
+      closed-forms subsection — each subsection stating five things per
+      method: the supported design (the method's fence), determinism
       (closed-form or seed-dependent), any `conf_level` restriction (or that
       none exists), `unit` behavior including the numeric-`unit` projection,
       and when to reach for it over the default. Verified by a per-subsection
@@ -123,6 +125,7 @@ vignette → rejected at the gate in favor of extending `interval-methods.Rmd`.
 - 2026-08-06: plan gate chose extending `interval-methods.Rmd` over a new vignette because one canonical interval article beats a split topic and needs no pkgdown index change; falsified by the article growing past its siblings (~300 lines is the current ceiling, `multilevel-designs.Rmd`) or reader feedback that the article is too long to navigate.
 - 2026-08-06: plan gate chose checker scope-extension over folding the hardening candidate in because the hardening defects (recall vocabulary, self-test injection, anchors) bite only under future edits and are orthogonal to writing docs; the row's fired promotion condition is answered by this deliberate re-deferral, recorded on the row; falsified by a vignette claim the token net demonstrably misses shipping unchecked.
 - 2026-08-06: plan gate chose writing MPL vignette claims into the checker's scope over a write-around (no checkable claims in the vignette) because the write-around would make the vignette vaguer to keep a script simple; falsified by the scope extension proving brittle enough to red CI on innocent prose edits.
+- 2026-08-06: amendment return: AC1 — "documents each opt-in method (`"npbootstrap"`, `"searle"`, `"burch"`, `"mpl"`) in a dedicated subsection — `"searle"` and `"burch"` sharing the classical closed-forms subsection" (the shipped three-subsection layout is the better writing; gated at the review mini-gate, user approved; re-review proceeds).
 - 2026-08-06: T5 done, status → review — doc gate all green: `air format --check` clean, `lintr::lint_package()` 0 lints, `pkgdown::check_pkgdown()` no problems, `pkgdown::build_site()` finished clean, both touched vignettes render individually against the installed package. No R code changed (docs + data-raw checker only), so the profile's after-code-change test run was not triggered.
 - 2026-08-06: T4 done — four glossary entries in alphabetical position + five References additions (Burch, McGraw & Wong, Searle, Ukoumunne, Xiao & Liu); both vignettes render and every anchor verified present in the generated HTML (the four entry ids + the parent section id the links target).
 - 2026-08-06: T3 done — one `build_scopes()` now feeds the live check, the self-test, and `--list` (stronger than the equal-sets requirement: the duplicate `scopes0` is gone), a `vignette_scope()` extracts the MPL subsection prose (code chunks excluded), 4 new candidates all dispositioned `out` (each names where its claim IS settled) + 1 vignette refusal row; checker 41 candidates/0 failures, self-test green.
