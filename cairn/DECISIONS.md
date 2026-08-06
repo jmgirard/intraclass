@@ -990,3 +990,25 @@ Spearman-Brown pole on the same data, and `npb_guard_sb_pole()` tolerating the
 pole itself — both recorded as correct in place at `R/ci-npbootstrap.R:126` and
 in-support for the projected form under D-010; reopening either supersedes D-010
 and reaches all three methods sharing that guard (ROADMAP candidate).
+
+### D-023 (2026-08-06): The dangling-id advisory's pre-migration hits are accepted noise, pending a plugin-side tolerance
+
+**Context:** the 2026-08-06 /milestone audit reported `cairn_validate`'s
+`dangling id tokens` advisory at 321 WARNs. Tallied by file, the hits are
+citations of pre-migration ids (M1–M47), whose records are entombed in
+`cairn/legacy/` (migration, 2026-07-12): `references/ORACLES.md` (145) cites
+the milestone that established each oracle; the `estimand-specs/` files are
+themselves named after pre-migration ids; `COVERAGE.md` (33) maps tests to the
+milestones that added them. The check excludes the `legacy/` directory but
+resolves ids only against live ROADMAP rows, milestone files, and D-entries,
+so a migrated repo warns forever.
+**Decision:** the pre-migration hits are accepted as expected noise. The
+citing files are not rewritten — the citations are correct history, and
+qualifying or stripping bare id tokens would damage the records they anchor.
+The fix belongs in the plugin (a legacy-id tolerance in `check_dangling_ids`),
+filed the same day as a candidate row in the cairn repo's ROADMAP. Until it
+ships, an audit reading this advisory checks only for hits on post-migration
+ids (M48+); this triage found none.
+**Rejected:** editing the ~19 citing files to satisfy the advisory (damages
+correct records); a repo-local suppression list (a second tracking surface and
+a divergence vector).
