@@ -154,7 +154,7 @@ Evidence gathered fresh 2026-08-07 (PR #117):
 - AC4: `data-raw/oracle-rerun-ledger.tsv` row `oracle-bayesian.R 2026-08-07
   reproduced 4/4 max_abs_delta 0.000e+00` — non-escalated, replacing
   `diverged-escalated`.
-- AC5: ORACLES.md O-Bayes observed block (lines 819–844) matches the committed
+- AC5: ORACLES.md O-Bayes observed block (lines 816–844) matches the committed
   fixture value-for-value (re-read side-by-side: 1.000/−.052/.958/−.236/+.678;
   1.000/−.265/.918/−.381/+3.45; n_rep 500, seed 20200) and states the adaptive
   warmup + seeded template; the AC5 grep sweep's per-hit dispositions are the
@@ -163,3 +163,30 @@ Evidence gathered fresh 2026-08-07 (PR #117):
   observations falsified: 0, registry gaps: 0; installed-package suite at
   `NOT_CRAN=true CI=true` (this session, logged run): failed=0 error=0
   (5854 pass, 23 live-Stan CI skips).
+
+Consistency gate: `cairn_validate` 16/16 PASS + 8 advisories OK; `document()`
+no-diff; `pkgdown::check_pkgdown()` clean; no user-visible change so no NEWS
+entry owed; full `devtools::check(env_vars = c(NOT_CRAN = "false"))`:
+0 errors / 0 warnings / 0 notes.
+
+Fresh-context review (3 lenses → scorer): 14 deduped candidates. Actioned (≥80),
+both fixed on the branch: F1 (88) — the new local D-025 entry lacked the
+disambiguating note the local D-024 carries against the cairn plugin's same id
+(the M107 H1/I1 convention); note added mirroring D-024's. F4 (82) — the
+rewritten sampler comment ("Match the source's sampler") silently dropped the
+previously disclosed attempt-0 budget divergence (2000/1000 vs the source's
+1000/500); disclosure restored at brm_args and the pins-block intro. Voluntary
+sub-80 truthfulness fixes: F3 (72) `base_seed` comment no longer claimed
+distinct-from-every-Stan-seed; F13 (68) "~ −0.25" tilde figure was the
+superseded intermediate run's, now "~ −0.24" (fixture −.236); F14 (62) stale
+816-vs-819 line anchor in this Review section. Logged, not actioned (score,
+one line each): F2 (65) rep-1 data bit-identical to template data — consequence-
+free coupling, template draws unused; F5 (20) one-row-per-script ledger
+replacement is the documented design; F6 (20) append-only T2 work-log line
+superseded by later lines + D-025; F7 (40) pre-existing all-NA −Inf/Inf edge in
+`brms_convergence`, not introduced here; F8 (12) pre-existing cross-cell Stan
+seed reuse; F9 (50) engine versions in ledger + ORACLES prose, fixture-embedded
+versions never in scope; F10 (35) D-024 clause-3 letter vs the gated in-milestone
+amendment — disclosed, maintainer-decided; F11 (45) attribution wording firmer
+than the probe hedge, supported by the seeded-runs evidence; F12 (48) "bit
+level" shorthand for max_abs_delta exactly 0 over 21 leaves.

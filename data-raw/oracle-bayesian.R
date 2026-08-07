@@ -59,8 +59,11 @@ cells <- list(
   list(k = 5L, s2_r = 0.01)
 )
 n_rep <- 500L
-base_seed <- 20200L # DGP stream seed (distinct from each fit's Stan seed)
-# Match the source's sampler. Like the source (Sec. 4.1.3), warmup is
+base_seed <- 20200L # DGP stream seed; also the template fit's Stan seed (M108).
+# Each rep's refit samples with its own Stan seed, base_seed + r.
+# Sampler: the attempt-0 budget is iter 2000 / warmup 1000 per chain — double
+# the source's 1000/500 base, retained from the fixed-budget era (a reported
+# divergence, #4/#18). Like the source (Sec. 4.1.3), warmup is
 # adaptively DOUBLED per replication -- up to max_warmup_doublings times while
 # R-hat >= 1.10 or bulk ESS <= 100 on the monitored components (M108
 # adjudication of the 2026-08-06 re-run divergence; see cairn/DECISIONS.md
@@ -254,9 +257,9 @@ message("Wrote ", out)
 # --- Validate against ten Hove et al. (2020), Sec. 4.2 (the pins) ----------
 # The pins encode the source's QUALITATIVE findings (a coverage oracle reproduces
 # findings, not exact decimals). Tolerances absorb our finite n_rep and our
-# INDEPENDENT MAP estimator; one divergence from the source is REPORTED, not
-# tuned away (#4/#18):
-#   * Our reflected-KDE MAP of sigma_r is modestly NEGATIVE-biased (~ -0.25 at k=5)
+# INDEPENDENT MAP estimator; divergences from the source are REPORTED, not
+# tuned away (#4/#18) -- the attempt-0 sampler budget (see brm_args above), and:
+#   * Our reflected-KDE MAP of sigma_r is modestly NEGATIVE-biased (~ -0.24 at k=5)
 #     where their modeest MAP was ~unbiased -- an estimator difference at a tiny
 #     near-boundary sigma_r that barely moves the ICC (sigma^2_r is a small term in
 #     the denominator). We therefore pin the ROBUST contrast (EAP overestimates far

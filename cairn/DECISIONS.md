@@ -1051,6 +1051,12 @@ re-baseline-on-drift.
 
 ### D-025 (2026-08-07): oracle-bayesian.R k=2 divergence adjudicated — fixed warmup and an unseeded template were the causes; adaptive doubling + seeded template, fixture re-baselined (executes D-024 clauses 3–4)
 
+*(This is this repo's own D-025, next in its local sequence after D-024. It is
+distinct from the cairn plugin's D-025 — an upstream validation-doctrine id —
+which every repo-authored site cites qualified as "cairn D-025" (D-020
+Amendments 3–4); PROFILE.md's one such cross-reference is already qualified.
+Bare `D-025` in this repo's files refers to this entry.)*
+
 **Context:** The first M107 harness re-run of `data-raw/oracle-bayesian.R`
 (2026-08-06) came back `diverged-escalated`: k=2 `converged_frac` .864 against
 the pinned ≥ .90 floor (committed fixture .904), the three published-findings
