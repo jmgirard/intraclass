@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m108-oracle-bayesian-k2-adjudication`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m108-oracle-bayesian-k2-adjudication` · https://github.com/jmgirard/intraclass/pull/117   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -49,35 +49,35 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: A new D-entry in `cairn/DECISIONS.md` records the adjudication of
+- [x] AC1: A new D-entry in `cairn/DECISIONS.md` records the adjudication of
       the `oracle-bayesian.R` `diverged-escalated` ledger row (run
       2026-08-06): the measured attribution of the k=2 convergence shortfall,
       the remedy chosen, and its rationale, citing D-024 as the policy it
       executes; the ROADMAP candidate row retires to it.
-- [ ] AC2: The work log records `converged_frac` for the k=2 cell at the
+- [x] AC2: The work log records `converged_frac` for the k=2 cell at the
       current sampler settings and, if the chosen remedy amends sampler
       settings, at the amended settings — both measured on the script's own
       seed stream (`base_seed = 20200`) — so the shortfall's attribution is a
       measured claim, not an inference.
-- [ ] AC3: `data-raw/oracle-bayesian.R` implements the chosen remedy; if the
+- [x] AC3: `data-raw/oracle-bayesian.R` implements the chosen remedy; if the
       remedy regenerates the fixture, the regenerated
       `tests/testthat/fixtures/bayesian-oracle.rds` is committed and the
       generating run passes all four `stopifnot` pin blocks (the work log
       records 4/4 from the run transcript — save-first ordering means the
       script can write a fixture and then abort, so the transcript is the
       evidence).
-- [ ] AC4: A post-remedy harness re-run (`Rscript data-raw/rerun-oracle.R
+- [x] AC4: A post-remedy harness re-run (`Rscript data-raw/rerun-oracle.R
       oracle-bayesian.R`) records a non-escalated verdict — `reproduced` or
       `drift-within-noise`, pins 4/4 — in `data-raw/oracle-rerun-ledger.tsv`,
       replacing the `diverged-escalated` row.
-- [ ] AC5: `cairn/references/ORACLES.md`'s O-Bayes entry's observed
+- [x] AC5: `cairn/references/ORACLES.md`'s O-Bayes entry's observed
       statistics and convergence caveat match the script and fixture as they
       stand after the adjudicated remedy; and a recorded `git grep -n` sweep
       for the stems `converg`, `warmup`, and `0.90` over `R/ man/ vignettes/
       NEWS.md tests/testthat/ cairn/references/` has each hit either updated
       or recorded in the work log as not stating the changed fact (the claim
       is about what that sweep enumerates, nothing wider).
-- [ ] AC6: The three `check-references` checkers
+- [x] AC6: The three `check-references` checkers
       (`data-raw/enumerate-generalizing-claims.py --check`,
       `data-raw/check-reference-observations.py`,
       `data-raw/check-oracle-registry.py`) pass locally after the ORACLES.md
@@ -136,3 +136,30 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Evidence gathered fresh 2026-08-07 (PR #117):
+
+- AC1: `cairn/DECISIONS.md:1052` carries `### D-025 (2026-08-07)` recording the
+  measured attribution (fixed warmup + unseeded template), both remedies, and
+  the D-024 clause 3–4 execution; the motivating candidate row greps 0 in
+  ROADMAP (retired at the plan commit, per the T3 work-log line).
+- AC2: work-log lines of 2026-08-07 record k=2 `converged_frac` .864 at the
+  pre-remedy fixed-warmup settings (2026-08-06 harness run, seed stream 20200)
+  and 1.000/1.000 (k=2/k=5) at the amended settings — measured, same stream.
+- AC3: `data-raw/oracle-bayesian.R` implements the bounded adaptive-warmup
+  loop (`max_warmup_doublings <- 3L`, `warmup * 2L` refits at lines 78/160–164);
+  regenerated fixture committed (n_rep 500, seed 20200, stats re-read above);
+  work log records exit-0 transcripts past all four save-first pin blocks (4/4)
+  for both regeneration runs.
+- AC4: `data-raw/oracle-rerun-ledger.tsv` row `oracle-bayesian.R 2026-08-07
+  reproduced 4/4 max_abs_delta 0.000e+00` — non-escalated, replacing
+  `diverged-escalated`.
+- AC5: ORACLES.md O-Bayes observed block (lines 819–844) matches the committed
+  fixture value-for-value (re-read side-by-side: 1.000/−.052/.958/−.236/+.678;
+  1.000/−.265/.918/−.381/+3.45; n_rep 500, seed 20200) and states the adaptive
+  warmup + seeded template; the AC5 grep sweep's per-hit dispositions are the
+  2026-08-07 T4 work-log line.
+- AC6: checkers re-run fresh at review — claims ledger in sync (294/294),
+  observations falsified: 0, registry gaps: 0; installed-package suite at
+  `NOT_CRAN=true CI=true` (this session, logged run): failed=0 error=0
+  (5854 pass, 23 live-Stan CI skips).
