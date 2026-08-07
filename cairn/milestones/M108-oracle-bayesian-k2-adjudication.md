@@ -106,6 +106,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
 
 - 2026-08-07: created by /milestone-plan (promotes the M107 k=2 adjudication candidate row; the plan gate's remedy choice IS the D-024 escalation decision).
+- 2026-08-07: criteria audit ([O] fresh-context reader) returned 5 findings on this file's ACs — AC2/AC3/AC5/AC6 presupposed the warmup remedy before the gate decided it (AC3 as drafted mandated a re-baseline D-024 clause 4 reserves to the escalation outcome), AC4 over-pinned `reproduced`; all fixed with the auditor's repairs (remedy-conditional wording; `reproduced` or `drift-within-noise`) before the gate.
 - 2026-08-07: plan gate chose adaptive warmup doubling + fixture regeneration over (a) a larger fixed budget and (b) revising the .90 floor to .85, because the source's own protocol is adaptive and a fixed budget re-fails at the next engine upgrade, while a floor cut moves the bar to fit the evidence (GP5); falsified by the amended script's k=2 `converged_frac` still landing below .90 on the same seed stream.
 
 ## Decisions
