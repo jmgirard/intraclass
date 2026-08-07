@@ -105,7 +105,7 @@ offline background jobs by design).
       fixture-writing script's fresh values to its committed fixture, capture
       R/glmmTMB/lme4/brms/rstan/StanHeaders versions, append the
       `data-raw/oracle-rerun-ledger.tsv` row.
-- [ ] T4: Launch the `oracle-bayesian.R` harness run in the background early
+- [x] T4: Launch the `oracle-bayesian.R` harness run in the background early
       in the session (~2 h live Stan; expect contention to double per-fit
       time).
 - [ ] T5: Re-run the 15 non-Bayes scripts through the harness (the long
@@ -129,6 +129,7 @@ offline background jobs by design).
 - 2026-08-06: T1 done — D-024 (divergence policy) appended; branch cut, status in-progress. Implement question gate skipped: no genuinely open choices (plan gate settled scope/policy/D-021; no dependency or API changes).
 - 2026-08-06: T2 done — all five pin-before-save scripts reordered (Commit block ahead of pins), parse + air + lintr clean; README caveat rewritten (save-first everywhere; the five still lack checkpoints). Noted: `oracle-bayesian.R`'s "Observed" comment carries the pre-M72 numbers, matching the old ORACLES prose, not the fixture — T4/T6 will adjudicate.
 - 2026-08-06: T3 done — harness built (shadowed non-fatal `stopifnot` recorder + `saveRDS` redirect to tempdir; leaf-wise fixture compare; replace-on-rerun ledger); bench-tested on oracle-sem.R (pins 2/2) and oracle-fixed-vs-random.R (pins 0/0, honest); air+lintr clean, ref-observations checker green.
+- 2026-08-06: T4 done — `oracle-bayesian.R` fresh run (13.8 min, brms 2.23.0/rstan 2.32.7): diverged-escalated, pins 3/4 — block 1 (convergence guard) fails at k=2 conv .864 < .90 (fixture: .904); blocks 2–4 (published findings) all hold; max_abs_delta .040 = the k=2 convergence gap; AC2 probe literally empty. Escalation to the maintainer at the completion gate per D-024.
 
 ## Decisions
 
