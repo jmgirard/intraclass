@@ -825,10 +825,17 @@ is cited by **PDF page** for that reason.
   the prose appears to have been written from a different run than the fixture that
   shipped. The script was **not** re-run to adjudicate: under D-008 a re-run today
   would produce a third set of numbers rather than settle which earlier run was
-  authoritative, so re-establishing reproducibility is separately planned (ROADMAP
-  candidate, M72 T4). No test asserted the old figures — `test-icc-brms.R` checks only
+  authoritative. No test asserted the old figures — `test-icc-brms.R` checks only
   the qualitative pins against the fixture — and all four findings below hold on the
-  corrected numbers.)* **Two reported divergences (#4/#18, not
+  corrected numbers. The M107 harness has since re-run the script — observed
+  2026-08-06 (brms 2.23.0, rstan 2.32.7, R 4.6.1): the three published-findings
+  pin blocks hold on the fresh statistics and the fresh values track the committed
+  fixture (max |Δ| = .040), while the convergence-guard pin fails at k = 2 —
+  fresh converged_frac .864 against the pinned ≥ .90 floor (the fixture's own
+  .904) with divergent-transition warnings under the newer sampler — so the
+  ledger row (`data-raw/oracle-rerun-ledger.tsv`) reads `diverged-escalated`
+  per D-024, pending the maintainer's adjudication; the committed fixture is
+  unchanged by the re-run.)* **Two reported divergences (#4/#18, not
   tuned):** (a) convergence is high but not their 100% — they adaptively *doubled*
   warmup until R̂ < 1.10, we use a fixed budget, so a minority of the near-boundary
   k = 2 reps fall short; (b) our reflected-KDE σ_r MAP is modestly *negative*-biased
