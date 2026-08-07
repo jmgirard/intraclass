@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5
-- **Branch/PR:** m107-oracle-script-reproducibility
+- **Branch/PR:** m107-oracle-script-reproducibility · [PR #116](https://github.com/jmgirard/intraclass/pull/116)
 
 ## Goal
 
@@ -34,7 +34,7 @@ offline background jobs by design).
 
 ## Acceptance criteria
 
-- [ ] AC1: `data-raw/oracle-rerun-ledger.tsv` is committed with one row per
+- [x] AC1: `data-raw/oracle-rerun-ledger.tsv` is committed with one row per
       re-run script — script name, run date, engine/package versions of that
       run, and a verdict: for a fixture-writing script one of {reproduced,
       drift-within-noise, diverged-escalated}; for a script committing no
@@ -45,13 +45,13 @@ offline background jobs by design).
       command recorded at review (partition via bare-`saveRDS` grep, per
       D-008 Amendment 1; a pin failure on a fixture-writing script records
       `diverged-escalated`).
-- [ ] AC2: After each of the sixteen harness runs (the set AC1 enumerates),
+- [x] AC2: After each of the sixteen harness runs (the set AC1 enumerates),
       `git status --porcelain -- ':(exclude)data-raw/oracle-rerun-ledger.tsv'
       ':(exclude)cairn'` is literally empty — the harness sends script writes
       to a scratch directory outside the worktree (`tempdir()`) so committed
       fixtures are compared, never modified; the per-run command output is
       the review evidence.
-- [ ] AC3: Each of the five scripts `data-raw/README.md`'s pin-before-save
+- [x] AC3: Each of the five scripts `data-raw/README.md`'s pin-before-save
       list names — `oracle-bayesian.R`, `oracle-bayesian-fixed.R`,
       `oracle-bayesian-incomplete.R`, `oracle-bayesian-incomplete-fixed.R`,
       `oracle-bayesian-oneway.R` — writes its fixture before its
@@ -60,12 +60,12 @@ offline background jobs by design).
       nothing written. Four of the five are live-Stan siblings this milestone
       does not execute, so their verification is by reading each script at
       review.
-- [ ] AC4: A D-entry records the divergence policy — the qualitative pins are
+- [x] AC4: A D-entry records the divergence policy — the qualitative pins are
       the reproducibility bar; a divergence escalates and is never silently
       re-baselined; committed fixtures are not overwritten by a re-run;
       numeric drift and engine-version deltas are recorded — and no ledger
       row's run date is earlier than that entry's date.
-- [ ] AC5: The fresh `oracle-bayesian.R` run's pin outcomes — its four
+- [x] AC5: The fresh `oracle-bayesian.R` run's pin outcomes — its four
       `stopifnot` blocks (`data-raw/oracle-bayesian.R:226-247`; block 1 the
       convergence guard, blocks 2–4 the published findings) evaluated
       non-fatally by the harness, block-level pass/fail recorded for all
@@ -139,3 +139,13 @@ offline background jobs by design).
 ## Decisions
 
 ## Review
+
+Evidence gathered fresh 2026-08-07 on branch m107-oracle-script-reproducibility, [PR #116](https://github.com/jmgirard/intraclass/pull/116).
+
+- AC1: ledger committed; `diff <(ls data-raw/oracle-*.R … | grep -v '^oracle-bayesian-' | sort) <(cut -f1 ledger | sort)` → EQUAL (16=16); bare-`saveRDS` partition ∩ comparison-verdict rows = 6/6; verdict vocabulary exactly {reproduced ×4, drift-within-noise ×1, diverged-escalated ×1, pins-pass ×9, pins-fail-escalated ×1}; oracle-bayesian.R (fixture-writing, pin failure) reads diverged-escalated as required. ✔
+- AC2: probe `git status --porcelain -- ':(exclude)data-raw/oracle-rerun-ledger.tsv' ':(exclude)cairn'` literally empty after all 16 runs — 12 logged in rerun-nonbayes.log (0 PROBE lines), cluster-ck log (0 PROBE lines), oracle-bayesian probe run in-session (empty), oracle-sem + oracle-fixed-vs-random re-run fresh at review with probes `[]` and `[]`. ✔
+- AC3: per-script read — first `saveRDS(` precedes first `stopifnot(` in all five: bayesian 210<243, fixed 184<211, incomplete 233<262, incomplete-fixed 256<291, oneway 200<229; the write is the fixture (not merely a checkpoint; none of the five has one). Four live-Stan siblings verified by inspection only, as the criterion states. ✔
+- AC4: `### D-024 (2026-08-06)` present (grep count 1); ledger run dates ∈ {2026-08-06, 2026-08-07}, none earlier. ✔
+- AC5: oracle-bayesian.R row pins=3/4, pin_detail names the failing block (`all(agg$converged_frac >= 0.9)`, the convergence guard); the harness evaluated all four blocks non-fatally (recorder semantics, T3) — block-level status readable for all four (failing blocks enumerated, complement passed). ORACLES.md carries the dated-observation correction ("The M107 harness has since re-run the script — observed 2026-08-06 …", grep count 1). ✔
+- AC6: suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5854 / SKIP 23 (all skip_on_ci-brms); air `--check` exit 0; `lint_package()` 0. Checkers re-run at review: enumerate-generalizing-claims `--check` 294/294 in sync; check-reference-observations 0 unmarked / 0 falsified; check-oracle-registry 67 tokens, 0 gaps. `devtools::check()` pending below.
+- Consistency gate: `cairn_validate` exit 0 (16 PASS / 8 OK); `document()` no diff; `pkgdown::check_pkgdown()` no problems; NEWS entry not owed — the milestone ships no user-visible package change (data-raw + cairn only); `data-raw/` already .Rbuildignored. `devtools::check(env_vars=c(NOT_CRAN="false"))` running; result recorded below.
