@@ -1,6 +1,6 @@
 # M107: Oracle-script reproducibility — the re-run harness and the first sixteen re-runs
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -115,7 +115,7 @@ offline background jobs by design).
       pin outcomes; correct the O-Bayes observation in `ORACLES.md` in place
       as a dated observation; add any generalizing-claims triage rows; run
       the three AC6 checkers locally.
-- [ ] T7: Rewrite the ROADMAP reproducibility candidate row to the 19-script
+- [x] T7: Rewrite the ROADMAP reproducibility candidate row to the 19-script
       remainder; record AC1's set-equality and partition commands; full
       verify gate (`NOT_CRAN=true CI=true` suite, lintr, air).
 
@@ -134,6 +134,7 @@ offline background jobs by design).
 - 2026-08-07: comparator made NA-aware (positional compare; differing NA patterns → structural Inf); `oracle-cluster-ck-coverage.R` (the 15th non-Bayes script) launched in background at committed n_rep=240.
 - 2026-08-07: T6 desk half — O-Bayes ORACLES.md parenthetical corrected in place to the observed 2026-08-06 re-run (published-findings pins hold, convergence guard fails at k=2, fixture unchanged); all three AC6 checkers green (294/294 triaged, 0 falsified, 0 registry gaps).
 - 2026-08-07: T5/T6 complete — `oracle-cluster-ck-coverage.R` reproduced at delta 0.000e+00 (pins 1/1, 24.1 min, probe empty); all 16 ledger rows in. AC1 verified: set equality (ls-glob diff clean) and the bare-`saveRDS` partition (6 scripts) exactly match the 6 comparison-verdict rows. Verify gate launched.
+- 2026-08-07: T7 done — candidate row was rewritten at plan time; AC1 commands recorded; verify gate clean (`NOT_CRAN=true CI=true`: FAIL 0 / PASS 5854 / SKIP 23 all skip_on_ci-brms; air exit 0; lint_package 0). Status → review. Two D-024 escalations pending maintainer adjudication: oracle-bayesian.R convergence guard (engine-drift shaped), oracle-incomplete.R stale one-row tidy() expectation.
 
 ## Decisions
 
