@@ -155,8 +155,9 @@
 * New `ci_method = "mpl"` for the **balanced-complete two-way random**
   absolute-agreement `ICC(A,1)` (and `ICC(A,k)`): the **modified profile-likelihood**
   interval of Xiao & Liu (2013). Like the closed forms it is **boundary robust** — it
-  returns a finite interval on every dataset, including the near-zero-ICC boundary
-  where the Monte-Carlo default aborts — and takes no `mc_samples`, `boot_samples`, or
+  returns a finite interval at the near-zero-ICC boundary
+  where the Monte-Carlo default aborts (a degenerate fit or a failed root search
+  raises a classed error rather than a fabricated boundary value) — and takes no `mc_samples`, `boot_samples`, or
   `seed` and reports no standard error. It is a deliberately **conservative** opt-in
   (it over-covers and is wider than the Monte-Carlo interval at interior settings), so
   it is not the default. It applies only to the two-way random absolute-agreement
@@ -283,6 +284,15 @@
 
 ## Documentation
 
+* The `?icc` documentation of the classical closed forms no longer claims that
+  `"searle"` and `"burch"` give a finite interval on every dataset: on data with
+  no between-subject variance at all, `"burch"` aborts with a classed error (its
+  kurtosis standardization divides by zero there) while `"searle"` still returns
+  its attained minimum — the asymmetry the vignette already states.
+* The `?icc` reference entry for Burch (2011) now cites the correct article —
+  "Assessing the performance of normal-based and REML-based confidence intervals
+  for the intraclass correlation coefficient", *Computational Statistics and Data
+  Analysis*, 55, 1018–1028 — matching the glossary's already-corrected entry.
 * The *Confidence-interval methods* vignette now covers the four opt-in
   `ci_method` values — `"npbootstrap"`, `"searle"`, `"burch"`, and `"mpl"` —
   with each method's design fence, determinism, `conf_level` set, `unit`
