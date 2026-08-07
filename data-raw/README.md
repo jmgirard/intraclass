@@ -71,12 +71,14 @@ overridden and the suite then flakes on MCMC noise.
    resumes instead of restarting.
 3. **Fixture written *before* the hard assertions** — so a long run is never
    lost to a marginal pin; the script's own validation then runs against the
-   file it just wrote. Every script now follows save-first: the five earliest
-   two-way scripts (`oracle-bayesian.R`, `-fixed.R`, `-incomplete.R`,
-   `-incomplete-fixed.R`, `-oneway.R`) had their fixture write moved ahead of
-   the pins (M107). **Caveat:** those five still have no checkpoint — a
-   crashed run restarts from rep 1; add the checkpoint pattern when next
-   regenerating one.
+   file it just wrote. The five earliest two-way scripts (`oracle-bayesian.R`,
+   `-fixed.R`, `-incomplete.R`, `-incomplete-fixed.R`, `-oneway.R`) had their
+   fixture write moved ahead of the pins (M107). **Two caveats:** those five
+   still have no checkpoint — a crashed run restarts from rep 1; and two
+   checkpointed sweeps (`-incomplete-fixed-multilevel.R`,
+   `-incomplete-multilevel.R`) still write their *fixture* after their pins —
+   the checkpoint preserves the rows on a marginal pin, but adopt
+   fixture-save-first when next regenerating either.
 4. **Commit** the fixture (`tests/testthat/fixtures/*.rds`); the test suite
    pins the qualitative findings with tolerances that absorb finite n_rep.
 

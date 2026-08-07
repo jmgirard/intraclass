@@ -109,8 +109,18 @@ compare_fixtures <- function(fresh, committed) {
       "]"
     )
   }
+  # Zero comparable leaves is a STRUCTURAL divergence (a renamed/retyped
+  # fixture), never a benign no-evidence pass -- map it to Inf like a length
+  # or NA-pattern mismatch, so the verdict logic escalates it.
+  if (!length(deltas)) {
+    note <- paste(
+      "no comparable numeric leaves",
+      note,
+      sep = if (nzchar(note)) "; " else ""
+    )
+  }
   list(
-    max_abs_delta = if (length(deltas)) max(deltas) else NA_real_,
+    max_abs_delta = if (length(deltas)) max(deltas) else Inf,
     n_leaves = length(shared),
     note = note
   )
@@ -170,10 +180,43 @@ rerun_one <- function(script_name) {
     invisible(dest)
   }
 
+  # Checkpoint I/O must also stay out of the worktree: the checkpointed
+  # scripts read/exist-check/unlink `data-raw/.oracle-*-checkpoint.rds`, and
+  # unshadowed those calls would resume a "fresh" run from a stale real
+  # checkpoint (a self-certifying re-run) or delete a real in-progress one.
+  redirect_ckpt <- function(path) {
+    if (
+      is.character(path) &&
+        length(path) == 1 &&
+        grepl("^\\.oracle-.*-checkpoint\\.rds$", basename(path))
+    ) {
+      file.path(scratch, basename(path))
+    } else {
+      path
+    }
+  }
+  redirecting_read_rds <- function(file, ...) {
+    base::readRDS(redirect_ckpt(file), ...)
+  }
+  redirecting_file_exists <- function(...) {
+    base::file.exists(
+      vapply(c(...), redirect_ckpt, character(1), USE.NAMES = FALSE)
+    )
+  }
+  redirecting_unlink <- function(x, ...) {
+    base::unlink(
+      vapply(x, redirect_ckpt, character(1), USE.NAMES = FALSE),
+      ...
+    )
+  }
+
   run_env <- new.env(parent = globalenv())
   assign("stopifnot", recording_stopifnot, envir = run_env)
-  # The name must be exactly saveRDS to shadow base::saveRDS in the script.
+  # The names must exactly shadow the base functions the scripts call.
   assign("saveRDS", redirecting_save_rds, envir = run_env) # nolint: object_name_linter.
+  assign("readRDS", redirecting_read_rds, envir = run_env) # nolint: object_name_linter.
+  assign("file.exists", redirecting_file_exists, envir = run_env) # nolint: object_name_linter.
+  assign("unlink", redirecting_unlink, envir = run_env)
 
   message("== re-running ", script_name, " (writes -> ", scratch, ")")
   t0 <- Sys.time()
@@ -213,8 +256,13 @@ rerun_one <- function(script_name) {
   n_leaves <- NA_integer_
   compare_note <- ""
   for (w in fixture_writes) {
-    cmp <- compare_fixtures(readRDS(w$redirected), readRDS(w$original))
-    if (is.na(max_abs_delta) || cmp$max_abs_delta > max_abs_delta) {
+    cmp <- compare_fixtures(
+      base::readRDS(w$redirected),
+      base::readRDS(w$original)
+    )
+    worse <- is.na(max_abs_delta) ||
+      (!is.na(cmp$max_abs_delta) && cmp$max_abs_delta > max_abs_delta)
+    if (worse) {
       max_abs_delta <- cmp$max_abs_delta
       n_leaves <- cmp$n_leaves
       compare_note <- cmp$note
@@ -225,6 +273,10 @@ rerun_one <- function(script_name) {
   pins_ok <- n_pass == n_pins && is.null(source_err)
   verdict <- if (is_fixture_script) {
     if (!pins_ok) {
+      "diverged-escalated"
+    } else if (!is.na(max_abs_delta) && is.infinite(max_abs_delta)) {
+      # Structural divergence (length/NA-pattern mismatch, or nothing
+      # comparable at all) is never "noise" -- escalate per D-024.
       "diverged-escalated"
     } else if (!is.na(max_abs_delta) && max_abs_delta <= reproduced_tol) {
       "reproduced"

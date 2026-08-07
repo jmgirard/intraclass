@@ -14,4 +14,4 @@ oracle-multilevel.R	2026-08-07	pins-pass	7/7		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.
 oracle-nested-fixed-interval.R	2026-08-07	reproduced	2/2		0.000e+00	10	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=14.76
 oracle-nested-multilevel.R	2026-08-07	pins-pass	16/16		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.04
 oracle-sem-multilevel-recovery.R	2026-08-07	reproduced	1/1		0.000e+00	15	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=1.2
-oracle-sem.R	2026-08-07	pins-pass	2/2		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.05
+oracle-sem.R	2026-08-07	pins-pass	2/2		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.02

@@ -219,6 +219,7 @@ saveRDS(
   ),
   out
 )
+message("Wrote ", out)
 
 # --- Validate against ten Hove et al. (2020), Sec. 4.2 (the pins) ----------
 # The pins encode the source's QUALITATIVE findings (a coverage oracle reproduces
@@ -262,4 +263,3 @@ stopifnot(
   k5$coverage_icc <= 0.99,
   k2$coverage_icc < k5$coverage_icc
 )
-message("Wrote ", out)

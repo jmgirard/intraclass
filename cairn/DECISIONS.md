@@ -1015,6 +1015,12 @@ a divergence vector).
 
 ### D-024 (2026-08-06): Oracle re-run divergence policy — pins are the bar; escalate, never re-baseline
 
+*(This is this repo's own D-024, next in its local sequence after D-023. It is
+distinct from the cairn plugin's D-024 — the upstream ORACLES.md-shape question
+— which every repo-authored site cites qualified as "cairn D-024" (D-020
+Amendments 3–4); PROFILE.md's one bare cross-reference was qualified in this
+same milestone.)*
+
 **Context:** D-008 fixed the M72 verification bar at *provenance* and left
 reproducibility a standing, separately-plannable gap (PRINCIPLES.md #12). M107
 re-runs seeded oracle scripts through a compare-don't-overwrite harness, and its
@@ -1025,9 +1031,10 @@ numbers, not an adjudication.
 **Decision:** For every harness re-run of a `data-raw/oracle-*.R` script,
 current and future: (1) the script's qualitative pins — its `stopifnot`
 published-findings blocks — are the reproducibility bar; a fresh run on which
-every pin holds is `reproduced` (fixture-writing scripts) or `pins-pass` (no
-fixture). (2) Numeric drift in a fixture-writing script's statistics with all
-pins holding is recorded as `drift-within-noise` beside the run's
+every pin holds and whose compared values match the committed fixture to
+roundoff is `reproduced` (fixture-writing scripts) or, with no fixture to
+compare, `pins-pass`. (2) Numeric drift in a fixture-writing script's
+statistics with all pins holding is recorded as `drift-within-noise` beside the run's
 engine/package versions — a delta, never a failure. (3) A pin failure escalates
 to the maintainer (`diverged-escalated` / `pins-fail-escalated`) and its
 adjudication is sized as its own follow-on work; the re-run is never silently
