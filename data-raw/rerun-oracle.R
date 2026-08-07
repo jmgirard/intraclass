@@ -83,8 +83,17 @@ compare_fixtures <- function(fresh, committed) {
       if (length(a) != length(b)) {
         return(Inf)
       }
-      m <- suppressWarnings(max(abs(a - b)))
-      if (is.na(m)) Inf else m
+      # A committed fixture can carry structural NAs (e.g. a boundary cell's
+      # undefined statistic); compare positionally -- differing NA patterns
+      # are a structural divergence, matching NAs are not a difference.
+      if (!identical(is.na(a), is.na(b))) {
+        return(Inf)
+      }
+      both <- !is.na(a)
+      if (!any(both)) {
+        return(0)
+      }
+      max(abs(a[both] - b[both]))
     },
     numeric(1)
   )
