@@ -60,9 +60,14 @@ cells <- list(
 )
 n_rep <- 250L
 base_seed <- 20200L # DGP stream seed (distinct from each fit's Stan seed)
-# Match the source's sampler; iter bumped to 2000 for robust fixed-warmup
-# convergence (we do not adaptively double warmup as they did). cores = 3 samples
-# the chains in parallel (this is a long batch run).
+# Match the source's sampler. Like the source (Sec. 4.1.3), warmup is
+# adaptively DOUBLED per replication -- up to max_warmup_doublings times while
+# R-hat >= 1.10 or bulk ESS <= 100 on the monitored components (M108
+# adjudication of the 2026-08-06 re-run divergence; see cairn/DECISIONS.md
+# D-025). Each refit keeps 1000 post-warmup iterations per chain
+# (iter = warmup + 1000), so the base 1000/2000 split is the attempt-0
+# budget, not a fixed budget. cores = 3 samples the chains in parallel (this
+# is a long batch run).
 brm_args <- list(
   chains = 3L,
   iter = 2000L,
@@ -70,6 +75,7 @@ brm_args <- list(
   cores = 3L,
   refresh = 0L
 )
+max_warmup_doublings <- 3L
 
 # The two-way component -> posterior-draw-column map the engine uses (M23); passed to the
 # shipped reducers, which since M24 (ADR-034) take an explicit `spec`/`vars`.
@@ -124,20 +130,39 @@ base_fit <- do.call(
 )
 
 # One replication -> the statistics we aggregate. Refits the compiled model on a fresh
-# dataset via update(), then runs the shipped reduction: MAP ICC(A,1) + its percentile
+# dataset via update() -- doubling warmup (<= max_warmup_doublings, the source's own
+# adaptive protocol) while the monitored components miss the R-hat < 1.10 / bulk
+# ESS > 100 bar -- then runs the shipped reduction: MAP ICC(A,1) + its percentile
 # credible interval (coverage of the population ICC), and the MAP and EAP of sigma_r (the
 # MAP-vs-EAP contrast is on sigma_r itself, as the source reports it), plus convergence.
 one_rep <- function(k, s2_r, seed) {
   d <- simulate_twoway(k, s2_r)
-  fit <- suppressWarnings(suppressMessages(
-    stats::update(
-      base_fit,
-      newdata = d,
-      seed = seed,
-      recompile = FALSE,
-      refresh = 0
-    )
-  ))
+  warmup <- brm_args$warmup
+  n_doublings <- 0L
+  repeat {
+    fit <- suppressWarnings(suppressMessages(
+      stats::update(
+        base_fit,
+        newdata = d,
+        seed = seed,
+        warmup = warmup,
+        iter = warmup + 1000L,
+        recompile = FALSE,
+        refresh = 0
+      )
+    ))
+    conv <- intraclass:::brms_convergence(fit, vars = unname(spec_tw))
+    if (
+      (isTRUE(conv$rhat < 1.10) && isTRUE(conv$ess_bulk > 100)) ||
+        n_doublings >= max_warmup_doublings
+    ) {
+      break
+    }
+    warmup <- warmup * 2L
+    n_doublings <- n_doublings + 1L
+    rm(fit)
+    gc(verbose = FALSE)
+  }
   draws <- intraclass:::brms_component_draws(fit, spec_tw)
   est <- intraclass:::icc_estimand(
     type = "agreement",
@@ -148,7 +173,6 @@ one_rep <- function(k, s2_r, seed) {
   summ <- intraclass:::posterior_summary(draws, list(est), conf_level = 0.95)[[
     1
   ]]
-  conv <- intraclass:::brms_convergence(fit, vars = unname(spec_tw))
   pop <- pop_icc_a1(s2_r)
   sr_draws <- sqrt(draws["rater", ]) # sigma_r = sqrt of the rater-variance draws
   out <- data.frame(
@@ -159,7 +183,8 @@ one_rep <- function(k, s2_r, seed) {
     cover_icc = summ$conf.low <= pop && pop <= summ$conf.high,
     map_sr = intraclass:::posterior_mode(sr_draws, lower = 0),
     eap_sr = mean(sr_draws),
-    converged = isTRUE(conv$rhat < 1.10) && isTRUE(conv$ess_bulk > 100)
+    converged = isTRUE(conv$rhat < 1.10) && isTRUE(conv$ess_bulk > 100),
+    n_doublings = n_doublings
   )
   rm(fit)
   gc(verbose = FALSE)
@@ -193,6 +218,7 @@ agg <- do.call(
       n_rep = nrow(x),
       pop_icc = x$pop_icc[1],
       converged_frac = mean(x$converged),
+      frac_adapted = mean(x$n_doublings > 0L),
       # Relative bias (theta_bar - theta) / theta, the source's metric.
       map_icc_relbias = mean(x$map_icc) / x$pop_icc[1] - 1,
       coverage_icc = mean(x$cover_icc),
@@ -213,6 +239,7 @@ saveRDS(
     generated = Sys.Date(),
     dgp = list(n_subjects = n_subjects, s2_s = s2_s, s2_sr = s2_sr),
     brm_args = brm_args,
+    max_warmup_doublings = max_warmup_doublings,
     n_rep = n_rep,
     base_seed = base_seed,
     stats = agg
@@ -224,23 +251,25 @@ message("Wrote ", out)
 # --- Validate against ten Hove et al. (2020), Sec. 4.2 (the pins) ----------
 # The pins encode the source's QUALITATIVE findings (a coverage oracle reproduces
 # findings, not exact decimals). Tolerances absorb our finite n_rep and our
-# INDEPENDENT MAP estimator; two divergences from the source are REPORTED, not
+# INDEPENDENT MAP estimator; one divergence from the source is REPORTED, not
 # tuned away (#4/#18):
-#   * CONVERGENCE is high but not their 100%: they adaptively DOUBLED warmup until
-#     R-hat < 1.10; we use a fixed warmup budget, so a minority of the near-boundary
-#     k = 2 reps fall short (k=2 ~0.92, k=5 ~0.99). Pinned >= 0.90.
 #   * Our reflected-KDE MAP of sigma_r is modestly NEGATIVE-biased (~ -0.15 at k=5)
 #     where their modeest MAP was ~unbiased -- an estimator difference at a tiny
 #     near-boundary sigma_r that barely moves the ICC (sigma^2_r is a small term in
 #     the denominator). We therefore pin the ROBUST contrast (EAP overestimates far
 #     more than the MAP), not our sigma_r MAP's absolute bias.
-# Observed (n_rep = 250, seed 20200): k=5 conv .992, MAP-ICC relbias -.040, cover
-# .948, MAP-sr relbias -.147, EAP-sr relbias +.741; k=2 conv .924, MAP-ICC relbias
-# -.243, cover .912, MAP-sr relbias -.318, EAP-sr relbias +3.599.
+# Warmup is adaptively doubled per rep as in the source (M108/D-025), so the
+# earlier fixed-warmup convergence shortfall (k=2 .864-.924 across runs) no
+# longer applies; the >= 0.90 pin stands, with the bounded adaptation (<= 3
+# doublings) leaving room for a rare rep to fall short.
+# Observed (n_rep = 250, seed 20200, adaptive warmup): recorded from the M108
+# regeneration run -- see the values asserted by test-icc-brms.R against the
+# committed fixture.
 k5 <- agg[agg$k == 5L, ]
 k2 <- agg[agg$k == 2L, ]
 
-# (1) High convergence at the half-t DGP (their 100%, modulo our fixed warmup).
+# (1) High convergence at the half-t DGP (their 100%, under the same adaptive
+#     warmup doubling, bounded at max_warmup_doublings).
 stopifnot(all(agg$converged_frac >= 0.90))
 # (2) sigma_r: the EAP SEVERELY overestimates, and by far more than the MAP -- the
 #     source's central Fig-1 finding (the estimator-independent, robust claim).

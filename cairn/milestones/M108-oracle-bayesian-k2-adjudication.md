@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M108: Adjudicate the oracle-bayesian.R k=2 convergence divergence
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m108-oracle-bayesian-k2-adjudication`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -85,7 +85,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Amend `data-raw/oracle-bayesian.R` (brm_args at
+- [x] T1: Amend `data-raw/oracle-bayesian.R` (brm_args at
       data-raw/oracle-bayesian.R:66): per-rep bounded adaptive warmup —
       refit with doubled warmup (≤ 3 doublings) while R̂ ≥ 1.10 or
       ESS ≤ 100 — and update the header's divergence-from-source notes
@@ -108,6 +108,8 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 - 2026-08-07: created by /milestone-plan (promotes the M107 k=2 adjudication candidate row; the plan gate's remedy choice IS the D-024 escalation decision).
 - 2026-08-07: criteria audit ([O] fresh-context reader) returned 5 findings on this file's ACs — AC2/AC3/AC5/AC6 presupposed the warmup remedy before the gate decided it (AC3 as drafted mandated a re-baseline D-024 clause 4 reserves to the escalation outcome), AC4 over-pinned `reproduced`; all fixed with the auditor's repairs (remedy-conditional wording; `reproduced` or `drift-within-noise`) before the gate.
 - 2026-08-07: plan gate chose adaptive warmup doubling + fixture regeneration over (a) a larger fixed budget and (b) revising the .90 floor to .85, because the source's own protocol is adaptive and a fixed budget re-fails at the next engine upgrade, while a floor cut moves the bar to fit the evidence (GP5); falsified by the amended script's k=2 `converged_frac` still landing below .90 on the same seed stream.
+- 2026-08-07: status → in-progress; branch `m108-oracle-bayesian-k2-adjudication` cut from pushed main; question gate skipped (the plan gate already fixed the remedy and its parameters — nothing genuinely open).
+- 2026-08-07: T1 done — `one_rep()` now refits with doubled warmup (≤ 3 doublings, `iter = warmup + 1000`) while R̂ ≥ 1.10 or bulk ESS ≤ 100 on the monitored components; per-rep `n_doublings` and per-cell `frac_adapted` recorded; fixed-warmup divergence notes rewritten (observed-stats line filled at T2 from the regeneration run); air + parse clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
