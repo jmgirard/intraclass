@@ -84,10 +84,14 @@
 the same ICC could be “poor” or “excellent” and you would not know it.
 So every <code><a href="../reference/icc.html">icc()</a></code> coefficient comes with an interval, never a
 bare number, and the <code>ci_method</code> argument selects how that
-interval is built. This article covers the two frequentist methods —
-Monte-Carlo and the parametric bootstrap — and the Bayesian <a href="glossary.html#credible-interval"><strong>credible</strong></a>
-interval that comes with the brms engine, and when they diverge. (Terms
-are defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
+interval is built. This article covers the Monte-Carlo default and the
+parametric bootstrap; the <a href="#the-opt-in-boundary-robust-methods">four opt-in methods</a> for
+the near-boundary terrain the default struggles on — the transformed
+bootstrap-<em>t</em> (<code>"npbootstrap"</code>), the exact-F
+(<code>"searle"</code>) and Burch (<code>"burch"</code>) closed forms,
+and the modified profile likelihood (<code>"mpl"</code>); and the
+Bayesian <a href="glossary.html#credible-interval"><strong>credible</strong></a>
+interval that comes with the brms engine. (Terms are defined in the <a href="glossary.html"><em>Glossary</em></a>.)</p>
 <div class="section level2">
 <h2 id="monte-carlo-and-the-parametric-bootstrap">Monte-Carlo and the parametric bootstrap<a class="anchor" aria-label="anchor" href="#monte-carlo-and-the-parametric-bootstrap"></a>
 </h2>
@@ -116,7 +120,7 @@ slower.</p>
 <span><span class="co">#&gt;      index estimate           mc    bootstrap</span></span>
 <span><span class="co">#&gt; 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]</span></span>
 <span><span class="co">#&gt; 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]</span></span>
-<span><span class="co">#&gt; 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]</span></span>
+<span><span class="co">#&gt; 3 ICC(C,1)    0.715 [0.33, 0.93] [0.15, 0.90]</span></span>
 <span><span class="co">#&gt; 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]</span></span></code></pre></div>
 <p>The point estimates are identical (same fit) and the upper bounds
 coincide; the bootstrap’s lower bounds run a little lower here, because
@@ -133,6 +137,154 @@ Monte-Carlo only. Raise <code>boot_samples</code> (default
 cost.</p>
 </div>
 <div class="section level2">
+<h2 id="the-opt-in-boundary-robust-methods">The opt-in boundary-robust methods<a class="anchor" aria-label="anchor" href="#the-opt-in-boundary-robust-methods"></a>
+</h2>
+<p>Near the <a href="glossary.html#zero-variance-boundary">zero-variance
+boundary</a> the Monte-Carlo default can fail to produce an interval;
+when it aborts, its message names an alternative method — chosen by
+running the candidates on your own data, not by consulting a table — so
+in practice you rarely need to pick one from scratch. This section is
+for when you do. Four opt-in methods serve exactly that terrain; each is
+fenced to a specific design and aborts with a classed error anywhere
+else.</p>
+<div class="section level3">
+<h3 id="the-transformed-bootstrap-t-ci_method-npbootstrap">The transformed bootstrap-<em>t</em>
+(<code>ci_method = "npbootstrap"</code>)<a class="anchor" aria-label="anchor" href="#the-transformed-bootstrap-t-ci_method-npbootstrap"></a>
+</h3>
+<p>The non-parametric <a href="glossary.html#transformed-bootstrap-t"><strong>transformed
+bootstrap-<em>t</em></strong></a> of Ukoumunne et al. (2003) serves the
+<strong>one-way random design</strong> (<code>model = "oneway"</code>),
+on balanced and unbalanced data alike — of the four opt-in methods it is
+the only one that serves unbalanced one-way data. It resamples whole
+subjects with replacement rather than simulating from the fitted model,
+so it is the only opt-in method that takes a <code>seed</code> (and
+<code>boot_samples</code>); pin both for a reproducible interval. Any
+<code>conf_level</code> in <code>(0, 1)</code> is accepted.
+<code>unit = "average"</code> — the ICC(k) — is the exact monotone
+Spearman-Brown image of the ICC(1) endpoints, so its coverage is
+inherited by construction, balanced or not; a numeric <code>unit</code>
+(a D-study projection) is restricted to balanced data. Reach for it for
+boundary robustness — an interval that exists where the Monte-Carlo
+default aborts — and for robustness to non-normal subject effects. Its
+endpoints are deliberately left untruncated on the estimator’s own
+support (Ukoumunne et al. 2003, §5.2), so a near-boundary lower limit
+can be negative — honest disclosure, not an error.</p>
+</div>
+<div class="section level3">
+<h3 id="the-classical-closed-forms-ci_method-searle-and-burch">The classical closed forms (<code>ci_method = "searle"</code> and
+<code>"burch"</code>)<a class="anchor" aria-label="anchor" href="#the-classical-closed-forms-ci_method-searle-and-burch"></a>
+</h3>
+<p>Two deterministic classical intervals for the <strong>balanced
+one-way random design</strong>: closed forms with no resampling, so
+<code>mc_samples</code>, <code>boot_samples</code>, and
+<code>seed</code> do not apply and no <code>std.error</code> is
+reported. Any <code>conf_level</code> in <code>(0, 1)</code> is
+accepted, and both project ICC(k) — and a numeric <code>unit</code> —
+through the same Spearman-Brown image as <code>"npbootstrap"</code>. The
+<a href="glossary.html#exact-f-interval"><strong>exact-F
+interval</strong></a> (<code>"searle"</code>; Searle 1971, the McGraw
+&amp; Wong 1996 Table 7 limits) is exact under normality:
+best-calibrated and narrowest when the data are approximately normal.
+The <a href="glossary.html#burch-interval"><strong>Burch
+interval</strong></a> (<code>"burch"</code>; Burch 2011) is REML-based
+and kurtosis-adjusted: its width tracks the data’s tail weight, and it
+is robust to non-normality. Prefer <code>"searle"</code> for near-normal
+data and <code>"burch"</code> when heavy tails are a concern. Their
+value over the default is a finite, well-calibrated interval at the
+near-zero-ICC boundary where the Monte-Carlo default aborts. One
+asymmetry between the siblings: on data with <em>no</em> between-subject
+variance at all, <code>"burch"</code> aborts (its kurtosis
+standardization divides by zero there) while <code>"searle"</code> still
+returns its attained minimum.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, model <span class="op">=</span> <span class="st">"oneway"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"oneway"</span>, ci_method <span class="op">=</span> <span class="st">"searle"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">bu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"oneway"</span>, ci_method <span class="op">=</span> <span class="st">"burch"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">np</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"oneway"</span>, ci_method <span class="op">=</span> <span class="st">"npbootstrap"</span>, boot_samples <span class="op">=</span> <span class="fl">199</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  index <span class="op">=</span> <span class="va">mc</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  montecarlo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">mc</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
+<span>  searle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">se</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">se</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
+<span>  burch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">bu</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">bu</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
+<span>  npbootstrap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">np</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">np</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;    index estimate   montecarlo        searle         burch   npbootstrap</span></span>
+<span><span class="co">#&gt; 1 ICC(1)    0.166 [0.01, 0.83] [-0.13, 0.72] [-0.13, 0.56] [-0.05, 0.89]</span></span>
+<span><span class="co">#&gt; 2 ICC(k)    0.443 [0.03, 0.95] [-0.88, 0.91] [-0.90, 0.84] [-0.26, 0.97]</span></span></code></pre></div>
+<p>All four columns share the same point estimate —
+<code>ci_method</code> selects the interval, never the estimator. The
+visible difference is at the lower end: the three opt-in methods’ lower
+limits dip below zero, because their endpoints are left untruncated on
+the estimator’s own support, while the Monte-Carlo interval stays inside
+the range. And the Burch adjustment is empirical, not a one-way widening
+— here it comes out <em>narrower</em> than the exact-F interval, because
+its width tracks the tail weight these particular data actually
+show.</p>
+</div>
+<div class="section level3">
+<h3 id="the-modified-profile-likelihood-ci_method-mpl">The modified profile likelihood
+(<code>ci_method = "mpl"</code>)<a class="anchor" aria-label="anchor" href="#the-modified-profile-likelihood-ci_method-mpl"></a>
+</h3>
+<p>The <a href="glossary.html#modified-profile-likelihood"><strong>modified
+profile-likelihood interval</strong></a> of Xiao &amp; Liu (2013) is the
+two-way counterpart: it serves the <strong>balanced, complete two-way
+random absolute-agreement</strong> ICC(A,1), with ICC(A,k) and any
+numeric-<code>unit</code> projection its pole-safe Spearman-Brown image,
+and aborts on any other design, on consistency or fixed raters, and on
+unbalanced or incomplete data. It is a deterministic closed form — no
+resampling, no <code>seed</code>. Its calibration fixes two fences:
+<code>conf_level</code> must be 0.90, 0.95, or 0.99 (each level carries
+its own calibrated correction constant, never interpolated between
+levels), and the calibration grid spans 2–10 raters and 10–100 subjects.
+Like <code>"npbootstrap"</code>, it returns an interval at the
+near-zero-ICC boundary where the two-way Monte-Carlo default aborts; it
+is deliberately conservative — it over-covers, and is wider than the
+Monte-Carlo interval at interior cells — which is why it is an opt-in
+and not the default. Two reporting caveats from <code><a href="../reference/icc.html">?icc</a></code>: the
+two-sided interval is not equal-tailed, so a limit must not be read as a
+one-sided bound at half the complementary level; and at
+<code>conf_level = 0.99</code> with two raters the interval can be
+near-vacuous.</p>
+<p>The shipped <code>ratings</code> data are too small for the
+calibration grid (six subjects), so the demonstration simulates a
+balanced two-way design inside it:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">88</span><span class="op">)</span></span>
+<span><span class="va">n_s</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
+<span><span class="va">n_r</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span><span class="va">subj_eff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_s</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">0.6</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">rater_eff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_r</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">noise</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_s</span> <span class="op">*</span> <span class="va">n_r</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">0.2</span><span class="op">)</span><span class="op">)</span>, <span class="va">n_s</span>, <span class="va">n_r</span><span class="op">)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  subject <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_s</span><span class="op">)</span>, times <span class="op">=</span> <span class="va">n_r</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  rater <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_r</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">n_s</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">subj_eff</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n_r</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n_s</span><span class="op">)</span>, <span class="va">rater_eff</span><span class="op">)</span> <span class="op">+</span> <span class="va">noise</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">mc2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">sim</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, ci_method <span class="op">=</span> <span class="st">"mpl"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  index <span class="op">=</span> <span class="va">mc2</span><span class="op">$</span><span class="va">index</span>,</span>
+<span>  estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mc2</span><span class="op">$</span><span class="va">estimate</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  montecarlo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">mc2</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">mc2</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span>,</span>
+<span>  mpl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"[%.2f, %.2f]"</span>, <span class="va">ml</span><span class="op">$</span><span class="va">conf.low</span>, <span class="va">ml</span><span class="op">$</span><span class="va">conf.high</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;      index estimate   montecarlo          mpl</span></span>
+<span><span class="co">#&gt; 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]</span></span>
+<span><span class="co">#&gt; 2 ICC(A,k)    0.907 [0.78, 0.96] [0.75, 0.96]</span></span></code></pre></div>
+<p>The two point estimates agree (same REML fit); the <code>"mpl"</code>
+interval is the wider of the pair at this comfortably interior cell —
+the conservatism described above, visible on ordinary data.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="bayesian-credible-intervals-ci_method-posterior">Bayesian credible intervals
 (<code>ci_method = "posterior"</code>)<a class="anchor" aria-label="anchor" href="#bayesian-credible-intervals-ci_method-posterior"></a>
 </h2>
@@ -147,7 +299,7 @@ that engine.</p>
 pre-computed output (fitting a Stan model needs a toolchain not
 available when this site is built), so they are not evaluated at knit
 time.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>, type <span class="op">=</span> <span class="st">"agreement"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement ──────────────────</span></span>
 <span><span class="co">#&gt; Subjects: 6 | Raters: 4 (random) | Observations: 24 of 24 cells (complete)</span></span>
@@ -173,7 +325,7 @@ than two raters).</p>
 interval</strong> (HPDI) — the <em>narrowest</em> interval containing
 95% of the posterior mass — with
 <code>posterior_summary = "hpdi"</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">ratings</span>, <span class="va">score</span>, <span class="va">subject</span>, <span class="va">rater</span>, engine <span class="op">=</span> <span class="st">"brms"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"agreement"</span>, posterior_summary <span class="op">=</span> <span class="st">"hpdi"</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Intraclass correlation: two-way random, absolute agreement ──────────────────</span></span>

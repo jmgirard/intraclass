@@ -106,6 +106,17 @@ average you will actually use; on incomplete data it becomes the
 ICC</strong> for its counterpart.</p>
 </div>
 <div class="section level2">
+<h2 id="burch-interval">Burch interval<a class="anchor" aria-label="anchor" href="#burch-interval"></a>
+</h2>
+<p>An opt-in closed-form confidence interval for the balanced one-way
+design (<code>ci_method = "burch"</code>): REML-based limits with a
+kurtosis adjustment (Burch 2011), so its width tracks the tail weight of
+the data — robust to non-normality where the <strong>exact-F
+interval</strong> leans on it. Deterministic: no resamples, no seed. See
+<a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
+methods</em></a>.</p>
+</div>
+<div class="section level2">
 <h2 id="confidence-interval-vs--credible-interval">Confidence interval vs. credible interval<a class="anchor" aria-label="anchor" href="#confidence-interval-vs--credible-interval"></a>
 </h2>
 <p>A <strong>confidence interval</strong> (the frequentist engines’
@@ -208,6 +219,16 @@ level are <em>different estimands</em>, and picking the coefficient is
 really picking which one answers your question. See <a href="choosing-an-icc.html"><em>Choosing an ICC</em></a>.</p>
 </div>
 <div class="section level2">
+<h2 id="exact-f-interval">Exact-F interval<a class="anchor" aria-label="anchor" href="#exact-f-interval"></a>
+</h2>
+<p>An opt-in closed-form confidence interval for the balanced one-way
+design (<code>ci_method = "searle"</code>): it inverts the exact-F pivot
+of the one-way ANOVA (Searle 1971; the McGraw &amp; Wong 1996 Table 7
+limits). Exact under normality — best-calibrated and narrowest when the
+data are approximately normal — and deterministic. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
+methods</em></a>.</p>
+</div>
+<div class="section level2">
 <h2 id="fiml">FIML<a class="anchor" aria-label="anchor" href="#fiml"></a>
 </h2>
 <p><strong>Full-information maximum likelihood</strong> — the technique
@@ -260,6 +281,18 @@ a genuinely different — though asymptotically equivalent — estimator
 than the mixed model’s random effect, and can differ modestly on small
 designs. See <a href="engines.html#a-structural-equation-engine-lavaan"><em>Estimation
 engines</em></a>.</p>
+</div>
+<div class="section level2">
+<h2 id="modified-profile-likelihood">Modified profile likelihood<a class="anchor" aria-label="anchor" href="#modified-profile-likelihood"></a>
+</h2>
+<p>An opt-in deterministic confidence interval for the balanced,
+complete two-way random absolute-agreement design
+(<code>ci_method = "mpl"</code>; Xiao &amp; Liu 2013): it profiles the
+likelihood in the ICC with a calibrated small-sample correction and
+returns an interval at the near-zero boundary where the Monte-Carlo
+default aborts. Available at <code>conf_level</code> 0.90, 0.95, and
+0.99, and deliberately conservative. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
+methods</em></a>.</p>
 </div>
 <div class="section level2">
 <h2 id="monte-carlo-interval">Monte-Carlo interval<a class="anchor" aria-label="anchor" href="#monte-carlo-interval"></a>
@@ -343,6 +376,18 @@ asks how reliably they distinguish <em>cluster means</em>.
 designs</em></a>.</p>
 </div>
 <div class="section level2">
+<h2 id="transformed-bootstrap-t">Transformed bootstrap-<em>t</em><a class="anchor" aria-label="anchor" href="#transformed-bootstrap-t"></a>
+</h2>
+<p>An opt-in confidence-interval method for the one-way design, balanced
+or unbalanced (<code>ci_method = "npbootstrap"</code>; Ukoumunne et
+al. 2003): it resamples whole subjects with replacement, stabilizes the
+variance with a log-F transform, studentizes, and back-transforms the
+endpoints — so it takes a <code>seed</code> and
+<code>boot_samples</code>. Robust at the zero-variance boundary and to
+non-normal subject effects. See <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
+methods</em></a>.</p>
+</div>
+<div class="section level2">
 <h2 id="variance-component">Variance component<a class="anchor" aria-label="anchor" href="#variance-component"></a>
 </h2>
 <p>A share of the total variation in the scores traced to one source —
@@ -366,15 +411,30 @@ methods</em></a>.</p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Burch, B. D. (2011). Assessing the performance of normal-based and
+REML-based confidence intervals for the intraclass correlation
+coefficient. <em>Computational Statistics and Data Analysis, 55</em>,
+1018–1028.</p>
 <p>Jorgensen, T. D. (2021). How to estimate absolute-error components in
 structural equation models of generalizability theory. <em>Psych,
 3</em>(2), 113–133.</p>
+<p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about
+some intraclass correlation coefficients. <em>Psychological Methods,
+1</em>(1), 30–46.</p>
+<p>Searle, S. R. (1971). <em>Linear Models</em>. Wiley.</p>
 <p>ten Hove, D., Jorgensen, T. D., &amp; van der Ark, L. A. (2020). On
 the usefulness of interrater reliability coefficients. In M. Wiberg et
 al. (Eds.), <em>Quantitative Psychology</em> (pp. 67–75). Springer.</p>
 <p>ten Hove, D., Jorgensen, T. D., &amp; van der Ark, L. A. (2022).
 Interrater reliability for multilevel data: A generalizability theory
 approach. <em>Psychological Methods, 27</em>(4), 650–666.</p>
+<p>Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., &amp; Chinn, S.
+(2003). Non-parametric bootstrap confidence intervals for the intraclass
+correlation coefficient. <em>Statistics in Medicine, 22</em>(24),
+3805–3821.</p>
+<p>Xiao, Y., &amp; Liu, H. (2013). Modified profile likelihood approach
+for certain intraclass correlation coefficients. <em>Computational
+Statistics, 28</em>(5), 2241–2265.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

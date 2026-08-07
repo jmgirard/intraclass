@@ -343,6 +343,15 @@
 
 ### Documentation
 
+- The *Confidence-interval methods* vignette now covers the four opt-in
+  `ci_method` values — `"npbootstrap"`, `"searle"`, `"burch"`, and
+  `"mpl"` — with each method’s design fence, determinism, `conf_level`
+  set, `unit` behavior, and when to reach for it over the default, plus
+  live-evaluated comparisons and new glossary entries for all four. The
+  universal and negative claims in the vignette’s MPL subsection are
+  swept by the same mechanical claim-checker that already guards the
+  [`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md) MPL
+  documentation.
 - The package comparison and “related work” documentation no longer
   presents `gtheory` as an alternative package to reach for: it was
   archived from CRAN in March 2025 and is not a dependency. The

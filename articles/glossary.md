@@ -27,6 +27,15 @@ whose average you will actually use; on incomplete data it becomes the
 **effective number of ratings**. See **single-unit ICC** for its
 counterpart.
 
+## Burch interval
+
+An opt-in closed-form confidence interval for the balanced one-way
+design (`ci_method = "burch"`): REML-based limits with a kurtosis
+adjustment (Burch 2011), so its width tracks the tail weight of the data
+— robust to non-normality where the **exact-F interval** leans on it.
+Deterministic: no resamples, no seed. See [*Confidence-interval
+methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
+
 ## Confidence interval vs. credible interval
 
 A **confidence interval** (the frequentist engines’ output) is a range
@@ -118,6 +127,15 @@ level are *different estimands*, and picking the coefficient is really
 picking which one answers your question. See [*Choosing an
 ICC*](https://jmgirard.github.io/intraclass/articles/choosing-an-icc.md).
 
+## Exact-F interval
+
+An opt-in closed-form confidence interval for the balanced one-way
+design (`ci_method = "searle"`): it inverts the exact-F pivot of the
+one-way ANOVA (Searle 1971; the McGraw & Wong 1996 Table 7 limits).
+Exact under normality — best-calibrated and narrowest when the data are
+approximately normal — and deterministic. See [*Confidence-interval
+methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
+
 ## FIML
 
 **Full-information maximum likelihood** — the technique the **lavaan**
@@ -161,6 +179,17 @@ effect, its variance is read from the spread of the estimated column
 asymptotically equivalent — estimator than the mixed model’s random
 effect, and can differ modestly on small designs. See [*Estimation
 engines*](https://jmgirard.github.io/intraclass/articles/engines.html#a-structural-equation-engine-lavaan).
+
+## Modified profile likelihood
+
+An opt-in deterministic confidence interval for the balanced, complete
+two-way random absolute-agreement design (`ci_method = "mpl"`; Xiao &
+Liu 2013): it profiles the likelihood in the ICC with a calibrated
+small-sample correction and returns an interval at the near-zero
+boundary where the Monte-Carlo default aborts. Available at `conf_level`
+0.90, 0.95, and 0.99, and deliberately conservative. See
+[*Confidence-interval
+methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
 
 ## Monte-Carlo interval
 
@@ -233,6 +262,16 @@ how reliably raters distinguish subjects *within* a cluster; the
 reports both from one fit. See [*Multilevel
 designs*](https://jmgirard.github.io/intraclass/articles/multilevel-designs.html#subject-level-vs.-cluster-level).
 
+## Transformed bootstrap-*t*
+
+An opt-in confidence-interval method for the one-way design, balanced or
+unbalanced (`ci_method = "npbootstrap"`; Ukoumunne et al. 2003): it
+resamples whole subjects with replacement, stabilizes the variance with
+a log-F transform, studentizes, and back-transforms the endpoints — so
+it takes a `seed` and `boot_samples`. Robust at the zero-variance
+boundary and to non-normal subject effects. See [*Confidence-interval
+methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
+
 ## Variance component
 
 A share of the total variation in the scores traced to one source — how
@@ -253,9 +292,20 @@ methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
 
 ## References
 
+Burch, B. D. (2011). Assessing the performance of normal-based and
+REML-based confidence intervals for the intraclass correlation
+coefficient. *Computational Statistics and Data Analysis, 55*,
+1018–1028.
+
 Jorgensen, T. D. (2021). How to estimate absolute-error components in
 structural equation models of generalizability theory. *Psych, 3*(2),
 113–133.
+
+McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
+intraclass correlation coefficients. *Psychological Methods, 1*(1),
+30–46.
+
+Searle, S. R. (1971). *Linear Models*. Wiley.
 
 ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2020). On the
 usefulness of interrater reliability coefficients. In M. Wiberg et
@@ -264,3 +314,11 @@ al. (Eds.), *Quantitative Psychology* (pp. 67–75). Springer.
 ten Hove, D., Jorgensen, T. D., & van der Ark, L. A. (2022). Interrater
 reliability for multilevel data: A generalizability theory approach.
 *Psychological Methods, 27*(4), 650–666.
+
+Ukoumunne, O. C., Davison, A. C., Gulliford, M. C., & Chinn, S. (2003).
+Non-parametric bootstrap confidence intervals for the intraclass
+correlation coefficient. *Statistics in Medicine, 22*(24), 3805–3821.
+
+Xiao, Y., & Liu, H. (2013). Modified profile likelihood approach for
+certain intraclass correlation coefficients. *Computational Statistics,
+28*(5), 2241–2265.

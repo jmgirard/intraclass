@@ -10,11 +10,14 @@ same ICC could be “poor” or “excellent” and you would not know it. So
 every [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md)
 coefficient comes with an interval, never a bare number, and the
 `ci_method` argument selects how that interval is built. This article
-covers the two frequentist methods — Monte-Carlo and the parametric
-bootstrap — and the Bayesian
+covers the Monte-Carlo default and the parametric bootstrap; the [four
+opt-in methods](#the-opt-in-boundary-robust-methods) for the
+near-boundary terrain the default struggles on — the transformed
+bootstrap-*t* (`"npbootstrap"`), the exact-F (`"searle"`) and Burch
+(`"burch"`) closed forms, and the modified profile likelihood (`"mpl"`);
+and the Bayesian
 [**credible**](https://jmgirard.github.io/intraclass/articles/glossary.html#credible-interval)
-interval that comes with the brms engine, and when they diverge. (Terms
-are defined in the
+interval that comes with the brms engine. (Terms are defined in the
 [*Glossary*](https://jmgirard.github.io/intraclass/articles/glossary.md).)
 
 ## Monte-Carlo and the parametric bootstrap
@@ -49,7 +52,7 @@ data.frame(
 #>      index estimate           mc    bootstrap
 #> 1 ICC(A,1)    0.290 [0.05, 0.71] [0.02, 0.72]
 #> 2 ICC(A,k)    0.620 [0.17, 0.91] [0.09, 0.91]
-#> 3 ICC(C,1)    0.715 [0.34, 0.92] [0.15, 0.90]
+#> 3 ICC(C,1)    0.715 [0.33, 0.93] [0.15, 0.90]
 #> 4 ICC(C,k)    0.909 [0.67, 0.98] [0.41, 0.97]
 ```
 
@@ -64,6 +67,153 @@ interval in particular carries more resampling noise. The bootstrap is
 available for every design the `"glmmTMB"` and `"lme4"` engines fit;
 `"lavaan"` supports Monte-Carlo only. Raise `boot_samples` (default
 `999`) for a smoother interval at proportionally more cost.
+
+## The opt-in boundary-robust methods
+
+Near the [zero-variance
+boundary](https://jmgirard.github.io/intraclass/articles/glossary.html#zero-variance-boundary)
+the Monte-Carlo default can fail to produce an interval; when it aborts,
+its message names an alternative method — chosen by running the
+candidates on your own data, not by consulting a table — so in practice
+you rarely need to pick one from scratch. This section is for when you
+do. Four opt-in methods serve exactly that terrain; each is fenced to a
+specific design and aborts with a classed error anywhere else.
+
+### The transformed bootstrap-*t* (`ci_method = "npbootstrap"`)
+
+The non-parametric [**transformed
+bootstrap-*t***](https://jmgirard.github.io/intraclass/articles/glossary.html#transformed-bootstrap-t)
+of Ukoumunne et al. (2003) serves the **one-way random design**
+(`model = "oneway"`), on balanced and unbalanced data alike — of the
+four opt-in methods it is the only one that serves unbalanced one-way
+data. It resamples whole subjects with replacement rather than
+simulating from the fitted model, so it is the only opt-in method that
+takes a `seed` (and `boot_samples`); pin both for a reproducible
+interval. Any `conf_level` in `(0, 1)` is accepted. `unit = "average"` —
+the ICC(k) — is the exact monotone Spearman-Brown image of the ICC(1)
+endpoints, so its coverage is inherited by construction, balanced or
+not; a numeric `unit` (a D-study projection) is restricted to balanced
+data. Reach for it for boundary robustness — an interval that exists
+where the Monte-Carlo default aborts — and for robustness to non-normal
+subject effects. Its endpoints are deliberately left untruncated on the
+estimator’s own support (Ukoumunne et al. 2003, §5.2), so a
+near-boundary lower limit can be negative — honest disclosure, not an
+error.
+
+### The classical closed forms (`ci_method = "searle"` and `"burch"`)
+
+Two deterministic classical intervals for the **balanced one-way random
+design**: closed forms with no resampling, so `mc_samples`,
+`boot_samples`, and `seed` do not apply and no `std.error` is reported.
+Any `conf_level` in `(0, 1)` is accepted, and both project ICC(k) — and
+a numeric `unit` — through the same Spearman-Brown image as
+`"npbootstrap"`. The [**exact-F
+interval**](https://jmgirard.github.io/intraclass/articles/glossary.html#exact-f-interval)
+(`"searle"`; Searle 1971, the McGraw & Wong 1996 Table 7 limits) is
+exact under normality: best-calibrated and narrowest when the data are
+approximately normal. The [**Burch
+interval**](https://jmgirard.github.io/intraclass/articles/glossary.html#burch-interval)
+(`"burch"`; Burch 2011) is REML-based and kurtosis-adjusted: its width
+tracks the data’s tail weight, and it is robust to non-normality. Prefer
+`"searle"` for near-normal data and `"burch"` when heavy tails are a
+concern. Their value over the default is a finite, well-calibrated
+interval at the near-zero-ICC boundary where the Monte-Carlo default
+aborts. One asymmetry between the siblings: on data with *no*
+between-subject variance at all, `"burch"` aborts (its kurtosis
+standardization divides by zero there) while `"searle"` still returns
+its attained minimum.
+
+``` r
+
+mc <- tidy(icc(ratings, score, subject, rater, model = "oneway", seed = 1))
+se <- tidy(icc(ratings, score, subject, rater,
+  model = "oneway", ci_method = "searle"
+))
+bu <- tidy(icc(ratings, score, subject, rater,
+  model = "oneway", ci_method = "burch"
+))
+np <- tidy(icc(ratings, score, subject, rater,
+  model = "oneway", ci_method = "npbootstrap", boot_samples = 199, seed = 1
+))
+data.frame(
+  index = mc$index,
+  estimate = round(mc$estimate, 3),
+  montecarlo = sprintf("[%.2f, %.2f]", mc$conf.low, mc$conf.high),
+  searle = sprintf("[%.2f, %.2f]", se$conf.low, se$conf.high),
+  burch = sprintf("[%.2f, %.2f]", bu$conf.low, bu$conf.high),
+  npbootstrap = sprintf("[%.2f, %.2f]", np$conf.low, np$conf.high)
+)
+#>    index estimate   montecarlo        searle         burch   npbootstrap
+#> 1 ICC(1)    0.166 [0.01, 0.83] [-0.13, 0.72] [-0.13, 0.56] [-0.05, 0.89]
+#> 2 ICC(k)    0.443 [0.03, 0.95] [-0.88, 0.91] [-0.90, 0.84] [-0.26, 0.97]
+```
+
+All four columns share the same point estimate — `ci_method` selects the
+interval, never the estimator. The visible difference is at the lower
+end: the three opt-in methods’ lower limits dip below zero, because
+their endpoints are left untruncated on the estimator’s own support,
+while the Monte-Carlo interval stays inside the range. And the Burch
+adjustment is empirical, not a one-way widening — here it comes out
+*narrower* than the exact-F interval, because its width tracks the tail
+weight these particular data actually show.
+
+### The modified profile likelihood (`ci_method = "mpl"`)
+
+The [**modified profile-likelihood
+interval**](https://jmgirard.github.io/intraclass/articles/glossary.html#modified-profile-likelihood)
+of Xiao & Liu (2013) is the two-way counterpart: it serves the
+**balanced, complete two-way random absolute-agreement** ICC(A,1), with
+ICC(A,k) and any numeric-`unit` projection its pole-safe Spearman-Brown
+image, and aborts on any other design, on consistency or fixed raters,
+and on unbalanced or incomplete data. It is a deterministic closed form
+— no resampling, no `seed`. Its calibration fixes two fences:
+`conf_level` must be 0.90, 0.95, or 0.99 (each level carries its own
+calibrated correction constant, never interpolated between levels), and
+the calibration grid spans 2–10 raters and 10–100 subjects. Like
+`"npbootstrap"`, it returns an interval at the near-zero-ICC boundary
+where the two-way Monte-Carlo default aborts; it is deliberately
+conservative — it over-covers, and is wider than the Monte-Carlo
+interval at interior cells — which is why it is an opt-in and not the
+default. Two reporting caveats from
+[`?icc`](https://jmgirard.github.io/intraclass/reference/icc.md): the
+two-sided interval is not equal-tailed, so a limit must not be read as a
+one-sided bound at half the complementary level; and at
+`conf_level = 0.99` with two raters the interval can be near-vacuous.
+
+The shipped `ratings` data are too small for the calibration grid (six
+subjects), so the demonstration simulates a balanced two-way design
+inside it:
+
+``` r
+
+set.seed(88)
+n_s <- 20
+n_r <- 4
+subj_eff <- rnorm(n_s, sd = sqrt(0.6))
+rater_eff <- rnorm(n_r, sd = sqrt(0.1))
+noise <- matrix(rnorm(n_s * n_r, sd = sqrt(0.2)), n_s, n_r)
+sim <- data.frame(
+  subject = factor(rep(seq_len(n_s), times = n_r)),
+  rater = factor(rep(seq_len(n_r), each = n_s)),
+  score = as.numeric(outer(subj_eff, rep(1, n_r)) +
+    outer(rep(1, n_s), rater_eff) + noise)
+)
+mc2 <- tidy(icc(sim, score, subject, rater, type = "agreement", seed = 1))
+ml <- tidy(icc(sim, score, subject, rater, type = "agreement", ci_method = "mpl"))
+data.frame(
+  index = mc2$index,
+  estimate = round(mc2$estimate, 3),
+  montecarlo = sprintf("[%.2f, %.2f]", mc2$conf.low, mc2$conf.high),
+  mpl = sprintf("[%.2f, %.2f]", ml$conf.low, ml$conf.high)
+)
+#>      index estimate   montecarlo          mpl
+#> 1 ICC(A,1)    0.709 [0.47, 0.84] [0.42, 0.87]
+#> 2 ICC(A,k)    0.907 [0.78, 0.96] [0.75, 0.96]
+```
+
+The two point estimates agree (same REML fit); the `"mpl"` interval is
+the wider of the pair at this comfortably interior cell — the
+conservatism described above, visible on ordinary data.
 
 ## Bayesian credible intervals (`ci_method = "posterior"`)
 
