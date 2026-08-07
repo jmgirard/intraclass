@@ -265,8 +265,10 @@ message("Wrote ", out)
 # earlier fixed-warmup convergence shortfall (k=2 .864-.924 across runs) no
 # longer applies; the >= 0.90 pin stands, with the bounded adaptation (<= 3
 # doublings) leaving room for a rare rep to fall short.
-# Observed (n_rep = 500, seed 20200, adaptive warmup, seeded template): recorded
-# from the M108 regeneration run after the template-seeding amendment.
+# Observed (n_rep = 500, seed 20200, adaptive warmup, seeded template): k=5 conv
+# 1.000 (frac adapted .008), MAP-ICC relbias -.052, cover .958, MAP-sr relbias
+# -.236, EAP-sr relbias +.678; k=2 conv 1.000 (frac adapted .112), MAP-ICC
+# relbias -.265, cover .918, MAP-sr relbias -.381, EAP-sr relbias +3.454.
 k5 <- agg[agg$k == 5L, ]
 k2 <- agg[agg$k == 2L, ]
 

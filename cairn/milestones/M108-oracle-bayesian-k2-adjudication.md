@@ -126,6 +126,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 - 2026-08-07: T3 harness re-run → `diverged-escalated` 3/4, failing pin 4c (`k2$coverage_icc < k5$coverage_icc`: fresh .964 vs .940) with max delta .13 vs the same-seed T2 fixture — a different pin than the adjudicated one; stopped per the T2 stop rule and probed instead of re-running.
 - 2026-08-07: attribution probes — a 30-rep slice of the real pipeline is bit-identical across repeated direct runs AND under the harness `source()` mechanism when the template stage is seeded; changing only the template's data seed (42→43) changes every rep's draws (template seeds 999/888 coincidentally identical — channel partial, unresolved, immaterial to the fix). The script's non-reproducibility is the unseeded template stage; explains the historical .864/.904/.924 spread.
 - 2026-08-07: substantive amendment (gate): Scope-In adds the template seeding fix + n_rep 250→500; maintainer chose "seed fix + n_rep 500" over 250-only, pin-softening, and pause.
+- 2026-08-07: T2 re-done under the amendment — AC2/AC3 at the final settings (seeded template, n_rep 500, seed stream 20200): k=2 `converged_frac` 1.000 (frac adapted .112), k=5 1.000 (.008), vs .864 at k=2 on the 2026-08-06 fixed-warmup run; transcript shows exit 0 past all four save-first pin blocks (4/4); coverage .918 (k=2) < .958 (k=5), the ordering pin's gap now .04; fixture committed.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
