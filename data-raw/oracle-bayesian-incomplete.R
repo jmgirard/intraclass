@@ -222,6 +222,38 @@ agg <- do.call(
 )
 print(agg)
 
+# --- Commit the reference --------------------------------------------------
+out <- file.path(
+  "tests",
+  "testthat",
+  "fixtures",
+  "bayesian-incomplete-oracle.rds"
+)
+dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
+saveRDS(
+  list(
+    source = "ten Hove, Jorgensen & van der Ark (2020), doi:10.1007/978-3-030-43469-4_7; ragged extension pinned to glmmTMB M3 (ADR-008)",
+    generated = Sys.Date(),
+    dgp = list(
+      n_subjects = n_subjects,
+      k = k,
+      s2_s = s2_s,
+      s2_r = s2_r,
+      s2_sr = s2_sr,
+      missing_frac = missing_frac,
+      k_eff_ragged = k_eff_ragged
+    ),
+    brm_args = brm_args,
+    n_rep = n_rep,
+    base_seed = base_seed,
+    stats = agg
+  ),
+  out
+)
+message("Wrote ", out)
+# (Moved BEFORE the pins: save-first, M107 -- a marginal pin must never abort
+# a completed multi-hour run with nothing written.)
+
 # --- Validate: reduction + coverage (the pins) -----------------------------
 cmp <- agg[agg$design == "complete", ]
 rag <- agg[agg$design == "ragged", ]
@@ -258,33 +290,3 @@ stopifnot(
   abs(cmp$map_icc1_relbias) < 0.10,
   abs(rag$map_icc1_relbias) < 0.12
 )
-
-# --- Commit the reference --------------------------------------------------
-out <- file.path(
-  "tests",
-  "testthat",
-  "fixtures",
-  "bayesian-incomplete-oracle.rds"
-)
-dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-saveRDS(
-  list(
-    source = "ten Hove, Jorgensen & van der Ark (2020), doi:10.1007/978-3-030-43469-4_7; ragged extension pinned to glmmTMB M3 (ADR-008)",
-    generated = Sys.Date(),
-    dgp = list(
-      n_subjects = n_subjects,
-      k = k,
-      s2_s = s2_s,
-      s2_r = s2_r,
-      s2_sr = s2_sr,
-      missing_frac = missing_frac,
-      k_eff_ragged = k_eff_ragged
-    ),
-    brm_args = brm_args,
-    n_rep = n_rep,
-    base_seed = base_seed,
-    stats = agg
-  ),
-  out
-)
-message("Wrote ", out)

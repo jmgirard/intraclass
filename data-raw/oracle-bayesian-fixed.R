@@ -178,19 +178,6 @@ agg <- data.frame(
 )
 print(agg)
 
-# --- Validate (the pins) ---------------------------------------------------
-stopifnot(
-  # (1) High convergence at the half-t DGP.
-  agg$converged_frac >= 0.90,
-  # (2) Percentile 95% credible-interval coverage of the fixed-population ICC(A,1)
-  #     ~nominal.
-  agg$coverage_icc >= 0.88,
-  agg$coverage_icc <= 0.99,
-  # (3) The MAP is biased low (the right-skewed-ICC-draws mode sits below the
-  #     population plug-in) -- characterized, not asserted unbiased.
-  agg$map_icc_relbias < 0
-)
-
 # --- Commit ----------------------------------------------------------------
 out <- file.path("tests", "testthat", "fixtures", "bayesian-fixed-oracle.rds")
 dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
@@ -217,3 +204,18 @@ saveRDS(
   out
 )
 message("Wrote ", out)
+# (Moved BEFORE the pins: save-first, M107 -- a marginal pin must never abort
+# a completed multi-hour run with nothing written.)
+
+# --- Validate (the pins) ---------------------------------------------------
+stopifnot(
+  # (1) High convergence at the half-t DGP.
+  agg$converged_frac >= 0.90,
+  # (2) Percentile 95% credible-interval coverage of the fixed-population ICC(A,1)
+  #     ~nominal.
+  agg$coverage_icc >= 0.88,
+  agg$coverage_icc <= 0.99,
+  # (3) The MAP is biased low (the right-skewed-ICC-draws mode sits below the
+  #     population plug-in) -- characterized, not asserted unbiased.
+  agg$map_icc_relbias < 0
+)

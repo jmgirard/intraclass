@@ -194,6 +194,29 @@ agg <- do.call(
 )
 print(agg)
 
+# --- Commit the reference --------------------------------------------------
+out <- file.path("tests", "testthat", "fixtures", "bayesian-oneway-oracle.rds")
+dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
+saveRDS(
+  list(
+    source = paste(
+      "ten Hove, Jorgensen & van der Ark (2020),",
+      "doi:10.1007/978-3-030-43469-4_7 (prior/MAP/percentile);",
+      "Shrout & Fleiss (1979) / McGraw & Wong (1996) Case 1 (estimand)"
+    ),
+    generated = Sys.Date(),
+    dgp = list(n_subjects = n_subjects, s2_s = s2_s, s2_res = s2_res),
+    brm_args = brm_args,
+    n_rep = n_rep,
+    base_seed = base_seed,
+    stats = agg
+  ),
+  out
+)
+message("Wrote ", out)
+# (Moved BEFORE the pins: save-first, M107 -- a marginal pin must never abort
+# a completed multi-hour run with nothing written.)
+
 # --- Validate against the expected behavior (the pins) ---------------------
 # Pins encode the QUALITATIVE one-way findings (a coverage oracle reproduces
 # findings, not exact decimals). Tolerances bracket the observed seeded run and
@@ -226,24 +249,3 @@ stopifnot(
   k2$map_icc1_relbias < k5$map_icc1_relbias, # more biased than k = 5
   k2$coverage_icc1 >= 0.88 # interval still ~covers
 )
-
-# --- Commit the reference --------------------------------------------------
-out <- file.path("tests", "testthat", "fixtures", "bayesian-oneway-oracle.rds")
-dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-saveRDS(
-  list(
-    source = paste(
-      "ten Hove, Jorgensen & van der Ark (2020),",
-      "doi:10.1007/978-3-030-43469-4_7 (prior/MAP/percentile);",
-      "Shrout & Fleiss (1979) / McGraw & Wong (1996) Case 1 (estimand)"
-    ),
-    generated = Sys.Date(),
-    dgp = list(n_subjects = n_subjects, s2_s = s2_s, s2_res = s2_res),
-    brm_args = brm_args,
-    n_rep = n_rep,
-    base_seed = base_seed,
-    stats = agg
-  ),
-  out
-)
-message("Wrote ", out)

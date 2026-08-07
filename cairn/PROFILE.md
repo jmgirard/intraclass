@@ -4,7 +4,7 @@
      operational skills read. cairn-init instantiates this into the repo's
      `cairn/PROFILE.md`. The oracle / Validation doctrine is UNIVERSAL and
      deliberately NOT a slot here — it is the orthogonal domain axis
-     (D-024/D-025), stated once in skills/shared/validation-doctrine.md
+     (cairn D-024/D-025 — the plugin's ids, not this repo's), stated once in skills/shared/validation-doctrine.md
      (referenced from tracking-rules). All six `## <slot>` sections
      are defined; cairn_validate FAILs on a missing or empty slot. -->
 

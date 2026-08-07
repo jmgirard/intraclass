@@ -203,6 +203,24 @@ agg <- do.call(
 )
 print(agg)
 
+# --- Commit the reference (BEFORE the pins: save-first, so a marginal pin ---
+# --- can never abort a completed multi-hour run with nothing written) -------
+out <- file.path("tests", "testthat", "fixtures", "bayesian-oracle.rds")
+dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
+saveRDS(
+  list(
+    source = "ten Hove, Jorgensen & van der Ark (2020), doi:10.1007/978-3-030-43469-4_7",
+    generated = Sys.Date(),
+    dgp = list(n_subjects = n_subjects, s2_s = s2_s, s2_sr = s2_sr),
+    brm_args = brm_args,
+    n_rep = n_rep,
+    base_seed = base_seed,
+    stats = agg
+  ),
+  out
+)
+message("Wrote ", out)
+
 # --- Validate against ten Hove et al. (2020), Sec. 4.2 (the pins) ----------
 # The pins encode the source's QUALITATIVE findings (a coverage oracle reproduces
 # findings, not exact decimals). Tolerances absorb our finite n_rep and our
@@ -245,20 +263,3 @@ stopifnot(
   k5$coverage_icc <= 0.99,
   k2$coverage_icc < k5$coverage_icc
 )
-
-# --- Commit the reference --------------------------------------------------
-out <- file.path("tests", "testthat", "fixtures", "bayesian-oracle.rds")
-dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-saveRDS(
-  list(
-    source = "ten Hove, Jorgensen & van der Ark (2020), doi:10.1007/978-3-030-43469-4_7",
-    generated = Sys.Date(),
-    dgp = list(n_subjects = n_subjects, s2_s = s2_s, s2_sr = s2_sr),
-    brm_args = brm_args,
-    n_rep = n_rep,
-    base_seed = base_seed,
-    stats = agg
-  ),
-  out
-)
-message("Wrote ", out)
