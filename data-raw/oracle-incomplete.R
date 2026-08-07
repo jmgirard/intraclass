@@ -123,8 +123,12 @@ scon <- icc(sim, score, subject, rater, type = "consistency", seed = 7)
 cs <- sfit$components
 pop_a1 <- s2s / (s2s + s2r + s2res)
 pop_c1 <- s2s / (s2s + s2res)
+# tidy() returns one row per unit (single + average) since the numeric-unit
+# work; this oracle's pins are written against the single-unit estimand.
 tidy_a <- generics::tidy(sfit)
+tidy_a <- tidy_a[tidy_a$index == "ICC(A,1)", ]
 tidy_c <- generics::tidy(scon)
+tidy_c <- tidy_c[tidy_c$index == "ICC(C,1)", ]
 
 cat("Oracle 2 -- seeded MCAR-incomplete simulation (n =", nrow(sim), ")\n")
 cat(sprintf(

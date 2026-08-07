@@ -9,7 +9,7 @@ oracle-fixed-multilevel.R	2026-08-07	pins-pass	10/10		NA	NA	4.6.1	1.1.14	2.0.1	2
 oracle-fixed-vs-random.R	2026-08-07	pins-pass	0/0		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.01
 oracle-incomplete-fixed-nested.R	2026-08-07	reproduced	3/3		0.000e+00	9	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=3.86
 oracle-incomplete-multilevel.R	2026-08-07	pins-pass	7/7		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.03
-oracle-incomplete.R	2026-08-07	pins-fail-escalated	1/2	abs(tidy_a$estimate - pop_a1) < 0.05 & abs(tidy_c$estimate - pop_c1) < 0.05 & pop_a1 >= tidy_a$conf.low && pop_a1 <= tidy_a$conf.high & pop_c1 >= tidy_c$conf.low && pop_c1 <= tidy_c$conf.high	NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.05
+oracle-incomplete.R	2026-08-07	pins-pass	2/2		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.03
 oracle-multilevel.R	2026-08-07	pins-pass	7/7		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.04
 oracle-nested-fixed-interval.R	2026-08-07	reproduced	2/2		0.000e+00	10	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=14.76
 oracle-nested-multilevel.R	2026-08-07	pins-pass	16/16		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.04
