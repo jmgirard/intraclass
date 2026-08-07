@@ -813,38 +813,36 @@ is cited by **PDF page** for that reason.
   *independent* of their `modeest` tool, so convergence on their numbers is a stronger
   cross-implementation check than re-running their code; the mode bandwidth/boundary
   spec is fixed a-priori and validated, not tuned to these targets.
-- **Reproduced (n_rep = 250/cell, σ²_r = .01, seed 20200; committed
-  `tests/testthat/fixtures/bayesian-oracle.rds`).** k = 5: convergence .996, MAP
-  ICC(A,1) rel bias **−.041** (unbiased), coverage **.956** (nominal), EAP σ_r rel bias
-  **+.746** vs MAP σ_r **−.145**. k = 2: convergence .904, MAP ICC(A,1) rel bias
-  **−.259** (biased low), coverage .916 (undercovers), EAP σ_r rel bias **+3.67** vs
-  MAP σ_r −.365. The four findings replicate.
-  *(Values corrected M72 to the committed fixture. The figures previously printed here
-  — .992/−.040/.948/+.741/−.147 and .924/−.243/.912/+3.60/−.318 — disagreed with
-  `bayesian-oracle.rds` on every statistic, while its DGP, seed and n_rep matched, so
-  the prose appears to have been written from a different run than the fixture that
-  shipped. The script was **not** re-run to adjudicate: under D-008 a re-run today
-  would produce a third set of numbers rather than settle which earlier run was
-  authoritative. No test asserted the old figures — `test-icc-brms.R` checks only
-  the qualitative pins against the fixture — and all four findings below hold on the
-  corrected numbers. The M107 harness has since re-run the script — observed
-  2026-08-06 (brms 2.23.0, rstan 2.32.7, R 4.6.1): the three published-findings
-  pin blocks hold on the fresh statistics, while the convergence-guard pin
-  fails at k = 2 — fresh converged_frac .864 against the pinned ≥ .90 floor
-  (the fixture's own .904); that .040 convergence gap is also the largest
-  difference between the fresh and committed statistics, so every other
-  compared value differs by less. The fixture records no engine versions to
-  compare these against — this run's are the first captured. The ledger row
-  (`data-raw/oracle-rerun-ledger.tsv`) reads `diverged-escalated` per D-024,
-  pending the maintainer's adjudication; the committed fixture is unchanged
-  by the re-run.)* **Two reported divergences (#4/#18, not
-  tuned):** (a) convergence is high but not their 100% — they adaptively *doubled*
-  warmup until R̂ < 1.10, we use a fixed budget, so a minority of the near-boundary
-  k = 2 reps fall short; (b) our reflected-KDE σ_r MAP is modestly *negative*-biased
-  where their `modeest` MAP was ~unbiased — an independent-estimator difference at a
-  tiny near-boundary σ_r that barely moves the ICC (σ²_r is a small denominator term).
-  So the σ_r pin is the robust **EAP-overestimates-far-more-than-MAP** contrast, not our
-  MAP's absolute bias.
+- **Reproduced (n_rep = 500/cell, σ²_r = .01, seed 20200, adaptive warmup +
+  seeded template; committed `tests/testthat/fixtures/bayesian-oracle.rds`,
+  re-baselined M108/D-025 — observed 2026-08-07, brms 2.23.0, rstan 2.32.7,
+  R 4.6.1).** k = 5: convergence **1.000**, MAP ICC(A,1) rel bias **−.052**
+  (unbiased), coverage **.958** (nominal), EAP σ_r rel bias **+.678** vs MAP σ_r
+  **−.236**. k = 2: convergence **1.000**, MAP ICC(A,1) rel bias **−.265**
+  (biased low), coverage .918 (undercovers), EAP σ_r rel bias **+3.45** vs
+  MAP σ_r −.381. The four findings replicate, and the post-remedy harness
+  re-run reproduces the fixture at bit level (`reproduced`, pins 4/4,
+  max_abs_delta 0 — 2026-08-07 ledger row).
+  *(History: the 2026-08-06 M107 harness re-run of the then fixed-warmup script
+  read `diverged-escalated` — fresh k = 2 converged_frac .864 against the
+  pinned ≥ .90 floor, the three published-findings pins holding. M108
+  adjudicated it (D-025): the convergence shortfall was the fixed warmup
+  budget that had replaced the source's adaptive protocol, and the wider
+  run-to-run spread (.864/.904/.924 across nominally identical runs) was the
+  script's unseeded base-template stage, on which `update()` refit draws
+  measurably depend — so every pre-M108 run, the committed fixture included,
+  was an unreproducible realization. Both fixed — per-rep adaptive warmup
+  doubling (≤ 3) and a seeded template — the script is now a deterministic
+  function of its declared seeds. Earlier prose-vs-fixture figure
+  disagreements were corrected at M72 without a re-run; both records are in
+  git.)* **One reported divergence (#4/#18, not tuned):** our reflected-KDE
+  σ_r MAP is modestly *negative*-biased where their `modeest` MAP was
+  ~unbiased — an independent-estimator difference at a tiny near-boundary σ_r
+  that barely moves the ICC (σ²_r is a small denominator term). So the σ_r pin
+  is the robust **EAP-overestimates-far-more-than-MAP** contrast, not our
+  MAP's absolute bias. The former fixed-warmup convergence divergence is gone:
+  warmup doubles adaptively as in the source (convergence 1.000 both cells;
+  11.2% of k = 2 reps needed ≥ 1 doubling, 0.8% at k = 5).
 - **Provenance:** `data-raw/oracle-bayesian.R` (Slice 2) — seeded reproduction of the
   DGP applying the shipped reduction (`brms_component_draws` / `posterior_summary` /
   `posterior_mode` / `brms_convergence`) to `update()`-refit brms fits (the model is

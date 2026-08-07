@@ -585,9 +585,9 @@ test_that("O-Bayes: committed reference reproduces ten Hove (2020) findings", {
   k5 <- s[s$k == 5L, ]
   k2 <- s[s$k == 2L, ]
 
-  # (1) High convergence at the half-t DGP -- their finding was 100%, but they
-  #     adaptively doubled warmup; we use a fixed budget, so a minority of the
-  #     near-boundary k = 2 reps fall short (a reported divergence, #4/#18).
+  # (1) High convergence at the half-t DGP -- their finding was 100%, and since
+  #     M108 (D-025) the script doubles warmup adaptively as they did (bounded,
+  #     <= 3 doublings), so the committed reference converges at 1.000 per cell.
   expect_true(all(s$converged_frac >= 0.90))
 
   # (2) sigma_r: the EAP SEVERELY overestimates while the MAP is far less biased
