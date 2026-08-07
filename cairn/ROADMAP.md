@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | in-progress | — | normal | milestones/M108-oracle-bayesian-k2-adjudication.md |
+| M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | review | — | normal | milestones/M108-oracle-bayesian-k2-adjudication.md |
 | M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | planned | M108 | normal | milestones/M109-bayesian-oracle-reruns.md |
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
 | M106 | The opt-in ci_method values are documented in the vignettes | done | — | normal | milestones/archive/M106-optin-ci-method-vignette.md |
