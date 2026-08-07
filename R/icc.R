@@ -365,9 +365,12 @@
 #'   Details for the ICC(k), endpoint-support, and point-estimate conventions.
 #'   `"searle"` and `"burch"` are two **deterministic classical closed-form**
 #'   intervals, also **only for the balanced one-way random design** (they abort
-#'   otherwise). Both give a finite interval on every dataset -- including the
-#'   near-zero-ICC boundary where the Monte-Carlo default aborts -- and neither
-#'   resamples, so `mc_samples`, `boot_samples`, and `seed` do not apply.
+#'   otherwise). Both return a finite interval at the near-zero-ICC boundary
+#'   where the Monte-Carlo default aborts -- with one asymmetry: on data with no
+#'   between-subject variance at all, `"burch"` aborts (its kurtosis
+#'   standardization divides by zero there) while `"searle"` still returns its
+#'   attained minimum -- and neither resamples, so `mc_samples`, `boot_samples`,
+#'   and `seed` do not apply.
 #'   `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7):
 #'   **exact under normality**, best-calibrated and narrowest when the data are
 #'   approximately normal. `"burch"` is the REML-based, kurtosis-adjusted interval
@@ -540,9 +543,9 @@
 #'   `print`/`summary` methods.
 #'
 #' @references
-#' Burch, B. D. (2011). Confidence intervals for the intraclass correlation
-#' coefficient based on the restricted maximum likelihood estimator.
-#' *Journal of Statistical Computation and Simulation, 81*(9), 1101-1115.
+#' Burch, B. D. (2011). Assessing the performance of normal-based and REML-based
+#' confidence intervals for the intraclass correlation coefficient.
+#' *Computational Statistics and Data Analysis, 55*, 1018-1028.
 #'
 #' McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some intraclass
 #' correlation coefficients. *Psychological Methods, 1*(1), 30-46.

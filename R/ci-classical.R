@@ -3,9 +3,10 @@
 # Two closed-form intervals for the balanced one-way random ICC, exported as
 # `ci_method = "searle"` and `ci_method = "burch"` (M82, D-012; assessed
 # GO-for-opt-in in M76). Both are DETERMINISTIC (no resampling): a finite,
-# well-calibrated interval exists on every dataset, including the near-zero-ICC
-# boundary where the Monte-Carlo default aborts (`intraclass_singular_fit`,
-# D-006). They differ in their robustness:
+# well-calibrated interval exists at the near-zero-ICC boundary where the
+# Monte-Carlo default aborts (`intraclass_singular_fit`, D-006) -- except that
+# `burch` at MSA exactly 0 aborts classed rather than standardize by
+# `sqrt(MSA) = 0` (D-022). They differ in their robustness:
 #   - SEARLE exact-F (Searle 1971 eq. 4/6; mcgraw1996 Table 7): EXACT under
 #     normality, best-calibrated + narrowest on ~normal data.
 #   - Burch (2011) REML (eq. 6/13/15/16/17): kurtosis-adjusted `log(1+nθ̂)`

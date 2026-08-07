@@ -121,3 +121,8 @@ the same source-rounding subtlety flagged for ohyama2025 §4.
   independent published exact-F value for the SEARLE leg.
 - The non-normal / near-zero coverage expectations set the GP6 sweep design and
   the non-normal decision rule (T4).
+- The `?icc` `@references` entry cites this paper by its verified title and
+  journal; a wrong title, journal, and page range (the *JSCS* rendering the
+  M106 review's F4 corrected in the glossary) was still live there — observed
+  2026-08-06. <!-- check: git grep -qF 'Computational Statistics and Data Analysis' -- R/icc.R && ! git grep -qiF 'Journal of Statistical Computation and Simulation' -- R -->
+
