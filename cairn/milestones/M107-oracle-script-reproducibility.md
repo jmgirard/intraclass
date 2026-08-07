@@ -100,7 +100,7 @@ offline background jobs by design).
       pin-before-save scripts (move fixture `saveRDS` ahead of the
       published-findings pins, minimal diff, same seed/flow); update the
       README note.
-- [ ] T3: Build `data-raw/rerun-oracle.R`: source a named oracle script with
+- [x] T3: Build `data-raw/rerun-oracle.R`: source a named oracle script with
       writes redirected to `tempdir()`, evaluate pins non-fatally, compare a
       fixture-writing script's fresh values to its committed fixture, capture
       R/glmmTMB/lme4/brms/rstan/StanHeaders versions, append the
@@ -128,6 +128,7 @@ offline background jobs by design).
 - 2026-08-06: D-021 collision disposed at the gate — the maintainer confirmed this scope proceeds under its untouched oracle-discipline clause; no superseding entry.
 - 2026-08-06: T1 done — D-024 (divergence policy) appended; branch cut, status in-progress. Implement question gate skipped: no genuinely open choices (plan gate settled scope/policy/D-021; no dependency or API changes).
 - 2026-08-06: T2 done — all five pin-before-save scripts reordered (Commit block ahead of pins), parse + air + lintr clean; README caveat rewritten (save-first everywhere; the five still lack checkpoints). Noted: `oracle-bayesian.R`'s "Observed" comment carries the pre-M72 numbers, matching the old ORACLES prose, not the fixture — T4/T6 will adjudicate.
+- 2026-08-06: T3 done — harness built (shadowed non-fatal `stopifnot` recorder + `saveRDS` redirect to tempdir; leaf-wise fixture compare; replace-on-rerun ledger); bench-tested on oracle-sem.R (pins 2/2) and oracle-fixed-vs-random.R (pins 0/0, honest); air+lintr clean, ref-observations checker green.
 
 ## Decisions
 
