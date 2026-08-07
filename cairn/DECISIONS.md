@@ -1048,3 +1048,34 @@ inherit it; a maintainer-decided re-baseline supersedes nothing here — it is
 the escalation path this entry itself provides. Decided at the M107 plan gate
 (2026-08-06), the maintainer choosing escalate-never-re-baseline over
 re-baseline-on-drift.
+
+### D-025 (2026-08-07): oracle-bayesian.R k=2 divergence adjudicated — fixed warmup and an unseeded template were the causes; adaptive doubling + seeded template, fixture re-baselined (executes D-024 clauses 3–4)
+
+**Context:** The first M107 harness re-run of `data-raw/oracle-bayesian.R`
+(2026-08-06) came back `diverged-escalated`: k=2 `converged_frac` .864 against
+the pinned ≥ .90 floor (committed fixture .904), the three published-findings
+pins holding. D-024 clause 3 sizes such an adjudication as its own work; M108
+is that work, and its plan gate (2026-08-07) made the escalation decision.
+**Decision:** Two measured attributions, two remedies, one re-baseline. (1) The
+convergence shortfall is the script's fixed warmup budget, which had replaced
+the source's adaptive protocol (ten Hove et al. 2020 §4.1.3): with per-rep
+bounded adaptive warmup doubling (≤ 3 doublings, `iter = warmup + 1000`, refit
+while R̂ ≥ 1.10 or bulk ESS ≤ 100), k=2 `converged_frac` is 1.000 on the same
+seed stream (fixed-warmup: .864). Rejected: a larger fixed budget (re-fails at
+the next engine upgrade) and lowering the .90 floor (moves the bar to fit the
+evidence — GP5). (2) Mid-milestone, the post-remedy harness re-run diverged on
+a different pin (the k=2 < k=5 coverage ordering), which probes attributed to
+the script's unseeded base-template stage: `update()` refit draws depend on
+the template fit, so every prior run — the committed fixture included — was an
+unreproducible realization (the .864/.904/.924 historical spread). Remedy,
+chosen at the 2026-08-07 amendment gate: seed the template stage
+(`set.seed(base_seed)` before the template draw, Stan `seed` on the template
+fit) and raise `n_rep` to 500. (3) The fixture is re-baselined to the
+deterministic run under D-024 clause 4 (maintainer-decided): 4/4 pins, and the
+harness re-run reproduces it at `max_abs_delta` 0 (`reproduced`, 4/4).
+**Consequences:** the ≥ .90 convergence pin and every published-findings pin
+stand unchanged; the 19 sibling `oracle-bayesian-*.R` scripts share the
+unseeded-template pattern, so M109 inherits both remedies as precedent — a
+sibling divergence is adjudicated, never batch-fixed, but the attribution here
+is where its adjudication starts; the M107 ledger's `diverged-escalated` rows
+for this script are closed by the 2026-08-07 `reproduced` row.

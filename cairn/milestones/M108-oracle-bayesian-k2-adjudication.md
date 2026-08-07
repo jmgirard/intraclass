@@ -107,7 +107,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
       work-log k=2/k=5 `converged_frac` beside the 2026-08-06 run's .864;
       commit the regenerated fixture with transcript-verified 4/4 pins. A
       pin still failing → stop and return to the gate, never re-run to green.
-- [ ] T3: Harness re-run → non-escalated ledger row; append the D-entry
+- [x] T3: Harness re-run → non-escalated ledger row; append the D-entry
       (adjudication + rationale, citing D-024); retire the ROADMAP candidate
       row to it.
 - [ ] T4: ORACLES.md O-Bayes refresh; the AC5 grep sweep with per-hit
@@ -127,6 +127,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 - 2026-08-07: attribution probes — a 30-rep slice of the real pipeline is bit-identical across repeated direct runs AND under the harness `source()` mechanism when the template stage is seeded; changing only the template's data seed (42→43) changes every rep's draws (template seeds 999/888 coincidentally identical — channel partial, unresolved, immaterial to the fix). The script's non-reproducibility is the unseeded template stage; explains the historical .864/.904/.924 spread.
 - 2026-08-07: substantive amendment (gate): Scope-In adds the template seeding fix + n_rep 250→500; maintainer chose "seed fix + n_rep 500" over 250-only, pin-softening, and pause.
 - 2026-08-07: T2 re-done under the amendment — AC2/AC3 at the final settings (seeded template, n_rep 500, seed stream 20200): k=2 `converged_frac` 1.000 (frac adapted .112), k=5 1.000 (.008), vs .864 at k=2 on the 2026-08-06 fixed-warmup run; transcript shows exit 0 past all four save-first pin blocks (4/4); coverage .918 (k=2) < .958 (k=5), the ordering pin's gap now .04; fixture committed.
+- 2026-08-07: T3 done — AC4: harness re-run verdict `reproduced`, pins 4/4, max_abs_delta 0.000e+00 over 21 leaves (ledger row replaces `diverged-escalated`); D-025 appended (adjudication + rationale, executing D-024 clauses 3–4); the motivating ROADMAP candidate row was already retired at the 2026-08-07 plan commit (promoted into the M108 row), so AC1's retirement clause is carried by that commit + D-025.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
