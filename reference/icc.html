@@ -378,9 +378,12 @@ exists where the Monte-Carlo default aborts) and non-normality robustness. See
 Details for the ICC(k), endpoint-support, and point-estimate conventions.
 <code>"searle"</code> and <code>"burch"</code> are two <strong>deterministic classical closed-form</strong>
 intervals, also <strong>only for the balanced one-way random design</strong> (they abort
-otherwise). Both give a finite interval on every dataset – including the
-near-zero-ICC boundary where the Monte-Carlo default aborts – and neither
-resamples, so <code>mc_samples</code>, <code>boot_samples</code>, and <code>seed</code> do not apply.
+otherwise). Both return a finite interval at the near-zero-ICC boundary
+where the Monte-Carlo default aborts – with one asymmetry: on data with no
+between-subject variance at all, <code>"burch"</code> aborts (its kurtosis
+standardization divides by zero there) while <code>"searle"</code> still returns its
+attained minimum – and neither resamples, so <code>mc_samples</code>, <code>boot_samples</code>,
+and <code>seed</code> do not apply.
 <code>"searle"</code> is the exact-F pivot (Searle 1971; McGraw &amp; Wong 1996, Table 7):
 <strong>exact under normality</strong>, best-calibrated and narrowest when the data are
 approximately normal. <code>"burch"</code> is the REML-based, kurtosis-adjusted interval
@@ -726,9 +729,9 @@ Monte-Carlo default aborts.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Burch, B. D. (2011). Confidence intervals for the intraclass correlation
-coefficient based on the restricted maximum likelihood estimator.
-<em>Journal of Statistical Computation and Simulation, 81</em>(9), 1101-1115.</p>
+    <p>Burch, B. D. (2011). Assessing the performance of normal-based and REML-based
+confidence intervals for the intraclass correlation coefficient.
+<em>Computational Statistics and Data Analysis, 55</em>, 1018-1028.</p>
 <p>McGraw, K. O., &amp; Wong, S. P. (1996). Forming inferences about some intraclass
 correlation coefficients. <em>Psychological Methods, 1</em>(1), 30-46.</p>
 <p>Searle, S. R. (1971). <em>Linear Models</em>. Wiley.</p>

@@ -346,34 +346,36 @@ icc(
   See Details for the ICC(k), endpoint-support, and point-estimate
   conventions. `"searle"` and `"burch"` are two **deterministic
   classical closed-form** intervals, also **only for the balanced
-  one-way random design** (they abort otherwise). Both give a finite
-  interval on every dataset – including the near-zero-ICC boundary where
-  the Monte-Carlo default aborts – and neither resamples, so
-  `mc_samples`, `boot_samples`, and `seed` do not apply. `"searle"` is
-  the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7): **exact
-  under normality**, best-calibrated and narrowest when the data are
-  approximately normal. `"burch"` is the REML-based, kurtosis-adjusted
-  interval of Burch (2011): wider, but robust to non-normality and never
-  under-covering. Prefer `"searle"` for near-normal data and `"burch"`
-  when heavy tails or non-normality are a concern. `"mpl"` is the
-  **modified profile-likelihood** interval of Xiao & Liu (2013), **only
-  for the balanced-complete two-way random absolute-agreement ICC(A,1)**
-  (with ICC(A,k) and any numeric-`unit` projection `ICC(A,m)` its
-  Spearman-Brown image, pole-safe for every `m >= 1`); it aborts on any
-  other design, on consistency (ICC(C,.)) or fixed raters, and on
-  unbalanced or incomplete data. It is a **deterministic closed form**
-  (no resampling; `mc_samples`, `boot_samples`, and `seed` do not apply)
-  that, like `"npbootstrap"`, returns an interval at the near-zero-ICC
-  boundary where the two-way Monte-Carlo default aborts – a limit is
-  reported at the `[0, 1]` boundary only when the profile deviance shows
-  the confidence set reaching it, and a degenerate fit (raters in
-  near-perfect agreement) or a failed root search raises a classed error
-  rather than a fabricated boundary value – and covers at or above
-  nominal across the pre-registered grid where the incumbents can
-  under-cover (assessed as GO-for-opt-in against that grid). It is
-  deliberately **conservative** (it over-covers, and is wider than the
-  Monte-Carlo interval at interior cells), so it is an opt-in, not the
-  default.
+  one-way random design** (they abort otherwise). Both return a finite
+  interval at the near-zero-ICC boundary where the Monte-Carlo default
+  aborts – with one asymmetry: on data with no between-subject variance
+  at all, `"burch"` aborts (its kurtosis standardization divides by zero
+  there) while `"searle"` still returns its attained minimum – and
+  neither resamples, so `mc_samples`, `boot_samples`, and `seed` do not
+  apply. `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong
+  1996, Table 7): **exact under normality**, best-calibrated and
+  narrowest when the data are approximately normal. `"burch"` is the
+  REML-based, kurtosis-adjusted interval of Burch (2011): wider, but
+  robust to non-normality and never under-covering. Prefer `"searle"`
+  for near-normal data and `"burch"` when heavy tails or non-normality
+  are a concern. `"mpl"` is the **modified profile-likelihood** interval
+  of Xiao & Liu (2013), **only for the balanced-complete two-way random
+  absolute-agreement ICC(A,1)** (with ICC(A,k) and any numeric-`unit`
+  projection `ICC(A,m)` its Spearman-Brown image, pole-safe for every
+  `m >= 1`); it aborts on any other design, on consistency (ICC(C,.)) or
+  fixed raters, and on unbalanced or incomplete data. It is a
+  **deterministic closed form** (no resampling; `mc_samples`,
+  `boot_samples`, and `seed` do not apply) that, like `"npbootstrap"`,
+  returns an interval at the near-zero-ICC boundary where the two-way
+  Monte-Carlo default aborts – a limit is reported at the `[0, 1]`
+  boundary only when the profile deviance shows the confidence set
+  reaching it, and a degenerate fit (raters in near-perfect agreement)
+  or a failed root search raises a classed error rather than a
+  fabricated boundary value – and covers at or above nominal across the
+  pre-registered grid where the incumbents can under-cover (assessed as
+  GO-for-opt-in against that grid). It is deliberately **conservative**
+  (it over-covers, and is wider than the Monte-Carlo interval at
+  interior cells), so it is an opt-in, not the default.
 
   Two constraints follow from its calibration. It is available **only at
   `conf_level` 0.90, 0.95, or 0.99** – the correction constant is
@@ -741,9 +743,10 @@ Monte-Carlo default aborts.
 
 ## References
 
-Burch, B. D. (2011). Confidence intervals for the intraclass correlation
-coefficient based on the restricted maximum likelihood estimator.
-*Journal of Statistical Computation and Simulation, 81*(9), 1101-1115.
+Burch, B. D. (2011). Assessing the performance of normal-based and
+REML-based confidence intervals for the intraclass correlation
+coefficient. *Computational Statistics and Data Analysis, 55*,
+1018-1028.
 
 McGraw, K. O., & Wong, S. P. (1996). Forming inferences about some
 intraclass correlation coefficients. *Psychological Methods, 1*(1),
