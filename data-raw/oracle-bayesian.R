@@ -253,7 +253,7 @@ message("Wrote ", out)
 # findings, not exact decimals). Tolerances absorb our finite n_rep and our
 # INDEPENDENT MAP estimator; one divergence from the source is REPORTED, not
 # tuned away (#4/#18):
-#   * Our reflected-KDE MAP of sigma_r is modestly NEGATIVE-biased (~ -0.15 at k=5)
+#   * Our reflected-KDE MAP of sigma_r is modestly NEGATIVE-biased (~ -0.25 at k=5)
 #     where their modeest MAP was ~unbiased -- an estimator difference at a tiny
 #     near-boundary sigma_r that barely moves the ICC (sigma^2_r is a small term in
 #     the denominator). We therefore pin the ROBUST contrast (EAP overestimates far
@@ -262,9 +262,10 @@ message("Wrote ", out)
 # earlier fixed-warmup convergence shortfall (k=2 .864-.924 across runs) no
 # longer applies; the >= 0.90 pin stands, with the bounded adaptation (<= 3
 # doublings) leaving room for a rare rep to fall short.
-# Observed (n_rep = 250, seed 20200, adaptive warmup): recorded from the M108
-# regeneration run -- see the values asserted by test-icc-brms.R against the
-# committed fixture.
+# Observed (n_rep = 250, seed 20200, adaptive warmup): k=5 conv 1.000 (frac
+# adapted .032), MAP-ICC relbias -.049, cover .944, MAP-sr relbias -.246,
+# EAP-sr relbias +.659; k=2 conv 1.000 (frac adapted .116), MAP-ICC relbias
+# -.257, cover .920, MAP-sr relbias -.256, EAP-sr relbias +3.524.
 k5 <- agg[agg$k == 5L, ]
 k2 <- agg[agg$k == 2L, ]
 

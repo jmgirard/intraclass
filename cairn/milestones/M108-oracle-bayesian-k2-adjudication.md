@@ -90,7 +90,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
       refit with doubled warmup (≤ 3 doublings) while R̂ ≥ 1.10 or
       ESS ≤ 100 — and update the header's divergence-from-source notes
       (lines 229–239), which the remedy partly obsoletes.
-- [ ] T2: Run the amended script in the background (both cells, ~500+ fits;
+- [x] T2: Run the amended script in the background (both cells, ~500+ fits;
       check for concurrent R sessions first — M107 contention lesson);
       work-log k=2/k=5 `converged_frac` beside the 2026-08-06 run's .864;
       commit the regenerated fixture with transcript-verified 4/4 pins. A
@@ -110,6 +110,7 @@ fixtures and are untouched by this remedy; the M107 harness — no changes.
 - 2026-08-07: plan gate chose adaptive warmup doubling + fixture regeneration over (a) a larger fixed budget and (b) revising the .90 floor to .85, because the source's own protocol is adaptive and a fixed budget re-fails at the next engine upgrade, while a floor cut moves the bar to fit the evidence (GP5); falsified by the amended script's k=2 `converged_frac` still landing below .90 on the same seed stream.
 - 2026-08-07: status → in-progress; branch `m108-oracle-bayesian-k2-adjudication` cut from pushed main; question gate skipped (the plan gate already fixed the remedy and its parameters — nothing genuinely open).
 - 2026-08-07: T1 done — `one_rep()` now refits with doubled warmup (≤ 3 doublings, `iter = warmup + 1000`) while R̂ ≥ 1.10 or bulk ESS ≤ 100 on the monitored components; per-rep `n_doublings` and per-cell `frac_adapted` recorded; fixed-warmup divergence notes rewritten (observed-stats line filled at T2 from the regeneration run); air + parse clean.
+- 2026-08-07: T2 done — AC2: k=2 `converged_frac` 1.000 and k=5 1.000 at the amended settings (seed stream 20200; frac adapted .116/.032) vs the 2026-08-06 fixed-warmup harness run's k=2 .864 (ledger row; committed fixture .904) — the shortfall is attributable to the fixed warmup budget, removed by the source's own adaptive protocol. AC3: regeneration transcript shows the run exiting 0 past all four save-first `stopifnot` pin blocks (4/4; no R sessions were running concurrently); regenerated fixture committed (k=5 σ_r MAP relbias moved −.147→−.246, divergence note figure updated).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
