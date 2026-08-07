@@ -1,11 +1,11 @@
 # M107: Oracle-script reproducibility — the re-run harness and the first sixteen re-runs
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5
-- **Branch/PR:** —
+- **Branch/PR:** m107-oracle-script-reproducibility
 
 ## Goal
 
@@ -92,7 +92,7 @@ offline background jobs by design).
 
 ## Tasks
 
-- [ ] T1: Commit the divergence-policy D-entry (gate-decided 2026-08-06):
+- [x] T1: Commit the divergence-policy D-entry (gate-decided 2026-08-06):
       pins are the bar; escalate, never re-baseline; fixtures never
       overwritten by a re-run; drift and engine-version deltas recorded in
       the ledger.
@@ -126,6 +126,7 @@ offline background jobs by design).
 - 2026-08-06: plan gate chose the 16-script scope over oracle-bayesian-only and all-35 because the non-Bayes runs are cheap and the 19 Stan re-runs are a multi-day job the harness unblocks; falsified by the harness proving unusable for a batched Stan re-run.
 - 2026-08-06: plan gate chose escalate-never-re-baseline over re-baseline-on-drift because re-baselining erases provenance and makes every re-run self-certifying; falsified by a pin-level divergence traced to a benign engine-version change where the published finding still holds.
 - 2026-08-06: D-021 collision disposed at the gate — the maintainer confirmed this scope proceeds under its untouched oracle-discipline clause; no superseding entry.
+- 2026-08-06: T1 done — D-024 (divergence policy) appended; branch cut, status in-progress. Implement question gate skipped: no genuinely open choices (plan gate settled scope/policy/D-021; no dependency or API changes).
 
 ## Decisions
 
