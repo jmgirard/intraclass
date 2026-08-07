@@ -96,7 +96,7 @@ offline background jobs by design).
       pins are the bar; escalate, never re-baseline; fixtures never
       overwritten by a re-run; drift and engine-version deltas recorded in
       the ledger.
-- [ ] T2: Save-first hardening of the five `data-raw/README.md`
+- [x] T2: Save-first hardening of the five `data-raw/README.md`
       pin-before-save scripts (move fixture `saveRDS` ahead of the
       published-findings pins, minimal diff, same seed/flow); update the
       README note.
@@ -127,6 +127,7 @@ offline background jobs by design).
 - 2026-08-06: plan gate chose escalate-never-re-baseline over re-baseline-on-drift because re-baselining erases provenance and makes every re-run self-certifying; falsified by a pin-level divergence traced to a benign engine-version change where the published finding still holds.
 - 2026-08-06: D-021 collision disposed at the gate — the maintainer confirmed this scope proceeds under its untouched oracle-discipline clause; no superseding entry.
 - 2026-08-06: T1 done — D-024 (divergence policy) appended; branch cut, status in-progress. Implement question gate skipped: no genuinely open choices (plan gate settled scope/policy/D-021; no dependency or API changes).
+- 2026-08-06: T2 done — all five pin-before-save scripts reordered (Commit block ahead of pins), parse + air + lintr clean; README caveat rewritten (save-first everywhere; the five still lack checkpoints). Noted: `oracle-bayesian.R`'s "Observed" comment carries the pre-M72 numbers, matching the old ORACLES prose, not the fixture — T4/T6 will adjudicate.
 
 ## Decisions
 
