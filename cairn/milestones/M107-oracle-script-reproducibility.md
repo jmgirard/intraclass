@@ -73,7 +73,7 @@ offline background jobs by design).
       observation in `cairn/references/ORACLES.md` (the parenthetical at
       ~lines 822–831 containing "The script was **not** re-run to
       adjudicate") is corrected in place to a dated observation of this run.
-- [ ] AC6: The active profile's verify slot is clean, and after the edits
+- [x] AC6: The active profile's verify slot is clean, and after the edits
       these pass locally: `python3 data-raw/enumerate-generalizing-claims.py
       --check` (the checker that scans ORACLES.md; any new dated numeric
       observation gets its `generalizing-claims-triage.tsv` row),
@@ -148,4 +148,4 @@ Evidence gathered fresh 2026-08-07 on branch m107-oracle-script-reproducibility,
 - AC4: `### D-024 (2026-08-06)` present (grep count 1); ledger run dates ∈ {2026-08-06, 2026-08-07}, none earlier. ✔
 - AC5: oracle-bayesian.R row pins=3/4, pin_detail names the failing block (`all(agg$converged_frac >= 0.9)`, the convergence guard); the harness evaluated all four blocks non-fatally (recorder semantics, T3) — block-level status readable for all four (failing blocks enumerated, complement passed). ORACLES.md carries the dated-observation correction ("The M107 harness has since re-run the script — observed 2026-08-06 …", grep count 1). ✔
 - AC6: suite at `NOT_CRAN=true CI=true` FAIL 0 / PASS 5854 / SKIP 23 (all skip_on_ci-brms); air `--check` exit 0; `lint_package()` 0. Checkers re-run at review: enumerate-generalizing-claims `--check` 294/294 in sync; check-reference-observations 0 unmarked / 0 falsified; check-oracle-registry 67 tokens, 0 gaps. `devtools::check()` pending below.
-- Consistency gate: `cairn_validate` exit 0 (16 PASS / 8 OK); `document()` no diff; `pkgdown::check_pkgdown()` no problems; NEWS entry not owed — the milestone ships no user-visible package change (data-raw + cairn only); `data-raw/` already .Rbuildignored. `devtools::check(env_vars=c(NOT_CRAN="false"))` running; result recorded below.
+- Consistency gate: `cairn_validate` exit 0 (16 PASS / 8 OK); `document()` no diff; `pkgdown::check_pkgdown()` no problems; NEWS entry not owed — the milestone ships no user-visible package change (data-raw + cairn only); `data-raw/` already .Rbuildignored. `devtools::check(env_vars=c(NOT_CRAN="false"))`: 0 errors / 0 warnings / 0 notes (2m35s). AC6 ✔ (its suite/air/lintr and three-checker halves recorded in the AC6 line above).
