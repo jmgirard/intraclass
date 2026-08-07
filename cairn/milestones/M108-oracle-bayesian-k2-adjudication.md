@@ -190,3 +190,10 @@ versions never in scope; F10 (35) D-024 clause-3 letter vs the gated in-mileston
 amendment — disclosed, maintainer-decided; F11 (45) attribution wording firmer
 than the probe hedge, supported by the seeded-runs evidence; F12 (48) "bit
 level" shorthand for max_abs_delta exactly 0 over 21 leaves.
+
+CI gate fix (2026-08-07): the `check-references` job failed on
+`roadmap-terminal-rows` — a pre-existing break from M107's post-merge hygiene,
+which rotated M100 out of the ROADMAP terminal rows but did not update the
+`data-raw/record-claims.tsv` row (the third occurrence of the miss the row's
+own history records; this branch's CI was first to run since). Row corrected to
+M107..M101; `check-record-claims.py` + `--self-test` green locally.
