@@ -108,10 +108,10 @@ offline background jobs by design).
 - [x] T4: Launch the `oracle-bayesian.R` harness run in the background early
       in the session (~2 h live Stan; expect contention to double per-fit
       time).
-- [ ] T5: Re-run the 15 non-Bayes scripts through the harness (the long
+- [x] T5: Re-run the 15 non-Bayes scripts through the harness (the long
       `oracle-cluster-ck-coverage.R` at its committed n_rep, in background);
       record ledger rows and the per-run AC2 probe outputs.
-- [ ] T6: Harvest the `oracle-bayesian.R` run: ledger row with block-level
+- [x] T6: Harvest the `oracle-bayesian.R` run: ledger row with block-level
       pin outcomes; correct the O-Bayes observation in `ORACLES.md` in place
       as a dated observation; add any generalizing-claims triage rows; run
       the three AC6 checkers locally.
@@ -133,6 +133,7 @@ offline background jobs by design).
 - 2026-08-07: T5 batch done (12 scripts overnight; every AC2 probe empty): 3 reproduced at delta 0 (incomplete-fixed-nested, nested-fixed-interval, sem-multilevel-recovery), 8 pins-pass, oracle-fixed-cluster-level drift-within-noise pins 3/3 (219.6 min; delta=Inf traced to structural NAs in the committed fixture's boundary cell — comparator artifact, row annotated), oracle-incomplete pins-fail-escalated 1/2 — diagnosed: its Oracle-2 pin assumes one-row `tidy()`, which now returns single+average rows, so scalar comparisons vectorize; the single-unit row itself is within every bound (est .5790 vs pop .5714). Stale script expectation, not statistical divergence; to the gate per D-024.
 - 2026-08-07: comparator made NA-aware (positional compare; differing NA patterns → structural Inf); `oracle-cluster-ck-coverage.R` (the 15th non-Bayes script) launched in background at committed n_rep=240.
 - 2026-08-07: T6 desk half — O-Bayes ORACLES.md parenthetical corrected in place to the observed 2026-08-06 re-run (published-findings pins hold, convergence guard fails at k=2, fixture unchanged); all three AC6 checkers green (294/294 triaged, 0 falsified, 0 registry gaps).
+- 2026-08-07: T5/T6 complete — `oracle-cluster-ck-coverage.R` reproduced at delta 0.000e+00 (pins 1/1, 24.1 min, probe empty); all 16 ledger rows in. AC1 verified: set equality (ls-glob diff clean) and the bare-`saveRDS` partition (6 scripts) exactly match the 6 comparison-verdict rows. Verify gate launched.
 
 ## Decisions
 

@@ -1,5 +1,6 @@
 script	run_date	verdict	pins	pin_detail	max_abs_delta	n_compared_leaves	r_version	glmmtmb	lme4	brms	rstan	stanheaders	lavaan	notes
 oracle-bayesian.R	2026-08-06	diverged-escalated	3/4	all(agg$converged_frac >= 0.9)	4.000e-02	19	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=13.78
+oracle-cluster-ck-coverage.R	2026-08-07	reproduced	1/1		0.000e+00	9	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=24.06
 oracle-cluster-ck-incomplete.R	2026-08-06	pins-pass	9/9		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.44
 oracle-d-study.R	2026-08-06	pins-pass	0/0		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.02
 oracle-fixed-cluster-level.R	2026-08-07	drift-within-noise	3/3		 Inf	10	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=219.58; delta=Inf is a comparator artifact of the pre-NA-fix leaf diff: the committed fixture's coverage_random/mean_bias columns carry structural NAs (boundary cell), which mapped to Inf; NA patterns match and pins 3/3 are the D-024 bar
