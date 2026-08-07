@@ -58,7 +58,7 @@ cells <- list(
   list(k = 2L, s2_r = 0.01),
   list(k = 5L, s2_r = 0.01)
 )
-n_rep <- 250L
+n_rep <- 500L
 base_seed <- 20200L # DGP stream seed (distinct from each fit's Stan seed)
 # Match the source's sampler. Like the source (Sec. 4.1.3), warmup is
 # adaptively DOUBLED per replication -- up to max_warmup_doublings times while
@@ -111,11 +111,13 @@ simulate_twoway <- function(k, s2_r) {
 # / posterior_mode / brms_convergence) -- so this validates the same estimation recipe
 # fit_brms_twoway() uses, only amortizing the compile (the model is identical across k).
 # The base fit is only a COMPILED TEMPLATE: its own draws are never used (each rep
-# re-samples via update(seed = ...)). The per-rep DGP data and Stan seeds are fixed, so
-# the committed reference is a reproducible seeded realization; minor cross-run variation
-# (a few tenths of a percent in the convergence/coverage rates) is ordinary MCMC noise
-# and leaves every reported finding intact.
+# re-samples via update(seed = ...)). The template stage is itself SEEDED (M108/D-025):
+# update() refit draws measurably depend on the template fit, so an unseeded template
+# made every earlier run an unreproducible realization. With the template seeded, the
+# whole script is a deterministic function of its declared seeds and the committed
+# reference is bit-reproducible (the M107 harness's `reproduced` bar).
 message("Compiling the base Stan model once ...")
+set.seed(base_seed)
 d0 <- simulate_twoway(cells[[1]]$k, cells[[1]]$s2_r)
 base_fit <- do.call(
   brms::brm,
@@ -123,7 +125,8 @@ base_fit <- do.call(
     list(
       formula = score ~ 1 + (1 | subject) + (1 | rater),
       data = d0,
-      prior = brms::set_prior("student_t(4, 0, 1)", class = "sd")
+      prior = brms::set_prior("student_t(4, 0, 1)", class = "sd"),
+      seed = base_seed
     ),
     brm_args
   )
@@ -262,10 +265,8 @@ message("Wrote ", out)
 # earlier fixed-warmup convergence shortfall (k=2 .864-.924 across runs) no
 # longer applies; the >= 0.90 pin stands, with the bounded adaptation (<= 3
 # doublings) leaving room for a rare rep to fall short.
-# Observed (n_rep = 250, seed 20200, adaptive warmup): k=5 conv 1.000 (frac
-# adapted .032), MAP-ICC relbias -.049, cover .944, MAP-sr relbias -.246,
-# EAP-sr relbias +.659; k=2 conv 1.000 (frac adapted .116), MAP-ICC relbias
-# -.257, cover .920, MAP-sr relbias -.256, EAP-sr relbias +3.524.
+# Observed (n_rep = 500, seed 20200, adaptive warmup, seeded template): recorded
+# from the M108 regeneration run after the template-seeding amendment.
 k5 <- agg[agg$k == 5L, ]
 k2 <- agg[agg$k == 2L, ]
 
