@@ -43,6 +43,7 @@ COLLIDED = "data-raw/m92-interp-sweep-run1-collided.rds"
 LEDGER = "data-raw/mpl-doc-claims.tsv"
 ICC_R = "R/icc.R"
 NEWS = "NEWS.md"
+VIGNETTE = "vignettes/interval-methods.Rmd"
 
 # --------------------------------------------------------------------------
 # Minimal RDS (version 2/3, XDR) reader — only the object shapes the M92
@@ -293,6 +294,49 @@ def news_scope(text):
     return " ".join(body)
 
 
+def vignette_scope(text):
+    """The MPL subsection's prose (M106): from its ### heading to the next
+    heading, code chunks excluded — claims live in prose, not in R code."""
+    lines = text.splitlines()
+    start = None
+    for i, ln in enumerate(lines):
+        if re.match(r"^### The modified profile likelihood", ln):
+            start = i
+            break
+    if start is None:
+        raise ValueError(
+            f"{VIGNETTE}: the modified-profile-likelihood subsection was not found"
+        )
+    body, in_chunk = [], False
+    for ln in lines[start + 1 :]:
+        if ln.startswith("```"):
+            in_chunk = not in_chunk
+            continue
+        if in_chunk:
+            continue
+        if ln.startswith("## ") or ln.startswith("### "):
+            break
+        if ln.strip():
+            body.append(ln.strip())
+    return " ".join(body)
+
+
+def build_scopes():
+    """The one doc-scope build. The live check, the self-test, and --list all
+    call this, so the three can never sweep different surface sets (M106)."""
+    with open(ICC_R, encoding="utf-8") as fh:
+        icc = icc_scope(fh.read())
+    with open(NEWS, encoding="utf-8") as fh:
+        news = news_scope(fh.read())
+    with open(VIGNETTE, encoding="utf-8") as fh:
+        vig = vignette_scope(fh.read())
+    return {
+        "R/icc.R": icc["conf_level"] + " " + icc["ci_method"],
+        "NEWS.md": news,
+        VIGNETTE: vig,
+    }
+
+
 def normalize(s):
     s = s.replace("—", "--").replace("–", "--")
     s = re.sub(r"[*`]", "", s)
@@ -355,12 +399,7 @@ def run_check(fixture=FIXTURE, ledger_rows=None, scopes=None, verbose=True):
     if ledger_rows is None:
         ledger_rows = read_ledger()
     if scopes is None:
-        with open(ICC_R, encoding="utf-8") as fh:
-            icc = icc_scope(fh.read())
-        with open(NEWS, encoding="utf-8") as fh:
-            news = news_scope(fh.read())
-        scopes = {"R/icc.R": icc["conf_level"] + " " + icc["ci_method"],
-                  "NEWS.md": news}
+        scopes = build_scopes()
     cands = candidates(scopes)
     if not cands:
         failures.append("vacuity: no claim candidates found in the doc scope")
@@ -456,12 +495,7 @@ def self_test():
         problems.append("collided run-1 fixture did not red the check")
     # 3. deleting each settled claim's sentence from the docs must red
     #    (a ledger row whose claim is gone)
-    with open(ICC_R, encoding="utf-8") as fh:
-        icc = icc_scope(fh.read())
-    with open(NEWS, encoding="utf-8") as fh:
-        news = news_scope(fh.read())
-    scopes0 = {"R/icc.R": icc["conf_level"] + " " + icc["ci_method"],
-               "NEWS.md": news}
+    scopes0 = build_scopes()
     for r in settle_rows:
         qnorm = normalize(r["quote"])
         gutted = {
@@ -501,13 +535,7 @@ def main(argv):
     if "--self-test" in argv:
         return 1 if self_test() else 0
     if "--list" in argv:
-        with open(ICC_R, encoding="utf-8") as fh:
-            icc = icc_scope(fh.read())
-        with open(NEWS, encoding="utf-8") as fh:
-            news = news_scope(fh.read())
-        scopes = {"R/icc.R": icc["conf_level"] + " " + icc["ci_method"],
-                  "NEWS.md": news}
-        for fname, sent, key in candidates(scopes):
+        for fname, sent, key in candidates(build_scopes()):
             print(f"{key}\t{fname}\t{sent}")
         return 0
     fixture = FIXTURE

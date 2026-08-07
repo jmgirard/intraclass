@@ -1,8 +1,9 @@
 # M94 MPL doc-claims ledger (cairn/LESSONS.md M71 rule made mechanical on the
 # roxygen surface). One row per universal/negative/numeric claim candidate that
-# `python3 data-raw/check-mpl-doc-claims.py` enumerates in the M94 doc scope
-# (the `@param conf_level` + `@param ci_method` blocks of R/icc.R and the M94
-# NEWS.md entry). Columns: key, file, disposition, quote, assertion, reason.
+# `python3 data-raw/check-mpl-doc-claims.py` enumerates in the doc scope
+# (the `@param conf_level` + `@param ci_method` blocks of R/icc.R, the M94
+# NEWS.md entry, and — since M106 — the interval-methods vignette's MPL
+# subsection). Columns: key, file, disposition, quote, assertion, reason.
 #   key         sha1[:12] of "file\tnormalized claim sentence" (recomputed by
 #               the enumerator; a changed sentence must be re-triaged).
 #   disposition settle  — the assertion column is evaluated against
@@ -63,3 +64,8 @@ dbcf0e849b34	R/icc.R	out	It never names the method you asked for, which just fai
 3055aa5bc664	R/icc.R	out	screened at a small resample count and capped when run in full		M103 boundary-hint claim, not about the M92 cells: hint_screen_samples and hint_verify_boot_cap in R/boundary-hint.R, settled by test-reducer-abort-hint.R's AC8 latency test (each no-name abort under 5 s, measured 0.69-1.00 s against 25.6-27.2 s uncapped)
 f2ff697c75d2	R/icc.R	out	each such gap and each such point estimate is below		M104: a claim about the bootstrap point/interval containment sweep, not about the M92 MPL interpolation cells this ledger's fixture holds, so that fixture cannot settle it. Settled mechanically elsewhere: tests/testthat/test-bootstrap-point-containment.R asserts both bounds over every row of tests/testthat/fixtures/bootstrap-point-containment.tsv (M104 AC2).
 8b5d3c3e3628	R/icc.R	out	in that sweep's cells with real between-subject signal the interval contains its point		M104: same sweep, same reason -- out of this fixture's subject matter. The converse assertion (every row whose point is at or above 1e-8 has conf.low <= estimate) is pinned by the same test against the same committed fixture (M104 AC2).
+e6451ef204bb	vignettes/interval-methods.Rmd	out	no resampling, no seed		M106 vignette restatement of the mpl determinism claim (D-015): closed form, samples NA, no seed argument consumed; settled by the deterministic-metadata dispatch tests in test-ci-mpl.R, not the M92 cells
+e50b57c2c557	vignettes/interval-methods.Rmd	out	never interpolated between levels		M106 vignette restatement of the level fence (D-017/M90), settled by the conf_level abort tests (mirror of the R/icc.R row e428d688f11e); the 2-10 rater / 10-100 subject grid figures are facts of the shipped kappa_m table, pinned by the mpl grid-fence abort tests
+41e4c69d7afd	vignettes/interval-methods.Rmd	out	it is an opt-in and not the default		M106 vignette restatement of the deliberately-conservative claim from the M87/M90 assessment grid (D-014; mirror of the R/icc.R row d445b858554b); the wider-at-interior-cells leg is measured in cairn/references/mpl-twoway-random-comparison.md, not by the M92 cells
+b6b220daac63	vignettes/interval-methods.Rmd	out	not equal-tailed		M106 vignette restatement of the roxygen asymmetry + near-vacuity caveats, whose cell-level legs are settled by the R/icc.R f80587033837 rows (this fixture) and by M91's D3 cell (data-raw/m91-interp-sweep.rds); the vignette sentence adds no new figure
+-	vignettes/interval-methods.Rmd	absent	nothing\s+(?:\w+\s+){0,3}isolates(?:\s+\w+){0,3}\s+rater|no\s+(?:pair|cell)s?\s+(?:\w+\s+){0,3}isolat\w*\s+(?:the\s+)?rater		AC6 refusal (the claim M92's review found false), vignette surface added by M106
