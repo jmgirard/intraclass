@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m114-skew-warn-trigger   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m114-skew-warn-trigger · https://github.com/jmgirard/intraclass/pull/123   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -46,8 +46,12 @@ candidate row.
       `cairn/references/mc-skew-warn-trigger.md` is frozen (GP5) in a commit
       that precedes every derivation-artifact commit (derivation artifacts:
       T2's script, T3's derived table, T4's held-out sweep script and
-      outputs); any post-freeze edit to the page lands in its own commit
-      before the first derivation-artifact commit (M113 lesson). The page
+      outputs); any post-freeze edit to the frozen-rules content —
+      everything above the `## Results` section — lands in its own commit
+      before the first derivation-artifact commit (M113 lesson); the
+      `## Results` and `## Disposition` sections are result reporting,
+      filled at T5 after the derivation artifacts land, and are not
+      freeze-fenced. The page
       defines, before derivation: the candidate statistic family
       (kurtosis + skewness, plan gate 2026-08-08), the per-cell fire-rate
       floors/ceilings that constitute "reliable", the threshold-search grid,
@@ -126,6 +130,7 @@ candidate row.
 - 2026-08-08: created by /milestone-plan (promotes the D-027 warn-trigger commissioning row; plan gate: two milestones — assessment now, response after the verdict; held-out battery in; candidate family = kurtosis + skewness).
 - 2026-08-08: criteria audit ([O] fresh reader) returned 9 findings, all fixed in the AC wording pre-gate: fixture endpoint columns live in the long `raw` table not the wide table; 1e-12 platform-scoped; held-out table given a committed home + disjoint seed ids; AC1 additionally freezes the threshold-selection procedure so AC5's mechanical read is reachable; degrade limb bounded to the frozen family; AC6 pathspec extended to the full installed surface.
 - 2026-08-08: T3 done — AC3 byte-stability VERIFIED: full re-run of both scripts reproduced the 138,000-row table byte-identically (cmp clean vs the run-1 copy). The 6b5653c checkpoint had captured the tsv mid-re-run (m111 half only, 128,000 rows); this commit lands the complete table — the verdict ledgers were derived from the complete run-1 table before the re-run and are unaffected.
+- 2026-08-08: amendment return: AC1 — "any post-freeze edit to the frozen-rules content — everything above the `## Results` section — lands in its own commit before the first derivation-artifact commit (M113 lesson); the `## Results` and `## Disposition` sections are result reporting, filled at T5 after the derivation artifacts land, and are not freeze-fenced." (review found the original clause quantified over the whole page, forbidding the T5 results fill the page's own design schedules; frozen-rules content verified untouched post-freeze by diff).
 - 2026-08-08: all tasks done → status review. Verify slot clean: devtools::test() FAIL 0 / PASS 6116 (3 expected footgun warnings); lintr::lint_package() 0; air format --check clean; cairn_validate all checks passed; AC6 diff (R/ src/ man/ NAMESPACE DESCRIPTION NEWS.md tests/ vignettes/ data/) empty.
 - 2026-08-08: air format pass over the three m114 data-raw scripts (argument-per-line reflow only; behavior-identical, the committed table and ledgers stand).
 - 2026-08-08: plan gate chose seed-scheme regeneration + per-rep consistency proof over re-running the M111 sweep with statistics added, because reps regenerate deterministically without refitting (36 min saved; the stale-checkpoint candidate's promotion condition stays unfired); falsified by the AC2 consistency assertion failing on any rep.
