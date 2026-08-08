@@ -23,10 +23,10 @@ lives in `ROADMAP.md`, decisions in `DECISIONS.md`.
 - `data-raw/m111-fallback-results.rds` — committed M111 fixture; long `raw`
   table carries per-rep `lower`/`upper`/`aborted` per leg; wide `reps` table
   carries per-rep `mc_covered`/`mc_aborted`; per-rep seeded
-  `base = cell$id * 1000000L + rep` — observed 2026-08-08.
+  `base = cell$id * 1000000L + rep` — observed 2026-08-08. <!-- check: git grep -qF 'base <- cell$id * 1000000L + rep' data-raw/m111-fallback-sweep.R  # text-level proxy: the generating script pins the seed scheme; the rds columns are settled live by the T2 derivation script's own assertions -->
 - `data-raw/m113-skew-response-coverage.tsv` — per-cell non-abort coverage
   and abort rate for the `mc` leg over the 64 M111 cells — observed
-  2026-08-08.
+  2026-08-08. <!-- check: head -1 data-raw/m113-skew-response-coverage.tsv | grep -q 'coverage_nonabort' && grep -cq $'\tmc\t' data-raw/m113-skew-response-coverage.tsv -->
 
 ## Pre-registered rules — frozen 2026-08-08, before any derivation artifact (GP5)
 
