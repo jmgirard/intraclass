@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate; plus PRINCIPLES.md #3 [IP] via its D-001 fence — the ip-touching tag on AC5 -->
-- **Branch/PR:** m111-fallback-on-abort   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m111-fallback-on-abort · https://github.com/jmgirard/intraclass/pull/120   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -130,6 +130,8 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: T5 done — `m111-fallback-verdict.R` applies the frozen rules mechanically (ledger `m111-fallback-rules.rds`): F1 PASS both arms; F3 fails 23/36 (SEARLE) and 4/36 (Burch) — the abort event is informative, so off-boundary aborts select degenerate samples no fixed classical interval covers (cond. coverage 0.00–0.49 there; Burch 1.000 at 28/29 ρ≤0.10 cells); F2 fails 45 and 30 of 64 (mostly inherited from the MC leg, incl. an incumbent defect: MC alone covers 0.67 on skewed ρ=0.60 k≥30 cells with 0 aborts); F5 fails 45/48. Results + NO-GO disposition appended to the criteria page; one figure corrected against the ledger before commit (28-of-29, not all-29); 7 new claims triaged; all three checkers + cairn_validate green.
 - 2026-08-08: T6 done — D-026 recorded (NO-GO both arms; abort informative; fences unchanged; reopening evidence class stated); the MC-skew incumbent defect added as a ROADMAP candidate row (search-first: no existing row or D-entry covers the MC default's non-normal coverage; the fallback row this milestone absorbed was about aborts).
 - 2026-08-08: all tasks done; full devtools::test() suite green (failed+error = 0; no package code changed — the diff is data-raw/ + cairn/ only); status → review.
+- 2026-08-08: review evidence pass failed AC4 (defect return 1): the criteria page summarized F3 but did not report the per-cell conditional table nor list the 28 below-floor cells as conditional-insufficient in its results section; status → in-progress.
+- 2026-08-08: AC4 fix — the 36-cell conditional table and the 28-cell conditional-insufficient list added to the results section, generated from `m111-fallback-rules.rds` (never hand-transcribed); checkers + cairn_validate green; status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

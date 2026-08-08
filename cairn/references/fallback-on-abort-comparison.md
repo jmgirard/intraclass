@@ -126,6 +126,62 @@ other kind).
 **F4 (descriptive).** Median fallback width among abort reps, summed over the
 36 reporting cells: SEARLE 21.68, Burch 20.96 — moot given F3.
 
+**Per-cell conditional-on-abort coverage (every ≥ 100-abort cell; re-derived
+by `data-raw/m111-fallback-verdict.R`):**
+
+| ρ | k | n | dist | n_abort | SEARLE cond. | Burch cond. |
+|---|---|---|---|---|---|---|
+| 0.05 | 10 | 5 | gaussian | 764 | 0.937 | 1.000 |
+| 0.05 | 10 | 5 | t5 | 756 | 0.929 | 1.000 |
+| 0.05 | 10 | 5 | uniform | 723 | 0.925 | 1.000 |
+| 0.05 | 10 | 5 | chisq1 | 791 | 0.922 | 1.000 |
+| 0.05 | 30 | 5 | gaussian | 528 | 0.866 | 1.000 |
+| 0.05 | 30 | 5 | t5 | 529 | 0.883 | 1.000 |
+| 0.05 | 30 | 5 | uniform | 493 | 0.878 | 1.000 |
+| 0.05 | 30 | 5 | chisq1 | 558 | 0.873 | 1.000 |
+| 0.05 | 50 | 5 | gaussian | 344 | 0.837 | 1.000 |
+| 0.05 | 50 | 5 | t5 | 349 | 0.848 | 1.000 |
+| 0.05 | 50 | 5 | uniform | 344 | 0.872 | 1.000 |
+| 0.05 | 50 | 5 | chisq1 | 387 | 0.791 | 1.000 |
+| 0.05 | 10 | 2 | gaussian | 835 | 0.949 | 1.000 |
+| 0.05 | 10 | 2 | t5 | 889 | 0.942 | 1.000 |
+| 0.05 | 10 | 2 | uniform | 914 | 0.942 | 1.000 |
+| 0.05 | 10 | 2 | chisq1 | 891 | 0.945 | 1.000 |
+| 0.10 | 10 | 5 | gaussian | 524 | 0.906 | 1.000 |
+| 0.10 | 10 | 5 | t5 | 508 | 0.896 | 1.000 |
+| 0.10 | 10 | 5 | uniform | 483 | 0.919 | 1.000 |
+| 0.10 | 10 | 5 | chisq1 | 591 | 0.892 | 1.000 |
+| 0.10 | 30 | 5 | gaussian | 163 | 0.736 | 1.000 |
+| 0.10 | 30 | 5 | t5 | 209 | 0.727 | 1.000 |
+| 0.10 | 30 | 5 | uniform | 160 | 0.725 | 1.000 |
+| 0.10 | 30 | 5 | chisq1 | 254 | 0.654 | 1.000 |
+| 0.10 | 50 | 5 | chisq1 | 118 | 0.186 | 0.492 |
+| 0.10 | 10 | 2 | gaussian | 801 | 0.943 | 1.000 |
+| 0.10 | 10 | 2 | t5 | 761 | 0.929 | 1.000 |
+| 0.10 | 10 | 2 | uniform | 823 | 0.948 | 1.000 |
+| 0.10 | 10 | 2 | chisq1 | 794 | 0.940 | 1.000 |
+| 0.30 | 10 | 5 | t5 | 125 | 0.296 | 0.072 |
+| 0.30 | 10 | 5 | chisq1 | 233 | 0.240 | 0.077 |
+| 0.30 | 10 | 2 | gaussian | 361 | 0.853 | 1.000 |
+| 0.30 | 10 | 2 | t5 | 411 | 0.825 | 1.000 |
+| 0.30 | 10 | 2 | uniform | 317 | 0.874 | 1.000 |
+| 0.30 | 10 | 2 | chisq1 | 457 | 0.803 | 1.000 |
+| 0.60 | 10 | 2 | chisq1 | 186 | 0.000 | 0.210 |
+
+**Conditional-insufficient cells (abort count < 100 — reported, never judged;
+no conditional claim is made for any of them):**
+(0.10, 50, 5, gaussian: 88), (0.10, 50, 5, t5: 80), (0.10, 50, 5, uniform: 62),
+(0.30, 10, 5, gaussian: 65), (0.30, 10, 5, uniform: 36),
+(0.30, 30, 5, gaussian: 2), (0.30, 30, 5, t5: 3), (0.30, 30, 5, uniform: 0),
+(0.30, 30, 5, chisq1: 10), (0.30, 50, 5, gaussian: 0), (0.30, 50, 5, t5: 0),
+(0.30, 50, 5, uniform: 0), (0.30, 50, 5, chisq1: 3),
+(0.60, 10, 5, gaussian: 2), (0.60, 10, 5, t5: 6), (0.60, 10, 5, uniform: 1),
+(0.60, 10, 5, chisq1: 56), (0.60, 30, 5, gaussian: 0), (0.60, 30, 5, t5: 0),
+(0.60, 30, 5, uniform: 0), (0.60, 30, 5, chisq1: 0),
+(0.60, 50, 5, gaussian: 0), (0.60, 50, 5, t5: 0), (0.60, 50, 5, uniform: 0),
+(0.60, 50, 5, chisq1: 0), (0.60, 10, 2, gaussian: 62), (0.60, 10, 2, t5: 83),
+(0.60, 10, 2, uniform: 35)
+
 ## Disposition
 
 Per the frozen aggregation rule, **NO-GO for both arms** — neither passes its
