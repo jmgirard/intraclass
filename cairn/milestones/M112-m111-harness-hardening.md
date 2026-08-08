@@ -111,6 +111,7 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - 2026-08-08: T4 — recorded the F1/F5 inexpressibility and the failing-side count's vacuity-when-live as a milestone-local decision (lineage: M111 review D6 -> M112 criteria audit); no D-entry, the finding is local to the frozen M111 criterion.
 - 2026-08-08: T5 — `air format --check .` clean, `lintr::lint_package()` 0 lints (`data-raw/` is in scope; only `data-raw/reviews` is excluded), all four CI-wired `data-raw` checkers plus their vacuity self-tests pass, the local-only `check-oracle-registry.py` reports 0 gaps, and `NOT_CRAN=true CI=true devtools::test()` is [ FAIL 0 | WARN 2 | SKIP 23 | PASS 5854 ]; no `R/` or `tests/` file is touched by this branch, and no NEWS entry is owed (the diff is research-harness only, no user-visible change).
 - 2026-08-08: review — PR #122 opened (draft); AC1-AC5 verified with fresh evidence and ticked; cairn_validate all-pass, document() no diff, pkgdown clean; three fresh-context reviewers spawned (prior-review and blame lenses returned; diff-bug lens and devtools::check() still running at this checkpoint).
+- 2026-08-08: review — three fresh-context reviewers + scorer returned 13 findings, all scored sub-80 (highest 60), so the actioned list is empty and no criterion failed; H-1/M-4 absorbed into one new ROADMAP candidate row on the sweep's checkpoint cache, M-2 (the T4 decision's F1 rationale) surfaced to the maintainer at the merge gate.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -169,3 +170,23 @@ All criterion evidence below is fresh, gathered by command at review time.
 
 - Universal: `cairn_validate.py` exit 0 — every CHECK passes, every advisory OK. No `DESIGN.md` principle changed, so `cairn_impact.py` does not apply (GP5 is touched, not amended).
 - Toolchain (`r-package` profile): `devtools::document()` produces no diff; no generated file hand-edited; `pkgdown::check_pkgdown()` finds no problems; no NEWS entry owed (the diff is `data-raw/` research harness plus tracking — no user-visible change); no new top-level file (`data-raw` already carries an `.Rbuildignore` entry); `devtools::check(env_vars = c(NOT_CRAN = "false"))` **0 errors, 0 warnings, 0 notes** in 3m31s.
+
+### Independent review
+
+Three fresh-context reviewers (diff-bug [O], blame-history [S], prior-PR-comments [S]) plus a [S] confidence scorer that did not generate the findings. The prior-review lens found no regression of any point M111's or M113's review raised. 13 findings reported in total; **all 13 scored below 80, so the actioned list is empty and none returns the milestone.** Logged, none silently dropped:
+
+- H-1 (30) — a stale checkpoint dir can serve rows computed under the pre-M112 abort semantics on a re-run; the caching line is unchanged from M111 → candidate row.
+- M-1 (40) — the demo's abort stub returns `status = "abort"` rather than signalling the condition, so `mc_ci()`'s `tryCatch` handler is not itself exercised; AC2's stub clause is met as written and a broken handler would propagate as a `try-error`.
+- M-2 (55) — the T4 decision's F1 half argues "a count, not a rate", but F1's "100% of reps" is a rate with threshold 1.0, so `[0.995, 1.0)` is a definable window; outcome-neutral (0 classical-leg aborts either way). Surfaced to the maintainer at the merge gate.
+- M-3 (30) — the printed near-miss line and the ledger carry F2/F3 only, without restating that F1/F5 are excluded from the binding set.
+- M-4 (30) — `assert_sweep_results()` checks cell identity but not cell parameters, so a stale checkpoint under an edited grid passes every check → same candidate row as H-1.
+- M-5 (60) — the demo re-implements the driver's two lines instead of executing the `sys.nframe() == 0L` block, so the guard's wiring at `:355` is verified by reading rather than by running (AC3's `system2` pattern is the stronger one).
+- L-6 (25) — the length check is unreachable for the failure its message names (`mclapply` preserves list length on a killed worker); harmless defensive code.
+- L-7 (25) — `expect_error()` matches any error, so an unrelated failure inside `one_rep()` would still print PASS.
+- L-8 (30) — `system2(env = )` is an unquoted shell prefix; breaks only on a tempdir path containing a space, and `unlink(tmp)` runs only on success.
+- L-9 (25) — the sweep echoes neither resolved path, so an exported override changes the destination with no transcript clue.
+- L-10 (35) — "an unset environment reproduces the 2026-08-08 run exactly" overclaims (platform/RNG dependence, plus the checkpoint short-circuit).
+- L-11 (25) — AC4's ledger comparison has no committed re-runnable artifact, unlike AC1-AC3.
+- N-12 (10) — cosmetic: a runtime estimate in a header comment and an awkward interpolated PASS message.
+
+Follow-up spawned: one ROADMAP candidate row absorbing H-1 and M-4 (search-first sweep found no existing row on the checkpoint cache), promoting on the next re-run or regeneration of the M111 sweep.
