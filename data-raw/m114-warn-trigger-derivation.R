@@ -45,8 +45,11 @@ if (!identical(plat, here)) {
   stop(
     "platform mismatch vs the fixture's meta$platform — the AC2 1e-12 ",
     "consistency proof is only certified on the recording platform.\n",
-    "fixture: ", paste(unlist(plat), collapse = " / "), "\n",
-    "here:    ", paste(unlist(here), collapse = " / ")
+    "fixture: ",
+    paste(unlist(plat), collapse = " / "),
+    "\n",
+    "here:    ",
+    paste(unlist(here), collapse = " / ")
   )
 }
 
@@ -113,10 +116,19 @@ for (ci in seq_len(nrow(cells))) {
           abs(s[["upper"]] - se_cell$upper[r]) > tol_searle
       ) {
         stop(
-          "AC2 consistency failure at cell ", cell$cell, " rep ",
-          se_cell$rep[r], ": regenerated searle interval [",
-          s[["lower"]], ", ", s[["upper"]], "] vs stored [",
-          se_cell$lower[r], ", ", se_cell$upper[r], "]"
+          "AC2 consistency failure at cell ",
+          cell$cell,
+          " rep ",
+          se_cell$rep[r],
+          ": regenerated searle interval [",
+          s[["lower"]],
+          ", ",
+          s[["upper"]],
+          "] vs stored [",
+          se_cell$lower[r],
+          ", ",
+          se_cell$upper[r],
+          "]"
         )
       }
       n_checked <- n_checked + 1L
@@ -148,7 +160,9 @@ stats <- do.call(rbind, rows)
 stopifnot(nrow(stats) == 64L * 2000L)
 message(sprintf(
   "AC2 proof: %d/%d non-aborted searle reps matched within %g",
-  n_checked, sum(!searle$aborted), tol_searle
+  n_checked,
+  sum(!searle$aborted),
+  tol_searle
 ))
 stopifnot(n_checked == sum(!searle$aborted))
 

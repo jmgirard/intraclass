@@ -89,8 +89,12 @@ build_heldout_cells <- function(n_rep = 1000L) {
       for (kn in kn_levels) {
         cid <- cid + 1L
         cells[[length(cells) + 1L]] <- list(
-          id = cid, rho = rho, k = kn[["k"]], n = kn[["n"]],
-          dist = dist, n_rep = n_rep
+          id = cid,
+          rho = rho,
+          k = kn[["k"]],
+          n = kn[["n"]],
+          dist = dist,
+          n_rep = n_rep
         )
       }
     }
@@ -98,8 +102,12 @@ build_heldout_cells <- function(n_rep = 1000L) {
   for (kn in kn_levels) {
     cid <- cid + 1L
     cells[[length(cells) + 1L]] <- list(
-      id = cid, rho = 0.30, k = kn[["k"]], n = kn[["n"]],
-      dist = "gaussian", n_rep = n_rep
+      id = cid,
+      rho = 0.30,
+      k = kn[["k"]],
+      n = kn[["n"]],
+      dist = "gaussian",
+      n_rep = n_rep
     )
   }
   stopifnot(vapply(cells, `[[`, integer(1), "id") == 65:74)
@@ -118,7 +126,11 @@ run_cell <- function(cell) {
     if (!ab && (!is.finite(mc$lower) || !is.finite(mc$upper))) {
       stop(
         "mc leg returned a non-finite interval without signalling ",
-        "intraclass_singular_fit (cell ", cell$id, ", rep ", r, ")"
+        "intraclass_singular_fit (cell ",
+        cell$id,
+        ", rep ",
+        r,
+        ")"
       )
     }
     aborted[r] <- ab
@@ -181,13 +193,19 @@ close(con)
 message("appended ", nrow(out), " heldout rows to ", stats_path)
 
 # per-cell quick summary for the log
-agg <- do.call(rbind, lapply(split(heldout, heldout$cell), function(g) {
-  na <- !g$mc_aborted
-  data.frame(
-    cell = g$cell[1], dist = g$dist[1], rho = g$rho[1],
-    k = g$k[1], n = g$n[1],
-    abort_rate = mean(g$mc_aborted),
-    nonabort_coverage = mean(g$mc_covered[na])
-  )
-}))
+agg <- do.call(
+  rbind,
+  lapply(split(heldout, heldout$cell), function(g) {
+    na <- !g$mc_aborted
+    data.frame(
+      cell = g$cell[1],
+      dist = g$dist[1],
+      rho = g$rho[1],
+      k = g$k[1],
+      n = g$n[1],
+      abort_rate = mean(g$mc_aborted),
+      nonabort_coverage = mean(g$mc_covered[na])
+    )
+  })
+)
 print(agg, row.names = FALSE)
