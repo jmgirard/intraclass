@@ -8,7 +8,7 @@
 - **Depends on:** M108   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m109-bayesian-oracle-reruns   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m109-bayesian-oracle-reruns · https://github.com/jmgirard/intraclass/pull/118   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -35,27 +35,27 @@ this milestone (rejected-alternative line in the work log).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `data-raw/oracle-rerun-ledger.tsv` carries a row with run_date on
+- [x] AC1: `data-raw/oracle-rerun-ledger.tsv` carries a row with run_date on
       or after this milestone's branch date for every script enumerated by
       `ls data-raw/oracle-bayesian-*.R` (the glob excludes
       `oracle-bayesian.R` itself), each with a D-024 verdict and captured
       engine versions.
-- [ ] AC2: At review, `git diff --stat origin/main -- tests/testthat/fixtures/`
+- [x] AC2: At review, `git diff --stat origin/main -- tests/testthat/fixtures/`
       is empty — the committed fixtures tree is unchanged vs origin/main.
-- [ ] AC3: Each escalated verdict (`diverged-escalated` /
+- [x] AC3: Each escalated verdict (`diverged-escalated` /
       `pins-fail-escalated`), if any, has a ROADMAP candidate row created in
       the same commit as its ledger row; and the ledger's git history on the
       milestone branch shows each escalated row persisting unreplaced from
       its escalation commit to review (the harness replaces a script's row
       on re-run, so an unreplaced row IS the evidence no post-escalation
       re-run happened — D-024 clause 3).
-- [ ] AC4: `oracle-bayesian-cluster-ck.R` and
+- [x] AC4: `oracle-bayesian-cluster-ck.R` and
       `oracle-bayesian-incomplete-fixed-nested.R` express their
       published-findings pins outside `stopifnot` (a `check()` helper and an
       `in_band` verdict loop), which the harness's `stopifnot` recorder does
       not see; their ledger rows' notes field records those pin outcomes
       from the run transcript.
-- [ ] AC5: Each batch task's work-log entry records elapsed minutes per
+- [x] AC5: Each batch task's work-log entry records elapsed minutes per
       script and the pre-launch concurrent-R-session check (the M107
       contention lesson).
 
@@ -108,3 +108,11 @@ this milestone (rejected-alternative line in the work log).
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Review 2026-08-08 (PR #118). Acceptance-criteria evidence, fresh by command:
+
+- AC1: glob-driven sweep — all 19 `data-raw/oracle-bayesian-*.R` scripts have a ledger row dated 2026-08-07/08 with a D-024 verdict (11 reproduced, 8 drift-within-noise) and captured engine versions (R 4.6.1, glmmTMB 1.1.14, brms 2.23.0, rstan 2.32.7). PASS.
+- AC2: `git diff --stat origin/main -- tests/testthat/fixtures/` → 0 lines. PASS.
+- AC3: ledger verdict scan → 0 escalated verdicts; vacuously satisfied (no candidate rows owed, no persistence check applicable). PASS.
+- AC4: both rows' notes fields carry the transcript pin outcomes — cluster-ck "non-stopifnot check() pins … 5/5 PASS", incomplete-fixed-nested "non-stopifnot in_band verdicts … 4/4 PASS". PASS.
+- AC5: work log carries 5 batch lines (T1 ×2 spanning the glmmTMB interruption, T2–T4), each with per-script elapsed minutes and the pre-launch concurrent-R check. PASS.
