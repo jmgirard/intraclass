@@ -77,7 +77,7 @@ this milestone (rejected-alternative line in the work log).
       `rerun-oracle.R` invocation; work-log elapsed + concurrent-R check.
 - [x] T2: Batch 2 (~1,340 fits): `-fixed`, `-incomplete-fixed-multilevel`,
       `-incomplete-multilevel`, `-multilevel`, `-nested`, `-oneway`.
-- [ ] T3: Batch 3 (~1,760 fits): `-incomplete-fixed`, `-incomplete`,
+- [x] T3: Batch 3 (~1,760 fits): `-incomplete-fixed`, `-incomplete`,
       `-incomplete-nested-subjects`, `-incomplete-oneway`.
 - [ ] T4: Batch 4 (~1,680 fits): `-cluster-ck`, `-incomplete-fixed-nested`;
       capture both scripts' non-`stopifnot` pin outcomes from the run
@@ -99,6 +99,7 @@ this milestone (rejected-alternative line in the work log).
 - 2026-08-07: T1 batch 1 launched (pre-launch concurrent-R check: one active R session — a tidymedia devtools::test run, contention expected); 5/7 scripts ledgered: conflated 33.0m drift-within-noise 4/4, fixed-replicates 8.8m drift-within-noise 4/4, replicates 11.3m drift-within-noise 4/4, multilevel-fixed 15.8m drift-within-noise 1/1, incomplete-nested 35.8m reproduced 3/3. Run halted at the ledger-row step of -multilevel-replicates: a concurrent glmmTMB reinstall had removed the package from the site-library mid-run, so the harness's version capture errored — verified a harness/environment artifact (live R.INSTALL process + 00LOCK-glmmTMB observed), not a pin failure; -multilevel-replicates and -nested-fixed queued to re-run after the install completes.
 - 2026-08-07: T1 complete — the glmmTMB reinstall landed 1.1.14 (same version, no ledger straddle); recovery re-run: multilevel-replicates 42.8m drift-within-noise 8/8, nested-fixed 17.4m reproduced 1/1. Batch 1 totals: 7/7 rows, 2 reproduced + 5 drift-within-noise, zero escalations; wall-clock ≈2.9h against the ~25m the M107 anchor implied — per-fit geometry + contention, consistent with the M107 lesson.
 - 2026-08-08: T2 complete (pre-launch concurrent-R check: a circumplex devtools::check session active — contention expected; it also explains T1's glmmTMB reinstall window): fixed 2.8m drift-within-noise 1/1, incomplete-fixed-multilevel 14.8m reproduced 4/4, incomplete-multilevel 22.6m reproduced 5/5, multilevel 48.2m reproduced 4/4, nested 35.8m drift-within-noise 3/3, oneway 3.4m drift-within-noise 4/4. Batch 2 totals: 6/6 rows, zero escalations — the k=2 cells in -multilevel and -oneway both cleared their pins.
+- 2026-08-08: T3 complete (pre-launch concurrent-R check: none active): incomplete-fixed 4.8m reproduced 4/4, incomplete 6.7m reproduced 4/4, incomplete-nested-subjects 49.8m reproduced 3/3, incomplete-oneway 5.2m reproduced 5/5. Batch 3 totals: 4/4 rows, all reproduced at max_abs_delta 0, zero escalations.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
