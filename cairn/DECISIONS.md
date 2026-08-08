@@ -1141,3 +1141,44 @@ under-coverage on skewed high-ρ data (0.67 at (0.60, k≥30, 5, chisq1), 0
 aborts — an incumbent defect this sweep surfaced, not part of this verdict)
 becomes a ROADMAP candidate row. O-Classical-OW is unchanged (the M76
 prototypes were reused as-is).
+
+### D-027 (2026-08-08): M113 S1/S2 verdict — no classical replacement (both arms no-GO on the wider battery); the MC incumbent's disposition is warn
+
+**Context:** M113 read the committed M111 per-rep fixture
+(`data-raw/m111-fallback-results.rds`) against the pre-registered S1/S2
+disposition rules (GP5; `cairn/references/mc-skew-response-comparison.md`,
+frozen 2026-08-08 before the derivation artifact; derived table
+`data-raw/m113-skew-response-coverage.tsv`, 64 cells × 3 legs, n_rep = 2000).
+This executes the response question D-026 spun out: whether the one-way MC
+default's measured skew under-coverage should be met by replacement, a
+runtime warning, documentation, or nothing.
+
+**Decision:**
+
+- **S1 `searle`: no-GO.** 21/64 cells below the 0.93 unconditional floor,
+  worst 0.674 at (ρ = 0.60, k = 50, n = 5, chisq1).
+- **S1 `burch`: no-GO.** 16/64 cells below, worst 0.6655 at
+  (0.60, 30, 5, chisq1), including one gaussian cell (0.9285 at
+  (0.60, 10, 2)). M76's "never under-covers" verdict does not extend to the
+  wider battery the D-012 scope fence named — that fence was warranted.
+- **S2 `mc`: warn.** 36/64 cells below the floor among non-aborted reps.
+  By abort rate the failing set partitions into: skew/kurtosis
+  under-coverage at low-abort cells (10 cells, abort rate ≤ 0.1, all
+  t5/chisq1, five zero-abort; worst 0.6725/0.676 at ρ = 0.60 chisq1) — the
+  defect that motivated M113 — and selection-conditioned under-coverage at
+  high-abort cells (26 cells, abort rate > 0.1), consistent with D-026's
+  abort-is-informative finding. Every failing gaussian/uniform cell is in
+  the high-abort bucket; the warn fires on the ≥ 2-families limb via the
+  low-abort t5 + chisq1 cells.
+- The warn commissions a follow-on milestone to design the runtime trigger
+  (ROADMAP candidate row added by M113); per the frozen rule it degrades to
+  `document` there, recorded in its own D-entry, if no reliable trigger
+  exists. No shipped skew diagnostic exists today; Burch's kurtosis
+  `burch_kappa_hat()` is the nearest precedent.
+- **No default-method change:** nothing cleared S1, so the D-001 fence is
+  untouched and no supersession arises.
+
+**Consequences:** M113 ships no code. Reopening evidence class: S1 replacement
+reopens only on a method demonstrating every-cell floor coverage over this
+grid (or a superseding frozen assessment); the abort-side selection
+phenomenon belongs to D-026's reopening class, not this one.
