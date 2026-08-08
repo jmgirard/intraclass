@@ -1,0 +1,128 @@
+<!-- Section ownership + write-modes: see tracking-rules.md "Milestone-file
+     section ownership". A phase skill never rewrites another phase's section.
+     Per-section owners are tagged below. -->
+# M111: Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical)
+
+- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
+- **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
+- **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
+- **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate; plus PRINCIPLES.md #3 [IP] via its D-001 fence — the ip-touching tag on AC5 -->
+- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+
+## Goal
+<!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
+
+Decide, against a pre-registered frozen criterion, whether the one-way default
+should return a classical fallback interval where the MC default aborts
+(`intraclass_singular_fit`) — assessment only, no exported code; verdict as a
+D-entry answering the question D-012/D-013/D-018 fenced open.
+
+## Scope
+<!-- owner: plan · create/amend-via-gate -->
+
+**In:** a frozen pre-registered criteria page (GP5; adapted M76 C1–C5
+thresholds + a new conditional-on-abort coverage rule); a 64-cell sweep of the
+**composite procedure** (MC where it converges, classical where it aborts) —
+ρ ∈ {0.05, 0.10, 0.30, 0.60} × (k,n) ∈ {(10,5),(30,5),(50,5),(10,2)} ×
+dist ∈ {gaussian, t5, platykurtic, skewed per burch2011 Table 2} — with both
+SEARLE exact-F and Burch REML as fallback arms (Burch §5 prefers normal-based
+near ρ≈0, the abort region, so the sweep picks the method); per-rep abort
+indicator + platform recorded in the fixture (the M84/M105 platform lesson);
+GO/NO-GO D-entry.
+
+**Out:** any exported code or actual default change → follow-on implementation
+milestone on GO; unbalanced designs (classical forms are balanced-only,
+D-013) → the unbalanced `n₀`/`n_i` candidate row; two-way designs → the MPL
+track; re-litigating the opt-in GO (D-012 stands) or D-018's diagnostic
+licence (a GO supersedes its return fence explicitly, in the D-entry).
+
+## Acceptance criteria
+<!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
+
+- [ ] AC1: The pre-registered criterion page
+      `cairn/references/fallback-on-abort-comparison.md` is committed with its
+      GO/NO-GO rules, grid, and aggregation rule before any sweep artifact:
+      every sweep artifact lives under `data-raw/m111-fallback-*`, and
+      `git log --diff-filter=A` shows the page's introducing commit predates
+      every commit introducing a file under that path set (the settling
+      procedure); every number in the page's Criteria table names its source
+      (an adapted M76 C1–C5 rule or a cited value).
+- [ ] AC2: The frozen grid includes at least one platykurtic and at least one
+      skewed cluster-effect distribution, each traced to `burch2011` Table 2
+      (page/table anchor in the criteria page), and at least one ρ ≥ 0.30
+      level, alongside near-zero cells (ρ ≤ 0.10) with gaussian and t5 arms
+      carried over from M76.
+- [ ] AC3: The composite fallback procedure — MC default where it converges,
+      the classical method where it raises `intraclass_singular_fit` — is
+      assessed for both SEARLE exact-F and Burch REML at every grid cell at
+      n_rep ≥ 2000 per cell, from a committed seeded script under
+      `data-raw/m111-fallback-*` whose fixture (with per-rep abort indicator
+      and the generating platform recorded) lands in the same milestone;
+      unconditional composite coverage, width, and tail-miss rates are
+      reported per cell × method against the frozen criteria.
+- [ ] AC4: Conditional-on-abort coverage of each classical fallback is
+      reported at every cell whose abort count is ≥ 100, and every cell below
+      that floor is listed as conditional-insufficient in the criteria page's
+      results section; that section makes no conditional claim for a
+      below-floor cell, with `enumerate-generalizing-claims.py --check`
+      (AC6) as the mechanical backstop on its claims.
+- [ ] AC5: A D-entry records the per-method GO/NO-GO verdict per the frozen
+      aggregation rule; on any GO it names the fallback method, states that
+      superseding the MC-default contract is D-001-fenced (a D-entry, not a
+      constitutional amendment), names D-018's return fence as what a GO
+      lifts, and recommends (not performs) the implementation milestone; on
+      all-NO-GO it states what evidence class would reopen the question.
+      (RB tripwire: ip-touching)
+- [ ] AC6: `python3 data-raw/enumerate-generalizing-claims.py --check` and
+      `python3 data-raw/check-reference-observations.py` both exit 0 on the
+      branch head, and `cairn_validate` passes — run fresh at review (the
+      three commands are the procedure).
+
+## Coverage
+<!-- owner: plan · create/amend-via-gate -->
+
+- AC1 → T2
+- AC2 → T1, T2
+- AC3 → T3, T4
+- AC4 → T5
+- AC5 → T6
+- AC6 → T1, T2, T5
+
+## Tasks
+<!-- owner: plan (create) / implement (check-off, minor edits) -->
+
+- [ ] T1: Extract the burch2011 Table 2 battery from the shelf PDF
+      (`cairn/references/sources/`); choose the platykurtic and skewed
+      generators with page/table anchors; extend `burch2011.md`'s note and
+      the m76 prototype generators (`data-raw/m76-classical-oneway-prototype.R`
+      stays untouched; new code under `data-raw/m111-fallback-*`).
+- [ ] T2: Author and commit the frozen criteria page
+      `cairn/references/fallback-on-abort-comparison.md` (grid, adapted
+      C1–C5 + conditional-on-abort rule, aggregation rule, INDEX line,
+      triage rows) before any sweep artifact.
+- [ ] T3: Build the sweep harness under `data-raw/m111-fallback-*`, reusing
+      the m76 sweep structure: per-cell checkpointing, per-cell distinct
+      per-rep seeds, per-rep abort indicator, platform capture; size the run
+      per design family (M107/M109 lessons) and check for concurrent R
+      sessions / live R.INSTALL before launch.
+- [ ] T4: Run the ~13 h sweep as a background job; commit the fixture.
+- [ ] T5: Analyze against the frozen criteria; write the results and
+      per-method ledger into the criteria page; run the three AC6 checkers
+      locally.
+- [ ] T6: Record the GO/NO-GO D-entry; update the ROADMAP candidate row
+      (absorbed by this milestone) and the work log.
+
+## Work log
+<!-- owner: any skill · append-only; one line per entry; absolute dates -->
+
+- 2026-08-08: created by /milestone-plan (promotes the classical fallback-on-abort candidate; plan gate: full 64-cell grid, both fallback arms, adapted M76 thresholds, verdict in-session with the ip-touching tag held on AC5).
+- 2026-08-08: criteria audit ([O] fresh-context) returned 3 findings — AC1's "any sweep result" and "each threshold" universals bounded to the `data-raw/m111-fallback-*` path set and the Criteria table; AC4's claims-ban scoped to the results section with the claim-enumerator as backstop; AC3 gains the per-rep abort indicator + platform requirement — all fixed pre-gate.
+- 2026-08-08: plan gate chose the composite-procedure framing (assess MC-with-fallback as delivered) over a second full replacement-grade re-assessment because D-012 already answered replacement NO-GO and the fallback is the candidate's actual question; falsified by evidence the composite's coverage differs materially from its per-arm components at cells the sweep did not isolate.
+- 2026-08-08: plan gate chose both fallback arms over Burch-only because burch2011 §5 prefers the normal-based method near ρ≈0 — the abort region; falsified by neither arm passing the frozen bar where a third construction would.
+
+## Decisions
+<!-- owner: implement / review · append-only -->
+
+## Review
+<!-- owner: review · exclusive -->
