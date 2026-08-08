@@ -132,6 +132,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: all tasks done; full devtools::test() suite green (failed+error = 0; no package code changed — the diff is data-raw/ + cairn/ only); status → review.
 - 2026-08-08: review evidence pass failed AC4 (defect return 1): the criteria page summarized F3 but did not report the per-cell conditional table nor list the 28 below-floor cells as conditional-insufficient in its results section; status → in-progress.
 - 2026-08-08: AC4 fix — the 36-cell conditional table and the 28-cell conditional-insufficient list added to the results section, generated from `m111-fallback-rules.rds` (never hand-transcribed); checkers + cairn_validate green; status → review.
+- 2026-08-08: CI `check-references` red on a PRE-EXISTING stale `record-claims.tsv` row (not this branch's doing): M110's hygiene rotated M105 out of the terminal-row window without updating the [claim:roadmap-terminal-rows] expectation, unseen on main because docs-only pushes skip the job (M77 paths-ignore); expectation corrected in place on this branch (M105→M110), checker locally green. Lesson: the check-references job now runs FOUR checkers — `check-record-claims.py` (M102) was absent from the local pre-push list.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
