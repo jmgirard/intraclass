@@ -173,6 +173,12 @@ and milestones; never restate a value here.
   Burch (2011) REML intervals vs the MC / parametric-bootstrap / npbootstrap
   incumbents. Results/disposition appended at T5/T6.
 
+- [fallback-on-abort-comparison.md](fallback-on-abort-comparison.md) — synthesis
+  note (M111): the pre-registered (GP5) F1–F6 criterion and 64-cell grid for the
+  fallback-on-abort composite (MC default where it converges, SEARLE exact-F or
+  Burch REML where it aborts), with a Clopper–Pearson conditional-on-abort
+  coverage rule; results + per-arm GO/NO-GO appended at T5.
+
 - [mpl-twoway-random-comparison.md](mpl-twoway-random-comparison.md) — synthesis
   note (M86/M87): the estimand mapping (xiao2013 ρ = package `ICC(A,1)`) and the
   oracle-validation of the from-scratch naive-PL / MPL implementation against

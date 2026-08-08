@@ -97,7 +97,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
       generators with page/table anchors; extend `burch2011.md`'s note and
       the m76 prototype generators (`data-raw/m76-classical-oneway-prototype.R`
       stays untouched; new code under `data-raw/m111-fallback-*`).
-- [ ] T2: Author and commit the frozen criteria page
+- [x] T2: Author and commit the frozen criteria page
       `cairn/references/fallback-on-abort-comparison.md` (grid, adapted
       C1–C5 + conditional-on-abort rule, aggregation rule, INDEX line,
       triage rows) before any sweep artifact.
@@ -124,6 +124,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: plan gate (follow-up): sweep harness parallel over cells at 4 workers (~4 h) rather than M76's serial structure (~13 h), at the maintainer's choice; per-cell seed streams are already independent so results are worker-count-invariant.
 - 2026-08-08: set in-progress by /milestone-implement; branch m111-fallback-on-abort cut from main (3079634). Implementation question gate skipped — the plan gate settled grid, arms, thresholds, workers, and verdict routing; T1's generator picks are AC2-fenced to burch2011 Table 2, not an open choice.
 - 2026-08-08: T1 done — Table 2 extracted verbatim into burch2011.md (11 distributions + κ, p. 1021, read from the shelf PDF pp. 4/8) with the located-and-scaled convention (§3 p. 1022); arms chosen: Uniform(0,1) κ=−1.2 (platykurtic) and χ²(1) κ=12.0 (skewed, the §5 boundary-caveat distribution); one enumerator superlative triaged OUT-quote; both references checkers green.
+- 2026-08-08: T2 done — frozen criteria page `fallback-on-abort-comparison.md` committed before any sweep artifact (F1–F6 adapted from M76 C1–C6; F3's conditional-on-abort rule uses a Clopper–Pearson bound because a strict floor on a ~100-rep conditional subset false-alarms ~18%/cell at true-nominal; F4 width demoted to descriptive — a fallback only replaces an abort, so no dominance rule); INDEX line + 7 OUT-repo-analysis triage rows appended programmatically; all three checkers + cairn_validate green.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
