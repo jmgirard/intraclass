@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (post-M110 audit: all mechanical checks green, both GitHub inboxes empty, no open RRs, nothing in flight; M48 stays parked on the unopened release window.)_
+_Last hygiene check: 2026-08-08 (M111 done and archived — fallback-on-abort NO-GO, D-026; M106 rotates out of the terminal-row window with the record-claim expectation updated in the same commit; two candidate rows added at M111: MC skew under-coverage + m111-harness hardening; M85 checker LESSONS line extended with the fourth checker.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | review | — | normal | milestones/M111-fallback-on-abort-assessment.md |
+| M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | done | — | normal | milestones/archive/M111-fallback-on-abort-assessment.md |
 | M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | done | M108 | normal | milestones/archive/M109-bayesian-oracle-reruns.md |
 | M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | done | — | normal | milestones/archive/M108-oracle-bayesian-k2-adjudication.md |
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
-| M106 | The opt-in ci_method values are documented in the vignettes | done | — | normal | milestones/archive/M106-optin-ci-method-vignette.md |
 | M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | done | — | normal | milestones/archive/M110-cronbach-oracle-leg.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M110 done (2026-08-08) → M105 rotated out (oldest terminal; its archive file still resolves there). Kept: M110, M109, M108, M107, M106 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M111 done (2026-08-08) → M106 rotated out (oldest terminal; its archive file still resolves there). Kept: M111, M110, M109, M108, M107 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
