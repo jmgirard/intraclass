@@ -1208,7 +1208,7 @@ fire rate is 0.1625 against the 0.90/0.50 floors — not a near-miss anywhere
 in the ledger. Measured cause: the Burch z-decomposition pools all k·n
 values, so at n = 5 the cluster effect carries ~20% of z's variance and its
 kurtosis enters at weight² ≈ 0.04 — at the worst cell (chisq1 cluster
-kurtosis 12, non-abort coverage 0.676) κ̂_bc's distribution (median 0.11,
+kurtosis 12, non-abort coverage 0.6725) κ̂_bc's distribution (median 0.11,
 spread ≈ 0.35) barely separates from gaussian's (median −0.03). The failure
 is dilution, not threshold placement.
 

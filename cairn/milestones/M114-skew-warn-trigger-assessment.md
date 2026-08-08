@@ -193,3 +193,38 @@ never reference milestone numbers); no new top-level files (all under
 data-raw/ + cairn/); `devtools::check(env_vars = c(NOT_CRAN = "false"))`
 — see line below. `devtools::test()` FAIL 0 / PASS 6116; lintr 0 lints;
 air format --check clean.
+
+`devtools::check(env_vars = c(NOT_CRAN = "false"))`: 0 errors / 0
+warnings / 0 notes (3m52s).
+
+Fan-out (3 reviewers + scorer): 7 diff-bug + 1 blame-history + 1
+prior-review candidate findings; the diff-bug lens independently
+reproduced the classification, both headline fire-rate metrics, and the
+DEGRADE outcome from the committed tables (no verdict-changing defect).
+Scorer: 0 findings ≥ 80 — actioned list empty. 9 logged sub-80:
+- F1 (74): page/D-028 paired cell 56's coverage (0.676) with cell 60's
+  median (0.11) — real citation slip, verdict untouched; FIXED on-branch
+  pre-merge (page corrected in place + marked; D-028 corrected before it
+  reaches main, git holds the original).
+- F2 (58): work-log lines not in chronological order (insertions
+  mid-list) — hygiene; left as-is, log is append-only.
+- F3 (55): verdict script would silently drop a fully-aborted cell from
+  the floors (NaN class / split-merge omission) — inert on this data;
+  noted for any future re-use (fail-loudly).
+- F4 (30): stat_defined column written but never consumed by fires() —
+  equivalent under the helper's contract; dead-column cleanup only.
+- F5 (63): frozen page's "uniform cells reported against the W3 line"
+  has no committed per-cell artifact on the degrade branch — page/artifact
+  reporting gap, non-binding.
+- F6 (45): AC2 aborted-searle limb implemented as non-finiteness check;
+  unreachable (zero aborted searle reps).
+- F7 (55): trigger_stats() MSE assumes subject-block-ordered rows —
+  fragility in the shared helper, valid at both call sites; kappa
+  cross-check catches misuse with a misdirecting message.
+- F8 (62): AC1 amendment timing (Results fill co-committed with
+  derivation artifacts, AC narrowed at review) — the gated amendment
+  return above IS the disposition of this; frozen-rules content
+  diff-verified untouched.
+- F9 (50): LESSONS M113 freeze-edit line unqualified vs the amended AC1
+  scope — interpretive gap; the LESSONS line is scoped at post-merge
+  hygiene (see below).

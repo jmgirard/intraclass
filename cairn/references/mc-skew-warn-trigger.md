@@ -146,7 +146,9 @@ regenerated data are the fixture's own.
 - **Measured cause — dilution, not threshold placement.** The z-decomposition
   pools all k·n values; at n = 5 the cluster component carries ~20% of z's
   variance, so its kurtosis enters at weight² ≈ 0.04. At the worst cell
-  (chisq1, cluster kurtosis 12, non-abort coverage 0.676) κ̂_bc has median
+  (chisq1, cluster kurtosis 12, non-abort coverage 0.6725 — corrected at
+  review from 0.676, which is cell 56's coverage while the median is cell
+  60's) κ̂_bc has median
   0.11 and spread ≈ 0.35 against gaussian's median −0.03 — no separating
   threshold exists at any operating point the floors accept.
 
