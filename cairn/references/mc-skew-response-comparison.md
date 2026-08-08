@@ -60,15 +60,40 @@ three outcomes are mutually exclusive and exhaustive given the floor, read
 directly off the derived table. The full verdict — two S1 dispositions plus
 one S2 disposition — is recorded as one D-entry.
 
-## Results
+## Results — derived 2026-08-08 from the committed M111 fixture
 
-Filled at T3, after the derivation script lands; frozen empty before it —
-observed 2026-08-08. <!-- check: none — a placeholder this milestone's T3 replaces; the replacement is the settlement -->
+Backing table `data-raw/m113-skew-response-coverage.tsv` (192 rows = 64 cells
+× 3 legs), written by `data-raw/m113-skew-response-derivation.R`; every figure
+below re-derives by re-running that script.
+
+- **S1 `searle`: no-GO.** 21/64 cells below the 0.93 unconditional floor;
+  worst 0.674 at (ρ = 0.60, k = 50, n = 5, chisq1). Failures concentrate in
+  chisq1/t5 from ρ = 0.05 (chisq1, k ≥ 30) upward, worsening with ρ and k.
+- **S1 `burch`: no-GO.** 16/64 cells below the floor; worst 0.6655 at
+  (0.60, 30, 5, chisq1), including one gaussian cell (0.9285 at
+  (0.60, 10, 2)). M76's "never under-covers" finding does not extend to the
+  wider battery — the D-012 scope fence was warranted.
+- **S2 `mc`: warn.** 36/64 cells below the floor among non-aborted reps,
+  spanning all four generator families including gaussian. Two phenomena:
+  (i) pure skew/kurtosis under-coverage on zero-abort cells — 5 cells, all
+  t5/chisq1 at ρ ≥ 0.30, n = 5 (the two worst: 0.6725 and 0.676 at ρ = 0.60,
+  chisq1, k = 50/30) — the defect that motivated M113; (ii)
+  selection-conditioned under-coverage where aborts are common (26 failing
+  cells with abort rate > 0.1: near-zero ρ and the (10, 2) design) — the
+  non-aborted subset there is a selected sample, consistent with D-026's
+  abort-is-informative finding.
+- **Width (descriptive).** Median width ratio vs the MC leg: `searle` 1.013
+  (range 0.710–1.351), `burch` 0.989 (range 0.667–1.295) — neither arm buys
+  its coverage failures with narrower intervals systematically.
 
 ## Disposition
 
-Filled at T3 with the D-entry id and where each disposition's follow-on
-lives; empty at freeze — observed 2026-08-08. <!-- check: none — a placeholder this milestone's T3 replaces; the replacement is the settlement -->
+Verdict recorded as D-027: `searle` no-GO, `burch` no-GO, `mc` **warn** —
+no default-method change (nothing cleared S1; the D-001 fence untouched).
+The warn commissions a follow-on milestone to design the runtime trigger
+(ROADMAP candidate row added by M113, lineage D-026 → M113/D-027); per the
+frozen S2 rule it degrades to `document` there, with its own D-entry, if no
+reliable trigger exists.
 
 ## Open questions
 

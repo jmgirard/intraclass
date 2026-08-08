@@ -88,7 +88,7 @@ work log).
       committed fixture; emit per-cell × leg unconditional coverage (and
       the per-tail miss splits the warn/document rules need) as a committed
       fixture; verify the MC column against the two quoted cells.
-- [ ] T3: Read the derived table against the frozen rules; record per-arm
+- [x] T3: Read the derived table against the frozen rules; record per-arm
       outcomes on the page's results section; draft the D-entry; on a
       replace-GO, stop at the gate for the maintainer decision.
       (RB tripwire: ip-touching)
@@ -107,6 +107,7 @@ work log).
 - 2026-08-08: T1 done — frozen criteria page cairn/references/mc-skew-response-comparison.md committed before any derivation artifact, with INDEX line, provenance, D-009 settling directives, and 4 OUT-repo-analysis triage rows; all four data-raw checkers + cairn_validate green.
 - 2026-08-08: minor amendment (pre-derivation, blind content untouched) — S2 clarified to read coverage among non-aborted reps, since the bare "coverage" wording would fire on the near-zero abort cells and re-open D-026's adjudicated abort; clarification dated on the page itself.
 - 2026-08-08: T2 done — derivation script + committed data-raw/m113-skew-response-coverage.tsv (192 rows = 64 cells × 3 legs); fixture-shape and quoted-cell assertions pass (0.676 exact; the k=50 cell is exactly 0.6725, rendered 0.673 half-up on the M111 page, so the pin is a ±0.0005 band); lintr 0, air clean.
+- 2026-08-08: T3 done — verdict recorded as D-027 (searle no-GO 21/64 cells below floor, worst 0.674; burch no-GO 16/64, worst 0.6655 incl. one gaussian cell; mc warn, 36/64 below floor among non-aborted reps across all four families — 5 zero-abort skew/kurtosis cells + 26 selection-conditioned high-abort cells); page Results/Disposition filled; warn-trigger candidate row added; no replace-GO, so the ip-touching stop did not fire and the D-001 fence is untouched.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
