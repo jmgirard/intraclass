@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M114: Runtime skew/kurtosis warn trigger — design & validation (assessment only)
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -126,6 +126,7 @@ candidate row.
 - 2026-08-08: created by /milestone-plan (promotes the D-027 warn-trigger commissioning row; plan gate: two milestones — assessment now, response after the verdict; held-out battery in; candidate family = kurtosis + skewness).
 - 2026-08-08: criteria audit ([O] fresh reader) returned 9 findings, all fixed in the AC wording pre-gate: fixture endpoint columns live in the long `raw` table not the wide table; 1e-12 platform-scoped; held-out table given a committed home + disjoint seed ids; AC1 additionally freezes the threshold-selection procedure so AC5's mechanical read is reachable; degrade limb bounded to the frozen family; AC6 pathspec extended to the full installed surface.
 - 2026-08-08: T3 done — AC3 byte-stability VERIFIED: full re-run of both scripts reproduced the 138,000-row table byte-identically (cmp clean vs the run-1 copy). The 6b5653c checkpoint had captured the tsv mid-re-run (m111 half only, 128,000 rows); this commit lands the complete table — the verdict ledgers were derived from the complete run-1 table before the re-run and are unaffected.
+- 2026-08-08: all tasks done → status review. Verify slot clean: devtools::test() FAIL 0 / PASS 6116 (3 expected footgun warnings); lintr::lint_package() 0; air format --check clean; cairn_validate all checks passed; AC6 diff (R/ src/ man/ NAMESPACE DESCRIPTION NEWS.md tests/ vignettes/ data/) empty.
 - 2026-08-08: air format pass over the three m114 data-raw scripts (argument-per-line reflow only; behavior-identical, the committed table and ledgers stand).
 - 2026-08-08: plan gate chose seed-scheme regeneration + per-rep consistency proof over re-running the M111 sweep with statistics added, because reps regenerate deterministically without refitting (36 min saved; the stale-checkpoint candidate's promotion condition stays unfired); falsified by the AC2 consistency assertion failing on any rep.
 - 2026-08-08: T1 done — frozen page authored (48-candidate closed family, W1–W3 tiered floors per the implement gate, mechanical selection ordering, 10-cell held-out battery ids 65–74) + INDEX.md line; freeze commit precedes every derivation artifact.
