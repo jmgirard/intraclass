@@ -60,6 +60,16 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   (**Not on the shelf — fields and bands not verified against the source**, M72,
   2026-07-19. The bands are load-bearing for `getting-started.Rmd`, so this is the
   most consequential of the entries whose source is off the shelf.)
+- Cronbach, L. J., Gleser, G. C., Nanda, H., & Rajaratnam, N. (1972). *The
+  Dependability of Behavioral Measurements: Theory of Generalizability for Scores
+  and Profiles.* John Wiley & Sons. (**The whole book is on the shelf** as
+  `cronbach1972`, supplied by the maintainer 2026-08-08; a library scan of the
+  Wiley printing, fields verified against its own title and copyright pages —
+  ISBN 0-471-18850-6, LCC card 70-180269. The two-facet decomposition this work
+  is co-cited for in `ORACLES.md` (O-Bayes-Rep) **is verified**: Design IV-A
+  `j:(i × p)`, Fig. 2.4 and Table 2.1, printed pp. 38/40, with the crossed
+  decomposition at Eq. (1.3), printed p. 28 — M110, 2026-08-08. No source note by
+  the M110 plan-gate decision, the M72 verification-only precedent.)
 - Donner, A., & Zou, G. (2002). Testing the equality of dependent intraclass
   correlation coefficients. *The Statistician, 51*(Part 3), 367–379. (Published in
   the JRSS Series D journal, which prints only the short title.) (No DOI is

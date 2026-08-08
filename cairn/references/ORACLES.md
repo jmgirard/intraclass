@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M63 from the D-007 split of the pre-migration `cairn/references/REFERENCES.md`, whose registry body moved byte-identically — the split **read nothing**, it relocated text (D-007).
 Pagination: see the **Source-leg verification** table below and its pagination-basis note.
-Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. One leg whose source is absent from the shelf (Cronbach et al. 1972) carries an in-place status marking at the claim and is the single outstanding row of the **Source-leg verification** table below; its co-cited half, Brennan (2001), was closed against Ch. 3 late in the milestone. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth. **M79 (2026-07-21)** wrote entries for every asserted oracle that previously lacked one — the M46/M47 cluster-`ck` pair, the `O-SEM-ML*` lavaan-multilevel family, the frequentist multilevel/d-study oracles, the lme4-engine `O-LME`/`O-LME2`, `O-cc`, `O-invariance`, and the fixed-nested `O-FNML` — each to this same D-008 kind-split bar (script-derived legs confirmed against a committed fixture or inline value without re-running; source legs anchored to the Source-leg table).
+Extraction: **verified 2026-07-19 (M72)** on the bar D-008 sets, which splits by entry kind — every entry now carries a `**Kind:**` bullet saying which assurance it holds. *Source-traceable* legs were re-read against the source itself at the cited page, never against a `<citekey>.md` note, and the distinct source claims are tabulated with their anchors and dated status below. *Script-derived* legs were confirmed against what the repo actually commits — an inline expected value in the script or a committed fixture under `tests/testthat/fixtures/` — **without re-running** (refused at the plan gate: the Bayesian sweeps are multi-hour live-Stan jobs). Where a script commits neither, its entry is stamped **script-attested, values not independently confirmed** with the reason specific to it. **A script-derived pass is a provenance claim, not a reproducibility one** (D-008): it says the registry agrees with what the repo commits, *not* that a re-run today reproduces those values. The last Source-leg row left open by M72 — Cronbach et al. (1972), then off the shelf — was closed at **M110 (2026-08-08)** against the maintainer-supplied whole book, so every row of the **Source-leg verification** table below now carries a verified status; its co-cited half, Brennan (2001), was closed against Ch. 3 late in M72. Counts are deliberately not pinned here (LESSONS 2026-07-19/M70) — the per-entry `**Kind:**` bullets carry the per-entry truth. **M79 (2026-07-21)** wrote entries for every asserted oracle that previously lacked one — the M46/M47 cluster-`ck` pair, the `O-SEM-ML*` lavaan-multilevel family, the frequentist multilevel/d-study oracles, the lme4-engine `O-LME`/`O-LME2`, `O-cc`, `O-invariance`, and the fixed-nested `O-FNML` — each to this same D-008 kind-split bar (script-derived legs confirmed against a committed fixture or inline value without re-running; source legs anchored to the Source-leg table).
 
 The registry of oracle values used in the test suite. **Every oracle value in
 the test suite must trace back to an entry here** with provenance — a citation
@@ -54,7 +54,7 @@ is marked unverified at the point of claim, not silently dropped.
 | Lee & Vispoel (2024) Eqs. 8/25 — raw σ̂²_i with divisor n_i−1, no bias correction | printed pp. 405/407 | verified — observed 2026-07-19 |
 | Vispoel, Hong, Lee & Xu (2022) — SEM indicator-mean vs 12 R/SAS/SPSS procedures, ≤ .001 (G) / ≤ .005 (global D) across 24 scales | PDF p. 6 (tables pp. 9–10) | verified — observed 2026-07-19; **GENOVA removed from the compared-program list, which the source does not mention** |
 | Brennan (2001) Ch. 3 — the two-facet decomposition behind O-Bayes-Rep: crossed `p × i × h` into seven effects (Fig. 3.1), and the `i:(p × o)` replicates-within-cell design O-Bayes-Rep actually fits (§3.1.2) | printed pp. 56 / 58 | verified — observed 2026-07-19 |
-| Cronbach et al. (1972) — the same decomposition, co-cited | — | **not verified — off the shelf**; marked in place at the claim, observed 2026-07-19 |
+| Cronbach et al. (1972) — Design IV-A `j:(i × p)`, the replicates-within-cell design O-Bayes-Rep fits (Fig. 2.4 + Table 2.1; read as Lord–Novick "replications" on p. 42), and the crossed two-facet decomposition into σ²(p), σ²(i), σ²(j), σ²(pi), σ²(pj), σ²(ij), σ²(pij,e), Eq. (1.3) | printed pp. 38/40/42 · 28 | verified — observed 2026-08-08 (M110) |
 
 **Pagination basis.** ten Hove et al. (2022) is cited by its **advance-online
 PDF pages 1–17**, *not* the journal pages of the version of record,
@@ -66,7 +66,9 @@ Wong (1996), Shrout & Fleiss (1979), Jorgensen (2021), and Lee & Vispoel (2024)
 are cited by the journal pagination printed on the page — for Lee & Vispoel the
 running head gives *Psych* 2024, 6 with the folio, so PDF page N = printed page
 400 + N. Vispoel, Hong, Lee & Xu (2022) is an unpaginated conference paper and
-is cited by **PDF page** for that reason.
+is cited by **PDF page** for that reason. Cronbach et al. (1972) is a
+whole-book library scan of the Wiley printing (ISBN 0-471-18850-6), cited by
+the printed pagination on the page; in that scan PDF page = printed page + 20.
 
 ## Registry
 
@@ -1230,8 +1232,15 @@ is cited by **PDF page** for that reason.
   subject×rater cell, which is Brennan's `i:(p × o)` design (§3.1.2, printed p. 58), named
   there as "the random effects two-way factorial design with replications (items) within
   cells". Its four effects — p, o, po, i:po — are exactly this entry's σ²_s, σ²_r, σ²_sr, σ²_e.
-  **Cronbach et al. (1972) is still off the shelf, so that half of the co-citation remains
-  unverified** (M72, observed 2026-07-19); the decomposition is standard GT and is
+  **Cronbach et al. (1972) verified against the whole book 2026-08-08 (M110):** their
+  Design IV-A, `j:(i × p)` — the j facet nested within person×condition cells
+  (Fig. 2.4, printed p. 38; sampling frequencies in Table 2.1, printed p. 40) — is
+  Brennan's `i:(p × o)` with the facet letters exchanged: the estimable effects
+  p, i, pi plus the confounded within-cell residual (j, pj, ij, pij, e) are exactly
+  this entry's σ²_s, σ²_r, σ²_sr, σ²_e, and p. 42 reads the nested j as Lord–Novick
+  "replications" of observations under a condition — the replicates-within-cell
+  reading this oracle fits. The crossed decomposition co-cited beside it is
+  Eq. (1.3), printed p. 28. The decomposition is standard GT and is also
   independently pinned by the entry's own oracles; estimand-spec `M17-within-cell-replicates.md` (§1-2
   measurement model + per-component divisors — no new spec, M29 gives the shipped estimand the brms engine).
 - **DGP:** two-way random with within-cell replicates, N_s = 25, k = 4, n_o = 3, σ²_s = 1.0, σ²_r = 0.16,

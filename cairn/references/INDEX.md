@@ -16,8 +16,11 @@ and milestones; never restate a value here.
   oracles, `O-cc`, `O-invariance`, `O-FNML`) and committed
   `data-raw/check-oracle-registry.py`, which fails if any asserted oracle lacks an
   entry — observed 2026-07-21. <!-- check: python3 data-raw/check-oracle-registry.py -->
-- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (38 entries;
-  extraction-verified 2026-07-19, M72). Primary
+- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (entry count not
+  pinned — LESSONS 2026-07-19/M70, and the pinned "38" this line carried
+  shipped stale when `burch2011` arrived at M76 uncounted, corrected M110: the
+  M72 pass extraction-verified the then-corpus, and later entries were
+  verified at ingest — `burch2011` M76, `cronbach1972` M110). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
@@ -179,13 +182,14 @@ and milestones; never restate a value here.
 ## Source shelf inventory
 
 `sources/` is **gitignored** (renamed from `pdf/` at M68); this inventory is the
-committed record of what is on the shelf and which milestone ingests it. **34 PDFs
-— observed 2026-07-21**: <!-- check: none — a count of the gitignored shelf (cairn/references/sources/); the shelf varies per working copy, so a PDF count is not settleable from the committed repo --> the 30 verified against their own title pages at M63/T1,
+committed record of what is on the shelf and which milestone ingests it. **35 PDFs
+— observed 2026-08-08**: <!-- check: none — a count of the gitignored shelf (cairn/references/sources/); the shelf varies per working copy, so a PDF count is not settleable from the committed repo --> the 30 verified against their own title pages at M63/T1,
 less the superseded `jorgensen2019.pdf` preprint (since deleted, as the M66
 correction anticipated), plus `vanderark2023`, added by the maintainer 2026-07-19
 and verified against its title page when ingested, plus the three the maintainer
 added mid-M72 (below), plus `burch2011`, added by the maintainer 2026-07-21 for
-M76 and ingested here with a source note (verified against the source).
+M76 and ingested here with a source note (verified against the source), plus
+`cronbach1972`, added by the maintainer 2026-08-08 for M110 (below).
 
 **Three arrivals during M72 (2026-07-19), none yet carrying a source note.**
 `lee2024a` and `vispoel2022b` are cited by `ORACLES.md` and their source legs were
@@ -193,8 +197,17 @@ verified against them under M72 T3. `brennan2001_ch3` is **Chapter 3 only** of
 Brennan (2001), supplied so the O-Bayes-Rep decomposition leg could be closed
 (verified, T3); the rest of the book is not on the shelf, so whole-book
 bibliographic fields still come from outside it. Together these closed three of
-the four legs the "acquire the off-shelf sources" candidate row was written for;
-it now names only Cronbach et al. (1972).
+the four legs the "acquire the off-shelf sources" candidate row was written for,
+leaving Cronbach et al. (1972) — closed at M110 (below).
+
+**One arrival during M110 (2026-08-08).** `cronbach1972` is the whole of
+Cronbach, Gleser, Nanda & Rajaratnam (1972) — a library scan of the Wiley
+printing, identity verified against its own title and copyright pages —
+supplied by the maintainer so the last open Source-leg row in `ORACLES.md`
+could be closed (verified, M110: Design IV-A `j:(i × p)`, printed pp. 38/40/42,
+and Eq. (1.3), printed p. 28). By the M110 plan-gate decision it carries no
+source note, following the M72 verification-only precedent — observed
+2026-08-08. <!-- check: test -e cairn/references/BIBLIOGRAPHY.md && grep -q 'cronbach1972' cairn/references/BIBLIOGRAPHY.md && test ! -e cairn/references/cronbach1972.md -->
 
 A fourth PDF, `vispoel2022a`, arrived and was **removed from the shelf on
 2026-07-19 at the maintainer's instruction**. It was cited nowhere in the repo:
@@ -206,8 +219,9 @@ none of the agreement figures. It did **not** settle O-SEM's external-validation
 pin; `vispoel2022b` does. Recorded here rather than silently dropped, because the
 near-identical citekeys are exactly the confusion a later reader would re-create.
 
-**So the "no orphan in either direction" invariant below no longer holds**: three
-shelf PDFs now have no source note. (A stray non-PDF, `vispoel2022b.txt`, also
+**So the "no orphan in either direction" invariant below no longer holds**: four
+shelf PDFs now have no source note (M72's three arrivals plus `cronbach1972`,
+M110). (A stray non-PDF, `vispoel2022b.txt`, also
 sits in `sources/`; it is not a source and is not inventoried here.)
 
 Citekey convention:
@@ -226,9 +240,11 @@ sources were ingested by M64;
 sources by M65; the seven foundational/interpretation sources by M66; the four
 equality-testing sources by M67. Every *note* still has a shelf PDF, but the
 converse no longer holds: the three PDFs that remain from M72's arrivals
-(`lee2024a`, `vispoel2022b`, `brennan2001_ch3`) carry no note, so the shelf has note-less
+(`lee2024a`, `vispoel2022b`, `brennan2001_ch3`) and M110's `cronbach1972` carry no
+note, so the shelf has note-less
 members — **the "no orphan in either direction" state recorded here through
-M71 ended on 2026-07-19** (observed 2026-07-19). <!-- check: test ! -e cairn/references/lee2024a.md && test ! -e cairn/references/vispoel2022b.md && test ! -e cairn/references/brennan2001_ch3.md --> Writing notes for the two cited
+M71 ended on 2026-07-19** (observed 2026-07-19; `cronbach1972` added to the
+note-less set 2026-08-08). <!-- check: test ! -e cairn/references/lee2024a.md && test ! -e cairn/references/vispoel2022b.md && test ! -e cairn/references/brennan2001_ch3.md && test ! -e cairn/references/cronbach1972.md --> Writing notes for the two cited
 arrivals is not M72's scope; M72 verified their *legs* against them directly,
 which is what D-008's source-traceable rule requires.
 

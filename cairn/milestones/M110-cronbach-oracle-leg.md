@@ -1,11 +1,11 @@
 # M110: Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation
 
-- **Status:** planned
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1
-- **Branch/PR:** —
+- **Branch/PR:** `m110-cronbach-oracle-leg` · [PR #119](https://github.com/jmgirard/intraclass/pull/119)
 
 ## Goal
 
@@ -33,7 +33,7 @@ checkers and `cairn_validate` are the mechanical gate.
 
 ## Acceptance criteria
 
-- [ ] AC1: `cronbach1972` — Cronbach, Gleser, Nanda & Rajaratnam (1972), *The
+- [x] AC1: `cronbach1972` — Cronbach, Gleser, Nanda & Rajaratnam (1972), *The
       Dependability of Behavioral Measurements*, supplied whole — is on the
       `cairn/references/sources/` shelf, its identity verified against its own
       title page (a gitignored working-copy fact: review evidence is a local
@@ -43,7 +43,7 @@ checkers and `cairn_validate` are the mechanical gate.
       date; and `INDEX.md`'s shelf inventory records the arrival, mirroring
       the `burch2011`/M72 arrival paragraphs. No `cronbach1972.md` source note
       appears in this milestone's diff (gate decision 2026-08-08).
-- [ ] AC2: the `ORACLES.md` Source-leg table's Cronbach et al. (1972) row
+- [x] AC2: the `ORACLES.md` Source-leg table's Cronbach et al. (1972) row
       carries a dated verification outcome with a page anchor and a stated
       pagination basis: `verified`, citing the passage in the source's own
       design taxonomy that supports the co-citation — the
@@ -53,13 +53,13 @@ checkers and `cairn_validate` are the mechanical gate.
       was found — or, where the reading falsifies or cannot support the
       co-citation, the implicated entries corrected in place with the
       correction cited (D-008's posture), never a softened status.
-- [ ] AC3: the O-Bayes-Rep registry entry's Sources bullet replaces "Cronbach
+- [x] AC3: the O-Bayes-Rep registry entry's Sources bullet replaces "Cronbach
       et al. (1972) is still off the shelf, so that half of the co-citation
       remains unverified" with the dated reading outcome and its citation (the
       supporting passage's anchor in the verified branch, the cited correction
       otherwise), and the `ORACLES.md` `Extraction:` header no longer
       describes an outstanding Source-leg row.
-- [ ] AC4: the consistency sweep passes: every hit of `git grep -in -i
+- [x] AC4: the consistency sweep passes: every hit of `git grep -in -i
       cronbach` over the committed tree is re-read and left consistent with
       the closed leg (for history files — `milestones/archive/`, work logs —
       "consistent" means the text does not assert the leg is open *now*;
@@ -79,21 +79,21 @@ checkers and `cairn_validate` are the mechanical gate.
 
 ## Tasks
 
-- [ ] T1: Ingest the maintainer-supplied book: place it on the shelf as
+- [x] T1: Ingest the maintainer-supplied book: place it on the shelf as
       `cronbach1972.pdf`, verify identity against its own title page, state
       the pagination basis, and locate the two-facet decomposition passage(s)
       in the source's design taxonomy — reading to the end of the relevant
       material before any absence claim (LESSONS 2026-07-18/M65). If the file
       has not arrived at implement start, park the milestone `blocked`.
-- [ ] T2: Close the leg in `ORACLES.md`: the Source-leg row (line 57), the
+- [x] T2: Close the leg in `ORACLES.md`: the Source-leg row (line 57), the
       pagination-basis paragraph (lines 59–69), the O-Bayes-Rep Sources
       bullet (~line 1233), and the `Extraction:` header (line 5) — then
       re-read every header that summarizes the table (LESSONS 2026-07-19/M72).
-- [ ] T3: Record the arrival: the `BIBLIOGRAPHY.md` entry (fields verified
+- [x] T3: Record the arrival: the `BIBLIOGRAPHY.md` entry (fields verified
       against the book); the `INDEX.md` inventory paragraph plus the
       full-file re-read correcting every claim the arrival falsifies, its
       D-009 `check:` directives updated in lockstep.
-- [ ] T4: Consistency sweep: re-read every `git grep -in -i cronbach` hit;
+- [x] T4: Consistency sweep: re-read every `git grep -in -i cronbach` hit;
       grep this milestone's own new prose for bare counts and universals
       (LESSONS 2026-07-19/M72); run the three `data-raw` checkers to exit 0
       and `cairn_validate` clean.
@@ -104,5 +104,28 @@ checkers and `cairn_validate` are the mechanical gate.
 - 2026-08-08: criteria audit ([O] fresh reader) ran twice — pass 1 returned 8 findings (6 fixed in the AC wording, 2 routed to the gate); the post-gate re-audit returned 2 minor wording fixes (branch exhaustiveness on AC2, citation asymmetry on AC3), both applied, and noted AC1/AC4 must ship together (held by the Coverage map).
 - 2026-08-08: plan gate chose the no-note M72 precedent over a full `cronbach1972.md` source note because the ask is one co-citation leg and the sibling half (`brennan2001_ch3`) is recorded the same way; falsified by the repo taking a dependency on Cronbach extractions beyond this leg, which would owe the note.
 - 2026-08-08: plan chose a procedure-enumerated sweep (the named `git grep` plus a full `INDEX.md` re-read) over a hand-list of known stale sites because a hand-list ships every site it omits stale; falsified by a stale Cronbach claim surviving the sweep on a surface neither procedure enumerates.
+- 2026-08-08: /milestone-implement start — `cronbach1972.pdf` found already on the shelf (ctime 2026-08-08 10:44, supplied during this session; mtime Jul 19 is the copy's preserved original — the M63 ctime check); no blocker, branch `m110-cronbach-oracle-leg` cut. Question gate skipped: the plan gate settled both open choices, no RB tripwires tagged.
+- 2026-08-08: T1 done — identity verified against the title/copyright pages (Wiley 1972, all four authors, ISBN 0-471-18850-6; whole-book library scan); pagination basis PDF = printed + 20; leg closes on the AC2 verified branch's stronger arm — Design IV-A `j:(i × p)` (Fig. 2.4 p. 38, Table 2.1 p. 40, Lord–Novick "replications" reading p. 42) is Brennan's `i:(p × o)`, plus the crossed Eq. (1.3) p. 28.
+- 2026-08-08: T2 done — ORACLES.md Source-leg row, pagination-basis note, O-Bayes-Rep Sources bullet, and Extraction header all updated; header sweep (grep outstanding/off-shelf/Source-leg) found no other summary asserting the leg open (line 34 is the standing off-shelf rule, kept).
+- 2026-08-08: T3 done — BIBLIOGRAPHY.md gains the Cronbach entry (fields against the book's own title/copyright pages); INDEX.md full-file re-read: corrected 38→39 entries (a stale count the grep would have missed — the AC4 full-read procedure earning its keep), 34→35 PDFs, three→four note-less members, the closed-leg sentence, an M110 arrival paragraph with its own check directive, and the note-less check directive extended to cronbach1972.md.
+- 2026-08-08: T4 done — every grep hit re-read (archive/data-raw hits are then-state or alpha-1951, none assert the leg open); the new "every row verified" universal confirmed against the table (19 verified rows, no unverified); check-reference-observations 0 falsified, mpl-doc-claims OK; the new ORACLES row tripped the generalizing-claims gate exactly as LESSONS/M85 predicts — triaged OUT-quote — then --check green; cairn_validate all checks passed. Profile verify slot (testthat) not run per the plan's Out: no runtime surface in the diff; review's consistency gate covers toolchain checks.
+- 2026-08-08: all tasks done → status review; checkpoint pushed.
+- 2026-08-08: review return 1 (defect track) — AC4 failed inside its own procedure's domain: review finding D1 (scored 85) shows the INDEX.md "39 entries" count M110 wrote is wrong (HEAD counts 40 `^- ` bullets; the pre-M110 "38" was already stale from M76's uncounted burch2011 and M110 derived 39 from the narrative, not the file). Status → in-progress for the fix.
+- 2026-08-08: D1 fixed — the INDEX count unpinned (M70 remedy) with lineage carried; checkers green; status → review, re-verified.
 
 ## Decisions
+
+## Review
+
+Evidence gathered fresh at review, 2026-08-08, PR #119.
+
+- AC1: `cronbach1972.pdf` present on the shelf (7,621,153 bytes, local observation per the criterion's D-009 `check: none` disposition), identity read against its title/copyright pages this session (Wiley 1972, four authors, ISBN 0-471-18850-6); `grep` finds the new Cronbach BIBLIOGRAPHY entry (1 hit) and the INDEX "One arrival during M110" paragraph (1 hit); `git diff --name-only main..HEAD` lists 6 files, no `cronbach1972.md`.
+- AC2: ORACLES.md:57 is the verified branch — Design IV-A `j:(i × p)` named as the replicates-within-cell design (which passage and form: stated in the row), anchors `printed pp. 38/40/42 · 28`, status `verified — observed 2026-08-08 (M110)`; the pagination-basis paragraph (line ~69) states the whole-book-scan basis and the +20 offset.
+- AC3: the replaced sentence ("still off the shelf") greps 0 hits in ORACLES.md; the Sources bullet (line 1235) opens "**Cronbach et al. (1972) verified against the whole book 2026-08-08 (M110)**" with the Fig. 2.4/Table 2.1/p. 42/Eq. (1.3) anchors; the Extraction header now reads "closed at **M110 (2026-08-08)**" and describes no outstanding row.
+- AC4: fresh runs — check-reference-observations.py: 0 unmarked, 0 falsified; enumerate-generalizing-claims.py --check: in sync (295/295); check-mpl-doc-claims.py: OK, 0 failures; `git grep -il cronbach` = 12 committed files, all re-read at T4 (work log), history files assert only then-state.
+
+Consistency gate: `cairn_validate` exit 0 (all checks pass); no principle changed → `cairn_impact` skipped. Toolchain slot: `document()` no diff; diff touches no generated files (`NAMESPACE`/`man/`/`data/` absent from the 6-file diff); README/pkgdown unaffected, `check_pkgdown()` no problems; NEWS — no user-visible change (references-only diff), no entry owed; no new top-level files; `devtools::check(NOT_CRAN=false)` clean — 0 errors, 0 warnings, 0 notes (4m03s, testthat OK).
+
+Fresh-context review (three lenses + scorer): [O] diff-bug — 12 findings, all page anchors independently re-verified correct against the PDF; [S] blame-history — no defects, independently confirmed the +20 offset, the Design IV-A structure, and the p. 42 quotation; [S] prior-review — 5 findings (lesson-shape flags), GitHub threads probe empty. Scorer: 1 of 17 at ≥80.
+- Actioned — D1 (85): the INDEX.md bibliography count M110 wrote ("39 entries") was wrong (HEAD counts 40; the prior "38" was stale from M76). **Return-floor return (AC4), fixed**: the count is unpinned per LESSONS/M70 with the staleness named and the verification lineage carried instead; checkers re-run green, `grep -c '^- '` = 40 confirms the residual prose pins no total.
+- Logged below 80 (16): P1 78 count-pin shape (fixed by the D1 remedy); P3 65 / D6 40 the new "every row verified" universal, true today (19/19), no settling directive (Extraction lines are D-009-exempt by rule); D7 65 BIBLIOGRAPHY omits the p. 42 anchor its siblings carry; D4 50 the new check directive doesn't settle the ORACLES-row claim; P4 45 / D5 45 "facet letters exchanged" imprecise though the mapping is verified correct; P2 40 shelf-count idiom; D9 30 anchor-separator style; D2 25 / D3 25 pre-existing M76 staleness ("Ingested — 30" list and the BIBLIOGRAPHY Provenance "(→ 38)" chain omit burch2011 — pre-dates this diff, left for a records-hygiene pass); D8 20 city-of-publication style; P5 15 quotation fidelity (verified verbatim); D10/D11/D12 ≤10 informational.
