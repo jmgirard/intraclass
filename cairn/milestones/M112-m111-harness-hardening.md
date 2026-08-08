@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M112: Harden the M111 fallback-sweep harness
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -96,7 +96,7 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - [x] T4: Record the F1/F5 inexpressibility + vacuity-when-live finding as
       a milestone-local decision (lineage: M111 review D6 → M112 criteria
       audit).
-- [ ] T5: Run air, lintr, and the four `data-raw` checkers; fix what reds.
+- [x] T5: Run air, lintr, and the four `data-raw` checkers; fix what reds.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates -->
@@ -109,6 +109,7 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - 2026-08-08: T2 — `mc_ci()` returns an explicit ok/abort status and the MC leg's `aborted` flag is set from it; a non-finite MC interval arriving without the classed condition now errors loudly; the MC-vs-classical flag divergence is stated in the script header; both stubs demonstrated in the demo script.
 - 2026-08-08: T3 — near-miss corrected to the frozen failing-side window `[threshold - 0.005, threshold)` for F2 and added for F3, plus env-var input/output overrides on both scripts; against the committed fixture the corrected counts are F2 SEARLE 4 / Burch 5 (the shipped passing-side script counted 1 / 4) and F3 SEARLE 1 / Burch 0, with `f2_near_miss` the only shipped ledger column that changes and both `.rds` fixtures untouched.
 - 2026-08-08: T4 — recorded the F1/F5 inexpressibility and the failing-side count's vacuity-when-live as a milestone-local decision (lineage: M111 review D6 -> M112 criteria audit); no D-entry, the finding is local to the frozen M111 criterion.
+- 2026-08-08: T5 — `air format --check .` clean, `lintr::lint_package()` 0 lints (`data-raw/` is in scope; only `data-raw/reviews` is excluded), all four CI-wired `data-raw` checkers plus their vacuity self-tests pass, the local-only `check-oracle-registry.py` reports 0 gaps, and `NOT_CRAN=true CI=true devtools::test()` is [ FAIL 0 | WARN 2 | SKIP 23 | PASS 5854 ]; no `R/` or `tests/` file is touched by this branch, and no NEWS entry is owed (the diff is research-harness only, no user-visible change).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
