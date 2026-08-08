@@ -101,7 +101,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
       `cairn/references/fallback-on-abort-comparison.md` (grid, adapted
       C1–C5 + conditional-on-abort rule, aggregation rule, INDEX line,
       triage rows) before any sweep artifact.
-- [ ] T3: Build the sweep harness under `data-raw/m111-fallback-*`, reusing
+- [x] T3: Build the sweep harness under `data-raw/m111-fallback-*`, reusing
       the m76 sweep structure parallelized over cells (`mclapply`, 4 workers
       — plan gate 2026-08-08): per-cell checkpointing, per-cell distinct
       per-rep seeds, per-rep abort indicator, platform capture; size the run
@@ -125,6 +125,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: set in-progress by /milestone-implement; branch m111-fallback-on-abort cut from main (3079634). Implementation question gate skipped — the plan gate settled grid, arms, thresholds, workers, and verdict routing; T1's generator picks are AC2-fenced to burch2011 Table 2, not an open choice.
 - 2026-08-08: T1 done — Table 2 extracted verbatim into burch2011.md (11 distributions + κ, p. 1021, read from the shelf PDF pp. 4/8) with the located-and-scaled convention (§3 p. 1022); arms chosen: Uniform(0,1) κ=−1.2 (platykurtic) and χ²(1) κ=12.0 (skewed, the §5 boundary-caveat distribution); one enumerator superlative triaged OUT-quote; both references checkers green.
 - 2026-08-08: T2 done — frozen criteria page `fallback-on-abort-comparison.md` committed before any sweep artifact (F1–F6 adapted from M76 C1–C6; F3's conditional-on-abort rule uses a Clopper–Pearson bound because a strict floor on a ~100-rep conditional subset false-alarms ~18%/cell at true-nominal; F4 width demoted to descriptive — a fallback only replaces an abort, so no dominance rule); INDEX line + 7 OUT-repo-analysis triage rows appended programmatically; all three checkers + cairn_validate green.
+- 2026-08-08: T3 done — `data-raw/m111-fallback-sweep.R`: 64-cell grid, per-rep mc/searle/burch legs with composite derived at summary time, mclapply 4 workers, per-cell checkpoint files (gitignored, resume-safe), platform metadata in the fixture; lintr 0 lints, air-formatted; smoke test (3 reps × 3 cells incl. both new arms) shows aborts on the uniform ρ=0.05 cell and the composite filling them.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
