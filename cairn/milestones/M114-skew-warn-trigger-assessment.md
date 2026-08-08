@@ -42,7 +42,7 @@ candidate row.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: The reliability criteria page
+- [x] AC1: The reliability criteria page
       `cairn/references/mc-skew-warn-trigger.md` is frozen (GP5) in a commit
       that precedes every derivation-artifact commit (derivation artifacts:
       T2's script, T3's derived table, T4's held-out sweep script and
@@ -59,7 +59,7 @@ candidate row.
       and the held-out battery (cells, distributions, geometry, n_rep,
       seeding, floor applicability) — so the verdict is a function of
       (frozen page, derived tables) alone.
-- [ ] AC2: `data-raw/m114-warn-trigger-derivation.R` regenerates every
+- [x] AC2: `data-raw/m114-warn-trigger-derivation.R` regenerates every
       (cell, rep) dataset from the M111 seed scheme
       (`cell$id * 1000000L + rep`) and proves the regeneration is the
       fixture's: for every one of the 64 × 2000 reps, the recomputed SEARLE
@@ -68,17 +68,17 @@ candidate row.
       within 1e-12 — asserted in-script, on a platform matching the
       fixture's recorded `meta$platform` (aborted searle reps, if any,
       compared on their aborted flag instead).
-- [ ] AC3: Per-rep candidate trigger statistics for all M111 reps and all
+- [x] AC3: Per-rep candidate trigger statistics for all M111 reps and all
       held-out reps are committed as a derived table
       (`data-raw/m114-warn-trigger-stats.tsv`), re-derivable by re-running
       the scripts (byte-stable on re-run under the committed seeds).
-- [ ] AC4: The held-out battery — ≥ 2 data-generating distributions not in
+- [x] AC4: The held-out battery — ≥ 2 data-generating distributions not in
       the M111 grid, ≥ 1 geometry off the M111 (k, n) set, cell ids ≥ 65 so
       seed streams stay disjoint from the M111 ids 1–64, all named on the
       frozen page before it runs — is swept per-rep (MC-leg coverage +
       trigger statistic) and its cells enter the frozen rules' verdict
       alongside the M111-derived cells (GP6).
-- [ ] AC5: The verdict is read mechanically from the frozen rules over the
+- [x] AC5: The verdict is read mechanically from the frozen rules over the
       derived tables — the derivation script applies the frozen selection
       rule with no free choices — and recorded as a D-entry: either (a) a
       trigger spec (statistic, threshold, measured per-cell operating
@@ -86,7 +86,7 @@ candidate row.
       as the bounded finding "no candidate in the frozen family met the
       frozen floors/ceilings on the derived tables". The page's
       Results/Disposition sections carry the per-cell table.
-- [ ] AC6: The milestone ships no exported-code change:
+- [x] AC6: The milestone ships no exported-code change:
       `git diff --stat main...HEAD -- R/ src/ man/ NAMESPACE DESCRIPTION
       NEWS.md tests/ vignettes/ data/` is empty at review.
 
@@ -148,3 +148,48 @@ candidate row.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Evidence gathered 2026-08-08 on branch head f43a093 (PR #123), after the
+AC1 gated amendment (freeze-edit clause scoped to frozen-rules content).
+
+- AC1: PASS — `git log main..HEAD`: freeze commit a3a3692 precedes every
+  derivation-artifact commit (c6ead75 script, 6b5653c ledgers/heldout,
+  51d93b3 table, 74fdcaf reformat); `git log --follow` on the page shows
+  exactly two commits (a3a3692 freeze, 6b5653c results fill) and the
+  a3a3692..6b5653c page diff touches only `## Results`/`## Disposition` —
+  frozen-rules content untouched post-freeze. Page defines family,
+  floors/ceilings, threshold grids, selection rule + tie-breaks, degrade
+  rule, and the held-out battery, all in the freeze commit.
+- AC2: PASS — derivation script ran twice this session (initial + the
+  byte-stability re-run), both passing the in-script proof: 128000/128000
+  non-aborted searle reps matched stored endpoints within 1e-12 on the
+  recording platform (platform gate asserted `meta$platform` identity);
+  zero aborted searle reps exist, the if-any clause idle.
+- AC3: PASS — `data-raw/m114-warn-trigger-stats.tsv` committed, 138,001
+  lines (header + 64×2000 m111 + 10×1000 heldout); full re-run of both
+  scripts reproduced it byte-identically (`cmp` clean vs the run-1 copy);
+  working tree clean against the committed table.
+- AC4: PASS — table's heldout rows enumerate ids 65–74 exactly as the
+  frozen page names them (lognormal/laplace × {0.30, 0.60} × {(20,3),
+  (50,5)} + gaussian × 0.30 × both geometries, n_rep = 1000, seeds
+  disjoint by id ≥ 65); 2 new families, (20,3) off the M111 geometry set;
+  held-out cells classified by the same frozen rules entered the verdict
+  (4 targeted T-b, 2 protected among them).
+- AC5: PASS — verdict script reads only the frozen constants + the two
+  derived tables and emitted the degrade branch mechanically (0/48 pass
+  W1–W3; ledgers committed); D-028 records the bounded finding verbatim
+  ("no candidate in the frozen family met the frozen floors/ceilings on
+  the derived tables"); page Results/Disposition carry the per-cell
+  classification and the candidates ledger reference.
+- AC6: PASS — fresh `git diff --stat main...HEAD -- R/ src/ man/
+  NAMESPACE DESCRIPTION NEWS.md tests/ vignettes/ data/` is empty.
+
+Consistency gate (by command, 2026-08-08): `cairn_validate` all checks
+passed (fresh run below); `devtools::document()` no diff; generated files
+untouched (AC6 diff empty covers NAMESPACE/man/data); README.Rmd absent →
+no knit check; `pkgdown::check_pkgdown()` no problems; NEWS.md — no entry,
+correct: assessment-only, no user-visible change (user-facing materials
+never reference milestone numbers); no new top-level files (all under
+data-raw/ + cairn/); `devtools::check(env_vars = c(NOT_CRAN = "false"))`
+— see line below. `devtools::test()` FAIL 0 / PASS 6116; lintr 0 lints;
+air format --check clean.
