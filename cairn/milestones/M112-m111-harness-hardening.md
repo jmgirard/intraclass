@@ -112,6 +112,7 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - 2026-08-08: T5 — `air format --check .` clean, `lintr::lint_package()` 0 lints (`data-raw/` is in scope; only `data-raw/reviews` is excluded), all four CI-wired `data-raw` checkers plus their vacuity self-tests pass, the local-only `check-oracle-registry.py` reports 0 gaps, and `NOT_CRAN=true CI=true devtools::test()` is [ FAIL 0 | WARN 2 | SKIP 23 | PASS 5854 ]; no `R/` or `tests/` file is touched by this branch, and no NEWS entry is owed (the diff is research-harness only, no user-visible change).
 - 2026-08-08: review — PR #122 opened (draft); AC1-AC5 verified with fresh evidence and ticked; cairn_validate all-pass, document() no diff, pkgdown clean; three fresh-context reviewers spawned (prior-review and blame lenses returned; diff-bug lens and devtools::check() still running at this checkpoint).
 - 2026-08-08: review — three fresh-context reviewers + scorer returned 13 findings, all scored sub-80 (highest 60), so the actioned list is empty and no criterion failed; H-1/M-4 absorbed into one new ROADMAP candidate row on the sweep's checkpoint cache, M-2 (the T4 decision's F1 rationale) surfaced to the maintainer at the merge gate.
+- 2026-08-08: merge approved by the maintainer at the review gate (PR #122); M-2 (the T4 decision's F1 rationale, scored 55) ships as recorded rather than superseded — offered at the gate and declined in favour of merging, so the finding stands logged in the Review section.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
