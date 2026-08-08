@@ -107,8 +107,8 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
       per-rep seeds, per-rep abort indicator, platform capture; size the run
       per design family (M107/M109 lessons) and check for concurrent R
       sessions / live R.INSTALL before launch.
-- [ ] T4: Run the ~4 h sweep as a background job; commit the fixture.
-- [ ] T5: Analyze against the frozen criteria; write the results and
+- [x] T4: Run the ~4 h sweep as a background job; commit the fixture.
+- [x] T5: Analyze against the frozen criteria; write the results and
       per-method ledger into the criteria page; run the three AC6 checkers
       locally.
 - [ ] T6: Record the GO/NO-GO D-entry; update the ROADMAP candidate row
@@ -126,6 +126,8 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: T1 done — Table 2 extracted verbatim into burch2011.md (11 distributions + κ, p. 1021, read from the shelf PDF pp. 4/8) with the located-and-scaled convention (§3 p. 1022); arms chosen: Uniform(0,1) κ=−1.2 (platykurtic) and χ²(1) κ=12.0 (skewed, the §5 boundary-caveat distribution); one enumerator superlative triaged OUT-quote; both references checkers green.
 - 2026-08-08: T2 done — frozen criteria page `fallback-on-abort-comparison.md` committed before any sweep artifact (F1–F6 adapted from M76 C1–C6; F3's conditional-on-abort rule uses a Clopper–Pearson bound because a strict floor on a ~100-rep conditional subset false-alarms ~18%/cell at true-nominal; F4 width demoted to descriptive — a fallback only replaces an abort, so no dominance rule); INDEX line + 7 OUT-repo-analysis triage rows appended programmatically; all three checkers + cairn_validate green.
 - 2026-08-08: T3 done — `data-raw/m111-fallback-sweep.R`: 64-cell grid, per-rep mc/searle/burch legs with composite derived at summary time, mclapply 4 workers, per-cell checkpoint files (gitignored, resume-safe), platform metadata in the fixture; lintr 0 lints, air-formatted; smoke test (3 reps × 3 cells incl. both new arms) shows aborts on the uniform ρ=0.05 cell and the composite filling them.
+- 2026-08-08: T4 done — sweep ran 36 min at 4 workers (well under the ~4 h projection: no bootstrap refits in this harness), 64/64 cells, fixture `m111-fallback-results.rds` (384k rows) committed with platform metadata (macOS/arm64).
+- 2026-08-08: T5 done — `m111-fallback-verdict.R` applies the frozen rules mechanically (ledger `m111-fallback-rules.rds`): F1 PASS both arms; F3 fails 23/36 (SEARLE) and 4/36 (Burch) — the abort event is informative, so off-boundary aborts select degenerate samples no fixed classical interval covers (cond. coverage 0.00–0.49 there; Burch 1.000 at 28/29 ρ≤0.10 cells); F2 fails 45 and 30 of 64 (mostly inherited from the MC leg, incl. an incumbent defect: MC alone covers 0.67 on skewed ρ=0.60 k≥30 cells with 0 aborts); F5 fails 45/48. Results + NO-GO disposition appended to the criteria page; one figure corrected against the ledger before commit (28-of-29, not all-29); 7 new claims triaged; all three checkers + cairn_validate green.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
