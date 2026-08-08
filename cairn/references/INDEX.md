@@ -179,6 +179,13 @@ and milestones; never restate a value here.
   Burch REML where it aborts), with a Clopper–Pearson conditional-on-abort
   coverage rule; results + per-arm GO/NO-GO appended at T5.
 
+- [mc-skew-response-comparison.md](mc-skew-response-comparison.md) — synthesis
+  note (M113): the pre-registered (GP5) S1/S2 disposition rules for the MC
+  default's measured skew under-coverage (classical replace bar per arm;
+  warn/document/no-change for the incumbent), read over per-cell unconditional
+  coverage re-derived from the committed M111 fixture. Results/disposition
+  appended at T3.
+
 - [mpl-twoway-random-comparison.md](mpl-twoway-random-comparison.md) — synthesis
   note (M86/M87): the estimand mapping (xiao2013 ρ = package `ICC(A,1)`) and the
   oracle-validation of the from-scratch naive-PL / MPL implementation against

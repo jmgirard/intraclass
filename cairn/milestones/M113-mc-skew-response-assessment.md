@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M113: MC-default skew response — frozen-rules disposition from the M111 data
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m113-mc-skew-response   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -80,7 +80,7 @@ work log).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Author the frozen criteria page from
+- [x] T1: Author the frozen criteria page from
       `templates/synthesis-note.md` (rules, floor lineage, known-priors
       acknowledgment, disposition vocabulary, provenance, INDEX line,
       triage rows); commit it before any derivation artifact.
@@ -102,6 +102,9 @@ work log).
 - 2026-08-08: criteria audit ([O], fresh-context) returned: AC1's "frozen before any sweep artifact" unsatisfiable — the M111 results already exist and are quoted in the ROADMAP, so commit order cannot establish blindness (fixed: frozen before any *new* derivation artifact, known priors acknowledged, floor traced externally); AC2 confirmed fully re-derivable from the committed fixture's per-rep leg rows; AC3 confirmed reachable — the default-method choice is D-entry-tradeable under the D-001 fence, not IP-blocked; AC4's path allowlist over-tight (fixed: negative check on the four dirs).
 - 2026-08-08: plan gate chose the full four-way disposition over (a) replace-only GO/NO-GO and (b) document-only-without-assessment, because one cheap derivation over already-committed data settles all four dispositions under frozen rules; falsified by the frozen rules proving unable to discriminate warn vs document on this evidence.
 - 2026-08-08: plan chose derivation-from-committed-fixture over a classical-only re-sweep because the fixture carries per-rep `covered`/miss columns for all three legs (audit-verified at `m111-fallback-sweep.R:130-152`); falsified by the committed fixture proving to hold cell summaries rather than per-rep rows — the re-sweep then returns and M113 gains a Depends-on: M112.
+- 2026-08-08: set in-progress by /milestone-implement; branch m113-mc-skew-response cut from pushed main (e7e0a45).
+- 2026-08-08: implement question gate adopted the S1/S2 frozen rule set as proposed (every-cell 0.93 replace bar per classical arm, width descriptive; warn-vs-document by generator-family spread for the incumbent); escalation via /milestone-brief offered on the ip-touching tag and declined.
+- 2026-08-08: T1 done — frozen criteria page cairn/references/mc-skew-response-comparison.md committed before any derivation artifact, with INDEX line, provenance, D-009 settling directives, and 4 OUT-repo-analysis triage rows; all four data-raw checkers + cairn_validate green.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -15,7 +15,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
 | M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | done | — | normal | milestones/archive/M110-cronbach-oracle-leg.md |
 | M112 | Harden the M111 fallback-sweep harness | planned | — | normal | milestones/M112-m111-harness-hardening.md |
-| M113 | MC-default skew response — frozen-rules disposition from the M111 data | planned | — | normal | milestones/M113-mc-skew-response-assessment.md |
+| M113 | MC-default skew response — frozen-rules disposition from the M111 data | in-progress | — | normal | milestones/M113-mc-skew-response-assessment.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M111 done (2026-08-08) → M106 rotated out (oldest terminal; its archive file still resolves there). Kept: M111, M110, M109, M108, M107 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
