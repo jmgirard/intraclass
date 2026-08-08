@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1
-- **Branch/PR:** `m110-cronbach-oracle-leg`
+- **Branch/PR:** `m110-cronbach-oracle-leg` · [PR #119](https://github.com/jmgirard/intraclass/pull/119)
 
 ## Goal
 
@@ -33,7 +33,7 @@ checkers and `cairn_validate` are the mechanical gate.
 
 ## Acceptance criteria
 
-- [ ] AC1: `cronbach1972` — Cronbach, Gleser, Nanda & Rajaratnam (1972), *The
+- [x] AC1: `cronbach1972` — Cronbach, Gleser, Nanda & Rajaratnam (1972), *The
       Dependability of Behavioral Measurements*, supplied whole — is on the
       `cairn/references/sources/` shelf, its identity verified against its own
       title page (a gitignored working-copy fact: review evidence is a local
@@ -43,7 +43,7 @@ checkers and `cairn_validate` are the mechanical gate.
       date; and `INDEX.md`'s shelf inventory records the arrival, mirroring
       the `burch2011`/M72 arrival paragraphs. No `cronbach1972.md` source note
       appears in this milestone's diff (gate decision 2026-08-08).
-- [ ] AC2: the `ORACLES.md` Source-leg table's Cronbach et al. (1972) row
+- [x] AC2: the `ORACLES.md` Source-leg table's Cronbach et al. (1972) row
       carries a dated verification outcome with a page anchor and a stated
       pagination basis: `verified`, citing the passage in the source's own
       design taxonomy that supports the co-citation — the
@@ -53,13 +53,13 @@ checkers and `cairn_validate` are the mechanical gate.
       was found — or, where the reading falsifies or cannot support the
       co-citation, the implicated entries corrected in place with the
       correction cited (D-008's posture), never a softened status.
-- [ ] AC3: the O-Bayes-Rep registry entry's Sources bullet replaces "Cronbach
+- [x] AC3: the O-Bayes-Rep registry entry's Sources bullet replaces "Cronbach
       et al. (1972) is still off the shelf, so that half of the co-citation
       remains unverified" with the dated reading outcome and its citation (the
       supporting passage's anchor in the verified branch, the cited correction
       otherwise), and the `ORACLES.md` `Extraction:` header no longer
       describes an outstanding Source-leg row.
-- [ ] AC4: the consistency sweep passes: every hit of `git grep -in -i
+- [x] AC4: the consistency sweep passes: every hit of `git grep -in -i
       cronbach` over the committed tree is re-read and left consistent with
       the closed leg (for history files — `milestones/archive/`, work logs —
       "consistent" means the text does not assert the leg is open *now*;
@@ -112,3 +112,14 @@ checkers and `cairn_validate` are the mechanical gate.
 - 2026-08-08: all tasks done → status review; checkpoint pushed.
 
 ## Decisions
+
+## Review
+
+Evidence gathered fresh at review, 2026-08-08, PR #119.
+
+- AC1: `cronbach1972.pdf` present on the shelf (7,621,153 bytes, local observation per the criterion's D-009 `check: none` disposition), identity read against its title/copyright pages this session (Wiley 1972, four authors, ISBN 0-471-18850-6); `grep` finds the new Cronbach BIBLIOGRAPHY entry (1 hit) and the INDEX "One arrival during M110" paragraph (1 hit); `git diff --name-only main..HEAD` lists 6 files, no `cronbach1972.md`.
+- AC2: ORACLES.md:57 is the verified branch — Design IV-A `j:(i × p)` named as the replicates-within-cell design (which passage and form: stated in the row), anchors `printed pp. 38/40/42 · 28`, status `verified — observed 2026-08-08 (M110)`; the pagination-basis paragraph (line ~69) states the whole-book-scan basis and the +20 offset.
+- AC3: the replaced sentence ("still off the shelf") greps 0 hits in ORACLES.md; the Sources bullet (line 1235) opens "**Cronbach et al. (1972) verified against the whole book 2026-08-08 (M110)**" with the Fig. 2.4/Table 2.1/p. 42/Eq. (1.3) anchors; the Extraction header now reads "closed at **M110 (2026-08-08)**" and describes no outstanding row.
+- AC4: fresh runs — check-reference-observations.py: 0 unmarked, 0 falsified; enumerate-generalizing-claims.py --check: in sync (295/295); check-mpl-doc-claims.py: OK, 0 failures; `git grep -il cronbach` = 12 committed files, all re-read at T4 (work log), history files assert only then-state.
+
+Consistency gate: `cairn_validate` exit 0 (all checks pass); no principle changed → `cairn_impact` skipped. Toolchain slot: `document()` no diff; diff touches no generated files (`NAMESPACE`/`man/`/`data/` absent from the 6-file diff); README/pkgdown unaffected, `check_pkgdown()` no problems; NEWS — no user-visible change (references-only diff), no entry owed; no new top-level files; `devtools::check(NOT_CRAN=false)` run at review (result recorded below).
