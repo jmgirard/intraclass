@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M114: Runtime skew/kurtosis warn trigger — design & validation (assessment only)
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5, GP6   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m114-skew-warn-trigger   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -99,7 +99,7 @@ candidate row.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Author and freeze `cairn/references/mc-skew-warn-trigger.md` —
+- [x] T1: Author and freeze `cairn/references/mc-skew-warn-trigger.md` —
       candidate family, floors/ceilings, threshold-search grid + selection
       rule + tie-break, degrade rule, held-out battery spec — committed
       before any derivation artifact (own commit; M113 lesson).
@@ -126,10 +126,13 @@ candidate row.
 - 2026-08-08: created by /milestone-plan (promotes the D-027 warn-trigger commissioning row; plan gate: two milestones — assessment now, response after the verdict; held-out battery in; candidate family = kurtosis + skewness).
 - 2026-08-08: criteria audit ([O] fresh reader) returned 9 findings, all fixed in the AC wording pre-gate: fixture endpoint columns live in the long `raw` table not the wide table; 1e-12 platform-scoped; held-out table given a committed home + disjoint seed ids; AC1 additionally freezes the threshold-selection procedure so AC5's mechanical read is reachable; degrade limb bounded to the frozen family; AC6 pathspec extended to the full installed surface.
 - 2026-08-08: plan gate chose seed-scheme regeneration + per-rep consistency proof over re-running the M111 sweep with statistics added, because reps regenerate deterministically without refitting (36 min saved; the stale-checkpoint candidate's promotion condition stays unfired); falsified by the AC2 consistency assertion failing on any rep.
+- 2026-08-08: T1 done — frozen page authored (48-candidate closed family, W1–W3 tiered floors per the implement gate, mechanical selection ordering, 10-cell held-out battery ids 65–74) + INDEX.md line; freeze commit precedes every derivation artifact.
 - 2026-08-08: plan gate chose kurtosis + skewness candidate family over kurtosis-only and over a wider open family (Shapiro–Wilk, tail ratios), because both failing families are moment-detectable while skewed-light-tailed data would escape kurtosis alone, and a wider family multiplies selection multiplicity on a frozen page; falsified by a held-out or user-reported under-coverage case both frozen statistics miss.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- 2026-08-08: implement gate fixed the frozen bar (severity-tiered floors: fire ≥ 0.90 at cov < 0.80 cells, ≥ 0.50 at 0.80–0.93 cells, ≤ 0.10 at well-covered gaussian cells) and made the 26 high-abort cells descriptive-only (their under-coverage is D-026's selection phenomenon, fenced out of this verdict; a moment statistic cannot detect gaussian selection effects, so binding them would guarantee degradation for a reason the trigger does not target).
 
 ## Review
 <!-- owner: review · exclusive -->
