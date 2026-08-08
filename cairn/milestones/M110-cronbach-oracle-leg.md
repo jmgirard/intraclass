@@ -1,6 +1,6 @@
 # M110: Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -93,7 +93,7 @@ checkers and `cairn_validate` are the mechanical gate.
       against the book); the `INDEX.md` inventory paragraph plus the
       full-file re-read correcting every claim the arrival falsifies, its
       D-009 `check:` directives updated in lockstep.
-- [ ] T4: Consistency sweep: re-read every `git grep -in -i cronbach` hit;
+- [x] T4: Consistency sweep: re-read every `git grep -in -i cronbach` hit;
       grep this milestone's own new prose for bare counts and universals
       (LESSONS 2026-07-19/M72); run the three `data-raw` checkers to exit 0
       and `cairn_validate` clean.
@@ -108,5 +108,7 @@ checkers and `cairn_validate` are the mechanical gate.
 - 2026-08-08: T1 done — identity verified against the title/copyright pages (Wiley 1972, all four authors, ISBN 0-471-18850-6; whole-book library scan); pagination basis PDF = printed + 20; leg closes on the AC2 verified branch's stronger arm — Design IV-A `j:(i × p)` (Fig. 2.4 p. 38, Table 2.1 p. 40, Lord–Novick "replications" reading p. 42) is Brennan's `i:(p × o)`, plus the crossed Eq. (1.3) p. 28.
 - 2026-08-08: T2 done — ORACLES.md Source-leg row, pagination-basis note, O-Bayes-Rep Sources bullet, and Extraction header all updated; header sweep (grep outstanding/off-shelf/Source-leg) found no other summary asserting the leg open (line 34 is the standing off-shelf rule, kept).
 - 2026-08-08: T3 done — BIBLIOGRAPHY.md gains the Cronbach entry (fields against the book's own title/copyright pages); INDEX.md full-file re-read: corrected 38→39 entries (a stale count the grep would have missed — the AC4 full-read procedure earning its keep), 34→35 PDFs, three→four note-less members, the closed-leg sentence, an M110 arrival paragraph with its own check directive, and the note-less check directive extended to cronbach1972.md.
+- 2026-08-08: T4 done — every grep hit re-read (archive/data-raw hits are then-state or alpha-1951, none assert the leg open); the new "every row verified" universal confirmed against the table (19 verified rows, no unverified); check-reference-observations 0 falsified, mpl-doc-claims OK; the new ORACLES row tripped the generalizing-claims gate exactly as LESSONS/M85 predicts — triaged OUT-quote — then --check green; cairn_validate all checks passed. Profile verify slot (testthat) not run per the plan's Out: no runtime surface in the diff; review's consistency gate covers toolchain checks.
+- 2026-08-08: all tasks done → status review; checkpoint pushed.
 
 ## Decisions
