@@ -93,7 +93,7 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
       add the output-path override (`m111-fallback-verdict.R:55,158`); run
       the synthetic-ledger demonstration and the committed-fixture dry run;
       log the corrected counts.
-- [ ] T4: Record the F1/F5 inexpressibility + vacuity-when-live finding as
+- [x] T4: Record the F1/F5 inexpressibility + vacuity-when-live finding as
       a milestone-local decision (lineage: M111 review D6 → M112 criteria
       audit).
 - [ ] T5: Run air, lintr, and the four `data-raw` checkers; fix what reds.
@@ -108,9 +108,46 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - 2026-08-08: T1 — `assert_sweep_results()` now runs between the parallel map and any fixture write (list length, try-error, non-data-frame, per-cell `n_rep x 3` row count, cell-id order); demonstrated in `data-raw/m112-harness-demo.R` — the clean `n_rep = 2` 64-cell run passes (384 rows) and the NULL-injected, row-short and cell-short mutations each error.
 - 2026-08-08: T2 — `mc_ci()` returns an explicit ok/abort status and the MC leg's `aborted` flag is set from it; a non-finite MC interval arriving without the classed condition now errors loudly; the MC-vs-classical flag divergence is stated in the script header; both stubs demonstrated in the demo script.
 - 2026-08-08: T3 — near-miss corrected to the frozen failing-side window `[threshold - 0.005, threshold)` for F2 and added for F3, plus env-var input/output overrides on both scripts; against the committed fixture the corrected counts are F2 SEARLE 4 / Burch 5 (the shipped passing-side script counted 1 / 4) and F3 SEARLE 1 / Burch 0, with `f2_near_miss` the only shipped ledger column that changes and both `.rds` fixtures untouched.
+- 2026-08-08: T4 — recorded the F1/F5 inexpressibility and the failing-side count's vacuity-when-live as a milestone-local decision (lineage: M111 review D6 -> M112 criteria audit); no D-entry, the finding is local to the frozen M111 criterion.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+### 2026-08-08 (T4): F1 and F5 take no near-miss count, and the count is vacuous whenever the tie-break is live
+
+**Context.** The frozen aggregation rule defines a near-miss as "a binding
+statistic within 0.005 of its threshold on the failing side of nominal" and
+uses the per-arm near-miss count as the first tie-break between two passing
+arms. M112 T3 implements that window for F2 and F3. The M111 review (D6) and
+the M112 criteria audit (2026-08-08) each found the remaining two binding
+rules do not fit the sentence.
+
+**Decision.** F1 and F5 are recorded as inexpressible under the frozen text
+and are not implemented. F1's binding statistic is "a finite interval on 100%
+of reps": its threshold is a count, not a rate on a 0-1 scale, so no 0.005
+window sits below it — a single non-finite rep is a whole-cell failure, never
+a near-miss. F5 binds on three statistics at once (lower tail-miss <= 0.045,
+upper tail-miss <= 0.045, and |lower - upper| <= 0.03), so "the binding
+statistic" has no referent: a cell can sit inside the window on one and far
+outside on another, and the frozen text names no rule for combining them.
+
+**The count is also vacuous when it matters.** The tie-break fires only when
+both arms pass every binding rule at every applicable cell. A failing-side
+near-miss is by construction below its threshold, which is the failing
+condition of that same rule — so any cell contributing to the count is a cell
+that fails, and an arm reaching the tie-break has a near-miss count of 0 on
+every rule. Demonstrated by `data-raw/m112-harness-demo.R`: each constructed
+near-miss cell also appears in the corresponding rule's failing set. The
+tie-break as frozen therefore always falls through to its second criterion,
+the summed median fallback width.
+
+**Why not fix the definition.** Rejected at the plan gate: a pre-registered
+criterion is not redefined after its results are known. The corrected count
+still earns its place as a *descriptive* margin statistic — how close a
+failing cell came — which is how the M111 page's "4 SEARLE / 5 Burch cells
+fail within 0.005 of the floor" reads it. Reopen only via an explicit
+maintainer decision, and only for a future sweep that freezes a new
+definition before running.
 
 ## Review
 <!-- owner: review · exclusive -->
