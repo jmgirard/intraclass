@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M111: Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical)
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** IP1, GP5, GP6   <!-- owner: plan · create/amend-via-gate; plus PRINCIPLES.md #3 [IP] via its D-001 fence — the ip-touching tag on AC5 -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m111-fallback-on-abort   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -122,6 +122,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: plan gate chose the composite-procedure framing (assess MC-with-fallback as delivered) over a second full replacement-grade re-assessment because D-012 already answered replacement NO-GO and the fallback is the candidate's actual question; falsified by evidence the composite's coverage differs materially from its per-arm components at cells the sweep did not isolate.
 - 2026-08-08: plan gate chose both fallback arms over Burch-only because burch2011 §5 prefers the normal-based method near ρ≈0 — the abort region; falsified by neither arm passing the frozen bar where a third construction would.
 - 2026-08-08: plan gate (follow-up): sweep harness parallel over cells at 4 workers (~4 h) rather than M76's serial structure (~13 h), at the maintainer's choice; per-cell seed streams are already independent so results are worker-count-invariant.
+- 2026-08-08: set in-progress by /milestone-implement; branch m111-fallback-on-abort cut from main (3079634). Implementation question gate skipped — the plan gate settled grid, arms, thresholds, workers, and verdict routing; T1's generator picks are AC2-fenced to burch2011 Table 2, not an open choice.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

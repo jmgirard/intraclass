@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | planned | — | normal | milestones/M111-fallback-on-abort-assessment.md |
+| M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | in-progress | — | normal | milestones/M111-fallback-on-abort-assessment.md |
 | M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | done | M108 | normal | milestones/archive/M109-bayesian-oracle-reruns.md |
 | M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | done | — | normal | milestones/archive/M108-oracle-bayesian-k2-adjudication.md |
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
