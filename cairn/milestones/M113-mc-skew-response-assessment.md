@@ -84,7 +84,7 @@ work log).
       `templates/synthesis-note.md` (rules, floor lineage, known-priors
       acknowledgment, disposition vocabulary, provenance, INDEX line,
       triage rows); commit it before any derivation artifact.
-- [ ] T2: Write `data-raw/m113-skew-response-derivation.R` reading the
+- [x] T2: Write `data-raw/m113-skew-response-derivation.R` reading the
       committed fixture; emit per-cell × leg unconditional coverage (and
       the per-tail miss splits the warn/document rules need) as a committed
       fixture; verify the MC column against the two quoted cells.
@@ -105,6 +105,8 @@ work log).
 - 2026-08-08: set in-progress by /milestone-implement; branch m113-mc-skew-response cut from pushed main (e7e0a45).
 - 2026-08-08: implement question gate adopted the S1/S2 frozen rule set as proposed (every-cell 0.93 replace bar per classical arm, width descriptive; warn-vs-document by generator-family spread for the incumbent); escalation via /milestone-brief offered on the ip-touching tag and declined.
 - 2026-08-08: T1 done — frozen criteria page cairn/references/mc-skew-response-comparison.md committed before any derivation artifact, with INDEX line, provenance, D-009 settling directives, and 4 OUT-repo-analysis triage rows; all four data-raw checkers + cairn_validate green.
+- 2026-08-08: minor amendment (pre-derivation, blind content untouched) — S2 clarified to read coverage among non-aborted reps, since the bare "coverage" wording would fire on the near-zero abort cells and re-open D-026's adjudicated abort; clarification dated on the page itself.
+- 2026-08-08: T2 done — derivation script + committed data-raw/m113-skew-response-coverage.tsv (192 rows = 64 cells × 3 legs); fixture-shape and quoted-cell assertions pass (0.676 exact; the k=50 cell is exactly 0.6725, rendered 0.673 half-up on the M111 page, so the pin is a ±0.0005 band); lintr 0, air clean.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

@@ -51,7 +51,7 @@ classical arm; `warn` | `document` | `no-change` for the MC incumbent.
 | # | Rule (binding unless marked) | Source of the threshold |
 |---|---|---|
 | S1 | **Classical replace bar (per arm).** A classical arm (`searle` \| `burch`) is replace-GO iff its unconditional per-cell coverage ≥ 0.93 at every one of the 64 cells; otherwise no-GO. Width is descriptive, not binding: median width ratio vs the MC leg reported per cell; a replace-GO carries the width evidence to the maintainer gate rather than folding it into the rule. | floor: M76 C2 (ukoumunne2003 worst tabulated 0.931; burch2011 §5 "just under 0.93"); every-cell form: D-012 |
-| S2 | **Incumbent disposition (evaluated regardless of S1).** `no-change` iff the MC leg's coverage ≥ 0.93 at every cell. `document` iff every failing MC cell lies in a single named generator family — a documentation caveat can fence one nameable family. `warn` iff failing MC cells span ≥ 2 generator families or include any gaussian cell — a caveat cannot fence that, so a runtime signal is warranted. `warn` commissions the follow-on milestone to design the trigger and degrades to `document` there if no reliable runtime trigger exists (recorded in that milestone's D-entry). | floor: M76 C2; family logic: frozen here (plan gate 2026-08-08) |
+| S2 | **Incumbent disposition (evaluated regardless of S1).** `no-change` iff the MC leg's coverage — among its non-aborted reps, since the abort event's disposition is D-026's and is not re-opened here (clarified 2026-08-08, pre-derivation: the rule as first frozen said "coverage" bare, which read unconditionally would fire on the near-zero abort cells this page's scope fences out) — is ≥ 0.93 at every cell. `document` iff every failing MC cell lies in a single named generator family — a documentation caveat can fence one nameable family. `warn` iff failing MC cells span ≥ 2 generator families or include any gaussian cell — a caveat cannot fence that, so a runtime signal is warranted. `warn` commissions the follow-on milestone to design the trigger and degrades to `document` there if no reliable runtime trigger exists (recorded in that milestone's D-entry). | floor: M76 C2; family logic: frozen here (plan gate 2026-08-08) |
 
 **Aggregation (frozen).** S1 verdicts are per-arm and independent; any
 replace-GO stops at the merge gate for the maintainer's explicit decision
@@ -72,7 +72,6 @@ lives; empty at freeze — observed 2026-08-08. <!-- check: none — a placehold
 
 ## Open questions
 
-- Whether the committed fixture's per-rep rows carry every column the S2
-  family logic needs (leg-level `covered` per cell suffices; nothing else is
-  required) — settled mechanically by T2's derivation script when it runs —
-  observed 2026-08-08. <!-- check: none — settled live by T2 in this milestone; the row is removed when it lands -->
+None — the fixture-columns question this section carried at freeze was
+settled by the T2 derivation script's own assertions (it ran 2026-08-08 and
+verified every column the S1/S2 logic reads).
