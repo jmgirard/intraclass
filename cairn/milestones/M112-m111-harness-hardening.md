@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m112-m111-harness-hardening`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m112-m111-harness-hardening` · https://github.com/jmgirard/intraclass/pull/122   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -39,34 +39,34 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: After the parallel map, the sweep driver asserts the result list
+- [x] AC1: After the parallel map, the sweep driver asserts the result list
       has exactly one entry per cell, every entry is a data frame, and the
       bound raw table has `n_rep × 3` rows for each of the 64 cells, all
       before any fixture write; in a small-`n_rep` mutation run using a
       checkpoint directory distinct from the full run's, forcing one cell's
       result to `NULL` exits with an error, and the unmutated small-`n_rep`
       run passes the same assertions.
-- [ ] AC2: The MC leg's `aborted` flag is set only from an explicit status
+- [x] AC2: The MC leg's `aborted` flag is set only from an explicit status
       `mc_ci()` returns on catching a condition of class
       `intraclass_singular_fit` (the classical legs' finiteness-based flags
       are unchanged; the divergence is stated in the script header); a
       stubbed MC leg returning non-finite endpoints without signalling that
       class errors loudly rather than counting as an abort, and a stub
       signalling the class counts as aborted.
-- [ ] AC3: The verdict script's near-miss count implements the frozen
+- [x] AC3: The verdict script's near-miss count implements the frozen
       failing-side definition for F2 and F3 (binding statistic within 0.005
       below the 0.93 floor), demonstrated on a synthetic ledger holding one
       constructed near-miss per rule plus clear passes and clear failures
       outside the window, counted exactly; F1 and F5 are recorded as
       inexpressible under the frozen text (no applicable window / no single
       binding statistic), not implemented.
-- [ ] AC4: `git diff` is empty for `data-raw/m111-fallback-results.rds` and
+- [x] AC4: `git diff` is empty for `data-raw/m111-fallback-results.rds` and
       `data-raw/m111-fallback-rules.rds`; the corrected verdict script, run
       with its output-path override against the committed fixture,
       reproduces the shipped per-rule pass/fail outcomes with only the
       near-miss columns differing, and the corrected F2/F3 near-miss counts
       are recorded in the work log.
-- [ ] AC5: `air format --check`, `lintr::lint_package()`, and all four
+- [x] AC5: `air format --check`, `lintr::lint_package()`, and all four
       `data-raw` checkers pass locally before the PR push (M62/M85 lessons).
 
 ## Coverage
@@ -110,6 +110,7 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - 2026-08-08: T3 — near-miss corrected to the frozen failing-side window `[threshold - 0.005, threshold)` for F2 and added for F3, plus env-var input/output overrides on both scripts; against the committed fixture the corrected counts are F2 SEARLE 4 / Burch 5 (the shipped passing-side script counted 1 / 4) and F3 SEARLE 1 / Burch 0, with `f2_near_miss` the only shipped ledger column that changes and both `.rds` fixtures untouched.
 - 2026-08-08: T4 — recorded the F1/F5 inexpressibility and the failing-side count's vacuity-when-live as a milestone-local decision (lineage: M111 review D6 -> M112 criteria audit); no D-entry, the finding is local to the frozen M111 criterion.
 - 2026-08-08: T5 — `air format --check .` clean, `lintr::lint_package()` 0 lints (`data-raw/` is in scope; only `data-raw/reviews` is excluded), all four CI-wired `data-raw` checkers plus their vacuity self-tests pass, the local-only `check-oracle-registry.py` reports 0 gaps, and `NOT_CRAN=true CI=true devtools::test()` is [ FAIL 0 | WARN 2 | SKIP 23 | PASS 5854 ]; no `R/` or `tests/` file is touched by this branch, and no NEWS entry is owed (the diff is research-harness only, no user-visible change).
+- 2026-08-08: review — PR #122 opened (draft); AC1-AC5 verified with fresh evidence and ticked; cairn_validate all-pass, document() no diff, pkgdown clean; three fresh-context reviewers spawned (prior-review and blame lenses returned; diff-bug lens and devtools::check() still running at this checkpoint).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -152,3 +153,14 @@ definition before running.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+**Reviewed 2026-08-08** — branch `m112-m111-harness-hardening`, PR #122.
+All criterion evidence below is fresh, gathered by command at review time.
+
+### Acceptance-criteria evidence
+
+- **AC1** — `data-raw/m111-fallback-sweep.R:355` calls `assert_sweep_results(results, cells)` between the `mclapply` map and the fixture write at `:359`; the only earlier write is the per-cell checkpoint inside `run_cell` (`:293`), not a fixture. The guard asserts list length, no `try-error` element, every element a data frame, per-cell `n_rep x 3` rows, and cell-id order. `Rscript data-raw/m112-harness-demo.R` (exit 0, isolated tempdir checkpoint dir): the clean `n_rep = 2` run over all 64 cells passes the assertions (384 rows), and three mutations each error — one cell forced to `NULL` ("cells returned no data frame (killed worker?): 17"), one cell short a row ("wrong row count ... 17 (5/6)"), and a list short a cell ("63 results for 64 cells").
+- **AC2** — `mc_ci()` (`m111-fallback-sweep.R:82-102`) returns `status = "ok"`, or `status = "abort"` from its `intraclass_singular_fit` handler; `one_rep()` (`:152-168`) sets the MC leg's `aborted` from `identical(ci[["status"]], "abort")` and errors when a non-finite MC interval carries status `ok`. The searle/burch branch keeps `aborted <- !finite_ci` unchanged, and the header (`:15-22`) states the divergence and why each leg's semantics are right. Demo run: the non-finite-without-condition stub errors ("mc leg returned a non-finite interval without signalling intraclass_singular_fit (cell 1, rep 1)"), the abort-signalling stub yields `aborted = TRUE`, and a finite ok stub yields `aborted = FALSE, covered = TRUE`.
+- **AC3** — `near_miss_below(stat, threshold, width = 0.005)` (`m111-fallback-verdict.R:48-50`) implements `[threshold - 0.005, threshold)`, applied to F2's coverage (`:80`) and F3's Clopper-Pearson bound at applicable cells (`:87`). Demonstrated on a synthetic 7-cell ledger fed through the real script via `M111_RESULTS_IN`: the constructed F2 near-miss (coverage 0.9270) is counted and the passing-side 0.9320 value the pre-M112 script counted is not; the constructed F3 near-miss (bound 0.9281) is counted and the clear pass (1.0000), the clear failure (0.8487) and the sub-100-abort cell are not; each near-miss cell also appears in its rule's failing set. F1 and F5 are not implemented and are recorded as inexpressible in the milestone-local decision of 2026-08-08 (T4), with the reason per rule.
+- **AC4** — `git diff --stat main..HEAD -- data-raw/m111-fallback-results.rds data-raw/m111-fallback-rules.rds` is empty, as is `git status --short data-raw/` after the dry run: both fixtures are byte-identical to the default branch. Running the corrected script against the committed fixture with `M111_RULES_OUT` pointed at a scratch path reproduces the shipped arm summaries exactly (searle F2 45/64, F3 23 of 36, F5 45/64; burch 30/64, 4 of 36, 48/64); comparing the two ledgers column by column, `f2_near_miss` is the only shared column that differs, `f3_near_miss` is the only new column, and `f2_pass`/`f3_pass`/`f5_pass` are identical. Corrected counts: F2 near-misses searle 4 / burch 5 (the passing-side script counted 1 / 4), F3 near-misses searle 1 / burch 0 — the F2 pair matches the "4 SEARLE and 5 Burch cells fail within 0.005 of the floor" already on `cairn/references/fallback-on-abort-comparison.md`, which the M111 review had corrected by hand.
+- **AC5** — Fresh at review: `air format --check .` exit 0; `lintr::lint_package()` 0 lints (`.lintr` excludes only `data-raw/reviews`, so all three touched scripts are in scope); the four CI-wired `data-raw` checkers and their vacuity self-tests all pass (`check-reference-observations.py` 0 falsified, `enumerate-generalizing-claims.py --check` in sync, `check-mpl-doc-claims.py` 12 settled / 0 failures, `check-record-claims.py` 5 claims re-derived / 0 failures). The local-only fifth checker `check-oracle-registry.py` also passes (0 gaps).
