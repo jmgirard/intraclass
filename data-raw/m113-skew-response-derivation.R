@@ -10,6 +10,9 @@
 #                       (the M111 F2 convention; classical legs never abort).
 #   coverage_nonabort — mean(covered) among non-aborted reps; the S2 rule reads
 #                       this column (abort disposition is D-026's, not re-opened).
+#   lo_miss / hi_miss — tail-miss rates among NON-ABORTED reps, so they sum to 1
+#                       with coverage_nonabort, not with coverage_uncond (for the
+#                       MC leg the difference is the abort mass).
 # Width: med_width per leg; width_ratio_vs_mc = med_width / MC med_width over
 # the MC leg's non-aborted reps at that cell (S1 descriptive evidence).
 

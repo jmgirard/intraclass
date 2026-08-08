@@ -1161,13 +1161,15 @@ runtime warning, documentation, or nothing.
   (0.60, 30, 5, chisq1), including one gaussian cell (0.9285 at
   (0.60, 10, 2)). M76's "never under-covers" verdict does not extend to the
   wider battery the D-012 scope fence named — that fence was warranted.
-- **S2 `mc`: warn.** 36/64 cells below the floor among non-aborted reps,
-  spanning all four generator families including gaussian. Two phenomena:
-  pure skew/kurtosis under-coverage on zero-abort cells (5 cells, t5/chisq1
-  at ρ ≥ 0.30, n = 5; worst 0.6725/0.676 at ρ = 0.60 chisq1) — the defect
-  that motivated M113 — and selection-conditioned under-coverage where
-  aborts are common (26 failing cells with abort rate > 0.1), consistent
-  with D-026's abort-is-informative finding.
+- **S2 `mc`: warn.** 36/64 cells below the floor among non-aborted reps.
+  By abort rate the failing set partitions into: skew/kurtosis
+  under-coverage at low-abort cells (10 cells, abort rate ≤ 0.1, all
+  t5/chisq1, five zero-abort; worst 0.6725/0.676 at ρ = 0.60 chisq1) — the
+  defect that motivated M113 — and selection-conditioned under-coverage at
+  high-abort cells (26 cells, abort rate > 0.1), consistent with D-026's
+  abort-is-informative finding. Every failing gaussian/uniform cell is in
+  the high-abort bucket; the warn fires on the ≥ 2-families limb via the
+  low-abort t5 + chisq1 cells.
 - The warn commissions a follow-on milestone to design the runtime trigger
   (ROADMAP candidate row added by M113); per the frozen rule it degrades to
   `document` there, recorded in its own D-entry, if no reliable trigger

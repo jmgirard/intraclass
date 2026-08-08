@@ -51,7 +51,7 @@ classical arm; `warn` | `document` | `no-change` for the MC incumbent.
 | # | Rule (binding unless marked) | Source of the threshold |
 |---|---|---|
 | S1 | **Classical replace bar (per arm).** A classical arm (`searle` \| `burch`) is replace-GO iff its unconditional per-cell coverage ≥ 0.93 at every one of the 64 cells; otherwise no-GO. Width is descriptive, not binding: median width ratio vs the MC leg reported per cell; a replace-GO carries the width evidence to the maintainer gate rather than folding it into the rule. | floor: M76 C2 (ukoumunne2003 worst tabulated 0.931; burch2011 §5 "just under 0.93"); every-cell form: D-012 |
-| S2 | **Incumbent disposition (evaluated regardless of S1).** `no-change` iff the MC leg's coverage — among its non-aborted reps, since the abort event's disposition is D-026's and is not re-opened here (clarified 2026-08-08, pre-derivation: the rule as first frozen said "coverage" bare, which read unconditionally would fire on the near-zero abort cells this page's scope fences out) — is ≥ 0.93 at every cell. `document` iff every failing MC cell lies in a single named generator family — a documentation caveat can fence one nameable family. `warn` iff failing MC cells span ≥ 2 generator families or include any gaussian cell — a caveat cannot fence that, so a runtime signal is warranted. `warn` commissions the follow-on milestone to design the trigger and degrades to `document` there if no reliable runtime trigger exists (recorded in that milestone's D-entry). | floor: M76 C2; family logic: frozen here (plan gate 2026-08-08) |
+| S2 | **Incumbent disposition (evaluated regardless of S1).** `no-change` iff the MC leg's coverage — among its non-aborted reps, since the abort event's disposition is D-026's and is not re-opened here (clarified 2026-08-08 before the verdict was read; the rule as first frozen said "coverage" bare. Recorded honestly at review: the clarification's commit landed with the T2 derivation commit, so commit order corroborates only the bare rule's freeze, and the work log alone carries the before-derivation claim; the verdict is invariant to the reading — unconditional coverage fails 49/64 cells, also `warn` — and the high-abort cells are retained under both readings, re-labelled rather than excluded) — is ≥ 0.93 at every cell. `document` iff every failing MC cell lies in a single named generator family — a documentation caveat can fence one nameable family. `warn` iff failing MC cells span ≥ 2 generator families or include any gaussian cell — a caveat cannot fence that, so a runtime signal is warranted. `warn` commissions the follow-on milestone to design the trigger and degrades to `document` there if no reliable runtime trigger exists (recorded in that milestone's D-entry). | floor: M76 C2; family logic: frozen here (plan gate 2026-08-08) |
 
 **Aggregation (frozen).** S1 verdicts are per-arm and independent; any
 replace-GO stops at the merge gate for the maintainer's explicit decision
@@ -68,20 +68,25 @@ below re-derives by re-running that script.
 
 - **S1 `searle`: no-GO.** 21/64 cells below the 0.93 unconditional floor;
   worst 0.674 at (ρ = 0.60, k = 50, n = 5, chisq1). Failures concentrate in
-  chisq1/t5 from ρ = 0.05 (chisq1, k ≥ 30) upward, worsening with ρ and k.
+  chisq1/t5 from ρ = 0.05 (chisq1, k ≥ 30) upward, worsening with ρ (not
+  monotone in k).
 - **S1 `burch`: no-GO.** 16/64 cells below the floor; worst 0.6655 at
   (0.60, 30, 5, chisq1), including one gaussian cell (0.9285 at
   (0.60, 10, 2)). M76's "never under-covers" finding does not extend to the
   wider battery — the D-012 scope fence was warranted.
-- **S2 `mc`: warn.** 36/64 cells below the floor among non-aborted reps,
-  spanning all four generator families including gaussian. Two phenomena:
-  (i) pure skew/kurtosis under-coverage on zero-abort cells — 5 cells, all
-  t5/chisq1 at ρ ≥ 0.30, n = 5 (the two worst: 0.6725 and 0.676 at ρ = 0.60,
-  chisq1, k = 50/30) — the defect that motivated M113; (ii)
-  selection-conditioned under-coverage where aborts are common (26 failing
-  cells with abort rate > 0.1: near-zero ρ and the (10, 2) design) — the
-  non-aborted subset there is a selected sample, consistent with D-026's
-  abort-is-informative finding.
+- **S2 `mc`: warn.** 36/64 cells below the floor among non-aborted reps.
+  Split by abort rate, the full failing set partitions into two phenomena
+  (corrected at review — an earlier draft's 5 + 26 split left 5 cells in
+  neither bucket): (i) skew/kurtosis under-coverage at **low-abort cells**
+  — 10 cells with abort rate ≤ 0.1, all t5/chisq1 (7 + 3), five of them
+  zero-abort; the two worst are 0.6725 / 0.676 at (ρ = 0.60, chisq1,
+  k = 50/30, n = 5), and the worst nonzero-abort case is 0.827 at
+  (0.30, 50, 5, chisq1) on 3/2000 aborts — the defect that motivated M113;
+  (ii) selection-conditioned under-coverage at **high-abort cells** — 26
+  cells with abort rate > 0.1 (near-zero ρ and the (10, 2) design),
+  consistent with D-026's abort-is-informative finding. Every failing
+  gaussian and uniform cell lies in bucket (ii); the warn fires on the
+  ≥ 2-families limb via bucket (i)'s t5 + chisq1, not on the gaussian limb.
 - **Width (descriptive).** Median width ratio vs the MC leg: `searle` 1.013
   (range 0.710–1.351), `burch` 0.989 (range 0.667–1.295) — neither arm buys
   its coverage failures with narrower intervals systematically.
