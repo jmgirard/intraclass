@@ -16,9 +16,11 @@ and milestones; never restate a value here.
   oracles, `O-cc`, `O-invariance`, `O-FNML`) and committed
   `data-raw/check-oracle-registry.py`, which fails if any asserted oracle lacks an
   entry — observed 2026-07-21. <!-- check: python3 data-raw/check-oracle-registry.py -->
-- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (39 entries: 38
-  extraction-verified 2026-07-19, M72; the `cronbach1972` entry added and
-  verified against the book 2026-08-08, M110). Primary
+- [BIBLIOGRAPHY.md](BIBLIOGRAPHY.md) — the bibliography (entry count not
+  pinned — LESSONS 2026-07-19/M70, and the pinned "38" this line carried
+  shipped stale when `burch2011` arrived at M76 uncounted, corrected M110: the
+  M72 pass extraction-verified the then-corpus, and later entries were
+  verified at ingest — `burch2011` M76, `cronbach1972` M110). Primary
   sources include ten Hove, Jorgensen & van der Ark (2022)
   <doi:10.1037/met0000391>, Brennan (2001), and Shrout & Fleiss (1979).
 - [REFERENCES.md](REFERENCES.md) — 6-line pointer stub only; the pre-migration
