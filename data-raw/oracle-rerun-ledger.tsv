@@ -1,8 +1,10 @@
 script	run_date	verdict	pins	pin_detail	max_abs_delta	n_compared_leaves	r_version	glmmtmb	lme4	brms	rstan	stanheaders	lavaan	notes
+oracle-bayesian-cluster-ck.R	2026-08-08	reproduced	2/2		0.000e+00	22	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=110.96; non-stopifnot check() pins (run transcript, M109): 5/5 PASS — k_c^eff = k on complete / < k on ragged; convergence >= 0.85 every cell; complete coverage >= 0.88 (A & C); ragged low-C_n coverage >= complete - 0.08; ragged high-C_n coverage >= 0.88 (A & C); min coverage A=0.942 C=0.946, high-C_n A=0.942
 oracle-bayesian-conflated.R	2026-08-07	drift-within-noise	4/4		1.250e-02	26	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=33.03
 oracle-bayesian-fixed-replicates.R	2026-08-07	drift-within-noise	4/4		3.264e-02	29	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=8.84
 oracle-bayesian-fixed.R	2026-08-07	drift-within-noise	1/1		5.000e-03	19	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=2.82
 oracle-bayesian-incomplete-fixed-multilevel.R	2026-08-07	reproduced	4/4		0.000e+00	28	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=14.8
+oracle-bayesian-incomplete-fixed-nested.R	2026-08-08	reproduced	1/1		0.000e+00	16	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=280.58; non-stopifnot in_band verdicts (run transcript, M109): 4/4 PASS — mod_interior coverage=0.9750 bias=+0.0043; mod_boundary 0.9542/-0.0035; high_interior 0.9828/-0.0030; high_boundary 0.9700/-0.0076
 oracle-bayesian-incomplete-fixed.R	2026-08-08	reproduced	4/4		0.000e+00	25	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=4.78
 oracle-bayesian-incomplete-multilevel.R	2026-08-07	reproduced	5/5		0.000e+00	29	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=22.55
 oracle-bayesian-incomplete-nested-subjects.R	2026-08-08	reproduced	3/3		0.000e+00	25	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=49.75
