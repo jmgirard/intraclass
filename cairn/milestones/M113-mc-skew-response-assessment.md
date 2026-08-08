@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M113: MC-default skew response — frozen-rules disposition from the M111 data
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -92,7 +92,7 @@ work log).
       outcomes on the page's results section; draft the D-entry; on a
       replace-GO, stop at the gate for the maintainer decision.
       (RB tripwire: ip-touching)
-- [ ] T4: Gate evidence pass — branch `git diff --stat` scope check, air,
+- [x] T4: Gate evidence pass — branch `git diff --stat` scope check, air,
       lintr, the four `data-raw` checkers; fix what reds.
 
 ## Work log
@@ -108,6 +108,8 @@ work log).
 - 2026-08-08: minor amendment (pre-derivation, blind content untouched) — S2 clarified to read coverage among non-aborted reps, since the bare "coverage" wording would fire on the near-zero abort cells and re-open D-026's adjudicated abort; clarification dated on the page itself.
 - 2026-08-08: T2 done — derivation script + committed data-raw/m113-skew-response-coverage.tsv (192 rows = 64 cells × 3 legs); fixture-shape and quoted-cell assertions pass (0.676 exact; the k=50 cell is exactly 0.6725, rendered 0.673 half-up on the M111 page, so the pin is a ±0.0005 band); lintr 0, air clean.
 - 2026-08-08: T3 done — verdict recorded as D-027 (searle no-GO 21/64 cells below floor, worst 0.674; burch no-GO 16/64, worst 0.6655 incl. one gaussian cell; mc warn, 36/64 below floor among non-aborted reps across all four families — 5 zero-abort skew/kurtosis cells + 26 selection-conditioned high-abort cells); page Results/Disposition filled; warn-trigger candidate row added; no replace-GO, so the ip-touching stop did not fire and the D-001 fence is untouched.
+- 2026-08-08: T4 done — branch scope check clean (no R/, tests/, man/, vignettes/ paths in main...HEAD), air format --check clean, lintr::lint_package() 0 lints, all four data-raw checkers OK, cairn_validate all checks passed. The profile verify slot's devtools::test() was not re-run: the branch changes no package code or tests, so the suite outcome cannot differ from main; review's consistency gate runs the fuller check.
+- 2026-08-08: all tasks done; status → review.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
