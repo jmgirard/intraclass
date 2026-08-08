@@ -111,7 +111,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - [x] T5: Analyze against the frozen criteria; write the results and
       per-method ledger into the criteria page; run the three AC6 checkers
       locally.
-- [ ] T6: Record the GO/NO-GO D-entry; update the ROADMAP candidate row
+- [x] T6: Record the GO/NO-GO D-entry; update the ROADMAP candidate row
       (absorbed by this milestone) and the work log.
 
 ## Work log
@@ -128,9 +128,12 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: T3 done — `data-raw/m111-fallback-sweep.R`: 64-cell grid, per-rep mc/searle/burch legs with composite derived at summary time, mclapply 4 workers, per-cell checkpoint files (gitignored, resume-safe), platform metadata in the fixture; lintr 0 lints, air-formatted; smoke test (3 reps × 3 cells incl. both new arms) shows aborts on the uniform ρ=0.05 cell and the composite filling them.
 - 2026-08-08: T4 done — sweep ran 36 min at 4 workers (well under the ~4 h projection: no bootstrap refits in this harness), 64/64 cells, fixture `m111-fallback-results.rds` (384k rows) committed with platform metadata (macOS/arm64).
 - 2026-08-08: T5 done — `m111-fallback-verdict.R` applies the frozen rules mechanically (ledger `m111-fallback-rules.rds`): F1 PASS both arms; F3 fails 23/36 (SEARLE) and 4/36 (Burch) — the abort event is informative, so off-boundary aborts select degenerate samples no fixed classical interval covers (cond. coverage 0.00–0.49 there; Burch 1.000 at 28/29 ρ≤0.10 cells); F2 fails 45 and 30 of 64 (mostly inherited from the MC leg, incl. an incumbent defect: MC alone covers 0.67 on skewed ρ=0.60 k≥30 cells with 0 aborts); F5 fails 45/48. Results + NO-GO disposition appended to the criteria page; one figure corrected against the ledger before commit (28-of-29, not all-29); 7 new claims triaged; all three checkers + cairn_validate green.
+- 2026-08-08: T6 done — D-026 recorded (NO-GO both arms; abort informative; fences unchanged; reopening evidence class stated); the MC-skew incumbent defect added as a ROADMAP candidate row (search-first: no existing row or D-entry covers the MC default's non-normal coverage; the fallback row this milestone absorbed was about aborts).
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
+
+- 2026-08-08: verdict decided in-session (the plan-gate choice on AC5's ip-touching tripwire): the frozen rules returned an unambiguous structural NO-GO for both arms (1 SEARLE / 4 Burch near-misses; every other failure by a wide margin), so no Fable escalation was raised; the escalation option remains reachable via D-026's reopening clause. Promoted cross-cutting verdict: D-026.
 
 ## Review
 <!-- owner: review · exclusive -->

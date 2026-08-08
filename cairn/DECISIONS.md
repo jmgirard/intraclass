@@ -1085,3 +1085,52 @@ unseeded-template pattern, so M109 inherits both remedies as precedent — a
 sibling divergence is adjudicated, never batch-fixed, but the attribution here
 is where its adjudication starts; the M107 ledger's `diverged-escalated` rows
 for this script are closed by the 2026-08-07 `reproduced` row.
+
+### D-026 (2026-08-08): M111 GO/NO-GO — fallback-on-abort default: NO-GO for both arms; the abort event is informative and the status-quo abort stands
+
+**Context:** M111 assessed, against a pre-registered frozen criterion (GP5;
+`cairn/references/fallback-on-abort-comparison.md`, F1–F6), whether the one-way
+default should return a classical fallback interval — SEARLE exact-F or Burch
+(2011) REML, the D-012 opt-in methods — where the MC default aborts classed
+`intraclass_singular_fit`. This is the `#3`/ADR-003 contract question D-012
+fenced out, D-013 restated, and D-018 licensed diagnostics for but not the
+return. Evidence: a 64-cell sweep (ρ ∈ {0.05, 0.10, 0.30, 0.60} × 4 designs ×
+{gaussian, t5, uniform, chisq1} per burch2011 Table 2; n_rep = 2000;
+`data-raw/m111-fallback-results.rds`, rules ledger
+`data-raw/m111-fallback-rules.rds`).
+
+**Decision — NO-GO for both composite arms**, per the frozen aggregation rule
+(neither passes every binding rule at every applicable cell; the failures are
+structural, not marginal):
+
+- **The abort event is informative (the decisive finding, F3).** Aborts are not
+  confined to the near-zero boundary (16–23% of reps at ρ = 0.30 in the 10×2
+  design; 6–12% at ρ = 0.30 in 10×5 under t5/chisq1). An off-boundary abort
+  selects exactly the samples whose between-subject variance collapsed, and a
+  classical interval computed from such a sample excludes the truth:
+  conditional-on-abort coverage 0.00–0.49 at those cells (both arms), against
+  1.000 for Burch at 28/29 ρ ≤ 0.10 cells. A fixed fallback would hand users a
+  confident interval precisely where the data are least representative.
+- **F2/F5 corroborate:** unconditional composite coverage fails 45/64 (SEARLE)
+  and 30/64 (Burch) cells, largely inherited from the MC leg the composite
+  keeps.
+- **The status-quo abort is vindicated off-boundary** (no assessed method
+  covers conditionally there), and the boundary case is already served: the
+  abort message names the applicable opt-in `ci_method` (M93/D-018), keeping
+  the choice with the user.
+- **Reopening evidence class (all-NO-GO clause):** a fallback construction
+  that models the selection event itself (conditional-likelihood /
+  post-selection inference) with demonstrated conditional coverage across this
+  grid's ≥100-abort cells; or a user-facing need restricted to the ρ ≤ 0.10
+  region where Burch measured 1.000 (28/29 cells). Preference for "an interval
+  instead of an error" alone does not reopen it.
+
+**Fences unchanged:** the default stays the glmmTMB MC method (`#3`'s D-001
+fence untouched — no default-method supersession); D-018's diagnostic-only
+licence stands. Confirms D-012/D-013 and closes the question they fenced open.
+
+**Consequences:** M111 ships no code. The MC default's own unconditional
+under-coverage on skewed high-ρ data (0.67 at (0.60, k≥30, 5, chisq1), 0
+aborts — an incumbent defect this sweep surfaced, not part of this verdict)
+becomes a ROADMAP candidate row. O-Classical-OW is unchanged (the M76
+prototypes were reused as-is).
