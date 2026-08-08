@@ -1,11 +1,11 @@
 # M110: Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** IP1
-- **Branch/PR:** —
+- **Branch/PR:** `m110-cronbach-oracle-leg`
 
 ## Goal
 
@@ -79,13 +79,13 @@ checkers and `cairn_validate` are the mechanical gate.
 
 ## Tasks
 
-- [ ] T1: Ingest the maintainer-supplied book: place it on the shelf as
+- [x] T1: Ingest the maintainer-supplied book: place it on the shelf as
       `cronbach1972.pdf`, verify identity against its own title page, state
       the pagination basis, and locate the two-facet decomposition passage(s)
       in the source's design taxonomy — reading to the end of the relevant
       material before any absence claim (LESSONS 2026-07-18/M65). If the file
       has not arrived at implement start, park the milestone `blocked`.
-- [ ] T2: Close the leg in `ORACLES.md`: the Source-leg row (line 57), the
+- [x] T2: Close the leg in `ORACLES.md`: the Source-leg row (line 57), the
       pagination-basis paragraph (lines 59–69), the O-Bayes-Rep Sources
       bullet (~line 1233), and the `Extraction:` header (line 5) — then
       re-read every header that summarizes the table (LESSONS 2026-07-19/M72).
@@ -104,5 +104,8 @@ checkers and `cairn_validate` are the mechanical gate.
 - 2026-08-08: criteria audit ([O] fresh reader) ran twice — pass 1 returned 8 findings (6 fixed in the AC wording, 2 routed to the gate); the post-gate re-audit returned 2 minor wording fixes (branch exhaustiveness on AC2, citation asymmetry on AC3), both applied, and noted AC1/AC4 must ship together (held by the Coverage map).
 - 2026-08-08: plan gate chose the no-note M72 precedent over a full `cronbach1972.md` source note because the ask is one co-citation leg and the sibling half (`brennan2001_ch3`) is recorded the same way; falsified by the repo taking a dependency on Cronbach extractions beyond this leg, which would owe the note.
 - 2026-08-08: plan chose a procedure-enumerated sweep (the named `git grep` plus a full `INDEX.md` re-read) over a hand-list of known stale sites because a hand-list ships every site it omits stale; falsified by a stale Cronbach claim surviving the sweep on a surface neither procedure enumerates.
+- 2026-08-08: /milestone-implement start — `cronbach1972.pdf` found already on the shelf (ctime 2026-08-08 10:44, supplied during this session; mtime Jul 19 is the copy's preserved original — the M63 ctime check); no blocker, branch `m110-cronbach-oracle-leg` cut. Question gate skipped: the plan gate settled both open choices, no RB tripwires tagged.
+- 2026-08-08: T1 done — identity verified against the title/copyright pages (Wiley 1972, all four authors, ISBN 0-471-18850-6; whole-book library scan); pagination basis PDF = printed + 20; leg closes on the AC2 verified branch's stronger arm — Design IV-A `j:(i × p)` (Fig. 2.4 p. 38, Table 2.1 p. 40, Lord–Novick "replications" reading p. 42) is Brennan's `i:(p × o)`, plus the crossed Eq. (1.3) p. 28.
+- 2026-08-08: T2 done — ORACLES.md Source-leg row, pagination-basis note, O-Bayes-Rep Sources bullet, and Extraction header all updated; header sweep (grep outstanding/off-shelf/Source-leg) found no other summary asserting the leg open (line 34 is the standing off-shelf rule, kept).
 
 ## Decisions

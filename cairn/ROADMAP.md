@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
 | M106 | The opt-in ci_method values are documented in the vignettes | done | — | normal | milestones/archive/M106-optin-ci-method-vignette.md |
 | M105 | Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently | done | — | normal | milestones/archive/M105-degenerate-input-and-burch-guards.md |
-| M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | planned | — | normal | milestones/M110-cronbach-oracle-leg.md |
+| M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | in-progress | — | normal | milestones/M110-cronbach-oracle-leg.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M109 done (2026-08-08) → M104 rotated out (oldest terminal; its archive file still resolves there). Kept: M109, M108, M107, M106, M105 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
