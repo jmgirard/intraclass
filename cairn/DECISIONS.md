@@ -1182,3 +1182,47 @@ runtime warning, documentation, or nothing.
 reopens only on a method demonstrating every-cell floor coverage over this
 grid (or a superseding frozen assessment); the abort-side selection
 phenomenon belongs to D-026's reopening class, not this one.
+
+### D-028 (2026-08-08): M114 warn-trigger verdict — degrade to `document`; no candidate in the frozen family met the frozen floors
+
+**Context:** M113's S2 `warn` disposition (D-027) commissioned runtime-trigger
+design, degrading to `document` — with its own D-entry — if no reliable
+trigger exists. M114 froze (GP5; `cairn/references/mc-skew-warn-trigger.md`,
+committed before any derivation artifact) a closed 48-candidate family —
+κ̂_bc (the shipped `burch_kappa_hat()`/`burch_kappa_bc()`) and the skewness
+analog γ̂ on the same z-decomposition, forms K(c_k) / S(c_g) / K∨S —
+severity-tiered binding floors (W1: fire ≥ 0.90 at targeted cells with
+non-abort coverage < 0.80; W2: ≥ 0.50 at 0.80–0.93; W3: ≤ 0.10 at protected
+gaussian cells; implement gate 2026-08-08), a mechanical selection ordering,
+and a 10-cell held-out battery (lognormal/laplace/gaussian, ids 65–74,
+n_rep = 1000, (20, 3) off the M111 geometry set — GP6). Evidence: per-rep
+statistics over the seed-regenerated M111 fixture (identity proof:
+128000/128000 regenerated SEARLE endpoints matched the stored ones within
+1e-12) plus the held-out sweep — `data-raw/m114-warn-trigger-stats.tsv`,
+ledgers `m114-warn-trigger-candidates.tsv` / `m114-warn-trigger-verdict.tsv`.
+
+**Decision — degrade.** The bounded finding: no candidate in the frozen
+family met the frozen floors/ceilings on the derived tables. 0/48 candidates
+pass W1, 0/48 pass W2 (28/48 pass W3 alone); the best minimum targeted-cell
+fire rate is 0.1625 against the 0.90/0.50 floors — not a near-miss anywhere
+in the ledger. Measured cause: the Burch z-decomposition pools all k·n
+values, so at n = 5 the cluster effect carries ~20% of z's variance and its
+kurtosis enters at weight² ≈ 0.04 — at the worst cell (chisq1 cluster
+kurtosis 12, non-abort coverage 0.676) κ̂_bc's distribution (median 0.11,
+spread ≈ 0.35) barely separates from gaussian's (median −0.03). The failure
+is dilution, not threshold placement.
+
+**The MC default's skew response is therefore `document`:** a documentation
+caveat naming the measured failure surface — heavy-tailed or skewed subject
+(cluster) effects at moderate-to-high ρ under-cover, and both classical
+opt-ins fail the same cells (D-027 S1) — shipped by the response milestone
+(candidate row added by M114). No runtime warning ships; no default-method
+change arises (D-001 fence untouched).
+
+**Reopening evidence class:** a frozen assessment of a statistic family that
+measures the cluster effect *directly* (moments of subject means or
+predicted cluster effects, standardized within-design) meeting these floors
+— promote on such a design, never on re-thresholding this family.
+
+**Consequences:** M114 ships no code. D-027's warn → document transition is
+executed by its own frozen rule; the S2 disposition chain closes here.

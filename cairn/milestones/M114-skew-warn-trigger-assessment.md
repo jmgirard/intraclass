@@ -110,11 +110,11 @@ candidate row.
       evaluation), emit the M111 half of the derived table.
 - [ ] T3: Commit the derived table `data-raw/m114-warn-trigger-stats.tsv`
       (M111 + held-out rows) with byte-stability on re-run.
-- [ ] T4: Write and run the held-out sweep (`data-raw/m114-heldout-sweep.R`,
+- [x] T4: Write and run the held-out sweep (`data-raw/m114-heldout-sweep.R`,
       cell ids ≥ 65, per the frozen spec; M112-hardened harness idioms —
       mclapply NULL-slot guard, status-based abort classification); append
       its per-rep rows to the derived table.
-- [ ] T5: Apply the frozen selection rule mechanically over the derived
+- [x] T5: Apply the frozen selection rule mechanically over the derived
       tables; record the verdict D-entry; fill the page's
       Results/Disposition sections; add the response-milestone candidate
       row to the ROADMAP (successor to the D-027 commissioning row this
@@ -128,6 +128,9 @@ candidate row.
 - 2026-08-08: plan gate chose seed-scheme regeneration + per-rep consistency proof over re-running the M111 sweep with statistics added, because reps regenerate deterministically without refitting (36 min saved; the stale-checkpoint candidate's promotion condition stays unfired); falsified by the AC2 consistency assertion failing on any rep.
 - 2026-08-08: T1 done — frozen page authored (48-candidate closed family, W1–W3 tiered floors per the implement gate, mechanical selection ordering, 10-cell held-out battery ids 65–74) + INDEX.md line; freeze commit precedes every derivation artifact.
 - 2026-08-08: T2 done — derivation script + shared stats helper (`m114-trigger-stats.R`, sourced by both halves so no copy drift); AC2 proof PASSED: 128000/128000 non-aborted searle reps matched within 1e-12 on the recording platform; minor amendment: verdict logic factored into `m114-warn-trigger-verdict.R` (T5's mechanical read gets its own artifact, no selection logic in the measuring scripts).
+- 2026-08-08: T4 done — held-out battery ran (10 cells, ids 65–74): four T-b targeted cells (66/68/70/72, every (50,5) lognormal/laplace cell, worst 0.825), (20,3) cells all cover ≥ 0.939; no checkpoint cache by design (the M112-review staleness trap).
+- 2026-08-08: T5 done — VERDICT: DEGRADE (D-028). 0/48 candidates pass W1 or W2 (28/48 pass W3 alone; best min targeted fire 0.1625 vs 0.90/0.50 floors — not a near-miss); measured cause is dilution (cluster effect at weight² ≈ 0.04 in the pooled z at n = 5), so reopening routes to a cluster-effect-direct family, never re-thresholding. Page Results/Disposition filled; two candidate rows added (document-caveat response; direct-family reopening).
+- 2026-08-08: T3 checkpoint — derived table written (138,000 rows) and committed with this checkpoint; the AC3 byte-stability proof (full re-run of both scripts + cmp) is IN FLIGHT, not yet verified — T3 stays unticked until the cmp returns clean.
 - 2026-08-08: plan gate chose kurtosis + skewness candidate family over kurtosis-only and over a wider open family (Shapiro–Wilk, tail ratios), because both failing families are moment-detectable while skewed-light-tailed data would escape kurtosis alone, and a wider family multiplies selection multiplicity on a frozen page; falsified by a held-out or user-reported under-coverage case both frozen statistics miss.
 
 ## Decisions

@@ -124,11 +124,37 @@ mechanically by the derivation script from (this page, the derived tables);
 any post-freeze edit to this page lands in its own commit before the first
 derivation-artifact commit (M113 lesson).
 
-## Results
+## Results — derived 2026-08-08 from the committed tables
 
-Filled at T5, after the derivation and held-out artifacts land; empty at
-freeze — observed 2026-08-08.
+Backing tables: `data-raw/m114-warn-trigger-stats.tsv` (138,000 per-rep rows:
+64 M111 cells × 2000 + 10 held-out cells × 1000), candidate ledger
+`data-raw/m114-warn-trigger-candidates.tsv` (48 rows), per-cell verdict table
+`data-raw/m114-warn-trigger-verdict.tsv`. Every figure re-derives by
+re-running the three scripts; the identity proof (128000/128000 regenerated
+SEARLE endpoints within 1e-12 of the stored fixture) certifies the
+regenerated data are the fixture's own.
+
+- **Classification** (frozen rules over the derived tables): 2 targeted T-a,
+  12 targeted T-b (10 M111 bucket-(i) cells + held-out 66/68/70/72 — every
+  (50, 5) lognormal/laplace cell; worst held-out non-abort coverage 0.825 at
+  (0.60, 50, 5, lognormal)), 11 protected gaussian, 49 descriptive. The
+  held-out (20, 3) cells all cover ≥ 0.939 — the defect tracks the
+  large-k/n = 5 corner off-grid too.
+- **Verdict: 0/48 candidates pass.** No candidate passes W1 (T-a floor 0.90)
+  or W2 (T-b floor 0.50); 28/48 pass W3 alone. Best minimum targeted-cell
+  fire rate: 0.1625 (K(0.5)∨S(0.25)) — not a near-miss anywhere.
+- **Measured cause — dilution, not threshold placement.** The z-decomposition
+  pools all k·n values; at n = 5 the cluster component carries ~20% of z's
+  variance, so its kurtosis enters at weight² ≈ 0.04. At the worst cell
+  (chisq1, cluster kurtosis 12, non-abort coverage 0.676) κ̂_bc has median
+  0.11 and spread ≈ 0.35 against gaussian's median −0.03 — no separating
+  threshold exists at any operating point the floors accept.
 
 ## Disposition
 
-Filled at T5; empty at freeze — observed 2026-08-08.
+**Degrade** (frozen degrade rule): no candidate in the frozen family met the
+frozen floors/ceilings on the derived tables. Recorded as D-028: the D-027
+S2 disposition becomes `document`; the caveat ships via the response
+milestone (ROADMAP candidate row, added by M114). Reopening class: a frozen
+assessment of a cluster-effect-direct statistic family (D-028) — never
+re-thresholding this one.
