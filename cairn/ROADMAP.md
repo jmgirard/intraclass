@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (M110 done and archived — the last open ORACLES.md Source-leg row closed against the Cronbach 1972 book; M105 rotates out of the terminal-row window; the M70 count LESSONS line extended in place on stale-narrative count corrections.)_
+_Last hygiene check: 2026-08-08 (post-M110 audit: all mechanical checks green, both GitHub inboxes empty, no open RRs, nothing in flight; M48 stays parked on the unopened release window.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
