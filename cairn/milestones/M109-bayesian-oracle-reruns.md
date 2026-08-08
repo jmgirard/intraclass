@@ -96,6 +96,8 @@ this milestone (rejected-alternative line in the work log).
 - 2026-08-07: plan gate chose depends-on M108 over parallel execution because sibling scripts share the fixed-warmup pattern and ≥.90 pins (k=2 cells in `-multilevel` and `-oneway`), so the adjudicated remedy sets the escalation precedent; falsified by M108's remedy proving inapplicable to a sibling's divergence class.
 - 2026-08-07: plan chose ledger-notes recording of the two non-`stopifnot` scripts' pins over extending the harness recorder, because the harness shipped M107-reviewed and a notes field preserves the record without reopening it; falsified by a third script adopting a non-`stopifnot` pin idiom.
 
+- 2026-08-07: T1 batch 1 launched (pre-launch concurrent-R check: one active R session — a tidymedia devtools::test run, contention expected); 5/7 scripts ledgered: conflated 33.0m drift-within-noise 4/4, fixed-replicates 8.8m drift-within-noise 4/4, replicates 11.3m drift-within-noise 4/4, multilevel-fixed 15.8m drift-within-noise 1/1, incomplete-nested 35.8m reproduced 3/3. Run halted at the ledger-row step of -multilevel-replicates: a concurrent glmmTMB reinstall had removed the package from the site-library mid-run, so the harness's version capture errored — verified a harness/environment artifact (live R.INSTALL process + 00LOCK-glmmTMB observed), not a pin failure; -multilevel-replicates and -nested-fixed queued to re-run after the install completes.
+
 ## Decisions
 <!-- owner: implement / review · append-only -->
 

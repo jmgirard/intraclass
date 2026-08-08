@@ -1,4 +1,9 @@
 script	run_date	verdict	pins	pin_detail	max_abs_delta	n_compared_leaves	r_version	glmmtmb	lme4	brms	rstan	stanheaders	lavaan	notes
+oracle-bayesian-conflated.R	2026-08-07	drift-within-noise	4/4		1.250e-02	26	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=33.03
+oracle-bayesian-fixed-replicates.R	2026-08-07	drift-within-noise	4/4		3.264e-02	29	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=8.84
+oracle-bayesian-incomplete-nested.R	2026-08-07	reproduced	3/3		0.000e+00	25	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=35.77
+oracle-bayesian-multilevel-fixed.R	2026-08-07	drift-within-noise	1/1		1.279e-03	23	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=15.77
+oracle-bayesian-replicates.R	2026-08-07	drift-within-noise	4/4		1.250e-02	29	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=11.32
 oracle-bayesian.R	2026-08-07	reproduced	4/4		0.000e+00	21	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=31.49
 oracle-cluster-ck-coverage.R	2026-08-07	reproduced	1/1		0.000e+00	9	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=24.06
 oracle-cluster-ck-incomplete.R	2026-08-06	pins-pass	9/9		NA	NA	4.6.1	1.1.14	2.0.1	2.23.0	2.32.7	2.32.10	0.6.21	elapsed_min=0.44
