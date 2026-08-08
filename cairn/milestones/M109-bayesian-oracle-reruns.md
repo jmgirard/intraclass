@@ -71,7 +71,7 @@ this milestone (rejected-alternative line in the work log).
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Batch 1 (~840 fits): `-conflated`, `-fixed-replicates`,
+- [x] T1: Batch 1 (~840 fits): `-conflated`, `-fixed-replicates`,
       `-replicates`, `-multilevel-fixed`, `-incomplete-nested`,
       `-multilevel-replicates`, `-nested-fixed` — one background
       `rerun-oracle.R` invocation; work-log elapsed + concurrent-R check.
@@ -97,6 +97,7 @@ this milestone (rejected-alternative line in the work log).
 - 2026-08-07: plan chose ledger-notes recording of the two non-`stopifnot` scripts' pins over extending the harness recorder, because the harness shipped M107-reviewed and a notes field preserves the record without reopening it; falsified by a third script adopting a non-`stopifnot` pin idiom.
 
 - 2026-08-07: T1 batch 1 launched (pre-launch concurrent-R check: one active R session — a tidymedia devtools::test run, contention expected); 5/7 scripts ledgered: conflated 33.0m drift-within-noise 4/4, fixed-replicates 8.8m drift-within-noise 4/4, replicates 11.3m drift-within-noise 4/4, multilevel-fixed 15.8m drift-within-noise 1/1, incomplete-nested 35.8m reproduced 3/3. Run halted at the ledger-row step of -multilevel-replicates: a concurrent glmmTMB reinstall had removed the package from the site-library mid-run, so the harness's version capture errored — verified a harness/environment artifact (live R.INSTALL process + 00LOCK-glmmTMB observed), not a pin failure; -multilevel-replicates and -nested-fixed queued to re-run after the install completes.
+- 2026-08-07: T1 complete — the glmmTMB reinstall landed 1.1.14 (same version, no ledger straddle); recovery re-run: multilevel-replicates 42.8m drift-within-noise 8/8, nested-fixed 17.4m reproduced 1/1. Batch 1 totals: 7/7 rows, 2 reproduced + 5 drift-within-noise, zero escalations; wall-clock ≈2.9h against the ~25m the M107 anchor implied — per-fit geometry + contention, consistent with the M107 lesson.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
