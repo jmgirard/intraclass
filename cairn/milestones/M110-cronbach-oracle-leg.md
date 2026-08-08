@@ -89,7 +89,7 @@ checkers and `cairn_validate` are the mechanical gate.
       pagination-basis paragraph (lines 59–69), the O-Bayes-Rep Sources
       bullet (~line 1233), and the `Extraction:` header (line 5) — then
       re-read every header that summarizes the table (LESSONS 2026-07-19/M72).
-- [ ] T3: Record the arrival: the `BIBLIOGRAPHY.md` entry (fields verified
+- [x] T3: Record the arrival: the `BIBLIOGRAPHY.md` entry (fields verified
       against the book); the `INDEX.md` inventory paragraph plus the
       full-file re-read correcting every claim the arrival falsifies, its
       D-009 `check:` directives updated in lockstep.
@@ -107,5 +107,6 @@ checkers and `cairn_validate` are the mechanical gate.
 - 2026-08-08: /milestone-implement start — `cronbach1972.pdf` found already on the shelf (ctime 2026-08-08 10:44, supplied during this session; mtime Jul 19 is the copy's preserved original — the M63 ctime check); no blocker, branch `m110-cronbach-oracle-leg` cut. Question gate skipped: the plan gate settled both open choices, no RB tripwires tagged.
 - 2026-08-08: T1 done — identity verified against the title/copyright pages (Wiley 1972, all four authors, ISBN 0-471-18850-6; whole-book library scan); pagination basis PDF = printed + 20; leg closes on the AC2 verified branch's stronger arm — Design IV-A `j:(i × p)` (Fig. 2.4 p. 38, Table 2.1 p. 40, Lord–Novick "replications" reading p. 42) is Brennan's `i:(p × o)`, plus the crossed Eq. (1.3) p. 28.
 - 2026-08-08: T2 done — ORACLES.md Source-leg row, pagination-basis note, O-Bayes-Rep Sources bullet, and Extraction header all updated; header sweep (grep outstanding/off-shelf/Source-leg) found no other summary asserting the leg open (line 34 is the standing off-shelf rule, kept).
+- 2026-08-08: T3 done — BIBLIOGRAPHY.md gains the Cronbach entry (fields against the book's own title/copyright pages); INDEX.md full-file re-read: corrected 38→39 entries (a stale count the grep would have missed — the AC4 full-read procedure earning its keep), 34→35 PDFs, three→four note-less members, the closed-leg sentence, an M110 arrival paragraph with its own check directive, and the note-less check directive extended to cronbach1972.md.
 
 ## Decisions
