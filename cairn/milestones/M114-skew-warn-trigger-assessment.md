@@ -103,7 +103,7 @@ candidate row.
       candidate family, floors/ceilings, threshold-search grid + selection
       rule + tie-break, degrade rule, held-out battery spec — committed
       before any derivation artifact (own commit; M113 lesson).
-- [ ] T2: Write `data-raw/m114-warn-trigger-derivation.R`: regenerate the
+- [x] T2: Write `data-raw/m114-warn-trigger-derivation.R`: regenerate the
       64 × 2000 reps from seeds, assert the AC2 SEARLE consistency proof,
       compute per-rep kurtosis + skewness statistics, join to stored
       `mc_covered`/`mc_aborted` (non-aborted reps carry the trigger
@@ -127,6 +127,7 @@ candidate row.
 - 2026-08-08: criteria audit ([O] fresh reader) returned 9 findings, all fixed in the AC wording pre-gate: fixture endpoint columns live in the long `raw` table not the wide table; 1e-12 platform-scoped; held-out table given a committed home + disjoint seed ids; AC1 additionally freezes the threshold-selection procedure so AC5's mechanical read is reachable; degrade limb bounded to the frozen family; AC6 pathspec extended to the full installed surface.
 - 2026-08-08: plan gate chose seed-scheme regeneration + per-rep consistency proof over re-running the M111 sweep with statistics added, because reps regenerate deterministically without refitting (36 min saved; the stale-checkpoint candidate's promotion condition stays unfired); falsified by the AC2 consistency assertion failing on any rep.
 - 2026-08-08: T1 done — frozen page authored (48-candidate closed family, W1–W3 tiered floors per the implement gate, mechanical selection ordering, 10-cell held-out battery ids 65–74) + INDEX.md line; freeze commit precedes every derivation artifact.
+- 2026-08-08: T2 done — derivation script + shared stats helper (`m114-trigger-stats.R`, sourced by both halves so no copy drift); AC2 proof PASSED: 128000/128000 non-aborted searle reps matched within 1e-12 on the recording platform; minor amendment: verdict logic factored into `m114-warn-trigger-verdict.R` (T5's mechanical read gets its own artifact, no selection logic in the measuring scripts).
 - 2026-08-08: plan gate chose kurtosis + skewness candidate family over kurtosis-only and over a wider open family (Shapiro–Wilk, tail ratios), because both failing families are moment-detectable while skewed-light-tailed data would escape kurtosis alone, and a wider family multiplies selection multiplicity on a frozen page; falsified by a held-out or user-reported under-coverage case both frozen statistics miss.
 
 ## Decisions
