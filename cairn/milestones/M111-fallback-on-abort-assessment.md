@@ -102,11 +102,12 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
       C1–C5 + conditional-on-abort rule, aggregation rule, INDEX line,
       triage rows) before any sweep artifact.
 - [ ] T3: Build the sweep harness under `data-raw/m111-fallback-*`, reusing
-      the m76 sweep structure: per-cell checkpointing, per-cell distinct
+      the m76 sweep structure parallelized over cells (`mclapply`, 4 workers
+      — plan gate 2026-08-08): per-cell checkpointing, per-cell distinct
       per-rep seeds, per-rep abort indicator, platform capture; size the run
       per design family (M107/M109 lessons) and check for concurrent R
       sessions / live R.INSTALL before launch.
-- [ ] T4: Run the ~13 h sweep as a background job; commit the fixture.
+- [ ] T4: Run the ~4 h sweep as a background job; commit the fixture.
 - [ ] T5: Analyze against the frozen criteria; write the results and
       per-method ledger into the criteria page; run the three AC6 checkers
       locally.
@@ -120,6 +121,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 - 2026-08-08: criteria audit ([O] fresh-context) returned 3 findings — AC1's "any sweep result" and "each threshold" universals bounded to the `data-raw/m111-fallback-*` path set and the Criteria table; AC4's claims-ban scoped to the results section with the claim-enumerator as backstop; AC3 gains the per-rep abort indicator + platform requirement — all fixed pre-gate.
 - 2026-08-08: plan gate chose the composite-procedure framing (assess MC-with-fallback as delivered) over a second full replacement-grade re-assessment because D-012 already answered replacement NO-GO and the fallback is the candidate's actual question; falsified by evidence the composite's coverage differs materially from its per-arm components at cells the sweep did not isolate.
 - 2026-08-08: plan gate chose both fallback arms over Burch-only because burch2011 §5 prefers the normal-based method near ρ≈0 — the abort region; falsified by neither arm passing the frozen bar where a third construction would.
+- 2026-08-08: plan gate (follow-up): sweep harness parallel over cells at 4 workers (~4 h) rather than M76's serial structure (~13 h), at the maintainer's choice; per-cell seed streams are already independent so results are worker-count-invariant.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
