@@ -3,12 +3,12 @@
      Per-section owners are tagged below. -->
 # M112: Harden the M111 fallback-sweep harness
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP5   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m112-m111-harness-hardening`   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -81,15 +81,15 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Add the post-`mclapply` guards (`m111-fallback-sweep.R:276-279`):
+- [x] T1: Add the post-`mclapply` guards (`m111-fallback-sweep.R:276-279`):
       length == cell count, all data frames, per-cell row counts; run the
       NULL-injection mutation and the clean pass at small `n_rep` with an
       isolated checkpoint dir; record both outcomes in the work log.
-- [ ] T2: Return an explicit ok/abort status from `mc_ci()` (`:67-85`), set
+- [x] T2: Return an explicit ok/abort status from `mc_ci()` (`:67-85`), set
       the MC leg's `aborted` from it in `one_rep()` (`:134`), turn the
       finiteness test into a should-never-fire loud error for the MC leg,
       and demonstrate both stub behaviors at small `n_rep`.
-- [ ] T3: Correct `f2_near_miss` to the failing side, add the F3 window,
+- [x] T3: Correct `f2_near_miss` to the failing side, add the F3 window,
       add the output-path override (`m111-fallback-verdict.R:55,158`); run
       the synthetic-ledger demonstration and the committed-fixture dry run;
       log the corrected counts.
@@ -105,6 +105,9 @@ the MC default's skew under-coverage → M113; any `R/` change → none needed.
 - 2026-08-08: criteria audit ([O], fresh-context) returned: AC1 checkpoint-dir hazard (fixed in wording), AC2 semantics-divergence note (fixed), AC3 unsatisfiable as drafted — F1 has no applicable 0.005 window and F5 no single binding statistic under the frozen text, and the failing-side count is vacuously 0 whenever the tie-break is live; AC4 self-contradiction via the hardcoded ledger path (fixed: output-path override, "verdict" claim dropped since the script only measures).
 - 2026-08-08: plan gate chose fixing F2+F3 to the frozen failing-side definition over (a) amending the frozen definition for F1/F5 and (b) dropping the tie-break task, because a pre-registered criterion is not redefined after results are known and the two well-defined rules are cleanly correctable; falsified by a future sweep needing a live tie-break, which would require a newly frozen definition regardless.
 - 2026-08-08: plan gate chose planning M112 independent of M113 over sequencing them, because M113 derives entirely from the committed fixture and never runs this harness; falsified by M113's derivation finding the fixture lacks per-rep leg rows (it would then need a re-run through this harness).
+- 2026-08-08: T1 — `assert_sweep_results()` now runs between the parallel map and any fixture write (list length, try-error, non-data-frame, per-cell `n_rep x 3` row count, cell-id order); demonstrated in `data-raw/m112-harness-demo.R` — the clean `n_rep = 2` 64-cell run passes (384 rows) and the NULL-injected, row-short and cell-short mutations each error.
+- 2026-08-08: T2 — `mc_ci()` returns an explicit ok/abort status and the MC leg's `aborted` flag is set from it; a non-finite MC interval arriving without the classed condition now errors loudly; the MC-vs-classical flag divergence is stated in the script header; both stubs demonstrated in the demo script.
+- 2026-08-08: T3 — near-miss corrected to the frozen failing-side window `[threshold - 0.005, threshold)` for F2 and added for F3, plus env-var input/output overrides on both scripts; against the committed fixture the corrected counts are F2 SEARLE 4 / Burch 5 (the shipped passing-side script counted 1 / 4) and F3 SEARLE 1 / Burch 0, with `f2_near_miss` the only shipped ledger column that changes and both `.rds` fixtures untouched.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->

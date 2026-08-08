@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | done | M108 | normal | milestones/archive/M109-bayesian-oracle-reruns.md |
 | M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | done | — | normal | milestones/archive/M108-oracle-bayesian-k2-adjudication.md |
 | M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | done | — | normal | milestones/archive/M110-cronbach-oracle-leg.md |
-| M112 | Harden the M111 fallback-sweep harness | planned | — | normal | milestones/M112-m111-harness-hardening.md |
+| M112 | Harden the M111 fallback-sweep harness | in-progress | — | normal | milestones/M112-m111-harness-hardening.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M113 done (2026-08-08) → M107 rotated out (oldest terminal; its archive file still resolves there). Kept: M113, M111, M110, M109, M108 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
