@@ -40,7 +40,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: The pre-registered criterion page
+- [x] AC1: The pre-registered criterion page
       `cairn/references/fallback-on-abort-comparison.md` is committed with its
       GO/NO-GO rules, grid, and aggregation rule before any sweep artifact:
       every sweep artifact lives under `data-raw/m111-fallback-*`, and
@@ -48,12 +48,12 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
       every commit introducing a file under that path set (the settling
       procedure); every number in the page's Criteria table names its source
       (an adapted M76 C1–C5 rule or a cited value).
-- [ ] AC2: The frozen grid includes at least one platykurtic and at least one
+- [x] AC2: The frozen grid includes at least one platykurtic and at least one
       skewed cluster-effect distribution, each traced to `burch2011` Table 2
       (page/table anchor in the criteria page), and at least one ρ ≥ 0.30
       level, alongside near-zero cells (ρ ≤ 0.10) with gaussian and t5 arms
       carried over from M76.
-- [ ] AC3: The composite fallback procedure — MC default where it converges,
+- [x] AC3: The composite fallback procedure — MC default where it converges,
       the classical method where it raises `intraclass_singular_fit` — is
       assessed for both SEARLE exact-F and Burch REML at every grid cell at
       n_rep ≥ 2000 per cell, from a committed seeded script under
@@ -61,20 +61,20 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
       and the generating platform recorded) lands in the same milestone;
       unconditional composite coverage, width, and tail-miss rates are
       reported per cell × method against the frozen criteria.
-- [ ] AC4: Conditional-on-abort coverage of each classical fallback is
+- [x] AC4: Conditional-on-abort coverage of each classical fallback is
       reported at every cell whose abort count is ≥ 100, and every cell below
       that floor is listed as conditional-insufficient in the criteria page's
       results section; that section makes no conditional claim for a
       below-floor cell, with `enumerate-generalizing-claims.py --check`
       (AC6) as the mechanical backstop on its claims.
-- [ ] AC5: A D-entry records the per-method GO/NO-GO verdict per the frozen
+- [x] AC5: A D-entry records the per-method GO/NO-GO verdict per the frozen
       aggregation rule; on any GO it names the fallback method, states that
       superseding the MC-default contract is D-001-fenced (a D-entry, not a
       constitutional amendment), names D-018's return fence as what a GO
       lifts, and recommends (not performs) the implementation milestone; on
       all-NO-GO it states what evidence class would reopen the question.
       (RB tripwire: ip-touching)
-- [ ] AC6: `python3 data-raw/enumerate-generalizing-claims.py --check` and
+- [x] AC6: `python3 data-raw/enumerate-generalizing-claims.py --check` and
       `python3 data-raw/check-reference-observations.py` both exit 0 on the
       branch head, and `cairn_validate` passes — run fresh at review (the
       three commands are the procedure).
@@ -140,3 +140,14 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Evidence gathered fresh 2026-08-08 (second pass; the first failed AC4, defect return 1 — see work log):
+
+- AC1 ✓: criteria page introduced at f3fd283 (2026-08-08 11:58:11), earliest `data-raw/m111-fallback-*` artifact at f16c485 (12:00:01) — `git log --diff-filter=A` ordering holds for every artifact under the path set; each Criteria-table row carries its "Source of the threshold" entry (M76 C1–C6 or "frozen here").
+- AC2 ✓: grid names uniform (κ=−1.2, platykurtic) and chisq1 (κ=12.0, skewed) traced to burch2011 Table 2 (p. 1021); ρ levels {0.05, 0.10, 0.30, 0.60} include two ≥ 0.30; gaussian/t5 arms at ρ ≤ 0.10 carry the M76 cells.
+- AC3 ✓: fixture holds 64 cells × 2000 reps with both composite-arm columns, per-rep `mc_aborted` indicator, and platform metadata (Darwin arm64, R 4.6.1); per-cell × arm coverage/width/tails reported in the summary table and on the criteria page.
+- AC4 ✓: the 36-cell conditional table and the 28-cell conditional-insufficient list are in the page's results section (added at the return-1 fix, generated from the ledger); `enumerate-generalizing-claims.py --check` green as the claims backstop.
+- AC5 ✓: D-026 records per-arm NO-GO under the frozen aggregation rule, states the reopening evidence class (all-NO-GO clause), and names the D-001 fence and D-018's licence as unchanged.
+- AC6 ✓: `enumerate-generalizing-claims.py --check`, `check-reference-observations.py`, and `cairn_validate` all exit 0 on the branch head (8e967de).
+
+Consistency gate: cairn_validate exit 0 (all checks); no DESIGN.md principle changed (cairn_impact skipped). Driving RR: — (no projections to juxtapose). Full devtools::test() suite green pre-review (failed+error = 0; diff touches no package code).
