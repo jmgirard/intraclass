@@ -1100,17 +1100,22 @@ return. Evidence: a 64-cell sweep (ρ ∈ {0.05, 0.10, 0.30, 0.60} × 4 designs 
 `data-raw/m111-fallback-rules.rds`).
 
 **Decision — NO-GO for both composite arms**, per the frozen aggregation rule
-(neither passes every binding rule at every applicable cell; the failures are
-structural, not marginal):
+(neither passes every binding rule at every applicable cell; the decisive F3
+failures are structural — conditional coverage 0.00–0.49 against the 0.93
+floor — while F2 has 4 SEARLE / 5 Burch within-0.005 marginal fails among its
+45/30):
 
 - **The abort event is informative (the decisive finding, F3).** Aborts are not
   confined to the near-zero boundary (16–23% of reps at ρ = 0.30 in the 10×2
-  design; 6–12% at ρ = 0.30 in 10×5 under t5/chisq1). An off-boundary abort
-  selects exactly the samples whose between-subject variance collapsed, and a
-  classical interval computed from such a sample excludes the truth:
-  conditional-on-abort coverage 0.00–0.49 at those cells (both arms), against
-  1.000 for Burch at 28/29 ρ ≤ 0.10 cells. A fixed fallback would hand users a
-  confident interval precisely where the data are least representative.
+  design; 6–12% at ρ = 0.30 in 10×5 under t5/chisq1). An abort at an
+  *informative* design — one whose classical interval is narrow — selects
+  exactly the samples whose between-subject variance collapsed, and the
+  fallback interval sits below the truth (every conditional miss upper-tail):
+  conditional-on-abort coverage 0.00–0.49 at those cells (both arms). Burch
+  covers 1.000 at the low-information abort cells — 28/29 at ρ ≤ 0.10 plus
+  all four (0.30, 10, 2, ·) — but no shipped diagnostic can tell a user which
+  case their abort is. A fixed fallback would hand users a confident interval
+  precisely where the data are least representative.
 - **F2/F5 corroborate:** unconditional composite coverage fails 45/64 (SEARLE)
   and 30/64 (Burch) cells, largely inherited from the MC leg the composite
   keeps.
@@ -1121,9 +1126,11 @@ structural, not marginal):
 - **Reopening evidence class (all-NO-GO clause):** a fallback construction
   that models the selection event itself (conditional-likelihood /
   post-selection inference) with demonstrated conditional coverage across this
-  grid's ≥100-abort cells; or a user-facing need restricted to the ρ ≤ 0.10
-  region where Burch measured 1.000 (28/29 cells). Preference for "an interval
-  instead of an error" alone does not reopen it.
+  grid's ≥100-abort cells; or a user-facing need restricted to the
+  low-information abort cells where Burch measured 1.000 (28/29 at ρ ≤ 0.10
+  plus the four (0.30, 10, 2, ·) cells — the (0.10, 50, 5, chisq1) exception
+  shows the boundary is informational, not a ρ threshold). Preference for "an
+  interval instead of an error" alone does not reopen it.
 
 **Fences unchanged:** the default stays the glmmTMB MC method (`#3`'s D-001
 fence untouched — no default-method supersession); D-018's diagnostic-only

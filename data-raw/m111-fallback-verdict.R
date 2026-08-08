@@ -11,13 +11,12 @@ res <- readRDS("data-raw/m111-fallback-results.rds")
 agg <- res$summary
 wide <- res$wide
 
-# F1 — interval always: every composite rep carries a finite coverage verdict
-# (the classical legs are closed-form, so a composite NA would mean a leg
-# failed to compute; assert none did).
-stopifnot(
-  !anyNA(wide$comp_searle_covered),
-  !anyNA(wide$comp_burch_covered)
-)
+# F1 — interval always: no classical leg ever failed to produce a finite
+# interval. Asserted on the raw per-leg abort indicator (a failed leg records
+# aborted=TRUE on its own row), NOT on comp_*_covered, which is FALSE — never
+# NA — for a failed leg and so cannot carry this evidence (M111 review D3).
+n_leg_aborts <- sum(res$raw$aborted[res$raw$method != "mc"])
+stopifnot(n_leg_aborts == 0L)
 f1_pass <- TRUE
 
 # F3 helper — one-sided 95% upper Clopper-Pearson bound for a proportion.
@@ -34,6 +33,9 @@ rules <- do.call(
       lo <- g[[paste0("comp_", arm, "_lo_miss")]]
       hi <- g[[paste0("comp_", arm, "_hi_miss")]]
       cond_cov <- g[[paste0("cond_", arm, "_coverage")]]
+      ab <- wide[wide$cell == g$cell & wide$mc_aborted, ]
+      cond_lo <- if (nrow(ab)) mean(ab[[paste0(arm, "_lo_miss")]]) else NA_real_
+      cond_hi <- if (nrow(ab)) mean(ab[[paste0(arm, "_hi_miss")]]) else NA_real_
       f3_applicable <- n_ab >= 100
       f3_ucb <- if (f3_applicable) {
         cp_upper(round(cond_cov * n_ab), n_ab)
@@ -52,6 +54,8 @@ rules <- do.call(
         f2_pass = cov_u >= 0.93,
         f2_near_miss = cov_u >= 0.93 & cov_u < 0.935,
         cond_coverage = cond_cov,
+        cond_lo_miss = cond_lo,
+        cond_hi_miss = cond_hi,
         f3_applicable = f3_applicable,
         f3_ucb = f3_ucb,
         f3_pass = !f3_applicable | (f3_ucb >= 0.93),
@@ -68,7 +72,7 @@ rownames(rules) <- NULL
 
 cat(
   "== F1 (interval always):",
-  if (f1_pass) "PASS (0 composite NAs)" else "FAIL",
+  if (f1_pass) "PASS (0 aborted classical-leg rows)" else "FAIL",
   "\n\n"
 )
 
@@ -122,7 +126,7 @@ ab <- unique(rules[
 ])
 print(ab[order(-ab$n_abort), ], row.names = FALSE)
 
-cat("\n== conditional-on-abort coverage at applicable cells:\n")
+cat("\n== conditional-on-abort coverage + tails at applicable cells:\n")
 cc <- rules[
   rules$f3_applicable,
   c(
@@ -133,6 +137,8 @@ cc <- rules[
     "arm",
     "n_abort",
     "cond_coverage",
+    "cond_lo_miss",
+    "cond_hi_miss",
     "f3_ucb",
     "f3_pass"
   )

@@ -138,6 +138,7 @@ licence (a GO supersedes its return fence explicitly, in the D-entry).
 <!-- owner: implement / review · append-only -->
 
 - 2026-08-08: verdict decided in-session (the plan-gate choice on AC5's ip-touching tripwire): the frozen rules returned an unambiguous structural NO-GO for both arms (1 SEARLE / 4 Burch near-misses; every other failure by a wide margin), so no Fable escalation was raised; the escalation option remains reachable via D-026's reopening clause. Promoted cross-cutting verdict: D-026.
+- 2026-08-08 (review correction of the entry above): its near-miss figures were the wrong statistic — F2 near-PASSES (the tie-break count), not marginal failures; the correct margins are 4 SEARLE / 5 Burch F2 fails within 0.005 of the floor, with the decisive F3 failures structural (0.00–0.49 vs 0.93, review finding D2 scored 90). The escalation-skip conclusion stands on the corrected basis: the verdict rests on F3, which is unambiguous.
 
 ## Review
 <!-- owner: review · exclusive -->
@@ -151,4 +152,12 @@ Evidence gathered fresh 2026-08-08 (second pass; the first failed AC4, defect re
 - AC5 ✓: D-026 records per-arm NO-GO under the frozen aggregation rule, states the reopening evidence class (all-NO-GO clause), and names the D-001 fence and D-018's licence as unchanged.
 - AC6 ✓: `enumerate-generalizing-claims.py --check`, `check-reference-observations.py`, and `cairn_validate` all exit 0 on the branch head (8e967de).
 
-Consistency gate: cairn_validate exit 0 (all checks); no DESIGN.md principle changed (cairn_impact skipped). Driving RR: — (no projections to juxtapose). Full devtools::test() suite green pre-review (failed+error = 0; diff touches no package code).
+Consistency gate: cairn_validate exit 0 (all checks); no DESIGN.md principle changed (cairn_impact skipped). Driving RR: — (no projections to juxtapose). Full devtools::test() suite green pre-review (failed+error = 0; diff touches no package code). Toolchain gate: devtools::document() no diff; pkgdown check_pkgdown clean; README untouched. CI: check-references red on a pre-existing stale record-claims row (corrected, see work log); remaining jobs green/pending at gate time.
+
+Fan-out (3 lenses → scorer): prior-review lens clean (no regressions; repo has no PR-thread history); blame-history 7 observations; diff-bug 15 findings with headline figures re-derived clean (generators, seeds, CP bound, all rule counts match the ledger). Scored ≥80 and FIXED on the branch:
+- D2 (90): the disposition's "(1 SEARLE / 4 Burch near-misses; the rest fail by wide margins)" quoted F2 near-PASSES (the tie-break stat) as failure margins — corrected on the page and in D-026 (true margins: 4 SEARLE / 5 Burch F2 fails within 0.005; F3 structural); the milestone Decisions escalation-skip entry corrected by an appended dated line (conclusion stands on F3).
+- D7 (88): F5's conditional-tail reporting was unimplemented and the page's one conditional-tail claim inverted — verdict.R now computes cond_lo/hi_miss into the ledger (all conditional misses are upper-tail; lower-tail 0.000 everywhere), page corrected.
+- D1 (85): "no assessed method covers conditionally off-boundary" overgeneralized — Burch covers 1.000 at all four (0.30,10,2,·) cells; page + D-026 rescoped to informative-design cells (the boundary is informational, not a ρ threshold).
+- D3 (80): verdict.R's F1 assertion was vacuous (comp_*_covered is never NA by construction) — replaced with the real per-leg abort-row assertion (0 of 256,000).
+- D9 (80): failing n=2 composite range "0.82–0.89" understated — corrected to 0.816–0.929 / 0.838–0.920.
+Logged sub-80 (13): B4 62 (Table 2 extraction lacked its own dated line — added), B6 68 (folded into D1's fix), B7 60 (candidate-row hedge tightened), D4 78 / D5 78 / D10 78 / D15 72 / D8 70 / D12 68 / D13 55 (factual/wording slips on the page and script header — all corrected as part of the D1/D2 page pass), D6 58 + D11 52 (latent harness gaps → new hardening candidate row), D14 55 (work-log phrasing; append-only, left).

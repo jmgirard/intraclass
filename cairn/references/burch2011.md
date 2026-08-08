@@ -134,6 +134,10 @@ scaled to mean 0 and the target variance — worked example printed for χ²(1):
 `A_i = σ₁(X_i − 1)/√2` with `X_i ~ χ²(1)`. The same convention applies to any
 Table 2 family.
 
+This section's extraction was read directly from the p. 1021 table render at
+ingestion (M111), separate from the M76 blanket pass above — observed
+2026-08-08. <!-- check: none — a statement about how this section was authored; git history (commit 643f0f0) is the record -->
+
 ## Traces to (M111)
 
 - The M111 fallback-on-abort sweep's two new non-normal arms are chosen from

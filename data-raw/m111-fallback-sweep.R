@@ -12,8 +12,9 @@
 # on an abort rep here is the D-018-licensed diagnostic use: nothing reaches a
 # user, and the package's own abort behavior is untouched.
 #
-# Run in the background (~2 h at 4 workers; check for concurrent R sessions and
-# live R.INSTALL processes first — M107/M109 lessons):
+# Run in the background (measured 36 min at 4 workers on an M-series Mac;
+# check for concurrent R sessions and live R.INSTALL processes first —
+# M107/M109 lessons):
 #   Rscript data-raw/m111-fallback-sweep.R
 # Parallel over cells (parallel::mclapply, 4 workers — plan gate 2026-08-08;
 # per-cell seed streams are independent, so results are worker-count-invariant).
