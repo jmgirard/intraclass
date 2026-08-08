@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (M109 done and archived — all 19 Bayesian oracle re-runs green, zero escalations; M104 rotates out of the terminal-row window; the M107 LESSONS sizing line extended in place.)_
+_Last hygiene check: 2026-08-08 (M110 done and archived — the last open ORACLES.md Source-leg row closed against the Cronbach 1972 book; M105 rotates out of the terminal-row window; the M70 count LESSONS line extended in place on stale-narrative count corrections.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -13,10 +13,9 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | done | — | normal | milestones/archive/M108-oracle-bayesian-k2-adjudication.md |
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
 | M106 | The opt-in ci_method values are documented in the vignettes | done | — | normal | milestones/archive/M106-optin-ci-method-vignette.md |
-| M105 | Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently | done | — | normal | milestones/archive/M105-degenerate-input-and-burch-guards.md |
-| M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | review | — | normal | milestones/M110-cronbach-oracle-leg.md |
+| M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | done | — | normal | milestones/archive/M110-cronbach-oracle-leg.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M109 done (2026-08-08) → M104 rotated out (oldest terminal; its archive file still resolves there). Kept: M109, M108, M107, M106, M105 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M110 done (2026-08-08) → M105 rotated out (oldest terminal; its archive file still resolves there). Kept: M110, M109, M108, M107, M106 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
