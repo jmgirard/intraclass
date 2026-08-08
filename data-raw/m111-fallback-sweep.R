@@ -12,6 +12,15 @@
 # on an abort rep here is the D-018-licensed diagnostic use: nothing reaches a
 # user, and the package's own abort behavior is untouched.
 #
+# The `aborted` flag means different things on the two kinds of leg, by design
+# (M112 T2). On the MC leg it records ONLY the classed intraclass_singular_fit
+# condition — the event the fallback exists to replace — taken from the status
+# mc_ci() returns; a non-finite MC endpoint arriving without that condition is
+# an error, not an abort. On the closed-form searle/burch legs there is no such
+# condition to catch, so their flag stays the finiteness test it has always
+# been: those legs are the "interval always" comparator (F1), and a non-finite
+# endpoint there is exactly the failure F1 measures.
+#
 # Run in the background (measured 36 min at 4 workers on an M-series Mac;
 # check for concurrent R sessions and live R.INSTALL processes first —
 # M107/M109 lessons):
@@ -28,8 +37,11 @@ suppressMessages(devtools::load_all(quiet = TRUE))
 # the file's `if (sys.nframe() == 0L)` oracle block.
 source("data-raw/m76-classical-oneway-prototype.R")
 
-out_path <- "data-raw/m111-fallback-results.rds"
-ckpt_dir <- "data-raw/m111-fallback-checkpoints"
+# Paths are overridable so a demonstration run (data-raw/m112-harness-demo.R)
+# can never touch the committed M111 fixture; the defaults are the committed
+# ones, so an unset environment reproduces the 2026-08-08 run exactly.
+out_path <- Sys.getenv("M111_RESULTS_OUT", "data-raw/m111-fallback-results.rds")
+ckpt_dir <- Sys.getenv("M111_CKPT_DIR", "data-raw/m111-fallback-checkpoints")
 n_workers <- 4L
 
 # ---- data generation ---------------------------------------------------------
@@ -63,7 +75,10 @@ gen_oneway <- function(k, n, rho, dist, seed) {
 
 # ---- MC default extractor ----------------------------------------------------
 # The abort caught here is the classed condition the fallback exists to
-# replace; anything else propagates (never silently coerced).
+# replace; anything else propagates (never silently coerced). The returned
+# status is what the MC leg's `aborted` flag is set from (M112 T2) — a
+# non-finite endpoint is NOT evidence of the classed abort, and one arriving
+# without the condition is a defect the caller raises rather than counts.
 mc_ci <- function(d, seed) {
   tryCatch(
     {
@@ -78,9 +93,11 @@ mc_ci <- function(d, seed) {
         seed = seed
       ))
       i1 <- td[td$index == "ICC(1)", ]
-      c(lower = i1$conf.low, upper = i1$conf.high)
+      list(status = "ok", lower = i1$conf.low, upper = i1$conf.high)
     },
-    intraclass_singular_fit = function(e) c(lower = NA_real_, upper = NA_real_)
+    intraclass_singular_fit = function(e) {
+      list(status = "abort", lower = NA_real_, upper = NA_real_)
+    }
   )
 }
 
@@ -131,7 +148,24 @@ one_rep <- function(cell, rep) {
     ci <- legs[[m]]
     lo <- ci[["lower"]]
     hi <- ci[["upper"]]
-    aborted <- !is.finite(lo) || !is.finite(hi)
+    finite_ci <- is.finite(lo) && is.finite(hi)
+    if (m == "mc") {
+      # Set from the extractor's status, never from finiteness: only the
+      # classed intraclass_singular_fit abort is the event under study.
+      aborted <- identical(ci[["status"]], "abort")
+      if (!aborted && !finite_ci) {
+        stop(
+          "mc leg returned a non-finite interval without signalling ",
+          "intraclass_singular_fit (cell ",
+          cell$id,
+          ", rep ",
+          rep,
+          ")"
+        )
+      }
+    } else {
+      aborted <- !finite_ci
+    }
     data.frame(
       cell = cell$id,
       rho = cell$rho,
@@ -270,12 +304,55 @@ run_cell <- function(cell) {
   res
 }
 
+# ---- post-map completeness guard --------------------------------------------
+# mclapply reports a killed worker as a NULL element, which inherits from
+# nothing and binds away silently under rbind: the fixture would then be short
+# by whole cells with no sign in the output (M111 review; M112 T1). Every
+# failure mode below is checked BEFORE any fixture write.
+assert_sweep_results <- function(results, cells) {
+  if (length(results) != length(cells)) {
+    stop(sprintf(
+      "sweep incomplete: %d results for %d cells (a worker was lost)",
+      length(results),
+      length(cells)
+    ))
+  }
+  failed <- vapply(results, inherits, logical(1), what = "try-error")
+  if (any(failed)) {
+    stop("cells errored: ", paste(which(failed), collapse = ", "))
+  }
+  not_df <- !vapply(results, is.data.frame, logical(1))
+  if (any(not_df)) {
+    stop(
+      "cells returned no data frame (killed worker?): ",
+      paste(which(not_df), collapse = ", ")
+    )
+  }
+  want <- vapply(cells, function(cell) as.integer(cell$n_rep) * 3L, integer(1))
+  got <- vapply(results, nrow, integer(1))
+  short <- which(got != want)
+  if (length(short)) {
+    stop(sprintf(
+      "cells with wrong row count (want n_rep x 3 legs): %s",
+      paste(
+        sprintf("%d (%d/%d)", short, got[short], want[short]),
+        collapse = ", "
+      )
+    ))
+  }
+  ids <- vapply(results, function(r) as.integer(r$cell[1]), integer(1))
+  want_ids <- vapply(cells, function(cell) as.integer(cell$id), integer(1))
+  if (!identical(ids, want_ids)) {
+    stop("result order does not match the cell grid")
+  }
+  invisible(TRUE)
+}
+
 if (sys.nframe() == 0L) {
   dir.create(ckpt_dir, showWarnings = FALSE)
   cells <- build_cells()
   results <- parallel::mclapply(cells, run_cell, mc.cores = n_workers)
-  failed <- vapply(results, inherits, logical(1), what = "try-error")
-  stopifnot(!any(failed))
+  assert_sweep_results(results, cells)
   raw <- do.call(rbind, results)
   wide <- widen_reps(raw)
   agg <- summarize_sweep(wide)
