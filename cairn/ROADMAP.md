@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-07 (M108 done and archived — the k=2 adjudication + template seeding; M101 rotates out of the terminal-row window; the roadmap-terminal-rows ledger row rotated in this same commit.)_
+_Last hygiene check: 2026-08-08 (M109 done and archived — all 19 Bayesian oracle re-runs green, zero escalations; M104 rotates out of the terminal-row window; the M107 LESSONS sizing line extended in place.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | review | M108 | normal | milestones/M109-bayesian-oracle-reruns.md |
+| M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | done | M108 | normal | milestones/archive/M109-bayesian-oracle-reruns.md |
 | M108 | Adjudicate the oracle-bayesian.R k=2 convergence divergence | done | — | normal | milestones/archive/M108-oracle-bayesian-k2-adjudication.md |
 | M107 | Oracle-script reproducibility — the re-run harness and the first sixteen re-runs | done | — | normal | milestones/archive/M107-oracle-script-reproducibility.md |
 | M106 | The opt-in ci_method values are documented in the vignettes | done | — | normal | milestones/archive/M106-optin-ci-method-vignette.md |
 | M105 | Non-finite input and the zero-between-variance Burch interval fail classed, never raw and never silently | done | — | normal | milestones/archive/M105-degenerate-input-and-burch-guards.md |
-| M104 | What the parametric bootstrap reports when its interval sits above its own point | done | — | normal | milestones/archive/M104-bootstrap-point-containment.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M108 done (2026-08-07) → M101 rotated out (oldest terminal; its archive file and the D-021 disposition it recorded still resolve there). Kept: M108, M107, M106, M105, M104 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M109 done (2026-08-08) → M104 rotated out (oldest terminal; its archive file still resolves there). Kept: M109, M108, M107, M106, M105 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
