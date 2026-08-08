@@ -102,6 +102,7 @@ this milestone (rejected-alternative line in the work log).
 - 2026-08-08: T3 complete (pre-launch concurrent-R check: none active): incomplete-fixed 4.8m reproduced 4/4, incomplete 6.7m reproduced 4/4, incomplete-nested-subjects 49.8m reproduced 3/3, incomplete-oneway 5.2m reproduced 5/5. Batch 3 totals: 4/4 rows, all reproduced at max_abs_delta 0, zero escalations.
 - 2026-08-08: T4 complete (pre-launch concurrent-R check: none active): cluster-ck 111.0m reproduced 2/2, incomplete-fixed-nested 280.6m reproduced 1/1, both max_abs_delta 0. AC4 notes captured from the run transcript into both ledger rows: cluster-ck's check() pins 5/5 PASS (min coverage A=0.942 C=0.946), incomplete-fixed-nested's in_band verdicts 4/4 PASS (worst cell mod_boundary coverage 0.9542).
 - 2026-08-08: T5 complete — ledger scan shows zero escalated verdicts (AC3 vacuous: no candidate rows owed, no persistence check applicable); `git diff --stat origin/main -- tests/testthat/fixtures/` empty; all 19 oracle-bayesian-*.R scripts carry rows dated 2026-08-07/08. Verify slot: devtools::test() 6116 pass, 0 fail, 0 error, 0 skip (live-Stan brms tests ran). Status → review.
+- 2026-08-08: review F6 disposition — the plan-gate falsifier ("a batch's measured wall-clock exceeding a working session") arguably fired: batch 4 ran ~6.5 h continuous and the sweep totalled ~12.5 h vs the 4–10 h estimate. The decision (one milestone, four batches) stands — the work completed within the milestone and background launches made no batch block a sitting — but the M107 500-fits/13.8-min anchor understates heavier per-fit geometries ~2–5×; the next multi-script Stan sweep should anchor per design family, not per fit count.
 
 ## Decisions
 <!-- owner: implement / review · append-only -->
@@ -116,3 +117,18 @@ Review 2026-08-08 (PR #118). Acceptance-criteria evidence, fresh by command:
 - AC3: ledger verdict scan → 0 escalated verdicts; vacuously satisfied (no candidate rows owed, no persistence check applicable). PASS.
 - AC4: both rows' notes fields carry the transcript pin outcomes — cluster-ck "non-stopifnot check() pins … 5/5 PASS", incomplete-fixed-nested "non-stopifnot in_band verdicts … 4/4 PASS". PASS.
 - AC5: work log carries 5 batch lines (T1 ×2 spanning the glmmTMB interruption, T2–T4), each with per-script elapsed minutes and the pre-launch concurrent-R check. PASS.
+
+Consistency gate 2026-08-08: cairn_validate exit 0 (all checks pass); devtools::document() no diff; pkgdown::check_pkgdown() clean; devtools::check(NOT_CRAN=false) 0 errors / 0 warnings / 0 notes; no principle changed (cairn_impact skipped); no user-visible change, so no NEWS entry owed. devtools::test() full suite: 6116 pass / 0 fail / 0 error / 0 skip.
+
+Independent review (3 lenses + scorer, PR #118): blame-history — no findings (pre-existing ledger rows byte-identical, growth strictly additive, no escalated-then-replaced row); prior-review — no regression (1 candidate, self-cleared); diff-bug — deep positive verification (pins denominators, n_compared_leaves, and AC4 note values independently reproduced from scripts and fixtures; work-log elapsed figures corroborated by commit timestamps) + 10 candidate findings. Scorer: 0 of 11 findings reached the 80 action threshold — actioned list empty. Logged (id, score, one line):
+- PR1 28: drift rows lack unseeded-template attribution — D-024 defines the verdict by outcome; scope put script fixes Out.
+- F1 35: reproduced/drift split correlates with the D-025 seeding pattern, unrecorded — D-025's Consequences already document the precedent.
+- F2 55: fixed-replicates has no set.seed at all (largest delta 3.26e-02) — real, but script fixes are scoped Out and the verdict follows D-024 mechanically.
+- F3 22: drift-within-noise has no magnitude bound — a D-024/harness design critique predating this diff.
+- F4 12: AC4 pins live in notes prose, not the pins column — the Scope's explicitly chosen tradeoff.
+- F5 42: a future harness re-run replaces the two AC4 rows and cannot regenerate their notes — M107 harness behavior, untouched here.
+- F6 62: the plan-gate wall-clock falsifier arguably fired (batch 4 ≈6.5 h; sweep ≈12.5 h vs est. 4–10 h) with no disposition — dispositioned by work-log line this review.
+- F7 15: Goal "close the gap" vs measured-not-closed for drift rows — unmodified line.
+- F8 66: the T1 recovery relaunch has no separate pre-launch concurrent-R check line — AC5's unit is the batch task and T1's entry records the check; the relaunch was gated on the install completing and the same-version landing is recorded.
+- F9 32: AC4 transcript citations not independently checkable — values verified to match fixtures.
+- F10 18: AC4 notes break the elapsed_min-last segment convention — no consumer parses the field.
