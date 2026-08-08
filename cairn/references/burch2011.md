@@ -110,6 +110,44 @@ the same source-rounding subtlety flagged for ohyama2025 §4.
   interval fails and REML earns its keep; `κ < 0` (platykurtic) the normal-based
   interval over-covers and REML ≈ nominal (Fig. 1).
 
+## Table 2 — the non-normal battery (p. 1021), extracted by M111
+
+Kurtosis values `κ = E[(X−μ)⁴]/σ⁴ − 3` for the 11 §3 simulation distributions
+(Table 2, p. 1021, verbatim):
+
+| class | distribution | κ |
+|---|---|---|
+| symmetric | Uniform(0, 1) | −1.2 |
+| symmetric | Power exponential(0, 1, 2.78) | −0.5 |
+| symmetric | Normal(0, 1) | 0.0 |
+| symmetric | t(10) | 1.0 |
+| symmetric | Laplace(0, 1) | 3.0 |
+| symmetric | t(5) | 6.0 |
+| asymmetric | Beta(0.4, 0.6) | −1.33 |
+| asymmetric | Weibull(3.36, 1) | −0.29 |
+| asymmetric | Gamma(2, 1) | 3.0 |
+| asymmetric | Exponential(1) | 6.0 |
+| asymmetric | χ²(1) | 12.0 |
+
+**Located-and-scaled convention (§3, p. 1022):** each variate is centered and
+scaled to mean 0 and the target variance — worked example printed for χ²(1):
+`A_i = σ₁(X_i − 1)/√2` with `X_i ~ χ²(1)`. The same convention applies to any
+Table 2 family.
+
+This section's extraction was read directly from the p. 1021 table render at
+ingestion (M111), separate from the M76 blanket pass above — observed
+2026-08-08. <!-- check: none — a statement about how this section was authored; git history (commit 643f0f0) is the record -->
+
+## Traces to (M111)
+
+- The M111 fallback-on-abort sweep's two new non-normal arms are chosen from
+  Table 2: **Uniform(0, 1)** (κ = −1.2, platykurtic) and **χ²(1)** (κ = 12.0,
+  skewed, the battery's largest kurtosis) — χ²(1) is also the distribution the
+  §5 boundary caveat names at ρ = 0.05 (coverage "just under 0.93" at a = 100),
+  making it the stress case for exactly the near-zero region where the MC
+  default aborts. Generators in `data-raw/` (M111) follow the
+  located-and-scaled convention above.
+
 ## Traces to (M76)
 
 - `data-raw/m76-classical-oneway-prototype.R` — the `burch_reml_ci*()` prototype
