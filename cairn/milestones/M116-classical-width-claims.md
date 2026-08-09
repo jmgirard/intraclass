@@ -1,6 +1,6 @@
 # M116: Correct the falsified `"searle"`/`"burch"` width claims
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -117,6 +117,10 @@ planned. A committed doc-claim checker → barred by D-021.
 - [x] T5: Append `D-012 Amendment 1` and the D-021-line entry; correct the M76
       comparison page whole-file with its dated observation.
 - [x] T6: Ledger re-keying and the full gate; open the PR and drive CI green.
+- [x] T7: Act on the review pass-1 findings — the false per-family reversal
+      sentence, the pooled "about 4%" figure at four sites, and the `skip_if()`
+      that skips the whole `test_that`. Re-key any staled ledger row and re-run
+      the full gate.
 
 ## Work log
 
@@ -155,6 +159,10 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-09: `docs/` is gitignored and untracked, so the stale rendered pkgdown pages carrying the withdrawn claim are a local build artifact only and ship nowhere; no action taken.
 - 2026-08-09: status -> review.
 - 2026-08-09: review pass 1 returned the milestone. AC4 fails: `vignettes/interval-methods.Rmd` claims "no distribution family reverses it — not the gaussian cells, not the heavy-tailed t(5) ones, not the skewed chi-square(1) ones", but the committed tsv records five reversing cells lying in exactly those three families (gaussian 1.00075/1.00027, t5 1.00276, chisq1 1.00511/1.02110); only `uniform` has none, and it is unnamed. AC1/AC2/AC5/AC6 verified with fresh evidence and ticked; AC3/AC7 measured green but left unticked because the fix re-opens the swept prose and the gate. Also actioned: F1 "median of about 4%" traces only to the pooled 80-cell median, not to either grid's own; F19 `skip_if()` inside the vignette loop skips the whole test_that so `glossary.Rmd` goes unchecked when `interval-methods.Rmd` is absent. Status -> in-progress. Defect returns: 1.
+- 2026-08-09: T7 done (review pass-1 findings). F2 fixed: the vignette no longer claims the gaussian/t5/chisq1 families do not reverse — it states the median-level fact, names `uniform` as the family narrower in every cell, and reports the five reversing cells (all at rho=0.6, n=5, none past parity by more than 2.2%), each figure re-derived from the committed tsv. F1 fixed at all four sites: "about 4%" became the two per-grid medians ("about 6%" and "about 4%"), since the single figure traced only to a pooled 80-cell median the tsv carries no row for; two rounding-bucket pins added to the generator so a regeneration that would restate the docs reds. F19 fixed: both vignettes are resolved before `skip_if()`, which now fires only when neither is installed, so a partial install reds instead of silently skipping `glossary.Rmd`; anti-vacuity `expect_gt(length(lines), 0)` added on both.
+- 2026-08-09: fixed a rule violation none of the three reviewers caught — T3 had introduced `M76`/`M113` into `vignettes/interval-methods.Rmd`, and tracking-rules bars milestone numbers from user-facing materials (`git grep` over `origin/main` confirms the vignettes carried none before this branch). The two grids are now described by shape ("a 16-cell gaussian/`t(5)` sweep", "a larger 64-cell battery spanning four distribution families"); no `M<NN>` remains in `vignettes/`, `NEWS.md`, `README.md` or `man/`.
+- 2026-08-09: `mpl-doc-claims.tsv:74` re-keyed 2bdf1189679b -> 128cb626e4ee via the checker's own candidate enumerator (no hand-transcribed hash), and its disposition note corrected to name the two new median pins.
+- 2026-08-09: T7 gate. Installed-package suite (vignettes built, `test_dir(package=, load_package="installed")`, `NOT_CRAN=true CI=true`): 0 failed / 0 error / 6086 passed / 23 skipped, every skip a live-Stan brms test and none in the doc pins. All six claim patterns re-mutation-verified after the rewrite (baseline 0; each reintroduction reds). `cairn_validate`; all four data-raw checkers plus each `--self-test`; `air format --check`; `lintr::lint_package()` 0 lints; `devtools::document()` idempotent. Status -> review.
 
 ## Decisions
 

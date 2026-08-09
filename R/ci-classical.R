@@ -15,7 +15,7 @@
 #     a remedy for heavy tails.
 # NOT "burch is wider than searle" -- that shipped for three milestones and is
 # false on both committed grids (M116: burch narrower in 16/16 M76 cells and
-# 59/64 M113 cells, no family reversing; see
+# 59/64 M113 cells, no family reversing on its median; see
 # data-raw/m116-classical-width-comparison.tsv). Burch's own eq. 18 comparison
 # is against this very exact-F interval and is kurtosis-CONDITIONAL, with his
 # reversal measured on data where the errors are non-normal too -- which neither

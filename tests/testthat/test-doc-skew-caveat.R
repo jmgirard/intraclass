@@ -224,13 +224,29 @@ test_that("no installed surface still carries a withdrawn claim", {
     "the installed NEWS"
   )
 
-  for (v in c("interval-methods.Rmd", "glossary.Rmd")) {
-    vig <- system.file("doc", v, package = "intraclass")
-    skip_if(
-      !nzchar(vig),
-      "vignettes not installed (install with build_vignettes)"
-    )
-    expect_no_withdrawn_claim(squash(readLines(vig, warn = FALSE)), v)
+  # Resolve both vignettes BEFORE skipping: `skip_if()` aborts the whole
+  # `test_that` block, not the loop iteration, so skipping inside the loop would
+  # leave glossary.Rmd unchecked whenever interval-methods.Rmd is the one
+  # missing. Skip only when NEITHER is installed; a partial install is a real
+  # failure of this leg, not a reason to stop looking.
+  vigs <- vapply(
+    c("interval-methods.Rmd", "glossary.Rmd"),
+    function(v) system.file("doc", v, package = "intraclass"),
+    character(1)
+  )
+  skip_if(
+    !any(nzchar(vigs)),
+    "vignettes not installed (install with build_vignettes)"
+  )
+  for (v in names(vigs)) {
+    expect_true(nzchar(vigs[[v]]), info = paste(v, "is not installed"))
+    if (!nzchar(vigs[[v]])) {
+      next
+    }
+    lines <- readLines(vigs[[v]], warn = FALSE)
+    # Anti-vacuity: an empty file would satisfy every pattern silently.
+    expect_gt(length(lines), 0L)
+    expect_no_withdrawn_claim(squash(lines), v)
   }
 })
 

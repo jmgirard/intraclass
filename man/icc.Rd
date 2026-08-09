@@ -294,8 +294,9 @@ are approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted
 interval of Burch (2011), designed for robustness to non-normality; its
 width tracks the data's tail weight rather than widening by construction.
 On the two grids this package has measured, \code{"burch"} comes out the
-\strong{narrower} of the two in nearly every cell -- 16 of 16 and 59 of 64, by a
-median of about 4\% -- with no distribution family reversing that. Both grids
+\strong{narrower} of the two in 16 of 16 cells of one and 59 of 64 of the other,
+by a median of about 6\% and about 4\% respectively, with no distribution
+family reversing that on its median. Both grids
 vary only the subject effect, though; Burch (2011) reports the direction
 reversing for symmetric heavy-tailed data with the errors non-normal too,
 which neither grid tests. Treat neither as reliably the tighter interval.

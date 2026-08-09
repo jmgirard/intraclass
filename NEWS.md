@@ -61,9 +61,10 @@
   presenting `ci_method = "burch"` as the broader of the pair and
   `ci_method = "searle"` as the tightest available on near-normal data — in the
   help page, the article, the glossary, the runtime message and this file. Both
-  grids the package has measured say otherwise: `"burch"` is the narrower of the two in 16 of 16 cells of one and 59
-  of 64 of the other, by a median of about 4%, with no distribution family
-  reversing it. No source supports the withdrawn wording either — Burch (2011)
+  grids the package has measured say otherwise: `"burch"` is the narrower of the
+  two in 16 of 16 cells of one and 59 of 64 of the other, by a median of about
+  6% and about 4% respectively, with no distribution family reversing it on its
+  median. No source supports the withdrawn wording either — Burch (2011)
   compares against this same exact-F interval and reports a
   *kurtosis-conditional* ordering, shorter for light-tailed data and wider only
   for heavy-tailed data where the errors are non-normal too, which neither grid

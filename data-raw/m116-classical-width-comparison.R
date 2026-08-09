@@ -218,6 +218,20 @@ stopifnot(
   "M113 chisq1 count moved" = pick("m113", "chisq1")$burch_narrower == 14L
 )
 
+# The per-grid medians the prose sites round to ("about 6%" / "about 4%"). Pinned
+# to the rounding bucket, not the digits, so an immaterial drift does not red but
+# a move that would restate the docs does.
+stopifnot(
+  "M76 median ratio no longer rounds to 6% narrower" = round(
+    100 * (1 - pick("m76", "all")$ratio_median)
+  ) ==
+    6,
+  "M113 median ratio no longer rounds to 4% narrower" = round(
+    100 * (1 - pick("m113", "all")$ratio_median)
+  ) ==
+    4
+)
+
 # Every family's median ratio is below 1 on both grids — the claim the docs make
 # is "narrower in nearly every cell of both grids", never a kurtosis-conditional
 # direction, because no family here reverses.

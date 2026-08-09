@@ -150,11 +150,15 @@ default (see [When the default under-covers](#when-the-default-under-covers)).
 
 **Which is the tighter interval?** Neither, reliably — and the two grids this
 package has measured point the opposite way from what you might expect of a
-"robust" interval. Across the M76 sweep (16 cells) and the wider M113 grid (64
-cells), `"burch"` is the *narrower* of the two in 16 of 16 and 59 of 64 cells
-respectively, by a median of about 4%, and no distribution family reverses it —
-not the gaussian cells, not the heavy-tailed `t(5)` ones, not the skewed
-chi-square(1) ones. That is a real limit on the comparison, though, because both
+"robust" interval. Across a 16-cell gaussian/`t(5)` sweep and a larger 64-cell
+battery spanning four distribution families, `"burch"` is the *narrower* of the
+two in 16 of 16 and 59 of 64 cells respectively — a median of about 6% narrower
+on the smaller grid and about 4% on the larger. No distribution family reverses
+that on its median, and on the uniform family `"burch"` is narrower in every
+cell. Five cells of the larger grid do reverse, spread across the gaussian,
+`t(5)` and chi-square(1) families; all five sit at a true ICC of 0.6 with 5
+raters, and none exceeds parity by more than 2.2%. That is a real limit on the
+comparison, though, because both
 grids draw only the **subject effects** from the non-normal family and always
 draw the errors from a normal. Burch's own expected-length comparison — which is
 against this very exact-F interval — is kurtosis-conditional: he finds his
@@ -163,7 +167,8 @@ data, measuring with both the subject effects and the errors non-normal. So the
 honest summary is that the ordering depends on the data, this package has
 measured it only in the subject-effect-only case, and you should not pick between
 them on width.
-Prefer `"searle"`: across every distribution family in that study it landed
+
+Prefer `"searle"`: across every distribution family in that skew study it landed
 closer to nominal coverage in most cells, heavy-tailed ones included. What
 `"burch"` buys is dipping below the nominal level in fewer cells overall — a more
 limited kind of steadiness than its kurtosis adjustment suggests. Their value over
