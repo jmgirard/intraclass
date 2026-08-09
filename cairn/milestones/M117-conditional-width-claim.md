@@ -1,11 +1,11 @@
 # M117: State the `"burch"`/`"searle"` width relationship conditionally
 
-- **Status:** planned   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** —   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m117-conditional-width-claim   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 
@@ -129,6 +129,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: plan gate chose stating ρ and subject count only over also stating the conditional rater contrast, because the marginal and within-`k` rater contrasts point opposite ways and a third conditional would obscure the rule of thumb; falsified by a measured rater effect at fixed `k` large enough that omitting it misleads.
 - 2026-08-09: plan gate chose deriving the conditional from the M113 grid alone over reporting both grids per level, because M76 carries only ρ ∈ {0.05, 0.1} and its design is a strict subset of M113's; falsified by a grid whose ρ coverage M113 lacks.
 - 2026-08-09: plan gate chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and narrowing the promise, because a recalled path list is the proxy shape that beat M102 three times; falsified by the walk reddening on legitimate width vocabulary it cannot distinguish.
+- 2026-08-09: started by /milestone-implement on branch m117-conditional-width-claim.
 - 2026-08-09: plan gate read D-012 Amendment 1's reopening clause ("a grid on which Burch's median width exceeds SEARLE's") as not tripped by the ρ=0.6/`k`=50 region's 1.0015 median, the clause being scoped to whole grids and M76 carrying no reversal; no D-012 Amendment 2. Falsified by a whole committed grid whose median ratio exceeds 1.
 
 ## Decisions
