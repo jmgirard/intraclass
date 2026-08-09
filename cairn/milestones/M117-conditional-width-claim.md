@@ -5,7 +5,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP1, GP7   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** m117-conditional-width-claim   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** m117-conditional-width-claim · https://github.com/jmgirard/intraclass/pull/126   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 
@@ -130,6 +130,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: plan gate chose deriving the conditional from the M113 grid alone over reporting both grids per level, because M76 carries only ρ ∈ {0.05, 0.1} and its design is a strict subset of M113's; falsified by a grid whose ρ coverage M113 lacks.
 - 2026-08-09: plan gate chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and narrowing the promise, because a recalled path list is the proxy shape that beat M102 three times; falsified by the walk reddening on legitimate width vocabulary it cannot distinguish.
 - 2026-08-09: started by /milestone-implement on branch m117-conditional-width-claim.
+- 2026-08-09: PR #126 opened; CI matrix pending.
 - 2026-08-09: T8 — gate clean. Installed run of `test-doc-skew-caveat.R` (`load_package = "installed"`, `NOT_CRAN=true CI=true`, `build_vignettes = TRUE`): 0 failed, 0 skipped, 709 passed — AC5's zero-skip claim measured on the surface it is about, not inferred from a dev run. Full installed suite: 0 failed, 0 errors, 6563 passed, 23 skipped (all `skip_on_ci`, the brms live-Stan class) and 2 engine fitting warnings in `test-icc-lavaan-multilevel.R` / `test-icc-type-vector.R`, neither touched by this branch. `air format --check`, `lintr::lint_package()` (0 lints), `pkgdown::check_pkgdown()` and `cairn_validate` all clean.
 - 2026-08-09: T5–T7 — the six reported sites rewritten; `?icc`'s front door states direction and the parity warning with no percentages (gate choice), the interval-methods article carries per-true-ICC and per-subject-count tables, and `R/ci-classical.R` carries the figures. Both vignette tables land inside one width sentence, so the numeral pin covers every cell — mutation-verified (0.9971 → 0.9972 reds, restore greens). Ledgers: three `mpl-doc-claims.tsv` rows re-triaged (two retired, three added — the sentence-hash key restales on any edit inside the block, M105), one `generalizing-claims-triage.tsv` row added for the new references claim (M85), and a second D-009 dated observation on `classical-oneway-comparison.md` with an exit-coded directive, mutation-verified red on a moved value. All four data-raw checkers exit 0.
 - 2026-08-09: T6 pattern verification used SQUASHED text, not `git grep`: line-based counting found 1 pre-correction hit for `pooled_pct_param` where the squashed sweep found 2 — the NEWS occurrence wrapped across lines (M115). Both new patterns: 0 hits corrected, ≥1 pre-correction.
