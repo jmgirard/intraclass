@@ -135,6 +135,49 @@ available for every design the <code>"glmmTMB"</code> and
 Monte-Carlo only. Raise <code>boot_samples</code> (default
 <code>999</code>) for a smoother interval at proportionally more
 cost.</p>
+<div class="section level3">
+<h3 id="when-the-default-under-covers">When the default under-covers<a class="anchor" aria-label="anchor" href="#when-the-default-under-covers"></a>
+</h3>
+<p>The boundary is not the default’s only weak spot, and the other one
+is easier to miss because nothing about the output looks wrong. The
+Monte-Carlo draw assumes the fitted parameters are approximately
+normally distributed around the truth. That assumption is about the
+<em>estimates</em>, not the ratings — but it degrades when the
+<strong>subject effects</strong> are strongly skewed or heavy-tailed,
+and then a nominal 95% interval covers considerably less often than 95%
+of the time.</p>
+<p>A one-way simulation study measured this across four subject-effect
+distributions. Where the default produced an interval at all, coverage
+fell to 0.6725 at its worst — chi-square(1) subject effects, a true ICC
+of 0.6, 50 subjects and 5 raters. Those runs did not abort, warn, or
+widen, so the shortfall is invisible in the interval itself.</p>
+<p>Two patterns in that study are worth carrying away, and one tempting
+reading of it is wrong. At 5 raters per subject, coverage falls as the
+subject count rises, once the true ICC is moderate or high — the largest
+designs are the exposed ones, not the smallest. And near-normal or
+uniform subject effects under-covered only in cells where many runs
+aborted; wherever the default almost always returned an interval, those
+distributions were fine. The wrong reading is that fewer raters is
+safer: in every cell where both were measured, 2 raters covered worse
+than 5. What changes is that a larger share of the 2-rater runs abort
+outright, and an abort is a visible failure rather than a quiet one.</p>
+<p>The held-out battery agrees where the geometry matches: lognormal and
+Laplace subject effects covered 0.825 and 0.84 at that same 50-subject,
+5-rater geometry, while their 20-subject, 3-rater cells came out near
+nominal.</p>
+<p>The natural reaction — switch to a closed form — does not help. In
+every cell where the default under-covered without also aborting often,
+<code>"searle"</code> and <code>"burch"</code> under-covered as well,
+usually by more: <code>"burch"</code>, the one this article used to
+recommend for heavy tails, bottoms out at 0.6655. The remaining methods
+were never run on that study, so this article recommends none of them in
+its place.</p>
+<p>What to do instead is ordinary statistical hygiene rather than a
+package setting. Look at the distribution of the subject means before
+trusting a narrow interval; report the variance components alongside the
+coefficient; and treat an interval on visibly skewed data as optimistic
+about its own precision.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="the-opt-in-boundary-robust-methods">The opt-in boundary-robust methods<a class="anchor" aria-label="anchor" href="#the-opt-in-boundary-robust-methods"></a>
@@ -187,9 +230,15 @@ interval</strong></a> (<code>"searle"</code>; Searle 1971, the McGraw
 best-calibrated and narrowest when the data are approximately normal.
 The <a href="glossary.html#burch-interval"><strong>Burch
 interval</strong></a> (<code>"burch"</code>; Burch 2011) is REML-based
-and kurtosis-adjusted: its width tracks the data’s tail weight, and it
-is robust to non-normality. Prefer <code>"searle"</code> for near-normal
-data and <code>"burch"</code> when heavy tails are a concern. Their
+and kurtosis-adjusted: its width tracks the data’s tail weight, which
+buys it some robustness to mild non-normality. It is not, however, a
+remedy for heavy tails: on strongly skewed subject effects it
+under-covers about as badly as the default (see <a href="#when-the-default-under-covers">When the default
+under-covers</a>). Prefer <code>"searle"</code>: across every
+distribution family in that study it landed closer to nominal coverage
+in most cells, heavy-tailed ones included. What <code>"burch"</code>
+buys is dipping below the nominal level in fewer cells overall — a
+narrower kind of steadiness than its kurtosis adjustment suggests. Their
 value over the default is a finite, well-calibrated interval at the
 near-zero-ICC boundary where the Monte-Carlo default aborts. One
 asymmetry between the siblings: on data with <em>no</em> between-subject

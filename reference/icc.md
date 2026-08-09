@@ -355,27 +355,35 @@ icc(
   apply. `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong
   1996, Table 7): **exact under normality**, best-calibrated and
   narrowest when the data are approximately normal. `"burch"` is the
-  REML-based, kurtosis-adjusted interval of Burch (2011): wider, but
-  robust to non-normality and never under-covering. Prefer `"searle"`
-  for near-normal data and `"burch"` when heavy tails or non-normality
-  are a concern. `"mpl"` is the **modified profile-likelihood** interval
-  of Xiao & Liu (2013), **only for the balanced-complete two-way random
-  absolute-agreement ICC(A,1)** (with ICC(A,k) and any numeric-`unit`
-  projection `ICC(A,m)` its Spearman-Brown image, pole-safe for every
-  `m >= 1`); it aborts on any other design, on consistency (ICC(C,.)) or
-  fixed raters, and on unbalanced or incomplete data. It is a
-  **deterministic closed form** (no resampling; `mc_samples`,
-  `boot_samples`, and `seed` do not apply) that, like `"npbootstrap"`,
-  returns an interval at the near-zero-ICC boundary where the two-way
-  Monte-Carlo default aborts – a limit is reported at the `[0, 1]`
-  boundary only when the profile deviance shows the confidence set
-  reaching it, and a degenerate fit (raters in near-perfect agreement)
-  or a failed root search raises a classed error rather than a
-  fabricated boundary value – and covers at or above nominal across the
-  pre-registered grid where the incumbents can under-cover (assessed as
-  GO-for-opt-in against that grid). It is deliberately **conservative**
-  (it over-covers, and is wider than the Monte-Carlo interval at
-  interior cells), so it is an opt-in, not the default.
+  REML-based, kurtosis-adjusted interval of Burch (2011): wider, and
+  designed for robustness to non-normality. That robustness has limits
+  this package has measured: on strongly skewed subject effects
+  `"burch"` under-covers about as badly as the default, worst 0.6655 at
+  chi-square(1) subject effects with a true ICC of 0.6, 30 subjects and
+  5 raters. Prefer `"searle"`: across every distribution family in that
+  study it landed closer to nominal coverage in most cells, including
+  the heavy-tailed ones. `"burch"` dipped below the nominal level in
+  fewer cells overall, which is the one respect in which it was
+  steadier, but it is a remedy for neither heavy tails nor skew (see the
+  coverage caveat under Confidence intervals). `"mpl"` is the **modified
+  profile-likelihood** interval of Xiao & Liu (2013), **only for the
+  balanced-complete two-way random absolute-agreement ICC(A,1)** (with
+  ICC(A,k) and any numeric-`unit` projection `ICC(A,m)` its
+  Spearman-Brown image, pole-safe for every `m >= 1`); it aborts on any
+  other design, on consistency (ICC(C,.)) or fixed raters, and on
+  unbalanced or incomplete data. It is a **deterministic closed form**
+  (no resampling; `mc_samples`, `boot_samples`, and `seed` do not apply)
+  that, like `"npbootstrap"`, returns an interval at the near-zero-ICC
+  boundary where the two-way Monte-Carlo default aborts – a limit is
+  reported at the `[0, 1]` boundary only when the profile deviance shows
+  the confidence set reaching it, and a degenerate fit (raters in
+  near-perfect agreement) or a failed root search raises a classed error
+  rather than a fabricated boundary value – and covers at or above
+  nominal across the pre-registered grid where the incumbents can
+  under-cover (assessed as GO-for-opt-in against that grid). It is
+  deliberately **conservative** (it over-covers, and is wider than the
+  Monte-Carlo interval at interior cells), so it is an opt-in, not the
+  default.
 
   Two constraints follow from its calibration. It is available **only at
   `conf_level` 0.90, 0.95, or 0.99** – the correction constant is
@@ -677,6 +685,33 @@ covariance on the model's internal (log) scale and back-transformed, so
 the interval is boundary-aware near the common zero-rater-variance case
 where the delta method fails. Pass `seed` for a reproducible interval.
 
+**Coverage caveat — skewed or heavy-tailed subject effects.** The
+simulation draws parameters from a normal approximation to the fitted
+covariance, and that approximation degrades when the *subject* effects
+themselves are strongly skewed or heavy-tailed. A one-way simulation
+study measured the default's coverage well below its nominal level
+across such data, worst at chi-square(1) subject effects with a true ICC
+of 0.6, 50 subjects and 5 raters, where intervals that were produced at
+all covered 0.6725 of the time. At 5 raters per subject, coverage falls
+as the subject count rises once the true ICC is moderate or high. Fewer
+raters is not a refuge: in every cell where both were measured, 2 raters
+covered worse than 5 — but a larger share of those runs abort instead of
+reporting an interval, and this caveat is about what does get reported.
+Near-normal and uniform subject effects under-covered only in cells
+where many runs aborted; among cells that almost always report an
+interval, they showed no shortfall. Held-out cells at lognormal and
+Laplace subject effects under-covered at that same 50-subject, 5-rater
+geometry, covering 0.825 and 0.84, while their 20-subject, 3-rater cells
+were near nominal.
+
+This is not repaired by switching to a closed form. In every cell where
+the default under-covered without also aborting often, the balanced
+one-way opt-ins `"searle"` and `"burch"` under-covered too, and usually
+by more — see `ci_method`. The remaining methods were not run on that
+study, so nothing here recommends one; treat an interval on visibly
+skewed or heavy-tailed subject effects as optimistic, and prefer
+reporting the variance components alongside it.
+
 ## The `"npbootstrap"` interval (one-way)
 
 For `unit = "average"` (the ICC(k), reliability of the mean of the *k*
@@ -729,17 +764,19 @@ Both are deterministic closed forms from the one-way ANOVA. `"searle"`
 inverts the exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle
 1971; the McGraw & Wong 1996 Table 7 limits); it is exact under
 normality. `"burch"` builds kurtosis-adjusted `log(1 + n*theta-hat)`
-limits (Burch 2011), so its width tracks the data's tail weight – wider
-but robust to non-normality, and never under-covering. Both share the
-conventions above: the `unit = "average"` (ICC(k)) interval is the same
-exact monotone **Spearman-Brown** image of the ICC(1) endpoints (so its
-coverage is identical by construction), endpoints are left
-**untruncated** on the estimator's own support, and the reported
-**point** is the engine (REML) point. Being closed forms they take no
-`mc_samples`, `boot_samples`, or `seed`, and report no `std.error`
-(there is no sampling distribution). Their value is a finite,
-well-calibrated interval on the near-zero-ICC boundary where the
-Monte-Carlo default aborts.
+limits (Burch 2011), so its width tracks the data's tail weight – wider,
+and designed for robustness to non-normality. That robustness has a
+measured limit: on strongly skewed subject effects `"burch"`
+under-covers about as badly as the default (see the coverage caveat
+under Confidence intervals). Both share the conventions above: the
+`unit = "average"` (ICC(k)) interval is the same exact monotone
+**Spearman-Brown** image of the ICC(1) endpoints (so its coverage is
+identical by construction), endpoints are left **untruncated** on the
+estimator's own support, and the reported **point** is the engine (REML)
+point. Being closed forms they take no `mc_samples`, `boot_samples`, or
+`seed`, and report no `std.error` (there is no sampling distribution).
+Their value is a finite, well-calibrated interval on the near-zero-ICC
+boundary where the Monte-Carlo default aborts.
 
 ## References
 

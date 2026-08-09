@@ -31,8 +31,12 @@ counterpart.
 
 An opt-in closed-form confidence interval for the balanced one-way
 design (`ci_method = "burch"`): REML-based limits with a kurtosis
-adjustment (Burch 2011), so its width tracks the tail weight of the data
-— robust to non-normality where the **exact-F interval** leans on it.
+adjustment (Burch 2011), so its width tracks the tail weight of the
+data, where the **exact-F interval** leans on normality instead. That
+adjustment is not a remedy for heavy tails: on strongly skewed subject
+effects `"burch"` under-covers about as badly as the default — see
+[*When the default
+under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#when-the-default-under-covers).
 Deterministic: no resamples, no seed. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).
 
@@ -197,7 +201,12 @@ The default confidence-interval method (`ci_method = "montecarlo"`). It
 draws many parameter vectors from the fitted model’s estimated
 covariance, on a scale that respects the zero-variance boundary,
 recomputes the ICC for each draw, and takes the 2.5% and 97.5%
-quantiles. Fast and boundary-aware. See [*Confidence-interval
+quantiles. Fast and boundary-aware. It does assume the fitted parameters
+are approximately normally distributed around the truth, and it
+under-covers when the subject effects are strongly skewed or
+heavy-tailed — see [*When the default
+under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#when-the-default-under-covers).
+See also [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.md).
 
 ## One-way vs. two-way
