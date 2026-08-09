@@ -456,14 +456,42 @@ width_fixture <- function() {
 # Recomputed here from the per-cell rows, never read from the generator's own
 # summary block: the point is that the docs' figures survive an independent
 # derivation, not that two files agree.
-width_level_medians <- function(w, grid, fac) {
+#
+# `k_at_n5` is the subject-count cut HOLDING the rater count at 5. It is the cut
+# the docs quote, because the marginal one is confounded: k = 10 is the only
+# subject count carrying n = 2, so its marginal median mixes two rater counts
+# while k = 30 and k = 50 carry n = 5 alone. That is the same design fact this
+# file already uses to refuse a rater-count claim, one level down.
+width_cut <- function(w, grid, fac) {
   x <- w[w$grid == grid, , drop = FALSE]
-  levels_seen <- sort(unique(x[[fac]]))
+  if (identical(fac, "k_at_n5")) {
+    return(list(x = x[x$n == 5, , drop = FALSE], col = "k"))
+  }
+  list(x = x, col = fac)
+}
+
+width_level_medians <- function(w, grid, fac) {
+  cut <- width_cut(w, grid, fac)
+  levels_seen <- sort(unique(cut$x[[cut$col]]))
   out <- vapply(
     levels_seen,
-    function(lv) round(stats::median(x$ratio[x[[fac]] == lv]), 4),
+    function(lv) round(stats::median(cut$x$ratio[cut$x[[cut$col]] == lv]), 4),
     numeric(1)
   )
+  stats::setNames(out, format(levels_seen))
+}
+
+# The "narrower in N of M" counts the article's tables quote, per level.
+width_level_counts <- function(w, grid, fac) {
+  cut <- width_cut(w, grid, fac)
+  levels_seen <- sort(unique(cut$x[[cut$col]]))
+  out <- lapply(levels_seen, function(lv) {
+    rows <- cut$x[cut$x[[cut$col]] == lv, , drop = FALSE]
+    c(
+      narrower = sum(rows$burch_narrower %in% c(TRUE, "TRUE")),
+      cells = nrow(rows)
+    )
+  })
   stats::setNames(out, format(levels_seen))
 }
 
@@ -482,10 +510,37 @@ width_sentences <- function(text) {
   ]
 }
 
-width_surfaces <- function() {
-  out <- lapply(source_doc_surfaces(), width_sentences)
+# Two legs, and both matter. The SOURCE leg reaches internal comments that never
+# reach a built package; the INSTALLED leg is the only one that exists under
+# `R CMD check`, where `R/`, `vignettes/` and `NEWS.md` are all absent. A pin
+# that runs on the source tree alone skips in CI and pins nothing there -- the
+# M115 lesson, which the first M117 pass repeated on every new block.
+width_legs <- function() {
+  legs <- list(
+    installed = installed_doc_surfaces(),
+    source = source_doc_surfaces()
+  )
+  legs[vapply(legs, length, integer(1)) > 0L]
+}
+
+width_surfaces_leg <- function(surfaces) {
+  out <- lapply(surfaces, width_sentences)
   out[vapply(out, length, integer(1)) > 0L]
 }
+
+# The files each leg is known to carry a width statement in, measured by the AC5
+# sweep (T4). Floors, not exact counts: a new surface may join, but a leg
+# quietly falling below what it reached is a narrowing no assertion would
+# otherwise catch.
+width_expected_source <- c(
+  "R/icc.R",
+  "R/boundary-hint.R",
+  "R/ci-classical.R",
+  "vignettes/interval-methods.Rmd",
+  "vignettes/glossary.Rmd",
+  "NEWS.md"
+)
+width_expected_installed <- c("Rd:icc.Rd", "NEWS.md")
 
 # A width STATEMENT is usually more than the one sentence naming the method: the
 # condition attaches in the next sentence, which repeats neither "burch" nor a
@@ -512,8 +567,8 @@ width_neighbourhood <- function(text) {
   sents[idx[!crosses_heading]]
 }
 
-width_neighbourhoods <- function() {
-  out <- lapply(source_doc_surfaces(), width_neighbourhood)
+width_neighbourhoods_leg <- function(surfaces) {
+  out <- lapply(surfaces, width_neighbourhood)
   out[vapply(out, length, integer(1)) > 0L]
 }
 
@@ -523,6 +578,7 @@ width_neighbourhoods <- function() {
 width_numeral_allowlist <- c(
   1, # "in every cell", "no. 1" style bare units, and the parity value itself
   2, # "the two grids"
+  5, # the rater count the subject-count figures are measured at
   1971, # Searle (1971)
   1996, # McGraw & Wong (1996)
   2011, # Burch (2011)
@@ -531,6 +587,128 @@ width_numeral_allowlist <- c(
   95,
   0.95 # the nominal level, as a percentage and as a proportion
 )
+
+# --- figure-to-level ASSOCIATION ----------------------------------------------
+#
+# The first M117 pass pinned figures by MEMBERSHIP: every numeral had to appear
+# somewhere in a flat pool of measured values. That accepts any real figure in
+# any position, so `| 0.6 | 0.9971 |` -> `| 0.6 | 0.9769 |` passes -- the docs
+# would state a true figure against the wrong level and nothing reds. What
+# follows pins the PAIR instead: which level a figure is stated against, not
+# merely that the figure exists.
+#
+# Two shapes carry a pair, and every stated figure must be in one of them:
+#   - a markdown table row in the article, under a header naming its factor;
+#   - the canonical prose forms "<ratio> at a true ICC of <level>" and
+#     "<ratio> at <level> subjects".
+# A ratio-shaped numeral in neither shape is a free-standing figure and fails.
+
+# The article, installed copy preferred (it is what ships and what `R CMD check`
+# sees); source tree only as the dev-session fallback.
+article_lines <- function() {
+  vig <- system.file("doc", "interval-methods.Rmd", package = "intraclass")
+  if (!nzchar(vig)) {
+    vig <- testthat::test_path("..", "..", "vignettes", "interval-methods.Rmd")
+  }
+  if (!file.exists(vig)) {
+    return(character(0))
+  }
+  readLines(vig, warn = FALSE)
+}
+
+# Table rows, keyed to the factor their header names. The factor resets at any
+# non-table line, so a row can never inherit a header from an earlier table.
+width_table_claims <- function(lines) {
+  out <- list()
+  fac <- NA_character_
+  for (ln in lines) {
+    if (grepl("^\\|\\s*true ICC\\b", ln)) {
+      fac <- "rho"
+      next
+    }
+    if (grepl("^\\|\\s*subjects\\b", ln)) {
+      fac <- "k_at_n5"
+      next
+    }
+    if (!grepl("^\\|", ln)) {
+      fac <- NA_character_
+      next
+    }
+    if (grepl("^\\|[-:| ]+\\|$", ln)) {
+      next
+    }
+    m <- regmatches(
+      ln,
+      regexec(
+        "^\\|\\s*([0-9.]+)\\s*\\|\\s*([0-9.]+)\\s*\\|\\s*([0-9]+) of ([0-9]+)",
+        ln
+      )
+    )[[1]]
+    if (!length(m) || is.na(fac)) {
+      next
+    }
+    out[[length(out) + 1L]] <- list(
+      factor = fac,
+      level = as.numeric(m[2]),
+      ratio = as.numeric(m[3]),
+      narrower = as.integer(m[4]),
+      cells = as.integer(m[5])
+    )
+  }
+  out
+}
+
+# A ratio-shaped numeral: the band the width ratios live in. Deliberately
+# narrower than "any 4-decimal number" so a coverage figure in a neighbouring
+# clause is not mistaken for a width figure.
+width_ratio_token <- "(?<![0-9.])(0\\.[89][0-9]{3}|1\\.0[0-9]{3})(?![0-9])"
+
+width_prose_pairs <- function(text) {
+  shapes <- list(
+    list(
+      factor = "rho",
+      re = paste0("(", width_ratio_token, ")", " at a true ICC of ([0-9.]+)")
+    ),
+    list(
+      factor = "k_at_n5",
+      re = paste0("(", width_ratio_token, ")", " at ([0-9]+) subjects")
+    )
+  )
+  out <- list()
+  for (sh in shapes) {
+    m <- gregexpr(sh$re, text, perl = TRUE)
+    for (hit in regmatches(text, m)[[1]]) {
+      parts <- regmatches(hit, regexec(sh$re, hit, perl = TRUE))[[1]]
+      out[[length(out) + 1L]] <- list(
+        factor = sh$factor,
+        ratio = as.numeric(parts[2]),
+        level = as.numeric(parts[length(parts)])
+      )
+    }
+  }
+  out
+}
+
+# Markdown table rows are pinned by `width_table_claims()`; strip them before
+# looking for prose figures so a table cell is not also read as a loose numeral.
+width_strip_tables <- function(text) {
+  gsub("\\|[^|]*\\|", " ", text)
+}
+
+# Does a stated (factor, level, ratio) match the recomputed median? Per-rho
+# figures must come from M113 alone (AC4); the subject-count cut is stated for
+# both grids, so either may supply the match.
+width_pair_matches <- function(w, pair) {
+  grids <- if (identical(pair$factor, "rho")) "m113" else c("m113", "m76")
+  for (g in grids) {
+    med <- width_level_medians(w, g, pair$factor)
+    i <- which(abs(as.numeric(names(med)) - pair$level) < 1e-9)
+    if (length(i) == 1L && abs(med[[i]] - pair$ratio) < 1e-9) {
+      return(TRUE)
+    }
+  }
+  FALSE
+}
 
 test_that("the width fixture re-derives from the data-raw comparison", {
   skip_if_not(dir.exists(data_raw_dir), "data-raw/ not present (built package)")
@@ -572,20 +750,28 @@ test_that("the width figures the docs state are recomputed from the cells", {
 
   # The M113 grid is the one the docs derive from: the only grid varying rho.
   by_rho <- width_level_medians(w, "m113", "rho")
-  by_k <- width_level_medians(w, "m113", "k")
+  by_k <- width_level_medians(w, "m113", "k_at_n5")
 
   expect_identical(names(by_rho), c("0.05", "0.10", "0.30", "0.60"))
   expect_identical(names(by_k), c("10", "30", "50"))
 
-  # 1. The advantage is flat and clear of parity below rho = 0.6, then gone.
-  expect_true(all(by_rho[c("0.05", "0.10", "0.30")] < 0.96))
+  # 1. The advantage is FLAT and clear of parity below rho = 0.6, then gone.
+  #    Flat, not shrinking: the three sub-0.6 medians span under half a
+  #    percentage point and do not decrease in order. Four doc sites said
+  #    "shrinks as either grows"; on these very figures the margin GROWS from
+  #    0.05 to 0.1, and this is the assertion that reds if it comes back.
+  low <- by_rho[c("0.05", "0.10", "0.30")]
+  expect_true(all(low < 0.96))
+  expect_lt(diff(range(low)), 0.005)
+  expect_false(all(diff(low) > 0))
   expect_gt(by_rho[["0.60"]], 0.99)
   expect_lt(by_rho[["0.60"]], 1)
 
   # 2. It shrinks monotonically in the subject count, on BOTH grids -- which is
-  #    what lets the docs state that direction without naming a grid.
+  #    what lets the docs state that direction without naming a grid. The cut
+  #    holds the rater count at 5; the marginal cut is confounded (below).
   expect_true(all(diff(by_k) > 0))
-  expect_true(all(diff(width_level_medians(w, "m76", "k")) > 0))
+  expect_true(all(diff(width_level_medians(w, "m76", "k_at_n5")) > 0))
 
   # 3. Every reversing cell sits at rho = 0.6.
   expect_true(all(w$rho[!(w$burch_narrower %in% c(TRUE, "TRUE"))] == 0.6))
@@ -601,6 +787,17 @@ test_that("the rater count is confounded with the subject count, marginally", {
   expect_true(all(w$k[w$n == 2] == 10))
   expect_true(all(c(2, 5) %in% unique(w$n)))
   expect_gt(sum(w$n == 2), 0L)
+
+  # And the consequence for the SUBJECT-count figures, which is what sends the
+  # docs to the 5-rater cut: the marginal and stratified medians are the same
+  # row wherever a subject count carries n = 5 alone, and differ at k = 10.
+  # A marginal k = 10 figure would therefore be reporting the rater count.
+  for (g in c("m76", "m113")) {
+    marginal <- width_level_medians(w, g, "k")
+    fixed <- width_level_medians(w, g, "k_at_n5")
+    expect_equal(unname(marginal[c("30", "50")]), unname(fixed[c("30", "50")]))
+    expect_gt(abs(marginal[["10"]] - fixed[["10"]]), 0.01)
+  }
 })
 
 test_that("M76's design is contained in M113's on (rho, k, n)", {
@@ -615,64 +812,254 @@ test_that("M76's design is contained in M113's on (rho, k, n)", {
   expect_gt(length(combos("m113")), length(combos("m76")))
 })
 
-test_that("every width statement names the true ICC and the subject count", {
-  # Over the neighbourhood, not the bare claim sentence: the condition reads
-  # better as its own sentence, and requiring it inside the sentence naming the
-  # method would be a demand about prose style, not about what is stated.
-  surfaces <- width_neighbourhoods()
-  # Anti-vacuity: the sweep must actually find width statements, or every
-  # assertion below passes over an empty set.
-  skip_if(length(surfaces) == 0L, "source tree not present")
-  expect_gte(length(surfaces), 5L)
+test_that("the article's width tables state the median for the level named", {
+  # The association pin. Every row is checked against the median RECOMPUTED for
+  # that row's own level, so swapping two rows' figures reds even though both
+  # figures are real.
+  lines <- article_lines()
+  skip_if(
+    !length(lines),
+    "the article is neither installed nor in a source tree"
+  )
+  claims <- width_table_claims(lines)
+  fac_of <- vapply(claims, function(cl) cl$factor, character(1))
 
-  for (nm in names(surfaces)) {
-    text <- paste(surfaces[[nm]], collapse = " ")
-    expect_match(
-      text,
-      "true ICC|ICC of|rho",
-      ignore.case = TRUE,
-      info = paste(
-        nm,
-        "states a width relationship without conditioning on ICC"
-      )
-    )
-    expect_match(
-      text,
-      "subject",
-      ignore.case = TRUE,
-      info = paste(nm, "states a width relationship without naming subjects")
-    )
+  # Anti-vacuity and completeness in one: the article states every level of both
+  # factors, so a dropped row reds here rather than silently narrowing the pin.
+  expect_identical(sum(fac_of == "rho"), 4L)
+  expect_identical(sum(fac_of == "k_at_n5"), 3L)
+
+  w <- width_fixture()
+  for (cl in claims) {
+    med <- width_level_medians(w, "m113", cl$factor)
+    cnt <- width_level_counts(w, "m113", cl$factor)
+    i <- which(abs(as.numeric(names(med)) - cl$level) < 1e-9)
+    where <- paste0(cl$factor, " = ", cl$level)
+    expect_identical(length(i), 1L, info = where)
+    expect_equal(cl$ratio, unname(med[[i]]), info = where)
+    expect_identical(cl$narrower, unname(cnt[[i]][["narrower"]]), info = where)
+    expect_identical(cl$cells, unname(cnt[[i]][["cells"]]), info = where)
   }
 })
 
-test_that("no width statement mentions the rater count", {
-  # A sufficient condition, deliberately stronger than "states no rater-count
-  # width effect": a sentence that never says "rater" cannot state one. The
-  # stronger form is what is decidable -- and the marginal figure it forbids is
-  # the one the design confounds.
-  surfaces <- width_neighbourhoods()
-  skip_if(length(surfaces) == 0L, "source tree not present")
+test_that("no width figure is stated without the level it belongs to", {
+  # The complement of the table pin, over prose. A ratio-shaped numeral that is
+  # not in a canonical "<ratio> at <level>" pair is a free-standing figure --
+  # which is how a GRID-WIDE pooled median would have to be written, since it
+  # has no level to attach to (AC4).
+  w <- width_fixture()
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
 
-  for (nm in names(surfaces)) {
-    for (s in surfaces[[nm]]) {
-      expect_false(
-        grepl("rater", s, ignore.case = TRUE),
-        info = paste0(nm, ": width sentence mentions raters -- '", s, "'")
+  for (leg in names(legs)) {
+    surfaces <- width_surfaces_leg(legs[[leg]])
+    expected <- if (identical(leg, "source")) {
+      width_expected_source
+    } else {
+      width_expected_installed
+    }
+    expect_true(
+      all(expected %in% names(surfaces)),
+      info = paste(leg, "leg lost a surface the AC5 sweep reported")
+    )
+
+    for (nm in names(surfaces)) {
+      text <- width_strip_tables(paste(surfaces[[nm]], collapse = " "))
+      tokens <- unlist(regmatches(
+        text,
+        gregexpr(width_ratio_token, text, perl = TRUE)
+      ))
+      pairs <- width_prose_pairs(text)
+      expect_identical(
+        length(tokens),
+        length(pairs),
+        info = paste0(
+          leg,
+          "/",
+          nm,
+          ": ",
+          length(tokens) - length(pairs),
+          " width figure(s) stated with no level attached"
+        )
       )
+      for (p in pairs) {
+        expect_true(
+          width_pair_matches(w, p),
+          info = paste0(
+            leg,
+            "/",
+            nm,
+            ": ",
+            p$ratio,
+            " is not the recomputed median at ",
+            p$factor,
+            " = ",
+            p$level
+          )
+        )
+      }
+    }
+  }
+})
+
+test_that("every 'N of M cells' count in a width statement is a grid total", {
+  # The counts stated outside the article's tables are whole-grid ones, and the
+  # denominator identifies the grid: 16 cells is the smaller grid, 64 the
+  # larger. So these too are pairs, not pool members.
+  w <- width_fixture()
+  totals <- lapply(c("m76", "m113"), function(g) {
+    rows <- w[w$grid == g, , drop = FALSE]
+    c(
+      narrower = sum(rows$burch_narrower %in% c(TRUE, "TRUE")),
+      cells = nrow(rows)
+    )
+  })
+  legs <- width_legs()
+  seen <- 0L
+
+  for (leg in names(legs)) {
+    for (nm in names(width_surfaces_leg(legs[[leg]]))) {
+      text <- width_strip_tables(paste(
+        width_surfaces_leg(legs[[leg]])[[nm]],
+        collapse = " "
+      ))
+      hits <- regmatches(
+        text,
+        gregexpr("[0-9]+ of [0-9]+ cells", text, perl = TRUE)
+      )[[1]]
+      for (h in hits) {
+        parts <- as.integer(regmatches(h, gregexpr("[0-9]+", h))[[1]])
+        match <- Filter(
+          function(t) t[["cells"]] == parts[2] && t[["narrower"]] == parts[1],
+          totals
+        )
+        expect_identical(
+          length(match),
+          1L,
+          info = paste0(leg, "/", nm, ": '", h, "' is no grid's measured total")
+        )
+        seen <- seen + 1L
+      }
+    }
+  }
+  # Anti-vacuity: both grid totals are stated somewhere, on at least one leg.
+  expect_gte(seen, 2L)
+})
+
+test_that("every width statement names the shape in ICC and in subject count", {
+  # AC3, and stronger than the leg it replaces. `expect_match(text, "subject")`
+  # never reddened at any of the six sites when the M117 clause was reverted --
+  # the word already occurs in neighbouring prose. What has to be present is a
+  # DIRECTION for each factor, so a site saying only that the relationship is
+  # conditional no longer passes.
+  #
+  # Over the neighbourhood, not the bare claim sentence: the condition reads
+  # better as its own sentence, and requiring it inside the sentence naming the
+  # method would be a demand about prose style, not about what is stated.
+  markers <- c(
+    # Flat below 0.6, not shrinking -- the shape the fixture measures and the
+    # one four sites got wrong by saying "shrinks as either grows".
+    icc_shape = paste0(
+      "(flat|much the same|barely|hardly|holds|constant|steady)",
+      ".{0,160}?(true ICC|ICC of)",
+      "|(true ICC|ICC of).{0,160}?",
+      "(flat|much the same|barely|hardly|holds|constant|steady)"
+    ),
+    # And gone by 0.6.
+    icc_parity = paste0(
+      "0\\.6.{0,200}?",
+      "(parity|vanish|almost nothing|fraction of a percent|no advantage|gone)",
+      "|(parity|vanish|almost nothing|fraction of a percent|no advantage)",
+      ".{0,200}?0\\.6"
+    ),
+    # Shrinks in the subject count. Tied to a shrink verb, never to the bare
+    # word "subject": "most markedly with few subjects" is the false claim, not
+    # the true one, and must not satisfy this. Either order -- "shrinks as the
+    # subject count grows" and "in the subject count it does shrink" say the
+    # same thing, and neither is the false claim.
+    subjects = paste0(
+      "(shrink|erod|dwindl|falls away|fade).{0,160}?subject",
+      "|subject.{0,160}?(shrink|erod|dwindl|falls away|fade)"
+    )
+  )
+
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
+  for (leg in names(legs)) {
+    surfaces <- width_neighbourhoods_leg(legs[[leg]])
+    floor <- if (identical(leg, "source")) {
+      length(width_expected_source)
+    } else {
+      length(width_expected_installed)
+    }
+    expect_gte(length(surfaces), floor)
+
+    for (nm in names(surfaces)) {
+      text <- paste(surfaces[[nm]], collapse = " ")
+      for (mk in names(markers)) {
+        expect_match(
+          text,
+          markers[[mk]],
+          ignore.case = TRUE,
+          perl = TRUE,
+          info = paste0(leg, "/", nm, ": no '", mk, "' clause")
+        )
+      }
+    }
+  }
+})
+
+test_that("no width statement makes a rater-count claim", {
+  # M117 shipped a blanket ban on the word "rater" here. It cannot survive the
+  # correction it was written to protect: the subject-count figures are the
+  # 5-rater ones, and saying so is what keeps them honest. So the rule is now
+  # about WHICH rater sentences are allowed rather than whether any is:
+  #
+  #   1. a rater-mentioning sentence carries a licensed marker -- it names the
+  #      fixed stratum, or it says the contrast is confounded and unstated;
+  #   2. no width statement mentions the two-rater level at all, that being the
+  #      level the design confounds with the subject count and the one a
+  #      comparative claim would have to quote.
+  licensed <- "5[- ]raters?|5-rater|confound|not separable|no rater"
+  forbidden <- "\\b(2|two)[- ]raters?\\b"
+
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
+  for (leg in names(legs)) {
+    surfaces <- width_neighbourhoods_leg(legs[[leg]])
+    for (nm in names(surfaces)) {
+      for (s in surfaces[[nm]]) {
+        expect_false(
+          grepl(forbidden, s, ignore.case = TRUE, perl = TRUE),
+          info = paste0(leg, "/", nm, ": quotes the confounded rater level")
+        )
+        if (grepl("rater", s, ignore.case = TRUE)) {
+          expect_match(
+            s,
+            licensed,
+            ignore.case = TRUE,
+            perl = TRUE,
+            info = paste0(leg, "/", nm, ": unlicensed rater mention")
+          )
+        }
+      }
     }
   }
 })
 
 test_that("every numeral in a width statement is a measured value", {
+  # The membership net, kept as a backstop under the association pins above: it
+  # catches a numeral of a shape those pins do not model at all.
   w <- width_fixture()
-  surfaces <- width_surfaces()
-  skip_if(length(surfaces) == 0L, "source tree not present")
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
 
   measured <- unique(c(
     unlist(lapply(c("m76", "m113"), function(g) {
       c(
         width_level_medians(w, g, "rho"),
         width_level_medians(w, g, "k"),
+        width_level_medians(w, g, "k_at_n5"),
         unique(w$rho[w$grid == g]),
         unique(w$k[w$grid == g]),
         # cell and reversal counts the prose is allowed to quote
@@ -691,34 +1078,52 @@ test_that("every numeral in a width statement is a measured value", {
               numeric(1)
             )
           )
-        }))
+        })),
+        unlist(lapply(width_level_counts(w, g, "k_at_n5"), function(x) x))
       )
     })),
     width_numeral_allowlist
   ))
 
-  for (nm in names(surfaces)) {
-    # Identifiers are not figures: milestone ids (M76, M117), fixture filenames
-    # (m116-classical-width-comparison.tsv), distribution labels (t5, chisq1).
-    # Strip any token whose digits are glued to letters, rather than
-    # allowlisting each -- an allowlist would grow forever and would also
-    # allowlist the bare integer everywhere else it appeared. Case-insensitive
-    # by construction: the lowercase filename form slipped an `\\bM[0-9]+\\b`
-    # rule and shipped `116` as an unmeasured figure.
-    text <- gsub(
-      "[A-Za-z][A-Za-z._-]*[0-9]+[A-Za-z0-9._-]*",
-      " ",
-      surfaces[[nm]]
-    )
-    numerals <- unlist(regmatches(
-      text,
-      gregexpr("[0-9]+(\\.[0-9]+)?", text)
-    ))
-    for (tok in numerals) {
-      expect_true(
-        any(abs(measured - as.numeric(tok)) < 1e-9),
-        info = paste0(nm, ": numeral '", tok, "' is not a measured value")
+  for (leg in names(legs)) {
+    surfaces <- width_surfaces_leg(legs[[leg]])
+    floor <- if (identical(leg, "source")) {
+      length(width_expected_source)
+    } else {
+      length(width_expected_installed)
+    }
+    expect_gte(length(surfaces), floor)
+
+    for (nm in names(surfaces)) {
+      # Identifiers are not figures: milestone ids (M76, M117), fixture
+      # filenames (m116-classical-width-comparison.tsv), distribution labels
+      # (t5, chisq1). Strip any token whose digits are glued to letters, rather
+      # than allowlisting each -- an allowlist would grow forever and would also
+      # allowlist the bare integer everywhere else it appeared. Case-insensitive
+      # by construction: the lowercase filename form slipped an `\\bM[0-9]+\\b`
+      # rule and shipped `116` as an unmeasured figure.
+      text <- gsub(
+        "[A-Za-z][A-Za-z._-]*[0-9]+[A-Za-z0-9._-]*",
+        " ",
+        surfaces[[nm]]
       )
+      numerals <- unlist(regmatches(
+        text,
+        gregexpr("[0-9]+(\\.[0-9]+)?", text)
+      ))
+      for (tok in numerals) {
+        expect_true(
+          any(abs(measured - as.numeric(tok)) < 1e-9),
+          info = paste0(
+            leg,
+            "/",
+            nm,
+            ": numeral '",
+            tok,
+            "' is not a measured value"
+          )
+        )
+      }
     }
   }
 })
