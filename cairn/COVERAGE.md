@@ -15,16 +15,27 @@ per-milestone narrative of *when* each cell shipped) lives in git + `legacy/`, n
 here. **Refresh this file whenever a milestone changes the arg space** — it drifts
 silently (no CI gate reads it, same hazard as `references/INDEX.md`).
 
-**Last synced: 2026-07-17, through M61** (M44 vectorized `type`; M45 shipped
-consistency-conflated; M46/M47 shipped the averaged cluster-level `ICC(c,k)` on
-incomplete data, glmmTMB/lme4 then brms; **M54/M56/M57/M58 shipped the
-crossed-Design-1 multilevel lavaan engine** — random both levels + conflated,
+**Last synced: 2026-08-09, through M116.** Through M61: M44 vectorized `type`;
+M45 shipped consistency-conflated; M46/M47 shipped the averaged cluster-level
+`ICC(c,k)` on incomplete data, glmmTMB/lme4 then brms; **M54/M56/M57/M58 shipped
+the crossed-Design-1 multilevel lavaan engine** — random both levels + conflated,
 balanced then incomplete/unbalanced, fixed both levels balanced, plus a
-balanced-random bootstrap). M48–M61 that left the `icc()`/`d_study()` arg space
-untouched (M49 parity matrix, M50 boundary policy, M51 corner guards, M52 brms
-hardening, M55 gtheory docs, M59 test speed, M60 recovery freeze, M61 plotting)
-are provenance-only, not reflected below. Milestone/ADR ids below are provenance
-tags — follow them to `legacy/` for the full story.
+balanced-random bootstrap.
+
+**M62–M116 added no design / engine / `type` / `level` cell: the entire delta is
+the `ci_method` axis**, which grew from three values to seven — **`"npbootstrap"`**
+(M75 balanced one-way; M84/M85 unbalanced ICC(1)/ICC(k)), the two classical closed
+forms **`"searle"`/`"burch"`** (M76 assessment → M82 export; balanced one-way only),
+and **`"mpl"`** (M86–M92; balanced-complete two-way random absolute agreement only,
+at three calibrated `conf_level`s) — plus the runtime **boundary-abort remedy hint**
+(M93/M97/M98/M100–M106), which names a verified opt-in method when the default
+aborts. Milestones that left the arg space untouched are provenance-only, not
+reflected below: M49–M61 as before, M63–M74 / M79–M81 / M107–M110 (references,
+source notes, oracle registry), M77/M78 (CI wall-clock), M83 (brms test rot),
+M96/M99/M104/M105 (sweep accounting + degenerate-input guards), and M111–M116
+(frozen assessments and the doc corrections they forced — no computed value
+changed). Milestone/ADR ids below are provenance tags — follow them to `legacy/`
+for the full story.
 
 ## Reason taxonomy (why an unsupported case is unsupported)
 
@@ -51,7 +62,8 @@ tags — follow them to `legacy/` for the full story.
 | `level` | `subject`, `cluster`, `conflated` | multilevel only |
 | `design` | inferred / `crossed` / `nested_in_clusters` / `nested_in_subjects` | multilevel only |
 | `engine` | `glmmTMB`, `lme4`, `lavaan`, `brms` | `lavaan` covers single-level two-way + the crossed-D1 multilevel cell (see §④); `brms` covers a wide surface — see the brms row in Cross-cutting for the exact cells |
-| `ci_method` | `montecarlo`, `bootstrap`, `posterior` | `posterior` = brms only (forced) |
+| `ci_method` | `montecarlo`, `bootstrap`, `posterior`, `npbootstrap`, `searle`, `burch`, `mpl` | `montecarlo`/`bootstrap` = general (glmmTMB/lme4, plus lavaan where noted); `posterior` = brms only (forced); the last four are **design-fenced opt-ins** — `npbootstrap`/`searle`/`burch` one-way only, `mpl` balanced-complete two-way random agreement only — see §⑤ |
+| `conf_level` | any value in (0, 1) | except `ci_method = "mpl"`, calibrated at **0.90 / 0.95 / 0.99 only**; any other level aborts (M91) |
 | `brm_args` | list forwarded to `brms::brm()` | brms only |
 | `prior` | `NULL` (sourced half-*t*(4,0,1)) / a \pkg{brms} prior object | brms only; custom = footgun-warned, voids coverage oracle (M34, ADR-044) |
 | `posterior_summary` | `percentile` (default) / `hpdi` | `posterior` only; HPDI = comparison alternative, no coverage claim (M34, ADR-044) |
@@ -70,6 +82,7 @@ tags — follow them to `legacy/` for the full story.
 | balance | ✅ balanced, ✅ incomplete/ragged |
 | `engine` = glmmTMB, lme4 | ✅ (both, on balanced + ragged; ragged lme4 degrades to glmmTMB at the variance boundary) |
 | `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4) |
+| `ci_method = "mpl"` (modified profile likelihood, xiao2013) | ✅ **only** `raters = "random"` + `type = "agreement"` + balanced/complete: ICC(A,1), its Spearman–Brown image ICC(A,k), and numeric `unit = m` (M89, pole-safe for every `m ≥ 1`). Deterministic (no `mc_samples`/`boot_samples`/`seed`). `conf_level` ∈ {0.90, 0.95, 0.99} only (M91); off-node subject counts interpolate in the tabulated κ_m (M90/M92). Conservative (over-covers) — opt-in, not the default. A vectorized `type` call drops `consistency` with a warning; a scalar `consistency`, `raters = "fixed"`, unbalanced/incomplete, replicates, one-way and multilevel all abort (M88, D-014/D-015). |
 | `engine = "brms"` (`ci_method = "posterior"`), `raters = random` | ✅ balanced + incomplete/ragged (M23/M30). Half-*t*(4,0,1) prior, MAP point + percentile credible interval; ragged threads the M3 `k_eff` divisor per draw (variance-ratio push-forward, no θ² correction). |
 | `engine = "brms"`, `raters = fixed` | ✅ balanced + incomplete/ragged (M26/M31). θ²_r per draw, moment-corrected (2b + boundary-aware average-floor); on ragged data the 2b goes live. Balanced `fixed ≡ random` holds only *approximately* for brms (prior on σ_r vs flat rater effects), so the oracle pins containment + coverage, not pointwise equality. |
 
@@ -122,6 +135,8 @@ Raters are interchangeable — `type` does not apply; coefficients are `ICC(1)` 
 | `engine` = glmmTMB, lme4 | ✅ |
 | `engine = "brms"` | ✅ balanced + incomplete/ragged (M26/M33) — `ICC(1)`/`ICC(1,k)`, MAP + percentile credible interval; ragged threads the M3/M6 `k_eff` divisor per draw (variance-ratio push-forward, no 2b). Numeric-`m` (D-study) brms deferred. |
 | `ci_method` = montecarlo, bootstrap | ✅ (glmmTMB + lme4); ✅ **posterior** (brms, balanced **and** ragged) |
+| `ci_method = "npbootstrap"` (transformed bootstrap-*t*, ukoumunne2003) | ✅ **one-way only** — `unit = "single"` (ICC(1)) and `"average"` (ICC(k)) on **balanced** (M75) *and* **unbalanced** (M84 ICC(1) via the Ohyama 2025 `n0`; M85 ICC(k) via the pole-safe `k_eff` SB image) data. Numeric `unit = m` balanced only (unbalanced the SB pole is not guaranteed interior — a candidate). Resamples whole subjects; honours `boot_samples`/`seed`. Boundary- and non-normality-robust: returns an interval where the montecarlo default aborts. |
+| `ci_method = "searle"` / `"burch"` (classical closed forms) | ✅ **balanced one-way only** (M76 assessment → M82 export, D-012) — single, average, and numeric `m` (shared SB map + pole guard). Deterministic: `mc_samples`/`boot_samples`/`seed` do not apply and `std.error` is `NA`. `"searle"` = exact-F pivot (exact under normality); `"burch"` = REML kurtosis-adjusted. Both finite at the near-zero-ICC boundary, except `"burch"` aborts classed at MSA exactly 0 (D-022, M105). **Neither is reliably the tighter interval and `"burch"` is not a remedy for skew** — it under-covers about as badly as the default on strongly skewed subject effects (worst 0.6655, M113/M115/M116). |
 
 **Gaps**
 
@@ -172,6 +187,38 @@ Design inferred from the crossing pattern (or declared via `design`).
 
 ---
 
+## ⑤ `ci_method` — interval-method availability
+
+The three general methods follow the engine (`montecarlo` / `bootstrap` for
+glmmTMB, lme4 and lavaan-where-noted; `posterior` forced for brms), and their
+per-design cells are the ① – ④ tables above. The four **opt-in** methods are
+fenced to one design each and abort loudly anywhere else (#5/#8) — they exist for
+the near-zero-ICC boundary where the Monte-Carlo default aborts, and for
+non-normality.
+
+| `ci_method` | Design fence | `unit` | Notes |
+|---|---|---|---|
+| `montecarlo` (default) | all fitted designs | all | Simulates from the fitted parameter covariance on the engine's log scale. Aborts near the variance boundary — that abort is the trigger for the remedy hint below. |
+| `bootstrap` | every glmmTMB/lme4 design; lavaan two-way random + crossed-D1 random multilevel balanced | all | Parametric (simulate-refit percentile). At zero between-subject variance `conf.low` can sit fractionally above the point; both < 1e-8 over the committed sweep (M104). |
+| `posterior` | brms only, and brms requires it | all brms cells | See the Cross-cutting brms row. |
+| `npbootstrap` (M75/M84/M85) | one-way only, **balanced + unbalanced** | single, average; numeric `m` balanced only | Non-parametric transformed bootstrap-*t*; resamples subjects, honours `boot_samples`/`seed`. |
+| `searle` (M82) | **balanced** one-way only | single, average, numeric `m` | Exact-F pivot; exact under normality. Deterministic, `std.error = NA`. |
+| `burch` (M82) | **balanced** one-way only | single, average, numeric `m` | REML kurtosis-adjusted; aborts at MSA exactly 0 (D-022). Not a skew remedy (M113/M115). |
+| `mpl` (M86–M92) | **balanced-complete two-way random absolute agreement** only | single, average, numeric `m` (M89) | `conf_level` ∈ {0.90, 0.95, 0.99} only; conservative; κ_m tabulated at subject-count nodes and interpolated between them. |
+
+**Cross-method behaviour**
+
+| Case | Reason |
+|---|---|
+| Runtime **remedy hint** on a boundary/degenerate abort | ✅ (M93; M97 resample stability, M98 clamp detection, M100/M101 message-claim audits, M103 reducer aborts, M105 degenerate-input guards) — when a method aborts, the error names an opt-in method **verified by actually running it on the same data** (all endpoints finite, ordered, in range), cheapest-first, never the method that just failed, and names none where none serves. A trialled `"npbootstrap"` reuses the caller's `boot_samples`/`seed` (or names the fixed seed it used); the trial leaves the RNG stream untouched. |
+| **Automatic** fallback from an aborting `montecarlo` to a classical interval | ⚫ **By design (decided against)** — D-026 (M111): NO-GO on both arms; the abort event is informative and the status-quo abort stands. Users opt in explicitly, guided by the hint. |
+| Classical **replacement** of the Monte-Carlo default under skew | ⚫ **By design (decided against)** — D-027 (M113): both arms no-GO on the wider battery; the incumbent's disposition is documentation, not substitution. Reopens only on a method demonstrating every-cell floor coverage over that grid (candidate: extend the battery to `npbootstrap`/`bootstrap`/`posterior`/`mpl`). |
+| Runtime **warning** when skew/kurtosis threatens coverage | ⚫ **By design (decided against, for now)** — D-028 (M114): no candidate in the frozen statistic family met the frozen floors, so the response degraded to `document` (M115's caveat). Reopens only on a cluster-effect-direct statistic (candidate), never on re-thresholding the same family. |
+| `conf_level` other than 0.90/0.95/0.99 under `ci_method = "mpl"` | ⚫ **By design** — κ_m is calibrated at each level's own deviance quantile and is never interpolated across levels (M91); any other level aborts. |
+| Selectable coupling (MC or bootstrap interval on a brms fit) | 🔵 **Not yet** — see the brms row in Cross-cutting. |
+
+---
+
 ## `d_study()` — reliability projection across rater / occasion counts
 
 | Case | Status |
@@ -182,6 +229,7 @@ Design inferred from the crossing pattern (or declared via `design`).
 | **incomplete-data** multilevel projection | ✅ (M18 subject, crossed; nested D2/3 via M19). Cluster level projects too — the averaged `ICC(c,k)` incomplete divisor is now the M46 `k_c^eff` (formerly dropped-with-note). Projection moves only the divisor `m`, so the ragged fit projects unchanged. |
 | **subjects-per-cluster** ("three-facet") projection | ⚫ **By design (not a d_study facet)** — ten Hove Eq. 13's cluster ICC has no subject facet; subjects-per-cluster is an efficiency/sample-size dimension, folded into the parked *design/power helpers* item ([[cluster-icc-no-subject-facet]]). |
 | bootstrap-projected `d_study()` bands | ✅ (M18) — the band follows the fit's `ci_method`; a bootstrap fit reprojects its resample components across *m* (at *m* = observed count the band equals the fitted `ICC(*,k)` bootstrap interval exactly). |
+| `d_study()` band off a fit made with an **opt-in** `ci_method` (`npbootstrap`, `searle`, `burch`, `mpl`) | ⚫ **By design (band is Monte-Carlo)** — only `bootstrap` has reprojectable resample components; every other fit projects from the stored parameter covariance, so the band is Monte-Carlo and does **not** carry the opt-in method's boundary/robustness properties. Project a numeric `unit` through `icc()` instead if the opt-in method's interval is what you need at *m* (all four support numeric `m` within their fences — §⑤). |
 | rater-count projection off a **within-cell replicate** fit | ✅ (M22) — per-component `error_divisors` (rater/interaction ÷ `m`, pure error ÷ `m·n_o`); one curve per occasion setting. Single-level (fixed consistency via Spearman–Brown; fixed agreement refused) + multilevel (crossed D1 + nested D2). |
 | **occasion** (`n_o`) projection off a **balanced** replicate fit | ✅ (M39) — see the ② table. |
 | occasion projection off a **ragged** replicate fit | 🔵/🟣 — bounded by the 🟣 research occasion-averaged ragged divisor (M20/ADR-030); refused loudly. |
@@ -194,5 +242,5 @@ Design inferred from the crossing pattern (or declared via `design`).
 |---|---|
 | `engine = "brms"` + `ci_method = "posterior"` (Bayesian credible intervals) | ✅ **The Bayesian engine, broadly shipped.** Half-*t*(4,0,1) prior on every random-effect SD (ten Hove et al. 2020), MAP point + percentile credible interval, `posterior` forced/Bayesian-only, `brm_args` passthrough. **Supported cells:** two-way random (M23) & fixed (M26), one-way (M26), crossed D1 multilevel random subject+cluster (M24) & fixed subject (M27), nested D2/D3 multilevel random subject (M25) & D2 fixed subject balanced (M27), the conflated diagnostic (M29), within-cell replicates (M29/M33), **all balanced**; plus **incomplete/ragged**: two-way random (M30), crossed D1 multilevel random subject+cluster incl. averaged `ICC(c,k)` via M46 `k_c^eff` (M30/M47), nested D2/D3 random subject (M32), one-way (M33), single-level fixed (M31), crossed D1 fixed subject (M31), nested D2 fixed subject (M38). Fixed-rater cells use the moment-corrected (2b + boundary-aware average-floor) push-forward; random-rater cells are variance ratios (no θ² correction). User `prior=` override (M34) and `posterior_summary = "hpdi"` (M34) are reduction-oracle features, not coverage claims — a custom prior VOIDS coverage (loud `intraclass_custom_prior` warning). **Still deferred:** incomplete/unbalanced **fixed cluster-level** (🟣 double-blocked, all engines — §④ gap), fixed/conflated × replicates, Design-3 fixed (⚫), `rstanarm`, selectable `posterior` coupling (MC/bootstrap on a Bayesian fit). |
 | categorical / ordinal ratings (GLMM engines) | 🔵 **Not yet** — unscheduled; needs its own estimand pass (link/family choice + oracle registry) before it is schedulable (ROADMAP). |
-| non-parametric bootstrap / profile-likelihood CIs | 🔵 **Not yet** — method-comparison nice-to-have; the *parametric* bootstrap shipped in M16, the rest is unscheduled. |
+| non-parametric bootstrap / profile-likelihood / classical closed-form CIs | ✅ **Shipped as design-fenced opt-ins** (was 🔵 through M61) — the *parametric* bootstrap in M16, the **non-parametric** transformed bootstrap-*t* in M75/M84/M85, the **modified profile likelihood** in M86–M92, and the two **classical closed forms** in M76/M82. Fences, `unit` support and calibration limits: §⑤. Still unscheduled: profile-likelihood intervals for any design other than the balanced-complete two-way random one, and non-parametric resampling for two-way/multilevel designs. |
 | lme4 boundary-robust interval for singular fits / merDeriv edge cases | 🔵 **Not yet (deprioritized)** — glmmTMB covers the singular-fit case via the degrade-to-glmmTMB handoff; opportunistic parity only (ROADMAP). |
