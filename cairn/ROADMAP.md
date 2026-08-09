@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (M115 done and archived — skew under-coverage caveat shipped, falsified `"burch"` advice withdrawn from seven sites; M110 rotated out with the record-claims expectation in the same commit; width-claim candidate row added; LESSONS: M64/M75 retired to ownership, two M115 lines added.)_
+_Last hygiene check: 2026-08-09 (M116 done and archived — the `"burch"`-is-wider width ranking withdrawn from all six user-facing sites and replaced with the measured, bounded direction; M112 rotated out with the record-claims expectation in the same commit; ICC-dependence candidate row added; LESSONS: the M115 doc-pin and unfiltered-grid lines extended in place, no new line.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,18 +9,17 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M116 | Correct the falsified `"searle"`/`"burch"` width claims | done | — | normal | milestones/archive/M116-classical-width-claims.md |
 | M115 | Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice | done | — | normal | milestones/archive/M115-skew-undercoverage-caveat.md |
 | M114 | Runtime skew/kurtosis warn trigger — design & validation (assessment only) | done | — | normal | milestones/archive/M114-skew-warn-trigger-assessment.md |
 | M113 | MC-default skew response — frozen-rules disposition from the M111 data | done | — | normal | milestones/archive/M113-mc-skew-response-assessment.md |
 | M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | done | — | normal | milestones/archive/M111-fallback-on-abort-assessment.md |
-| M112 | Harden the M111 fallback-sweep harness | done | — | normal | milestones/archive/M112-m111-harness-hardening.md |
 
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M115 done (2026-08-08) → M110 rotated out (oldest terminal by merge order, ae05be6; its archive file still resolves there). Kept: M115, M114, M113, M111, M112 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M116 done (2026-08-09) → M112 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M116, M115, M114, M113, M111 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
-| M116 | Correct the falsified `"searle"`/`"burch"` width claims | review | — | normal | milestones/M116-classical-width-claims.md |
 
 ## Candidates
 
