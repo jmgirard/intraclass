@@ -425,6 +425,255 @@ test_that("every numeral in the vignette's caveat section is a measured value", 
   }
 })
 
+# --- M117: the burch/searle width relationship, stated conditionally ----------
+# The docs used to state one pooled figure per grid ("about 6% and about 4%
+# narrower"). It hid two dependences: the advantage shrinks in the true ICC and
+# in the subject count, reaching parity at rho = 0.6 where every reversing cell
+# sits. These blocks hold the replacement prose to the fixture.
+width_fixture_path <- testthat::test_path(
+  "fixtures",
+  "classical-width-by-cell.tsv"
+)
+
+width_fixture <- function() {
+  utils::read.delim(width_fixture_path, stringsAsFactors = FALSE)
+}
+
+# Recomputed here from the per-cell rows, never read from the generator's own
+# summary block: the point is that the docs' figures survive an independent
+# derivation, not that two files agree.
+width_level_medians <- function(w, grid, fac) {
+  x <- w[w$grid == grid, , drop = FALSE]
+  levels_seen <- sort(unique(x[[fac]]))
+  out <- vapply(
+    levels_seen,
+    function(lv) round(stats::median(x$ratio[x[[fac]] == lv]), 4),
+    numeric(1)
+  )
+  stats::setNames(out, format(levels_seen))
+}
+
+# A "width sentence" is one naming burch alongside width vocabulary. The set is
+# decided by the AC5 sweep plus this filter -- never by a list of sections
+# someone remembered writing, which is how the two pre-existing numeral anchors
+# (`@section Confidence intervals:` and `### When the default under-covers`)
+# came to cover none of the width sites at all.
+width_vocab <- "narrow|wider|widening|width|tighter|tightest|broader|shorter"
+
+width_sentences <- function(text) {
+  sents <- unlist(strsplit(text, "(?<=[.!?]) ", perl = TRUE))
+  sents[
+    grepl("burch", sents, ignore.case = TRUE) &
+      grepl(width_vocab, sents, ignore.case = TRUE)
+  ]
+}
+
+width_surfaces <- function() {
+  out <- lapply(source_doc_surfaces(), width_sentences)
+  out[vapply(out, length, integer(1)) > 0L]
+}
+
+# The rater prohibition is about the PASSAGE, not the claim sentence alone: the
+# figure it forbids most naturally lands in a neighbouring sentence that names
+# no method ("all five sit at a true ICC of 0.6 with 5 raters"), which the
+# filter above passes over vacuously. So that one check runs over each width
+# sentence plus its immediate neighbours. The numeral check deliberately does
+# NOT use this window -- neighbouring sentences carry coverage figures and
+# citations from other claims, whose numerals belong to those claims' pins.
+width_neighbourhood <- function(text) {
+  sents <- unlist(strsplit(text, "(?<=[.!?]) ", perl = TRUE))
+  hit <- which(
+    grepl("burch", sents, ignore.case = TRUE) &
+      grepl(width_vocab, sents, ignore.case = TRUE)
+  )
+  if (!length(hit)) {
+    return(character(0))
+  }
+  idx <- sort(unique(pmax(1L, pmin(length(sents), c(hit - 1L, hit, hit + 1L)))))
+  sents[idx]
+}
+
+width_neighbourhoods <- function() {
+  out <- lapply(source_doc_surfaces(), width_neighbourhood)
+  out[vapply(out, length, integer(1)) > 0L]
+}
+
+# Numerals in a width sentence that are not measurements: citation years, the
+# source's own table numbers, the nominal level, and small integers used as
+# counts of things other than cells.
+width_numeral_allowlist <- c(
+  1, # "in every cell", "no. 1" style bare units, and the parity value itself
+  2, # "the two grids"
+  1971, # Searle (1971)
+  1996, # McGraw & Wong (1996)
+  2011, # Burch (2011)
+  9.14, # Searle's Table 9.14
+  7, # McGraw & Wong's Table 7
+  95,
+  0.95 # the nominal level, as a percentage and as a proportion
+)
+
+test_that("the width fixture re-derives from the data-raw comparison", {
+  skip_if_not(dir.exists(data_raw_dir), "data-raw/ not present (built package)")
+
+  src <- utils::read.delim(
+    file.path(data_raw_dir, "m116-classical-width-comparison.tsv"),
+    stringsAsFactors = FALSE,
+    comment.char = "#"
+  )
+  # The data-raw file carries three stacked blocks; the per-cell one is the
+  # block whose header names `burch_width`, and read.delim takes the first
+  # header it meets, so select the rows by shape rather than by position.
+  w <- width_fixture()
+  expect_identical(nrow(w), 80L)
+  expect_identical(sort(unique(w$grid)), c("m113", "m76"))
+
+  key <- function(d) paste(d$grid, d$rho, d$k, d$n, d$dist, sep = "\r")
+  detail <- src[src$grid %in% c("m76", "m113") & !is.na(src$dist), ]
+  detail <- detail[key(detail) %in% key(w), , drop = FALSE]
+  matched <- detail[match(key(w), key(detail)), , drop = FALSE]
+  expect_false(anyNA(matched$grid))
+  expect_equal(as.numeric(matched$ratio), w$ratio)
+})
+
+test_that("the width figures the docs state are recomputed from the cells", {
+  w <- width_fixture()
+
+  # The M113 grid is the one the docs derive from: the only grid varying rho.
+  by_rho <- width_level_medians(w, "m113", "rho")
+  by_k <- width_level_medians(w, "m113", "k")
+
+  expect_identical(names(by_rho), c("0.05", "0.10", "0.30", "0.60"))
+  expect_identical(names(by_k), c("10", "30", "50"))
+
+  # 1. The advantage is flat and clear of parity below rho = 0.6, then gone.
+  expect_true(all(by_rho[c("0.05", "0.10", "0.30")] < 0.96))
+  expect_gt(by_rho[["0.60"]], 0.99)
+  expect_lt(by_rho[["0.60"]], 1)
+
+  # 2. It shrinks monotonically in the subject count, on BOTH grids -- which is
+  #    what lets the docs state that direction without naming a grid.
+  expect_true(all(diff(by_k) > 0))
+  expect_true(all(diff(width_level_medians(w, "m76", "k")) > 0))
+
+  # 3. Every reversing cell sits at rho = 0.6.
+  expect_true(all(w$rho[!(w$burch_narrower %in% c(TRUE, "TRUE"))] == 0.6))
+})
+
+test_that("the rater count is confounded with the subject count, marginally", {
+  # This is what licenses the docs stating no rater-count width effect. It is a
+  # claim about the MARGINAL contrast only: n = 2 never occurs away from
+  # k = 10, so the n = 5 margin is the only one carrying k in {30, 50}. At
+  # fixed k the contrast IS separable and points the other way, which is
+  # precisely why a marginal per-n figure would mislead.
+  w <- width_fixture()
+  expect_true(all(w$k[w$n == 2] == 10))
+  expect_true(all(c(2, 5) %in% unique(w$n)))
+  expect_gt(sum(w$n == 2), 0L)
+})
+
+test_that("M76's design is contained in M113's on (rho, k, n)", {
+  # The containment that made a pooled per-grid figure read as a between-grid
+  # difference when it was really M113's extra rho levels.
+  w <- width_fixture()
+  combos <- function(g) {
+    x <- w[w$grid == g, c("rho", "k", "n")]
+    sort(unique(paste(x$rho, x$k, x$n, sep = "|")))
+  }
+  expect_true(all(combos("m76") %in% combos("m113")))
+  expect_gt(length(combos("m113")), length(combos("m76")))
+})
+
+test_that("every width statement names the true ICC and the subject count", {
+  surfaces <- width_surfaces()
+  # Anti-vacuity: the sweep must actually find width statements, or every
+  # assertion below passes over an empty set.
+  skip_if(length(surfaces) == 0L, "source tree not present")
+  expect_gte(length(surfaces), 5L)
+
+  for (nm in names(surfaces)) {
+    text <- paste(surfaces[[nm]], collapse = " ")
+    expect_match(
+      text,
+      "true ICC|ICC of|rho",
+      ignore.case = TRUE,
+      info = paste(
+        nm,
+        "states a width relationship without conditioning on ICC"
+      )
+    )
+    expect_match(
+      text,
+      "subject",
+      ignore.case = TRUE,
+      info = paste(nm, "states a width relationship without naming subjects")
+    )
+  }
+})
+
+test_that("no width statement mentions the rater count", {
+  # A sufficient condition, deliberately stronger than "states no rater-count
+  # width effect": a sentence that never says "rater" cannot state one. The
+  # stronger form is what is decidable -- and the marginal figure it forbids is
+  # the one the design confounds.
+  surfaces <- width_neighbourhoods()
+  skip_if(length(surfaces) == 0L, "source tree not present")
+
+  for (nm in names(surfaces)) {
+    for (s in surfaces[[nm]]) {
+      expect_false(
+        grepl("rater", s, ignore.case = TRUE),
+        info = paste0(nm, ": width sentence mentions raters -- '", s, "'")
+      )
+    }
+  }
+})
+
+test_that("every numeral in a width statement is a measured value", {
+  w <- width_fixture()
+  surfaces <- width_surfaces()
+  skip_if(length(surfaces) == 0L, "source tree not present")
+
+  measured <- unique(c(
+    unlist(lapply(c("m76", "m113"), function(g) {
+      c(
+        width_level_medians(w, g, "rho"),
+        width_level_medians(w, g, "k"),
+        unique(w$rho[w$grid == g]),
+        unique(w$k[w$grid == g]),
+        # cell and reversal counts the prose is allowed to quote
+        sum(w$grid == g),
+        sum(w$grid == g & w$burch_narrower %in% c(TRUE, "TRUE")),
+        sum(w$grid == g & !(w$burch_narrower %in% c(TRUE, "TRUE"))),
+        vapply(
+          split(w[w$grid == g, ], w$dist[w$grid == g]),
+          nrow,
+          numeric(1)
+        ),
+        vapply(
+          split(w[w$grid == g, ], w$dist[w$grid == g]),
+          function(x) sum(x$burch_narrower %in% c(TRUE, "TRUE")),
+          numeric(1)
+        )
+      )
+    })),
+    width_numeral_allowlist
+  ))
+
+  for (nm in names(surfaces)) {
+    numerals <- unlist(regmatches(
+      surfaces[[nm]],
+      gregexpr("[0-9]+(\\.[0-9]+)?", surfaces[[nm]])
+    ))
+    for (tok in numerals) {
+      expect_true(
+        any(abs(measured - as.numeric(tok)) < 1e-9),
+        info = paste0(nm, ": numeral '", tok, "' is not a measured value")
+      )
+    }
+  }
+})
+
 test_that("the replacement searle/burch comparison holds on the fixture", {
   # `@param ci_method` now makes two comparative claims in place of the
   # withdrawn one. They are ledgered `out` in `data-raw/mpl-doc-claims.tsv`

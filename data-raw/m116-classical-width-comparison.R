@@ -432,3 +432,18 @@ writeLines(
 print(summary_tbl)
 print(level_tbl)
 cat("\nwrote ", out, "\n", sep = "")
+
+# --- the test-visible copy (M117) ---------------------------------------------
+# `data-raw/` is .Rbuildignore'd, so a test reading the fixture above skips
+# under `R CMD check` -- and a doc pin that skips where the docs actually ship
+# pins nothing (M115). The per-CELL rows go to tests/testthat/fixtures/ so the
+# test recomputes each level median itself rather than trusting `level_tbl`.
+test_fixture <- "tests/testthat/fixtures/classical-width-by-cell.tsv"
+utils::write.table(
+  cells,
+  test_fixture,
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
+cat("wrote ", test_fixture, "\n", sep = "")
