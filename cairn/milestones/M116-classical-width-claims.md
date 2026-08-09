@@ -52,11 +52,11 @@ planned. A committed doc-claim checker → barred by D-021.
       (gaussian 14/16, uniform 16/16, t5 15/16, chisq1 14/16) with each family's
       median width ratio. Comparisons are `{searle, burch}` only — both legs
       abort in 0 cells, where the MC leg's widths are conditioned on non-abort.
-- [ ] AC3: The claim-pattern set in `tests/testthat/test-doc-skew-caveat.R`
+- [x] AC3: The claim-pattern set in `tests/testthat/test-doc-skew-caveat.R`
       (installed-surface + source-tree legs, whitespace-collapsed) is extended
       to the width claim, and both legs pass. Each pattern is mutation-verified:
       reintroducing the exact withdrawn wording reds the test.
-- [ ] AC4: `?icc`, `vignettes/interval-methods.Rmd`, `vignettes/glossary.Rmd`,
+- [x] AC4: `?icc`, `vignettes/interval-methods.Rmd`, `vignettes/glossary.Rmd`,
       `NEWS.md` and the `R/ci-classical.R` header comment each state the width
       relationship as measured-and-bounded — the direction on this package's
       grids, that those grids vary the subject effect only, and that Burch
@@ -74,7 +74,7 @@ planned. A committed doc-claim checker → barred by D-021.
       (`:125`) and the Disposition (`:140–147`) — under a dated D-009
       observation whose `check:` directive runs on python3/shell/git alone and
       is mutation-verified.
-- [ ] AC7: Green on `cairn_validate`; `check-reference-observations.py`,
+- [x] AC7: Green on `cairn_validate`; `check-reference-observations.py`,
       `check-mpl-doc-claims.py`, `check-record-claims.py` and
       `enumerate-generalizing-claims.py --check` with each one's `--self-test`;
       `air format --check`; `lintr::lint_package()`; and the installed-package
@@ -163,6 +163,8 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-09: fixed a rule violation none of the three reviewers caught — T3 had introduced `M76`/`M113` into `vignettes/interval-methods.Rmd`, and tracking-rules bars milestone numbers from user-facing materials (`git grep` over `origin/main` confirms the vignettes carried none before this branch). The two grids are now described by shape ("a 16-cell gaussian/`t(5)` sweep", "a larger 64-cell battery spanning four distribution families"); no `M<NN>` remains in `vignettes/`, `NEWS.md`, `README.md` or `man/`.
 - 2026-08-09: `mpl-doc-claims.tsv:74` re-keyed 2bdf1189679b -> 128cb626e4ee via the checker's own candidate enumerator (no hand-transcribed hash), and its disposition note corrected to name the two new median pins.
 - 2026-08-09: T7 gate. Installed-package suite (vignettes built, `test_dir(package=, load_package="installed")`, `NOT_CRAN=true CI=true`): 0 failed / 0 error / 6086 passed / 23 skipped, every skip a live-Stan brms test and none in the doc pins. All six claim patterns re-mutation-verified after the rewrite (baseline 0; each reintroduction reds). `cairn_validate`; all four data-raw checkers plus each `--self-test`; `air format --check`; `lintr::lint_package()` 0 lints; `devtools::document()` idempotent. Status -> review.
+
+- 2026-08-09: review pass 2. Three lenses; blame-history and prior-review returned zero findings, the [O] diff lens 14, of which the scorer actioned one. B2 (82) fixed in place at 516b29b — Burch's expected-length battery is symmetric throughout, so three sites that had dropped "symmetric" are corrected and NEWS's unbacked "only" is dropped. Thirteen logged below the bar, three substantive: the burch advantage is not flat in ICC (per-rho medians 0.9485/0.9470/0.9475/0.9971, all five reversals at rho=0.6); the two grids are nested in design space (all 16 M76 designs recur in M113); and the 6%-vs-4% gap is that rho coverage rather than a difference between studies. No return: B2 falsifies no criterion and is below the user-deliverable floor. All seven criteria now ticked against recorded evidence.
 
 ## Decisions
 
@@ -286,3 +288,70 @@ for; F23 (25) a long NEWS line.
 **Disposition: returned to `in-progress`** under the review return floor — F2
 scores 90 on a defect in what the package tells its users and demonstrates AC4
 failing. Defect returns for this milestone: 1.
+
+### Pass 2 — 2026-08-09
+
+`main` still at `cbb6da0`; no merge-forward. Reviewed at `516b29b`.
+
+**AC3 — PASS.** Installed-package run at the final commit: FAIL 0 / PASS 6086 /
+SKIP 23, every skip a live-Stan brms "On CI" test and **0 in
+`test-doc-skew-caveat.R`**, so both legs executed. All six patterns
+re-mutation-verified after the T7 rewrite — baseline 0, each reintroduction reds
+(2, 4, 4, 2, 2, 2). Source-tree leg alone: FAIL 0 / PASS 221.
+
+**AC4 — PASS.** Every figure re-derived from the tsv in this session and by the
+[O] lens independently: 16 of 16 and 59 of 64; the two per-grid medians (0.9430
+→ 5.70% ≈ "about 6%", 0.9614 → 3.87% ≈ "about 4%"); all eight family medians
+below 1; uniform 16/16; five reversing cells split gaussian 2 / t5 1 / chisq1 2,
+all at ρ = 0.6 and n = 5 raters, max ratio 1.0211 ≤ the stated 2.2%. Both
+per-grid medians are now pinned in the generator to their rounding bucket. The
+subject-effect-only fence and Burch's untested-condition reversal are stated at
+all five sites. A rule violation T3 had introduced — `M76`/`M113` in a
+vignette, barred from user-facing materials — was found and fixed at T7;
+`origin/main` carried none, confirming the branch introduced it.
+
+**AC7 — PASS.** `cairn_validate` clean; all four `data-raw` checkers plus each
+`--self-test`; `air format --check`; `lintr::lint_package()` 0 lints;
+`devtools::document()` idempotent. Consistency gate: `devtools::check()`
+**Status OK — 0 errors, 0 warnings, 0 notes**. PR #125 all 9 checks green.
+
+**AC1 / AC2 / AC5 / AC6** were verified with fresh evidence at pass 1 and remain
+ticked; AC2's script was re-run at this commit and reproduces the committed tsv
+byte-identically with its new pins holding.
+
+### Findings — pass 2
+
+Three fresh-context lenses again. The [S] blame-history and [S] prior-review
+lenses each returned **zero findings**, both confirming the T7 fix resolves
+pass 1's F1/F2/F19 without regressing M115 G1 or M106 F2. The [O] diff lens
+returned 14; the [S] scorer actioned one.
+
+Actioned (≥80), 1 of 14:
+
+- **B2 (82) — three sites had dropped Burch's "symmetric" qualifier, and NEWS
+  said his reversal happens "only" for heavy-tailed data.** His expected-length
+  battery is symmetric throughout (uniform, power exponential, t(10), Laplace,
+  t(5) — `burch2011.md`), so it settles nothing about skewed data either way.
+  → **fixed now** at `516b29b`: "symmetric" restored at all three sites, "only"
+  dropped, and NEWS states the limitation explicitly.
+
+Logged below the bar (13). Three are substantive enough to name in full:
+**A3 (65)** — the measured advantage is not flat in ICC: per-ρ median ratios are
+0.9485 / 0.9470 / 0.9475 / **0.9971**, so at ρ = 0.6 burch's edge is ~0.3% and
+all five reversals live there, while `?icc`, NEWS and the glossary state only
+the pooled figure. **A1 (40)** — the two grids are nested in design space (all
+16 M76 design points recur in M113, which alone adds ρ ∈ {0.3, 0.6}), so "16 of
+16 and 59 of 64" is 64 distinct designs, 16 measured twice, not 80 independent
+cells; their widths are independent measurements, not duplicates (0 of 16
+matched rows share a width). **A2 (55)** — the 6%-vs-4% gap is that ρ coverage,
+not a difference between studies: restricting M113 to M76's footprint gives
+0.9490 against M76's 0.9430. Also: B1 (40) the reversal-location and 2.2%
+figures are unpinned; D2 (68) the anti-vacuity guard reached the installed leg
+but not the source-tree leg; E2 (60) the Coverage map still reads AC4 → T3
+though T7 discharged it; C2 (45) and C3 (40) two DECISIONS clauses read
+per-cell where they are per-median; A4 (30), B3 (35), C1 (35), D1 (45), D3 (20),
+E1 (12).
+
+**Disposition: no return.** B2 scored 82 — below the ≥90 user-deliverable floor
+and it falsifies no acceptance criterion — so it took the fix-now triage without
+a status change. Defect returns for this milestone remain: 1.
