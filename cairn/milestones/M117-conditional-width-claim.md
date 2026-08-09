@@ -102,7 +102,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       Sequence with T7: the D-009 directive at
       `cairn/references/classical-oneway-comparison.md:126` reads the summary
       block's first row positionally.
-- [ ] T2 Widen the two surface legs of `tests/testthat/test-doc-skew-caveat.R`
+- [x] T2 Widen the two surface legs of `tests/testthat/test-doc-skew-caveat.R`
       (`:217-250`, `:253-274`) to directory walks with per-leg anti-vacuity
       assertions; confirm 0 skips in the file on an installed run.
 - [ ] T3 Tests first, red: the recompute-and-match assertions for the figures
@@ -130,6 +130,8 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: plan gate chose deriving the conditional from the M113 grid alone over reporting both grids per level, because M76 carries only ρ ∈ {0.05, 0.1} and its design is a strict subset of M113's; falsified by a grid whose ρ coverage M113 lacks.
 - 2026-08-09: plan gate chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and narrowing the promise, because a recalled path list is the proxy shape that beat M102 three times; falsified by the walk reddening on legitimate width vocabulary it cannot distinguish.
 - 2026-08-09: started by /milestone-implement on branch m117-conditional-width-claim.
+- 2026-08-09: T2 — both surface legs now walk their own domain (whole Rd database, every installed vignette, installed NEWS; every `R/*.R`, every `vignettes/*.Rmd`, `NEWS.md`), each asserting it still reaches all six retired hand-list paths and strictly more. The vignette-presence assertion moved to its own `test_that` — left above the sweep, its `skip_if` took the Rd and NEWS checks down with it in a dev session (M116). 375 → 423 passing assertions.
+- 2026-08-09: minor amendment — T4 (enumerate the sites) runs before T3 (pin the figures); the sweep is what scopes which figures exist to pin. No scope or criterion change.
 - 2026-08-09: T1 — generator emits a per-(grid, factor, level) block for rho and subject count, both groupings routed through one `width_summary()` core; 15 new pins, each mutation-verified via a harness that masks `stopifnot` so one mutation reports every pin it trips (10 mutations + an unmutated control that fires none). The rho=0.6 sign-crossing mutation the rounding-bucket idiom cannot see reds the exact pin and the direction pin. The D-009 directive reading the fixture positionally still exits 0.
 - 2026-08-09: plan gate read D-012 Amendment 1's reopening clause ("a grid on which Burch's median width exceeds SEARLE's") as not tripped by the ρ=0.6/`k`=50 region's 1.0015 median, the clause being scoped to whole grids and M76 carrying no reversal; no D-012 Amendment 2. Falsified by a whole committed grid whose median ratio exceeds 1.
 

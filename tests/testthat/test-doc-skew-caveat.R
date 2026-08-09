@@ -214,62 +214,125 @@ expect_no_withdrawn_claim <- function(text, where) {
   }
 }
 
-test_that("no installed surface still carries a withdrawn claim", {
-  expect_no_withdrawn_claim(squash(rd_flat(icc_rd())), "the installed help")
+# The site set is decided by a WALK, never by a remembered list (M117). Six
+# hand-listed paths stood here through M115 and M116; a hand list is the shape
+# that ships a stale site the moment a surface is added, because nothing
+# reminds anyone to extend it. Both legs below enumerate their own domain, and
+# each asserts that the walk still reaches every path the old list named -- so
+# widening the sweep cannot silently narrow it.
+legacy_source_paths <- c(
+  "R/icc.R",
+  "R/boundary-hint.R",
+  "R/ci-classical.R",
+  "vignettes/interval-methods.Rmd",
+  "vignettes/glossary.Rmd",
+  "NEWS.md"
+)
+
+# Every documentation surface the INSTALLED package carries: the whole Rd
+# database (not just icc.Rd), every installed vignette, the installed NEWS.
+installed_doc_surfaces <- function() {
+  out <- list()
+  db <- tryCatch(tools::Rd_db("intraclass"), error = function(e) NULL)
+  if (is.null(db)) {
+    # `load_all` has no Rd database; parse the source Rd instead, which is the
+    # same content pre-install. Under `R CMD check` the branch above is taken.
+    man <- list.files(
+      testthat::test_path("..", "..", "man"),
+      pattern = "\\.Rd$",
+      full.names = TRUE
+    )
+    db <- stats::setNames(lapply(man, tools::parse_Rd), basename(man))
+  }
+  for (nm in names(db)) {
+    out[[paste0("Rd:", nm)]] <- squash(rd_flat(db[[nm]]))
+  }
+
+  doc_dir <- system.file("doc", package = "intraclass")
+  if (nzchar(doc_dir)) {
+    vigs <- list.files(doc_dir, pattern = "\\.(Rmd|md)$", full.names = TRUE)
+    for (v in vigs) {
+      out[[paste0("vignette:", basename(v))]] <- squash(
+        readLines(v, warn = FALSE)
+      )
+    }
+  }
 
   news <- system.file("NEWS.md", package = "intraclass")
-  expect_true(nzchar(news))
-  expect_no_withdrawn_claim(
-    squash(readLines(news, warn = FALSE)),
-    "the installed NEWS"
-  )
+  if (nzchar(news)) {
+    out[["NEWS.md"]] <- squash(readLines(news, warn = FALSE))
+  }
+  out
+}
 
-  # Resolve both vignettes BEFORE skipping: `skip_if()` aborts the whole
-  # `test_that` block, not the loop iteration, so skipping inside the loop would
-  # leave glossary.Rmd unchecked whenever interval-methods.Rmd is the one
-  # missing. Skip only when NEITHER is installed; a partial install is a real
-  # failure of this leg, not a reason to stop looking.
-  vigs <- vapply(
-    c("interval-methods.Rmd", "glossary.Rmd"),
-    function(v) system.file("doc", v, package = "intraclass"),
-    character(1)
+# Every documentation-bearing file in the SOURCE tree: all of R/ (roxygen and
+# internal comments alike), all of vignettes/, and NEWS.md.
+source_doc_surfaces <- function() {
+  root <- testthat::test_path("..", "..")
+  paths <- c(
+    list.files(file.path(root, "R"), pattern = "\\.R$", full.names = TRUE),
+    list.files(
+      file.path(root, "vignettes"),
+      pattern = "\\.Rmd$",
+      full.names = TRUE
+    ),
+    file.path(root, "NEWS.md")
   )
+  paths <- paths[file.exists(paths)]
+  out <- lapply(paths, function(p) {
+    squash(gsub("^#'?", "", readLines(p, warn = FALSE)))
+  })
+  stats::setNames(out, sub(paste0("^", root, "/"), "", paths))
+}
+
+test_that("no installed surface still carries a withdrawn claim", {
+  surfaces <- installed_doc_surfaces()
+
+  # Anti-vacuity, three ways: the walk found surfaces at all, it found the
+  # help page the claims actually lived in, and no surface is an empty string
+  # (every `expect_false(grepl(...))` passes on one).
+  expect_gt(length(surfaces), 0L)
+  expect_true("Rd:icc.Rd" %in% names(surfaces))
+  expect_true(all(nzchar(unlist(surfaces))))
+
+  # Sweep everything the walk found FIRST. A `skip_if` aborts the whole
+  # `test_that`, not one assertion (M116), so a vignette-presence skip placed
+  # above this loop would take the Rd and NEWS checks down with it -- which is
+  # exactly what the dev-session run does when vignettes are not installed.
+  for (nm in names(surfaces)) {
+    expect_no_withdrawn_claim(surfaces[[nm]], nm)
+  }
+})
+
+test_that("the installed surfaces include both vignettes", {
+  # Separated from the sweep above so its skip cannot suppress that sweep. A
+  # PARTIAL install is a real failure here, not a reason to stop looking; only
+  # a build with no vignettes at all skips.
+  vig_names <- grep("^vignette:", names(installed_doc_surfaces()), value = TRUE)
   skip_if(
-    !any(nzchar(vigs)),
+    length(vig_names) == 0L,
     "vignettes not installed (install with build_vignettes)"
   )
-  for (v in names(vigs)) {
-    expect_true(nzchar(vigs[[v]]), info = paste(v, "is not installed"))
-    if (!nzchar(vigs[[v]])) {
-      next
-    }
-    lines <- readLines(vigs[[v]], warn = FALSE)
-    # Anti-vacuity: an empty file would satisfy every pattern silently.
-    expect_gt(length(lines), 0L)
-    expect_no_withdrawn_claim(squash(lines), v)
+  for (v in c("interval-methods.Rmd", "glossary.Rmd")) {
+    expect_true(paste0("vignette:", v) %in% vig_names, info = v)
   }
 })
 
 test_that("no source file still claims it either, however the line wraps", {
   # Source-tree leg: catches the claim in files that never reach the installed
   # package (an internal comment) and in roxygen before it is rendered.
-  root <- testthat::test_path("..", "..")
-  paths <- file.path(
-    root,
-    c(
-      "R/icc.R",
-      "R/boundary-hint.R",
-      "R/ci-classical.R",
-      "vignettes/interval-methods.Rmd",
-      "vignettes/glossary.Rmd",
-      "NEWS.md"
-    )
-  )
-  skip_if_not(all(file.exists(paths)), "source tree not present")
+  surfaces <- source_doc_surfaces()
+  skip_if(length(surfaces) == 0L, "source tree not present")
 
-  for (path in paths) {
-    text <- squash(gsub("^#'?", "", readLines(path, warn = FALSE)))
-    expect_no_withdrawn_claim(text, basename(path))
+  # The walk must still reach everything the retired hand list named, and must
+  # reach strictly more than it did -- otherwise "widened" would be a claim no
+  # one checks.
+  expect_true(all(legacy_source_paths %in% names(surfaces)))
+  expect_gt(length(surfaces), length(legacy_source_paths))
+  expect_true(all(nzchar(unlist(surfaces))))
+
+  for (nm in names(surfaces)) {
+    expect_no_withdrawn_claim(surfaces[[nm]], nm)
   }
 })
 
