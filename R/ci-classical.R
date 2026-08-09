@@ -10,7 +10,9 @@
 #   - SEARLE exact-F (Searle 1971 eq. 4/6; mcgraw1996 Table 7): EXACT under
 #     normality, best-calibrated + narrowest on ~normal data.
 #   - Burch (2011) REML (eq. 6/13/15/16/17): kurtosis-adjusted `log(1+nθ̂)`
-#     limits; wider but never under-covers, robust to non-normality.
+#     limits; wider, and designed for robustness to non-normality -- but
+#     measured (M113) to under-cover on strongly skewed subject effects, worst
+#     0.6655, so it is not a remedy for heavy tails.
 #
 # Both mirror the sibling `"npbootstrap"` (M75, D-010) exactly on the API
 # conventions: balanced one-way only (guarded upstream in `icc()`), the reported
