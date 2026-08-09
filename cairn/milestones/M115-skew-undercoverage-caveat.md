@@ -128,7 +128,7 @@ updated only as their existing checkers mechanically require.
       `vignettes/glossary.Rmd:181-187`.
 - [x] T7: NEWS bullet in the development-version section; amend the
       unreleased `:143-152` bullet; run `devtools::document()`.
-- [ ] T8: Run all four data-raw checkers, then the full gate; fix fallout.
+- [x] T8: Run all four data-raw checkers, then the full gate; fix fallout.
 
 ## Work log
 <!-- owner: any skill · append-only; one line per entry; absolute dates. -->
@@ -147,6 +147,8 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: T5 done — runtime hint blurb and the `R/ci-classical.R` header comment now state the measured limit; the full existing `test-boundary-abort-hint.R` suite passes unchanged against the new blurb.
 - 2026-08-08: T6 done — vignette gains a `### When the default under-covers` subsection under the Monte-Carlo section, the closed-forms preference sentence is replaced, and the glossary Monte-Carlo entry cross-links the new subsection.
 - 2026-08-08: T7 done — two NEWS bullets under Minor improvements (the caveat, and an explicit Correction withdrawing the burch claim across help/article/runtime message); the unreleased searle/burch feature bullet amended in place; `document()` leaves no `man/` diff; the caveat test file is fully green.
+- 2026-08-08: T8 — all four data-raw checkers exit 0; `air format --check` clean; `lintr::lint_package()` 0 lints; full suite at NOT_CRAN=true CI=true 0 failures / 0 errors / 25 skips.
+- 2026-08-08: added a vignette-side numeral assertion (same bar as the help-page block, source-tree fallback for dev sessions) beyond what AC1 requires; the caveat file is green.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->

@@ -209,6 +209,49 @@ test_that("the installed help and vignette name burch's measured worst cell", {
   expect_true(any(grepl(worst, readLines(vig, warn = FALSE), fixed = TRUE)))
 })
 
+test_that("every numeral in the vignette's caveat section is a measured value", {
+  # Same bar as the help page's block, applied to the article's own section.
+  # Source-tree fallback keeps this meaningful in a dev session, where the
+  # vignette is not installed; under `R CMD check` the shipped copy is read.
+  vig <- system.file("doc", "interval-methods.Rmd", package = "intraclass")
+  if (!nzchar(vig)) {
+    vig <- testthat::test_path("..", "..", "vignettes", "interval-methods.Rmd")
+    skip_if_not(file.exists(vig), "vignette not installed and no source tree")
+  }
+  lines <- readLines(vig, warn = FALSE)
+
+  start <- grep("^### When the default under-covers", lines)
+  expect_identical(length(start), 1L)
+  rest <- lines[seq(start + 1L, length(lines))]
+  ends <- grep("^#{2,3} ", rest)
+  section <- paste(
+    if (length(ends)) rest[seq_len(ends[1] - 1L)] else rest,
+    collapse = " "
+  )
+
+  f <- skew_fixture()
+  measured <- unique(c(
+    f$rho,
+    f$k,
+    f$n,
+    f$n_rep,
+    f$abort_rate,
+    f$coverage_uncond,
+    f$coverage_nonabort,
+    caveat_numeral_allowlist,
+    95 # the nominal level, written as a percentage in prose
+  ))
+
+  numerals <- regmatches(section, gregexpr("[0-9]+(\\.[0-9]+)?", section))[[1]]
+  expect_gt(length(numerals), 0L)
+  for (tok in numerals) {
+    expect_true(
+      any(abs(measured - as.numeric(tok)) < 1e-9),
+      info = paste0("numeral '", tok, "' in the vignette is not measured")
+    )
+  }
+})
+
 test_that("the runtime hint no longer promises burch never under-covers", {
   # The blurb the user meets when the default aborts. `usable` is stubbed so
   # the bullet renders without running a method on data -- the text is what is
