@@ -216,7 +216,14 @@ claim_patterns <- c(
   # were checked to have zero hits across the corrected surfaces and one hit
   # each on the pre-correction tree (641f036).
   pooled_pct_param = "about 6% and about 4%",
-  pooled_pct_vignette = "about 6% narrower"
+  pooled_pct_vignette = "about 6% narrower",
+  # And M117's own first pass withdrew a third claim, at its review: that the
+  # margin shrinks in the true ICC. It does not -- the M113 medians are 0.9485,
+  # 0.9470 and 0.9475 at 0.05, 0.1 and 0.3, so the margin PEAKS at 0.1 and the
+  # shape is flat-then-collapse. Both phrasings had zero hits on the corrected
+  # surfaces and at least one on the pre-correction tree (c63a5fd).
+  shrinks_in_rho = "shrinks as either grows",
+  widest_few_subjects = "at a low true ICC with few subjects"
 )
 
 expect_no_withdrawn_claim <- function(text, where) {
@@ -540,7 +547,15 @@ width_expected_source <- c(
   "vignettes/glossary.Rmd",
   "NEWS.md"
 )
-width_expected_installed <- c("Rd:icc.Rd", "NEWS.md")
+# The installed leg's set depends on whether the build carried vignettes, so it
+# is derived from the surfaces actually present rather than fixed. Deriving it
+# is what keeps the floor AT the measured count: a fixed pair would have let two
+# of the four installed width surfaces vanish unnoticed.
+width_expected_installed <- function(surfaces) {
+  out <- c("Rd:icc.Rd", "NEWS.md")
+  vigs <- c("vignette:interval-methods.Rmd", "vignette:glossary.Rmd")
+  c(out, vigs[vigs %in% names(surfaces)])
+}
 
 # A width STATEMENT is usually more than the one sentence naming the method: the
 # condition attaches in the next sentence, which repeats neither "burch" nor a
@@ -921,7 +936,7 @@ test_that("no width figure is stated without the level it belongs to", {
     expected <- if (identical(leg, "source")) {
       width_expected_source
     } else {
-      width_expected_installed
+      width_expected_installed(legs[[leg]])
     }
     expect_true(
       all(expected %in% names(surfaces)),
@@ -1055,7 +1070,7 @@ test_that("every width statement names the shape in ICC and in subject count", {
     expected <- if (identical(leg, "source")) {
       width_expected_source
     } else {
-      width_expected_installed
+      width_expected_installed(legs[[leg]])
     }
     # Anti-vacuity, per surface rather than as a total: every surface the AC5
     # sweep reported must still contribute a margin claim, so a statement
@@ -1160,12 +1175,12 @@ test_that("every numeral in a width statement is a measured value", {
 
   for (leg in names(legs)) {
     surfaces <- width_surfaces_leg(legs[[leg]])
-    floor <- if (identical(leg, "source")) {
-      length(width_expected_source)
+    expected <- if (identical(leg, "source")) {
+      width_expected_source
     } else {
-      length(width_expected_installed)
+      width_expected_installed(legs[[leg]])
     }
-    expect_gte(length(surfaces), floor)
+    expect_true(all(expected %in% names(surfaces)))
 
     for (nm in names(surfaces)) {
       # Identifiers are not figures: milestone ids (M76, M117), fixture
