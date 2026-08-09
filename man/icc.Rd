@@ -572,6 +572,26 @@ Intervals are Monte-Carlo: parameters are drawn from the fitted covariance on
 the model's internal (log) scale and back-transformed, so the interval is
 boundary-aware near the common zero-rater-variance case where the delta method
 fails. Pass \code{seed} for a reproducible interval.
+
+\strong{Coverage caveat --- skewed or heavy-tailed subject effects.} The
+simulation draws parameters from a normal approximation to the fitted
+covariance, and that approximation degrades when the \emph{subject} effects
+themselves are strongly skewed or heavy-tailed. A one-way simulation study
+measured the default's coverage well below its nominal level across such
+data, worst at chi-square(1) subject effects with a true ICC of 0.6, 50
+subjects and 5 raters, where intervals that were produced at all covered
+0.6725 of the time. The shortfall grows with the number of raters per
+subject and with the true ICC; near-normal and uniform subject effects
+showed no such shortfall. Held-out cells at lognormal and Laplace subject
+effects behaved the same way, covering 0.825 and 0.84 at that geometry.
+
+This is not repaired by switching to a closed form. In every cell where the
+default under-covered without also aborting often, the balanced one-way
+opt-ins \code{"searle"} and \code{"burch"} under-covered too, and usually by more ---
+see \code{ci_method}. The remaining methods were not run on that study, so
+nothing here recommends one; treat an interval on visibly skewed or
+heavy-tailed subject effects as optimistic, and prefer reporting the
+variance components alongside it.
 }
 
 \section{The \code{"npbootstrap"} interval (one-way)}{
