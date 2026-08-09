@@ -102,7 +102,7 @@ planned. A committed doc-claim checker → barred by D-021.
       with a high-DPI crop where the text layer is doubtful (LESSONS M66) —
       Searle's equations are `.gif` images, so quote its prose only and read
       Table 9.14 from the image.
-- [ ] T2: Write `data-raw/m116-classical-width-comparison.R` and its committed
+- [x] T2: Write `data-raw/m116-classical-width-comparison.R` and its committed
       output. The DGP fact belongs to the sweep scripts, not the fixtures —
       assert it against `data-raw/m76-coverage-sweep.R:33-38` and
       `data-raw/m111-fallback-sweep.R:57-67` (M113's tsv re-derives
@@ -136,6 +136,9 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-08: amendment gate — AC1's citation clause amended to the split above (maintainer chose "amend as proposed" over dropping the ohyama half or the whole citation fix).
 - 2026-08-08: the whole-book length-vocabulary search over Searle's eleven chapter files returned a hit in Ch. 2 as well as Ch. 3; the Ch. 2 one is "the much shorter proof of Banerjee (1964)" — about a proof, not an interval. The note was corrected before commit to say "two chapters", not the "Chapter 3 only" first drafted (LESSONS 2026-07-19/M72: do not ship an unverified universal in the prose that records a lesson).
 - 2026-08-08: M74 gate caught six new generalizing-claim candidates and one orphan row, as LESSONS 2026-07-21/M76 predicts for any references/ edit. Rows added programmatically via the enumerator's own key function (no hand-transcribed hashes): burch2011:1e38e8e767 OUT-quote; mcgraw1996:cafe812bae OUT-provenance (replacing the staled cedef8f67b); mcgraw1996:236dda51d7, searle1971:5d42925a3a, searle1971:41b8940b0c, searle1971:16af2c708c OUT-repo-analysis. Enumerator, observations checker and both self-tests green; devtools::test() FAIL 0 PASS 6027 SKIP 25.
+
+- 2026-08-08: T2 done. `data-raw/m116-classical-width-comparison.R` + committed `.tsv`: burch median width below searle's in 16/16 M76 cells (8/8 gaussian, 8/8 t5) and 59/64 M113 cells (gaussian 14/16, uniform 16/16, t5 15/16, chisq1 14/16); every family's median ratio is below 1 on both grids (0.9424-0.9648), so NO family reverses and the docs must not state a kurtosis-conditional direction. Nine count pins plus an all-families-below-1 pin are asserted in-script. Comparator fenced to {searle, burch} — both abort in 0 cells; the MC leg is excluded because its widths are conditioned on non-aborted reps (764/2000 at one cell).
+- 2026-08-08: T2's DGP fence took three attempts and the first two shipped green while being wrong — worth a LESSONS line. (1) A lexical search for the t-generator matches `sqrt(`, which contains `rt(`, so the guard reported a dependence that does not exist. (2) A positional rule ("no non-gaussian generator at or below the error-draw line") passed the mutation test: hoisting the offending draw into a variable one line above defeats it. Only the third, which walks the PARSED function body and requires every RNG call to belong either to the subject-effect RHS or to the error RHS (rnorm only), reds. Mutation-verified three ways — hoisted draw, inlined draw, and a de-branched subject effect — each redding a distinct assertion.
 
 ## Decisions
 
