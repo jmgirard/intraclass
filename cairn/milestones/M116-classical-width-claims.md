@@ -1,11 +1,11 @@
 # M116: Correct the falsified `"searle"`/`"burch"` width claims
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m116-classical-width-claims`
+- **Branch/PR:** `m116-classical-width-claims` / PR #125
 
 ## Goal
 
@@ -30,7 +30,7 @@ planned. A committed doc-claim checker → barred by D-021.
 
 ## Acceptance criteria
 
-- [ ] AC1: `cairn/references/burch2011.md` records, with quotations verified
+- [x] AC1: `cairn/references/burch2011.md` records, with quotations verified
       verbatim against the PDF and its `Extraction:` line re-stamped: Burch's
       platykurtic-shorter result (88% of normal-based length at a=100, b=5,
       ρ=0.25, uniform(0,1)); his leptokurtic-wider statement; that both `A_i`
@@ -45,7 +45,7 @@ planned. A committed doc-claim checker → barred by D-021.
       faithful to that source, disambiguated to say the numbers are ohyama's and
       that his eq. 6 is the Thomas & Hultquist (1978) unbalanced variant rather
       than Searle's.
-- [ ] AC2: A committed R script recomputes from `data-raw/m76-sweep-results.rds`
+- [x] AC2: A committed R script recomputes from `data-raw/m76-sweep-results.rds`
       and `data-raw/m113-skew-response-coverage.tsv`, writing a committed text
       output: burch's median width below searle's in 16/16 M76 cells (8/8
       gaussian) and 59/64 M113 cells, broken out per `dist` family
@@ -62,10 +62,10 @@ planned. A committed doc-claim checker → barred by D-021.
       grids, that those grids vary the subject effect only, and that Burch
       reports a leptokurtic reversal under a condition they do not test. Every
       figure traces to AC2's output or an AC1 quotation.
-- [ ] AC5: The `R/boundary-hint.R` runtime hint no longer describes `"burch"` as
+- [x] AC5: The `R/boundary-hint.R` runtime hint no longer describes `"burch"` as
       wider; its replacement is pinned inside the existing hint test at
       `test-doc-skew-caveat.R:353`, whose `"heavy"` assertion still passes.
-- [ ] AC6: `cairn/DECISIONS.md` carries `D-012 Amendment 1` correcting D-012's
+- [x] AC6: `cairn/DECISIONS.md` carries `D-012 Amendment 1` correcting D-012's
       two width clauses (`DECISIONS.md:394`, `:399`) and a new D-entry recording
       that D-021's door governs records-verification apparatus, not corrections
       to shipped user-facing documentation and runtime messages.
@@ -154,7 +154,127 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-09: CI scope note for review — `check-standard.yaml`'s `pull_request` matrix is ubuntu-release + windows-release only; macOS, R-devel and oldrel-1 run on push to main, so those three legs are exercised only after merge. Deliberate (M77/M78), not a gap, but it means the PR's green is narrower than the full matrix.
 - 2026-08-09: `docs/` is gitignored and untracked, so the stale rendered pkgdown pages carrying the withdrawn claim are a local build artifact only and ship nowhere; no action taken.
 - 2026-08-09: status -> review.
+- 2026-08-09: review pass 1 returned the milestone. AC4 fails: `vignettes/interval-methods.Rmd` claims "no distribution family reverses it — not the gaussian cells, not the heavy-tailed t(5) ones, not the skewed chi-square(1) ones", but the committed tsv records five reversing cells lying in exactly those three families (gaussian 1.00075/1.00027, t5 1.00276, chisq1 1.00511/1.02110); only `uniform` has none, and it is unnamed. AC1/AC2/AC5/AC6 verified with fresh evidence and ticked; AC3/AC7 measured green but left unticked because the fix re-opens the swept prose and the gate. Also actioned: F1 "median of about 4%" traces only to the pooled 80-cell median, not to either grid's own; F19 `skip_if()` inside the vignette loop skips the whole test_that so `glossary.Rmd` goes unchecked when `interval-methods.Rmd` is absent. Status -> in-progress. Defect returns: 1.
 
 ## Decisions
 
 ## Review
+
+### Pass 1 — 2026-08-09 (returned: AC4 fails)
+
+Branch synced: `main` had not moved since the cut (`cbb6da0`), so no merge-forward.
+PR https://github.com/jmgirard/intraclass/pull/125, all 9 checks green at
+`34597ad` (the reviewed HEAD).
+
+**AC1 — PASS.** Every quotation re-verified against the shelf sources in this
+session, not from the notes. `burch2011.pdf` via `pdftotext` + de-hyphenation:
+all six probes hit verbatim (the 88% sentence, "thus wider intervals are
+warranted", the leptokurtic-wider sentence, the §5 platykurtic-shorter sentence,
+the eq. 18 length-ratio heading, and the Fig. 2 setup naming both `A_i` and
+`e_ij`). `mcgraw1996.pdf`: the recorded vocabulary sweep reproduces — 0 hits for
+`narrow*`/`shortest`/`shorter`/`width`/`precise*`/`tight*`, 1 `length`, 4
+`wide*` (all "widely"/"widespread"). `searle1971.epub`: the length-vocabulary
+search over all 11 chapter files returns hits in exactly two — Ch. 2 (the
+Banerjee proof) and Ch. 3 (the regression-coefficient t-interval) — and **zero
+in Ch. 9**, and every Ch. 9 / Ch. 3 quotation hits verbatim. Table 9.14 read
+from `images/414-2.gif`: row 3 and row 5 and the footnote match the note term
+for term. `git grep -iE 'Searle 1971 eq\.? *4'` over `R man vignettes NEWS.md`
+returns nothing; `ohyama2025.md` keeps its numbering with the disambiguating
+note.
+
+**AC2 — PASS.** `Rscript data-raw/m116-classical-width-comparison.R` re-run from
+a clean tree: exits 0, all nine count pins and the all-families-below-1 pin
+hold, and the committed `.tsv` is byte-identical afterwards (`git status` clean).
+Figures reproduce exactly: m76 16/16 (gaussian 8/8, t5 8/8), m113 59/64
+(gaussian 14/16, uniform 16/16, t5 15/16, chisq1 14/16), family median ratios
+0.9424–0.9648. The comparator is fenced to `{searle, burch}` in code and both
+legs' abort columns are asserted zero on both grids.
+
+**AC3 — PASS on both legs, not ticked.** Installed-package run
+(`devtools::install(build_vignettes = TRUE)` then
+`testthat::test_dir(package = "intraclass", load_package = "installed")`, at
+`NOT_CRAN=true CI=true`): FAIL 0 / WARN 2 / SKIP 23 / PASS 6082, and all 23
+skips are `test-icc-brms.R` "On CI" — **0 skips in `test-doc-skew-caveat.R`**,
+so both the installed-surface and source-tree legs actually executed.
+Mutation-verified fresh, one injected sentence per pattern into a swept file:
+baseline FAIL 0, and each of the six reintroductions reds (2, 4, 4, 2, 2, 2
+failures); tree restored clean after each. Not ticked because the AC4 fix
+re-opens the swept prose.
+
+**AC4 — FAIL.** The measured-and-bounded shape is present at all five sites
+(direction on both grids, the subject-effect-only fence, Burch's reversal named
+as untested here), but one figure-claim does not trace to AC2's output:
+`vignettes/interval-methods.Rmd` states "no distribution family reverses it —
+not the gaussian cells, not the heavy-tailed `t(5)` ones, not the skewed
+chi-square(1) ones", while the committed tsv records five reversing cells lying
+in exactly those three families (gaussian 1.00075 and 1.00027, t5 1.00276,
+chisq1 1.00511 and 1.02110); the one family with no reversing cell, `uniform`,
+is the one not named. What AC2 supports is "no family's *median* reverses".
+Finding F2 below.
+
+**AC5 — PASS.** Both width words are gone from `boundary_fenced_hint()`; the
+hint test (now `test-doc-skew-caveat.R:378`) carries the pinned replacement plus
+`expect_false(grepl("narrow"|"wider"))`, and its `"heavy"` assertion still
+passes in the installed run above.
+
+**AC6 — PASS.** `D-012 Amendment 1` and `D-029` are present and correct both
+width clauses and the D-021 line respectively. `classical-oneway-comparison.md`
+is corrected at the C3 narrative and at both Disposition bullets. Its `check:`
+directive runs on python3 alone: exit 0 as shipped, exit 1 with the m76
+`burch_narrower` figure flipped to 9 (tsv restored). **Enumeration item 2 of
+AC6 is vacuous on measurement:** the ledger table (`:125` pre-edit, `:135` now)
+carries no searle-vs-burch direction — its C3 column counts fails against MC —
+so "corrected wherever the direction appears" is satisfied with nothing to
+correct there. Recorded rather than silently passed; F21 below.
+
+**AC7 — PASS, not ticked.** `cairn_validate` 16 PASS / 8 OK, exit 0. All four
+`data-raw` checkers exit 0 on both their run and their `--self-test`.
+`air format --check .` exit 0. `lintr::lint_package()`, `pkgdown` and the two
+`R CMD check` legs verified via the PR's green checks at the reviewed sha.
+`devtools::document()` produces no diff (consistency-gate). Not ticked because
+the AC4 fix re-opens the gate; the full `devtools::check()` is deferred to the
+re-review rather than run twice.
+
+### Findings
+
+Three fresh-context reviewers ([O] diff-bug, [S] blame-history, [S] prior-review)
+and an [S] scorer that did not generate them. The prior-review lens found the
+archived M115 G1 and M106 F2 findings this milestone descends from and reported
+**no regression**; the GitHub inline-comment probe returned empty, so the thread
+walk was skipped.
+
+Actioned (≥80), 4 of 24:
+
+- **F2 (90) — the vignette's per-family reversal claim is false.** AC4's
+  failure above. → **fix now**, next pass.
+- **F1 (85) — "by a median of about 4%" at four sites.** Traces only to the
+  pooled median over all 80 cells (0.96054); the m76 grid's own median is
+  0.9430 = 5.7%, and no pooled figure appears in the tsv. → **fix now**: state
+  each grid's median, or pin the pooled figure in the script.
+- **F22 (90) — the seven ACs were still unticked at `review`.** Review's own
+  job under AC fencing. → **rejected as a finding**, discharged by this section.
+- **F19 (80) — `skip_if()` inside the vignette `for` loop skips the whole
+  `test_that`.** If `interval-methods.Rmd` is missing, `glossary.Rmd` — the leg
+  this milestone added — is never checked. → **fix now**, next pass.
+
+Logged below the bar (20), surfaced not dropped: F21 (78) AC6's ledger-table
+enumeration vacuous — recorded above; F11 (75) no median-ratio pin in the
+script though five prose sites state one; F20 (75) the new positive figures are
+pinned by no test; F8 (72) the DGP AST fence misses RNG calls in top-level
+control flow; F14 (68) `ohyama2025.md`'s check directive is self-referential;
+F7 (65) `all(logical(0))` makes the abort assertions vacuous on a renamed
+column; F9 (65) the fence checks the generator's name, not the error's
+distribution; F15 (62) the comparison-page directive leaves "2–10%" unguarded;
+F5 (55) "that study" loses its antecedent; F3 (50) the weaker family claim is
+median-level only; F4 (50) "nearly every" understates m76's 16/16; F17 (50) the
+patterns guard the wording, not the claim; F10 (45) the `^r[a-z]+$` net over-
+and under-matches; F16 (45) a both-grids claim cites one generator; F18 (45)
+the assertion passes vacuously on empty text; F6 (40) "the wider M113 grid" is
+ambiguous beside a width discussion; F12 (35) an assertion message overstates
+its check; F13 (30) no CI re-runs the generator against the committed tsv;
+B1 (30) `ohyama2025.md`'s table cell keeps ohyama's numbering — what AC1 asked
+for; F23 (25) a long NEWS line.
+
+**Disposition: returned to `in-progress`** under the review return floor — F2
+scores 90 on a defect in what the package tells its users and demonstrates AC4
+failing. Defect returns for this milestone: 1.
