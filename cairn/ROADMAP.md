@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (M114 done and archived — warn-trigger DEGRADE verdict D-028, document-caveat + direct-family candidate rows added; M109 rotates out of the terminal window; record-claims expectation rotated in the same commit; LESSONS: M113 freeze-edit line scoped, freeze-fence-criterion + record-claims-rotation lines added.)_
+_Last hygiene check: 2026-08-08 (M114 done and archived — warn-trigger DEGRADE verdict D-028, document-caveat + direct-family candidate rows added; M109 rotates out of the terminal window; record-claims expectation rotated in the same commit; LESSONS: M113 freeze-edit line scoped, freeze-fence-criterion + record-claims-rotation lines added; M65/M71 absence-claim lines retired — owned by the dated-observation doctrine and enforced by the D-009 checker that redded this PR's CI.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
