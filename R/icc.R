@@ -394,9 +394,14 @@
 #'   `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7):
 #'   **exact under normality**, best-calibrated and narrowest when the data are
 #'   approximately normal. `"burch"` is the REML-based, kurtosis-adjusted interval
-#'   of Burch (2011): wider, but robust to non-normality and never under-covering.
-#'   Prefer `"searle"` for near-normal data and `"burch"` when heavy tails or
-#'   non-normality are a concern.
+#'   of Burch (2011): wider, and designed for robustness to non-normality.
+#'   That robustness has limits this package has measured: on strongly skewed
+#'   subject effects `"burch"` under-covers about as badly as the default,
+#'   worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
+#'   subjects and 5 raters. Prefer `"searle"` for near-normal data; treat
+#'   `"burch"` as the better-behaved of the two closed forms under mild
+#'   non-normality rather than as a remedy for heavy tails (see the coverage
+#'   caveat under Confidence intervals).
 #'   `"mpl"` is the **modified profile-likelihood** interval of Xiao & Liu (2013),
 #'   **only for the balanced-complete two-way random absolute-agreement ICC(A,1)** (with
 #'   ICC(A,k) and any numeric-`unit` projection `ICC(A,m)` its Spearman-Brown image,

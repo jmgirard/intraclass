@@ -291,9 +291,14 @@ and \code{seed} do not apply.
 \code{"searle"} is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7):
 \strong{exact under normality}, best-calibrated and narrowest when the data are
 approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted interval
-of Burch (2011): wider, but robust to non-normality and never under-covering.
-Prefer \code{"searle"} for near-normal data and \code{"burch"} when heavy tails or
-non-normality are a concern.
+of Burch (2011): wider, and designed for robustness to non-normality.
+That robustness has limits this package has measured: on strongly skewed
+subject effects \code{"burch"} under-covers about as badly as the default,
+worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
+subjects and 5 raters. Prefer \code{"searle"} for near-normal data; treat
+\code{"burch"} as the better-behaved of the two closed forms under mild
+non-normality rather than as a remedy for heavy tails (see the coverage
+caveat under Confidence intervals).
 \code{"mpl"} is the \strong{modified profile-likelihood} interval of Xiao & Liu (2013),
 \strong{only for the balanced-complete two-way random absolute-agreement ICC(A,1)} (with
 ICC(A,k) and any numeric-\code{unit} projection \code{ICC(A,m)} its Spearman-Brown image,
