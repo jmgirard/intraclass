@@ -8,7 +8,7 @@
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Principles touched:** GP2   <!-- owner: plan · create/amend-via-gate -->
-- **Branch/PR:** `m115-skew-undercoverage-caveat`   <!-- owner: implement (branch) / review (PR URL) · create -->
+- **Branch/PR:** `m115-skew-undercoverage-caveat` / https://github.com/jmgirard/intraclass/pull/124   <!-- owner: implement (branch) / review (PR URL) · create -->
 
 ## Goal
 <!-- owner: plan · create; a wrong goal returns to plan, never edited in place -->
@@ -50,7 +50,7 @@ updated only as their existing checkers mechanically require.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `R/icc.R`'s `@section Confidence intervals:` block states the
+- [x] AC1: `R/icc.R`'s `@section Confidence intervals:` block states the
       distributional condition (skewed or heavy-tailed subject effects), the
       geometry measured worst, and the worst measured non-abort coverage;
       `tests/testthat/test-doc-skew-caveat.R` reads that section from the
@@ -58,7 +58,7 @@ updated only as their existing checkers mechanically require.
       extracts every numeric token from it, and requires each to equal a value
       in the committed fixture `tests/testthat/fixtures/skew-undercoverage.tsv`
       or to appear in the test's committed non-fixture allowlist.
-- [ ] AC2: The same test asserts that for every cell in that fixture whose
+- [x] AC2: The same test asserts that for every cell in that fixture whose
       `mc` row has abort rate (`n_abort / n_rep`) at most 0.1 and
       `coverage_nonabort` below 0.93, both the `searle` and `burch` rows for
       that cell have `coverage_uncond` below 0.93 — 10 such cells — and that
@@ -69,7 +69,7 @@ updated only as their existing checkers mechanically require.
       `data-raw/m113-skew-response-coverage.tsv` and
       `data-raw/m114-warn-trigger-stats.tsv`, and a source-tree provenance
       test asserts the fixture matches those sources.
-- [ ] AC3: The literal string `never under-cover` is absent from `R/icc.R`,
+- [x] AC3: The literal string `never under-cover` is absent from `R/icc.R`,
       `R/boundary-hint.R`, `R/ci-classical.R`, `vignettes/interval-methods.Rmd`
       and `NEWS.md` (one `git grep -c` over those five paths returns 0,
       recorded as review evidence); and the test asserts, against the
@@ -79,17 +79,17 @@ updated only as their existing checkers mechanically require.
       it never under-covers, and that the Rd, the vignette and the hint each
       name the measured heavy-tail exception (`burch` worst
       `coverage_uncond` 0.6655 at ρ = 0.60, k = 30, n = 5, chisq1).
-- [ ] AC4: `data-raw/check-mpl-doc-claims.py`, `check-record-claims.py`,
+- [x] AC4: `data-raw/check-mpl-doc-claims.py`, `check-record-claims.py`,
       `check-reference-observations.py` and `enumerate-generalizing-claims.py`
       each exit 0 on the branch tip, including any `mpl-doc-claims.tsv` row
       re-keyed or added by the `@param ci_method` edit — which must be `out`
       rows whose reason names `tests/testthat/test-doc-skew-caveat.R`, the
       checker settling only against `data-raw/m92-interp-sweep.rds`.
-- [ ] AC5: `NEWS.md`'s development-version section carries a bullet stating
+- [x] AC5: `NEWS.md`'s development-version section carries a bullet stating
       the caveat (naming the worst measured cell and its figure) and
       withdrawing the `"burch"` never-under-covers and heavy-tail-preference
       advice; the figures it names are ones the AC1 test recomputes.
-- [ ] AC6: `devtools::document()` leaves no uncommitted diff under `man/`, and
+- [x] AC6: `devtools::document()` leaves no uncommitted diff under `man/`, and
       the r-package profile's verify + consistency gate is clean — full suite
       at `NOT_CRAN=true CI=true` with 0 failures and 0 errors, `air format
       --check` and `lintr::lint_package()` clean.
@@ -158,3 +158,55 @@ updated only as their existing checkers mechanically require.
 
 ## Review
 <!-- owner: review · exclusive -->
+
+Evidence gathered 2026-08-08 on `m115-skew-undercoverage-caveat` @ c7bdcb2+,
+PR #124. Every figure below was produced by running the command named, never
+recalled.
+
+- **AC1 — met.** `tests/testthat/test-doc-skew-caveat.R` run against the
+  INSTALLED package (`devtools::install(build_vignettes = TRUE)`, then
+  `test_file(..., package = "intraclass")`): 124 assertions, 0 failures,
+  0 errors, **0 skips** — so the installed-Rd branch executed rather than
+  falling back. The block's numeral extractor accepts only fixture values or
+  the two-entry allowlist; it also asserts the block is non-empty of numerals,
+  so it cannot pass on a caveat with no figures.
+- **AC2 — met.** Same run. The 10-cell paired assertion holds (and asserts the
+  count is exactly 10, not merely non-zero); the quoted-token enumerator finds
+  only `"searle"` and `"burch"` in the block and cross-checks the allowlist
+  against the fixture's own `method` column. The source-tree provenance test
+  re-derives both fixture legs from `data-raw/m113-skew-response-coverage.tsv`
+  and `data-raw/m114-warn-trigger-stats.tsv` and passes.
+- **AC3 — met.** `git grep -c "never under-cover" -- R/icc.R R/boundary-hint.R
+  R/ci-classical.R vignettes/interval-methods.Rmd NEWS.md` exits 1 with no
+  output (no match on any of the five paths). The installed-surface absence
+  assertions and the rendered-hint assertion are in the same 0-failure run;
+  the hint is rendered via `cli::format_message()` per the M93 lesson. The
+  full pre-existing `test-boundary-abort-hint.R` suite passes unchanged
+  against the new blurb.
+- **AC4 — met.** `check-mpl-doc-claims.py`, `check-record-claims.py`,
+  `check-reference-observations.py` and `enumerate-generalizing-claims.py
+  --check` each exit 0. No ledger row was added: the replacement sentences
+  carry none of the checker's trigger tokens and are therefore not claim
+  candidates, so the stale row was deleted rather than re-keyed.
+- **AC5 — met.** Two bullets under `## Minor improvements` — the caveat
+  (naming 0.6725 at the worst cell) and an explicit **Correction.** bullet
+  withdrawing the `"burch"` claim and recommendation across help page,
+  article and runtime message. Both figures they name (0.6725, 0.6655) are
+  ones the AC1 test recomputes from the fixture.
+- **AC6 — met.** `devtools::document()` leaves 0 changed paths under `man/`
+  and `NAMESPACE`. Full suite at `NOT_CRAN=true CI=true`: 0 failures,
+  0 errors, 25 skips. `air format --check .` exit 0; `lintr::lint_package()`
+  0 lints.
+
+**Consistency gate.** `cairn_validate` — all checks passed, no advisories.
+`cairn_impact` skipped: `cairn/DESIGN.md` is untouched, so no principle
+changed. Toolchain slot (`r-package`): `document()` no-diff confirmed above;
+`devtools::check(args = "--no-manual", env_vars = c(NOT_CRAN = "false"))`
+Status OK — 0 errors, 0 warnings, 0 notes, vignettes built;
+`pkgdown::check_pkgdown()` no problems; README.Rmd/README.md untouched, so no
+re-knit owed; no new top-level files, so no `.Rbuildignore` entry owed.
+
+**Returns.** None. This is the milestone's first review pass; one amendment
+return was taken at the implement gate (AC1-AC3, logged in the work log) and
+runs on its own track.
+
