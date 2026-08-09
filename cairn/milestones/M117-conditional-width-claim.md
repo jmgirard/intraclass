@@ -1,6 +1,6 @@
 # M117: State the `"burch"`/`"searle"` width relationship conditionally
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -38,7 +38,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [x] AC2 Every width figure any rewritten site states is recomputed by
+- [ ] AC2 Every width figure any rewritten site states is recomputed by
       `test-doc-skew-caveat.R` from the fixture's per-cell rows and asserted to
       match at the prose's own rounding. The numeral-enumeration leg is
       extended to each roxygen block and each `###` vignette section that AC5's
@@ -46,7 +46,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       what the sweep returns, not a remembered list (the two existing anchors,
       `@section Confidence intervals:` and `^### When the default under-covers`,
       cover none of the width sites).
-- [x] AC3 At every site AC5's sweep reports as carrying a width statement, that
+- [ ] AC3 At every site AC5's sweep reports as carrying a width statement, that
       statement names how the ratio moves with ρ and with the subject count, and
       no site states a rater-count width effect. A test asserts from the per-cell
       rows the fact that licenses the omission: `n = 2` occurs only at `k = 10`,
@@ -54,7 +54,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       asserts nothing about separability at fixed `k`, where a rater contrast
       does exist and points the other way. The runtime hint stays width-silent,
       as `test-doc-skew-caveat.R:424-425` already pins.
-- [x] AC4 Every per-ρ figure stated is computed from the M113 rows alone, and no
+- [ ] AC4 Every per-ρ figure stated is computed from the M113 rows alone, and no
       figure pools over ρ or over `k` within a grid. A test asserts the two
       grids' `(ρ, k, n)` design-combination sets stand in the containment
       M76 ⊂ M113 that made the pooled figure misread as a between-grid
@@ -73,7 +73,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       withdrawn phrasings survive legitimately in `DECISIONS.md`, `LESSONS.md`
       and `milestones/archive/`, which D-020 rule 4 excludes because IP4 forbids
       editing history.
-- [x] AC7 `check-mpl-doc-claims.py`, `check-reference-observations.py`,
+- [ ] AC7 `check-mpl-doc-claims.py`, `check-reference-observations.py`,
       `enumerate-generalizing-claims.py --check` and `check-record-claims.py`
       each exit 0 on the final tree, with `mpl-doc-claims.tsv` re-triaged for
       every sentence changed inside the blocks it keys, and
@@ -131,6 +131,9 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: plan gate chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and narrowing the promise, because a recalled path list is the proxy shape that beat M102 three times; falsified by the walk reddening on legitimate width vocabulary it cannot distinguish.
 - 2026-08-09: started by /milestone-implement on branch m117-conditional-width-claim.
 - 2026-08-09: PR #126 opened; CI matrix pending.
+- 2026-08-09: review return #1 (defect) — four criteria fail as written and are unticked. AC2: the numeral pin is set-membership against a flat 44-value pool, not an association between figure and level, and `R/ci-classical.R`'s seven figures are not selected by the sentence filter at all (its sentence names `searle`, never `burch`); both mutation-verified green by the [O] lens, including a sign-reversing 0.9971 -> 1.0971. AC3: `R/boundary-hint.R` states that the relationship is conditional but never how it moves with the subject count, and the `expect_match(text, "subject")` leg never reds on any of the six sites. AC4: its second clause as written ("no figure pools over rho or over `k` within a grid") is unsatisfiable by any per-factor cut. AC7: the new D-009 directive settles 4 of about 13 stated figures and facts. Separately, four shipped prose claims are wrong or overstated against the fixture (O4 rho non-monotonicity, O5 the both-grids attribution at rho=0.6, O6 the k margin confounded with rater count at k=10, O7 the pooled-difference attribution) — the defect class this milestone exists to remove.
+- 2026-08-09: the implement-time AC2 evidence was too weak and was reported as stronger than it was: the mutation run (0.9971 -> 0.9972) only demonstrated that OUT-OF-POOL values red. Any future numeral pin here must be mutation-tested by swapping a real figure to another real figure from the same pool, never by perturbing to an unmeasured value.
+- 2026-08-09: CI note — pushing the review-evidence checkpoint mid-run cancelled the three in-flight matrix jobs (cancel-in-progress); they re-ran on the new head. Hold pushes while a measurement CI run is in flight, review phase included (M78).
 - 2026-08-09: T8 — gate clean. Installed run of `test-doc-skew-caveat.R` (`load_package = "installed"`, `NOT_CRAN=true CI=true`, `build_vignettes = TRUE`): 0 failed, 0 skipped, 709 passed — AC5's zero-skip claim measured on the surface it is about, not inferred from a dev run. Full installed suite: 0 failed, 0 errors, 6563 passed, 23 skipped (all `skip_on_ci`, the brms live-Stan class) and 2 engine fitting warnings in `test-icc-lavaan-multilevel.R` / `test-icc-type-vector.R`, neither touched by this branch. `air format --check`, `lintr::lint_package()` (0 lints), `pkgdown::check_pkgdown()` and `cairn_validate` all clean.
 - 2026-08-09: T5–T7 — the six reported sites rewritten; `?icc`'s front door states direction and the parity warning with no percentages (gate choice), the interval-methods article carries per-true-ICC and per-subject-count tables, and `R/ci-classical.R` carries the figures. Both vignette tables land inside one width sentence, so the numeral pin covers every cell — mutation-verified (0.9971 → 0.9972 reds, restore greens). Ledgers: three `mpl-doc-claims.tsv` rows re-triaged (two retired, three added — the sentence-hash key restales on any edit inside the block, M105), one `generalizing-claims-triage.tsv` row added for the new references claim (M85), and a second D-009 dated observation on `classical-oneway-comparison.md` with an exit-coded directive, mutation-verified red on a moved value. All four data-raw checkers exit 0.
 - 2026-08-09: T6 pattern verification used SQUASHED text, not `git grep`: line-based counting found 1 pre-correction hit for `pooled_pct_param` where the squashed sweep found 2 — the NEWS occurrence wrapped across lines (M115). Both new patterns: 0 hits corrected, ≥1 pre-correction.
@@ -157,6 +160,27 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - AC6 — two-sided over squashed text: `pooled_pct_param` 2 pre-correction / 0 corrected, `pooled_pct_vignette` 1 / 0. All six M116 patterns preserved verbatim.
 - AC7 — `check-mpl-doc-claims.py`, `check-reference-observations.py`, `check-record-claims.py`, `enumerate-generalizing-claims.py --check` all exit 0. Ledgers re-triaged; the new D-009 directive mutation-verified (reds on a moved value, greens on restore).
 - AC8 — `air format --check` clean, `lintr::lint_package()` 0 lints, full installed suite 0 failed / 0 errors / 6563 passed / 23 skipped (all `skip_on_ci`).
+
+### Independent review — three lenses, scored
+
+[S] prior-review: 0 findings (verified the four lessons M115/M116 taught on these files are not reintroduced; the GitHub inline-comment surface is empty, so the thread walk was correctly skipped). [S] blame-history: 10 items, none scoring >= 80 — nothing M115/M116 built was silently weakened, and it independently re-derived all thirteen quoted medians against the fixture. [O] diff-bug: 20 findings, 12 scoring >= 80.
+
+**Actioned (>= 80), verbatim:**
+
+- O1 (92) — "Every width figure in `R/ci-classical.R` is unpinned — AC2 is falsified." The sentence carrying all seven figures begins "Nor is it a flat margin..." and never contains the token `burch`, so `width_sentences()` does not select it. Mutation-verified: `0.9485 -> 0.9584`, `0.9293 -> 0.7293`, and `0.9971 -> 1.0971` (which reverses the direction the same comment asserts two lines above) all pass green.
+- O2 (88) — "The numeral pin is a set-membership test, not an association test." `measured` is a flat 44-value pool; any numeral landing anywhere in it passes regardless of which row it sits in. Mutation-verified green: `| 0.6 | 0.9971 | 11 of 16 |` -> `| 0.6 | 0.9769 | 13 of 16 |`; `| 0.05 | 0.9485 | 16 of 16 |` -> `| 0.05 | 0.9293 | 31 of 32 |`; `59 of 64` -> `43 of 64`.
+- O3 (84) — "Most of the vignette's conditional prose is outside any pin." Mutation-verified green: the M76 triple `0.9153, 0.9611, 0.9775 -> 0.7153, 0.7611, 0.7775`; `five cells -> nine cells`; `up to a true ICC of 0.3 -> of 0.9`; NEWS `16 of 16 ... 59 of 64 -> 15 of 16 ... 43 of 64`.
+- O4 (85) — "'shrinks as either grows' is false in rho, on the very figures the docs quote." Margins are 5.15% / 5.30% / 5.25% / 0.29% at rho = .05/.1/.3/.6 — the margin GROWS from .05 to .1 and peaks at .1. The pattern is flat-then-collapse. Four shipped sites overstate it; the vignette states it correctly.
+- O5 (83) — "The rho=0.6 finding is attributed to 'the two grids', but M76 has no rho=0.6." Three shipped surfaces attribute to both grids a pattern only M113 can show.
+- O6 (85) — "The subject-count margin is confounded with the rater count, by the identical design fact used to refuse a rater claim." k=10 is the only k level carrying n=2; at fixed n=5 the k=10 median is 0.9154, so "a fourteenth to a fortieth" becomes "a twelfth to a forty-third". Recurrence of the M115 lesson one level down.
+- O7 (85) — "The pooled-difference attribution contradicts the repo's own recorded number." Restricting M113 to M76's footprint gives 0.9490 against 0.9430, leaving about a third of the 0.0184 gap unexplained; the grids also differ in families and disagree by up to 0.0083 at matched design points.
+- O9 (84) — "AC3's subject-count assertion is vacuous." Reverting the M117 addition at each of the six sites in turn, `expect_match(text, "subject")` never reddened once — the word already occurs in neighbouring prose.
+- O10 (80) — "Anti-vacuity floors are below the known site count." `expect_gte(length(surfaces), 5L)` against six measured sites; the numeral test has no floor at all.
+- O11 (85) — "AC3 checks a much weaker property than it states." A site asserting the ratio is INDEPENDENT of rho and subject count would pass. `R/boundary-hint.R` states only THAT the relationship is conditional, never how it moves — a literal AC3 violation.
+- O13 (80) — "Every new prose pin skips in CI." Under `R CMD check` the source-tree walk finds no `R/`, `vignettes/` or `NEWS.md`, so the numeral, conditional-statement, no-rater and re-derivation blocks all skip; the installed leg checks only ABSENCE of withdrawn phrases. The file's own comment invokes the M115 lesson this repeats.
+- O14 (85) — "The D-009 directive settles a third of its observation." The check command settles 4 of about 13 stated figures and facts.
+
+**Logged, below the action bar (8):** O12 (78, the sentence filter selects two R code blocks as "width sentences"); O15 (68, AC4's literal second clause is unsatisfiable by any per-factor cut — an amendment-shaped finding); O18 (68, the AC1 mutation harness is not committed, against M95 precedent); O19 (65, permissive small-integer allowlist); O8 (62, "about a fortieth" for 1/43.3); O20 (55, AC6's exclusion enumeration omits `cairn/references/`); O16 (50, the new fixture has no provenance header — weakened because a sibling fixture also lacks one); O17 (50, "once the true ICC reaches 0.6" reads as extrapolation).
 
 ### Consistency gate
 
