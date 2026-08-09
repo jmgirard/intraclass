@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-09 (M116 done and archived — the `"burch"`-is-wider width ranking withdrawn from all six user-facing sites and replaced with the measured, bounded direction; M112 rotated out with the record-claims expectation in the same commit; ICC-dependence candidate row added; LESSONS: the M115 doc-pin and unfiltered-grid lines extended in place, no new line.)_
+_Last hygiene check: 2026-08-09 (status pass after M116 — nothing changed: all 24 checks green, no advisories, tree clean, both GitHub inboxes empty; M48 stays parked on the unopened release window.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
