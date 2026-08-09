@@ -254,6 +254,41 @@ All three verified independently against
 its named procedure's domain, which is the return floor. AC3 is un-ticked;
 AC1, AC2, AC4-AC6 stand on their recorded evidence.
 
+**Re-review (2026-08-08, second pass) after the return-1 fixes.** One [O]
+lens over the rewritten prose, tasked to recompute every factual claim
+against the fixtures. It verified all 17 numeric claims in the rewrite
+(0.6725, 0.6655, 0.825, 0.84, the monotone-in-subjects pattern at 8/8
+sequences, 2-raters-worse at 16/16, the abort comparison at 16/16, the
+gaussian/uniform high-abort qualifier, searle-closer-in-most-cells per
+family, burch-below-nominal-in-fewer). 16 candidate findings, scored by a
+fresh scorer; two >= 80, both triaged without a status change under the
+return floor (neither fails an acceptance criterion):
+
+- **G3 (82) - fixed now.** The attribution test was near-vacuous:
+  `grepl(format(worst$rho), sec, fixed = TRUE)` with rho 0.6 is satisfied by
+  the substring inside `0.6725`, `as.character(worst$n)` = "5" by `0.95` or
+  `50`, and `worst$dist` was never compared to the prose at all. Rebuilt with
+  numeric-boundary matching and a distribution-name map; mutation-verified
+  against the reviewer's own fabrication (a caveat naming uniform effects at
+  ICC 0.3, 10 subjects, 2 raters), which now fails on both the ICC value and
+  the distribution name.
+- **G1 (85) - follow-up candidate row.** `?icc`, the article, the glossary,
+  NEWS, the runtime hint and `R/ci-classical.R` describe `"burch"` as *wider*
+  than `"searle"` and `"searle"` as *narrowest* on near-normal data. Measured
+  on `med_width`: `burch` is narrower in 59 of 64 cells (14 of 16 gaussian),
+  neither method aborting anywhere in the grid. Pre-existing and outside this
+  milestone's Scope, and correcting it needs a source check on whether
+  "narrowest" was an asymptotic expected-length claim from Searle (1971) /
+  McGraw & Wong (1996) rather than a measured one - so it takes a ROADMAP
+  candidate row rather than a rushed edit here.
+
+Also fixed though below the action bar, being the same seventh-site pattern
+that caused return 1: **G2 (72)** the `vignettes/glossary.Rmd` Burch entry
+still carried the withdrawn recommendation and now names the measured limit
+and cross-links the new section, and **G16 (35)** that file is now in the
+test's source-leg path list. Logged, not actioned: G8 65, G7 60, G12 55,
+G4 55, G14 50, G11 45, G6 40, G9 40, G10 35, G15 30, G5 20.
+
 **Returns.** Defect return 1 of this milestone (first review pass). One
 amendment return was taken at the implement gate (AC1-AC3) and runs on its
 own track.

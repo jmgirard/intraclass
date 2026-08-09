@@ -37,8 +37,11 @@ See **single-unit ICC** for its counterpart.
 
 An opt-in closed-form confidence interval for the balanced one-way design
 (`ci_method = "burch"`): REML-based limits with a kurtosis adjustment (Burch 2011),
-so its width tracks the tail weight of the data — robust to non-normality where the
-**exact-F interval** leans on it. Deterministic: no resamples, no seed. See
+so its width tracks the tail weight of the data, where the **exact-F interval** leans
+on normality instead. That adjustment is not a remedy for heavy tails: on strongly
+skewed subject effects `"burch"` under-covers about as badly as the default — see
+[*When the default under-covers*](interval-methods.html#when-the-default-under-covers).
+Deterministic: no resamples, no seed. See
 [*Confidence-interval methods*](interval-methods.html#the-opt-in-boundary-robust-methods).
 
 ## Confidence interval vs. credible interval

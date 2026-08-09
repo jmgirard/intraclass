@@ -217,6 +217,7 @@ test_that("no source file still claims it either, however the line wraps", {
       "R/boundary-hint.R",
       "R/ci-classical.R",
       "vignettes/interval-methods.Rmd",
+      "vignettes/glossary.Rmd",
       "NEWS.md"
     )
   )
@@ -240,10 +241,26 @@ test_that("the caveat names the worst cell the fixture actually records", {
   failing <- low_abort_failures(skew_fixture())
   worst <- failing[which.min(failing$coverage_nonabort), ]
 
-  expect_true(grepl(format(worst$coverage_nonabort), sec, fixed = TRUE))
-  expect_true(grepl(format(worst$rho), sec, fixed = TRUE))
-  expect_true(grepl(as.character(worst$k), sec, fixed = TRUE))
-  expect_true(grepl(as.character(worst$n), sec, fixed = TRUE))
+  # Substring matching is not enough here: "0.6" occurs inside "0.6725" and
+  # "5" inside "0.95" and "50", so an unanchored check passes against prose
+  # naming the wrong cell entirely. Every token below is matched on its own
+  # numeric boundaries, and the distribution is matched by the name the prose
+  # uses for it.
+  num <- function(x) paste0("(?<![0-9.])", x, "(?![0-9])")
+  dist_prose <- c(
+    chisq1 = "chi-square\\(1\\)",
+    lognormal = "lognormal",
+    laplace = "Laplace",
+    t5 = "t\\(5\\)",
+    gaussian = "normal",
+    uniform = "uniform"
+  )
+
+  expect_match(sec, num(format(worst$coverage_nonabort)), perl = TRUE)
+  expect_match(sec, num(format(worst$rho)), perl = TRUE)
+  expect_match(sec, num(as.character(worst$k)), perl = TRUE)
+  expect_match(sec, num(as.character(worst$n)), perl = TRUE)
+  expect_match(sec, dist_prose[[worst$dist]])
 })
 
 test_that("the installed help and vignette name burch's measured worst cell", {
