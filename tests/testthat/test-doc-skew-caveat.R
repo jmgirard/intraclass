@@ -80,6 +80,163 @@ test_that("burch's worst measured cell is the one the corrected docs name", {
   expect_identical(worst$dist, "chisq1")
 })
 
+# The documented surfaces, read from the INSTALLED package ---------------------
+#
+# Everything below runs wherever the package is installed, `R CMD check`
+# included -- the point of reading the help database rather than `R/icc.R`.
+
+rd_flat <- function(x) {
+  paste(rapply(list(x), as.character, how = "unlist"), collapse = "")
+}
+
+# The installed help database is the surface that matters -- it is what a user
+# reads and what ships -- but it does not exist under `devtools::load_all()`,
+# where the package is loaded from source and `Rd_db()` errors rather than
+# returning nothing. Fall back to the source `man/icc.Rd` there, so the same
+# assertions run in a dev session; under `R CMD check` the first branch is the
+# one taken, and a build with neither is a failure, never a skip.
+icc_rd <- function() {
+  installed <- tryCatch(tools::Rd_db("intraclass"), error = function(e) NULL)
+  if (!is.null(installed) && "icc.Rd" %in% names(installed)) {
+    return(installed[["icc.Rd"]])
+  }
+  source_rd <- testthat::test_path("..", "..", "man", "icc.Rd")
+  expect_true(file.exists(source_rd))
+  tools::parse_Rd(source_rd)
+}
+
+# The `@section Confidence intervals:` block, and only it: the section is
+# located by its own title, so neighbouring sections can never widen the scope.
+caveat_section <- function() {
+  found <- NULL
+  for (el in icc_rd()) {
+    if (!identical(attr(el, "Rd_tag"), "\\section")) {
+      next
+    }
+    if (grepl("Confidence intervals", rd_flat(el[[1]]), fixed = TRUE)) {
+      found <- rd_flat(el[[2]])
+    }
+  }
+  found
+}
+
+# Numerals that are not measurements: confidence levels and the like. Every
+# other number in the caveat must come from the fixture.
+caveat_numeral_allowlist <- c(0.95, 1)
+
+test_that("the caveat names the distributional condition it is about", {
+  sec <- caveat_section()
+  expect_false(is.null(sec))
+  expect_match(sec, "skew", ignore.case = TRUE)
+  expect_match(sec, "heavy[ -]tailed", ignore.case = TRUE)
+})
+
+test_that("every numeral in the caveat is a measured value or allowlisted", {
+  sec <- caveat_section()
+  f <- skew_fixture()
+
+  measured <- unique(c(
+    f$rho,
+    f$k,
+    f$n,
+    f$n_rep,
+    f$abort_rate,
+    f$coverage_uncond,
+    f$coverage_nonabort,
+    caveat_numeral_allowlist
+  ))
+
+  numerals <- regmatches(sec, gregexpr("[0-9]+(\\.[0-9]+)?", sec))[[1]]
+  # Anti-vacuity: an empty match set would pass the loop below for free, and
+  # a caveat with no figures is not the one AC1 asks for.
+  expect_gt(length(numerals), 0L)
+
+  for (tok in numerals) {
+    value <- as.numeric(tok)
+    expect_true(
+      any(abs(measured - value) < 1e-9),
+      info = paste0("numeral '", tok, "' in the caveat is not a measured value")
+    )
+  }
+})
+
+test_that("the caveat quotes only methods the fixture measured", {
+  sec <- caveat_section()
+  # `"mc"` is the fixture's key for the exported string `"montecarlo"`; the
+  # caveat names the string a user types.
+  allowed <- c("montecarlo", "searle", "burch")
+
+  quoted <- regmatches(sec, gregexpr('"[^"]+"', sec))[[1]]
+  quoted <- gsub('"', "", quoted, fixed = TRUE)
+  expect_gt(length(quoted), 0L)
+  expect_true(all(quoted %in% allowed), info = paste(quoted, collapse = ", "))
+
+  # And the fixture really does carry those three, so the allowlist is not a
+  # free-standing hand list.
+  f <- skew_fixture()
+  expect_setequal(unique(f$method), c("mc", "searle", "burch"))
+})
+
+test_that("no installed surface still claims burch never under-covers", {
+  claim <- "never under-cover"
+
+  expect_false(grepl(claim, rd_flat(icc_rd()), fixed = TRUE))
+
+  news <- system.file("NEWS.md", package = "intraclass")
+  expect_true(nzchar(news))
+  expect_false(any(grepl(claim, readLines(news, warn = FALSE), fixed = TRUE)))
+
+  vig <- system.file("doc", "interval-methods.Rmd", package = "intraclass")
+  skip_if(
+    !nzchar(vig),
+    "vignettes not installed (install with build_vignettes)"
+  )
+  expect_false(any(grepl(claim, readLines(vig, warn = FALSE), fixed = TRUE)))
+})
+
+test_that("the installed help and vignette name burch's measured worst cell", {
+  f <- skew_fixture()
+  b <- f[f$source == "m113" & f$method == "burch", , drop = FALSE]
+  worst <- format(min(b$coverage_uncond))
+
+  expect_true(grepl(worst, rd_flat(icc_rd()), fixed = TRUE))
+
+  vig <- system.file("doc", "interval-methods.Rmd", package = "intraclass")
+  skip_if(
+    !nzchar(vig),
+    "vignettes not installed (install with build_vignettes)"
+  )
+  expect_true(any(grepl(worst, readLines(vig, warn = FALSE), fixed = TRUE)))
+})
+
+test_that("the runtime hint no longer promises burch never under-covers", {
+  # The blurb the user meets when the default aborts. `usable` is stubbed so
+  # the bullet renders without running a method on data -- the text is what is
+  # under test here, not the verification machinery around it.
+  bullets <- boundary_fenced_hint(
+    usable = function(method) TRUE,
+    contrast = "the default",
+    oneway = TRUE,
+    multilevel = FALSE,
+    replicates = FALSE,
+    raters = 5L,
+    balanced = TRUE,
+    type = "agreement",
+    type_supplied = FALSE,
+    unit = list("single")
+  )
+  rendered <- gsub(
+    "[[:space:]]+",
+    " ",
+    cli::ansi_strip(cli::format_message(bullets))
+  )
+
+  expect_match(rendered, "burch", fixed = TRUE)
+  expect_false(grepl("never under-cover", rendered, fixed = TRUE))
+  # It names the exception rather than merely dropping the claim.
+  expect_match(rendered, "heavy", ignore.case = TRUE)
+})
+
 # Fixture provenance ----------------------------------------------------------
 #
 # Source-tree only: `data-raw/` is `.Rbuildignore`d, so the built package has

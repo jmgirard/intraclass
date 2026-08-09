@@ -110,7 +110,7 @@ updated only as their existing checkers mechanically require.
 - [x] T1: Write `data-raw/make-skew-undercoverage-fixture.R`, generate
       `tests/testthat/fixtures/skew-undercoverage.tsv` from the two M113/M114
       sources, and add the source-tree provenance test asserting they agree.
-- [ ] T2: Write `tests/testthat/test-doc-skew-caveat.R` — the installed-Rd
+- [x] T2: Write `tests/testthat/test-doc-skew-caveat.R` — the installed-Rd
       numeric-token extractor, the quoted-method-token enumerator, the
       10-cell paired assertion, the absence assertions and the rendered-hint
       assertion. Red before any doc edit.
@@ -141,6 +141,7 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: T0 started by /milestone-implement on `m115-skew-undercoverage-caveat`; status in-progress.
 - 2026-08-08: substantive amendment at the implement gate — AC1/AC2/AC3 re-aimed from source-tree reads at the installed package (`tools::Rd_db()`, `inst/doc/`, installed `NEWS.md`, rendered hint) plus a committed `tests/testthat/fixtures/skew-undercoverage.tsv`, because a source-reading test skips under `R CMD check` (`.Rbuildignore ^data-raw$`) and would leave AC1-AC3 with no PR-CI evidence; tasks resplit 7 -> 8 and Coverage remapped.
 - 2026-08-08: T1 done — `data-raw/make-skew-undercoverage-fixture.R` derives `tests/testthat/fixtures/skew-undercoverage.tsv` (202 rows: 192 M113 grid + 10 M114 held-out cells); provenance tests re-derive both legs from the sources and assert the text round trip, source-tree-gated; 89 assertions pass.
+- 2026-08-08: T2 done — installed-surface assertions written and RED before any doc edit: 9 failures, 0 errors (caveat absent; `never under-cover` still in the Rd and NEWS; the rendered hint still promises it). `icc_rd()` reads the installed help DB, falling back to source `man/icc.Rd` under load_all where `Rd_db()` errors.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
