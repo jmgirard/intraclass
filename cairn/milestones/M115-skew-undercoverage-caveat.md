@@ -126,7 +126,7 @@ updated only as their existing checkers mechanically require.
       `vignettes/interval-methods.Rmd` under the Monte-Carlo section, replace
       the preference sentence at `:106-108`, cross-link from
       `vignettes/glossary.Rmd:181-187`.
-- [ ] T7: NEWS bullet in the development-version section; amend the
+- [x] T7: NEWS bullet in the development-version section; amend the
       unreleased `:143-152` bullet; run `devtools::document()`.
 - [ ] T8: Run all four data-raw checkers, then the full gate; fix fallout.
 
@@ -146,6 +146,7 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: T4 done — `@param ci_method`'s burch description now states the measured limit (worst 0.6655) instead of never-under-covering; ledger row `d25a8b790ea6` deleted rather than re-keyed because the new sentences carry no trigger token and are not claim candidates; `check-mpl-doc-claims.py` OK (40 candidates, 0 failures).
 - 2026-08-08: T5 done — runtime hint blurb and the `R/ci-classical.R` header comment now state the measured limit; the full existing `test-boundary-abort-hint.R` suite passes unchanged against the new blurb.
 - 2026-08-08: T6 done — vignette gains a `### When the default under-covers` subsection under the Monte-Carlo section, the closed-forms preference sentence is replaced, and the glossary Monte-Carlo entry cross-links the new subsection.
+- 2026-08-08: T7 done — two NEWS bullets under Minor improvements (the caveat, and an explicit Correction withdrawing the burch claim across help/article/runtime message); the unreleased searle/burch feature bullet amended in place; `document()` leaves no `man/` diff; the caveat test file is fully green.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
