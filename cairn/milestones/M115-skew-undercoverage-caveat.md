@@ -50,7 +50,7 @@ updated only as their existing checkers mechanically require.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [ ] AC1: `R/icc.R`'s `@section Confidence intervals:` block states the
+- [x] AC1: `R/icc.R`'s `@section Confidence intervals:` block states the
       distributional condition (skewed or heavy-tailed subject effects), the
       geometry measured worst, and the worst measured non-abort coverage;
       `tests/testthat/test-doc-skew-caveat.R` reads that section from the
@@ -58,7 +58,7 @@ updated only as their existing checkers mechanically require.
       extracts every numeric token from it, and requires each to equal a value
       in the committed fixture `tests/testthat/fixtures/skew-undercoverage.tsv`
       or to appear in the test's committed non-fixture allowlist.
-- [ ] AC2: The same test asserts that for every cell in that fixture whose
+- [x] AC2: The same test asserts that for every cell in that fixture whose
       `mc` row has abort rate (`n_abort / n_rep`) at most 0.1 and
       `coverage_nonabort` below 0.93, both the `searle` and `burch` rows for
       that cell have `coverage_uncond` below 0.93 — 10 such cells — and that
@@ -69,7 +69,7 @@ updated only as their existing checkers mechanically require.
       `data-raw/m113-skew-response-coverage.tsv` and
       `data-raw/m114-warn-trigger-stats.tsv`, and a source-tree provenance
       test asserts the fixture matches those sources.
-- [ ] AC3: The withdrawn claim (`never under-cover`, however its line wraps)
+- [x] AC3: The withdrawn claim (`never under-cover`, however its line wraps)
       is absent from `R/icc.R`, `R/boundary-hint.R`, `R/ci-classical.R`,
       `vignettes/interval-methods.Rmd` and `NEWS.md`, verified over
       whitespace-collapsed text by `tests/testthat/test-doc-skew-caveat.R`
@@ -82,17 +82,17 @@ updated only as their existing checkers mechanically require.
       vignette and the hint each name the measured heavy-tail exception
       (`burch` worst `coverage_uncond` 0.6655 at rho = 0.60, k = 30, n = 5,
       chisq1).
-- [ ] AC4: `data-raw/check-mpl-doc-claims.py`, `check-record-claims.py`,
+- [x] AC4: `data-raw/check-mpl-doc-claims.py`, `check-record-claims.py`,
       `check-reference-observations.py` and `enumerate-generalizing-claims.py`
       each exit 0 on the branch tip, including any `mpl-doc-claims.tsv` row
       re-keyed or added by the `@param ci_method` edit — which must be `out`
       rows whose reason names `tests/testthat/test-doc-skew-caveat.R`, the
       checker settling only against `data-raw/m92-interp-sweep.rds`.
-- [ ] AC5: `NEWS.md`'s development-version section carries a bullet stating
+- [x] AC5: `NEWS.md`'s development-version section carries a bullet stating
       the caveat (naming the worst measured cell and its figure) and
       withdrawing the `"burch"` never-under-covers and heavy-tail-preference
       advice; the figures it names are ones the AC1 test recomputes.
-- [ ] AC6: `devtools::document()` leaves no uncommitted diff under `man/`, and
+- [x] AC6: `devtools::document()` leaves no uncommitted diff under `man/`, and
       the r-package profile's verify + consistency gate is clean — full suite
       at `NOT_CRAN=true CI=true` with 0 failures and 0 errors, `air format
       --check` and `lintr::lint_package()` clean.
@@ -253,6 +253,31 @@ All three verified independently against
 **Disposition: return to `in-progress`.** F1 demonstrates AC3 failing inside
 its named procedure's domain, which is the return floor. AC3 is un-ticked;
 AC1, AC2, AC4-AC6 stand on their recorded evidence.
+
+**Evidence re-gathered after the return-1 fixes and the pass-2 triage
+(2026-08-08, branch tip).** All six criteria re-verified from scratch; the
+earlier evidence block above is superseded by this one.
+
+- **AC1 / AC2 — met.** `test-doc-skew-caveat.R` against the INSTALLED package
+  (`devtools::install(build_vignettes = TRUE)`): **169 assertions, 0 failures,
+  0 errors, 0 skips**, so every installed-surface branch executed.
+- **AC3 — met, on the amended procedure.** Whitespace-collapsed search for
+  `never under-cover` over all six source paths (the five named plus
+  `vignettes/glossary.Rmd`, added this pass): 0 present. The same absence is
+  asserted against the installed Rd, shipped vignette and installed NEWS in
+  the run above, together with the rendered-hint and heavy-tail-exception
+  assertions. Both new guards are mutation-verified: reintroducing the wrapped
+  sentence leaves `git grep -c` at 0 while the guard fails and names the file.
+- **AC4 — met.** All four data-raw checkers exit 0, including the two `out`
+  rows added for the replacement comparison sentences, whose reason names the
+  test that settles them.
+- **AC5 — met.** Both NEWS bullets present; the Correction bullet is worded so
+  it need not quote the phrase it withdraws, which lets the absence check run
+  with no carve-out.
+- **AC6 — met.** `document()` leaves 0 uncommitted paths under `man/` and
+  `NAMESPACE`; full suite at `NOT_CRAN=true CI=true` 0 failures / 0 errors /
+  25 skips; `air format --check` exit 0; `lintr::lint_package()` 0 lints;
+  `cairn_validate` all checks passed; `pkgdown::check_pkgdown()` no problems.
 
 **Re-review (2026-08-08, second pass) after the return-1 fixes.** One [O]
 lens over the rewritten prose, tasked to recompute every factual claim
