@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (M112 done and archived — harness guards, classed-abort status, failing-side near-miss; M108 rotates out of the terminal window; candidate row added on the sweep's stale checkpoint cache; LESSONS: mclapply NULL-slot line added, the M64 open-questions line pruned for the cap.)_
+_Last hygiene check: 2026-08-08 (M114 done and archived — warn-trigger DEGRADE verdict D-028, document-caveat + direct-family candidate rows added; M109 rotates out of the terminal window; record-claims expectation rotated in the same commit; LESSONS: M113 freeze-edit line scoped, freeze-fence-criterion + record-claims-rotation lines added.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,13 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M114 | Runtime skew/kurtosis warn trigger — design & validation (assessment only) | done | — | normal | milestones/archive/M114-skew-warn-trigger-assessment.md |
 | M113 | MC-default skew response — frozen-rules disposition from the M111 data | done | — | normal | milestones/archive/M113-mc-skew-response-assessment.md |
 | M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | done | — | normal | milestones/archive/M111-fallback-on-abort-assessment.md |
-| M109 | Re-run the 19 remaining oracle-bayesian-*.R scripts through the harness | done | M108 | normal | milestones/archive/M109-bayesian-oracle-reruns.md |
 | M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | done | — | normal | milestones/archive/M110-cronbach-oracle-leg.md |
 | M112 | Harden the M111 fallback-sweep harness | done | — | normal | milestones/archive/M112-m111-harness-hardening.md |
-| M114 | Runtime skew/kurtosis warn trigger — design & validation (assessment only) | review | — | normal | milestones/M114-skew-warn-trigger-assessment.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M112 done (2026-08-08) → M108 rotated out (oldest terminal, 2026-08-07; its archive file still resolves there). Kept: M113, M112, M111, M110, M109 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M114 done (2026-08-08) → M109 rotated out (oldest terminal, 2026-08-07; its archive file still resolves there). Kept: M114, M113, M111, M110, M112 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
