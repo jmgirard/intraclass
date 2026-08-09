@@ -5,7 +5,7 @@ Pagination: printed journal pages 1018–1028 (11 PDF pages, PDF p. 1 = printed
 p. 1018; the version of record). The issue number is not printed in the PDF —
 the running foot gives only `55 (2011) 1018–1028` — so any issue number is
 carried from an external record, not from the source.
-Extraction: verified 2026-07-21 against the source (all 11 PDF pages read to the final page); the eq. 6/13/15/16/17 REML-CI construction and the §4 arsenic worked example (Table 3, p. 1027) were confirmed and the REML ρ interval (0.73, 0.95) reproduced from the printed ANOVA in-session — observed 2026-07-21.
+Extraction: verified 2026-08-08 against the source (all 11 PDF pages read to the final page); the eq. 6/13/15/16/17 REML-CI construction and the §4 arsenic worked example (Table 3, p. 1027) were confirmed and the REML ρ interval (0.73, 0.95) reproduced from the printed ANOVA in-session at the 2026-07-21 first pass, and the M116 re-read added the §3/§5 expected-length section below with every quotation re-checked verbatim against the p. 1023/1024/1027 text — observed 2026-08-08.
 
 **Citation.** Burch BD (2011). "Assessing the performance of normal-based and
 REML-based confidence intervals for the intraclass correlation coefficient."
@@ -109,6 +109,59 @@ the same source-rounding subtlety flagged for ohyama2025 §4.
 - **Non-normality:** kurtosis `κ > 0` (leptokurtic) is where the normal-based
   interval fails and REML earns its keep; `κ < 0` (platykurtic) the normal-based
   interval over-covers and REML ≈ nominal (Fig. 1).
+
+## Expected length vs the normal-based interval (§3, eq. 18, pp. 1023–1024; §5, p. 1027), extracted by M116
+
+The comparison the package's own width claim needed and never had. Burch
+compares **his interval against the exact-F one directly** — his "normal-based"
+comparator is eq. 3, the same pivot the package ships as `"searle"` (see the
+construction section above) — so eq. 18's ratio is a burch-vs-searle
+expected-length ratio, not a comparison against some third interval:
+
+> "E (Length of REML-based interval) / E (Length of Normal-based interval)" (eq. 18, p. 1023)
+
+**The direction is kurtosis-conditional, not one-way.** Fig. 2's setup draws
+**both** effects from the studied family — "assuming that the `A_i`'s and
+`e_ij`'s depend on the uniform(0,1), power exponential(0,1,2.78), t(10),
+Laplace(0,1), or t(5) distributions given in Table 2, where `b = 5` and the
+values of `a` range from 10 to 100 in increments of 10 for `ρ = 0.5`" (p. 1023).
+Its findings (p. 1024):
+
+> "For symmetric platykurtic distributions, the REML-based intervals are
+> approximately equal to the nominal coverage probability and have average
+> lengths that are less than those of the normal-based intervals. For symmetric
+> leptokurtic distributions, the REML-based intervals, on average, are wider
+> than their normal-based counterparts. The REML-based intervals, unlike the
+> normal-based intervals, have coverage probabilities that are close to the
+> nominal level of 0.95 and thus wider intervals are warranted."
+
+And in the Discussion (p. 1027), with the one printed ratio figure:
+
+> "The REML-based confidence interval procedure yields intervals that are closer
+> to the nominal coverage probability (of 0.95) for non-normal distributions and
+> are shorter in expected length than the normal-based confidence intervals for
+> the platykurtic distributions under study."
+
+> "if `a = 100`, `b = 5`, `ρ = 0.25`, and one considers the case where the
+> between class and within class effects are based on the uniform(0,1)
+> distribution, then the simulated coverage probabilities for the REML-based and
+> normal-based intervals are 0.95 and 0.97, respectively, and the expected length
+> of the REML-based interval is **88%** of that of the normal-based interval."
+
+**What Burch does NOT say.** Nowhere does he call the normal-based (exact-F)
+interval the narrower or the shortest of the two. For the platykurtic families
+he reports the opposite, and the widening he does report is confined to
+symmetric leptokurtic data with **both** `A_i` and `e_ij` non-normal — a
+condition neither committed repo grid tests, since both draw the non-normal
+family for the subject effect alone (`data-raw/m76-coverage-sweep.R` lines
+33–38). So this source neither supports the withdrawn "burch is wider" claim nor
+refutes the repo's own measurement; it bounds where each applies.
+
+Quotations above are de-hyphenated across line breaks ("nom- inal" → "nominal",
+"normal- based" → "normal-based"); the parenthesized figures are printed
+`uniform(0,1)` without a space, as rendered here — read from the p. 1023/1024/1027
+text layer and each re-checked verbatim against it — observed 2026-08-08.
+<!-- check: none — a statement about how this section was authored; the source PDF is gitignored, so no committed artifact can settle it -->
 
 ## Table 2 — the non-normal battery (p. 1021), extracted by M111
 

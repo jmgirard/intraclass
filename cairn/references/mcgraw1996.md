@@ -2,7 +2,7 @@
 
 **Provenance.** Ingested 2026-07-18 by M64 from `cairn/references/sources/mcgraw1996.pdf` (gitignored).
 Pagination: printed journal pages 30–46, plus the correction at 1(4):390 carried as the PDF's final page.
-Extraction: verified 2026-07-18 against the source (all 18 PDF pages = printed 30–46 plus the 1(4):390 correction, read to the final page) by M69; the Case-3A θ²_c definition and estimand and the erratum text confirmed verbatim, three transcription gaps corrected in place, no oracle value affected — observed 2026-07-18.
+Extraction: verified 2026-08-08 against the source (all 18 PDF pages = printed 30–46 plus the 1(4):390 correction, read to the final page) — the 2026-07-18 M69 pass confirmed the Case-3A θ²_c definition and estimand and the erratum text verbatim, corrected three transcription gaps in place with no oracle value affected, and the M116 re-read added the interval-length absence record below (whole-text vocabulary search plus a 150-DPI read of printed p. 41) — observed 2026-08-08.
 
 **Citation.** McGraw KO, Wong SP (1996). "Forming inferences about some
 intraclass correlation coefficients." *Psychological Methods* 1(1):30–46.
@@ -121,6 +121,22 @@ as Cronbach's alpha in psychometrics" (pp. 35–36).
 - `ICC(A,k)` for Cases 2, 2A, and 3A **but not 3**:
   lower `n(MS_R − F_*MS_E)/(F_*(MS_C − MS_E) + n MS_R)`,
   upper `n(F*MS_R − MS_E)/(MS_C − MS_E + nF*MS_R)` (p. 41) — **see the erratum**.
+
+**No interval-length claim anywhere in this source (M116).** Table 7 gives the
+limits and their df and says nothing about how wide the resulting intervals are.
+Two passes, because a text-layer absence is not evidence on its own (LESSONS
+2026-07-19/M66): (1) a case-insensitive search of the whole extracted text
+(51,534 chars, all 18 pages) for `narrow\w*`, `shortest`, `shorter`, `\bwidth\b`,
+`\blength\w*\b`, `\bwide\w*\b`, `precise\w*` and `tight\w*` returns **zero**
+interval-size hits — the sole `length` is "measurements in the length class
+(e.g., inches)" and the four `wide*` are all "widely"/"widespread"; (2) printed
+p. 41 (PDF p. 12), the page carrying Table 7, was additionally rendered at 150
+DPI and read — formulas, df and the `Note.` glossary only, no prose
+characterizing interval size, and the render matches the text layer character
+for character, so this is born-digital text rather than OCR. The package's
+withdrawn "best-calibrated and narrowest" wording cited this source alongside
+Searle (1971) for the exact-F pivot; the pivot is here, the narrowness is not —
+observed 2026-08-08. <!-- check: none — an absence claim about a gitignored PDF; the two settling passes are named in this paragraph and re-runnable wherever the shelf exists -->
 
 Test statistics for `H₀: ρ = ρ₀` are in Table 8 (p. 42), derived in Appendix A
 (pp. 44–46). Appendix B (p. 46) gives Fisher's transform *for* ICCs:

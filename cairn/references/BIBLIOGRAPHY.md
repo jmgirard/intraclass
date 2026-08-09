@@ -161,8 +161,16 @@ in the `<citekey>.md` source notes indexed by [`INDEX.md`](INDEX.md).
   the intraclass correlation parameter for binary data. *Statistics in Medicine,
   24*, 3497–3512. doi:10.1002/sim.2197. (The BCML point estimator underlying
   Saha (2012); binary outcomes — see [`saha2005.md`](saha2005.md).)
+- Searle, S. R. (1971). *Linear Models.* New York: Wiley. (Read from the Wiley
+  Classics Library Edition (1997), a verbatim reprint of the 1971 text — LC card
+  number 70-138919, ISBN 0-471-18499-3 — so equation and table numbers match the
+  original. **EPUB, reflowable: no fixed pagination**, so this entry cites
+  chapter/section/table anchors, not pages. Source of the `ci_method = "searle"`
+  exact-F interval, Ch. 9 §9d Table 9.14 — see [`searle1971.md`](searle1971.md).)
 - Searle, S. R., Casella, G., & McCulloch, C. E. (2006). *Variance Components.* Wiley.
-  (**Not on the shelf — fields not verified against the source**, M72, 2026-07-19.)
+  (**Not on the shelf — fields not verified against the source**, M72, 2026-07-19.
+  A distinct, later work from Searle (1971) above; Burch (2011) cites its 1992
+  edition. Do not conflate the two.)
 - Shieh, G. (2016). Choosing the best index for the average score intraclass
   correlation coefficient. *Behavior Research Methods, 48*(3), 994–1003.
   doi:10.3758/s13428-015-0623-y. (Cited as `shieh2015` after the 2015

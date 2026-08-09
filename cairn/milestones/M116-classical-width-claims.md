@@ -39,8 +39,12 @@ planned. A committed doc-claim checker → barred by D-021.
       `mcgraw1996.md` and a new `searle1971.md` each record whether that source
       makes any interval-length claim. `searle1971.md` locates the exact-F
       interval at Ch. 9 §9d / Table 9.14 / eq. (60), and the `Searle 1971
-      eq. 4/6` citation is corrected to it at `R/ci-classical.R:10` and
-      `cairn/references/ohyama2025.md:33`.
+      eq. 4/6` citation at `R/ci-classical.R:10` — which attributes ohyama2025's
+      own equation numbers to Searle — is corrected to it.
+      `cairn/references/ohyama2025.md:33` keeps ohyama's numbering, which is
+      faithful to that source, disambiguated to say the numbers are ohyama's and
+      that his eq. 6 is the Thomas & Hultquist (1978) unbalanced variant rather
+      than Searle's.
 - [ ] AC2: A committed R script recomputes from `data-raw/m76-sweep-results.rds`
       and `data-raw/m113-skew-response-coverage.tsv`, writing a committed text
       output: burch's median width below searle's in 16/16 M76 cells (8/8
@@ -91,7 +95,7 @@ planned. A committed doc-claim checker → barred by D-021.
 
 ## Tasks
 
-- [ ] T1: Read the sources and write the provenance. Burch (2011) §4 (Fig. 2
+- [x] T1: Read the sources and write the provenance. Burch (2011) §4 (Fig. 2
       expected-length ratios) and §5; `mcgraw1996.pdf` for any length claim
       (none found at plan time); `searle1971.epub` per the work-log findings
       below, including the equation-citation correction. Settle every quotation
@@ -126,6 +130,12 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-08: gated amendment — AC1 and T1 gain the `Searle 1971 eq. 4/6` citation correction at `R/ci-classical.R:10` and `cairn/references/ohyama2025.md:33`, found by the plan-time source read (the interval is Table 9.14 / eq. (60); the reprint is verbatim, so the numbering is not an edition artifact). Maintainer chose folding it in over a candidate row, per D-021's correct-in-place clause.
 
 - 2026-08-08: branched `m116-classical-width-claims` from main at cbb6da0; status in-progress.
+
+- 2026-08-08: T1 done. burch2011.md gains an expected-length section (§3 eq. 18 p. 1023, Fig. 2 findings p. 1024, §5 p. 1027) — Burch's direction is kurtosis-conditional (REML shorter for platykurtic, wider for symmetric leptokurtic, "thus wider intervals are warranted") and measured with BOTH A_i and e_ij non-normal; four quotations re-checked verbatim, de-hyphenated across line breaks. searle1971.md written: the interval is Ch. 9 §9d Table 9.14 row 3 + eq. (60), matching searle_endpoints() term for term (g = F/F_U, rho = (g-1)/(g+n-1)), credited onward to Graybill (1961, p. 379); NO interval-length claim in Ch. 9. mcgraw1996.md records the same absence, settled two ways per LESSONS M66 (whole-text vocabulary sweep over 51,534 chars = 0 interval-size hits; printed p. 41 re-read at 150 DPI, render matches the text layer so the source is born-digital not OCR). Both Extraction lines re-stamped 2026-08-08.
+- 2026-08-08: T1 correction to a plan-gate finding — "eq. 4/6" are ohyama2025's OWN equation numbers (his eq. 4 is the balanced Searle interval verbatim; his eq. 6 is the Thomas & Hultquist 1978 unbalanced variant), not Searle's. So R/ci-classical.R:10 was genuinely wrong (it read ohyama's numbers as Searle's) and is corrected to Ch. 9 Table 9.14; ohyama2025.md:33 was NOT wrong and keeps its numbering, gaining a note above the table saying whose numbers they are. Correcting it as AC1 first directed would have falsified a verified extraction.
+- 2026-08-08: amendment gate — AC1's citation clause amended to the split above (maintainer chose "amend as proposed" over dropping the ohyama half or the whole citation fix).
+- 2026-08-08: the whole-book length-vocabulary search over Searle's eleven chapter files returned a hit in Ch. 2 as well as Ch. 3; the Ch. 2 one is "the much shorter proof of Banerjee (1964)" — about a proof, not an interval. The note was corrected before commit to say "two chapters", not the "Chapter 3 only" first drafted (LESSONS 2026-07-19/M72: do not ship an unverified universal in the prose that records a lesson).
+- 2026-08-08: M74 gate caught six new generalizing-claim candidates and one orphan row, as LESSONS 2026-07-21/M76 predicts for any references/ edit. Rows added programmatically via the enumerator's own key function (no hand-transcribed hashes): burch2011:1e38e8e767 OUT-quote; mcgraw1996:cafe812bae OUT-provenance (replacing the staled cedef8f67b); mcgraw1996:236dda51d7, searle1971:5d42925a3a, searle1971:41b8940b0c, searle1971:16af2c708c OUT-repo-analysis. Enumerator, observations checker and both self-tests green; devtools::test() FAIL 0 PASS 6027 SKIP 25.
 
 ## Decisions
 

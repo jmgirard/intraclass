@@ -7,7 +7,7 @@
 # Monte-Carlo default aborts (`intraclass_singular_fit`, D-006) -- except that
 # `burch` at MSA exactly 0 aborts classed rather than standardize by
 # `sqrt(MSA) = 0` (D-022). They differ in their robustness:
-#   - SEARLE exact-F (Searle 1971 eq. 4/6; mcgraw1996 Table 7): EXACT under
+#   - SEARLE exact-F (Searle 1971 Ch. 9 Table 9.14; mcgraw1996 Table 7): EXACT under
 #     normality, best-calibrated + narrowest on ~normal data.
 #   - Burch (2011) REML (eq. 6/13/15/16/17): kurtosis-adjusted `log(1+nθ̂)`
 #     limits; wider, and designed for robustness to non-normality -- but
@@ -77,7 +77,8 @@ classical_guard_observed <- function(ss, method, call, hint = character(0)) {
 }
 
 # --- SEARLE exact-F ------------------------------------------------------------
-# Pivot (Searle 1971): with F = MSA/MSE and n the group size,
+# Pivot (Searle 1971, Ch. 9 §9d Table 9.14 row 3 + eq. 60): with F = MSA/MSE and
+# n the group size,
 #   F / (1 + n·λ) ~ F(df1, df2) where λ = σ²_a/σ²_e, so a 1-α interval for
 #   g = (1 + n·λ) is [F/F_U, F/F_L] with F_U = qf(1-α/2), F_L = qf(α/2);
 # back-transform g -> ρ via ρ(g) = (g-1)/(g+n-1) (the ICC(1) endpoint). Monotone,
