@@ -105,19 +105,19 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - [x] T2 Widen the two surface legs of `tests/testthat/test-doc-skew-caveat.R`
       (`:217-250`, `:253-274`) to directory walks with per-leg anti-vacuity
       assertions; confirm 0 skips in the file on an installed run.
-- [ ] T3 Tests first, red: the recompute-and-match assertions for the figures
+- [x] T3 Tests first, red: the recompute-and-match assertions for the figures
       T5 will state, the marginal-confounding assertion, the M76 ⊂ M113
       containment assertion.
-- [ ] T4 Run the widened sweep to enumerate the sites carrying a width
+- [x] T4 Run the widened sweep to enumerate the sites carrying a width
       statement; record the list as evidence (it, not memory, scopes T5).
-- [ ] T5 Rewrite the width statement at each site T4 reports — `R/icc.R`
+- [x] T5 Rewrite the width statement at each site T4 reports — `R/icc.R`
       `@param ci_method` (`:404-407`) and `@details` (`:570-572`),
       `R/ci-classical.R:17-23`, `vignettes/interval-methods.Rmd:146-169`,
       `vignettes/glossary.Rmd:40-42`, `NEWS.md:60-66` — then
       `devtools::document()`.
-- [ ] T6 Add and two-sided verify the new `claim_patterns` entries against the
+- [x] T6 Add and two-sided verify the new `claim_patterns` entries against the
       pre-correction tree.
-- [ ] T7 Ledgers: `mpl-doc-claims.tsv` re-triage, the D-009 dated observation on
+- [x] T7 Ledgers: `mpl-doc-claims.tsv` re-triage, the D-009 dated observation on
       `classical-oneway-comparison.md`, all four data-raw checkers green.
 - [ ] T8 Full gate: air, lintr, `pkgdown::check_pkgdown()`, installed-package
       suite at `NOT_CRAN=true CI=true`; PR and CI matrix.
@@ -130,6 +130,8 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: plan gate chose deriving the conditional from the M113 grid alone over reporting both grids per level, because M76 carries only ρ ∈ {0.05, 0.1} and its design is a strict subset of M113's; falsified by a grid whose ρ coverage M113 lacks.
 - 2026-08-09: plan gate chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and narrowing the promise, because a recalled path list is the proxy shape that beat M102 three times; falsified by the walk reddening on legitimate width vocabulary it cannot distinguish.
 - 2026-08-09: started by /milestone-implement on branch m117-conditional-width-claim.
+- 2026-08-09: T5–T7 — the six reported sites rewritten; `?icc`'s front door states direction and the parity warning with no percentages (gate choice), the interval-methods article carries per-true-ICC and per-subject-count tables, and `R/ci-classical.R` carries the figures. Both vignette tables land inside one width sentence, so the numeral pin covers every cell — mutation-verified (0.9971 → 0.9972 reds, restore greens). Ledgers: three `mpl-doc-claims.tsv` rows re-triaged (two retired, three added — the sentence-hash key restales on any edit inside the block, M105), one `generalizing-claims-triage.tsv` row added for the new references claim (M85), and a second D-009 dated observation on `classical-oneway-comparison.md` with an exit-coded directive, mutation-verified red on a moved value. All four data-raw checkers exit 0.
+- 2026-08-09: T6 pattern verification used SQUASHED text, not `git grep`: line-based counting found 1 pre-correction hit for `pooled_pct_param` where the squashed sweep found 2 — the NEWS occurrence wrapped across lines (M115). Both new patterns: 0 hits corrected, ≥1 pre-correction.
 - 2026-08-09: T4 — the widened sweep walks 33 files and reports 6 carrying a burch width sentence: `R/icc.R`, `R/ci-classical.R`, `R/boundary-hint.R`, `vignettes/glossary.Rmd`, `vignettes/interval-methods.Rmd`, `NEWS.md`. That list, not memory, scopes T5.
 - 2026-08-09: T3 (red) — new fixture `tests/testthat/fixtures/classical-width-by-cell.tsv` (80 per-cell rows, written by the same generator, re-derivation test guarded on `data-raw/`); tests recompute every level median from the per-cell rows rather than trusting the generator's summary block. Fixture-side blocks green; the three prose-dependent blocks red as intended (10 + 2 + 11 failures). The rater check runs over a ±1-sentence window: the sentence that would carry a rater figure names no method, so the sentence-level filter passed over it vacuously and the window is what gave the check teeth (it went 0 → 2 failures on the unmodified tree).
 - 2026-08-09: T2 — both surface legs now walk their own domain (whole Rd database, every installed vignette, installed NEWS; every `R/*.R`, every `vignettes/*.Rmd`, `NEWS.md`), each asserting it still reaches all six retired hand-list paths and strictly more. The vignette-presence assertion moved to its own `test_that` — left above the sweep, its `skip_if` took the Rd and NEWS checks down with it in a dev session (M116). 375 → 423 passing assertions.

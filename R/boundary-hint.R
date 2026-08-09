@@ -496,6 +496,11 @@ boundary_fenced_hint <- function(
     }
     # Neither blurb claims to be the tighter interval: the shipped "narrowest"
     # / "wider" pair was false on both measured grids and is withdrawn (M116).
+    # Nor could a blurb state the relationship honestly in a clause -- it is
+    # conditional on the true ICC and on the subject count, and near a true ICC
+    # of 0.6 the two are within a fraction of a percent of each other (M117).
+    # This is where a user picks a method, so a width ranking here is the one
+    # that would actually mislead; the conditional statement lives in `?icc`.
     blurb <- c(
       searle = "{.code ci_method = \"searle\"} (best calibrated when the data \\
                 are close to normal)",

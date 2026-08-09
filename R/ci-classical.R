@@ -16,7 +16,12 @@
 # NOT "burch is wider than searle" -- that shipped for three milestones and is
 # false on both committed grids (M116: burch narrower in 16/16 M76 cells and
 # 59/64 M113 cells, no family reversing on its median; see
-# data-raw/m116-classical-width-comparison.tsv). Burch's own eq. 18 comparison
+# data-raw/m116-classical-width-comparison.tsv). Nor is it a flat margin, which
+# the pooled figure that replaced it implied (M117): on the M113 grid the median
+# width ratio is 0.9485, 0.9470 and 0.9475 at a true ICC of 0.05, 0.1 and 0.3 but
+# 0.9971 at 0.6, and 0.9293, 0.9646 and 0.9769 at 10, 30 and 50 subjects -- the
+# advantage shrinks in both, and every cell where searle came out narrower sits
+# at a true ICC of 0.6. Burch's own eq. 18 comparison
 # is against this very exact-F interval and is kurtosis-CONDITIONAL, with his
 # reversal measured on data where the errors are non-normal too -- which neither
 # grid varies. Neither method is reliably the tighter one.

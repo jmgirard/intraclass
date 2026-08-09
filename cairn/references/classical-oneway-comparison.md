@@ -125,6 +125,20 @@ both are still wider than MC at n=2 — but "Burch is the wider of the two" was
 never measured on this grid and is contradicted by it — observed 2026-08-09.
 <!-- check: python3 -c "import csv,sys;rows=[r for r in csv.DictReader((l for l in open('data-raw/m116-classical-width-comparison.tsv') if not l.startswith('#')),delimiter='\t') if r.get('grid')=='m76' and r.get('dist')=='all'];sys.exit(0 if rows and rows[0]['cells']=='16' and rows[0]['burch_narrower']=='16' else 1)" -->
 
+**The width margin is conditional, not flat** — a second reading corrected at
+M117, one level down from the M116 one above. Replacing "Burch is wider" with a
+single pooled figure per grid ("about 6% and about 4% narrower") stated as a
+constant what the grids measure as a strong function of two design factors.
+Recomputed from the same fixture's new per-factor block: on the M113 grid the
+median width ratio is 0.9485, 0.9470 and 0.9475 at a true ICC of 0.05, 0.1 and
+0.3, but 0.9971 at 0.6 — and all five reversing cells sit at 0.6. Across subject
+count it is 0.9293, 0.9646 and 0.9769 at 10, 30 and 50, the same direction on
+the M76 grid (0.9153, 0.9611, 0.9775). The rater count is deliberately not cut:
+n=2 occurs only at k=10 in both grids, so the marginal contrast is confounded
+with subject count. Nothing in C3's verdict changes — the direction is
+unaffected, only the magnitude's constancy — observed 2026-08-09.
+<!-- check: python3 -c "import csv,sys;L=[l for l in open('data-raw/m116-classical-width-comparison.tsv')];i=[n for n,l in enumerate(L) if l.startswith('grid\tfactor\tlevel')][0];j=[n for n,l in enumerate(L) if l.startswith('grid\trho\tk\tn')][0];rows=[r for r in csv.DictReader([l for l in L[i:j] if not l.startswith('#') and l.strip()],delimiter='\t')];g=lambda f,lv:[r for r in rows if r['grid']=='m113' and r['factor']==f and float(r['level'])==lv][0]['ratio_median'];sys.exit(0 if g('rho',0.6)=='0.9971' and g('rho',0.3)=='0.9475' and g('k',10.0)=='0.9293' and g('k',50.0)=='0.9769' else 1)" -->
+
 **C5 — tail symmetry.** SEARLE passes at **every** cell (tail-difference ≤ 0.010,
 no tail > 0.043). Burch fails at the four **n=2** cells: its miss is entirely
 lower-tail (0.034–0.039 lower, 0.000 upper — `|diff|` up to 0.039 > 0.03),

@@ -13,6 +13,12 @@
 
 fixture_path <- testthat::test_path("fixtures", "skew-undercoverage.tsv")
 
+# The source-tree `data-raw/` dir, absent from a built package. Defined here
+# rather than beside the provenance blocks at the foot of the file: a later
+# definition is not in scope for the earlier width-fixture block that also
+# guards on it.
+data_raw_dir <- testthat::test_path("..", "..", "data-raw")
+
 skew_fixture <- function() {
   utils::read.delim(fixture_path, stringsAsFactors = FALSE)
 }
@@ -202,7 +208,15 @@ claim_patterns <- c(
   searle_narrowest_news = "narrowest on near-normal",
   searle_narrowest_hint = "narrowest)",
   burch_wider_conj = "wider, and",
-  burch_wider_news = "wider and below-nominal"
+  burch_wider_news = "wider and below-nominal",
+  # M117 withdrew the POOLED width figure that M116's correction put in place.
+  # It was true of each grid as a whole and false of most of it: the margin
+  # runs from about a fourteenth at 10 subjects to parity at a true ICC of 0.6,
+  # so one number per grid told a reader nothing they could use. Both patterns
+  # were checked to have zero hits across the corrected surfaces and one hit
+  # each on the pre-correction tree (641f036).
+  pooled_pct_param = "about 6% and about 4%",
+  pooled_pct_vignette = "about 6% narrower"
 )
 
 expect_no_withdrawn_claim <- function(text, where) {
@@ -473,13 +487,17 @@ width_surfaces <- function() {
   out[vapply(out, length, integer(1)) > 0L]
 }
 
-# The rater prohibition is about the PASSAGE, not the claim sentence alone: the
-# figure it forbids most naturally lands in a neighbouring sentence that names
-# no method ("all five sit at a true ICC of 0.6 with 5 raters"), which the
-# filter above passes over vacuously. So that one check runs over each width
-# sentence plus its immediate neighbours. The numeral check deliberately does
-# NOT use this window -- neighbouring sentences carry coverage figures and
-# citations from other claims, whose numerals belong to those claims' pins.
+# A width STATEMENT is usually more than the one sentence naming the method: the
+# condition attaches in the next sentence, which repeats neither "burch" nor a
+# width word, and a forbidden rater figure would land there too. So the two
+# checks about what the passage says run over each width sentence plus its
+# immediate neighbours. The numeral check deliberately does NOT use this window
+# -- neighbouring sentences carry coverage figures and citations belonging to
+# other claims, which have their own pins.
+#
+# Neighbours are bounded by markdown headings: without that, the window walks
+# out of the classical-intervals section and into the MPL one, whose "fixed
+# raters" is about the design a method serves, not about width.
 width_neighbourhood <- function(text) {
   sents <- unlist(strsplit(text, "(?<=[.!?]) ", perl = TRUE))
   hit <- which(
@@ -490,7 +508,8 @@ width_neighbourhood <- function(text) {
     return(character(0))
   }
   idx <- sort(unique(pmax(1L, pmin(length(sents), c(hit - 1L, hit, hit + 1L)))))
-  sents[idx]
+  crosses_heading <- grepl("#{2,} ", sents[idx]) & !(idx %in% hit)
+  sents[idx[!crosses_heading]]
 }
 
 width_neighbourhoods <- function() {
@@ -516,24 +535,36 @@ width_numeral_allowlist <- c(
 test_that("the width fixture re-derives from the data-raw comparison", {
   skip_if_not(dir.exists(data_raw_dir), "data-raw/ not present (built package)")
 
-  src <- utils::read.delim(
+  # The data-raw file carries three stacked blocks with three different
+  # headers, and `read.delim` would take the first one it meets and then choke
+  # on the wider rows below. Slice the per-cell block by its own header line.
+  lines <- readLines(
     file.path(data_raw_dir, "m116-classical-width-comparison.tsv"),
-    stringsAsFactors = FALSE,
-    comment.char = "#"
+    warn = FALSE
   )
-  # The data-raw file carries three stacked blocks; the per-cell one is the
-  # block whose header names `burch_width`, and read.delim takes the first
-  # header it meets, so select the rows by shape rather than by position.
+  start <- grep("^grid\trho\tk\tn\tdist\t", lines)
+  expect_identical(length(start), 1L)
+  block <- lines[seq(start, length(lines))]
+  block <- block[nzchar(block) & !startsWith(block, "#")]
+  src <- utils::read.delim(
+    text = paste(block, collapse = "\n"),
+    stringsAsFactors = FALSE
+  )
+
   w <- width_fixture()
   expect_identical(nrow(w), 80L)
   expect_identical(sort(unique(w$grid)), c("m113", "m76"))
 
+  # Keyed rather than positional, so a reordering of either file cannot hide a
+  # changed value.
   key <- function(d) paste(d$grid, d$rho, d$k, d$n, d$dist, sep = "\r")
-  detail <- src[src$grid %in% c("m76", "m113") & !is.na(src$dist), ]
-  detail <- detail[key(detail) %in% key(w), , drop = FALSE]
-  matched <- detail[match(key(w), key(detail)), , drop = FALSE]
+  expect_identical(nrow(src), nrow(w))
+  matched <- src[match(key(w), key(src)), , drop = FALSE]
   expect_false(anyNA(matched$grid))
-  expect_equal(as.numeric(matched$ratio), w$ratio)
+  expect_equal(matched$ratio, w$ratio)
+  expect_equal(matched$burch_width, w$burch_width)
+  expect_equal(matched$searle_width, w$searle_width)
+  expect_identical(matched$burch_narrower, w$burch_narrower)
 })
 
 test_that("the width figures the docs state are recomputed from the cells", {
@@ -585,7 +616,10 @@ test_that("M76's design is contained in M113's on (rho, k, n)", {
 })
 
 test_that("every width statement names the true ICC and the subject count", {
-  surfaces <- width_surfaces()
+  # Over the neighbourhood, not the bare claim sentence: the condition reads
+  # better as its own sentence, and requiring it inside the sentence naming the
+  # method would be a demand about prose style, not about what is stated.
+  surfaces <- width_neighbourhoods()
   # Anti-vacuity: the sweep must actually find width statements, or every
   # assertion below passes over an empty set.
   skip_if(length(surfaces) == 0L, "source tree not present")
@@ -645,25 +679,40 @@ test_that("every numeral in a width statement is a measured value", {
         sum(w$grid == g),
         sum(w$grid == g & w$burch_narrower %in% c(TRUE, "TRUE")),
         sum(w$grid == g & !(w$burch_narrower %in% c(TRUE, "TRUE"))),
-        vapply(
-          split(w[w$grid == g, ], w$dist[w$grid == g]),
-          nrow,
-          numeric(1)
-        ),
-        vapply(
-          split(w[w$grid == g, ], w$dist[w$grid == g]),
-          function(x) sum(x$burch_narrower %in% c(TRUE, "TRUE")),
-          numeric(1)
-        )
+        # per-level and per-family cell counts, and the "narrower in N of M"
+        # counts the tables quote
+        unlist(lapply(c("dist", "rho", "k", "n"), function(fac) {
+          parts <- split(w[w$grid == g, ], w[[fac]][w$grid == g])
+          c(
+            vapply(parts, nrow, numeric(1)),
+            vapply(
+              parts,
+              function(x) sum(x$burch_narrower %in% c(TRUE, "TRUE")),
+              numeric(1)
+            )
+          )
+        }))
       )
     })),
     width_numeral_allowlist
   ))
 
   for (nm in names(surfaces)) {
+    # Identifiers are not figures: milestone ids (M76, M117), fixture filenames
+    # (m116-classical-width-comparison.tsv), distribution labels (t5, chisq1).
+    # Strip any token whose digits are glued to letters, rather than
+    # allowlisting each -- an allowlist would grow forever and would also
+    # allowlist the bare integer everywhere else it appeared. Case-insensitive
+    # by construction: the lowercase filename form slipped an `\\bM[0-9]+\\b`
+    # rule and shipped `116` as an unmeasured figure.
+    text <- gsub(
+      "[A-Za-z][A-Za-z._-]*[0-9]+[A-Za-z0-9._-]*",
+      " ",
+      surfaces[[nm]]
+    )
     numerals <- unlist(regmatches(
-      surfaces[[nm]],
-      gregexpr("[0-9]+(\\.[0-9]+)?", surfaces[[nm]])
+      text,
+      gregexpr("[0-9]+(\\.[0-9]+)?", text)
     ))
     for (tok in numerals) {
       expect_true(
@@ -743,8 +792,6 @@ test_that("the runtime hint carries neither withdrawn claim", {
 # the fixture but not the two artifacts it derives from. The pins above are the
 # ones that must run everywhere; this one guards against a hand-edited fixture
 # and runs wherever the sources exist.
-
-data_raw_dir <- testthat::test_path("..", "..", "data-raw")
 
 test_that("the fixture re-derives from its M113/M114 sources", {
   skip_if_not(dir.exists(data_raw_dir), "data-raw/ not present (built package)")
