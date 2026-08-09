@@ -107,11 +107,11 @@ planned. A committed doc-claim checker → barred by D-021.
       assert it against `data-raw/m76-coverage-sweep.R:33-38` and
       `data-raw/m111-fallback-sweep.R:57-67` (M113's tsv re-derives
       `m111-fallback-results.rds`; it runs no sweep of its own).
-- [ ] T3: Rewrite the five prose sites. Numerals matched on numeric boundaries
+- [x] T3: Rewrite the five prose sites. Numerals matched on numeric boundaries
       and attributions checked against the specific row (LESSONS M115); no
       monotonicity or comparative claim written without recomputing it over the
       unfiltered grid.
-- [ ] T4: Extend the `test-doc-skew-caveat.R` pattern set and the hint text,
+- [x] T4: Extend the `test-doc-skew-caveat.R` pattern set and the hint text,
       mutation-verifying each. Install with `build_vignettes = TRUE` and confirm
       0 SKIPs (LESSONS M115).
 - [ ] T5: Append `D-012 Amendment 1` and the D-021-line entry; correct the M76
@@ -139,6 +139,12 @@ planned. A committed doc-claim checker → barred by D-021.
 
 - 2026-08-08: T2 done. `data-raw/m116-classical-width-comparison.R` + committed `.tsv`: burch median width below searle's in 16/16 M76 cells (8/8 gaussian, 8/8 t5) and 59/64 M113 cells (gaussian 14/16, uniform 16/16, t5 15/16, chisq1 14/16); every family's median ratio is below 1 on both grids (0.9424-0.9648), so NO family reverses and the docs must not state a kurtosis-conditional direction. Nine count pins plus an all-families-below-1 pin are asserted in-script. Comparator fenced to {searle, burch} — both abort in 0 cells; the MC leg is excluded because its widths are conditioned on non-aborted reps (764/2000 at one cell).
 - 2026-08-08: T2's DGP fence took three attempts and the first two shipped green while being wrong — worth a LESSONS line. (1) A lexical search for the t-generator matches `sqrt(`, which contains `rt(`, so the guard reported a dependence that does not exist. (2) A positional rule ("no non-gaussian generator at or below the error-draw line") passed the mutation test: hoisting the offending draw into a variable one line above defeats it. Only the third, which walks the PARSED function body and requires every RNG call to belong either to the subject-effect RHS or to the error RHS (rnorm only), reds. Mutation-verified three ways — hoisted draw, inlined draw, and a de-branched subject effect — each redding a distinct assertion.
+
+- 2026-08-09: T3 done. Five prose sites rewritten to the measured-and-bounded form (?icc @param + the classical Details section, R/ci-classical.R header, vignettes/interval-methods.Rmd, vignettes/glossary.Rmd, NEWS.md), plus a new NEWS correction bullet. "narrowest" is gone from every searle description; "wider" survives only where it reports Burch's own kurtosis-conditional finding or names the wider M113 grid. One collateral fix: interval-methods.Rmd's figurative "a narrower kind of steadiness" now sat beside a real width discussion, so it reads "a more limited kind of steadiness". The NEWS bullet was reworded mid-task to stop quoting the phrases it withdraws — the test file's own header requires that, and the first draft quoted both.
+- 2026-08-09: T4 done. claim_pattern (scalar) became claim_patterns (6 named) behind one expect_no_withdrawn_claim() helper, applied to the installed-help, installed-NEWS, installed-vignette and source-tree legs plus the runtime hint; glossary.Rmd added to the installed leg. Patterns are multi-word by necessity: a bare "narrowest" reds on the vignette's legitimate HPDI paragraph and a bare "wider" on Burch's own reported reversal. Each of the five new patterns has zero hits on the corrected tree and >=1 on the pre-correction tree (4cffc81), and each was mutation-verified by reintroduction: "and narrowest" 1 failure, "narrowest on near-normal" 2, "narrowest)" 1, "wider, and" 1, "wider and below-nominal" 2; baseline 0.
+- 2026-08-09: the runtime hint (R/boundary-hint.R) drops both width words; its test now also asserts no "narrow"/"wider" renders at all, since the hint is where a user actually picks a method. The existing "heavy" assertion still passes.
+- 2026-08-09: AC3's 0-SKIP requirement (LESSONS M115) needed a harness change, not just an install. `devtools::install(build_vignettes = TRUE)` installs the vignettes, but `testthat::test_local()` loads via pkgload so `system.file("doc", ...)` still resolves to the source tree and both installed-surface tests skip. Running `testthat::test_dir("tests/testthat", package = "intraclass", load_package = "installed")` gives the real installed-package read: doc-skew-caveat 0 skips, all pass. (`upgrade = "never"` is rejected by devtools::install — it wants TRUE/FALSE/NA.)
+- 2026-08-09: M94 checker caught three new roxygen claims (its fifth recurrence per LESSONS); rows 2bdf1189679b / 354d6f11619c / d010e0f961a6 added dispositioned `out`, each naming the instrument that does settle it (the M116 tsv, the generator's AST assertion, or burch2011.md p. 1024) per the M104 rule. All four data-raw checkers and their self-tests green.
 
 ## Decisions
 

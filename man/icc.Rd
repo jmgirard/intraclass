@@ -288,11 +288,18 @@ between-subject variance at all, \code{"burch"} aborts (its kurtosis
 standardization divides by zero there) while \code{"searle"} still returns its
 attained minimum -- and neither resamples, so \code{mc_samples}, \code{boot_samples},
 and \code{seed} do not apply.
-\code{"searle"} is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7):
-\strong{exact under normality}, best-calibrated and narrowest when the data are
-approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted interval
-of Burch (2011): wider, and designed for robustness to non-normality.
-That robustness has limits this package has measured: on strongly skewed
+\code{"searle"} is the exact-F pivot (Searle 1971, Table 9.14; McGraw & Wong
+1996, Table 7): \strong{exact under normality}, and best-calibrated when the data
+are approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted
+interval of Burch (2011), designed for robustness to non-normality; its
+width tracks the data's tail weight rather than widening by construction.
+On the two grids this package has measured, \code{"burch"} comes out the
+\strong{narrower} of the two in nearly every cell -- 16 of 16 and 59 of 64, by a
+median of about 4\% -- with no distribution family reversing that. Both grids
+vary only the subject effect, though; Burch (2011) reports the direction
+reversing for symmetric heavy-tailed data with the errors non-normal too,
+which neither grid tests. Treat neither as reliably the tighter interval.
+Burch's robustness has limits this package has measured: on strongly skewed
 subject effects \code{"burch"} under-covers about as badly as the default,
 worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
 subjects and 5 raters. Prefer \code{"searle"}: across every distribution family
@@ -650,11 +657,14 @@ near and below zero.
 
 \section{The classical \code{"searle"} and \code{"burch"} intervals (balanced one-way)}{
 Both are deterministic closed forms from the one-way ANOVA. \code{"searle"} inverts the
-exact-F pivot \code{F / (1 + n*lambda) ~ F(k-1, k(n-1))} (Searle 1971; the McGraw & Wong
-1996 Table 7 limits); it is exact under normality. \code{"burch"} builds
+exact-F pivot \code{F / (1 + n*lambda) ~ F(k-1, k(n-1))} (Searle 1971, Ch. 9 Table 9.14;
+the McGraw & Wong 1996 Table 7 limits); it is exact under normality. \code{"burch"} builds
 kurtosis-adjusted \code{log(1 + n*theta-hat)} limits (Burch 2011), so its width tracks
-the data's tail weight -- wider, and designed for robustness to non-normality.
-That robustness has a measured limit: on strongly skewed subject effects
+the data's tail weight rather than widening by construction: on both grids this
+package has measured it came out narrower than \code{"searle"} in nearly every cell,
+while Burch reports the reverse for heavy-tailed data with non-normal errors, a
+case those grids do not cover.
+Its robustness has a measured limit: on strongly skewed subject effects
 \code{"burch"} under-covers about as badly as the default (see the coverage caveat
 under Confidence intervals). Both share the conventions above: the \code{unit = "average"} (ICC(k))
 interval is the same exact monotone \strong{Spearman-Brown} image of the ICC(1)

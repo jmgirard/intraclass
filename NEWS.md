@@ -57,6 +57,19 @@
   `"searle"` landed closer to nominal coverage in most cells of every
   distribution family measured; what `"burch"` retains is dipping below the
   nominal level in fewer cells overall.
+* **Correction.** Earlier releases ranked the two classical intervals by width —
+  presenting `ci_method = "burch"` as the broader of the pair and
+  `ci_method = "searle"` as the tightest available on near-normal data — in the
+  help page, the article, the glossary, the runtime message and this file. Both
+  grids the package has measured say otherwise: `"burch"` is the narrower of the two in 16 of 16 cells of one and 59
+  of 64 of the other, by a median of about 4%, with no distribution family
+  reversing it. No source supports the withdrawn wording either — Burch (2011)
+  compares against this same exact-F interval and reports a
+  *kurtosis-conditional* ordering, shorter for light-tailed data and wider only
+  for heavy-tailed data where the errors are non-normal too, which neither grid
+  varies. The claim is withdrawn everywhere it appeared; neither interval is
+  described as reliably the tighter one, and the coverage-based preference for
+  `"searle"` is unchanged.
 * `icc()` now rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed
   error naming the column and the offending rows, instead of passing it to the
   fitting engine and surfacing that engine's own unclassed message.
@@ -159,10 +172,10 @@
 
 * New `ci_method = "searle"` and `ci_method = "burch"` for the **balanced one-way
   random** design: two **deterministic classical closed-form** intervals. `"searle"`
-  is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7), exact under
-  normality and narrowest on near-normal data; `"burch"` is the REML-based,
-  kurtosis-adjusted interval of Burch (2011), wider and below-nominal in fewer
-  cells (but see the correction above — it is not a remedy for heavy tails).
+  is the exact-F pivot (Searle 1971, Table 9.14; McGraw & Wong 1996, Table 7),
+  exact under normality; `"burch"` is the REML-based, kurtosis-adjusted interval
+  of Burch (2011), below-nominal in fewer cells (but see the corrections above —
+  it is not a remedy for heavy tails, and it is not the wider of the two).
   Like `"npbootstrap"` they are **boundary robust** — a finite
   interval where the Monte-Carlo default aborts on near-zero-ICC data — and one-way
   only (they abort otherwise). Being closed forms they take no `mc_samples`,

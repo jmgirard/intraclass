@@ -185,25 +185,53 @@ test_that("the caveat quotes only methods the fixture measured", {
 # is worded so it need not quote the phrase it withdraws.
 squash <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
 
-claim_pattern <- "never under-cover"
+# Two withdrawn claims, not one. M115 withdrew "burch never under-covers"; M116
+# withdrew the width ranking that shipped beside it -- `"burch"` presented as the
+# broader interval and `"searle"` as the tightest on near-normal data -- which
+# both measured grids contradict (data-raw/m116-classical-width-comparison.tsv).
+#
+# The width patterns are deliberately multi-word. A bare "narrowest" would red on
+# the vignette's HPDI paragraph, which legitimately calls that interval the
+# narrowest containing 95% of the posterior mass; a bare "wider" would red on
+# "the wider M113 grid" and on Burch's own kurtosis-conditional statement, which
+# the corrected prose reports. Each pattern below was checked to have zero hits
+# across the corrected tree and at least one on the pre-correction tree.
+claim_patterns <- c(
+  never_undercover = "never under-cover",
+  searle_narrowest_conj = "and narrowest",
+  searle_narrowest_news = "narrowest on near-normal",
+  searle_narrowest_hint = "narrowest)",
+  burch_wider_conj = "wider, and",
+  burch_wider_news = "wider and below-nominal"
+)
 
-test_that("no installed surface still claims burch never under-covers", {
-  expect_false(grepl(claim_pattern, squash(rd_flat(icc_rd())), fixed = TRUE))
+expect_no_withdrawn_claim <- function(text, where) {
+  for (nm in names(claim_patterns)) {
+    testthat::expect_false(
+      grepl(claim_patterns[[nm]], text, fixed = TRUE),
+      info = paste0("withdrawn claim '", nm, "' still present in ", where)
+    )
+  }
+}
+
+test_that("no installed surface still carries a withdrawn claim", {
+  expect_no_withdrawn_claim(squash(rd_flat(icc_rd())), "the installed help")
 
   news <- system.file("NEWS.md", package = "intraclass")
   expect_true(nzchar(news))
-  expect_false(
-    grepl(claim_pattern, squash(readLines(news, warn = FALSE)), fixed = TRUE)
+  expect_no_withdrawn_claim(
+    squash(readLines(news, warn = FALSE)),
+    "the installed NEWS"
   )
 
-  vig <- system.file("doc", "interval-methods.Rmd", package = "intraclass")
-  skip_if(
-    !nzchar(vig),
-    "vignettes not installed (install with build_vignettes)"
-  )
-  expect_false(
-    grepl(claim_pattern, squash(readLines(vig, warn = FALSE)), fixed = TRUE)
-  )
+  for (v in c("interval-methods.Rmd", "glossary.Rmd")) {
+    vig <- system.file("doc", v, package = "intraclass")
+    skip_if(
+      !nzchar(vig),
+      "vignettes not installed (install with build_vignettes)"
+    )
+    expect_no_withdrawn_claim(squash(readLines(vig, warn = FALSE)), v)
+  }
 })
 
 test_that("no source file still claims it either, however the line wraps", {
@@ -225,10 +253,7 @@ test_that("no source file still claims it either, however the line wraps", {
 
   for (path in paths) {
     text <- squash(gsub("^#'?", "", readLines(path, warn = FALSE)))
-    expect_false(
-      grepl(claim_pattern, text, fixed = TRUE),
-      info = paste("withdrawn claim still present in", basename(path))
-    )
+    expect_no_withdrawn_claim(text, basename(path))
   }
 })
 
@@ -350,7 +375,7 @@ test_that("the replacement searle/burch comparison holds on the fixture", {
   expect_lt(below("burch"), below("searle"))
 })
 
-test_that("the runtime hint no longer promises burch never under-covers", {
+test_that("the runtime hint carries neither withdrawn claim", {
   # The blurb the user meets when the default aborts. `usable` is stubbed so
   # the bullet renders without running a method on data -- the text is what is
   # under test here, not the verification machinery around it.
@@ -373,9 +398,15 @@ test_that("the runtime hint no longer promises burch never under-covers", {
   )
 
   expect_match(rendered, "burch", fixed = TRUE)
-  expect_false(grepl("never under-cover", rendered, fixed = TRUE))
+  expect_match(rendered, "searle", fixed = TRUE)
+  expect_no_withdrawn_claim(rendered, "the runtime hint")
   # It names the exception rather than merely dropping the claim.
   expect_match(rendered, "heavy", ignore.case = TRUE)
+  # And it ranks the pair on calibration, never on width (M116): the hint is
+  # where a user picks a method, so a width ranking here is the one that would
+  # actually mislead. Both bullets must render for this to mean anything.
+  expect_false(grepl("narrow", rendered, ignore.case = TRUE))
+  expect_false(grepl("wider", rendered, ignore.case = TRUE))
 })
 
 # Fixture provenance ----------------------------------------------------------

@@ -140,17 +140,33 @@ not apply and no `std.error` is reported. Any `conf_level` in `(0, 1)` is
 accepted, and both project ICC(k) — and a numeric `unit` — through the same
 Spearman-Brown image as `"npbootstrap"`. The [**exact-F
 interval**](glossary.html#exact-f-interval) (`"searle"`; Searle 1971, the McGraw &
-Wong 1996 Table 7 limits) is exact under normality: best-calibrated and narrowest
-when the data are approximately normal. The [**Burch
+Wong 1996 Table 7 limits) is exact under normality and best-calibrated when the
+data are approximately normal. The [**Burch
 interval**](glossary.html#burch-interval) (`"burch"`; Burch 2011) is REML-based
 and kurtosis-adjusted: its width tracks the data's tail weight, which buys it
 some robustness to mild non-normality. It is not, however, a remedy for heavy
 tails: on strongly skewed subject effects it under-covers about as badly as the
 default (see [When the default under-covers](#when-the-default-under-covers)).
+
+**Which is the tighter interval?** Neither, reliably — and the two grids this
+package has measured point the opposite way from what you might expect of a
+"robust" interval. Across the M76 sweep (16 cells) and the wider M113 grid (64
+cells), `"burch"` is the *narrower* of the two in 16 of 16 and 59 of 64 cells
+respectively, by a median of about 4%, and no distribution family reverses it —
+not the gaussian cells, not the heavy-tailed `t(5)` ones, not the skewed
+chi-square(1) ones. That is a real limit on the comparison, though, because both
+grids draw only the **subject effects** from the non-normal family and always
+draw the errors from a normal. Burch's own expected-length comparison — which is
+against this very exact-F interval — is kurtosis-conditional: he finds his
+interval shorter for light-tailed data but *wider* for symmetric heavy-tailed
+data, measuring with both the subject effects and the errors non-normal. So the
+honest summary is that the ordering depends on the data, this package has
+measured it only in the subject-effect-only case, and you should not pick between
+them on width.
 Prefer `"searle"`: across every distribution family in that study it landed
 closer to nominal coverage in most cells, heavy-tailed ones included. What
-`"burch"` buys is dipping below the nominal level in fewer cells overall — a
-narrower kind of steadiness than its kurtosis adjustment suggests. Their value over
+`"burch"` buys is dipping below the nominal level in fewer cells overall — a more
+limited kind of steadiness than its kurtosis adjustment suggests. Their value over
 the default is a finite, well-calibrated interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts. One asymmetry
 between the siblings: on data with *no* between-subject variance at all,
@@ -184,7 +200,8 @@ three opt-in methods' lower limits dip below zero, because their endpoints are
 left untruncated on the estimator's own support, while the Monte-Carlo interval
 stays inside the range. And the Burch adjustment is empirical, not a one-way
 widening — here it comes out *narrower* than the exact-F interval, because its
-width tracks the tail weight these particular data actually show.
+width tracks the tail weight these particular data actually show, which is the
+same direction the grids above measure.
 
 ### The modified profile likelihood (`ci_method = "mpl"`)
 

@@ -8,11 +8,18 @@
 # `burch` at MSA exactly 0 aborts classed rather than standardize by
 # `sqrt(MSA) = 0` (D-022). They differ in their robustness:
 #   - SEARLE exact-F (Searle 1971 Ch. 9 Table 9.14; mcgraw1996 Table 7): EXACT under
-#     normality, best-calibrated + narrowest on ~normal data.
+#     normality, best-calibrated on ~normal data.
 #   - Burch (2011) REML (eq. 6/13/15/16/17): kurtosis-adjusted `log(1+nθ̂)`
-#     limits; wider, and designed for robustness to non-normality -- but
-#     measured (M113) to under-cover on strongly skewed subject effects, worst
-#     0.6655, so it is not a remedy for heavy tails.
+#     limits; designed for robustness to non-normality -- but measured (M113) to
+#     under-cover on strongly skewed subject effects, worst 0.6655, so it is not
+#     a remedy for heavy tails.
+# NOT "burch is wider than searle" -- that shipped for three milestones and is
+# false on both committed grids (M116: burch narrower in 16/16 M76 cells and
+# 59/64 M113 cells, no family reversing; see
+# data-raw/m116-classical-width-comparison.tsv). Burch's own eq. 18 comparison
+# is against this very exact-F interval and is kurtosis-CONDITIONAL, with his
+# reversal measured on data where the errors are non-normal too -- which neither
+# grid varies. Neither method is reliably the tighter one.
 #
 # Both mirror the sibling `"npbootstrap"` (M75, D-010) exactly on the API
 # conventions: balanced one-way only (guarded upstream in `icc()`), the reported
