@@ -10,6 +10,10 @@
 #          Burch (2011) measures with BOTH effects non-normal, so his reported
 #          leptokurtic reversal is untested here, not refuted.
 # ratio = burch median width / searle median width; < 1 means burch is NARROWER.
+# Blocks: by distribution family, then by DESIGN FACTOR (M117), then per cell.
+#          The factor block cuts by rho and by subject count k only. n (raters)
+#          is confounded with k marginally -- n = 2 occurs only at k = 10 in
+#          both grids -- so no per-n row is emitted and no doc states one.
 grid	dist	cells	burch_narrower	ratio_min	ratio_median	ratio_max
 m76	all	16	16	0.8995	0.943	0.9793
 m76	gaussian	8	8	0.9021	0.9448	0.9769
@@ -19,6 +23,24 @@ m113	chisq1	16	14	0.8992	0.9601	1.0211
 m113	gaussian	16	14	0.9	0.962	1.0007
 m113	t5	16	15	0.9012	0.9648	1.0028
 m113	uniform	16	16	0.8979	0.9612	0.9994
+
+# by design factor (M117). One row per (grid, factor, level).
+# The pooled per-grid median hides both cuts: the advantage shrinks in the
+# true ICC and in the subject count, reaching parity at rho = 0.6, where all
+# five reversing cells sit.
+grid	factor	level	cells	burch_narrower	ratio_min	ratio_median	ratio_max
+m76	rho	0.05	8	8	0.9012	0.943	0.9793
+m76	rho	0.1	8	8	0.8995	0.9453	0.9781
+m76	k	10	8	8	0.8995	0.9153	0.9297
+m76	k	30	4	4	0.9563	0.9611	0.9662
+m76	k	50	4	4	0.9745	0.9775	0.9793
+m113	rho	0.05	16	16	0.8992	0.9485	0.9757
+m113	rho	0.1	16	16	0.8979	0.947	0.9773
+m113	rho	0.3	16	16	0.9263	0.9475	0.9906
+m113	rho	0.6	16	11	0.9291	0.9971	1.0211
+m113	k	10	32	31	0.8979	0.9293	1.0007
+m113	k	30	16	15	0.9591	0.9646	1.0051
+m113	k	50	16	13	0.9744	0.9769	1.0211
 
 # per-cell detail
 grid	rho	k	n	dist	burch_width	searle_width	ratio	burch_narrower

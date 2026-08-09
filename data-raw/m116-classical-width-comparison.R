@@ -176,16 +176,43 @@ cells <- rbind(
 )
 
 # --- the figures the docs cite -------------------------------------------------
-summarize_grid <- function(d, grid, dist) {
-  x <- d[d$grid == grid & (is.na(dist) | d$dist == dist), ]
+# One arithmetic core, two groupings. M117 added the per-factor grouping and
+# routed the pre-existing per-distribution one through the same function, so the
+# two tables cannot drift into computing "median ratio" differently.
+width_summary <- function(x) {
   data.frame(
-    grid = grid,
-    dist = if (is.na(dist)) "all" else dist,
     cells = nrow(x),
     burch_narrower = sum(x$burch_narrower),
     ratio_min = round(min(x$ratio), 4),
     ratio_median = round(stats::median(x$ratio), 4),
     ratio_max = round(max(x$ratio), 4)
+  )
+}
+
+summarize_grid <- function(d, grid, dist) {
+  x <- d[d$grid == grid & (is.na(dist) | d$dist == dist), ]
+  cbind(
+    data.frame(grid = grid, dist = if (is.na(dist)) "all" else dist),
+    width_summary(x)
+  )
+}
+
+# M117: the same ratio, cut by the DESIGN factors rather than by distribution
+# family. The pooled per-grid median the docs used to state hides both cuts --
+# the advantage shrinks in the true ICC and in the subject count, and reaches
+# parity at rho = 0.6, where every reversing cell sits.
+#
+# `n` (raters) is deliberately NOT cut here. In both grids n = 2 occurs only at
+# k = 10, so the MARGINAL rater contrast is confounded with the subject count:
+# the n = 5 margin is the only one carrying k in {30, 50}. (The contrast at
+# fixed k is separable and points the other way -- which is exactly why a
+# marginal per-n row would invite a false reading. The confounding itself is
+# asserted below and pinned in tests/testthat/test-doc-skew-caveat.R.)
+summarize_level <- function(d, grid, fac, level) {
+  x <- d[d$grid == grid & d[[fac]] == level, ]
+  cbind(
+    data.frame(grid = grid, factor = fac, level = level),
+    width_summary(x)
   )
 }
 
@@ -201,6 +228,43 @@ summary_tbl <- do.call(
   Map(function(g, d) summarize_grid(cells, g, d), keys$grid, keys$dist)
 )
 rownames(summary_tbl) <- NULL
+
+level_keys <- do.call(
+  rbind,
+  lapply(c("m76", "m113"), function(g) {
+    do.call(
+      rbind,
+      lapply(c("rho", "k"), function(fac) {
+        data.frame(
+          grid = g,
+          factor = fac,
+          level = sort(unique(cells[[fac]][cells$grid == g])),
+          stringsAsFactors = FALSE
+        )
+      })
+    )
+  })
+)
+level_tbl <- do.call(
+  rbind,
+  Map(
+    function(g, fac, lv) summarize_level(cells, g, fac, lv),
+    level_keys$grid,
+    level_keys$factor,
+    level_keys$level
+  )
+)
+rownames(level_tbl) <- NULL
+
+# The design fact that licenses leaving the rater count out of `level_tbl`:
+# n = 2 occurs only at k = 10, in both grids. Asserted, not assumed -- if a
+# future grid breaks the confounding, this reds and a per-n cut becomes
+# statable.
+stopifnot(
+  "n = 2 no longer occurs only at k = 10 -- the marginal rater contrast may now be separable" = all(
+    cells$k[cells$n == 2] == 10
+  )
+)
 
 # --- pins: the figures the prose sites are allowed to state --------------------
 pick <- function(grid, dist) {
@@ -232,11 +296,89 @@ stopifnot(
     4
 )
 
-# Every family's median ratio is below 1 on both grids — the claim the docs make
-# is "narrower in nearly every cell of both grids", never a kurtosis-conditional
-# direction, because no family here reverses.
+# Every family's median ratio is below 1 on both grids — no family reverses on
+# its median, which is why the docs state no kurtosis-conditional direction.
 stopifnot(
   "a family's median ratio is not below 1" = all(summary_tbl$ratio_median < 1)
+)
+
+# --- M117 pins: the per-level figures the docs state ---------------------------
+# Exact to 4 dp, not to a rounding bucket. There is no Monte-Carlo noise at this
+# layer -- the script is pure aggregation over committed fixtures -- so a moved
+# digit means a source moved, and the docs quoting these numbers should red.
+# The bucket idiom above is kept for the two figures it was written for, but it
+# cannot carry these: at rho = 0.6 the median is 0.9971, and a drift to 1.0049
+# REVERSES the direction the prose states while staying in the same bucket.
+lvl <- function(grid, fac, level) {
+  hit <- level_tbl[
+    level_tbl$grid == grid &
+      level_tbl$factor == fac &
+      abs(level_tbl$level - level) < 1e-9,
+  ]
+  stopifnot("no such (grid, factor, level) row" = nrow(hit) == 1L)
+  hit
+}
+
+stopifnot(
+  "M113 rho=0.05 median moved" = lvl("m113", "rho", 0.05)$ratio_median ==
+    0.9485,
+  "M113 rho=0.1 median moved" = lvl("m113", "rho", 0.1)$ratio_median == 0.947,
+  "M113 rho=0.3 median moved" = lvl("m113", "rho", 0.3)$ratio_median == 0.9475,
+  "M113 rho=0.6 median moved" = lvl("m113", "rho", 0.6)$ratio_median == 0.9971,
+  "M113 k=10 median moved" = lvl("m113", "k", 10)$ratio_median == 0.9293,
+  "M113 k=30 median moved" = lvl("m113", "k", 30)$ratio_median == 0.9646,
+  "M113 k=50 median moved" = lvl("m113", "k", 50)$ratio_median == 0.9769
+)
+
+# The two sentences those figures license, stated as properties so a source
+# change reds here even if someone updates the digits above.
+m113_rho <- level_tbl[level_tbl$grid == "m113" & level_tbl$factor == "rho", ]
+m113_rho <- m113_rho[order(m113_rho$level), ]
+stopifnot(
+  # 1. Parity at the top of the rho range, and nowhere near it below.
+  "rho = 0.6 is no longer within 1% of parity" = abs(
+    1 - m113_rho$ratio_median[m113_rho$level == 0.6]
+  ) <
+    0.01,
+  "burch is no longer the narrower one at rho = 0.6 -- the direction reversed" = m113_rho$ratio_median[
+    m113_rho$level == 0.6
+  ] <
+    1,
+  "a rho level below 0.6 is no longer clear of parity" = all(
+    m113_rho$ratio_median[m113_rho$level < 0.6] < 0.96
+  ),
+  # 2. Every reversing cell sits at rho = 0.6.
+  "a reversing cell now sits away from rho = 0.6" = all(
+    cells$rho[!cells$burch_narrower] == 0.6
+  )
+)
+
+# 3. The advantage shrinks monotonically as the subject count grows -- on BOTH
+#    grids, which is what lets the docs state it without naming a grid.
+for (g in c("m76", "m113")) {
+  by_k <- level_tbl[level_tbl$grid == g & level_tbl$factor == "k", ]
+  by_k <- by_k[order(by_k$level), ]
+  stopifnot(
+    "the ratio is no longer monotone increasing in the subject count" = all(
+      diff(by_k$ratio_median) > 0
+    )
+  )
+}
+
+# 4. M76's design is a strict subset of M113's on (rho, k, n): the containment
+#    that made a POOLED per-grid figure read as a between-grid difference when
+#    it was really M113's extra rho levels. Pinned so the docs' "derived from
+#    the M113 grid alone" choice keeps its reason.
+combos <- function(g) {
+  x <- cells[cells$grid == g, c("rho", "k", "n")]
+  sort(unique(paste(x$rho, x$k, x$n, sep = "|")))
+}
+stopifnot(
+  "M76's design is no longer contained in M113's" = all(
+    combos("m76") %in% combos("m113")
+  ),
+  "M113 no longer carries design points M76 lacks" = length(combos("m113")) >
+    length(combos("m76"))
 )
 
 header <- c(
@@ -251,7 +393,18 @@ header <- c(
   "#          rnorm, asserted by the generator against the sweep scripts' source.",
   "#          Burch (2011) measures with BOTH effects non-normal, so his reported",
   "#          leptokurtic reversal is untested here, not refuted.",
-  "# ratio = burch median width / searle median width; < 1 means burch is NARROWER."
+  "# ratio = burch median width / searle median width; < 1 means burch is NARROWER.",
+  "# Blocks: by distribution family, then by DESIGN FACTOR (M117), then per cell.",
+  "#          The factor block cuts by rho and by subject count k only. n (raters)",
+  "#          is confounded with k marginally -- n = 2 occurs only at k = 10 in",
+  "#          both grids -- so no per-n row is emitted and no doc states one."
+)
+
+level_header <- c(
+  "# by design factor (M117). One row per (grid, factor, level).",
+  "# The pooled per-grid median hides both cuts: the advantage shrinks in the",
+  "# true ICC and in the subject count, reaching parity at rho = 0.6, where all",
+  "# five reversing cells sit."
 )
 
 as_tsv <- function(d) {
@@ -263,9 +416,19 @@ as_tsv <- function(d) {
 
 out <- "data-raw/m116-classical-width-comparison.tsv"
 writeLines(
-  c(header, as_tsv(summary_tbl), "", "# per-cell detail", as_tsv(cells)),
+  c(
+    header,
+    as_tsv(summary_tbl),
+    "",
+    level_header,
+    as_tsv(level_tbl),
+    "",
+    "# per-cell detail",
+    as_tsv(cells)
+  ),
   out
 )
 
 print(summary_tbl)
+print(level_tbl)
 cat("\nwrote ", out, "\n", sep = "")

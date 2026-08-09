@@ -96,7 +96,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 
 ## Tasks
 
-- [ ] T1 Extend `data-raw/m116-classical-width-comparison.R`: per-factor
+- [x] T1 Extend `data-raw/m116-classical-width-comparison.R`: per-factor
       summary rows for ρ and `k` per grid (reuse `summarize_grid`'s arithmetic,
       `R:178-189`), regenerate the `.tsv`, add the pins, mutation-verify each.
       Sequence with T7: the D-009 directive at
@@ -130,6 +130,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: plan gate chose deriving the conditional from the M113 grid alone over reporting both grids per level, because M76 carries only ρ ∈ {0.05, 0.1} and its design is a strict subset of M113's; falsified by a grid whose ρ coverage M113 lacks.
 - 2026-08-09: plan gate chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and narrowing the promise, because a recalled path list is the proxy shape that beat M102 three times; falsified by the walk reddening on legitimate width vocabulary it cannot distinguish.
 - 2026-08-09: started by /milestone-implement on branch m117-conditional-width-claim.
+- 2026-08-09: T1 — generator emits a per-(grid, factor, level) block for rho and subject count, both groupings routed through one `width_summary()` core; 15 new pins, each mutation-verified via a harness that masks `stopifnot` so one mutation reports every pin it trips (10 mutations + an unmutated control that fires none). The rho=0.6 sign-crossing mutation the rounding-bucket idiom cannot see reds the exact pin and the direction pin. The D-009 directive reading the fixture positionally still exits 0.
 - 2026-08-09: plan gate read D-012 Amendment 1's reopening clause ("a grid on which Burch's median width exceeds SEARLE's") as not tripped by the ρ=0.6/`k`=50 region's 1.0015 median, the clause being scoped to whole grids and M76 carrying no reversal; no D-012 Amendment 2. Falsified by a whole committed grid whose median ratio exceeds 1.
 
 ## Decisions
