@@ -129,17 +129,17 @@ Review return #1 repair:
       rater count present at every subject count) replacing the confounded
       marginal `k` rows as what the docs quote; regenerate; pin the new rows and
       the flat-below-0.6 ρ shape; commit the mutation harness.
-- [ ] T10 Rewrite the test's width apparatus: a level↔figure ASSOCIATION pin
+- [x] T10 Rewrite the test's width apparatus: a level↔figure ASSOCIATION pin
       (not set membership) run over the installed surfaces as well as the source
       tree, a discriminating conditional-statement pin, a fixed-stratum rater
       rule in place of the blanket rater ban, anti-vacuity floors at the
       measured site count.
-- [ ] T11 Correct the prose at the six reported sites: the ρ shape is
+- [x] T11 Correct the prose at the six reported sites: the ρ shape is
       flat-then-collapse, not shrinking; the subject-count figures are the
       5-rater ones; ρ = 0.6 is attributed to M113 alone; the grid-containment
       claim is bounded to what it explains; the figures move out of
       `R/ci-classical.R` into the article.
-- [ ] T12 Extend the D-009 directive to settle every figure and fact the
+- [x] T12 Extend the D-009 directive to settle every figure and fact the
       references paragraph states; re-triage the ledgers; four checkers green.
 - [ ] T13 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`,
       installed-package suite at `NOT_CRAN=true CI=true`, CI matrix.
@@ -164,6 +164,10 @@ Review return #1 repair:
 - 2026-08-09: T2 — both surface legs now walk their own domain (whole Rd database, every installed vignette, installed NEWS; every `R/*.R`, every `vignettes/*.Rmd`, `NEWS.md`), each asserting it still reaches all six retired hand-list paths and strictly more. The vignette-presence assertion moved to its own `test_that` — left above the sweep, its `skip_if` took the Rd and NEWS checks down with it in a dev session (M116). 375 → 423 passing assertions.
 - 2026-08-09: minor amendment — T4 (enumerate the sites) runs before T3 (pin the figures); the sweep is what scopes which figures exist to pin. No scope or criterion change.
 - 2026-08-09: T1 — generator emits a per-(grid, factor, level) block for rho and subject count, both groupings routed through one `width_summary()` core; 15 new pins, each mutation-verified via a harness that masks `stopifnot` so one mutation reports every pin it trips (10 mutations + an unmutated control that fires none). The rho=0.6 sign-crossing mutation the rounding-bucket idiom cannot see reds the exact pin and the direction pin. The D-009 directive reading the fixture positionally still exits 0.
+- 2026-08-09: T12 — the D-009 directive now settles every figure and fact the paragraph states (10 level medians, the five-reversing-cells fact, the n = 2 confounding, the sub-0.6 flatness and its non-monotone peak, and that the marginal and 5-rater k = 10 rows differ), up from 4. Mutation-verified: moving any of three level medians by one digit reds it. Ledgers: two `mpl-doc-claims.tsv` rows re-triaged onto the corrected sentences (the replaced row asserted the margin shrinking in rho, which the fixture falsifies), one `generalizing-claims-triage.tsv` row split into two on the rewritten paragraph. All four data-raw checkers exit 0.
+- 2026-08-09: T11 — the six sites rewritten: the rho shape is flat-then-collapse (the margin peaks at 0.1, so the shipped "shrinks as either grows" was false on its own figures), the subject-count figures are the 5-rater ones, rho = 0.6 is attributed to the one grid that reaches it, the grid-containment claim is bounded to "most of the gap", and `R/ci-classical.R`'s seven figures move to the article. Mutation-verified at all seven statements: replacing each with "That margin is conditional on the true ICC and on the subject count" — the shape review O11 found passing — now reds 2 or 3 markers at every one.
+- 2026-08-09: T10 — the association pin. Swapping a real figure for another real figure from the same pool now reds (0.9971 -> 0.9769 at rho = 0.6, 0.9154 -> 0.9646 at 10 subjects, `13 of 16` -> `15 of 16`, `59 of 64` -> `61 of 64`), and a free-standing pooled ratio (0.9614 with no level) reds as "stated with no level attached". Pins run over the installed help/vignettes/NEWS as well as the source tree, so they no longer all skip under `R CMD check`. Two defects found while building it: the table-strip regex matched non-overlappingly and left every other cell readable as loose prose, and the article's smaller-grid triple sat in a sentence naming neither method, so its three figures were unpinned (review O3, recurring).
+- 2026-08-09: the AC3 pin is keyed per contiguous STATEMENT, not per file: with per-file keying, reverting `?icc`'s `@param` conditional reddened nothing because `@details` still satisfied the file. A run is held to the three direction markers only when it names the margin or the advantage — a NEWS bullet pointing at the correction asserts no margin and is not held to one.
 - 2026-08-09: amendment return: AC4 — "no stated figure is a grid-wide median pooling ρ and `k` together — every figure is cut at one level of one factor"; the original second clause forbade pooling over ρ OR over `k`, which every per-factor cut necessarily does (review O15). Gate chose the rewrite over keeping wording no work could satisfy.
 - 2026-08-09: gate chose recomputing the subject-count figures at 5 raters (0.9154/0.9646/0.9769 on M113, 0.9017/0.9611/0.9775 on M76) over keeping the marginal ones with a caveat or dropping them, because k = 10 is the only subject count carrying n = 2 and the marginal cut repeats one level down the confounding the milestone used to refuse a rater claim (review O6); falsified by a grid balancing the rater count across subject counts.
 - 2026-08-09: gate chose moving the stated figures out of `R/ci-classical.R`'s internal comment into the article over keeping them beside the code, because an internal comment is not in the built package, so every pin over it skips under `R CMD check` (review O13); falsified by a figure that has no installed surface to live on.

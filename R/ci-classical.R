@@ -14,14 +14,20 @@
 #     under-cover on strongly skewed subject effects, worst 0.6655, so it is not
 #     a remedy for heavy tails.
 # NOT "burch is wider than searle" -- that shipped for three milestones and is
-# false on both committed grids (M116: burch narrower in 16/16 M76 cells and
-# 59/64 M113 cells, no family reversing on its median; see
-# data-raw/m116-classical-width-comparison.tsv). Nor is it a flat margin, which
-# the pooled figure that replaced it implied (M117): on the M113 grid the median
-# width ratio is 0.9485, 0.9470 and 0.9475 at a true ICC of 0.05, 0.1 and 0.3 but
-# 0.9971 at 0.6, and 0.9293, 0.9646 and 0.9769 at 10, 30 and 50 subjects -- the
-# advantage shrinks in both, and every cell where searle came out narrower sits
-# at a true ICC of 0.6. Burch's own eq. 18 comparison
+# false on both committed grids (M116: burch narrower in 16 of 16 cells of the
+# M76 grid and 59 of 64 cells of the M113 one, no family reversing on its
+# median; see data-raw/m116-classical-width-comparison.tsv). Nor is it a flat
+# margin, which the pooled figure that replaced it implied (M117): burch's width
+# margin holds much the same up to a true ICC of 0.3 rather than shrinking as
+# the true ICC rises, then collapses to near parity at 0.6, where every cell
+# searle won sits; and it shrinks steadily as the subject count grows, measured
+# at 5 raters. That is the only rater count present at every subject count, so
+# the unstratified subject-count cut would be confounded.
+# The per-level figures live in the interval-methods article, tabulated and
+# pinned by tests/testthat/test-doc-skew-caveat.R against the committed
+# fixture. They are deliberately not restated here: a figure in a source
+# comment is not in the built package, so no pin that runs under `R CMD check`
+# can reach it. Burch's own eq. 18 comparison
 # is against this very exact-F interval and is kurtosis-CONDITIONAL, with his
 # reversal measured on data where the errors are non-normal too -- which neither
 # grid varies. Neither method is reliably the tighter one.

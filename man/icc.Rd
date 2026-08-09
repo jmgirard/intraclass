@@ -294,11 +294,13 @@ are approximately normal. \code{"burch"} is the REML-based, kurtosis-adjusted
 interval of Burch (2011), designed for robustness to non-normality; its
 width tracks the data's tail weight rather than widening by construction.
 On the two grids this package has measured, \code{"burch"} is usually the
-\strong{narrower} of the two -- but by a margin that depends on the data, so it
-is not a rule of thumb. The margin is widest at a low true ICC with few
-subjects and shrinks as either grows; by a true ICC of 0.6 the two
-intervals are within a fraction of a percent, and every cell where
-\code{"searle"} came out narrower sits there. Both grids
+\strong{narrower} of the two -- but by a margin that depends on the design, so
+it is not a rule of thumb. That margin does not simply shrink as the true
+ICC rises: it holds much the same up to a true ICC of 0.3, then collapses,
+and on the one grid reaching a true ICC of 0.6 the two intervals sit within
+a fraction of a percent of each other there, which is also where every cell
+\code{"searle"} won sits; in the subject count it does shrink, steadily, as the
+study grows -- measured at 5 raters. Both grids
 vary only the subject effect, though; Burch (2011) reports the direction
 reversing for symmetric heavy-tailed data with the errors non-normal too,
 which neither grid tests. Treat neither as reliably the tighter interval;
@@ -665,10 +667,13 @@ exact-F pivot \code{F / (1 + n*lambda) ~ F(k-1, k(n-1))} (Searle 1971, Ch. 9 Tab
 the McGraw & Wong 1996 Table 7 limits); it is exact under normality. \code{"burch"} builds
 kurtosis-adjusted \code{log(1 + n*theta-hat)} limits (Burch 2011), so its width tracks
 the data's tail weight rather than widening by construction: on both grids this
-package has measured it came out narrower than \code{"searle"} in nearly every cell --
-most so at a low true ICC with few subjects, and by a vanishing margin once the
-true ICC reaches 0.6, where every cell favouring \code{"searle"} sits --
-while Burch reports the reverse for symmetric heavy-tailed data with non-normal errors, a
+package has measured it came out narrower than \code{"searle"} in nearly every cell.
+How much narrower is conditional, and not in the direction one might guess:
+\code{"burch"}'s margin holds much the same up to a true ICC of 0.3 rather than
+shrinking as the true ICC rises, then collapses to near parity at 0.6 -- on the
+one grid reaching that value, where every cell favouring \code{"searle"} sits. It
+shrinks steadily as the subject count grows, measured at 5 raters.
+Burch reports the reverse for symmetric heavy-tailed data with non-normal errors, a
 case those grids do not cover.
 Its robustness has a measured limit: on strongly skewed subject effects
 \code{"burch"} under-covers about as badly as the default (see the coverage caveat

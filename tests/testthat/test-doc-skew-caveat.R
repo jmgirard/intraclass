@@ -564,12 +564,43 @@ width_neighbourhood <- function(text) {
   }
   idx <- sort(unique(pmax(1L, pmin(length(sents), c(hit - 1L, hit, hit + 1L)))))
   crosses_heading <- grepl("#{2,} ", sents[idx]) & !(idx %in% hit)
-  sents[idx[!crosses_heading]]
+  keep <- idx[!crosses_heading]
+  if (!length(keep)) {
+    return(list())
+  }
+  # One file can carry several width statements far apart -- `@param ci_method`
+  # and `@details` in the same roxygen block, three separate NEWS bullets. A
+  # per-FILE check lets a good statement cover a weakened one: reverting the
+  # conditional clause from `@param` reddened nothing, because `@details` still
+  # satisfied the file. So the unit is the contiguous RUN of sentences, which is
+  # the statement.
+  lapply(split(keep, cumsum(c(1L, diff(keep) != 1L))), function(r) sents[r])
 }
 
 width_neighbourhoods_leg <- function(surfaces) {
-  out <- lapply(surfaces, width_neighbourhood)
-  out[vapply(out, length, integer(1)) > 0L]
+  out <- list()
+  for (nm in names(surfaces)) {
+    runs <- width_neighbourhood(surfaces[[nm]])
+    for (i in seq_along(runs)) {
+      out[[paste0(nm, " #", i)]] <- runs[[i]]
+    }
+  }
+  out
+}
+
+# Which runs must state how the ratio moves. A run that names the MARGIN or the
+# ADVANTAGE is making a claim about its size, and a claim about its size that
+# does not say what the size depends on is the defect this milestone exists to
+# remove. A run merely mentioning the pair beside a width word -- a NEWS bullet
+# pointing at the correction, the article's paragraph on Burch's own
+# kurtosis-conditional ordering -- asserts no margin and is not held to it.
+width_asserts_margin <- function(run) {
+  grepl("margin|advantage", paste(run, collapse = " "), ignore.case = TRUE)
+}
+
+width_claim_runs <- function(surfaces) {
+  runs <- width_neighbourhoods_leg(surfaces)
+  runs[vapply(runs, width_asserts_margin, logical(1))]
 }
 
 # Numerals in a width sentence that are not measurements: citation years, the
@@ -691,8 +722,12 @@ width_prose_pairs <- function(text) {
 
 # Markdown table rows are pinned by `width_table_claims()`; strip them before
 # looking for prose figures so a table cell is not also read as a loose numeral.
+# A whole run of table cells, not one cell at a time: `\\|[^|]*\\|` matches
+# non-overlappingly, so on `| a | b | c |` it takes `| a |` and then `| c |` and
+# leaves `b` behind as loose prose -- which is how three of the article's seven
+# table figures first read as free-standing.
 width_strip_tables <- function(text) {
-  gsub("\\|[^|]*\\|", " ", text)
+  gsub("\\|(?:[^|]*\\|)+", " ", text, perl = TRUE)
 }
 
 # Does a stated (factor, level, ratio) match the recomputed median? Per-rho
@@ -810,6 +845,13 @@ test_that("M76's design is contained in M113's on (rho, k, n)", {
   }
   expect_true(all(combos("m76") %in% combos("m113")))
   expect_gt(length(combos("m113")), length(combos("m76")))
+
+  # And the specific gap the docs now name. Three surfaces attributed the
+  # rho = 0.6 parity finding to "the two grids"; only one grid reaches that
+  # value, so the smaller one cannot have shown it. This is the fact that
+  # licenses "on the one grid reaching that value".
+  expect_false(any(w$rho[w$grid == "m76"] == 0.6))
+  expect_true(any(w$rho[w$grid == "m113"] == 0.6))
 })
 
 test_that("the article's width tables state the median for the level named", {
@@ -839,6 +881,29 @@ test_that("the article's width tables state the median for the level named", {
     expect_equal(cl$ratio, unname(med[[i]]), info = where)
     expect_identical(cl$narrower, unname(cnt[[i]][["narrower"]]), info = where)
     expect_identical(cl$cells, unname(cnt[[i]][["cells"]]), info = where)
+  }
+})
+
+test_that("the article states the smaller grid's subject-count medians too", {
+  # The pair check accepts either grid, because "0.9646 at 30 subjects" names no
+  # grid and both are legitimately quoted. That leaves one hole: swapping the
+  # smaller grid's figure for the larger grid's at the same level would pass.
+  # Completeness closes it -- all three of the smaller grid's 5-rater medians
+  # must be stated, so a substituted one goes missing here.
+  lines <- article_lines()
+  skip_if(
+    !length(lines),
+    "the article is neither installed nor in a source tree"
+  )
+  text <- squash(lines)
+  med <- width_level_medians(width_fixture(), "m76", "k_at_n5")
+  for (lv in names(med)) {
+    expect_match(
+      text,
+      paste0(format(med[[lv]], nsmall = 4), " at ", lv, " subjects"),
+      fixed = TRUE,
+      info = paste("the smaller grid's median at", lv, "subjects is not stated")
+    )
   }
 })
 
@@ -986,16 +1051,24 @@ test_that("every width statement names the shape in ICC and in subject count", {
   legs <- width_legs()
   expect_gt(length(legs), 0L)
   for (leg in names(legs)) {
-    surfaces <- width_neighbourhoods_leg(legs[[leg]])
-    floor <- if (identical(leg, "source")) {
-      length(width_expected_source)
+    runs <- width_claim_runs(legs[[leg]])
+    expected <- if (identical(leg, "source")) {
+      width_expected_source
     } else {
-      length(width_expected_installed)
+      width_expected_installed
     }
-    expect_gte(length(surfaces), floor)
+    # Anti-vacuity, per surface rather than as a total: every surface the AC5
+    # sweep reported must still contribute a margin claim, so a statement
+    # disappearing from one file cannot be masked by two in another.
+    for (e in expected) {
+      expect_true(
+        sum(startsWith(names(runs), paste0(e, " #"))) >= 1L,
+        info = paste(leg, e, "no longer states a width margin")
+      )
+    }
 
-    for (nm in names(surfaces)) {
-      text <- paste(surfaces[[nm]], collapse = " ")
+    for (nm in names(runs)) {
+      text <- paste(runs[[nm]], collapse = " ")
       for (mk in names(markers)) {
         expect_match(
           text,

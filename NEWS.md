@@ -62,13 +62,16 @@
   `ci_method = "searle"` as the tightest available on near-normal data — in the
   help page, the article, the glossary, the runtime message and this file. Both
   grids the package has measured say otherwise: `"burch"` is the narrower of the
-  two in 16 of 16 cells of one and 59 of 64 of the other, with no distribution
-  family reversing it on its median. That margin is **conditional**, and the
-  documentation now says so rather than quoting one pooled figure: it is widest
-  at a low true ICC with few subjects and shrinks as either grows, until at a
-  true ICC of 0.6 the two intervals are within a fraction of a percent and every
-  cell favouring `"searle"` sits there. The article tabulates it by true ICC and
-  by subject count. No source supports the withdrawn wording either — Burch (2011)
+  two in 16 of 16 cells of one and 59 of 64 cells of the other, with no
+  distribution family reversing it on its median. That margin is **conditional**,
+  and the documentation now says so rather than quoting one pooled figure — but
+  not in the direction one might guess: `"burch"`'s width margin holds much the
+  same up to a true ICC of 0.3 rather than shrinking as the true ICC rises, then
+  collapses to near parity at 0.6 where every cell favouring `"searle"` sits, and
+  shrinks steadily as the subject count grows, measured at 5 raters. That is the
+  only rater count present at every subject count, so an unstratified
+  subject-count figure would be confounded. The article tabulates both cuts. No
+  source supports the withdrawn wording either — Burch (2011)
   compares against this same exact-F interval and reports a
   *kurtosis-conditional* ordering, shorter for light-tailed data and wider for
   symmetric heavy-tailed data where the errors are non-normal too, which neither
