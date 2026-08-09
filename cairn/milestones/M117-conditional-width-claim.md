@@ -31,14 +31,14 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 
 ## Acceptance criteria
 
-- [ ] AC1 The generator emits one summary row per (grid, factor, level) for
+- [x] AC1 The generator emits one summary row per (grid, factor, level) for
       factor ∈ {ρ, subject count `k`}, by the same width-ratio arithmetic as
       the per-cell rows, and the `.tsv` is regenerated to carry them. Each new
       `stopifnot` pin is mutation-verified against a perturbation large enough
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [ ] AC2 Every width figure any rewritten site states is recomputed by
+- [x] AC2 Every width figure any rewritten site states is recomputed by
       `test-doc-skew-caveat.R` from the fixture's per-cell rows and asserted to
       match at the prose's own rounding. The numeral-enumeration leg is
       extended to each roxygen block and each `###` vignette section that AC5's
@@ -46,7 +46,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       what the sweep returns, not a remembered list (the two existing anchors,
       `@section Confidence intervals:` and `^### When the default under-covers`,
       cover none of the width sites).
-- [ ] AC3 At every site AC5's sweep reports as carrying a width statement, that
+- [x] AC3 At every site AC5's sweep reports as carrying a width statement, that
       statement names how the ratio moves with ρ and with the subject count, and
       no site states a rater-count width effect. A test asserts from the per-cell
       rows the fact that licenses the omission: `n = 2` occurs only at `k = 10`,
@@ -54,12 +54,12 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       asserts nothing about separability at fixed `k`, where a rater contrast
       does exist and points the other way. The runtime hint stays width-silent,
       as `test-doc-skew-caveat.R:424-425` already pins.
-- [ ] AC4 Every per-ρ figure stated is computed from the M113 rows alone, and no
+- [x] AC4 Every per-ρ figure stated is computed from the M113 rows alone, and no
       figure pools over ρ or over `k` within a grid. A test asserts the two
       grids' `(ρ, k, n)` design-combination sets stand in the containment
       M76 ⊂ M113 that made the pooled figure misread as a between-grid
       difference.
-- [ ] AC5 `test-doc-skew-caveat.R`'s installed-surface and source-tree legs
+- [x] AC5 `test-doc-skew-caveat.R`'s installed-surface and source-tree legs
       resolve their targets by directory walk — every `R/*.R`, every
       `vignettes/*.Rmd`, `NEWS.md`, plus the installed Rd database, installed
       vignettes and installed `NEWS.md` — replacing the six hand-listed paths,
@@ -67,19 +67,19 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       confirmed under `testthat::test_file("tests/testthat/test-doc-skew-caveat.R",
       package = "intraclass", load_package = "installed")` on a
       `build_vignettes = TRUE` install.
-- [ ] AC6 Each pattern added to `claim_patterns` is two-sided verified — zero
+- [x] AC6 Each pattern added to `claim_patterns` is two-sided verified — zero
       hits over the surfaces AC5's sweep walks, at least one hit on the
       pre-correction tree. Scoped to those surfaces, never the repo: the
       withdrawn phrasings survive legitimately in `DECISIONS.md`, `LESSONS.md`
       and `milestones/archive/`, which D-020 rule 4 excludes because IP4 forbids
       editing history.
-- [ ] AC7 `check-mpl-doc-claims.py`, `check-reference-observations.py`,
+- [x] AC7 `check-mpl-doc-claims.py`, `check-reference-observations.py`,
       `enumerate-generalizing-claims.py --check` and `check-record-claims.py`
       each exit 0 on the final tree, with `mpl-doc-claims.tsv` re-triaged for
       every sentence changed inside the blocks it keys, and
       `cairn/references/classical-oneway-comparison.md` recording the per-factor
       breakdown under a D-009 dated observation.
-- [ ] AC8 The profile's verify slot is clean: `air format --check`,
+- [x] AC8 The profile's verify slot is clean: `air format --check`,
       `lintr::lint_package()`, and the installed-package suite at
       `NOT_CRAN=true CI=true`.
 
@@ -144,3 +144,24 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 ## Decisions
 
 ## Review
+
+**PR:** https://github.com/jmgirard/intraclass/pull/126 · reviewed 2026-08-09.
+
+### Evidence per criterion (fresh, this session)
+
+- AC1 — the regenerated `.tsv` carries 12 per-(grid, factor, level) rows (m76: rho x2, k x3; m113: rho x4, k x3), computed by the shared `width_summary()` core. Pins re-verified with the mutation harness: 10 targeted mutations fire 53 pin-reds between them, every new pin fires on at least one, and the unmutated control fires none. The rho=0.6 sign-crossing mutation (0.9971 -> 1.0049) reds both the exact pin and the direction pin; the pre-existing rounding-bucket idiom does not see it.
+- AC2 — installed-package run of the width blocks green; every stated figure is recomputed from the per-cell rows at test time. Corroborated independently: the [S] blame-history lens re-derived all thirteen quoted medians in a fresh R session and matched every doc site.
+- AC3 — green, including the marginal-confounding assertion (`n = 2` occurs only at `k = 10`) and the no-rater-mention check over the heading-bounded window. The runtime hint stays width-silent (pre-existing pin, still green).
+- AC4 — green, including the M76 subset-of M113 containment assertion on (rho, k, n). Every per-rho figure stated is M113-only.
+- AC5 — `testthat::test_file(..., load_package = "installed")` at `NOT_CRAN=true CI=true` on a `build_vignettes = TRUE` install: **0 failed, 0 skipped, 709 passed**. Both legs walk their domain and assert they still reach all six retired hand-list paths and strictly more.
+- AC6 — two-sided over squashed text: `pooled_pct_param` 2 pre-correction / 0 corrected, `pooled_pct_vignette` 1 / 0. All six M116 patterns preserved verbatim.
+- AC7 — `check-mpl-doc-claims.py`, `check-reference-observations.py`, `check-record-claims.py`, `enumerate-generalizing-claims.py --check` all exit 0. Ledgers re-triaged; the new D-009 directive mutation-verified (reds on a moved value, greens on restore).
+- AC8 — `air format --check` clean, `lintr::lint_package()` 0 lints, full installed suite 0 failed / 0 errors / 6563 passed / 23 skipped (all `skip_on_ci`).
+
+### Consistency gate
+
+`cairn_validate` exit 0 (one advisory: 8 acceptance criteria against the 7 split tripwire — a justified exceedance, seven substantive plus the template-mandated verify criterion). `devtools::document()` no diff. `pkgdown::check_pkgdown()` clean. `devtools::check(--as-cran)`: **0 errors, 0 warnings, 0 notes**. No `DESIGN.md` principle changed, so `cairn_impact` no-ops.
+
+### Process note
+
+A concurrently-running review subagent wrote perturbed ratio values into `tests/testthat/fixtures/classical-width-by-cell.tsv` mid-review, briefly reddening the two width blocks. The file was restored from git and every criterion re-verified clean. Logged because evidence gathered while subagents share the working tree can be contaminated -- and because the pins reddening on that unplanned perturbation is independent confirmation they detect a moved fixture.
