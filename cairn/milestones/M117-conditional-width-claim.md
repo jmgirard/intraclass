@@ -1,6 +1,6 @@
 # M117: State the `"burch"`/`"searle"` width relationship conditionally
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -31,7 +31,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 
 ## Acceptance criteria
 
-- [x] AC1 The generator emits one summary row per (grid, factor, level) for
+- [ ] AC1 The generator emits one summary row per (grid, factor, level) for
       factor ∈ {ρ, subject count `k`}, by the same width-ratio arithmetic as
       the per-cell rows, and the `.tsv` is regenerated to carry them. Each new
       `stopifnot` pin is mutation-verified against a perturbation large enough
@@ -46,7 +46,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       what the sweep returns, not a remembered list (the two existing anchors,
       `@section Confidence intervals:` and `^### When the default under-covers`,
       cover none of the width sites).
-- [ ] AC3 At every site AC5's sweep reports as carrying a width statement, that
+- [x] AC3 At every site AC5's sweep reports as carrying a width statement, that
       statement names how the ratio moves with ρ and with the subject count, and
       no site states a rater-count width effect. A test asserts from the per-cell
       rows the fact that licenses the omission: `n = 2` occurs only at `k = 10`,
@@ -74,7 +74,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       withdrawn phrasings survive legitimately in `DECISIONS.md`, `LESSONS.md`
       and `milestones/archive/`, which D-020 rule 4 excludes because IP4 forbids
       editing history.
-- [ ] AC7 `check-mpl-doc-claims.py`, `check-reference-observations.py`,
+- [x] AC7 `check-mpl-doc-claims.py`, `check-reference-observations.py`,
       `enumerate-generalizing-claims.py --check` and `check-record-claims.py`
       each exit 0 on the final tree, with `mpl-doc-claims.tsv` re-triaged for
       every sentence changed inside the blocks it keys, and
@@ -166,6 +166,7 @@ Review return #1 repair:
 - 2026-08-09: T1 — generator emits a per-(grid, factor, level) block for rho and subject count, both groupings routed through one `width_summary()` core; 15 new pins, each mutation-verified via a harness that masks `stopifnot` so one mutation reports every pin it trips (10 mutations + an unmutated control that fires none). The rho=0.6 sign-crossing mutation the rounding-bucket idiom cannot see reds the exact pin and the direction pin. The D-009 directive reading the fixture positionally still exits 0.
 - 2026-08-09: status review. CI on `0c43faf`: `format-check`, `lint`, `pkgdown` and `check-references` pass; `ubuntu-latest (release)`, `windows-latest (release)` and `test-coverage` still running after 13 minutes (the matrix runs 17-23 minutes, M78). The status-change commit is deliberately NOT pushed while they are in flight — pushing cancels them and restarts on the new head, which is what happened at the last review checkpoint.
 - 2026-08-09: CI caught what the review's local evidence could not: the `test-coverage` job was RED on the branch head (3 failures, `53a0711`) while `R CMD check` was green on every platform. `covr` runs the suite against a built package in a temp dir that carries `NEWS.md` but no `R/*.R` and no `vignettes/` — a PARTIAL source tree, where the walk returns one surface and `skip_if(length(surfaces) == 0L)` does not fire, so every anti-vacuity floor fails instead of skipping. The source leg now gates on `data-raw/` (`.Rbuildignore`d, so present in the source tree and in no built copy). Reproduced in a scratch dir with that exact layout: the pre-fix file reds the same two assertions the CI log names, the fixed file skips cleanly (0 failed, 4 skipped).
+- 2026-08-09: review return #2 (defect) — AC1, AC2 and AC4 fail as written, each verified by command with the tree restored. AC1: three M117 `stopifnot` pins fire on no committed mutation (the two containment pins and the `lvl()` guard), so "each new pin is mutation-verified" is false; tick withdrawn. AC2: four stated width figures are asserted by nothing — `five cells` -> `nine cells`, `half a percentage point` -> `five percentage points`, `64-cell` -> `32-cell`, `four distribution families` -> `six` all leave the suite green. AC4: its amended final clause has no implementation — "Pooled over the larger grid the median width ratio is 0.9614." passes, because the sweep selects only sentences carrying the token `burch`. AC3, AC5, AC6, AC7 and AC8 verified and ticked; CI fully green on `0183caf`. Thrash trigger (b) fires on AC2 (second failure, same shape); the plan gate's recorded alternative — narrowing the promise — is the one to reconsider.
 - 2026-08-09: T13 — gate clean on a rebuilt `build_vignettes = TRUE` install. `test-doc-skew-caveat.R` at `load_package = "installed"`, `NOT_CRAN=true CI=true`: 0 failed, 0 skipped, 987 passed (AC5's zero-skip claim re-measured on the surface it is about). Full installed suite: 0 failed, 0 errors, 6841 passed, 23 skipped (all `skip_on_ci`, the brms live-Stan class), 2 pre-existing engine fitting warnings in `test-icc-lavaan-multilevel.R` / `test-icc-type-vector.R`, neither touched by this branch. `air format --check`, `lintr::lint_package()` (0 lints), `pkgdown::check_pkgdown()`, `devtools::document()` (no diff) and `cairn_validate` all clean; the two `cairn_validate` advisories are the 8-criterion and 13-task split tripwires, both a review return's repair tasks rather than a mis-sized milestone.
 - 2026-08-09: AC6 extended for the claim this return withdraws: `shrinks as either grows` (2 pre-correction hits, 0 corrected) and `at a low true ICC with few subjects` (3 / 0), both counted over squashed text across the swept surfaces.
 - 2026-08-09: the installed leg's anti-vacuity set is now DERIVED from the surfaces present rather than a fixed pair, so the floor sits at the measured count instead of below it (review O10).
@@ -224,3 +225,52 @@ Review return #1 repair:
 ### Process note
 
 A concurrently-running review subagent wrote perturbed ratio values into `tests/testthat/fixtures/classical-width-by-cell.tsv` mid-review, briefly reddening the two width blocks. The file was restored from git and every criterion re-verified clean. Logged because evidence gathered while subagents share the working tree can be contaminated -- and because the pins reddening on that unplanned perturbation is independent confirmation they detect a moved fixture.
+
+---
+
+## Review — return #2 (2026-08-09)
+
+**PR:** https://github.com/jmgirard/intraclass/pull/126 · CI on `0183caf` fully green (ubuntu 21m24s, windows 23m53s, test-coverage 22m3s, plus format-check, lint, pkgdown, check-references, codecov). The `test-coverage` pass is itself the confirmation that the `covr` partial-source-tree guard works — that job was red on `53a0711`.
+
+### Evidence per criterion (fresh, this session)
+
+- AC1 — **FAIL, tick withdrawn.** Differencing the committed harness's fired-label set against the 48 `stopifnot` labels in the generator: 33 labels fire, and three M117-added pins fire on no mutation at all — `"M76's design is no longer contained in M113's"`, `"M113 no longer carries design points M76 lacks"`, and the `lvl()` guard `"no such (grid, factor, level) row"`. No committed mutation alters a design-combination set or removes a level, so those three cannot fire by construction. AC1 requires each new pin mutation-verified.
+- AC2 — **FAIL.** Four width figures the rewritten article states are not asserted to match; each was mutated in the real tree and left the suite green (0 failed, 914 passed, tree restored): `all five cells favouring "searle"` → `all nine cells`; `span under half a percentage point` → `under five percentage points`; `On the 64-cell battery` → `32-cell`; `spanning four distribution families` → `six`. Spelled-out numerals are outside the numeral net entirely, and `32` is in the measured pool as the m113 marginal `k = 10` cell count. The table rows, the per-level counts and the M76 prose triple ARE genuinely associated and recomputed — the failure is the figures outside those two shapes.
+- AC3 — **pass.** The shipped statement at each of the six reported sites names the ρ shape and the subject-count direction (marker pins green on both legs), no site states a rater-count width effect, the `n = 2`-only-at-`k = 10` assertion is present, and the runtime hint stays width-silent. Recorded against the criterion as written: it constrains the docs plus one named test, both of which hold. The enforcement gaps found this round are logged as findings, not as an AC3 failure.
+- AC4 — **FAIL.** The amended criterion's final clause — "a test asserts … that no swept surface states a grid-wide pooled ratio" — has no implementation. Verified in the real tree: inserting into the article "Pooled over the larger grid the median width ratio is 0.9614." (exactly the m113 grid-wide median) leaves the suite green, because `width_sentences()` selects only sentences carrying the literal token `burch`. The first clause (per-ρ figures from M113 alone) and the containment assertion both hold.
+- AC5 — **pass.** `testthat::test_file(..., load_package = "installed")` at `NOT_CRAN=true CI=true` on a `build_vignettes = TRUE` install: **0 failed, 0 skipped, 1087 passed**. Corroborated independently by the [O] lens, which ran it and got the same. Both legs walk their domain and assert they reach all six retired hand-list paths and strictly more.
+- AC6 — **pass.** Two-sided over squashed text across the six swept files: `about 6% and about 4%` 2 hits on `main` / 0 now; `about 6% narrower` 1 / 0; `shrinks as either grows` 2 on `c63a5fd` / 0 now; `at a low true ICC with few subjects` 3 / 0. The six M116 patterns are preserved verbatim (the diff adds only a trailing comma).
+- AC7 — **pass.** `check-mpl-doc-claims.py`, `check-reference-observations.py`, `check-record-claims.py` and `enumerate-generalizing-claims.py --check` all exit 0; two `mpl-doc-claims.tsv` rows and two `generalizing-claims-triage.tsv` rows re-triaged onto the corrected sentences; the D-009 dated observation records the per-factor breakdown and is mutation-discriminating (three separate one-digit moves in the `.tsv` each red it). F16 below is a quality gap in that directive, not a failure of the criterion as written.
+- AC8 — **pass.** `air format --check` clean, `lintr::lint_package()` 0 lints, full installed suite 0 failed / 6841 passed / 23 skipped (all `skip_on_ci`) / 2 pre-existing engine fitting warnings.
+
+### Independent review — three lenses, scored
+
+[O] diff-bug: 17 findings. [S] blame-history: 6 items, of which 3 are negative evidence — every R-file change on the branch is comment-only (`git diff main..HEAD -- R/*.R` has no non-comment line), and an independent re-derivation of every stated figure from the fixture found no mismatch at any site. [S] prior-review: all 12 actioned findings from return #1 verified genuinely fixed by independent re-derivation, not taken from the milestone's self-report; the GitHub inline-comment surface is empty, so the thread walk was correctly skipped. Scored by a fresh [S] scorer holding the diff and the plan: 13 findings at or above 80.
+
+**Actioned (>= 80), verbatim:**
+
+- F13 (90) — "`width_expected_source`/`width_expected_installed()` are hand-coded vectors used as the completeness floor, directly contradicting AC2's explicit clause 'the anchors are what the sweep returns, not a remembered list'."
+- F11 (90) — "AC1's 'each new `stopifnot` pin is mutation-verified' is false for three M117-added pins." No mutation alters a design-combination set or removes a level, so the two containment pins and the `lvl()` guard structurally cannot fire.
+- F1 (88) — "`vignettes/interval-methods.Rmd` says 'the two are separate simulations that differ cell by cell even at the design points they share'." At (ρ=0.05, k=10, n=5) the grids are numerically identical: gaussian `burch_width` 0.448546497847247 in both, t(5) 0.455442806834235 in both. 14 of 16 shared cells differ materially; 2 coincide to ~10 significant digits. A newly-added false claim.
+- F14 (87) — "`R/boundary-hint.R`'s width statement has no pin that runs under `R CMD check`." The site is an internal comment and the source leg gates on `data-raw/`, which is `.Rbuildignore`d. Residual of O13 inside the milestone that closed O13.
+- F7 (85) — "A grid-wide pooled ratio can be stated on a swept surface and passes." Verified green: "Pooled over the larger grid the median width ratio is 0.9614."
+- F9 (85) — "The rater rule does not enforce AC3's 'no site states a rater-count width effect'." Verified green: "The margin is also wider with 10 raters than with 5 raters." — `5 raters` is itself a licensing marker.
+- F16 (85) — "The D-009 directive half-settles one stated fact." The paragraph says the largest margin is at 0.1, but the directive checks `lo[1]<lo[0]` and not `lo[1]<lo[2]`; it also settles the marginal-vs-stratified `k = 10` difference for m113 only though the paragraph says both grids.
+- F2 (84) — "The AC3 direction-marker pin does not detect a reversed claim." Verified green: `collapses to near parity at 0.6` → `grows far past parity at 0.6`.
+- F6 (83) — "The `N of M cells` pin does not check which grid the count is attributed to." Verified green: `59 of 64 cells` → `16 of 16 cells` at both sites, making the text read "16 of 16 cells of the M76 grid and 16 of 16 cells of the M113 one".
+- F4 (83) — "The O5 defect can be reintroduced." Reverting "on the one grid reaching a true ICC of 0.6" → "and on both grids at a true ICC of 0.6" reds nothing; the containment test pins the fixture fact but nothing binds the prose to it.
+- F3 (82) — "The O4 defect can be reintroduced verbatim in meaning." Verified green: `holds much the same up to a true ICC of 0.3 rather than shrinking as` → `holds up but shrinks steadily as the true ICC rises, so by 0.3 it is far smaller than at 0.05, as`. `claim_patterns$shrinks_in_rho` is an exact string and does not catch the paraphrase.
+- F10 (80) — "Several stated quantities are pinned only by pool membership, or not at all." Ten variants pass, four of them re-verified in the real tree this session.
+- F8 (80) — "The margin-run floor is per file, so a weakened statement is masked by a sibling in the same file." Replacing `R/icc.R`'s `@param` passage with the pre-M117 wording (which drops the word `margin`, removing the run from `width_claim_runs()`) reds nothing because `@details` satisfies the file.
+
+**Logged, below the action bar (12):** F12 (78, the harness asserts only its control, never that every pin fires; the masked `stopifnot` treats `logical(0)` as passing); F15 (78, the return-#1 Review evidence block is stale and self-contradictory against the return-#1 entry below it); B1 (76, its AC1 line says 10 mutations / 53 pin-reds against the committed harness's 11 / 33); B2 (76, `licensed` matches the bare substring `no rater`, so "there is no rater effect on the width margin" passes as licensed); F5 (75, `NEWS.md` and `R/ci-classical.R` state the ρ shape beside a both-grids attribution — M76 carries no ρ = 0.3 or 0.6, and its two ρ medians run 0.9430 → 0.9453, so "rather than shrinking" is false there); B3 (65, the `data-raw/` gate also skips the source leg in an unpacked source tarball where `R/` and `vignettes/` are present); P2 (45, AC6's two-sided verification is a manual step, not a repeatable test); P1 (45, O12's code-block hazard remains unguarded but dormant); B6 (45, apparatus growth against D-029 — a maintainer judgment); F17 (40, minor bundle: fixture provenance header, redundant allowlist entry, unescaped regex root, a type inconsistency); P3 (25, O19's allowlist unchanged, pre-existing); B4/B5/P0/P4 (20/15/15/10, negative evidence, no defect).
+
+### Consistency gate
+
+`cairn_validate` exit 0 (the two sizing advisories: 8 criteria and 13 tasks against the 7/10 tripwires — a review return's repair load, not a mis-sized cut). `devtools::document()` no diff. `pkgdown::check_pkgdown()` clean. CI fully green on `0183caf`. No `DESIGN.md` principle changed, so `cairn_impact` no-ops.
+
+### Verdict — defect return #2
+
+AC1, AC2 and AC4 fail as written, each verified by command with the tree restored afterwards. Status returns to `in-progress`.
+
+**Thrash trigger (b) fires on AC2.** It failed at return #1 as "the numeral pin is a set-membership test, not an association test" and fails again here as figures outside the two associated shapes going unpinned — a new mechanism of the same shape, which is what (b) names. The alternative the plan gate recorded against is on point: *"chose widening the test's source-tree leg to a directory walk over keeping the six hand-listed paths and **narrowing the promise**"*. The narrow-the-promise half is what has now been declined twice. Trigger (a) has not fired — this is the second defect return, not the third.
