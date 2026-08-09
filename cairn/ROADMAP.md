@@ -20,7 +20,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
-| M116 | Correct the falsified `"searle"`/`"burch"` width claims | in-progress | — | normal | milestones/M116-classical-width-claims.md |
+| M116 | Correct the falsified `"searle"`/`"burch"` width claims | review | — | normal | milestones/M116-classical-width-claims.md |
 
 ## Candidates
 
