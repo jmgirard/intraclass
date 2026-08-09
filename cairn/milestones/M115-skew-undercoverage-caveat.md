@@ -50,7 +50,7 @@ updated only as their existing checkers mechanically require.
 ## Acceptance criteria
 <!-- owner: plan · create/amend-via-gate; review reads, never reinterprets -->
 
-- [x] AC1: `R/icc.R`'s `@section Confidence intervals:` block states the
+- [ ] AC1: `R/icc.R`'s `@section Confidence intervals:` block states the
       distributional condition (skewed or heavy-tailed subject effects), the
       geometry measured worst, and the worst measured non-abort coverage;
       `tests/testthat/test-doc-skew-caveat.R` reads that section from the
@@ -58,7 +58,7 @@ updated only as their existing checkers mechanically require.
       extracts every numeric token from it, and requires each to equal a value
       in the committed fixture `tests/testthat/fixtures/skew-undercoverage.tsv`
       or to appear in the test's committed non-fixture allowlist.
-- [x] AC2: The same test asserts that for every cell in that fixture whose
+- [ ] AC2: The same test asserts that for every cell in that fixture whose
       `mc` row has abort rate (`n_abort / n_rep`) at most 0.1 and
       `coverage_nonabort` below 0.93, both the `searle` and `burch` rows for
       that cell have `coverage_uncond` below 0.93 — 10 such cells — and that
@@ -69,27 +69,30 @@ updated only as their existing checkers mechanically require.
       `data-raw/m113-skew-response-coverage.tsv` and
       `data-raw/m114-warn-trigger-stats.tsv`, and a source-tree provenance
       test asserts the fixture matches those sources.
-- [ ] AC3: The literal string `never under-cover` is absent from `R/icc.R`,
-      `R/boundary-hint.R`, `R/ci-classical.R`, `vignettes/interval-methods.Rmd`
-      and `NEWS.md` (one `git grep -c` over those five paths returns 0,
-      recorded as review evidence); and the test asserts, against the
-      installed package, that the string is absent from `icc.Rd`, the shipped
-      `inst/doc/interval-methods.Rmd` and the installed `NEWS.md`, that the
-      rendered `boundary_method_hint()` blurb for `"burch"` no longer claims
-      it never under-covers, and that the Rd, the vignette and the hint each
-      name the measured heavy-tail exception (`burch` worst
-      `coverage_uncond` 0.6655 at ρ = 0.60, k = 30, n = 5, chisq1).
-- [x] AC4: `data-raw/check-mpl-doc-claims.py`, `check-record-claims.py`,
+- [ ] AC3: The withdrawn claim (`never under-cover`, however its line wraps)
+      is absent from `R/icc.R`, `R/boundary-hint.R`, `R/ci-classical.R`,
+      `vignettes/interval-methods.Rmd` and `NEWS.md`, verified over
+      whitespace-collapsed text by `tests/testthat/test-doc-skew-caveat.R`
+      ("no source file still claims it either, however the line wraps") rather
+      than by a line-based grep, which returns 0 against a wrapped occurrence;
+      and the test asserts, against the installed package, the same absence in
+      `icc.Rd`, the shipped `inst/doc/interval-methods.Rmd` and the installed
+      `NEWS.md`, that the rendered `boundary_method_hint()` blurb for
+      `"burch"` no longer claims it never under-covers, and that the Rd, the
+      vignette and the hint each name the measured heavy-tail exception
+      (`burch` worst `coverage_uncond` 0.6655 at rho = 0.60, k = 30, n = 5,
+      chisq1).
+- [ ] AC4: `data-raw/check-mpl-doc-claims.py`, `check-record-claims.py`,
       `check-reference-observations.py` and `enumerate-generalizing-claims.py`
       each exit 0 on the branch tip, including any `mpl-doc-claims.tsv` row
       re-keyed or added by the `@param ci_method` edit — which must be `out`
       rows whose reason names `tests/testthat/test-doc-skew-caveat.R`, the
       checker settling only against `data-raw/m92-interp-sweep.rds`.
-- [x] AC5: `NEWS.md`'s development-version section carries a bullet stating
+- [ ] AC5: `NEWS.md`'s development-version section carries a bullet stating
       the caveat (naming the worst measured cell and its figure) and
       withdrawing the `"burch"` never-under-covers and heavy-tail-preference
       advice; the figures it names are ones the AC1 test recomputes.
-- [x] AC6: `devtools::document()` leaves no uncommitted diff under `man/`, and
+- [ ] AC6: `devtools::document()` leaves no uncommitted diff under `man/`, and
       the r-package profile's verify + consistency gate is clean — full suite
       at `NOT_CRAN=true CI=true` with 0 failures and 0 errors, `air format
       --check` and `lintr::lint_package()` clean.
@@ -153,6 +156,9 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: verified the amendment's purpose against a real install (`devtools::install(build_vignettes = TRUE)`): the caveat file runs 124 assertions with 0 failures, 0 errors and **0 skips** — the installed-Rd, installed-NEWS and shipped-vignette branches all execute rather than skipping, which is what the source-tree design would have done.
 - 2026-08-08: all tasks done; status review.
 - 2026-08-08: review return 1 — AC3 FAILED. `R/icc.R:555-556` still ships "never / under-covering" for `"burch"` in the Details block, a sixth site the Scope's five-site enumeration missed; the line-wrap defeated both the AC3 grep and the test's fixed-string match, so AC3's recorded evidence was a false negative (F1, scored 96). Also actioned: F4 (88) the gaussian/uniform "no such shortfall" claim is false (0.7210/0.7247), and F2 (82) the "grows with raters" claim is reversed by the data. Status back to in-progress.
+- 2026-08-08: amendment return: AC3 — "The withdrawn claim (`never under-cover`, however its line wraps) is absent from ... verified over whitespace-collapsed text by `tests/testthat/test-doc-skew-caveat.R` ... rather than by a line-based grep, which returns 0 against a wrapped occurrence"; the original procedure was shown blind by mutation — reintroducing the wrapped sentence left `git grep -c` at 0 while the new guard failed on two assertions and named the file.
+- 2026-08-08: return-1 fixes — F1 sixth site corrected at `R/icc.R:555`; F2/F3 trend sentence rewritten to what the fixture supports (coverage falls with subject count at 5 raters once ICC is moderate/high; 2 raters worse in all 16 paired cells but abort more often); F4 restored D-027's high-abort qualifier; F5 held-out claim scoped to the (50,5) geometry; F6 the unbacked "steadier under mild non-normality" recommendation replaced across four sites by the measured comparison (searle closer to nominal in most cells of every family; burch below-nominal in fewer cells), pinned by a new test and two `out` ledger rows; F13 provenance test gains the `coverage_uncond` re-derivation; an attribution pin added, mutation-verified against the reviewer's fabricated-cell mutation.
+- 2026-08-08: all six criterion checkboxes un-ticked — their recorded evidence predates the return-1 fixes; re-review re-gathers all of it.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
