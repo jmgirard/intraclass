@@ -37,7 +37,10 @@ planned. A committed doc-claim checker → barred by D-021.
       and `e_ij` carry the studied distribution; and that his "normal-based"
       comparator is the eq. (3) exact-F pivot the package ships as `"searle"`.
       `mcgraw1996.md` and a new `searle1971.md` each record whether that source
-      makes any interval-length claim.
+      makes any interval-length claim. `searle1971.md` locates the exact-F
+      interval at Ch. 9 §9d / Table 9.14 / eq. (60), and the `Searle 1971
+      eq. 4/6` citation is corrected to it at `R/ci-classical.R:10` and
+      `cairn/references/ohyama2025.md:33`.
 - [ ] AC2: A committed R script recomputes from `data-raw/m76-sweep-results.rds`
       and `data-raw/m113-skew-response-coverage.tsv`, writing a committed text
       output: burch's median width below searle's in 16/16 M76 cells (8/8
@@ -90,9 +93,11 @@ planned. A committed doc-claim checker → barred by D-021.
 
 - [ ] T1: Read the sources and write the provenance. Burch (2011) §4 (Fig. 2
       expected-length ratios) and §5; `mcgraw1996.pdf` for any length claim
-      (none found at plan time); Searle (1971) when the maintainer supplies the
-      PDF — that leg alone blocks on it. Settle every quotation with a
-      high-DPI crop where the text layer is doubtful (LESSONS M66).
+      (none found at plan time); `searle1971.epub` per the work-log findings
+      below, including the equation-citation correction. Settle every quotation
+      with a high-DPI crop where the text layer is doubtful (LESSONS M66) —
+      Searle's equations are `.gif` images, so quote its prose only and read
+      Table 9.14 from the image.
 - [ ] T2: Write `data-raw/m116-classical-width-comparison.R` and its committed
       output. The DGP fact belongs to the sweep scripts, not the fixtures —
       assert it against `data-raw/m76-coverage-sweep.R:33-38` and
@@ -115,6 +120,10 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-08: plan gate chose bounding the doc claim to the two committed grids over running a both-components-non-normal sweep, because the existing evidence already falsifies the shipped claim and a new grid answers a different question; falsified by a user needing width advice for leptokurtic data.
 - 2026-08-08: plan gate chose extending `test-doc-skew-caveat.R`'s existing M115 sweep over authoring a second instrument, because a parallel sweep is the doc-claim guard D-021 bars and the existing one already covers the same six files plus the installed help database; falsified by the existing test's legs proving unable to carry the width pattern.
 - 2026-08-08: plan-time criteria audit ran ([O] fresh-context reader, 14 findings). Fixed here: AC2 could not recompute the DGP fact from the fixtures and mis-named M113's provenance; the three-way "narrowest" ranking was contaminated by the MC leg's abort-conditioned widths; AC2 gained per-family breakouts after the audit showed a kurtosis-conditional rewrite would itself be unbacked; `NEWS.md` and the `R/ci-classical.R` comment gained a positive replacement owner; the D-009 directive was constrained to python3/shell/git; AC6 widened to the whole comparison page; AC7's checkers were named with `--self-test` and its "every reworded claim" universal replaced with an explicit list, since `check-mpl-doc-claims.py`'s trigger net misses the comparative class. Routed to the gate: the D-021 collision (AC5) and the sweep-scope question.
+
+- 2026-08-08: maintainer supplied `cairn/references/sources/searle1971.epub` (Wiley Classics Library Edition 1997, a verbatim reprint of the 1971 text — same LC card number 70-138919 — so equation and table numbering match the original). T1's Searle leg is unblocked.
+- 2026-08-08: plan-time read of Searle (1971). The exact-F interval is Ch. 9 §9d "Confidence intervals", Table 9.14 ("Confidence intervals on variance components and functions thereof, in the 1-way classification, random model, balanced data"), built on eq. (60) for `F = MSA/MSE`; Searle credits the σ²e/(σ²α+σ²e) interval to Graybill (1961, p. 379) and the σ²α/σ²e one to Scheffé (1959, p. 229). No interval-length or narrowness claim attaches to it anywhere in Ch. 9. The book's only shortest-length optimality result is in Ch. 3 §5 and concerns the symmetric t-interval on a regression coefficient in the full-rank model — a different object; T1 records it as the candidate provenance for "narrowest" without asserting it is the actual origin. Three sources now checked (Burch 2011, McGraw & Wong 1996, Searle 1971) and none supports the shipped claim.
+- 2026-08-08: gated amendment — AC1 and T1 gain the `Searle 1971 eq. 4/6` citation correction at `R/ci-classical.R:10` and `cairn/references/ohyama2025.md:33`, found by the plan-time source read (the interval is Table 9.14 / eq. (60); the reprint is verbatim, so the numbering is not an edition artifact). Maintainer chose folding it in over a candidate row, per D-021's correct-in-place clause.
 
 ## Decisions
 
