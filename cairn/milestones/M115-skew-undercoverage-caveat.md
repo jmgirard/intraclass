@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M115: Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice
 
-- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -69,7 +69,7 @@ updated only as their existing checkers mechanically require.
       `data-raw/m113-skew-response-coverage.tsv` and
       `data-raw/m114-warn-trigger-stats.tsv`, and a source-tree provenance
       test asserts the fixture matches those sources.
-- [x] AC3: The literal string `never under-cover` is absent from `R/icc.R`,
+- [ ] AC3: The literal string `never under-cover` is absent from `R/icc.R`,
       `R/boundary-hint.R`, `R/ci-classical.R`, `vignettes/interval-methods.Rmd`
       and `NEWS.md` (one `git grep -c` over those five paths returns 0,
       recorded as review evidence); and the test asserts, against the
@@ -152,6 +152,7 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: `devtools::check()` (--no-manual, NOT_CRAN=false) Status OK — 0 errors / 0 warnings / 0 notes, vignettes built.
 - 2026-08-08: verified the amendment's purpose against a real install (`devtools::install(build_vignettes = TRUE)`): the caveat file runs 124 assertions with 0 failures, 0 errors and **0 skips** — the installed-Rd, installed-NEWS and shipped-vignette branches all execute rather than skipping, which is what the source-tree design would have done.
 - 2026-08-08: all tasks done; status review.
+- 2026-08-08: review return 1 — AC3 FAILED. `R/icc.R:555-556` still ships "never / under-covering" for `"burch"` in the Details block, a sixth site the Scope's five-site enumeration missed; the line-wrap defeated both the AC3 grep and the test's fixed-string match, so AC3's recorded evidence was a false negative (F1, scored 96). Also actioned: F4 (88) the gaussian/uniform "no such shortfall" claim is false (0.7210/0.7247), and F2 (82) the "grows with raters" claim is reversed by the data. Status back to in-progress.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
@@ -176,7 +177,9 @@ recalled.
   against the fixture's own `method` column. The source-tree provenance test
   re-derives both fixture legs from `data-raw/m113-skew-response-coverage.tsv`
   and `data-raw/m114-warn-trigger-stats.tsv` and passes.
-- **AC3 — met.** `git grep -c "never under-cover" -- R/icc.R R/boundary-hint.R
+- **AC3 — FAILED (return, 2026-08-08).** The recorded grep evidence below is a
+  false negative; see the findings block. Original evidence line kept for the
+  record: `git grep -c "never under-cover" -- R/icc.R R/boundary-hint.R
   R/ci-classical.R vignettes/interval-methods.Rmd NEWS.md` exits 1 with no
   output (no match on any of the five paths). The installed-surface absence
   assertions and the rendered-hint assertion are in the same 0-failure run;
@@ -206,7 +209,46 @@ Status OK — 0 errors, 0 warnings, 0 notes, vignettes built;
 `pkgdown::check_pkgdown()` no problems; README.Rmd/README.md untouched, so no
 re-knit owed; no new top-level files, so no `.Rbuildignore` entry owed.
 
-**Returns.** None. This is the milestone's first review pass; one amendment
-return was taken at the implement gate (AC1-AC3, logged in the work log) and
-runs on its own track.
+**Independent review — three lenses + scorer (2026-08-08).** Blame-history:
+no findings. Prior-review/lessons: no findings (PR-thread probe returned `[]`,
+so the thread walk was skipped). Diff-bug lens: 20 candidate findings, scored
+by a fresh scorer against the diff and this plan. Three scored >= 80 and are
+actioned; 17 scored below 80 and are logged, not actioned:
+F3 78 (same sentence as F2, fixed with it), F5 62, F13 62, F10 58, F9 55,
+F6 50, F15 50, F11 45, F14 45, F16 40, F17 35, F7 30, F8 30, F18 30, F21 30,
+F12 25, F19 15, F20 10.
+
+Actioned findings, verbatim:
+
+- **F1 (96).** `R/icc.R:555-556` (rendered at `man/icc.Rd:648-649`), in the
+  Details block: "kurtosis-adjusted `log(1 + n*theta-hat)` limits (Burch
+  2011), so its width tracks the data's tail weight -- wider but robust to
+  non-normality, and never / under-covering." This is the exact claim D-027
+  falsified, on the same help page the caveat was added to, at a sixth site
+  the Scope's "all five sites" never enumerated. It wraps across two lines,
+  so AC3's `git grep -c` and the test's `fixed = TRUE` match over the
+  flattened Rd both miss it. AC3 was recorded met on a false negative.
+- **F4 (88).** "near-normal and uniform subject effects showed no such
+  shortfall" (`R/icc.R:165-166`, `vignettes/interval-methods.Rmd:80-81`) is
+  false: gaussian reaches `coverage_nonabort` 0.7210 and uniform 0.7247 (both
+  at rho 0.05, k 10, n 2). D-027's true statement carries the qualifier the
+  docs dropped -- every failing gaussian/uniform cell is in the high-abort
+  bucket.
+- **F2 (82).** "The shortfall grows with the number of raters per subject"
+  (`R/icc.R:163-165`, `vignettes/interval-methods.Rmd:79`) is contradicted by
+  the fixture: at k = 10, chisq1, the n = 2 cells cover worse than the n = 5
+  cells at every rho (0.7322 vs 0.8701 at rho 0.05). The claim was composed
+  from the abort-filtered subset, where 9 of 10 failing cells happen to be
+  n = 5 -- a selection artifact read back as a trend.
+
+All three verified independently against
+`data-raw/m113-skew-response-coverage.tsv` before actioning.
+
+**Disposition: return to `in-progress`.** F1 demonstrates AC3 failing inside
+its named procedure's domain, which is the return floor. AC3 is un-ticked;
+AC1, AC2, AC4-AC6 stand on their recorded evidence.
+
+**Returns.** Defect return 1 of this milestone (first review pass). One
+amendment return was taken at the implement gate (AC1-AC3) and runs on its
+own track.
 
