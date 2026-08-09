@@ -38,7 +38,11 @@ See **single-unit ICC** for its counterpart.
 An opt-in closed-form confidence interval for the balanced one-way design
 (`ci_method = "burch"`): REML-based limits with a kurtosis adjustment (Burch 2011),
 so its width tracks the tail weight of the data, where the **exact-F interval** leans
-on normality instead. That adjustment is not a remedy for heavy tails: on strongly
+on normality instead. Tracking tail weight is not the same as widening: on the two
+grids this package has measured it came out the narrower of the two in nearly every
+cell, while Burch reports the reverse for symmetric heavy-tailed data with non-normal errors,
+which those grids do not vary — so neither interval is reliably the tighter one.
+That adjustment is not a remedy for heavy tails: on strongly
 skewed subject effects `"burch"` under-covers about as badly as the default — see
 [*When the default under-covers*](interval-methods.html#when-the-default-under-covers).
 Deterministic: no resamples, no seed. See
@@ -126,9 +130,10 @@ picking the coefficient is really picking which one answers your question. See
 
 An opt-in closed-form confidence interval for the balanced one-way design
 (`ci_method = "searle"`): it inverts the exact-F pivot of the one-way ANOVA
-(Searle 1971; the McGraw & Wong 1996 Table 7 limits). Exact under normality —
-best-calibrated and narrowest when the data are approximately normal — and
-deterministic. See
+(Searle 1971, Ch. 9 Table 9.14; the McGraw & Wong 1996 Table 7 limits). Exact
+under normality — best-calibrated when the data are approximately normal — and
+deterministic. Exact is not the same as shortest: see the **Burch interval**
+above for what this package measured about their relative widths. See
 [*Confidence-interval methods*](interval-methods.html#the-opt-in-boundary-robust-methods).
 
 ## FIML

@@ -1226,3 +1226,80 @@ predicted cluster effects, standardized within-design) meeting these floors
 
 **Consequences:** M114 ships no code. D-027's warn → document transition is
 executed by its own frozen rule; the S2 disposition chain closes here.
+
+### D-012 Amendment 1 (2026-08-09): two of D-012's width clauses are wrong against its own sweep — corrected, verdict untouched
+
+**Context:** D-012's ledger states, of SEARLE, "Best-calibrated + narrowest when
+data are ≈ normal", and of Burch, "The robust / guaranteed-coverage choice,
+bought with width". M116 recomputed widths from the very fixture D-012 was
+decided on, `data-raw/m76-sweep-results.rds`, and both clauses fail on it:
+Burch's median width is **below** SEARLE's in **16 of 16 cells, 8 of 8 gaussian
+among them**, by 2–10%. Neither method aborts anywhere in that grid, so the two
+legs' medians are computed over the same replicates and compare directly. The
+wider M113 grid agrees — Burch narrower in 59 of 64 cells, and in every
+distribution family separately (gaussian 14/16, uniform 16/16, t5 15/16,
+chisq1 14/16), with no family reversing. Nor does any source support the
+withdrawn wording: Searle (1971) makes no interval-length claim about the
+Table 9.14 intervals, McGraw & Wong (1996) uses no length vocabulary at all, and
+Burch (2011) eq. 18 compares against **this same exact-F interval** and reports
+the opposite direction for platykurtic data.
+
+The error is a misread of D-012's own C3 criterion, which compares each
+classical method **to the MC default**, not to each other. Both classical
+methods are wider than MC at the n=2 cells; "bought with width" is true of that
+comparison and was carried across to a searle-vs-burch comparison the sweep
+never made. The shipped documentation inherited it and stated it for three
+milestones.
+
+**Decision:** both clauses are corrected as follows, and **only** those clauses.
+SEARLE reads "Best-calibrated when data are ≈ normal", with no width claim.
+Burch reads "The robust / guaranteed-coverage choice; wider than the MC default
+at n=2, and — measured at M116 — narrower than SEARLE in every cell of this
+grid". D-012's GO/NO-GO verdict, its scope fence and its opt-in recommendation
+are untouched: they rest on coverage, tail symmetry and abort behaviour, none of
+which this amendment disturbs. The coverage-based preference for `"searle"`
+(D-027/M115) likewise stands.
+
+**Consequences:** `cairn/references/classical-oneway-comparison.md` is corrected
+wherever the direction appears — the C3 narrative, the ledger table and the
+Disposition — under a dated observation. Reopening needs a measurement, not a
+re-reading: a grid on which Burch's median width exceeds SEARLE's. Burch's own
+leptokurtic reversal is the likeliest place to find one, and it is untested here
+because both repo grids draw only the subject effect from the non-normal family
+(ROADMAP candidate).
+
+### D-029 (2026-08-09): D-021's door is about records apparatus, not about correcting what the package tells its users
+
+**Context:** D-021 bars planning a milestone "whose deliverable is verification
+of this repo's own records, prose or messages … unless its trigger is a defect
+in what the package computes", and adds that "a false or unbacked claim in a
+record is corrected in place, in the milestone that finds it, and never promoted
+into a milestone of its own". Read at its widest, that bars M116, whose
+deliverable is a correction to `?icc`, two vignettes, NEWS and a runtime
+message. Read at its narrowest it does not reach M116 at all. The question has
+now come up twice — M115 shipped this same class on 2026-08-08, five days after
+D-021, without the tension being recorded — so it is settled here rather than
+re-litigated at the next plan gate.
+
+**Decision:** D-021 governs **records-verification apparatus** — a ledger over
+tracking figures, a guard over doc claims, a truthfulness audit, the M94–M102
+class it was written against. It does **not** govern correcting a false
+statement the package makes to its users in shipped documentation or a runtime
+message. Three reasons. The subject differs: tracking prose is read by us, `?icc`
+and a `cli` hint are read by users, and D-021's own carve-out names "a wrong
+exported behaviour", which a hint recommending a method on a false basis is.
+The self-feeding property D-021 was written to stop does not apply: user-facing
+surfaces are a bounded, enumerable set, where the apparatus class "never runs
+out of subject matter". And the correct-in-place clause presumes the finding is
+cheap to action in the milestone that found it; where it is not — M115 found
+this one and deferred it precisely because the provenance question needed three
+sources read, one of them a book not then on the shelf — a milestone is the
+honest vehicle.
+
+**Consequences:** a scope whose deliverable is a user-facing documentation or
+message correction plans normally, and D-021 is not quoted at it. A scope whose
+deliverable is a checker, ledger or audit over the repo's own records still
+needs D-021's trigger; M116 accordingly ships **no** new doc-claim checker, and
+extends M115's existing test rather than authoring a second instrument. If this
+distinction is ever used to smuggle apparatus in as "documentation", this is the
+entry to supersede.

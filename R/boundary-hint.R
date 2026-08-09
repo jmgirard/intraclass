@@ -494,12 +494,14 @@ boundary_fenced_hint <- function(
     if (!length(named)) {
       return(character(0))
     }
+    # Neither blurb claims to be the tighter interval: the shipped "narrowest"
+    # / "wider" pair was false on both measured grids and is withdrawn (M116).
     blurb <- c(
-      searle = "{.code ci_method = \"searle\"} (best calibrated when the data are \\
-                close to normal, and narrowest)",
-      burch = "{.code ci_method = \"burch\"} (wider, and dips below the nominal \\
-               level in fewer cells -- but measured to under-cover on \\
-               heavy-tailed or skewed subject effects, as the default does)"
+      searle = "{.code ci_method = \"searle\"} (best calibrated when the data \\
+                are close to normal)",
+      burch = "{.code ci_method = \"burch\"} (dips below the nominal level in \\
+               fewer cells -- but measured to under-cover on heavy-tailed or \\
+               skewed subject effects, as the default does)"
     )
     lead <- if (length(named) > 1L) {
       paste0(

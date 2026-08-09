@@ -7,12 +7,19 @@
 # Monte-Carlo default aborts (`intraclass_singular_fit`, D-006) -- except that
 # `burch` at MSA exactly 0 aborts classed rather than standardize by
 # `sqrt(MSA) = 0` (D-022). They differ in their robustness:
-#   - SEARLE exact-F (Searle 1971 eq. 4/6; mcgraw1996 Table 7): EXACT under
-#     normality, best-calibrated + narrowest on ~normal data.
+#   - SEARLE exact-F (Searle 1971 Ch. 9 Table 9.14; mcgraw1996 Table 7): EXACT under
+#     normality, best-calibrated on ~normal data.
 #   - Burch (2011) REML (eq. 6/13/15/16/17): kurtosis-adjusted `log(1+nθ̂)`
-#     limits; wider, and designed for robustness to non-normality -- but
-#     measured (M113) to under-cover on strongly skewed subject effects, worst
-#     0.6655, so it is not a remedy for heavy tails.
+#     limits; designed for robustness to non-normality -- but measured (M113) to
+#     under-cover on strongly skewed subject effects, worst 0.6655, so it is not
+#     a remedy for heavy tails.
+# NOT "burch is wider than searle" -- that shipped for three milestones and is
+# false on both committed grids (M116: burch narrower in 16/16 M76 cells and
+# 59/64 M113 cells, no family reversing on its median; see
+# data-raw/m116-classical-width-comparison.tsv). Burch's own eq. 18 comparison
+# is against this very exact-F interval and is kurtosis-CONDITIONAL, with his
+# reversal measured on data where the errors are non-normal too -- which neither
+# grid varies. Neither method is reliably the tighter one.
 #
 # Both mirror the sibling `"npbootstrap"` (M75, D-010) exactly on the API
 # conventions: balanced one-way only (guarded upstream in `icc()`), the reported
@@ -77,7 +84,8 @@ classical_guard_observed <- function(ss, method, call, hint = character(0)) {
 }
 
 # --- SEARLE exact-F ------------------------------------------------------------
-# Pivot (Searle 1971): with F = MSA/MSE and n the group size,
+# Pivot (Searle 1971, Ch. 9 §9d Table 9.14 row 3 + eq. 60): with F = MSA/MSE and
+# n the group size,
 #   F / (1 + n·λ) ~ F(df1, df2) where λ = σ²_a/σ²_e, so a 1-α interval for
 #   g = (1 + n·λ) is [F/F_U, F/F_L] with F_U = qf(1-α/2), F_L = qf(α/2);
 # back-transform g -> ρ via ρ(g) = (g-1)/(g+n-1) (the ICC(1) endpoint). Monotone,

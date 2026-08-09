@@ -28,6 +28,14 @@ Same one-way random effects model + `ρ = σ²_a/(σ²_a+σ²_e)` as ukoumunne20
 
 ## Methods compared (§2), by our-package mapping
 
+**Equation numbers in the Source column are ohyama's own**, not the cited
+source's — a trap M116 walked into from the copy of this cell at
+`R/ci-classical.R`, which read them as Searle's and was corrected. Specifically:
+ohyama's eq. 4 is the balanced Searle interval (identical to Searle 1971
+Table 9.14 row 3, see [`searle1971.md`](searle1971.md)), while his eq. 6 is the
+Thomas & Hultquist (1978) unbalanced improvement, **not** Searle's — observed
+2026-08-08. <!-- check: python3 -c "import sys;t=open('cairn/references/ohyama2025.md').read();sys.exit(0 if 'Thomas & Hultquist (1978) unbalanced improvement' in t else 1)" -->
+
 | ohyama label | Source | Mechanism | Our-package analogue |
 |---|---|---|---|
 | SEARLE | Searle 1971 (eq. 4/6) | exact F-distribution limits | classical ANOVA CI (not an `icc()` method) |

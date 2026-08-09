@@ -93,6 +93,13 @@ and milestones; never restate a value here.
 - [saha2012.md](saha2012.md) — source note (M65): profile-likelihood CI for the
   **binary** beta-binomial ICC; PL near-nominal where four asymptotic Wald
   intervals under-cover badly. Outside the contract boundary.
+- [searle1971.md](searle1971.md) — source note (M116): the `ci_method = "searle"`
+  exact-F interval's actual home (Ch. 9 §9d, **Table 9.14** row 3, eq. 60), which
+  matches `searle_endpoints()` term for term, and the record that this source
+  makes **no interval-length claim** about it — the withdrawn "narrowest" wording
+  has no support here. Searle credits the row onward to Graybill (1961, p. 379).
+  **EPUB, no fixed pagination**; the book's only shortest-length result is in
+  Ch. 3 §5 and is about a regression coefficient's *t*-interval.
 - [shieh2015.md](shieh2015.md) — source note (M66): the conventional average-score
   index `ICC(2) = 1 − 1/F*` is negatively biased (`−2(1−ρ*)/(N−3)`) and
   MSE-dominated by four alternatives in a `ρ̂*(c) = 1 − c/F*` family. **Critiques an
