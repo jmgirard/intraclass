@@ -66,9 +66,10 @@
   6% and about 4% respectively, with no distribution family reversing it on its
   median. No source supports the withdrawn wording either — Burch (2011)
   compares against this same exact-F interval and reports a
-  *kurtosis-conditional* ordering, shorter for light-tailed data and wider only
-  for heavy-tailed data where the errors are non-normal too, which neither grid
-  varies. The claim is withdrawn everywhere it appeared; neither interval is
+  *kurtosis-conditional* ordering, shorter for light-tailed data and wider for
+  symmetric heavy-tailed data where the errors are non-normal too, which neither
+  grid varies. His length comparison uses symmetric families throughout, so it
+  settles nothing about skewed data either way. The claim is withdrawn everywhere it appeared; neither interval is
   described as reliably the tighter one, and the coverage-based preference for
   `"searle"` is unchanged.
 * `icc()` now rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed

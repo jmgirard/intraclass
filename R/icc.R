@@ -570,7 +570,7 @@
 #' kurtosis-adjusted `log(1 + n*theta-hat)` limits (Burch 2011), so its width tracks
 #' the data's tail weight rather than widening by construction: on both grids this
 #' package has measured it came out narrower than `"searle"` in nearly every cell,
-#' while Burch reports the reverse for heavy-tailed data with non-normal errors, a
+#' while Burch reports the reverse for symmetric heavy-tailed data with non-normal errors, a
 #' case those grids do not cover.
 #' Its robustness has a measured limit: on strongly skewed subject effects
 #' `"burch"` under-covers about as badly as the default (see the coverage caveat

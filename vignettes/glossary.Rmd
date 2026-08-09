@@ -40,7 +40,7 @@ An opt-in closed-form confidence interval for the balanced one-way design
 so its width tracks the tail weight of the data, where the **exact-F interval** leans
 on normality instead. Tracking tail weight is not the same as widening: on the two
 grids this package has measured it came out the narrower of the two in nearly every
-cell, while Burch reports the reverse for heavy-tailed data with non-normal errors,
+cell, while Burch reports the reverse for symmetric heavy-tailed data with non-normal errors,
 which those grids do not vary — so neither interval is reliably the tighter one.
 That adjustment is not a remedy for heavy tails: on strongly
 skewed subject effects `"burch"` under-covers about as badly as the default — see
