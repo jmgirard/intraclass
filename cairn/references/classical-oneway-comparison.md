@@ -115,6 +115,16 @@ a C3 failure **as written**, but MC's narrowness there is an artifact of its
 against an interval that covers 70% of the time is not a fair dominance test. The
 classical methods are wider precisely because they hold coverage.
 
+**C3 compares each classical method to MC, never to each other** — a distinction
+that mattered, because the searle-vs-burch reading was taken from this criterion
+and is false. Recomputed at M116 from this page's own fixture: **Burch's median
+width is below SEARLE's in 16 of 16 cells, gaussian and t5 alike**, by 2–10%
+(`data-raw/m116-classical-width-comparison.tsv`). Neither classical leg aborts
+here, so their medians are over the same reps. Nothing in C3's verdict changes —
+both are still wider than MC at n=2 — but "Burch is the wider of the two" was
+never measured on this grid and is contradicted by it — observed 2026-08-09.
+<!-- check: python3 -c "import csv,sys;rows=[r for r in csv.DictReader((l for l in open('data-raw/m116-classical-width-comparison.tsv') if not l.startswith('#')),delimiter='\t') if r.get('grid')=='m76' and r.get('dist')=='all'];sys.exit(0 if rows and rows[0]['cells']=='16' and rows[0]['burch_narrower']=='16' else 1)" -->
+
 **C5 — tail symmetry.** SEARLE passes at **every** cell (tail-difference ≤ 0.010,
 no tail > 0.043). Burch fails at the four **n=2** cells: its miss is entirely
 lower-tail (0.034–0.039 lower, 0.000 upper — `|diff|` up to 0.039 > 0.03),
@@ -137,14 +147,21 @@ decisively solve the motivating abort defect. The durable verdict is D-012.
 - **D1 — SEARLE exact-F → NO-GO replace / GO opt-in.** Passes C1 (0 aborts) and C5
   (symmetric at every cell), near-nominal C2 at 15/16 cells. Blocks replacement on:
   the single leptokurtic under-coverage (C2/C4 at ρ=0.10, k=50, t5 = 0.924) and the
-  n=2 C3 width fails (against a 0.70-covering MC). It is the **best-calibrated,
-  narrowest** classical interval when data are ≈ normal, and holds up on t5 better
+  n=2 C3 width fails (against a 0.70-covering MC). It is the **best-calibrated**
+  classical interval when data are ≈ normal, and holds up on t5 better
   than normal theory predicts (fails only the hardest leptokurtic cell).
+  (**"narrowest" struck at M116** — false on this grid, where Burch is narrower
+  in all 16 cells; see the C3 note above and D-012 Amendment 1.)
 - **D2 — Burch REML → NO-GO replace / GO opt-in (the robust/conservative choice).**
   Passes C1, C2 (all cells), C4 (all t5 cells — best on non-normality, exceeding
-  both incumbents). Blocks replacement on: over-coverage/width at small `k` and the
-  n=2 C5 tail asymmetry. It **never under-covers** and is the **non-normality-robust,
-  never-under-cover** option, bought with width.
+  both incumbents). Blocks replacement on: over-coverage at small `k`, its width
+  against MC at n=2, and the n=2 C5 tail asymmetry. It **never under-covers** on
+  this grid and is the **non-normality-robust** option here. (**"bought with
+  width" struck at M116** as against SEARLE: the extra coverage is not bought
+  with width at all — Burch is the *narrower* of the two in all 16 cells. It is
+  bought against MC only, and only at n=2. Its never-under-covers property is
+  also grid-local: M113's wider battery measured it under-covering to 0.6655 on
+  skewed subject effects, D-027.)
 - **D3 — recommendation (C6): a follow-on opt-in implementation milestone, no
   default change.** Both are cleared to be planned as opt-in `ci_method` values
   (SEARLE for near-normal data; Burch for non-normality robustness / guaranteed

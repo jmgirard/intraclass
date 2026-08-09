@@ -114,7 +114,7 @@ planned. A committed doc-claim checker → barred by D-021.
 - [x] T4: Extend the `test-doc-skew-caveat.R` pattern set and the hint text,
       mutation-verifying each. Install with `build_vignettes = TRUE` and confirm
       0 SKIPs (LESSONS M115).
-- [ ] T5: Append `D-012 Amendment 1` and the D-021-line entry; correct the M76
+- [x] T5: Append `D-012 Amendment 1` and the D-021-line entry; correct the M76
       comparison page whole-file with its dated observation.
 - [ ] T6: Ledger re-keying and the full gate; open the PR and drive CI green.
 
@@ -145,6 +145,10 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-09: the runtime hint (R/boundary-hint.R) drops both width words; its test now also asserts no "narrow"/"wider" renders at all, since the hint is where a user actually picks a method. The existing "heavy" assertion still passes.
 - 2026-08-09: AC3's 0-SKIP requirement (LESSONS M115) needed a harness change, not just an install. `devtools::install(build_vignettes = TRUE)` installs the vignettes, but `testthat::test_local()` loads via pkgload so `system.file("doc", ...)` still resolves to the source tree and both installed-surface tests skip. Running `testthat::test_dir("tests/testthat", package = "intraclass", load_package = "installed")` gives the real installed-package read: doc-skew-caveat 0 skips, all pass. (`upgrade = "never"` is rejected by devtools::install — it wants TRUE/FALSE/NA.)
 - 2026-08-09: M94 checker caught three new roxygen claims (its fifth recurrence per LESSONS); rows 2bdf1189679b / 354d6f11619c / d010e0f961a6 added dispositioned `out`, each naming the instrument that does settle it (the M116 tsv, the generator's AST assertion, or burch2011.md p. 1024) per the M104 rule. All four data-raw checkers and their self-tests green.
+
+- 2026-08-09: T5 done. `D-012 Amendment 1` corrects the two width clauses against D-012's OWN fixture and names the root cause: C3 compares each classical method to MC, never to each other, and "bought with width" was carried across to a searle-vs-burch comparison the sweep never made. The GO/NO-GO verdict, scope fence and opt-in recommendation are explicitly untouched — they rest on coverage, tails and aborts. `D-029` records where D-021's door falls: it governs records-verification apparatus, not corrections to what the package tells users; M116 accordingly ships no new checker and extends M115's instrument instead.
+- 2026-08-09: classical-oneway-comparison.md corrected in three places (C3 narrative, D1 SEARLE bullet, D2 Burch bullet) under one dated observation whose directive reads the M116 tsv with python3 alone (LESSONS M91) and reds when the figure is flipped. The D2 bullet also gains the grid-locality of "never under-covers" (M113 measured 0.6655, D-027). The **ledger table at :135 was left alone** — the audit expected a wrong direction there, but its C3 column counts fails against MC only and is correct as written; changing correct numbers to satisfy an expectation would have been the error.
+- 2026-08-09: M74 gate again — four new candidates plus the two orphans the plan-time audit predicted (39c943d64a, the "narrowest" row, and f59492dac8). Retired both, added four OUT-repo-analysis rows naming the M116 tsv as the settling instrument. All four data-raw checkers green.
 
 ## Decisions
 
