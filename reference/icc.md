@@ -352,25 +352,33 @@ icc(
   at all, `"burch"` aborts (its kurtosis standardization divides by zero
   there) while `"searle"` still returns its attained minimum – and
   neither resamples, so `mc_samples`, `boot_samples`, and `seed` do not
-  apply. `"searle"` is the exact-F pivot (Searle 1971; McGraw & Wong
-  1996, Table 7): **exact under normality**, best-calibrated and
-  narrowest when the data are approximately normal. `"burch"` is the
-  REML-based, kurtosis-adjusted interval of Burch (2011): wider, and
-  designed for robustness to non-normality. That robustness has limits
-  this package has measured: on strongly skewed subject effects
-  `"burch"` under-covers about as badly as the default, worst 0.6655 at
-  chi-square(1) subject effects with a true ICC of 0.6, 30 subjects and
-  5 raters. Prefer `"searle"`: across every distribution family in that
-  study it landed closer to nominal coverage in most cells, including
-  the heavy-tailed ones. `"burch"` dipped below the nominal level in
-  fewer cells overall, which is the one respect in which it was
-  steadier, but it is a remedy for neither heavy tails nor skew (see the
-  coverage caveat under Confidence intervals). `"mpl"` is the **modified
-  profile-likelihood** interval of Xiao & Liu (2013), **only for the
-  balanced-complete two-way random absolute-agreement ICC(A,1)** (with
-  ICC(A,k) and any numeric-`unit` projection `ICC(A,m)` its
-  Spearman-Brown image, pole-safe for every `m >= 1`); it aborts on any
-  other design, on consistency (ICC(C,.)) or fixed raters, and on
+  apply. `"searle"` is the exact-F pivot (Searle 1971, Table 9.14;
+  McGraw & Wong 1996, Table 7): **exact under normality**, and
+  best-calibrated when the data are approximately normal. `"burch"` is
+  the REML-based, kurtosis-adjusted interval of Burch (2011), designed
+  for robustness to non-normality; its width tracks the data's tail
+  weight rather than widening by construction. On the two grids this
+  package has measured, `"burch"` comes out the **narrower** of the two
+  in 16 of 16 cells of one and 59 of 64 of the other, by a median of
+  about 6% and about 4% respectively, with no distribution family
+  reversing that on its median. Both grids vary only the subject effect,
+  though; Burch (2011) reports the direction reversing for symmetric
+  heavy-tailed data with the errors non-normal too, which neither grid
+  tests. Treat neither as reliably the tighter interval. Burch's
+  robustness has limits this package has measured: on strongly skewed
+  subject effects `"burch"` under-covers about as badly as the default,
+  worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6,
+  30 subjects and 5 raters. Prefer `"searle"`: across every distribution
+  family in that study it landed closer to nominal coverage in most
+  cells, including the heavy-tailed ones. `"burch"` dipped below the
+  nominal level in fewer cells overall, which is the one respect in
+  which it was steadier, but it is a remedy for neither heavy tails nor
+  skew (see the coverage caveat under Confidence intervals). `"mpl"` is
+  the **modified profile-likelihood** interval of Xiao & Liu (2013),
+  **only for the balanced-complete two-way random absolute-agreement
+  ICC(A,1)** (with ICC(A,k) and any numeric-`unit` projection `ICC(A,m)`
+  its Spearman-Brown image, pole-safe for every `m >= 1`); it aborts on
+  any other design, on consistency (ICC(C,.)) or fixed raters, and on
   unbalanced or incomplete data. It is a **deterministic closed form**
   (no resampling; `mc_samples`, `boot_samples`, and `seed` do not apply)
   that, like `"npbootstrap"`, returns an interval at the near-zero-ICC
@@ -762,14 +770,17 @@ the data are consistent with values near and below zero.
 
 Both are deterministic closed forms from the one-way ANOVA. `"searle"`
 inverts the exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle
-1971; the McGraw & Wong 1996 Table 7 limits); it is exact under
-normality. `"burch"` builds kurtosis-adjusted `log(1 + n*theta-hat)`
-limits (Burch 2011), so its width tracks the data's tail weight – wider,
-and designed for robustness to non-normality. That robustness has a
-measured limit: on strongly skewed subject effects `"burch"`
-under-covers about as badly as the default (see the coverage caveat
-under Confidence intervals). Both share the conventions above: the
-`unit = "average"` (ICC(k)) interval is the same exact monotone
+1971, Ch. 9 Table 9.14; the McGraw & Wong 1996 Table 7 limits); it is
+exact under normality. `"burch"` builds kurtosis-adjusted
+`log(1 + n*theta-hat)` limits (Burch 2011), so its width tracks the
+data's tail weight rather than widening by construction: on both grids
+this package has measured it came out narrower than `"searle"` in nearly
+every cell, while Burch reports the reverse for symmetric heavy-tailed
+data with non-normal errors, a case those grids do not cover. Its
+robustness has a measured limit: on strongly skewed subject effects
+`"burch"` under-covers about as badly as the default (see the coverage
+caveat under Confidence intervals). Both share the conventions above:
+the `unit = "average"` (ICC(k)) interval is the same exact monotone
 **Spearman-Brown** image of the ICC(1) endpoints (so its coverage is
 identical by construction), endpoints are left **untruncated** on the
 estimator's own support, and the reported **point** is the engine (REML)

@@ -384,11 +384,19 @@ between-subject variance at all, <code>"burch"</code> aborts (its kurtosis
 standardization divides by zero there) while <code>"searle"</code> still returns its
 attained minimum – and neither resamples, so <code>mc_samples</code>, <code>boot_samples</code>,
 and <code>seed</code> do not apply.
-<code>"searle"</code> is the exact-F pivot (Searle 1971; McGraw &amp; Wong 1996, Table 7):
-<strong>exact under normality</strong>, best-calibrated and narrowest when the data are
-approximately normal. <code>"burch"</code> is the REML-based, kurtosis-adjusted interval
-of Burch (2011): wider, and designed for robustness to non-normality.
-That robustness has limits this package has measured: on strongly skewed
+<code>"searle"</code> is the exact-F pivot (Searle 1971, Table 9.14; McGraw &amp; Wong
+1996, Table 7): <strong>exact under normality</strong>, and best-calibrated when the data
+are approximately normal. <code>"burch"</code> is the REML-based, kurtosis-adjusted
+interval of Burch (2011), designed for robustness to non-normality; its
+width tracks the data's tail weight rather than widening by construction.
+On the two grids this package has measured, <code>"burch"</code> comes out the
+<strong>narrower</strong> of the two in 16 of 16 cells of one and 59 of 64 of the other,
+by a median of about 6% and about 4% respectively, with no distribution
+family reversing that on its median. Both grids
+vary only the subject effect, though; Burch (2011) reports the direction
+reversing for symmetric heavy-tailed data with the errors non-normal too,
+which neither grid tests. Treat neither as reliably the tighter interval.
+Burch's robustness has limits this package has measured: on strongly skewed
 subject effects <code>"burch"</code> under-covers about as badly as the default,
 worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
 subjects and 5 raters. Prefer <code>"searle"</code>: across every distribution family
@@ -745,11 +753,14 @@ near and below zero.</p>
     <div class="section level2">
     <h2 id="the-classical-searle-and-burch-intervals-balanced-one-way-">The classical <code>"searle"</code> and <code>"burch"</code> intervals (balanced one-way)<a class="anchor" aria-label="anchor" href="#the-classical-searle-and-burch-intervals-balanced-one-way-"></a></h2>
     <p>Both are deterministic closed forms from the one-way ANOVA. <code>"searle"</code> inverts the
-exact-F pivot <code>F / (1 + n*lambda) ~ F(k-1, k(n-1))</code> (Searle 1971; the McGraw &amp; Wong
-1996 Table 7 limits); it is exact under normality. <code>"burch"</code> builds
+exact-F pivot <code>F / (1 + n*lambda) ~ F(k-1, k(n-1))</code> (Searle 1971, Ch. 9 Table 9.14;
+the McGraw &amp; Wong 1996 Table 7 limits); it is exact under normality. <code>"burch"</code> builds
 kurtosis-adjusted <code>log(1 + n*theta-hat)</code> limits (Burch 2011), so its width tracks
-the data's tail weight – wider, and designed for robustness to non-normality.
-That robustness has a measured limit: on strongly skewed subject effects
+the data's tail weight rather than widening by construction: on both grids this
+package has measured it came out narrower than <code>"searle"</code> in nearly every cell,
+while Burch reports the reverse for symmetric heavy-tailed data with non-normal errors, a
+case those grids do not cover.
+Its robustness has a measured limit: on strongly skewed subject effects
 <code>"burch"</code> under-covers about as badly as the default (see the coverage caveat
 under Confidence intervals). Both share the conventions above: the <code>unit = "average"</code> (ICC(k))
 interval is the same exact monotone <strong>Spearman-Brown</strong> image of the ICC(1)
