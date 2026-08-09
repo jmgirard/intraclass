@@ -186,6 +186,13 @@ and milestones; never restate a value here.
   coverage re-derived from the committed M111 fixture. Results/disposition
   appended at T3.
 
+- [mc-skew-warn-trigger.md](mc-skew-warn-trigger.md) — synthesis note (M114):
+  the pre-registered (GP5) reliability criteria for a runtime skew/kurtosis
+  warn trigger for the one-way MC default (48-candidate kurtosis/skewness
+  family on the Burch z-decomposition; severity-tiered fire-rate floors W1–W3;
+  mechanical selection rule; 10-cell held-out battery, GP6). Results/
+  disposition appended at T5.
+
 - [mpl-twoway-random-comparison.md](mpl-twoway-random-comparison.md) — synthesis
   note (M86/M87): the estimand mapping (xiao2013 ρ = package `ICC(A,1)`) and the
   oracle-validation of the from-scratch naive-PL / MPL implementation against
