@@ -290,6 +290,17 @@ installed_doc_surfaces <- function() {
 # internal comments alike), all of vignettes/, and NEWS.md.
 source_doc_surfaces <- function() {
   root <- testthat::test_path("..", "..")
+  # "Is there a source tree?" is not "did the walk find anything?". Under
+  # `covr` the suite runs against a BUILT package in a temp dir that carries
+  # `NEWS.md` but no `R/*.R` and no `vignettes/` -- a partial tree, where the
+  # walk returns exactly one surface and every anti-vacuity floor below then
+  # FAILS instead of skipping. That reddened the coverage job on this branch
+  # while `R CMD check` stayed green, because only covr runs from that layout.
+  # `data-raw/` is the discriminator already used at the foot of this file: it
+  # is `.Rbuildignore`d, so it exists in the source tree and in no built copy.
+  if (!dir.exists(data_raw_dir)) {
+    return(list())
+  }
   paths <- c(
     list.files(file.path(root, "R"), pattern = "\\.R$", full.names = TRUE),
     list.files(
