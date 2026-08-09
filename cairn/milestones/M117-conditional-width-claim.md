@@ -55,10 +55,11 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       does exist and points the other way. The runtime hint stays width-silent,
       as `test-doc-skew-caveat.R:424-425` already pins.
 - [ ] AC4 Every per-ρ figure stated is computed from the M113 rows alone, and no
-      figure pools over ρ or over `k` within a grid. A test asserts the two
-      grids' `(ρ, k, n)` design-combination sets stand in the containment
-      M76 ⊂ M113 that made the pooled figure misread as a between-grid
-      difference.
+      stated figure is a grid-wide median pooling ρ and `k` together — every
+      figure is cut at one level of one factor. A test asserts the two grids'
+      `(ρ, k, n)` design-combination sets stand in the containment M76 ⊂ M113
+      that made the pooled figure misread as a between-grid difference, and that
+      no swept surface states a grid-wide pooled ratio.
 - [x] AC5 `test-doc-skew-caveat.R`'s installed-surface and source-tree legs
       resolve their targets by directory walk — every `R/*.R`, every
       `vignettes/*.Rmd`, `NEWS.md`, plus the installed Rd database, installed
@@ -86,13 +87,13 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 ## Coverage
 
 - AC1 → T1
-- AC2 → T3, T5
-- AC3 → T3, T5
-- AC4 → T3, T5
+- AC2 → T3, T5, T9, T10, T11
+- AC3 → T3, T5, T10, T11
+- AC4 → T3, T5, T9, T10, T11
 - AC5 → T2
 - AC6 → T6
-- AC7 → T7
-- AC8 → T8
+- AC7 → T7, T12
+- AC8 → T8, T13
 
 ## Tasks
 
@@ -122,6 +123,27 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - [x] T8 Full gate: air, lintr, `pkgdown::check_pkgdown()`, installed-package
       suite at `NOT_CRAN=true CI=true`; PR and CI matrix.
 
+Review return #1 repair:
+
+- [x] T9 Generator: a `k_at_n5` factor cut (subject count at 5 raters, the only
+      rater count present at every subject count) replacing the confounded
+      marginal `k` rows as what the docs quote; regenerate; pin the new rows and
+      the flat-below-0.6 ρ shape; commit the mutation harness.
+- [ ] T10 Rewrite the test's width apparatus: a level↔figure ASSOCIATION pin
+      (not set membership) run over the installed surfaces as well as the source
+      tree, a discriminating conditional-statement pin, a fixed-stratum rater
+      rule in place of the blanket rater ban, anti-vacuity floors at the
+      measured site count.
+- [ ] T11 Correct the prose at the six reported sites: the ρ shape is
+      flat-then-collapse, not shrinking; the subject-count figures are the
+      5-rater ones; ρ = 0.6 is attributed to M113 alone; the grid-containment
+      claim is bounded to what it explains; the figures move out of
+      `R/ci-classical.R` into the article.
+- [ ] T12 Extend the D-009 directive to settle every figure and fact the
+      references paragraph states; re-triage the ledgers; four checkers green.
+- [ ] T13 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`,
+      installed-package suite at `NOT_CRAN=true CI=true`, CI matrix.
+
 ## Work log
 
 - 2026-08-09: created by /milestone-plan (promotes the M116 re-review candidate row).
@@ -142,6 +164,10 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - 2026-08-09: T2 — both surface legs now walk their own domain (whole Rd database, every installed vignette, installed NEWS; every `R/*.R`, every `vignettes/*.Rmd`, `NEWS.md`), each asserting it still reaches all six retired hand-list paths and strictly more. The vignette-presence assertion moved to its own `test_that` — left above the sweep, its `skip_if` took the Rd and NEWS checks down with it in a dev session (M116). 375 → 423 passing assertions.
 - 2026-08-09: minor amendment — T4 (enumerate the sites) runs before T3 (pin the figures); the sweep is what scopes which figures exist to pin. No scope or criterion change.
 - 2026-08-09: T1 — generator emits a per-(grid, factor, level) block for rho and subject count, both groupings routed through one `width_summary()` core; 15 new pins, each mutation-verified via a harness that masks `stopifnot` so one mutation reports every pin it trips (10 mutations + an unmutated control that fires none). The rho=0.6 sign-crossing mutation the rounding-bucket idiom cannot see reds the exact pin and the direction pin. The D-009 directive reading the fixture positionally still exits 0.
+- 2026-08-09: amendment return: AC4 — "no stated figure is a grid-wide median pooling ρ and `k` together — every figure is cut at one level of one factor"; the original second clause forbade pooling over ρ OR over `k`, which every per-factor cut necessarily does (review O15). Gate chose the rewrite over keeping wording no work could satisfy.
+- 2026-08-09: gate chose recomputing the subject-count figures at 5 raters (0.9154/0.9646/0.9769 on M113, 0.9017/0.9611/0.9775 on M76) over keeping the marginal ones with a caveat or dropping them, because k = 10 is the only subject count carrying n = 2 and the marginal cut repeats one level down the confounding the milestone used to refuse a rater claim (review O6); falsified by a grid balancing the rater count across subject counts.
+- 2026-08-09: gate chose moving the stated figures out of `R/ci-classical.R`'s internal comment into the article over keeping them beside the code, because an internal comment is not in the built package, so every pin over it skips under `R CMD check` (review O13); falsified by a figure that has no installed surface to live on.
+- 2026-08-09: T9 — `k_at_n5` factor rows (both grids, 3 levels each) added through the same `width_summary()` core; 12 new pins plus a structural pin that the marginal and 5-rater k cuts coincide at k = 30/50 and differ at k = 10. Mutation harness now committed (`data-raw/m117-width-pin-mutations.R`, review O18): 11 mutations red 33 distinct pins between them, every new pin fires on at least one, unmutated control fires none.
 - 2026-08-09: plan gate read D-012 Amendment 1's reopening clause ("a grid on which Burch's median width exceeds SEARLE's") as not tripped by the ρ=0.6/`k`=50 region's 1.0015 median, the clause being scoped to whole grids and M76 carrying no reversal; no D-012 Amendment 2. Falsified by a whole committed grid whose median ratio exceeds 1.
 
 ## Decisions
