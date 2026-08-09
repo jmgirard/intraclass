@@ -497,8 +497,8 @@ boundary_fenced_hint <- function(
     blurb <- c(
       searle = "{.code ci_method = \"searle\"} (best calibrated when the data are \\
                 close to normal, and narrowest)",
-      burch = "{.code ci_method = \"burch\"} (wider, and the steadier of the two \\
-               under mild non-normality -- but measured to under-cover on \\
+      burch = "{.code ci_method = \"burch\"} (wider, and dips below the nominal \\
+               level in fewer cells -- but measured to under-cover on \\
                heavy-tailed or skewed subject effects, as the default does)"
     )
     lead <- if (length(named) > 1L) {

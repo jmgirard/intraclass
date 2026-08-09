@@ -177,21 +177,73 @@ test_that("the caveat quotes only methods the fixture measured", {
   expect_setequal(unique(f$method), c("mc", "searle", "burch"))
 })
 
-test_that("no installed surface still claims burch never under-covers", {
-  claim <- "never under-cover"
+# The withdrawn claim wraps across lines in roxygen and in the rendered Rd, so
+# a line-based grep or a `fixed = TRUE` match sees nothing while the sentence
+# is plainly there -- that is how it survived in a sixth site through a whole
+# implementation pass. Every absence check below runs over whitespace-collapsed
+# text for that reason, and there are no carve-outs: the NEWS correction bullet
+# is worded so it need not quote the phrase it withdraws.
+squash <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
 
-  expect_false(grepl(claim, rd_flat(icc_rd()), fixed = TRUE))
+claim_pattern <- "never under-cover"
+
+test_that("no installed surface still claims burch never under-covers", {
+  expect_false(grepl(claim_pattern, squash(rd_flat(icc_rd())), fixed = TRUE))
 
   news <- system.file("NEWS.md", package = "intraclass")
   expect_true(nzchar(news))
-  expect_false(any(grepl(claim, readLines(news, warn = FALSE), fixed = TRUE)))
+  expect_false(
+    grepl(claim_pattern, squash(readLines(news, warn = FALSE)), fixed = TRUE)
+  )
 
   vig <- system.file("doc", "interval-methods.Rmd", package = "intraclass")
   skip_if(
     !nzchar(vig),
     "vignettes not installed (install with build_vignettes)"
   )
-  expect_false(any(grepl(claim, readLines(vig, warn = FALSE), fixed = TRUE)))
+  expect_false(
+    grepl(claim_pattern, squash(readLines(vig, warn = FALSE)), fixed = TRUE)
+  )
+})
+
+test_that("no source file still claims it either, however the line wraps", {
+  # Source-tree leg: catches the claim in files that never reach the installed
+  # package (an internal comment) and in roxygen before it is rendered.
+  root <- testthat::test_path("..", "..")
+  paths <- file.path(
+    root,
+    c(
+      "R/icc.R",
+      "R/boundary-hint.R",
+      "R/ci-classical.R",
+      "vignettes/interval-methods.Rmd",
+      "NEWS.md"
+    )
+  )
+  skip_if_not(all(file.exists(paths)), "source tree not present")
+
+  for (path in paths) {
+    text <- squash(gsub("^#'?", "", readLines(path, warn = FALSE)))
+    expect_false(
+      grepl(claim_pattern, text, fixed = TRUE),
+      info = paste("withdrawn claim still present in", basename(path))
+    )
+  }
+})
+
+test_that("the caveat names the worst cell the fixture actually records", {
+  # Attribution, not just membership: the numeral test alone would accept any
+  # fixture value in any position, so a caveat quoting a real number against
+  # the wrong cell would pass. This pins the prose to the row the fixture says
+  # is worst.
+  sec <- squash(caveat_section())
+  failing <- low_abort_failures(skew_fixture())
+  worst <- failing[which.min(failing$coverage_nonabort), ]
+
+  expect_true(grepl(format(worst$coverage_nonabort), sec, fixed = TRUE))
+  expect_true(grepl(format(worst$rho), sec, fixed = TRUE))
+  expect_true(grepl(as.character(worst$k), sec, fixed = TRUE))
+  expect_true(grepl(as.character(worst$n), sec, fixed = TRUE))
 })
 
 test_that("the installed help and vignette name burch's measured worst cell", {
@@ -250,6 +302,35 @@ test_that("every numeral in the vignette's caveat section is a measured value", 
       info = paste0("numeral '", tok, "' in the vignette is not measured")
     )
   }
+})
+
+test_that("the replacement searle/burch comparison holds on the fixture", {
+  # `@param ci_method` now makes two comparative claims in place of the
+  # withdrawn one. They are ledgered `out` in `data-raw/mpl-doc-claims.tsv`
+  # naming this test as what settles them, so they are pinned rather than
+  # merely reworded -- the failure mode that produced the original claim.
+  f <- skew_fixture()
+  g <- f[f$source == "m113", , drop = FALSE]
+  key <- function(d) paste(d$rho, d$k, d$n, d$dist, sep = "\r")
+
+  # Claim 1: searle lands closer to nominal in most cells of EVERY family.
+  for (d in unique(g$dist)) {
+    sub <- g[g$dist == d, , drop = FALSE]
+    s <- sub[sub$method == "searle", , drop = FALSE]
+    b <- sub[sub$method == "burch", , drop = FALSE]
+    b <- b[match(key(s), key(b)), , drop = FALSE]
+    expect_false(anyNA(b$rho))
+    searle_closer <- sum(
+      abs(s$coverage_uncond - 0.95) < abs(b$coverage_uncond - 0.95)
+    )
+    expect_gt(searle_closer, nrow(s) / 2)
+  }
+
+  # Claim 2: burch dips below the nominal level in fewer cells overall.
+  below <- function(m) {
+    sum(g$method == m & g$coverage_uncond < 0.93)
+  }
+  expect_lt(below("burch"), below("searle"))
 })
 
 test_that("the runtime hint no longer promises burch never under-covers", {
@@ -334,6 +415,10 @@ test_that("the fixture re-derives from its M113/M114 sources", {
     covered <- reps$mc_covered %in% c("TRUE", TRUE)
     expect_equal(cell$abort_rate, sum(aborted) / nrow(reps))
     expect_equal(cell$coverage_nonabort, sum(covered[!aborted]) / sum(!aborted))
+    # `coverage_uncond` is the column that differs from `coverage_nonabort` at
+    # the held-out (20, 3) cells, so leaving it unchecked would let a hand edit
+    # there pass provenance.
+    expect_equal(cell$coverage_uncond, sum(covered & !aborted) / nrow(reps))
   }
 })
 

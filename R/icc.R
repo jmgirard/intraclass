@@ -160,10 +160,16 @@
 #' measured the default's coverage well below its nominal level across such
 #' data, worst at chi-square(1) subject effects with a true ICC of 0.6, 50
 #' subjects and 5 raters, where intervals that were produced at all covered
-#' 0.6725 of the time. The shortfall grows with the number of raters per
-#' subject and with the true ICC; near-normal and uniform subject effects
-#' showed no such shortfall. Held-out cells at lognormal and Laplace subject
-#' effects behaved the same way, covering 0.825 and 0.84 at that geometry.
+#' 0.6725 of the time. At 5 raters per subject, coverage falls as the subject
+#' count rises once the true ICC is moderate or high. Fewer raters is not a
+#' refuge: in every cell where both were measured, 2 raters covered worse than
+#' 5 --- but a larger share of those runs abort instead of reporting an
+#' interval, and this caveat is about what does get reported. Near-normal and
+#' uniform subject effects under-covered only in cells where many runs
+#' aborted; among cells that almost always report an interval, they showed no
+#' shortfall. Held-out cells at lognormal and Laplace subject effects
+#' under-covered at that same 50-subject, 5-rater geometry, covering 0.825 and
+#' 0.84, while their 20-subject, 3-rater cells were near nominal.
 #'
 #' This is not repaired by switching to a closed form. In every cell where the
 #' default under-covered without also aborting often, the balanced one-way
@@ -398,10 +404,12 @@
 #'   That robustness has limits this package has measured: on strongly skewed
 #'   subject effects `"burch"` under-covers about as badly as the default,
 #'   worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
-#'   subjects and 5 raters. Prefer `"searle"` for near-normal data; treat
-#'   `"burch"` as the better-behaved of the two closed forms under mild
-#'   non-normality rather than as a remedy for heavy tails (see the coverage
-#'   caveat under Confidence intervals).
+#'   subjects and 5 raters. Prefer `"searle"`: across every distribution family
+#'   in that study it landed closer to nominal coverage in most cells, including
+#'   the heavy-tailed ones. `"burch"` dipped below the nominal level in fewer
+#'   cells overall, which is the one respect in which it was steadier, but it is
+#'   a remedy for neither heavy tails nor skew (see the coverage caveat under
+#'   Confidence intervals).
 #'   `"mpl"` is the **modified profile-likelihood** interval of Xiao & Liu (2013),
 #'   **only for the balanced-complete two-way random absolute-agreement ICC(A,1)** (with
 #'   ICC(A,k) and any numeric-`unit` projection `ICC(A,m)` its Spearman-Brown image,
@@ -552,8 +560,10 @@
 #' exact-F pivot `F / (1 + n*lambda) ~ F(k-1, k(n-1))` (Searle 1971; the McGraw & Wong
 #' 1996 Table 7 limits); it is exact under normality. `"burch"` builds
 #' kurtosis-adjusted `log(1 + n*theta-hat)` limits (Burch 2011), so its width tracks
-#' the data's tail weight -- wider but robust to non-normality, and never
-#' under-covering. Both share the conventions above: the `unit = "average"` (ICC(k))
+#' the data's tail weight -- wider, and designed for robustness to non-normality.
+#' That robustness has a measured limit: on strongly skewed subject effects
+#' `"burch"` under-covers about as badly as the default (see the coverage caveat
+#' under Confidence intervals). Both share the conventions above: the `unit = "average"` (ICC(k))
 #' interval is the same exact monotone **Spearman-Brown** image of the ICC(1)
 #' endpoints (so its coverage is identical by construction), endpoints are left
 #' **untruncated** on the estimator's own support, and the reported **point** is the

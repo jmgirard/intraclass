@@ -75,12 +75,23 @@ interval covers considerably less often than 95% of the time.
 
 A one-way simulation study measured this across four subject-effect distributions.
 Where the default produced an interval at all, coverage fell to 0.6725 at its worst
-— chi-square(1) subject effects, a true ICC of 0.6, 50 subjects and 5 raters. The
-shortfall grows with the number of raters per subject and with the true ICC, and it
-is invisible in the interval itself: those runs did not abort, warn, or widen. Cells
-with near-normal or uniform subject effects showed no such shortfall, and held-out
-cells with lognormal and Laplace subject effects behaved like the skewed ones,
-covering 0.825 and 0.84 at that geometry.
+— chi-square(1) subject effects, a true ICC of 0.6, 50 subjects and 5 raters. Those
+runs did not abort, warn, or widen, so the shortfall is invisible in the interval
+itself.
+
+Two patterns in that study are worth carrying away, and one tempting reading of it
+is wrong. At 5 raters per subject, coverage falls as the subject count rises, once
+the true ICC is moderate or high — the largest designs are the exposed ones, not the
+smallest. And near-normal or uniform subject effects under-covered only in cells
+where many runs aborted; wherever the default almost always returned an interval,
+those distributions were fine. The wrong reading is that fewer raters is safer: in
+every cell where both were measured, 2 raters covered worse than 5. What changes is
+that a larger share of the 2-rater runs abort outright, and an abort is a visible
+failure rather than a quiet one.
+
+The held-out battery agrees where the geometry matches: lognormal and Laplace
+subject effects covered 0.825 and 0.84 at that same 50-subject, 5-rater geometry,
+while their 20-subject, 3-rater cells came out near nominal.
 
 The natural reaction — switch to a closed form — does not help. In every cell where
 the default under-covered without also aborting often, `"searle"` and `"burch"`
@@ -136,8 +147,10 @@ and kurtosis-adjusted: its width tracks the data's tail weight, which buys it
 some robustness to mild non-normality. It is not, however, a remedy for heavy
 tails: on strongly skewed subject effects it under-covers about as badly as the
 default (see [When the default under-covers](#when-the-default-under-covers)).
-Prefer `"searle"` for near-normal data, and `"burch"` where the tails are
-mildly heavier than normal. Their value over
+Prefer `"searle"`: across every distribution family in that study it landed
+closer to nominal coverage in most cells, heavy-tailed ones included. What
+`"burch"` buys is dipping below the nominal level in fewer cells overall — a
+narrower kind of steadiness than its kurtosis adjustment suggests. Their value over
 the default is a finite, well-calibrated interval at the near-zero-ICC boundary
 where the Monte-Carlo default aborts. One asymmetry
 between the siblings: on data with *no* between-subject variance at all,

@@ -48,14 +48,15 @@
   raters. The runs concerned do not abort or warn, so the caveat is where a
   user meets it: the help page, the article, and the glossary entry for the
   method.
-* **Correction.** Earlier releases described `ci_method = "burch"` as never
-  under-covering and recommended it when heavy tails were a concern; the
+* **Correction.** Earlier releases described `ci_method = "burch"` as immune to
+  under-coverage and recommended it when heavy tails were a concern; the
   message printed when the default aborts said the same. A simulation study
   measured `"burch"` under-covering on strongly skewed subject effects about as
   badly as the default (worst 0.6655), so that claim and that recommendation
   are withdrawn from the help page, the article, and the runtime message.
-  `"burch"` remains the steadier of the two closed forms under mild
-  non-normality.
+  `"searle"` landed closer to nominal coverage in most cells of every
+  distribution family measured; what `"burch"` retains is dipping below the
+  nominal level in fewer cells overall.
 * `icc()` now rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed
   error naming the column and the offending rows, instead of passing it to the
   fitting engine and surfacing that engine's own unclassed message.
@@ -160,9 +161,9 @@
   random** design: two **deterministic classical closed-form** intervals. `"searle"`
   is the exact-F pivot (Searle 1971; McGraw & Wong 1996, Table 7), exact under
   normality and narrowest on near-normal data; `"burch"` is the REML-based,
-  kurtosis-adjusted interval of Burch (2011), wider and steadier under mild
-  non-normality (but see the correction above — not under heavy tails). Like
-  `"npbootstrap"` they are **boundary robust** — a finite
+  kurtosis-adjusted interval of Burch (2011), wider and below-nominal in fewer
+  cells (but see the correction above — it is not a remedy for heavy tails).
+  Like `"npbootstrap"` they are **boundary robust** — a finite
   interval where the Monte-Carlo default aborts on near-zero-ICC data — and one-way
   only (they abort otherwise). Being closed forms they take no `mc_samples`,
   `boot_samples`, or `seed` and report no standard error; the `ICC(k)` interval is
