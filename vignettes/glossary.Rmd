@@ -183,8 +183,12 @@ conservative. See
 The default confidence-interval method (`ci_method = "montecarlo"`). It draws many
 parameter vectors from the fitted model's estimated covariance, on a scale that
 respects the zero-variance boundary, recomputes the ICC for each draw, and takes the
-2.5% and 97.5% quantiles. Fast and boundary-aware. See [*Confidence-interval
-methods*](interval-methods.html).
+2.5% and 97.5% quantiles. Fast and boundary-aware. It does assume the fitted
+parameters are approximately normally distributed around the truth, and it
+under-covers when the subject effects are strongly skewed or heavy-tailed — see
+[*When the default
+under-covers*](interval-methods.html#when-the-default-under-covers). See also
+[*Confidence-interval methods*](interval-methods.html).
 
 ## One-way vs. two-way
 

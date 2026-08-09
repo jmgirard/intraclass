@@ -120,9 +120,9 @@ updated only as their existing checkers mechanically require.
       ci_method`; re-triage `data-raw/mpl-doc-claims.tsv` row `d25a8b790ea6`
       (stale key) in the same commit, and add a row for any new
       trigger-token sentence.
-- [ ] T5: Correct the runtime hint blurb at `R/boundary-hint.R:500` and the
+- [x] T5: Correct the runtime hint blurb at `R/boundary-hint.R:500` and the
       internal comment at `R/ci-classical.R:13`.
-- [ ] T6: Add the "when the default under-covers" subsection to
+- [x] T6: Add the "when the default under-covers" subsection to
       `vignettes/interval-methods.Rmd` under the Monte-Carlo section, replace
       the preference sentence at `:106-108`, cross-link from
       `vignettes/glossary.Rmd:181-187`.
@@ -144,6 +144,8 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: T2 done — installed-surface assertions written and RED before any doc edit: 9 failures, 0 errors (caveat absent; `never under-cover` still in the Rd and NEWS; the rendered hint still promises it). `icc_rd()` reads the installed help DB, falling back to source `man/icc.Rd` under load_all where `Rd_db()` errors.
 - 2026-08-08: T3 done — caveat authored in `@section Confidence intervals:`; AC1/AC2 assertions now green (every numeral in the block traces to the fixture, quoted method tokens are exactly `"searle"`/`"burch"`), 5 failures remain and all belong to T4-T7.
 - 2026-08-08: T4 done — `@param ci_method`'s burch description now states the measured limit (worst 0.6655) instead of never-under-covering; ledger row `d25a8b790ea6` deleted rather than re-keyed because the new sentences carry no trigger token and are not claim candidates; `check-mpl-doc-claims.py` OK (40 candidates, 0 failures).
+- 2026-08-08: T5 done — runtime hint blurb and the `R/ci-classical.R` header comment now state the measured limit; the full existing `test-boundary-abort-hint.R` suite passes unchanged against the new blurb.
+- 2026-08-08: T6 done — vignette gains a `### When the default under-covers` subsection under the Monte-Carlo section, the closed-forms preference sentence is replaced, and the glossary Monte-Carlo entry cross-links the new subsection.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
