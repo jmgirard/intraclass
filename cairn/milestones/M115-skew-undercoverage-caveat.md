@@ -3,7 +3,7 @@
      Per-section owners are tagged below. -->
 # M115: Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -149,6 +149,9 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: T7 done — two NEWS bullets under Minor improvements (the caveat, and an explicit Correction withdrawing the burch claim across help/article/runtime message); the unreleased searle/burch feature bullet amended in place; `document()` leaves no `man/` diff; the caveat test file is fully green.
 - 2026-08-08: T8 — all four data-raw checkers exit 0; `air format --check` clean; `lintr::lint_package()` 0 lints; full suite at NOT_CRAN=true CI=true 0 failures / 0 errors / 25 skips.
 - 2026-08-08: added a vignette-side numeral assertion (same bar as the help-page block, source-tree fallback for dev sessions) beyond what AC1 requires; the caveat file is green.
+- 2026-08-08: `devtools::check()` (--no-manual, NOT_CRAN=false) Status OK — 0 errors / 0 warnings / 0 notes, vignettes built.
+- 2026-08-08: verified the amendment's purpose against a real install (`devtools::install(build_vignettes = TRUE)`): the caveat file runs 124 assertions with 0 failures, 0 errors and **0 skips** — the installed-Rd, installed-NEWS and shipped-vignette branches all execute rather than skipping, which is what the source-tree design would have done.
+- 2026-08-08: all tasks done; status review.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
