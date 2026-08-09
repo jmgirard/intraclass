@@ -1,11 +1,11 @@
 # M116: Correct the falsified `"searle"`/`"burch"` width claims
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** `m116-classical-width-claims`
 
 ## Goal
 
@@ -124,6 +124,8 @@ planned. A committed doc-claim checker → barred by D-021.
 - 2026-08-08: maintainer supplied `cairn/references/sources/searle1971.epub` (Wiley Classics Library Edition 1997, a verbatim reprint of the 1971 text — same LC card number 70-138919 — so equation and table numbering match the original). T1's Searle leg is unblocked.
 - 2026-08-08: plan-time read of Searle (1971). The exact-F interval is Ch. 9 §9d "Confidence intervals", Table 9.14 ("Confidence intervals on variance components and functions thereof, in the 1-way classification, random model, balanced data"), built on eq. (60) for `F = MSA/MSE`; Searle credits the σ²e/(σ²α+σ²e) interval to Graybill (1961, p. 379) and the σ²α/σ²e one to Scheffé (1959, p. 229). No interval-length or narrowness claim attaches to it anywhere in Ch. 9. The book's only shortest-length optimality result is in Ch. 3 §5 and concerns the symmetric t-interval on a regression coefficient in the full-rank model — a different object; T1 records it as the candidate provenance for "narrowest" without asserting it is the actual origin. Three sources now checked (Burch 2011, McGraw & Wong 1996, Searle 1971) and none supports the shipped claim.
 - 2026-08-08: gated amendment — AC1 and T1 gain the `Searle 1971 eq. 4/6` citation correction at `R/ci-classical.R:10` and `cairn/references/ohyama2025.md:33`, found by the plan-time source read (the interval is Table 9.14 / eq. (60); the reprint is verbatim, so the numbering is not an edition artifact). Maintainer chose folding it in over a candidate row, per D-021's correct-in-place clause.
+
+- 2026-08-08: branched `m116-classical-width-claims` from main at cbb6da0; status in-progress.
 
 ## Decisions
 
