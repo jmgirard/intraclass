@@ -126,6 +126,26 @@ mutations <- list(
     cells$burch_narrower[i] <- FALSE
     cells
   }),
+  # M76 given a design point M113 lacks: the containment the docs' "derived
+  # from the larger grid alone" choice rests on.
+  containment_broken = quote({
+    # A design point M113 does not carry at all -- copying an existing M113
+    # combination into M76 leaves the containment intact, which is how the
+    # first attempt at this mutation reddened nothing.
+    donor <- cells[cells$grid == "m113" & cells$rho == 0.6, ][1, ]
+    donor$grid <- "m76"
+    donor$k <- 99L
+    rbind(cells, donor)
+  }),
+  # M113 cut back to M76's design points, so the containment is no longer
+  # strict and the larger grid carries nothing the smaller lacks.
+  containment_equal = quote({
+    keep <- !(cells$grid == "m113" & cells$rho %in% c(0.3, 0.6))
+    cells[keep, ]
+  }),
+  # A level removed outright: `lvl()` finds no row, which must trip its own
+  # guard rather than silently returning an empty frame.
+  level_removed = quote(cells[!(cells$grid == "m113" & cells$rho == 0.3), ]),
   # The subject-count direction itself, on the stratified cut only.
   k_direction = quote({
     i <- cells$grid == "m113" & cells$k == 50 & cells$n == 5
@@ -144,7 +164,10 @@ run_one <- function(mutation) {
     args <- list(...)
     labs <- names(args)
     for (i in seq_along(args)) {
-      ok <- isTRUE(all(args[[i]]))
+      # A zero-length condition is vacuous, never satisfied: `all(logical(0))`
+      # is TRUE, so a mutation removing a level would otherwise silence every
+      # downstream pin that indexes into it instead of tripping them.
+      ok <- length(args[[i]]) > 0L && isTRUE(all(args[[i]]))
       if (!ok) {
         lab <- if (!is.null(labs) && nzchar(labs[i])) {
           labs[i]
@@ -196,3 +219,47 @@ cat(
   "\n",
   sep = ""
 )
+
+# Coverage, asserted rather than eyeballed. Printing which pins fired says
+# nothing about the ones that fired on NOTHING -- three M117 pins sat
+# unexercised through a whole review because the harness only printed. A pin
+# absent from `fired` now fails here unless it is explicitly exempted, so a
+# newly added pin cannot arrive dead.
+#
+# The exemptions are M116's input fences: they guard the SOURCES this script
+# reads (the sweep scripts' DGP, the grids' abort rates, the run directory),
+# which no perturbation of the derived `cells` frame can reach.
+exempt <- c(
+  "run this from the repo root",
+  "subject effect does not branch on dist",
+  "the error term uses a non-rnorm generator",
+  "the error term draws no random numbers at all",
+  "a random draw happens outside the subject effect and the error term",
+  "M76: a classical leg aborts",
+  "M113: a classical leg aborts",
+  "cell is not exactly one searle + one burch",
+  "M76 all-cell count moved",
+  "M76 narrower count moved",
+  "M76 gaussian count moved",
+  "a family's median ratio is not below 1"
+)
+labels <- unique(sub(
+  '^"',
+  "",
+  sub(
+    '" = $',
+    "",
+    regmatches(
+      paste(src, collapse = "\n"),
+      gregexpr('"[^"]{15,}" = ', paste(src, collapse = "\n"))
+    )[[1]]
+  )
+))
+dead <- setdiff(setdiff(labels, fired), exempt)
+if (length(dead)) {
+  stop(
+    "pin(s) reddened by no mutation and not exempt:\n  ",
+    paste(dead, collapse = "\n  ")
+  )
+}
+cat("every non-exempt pin fired; ", length(exempt), " exempt\n", sep = "")

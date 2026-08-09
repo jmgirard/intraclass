@@ -497,9 +497,9 @@ boundary_fenced_hint <- function(
     # Neither blurb claims to be the tighter interval: the shipped "narrowest"
     # / "wider" pair was false on both measured grids and is withdrawn (M116).
     # Nor could a blurb state the relationship honestly in a clause -- burch's
-    # width margin holds much the same up to a true ICC of 0.3 rather than
-    # shrinking as the true ICC rises, collapses to near parity at 0.6, and
-    # shrinks steadily as the subject count grows, measured at 5 raters (M117).
+    # width margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises,
+    # then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
+    # and it shrinks steadily as the subject count grows, measured at 5 raters (M117).
     # This is where a user picks a method, so a width ranking here is the one
     # that would actually mislead; the conditional statement lives in `?icc`
     # and the per-level figures in the interval-methods article.

@@ -15,14 +15,14 @@
 #     a remedy for heavy tails.
 # NOT "burch is wider than searle" -- that shipped for three milestones and is
 # false on both committed grids (M116: burch narrower in 16 of 16 cells of the
-# M76 grid and 59 of 64 cells of the M113 one, no family reversing on its
+# smaller grid and 59 of 64 cells of the larger grid, no family reversing on its
 # median; see data-raw/m116-classical-width-comparison.tsv). Nor is it a flat
 # margin, which the pooled figure that replaced it implied (M117): burch's width
-# margin holds much the same up to a true ICC of 0.3 rather than shrinking as
-# the true ICC rises, then collapses to near parity at 0.6, where every cell
-# searle won sits; and it shrinks steadily as the subject count grows, measured
-# at 5 raters. That is the only rater count present at every subject count, so
-# the unstratified subject-count cut would be confounded.
+# margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises,
+# then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
+# where every cell searle won sits; and it shrinks steadily as the subject count grows, measured at 5 raters.
+# That is the only rater count present at every subject count, so the
+# unstratified subject-count cut would be confounded.
 # The per-level figures live in the interval-methods article, tabulated and
 # pinned by tests/testthat/test-doc-skew-caveat.R against the committed
 # fixture. They are deliberately not restated here: a figure in a source

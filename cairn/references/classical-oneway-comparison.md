@@ -133,8 +133,9 @@ two design factors. Recomputed from the same fixture's per-factor block: on the
 M113 grid the median width ratio is 0.9485, 0.9470 and 0.9475 at a true ICC of
 0.05, 0.1 and 0.3, but 0.9971 at 0.6 — and all five reversing cells sit at 0.6.
 Below 0.6 the margin is **flat, not shrinking**: those three medians span under
-0.005 and the largest margin is at 0.1, not at 0.05, so "the advantage shrinks
-as the true ICC grows" is false on the very figures it was stated over. Across
+0.005 and the largest margin is at 0.1 — larger than at 0.05 and than at 0.3 —
+so "the advantage shrinks as the true ICC grows" is false on the very figures it
+was stated over. Across
 subject count, **holding the rater count at 5**, it is 0.9154, 0.9646 and 0.9769
 at 10, 30 and 50, the same direction on the M76 grid (0.9017, 0.9611, 0.9775).
 The rater count gets no cut of its own, and the marginal subject-count cut is
@@ -142,7 +143,7 @@ not quoted either: n=2 occurs only at k=10 in both grids, so both the marginal
 rater contrast and the k=10 marginal row are confounded. Nothing in C3's verdict
 changes — the direction is unaffected, only its constancy in the true ICC —
 observed 2026-08-09.
-<!-- check: python3 -c "import csv,sys;L=[l for l in open('data-raw/m116-classical-width-comparison.tsv')];i=[n for n,l in enumerate(L) if l.startswith('grid\tfactor\tlevel')][0];j=[n for n,l in enumerate(L) if l.startswith('grid\trho\tk\tn')][0];lv={(r['grid'],r['factor'],float(r['level'])):r for r in csv.DictReader([l for l in L[i:j] if not l.startswith('#') and l.strip()],delimiter='\t')};cl=[r for r in csv.DictReader([l for l in L[j:] if not l.startswith('#') and l.strip()],delimiter='\t')];g=lambda a,b,c:lv[(a,b,c)]['ratio_median'];f=lambda a,b,c:float(g(a,b,c));lo=[f('m113','rho',x) for x in (0.05,0.1,0.3)];sys.exit(0 if (g('m113','rho',0.05)=='0.9485' and g('m113','rho',0.1)=='0.947' and g('m113','rho',0.3)=='0.9475' and g('m113','rho',0.6)=='0.9971' and g('m113','k_at_n5',10.0)=='0.9154' and g('m113','k_at_n5',30.0)=='0.9646' and g('m113','k_at_n5',50.0)=='0.9769' and g('m76','k_at_n5',10.0)=='0.9017' and g('m76','k_at_n5',30.0)=='0.9611' and g('m76','k_at_n5',50.0)=='0.9775' and [r['rho'] for r in cl if r['burch_narrower']=='FALSE']==['0.6']*5 and all(r['k']=='10' for r in cl if r['n']=='2') and max(lo)-min(lo)<0.005 and lo[1]<lo[0] and f('m113','k',10.0)!=f('m113','k_at_n5',10.0)) else 1)" -->
+<!-- check: python3 -c "import csv,sys;L=[l for l in open('data-raw/m116-classical-width-comparison.tsv')];i=[n for n,l in enumerate(L) if l.startswith('grid\tfactor\tlevel')][0];j=[n for n,l in enumerate(L) if l.startswith('grid\trho\tk\tn')][0];lv={(r['grid'],r['factor'],float(r['level'])):r for r in csv.DictReader([l for l in L[i:j] if not l.startswith('#') and l.strip()],delimiter='\t')};cl=[r for r in csv.DictReader([l for l in L[j:] if not l.startswith('#') and l.strip()],delimiter='\t')];g=lambda a,b,c:lv[(a,b,c)]['ratio_median'];f=lambda a,b,c:float(g(a,b,c));lo=[f('m113','rho',x) for x in (0.05,0.1,0.3)];sys.exit(0 if (g('m113','rho',0.05)=='0.9485' and g('m113','rho',0.1)=='0.947' and g('m113','rho',0.3)=='0.9475' and g('m113','rho',0.6)=='0.9971' and g('m113','k_at_n5',10.0)=='0.9154' and g('m113','k_at_n5',30.0)=='0.9646' and g('m113','k_at_n5',50.0)=='0.9769' and g('m76','k_at_n5',10.0)=='0.9017' and g('m76','k_at_n5',30.0)=='0.9611' and g('m76','k_at_n5',50.0)=='0.9775' and [r['rho'] for r in cl if r['burch_narrower']=='FALSE']==['0.6']*5 and all(r['k']=='10' for r in cl if r['n']=='2') and max(lo)-min(lo)<0.005 and lo[1]<lo[0] and lo[1]<lo[2] and f('m113','k',10.0)!=f('m113','k_at_n5',10.0) and f('m76','k',10.0)!=f('m76','k_at_n5',10.0) and f('m113','k',30.0)==f('m113','k_at_n5',30.0) and f('m76','k',30.0)==f('m76','k_at_n5',30.0)) else 1)" -->
 
 **C5 — tail symmetry.** SEARLE passes at **every** cell (tail-difference ≤ 0.010,
 no tail > 0.043). Burch fails at the four **n=2** cells: its miss is entirely
