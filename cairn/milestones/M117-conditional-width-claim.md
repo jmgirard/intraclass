@@ -38,14 +38,16 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [ ] AC2 Every width figure any rewritten site states is recomputed by
-      `test-doc-skew-caveat.R` from the fixture's per-cell rows and asserted to
-      match at the prose's own rounding. The numeral-enumeration leg is
-      extended to each roxygen block and each `###` vignette section that AC5's
-      sweep reports as carrying a burch/searle width sentence — the anchors are
-      what the sweep returns, not a remembered list (the two existing anchors,
-      `@section Confidence intervals:` and `^### When the default under-covers`,
-      cover none of the width sites).
+- [ ] AC2 On every surface AC5's sweep walks, each figure a width statement
+      states sits in one of a fixed set of canonical shapes declared in
+      `test-doc-skew-caveat.R`, and is checked against the value recomputed
+      from the fixture's per-cell rows at the prose's own rounding. A
+      figure-shaped token — decimal, bare integer, or spelled-out cardinal —
+      that a width statement carries outside every canonical shape and outside
+      the declared non-measurement allowlist fails the test rather than passing
+      unchecked; ratio-shaped tokens are scanned across the whole surface, not
+      only inside sentences naming a method, so a pooled figure cannot escape
+      by omitting the method name.
 - [x] AC3 At every site AC5's sweep reports as carrying a width statement, that
       statement names how the ratio moves with ρ and with the subject count, and
       no site states a rater-count width effect. A test asserts from the per-cell
@@ -54,12 +56,13 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       asserts nothing about separability at fixed `k`, where a rater contrast
       does exist and points the other way. The runtime hint stays width-silent,
       as `test-doc-skew-caveat.R:424-425` already pins.
-- [ ] AC4 Every per-ρ figure stated is computed from the M113 rows alone, and no
-      stated figure is a grid-wide median pooling ρ and `k` together — every
-      figure is cut at one level of one factor. A test asserts the two grids'
-      `(ρ, k, n)` design-combination sets stand in the containment M76 ⊂ M113
-      that made the pooled figure misread as a between-grid difference, and that
-      no swept surface states a grid-wide pooled ratio.
+- [ ] AC4 Every per-ρ figure stated is computed from the M113 rows alone,
+      asserted by matching each against the M113 recomputation and no other
+      grid's. A test asserts the two grids' `(ρ, k, n)` design-combination sets
+      stand in the containment M76 ⊂ M113 that made the pooled figure misread
+      as a between-grid difference. A grid-wide pooled ratio is barred by AC2's
+      surface-wide ratio scan, which fails any ratio-shaped figure not bound to
+      a level.
 - [x] AC5 `test-doc-skew-caveat.R`'s installed-surface and source-tree legs
       resolve their targets by directory walk — every `R/*.R`, every
       `vignettes/*.Rmd`, `NEWS.md`, plus the installed Rd database, installed
@@ -86,62 +89,54 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 
 ## Coverage
 
-- AC1 → T1
-- AC2 → T3, T5, T9, T10, T11
-- AC3 → T3, T5, T10, T11
-- AC4 → T3, T5, T9, T10, T11
+- AC1 → T1, T17
+- AC2 → T3, T5, T9, T10, T11, T14, T15
+- AC3 → T3, T5, T10, T11, T15
+- AC4 → T3, T5, T9, T10, T11, T14, T15
 - AC5 → T2
 - AC6 → T6
-- AC7 → T7, T12
-- AC8 → T8, T13
+- AC7 → T7, T12, T16
+- AC8 → T8, T13, T17
 
 ## Tasks
 
-- [x] T1 Extend `data-raw/m116-classical-width-comparison.R`: per-factor
-      summary rows for ρ and `k` per grid (reuse `summarize_grid`'s arithmetic,
-      `R:178-189`), regenerate the `.tsv`, add the pins, mutation-verify each.
-      Sequence with T7: the D-009 directive at
-      `cairn/references/classical-oneway-comparison.md:126` reads the summary
-      block's first row positionally.
-- [x] T2 Widen the two surface legs of `tests/testthat/test-doc-skew-caveat.R`
-      (`:217-250`, `:253-274`) to directory walks with per-leg anti-vacuity
-      assertions; confirm 0 skips in the file on an installed run.
-- [x] T3 Tests first, red: the recompute-and-match assertions for the figures
-      T5 will state, the marginal-confounding assertion, the M76 ⊂ M113
-      containment assertion.
-- [x] T4 Run the widened sweep to enumerate the sites carrying a width
-      statement; record the list as evidence (it, not memory, scopes T5).
-- [x] T5 Rewrite the width statement at each site T4 reports — `R/icc.R`
-      `@param ci_method` (`:404-407`) and `@details` (`:570-572`),
-      `R/ci-classical.R:17-23`, `vignettes/interval-methods.Rmd:146-169`,
-      `vignettes/glossary.Rmd:40-42`, `NEWS.md:60-66` — then
-      `devtools::document()`.
-- [x] T6 Add and two-sided verify the new `claim_patterns` entries against the
-      pre-correction tree.
-- [x] T7 Ledgers: `mpl-doc-claims.tsv` re-triage, the D-009 dated observation on
-      `classical-oneway-comparison.md`, all four data-raw checkers green.
-- [x] T8 Full gate: air, lintr, `pkgdown::check_pkgdown()`, installed-package
-      suite at `NOT_CRAN=true CI=true`; PR and CI matrix.
+Shipped (detail in the work log and git):
 
-Review return #1 repair:
+- [x] T1 Generator: per-factor summary rows for ρ and `k` per grid; regenerate; pins mutation-verified.
+- [x] T2 Both surface legs widened to directory walks with per-leg anti-vacuity assertions.
+- [x] T3 Tests first, red: recompute-and-match, marginal confounding, M76 ⊂ M113 containment.
+- [x] T4 The widened sweep enumerates the sites carrying a width statement; that list scopes T5.
+- [x] T5 Width statement rewritten at each reported site; `devtools::document()`.
+- [x] T6 New `claim_patterns` entries added and two-sided verified.
+- [x] T7 Ledgers re-triaged; D-009 dated observation; four data-raw checkers green.
+- [x] T8 Full gate; PR #126 and CI matrix.
+- [x] T9 `k_at_n5` cut replacing the confounded marginal `k` rows; pins; mutation harness committed.
+- [x] T10 Level↔figure association pin over both legs; per-statement direction pin; rater licensing rule.
+- [x] T11 Prose corrected at the six sites; figures moved out of `R/ci-classical.R` into the article.
+- [x] T12 D-009 directive extended to every stated figure; ledgers re-triaged.
+- [x] T13 Full gate on a rebuilt install; the source leg gated so `covr`'s partial tree skips.
 
-- [x] T9 Generator: a `k_at_n5` factor cut (subject count at 5 raters, the only
-      rater count present at every subject count) replacing the confounded
-      marginal `k` rows as what the docs quote; regenerate; pin the new rows and
-      the flat-below-0.6 ρ shape; commit the mutation harness.
-- [x] T10 Rewrite the test's width apparatus: a level↔figure ASSOCIATION pin
-      (not set membership) run over the installed surfaces as well as the source
-      tree, a discriminating conditional-statement pin, a fixed-stratum rater
-      rule in place of the blanket rater ban, anti-vacuity floors at the
-      measured site count.
-- [x] T11 Correct the prose at the six reported sites: the ρ shape is
-      flat-then-collapse, not shrinking; the subject-count figures are the
-      5-rater ones; ρ = 0.6 is attributed to M113 alone; the grid-containment
-      claim is bounded to what it explains; the figures move out of
-      `R/ci-classical.R` into the article.
-- [x] T12 Extend the D-009 directive to settle every figure and fact the
-      references paragraph states; re-triage the ledgers; four checkers green.
-- [x] T13 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`,
+Review return #2 repair:
+
+- [ ] T14 Canonical-shape figure scan: declare the shapes (table row, `<ratio> at
+      a true ICC of <level>`, `<ratio> at <level> subjects`, `<count> of <total>
+      cells of the <grid> grid`, `<total>-cell battery`, `<n> distribution
+      families`, `the largest margin is at a true ICC of <level>`), check each
+      against the recomputation, and REFUSE any figure-shaped token — decimal,
+      integer or spelled-out cardinal — a width statement carries outside them.
+      Ratio-shaped tokens scanned surface-wide, not only in method-naming
+      sentences.
+- [ ] T15 Canonical clause templates for the three directional claims at all six
+      sites, levels bound to the fixture; rewrite the prose to the canonical
+      shapes; fix the two prose defects the review found (the "differ cell by
+      cell" sentence; the missing one-grid hedge in `NEWS.md` and
+      `R/ci-classical.R`).
+- [ ] T16 Mechanical gaps: mutations for AC1's three unfired pins, a masked
+      `stopifnot` that fails on a vacuous condition, the duplicated hand list
+      folded into AC5's retired-path list, per-surface margin-run counts, the
+      rater rule tightened, the D-009 directive extended, and the source-tree
+      gate keyed on `R/*.R` presence rather than `data-raw/`.
+- [ ] T17 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`,
       installed-package suite at `NOT_CRAN=true CI=true`, CI matrix.
 
 ## Work log
@@ -166,6 +161,8 @@ Review return #1 repair:
 - 2026-08-09: T1 — generator emits a per-(grid, factor, level) block for rho and subject count, both groupings routed through one `width_summary()` core; 15 new pins, each mutation-verified via a harness that masks `stopifnot` so one mutation reports every pin it trips (10 mutations + an unmutated control that fires none). The rho=0.6 sign-crossing mutation the rounding-bucket idiom cannot see reds the exact pin and the direction pin. The D-009 directive reading the fixture positionally still exits 0.
 - 2026-08-09: status review. CI on `0c43faf`: `format-check`, `lint`, `pkgdown` and `check-references` pass; `ubuntu-latest (release)`, `windows-latest (release)` and `test-coverage` still running after 13 minutes (the matrix runs 17-23 minutes, M78). The status-change commit is deliberately NOT pushed while they are in flight — pushing cancels them and restarts on the new head, which is what happened at the last review checkpoint.
 - 2026-08-09: CI caught what the review's local evidence could not: the `test-coverage` job was RED on the branch head (3 failures, `53a0711`) while `R CMD check` was green on every platform. `covr` runs the suite against a built package in a temp dir that carries `NEWS.md` but no `R/*.R` and no `vignettes/` — a PARTIAL source tree, where the walk returns one surface and `skip_if(length(surfaces) == 0L)` does not fire, so every anti-vacuity floor fails instead of skipping. The source leg now gates on `data-raw/` (`.Rbuildignore`d, so present in the source tree and in no built copy). Reproduced in a scratch dir with that exact layout: the pre-fix file reds the same two assertions the CI log names, the fixed file skips cleanly (0 failed, 4 skipped).
+- 2026-08-09: amendment (implement-side, executing the return-#2 gate choice) — AC2 rewritten to "each figure a width statement states sits in one of a fixed set of canonical shapes … A figure-shaped token — decimal, bare integer, or spelled-out cardinal — that a width statement carries outside every canonical shape and outside the declared non-measurement allowlist fails the test rather than passing unchecked"; AC4's unimplemented pooled-ratio clause folded into that scan. The promise inverts: the test now refuses a figure it cannot check, instead of promising to check every figure. Gate flagged that this is AC4's SECOND amendment and the user accepted both rewrites seeing that.
+- 2026-08-09: gate chose canonical clause templates for the three directional claims at all six sites over templates on user-facing pages only or keeping the keyword check, because a reversed or paraphrased claim passes the keyword check today (review F2/F3/F4) and the claim has been wrong twice; falsified by a site where the template cannot be stated without distorting the surrounding prose.
 - 2026-08-09: review return #2 (defect) — AC1, AC2 and AC4 fail as written, each verified by command with the tree restored. AC1: three M117 `stopifnot` pins fire on no committed mutation (the two containment pins and the `lvl()` guard), so "each new pin is mutation-verified" is false; tick withdrawn. AC2: four stated width figures are asserted by nothing — `five cells` -> `nine cells`, `half a percentage point` -> `five percentage points`, `64-cell` -> `32-cell`, `four distribution families` -> `six` all leave the suite green. AC4: its amended final clause has no implementation — "Pooled over the larger grid the median width ratio is 0.9614." passes, because the sweep selects only sentences carrying the token `burch`. AC3, AC5, AC6, AC7 and AC8 verified and ticked; CI fully green on `0183caf`. Thrash trigger (b) fires on AC2 (second failure, same shape); the plan gate's recorded alternative — narrowing the promise — is the one to reconsider.
 - 2026-08-09: T13 — gate clean on a rebuilt `build_vignettes = TRUE` install. `test-doc-skew-caveat.R` at `load_package = "installed"`, `NOT_CRAN=true CI=true`: 0 failed, 0 skipped, 987 passed (AC5's zero-skip claim re-measured on the surface it is about). Full installed suite: 0 failed, 0 errors, 6841 passed, 23 skipped (all `skip_on_ci`, the brms live-Stan class), 2 pre-existing engine fitting warnings in `test-icc-lavaan-multilevel.R` / `test-icc-type-vector.R`, neither touched by this branch. `air format --check`, `lintr::lint_package()` (0 lints), `pkgdown::check_pkgdown()`, `devtools::document()` (no diff) and `cairn_validate` all clean; the two `cairn_validate` advisories are the 8-criterion and 13-task split tripwires, both a review return's repair tasks rather than a mis-sized milestone.
 - 2026-08-09: AC6 extended for the claim this return withdraws: `shrinks as either grows` (2 pre-correction hits, 0 corrected) and `at a low true ICC with few subjects` (3 / 0), both counted over squashed text across the swept surfaces.
