@@ -107,7 +107,7 @@ updated only as their existing checkers mechanically require.
 ## Tasks
 <!-- owner: plan (create) / implement (check-off, minor edits) -->
 
-- [ ] T1: Write `data-raw/make-skew-undercoverage-fixture.R`, generate
+- [x] T1: Write `data-raw/make-skew-undercoverage-fixture.R`, generate
       `tests/testthat/fixtures/skew-undercoverage.tsv` from the two M113/M114
       sources, and add the source-tree provenance test asserting they agree.
 - [ ] T2: Write `tests/testthat/test-doc-skew-caveat.R` — the installed-Rd
@@ -140,6 +140,7 @@ updated only as their existing checkers mechanically require.
 - 2026-08-08: plan chose `@section Confidence intervals:` as the caveat's roxygen home over `@param ci_method` because the section is outside every data-raw checker's sweep while the param block is keyed sentence-by-sentence; falsified by the caveat needing to be read at the point of choosing a method rather than at the point of reading about intervals.
 - 2026-08-08: T0 started by /milestone-implement on `m115-skew-undercoverage-caveat`; status in-progress.
 - 2026-08-08: substantive amendment at the implement gate — AC1/AC2/AC3 re-aimed from source-tree reads at the installed package (`tools::Rd_db()`, `inst/doc/`, installed `NEWS.md`, rendered hint) plus a committed `tests/testthat/fixtures/skew-undercoverage.tsv`, because a source-reading test skips under `R CMD check` (`.Rbuildignore ^data-raw$`) and would leave AC1-AC3 with no PR-CI evidence; tasks resplit 7 -> 8 and Coverage remapped.
+- 2026-08-08: T1 done — `data-raw/make-skew-undercoverage-fixture.R` derives `tests/testthat/fixtures/skew-undercoverage.tsv` (202 rows: 192 M113 grid + 10 M114 held-out cells); provenance tests re-derive both legs from the sources and assert the text round trip, source-tree-gated; 89 assertions pass.
 
 ## Decisions
 <!-- owner: implement / review · append-only; milestone-local -->
