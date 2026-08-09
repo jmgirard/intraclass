@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-08 (status pass — nothing in flight, no milestone changed; the previous over-long stamp is replaced by this short one, clearing the record-density advisory. Prior stamp's detail: M114 archive summary + git.)_
+_Last hygiene check: 2026-08-08 (M115 done and archived — skew under-coverage caveat shipped, falsified `"burch"` advice withdrawn from seven sites; M110 rotated out with the record-claims expectation in the same commit; width-claim candidate row added; LESSONS: M64/M75 retired to ownership, two M115 lines added.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
@@ -9,14 +9,14 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
+| M115 | Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice | done | — | normal | milestones/archive/M115-skew-undercoverage-caveat.md |
 | M114 | Runtime skew/kurtosis warn trigger — design & validation (assessment only) | done | — | normal | milestones/archive/M114-skew-warn-trigger-assessment.md |
 | M113 | MC-default skew response — frozen-rules disposition from the M111 data | done | — | normal | milestones/archive/M113-mc-skew-response-assessment.md |
 | M111 | Fallback-on-abort default assessment — GO/NO-GO (composite MC → classical) | done | — | normal | milestones/archive/M111-fallback-on-abort-assessment.md |
-| M110 | Close the Cronbach (1972) leg of the O-Bayes-Rep co-citation | done | — | normal | milestones/archive/M110-cronbach-oracle-leg.md |
 | M112 | Harden the M111 fallback-sweep harness | done | — | normal | milestones/archive/M112-m111-harness-hardening.md |
-| M115 | Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice | review | — | normal | milestones/M115-skew-undercoverage-caveat.md |
+
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
-<!-- terminal-row retention: M114 done (2026-08-08) → M109 rotated out (oldest terminal, 2026-08-07; its archive file still resolves there). Kept: M114, M113, M111, M110, M112 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
+<!-- terminal-row retention: M115 done (2026-08-08) → M110 rotated out (oldest terminal by merge order, ae05be6; its archive file still resolves there). Kept: M115, M114, M113, M111, M112 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
 <!-- rows grouped by status; keep only the 5 most recent terminal (done/dropped)
      rows — older history in cairn/legacy/ + git. -->
 
