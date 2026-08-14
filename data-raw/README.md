@@ -2,14 +2,15 @@
 
 ## Record-claim checkers
 
-Five checkers live here — `check-mpl-doc-claims.py`, `check-oracle-registry.py`,
-`check-record-claims.py`, `check-reference-observations.py` and
-`enumerate-generalizing-claims.py` [claim:data-raw-checker-inventory] — all
-stdlib-only `python3` so the R-free `check-references` CI job can run them.
-Four of the five are wired into that job, which invokes a `data-raw` checker
-eight times [claim:lint-checker-invocations]: each wired checker twice, once for
-the check and once for its vacuity self-test. `check-oracle-registry.py` is run
-locally only.
+Six checkers live here — `check-checkpoint-sites.py`, `check-mpl-doc-claims.py`,
+`check-oracle-registry.py`, `check-record-claims.py`,
+`check-reference-observations.py` and `enumerate-generalizing-claims.py`
+[claim:data-raw-checker-inventory] — all stdlib-only `python3` so the R-free
+`check-references` CI job can run them. Five of the six are wired into that job,
+which invokes a `data-raw` checker ten times
+[claim:lint-checker-invocations]: each wired checker twice, once for the check
+and once for its vacuity self-test. `check-oracle-registry.py` is run locally
+only.
 
 `check-record-claims.py` (M102) re-derives the figures registered in
 `record-claims.tsv`. A record states a load-bearing figure by citing the row
