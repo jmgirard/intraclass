@@ -165,4 +165,75 @@ stopifnot(
   "a gaussian cell exceeds three two-sample bootstrap SEs" = all(abs(z) <= 3)
 )
 
+# --- leg 3: what the anchor certifies about the FAMILY --------------------------
+# This is the leg AC2 rests on after its third re-cut. A source-text guard over
+# the generator was defeated three times, each by a new spelling of the same
+# trick, because "what this program resolves to" is not a domain any AST walk
+# enumerates. The anchor is not a source check: it is computed from the shipped
+# grid, so no edit to the generator can fake it.
+#
+# Re-running the anchor cell with the family forced shows the separation. The
+# correct family clears the 0.01 tolerance; every other family misses it, and
+# the nearest wrong family in kurtosis -- power exponential, one step from
+# uniform on burch2011 Table 2 -- is the tightest case and still misses by 6
+# tolerances.
+cat("\nLeg 3 -- what the anchor certifies about the family\n")
+cat(
+  "anchor cell re-run with `dist` forced; printed target 0.88, tolerance 0.01\n\n"
+)
+cat(sprintf(
+  "%-10s %12s %10s %14s\n",
+  "family",
+  "mean_ratio",
+  "gap",
+  "tolerances"
+))
+
+anchor_cell <- cells[cells$block == "anchor", ]
+fam_gap <- numeric(0)
+for (d in names(table2_kurtosis)) {
+  bw <- sw <- numeric(n_rep)
+  for (rep in seq_len(n_rep)) {
+    gr <- gen_oneway(
+      anchor_cell$k,
+      anchor_cell$n,
+      anchor_cell$rho,
+      d,
+      anchor_cell$id * 1000000L + rep
+    )
+    ep <- endpoints_both(gr)
+    bw[rep] <- ep$burch[["upper"]] - ep$burch[["lower"]]
+    sw[rep] <- ep$searle[["upper"]] - ep$searle[["lower"]]
+  }
+  fam_gap[d] <- abs(mean(bw) / mean(sw) - printed[["ratio"]])
+  cat(sprintf(
+    "%-10s %12.4f %10.4f %14s\n",
+    d,
+    mean(bw) / mean(sw),
+    fam_gap[d],
+    if (fam_gap[d] <= tol[["ratio"]]) {
+      "within"
+    } else {
+      sprintf("%.0f out", fam_gap[d] / tol[["ratio"]])
+    }
+  ))
+}
+
+# The certification, asserted rather than eyeballed: the cell's own family is
+# the only one inside the tolerance.
+inside <- names(fam_gap)[fam_gap <= tol[["ratio"]]]
+stopifnot(
+  "the anchor cell's own family is not inside the tolerance" = anchor_cell$dist %in%
+    inside,
+  "a family other than the anchor cell's is inside the tolerance, so the anchor does not separate families" = identical(
+    inside,
+    anchor_cell$dist
+  )
+)
+cat(sprintf(
+  "\nonly `%s` is inside; nearest wrong family misses by %.0f tolerances\n",
+  anchor_cell$dist,
+  min(fam_gap[names(fam_gap) != anchor_cell$dist]) / tol[["ratio"]]
+))
+
 cat("\nOK: both anchors clear; the frozen W1-W3 rules may be read.\n")
