@@ -1,6 +1,6 @@
 # M118: Measure Burch's leptokurtic width reversal on a both-components-non-normal grid
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -185,6 +185,7 @@ planned; a width finding is not a contract change.
 - 2026-08-14: T9 done. Leg (b) now runs at rho 0.05/0.25/0.5 with per-rho tolerances 0.05/0.10/0.10, and both legs are mutation-verified by one harness: 11 fence mutations and 3 composition mutations, all red, both baselines accepted. `data-raw/m118-composition-spread.R` prints the legitimate spread (0.0288/0.0572/0.0727) beside each mutation's separation and asserts the property the tolerances must have — real inside every one, each mutation outside at least one — rather than leaving it to be eyeballed.
 - 2026-08-14: the component swap is caught at 2 of 3 rho, and that is the whole reason leg (b) is not single-rho: at rho = 0.5 it reads 0.0727, identical to the real script, because 0.5 is the fixed point of rho <-> 1 - rho.
 - 2026-08-14: the fence's `switch(dist` clause was rewritten on the AST rather than deleted — it checks that some `switch` in `draw_standard`'s body dispatches on the symbol `dist`, taking `EXPR =` and positional spellings alike. Deleting it (the first attempt) lost a real catch; as an AST check it keeps the catch and drops the lexical defect. It reads `draw_standard`'s body, not `gen_oneway`'s, so it sits outside what the amended AC2's clause (a) promises — kept because it is free, not because the criterion rests on it.
+- 2026-08-14: full suite clean after the amendment — 7159 passing, 0 failures (down 7 from consolidating leg (b)'s per-family assertions into one call). Status → review for a third pass.
 - 2026-08-14: amendment return: AC2 — "Two committed procedures bound that claim, both of them procedures over `gen_oneway` alone, and this criterion promises only what they decide." Amended wording audited by a fresh [O] reader before writing; user-approved at the mini gate. This consumes the first of AC2's two amendment slots.
 - 2026-08-14: second review pass — an adversarial [O] reviewer defeated the fixed fence with 10 further mutations, all green against both test files. Independently reproduced two: `assign("dist", "gaussian")` leaves the fence green AND passes the composition leg at every rho (only the family is wrong, not the ICC); and swapping `sd_a`/`sd_e` has error 0.0727 at rho = 0.5 — identical to the real script, because 0.5 is the fixed point of rho <-> 1-rho — while giving 0.3227 at rho = 0.25 and 0.5227 at 0.05.
 - 2026-08-14: that is the widening test, not a second defect. AC2 promises the test fails when a draw "resolves" to a normal deviate, a universal over program behaviours no AST walk enumerates; the round-1 repair answered one counterexample by widening a recall-fixed list of forms and `assign()` defeated the wider list at once. The repo's own precedent is M102's "no command reads git history", beaten in turn by a ref spelling, an argument-order bug and `awk`. Routing to the gated criterion amendment; the repair is to narrow the promise until a stated procedure settles it.
