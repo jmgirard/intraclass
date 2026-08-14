@@ -1,6 +1,6 @@
 # M119: Reconcile the shipped width claims with M118's third grid
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** M118
 - **Driving RR:** —
@@ -69,10 +69,10 @@ not in scope.
 - [x] T2 Reword each site the walk returns, and `devtools::document()` the
       `man/icc.Rd` mirrors.
 - [x] T3 Bind each new figure to a canonical shape and to its fixture cell.
-- [ ] T4 Install with `build_vignettes = TRUE`; run the installed-surface suite
+- [x] T4 Install with `build_vignettes = TRUE`; run the installed-surface suite
       and confirm zero skips; check the run floors.
-- [ ] T5 Extend the M117 mutation harness with the four break forms per claim.
-- [ ] T6 NEWS entry; re-triage the `mpl-doc-claims.tsv` rows; run `verify`, the
+- [x] T5 Extend the M117 mutation harness with the four break forms per claim.
+- [x] T6 NEWS entry; re-triage the `mpl-doc-claims.tsv` rows; run `verify`, the
       four checkers, `air format .`, lintr.
 
 ## Work log
@@ -84,6 +84,11 @@ not in scope.
 - 2026-08-14: /milestone-implement on branch `m119-residual-grid-doc-reconcile`; question gate chose the shared clause to carry one fixture-pinned figure, and the changelog's falsified clause to be corrected in place (the release is unshipped, so a second contradicting entry would be the only alternative).
 - 2026-08-14: T1 walk added and run red first: it returned 6 source statements (`R/icc.R` x2, `R/ci-classical.R`, both vignettes, `NEWS.md`) plus the two `Rd:icc.Rd` mirrors, and 8 withdrawn-claim assertions failed across them. Two seed predicates were measured and rejected first — burch-plus-error reached the abort-remedy prose, and grid-plus-subject-effect split the NEWS bullet on a corrected M117 scope clause.
 - 2026-08-14: T2/T3 reworded all 6 sites plus the M117 scope qualifiers, `devtools::document()`ed the Rd mirrors, and bound the new figures: `ratio_family` (checked against the M118 fixture's t(5) cell at 100 subjects) and `n_grids` extended to "three"; the clause's qualitative direction is recomputed per family from the fixture's decision block.
+- 2026-08-14: T5/T6 content landed with the T1-T3 checkpoint (`f5ab149`, one `git add -A`); this line records their check-off rather than a second commit of the same work.
+- 2026-08-14: T5 extended the M117 harness to a second mutated surface (the `?icc` roxygen, which carries the scope claim the article does not) and added eight mutations — four break forms each for the residual clause and the scope claim; all eight red, both controls clean. The harness's prose scan now mirrors three more suite scans: withdrawn claims, the scope refusal, and the residual template over residual runs.
+- 2026-08-14: T6 re-triaged the two `mpl-doc-claims.tsv` rows the reworded `@param ci_method` sentences restaled (`873819a29ffd` → `a64f246e63cc`, `354d6f11619c` → `11bf5404facf`); the checker enumerates 46 candidates with 0 failures. All four `data-raw/` checkers pass, `air format .` and `lintr::lint_package()` clean.
+- 2026-08-14: T4 installed with `build_vignettes = TRUE` and ran the installed-surface suite under `NOT_CRAN=true`: FAIL 0 | WARN 5 | SKIP 0 | PASS 7786. The five warnings are in `test-icc-lavaan-multilevel.R`, `test-ci-bootstrap.R`, `test-icc-type-vector.R` and `test-icc-brms.R`, none a surface this milestone touches. `width_expected_runs` is unedited on the branch, so every floor is at its pre-milestone value.
+- 2026-08-14: corrected `cairn/references/classical-width-reversal-comparison.md`'s forward reference, which said M119 restates the surfaces that "currently" tell users no measured grid varies the residual — false once this branch merges; now dated and pointed at the walk.
 - 2026-08-13: plan corrected AC3 from "the count the surfaces actually carry" to a floor, the apparatus enforcing `>=` (`:1666-1670`) and its own comment (`:570-573`) calling floors deliberate, so the drafted wording was unverifiable; and added the `build_vignettes = TRUE` precondition without which five vignette legs skip silently.
 
 ## Decisions
