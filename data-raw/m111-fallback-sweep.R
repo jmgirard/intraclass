@@ -36,6 +36,10 @@ suppressMessages(devtools::load_all(quiet = TRUE))
 # Defines searle_f_ci_balanced() and burch_reml_ci_balanced(); sourcing skips
 # the file's `if (sys.nframe() == 0L)` oracle block.
 source("data-raw/m76-classical-oneway-prototype.R")
+# M120: the shared stale-checkpoint guard. Sourcing it installs the
+# deserialization trace, so a checkpoint read that bypasses the guard fails the
+# run rather than quietly seeding the fixture.
+source("data-raw/checkpoint-guard.R")
 
 # Paths are overridable so a demonstration run (data-raw/m112-harness-demo.R)
 # can never touch the committed M111 fixture; the defaults are the committed
@@ -279,10 +283,28 @@ summarize_sweep <- function(wide) {
 }
 
 # ---- sweep (parallel over cells, per-cell checkpoints) -----------------------
+cell_spec <- function(cell) {
+  ckpt_spec(
+    params = list(
+      rho = cell$rho,
+      k = cell$k,
+      n = cell$n,
+      dist = cell$dist,
+      n_rep = cell$n_rep,
+      base_seed = cell$id * 1000000L
+    ),
+    block = c("gen_oneway", "mc_ci", "one_rep"),
+    site = "m111-fallback-sweep",
+    envir = environment(gen_oneway)
+  )
+}
+
 run_cell <- function(cell) {
   ckpt <- file.path(ckpt_dir, sprintf("cell-%02d.rds", cell$id))
   if (file.exists(ckpt)) {
-    return(readRDS(ckpt))
+    # M120: keyed on the cell id alone this served rows from whatever grid last
+    # wrote cell-NN.rds, and every downstream guard passed on them.
+    return(ckpt_read(ckpt, cell_spec(cell)))
   }
   t0 <- Sys.time()
   cell_rows <- vector("list", cell$n_rep)
@@ -290,7 +312,7 @@ run_cell <- function(cell) {
     cell_rows[[rep]] <- one_rep(cell, rep)
   }
   res <- do.call(rbind, cell_rows)
-  saveRDS(res, ckpt)
+  ckpt_write(ckpt, payload = res, spec = cell_spec(cell))
   el <- round(as.numeric(difftime(Sys.time(), t0, units = "mins")), 1)
   cat(sprintf(
     "cell %2d/64 done: rho=%.2f k=%d n=%d %-8s (%.1f min)\n",
@@ -350,9 +372,13 @@ assert_sweep_results <- function(results, cells) {
 
 if (sys.nframe() == 0L) {
   dir.create(ckpt_dir, showWarnings = FALSE)
+  ckpt_trace_install()
+  ckpt_trace_register(ckpt_dir)
   cells <- build_cells()
   results <- parallel::mclapply(cells, run_cell, mc.cores = n_workers)
   assert_sweep_results(results, cells)
+  # Before any fixture write: no cell may have come from an unguarded read.
+  ckpt_trace_assert()
   raw <- do.call(rbind, results)
   wide <- widen_reps(raw)
   agg <- summarize_sweep(wide)

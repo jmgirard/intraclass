@@ -60,6 +60,10 @@
 
 pkgload::load_all(".", quiet = TRUE, export_all = FALSE)
 library(brms)
+# M120: the shared stale-checkpoint guard. Sourcing it installs the
+# deserialization trace, so a resume that bypasses the guard fails the run
+# instead of feeding a committed oracle fixture rows of unknown provenance.
+source("data-raw/checkpoint-guard.R")
 
 # --- Config ----------------------------------------------------------------
 n_subjects <- 30L
@@ -207,12 +211,42 @@ one_rep <- function(design, seed) {
 }
 
 # --- Run the simulation ----------------------------------------------------
-ckpt <- "data-raw/.oracle-bayesian-incomplete-oneway-checkpoint.rds"
+# Path overridable so a guard demonstration can never reach the real checkpoint
+# or the committed fixture (M120).
+ckpt <- Sys.getenv(
+  "ORACLE_INCOMPLETE_ONEWAY_CKPT",
+  "data-raw/.oracle-bayesian-incomplete-oneway-checkpoint.rds"
+)
+ckpt_trace_install()
+ckpt_trace_register(ckpt)
 # Distinct per-cell seed streams so the two cells are independent and each rep is
 # reproducible from base_seed + (cell offset) + r.
 cell_offset <- c(complete = 0L, ragged = 100000L)
-rows <- if (file.exists(ckpt)) readRDS(ckpt) else list()
-done <- length(rows)
+
+# M120: the resume was `i <= done` over a positional list, so a re-run after any
+# config edit -- or after the todo order changed -- served rows the current
+# design never computed, under the wrong design label.
+rep_spec <- function() {
+  ckpt_spec(
+    params = list(
+      n_subjects = n_subjects,
+      k = k,
+      s2_s = s2_s,
+      s2_res = s2_res,
+      missing_frac = missing_frac,
+      n_rep = n_rep,
+      base_seed = base_seed
+    ),
+    block = c("make_incidence", "simulate", "one_rep"),
+    site = "oracle-bayesian-incomplete-oneway"
+  )
+}
+
+store <- if (file.exists(ckpt)) {
+  ckpt_read(ckpt, rep_spec())
+} else {
+  ckpt_store_new()
+}
 todo <- expand.grid(
   r = seq_len(n_rep),
   design = c("complete", "ragged"),
@@ -220,18 +254,26 @@ todo <- expand.grid(
 )
 todo <- todo[c("design", "r")]
 todo <- todo[order(match(todo$design, c("complete", "ragged")), todo$r), ]
+rows <- vector("list", nrow(todo))
 for (i in seq_len(nrow(todo))) {
-  if (i <= done) {
-    next
-  }
   design <- todo$design[i]
   r <- todo$r[i]
+  key <- paste0(design, "-", r)
+  cached <- ckpt_store_get(store, key, rep_spec())
+  if (!is.null(cached)) {
+    rows[[i]] <- cached
+    next
+  }
   rows[[i]] <- one_rep(design, seed = base_seed + cell_offset[[design]] + r)
+  store <- ckpt_store_put(store, key, rows[[i]], rep_spec())
   if (i %% 20L == 0L) {
-    saveRDS(rows, ckpt)
+    ckpt_write(ckpt, payload = store, spec = rep_spec())
     message(sprintf("  ... %d / %d fits done", i, nrow(todo)))
   }
 }
+ckpt_write(ckpt, payload = store, spec = rep_spec())
+# Before the fixture write: no rep may have come from an unguarded read.
+ckpt_trace_assert()
 reps <- do.call(rbind, rows)
 
 # --- Aggregate to per-cell reference statistics ----------------------------
@@ -258,11 +300,14 @@ print(agg)
 # --- Commit the reference (BEFORE the hard pins) ---------------------------
 # Write the seeded output first, so the fixture reflects the TRUE run even if a pin
 # trips (the honest-signal design, #4/#18; the M32 Slice 2 precedent).
-out <- file.path(
-  "tests",
-  "testthat",
-  "fixtures",
-  "bayesian-incomplete-oneway-oracle.rds"
+out <- Sys.getenv(
+  "ORACLE_INCOMPLETE_ONEWAY_OUT",
+  file.path(
+    "tests",
+    "testthat",
+    "fixtures",
+    "bayesian-incomplete-oneway-oracle.rds"
+  )
 )
 dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
 saveRDS(

@@ -55,6 +55,10 @@
 
 pkgload::load_all(".", quiet = TRUE, export_all = FALSE)
 library(brms)
+# M120: the shared stale-checkpoint guard. Sourcing it installs the
+# deserialization trace, so a resume that bypasses the guard fails the run
+# instead of feeding a committed oracle fixture rows of unknown provenance.
+source("data-raw/checkpoint-guard.R")
 
 # --- Config ----------------------------------------------------------------
 n_subj <- 25L
@@ -201,18 +205,59 @@ one_rep <- function(seed) {
 }
 
 # --- Run the simulation ----------------------------------------------------
-ckpt <- "data-raw/.oracle-bayesian-fixed-replicates-checkpoint.rds"
-rows <- if (file.exists(ckpt)) readRDS(ckpt) else vector("list", n_rep)
+# Paths are overridable so a guard demonstration can never reach the real
+# checkpoint or the committed fixture (M120).
+ckpt <- Sys.getenv(
+  "ORACLE_FIXED_REPLICATES_CKPT",
+  "data-raw/.oracle-bayesian-fixed-replicates-checkpoint.rds"
+)
+ckpt_trace_install()
+ckpt_trace_register(ckpt)
+
+# M120: the resume was keyed on the rep INDEX alone, so a re-run after any
+# config edit served rows the current design never computed -- and every pin
+# below would then have held against the wrong numbers.
+rep_spec <- function() {
+  ckpt_spec(
+    params = list(
+      n_subj = n_subj,
+      k = k,
+      n_o = n_o,
+      s2_s = s2_s,
+      mu_r = mu_r,
+      s2_sr = s2_sr,
+      s2_e = s2_e,
+      n_rep = n_rep,
+      base_seed = base_seed
+    ),
+    block = c("simulate_fixed_replicates", "one_rep"),
+    site = "oracle-bayesian-fixed-replicates"
+  )
+}
+
+store <- if (file.exists(ckpt)) {
+  ckpt_read(ckpt, rep_spec())
+} else {
+  ckpt_store_new()
+}
+rows <- vector("list", n_rep)
 for (r in seq_len(n_rep)) {
-  if (!is.null(rows[[r]])) {
+  key <- paste0("rep-", r)
+  cached <- ckpt_store_get(store, key, rep_spec())
+  if (!is.null(cached)) {
+    rows[[r]] <- cached
     next
   }
   rows[[r]] <- one_rep(seed = base_seed + r)
+  store <- ckpt_store_put(store, key, rows[[r]], rep_spec())
   if (r %% 10L == 0L) {
     message(sprintf("  ... %d/%d reps", r, n_rep))
-    saveRDS(rows, ckpt)
+    ckpt_write(ckpt, payload = store, spec = rep_spec())
   }
 }
+ckpt_write(ckpt, payload = store, spec = rep_spec())
+# Before the fixture write: no rep may have come from an unguarded read.
+ckpt_trace_assert()
 reps <- do.call(rbind, rows)
 
 # --- Aggregate to the reference statistics ---------------------------------
@@ -235,11 +280,14 @@ agg <- data.frame(
 print(agg)
 
 # --- Commit the reference (BEFORE the hard pins, so a long run is not lost) --
-out <- file.path(
-  "tests",
-  "testthat",
-  "fixtures",
-  "bayesian-fixed-replicates-oracle.rds"
+out <- Sys.getenv(
+  "ORACLE_FIXED_REPLICATES_OUT",
+  file.path(
+    "tests",
+    "testthat",
+    "fixtures",
+    "bayesian-fixed-replicates-oracle.rds"
+  )
 )
 dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
 saveRDS(

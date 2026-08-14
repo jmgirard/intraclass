@@ -37,6 +37,10 @@ suppressPackageStartupMessages({
 })
 devtools::load_all(quiet = TRUE)
 library(brms)
+# M120: the shared stale-checkpoint guard. Sourcing it installs the
+# deserialization trace, so a resume that bypasses the guard fails the run
+# instead of feeding a committed oracle fixture rows of unknown provenance.
+source("data-raw/checkpoint-guard.R")
 
 # --- Config ----------------------------------------------------------------
 vsc <- 1.0 # sigma^2_{s:c}
@@ -234,11 +238,47 @@ base_fit <- do.call(
 # --- Run -------------------------------------------------------------------
 # ~960 hierarchical refits (4 cells x 240). Checkpoint after each cell (gitignored) so a crash in
 # the aggregation tail never forces re-sampling.
-ckpt <- "data-raw/.oracle-bayesian-incomplete-fixed-nested-checkpoint.rds"
-done <- if (file.exists(ckpt)) readRDS(ckpt) else list()
+# Path overridable so a guard demonstration can never reach the real checkpoint
+# or the committed fixture (M120).
+ckpt <- Sys.getenv(
+  "ORACLE_INCOMPLETE_FIXED_NESTED_CKPT",
+  "data-raw/.oracle-bayesian-incomplete-fixed-nested-checkpoint.rds"
+)
+ckpt_trace_install()
+ckpt_trace_register(ckpt)
+
+# M120: the resume was keyed on the cell LABEL alone, so editing a cell's nc /
+# ns / theta2 / p_keep and re-running served the OLD cell under the new label --
+# the one shape a label can never reveal.
+cell_spec <- function(cl) {
+  ckpt_spec(
+    params = list(
+      vsc = vsc,
+      vres = vres,
+      nc = cl$nc,
+      ns = cl$ns,
+      theta2 = cl$theta2,
+      p_keep = cl$p_keep,
+      n_rep = n_rep,
+      base_seed = base_seed
+    ),
+    block = c("sim_ragged_d2_fixed", "one_rep_summary", "one_cell"),
+    site = "oracle-bayesian-incomplete-fixed-nested"
+  )
+}
+file_spec <- function() cell_spec(cells[[1]])
+
+store <- if (file.exists(ckpt)) {
+  ckpt_read(ckpt, file_spec())
+} else {
+  ckpt_store_new()
+}
+done <- list()
 for (cl in cells) {
-  if (!is.null(done[[cl$label]])) {
+  cached <- ckpt_store_get(store, cl$label, cell_spec(cl))
+  if (!is.null(cached)) {
     message(sprintf("Cell %s: cached", cl$label))
+    done[[cl$label]] <- cached
     next
   }
   message(sprintf("Cell %s: %d reps", cl$label, n_rep))
@@ -251,8 +291,11 @@ for (cl in cells) {
     cl$p_keep,
     base_seed = base_seed
   )
-  saveRDS(done, ckpt)
+  store <- ckpt_store_put(store, cl$label, done[[cl$label]], cell_spec(cl))
+  ckpt_write(ckpt, payload = store, spec = file_spec())
 }
+# Before the fixture write: no cell may have come from an unguarded read.
+ckpt_trace_assert()
 summary_df <- do.call(rbind, done[vapply(cells, `[[`, "", "label")])
 rownames(summary_df) <- NULL
 
@@ -268,7 +311,10 @@ saveRDS(
       generated = Sys.time()
     )
   ),
-  "tests/testthat/fixtures/bayesian-incomplete-fixed-nested-oracle.rds"
+  Sys.getenv(
+    "ORACLE_INCOMPLETE_FIXED_NESTED_OUT",
+    "tests/testthat/fixtures/bayesian-incomplete-fixed-nested-oracle.rds"
+  )
 )
 
 print(summary_df)
