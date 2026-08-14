@@ -1,0 +1,21 @@
+#	M120 site declaration — every data-raw harness that RESUMES from a checkpoint.
+#	A site here reads a cache back and may therefore serve rows the current design
+#	never computed; harnesses that only WRITE a checkpoint are deliberately absent
+#	(they cannot serve a stale row). This file is the declared enumeration AC4
+#	quantifies over — it is not, and never claims to be, a discovery procedure over
+#	all harnesses. That job belongs to the run-time trace in checkpoint-guard.R,
+#	which observes deserializations rather than spellings.
+#
+#	script       path relative to the repo root
+#	params       the design parameters compared on resume, in the declared order;
+#	             the mismatch message names the EARLIEST differing one in this order
+#	block        functions whose deparsed bodies form the generating-block hash —
+#	             a change to any of them invalidates the cache; a comment or
+#	             formatting change elsewhere in the script does not
+#	unit         what one checkpoint entry covers
+script	params	block	unit
+data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	gen_oneway,mc_ci,one_rep	cell
+data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,n_rep,base_seed	simulate_fixed_replicates,one_rep	rep
+data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,n_rep,base_seed	make_incidence,simulate,one_rep	rep
+data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	sim_ragged_d2_fixed,one_rep_summary,one_cell	cell
+data-raw/oracle-bayesian-multilevel-replicates.R	n_clusters,n_subj_per,k,n_o,s2_c,s2_sc,s2_r,s2_cr,s2_sr,s2_e,n_rep,base_seed	simulate,one_rep	rep
