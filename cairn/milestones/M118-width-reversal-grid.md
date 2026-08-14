@@ -190,6 +190,7 @@ planned; a width finding is not a contract change.
 - 2026-08-14: F10, F11 fixed in place ahead of the amendment because they are a live contradiction between two records rather than a criterion question — the reference page still asserted "nothing in it is falsified" of D-012 Amendment 1 while the corrected D-030 said the opposite, and D-030's own replacement sentence misdescribed this grid as symmetric-only and single-rho when it carries chisq1 and reaches rho = 0.60. Both records now agree, and the D-027 mis-attribution is corrected on the page too (its frozen Consequence clause carries the same error and is left untouched, the dated note in Results carrying the correction instead).
 - 2026-08-14: full suite clean after the fixes — 7166 passing, 0 failures (up 8 from the composition leg), same 3 deliberate warnings and 2 pre-existing skips. Status → review for a second review pass.
 - 2026-08-14: status → in-progress. Every gate was clean — cairn_validate, devtools::check() (0/0/1 pre-existing NOTE), and four CI jobs green — so the return is the criterion, not the gate.
+- 2026-08-14: fifth pass (merge gate) — all 7 criteria re-executed by command at `d582bbb`, all met; suite 7161 passing, cairn_validate and all four checkers clean, CI green on all nine checks at the exact review commit. Fan-out not re-spawned: the diff since the fourth-pass delta review is this milestone file alone.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
@@ -385,3 +386,56 @@ milestone that wants a stronger guarantee should start from them.
 by the T7 sweep). Scope is amendment-gated and the error is an undercount of
 work done rather than a promise broken, so it is recorded here rather than
 opening a third gate on this milestone.
+
+### Fifth pass — merge-gate re-verification (2026-08-14)
+
+Every criterion re-executed by command at `d582bbb`; no figure below is recall.
+
+- **AC1 — met.** `git merge-base --is-ancestor f88cc22 d4b1878` exits 0: the
+  frozen page's add-commit is strictly earlier than the add-commit of the
+  earliest derivation artifact (both TSVs and the `.rds`, all first appearing
+  in `d4b1878`). Commit order corroborates the freeze.
+- **AC2 — met.** Leg (a): `m118-anchor-checks.R` leg 3 exits 0 — uniform 0.8807
+  (gap 0.0007, inside 0.01), the nearest wrong family (powexp) 6 tolerances out
+  and the rest 11 / 24 / 53 / 69 / 182. Leg (b) re-derived independently from
+  the committed TSV rather than from the test: worst pairwise family gap 0.0130
+  (`fig2`, k = 20, laplace vs t5) over the 26 groups with ≥ 2 families, against
+  the 0.005 pin. The unpromised screen also runs clean — all 11 fence mutations
+  and all 3 composition mutations red, both baselines accepted.
+- **AC3 — met.** `test-m118-family-kurtosis.R` passes inside the clean suite
+  below. `m118-kurtosis-spread.R` exits 0 and reprints the load-bearing split:
+  every wrong `pe_beta` tried (2.20 / 2.50 / 3.00 / 3.40) leaves the variance at
+  ~1.002 and the ordering intact — "yes (missed)" on both — so only the 0.02
+  powexp tolerance separates them from 2.78.
+- **AC4 — met, both legs.** `m118-anchor-checks.R` exits 0. burch2011 (p. 1027):
+  mean ratio 0.8807 vs 0.88 (gap 0.0007 / tol 0.01), `"burch"` coverage 0.9600
+  vs 0.95 (gap 0.0100 / tol 0.015), `"searle"` 0.9790 vs 0.97 (gap 0.0090 / tol
+  0.015). Repo leg: worst of the 16 gaussian cells 1.68 two-sample bootstrap SE
+  against the bound of 3, 13 of 16 differences negative.
+- **AC5 — met.** The two TSVs are byte-identical; 125 rows × 14 columns, one
+  flat block, `n_rep` = 2000 and `n_skip` = 0 on every row. Blocks anchor 1 /
+  fig2 60 / m111 64, each matching the criterion's stated geometry and families.
+- **AC6 — met.** Every per-family ratio D-030 states re-derives exactly from the
+  committed table: t10 1.004/1.080, laplace 1.096/1.300, t5 1.065/1.296 (all
+  above 1 at 10 of 10 subject counts); uniform 0.917/0.898, powexp 0.947/0.951,
+  gaussian 0.973/0.996 (all below 1 at 10 of 10).
+- **AC7 — met.** `devtools::test()`: `FAIL 0 | WARN 3 | SKIP 2 | PASS 7161`.
+  All four `data-raw/` checkers exit 0, as do their four `--self-test` modes.
+
+**Consistency gate.** `cairn_validate` 16 PASS / 8 advisory OK, exit 0.
+`DESIGN.md` is untouched by the branch, so `cairn_impact` does not apply.
+Toolchain slot: `devtools::document()` leaves the tree clean; the branch touches
+no `man/`, `NAMESPACE`, `data/` or `README` file and adds no top-level file; no
+NEWS entry is owed (no `R/`, `src/` or `inst/` file changes on the branch —
+M119 carries the user-facing reconciliation). CI on the exact review commit
+`d582bbb` is green on all nine checks, including `R CMD check` on
+ubuntu-latest and windows-latest, `pkgdown`, `lint`, `format-check` and
+`check-references`.
+
+**Independent review — not re-spawned, and why.** The three-lens fan-out plus
+scorer ran on this branch (39 findings, 4 actioned) and a fourth-pass [O]
+delta reviewer covered the AC2 amendment. `git diff --name-only 721bd19..HEAD`
+returns only this milestone file: every commit since that delta review changed
+review prose alone, so the code, data and test surface under review is
+unchanged from what those passes read. Re-spawning would buy a second reading
+of the same diff, which the delegation rule declines.
