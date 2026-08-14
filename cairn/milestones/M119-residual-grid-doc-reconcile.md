@@ -1,11 +1,11 @@
 # M119: Reconcile the shipped width claims with M118's third grid
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** M118
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** —
+- **Branch/PR:** `m119-residual-grid-doc-reconcile`
 
 ## Goal
 
@@ -64,11 +64,11 @@ not in scope.
 
 ## Tasks
 
-- [ ] T1 Add the residual-invariance walk to `test-doc-skew-caveat.R`; run it
+- [x] T1 Add the residual-invariance walk to `test-doc-skew-caveat.R`; run it
       red first to freeze the exact site set M118 falsified.
-- [ ] T2 Reword each site the walk returns, and `devtools::document()` the
+- [x] T2 Reword each site the walk returns, and `devtools::document()` the
       `man/icc.Rd` mirrors.
-- [ ] T3 Bind each new figure to a canonical shape and to its fixture cell.
+- [x] T3 Bind each new figure to a canonical shape and to its fixture cell.
 - [ ] T4 Install with `build_vignettes = TRUE`; run the installed-surface suite
       and confirm zero skips; check the run floors.
 - [ ] T5 Extend the M117 mutation harness with the four break forms per claim.
@@ -81,6 +81,9 @@ not in scope.
 - 2026-08-13: plan-gate criteria audit ([O], fresh context) found the drafted site list was `width_expected_runs`' nine width-margin keys rather than the residual-invariance sites; a grep put the real set at four source surfaces plus the generated Rd, and AC1 now names a walk rather than any list.
 - 2026-08-13: plan gate chose four break forms per claim over the single restore-the-old-wording probe because the audit measured three consecutive review rounds where each round closed the mutations it found and left the next open; falsified by a shipped claim surviving all four breaks yet later found wrong.
 - 2026-08-13: plan chose extending `test-doc-skew-caveat.R` over a new instrument, following D-029's M116 precedent; falsified by the existing file proving unable to carry a residual-invariance walk.
+- 2026-08-14: /milestone-implement on branch `m119-residual-grid-doc-reconcile`; question gate chose the shared clause to carry one fixture-pinned figure, and the changelog's falsified clause to be corrected in place (the release is unshipped, so a second contradicting entry would be the only alternative).
+- 2026-08-14: T1 walk added and run red first: it returned 6 source statements (`R/icc.R` x2, `R/ci-classical.R`, both vignettes, `NEWS.md`) plus the two `Rd:icc.Rd` mirrors, and 8 withdrawn-claim assertions failed across them. Two seed predicates were measured and rejected first — burch-plus-error reached the abort-remedy prose, and grid-plus-subject-effect split the NEWS bullet on a corrected M117 scope clause.
+- 2026-08-14: T2/T3 reworded all 6 sites plus the M117 scope qualifiers, `devtools::document()`ed the Rd mirrors, and bound the new figures: `ratio_family` (checked against the M118 fixture's t(5) cell at 100 subjects) and `n_grids` extended to "three"; the clause's qualitative direction is recomputed per family from the fixture's decision block.
 - 2026-08-13: plan corrected AC3 from "the count the surfaces actually carry" to a floor, the apparatus enforcing `>=` (`:1666-1670`) and its own comment (`:570-573`) calling floors deliberate, so the drafted wording was unverifiable; and added the `build_vignettes = TRUE` precondition without which five vignette legs skip silently.
 
 ## Decisions

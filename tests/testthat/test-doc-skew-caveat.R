@@ -223,7 +223,21 @@ claim_patterns <- c(
   # shape is flat-then-collapse. Both phrasings had zero hits on the corrected
   # surfaces and at least one on the pre-correction tree (c63a5fd).
   shrinks_in_rho = "shrinks as either grows",
-  widest_few_subjects = "at a low true ICC with few subjects"
+  widest_few_subjects = "at a low true ICC with few subjects",
+  # M119 withdrew a fourth claim: that no grid this package has measured varies
+  # the residual, so Burch's own reversal is untested here. M118 built exactly
+  # that grid and the reversal reproduced (its fixture is
+  # `fixtures/width-reversal-by-cell.tsv`), so every phrasing of "neither grid
+  # tests it" is now false rather than merely bounded. Each pattern below was
+  # checked to have zero hits across the corrected surfaces and at least one on
+  # the pre-correction tree (c0a7500).
+  residual_neither_tests = "which neither grid tests",
+  residual_neither_varies = "which neither grid varies",
+  residual_not_cover = "a case those grids do not cover",
+  residual_do_not_vary = "which those grids do not vary",
+  residual_vary_only = "Both grids vary only the subject effect",
+  residual_subject_only = "measured it only in the subject-effect-only case",
+  residual_draw_only = "both grids draw only the"
 )
 
 expect_no_withdrawn_claim <- function(text, where) {
@@ -472,6 +486,46 @@ width_fixture <- function() {
   utils::read.delim(width_fixture_path, stringsAsFactors = FALSE)
 }
 
+# M118's third grid, the one that draws BOTH components from the cell's family.
+# The two fixtures are never merged: they measure different data-generating
+# rules and their columns differ (this one is a per-cell summary carrying
+# `median_ratio`, the M117 one a per-cell ratio). Everything M119 states about
+# the residual reads from this file; everything M117 states about the margin
+# reads from the other.
+residual_fixture_path <- testthat::test_path(
+  "fixtures",
+  "width-reversal-by-cell.tsv"
+)
+
+residual_fixture <- function() {
+  utils::read.delim(
+    residual_fixture_path,
+    comment.char = "#",
+    stringsAsFactors = FALSE
+  )
+}
+
+# The decision block of M118's grid: Burch's own Fig. 2 design (`n = 5`,
+# `rho = 0.5`, k = 10(10)100) over his six symmetric Table 2 families. The
+# other two blocks are validation and comparison and support no doc claim.
+residual_fig2 <- function(r) r[r$block == "fig2", , drop = FALSE]
+
+# How a family is written in prose, mapped to the fixture's own `dist` label. A
+# prose name outside this map fails its shape rather than matching nothing:
+# an unmapped name would otherwise leave the figure beside it unconsumed, which
+# the unchecked-figure scan then reports -- but reporting a stray numeral says
+# nothing about the family the claim named, and naming the family is the point.
+residual_family_labels <- function() {
+  list(
+    "uniform" = "uniform",
+    "powexp" = "powexp",
+    "normal" = "gaussian",
+    "t(10)" = "t10",
+    "Laplace" = "laplace",
+    "t(5)" = "t5"
+  )
+}
+
 # Recomputed here from the per-cell rows, never read from the generator's own
 # summary block: the point is that the docs' figures survive an independent
 # derivation, not that two files agree.
@@ -586,12 +640,19 @@ width_surfaces_leg <- function(surfaces) {
 # Neighbours are bounded by markdown headings: without that, the window walks
 # out of the classical-intervals section and into the MPL one, whose "fixed
 # raters" is about the design a method serves, not about width.
-width_neighbourhood <- function(text) {
+#
+# `hits` is the sentence predicate deciding which sentences seed a run. The
+# default is the width one; M119's residual walk passes its own and reuses the
+# window, the heading bound and the contiguous-run split unchanged, so the two
+# walks cannot drift apart in how they cut a statement out of a surface.
+width_hits <- function(sents) {
+  grepl("burch", sents, ignore.case = TRUE) &
+    grepl(width_vocab, sents, ignore.case = TRUE)
+}
+
+width_neighbourhood <- function(text, hits = width_hits) {
   sents <- width_split(text)
-  hit <- which(
-    grepl("burch", sents, ignore.case = TRUE) &
-      grepl(width_vocab, sents, ignore.case = TRUE)
-  )
+  hit <- which(hits(sents))
   if (!length(hit)) {
     return(character(0))
   }
@@ -610,10 +671,10 @@ width_neighbourhood <- function(text) {
   lapply(split(keep, cumsum(c(1L, diff(keep) != 1L))), function(r) sents[r])
 }
 
-width_neighbourhoods_leg <- function(surfaces) {
+width_neighbourhoods_leg <- function(surfaces, hits = width_hits) {
   out <- list()
   for (nm in names(surfaces)) {
-    runs <- width_neighbourhood(surfaces[[nm]])
+    runs <- width_neighbourhood(surfaces[[nm]], hits)
     for (i in seq_along(runs)) {
       out[[paste0(nm, " #", i)]] <- runs[[i]]
     }
@@ -883,7 +944,7 @@ width_strip_tables <- function(text) {
 #
 # `re` is matched over the squashed surface text; group 1..n feed `ok`, which
 # recomputes from the fixture and returns TRUE when the stated figure is right.
-width_canonical_shapes <- function(w) {
+width_canonical_shapes <- function(w, r = residual_fixture()) {
   rho_levels <- sort(unique(w$rho[w$grid == "m113"]))
   parity <- max(rho_levels)
   flat_top <- max(rho_levels[rho_levels < parity])
@@ -914,6 +975,28 @@ width_canonical_shapes <- function(w) {
           },
           logical(1)
         ))
+      }
+    ),
+    # M119: a median ratio from the BOTH-components grid, at the family and
+    # subject count it names. Consumed before `k_level` below, so the "100
+    # subjects" inside it is never re-read as a bare M117 level reference --
+    # 100 is not a subject count either committed M117 grid carries. The family
+    # is matched through `residual_family_labels`, so a real figure attributed
+    # to the wrong family fails rather than passing on the number alone.
+    ratio_family = list(
+      re = paste0(
+        "a median width ratio of ([0-9]\\.[0-9]{4}) at ",
+        "([A-Za-z]+\\([0-9]+\\)|[A-Za-z]+) with ([0-9]+) subjects"
+      ),
+      ok = function(p) {
+        fam <- residual_family_labels()[[p[3]]]
+        if (is.null(fam)) {
+          return(FALSE)
+        }
+        f <- residual_fig2(r)
+        cell <- f[f$dist == fam & f$k == as.integer(p[4]), , drop = FALSE]
+        nrow(cell) == 1L &&
+          abs(round(cell$median_ratio, 4) - as.numeric(p[2])) < 1e-9
       }
     ),
     # <count> of <total> cells of the <grid> grid -- the grid is part of the
@@ -987,11 +1070,23 @@ width_canonical_shapes <- function(w) {
       re = "collapses to near parity at a true ICC of ([0-9.]+)",
       ok = function(p) near(as.numeric(p[2]), parity)
     ),
-    # "the two grids" is a figure too: it says how many grids there are
+    # "the two grids" is a figure too: it says how many grids there are. M119
+    # adds the third: "two" still means the pair that varies only the subject
+    # effect (the M117 fixture's own `grid` column), and "three" means those
+    # plus M118's both-components grid. That grid is ONE grid in three blocks --
+    # its blocks share a data-generating rule and differ only in design points --
+    # so it counts once, and the count is conditioned on its fixture actually
+    # carrying rows rather than being asserted as a literal.
     n_grids = list(
-      re = "the (two) grids",
+      re = "the (two|three) grids",
       ok = function(p) {
-        width_cardinal_value(p[2]) == length(unique(w$grid))
+        subject_only <- length(unique(w$grid))
+        want <- if (identical(p[2], "two")) {
+          subject_only
+        } else {
+          subject_only + as.integer(nrow(residual_fig2(r)) > 0L)
+        }
+        width_cardinal_value(p[2]) == want
       }
     ),
     # Source citations are not repo measurements. This shape verifies nothing --
@@ -1191,7 +1286,7 @@ width_unchecked_figures <- function(run_text, shapes) {
 width_loose_ratios <- function(surface_text, shapes) {
   residue <- width_consume(
     width_strip_tables(surface_text),
-    shapes[c("ratio_rho", "ratio_k")]
+    shapes[c("ratio_rho", "ratio_k", "ratio_family")]
   )$residue
   unlist(regmatches(
     residue,
@@ -1845,4 +1940,248 @@ test_that("every fixture value round-trips through the committed text", {
   tmp <- withr::local_tempfile(fileext = ".tsv")
   utils::write.table(f, tmp, sep = "\t", quote = FALSE, row.names = FALSE)
   expect_equal(utils::read.delim(tmp, stringsAsFactors = FALSE), f)
+})
+
+# --- M119: what the three grids jointly measure about the residual ------------
+#
+# For three milestones the shipped prose bounded Burch's own reversal claim by
+# saying no grid this package has measured varies the residual. M118 built that
+# grid -- both `A_i` and `e_ij` drawn from the cell's family, located and scaled
+# per burch2011 sec 3 -- and the reversal reproduced at 10 of 10 subject counts
+# on both limbs (D-030). So the bound is not merely stale: the sentences that
+# state it are false.
+#
+# The site set is decided by a WALK, exactly as the M117 blocks above decide
+# theirs, and for the same reason: a list of paths recorded in the milestone
+# file ships a stale site the moment a surface is added. The walk reuses
+# `width_neighbourhood()` with its own sentence predicate, so the two cannot
+# drift apart in how a statement is cut out of a surface.
+#
+# A RESIDUAL sentence names a measured GRID beside the variance component that
+# grid draws from. That pairing is what makes a sentence a claim about which
+# component the measured grids vary. The two obvious predicates both fail: a
+# sentence naming Burch beside the word "error" reaches the abort-remedy prose
+# ("it names a method only after running it", "honest disclosure, not an
+# error"), which mentions `"burch"` and has nothing to do with any grid, and
+# "residual" alone reaches the variance-component glossary. Requiring the grid
+# AND the component is what cuts the set down to the sentences that make the
+# claim -- 6 source statements and their mirrors, measured by the walk below.
+#
+# The component is the RESIDUAL specifically, never the subject effect: every
+# grid here varies the subject effect, so a sentence naming it makes no claim
+# about what distinguishes them. Seeding on it as well split the NEWS bullet in
+# two, the second seed being a corrected M117 scope clause ("Both grids that
+# vary only the subject effect say otherwise") that asserts nothing about the
+# residual and is not this milestone's to reword.
+residual_vocab <- "residual|error term|errors\\b"
+
+residual_hits <- function(sents) {
+  grepl("\\bgrids?\\b", sents, ignore.case = TRUE, perl = TRUE) &
+    grepl(residual_vocab, sents, ignore.case = TRUE, perl = TRUE)
+}
+
+# The seed predicate above is deliberately loose about context, and on its own
+# it reaches two vignettes' `expand.grid()` code chunks, which sit in the same
+# squashed "sentence" as the word `residual` and assert nothing about any
+# measured grid. So a run is kept only if the STATEMENT names Burch somewhere in
+# it. Naming him is what makes a grid one of the measured ones here.
+#
+# The burch test is at run level and not at sentence level on purpose: the
+# article states the design fact and attributes the reversal in two adjacent
+# sentences, and neither carries both halves.
+residual_runs_leg <- function(surfaces) {
+  runs <- width_neighbourhoods_leg(surfaces, residual_hits)
+  Filter(
+    function(run) any(grepl("burch", run, ignore.case = TRUE)),
+    runs
+  )
+}
+
+# How many residual statements each surface carries, measured by the walk at
+# this commit. Floors, not exact counts, on the M117 rationale: a new surface
+# may join, but a surface quietly dropping its statement is a narrowing no
+# other assertion would catch. `R/icc.R` carries two (the `@param ci_method`
+# block and the `@details` block) and its Rd mirror carries them both.
+residual_expected_runs <- c(
+  "R/icc.R" = 2L,
+  "R/ci-classical.R" = 1L,
+  "vignettes/interval-methods.Rmd" = 1L,
+  "vignettes/glossary.Rmd" = 1L,
+  "NEWS.md" = 1L,
+  "Rd:icc.Rd" = 2L,
+  "vignette:interval-methods.Rmd" = 1L,
+  "vignette:glossary.Rmd" = 1L
+)
+
+# The one clause every residual statement carries verbatim. Its shape follows
+# `width_templates()` for the same reason M117 chose a verbatim template over
+# keyword proximity: "the residual matters" and "the residual does not matter"
+# share every keyword, so only the literal text can tell a claim from its
+# reverse. Its figure and its subject count come from the fixture, not from the
+# author, and the `ratio_family` canonical shape re-checks them where they sit.
+#
+# No method name and no backticks: the clause ships into roxygen, an Rd
+# rendering of the same roxygen, two vignettes and NEWS, which mark up code
+# spans differently, and `rd_flat()` flattens the Rd markup away. M117's
+# templates avoid both for the same reason.
+residual_template <- function(r) {
+  f <- residual_fig2(r)
+  k_top <- max(f$k)
+  cell <- f[f$dist == "t5" & f$k == k_top, , drop = FALSE]
+  stopifnot(nrow(cell) == 1L)
+  c(
+    residual = paste0(
+      "the two grids that vary only the subject effect put it narrower ",
+      "nearly everywhere, while the third, which draws the residual from ",
+      "the same family as the subject effect, puts it wider at every ",
+      "symmetric heavy-tailed family measured (a median width ratio of ",
+      format(round(cell$median_ratio, 4), nsmall = 4),
+      " at t(5) with ",
+      format(k_top),
+      " subjects) and narrower at every lighter-tailed one, the normal ",
+      "included"
+    )
+  )
+}
+
+# M117's margin figures are true of the two subject-effect-only grids and false
+# of M118's, so a surface naming "the two grids" now has to say WHICH two. The
+# scope clause is required verbatim and in the same sentence -- not adjacent to
+# the phrase, because `?icc` reads "on the two grids this package has measured
+# that vary only the subject effect", and not by keyword, because "the two grids
+# that hold the residual Gaussian" says the same thing in words no fixture can
+# be checked against. A paraphrase of a scope is how a scope quietly widens.
+#
+# Three phrasings name the pair across the surfaces ("the two grids", "both
+# grids", "both measured grids"), so the scan takes all three: policing only the
+# one `?icc` happens to use would leave the NEWS bullet and the `ci-classical.R`
+# header free to widen silently. Two scope markers are accepted because the
+# surfaces write the scope two ways, and both are verbatim.
+residual_scope_clauses <- c(
+  "that vary only the subject effect",
+  "subject-effect-only"
+)
+
+residual_pair_names <- "the two grids|both (measured |committed )?grids"
+
+residual_scope_violations <- function(surface_text) {
+  sents <- width_split(surface_text)
+  named <- grepl(residual_pair_names, sents, ignore.case = TRUE, perl = TRUE)
+  scoped <- Reduce(
+    `|`,
+    lapply(residual_scope_clauses, function(cl) grepl(cl, sents, fixed = TRUE))
+  )
+  bad <- sents[named & !scoped]
+  list(bad = substr(bad, 1, 160), scanned = sum(named))
+}
+
+test_that("no surface names the two grids without saying which two", {
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
+  seen <- 0L
+  for (leg in names(legs)) {
+    for (nm in names(legs[[leg]])) {
+      got <- residual_scope_violations(legs[[leg]][[nm]])
+      seen <- seen + got$scanned
+      expect_identical(
+        length(got$bad),
+        0L,
+        info = paste0(leg, "/", nm, ": ", paste(got$bad, collapse = " // "))
+      )
+    }
+  }
+  # Anti-vacuity: the phrase is actually present and was actually scanned.
+  expect_gte(seen, 4L)
+})
+
+test_that("every residual statement the walk finds states what three grids measure", {
+  r <- residual_fixture()
+  templates <- residual_template(r)
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
+
+  for (leg in names(legs)) {
+    runs <- residual_runs_leg(legs[[leg]])
+    for (e in names(residual_expected_runs)) {
+      if (!e %in% names(legs[[leg]])) {
+        next
+      }
+      expect_true(
+        sum(startsWith(names(runs), paste0(e, " #"))) >=
+          residual_expected_runs[[e]],
+        info = paste(leg, e, "lost a residual statement")
+      )
+    }
+    # Anti-vacuity: the walk found statements at all on this leg.
+    expect_gt(length(runs), 0L)
+
+    for (nm in names(runs)) {
+      text <- paste(runs[[nm]], collapse = " ")
+      for (tm in names(templates)) {
+        expect_true(
+          grepl(templates[[tm]], text, fixed = TRUE),
+          info = paste0(leg, "/", nm, ": no verbatim '", tm, "' clause")
+        )
+      }
+    }
+  }
+})
+
+test_that("the residual clause's direction is what the third grid measures", {
+  # AC2's consistency leg for the qualitative half of the clause. "Wider at
+  # every symmetric heavy-tailed family measured" and "narrower at every
+  # lighter-tailed one, the normal included" are recomputed here from the
+  # decision block rather than read off the reference page, so a regenerated
+  # fixture that moved a family across 1 reds the clause it no longer supports.
+  f <- residual_fig2(residual_fixture())
+  heavy <- c("t10", "laplace", "t5")
+  lighter <- c("uniform", "powexp", "gaussian")
+  expect_setequal(unique(f$dist), c(heavy, lighter))
+  # The block is Burch's Fig. 2 design: every family measured at every one of
+  # its subject counts, so "every family measured" is not a selective read.
+  expect_identical(
+    unname(table(f$dist)[heavy]),
+    unname(table(f$dist)[lighter])
+  )
+  for (d in heavy) {
+    expect_true(
+      all(f$median_ratio[f$dist == d] > 1),
+      info = paste("heavy-tailed family not wider throughout:", d)
+    )
+  }
+  for (d in lighter) {
+    expect_true(
+      all(f$median_ratio[f$dist == d] < 1),
+      info = paste("lighter-tailed family not narrower throughout:", d)
+    )
+  }
+})
+
+test_that("the residual clause's figure is the fixture cell it names", {
+  # The `ratio_family` shape is what enforces this wherever the clause sits;
+  # this test pins the shape itself, so a shape that stopped matching (or
+  # started matching everything) cannot leave the surface checks vacuously
+  # green. A right number at the wrong family and a wrong number at the right
+  # family must both fail.
+  r <- residual_fixture()
+  shapes <- width_canonical_shapes(width_fixture(), r)
+  sh <- shapes$ratio_family
+  parts <- function(s) regmatches(s, regexec(sh$re, s, perl = TRUE))[[1]]
+
+  true_cell <- "a median width ratio of 1.2963 at t(5) with 100 subjects"
+  # full match plus the shape's three groups: ratio, family, subject count.
+  expect_length(parts(true_cell), 4L)
+  expect_true(sh$ok(parts(true_cell)))
+  # t(5)'s figure attributed to Laplace, whose k = 100 median is 1.2998.
+  expect_false(sh$ok(parts(
+    "a median width ratio of 1.2963 at Laplace with 100 subjects"
+  )))
+  # The right family at a subject count whose median is a different number.
+  expect_false(sh$ok(parts(
+    "a median width ratio of 1.2963 at t(5) with 10 subjects"
+  )))
+  # A family name the prose-to-fixture map does not carry.
+  expect_false(sh$ok(parts(
+    "a median width ratio of 1.2963 at Cauchy with 100 subjects"
+  )))
 })
