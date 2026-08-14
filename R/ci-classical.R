@@ -28,7 +28,11 @@
 # pinned by tests/testthat/test-doc-skew-caveat.R against the committed
 # fixture. They are deliberately not restated here: a figure in a source
 # comment is not in the built package, so no pin that runs under `R CMD check`
-# can reach it. Burch's own eq. 18 comparison
+# can reach it. The one exception below is the M119 residual clause, which is
+# required VERBATIM at every site its walk returns and carries a figure with
+# it; that copy is pinned on the walk's source leg only, for the reason just
+# given, and the Rd/NEWS/vignette copies carry the check under `R CMD check`.
+# Burch's own eq. 18 comparison
 # is against this very exact-F interval and is kurtosis-CONDITIONAL, measured on
 # data where the errors are non-normal too, and M118 built that grid here.
 # What `"burch"` does against `"searle"` depends on what the residual is

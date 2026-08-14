@@ -75,8 +75,10 @@
   source supports the withdrawn wording either — Burch (2011)
   compares against this same exact-F interval and reports a
   *kurtosis-conditional* ordering, shorter for light-tailed data and wider for
-  symmetric heavy-tailed data where the errors are non-normal too, and a third
-  grid now measures that case.
+  symmetric heavy-tailed data where the errors are non-normal too. His length
+  comparison uses symmetric families throughout, so it
+  settles nothing about skewed data either way.
+  A third grid now measures that case.
   What `"burch"` does against `"searle"` depends on what the residual is
   drawn from, and the three grids now measure that:
   the two grids that vary only the subject effect put it narrower
@@ -84,8 +86,7 @@
   the same family as the subject effect, puts it wider at every
   symmetric heavy-tailed family measured (a median width ratio of
   1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
-  the normal included. His length comparison uses symmetric families throughout, so it
-  settles nothing about skewed data either way. The claim is withdrawn everywhere it appeared; neither interval is
+  the normal included. The claim is withdrawn everywhere it appeared; neither interval is
   described as reliably the tighter one, and the coverage-based preference for
   `"searle"` is unchanged.
 * `icc()` now rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed

@@ -309,7 +309,8 @@ the same family as the subject effect, puts it wider at every
 symmetric heavy-tailed family measured (a median width ratio of
 1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
 the normal included. Treat neither as reliably the tighter interval;
-the measured figures are tabulated in the interval-methods article.
+the per-level figures for the two grids that vary only the subject effect
+are tabulated in the interval-methods article.
 Burch's robustness has limits this package has measured: on strongly skewed
 subject effects \code{"burch"} under-covers about as badly as the default,
 worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30

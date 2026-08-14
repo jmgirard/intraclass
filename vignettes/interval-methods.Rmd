@@ -201,7 +201,7 @@ detail. Burch's own expected-length comparison — which is
 against this very exact-F interval — is kurtosis-conditional: he finds his
 interval shorter for light-tailed data but *wider* for symmetric heavy-tailed
 data, measuring with both the subject effects and the errors non-normal. A third
-grid, drawing both components from the same family, now measures that case here.
+grid now measures that case here.
 What `"burch"` does against `"searle"` depends on what the residual is
 drawn from, and the three grids now measure that:
 the two grids that vary only the subject effect put it narrower

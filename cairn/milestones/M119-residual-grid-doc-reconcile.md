@@ -5,7 +5,7 @@
 - **Depends on:** M118
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m119-residual-grid-doc-reconcile`
+- **Branch/PR:** `m119-residual-grid-doc-reconcile` / https://github.com/jmgirard/intraclass/pull/128
 
 ## Goal
 
