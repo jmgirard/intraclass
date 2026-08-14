@@ -235,27 +235,106 @@ strongly skewed subject effects it under-covers about as badly as the
 default (see <a href="#when-the-default-under-covers">When the default
 under-covers</a>).</p>
 <p><strong>Which is the tighter interval?</strong> Neither, reliably —
-and the two grids this package has measured point the opposite way from
-what you might expect of a “robust” interval. Across a 16-cell
-gaussian/<code>t(5)</code> sweep and a larger 64-cell battery spanning
-four distribution families, <code>"burch"</code> is the
-<em>narrower</em> of the two in 16 of 16 and 59 of 64 cells respectively
-— a median of about 6% narrower on the smaller grid and about 4% on the
-larger. No distribution family reverses that on its median, and on the
-uniform family <code>"burch"</code> is narrower in every cell. Five
-cells of the larger grid do reverse, spread across the gaussian,
-<code>t(5)</code> and chi-square(1) families; all five sit at a true ICC
-of 0.6 with 5 raters, and none exceeds parity by more than 2.2%. That is
-a real limit on the comparison, though, because both grids draw only the
-<strong>subject effects</strong> from the non-normal family and always
-draw the errors from a normal. Burch’s own expected-length comparison —
-which is against this very exact-F interval — is kurtosis-conditional:
-he finds his interval shorter for light-tailed data but <em>wider</em>
-for symmetric heavy-tailed data, measuring with both the subject effects
-and the errors non-normal. So the honest summary is that the ordering
-depends on the data, this package has measured it only in the
-subject-effect-only case, and you should not pick between them on
-width.</p>
+and the margin between them is not a fixed one. Over the larger grid’s
+64 cells, spanning four distribution families, <code>"burch"</code> is
+the <em>narrower</em> of the two in 59 of 64 cells of the larger grid,
+but how much narrower depends on where in the design you look. Below,
+the median width ratio is <code>"burch"</code>’s width over
+<code>"searle"</code>’s, so a value under 1 means <code>"burch"</code>
+is narrower and 1 means they are the same width.</p>
+<table class="table">
+<thead><tr class="header">
+<th align="right">true ICC</th>
+<th align="right">median width ratio</th>
+<th align="right">
+<code>"burch"</code> narrower</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.05</td>
+<td align="right">0.9485</td>
+<td align="right">16 of 16</td>
+</tr>
+<tr class="even">
+<td align="right">0.1</td>
+<td align="right">0.9470</td>
+<td align="right">16 of 16</td>
+</tr>
+<tr class="odd">
+<td align="right">0.3</td>
+<td align="right">0.9475</td>
+<td align="right">16 of 16</td>
+</tr>
+<tr class="even">
+<td align="right">0.6</td>
+<td align="right">0.9971</td>
+<td align="right">11 of 16</td>
+</tr>
+</tbody>
+</table>
+<table class="table">
+<thead><tr class="header">
+<th align="right">subjects (at 5 raters)</th>
+<th align="right">median width ratio</th>
+<th align="right">
+<code>"burch"</code> narrower</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">0.9154</td>
+<td align="right">15 of 16</td>
+</tr>
+<tr class="even">
+<td align="right">30</td>
+<td align="right">0.9646</td>
+<td align="right">15 of 16</td>
+</tr>
+<tr class="odd">
+<td align="right">50</td>
+<td align="right">0.9769</td>
+<td align="right">13 of 16</td>
+</tr>
+</tbody>
+</table>
+<p>Two things to read off. In the true ICC, <code>"burch"</code>’s width
+advantage holds much the same up to a true ICC of 0.3 rather than
+shrinking as the true ICC rises (on the larger grid; the smaller grid’s
+margin does shrink across its levels) — by level medians the largest
+margin is at a true ICC of 0.1, not at the bottom of the range, though
+cell by cell the bottom level carries the larger margin in 11 of 16
+paired cells — and then collapses to near parity at a true ICC of 0.6,
+on the one grid reaching that value, where every cell favouring
+<code>"searle"</code> sits. In the subject count it shrinks steadily as
+the subject count grows, measured at 5 raters, which is the cut the
+second table takes. That cut is at 5 raters because 10 subjects is the
+only subject count in either grid where the rater count varies, so an
+unstratified row there would be confounded with it. The smaller grid’s
+16 cells carry only the two lowest true-ICC values, so that sweep cannot
+show the first pattern; it shows the second in the same direction,
+<code>"burch"</code> running narrower by a median width ratio of 0.9017
+at 10 subjects, 0.9611 at 30 subjects and 0.9775 at 50 subjects.</p>
+<p>A pooled figure over both grids would hide all of this, and it would
+invite a second misreading. The smaller grid’s design points are a
+subset of the larger one’s, so much of the gap between their pooled
+medians is which true-ICC values each grid covers rather than a
+disagreement between two bodies of evidence — but only much of it.
+Restricting the larger grid to the smaller one’s design points closes
+most of that gap and leaves a remainder, and the two are separate
+simulations that mostly disagree at the design points they share,
+agreeing closely at only a couple of them. A pooled between-grid
+comparison is not a clean contrast in either direction, which is why
+nothing above is one.</p>
+<p>There is a real limit on the comparison, though, because both grids
+draw only the <strong>subject effects</strong> from the non-normal
+family and always draw the errors from a normal. Burch’s own
+expected-length comparison — which is against this very exact-F interval
+— is kurtosis-conditional: he finds his interval shorter for
+light-tailed data but <em>wider</em> for symmetric heavy-tailed data,
+measuring with both the subject effects and the errors non-normal. So
+the honest summary is that the ordering depends on the data, this
+package has measured it only in the subject-effect-only case, and you
+should not pick between them on width.</p>
 <p>Prefer <code>"searle"</code>: across every distribution family in
 that skew study it landed closer to nominal coverage in most cells,
 heavy-tailed ones included. What <code>"burch"</code> buys is dipping

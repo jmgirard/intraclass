@@ -35,11 +35,18 @@ adjustment (Burch 2011), so its width tracks the tail weight of the
 data, where the **exact-F interval** leans on normality instead.
 Tracking tail weight is not the same as widening: on the two grids this
 package has measured it came out the narrower of the two in nearly every
-cell, while Burch reports the reverse for symmetric heavy-tailed data
-with non-normal errors, which those grids do not vary — so neither
-interval is reliably the tighter one. That adjustment is not a remedy
-for heavy tails: on strongly skewed subject effects `"burch"`
-under-covers about as badly as the default — see [*When the default
+cell. How much narrower is conditional, and not in the direction one
+might guess: `"burch"`’s margin holds much the same up to a true ICC of
+0.3 rather than shrinking as the true ICC rises (on the larger grid; the
+smaller grid’s margin does shrink across its levels), then collapses to
+near parity at a true ICC of 0.6, on the one grid reaching that value,
+where every cell favouring the exact-F interval sits. It shrinks
+steadily as the subject count grows, measured at 5 raters. Burch reports
+the reverse for symmetric heavy-tailed data with non-normal errors,
+which those grids do not vary — so neither interval is reliably the
+tighter one. That adjustment is not a remedy for heavy tails: on
+strongly skewed subject effects `"burch"` under-covers about as badly as
+the default — see [*When the default
 under-covers*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#when-the-default-under-covers).
 Deterministic: no resamples, no seed. See [*Confidence-interval
 methods*](https://jmgirard.github.io/intraclass/articles/interval-methods.html#the-opt-in-boundary-robust-methods).

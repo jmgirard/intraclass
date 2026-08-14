@@ -83,9 +83,19 @@
   data — in the help page, the article, the glossary, the runtime
   message and this file. Both grids the package has measured say
   otherwise: `"burch"` is the narrower of the two in 16 of 16 cells of
-  one and 59 of 64 of the other, by a median of about 6% and about 4%
-  respectively, with no distribution family reversing it on its median.
-  No source supports the withdrawn wording either — Burch (2011)
+  the smaller grid and 59 of 64 cells of the larger grid, with no
+  distribution family reversing it on its median. That margin is
+  **conditional**, and the documentation now says so rather than quoting
+  one pooled figure — but not in the direction one might guess:
+  `"burch"`’s width margin holds much the same up to a true ICC of 0.3
+  rather than shrinking as the true ICC rises (on the larger grid; the
+  smaller grid’s margin does shrink across its levels), then collapses
+  to near parity at a true ICC of 0.6, on the one grid reaching that
+  value, where every cell favouring `"searle"` sits, and it shrinks
+  steadily as the subject count grows, measured at 5 raters. That is the
+  only rater count present at every subject count, so an unstratified
+  subject-count figure would be confounded. The article tabulates both
+  cuts. No source supports the withdrawn wording either — Burch (2011)
   compares against this same exact-F interval and reports a
   *kurtosis-conditional* ordering, shorter for light-tailed data and
   wider for symmetric heavy-tailed data where the errors are non-normal
