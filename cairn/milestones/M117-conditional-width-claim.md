@@ -28,7 +28,7 @@ shrinks in the true ICC and in the subject count, reaching parity near ρ = 0.6.
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [ ] AC2 On every surface AC5's sweep walks, the ordered canonical scan's
+- [x] AC2 On every surface AC5's sweep walks, the ordered canonical scan's
       reported claims are each enforced on their shape's `ok` verdict,
       surface-wide — a claim whose verdict fails reds the test wherever on the
       surface it sits; the criterion quantifies over the claims
@@ -373,3 +373,24 @@ CI green on the review head `e47c18d` (REST poll, all nine checks). [O] diff-bug
 ### Verdict — defect return #4 (F1); thrash trigger (a) holds
 
 AC2 fails inside the domain of the procedure it names, by a fourth mechanism of the recurring shape (a figure reaching a swept surface by a route the guard does not check — this time through the surface-wide scan's discarded `ok` verdicts). AC1, AC3–AC9 all verified with fresh evidence above; CI fully green; every stated doc figure independently re-derived correct. The fix is precisely diagnosed (surface-wide `ok` enforcement for value-checkable shapes; bare level shapes stay neighbourhood-scoped) and needs a paired gated AC2 wording amendment for the two-tier scope. Trigger (a) held before this round and a `/milestone-plan` re-cut has already been spent, so per the thrash rule no bare retry is recommended; the routing options go to the maintainer.
+
+## Review — pass 5 (2026-08-13, round-5 fix)
+
+### Evidence per criterion (fresh, this session)
+
+- AC2 (amended this round, gated + fresh [O] audit) — **pass.** `width_surface_claim_failures()` enforces every reported claim's `ok` verdict surface-wide, excluding exactly `rho_level`/`k_level` (disclosed in the header's not-claimed list); the new suite test covers every leg/surface with per-leg anti-vacuity (installed 126 claims, source 207, floor 30). The [O] lens reproduced both closures at suite level: the round-4 F1 sentence ("0.8123 at a true ICC of 0.3" after the YAML title) reds with exactly one failure in the new test, and the rater probe reds in the rater test — each restored, tree clean. Harness: 20 prose mutations, all refused, control clean; `false_canonical_outside` reds ONLY via the new enforcement, proving the fix is that class's sole defense. Installed run of the file: 0 failed, 1149 passed, 0 skipped.
+- AC1, AC3–AC9 — **stand on pass-4 evidence plus this round's fresh runs.** The round-5 delta touches only the test file, the harness, and tracking (blame lens verified `R/`, vignettes, `NEWS.md`, `man/` unchanged since pass 4); the full fresh suite and harness re-runs this round are green (dev 0 failed / 1134 passed; harness every non-exempt fixture pin fired, all 20 prose mutations refused), `air format --check` clean, lintr 0 lints on the changed files, all four data-raw checkers exit 0, `cairn_validate` exit 0 (two accepted sizing advisories), `devtools::document()` no diff.
+
+### Independent review — three lenses, scored
+
+Scoped to the round-5 delta (`fae92ba..HEAD`), the rest of the branch already reviewed at passes 1–4. [O] diff-bug: 3 candidates + 12 verified-clean areas (rater-rule equivalence proven empirically on five adversarial probes; both suite-level defect reproductions; the 0.9430 median re-derived). [S] blame-history: 4/4 checked clean (the two-scope rater design survives verbatim; no current record asserts 0.9440). [S] prior-review: all four pass-4 promised fixes verifiably closed (F1, F4, F3, F6), no below-bar finding worsened, GitHub comment probe empty. Scorer: **no finding at or above 80 — the actioned list is empty.**
+
+**Logged, below the action bar (3):** F1 (72, `argmax_cut` is case-sensitive so a sentence-initial "By level medians…" would fall to `argmax_bare` and red a CORRECT claim surface-wide — fail-safe direction, currently dormant: the article states it lowercase mid-sentence); F2 (25, the rater probe splices mid-sentence — cosmetic, reds as intended); F3 (15, `prose_scan` double-reports a neighbourhood false claim — harmless redundancy).
+
+### Consistency gate
+
+`cairn_validate` exit 0. `devtools::document()` no diff. All four data-raw checkers exit 0. Harness exit 0. No `DESIGN.md` principle changed → `cairn_impact` no-ops. CI on the pass-5 head: recorded at the approval gate below.
+
+### Verdict — all nine criteria verified; no return
+
+Defect returns stand at 4 (rounds 1–3 + pass 4); pass 5 convenes none. The milestone proceeds to the merge-approval gate.
