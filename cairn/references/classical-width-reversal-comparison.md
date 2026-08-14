@@ -105,9 +105,92 @@ burch2011 (p. 1027) within the M118 AC4 tolerances, and the M111 block's gaussia
 cells reproduce their committed M111 counterparts within stated Monte-Carlo
 error. A failure of either is a defect in this grid, not a finding about Burch.
 
-## Results
+## Results — swept 2026-08-13
 
-<!-- filled at T6 from the derived table; outside the freeze -->
+Backing table `data-raw/m118-width-reversal-by-cell.tsv` (125 cells, one flat
+block), mirrored to `tests/testthat/fixtures/width-reversal-by-cell.tsv` and
+written by `data-raw/m118-width-reversal-sweep.R`; every figure below re-derives
+by re-running that script. The two anchors re-derive by
+`data-raw/m118-anchor-checks.R`, which asserts them.
+
+**Validation preconditions — both clear, so the rules below may be read.**
+
+- Against burch2011 (p. 1027), at `k = 100`, `n = 5`, `rho = 0.25`, uniform for
+  both components: mean length ratio 0.8807 against the printed 0.88;
+  `"burch"` coverage 0.9600 against 0.95; `"searle"` coverage 0.9790 against
+  0.97. Gaps 0.0007 / 0.0100 / 0.0090 against tolerances 0.01 / 0.015 / 0.015.
+  The mean rather than the median ratio is used here because Burch's eq. 18 is
+  a ratio of *expected* lengths.
+- Against the committed `data-raw/m111-fallback-results.rds`, over the 16
+  gaussian cells of the M111 block: worst discrepancy in the median
+  per-replicate width ratio is 1.68 two-sample bootstrap SEs, against a bound
+  of 3. Reported and not asserted: 13 of the 16 differences are negative, mean
+  z = −0.30 — a lean this grid cannot resolve, stated rather than described as
+  an absence of bias.
+
+  This is also the only place the plan gate's choice of the shipped reducers
+  over the M76/M111 prototypes gets tested. Agreement at ≤ 1.68 SE is evidence
+  against the divergence that choice risked.
+
+**W1 — reproduced, at 10 of 10 subject counts on every limb.** Median
+`"burch"`/`"searle"` length ratio on the Fig. 2 block (`n = 5`, `rho = 0.5`):
+
+| family | excess kurtosis | k = 10 | k = 50 | k = 100 | cells > 1 |
+|---|---|---|---|---|---|
+| Uniform(0,1) | −1.2 | 0.917 | 0.900 | 0.898 | 0 of 10 |
+| Power exponential(0,1,2.78) | −0.5 | 0.947 | 0.951 | 0.951 | 0 of 10 |
+| Normal(0,1) | 0.0 | 0.973 | 0.991 | 0.996 | 0 of 10 |
+| t(10) | 1.0 | 1.004 | 1.060 | 1.080 | 10 of 10 |
+| Laplace(0,1) | 3.0 | 1.096 | 1.258 | 1.300 | 10 of 10 |
+| t(5) | 6.0 | 1.065 | 1.229 | 1.296 | 10 of 10 |
+
+Both limbs hold with no marginal cell, so W2 and W3 do not arise. The sign
+change falls between excess kurtosis 0.0 and 1.0 — the crossing the frozen
+priors named as the demanding part of the rule, since the repo's existing grids
+put the gaussian ratio below 1. Normal(0,1) binds neither limb by the rule and
+behaves as expected of a REML asymptotic: 0.973 at `k = 10` rising toward 0.996
+at `k = 100`, below 1 throughout.
+
+Two observations the rule does not rest on. The ratio is **not** monotone in
+tail weight at the top — at `k = 100` Laplace (1.300) sits marginally above
+t(5) (1.296) despite the lower kurtosis — so a monotone-ordering rule would have
+read differently from the sign rule W1 states. And the effect grows with the
+subject count in every heavy-tailed family, the opposite of the shrinking-margin
+direction M117 measured on the subject-effect-only grids.
+
+**Coverage (context; binds no rule).** Per family on the Fig. 2 block, because
+the pooled ranges overlap and would misdescribe the contrast — `"searle"` at
+t(10) covers better than `"burch"` does at t(5), so a pooled "burch holds while
+searle falls" is not what was measured:
+
+| family | `"burch"` | `"searle"` |
+|---|---|---|
+| t(10) | 0.924–0.947 | 0.904–0.940 |
+| Laplace(0,1) | 0.907–0.941 | 0.831–0.883 |
+| t(5) | 0.906–0.932 | 0.825–0.893 |
+
+The gap opens with tail weight: at t(10) the two are comparable, and by Laplace
+and t(5) `"searle"` has fallen well below nominal while `"burch"` stays within
+about four points of it. That is the coverage-conditional reading Burch states
+at p. 1024 ("thus wider intervals are warranted"), measured here rather than
+assumed — the extra width buys coverage, and only where the tails are heavy
+enough to cost `"searle"` any.
+
+**M111 block — the comparison with the committed grids.** Ratio of medians on
+both sides, so the two grids' figures are the same statistic; each cell differs
+from its committed counterpart only in the residual's family.
+
+| family | subject-effect only | both components | `"burch"` wider |
+|---|---|---|---|
+| gaussian | 0.962 | 0.959 | 0 of 16 (was 2 of 16) |
+| uniform | 0.961 | 0.866 | 0 of 16 (was 0 of 16) |
+| t5 | 0.965 | 1.109 | 13 of 16 (was 1 of 16) |
+| chisq1 | 0.960 | 1.638 | 16 of 16 (was 2 of 16) |
+
+`chisq1` is asymmetric and supports no disposition, per the grid design above;
+it is reported because it is the sharpest measured instance of the residual's
+family mattering, reaching a ratio of 2.676. The gaussian row is the control and
+moves within noise.
 
 ## Disposition
 

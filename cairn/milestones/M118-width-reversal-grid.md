@@ -70,10 +70,17 @@ planned; a width finding is not a contract change.
       burch2011 (p. 1027): at `k = 100`, `n = 5`, `rho = 0.25`, uniform for both
       components, the mean `"burch"` length over the mean `"searle"` length is
       within 0.01 of 0.88, `"burch"` coverage within 0.015 of 0.95, and
-      `"searle"` coverage within 0.015 of 0.97. Against this repo: the gaussian
-      cells of the M111 block reproduce their committed M111 counterparts'
-      median width ratio within Monte-Carlo error, stated as a multiple of the
-      binomial SE at `n_rep = 2000`.
+      `"searle"` coverage within 0.015 of 0.97. Against this repo: each of the
+      16 gaussian cells of the M111 block —
+      `subset(build_cells(), block == "m111" & dist == "gaussian")` in
+      `data-raw/m118-width-reversal-sweep.R` — reproduces the median
+      per-replicate `"burch"`/`"searle"` width ratio of the matching
+      `rho`/`k`/`n` cell in the committed
+      `data-raw/m111-fallback-results.rds`. Each cell's discrepancy is stated
+      as a multiple of the two-sample bootstrap standard error
+      `sqrt(se_M118^2 + se_M111^2)`, each term the nonparametric bootstrap SE
+      of that cell's median ratio over its own 2000 replicates, and no cell
+      exceeds three of them.
 - [ ] AC5 `data-raw/m118-width-reversal-by-cell.tsv`, mirrored to
       `tests/testthat/fixtures/width-reversal-by-cell.tsv`, is one flat block
       carrying one row per cell at `n_rep = 2000` — mean and median
@@ -118,7 +125,7 @@ planned; a width finding is not a contract change.
 - [x] T5 Run the sweep over the three blocks via the shipped reducers
       `searle_endpoints()` / `burch_reml_endpoints()` (`R/ci-classical.R:109`,
       `:188`) off `classical_oneway_ss()`; write both tables.
-- [ ] T6 Assert both AC4 anchors — the burch2011 printed cell and the M111
+- [x] T6 Assert both AC4 anchors — the burch2011 printed cell and the M111
       gaussian cross-check; fill the page's Results section.
 - [ ] T7 Fill Disposition; append the verdict `D-entry`; correct the two
       falsified `cairn/` records in place, marked and dated.
@@ -144,6 +151,10 @@ planned; a width finding is not a contract change.
 - 2026-08-13: T4 done — 41 assertions, no skips and no `NOT_CRAN` needed (the whole file runs in ~2s, so `skip_on_cran()` was dropped rather than left to hide a leg). `data-raw/m118-kurtosis-spread.R` measures the AC's load-bearing claim rather than asserting it: every wrong beta tried (2.2, 2.5, 3.0, 3.4) keeps the variance at ~1.002 and the kurtosis inside the uniform/gaussian bracket, so both other legs miss it and only the 0.02 tolerance catches it.
 - 2026-08-13: T5 done — 125 cells x 2000 reps in 0.3 min at 4 workers, 0 degenerate cells; both closed-form legs, so the sweep is ~100x cheaper than M111's MC-bearing one.
 - 2026-08-13: W1 is met on every limb at 10 of 10 subject counts — no marginal call. The sign change sits exactly where the frozen page flagged it as demanding: gaussian stays below 1 (0.973 at k=10 to 0.996 at k=100) and t(10) is above it at every k (1.004 to 1.080), so the crossing falls between excess kurtosis 0.0 and 1.0 as W1's t(10) limb required.
+- 2026-08-13: AC4's repo leg amended at a mini gate (user-approved), fresh [O] reader first. Three defects, each fatal to verifiability: it named a binomial SE for a comparison of medians (a statistic in the wrong units); a one-sample SE would have made a nominal 3-sigma bound an effective 2.12 sigma, giving a ~42% false-failure rate over 16 cells on a precondition whose documented meaning is that the grid is defective; and "median width ratio" was ambiguous between the ratio of medians and the median of ratios, which differ by more than the discrepancy being bounded. It now names the median of ratios — the statistic W1 itself reads — and the `.rds`, the only committed artifact carrying the per-replicate widths both sides need.
+- 2026-08-13: the 3-sigma bound was chosen with the discrepancies already in hand, so it is logged rather than presented as blind: it is the off-the-shelf convention, not the tightest value that passes (measured worst case 1.68), and a tighter post-hoc value was declined at the gate for that reason. The frozen W1-W3 rules, their aggregation and their consequence clause are untouched — AC4 is a validation precondition, not one of them.
+- 2026-08-13: an intermediate comparison compared M113's ratio-of-medians against M118's median-of-ratios and was discarded before any figure from it was recorded — the M116 lesson about pooling statistics that are not the same statistic, hit one level down.
+- 2026-08-13: T6 done — both anchors assert from committed `data-raw/m118-anchor-checks.R`; Results filled. Every figure written into the page was then re-derived from the committed fixture, which caught two wrong coverage ranges: the pooled leptokurtic ranges had been composed by reading two of the three family rows, dropping t(10)'s 0.947 and 0.940, and the true pooled ranges overlap so the contrast as drafted was false. Restated per family (the M115/M116 subset-derived-claim lesson, recurring).
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
