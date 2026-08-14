@@ -221,4 +221,46 @@ ckpt_trace_assert()
 pass("a read outside any registered checkpoint location is not flagged")
 
 ckpt_trace_remove()
+
+# ---- AC3/AC4 on a REAL site --------------------------------------------------
+# Everything above runs against a stand-in site. This section runs the M111
+# sweep itself, at n_rep = 2 and with both its paths redirected into a tempdir,
+# so the guard is exercised on the harness the defect was found in rather than
+# only on a model of it. The four oracle sites share this code path but each
+# needs brms/Stan and hours of refits, so they are covered by the routing check
+# (data-raw/check-checkpoint-sites.py), not by a run here.
+cat("\n== AC3/AC4: the M111 sweep, end to end at n_rep = 2 ==\n")
+
+site_tmp <- tempfile("m120-m111-")
+dir.create(site_tmp)
+Sys.setenv(
+  M111_CKPT_DIR = file.path(site_tmp, "ckpt"),
+  M111_RESULTS_OUT = file.path(site_tmp, "results.rds")
+)
+source("data-raw/m111-fallback-sweep.R")
+
+dir.create(ckpt_dir, recursive = TRUE, showWarnings = FALSE)
+ckpt_trace_install()
+ckpt_trace_register(ckpt_dir)
+ckpt_trace_reset()
+
+cells <- build_cells(n_rep = 2L)
+cell <- cells[[1]]
+first <- run_cell(cell) # computes and writes
+again <- run_cell(cell) # resumes through the guard
+stopifnot(identical(first, again))
+ckpt_trace_assert()
+pass("a completed cell resumes from its checkpoint and the trace stays clean")
+
+# The candidate row's scenario: build_cells() is edited and the sweep re-run.
+# The cell id is unchanged, so the old file is still found at the same path.
+stale_cell <- cell
+stale_cell$rho <- 0.60
+expect_error(
+  run_cell(stale_cell),
+  "a re-run after editing build_cells() is refused, not served from the old grid",
+  must_match = "rho changed"
+)
+
+ckpt_trace_remove()
 cat("\nAll M120 guard demonstrations passed.\n")
