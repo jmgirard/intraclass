@@ -14,7 +14,7 @@
 #     under-cover on strongly skewed subject effects, worst 0.6655, so it is not
 #     a remedy for heavy tails.
 # NOT "burch is wider than searle" -- that shipped for three milestones and is
-# false on both committed grids (M116: burch narrower in 16 of 16 cells of the
+# false on both subject-effect-only grids (M116: burch narrower in 16 of 16 cells of the
 # smaller grid and 59 of 64 cells of the larger grid, no family reversing on its
 # median; see data-raw/m116-classical-width-comparison.tsv). Nor is it a flat
 # margin, which the pooled figure that replaced it implied (M117): burch's width
@@ -28,10 +28,21 @@
 # pinned by tests/testthat/test-doc-skew-caveat.R against the committed
 # fixture. They are deliberately not restated here: a figure in a source
 # comment is not in the built package, so no pin that runs under `R CMD check`
-# can reach it. Burch's own eq. 18 comparison
-# is against this very exact-F interval and is kurtosis-CONDITIONAL, with his
-# reversal measured on data where the errors are non-normal too -- which neither
-# grid varies. Neither method is reliably the tighter one.
+# can reach it. The one exception below is the M119 residual clause, which is
+# required VERBATIM at every site its walk returns and carries a figure with
+# it; that copy is pinned on the walk's source leg only, for the reason just
+# given, and the Rd/NEWS/vignette copies carry the check under `R CMD check`.
+# Burch's own eq. 18 comparison
+# is against this very exact-F interval and is kurtosis-CONDITIONAL, measured on
+# data where the errors are non-normal too, and M118 built that grid here.
+# What `"burch"` does against `"searle"` depends on what the residual is
+# drawn from, and the three grids now measure that:
+# the two grids that vary only the subject effect put it narrower
+# nearly everywhere, while the third, which draws the residual from
+# the same family as the subject effect, puts it wider at every
+# symmetric heavy-tailed family measured (a median width ratio of
+# 1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
+# the normal included. Neither method is reliably the tighter one.
 #
 # Both mirror the sibling `"npbootstrap"` (M75, D-010) exactly on the API
 # conventions: balanced one-way only (guarded upstream in `icc()`), the reported

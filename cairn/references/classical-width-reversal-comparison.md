@@ -218,7 +218,10 @@ subject counts, so W2 and W3 do not arise and no threshold judgement was needed.
 
 Per the frozen consequence clause, which is identical under all three tags, this
 changes what the package says and not what it does. M119 restates the shipped
-surfaces that currently tell users no measured grid varies the residual; no
+surfaces that told users no measured grid varies the residual — six statements
+plus their generated `man/icc.Rd` mirrors, enumerated by the walk in
+`tests/testthat/test-doc-skew-caveat.R` — observed 2026-08-14. <!-- check: git grep -qF 'residual_expected_runs <- c(' tests/testthat/test-doc-skew-caveat.R -->
+No
 method recommendation, default or `ci_method` behaviour changes on this
 evidence, and the coverage-based preference for `"searle"` is untouched.
 

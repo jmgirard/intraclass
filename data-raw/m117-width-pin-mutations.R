@@ -307,6 +307,13 @@ cat("every non-exempt pin fired; ", length(exempt), " exempt\n", sep = "")
 #   rater_width_claim       return #1 / return #4 (F4): a rater-count width
 #                           comparison inside a width neighbourhood
 #
+# M119 adds two claims and gives each the four break forms AC4 names -- restore
+# the pre-milestone wording, paraphrase it, negate it, drop its hedge:
+#   m119_residual_*         the residual clause (article surface): what the
+#                           three grids jointly measure about the residual
+#   m119_scope_*            the scope claim (`?icc` roxygen surface): which two
+#                           grids the M117 margin figures are true of
+#
 # NOT probed, disclosed (the narrowed AC2 promise — see the claimed-classes
 # header in the test file): figures equal to an allowlisted value, spelled
 # forms beyond the cardinal net, figures in sentences with no width
@@ -323,11 +330,27 @@ sys.source(
 article_path <- "vignettes/interval-methods.Rmd"
 article <- readLines(article_path, warn = FALSE)
 
+# M119 mutates a second surface: the `?icc` roxygen, which carries the scope
+# claim ("the two grids ... that vary only the subject effect") in a sentence
+# the article does not have. Source files reach the walk with their roxygen and
+# comment markers stripped, exactly as `source_doc_surfaces()` strips them, so
+# the scan here reads what the suite reads.
+roxygen_path <- "R/icc.R"
+roxygen <- readLines(roxygen_path, warn = FALSE)
+
+prose_text <- function(lines, path) {
+  if (grepl("\\.R$", path)) {
+    prose_env$squash(gsub("^\\s*#+'?\\s?", "", lines))
+  } else {
+    prose_env$squash(lines)
+  }
+}
+
 # One verdict for one surface state: every refusal the suite's scans would
 # emit for these lines.
-prose_scan <- function(lines) {
+prose_scan <- function(lines, path = article_path) {
   e <- prose_env
-  text <- e$squash(lines)
+  text <- prose_text(lines, path)
   w <- e$width_fixture()
   shapes <- e$width_canonical_shapes(w)
   fails <- character(0)
@@ -368,6 +391,29 @@ prose_scan <- function(lines) {
   pct <- e$width_pct_violations(text)$bad
   if (length(pct)) {
     fails <- c(fails, paste0("pct: ", substr(pct, 1, 60)))
+  }
+  # M119's three scans, mirrored here for the same reason as the M117 ones: a
+  # duplicated scanner drifts from the one it claims to exercise.
+  for (nm in names(e$claim_patterns)) {
+    if (grepl(e$claim_patterns[[nm]], text, fixed = TRUE)) {
+      fails <- c(fails, paste0("withdrawn: ", nm))
+    }
+  }
+  scope <- e$residual_scope_violations(text)$bad
+  if (length(scope)) {
+    fails <- c(fails, paste0("scope: ", substr(scope, 1, 60)))
+  }
+  tmpl <- e$residual_template(e$residual_fixture())
+  for (run in e$width_neighbourhood(text, e$residual_hits)) {
+    if (!any(grepl("burch", run, ignore.case = TRUE))) {
+      next
+    }
+    run_text <- paste(run, collapse = " ")
+    for (tm in names(tmpl)) {
+      if (!grepl(tmpl[[tm]], run_text, fixed = TRUE)) {
+        fails <- c(fails, paste0("residual-template-missing: ", tm))
+      }
+    }
   }
   claims <- e$width_table_claims(lines)
   orph <- attr(claims, "orphans")
@@ -509,6 +555,38 @@ prose_mutations <- list(
       "The coverage held at 0.8123 at a true ICC of 0.3 in that run."
     )
   },
+  # M119 (AC4): the residual clause this milestone adds, under the four break
+  # forms every claim it adds or rewords faces -- restore the pre-milestone
+  # wording, paraphrase it, negate it, drop its hedge.
+  m119_residual_restored = function(l) {
+    sub_must(
+      l,
+      "drawn from, and the three grids now measure that:",
+      "drawn from, a reversal which neither grid tests:"
+    )
+  },
+  m119_residual_paraphrased = function(l) {
+    sub_must(
+      l,
+      "the same family as the subject effect, puts it wider at every",
+      "the same family as the subject effect, makes it wider at every"
+    )
+  },
+  m119_residual_negated = function(l) {
+    sub_must(
+      l,
+      "the same family as the subject effect, puts it wider at every",
+      "the same family as the subject effect, puts it narrower at every"
+    )
+  },
+  m119_residual_hedge_dropped = function(l) {
+    l <- sub_must(
+      l,
+      "1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,",
+      "1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one."
+    )
+    sub_must(l, "the normal included. So the", "So the")
+  },
   rater_width_claim = function(l) {
     # F4/return #1: a rater-count width comparison inside a width
     # neighbourhood — must red via the forbidden rater rule, now mirrored in
@@ -521,24 +599,87 @@ prose_mutations <- list(
   }
 )
 
-control_fails <- prose_scan(article)
-if (length(control_fails)) {
-  stop(
-    "the unmutated article already fails the prose scan -- fix that first:\n  ",
-    paste(control_fails, collapse = "\n  ")
-  )
+# The SECOND mutated surface (M119). The scope claim -- which two grids the
+# M117 margin figures are true of -- lives in the `?icc` roxygen and not in the
+# article, so the four break forms it faces are patched there. Restoring it is
+# restoring the pre-milestone wording verbatim; the other three each leave a
+# scope that reads as one but says something the fixture cannot check.
+roxygen_mutations <- list(
+  m119_scope_restored = function(l) {
+    l <- sub_must(
+      l,
+      "On the two grids this package has measured that vary only the subject",
+      "On the two grids this package has measured,"
+    )
+    sub_must(
+      l,
+      "effect, `\"burch\"` is usually the **narrower** of the two",
+      "`\"burch\"` is usually the **narrower** of the two"
+    )
+  },
+  m119_scope_paraphrased = function(l) {
+    l <- sub_must(
+      l,
+      "On the two grids this package has measured that vary only the subject",
+      "On the two grids this package has measured, whose residuals are Gaussian"
+    )
+    sub_must(
+      l,
+      "effect, `\"burch\"` is usually the **narrower** of the two",
+      "throughout, `\"burch\"` is usually the **narrower** of the two"
+    )
+  },
+  m119_scope_negated = function(l) {
+    sub_must(
+      l,
+      "On the two grids this package has measured that vary only the subject",
+      "On the two grids this package has measured that vary the residual as well as the subject"
+    )
+  },
+  m119_scope_dropped = function(l) {
+    l <- sub_must(
+      l,
+      "On the two grids this package has measured that vary only the subject",
+      "On the two grids this package has measured"
+    )
+    sub_must(
+      l,
+      "effect, `\"burch\"` is usually the **narrower** of the two",
+      "`\"burch\"` is usually the **narrower** of the two"
+    )
+  }
+)
+
+prose_surfaces <- list(
+  list(path = article_path, lines = article, mutations = prose_mutations),
+  list(path = roxygen_path, lines = roxygen, mutations = roxygen_mutations)
+)
+
+for (s in prose_surfaces) {
+  control_fails <- prose_scan(s$lines, s$path)
+  if (length(control_fails)) {
+    stop(
+      "the unmutated ",
+      s$path,
+      " already fails the prose scan -- fix that first:\n  ",
+      paste(control_fails, collapse = "\n  ")
+    )
+  }
 }
 
 cat("\n==== prose-mutation leg ====\n")
 prose_dead <- character(0)
-for (nm in names(prose_mutations)) {
-  fails <- prose_scan(prose_mutations[[nm]](article))
-  cat("\n== ", nm, " -- ", length(fails), " refusal(s)\n", sep = "")
-  for (f in fails) {
-    cat("   - ", substr(f, 1, 100), "\n", sep = "")
-  }
-  if (!length(fails)) {
-    prose_dead <- c(prose_dead, nm)
+for (s in prose_surfaces) {
+  cat("\n---- surface: ", s$path, " ----\n", sep = "")
+  for (nm in names(s$mutations)) {
+    fails <- prose_scan(s$mutations[[nm]](s$lines), s$path)
+    cat("\n== ", nm, " -- ", length(fails), " refusal(s)\n", sep = "")
+    for (f in fails) {
+      cat("   - ", substr(f, 1, 100), "\n", sep = "")
+    }
+    if (!length(fails)) {
+      prose_dead <- c(prose_dead, nm)
+    }
   }
 }
 # Coverage, asserted rather than eyeballed (same rule as the fixture leg): a
