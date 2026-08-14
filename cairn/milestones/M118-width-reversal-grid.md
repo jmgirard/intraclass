@@ -185,6 +185,7 @@ planned; a width finding is not a contract change.
 - 2026-08-14: T9 done. Leg (b) now runs at rho 0.05/0.25/0.5 with per-rho tolerances 0.05/0.10/0.10, and both legs are mutation-verified by one harness: 11 fence mutations and 3 composition mutations, all red, both baselines accepted. `data-raw/m118-composition-spread.R` prints the legitimate spread (0.0288/0.0572/0.0727) beside each mutation's separation and asserts the property the tolerances must have — real inside every one, each mutation outside at least one — rather than leaving it to be eyeballed.
 - 2026-08-14: the component swap is caught at 2 of 3 rho, and that is the whole reason leg (b) is not single-rho: at rho = 0.5 it reads 0.0727, identical to the real script, because 0.5 is the fixed point of rho <-> 1 - rho.
 - 2026-08-14: the fence's `switch(dist` clause was rewritten on the AST rather than deleted — it checks that some `switch` in `draw_standard`'s body dispatches on the symbol `dist`, taking `EXPR =` and positional spellings alike. Deleting it (the first attempt) lost a real catch; as an AST check it keeps the catch and drops the lexical defect. It reads `draw_standard`'s body, not `gen_oneway`'s, so it sits outside what the amended AC2's clause (a) promises — kept because it is free, not because the criterion rests on it.
+- 2026-08-14: third pass found the amended AC2 carries its own over-claim — "the tolerances sit between a measured legitimate spread and the nearest mutation at every rho" is false at rho = 0.50, where the component swap is a no-op and reads exactly the legitimate 0.0727. The criterion written to bound an unbounded promise was itself unbounded in one clause; the spread script asserts the correct weaker property, so only the prose is wrong. This would be AC2's SECOND amendment, which the second-occurrence stop routes to the user rather than convening another round.
 - 2026-08-14: full suite clean after the amendment — 7159 passing, 0 failures (down 7 from consolidating leg (b)'s per-family assertions into one call). Status → review for a third pass.
 - 2026-08-14: amendment return: AC2 — "Two committed procedures bound that claim, both of them procedures over `gen_oneway` alone, and this criterion promises only what they decide." Amended wording audited by a fresh [O] reader before writing; user-approved at the mini gate. This consumes the first of AC2's two amendment slots.
 - 2026-08-14: second review pass — an adversarial [O] reviewer defeated the fixed fence with 10 further mutations, all green against both test files. Independently reproduced two: `assign("dist", "gaussian")` leaves the fence green AND passes the composition leg at every rho (only the family is wrong, not the ICC); and swapping `sd_a`/`sd_e` has error 0.0727 at rho = 0.5 — identical to the real script, because 0.5 is the fixed point of rho <-> 1-rho — while giving 0.3227 at rho = 0.25 and 0.5227 at 0.05.
@@ -233,7 +234,20 @@ line below is a command run at review, never recall.
   verbatim ("no widened grid, no additional families, no re-set threshold"),
   and its Results and Disposition sections are the two the criterion places
   outside the freeze.
-- **AC2 — NOT MET (return).** Tick withdrawn 2026-08-14. `test-m118-both-components-dgp.R` passes 2/2.
+- **AC2 — NOT MET (third pass, 2026-08-14). Not ticked.** The procedures all
+  pass: `test-m118-both-components-dgp.R` 3/3, and the harness accepts the
+  unmutated script and rejects all 11 fence and all 3 composition mutations.
+  What fails is one clause of the amended criterion's own prose. It says "the
+  tolerances sit between a measured legitimate spread and the nearest mutation
+  at every `rho`", and at rho = 0.50 that is false: the component swap reads
+  0.0727 there — identical to the legitimate spread, because the swap is a
+  no-op at the fixed point of rho ↔ 1 − rho — so the 0.10 tolerance sits above
+  it rather than below. True at rho = 0.05 (0.0288 < 0.05 < 0.0795) and
+  rho = 0.25 (0.0572 < 0.10 < 0.1997). `data-raw/m118-composition-spread.R`
+  asserts the correct weaker property — the real script inside every tolerance,
+  each mutation outside at least one — so the instrument is right and the
+  sentence describing it is wrong. Under the never-reinterpret rule this cannot
+  be read charitably, and a second amendment on AC2 stops for the user.
   `data-raw/m118-dgp-fence-mutations.R` accepts the unmutated script and
   rejects all 7 planted defects, which vary form as well as site: direct
   substitution, a draw hoisted into a variable above its use, and a
