@@ -194,10 +194,29 @@ moves within noise.
 
 ## Disposition
 
-<!-- filled at T7; outside the freeze -->
+Verdict recorded as D-030: **W1 — reproduced.** Both limbs hold at 10 of 10
+subject counts, so W2 and W3 do not arise and no threshold judgement was needed.
+
+Per the frozen consequence clause, which is identical under all three tags, this
+changes what the package says and not what it does. M119 restates the shipped
+surfaces that currently tell users no measured grid varies the residual; no
+method recommendation, default or `ci_method` behaviour changes on this
+evidence, and D-027's coverage-based preference for `"searle"` is untouched.
+
+`D-012 Amendment 1`'s reopening condition — "a grid on which Burch's median
+width exceeds SEARLE's" — is **met**. That amendment's own corrected wording is
+scoped to the M76 grid ("narrower than SEARLE in every cell of this grid") and
+stays true of it, so nothing in it is falsified; what this grid falsifies is the
+*bound* the shipped documentation puts on that finding, namely that no measured
+grid varies the residual.
 
 ## Open questions
 
-- Whether the crossing point in excess kurtosis can be located from this grid
-  is left open: the six families sample tail weight at −1.2, −0.5, 0.0, 1.0, 3.0
-  and 6.0, which brackets a crossing but does not resolve it.
+- Where in excess kurtosis the sign change falls is bracketed but not resolved:
+  the six families sample tail weight at −1.2, −0.5, 0.0, 1.0, 3.0 and 6.0, and
+  the crossing lies between 0.0 and 1.0. Locating it would need families this
+  grid does not carry.
+- Whether the reversal extends to skewed data is not addressed. The five
+  asymmetric Table 2 families were dropped at the M118 plan gate, and `chisq1`'s
+  behaviour in the comparison block supports no disposition.
+

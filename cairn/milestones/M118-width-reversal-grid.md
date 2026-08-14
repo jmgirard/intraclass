@@ -127,7 +127,7 @@ planned; a width finding is not a contract change.
       `:188`) off `classical_oneway_ss()`; write both tables.
 - [x] T6 Assert both AC4 anchors — the burch2011 printed cell and the M111
       gaussian cross-check; fill the page's Results section.
-- [ ] T7 Fill Disposition; append the verdict `D-entry`; correct the two
+- [x] T7 Fill Disposition; append the verdict `D-entry`; correct the two
       falsified `cairn/` records in place, marked and dated.
 - [ ] T8 Run `verify`, the four `data-raw/` checkers, `air format .`, lintr.
 
@@ -155,6 +155,9 @@ planned; a width finding is not a contract change.
 - 2026-08-13: the 3-sigma bound was chosen with the discrepancies already in hand, so it is logged rather than presented as blind: it is the off-the-shelf convention, not the tightest value that passes (measured worst case 1.68), and a tighter post-hoc value was declined at the gate for that reason. The frozen W1-W3 rules, their aggregation and their consequence clause are untouched — AC4 is a validation precondition, not one of them.
 - 2026-08-13: an intermediate comparison compared M113's ratio-of-medians against M118's median-of-ratios and was discarded before any figure from it was recorded — the M116 lesson about pooling statistics that are not the same statistic, hit one level down.
 - 2026-08-13: T6 done — both anchors assert from committed `data-raw/m118-anchor-checks.R`; Results filled. Every figure written into the page was then re-derived from the committed fixture, which caught two wrong coverage ranges: the pooled leptokurtic ranges had been composed by reading two of the three family rows, dropping t(10)'s 0.947 and 0.940, and the true pooled ranges overlap so the contrast as drafted was false. Restated per family (the M115/M116 subset-derived-claim lesson, recurring).
+- 2026-08-13: T7 done — Disposition filled, D-030 appended, and the falsified records corrected in place. A sweep for the claim class found a THIRD stale site the scope's hand-list of two had missed — `cairn/references/INDEX.md:187`, a line this milestone itself wrote at T1 — which is the M118 lesson in miniature: a hand-list goes stale between the writing and the checking, and only the sweep caught it.
+- 2026-08-13: D-030 records the reopening condition as met WITHOUT superseding D-012 Amendment 1: that amendment's corrected wording is scoped to the M76 grid and stays true of it, so what this grid falsifies is the bound the shipped docs put on the finding, not the amendment.
+- 2026-08-13: the m116 comparison script's header lines were edited, so its TSV was regenerated to keep generator and artifact in step; the data rows are byte-identical and the committed test fixture is unchanged.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions

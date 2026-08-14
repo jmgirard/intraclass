@@ -1303,3 +1303,70 @@ needs D-021's trigger; M116 accordingly ships **no** new doc-claim checker, and
 extends M115's existing test rather than authoring a second instrument. If this
 distinction is ever used to smuggle apparatus in as "documentation", this is the
 entry to supersede.
+
+### D-030 (2026-08-13): M118 verdict — Burch's leptokurtic width reversal reproduces on a both-components grid; `D-012 Amendment 1`'s reopening condition is met, and its own wording stands
+
+**Context:** `D-012 Amendment 1` corrected three milestones' worth of shipped
+documentation that called `"burch"` the wider of the two classical one-way
+intervals — on both committed grids it is the narrower one, in 16 of 16 and 59
+of 64 cells — and set its reopening condition as "a grid on which Burch's median
+width exceeds SEARLE's", naming Burch's own symmetric-leptokurtic reversal as the
+likeliest place to find one. That reversal was untested here because both grids
+draw only the subject effect from the non-Gaussian family and always draw the
+residual from a normal. M118 built the missing grid: both `A_i` and `e_ij` drawn
+from the cell's family, located and scaled per burch2011 §3 (p. 1022), at Burch's
+own Fig. 2 geometry (`n = 5`, `k = 10(10)100`, `rho = 0.5`) over the six
+symmetric Table 2 families, `n_rep = 2000`. Rules W1–W3 were frozen before any
+derivation artifact (GP5; `cairn/references/classical-width-reversal-comparison.md`,
+committed one commit ahead of the sweep).
+
+**Decision — W1, `reproduced`.** Both limbs hold at 10 of 10 subject counts, so
+the ≥ 7-of-10 bar was never close and W2/W3 do not arise. Median
+`"burch"`/`"searle"` length ratio, per symmetric family, at `k = 10` / `k = 100`:
+
+- **Heavy-tailed limb (ratio > 1 required).** t(10) 1.004 / 1.080; Laplace(0,1)
+  1.096 / 1.300; t(5) 1.065 / 1.296. Above 1 at every subject count in all three.
+- **Light-tailed limb (ratio < 1 required).** Uniform(0,1) 0.917 / 0.898; Power
+  exponential(0,1,2.78) 0.947 / 0.951. Below 1 at every subject count in both.
+- **Normal(0,1)**, descriptive and binding neither limb: 0.973 / 0.996, below 1
+  throughout. So the sign change falls between excess kurtosis 0.0 and 1.0 — the
+  crossing the frozen priors flagged in advance as the demanding part of the
+  rule, since the repo's existing grids put the gaussian ratio below 1.
+
+Both validation preconditions cleared first. Against burch2011 (p. 1027) the
+anchor cell returned a mean length ratio of 0.8807 against the printed 0.88, with
+coverages 0.9600 and 0.9790 against 0.95 and 0.97. Against the committed
+`data-raw/m111-fallback-results.rds`, the 16 gaussian cells agree to within 1.68
+two-sample bootstrap SEs, which is also the only test of the plan gate's choice
+of the shipped reducers over the M76/M111 prototypes.
+
+**What this does and does not disturb.** `D-012 Amendment 1`'s reopening
+condition is **met**, but its corrected wording is scoped to the M76 grid
+("narrower than SEARLE in every cell of this grid") and stays true of it —
+nothing in that amendment is falsified and it is not superseded. What this grid
+falsifies is the *bound* the shipped documentation puts on that finding: four
+user-facing surfaces currently tell users that no measured grid varies the
+residual. M119 restates them.
+
+Per the frozen consequence clause, identical under all three tags, no method
+recommendation, default or `ci_method` behaviour changes on this evidence, and
+D-027's coverage-based preference for `"searle"` is untouched — that preference
+rests on coverage, which this milestone measured but did not put under any rule.
+Coverage does corroborate Burch's stated rationale rather than undercut it: at
+Laplace and t(5) `"searle"` falls to 0.831–0.883 and 0.825–0.893 while `"burch"`
+holds 0.907–0.941 and 0.906–0.932, so the extra width buys coverage where the
+tails are heavy enough to cost `"searle"` any. At t(10) the two are comparable
+(0.904–0.940 against 0.924–0.947), so this is a gradient, not a cliff.
+
+**Scope fence.** Symmetric families only. The five asymmetric burch2011 Table 2
+families were dropped at the M118 plan gate rather than deferred, and no
+skewed-family claim is made here; `chisq1` appears in the comparison block only.
+The crossing point in excess kurtosis is bracketed between 0.0 and 1.0 and not
+resolved. Reopening either needs a superseding frozen assessment.
+
+**Consequences:** M118 ships no package code. `cairn/references/burch2011.md`
+and `data-raw/m116-classical-width-comparison.R` are corrected in place where
+they said this condition was untested in the repo; `cairn/references/INDEX.md`
+likewise. M119 carries the user-facing correction. Confirms D-012's original
+scope fence, which named exactly this gap ("a replacement verdict would need
+Burch's wider battery"), and answers the question `D-012 Amendment 1` left open.

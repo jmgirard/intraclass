@@ -152,10 +152,16 @@ And in the Discussion (p. 1027), with the one printed ratio figure:
 interval the narrower or the shortest of the two. For the platykurtic families
 he reports the opposite, and the widening he does report is confined to
 symmetric leptokurtic data with **both** `A_i` and `e_ij` non-normal — a
-condition neither committed repo grid tests, since both draw the non-normal
+condition the M76 and M111 grids do not test, since both draw the non-normal
 family for the subject effect alone (`data-raw/m76-coverage-sweep.R` lines
 33–38). So this source neither supports the withdrawn "burch is wider" claim nor
-refutes the repo's own measurement; it bounds where each applies.
+refutes those grids' measurement; it bounds where each applies.
+**(Corrected M118, 2026-08-13: this passage read "a condition neither committed
+repo grid tests", which a third committed grid falsified. M118 built that grid —
+both components drawn from the family, at Burch's own Fig. 2 geometry — and the
+reversal reproduced on every limb, so the widening reported here is now measured
+in this repo rather than only cited. See
+`cairn/references/classical-width-reversal-comparison.md` and D-030.)**
 
 Quotations above are de-hyphenated across line breaks ("nom- inal" → "nominal",
 "normal- based" → "normal-based"); the parenthesized figures are printed

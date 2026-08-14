@@ -184,8 +184,9 @@ and milestones; never restate a value here.
   note (M118): the pre-registered (GP5) W1–W3 rules deciding whether Burch (2011)'s
   reported width reversal — his REML interval running wider than the exact-F one
   for symmetric leptokurtic data — reproduces on a grid drawing **both** variance
-  components from the non-Gaussian family, which neither committed repo grid does.
-  W1 requires an ordered sign change across the six symmetric Table 2 families.
+  components from the non-Gaussian family, which the M76 and M111 grids do not.
+  W1 requires an ordered sign change across the six symmetric Table 2 families,
+  and it was met at 10 of 10 subject counts on every limb.
   Results/disposition appended at T6/T7.
 
 - [fallback-on-abort-comparison.md](fallback-on-abort-comparison.md) — synthesis
