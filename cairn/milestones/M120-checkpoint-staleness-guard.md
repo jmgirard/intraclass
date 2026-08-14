@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** —
-- **Branch/PR:** `m120-checkpoint-staleness-guard`
+- **Branch/PR:** `m120-checkpoint-staleness-guard` / https://github.com/jmgirard/intraclass/pull/129
 
 ## Goal
 
@@ -34,19 +34,19 @@ them.
 
 ## Acceptance criteria
 
-- [ ] AC1 The guard writes, beside each checkpoint payload, a spec carrying
+- [x] AC1 The guard writes, beside each checkpoint payload, a spec carrying
       the site's declared parameter set in a declared order — for `m111`
       exactly `rho`, `k`, `n`, `dist`, `n_rep`, and the cell's base seed — plus
       a hash over that site's declared generating block, and a read whose
       recorded spec differs from the current one signals an error naming the
       earliest differing entry in that declared order. A spec recording no
       entries is a failure of this criterion, not a satisfaction of it.
-- [ ] AC2 During any run in which the guard's trace is installed, every
+- [x] AC2 During any run in which the guard's trace is installed, every
       deserialization of a checkpoint path either went through the guard or
       aborts the run before the harness writes any output. Evidence is the
       trace's own report over the runs AC3 and AC4 perform — this criterion
       claims nothing about a run in which the trace was not installed.
-- [ ] AC3 Each of these planted-defect forms is demonstrated at least once, on
+- [x] AC3 Each of these planted-defect forms is demonstrated at least once, on
       a cache the demonstration writes itself: each declared parameter
       mismatching individually (at least two different parameters, showing the
       naming rule); a spec absent entirely (the pre-existing on-disk case); a
@@ -54,11 +54,11 @@ them.
       not; a cache written by a different site at the same path; and a spec
       matching on every parameter but differing in the generating-block hash.
       Each aborts, and a matching cache resumes normally in the same script.
-- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
+- [x] AC4 The five sites in the Scope table source the guard, and the CI job
       that already runs the repo's standalone `data-raw` checkers fails when a
       listed site's cache read bypasses it. Verified by reverting one site's
       guard call and observing that job red.
-- [ ] AC5 `git diff --stat main...HEAD` over the whole tree shows no change
+- [x] AC5 `git diff --stat main...HEAD` over the whole tree shows no change
       outside the file list this milestone declares in its work log — in
       particular no change under `tests/testthat/fixtures/`,
       `tests/testthat/_snaps/`, `R/sysdata.rda`, or any `data-raw/*.rds`.
@@ -124,3 +124,56 @@ them.
 ## Decisions
 
 ## Review
+
+Reviewed 2026-08-14 on `m120-checkpoint-staleness-guard` at PR #129. `main` was
+level with origin and the branch not behind it, so no merge preceded this
+evidence.
+
+**AC1 — spec recorded, mismatch names the earliest differing entry.** Fresh run
+of `Rscript data-raw/m120-checkpoint-guard-demo.R`. A matching cache returns the
+cached payload; a changed `rho` and a changed `dist` are each refused by name;
+with two parameters differing at once the message names the earlier in declared
+order, shown both ways round (`dist` before `base_seed`, `rho` before `dist`),
+so the rule is order-sensitive rather than set-sensitive. `ckpt_spec()` refuses
+an empty parameter list at construction, so the null guard AC1's last sentence
+forbids cannot be built.
+
+**AC2 — no unguarded deserialization survives.** Same run. A guarded run passes
+the trace; a bare `readRDS` and a `base::readRDS` of a registered checkpoint each
+abort at the read; a bypass swallowed by a caller's `tryCatch` still fails the
+end-of-run assertion; a read outside any registered location is not flagged. The
+fork case is exercised directly: an unspecced `cell-02.rds` planted under
+`mclapply` makes the worker refuse and surface to the parent as `cells errored:
+2`, before any fixture write.
+
+**AC3 — every planted-defect form.** Same run, each form on a cache the demo
+writes itself: two parameters mismatching individually; a spec absent entirely;
+a cache written by another site (refused naming `other-site`); a partially stale
+multi-entry store (the current-design entry served, its superseded sibling
+refused); and a generating-block hash differing with every parameter matching.
+The counterweight case passes too — a comment inside a block function and an
+edit to a function outside the declared block both leave the cache usable, so
+the hash is not so wide that every cache is permanently stale. Clean resume is
+shown in the same script on the real M111 site.
+
+**AC4 — the five sites route through the guard, and reverting one reds.**
+`python3 data-raw/check-checkpoint-sites.py` exits 0 over the five declared
+sites. Reverting the `source()` of the guard in
+`oracle-bayesian-multilevel-replicates.R` makes it exit 1 naming that file;
+restoring returns exit 0 with an empty diff. Its `--self-test` plants three
+separate reversions and confirms each is detected, and that the unmutated site
+passes.
+
+**AC5 — nothing outside the declared file list.** `git diff --name-only
+main...HEAD` filtered for `tests/testthat/fixtures/`, `tests/testthat/_snaps/`,
+`R/sysdata.rda` and `*.rds` returns nothing. The 14 changed files are exactly
+the list the work log declares.
+
+**AC6 — verify slot and the toolchain gate.** `devtools::test()` `[ FAIL 0 |
+WARN 3 | SKIP 2 | PASS 7564 ]`; `air format --check` exit 0;
+`lintr::lint_package()` no lints; `devtools::document()` produces no diff under
+`NAMESPACE`/`man/`; `cairn_validate` exit 0 across all 24 checks; all six
+`data-raw` checkers and every self-test exit 0. `devtools::check()` recorded
+below. No NEWS entry is owed — every changed R file is under `data-raw/`, which
+`.Rbuildignore` excludes from the build, so nothing user-visible changed.
+
