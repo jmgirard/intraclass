@@ -5,7 +5,7 @@
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6
-- **Branch/PR:** `m118-width-reversal-grid`
+- **Branch/PR:** `m118-width-reversal-grid` / https://github.com/jmgirard/intraclass/pull/127
 
 ## Goal
 
@@ -33,7 +33,7 @@ planned; a width finding is not a contract change.
 
 ## Acceptance criteria
 
-- [ ] AC1 `cairn/references/classical-width-reversal-comparison.md` states the
+- [x] AC1 `cairn/references/classical-width-reversal-comparison.md` states the
       grid design and the frozen disposition rules W1–W3, of which W3
       pre-registers that a non-reproduction of the reversal is recorded as the
       finding and closes the question — no widened grid, no re-set threshold.
@@ -41,13 +41,13 @@ planned; a width finding is not a contract change.
       earliest of the milestone's derivation artifacts; its Results and
       Disposition sections are filled post-derivation and are outside the
       freeze.
-- [ ] AC2 In every non-gaussian cell, `data-raw/m118-width-reversal-sweep.R`
+- [x] AC2 In every non-gaussian cell, `data-raw/m118-width-reversal-sweep.R`
       draws both the subject effect and the residual from the cell's family. A
       committed test walks the parsed body of its generator and fails when any
       component's draw resolves to a normal deviate, mutation-verified against a
       family of breaks that varies form as well as site: direct substitution, a
       draw hoisted into a variable above its use, and a namespace-qualified call.
-- [ ] AC3 Each of the seven families enumerated by `table2_kurtosis` in
+- [x] AC3 Each of the seven families enumerated by `table2_kurtosis` in
       `data-raw/m118-width-reversal-sweep.R` — whose names a test requires to
       equal `draw_standard()`'s switch arms — is verified against burch2011
       Table 2 (p. 1021) by three legs. (a) The family's closed-form excess
@@ -66,7 +66,7 @@ planned; a width finding is not a contract change.
       (a) and (b) both inherit from the draw itself, so a wrong beta passes every
       other leg while leaving the family's kurtosis inside its neighbours'
       bracket.
-- [ ] AC4 The grid is anchored on two independent references. Against
+- [x] AC4 The grid is anchored on two independent references. Against
       burch2011 (p. 1027): at `k = 100`, `n = 5`, `rho = 0.25`, uniform for both
       components, the mean `"burch"` length over the mean `"searle"` length is
       within 0.01 of 0.88, `"burch"` coverage within 0.015 of 0.95, and
@@ -81,7 +81,7 @@ planned; a width finding is not a contract change.
       `sqrt(se_M118^2 + se_M111^2)`, each term the nonparametric bootstrap SE
       of that cell's median ratio over its own 2000 replicates, and no cell
       exceeds three of them.
-- [ ] AC5 `data-raw/m118-width-reversal-by-cell.tsv`, mirrored to
+- [x] AC5 `data-raw/m118-width-reversal-by-cell.tsv`, mirrored to
       `tests/testthat/fixtures/width-reversal-by-cell.tsv`, is one flat block
       carrying one row per cell at `n_rep = 2000` — mean and median
       `"burch"`/`"searle"` length ratio, both coverages, replicate count — over
@@ -89,11 +89,11 @@ planned; a width finding is not a contract change.
       `rho = 0.5`, the six symmetric Table 2 families), and the M111 block
       (`rho` ∈ {0.05, 0.10, 0.30, 0.60} × `(k,n)` ∈ {(10,5),(30,5),(50,5),(10,2)}
       × {gaussian, t5, uniform, chisq1}).
-- [ ] AC6 A `cairn/DECISIONS.md` entry applies W1–W3 to that table and states,
+- [x] AC6 A `cairn/DECISIONS.md` entry applies W1–W3 to that table and states,
       per symmetric family, whether the measured median `"burch"` width exceeds
       the measured median `"searle"` width, and whether `D-012 Amendment 1`'s
       reopening condition is thereby met.
-- [ ] AC7 The `r-package` profile's `verify` slot is clean, and all four
+- [x] AC7 The `r-package` profile's `verify` slot is clean, and all four
       `data-raw/` checkers pass.
 
 ## Coverage
@@ -165,3 +165,64 @@ planned; a width finding is not a contract change.
 ## Decisions
 
 ## Review
+
+Evidence gathered 2026-08-13 on `m118-width-reversal-grid` at PR #127; every
+line below is a command run at review, never recall.
+
+- **AC1 — met.** The rules page was added in `f88cc22`; all three derivation
+  artifacts (`.rds` and both TSVs) first appear in `d4b1878`.
+  `git merge-base --is-ancestor` confirms the page commit is strictly earlier,
+  so commit order corroborates the freeze (GP5). The page carries the frozen
+  grid design and the W1–W3 table, W3 carrying the record-and-stop clause
+  verbatim ("no widened grid, no additional families, no re-set threshold"),
+  and its Results and Disposition sections are the two the criterion places
+  outside the freeze.
+- **AC2 — met.** `test-m118-both-components-dgp.R` passes 2/2.
+  `data-raw/m118-dgp-fence-mutations.R` accepts the unmutated script and
+  rejects all 7 planted defects, which vary form as well as site: direct
+  substitution, a draw hoisted into a variable above its use, and a
+  namespace-qualified call, on each component, plus a dispatcher that stops
+  branching on `dist`. The criterion names three break forms; the harness runs
+  seven, covering all three.
+- **AC3 — met.** `test-m118-family-kurtosis.R` passes 41/41 with 0 skips and
+  needs no `NOT_CRAN`. All three legs run: closed forms written in each
+  family's own parameters against Table 2, mean and variance at 10^6 and
+  2×10^6 seeded draws, and the ordering leg plus the 0.02 tolerance on
+  uniform / power exponential / gaussian. A fourth test pins the family
+  enumeration to `draw_standard()`'s own switch arms, so an eighth family
+  cannot escape the checks.
+- **AC4 — met, both legs.** `data-raw/m118-anchor-checks.R` asserts them and
+  exits clean. Against burch2011 (p. 1027): mean length ratio 0.8807 against
+  the printed 0.88 (gap 0.0007, tolerance 0.01); `"burch"` coverage 0.9600
+  against 0.95 (gap 0.0100, tolerance 0.015); `"searle"` coverage 0.9790
+  against 0.97 (gap 0.0090, tolerance 0.015). Against this repo: the worst of
+  the 16 gaussian cells is 1.68 two-sample bootstrap SEs against the bound of
+  3. Recorded and not asserted, per the script's own note: 13 of the 16
+  differences are negative, mean z = −0.30.
+- **AC5 — met.** Both files carry 125 rows × 14 columns as one flat block and
+  are identical to each other. Blocks are anchor 1 / fig2 60 / m111 64. Every
+  row has `n_rep = 2000` and `n_skip = 0`. The fig2 block is `k` = 10(10)100,
+  `rho` = 0.5, `n` = 5 over the six symmetric families; the m111 block is
+  `rho` ∈ {0.05, 0.1, 0.3, 0.6} × (k,n) ∈ {10-5, 30-5, 50-5, 10-2} ×
+  {chisq1, gaussian, t5, uniform}; the anchor is k=100, n=5, rho=0.25,
+  uniform. The required columns are all present: `mean_ratio`,
+  `median_ratio`, both median widths, both coverages, and the replicate
+  count.
+- **AC6 — met.** D-030 names the tag (`W1, reproduced`), gives the ratio at
+  k = 10 and k = 100 for each of the six symmetric families under the two
+  limbs, and states `D-012 Amendment 1`'s reopening condition as met. It also
+  says explicitly what it does not disturb: Amendment 1's own wording is
+  scoped to the M76 grid and stays true of it, so nothing is superseded.
+- **AC7 — met.** `devtools::test()`: 7158 passing, 0 failures. The 3 warnings
+  are the deliberate fixed-rater conditions the brms tests exercise and the 2
+  skips are the pre-existing vignettes-not-installed legs; neither is touched
+  by a branch that changes no `R/` code. All four `data-raw/` checkers pass.
+
+**Consistency gate.** `cairn_validate`: 16 PASS, 8 advisory OK, none failing —
+including `coverage complete` and `weight caps`. No `DESIGN.md` principle
+changed, so `cairn_impact` does not apply. Toolchain slot: `devtools::document()`
+leaves no diff; `man/`, `NAMESPACE` and `data/` are untouched by the branch;
+README is untouched and in sync; `pkgdown::check_pkgdown()` reports no problems;
+no new top-level files, so no `.Rbuildignore` entry is owed. No NEWS entry is
+owed and none was written — the branch changes no `R/`, `src/` or `inst/` file,
+so nothing user-visible ships here; M119 carries that.
