@@ -302,6 +302,40 @@ test_that("gen_oneway composes the two components so the population ICC is the c
   expect_true(assert_composition_icc(sweep_script))
 })
 
+# The check over the SHIPPED table, which is what AC2 rests on. Everything else
+# in this file reads the generator's source or re-runs it at a chosen point, and
+# a corruption conditioned on rho, k, n or block is free of all of them -- the
+# M118 review defeated the source fence three times and then defeated a
+# one-cell re-run with four lines gated on `rho != 0.25`.
+#
+# This leg reads the committed fixture instead: within every (block, rho, k, n)
+# group, the families' mean length ratios must be pairwise distinct. A grid
+# whose cells all drew the same family collapses every group to a single value
+# and reds here, whatever the generator's source looks like.
+#
+# It decides distinctness, NOT correctness -- it cannot tell t(5) from t(10),
+# only that the seven labels are not all the same data. AC3's kurtosis tests own
+# per-family identity. The pin is 0.005 against a measured worst of 0.0130
+# (fig2, k = 20) and 0.0508 (m111), so the real table clears it by 2.6x at its
+# tightest. Distinctness is strictly weaker than W1's sign rule, so this is not
+# circular with the verdict it protects.
+test_that("every shipped group's families are pairwise distinct in width ratio", {
+  fixture <- testthat::test_path("fixtures", "width-reversal-by-cell.tsv")
+  skip_if_not(file.exists(fixture), "fixture not present")
+  f <- utils::read.delim(fixture, comment.char = "#")
+
+  groups <- split(f, list(f$block, f$rho, f$k, f$n), drop = TRUE)
+  groups <- groups[vapply(groups, nrow, integer(1)) > 1L]
+  expect_gt(length(groups), 20L) # anti-vacuity: the split must actually group
+
+  worst <- vapply(
+    groups,
+    function(d) min(stats::dist(d$mean_ratio)),
+    numeric(1)
+  )
+  expect_gt(min(worst), 0.005)
+})
+
 test_that("the M118 sweep script is not in M116's subject-only fence list", {
   skip_if_not(
     file.exists(sweep_script),

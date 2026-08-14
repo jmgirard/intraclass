@@ -41,35 +41,27 @@ planned; a width finding is not a contract change.
       earliest of the milestone's derivation artifacts; its Results and
       Disposition sections are filled post-derivation and are outside the
       freeze.
-- [ ] AC2 `data-raw/m118-width-reversal-sweep.R` draws both the subject effect
-      and the residual from the cell's family. Two committed procedures bound
-      that claim, both of them procedures over `gen_oneway` alone, and this
-      criterion promises only what they decide.
-      (a) A walk of `gen_oneway`'s parsed body asserts three things: that each
-      of the two component assignments `a` and `e` calls `draw_standard()`
-      exactly once, passing the symbol `dist`; that no call in the body
-      resolves to a name matching `^r[a-z]+$` other than `rep`, `return`,
-      `round` and `rev`; and that no formal parameter of `gen_oneway` is the
-      target of a `<-`, `=` or `<<-` at any nesting depth.
-      (b) A composition leg evaluates `gen_oneway` out of the script and asserts
-      the recovered ICC is within 0.05 of `rho` at `rho = 0.05`, and within 0.10
-      at `rho = 0.25` and `rho = 0.50`, for all seven families at `k = 400`,
-      `n = 5`, seed 900001. Both legs are mutation-verified by
-      `data-raw/m118-dgp-fence-mutations.R`, which requires the unmutated script
-      to be accepted and every mutation the file commits to be rejected — among
-      them, for (b), a scale error, a subject/residual scale swap and a
-      mis-composition. The tolerances sit between a measured legitimate spread
-      and the nearest mutation at every `rho`; both are what
-      `data-raw/m118-composition-spread.R` prints.
-      Outside these two procedures the criterion promises nothing, and neither
-      decides what an arbitrary program resolves to. Whatever fixes a cell's
-      family or design anywhere but in `gen_oneway`'s own body, or at run time
-      rather than in the parsed text, is unpromised: `assign()`, a shadowed
-      `draw_standard`, a `for`-loop binding a parameter, post-parse body surgery
-      and the `run_cell` call site are instances found at review, not the
-      boundary. What bounds the grid this milestone actually ships is AC4's
-      burch2011 anchor, whose uniform cell is the one measured point at which a
-      wrong family shows.
+- [ ] AC2 The claim that both components are drawn from the cell's family rests
+      on measurement, not on inspection of the generator's source. Two committed
+      measurements bound it, and this criterion promises only what they decide.
+      (a) `data-raw/m118-anchor-checks.R` leg 3 re-runs the burch2011 anchor
+      cell — `k = 100`, `n = 5`, `rho = 0.25`, `dist` forced to each of the
+      seven families — and asserts the cell's own family is the only one inside
+      the 0.01 tolerance around the printed 0.88 that AC4 owns. It covers one
+      cell at one geometry and decides nothing about the other 124.
+      (b) `tests/testthat/test-m118-both-components-dgp.R` asserts that within
+      every `(block, rho, k, n)` group of the committed table the families' mean
+      length ratios are pairwise distinct by at least 0.005, against a measured
+      worst of 0.0130. It covers every shipped cell and decides only that the
+      families differ, never that each is the right one; AC3's kurtosis tests
+      own per-family identity.
+      The AST fence, `assert_composition_icc()` and
+      `data-raw/m118-dgp-fence-mutations.R` remain a source-shape and
+      composition screen carrying no promise: the harness requires the
+      unmutated script to be accepted and every mutation it commits to be
+      rejected, and nothing is claimed about any mutation it does not commit.
+      A source-text guard was tried and defeated in three successive rounds; no
+      clause here quantifies over edits a named procedure does not run.
 - [x] AC3 Each of the seven families enumerated by `table2_kurtosis` in
       `data-raw/m118-width-reversal-sweep.R` — whose names a test requires to
       equal `draw_standard()`'s switch arms — is verified against burch2011
@@ -185,6 +177,9 @@ planned; a width finding is not a contract change.
 - 2026-08-14: T9 done. Leg (b) now runs at rho 0.05/0.25/0.5 with per-rho tolerances 0.05/0.10/0.10, and both legs are mutation-verified by one harness: 11 fence mutations and 3 composition mutations, all red, both baselines accepted. `data-raw/m118-composition-spread.R` prints the legitimate spread (0.0288/0.0572/0.0727) beside each mutation's separation and asserts the property the tolerances must have — real inside every one, each mutation outside at least one — rather than leaving it to be eyeballed.
 - 2026-08-14: the component swap is caught at 2 of 3 rho, and that is the whole reason leg (b) is not single-rho: at rho = 0.5 it reads 0.0727, identical to the real script, because 0.5 is the fixed point of rho <-> 1 - rho.
 - 2026-08-14: the fence's `switch(dist` clause was rewritten on the AST rather than deleted — it checks that some `switch` in `draw_standard`'s body dispatches on the symbol `dist`, taking `EXPR =` and positional spellings alike. Deleting it (the first attempt) lost a real catch; as an AST check it keeps the catch and drops the lexical defect. It reads `draw_standard`'s body, not `gen_oneway`'s, so it sits outside what the amended AC2's clause (a) promises — kept because it is free, not because the criterion rests on it.
+- 2026-08-14: amendment return: AC2 — "Two committed measurements bound it, and this criterion promises only what they decide." Second and final AC2 amendment, taken on the maintainer's explicit disposition at the thrash gate (rest the family claim on measurement, demote the source checks to an unpromised screen). Audited before writing.
+- 2026-08-14: the audit defeated the FIRST draft of that re-cut on its first attempt, and the attack is why leg (b) exists: four lines gated on `rho != 0.25` shadow `draw_standard` locally, leaving the anchor cell byte-identical while 124 of 125 cells draw gaussian. Reproduced — a nominal t5 cell at rho = 0.5 goes from kurtosis 2.359 to -0.052 with every check green. The draft had kept the universal ("no edit to the generator can fake that") and shrunk the domain from 125 cells to 1, which is a bar-drop in domain rather than a narrowing.
+- 2026-08-14: leg (b) is the repair — pairwise family distinctness within every (block, rho, k, n) group of the COMMITTED table, pin 0.005 against a measured worst of 0.0130 (fig2, k = 20). It reads the shipped artifact rather than the generator, so a corruption conditioned on rho, k, n or block cannot hide from it; it reds to 0.0000 on a collapsed table. It decides distinctness only, never identity, and says so.
 - 2026-08-14: third pass ALSO found AC2's clause (a) defeated again, inside its own stated domain: `dist[1] <- "gaussian"` is a target of a `<-` in `gen_oneway`'s body, which clause (a) says is asserted, but `m118_assign_targets()` records a target only when the LHS is a bare symbol. Reproduced: both legs green, a nominal t5 cell at pooled excess kurtosis -0.086. One character from the round-1 defect.
 - 2026-08-14: that is the thrash rule's trigger (b) — the same criterion failing twice, each by a new mechanism of the same shape. The plan gate's work log records no alternative weighed for the guard approach (its rejected-alternative lines cover families, disposition, reducers, cache and tolerance), so the remedy the rule names is an escalation offer rather than a third repair. Disposition goes to the user, and the second-amendment stop on AC2 routes there too.
 - 2026-08-14: third pass found the amended AC2 carries its own over-claim — "the tolerances sit between a measured legitimate spread and the nearest mutation at every rho" is false at rho = 0.50, where the component swap is a no-op and reads exactly the legitimate 0.0727. The criterion written to bound an unbounded promise was itself unbounded in one clause; the spread script asserts the correct weaker property, so only the prose is wrong. This would be AC2's SECOND amendment, which the second-occurrence stop routes to the user rather than convening another round.
