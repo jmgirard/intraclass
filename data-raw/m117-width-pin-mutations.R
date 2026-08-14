@@ -463,6 +463,19 @@ prose_mutations <- list(
   },
   hedge_dropped = function(l) {
     strip_must(l, ", on the one grid reaching that")
+  },
+  # AC9 restorations: each puts back a pre-correction wording and must red.
+  flat_hedge_dropped = function(l) {
+    strip_must(
+      l,
+      "(on the larger grid; the smaller grid's margin does shrink across its levels)"
+    )
+  },
+  margin_cut_dropped = function(l) {
+    sub_must(l, "by level medians the largest margin", "the largest margin")
+  },
+  paired_count_swapped = function(l) {
+    sub_must(l, "in 11 of 16 paired cells", "in 13 of 16 paired cells")
   }
 )
 

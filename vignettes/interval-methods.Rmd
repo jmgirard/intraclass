@@ -169,8 +169,11 @@ value under 1 means `"burch"` is narrower and 1 means they are the same width.
 | 50 | 0.9769 | 13 of 16 |
 
 Two things to read off. In the true ICC, `"burch"`'s width advantage holds much
-the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises —
-the largest margin is at a true ICC of 0.1, not at the bottom of the range — and
+the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
+(on the larger grid; the smaller grid's margin does shrink across its levels) —
+by level medians the largest margin is at a true ICC of 0.1, not at the bottom
+of the range, though cell by cell the bottom level carries the larger margin
+in 11 of 16 paired cells — and
 then collapses to near parity at a true ICC of 0.6, on the one grid reaching that
 value, where every cell favouring `"searle"` sits. In the subject count it
 shrinks steadily as the subject count grows, measured at 5 raters, which is the

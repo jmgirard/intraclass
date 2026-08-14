@@ -638,10 +638,17 @@ width_templates <- function(w) {
   parity <- max(rho_levels)
   flat_top <- max(rho_levels[rho_levels < parity])
   c(
+    # The grid hedge is part of the template (AC9): the flat shape is the
+    # larger grid's; the smaller grid's margin DOES shrink across its levels
+    # (direction pinned by "the flat clause's grid hedge..." below), so the
+    # un-hedged clause was false of one of the two grids it read as
+    # describing.
     flat = paste0(
       "holds much the same up to a true ICC of ",
       format(flat_top),
-      " rather than shrinking as the true ICC rises"
+      " rather than shrinking as the true ICC rises",
+      " (on the larger grid; the smaller grid's margin does shrink",
+      " across its levels)"
     ),
     parity = paste0(
       "collapses to near parity at a true ICC of ",
@@ -928,14 +935,39 @@ width_canonical_shapes <- function(w) {
         width_num_value(p[2]) == length(unique(w$dist[w$grid == "m113"]))
       }
     ),
-    # which level carries the largest margin -- the article states it, so it
-    # is checked rather than left as an unbacked aside
-    argmax = list(
-      re = "the largest margin is at a true ICC of ([0-9.]+)",
+    # which level carries the largest margin -- true at the level-median cut,
+    # contradicted cell by cell (11 of 16 paired cells put it at the bottom
+    # level), so the claim must STATE ITS CUT: the qualified form is checked
+    # against the medians, and the bare form fails outright rather than
+    # passing via the loose level shapes below (AC9). `argmax_cut` is
+    # consumed first, so `argmax_bare` sees only unqualified statements.
+    argmax_cut = list(
+      re = "by level medians the largest margin is at a true ICC of ([0-9.]+)",
       ok = function(p) {
         m <- med("m113", "rho")
         low <- m[as.numeric(names(m)) < parity]
         near(as.numeric(p[2]), as.numeric(names(low)[which.min(low)]))
+      }
+    ),
+    argmax_bare = list(
+      re = "largest margin is at a true ICC of ([0-9.]+)",
+      ok = function(p) FALSE
+    ),
+    # the paired-cell contradiction beside the cut-qualified claim: within the
+    # larger grid, pair its two lowest-rho levels' cells on (k, n, dist) and
+    # count where the margin is larger at the bottom level
+    paired_cells = list(
+      re = "in ([0-9]+) of ([0-9]+) paired cells",
+      ok = function(p) {
+        lv <- sort(unique(w$rho[w$grid == "m113"]))[1:2]
+        a <- w[w$grid == "m113" & w$rho == lv[1], ]
+        b <- w[w$grid == "m113" & w$rho == lv[2], ]
+        key <- function(d) paste(d$k, d$n, d$dist)
+        a <- a[order(key(a)), ]
+        b <- b[order(key(b)), ]
+        identical(key(a), key(b)) &&
+          as.integer(p[2]) == sum(a$ratio < b$ratio) &&
+          as.integer(p[3]) == nrow(a)
       }
     ),
     # the two canonical level references the directional templates carry
@@ -1312,6 +1344,22 @@ test_that("M76's design is contained in M113's on (rho, k, n)", {
   # licenses "on the one grid reaching that value".
   expect_false(any(w$rho[w$grid == "m76"] == 0.6))
   expect_true(any(w$rho[w$grid == "m113"] == 0.6))
+})
+
+test_that("the flat clause's grid hedge matches the per-grid recomputation", {
+  # AC9. The hedged template says the larger grid's sub-parity margin holds
+  # much the same while the smaller grid's does shrink. Both facts recomputed
+  # from the per-cell rows: the larger grid's sub-parity medians sit within
+  # tolerance of one another, and the smaller grid's median ratio RISES from
+  # its lower to its upper level -- its margin shrinking, the other way.
+  w <- width_fixture()
+  m113 <- width_level_medians(w, "m113", "rho")
+  parity <- max(as.numeric(names(m113)))
+  sub <- m113[as.numeric(names(m113)) < parity]
+  expect_lt(max(sub) - min(sub), 0.005)
+  m76 <- width_level_medians(w, "m76", "rho")
+  o <- order(as.numeric(names(m76)))
+  expect_lt(m76[[o[1]]], m76[[o[2]]])
 })
 
 test_that("the article's width tables state the median for the level named", {

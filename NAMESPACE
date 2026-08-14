@@ -18,7 +18,9 @@ export(d_study)
 export(glance)
 export(icc)
 export(tidy)
-importFrom(generics,glance)
-importFrom(generics,tidy)
+importFrom(generics,
+  glance,
+  tidy
+)
 importFrom(lifecycle,deprecated)
 importFrom(rlang,.data)

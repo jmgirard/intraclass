@@ -295,7 +295,8 @@ interval of Burch (2011), designed for robustness to non-normality; its
 width tracks the data's tail weight rather than widening by construction.
 On the two grids this package has measured, \code{"burch"} is usually the
 \strong{narrower} of the two -- but by a margin that depends on the design, so
-it is not a rule of thumb. That margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises,
+it is not a rule of thumb. That margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
+(on the larger grid; the smaller grid's margin does shrink across its levels),
 then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
 which is also where every cell \code{"searle"} won sits; and it
 shrinks steadily as the subject count grows, measured at 5 raters. Both grids
@@ -667,7 +668,8 @@ kurtosis-adjusted \code{log(1 + n*theta-hat)} limits (Burch 2011), so its width 
 the data's tail weight rather than widening by construction: on both grids this
 package has measured it came out narrower than \code{"searle"} in nearly every cell.
 How much narrower is conditional, and not in the direction one might guess:
-\code{"burch"}'s margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises,
+\code{"burch"}'s margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
+(on the larger grid; the smaller grid's margin does shrink across its levels),
 then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
 where every cell favouring \code{"searle"} sits. It shrinks steadily as the subject count grows, measured at 5 raters.
 Burch reports the reverse for symmetric heavy-tailed data with non-normal errors, a
