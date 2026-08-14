@@ -38,16 +38,17 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [ ] AC2 On every surface AC5's sweep walks, each figure a width statement
-      states sits in one of a fixed set of canonical shapes declared in
-      `test-doc-skew-caveat.R`, and is checked against the value recomputed
-      from the fixture's per-cell rows at the prose's own rounding. A
-      figure-shaped token — decimal, bare integer, or spelled-out cardinal —
-      that a width statement carries outside every canonical shape and outside
-      the declared non-measurement allowlist fails the test rather than passing
-      unchecked; ratio-shaped tokens are scanned across the whole surface, not
-      only inside sentences naming a method, so a pooled figure cannot escape
-      by omitting the method name.
+- [ ] AC2 At every site AC5's sweep reports as carrying a width statement, each
+      figure the declared canonical templates and shapes match is checked
+      against the value recomputed from the fixture's per-cell rows at the
+      prose's own rounding. A committed prose-mutation leg extends the M117
+      harness — each mutation patches a swept surface and requires the scan to
+      red, and the leg's coverage assertion fails on any mutation nothing
+      reds — with its class list naming each encoded defeat and the review
+      return it answers, AC4's three pooled-figure placements among them. The
+      scan's file header names the token classes it checks and states that
+      tokens outside them are not claimed checked; this criterion claims the
+      declared classes only.
 - [x] AC3 At every site AC5's sweep reports as carrying a width statement, that
       statement names how the ratio moves with ρ and with the subject count, and
       no site states a rater-count width effect. A test asserts from the per-cell
@@ -56,13 +57,16 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       asserts nothing about separability at fixed `k`, where a rater contrast
       does exist and points the other way. The runtime hint stays width-silent,
       as `test-doc-skew-caveat.R:424-425` already pins.
-- [ ] AC4 Every per-ρ figure stated is computed from the M113 rows alone,
-      asserted by matching each against the M113 recomputation and no other
-      grid's. A test asserts the two grids' `(ρ, k, n)` design-combination sets
-      stand in the containment M76 ⊂ M113 that made the pooled figure misread
-      as a between-grid difference. A grid-wide pooled ratio is barred by AC2's
-      surface-wide ratio scan, which fails any ratio-shaped figure not bound to
-      a level.
+- [ ] AC4 Each figure the declared per-ρ shapes match on the surfaces AC5's
+      sweep walks is computed from the M113 rows alone, asserted by matching it
+      against the M113 recomputation and no other grid's. A test asserts the
+      two grids' `(ρ, k, n)` design-combination sets stand in the containment
+      M76 ⊂ M113 that made the pooled figure misread as a between-grid
+      difference. The prose-mutation leg's pooled-figure family varies
+      placement, form and grid — before a surface's first table, between
+      tables, and in running prose; the 4-decimal ratio, a pooled percentage,
+      and a spelled approximation; the larger and the smaller grid's medians —
+      each reddening, with no claim beyond the declared classes.
 - [x] AC5 `test-doc-skew-caveat.R`'s installed-surface and source-tree legs
       resolve their targets by directory walk — every `R/*.R`, every
       `vignettes/*.Rmd`, `NEWS.md`, plus the installed Rd database, installed
@@ -86,17 +90,27 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - [x] AC8 The profile's verify slot is clean: `air format --check`,
       `lintr::lint_package()`, and the installed-package suite at
       `NOT_CRAN=true CI=true`.
+- [ ] AC9 At every site the template scan reports carrying the flat-below-0.3
+      clause, the clause carries a grid hedge matching the per-grid
+      recomputation (the smaller grid's median margin moves the other way
+      across its ρ levels). The largest-margin sentence states its cut (level
+      medians), with a test pinning both facts: agreement at that cut and the
+      11-of-16 paired-cell contradiction that bars the unqualified form. Each
+      corrected sentence is covered by an association pin, and the
+      prose-mutation leg carries a mutation restoring each pre-correction
+      wording that reds.
 
 ## Coverage
 
 - AC1 → T1, T17
-- AC2 → T3, T5, T9, T10, T11, T14, T15
+- AC2 → T3, T5, T9, T10, T11, T14, T15, T18
 - AC3 → T3, T5, T10, T11, T15
-- AC4 → T3, T5, T9, T10, T11, T14, T15
+- AC4 → T3, T5, T9, T10, T11, T14, T15, T18
 - AC5 → T2
 - AC6 → T6
-- AC7 → T7, T12, T16
-- AC8 → T8, T13, T17
+- AC7 → T7, T12, T16, T19
+- AC8 → T8, T13, T17, T20
+- AC9 → T19
 
 ## Tasks
 
@@ -116,28 +130,18 @@ Shipped (detail in the work log and git):
 - [x] T12 D-009 directive extended to every stated figure; ledgers re-triaged.
 - [x] T13 Full gate on a rebuilt install; the source leg gated so `covr`'s partial tree skips.
 
-Review return #2 repair:
+Review return #2 repair (detail in the work log and git):
 
-- [x] T14 Canonical-shape figure scan: declare the shapes (table row, `<ratio> at
-      a true ICC of <level>`, `<ratio> at <level> subjects`, `<count> of <total>
-      cells of the <grid> grid`, `<total>-cell battery`, `<n> distribution
-      families`, `the largest margin is at a true ICC of <level>`), check each
-      against the recomputation, and REFUSE any figure-shaped token — decimal,
-      integer or spelled-out cardinal — a width statement carries outside them.
-      Ratio-shaped tokens scanned surface-wide, not only in method-naming
-      sentences.
-- [x] T15 Canonical clause templates for the three directional claims at all six
-      sites, levels bound to the fixture; rewrite the prose to the canonical
-      shapes; fix the two prose defects the review found (the "differ cell by
-      cell" sentence; the missing one-grid hedge in `NEWS.md` and
-      `R/ci-classical.R`).
-- [x] T16 Mechanical gaps: mutations for AC1's three unfired pins, a masked
-      `stopifnot` that fails on a vacuous condition, the duplicated hand list
-      folded into AC5's retired-path list, per-surface margin-run counts, the
-      rater rule tightened, the D-009 directive extended, and the source-tree
-      gate keyed on `R/*.R` presence rather than `data-raw/`.
-- [x] T17 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`,
-      installed-package suite at `NOT_CRAN=true CI=true`, CI matrix.
+- [x] T14 Canonical-shape figure scan (eleven declared shapes, each checked against the recomputation; unmatched figure-shaped tokens refused; ratios scanned surface-wide).
+- [x] T15 Canonical clause templates for the three directional claims at all six sites; the two return-#2 prose defects fixed.
+- [x] T16 Mechanical gaps: unfired-pin mutations, vacuity-safe masked `stopifnot`, hand list folded into AC5's retired paths, D-009 directive extended, source gate rekeyed.
+- [x] T17 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`, installed suite at `NOT_CRAN=true CI=true`, CI matrix.
+
+Re-cut (2026-08-13):
+
+- [ ] T18 Prose-mutation leg in `data-raw/m117-width-pin-mutations.R`: patch a swept surface → run the scan → require red; coverage assertion; class list naming each review-return defeat, pooled-figure mutations varying placement, form and grid per AC4; fix `width_strip_tables()` (per-table non-greedy match) so all three placements red; scan header states the claimed-classes boundary.
+- [ ] T19 AC9 corrections: grid hedge at the flat-clause sites carrying none; the largest-margin sentence states its cut; association pins and restoration mutations; ledgers re-triaged.
+- [ ] T20 Full gate on a rebuilt `build_vignettes = TRUE` install; CI matrix; review evidence refresh.
 
 ## Work log
 
@@ -183,6 +187,11 @@ Review return #2 repair:
 - 2026-08-09: gate chose moving the stated figures out of `R/ci-classical.R`'s internal comment into the article over keeping them beside the code, because an internal comment is not in the built package, so every pin over it skips under `R CMD check` (review O13); falsified by a figure that has no installed surface to live on.
 - 2026-08-09: T9 — `k_at_n5` factor rows (both grids, 3 levels each) added through the same `width_summary()` core; 12 new pins plus a structural pin that the marginal and 5-rater k cuts coincide at k = 30/50 and differ at k = 10. Mutation harness now committed (`data-raw/m117-width-pin-mutations.R`, review O18): 11 mutations red 33 distinct pins between them, every new pin fires on at least one, unmutated control fires none.
 - 2026-08-09: plan gate read D-012 Amendment 1's reopening clause ("a grid on which Burch's median width exceeds SEARLE's") as not tripped by the ρ=0.6/`k`=50 region's 1.0015 median, the clause being scoped to whole grids and M76 carrying no reversal; no D-012 Amendment 2. Falsified by a whole committed grid whose median ratio exceeds 1.
+- 2026-08-13: re-cut criteria audit ([O], fresh context) returned 11 findings; those with one clear right answer were fixed in the wording before this amendment — the prose-mutation leg named as NEW (the committed harness carries only fixture-cell mutations, so "the scan reds on every harness mutation" was unsatisfiable as drafted), the pooled placements unified at AC4's three, AC4's lead universal bound to the declared per-ρ shapes on the swept surfaces, the pooled-figure mutations made to vary form and grid rather than placement alone, AC9's quantifier bound to the template scan's reported sites. It also verified AC9's premises on the fixture: m76's median margin runs 5.70% → 5.47% across its ρ levels (opposite m113), and the largest-margin claim holds at m113's level medians while contradicted 11–5 in the paired cells. Judgment calls went to the gate.
+- 2026-08-13: re-cut gate chose narrowing the promise over a fourth universal round or Fable escalation — AC2/AC4/AC9 claim exactly the declared classes and committed mutations, with the boundary stated in the test's own header; falsified by a shipped width figure outside the declared classes measurably misleading a user, which reopens the guard-scope question. The same choice records the maintainer's D-029 judgment: the prose-mutation leg extends the existing instrument, not a second checker.
+- 2026-08-13: re-cut gate chose amending M117 in place on its existing branch and PR over a superseding fresh milestone, because the branch holds the twice-verified corrections and a green CI matrix; falsified by the amended plan-owned body failing the 150-line cap.
+- 2026-08-13: re-cut gate chose having the largest-margin sentence state its cut (level medians, at which it is true) with the 11-of-16 paired-cell contradiction pinned beside it, over restating per grid or withdrawing it; falsified by a user reading the cut-qualified sentence as the per-cell claim anyway.
+- 2026-08-13: amendment landed by /milestone-plan (AC2/AC4 rewritten, AC9 and T18–T20 added, coverage updated); the parking blocker is resolved by the recorded guard-scope decision, and status stays `blocked` until `/milestone-implement` resumes it — `in-progress` is that skill's transition to make.
 
 ## Decisions
 
