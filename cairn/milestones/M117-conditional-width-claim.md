@@ -38,7 +38,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [ ] AC2 At every site AC5's sweep reports as carrying a width statement, each
+- [x] AC2 At every site AC5's sweep reports as carrying a width statement, each
       figure the declared canonical templates and shapes match is checked
       against the value recomputed from the fixture's per-cell rows at the
       prose's own rounding. A committed prose-mutation leg extends the M117
@@ -57,7 +57,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       asserts nothing about separability at fixed `k`, where a rater contrast
       does exist and points the other way. The runtime hint stays width-silent,
       as `test-doc-skew-caveat.R:424-425` already pins.
-- [ ] AC4 Each figure the declared per-ρ shapes match on the surfaces AC5's
+- [x] AC4 Each figure the declared per-ρ shapes match on the surfaces AC5's
       sweep walks is computed from the M113 rows alone, asserted by matching it
       against the M113 recomputation and no other grid's. A test asserts the
       two grids' `(ρ, k, n)` design-combination sets stand in the containment
@@ -90,7 +90,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 - [x] AC8 The profile's verify slot is clean: `air format --check`,
       `lintr::lint_package()`, and the installed-package suite at
       `NOT_CRAN=true CI=true`.
-- [ ] AC9 At every site the template scan reports carrying the flat-below-0.3
+- [x] AC9 At every site the template scan reports carrying the flat-below-0.3
       clause, the clause carries a grid hedge matching the per-grid
       recomputation (the smaller grid's median margin moves the other way
       across its ρ levels). The largest-margin sentence states its cut (level
@@ -340,3 +340,19 @@ AC2 and AC4 fail, each inside the domain of the procedure it names, each verifie
 **Trigger (b) fires again on AC2**, now for the third time and by a third mechanism of the same shape: a figure or a claim reaching a swept surface by a route the guard does not cover. The alternative the plan gate recorded against — *"keeping the six hand-listed paths and narrowing the promise"* — was spent this round, and the narrowed promise failed on the very first mechanism nobody had thought of. That exhausts the recorded alternative, so an escalation via `/milestone-brief` is offered on the underlying question rather than a fourth round of the same work.
 
 What is NOT in doubt: two independent from-scratch re-derivations found every stated figure correct at every doc site, the whole CI matrix is green, and all three of return #2's action-bar findings are closed at the mechanism rather than at the instance.
+
+## Review — pass 4 (2026-08-13, post-re-cut)
+
+**PR:** https://github.com/jmgirard/intraclass/pull/126 (draft) · CI green on `572b8ec` (all nine checks incl. test-coverage); re-polled on the review head `e47c18d` below.
+
+### Evidence per criterion (fresh, this session)
+
+- AC1 — **pass.** Harness fixture leg, fresh run: 14 mutations, 38 distinct pins reddened, control trips nothing, coverage asserted (every non-exempt pin fired, 12 exempt), exit 0.
+- AC2 — **pass.** Installed run of the file (`test_dir`, `load_package = "installed"`, `NOT_CRAN=true CI=true`, `build_vignettes = TRUE` install): 0 failed, 1177 passed, 0 skipped — every canonical figure checked against the recomputation. Prose-mutation leg: 18 mutations, each patching a swept surface, ALL refused, control clean, coverage asserted; the class list names each review-return defeat (the three pooled placements included, reddening via the rewritten `width_strip_tables()` segment scanner). Claimed-classes header present, naming checked classes and the not-claimed boundary.
+- AC3 — **pass.** Template test green on the installed run: all three canonical clauses verbatim at every margin-asserting run on both legs; per-surface run floors hold; rater forbidden/licensed rules green; the runtime hint stays width-silent.
+- AC4 — **pass.** `ratio_rho` checks against M113's medians only; the containment test (M76 ⊂ M113 on (ρ, k, n), strictly) green; the pooled-figure family varies placement (before first table / between tables / running prose), form (4-decimal ratio, digit percentage, spelled percentage) and grid (0.9614 larger, 0.9440 smaller) — each mutation refused in the fresh harness run.
+- AC5 — **pass.** The named command on a rebuilt `build_vignettes = TRUE` install: 0 failed, 1177 passed, **0 skipped**.
+- AC6 — **pass.** Two-sided, re-verified against the true pre-correction baseline (`dd3038e^`, the branch commit before T11's rewrite — the withdrawn phrasings were this branch's own first pass, so `main` is not the baseline): `shrinks as either grows` 2 pre-correction hits (NEWS, R/icc.R) / 0 corrected; `at a low true ICC with few subjects` 2 verified pre-correction (R/icc.R, glossary) / 0 corrected; withdrawn-claim sweeps green on both legs.
+- AC7 — **pass.** All four data-raw checkers exit 0, fresh; the `mpl-doc-claims.tsv` row for the hedged `R/icc.R` sentence re-keyed (full-sentence hash restaled by the AC9 hedge, M105); `check-reference-observations.py` green over the references page's dated observations.
+- AC8 — **pass.** `air format --check` clean; `lintr::lint_package()` 0 lints; installed suite 0 failed / 0 errors / 7031 passed / 23 skipped (all `skip_on_ci`) at `NOT_CRAN=true CI=true`.
+- AC9 — **pass.** The hedge clause verbatim at all seven statements (grep: R/icc.R ×2, R/ci-classical.R, R/boundary-hint.R, glossary, interval-methods, NEWS; man/icc.Rd ×2 regenerated); the direction pin recomputes both facts (m113 sub-parity spread < 0.005; m76's median ratio rises across its levels); the largest-margin sentence states its cut, checked by `argmax_cut` against the medians with `argmax_bare` failing any unqualified form and `paired_cells` recomputing 11 of 16; the three restoration mutations (hedge dropped, cut dropped, paired count swapped) each refused.
