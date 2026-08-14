@@ -279,14 +279,16 @@ line below is a command run at review, never recall.
   legs; neither is touched by a branch that changes no `R/` code. All four
   `data-raw/` checkers pass, as do the three M118 harnesses.
 
-**Consistency gate.** `cairn_validate`: 16 PASS, 8 advisory OK, none failing —
-including `coverage complete` and `weight caps`. No `DESIGN.md` principle
-changed, so `cairn_impact` does not apply. Toolchain slot: `devtools::document()`
-leaves no diff; `man/`, `NAMESPACE` and `data/` are untouched by the branch;
-README is untouched and in sync; `pkgdown::check_pkgdown()` reports no problems;
-no new top-level files, so no `.Rbuildignore` entry is owed. No NEWS entry is
-owed and none was written — the branch changes no `R/`, `src/` or `inst/` file,
-so nothing user-visible ships here; M119 carries that.
+**Consistency gate (re-run 2026-08-14).** `cairn_validate`: 16 PASS, 8 advisory
+OK, none failing — including `coverage complete` and `weight caps` (the file
+sits at 141 of 149 plan-owned lines after the AC2 re-cut freed 8). No
+`DESIGN.md` principle changed, so `cairn_impact` does not apply. Toolchain slot:
+`devtools::check()` 0 errors, 0 warnings, 1 NOTE — the long-running-tests note
+this suite has always carried, not introduced here; `devtools::document()`
+leaves no diff; `man/`, `NAMESPACE` and `data/` untouched by the branch; README
+untouched and in sync; `pkgdown::check_pkgdown()` clean; no new top-level files.
+No NEWS entry is owed and none was written — the branch changes no `R/`, `src/`
+or `inst/` file, so nothing user-visible ships; M119 carries that.
 
 ### Independent review — three lenses, then a scorer (2026-08-14)
 
