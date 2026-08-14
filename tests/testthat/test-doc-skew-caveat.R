@@ -860,7 +860,9 @@ width_strip_tables <- function(text) {
 # CLAIMED CLASSES (AC2, re-cut 2026-08-13). What this file checks -- and all
 # it claims to check:
 #   - the canonical shapes in `width_canonical_shapes()` and the verbatim
-#     templates in `width_templates()`, each against the recomputed fixture;
+#     templates in `width_templates()`, each against the recomputed fixture,
+#     with every reported claim's ok verdict enforced SURFACE-WIDE (round 5)
+#     except the two bare level shapes noted in the not-claimed list;
 #   - markdown table rows under a recognized header (association-pinned), with
 #     unconsumed ratio-bearing rows refused as orphans;
 #   - surface-wide: 4-decimal ratio-band tokens outside every shape, and
@@ -874,7 +876,10 @@ width_strip_tables <- function(text) {
 # (90/95/99) or 100; spelled forms beyond the cardinal list or carrying three
 # or more qualifiers; figures in sentences with no width vocabulary; short
 # punctuation-free fragments between pipes, which strip as table cells
-# (`width_strip_tables`).
+# (`width_strip_tables`); bare level references (`rho_level`/`k_level`)
+# OUTSIDE width neighbourhoods — they consume as aids surface-wide, but their
+# membership verdicts are enforced only beside a width claim, since a bare
+# level in unrelated prose is not a width figure.
 #
 # `re` is matched over the squashed surface text; group 1..n feed `ok`, which
 # recomputes from the fixture and returns TRUE when the stated figure is right.
@@ -1192,6 +1197,60 @@ width_loose_ratios <- function(surface_text, shapes) {
     residue,
     gregexpr(width_ratio_token, residue, perl = TRUE)
   ))
+}
+
+# Surface-wide enforcement of the ordered scan's reported claims (AC2, round
+# 5): every claim's ok verdict is enforced wherever on the surface it sits — a
+# false canonical-form figure outside a width neighbourhood was consumed
+# unchecked before (review round 4, F1). The two bare level shapes are the
+# exception: they still consume as aids, but a bare level reference in
+# unrelated prose is not a width figure ("100 subjects" in the article), so
+# their membership verdicts are enforced only inside width neighbourhoods.
+width_surface_claim_failures <- function(surface_text, shapes) {
+  got <- width_consume(width_strip_tables(surface_text), shapes)
+  bad <- Filter(
+    function(cl) !cl$ok && !cl$shape %in% c("rho_level", "k_level"),
+    got$claims
+  )
+  out <- vapply(
+    bad,
+    function(cl) paste0(cl$text, " (", cl$shape, ")"),
+    character(1)
+  )
+  attr(out, "n_claims") <- length(got$claims)
+  out
+}
+
+# The rater rules, as one callable: forbidden patterns over every width
+# neighbourhood sentence, the licensed requirement over margin-asserting runs
+# (scopes per the rater test's own rationale).
+width_rater_violations <- function(surface_text) {
+  forbidden <- paste0(
+    "\\b(2|two|10|ten|20|twenty)[- ]raters?\\b",
+    "|no rater[- a-z]*(effect|dependence|sensitivity|influence)",
+    "|raters? than"
+  )
+  licensed <- "5[- ]raters?|5-rater|confound|not separable"
+  bad <- character(0)
+  runs <- width_neighbourhood(surface_text)
+  for (run in runs) {
+    for (s in run) {
+      if (grepl(forbidden, s, ignore.case = TRUE, perl = TRUE)) {
+        bad <- c(bad, paste0("forbidden rater claim: ", s))
+      }
+    }
+    if (width_asserts_margin(run)) {
+      for (s in run) {
+        if (
+          grepl("rater", s, ignore.case = TRUE) &&
+            !grepl(licensed, s, ignore.case = TRUE, perl = TRUE)
+        ) {
+          bad <- c(bad, paste0("unlicensed rater mention: ", s))
+        }
+      }
+    }
+  }
+  bad
 }
 
 # Percent figures in width-vocabulary sentences, surface-wide. A digit-%
@@ -1526,6 +1585,32 @@ test_that("every ratio-shaped figure on a swept surface is bound to a level", {
   }
 })
 
+test_that("every reported canonical claim is enforced surface-wide", {
+  # AC2 (round 5): the ordered scan's reported claims are enforced on their
+  # ok verdicts wherever they sit, not only inside width neighbourhoods —
+  # review round 4's F1 placed a false canonical-form figure ("0.8123 at a
+  # true ICC of 0.3") outside every neighbourhood and the suite stayed green.
+  w <- width_fixture()
+  shapes <- width_canonical_shapes(w)
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
+  seen <- 0L
+  for (leg in names(legs)) {
+    for (nm in names(legs[[leg]])) {
+      fails <- width_surface_claim_failures(legs[[leg]][[nm]], shapes)
+      seen <- seen + attr(fails, "n_claims")
+      expect_identical(
+        length(fails),
+        0L,
+        info = paste0(leg, "/", nm, ": ", paste(fails, collapse = " // "))
+      )
+    }
+  }
+  # Anti-vacuity: the article alone reports 20+ claims, so a scan finding far
+  # fewer has stopped matching, not gone clean.
+  expect_gte(seen, 30L)
+})
+
 test_that("no width sentence carries a percentage figure", {
   # The ancestral defect form: "about 6% / about 4% narrower" was the pooled
   # percentage M116 withdrew, and a NEW pooled percentage ("about 5% narrower
@@ -1612,36 +1697,18 @@ test_that("no width statement makes a rater-count claim", {
   # a margin. Over every width statement it reddens on the article's MPL
   # paragraph, whose "fixed raters" is about the design a method serves and has
   # nothing to do with width.
-  forbidden <- paste0(
-    "\\b(2|two|10|ten|20|twenty)[- ]raters?\\b",
-    "|no rater[- a-z]*(effect|dependence|sensitivity|influence)",
-    "|raters? than"
-  )
-  licensed <- "5[- ]raters?|5-rater|confound|not separable"
-
+  # Both rules live in `width_rater_violations()` so the mutation harness runs
+  # the same scan this test does (one definition, no drift).
   legs <- width_legs()
   expect_gt(length(legs), 0L)
   for (leg in names(legs)) {
-    for (nm in names(width_neighbourhoods_leg(legs[[leg]]))) {
-      for (s in width_neighbourhoods_leg(legs[[leg]])[[nm]]) {
-        expect_false(
-          grepl(forbidden, s, ignore.case = TRUE, perl = TRUE),
-          info = paste0(leg, "/", nm, ": states a rater-count width effect")
-        )
-      }
-    }
-    for (nm in names(width_claim_runs(legs[[leg]]))) {
-      for (s in width_claim_runs(legs[[leg]])[[nm]]) {
-        if (grepl("rater", s, ignore.case = TRUE)) {
-          expect_match(
-            s,
-            licensed,
-            ignore.case = TRUE,
-            perl = TRUE,
-            info = paste0(leg, "/", nm, ": unlicensed rater mention")
-          )
-        }
-      }
+    for (nm in names(legs[[leg]])) {
+      bad <- width_rater_violations(legs[[leg]][[nm]])
+      expect_identical(
+        length(bad),
+        0L,
+        info = paste0(leg, "/", nm, ": ", paste(bad, collapse = " // "))
+      )
     }
   }
 })

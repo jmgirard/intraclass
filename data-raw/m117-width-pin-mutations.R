@@ -296,6 +296,16 @@ cat("every non-exempt pin fired; ", length(exempt), " exempt\n", sep = "")
 #   template_reversed       return #2: directional template reversed
 #   hedge_dropped           return #2: one-grid hedge dropped from the parity
 #                           template
+#   flat_hedge_dropped      return #3 parking record / AC9: the flat clause's
+#                           grid hedge removed
+#   margin_cut_dropped      return #3 parking record / AC9: the largest-margin
+#                           sentence loses its stated cut
+#   paired_count_swapped    return #3 parking record / AC9: the paired-cell
+#                           count swapped
+#   false_canonical_outside return #4 (F1): a false canonical-form figure
+#                           outside every width neighbourhood
+#   rater_width_claim       return #1 / return #4 (F4): a rater-count width
+#                           comparison inside a width neighbourhood
 #
 # NOT probed, disclosed (the narrowed AC2 promise — see the claimed-classes
 # header in the test file): figures equal to an allowlisted value, spelled
@@ -346,6 +356,14 @@ prose_scan <- function(lines) {
   loose <- e$width_loose_ratios(text, shapes)
   if (length(loose)) {
     fails <- c(fails, paste0("loose-ratio: ", loose))
+  }
+  claim_fails <- e$width_surface_claim_failures(text, shapes)
+  if (length(claim_fails)) {
+    fails <- c(fails, paste0("claim: ", claim_fails))
+  }
+  rater <- e$width_rater_violations(text)
+  if (length(rater)) {
+    fails <- c(fails, paste0("rater: ", substr(rater, 1, 60)))
   }
   pct <- e$width_pct_violations(text)$bad
   if (length(pct)) {
@@ -445,12 +463,15 @@ prose_mutations <- list(
     )
   },
   smaller_grid_pooled = function(l) {
+    # 0.9430 is the smaller grid's MEASURED pooled median (review round 4, F3:
+    # the first cut probed an unmeasured 0.9440) — a real-figure probe, per
+    # the never-perturb-to-an-unmeasured-value rule.
     insert_after(
       l,
       "A pooled figure over both grids",
       paste(
         "Across the smaller grid the pooled median width ratio is",
-        "0.9440."
+        "0.9430."
       )
     )
   },
@@ -476,6 +497,27 @@ prose_mutations <- list(
   },
   paired_count_swapped = function(l) {
     sub_must(l, "in 11 of 16 paired cells", "in 13 of 16 paired cells")
+  },
+  # Round-5 additions (review return #4):
+  false_canonical_outside = function(l) {
+    # F1: a FALSE figure in canonical form, far from any width neighbourhood
+    # (the true median at 0.3 is 0.9475) — must red via the surface-wide
+    # claim enforcement, which is the round-5 fix.
+    insert_after(
+      l,
+      'title: "Confidence-interval methods"',
+      "The coverage held at 0.8123 at a true ICC of 0.3 in that run."
+    )
+  },
+  rater_width_claim = function(l) {
+    # F4/return #1: a rater-count width comparison inside a width
+    # neighbourhood — must red via the forbidden rater rule, now mirrored in
+    # prose_scan.
+    insert_after(
+      l,
+      "of the larger grid, but how much narrower depends",
+      "It is narrower with 2 raters than with 5."
+    )
   }
 )
 
