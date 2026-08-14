@@ -1,6 +1,6 @@
 # M118: Measure Burch's leptokurtic width reversal on a both-components-non-normal grid
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -129,7 +129,7 @@ planned; a width finding is not a contract change.
       gaussian cross-check; fill the page's Results section.
 - [x] T7 Fill Disposition; append the verdict `D-entry`; correct the two
       falsified `cairn/` records in place, marked and dated.
-- [ ] T8 Run `verify`, the four `data-raw/` checkers, `air format .`, lintr.
+- [x] T8 Run `verify`, the four `data-raw/` checkers, `air format .`, lintr.
 
 ## Work log
 
@@ -158,6 +158,8 @@ planned; a width finding is not a contract change.
 - 2026-08-13: T7 done — Disposition filled, D-030 appended, and the falsified records corrected in place. A sweep for the claim class found a THIRD stale site the scope's hand-list of two had missed — `cairn/references/INDEX.md:187`, a line this milestone itself wrote at T1 — which is the M118 lesson in miniature: a hand-list goes stale between the writing and the checking, and only the sweep caught it.
 - 2026-08-13: D-030 records the reopening condition as met WITHOUT superseding D-012 Amendment 1: that amendment's corrected wording is scoped to the M76 grid and stays true of it, so what this grid falsifies is the bound the shipped docs put on the finding, not the amendment.
 - 2026-08-13: the m116 comparison script's header lines were edited, so its TSV was regenerated to keep generator and artifact in step; the data rows are byte-identical and the committed test fixture is unchanged.
+- 2026-08-13: T8 done — full `devtools::test()` clean at 7158 passing, 0 failures; the 3 warnings are the deliberate fixed-rater conditions the brms tests exercise and the 2 skips are the pre-existing vignette-not-installed legs, neither touched by a branch that changes no R/ code. air, lintr, all four data-raw checkers, the three M118 harnesses and cairn_validate all green.
+- 2026-08-13: status → review.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
