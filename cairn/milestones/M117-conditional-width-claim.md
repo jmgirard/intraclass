@@ -147,17 +147,10 @@ Review return #2 repair (detail in the work log and git):
 
 Re-cut (2026-08-13):
 
-- [ ] T21 Round-5 fix (user override, logged): surface-wide `ok` enforcement
-      for the ordered scan's reported claims (bare level shapes
-      neighbourhood-scoped); header not-claimed line; prose_scan mirrors the
-      rater rules and the new enforcement; harness gains the
-      false-canonical-outside and rater-claim mutations, the class list
-      completed (three AC9 restorations labelled) and the smaller-grid value
-      corrected to the measured 0.9430; full gate + CI.
-
-- [x] T18 Prose-mutation leg in `data-raw/m117-width-pin-mutations.R`: patch a swept surface → run the scan → require red; coverage assertion; class list naming each review-return defeat, pooled-figure mutations varying placement, form and grid per AC4; fix `width_strip_tables()` (per-table non-greedy match) so all three placements red; scan header states the claimed-classes boundary.
-- [x] T19 AC9 corrections: grid hedge at the flat-clause sites carrying none; the largest-margin sentence states its cut; association pins and restoration mutations; ledgers re-triaged.
+- [x] T18 Prose-mutation leg (patch surface → scan → require red; coverage assertion; class list per AC2/AC4); `width_strip_tables()` segment-scanner fix; claimed-classes header.
+- [x] T19 AC9 corrections: grid hedges, cut-qualified largest-margin sentence, pins + restoration mutations, ledgers re-triaged.
 - [x] T20 Full gate on a rebuilt `build_vignettes = TRUE` install; CI matrix; review evidence refresh.
+- [ ] T21 Round-5 fix (user override, logged): surface-wide `ok` enforcement per amended AC2 (bare level shapes neighbourhood-scoped; header not-claimed line); prose_scan mirrors the rater rules and the enforcement; harness gains the false-canonical-outside and rater-claim mutations, the class list completed and the smaller-grid value corrected to 0.9430; full gate + CI.
 
 ## Work log
 
