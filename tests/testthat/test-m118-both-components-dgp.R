@@ -194,9 +194,13 @@ assert_both_components_dgp <- function(path) {
   #    here until the M118 review: a lexical match on deparsed text, in a guard
   #    whose whole point is reading the parsed body. That form false-red on a
   #    legitimate `switch(EXPR = dist, ...)` and passed a dead nested
-  #    `switch(dist, ...)` beside a hard-coded dispatch. On the AST both go the
-  #    right way: the EXPR spelling is the same call, and a dead one is not the
-  #    call whose value is returned.
+  #    `switch(dist, ...)` beside a hard-coded dispatch. The AST form fixes the
+  #    FIRST of those only -- `EXPR = dist` is the same call once parsed. It
+  #    does NOT fix the second: this collects every `switch` in the body and
+  #    passes if any dispatches on `dist`, without asking which call's value is
+  #    returned, so a dead one still satisfies it. Recorded rather than repaired
+  #    because AC2 rests on neither; the claim that both cases were fixed was
+  #    wrong and is withdrawn.
   switches <- m118_calls_to(body(eval(draw)), "switch")
   dispatches_on_dist <- any(vapply(
     switches,

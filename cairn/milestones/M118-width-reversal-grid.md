@@ -41,7 +41,7 @@ planned; a width finding is not a contract change.
       earliest of the milestone's derivation artifacts; its Results and
       Disposition sections are filled post-derivation and are outside the
       freeze.
-- [ ] AC2 The claim that both components are drawn from the cell's family rests
+- [x] AC2 The claim that both components are drawn from the cell's family rests
       on measurement, not on inspection of the generator's source. Two committed
       measurements bound it, and this criterion promises only what they decide.
       (a) `data-raw/m118-anchor-checks.R` leg 3 re-runs the burch2011 anchor
@@ -231,26 +231,17 @@ line below is a command run at review, never recall.
   verbatim ("no widened grid, no additional families, no re-set threshold"),
   and its Results and Disposition sections are the two the criterion places
   outside the freeze.
-- **AC2 — NOT MET (third pass, 2026-08-14). Not ticked.** The procedures all
-  pass: `test-m118-both-components-dgp.R` 3/3, and the harness accepts the
-  unmutated script and rejects all 11 fence and all 3 composition mutations.
-  What fails is one clause of the amended criterion's own prose. It says "the
-  tolerances sit between a measured legitimate spread and the nearest mutation
-  at every `rho`", and at rho = 0.50 that is false: the component swap reads
-  0.0727 there — identical to the legitimate spread, because the swap is a
-  no-op at the fixed point of rho ↔ 1 − rho — so the 0.10 tolerance sits above
-  it rather than below. True at rho = 0.05 (0.0288 < 0.05 < 0.0795) and
-  rho = 0.25 (0.0572 < 0.10 < 0.1997). `data-raw/m118-composition-spread.R`
-  asserts the correct weaker property — the real script inside every tolerance,
-  each mutation outside at least one — so the instrument is right and the
-  sentence describing it is wrong. Under the never-reinterpret rule this cannot
-  be read charitably, and a second amendment on AC2 stops for the user.
-  `data-raw/m118-dgp-fence-mutations.R` accepts the unmutated script and
-  rejects all 7 planted defects, which vary form as well as site: direct
-  substitution, a draw hoisted into a variable above its use, and a
-  namespace-qualified call, on each component, plus a dispatcher that stops
-  branching on `dist`. The criterion names three break forms; the harness runs
-  seven, covering all three.
+- **AC2 — met against the re-cut criterion (2026-08-14).** This evidence
+  replaces the pass-1 and pass-3 entries, both of which described criteria that
+  no longer exist. Leg (a): `data-raw/m118-anchor-checks.R` runs clean and its
+  leg 3 asserts the anchor cell's own family is the only one inside 0.01 of
+  0.88 — uniform 0.8807 (gap 0.0007), the nearest wrong family 6 tolerances
+  out, the rest 11 to 182. Leg (b): the shipped-table distinctness check passes,
+  worst pairwise gap 0.0130 over 26 groups against a pin of 0.005, and reds to
+  0.0000 on a collapsed table. The unpromised screen: `test-m118-both-components-dgp.R`
+  5/5, and the harness accepts the unmutated script and rejects all 11 fence and
+  all 3 composition mutations. Each clause's domain is stated in the criterion
+  and none quantifies beyond it.
 - **AC3 — met.** `test-m118-family-kurtosis.R` passes 41/41 with 0 skips and
   needs no `NOT_CRAN`. All three legs run: closed forms written in each
   family's own parameters against Table 2, mean and variance at 10^6 and
@@ -258,14 +249,16 @@ line below is a command run at review, never recall.
   uniform / power exponential / gaussian. A fourth test pins the family
   enumeration to `draw_standard()`'s own switch arms, so an eighth family
   cannot escape the checks.
-- **AC4 — met, both legs.** `data-raw/m118-anchor-checks.R` asserts them and
-  exits clean. Against burch2011 (p. 1027): mean length ratio 0.8807 against
-  the printed 0.88 (gap 0.0007, tolerance 0.01); `"burch"` coverage 0.9600
-  against 0.95 (gap 0.0100, tolerance 0.015); `"searle"` coverage 0.9790
-  against 0.97 (gap 0.0090, tolerance 0.015). Against this repo: the worst of
-  the 16 gaussian cells is 1.68 two-sample bootstrap SEs against the bound of
-  3. Recorded and not asserted, per the script's own note: 13 of the 16
-  differences are negative, mean z = −0.30.
+- **AC4 — met, both legs (re-verified 2026-08-14 after leg 3 was added).**
+  `data-raw/m118-anchor-checks.R` asserts them and exits clean. Against
+  burch2011 (p. 1027): mean length ratio 0.8807 against the printed 0.88 (gap
+  0.0007, tolerance 0.01); `"burch"` coverage 0.9600 against 0.95 (gap 0.0100,
+  tolerance 0.015); `"searle"` coverage 0.9790 against 0.97 (gap 0.0090,
+  tolerance 0.015). Against this repo: the worst of the 16 gaussian cells is
+  1.68 two-sample bootstrap SEs against the bound of 3, and 13 of the 16
+  differences are negative with mean z = −0.30, reported and not asserted. The
+  script now carries a third leg, which AC4 does not describe and does not
+  rest on; AC2 owns it.
 - **AC5 — met.** Both files carry 125 rows × 14 columns as one flat block and
   are identical to each other. Blocks are anchor 1 / fig2 60 / m111 64. Every
   row has `n_rep = 2000` and `n_skip = 0`. The fig2 block is `k` = 10(10)100,

@@ -190,7 +190,7 @@ composition_mutations <- list(
     to = "  sd_a <- rho"
   ),
   list(
-    name = "component swap: sd_a and sd_e exchanged",
+    name = "both components scaled by sd_e (ICC pinned to 0.5)",
     from = "  a <- sd_a * draw_standard(k, dist)",
     to = "  a <- sd_e * draw_standard(k, dist)"
   ),

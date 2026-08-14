@@ -40,7 +40,7 @@ rhos <- c(0.05, 0.25, 0.5)
 
 mutations <- list(
   "scale error: sd_a <- rho" = c("  sd_a <- sqrt(rho)", "  sd_a <- rho"),
-  "component swap" = c(
+  "both scales = sd_e" = c(
     "  a <- sd_a * draw_standard(k, dist)",
     "  a <- sd_e * draw_standard(k, dist)"
   ),
