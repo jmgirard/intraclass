@@ -115,7 +115,7 @@ planned; a width finding is not a contract change.
       harness over the three break forms in AC2. Leave m116's own two-script
       list untouched.
 - [x] T4 Write the kurtosis check against burch2011 Table 2.
-- [ ] T5 Run the sweep over the three blocks via the shipped reducers
+- [x] T5 Run the sweep over the three blocks via the shipped reducers
       `searle_endpoints()` / `burch_reml_endpoints()` (`R/ci-classical.R:109`,
       `:188`) off `classical_oneway_ss()`; write both tables.
 - [ ] T6 Assert both AC4 anchors — the burch2011 printed cell and the M111
@@ -142,6 +142,8 @@ planned; a width finding is not a contract change.
 - 2026-08-13: AC3 amended at a mini gate (user-approved) — the original "within 0.05 of the printed value" is unsatisfiable for t(10)/t(5)/chi-squared(1), a mis-set pin GP5 permits correcting prospectively rather than a bar loosened post hoc: no test asserted it yet, and no replicate count reaches it because the sample excess kurtosis has no finite asymptotic variance at t(5). The per-family spreads that decide which three families carry a tolerance are the ones `Rscript data-raw/m118-kurtosis-spread.R` prints; that script also asserts the pinned/unpinned split against them, so the split reds there rather than silently rotting if a family's behaviour changes.
 - 2026-08-13: the amended AC3 wording went to a fresh-context [O] reader before being written, which found the drafted version blind to a wrong `pe_beta` — it passes the closed-form leg (same constant), the variance leg (powexp alone derives its divisor from that constant) and the ordering leg (beta in 2.2-3.4 leaves the kurtosis inside its neighbours' bracket). The shipped wording adds the per-family tolerance that closes it; the drafted claim "the ordering leg is what catches a wrong constant" was false and is not in the shipped text.
 - 2026-08-13: T4 done — 41 assertions, no skips and no `NOT_CRAN` needed (the whole file runs in ~2s, so `skip_on_cran()` was dropped rather than left to hide a leg). `data-raw/m118-kurtosis-spread.R` measures the AC's load-bearing claim rather than asserting it: every wrong beta tried (2.2, 2.5, 3.0, 3.4) keeps the variance at ~1.002 and the kurtosis inside the uniform/gaussian bracket, so both other legs miss it and only the 0.02 tolerance catches it.
+- 2026-08-13: T5 done — 125 cells x 2000 reps in 0.3 min at 4 workers, 0 degenerate cells; both closed-form legs, so the sweep is ~100x cheaper than M111's MC-bearing one.
+- 2026-08-13: W1 is met on every limb at 10 of 10 subject counts — no marginal call. The sign change sits exactly where the frozen page flagged it as demanding: gaussian stays below 1 (0.973 at k=10 to 0.996 at k=100) and t(10) is above it at every k (1.004 to 1.080), so the crossing falls between excess kurtosis 0.0 and 1.0 as W1's t(10) limb required.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
