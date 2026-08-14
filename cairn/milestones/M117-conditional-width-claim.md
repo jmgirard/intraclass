@@ -38,17 +38,25 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
       to change the sentence the prose states — including, at every level whose
       median lies within 0.01 of parity, one crossing ratio 1 (the existing
       rounding-bucket idiom, `R:224-233`, does not red on that by itself).
-- [ ] AC2 At every site AC5's sweep reports as carrying a width statement, each
-      figure the declared canonical templates and shapes match is checked
-      against the value recomputed from the fixture's per-cell rows at the
-      prose's own rounding. A committed prose-mutation leg extends the M117
-      harness — each mutation patches a swept surface and requires the scan to
-      red, and the leg's coverage assertion fails on any mutation nothing
-      reds — with its class list naming each encoded defeat and the review
-      return it answers, AC4's three pooled-figure placements among them. The
-      scan's file header names the token classes it checks and states that
-      tokens outside them are not claimed checked; this criterion claims the
-      declared classes only.
+- [ ] AC2 On every surface AC5's sweep walks, the ordered canonical scan's
+      reported claims are each enforced on their shape's `ok` verdict,
+      surface-wide — a claim whose verdict fails reds the test wherever on the
+      surface it sits; the criterion quantifies over the claims
+      `width_consume`'s ordered consumption reports, the order deliberate
+      (`argmax_cut` before `argmax_bare`, the templates before the bare level
+      shapes). The two bare level shapes (`rho_level`, `k_level`) are the
+      exception: they still consume as aids, but their membership verdicts are
+      enforced only inside width neighbourhoods, because a bare level
+      reference in unrelated prose is not a width figure — and the
+      claimed-classes header's not-claimed list states that consequence. A
+      committed prose-mutation leg extends the M117 harness — each mutation
+      patches a swept surface and requires the scan to red, and the leg's
+      coverage assertion fails on any mutation nothing reds — with its class
+      list naming each encoded defeat and the review return it answers, a
+      false canonical-form figure outside a width neighbourhood and a
+      rater-count width claim among them. The scan's file header names the
+      token classes it checks and states that tokens outside them are not
+      claimed checked; this criterion claims the declared classes only.
 - [x] AC3 At every site AC5's sweep reports as carrying a width statement, that
       statement names how the ratio moves with ρ and with the subject count, and
       no site states a rater-count width effect. A test asserts from the per-cell
@@ -103,7 +111,7 @@ A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 ## Coverage
 
 - AC1 → T1, T17
-- AC2 → T3, T5, T9, T10, T11, T14, T15, T18
+- AC2 → T3, T5, T9, T10, T11, T14, T15, T18, T21
 - AC3 → T3, T5, T10, T11, T15
 - AC4 → T3, T5, T9, T10, T11, T14, T15, T18
 - AC5 → T2
@@ -138,6 +146,14 @@ Review return #2 repair (detail in the work log and git):
 - [x] T17 Full gate and push: air, lintr, `pkgdown::check_pkgdown()`, installed suite at `NOT_CRAN=true CI=true`, CI matrix.
 
 Re-cut (2026-08-13):
+
+- [ ] T21 Round-5 fix (user override, logged): surface-wide `ok` enforcement
+      for the ordered scan's reported claims (bare level shapes
+      neighbourhood-scoped); header not-claimed line; prose_scan mirrors the
+      rater rules and the new enforcement; harness gains the
+      false-canonical-outside and rater-claim mutations, the class list
+      completed (three AC9 restorations labelled) and the smaller-grid value
+      corrected to the measured 0.9430; full gate + CI.
 
 - [x] T18 Prose-mutation leg in `data-raw/m117-width-pin-mutations.R`: patch a swept surface → run the scan → require red; coverage assertion; class list naming each review-return defeat, pooled-figure mutations varying placement, form and grid per AC4; fix `width_strip_tables()` (per-table non-greedy match) so all three placements red; scan header states the claimed-classes boundary.
 - [x] T19 AC9 corrections: grid hedge at the flat-clause sites carrying none; the largest-margin sentence states its cut; association pins and restoration mutations; ledgers re-triaged.
@@ -195,7 +211,9 @@ Re-cut (2026-08-13):
 - 2026-08-13: resumed by /milestone-implement (blocked → in-progress; blocker resolved by the re-cut gate's guard-scope decision). No implementation question gate: the same-day plan gate settled the open choices. Remaining: T18–T20.
 - 2026-08-13: T18 — `width_strip_tables()` rewritten as a pipe-segment scanner (blanks only runs of ≥2 cell-shaped segments: ≤60 chars, sentence-free), so prose between tables survives to be scanned; the three refusal scans hoisted to named helpers (`width_unchecked_figures`, `width_loose_ratios`, `width_pct_violations`) the harness sources with `test_that` stubbed — one definition, no drift; spelled net allows up to two non-stopword qualifiers; percent figures refused in width sentences (nominal 90/95/99/100 excluded — knitr `out.width = "100%"` and the HPDI 95% were the two legitimate hits); ratio-bearing table rows nothing consumes refused as orphans; claimed-classes boundary declared in the file header. Prose-mutation leg: 15 class-named mutations (placement × form × grid for the pooled family; every review-return defeat encoded), all refused, control clean, coverage asserted. Suite: 0 failed, 945 passed; air + lintr clean (lintr 3.4.0 installed locally — absent from this machine's library).
 - 2026-08-13: T19 — the flat template now carries the grid hedge "(on the larger grid; the smaller grid's margin does shrink across its levels)", stated verbatim at all seven sites (`R/icc.R` ×2, `R/ci-classical.R`, `R/boundary-hint.R`, both vignettes, `NEWS.md`) and backed by a direction pin recomputing both facts from the per-cell rows; the article's largest-margin sentence states its cut ("by level medians") with the 11-of-16 paired-cell contradiction beside it, pinned by three new canonical shapes — `argmax_cut` (checked against the medians), `argmax_bare` (the unqualified form fails outright), `paired_cells` (recomputed pairing on (k, n, dist)); `width_cardinal_value()` returns NA on unknown words so a shape matching a non-cardinal fails instead of crashing. Three AC9 restoration mutations added (hedge dropped, cut dropped, paired count swapped) — 18 prose mutations, all refused, control clean. `mpl-doc-claims.tsv` row re-keyed for the hedged `R/icc.R` sentence (full-sentence hash restaled, M105); all four data-raw checkers exit 0. Doc suite 0 failed / 948 passed; `devtools::document()` regenerated `man/icc.Rd`; air + lintr clean.
-- 2026-08-13: review pass 4, defect return #4 (F1) — AC2 fails inside its named procedure's domain: `width_loose_ratios()` discards the consumed claims' `ok` verdicts, so a false canonical-form figure outside a width neighbourhood passes the suite (reproduced: "0.8123 at a true ICC of 0.3" in the article, 0 failed / 1177 passed). AC1, AC3–AC9 verified fresh; CI green on `e47c18d`; every stated figure re-derived correct by the [O] lens. Fix diagnosed: surface-wide `ok` for value-checkable shapes (the bare level shapes stay neighbourhood-scoped — surface-wide `k_level` reds on the article's legitimate "100 subjects"), paired with a gated AC2 two-tier-scope amendment; F4 (80) folds in (rater scan + mutation for the harness; the T18 "every review-return defeat encoded" claim is superseded — the rater defeat was not encoded). Trigger (a) holds (fourth return, re-plan already spent): routing goes to the maintainer, no bare retry recommended. on a rebuilt `build_vignettes = TRUE` install. `test-doc-skew-caveat.R` at `load_package = "installed"`, `NOT_CRAN=true CI=true`: 0 failed, 1177 passed, 0 skipped. Full installed suite: 0 failed, 0 errors, 7031 passed, 23 skipped (all `skip_on_ci`). `pkgdown::check_pkgdown()` clean, `devtools::document()` no diff, `air format --check` clean, `lintr` 0 lints, all four data-raw checkers exit 0, `cairn_validate` green (the two sizing advisories are the accepted re-cut artifact). CI matrix fully green on `572b8ec` via REST polling (M63): both platform checks, test-coverage, lint, format-check, pkgdown, check-references, both codecov checks. Status → review.
+- 2026-08-13: review pass 4, defect return #4 (F1) — AC2 fails inside its named procedure's domain: `width_loose_ratios()` discards the consumed claims' `ok` verdicts, so a false canonical-form figure outside a width neighbourhood passes the suite (reproduced: "0.8123 at a true ICC of 0.3" in the article, 0 failed / 1177 passed). AC1, AC3–AC9 verified fresh; CI green on `e47c18d`; every stated figure re-derived correct by the [O] lens. Fix diagnosed: surface-wide `ok` for value-checkable shapes (the bare level shapes stay neighbourhood-scoped — surface-wide `k_level` reds on the article's legitimate "100 subjects"), paired with a gated AC2 two-tier-scope amendment; F4 (80) folds in (rater scan + mutation for the harness; the T18 "every review-return defeat encoded" claim is superseded — the rater defeat was not encoded). Trigger (a) holds (fourth return, re-plan already spent): routing goes to the maintainer, no bare retry recommended.
+- 2026-08-13: maintainer chose the targeted fix round over the recommended /milestone-brief escalation — a logged user override of the thrash rule's no-retry counsel; parking and dropping were declined. Round 5 = gated AC2 amendment + the diagnosed enforcement fix + the F4 fold-in, then re-review.
+- 2026-08-13: gated amendment — AC2 rewritten to the two-tier scope (surface-wide `ok` enforcement over the ordered scan's reported claims; `rho_level`/`k_level` consume as aids with verdicts enforced only in width neighbourhoods; header not-claimed disclosure required; the two new mutation classes named). Fresh [O] criteria audit ran on the draft: two wording defects with clear right answers fixed before writing ("value-checkable" replaced by ok-verdict enforcement — `citation`'s always-TRUE and `argmax_bare`'s always-FALSE are then intended behavior; the quantifier re-anchored to `width_consume`'s reported claims, its ordering deliberate), scope widened to every walked surface per its finding 4, header-state requirement per its finding 5a/5b, the rater mutation criterion-backed per its finding 6. T21 added; Coverage: AC2 → +T21. on a rebuilt `build_vignettes = TRUE` install. `test-doc-skew-caveat.R` at `load_package = "installed"`, `NOT_CRAN=true CI=true`: 0 failed, 1177 passed, 0 skipped. Full installed suite: 0 failed, 0 errors, 7031 passed, 23 skipped (all `skip_on_ci`). `pkgdown::check_pkgdown()` clean, `devtools::document()` no diff, `air format --check` clean, `lintr` 0 lints, all four data-raw checkers exit 0, `cairn_validate` green (the two sizing advisories are the accepted re-cut artifact). CI matrix fully green on `572b8ec` via REST polling (M63): both platform checks, test-coverage, lint, format-check, pkgdown, check-references, both codecov checks. Status → review.
 
 ## Decisions
 
