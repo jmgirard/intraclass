@@ -135,6 +135,8 @@ ckpt_write <- function(path, payload, spec) {
 # before this guard existed is exactly that file, and its provenance is unknown.
 ckpt_read <- function(path, spec) {
   ckpt_trace_note(path, guarded = TRUE)
+  ckpt_trace_state$in_guard <- TRUE
+  on.exit(ckpt_trace_state$in_guard <- FALSE, add = TRUE)
   raw <- readRDS(path)
   if (!is.list(raw) || is.null(raw$ckpt_spec)) {
     stop(
@@ -219,6 +221,7 @@ ckpt_trace_state$registered <- character(0)
 ckpt_trace_state$observed <- character(0)
 ckpt_trace_state$guarded <- character(0)
 ckpt_trace_state$installed <- FALSE
+ckpt_trace_state$in_guard <- FALSE
 
 ckpt_norm <- function(path) {
   normalizePath(path, winslash = "/", mustWork = FALSE)
@@ -234,12 +237,35 @@ ckpt_trace_register <- function(path) {
   invisible(ckpt_trace_state$registered)
 }
 
+# Fail FAST, in the process that did the read, rather than only at the
+# end-of-run assertion. M111 maps its cells with parallel::mclapply, and a
+# forked worker's copy of this environment dies with the worker -- so a
+# parent-side assertion cannot see a worker's reads at all, and would pass
+# vacuously over exactly the harness this guard was written for. Aborting at the
+# read keeps the check in whichever process performed it.
 ckpt_trace_note <- function(path, guarded = FALSE) {
+  # readRDS() also accepts a connection; only a path can be compared against a
+  # registered location, so anything else is somebody else's business.
+  if (!is.character(path) || length(path) != 1L) {
+    return(invisible(NULL))
+  }
   p <- ckpt_norm(path)
   if (guarded) {
     ckpt_trace_state$guarded <- union(ckpt_trace_state$guarded, p)
-  } else {
-    ckpt_trace_state$observed <- union(ckpt_trace_state$observed, p)
+    return(invisible(NULL))
+  }
+  if (isTRUE(ckpt_trace_state$in_guard)) {
+    return(invisible(NULL))
+  }
+  ckpt_trace_state$observed <- union(ckpt_trace_state$observed, p)
+  if (length(ckpt_under_registered(p))) {
+    stop(
+      "stale-checkpoint guard: ",
+      basename(p),
+      " bypassed the checkpoint guard (read with a bare readRDS rather than ",
+      "ckpt_read(); its provenance is therefore unknown)",
+      call. = FALSE
+    )
   }
   invisible(NULL)
 }
@@ -256,7 +282,10 @@ ckpt_trace_install <- function() {
   }
   suppressMessages(trace(
     "readRDS",
-    tracer = quote(try(ckpt_trace_note(file), silent = TRUE)),
+    # NOT wrapped in try(): the note aborts on an unguarded read of a
+    # registered checkpoint, and that abort is the whole point -- swallowing it
+    # here would leave the trace recording bypasses it never acts on.
+    tracer = quote(ckpt_trace_note(file)),
     where = baseenv(),
     print = FALSE
   ))

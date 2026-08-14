@@ -197,19 +197,31 @@ pass(
   "a run whose every checkpoint read went through the guard passes the trace"
 )
 
+# The abort lands AT THE READ, in whichever process performed it -- not only at
+# the end-of-run assertion. M111 maps its cells with mclapply, and a forked
+# worker's trace state never returns to the parent, so a parent-only check would
+# pass vacuously over exactly the harness this guard exists for.
 ckpt_trace_reset()
-invisible(readRDS(p)) # the bare call the guard is meant to replace
 expect_error(
-  ckpt_trace_assert(),
-  "a bare readRDS of a registered checkpoint fails the run",
+  readRDS(p), # the bare call the guard is meant to replace
+  "a bare readRDS of a registered checkpoint aborts at the read",
   must_match = "bypassed the checkpoint guard"
 )
 
 ckpt_trace_reset()
-invisible(base::readRDS(p)) # the namespace-qualified spelling
+expect_error(
+  base::readRDS(p), # the namespace-qualified spelling
+  "the base:: spelling is caught too — the trace watches loads, not spellings",
+  must_match = "bypassed the checkpoint guard"
+)
+
+# And the end-of-run assertion still reports a bypass that was caught and
+# swallowed by a caller's tryCatch rather than allowed to kill the run.
+ckpt_trace_reset()
+invisible(tryCatch(readRDS(p), error = function(e) NULL))
 expect_error(
   ckpt_trace_assert(),
-  "the base:: spelling is caught too — the trace watches loads, not spellings",
+  "a bypass swallowed by a tryCatch still fails the end-of-run assertion",
   must_match = "bypassed the checkpoint guard"
 )
 
@@ -260,6 +272,28 @@ expect_error(
   run_cell(stale_cell),
   "a re-run after editing build_cells() is refused, not served from the old grid",
   must_match = "rho changed"
+)
+
+# The fork case, which is why the trace aborts at the read rather than only at
+# the end-of-run assertion: M111 maps its cells with parallel::mclapply, and a
+# worker's trace state dies with the worker. A stale checkpoint must therefore
+# be refused INSIDE the worker, and surface as that cell's failure.
+cat("\n== AC2: a stale checkpoint refused inside an mclapply worker ==\n")
+saveRDS(list(nonsense = TRUE), file.path(ckpt_dir, "cell-02.rds"))
+worker_results <- parallel::mclapply(cells[1:2], run_cell, mc.cores = 2L)
+worker_msgs <- vapply(
+  worker_results,
+  function(r) {
+    if (inherits(r, "try-error")) conditionMessage(attr(r, "condition")) else ""
+  },
+  character(1)
+)
+stopifnot(any(grepl("stale-checkpoint guard", worker_msgs, fixed = TRUE)))
+pass("a forked worker refuses the stale cell rather than returning its rows")
+expect_error(
+  assert_sweep_results(worker_results, cells[1:2]),
+  "the refusal surfaces to the parent as a failed cell, before any fixture write",
+  must_match = "cells errored"
 )
 
 ckpt_trace_remove()
