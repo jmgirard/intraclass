@@ -1,6 +1,6 @@
 # M118: Measure Burch's leptokurtic width reversal on a both-components-non-normal grid
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,12 +41,35 @@ planned; a width finding is not a contract change.
       earliest of the milestone's derivation artifacts; its Results and
       Disposition sections are filled post-derivation and are outside the
       freeze.
-- [ ] AC2 In every non-gaussian cell, `data-raw/m118-width-reversal-sweep.R`
-      draws both the subject effect and the residual from the cell's family. A
-      committed test walks the parsed body of its generator and fails when any
-      component's draw resolves to a normal deviate, mutation-verified against a
-      family of breaks that varies form as well as site: direct substitution, a
-      draw hoisted into a variable above its use, and a namespace-qualified call.
+- [ ] AC2 `data-raw/m118-width-reversal-sweep.R` draws both the subject effect
+      and the residual from the cell's family. Two committed procedures bound
+      that claim, both of them procedures over `gen_oneway` alone, and this
+      criterion promises only what they decide.
+      (a) A walk of `gen_oneway`'s parsed body asserts three things: that each
+      of the two component assignments `a` and `e` calls `draw_standard()`
+      exactly once, passing the symbol `dist`; that no call in the body
+      resolves to a name matching `^r[a-z]+$` other than `rep`, `return`,
+      `round` and `rev`; and that no formal parameter of `gen_oneway` is the
+      target of a `<-`, `=` or `<<-` at any nesting depth.
+      (b) A composition leg evaluates `gen_oneway` out of the script and asserts
+      the recovered ICC is within 0.05 of `rho` at `rho = 0.05`, and within 0.10
+      at `rho = 0.25` and `rho = 0.50`, for all seven families at `k = 400`,
+      `n = 5`, seed 900001. Both legs are mutation-verified by
+      `data-raw/m118-dgp-fence-mutations.R`, which requires the unmutated script
+      to be accepted and every mutation the file commits to be rejected — among
+      them, for (b), a scale error, a subject/residual scale swap and a
+      mis-composition. The tolerances sit between a measured legitimate spread
+      and the nearest mutation at every `rho`; both are what
+      `data-raw/m118-composition-spread.R` prints.
+      Outside these two procedures the criterion promises nothing, and neither
+      decides what an arbitrary program resolves to. Whatever fixes a cell's
+      family or design anywhere but in `gen_oneway`'s own body, or at run time
+      rather than in the parsed text, is unpromised: `assign()`, a shadowed
+      `draw_standard`, a `for`-loop binding a parameter, post-parse body surgery
+      and the `run_cell` call site are instances found at review, not the
+      boundary. What bounds the grid this milestone actually ships is AC4's
+      burch2011 anchor, whose uniform cell is the one measured point at which a
+      wrong family shows.
 - [x] AC3 Each of the seven families enumerated by `table2_kurtosis` in
       `data-raw/m118-width-reversal-sweep.R` — whose names a test requires to
       equal `draw_standard()`'s switch arms — is verified against burch2011
@@ -99,7 +122,7 @@ planned; a width finding is not a contract change.
 ## Coverage
 
 - AC1 → T1
-- AC2 → T2, T3
+- AC2 → T2, T3, T9
 - AC3 → T2, T4
 - AC4 → T5, T6
 - AC5 → T5, T6
@@ -108,28 +131,21 @@ planned; a width finding is not a contract change.
 
 ## Tasks
 
-- [x] T1 Author the frozen page from cairn's `templates/synthesis-note.md`:
-      grid design, and W1–W3 as reversal-present / reversal-absent / mixed
-      dispositions per the gate's record-and-stop answer. Commit alone, first.
-- [x] T2 Write the generator in `data-raw/m118-width-reversal-sweep.R` — one
-      standardized variate function per family applied to both components, sign
-      and scale per burch2011 §3 (p. 1022); hand-roll power exponential(0,1,2.78)
-      via the gamma route. No checkpoint cache (the M114 convention,
-      `data-raw/m114-heldout-sweep.R:17-18`).
-- [x] T3 Write the AST fence asserting both components are non-normal — the
-      mirror of `assert_subject_only_dgp()`
+- [x] T1 Author the frozen page (grid design, W1–W3); commit alone, first.
+- [x] T2 Write the generator: one standardized variate per family applied to
+      both components, per burch2011 §3 (p. 1022); no checkpoint cache.
+- [x] T3 Write the AST fence — the mirror of `assert_subject_only_dgp()`
       (`data-raw/m116-classical-width-comparison.R:65-126`) — plus its mutation
-      harness over the three break forms in AC2. Leave m116's own two-script
-      list untouched.
+      harness. Leave m116's own two-script list untouched.
 - [x] T4 Write the kurtosis check against burch2011 Table 2.
-- [x] T5 Run the sweep over the three blocks via the shipped reducers
-      `searle_endpoints()` / `burch_reml_endpoints()` (`R/ci-classical.R:109`,
-      `:188`) off `classical_oneway_ss()`; write both tables.
-- [x] T6 Assert both AC4 anchors — the burch2011 printed cell and the M111
-      gaussian cross-check; fill the page's Results section.
-- [x] T7 Fill Disposition; append the verdict `D-entry`; correct the two
-      falsified `cairn/` records in place, marked and dated.
+- [x] T5 Run the sweep via the shipped reducers (`R/ci-classical.R:109`,
+      `:188`); write both tables.
+- [x] T6 Assert both AC4 anchors; fill the page's Results section.
+- [x] T7 Fill Disposition; append the verdict `D-entry`; correct the falsified
+      `cairn/` records in place, marked and dated.
 - [x] T8 Run `verify`, the four `data-raw/` checkers, `air format .`, lintr.
+- [x] T9 Extend leg (b) to three `rho` with per-rho tolerances; add its
+      mutations to the harness; commit `data-raw/m118-composition-spread.R`.
 
 ## Work log
 
@@ -166,6 +182,10 @@ planned; a width finding is not a contract change.
 - 2026-08-14: C10 fixed — the Results header claimed every figure re-derives from the sweep script, which is false for the M111 block's comparison column and counts (they come from the committed m116 table); the sentence now says which. The frozen page's two stale Evidence-snapshot lines are corrected by a dated note in Results rather than edited above, because a post-freeze edit there would cost the commit-order corroboration the freeze rests on (M113 lesson).
 - 2026-08-14: B1/B2/B11/C1 fixed in D-030 — it no longer claims nothing in D-012 Amendment 1 is falsified (its closing "untested here" clause is spent, and the entry now says so), no longer credits D-012's scope fence with naming this gap, no longer attributes the searle preference to D-027, and states the stale-site set procedurally instead of as a hand-counted four.
 - 2026-08-14: A11/B9 fixed — the INDEX line no longer restates 10 of 10, and its "ordered sign change" is restated as the per-family sign rule W1 actually is (C5); A12 hedged with the two measured non-monotone points.
+- 2026-08-14: T9 done. Leg (b) now runs at rho 0.05/0.25/0.5 with per-rho tolerances 0.05/0.10/0.10, and both legs are mutation-verified by one harness: 11 fence mutations and 3 composition mutations, all red, both baselines accepted. `data-raw/m118-composition-spread.R` prints the legitimate spread (0.0288/0.0572/0.0727) beside each mutation's separation and asserts the property the tolerances must have — real inside every one, each mutation outside at least one — rather than leaving it to be eyeballed.
+- 2026-08-14: the component swap is caught at 2 of 3 rho, and that is the whole reason leg (b) is not single-rho: at rho = 0.5 it reads 0.0727, identical to the real script, because 0.5 is the fixed point of rho <-> 1 - rho.
+- 2026-08-14: the fence's `switch(dist` clause was rewritten on the AST rather than deleted — it checks that some `switch` in `draw_standard`'s body dispatches on the symbol `dist`, taking `EXPR =` and positional spellings alike. Deleting it (the first attempt) lost a real catch; as an AST check it keeps the catch and drops the lexical defect. It reads `draw_standard`'s body, not `gen_oneway`'s, so it sits outside what the amended AC2's clause (a) promises — kept because it is free, not because the criterion rests on it.
+- 2026-08-14: amendment return: AC2 — "Two committed procedures bound that claim, both of them procedures over `gen_oneway` alone, and this criterion promises only what they decide." Amended wording audited by a fresh [O] reader before writing; user-approved at the mini gate. This consumes the first of AC2's two amendment slots.
 - 2026-08-14: second review pass — an adversarial [O] reviewer defeated the fixed fence with 10 further mutations, all green against both test files. Independently reproduced two: `assign("dist", "gaussian")` leaves the fence green AND passes the composition leg at every rho (only the family is wrong, not the ICC); and swapping `sd_a`/`sd_e` has error 0.0727 at rho = 0.5 — identical to the real script, because 0.5 is the fixed point of rho <-> 1-rho — while giving 0.3227 at rho = 0.25 and 0.5227 at 0.05.
 - 2026-08-14: that is the widening test, not a second defect. AC2 promises the test fails when a draw "resolves" to a normal deviate, a universal over program behaviours no AST walk enumerates; the round-1 repair answered one counterexample by widening a recall-fixed list of forms and `assign()` defeated the wider list at once. The repo's own precedent is M102's "no command reads git history", beaten in turn by a ref spelling, an argument-order bug and `awk`. Routing to the gated criterion amendment; the repair is to narrow the promise until a stated procedure settles it.
 - 2026-08-14: F10, F11 fixed in place ahead of the amendment because they are a live contradiction between two records rather than a criterion question — the reference page still asserted "nothing in it is falsified" of D-012 Amendment 1 while the corrected D-030 said the opposite, and D-030's own replacement sentence misdescribed this grid as symmetric-only and single-rho when it carries chisq1 and reaches rho = 0.60. Both records now agree, and the D-027 mis-attribution is corrected on the page too (its frozen Consequence clause carries the same error and is left untouched, the dated note in Results carrying the correction instead).

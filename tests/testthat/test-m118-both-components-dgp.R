@@ -185,11 +185,31 @@ assert_both_components_dgp <- function(path) {
     }
   }
 
-  # 3. draw_standard actually branches on dist, so passing it through means
-  #    something.
-  draw_txt <- paste(deparse(draw), collapse = " ")
-  if (!grepl("switch\\s*\\(\\s*dist", draw_txt)) {
-    stop("draw_standard() does not switch on dist")
+  # 3. draw_standard dispatches on the `dist` it is handed. This is a check over
+  #    draw_standard's body, NOT gen_oneway's, so it is outside what AC2's
+  #    clause (a) promises -- kept because it is a real catch and costs nothing,
+  #    not because the criterion rests on it.
+  #
+  #    It replaces a `grepl("switch\\s*\\(\\s*dist", deparse(draw))` that stood
+  #    here until the M118 review: a lexical match on deparsed text, in a guard
+  #    whose whole point is reading the parsed body. That form false-red on a
+  #    legitimate `switch(EXPR = dist, ...)` and passed a dead nested
+  #    `switch(dist, ...)` beside a hard-coded dispatch. On the AST both go the
+  #    right way: the EXPR spelling is the same call, and a dead one is not the
+  #    call whose value is returned.
+  switches <- m118_calls_to(body(eval(draw)), "switch")
+  dispatches_on_dist <- any(vapply(
+    switches,
+    function(cl) {
+      a <- as.list(cl)[-1]
+      nm <- names(a)
+      expr_arg <- if (!is.null(nm) && "EXPR" %in% nm) a[["EXPR"]] else a[[1]]
+      is.name(expr_arg) && identical(as.character(expr_arg), "dist")
+    },
+    logical(1)
+  ))
+  if (!dispatches_on_dist) {
+    stop("draw_standard() does not dispatch on dist")
   }
   invisible(TRUE)
 }
@@ -202,43 +222,84 @@ test_that("the M118 generator draws both components from the cell's family", {
   expect_true(assert_both_components_dgp(sweep_script))
 })
 
+# Leg (b) of AC2, as a callable so `data-raw/m118-dgp-fence-mutations.R` can run
+# THIS definition against mutated copies rather than a second copy of it (the
+# M117 technique, already used for the AST fence above).
+#
+# The AST fence checks WHERE the draws come from. It cannot see how they are
+# COMBINED, and two mutations found at the M118 review pass it while corrupting
+# the truth every coverage figure is scored against: `sd_a <- rho` and
+# `rep(a, times = n)`.
+#
+# Per-rho tolerances, because a flat one cannot work. Measured legitimate spread
+# is 0.0288 / 0.0572 / 0.0727 at rho 0.05 / 0.25 / 0.50; the nearest mutation is
+# 0.0795 / 0.1997 / 0.1770. A flat 0.10 would leave the rho = 0.05 cell inert --
+# both the scale error and the mis-composition sit BELOW it there -- while 0.05
+# at that rho catches all three. Every figure is printed by
+# data-raw/m118-composition-spread.R.
+#
+# Three rho and not one, because rho = 0.5 is the fixed point of rho <-> 1 - rho:
+# a subject/residual scale swap is EXACTLY a no-op there at any tolerance, and
+# shows only at another rho (0.3227 at 0.25, 0.5227 at 0.05). The single-rho
+# version of this leg shipped blind to it.
+m118_composition_tol <- c("0.05" = 0.05, "0.25" = 0.10, "0.5" = 0.10)
+
+m118_gen_defs <- function(path) {
+  env <- new.env(parent = globalenv())
+  wanted <- c("draw_standard", "pe_beta", "table2_kurtosis", "gen_oneway")
+  for (e in as.list(parse(path))) {
+    if (m118_is_assign(e) && as.character(e[[2]]) %in% wanted) {
+      eval(e, envir = env)
+    }
+  }
+  missing <- setdiff(wanted, ls(env))
+  if (length(missing)) {
+    stop("not found in ", path, ": ", paste(missing, collapse = ", "))
+  }
+  env
+}
+
+m118_icc_hat <- function(g) {
+  ss <- classical_oneway_ss(g)
+  (ss$msa - ss$mse) / (ss$msa + (ss$n - 1) * ss$mse)
+}
+
+# worst |icc_hat - rho| over the seven families at one rho
+m118_composition_dev <- function(env, rho) {
+  max(vapply(
+    names(env$table2_kurtosis),
+    function(fam) {
+      abs(m118_icc_hat(env$gen_oneway(400L, 5L, rho, fam, 900001L)) - rho)
+    },
+    numeric(1)
+  ))
+}
+
+assert_composition_icc <- function(path) {
+  env <- m118_gen_defs(path)
+  for (rho in c(0.05, 0.25, 0.5)) {
+    dev <- m118_composition_dev(env, rho)
+    tol <- m118_composition_tol[[as.character(rho)]]
+    if (dev >= tol) {
+      stop(
+        "gen_oneway does not recover the cell's ICC at rho = ",
+        rho,
+        ": worst deviation ",
+        signif(dev, 4),
+        " against tolerance ",
+        tol
+      )
+    }
+  }
+  invisible(TRUE)
+}
+
 test_that("gen_oneway composes the two components so the population ICC is the cell's", {
   skip_if_not(
     file.exists(sweep_script),
     "data-raw/ not present (built package)"
   )
-  # The AST fence above checks WHERE the draws come from. It cannot see how they
-  # are COMBINED, and two mutations found at the M118 review pass it while
-  # corrupting the truth every coverage figure is scored against:
-  # `sd_a <- rho` gives icc_hat 0.346 and `rep(a, times = n)` gives 0.015, both
-  # against a cell claiming 0.5. This leg pins the composition instead of the
-  # source, which is the "located and scaled per burch2011 sec 3 so the
-  # population ICC equals the cell's rho" property the milestone Scope asserts.
-  #
-  # Tolerance 0.10 against a measured legitimate spread of at most 0.073 over
-  # six seeds (chisq1, the worst) and a nearest mutation at 0.154 -- it
-  # separates the two without sitting on either. Seeds are fixed, so this is
-  # deterministic and cannot flake.
-  # Only the definitions this leg needs are evaluated -- the script calls
-  # devtools::load_all() and runs a sweep at top level, so it must never be
-  # sourced whole from a test. `classical_oneway_ss()` is the package's own.
-  env <- new.env(parent = globalenv())
-  wanted <- c("draw_standard", "pe_beta", "table2_kurtosis", "gen_oneway")
-  for (e in as.list(parse(sweep_script))) {
-    if (m118_is_assign(e) && as.character(e[[2]]) %in% wanted) {
-      eval(e, envir = env)
-    }
-  }
-  expect_setequal(ls(env), wanted)
-
-  icc_hat <- function(g) {
-    ss <- classical_oneway_ss(g)
-    (ss$msa - ss$mse) / (ss$msa + (ss$n - 1) * ss$mse)
-  }
-  for (fam in names(env$table2_kurtosis)) {
-    g <- env$gen_oneway(400L, 5L, 0.5, fam, 900001L)
-    expect_lt(abs(icc_hat(g) - 0.5), 0.10, label = paste("icc_hat", fam))
-  }
+  expect_true(assert_composition_icc(sweep_script))
 })
 
 test_that("the M118 sweep script is not in M116's subject-only fence list", {

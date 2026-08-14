@@ -20,6 +20,11 @@
 
 stopifnot("run this from the repo root" = file.exists("DESCRIPTION"))
 
+# leg (b) evaluates gen_oneway and reads the ANOVA through the package's own
+# classical_oneway_ss(), so the package must be loaded before the test file's
+# definitions are sourced.
+suppressMessages(devtools::load_all(quiet = TRUE))
+
 test_file_path <- "tests/testthat/test-m118-both-components-dgp.R"
 sweep_path <- "data-raw/m118-width-reversal-sweep.R"
 
@@ -35,6 +40,7 @@ local(
 )
 sys.source(test_file_path, envir = env, keep.source = FALSE)
 fence <- get("assert_both_components_dgp", envir = env)
+composition <- get("assert_composition_icc", envir = env)
 
 src <- readLines(sweep_path, warn = FALSE)
 
@@ -172,3 +178,75 @@ if (length(failures)) {
   )
 }
 cat("all ", length(mutations), " mutations rejected by the fence\n", sep = "")
+
+# --- leg (b): the composition mutations ---------------------------------------
+# The AST fence cannot see how the two components are COMBINED. All three below
+# are green against it and are what leg (b) exists to reject. The swap is why
+# leg (b) runs at three rho: at rho = 0.5 it is exactly a no-op.
+composition_mutations <- list(
+  list(
+    name = "scale error: sd_a <- rho",
+    from = "  sd_a <- sqrt(rho)",
+    to = "  sd_a <- rho"
+  ),
+  list(
+    name = "component swap: sd_a and sd_e exchanged",
+    from = "  a <- sd_a * draw_standard(k, dist)",
+    to = "  a <- sd_e * draw_standard(k, dist)"
+  ),
+  list(
+    name = "mis-composition: rep(a, times = n)",
+    from = "  vals <- rep(a, each = n) + e",
+    to = "  vals <- rep(a, times = n) + e"
+  )
+)
+
+cat("\nComposition leg (AC2 b) -- must reject every mutation below\n\n")
+base_c <- tryCatch(
+  {
+    composition(sweep_path)
+    "accepted"
+  },
+  error = function(e) paste0("REJECTED: ", conditionMessage(e))
+)
+cat(sprintf("  %-52s %s\n", "unmutated script (must be accepted)", base_c))
+if (!identical(base_c, "accepted")) {
+  stop(
+    "the composition leg rejects the real script; results below are meaningless"
+  )
+}
+
+c_failures <- character(0)
+for (mut in composition_mutations) {
+  tmp <- tempfile(fileext = ".R")
+  writeLines(apply_mutation(src, mut), tmp)
+  reds <- tryCatch(
+    {
+      composition(tmp)
+      FALSE
+    },
+    error = function(e) TRUE
+  )
+  unlink(tmp)
+  cat(sprintf(
+    "  %-52s %s\n",
+    mut$name,
+    if (reds) "red (good)" else "GREEN -- MISSED"
+  ))
+  if (!reds) c_failures <- c(c_failures, mut$name)
+}
+
+cat("\n")
+if (length(c_failures)) {
+  stop(
+    length(c_failures),
+    " composition mutation(s) survived: ",
+    paste(c_failures, collapse = "; ")
+  )
+}
+cat(
+  "all ",
+  length(composition_mutations),
+  " composition mutations rejected by leg (b)\n",
+  sep = ""
+)
