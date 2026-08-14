@@ -79,11 +79,11 @@ them.
 - [x] T1 Record the site table: for each of the five sites, its checkpoint
       path expression, its declared parameter set and order, and the functions
       whose bodies form its declared generating block.
-- [ ] T2 Write `data-raw/checkpoint-guard.R` — spec construction, the
+- [x] T2 Write `data-raw/checkpoint-guard.R` — spec construction, the
       base-R-only block hash (deparsed bodies via `tools::md5sum`; no new
       dependency), guarded write, and guarded read with the ordered mismatch
       message. Tests first.
-- [ ] T3 Add the run-scoped trace that records every checkpoint
+- [x] T3 Add the run-scoped trace that records every checkpoint
       deserialization and aborts on an unguarded one, before any output write.
 - [ ] T4 Route all five sites through the guard, adding a path override to the
       four oracle scripts so no test run can reach a committed fixture path.
@@ -104,6 +104,9 @@ them.
 - 2026-08-14: plan gate chose settings plus a narrow generating-block hash over settings alone and over a whole-file fingerprint, because settings alone miss a changed generator (the M112 re-run case) while a whole-file hash marks every cache stale after any edit, including this milestone's own; falsified by a generator change the declared block does not cover.
 - 2026-08-14: plan gate chose CI wiring over the hand-run demonstration idiom, because a hand-run guard is asserted once at review and never again; falsified by the CI leg's runtime proving unaffordable.
 - 2026-08-14: T1 — `data-raw/checkpoint-sites.tsv` declares the five resume sites, each with its compared parameters in declared order, the functions forming its generating-block hash, and whether one entry covers a cell or a rep; the four oracle sites' parameter sets were read off each script's own Config block rather than composed.
+- 2026-08-14: T2/T3 — `data-raw/checkpoint-guard.R` ships spec construction, the base-R block hash, guarded write/read, per-entry stores, and the run-scoped `readRDS` trace; both landed in one file and one commit, and `data-raw/m120-checkpoint-guard-demo.R` was written first and observed to fail with the guard absent before any of it existed.
+- 2026-08-14: the demo's first clean-case claim was wrong as written — it asserted a comment-only edit leaves the hash alone but actually re-braced the body, which is a body change; the case now tests the property that holds (a comment inside a block function, and an edit to a function outside the declared block) and passes.
+- 2026-08-14: the trace catches `base::readRDS` as well as the bare call, verified in the demo — `trace()` rebinds in the base namespace, so the qualified spelling is not a hole.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
