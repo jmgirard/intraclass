@@ -273,10 +273,11 @@ line below is a command run at review, never recall.
   limbs, and states `D-012 Amendment 1`'s reopening condition as met. It also
   says explicitly what it does not disturb: Amendment 1's own wording is
   scoped to the M76 grid and stays true of it, so nothing is superseded.
-- **AC7 — met.** `devtools::test()`: 7158 passing, 0 failures. The 3 warnings
-  are the deliberate fixed-rater conditions the brms tests exercise and the 2
-  skips are the pre-existing vignettes-not-installed legs; neither is touched
-  by a branch that changes no `R/` code. All four `data-raw/` checkers pass.
+- **AC7 — met (re-verified 2026-08-14).** `devtools::test()`: 7161 passing,
+  0 failures. The 3 warnings are the deliberate fixed-rater conditions the brms
+  tests exercise and the 2 skips are the pre-existing vignettes-not-installed
+  legs; neither is touched by a branch that changes no `R/` code. All four
+  `data-raw/` checkers pass, as do the three M118 harnesses.
 
 **Consistency gate.** `cairn_validate`: 16 PASS, 8 advisory OK, none failing —
 including `coverage complete` and `weight caps`. No `DESIGN.md` principle
@@ -349,3 +350,36 @@ on deparsed text · C11 42 reported-not-asserted figures, as designed.
 0 warnings, 1 NOTE — the pre-existing long-running-tests note this suite has
 always carried, not introduced here. CI on the review commit: `lint`,
 `check-references`, `format-check`, `pkgdown` green.
+
+### Fourth pass — the delta review of the amendment (2026-08-14)
+
+One [O] reviewer over the amendment delta; the three-lens fan-out had already
+run on this branch and its findings drove the amendment.
+
+**Actioned.** It defeated the first draft of the re-cut on its first attempt —
+four lines gated on `rho != 0.25` shadow `draw_standard` locally, leaving the
+anchor cell byte-identical while 124 of 125 cells draw gaussian, every check
+green. Reproduced here. That draft had kept a universal ("no edit to the
+generator can fake that") while shrinking the domain from 125 cells to 1, which
+is a bar-drop in domain rather than a narrowing. The shipped AC2 drops the
+universal, states each leg's domain, and adds leg (b) over the committed table,
+which the attack cannot hide from because it never reads the source. It also
+found the "component swap" mutation mislabelled (the edit sets both scales to
+`sd_e`, pinning ICC to 0.5, rather than swapping) and the claim that the AST
+rewrite fixed both `switch`-check failure modes false — it fixed the false-red
+only. Both corrected.
+
+**Logged, not actioned.** Leg (a) covers one cell at one geometry; leg (b)
+decides distinctness and not identity; `run_cell`'s call site and the
+cell→family map are guarded by nothing; the anchor's per-family separation
+figures are printed rather than asserted beyond the set-equality; leg (b)'s
+"all seven families" is iterated rather than pinned to a count. Every one of
+these is now inside what AC2 explicitly declines to promise, which is the point
+of the re-cut rather than an oversight — but they are real limits and a future
+milestone that wants a stronger guarantee should start from them.
+
+**Known discrepancy, not repaired.** The Scope section still says "the two
+`cairn/` records" where three were corrected (the third, `INDEX.md`, was found
+by the T7 sweep). Scope is amendment-gated and the error is an undercount of
+work done rather than a promise broken, so it is recorded here rather than
+opening a third gate on this milestone.
