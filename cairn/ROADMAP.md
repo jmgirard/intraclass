@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-14 (M119 done and archived; terminal rows rotated — M114 out, M119 in — with the record-claims expectation updated in this same commit; no milestone is in progress and none is planned; M48 stays parked on the unopened window.)_
+_Last hygiene check: 2026-08-14 (full audit pass after M119 archived: all validate checks and advisories green, no orphans, tracking level with git, both GitHub inboxes empty; nothing changed. No milestone in progress or planned; M48 stays parked on the unopened window.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
