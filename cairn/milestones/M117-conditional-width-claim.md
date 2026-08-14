@@ -15,19 +15,9 @@ shrinks in the true ICC and in the subject count, reaching parity near ρ = 0.6.
 
 ## Scope
 
-**In:** the per-factor breakdown of `data-raw/m116-classical-width-comparison.tsv`
-(ρ and subject count, per grid, from the committed per-cell rows); rewriting the
-width statement at every doc surface a widened sweep reports as carrying one;
-widening `test-doc-skew-caveat.R`'s two surface legs from six hand-listed paths
-to a directory walk; recomputed (not transcribed) pins for every figure stated;
-the ledger re-triage the changed sentences force.
+**In:** the per-factor breakdown of `data-raw/m116-classical-width-comparison.tsv` (ρ and subject count, per grid, from the committed per-cell rows); rewriting the width statement at every doc surface the widened sweep reports; both surface legs widened from six hand-listed paths to a directory walk; recomputed (not transcribed) pins for every figure stated; the ledger re-triage the changed sentences force.
 
-**Out:** re-running either sweep or adding cells — the fixture is sufficient and
-its sources are committed. A rater-count width claim → left unstated (the
-marginal contrast is confounded; the milestone records why). Burch's untested
-leptokurtic reversal → ROADMAP candidate (both-components-non-normal grid).
-Extending the skew battery to the other `ci_method` values → ROADMAP candidate.
-A new doc-claim checker → barred by D-029; this extends the M115 instrument.
+**Out:** re-running either sweep or adding cells (the fixture and its sources are committed). A rater-count width claim → left unstated (marginal contrast confounded; recorded why). Burch's untested leptokurtic reversal → ROADMAP candidate. Extending the skew battery to other `ci_method` values → ROADMAP candidate. A new doc-claim checker → barred by D-029; this extends the M115 instrument.
 
 ## Acceptance criteria
 
