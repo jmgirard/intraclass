@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ them.
       recorded spec differs from the current one signals an error naming the
       earliest differing entry in that declared order. A spec recording no
       entries is a failure of this criterion, not a satisfaction of it.
-- [x] AC2 During any run in which the guard's trace is installed, every
+- [ ] AC2 During any run in which the guard's trace is installed, every
       deserialization of a checkpoint path either went through the guard or
       aborts the run before the harness writes any output. Evidence is the
       trace's own report over the runs AC3 and AC4 perform — this criterion
@@ -54,7 +54,7 @@ them.
       not; a cache written by a different site at the same path; and a spec
       matching on every parameter but differing in the generating-block hash.
       Each aborts, and a matching cache resumes normally in the same script.
-- [x] AC4 The five sites in the Scope table source the guard, and the CI job
+- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
       that already runs the repo's standalone `data-raw` checkers fails when a
       listed site's cache read bypasses it. Verified by reverting one site's
       guard call and observing that job red.
@@ -119,6 +119,8 @@ them.
 - 2026-08-14: T7 — full local gate green: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed, all six data-raw checkers and their self-tests exit 0. The suite is unaffected by design — every changed R file is under `data-raw/`, which `.Rbuildignore` excludes.
 - 2026-08-14: AC5 declared file list, the whole of what this branch changes: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.py`, `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, the four `data-raw/oracle-bayesian-*.R` sites, and `data-raw/record-claims.tsv`. Nothing under `tests/testthat/fixtures/`, `tests/testthat/_snaps/`, `R/sysdata.rda`, or any `.rds` is touched.
 - 2026-08-14: status review.
+- 2026-08-14: review return 1 (defect) — AC2 fails on two counts: the trace's `guarded` set is permanent, so a swallowed bypass after any legitimate read is subtracted out and never reported (F1, 80); and the fork demonstration exercises the spec check, not the trace, so the bare-read-inside-a-worker scenario the trace fix was written for is demonstrated nowhere (F25, 85). AC4 fails because the routing checker matches raw text with no comment stripping (F14, 82) and accepts `ckpt_read` OR `ckpt_store_get` anywhere in the file, so an oracle site can drop its per-entry guard undetected (F15, 80). AC2 and AC4 unticked; status in-progress. F3, F4, F10 and F11 (85/82/85/85) are actioned alongside.
+- 2026-08-14: the AC2 evidence line recorded earlier in this same review claimed the fork case demonstrates the trace surviving `mclapply`; that claim was false and is corrected in the Review section rather than left standing.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -177,3 +179,81 @@ WARN 3 | SKIP 2 | PASS 7564 ]`; `air format --check` exit 0;
 below. No NEWS entry is owed — every changed R file is under `data-raw/`, which
 `.Rbuildignore` excludes from the build, so nothing user-visible changed.
 
+**`devtools::check()`** — 0 errors, 0 warnings, 0 notes (13m 33s).
+
+**CI on PR #129** — `check-references`, `checkpoint-guard`, `lint`,
+`format-check` and `pkgdown` all pass; `R CMD check` on both platforms and
+coverage were still running at the return.
+
+### Independent review — three lenses, then a scorer
+
+The blame-history lens (Sonnet) and the prior-review lens (Sonnet) each reported
+no findings: no regression of a prior milestone's intent, no contradiction of a
+recorded decision, no regression of a LESSONS entry. Both independently
+confirmed the four oracle rewrites preserve iteration order, output positions,
+seed derivation and fixture contents. The diff-bug lens (Opus) reported 31
+candidates, scored by a fresh Sonnet scorer holding the diff and this file.
+
+**Actioned (score >= 80), eight findings.** Four demonstrate an acceptance
+criterion failing as written and force the return; four are severe verified
+gaps that do not violate a criterion's literal text.
+
+- **F1 (80, AC2 fails).** `ckpt_read()` unions the path into the trace's
+  `guarded` set permanently, and `ckpt_trace_assert()` is
+  `setdiff(observed, guarded)`. After any legitimate guarded read of a path, a
+  later bare `readRDS` of that same path whose abort a caller swallows is
+  subtracted out and never reported. The demo's swallowed-bypass case passes
+  only because `ckpt_trace_reset()` precedes it, which no real site calls.
+- **F25 (85, AC2 fails).** The fork demonstration does not exercise the trace.
+  The planted `cell-02.rds` carries no spec, so it aborts through the ordinary
+  spec check; the bare-`readRDS`-inside-a-forked-worker scenario the trace fix
+  was written for is demonstrated nowhere. AC2's fork evidence is missing, and
+  this file's own earlier claim to the contrary was wrong.
+- **F14 (82, AC4 fails).** `check-checkpoint-sites.py` matches raw file text
+  with no comment stripping, so `# source("data-raw/checkpoint-guard.R")` and
+  `# ckpt_trace_assert()` both pass. Commenting the guard out during debugging
+  is invisible to CI.
+- **F15 (80, AC4 fails).** The routing regex accepts `ckpt_read` OR
+  `ckpt_store_get` anywhere in the file. Replacing an oracle site's
+  `ckpt_store_get(...)` with direct payload access leaves `ckpt_read` present
+  and the checker silent — restoring the pre-M120 defect on the four sites CI
+  can never run.
+- **F3 (85).** `get0(..., mode = "function")` inherits, so a renamed block
+  function resolves to a same-named function up the search path. Two sites
+  declare a block function named `simulate`, which shadows `stats::simulate`:
+  rename it and the hash tracks the generic forever.
+- **F4 (82).** Four of five declared blocks under-cover their generators —
+  `est_occ()`, `cell_offset`, `kc_of()` and the brms `base_fit` all determine
+  cached numbers and sit outside the hashed block.
+- **F11 (85).** The per-entry store is inert on all four oracle sites: file-level
+  and entry-level checks use the same spec, so the file check always fires first
+  and the entry check can never discriminate. AC3's partial-staleness form holds
+  only on the stand-in, which writes under a different site name.
+- **F10 (85).** `file_spec()` uses cell 1's parameters as the whole file's spec,
+  so editing cell 1 discards valid cells 2-4 (~720 Stan refits).
+
+**Logged below the action bar (score < 80), 23 findings** — surfaced, not
+dropped: F2 formals excluded from the block hash (75); F19 self-test probes only
+site 1 (65); F6 re-sourcing the guard resets trace state while `readRDS` stays
+traced (65); F24 five site comments claim the trace self-installs when it does
+not (65); F12 raising `n_rep` now discards the whole cache (60); F16 the checker
+never enforces the declared parameter ORDER (60); F23 the CI comment overstates
+"end to end" (60); F22 the job installs the full Suggests closure (55); F8 the
+trace fires on every `readRDS` process-wide (50); F5 `all.equal` accepts a type
+change (40); F7 `in_guard` does not restore (40); F17 the bare-read regex is
+anchored to the name `ckpt` (40); F26 the smoke case mutates a cell rather than
+`build_cells()` (40); F28 the TSV overclaims what the hash invalidates (40);
+F13 `ckpt_store_get` conflates absent with NULL payload (35); F27 the "whatever
+spelling" framing overstates (35); F9 `deparse` is not stable across R releases
+(30); F20 the `site` string is unvalidated (30); F29 the new checker is arguably
+records apparatus needing its own decision entry (30); F30 the TSV row count is
+unpinned (30); F18 the spec-block regex is coupled to air's indentation (25);
+F31 bare `stop()`/`cat()` in `data-raw` (20); F21 the claim that the CI job
+would fail for a missing `devtools` (5) — empirically false, that job passes.
+
+### Return
+
+Returned to `in-progress` at the first defect return for this milestone. F1 and
+F25 fail AC2; F14 and F15 fail AC4. AC2 and AC4 are unticked; AC1, AC3, AC5 and
+AC6 keep their recorded evidence. F3, F4, F10 and F11 are actioned in the same
+pass.
