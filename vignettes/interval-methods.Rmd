@@ -148,17 +148,54 @@ some robustness to mild non-normality. It is not, however, a remedy for heavy
 tails: on strongly skewed subject effects it under-covers about as badly as the
 default (see [When the default under-covers](#when-the-default-under-covers)).
 
-**Which is the tighter interval?** Neither, reliably — and the two grids this
-package has measured point the opposite way from what you might expect of a
-"robust" interval. Across a 16-cell gaussian/`t(5)` sweep and a larger 64-cell
-battery spanning four distribution families, `"burch"` is the *narrower* of the
-two in 16 of 16 and 59 of 64 cells respectively — a median of about 6% narrower
-on the smaller grid and about 4% on the larger. No distribution family reverses
-that on its median, and on the uniform family `"burch"` is narrower in every
-cell. Five cells of the larger grid do reverse, spread across the gaussian,
-`t(5)` and chi-square(1) families; all five sit at a true ICC of 0.6 with 5
-raters, and none exceeds parity by more than 2.2%. That is a real limit on the
-comparison, though, because both
+**Which is the tighter interval?** Neither, reliably — and the margin between
+them is not a fixed one. Over the larger grid's 64 cells, spanning four
+distribution families, `"burch"` is the *narrower* of the two in 59 of 64 cells
+of the larger grid, but how much narrower depends on where in the design you
+look. Below, the median width ratio is `"burch"`'s width over `"searle"`'s, so a
+value under 1 means `"burch"` is narrower and 1 means they are the same width.
+
+| true ICC | median width ratio | `"burch"` narrower |
+|---:|---:|---:|
+| 0.05 | 0.9485 | 16 of 16 |
+| 0.1 | 0.9470 | 16 of 16 |
+| 0.3 | 0.9475 | 16 of 16 |
+| 0.6 | 0.9971 | 11 of 16 |
+
+| subjects (at 5 raters) | median width ratio | `"burch"` narrower |
+|---:|---:|---:|
+| 10 | 0.9154 | 15 of 16 |
+| 30 | 0.9646 | 15 of 16 |
+| 50 | 0.9769 | 13 of 16 |
+
+Two things to read off. In the true ICC, `"burch"`'s width advantage holds much
+the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
+(on the larger grid; the smaller grid's margin does shrink across its levels) —
+by level medians the largest margin is at a true ICC of 0.1, not at the bottom
+of the range, though cell by cell the bottom level carries the larger margin
+in 11 of 16 paired cells — and
+then collapses to near parity at a true ICC of 0.6, on the one grid reaching that
+value, where every cell favouring `"searle"` sits. In the subject count it
+shrinks steadily as the subject count grows, measured at 5 raters, which is the
+cut the second table takes. That cut is at 5 raters because 10 subjects is the
+only subject count in either grid where the rater count varies, so an
+unstratified row there would be confounded with it. The smaller grid's 16 cells
+carry only the two lowest true-ICC values, so that sweep cannot show the first
+pattern; it shows the second in the same direction, `"burch"` running narrower by
+a median width ratio of 0.9017 at 10 subjects, 0.9611 at 30 subjects and 0.9775
+at 50 subjects.
+
+A pooled figure over both grids would hide all of this, and it would invite a
+second misreading. The smaller grid's design points are a subset of the larger
+one's, so much of the gap between their pooled medians is which true-ICC values
+each grid covers rather than a disagreement between two bodies of evidence — but
+only much of it. Restricting the larger grid to the smaller one's design points
+closes most of that gap and leaves a remainder, and the two are separate
+simulations that mostly disagree at the design points they share, agreeing
+closely at only a couple of them. A pooled between-grid comparison is not a clean
+contrast in either direction, which is why nothing above is one.
+
+There is a real limit on the comparison, though, because both
 grids draw only the **subject effects** from the non-normal family and always
 draw the errors from a normal. Burch's own expected-length comparison — which is
 against this very exact-F interval — is kurtosis-conditional: he finds his

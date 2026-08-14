@@ -18,7 +18,6 @@ Description: Estimates interrater-reliability intraclass correlation
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
 Imports:
     cli,
     generics,
@@ -54,3 +53,4 @@ BugReports: https://github.com/jmgirard/intraclass/issues
 Depends: 
     R (>= 3.5)
 LazyData: true
+Config/roxygen2/version: 8.1.0

@@ -9,7 +9,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
 | ID | Title | Status | Depends on | Priority | File/Archive |
 |---|---|---|---|---|---|
-| M117 | State the `"burch"`/`"searle"` width relationship conditionally | blocked | — | normal | milestones/M117-conditional-width-claim.md |
+| M117 | State the `"burch"`/`"searle"` width relationship conditionally | review | — | normal | milestones/M117-conditional-width-claim.md |
 
 | M116 | Correct the falsified `"searle"`/`"burch"` width claims | done | — | normal | milestones/archive/M116-classical-width-claims.md |
 | M115 | Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice | done | — | normal | milestones/archive/M115-skew-undercoverage-caveat.md |

@@ -176,16 +176,57 @@ cells <- rbind(
 )
 
 # --- the figures the docs cite -------------------------------------------------
-summarize_grid <- function(d, grid, dist) {
-  x <- d[d$grid == grid & (is.na(dist) | d$dist == dist), ]
+# One arithmetic core, two groupings. M117 added the per-factor grouping and
+# routed the pre-existing per-distribution one through the same function, so the
+# two tables cannot drift into computing "median ratio" differently.
+width_summary <- function(x) {
   data.frame(
-    grid = grid,
-    dist = if (is.na(dist)) "all" else dist,
     cells = nrow(x),
     burch_narrower = sum(x$burch_narrower),
     ratio_min = round(min(x$ratio), 4),
     ratio_median = round(stats::median(x$ratio), 4),
     ratio_max = round(max(x$ratio), 4)
+  )
+}
+
+summarize_grid <- function(d, grid, dist) {
+  x <- d[d$grid == grid & (is.na(dist) | d$dist == dist), ]
+  cbind(
+    data.frame(grid = grid, dist = if (is.na(dist)) "all" else dist),
+    width_summary(x)
+  )
+}
+
+# M117: the same ratio, cut by the DESIGN factors rather than by distribution
+# family. The pooled per-grid median the docs used to state hides both cuts --
+# the advantage shrinks in the true ICC and in the subject count, and reaches
+# parity at rho = 0.6, where every reversing cell sits.
+#
+# `n` (raters) is deliberately NOT cut as a factor of its own. In both grids
+# n = 2 occurs only at k = 10, so the MARGINAL rater contrast is confounded with
+# the subject count: the n = 5 margin is the only one carrying k in {30, 50}.
+# (The contrast at fixed k is separable and points the other way -- which is
+# exactly why a marginal per-n row would invite a false reading. The confounding
+# itself is asserted below and pinned in
+# tests/testthat/test-doc-skew-caveat.R.)
+#
+# That same confounding runs the other way through the MARGINAL per-k rows, and
+# the `k_at_n5` factor is what the docs quote instead: the subject-count cut
+# HOLDING the rater count at 5, the only rater count present at every subject
+# count. The marginal `k` rows stay in the file because the per-rho rows are
+# compared against them, but no doc surface states one -- at k = 10 the marginal
+# median (0.9293 on M113) mixes n = 2 and n = 5 cells while k = 30 and k = 50
+# carry n = 5 alone. The per-rho rows need no such stratification: every rho
+# level carries the identical (k, n) mix, so that cut is balanced by design.
+summarize_level <- function(d, grid, fac, level) {
+  # `k_at_n5` is the k cut restricted to the 5-rater cells; every other factor
+  # names its own column and takes the grid whole.
+  base <- if (identical(fac, "k_at_n5")) d[d$n == 5, ] else d
+  col <- if (identical(fac, "k_at_n5")) "k" else fac
+  x <- base[base$grid == grid & base[[col]] == level, ]
+  cbind(
+    data.frame(grid = grid, factor = fac, level = level),
+    width_summary(x)
   )
 }
 
@@ -201,6 +242,48 @@ summary_tbl <- do.call(
   Map(function(g, d) summarize_grid(cells, g, d), keys$grid, keys$dist)
 )
 rownames(summary_tbl) <- NULL
+
+level_keys <- do.call(
+  rbind,
+  lapply(c("m76", "m113"), function(g) {
+    do.call(
+      rbind,
+      lapply(c("rho", "k", "k_at_n5"), function(fac) {
+        rows <- if (identical(fac, "k_at_n5")) {
+          cells$k[cells$grid == g & cells$n == 5]
+        } else {
+          cells[[fac]][cells$grid == g]
+        }
+        data.frame(
+          grid = g,
+          factor = fac,
+          level = sort(unique(rows)),
+          stringsAsFactors = FALSE
+        )
+      })
+    )
+  })
+)
+level_tbl <- do.call(
+  rbind,
+  Map(
+    function(g, fac, lv) summarize_level(cells, g, fac, lv),
+    level_keys$grid,
+    level_keys$factor,
+    level_keys$level
+  )
+)
+rownames(level_tbl) <- NULL
+
+# The design fact that licenses leaving the rater count out of `level_tbl`:
+# n = 2 occurs only at k = 10, in both grids. Asserted, not assumed -- if a
+# future grid breaks the confounding, this reds and a per-n cut becomes
+# statable.
+stopifnot(
+  "n = 2 no longer occurs only at k = 10 -- the marginal rater contrast may now be separable" = all(
+    cells$k[cells$n == 2] == 10
+  )
+)
 
 # --- pins: the figures the prose sites are allowed to state --------------------
 pick <- function(grid, dist) {
@@ -232,11 +315,157 @@ stopifnot(
     4
 )
 
-# Every family's median ratio is below 1 on both grids — the claim the docs make
-# is "narrower in nearly every cell of both grids", never a kurtosis-conditional
-# direction, because no family here reverses.
+# Every family's median ratio is below 1 on both grids — no family reverses on
+# its median, which is why the docs state no kurtosis-conditional direction.
 stopifnot(
   "a family's median ratio is not below 1" = all(summary_tbl$ratio_median < 1)
+)
+
+# --- M117 pins: the per-level figures the docs state ---------------------------
+# Exact to 4 dp, not to a rounding bucket. There is no Monte-Carlo noise at this
+# layer -- the script is pure aggregation over committed fixtures -- so a moved
+# digit means a source moved, and the docs quoting these numbers should red.
+# The bucket idiom above is kept for the two figures it was written for, but it
+# cannot carry these: at rho = 0.6 the median is 0.9971, and a drift to 1.0049
+# REVERSES the direction the prose states while staying in the same bucket.
+lvl <- function(grid, fac, level) {
+  hit <- level_tbl[
+    level_tbl$grid == grid &
+      level_tbl$factor == fac &
+      abs(level_tbl$level - level) < 1e-9,
+  ]
+  stopifnot("no such (grid, factor, level) row" = nrow(hit) == 1L)
+  hit
+}
+
+stopifnot(
+  "M113 rho=0.05 median moved" = lvl("m113", "rho", 0.05)$ratio_median ==
+    0.9485,
+  "M113 rho=0.1 median moved" = lvl("m113", "rho", 0.1)$ratio_median == 0.947,
+  "M113 rho=0.3 median moved" = lvl("m113", "rho", 0.3)$ratio_median == 0.9475,
+  "M113 rho=0.6 median moved" = lvl("m113", "rho", 0.6)$ratio_median == 0.9971,
+  "M113 k=10 median moved" = lvl("m113", "k", 10)$ratio_median == 0.9293,
+  "M113 k=30 median moved" = lvl("m113", "k", 30)$ratio_median == 0.9646,
+  "M113 k=50 median moved" = lvl("m113", "k", 50)$ratio_median == 0.9769,
+  # The rows the docs actually quote: the subject-count cut at 5 raters.
+  "M113 k=10 (n=5) median moved" = lvl("m113", "k_at_n5", 10)$ratio_median ==
+    0.9154,
+  "M113 k=30 (n=5) median moved" = lvl("m113", "k_at_n5", 30)$ratio_median ==
+    0.9646,
+  "M113 k=50 (n=5) median moved" = lvl("m113", "k_at_n5", 50)$ratio_median ==
+    0.9769,
+  "M76 k=10 (n=5) median moved" = lvl("m76", "k_at_n5", 10)$ratio_median ==
+    0.9017,
+  "M76 k=30 (n=5) median moved" = lvl("m76", "k_at_n5", 30)$ratio_median ==
+    0.9611,
+  "M76 k=50 (n=5) median moved" = lvl("m76", "k_at_n5", 50)$ratio_median ==
+    0.9775,
+  "M113 k=10 (n=5) narrower count moved" = lvl(
+    "m113",
+    "k_at_n5",
+    10
+  )$burch_narrower ==
+    15L,
+  "M113 k=50 (n=5) narrower count moved" = lvl(
+    "m113",
+    "k_at_n5",
+    50
+  )$burch_narrower ==
+    13L
+)
+
+# 0. The confounding the `k_at_n5` cut exists to remove, asserted as the
+#    structure it is rather than assumed: the marginal and 5-rater cuts are the
+#    SAME row wherever the subject count carries n = 5 alone, and differ at
+#    k = 10, the one level that also carries n = 2. If a future grid balanced
+#    the rater count across subject counts, the two cuts would coincide
+#    everywhere and this reds -- at which point the marginal rows become
+#    statable and the stratified ones stop earning their place.
+for (g in c("m76", "m113")) {
+  same <- vapply(
+    c(30, 50),
+    function(lv) {
+      lvl(g, "k", lv)$ratio_median == lvl(g, "k_at_n5", lv)$ratio_median
+    },
+    logical(1)
+  )
+  stopifnot(
+    "a subject count away from k = 10 no longer carries n = 5 alone" = all(
+      same
+    ),
+    "k = 10's marginal and 5-rater medians no longer differ -- the rater count may now be balanced" = abs(
+      lvl(g, "k", 10)$ratio_median - lvl(g, "k_at_n5", 10)$ratio_median
+    ) >
+      0.01
+  )
+}
+
+# The two sentences those figures license, stated as properties so a source
+# change reds here even if someone updates the digits above.
+m113_rho <- level_tbl[level_tbl$grid == "m113" & level_tbl$factor == "rho", ]
+m113_rho <- m113_rho[order(m113_rho$level), ]
+stopifnot(
+  # 1. Parity at the top of the rho range, and nowhere near it below.
+  "rho = 0.6 is no longer within 1% of parity" = abs(
+    1 - m113_rho$ratio_median[m113_rho$level == 0.6]
+  ) <
+    0.01,
+  "burch is no longer the narrower one at rho = 0.6 -- the direction reversed" = m113_rho$ratio_median[
+    m113_rho$level == 0.6
+  ] <
+    1,
+  "a rho level below 0.6 is no longer clear of parity" = all(
+    m113_rho$ratio_median[m113_rho$level < 0.6] < 0.96
+  ),
+  # 1b. FLAT below 0.6, not shrinking: the three sub-0.6 medians span under half
+  #     a percentage point and do not decrease in order (0.9485, 0.9470,
+  #     0.9475). The docs said "shrinks as either grows" for three milestones;
+  #     that is false in rho on these very figures, and this is the pin that
+  #     reds if anyone restores it.
+  "the sub-0.6 rho medians are no longer flat" = diff(range(
+    m113_rho$ratio_median[m113_rho$level < 0.6]
+  )) <
+    0.005,
+  "the rho medians are now monotone below 0.6 -- 'shrinks as rho grows' may have become true" = !all(
+    diff(m113_rho$ratio_median[m113_rho$level < 0.6]) > 0
+  ),
+  # 2. Every reversing cell sits at rho = 0.6.
+  "a reversing cell now sits away from rho = 0.6" = all(
+    cells$rho[!cells$burch_narrower] == 0.6
+  )
+)
+
+# 3. The advantage shrinks monotonically as the subject count grows -- on BOTH
+#    grids and in BOTH cuts, which is what lets the docs state that direction
+#    without naming a grid. The `k_at_n5` leg is the one the docs quote; the
+#    marginal leg is checked too so the direction is not an artifact of the
+#    stratification.
+for (g in c("m76", "m113")) {
+  for (fac in c("k", "k_at_n5")) {
+    by_k <- level_tbl[level_tbl$grid == g & level_tbl$factor == fac, ]
+    by_k <- by_k[order(by_k$level), ]
+    stopifnot(
+      "the ratio is no longer monotone increasing in the subject count" = all(
+        diff(by_k$ratio_median) > 0
+      )
+    )
+  }
+}
+
+# 4. M76's design is a strict subset of M113's on (rho, k, n): the containment
+#    that made a POOLED per-grid figure read as a between-grid difference when
+#    it was really M113's extra rho levels. Pinned so the docs' "derived from
+#    the M113 grid alone" choice keeps its reason.
+combos <- function(g) {
+  x <- cells[cells$grid == g, c("rho", "k", "n")]
+  sort(unique(paste(x$rho, x$k, x$n, sep = "|")))
+}
+stopifnot(
+  "M76's design is no longer contained in M113's" = all(
+    combos("m76") %in% combos("m113")
+  ),
+  "M113 no longer carries design points M76 lacks" = length(combos("m113")) >
+    length(combos("m76"))
 )
 
 header <- c(
@@ -251,7 +480,22 @@ header <- c(
   "#          rnorm, asserted by the generator against the sweep scripts' source.",
   "#          Burch (2011) measures with BOTH effects non-normal, so his reported",
   "#          leptokurtic reversal is untested here, not refuted.",
-  "# ratio = burch median width / searle median width; < 1 means burch is NARROWER."
+  "# ratio = burch median width / searle median width; < 1 means burch is NARROWER.",
+  "# Blocks: by distribution family, then by DESIGN FACTOR (M117), then per cell.",
+  "#          Factors: rho, subject count k, and k_at_n5 -- the k cut holding the",
+  "#          rater count at 5. n (raters) gets no factor of its own: n = 2 occurs",
+  "#          only at k = 10 in both grids, so the marginal rater contrast is",
+  "#          confounded with k. The same confounding runs back through the",
+  "#          marginal k rows, which is why the docs quote k_at_n5 instead."
+)
+
+level_header <- c(
+  "# by design factor (M117). One row per (grid, factor, level).",
+  "# The pooled per-grid median hides both cuts: below a true ICC of 0.6 the",
+  "# advantage is flat rather than shrinking, then collapses to near parity at",
+  "# 0.6, where all five reversing cells sit; and it shrinks steadily in the",
+  "# subject count. Quote the k_at_n5 rows, never the marginal k rows: at k = 10",
+  "# the latter mix n = 2 and n = 5 while k = 30 and k = 50 carry n = 5 alone."
 )
 
 as_tsv <- function(d) {
@@ -263,9 +507,34 @@ as_tsv <- function(d) {
 
 out <- "data-raw/m116-classical-width-comparison.tsv"
 writeLines(
-  c(header, as_tsv(summary_tbl), "", "# per-cell detail", as_tsv(cells)),
+  c(
+    header,
+    as_tsv(summary_tbl),
+    "",
+    level_header,
+    as_tsv(level_tbl),
+    "",
+    "# per-cell detail",
+    as_tsv(cells)
+  ),
   out
 )
 
 print(summary_tbl)
+print(level_tbl)
 cat("\nwrote ", out, "\n", sep = "")
+
+# --- the test-visible copy (M117) ---------------------------------------------
+# `data-raw/` is .Rbuildignore'd, so a test reading the fixture above skips
+# under `R CMD check` -- and a doc pin that skips where the docs actually ship
+# pins nothing (M115). The per-CELL rows go to tests/testthat/fixtures/ so the
+# test recomputes each level median itself rather than trusting `level_tbl`.
+test_fixture <- "tests/testthat/fixtures/classical-width-by-cell.tsv"
+utils::write.table(
+  cells,
+  test_fixture,
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
+cat("wrote ", test_fixture, "\n", sep = "")
