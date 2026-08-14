@@ -1,6 +1,6 @@
 # M118: Measure Burch's leptokurtic width reversal on a both-components-non-normal grid
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
