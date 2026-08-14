@@ -21,10 +21,13 @@
 # it against non-aborting legs measures selection, not width. This is the same
 # artifact cairn/references/classical-oneway-comparison.md flags for C3.
 #
-# DGP FENCE: neither grid varies the ERROR term's distribution. Both draw the
-# subject effect from `dist` and the error always from rnorm. That is asserted
-# below against the generating scripts' PARSED bodies, because the fixtures carry
-# only a `dist` label and cannot witness it.
+# DGP FENCE: neither grid COMPARED HERE varies the ERROR term's distribution.
+# Both draw the subject effect from `dist` and the error always from rnorm. That
+# is asserted below against the generating scripts' PARSED bodies, because the
+# fixtures carry only a `dist` label and cannot witness it. M118 added a THIRD
+# grid that does vary it; it is deliberately absent from `dgp_scripts` below,
+# whose fence asserts the opposite property, and its own mirror-image fence lives
+# in tests/testthat/test-m118-both-components-dgp.R.
 
 # Run from the repo root, like the sibling data-raw scripts.
 stopifnot("run this from the repo root" = file.exists("DESCRIPTION"))
@@ -479,7 +482,9 @@ header <- c(
   "# DGP: both grids draw the SUBJECT EFFECT from `dist` and the error always from",
   "#          rnorm, asserted by the generator against the sweep scripts' source.",
   "#          Burch (2011) measures with BOTH effects non-normal, so his reported",
-  "#          leptokurtic reversal is untested here, not refuted.",
+  "#          leptokurtic reversal is not exercised by EITHER grid in this table.",
+  "#          M118 measured it on a third grid that varies both components, where",
+  "#          the reversal reproduced: see m118-width-reversal-by-cell.tsv, D-030.",
   "# ratio = burch median width / searle median width; < 1 means burch is NARROWER.",
   "# Blocks: by distribution family, then by DESIGN FACTOR (M117), then per cell.",
   "#          Factors: rho, subject count k, and k_at_n5 -- the k cut holding the",
