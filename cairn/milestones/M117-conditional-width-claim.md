@@ -1,6 +1,6 @@
 # M117: State the `"burch"`/`"searle"` width relationship conditionally
 
-- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** review   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -141,7 +141,7 @@ Re-cut (2026-08-13):
 
 - [x] T18 Prose-mutation leg in `data-raw/m117-width-pin-mutations.R`: patch a swept surface → run the scan → require red; coverage assertion; class list naming each review-return defeat, pooled-figure mutations varying placement, form and grid per AC4; fix `width_strip_tables()` (per-table non-greedy match) so all three placements red; scan header states the claimed-classes boundary.
 - [x] T19 AC9 corrections: grid hedge at the flat-clause sites carrying none; the largest-margin sentence states its cut; association pins and restoration mutations; ledgers re-triaged.
-- [ ] T20 Full gate on a rebuilt `build_vignettes = TRUE` install; CI matrix; review evidence refresh.
+- [x] T20 Full gate on a rebuilt `build_vignettes = TRUE` install; CI matrix; review evidence refresh.
 
 ## Work log
 
@@ -195,6 +195,7 @@ Re-cut (2026-08-13):
 - 2026-08-13: resumed by /milestone-implement (blocked → in-progress; blocker resolved by the re-cut gate's guard-scope decision). No implementation question gate: the same-day plan gate settled the open choices. Remaining: T18–T20.
 - 2026-08-13: T18 — `width_strip_tables()` rewritten as a pipe-segment scanner (blanks only runs of ≥2 cell-shaped segments: ≤60 chars, sentence-free), so prose between tables survives to be scanned; the three refusal scans hoisted to named helpers (`width_unchecked_figures`, `width_loose_ratios`, `width_pct_violations`) the harness sources with `test_that` stubbed — one definition, no drift; spelled net allows up to two non-stopword qualifiers; percent figures refused in width sentences (nominal 90/95/99/100 excluded — knitr `out.width = "100%"` and the HPDI 95% were the two legitimate hits); ratio-bearing table rows nothing consumes refused as orphans; claimed-classes boundary declared in the file header. Prose-mutation leg: 15 class-named mutations (placement × form × grid for the pooled family; every review-return defeat encoded), all refused, control clean, coverage asserted. Suite: 0 failed, 945 passed; air + lintr clean (lintr 3.4.0 installed locally — absent from this machine's library).
 - 2026-08-13: T19 — the flat template now carries the grid hedge "(on the larger grid; the smaller grid's margin does shrink across its levels)", stated verbatim at all seven sites (`R/icc.R` ×2, `R/ci-classical.R`, `R/boundary-hint.R`, both vignettes, `NEWS.md`) and backed by a direction pin recomputing both facts from the per-cell rows; the article's largest-margin sentence states its cut ("by level medians") with the 11-of-16 paired-cell contradiction beside it, pinned by three new canonical shapes — `argmax_cut` (checked against the medians), `argmax_bare` (the unqualified form fails outright), `paired_cells` (recomputed pairing on (k, n, dist)); `width_cardinal_value()` returns NA on unknown words so a shape matching a non-cardinal fails instead of crashing. Three AC9 restoration mutations added (hedge dropped, cut dropped, paired count swapped) — 18 prose mutations, all refused, control clean. `mpl-doc-claims.tsv` row re-keyed for the hedged `R/icc.R` sentence (full-sentence hash restaled, M105); all four data-raw checkers exit 0. Doc suite 0 failed / 948 passed; `devtools::document()` regenerated `man/icc.Rd`; air + lintr clean.
+- 2026-08-13: T20 — gate clean on a rebuilt `build_vignettes = TRUE` install. `test-doc-skew-caveat.R` at `load_package = "installed"`, `NOT_CRAN=true CI=true`: 0 failed, 1177 passed, 0 skipped. Full installed suite: 0 failed, 0 errors, 7031 passed, 23 skipped (all `skip_on_ci`). `pkgdown::check_pkgdown()` clean, `devtools::document()` no diff, `air format --check` clean, `lintr` 0 lints, all four data-raw checkers exit 0, `cairn_validate` green (the two sizing advisories are the accepted re-cut artifact). CI matrix fully green on `572b8ec` via REST polling (M63): both platform checks, test-coverage, lint, format-check, pkgdown, check-references, both codecov checks. Status → review.
 
 ## Decisions
 
