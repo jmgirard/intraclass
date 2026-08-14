@@ -185,8 +185,8 @@ and milestones; never restate a value here.
   reported width reversal — his REML interval running wider than the exact-F one
   for symmetric leptokurtic data — reproduces on a grid drawing **both** variance
   components from the non-Gaussian family, which the M76 and M111 grids do not.
-  W1 requires an ordered sign change across the six symmetric Table 2 families,
-  and it was met at 10 of 10 subject counts on every limb.
+  W1 requires a per-family sign change across the six symmetric Table 2 families,
+  light-tailed narrower and heavy-tailed wider, at a majority of subject counts.
   Results/disposition appended at T6/T7.
 
 - [fallback-on-abort-comparison.md](fallback-on-abort-comparison.md) — synthesis

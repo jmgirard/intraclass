@@ -78,6 +78,29 @@ m118_is_assign <- function(e) {
     is.name(e[[2]])
 }
 
+# every symbol assigned anywhere inside `expr`, at any nesting depth, by any of
+# `<-`, `=` or `<<-`
+m118_assign_targets <- function(expr) {
+  out <- character(0)
+  walk <- function(e) {
+    if (is.call(e)) {
+      if (
+        is.name(e[[1]]) &&
+          as.character(e[[1]]) %in% c("<-", "=", "<<-") &&
+          length(e) >= 3L &&
+          is.name(e[[2]])
+      ) {
+        out <<- c(out, as.character(e[[2]]))
+      }
+      for (i in seq_along(e)) {
+        if (!is.null(e[[i]]) && !identical(e[[i]], quote(expr = ))) walk(e[[i]])
+      }
+    }
+  }
+  walk(expr)
+  unique(out)
+}
+
 m118_top_assign <- function(exprs, nm) {
   hit <- NULL
   for (e in exprs) {
@@ -122,6 +145,26 @@ assert_both_components_dgp <- function(path) {
     )
   }
 
+  # 1b. No parameter is rebound inside the body. Clause 2 below checks that the
+  #     SYMBOL `dist` reaches draw_standard(); without this clause it cannot
+  #     tell that symbol from a local of the same name, so a single
+  #     `dist <- "gaussian"` at the top of the body satisfies every other clause
+  #     while making all 125 cells gaussian (a nominal t5 cell then yields
+  #     pooled excess kurtosis -0.086). Found at the M118 review; the guard was
+  #     green against it. `rho`, `k` and `n` are covered too because rebinding
+  #     any of them corrupts the design a cell's label claims.
+  #     Walked over the WHOLE body, not just its top level: a rebinding nested
+  #     in an `if` or a braced block is the same defect one indent down.
+  params <- names(formals(eval(gen)))
+  rebound <- intersect(m118_assign_targets(gen_body), params)
+  if (length(rebound)) {
+    stop(
+      "gen_oneway rebinds its own parameter(s), so a cell need not use what ",
+      "its label says: ",
+      paste(rebound, collapse = ", ")
+    )
+  }
+
   # 2. BOTH components are drawn by draw_standard(), each passing the cell's
   #    `dist` through. Checking only one of them is what would let the residual
   #    silently revert to a fixed family.
@@ -157,6 +200,45 @@ test_that("the M118 generator draws both components from the cell's family", {
     "data-raw/ not present (built package)"
   )
   expect_true(assert_both_components_dgp(sweep_script))
+})
+
+test_that("gen_oneway composes the two components so the population ICC is the cell's", {
+  skip_if_not(
+    file.exists(sweep_script),
+    "data-raw/ not present (built package)"
+  )
+  # The AST fence above checks WHERE the draws come from. It cannot see how they
+  # are COMBINED, and two mutations found at the M118 review pass it while
+  # corrupting the truth every coverage figure is scored against:
+  # `sd_a <- rho` gives icc_hat 0.346 and `rep(a, times = n)` gives 0.015, both
+  # against a cell claiming 0.5. This leg pins the composition instead of the
+  # source, which is the "located and scaled per burch2011 sec 3 so the
+  # population ICC equals the cell's rho" property the milestone Scope asserts.
+  #
+  # Tolerance 0.10 against a measured legitimate spread of at most 0.073 over
+  # six seeds (chisq1, the worst) and a nearest mutation at 0.154 -- it
+  # separates the two without sitting on either. Seeds are fixed, so this is
+  # deterministic and cannot flake.
+  # Only the definitions this leg needs are evaluated -- the script calls
+  # devtools::load_all() and runs a sweep at top level, so it must never be
+  # sourced whole from a test. `classical_oneway_ss()` is the package's own.
+  env <- new.env(parent = globalenv())
+  wanted <- c("draw_standard", "pe_beta", "table2_kurtosis", "gen_oneway")
+  for (e in as.list(parse(sweep_script))) {
+    if (m118_is_assign(e) && as.character(e[[2]]) %in% wanted) {
+      eval(e, envir = env)
+    }
+  }
+  expect_setequal(ls(env), wanted)
+
+  icc_hat <- function(g) {
+    ss <- classical_oneway_ss(g)
+    (ss$msa - ss$mse) / (ss$msa + (ss$n - 1) * ss$mse)
+  }
+  for (fam in names(env$table2_kurtosis)) {
+    g <- env$gen_oneway(400L, 5L, 0.5, fam, 900001L)
+    expect_lt(abs(icc_hat(g) - 0.5), 0.10, label = paste("icc_hat", fam))
+  }
 })
 
 test_that("the M118 sweep script is not in M116's subject-only fence list", {

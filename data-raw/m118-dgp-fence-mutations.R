@@ -77,6 +77,31 @@ mutations <- list(
     name = "dispatcher: draw_standard stops branching on dist",
     from = "    dist,",
     to = "    \"gaussian\","
+  ),
+  # The four below were added after the M118 review, where the first of them
+  # was found GREEN against the shipped fence. All seven above vary WHERE a
+  # draw comes from; none varied what is PASSED IN, which is the axis the fence
+  # was blind on -- the M117 lesson (an instrument's match set and its
+  # enforcement set differing) landing on this guard's own mutation family.
+  list(
+    name = "parameter shadowed: dist rebound in the body",
+    from = "  set.seed(seed)",
+    to = "  set.seed(seed)\n  dist <- \"gaussian\""
+  ),
+  list(
+    name = "parameter shadowed: dist rebound inside a block",
+    from = "  set.seed(seed)",
+    to = "  set.seed(seed)\n  if (TRUE) {\n    dist <- \"gaussian\"\n  }"
+  ),
+  list(
+    name = "parameter shadowed: rho rebound (ICC no longer the cell's)",
+    from = "  sd_a <- sqrt(rho)",
+    to = "  rho <- 0.5\n  sd_a <- sqrt(rho)"
+  ),
+  list(
+    name = "parameter shadowed: n rebound (design not the cell's)",
+    from = "  sd_e <- sqrt(1 - rho)",
+    to = "  sd_e <- sqrt(1 - rho)\n  n <- 5L"
   )
 )
 

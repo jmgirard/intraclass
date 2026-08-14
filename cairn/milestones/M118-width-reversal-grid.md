@@ -161,10 +161,39 @@ planned; a width finding is not a contract change.
 - 2026-08-13: T8 done — full `devtools::test()` clean at 7158 passing, 0 failures; the 3 warnings are the deliberate fixed-rater conditions the brms tests exercise and the 2 skips are the pre-existing vignette-not-installed legs, neither touched by a branch that changes no R/ code. air, lintr, all four data-raw checkers, the three M118 harnesses and cairn_validate all green.
 - 2026-08-13: status → review.
 - 2026-08-14: review return 1 (defect) — AC2 fails inside the domain of the procedure it names. The AST fence never checks that `dist` is still the generator's PARAMETER, so `dist <- "gaussian"` as the body's first line satisfies all three clauses while every cell draws gaussian (reproduced at review: a nominal t5 cell yields pooled excess kurtosis -0.086). Also actioned: C6 the terminal-row rotation must land with the done-flip or CI reds; B1 D-030's "nothing in that amendment is falsified" is wrong about Amendment 1's closing clause; C10 the Results provenance sentence is false for the M111-block column.
+- 2026-08-14: return fix — AC2's fence gains a clause 1b asserting no parameter of `gen_oneway` is rebound anywhere in its body (walked at any nesting depth, so a rebinding one indent down is the same defect). The mutation harness grows from 7 breaks to 11: the review's `dist <- "gaussian"` form, its nested-block variant, and rho- and n-rebinds. All 11 red, the unmutated script accepted.
+- 2026-08-14: also closed A3 (scored 62, below the action bar) because its failure mode is a wrong population ICC under every coverage figure and the guard is cheap: a composition leg asserts `gen_oneway` recovers icc_hat within 0.10 of the cell's rho for all seven families. Mutation-verified — the real script's worst is 0.0727, `sd_a <- rho` gives 0.177 and `rep(a, times = n)` gives 0.540, so the tolerance sits between a measured legitimate spread and the nearest defect rather than on either.
+- 2026-08-14: C10 fixed — the Results header claimed every figure re-derives from the sweep script, which is false for the M111 block's comparison column and counts (they come from the committed m116 table); the sentence now says which. The frozen page's two stale Evidence-snapshot lines are corrected by a dated note in Results rather than edited above, because a post-freeze edit there would cost the commit-order corroboration the freeze rests on (M113 lesson).
+- 2026-08-14: B1/B2/B11/C1 fixed in D-030 — it no longer claims nothing in D-012 Amendment 1 is falsified (its closing "untested here" clause is spent, and the entry now says so), no longer credits D-012's scope fence with naming this gap, no longer attributes the searle preference to D-027, and states the stale-site set procedurally instead of as a hand-counted four.
+- 2026-08-14: A11/B9 fixed — the INDEX line no longer restates 10 of 10, and its "ordered sign change" is restated as the per-family sign rule W1 actually is (C5); A12 hedged with the two measured non-monotone points.
 - 2026-08-14: status → in-progress. Every gate was clean — cairn_validate, devtools::check() (0/0/1 pre-existing NOTE), and four CI jobs green — so the return is the criterion, not the gate.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
+
+**2026-08-14 — D-030 corrected in place rather than by an appended amendment.**
+Four errors in D-030 were actioned or logged at the review (B1, B2, B11, C1).
+`DECISIONS.md` is append-only under IP4, and the repo's own precedent for a
+wrong entry is an appended amendment (D-008 Amendment 1, D-012 Amendment 1). We
+edited D-030 itself instead, on the ground that it has not merged: it was
+authored by this milestone, sits only on `m118-width-reversal-grid`, and the
+branch squash-merges, so no reader has ever seen the wrong text and no history
+on the default branch is rewritten. The line this draws: once D-030 lands on the
+default branch, any further correction takes an appended amendment. Recorded
+here because the alternative reading — that a committed entry is history the
+moment it is committed anywhere — is defensible, and a later reader should see
+that the choice was made rather than overlooked.
+
+**2026-08-14 — the terminal-row rotation is owed at the `done` flip, not now.**
+Review finding C6 (85): `data-raw/record-claims.tsv` pins the ROADMAP's terminal
+rows as exactly M117/M116/M115/M114/M113, and simulating M118's flip to `done`
+yields six, which reds `check-references` on the next PR. The rotation cannot be
+made now — M118 is not terminal until the post-merge hygiene commit — so it is
+recorded here as owed work for that commit: rotate M113 out, add M118, and
+update both the retention comment and the `record-claims.tsv` expectation **in
+that same commit**. This is the M114 lesson, which `LESSONS.md` records this repo
+hitting three times; the milestone that finds it is the one that must carry it.
+
 
 ## Review
 

@@ -1318,7 +1318,8 @@ from the cell's family, located and scaled per burch2011 §3 (p. 1022), at Burch
 own Fig. 2 geometry (`n = 5`, `k = 10(10)100`, `rho = 0.5`) over the six
 symmetric Table 2 families, `n_rep = 2000`. Rules W1–W3 were frozen before any
 derivation artifact (GP5; `cairn/references/classical-width-reversal-comparison.md`,
-committed one commit ahead of the sweep).
+committed ahead of every derivation artifact -- one commit ahead of the sweep
+script, three ahead of the results).
 
 **Decision — W1, `reproduced`.** Both limbs hold at 10 of 10 subject counts, so
 the ≥ 7-of-10 bar was never close and W2/W3 do not arise. Median
@@ -1343,15 +1344,25 @@ of the shipped reducers over the M76/M111 prototypes.
 **What this does and does not disturb.** `D-012 Amendment 1`'s reopening
 condition is **met**, but its corrected wording is scoped to the M76 grid
 ("narrower than SEARLE in every cell of this grid") and stays true of it —
-nothing in that amendment is falsified and it is not superseded. What this grid
-falsifies is the *bound* the shipped documentation puts on that finding: four
-user-facing surfaces currently tell users that no measured grid varies the
-residual. M119 restates them.
+that ledger clause is not falsified and it is not superseded. Its closing
+sentence is a different matter: "it is untested here because both repo grids
+draw only the subject effect from the non-normal family" is a repo-state claim,
+and this grid is what answers it -- so that clause is spent, and this entry is
+where a reader is told so. What this grid also falsifies is the *bound* the
+shipped documentation puts on the finding: the sites matched by a
+whitespace-collapsed search of `R/`, `vignettes/`, `NEWS.md` and `man/` for the
+residual-invariance claim still tell users that no measured grid varies the
+residual. M119 restates them, and decides that set by a walk rather than by any
+list -- including this one.
 
 Per the frozen consequence clause, identical under all three tags, no method
 recommendation, default or `ci_method` behaviour changes on this evidence, and
-D-027's coverage-based preference for `"searle"` is untouched — that preference
+the coverage-based preference for `"searle"` is untouched -- that preference
 rests on coverage, which this milestone measured but did not put under any rule.
+(That preference is M115's, recorded in its archive summary; D-012 Amendment 1's
+parenthetical "(D-027/M115)" has been read here before as though D-027 carried
+it, and it does not -- D-027 records both classical arms no-GO and states no
+preference between them.)
 Coverage does corroborate Burch's stated rationale rather than undercut it: at
 Laplace and t(5) `"searle"` falls to 0.831–0.883 and 0.825–0.893 while `"burch"`
 holds 0.907–0.941 and 0.906–0.932, so the extra width buys coverage where the
@@ -1367,6 +1378,9 @@ resolved. Reopening either needs a superseding frozen assessment.
 **Consequences:** M118 ships no package code. `cairn/references/burch2011.md`
 and `data-raw/m116-classical-width-comparison.R` are corrected in place where
 they said this condition was untested in the repo; `cairn/references/INDEX.md`
-likewise. M119 carries the user-facing correction. Confirms D-012's original
-scope fence, which named exactly this gap ("a replacement verdict would need
-Burch's wider battery"), and answers the question `D-012 Amendment 1` left open.
+likewise. M119 carries the user-facing correction. It answers the question
+`D-012 Amendment 1` left open. It does **not** discharge D-012's original scope
+fence, which named a different gap -- "platykurtic + skewed, Table 2" families
+and larger rho -- and which this symmetric-only, single-rho grid does not
+satisfy; the both-components condition was first named by Amendment 1, not by
+D-012.

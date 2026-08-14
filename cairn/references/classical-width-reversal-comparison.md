@@ -109,9 +109,25 @@ error. A failure of either is a defect in this grid, not a finding about Burch.
 
 Backing table `data-raw/m118-width-reversal-by-cell.tsv` (125 cells, one flat
 block), mirrored to `tests/testthat/fixtures/width-reversal-by-cell.tsv` and
-written by `data-raw/m118-width-reversal-sweep.R`; every figure below re-derives
-by re-running that script. The two anchors re-derive by
+written by `data-raw/m118-width-reversal-sweep.R`. Every figure below re-derives
+from that table **except** the M111 block's "subject-effect only" column and its
+"(was N of 16)" counts, which come from the committed
+`data-raw/m116-classical-width-comparison.tsv` — they are this grid's
+comparison, not its measurement. The two anchors re-derive by
 `data-raw/m118-anchor-checks.R`, which asserts them.
+
+**Two corrections to this page, made at the M118 review (2026-08-14) and placed
+here rather than above because the sections above are freeze-fenced.** (1) The
+Evidence snapshot's "Both committed repo grids draw the subject effect from the
+cell's family and the residual from a normal" was true when frozen and is not
+now — this milestone commits a third grid, and the snapshot's settling directive
+names only the two older sweep scripts, so it cannot register the change. Read
+that line as scoped to `m76-coverage-sweep.R` and `m111-fallback-sweep.R`, which
+is what its directive actually checks. (2) The snapshot's "the derived table
+this page is read against does not exist at freeze time" is likewise a
+freeze-time statement; the table exists from `d4b1878`. Neither line is edited
+in place: a post-freeze edit above this point would cost the commit-order
+corroboration the freeze rests on (the M113 lesson).
 
 **Validation preconditions — both clear, so the rules below may be read.**
 
@@ -154,9 +170,12 @@ at `k = 100`, below 1 throughout.
 Two observations the rule does not rest on. The ratio is **not** monotone in
 tail weight at the top — at `k = 100` Laplace (1.300) sits marginally above
 t(5) (1.296) despite the lower kurtosis — so a monotone-ordering rule would have
-read differently from the sign rule W1 states. And the effect grows with the
-subject count in every heavy-tailed family, the opposite of the shrinking-margin
-direction M117 measured on the subject-effect-only grids.
+read differently from the sign rule W1 states. And the effect broadly grows with
+the subject count in every heavy-tailed family — the opposite of the
+shrinking-margin direction M117 measured on the subject-effect-only grids —
+though not monotonically: Laplace peaks at `k = 90` (1.3038) before easing to
+1.2998 at `k = 100`, and t(5) dips from 1.2642 at `k = 70` to 1.2630 at
+`k = 80`.
 
 **Coverage (context; binds no rule).** Per family on the Fig. 2 block, because
 the pooled ranges overlap and would misdescribe the contrast — `"searle"` at
