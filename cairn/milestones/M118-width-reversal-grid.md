@@ -1,6 +1,6 @@
 # M118: Measure Burch's leptokurtic width reversal on a both-components-non-normal grid
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -41,7 +41,7 @@ planned; a width finding is not a contract change.
       earliest of the milestone's derivation artifacts; its Results and
       Disposition sections are filled post-derivation and are outside the
       freeze.
-- [x] AC2 In every non-gaussian cell, `data-raw/m118-width-reversal-sweep.R`
+- [ ] AC2 In every non-gaussian cell, `data-raw/m118-width-reversal-sweep.R`
       draws both the subject effect and the residual from the cell's family. A
       committed test walks the parsed body of its generator and fails when any
       component's draw resolves to a normal deviate, mutation-verified against a
@@ -160,6 +160,8 @@ planned; a width finding is not a contract change.
 - 2026-08-13: the m116 comparison script's header lines were edited, so its TSV was regenerated to keep generator and artifact in step; the data rows are byte-identical and the committed test fixture is unchanged.
 - 2026-08-13: T8 done — full `devtools::test()` clean at 7158 passing, 0 failures; the 3 warnings are the deliberate fixed-rater conditions the brms tests exercise and the 2 skips are the pre-existing vignette-not-installed legs, neither touched by a branch that changes no R/ code. air, lintr, all four data-raw checkers, the three M118 harnesses and cairn_validate all green.
 - 2026-08-13: status → review.
+- 2026-08-14: review return 1 (defect) — AC2 fails inside the domain of the procedure it names. The AST fence never checks that `dist` is still the generator's PARAMETER, so `dist <- "gaussian"` as the body's first line satisfies all three clauses while every cell draws gaussian (reproduced at review: a nominal t5 cell yields pooled excess kurtosis -0.086). Also actioned: C6 the terminal-row rotation must land with the done-flip or CI reds; B1 D-030's "nothing in that amendment is falsified" is wrong about Amendment 1's closing clause; C10 the Results provenance sentence is false for the M111-block column.
+- 2026-08-14: status → in-progress. Every gate was clean — cairn_validate, devtools::check() (0/0/1 pre-existing NOTE), and four CI jobs green — so the return is the criterion, not the gate.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
@@ -177,7 +179,7 @@ line below is a command run at review, never recall.
   verbatim ("no widened grid, no additional families, no re-set threshold"),
   and its Results and Disposition sections are the two the criterion places
   outside the freeze.
-- **AC2 — met.** `test-m118-both-components-dgp.R` passes 2/2.
+- **AC2 — NOT MET (return).** Tick withdrawn 2026-08-14. `test-m118-both-components-dgp.R` passes 2/2.
   `data-raw/m118-dgp-fence-mutations.R` accepts the unmutated script and
   rejects all 7 planted defects, which vary form as well as site: direct
   substitution, a draw hoisted into a variable above its use, and a
@@ -226,3 +228,66 @@ README is untouched and in sync; `pkgdown::check_pkgdown()` reports no problems;
 no new top-level files, so no `.Rbuildignore` entry is owed. No NEWS entry is
 owed and none was written — the branch changes no `R/`, `src/` or `inst/` file,
 so nothing user-visible ships here; M119 carries that.
+
+### Independent review — three lenses, then a scorer (2026-08-14)
+
+39 candidate findings from an [O] diff-bug lens, an [S] blame-history lens and
+an [S] prior-review lens; all 39 scored by a fresh [S] scorer that generated
+none of them. 4 actioned (≥ 80), none ≥ 90, 35 below the bar.
+
+**Actioned — A1 (86), the return.** AC2's named procedure is a committed test
+that walks the parsed body and fails when a component's draw resolves to a
+normal deviate. Inserting `dist <- "gaussian"` as the first line of
+`gen_oneway`'s body satisfies all three fence clauses — no RNG call in the body,
+both components still passing the bare symbol `dist`, `draw_standard` still
+switching on `dist` — so the fence stays green while every cell draws gaussian.
+Reproduced at review: a nominal `t5` cell then yields pooled excess kurtosis
+−0.086. Two sibling mutations are also green — `sd_a <- rho` and
+`rep(a, times = n)` — and those corrupt the population ICC the coverage figures
+are scored against, though `m118-anchor-checks.R` leg 2 would catch both.
+
+**Actioned — C6 (85).** `data-raw/record-claims.tsv` pins the terminal ROADMAP
+rows as exactly M117/M116/M115/M114/M113. Simulating the merge-time flip of
+M118 to `done` yields six, so `check-references` reds on the next PR unless the
+rotation and the expectation land in the same commit (the M114 lesson, hit three
+times before).
+
+**Actioned — B1 (82).** D-030 says nothing in `D-012 Amendment 1` is falsified.
+Its ledger clause indeed stands, but Amendment 1's closing sentence — "it is
+untested here because both repo grids draw only the subject effect" — is exactly
+what this milestone falsifies. The T7 record sweep missed it.
+
+**Actioned — C10 (80).** The Results header claims every figure re-derives by
+re-running `m118-width-reversal-sweep.R`, but the M111 block's "subject-effect
+only" column and its "(was N of 16)" counts come from
+`m116-classical-width-comparison.tsv`. The figures are correct and
+level-matched; the provenance sentence is not.
+
+**Below the bar (35), logged not actioned.** A2 72 hard-coded family at the call
+site is outside the fence's domain · A3 62 the located-and-scaled composition is
+unfenced (anchor leg 2 would catch it) · A4 68 / C13 64 the mirrored fixture is
+read by no test · A5 72 the M111-block aggregator is under-stated · A6 63 empty
+`## Decisions` section · A7 64 the MSA=0 guard is mis-attributed to D-022 · A8
+66 "Burch's own Fig. 2 design" over six families where the source names five ·
+A9 68 / C9 66 false "both sizes a cell actually uses" comment · A10 72 / C3 68 /
+C12 58 the frozen page's own Evidence snapshot is stale at HEAD · A11 68 / B9 68
+INDEX restates a measured value · A12 62 "grows with the subject count in every
+heavy-tailed family" is non-monotone at the top · A13 52 mixed rounding · A14 50
+no NULL guard in the anchor script · A15 35 `n_rep` column ignores `n_skip` ·
+B2 72 D-030 mis-credits D-012's scope fence · B3 60 W1's statistic differs from
+the reopening condition's (verdict confirmed invariant) · B4 70 / C7 66 the
+sibling fence test is a whole-file grep · B6 45 dropped "not refuted" hedge ·
+B7 66 the burch2011 correction discloses one of two edited clauses · B8 66 the
+new dated claim carries no settling directive · B10 45 the deferral to M119 is
+what the plan called for · B11 72 D-030 mis-cites D-027 for the searle
+preference · B12 50 imprecise freeze-ordering phrasing · C1 66 D-030's
+"four surfaces" is a hand-list · C2 50 M119's scope list, disclaimed by its own
+AC1 · C4 72 the snapshot's directive enumerates two files for an all-grids claim
+· C5 62 "ordered sign change" in INDEX · C8 72 fence clause 3 is a lexical match
+on deparsed text · C11 42 reported-not-asserted figures, as designed.
+
+**Gate results (all clean; the return is the criterion, not the gate).**
+`cairn_validate` 16 PASS / 8 advisory OK. `devtools::check()` 0 errors,
+0 warnings, 1 NOTE — the pre-existing long-running-tests note this suite has
+always carried, not introduced here. CI on the review commit: `lint`,
+`check-references`, `format-check`, `pkgdown` green.
