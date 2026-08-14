@@ -220,14 +220,19 @@ Per the frozen consequence clause, which is identical under all three tags, this
 changes what the package says and not what it does. M119 restates the shipped
 surfaces that currently tell users no measured grid varies the residual; no
 method recommendation, default or `ci_method` behaviour changes on this
-evidence, and D-027's coverage-based preference for `"searle"` is untouched.
+evidence, and the coverage-based preference for `"searle"` is untouched.
 
 `D-012 Amendment 1`'s reopening condition — "a grid on which Burch's median
-width exceeds SEARLE's" — is **met**. That amendment's own corrected wording is
-scoped to the M76 grid ("narrower than SEARLE in every cell of this grid") and
-stays true of it, so nothing in it is falsified; what this grid falsifies is the
-*bound* the shipped documentation puts on that finding, namely that no measured
-grid varies the residual.
+width exceeds SEARLE's" — is **met**. That amendment's ledger clause is scoped to
+the M76 grid ("narrower than SEARLE in every cell of this grid") and stays true
+of it. Its closing sentence is a different matter: "it is untested here because
+both repo grids draw only the subject effect from the non-normal family" is a
+repo-state claim, and this grid is what answers it, so that clause is spent.
+What this grid also falsifies is the *bound* the shipped documentation puts on
+the finding, namely that no measured grid varies the residual.
+D-027 is not the home of the coverage-based preference for `"searle"` that the
+paragraph above cites — that preference is M115's (corrected 2026-08-14; D-027
+records both classical arms no-GO and states no preference between them).
 
 ## Open questions
 

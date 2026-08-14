@@ -1381,6 +1381,9 @@ they said this condition was untested in the repo; `cairn/references/INDEX.md`
 likewise. M119 carries the user-facing correction. It answers the question
 `D-012 Amendment 1` left open. It does **not** discharge D-012's original scope
 fence, which named a different gap -- "platykurtic + skewed, Table 2" families
-and larger rho -- and which this symmetric-only, single-rho grid does not
-satisfy; the both-components condition was first named by Amendment 1, not by
+and larger rho. This grid does add platykurtic families (uniform, power
+exponential) and does reach rho = 0.60, so it is not the grid's design that
+leaves that fence standing: it is that M118 makes no replacement verdict at all
+and no skewed-family disposition, which is what discharging the fence would
+require. The both-components condition was first named by Amendment 1, not by
 D-012.
