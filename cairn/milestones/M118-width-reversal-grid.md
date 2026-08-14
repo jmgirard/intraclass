@@ -88,12 +88,12 @@ planned; a width finding is not a contract change.
 - [x] T1 Author the frozen page from cairn's `templates/synthesis-note.md`:
       grid design, and W1–W3 as reversal-present / reversal-absent / mixed
       dispositions per the gate's record-and-stop answer. Commit alone, first.
-- [ ] T2 Write the generator in `data-raw/m118-width-reversal-sweep.R` — one
+- [x] T2 Write the generator in `data-raw/m118-width-reversal-sweep.R` — one
       standardized variate function per family applied to both components, sign
       and scale per burch2011 §3 (p. 1022); hand-roll power exponential(0,1,2.78)
       via the gamma route. No checkpoint cache (the M114 convention,
       `data-raw/m114-heldout-sweep.R:17-18`).
-- [ ] T3 Write the AST fence asserting both components are non-normal — the
+- [x] T3 Write the AST fence asserting both components are non-normal — the
       mirror of `assert_subject_only_dgp()`
       (`data-raw/m116-classical-width-comparison.R:65-126`) — plus its mutation
       harness over the three break forms in AC2. Leave m116's own two-script
@@ -120,6 +120,9 @@ planned; a width finding is not a contract change.
 - 2026-08-13: implement gate froze W1 as an ordered sign change across the six symmetric families — heavy-tailed limb wider, light-tailed limb narrower, each at ≥ 7 of 10 subject counts — over the weaker "wider in at least one heavy-tailed family" alternative, because the source predicts a kurtosis-ordered sign change rather than a blanket widening (p. 1024); falsified by a result where the limbs disagree in a way the partial tag cannot express.
 - 2026-08-13: implement gate froze the consequence clause identically under all three tags — restate the measured facts, change no method recommendation — over reopening the runtime hint's advice on a reproduction; falsified by a user-facing need to advise on width under heavy tails, which stays out of M118 and M119 alike.
 - 2026-08-13: T1 done — frozen page committed alone and first (GP5); its two settling directives were falsified on first run and fixed against the real text: `git grep -E` is POSIX ERE with no `\s`, and the burch2011 phrase wraps a line (the M115 line-based-search trap). Triage row generated programmatically from the enumerator's own key (M76 lesson).
+- 2026-08-13: T2 done — `draw_standard()` supplies both components; power exponential hand-rolled via the gamma route, its beta = 2.78 confirmed against Burch's printed -0.5 (theoretical excess kurtosis -0.50049), which is what fixes his third parameter as the exponent rather than a scale.
+- 2026-08-13: T3 done — AST fence plus a 7-mutation harness, all 7 red and the unmutated script accepted; the harness `sys.source()`s the test file with `test_that` stubbed, so guard and harness share one definition (M117 technique). Fence clause 1 (gen_oneway draws nothing itself) is what catches the hoisted and namespace-qualified forms a per-component check misses.
+- 2026-08-13: T2/T3 hit the M62 lint lesson — four UPPERCASE constants passed `air` and would have reddened the CI lint job; renamed snake_case and the harness re-run after the rename (BSD `sed` has no `\b`, so the first rename silently did nothing and was caught by re-grepping rather than by trusting the command).
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
