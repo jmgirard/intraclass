@@ -47,9 +47,25 @@ planned; a width finding is not a contract change.
       component's draw resolves to a normal deviate, mutation-verified against a
       family of breaks that varies form as well as site: direct substitution, a
       draw hoisted into a variable above its use, and a namespace-qualified call.
-- [ ] AC3 Each family's simulated excess kurtosis, at ≥ 100,000 draws, is within
-      0.05 of burch2011 Table 2's printed value (p. 1021) for that family, for
-      the subject-effect and residual draws alike.
+- [ ] AC3 Each of the seven families enumerated by `table2_kurtosis` in
+      `data-raw/m118-width-reversal-sweep.R` — whose names a test requires to
+      equal `draw_standard()`'s switch arms — is verified against burch2011
+      Table 2 (p. 1021) by three legs. (a) The family's closed-form excess
+      kurtosis, written out as a formula in its own parameters, equals the
+      printed value within 0.01. (b) At ≥ 10^6 seeded draws the simulated mean
+      is within 0.01 of 0 and the simulated variance within 0.01 of 1, for the
+      subject-effect and residual draws alike. (c) At the same draws the
+      simulated excess kurtoses are strictly increasing in printed kurtosis
+      order, and are additionally within 0.02 of the printed value for uniform,
+      power exponential and gaussian. No fixed tolerance is set for t(10),
+      Laplace, t(5) or chi-squared(1): the sample excess kurtosis needs a finite
+      eighth moment for a finite asymptotic variance, which t(5) — whose moments
+      are finite only below order 5 — does not have, and the ordering leg covers
+      those four. The power-exponential tolerance in (c) is load-bearing rather
+      than incidental: `pe_beta` is the only distributional constant that legs
+      (a) and (b) both inherit from the draw itself, so a wrong beta passes every
+      other leg while leaving the family's kurtosis inside its neighbours'
+      bracket.
 - [ ] AC4 The grid is anchored on two independent references. Against
       burch2011 (p. 1027): at `k = 100`, `n = 5`, `rho = 0.25`, uniform for both
       components, the mean `"burch"` length over the mean `"searle"` length is
@@ -98,7 +114,7 @@ planned; a width finding is not a contract change.
       (`data-raw/m116-classical-width-comparison.R:65-126`) — plus its mutation
       harness over the three break forms in AC2. Leave m116's own two-script
       list untouched.
-- [ ] T4 Write the kurtosis check against burch2011 Table 2.
+- [x] T4 Write the kurtosis check against burch2011 Table 2.
 - [ ] T5 Run the sweep over the three blocks via the shipped reducers
       `searle_endpoints()` / `burch_reml_endpoints()` (`R/ci-classical.R:109`,
       `:188`) off `classical_oneway_ss()`; write both tables.
@@ -123,6 +139,9 @@ planned; a width finding is not a contract change.
 - 2026-08-13: T2 done — `draw_standard()` supplies both components; power exponential hand-rolled via the gamma route, its beta = 2.78 confirmed against Burch's printed -0.5 (theoretical excess kurtosis -0.50049), which is what fixes his third parameter as the exponent rather than a scale.
 - 2026-08-13: T3 done — AST fence plus a 7-mutation harness, all 7 red and the unmutated script accepted; the harness `sys.source()`s the test file with `test_that` stubbed, so guard and harness share one definition (M117 technique). Fence clause 1 (gen_oneway draws nothing itself) is what catches the hoisted and namespace-qualified forms a per-component check misses.
 - 2026-08-13: T2/T3 hit the M62 lint lesson — four UPPERCASE constants passed `air` and would have reddened the CI lint job; renamed snake_case and the harness re-run after the rename (BSD `sed` has no `\b`, so the first rename silently did nothing and was caught by re-grepping rather than by trusting the command).
+- 2026-08-13: AC3 amended at a mini gate (user-approved) — the original "within 0.05 of the printed value" is unsatisfiable for t(10)/t(5)/chi-squared(1), a mis-set pin GP5 permits correcting prospectively rather than a bar loosened post hoc: no test asserted it yet, and no replicate count reaches it because the sample excess kurtosis has no finite asymptotic variance at t(5). The per-family spreads that decide which three families carry a tolerance are the ones `Rscript data-raw/m118-kurtosis-spread.R` prints; that script also asserts the pinned/unpinned split against them, so the split reds there rather than silently rotting if a family's behaviour changes.
+- 2026-08-13: the amended AC3 wording went to a fresh-context [O] reader before being written, which found the drafted version blind to a wrong `pe_beta` — it passes the closed-form leg (same constant), the variance leg (powexp alone derives its divisor from that constant) and the ordering leg (beta in 2.2-3.4 leaves the kurtosis inside its neighbours' bracket). The shipped wording adds the per-family tolerance that closes it; the drafted claim "the ordering leg is what catches a wrong constant" was false and is not in the shipped text.
+- 2026-08-13: T4 done — 41 assertions, no skips and no `NOT_CRAN` needed (the whole file runs in ~2s, so `skip_on_cran()` was dropped rather than left to hide a leg). `data-raw/m118-kurtosis-spread.R` measures the AC's load-bearing claim rather than asserting it: every wrong beta tried (2.2, 2.5, 3.0, 3.4) keeps the variance at ~1.002 and the kurtosis inside the uniform/gaussian bracket, so both other legs miss it and only the 0.02 tolerance catches it.
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions
