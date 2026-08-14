@@ -1,7 +1,7 @@
 # Roadmap
 
 _The only authority on milestone status. Grouped by status, not ID._
-_Last hygiene check: 2026-08-09 (status pass after M116 — nothing changed: all 24 checks green, no advisories, tree clean, both GitHub inboxes empty; M48 stays parked on the unopened release window.)_
+_Last hygiene check: 2026-08-13 (status pass — reconciled main with the m117 branch: M117 is `blocked` (parked 2026-08-09 after review return #3, PR #126 draft; blocker = maintainer call on guard scope), so main's stale `planned` row and mirror were caught up; checks green, one sizing advisory on M117 (8 ACs), inboxes clean; M48 stays parked on the unopened window.)_
 
 Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 
