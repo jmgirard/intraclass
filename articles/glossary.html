@@ -113,19 +113,27 @@ design (<code>ci_method = "burch"</code>): REML-based limits with a
 kurtosis adjustment (Burch 2011), so its width tracks the tail weight of
 the data, where the <strong>exact-F interval</strong> leans on normality
 instead. Tracking tail weight is not the same as widening: on the two
-grids this package has measured it came out the narrower of the two in
-nearly every cell. How much narrower is conditional, and not in the
-direction one might guess: <code>"burch"</code>’s margin holds much the
-same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
-(on the larger grid; the smaller grid’s margin does shrink across its
-levels), then collapses to near parity at a true ICC of 0.6, on the one
-grid reaching that value, where every cell favouring the exact-F
-interval sits. It shrinks steadily as the subject count grows, measured
-at 5 raters. Burch reports the reverse for symmetric heavy-tailed data
-with non-normal errors, which those grids do not vary — so neither
-interval is reliably the tighter one. That adjustment is not a remedy
-for heavy tails: on strongly skewed subject effects <code>"burch"</code>
-under-covers about as badly as the default — see <a href="interval-methods.html#when-the-default-under-covers"><em>When the
+grids this package has measured that vary only the subject effect it
+came out the narrower of the two in nearly every cell. How much narrower
+is conditional, and not in the direction one might guess:
+<code>"burch"</code>’s margin holds much the same up to a true ICC of
+0.3 rather than shrinking as the true ICC rises (on the larger grid; the
+smaller grid’s margin does shrink across its levels), then collapses to
+near parity at a true ICC of 0.6, on the one grid reaching that value,
+where every cell favouring the exact-F interval sits. It shrinks
+steadily as the subject count grows, measured at 5 raters. Burch reports
+the reverse for symmetric heavy-tailed data with non-normal errors, and
+a third grid now measures that case. What <code>"burch"</code> does
+against <code>"searle"</code> depends on what the residual is drawn
+from, and the three grids now measure that: the two grids that vary only
+the subject effect put it narrower nearly everywhere, while the third,
+which draws the residual from the same family as the subject effect,
+puts it wider at every symmetric heavy-tailed family measured (a median
+width ratio of 1.2963 at t(5) with 100 subjects) and narrower at every
+lighter-tailed one, the normal included. So neither interval is reliably
+the tighter one. That adjustment is not a remedy for heavy tails: on
+strongly skewed subject effects <code>"burch"</code> under-covers about
+as badly as the default — see <a href="interval-methods.html#when-the-default-under-covers"><em>When the
 default under-covers</em></a>. Deterministic: no resamples, no seed. See
 <a href="interval-methods.html#the-opt-in-boundary-robust-methods"><em>Confidence-interval
 methods</em></a>.</p>

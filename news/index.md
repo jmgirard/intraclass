@@ -81,9 +81,9 @@
   width — presenting `ci_method = "burch"` as the broader of the pair
   and `ci_method = "searle"` as the tightest available on near-normal
   data — in the help page, the article, the glossary, the runtime
-  message and this file. Both grids the package has measured say
-  otherwise: `"burch"` is the narrower of the two in 16 of 16 cells of
-  the smaller grid and 59 of 64 cells of the larger grid, with no
+  message and this file. Both grids that vary only the subject effect
+  say otherwise: `"burch"` is the narrower of the two in 16 of 16 cells
+  of the smaller grid and 59 of 64 cells of the larger grid, with no
   distribution family reversing it on its median. That margin is
   **conditional**, and the documentation now says so rather than quoting
   one pooled figure — but not in the direction one might guess:
@@ -99,11 +99,18 @@
   compares against this same exact-F interval and reports a
   *kurtosis-conditional* ordering, shorter for light-tailed data and
   wider for symmetric heavy-tailed data where the errors are non-normal
-  too, which neither grid varies. His length comparison uses symmetric
-  families throughout, so it settles nothing about skewed data either
-  way. The claim is withdrawn everywhere it appeared; neither interval
-  is described as reliably the tighter one, and the coverage-based
-  preference for `"searle"` is unchanged.
+  too. His length comparison uses symmetric families throughout, so it
+  settles nothing about skewed data either way. A third grid now
+  measures that case. What `"burch"` does against `"searle"` depends on
+  what the residual is drawn from, and the three grids now measure that:
+  the two grids that vary only the subject effect put it narrower nearly
+  everywhere, while the third, which draws the residual from the same
+  family as the subject effect, puts it wider at every symmetric
+  heavy-tailed family measured (a median width ratio of 1.2963 at t(5)
+  with 100 subjects) and narrower at every lighter-tailed one, the
+  normal included. The claim is withdrawn everywhere it appeared;
+  neither interval is described as reliably the tighter one, and the
+  coverage-based preference for `"searle"` is unchanged.
 
 - [`icc()`](https://jmgirard.github.io/intraclass/reference/icc.md) now
   rejects a non-finite `score` (`Inf`, `-Inf`, `NaN`) with a classed

@@ -203,27 +203,34 @@ shows the second in the same direction, `"burch"` running narrower by a
 median width ratio of 0.9017 at 10 subjects, 0.9611 at 30 subjects and
 0.9775 at 50 subjects.
 
-A pooled figure over both grids would hide all of this, and it would
-invite a second misreading. The smaller grid’s design points are a
-subset of the larger one’s, so much of the gap between their pooled
-medians is which true-ICC values each grid covers rather than a
-disagreement between two bodies of evidence — but only much of it.
-Restricting the larger grid to the smaller one’s design points closes
-most of that gap and leaves a remainder, and the two are separate
-simulations that mostly disagree at the design points they share,
-agreeing closely at only a couple of them. A pooled between-grid
+A pooled figure over both grids that vary only the subject effect would
+hide all of this, and it would invite a second misreading. The smaller
+grid’s design points are a subset of the larger one’s, so much of the
+gap between their pooled medians is which true-ICC values each grid
+covers rather than a disagreement between two bodies of evidence — but
+only much of it. Restricting the larger grid to the smaller one’s design
+points closes most of that gap and leaves a remainder, and the two are
+separate simulations that mostly disagree at the design points they
+share, agreeing closely at only a couple of them. A pooled between-grid
 comparison is not a clean contrast in either direction, which is why
 nothing above is one.
 
-There is a real limit on the comparison, though, because both grids draw
-only the **subject effects** from the non-normal family and always draw
-the errors from a normal. Burch’s own expected-length comparison — which
+Both of the grids above draw the **subject effects** alone from the
+non-normal family and always draw the errors from a normal, and that is
+not an incidental detail. Burch’s own expected-length comparison — which
 is against this very exact-F interval — is kurtosis-conditional: he
 finds his interval shorter for light-tailed data but *wider* for
 symmetric heavy-tailed data, measuring with both the subject effects and
-the errors non-normal. So the honest summary is that the ordering
-depends on the data, this package has measured it only in the
-subject-effect-only case, and you should not pick between them on width.
+the errors non-normal. A third grid now measures that case here. What
+`"burch"` does against `"searle"` depends on what the residual is drawn
+from, and the three grids now measure that: the two grids that vary only
+the subject effect put it narrower nearly everywhere, while the third,
+which draws the residual from the same family as the subject effect,
+puts it wider at every symmetric heavy-tailed family measured (a median
+width ratio of 1.2963 at t(5) with 100 subjects) and narrower at every
+lighter-tailed one, the normal included. So the honest summary is that
+the ordering depends on the data — on what the residual is drawn from
+most of all — and you should not pick between them on width.
 
 Prefer `"searle"`: across every distribution family in that skew study
 it landed closer to nominal coverage in most cells, heavy-tailed ones

@@ -389,17 +389,24 @@ and <code>seed</code> do not apply.
 are approximately normal. <code>"burch"</code> is the REML-based, kurtosis-adjusted
 interval of Burch (2011), designed for robustness to non-normality; its
 width tracks the data's tail weight rather than widening by construction.
-On the two grids this package has measured, <code>"burch"</code> is usually the
-<strong>narrower</strong> of the two – but by a margin that depends on the design, so
+On the two grids this package has measured that vary only the subject
+effect, <code>"burch"</code> is usually the <strong>narrower</strong> of the two – but by a margin
+that depends on the design, so
 it is not a rule of thumb. That margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels),
 then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
 which is also where every cell <code>"searle"</code> won sits; and it
-shrinks steadily as the subject count grows, measured at 5 raters. Both grids
-vary only the subject effect, though; Burch (2011) reports the direction
-reversing for symmetric heavy-tailed data with the errors non-normal too,
-which neither grid tests. Treat neither as reliably the tighter interval;
-the measured figures are tabulated in the interval-methods article.
+shrinks steadily as the subject count grows, measured at 5 raters.
+What <code>"burch"</code> does against <code>"searle"</code> depends on what the residual is
+drawn from, and the three grids now measure that:
+the two grids that vary only the subject effect put it narrower
+nearly everywhere, while the third, which draws the residual from
+the same family as the subject effect, puts it wider at every
+symmetric heavy-tailed family measured (a median width ratio of
+1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
+the normal included. Treat neither as reliably the tighter interval;
+the per-level figures for the two grids that vary only the subject effect
+are tabulated in the interval-methods article.
 Burch's robustness has limits this package has measured: on strongly skewed
 subject effects <code>"burch"</code> under-covers about as badly as the default,
 worst 0.6655 at chi-square(1) subject effects with a true ICC of 0.6, 30
@@ -760,15 +767,24 @@ near and below zero.</p>
 exact-F pivot <code>F / (1 + n*lambda) ~ F(k-1, k(n-1))</code> (Searle 1971, Ch. 9 Table 9.14;
 the McGraw &amp; Wong 1996 Table 7 limits); it is exact under normality. <code>"burch"</code> builds
 kurtosis-adjusted <code>log(1 + n*theta-hat)</code> limits (Burch 2011), so its width tracks
-the data's tail weight rather than widening by construction: on both grids this
-package has measured it came out narrower than <code>"searle"</code> in nearly every cell.
+the data's tail weight rather than widening by construction: on the two grids
+this package has measured that vary only the subject effect it came out
+narrower than <code>"searle"</code> in nearly every cell.
 How much narrower is conditional, and not in the direction one might guess:
 <code>"burch"</code>'s margin holds much the same up to a true ICC of 0.3 rather than shrinking as the true ICC rises
 (on the larger grid; the smaller grid's margin does shrink across its levels),
 then collapses to near parity at a true ICC of 0.6, on the one grid reaching that value,
 where every cell favouring <code>"searle"</code> sits. It shrinks steadily as the subject count grows, measured at 5 raters.
-Burch reports the reverse for symmetric heavy-tailed data with non-normal errors, a
-case those grids do not cover.
+Burch reports the reverse for symmetric heavy-tailed data with non-normal
+errors, and a third grid now measures that case.
+What <code>"burch"</code> does against <code>"searle"</code> depends on what the residual is
+drawn from, and the three grids now measure that:
+the two grids that vary only the subject effect put it narrower
+nearly everywhere, while the third, which draws the residual from
+the same family as the subject effect, puts it wider at every
+symmetric heavy-tailed family measured (a median width ratio of
+1.2963 at t(5) with 100 subjects) and narrower at every lighter-tailed one,
+the normal included.
 Its robustness has a measured limit: on strongly skewed subject effects
 <code>"burch"</code> under-covers about as badly as the default (see the coverage caveat
 under Confidence intervals). Both share the conventions above: the <code>unit = "average"</code> (ICC(k))
