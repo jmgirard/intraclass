@@ -1,6 +1,6 @@
 # M117: State the `"burch"`/`"searle"` width relationship conditionally
 
-- **Status:** blocked   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
+- **Status:** in-progress   <!-- owner: transitioning skill · mirror-update; cairn/ROADMAP.md is the authority -->
 - **Priority:** normal   <!-- owner: plan · create/amend-via-gate; high | normal | low -->
 - **Depends on:** —   <!-- owner: plan · create/amend-via-gate; M<xx>, M<yy> or — -->
 - **Driving RR:** —   <!-- owner: plan · create/amend-via-gate -->
@@ -192,6 +192,7 @@ Re-cut (2026-08-13):
 - 2026-08-13: re-cut gate chose amending M117 in place on its existing branch and PR over a superseding fresh milestone, because the branch holds the twice-verified corrections and a green CI matrix; falsified by the amended plan-owned body failing the 150-line cap.
 - 2026-08-13: re-cut gate chose having the largest-margin sentence state its cut (level medians, at which it is true) with the 11-of-16 paired-cell contradiction pinned beside it, over restating per grid or withdrawing it; falsified by a user reading the cut-qualified sentence as the per-cell claim anyway.
 - 2026-08-13: amendment landed by /milestone-plan (AC2/AC4 rewritten, AC9 and T18–T20 added, coverage updated); the parking blocker is resolved by the recorded guard-scope decision, and status stays `blocked` until `/milestone-implement` resumes it — `in-progress` is that skill's transition to make.
+- 2026-08-13: resumed by /milestone-implement (blocked → in-progress; blocker resolved by the re-cut gate's guard-scope decision). No implementation question gate: the same-day plan gate settled the open choices. Remaining: T18–T20.
 
 ## Decisions
 
