@@ -1,11 +1,11 @@
 # M118: Measure Burch's leptokurtic width reversal on a both-components-non-normal grid
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
 - **Principles touched:** GP5, GP6
-- **Branch/PR:** —
+- **Branch/PR:** `m118-width-reversal-grid`
 
 ## Goal
 
@@ -85,7 +85,7 @@ planned; a width finding is not a contract change.
 
 ## Tasks
 
-- [ ] T1 Author the frozen page from cairn's `templates/synthesis-note.md`:
+- [x] T1 Author the frozen page from cairn's `templates/synthesis-note.md`:
       grid design, and W1–W3 as reversal-present / reversal-absent / mixed
       dispositions per the gate's record-and-stop answer. Commit alone, first.
 - [ ] T2 Write the generator in `data-raw/m118-width-reversal-sweep.R` — one
@@ -117,6 +117,9 @@ planned; a width finding is not a contract change.
 - 2026-08-13: plan chose the shipped reducers over the M76/M111 prototypes (`data-raw/m76-classical-oneway-prototype.R`) because the measurement should describe what users get; falsified by the AC4 gaussian cross-check diverging from the M111 counterparts.
 - 2026-08-13: plan chose no checkpoint cache over M111's cell-id cache because that cache is the known staleness trap already holding its own ROADMAP row and the closed-form legs make a resume unnecessary; falsified by a measured sweep runtime long enough to need resuming.
 - 2026-08-13: plan tightened the anchor ratio tolerance to ±0.01 from a drafted ±0.02, which the audit measured at 5–10 SE and therefore near-vacuous at `n_rep = 2000`; GP5 forbids loosening it later.
+- 2026-08-13: implement gate froze W1 as an ordered sign change across the six symmetric families — heavy-tailed limb wider, light-tailed limb narrower, each at ≥ 7 of 10 subject counts — over the weaker "wider in at least one heavy-tailed family" alternative, because the source predicts a kurtosis-ordered sign change rather than a blanket widening (p. 1024); falsified by a result where the limbs disagree in a way the partial tag cannot express.
+- 2026-08-13: implement gate froze the consequence clause identically under all three tags — restate the measured facts, change no method recommendation — over reopening the runtime hint's advice on a reproduction; falsified by a user-facing need to advise on width under heavy tails, which stays out of M118 and M119 alike.
+- 2026-08-13: T1 done — frozen page committed alone and first (GP5); its two settling directives were falsified on first run and fixed against the real text: `git grep -E` is POSIX ERE with no `\s`, and the burch2011 phrase wraps a line (the M115 line-based-search trap). Triage row generated programmatically from the enumerator's own key (M76 lesson).
 - 2026-08-13: post-audit consolidation merged the freeze pair into AC1 and the two anchors into AC4, clearing the >7-criteria tripwire; both merges concatenate audited text and were re-checked against the audit's three questions, with no claim added.
 
 ## Decisions

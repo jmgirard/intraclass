@@ -14,7 +14,7 @@ Pre-migration history (M1–M47, ADR-001..058): see `cairn/legacy/` and git log.
 | M115 | Document the default interval's skew/kurtosis under-coverage — and withdraw the falsified `"burch"` advice | done | — | normal | milestones/archive/M115-skew-undercoverage-caveat.md |
 | M114 | Runtime skew/kurtosis warn trigger — design & validation (assessment only) | done | — | normal | milestones/archive/M114-skew-warn-trigger-assessment.md |
 | M113 | MC-default skew response — frozen-rules disposition from the M111 data | done | — | normal | milestones/archive/M113-mc-skew-response-assessment.md |
-| M118 | Measure Burch's leptokurtic width reversal on a both-components-non-normal grid | planned | — | normal | milestones/M118-width-reversal-grid.md |
+| M118 | Measure Burch's leptokurtic width reversal on a both-components-non-normal grid | in-progress | — | normal | milestones/M118-width-reversal-grid.md |
 | M119 | Reconcile the shipped width claims with M118's third grid | planned | M118 | normal | milestones/M119-residual-grid-doc-reconcile.md |
 | M48 | v0.1.0 release consolidation — CRAN submission-ready | blocked | M49, M50, M51, M53, M54, M55, M61, M68 | high | milestones/M48-release-v010.md |
 <!-- terminal-row retention: M117 done (2026-08-13) → M111 rotated out (oldest terminal by merge order; its archive file still resolves there). Kept: M117, M116, M115, M114, M113 (5 most recent terminal) [claim:roadmap-terminal-rows]. -->
