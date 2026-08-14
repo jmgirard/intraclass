@@ -723,6 +723,7 @@ article_lines <- function() {
 # non-table line, so a row can never inherit a header from an earlier table.
 width_table_claims <- function(lines) {
   out <- list()
+  orphans <- character(0)
   fac <- NA_character_
   for (ln in lines) {
     if (grepl("^\\|\\s*true ICC\\b", ln)) {
@@ -748,6 +749,13 @@ width_table_claims <- function(lines) {
       )
     )[[1]]
     if (!length(m) || is.na(fac)) {
+      # A ratio-bearing table row NOTHING consumes is a figure no checker
+      # verifies: a data row under an unrecognized header (fac is NA), or a
+      # malformed row the shape regex rejects (review return #3). Refused via
+      # the orphans attribute rather than skipped.
+      if (grepl(width_ratio_token, ln, perl = TRUE)) {
+        orphans <- c(orphans, ln)
+      }
       next
     }
     out[[length(out) + 1L]] <- list(
@@ -758,6 +766,7 @@ width_table_claims <- function(lines) {
       cells = as.integer(m[5])
     )
   }
+  attr(out, "orphans") <- orphans
   out
 }
 
@@ -798,8 +807,33 @@ width_prose_pairs <- function(text) {
 # non-overlappingly, so on `| a | b | c |` it takes `| a |` and then `| c |` and
 # leaves `b` behind as loose prose -- which is how three of the article's seven
 # table figures first read as free-standing.
+#
+# But not the greedy chain either: `\\|(?:[^|]*\\|)+` matched from a surface's
+# FIRST pipe to its LAST, erasing the prose between two tables before any scan
+# ran (review return #3) -- `[^|]*` consumes a paragraph as happily as a cell.
+# So the stripper walks pipe-delimited segments and blanks only maximal runs of
+# two or more CELL-shaped segments: short (<= 60 chars) and sentence-free (no
+# terminal punctuation followed by space). Prose between tables fails both and
+# survives to be scanned. Boundary (claimed-classes header): a short,
+# punctuation-free fragment sitting between two pipes is stripped as a cell.
 width_strip_tables <- function(text) {
-  gsub("\\|(?:[^|]*\\|)+", " ", text, perl = TRUE)
+  pipes <- gregexpr("|", text, fixed = TRUE)[[1]]
+  if (pipes[1] == -1L || length(pipes) < 3L) {
+    return(text)
+  }
+  seg <- substring(text, head(pipes, -1L) + 1L, tail(pipes, -1L) - 1L)
+  cellish <- nchar(seg) <= 60L & !grepl("[.!?] ", seg)
+  run_id <- cumsum(c(TRUE, diff(cellish) != 0L))
+  for (r in unique(run_id[cellish])) {
+    idx <- which(run_id == r & cellish)
+    if (length(idx) < 2L) {
+      next
+    }
+    from <- pipes[idx[1]]
+    to <- pipes[idx[length(idx)] + 1L]
+    substr(text, from, to) <- strrep(" ", to - from + 1L)
+  }
+  text
 }
 
 # --- canonical shapes: the check refuses what it cannot verify ----------------
@@ -815,6 +849,25 @@ width_strip_tables <- function(text) {
 # recomputed fixture; a figure-shaped token outside every shape FAILS rather
 # than passing unchecked. The author's options become "write it canonically" or
 # "allowlist it as a non-measurement" -- both explicit, neither silent.
+#
+# CLAIMED CLASSES (AC2, re-cut 2026-08-13). What this file checks -- and all
+# it claims to check:
+#   - the canonical shapes in `width_canonical_shapes()` and the verbatim
+#     templates in `width_templates()`, each against the recomputed fixture;
+#   - markdown table rows under a recognized header (association-pinned), with
+#     unconsumed ratio-bearing rows refused as orphans;
+#   - surface-wide: 4-decimal ratio-band tokens outside every shape, and
+#     percent-ish tokens in width-vocabulary sentences, refused;
+#   - in width neighbourhoods: digit figures outside the allowlist, and spelled
+#     cardinals (up to two non-stopword qualifiers) before a measure noun,
+#     refused.
+# NOT claimed -- tokens outside these classes are not checked here, by design
+# (the narrowed AC2 promise; review is the net for them): figures equal to an
+# allowlisted value (0, 1, 5, 95, 0.95); percent figures at a nominal level
+# (90/95/99) or 100; spelled forms beyond the cardinal list or carrying three
+# or more qualifiers; figures in sentences with no width vocabulary; short
+# punctuation-free fragments between pipes, which strip as table cells
+# (`width_strip_tables`).
 #
 # `re` is matched over the squashed surface text; group 1..n feed `ok`, which
 # recomputes from the fixture and returns TRUE when the stated figure is right.
@@ -998,7 +1051,14 @@ width_cardinals <- c(
 )
 
 width_cardinal_value <- function(x) {
-  unname(width_cardinals[[tolower(x)]])
+  # Unknown words return NA rather than erroring, so a shape that matched a
+  # non-cardinal word ("further distribution families") FAILS its `ok` check
+  # instead of crashing the scan.
+  if (tolower(x) %in% names(width_cardinals)) {
+    unname(width_cardinals[[tolower(x)]])
+  } else {
+    NA_real_
+  }
 }
 
 # A figure written either way. Spelled cardinals are how `five cells` -> `nine
@@ -1034,6 +1094,100 @@ width_consume <- function(text, shapes) {
     text <- gsub(sh$re, " <figure> ", text, perl = TRUE)
   }
   list(residue = text, claims = claims)
+}
+
+# --- the three refusal scans, as callable helpers -------------------------
+#
+# Named functions rather than test-body code so the mutation harness
+# (data-raw/m117-width-pin-mutations.R, prose leg) runs the SAME scans the
+# suite runs -- a duplicated scanner would drift apart from the one it claims
+# to exercise.
+
+# Spelled cardinals before a measure noun, allowing up to two qualifying
+# words ("four ADDITIONAL distribution families" slipped the adjacent-only
+# net at review return #3); stopwords excluded so "one of the grids" stays
+# prose.
+width_spelled_re <- function() {
+  paste0(
+    "\\b(",
+    paste(names(width_cardinals), collapse = "|"),
+    ")(?:[ -](?!of\\b|the\\b|and\\b|or\\b|in\\b|to\\b|a\\b)[a-z]+){0,2}[ -](",
+    width_measure_nouns,
+    ")\\b"
+  )
+}
+
+# Unchecked figures inside one width neighbourhood run: spelled figures the
+# cardinal net catches, and digit tokens outside the allowlist, after every
+# canonical shape and table row is consumed.
+width_unchecked_figures <- function(run_text, shapes) {
+  got <- width_consume(width_strip_tables(run_text), shapes)
+  residue <- gsub(
+    "[A-Za-z][A-Za-z._-]*[0-9]+[A-Za-z0-9._-]*",
+    " ",
+    got$residue
+  )
+  spilled <- unlist(regmatches(
+    residue,
+    gregexpr(width_spelled_re(), residue, perl = TRUE, ignore.case = TRUE)
+  ))
+  numerals <- unlist(regmatches(
+    residue,
+    gregexpr("[0-9]+(\\.[0-9]+)?", residue)
+  ))
+  numerals <- numerals[
+    !vapply(
+      numerals,
+      function(tok) any(abs(width_numeral_allowlist - as.numeric(tok)) < 1e-9),
+      logical(1)
+    )
+  ]
+  list(
+    claims = got$claims,
+    spelled = spilled,
+    numerals = numerals
+  )
+}
+
+# Ratio-band tokens no canonical shape consumes, surface-wide (a pooled ratio
+# needs no method name to mislead).
+width_loose_ratios <- function(surface_text, shapes) {
+  residue <- width_consume(
+    width_strip_tables(surface_text),
+    shapes[c("ratio_rho", "ratio_k")]
+  )$residue
+  unlist(regmatches(
+    residue,
+    gregexpr(width_ratio_token, residue, perl = TRUE)
+  ))
+}
+
+# Percent figures in width-vocabulary sentences, surface-wide. A digit-%
+# whose number is a nominal level (90/95/99) or 100 is not a width
+# measurement; the percent WORDS are refused unconditionally.
+width_pct_violations <- function(surface_text) {
+  pct <- "[0-9](\\.[0-9]+)?\\s*%|\\b(per ?cent|percentage points?)\\b"
+  sents <- width_split(surface_text)
+  widthy <- sents[grepl(width_vocab, sents, ignore.case = TRUE)]
+  bad <- widthy[grepl(pct, widthy, ignore.case = TRUE, perl = TRUE)]
+  bad <- bad[vapply(
+    bad,
+    function(s) {
+      hits <- regmatches(
+        s,
+        gregexpr("[0-9]+(\\.[0-9]+)?(?=\\s*%)", s, perl = TRUE)
+      )[[1]]
+      words <- grepl(
+        "\\b(per ?cent|percentage points?)\\b",
+        s,
+        ignore.case = TRUE,
+        perl = TRUE
+      )
+      words || any(!as.numeric(hits) %in% c(90, 95, 99, 100))
+    },
+    logical(1)
+  )]
+  list(bad = bad, scanned = length(widthy))
 }
 
 # Does a stated (factor, level, ratio) match the recomputed median? Per-rho
@@ -1170,6 +1324,14 @@ test_that("the article's width tables state the median for the level named", {
     "the article is neither installed nor in a source tree"
   )
   claims <- width_table_claims(lines)
+  expect_identical(
+    length(attr(claims, "orphans")),
+    0L,
+    info = paste(
+      "ratio-bearing table row(s) no checker consumes:",
+      paste(attr(claims, "orphans"), collapse = " // ")
+    )
+  )
   fac_of <- vapply(claims, function(cl) cl$factor, character(1))
 
   # Anti-vacuity and completeness in one: the article states every level of both
@@ -1248,58 +1410,38 @@ test_that("no width statement carries a figure nothing checks", {
   # checker has verified -- so it fails here rather than shipping unchecked.
   w <- width_fixture()
   shapes <- width_canonical_shapes(w)
-  spelled <- paste0(
-    "\\b(",
-    paste(names(width_cardinals), collapse = "|"),
-    ")[ -](",
-    width_measure_nouns,
-    ")\\b"
-  )
   legs <- width_legs()
   expect_gt(length(legs), 0L)
 
   for (leg in names(legs)) {
     runs <- width_neighbourhoods_leg(legs[[leg]])
     for (nm in names(runs)) {
-      text <- width_strip_tables(paste(runs[[nm]], collapse = " "))
-      residue <- width_consume(text, shapes)$residue
-      # Identifiers are not figures: milestone ids, fixture filenames,
-      # distribution labels. Any token whose digits are glued to letters.
-      residue <- gsub("[A-Za-z][A-Za-z._-]*[0-9]+[A-Za-z0-9._-]*", " ", residue)
-
-      spilled <- unlist(regmatches(
-        residue,
-        gregexpr(spelled, residue, perl = TRUE, ignore.case = TRUE)
-      ))
+      found <- width_unchecked_figures(
+        paste(runs[[nm]], collapse = " "),
+        shapes
+      )
       expect_identical(
-        length(spilled),
+        length(found$spelled),
         0L,
         info = paste0(
           leg,
           "/",
           nm,
           ": unchecked spelled figure(s) ",
-          paste(spilled, collapse = ", ")
+          paste(found$spelled, collapse = ", ")
         )
       )
-
-      numerals <- unlist(regmatches(
-        residue,
-        gregexpr("[0-9]+(\\.[0-9]+)?", residue)
-      ))
-      for (tok in numerals) {
-        expect_true(
-          any(abs(width_numeral_allowlist - as.numeric(tok)) < 1e-9),
-          info = paste0(
-            leg,
-            "/",
-            nm,
-            ": figure '",
-            tok,
-            "' is in no canonical shape and is not allowlisted"
-          )
+      expect_identical(
+        length(found$numerals),
+        0L,
+        info = paste0(
+          leg,
+          "/",
+          nm,
+          ": figure(s) in no canonical shape and not allowlisted: ",
+          paste(found$numerals, collapse = ", ")
         )
-      }
+      )
     }
   }
 })
@@ -1310,21 +1452,17 @@ test_that("every ratio-shaped figure on a swept surface is bound to a level", {
   # (AC4). A ratio-shaped token that no canonical shape and no table row
   # consumes is by construction not bound to any level.
   w <- width_fixture()
-  # Only the two ratio-bearing shapes: the rest are level and count shapes
-  # whose patterns legitimately match unrelated help text elsewhere on a
-  # surface, and consuming those would say nothing about a loose ratio.
-  shapes <- width_canonical_shapes(w)[c("ratio_rho", "ratio_k")]
+  # `width_loose_ratios` consumes only the two ratio-bearing shapes: the rest
+  # are level and count shapes whose patterns legitimately match unrelated
+  # help text elsewhere on a surface, and consuming those would say nothing
+  # about a loose ratio.
+  shapes <- width_canonical_shapes(w)
   legs <- width_legs()
   expect_gt(length(legs), 0L)
 
   for (leg in names(legs)) {
     for (nm in names(legs[[leg]])) {
-      text <- width_strip_tables(legs[[leg]][[nm]])
-      residue <- width_consume(text, shapes)$residue
-      loose <- unlist(regmatches(
-        residue,
-        gregexpr(width_ratio_token, residue, perl = TRUE)
-      ))
+      loose <- width_loose_ratios(legs[[leg]][[nm]], shapes)
       expect_identical(
         length(loose),
         0L,
@@ -1338,6 +1476,42 @@ test_that("every ratio-shaped figure on a swept surface is bound to a level", {
       )
     }
   }
+})
+
+test_that("no width sentence carries a percentage figure", {
+  # The ancestral defect form: "about 6% / about 4% narrower" was the pooled
+  # percentage M116 withdrew, and a NEW pooled percentage ("about 5% narrower
+  # overall") is ratio-shaped to a reader while matching no ratio token and no
+  # canonical shape. No shape states a width percentage, so any percent-ish
+  # token in a sentence carrying width vocabulary is a figure nothing checks --
+  # refused outright, surface-wide (a pooled figure needs no method name).
+  # A percent FIGURE, not any percent sign: Rd comment lines open with `%`,
+  # and sprintf/formatC code carries `%s` and `width = 8` in the same
+  # "sentence", so a bare `%` net reds on machinery. Nominal levels and
+  # knitr's `out.width = "100%"` are likewise not width measurements; see
+  # `width_pct_violations` for the exact boundary.
+  legs <- width_legs()
+  expect_gt(length(legs), 0L)
+  seen <- 0L
+  for (leg in names(legs)) {
+    for (nm in names(legs[[leg]])) {
+      got <- width_pct_violations(legs[[leg]][[nm]])
+      seen <- seen + got$scanned
+      expect_identical(
+        length(got$bad),
+        0L,
+        info = paste0(
+          leg,
+          "/",
+          nm,
+          ": percentage figure in a width sentence -- ",
+          paste(got$bad, collapse = " // ")
+        )
+      )
+    }
+  }
+  # Anti-vacuity: the width sentences were actually found and scanned.
+  expect_gte(seen, 10L)
 })
 
 test_that("every width statement names the shape in ICC and in subject count", {

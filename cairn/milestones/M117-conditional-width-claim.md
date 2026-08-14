@@ -139,7 +139,7 @@ Review return #2 repair (detail in the work log and git):
 
 Re-cut (2026-08-13):
 
-- [ ] T18 Prose-mutation leg in `data-raw/m117-width-pin-mutations.R`: patch a swept surface → run the scan → require red; coverage assertion; class list naming each review-return defeat, pooled-figure mutations varying placement, form and grid per AC4; fix `width_strip_tables()` (per-table non-greedy match) so all three placements red; scan header states the claimed-classes boundary.
+- [x] T18 Prose-mutation leg in `data-raw/m117-width-pin-mutations.R`: patch a swept surface → run the scan → require red; coverage assertion; class list naming each review-return defeat, pooled-figure mutations varying placement, form and grid per AC4; fix `width_strip_tables()` (per-table non-greedy match) so all three placements red; scan header states the claimed-classes boundary.
 - [ ] T19 AC9 corrections: grid hedge at the flat-clause sites carrying none; the largest-margin sentence states its cut; association pins and restoration mutations; ledgers re-triaged.
 - [ ] T20 Full gate on a rebuilt `build_vignettes = TRUE` install; CI matrix; review evidence refresh.
 
@@ -193,6 +193,7 @@ Re-cut (2026-08-13):
 - 2026-08-13: re-cut gate chose having the largest-margin sentence state its cut (level medians, at which it is true) with the 11-of-16 paired-cell contradiction pinned beside it, over restating per grid or withdrawing it; falsified by a user reading the cut-qualified sentence as the per-cell claim anyway.
 - 2026-08-13: amendment landed by /milestone-plan (AC2/AC4 rewritten, AC9 and T18–T20 added, coverage updated); the parking blocker is resolved by the recorded guard-scope decision, and status stays `blocked` until `/milestone-implement` resumes it — `in-progress` is that skill's transition to make.
 - 2026-08-13: resumed by /milestone-implement (blocked → in-progress; blocker resolved by the re-cut gate's guard-scope decision). No implementation question gate: the same-day plan gate settled the open choices. Remaining: T18–T20.
+- 2026-08-13: T18 — `width_strip_tables()` rewritten as a pipe-segment scanner (blanks only runs of ≥2 cell-shaped segments: ≤60 chars, sentence-free), so prose between tables survives to be scanned; the three refusal scans hoisted to named helpers (`width_unchecked_figures`, `width_loose_ratios`, `width_pct_violations`) the harness sources with `test_that` stubbed — one definition, no drift; spelled net allows up to two non-stopword qualifiers; percent figures refused in width sentences (nominal 90/95/99/100 excluded — knitr `out.width = "100%"` and the HPDI 95% were the two legitimate hits); ratio-bearing table rows nothing consumes refused as orphans; claimed-classes boundary declared in the file header. Prose-mutation leg: 15 class-named mutations (placement × form × grid for the pooled family; every review-return defeat encoded), all refused, control clean, coverage asserted. Suite: 0 failed, 945 passed; air + lintr clean (lintr 3.4.0 installed locally — absent from this machine's library).
 
 ## Decisions
 
