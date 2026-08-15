@@ -6,6 +6,15 @@
 #	all harnesses. That job belongs to the run-time trace in checkpoint-guard.R,
 #	which observes deserializations rather than spellings.
 #
+#	The deserialization list AC2 quantifies over. A declared site, and every
+#	non-package file it source()s other than the guard, may call none of these:
+#	each returns an R object from bytes on disk, so each is a way to serve a
+#	cached row the current design never computed. The list is an ENUMERATION and
+#	says nothing about a name outside it; the checker refuses to run unless it
+#	contains at least the four required names, so it cannot be quietly shortened
+#	to whatever the sites happen not to use.
+#@deserializers	readRDS,load,unserialize,readr::read_rds
+#
 #	script       path relative to the repo root
 #	params       the design parameters compared on resume, in the declared order;
 #	             the mismatch message names the EARLIEST differing one in this order

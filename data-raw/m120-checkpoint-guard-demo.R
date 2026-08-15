@@ -284,6 +284,135 @@ stopifnot(nzchar(
 ))
 pass("a local shadowing a top-level binding is not reported as a determinant")
 
+# ---- AC1: the run-time and the static walk, pinned against each other -------
+# ckpt_spec() walks LIVE BINDINGS; the routing checker walks PARSED SOURCE. Four
+# of the five real sites need brms/Stan and hours of refits, so the static walk
+# is the only one that ever reaches them -- which means nothing about the real
+# sites can show the two walks answer alike. This synthetic site can, and it
+# carries one instance of each class the walk must classify: a captured value, a
+# captured function, a shadowed local, an exempted object and a declared
+# parameter.
+cat("\n== AC1: the run-time and static generating walks agree ==\n")
+
+syn_path <- "data-raw/m120-synthetic-site.R"
+syn_roots <- "syn_one_rep"
+syn_values <- "syn_est"
+syn_params <- "syn_rho"
+syn_exempt <- "syn_base_fit"
+
+checker <- new.env(parent = globalenv())
+sys.source("data-raw/check-checkpoint-sites.R", envir = checker)
+
+syn_source <- function(path) {
+  e <- new.env(parent = globalenv())
+  sys.source(path, envir = e)
+  e
+}
+syn_env <- syn_source(syn_path)
+
+runtime_scan <- ckpt_block_scan(
+  syn_roots,
+  syn_values,
+  syn_params,
+  syn_exempt,
+  envir = syn_env
+)
+static_scan <- checker$static_scan_file(
+  syn_path,
+  syn_roots,
+  syn_values,
+  syn_params,
+  syn_exempt
+)
+stopifnot(identical(runtime_scan$fns, static_scan$fns))
+stopifnot(identical(runtime_scan$uncovered, static_scan$uncovered))
+# Not vacuous: the walk reached the entry point AND the function captured by
+# name rather than called, and left nothing uncovered.
+stopifnot(identical(runtime_scan$fns, c("syn_one_rep", "syn_scale")))
+stopifnot(!length(runtime_scan$uncovered))
+pass("both walks hash the same functions and report nothing uncovered")
+
+# Withdraw the declarations and both walks name the same two determinants -- the
+# captured value and the exempted object -- and neither names the shadowed
+# local, whose top-level namesake the entry point never reads.
+runtime_bare <- ckpt_block_scan(
+  syn_roots,
+  character(0),
+  syn_params,
+  character(0),
+  envir = syn_env
+)
+static_bare <- checker$static_scan_file(
+  syn_path,
+  syn_roots,
+  character(0),
+  syn_params,
+  character(0)
+)
+stopifnot(identical(runtime_bare$uncovered, static_bare$uncovered))
+stopifnot(identical(runtime_bare$uncovered, c("syn_base_fit", "syn_est")))
+stopifnot(!("syn_shadowed" %in% runtime_bare$uncovered))
+pass(
+  "both walks name the same undeclared determinants, and neither names the shadowed local"
+)
+
+expect_error(
+  ckpt_spec(
+    params = list(syn_rho = syn_env$syn_rho),
+    roots = syn_roots,
+    site = "synthetic",
+    envir = syn_env
+  ),
+  "removing a determinant's declaration refuses the spec, naming it",
+  must_match = "syn_est"
+)
+
+# And the determinant reached by capture really does decide the hash. The edit
+# is made to the SOURCE and re-sourced, because that is the edit the shipped
+# hole survived: `est_occ` sits outside the hashed closure on two oracle sites,
+# and editing it left the block hash byte-identical.
+syn_hash <- function(env) {
+  ckpt_block_hash(syn_roots, syn_values, syn_params, syn_exempt, envir = env)
+}
+syn_edit <- function(from, to) {
+  path <- file.path(tmp, paste0("syn-", nchar(to), ".R"))
+  src <- readLines(syn_path)
+  edited <- sub(from, to, src, fixed = TRUE)
+  stopifnot(!identical(edited, src)) # the edit landed
+  writeLines(edited, path)
+  syn_source(path)
+}
+base_hash <- syn_hash(syn_env)
+stopifnot(
+  !identical(
+    base_hash,
+    syn_hash(syn_edit(
+      'syn_make_est("agreement")',
+      'syn_make_est("consistency")'
+    ))
+  )
+)
+pass("editing the captured determinant's argument changes the block hash")
+stopifnot(
+  !identical(
+    base_hash,
+    syn_hash(syn_edit('if (kind == "agreement") 1 else 2', "1.5"))
+  )
+)
+pass(
+  "editing the generator of the captured determinant changes the block hash too"
+)
+# The counterweight, so the hash is not simply always different: a comment added
+# inside the entry point changes no cached number and leaves it alone.
+stopifnot(identical(
+  base_hash,
+  syn_hash(syn_edit(
+    "  out <- unlist(lapply(seq_len(k), syn_scale))",
+    "  # a note to the next reader\n  out <- unlist(lapply(seq_len(k), syn_scale))"
+  ))
+))
+pass("a comment added inside the entry point leaves the block hash unchanged")
+
 # A declared block name that no longer exists is "not found", never silently
 # resolved to a same-named function further up the search path. Two real sites
 # declare a block function named `simulate`, which stats:: also exports: without
@@ -434,7 +563,7 @@ ckpt_trace_remove()
 # so the guard is exercised on the harness the defect was found in rather than
 # only on a model of it. The four oracle sites share this code path but each
 # needs brms/Stan and hours of refits, so they are covered by the routing check
-# (data-raw/check-checkpoint-sites.py), not by a run here.
+# (data-raw/check-checkpoint-sites.R), not by a run here.
 cat("\n== AC3/AC4: the M111 sweep, end to end at n_rep = 2 ==\n")
 
 site_tmp <- tempfile("m120-m111-")
