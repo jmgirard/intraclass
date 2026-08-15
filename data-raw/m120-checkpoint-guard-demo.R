@@ -223,6 +223,67 @@ expect_error(
 )
 undeclared_helper <- function(x) x * 1
 
+# A determinant reached by VARIABLE CAPTURE, not by a call: the value is
+# computed at top level from a site function and then referenced inside the
+# entry point. This is the form that shipped uncovered — editing the estimand
+# helper left the hash byte-identical on two oracle sites — because the walk
+# collected call heads only.
+cat("\n== AC1: a determinant reached by variable capture ==\n")
+capture_helper <- function(kind) list(kind = kind, weight = 1)
+captured_est <- capture_helper("agreement")
+gen_via_capture <- function(rho, k) rho * seq_len(k) * captured_est$weight
+capture_spec <- function() {
+  ckpt_spec(
+    params = list(rho = 0.3, k = 10),
+    roots = "gen_via_capture",
+    values = "captured_est",
+    site = "demo-capture"
+  )
+}
+cap_path <- path_of("capture")
+ckpt_write(cap_path, payload = gen_via_capture(0.3, 10), spec = capture_spec())
+stopifnot(identical(
+  ckpt_read(cap_path, capture_spec()),
+  gen_via_capture(0.3, 10)
+))
+pass("a cache written under the current captured value resumes")
+captured_est <- capture_helper("consistency") # the estimand changes
+expect_error(
+  ckpt_read(cap_path, capture_spec()),
+  "editing a determinant reached by variable capture invalidates the cache",
+  must_match = "generating block"
+)
+captured_est <- capture_helper("agreement")
+
+# And an uncovered one is refused at construction, by name, rather than hashed
+# silently or skipped silently.
+cat("\n== AC1: an uncovered determinant is named, not skipped ==\n")
+expect_error(
+  ckpt_spec(
+    params = list(rho = 0.3, k = 10),
+    roots = "gen_via_capture",
+    site = "demo-capture"
+  ),
+  "a determinant that is neither hashed nor declared aborts naming itself",
+  must_match = "captured_est"
+)
+
+# A local shadowing a top-level name is not a dependency on it.
+cat("\n== AC1: a local shadowing a top-level binding ==\n")
+shadowed <- "top-level value nobody reads"
+gen_with_shadow <- function(rho, k) {
+  shadowed <- rho * seq_len(k)
+  shadowed
+}
+stopifnot(nzchar(
+  ckpt_spec(
+    params = list(rho = 0.3, k = 10),
+    roots = "gen_with_shadow",
+    site = "demo-shadow"
+  )$block_hash
+))
+pass("a local shadowing a top-level binding is not reported as a determinant")
+
 # A declared block name that no longer exists is "not found", never silently
 # resolved to a same-named function further up the search path. Two real sites
 # declare a block function named `simulate`, which stats:: also exports: without

@@ -251,7 +251,16 @@ rep_spec <- function() {
       base_seed = base_seed
     ),
     roots = "one_rep",
-    values = c("cell_offset", "designs", "base_prior", "brm_args"),
+    values = c(
+      "cell_offset",
+      "designs",
+      "base_prior",
+      "brm_args",
+      "single_est",
+      "average_est",
+      "pop_single",
+      "pop_average"
+    ),
     site = ckpt_site
   )
 }

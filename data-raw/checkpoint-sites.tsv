@@ -18,14 +18,20 @@
 #	             derived: seed-offset vectors, sampler argument lists, and the
 #	             formula and prior each base fit is compiled from. Following data
 #	             references instead would drag in the compiled model object itself
+#	exemptions   determinants the walk reaches but cannot hash, each with its reason
+#	             below. Empty on a site with none. This list WEAKENS the check, so
+#	             it is the one place a determinant may go uncovered, and it is a
+#	             recorded decision rather than a silent omission.
+#	             base_fit — a compiled brms/Stan fit; not stably deparsable, and
+#	             what determines it (base_formula, base_prior, brm_args) is hashed.
 #	unit         what one checkpoint entry covers
 #	api          the guard calls the site must make — ALL of them, live. A site
 #	             that keeps its file-level call and drops its per-entry one has
 #	             stopped checking the thing that goes stale, so no single call
 #	             stands in for the set
-script	params	roots	values	unit	api
-data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	one_rep	 	cell	ckpt_read,ckpt_write
-data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,base_seed	one_rep	base_formula,base_prior,brm_args	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
-data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,base_seed	one_rep,make_incidence	cell_offset,base_formula,base_prior,brm_args	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
-data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	one_cell	base_formula,base_prior,brm_args	cell	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
-data-raw/oracle-bayesian-multilevel-replicates.R	n_clusters,n_subj_per,k,n_o,s2_c,s2_sc,s2_r,s2_cr,s2_sr,s2_e,base_seed	one_rep	cell_offset,designs,base_prior,brm_args	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+script	params	roots	values	exemptions	unit	api
+data-raw/m111-fallback-sweep.R	rho,k,n,dist,n_rep,base_seed	one_rep	 	 	cell	ckpt_read,ckpt_write
+data-raw/oracle-bayesian-fixed-replicates.R	n_subj,k,n_o,s2_s,mu_r,s2_sr,s2_e,base_seed	one_rep	base_formula,base_prior,brm_args,single_est,average_est,pop_single,pop_average,spec_frep	base_fit	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-incomplete-oneway.R	n_subjects,k,s2_s,s2_res,missing_frac,base_seed	one_rep,make_incidence	cell_offset,base_formula,base_prior,brm_args,inc,k_eff_ragged,spec_ow	base_fit	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-incomplete-fixed-nested.R	vsc,vres,nc,ns,theta2,p_keep,n_rep,base_seed	one_cell	base_formula,base_prior,brm_args,spec_sr	base_fit	cell	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save
+data-raw/oracle-bayesian-multilevel-replicates.R	n_clusters,n_subj_per,k,n_o,s2_c,s2_sc,s2_r,s2_cr,s2_sr,s2_e,base_seed	one_rep	cell_offset,designs,base_prior,brm_args,single_est,average_est,pop_single,pop_average	 	rep	ckpt_store_load,ckpt_store_get,ckpt_store_put,ckpt_store_save

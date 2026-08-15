@@ -242,7 +242,16 @@ rep_spec <- function() {
       base_seed = base_seed
     ),
     roots = c("one_rep", "make_incidence"),
-    values = c("cell_offset", "base_formula", "base_prior", "brm_args"),
+    values = c(
+      "cell_offset",
+      "base_formula",
+      "base_prior",
+      "brm_args",
+      "inc",
+      "k_eff_ragged",
+      "spec_ow"
+    ),
+    exemptions = "base_fit",
     site = ckpt_site
   )
 }

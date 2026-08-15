@@ -42,39 +42,92 @@ ckpt_find_block <- function(nm, envir) {
   }
 }
 
-# Every bare name in call position within an expression. `pkg::f()` and
-# `pkg:::f()` are deliberately not collected: a package function is not the
-# site's own code, and the package's behavior is pinned by the test suite rather
-# than by this hash.
+# EVERY bare name in an expression, not only those in call position. Collecting
+# call heads alone was the hole that shipped: a determinant reached by variable
+# capture -- `single_est <- est_occ("single")` at top level, then `single_est`
+# referenced inside the entry point -- appears in no call position, so editing
+# the estimand left the hash byte-identical, and a committed oracle fixture
+# would have been written from rows computed under the old estimand.
+#
+# `pkg::f` and `pkg:::f` are deliberately not collected: a package object is not
+# the site's own code, and the package's behavior is pinned by the test suite
+# rather than by this hash. `x$y`'s `y` is a member name, not a binding.
+#
 # Walked BY INDEX, never `for (x in as.list(e))`: an empty argument (the blank
 # in `d[keep, , drop = FALSE]`) binds a loop variable to the missing marker and
 # every later touch of it raises "argument is missing". Indexing reads the same
 # object without binding it.
-ckpt_called_names <- function(e, acc = character(0)) {
-  if (is.call(e)) {
-    if (is.name(e[[1]])) {
-      acc <- c(acc, as.character(e[[1]]))
-    }
-    args <- as.list(e)[-1]
-    for (i in seq_along(args)) {
-      if (!is.null(args[[i]]) && !identical(args[[i]], quote(expr = ))) {
-        acc <- ckpt_called_names(args[[i]], acc)
-      }
+ckpt_symbols <- function(e, acc = character(0)) {
+  if (is.name(e)) {
+    nm <- as.character(e)
+    return(if (nzchar(nm)) c(acc, nm) else acc)
+  }
+  if (!is.call(e)) {
+    return(acc)
+  }
+  if (is.name(e[[1]]) && as.character(e[[1]]) %in% c("::", ":::", "$", "@")) {
+    return(ckpt_symbols(e[[2]], acc))
+  }
+  parts <- as.list(e)
+  for (i in seq_along(parts)) {
+    if (!is.null(parts[[i]]) && !identical(parts[[i]], quote(expr = ))) {
+      acc <- ckpt_symbols(parts[[i]], acc)
     }
   }
   acc
 }
 
-# The generating block, DERIVED rather than hand-listed: start at the site's
-# declared entry points and follow the calls they actually make, keeping every
-# one that resolves to a function of the site's own (a package function stops
-# the walk, per ckpt_called_names and ckpt_find_block). A hand-listed set is
-# fixed by whoever wrote it remembering every helper, and one site's list was
-# found missing two functions that decide its cached numbers — the recall
-# failure this replaces. Sorted, so the hash does not depend on walk order.
-ckpt_block_closure <- function(roots, envir) {
+# Names a function binds for itself: its formals, anything it assigns, and its
+# for-loop variables. These are subtracted from the walked symbols, because a
+# local that happens to share a name with a top-level binding is not a
+# dependency on it -- `oracle-bayesian-incomplete-oneway.R` has a top-level
+# `out` (an output path) and a local `out` (a data frame), and without this the
+# walk reports the site depending on a path it never reads.
+ckpt_local_names <- function(fn) {
+  acc <- names(formals(fn))
+  walk <- function(e) {
+    if (!is.call(e)) {
+      return(invisible(NULL))
+    }
+    if (is.name(e[[1]])) {
+      op <- as.character(e[[1]])
+      if (op %in% c("<-", "=", "<<-") && length(e) >= 3L && is.name(e[[2]])) {
+        acc <<- c(acc, as.character(e[[2]]))
+      }
+      if (op == "for" && length(e) >= 3L && is.name(e[[2]])) {
+        acc <<- c(acc, as.character(e[[2]]))
+      }
+      if (op == "function") {
+        acc <<- c(acc, names(as.list(e[[2]])))
+      }
+    }
+    parts <- as.list(e)
+    for (i in seq_along(parts)) {
+      if (!is.null(parts[[i]]) && !identical(parts[[i]], quote(expr = ))) {
+        walk(parts[[i]])
+      }
+    }
+  }
+  walk(body(fn))
+  unique(acc)
+}
+
+# The generating block, DERIVED rather than hand-listed: walk from the site's
+# declared entry points over every symbol their bodies mention, following those
+# that resolve to functions the site defines, and CLASSIFY every symbol that
+# resolves to a top-level binding of the site's own. A symbol that is neither
+# hashed, nor a declared parameter, nor a declared value, nor a declared
+# exemption is returned as uncovered, and the caller refuses to build a spec
+# while any remains. That is the whole point of the redesign: what a cache
+# depends on is decided by the walk, and anything the walk cannot cover is a
+# recorded decision rather than a silent omission.
+#
+# Sorted, so the hash does not depend on walk order.
+ckpt_block_scan <- function(roots, values, params, exemptions, envir) {
   seen <- character(0)
   queue <- roots
+  uncovered <- character(0)
+  declared <- c(values, params, exemptions)
   while (length(queue)) {
     nm <- queue[[1]]
     queue <- queue[-1]
@@ -97,33 +150,52 @@ ckpt_block_closure <- function(roots, envir) {
       )
     }
     seen <- c(seen, nm)
-    for (called in unique(ckpt_called_names(body(hit$value)))) {
-      if (called %in% seen || called %in% queue) {
+    locals <- ckpt_local_names(hit$value)
+    for (s in setdiff(unique(ckpt_symbols(body(hit$value))), locals)) {
+      if (s %in% seen || s %in% queue) {
         next
       }
-      h <- ckpt_find_block(called, envir)
-      if (h$found && is.function(h$value)) {
-        queue <- c(queue, called)
+      h <- ckpt_find_block(s, envir)
+      if (!h$found) {
+        next # a local, a formal, or a package object: not the site's own
+      }
+      if (is.function(h$value)) {
+        queue <- c(queue, s)
+      } else if (!(s %in% declared)) {
+        uncovered <- c(uncovered, s)
       }
     }
   }
-  sort(seen)
+  list(fns = sort(seen), uncovered = sort(unique(uncovered)))
 }
 
-# Hash the generating block: every function in the closure of the declared entry
-# points (deparsed bodies, in sorted name order), then every declared VALUE in
-# its declared order (deparsed value). Values are declared rather than derived
-# because not everything that decides a cached number is a function — the
-# seed-offset vectors, the sampler argument lists, and the formula and prior each
-# base fit is compiled from all do — and following data references would drag in
-# the compiled model object itself. Base R only: tools::md5sum needs a file, so
-# the deparsed text goes through a tempfile.
-ckpt_block_hash <- function(roots, values, envir = parent.frame()) {
+# Hash the generating block: every function the walk reached (deparsed bodies,
+# in sorted name order), then every declared VALUE in its declared order
+# (deparsed value). Base R only: tools::md5sum needs a file, so the deparsed
+# text goes through a tempfile.
+ckpt_block_hash <- function(
+  roots,
+  values,
+  params = character(0),
+  exemptions = character(0),
+  envir = parent.frame()
+) {
   if (!length(roots)) {
     stop("checkpoint spec: no declared entry points", call. = FALSE)
   }
-  fns <- ckpt_block_closure(roots, envir)
-  text <- unlist(lapply(fns, function(nm) {
+  scan <- ckpt_block_scan(roots, values, params, exemptions, envir)
+  if (length(scan$uncovered)) {
+    stop(
+      "checkpoint spec: the generating walk reached ",
+      length(scan$uncovered),
+      " object(s) this site defines that are neither hashed nor declared: ",
+      paste(scan$uncovered, collapse = ", "),
+      " (declare each as a value, or as an exemption with a stated reason in ",
+      "data-raw/checkpoint-sites.tsv)",
+      call. = FALSE
+    )
+  }
+  text <- unlist(lapply(scan$fns, function(nm) {
     c(paste0("## fn ", nm), deparse(body(ckpt_find_block(nm, envir)$value)))
   }))
   text <- c(
@@ -150,6 +222,7 @@ ckpt_spec <- function(
   params,
   roots,
   values = character(0),
+  exemptions = character(0),
   site,
   envir = parent.frame()
 ) {
@@ -171,7 +244,13 @@ ckpt_spec <- function(
     params = params,
     order = names(params),
     block = c(roots, values),
-    block_hash = ckpt_block_hash(roots, values, envir = envir)
+    block_hash = ckpt_block_hash(
+      roots,
+      values,
+      params = names(params),
+      exemptions = exemptions,
+      envir = envir
+    )
   )
 }
 

@@ -231,7 +231,17 @@ rep_spec <- function() {
       base_seed = base_seed
     ),
     roots = "one_rep",
-    values = c("base_formula", "base_prior", "brm_args"),
+    values = c(
+      "base_formula",
+      "base_prior",
+      "brm_args",
+      "single_est",
+      "average_est",
+      "pop_single",
+      "pop_average",
+      "spec_frep"
+    ),
+    exemptions = "base_fit",
     site = ckpt_site
   )
 }

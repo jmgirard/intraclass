@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** planned
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -118,7 +118,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 
 ## Tasks
 
-- [ ] T1 Walk every symbol in the walked bodies, not only call heads; classify
+- [x] T1 Walk every symbol in the walked bodies, not only call heads; classify
       each as hashed, declared parameter, declared value, or declared exemption,
       and abort naming an unclassified one. Add the exemption column with
       reasons.
@@ -198,6 +198,9 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 - 2026-08-14: re-cut gate chose one re-cut milestone over splitting the static check or the watcher out, because all three pieces need the same reachability machinery and splitting would duplicate it across two branches; falsified by the re-cut exceeding the sizing tripwires again.
 - 2026-08-14: re-cut criteria audit, round 2 ([O], fresh context, over the amended wording) — all six still defective, and one counterexample was executed rather than argued: `load()` and `unserialize()` of a registered checkpoint return silently, so AC2's handoff to the watcher was false and AC3's 'plain-path read' universal was falsified by a call the watcher never traces. Adopted in full: AC2 names a required-minimum deserialization list and probes it by planting each name; AC3 is scoped to `readRDS` and gains the re-source case; AC1 is anchored on the static walk with the run-time rule pinned against it on a synthetic site, since four of five sites can never be run; AC4 quantifies per declared guard call, not per site, and probes the idiom list itself; AC5 uses a diff-based enumeration that also catches a deleted fixture; AC6 requires each checker's self-test status declared, `check-abort-remedy-verdicts.R` having been found to accept `--self-test` and exit 0 without having one.
 - 2026-08-14: the round-2 audit's cross-cutting finding shaped every fix — a declared list that WEAKENS a check must not be expandable at will by the author whose recall already failed, so each such list is now tied to something checkable: exemptions empty unless a compiled-object determinant exists, the deserialization list carrying four required names, and the idiom list itself probed by a planted mutation.
+- 2026-08-14: re-cut in-progress on the existing branch; T1 — the walk collects every symbol in a walked body, not only call heads, subtracts the function's own locals (formals, assignments, loop variables) so a shadowing local is not read as a dependency, and classifies each remaining site-defined symbol as hashed, declared parameter, declared value, or declared exemption, refusing to build a spec while any is unclassified.
+- 2026-08-14: T1 — run against the five sites, the walk named exactly the class that had been silently uncovered: `single_est`, `average_est`, `pop_single`, `pop_average`, `spec_frep` on fixed-replicates; `inc`, `k_eff_ragged`, `spec_ow` on incomplete-oneway; `spec_sr` on incomplete-fixed-nested; `single_est`, `average_est`, `pop_single`, `pop_average` on multilevel-replicates. Each is now a declared value. `base_fit` is the only exemption, on the three sites that capture it, with its reason recorded in the TSV; the fourth passes it as an argument, so it is a formal there and never reaches the walk. m111 needs neither.
+- 2026-08-14: T1 — three demonstrations added and the fix shown to discriminate: reverting the walk to call-heads-only reds the uncovered-determinant case and no other. A local shadowing a top-level binding is not reported (the false positive the first run surfaced on `out` in incomplete-oneway, which is both an output path at top level and a data frame inside `one_rep`).
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
