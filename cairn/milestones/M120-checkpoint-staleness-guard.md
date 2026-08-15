@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -104,7 +104,7 @@ stands on the branch, promised by no criterion.
       shows no path outside the most recent file list this milestone declares in
       its work log.
 
-- [x] AC6 The profile's `verify` slot is clean, and `air format --check`,
+- [ ] AC6 The profile's `verify` slot is clean, and `air format --check`,
       `lintr::lint_package()`, and every checker matched by `data-raw/check-*.R`
       and `data-raw/check-*.py` exit 0. Every such checker declares in
       `data-raw/record-claims.tsv` whether it has a `--self-test`; each that
@@ -250,6 +250,9 @@ stands on the branch, promised by no criterion.
 - 2026-08-15: T14 — full local gate green on the final tree: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` exit 0 (unchanged from the pre-amendment baseline, as expected — every changed file is under `data-raw/`, which `.Rbuildignore` excludes), `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed with one advisory (the 13-task tripwire, answered above and now 14), the guard demonstration exit 0 over 50 PASS cases, the routing check and its 130-mutation self-test exit 0 with 5 forms reported as not applying, all six `data-raw` checkers and the five self-tests exit 0, and `m112-harness-demo.R` passes. The killed first run of the suite is superseded by this one, which was observed rather than expected.
 - 2026-08-15: AC5 declared file list, the whole of what this branch changes — the same 21 files the return-2 pass declared, this session having added none: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R`, the four python checkers `check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py` and `check-reference-observations.py`, `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, `data-raw/m120-synthetic-site.R`, the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims-checker-self-tests.py`, `data-raw/record-claims.tsv` and `data-raw/rerun-oracle.R`. The fixture-filtered diff is empty and `git status --porcelain` is empty. Status to review.
 - 2026-08-15: fifth review — all six criteria re-executed with fresh evidence and ticked; `cairn_validate` all checks passed (one advisory, the task-count tripwire), `devtools::document()` no diff, `pkgdown::check_pkgdown()` no problems, `devtools::check()` still running at this commit. The fifth-review section was first written ABOVE `## Review`, where it counted against the plan-owned cap and failed `weight caps` at 230 lines; it is now at EOF where the exemption applies and the body is back to 147/149. Two of the three review lenses have reported: blame-history and prior-review each found no regression.
+- 2026-08-15: review return 5 (defect) — AC6 fails: `lintr::lint_package()` reports 17 lints, all `quotes_linter`, all in the pre-source-alias subprocess block T11 added at `m120-checkpoint-guard-demo.R:656-677`, and CI's lint job sets `LINTR_ERROR_ON_LINT: true`. AC6 unticked; AC1-AC5 keep their evidence; status in-progress. A-F3 (85, the guard header's three surviving alias claims) and A-F5 (82, an NA registration making every later read abort) are actioned alongside; 22 findings are logged below the action bar.
+- 2026-08-15: the T14 line above claiming `lintr::lint_package()` no lints is superseded and false — the command was piped into `tail`, so the exit code read was the pipeline's, not lintr's. The lints were present when that line was written; the correction is recorded in the Review section rather than the line edited.
+- 2026-08-15: thrash — fifth defect return, the threshold holding since return 3 and a re-cut already spent. Trigger (b) did NOT fire: AC6 has not failed before, and this is a mechanical defect this session introduced, not a criterion promising more than a procedure settles. The disposition goes to the maintainer with that distinction stated.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -1127,3 +1130,90 @@ no lints. All six `data-raw` checkers exit 0. `record-claims.tsv`'s
 no arguments, so it accepts the flag and exits 0 having planted nothing. Each of
 the five exits 0 under `--self-test` and prints one PASS line per planted
 mutation: 135, 36, 30, 2 and 1 respectively.
+
+### Independent review — three lenses, then a scorer (fifth pass)
+
+The blame-history lens (Sonnet) and the prior-review lens (Sonnet) each reported
+no regression. The prior-review lens re-checked, against the current tree, every
+item earlier passes fixed — the bypass-as-event record, relative-path
+registration, the forked worker's swallowed bypass reaching the parent, the
+re-source preserving state, dead-code parking, and the pre-source alias — and
+found each still fixed or correctly disclaimed; its GitHub probe returned no
+inline review comments, so that surface was skipped. The blame lens confirmed
+the four oracle rewrites still preserve iteration order, seed derivation, the
+periodic-save cadence and output positions, that `assert_sweep_results()` is
+untouched and the trace assertion still precedes m111's fixture write, and that
+the removed alias case was a mislabel rather than lost coverage: the guard
+installs the trace at `source()` time, so the old case was always an
+after-install alias. The diff-bug lens (Opus) reported 24 findings, most verified
+by execution. All were scored by a fresh Sonnet scorer holding the diff, the
+criteria and the findings.
+
+**Actioned (score >= 80), three findings.** One fails an acceptance criterion.
+
+- **A-F1 (97, AC6 fails).** `lintr::lint_package()` reports 17 lints, every one
+  `quotes_linter` "Only use double-quotes", all in the pre-source-alias
+  subprocess block added at `m120-checkpoint-guard-demo.R:656-677`. AC6 names
+  `lintr::lint_package()` as its own gate, so this is a criterion failure and not
+  a style nitpick, and CI's `lint` job sets `LINTR_ERROR_ON_LINT: true`, so the
+  branch reds there too. Re-verified by the reviewing session: LINT COUNT: 17.
+- **A-F3 (85).** `checkpoint-guard.R:19-22`, `:465-470` and `:673-681` still
+  claim the trace catches a read "however the CALL was spelled — bare,
+  base::-qualified, or through an alias the caller bound", and that sourcing the
+  guard "closes" the pre-source-alias hole. The branch's own AC3 case prints
+  `ESCAPED-UNREPORTED`, proving otherwise. T11 corrected the demo's comment and
+  left all three guard-header claims standing. Amended AC3 disclaims the form, so
+  no criterion fails — but this is prose asserting behaviour the code does not
+  have, in the file this milestone is about.
+- **A-F5 (82).** `ckpt_trace_register(Sys.getenv("SOME_CKPT"))` with the variable
+  unset unions `NA` into the registry, after which every subsequent `readRDS`
+  aborts as a bypass. Executed. Recorded as return-4 F10 (85) and actioned there;
+  `checkpoint-guard.R` is unchanged since `7918427`, so it was not.
+
+**Logged below the action bar (score < 80), twenty-two findings** — surfaced, not
+dropped: A-F10 three live `readRDS` spellings pass the AC2 static check (78,
+return-4 F3 unfixed); A-F11 AC1's exemption conditions are enforced by nothing
+(78, return-4 F11 unfixed); A-F15 the ledger's "sixth checker" framing survives
+the correction the work log claims (78); A-F6 reinstall orphans recorded bypasses
+(76, return-4 F16 unfixed); A-F2 AC1's "`ckpt_spec()` implements the same rule"
+diverges on the real m111 site, 11 functions against 3, outside what the pinned
+procedure settles (75); A-F8 m111 registers nothing when sourced (74, return-4
+F15 unfixed); A-F17 `ckpt_store_has()` is dead code (70); A-F14 two headers say
+the trace watches "deserializations" when it watches `readRDS` (68); A-F20 check
+1 is a presence test, not a reachability test (68); A-F7 `ckpt_mark_bypass`'s
+comment describes a per-path hash scheme the code does not implement (65);
+A-F21 check 6 is satisfied by any string in the `ckpt_spec()` call (60); A-F13
+the TSV calls parking `local({})` and `repeat { break }` work owed when both
+genuinely execute (55); A-F19 `in_guard` restores to FALSE rather than its prior
+value and covers lazy promise forcing (55); A-F22 the applier walk false-fails on
+`do.call`, list-held functions and `$` dispatch (55); A-F24 the AC3 assertion's
+`must_match` names one of five markers (55); A-F16 two self-tests print fewer
+PASS lines than "one per planted mutation" implies (45); A-F18 `ckpt_store_get()`
+conflates absent with NULL payload (45); A-F4 the ordering check is definition
+order, not execution order (35); A-F9 `cond_is_live()` is deparse equality (30);
+A-F12 the fixed-nested `base_fit` exemption is inert (20); A-F23 bare
+`stop()`/`cat()` in `data-raw` (20); B1 the 2026-08-14 Review section cites the
+retired `.py` checker (15, history, left standing under IP4).
+
+### Return (fifth defect return)
+
+AC6 fails and is unticked; AC1–AC5 keep the evidence recorded above. A-F1 fails
+AC6 inside the criterion's own named procedure — `lintr::lint_package()` is what
+AC6 names, and it exits non-zero on this tree.
+
+**A correction, recorded rather than left standing.** The T14 work-log line and
+this section's own AC6 evidence both claimed `lintr::lint_package()` reported no
+lints. That claim was false. Its cause is worth naming because it is the shape
+this milestone exists to stop: the check was run as
+`Rscript -e '...' 2>&1 | tail -3`, and the exit code read afterwards was the
+pipeline's — `tail`'s — not lintr's. A gate observed through a pipe is not
+observed. The lints were present when that line was written.
+
+**Thrash rule (return 5).** The third-return threshold was reached at return 3
+and holds; a re-cut is already spent, so it is off the menu. Trigger (b) has NOT
+fired here: AC6 has not failed before, and this failure is not a new mechanism of
+an old shape — it is a mechanical defect introduced by this session's own T11
+edit, seventeen single-quoted strings, with a repair that touches no criterion.
+That distinguishes it from returns 1–4, every one of which turned on a criterion
+promising more than a procedure could settle. The disposition goes to the
+maintainer with that distinction stated rather than absorbed.
