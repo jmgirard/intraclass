@@ -18,20 +18,21 @@ covers an undeclared one only while it runs.
 
 ## Scope
 
+Surface tier: **internal** — `data-raw/` harnesses, no external consumer.
+
 **In:** the guard shared by the five declared resume harnesses
 (`m111-fallback-sweep.R` and the four `oracle-bayesian-*.R` sites): its spec and
-staleness refusal, its `readRDS` watcher, and the static check over the declared
-sites. Within a site, what a cache depends on and whether its reads route
-through the guard are computed by walking its parsed source; every list that
-weakens a check — exemptions, appliers, entry-point idioms — is recorded with a
-stated reason and is itself probed.
+staleness refusal, its `readRDS` watcher, and the static check over those sites.
+A cache's dependencies are computed by walking the site's parsed source; the
+exemption list weakening that walk carries a stated reason and is probed.
 
 **Out:** running the four oracle scripts to completion or re-baselining their
-fixtures (the re-run programme owns that, under the escalate-never-re-baseline
-policy). Out: any write to a committed fixture (AC5). Out: deserialization
-functions outside AC2's declared list, and reads through a connection — a
-candidate row carries these, and AC2's own probe is what would surface a site
-adopting one. Out: harnesses that write a checkpoint but never read one back.
+fixtures (the re-run programme owns that); any write to a committed fixture
+(AC5); deserialization outside AC2's list and reads through a connection;
+harnesses that write a checkpoint but never read one back. Out to candidate
+rows at the return-4 descope: shapes the walk does not park, bypasses in a
+forked worker, and floors on the `api`, applier and idiom lists — that code
+stands on the branch, promised by no criterion.
 
 ## Acceptance criteria
 
@@ -61,38 +62,41 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       enumeration, not a discovery procedure: it claims nothing about a
       deserialization function outside the list, and neither does AC3.
 
-- [ ] AC3 During a run in which the guard has been sourced, a `readRDS()` call
-      taking a length-one character path naming a registered checkpoint, that
-      did not go through the guard, aborts at the read in the process that
-      sourced the guard or any process forked from it, and is reported by the
-      end-of-run assertion even when the process that performed it swallowed the
-      abort. Demonstrated for a bare call, a namespace-qualified call, a
-      caller-bound alias, a call inside a forked worker, a call inside a forked
-      worker whose abort that worker swallows, a swallowed call in the parent
-      following a legitimate guarded read of the same path, and a bare call
-      after the guard has been sourced a second time in that process — the
-      re-source leaving registrations and recorded bypasses intact. Outside this
-      claim: a process that did not inherit the trace by forking, a `readRDS()`
-      given a connection, and every deserialization function other than
+- [ ] AC3 During a run in which the guard has been sourced, each of these calls,
+      taking a length-one character path naming a registered checkpoint and not
+      routed through the guard, aborts at the read in the process that sourced
+      the guard and — where the caller swallowed the abort — is reported by the
+      end-of-run assertion against a path registered for that form alone: a bare
+      `readRDS`; a namespace-qualified call; an alias bound after the guard was
+      sourced; `do.call` on the name; a swallowed call following a legitimate
+      guarded read of the same path; and a bare call after a second `source()`
+      of the guard in that process. This is an enumeration, not a discovery
+      procedure. One excluded form is demonstrated outside it, in its own
+      process: a read through a binding captured while the trace was uninstalled
+      — what an alias bound before the guard's `source()` reproduces — returns
+      the file's stored object with no design comparison and is unreported,
+      while a swallowed bare call to the same path there is reported. Also
+      outside: a connection argument, any process other than the one that
+      sourced the guard, and every deserialization function other than
       `readRDS`, which AC2 covers statically within the declared sites.
 
-- [ ] AC4 The static check decides whether a guard call is reached by the
-      declared rule — called from live top-level code, transitively, or handed
-      by name to a function in the declared applier list — where live excludes
-      anything under a condition neither literally true nor among the declared
-      entry-point idioms, each idiom carrying a stated reason in
-      `checkpoint-sites.tsv`. Its mutation self-test plants, on every declared
-      site and once per name in that site's declared `api` column, each form in
-      its declared mutation list, which includes at least: the guard call
-      deleted; present but reached from nothing; under a non-literal false
-      condition; under a declared idiom inside a function nothing calls; the
-      pre-write assertion moved after that site's first output write, on each
-      site performing one, a site with none being reported rather than skipped;
-      and the registration given a non-path argument. Each planted form is
-      detected on each site and on each of its declared guard calls, and each
-      unmutated site passes. The check, run on a tree carrying one planted form,
-      is observed to exit non-zero, and CI invokes it as a step that is not
-      `continue-on-error`. Coverage of the listed forms only is claimed.
+- [ ] AC4 On every declared site, `data-raw/check-checkpoint-sites.R
+      --self-test` plants each of the forms named here — once per name in that
+      site's declared `api` column for a per-call form, once per site for a
+      site-level one — and each planted form is detected, while each unmutated
+      site passes: the guard call deleted; a copy kept in a top-level function
+      definition that nothing calls; a copy under `if (0)`, under
+      `if (FALSE || FALSE)` and under `if (getOption(..., FALSE))`; a copy under
+      a declared idiom inside a function nothing calls; the pre-write assertion
+      moved after that site's first `saveRDS()` call, reported as not applying
+      rather than omitted on a site with no such call; the registration given a
+      literal `NULL`; a live `source()` of the guard commented out; and a dead
+      copy left beside a removed live call. The check, run on a tree carrying
+      one planted form, is observed to exit non-zero, and CI invokes it as a
+      step that is not `continue-on-error`. Coverage of the forms named here
+      only is claimed; `checkpoint-sites.tsv` documents the walk as implemented,
+      naming the shapes it does not park (`while`, `for`, `repeat`, `local`,
+      `switch`, a list-held function, `quote`).
 
 - [x] AC5 `git diff --name-only main...HEAD -- '*.rds' '*.rda' '*.RData'
       'tests/testthat/_snaps/**' 'tests/testthat/fixtures/**'` is empty,
@@ -111,35 +115,35 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 
 - AC1 → T1, T2
 - AC2 → T3
-- AC3 → T6, T7
-- AC4 → T4, T5
-- AC5 → T8, T9
-- AC6 → T8, T9
+- AC3 → T6, T7, T10, T11
+- AC4 → T4, T5, T12, T13
+- AC5 → T8, T9, T14
+- AC6 → T8, T9, T14
 
 ## Tasks
 
-- [x] T1 Walk every symbol in the walked bodies, not only call heads; classify
-      each as hashed, declared parameter, declared value, or declared exemption,
-      and abort naming an unclassified one. Add the exemption column with
-      reasons.
-- [x] T2 Give the static check the same walk over parsed source, and pin the two
-      against each other on a synthetic site exercising a captured value, a
-      captured function, a shadowed local and an exempted object.
-- [x] T3 Add the deserialization-call check over each site and the files it
-      sources, with the required-minimum list; plant one call of each listed
-      name in each site and observe it reported.
-- [x] T4 Implement the reachability and liveness rules — declared appliers,
-      declared entry-point idioms with reasons — including a guard call under a
-      declared idiom inside a function nothing calls.
-- [x] T5 Quantify the mutation self-test per site, per form, and per declared
-      guard call.
-- [x] T6 Make sourcing the guard twice in one process leave registrations and
-      recorded bypasses intact.
-- [x] T7 Extend the watcher demonstration to the seventh case and scope its
-      claim to `readRDS`.
-- [x] T8 Switch the fixture fence to the diff-based enumeration; declare each
-      checker's self-test status in `record-claims.tsv`.
+- [x] T1 Walk every symbol in a walked body; classify each and abort naming an
+      unclassified one. Add the exemption column with reasons.
+- [x] T2 Give the static check the same walk, pinned against the run-time one on
+      a synthetic site.
+- [x] T3 Add the deserialization-call check with its required-minimum list.
+- [x] T4 Implement the reachability and liveness rules.
+- [x] T5 Quantify the self-test per site, per form, per declared guard call.
+- [x] T6 Make a second `source()` of the guard leave registrations and recorded
+      bypasses intact.
+- [x] T7 Extend the watcher demonstration and scope its claim to `readRDS`.
+- [x] T8 Diff-based fixture fence; declare each checker's self-test status.
 - [x] T9 Full local gate; re-confirm the AC5 diff and re-declare the file list.
+- [ ] T10 Give each AC3 form its own registered checkpoint path, so a form's
+      end-of-run report is its own and not an earlier form's marker. Add the
+      `do.call` form.
+- [ ] T11 Demonstrate the excluded pre-source alias in its own process, against
+      the positive control (a swallowed bare call to the same path is reported).
+- [ ] T12 Make the self-test report a form as not applying rather than omitting
+      it, and print the per-call and per-site plant counts it claims.
+- [ ] T13 Document the reachability walk in `checkpoint-sites.tsv` as
+      implemented, naming the shapes it does not park.
+- [ ] T14 Full local gate; re-confirm the AC5 diff and re-declare the file list.
 
 ## Work log
 
@@ -231,6 +235,11 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 - 2026-08-14: the demo's comment claiming "every site sources the guard as its first act, so no site can bind an untraced alias either" is false as written and is what F4 turns on: m111 sources the prototype at line 38 before the guard at line 42, and every oracle site runs `pkgload::load_all()` and `library(brms)` first.
 - 2026-08-15: parked as `blocked` at the maintainer's decision at the return-4 routing gate, in preference to escalating via `/milestone-brief`, re-scoping to the run-time guard alone, or dropping. Blocker: a maintainer judgement on how M120 should be resolved, which no work on the branch can settle — four attempts at a source-reading check that no unforeseen code shape slips past have each been defeated by a new shape, and the rules bar a fifth retry under the current plan. Nothing is merged; the branch, its 21 changed files and all four review passes stand on disk. It stays parked until the maintainer reopens it.
 - 2026-08-15: unblocked at the maintainer's decision and back to `in-progress`; the resume gate chose narrowing AC3 and AC4 to what a stated procedure settles (gated amendments, then re-review) over cutting both to candidate rows, over escalating via `/milestone-brief`, and over staying parked. This is the descope route the thrash threshold recommends, taken by narrowing the promise rather than by dropping the criteria; the same-objective re-cut is spent and off the menu.
+- 2026-08-15: amended-criteria audit, round 1 ([O], fresh context, over the draft wording) — 11 findings, neither criterion clean: the draft AC4 re-asserted the universal in its first sentence and answered a defeated enumeration by widening it from six recalled forms to sixteen, three of them unsatisfiable (`local({})` at top level executes, so detecting it would be a false positive); the draft AC3's "resolves through the traced binding at call time" misclassifies both of its own alias cases, since `trace()` rebinds the value and an alias captures the object at bind time.
+- 2026-08-15: amended-criteria audit, round 2 ([O], fresh context, over the repaired wording) — 16 findings, verified by planting rather than argued: three of AC4's six required forms are family names whose other members are undetected (`while (FALSE)`, `for (i in seq_len(0))`, `repeat`, `local({})` all pass the "reached from nothing" check; `42`, a symbol bound to `NULL` and `character(0)` all pass the "non-path argument" check), `ckpt_trace_bypassed()` returns unique paths so one marker satisfies every form's reporting clause, and `ckpt_trace_install()` assigns a fresh marker directory, so the uninstall/reinstall demo wipes bypasses recorded earlier in the run (measured 1 → 0).
+- 2026-08-15: amendment return: AC3 — "This is an enumeration, not a discovery procedure. One excluded form is demonstrated outside it, in its own process: a read through a binding captured while the trace was uninstalled — what an alias bound before the guard's `source()` reproduces — returns the file's stored object with no design comparison and is unreported, while a swallowed bare call to the same path there is reported."
+- 2026-08-15: AC4 amended under the thrash threshold's descope route — the promise that the check decides reachability by a stated rule is withdrawn, and AC4 now claims only that eight named mutation shapes are planted and detected; the shapes the walk does not park are documented as non-coverage rather than promised. The amendment gate chose this narrowest version over restoring AC3's fork forms and over adding two new checker refusals (an empty-`api` report and fixed applier/idiom sets), the latter being the checker-hardening move the rules make non-recommended on a fifth attempt.
+- 2026-08-15: Scope amended in the same pass — surface tier recorded as internal, and the descoped remainder routed out: the shapes the walk does not park, bypasses in a forked worker, and floors on the `api`, applier and idiom lists. Tasks T1–T9 compressed (their detail is in this log) to fit T10–T14 under the 150-line cap; body 147/149.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
