@@ -18,9 +18,11 @@
 #
 # The trace at the bottom is the other half. Comparing specs only protects reads
 # that come THROUGH this file; the trace watches readRDS() itself, so a read of
-# a registered checkpoint fails the run whenever the call reaches the traced
-# function -- bare, base::-qualified, via do.call, or through an alias bound
-# AFTER this file was sourced.
+# a registered checkpoint that did NOT come through this file's own read
+# functions fails the run whenever the call reaches the traced function --
+# bare, base::-qualified, via do.call, or through an alias bound AFTER this
+# file was sourced. (ckpt_read() reaches it too and is exempt by design; see
+# in_guard below.)
 #
 # What the trace does NOT reach, stated here so nothing downstream assumes
 # otherwise:
@@ -694,10 +696,11 @@ ckpt_trace_assert <- function() {
 # harness makes for itself left two holes that both bit: an alias bound to
 # readRDS before that call was untraced for the rest of the run, and a harness
 # that simply never made the call got no trace at all while every routing check
-# still passed. Installing here closes the second outright and narrows the
-# first to the window before this file is sourced -- a narrowing, not a
-# closure: an alias bound ahead of the source() is still untraced, and the
-# demonstration shows it escaping. The five sites' comments saying "sourcing it
+# still passed. Installing here closes the second for any harness that sources
+# this file -- which the routing check is what enforces on the declared sites --
+# and narrows the first to the window before this file is sourced: a narrowing,
+# not a closure, since an alias bound ahead of the source() is still untraced,
+# and the demonstration shows it escaping. The five sites' comments saying "sourcing it
 # installs the trace" are true.
 # ckpt_trace_install() remains callable and is a no-op once installed.
 ckpt_trace_install()
