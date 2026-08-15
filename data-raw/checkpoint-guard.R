@@ -17,12 +17,17 @@
 # and nothing here writes to a path the caller did not name.
 #
 # The trace at the bottom is the other half. Comparing specs only protects reads
-# that come THROUGH this file; the trace watches readRDS() itself, so a bare
-# readRDS() of a registered checkpoint fails the run however the CALL was
-# spelled -- bare, base::-qualified, or through an alias the caller bound.
+# that come THROUGH this file; the trace watches readRDS() itself, so a read of
+# a registered checkpoint fails the run whenever the call reaches the traced
+# function -- bare, base::-qualified, via do.call, or through an alias bound
+# AFTER this file was sourced.
 #
 # What the trace does NOT reach, stated here so nothing downstream assumes
 # otherwise:
+#   * an alias bound BEFORE this file was sourced. trace() rebinds the VALUE,
+#     so a copy taken earlier is the original closure and stays untraced for
+#     the life of the run. m120-checkpoint-guard-demo.R demonstrates this
+#     escaping, in its own process, rather than leaving it asserted.
 #   * a readRDS() handed a CONNECTION rather than a path. Only a path can be
 #     compared against a registered location, so `readRDS(gzfile(p))` returns
 #     its payload untouched.
@@ -464,10 +469,12 @@ ckpt_store_get <- function(store, key, spec) {
 
 # ---- the run-scoped deserialization trace ------------------------------------
 # Comparing specs protects reads routed through the guard. The trace protects
-# the run against reads that are not: it watches readRDS() as it happens, so no
-# spelling of the call -- bare, base::-qualified, or through an alias -- is
-# invisible to it. Registered locations bound what it judges; a read outside
-# them is somebody else's business and is left alone.
+# the run against reads that are not: it watches readRDS() as it happens, so a
+# call that reaches the traced function -- bare, base::-qualified, via do.call,
+# or through an alias bound after this file was sourced -- is caught whatever
+# the spelling. An alias bound BEFORE it was sourced is not; see the header.
+# Registered locations bound what it judges; a read outside them is somebody
+# else's business and is left alone.
 
 # CREATED ONCE PER PROCESS, not once per source(). Sourcing this file a second
 # time is not hypothetical -- the demonstration sources the guard and then
@@ -526,10 +533,22 @@ ckpt_norm <- function(path) {
 # Register a checkpoint file or directory. Reads under it are the trace's
 # business; reads elsewhere are not.
 ckpt_trace_register <- function(path) {
-  ckpt_trace_state$registered <- union(
-    ckpt_trace_state$registered,
-    ckpt_norm(path)
-  )
+  # Refuse a path that cannot be resolved rather than record it. ckpt_norm()
+  # returns NA for an empty or non-character path -- which is what
+  # ckpt_trace_register(Sys.getenv("SOME_CKPT")) gives when the variable is
+  # unset -- and an NA in the registry matched EVERY later read, so a single
+  # unset environment variable turned the guard into a run-wide abort on any
+  # readRDS at all. Failing at the registration names the defect where it is.
+  p <- ckpt_norm(path)
+  if (is.na(p)) {
+    stop(
+      "stale-checkpoint guard: cannot register a checkpoint location from ",
+      "a non-path (an unset Sys.getenv() gives \"\"); pass the path the ",
+      "harness actually reads",
+      call. = FALSE
+    )
+  }
+  ckpt_trace_state$registered <- union(ckpt_trace_state$registered, p)
   invisible(ckpt_trace_state$registered)
 }
 
@@ -672,11 +691,13 @@ ckpt_trace_assert <- function() {
 
 # ---- install on load ---------------------------------------------------------
 # Sourcing this file installs the trace. Deferring installation to a call each
-# harness makes for itself left two holes that both bit: any alias bound to
-# readRDS BEFORE the call was untraced for the rest of the run, and a harness
+# harness makes for itself left two holes that both bit: an alias bound to
+# readRDS before that call was untraced for the rest of the run, and a harness
 # that simply never made the call got no trace at all while every routing check
-# still passed. Neither is a hole a caller can be relied on to avoid, which is
-# the whole premise of this guard -- so the guard closes them itself, and the
-# five sites' comments saying "sourcing it installs the trace" are true.
+# still passed. Installing here closes the second outright and narrows the
+# first to the window before this file is sourced -- a narrowing, not a
+# closure: an alias bound ahead of the source() is still untraced, and the
+# demonstration shows it escaping. The five sites' comments saying "sourcing it
+# installs the trace" are true.
 # ckpt_trace_install() remains callable and is a no-op once installed.
 ckpt_trace_install()

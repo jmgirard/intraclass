@@ -115,10 +115,10 @@ stands on the branch, promised by no criterion.
 
 - AC1 → T1, T2
 - AC2 → T3
-- AC3 → T6, T7, T10, T11
+- AC3 → T6, T7, T10, T11, T15
 - AC4 → T4, T5, T12, T13
 - AC5 → T8, T9, T14
-- AC6 → T8, T9, T14
+- AC6 → T8, T9, T14, T15
 
 ## Tasks
 
@@ -144,6 +144,8 @@ stands on the branch, promised by no criterion.
 - [x] T13 Document the reachability walk in `checkpoint-sites.tsv` as
       implemented, naming the shapes it does not park.
 - [x] T14 Full local gate; re-confirm the AC5 diff and re-declare the file list.
+- [ ] T15 Return-5 repairs: the subprocess block's quoting, the guard
+      header's three alias claims, and an unresolvable checkpoint location.
 
 ## Work log
 
@@ -253,6 +255,8 @@ stands on the branch, promised by no criterion.
 - 2026-08-15: review return 5 (defect) — AC6 fails: `lintr::lint_package()` reports 17 lints, all `quotes_linter`, all in the pre-source-alias subprocess block T11 added at `m120-checkpoint-guard-demo.R:656-677`, and CI's lint job sets `LINTR_ERROR_ON_LINT: true`. AC6 unticked; AC1-AC5 keep their evidence; status in-progress. A-F3 (85, the guard header's three surviving alias claims) and A-F5 (82, an NA registration making every later read abort) are actioned alongside; 22 findings are logged below the action bar.
 - 2026-08-15: the T14 line above claiming `lintr::lint_package()` no lints is superseded and false — the command was piped into `tail`, so the exit code read was the pipeline's, not lintr's. The lints were present when that line was written; the correction is recorded in the Review section rather than the line edited.
 - 2026-08-15: thrash — fifth defect return, the threshold holding since return 3 and a re-cut already spent. Trigger (b) did NOT fire: AC6 has not failed before, and this is a mechanical defect this session introduced, not a criterion promising more than a procedure settles. The disposition goes to the maintainer with that distinction stated.
+- 2026-08-15: T15 (part) — A-F1: the pre-source-alias subprocess script is now one raw string, so the generated code keeps its own double quotes and this file carries no single-quoted strings; `lintr::lint_package()` reports 0 lints, read from lintr's own count rather than through a pipe. A-F3: the guard's three surviving alias claims are corrected — the header now states the trace catches a call that reaches the traced function (bare, namespace-qualified, `do.call`, or an alias bound AFTER the source()), lists the pre-source alias as the first thing it does not reach, and the install-on-load note says it narrows that window rather than closing it. A-F5: `ckpt_trace_register()` refuses a location that cannot be resolved instead of recording NA, which had matched every later read.
+- 2026-08-15: the A-F5 repair carries a regression case, and it was shown to red before the fix: with the refusal disabled the demo exits 1 at that case with "expected an error but none was signalled", and an unrelated read afterwards is still not flagged once the fix is in. The demonstration now runs 52 PASS cases.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions

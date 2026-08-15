@@ -627,6 +627,21 @@ expect_error(
   must_match = "pre-resource.rds"
 )
 
+# An unset environment variable is the realistic way a site hands the trace a
+# non-path, and recording it made the registry match EVERY later read: one unset
+# variable turned the guard into a run-wide abort on any readRDS at all. It is
+# refused at the registration now, where the defect is.
+cat("\n== AC3: a checkpoint location that cannot be resolved ==\n")
+expect_error(
+  ckpt_trace_register(Sys.getenv("M120_DELIBERATELY_UNSET_CKPT")),
+  "an unresolvable checkpoint location is refused at registration",
+  must_match = "cannot register a checkpoint location"
+)
+unrelated <- file.path(tempdir(), "m120-unrelated.rds")
+saveRDS(1, unrelated)
+invisible(readRDS(unrelated))
+pass("and an unrelated read afterwards is still not flagged")
+
 # A clean control: reset first, because every form above deliberately leaves its
 # marker standing. What this case must show is that a read outside every
 # registered location records nothing of its own.
@@ -651,32 +666,31 @@ pass("a read outside any registered checkpoint location is not flagged")
 # would be satisfied by a case that never ran at all.
 cat("\n== AC3: an alias bound BEFORE the guard is sourced (excluded) ==\n")
 pre_alias_script <- tempfile("m120-pre-alias-", fileext = ".R")
+# A raw string, so the generated script keeps its own double quotes without
+# escaping and this file needs no single-quoted strings of its own.
 writeLines(
-  c(
-    'pre_alias <- readRDS # bound while readRDS is still untraced',
-    'source("data-raw/checkpoint-guard.R")',
-    'gen <- function(x) x',
-    'd <- tempfile("m120-pre-alias-")',
-    'dir.create(d)',
-    'fp <- file.path(d, "pre-alias.rds")',
-    'spec <- ckpt_spec(',
-    '  params = list(a = 1), roots = "gen", site = "pre-alias"',
-    ')',
-    'ckpt_write(fp, payload = gen(1), spec = spec)',
-    'ckpt_trace_register(fp)',
-    '',
-    '# The excluded form: no abort, and the object comes back with no design',
-    '# comparison -- the whole file, spec envelope and all, not the payload.',
-    'got <- pre_alias(fp)',
-    'stopifnot(is.list(got), !is.null(got$ckpt_spec), !is.null(got$payload))',
-    'stopifnot(length(ckpt_trace_bypassed()) == 0L)',
-    'cat("ESCAPED-UNREPORTED\\n")',
-    '',
-    '# The control, same path, same process: a bare read IS recorded.',
-    'invisible(tryCatch(readRDS(fp), error = function(e) NULL))',
-    'stopifnot(ckpt_norm(fp) %in% ckpt_trace_bypassed())',
-    'cat("CONTROL-REPORTED\\n")'
-  ),
+  r"(pre_alias <- readRDS # bound while readRDS is still untraced
+source("data-raw/checkpoint-guard.R")
+gen <- function(x) x
+d <- tempfile("m120-pre-alias-")
+dir.create(d)
+fp <- file.path(d, "pre-alias.rds")
+spec <- ckpt_spec(params = list(a = 1), roots = "gen", site = "pre-alias")
+ckpt_write(fp, payload = gen(1), spec = spec)
+ckpt_trace_register(fp)
+
+# The excluded form: no abort, and the object comes back with no design
+# comparison -- the whole file, spec envelope and all, not the payload.
+got <- pre_alias(fp)
+stopifnot(is.list(got), !is.null(got$ckpt_spec), !is.null(got$payload))
+stopifnot(length(ckpt_trace_bypassed()) == 0L)
+cat("ESCAPED-UNREPORTED\n")
+
+# The control, same path, same process: a bare read IS recorded.
+invisible(tryCatch(readRDS(fp), error = function(e) NULL))
+stopifnot(ckpt_norm(fp) %in% ckpt_trace_bypassed())
+cat("CONTROL-REPORTED\n")
+)",
   pre_alias_script
 )
 pre_alias_out <- system2(
