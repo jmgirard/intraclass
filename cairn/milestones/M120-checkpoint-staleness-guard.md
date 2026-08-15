@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -139,7 +139,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       claim to `readRDS`.
 - [x] T8 Switch the fixture fence to the diff-based enumeration; declare each
       checker's self-test status in `record-claims.tsv`.
-- [ ] T9 Full local gate; re-confirm the AC5 diff and re-declare the file list.
+- [x] T9 Full local gate; re-confirm the AC5 diff and re-declare the file list.
 
 ## Work log
 
@@ -224,6 +224,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 - 2026-08-14: T9 — full local gate green on the final tree: `air format --check` clean, `lintr::lint_package()` no lints, `devtools::document()` leaves `NAMESPACE`/`man/` unchanged, `pkgdown::check_pkgdown()` no problems, `cairn_validate` all checks passed with no advisory, all six `data-raw` checkers exit 0 and the five with a self-test exit 0 under it, the routing check and its 130-mutation self-test exit 0, the guard demonstration exits 0 over 47 cases, and `m112-harness-demo.R` passes. The milestone's plan-owned body is 143/149 lines.
 - 2026-08-14: AC5 declared file list, the whole of what this branch changes — 21 files: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R`, the four python checkers `check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py` and `check-reference-observations.py` (newly declared, for T8), `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, `data-raw/m120-synthetic-site.R` (newly declared, for T2), the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims-checker-self-tests.py` (newly declared, for T8), `data-raw/record-claims.tsv` and `data-raw/rerun-oracle.R`. Nothing under `tests/testthat/fixtures/`, `tests/testthat/_snaps/`, `R/sysdata.rda`, `data/`, or any `.rds` is touched, and the working tree is clean.
 - 2026-08-14: CHECKPOINT — T9 stays unticked: every gate check above has been run and is green on the final tree EXCEPT `devtools::test()`, whose re-run on that tree was still in flight at this commit. The preceding run, on the tree at commit 1e6c965, was `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, and every R file changed since is under `data-raw/`, which `.Rbuildignore` excludes from the build — but that is a reason to expect the result, not the result.
+- 2026-08-14: T9 — the held-open gate check landed on the final tree: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, exit 0. The gate is now green in full and the checkpoint line above is settled by observation rather than by the expectation it recorded. Status to review.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
