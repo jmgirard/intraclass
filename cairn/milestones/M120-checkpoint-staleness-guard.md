@@ -100,7 +100,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       shows no path outside the most recent file list this milestone declares in
       its work log.
 
-- [ ] AC6 The profile's `verify` slot is clean, and `air format --check`,
+- [x] AC6 The profile's `verify` slot is clean, and `air format --check`,
       `lintr::lint_package()`, and every checker matched by `data-raw/check-*.R`
       and `data-raw/check-*.py` exit 0. Every such checker declares in
       `data-raw/record-claims.tsv` whether it has a `--self-test`; each that
@@ -857,3 +857,29 @@ main...HEAD -- '*.rds' '*.rda' '*.RData' 'tests/testthat/_snaps/**'
 'tests/testthat/fixtures/**'` returns nothing; `git status --porcelain` is
 empty; `git diff --name-only main...HEAD` returns 21 paths, exactly the list the
 work log declares.
+
+**AC6 — verify slot, the checkers, and their declared self-test status.** Fresh
+runs: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` exit 0; `air
+format --check` exit 0; `lintr::lint_package()` exit 0. Every checker matched by
+`data-raw/check-*.R` and `data-raw/check-*.py` exits 0 — the six being
+`check-abort-remedy-verdicts.R`, `check-checkpoint-sites.R`,
+`check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py`
+and `check-reference-observations.py`. Each declares its self-test status in
+`record-claims.tsv`, re-derived by
+`python3 data-raw/record-claims-checker-self-tests.py`: five `has-self-test`,
+`check-abort-remedy-verdicts.R` `no-self-test` with its reason recorded there and
+in `data-raw/README.md` — it parses no arguments, so it accepts the flag and
+exits 0 having planted nothing. Each of the five exits 0 under `--self-test` and
+prints one PASS line per planted mutation (30, 2, 36, 1, and the routing
+checker's 130).
+
+Toolchain consistency gate: `devtools::document()` produces no diff under
+`NAMESPACE`/`man/`; `pkgdown::check_pkgdown()` reports no problems;
+`devtools::check()` is 0 errors, 0 warnings, 1 NOTE — the same pre-existing
+`spelling.Rout`/`.Rout.save` comparison over words in `NEWS.md` and the
+vignettes, none of which this branch touches, with no `.Rout.save` tracked in the
+repo. No NEWS entry is owed: no package-surface file changed, every changed R
+file being under `data-raw/`, which `.Rbuildignore` excludes. `cairn_validate`
+exit 0, all checks passed, no advisory. CI on PR #129 is green on every check
+including `R CMD check` on ubuntu-latest and windows-latest, `test-coverage` and
+both codecov legs.
