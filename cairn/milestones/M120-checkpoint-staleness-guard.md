@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -134,16 +134,16 @@ stands on the branch, promised by no criterion.
 - [x] T7 Extend the watcher demonstration and scope its claim to `readRDS`.
 - [x] T8 Diff-based fixture fence; declare each checker's self-test status.
 - [x] T9 Full local gate; re-confirm the AC5 diff and re-declare the file list.
-- [ ] T10 Give each AC3 form its own registered checkpoint path, so a form's
+- [x] T10 Give each AC3 form its own registered checkpoint path, so a form's
       end-of-run report is its own and not an earlier form's marker. Add the
       `do.call` form.
-- [ ] T11 Demonstrate the excluded pre-source alias in its own process, against
+- [x] T11 Demonstrate the excluded pre-source alias in its own process, against
       the positive control (a swallowed bare call to the same path is reported).
-- [ ] T12 Make the self-test report a form as not applying rather than omitting
+- [x] T12 Make the self-test report a form as not applying rather than omitting
       it, and print the per-call and per-site plant counts it claims.
-- [ ] T13 Document the reachability walk in `checkpoint-sites.tsv` as
+- [x] T13 Document the reachability walk in `checkpoint-sites.tsv` as
       implemented, naming the shapes it does not park.
-- [ ] T14 Full local gate; re-confirm the AC5 diff and re-declare the file list.
+- [x] T14 Full local gate; re-confirm the AC5 diff and re-declare the file list.
 
 ## Work log
 
@@ -246,6 +246,9 @@ stands on the branch, promised by no criterion.
 - 2026-08-15: T12 — the self-test reports a form that does not apply instead of omitting it: `declaration-withdrawn` on m111 (no declared determinant the walk reaches) and the sourced-file deserialization plant on the four oracle sites (they source nothing but the guard) were being dropped silently while the summary said "0 form(s) reported as not applying". It now prints 130 mutations planted over 5 sites and 10 declared forms, each detected, with 5 reported as not applying, and a per-site line giving that site's planted count against its declared guard calls.
 - 2026-08-15: T13 — `checkpoint-sites.tsv` now records the walk AS IMPLEMENTED beside the rule it was written to: only `if` carries liveness, so a call reached through `while (FALSE)`, `for (i in seq_len(0))`, `repeat { break }`, `switch`, a list-held function, `local({})` or `quote()` counts as reached. The applier list's claim to weaken nothing is corrected in the same pass — marking a bare-name argument as reached is exactly what turns a parked call into a reached one.
 - 2026-08-15: CHECKPOINT — T10–T13 done and unticked pending the verify slot: the demonstration exits 0 over 50 PASS cases, the routing check and its 130-mutation self-test exit 0, `air format --check` is clean and `lintr::lint_package()` reports no lints, but `devtools::test()` on this tree was still running at this commit. Every changed file is under `data-raw/`, which `.Rbuildignore` excludes, so the suite is expected unaffected — an expectation, not the result.
+- 2026-08-15: the descoped remainder took a ROADMAP candidate row — the shapes the walk does not park (eight verified passing at return 4), the fork-worker bypass AC3 no longer promises, and the absent floors on the `api`, applier and idiom declarations — promoted by a declared site needing one of those shapes, never by their count.
+- 2026-08-15: T14 — full local gate green on the final tree: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` exit 0 (unchanged from the pre-amendment baseline, as expected — every changed file is under `data-raw/`, which `.Rbuildignore` excludes), `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed with one advisory (the 13-task tripwire, answered above and now 14), the guard demonstration exit 0 over 50 PASS cases, the routing check and its 130-mutation self-test exit 0 with 5 forms reported as not applying, all six `data-raw` checkers and the five self-tests exit 0, and `m112-harness-demo.R` passes. The killed first run of the suite is superseded by this one, which was observed rather than expected.
+- 2026-08-15: AC5 declared file list, the whole of what this branch changes — the same 21 files the return-2 pass declared, this session having added none: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R`, the four python checkers `check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py` and `check-reference-observations.py`, `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, `data-raw/m120-synthetic-site.R`, the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims-checker-self-tests.py`, `data-raw/record-claims.tsv` and `data-raw/rerun-oracle.R`. The fixture-filtered diff is empty and `git status --porcelain` is empty. Status to review.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
