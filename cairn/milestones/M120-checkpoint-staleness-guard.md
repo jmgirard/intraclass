@@ -35,7 +35,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 
 ## Acceptance criteria
 
-- [ ] AC1 For each of the five declared sites, the static check walks, from that
+- [x] AC1 For each of the five declared sites, the static check walks, from that
       site's declared entry points, every symbol appearing in the walked bodies,
       following transitively those resolving to functions the site's own source
       defines, and reports a failure naming the symbol when a walked symbol
@@ -52,7 +52,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       its declaration is reported by name. Nothing is claimed about a
       determinant reached other than as a symbol in a walked body.
 
-- [ ] AC2 For each of the five declared sites, no call to `readRDS`, `load`,
+- [x] AC2 For each of the five declared sites, no call to `readRDS`, `load`,
       `unserialize` or `readr::read_rds` — the deserialization list, recorded in
       `checkpoint-sites.tsv` and required to contain at least those four —
       occurs in that site's own source or in any non-package file it `source()`s
@@ -61,7 +61,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       enumeration, not a discovery procedure: it claims nothing about a
       deserialization function outside the list, and neither does AC3.
 
-- [ ] AC3 During a run in which the guard has been sourced, a `readRDS()` call
+- [x] AC3 During a run in which the guard has been sourced, a `readRDS()` call
       taking a length-one character path naming a registered checkpoint, that
       did not go through the guard, aborts at the read in the process that
       sourced the guard or any process forked from it, and is reported by the
@@ -76,7 +76,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       given a connection, and every deserialization function other than
       `readRDS`, which AC2 covers statically within the declared sites.
 
-- [ ] AC4 The static check decides whether a guard call is reached by the
+- [x] AC4 The static check decides whether a guard call is reached by the
       declared rule — called from live top-level code, transitively, or handed
       by name to a function in the declared applier list — where live excludes
       anything under a condition neither literally true nor among the declared
@@ -94,7 +94,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       is observed to exit non-zero, and CI invokes it as a step that is not
       `continue-on-error`. Coverage of the listed forms only is claimed.
 
-- [ ] AC5 `git diff --name-only main...HEAD -- '*.rds' '*.rda' '*.RData'
+- [x] AC5 `git diff --name-only main...HEAD -- '*.rds' '*.rda' '*.RData'
       'tests/testthat/_snaps/**' 'tests/testthat/fixtures/**'` is empty,
       `git status --porcelain` is empty, and `git diff --name-only main...HEAD`
       shows no path outside the most recent file list this milestone declares in
@@ -784,3 +784,76 @@ plan gate recorded against have now been tried — the source scan was rejected 
 plan time, and the parse-the-source checker that replaced the text match is what
 E1 and E15 defeat. No recorded alternative remains to fall back on, which is the
 condition under which the rule offers escalation.
+
+## Fourth review (2026-08-14, after the re-cut)
+
+First review of the re-cut criteria, on `m120-checkpoint-staleness-guard` at PR
+#129. `main` is level with origin at `d168b60` and the branch is not behind it,
+so no merge preceded this evidence. The three review sections above are
+superseded wholesale: they verified criteria the re-cut replaced, and nothing
+below rests on them.
+
+**AC1 — every symbol the walk reaches is classified, and the two walks agree.**
+`Rscript data-raw/check-checkpoint-sites.R` exits 0 over the five declared
+sites, its static walk reporting no unclassified determinant. The walk is not
+vacuous there: with the exemption column emptied, `base_fit` is reported by name
+on `oracle-bayesian-fixed-replicates.R` and `-incomplete-oneway.R`, the two
+sites that reach it by capture. Withdrawing one declared determinant from the
+declaration — the script untouched — is reported by name on each of the four
+sites that declare one (`single_est`, `inc`, `spec_sr`, `single_est`); m111
+declares none and so has none to withdraw. The exemption column carries its
+reason in `checkpoint-sites.tsv`.
+
+The run-time and static walks are pinned on `data-raw/m120-synthetic-site.R`,
+which carries a captured value, a captured function, a shadowed local, an
+exempted object and a declared parameter: both return the identical hashed-
+function set (`syn_one_rep`, `syn_scale`) and the identical uncovered set, with
+the declarations in place and with them withdrawn (`syn_base_fit`, `syn_est`),
+and neither names the shadowed local. On that site, editing the captured
+determinant's argument and editing the generator it is computed from each change
+the block hash, while a comment added inside the entry point does not; removing
+the declaration refuses the spec naming `syn_est`.
+
+**AC2 — no declared site deserializes for itself.** The list is recorded as
+`#@deserializers readRDS,load,unserialize,readr::read_rds`, and the required
+minimum is load-bearing: dropping `load` from it makes the check exit 1 on all
+five sites and the self-test exit 1. The check exits 0 as committed. Its
+`--self-test` plants one live call of each of the four names on each of the five
+sites (20 plants) and one in `m76-classical-oneway-prototype.R`, which m111
+sources, exercising the transitive leg; each of the 21 is detected.
+
+**AC3 — the watcher, on all seven forms.** Fresh run of `Rscript
+data-raw/m120-checkpoint-guard-demo.R`, exit 0 over 47 cases. Each of AC3's
+forms has its own case and each aborts: a bare `readRDS`; a `base::`-qualified
+call; an alias the caller bound before any install call the script makes; a bare
+read inside an `mclapply` worker, on a checkpoint the spec check accepts, so
+nothing but the trace can refuse it; a worker that swallows its own abort, still
+reported by the parent from the on-disk markers; a swallowed bypass in the
+parent following a legitimate guarded read of the same path; and a bare read
+after the guard is sourced a second time, with the registrations and the
+recorded bypass both verified intact across that re-source. The counterweight
+holds: a read outside any registered location is not flagged.
+
+**AC4 — reached, not merely present.** `Rscript
+data-raw/check-checkpoint-sites.R` exits 0 over the five sites. Run on a tree
+carrying one planted form — m111's live `ckpt_read` stripped and a copy parked
+under a declared idiom inside a function nothing calls — it exits 1 naming the
+site and the reason; restoring returns exit 0 with a clean tree. The declared
+rule is load-bearing in both directions: dropping `mclapply` from the declared
+applier list makes m111's `ckpt_read` and `ckpt_write` unreachable and the check
+exits 1, which is the handoff m111's guard call actually depends on.
+
+Its `--self-test` plants 130 mutations over five sites, ten declared forms and
+every declared guard call; each is detected and each unmutated site passes, exit
+0. The required-form minimum is load-bearing: dropping `parked-idiom-unreached`
+from the declared list makes the self-test exit 1 naming the missing form. The
+`assert-after-write` form applies on all five sites, so none was reported as not
+applying. In CI the `checkpoint-guard` job runs the demonstration, the check and
+its self-test as three steps; the workflow carries no `continue-on-error` at
+all.
+
+**AC5 — nothing outside the declared file list.** `git diff --name-only
+main...HEAD -- '*.rds' '*.rda' '*.RData' 'tests/testthat/_snaps/**'
+'tests/testthat/fixtures/**'` returns nothing; `git status --porcelain` is
+empty; `git diff --name-only main...HEAD` returns 21 paths, exactly the list the
+work log declares.
