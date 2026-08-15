@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -104,7 +104,7 @@ stands on the branch, promised by no criterion.
       shows no path outside the most recent file list this milestone declares in
       its work log.
 
-- [ ] AC6 The profile's `verify` slot is clean, and `air format --check`,
+- [x] AC6 The profile's `verify` slot is clean, and `air format --check`,
       `lintr::lint_package()`, and every checker matched by `data-raw/check-*.R`
       and `data-raw/check-*.py` exit 0. Every such checker declares in
       `data-raw/record-claims.tsv` whether it has a `--self-test`; each that
@@ -144,7 +144,7 @@ stands on the branch, promised by no criterion.
 - [x] T13 Document the reachability walk in `checkpoint-sites.tsv` as
       implemented, naming the shapes it does not park.
 - [x] T14 Full local gate; re-confirm the AC5 diff and re-declare the file list.
-- [ ] T15 Return-5 repairs: the subprocess block's quoting, the guard
+- [x] T15 Return-5 repairs: the subprocess block's quoting, the guard
       header's three alias claims, and an unresolvable checkpoint location.
 
 ## Work log
@@ -257,6 +257,7 @@ stands on the branch, promised by no criterion.
 - 2026-08-15: thrash — fifth defect return, the threshold holding since return 3 and a re-cut already spent. Trigger (b) did NOT fire: AC6 has not failed before, and this is a mechanical defect this session introduced, not a criterion promising more than a procedure settles. The disposition goes to the maintainer with that distinction stated.
 - 2026-08-15: T15 (part) — A-F1: the pre-source-alias subprocess script is now one raw string, so the generated code keeps its own double quotes and this file carries no single-quoted strings; `lintr::lint_package()` reports 0 lints, read from lintr's own count rather than through a pipe. A-F3: the guard's three surviving alias claims are corrected — the header now states the trace catches a call that reaches the traced function (bare, namespace-qualified, `do.call`, or an alias bound AFTER the source()), lists the pre-source alias as the first thing it does not reach, and the install-on-load note says it narrows that window rather than closing it. A-F5: `ckpt_trace_register()` refuses a location that cannot be resolved instead of recording NA, which had matched every later read.
 - 2026-08-15: the A-F5 repair carries a regression case, and it was shown to red before the fix: with the refusal disabled the demo exits 1 at that case with "expected an error but none was signalled", and an unrelated read afterwards is still not flagged once the fix is in. The demonstration now runs 52 PASS cases.
+- 2026-08-15: T15 — full local gate green on the repaired tree: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` (run under `TESTTHAT_CPUS=18`, which brings it inside the ten-minute foreground limit two earlier runs exceeded), `lintr::lint_package()` 0 lints read from its own count, `air format --check` exit 0, `devtools::document()` leaves `NAMESPACE`/`man/` unchanged, the demonstration exits 0 over 52 PASS cases, the routing check and its 130-mutation self-test exit 0, and all six data-raw checkers plus the five self-tests exit 0. Status back to review.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -1221,3 +1222,29 @@ edit, seventeen single-quoted strings, with a repair that touches no criterion.
 That distinguishes it from returns 1–4, every one of which turned on a criterion
 promising more than a procedure could settle. The disposition goes to the
 maintainer with that distinction stated rather than absorbed.
+
+### Re-executed after the return-5 repairs (2026-08-15)
+
+**AC6 — re-executed, now green.** `lintr::lint_package()` reports 0 lints, read
+from lintr's own count rather than through a pipe — the reading error that
+produced the false T14 claim. `devtools::test()`
+`[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`; `air format --check` exit 0;
+`devtools::document()` leaves `NAMESPACE` and `man/` unchanged. All six
+`data-raw` checkers exit 0, and the five carrying a `--self-test` exit 0 under
+it; `record-claims.tsv`'s declaration of which five those are is unchanged and
+`check-record-claims.py` returns 0 failures.
+
+**AC3 — re-executed after the guard change.** The demonstration exits 0 over 52
+PASS cases, two more than before: `ckpt_trace_register()` now refuses a location
+it cannot resolve, and an unrelated read afterwards is still not flagged. That
+case was shown to red before the fix — with the refusal disabled the demo exits 1
+at exactly that case, "expected an error but none was signalled". Every form
+AC3 enumerates, and the excluded pre-source alias with its positive control, are
+unchanged and pass.
+
+**A-F3 (actioned, no criterion).** The guard's three alias claims are corrected
+against the demonstrated behaviour: the header now says a call reaching the
+traced function is caught — bare, namespace-qualified, `do.call`, or an alias
+bound after the `source()` — lists the pre-source alias first among what the
+trace does not reach, and the install-on-load note states that installing here
+narrows that window rather than closing it.
