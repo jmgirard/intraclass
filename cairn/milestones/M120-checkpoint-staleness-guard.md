@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -61,7 +61,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       enumeration, not a discovery procedure: it claims nothing about a
       deserialization function outside the list, and neither does AC3.
 
-- [x] AC3 During a run in which the guard has been sourced, a `readRDS()` call
+- [ ] AC3 During a run in which the guard has been sourced, a `readRDS()` call
       taking a length-one character path naming a registered checkpoint, that
       did not go through the guard, aborts at the read in the process that
       sourced the guard or any process forked from it, and is reported by the
@@ -76,7 +76,7 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
       given a connection, and every deserialization function other than
       `readRDS`, which AC2 covers statically within the declared sites.
 
-- [x] AC4 The static check decides whether a guard call is reached by the
+- [ ] AC4 The static check decides whether a guard call is reached by the
       declared rule — called from live top-level code, transitively, or handed
       by name to a function in the declared applier list — where live excludes
       anything under a condition neither literally true nor among the declared
@@ -225,6 +225,10 @@ adopting one. Out: harnesses that write a checkpoint but never read one back.
 - 2026-08-14: AC5 declared file list, the whole of what this branch changes — 21 files: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R`, the four python checkers `check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py` and `check-reference-observations.py` (newly declared, for T8), `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, `data-raw/m120-synthetic-site.R` (newly declared, for T2), the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims-checker-self-tests.py` (newly declared, for T8), `data-raw/record-claims.tsv` and `data-raw/rerun-oracle.R`. Nothing under `tests/testthat/fixtures/`, `tests/testthat/_snaps/`, `R/sysdata.rda`, `data/`, or any `.rds` is touched, and the working tree is clean.
 - 2026-08-14: CHECKPOINT — T9 stays unticked: every gate check above has been run and is green on the final tree EXCEPT `devtools::test()`, whose re-run on that tree was still in flight at this commit. The preceding run, on the tree at commit 1e6c965, was `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, and every R file changed since is under `data-raw/`, which `.Rbuildignore` excludes from the build — but that is a reason to expect the result, not the result.
 - 2026-08-14: T9 — the held-open gate check landed on the final tree: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, exit 0. The gate is now green in full and the checkpoint line above is settled by observation rather than by the expectation it recorded. Status to review.
+- 2026-08-14: review return 4 (defect) — AC4 fails because `reach_scan()` does not decide reachability by the rule AC4's own first sentence states: any function literal met in walked code is walked live and only `if` carries liveness, so eight parked forms pass, including a definition inside the site's own declared-idiom block, `while (FALSE)`, `for (i in seq_len(0))`, `switch`, a list-held function, `local({})` and `quote()` (F1, 92, re-verified here). AC3 fails because an alias bound to `readRDS` before the guard is sourced is untraced and unreported, which none of AC3's three stated exclusions covers (F4, 83, re-verified here). AC3 and AC4 unticked; AC1, AC2, AC5 and AC6 keep their evidence; status in-progress. F3, F11, F2, F10, F6, F15, F9, F8 and F16 (90/90/87/85/84/84/82/80/80) are actioned alongside; 17 findings are logged below the action bar.
+- 2026-08-14: the two returns differ in track and the difference is recorded rather than collapsed — F1 is a defect return whose repair is a procedure fix, while F4 is an amendment return under the widening test, since no procedure can catch an alias bound before `trace()` rebinds the name and the only repair available widens AC3's author-recall exclusion list; its admissible repair narrows AC3's promise to what a procedure decides.
+- 2026-08-14: thrash — fourth defect return, the third-return threshold having been reached at return 3 and holding. Trigger (b) fired again on AC4, which has now failed in all four reviews by a new mechanism of the same shape each time. Both recorded plan alternatives are spent and a re-cut is already spent, so re-plan-or-split is not the remedy; no further retry is queued and the disposition goes to the maintainer.
+- 2026-08-14: the demo's comment claiming "every site sources the guard as its first act, so no site can bind an untraced alias either" is false as written and is what F4 turns on: m111 sources the prototype at line 38 before the guard at line 42, and every oracle site runs `pkgload::load_all()` and `library(brms)` first.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -883,3 +887,139 @@ file being under `data-raw/`, which `.Rbuildignore` excludes. `cairn_validate`
 exit 0, all checks passed, no advisory. CI on PR #129 is green on every check
 including `R CMD check` on ubuntu-latest and windows-latest, `test-coverage` and
 both codecov legs.
+
+### Independent review — three lenses, then a scorer (fourth pass)
+
+The blame-history lens (Sonnet) reported no findings: it traced every touched
+region against the milestone's own Decisions entries, the archived M111/M112/M114
+milestones and D-020's amendments, and found nothing that silently undoes a
+deliberate past addition — confirming the four oracle rewrites still preserve
+iteration order, seed derivation, base-fit compile-once placement, output
+positions and fixture contents, that `rerun-oracle.R`'s pre-existing shadowing is
+untouched, and that the four python checkers' self-test edits change no check
+logic or exit path. The prior-review lens (Sonnet) confirmed, against the diff,
+that E1/E15, E3, E2's re-scope, D3, D13, D7, D2, D5, D10, D11 and F16 all remain
+fixed, and raised one regression candidate (R1). The diff-bug lens (Opus)
+reported 20 findings, verifying most by running the checker. Two further findings
+were raised by the reviewing session itself. All were scored by a fresh Sonnet
+scorer holding the diff, the criteria and the findings.
+
+The reviewing session re-ran F1, F3, F4, F7, R1, S-IDIOM and S-EXEMPT itself
+rather than accept them on report; each reproduced.
+
+**Actioned (score >= 80), eleven findings.** Two demonstrate an acceptance
+criterion failing as written.
+
+- **F1 (92, AC4 fails).** `reach_scan()` does not implement the rule AC4's first
+  sentence states. Any `function` literal met in walked code has its body walked
+  live, and only `if` carries liveness handling — `while`, `for`, `switch` and
+  `quote` carry none. Verified independently: with m111's live `ckpt_read`
+  stripped, a parked copy in each of eight positions returns zero failures —
+  a definition inside the site's own `if (sys.nframe() == 0L)` block, a `<<-`
+  definition, `while (FALSE)`, `for (i in seq_len(0))`, `switch("none", ...)`,
+  a function stored in a list, one inside `local({...})`, and `quote(...)`,
+  which is not executable code at all.
+- **F4 (83, AC3 fails).** An alias bound to `readRDS` *before* the guard is
+  sourced is untraced: `trace()` rebinds the name, and a copy taken earlier is
+  the original closure. Verified: the read returns its payload and
+  `ckpt_trace_assert()` is clean, while the post-source control aborts. AC3
+  states three exclusions and this is a fourth. The guard header claims the alias
+  case unqualified, and the demo's comment — "every site sources the guard as its
+  first act, so no site can bind an untraced alias either" — is false: m111
+  sources the prototype at line 38 before the guard at line 42, and every oracle
+  site runs `pkgload::load_all()` and `library(brms)` first.
+- **F3 (90).** Three ordinary spellings of a live deserialization pass the AC2
+  check, which matches AST call heads only. Verified, with the bare-call control
+  detected: `m120_rd <- readRDS; m120_rd(...)`, `do.call("readRDS", list(...))`,
+  and `(readRDS)(...)`. The last two are literally a call to `readRDS` in the
+  site's own source. Also: `sourced_paths()` collects only literal string
+  arguments, so `source(file.path(...))` stops the transitive scan silently.
+- **F11 (90).** AC1's two exemption conditions are unenforced: nothing checks
+  that an exemption carries a stated reason or that the column is empty where it
+  should be, and the `declaration-withdrawn` mutation intersects `site$values`
+  only, never `site$exemptions`. A maintainer facing the walk's abort can move
+  the named symbol into `exemptions` and everything stays green.
+- **F2 (87).** The assert-before-write check attributes a call inside a reachable
+  function to that function's *definition* index, so "execution order" is
+  definition order. It both false-passes (a writer helper defined last, called
+  before the assertion) and false-fails (the same helper defined first, called
+  after).
+- **F10 (85).** `ckpt_norm()` returns `NA_character_` for an empty or non-character
+  path; `ckpt_trace_register()` unions that `NA` into the registry, and
+  `ckpt_under_registered()` then flags *every* subsequent `readRDS` as a bypass.
+  Reachable through `ckpt_trace_register(Sys.getenv("SOME_CKPT"))` with the
+  variable unset.
+- **F6 (84).** The applier list is a weakening channel documented as the
+  opposite: the TSV says it "WEAKENS nothing on its own", but marking a
+  bare-name argument to a declared applier as reached is exactly what turns a
+  parked call into a reached one — `lapply(character(0), m120_parked)` runs zero
+  times and satisfies the check. No mutation form probes it.
+- **F15 (84).** m111 registers its checkpoint only under `sys.nframe() == 0L`, so
+  every *sourced* use — `rerun-oracle.R`, `m112-harness-demo.R`, the
+  demonstration itself — registers nothing and the trace watches nothing. The
+  demonstration masks this by registering the directory itself.
+- **F9 (82).** The reachability walk false-fails on `do.call` with a string name,
+  on functions held in a list, and on S3 dispatch: `mark()` follows only
+  `is.name()` arguments and `call_head_name()` returns `""` for a `$` head.
+- **F8 (80).** `cond_is_live()` is deparse-equality against two literal strings,
+  so rewriting m111's resume branch as `if (!file.exists(ckpt)) NULL else ...`
+  — semantically identical — reports the guard call as parked.
+- **F16 (80).** `ckpt_trace_install()` assigns a new `marker_dir` on every
+  install, so `ckpt_trace_remove()` followed by re-install orphans any bypass
+  already recorded. The demonstration performs exactly that sequence.
+
+**Logged below the action bar (score < 80), seventeen findings** — surfaced, not
+dropped: S-IDIOM the declared idiom list is not itself probed, so adding a
+disabling condition to it leaves the self-test green (76, verified); F20e
+`quote(readRDS(p))` would false-fail the deserialization check (65); F20a
+`in_guard` restores to FALSE rather than its prior value and covers lazy argument
+forcing (62); F19 check 6 is satisfied by any string anywhere in the `ckpt_spec()`
+call (55); F5 the two walks diverge on a real site — 11 functions at run time
+against 3 statically on m111 — in a way the synthetic pin structurally cannot
+catch (55); S-EXEMPT the `base_fit` exemption on the fixed-nested site is inert
+(52, verified); F18 check 1 is a presence test, not a reachability test (52);
+F12 `dead-copy` is detected but its diagnostic says the call is not in the file
+(50); F20d `assign()`-created locals are not recognized (50); F20f the README
+states a stronger self-test claim than its script settles (50); F17 the
+self-test's "0 form(s) not applying" is inaccurate — m111 gets no
+`declaration-withdrawn` mutation and no N/A line (48); F7 the else-arm of a
+declared idiom is blessed by that idiom (45); F13 the assert-after-write message
+names the same line for both sides (38); F14 `ckpt_mark_bypass`'s comment
+describes a per-path hash-named scheme the code does not implement (38); R1
+`kc_of` is an uncovered determinant on the fixed-nested site — editing it leaves
+the block hash byte-identical (35, verified by execution; scored low because
+AC1's closing sentence disclaims exactly this shape); F20b `ckpt_store_has()` is
+dead code (32); F20c `deparse()` text is not stable across R releases (18 — the
+milestone's own Decisions entry weighed and accepted this, naming it as the
+recorded falsifier).
+
+### Return (fourth defect return)
+
+AC3 and AC4 fail and are unticked; AC1, AC2, AC5 and AC6 keep the evidence
+recorded above. F1 fails AC4 — the check does not decide reachability by the rule
+AC4's first sentence states, and eight parked forms pass. F4 fails AC3 — a
+`readRDS` call on a registered checkpoint, through an alias bound before the
+guard was sourced, does not abort and is not reported.
+
+AC1 and AC2 are ticked deliberately and narrowly: both criteria assert something
+about the five sites as they stand, and both statements are true today. F3 and
+F11 show the *checks* that establish them are incomplete, not that the statements
+are false. They are actioned findings, not criterion failures.
+
+**Two return tracks are indicated, and they differ.** F1 is a defect return: the
+repair is to make `reach_scan()` implement the stated rule, a procedure fix.
+F4 is an amendment return under the widening test — no procedure can catch an
+alias bound before `trace()` rebinds the name, so the only repair available to it
+widens AC3's exclusion enumeration, whose membership is fixed by author recall;
+the admissible repair is therefore to narrow AC3's promise to what a procedure
+decides, not to add a fourth exclusion.
+
+**Thrash rule (return 4).** The third-return threshold was reached at return 3 and
+holds; this is the fourth. Trigger (b) has fired again: AC4 has now failed in
+every one of the four reviews (F14/F15, then D7, then E1/E15, now F1/F2/F6/F9),
+each time by a new mechanism of the same shape — a check whose test admits a form
+nobody thought of. Both alternatives the plan gate recorded have been spent, and
+the work log already records a re-cut by `/milestone-plan` after return 3. Under
+the rule, re-plan-or-split is no longer the remedy, because that is the move that
+just failed. No further retry is queued under the current plan; the disposition
+goes to the maintainer.
