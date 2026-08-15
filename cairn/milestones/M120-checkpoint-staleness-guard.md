@@ -62,7 +62,7 @@ stands on the branch, promised by no criterion.
       enumeration, not a discovery procedure: it claims nothing about a
       deserialization function outside the list, and neither does AC3.
 
-- [ ] AC3 During a run in which the guard has been sourced, each of these calls,
+- [x] AC3 During a run in which the guard has been sourced, each of these calls,
       taking a length-one character path naming a registered checkpoint and not
       routed through the guard, aborts at the read in the process that sourced
       the guard and — where the caller swallowed the abort — is reported by the
@@ -80,7 +80,7 @@ stands on the branch, promised by no criterion.
       sourced the guard, and every deserialization function other than
       `readRDS`, which AC2 covers statically within the declared sites.
 
-- [ ] AC4 On every declared site, `data-raw/check-checkpoint-sites.R
+- [x] AC4 On every declared site, `data-raw/check-checkpoint-sites.R
       --self-test` plants each of the forms named here — once per name in that
       site's declared `api` column for a per-call form, once per site for a
       site-level one — and each planted form is detected, while each unmutated
@@ -249,6 +249,7 @@ stands on the branch, promised by no criterion.
 - 2026-08-15: the descoped remainder took a ROADMAP candidate row — the shapes the walk does not park (eight verified passing at return 4), the fork-worker bypass AC3 no longer promises, and the absent floors on the `api`, applier and idiom declarations — promoted by a declared site needing one of those shapes, never by their count.
 - 2026-08-15: T14 — full local gate green on the final tree: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]` exit 0 (unchanged from the pre-amendment baseline, as expected — every changed file is under `data-raw/`, which `.Rbuildignore` excludes), `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed with one advisory (the 13-task tripwire, answered above and now 14), the guard demonstration exit 0 over 50 PASS cases, the routing check and its 130-mutation self-test exit 0 with 5 forms reported as not applying, all six `data-raw` checkers and the five self-tests exit 0, and `m112-harness-demo.R` passes. The killed first run of the suite is superseded by this one, which was observed rather than expected.
 - 2026-08-15: AC5 declared file list, the whole of what this branch changes — the same 21 files the return-2 pass declared, this session having added none: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R`, the four python checkers `check-mpl-doc-claims.py`, `check-oracle-registry.py`, `check-record-claims.py` and `check-reference-observations.py`, `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, `data-raw/m120-synthetic-site.R`, the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims-checker-self-tests.py`, `data-raw/record-claims.tsv` and `data-raw/rerun-oracle.R`. The fixture-filtered diff is empty and `git status --porcelain` is empty. Status to review.
+- 2026-08-15: fifth review — all six criteria re-executed with fresh evidence and ticked; `cairn_validate` all checks passed (one advisory, the task-count tripwire), `devtools::document()` no diff, `pkgdown::check_pkgdown()` no problems, `devtools::check()` still running at this commit. The fifth-review section was first written ABOVE `## Review`, where it counted against the plan-owned cap and failed `weight caps` at 230 lines; it is now at EOF where the exemption applies and the body is back to 147/149. Two of the three review lenses have reported: blame-history and prior-review each found no regression.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -1043,3 +1044,86 @@ the work log already records a re-cut by `/milestone-plan` after return 3. Under
 the rule, re-plan-or-split is no longer the remedy, because that is the move that
 just failed. No further retry is queued under the current plan; the disposition
 goes to the maintainer.
+
+## Fifth review (2026-08-15, after the return-4 descope amendment)
+
+Fifth pass, on `m120-checkpoint-staleness-guard` at PR #129. `main` is level with
+origin (`d168b60`) and the branch contains it, so no merge preceded this
+evidence. AC3 and AC4 were amended on 2026-08-15; every criterion below is
+executed fresh against the CURRENT wording, and the four earlier passes'
+evidence is superseded.
+
+**AC1 — the walk classifies every reached symbol, and the two walks agree.**
+Fresh `Rscript data-raw/check-checkpoint-sites.R` exits 0 over the five declared
+sites, its static walk reporting no determinant that is neither hashed nor
+declared. Fresh `Rscript data-raw/m120-checkpoint-guard-demo.R` exits 0 over 50
+PASS cases; on `m120-synthetic-site.R` both walks hash the same functions and
+name the same undeclared determinants, and neither names the shadowed local.
+Withdrawing two declarations is refused by name (`syn_base_fit, syn_est`);
+editing a determinant reached by variable capture, and editing the generator it
+is computed from, each change the block hash, while a comment added inside the
+entry point does not; a renamed block function aborts as "not found" rather than
+resolving to `stats::simulate`. Exemptions: `base_fit` on the three sites that
+capture it, its reason recorded in `checkpoint-sites.tsv`; the column is empty on
+`m111-fallback-sweep.R` and `oracle-bayesian-multilevel-replicates.R`, neither of
+which reaches a compiled-object determinant.
+
+**AC2 — no unguarded deserialization in any declared site.** Same checker run,
+exit 0: no site, and no non-package file a site `source()`s other than the
+guard, calls `readRDS`, `load`, `unserialize` or `readr::read_rds` today. The
+list is floored — the checker refuses to run unless the `#@deserializers`
+directive holds at least those four. Its `--self-test` plants one live call of
+each declared name on every site (20 plants) and one in
+`m76-classical-oneway-prototype.R`, which m111 sources, and each of the 21 is
+detected; the four oracle sites source nothing but the guard, which the run now
+reports as not applying rather than omitting.
+
+**AC3 — each enumerated call form aborts and is reported against its own path.**
+Same demonstration run. Each form reads a checkpoint registered for that form
+alone, under a basename naming it, with nothing reset between forms: a bare
+`readRDS` (`bare.rds`), `base::readRDS` (`namespaced.rds`), an alias bound after
+the guard was sourced (`alias-after.rds`) and `do.call("readRDS", ...)`
+(`do-call.rds`) each abort at the read, each recorded against its own path. A
+swallowed bypass following a legitimate guarded read of the same path is
+reported naming `after-guarded.rds`; after a second `source()` of the guard,
+registrations and recorded bypasses are unchanged, a bare read still aborts
+(`post-resource.rds`), and the assertion still names the bypass recorded before
+the re-source (`pre-resource.rds`). The excluded form is demonstrated escaping
+rather than asserted: in its own subprocess, an alias bound BEFORE the guard was
+sourced returns the file's stored object with no abort and no marker, while a
+swallowed bare read of that same path in that process is recorded. A read
+outside every registered location is not flagged.
+
+**AC4 — every declared mutation form planted and detected, per site and per
+guard call.** `Rscript data-raw/check-checkpoint-sites.R --self-test` exits 0:
+130 mutations planted over the five sites, ten declared forms and every declared
+guard call, each detected, with five forms reported as not applying rather than
+omitted (the declaration-withdrawal form on m111, which declares no determinant
+the walk reaches; the sourced-file deserialization plant on the four oracle
+sites, which source nothing but the guard) and every unmutated site passing.
+AC4's own procedure was then run on disk: deleting
+`oracle-bayesian-incomplete-oneway.R`'s live `ckpt_store_get()` in favour of
+direct payload access makes `Rscript data-raw/check-checkpoint-sites.R` exit 1
+naming the site and the reason ("nothing reaches ckpt_store_get() -- the call is
+not in the file at all"); restoring returns exit 0 with a clean working tree. CI
+runs the demonstration, the check and its self-test as three steps of the
+`checkpoint-guard` job, none `continue-on-error` — the file contains no such key.
+A first probe wrapped the call in a function literal instead and was NOT
+detected; that is the shape `checkpoint-sites.tsv` now documents as unparked and
+AC4 disclaims, so it is recorded here as the boundary holding, not as a failure.
+
+**AC5 — nothing outside the declared file list.** `git diff --name-only
+main...HEAD` filtered to `*.rds`, `*.rda`, `*.RData`, `tests/testthat/_snaps/**`
+and `tests/testthat/fixtures/**` returns nothing; `git status --porcelain` is
+empty; the unfiltered diff is the same 21 paths the work log's most recent
+declaration names.
+
+**AC6 — verify slot and every checker.** `devtools::test()` `[ FAIL 0 | WARN 3 |
+SKIP 2 | PASS 7564 ]` exit 0; `air format --check` clean; `lintr::lint_package()`
+no lints. All six `data-raw` checkers exit 0. `record-claims.tsv`'s
+`checker-self-test-status` row, re-derived by
+`record-claims-checker-self-tests.py` (exit 0), declares the five that carry a
+`--self-test` and states why `check-abort-remedy-verdicts.R` does not — it parses
+no arguments, so it accepts the flag and exits 0 having planted nothing. Each of
+the five exits 0 under `--self-test` and prints one PASS line per planted
+mutation: 135, 36, 30, 2 and 1 respectively.
