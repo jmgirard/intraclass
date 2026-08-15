@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** in-progress
+- **Status:** planned
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -9,109 +9,137 @@
 
 ## Goal
 
-Make every instrumented `data-raw/` harness refuse a checkpoint that was not
-computed under the current design instead of silently resuming from it.
+Make every declared `data-raw/` resume harness refuse a checkpoint that was not
+computed under the current design, and make each declared site's coverage —
+which functions and values its cache depends on, and whether its reads route
+through the guard — computed by reachability rather than by a hand-listed set.
+Which harnesses are declared sites stays an enumeration; the run-time watcher
+covers an undeclared one only while it runs.
 
 ## Scope
 
-**In:** a shared guard sourced by the five resume-from-checkpoint harnesses
-(`m111-fallback-sweep.R:285`; `oracle-bayesian-fixed-replicates.R:205`,
-`-incomplete-oneway.R:214`, `-incomplete-fixed-nested.R:238`,
-`-multilevel-replicates.R:218`). Each cached payload is written beside a spec
-recording the site's declared design parameters and a hash of its declared
-generating block; a read whose recorded spec differs from the current one
-aborts. A run-scoped trace fails the run if any checkpoint deserialization
-bypassed the guard. A CI leg exercises the guard on fast synthetic harnesses
-and on `m111` at `n_rep = 2`.
+**In:** the guard shared by the five declared resume harnesses
+(`m111-fallback-sweep.R` and the four `oracle-bayesian-*.R` sites): its spec and
+staleness refusal, its `readRDS` watcher, and the static check over the declared
+sites. Within a site, what a cache depends on and whether its reads route
+through the guard are computed by walking its parsed source; every list that
+weakens a check — exemptions, appliers, entry-point idioms — is recorded with a
+stated reason and is itself probed.
 
-**Out:** running the four oracle scripts to completion, and any re-baselining
-of their committed fixtures — the re-run programme owns that, under the
-escalate-never-re-baseline policy. Out: the M104 containment-sweep guards →
-existing candidate row. Out: any write to a committed fixture (AC5).
-Out: harnesses that write a checkpoint but never read one back — they cannot
-serve a stale row, and the trace reports them as unread rather than guarding
-them.
+**Out:** running the four oracle scripts to completion or re-baselining their
+fixtures (the re-run programme owns that, under the escalate-never-re-baseline
+policy). Out: any write to a committed fixture (AC5). Out: deserialization
+functions outside AC2's declared list, and reads through a connection — a
+candidate row carries these, and AC2's own probe is what would surface a site
+adopting one. Out: harnesses that write a checkpoint but never read one back.
 
 ## Acceptance criteria
 
-- [ ] AC1 The guard writes, beside each checkpoint payload, a spec carrying
-      the site's declared parameter set in a declared order — for `m111`
-      exactly `rho`, `k`, `n`, `dist`, `n_rep`, and the cell's base seed — plus
-      a hash over that site's declared generating block, and a read whose
-      recorded spec differs from the current one signals an error naming the
-      earliest differing entry in that declared order. A spec recording no
-      entries is a failure of this criterion, not a satisfaction of it.
-- [ ] AC2 During any run in which the guard's trace is installed, every
-      deserialization of a checkpoint path either went through the guard or
-      aborts the run before the harness writes any output. Evidence is the
-      trace's own report over the runs AC3 and AC4 perform — this criterion
-      claims nothing about a run in which the trace was not installed.
-- [x] AC3 Each of these planted-defect forms is demonstrated at least once, on
-      a cache the demonstration writes itself: each declared parameter
-      mismatching individually (at least two different parameters, showing the
-      naming rule); a spec absent entirely (the pre-existing on-disk case); a
-      cache whose early rows predate a design change and whose later rows do
-      not; a cache written by a different site at the same path; and a spec
-      matching on every parameter but differing in the generating-block hash.
-      Each aborts, and a matching cache resumes normally in the same script.
-- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
-      that already runs the repo's standalone `data-raw` checkers fails when a
-      listed site's cache read bypasses it. Verified by reverting one site's
-      guard call and observing that job red.
-- [x] AC5 `git diff --stat main...HEAD` over the whole tree shows no change
-      outside the file list this milestone declares in its work log — in
-      particular no change under `tests/testthat/fixtures/`,
-      `tests/testthat/_snaps/`, `R/sysdata.rda`, or any `data-raw/*.rds`.
-- [x] AC6 The profile's `verify` slot is clean, and `air format --check`,
-      `lintr::lint_package()` and all four existing `data-raw` checkers pass.
+- [ ] AC1 For each of the five declared sites, the static check walks, from that
+      site's declared entry points, every symbol appearing in the walked bodies,
+      following transitively those resolving to functions the site's own source
+      defines, and reports a failure naming the symbol when a walked symbol
+      resolves to a top-level binding of that site and is neither hashed, nor
+      among that site's declared parameters or declared values, nor among its
+      declared exemptions — each exemption carrying a stated reason in
+      `checkpoint-sites.tsv`, and the exemption column empty on any site with no
+      compiled-object determinant. That static walk is this criterion's
+      procedure; `ckpt_spec()` implements the same rule at run time, and the two
+      are shown to return an identical symbol set on a synthetic site exercising
+      a captured value, a captured function, a shadowed local and an exempted
+      object. Demonstrated on that synthetic site: editing a determinant reached
+      by variable capture rather than by a call changes the hash, and removing
+      its declaration is reported by name. Nothing is claimed about a
+      determinant reached other than as a symbol in a walked body.
+
+- [ ] AC2 For each of the five declared sites, no call to `readRDS`, `load`,
+      `unserialize` or `readr::read_rds` — the deserialization list, recorded in
+      `checkpoint-sites.tsv` and required to contain at least those four —
+      occurs in that site's own source or in any non-package file it `source()`s
+      other than the guard. Verified by planting one call to each listed name in
+      each site in turn and observing the check report it. This is an
+      enumeration, not a discovery procedure: it claims nothing about a
+      deserialization function outside the list, and neither does AC3.
+
+- [ ] AC3 During a run in which the guard has been sourced, a `readRDS()` call
+      taking a length-one character path naming a registered checkpoint, that
+      did not go through the guard, aborts at the read in the process that
+      sourced the guard or any process forked from it, and is reported by the
+      end-of-run assertion even when the process that performed it swallowed the
+      abort. Demonstrated for a bare call, a namespace-qualified call, a
+      caller-bound alias, a call inside a forked worker, a call inside a forked
+      worker whose abort that worker swallows, a swallowed call in the parent
+      following a legitimate guarded read of the same path, and a bare call
+      after the guard has been sourced a second time in that process — the
+      re-source leaving registrations and recorded bypasses intact. Outside this
+      claim: a process that did not inherit the trace by forking, a `readRDS()`
+      given a connection, and every deserialization function other than
+      `readRDS`, which AC2 covers statically within the declared sites.
+
+- [ ] AC4 The static check decides whether a guard call is reached by the
+      declared rule — called from live top-level code, transitively, or handed
+      by name to a function in the declared applier list — where live excludes
+      anything under a condition neither literally true nor among the declared
+      entry-point idioms, each idiom carrying a stated reason in
+      `checkpoint-sites.tsv`. Its mutation self-test plants, on every declared
+      site and once per name in that site's declared `api` column, each form in
+      its declared mutation list, which includes at least: the guard call
+      deleted; present but reached from nothing; under a non-literal false
+      condition; under a declared idiom inside a function nothing calls; the
+      pre-write assertion moved after that site's first output write, on each
+      site performing one, a site with none being reported rather than skipped;
+      and the registration given a non-path argument. Each planted form is
+      detected on each site and on each of its declared guard calls, and each
+      unmutated site passes. The check, run on a tree carrying one planted form,
+      is observed to exit non-zero, and CI invokes it as a step that is not
+      `continue-on-error`. Coverage of the listed forms only is claimed.
+
+- [ ] AC5 `git diff --name-only main...HEAD -- '*.rds' '*.rda' '*.RData'
+      'tests/testthat/_snaps/**' 'tests/testthat/fixtures/**'` is empty,
+      `git status --porcelain` is empty, and `git diff --name-only main...HEAD`
+      shows no path outside the most recent file list this milestone declares in
+      its work log.
+
+- [ ] AC6 The profile's `verify` slot is clean, and `air format --check`,
+      `lintr::lint_package()`, and every checker matched by `data-raw/check-*.R`
+      and `data-raw/check-*.py` exit 0. Every such checker declares in
+      `data-raw/record-claims.tsv` whether it has a `--self-test`; each that
+      does exits 0 under it and prints one PASS line per planted mutation, and
+      each that does not is listed there with a stated reason.
 
 ## Coverage
 
-- AC1 → T2
+- AC1 → T1, T2
 - AC2 → T3
-- AC3 → T5
-- AC4 → T4, T6
-- AC5 → T7
-- AC6 → T7
+- AC3 → T6, T7
+- AC4 → T4, T5
+- AC5 → T8, T9
+- AC6 → T8, T9
 
 ## Tasks
 
-- [x] T1 Record the site table: for each of the five sites, its checkpoint
-      path expression, its declared parameter set and order, and the functions
-      whose bodies form its declared generating block.
-- [x] T2 Write `data-raw/checkpoint-guard.R` — spec construction, the
-      base-R-only block hash (deparsed bodies via `tools::md5sum`; no new
-      dependency), guarded write, and guarded read with the ordered mismatch
-      message. Tests first.
-- [x] T3 Add the run-scoped trace that records every checkpoint
-      deserialization and aborts on an unguarded one, before any output write.
-- [x] T4 Route all five sites through the guard, adding a path override to the
-      four oracle scripts so no test run can reach a committed fixture path.
-- [x] T5 Write the mutation demonstration covering every AC3 form, on the
-      `m112-harness-demo.R` pattern with tempdir overrides throughout.
-- [x] T6 Wire T5 plus a fast `m111` `n_rep = 2` run into the existing
-      `data-raw` checker CI job; verify red by reverting one guard call.
-- [x] T7 Full local gate; confirm the AC5 whole-tree diff and record the
-      declared file list in the work log.
-- [x] T8 Rebuild the trace so the three reads it missed cannot recur: install at
-      source time (closing the pre-install alias window), resolve a path's
-      identity through its deepest existing ancestor so registration before
-      creation still matches, and record a bypass to disk so a forked worker's
-      swallowed abort still reaches the end-of-run assertion. D3, D13, D4, D5.
-- [x] T9 Replace the text-matching routing checker with one that parses the R
-      source: live calls only, argument-aware, and order-aware for the pre-write
-      assertion. Runs in the existing R CI job; retire the Python checker and
-      re-derive the checker-count record claims. D7, D1, D8.
-- [x] T10 Derive each site's generating block from the call closure of declared
-      entry points rather than a hand-listed set; non-function determinants stay
-      declared. D11.
-- [x] T11 Point `rerun-oracle.R`'s redirection at the checkpoint path overrides,
-      so a "fresh" re-run cannot reach a real checkpoint through the guard's own
-      I/O. D2.
-- [x] T12 Drop `n_rep` from the per-rep entry specs, where an entry's payload
-      depends only on its seed. D10.
-- [x] T13 Full local gate; re-confirm the AC5 whole-tree diff and re-declare the
-      file list.
+- [ ] T1 Walk every symbol in the walked bodies, not only call heads; classify
+      each as hashed, declared parameter, declared value, or declared exemption,
+      and abort naming an unclassified one. Add the exemption column with
+      reasons.
+- [ ] T2 Give the static check the same walk over parsed source, and pin the two
+      against each other on a synthetic site exercising a captured value, a
+      captured function, a shadowed local and an exempted object.
+- [ ] T3 Add the deserialization-call check over each site and the files it
+      sources, with the required-minimum list; plant one call of each listed
+      name in each site and observe it reported.
+- [ ] T4 Implement the reachability and liveness rules — declared appliers,
+      declared entry-point idioms with reasons — including a guard call under a
+      declared idiom inside a function nothing calls.
+- [ ] T5 Quantify the mutation self-test per site, per form, and per declared
+      guard call.
+- [ ] T6 Make sourcing the guard twice in one process leave registrations and
+      recorded bypasses intact.
+- [ ] T7 Extend the watcher demonstration to the seventh case and scope its
+      claim to `readRDS`.
+- [ ] T8 Switch the fixture fence to the diff-based enumeration; declare each
+      checker's self-test status in `record-claims.tsv`.
+- [ ] T9 Full local gate; re-confirm the AC5 diff and re-declare the file list.
 
 ## Work log
 
@@ -163,6 +191,13 @@ them.
 - 2026-08-14: T13 — full local gate green after the return-2 redesign: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed (one advisory, the 13-task tripwire, answered above), the guard demonstration and the routing check and its self-test all exit 0, the five python checkers exit 0, and `m112-harness-demo.R` — which drives the changed `run_cell` read/write path and was missing from the earlier gate list — passes.
 - 2026-08-14: AC5 declared file list, the whole of what this branch changes, unchanged in shape but with two entries turned over: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R` (replacing the retired `.py`), `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims.tsv`, and `data-raw/rerun-oracle.R` (newly declared, for T11). Nothing under `tests/testthat/fixtures/`, `tests/testthat/_snaps/`, `R/sysdata.rda`, or any `.rds` is touched, and the working tree is clean.
 - 2026-08-14: review return 3 (defect) — AC4 fails because a guard call parked in a function nobody calls, or under any non-literal dead condition, satisfies the parsing checker (E1 95, E15 85); AC2 fails because re-sourcing the guard wipes every registration and orphans recorded bypasses (E3 88) and a connection-argument read is not traced at all (E2 85); AC1 fails because the derived block misses a determinant reached by variable capture rather than by a call, so editing `est_occ()` leaves the hash identical on two oracle sites and `kc_of` on a third (E4 90). AC1, AC2 and AC4 unticked; status in-progress. 15 findings logged below the action bar. Thrash: third return reached, and trigger (b) has fired on AC2 and AC4 in all three reviews with both recorded plan alternatives now spent.
+- 2026-08-14: re-cut by /milestone-plan after the third defect return. Goal, Scope, acceptance criteria, Coverage and Tasks are superseded; the branch, its work, and the two prior Decisions entries stand. The diagnosis the re-cut acts on: every criterion that failed made a universal claim no procedure it named could enumerate, so each is now either scoped to a recorded enumeration that is itself probed, or replaced by a claim a stated procedure settles.
+- 2026-08-14: re-cut criteria audit, round 1 ([O], fresh context) — 18 findings, no criterion clean. Eleven fixed here: AC5 gained a clean-worktree clause and a git-enumerated fixture domain (the hand list omitted `data/ratings.rda` and `data-raw/reviews/*.rds`); AC6 enumerates checkers by glob rather than by a count that drifted four to six to five-plus-one across three reviews; AC3 narrowed to the sourcing process and its forks and regained the return-1 case that pins `ckpt_mark_bypass()`; AC4 requires an observed non-zero exit rather than a workflow step existing; AC2 stopped quantifying over 'that site's checkpoint', which needs data-flow on a path built from `Sys.getenv()` and `sprintf()`; and the Goal's coverage promise was narrowed to what the criteria deliver. Three became gate questions.
+- 2026-08-14: re-cut gate chose a declared-exemption channel over hashing a summary of unhashable dependencies and over the silent skip that shipped, because the compiled model object cannot be deparsed stably and the milestone's own Decisions entry forbids following data references into it; falsified by an exemption list growing to cover a determinant that could have been hashed.
+- 2026-08-14: re-cut gate chose reachability as call-position closure plus a declared applier list over any-mention and over direct-calls-only, because any-mention reopens the parked-call hole and direct-calls-only goes vacuous on m111, whose `ckpt_read` is reached only through `mclapply(cells, run_cell)`; falsified by a handoff form outside the applier list appearing in a declared site. Liveness likewise allows only literally-true conditions plus declared entry-point idioms, m111's `sys.nframe() == 0L` being indistinguishable by parse from a disabling condition; falsified by an idiom entry admitting a condition that disables a guard call.
+- 2026-08-14: re-cut gate chose one re-cut milestone over splitting the static check or the watcher out, because all three pieces need the same reachability machinery and splitting would duplicate it across two branches; falsified by the re-cut exceeding the sizing tripwires again.
+- 2026-08-14: re-cut criteria audit, round 2 ([O], fresh context, over the amended wording) — all six still defective, and one counterexample was executed rather than argued: `load()` and `unserialize()` of a registered checkpoint return silently, so AC2's handoff to the watcher was false and AC3's 'plain-path read' universal was falsified by a call the watcher never traces. Adopted in full: AC2 names a required-minimum deserialization list and probes it by planting each name; AC3 is scoped to `readRDS` and gains the re-source case; AC1 is anchored on the static walk with the run-time rule pinned against it on a synthetic site, since four of five sites can never be run; AC4 quantifies per declared guard call, not per site, and probes the idiom list itself; AC5 uses a diff-based enumeration that also catches a deleted fixture; AC6 requires each checker's self-test status declared, `check-abort-remedy-verdicts.R` having been found to accept `--self-test` and exit 0 without having one.
+- 2026-08-14: the round-2 audit's cross-cutting finding shaped every fix — a declared list that WEAKENS a check must not be expandable at will by the author whose recall already failed, so each such list is now tied to something checkable: exemptions empty unless a compiled-object determinant exists, the deserialization list carrying four required names, and the idiom list itself probed by a planted mutation.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
