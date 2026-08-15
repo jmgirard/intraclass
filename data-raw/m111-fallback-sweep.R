@@ -293,7 +293,7 @@ cell_spec <- function(cell) {
       n_rep = cell$n_rep,
       base_seed = cell$id * 1000000L
     ),
-    block = c("gen_oneway", "mc_ci", "one_rep"),
+    roots = "one_rep",
     site = "m111-fallback-sweep",
     envir = environment(gen_oneway)
   )

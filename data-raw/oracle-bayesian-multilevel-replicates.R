@@ -248,18 +248,10 @@ rep_spec <- function() {
       s2_cr = s2_cr,
       s2_sr = s2_sr,
       s2_e = s2_e,
-      n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c(
-      "simulate",
-      "one_rep",
-      "est_occ",
-      "cell_offset",
-      "designs",
-      "base_prior",
-      "brm_args"
-    ),
+    roots = "one_rep",
+    values = c("cell_offset", "designs", "base_prior", "brm_args"),
     site = ckpt_site
   )
 }

@@ -263,15 +263,8 @@ cell_spec <- function(cl) {
       n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c(
-      "sim_ragged_d2_fixed",
-      "one_rep_summary",
-      "one_cell",
-      "kc_of",
-      "base_formula",
-      "base_prior",
-      "brm_args"
-    ),
+    roots = "one_cell",
+    values = c("base_formula", "base_prior", "brm_args"),
     site = ckpt_site
   )
 }

@@ -66,7 +66,8 @@ demo_spec <- function(
   dist = "gaussian",
   n_rep = 2,
   base_seed = 1,
-  block = c("gen_demo", "demo_offsets"),
+  roots = "gen_demo",
+  values = "demo_offsets",
   site = "demo"
 ) {
   ckpt_spec(
@@ -78,7 +79,8 @@ demo_spec <- function(
       n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = block,
+    roots = roots,
+    values = values,
     site = site
   )
 }
@@ -118,7 +120,7 @@ expect_error(
 # ---- AC1: an empty spec is a defect, not a free pass ------------------------
 cat("\n== AC1: a spec recording no parameters is refused at WRITE time ==\n")
 expect_error(
-  ckpt_spec(params = list(), block = "gen_demo", site = "demo"),
+  ckpt_spec(params = list(), roots = "gen_demo", site = "demo"),
   "a spec with no declared parameters cannot be constructed",
   must_match = "no declared parameters"
 )
@@ -188,19 +190,52 @@ demo_offsets <- c(a = 0L, b = 100L)
 stopifnot(identical(ckpt_read(drift, demo_spec()), gen_demo(0.3, 10)))
 pass("restoring the declared value makes the cache usable again")
 
+# The hashed block is DERIVED, not hand-listed: a helper the entry point calls
+# is covered without anyone declaring it. This is the failure the hand-listed
+# form actually produced — one site's list was missing two functions that decide
+# its cached numbers, and nothing could notice.
+cat("\n== AC3: a helper nobody declared is still covered ==\n")
+undeclared_helper <- function(x) x * 1
+gen_via_helper <- function(rho, k) undeclared_helper(rho * seq_len(k))
+helper_spec <- function() {
+  ckpt_spec(
+    params = list(rho = 0.3, k = 10),
+    roots = "gen_via_helper", # the helper is NOT declared anywhere
+    site = "demo-closure"
+  )
+}
+closure_path <- path_of("closure")
+ckpt_write(
+  closure_path,
+  payload = gen_via_helper(0.3, 10),
+  spec = helper_spec()
+)
+stopifnot(identical(
+  ckpt_read(closure_path, helper_spec()),
+  gen_via_helper(0.3, 10)
+))
+pass("a cache written under the current helper resumes")
+undeclared_helper <- function(x) x * 2 # the helper changes; nothing declares it
+expect_error(
+  ckpt_read(closure_path, helper_spec()),
+  "editing an undeclared helper the entry point calls still invalidates the cache",
+  must_match = "generating block"
+)
+undeclared_helper <- function(x) x * 1
+
 # A declared block name that no longer exists is "not found", never silently
 # resolved to a same-named function further up the search path. Two real sites
 # declare a block function named `simulate`, which stats:: also exports: without
 # this the hash would quietly track stats::simulate forever after a rename.
 simulate <- function(design) design
 stopifnot(is.function(stats::simulate)) # the stranger that must not be reached
-stopifnot(nzchar(demo_spec(block = c("gen_demo", "simulate"))$block_hash))
+stopifnot(nzchar(demo_spec(roots = c("gen_demo", "simulate"))$block_hash))
 pass("the site's own block function is found while it exists")
 rm(simulate) # the rename: the site's own function is gone
 expect_error(
-  demo_spec(block = c("gen_demo", "simulate")),
+  demo_spec(roots = c("gen_demo", "simulate")),
   "a renamed block function is 'not found', not resolved to stats::simulate",
-  must_match = "declared block entry not found: simulate"
+  must_match = "declared entry point not found: simulate"
 )
 
 # ---- AC3: a partially stale cache -------------------------------------------

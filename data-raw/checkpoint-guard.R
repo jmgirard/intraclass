@@ -42,33 +42,100 @@ ckpt_find_block <- function(nm, envir) {
   }
 }
 
-# Hash the declared generating block, in the declared order, under the declared
-# names. A declared FUNCTION contributes its deparsed body; a declared VALUE
-# contributes its deparsed value. Values are in the block because not everything
-# that decides a cached number is a function: the seed-offset vectors, the
-# sampler argument lists, and the formula and prior the base fit is compiled
-# from all determine the cached rows and would otherwise change unnoticed.
-# Base R only — tools::md5sum needs a file, so the deparsed text goes through a
-# tempfile.
-ckpt_block_hash <- function(block, envir = parent.frame()) {
-  if (!length(block)) {
-    stop("checkpoint spec: no declared generating block", call. = FALSE)
+# Every bare name in call position within an expression. `pkg::f()` and
+# `pkg:::f()` are deliberately not collected: a package function is not the
+# site's own code, and the package's behavior is pinned by the test suite rather
+# than by this hash.
+# Walked BY INDEX, never `for (x in as.list(e))`: an empty argument (the blank
+# in `d[keep, , drop = FALSE]`) binds a loop variable to the missing marker and
+# every later touch of it raises "argument is missing". Indexing reads the same
+# object without binding it.
+ckpt_called_names <- function(e, acc = character(0)) {
+  if (is.call(e)) {
+    if (is.name(e[[1]])) {
+      acc <- c(acc, as.character(e[[1]]))
+    }
+    args <- as.list(e)[-1]
+    for (i in seq_along(args)) {
+      if (!is.null(args[[i]]) && !identical(args[[i]], quote(expr = ))) {
+        acc <- ckpt_called_names(args[[i]], acc)
+      }
+    }
   }
-  text <- unlist(lapply(block, function(nm) {
+  acc
+}
+
+# The generating block, DERIVED rather than hand-listed: start at the site's
+# declared entry points and follow the calls they actually make, keeping every
+# one that resolves to a function of the site's own (a package function stops
+# the walk, per ckpt_called_names and ckpt_find_block). A hand-listed set is
+# fixed by whoever wrote it remembering every helper, and one site's list was
+# found missing two functions that decide its cached numbers — the recall
+# failure this replaces. Sorted, so the hash does not depend on walk order.
+ckpt_block_closure <- function(roots, envir) {
+  seen <- character(0)
+  queue <- roots
+  while (length(queue)) {
+    nm <- queue[[1]]
+    queue <- queue[-1]
+    if (nm %in% seen) {
+      next
+    }
     hit <- ckpt_find_block(nm, envir)
     if (!hit$found) {
       stop(
-        "checkpoint spec: declared block entry not found: ",
+        "checkpoint spec: declared entry point not found: ",
         nm,
         call. = FALSE
       )
     }
-    if (is.function(hit$value)) {
-      c(paste0("## fn ", nm), deparse(body(hit$value)))
-    } else {
-      c(paste0("## val ", nm), deparse(hit$value))
+    if (!is.function(hit$value)) {
+      stop(
+        "checkpoint spec: declared entry point is not a function: ",
+        nm,
+        call. = FALSE
+      )
     }
+    seen <- c(seen, nm)
+    for (called in unique(ckpt_called_names(body(hit$value)))) {
+      if (called %in% seen || called %in% queue) {
+        next
+      }
+      h <- ckpt_find_block(called, envir)
+      if (h$found && is.function(h$value)) {
+        queue <- c(queue, called)
+      }
+    }
+  }
+  sort(seen)
+}
+
+# Hash the generating block: every function in the closure of the declared entry
+# points (deparsed bodies, in sorted name order), then every declared VALUE in
+# its declared order (deparsed value). Values are declared rather than derived
+# because not everything that decides a cached number is a function — the
+# seed-offset vectors, the sampler argument lists, and the formula and prior each
+# base fit is compiled from all do — and following data references would drag in
+# the compiled model object itself. Base R only: tools::md5sum needs a file, so
+# the deparsed text goes through a tempfile.
+ckpt_block_hash <- function(roots, values, envir = parent.frame()) {
+  if (!length(roots)) {
+    stop("checkpoint spec: no declared entry points", call. = FALSE)
+  }
+  fns <- ckpt_block_closure(roots, envir)
+  text <- unlist(lapply(fns, function(nm) {
+    c(paste0("## fn ", nm), deparse(body(ckpt_find_block(nm, envir)$value)))
   }))
+  text <- c(
+    text,
+    unlist(lapply(values, function(nm) {
+      hit <- ckpt_find_block(nm, envir)
+      if (!hit$found) {
+        stop("checkpoint spec: declared value not found: ", nm, call. = FALSE)
+      }
+      c(paste0("## val ", nm), deparse(hit$value))
+    }))
+  )
   f <- tempfile("ckpt-block-")
   on.exit(unlink(f), add = TRUE)
   writeLines(text, f)
@@ -79,7 +146,13 @@ ckpt_block_hash <- function(block, envir = parent.frame()) {
 # refused here rather than at read time: a spec that records nothing never
 # mismatches, and a guard that never mismatches is indistinguishable from no
 # guard at all.
-ckpt_spec <- function(params, block, site, envir = parent.frame()) {
+ckpt_spec <- function(
+  params,
+  roots,
+  values = character(0),
+  site,
+  envir = parent.frame()
+) {
   if (!is.list(params) || !length(params) || is.null(names(params))) {
     stop(
       "checkpoint spec: no declared parameters (a spec that records nothing ",
@@ -97,8 +170,8 @@ ckpt_spec <- function(params, block, site, envir = parent.frame()) {
     site = site,
     params = params,
     order = names(params),
-    block = block,
-    block_hash = ckpt_block_hash(block, envir = envir)
+    block = c(roots, values),
+    block_hash = ckpt_block_hash(roots, values, envir = envir)
   )
 }
 

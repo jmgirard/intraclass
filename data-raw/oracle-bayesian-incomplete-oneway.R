@@ -239,18 +239,10 @@ rep_spec <- function() {
       s2_s = s2_s,
       s2_res = s2_res,
       missing_frac = missing_frac,
-      n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c(
-      "make_incidence",
-      "simulate",
-      "one_rep",
-      "cell_offset",
-      "base_formula",
-      "base_prior",
-      "brm_args"
-    ),
+    roots = c("one_rep", "make_incidence"),
+    values = c("cell_offset", "base_formula", "base_prior", "brm_args"),
     site = ckpt_site
   )
 }

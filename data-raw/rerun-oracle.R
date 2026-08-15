@@ -210,6 +210,31 @@ rerun_one <- function(script_name) {
     )
   }
 
+  # M120: the checkpoint guard does its own I/O from functions that live in the
+  # global environment, so the shadows below -- which only bind in `run_env` --
+  # never reach it, and a "fresh" re-run would write and resume the REAL
+  # checkpoint through the guard. Redirect at the path instead: every guarded
+  # site reads its checkpoint location from these overrides, so pointing them at
+  # the scratch directory redirects the guard's own reads and writes too.
+  ckpt_env <- c(
+    M111_CKPT_DIR = file.path(scratch, "m111-checkpoints"),
+    ORACLE_FIXED_REPLICATES_CKPT = file.path(scratch, ".fixed-replicates.rds"),
+    ORACLE_INCOMPLETE_ONEWAY_CKPT = file.path(
+      scratch,
+      ".incomplete-oneway.rds"
+    ),
+    ORACLE_INCOMPLETE_FIXED_NESTED_CKPT = file.path(
+      scratch,
+      ".incomplete-fixed-nested.rds"
+    ),
+    ORACLE_MULTILEVEL_REPLICATES_CKPT = file.path(
+      scratch,
+      ".multilevel-replicates.rds"
+    )
+  )
+  do.call(Sys.setenv, as.list(ckpt_env))
+  on.exit(Sys.unsetenv(names(ckpt_env)), add = TRUE)
+
   run_env <- new.env(parent = globalenv())
   assign("stopifnot", recording_stopifnot, envir = run_env)
   # The names must exactly shadow the base functions the scripts call.

@@ -2,15 +2,20 @@
 
 ## Record-claim checkers
 
-Six checkers live here — `check-checkpoint-sites.py`, `check-mpl-doc-claims.py`,
-`check-oracle-registry.py`, `check-record-claims.py`,
-`check-reference-observations.py` and `enumerate-generalizing-claims.py`
-[claim:data-raw-checker-inventory] — all stdlib-only `python3` so the R-free
-`check-references` CI job can run them. Five of the six are wired into that job,
-which invokes a `data-raw` checker ten times
-[claim:lint-checker-invocations]: each wired checker twice, once for the check
-and once for its vacuity self-test. `check-oracle-registry.py` is run locally
-only.
+Five checkers live here — `check-mpl-doc-claims.py`, `check-oracle-registry.py`,
+`check-record-claims.py`, `check-reference-observations.py` and
+`enumerate-generalizing-claims.py` [claim:data-raw-checker-inventory] — all
+stdlib-only `python3` so the R-free `check-references` CI job can run them. Four
+of the five are wired into that job, which invokes a `data-raw` checker eight
+times [claim:lint-checker-invocations]: each wired checker twice, once for the
+check and once for its vacuity self-test. `check-oracle-registry.py` is run
+locally only.
+
+`check-checkpoint-sites.R` is the sixth checker and the exception: it parses the
+R sources it checks, so it is R rather than `python3` and runs in the
+`checkpoint-guard` job beside the guard demonstration rather than in the R-free
+job. It replaced a `python3` predecessor that matched text, which three separate
+reversions of a site's guard call walked straight past.
 
 `check-record-claims.py` (M102) re-derives the figures registered in
 `record-claims.tsv`. A record states a load-bearing figure by citing the row

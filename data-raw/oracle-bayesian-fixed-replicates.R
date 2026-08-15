@@ -228,17 +228,10 @@ rep_spec <- function() {
       mu_r = mu_r,
       s2_sr = s2_sr,
       s2_e = s2_e,
-      n_rep = n_rep,
       base_seed = base_seed
     ),
-    block = c(
-      "simulate_fixed_replicates",
-      "one_rep",
-      "est_occ",
-      "base_formula",
-      "base_prior",
-      "brm_args"
-    ),
+    roots = "one_rep",
+    values = c("base_formula", "base_prior", "brm_args"),
     site = ckpt_site
   )
 }

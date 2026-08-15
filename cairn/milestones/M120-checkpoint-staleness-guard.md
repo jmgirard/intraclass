@@ -98,17 +98,17 @@ them.
       identity through its deepest existing ancestor so registration before
       creation still matches, and record a bypass to disk so a forked worker's
       swallowed abort still reaches the end-of-run assertion. D3, D13, D4, D5.
-- [ ] T9 Replace the text-matching routing checker with one that parses the R
+- [x] T9 Replace the text-matching routing checker with one that parses the R
       source: live calls only, argument-aware, and order-aware for the pre-write
       assertion. Runs in the existing R CI job; retire the Python checker and
       re-derive the checker-count record claims. D7, D1, D8.
-- [ ] T10 Derive each site's generating block from the call closure of declared
+- [x] T10 Derive each site's generating block from the call closure of declared
       entry points rather than a hand-listed set; non-function determinants stay
       declared. D11.
-- [ ] T11 Point `rerun-oracle.R`'s redirection at the checkpoint path overrides,
+- [x] T11 Point `rerun-oracle.R`'s redirection at the checkpoint path overrides,
       so a "fresh" re-run cannot reach a real checkpoint through the guard's own
       I/O. D2.
-- [ ] T12 Drop `n_rep` from the per-rep entry specs, where an entry's payload
+- [x] T12 Drop `n_rep` from the per-rep entry specs, where an entry's payload
       depends only on its seed. D10.
 - [ ] T13 Full local gate; re-confirm the AC5 whole-tree diff and re-declare the
       file list.
@@ -153,6 +153,13 @@ them.
 - 2026-08-14: thrash trigger (b) fired on both AC2 and AC4 — each has now failed twice by a new mechanism of the same shape. The plan gate's recorded falsifiers have both fired: "a checkpoint read the trace cannot observe" (D3, D13, D4) and "a generator change the declared block does not cover" (D11); the remedy is to reconsider those recorded alternatives rather than patch the next mechanism.
 - 2026-08-14: return-2 gate reconsidered both recorded alternatives and chose, for the trace, a structural rebuild over adding the rejected source scan beside it (the scan's own weakness — it knows only remembered spellings — is what just failed the other criterion); for the routing check, parsing the R source over hardening the text match; and for the block, deriving the function set from the call closure of declared entry points over hand-listing it. Discovered tasks T8–T13 added (minor amendment).
 - 2026-08-14: T8 — the trace installs when the guard is sourced (so a caller cannot bind an untraced alias, and cannot omit the install; the five sites' install calls are removed and their comments are now true), resolves a path's identity through its deepest existing ancestor after absolute-izing (so a relative path registered before its first write still matches), and records a bypass to a run-scoped marker directory (so a forked worker's swallowed abort still reaches the parent's assertion). Each of the three is demonstrated and each demonstration was shown to red when its own fix is reverted — the relative-path case only after it was moved outside the already-registered tempdir, where it had been passing for the wrong reason.
+- 2026-08-14: T9 — `data-raw/check-checkpoint-sites.R` replaces the Python checker and parses the sources it checks: dead `if (FALSE)` branches are dropped before anything is counted, `ckpt_trace_register()` must get a real argument, `ckpt_trace_assert()` must precede the site's first output write, and the declared parameters must appear in declared ORDER. The three reversions that walked past the old checker are each detected on every site by `--self-test`, and the retired checker was re-run on the dead-copy mutation and observed to exit 0, so the improvement is measured rather than assumed.
+- 2026-08-14: T9 — the routing check moves from the R-free `check-references` job to the `checkpoint-guard` job, which already has R; `data-raw/README.md` and `record-claims.tsv` are re-derived in the same commit (five stdlib-only python3 checkers, eight invocations) and `check-record-claims.py` returns 0 failures.
+- 2026-08-14: T10 — the hashed block is now the call closure of declared entry points: `ckpt_spec()` takes `roots` (functions, walked transitively through the site's own definitions) plus `values` (the non-function determinants, still declared, because following data references would drag in the compiled model object). m111's two missing estimator legs are covered without being named, and the demo shows an undeclared helper's edit invalidating a cache.
+- 2026-08-14: T11 — `rerun-oracle.R` now redirects at the checkpoint PATH via the sites' own env-var overrides, rather than relying on shadowed `readRDS`/`saveRDS` bindings the guard's globalenv-scoped functions never saw; a fresh re-run can no longer reach a real checkpoint through the guard's own I/O.
+- 2026-08-14: T12 — `n_rep` is dropped from the three sites whose entry is one rep, since a rep's payload depends only on its seed; the nested site keeps it, its entry being a whole cell. Raising `n_rep` there now extends the cache instead of discarding it.
+- 2026-08-14: two walkers hit R's empty-argument marker (the blank in `d[keep, , drop = FALSE]`), which errors on every touch once a `for` loop binds it; both iterate by index now. Found by the demo failing on the real M111 site, not by inspection.
+- 2026-08-14: `cairn_validate` advisory — M120 now carries 13 tasks, over the 10-task split tripwire. Not split: the added tasks are one deliverable's repair under a review return, and splitting mid-return would strand the criteria that fail on the branch that no longer owns them.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions

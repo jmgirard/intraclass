@@ -82,20 +82,12 @@ jobs:
       - name: Self-test the record-claims checker (route excision)
         run: python3 data-raw/check-record-claims.py --self-test
 
-      # M120: every harness declared in data-raw/checkpoint-sites.tsv still
-      # routes its resume read through the stale-checkpoint guard. Declared
-      # sites only — the open-ended case belongs to the run-time trace, which
-      # the checkpoint-guard job below exercises. Stdlib-only and R-free.
-      - name: Check the declared checkpoint sites still route through the guard
-        run: python3 data-raw/check-checkpoint-sites.py
-
-      - name: Self-test the checkpoint-site check (mutation harness)
-        run: python3 data-raw/check-checkpoint-sites.py --self-test
-
-  # M120: the guard's behaviour, not just its wiring. Runs the planted-defect
-  # demonstrations and the M111 sweep end to end at n_rep = 2, every path
-  # redirected into a tempdir so no committed fixture can be reached. Needs R,
-  # which is why it is not folded into the R-free check-references job above.
+  # M120: the guard's behaviour and its wiring. Runs the planted-defect
+  # demonstrations (including one M111 cell computed, resumed and refused at
+  # n_rep = 2), then the routing check over every declared site and that
+  # check's own mutation harness. Every path is redirected into a tempdir so no
+  # committed fixture can be reached. The routing check parses the R sources, so
+  # it needs R and cannot live in the R-free check-references job above.
   checkpoint-guard:
     runs-on: ubuntu-latest
     env:
@@ -114,3 +106,9 @@ jobs:
 
       - name: Demonstrate the stale-checkpoint guard fires
         run: Rscript data-raw/m120-checkpoint-guard-demo.R
+
+      - name: Check the declared checkpoint sites still route through the guard
+        run: Rscript data-raw/check-checkpoint-sites.R
+
+      - name: Self-test the checkpoint-site check (mutation harness)
+        run: Rscript data-raw/check-checkpoint-sites.R --self-test
