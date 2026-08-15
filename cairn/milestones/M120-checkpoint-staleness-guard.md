@@ -1250,3 +1250,20 @@ traced function is caught — bare, namespace-qualified, `do.call`, or an alias
 bound after the `source()` — lists the pre-source alias first among what the
 trace does not reach, and the install-on-load note states that installing here
 narrows that window rather than closing it.
+
+**Consistency gate.** `cairn_validate` all checks passed (one advisory, the
+14-task split tripwire, answered in the work log). `devtools::document()` no
+diff; `pkgdown::check_pkgdown()` no problems. `devtools::check()` 0 errors, 0
+warnings, 1 NOTE in 12m 53s — the NOTE is the spelling test's comparison of
+`spelling.Rout` against its saved copy, listing author names and British
+spellings in `icc.Rd`, `NEWS.md`, `glossary.Rmd` and `interval-methods.Rmd`.
+It is not this branch's: `git diff --name-only main...HEAD -- man/ inst/ tests/
+R/` is empty. It is recorded from the raw check log rather than from devtools'
+summary line, which filters that NOTE and prints "0 notes". No NEWS entry is
+owed — every changed file is under `data-raw/`, which `.Rbuildignore` excludes.
+
+**CI on PR #129 at `34ab24c`.** `check-references`, `checkpoint-guard`,
+`format-check`, `lint`, `pkgdown`, `test-coverage`, both codecov checks and
+`R CMD check` on ubuntu-latest all pass; the `lint` job is the one that would
+have failed on the 17 lints. windows-latest was still running when this was
+recorded.
