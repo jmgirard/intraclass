@@ -41,7 +41,7 @@ them.
       recorded spec differs from the current one signals an error naming the
       earliest differing entry in that declared order. A spec recording no
       entries is a failure of this criterion, not a satisfaction of it.
-- [ ] AC2 During any run in which the guard's trace is installed, every
+- [x] AC2 During any run in which the guard's trace is installed, every
       deserialization of a checkpoint path either went through the guard or
       aborts the run before the harness writes any output. Evidence is the
       trace's own report over the runs AC3 and AC4 perform — this criterion
@@ -54,7 +54,7 @@ them.
       not; a cache written by a different site at the same path; and a spec
       matching on every parameter but differing in the generating-block hash.
       Each aborts, and a matching cache resumes normally in the same script.
-- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
+- [x] AC4 The five sites in the Scope table source the guard, and the CI job
       that already runs the repo's standalone `data-raw` checkers fails when a
       listed site's cache read bypasses it. Verified by reverting one site's
       guard call and observing that job red.
@@ -62,7 +62,7 @@ them.
       outside the file list this milestone declares in its work log — in
       particular no change under `tests/testthat/fixtures/`,
       `tests/testthat/_snaps/`, `R/sysdata.rda`, or any `data-raw/*.rds`.
-- [ ] AC6 The profile's `verify` slot is clean, and `air format --check`,
+- [x] AC6 The profile's `verify` slot is clean, and `air format --check`,
       `lintr::lint_package()` and all four existing `data-raw` checkers pass.
 
 ## Coverage
@@ -311,3 +311,104 @@ Returned to `in-progress` at the first defect return for this milestone. F1 and
 F25 fail AC2; F14 and F15 fail AC4. AC2 and AC4 are unticked; AC1, AC3, AC5 and
 AC6 keep their recorded evidence. F3, F4, F10 and F11 are actioned in the same
 pass.
+
+## Re-review (2026-08-14, after return 1)
+
+Second review pass, on `m120-checkpoint-staleness-guard` at PR #129. `main` is
+level with origin and the branch is not behind it, so no merge preceded this
+evidence. Every criterion below is re-executed from scratch; review 1's evidence
+above is superseded for AC2 and AC4 and re-derived for the rest.
+
+**AC1 — spec recorded, mismatch names the earliest differing entry.** Fresh run
+of `Rscript data-raw/m120-checkpoint-guard-demo.R`, exit 0 over 28 passing
+cases. A matching cache returns the cached payload; a changed `rho` and a
+changed `dist` are each refused by name; with two parameters differing at once
+the message names the earlier in declared order, shown both ways round (`dist`
+before `base_seed`, `rho` before `dist`). `ckpt_spec()` refuses an empty
+parameter list at construction, so the null guard AC1's last sentence forbids
+cannot be built. New this pass: a declared block entry that is a value rather
+than a function is hashed the same way and its change refused, and a declared
+block name that no longer exists aborts as "not found" instead of resolving to
+`stats::simulate`, the name two sites share.
+
+**AC2 — no unguarded deserialization survives.** Same run. A guarded run passes
+the trace; a bare `readRDS` and a `base::readRDS` of a registered checkpoint each
+abort at the read; a read outside any registered location is not flagged. The two
+failures review 1 found are gone and each is now demonstrated on the mechanism
+that was missing:
+
+- *A swallowed bypass after a legitimate read of the same path.* The demo now
+  performs a guarded `ckpt_read()` first and does not reset the trace before the
+  swallowed bare read, so the case reproduces a real run's ordering. It aborts.
+  The pre-fix guard (`git show HEAD~2:data-raw/checkpoint-guard.R`, sourced
+  standalone) was driven through that sequence — a guarded read, then a
+  swallowed bare read of the same registered path, then the assertion — and
+  reported nothing, so the defect is confirmed and the case discriminates.
+- *A bare read inside a forked worker.* The demo plants a bare `readRDS` of a
+  **valid** registered checkpoint (the spec check accepts that file, verified in
+  the same script) inside `parallel::mclapply`, and the worker aborts with the
+  bypass message while the sibling worker that read nothing is untouched.
+  Isolated by mutation: suppressing the abort when the reading process is not
+  the parent reds this case and no other in the script.
+
+**AC3 — every planted-defect form.** Same run, each form on a cache the demo
+writes itself: two parameters mismatching individually; a spec absent entirely; a
+cache written by another site (refused naming `other-site`); a partially stale
+multi-entry store (the current-design entry served, its superseded sibling
+refused); and a generating-block hash differing with every parameter matching.
+The partial-staleness form now runs through the guard's own store API rather than
+a file-level spec, so the per-entry check is what serves and refuses. The
+counterweight cases pass — a comment inside a block function, an edit to a
+function outside the declared block, and restoring a changed declared value all
+leave the cache usable. Clean resume is shown in the same script on the real M111
+site.
+
+**AC4 — the five sites route through the guard, and reverting one reds.**
+`python3 data-raw/check-checkpoint-sites.py` exits 0 over the five declared
+sites. Two reversions were planted on disk and each made it exit 1 naming the
+site: replacing `oracle-bayesian-incomplete-oneway.R`'s per-entry
+`ckpt_store_get()` with direct payload access while its file-level load stayed
+("never calls ckpt_store_get()"), and commenting out the `source()` of the guard
+in `m111-fallback-sweep.R` ("does not source data-raw/checkpoint-guard.R").
+Both are the review-1 holes: an "any of these calls" test and raw-text matching.
+Restoring returned exit 0 with an empty `git diff`. Its `--self-test` plants a
+reversion per declared guard call plus two comment-outs on every one of the five
+sites and confirms each is detected and each unmutated site passes. The CI job
+runs both the check and the self-test as separate steps
+(`.github/workflows/lint.yaml`), so either exiting 1 fails the job.
+
+**AC5 — nothing outside the declared file list.** `git diff --name-only
+main...HEAD` filtered for `tests/testthat/fixtures/`, `tests/testthat/_snaps/`,
+`R/sysdata.rda` and `*.rds` returns nothing, and the working tree is clean. The
+14 changed files are exactly the list the work log declares; the return added no
+file.
+
+**AC6 — verify slot and the toolchain gate.** `devtools::test()` `[ FAIL 0 |
+WARN 3 | SKIP 2 | PASS 7564 ]`; `air format --check` exit 0;
+`lintr::lint_package()` no lints; all six `data-raw` checkers and every self-test
+exit 0. Toolchain gate: `devtools::document()` produces no diff under
+`NAMESPACE`/`man/`; `pkgdown::check_pkgdown()` reports no problems;
+`cairn_validate` exit 0 across all 24 checks. No NEWS entry is owed — every
+changed R file is under `data-raw/`, which `.Rbuildignore` excludes from the
+build, so nothing user-visible changed.
+
+**`devtools::check()`** — 0 errors, 0 warnings, 1 NOTE locally. The NOTE is a
+`spelling.Rout` / `spelling.Rout.save` comparison over words in `icc.Rd`,
+`NEWS.md` and the vignettes — none of which this branch touches — and no
+`.Rout.save` is tracked in the repo, so it is a local check-directory artifact.
+The authoritative reading is CI on this exact commit
+(`12bc2640f4f659cecd4bd7f236fa4a730c636f0b`), where `R CMD check` passes on both
+ubuntu-latest and windows-latest.
+
+**CI on PR #129** — every check green on the head commit: `R CMD check` on both
+platforms, `test-coverage`, `check-references`, `checkpoint-guard`, `lint`,
+`format-check`, `pkgdown` and both codecov legs.
+
+**Correction to review 1's record.** Review 1's AC2 paragraph above states that
+the fork case was "exercised directly" by an unspecced `cell-02.rds`. That claim
+was false — the planted file aborts through the spec check, not the trace — and
+its own work-log line said it had been corrected in the Review section when the
+section had not been touched. It is superseded here rather than edited: the fork
+evidence AC2 rests on is the bare-read-inside-a-worker case recorded in this
+block, and the unspecced-cell case stands only as evidence that the spec check
+also reaches inside a worker.
