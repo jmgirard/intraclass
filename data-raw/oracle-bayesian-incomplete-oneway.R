@@ -222,7 +222,6 @@ ckpt <- Sys.getenv(
   "ORACLE_INCOMPLETE_ONEWAY_CKPT",
   "data-raw/.oracle-bayesian-incomplete-oneway-checkpoint.rds"
 )
-ckpt_trace_install()
 ckpt_trace_register(ckpt)
 # Distinct per-cell seed streams so the two cells are independent and each rep is
 # reproducible from base_seed + (cell offset) + r.

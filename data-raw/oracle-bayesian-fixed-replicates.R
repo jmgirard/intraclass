@@ -212,7 +212,6 @@ ckpt <- Sys.getenv(
   "ORACLE_FIXED_REPLICATES_CKPT",
   "data-raw/.oracle-bayesian-fixed-replicates-checkpoint.rds"
 )
-ckpt_trace_install()
 ckpt_trace_register(ckpt)
 
 # M120: the resume was keyed on the rep INDEX alone, so a re-run after any

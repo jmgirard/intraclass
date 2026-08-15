@@ -93,6 +93,25 @@ them.
       `data-raw` checker CI job; verify red by reverting one guard call.
 - [x] T7 Full local gate; confirm the AC5 whole-tree diff and record the
       declared file list in the work log.
+- [x] T8 Rebuild the trace so the three reads it missed cannot recur: install at
+      source time (closing the pre-install alias window), resolve a path's
+      identity through its deepest existing ancestor so registration before
+      creation still matches, and record a bypass to disk so a forked worker's
+      swallowed abort still reaches the end-of-run assertion. D3, D13, D4, D5.
+- [ ] T9 Replace the text-matching routing checker with one that parses the R
+      source: live calls only, argument-aware, and order-aware for the pre-write
+      assertion. Runs in the existing R CI job; retire the Python checker and
+      re-derive the checker-count record claims. D7, D1, D8.
+- [ ] T10 Derive each site's generating block from the call closure of declared
+      entry points rather than a hand-listed set; non-function determinants stay
+      declared. D11.
+- [ ] T11 Point `rerun-oracle.R`'s redirection at the checkpoint path overrides,
+      so a "fresh" re-run cannot reach a real checkpoint through the guard's own
+      I/O. D2.
+- [ ] T12 Drop `n_rep` from the per-rep entry specs, where an entry's payload
+      depends only on its seed. D10.
+- [ ] T13 Full local gate; re-confirm the AC5 whole-tree diff and re-declare the
+      file list.
 
 ## Work log
 
@@ -132,6 +151,8 @@ them.
 - 2026-08-14: re-review — all six criteria re-executed with fresh evidence and the consistency gate green (`devtools::test()` 7564 passing, `devtools::document()` no diff, `pkgdown::check_pkgdown()` clean, `cairn_validate` 24 checks, CI green on `12bc264` including `R CMD check` on both platforms); AC1, AC3, AC5, AC6 hold.
 - 2026-08-14: review return 2 (defect) — AC2 fails on two new mechanisms: a checkpoint registered before it exists is never matched by the trace, because `normalizePath(mustWork = FALSE)` leaves a non-existent path relative while a later read resolves absolute (D3, 90), and a bypass a forked worker swallows with `tryCatch` reaches no assertion, the parent's state being a different process (D13, 90). AC4 fails because the routing checker's token test misses three reversions of a site's guard call — an assertion moved after the fixture write, `ckpt_trace_register(NULL)`, and a live per-entry read replaced while a dead one remains (D7, 92), the last being the F15 class again. AC2 and AC4 unticked; status in-progress. D2, D10, D5 and D11 (87/85/82/82) are actioned alongside; 18 findings are logged below the action bar.
 - 2026-08-14: thrash trigger (b) fired on both AC2 and AC4 — each has now failed twice by a new mechanism of the same shape. The plan gate's recorded falsifiers have both fired: "a checkpoint read the trace cannot observe" (D3, D13, D4) and "a generator change the declared block does not cover" (D11); the remedy is to reconsider those recorded alternatives rather than patch the next mechanism.
+- 2026-08-14: return-2 gate reconsidered both recorded alternatives and chose, for the trace, a structural rebuild over adding the rejected source scan beside it (the scan's own weakness — it knows only remembered spellings — is what just failed the other criterion); for the routing check, parsing the R source over hardening the text match; and for the block, deriving the function set from the call closure of declared entry points over hand-listing it. Discovered tasks T8–T13 added (minor amendment).
+- 2026-08-14: T8 — the trace installs when the guard is sourced (so a caller cannot bind an untraced alias, and cannot omit the install; the five sites' install calls are removed and their comments are now true), resolves a path's identity through its deepest existing ancestor after absolute-izing (so a relative path registered before its first write still matches), and records a bypass to a run-scoped marker directory (so a forked worker's swallowed abort still reaches the parent's assertion). Each of the three is demonstrated and each demonstration was shown to red when its own fix is reverted — the relative-path case only after it was moved outside the already-registered tempdir, where it had been passing for the wrong reason.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions

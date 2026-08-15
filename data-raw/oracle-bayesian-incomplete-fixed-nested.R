@@ -245,7 +245,6 @@ ckpt <- Sys.getenv(
   "ORACLE_INCOMPLETE_FIXED_NESTED_CKPT",
   "data-raw/.oracle-bayesian-incomplete-fixed-nested-checkpoint.rds"
 )
-ckpt_trace_install()
 ckpt_trace_register(ckpt)
 
 # M120: the resume was keyed on the cell LABEL alone, so editing a cell's nc /

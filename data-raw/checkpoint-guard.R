@@ -306,12 +306,44 @@ ckpt_store_get <- function(store, key, spec) {
 
 ckpt_trace_state <- new.env(parent = emptyenv())
 ckpt_trace_state$registered <- character(0)
-ckpt_trace_state$bypassed <- character(0)
 ckpt_trace_state$installed <- FALSE
 ckpt_trace_state$in_guard <- FALSE
+# Bypasses are recorded on DISK, not in this environment. A forked worker gets a
+# copy of the environment that dies with it, so a worker that swallowed the
+# abort left the parent's assertion nothing to see -- vacuous on exactly the
+# harness (M111's mclapply sweep) this guard was written for. A directory
+# crosses the fork boundary in the one direction that matters: the child writes,
+# the parent lists.
+ckpt_trace_state$marker_dir <- ""
 
+# Resolve a path's identity in a way that does not depend on the file existing
+# YET. normalizePath() returns an existing path absolute and a non-existent one
+# unchanged, so a checkpoint registered before its first write compared unequal
+# to the very same path read back later -- and every oracle site registers
+# before the store exists. Resolving the deepest EXISTING ancestor and
+# re-appending the remainder gives one answer either way.
 ckpt_norm <- function(path) {
-  normalizePath(path, winslash = "/", mustWork = FALSE)
+  if (!is.character(path) || length(path) != 1L || !nzchar(path)) {
+    return(NA_character_)
+  }
+  if (file.exists(path)) {
+    return(normalizePath(path, winslash = "/", mustWork = FALSE))
+  }
+  # Not there yet. Absolute-ize against the working directory FIRST -- the
+  # oracle sites register relative paths (`data-raw/.oracle-*-checkpoint.rds`),
+  # and a relative answer could never match the absolute one the same path gives
+  # once it exists -- then resolve the deepest existing ancestor, which is also
+  # what turns /var into /private/var on macOS.
+  abs <- if (grepl("^(/|~|[A-Za-z]:[/\\\\])", path)) {
+    path
+  } else {
+    file.path(getwd(), path)
+  }
+  parent <- dirname(abs)
+  if (identical(parent, abs)) {
+    return(abs)
+  }
+  file.path(ckpt_norm(parent), basename(abs))
 }
 
 # Register a checkpoint file or directory. Reads under it are the trace's
@@ -348,7 +380,7 @@ ckpt_trace_note <- function(path) {
   }
   p <- ckpt_norm(path)
   if (length(ckpt_under_registered(p))) {
-    ckpt_trace_state$bypassed <- union(ckpt_trace_state$bypassed, p)
+    ckpt_mark_bypass(p)
     stop(
       "stale-checkpoint guard: ",
       basename(p),
@@ -360,8 +392,39 @@ ckpt_trace_note <- function(path) {
   invisible(NULL)
 }
 
+# Record the bypass where a forked worker's record survives it. One file per
+# bypassed path, named by hash so concurrent workers never collide, holding the
+# path itself.
+ckpt_mark_bypass <- function(p) {
+  dir <- ckpt_trace_state$marker_dir
+  if (!nzchar(dir)) {
+    return(invisible(NULL))
+  }
+  if (!dir.exists(dir)) {
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  f <- tempfile("bypass-", tmpdir = dir, fileext = ".txt")
+  writeLines(p, f)
+  invisible(f)
+}
+
+ckpt_trace_bypassed <- function() {
+  dir <- ckpt_trace_state$marker_dir
+  if (!nzchar(dir) || !dir.exists(dir)) {
+    return(character(0))
+  }
+  files <- list.files(dir, pattern = "^bypass-", full.names = TRUE)
+  if (!length(files)) {
+    return(character(0))
+  }
+  unique(unlist(lapply(files, function(f) readLines(f, warn = FALSE))))
+}
+
 ckpt_trace_reset <- function() {
-  ckpt_trace_state$bypassed <- character(0)
+  dir <- ckpt_trace_state$marker_dir
+  if (nzchar(dir) && dir.exists(dir)) {
+    unlink(list.files(dir, pattern = "^bypass-", full.names = TRUE))
+  }
   invisible(NULL)
 }
 
@@ -369,6 +432,12 @@ ckpt_trace_install <- function() {
   if (isTRUE(ckpt_trace_state$installed)) {
     return(invisible(FALSE))
   }
+  ckpt_trace_state$marker_dir <- tempfile("ckpt-bypass-")
+  dir.create(
+    ckpt_trace_state$marker_dir,
+    recursive = TRUE,
+    showWarnings = FALSE
+  )
   suppressMessages(trace(
     "readRDS",
     # NOT wrapped in try(): the note aborts on an unguarded read of a
@@ -406,9 +475,11 @@ ckpt_under_registered <- function(paths) {
 
 # Call before any output write: a run that deserialized a registered checkpoint
 # without going through the guard has already read rows of unknown provenance,
-# and must not go on to write a fixture from them.
+# and must not go on to write a fixture from them. Reads the on-disk markers, so
+# a bypass a FORKED worker swallowed is reported here even though that worker's
+# memory is long gone.
 ckpt_trace_assert <- function() {
-  suspect <- ckpt_trace_state$bypassed
+  suspect <- ckpt_trace_bypassed()
   if (length(suspect)) {
     stop(
       "stale-checkpoint guard: ",
@@ -420,3 +491,14 @@ ckpt_trace_assert <- function() {
   }
   invisible(TRUE)
 }
+
+# ---- install on load ---------------------------------------------------------
+# Sourcing this file installs the trace. Deferring installation to a call each
+# harness makes for itself left two holes that both bit: any alias bound to
+# readRDS BEFORE the call was untraced for the rest of the run, and a harness
+# that simply never made the call got no trace at all while every routing check
+# still passed. Neither is a hole a caller can be relied on to avoid, which is
+# the whole premise of this guard -- so the guard closes them itself, and the
+# five sites' comments saying "sourcing it installs the trace" are true.
+# ckpt_trace_install() remains callable and is a no-op once installed.
+ckpt_trace_install()

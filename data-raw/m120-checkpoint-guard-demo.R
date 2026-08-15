@@ -10,6 +10,14 @@
 
 source("data-raw/checkpoint-guard.R")
 
+# Bound HERE, immediately after the guard is sourced and long before any
+# ckpt_trace_install() call this script makes, because that is the window the
+# alias case is about: trace() rebinds a name, so an alias captured while
+# readRDS is untraced stays untraced forever. Sourcing the guard installs the
+# trace, which is why this alias is caught; every site sources the guard as its
+# first act, so no site can bind an untraced alias either.
+aliased_read <- readRDS
+
 pass <- function(label) cat("PASS  ", label, "\n", sep = "")
 
 expect_error <- function(expr, label, must_match = NULL) {
@@ -278,6 +286,43 @@ expect_error(
   must_match = "bypassed the checkpoint guard"
 )
 
+# A checkpoint registered BEFORE it exists is still watched. Every oracle site
+# registers its store path at startup, on the first run of a fresh clone that
+# file does not exist yet, and a path identity that only resolves for existing
+# files compared unequal to the very same path read back later -- so the trace
+# was inert for exactly the first run.
+# The path must be RELATIVE for this to be the real case: the oracle sites
+# register `data-raw/.oracle-*-checkpoint.rds`, and a relative path that does not
+# exist yet is the one a naive resolver leaves relative while the same path,
+# once created, resolves absolute — so the two never compare equal and the trace
+# is inert for precisely the first run.
+# Deliberately rooted OUTSIDE `tmp`: `tmp` is already registered as a directory,
+# and a read under it would abort on that registration whatever the relative
+# path resolved to — the case would pass without testing anything.
+cat("\n== AC2: a relative checkpoint path registered before it exists ==\n")
+early_root <- tempfile("m120-early-")
+dir.create(early_root)
+owd <- setwd(early_root)
+ckpt_trace_register("not-yet/later.rds")
+dir.create("not-yet", showWarnings = FALSE)
+saveRDS(1, "not-yet/later.rds") # the harness creates it mid-run
+ckpt_trace_reset()
+expect_error(
+  readRDS("not-yet/later.rds"),
+  "a relative path registered before the file existed is still watched",
+  must_match = "bypassed the checkpoint guard"
+)
+setwd(owd)
+
+# The alias bound at the top of this script, before any install call it makes.
+cat("\n== AC2: an alias to readRDS, bound by the caller ==\n")
+ckpt_trace_reset()
+expect_error(
+  aliased_read(p),
+  "an alias bound by the caller is caught -- the trace is installed at source time",
+  must_match = "bypassed the checkpoint guard"
+)
+
 ckpt_trace_reset()
 outside <- file.path(tempdir(), "unregistered.rds")
 saveRDS(1, outside)
@@ -355,6 +400,30 @@ stopifnot(!nzchar(fork_msgs[1])) # the worker that read nothing is untouched
 pass(
   "a bare readRDS inside a forked worker aborts in that worker, on a checkpoint the spec check would have accepted"
 )
+
+# And the harder case: the worker SWALLOWS its own abort, so the parent sees a
+# perfectly ordinary return value. The worker's memory dies with it, so the
+# bypass is recorded to disk and the parent's assertion reads it there.
+cat("\n== AC2: a forked worker that swallows its own bypass ==\n")
+ckpt_trace_reset()
+swallowed <- parallel::mclapply(
+  1:2,
+  function(i) {
+    if (i == 2L) {
+      tryCatch(readRDS(valid_cell), error = function(e) NULL)
+    }
+    "looks fine"
+  },
+  mc.cores = 2L
+)
+stopifnot(identical(unlist(swallowed), c("looks fine", "looks fine")))
+pass("the worker swallowed its abort and returned an ordinary value")
+expect_error(
+  ckpt_trace_assert(),
+  "the parent's assertion still reports a bypass its forked worker swallowed",
+  must_match = "bypassed the checkpoint guard"
+)
+ckpt_trace_reset()
 
 # And the spec check reaches inside a worker too: a stale checkpoint must be
 # refused there and surface to the parent as that cell's failure.

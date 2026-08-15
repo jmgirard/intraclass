@@ -372,7 +372,6 @@ assert_sweep_results <- function(results, cells) {
 
 if (sys.nframe() == 0L) {
   dir.create(ckpt_dir, showWarnings = FALSE)
-  ckpt_trace_install()
   ckpt_trace_register(ckpt_dir)
   cells <- build_cells()
   results <- parallel::mclapply(cells, run_cell, mc.cores = n_workers)

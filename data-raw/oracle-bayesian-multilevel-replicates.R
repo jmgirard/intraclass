@@ -224,7 +224,6 @@ ckpt <- Sys.getenv(
   "ORACLE_MULTILEVEL_REPLICATES_CKPT",
   "data-raw/.oracle-bayesian-multilevel-replicates-checkpoint.rds"
 )
-ckpt_trace_install()
 ckpt_trace_register(ckpt)
 
 # M120: the resume was keyed on the design/rep LABEL alone, so a re-run after
