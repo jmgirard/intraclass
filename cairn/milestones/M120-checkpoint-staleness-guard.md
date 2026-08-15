@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** in-progress
+- **Status:** review
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
