@@ -1,6 +1,6 @@
 # M120: Refuse a stale resume cache in the data-raw harnesses
 
-- **Status:** review
+- **Status:** in-progress
 - **Priority:** normal
 - **Depends on:** —
 - **Driving RR:** —
@@ -34,14 +34,14 @@ them.
 
 ## Acceptance criteria
 
-- [x] AC1 The guard writes, beside each checkpoint payload, a spec carrying
+- [ ] AC1 The guard writes, beside each checkpoint payload, a spec carrying
       the site's declared parameter set in a declared order — for `m111`
       exactly `rho`, `k`, `n`, `dist`, `n_rep`, and the cell's base seed — plus
       a hash over that site's declared generating block, and a read whose
       recorded spec differs from the current one signals an error naming the
       earliest differing entry in that declared order. A spec recording no
       entries is a failure of this criterion, not a satisfaction of it.
-- [x] AC2 During any run in which the guard's trace is installed, every
+- [ ] AC2 During any run in which the guard's trace is installed, every
       deserialization of a checkpoint path either went through the guard or
       aborts the run before the harness writes any output. Evidence is the
       trace's own report over the runs AC3 and AC4 perform — this criterion
@@ -54,7 +54,7 @@ them.
       not; a cache written by a different site at the same path; and a spec
       matching on every parameter but differing in the generating-block hash.
       Each aborts, and a matching cache resumes normally in the same script.
-- [x] AC4 The five sites in the Scope table source the guard, and the CI job
+- [ ] AC4 The five sites in the Scope table source the guard, and the CI job
       that already runs the repo's standalone `data-raw` checkers fails when a
       listed site's cache read bypasses it. Verified by reverting one site's
       guard call and observing that job red.
@@ -162,6 +162,7 @@ them.
 - 2026-08-14: `cairn_validate` advisory — M120 now carries 13 tasks, over the 10-task split tripwire. Not split: the added tasks are one deliverable's repair under a review return, and splitting mid-return would strand the criteria that fail on the branch that no longer owns them.
 - 2026-08-14: T13 — full local gate green after the return-2 redesign: `devtools::test()` `[ FAIL 0 | WARN 3 | SKIP 2 | PASS 7564 ]`, `air format --check` clean, `lintr::lint_package()` no lints, `cairn_validate` all checks passed (one advisory, the 13-task tripwire, answered above), the guard demonstration and the routing check and its self-test all exit 0, the five python checkers exit 0, and `m112-harness-demo.R` — which drives the changed `run_cell` read/write path and was missing from the earlier gate list — passes.
 - 2026-08-14: AC5 declared file list, the whole of what this branch changes, unchanged in shape but with two entries turned over: `.github/workflows/lint.yaml`, `cairn/ROADMAP.md`, `cairn/milestones/M120-checkpoint-staleness-guard.md`, `data-raw/README.md`, `data-raw/check-checkpoint-sites.R` (replacing the retired `.py`), `data-raw/checkpoint-guard.R`, `data-raw/checkpoint-sites.tsv`, `data-raw/m111-fallback-sweep.R`, `data-raw/m120-checkpoint-guard-demo.R`, the four `data-raw/oracle-bayesian-*.R` sites, `data-raw/record-claims.tsv`, and `data-raw/rerun-oracle.R` (newly declared, for T11). Nothing under `tests/testthat/fixtures/`, `tests/testthat/_snaps/`, `R/sysdata.rda`, or any `.rds` is touched, and the working tree is clean.
+- 2026-08-14: review return 3 (defect) — AC4 fails because a guard call parked in a function nobody calls, or under any non-literal dead condition, satisfies the parsing checker (E1 95, E15 85); AC2 fails because re-sourcing the guard wipes every registration and orphans recorded bypasses (E3 88) and a connection-argument read is not traced at all (E2 85); AC1 fails because the derived block misses a determinant reached by variable capture rather than by a call, so editing `est_occ()` leaves the hash identical on two oracle sites and `kc_of` on a third (E4 90). AC1, AC2 and AC4 unticked; status in-progress. 15 findings logged below the action bar. Thrash: third return reached, and trigger (b) has fired on AC2 and AC4 in all three reviews with both recorded plan alternatives now spent.
 - 2026-08-14: audit finding 10 — the records-apparatus door needs a trigger in what the package computes; this milestone's deliverable guards numeric harness output, which that door's own carve-out leaves untouched ("guards that pin a NUMERIC result", "repairs to existing checkers surfaced as ordinary work"), and four of the five sites write committed oracle fixtures, so it is oracle discipline under #1 — no stale cache has yet produced a wrong shipped value, and the plan does not claim one.
 
 ## Decisions
@@ -616,3 +617,108 @@ changed `run_cell` read/write path — passes. Toolchain gate:
 `devtools::document()` produces no diff, `pkgdown::check_pkgdown()` reports no
 problems, `cairn_validate` passes every check with one advisory (the 13-task
 split tripwire, answered in the work log).
+
+**CI on PR #129** — every check green on the code commit `7a6f063`:
+`R CMD check` on ubuntu-latest and windows-latest, `test-coverage`,
+`check-references`, `checkpoint-guard`, `lint`, `format-check`, `pkgdown` and
+both codecov legs.
+
+### Independent review — three lenses, then a scorer (third pass)
+
+The blame-history lens (Sonnet) and the prior-review lens (Sonnet) each reported
+no defect. Both confirmed the four oracle rewrites still preserve iteration
+order, seed derivation, base-fit compile-once placement, output positions and
+fixture contents; that `rerun-oracle.R`'s pre-existing shadowing is untouched and
+the path redirection is additive; that dropping `n_rep` is sound on the three
+per-rep sites and correctly retained on the per-cell one; and that all eight
+review-1 findings and all three review-2 criterion failures are fixed at their
+stated mechanism rather than moved. The diff-bug lens (Opus) reported 25
+candidates, every one verified by running code, scored by a fresh Sonnet scorer
+holding the diff, this file and the plan.
+
+**Actioned (score >= 80), five findings — all five fail a criterion.**
+
+- **E1 (95, AC4 fails).** The routing checker's "live call" test is defeated by
+  parking the call in a function nobody calls: `calls_to()` finds a call anywhere
+  in the parsed source and `drop_dead()` removes only `if (FALSE)` branches, but
+  a function *definition* is live code. Three mutations on real sites each
+  returned zero failures — a bare `readRDS(ckpt)` in `m111` with `ckpt_read`
+  parked in an unused helper; `oracle-bayesian-incomplete-oneway.R`'s per-entry
+  `ckpt_store_get()` replaced by direct payload access with the call parked; and
+  `ckpt_trace_assert()` replaced by `invisible(TRUE)` with the call parked
+  earlier in the file, which also passes the ordering check.
+- **E4 (90, AC1 fails).** The derived block misses any determinant reached by
+  variable capture rather than by a call. `ckpt_called_names()` collects only
+  names in call position, so `single_est <- est_occ("single")` at top level,
+  referenced inside `one_rep()`, is invisible: `est_occ` is outside the closure
+  on two oracle sites and `kc_of` on a third. Editing `est_occ()` from
+  `type = "agreement"` to `"consistency"` leaves the block hash byte-identical,
+  every parameter matching, and the committed oracle fixture written from rows
+  computed under the old estimand. This is review 1's actioned F4 silently
+  reintroduced by T10.
+- **E3 (88, AC2 fails).** Sourcing the guard a second time re-executes
+  `ckpt_trace_state <- new.env(...)` and re-installs, wiping every registration
+  and orphaning every recorded bypass. The re-source is not hypothetical: the
+  demo sources the guard, then sources `m111-fallback-sweep.R`, which sources the
+  guard again — the demo survives only because it re-registers immediately
+  afterwards, and `rerun-oracle.R` runs several guarded scripts in one process.
+- **E2 (85, AC2 fails).** A connection-argument read is not traced at all:
+  `ckpt_trace_note()` returns early unless the argument is a length-one
+  character, so `readRDS(gzfile(p))` on a registered checkpoint returns its
+  payload silently and the assertion stays clean. The guard's own header claims
+  a read is caught "whatever spelling it was written in"; that is false.
+- **E15 (85, AC4 fails).** `drop_dead()` recognizes only literal `TRUE`/`FALSE`,
+  so a guard call parked under `if (0)`, `if (FALSE || FALSE)` or
+  `if (getOption("x", FALSE))` counts as live — a cheaper variant of E1,
+  verified separately.
+
+**Logged below the action bar (score < 80), 15 findings** — surfaced, not
+dropped: E5 the checker never checks a declared parameter is bound to the site's
+design object, so `rho = 0.05` passes (78); E10 AC4's text says "the CI job that
+already runs the repo's standalone `data-raw` checkers" but T9 moved the routing
+check into the new `checkpoint-guard` job (68); E11 a registration normalizing to
+`NA` makes the next unrelated `readRDS` abort (65); E16 AC3's partial-staleness
+form is still shown only on a stand-in site (60); BH2 `rerun-oracle.R` re-sources
+the guard once per script in one process (58); E7 m111 registers only under
+`sys.nframe() == 0L`, so a sourced-harness path is unwatched (55); E9 the demo
+still cites the retired `.py` checker (52); E17 the CI job installs the full
+Suggests closure (48); E12 `in_guard` exempts a lazily-forced argument and does
+not restore (45); BH1 `M111_CKPT_DIR` in `rerun-oracle.R`'s redirection is inert
+(45); E6 `line_of()` misattributes lines when a dead top-level expression is
+filtered, a wrong diagnostic rather than a false pass (42); E8 the marker-file
+comment claims hash naming and one file per path, neither true (42); E13
+`ckpt_store_get` conflates absent with NULL payload (38); E14 `ckpt_store_has()`
+is dead code (35); E18 the trace stats the filesystem on every `readRDS` (32).
+
+### Return (third defect return)
+
+AC1, AC2 and AC4 fail and are unticked; AC3, AC5 and AC6 keep the evidence
+recorded above. E1 and E15 fail AC4, E3 and E2 fail AC2, E4 fails AC1.
+
+The scorer was asked, per finding, whether the failure lands inside or outside
+the domain of the procedure the criterion names as its own evidence. E1 is
+inside AC4's — AC4's procedure is reverting a site's guard call and observing the
+job red, and E1 reverts a site's guard call. E3 is inside AC2's, the re-source it
+exploits happening within the AC3 run itself and masked only by a local
+workaround. So this is a defect return, not a criterion amendment. E2 and E4
+fall outside their criteria's named procedures and are actioned as defects
+without changing that disposition.
+
+**Correction to a work-log claim.** The return-1 work log states that the four
+oracle sites "now name their base formula, prior and sampler arguments (and their
+seed offsets, `est_occ` and `kc_of`) and declare them in the block." That was
+true when written and was falsified by T10, which replaced the hand-listed block
+with a derived closure and dropped `est_occ` and `kc_of` without saying so; E4 is
+the consequence. The work log is history and is not edited — the claim is
+superseded here.
+
+**Thrash rule (return 3).** The third-return threshold is reached, and once
+reached it holds: no further retry is queued under the current plan. Trigger (b)
+has also fired again — AC2 has now failed in all three reviews (F1/F25, then
+D3/D13, now E3/E2) and AC4 in all three (F14/F15, then D7, now E1/E15), each time
+by a new mechanism of the same shape: a read the watcher cannot see, and a
+routing check whose test admits a form nobody thought of. Both alternatives the
+plan gate recorded against have now been tried — the source scan was rejected at
+plan time, and the parse-the-source checker that replaced the text match is what
+E1 and E15 defeat. No recorded alternative remains to fall back on, which is the
+condition under which the rule offers escalation.
