@@ -11,11 +11,22 @@ times [claim:lint-checker-invocations]: each wired checker twice, once for the
 check and once for its vacuity self-test. `check-oracle-registry.py` is run
 locally only.
 
-`check-checkpoint-sites.R` is the sixth checker and the exception: it parses the
-R sources it checks, so it is R rather than `python3` and runs in the
-`checkpoint-guard` job beside the guard demonstration rather than in the R-free
-job. It replaced a `python3` predecessor that matched text, which three separate
-reversions of a site's guard call walked straight past.
+Two more checkers here are R rather than `python3`, so neither is matched by
+that `ls` and neither runs in the R-free job. `check-checkpoint-sites.R` parses
+the R sources it checks and runs in the `checkpoint-guard` job beside the guard
+demonstration; it replaced a `python3` predecessor that matched text, which
+three separate reversions of a site's guard call walked straight past.
+`check-abort-remedy-verdicts.R` is the second, and is run locally.
+
+Whether a checker probes itself is a committed claim rather than an impression
+[claim:checker-self-test-status]. Five of the six carry a `--self-test` that
+plants mutations and requires each to red the check, printing one PASS line per
+planted mutation so its coverage is counted rather than asserted.
+`check-abort-remedy-verdicts.R` is the one that does not: it parses no arguments
+at all, so it *accepts* `--self-test` and exits 0 having planted nothing, which
+reads exactly like a self-test that passed. It is also the checker with the
+least to plant into — what it emits is a verdict ledger over committed sweep
+results rather than a check with a pass/fail a mutation could red.
 
 `check-record-claims.py` (M102) re-derives the figures registered in
 `record-claims.tsv`. A record states a load-bearing figure by citing the row

@@ -162,6 +162,8 @@ def self_test(root):
         problems.append("known-TRUE directive read as falsified: %r" % true_cmd)
     if bad:
         problems.append("known-FALSE directive read as holding: %r" % false_cmd)
+    else:
+        print("PASS self-test: known-false directive %r -> detected" % false_cmd)
     if problems:
         print("SELF-TEST FAILED:")
         for p in problems:

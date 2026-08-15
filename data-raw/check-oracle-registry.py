@@ -159,6 +159,11 @@ def self_test(root):
         if normalize(orphan) in reg or normalize(orphan) in ALIASES:
             problems.append("orphan token unexpectedly covered: %r → %r"
                             % (orphan, normalize(orphan)))
+        else:
+            print(
+                "PASS self-test: planted orphan oracle %r (normalizes to %r, read "
+                "as uncovered) -> detected" % (orphan, normalize(orphan))
+            )
     if normalize(real) not in reg:
         problems.append("known entry read as a gap: %r" % real)
     if problems:

@@ -17,9 +17,22 @@
 # and nothing here writes to a path the caller did not name.
 #
 # The trace at the bottom is the other half. Comparing specs only protects reads
-# that come THROUGH this file; the trace watches deserialization itself, so a
-# bare readRDS() of a registered checkpoint fails the run whatever spelling it
-# was written in.
+# that come THROUGH this file; the trace watches readRDS() itself, so a bare
+# readRDS() of a registered checkpoint fails the run however the CALL was
+# spelled -- bare, base::-qualified, or through an alias the caller bound.
+#
+# What the trace does NOT reach, stated here so nothing downstream assumes
+# otherwise:
+#   * a readRDS() handed a CONNECTION rather than a path. Only a path can be
+#     compared against a registered location, so `readRDS(gzfile(p))` returns
+#     its payload untouched.
+#   * every deserialization function other than readRDS -- load(),
+#     unserialize(), readr::read_rds(). Within the declared sites those are
+#     covered statically instead, by data-raw/check-checkpoint-sites.R.
+#   * a process that did not inherit the trace by forking from the one that
+#     sourced this file.
+# The first two are why the static check exists beside the trace, and neither
+# surface claims the other's reach.
 
 # ---- spec construction -------------------------------------------------------
 
@@ -456,17 +469,29 @@ ckpt_store_get <- function(store, key, spec) {
 # invisible to it. Registered locations bound what it judges; a read outside
 # them is somebody else's business and is left alone.
 
-ckpt_trace_state <- new.env(parent = emptyenv())
-ckpt_trace_state$registered <- character(0)
-ckpt_trace_state$installed <- FALSE
-ckpt_trace_state$in_guard <- FALSE
-# Bypasses are recorded on DISK, not in this environment. A forked worker gets a
-# copy of the environment that dies with it, so a worker that swallowed the
-# abort left the parent's assertion nothing to see -- vacuous on exactly the
-# harness (M111's mclapply sweep) this guard was written for. A directory
-# crosses the fork boundary in the one direction that matters: the child writes,
-# the parent lists.
-ckpt_trace_state$marker_dir <- ""
+# CREATED ONCE PER PROCESS, not once per source(). Sourcing this file a second
+# time is not hypothetical -- the demonstration sources the guard and then
+# sources m111-fallback-sweep.R, which sources the guard again, and
+# rerun-oracle.R runs several guarded scripts in one process. A fresh
+# environment there would silently discard every registration made so far,
+# leaving the trace watching nothing, and would orphan every bypass already
+# recorded.
+if (
+  !exists("ckpt_trace_state", inherits = FALSE) ||
+    !is.environment(ckpt_trace_state)
+) {
+  ckpt_trace_state <- new.env(parent = emptyenv())
+  ckpt_trace_state$registered <- character(0)
+  ckpt_trace_state$installed <- FALSE
+  ckpt_trace_state$in_guard <- FALSE
+  # Bypasses are recorded on DISK, not in this environment. A forked worker gets
+  # a copy of the environment that dies with it, so a worker that swallowed the
+  # abort left the parent's assertion nothing to see -- vacuous on exactly the
+  # harness (M111's mclapply sweep) this guard was written for. A directory
+  # crosses the fork boundary in the one direction that matters: the child
+  # writes, the parent lists.
+  ckpt_trace_state$marker_dir <- ""
+}
 
 # Resolve a path's identity in a way that does not depend on the file existing
 # YET. normalizePath() returns an existing path absolute and a non-existent one
@@ -523,7 +548,8 @@ ckpt_trace_register <- function(path) {
 # happens and is never cancelled by anything that happened before or after it.
 ckpt_trace_note <- function(path) {
   # readRDS() also accepts a connection; only a path can be compared against a
-  # registered location, so anything else is somebody else's business.
+  # registered location, so anything else is outside this trace's reach -- see
+  # the header, which states that limit rather than papering over it.
   if (!is.character(path) || length(path) != 1L) {
     return(invisible(NULL))
   }

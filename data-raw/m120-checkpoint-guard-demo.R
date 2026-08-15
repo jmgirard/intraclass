@@ -548,6 +548,34 @@ expect_error(
   must_match = "bypassed the checkpoint guard"
 )
 
+# Sourcing the guard a SECOND time in one process must leave the trace's
+# registrations and its recorded bypasses where they are. This is not a
+# hypothetical: this script sources the guard, then sources m111-fallback-sweep.R
+# below, which sources the guard again; and rerun-oracle.R runs several guarded
+# scripts in one process. A re-source that rebuilt the state would leave the
+# trace watching nothing at all, and the run that follows would be unguarded
+# while every routing check still passed.
+cat("\n== AC2: the guard sourced a second time in one process ==\n")
+ckpt_trace_reset()
+invisible(tryCatch(readRDS(p), error = function(e) NULL)) # a swallowed bypass
+registered_before <- ckpt_trace_state$registered
+bypassed_before <- ckpt_trace_bypassed()
+stopifnot(length(registered_before) > 0L, length(bypassed_before) > 0L)
+source("data-raw/checkpoint-guard.R") # the second source
+stopifnot(identical(ckpt_trace_state$registered, registered_before))
+stopifnot(identical(ckpt_trace_bypassed(), bypassed_before))
+pass("re-sourcing the guard leaves registrations and recorded bypasses intact")
+expect_error(
+  readRDS(p),
+  "a bare read after the guard was sourced a second time still aborts",
+  must_match = "bypassed the checkpoint guard"
+)
+expect_error(
+  ckpt_trace_assert(),
+  "the bypass recorded before the re-source is still reported after it",
+  must_match = "bypassed the checkpoint guard"
+)
+
 ckpt_trace_reset()
 outside <- file.path(tempdir(), "unregistered.rds")
 saveRDS(1, outside)

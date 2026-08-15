@@ -15,6 +15,50 @@
 #	to whatever the sites happen not to use.
 #@deserializers	readRDS,load,unserialize,readr::read_rds
 #
+#	A guard call counts only where something REACHES it. Reachability starts at
+#	live top-level code and follows calls; a function handed BY NAME to one of
+#	these appliers is reached too, since m111's ckpt_read() is reached only
+#	through `mclapply(cells, run_cell)` and a direct-calls-only rule would go
+#	vacuous on exactly that site. The list WEAKENS nothing on its own — it can
+#	only make more code reachable — but it is declared rather than assumed so a
+#	handoff form outside it is a visible gap rather than a silent pass.
+#@appliers	lapply,sapply,vapply,mapply,Map,mclapply,parLapply,do.call,Reduce,Filter
+#
+#	Liveness. A branch counts only when its condition is literally TRUE or is one
+#	of these declared idioms, each with its reason; `if (0)`, `if (FALSE ||
+#	FALSE)` and `if (getOption("x", FALSE))` are none of the three and park a
+#	call rather than make it. This list WEAKENS the check, so each entry states
+#	why the branch is a real execution path and not a disabling switch:
+#	  sys.nframe() == 0L — the run-as-a-script entry-point block every harness
+#	    here uses; by parse it is indistinguishable from a disabling condition,
+#	    which is why it must be declared rather than inferred.
+#	  file.exists(ckpt) — the resume path itself: a harness reads its cache only
+#	    when the cache is there, so this is the branch the guard exists to check.
+#@idioms	sys.nframe() == 0L,file.exists(ckpt)
+#
+#	The mutation forms the self-test plants, on every declared site and once per
+#	name in that site's api column. The checker refuses to self-test unless the
+#	list contains the forms AC4 requires, so the probe cannot shrink to the forms
+#	that happen to pass. Each form removes the site's live guard call and then
+#	tries to make the checker believe the call is still there:
+#	  deleted                — removed outright, nothing put back
+#	  dead-copy              — a copy kept in an `if (FALSE)` branch
+#	  parked-unreached       — a copy in a function nothing calls
+#	  parked-false-cond      — a copy under `if (0)`, `if (FALSE || FALSE)` and
+#	                           `if (getOption(...))`, none of them literally false
+#	  parked-idiom-unreached — a copy under a DECLARED idiom, inside a function
+#	                           nothing calls: the idiom must not rescue a call
+#	                           nothing reaches, or the idiom list would be a
+#	                           back door into the liveness rule
+#	  assert-after-write     — the pre-write assertion moved to just after the
+#	                           site's first output write, inside the same block
+#	  register-non-path      — the registration handed a literal NULL
+#	  source-commented       — the source() of the guard commented out
+#	  deserialization-planted — one live call of each declared deserialization name
+#	  declaration-withdrawn  — a determinant withdrawn from the DECLARATION, the
+#	                           script left untouched
+#@mutations	deleted,dead-copy,parked-unreached,parked-false-cond,parked-idiom-unreached,assert-after-write,register-non-path,source-commented,deserialization-planted,declaration-withdrawn
+#
 #	script       path relative to the repo root
 #	params       the design parameters compared on resume, in the declared order;
 #	             the mismatch message names the EARLIEST differing one in this order

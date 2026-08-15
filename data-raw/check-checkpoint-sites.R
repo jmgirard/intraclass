@@ -81,24 +81,30 @@ drop_dead <- function(e) {
   as.call(lapply(as.list(e), function(x) if (is.null(x)) x else drop_dead(x)))
 }
 
-# Every call to `name` in the live source, as call objects.
+# bare f(), pkg::f(), and pkg:::f() all name the same call head.
+call_head_name <- function(head) {
+  if (is.name(head)) {
+    return(as.character(head))
+  }
+  if (
+    is.call(head) &&
+      is.name(head[[1]]) &&
+      as.character(head[[1]]) %in% c("::", ":::")
+  ) {
+    return(as.character(head[[3]]))
+  }
+  ""
+}
+
+# Every call to `name` in the live source, as call objects. This asks only
+# whether the text is there; whether anything REACHES it is reach_scan()'s
+# question, and the two are kept apart deliberately -- a call nothing reaches is
+# how three separate reversions walked past this checker's predecessors.
 calls_to <- function(exprs, name) {
   found <- list()
   walk <- function(e) {
     if (is.call(e)) {
-      head <- e[[1]]
-      # bare f(), pkg::f(), and pkg:::f() all count as a call to f
-      nm <- if (is.name(head)) {
-        as.character(head)
-      } else if (
-        is.call(head) &&
-          is.name(head[[1]]) &&
-          as.character(head[[1]]) %in% c("::", ":::")
-      ) {
-        as.character(head[[3]])
-      } else {
-        ""
-      }
+      nm <- call_head_name(e[[1]])
       if (identical(nm, name)) {
         found[[length(found) + 1L]] <<- e
       }
@@ -137,9 +143,183 @@ parse_live <- function(path) {
   exprs <- parse(path, keep.source = TRUE)
   refs <- attr(exprs, "srcref")
   live <- lapply(exprs, drop_dead)
-  live <- Filter(Negate(is.null), live)
-  attr(live, "srcref") <- refs
+  keep <- !vapply(live, is.null, logical(1))
+  live <- live[keep]
+  # Filtered TOGETHER with the expressions: dropping a dead top-level expression
+  # while keeping every srcref shifts each later line number by one, which turns
+  # the ordering check's diagnostic into a lie about a file it is right about.
+  attr(live, "srcref") <- if (is.null(refs)) NULL else refs[keep]
   live
+}
+
+# ---- reachability and liveness ----------------------------------------------
+# A guard call is made only if something reaches it. Parking the call in a
+# function nobody calls, or under a condition that never holds, leaves the text
+# in place while removing the call -- and a checker that counts occurrences
+# cannot tell the two apart. So the walk starts at live top-level code and
+# follows calls; a function handed BY NAME to a declared applier is followed
+# too, because m111's ckpt_read() is reached only through
+# `mclapply(cells, run_cell)`.
+#
+# Liveness is the second half. A branch counts only when its condition is
+# literally TRUE or is one of the declared idioms in checkpoint-sites.tsv, each
+# carrying its reason there. `if (0)`, `if (FALSE || FALSE)` and
+# `if (getOption("x", FALSE))` are none of the three, and each of them parked a
+# guard call past the previous version of this checker.
+
+cond_is_live <- function(cond, idioms) {
+  if (identical(cond, TRUE)) {
+    return(TRUE)
+  }
+  paste(deparse(cond), collapse = " ") %in% idioms
+}
+
+# Every call the walk REACHES, as list(name, index, call) -- index being the
+# top-level expression it sits under, which is what gives it a line number.
+reach_scan <- function(exprs, idioms, appliers) {
+  bindings <- static_bindings(exprs)
+  fn_names <- names(bindings)[vapply(
+    names(bindings),
+    function(n) static_resolve(n, bindings)$is_fn,
+    logical(1)
+  )]
+  def_index <- list()
+  is_def <- logical(length(exprs))
+  for (i in seq_along(exprs)) {
+    e <- exprs[[i]]
+    if (
+      is.call(e) &&
+        is.name(e[[1]]) &&
+        as.character(e[[1]]) %in% c("<-", "=") &&
+        length(e) >= 3L &&
+        is.name(e[[2]]) &&
+        is_fn_expr(e[[3]])
+    ) {
+      is_def[[i]] <- TRUE
+      def_index[[as.character(e[[2]])]] <- i
+    }
+  }
+
+  hits <- list()
+  reachable <- character(0)
+  queue <- character(0)
+  cur <- NA_integer_
+  # Order WITHIN a top-level expression. A line number cannot separate two calls
+  # in the same top-level block -- m111 makes its output write and its
+  # assertion inside one `if (sys.nframe() == 0L)`, so both carry that block's
+  # line -- and the ordering check would then be blind on exactly the site whose
+  # assertion matters most. Pre-order traversal is source order for sequential
+  # code, so (index, step) orders every call the walk reaches.
+  step <- 0L
+
+  mark <- function(nm) {
+    if (nm %in% fn_names && !(nm %in% reachable)) {
+      reachable <<- c(reachable, nm)
+      queue <<- c(queue, nm)
+    }
+  }
+
+  walk <- function(x, live) {
+    if (!is.call(x)) {
+      return(invisible(NULL))
+    }
+    nm <- call_head_name(x[[1]])
+    if (identical(nm, "function")) {
+      # An anonymous function in reachable code is run by whatever it was
+      # handed to; its body is reachable.
+      return(walk(x[[3]], live))
+    }
+    if (nzchar(nm)) {
+      step <<- step + 1L
+      hits[[length(hits) + 1L]] <<- list(
+        name = nm,
+        index = cur,
+        step = step,
+        live = live,
+        call = x
+      )
+      if (live) {
+        mark(nm)
+        if (nm %in% appliers) {
+          for (a in as.list(x)[-1]) {
+            if (is.name(a)) {
+              mark(as.character(a))
+            }
+          }
+        }
+      }
+    }
+    if (identical(nm, "if")) {
+      walk(x[[2]], live) # the condition itself is evaluated
+      inner <- live && cond_is_live(x[[2]], idioms)
+      walk(x[[3]], inner)
+      if (length(x) >= 4L) {
+        # Both arms stand or fall with the condition: a declared idiom says the
+        # branch is a real execution path, and an undeclared one says nothing
+        # about either arm.
+        walk(x[[4]], inner)
+      }
+      return(invisible(NULL))
+    }
+    parts <- as.list(x)[-1]
+    for (i in seq_along(parts)) {
+      if (!is.null(parts[[i]]) && !identical(parts[[i]], quote(expr = ))) {
+        walk(parts[[i]], live)
+      }
+    }
+    invisible(NULL)
+  }
+
+  for (i in seq_along(exprs)) {
+    if (is_def[[i]]) {
+      next # a definition is not an execution
+    }
+    cur <- i
+    step <- 0L
+    walk(exprs[[i]], TRUE)
+  }
+  while (length(queue)) {
+    nm <- queue[[1]]
+    queue <- queue[-1]
+    idx <- def_index[[nm]]
+    if (is.null(idx)) {
+      next
+    }
+    cur <- idx
+    step <- 0L
+    walk(exprs[[idx]][[3]][[3]], TRUE)
+  }
+  Filter(function(h) !is.null(h$name), hits)
+}
+
+# Reached means BOTH: the walk got here, and every condition on the way was
+# literally true or a declared idiom. A call the walk visited under a dead
+# condition is recorded but is not a call.
+reached_calls <- function(hits, name) {
+  Filter(function(h) identical(h$name, name) && isTRUE(h$live), hits)
+}
+
+# The source lines of the reached occurrences of `name`. A call inside a
+# reachable function is attributed to that function's DEFINITION line, which is
+# the only line a top-level srcref can give it.
+# Execution order over the reached occurrences of `name`: the top-level
+# expression they sit under, then their position within it.
+reached_order <- function(hits, name) {
+  h <- reached_calls(hits, name)
+  if (!length(h)) {
+    return(numeric(0))
+  }
+  vapply(h, function(x) x$index + x$step / 1e6, numeric(1))
+}
+
+reached_lines <- function(hits, name, exprs) {
+  refs <- attr(exprs, "srcref")
+  idx <- vapply(reached_calls(hits, name), function(h) h$index, integer(1))
+  idx <- idx[!is.na(idx)]
+  if (!length(idx) || is.null(refs)) {
+    return(integer(0))
+  }
+  vapply(idx, function(i) refs[[i]][1L], integer(1))
 }
 
 # ---- the checks --------------------------------------------------------------
@@ -169,28 +349,53 @@ check_site <- function(site, root = ".") {
     out <- c(out, paste0(site$script, ": no live source() of ", guard_path))
   }
 
-  # 2. Every declared guard call is made, live. ALL of them: a site that keeps
-  #    its file-level load and drops its per-entry read has stopped checking the
-  #    thing that goes stale, and no single call stands in for the set.
+  hits <- reach_scan(
+    exprs,
+    read_directive("idioms", file.path(root, sites_tsv)),
+    read_directive("appliers", file.path(root, sites_tsv))
+  )
+
+  # 2. Every declared guard call is REACHED, live. ALL of them: a site that
+  #    keeps its file-level load and drops its per-entry read has stopped
+  #    checking the thing that goes stale, and no single call stands in for the
+  #    set. A call the text contains but nothing reaches is reported as the
+  #    parked call it is, not as a call.
   required <- split_decl(site$api)
   if (!length(required)) {
     out <- c(out, paste0(site$script, ": declares no guard calls"))
   }
   for (call_name in required) {
-    if (!length(calls_to(exprs, call_name))) {
-      out <- c(out, paste0(site$script, ": never calls ", call_name, "()"))
+    if (!length(reached_calls(hits, call_name))) {
+      out <- c(
+        out,
+        paste0(
+          site$script,
+          ": nothing reaches ",
+          call_name,
+          "()",
+          if (length(calls_to(exprs, call_name))) {
+            " -- the call is in the file, but parked: under a condition that is neither literally true nor a declared idiom, or inside a function nothing calls"
+          } else {
+            " -- the call is not in the file at all"
+          }
+        )
+      )
     }
   }
 
   # 3. The checkpoint is registered with the trace, with a real argument. A
   #    literal NULL registers nothing and leaves every later read unwatched.
-  reg <- calls_to(exprs, "ckpt_trace_register")
+  reg <- reached_calls(hits, "ckpt_trace_register")
   if (!length(reg)) {
-    out <- c(out, paste0(site$script, ": never registers its checkpoint"))
+    out <- c(
+      out,
+      paste0(site$script, ": nothing reaches ckpt_trace_register()")
+    )
   } else if (
     !any(vapply(
       reg,
-      function(e) {
+      function(h) {
+        e <- h$call
         length(e) >= 2L && !is.null(e[[2]]) && !identical(e[[2]], NULL)
       },
       logical(1)
@@ -204,11 +409,18 @@ check_site <- function(site, root = ".") {
 
   # 4. The pre-write assertion runs BEFORE the site's output write. Asserting
   #    after the fixture has been written is not a guard, it is a postmortem.
-  assert_lines <- line_of(exprs, "ckpt_trace_assert")
-  write_lines <- line_of(exprs, "saveRDS")
+  assert_lines <- reached_lines(hits, "ckpt_trace_assert", exprs)
+  write_lines <- reached_lines(hits, "saveRDS", exprs)
   if (!length(assert_lines)) {
-    out <- c(out, paste0(site$script, ": never calls ckpt_trace_assert()"))
-  } else if (length(write_lines) && min(assert_lines) > min(write_lines)) {
+    out <- c(
+      out,
+      paste0(site$script, ": nothing reaches ckpt_trace_assert()")
+    )
+  } else if (
+    length(write_lines) &&
+      min(reached_order(hits, "ckpt_trace_assert")) >
+        min(reached_order(hits, "saveRDS"))
+  ) {
     out <- c(
       out,
       paste0(
@@ -225,7 +437,7 @@ check_site <- function(site, root = ".") {
   # 5. The declared parameters appear in a ckpt_spec() call, in the declared
   #    ORDER — the mismatch message names the earliest differing one, so the
   #    order is part of the contract, not a formatting detail.
-  specs <- calls_to(exprs, "ckpt_spec")
+  specs <- lapply(reached_calls(hits, "ckpt_spec"), function(h) h$call)
   if (!length(specs)) {
     out <- c(out, paste0(site$script, ": never builds a ckpt_spec()"))
   } else {
@@ -610,32 +822,88 @@ run_check <- function(root = ".") {
 # this repo keeps re-finding — and which this checker's predecessor fell into
 # three more times. Every declared site is probed, not a representative one.
 
-mutations_for <- function(site, src) {
-  muts <- list(
-    list(
-      label = "commented out the source() of the guard",
-      text = sub(
-        paste0('source("', guard_path, '")'),
-        paste0('# source("', guard_path, '")'),
-        src,
-        fixed = TRUE
-      )
-    ),
-    list(
-      label = "moved ckpt_trace_assert() after the output write",
-      text = paste0(
-        sub("ckpt_trace_assert()", "invisible(TRUE)", src, fixed = TRUE),
-        "\nckpt_trace_assert()\n"
-      )
-    ),
-    list(
-      label = "registered a literal NULL instead of the checkpoint path",
-      text = sub(
-        "ckpt_trace_register(",
-        "ckpt_trace_register(NULL) # ",
-        src,
-        fixed = TRUE
-      )
+# Move the assertion to immediately after the site's first output write, INSIDE
+# the block that write happens in, rather than appending it at end of file. On
+# m111 both sit in one `if (sys.nframe() == 0L)` expression, so an appended copy
+# would land outside that block and be caught by line number alone -- and the
+# within-block move, the one an ordinary edit makes, would go unprobed.
+# Returns NA when the site performs no output write; the self-test reports that
+# rather than silently skipping the form.
+move_assert_after_write <- function(site, src) {
+  exprs <- parse_live(site$script)
+  hits <- reach_scan(
+    exprs,
+    read_directive("idioms"),
+    read_directive("appliers")
+  )
+  if (!length(reached_lines(hits, "saveRDS", exprs))) {
+    return(NA_character_)
+  }
+  lines <- strsplit(src, "\n", fixed = TRUE)[[1]]
+  write_at <- grep("saveRDS\\(", lines)
+  write_at <- write_at[!grepl("^\\s*#", lines[write_at])]
+  if (!length(write_at)) {
+    return(NA_character_)
+  }
+  moved <- sub("ckpt_trace_assert()", "invisible(TRUE)", lines, fixed = TRUE)
+  # The write may span several lines, and a statement inserted into the middle
+  # of one would not parse -- which check_site() would report, giving a
+  # detection for the wrong reason. So step forward to the first insertion point
+  # that parses.
+  for (at in seq(write_at[[1]], length(moved))) {
+    cand <- paste(
+      c(moved[seq_len(at)], "ckpt_trace_assert()", moved[-seq_len(at)]),
+      collapse = "\n"
+    )
+    if (!inherits(tryCatch(parse(text = cand), error = identity), "error")) {
+      return(cand)
+    }
+  }
+  NA_character_
+}
+
+# Remove every live call to `call_name`, leaving nothing behind. Each parked
+# form below then adds its own way of keeping the TEXT while the call is gone.
+strip_calls <- function(src, call_name) {
+  gsub(
+    paste0("(?<![\\w.$])", call_name, "\\s*\\("),
+    "bypassed_(",
+    src,
+    perl = TRUE
+  )
+}
+
+mutations_for <- function(site, src, forms = read_directive("mutations")) {
+  muts <- list()
+  add <- function(form, label, ...) {
+    if (form %in% forms) {
+      muts[[length(muts) + 1L]] <<- c(list(label = label), list(...))
+    }
+  }
+
+  add(
+    "source-commented",
+    "commented out the source() of the guard",
+    text = sub(
+      paste0('source("', guard_path, '")'),
+      paste0('# source("', guard_path, '")'),
+      src,
+      fixed = TRUE
+    )
+  )
+  add(
+    "assert-after-write",
+    "moved ckpt_trace_assert() after the output write",
+    text = move_assert_after_write(site, src)
+  )
+  add(
+    "register-non-path",
+    "registered a literal NULL instead of the checkpoint path",
+    text = sub(
+      "ckpt_trace_register(",
+      "ckpt_trace_register(NULL) # ",
+      src,
+      fixed = TRUE
     )
   )
   # Withdraw one declared determinant. Nothing about the SCRIPT changes; what
@@ -663,8 +931,9 @@ mutations_for <- function(site, src) {
       setdiff(split_decl(site$values), droppable[[1]]),
       collapse = ","
     )
-    muts[[length(muts) + 1L]] <- list(
-      label = paste0(
+    add(
+      "declaration-withdrawn",
+      paste0(
         "withdrew the declaration of the determinant '",
         droppable[[1]],
         "'"
@@ -677,8 +946,9 @@ mutations_for <- function(site, src) {
   # This is AC2's own procedure, run on every site rather than on a
   # representative one.
   for (nm in read_directive("deserializers")) {
-    muts[[length(muts) + 1L]] <- list(
-      label = paste0("planted a live ", nm, "() call"),
+    add(
+      "deserialization-planted",
+      paste0("planted a live ", nm, "() call"),
       text = paste0(src, "\n", nm, '("planted.rds")\n')
     )
   }
@@ -692,8 +962,9 @@ mutations_for <- function(site, src) {
   )
   sourced <- sourced[file.exists(sourced)]
   if (length(sourced)) {
-    muts[[length(muts) + 1L]] <- list(
-      label = paste0("planted a live readRDS() call in ", sourced[[1]]),
+    add(
+      "deserialization-planted",
+      paste0("planted a live readRDS() call in ", sourced[[1]]),
       target = sourced[[1]],
       text = paste0(
         paste(readLines(sourced[[1]], warn = FALSE), collapse = "\n"),
@@ -702,35 +973,121 @@ mutations_for <- function(site, src) {
     )
   }
 
+  # Once per declared guard call, each form removing the site's live call and
+  # then trying a different way to leave the text behind. These are the
+  # reversions that walked past this checker's predecessors: a text search sees
+  # all of them, and each of the first four defeated a version of the parsing
+  # checker too.
   for (call_name in split_decl(site$api)) {
-    # Drop every live call, but keep a DEAD copy: this is the reversion that
-    # walked past a text search, and the one a debugging edit actually leaves.
-    muts[[length(muts) + 1L]] <- list(
-      label = paste0("replaced every live ", call_name, "() with a dead copy"),
+    gone <- strip_calls(src, call_name)
+    park <- paste0(call_name, "(a, b, c)")
+    add(
+      "deleted",
+      paste0("deleted every live ", call_name, "() outright"),
+      text = gone
+    )
+    add(
+      "dead-copy",
+      paste0("replaced every live ", call_name, "() with a dead copy"),
+      text = paste0(gone, "\nif (FALSE) {\n  ", park, "\n}\n")
+    )
+    add(
+      "parked-unreached",
+      paste0("parked ", call_name, "() in a function nothing calls"),
       text = paste0(
-        gsub(
-          paste0("(?<![\\w.$])", call_name, "\\s*\\("),
-          "bypassed_(",
-          src,
-          perl = TRUE
-        ),
-        "\nif (FALSE) {\n  ",
+        gone,
+        "\nm120_parked_helper <- function() {\n  ",
+        park,
+        "\n}\n"
+      )
+    )
+    add(
+      "parked-false-cond",
+      paste0("parked ", call_name, "() under conditions that are not literals"),
+      text = paste0(
+        gone,
+        "\nif (0) {\n  ",
+        park,
+        "\n}\n",
+        "if (FALSE || FALSE) {\n  ",
+        park,
+        "\n}\n",
+        'if (getOption("m120.never", FALSE)) {\n  ',
+        park,
+        "\n}\n"
+      )
+    )
+    # The idiom list may not become a back door: a DECLARED idiom around a call
+    # nothing reaches still leaves the call unmade.
+    add(
+      "parked-idiom-unreached",
+      paste0(
+        "parked ",
         call_name,
-        "(a, b, c)\n}\n"
+        "() under a declared idiom inside a function nothing calls"
+      ),
+      text = paste0(
+        gone,
+        "\nm120_parked_idiom <- function() {\n  if (sys.nframe() == 0L) {\n    ",
+        park,
+        "\n  }\n}\n"
       )
     )
   }
   muts
 }
 
+# The forms AC4 requires the declared mutation list to contain. A probe that may
+# be shortened at will measures nothing: each of these is a reversion that
+# actually walked past a version of this checker.
+required_mutations <- c(
+  "deleted",
+  "parked-unreached",
+  "parked-false-cond",
+  "parked-idiom-unreached",
+  "assert-after-write",
+  "register-non-path"
+)
+
 self_test <- function() {
   ok <- TRUE
-  for (site in read_sites()) {
+  forms <- read_directive("mutations")
+  missing_forms <- setdiff(required_mutations, forms)
+  if (length(missing_forms)) {
+    cat(
+      "FAIL self-test: the declared mutation list is missing ",
+      paste(missing_forms, collapse = ", "),
+      "\n",
+      sep = ""
+    )
+    return(FALSE)
+  }
+  planted <- 0L
+  skipped <- 0L
+  sites <- read_sites()
+  for (site in sites) {
     src <- paste(readLines(site$script, warn = FALSE), collapse = "\n")
     for (m in mutations_for(site, src)) {
+      planted <- planted + 1L
       # A mutation plants either an edited SCRIPT or an edited DECLARATION; the
       # declaration ones leave the script alone by design.
       mutated_site <- m$site %||% site
+      if (is.na(m$text)) {
+        # AC4: a site that performs no output write is REPORTED, never skipped
+        # in silence -- a form that quietly does not apply reads exactly like a
+        # form that passed.
+        cat(
+          "N/A  self-test [",
+          site$script,
+          "]: ",
+          m$label,
+          " -- this site performs no output write\n",
+          sep = ""
+        )
+        planted <- planted - 1L
+        skipped <- skipped + 1L
+        next
+      }
       if (identical(m$text, src) && is.null(m$site)) {
         cat(
           "FAIL self-test [",
@@ -796,6 +1153,21 @@ self_test <- function() {
       )
     }
   }
+  # The quantification, stated rather than left to be counted off the log: this
+  # probe is per site, per declared form, and per declared guard call, and a
+  # form that did not apply is named above rather than absorbed here.
+  cat(
+    "\nself-test: ",
+    planted,
+    " mutations planted over ",
+    length(sites),
+    " site(s) and ",
+    length(forms),
+    " declared form(s), each detected; ",
+    skipped,
+    " form(s) reported as not applying.\n",
+    sep = ""
+  )
   ok
 }
 
